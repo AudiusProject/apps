@@ -128,27 +128,27 @@ function* watchFetchSaves() {
     actions.FETCH_SAVES,
     function* (rawParams: ReturnType<typeof actions.fetchSaves>) {
       yield* waitForRead()
-      const accountData = yield* call(queryCurrentAccount)
-      if (!accountData) return
-      const { userId, trackSaveCount } = accountData
-      const saves = yield* select(getTrackSaves)
-      const params = prepareParams({
-        account: { userId: userId!, trackSaveCount: trackSaveCount! },
-        params: rawParams
-      })
-      const { query, sortDirection, sortMethod, offset, limit, category } =
-        params
-      const isSameParams =
-        query === currentQuery &&
-        currentSortDirection === sortDirection &&
-        currentSortMethod === sortMethod &&
-        currentCategory === category
+      try {
+        const accountData = yield* call(queryCurrentAccount)
+        if (!accountData) return
+        const { userId, trackSaveCount } = accountData
+        const saves = yield* select(getTrackSaves)
+        const params = prepareParams({
+          account: { userId: userId!, trackSaveCount: trackSaveCount! },
+          params: rawParams
+        })
+        const { query, sortDirection, sortMethod, offset, limit, category } =
+          params
+        const isSameParams =
+          query === currentQuery &&
+          currentSortDirection === sortDirection &&
+          currentSortMethod === sortMethod &&
+          currentCategory === category
 
-      // Don't refetch saves in the same session
-      if (saves && saves.length && isSameParams) {
-        yield* fork(fetchLineupMetadatas, offset, limit)
-      } else {
-        try {
+        // Don't refetch saves in the same session
+        if (saves && saves.length && isSameParams) {
+          yield* fork(fetchLineupMetadatas, offset, limit)
+        } else {
           currentQuery = query
           currentSortDirection = sortDirection
           currentSortMethod = sortMethod
@@ -168,9 +168,9 @@ function* watchFetchSaves() {
             yield* put(actions.endFetching(offset + saves.length))
           }
           yield* fork(fetchLineupMetadatas, offset, limit)
-        } catch (e) {
-          yield* put(actions.fetchSavesFailed())
         }
+      } catch (e) {
+        yield* put(actions.fetchSavesFailed())
       }
     }
   )
@@ -181,19 +181,19 @@ function* watchFetchMoreSaves() {
     actions.FETCH_MORE_SAVES,
     function* (rawParams: ReturnType<typeof actions.fetchMoreSaves>) {
       yield* waitForRead()
-      const account = yield* queryCurrentAccount()
-      const { userId, trackSaveCount } = account ?? {}
-      const params = prepareParams({
-        account: {
-          userId: userId!,
-          trackSaveCount: trackSaveCount!
-        },
-        params: rawParams
-      })
-
-      const { limit, offset } = params
-
       try {
+        const account = yield* call(queryCurrentAccount)
+        if (!account) return
+        const { userId, trackSaveCount } = account
+        const params = prepareParams({
+          account: {
+            userId,
+            trackSaveCount
+          },
+          params: rawParams
+        })
+
+        const { limit, offset } = params
         const { saves, tracks } = yield* call(sendLibraryRequest, params)
         yield* call(primeTrackDataSaga, tracks)
         yield* put(actions.fetchMoreSavesSucceeded(saves, offset))

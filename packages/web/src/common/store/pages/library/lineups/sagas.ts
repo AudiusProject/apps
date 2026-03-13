@@ -143,12 +143,16 @@ function* watchFetchSaves() {
   yield* takeEvery(
     [FETCH_SAVES, FETCH_MORE_SAVES],
     function* (_action: ReturnType<typeof saveActions.fetchSaves>) {
-      const accountData = (yield* call(queryCurrentAccount)) as AccountState
-      if (!accountData) return
-      const { trackSaveCount } = accountData
+      try {
+        const accountData = (yield* call(queryCurrentAccount)) as AccountState
+        if (!accountData) return
+        const { trackSaveCount } = accountData
 
-      if (trackSaveCount) {
-        yield* put(libraryTracksActions.setMaxEntries(trackSaveCount))
+        if (trackSaveCount) {
+          yield* put(libraryTracksActions.setMaxEntries(trackSaveCount))
+        }
+      } catch (e) {
+        // Non-fatal: this watcher only updates lineup max count metadata.
       }
     }
   )
