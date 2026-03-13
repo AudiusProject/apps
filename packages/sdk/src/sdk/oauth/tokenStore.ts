@@ -1,7 +1,11 @@
+const LS_ACCESS_TOKEN_KEY = 'audius_access_token'
+const LS_REFRESH_TOKEN_KEY = 'audius_refresh_token'
+
 /**
- * In-memory token store for OAuth2 PKCE tokens.
+ * Token store for OAuth2 PKCE tokens.
  *
- * Holds the current access + refresh token pair.  The `asAccessTokenProvider`
+ * Holds the current access + refresh token pair in memory and persists them
+ * to `localStorage` so they survive page reloads.  The `asAccessTokenProvider`
  * method returns a function compatible with `Configuration.accessToken` so
  * that all generated API instances automatically pick up new tokens after
  * login or refresh — no re-construction needed.
@@ -9,6 +13,15 @@
 export class OAuthTokenStore {
   private _accessToken: string | null = null
   private _refreshToken: string | null = null
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this._accessToken =
+        window.localStorage.getItem(LS_ACCESS_TOKEN_KEY) ?? null
+      this._refreshToken =
+        window.localStorage.getItem(LS_REFRESH_TOKEN_KEY) ?? null
+    }
+  }
 
   get accessToken(): string | null {
     return this._accessToken
@@ -24,6 +37,10 @@ export class OAuthTokenStore {
   setTokens(access: string, refresh: string): void {
     this._accessToken = access
     this._refreshToken = refresh
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LS_ACCESS_TOKEN_KEY, access)
+      window.localStorage.setItem(LS_REFRESH_TOKEN_KEY, refresh)
+    }
   }
 
   /**
@@ -32,6 +49,10 @@ export class OAuthTokenStore {
   clear(): void {
     this._accessToken = null
     this._refreshToken = null
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(LS_ACCESS_TOKEN_KEY)
+      window.localStorage.removeItem(LS_REFRESH_TOKEN_KEY)
+    }
   }
 
   /**
