@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+import { FetchError, ResponseError } from '../api/generated/default/runtime'
+
 import { OAuth } from './OAuth'
 import { OAuthTokenStore } from './tokenStore'
 
@@ -8,12 +10,20 @@ import { OAuthTokenStore } from './tokenStore'
 vi.stubGlobal('window', {
   localStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
   sessionStorage: { getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn() },
-  crypto: { getRandomValues: vi.fn((arr: Uint8Array) => arr.fill(0)) },
+  crypto: {
+    getRandomValues: vi.fn((arr: Uint8Array) => arr.fill(0)),
+    subtle: {
+      digest: vi.fn().mockResolvedValue(new ArrayBuffer(32))
+    }
+  },
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
   location: { href: '', origin: 'https://example.com' },
   open: vi.fn()
 })
+
+/** Flush all pending microtasks (including chained promise continuations). */
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 function makeOAuth(
   overrides: {
@@ -22,13 +32,21 @@ function makeOAuth(
     tokenStore?: OAuthTokenStore
   } = {}
 ): OAuth {
-  const { apiKey = 'test-api-key', basePath, tokenStore } = overrides
+  const {
+    apiKey = 'test-api-key',
+    basePath = 'https://api.example.com',
+    tokenStore
+  } = overrides
   return new OAuth({
+    basePath,
     ...(apiKey !== null ? { apiKey } : {}),
-    ...(basePath !== undefined ? { basePath } : {}),
     ...(tokenStore !== undefined ? { tokenStore } : {})
   })
 }
+
+// ---------------------------------------------------------------------------
+// refreshAccessToken
+// ---------------------------------------------------------------------------
 
 describe('OAuth.refreshAccessToken', () => {
   let tokenStore: OAuthTokenStore
@@ -37,17 +55,14 @@ describe('OAuth.refreshAccessToken', () => {
   beforeEach(() => {
     tokenStore = new OAuthTokenStore()
     tokenStore.setTokens('old-access', 'old-refresh')
-    oauth = makeOAuth({
-      basePath: 'https://api.example.com',
-      tokenStore
-    })
+    oauth = makeOAuth({ tokenStore })
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('success path: updates token store and returns new access token', async () => {
+  it('updates token store and returns new access token', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValueOnce(
@@ -71,10 +86,7 @@ describe('OAuth.refreshAccessToken', () => {
   it('sends the correct request body', async () => {
     const fetchSpy = vi.fn().mockResolvedValueOnce(
       new Response(
-        JSON.stringify({
-          access_token: 'new-access',
-          refresh_token: 'new-refresh'
-        }),
+        JSON.stringify({ access_token: 'new-access', refresh_token: 'new-refresh' }),
         { status: 200 }
       )
     )
@@ -105,7 +117,6 @@ describe('OAuth.refreshAccessToken', () => {
     const result = await oauth.refreshAccessToken()
 
     expect(result).toBeNull()
-    // Token store must remain unchanged
     expect(tokenStore.accessToken).toBe('old-access')
     expect(tokenStore.refreshToken).toBe('old-refresh')
   })
@@ -126,7 +137,7 @@ describe('OAuth.refreshAccessToken', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null when access_token is missing from response', async () => {
+  it('returns null and does not update store when access_token is missing', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValueOnce(
@@ -142,7 +153,7 @@ describe('OAuth.refreshAccessToken', () => {
     expect(tokenStore.accessToken).toBe('old-access')
   })
 
-  it('returns null when refresh_token is missing from response', async () => {
+  it('returns null and does not update store when refresh_token is missing', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValueOnce(
@@ -158,42 +169,14 @@ describe('OAuth.refreshAccessToken', () => {
     expect(tokenStore.refreshToken).toBe('old-refresh')
   })
 
-  it('returns null when neither token field is present in response', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: 'invalid_grant' }), {
-          status: 200
-        })
-      )
-    )
-
-    const result = await oauth.refreshAccessToken()
-
-    expect(result).toBeNull()
-  })
-
   it('returns null when tokenStore is not configured', async () => {
-    const oauthNoStore = makeOAuth({ basePath: 'https://api.example.com' })
-
-    const result = await oauthNoStore.refreshAccessToken()
-
-    expect(result).toBeNull()
-  })
-
-  it('returns null when basePath is not configured', async () => {
-    const oauthNoBase = makeOAuth({ tokenStore })
-
-    const result = await oauthNoBase.refreshAccessToken()
-
+    const result = await makeOAuth().refreshAccessToken()
     expect(result).toBeNull()
   })
 
   it('returns null when there is no refresh token stored', async () => {
     tokenStore.clear()
-
     const result = await oauth.refreshAccessToken()
-
     expect(result).toBeNull()
   })
 
@@ -209,6 +192,62 @@ describe('OAuth.refreshAccessToken', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// login — guard conditions
+// ---------------------------------------------------------------------------
+
+describe('OAuth.login guards', () => {
+  let oauth: OAuth
+
+  beforeEach(() => {
+    vi.mocked(window.open).mockReturnValue({
+      closed: false,
+      close: vi.fn()
+    } as unknown as Window)
+    vi.mocked(window.sessionStorage.getItem).mockReturnValue(null)
+    vi.mocked(window.addEventListener).mockClear()
+    oauth = makeOAuth()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('throws synchronously when a login is already in progress', async () => {
+    oauth.login({ redirectUri: 'https://example.com/cb' }).catch(() => {})
+    await expect(
+      oauth.login({ redirectUri: 'https://example.com/cb' })
+    ).rejects.toThrow('A login is already in progress.')
+  })
+
+  it('rejects when neither apiKey nor appName is configured', async () => {
+    const bare = new OAuth({ basePath: 'https://api.example.com' })
+    await expect(
+      bare.login({ redirectUri: 'https://example.com/cb' })
+    ).rejects.toThrow('App name or API key not set.')
+  })
+
+  it('rejects when write scope is requested without an apiKey', async () => {
+    const noKey = new OAuth({
+      basePath: 'https://api.example.com',
+      appName: 'my-app'
+    })
+    await expect(
+      noKey.login({ redirectUri: 'https://example.com/cb', scope: 'write' })
+    ).rejects.toThrow("The 'write' scope requires")
+  })
+
+  it('rejects when an invalid scope is provided', async () => {
+    await expect(
+      oauth.login({ redirectUri: 'https://example.com/cb', scope: 'admin' as any })
+    ).rejects.toThrow('Scope must be')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// message listener lifecycle
+// ---------------------------------------------------------------------------
+
 describe('OAuth message listener lifecycle', () => {
   beforeEach(() => {
     vi.mocked(window.addEventListener).mockClear()
@@ -217,7 +256,6 @@ describe('OAuth message listener lifecycle', () => {
       closed: false,
       close: vi.fn()
     } as unknown as Window)
-    vi.mocked(window.localStorage.setItem).mockClear()
     vi.mocked(window.sessionStorage.setItem).mockClear()
     vi.mocked(window.sessionStorage.getItem).mockReturnValue(null)
   })
@@ -227,16 +265,14 @@ describe('OAuth message listener lifecycle', () => {
   })
 
   it('does not attach a message listener in the constructor', () => {
-    makeOAuth({ basePath: 'https://api.example.com' })
+    makeOAuth()
     expect(window.addEventListener).not.toHaveBeenCalled()
   })
 
-  it('attaches a message listener when loginAsync starts (postMessage flow)', async () => {
-    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    // Kick off a login — don't await so we can inspect immediately
-    oauth.loginAsync({ redirectUri: 'postMessage' })
-    // Flush microtasks
-    await Promise.resolve()
+  it('attaches a message listener when popup login starts', async () => {
+    const oauth = makeOAuth()
+    oauth.login({ redirectUri: 'https://example.com/cb', display: 'popup' }).catch(() => {})
+    await flushPromises()
     expect(window.addEventListener).toHaveBeenCalledWith(
       'message',
       expect.any(Function),
@@ -244,13 +280,13 @@ describe('OAuth message listener lifecycle', () => {
     )
   })
 
-  it('does not attach a duplicate listener on repeated loginAsync calls', async () => {
-    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    oauth.loginAsync({ redirectUri: 'postMessage' })
-    await Promise.resolve()
-    oauth.loginAsync({ redirectUri: 'postMessage' }).catch(() => {})
-    await Promise.resolve()
-    // Should still only be registered once
+  it('does not attach a duplicate listener on repeated login calls', async () => {
+    const oauth = makeOAuth()
+    oauth.login({ redirectUri: 'https://example.com/cb' }).catch(() => {})
+    await flushPromises()
+    // Second call throws "A login is already in progress" — suppress rejection
+    oauth.login({ redirectUri: 'https://example.com/cb' }).catch(() => {})
+    await flushPromises()
     const messageAddCalls = vi
       .mocked(window.addEventListener)
       .mock.calls.filter(([event]) => event === 'message')
@@ -258,21 +294,17 @@ describe('OAuth message listener lifecycle', () => {
   })
 
   it('removes the message listener when the login settles', async () => {
-    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    const loginPromise = oauth.loginAsync({ redirectUri: 'postMessage' })
-    await Promise.resolve()
+    const oauth = makeOAuth()
+    const loginPromise = oauth.login({ redirectUri: 'https://example.com/cb' })
+    await flushPromises()
 
-    // Retrieve the registered handler
     const addCall = vi
       .mocked(window.addEventListener)
       .mock.calls.find(([event]) => event === 'message')
     expect(addCall).toBeDefined()
     const registeredHandler = addCall![1]
 
-    // Settle the login via an error path
     ;(oauth as any)._settleLogin(new Error('test settle'))
-
-    // Await so rejection is handled
     await loginPromise.catch(() => {})
 
     expect(window.removeEventListener).toHaveBeenCalledWith(
@@ -283,29 +315,12 @@ describe('OAuth message listener lifecycle', () => {
   })
 
   it('does not attach a listener when display is fullScreen', async () => {
-    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    // When display is fullScreen the code does window.location.href = …
-    // and never enters the popup branch
-    oauth.loginAsync({
-      redirectUri: 'https://myapp.example.com/callback',
-      display: 'fullScreen'
-    })
-    await Promise.resolve()
+    const oauth = makeOAuth()
+    oauth
+      .login({ redirectUri: 'https://example.com/cb', display: 'fullScreen' })
+      .catch(() => {})
+    await flushPromises()
     expect(window.addEventListener).not.toHaveBeenCalledWith(
-      'message',
-      expect.any(Function),
-      false
-    )
-  })
-
-  it('attaches a message listener for popup even with a real redirectUri', async () => {
-    const oauth = makeOAuth({ basePath: 'https://api.example.com' })
-    oauth.loginAsync({
-      redirectUri: 'https://myapp.example.com/callback',
-      display: 'popup'
-    })
-    await Promise.resolve()
-    expect(window.addEventListener).toHaveBeenCalledWith(
       'message',
       expect.any(Function),
       false
@@ -313,20 +328,316 @@ describe('OAuth message listener lifecycle', () => {
   })
 })
 
-describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
-  let tokenStore: OAuthTokenStore
+// ---------------------------------------------------------------------------
+// _receiveMessage — popup parent-side handler
+// ---------------------------------------------------------------------------
 
-  const mockProfile = {
-    userId: 1,
-    email: 'test@example.com',
-    name: 'Test User',
-    handle: 'testuser',
-    verified: false,
-    profilePicture: null,
-    apiKey: 'test-api-key',
-    sub: 1,
-    iat: '2026-01-01'
+describe('OAuth._receiveMessage (popup parent handler)', () => {
+  const CSRF_STATE = 'test-csrf-state'
+  const CODE_VERIFIER = 'test-code-verifier'
+  const REDIRECT_URI = 'https://example.com/callback'
+
+  let tokenStore: OAuthTokenStore
+  let fakePopup: { closed: boolean; close: ReturnType<typeof vi.fn> }
+  let oauth: OAuth
+  let loginPromise: Promise<void>
+
+  function makeEvent(data: object, source?: unknown): MessageEvent {
+    return { data, source: source ?? fakePopup } as unknown as MessageEvent
   }
+
+  beforeEach(async () => {
+    tokenStore = new OAuthTokenStore()
+    fakePopup = { closed: false, close: vi.fn() }
+    vi.mocked(window.open).mockReturnValue(fakePopup as unknown as Window)
+    vi.mocked(window.addEventListener).mockClear()
+    vi.mocked(window.removeEventListener).mockClear()
+    vi.mocked(window.sessionStorage.getItem).mockImplementation((key: string) => {
+      if (key === 'audiusOauthState') return CSRF_STATE
+      if (key === 'audiusPkceCodeVerifier') return CODE_VERIFIER
+      if (key === 'audiusPkceRedirectUri') return REDIRECT_URI
+      return null
+    })
+    oauth = makeOAuth({ tokenStore })
+    loginPromise = oauth.login({ redirectUri: REDIRECT_URI })
+    await flushPromises()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    loginPromise.catch(() => {})
+  })
+
+  it('ignores messages not from the active popup window', async () => {
+    await oauth._receiveMessage(
+      makeEvent({ code: 'c', state: CSRF_STATE }, { closed: false })
+    )
+    expect(window.removeEventListener).not.toHaveBeenCalled()
+  })
+
+  it('ignores messages without a state field', async () => {
+    await oauth._receiveMessage(makeEvent({ code: 'c' }))
+    expect(window.removeEventListener).not.toHaveBeenCalled()
+  })
+
+  it('rejects login when state does not match the CSRF token', async () => {
+    const settled = loginPromise.catch((e: Error) => e)
+    await oauth._receiveMessage(makeEvent({ code: 'c', state: 'wrong' }))
+    const error = await settled
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toMatch(/state mismatch/i)
+  })
+
+  it('rejects login when code verifier is missing from sessionStorage', async () => {
+    vi.mocked(window.sessionStorage.getItem).mockImplementation((key: string) =>
+      key === 'audiusOauthState' ? CSRF_STATE : null
+    )
+    const settled = loginPromise.catch((e: Error) => e)
+    await oauth._receiveMessage(makeEvent({ code: 'c', state: CSRF_STATE }))
+    const error = await settled
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toMatch(/code verifier/i)
+  })
+
+  it('resolves login and stores tokens on successful exchange', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ access_token: 'at', refresh_token: 'rt' }),
+          { status: 200 }
+        )
+      )
+    )
+    await Promise.all([
+      oauth._receiveMessage(makeEvent({ code: 'auth-code', state: CSRF_STATE })),
+      loginPromise
+    ])
+    expect(tokenStore.accessToken).toBe('at')
+    expect(tokenStore.refreshToken).toBe('rt')
+  })
+
+  it('closes the popup after successful exchange', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ access_token: 'at', refresh_token: 'rt' }),
+          { status: 200 }
+        )
+      )
+    )
+    await Promise.all([
+      oauth._receiveMessage(makeEvent({ code: 'auth-code', state: CSRF_STATE })),
+      loginPromise
+    ])
+    expect(fakePopup.close).toHaveBeenCalled()
+  })
+
+  it('rejects login when the token exchange request fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ error_description: 'bad_code' }),
+          { status: 400 }
+        )
+      )
+    )
+    await expect(
+      Promise.all([
+        oauth._receiveMessage(makeEvent({ code: 'auth-code', state: CSRF_STATE })),
+        loginPromise
+      ])
+    ).rejects.toThrow('bad_code')
+  })
+
+  it('rejects login with "unknown format" when message has no code', async () => {
+    const settled = loginPromise.catch((e: Error) => e)
+    await oauth._receiveMessage(makeEvent({ state: CSRF_STATE }))
+    const error = await settled
+    expect((error as Error).message).toMatch(/unknown format/i)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isAuthenticated / hasRefreshToken
+// ---------------------------------------------------------------------------
+
+describe('OAuth.isAuthenticated / hasRefreshToken', () => {
+  it('isAuthenticated is false when no token store is configured', () => {
+    expect(makeOAuth().isAuthenticated).toBe(false)
+  })
+
+  it('isAuthenticated is false when token store has no access token', () => {
+    const tokenStore = new OAuthTokenStore()
+    expect(makeOAuth({ tokenStore }).isAuthenticated).toBe(false)
+  })
+
+  it('isAuthenticated is true when an access token is stored', () => {
+    const tokenStore = new OAuthTokenStore()
+    tokenStore.setTokens('at', 'rt')
+    expect(makeOAuth({ tokenStore }).isAuthenticated).toBe(true)
+  })
+
+  it('hasRefreshToken is false when no token store is configured', () => {
+    expect(makeOAuth().hasRefreshToken).toBe(false)
+  })
+
+  it('hasRefreshToken is true when a refresh token is stored', () => {
+    const tokenStore = new OAuthTokenStore()
+    tokenStore.setTokens('at', 'rt')
+    expect(makeOAuth({ tokenStore }).hasRefreshToken).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getUser
+// ---------------------------------------------------------------------------
+
+describe('OAuth.getUser', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('sends Authorization header and returns user data when token is stored', async () => {
+    const tokenStore = new OAuthTokenStore()
+    tokenStore.setTokens('my-access-token', 'rt')
+    const oauth = makeOAuth({ tokenStore })
+    const userData = { id: '1', handle: 'foo' }
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(userData), { status: 200 })
+      )
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const result = await oauth.getUser()
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://api.example.com/oauth/me',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer my-access-token' }
+      })
+    )
+    expect(result).toEqual(userData)
+  })
+
+  it('makes the request without an Authorization header when no token is stored', async () => {
+    const oauth = makeOAuth()
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ id: '1' }), { status: 200 })
+      )
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await oauth.getUser()
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://api.example.com/oauth/me',
+      expect.objectContaining({ headers: {} })
+    )
+  })
+
+  it('throws ResponseError on non-2xx response', async () => {
+    const oauth = makeOAuth()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(new Response(null, { status: 401 }))
+    )
+
+    await expect(oauth.getUser()).rejects.toBeInstanceOf(ResponseError)
+  })
+
+  it('throws FetchError when the network request fails', async () => {
+    const oauth = makeOAuth()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValueOnce(new Error('network down'))
+    )
+
+    await expect(oauth.getUser()).rejects.toBeInstanceOf(FetchError)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// logout
+// ---------------------------------------------------------------------------
+
+describe('OAuth.logout', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('sends a revoke request and clears the token store when a refresh token exists', async () => {
+    const tokenStore = new OAuthTokenStore()
+    tokenStore.setTokens('at', 'my-refresh')
+    const oauth = makeOAuth({ tokenStore })
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await oauth.logout()
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://api.example.com/oauth/revoke',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ token: 'my-refresh', client_id: 'test-api-key' })
+      })
+    )
+    expect(tokenStore.accessToken).toBeNull()
+    expect(tokenStore.refreshToken).toBeNull()
+  })
+
+  it('skips the revoke request when there is no refresh token', async () => {
+    const tokenStore = new OAuthTokenStore()
+    const oauth = makeOAuth({ tokenStore })
+    const fetchSpy = vi.fn()
+    vi.stubGlobal('fetch', fetchSpy)
+
+    await oauth.logout()
+
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('does not throw when the revoke request fails', async () => {
+    const tokenStore = new OAuthTokenStore()
+    tokenStore.setTokens('at', 'rt')
+    const oauth = makeOAuth({ tokenStore })
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('network')))
+
+    await expect(oauth.logout()).resolves.toBeUndefined()
+    expect(tokenStore.accessToken).toBeNull()
+  })
+
+  it('clears PKCE sessionStorage keys on logout', async () => {
+    const oauth = makeOAuth()
+    vi.stubGlobal('fetch', vi.fn())
+    vi.mocked(window.sessionStorage.removeItem).mockClear()
+
+    await oauth.logout()
+
+    expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
+      'audiusPkceCodeVerifier'
+    )
+    expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
+      'audiusPkceRedirectUri'
+    )
+    expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
+      'audiusOauthState'
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getRedirectResult / _exchangeCodeForTokens
+// ---------------------------------------------------------------------------
+
+describe('OAuth.getRedirectResult', () => {
+  let tokenStore: OAuthTokenStore
 
   beforeEach(() => {
     tokenStore = new OAuthTokenStore()
@@ -355,7 +666,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     })
   }
 
-  it('exchanges code for tokens and returns LoginResult', async () => {
+  it('exchanges code for tokens and stores them', async () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
         if (key === 'audiusOauthState') return 'test-state'
@@ -368,9 +679,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     setLocationWithCode('auth-code-123', 'test-state')
     ;(window as any).history = { replaceState: vi.fn() }
 
-    const fetchMock = vi.fn()
-    // First call: /oauth/token
-    fetchMock.mockResolvedValueOnce(
+    const fetchMock = vi.fn().mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           access_token: 'access-123',
@@ -378,10 +687,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
         }),
         { status: 200 }
       )
-    )
-    // Second call: /oauth/me
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify(mockProfile), { status: 200 })
     )
     vi.stubGlobal('fetch', fetchMock)
 
@@ -392,15 +697,11 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     })
 
     expect(oauth.hasRedirectResult).toBe(true)
-    const result = await oauth.getRedirectResult()
+    await oauth.getRedirectResult()
 
-    expect(result).not.toBeNull()
-    expect(result!.profile.handle).toBe('testuser')
-    expect(result!.encodedJwt).toBe('access-123')
     expect(tokenStore.accessToken).toBe('access-123')
     expect(tokenStore.refreshToken).toBe('refresh-123')
 
-    // Verify correct POST body for token exchange
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.example.com/oauth/token',
       expect.objectContaining({
@@ -415,24 +716,21 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       })
     )
 
-    // Second call returns null (consumed)
+    // Result is consumed — subsequent calls are no-ops
     expect(oauth.hasRedirectResult).toBe(false)
-    expect(await oauth.getRedirectResult()).toBeNull()
+    await oauth.getRedirectResult()
 
     resetLocation()
   })
 
-  it('returns null when no code/state in URL', async () => {
+  it('is a no-op when no code/state in URL', async () => {
     resetLocation()
-    const oauth = makeOAuth({
-      basePath: 'https://api.example.com',
-      tokenStore
-    })
+    const oauth = makeOAuth({ tokenStore })
     expect(oauth.hasRedirectResult).toBe(false)
-    expect(await oauth.getRedirectResult()).toBeNull()
+    await oauth.getRedirectResult()
   })
 
-  it('returns null when code verifier is missing from sessionStorage', async () => {
+  it('is a no-op when code verifier is missing from sessionStorage', async () => {
     vi.mocked(window.sessionStorage.getItem).mockReturnValue(null)
     setLocationWithCode('auth-code-123', 'test-state')
     ;(window as any).history = { replaceState: vi.fn() }
@@ -442,11 +740,8 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       basePath: 'https://api.example.com',
       tokenStore
     })
-    // URL has code+state, so hasRedirectResult is true before detection
     expect(oauth.hasRedirectResult).toBe(true)
-    // But getRedirectResult returns null because verifier is missing
-    expect(await oauth.getRedirectResult()).toBeNull()
-    // After detection, hasRedirectResult reflects consumed state
+    await oauth.getRedirectResult()
     expect(oauth.hasRedirectResult).toBe(false)
 
     resetLocation()
@@ -468,7 +763,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       tokenStore
     })
     expect(oauth.hasRedirectResult).toBe(true)
-    expect(await oauth.getRedirectResult()).toBeNull()
+    await oauth.getRedirectResult()
     expect(oauth.hasRedirectResult).toBe(false)
 
     resetLocation()
@@ -486,17 +781,17 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     const replaceStateSpy = vi.fn()
     ;(window as any).history = { replaceState: replaceStateSpy }
 
-    // Mock fetch so the exchange doesn't fail
-    const fetchMock = vi.fn()
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ access_token: 'a', refresh_token: 'r' }), {
-        status: 200
-      })
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ access_token: 'a', refresh_token: 'r' }),
+            { status: 200 }
+          )
+        )
     )
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ userId: 1, handle: 'x' }), { status: 200 })
-    )
-    vi.stubGlobal('fetch', fetchMock)
 
     const oauth = new OAuth({
       apiKey: 'test-api-key',
@@ -504,7 +799,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       tokenStore
     })
 
-    // URL cleanup doesn't happen until getRedirectResult triggers detection
     expect(replaceStateSpy).not.toHaveBeenCalled()
     await oauth.getRedirectResult()
 
@@ -528,16 +822,17 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     )
     setLocationWithCode('auth-code-123', 'test-state')
     ;(window as any).history = { replaceState: vi.fn() }
-    const fetchMock = vi.fn()
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ access_token: 'a', refresh_token: 'r' }), {
-        status: 200
-      })
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ access_token: 'a', refresh_token: 'r' }),
+            { status: 200 }
+          )
+        )
     )
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ userId: 1, handle: 'x' }), { status: 200 })
-    )
-    vi.stubGlobal('fetch', fetchMock)
 
     const oauth = new OAuth({
       apiKey: 'test-api-key',
@@ -545,7 +840,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       tokenStore
     })
 
-    // Trigger detection
     await oauth.getRedirectResult()
 
     expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
@@ -577,20 +871,18 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     })
     ;(window as any).history = { replaceState: vi.fn() }
 
-    const fetchMock = vi.fn()
-    fetchMock.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          access_token: 'access-frag',
-          refresh_token: 'refresh-frag'
-        }),
-        { status: 200 }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: 'access-frag',
+            refresh_token: 'refresh-frag'
+          }),
+          { status: 200 }
+        )
       )
     )
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify(mockProfile), { status: 200 })
-    )
-    vi.stubGlobal('fetch', fetchMock)
 
     const oauth = new OAuth({
       apiKey: 'test-api-key',
@@ -599,9 +891,9 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     })
 
     expect(oauth.hasRedirectResult).toBe(true)
-    const result = await oauth.getRedirectResult()
-    expect(result).not.toBeNull()
-    expect(result!.encodedJwt).toBe('access-frag')
+    await oauth.getRedirectResult()
+    expect(tokenStore.accessToken).toBe('access-frag')
+    expect(tokenStore.refreshToken).toBe('refresh-frag')
 
     resetLocation()
   })
@@ -620,7 +912,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       tokenStore
     })
 
-    // Nothing happens until getRedirectResult is called
     expect(postMessageSpy).not.toHaveBeenCalled()
     await oauth.getRedirectResult()
 
@@ -629,7 +920,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       'https://example.com'
     )
     expect(closeSpy).toHaveBeenCalled()
-    // Should NOT start a local exchange
     expect(oauth.hasRedirectResult).toBe(false)
     ;(window as any).opener = null
     resetLocation()
