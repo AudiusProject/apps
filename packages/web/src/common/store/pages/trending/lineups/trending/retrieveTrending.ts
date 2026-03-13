@@ -56,21 +56,10 @@ export function* retrieveTrending({
   const lastGenre = yield select(getLastFetchedTrendingGenre)
   yield put(setLastFetchedTrendingGenre(genre))
 
-  // Guard against transient 0-limit fetches during boot so trending can recover
-  // by requesting at least one entry.
-  const safeLimit = Math.max(limit, 1)
-  const parsedUserId =
-    typeof currentUserId === 'number'
-      ? OptionalId.parse(currentUserId)
-      : undefined
-
-  const useCached =
-    lastGenre === genre && cachedTracks.length > offset + safeLimit
+  const useCached = lastGenre === genre && cachedTracks.length > offset + limit
 
   if (useCached) {
-    const trackIds = cachedTracks
-      .slice(offset, safeLimit + offset)
-      .map((t) => t.id)
+    const trackIds = cachedTracks.slice(offset, limit + offset).map((t) => t.id)
     const tracks: Track[] = yield* call(queryTracks, trackIds)
     return tracks.filter((t: Track) => !t.is_unlisted)
   }
@@ -78,9 +67,9 @@ export function* retrieveTrending({
   const args = {
     genre: genre ?? undefined,
     offset,
-    limit: safeLimit,
+    limit,
     time: timeRange,
-    userId: parsedUserId
+    userId: OptionalId.parse(currentUserId)
   }
 
   const { data = [] } = version
