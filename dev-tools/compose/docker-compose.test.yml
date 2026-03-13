@@ -317,36 +317,6 @@ services:
       - elasticsearch
       - discovery
 
-  test-discovery-provider-notifications:
-    user: ${DOCKER_UID:-root}:${DOCKER_GID:-root}
-    build:
-      context: ${PROJECT_ROOT}/packages/discovery-provider/plugins/notifications
-      dockerfile: Dockerfile
-    entrypoint: sh -c '[ ! "$$1" = "test" ] && sleep inf || (shift; npm run test "$$@")' -
-    environment:
-      AUDIUS_REDIS_URL: 'redis://discovery-provider-redis:6379/00'
-      DN_DB_URL: 'postgresql://postgres:postgres@discovery-provider-db:5432/discovery_provider'
-      IDENTITY_DB_URL: 'postgresql://postgres:postgres@identity-service-db:5432/identity_service'
-    volumes:
-      - ${PROJECT_ROOT}/packages/discovery-provider/plugins/notifications:/notifications
-      - /notifications/node_modules
-    depends_on:
-      test-discovery-provider-migrations:
-        condition: service_completed_successfully
-      test-comms-migrations:
-        condition: service_completed_successfully
-      test-identity-service-migrations:
-        condition: service_completed_successfully
-      discovery-provider-redis:
-        condition: service_healthy
-    logging: *default-logging
-    deploy:
-      mode: replicas
-      replicas: 1
-    profiles:
-      - tests
-      - notifications
-
   # comms
 
   test-comms-migrations:
