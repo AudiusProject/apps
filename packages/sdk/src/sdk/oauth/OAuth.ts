@@ -627,6 +627,10 @@ export class OAuth {
 
     const code = queryParams.get('code') ?? hashParams.get('code')
     const state = queryParams.get('state') ?? hashParams.get('state')
+    const openerOrigin =
+      queryParams.get('origin') ??
+      hashParams.get('origin') ??
+      window.location.origin
 
     if (!code || !state) {
       return
@@ -637,7 +641,7 @@ export class OAuth {
     // _receiveMessage handler will do the exchange using its own verifier.
     if (window.opener) {
       try {
-        window.opener.postMessage({ code, state }, window.location.origin)
+        window.opener.postMessage({ code, state }, openerOrigin)
       } catch {
         // Cannot communicate with opener — fall through to local handling
       }
@@ -669,6 +673,9 @@ export class OAuth {
     window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
 
+    const redirectUriForExchange =
+      storedRedirectUri ?? `${window.location.origin}${window.location.pathname}`
+
     // Remove code/state from the URL to prevent stale bookmarks
     try {
       const cleanUrl = new URL(window.location.href)
@@ -690,7 +697,7 @@ export class OAuth {
     this._redirectResult = this._exchangeCodeForTokens(
       code,
       codeVerifier,
-      storedRedirectUri ?? window.location.origin
+      redirectUriForExchange
     ).catch((err) => {
       this.logger.error(
         'OAuth redirect token exchange failed:',
