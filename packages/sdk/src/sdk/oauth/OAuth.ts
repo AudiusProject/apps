@@ -263,7 +263,7 @@ export class OAuth {
       this.config.basePath != null
 
     const csrfToken = generateId()
-    window.localStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
+    window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
 
     let pkceParams = ''
     if (usePkce) {
@@ -389,7 +389,7 @@ export class OAuth {
   }
 
   getCsrfToken() {
-    return window.localStorage.getItem(CSRF_TOKEN_KEY)
+    return window.sessionStorage.getItem(CSRF_TOKEN_KEY)
   }
 
   /**
@@ -420,6 +420,14 @@ export class OAuth {
     } finally {
       this._redirectResult = null
     }
+  }
+
+  /**
+   * Returns true if the user is currently authenticated (i.e. an access
+   * token is present in the token store).
+   */
+  get isAuthenticated(): boolean {
+    return !!this.config.tokenStore?.accessToken
   }
 
   /**
@@ -497,7 +505,7 @@ export class OAuth {
     this.config.tokenStore?.clear()
     window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-    window.localStorage.removeItem(CSRF_TOKEN_KEY)
+    window.sessionStorage.removeItem(CSRF_TOKEN_KEY)
   }
 
   /* ------- INTERNAL FUNCTIONS ------- */

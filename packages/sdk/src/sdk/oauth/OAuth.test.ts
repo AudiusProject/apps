@@ -218,7 +218,6 @@ describe('OAuth message listener lifecycle', () => {
       close: vi.fn()
     } as unknown as Window)
     vi.mocked(window.localStorage.setItem).mockClear()
-    vi.mocked(window.localStorage.getItem).mockReturnValue('csrf-token')
     vi.mocked(window.sessionStorage.setItem).mockClear()
     vi.mocked(window.sessionStorage.getItem).mockReturnValue(null)
   })
@@ -331,10 +330,6 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
 
   beforeEach(() => {
     tokenStore = new OAuthTokenStore()
-    vi.mocked(window.localStorage.getItem).mockImplementation((key: string) => {
-      if (key === 'audiusOauthState') return 'test-state'
-      return null
-    })
   })
 
   afterEach(() => {
@@ -363,6 +358,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
   it('exchanges code for tokens and returns LoginResult', async () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
+        if (key === 'audiusOauthState') return 'test-state'
         if (key === 'audiusPkceCodeVerifier') return 'test-verifier'
         if (key === 'audiusPkceRedirectUri')
           return 'https://example.com/callback'
@@ -475,6 +471,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
   it('cleans up the URL after detecting redirect params', () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
+        if (key === 'audiusOauthState') return 'test-state'
         if (key === 'audiusPkceCodeVerifier') return 'test-verifier'
         return null
       }
@@ -516,6 +513,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
   it('cleans up sessionStorage keys on redirect detection', () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
+        if (key === 'audiusOauthState') return 'test-state'
         if (key === 'audiusPkceCodeVerifier') return 'test-verifier'
         if (key === 'audiusPkceRedirectUri')
           return 'https://example.com/callback'
@@ -555,6 +553,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
   it('detects code in URL fragment (responseMode=fragment)', async () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
+        if (key === 'audiusOauthState') return 'test-state'
         if (key === 'audiusPkceCodeVerifier') return 'test-verifier'
         return null
       }
