@@ -442,8 +442,12 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       basePath: 'https://api.example.com',
       tokenStore
     })
-    expect(oauth.hasRedirectResult).toBe(false)
+    // URL has code+state, so hasRedirectResult is true before detection
+    expect(oauth.hasRedirectResult).toBe(true)
+    // But getRedirectResult returns null because verifier is missing
     expect(await oauth.getRedirectResult()).toBeNull()
+    // After detection, hasRedirectResult reflects consumed state
+    expect(oauth.hasRedirectResult).toBe(false)
 
     resetLocation()
   })
@@ -463,12 +467,14 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       basePath: 'https://api.example.com',
       tokenStore
     })
+    expect(oauth.hasRedirectResult).toBe(true)
+    expect(await oauth.getRedirectResult()).toBeNull()
     expect(oauth.hasRedirectResult).toBe(false)
 
     resetLocation()
   })
 
-  it('cleans up the URL after detecting redirect params', () => {
+  it('cleans up the URL after detecting redirect params', async () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
         if (key === 'audiusOauthState') return 'test-state'
@@ -481,36 +487,36 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     ;(window as any).history = { replaceState: replaceStateSpy }
 
     // Mock fetch so the exchange doesn't fail
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            access_token: 'a',
-            refresh_token: 'r',
-            userId: 1,
-            handle: 'x'
-          }),
-          { status: 200 }
-        )
-      )
+    const fetchMock = vi.fn()
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ access_token: 'a', refresh_token: 'r' }), {
+        status: 200
+      })
     )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ userId: 1, handle: 'x' }), { status: 200 })
+    )
+    vi.stubGlobal('fetch', fetchMock)
 
-    new OAuth({
+    const oauth = new OAuth({
       apiKey: 'test-api-key',
       basePath: 'https://api.example.com',
       tokenStore
     })
 
+    // URL cleanup doesn't happen until getRedirectResult triggers detection
+    expect(replaceStateSpy).not.toHaveBeenCalled()
+    await oauth.getRedirectResult()
+
     expect(replaceStateSpy).toHaveBeenCalledTimes(1)
-    const cleanedUrl = replaceStateSpy.mock.calls[0][2]
+    const cleanedUrl = replaceStateSpy.mock.calls[0]?.[2]
     expect(cleanedUrl).not.toContain('code=')
     expect(cleanedUrl).not.toContain('state=')
 
     resetLocation()
   })
 
-  it('cleans up sessionStorage keys on redirect detection', () => {
+  it('cleans up sessionStorage keys on redirect detection', async () => {
     vi.mocked(window.sessionStorage.getItem).mockImplementation(
       (key: string) => {
         if (key === 'audiusOauthState') return 'test-state'
@@ -522,23 +528,25 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     )
     setLocationWithCode('auth-code-123', 'test-state')
     ;(window as any).history = { replaceState: vi.fn() }
-    vi.stubGlobal(
-      'fetch',
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({ access_token: 'a', refresh_token: 'r' }),
-            { status: 200 }
-          )
-        )
+    const fetchMock = vi.fn()
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ access_token: 'a', refresh_token: 'r' }), {
+        status: 200
+      })
     )
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ userId: 1, handle: 'x' }), { status: 200 })
+    )
+    vi.stubGlobal('fetch', fetchMock)
 
-    new OAuth({
+    const oauth = new OAuth({
       apiKey: 'test-api-key',
       basePath: 'https://api.example.com',
       tokenStore
     })
+
+    // Trigger detection
+    await oauth.getRedirectResult()
 
     expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
       'audiusPkceCodeVerifier'
@@ -598,7 +606,7 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
     resetLocation()
   })
 
-  it('forwards code+state to opener via postMessage when in a popup', () => {
+  it('forwards code+state to opener via postMessage when in a popup', async () => {
     setLocationWithCode('popup-code', 'test-state')
     const postMessageSpy = vi.fn()
     const closeSpy = vi.fn()
@@ -611,6 +619,10 @@ describe('OAuth._exchangeCodeForTokens (via getRedirectResult)', () => {
       basePath: 'https://api.example.com',
       tokenStore
     })
+
+    // Nothing happens until getRedirectResult is called
+    expect(postMessageSpy).not.toHaveBeenCalled()
+    await oauth.getRedirectResult()
 
     expect(postMessageSpy).toHaveBeenCalledWith(
       { code: 'popup-code', state: 'test-state' },

@@ -134,6 +134,8 @@ export class OAuth {
 
   private _redirectResult: Promise<LoginResult> | null = null
 
+  private _redirectChecked = false
+
   constructor(private readonly config: OAuthConfig) {
     if (typeof window === 'undefined') {
       throw new Error(
@@ -148,9 +150,6 @@ export class OAuth {
     this.logger = (config.logger ?? new Logger()).createPrefixedLogger(
       '[oauth]'
     )
-
-    // Auto-detect a pending OAuth redirect (code + state in the URL)
-    this._detectRedirectResult()
   }
 
   /**
@@ -393,11 +392,25 @@ export class OAuth {
   }
 
   /**
-   * Returns true if the current page load contains a pending OAuth redirect
-   * result that has not yet been consumed via `getRedirectResult()`.
+   * Returns true if the current page load contains OAuth redirect params
+   * (`code` + `state`) that haven't been consumed via `getRedirectResult()`.
+   *
+   * Before `getRedirectResult()` has been called, this performs a lightweight
+   * URL check (no network requests). After, it reflects whether a cached
+   * result is still pending.
    */
   get hasRedirectResult(): boolean {
-    return this._redirectResult != null
+    if (this._redirectChecked) {
+      return this._redirectResult != null
+    }
+    // Lightweight URL check — no side effects
+    const queryParams = new URLSearchParams(window.location.search)
+    const hashParams = new URLSearchParams(
+      window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
+    )
+    const code = queryParams.get('code') ?? hashParams.get('code')
+    const state = queryParams.get('state') ?? hashParams.get('state')
+    return !!(code && state)
   }
 
   /**
@@ -409,14 +422,22 @@ export class OAuth {
    * Returns `null` if no redirect is pending.
    *
    * The result can only be consumed once — subsequent calls return `null`.
+   *
+   * If running inside a popup (`window.opener` exists), this forwards the
+   * authorization code to the opener window via `postMessage` and closes
+   * the popup — the opener's `loginAsync` promise resolves with the result.
+   * In that case, this method returns `null`.
    */
   async getRedirectResult(): Promise<LoginResult | null> {
+    if (!this._redirectChecked) {
+      this._redirectChecked = true
+      this._handleRedirectResult()
+    }
     if (!this._redirectResult) {
       return null
     }
     try {
-      const result = await this._redirectResult
-      return result
+      return await this._redirectResult
     } finally {
       this._redirectResult = null
     }
@@ -559,8 +580,8 @@ export class OAuth {
   }
 
   /**
-   * Called once from the constructor. Checks `window.location` for OAuth
-   * redirect params (`code` + `state`).
+   * Called lazily from `getRedirectResult()`. Checks `window.location` for
+   * OAuth redirect params (`code` + `state`).
    *
    * If running inside a popup (i.e. `window.opener` exists), the code and
    * state are forwarded back to the opener via `postMessage` and the popup
@@ -573,7 +594,7 @@ export class OAuth {
    * Also cleans up the URL (via `history.replaceState`) so that stale
    * `code` params cannot be bookmarked or replayed.
    */
-  private _detectRedirectResult(): void {
+  private _handleRedirectResult(): void {
     // Parse both query and fragment (responseMode can be either)
     const queryParams = new URLSearchParams(window.location.search)
     const hashParams = new URLSearchParams(
