@@ -645,6 +645,9 @@ export class OAuth {
     window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
     window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
 
+    const redirectUriForExchange =
+      storedRedirectUri ?? `${window.location.origin}${window.location.pathname}`
+
     // Remove code/state from the URL to prevent stale bookmarks
     try {
       const cleanUrl = new URL(window.location.href)
@@ -666,7 +669,7 @@ export class OAuth {
     this._redirectResult = this._exchangeCodeForTokens(
       code,
       codeVerifier,
-      storedRedirectUri ?? window.location.origin
+      redirectUriForExchange
     ).catch((err) => {
       this.logger.error(
         'OAuth redirect token exchange failed:',
