@@ -7,7 +7,7 @@ import {
 import { call, select } from 'typed-redux-saga'
 
 import { LineupSagas } from 'common/store/lineup/sagas'
-import { waitForRead } from 'utils/sagaHelpers'
+import { waitForReachability } from 'store/reachability/sagas'
 
 import { retrieveTrending } from './retrieveTrending'
 const { getTrendingGenre } = trendingPageSelectors
@@ -22,16 +22,24 @@ const {
 
 function getTracks(timeRange: TimeRange) {
   return function* ({ offset, limit }: { offset: number; limit: number }) {
-    yield* waitForRead()
+    // Trending is a public page and should not block on account status initialization.
+    // Waiting only for reachability avoids account-loading races during sign-in.
+    yield* waitForReachability()
     const genreAtStart = yield* select(getTrendingGenre)
-    const userId = yield* call(queryCurrentUserId)
+    let userId: number | null | undefined
+    try {
+      userId = yield* call(queryCurrentUserId)
+    } catch (e: any) {
+      console.warn(`Trending user context unavailable: ${e?.message ?? e}`)
+      userId = undefined
+    }
     try {
       const tracks = yield* retrieveTrending({
         timeRange,
         limit,
         offset,
         genre: genreAtStart,
-        currentUserId: userId
+        currentUserId: userId ?? undefined
       })
       return tracks
     } catch (e: any) {
