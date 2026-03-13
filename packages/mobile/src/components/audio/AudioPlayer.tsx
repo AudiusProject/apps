@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 
 import { useCurrentUserId, useTracks, useUsers } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import { ErrorLevel, Feature, Name } from '@audius/common/models'
+import { ErrorLevel, Feature, Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
   libraryPageTracksLineupActions,
@@ -25,6 +25,7 @@ import {
   Genre,
   removeNullable,
   getTrackPreviewDuration,
+  resolveImageUrl,
   resolveStreamUrl
 } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
@@ -66,6 +67,16 @@ import { useSavePodcastProgress } from './useSavePodcastProgress'
 
 export const DEFAULT_IMAGE_URL =
   'https://download.audius.co/static-resources/preview-image.jpg'
+
+const TRACK_ARTWORK_PREFERRED_SIZES = [
+  SquareSizes.SIZE_1000_BY_1000,
+  SquareSizes.SIZE_480_BY_480,
+  SquareSizes.SIZE_150_BY_150
+] as const
+
+const getArtworkTargetSize = (artwork?: Track['artwork']) =>
+  TRACK_ARTWORK_PREFERRED_SIZES.find((size) => artwork?.[size]) ??
+  SquareSizes.SIZE_1000_BY_1000
 
 const { getPlaying, getSeek, getCounter, getPlaybackRate, getUid } =
   playerSelectors
@@ -351,7 +362,11 @@ export const AudioPlayer = () => {
 
         const imageUrl =
           localTrackImageSource ??
-          track.artwork['1000x1000'] ??
+          (await resolveImageUrl({
+            artwork: track.artwork,
+            targetSize: getArtworkTargetSize(track.artwork),
+            defaultImage: DEFAULT_IMAGE_URL
+          })) ??
           DEFAULT_IMAGE_URL
 
         return {
