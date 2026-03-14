@@ -4,6 +4,7 @@ import { sdk } from '@audius/sdk'
 import { config } from './config'
 
 const APP_NAME = 'UploadExample'
+const REDIRECT_URI = 'audiusupload://oauth/callback'
 
 let sdkInstance: AudiusSdk | null = null
 
@@ -14,9 +15,10 @@ export function getSDK(): AudiusSdk {
       config.apiKey
         ? {
             appName: APP_NAME,
-            apiKey: config.apiKey
+            apiKey: config.apiKey,
+            redirectUri: REDIRECT_URI
           }
-        : { appName: APP_NAME }
+        : { appName: APP_NAME, redirectUri: REDIRECT_URI }
     )
   }
   return sdkInstance

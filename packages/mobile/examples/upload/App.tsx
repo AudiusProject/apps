@@ -17,8 +17,6 @@ import {
 import { config } from './src/config'
 import { getSDK } from './src/sdk'
 
-const REDIRECT_URI = 'audiusupload://oauth/callback'
-
 const GENRES = [
   'Electronic',
   'Rock',
@@ -66,14 +64,13 @@ export default function App() {
   // On mount: restore existing session.
   useEffect(() => {
     const sdk = getSDK()
-    if (!sdk.oauth) return
 
     // Restore a previously authenticated session.
     sdk.oauth.isAuthenticated().then((authenticated) => {
       if (!authenticated) return
       setLoading(true)
-      sdk
-        .oauth!.getUser()
+      sdk.oauth
+        .getUser()
         .then((user) => {
           setProfile(user)
           setScreen('signed-in')
@@ -87,7 +84,6 @@ export default function App() {
 
   const handleSignIn = useCallback(async () => {
     const sdk = getSDK()
-    if (!sdk.oauth) return
     setError(null)
     setLoading(true)
     try {
@@ -96,7 +92,6 @@ export default function App() {
       // tokens, and settles the promise — no separate deep-link event needed.
       await sdk.oauth.login({
         scope: 'write',
-        redirectUri: REDIRECT_URI,
         display: 'fullScreen'
       })
       const user = await sdk.oauth.getUser()
@@ -111,7 +106,7 @@ export default function App() {
 
   const handleSignOut = useCallback(async () => {
     await getSDK()
-      .oauth?.logout()
+      .oauth.logout()
       .catch(() => {})
     setProfile(null)
     setAudioFile(null)
