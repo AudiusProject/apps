@@ -30,5 +30,4 @@ export class TokenStoreMemory implements OAuthTokenStore {
     this._accessToken = null
     this._refreshToken = null
   }
-
 }
