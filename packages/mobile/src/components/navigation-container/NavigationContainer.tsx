@@ -253,6 +253,9 @@ const NavigationContainer = (props: NavigationContainerProps) => {
         },
         ResetPassword: {
           path: 'reset-password'
+        },
+        OAuthScreen: {
+          path: 'oauth/:rest'
         }
       }
     },
@@ -278,6 +281,17 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       }
 
       path = path.replace('#embed', '')
+
+      // OAuth authorization URLs (e.g. /oauth/authorize?...) are intercepted by
+      // the app via Universal Links. Route them to the OAuth screen instead of
+      // crashing with an unmatched path.
+      if (path.match(/^\/oauth\//)) {
+        const queryStart = path.indexOf('?')
+        const search = queryStart > -1 ? path.slice(queryStart) : ''
+        return {
+          routes: [{ name: 'OAuthScreen', params: { search } }]
+        }
+      }
 
       const connectPath = /^\/(connect)/
       if (path.match(connectPath)) {
