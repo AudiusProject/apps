@@ -31,7 +31,7 @@ React Native / Expo is now supported out of the box. See the [React Native / Exp
 
 | API                      | Before                           | After                                         |
 | ------------------------ | -------------------------------- | --------------------------------------------- |
-| `login()`                | fire-and-forget, no `redirectUri` | `async`, requires `redirectUri`, returns `Promise<void>` |
+| `login()`                | fire-and-forget, no `redirectUri` | `async`, returns `Promise<void>`; `redirectUri` optional if set in SDK config |
 | `hasRefreshToken`        | synchronous getter (`boolean`)   | `async` method returning `Promise<boolean>`   |
 
 ### Added APIs
@@ -42,9 +42,19 @@ React Native / Expo is now supported out of the box. See the [React Native / Exp
 | `isAuthenticated()`            | `async` method returning `Promise<boolean>` — true if an access token is stored. |
 | `getUser()`                    | Fetches the authenticated user's profile using the stored access token.     |
 
-### `redirectUri` is now required
+### `redirectUri`
 
-`login()` requires a `redirectUri` — there is no longer a default value.
+Set `redirectUri` once in the SDK config and it applies to every `login()` call. You can still pass it per-call to override the config value.
+
+```ts
+// Set once:
+const sdk = audiusSdk({ appName: 'My App', apiKey: 'YOUR_API_KEY', redirectUri: 'https://yourapp.com/callback' })
+
+// Override per-call if needed:
+await sdk.oauth.login({ scope: 'write', redirectUri: 'https://yourapp.com/other-callback' })
+```
+
+A `redirectUri` must be available from one of these sources or `login()` will throw.
 
 ## Migration guide
 
@@ -64,12 +74,16 @@ sdk.oauth!.login({ scope: 'write', display: 'popup' })
 ### After
 
 ```ts
+// Once at initialization:
+const sdk = audiusSdk({
+  appName: 'My App',
+  apiKey: 'YOUR_API_KEY',
+  redirectUri: 'https://yourapp.com/callback'
+})
+
 // On sign-in button click:
 try {
-  await sdk.oauth.login({
-    scope: 'write',
-    redirectUri: 'https://yourapp.com/callback'
-  })
+  await sdk.oauth.login({ scope: 'write' })
   setUser(await sdk.oauth.getUser())
 } catch (error) {
   setError(error.message)
@@ -115,6 +129,12 @@ No extra configuration is needed. `login()` resolves after the browser closes an
 the token exchange completes:
 
 ```ts
-await sdk.oauth.login({ scope: 'write', redirectUri: 'myapp://oauth/callback' })
+const sdk = audiusSdk({
+  appName: 'My App',
+  apiKey: 'YOUR_API_KEY',
+  redirectUri: 'myapp://oauth/callback'
+})
+
+await sdk.oauth.login({ scope: 'write' })
 const user = await sdk.oauth.getUser()
 ```
