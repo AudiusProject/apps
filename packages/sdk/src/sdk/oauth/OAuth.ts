@@ -21,6 +21,7 @@ type OAuthConfig = {
   logger?: LoggerService
   tokenStore: OAuthTokenStore
   basePath: string
+  redirectUri?: string
   openUrl?: (url: string) => void | Promise<void>
 }
 
@@ -73,8 +74,11 @@ export class OAuth {
     openUrl
   }: {
     scope?: OAuthScope
-    /** The registered redirect URI where Audius sends the user after consent. */
-    redirectUri: string
+    /**
+     * The registered redirect URI where Audius sends the user after consent.
+     * Falls back to the `redirectUri` set in the top-level SDK config.
+     */
+    redirectUri?: string
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
     /**
@@ -113,18 +117,27 @@ export class OAuth {
       return promise
     }
     const effectiveScope = scopeFormatted.includes('write') ? 'write' : 'read'
+    const resolvedRedirectUri = redirectUri ?? this.config.redirectUri
+    if (!resolvedRedirectUri) {
+      this._settleLogin(
+        new Error(
+          'redirectUri is required. Pass it to login() or set it in the SDK config.'
+        )
+      )
+      return promise
+    }
     const csrfToken = generateState()
     const codeVerifier = generateCodeVerifier()
     this._csrfToken = csrfToken
     this._pkceVerifier = codeVerifier
-    this._pkceRedirectUri = redirectUri
+    this._pkceRedirectUri = resolvedRedirectUri
     // Also persist to sessionStorage so the values survive a full-page redirect
     // (which destroys the JS context). Popup and mobile flows use the instance
     // properties above and never need the sessionStorage fallback.
     if (typeof window !== 'undefined' && window.sessionStorage) {
       window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
       window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
-      window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, redirectUri)
+      window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, resolvedRedirectUri)
     }
 
     let codeChallenge: string
@@ -151,7 +164,7 @@ export class OAuth {
     const appIdURIParam = `${this.apiKey ? 'api_key' : 'app_name'}=${appIdURISafe}`
     const pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
 
-    const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(redirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
+    const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
 
     const resolvedOpenUrl = openUrl ?? this.config.openUrl
     if (resolvedOpenUrl) {
@@ -484,7 +497,9 @@ export class OAuth {
     }
 
     const redirectUriForExchange =
-      this.pkceRedirectUri ?? `${parsed.origin}${parsed.pathname}`
+      this.pkceRedirectUri ??
+      this.config.redirectUri ??
+      `${parsed.origin}${parsed.pathname}`
 
     this._clearPkceState()
 

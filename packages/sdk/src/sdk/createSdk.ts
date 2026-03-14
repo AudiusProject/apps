@@ -61,11 +61,14 @@ export const createSdk = (config: SdkConfig) => {
   const tokenStore = services?.tokenStore ?? new TokenStoreLocalStorage()
 
   // Initialize OAuth early so it can be passed to middleware
+  const redirectUri = 'redirectUri' in config ? config.redirectUri : undefined
+
   const oauth = new OAuth({
     apiKey,
     tokenStore,
     basePath,
     logger,
+    redirectUri,
     openUrl: services?.openUrl
   })
 

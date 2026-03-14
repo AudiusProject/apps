@@ -145,6 +145,10 @@ const ConfigWithApiKeySchema = z.object({
    */
   apiKey: z.string().min(1),
   /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
+  /**
    * Target environment
    * @internal
    */
@@ -171,6 +175,10 @@ const ConfigWithApiSecretSchema = z.object({
    * API secret, required for writes that use Entity Manager
    */
   apiSecret: z.string().min(1),
+  /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
   /**
    * Target environment
    * @internal
@@ -199,6 +207,10 @@ const ConfigWithBearerTokenSchema = z.object({
    */
   bearerToken: z.string().min(1),
   /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
+  /**
    * Target environment
    * @internal
    */
@@ -217,6 +229,10 @@ const ConfigWithAppNameSchema = z.object({
    * Services injection
    */
   services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
   /**
    * Target environment
    * @internal
