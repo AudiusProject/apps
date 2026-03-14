@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { PublicClient, WalletClient } from 'viem'
 
+import type { OAuthTokenStore } from './oauth/tokenStore'
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
 import type { AntiAbuseOracleSelectorService } from './services/AntiAbuseOracleSelector/types'
 import type { ArchiverService } from './services/Archiver'
@@ -45,6 +46,20 @@ export type ServicesContainer = {
    * Service used to log and set a desired log level
    */
   logger: LoggerService
+
+  /**
+   * Service used to store OAuth access and refresh tokens.
+   * Defaults to `TokenStoreLocalStorage` which persists to localStorage.
+   * Override to use in-memory, cookie-based, or other storage strategies.
+   */
+  tokenStore: OAuthTokenStore
+
+  /**
+   * Called with the OAuth URL when `login()` is invoked. Defaults to
+   * `window.open` (popup) or `window.location.href` (fullScreen) on web.
+   * Required on mobile — use `Linking.openURL` or a WebView.
+   */
+  openUrl?: (url: string) => void | Promise<void>
 
   /**
    * Service used to interact with the Solana relay

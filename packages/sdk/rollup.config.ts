@@ -110,7 +110,7 @@ export const outputConfigs = {
    * Used by the Audius React Native client
    */
   sdkConfigReactNative: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.native.ts',
     output: [
       {
         dir: 'dist',

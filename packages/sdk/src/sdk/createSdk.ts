@@ -30,7 +30,7 @@ import {
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
-import { OAuthTokenStore } from './oauth/tokenStore'
+import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
 import { Logger, Storage, StorageNodeSelector } from './services'
 import { SdkConfigSchema, type SdkConfig } from './types'
 
@@ -58,18 +58,16 @@ export const createSdk = (config: SdkConfig) => {
   const middleware: Middleware[] = []
 
   // Token store for PKCE flow — provides dynamic accessToken to Configuration
-  const tokenStore = new OAuthTokenStore()
+  const tokenStore = services?.tokenStore ?? new TokenStoreLocalStorage()
 
   // Initialize OAuth early so it can be passed to middleware
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          apiKey,
-          tokenStore,
-          basePath,
-          logger
-        })
-      : undefined
+  const oauth = new OAuth({
+    apiKey,
+    tokenStore,
+    basePath,
+    logger,
+    openUrl: services?.openUrl
+  })
 
   if (apiSecret || services?.audiusWalletClient) {
     middleware.push(
@@ -113,7 +111,8 @@ export const createSdk = (config: SdkConfig) => {
     basePath,
     // Static bearerToken takes precedence; otherwise use the dynamic store
     // so PKCE login can inject tokens after construction.
-    accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
+    accessToken:
+      bearerToken ?? (() => tokenStore.getAccessToken().then((t) => t ?? ''))
   })
 
   // Initialize API clients

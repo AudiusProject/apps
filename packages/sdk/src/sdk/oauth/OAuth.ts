@@ -3,7 +3,11 @@ import { FetchError, ResponseError } from '../api/generated/default/runtime'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid } from '../utils/oauthScope'
 
-import { generateCodeVerifier, generateCodeChallenge } from './pkce'
+import {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  generateState
+} from './pkce'
 import type { OAuthTokenStore } from './tokenStore'
 import { OAuthScope } from './types'
 
@@ -11,18 +15,13 @@ const CSRF_TOKEN_KEY = 'audiusOauthState'
 const PKCE_VERIFIER_KEY = 'audiusPkceCodeVerifier'
 const PKCE_REDIRECT_URI_KEY = 'audiusPkceRedirectUri'
 
-const generateId = (): string => {
-  const arr = new Uint8Array(20)
-  window.crypto.getRandomValues(arr)
-  return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('')
-}
-
 type OAuthConfig = {
   appName?: string
   apiKey?: string
   logger?: LoggerService
-  tokenStore?: OAuthTokenStore
+  tokenStore: OAuthTokenStore
   basePath: string
+  openUrl?: (url: string) => void | Promise<void>
 }
 
 export class OAuth {
@@ -35,13 +34,11 @@ export class OAuth {
   private _boundMessageHandler: ((e: MessageEvent) => void) | null = null
   private _redirectResult: Promise<void> | null = null
   private _redirectChecked = false
+  private _csrfToken: string | null = null
+  private _pkceVerifier: string | null = null
+  private _pkceRedirectUri: string | null = null
 
   constructor(private readonly config: OAuthConfig) {
-    if (typeof window === 'undefined') {
-      throw new Error(
-        'Audius OAuth SDK functions are only available in browser. Refer to our documentation to learn how to implement Audius OAuth manually: https://docs.audius.co/developers/log-in-with-audius#manual-implementation.'
-      )
-    }
     this.apiKey = config.apiKey ?? null
     this.activePopupWindow = null
     this.popupCheckInterval = null
@@ -60,7 +57,7 @@ export class OAuth {
    *   resolves when the token exchange is complete.
    * - **Full-page redirect**: navigates the current page to Audius. After
    *   the user approves, Audius redirects back to `redirectUri`. Call
-   *   `getRedirectResult()` on the next mount to complete the exchange.
+   *   `handleRedirect()` on the next mount to complete the exchange.
    *
    * After a successful login, call `getUser()` to retrieve the user profile.
    * Subsequent SDK calls that require authentication use the stored access
@@ -72,13 +69,19 @@ export class OAuth {
     scope = 'read',
     redirectUri,
     display = 'popup',
-    responseMode = 'fragment'
+    responseMode = 'fragment',
+    openUrl
   }: {
     scope?: OAuthScope
     /** The registered redirect URI where Audius sends the user after consent. */
     redirectUri: string
     display?: 'popup' | 'fullScreen'
     responseMode?: 'fragment' | 'query'
+    /**
+     * Called with the OAuth URL to open it. Defaults to `window.open` (popup)
+     * or `window.location.href` (fullScreen) on web.
+     */
+    openUrl?: (url: string) => void | Promise<void>
   }): Promise<void> {
     if (this._currentLoginResolve != null) {
       throw new Error('A login is already in progress.')
@@ -88,6 +91,8 @@ export class OAuth {
       this._currentLoginResolve = resolve
       this._currentLoginReject = reject
     })
+    this._redirectChecked = false
+    this._redirectResult = null
 
     const scopeFormatted = typeof scope === 'string' ? [scope] : scope
 
@@ -108,16 +113,23 @@ export class OAuth {
       return promise
     }
     const effectiveScope = scopeFormatted.includes('write') ? 'write' : 'read'
-    const csrfToken = generateId()
-    window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
-
+    const csrfToken = generateState()
     const codeVerifier = generateCodeVerifier()
-    window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
-    window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, redirectUri)
+    this._csrfToken = csrfToken
+    this._pkceVerifier = codeVerifier
+    this._pkceRedirectUri = redirectUri
+    // Also persist to sessionStorage so the values survive a full-page redirect
+    // (which destroys the JS context). Popup and mobile flows use the instance
+    // properties above and never need the sessionStorage fallback.
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
+      window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
+      window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, redirectUri)
+    }
 
     let codeChallenge: string
     try {
-      codeChallenge = await generateCodeChallenge(codeVerifier)
+      codeChallenge = generateCodeChallenge(codeVerifier)
     } catch (e) {
       this._settleLogin(
         new Error(
@@ -129,17 +141,29 @@ export class OAuth {
       return promise
     }
 
-    const originURISafe = encodeURIComponent(window.location.origin)
+    const originParam =
+      typeof window !== 'undefined' && window.location
+        ? `&origin=${encodeURIComponent(window.location.origin)}`
+        : ''
     const appIdURISafe = encodeURIComponent(
       (this.apiKey || this.config.appName)!
     )
     const appIdURIParam = `${this.apiKey ? 'api_key' : 'app_name'}=${appIdURISafe}`
     const pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
 
-    const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(redirectUri)}&origin=${originURISafe}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
+    const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(redirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
 
-    if (display === 'popup') {
-      if (!this._boundMessageHandler) {
+    const resolvedOpenUrl = openUrl ?? this.config.openUrl
+    if (resolvedOpenUrl) {
+      try {
+        await resolvedOpenUrl(fullOauthUrl)
+      } catch (e) {
+        this._settleLogin(
+          e instanceof Error ? e : new Error('OAuth flow failed.')
+        )
+      }
+    } else if (display === 'popup') {
+      if (!this._boundMessageHandler && typeof window !== 'undefined') {
         this._boundMessageHandler = (e: MessageEvent) => this._receiveMessage(e)
         window.addEventListener('message', this._boundMessageHandler, false)
       }
@@ -172,54 +196,90 @@ export class OAuth {
     return promise
   }
 
-  getCsrfToken() {
-    return window.sessionStorage.getItem(CSRF_TOKEN_KEY)
+  private get csrfToken() {
+    return (
+      this._csrfToken ??
+      (typeof window !== 'undefined' && window.sessionStorage
+        ? window.sessionStorage.getItem(CSRF_TOKEN_KEY)
+        : null)
+    )
+  }
+
+  private get pkceVerifier() {
+    return (
+      this._pkceVerifier ??
+      (typeof window !== 'undefined' && window.sessionStorage
+        ? window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
+        : null)
+    )
+  }
+
+  private get pkceRedirectUri() {
+    return (
+      this._pkceRedirectUri ??
+      (typeof window !== 'undefined' && window.sessionStorage
+        ? window.sessionStorage.getItem(PKCE_REDIRECT_URI_KEY)
+        : null)
+    )
   }
 
   /**
-   * Returns true if the current page load contains OAuth redirect params
-   * (`code` + `state`) that haven't been consumed via `getRedirectResult()`.
-   *
-   * Before `getRedirectResult()` has been called, this performs a lightweight
-   * URL check (no network requests). After, it reflects whether a cached
-   * result is still pending.
+   * Returns true if the given URL (or the current page URL on web) contains
+   * OAuth redirect params (`code` + `state`) that haven't been consumed via
+   * `handleRedirect()` yet.
    */
-  get hasRedirectResult(): boolean {
+  hasRedirectResult(url?: string): boolean {
     if (this._redirectChecked) {
       return this._redirectResult != null
     }
-    const queryParams = new URLSearchParams(window.location.search)
-    const hashParams = new URLSearchParams(
-      window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
-    )
-    const code = queryParams.get('code') ?? hashParams.get('code')
-    const state = queryParams.get('state') ?? hashParams.get('state')
-    return !!(code && state)
+    const target =
+      url ?? (typeof window !== 'undefined' ? window.location.href : null)
+    if (!target) return false
+    try {
+      const parsed = new URL(target)
+      const queryParams = parsed.searchParams
+      const hashParams = new URLSearchParams(
+        parsed.hash.startsWith('#') ? parsed.hash.slice(1) : ''
+      )
+      const code = queryParams.get('code') ?? hashParams.get('code')
+      const state = queryParams.get('state') ?? hashParams.get('state')
+      return !!(code && state)
+    } catch {
+      return false
+    }
   }
 
   /**
-   * Call on every page load to handle an OAuth redirect.
+   * Completes an OAuth flow by processing the redirect URL.
    *
-   * - **Popup**: detects `window.opener`, forwards the authorization code to
-   *   the parent window, and closes the popup. The parent's `login()`
-   *   promise resolves.
-   * - **Full-page redirect**: performs the PKCE token exchange, stores the
-   *   tokens, and cleans up the URL. Call `getUser()` afterwards to retrieve
-   *   the user profile.
-   *
-   * Is a no-op when no redirect params are present.
+   * Pass the redirect URL explicitly (mobile deep link) or omit to use the
+   * current page URL (web). Is a no-op when no redirect params are present.
    * The result can only be consumed once — subsequent calls are no-ops.
+   *
+   * - **Web popup**: detects `window.opener`, forwards the code to the parent
+   *   window, and closes the popup. The parent's `login()` promise resolves.
+   * - **Web full-page redirect / mobile**: performs the PKCE token exchange
+   *   and stores the tokens. Call `getUser()` afterwards.
    */
-  async getRedirectResult(): Promise<void> {
+  async handleRedirect(url?: string): Promise<void> {
     if (!this._redirectChecked) {
       this._redirectChecked = true
-      this._handleRedirectResult()
+      const target =
+        url ??
+        (typeof window !== 'undefined' ? window.location.href : undefined)
+      if (target) this._handleRedirectResult(target)
     }
     if (!this._redirectResult) {
       return
     }
     try {
       await this._redirectResult
+      this._settleLogin()
+    } catch (err) {
+      this._settleLogin(
+        err instanceof Error ? err : new Error('Token exchange failed.')
+      )
+      throw err
     } finally {
       this._redirectResult = null
     }
@@ -229,16 +289,16 @@ export class OAuth {
    * Returns true if the user is currently authenticated (i.e. an access
    * token is present in the token store).
    */
-  get isAuthenticated(): boolean {
-    return !!this.config.tokenStore?.accessToken
+  async isAuthenticated(): Promise<boolean> {
+    return !!(await this.config.tokenStore.getAccessToken())
   }
 
   /**
    * Returns true if a refresh token is currently stored and a refresh
    * exchange could be attempted.
    */
-  get hasRefreshToken(): boolean {
-    return !!this.config.tokenStore?.refreshToken
+  async hasRefreshToken(): Promise<boolean> {
+    return !!(await this.config.tokenStore.getRefreshToken())
   }
 
   /**
@@ -252,7 +312,7 @@ export class OAuth {
    * request fails at the network level.
    */
   async getUser(): Promise<DecodedUserToken> {
-    const accessToken = this.config.tokenStore?.accessToken
+    const accessToken = await this.config.tokenStore.getAccessToken()
     const headers: Record<string, string> = {}
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`
@@ -278,11 +338,7 @@ export class OAuth {
    * Returns the new access token, or `null` if the refresh failed.
    */
   async refreshAccessToken(): Promise<string | null> {
-    if (!this.config.tokenStore) {
-      this.logger.error('Token store is required for token refresh.')
-      return null
-    }
-    const refreshToken = this.config.tokenStore.refreshToken
+    const refreshToken = await this.config.tokenStore.getRefreshToken()
     if (!refreshToken) {
       this.logger.error('No refresh token available.')
       return null
@@ -302,7 +358,7 @@ export class OAuth {
       }
       const tokens = await res.json()
       if (tokens.access_token && tokens.refresh_token) {
-        this.config.tokenStore.setTokens(
+        await this.config.tokenStore.setTokens(
           tokens.access_token,
           tokens.refresh_token
         )
@@ -320,13 +376,14 @@ export class OAuth {
    * to unauthenticated.
    */
   async logout(): Promise<void> {
-    if (this.config.tokenStore?.refreshToken) {
+    const refreshToken = await this.config.tokenStore.getRefreshToken()
+    if (refreshToken) {
       try {
         await fetch(`${this.config.basePath}/oauth/revoke`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            token: this.config.tokenStore.refreshToken,
+            token: refreshToken,
             client_id: this.apiKey
           })
         })
@@ -334,10 +391,8 @@ export class OAuth {
         // Per RFC 7009, revocation errors are non-fatal
       }
     }
-    this.config.tokenStore?.clear()
-    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-    window.sessionStorage.removeItem(CSRF_TOKEN_KEY)
+    await this.config.tokenStore.clear()
+    this._clearPkceState()
   }
 
   /* ------- INTERNAL FUNCTIONS ------- */
@@ -367,36 +422,29 @@ export class OAuth {
       throw new Error(err.error_description ?? 'Token exchange failed.')
     }
     const tokens = await tokenRes.json()
-    this.config.tokenStore?.setTokens(tokens.access_token, tokens.refresh_token)
+    await this.config.tokenStore.setTokens(
+      tokens.access_token,
+      tokens.refresh_token
+    )
   }
 
-  /**
-   * Called lazily from `getRedirectResult()`. Checks `window.location` for
-   * OAuth redirect params (`code` + `state`).
-   *
-   * If running inside a popup (i.e. `window.opener` exists), the code and
-   * state are forwarded back to the opener via `postMessage` and the popup
-   * closes itself. The opener's `_receiveMessage` handler then performs the
-   * token exchange using the PKCE verifier from **its** `sessionStorage`.
-   *
-   * If running as a full-page redirect, the token exchange is performed
-   * locally and the result is stored as `_redirectResult`.
-   *
-   * Also cleans up the URL (via `history.replaceState`) so that stale
-   * `code` params cannot be bookmarked or replayed.
-   */
-  private _handleRedirectResult(): void {
-    const queryParams = new URLSearchParams(window.location.search)
+  private _handleRedirectResult(url: string): void {
+    let parsed: URL
+    try {
+      parsed = new URL(url)
+    } catch {
+      return
+    }
+
+    const queryParams = parsed.searchParams
     const hashParams = new URLSearchParams(
-      window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
+      parsed.hash.startsWith('#') ? parsed.hash.slice(1) : ''
     )
 
     const code = queryParams.get('code') ?? hashParams.get('code')
     const state = queryParams.get('state') ?? hashParams.get('state')
     const openerOrigin =
-      queryParams.get('origin') ??
-      hashParams.get('origin') ??
-      window.location.origin
+      queryParams.get('origin') ?? hashParams.get('origin') ?? parsed.origin
 
     if (!code || !state) {
       return
@@ -405,7 +453,7 @@ export class OAuth {
     // If running inside a popup (opened by login on the parent page),
     // forward the code + state back to the opener and close. The opener's
     // _receiveMessage handler will do the exchange using its own verifier.
-    if (window.opener) {
+    if (typeof window !== 'undefined' && window.opener) {
       try {
         window.opener.postMessage({ code, state }, openerOrigin)
       } catch {
@@ -415,48 +463,48 @@ export class OAuth {
       return
     }
 
-    // Full-page redirect flow — handle the exchange locally
-    const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
+    // Full-page redirect / mobile — handle the exchange locally
+    const codeVerifier = this.pkceVerifier
     if (!codeVerifier) {
-      // No verifier means this isn't our redirect (stale bookmark, etc.)
+      this._settleLogin(
+        new Error('OAuth login state was lost. Please try signing in again.')
+      )
       return
     }
 
     // Verify CSRF state
-    if (this.getCsrfToken() !== state) {
-      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-      this.logger.error('OAuth redirect state mismatch.')
+    if (this.csrfToken !== state) {
+      this._clearPkceState()
+      this._settleLogin(
+        new Error(
+          'OAuth state mismatch — the login attempt may have been tampered with.'
+        )
+      )
       return
     }
 
-    const storedRedirectUri = window.sessionStorage.getItem(
-      PKCE_REDIRECT_URI_KEY
-    )
-
-    // Clean up PKCE session state
-    window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-    window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
-
     const redirectUriForExchange =
-      storedRedirectUri ??
-      `${window.location.origin}${window.location.pathname}`
+      this.pkceRedirectUri ?? `${parsed.origin}${parsed.pathname}`
 
-    // Remove code/state from the URL to prevent stale bookmarks
-    try {
-      const cleanUrl = new URL(window.location.href)
-      cleanUrl.searchParams.delete('code')
-      cleanUrl.searchParams.delete('state')
-      if (cleanUrl.hash) {
-        const hp = new URLSearchParams(cleanUrl.hash.slice(1))
-        hp.delete('code')
-        hp.delete('state')
-        const remaining = hp.toString()
-        cleanUrl.hash = remaining ? `#${remaining}` : ''
+    this._clearPkceState()
+
+    // Remove code/state from the URL to prevent stale bookmarks (web only)
+    if (typeof window !== 'undefined' && window.history) {
+      try {
+        const cleanUrl = new URL(url)
+        cleanUrl.searchParams.delete('code')
+        cleanUrl.searchParams.delete('state')
+        if (cleanUrl.hash) {
+          const hp = new URLSearchParams(cleanUrl.hash.slice(1))
+          hp.delete('code')
+          hp.delete('state')
+          const remaining = hp.toString()
+          cleanUrl.hash = remaining ? `#${remaining}` : ''
+        }
+        window.history.replaceState(null, '', cleanUrl.toString())
+      } catch {
+        // Non-fatal — URL cleanup is best-effort
       }
-      window.history.replaceState(null, '', cleanUrl.toString())
-    } catch {
-      // Non-fatal — URL cleanup is best-effort
     }
 
     this._redirectResult = this._exchangeCodeForTokens(
@@ -480,11 +528,22 @@ export class OAuth {
     }
     this._currentLoginResolve = null
     this._currentLoginReject = null
-    if (this._boundMessageHandler) {
+    if (this._boundMessageHandler && typeof window !== 'undefined') {
       window.removeEventListener('message', this._boundMessageHandler, false)
       this._boundMessageHandler = null
     }
     this._clearPopupCheckInterval()
+  }
+
+  private _clearPkceState(): void {
+    this._csrfToken = null
+    this._pkceVerifier = null
+    this._pkceRedirectUri = null
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(CSRF_TOKEN_KEY)
+      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
+      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+    }
   }
 
   _clearPopupCheckInterval() {
@@ -511,22 +570,17 @@ export class OAuth {
         this.activePopupWindow = null
       }
 
-      if (this.getCsrfToken() !== event.data.state) {
+      if (this.csrfToken !== event.data.state) {
         this._settleLogin(new Error('State mismatch.'))
         return
       }
 
-      const codeVerifier = window.sessionStorage.getItem(PKCE_VERIFIER_KEY)
-      const storedRedirectUri = window.sessionStorage.getItem(
-        PKCE_REDIRECT_URI_KEY
-      )
-      window.sessionStorage.removeItem(PKCE_VERIFIER_KEY)
-      window.sessionStorage.removeItem(PKCE_REDIRECT_URI_KEY)
+      const codeVerifier = this.pkceVerifier
+      const storedRedirectUri = this.pkceRedirectUri
+      this._clearPkceState()
 
       if (!codeVerifier) {
-        this._settleLogin(
-          new Error('PKCE code verifier not found in session storage.')
-        )
+        this._settleLogin(new Error('PKCE code verifier not found.'))
         return
       }
 

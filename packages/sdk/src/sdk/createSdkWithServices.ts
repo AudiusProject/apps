@@ -34,7 +34,7 @@ import {
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
-import { OAuthTokenStore } from './oauth/tokenStore'
+import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
 import {
   PaymentRouterClient,
   getDefaultPaymentRouterClientConfig
@@ -324,7 +324,8 @@ const initializeServices = ({
     antiAbuseOracle,
     emailEncryptionService,
     archiverService,
-    logger
+    logger,
+    tokenStore: config.services?.tokenStore ?? new TokenStoreLocalStorage()
   }
   return services
 }
@@ -363,7 +364,7 @@ const initializeApis = ({
   ]
 
   // Token store for PKCE flow — provides dynamic accessToken to Configuration
-  const tokenStore = new OAuthTokenStore()
+  const tokenStore = services.tokenStore ?? new TokenStoreLocalStorage()
 
   // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
   const oauth =
@@ -392,7 +393,8 @@ const initializeApis = ({
     basePath,
     // Static bearerToken takes precedence; otherwise use the dynamic store
     // so PKCE login can inject tokens after construction.
-    accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
+    accessToken:
+      bearerToken ?? (() => tokenStore.getAccessToken().then((t) => t ?? ''))
   })
 
   const tracks = new TracksApi(apiClientConfig, services)
