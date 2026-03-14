@@ -257,6 +257,24 @@ export class TracksApi extends GeneratedTracksApi {
         imageUploadResponse
       )
 
+    if (
+      !populatedMetadata.previewCid &&
+      populatedMetadata.previewStartSeconds !== undefined &&
+      populatedMetadata.trackCid
+    ) {
+      const previewCid = await retry3(
+        async () =>
+          await this.storage.generatePreview({
+            cid: populatedMetadata.trackCid!,
+            secondOffset: populatedMetadata.previewStartSeconds!
+          }),
+        (e) => {
+          this.logger.info('Retrying generatePreview', e)
+        }
+      )
+      populatedMetadata.previewCid = previewCid
+    }
+
     return this.writeTrackToChain(
       params.userId,
       populatedMetadata,
