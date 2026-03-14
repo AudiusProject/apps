@@ -1,179 +1,325 @@
 ---
-title: OAuth Methods
-description: Audius Protocol Documentation
+title: OAuth
+description: Audius OAuth — Authorization Code Flow with PKCE
 ---
 
 # OAuth
 
-Enable users to either authorize your app to perform actions on their behalf (i.e. grant write
-permissions), or simply verify who they are and give you access to their Audius profile info (no
-write permissions granted).
+Audius OAuth lets users authorize your app to perform actions on their behalf (write permissions) or
+simply verify their identity and share their profile info (read-only).
 
-## Methods
+The SDK implements the **OAuth 2.0 Authorization Code Flow with PKCE** — no backend server or client
+secret is required.
 
-### init
+## Getting Started
 
-#### init(`params`)
+### 1. Get an API Key
 
-Enables the Audius OAuth functionality. Call this before using any other `oauth` methods.
+Create a developer app and obtain an API key from:
 
-**Params**
+- **In-app settings** — [audius.co/settings](https://audius.co/settings) → Developer Apps
 
-- successCallback `(profile: UserProfile, encodedJwt: string) => void` - function to be called when
-  the user successfully authorizes or authenticates with Audius. This function will be called with
-  the user's profile information, which is an object with the following shape:
+### 2. Register a Redirect URI
 
-  ```ts
-  // `UserProfile` type:
-  {
-    userId: number; // unique Audius user identifier
-    email: string;
-    name: string; // user's display name
-    handle: string;
-    verified: boolean; // whether the user has the Audius "verified" checkmark
+On the same page, register the **redirect URI(s)** your app will use. Audius validates the redirect
+URI in every authorization request against this list.
 
-    /** URLs for the user's profile picture, if any.
-    * If the user has a profile picture, three sizes will be available: 150x150, 480x480, and 1000x1000.
-    * If the user has no profile picture, this field will be empty.
-    */
-    profilePicture: {"150x150": string, "480x480": string, "1000x1000": string } | { misc: string } | undefined | null
-    apiKey: string | null // the API key for your application if specified
-    sub: number; // alias for userId
-    iat: string; // timestamp for when auth was performed
-  }
-  ```
+- **Web popup / full-page redirect**: register your callback page URL (e.g. `https://yourapp.com/callback`)
+- **Mobile (React Native)**: register a custom URL scheme (e.g. `myapp://oauth/callback`)
+- **Local development**: register `http://localhost:PORT` (or the specific path you use)
 
-  The second argument (`encodedJwt`) is for advanced use cases that want to pass the JWT to a
-  backend for server-side verification.
+### 3. Initialize the SDK
 
-- errorCallback _optional_ `(errorMessage: string) => void` - function to be called when an error
-  occurs during the authentication flow. This function will be called with a string describing the
-  error.
+```ts
+import { sdk } from '@audius/sdk'
 
-**Returns**: Nothing
-
-**Example**
-
-```js
-audiusSdk.oauth.init({
-  successCallback: (user) => console.log('Logged in user', user),
-  errorCallback: (error) => console.log('Got error', error),
+const audiusSdk = sdk({
+  appName: 'My App',
+  apiKey: 'YOUR_API_KEY',
+  redirectUri: 'https://yourapp.com/callback',
 })
 ```
 
-### renderButton
+On **React Native / Expo**, import from `@audius/sdk` as normal — the native entry point is
+resolved automatically and configures `AsyncStorage`-backed token persistence and
+`expo-web-browser` for the OAuth browser session out of the box.
 
-#### renderButton(`params`)
+### 4. Log the User In
 
-Replaces the element passed in the first parameter with the Log In with Audius button.
+Call `login()` with a registered `redirectUri`. The SDK runs the full PKCE exchange and stores the
+resulting access and refresh tokens automatically.
 
-**Params**
+```ts
+await audiusSdk.oauth.login({ scope: 'write' })
 
-- element `HTMLElement` - HTML element to replace with the Log In with Audius button
-- scope _optional_ `'write' | 'read'` - Whether your app is requesting read or write permissions to
-  the user's account. Specify "write" if you'd like the user to authorize your app to perform
-  actions on their behalf, such as uploading a track or favoriting a playlist. Specify "read" if you
-  simply need the user's email and profile information, and do not need any write permissions.
-  Defaults to "read".
-- buttonOptions _optional_ `ButtonOptions` - optional object containing the customization settings
-  for the button to be rendered. Here are the options available:
+const user = await audiusSdk.oauth.getUser()
+console.log('Signed in as', user.name)
+```
 
-  ```ts
-  // type ButtonOptions =
-  {
-    // Size of the button:
-    size?: "small | 'medium' | 'large'
+### 5. Handle the Callback (web only)
 
-    // Corner style of the button:
-    corners?: 'default' | 'pill'
+On your callback page (the `redirectUri`), initialize the SDK and call `handleRedirect()`. The SDK
+handles both flows automatically:
 
-    // Your own text for the button; default is "Log In with Audius":
-    customText?: string
+- **Popup**: Detects `window.opener`, forwards the authorization code to the parent window, and
+  closes the popup. The parent's `login()` promise resolves.
+- **Full-page redirect**: Performs the PKCE token exchange and stores the tokens. Call `getUser()`
+  to retrieve the profile.
 
-    // Whether to disable the button's "grow" animation on hover:
-    disableHoverGrow?: boolean
+```ts
+const audiusSdk = sdk({ appName: 'My App', apiKey: 'YOUR_API_KEY' })
 
-    // Whether the button should take up the full width of its parent element:
-    fullWidth?: boolean
-  }
-  ```
+await audiusSdk.oauth.handleRedirect()
+// Popup: closes automatically, login() in parent resolves
+// Full-page redirect: token exchange complete, call getUser() next
+```
 
-  Use [this playground](https://9ncjui.csb.app/) to see how these customizations affect the button
-  appearance and determine what config works best for your app.
+:::tip
 
-:::note
-
-The `write` scope grants your app permission to perform most actions on the user's behalf, but it
-does NOT allow any access to DMs or wallets.
+On **mobile**, `handleRedirect()` is called automatically inside `login()` — your app does not
+need to call it at all.
 
 :::
 
-**Returns**: Nothing
+:::tip
 
-**Example**
+For the **popup flow**, the popup window must load your callback page before `handleRedirect()` can
+run. If your app has a large JavaScript bundle, users will see a spinner in the popup while it
+loads. To avoid this, use a dedicated lightweight callback page at your `redirectUri` that only
+initializes the SDK and calls `handleRedirect()` — rather than loading your full app.
 
-```js
-audiusSdk.oauth.renderButton({
-  element: document.getElementById('audiusLogInButton'),
-  scope: 'write',
-  buttonOptions: {
-    size: 'large',
-  },
-})
+:::
+
+### 6. Restore an Existing Session
+
+On page/app load, check `isAuthenticated()` to avoid prompting the user to log in again.
+
+```ts
+if (await audiusSdk.oauth.isAuthenticated()) {
+  const user = await audiusSdk.oauth.getUser()
+  // restore UI
+}
 ```
+
+### Full Example
+
+See the
+[web upload example](https://github.com/AudiusProject/audius-protocol/tree/main/packages/web/examples/upload)
+and the
+[React Native upload example](https://github.com/AudiusProject/audius-protocol/tree/main/packages/mobile/examples/upload)
+for complete, runnable apps that sign in with OAuth and upload a track — no backend required.
+
+## Methods
 
 ### login
 
 #### login(`params`)
 
-Opens the Log In with Audius popup, which begins the authentication flow. Use this if you have your
-own link or button implementation, and don't want to use `renderButton`.
+Opens the Audius consent screen and runs the full PKCE authorization flow.
+
+- **Popup (default)**: Opens a popup window. When the user approves, the popup redirects to
+  `redirectUri`. On that page, `handleRedirect()` forwards the code to the parent and closes the
+  popup. The `login()` promise resolves.
+- **Full-page redirect**: Navigates the current page to Audius. After the user approves, Audius
+  redirects back to `redirectUri`. Call `handleRedirect()` there to complete the exchange.
+- **Mobile**: Opens an in-app browser session (`ASWebAuthenticationSession` on iOS, Chrome Custom
+  Tab on Android). The redirect is captured and `handleRedirect()` is called automatically.
+  `login()` resolves when the token exchange is complete.
+
+Throws if the flow fails or the user cancels.
 
 **Params**
 
-- scope _optional_ `'write' | 'read'` - Whether your app is requesting read or write permissions to
-  the user's account. Specify "write" if you'd like the user to authorize your app to perform
-  actions on their behalf, such as uploading a track or favoriting a playlist. Specify "read" if you
-  simply need the user's email and profile information, and do not need any write permissions.
-  Defaults to "read".
+| Parameter    | Type                      | Default      | Description                                                                                                                    |
+| :----------- | :------------------------ | :----------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| scope        | `'read' \| 'write'`       | `'read'`     | `'write'` grants your app permission to act on the user's behalf (upload, favorite, etc.). `'read'` only returns profile info. |
+| redirectUri  | `string`                  | SDK config   | The registered redirect URI where Audius sends the user after consent. Falls back to `redirectUri` in the SDK config.         |
+| display      | `'popup' \| 'fullScreen'` | `'popup'`    | Whether to open the consent screen in a popup window or redirect the current page.                                             |
+| responseMode | `'fragment' \| 'query'`   | `'fragment'` | How the authorization response params are delivered in the redirect URL.                                                       |
 
 :::note
 
-The `write` scope grants your app permission to perform most actions on the user's behalf, but it
-does NOT allow any access to DMs or wallets.
+The `write` scope grants permission to perform most actions on the user's behalf but does **not**
+allow access to DMs or wallets.
 
 :::
 
-**Returns**: Nothing
+**Returns**: `Promise<void>`
 
-**Example**
+**Example (popup — recommended for web)**
 
-```js title="script.js"
-function logInWithAudius() {
-  audiusSdk.oauth.login({ scope: 'write' })
+```ts
+// redirectUri set once in sdk({ redirectUri: '...' })
+try {
+  await audiusSdk.oauth.login({ scope: 'write' })
+  const user = await audiusSdk.oauth.getUser()
+  console.log('Signed in as', user.name)
+} catch (err) {
+  console.error('Login failed or cancelled:', err.message)
 }
 ```
 
-```html title="index.html"
-<button onclick="logInWithAudius()">Continue with Audius!</button>
+**Example (mobile)**
+
+```ts
+// redirectUri set once in sdk({ redirectUri: 'myapp://oauth/callback' })
+await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
+const user = await audiusSdk.oauth.getUser()
 ```
 
-### isWriteAccessGranted
+### getUser
 
-#### isWriteAccessGranted(`params`)
+#### getUser()
 
-Checks whether your app has write permissions to the given user's account.
+Fetches the authenticated user's profile from the server using the stored access token. Always
+makes a network request so the result reflects current server-side state.
 
-**Params**
+Throws `ResponseError` (4xx/5xx) or `FetchError` (network failure) if the request fails. A `401`
+typically means no token is stored or the session has expired.
 
-- userId `string` - User's Audius user ID
+**Returns**: `Promise<DecodedUserToken>`
+
+```ts
+type DecodedUserToken = {
+  userId: number       // unique Audius user identifier
+  email: string
+  name: string         // display name
+  handle: string
+  verified: boolean    // Audius verified checkmark
+  profilePicture:
+    | { '150x150': string; '480x480': string; '1000x1000': string }
+    | { misc: string }
+    | undefined
+    | null
+  sub: number          // alias for userId
+  iat: number          // unix timestamp of when the token was issued
+}
+```
+
+**Example**
+
+```ts
+const user = await audiusSdk.oauth.getUser()
+console.log(`@${user.handle}`)
+```
+
+### handleRedirect
+
+#### handleRedirect(`url?`)
+
+Completes an OAuth flow by processing the redirect URL. Call this on your callback page after
+`login()` redirects there.
+
+- **Popup**: Detects `window.opener`, forwards the authorization code back to the parent window via
+  `postMessage`, and closes the popup. The parent's `login()` promise resolves.
+- **Full-page redirect / mobile**: Verifies the CSRF state, performs the PKCE token exchange, and
+  stores the tokens. Call `getUser()` afterwards to retrieve the profile.
+
+Pass the redirect URL explicitly (e.g. a mobile deep link URL) or omit to use the current page URL
+on web. Is a no-op when no redirect params are present. The result can only be consumed once.
+
+The `redirectUri` used in the token exchange is resolved in this order:
+1. The value stored in session state from the originating `login()` call
+2. The `redirectUri` set in the top-level SDK config
+3. The current page's origin + path (web only, fallback)
+
+On **mobile**, this is called automatically inside `login()` — you do not need to call it.
+
+**Returns**: `Promise<void>`
+
+**Example**
+
+```ts
+// On your callback page:
+const audiusSdk = sdk({ appName: 'My App', apiKey: 'YOUR_API_KEY' })
+await audiusSdk.oauth.handleRedirect()
+// Popup: closes and resolves login() in parent — nothing more needed here
+// Full-page: token stored — call getUser() to get the profile
+```
+
+### isAuthenticated
+
+#### isAuthenticated()
+
+Returns `true` if an access token is currently stored. Tokens are persisted across sessions
+(localStorage on web, AsyncStorage on React Native), so this will be `true` on page/app reload if
+the user previously logged in.
 
 **Returns**: `Promise<boolean>`
 
 **Example**
 
-```js
-async function hasSkrillexAuthorizedApp() {
-  await audiusSdk.oauth.isWriteAccessGranted({ userId: 'eAZl3' })
+```ts
+if (await audiusSdk.oauth.isAuthenticated()) {
+  const user = await audiusSdk.oauth.getUser()
 }
+```
+
+### hasRefreshToken
+
+#### hasRefreshToken()
+
+Returns `true` if a refresh token is stored and a refresh exchange could be attempted.
+
+**Returns**: `Promise<boolean>`
+
+**Example**
+
+```ts
+if (await audiusSdk.oauth.hasRefreshToken()) {
+  await audiusSdk.oauth.refreshAccessToken()
+}
+```
+
+### hasRedirectResult
+
+#### hasRedirectResult(`url?`)
+
+Synchronous check for whether the given URL (or current page URL on web) contains OAuth redirect
+params (`code` + `state`). No network requests or side effects. Useful for showing a loading state
+before calling `handleRedirect()`.
+
+**Returns**: `boolean`
+
+**Example**
+
+```ts
+if (audiusSdk.oauth.hasRedirectResult()) {
+  showLoadingSpinner()
+  await audiusSdk.oauth.handleRedirect()
+  hideLoadingSpinner()
+}
+```
+
+### refreshAccessToken
+
+#### refreshAccessToken()
+
+Refreshes the access token using the stored refresh token. The SDK calls this automatically when
+API requests return `401`, but you can trigger it manually if needed.
+
+**Returns**: `Promise<string | null>` — the new access token, or `null` if the refresh failed.
+
+**Example**
+
+```ts
+const newToken = await audiusSdk.oauth.refreshAccessToken()
+if (!newToken) {
+  // Prompt the user to log in again
+}
+```
+
+### logout
+
+#### logout()
+
+Revokes the current refresh token server-side and clears all stored tokens and PKCE session state.
+After calling this, all SDK API calls revert to unauthenticated.
+
+**Returns**: `Promise<void>`
+
+**Example**
+
+```ts
+await audiusSdk.oauth.logout()
 ```
