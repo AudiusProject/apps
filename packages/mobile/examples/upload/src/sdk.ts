@@ -1,5 +1,6 @@
 import type { AudiusSdk } from '@audius/sdk'
 import { sdk } from '@audius/sdk'
+
 import { config } from './config'
 
 const APP_NAME = 'UploadExample'
@@ -11,7 +12,10 @@ export function getSDK(): AudiusSdk {
   if (!sdkInstance) {
     sdkInstance = sdk(
       config.apiKey
-        ? { appName: APP_NAME, apiKey: config.apiKey }
+        ? {
+            appName: APP_NAME,
+            apiKey: config.apiKey
+          }
         : { appName: APP_NAME }
     )
   }

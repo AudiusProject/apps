@@ -6,16 +6,52 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "audiusupload",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Allow access to pick audio files for upload.",
         "NSPhotoLibraryUsageDescription": "Allow access to pick cover art for your track."
-      }
+      },
+      "bundleIdentifier": "com.anonymous.audiusupload"
     },
     "android": {
-      "adaptiveIcon": { "backgroundColor": "#ffffff" },
-      "permissions": ["READ_EXTERNAL_STORAGE", "READ_MEDIA_AUDIO"]
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_AUDIO"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ],
+          "data": [
+            {
+              "scheme": "audiusupload"
+            }
+          ]
+        },
+        {
+          "action": "VIEW",
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ],
+          "data": [
+            {
+              "scheme": "audiusupload"
+            }
+          ]
+        }
+      ],
+      "package": "com.anonymous.audiusupload"
     }
   }
 }
