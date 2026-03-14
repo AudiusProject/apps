@@ -28,7 +28,7 @@ export const getIsRedirectValid = ({
     const { protocol } = parsedRedirectUri
     // Only block schemes that could execute code directly in the browser.
     // All other validation (allowed domains, path, etc.) is enforced server-side
-    // via the registered redirect URI list (oauth_redirect_uris table).
+    // via the registered redirect URI list for the OAuth client.
     const dangerousSchemes = ['javascript:', 'data:', 'vbscript:']
     if (dangerousSchemes.includes(protocol)) {
       return false
