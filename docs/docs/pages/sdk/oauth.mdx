@@ -43,7 +43,12 @@ const audiusSdk = sdk({
 
 On **React Native / Expo**, import from `@audius/sdk` as normal — the native entry point is
 resolved automatically and configures `AsyncStorage`-backed token persistence and
-`expo-web-browser` for the OAuth browser session out of the box.
+`expo-web-browser` for the OAuth browser session out of the box. Make sure both peer
+dependencies are installed:
+
+```sh
+npx expo install expo-web-browser @react-native-async-storage/async-storage
+```
 
 ### 4. Log the User In
 

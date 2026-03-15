@@ -1,5 +1,3 @@
-import * as WebBrowser from 'expo-web-browser'
-
 import type { AudiusSdk } from './sdk'
 import { createSdk } from './sdk/createSdk'
 import { TokenStoreAsyncStorage } from './sdk/oauth/TokenStoreAsyncStorage'
@@ -29,6 +27,8 @@ export const sdk = (config: SdkConfig): AudiusSdk => {
   let sdkInstance!: AudiusSdk
 
   const defaultOpenUrl = async (url: string) => {
+    const WebBrowser = await import('expo-web-browser')
+
     let redirectUri: string | undefined
     try {
       redirectUri = new URL(url).searchParams.get('redirect_uri') ?? undefined
