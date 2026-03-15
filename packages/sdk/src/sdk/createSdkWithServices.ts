@@ -367,17 +367,14 @@ const initializeApis = ({
   const tokenStore = services.tokenStore ?? new TokenStoreLocalStorage()
 
   // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          apiKey,
-          tokenStore,
-          basePath,
-          logger: services.logger
-        })
-      : undefined
+  const oauth = new OAuth({
+    apiKey,
+    tokenStore,
+    basePath,
+    logger: services.logger
+  })
 
-  if (apiKey && oauth) {
+  if (apiKey) {
     middleware.push(
       addTokenRefreshMiddleware({
         oauth
