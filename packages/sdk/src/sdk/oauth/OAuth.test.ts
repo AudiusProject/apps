@@ -244,6 +244,22 @@ describe('OAuth.login guards', () => {
       })
     ).rejects.toThrow('Scope must be')
   })
+
+  it('releases the lock when an unexpected error is thrown during setup', async () => {
+    vi.mocked(window.sessionStorage.setItem).mockImplementation(() => {
+      throw new Error('Storage quota exceeded')
+    })
+
+    await expect(
+      oauth.login({ redirectUri: 'https://example.com/cb' })
+    ).rejects.toThrow('Storage quota exceeded')
+
+    // Lock must be released — a subsequent login() must not throw "already in progress".
+    // Both calls fail at sessionStorage.setItem so neither reaches the popup.
+    await expect(
+      oauth.login({ redirectUri: 'https://example.com/cb' })
+    ).rejects.toThrow('Storage quota exceeded')
+  })
 })
 
 // ---------------------------------------------------------------------------

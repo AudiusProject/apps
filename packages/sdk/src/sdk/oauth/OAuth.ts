@@ -98,112 +98,97 @@ export class OAuth {
     this._redirectChecked = false
     this._redirectResult = null
 
-    const scopeFormatted = typeof scope === 'string' ? [scope] : scope
+    try {
+      const scopeFormatted = typeof scope === 'string' ? [scope] : scope
 
-    if (!this.config.appName && !this.apiKey) {
-      this._settleLogin(new Error('App name or API key not set.'))
-      return promise
-    }
-    if (scopeFormatted.includes('write') && !this.apiKey) {
-      this._settleLogin(
-        new Error(
+      if (!this.config.appName && !this.apiKey) {
+        throw new Error('App name or API key not set.')
+      }
+      if (scopeFormatted.includes('write') && !this.apiKey) {
+        throw new Error(
           "The 'write' scope requires Audius SDK to be initialized with an API key"
         )
-      )
-      return promise
-    }
-    if (!isOAuthScopeValid(scopeFormatted)) {
-      this._settleLogin(new Error('Scope must be `read` or `write`.'))
-      return promise
-    }
-    const effectiveScope = scopeFormatted.includes('write') ? 'write' : 'read'
-    const resolvedRedirectUri = redirectUri ?? this.config.redirectUri
-    if (!resolvedRedirectUri) {
-      this._settleLogin(
-        new Error(
+      }
+      if (!isOAuthScopeValid(scopeFormatted)) {
+        throw new Error('Scope must be `read` or `write`.')
+      }
+      const effectiveScope = scopeFormatted.includes('write') ? 'write' : 'read'
+      const resolvedRedirectUri = redirectUri ?? this.config.redirectUri
+      if (!resolvedRedirectUri) {
+        throw new Error(
           'redirectUri is required. Pass it to login() or set it in the SDK config.'
         )
-      )
-      return promise
-    }
-    const csrfToken = generateState()
-    const codeVerifier = generateCodeVerifier()
-    this._csrfToken = csrfToken
-    this._pkceVerifier = codeVerifier
-    this._pkceRedirectUri = resolvedRedirectUri
-    // Also persist to sessionStorage so the values survive a full-page redirect
-    // (which destroys the JS context). Popup and mobile flows use the instance
-    // properties above and never need the sessionStorage fallback.
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
-      window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
-      window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, resolvedRedirectUri)
-    }
+      }
+      const csrfToken = generateState()
+      const codeVerifier = generateCodeVerifier()
+      this._csrfToken = csrfToken
+      this._pkceVerifier = codeVerifier
+      this._pkceRedirectUri = resolvedRedirectUri
+      // Also persist to sessionStorage so the values survive a full-page redirect
+      // (which destroys the JS context). Popup and mobile flows use the instance
+      // properties above and never need the sessionStorage fallback.
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
+        window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
+        window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, resolvedRedirectUri)
+      }
 
-    let codeChallenge: string
-    try {
-      codeChallenge = generateCodeChallenge(codeVerifier)
-    } catch (e) {
-      this._settleLogin(
-        new Error(
+      let codeChallenge: string
+      try {
+        codeChallenge = generateCodeChallenge(codeVerifier)
+      } catch (e) {
+        throw new Error(
           e instanceof Error
             ? `PKCE code challenge generation failed: ${e.message}`
             : 'PKCE code challenge generation failed.'
         )
+      }
+
+      const originParam =
+        typeof window !== 'undefined' && window.location
+          ? `&origin=${encodeURIComponent(window.location.origin)}`
+          : ''
+      const appIdURISafe = encodeURIComponent(
+        (this.apiKey || this.config.appName)!
       )
-      return promise
-    }
+      const appIdURIParam = `${this.apiKey ? 'api_key' : 'app_name'}=${appIdURISafe}`
+      const pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
 
-    const originParam =
-      typeof window !== 'undefined' && window.location
-        ? `&origin=${encodeURIComponent(window.location.origin)}`
-        : ''
-    const appIdURISafe = encodeURIComponent(
-      (this.apiKey || this.config.appName)!
-    )
-    const appIdURIParam = `${this.apiKey ? 'api_key' : 'app_name'}=${appIdURISafe}`
-    const pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
+      const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
 
-    const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
-
-    const resolvedOpenUrl = openUrl ?? this.config.openUrl
-    if (resolvedOpenUrl) {
-      try {
+      const resolvedOpenUrl = openUrl ?? this.config.openUrl
+      if (resolvedOpenUrl) {
         await resolvedOpenUrl(fullOauthUrl)
-      } catch (e) {
-        this._settleLogin(
-          e instanceof Error ? e : new Error('OAuth flow failed.')
+      } else if (display === 'popup') {
+        if (!this._boundMessageHandler && typeof window !== 'undefined') {
+          this._boundMessageHandler = (e: MessageEvent) =>
+            this._receiveMessage(e)
+          window.addEventListener('message', this._boundMessageHandler, false)
+        }
+        this.activePopupWindow = window.open(
+          fullOauthUrl,
+          '',
+          'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=375, height=785, top=100, left=100'
         )
-      }
-    } else if (display === 'popup') {
-      if (!this._boundMessageHandler && typeof window !== 'undefined') {
-        this._boundMessageHandler = (e: MessageEvent) => this._receiveMessage(e)
-        window.addEventListener('message', this._boundMessageHandler, false)
-      }
-      this.activePopupWindow = window.open(
-        fullOauthUrl,
-        '',
-        'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=375, height=785, top=100, left=100'
-      )
-      if (!this.activePopupWindow) {
-        this._settleLogin(
-          new Error(
+        if (!this.activePopupWindow) {
+          throw new Error(
             'The login popup was blocked. Please allow popups for this site and try again.'
           )
-        )
-        return promise
-      }
-      this._clearPopupCheckInterval()
-      this.popupCheckInterval = setInterval(() => {
-        if (this.activePopupWindow?.closed) {
-          this._settleLogin(
-            new Error('The login popup was closed prematurely.')
-          )
-          clearInterval(this.popupCheckInterval)
         }
-      }, 500)
-    } else {
-      window.location.href = fullOauthUrl
+        this._clearPopupCheckInterval()
+        this.popupCheckInterval = setInterval(() => {
+          if (this.activePopupWindow?.closed) {
+            this._settleLogin(
+              new Error('The login popup was closed prematurely.')
+            )
+            clearInterval(this.popupCheckInterval)
+          }
+        }, 500)
+      } else {
+        window.location.href = fullOauthUrl
+      }
+    } catch (e) {
+      this._settleLogin(e instanceof Error ? e : new Error('Login failed.'))
     }
 
     return promise
