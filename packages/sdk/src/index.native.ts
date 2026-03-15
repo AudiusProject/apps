@@ -7,8 +7,6 @@ import type { SdkConfig } from './sdk/types'
 
 export * from './sdk'
 
-const tokenStore = new TokenStoreAsyncStorage()
-
 /**
  * Creates the Audius SDK configured for React Native / Expo.
  *
@@ -21,8 +19,12 @@ const tokenStore = new TokenStoreAsyncStorage()
  *   directly to the SDK without relying on a Linking deep-link event.
  */
 export const sdk = (config: SdkConfig): AudiusSdk => {
-  // Declared with definite-assignment assertion — assigned immediately below,
-  // before defaultOpenUrl can ever be invoked (login() is called after sdk() returns).
+  const tokenStore = new TokenStoreAsyncStorage()
+
+  // `let` with a definite-assignment assertion is required here because
+  // defaultOpenUrl closes over sdkInstance, which is assigned on the very
+  // next line. login() can only be called after sdk() returns, so
+  // sdkInstance is always initialised before defaultOpenUrl is invoked.
   // eslint-disable-next-line prefer-const
   let sdkInstance!: AudiusSdk
 
@@ -35,6 +37,8 @@ export const sdk = (config: SdkConfig): AudiusSdk => {
     const result = await WebBrowser.openAuthSessionAsync(url, redirectUri)
     if (result.type === 'success') {
       await sdkInstance.oauth.handleRedirect(result.url)
+    } else if (result.type === 'locked') {
+      throw new Error('Another authentication session is already in progress.')
     } else {
       throw new Error('Login cancelled.')
     }

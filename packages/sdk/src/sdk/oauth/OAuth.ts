@@ -225,6 +225,9 @@ export class OAuth {
    * Returns true if the given URL (or the current page URL on web) contains
    * OAuth redirect params (`code` + `state`) that haven't been consumed via
    * `handleRedirect()` yet.
+   *
+   * Once `handleRedirect()` is called, this returns `false` for the lifetime
+   * of the instance — the result can only be consumed once.
    */
   hasRedirectResult(url?: string): boolean {
     if (this._redirectChecked) {
@@ -546,7 +549,7 @@ export class OAuth {
     }
   }
 
-  _clearPopupCheckInterval() {
+  private _clearPopupCheckInterval() {
     if (this.popupCheckInterval) {
       clearInterval(this.popupCheckInterval)
     }
