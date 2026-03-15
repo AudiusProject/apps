@@ -27,7 +27,17 @@ export const sdk = (config: SdkConfig): AudiusSdk => {
   let sdkInstance!: AudiusSdk
 
   const defaultOpenUrl = async (url: string) => {
-    const WebBrowser = await import('expo-web-browser')
+    let WebBrowser: any
+    try {
+      WebBrowser = await import('expo-web-browser')
+    } catch (error) {
+      const message =
+        'Failed to load "expo-web-browser". Please add "expo-web-browser" to your project dependencies to enable mobile login.' +
+        (error instanceof Error && error.message
+          ? ` Original error: ${error.message}`
+          : '')
+      throw new Error(message)
+    }
 
     let redirectUri: string | undefined
     try {
