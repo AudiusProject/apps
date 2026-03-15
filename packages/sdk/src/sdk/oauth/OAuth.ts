@@ -53,7 +53,7 @@ export class OAuth {
    * OAuth 2.0 Authorization Code Flow with PKCE.
    *
    * - **Popup** (default): opens a small window. The popup redirects to
-   *   `redirectUri`, where `getRedirectResult()` forwards the authorization
+   *   `redirectUri`, where `handleRedirect()` forwards the authorization
    *   code back to this window and closes the popup. The returned promise
    *   resolves when the token exchange is complete.
    * - **Full-page redirect**: navigates the current page to Audius. After
