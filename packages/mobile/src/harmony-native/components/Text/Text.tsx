@@ -69,10 +69,16 @@ export const Text = forwardRef<TextBase, TextProps>((props, ref) => {
       // On Android, letterSpacing adds trailing space after the last character
       // that isn't accounted for in text measurement, clipping the final letter.
       ...(Platform.OS === 'android' &&
-        'css' in variantStyles &&
-        variantStyles.css?.letterSpacing && {
-          paddingRight: variantStyles.css.letterSpacing
-        })
+      'css' in variantStyles &&
+      typeof variantStyles.css === 'object' &&
+      variantStyles.css !== null &&
+      'letterSpacing' in variantStyles.css &&
+      (variantStyles.css as { letterSpacing?: number }).letterSpacing
+        ? {
+            paddingRight: (variantStyles.css as { letterSpacing: number })
+              .letterSpacing
+          }
+        : {})
     }),
     ...(color && { color }),
     ...(shadow && t.shadow[shadow]),
