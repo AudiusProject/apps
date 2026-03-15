@@ -130,7 +130,10 @@ export class OAuth {
       if (typeof window !== 'undefined' && window.sessionStorage) {
         window.sessionStorage.setItem(CSRF_TOKEN_KEY, csrfToken)
         window.sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier)
-        window.sessionStorage.setItem(PKCE_REDIRECT_URI_KEY, resolvedRedirectUri)
+        window.sessionStorage.setItem(
+          PKCE_REDIRECT_URI_KEY,
+          resolvedRedirectUri
+        )
       }
 
       let codeChallenge: string
