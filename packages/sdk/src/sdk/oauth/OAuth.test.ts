@@ -248,7 +248,7 @@ describe('OAuth message listener lifecycle', () => {
     const oauth = makeOAuth({ basePath: 'https://api.example.com' })
     oauth.loginAsync({ redirectUri: 'postMessage' })
     await Promise.resolve()
-    oauth.loginAsync({ redirectUri: 'postMessage' })
+    oauth.loginAsync({ redirectUri: 'postMessage' }).catch(() => {})
     await Promise.resolve()
     // Should still only be registered once
     const messageAddCalls = vi

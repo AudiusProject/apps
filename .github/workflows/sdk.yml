@@ -1,0 +1,87 @@
+name: SDK CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/sdk/**'
+      - 'packages/eth/**'
+      - 'packages/fixed-decimal/**'
+      - 'packages/spl/**'
+      - 'package-lock.json'
+      - '.github/workflows/sdk.yml'
+  pull_request:
+    paths:
+      - 'packages/sdk/**'
+      - 'packages/eth/**'
+      - 'packages/fixed-decimal/**'
+      - 'packages/spl/**'
+      - 'package-lock.json'
+      - '.github/workflows/sdk.yml'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22.21.1'
+
+jobs:
+  sdk-ci:
+    name: SDK CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/sdk/node_modules
+          key: npm-cache-sdk-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-sdk-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm cache clean --force || true
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Cache for Turbo
+        uses: rharkor/caching-for-turbo@v2.2.1
+
+      - name: Typecheck
+        run: npx turbo run typecheck --filter=@audius/sdk
+
+      - name: Run tests
+        timeout-minutes: 15
+        run: npx turbo run test --filter=@audius/sdk -- --reporter=default --reporter=junit --outputFile=report.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sdk-test-results
+          path: packages/sdk/report.xml
