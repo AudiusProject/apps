@@ -6,11 +6,17 @@ on:
       - main
     paths:
       - 'packages/sdk/**'
+      - 'packages/eth/**'
+      - 'packages/fixed-decimal/**'
+      - 'packages/spl/**'
       - 'package-lock.json'
       - '.github/workflows/sdk.yml'
   pull_request:
     paths:
       - 'packages/sdk/**'
+      - 'packages/eth/**'
+      - 'packages/fixed-decimal/**'
+      - 'packages/spl/**'
       - 'package-lock.json'
       - '.github/workflows/sdk.yml'
   workflow_dispatch:
