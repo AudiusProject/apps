@@ -706,7 +706,7 @@ export const audiusBackend = ({
     sdk
   }: {
     ethAddress: string
-    sdk: AudiusSdk
+    sdk: AudiusSdkWithServices
   }): Promise<AudioWei | null> {
     if (!ethAddress) return null
 
@@ -788,7 +788,7 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdk) {
+  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdkWithServices) {
     if (!address) return null
 
     try {
