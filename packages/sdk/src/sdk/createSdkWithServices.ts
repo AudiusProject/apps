@@ -371,7 +371,9 @@ const initializeApis = ({
     apiKey,
     tokenStore,
     basePath,
-    logger: services.logger
+    logger: services.logger,
+    redirectUri: config.redirectUri,
+    openUrl: services.openUrl
   })
 
   if (apiKey) {
