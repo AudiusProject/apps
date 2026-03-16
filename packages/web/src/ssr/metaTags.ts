@@ -367,33 +367,43 @@ export const getUserPageContext = ({
 }
 
 /**
- * Track page meta tag context
+ * Track page meta tag context.
+ * Use isRemix and originalTrackCanonicalUrl so the original track can rank
+ * above remixes for the track name: originals get "Original" in the snippet,
+ * remixes get "Remix" and isBasedOn pointing to the original.
  */
 export const getTrackPageContext = ({
   title,
   userName,
   permalink,
   releaseDate,
-  hashId
+  hashId,
+  isRemix = false,
+  originalTrackCanonicalUrl
 }: {
   title?: string
   userName?: string
   permalink?: string
   releaseDate?: string
   hashId?: string
+  isRemix?: boolean
+  originalTrackCanonicalUrl?: string
 }) => {
   if (!title || !userName || !permalink) return {}
   const pageTitle = `${title} by ${userName}`
-  const pageDescription = `Stream ${title} by ${userName} on Audius`
+  const trackSnippet = `Stream ${title} by ${userName}`
+  const pageDescription = isRemix
+    ? `${trackSnippet} - Remix - on Audius`
+    : `${trackSnippet} - Original - on Audius`
   const canonicalUrl = fullTrackPage(permalink)
-  const structuredData = {
+  const structuredData: Record<string, unknown> = {
     '@context': 'http://schema.googleapis.com/',
     '@type': 'MusicRecording',
     '@id': canonicalUrl,
     url: canonicalUrl,
     name: title,
     description: pageDescription,
-    datePublished: releaseDate || null,
+    datePublished: releaseDate ?? null,
     potentialAction: {
       '@type': 'ListenAction',
       target: [
@@ -407,6 +417,12 @@ export const getTrackPageContext = ({
         category: 'free',
         eligibleRegion: []
       }
+    }
+  }
+  if (isRemix && originalTrackCanonicalUrl) {
+    structuredData.isBasedOn = {
+      '@type': 'MusicRecording',
+      '@id': originalTrackCanonicalUrl
     }
   }
 

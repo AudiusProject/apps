@@ -20,6 +20,7 @@ import {
   getWebUrl
 } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
+import { fullTrackPage } from 'utils/route'
 
 import { getIndexHtml } from '../getIndexHtml'
 
@@ -34,6 +35,7 @@ type TrackPageContext = PageContextServer & {
     track: Track & { id: string; is_stream_gated?: boolean }
     user: User
     commentData?: CommentData | null
+    originalTrackPermalink?: string | null
   }
 }
 
@@ -69,12 +71,22 @@ export default function render(pageContext: TrackPageContext) {
       image: DEFAULT_IMAGE_URL
     }
   } else {
+    const isRemix = !!(
+      (track as { remix_of?: unknown; remixOf?: unknown }).remix_of ??
+      (track as { remix_of?: unknown; remixOf?: unknown }).remixOf
+    )
+    const originalTrackCanonicalUrl =
+      pageProps.originalTrackPermalink != null
+        ? fullTrackPage(pageProps.originalTrackPermalink)
+        : undefined
     seoMetadata = getTrackPageContext({
       title,
       permalink,
       userName,
-      releaseDate: release_date || created_at,
-      hashId: id
+      releaseDate: release_date ?? created_at,
+      hashId: id,
+      isRemix,
+      originalTrackCanonicalUrl
     })
   }
 
