@@ -64,10 +64,7 @@ jobs:
           SKIP_ANDROID_INSTALL: true
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
-        run: |
-          mkdir -p /tmp/android-sdk-dummy
-          npm cache clean --force || true
-          npm ci --prefer-offline || npm install --prefer-offline
+        run: npm ci --prefer-offline
 
       - name: Cache for Turbo
         uses: rharkor/caching-for-turbo@v2.2.1
