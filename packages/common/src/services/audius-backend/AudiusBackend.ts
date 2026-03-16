@@ -711,7 +711,8 @@ export const audiusBackend = ({
     if (!ethAddress) return null
 
     try {
-      const checksumWallet = getAddress(ethAddress)      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
+      const checksumWallet = getAddress(ethAddress)
+      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
         checksumWallet
       ])
       return AUDIO(balance).value
@@ -791,7 +792,8 @@ export const audiusBackend = ({
     if (!address) return null
 
     try {
-      const checksumWallet = getAddress(address)      const ethereum = sdk.services.ethereum
+      const checksumWallet = getAddress(address)
+      const ethereum = sdk.services.ethereum
       const [balance, stakedBalance, delegatedBalance] = await Promise.all([
         ethereum.audiusToken.read.balanceOf([checksumWallet]),
         ethereum.staking.read.totalStakedFor([checksumWallet]),
