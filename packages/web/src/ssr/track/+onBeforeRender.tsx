@@ -44,6 +44,22 @@ async function fetchCommentData(commentId: string) {
   }
 }
 
+// Fetch parent track permalink when this track is a remix (for SEO: link remix → original)
+async function fetchOriginalTrackPermalink(
+  parentTrackId: string
+): Promise<string | null> {
+  try {
+    const url = `${getApiUrl()}/v1/tracks/${parentTrackId}`
+    const res = await fetch(url)
+    if (res.status !== 200) return null
+    const json = await res.json()
+    const parent = Array.isArray(json.data) ? json.data[0] : json.data
+    return parent?.permalink ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function onBeforeRender(pageContext: TrackPageContextServer) {
   const { handle, slug } = pageContext.routeParams
   const { commentId } = pageContext.urlParsed.search ?? {}
@@ -76,9 +92,26 @@ export async function onBeforeRender(pageContext: TrackPageContextServer) {
       }
     }
 
+    // When this track is a remix, fetch original track permalink for SEO (isBasedOn, etc.)
+    let originalTrackPermalink: string | null = null
+    const remixOf = apiTrack.remix_of ?? apiTrack.remixOf
+    const parentId =
+      remixOf?.tracks?.[0]?.parent_track_id ??
+      remixOf?.tracks?.[0]?.parentTrackId
+    if (parentId != null) {
+      originalTrackPermalink = await fetchOriginalTrackPermalink(
+        String(parentId)
+      )
+    }
+
     return {
       pageContext: {
-        pageProps: { track, user, commentData }
+        pageProps: {
+          track,
+          user,
+          commentData,
+          originalTrackPermalink
+        }
       }
     }
   } catch (e) {

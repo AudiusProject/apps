@@ -238,13 +238,14 @@ const TrackPage = () => {
 
   const defaults = getTrackDefaults(track as Track | null)
 
-  // SEO fields
+  // SEO fields (isRemix so original vs remix snippet/structured data is correct)
   const releaseDate = track ? track.release_date || track.created_at : ''
   const seoFields = getTrackPageContext({
     title: track?.title,
     permalink: track?.permalink,
     userName: user?.name,
-    releaseDate: releaseDate ? formatDate(releaseDate) : ''
+    releaseDate: releaseDate ? formatDate(releaseDate) : '',
+    isRemix: !!track?.remix_of
   })
 
   // Handle deleted track
