@@ -123,6 +123,7 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           mkdir -p /tmp/android-sdk-dummy
+          npm cache clean --force || true
           npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Typecheck
