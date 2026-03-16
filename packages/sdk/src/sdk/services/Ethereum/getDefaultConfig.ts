@@ -17,6 +17,7 @@ export const getDefaultEthereumServiceConfig = (
     governance: config.ethereum.addresses.governanceAddress,
     claimsManager: config.ethereum.addresses.claimsManagerAddress,
     trustedNotifierManager:
-      config.ethereum.addresses.trustedNotifierManagerAddress
+      config.ethereum.addresses.trustedNotifierManagerAddress,
+    registry: config.ethereum.addresses.registryAddress
   }
 })

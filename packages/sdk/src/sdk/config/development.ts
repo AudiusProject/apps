@@ -51,7 +51,8 @@ export const developmentConfig: SdkServicesConfig = {
       "stakingAddress": "0x",
       "governanceAddress": "0x",
       "claimsManagerAddress": "0x",
-      "trustedNotifierManagerAddress": "0x"
+      "trustedNotifierManagerAddress": "0x",
+      "registryAddress": "0x"
     }
   }
 }

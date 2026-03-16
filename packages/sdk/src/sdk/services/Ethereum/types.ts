@@ -14,6 +14,7 @@ export type EthereumServiceConfigInternal = {
     ethRewardsManager: Hex
     serviceTypeManager: Hex
     trustedNotifierManager: Hex
+    registry: Hex
   }
 }
 

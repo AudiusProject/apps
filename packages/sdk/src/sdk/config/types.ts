@@ -41,6 +41,7 @@ export type SdkServicesConfig = {
       governanceAddress: Hex
       claimsManagerAddress: Hex
       trustedNotifierManagerAddress: Hex
+      registryAddress: Hex
     }
   }
 }

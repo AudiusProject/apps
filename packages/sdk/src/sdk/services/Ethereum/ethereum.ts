@@ -18,6 +18,7 @@ import {
   DelegateManager,
   EthRewardsManager,
   Governance,
+  Registry,
   ServiceProviderFactory,
   ServiceTypeManager,
   Staking,
@@ -108,6 +109,11 @@ export class EthereumService {
     { public: PublicClient; wallet: WalletClient }
   >
 
+  public readonly registry: GetContractReturnType<
+    typeof Registry.abi,
+    { public: PublicClient; wallet: WalletClient }
+  >
+
   constructor(config: EthereumServiceConfig) {
     const configWithDefaults = mergeConfigWithDefaults(
       config,
@@ -171,6 +177,11 @@ export class EthereumService {
     this.trustedNotifierManager = getContract({
       address: a.trustedNotifierManager ?? TrustedNotifierManager.address,
       abi: TrustedNotifierManager.abi,
+      client
+    })
+    this.registry = getContract({
+      address: a.registry ?? Registry.address,
+      abi: Registry.abi,
       client
     })
   }

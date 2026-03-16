@@ -363,7 +363,8 @@ export const productionConfig: SdkServicesConfig = {
       "stakingAddress": "0xe6D97B2099F142513be7A2a068bE040656Ae4591",
       "governanceAddress": "0x4DEcA517D6817B6510798b7328F2314d3003AbAC",
       "claimsManagerAddress": "0x44617F9dCEd9787C3B06a05B35B4C779a2AA1334",
-      "trustedNotifierManagerAddress": "0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39"
+      "trustedNotifierManagerAddress": "0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39",
+      "registryAddress": "0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C"
     }
   }
 }
