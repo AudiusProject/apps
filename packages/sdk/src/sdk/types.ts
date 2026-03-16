@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { PublicClient, WalletClient } from 'viem'
 
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
 import type { AntiAbuseOracleSelectorService } from './services/AntiAbuseOracleSelector/types'
@@ -101,6 +102,18 @@ export type ServicesContainer = {
    * with optional per-environment address overrides.
    */
   ethereum: EthereumService
+
+  /**
+   * viem PublicClient for Ethereum reads. Sourced from the ethereum service,
+   * or overridden via services injection.
+   */
+  ethPublicClient: PublicClient
+
+  /**
+   * viem WalletClient for Ethereum writes. Sourced from the ethereum service,
+   * or overridden via services injection (e.g. to use an identity relay).
+   */
+  ethWalletClient: WalletClient
 }
 /**
  * SDK configuration schema that requires api key only (for read-only access with higher rate limits)

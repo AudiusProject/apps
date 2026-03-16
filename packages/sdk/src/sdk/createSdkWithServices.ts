@@ -283,18 +283,26 @@ const initializeServices = ({
       solanaClient
     })
 
+  const ethPublicClient =
+    config.services?.ethPublicClient ??
+    createPublicClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
+    })
+
+  const ethWalletClient =
+    config.services?.ethWalletClient ??
+    createWalletClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
+    })
+
   const ethereum =
     config.services?.ethereum ??
     new EthereumService({
       ...getDefaultEthereumServiceConfig(servicesConfig),
-      publicClient: createPublicClient({
-        chain: mainnet,
-        transport: http(servicesConfig.ethereum.rpcEndpoint)
-      }),
-      ethWalletClient: createWalletClient({
-        chain: mainnet,
-        transport: http(servicesConfig.ethereum.rpcEndpoint)
-      }),
+      publicClient: ethPublicClient,
+      ethWalletClient,
       audiusWalletClient
     })
 
@@ -305,6 +313,8 @@ const initializeServices = ({
     storage,
     audiusWalletClient,
     ethereum,
+    ethPublicClient: ethereum.publicClient,
+    ethWalletClient: ethereum.ethWalletClient,
     claimableTokensClient,
     rewardManagerClient,
     paymentRouterClient,

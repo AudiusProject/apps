@@ -1,4 +1,3 @@
-import { AudiusWormhole } from '@audius/eth'
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
 import { type AudiusSdkWithServices, Id } from '@audius/sdk'
 import { PublicKey } from '@solana/web3.js'
@@ -93,7 +92,7 @@ export class WalletClient {
       const ethereum = sdk.services.ethereum
 
       const permitTxHash = await ethereum.permitAudioToken({
-        spender: AudiusWormhole.address,
+        spender: ethereum.audiusWormhole.address,
         value: balance
       })
       console.debug(
