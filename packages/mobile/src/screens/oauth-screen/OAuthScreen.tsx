@@ -7,6 +7,7 @@ import { Id, OptionalId } from '@audius/sdk'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import queryString from 'query-string'
 import { ActivityIndicator, Linking, Image, ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   Button,
@@ -289,6 +290,7 @@ export const OAuthScreen = () => {
   const route = useRoute<any>()
   const { search = '' } = route.params ?? {}
   const { color, spacing } = useTheme()
+  const { bottom: bottomInset } = useSafeAreaInsets()
 
   const params = parseAndValidate(search)
   const {
@@ -395,6 +397,8 @@ export const OAuthScreen = () => {
       })
   }, [isLoggedIn])
 
+  const navigation = useNavigation()
+
   const handleAuthorize = useCallback(async () => {
     if (
       !account ||
@@ -431,16 +435,20 @@ export const OAuthScreen = () => {
 
       if (!code) {
         setSubmitError(messages.miscError)
-        setIsSubmitting(false)
         return
       }
 
       // Redirect back to the third-party app
       const finalUrl = buildRedirectUrl(redirectUri, code, state, responseMode)
       await Linking.openURL(finalUrl)
+
+      if (navigation.canGoBack()) {
+        navigation.goBack()
+      }
     } catch (e) {
       console.error('OAuth authorize error:', e)
       setSubmitError(messages.miscError)
+    } finally {
       setIsSubmitting(false)
     }
   }, [
@@ -453,10 +461,9 @@ export const OAuthScreen = () => {
     userAlreadyWriteAuthorized,
     userEmail,
     state,
-    responseMode
+    responseMode,
+    navigation
   ])
-
-  const navigation = useNavigation()
 
   const handleCancel = useCallback(async () => {
     if (redirectUri) {
@@ -539,12 +546,13 @@ export const OAuthScreen = () => {
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
+          justifyContent: 'center',
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.unit10,
-          paddingBottom: spacing.xl
+          paddingBottom: spacing.xl + bottomInset
         }}
       >
-        <Flex direction='column' gap='xl' flex={1}>
+        <Flex direction='column' gap='xl'>
           {/* Logos + Title */}
           <Flex alignItems='center' direction='column' gap='l'>
             <Flex
@@ -610,24 +618,22 @@ export const OAuthScreen = () => {
               <Paper shadow='flat' backgroundColor='white' borderRadius='s'>
                 <Flex p='l' direction='column' gap='l'>
                   {/* Access level */}
-                  <Flex direction='column' gap='s'>
-                    <Flex gap='s' alignItems='center'>
-                      {scope === 'write' ? (
-                        <IconPencil color='default' width={16} height={16} />
-                      ) : (
-                        <IconVisibilityPublic
-                          color='default'
-                          width={16}
-                          height={16}
-                        />
-                      )}
+                  <Flex direction='row' gap='s' alignItems='flex-start'>
+                    {scope === 'write' ? (
+                      <IconPencil color='default' width={16} height={16} />
+                    ) : (
+                      <IconVisibilityPublic
+                        color='default'
+                        width={16}
+                        height={16}
+                      />
+                    )}
+                    <Flex direction='column' gap='xs' flex={1}>
                       <Text variant='body' size='m' color='default'>
                         {scope === 'write'
                           ? messages.writeAccountAccess
                           : messages.readOnlyAccountAccess}
                       </Text>
-                    </Flex>
-                    <Flex pl='2xl'>
                       <Text variant='body' size='s' color='subdued'>
                         {scope === 'write'
                           ? messages.writeAccessGrants
@@ -639,14 +645,12 @@ export const OAuthScreen = () => {
                   <Divider />
 
                   {/* Account data */}
-                  <Flex direction='column' gap='s'>
-                    <Flex gap='s' alignItems='center'>
-                      <IconInfo color='default' width={16} height={16} />
+                  <Flex direction='row' gap='s' alignItems='flex-start'>
+                    <IconInfo color='default' width={16} height={16} />
+                    <Flex direction='column' gap='xs' flex={1}>
                       <Text variant='body' size='m' color='default'>
                         {messages.yourAccountData}
                       </Text>
-                    </Flex>
-                    <Flex pl='2xl'>
                       <Text variant='body' size='s' color='subdued'>
                         {userEmail
                           ? `${messages.yourAccountDataAccess}: ${userEmail}`
