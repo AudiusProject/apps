@@ -1,5 +1,5 @@
-import { OptionalId } from '@audius/sdk'
-import type { GetTracksByUserHandleFilterTracksEnum } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
+import type { GetTracksByUserHandleFilterTracksEnum } from '@audius/sdk/services'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'

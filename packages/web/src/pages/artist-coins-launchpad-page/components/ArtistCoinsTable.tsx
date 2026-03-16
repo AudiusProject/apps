@@ -25,7 +25,7 @@ import {
   spacing,
   Text
 } from '@audius/harmony'
-import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
+import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk/services'
 import { useNavigate } from 'react-router'
 import { Cell } from 'react-table'
 

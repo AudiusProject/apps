@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 
-import { Id, type NotificationsResponse } from '@audius/sdk'
+import { Id, type NotificationsResponse } from '@audius/sdk/services'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 import { usePrevious } from 'react-use'
 

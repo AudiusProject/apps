@@ -1,4 +1,4 @@
-import { developmentConfig, productionConfig, sdk } from '@audius/sdk'
+import { developmentConfig, productionConfig, sdk } from '@audius/sdk/services'
 
 const env = import.meta.env.VITE_ENVIRONMENT
 

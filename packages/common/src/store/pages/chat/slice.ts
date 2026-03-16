@@ -1,4 +1,5 @@
 import {
+  Id,
   type TypedCommsResponse,
   type UserChat,
   type ChatMessage,
@@ -7,9 +8,8 @@ import {
   type UnfurlResponse,
   type ValidatedChatPermissions,
   type ChatBlastAudience,
-  type ChatBlast,
-  Id
-} from '@audius/sdk'
+  type ChatBlast
+} from '@audius/sdk/services'
 import {
   Action,
   createSlice,

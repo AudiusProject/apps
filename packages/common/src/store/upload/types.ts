@@ -1,4 +1,4 @@
-import { type Genre, type Mood, NativeFile } from '@audius/sdk'
+import { type Genre, type Mood, NativeFile } from '@audius/sdk/services'
 
 import { CollectionValues } from '~/schemas'
 

@@ -9,7 +9,7 @@ import {
   PopupMenu,
   PopupMenuItem
 } from '@audius/harmony'
-import { AuthorizedApp } from '@audius/sdk'
+import { AuthorizedApp } from '@audius/sdk/services'
 
 import PreloadImage from 'components/preload-image/PreloadImage'
 

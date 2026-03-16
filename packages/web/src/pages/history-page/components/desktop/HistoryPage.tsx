@@ -12,7 +12,7 @@ import {
 import {
   GetUsersTrackHistorySortMethodEnum,
   GetUsersTrackHistorySortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
 

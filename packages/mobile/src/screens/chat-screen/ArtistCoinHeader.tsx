@@ -1,7 +1,7 @@
 import { useTradeableCoins } from '@audius/common/api'
 import { useArtistCoinMessageHeader } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import type { ChatBlastAudience } from '@audius/sdk'
+import type { ChatBlastAudience } from '@audius/sdk/services'
 import { Platform } from 'react-native'
 
 import { Flex, Text } from '@audius/harmony-native'

@@ -1,4 +1,4 @@
-import type { UserFeedItem as SdkUserFeedItem } from '@audius/sdk'
+import type { UserFeedItem as SdkUserFeedItem } from '@audius/sdk/services'
 
 import { UserCollectionMetadata, UserTrackMetadata } from '~/models'
 

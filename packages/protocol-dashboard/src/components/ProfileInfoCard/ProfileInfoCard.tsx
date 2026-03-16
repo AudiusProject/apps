@@ -6,7 +6,7 @@ import {
   Text,
   useTheme
 } from '@audius/harmony'
-import { User as AudiusUser } from '@audius/sdk'
+import { User as AudiusUser } from '@audius/sdk/services'
 
 import { Card } from 'components/Card/Card'
 import { ConnectAudiusProfileModal } from 'components/ConnectAudiusProfileModal/ConnectAudiusProfileModal'

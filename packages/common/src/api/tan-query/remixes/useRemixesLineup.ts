@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 
-import { EntityType } from '@audius/sdk'
+import { EntityType } from '@audius/sdk/services'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

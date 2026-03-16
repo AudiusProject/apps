@@ -13,7 +13,7 @@ import { Flex, IconCaretRight, Paper, PlainButton, Text } from '@audius/harmony'
 import {
   GetAudioTransactionsSortMethodEnum,
   GetAudioTransactionsSortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { useSetVisibility } from 'common/hooks/useModalState'

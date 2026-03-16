@@ -2,7 +2,7 @@ import {
   GetAudioTransactionsSortMethodEnum,
   GetAudioTransactionsSortDirectionEnum,
   Id
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 
 import { audioTransactionFromSdk } from '~/adapters/audioTransactions'

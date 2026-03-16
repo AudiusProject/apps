@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { usePrevious } from 'react-use'
 

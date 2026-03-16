@@ -1,5 +1,5 @@
 import { USDC } from '@audius/fixed-decimal'
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,

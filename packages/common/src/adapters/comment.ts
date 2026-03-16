@@ -2,7 +2,7 @@ import {
   Comment as CommentSDK,
   OptionalHashId,
   ReplyComment as ReplyCommentSDK
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import { Comment, ReplyComment } from '~/models/Comment'
 

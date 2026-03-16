@@ -1,5 +1,5 @@
 import { useCurrentUserId, useFollowers } from '@audius/common/api'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 
 import { Box, IconUserFollowers } from '@audius/harmony-native'
 import { useProfileRoute } from 'app/hooks/useRoute'

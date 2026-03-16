@@ -3,12 +3,12 @@ import type {
   Playlist,
   PlaylistWithoutTracks,
   Track
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import {
   ActivityItemTypeEnum,
   PlaylistWithoutTracksFromJSON,
   TrackFromJSON
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import { userCollectionMetadataFromSDK } from './collection'
 import { userTrackMetadataFromSDK } from './track'

@@ -3,7 +3,7 @@ import { memo, useEffect, useContext } from 'react'
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import { Status, PlayableType, ID } from '@audius/common/models'
 import { CollectionTrack, CollectionsPageType } from '@audius/common/store'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 
 import CollectionHeader from 'components/collection/mobile/CollectionHeader'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'

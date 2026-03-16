@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { Command } from '@commander-js/extra-typings'
 import { getCurrentUserId, initializeAudiusSdk, parseBoolean } from '../utils'
-import { Mood, type Genre } from '@audius/sdk'
+import { Mood, type Genre } from '@audius/sdk/services'
 
 export const editTrackCommand = new Command('edit')
   .description('Update an existing track')

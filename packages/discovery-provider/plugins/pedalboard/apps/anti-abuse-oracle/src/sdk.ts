@@ -1,4 +1,4 @@
-import { AudiusSdk, sdk } from '@audius/sdk'
+import { AudiusSdk, sdk } from '@audius/sdk/services'
 import { readConfig, Environment } from './config'
 
 const environmentToSdkEnvironment: Record<

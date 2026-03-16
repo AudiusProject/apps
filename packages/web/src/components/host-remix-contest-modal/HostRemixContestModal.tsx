@@ -26,7 +26,7 @@ import {
   TextLink,
   TextArea
 } from '@audius/harmony'
-import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk/services'
 
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'

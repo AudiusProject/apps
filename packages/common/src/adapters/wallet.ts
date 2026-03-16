@@ -1,4 +1,4 @@
-import { ConnectedWallets } from '@audius/sdk'
+import { ConnectedWallets } from '@audius/sdk/services'
 
 import { UserWallets } from '~/models'
 

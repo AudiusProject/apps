@@ -13,7 +13,7 @@ import {
   IconPlaylists,
   IconRepost as IconReposts
 } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import cn from 'classnames'
 
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'

@@ -9,7 +9,7 @@ import { logger } from '../logger'
 import { createReadStream } from 'fs'
 import { stat } from 'fs/promises'
 import { basename } from 'path'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import { queryParamToBoolean } from './utils'
 
 const removeInternalStatusFields = (jobStatus: JobStatus) => {

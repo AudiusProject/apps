@@ -15,7 +15,7 @@ import type {
 import type {
   GetCoinsSortMethodEnum,
   GetCoinsSortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import type { EventArg, NavigationState } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
 

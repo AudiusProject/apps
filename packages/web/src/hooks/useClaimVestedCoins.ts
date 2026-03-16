@@ -7,7 +7,7 @@ import {
   QUERY_KEYS
 } from '@audius/common/api'
 import { Feature } from '@audius/common/models'
-import type { UserCoinWithAccounts } from '@audius/sdk'
+import type { UserCoinWithAccounts } from '@audius/sdk/services'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import {

@@ -1,4 +1,4 @@
-import { ChatPermission, HashId, Id, UserChat } from '@audius/sdk'
+import { HashId, Id, ChatPermission, UserChat } from '@audius/sdk/services'
 import { useSelector } from 'react-redux'
 import { createSelector } from 'reselect'
 

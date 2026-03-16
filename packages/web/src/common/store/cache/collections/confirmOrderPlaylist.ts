@@ -8,7 +8,7 @@ import {
   getSDK
 } from '@audius/common/store'
 import { makeKindId } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { call, put } from 'typed-redux-saga'
 
 import { isPlaylistConfirmerDone } from './utils/hasPendingPlaylistUpdates'

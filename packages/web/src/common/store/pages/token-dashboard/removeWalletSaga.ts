@@ -5,7 +5,7 @@ import {
   ConfirmRemoveWalletAction,
   getSDK
 } from '@audius/common/store'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { QueryClient } from '@tanstack/react-query'
 import { call, getContext, put, takeLatest } from 'typed-redux-saga'
 

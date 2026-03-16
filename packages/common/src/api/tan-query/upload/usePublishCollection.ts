@@ -1,4 +1,4 @@
-import { HashId, Id, type UploadResponse } from '@audius/sdk'
+import { HashId, Id, type UploadResponse } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { mapValues } from 'lodash'
 import { useDispatch } from 'react-redux'

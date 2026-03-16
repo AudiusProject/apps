@@ -1,4 +1,4 @@
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { create, windowScheduler } from '@yornaath/batshit'
 import { memoize } from 'lodash'
 

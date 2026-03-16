@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 
 import {
   useArtistCoinMembersCount,

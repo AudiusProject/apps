@@ -1,6 +1,6 @@
 import { useRecommendedTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { GetRecommendedTracksTimeEnum } from '@audius/sdk'
+import { GetRecommendedTracksTimeEnum } from '@audius/sdk/services'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'

@@ -7,7 +7,7 @@ import {
   getCurrentUserHandle
 } from '../utils.js'
 
-import { ResponseError } from '@audius/sdk'
+import { ResponseError } from '@audius/sdk/services'
 
 const blockCommand = new Command('block')
   .description('Blocks a user from the Anti-Abuse Oracle')

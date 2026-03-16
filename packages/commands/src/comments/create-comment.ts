@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { Command } from '@commander-js/extra-typings'
 
 import { getCurrentUserId, initializeAudiusSdk } from '../utils.js'
-import { decodeHashId, EntityType } from '@audius/sdk'
+import { decodeHashId, EntityType } from '@audius/sdk/services'
 import { outputFormatOption } from '../common-options.js'
 
 export const createCommentCommand = new Command('create')

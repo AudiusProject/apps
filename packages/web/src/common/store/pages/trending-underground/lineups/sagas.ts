@@ -11,7 +11,7 @@ import {
   getContext,
   getSDK
 } from '@audius/common/store'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { keccak_256 } from 'js-sha3'
 import { call } from 'typed-redux-saga'
 

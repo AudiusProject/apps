@@ -1,4 +1,4 @@
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 
 import { useArtistCreatedCoin } from '~/api/tan-query/coins/useArtistCreatedCoin'
 import { ID } from '~/models'

@@ -5,7 +5,7 @@ import {
 import { Name } from '@audius/common/models'
 import { queryCurrentUserId } from '@audius/common/src/api'
 import { SearchKind, getSDK } from '@audius/common/store'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { call, cancel, fork, put, race, select, take } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

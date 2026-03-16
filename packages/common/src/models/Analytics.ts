@@ -1,4 +1,4 @@
-import { ChatPermission, Genre } from '@audius/sdk'
+import { type Genre, ChatPermission } from '@audius/sdk/services'
 
 import { FeedFilter } from '~/models/FeedFilter'
 import { ID, PlayableType } from '~/models/Identifiers'

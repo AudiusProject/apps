@@ -9,7 +9,7 @@ import {
   Collection
 } from '@audius/common/models'
 import { Button, Modal, SegmentedControl } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import cn from 'classnames'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'

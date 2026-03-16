@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 
 import { userCoinListFromSDK, type UserCoin } from '~/adapters/coin'

@@ -1,4 +1,4 @@
-import type { RelayRequestBody } from '@audius/sdk'
+import type { RelayRequestBody } from '@audius/sdk/services'
 import {
   PublicKey,
   TransactionMessage,

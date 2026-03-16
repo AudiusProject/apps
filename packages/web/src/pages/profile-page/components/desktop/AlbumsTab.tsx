@@ -8,7 +8,7 @@ import {
   CollectionSortMode
 } from '@audius/common/store'
 import { Box, Flex, LoadingSpinner } from '@audius/harmony'
-import { GetAlbumsByUserSortMethodEnum } from '@audius/sdk'
+import { GetAlbumsByUserSortMethodEnum } from '@audius/sdk/services'
 import { useSelector } from 'react-redux'
 
 import { CollectionCard } from 'components/collection'

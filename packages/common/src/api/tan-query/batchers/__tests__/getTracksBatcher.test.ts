@@ -4,7 +4,7 @@ import {
   HashId,
   Id,
   OptionalId
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { QueryClient } from '@tanstack/react-query'
 import { omit } from 'lodash'
 import { describe, it, expect, beforeEach, vi, MockInstance } from 'vitest'

@@ -1,11 +1,11 @@
 import {
+  createSdkWithServices,
   AudiusWalletClient,
   ClaimableTokensClient,
   PaymentRouterClient,
   RewardManagerClient,
-  createSdkWithServices,
   StorageNodeSelectorService
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 export const audiusSdk = () => {
   return createSdkWithServices({

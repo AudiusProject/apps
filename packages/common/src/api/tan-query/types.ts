@@ -1,4 +1,4 @@
-import { EntityType } from '@audius/sdk'
+import { EntityType } from '@audius/sdk/services'
 import {
   DataTag,
   DefinedInitialDataOptions,

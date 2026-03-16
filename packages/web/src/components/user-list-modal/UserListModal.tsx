@@ -17,7 +17,7 @@ import {
   ModalHeader,
   ModalTitle
 } from '@audius/harmony'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMatch, useLocation } from 'react-router'
 

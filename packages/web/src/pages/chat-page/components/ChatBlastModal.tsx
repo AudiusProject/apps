@@ -30,7 +30,7 @@ import {
   ModalContent,
   Select
 } from '@audius/harmony'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 import { Formik, useField } from 'formik'
 import { useDispatch } from 'react-redux'
 

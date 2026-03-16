@@ -11,7 +11,7 @@ import {
 import { remixMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
 import { useHostRemixContestModal } from '@audius/common/store'
-import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk/services'
 import dayjs from 'dayjs'
 import { Platform, ScrollView } from 'react-native'
 

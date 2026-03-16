@@ -7,7 +7,7 @@ import {
   useUserTracksByHandle
 } from '@audius/common/api'
 import { type ID } from '@audius/common/models'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { Formik } from 'formik'
 import TrackPlayer, { RepeatMode, State } from 'react-native-track-player'
 import { useAsync, useEffectOnce } from 'react-use'

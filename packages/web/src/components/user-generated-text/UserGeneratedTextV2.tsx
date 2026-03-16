@@ -21,13 +21,13 @@ import {
 } from '@audius/common/utils'
 import { Text, TextProps } from '@audius/harmony'
 import {
-  CommentMention,
   ResolveApi,
-  Track,
-  User,
-  Playlist,
+  type CommentMention,
+  type Track,
+  type User,
+  type Playlist,
   OptionalHashId
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { omit } from 'lodash'
 import { useAsync } from 'react-use'
 

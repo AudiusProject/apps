@@ -10,7 +10,7 @@ import {
 import { Track } from '@audius/common/models'
 import { getContext, getSDK } from '@audius/common/store'
 import { dayjs, Dayjs, route } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { each } from 'lodash'
 import { all, call, put, takeEvery } from 'typed-redux-saga'
 

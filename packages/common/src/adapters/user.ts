@@ -8,7 +8,7 @@ import {
   type UserPlaylistLibrary,
   Id,
   type UpdateUserRequestBody
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import camelcaseKeys from 'camelcase-keys'
 import { omit, pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'

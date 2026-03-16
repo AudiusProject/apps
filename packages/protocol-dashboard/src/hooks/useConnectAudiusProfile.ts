@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { DecodedUserToken, OAUTH_URL } from '@audius/sdk'
+import { DecodedUserToken, OAUTH_URL } from '@audius/sdk/services'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

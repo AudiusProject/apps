@@ -7,7 +7,7 @@ import {
   statusIsNotFinalized,
   UserMetadata
 } from '@audius/common/models'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import * as queryString from 'query-string'
 import { useDispatch } from 'react-redux'
 import { useLocation } from 'react-router'

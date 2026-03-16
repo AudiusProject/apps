@@ -1,4 +1,4 @@
-import { HashId, type TrendingTimesIds } from '@audius/sdk'
+import { HashId, type TrendingTimesIds } from '@audius/sdk/services'
 
 import { removeNullable } from '~/utils'
 

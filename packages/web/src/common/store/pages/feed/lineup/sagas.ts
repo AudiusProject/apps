@@ -22,7 +22,7 @@ import {
   CommonState,
   getSDK
 } from '@audius/common/store'
-import { Id, type GetUserFeedFilterEnum } from '@audius/sdk'
+import { Id, type GetUserFeedFilterEnum } from '@audius/sdk/services'
 import { all, call, select } from 'typed-redux-saga'
 
 import { LineupSagas } from 'common/store/lineup/sagas'

@@ -12,7 +12,7 @@ import {
   Box,
   FilterButton
 } from '@audius/harmony'
-import { Mood } from '@audius/sdk'
+import { Mood } from '@audius/sdk/services'
 import { useSearchParams } from 'react-router'
 
 import { MOODS } from 'utils/Moods'

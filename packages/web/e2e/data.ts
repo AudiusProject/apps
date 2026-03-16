@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 
-import type { Track, Playlist } from '@audius/sdk'
+import type { Track, Playlist } from '@audius/sdk/services'
 
 const runAgainstLocalStack = process.env.RUN_AGAINST_STAGE !== 'true'
 

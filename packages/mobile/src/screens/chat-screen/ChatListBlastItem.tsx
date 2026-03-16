@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useChatBlastAudienceContent } from '@audius/common/hooks'
 import { formatCount } from '@audius/common/utils'
-import type { ChatBlast } from '@audius/sdk'
+import type { ChatBlast } from '@audius/sdk/services'
 import { css } from '@emotion/native'
 import { TouchableHighlight } from 'react-native'
 

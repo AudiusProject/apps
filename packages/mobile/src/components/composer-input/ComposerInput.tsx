@@ -17,7 +17,7 @@ import {
   splitOnNewline,
   timestampRegex
 } from '@audius/common/utils'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import { isEqual, pick } from 'lodash'
 import type { TextInput as RnTextInput } from 'react-native'
 import { Platform, TouchableOpacity } from 'react-native'

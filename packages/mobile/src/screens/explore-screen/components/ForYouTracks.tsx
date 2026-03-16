@@ -3,7 +3,7 @@ import React from 'react'
 import { useRecommendedTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { QueueSource } from '@audius/common/store'
-import { GetRecommendedTracksTimeEnum } from '@audius/sdk'
+import { GetRecommendedTracksTimeEnum } from '@audius/sdk/services'
 
 import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 

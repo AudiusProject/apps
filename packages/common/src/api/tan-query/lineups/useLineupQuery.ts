@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react'
 
-import { EntityType } from '@audius/sdk'
+import { EntityType } from '@audius/sdk/services'
 import {
   QueryClient,
   QueryKey,

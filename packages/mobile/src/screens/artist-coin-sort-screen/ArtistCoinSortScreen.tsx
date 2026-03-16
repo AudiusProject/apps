@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { walletMessages } from '@audius/common/messages'
 import { playerSelectors } from '@audius/common/store'
-import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
+import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk/services'
 import { useSelector } from 'react-redux'
 
 import type { IconComponent } from '@audius/harmony-native'

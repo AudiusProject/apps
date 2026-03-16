@@ -1,4 +1,4 @@
-import { OptionalHashId, type Remix as SdkRemix } from '@audius/sdk'
+import { OptionalHashId, type Remix as SdkRemix } from '@audius/sdk/services'
 import snakecaseKeys from 'snakecase-keys'
 
 import { Remix } from '~/models/Track'

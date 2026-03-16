@@ -4,7 +4,7 @@ import {
 } from '@audius/common/adapters'
 import { queryCurrentUserId } from '@audius/common/api'
 import { getSDK } from '@audius/common/store'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { takeEvery, put, call } from 'typed-redux-saga'
 
 import type { CollectionAction, OfflineEntry } from '../slice'

@@ -4,7 +4,7 @@ import {
   StemsArchiveJobResult,
   getStemsArchiveQueue
 } from '../../jobs/createStemsArchive'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import {
   MESSAGE_HEADER,
   SIGNATURE_HEADER,

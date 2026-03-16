@@ -1,6 +1,6 @@
 import { useChatBlastAudienceContent } from '@audius/common/hooks'
 import { formatCount } from '@audius/common/utils'
-import type { ChatBlast } from '@audius/sdk'
+import type { ChatBlast } from '@audius/sdk/services'
 
 import { Flex, Text, IconTowerBroadcast } from '@audius/harmony-native'
 

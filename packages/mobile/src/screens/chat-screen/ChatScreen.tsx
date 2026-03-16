@@ -14,7 +14,7 @@ import {
   isEarliestUnread,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
-import { OptionalHashId, OptionalId, type ChatBlast } from '@audius/sdk'
+import { OptionalHashId, OptionalId, type ChatBlast } from '@audius/sdk/services'
 import { Portal } from '@gorhom/portal'
 import { useFocusEffect } from '@react-navigation/native'
 import type { FlatListProps, LayoutChangeEvent } from 'react-native'

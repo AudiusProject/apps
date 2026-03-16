@@ -1,4 +1,4 @@
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { useQuery, useQueryClient, QueryClient } from '@tanstack/react-query'
 import { pick } from 'lodash'
 

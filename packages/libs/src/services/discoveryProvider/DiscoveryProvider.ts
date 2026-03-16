@@ -1,5 +1,5 @@
-import type { Genre, Middleware, Mood } from '@audius/sdk'
-import { FetchError, ResponseError } from '@audius/sdk'
+import type { Genre, Middleware, Mood } from '@audius/sdk/services'
+import { FetchError, ResponseError } from '@audius/sdk/services'
 import axios, {
   AxiosError,
   AxiosRequestConfig,

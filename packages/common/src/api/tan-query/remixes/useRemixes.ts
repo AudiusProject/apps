@@ -3,7 +3,7 @@ import {
   Id,
   OptionalId,
   EntityType
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

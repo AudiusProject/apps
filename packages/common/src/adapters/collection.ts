@@ -1,7 +1,6 @@
 import {
   type AccessGate,
   type AccountCollection as SdkAccountCollection,
-  type CreateAlbumRequestBody,
   type CreatePlaylistRequestBody,
   Id,
   OptionalHashId,
@@ -10,10 +9,11 @@ import {
   type SearchPlaylist,
   type Track,
   type SearchTrack,
+  type UpdatePlaylistRequestBody,
+  type CreateAlbumRequestBody,
   UpdateAlbumRequest,
-  type UpdateAlbumRequestBody,
-  type UpdatePlaylistRequestBody
-} from '@audius/sdk'
+  type UpdateAlbumRequestBody
+} from '@audius/sdk/services'
 import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 

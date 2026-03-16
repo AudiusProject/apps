@@ -1,4 +1,4 @@
-import { Mood, OptionalId, EntityType } from '@audius/sdk'
+import { type Mood, OptionalId, EntityType } from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

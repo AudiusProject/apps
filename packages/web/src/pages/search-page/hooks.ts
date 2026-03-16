@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo } from 'react'
 
 import { SearchSortMethod } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { Genre, Mood } from '@audius/sdk'
+import { Genre, Mood } from '@audius/sdk/services'
 import { isEmpty } from 'lodash'
 import { flushSync } from 'react-dom'
 import {

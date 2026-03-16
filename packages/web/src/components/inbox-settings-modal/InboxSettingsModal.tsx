@@ -18,7 +18,7 @@ import {
   Switch,
   LoadingSpinner
 } from '@audius/harmony'
-import { ChatPermission } from '@audius/sdk'
+import { ChatPermission } from '@audius/sdk/services'
 import { Formik, useField, useFormikContext } from 'formik'
 
 import { useModalState } from 'common/hooks/useModalState'

@@ -1,4 +1,4 @@
-import { ResponseError } from '@audius/sdk'
+import { ResponseError } from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '../queryKeys'

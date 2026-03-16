@@ -2,7 +2,7 @@ import {
   OptionalHashId,
   type PlaylistLibrary as SdkPlaylistLibrary,
   type PlaylistUpdate as SdkPlaylistUpdate
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import {
   PlaylistLibrary,

@@ -23,7 +23,7 @@ import {
   Hint,
   IconQuestionCircle
 } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import cn from 'classnames'
 
 import { ConfirmationModal } from 'components/confirmation-modal'

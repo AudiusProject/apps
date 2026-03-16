@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { DeveloperApp, sdk } from '@audius/sdk'
+import { DeveloperApp, sdk } from '@audius/sdk/services'
 import { Flex, IconEmbed, Text } from '@audius/harmony'
 import { useSdk } from '../hooks/useSdk'
 import { useCallback } from 'react'

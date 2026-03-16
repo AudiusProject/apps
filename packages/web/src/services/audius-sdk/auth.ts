@@ -5,7 +5,7 @@ import {
 import {
   createHedgehogWalletClient,
   type AudiusWalletClient
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { getWalletClient } from '@wagmi/core'
 import { type WalletClient } from 'viem'
 

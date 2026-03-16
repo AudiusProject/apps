@@ -5,11 +5,7 @@ import { logger } from './logger'
 import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import { connectWeb3 } from './web3'
 import { app } from './server'
-import {
-  AudiusSdk,
-  createSdkWithServices,
-  type AudiusSdkWithServices
-} from '@audius/sdk'
+import { createSdkWithServices, type AudiusSdkWithServices, type AudiusSdk } from '@audius/sdk/services'
 
 export type SharedData = {
   config: Config

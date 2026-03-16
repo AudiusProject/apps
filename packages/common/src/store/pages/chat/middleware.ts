@@ -1,4 +1,4 @@
-import { type AudiusSdkWithServices, ChatEvents, Id } from '@audius/sdk'
+import { type AudiusSdkWithServices, type ChatEvents, Id } from '@audius/sdk/services'
 import { QueryClient } from '@tanstack/react-query'
 import { Middleware } from 'redux'
 

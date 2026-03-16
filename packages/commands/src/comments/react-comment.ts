@@ -6,7 +6,7 @@ import {
   initializeAudiusSdk,
   parseBoolean
 } from '../utils.js'
-import { decodeHashId } from '@audius/sdk'
+import { decodeHashId } from '@audius/sdk/services'
 import { outputFormatOption } from '../common-options.js'
 
 export const reactCommentCommand = new Command('react')

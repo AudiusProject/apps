@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { isResponseError } from '@audius/common/src/utils/error'
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdk } from '@audius/sdk/services'
 import { mainnet } from '@reown/appkit/networks'
 import { useDisconnect } from '@reown/appkit/react'
 import type { ParsedCaipAddress } from '@reown/appkit-common'

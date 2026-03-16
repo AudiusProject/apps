@@ -1,4 +1,4 @@
-import { GetAlbumsByUserSortMethodEnum, Id, OptionalId } from '@audius/sdk'
+import { GetAlbumsByUserSortMethodEnum, Id, OptionalId } from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

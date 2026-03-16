@@ -15,12 +15,29 @@
     "decentralized",
     "blockchain"
   ],
-  "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "services": ["dist/sdk/index.services.d.ts"]
+    }
+  },
   "browser": {
-    "./dist/index.cjs.js": "./dist/index.browser.cjs.js",
-    "./dist/index.esm.js": "./dist/index.browser.esm.js"
+    "./dist/index.esm.js": "./dist/index.browser.esm.js",
+    "./dist/index.services.esm.js": "./dist/index.services.browser.esm.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.browser.esm.js",
+      "default": "./dist/index.esm.js"
+    },
+    "./services": {
+      "types": "./dist/sdk/index.services.d.ts",
+      "react-native": "./dist/index.services.native.js",
+      "browser": "./dist/index.services.browser.esm.js",
+      "default": "./dist/index.services.esm.js"
+    }
   },
   "browserslist": {
     "production": [

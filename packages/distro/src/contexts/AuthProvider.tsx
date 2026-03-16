@@ -1,4 +1,4 @@
-import { User } from '@audius/sdk'
+import { User } from '@audius/sdk/services'
 import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useSdk } from '../hooks/useSdk'
 import { Status } from './types'

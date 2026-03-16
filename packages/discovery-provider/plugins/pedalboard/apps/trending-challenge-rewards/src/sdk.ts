@@ -1,11 +1,11 @@
 import {
+  createSdkWithServices,
   AntiAbuseOracleSelector,
-  Configuration,
   SolanaRelayWalletAdapter,
   SolanaClient,
   SolanaRelay,
-  createSdkWithServices
-} from '@audius/sdk'
+  Configuration
+} from '@audius/sdk/services'
 
 const makeAAOSelector = () =>
   new AntiAbuseOracleSelector({

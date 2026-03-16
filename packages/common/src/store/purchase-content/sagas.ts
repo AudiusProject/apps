@@ -1,5 +1,5 @@
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
-import { Id, OptionalId, type AudiusSdkWithServices } from '@audius/sdk'
+import { type AudiusSdkWithServices, Id, OptionalId } from '@audius/sdk/services'
 import type { createJupiterApiClient, QuoteResponse } from '@jup-ag/api'
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import {

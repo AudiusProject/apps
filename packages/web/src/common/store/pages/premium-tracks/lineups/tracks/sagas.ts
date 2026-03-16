@@ -9,7 +9,7 @@ import {
   premiumTracksPageLineupActions,
   getSDK
 } from '@audius/common/store'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { call } from 'typed-redux-saga'
 
 import { LineupSagas } from 'common/store/lineup/sagas'

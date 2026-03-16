@@ -7,7 +7,7 @@ import {
   timestampRegex
 } from '@audius/common/utils'
 import { Flex, Text, TextLink } from '@audius/harmony'
-import { CommentMention } from '@audius/sdk'
+import { CommentMention } from '@audius/sdk/services'
 import { useToggle } from 'react-use'
 
 import { LinkKind } from 'components/link'

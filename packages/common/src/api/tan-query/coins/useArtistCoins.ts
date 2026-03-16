@@ -1,4 +1,4 @@
-import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
+import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk/services'
 import {
   useQuery,
   useInfiniteQuery,

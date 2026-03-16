@@ -30,7 +30,7 @@ import {
   getSDK
 } from '@audius/common/store'
 import { makeKindId, Nullable, route } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { call, put, takeLatest } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

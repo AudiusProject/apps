@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useCurrentUserId } from '@audius/common/api'
 import { useCanSendChatBlast } from '@audius/common/hooks'
 import { chatActions, followersUserListSelectors } from '@audius/common/store'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 import { TouchableHighlight } from 'react-native-gesture-handler'
 import { useDispatch, useSelector } from 'react-redux'
 

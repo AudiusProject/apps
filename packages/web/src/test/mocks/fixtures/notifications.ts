@@ -1,5 +1,5 @@
 import { Entity, Notification, NotificationType } from '@audius/common/store'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 
 import { testTrack } from './tracks'
 import { artistUser } from './users'

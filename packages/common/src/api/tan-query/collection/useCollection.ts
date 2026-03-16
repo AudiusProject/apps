@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import { useQuery, useQueryClient, QueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { AnyAction, Dispatch } from 'redux'

@@ -1,5 +1,5 @@
 import { useCurrentCommentSection } from '@audius/common/context'
-import { GetTrackCommentsSortMethodEnum } from '@audius/sdk'
+import { GetTrackCommentsSortMethodEnum } from '@audius/sdk/services'
 
 import { Flex, SelectablePill } from '@audius/harmony-native'
 

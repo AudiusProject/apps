@@ -9,7 +9,7 @@ import {
   parseMusicalKey
 } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import { MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
+import { MAX_DESCRIPTION_LENGTH } from '@audius/sdk/services'
 import { Formik } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'

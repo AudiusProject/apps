@@ -1,4 +1,4 @@
-import { OptionalHashId, type Favorite as SdkFavorite } from '@audius/sdk'
+import { OptionalHashId, type Favorite as SdkFavorite } from '@audius/sdk/services'
 import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 

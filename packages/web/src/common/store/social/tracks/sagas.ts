@@ -22,7 +22,7 @@ import {
   removeNullable,
   getFilename
 } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import {
   call,
   select,

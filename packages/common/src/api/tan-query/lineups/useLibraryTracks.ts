@@ -1,9 +1,9 @@
 import {
   Id,
-  EntityType,
   GetUserLibraryTracksSortMethodEnum,
-  GetUserLibraryTracksSortDirectionEnum
-} from '@audius/sdk'
+  GetUserLibraryTracksSortDirectionEnum,
+  EntityType
+} from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

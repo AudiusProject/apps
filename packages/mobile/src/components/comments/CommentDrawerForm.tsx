@@ -8,7 +8,7 @@ import {
 } from '@audius/common/context'
 import type { UserMetadata } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import type { CommentMention } from '@audius/sdk'
+import type { CommentMention } from '@audius/sdk/services'
 import {
   BottomSheetTextInput,
   type BottomSheetFlatListMethods

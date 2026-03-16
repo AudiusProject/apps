@@ -11,7 +11,7 @@ import {
   useRemixersAudience
 } from '@audius/common/hooks'
 import { formatNumberCommas } from '@audius/common/utils'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 import { useField } from 'formik'
 import { TouchableOpacity } from 'react-native'
 

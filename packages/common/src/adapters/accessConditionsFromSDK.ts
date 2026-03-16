@@ -1,9 +1,9 @@
-import type { AccessGate } from '@audius/sdk'
+import type { AccessGate } from '@audius/sdk/services'
 import {
   instanceOfFollowGate,
   instanceOfPurchaseGate,
   instanceOfTokenGate
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import { AccessConditions } from '~/models'
 

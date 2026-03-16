@@ -25,7 +25,7 @@ import {
   useTheme,
   TextArea
 } from '@audius/harmony'
-import { EntityType, HashId } from '@audius/sdk'
+import { EntityType, HashId } from '@audius/sdk/services'
 import { isEqual, pick } from 'lodash'
 import { usePrevious } from 'react-use'
 

@@ -1,11 +1,11 @@
 import {
+  type Track,
+  type Playlist,
+  type User,
   ChatBlastAudience,
   ChatMessage,
-  Track,
-  Playlist,
-  User,
   ChatPermission
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { mapValues } from 'lodash'
 
 import { Status } from '~/models/Status'

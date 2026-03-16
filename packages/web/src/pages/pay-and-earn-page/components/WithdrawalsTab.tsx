@@ -20,7 +20,7 @@ import {
   GetUSDCTransactionsSortMethodEnum,
   GetUSDCTransactionsTypeEnum,
   GetUSDCTransactionsMethodEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 import { ThunkDispatch } from 'redux-thunk'
 

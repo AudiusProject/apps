@@ -1,4 +1,4 @@
-import { Mood } from '@audius/sdk'
+import { Mood } from '@audius/sdk/services'
 
 import { Genre } from '~/utils'
 import { Nullable } from '~/utils/typeUtils'

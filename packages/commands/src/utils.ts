@@ -1,14 +1,14 @@
 import {
   createSdkWithServices,
+  type AudiusSdkWithServices,
   SolanaRelay,
-  Configuration,
   createHedgehogWalletClient,
-  type AudiusSdk,
+  type LoggerService,
+  Configuration,
   encodeHashId,
   decodeHashId,
-  ResponseError,
-  type LoggerService
-} from '@audius/sdk'
+  ResponseError
+} from '@audius/sdk/services'
 
 import {
   Hedgehog,
@@ -40,7 +40,7 @@ export const parseUserId = async (arg: string) => {
   }
 }
 
-let audiusSdk: AudiusSdk | undefined
+let audiusSdk: AudiusSdkWithServices | undefined
 let currentHandle: string | undefined
 
 let hedgehog: Hedgehog | undefined

@@ -1,6 +1,6 @@
 import { useCurrentCommentSection } from '@audius/common/context'
 import { Flex, SelectablePill } from '@audius/harmony'
-import { GetTrackCommentsSortMethodEnum } from '@audius/sdk'
+import { GetTrackCommentsSortMethodEnum } from '@audius/sdk/services'
 
 const messages = {
   top: 'Top',

@@ -9,7 +9,7 @@ import type {
 } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import ReactNativeBlobUtil from 'react-native-blob-util'
 import { select, call, put, take, race, all } from 'typed-redux-saga'
 

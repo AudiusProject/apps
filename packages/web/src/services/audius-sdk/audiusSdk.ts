@@ -1,10 +1,10 @@
 import {
-  AudiusSdkWithServices,
+  type AudiusSdkWithServices,
   createSdkWithServices,
-  Configuration,
   SolanaRelay,
-  ArchiverService
-} from '@audius/sdk'
+  ArchiverService,
+  Configuration
+} from '@audius/sdk/services'
 import { createWalletClient, custom, RpcRequestError } from 'viem'
 import { mainnet } from 'viem/chains'
 import { getHttpRpcClient } from 'viem/utils'

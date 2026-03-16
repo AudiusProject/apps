@@ -9,7 +9,7 @@ import {
   TextInput,
   makeResponsiveStyles
 } from '@audius/harmony'
-import { HashId, encodeHashId } from '@audius/sdk'
+import { HashId, encodeHashId } from '@audius/sdk/services'
 
 export const useUserIdParserStyles = makeResponsiveStyles(({ theme }) => ({
   root: {

@@ -32,7 +32,7 @@ import {
   useLineupTable
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
+import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk/services'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'

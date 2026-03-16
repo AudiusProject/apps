@@ -1,9 +1,5 @@
 import { audiusSdk } from './sdk'
-import {
-  AudiusSdk,
-  developmentConfig,
-  productionConfig
-} from '@audius/sdk'
+import { developmentConfig, productionConfig, type AudiusSdk } from '@audius/sdk/services'
 import dotenv from 'dotenv'
 
 dotenv.config()

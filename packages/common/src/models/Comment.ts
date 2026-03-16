@@ -1,7 +1,7 @@
 import {
   Comment as CommentSDK,
   ReplyComment as ReplyCommentSDK
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import type { OverrideProperties } from 'type-fest'
 
 import { Maybe } from '~/utils/typeUtils'

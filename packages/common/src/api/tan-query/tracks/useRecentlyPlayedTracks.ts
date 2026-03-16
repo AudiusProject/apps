@@ -1,4 +1,4 @@
-import { Id, type GetUsersTrackHistoryRequest } from '@audius/sdk'
+import { Id, type GetUsersTrackHistoryRequest } from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

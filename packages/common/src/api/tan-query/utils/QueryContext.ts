@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import type { Dispatch } from 'redux'
 import { getContext } from 'typed-redux-saga'
 

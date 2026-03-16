@@ -1,6 +1,6 @@
 import { ReactElement } from 'react'
 
-import { Mood } from '@audius/sdk'
+import { Mood } from '@audius/sdk/services'
 
 export const moodEmojiMap: Record<Mood, string> = {
   Peaceful: 'dove-of-peace',

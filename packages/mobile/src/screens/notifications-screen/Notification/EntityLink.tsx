@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import type { Collection, ID, Track } from '@audius/common/models'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 
 import { Text } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'

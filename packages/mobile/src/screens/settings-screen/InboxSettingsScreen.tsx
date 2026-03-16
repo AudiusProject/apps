@@ -4,7 +4,7 @@ import { useSetInboxPermissions } from '@audius/common/hooks'
 import { statusIsNotFinalized } from '@audius/common/models'
 import type { InboxSettingsFormValues } from '@audius/common/store'
 import { transformPermitListToMap } from '@audius/common/utils'
-import { ChatPermission } from '@audius/sdk'
+import { ChatPermission } from '@audius/sdk/services'
 import { Formik } from 'formik'
 
 import { Button, Flex, IconMessage } from '@audius/harmony-native'

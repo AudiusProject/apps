@@ -1,10 +1,6 @@
 import { AUDIO, AudioWei, wAUDIO } from '@audius/fixed-decimal'
 import type { LocalStorage } from '@audius/hedgehog'
-import {
-  type AudiusSdkWithServices,
-  Id,
-  HedgehogWalletNotFoundError
-} from '@audius/sdk'
+import { type AudiusSdkWithServices, HedgehogWalletNotFoundError, Id } from '@audius/sdk/services'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,

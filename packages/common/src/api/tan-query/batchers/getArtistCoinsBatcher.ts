@@ -1,4 +1,4 @@
-import { Coin } from '@audius/sdk'
+import { Coin } from '@audius/sdk/services'
 import { create, keyResolver, windowScheduler } from '@yornaath/batshit'
 import { memoize } from 'lodash'
 

@@ -9,7 +9,7 @@ import {
   instanceOfCreatePlaylistNotificationActionData,
   instanceOfPlaylistMilestoneNotificationActionData,
   instanceOfTrackMilestoneNotificationActionData
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import { BadgeTier, type ID } from '~/models'
 import type { ChallengeRewardID } from '~/models/AudioRewards'

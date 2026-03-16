@@ -42,7 +42,7 @@ import {
   Divider,
   Tooltip
 } from '@audius/harmony'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { appkitModal } from 'app/ReownAppKitModal'

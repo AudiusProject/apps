@@ -1,7 +1,7 @@
 import { TrackMetadataType, useTrackMetadata } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { Flex } from '@audius/harmony'
-import { Mood } from '@audius/sdk'
+import { Mood } from '@audius/sdk/services'
 
 import { MetadataItem } from 'components/entity/MetadataItem'
 import { MOODS } from 'utils/Moods'

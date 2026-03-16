@@ -20,7 +20,7 @@ import {
   isEarliestUnread,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
 import { throttle } from 'lodash'

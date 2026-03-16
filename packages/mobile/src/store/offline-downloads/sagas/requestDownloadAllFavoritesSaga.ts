@@ -6,7 +6,7 @@ import {
 } from '@audius/common/api'
 import { libraryPageSelectors, getSDK } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { fetchAllAccountCollections } from 'common/store/saved-collections/sagas'
 import { takeEvery, select, call, put } from 'typed-redux-saga'
 

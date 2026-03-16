@@ -1,4 +1,4 @@
-import { HTTPQuery, querystring } from '@audius/sdk'
+import { HTTPQuery, querystring } from '@audius/sdk/services'
 
 const DEFAULT_TIMEOUT_MS = 3000
 export const TIMED_OUT_ERROR = 'Request Timed Out'

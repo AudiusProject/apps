@@ -52,12 +52,12 @@ import {
   waitForValue
 } from '@audius/common/utils'
 import {
-  OptionalId,
   CreateUserRequestWithFiles,
+  type UpdateUserRequestWithFiles,
+  OptionalId,
   Id,
-  decodeHashId,
-  type UpdateUserRequestWithFiles
-} from '@audius/sdk'
+  decodeHashId
+} from '@audius/sdk/services'
 import { isEmpty } from 'lodash'
 import {
   all,

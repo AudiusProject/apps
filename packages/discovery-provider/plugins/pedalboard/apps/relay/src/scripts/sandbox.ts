@@ -1,4 +1,4 @@
-import { sdk } from '@audius/sdk'
+import { sdk } from '@audius/sdk/services'
 import dotenv from 'dotenv'
 import { ethers } from 'ethers'
 

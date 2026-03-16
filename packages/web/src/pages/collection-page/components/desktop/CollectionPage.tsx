@@ -18,7 +18,7 @@ import {
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import { Divider, Flex, Paper, Text } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'

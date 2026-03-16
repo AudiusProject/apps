@@ -3,7 +3,7 @@ import { queryCurrentUserId, queryTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { put, select, call, take, race } from 'typed-redux-saga'
 
 import { getTrackOfflineDownloadStatus } from 'app/store/offline-downloads/selectors'

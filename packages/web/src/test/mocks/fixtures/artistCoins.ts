@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 
 export const mockArtistCoin = {
   ticker: 'MOCK',

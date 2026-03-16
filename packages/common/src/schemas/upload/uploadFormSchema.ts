@@ -1,4 +1,4 @@
-import { Genre, Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
+import { MAX_DESCRIPTION_LENGTH, Genre, Mood, type NativeFile } from '@audius/sdk/services'
 import { z } from 'zod'
 
 import { imageBlank } from '~/assets'

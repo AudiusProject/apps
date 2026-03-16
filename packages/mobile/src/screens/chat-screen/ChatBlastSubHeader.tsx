@@ -1,6 +1,6 @@
 import { useChatBlastAudienceContent } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
-import { OptionalHashId, type ChatBlast } from '@audius/sdk'
+import { OptionalHashId, type ChatBlast } from '@audius/sdk/services'
 import { css } from '@emotion/native'
 
 import { Flex, Text } from '@audius/harmony-native'

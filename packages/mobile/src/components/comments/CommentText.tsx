@@ -6,7 +6,7 @@ import {
   getDurationFromTimestampMatch,
   timestampRegex
 } from '@audius/common/utils'
-import type { CommentMention } from '@audius/sdk'
+import type { CommentMention } from '@audius/sdk/services'
 import type { NavigationProp, ParamListBase } from '@react-navigation/native'
 import type { GestureResponderEvent } from 'react-native'
 import { useToggle } from 'react-use'

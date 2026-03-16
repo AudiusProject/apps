@@ -2,7 +2,7 @@ import { FixedDecimal } from '@audius/fixed-decimal'
 import {
   FirstBuyQuoteRequest,
   FirstBuyQuoteResponse as FirstBuyQuoteApiResponse
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useMutation, UseMutationOptions } from '@tanstack/react-query'
 
 import { TOKEN_LISTING_MAP } from '~/store'

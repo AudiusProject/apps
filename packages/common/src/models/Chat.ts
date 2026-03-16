@@ -1,4 +1,4 @@
-import type { ChatMessage, UnfurlResponse } from '@audius/sdk'
+import type { ChatMessage, UnfurlResponse } from '@audius/sdk/services'
 
 import { Status } from '~/models'
 

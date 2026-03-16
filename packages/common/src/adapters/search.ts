@@ -1,4 +1,4 @@
-import type { SearchModel } from '@audius/sdk'
+import type { SearchModel } from '@audius/sdk/services'
 import { type QueryClient } from '@tanstack/react-query'
 
 import { primeCollectionData } from '~/api/tan-query/utils/primeCollectionData'

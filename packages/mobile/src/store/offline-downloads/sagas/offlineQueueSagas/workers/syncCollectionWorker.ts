@@ -7,7 +7,7 @@ import { queryCollection, queryCurrentUserId } from '@audius/common/api'
 import type { ID, DownloadReason } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
-import { OptionalId, Id } from '@audius/sdk'
+import { OptionalId, Id } from '@audius/sdk/services'
 import { difference } from 'lodash'
 import { call, put, race, select, take } from 'typed-redux-saga'
 

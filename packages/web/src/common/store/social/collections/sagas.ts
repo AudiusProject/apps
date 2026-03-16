@@ -24,7 +24,7 @@ import {
   makeKindId,
   route
 } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { call, takeEvery, put } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

@@ -5,7 +5,7 @@ import { Command, Option } from '@commander-js/extra-typings'
 
 import { getHedgehog, initializeAudiusSdk, parseBoolean } from '../utils.js'
 import { LocalStorage } from 'node-localstorage'
-import { decodeHashId } from '@audius/sdk'
+import { decodeHashId } from '@audius/sdk/services'
 import { outputFormatOption } from '../common-options.js'
 const localStorage = new LocalStorage('./local-storage')
 

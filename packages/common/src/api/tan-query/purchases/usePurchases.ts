@@ -4,7 +4,7 @@ import {
   Id,
   type GetPurchasesSortDirectionEnum,
   type GetPurchasesSortMethodEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { purchaseFromSDK } from '~/adapters/purchase'

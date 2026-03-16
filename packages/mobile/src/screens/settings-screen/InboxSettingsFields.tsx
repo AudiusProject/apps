@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import type { InboxSettingsFormValues } from '@audius/common/store'
-import { ChatPermission } from '@audius/sdk'
+import { ChatPermission } from '@audius/sdk/services'
 import { useField, useFormikContext } from 'formik'
 
 import { Text, Flex } from '@audius/harmony-native'

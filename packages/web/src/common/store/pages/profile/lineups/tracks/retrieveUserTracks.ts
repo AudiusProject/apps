@@ -5,7 +5,7 @@ import {
 import { primeTrackDataSaga } from '@audius/common/api'
 import { ID, Track } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { call } from 'typed-redux-saga'
 
 type RetrieveUserTracksArgs = {

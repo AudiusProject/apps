@@ -1,4 +1,4 @@
-import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk/services'
 import { InfiniteData } from '@tanstack/react-query'
 
 import { ID } from '~/models'

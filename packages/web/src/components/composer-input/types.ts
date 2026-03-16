@@ -1,7 +1,7 @@
 import { LinkEntity } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { TextAreaProps } from '@audius/harmony'
-import { CommentMention, EntityType } from '@audius/sdk'
+import { EntityType, type CommentMention } from '@audius/sdk/services'
 
 export type ComposerInputProps = {
   messageId: number

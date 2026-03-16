@@ -1,4 +1,4 @@
-import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'

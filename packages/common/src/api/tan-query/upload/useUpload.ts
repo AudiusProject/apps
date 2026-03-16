@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 
-import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
+import { HashId, type UploadTrackFilesTask } from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'

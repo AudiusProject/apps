@@ -7,7 +7,7 @@ import {
   type GetUSDCTransactionsMethodEnum,
   type GetUSDCTransactionsTypeEnum,
   type TransactionDetails
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

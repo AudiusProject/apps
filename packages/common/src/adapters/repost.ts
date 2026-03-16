@@ -1,4 +1,4 @@
-import { OptionalHashId, type Repost as SdkRepost } from '@audius/sdk'
+import { OptionalHashId, type Repost as SdkRepost } from '@audius/sdk/services'
 import snakecaseKeys from 'snakecase-keys'
 
 import { Repost } from '~/models/Repost'

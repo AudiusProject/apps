@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { useUserCoin } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { shortenSPLAddress } from '@audius/common/utils'
-import type { UserCoinAccount } from '@audius/sdk'
+import type { UserCoinAccount } from '@audius/sdk/services'
 
 import {
   Button,

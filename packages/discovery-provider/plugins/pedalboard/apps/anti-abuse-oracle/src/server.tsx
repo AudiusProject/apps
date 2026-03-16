@@ -16,7 +16,7 @@ import {
 } from './actionLog'
 import { logger } from 'hono/logger'
 import { config } from './config'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import { SolanaUtils, Utils } from '@audius/sdk-legacy'
 import bn from 'bn.js'
 import { useEmail, userFingerprints } from './identity'

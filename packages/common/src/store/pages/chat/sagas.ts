@@ -1,14 +1,14 @@
 import {
-  ChatBlast,
   HashId,
   Id,
   OptionalHashId,
   OptionalId,
+  type ChatBlast,
   type ChatMessage,
   type TypedCommsResponse,
   type UserChat,
   type ValidatedChatPermissions
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import {
   call,
   delay,

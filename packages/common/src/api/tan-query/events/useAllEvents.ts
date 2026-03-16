@@ -1,4 +1,4 @@
-import { OptionalId, Event as SDKEvent } from '@audius/sdk'
+import { OptionalId, Event as SDKEvent } from '@audius/sdk/services'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
 import { eventMetadataFromSDK } from '~/adapters/event'

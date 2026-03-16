@@ -1,4 +1,4 @@
-import { EntityManagerAction, EntityType } from '@audius/sdk'
+import { EntityManagerAction, EntityType } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

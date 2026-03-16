@@ -5,7 +5,7 @@ import { ID } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { useSelector } from 'common/hooks/useSelector'

@@ -1,4 +1,4 @@
-import { AudiusSdk, OptionalId } from '@audius/sdk'
+import { AudiusSdk, OptionalId } from '@audius/sdk/services'
 
 import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
 

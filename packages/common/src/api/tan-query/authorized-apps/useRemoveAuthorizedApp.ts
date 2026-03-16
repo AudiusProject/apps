@@ -1,4 +1,4 @@
-import { AuthorizedApp, Id } from '@audius/sdk'
+import { AuthorizedApp, Id } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 

@@ -1,5 +1,5 @@
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
-import { type AudiusSdkWithServices, Id } from '@audius/sdk'
+import { Id, type AudiusSdkWithServices } from '@audius/sdk/services'
 import { PublicKey } from '@solana/web3.js'
 
 import { userWalletsFromSDK } from '~/adapters'

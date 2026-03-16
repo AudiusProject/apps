@@ -1,4 +1,4 @@
-import { Event as EventSDK, HashId, OptionalHashId } from '@audius/sdk'
+import { Event as EventSDK, HashId, OptionalHashId } from '@audius/sdk/services'
 import camelcaseKeys from 'camelcase-keys'
 
 import { Event } from '~/models/Event'

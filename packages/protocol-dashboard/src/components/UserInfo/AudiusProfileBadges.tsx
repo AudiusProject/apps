@@ -3,7 +3,7 @@ import { cloneElement, ReactElement } from 'react'
 import { BadgeTier } from '@audius/common/models'
 import { badgeTiers } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { User } from '@audius/sdk'
+import { User } from '@audius/sdk/services'
 import cn from 'classnames'
 
 import IconBronzeBadgeSVG from 'assets/img/iconBronzeBadge.svg'

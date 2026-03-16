@@ -5,7 +5,7 @@ import {
   getContext,
   getSDK
 } from '@audius/common/store'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import { call, put, select } from 'typed-redux-saga'
 
 const { getAssociatedWallets } = tokenDashboardPageSelectors

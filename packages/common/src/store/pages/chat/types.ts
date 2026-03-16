@@ -1,4 +1,4 @@
-import { ChatPermission } from '@audius/sdk'
+import { ChatPermission } from '@audius/sdk/services'
 
 /** Action current user can take to be able to message another user */
 export enum ChatPermissionAction {

@@ -1,4 +1,4 @@
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { SearchResults, searchResultsFromSDK } from '~/adapters/search'

@@ -34,13 +34,7 @@ import {
   waitForValue,
   isPlayCountChallenge
 } from '@audius/common/utils'
-import {
-  Id,
-  AudiusSdk,
-  ChallengeId,
-  Errors,
-  RewardManagerError
-} from '@audius/sdk'
+import { ChallengeId, RewardManagerError, Id, type AudiusSdk, Errors } from '@audius/sdk/services'
 import {
   call,
   fork,

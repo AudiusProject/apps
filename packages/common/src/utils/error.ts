@@ -1,4 +1,4 @@
-import { ResponseError } from '@audius/sdk'
+import { ResponseError } from '@audius/sdk/services'
 
 type ErrorWithMessage = {
   name: string

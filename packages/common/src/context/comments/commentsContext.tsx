@@ -7,9 +7,9 @@ import {
 } from 'react'
 
 import {
-  EntityType,
-  GetTrackCommentsSortMethodEnum as CommentSortMethod
-} from '@audius/sdk'
+  GetTrackCommentsSortMethodEnum as CommentSortMethod,
+  EntityType
+} from '@audius/sdk/services'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

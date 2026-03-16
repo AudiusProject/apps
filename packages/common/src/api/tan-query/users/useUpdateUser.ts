@@ -1,4 +1,4 @@
-import { AudiusSdkWithServices, OptionalId } from '@audius/sdk'
+import { type AudiusSdkWithServices, OptionalId } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataToSdk } from '~/adapters/user'

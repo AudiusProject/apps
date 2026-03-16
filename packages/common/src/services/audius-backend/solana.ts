@@ -1,4 +1,4 @@
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import { u8 } from '@solana/buffer-layout'
 import {
   Account,

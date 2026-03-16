@@ -9,8 +9,7 @@ import {
   isCollectionUrl,
   isTrackUrl
 } from '@audius/common/utils'
-import { HashId } from '@audius/sdk'
-import type { ReactionTypes, ChatMessageReaction } from '@audius/sdk'
+import { HashId, type ReactionTypes, type ChatMessageReaction } from '@audius/sdk/services'
 import { css } from '@emotion/native'
 import { find } from 'linkifyjs'
 import type { ViewStyle, StyleProp } from 'react-native'

@@ -31,7 +31,7 @@ import {
   updatePlaylistArtwork,
   Nullable
 } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { call, put, takeEvery } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

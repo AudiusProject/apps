@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { DashboardWalletUser } from '@audius/sdk'
+import { DashboardWalletUser } from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 import { create, windowScheduler } from '@yornaath/batshit'
 import { useSelector } from 'react-redux'

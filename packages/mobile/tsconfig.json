@@ -25,6 +25,7 @@
       "@audius/harmony-native": ["./src/harmony-native/index.ts"],
       "@audius/common/*": ["../common/src/*"],
       "@audius/sdk": ["../sdk/src/index.ts"],
+      "@audius/sdk/services": ["../sdk/src/sdk/index.services.ts"],
       "~/*": ["../common/src/*"],
       "app/*": ["./src/*"],
       // Remove these when no longer dependent on @audius/web

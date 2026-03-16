@@ -3,7 +3,7 @@ import {
   useChatBlastAudienceContent
 } from '@audius/common/hooks'
 import type { User } from '@audius/common/models'
-import type { ChatBlast } from '@audius/sdk'
+import type { ChatBlast } from '@audius/sdk/services'
 
 import { Flex, Text, IconTowerBroadcast, Paper } from '@audius/harmony-native'
 

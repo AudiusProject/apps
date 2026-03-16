@@ -1,6 +1,6 @@
 import { useFirstAvailableBlastAudience } from '@audius/common/hooks'
 import { chatActions } from '@audius/common/store'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Formik } from 'formik'
 import { useDispatch } from 'react-redux'

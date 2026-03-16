@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 
 import { useCurrentUserId } from '~/api/tan-query/users/account/useCurrentUserId'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'

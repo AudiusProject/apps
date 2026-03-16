@@ -1,8 +1,8 @@
 import {
-  EntityManagerAction,
   GetTrackCommentsSortMethodEnum as CommentSortMethod,
-  CommentMention
-} from '@audius/sdk'
+  type CommentMention,
+  EntityManagerAction
+} from '@audius/sdk/services'
 
 import { Name } from '~/models/Analytics'
 import { ID } from '~/models/Identifiers'

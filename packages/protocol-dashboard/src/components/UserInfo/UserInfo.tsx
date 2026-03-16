@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { User as AudiusUser } from '@audius/sdk'
+import { User as AudiusUser } from '@audius/sdk/services'
 import { ButtonType } from '@audius/stems'
 import BN from 'bn.js'
 import clsx from 'clsx'

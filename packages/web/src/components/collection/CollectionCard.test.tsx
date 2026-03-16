@@ -1,6 +1,6 @@
 import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
 import { Text } from '@audius/harmony'
-import { developmentConfig } from '@audius/sdk'
+import { developmentConfig } from '@audius/sdk/services'
 import { setupServer } from 'msw/node'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'

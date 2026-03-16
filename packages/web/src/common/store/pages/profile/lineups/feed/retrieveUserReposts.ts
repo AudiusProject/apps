@@ -10,7 +10,7 @@ import {
   UserCollectionMetadata
 } from '@audius/common/models'
 import { getSDK } from '@audius/common/store'
-import { OptionalId, type Activity } from '@audius/sdk'
+import { OptionalId, type Activity } from '@audius/sdk/services'
 import { all } from 'redux-saga/effects'
 
 import { waitForRead } from 'utils/sagaHelpers'

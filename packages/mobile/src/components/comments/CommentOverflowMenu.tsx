@@ -18,7 +18,7 @@ import {
   type ReplyComment
 } from '@audius/common/models'
 import { removeNullable } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { Portal } from '@gorhom/portal'
 import Clipboard from '@react-native-clipboard/clipboard'
 

@@ -9,7 +9,7 @@ import {
   useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
-import type { Genre, Mood } from '@audius/sdk'
+import type { Genre, Mood } from '@audius/sdk/services'
 import { useNavigate, useParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'

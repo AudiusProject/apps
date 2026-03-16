@@ -1,4 +1,4 @@
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import { call, getContext } from 'typed-redux-saga'
 
 // These are defined explicitly here to avoid including the entire `storeContext` module

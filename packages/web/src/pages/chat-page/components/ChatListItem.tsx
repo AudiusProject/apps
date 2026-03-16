@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { useOtherChatUsersFromChat } from '@audius/common/api'
-import type { UserChat } from '@audius/sdk'
+import type { UserChat } from '@audius/sdk/services'
 import cn from 'classnames'
 
 import styles from './ChatListItem.module.css'

@@ -10,7 +10,7 @@ import {
   isTrackUrl
 } from '@audius/common/utils'
 import { Flex, IconError, IconPlus } from '@audius/harmony'
-import { HashId, Id, OptionalHashId, ReactionTypes } from '@audius/sdk'
+import { ReactionTypes, HashId, Id, OptionalHashId } from '@audius/sdk/services'
 import cn from 'classnames'
 import { find } from 'linkifyjs'
 import { useDispatch } from 'react-redux'

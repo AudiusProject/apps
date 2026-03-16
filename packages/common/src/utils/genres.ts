@@ -1,7 +1,7 @@
-import { Genre as SDKGenre } from '@audius/sdk'
+import { Genre as SDKGenre } from '@audius/sdk/services'
 
 /** Re-export SDK Genre as the canonical source for track metadata. */
-export { Genre } from '@audius/sdk'
+export { Genre } from '@audius/sdk/services'
 
 /**
  * UI-only value for "all genres" filter (e.g. trending page).

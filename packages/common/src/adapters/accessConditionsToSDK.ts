@@ -1,4 +1,4 @@
-import type { CreateAlbumMetadata, TrackMetadata } from '@audius/sdk'
+import type { CreateAlbumMetadata, TrackMetadata } from '@audius/sdk/services'
 
 import {
   AccessConditions,

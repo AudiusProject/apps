@@ -1,4 +1,4 @@
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { takeEvery, call, put, delay, all } from 'typed-redux-saga'
 
 import {

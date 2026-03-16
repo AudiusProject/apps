@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto'
 import chalk from 'chalk'
 import { Command } from '@commander-js/extra-typings'
 import { getCurrentUserId, initializeAudiusSdk, parseBoolean } from '../utils'
-import { decodeHashId } from '@audius/sdk'
+import { decodeHashId } from '@audius/sdk/services'
 import { outputFormatOption } from '../common-options'
 
 export const createAlbumCommand = new Command('create')

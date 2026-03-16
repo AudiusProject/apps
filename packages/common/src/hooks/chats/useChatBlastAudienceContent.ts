@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { ChatBlast, ChatBlastAudience, OptionalHashId } from '@audius/sdk'
+import { OptionalHashId, ChatBlast, ChatBlastAudience } from '@audius/sdk/services'
 
 import {
   useCollection,

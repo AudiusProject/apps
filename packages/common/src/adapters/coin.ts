@@ -2,7 +2,7 @@ import {
   HashId,
   type Coin as CoinSDK,
   type UserCoin as UserCoinSdk
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 
 import { ID } from '~/models'
 import { removeNullable } from '~/utils/typeUtils'

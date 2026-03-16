@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 
-import { AudiusSdk, Playlist, ResolveApi, Track, User } from '@audius/sdk'
+import { ResolveApi, type AudiusSdk, type Playlist, type Track, type User } from '@audius/sdk/services'
 
 import {
   formatCollectionName,

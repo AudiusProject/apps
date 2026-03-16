@@ -5,7 +5,7 @@ import {
   getWalletAddressesQueryKey
 } from '@audius/common/api'
 import { Status } from '@audius/common/models'
-import { developmentConfig, HashId } from '@audius/sdk'
+import { developmentConfig, HashId } from '@audius/sdk/services'
 import { http, HttpResponse } from 'msw'
 
 import { queryClient } from 'services/query-client'

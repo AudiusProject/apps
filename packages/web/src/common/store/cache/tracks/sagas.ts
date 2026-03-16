@@ -36,7 +36,7 @@ import {
   uuid,
   waitForAccount
 } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { call, fork, put, select, takeEvery } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

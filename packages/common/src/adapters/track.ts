@@ -12,7 +12,7 @@ import {
   Id,
   OptionalHashId,
   OptionalId
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import camelcaseKeys from 'camelcase-keys'
 import { omit, pick, mapValues } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'

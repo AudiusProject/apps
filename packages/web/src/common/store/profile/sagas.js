@@ -21,7 +21,7 @@ import {
   isResponseError,
   route
 } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { call, getContext, put, select, takeEvery } from 'redux-saga/effects'
 
 import feedSagas from 'common/store/pages/profile/lineups/feed/sagas.js'

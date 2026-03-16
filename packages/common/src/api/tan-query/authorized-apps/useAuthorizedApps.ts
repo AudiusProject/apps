@@ -1,4 +1,4 @@
-import { AuthorizedApp, Id } from '@audius/sdk'
+import { AuthorizedApp, Id } from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'

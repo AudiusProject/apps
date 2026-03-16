@@ -29,7 +29,7 @@ import {
   resolveStreamUrl
 } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { isEqual, uniq } from 'lodash'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,

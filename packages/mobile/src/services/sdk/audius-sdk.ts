@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events'
 
 import {
-  Configuration,
-  SolanaRelay,
   createSdkWithServices,
   type AudiusSdkWithServices,
-  ArchiverService
-} from '@audius/sdk'
+  SolanaRelay,
+  ArchiverService,
+  Configuration
+} from '@audius/sdk/services'
 
 import { env } from 'app/services/env'
 

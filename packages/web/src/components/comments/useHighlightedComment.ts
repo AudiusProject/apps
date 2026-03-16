@@ -1,5 +1,5 @@
 import { useComment } from '@audius/common/api'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import { useSearchParams } from 'react-router'
 
 export const useHighlightedComment = () => {

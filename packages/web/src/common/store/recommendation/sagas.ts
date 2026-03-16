@@ -7,7 +7,7 @@ import { ID } from '@audius/common/models'
 import { IntKeys } from '@audius/common/services'
 import { getContext, getSDK } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { call } from 'typed-redux-saga'
 
 export function* getRecommendedTracks(

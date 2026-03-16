@@ -1,6 +1,6 @@
 import { UserMetadata } from '@audius/common/models'
 import { getErrorMessage } from '@audius/common/utils'
-import { CreateGrantRequest, HashId, Id, OptionalId } from '@audius/sdk'
+import { CreateGrantRequest, HashId, Id, OptionalId } from '@audius/sdk/services'
 import base64url from 'base64url'
 
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'

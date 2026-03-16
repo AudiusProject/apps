@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import { TrackMetadataType, useTrackMetadata } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import type { Mood } from '@audius/sdk'
+import type { Mood } from '@audius/sdk/services'
 import { Image } from 'react-native'
 
 import { Flex, spacing } from '@audius/harmony-native'

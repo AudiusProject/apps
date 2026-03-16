@@ -1,10 +1,10 @@
 import {
   Id,
-  EntityType,
   GetUsersTrackHistorySortMethodEnum,
   GetUsersTrackHistorySortDirectionEnum,
-  type TrackActivity
-} from '@audius/sdk'
+  type TrackActivity,
+  EntityType
+} from '@audius/sdk/services'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

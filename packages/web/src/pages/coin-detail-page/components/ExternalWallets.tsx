@@ -22,7 +22,7 @@ import {
   Divider,
   IconLogoWhiteBackground
 } from '@audius/harmony'
-import { UserCoinAccount } from '@audius/sdk'
+import { UserCoinAccount } from '@audius/sdk/services'
 
 import ActionDrawer from 'components/action-drawer/ActionDrawer'
 import { ToastContext } from 'components/toast/ToastContext'

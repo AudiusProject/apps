@@ -8,7 +8,7 @@ import {
   IconUserList,
   Text
 } from '@audius/harmony'
-import { ChatBlast, OptionalHashId } from '@audius/sdk'
+import { ChatBlast, OptionalHashId } from '@audius/sdk/services'
 
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'

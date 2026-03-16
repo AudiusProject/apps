@@ -1,4 +1,4 @@
-import { Mood } from '@audius/sdk'
+import { Mood } from '@audius/sdk/services'
 import { pick } from 'lodash'
 
 import { useTrack } from '~/api'

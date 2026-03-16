@@ -18,7 +18,7 @@ import {
   type Activity,
   GetUserLibraryTracksSortMethodEnum,
   GetUserLibraryTracksSortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { call, fork, put, select, takeLatest } from 'typed-redux-saga'
 
 import { waitForRead } from 'utils/sagaHelpers'

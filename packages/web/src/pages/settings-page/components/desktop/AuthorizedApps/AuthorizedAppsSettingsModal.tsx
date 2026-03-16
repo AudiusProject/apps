@@ -9,7 +9,7 @@ import {
   IconTrash,
   IconShieldCheck
 } from '@audius/harmony'
-import { AuthorizedApp } from '@audius/sdk'
+import { AuthorizedApp } from '@audius/sdk/services'
 
 import { AppDetailsPage } from './AppDetailsPage'
 import styles from './AuthorizedAppsSettingsModal.module.css'

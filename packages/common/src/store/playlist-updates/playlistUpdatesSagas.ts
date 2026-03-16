@@ -1,4 +1,4 @@
-import { Id, type PlaylistUpdatesResponse } from '@audius/sdk'
+import { Id, type PlaylistUpdatesResponse } from '@audius/sdk/services'
 import { call, takeEvery, select, put } from 'typed-redux-saga'
 
 import { playlistUpdateFromSDK, transformAndCleanList } from '~/adapters'

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { useCurrentAccountUser, useHasAccount } from '@audius/common/api'
 import { Status } from '@audius/common/models'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import type {
   LinkingOptions,
   NavigationState,

@@ -13,7 +13,7 @@ import {
   getSDK
 } from '@audius/common/store'
 import { Genre, Nullable } from '@audius/common/utils'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { keccak_256 } from 'js-sha3'
 import { call, put, select } from 'typed-redux-saga'
 

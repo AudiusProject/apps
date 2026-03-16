@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 
 import { AnalyticsEvent, AllTrackingEvents } from '~/models/Analytics'
 import { AudiusBackend } from '~/services/audius-backend'

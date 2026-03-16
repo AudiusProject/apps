@@ -35,7 +35,7 @@ import {
   makeKindId,
   updatePlaylistArtwork
 } from '@audius/common/utils'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { all, call, put, takeEvery, takeLatest } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'

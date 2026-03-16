@@ -1,4 +1,4 @@
-import { Track } from '@audius/sdk'
+import { Track } from '@audius/sdk/services'
 import { Dispatch } from 'redux'
 
 import { ID } from '~/models/Identifiers'

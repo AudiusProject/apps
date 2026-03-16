@@ -1,4 +1,4 @@
-import { GetUserLibraryTracksTypeEnum } from '@audius/sdk'
+import { GetUserLibraryTracksTypeEnum } from '@audius/sdk/services'
 
 import type { Dayjs } from '~/utils/dayjs'
 import { ValueOf } from '~/utils/typeUtils'

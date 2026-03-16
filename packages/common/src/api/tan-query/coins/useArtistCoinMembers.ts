@@ -1,5 +1,5 @@
 import { FixedDecimal } from '@audius/fixed-decimal'
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

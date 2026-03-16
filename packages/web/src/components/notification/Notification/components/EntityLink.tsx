@@ -8,7 +8,7 @@ import {
 } from '@audius/common/models'
 import { Entity, useNotificationModal } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { useNavigate } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'

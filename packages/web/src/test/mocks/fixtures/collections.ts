@@ -1,5 +1,5 @@
 import { SquareSizes } from '@audius/common/models'
-import { Id, developmentConfig } from '@audius/sdk'
+import { developmentConfig, Id } from '@audius/sdk/services'
 
 import { artistUser } from './users'
 

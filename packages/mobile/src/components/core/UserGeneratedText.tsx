@@ -11,8 +11,8 @@ import {
   restrictedHandles,
   squashNewLines
 } from '@audius/common/utils'
-import type { CommentMention } from '@audius/sdk'
-import { HashId, ResolveApi } from '@audius/sdk'
+import { ResolveApi, type CommentMention } from '@audius/sdk/services'
+import { HashId } from '@audius/sdk/services'
 import { css } from '@emotion/native'
 import type { NavigationProp, ParamListBase } from '@react-navigation/native'
 import type { Match } from 'autolinker/dist/es2015'

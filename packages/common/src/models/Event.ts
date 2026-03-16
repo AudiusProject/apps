@@ -1,4 +1,4 @@
-import { Event as EventSDK } from '@audius/sdk'
+import { Event as EventSDK } from '@audius/sdk/services'
 import type { OverrideProperties } from 'type-fest'
 
 import { Nullable } from '../utils/typeUtils'

@@ -1,4 +1,4 @@
-import { AuthorizedApp } from '@audius/sdk'
+import { AuthorizedApp } from '@audius/sdk/services'
 
 export enum AuthorizedAppsPages {
   YOUR_APPS = 'your_apps',

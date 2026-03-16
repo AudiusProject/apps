@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'

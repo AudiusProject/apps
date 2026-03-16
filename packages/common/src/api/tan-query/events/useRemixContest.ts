@@ -1,4 +1,4 @@
-import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk/services'
 import type { OverrideProperties } from 'type-fest'
 
 import { Event } from '~/models/Event'

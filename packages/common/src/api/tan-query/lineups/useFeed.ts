@@ -1,4 +1,4 @@
-import { EntityType, Id, type GetUserFeedFilterEnum } from '@audius/sdk'
+import { Id, type GetUserFeedFilterEnum, EntityType } from '@audius/sdk/services'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

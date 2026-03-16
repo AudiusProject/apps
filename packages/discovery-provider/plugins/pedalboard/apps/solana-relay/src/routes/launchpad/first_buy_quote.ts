@@ -1,4 +1,4 @@
-import { FirstBuyQuoteResponse } from '@audius/sdk'
+import { FirstBuyQuoteResponse } from '@audius/sdk/services'
 import {
   createJupiterApiClient,
   QuoteResponse,

@@ -1,4 +1,4 @@
-import type { PurchaseSplit } from '@audius/sdk'
+import type { PurchaseSplit } from '@audius/sdk/services'
 
 import { Nullable } from '../utils/typeUtils'
 

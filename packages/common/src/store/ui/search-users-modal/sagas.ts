@@ -1,4 +1,4 @@
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { call, put, select, takeLatest } from 'typed-redux-saga'
 
 import { transformAndCleanList, userMetadataFromSDK } from '~/adapters'

@@ -1,4 +1,4 @@
-import type { CoverArt, CoverPhoto, ProfilePicture } from '@audius/sdk'
+import type { CoverArt, CoverPhoto, ProfilePicture } from '@audius/sdk/services'
 
 import {
   CoverArtSizesCids,

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import type { UploadTrackFilesTask } from '@audius/sdk'
+import type { UploadTrackFilesTask } from '@audius/sdk/services'
 
 import { Feature } from '~/models'
 import { uploadActions, ProgressStatus } from '~/store'

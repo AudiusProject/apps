@@ -1,4 +1,4 @@
-import { AudiusWalletClient } from '@audius/sdk'
+import { AudiusWalletClient } from '@audius/sdk/services'
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 import { TwitterUser } from '~/models'

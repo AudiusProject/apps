@@ -1,4 +1,4 @@
-import { ChallengeResponse, UndisbursedChallenge } from '@audius/sdk'
+import { ChallengeResponse, UndisbursedChallenge } from '@audius/sdk/services'
 import snakecaseKeys from 'snakecase-keys'
 
 import {

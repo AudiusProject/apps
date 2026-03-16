@@ -1,4 +1,4 @@
-import { ChatBlast, ChatBlastAudience, OptionalHashId } from '@audius/sdk'
+import { OptionalHashId, ChatBlast, ChatBlastAudience } from '@audius/sdk/services'
 
 import {
   useArtistCoinMembers,

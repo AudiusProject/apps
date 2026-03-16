@@ -1,4 +1,4 @@
-import { EventEventTypeEnum, EventEntityTypeEnum } from '@audius/sdk'
+import { EventEventTypeEnum, EventEntityTypeEnum } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 

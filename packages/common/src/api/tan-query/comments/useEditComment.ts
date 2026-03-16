@@ -1,4 +1,4 @@
-import { EntityType, CommentMention, Id } from '@audius/sdk'
+import { type CommentMention, Id, EntityType } from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 

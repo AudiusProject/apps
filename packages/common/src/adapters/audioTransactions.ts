@@ -1,4 +1,4 @@
-import type { TransactionDetails as SdkTransactionDetails } from '@audius/sdk'
+import type { TransactionDetails as SdkTransactionDetails } from '@audius/sdk/services'
 
 import {
   TransactionDetails,

@@ -1,6 +1,6 @@
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import { matchPath } from 'react-router'
 
 const { TRACK_ID_PAGE, TRACK_PAGE } = route

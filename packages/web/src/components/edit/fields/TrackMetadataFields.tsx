@@ -1,5 +1,5 @@
 import { Flex } from '@audius/harmony'
-import { MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
+import { MAX_DESCRIPTION_LENGTH } from '@audius/sdk/services'
 import { useField } from 'formik'
 
 import { getTrackFieldName } from 'components/edit-track/hooks'

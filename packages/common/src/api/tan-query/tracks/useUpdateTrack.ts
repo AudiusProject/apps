@@ -2,7 +2,7 @@ import {
   type UpdateTrackRequestBody,
   Id,
   type CrossPlatformFile
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useStore } from 'react-redux'
 

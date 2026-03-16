@@ -10,7 +10,7 @@ import {
   initializeAudiusSdk,
   parseBoolean
 } from '../utils.js'
-import { decodeHashId, Genre, Mood, type AudiusSdk } from '@audius/sdk'
+import { decodeHashId, type Genre, type Mood, type AudiusSdkWithServices } from '@audius/sdk/services'
 import { Command, Option } from '@commander-js/extra-typings'
 import { outputFormatOption } from '../common-options.js'
 
@@ -73,7 +73,7 @@ const getStreamConditions = async ({
   userId: string
   streamConditions: any
   price?: string
-  audiusSdk: AudiusSdk
+  audiusSdk: AudiusSdkWithServices
 }) => {
   if (priceString) {
     const price = Number.parseInt(priceString)
@@ -109,7 +109,7 @@ const getDownloadConditions = async ({
   parsedStreamConditions: any
   downloadConditions: any
   downloadPrice?: string
-  audiusSdk: AudiusSdk
+  audiusSdk: AudiusSdkWithServices
 }) => {
   if (streamConditions) {
     return JSON.parse(streamConditions)

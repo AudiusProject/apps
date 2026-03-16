@@ -5,7 +5,7 @@ import {
 import { queryCurrentUserId } from '@audius/common/api'
 import { FavoriteSource } from '@audius/common/models'
 import { collectionsSocialActions, getSDK } from '@audius/common/store'
-import { Id, OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk/services'
 import { takeEvery, put, call } from 'typed-redux-saga'
 
 import { make, track } from 'app/services/analytics'

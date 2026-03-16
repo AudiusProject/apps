@@ -2,7 +2,7 @@ import { useTradeableCoins } from '@audius/common/api'
 import { useArtistCoinMessageHeader } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import { Flex, Text } from '@audius/harmony'
-import { ChatBlastAudience } from '@audius/sdk'
+import { ChatBlastAudience } from '@audius/sdk/services'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 

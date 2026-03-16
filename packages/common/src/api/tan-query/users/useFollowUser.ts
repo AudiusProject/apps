@@ -1,4 +1,4 @@
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { Action } from '@reduxjs/toolkit'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'

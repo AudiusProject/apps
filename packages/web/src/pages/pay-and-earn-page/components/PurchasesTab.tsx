@@ -12,7 +12,7 @@ import {
   Id,
   GetPurchasesSortMethodEnum,
   GetPurchasesSortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { useIsMobile } from 'hooks/useIsMobile'

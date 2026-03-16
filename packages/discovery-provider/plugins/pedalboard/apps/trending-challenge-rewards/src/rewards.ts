@@ -11,7 +11,7 @@ import {
 import { WebClient } from '@slack/web-api'
 import { formatDisbursementTable } from './slack'
 import { discoveryDb } from './utils'
-import { ChallengeId } from '@audius/sdk'
+import { ChallengeId } from '@audius/sdk/services'
 import axios from 'axios'
 
 type Challenge = {

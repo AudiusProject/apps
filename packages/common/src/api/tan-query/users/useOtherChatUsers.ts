@@ -1,4 +1,4 @@
-import { HashId } from '@audius/sdk'
+import { HashId } from '@audius/sdk/services'
 import { useSelector } from 'react-redux'
 
 import { useUsers, useCurrentUserId } from '~/api'

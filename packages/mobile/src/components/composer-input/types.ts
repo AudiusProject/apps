@@ -1,6 +1,6 @@
 import type { LinkEntity } from '@audius/common/hooks'
 import type { ID, UserMetadata } from '@audius/common/models'
-import type { CommentMention, EntityType } from '@audius/sdk'
+import type { CommentMention, EntityType } from '@audius/sdk/services'
 import type { TextInput, TextStyle, ViewStyle } from 'react-native'
 
 import type { StylesProp } from 'app/styles'

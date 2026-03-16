@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useChatBlastAudienceContent } from '@audius/common/hooks'
 import { formatCount } from '@audius/common/utils'
 import { Box, Flex, IconTowerBroadcast, IconUser, Text } from '@audius/harmony'
-import { ChatBlast } from '@audius/sdk'
+import { ChatBlast } from '@audius/sdk/services'
 import cn from 'classnames'
 
 import styles from './ChatListItem.module.css'

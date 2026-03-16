@@ -11,7 +11,7 @@ import {
   LaunchCoinErrorMetadata,
   LaunchCoinResponse
 } from '@audius/common/models'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { useMutation, useQueryClient } from '@tanstack/react-query'

@@ -15,7 +15,7 @@ import {
   squashNewLines
 } from '@audius/common/utils'
 import { Text, TextLinkProps, TextProps } from '@audius/harmony'
-import { ResolveApi } from '@audius/sdk'
+import { ResolveApi } from '@audius/sdk/services'
 import Linkify from 'linkify-react'
 import { IntermediateRepresentation, Opts } from 'linkifyjs'
 import { useAsync } from 'react-use'

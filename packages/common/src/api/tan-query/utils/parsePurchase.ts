@@ -1,4 +1,4 @@
-import { HashId, type Purchase } from '@audius/sdk'
+import { HashId, type Purchase } from '@audius/sdk/services'
 
 import { PurchaseAccess } from '~/models'
 import {

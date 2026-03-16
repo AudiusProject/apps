@@ -2,7 +2,7 @@
 
 import { ethereumRouter } from './typed-routes/ethereum/ethRpc'
 import { solanaRouter } from './typed-routes/solana/solanaRelay'
-import { sdk } from '@audius/sdk'
+import { sdk } from '@audius/sdk/services'
 
 // Import libs before anything else becaues it takes a very long time to load.
 // Once it's imported once, it'll be in the cache and subsequent imports will be ~instant.

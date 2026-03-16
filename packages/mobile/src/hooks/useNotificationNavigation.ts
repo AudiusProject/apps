@@ -44,7 +44,7 @@ import {
   Entity,
   Achievement
 } from '@audius/common/store'
-import { OptionalId } from '@audius/sdk'
+import { OptionalId } from '@audius/sdk/services'
 import { useLinkTo } from '@react-navigation/native'
 
 import { useNavigation } from './useNavigation'

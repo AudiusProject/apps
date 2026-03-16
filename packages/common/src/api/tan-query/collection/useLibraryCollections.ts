@@ -3,7 +3,7 @@ import {
   type GetUserLibraryAlbumsSortDirectionEnum,
   type GetUserLibraryAlbumsSortMethodEnum,
   type GetUserLibraryAlbumsTypeEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

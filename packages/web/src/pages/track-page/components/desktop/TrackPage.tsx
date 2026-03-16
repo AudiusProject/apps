@@ -31,7 +31,7 @@ import {
 } from '@audius/common/store'
 import { formatDate, route, makeUid } from '@audius/common/utils'
 import { Box, Flex } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 

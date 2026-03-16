@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { Command, Option } from '@commander-js/extra-typings'
 
 import { getCurrentUserId, initializeAudiusSdk } from '../utils.js'
-import { ChallengeId, GenerateSpecifierRequest } from '@audius/sdk'
+import { ChallengeId } from '@audius/sdk/services'
 
 export const claimRewardCommand = new Command('claim-reward')
   .description('Claim a challenge reward')
@@ -26,7 +26,7 @@ export const claimRewardCommand = new Command('claim-reward')
       userId,
       contentId,
       referredUserId
-    } as GenerateSpecifierRequest)
+    })
     const res = await audiusSdk.rewards.claimRewards({
       claimRewardsRequest: {
         userId,
@@ -80,6 +80,6 @@ export const rewardSpecifierCommand = new Command('reward-specifier')
       userId,
       contentId,
       referredUserId
-    } as GenerateSpecifierRequest)
+    })
     console.log(chalk.yellow.bold('Specifier:'), specifier)
   })

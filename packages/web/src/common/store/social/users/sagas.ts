@@ -13,7 +13,7 @@ import {
   confirmerActions
 } from '@audius/common/store'
 import { makeKindId, route } from '@audius/common/utils'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { Action } from '@reduxjs/toolkit'
 import { call, takeEvery, put } from 'typed-redux-saga'
 

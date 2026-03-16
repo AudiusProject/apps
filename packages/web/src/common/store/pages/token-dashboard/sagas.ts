@@ -6,7 +6,7 @@ import {
   getContext,
   getSDK
 } from '@audius/common/store'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 import { call, put, takeLatest } from 'typed-redux-saga'
 
 import { waitForRead } from 'utils/sagaHelpers'

@@ -1,4 +1,4 @@
-import type { Related } from '@audius/sdk'
+import type { Related } from '@audius/sdk/services'
 import { QueryClient } from '@tanstack/react-query'
 
 import {

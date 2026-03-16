@@ -5,7 +5,7 @@ import { useCurrentCommentSection } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
 import type { ID, UserMetadata } from '@audius/common/models'
-import type { CommentMention } from '@audius/sdk'
+import type { CommentMention } from '@audius/sdk/services'
 import type { TextInput as RNTextInput } from 'react-native'
 
 import {

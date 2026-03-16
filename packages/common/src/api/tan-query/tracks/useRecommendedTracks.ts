@@ -1,4 +1,4 @@
-import { Id, type GetUserRecommendedTracksRequest } from '@audius/sdk'
+import { Id, type GetUserRecommendedTracksRequest } from '@audius/sdk/services'
 import {
   InfiniteData,
   useInfiniteQuery,

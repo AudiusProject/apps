@@ -1,4 +1,4 @@
-import { NativeFile } from '@audius/sdk'
+import { NativeFile } from '@audius/sdk/services'
 
 import { CollectionValues } from '~/schemas'
 

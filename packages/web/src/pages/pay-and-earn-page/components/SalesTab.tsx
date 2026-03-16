@@ -16,7 +16,7 @@ import {
   Id,
   GetSalesSortMethodEnum,
   GetSalesSortDirectionEnum
-} from '@audius/sdk'
+} from '@audius/sdk/services'
 import { useDispatch } from 'react-redux'
 
 import { ExternalTextLink } from 'components/link'

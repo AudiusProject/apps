@@ -2,7 +2,7 @@ import { ID } from '@audius/common/models'
 import { PROFILE_PAGE_COMMENTS } from '@audius/common/src/utils/route'
 import { ProfilePageTabRoute } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { OptionalHashId } from '@audius/sdk'
+import { OptionalHashId } from '@audius/sdk/services'
 import { matchPath } from 'react-router'
 
 const { USER_ID_PAGE, PROFILE_PAGE, staticRoutes } = route

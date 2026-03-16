@@ -1,4 +1,4 @@
-import { Id, TrackCommentNotificationResponse } from '@audius/sdk'
+import { Id, TrackCommentNotificationResponse } from '@audius/sdk/services'
 import { useQuery } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'

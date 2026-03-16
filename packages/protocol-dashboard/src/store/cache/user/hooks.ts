@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { DashboardWalletUser } from '@audius/sdk'
+import { DashboardWalletUser } from '@audius/sdk/services'
 import { AnyAction } from '@reduxjs/toolkit'
 import BN from 'bn.js'
 import { useDispatch, useSelector } from 'react-redux'

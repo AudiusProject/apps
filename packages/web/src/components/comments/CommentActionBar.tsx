@@ -24,7 +24,7 @@ import {
   Text,
   TextLink
 } from '@audius/harmony'
-import { Id } from '@audius/sdk'
+import { Id } from '@audius/sdk/services'
 
 import { ConfirmationModal } from 'components/confirmation-modal'
 import { ToastContext } from 'components/toast/ToastContext'

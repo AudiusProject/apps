@@ -1,4 +1,4 @@
-import { HashId, type Grant as SdkGrant } from '@audius/sdk'
+import { HashId, type Grant as SdkGrant } from '@audius/sdk/services'
 
 import { Grant } from '~/models/Grant'
 

@@ -1,4 +1,4 @@
-import type { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk/services'
 import { VersionedTransaction } from '@solana/web3.js'
 import { QueryClient } from '@tanstack/react-query'
 import { Location } from 'history'

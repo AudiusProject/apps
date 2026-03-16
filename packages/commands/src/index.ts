@@ -3,7 +3,7 @@
 import { program } from '@commander-js/extra-typings'
 
 import chalk from 'chalk'
-import type { ResponseError } from '@audius/sdk'
+import type { ResponseError } from '@audius/sdk/services'
 import { managerCommand } from './manager/account-managers.js'
 import { developerAppCommand } from './developer-apps/developer-apps.js'
 import { authHeadersCommand } from './misc/auth-headers.js'

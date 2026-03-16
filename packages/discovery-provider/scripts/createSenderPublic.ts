@@ -1,11 +1,11 @@
 import { RewardManagerProgram, Secp256k1Program } from '@audius/spl'
 import { PublicKey, type TransactionInstruction } from '@solana/web3.js'
 import {
-  Configuration,
   SolanaClient,
   SolanaRelay,
-  SolanaRelayWalletAdapter
-} from '@audius/sdk'
+  SolanaRelayWalletAdapter,
+  Configuration
+} from '@audius/sdk/services'
 
 // CHANGE THESE
 const endpoints = [
