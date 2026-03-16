@@ -153,7 +153,7 @@ const parseAndValidate = (search: string): ParsedParams => {
     responseMode !== 'query' &&
     responseMode !== 'fragment'
   ) {
-    error = messages.redirectURIInvalidError
+    error = messages.responseModeInvalidError
   } else if (!appName && !apiKey) {
     error = messages.missingAppNameError
   } else if (scope === 'write') {
