@@ -19,7 +19,7 @@ import {
   Transaction,
   VersionedTransaction
 } from '@solana/web3.js'
-import { getAddress, type Hex } from 'viem'
+import { getAddress } from 'viem'
 
 import { userMetadataToSdk } from '~/adapters/user'
 import { Env } from '~/services/env'
@@ -711,8 +711,7 @@ export const audiusBackend = ({
     if (!ethAddress) return null
 
     try {
-      const checksumWallet = getAddress(ethAddress) as Hex
-      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
+      const checksumWallet = getAddress(ethAddress)      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
         checksumWallet
       ])
       return AUDIO(balance).value
@@ -792,8 +791,7 @@ export const audiusBackend = ({
     if (!address) return null
 
     try {
-      const checksumWallet = getAddress(address) as Hex
-      const ethereum = sdk.services.ethereum
+      const checksumWallet = getAddress(address)      const ethereum = sdk.services.ethereum
       const [balance, stakedBalance, delegatedBalance] = await Promise.all([
         ethereum.audiusToken.read.balanceOf([checksumWallet]),
         ethereum.staking.read.totalStakedFor([checksumWallet]),

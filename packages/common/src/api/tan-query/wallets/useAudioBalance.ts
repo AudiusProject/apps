@@ -8,7 +8,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 import { call, getContext } from 'typed-redux-saga'
-import { getAddress, type Hex } from 'viem'
+import { getAddress } from 'viem'
 
 import {
   getQueryContext,
@@ -58,7 +58,7 @@ const getWalletAudioBalanceQueryFn =
     try {
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
-        const checksumWallet = getAddress(address) as Hex
+        const checksumWallet = getAddress(address)
         const ethereum = sdk.services.ethereum
         const balance = await ethereum.audiusToken.read.balanceOf([
           checksumWallet
