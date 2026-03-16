@@ -302,7 +302,7 @@ const initializeServices = ({
     new EthereumService({
       ...getDefaultEthereumServiceConfig(servicesConfig),
       publicClient: ethPublicClient,
-      ethWalletClient,
+      walletClient: ethWalletClient,
       audiusWalletClient
     })
 
@@ -314,7 +314,7 @@ const initializeServices = ({
     audiusWalletClient,
     ethereum,
     ethPublicClient: ethereum.publicClient,
-    ethWalletClient: ethereum.ethWalletClient,
+    ethWalletClient: ethereum.walletClient,
     claimableTokensClient,
     rewardManagerClient,
     paymentRouterClient,

@@ -56,7 +56,7 @@ const ONE_HOUR_IN_S = 60 * 60
  */
 export class EthereumService {
   public readonly publicClient: PublicClient
-  public readonly ethWalletClient: WalletClient
+  public readonly walletClient: WalletClient
   private readonly audiusWalletClient: AudiusWalletClient
   public readonly audiusToken: GetContractReturnType<
     typeof AudiusToken.abi,
@@ -114,12 +114,12 @@ export class EthereumService {
       getDefaultEthereumServiceConfig(productionConfig)
     )
     this.publicClient = config.publicClient
-    this.ethWalletClient = config.ethWalletClient
+    this.walletClient = config.walletClient
     this.audiusWalletClient = config.audiusWalletClient
 
     const client = {
       public: this.publicClient,
-      wallet: this.ethWalletClient
+      wallet: this.walletClient
     }
     const a = configWithDefaults.addresses
 
@@ -216,7 +216,7 @@ export class EthereumService {
       [owner, spender, value, deadline, Number(v), r, s],
       { account: owner }
     )
-    return this.ethWalletClient.writeContract(request)
+    return this.walletClient.writeContract(request)
   }
 
   /**
@@ -280,6 +280,6 @@ export class EthereumService {
       ],
       { account: from }
     )
-    return this.ethWalletClient.writeContract(request)
+    return this.walletClient.writeContract(request)
   }
 }

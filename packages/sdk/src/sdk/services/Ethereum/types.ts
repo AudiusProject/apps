@@ -21,7 +21,7 @@ export type EthereumServiceConfig = {
   /** viem PublicClient to use for Ethereum reads. */
   publicClient: PublicClient
   /** viem WalletClient to use for Ethereum writes. */
-  ethWalletClient: WalletClient
+  walletClient: WalletClient
   /** Wallet client for typed-data signing. */
   audiusWalletClient: AudiusWalletClient
   addresses?: Partial<EthereumServiceConfigInternal['addresses']>
