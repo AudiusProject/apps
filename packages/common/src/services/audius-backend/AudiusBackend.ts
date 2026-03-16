@@ -712,9 +712,9 @@ export const audiusBackend = ({
 
     try {
       const checksumWallet = getAddress(ethAddress)
-      const balance = await sdk.services.audiusTokenClient.balanceOf({
-        account: checksumWallet
-      })
+      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
+        checksumWallet
+      ])
       return AUDIO(balance).value
     } catch (e) {
       console.error(e)
@@ -788,27 +788,18 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(
-    address: string,
-    sdk: AudiusSdkWithServices
-  ) {
+  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdkWithServices) {
     if (!address) return null
 
     try {
       const checksumWallet = getAddress(address)
-      const [balance, delegatedBalance, stakedBalance] = await Promise.all([
-        sdk.services.audiusTokenClient.balanceOf({
-          account: checksumWallet
-        }),
-        sdk.services.delegateManagerClient.getTotalDelegatorStake({
-          delegatorAddress: checksumWallet
-        }),
-        sdk.services.stakingClient.totalStakedFor({
-          account: checksumWallet
-        })
+      const ethereum = sdk.services.ethereum
+      const [balance, stakedBalance, delegatedBalance] = await Promise.all([
+        ethereum.audiusToken.read.balanceOf([checksumWallet]),
+        ethereum.staking.read.totalStakedFor([checksumWallet]),
+        ethereum.delegateManager.read.getTotalDelegatorStake([checksumWallet])
       ])
-
-      return AUDIO(balance + delegatedBalance + stakedBalance).value
+      return AUDIO(balance + stakedBalance + delegatedBalance).value
     } catch (e) {
       reportError({ error: e as Error })
       console.error(e)

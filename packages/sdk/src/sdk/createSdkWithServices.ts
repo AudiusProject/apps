@@ -49,28 +49,8 @@ import {
   getDefaultEntityManagerConfig
 } from './services/EntityManager'
 import {
-  EthRewardsManagerClient,
-  getDefaultEthRewardsManagerConfig,
-  getDefaultServiceProviderFactoryConfig,
-  getDefaultServiceTypeManagerConfig,
-  ServiceProviderFactoryClient,
-  ServiceTypeManagerClient,
-  AudiusTokenClient,
-  getDefaultAudiusTokenConfig,
-  ClaimsManagerClient,
-  getDefaultClaimsManagerConfig,
-  DelegateManagerClient,
-  getDefaultDelegateManagerConfig,
-  StakingClient,
-  getDefaultStakingConfig,
-  TrustedNotifierManagerClient,
-  getDefaultTrustedNotifierManagerConfig,
-  AudiusWormholeClient,
-  getDefaultWormholeConfig,
-  RegistryClient,
-  getDefaultRegistryConfig,
-  GovernanceClient,
-  getDefaultGovernanceConfig
+  EthereumService,
+  getDefaultEthereumServiceConfig
 } from './services/Ethereum'
 import { Logger } from './services/Logger'
 import { SolanaRelay } from './services/Solana/SolanaRelay'
@@ -183,20 +163,6 @@ const initializeServices = ({
       // Allow undefined apiKey for now, use dummy wallet
       apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
       apiSecret
-    })
-
-  const ethPublicClient =
-    config.services?.ethPublicClient ??
-    createPublicClient({
-      chain: mainnet,
-      transport: http(servicesConfig.ethereum.rpcEndpoint)
-    })
-
-  const ethWalletClient =
-    config.services?.ethWalletClient ??
-    createWalletClient({
-      chain: mainnet,
-      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
   const storageNodeSelector =
@@ -317,86 +283,27 @@ const initializeServices = ({
       solanaClient
     })
 
-  /* Ethereum Contracts */
-  const audiusTokenClient =
-    config.services?.audiusTokenClient ??
-    new AudiusTokenClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultAudiusTokenConfig(servicesConfig)
+  const ethPublicClient =
+    config.services?.ethPublicClient ??
+    createPublicClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
-  const claimsManagerClient =
-    config.services?.claimsManagerClient ??
-    new ClaimsManagerClient({
-      ethPublicClient,
-      ...getDefaultClaimsManagerConfig(servicesConfig)
+  const ethWalletClient =
+    config.services?.ethWalletClient ??
+    createWalletClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
-  const delegateManagerClient =
-    config.services?.delegateManagerClient ??
-    new DelegateManagerClient({
-      ethPublicClient,
-      ...getDefaultDelegateManagerConfig(servicesConfig)
-    })
-
-  const stakingClient =
-    config.services?.stakingClient ??
-    new StakingClient({
-      ethPublicClient,
-      ...getDefaultStakingConfig(servicesConfig)
-    })
-
-  const trustedNotifierManagerClient =
-    config.services?.trustedNotifierManagerClient ??
-    new TrustedNotifierManagerClient({
-      ethPublicClient,
-      ...getDefaultTrustedNotifierManagerConfig(servicesConfig)
-    })
-
-  const audiusWormholeClient =
-    config.services?.audiusWormholeClient ??
-    new AudiusWormholeClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultWormholeConfig(servicesConfig)
-    })
-
-  const registryClient =
-    config.services?.registryClient ??
-    new RegistryClient({
-      ethPublicClient,
-      ...getDefaultRegistryConfig(servicesConfig)
-    })
-
-  const governanceClient =
-    config.services?.governanceClient ??
-    new GovernanceClient({
-      ethPublicClient,
-      ...getDefaultGovernanceConfig(servicesConfig)
-    })
-
-  const serviceTypeManagerClient =
-    config.services?.serviceTypeManagerClient ??
-    new ServiceTypeManagerClient({
-      ethPublicClient,
-      ...getDefaultServiceTypeManagerConfig(servicesConfig)
-    })
-
-  const serviceProviderFactoryClient =
-    config.services?.serviceProviderFactoryClient ??
-    new ServiceProviderFactoryClient({
-      ethPublicClient,
-      ...getDefaultServiceProviderFactoryConfig(servicesConfig)
-    })
-
-  const ethRewardsManagerClient =
-    config.services?.ethRewardsManagerClient ??
-    new EthRewardsManagerClient({
-      ethPublicClient,
-      ...getDefaultEthRewardsManagerConfig(servicesConfig)
+  const ethereum =
+    config.services?.ethereum ??
+    new EthereumService({
+      ...getDefaultEthereumServiceConfig(servicesConfig),
+      publicClient: ethPublicClient,
+      walletClient: ethWalletClient,
+      audiusWalletClient
     })
 
   const services: ServicesContainer = {
@@ -405,6 +312,7 @@ const initializeServices = ({
     entityManager,
     storage,
     audiusWalletClient,
+    ethereum,
     ethPublicClient,
     ethWalletClient,
     claimableTokensClient,
@@ -414,17 +322,6 @@ const initializeServices = ({
     solanaWalletAdapter,
     solanaRelay,
     antiAbuseOracle,
-    audiusTokenClient,
-    claimsManagerClient,
-    delegateManagerClient,
-    stakingClient,
-    trustedNotifierManagerClient,
-    audiusWormholeClient,
-    registryClient,
-    governanceClient,
-    serviceTypeManagerClient,
-    serviceProviderFactoryClient,
-    ethRewardsManagerClient,
     emailEncryptionService,
     archiverService,
     logger

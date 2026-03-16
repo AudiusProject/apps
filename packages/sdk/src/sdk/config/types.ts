@@ -39,9 +39,9 @@ export type SdkServicesConfig = {
       delegateManagerAddress: Hex
       stakingAddress: Hex
       governanceAddress: Hex
-      registryAddress: Hex
       claimsManagerAddress: Hex
       trustedNotifierManagerAddress: Hex
+      registryAddress: Hex
     }
   }
 }

@@ -1,18 +1,16 @@
 import { promises } from 'fs'
 import path from 'path'
 
-import { createPublicClient, http } from 'viem'
+import {
+  EthRewardsManager,
+  ServiceProviderFactory,
+  ServiceTypeManager
+} from '@audius/eth'
+import { range } from 'lodash'
+import { createPublicClient, hexToString, http } from 'viem'
 import { mainnet } from 'viem/chains'
 
 import type { SdkServicesConfig } from '../config/types'
-import {
-  EthRewardsManagerClient,
-  getDefaultEthRewardsManagerConfig,
-  getDefaultServiceProviderFactoryConfig,
-  getDefaultServiceTypeManagerConfig,
-  ServiceProviderFactoryClient,
-  ServiceTypeManagerClient
-} from '../services/Ethereum'
 
 const { writeFile } = promises
 
@@ -60,10 +58,10 @@ const productionConfig: SdkServicesConfig = {
       delegateManagerAddress: '0x4d7968ebfD390D5E7926Cb3587C39eFf2F9FB225',
       stakingAddress: '0xe6D97B2099F142513be7A2a068bE040656Ae4591',
       governanceAddress: '0x4DEcA517D6817B6510798b7328F2314d3003AbAC',
-      registryAddress: '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C',
       claimsManagerAddress: '0x44617F9dCEd9787C3B06a05B35B4C779a2AA1334',
       trustedNotifierManagerAddress:
-        '0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39'
+        '0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39',
+      registryAddress: '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C'
     }
   }
 }
@@ -112,12 +110,19 @@ const developmentConfig: SdkServicesConfig = {
       delegateManagerAddress: '0x',
       stakingAddress: '0x',
       governanceAddress: '0x',
-      registryAddress: '0x',
       claimsManagerAddress: '0x',
-      trustedNotifierManagerAddress: '0x'
+      trustedNotifierManagerAddress: '0x',
+      registryAddress: '0x'
     }
   }
 }
+
+const DISCOVERY_NODE_SERVICE_TYPE =
+  '0x646973636f766572792d6e6f6465000000000000000000000000000000000000' as const
+const CONTENT_NODE_SERVICE_TYPE =
+  '0x636f6e74656e742d6e6f64650000000000000000000000000000000000000000' as const
+const VALIDATOR_SERVICE_TYPE =
+  '0x76616c696461746f720000000000000000000000000000000000000000000000' as const
 
 const generateServicesConfig = async (
   config: SdkServicesConfig
@@ -127,33 +132,54 @@ const generateServicesConfig = async (
     transport: http(config.ethereum.rpcEndpoint)
   })
 
-  const serviceProviderFactory = new ServiceProviderFactoryClient({
-    ethPublicClient,
-    ...getDefaultServiceProviderFactoryConfig(config)
-  })
-  const ethRewardsManager = new EthRewardsManagerClient({
-    ethPublicClient,
-    ...getDefaultEthRewardsManagerConfig(config)
-  })
-  const serviceTypeManager = new ServiceTypeManagerClient({
-    ethPublicClient,
-    ...getDefaultServiceTypeManagerConfig(config)
-  })
+  const spfAddress = config.ethereum.addresses.serviceProviderFactoryAddress
+  const stmAddress = config.ethereum.addresses.serviceTypeManagerAddress
+  const ermAddress = config.ethereum.addresses.ethRewardsManagerAddress
 
-  const validators = await serviceProviderFactory.getValidators()
-  const contentNodes = await serviceProviderFactory.getContentNodes()
+  // Fetch service providers by type
+  const getServiceEndpoints = async (serviceType: `0x${string}`) => {
+    const count = await ethPublicClient.readContract({
+      address: spfAddress,
+      abi: ServiceProviderFactory.abi,
+      functionName: 'getTotalServiceTypeProviders',
+      args: [serviceType]
+    })
+    const list = await Promise.all(
+      range(1, Number(count) + 1).map((i) =>
+        ethPublicClient.readContract({
+          address: spfAddress,
+          abi: ServiceProviderFactory.abi,
+          functionName: 'getServiceEndpointInfo',
+          args: [serviceType, BigInt(i)]
+        })
+      )
+    )
+    return list.filter(([_, endpoint]) => endpoint !== '')
+  }
+
+  const validators = await getServiceEndpoints(VALIDATOR_SERVICE_TYPE)
+  const contentNodes = await getServiceEndpoints(CONTENT_NODE_SERVICE_TYPE)
   const storageNodes = validators.concat(contentNodes)
   if (!storageNodes || storageNodes.length === 0) {
     throw Error('Storage node services not found')
   }
-  const antiAbuseAddresses =
-    await ethRewardsManager.getAntiAbuseOracleAddresses()
+  const antiAbuseAddresses = await ethPublicClient.readContract({
+    address: ermAddress,
+    abi: EthRewardsManager.abi,
+    functionName: 'getAntiAbuseOracleAddresses'
+  })
 
   if (!antiAbuseAddresses || antiAbuseAddresses.length === 0) {
     throw Error('Anti Abuse node services not found')
   }
 
-  const minVersion = await serviceTypeManager.getDiscoveryNodeVersion()
+  const versionHex = await ethPublicClient.readContract({
+    address: stmAddress,
+    abi: ServiceTypeManager.abi,
+    functionName: 'getCurrentVersion',
+    args: [DISCOVERY_NODE_SERVICE_TYPE]
+  })
+  const minVersion = hexToString(versionHex, { size: 32 })
 
   config.network.minVersion = minVersion
   config.network.storageNodes = storageNodes.map(

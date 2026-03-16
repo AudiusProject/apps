@@ -230,6 +230,22 @@ export const productionConfig: SdkServicesConfig = {
         "delegateOwnerWallet": "0xC9721F892BcC8822eb34237E875BE93904f11073"
       },
       {
+        "endpoint": "https://audius-content-13.figment.io",
+        "delegateOwnerWallet": "0x33a2da466B14990E0124383204b06F9196f62d8e"
+      },
+      {
+        "endpoint": "https://audius-content-14.figment.io",
+        "delegateOwnerWallet": "0x817c513C1B702eA0BdD4F8C1204C60372f715006"
+      },
+      {
+        "endpoint": "https://audius-content-12.figment.io",
+        "delegateOwnerWallet": "0x780641e157621621658F118375dc1B36Ea514d46"
+      },
+      {
+        "endpoint": "https://audius-nodes.com",
+        "delegateOwnerWallet": "0xE83699015c8eb793A0678eA7dC398ac58f7928c4"
+      },
+      {
         "endpoint": "https://content.grassfed.network",
         "delegateOwnerWallet": "0x33Ab85445c8A2690B9488e9fB5E6A9849d3a18d3"
       },
@@ -286,10 +302,6 @@ export const productionConfig: SdkServicesConfig = {
         "delegateOwnerWallet": "0xcb23908aa0dCDef762ebEaA38391D8fFC69E6e8F"
       },
       {
-        "endpoint": "https://audius-content-12.figment.io",
-        "delegateOwnerWallet": "0x780641e157621621658F118375dc1B36Ea514d46"
-      },
-      {
         "endpoint": "https://cn0.mainnet.audiusindex.org",
         "delegateOwnerWallet": "0xf9b373E223b73473C59034072263f52aEF60133B"
       },
@@ -304,14 +316,6 @@ export const productionConfig: SdkServicesConfig = {
       {
         "endpoint": "https://cn3.mainnet.audiusindex.org",
         "delegateOwnerWallet": "0x24C4b2cb6eC4c87a03F66723d8750dbe98Fa3e4f"
-      },
-      {
-        "endpoint": "https://audius-content-13.figment.io",
-        "delegateOwnerWallet": "0x33a2da466B14990E0124383204b06F9196f62d8e"
-      },
-      {
-        "endpoint": "https://audius-content-14.figment.io",
-        "delegateOwnerWallet": "0x817c513C1B702eA0BdD4F8C1204C60372f715006"
       },
       {
         "endpoint": "https://cn4.mainnet.audiusindex.org",
@@ -358,9 +362,9 @@ export const productionConfig: SdkServicesConfig = {
       "delegateManagerAddress": "0x4d7968ebfD390D5E7926Cb3587C39eFf2F9FB225",
       "stakingAddress": "0xe6D97B2099F142513be7A2a068bE040656Ae4591",
       "governanceAddress": "0x4DEcA517D6817B6510798b7328F2314d3003AbAC",
-      "registryAddress": "0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C",
       "claimsManagerAddress": "0x44617F9dCEd9787C3B06a05B35B4C779a2AA1334",
-      "trustedNotifierManagerAddress": "0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39"
+      "trustedNotifierManagerAddress": "0x6f08105c8CEef2BC5653640fcdbBE1e7bb519D39",
+      "registryAddress": "0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C"
     }
   }
 }

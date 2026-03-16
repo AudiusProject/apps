@@ -50,9 +50,9 @@ export const developmentConfig: SdkServicesConfig = {
       "delegateManagerAddress": "0x",
       "stakingAddress": "0x",
       "governanceAddress": "0x",
-      "registryAddress": "0x",
       "claimsManagerAddress": "0x",
-      "trustedNotifierManagerAddress": "0x"
+      "trustedNotifierManagerAddress": "0x",
+      "registryAddress": "0x"
     }
   }
 }
