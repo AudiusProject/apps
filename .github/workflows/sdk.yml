@@ -106,7 +106,7 @@ jobs:
           npm ci --prefer-offline || npm install --prefer-offline
 
       - name: Typecheck
-        run: npx tsc --project packages/sdk/tsconfig.json --noEmit
+        run: npx turbo run typecheck --filter=@audius/sdk
 
   sdk-test:
     name: SDK Tests
