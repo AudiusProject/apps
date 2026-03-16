@@ -1,9 +1,0 @@
-{
-  "extends": "@tsconfig/node14/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "build",
-    "jsx": "react",
-    "isolatedModules": true,
-    "strict": false
-  }
-}

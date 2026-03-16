@@ -15,32 +15,6 @@ services:
     profiles:
       - discovery
 
-  discovery-provider-notifications:
-    build:
-      context: ${PROJECT_ROOT}/packages/discovery-provider/plugins/notifications
-      args:
-        git_sha: '${GIT_COMMIT}'
-    environment:
-      AUDIUS_REDIS_URL: 'redis://discovery-provider-redis:6379/00'
-      DN_DB_URL: 'postgresql://postgres:postgres@db:5432/discovery_provider_1'
-      IDENTITY_DB_URL: 'postgresql://postgres:postgres@db:5432/identity_service'
-    volumes:
-      - ${PROJECT_ROOT}/packages/discovery-provider/plugins/notifications:/notifications
-      - /notifications/node_modules
-    depends_on:
-      comms:
-        condition: service_completed_successfully
-      discovery-provider:
-        condition: service_healthy
-      identity-service:
-        condition: service_healthy
-      identity-service-redis:
-        condition: service_healthy
-    deploy:
-      mode: global
-    profiles:
-      - notifications
-
   discovery-provider-openresty:
     build:
       context: ${PROJECT_ROOT}/packages/discovery-provider

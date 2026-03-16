@@ -137,12 +137,6 @@ services:
       service: discovery-provider-redis
     <<: *common
 
-  discovery-provider-notifications:
-    extends:
-      file: docker-compose.discovery.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: discovery-provider-notifications
-    <<: *common
-
   discovery-provider-elasticsearch:
     extends:
       file: docker-compose.discovery.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml

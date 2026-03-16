@@ -1,9 +1,0 @@
-version: '3'
-services:
-  notifications:
-    build:
-      context: '.'
-      # dockerfile: Dockerfile.test
-
-volumes:
-  postgres_data_network_monitoring_1:

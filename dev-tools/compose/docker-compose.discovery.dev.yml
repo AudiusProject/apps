@@ -7,11 +7,6 @@ services:
       file: docker-compose.discovery.prod.yml
       service: discovery-provider-redis
 
-  discovery-provider-notifications:
-    extends:
-      file: docker-compose.discovery.prod.yml
-      service: discovery-provider-notifications
-
   comms:
     extends:
       file: docker-compose.discovery.prod.yml
