@@ -21,7 +21,7 @@ A serverless Audius track upload example using SDK + OAuth PKCE entirely in the 
 In your developer app settings at **audius.co/settings → Developer Apps**, add the following redirect URI:
 
 ```
-http://localhost:5177
+http://localhost:5177/
 ```
 
 This is required so the OAuth server will accept the callback URL when the popup redirects back to this app. For production deployments, register your deployed URL instead (e.g. `https://yourapp.com`).
