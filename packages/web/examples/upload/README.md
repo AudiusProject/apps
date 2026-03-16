@@ -24,7 +24,7 @@ In your developer app settings at **audius.co/settings → Developer Apps**, add
 http://localhost:5177/
 ```
 
-This is required so the OAuth server will accept the callback URL when the popup redirects back to this app. For production deployments, register your deployed URL instead (e.g. `https://yourapp.com`).
+This is recommended so the OAuth server can validate the callback URL when the popup redirects back to this app. For production deployments, register your deployed URL instead (e.g. `https://yourapp.com`).
 
 ### 2. Configure and run
 
