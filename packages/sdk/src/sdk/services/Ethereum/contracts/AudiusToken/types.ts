@@ -1,10 +1,16 @@
-import type { Account, Hex } from 'viem'
+import type { Account, Hex, PublicClient, Transport, WalletClient } from 'viem'
+import type { mainnet } from 'viem/chains'
 import { z } from 'zod'
 
 import { EthAddressSchema } from '../../../../types/EthAddress'
-import { GasFeeSchema, type EthereumClientConfig } from '../types'
+import type { AudiusWalletClient } from '../../../AudiusWalletClient'
+import { GasFeeSchema } from '../types'
 
-export type AudiusTokenConfig = AudiusTokenConfigInternal & EthereumClientConfig
+export type AudiusTokenConfig = AudiusTokenConfigInternal & {
+  audiusWalletClient: AudiusWalletClient
+  ethPublicClient: PublicClient<Transport, typeof mainnet>
+  ethWalletClient: WalletClient<Transport, typeof mainnet>
+}
 
 export type AudiusTokenConfigInternal = {
   address: Hex

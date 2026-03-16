@@ -1,84 +1,15 @@
-import type { PublicClient } from 'viem'
-
 import { abi } from './abi'
-import { SERVICE_TYPE_MANAGER_CONTRACT_ADDRESS } from './constants'
 
-export class ServiceTypeManager {
-  client: PublicClient
-  address: `0x${string}`
+/** bytes32-encoded "validator" service type for use with ServiceTypeManager and ServiceProviderFactory. */
+export const VALIDATOR_SERVICE_TYPE =
+  '0x76616c696461746f720000000000000000000000000000000000000000000000' as const
 
-  constructor(
-    client: PublicClient,
-    { address }: { address?: `0x${string}` } = {}
-  ) {
-    this.client = client
-    this.address = address ?? SERVICE_TYPE_MANAGER_CONTRACT_ADDRESS
-  }
-
-  getGovernanceAddress = () =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getGovernanceAddress'
-    })
-
-  getServiceTypeInfo = ({ serviceType }: { serviceType: `0x${string}` }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getServiceTypeInfo',
-      args: [serviceType]
-    })
-
-  getValidServiceTypes = () =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getValidServiceTypes'
-    })
-
-  serviceTypeIsValid = ({ serviceType }: { serviceType: `0x${string}` }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'serviceTypeIsValid',
-      args: [serviceType]
-    })
-
-  getVersion = ({
-    serviceType,
-    versionIndex
-  }: {
-    serviceType: `0x${string}`
-    versionIndex: bigint
-  }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getVersion',
-      args: [serviceType, versionIndex]
-    })
-
-  getCurrentVersion = ({ serviceType }: { serviceType: `0x${string}` }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getCurrentVersion',
-      args: [serviceType]
-    })
-
-  getNumberOfVersions = ({ serviceType }: { serviceType: `0x${string}` }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getNumberOfVersions',
-      args: [serviceType]
-    })
-
-  // TODO - writes
-  setGovernanceAddress = null
-  addServiceType = null
-  removeServiceType = null
-  setServiceVersion = null
-  serviceVersionIsValid = null
+/**
+ * Manages the registry of valid service types (e.g. "validator")
+ * and their versioning. Each service type has min/max stake
+ * bounds. Only governance can add/remove service types or publish new versions.
+ */
+export const ServiceTypeManager = {
+  abi,
+  address: '0x9EfB0f4F38aFbb4b0984D00C126E97E21b8417C5' as const
 }

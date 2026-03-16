@@ -1,10 +1,9 @@
 import { SdkServicesConfig } from '../../../../config/types'
-import { getDefaultEthereumClientConfig } from '../getDefaultConfig'
 
-import type { GovernanceConfig } from './types'
+import type { GovernanceConfigInternal } from './types'
 
 export const getDefaultGovernanceConfig = (config: {
   ethereum: SdkServicesConfig['ethereum']
-}): GovernanceConfig => ({
-  ...getDefaultEthereumClientConfig(config)
+}): GovernanceConfigInternal => ({
+  address: config.ethereum.addresses.governanceAddress
 })

@@ -1,15 +1,18 @@
-import type { TypedData } from 'viem'
-
 import { abi } from './abi'
 
-export type AudiusTokenTypes = typeof AudiusToken.types
-export class AudiusToken {
-  public static readonly abi = abi
-
-  public static readonly address =
-    '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998' as const
-
-  public static readonly types = {
+/**
+ * The AUDIO ERC-20 token contract.
+ * Initial supply of 1 billion tokens (18 decimals).
+ * Supports EIP-2612 gasless `permit()` approvals.
+ */
+export const AudiusToken = {
+  abi,
+  address: '0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998' as const,
+  domain: {
+    name: 'Audius',
+    version: '1'
+  } as const,
+  types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
       { name: 'version', type: 'string' },
@@ -23,5 +26,7 @@ export class AudiusToken {
       { name: 'nonce', type: 'uint256' },
       { name: 'deadline', type: 'uint256' }
     ]
-  } as const satisfies TypedData
+  } as const
 }
+
+export type AudiusTokenTypes = typeof AudiusToken.types

@@ -1,40 +1,43 @@
 import { ServiceProviderFactory } from '@audius/eth'
 import { range } from 'lodash'
-
-import { EthereumContract } from '../EthereumContract'
+import type { Hex, PublicClient } from 'viem'
 
 import type { ServiceProviderFactoryConfig } from './types'
 
-export class ServiceProviderFactoryClient extends EthereumContract {
+export class ServiceProviderFactoryClient {
+  public readonly contractAddress: Hex
+
   discoveryNodeServiceType: `0x${string}`
   contentNodeServiceType: `0x${string}`
   validatorServiceType: `0x${string}`
-  contract: ServiceProviderFactory
+
+  private readonly publicClient: PublicClient
 
   constructor(config: ServiceProviderFactoryConfig) {
-    super(config)
+    this.contractAddress = config.address
+    this.publicClient = config.ethPublicClient
 
     this.discoveryNodeServiceType = config.discoveryNodeServiceType
     this.contentNodeServiceType = config.contentNodeServiceType
     this.validatorServiceType = config.validatorServiceType
-
-    this.contract = new ServiceProviderFactory(this.client, {
-      address: config.addresses.serviceProviderFactoryAddress
-    })
   }
 
   getDiscoveryNodes = async () => {
-    const count = await this.contract.getTotalServiceTypeProviders({
-      serviceType: this.discoveryNodeServiceType
+    const count = await this.publicClient.readContract({
+      address: this.contractAddress,
+      abi: ServiceProviderFactory.abi,
+      functionName: 'getTotalServiceTypeProviders',
+      args: [this.discoveryNodeServiceType]
     })
 
     const list = await Promise.all(
-      range(1, Number(count) + 1).map(
-        async (i) =>
-          await this.contract.getServiceEndpointInfo({
-            serviceType: this.discoveryNodeServiceType,
-            index: BigInt(i)
-          })
+      range(1, Number(count) + 1).map(async (i) =>
+        this.publicClient.readContract({
+          address: this.contractAddress,
+          abi: ServiceProviderFactory.abi,
+          functionName: 'getServiceEndpointInfo',
+          args: [this.discoveryNodeServiceType, BigInt(i)]
+        })
       )
     )
     // Remove empty endpoints
@@ -42,17 +45,21 @@ export class ServiceProviderFactoryClient extends EthereumContract {
   }
 
   getContentNodes = async () => {
-    const count = await this.contract.getTotalServiceTypeProviders({
-      serviceType: this.contentNodeServiceType
+    const count = await this.publicClient.readContract({
+      address: this.contractAddress,
+      abi: ServiceProviderFactory.abi,
+      functionName: 'getTotalServiceTypeProviders',
+      args: [this.contentNodeServiceType]
     })
 
     const list = await Promise.all(
-      range(1, Number(count) + 1).map(
-        async (i) =>
-          await this.contract.getServiceEndpointInfo({
-            serviceType: this.contentNodeServiceType,
-            index: BigInt(i)
-          })
+      range(1, Number(count) + 1).map(async (i) =>
+        this.publicClient.readContract({
+          address: this.contractAddress,
+          abi: ServiceProviderFactory.abi,
+          functionName: 'getServiceEndpointInfo',
+          args: [this.contentNodeServiceType, BigInt(i)]
+        })
       )
     )
     // Remove empty endpoints
@@ -60,17 +67,21 @@ export class ServiceProviderFactoryClient extends EthereumContract {
   }
 
   getValidators = async () => {
-    const count = await this.contract.getTotalServiceTypeProviders({
-      serviceType: this.validatorServiceType
+    const count = await this.publicClient.readContract({
+      address: this.contractAddress,
+      abi: ServiceProviderFactory.abi,
+      functionName: 'getTotalServiceTypeProviders',
+      args: [this.validatorServiceType]
     })
 
     const list = await Promise.all(
-      range(1, Number(count) + 1).map(
-        async (i) =>
-          await this.contract.getServiceEndpointInfo({
-            serviceType: this.validatorServiceType,
-            index: BigInt(i)
-          })
+      range(1, Number(count) + 1).map(async (i) =>
+        this.publicClient.readContract({
+          address: this.contractAddress,
+          abi: ServiceProviderFactory.abi,
+          functionName: 'getServiceEndpointInfo',
+          args: [this.validatorServiceType, BigInt(i)]
+        })
       )
     )
     // Remove empty endpoints

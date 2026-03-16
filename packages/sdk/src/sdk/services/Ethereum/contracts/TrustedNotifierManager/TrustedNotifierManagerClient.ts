@@ -1,15 +1,14 @@
-import { TrustedNotifierManager } from '@audius/eth'
-
-import { EthereumContract } from '../EthereumContract'
+import type { Hex, PublicClient } from 'viem'
 
 import type { TrustedNotifierManagerConfig } from './types'
 
-export class TrustedNotifierManagerClient extends EthereumContract {
-  contract: TrustedNotifierManager
+export class TrustedNotifierManagerClient {
+  public readonly contractAddress: Hex
+
+  public readonly publicClient: PublicClient
 
   constructor(config: TrustedNotifierManagerConfig) {
-    super(config)
-
-    this.contract = new TrustedNotifierManager(this.client)
+    this.contractAddress = config.address
+    this.publicClient = config.ethPublicClient
   }
 }

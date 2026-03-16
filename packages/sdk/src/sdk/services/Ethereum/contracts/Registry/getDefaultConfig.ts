@@ -1,10 +1,9 @@
 import { SdkServicesConfig } from '../../../../config/types'
-import { getDefaultEthereumClientConfig } from '../getDefaultConfig'
 
-import type { RegistryConfig } from './types'
+import type { RegistryConfigInternal } from './types'
 
 export const getDefaultRegistryConfig = (config: {
   ethereum: SdkServicesConfig['ethereum']
-}): RegistryConfig => ({
-  ...getDefaultEthereumClientConfig(config)
+}): RegistryConfigInternal => ({
+  address: config.ethereum.addresses.registryAddress
 })

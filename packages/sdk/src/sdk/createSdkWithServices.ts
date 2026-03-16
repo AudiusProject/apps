@@ -330,30 +330,28 @@ const initializeServices = ({
   const claimsManagerClient =
     config.services?.claimsManagerClient ??
     new ClaimsManagerClient({
+      ethPublicClient,
       ...getDefaultClaimsManagerConfig(servicesConfig)
     })
 
   const delegateManagerClient =
     config.services?.delegateManagerClient ??
     new DelegateManagerClient({
-      audiusWalletClient,
       ethPublicClient,
-      ethWalletClient,
       ...getDefaultDelegateManagerConfig(servicesConfig)
     })
 
   const stakingClient =
     config.services?.stakingClient ??
     new StakingClient({
-      audiusWalletClient,
       ethPublicClient,
-      ethWalletClient,
       ...getDefaultStakingConfig(servicesConfig)
     })
 
   const trustedNotifierManagerClient =
     config.services?.trustedNotifierManagerClient ??
     new TrustedNotifierManagerClient({
+      ethPublicClient,
       ...getDefaultTrustedNotifierManagerConfig(servicesConfig)
     })
 
@@ -369,30 +367,35 @@ const initializeServices = ({
   const registryClient =
     config.services?.registryClient ??
     new RegistryClient({
+      ethPublicClient,
       ...getDefaultRegistryConfig(servicesConfig)
     })
 
   const governanceClient =
     config.services?.governanceClient ??
     new GovernanceClient({
+      ethPublicClient,
       ...getDefaultGovernanceConfig(servicesConfig)
     })
 
   const serviceTypeManagerClient =
     config.services?.serviceTypeManagerClient ??
     new ServiceTypeManagerClient({
+      ethPublicClient,
       ...getDefaultServiceTypeManagerConfig(servicesConfig)
     })
 
   const serviceProviderFactoryClient =
     config.services?.serviceProviderFactoryClient ??
     new ServiceProviderFactoryClient({
+      ethPublicClient,
       ...getDefaultServiceProviderFactoryConfig(servicesConfig)
     })
 
   const ethRewardsManagerClient =
     config.services?.ethRewardsManagerClient ??
     new EthRewardsManagerClient({
+      ethPublicClient,
       ...getDefaultEthRewardsManagerConfig(servicesConfig)
     })
 

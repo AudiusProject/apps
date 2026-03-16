@@ -1,15 +1,14 @@
-import { ClaimsManager } from '@audius/eth'
-
-import { EthereumContract } from '../EthereumContract'
+import type { Hex, PublicClient } from 'viem'
 
 import type { ClaimsManagerConfig } from './types'
 
-export class ClaimsManagerClient extends EthereumContract {
-  contract: ClaimsManager
+export class ClaimsManagerClient {
+  public readonly contractAddress: Hex
+
+  public readonly publicClient: PublicClient
 
   constructor(config: ClaimsManagerConfig) {
-    super(config)
-
-    this.contract = new ClaimsManager(this.client)
+    this.contractAddress = config.address
+    this.publicClient = config.ethPublicClient
   }
 }
