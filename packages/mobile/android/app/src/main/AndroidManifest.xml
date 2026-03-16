@@ -54,6 +54,8 @@
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
 
+            <!-- Deeplink intent filter for audius.co and redirect.audius.co -->
+            <!-- Note: /oauth routes are black-listed via separate intent filter below -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -62,6 +64,18 @@
                 <data android:scheme="http" />
                 <data android:host="redirect.audius.co" />
                 <data android:host="audius.co" />
+            </intent-filter>
+            <!-- Intent filter for oauth routes with autoVerify=false to black-list from App Links verification -->
+            <!-- These routes will still reach MainActivity which redirects them to browser -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="redirect.audius.co" />
+                <data android:host="audius.co" />
+                <data android:pathPrefix="/oauth" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
