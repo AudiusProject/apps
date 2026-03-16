@@ -1,5 +1,6 @@
-import { type Hex } from 'viem'
+import { createPublicClient, createWalletClient, http, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { mainnet } from 'viem/chains'
 
 import { ResolveApi } from './api/ResolveApi'
 import { AlbumsApi } from './api/albums/AlbumsApi'
@@ -47,6 +48,10 @@ import {
   EntityManagerClient,
   getDefaultEntityManagerConfig
 } from './services/EntityManager'
+import {
+  EthereumService,
+  getDefaultEthereumServiceConfig
+} from './services/Ethereum'
 import { Logger } from './services/Logger'
 import { SolanaRelay } from './services/Solana/SolanaRelay'
 import { SolanaRelayWalletAdapter } from './services/Solana/SolanaRelayWalletAdapter'
@@ -278,12 +283,28 @@ const initializeServices = ({
       solanaClient
     })
 
+  const ethereum =
+    config.services?.ethereum ??
+    new EthereumService({
+      ...getDefaultEthereumServiceConfig(servicesConfig),
+      publicClient: createPublicClient({
+        chain: mainnet,
+        transport: http(servicesConfig.ethereum.rpcEndpoint)
+      }),
+      ethWalletClient: createWalletClient({
+        chain: mainnet,
+        transport: http(servicesConfig.ethereum.rpcEndpoint)
+      }),
+      audiusWalletClient
+    })
+
   const services: ServicesContainer = {
     storageNodeSelector,
     antiAbuseOracleSelector,
     entityManager,
     storage,
     audiusWalletClient,
+    ethereum,
     claimableTokensClient,
     rewardManagerClient,
     paymentRouterClient,

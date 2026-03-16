@@ -23,11 +23,6 @@ import { getAddress, type Hex } from 'viem'
 
 import { userMetadataToSdk } from '~/adapters/user'
 import { Env } from '~/services/env'
-import {
-  createEthPublicClient,
-  getAudioBalance,
-  getFullAudioBalance
-} from '~/services/ethereum/ethereum'
 import dayjs from '~/utils/dayjs'
 
 import { ID, ComputedUserProperties, WriteableUserMetadata } from '../../models'
@@ -707,16 +702,19 @@ export const audiusBackend = ({
    * @returns {Promise<AudioWei | null>} balance or null if failed to fetch balance
    */
   async function getBalance({
-    ethAddress
+    ethAddress,
+    sdk
   }: {
     ethAddress: string
+    sdk: AudiusSdk
   }): Promise<AudioWei | null> {
     if (!ethAddress) return null
 
     try {
       const checksumWallet = getAddress(ethAddress) as Hex
-      const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
-      const balance = await getAudioBalance(ethClient, checksumWallet)
+      const balance = await sdk.services.ethereum.audiusToken.read.balanceOf([
+        checksumWallet
+      ])
       return AUDIO(balance).value
     } catch (e) {
       console.error(e)
@@ -790,14 +788,18 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(address: string) {
+  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdk) {
     if (!address) return null
 
     try {
       const checksumWallet = getAddress(address) as Hex
-      const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
-      const fullBalance = await getFullAudioBalance(ethClient, checksumWallet)
-      return AUDIO(fullBalance).value
+      const ethereum = sdk.services.ethereum
+      const [balance, stakedBalance, delegatedBalance] = await Promise.all([
+        ethereum.audiusToken.read.balanceOf([checksumWallet]),
+        ethereum.staking.read.totalStakedFor([checksumWallet]),
+        ethereum.delegateManager.read.getTotalDelegatorStake([checksumWallet])
+      ])
+      return AUDIO(balance + stakedBalance + delegatedBalance).value
     } catch (e) {
       reportError({ error: e as Error })
       console.error(e)

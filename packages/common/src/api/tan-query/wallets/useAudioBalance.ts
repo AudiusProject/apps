@@ -17,11 +17,6 @@ import {
 } from '~/api/tan-query/utils/QueryContext'
 import { Chain, ID } from '~/models'
 import { Feature } from '~/models/ErrorReporting'
-import {
-  createEthPublicClient,
-  getAudioBalance,
-  getFullAudioBalance
-} from '~/services/ethereum/ethereum'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -59,17 +54,23 @@ const getWalletAudioBalanceQueryFn =
     ReturnType<typeof getWalletAudioBalanceQueryKey>
   >) => {
     const [_ignored, chain, address, { includeStaked }] = queryKey
-    const { audiusSdk, audiusBackend, reportToSentry, env } = context
+    const { audiusSdk, audiusBackend, reportToSentry } = context
     try {
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
         const checksumWallet = getAddress(address) as Hex
-        const ethClient = createEthPublicClient(env.ETH_PROVIDER_URL)
-        const balance = await getAudioBalance(ethClient, checksumWallet)
+        const ethereum = sdk.services.ethereum
+        const balance = await ethereum.audiusToken.read.balanceOf([
+          checksumWallet
+        ])
         if (!includeStaked) {
           return AUDIO(balance).value
         }
-        const fullBalance = await getFullAudioBalance(ethClient, checksumWallet)
+        const [stakedBalance, delegatedBalance] = await Promise.all([
+          ethereum.staking.read.totalStakedFor([checksumWallet]),
+          ethereum.delegateManager.read.getTotalDelegatorStake([checksumWallet])
+        ])
+        const fullBalance = balance + stakedBalance + delegatedBalance
         return AUDIO(fullBalance).value
       } else {
         const wAudioSolBalance = await audiusBackend.getAddressWAudioBalance({

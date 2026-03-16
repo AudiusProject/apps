@@ -6,6 +6,7 @@ import type { ArchiverService } from './services/Archiver'
 import type { AudiusWalletClient } from './services/AudiusWalletClient'
 import { EmailEncryptionService } from './services/Encryption'
 import type { EntityManagerService } from './services/EntityManager'
+import type { EthereumService } from './services/Ethereum'
 import type { LoggerService } from './services/Logger'
 import type {
   PaymentRouterClient,
@@ -17,6 +18,7 @@ import { RewardManagerClient } from './services/Solana/programs/RewardManagerCli
 import type { SolanaClient } from './services/Solana/programs/SolanaClient'
 import type { StorageService } from './services/Storage'
 import type { StorageNodeSelectorService } from './services/StorageNodeSelector'
+
 export type ServicesContainer = {
   /**
    * Service used to choose storage node
@@ -92,6 +94,13 @@ export type ServicesContainer = {
    * Service used to create and download track archives
    */
   archiverService?: ArchiverService
+
+  /**
+   * Service for interacting with Audius Ethereum contracts.
+   * Exposes viem contract instances for all protocol contracts,
+   * with optional per-environment address overrides.
+   */
+  ethereum: EthereumService
 }
 /**
  * SDK configuration schema that requires api key only (for read-only access with higher rate limits)

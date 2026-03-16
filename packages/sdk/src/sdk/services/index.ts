@@ -1,4 +1,5 @@
 export * from './AntiAbuseOracle'
+export * from './Ethereum'
 export * from './AntiAbuseOracleSelector'
 export * from './Archiver'
 export * from './AudiusWalletClient'

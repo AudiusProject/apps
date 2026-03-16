@@ -1,11 +1,12 @@
 import {
   AudiusSdkWithServices,
-  createSdkWithServices,
+  sdk,
   Configuration,
   SolanaRelay,
-  ArchiverService
+  ArchiverService,
+  EthereumService
 } from '@audius/sdk'
-import { createWalletClient, custom, RpcRequestError } from 'viem'
+import { createPublicClient, createWalletClient, custom, http, RpcRequestError } from 'viem'
 import { mainnet } from 'viem/chains'
 import { getHttpRpcClient } from 'viem/utils'
 
@@ -89,14 +90,24 @@ export const initSdk = async () => {
       }
     })
   })
-  const audiusSdk = createSdkWithServices({
+
+  const ethereum = new EthereumService({
+    publicClient: createPublicClient({
+      chain: mainnet,
+      transport: http(env.ETH_PROVIDER_URL)
+    }),
+    ethWalletClient,
+    audiusWalletClient
+  })
+
+  const audiusSdk = sdk({
     appName: env.APP_NAME,
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,
     services: {
       solanaRelay,
       audiusWalletClient,
-      ethWalletClient,
+      ethereum,
       archiverService
     }
   })
