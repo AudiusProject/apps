@@ -29,7 +29,9 @@ export const sdk = (config: SdkConfig): AudiusSdk => {
   const defaultOpenUrl = async (url: string) => {
     let WebBrowser: any
     try {
-      WebBrowser = await import('expo-web-browser')
+      // Use require() instead of dynamic import() so Metro can resolve the
+      // module statically via extraNodeModules / resolveRequest at bundle time.
+      WebBrowser = require('expo-web-browser')
     } catch (error) {
       const message =
         'Failed to load "expo-web-browser". Please add "expo-web-browser" to your project dependencies to enable mobile login.' +

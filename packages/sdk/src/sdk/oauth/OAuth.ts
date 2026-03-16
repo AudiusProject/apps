@@ -451,6 +451,17 @@ export class OAuth {
       queryParams.get('origin') ?? hashParams.get('origin') ?? parsed.origin
 
     if (!code || !state) {
+      // The server may redirect back with an error instead of a code
+      // (e.g. access_denied when the user cancels on the consent page).
+      // Settle the login promise so callers are not left hanging.
+      const errorCode = queryParams.get('error') ?? hashParams.get('error')
+      if (errorCode) {
+        const errorDesc =
+          queryParams.get('error_description') ??
+          hashParams.get('error_description') ??
+          errorCode
+        this._settleLogin(new Error(errorDesc))
+      }
       return
     }
 
