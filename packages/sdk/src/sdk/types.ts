@@ -104,14 +104,12 @@ export type ServicesContainer = {
   ethereum: EthereumService
 
   /**
-   * viem PublicClient for Ethereum reads. Sourced from the ethereum service,
-   * or overridden via services injection.
+   * viem PublicClient for Ethereum reads.
    */
   ethPublicClient: PublicClient
 
   /**
-   * viem WalletClient for Ethereum writes. Sourced from the ethereum service,
-   * or overridden via services injection (e.g. to use an identity relay).
+   * viem WalletClient for Ethereum writes.
    */
   ethWalletClient: WalletClient
 }
