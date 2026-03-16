@@ -141,7 +141,7 @@ export const outputConfigs = {
    * - Makes external ES modules internal to prevent issues w/ using require()
    */
   sdkBrowserConfigCjs: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.ts',
     output: [
       {
         dir: 'dist',
@@ -180,7 +180,7 @@ export const outputConfigs = {
    * - Includes deps that are ignored or polyfilled for browser
    */
   sdkBrowserConfigEs: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.ts',
     output: [
       {
         dir: 'dist',
