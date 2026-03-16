@@ -43,7 +43,7 @@ export const getWalletAudioBalanceQueryKey = ({
 
 type FetchAudioBalanceContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'audiusBackend' | 'reportToSentry' | 'env'
+  'audiusSdk' | 'audiusBackend' | 'reportToSentry'
 >
 
 const getWalletAudioBalanceQueryFn =

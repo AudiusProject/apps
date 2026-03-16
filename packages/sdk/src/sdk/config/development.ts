@@ -43,7 +43,7 @@ export const developmentConfig: SdkServicesConfig = {
       ethRewardsManagerAddress: '0x',
       serviceProviderFactoryAddress: '0x',
       serviceTypeManagerAddress: '0x',
-      audiusTokenAddress: '0x',
+      audiusTokenAddress: '0xdcB2fC9469808630DD0744b0adf97C0003fC29B2',
       audiusWormholeAddress: '0x',
       delegateManagerAddress: '0x',
       stakingAddress: '0x',
