@@ -68,6 +68,10 @@ const stickerLoadedEventEmitter = new EventEmitter()
 const cancelRequestedEventEmitter = new EventEmitter()
 const CANCEL_REQUESTED_EVENT = 'cancel' as const
 const STICKER_LOADED_EVENT = 'loaded' as const
+const URI_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//
+
+const ensureFileUri = (uri: string) =>
+  URI_SCHEME_REGEX.test(uri) ? uri : `file://${uri}`
 
 const START_EVENT_NAMES_MAP = {
   instagram: EventNames.SHARE_TO_IG_STORY,
@@ -249,7 +253,8 @@ export const useShareToStory = ({
     async (videoUri: string, stickerUri: string) => {
       const shareOptions: ShareSingleOptions = {
         backgroundVideo: videoUri,
-        stickerImage: stickerUri,
+        // iOS Instagram Stories requires a file:// URL for local sticker media.
+        stickerImage: Platform.OS === 'ios' ? ensureFileUri(stickerUri) : stickerUri,
         attributionURL: env.AUDIUS_URL,
         social: Social.InstagramStories,
         appId: env.INSTAGRAM_APP_ID
@@ -470,7 +475,7 @@ export const useShareToStory = ({
           } else if (platform === 'snapchat') {
             await pasteToSnapchatApp(
               videoUri,
-              `file://${stickerUri}`,
+              ensureFileUri(stickerUri),
               encodeURI(getTrackRoute(content.track, true))
             )
           } else if (platform === 'tiktok') {
