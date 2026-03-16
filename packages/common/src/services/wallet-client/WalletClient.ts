@@ -1,7 +1,6 @@
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
 import { type AudiusSdkWithServices, Id } from '@audius/sdk'
 import { PublicKey } from '@solana/web3.js'
-import { type Hex } from 'viem'
 
 import { userWalletsFromSDK } from '~/adapters'
 import { ID } from '~/models/Identifiers'
@@ -102,7 +101,7 @@ export class WalletClient {
 
       const transferTxHash = await ethereum.wormholeTransferTokens({
         amount: balance,
-        recipient: `0x${account.address.toBuffer().toString('hex')}` as Hex
+        recipient: `0x${account.address.toBuffer().toString('hex')}`
       })
       console.debug(
         `AudiusWormhole transferred ${balance} tokens into the Wormhole...`,
