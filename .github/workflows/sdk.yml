@@ -157,7 +157,7 @@ jobs:
 
       - name: Run tests
         timeout-minutes: 15
-        run: npm run test -w @audius/sdk -- --reporter=default --reporter=junit --outputFile=report.xml
+        run: npx turbo run test --filter=@audius/sdk -- --reporter=default --reporter=junit --outputFile=report.xml
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
