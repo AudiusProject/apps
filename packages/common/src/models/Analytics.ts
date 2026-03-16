@@ -1664,16 +1664,34 @@ type RemixHide = {
   handle: string
 }
 
+/** Where in the app the send was initiated (for analytics parity with legacy Tip Audio) */
+export type SendAudioSource =
+  | 'send_tokens_modal'
+  | 'oauth_pay_page'
+  | 'send_tokens_drawer'
+
 type SendAudioRequest = {
   eventName: Name.SEND_AUDIO_REQUEST
   from: WalletAddress
   recipient: WalletAddress
+  amount?: string
+  source?: SendAudioSource | string
+  senderHandle?: string
+  senderWallet?: WalletAddress
+  recipientHandle?: string
+  recipientWallet?: WalletAddress
 }
 
 type SendAudioSuccess = {
   eventName: Name.SEND_AUDIO_SUCCESS
   from: WalletAddress
   recipient: WalletAddress
+  amount?: string
+  source?: SendAudioSource | string
+  senderHandle?: string
+  senderWallet?: WalletAddress
+  recipientHandle?: string
+  recipientWallet?: WalletAddress
 }
 
 type SendAudioFailure = {
@@ -1681,6 +1699,12 @@ type SendAudioFailure = {
   from: WalletAddress
   recipient: WalletAddress
   error: string
+  amount?: string
+  source?: SendAudioSource | string
+  senderHandle?: string
+  senderWallet?: WalletAddress
+  recipientHandle?: string
+  recipientWallet?: WalletAddress
 }
 
 type TransferAudioToWAudioRequest = {

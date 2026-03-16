@@ -103,7 +103,9 @@ export const SendTokensDrawer = () => {
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
         amount: state.amount,
         // When sending to a user, pass their Ethereum address to derive user-bank ATA
-        recipientEthAddress: state.selectedUser?.erc_wallet
+        recipientEthAddress: state.selectedUser?.erc_wallet,
+        source: 'send_tokens_drawer',
+        recipientHandle: state.selectedUser?.handle
       })
 
       setState((prev) => ({ ...prev, step: 'success', signature }))

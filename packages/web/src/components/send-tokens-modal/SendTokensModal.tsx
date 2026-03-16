@@ -150,7 +150,9 @@ const SendTokensModal = () => {
         // When sending to a user, pass their Ethereum address to derive user-bank ATA
         // Use erc_wallet first, fallback to wallet field
         recipientEthAddress:
-          state.selectedUser?.erc_wallet ?? state.selectedUser?.wallet
+          state.selectedUser?.erc_wallet ?? state.selectedUser?.wallet,
+        source: 'send_tokens_modal',
+        recipientHandle: state.selectedUser?.handle
       })
 
       setState((prev) => ({

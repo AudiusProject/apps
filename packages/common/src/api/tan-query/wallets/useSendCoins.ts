@@ -19,6 +19,10 @@ export type SendCoinsParams = {
   recipientWallet: SolanaWalletAddress
   amount: bigint
   recipientEthAddress?: string // Optional: when sending to a user, provide their ETH address to derive user-bank ATA
+  /** Where the send was initiated (for analytics parity with legacy Tip Audio) */
+  source?: string
+  /** Recipient handle when sending to a known user (for analytics) */
+  recipientHandle?: string
 }
 
 export type SendCoinsResult = {
@@ -140,21 +144,27 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
 
       return { previousBalance }
     },
-    onSuccess: (_, { recipientWallet }) => {
-      if (analytics) {
-        const currentUser = walletAddresses?.currentUser
-        if (currentUser) {
+    onSuccess: (_, { recipientWallet, amount, source, recipientHandle }) => {
+      if (isAudioMint && analytics) {
+        const senderWallet = walletAddresses?.currentUser
+        if (senderWallet) {
           analytics.track(
             analytics.make({
               eventName: Name.SEND_AUDIO_SUCCESS,
-              from: currentUser,
-              recipient: recipientWallet
+              from: senderWallet,
+              recipient: recipientWallet,
+              amount: amount.toString(),
+              source,
+              senderHandle: currentUser?.handle ?? undefined,
+              senderWallet,
+              recipientHandle: recipientHandle ?? undefined,
+              recipientWallet
             })
           )
         }
       }
     },
-    onError: (error, { amount, recipientWallet }, context) => {
+    onError: (error, { amount, recipientWallet, source, recipientHandle }, context) => {
       if (context?.previousBalance) {
         const userId = currentUser?.user_id ?? null
         const queryKey = getUserCoinQueryKey(mint, userId)
@@ -169,15 +179,21 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         })
       }
 
-      if (analytics) {
-        const currentUser = walletAddresses?.currentUser
-        if (currentUser) {
+      if (isAudioMint && analytics) {
+        const senderWallet = walletAddresses?.currentUser
+        if (senderWallet) {
           analytics.track(
             analytics.make({
               eventName: Name.SEND_AUDIO_FAILURE,
-              from: currentUser,
+              from: senderWallet,
               recipient: recipientWallet,
-              error: error instanceof Error ? error.message : 'Unknown error'
+              error: error instanceof Error ? error.message : 'Unknown error',
+              amount: amount.toString(),
+              source,
+              senderHandle: currentUser?.handle ?? undefined,
+              senderWallet,
+              recipientHandle: recipientHandle ?? undefined,
+              recipientWallet
             })
           )
         }

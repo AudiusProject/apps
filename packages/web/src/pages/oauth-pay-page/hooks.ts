@@ -284,7 +284,8 @@ export const useOAuthPaySetup = ({
     try {
       const { signature } = await sendCoinsMutation.mutateAsync({
         recipientWallet: recipient as SolanaWalletAddress,
-        amount: amountBigInt
+        amount: amountBigInt,
+        source: 'oauth_pay_page'
       })
 
       // Store signature to show success screen
