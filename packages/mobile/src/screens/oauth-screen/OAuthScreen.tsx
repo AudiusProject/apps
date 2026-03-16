@@ -64,23 +64,13 @@ const messages = {
 
 // base64url encode a string (UTF-8 bytes → base64url, no padding)
 const toBase64Url = (str: string): string => {
-  // Encode string as UTF-8 bytes, then base64url
-  const bytes: number[] = []
-  for (let i = 0; i < str.length; i++) {
-    const code = str.charCodeAt(i)
-    if (code < 0x80) {
-      bytes.push(code)
-    } else if (code < 0x800) {
-      bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f))
-    } else {
-      bytes.push(
-        0xe0 | (code >> 12),
-        0x80 | ((code >> 6) & 0x3f),
-        0x80 | (code & 0x3f)
-      )
-    }
+  // Use TextEncoder to correctly encode all Unicode code points as UTF-8
+  const utf8Bytes = new TextEncoder().encode(str)
+  let binary = ''
+  for (let i = 0; i < utf8Bytes.length; i++) {
+    binary += String.fromCharCode(utf8Bytes[i])
   }
-  return btoa(bytes.map((b) => String.fromCharCode(b)).join(''))
+  return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '')
