@@ -68,7 +68,7 @@ export const outputConfigs = {
    * Used by the Audius React Native client
    */
   sdkConfigReactNative: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.native.ts',
     output: [
       {
         dir: 'dist',
@@ -98,7 +98,7 @@ export const outputConfigs = {
    * - Includes deps that are ignored or polyfilled for browser
    */
   sdkBrowserConfigEs: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.ts',
     output: [
       {
         dir: 'dist',
