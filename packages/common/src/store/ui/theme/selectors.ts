@@ -7,7 +7,7 @@ export const getTheme = (state: CommonState) => {
   return getBaseState(state).theme
 }
 
-/** Palette from dropdown (default, classic, matrix). Falls back to classic for legacy. */
+/** Palette from dropdown (default, classic, matrix). UI defaults to default when null. */
 export const getThemePalette = (state: CommonState): ThemePalette | null => {
   return getBaseState(state).themePalette
 }

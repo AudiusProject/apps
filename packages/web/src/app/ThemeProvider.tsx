@@ -48,15 +48,15 @@ const selectHarmonyTheme = (state: AppState): Theme => {
     return resolveTheme(palette, mode, sysAppearance)
   }
 
+  // No stored palette (e.g. new account, incognito) — always use default (Neue) theme
   switch (legacyTheme) {
     case LegacyTheme.LIGHT:
-      return 'classic-light'
+      return 'default-light'
     case LegacyTheme.DARK:
-      return 'classic-dark'
+      return 'default-dark'
     case LegacyTheme.MATRIX:
       return 'matrix'
     case LegacyTheme.AUTO:
-      return sysAppearance === 'dark' ? 'classic-dark' : 'classic-light'
     default:
       return sysAppearance === 'dark' ? 'default-dark' : 'default-light'
   }

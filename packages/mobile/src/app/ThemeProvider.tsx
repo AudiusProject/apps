@@ -86,21 +86,22 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
     return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
   }
 
+  // No stored palette (e.g. new account, incognito) — always use default (Neue) theme
   switch (theme) {
     case Theme.LIGHT:
-      return 'classic-light'
+      return 'default-light'
     case Theme.DARK:
-      return 'classic-dark'
+      return 'default-dark'
     case Theme.MATRIX:
       return 'matrix'
     case Theme.AUTO:
     default:
       switch (systemAppearance) {
         case SystemAppearance.DARK:
-          return 'classic-dark'
+          return 'default-dark'
         case SystemAppearance.LIGHT:
         default:
-          return 'classic-light'
+          return 'default-light'
       }
   }
 }
