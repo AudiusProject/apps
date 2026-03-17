@@ -10,19 +10,25 @@ let sdkInstance: AudiusSdk | null = null
 /**
  * Returns a singleton SDK instance initialised with the developer app API key.
  * The API key enables PKCE-based OAuth for the write scope so that
- * sdk.oauth.loginAsync({ scope: 'write' }) stores an access token internally,
+ * sdk.oauth.login({ scope: 'write' }) stores an access token internally,
  * allowing sdk.tracks.createTrack to be called directly from the browser
  * without a backend server.
  */
 export function getSDK(): AudiusSdk {
   if (!sdkInstance) {
+    // Use the current page as the redirect URI — the popup redirects here and
+    // handleRedirect() detects window.opener, forwards the code to the parent,
+    // and closes the popup.
+    const redirectUri =
+      window.location.origin + window.location.pathname
     sdkInstance = config.apiKey
       ? sdk({
           appName: APP_NAME,
           apiKey: config.apiKey,
+          redirectUri,
           environment: config.environment
         })
-      : sdk({ appName: APP_NAME, environment: config.environment })
+      : sdk({ appName: APP_NAME, redirectUri, environment: config.environment })
   }
   return sdkInstance
 }

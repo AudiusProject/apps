@@ -34,7 +34,7 @@ import {
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
-import { OAuthTokenStore } from './oauth/tokenStore'
+import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
 import {
   PaymentRouterClient,
   getDefaultPaymentRouterClientConfig
@@ -49,28 +49,8 @@ import {
   getDefaultEntityManagerConfig
 } from './services/EntityManager'
 import {
-  EthRewardsManagerClient,
-  getDefaultEthRewardsManagerConfig,
-  getDefaultServiceProviderFactoryConfig,
-  getDefaultServiceTypeManagerConfig,
-  ServiceProviderFactoryClient,
-  ServiceTypeManagerClient,
-  AudiusTokenClient,
-  getDefaultAudiusTokenConfig,
-  ClaimsManagerClient,
-  getDefaultClaimsManagerConfig,
-  DelegateManagerClient,
-  getDefaultDelegateManagerConfig,
-  StakingClient,
-  getDefaultStakingConfig,
-  TrustedNotifierManagerClient,
-  getDefaultTrustedNotifierManagerConfig,
-  AudiusWormholeClient,
-  getDefaultWormholeConfig,
-  RegistryClient,
-  getDefaultRegistryConfig,
-  GovernanceClient,
-  getDefaultGovernanceConfig
+  EthereumService,
+  getDefaultEthereumServiceConfig
 } from './services/Ethereum'
 import { Logger } from './services/Logger'
 import { SolanaRelay } from './services/Solana/SolanaRelay'
@@ -183,20 +163,6 @@ const initializeServices = ({
       // Allow undefined apiKey for now, use dummy wallet
       apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
       apiSecret
-    })
-
-  const ethPublicClient =
-    config.services?.ethPublicClient ??
-    createPublicClient({
-      chain: mainnet,
-      transport: http(servicesConfig.ethereum.rpcEndpoint)
-    })
-
-  const ethWalletClient =
-    config.services?.ethWalletClient ??
-    createWalletClient({
-      chain: mainnet,
-      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
   const storageNodeSelector =
@@ -317,83 +283,27 @@ const initializeServices = ({
       solanaClient
     })
 
-  /* Ethereum Contracts */
-  const audiusTokenClient =
-    config.services?.audiusTokenClient ??
-    new AudiusTokenClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultAudiusTokenConfig(servicesConfig)
+  const ethPublicClient =
+    config.services?.ethPublicClient ??
+    createPublicClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
-  const claimsManagerClient =
-    config.services?.claimsManagerClient ??
-    new ClaimsManagerClient({
-      ...getDefaultClaimsManagerConfig(servicesConfig)
+  const ethWalletClient =
+    config.services?.ethWalletClient ??
+    createWalletClient({
+      chain: mainnet,
+      transport: http(servicesConfig.ethereum.rpcEndpoint)
     })
 
-  const delegateManagerClient =
-    config.services?.delegateManagerClient ??
-    new DelegateManagerClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultDelegateManagerConfig(servicesConfig)
-    })
-
-  const stakingClient =
-    config.services?.stakingClient ??
-    new StakingClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultStakingConfig(servicesConfig)
-    })
-
-  const trustedNotifierManagerClient =
-    config.services?.trustedNotifierManagerClient ??
-    new TrustedNotifierManagerClient({
-      ...getDefaultTrustedNotifierManagerConfig(servicesConfig)
-    })
-
-  const audiusWormholeClient =
-    config.services?.audiusWormholeClient ??
-    new AudiusWormholeClient({
-      audiusWalletClient,
-      ethPublicClient,
-      ethWalletClient,
-      ...getDefaultWormholeConfig(servicesConfig)
-    })
-
-  const registryClient =
-    config.services?.registryClient ??
-    new RegistryClient({
-      ...getDefaultRegistryConfig(servicesConfig)
-    })
-
-  const governanceClient =
-    config.services?.governanceClient ??
-    new GovernanceClient({
-      ...getDefaultGovernanceConfig(servicesConfig)
-    })
-
-  const serviceTypeManagerClient =
-    config.services?.serviceTypeManagerClient ??
-    new ServiceTypeManagerClient({
-      ...getDefaultServiceTypeManagerConfig(servicesConfig)
-    })
-
-  const serviceProviderFactoryClient =
-    config.services?.serviceProviderFactoryClient ??
-    new ServiceProviderFactoryClient({
-      ...getDefaultServiceProviderFactoryConfig(servicesConfig)
-    })
-
-  const ethRewardsManagerClient =
-    config.services?.ethRewardsManagerClient ??
-    new EthRewardsManagerClient({
-      ...getDefaultEthRewardsManagerConfig(servicesConfig)
+  const ethereum =
+    config.services?.ethereum ??
+    new EthereumService({
+      ...getDefaultEthereumServiceConfig(servicesConfig),
+      publicClient: ethPublicClient,
+      walletClient: ethWalletClient,
+      audiusWalletClient
     })
 
   const services: ServicesContainer = {
@@ -402,6 +312,7 @@ const initializeServices = ({
     entityManager,
     storage,
     audiusWalletClient,
+    ethereum,
     ethPublicClient,
     ethWalletClient,
     claimableTokensClient,
@@ -411,20 +322,10 @@ const initializeServices = ({
     solanaWalletAdapter,
     solanaRelay,
     antiAbuseOracle,
-    audiusTokenClient,
-    claimsManagerClient,
-    delegateManagerClient,
-    stakingClient,
-    trustedNotifierManagerClient,
-    audiusWormholeClient,
-    registryClient,
-    governanceClient,
-    serviceTypeManagerClient,
-    serviceProviderFactoryClient,
-    ethRewardsManagerClient,
     emailEncryptionService,
     archiverService,
-    logger
+    logger,
+    tokenStore: config.services?.tokenStore ?? new TokenStoreLocalStorage()
   }
   return services
 }
@@ -463,20 +364,19 @@ const initializeApis = ({
   ]
 
   // Token store for PKCE flow — provides dynamic accessToken to Configuration
-  const tokenStore = new OAuthTokenStore()
+  const tokenStore = services.tokenStore ?? new TokenStoreLocalStorage()
 
   // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
-  const oauth =
-    typeof window !== 'undefined'
-      ? new OAuth({
-          apiKey,
-          tokenStore,
-          basePath,
-          logger: services.logger
-        })
-      : undefined
+  const oauth = new OAuth({
+    apiKey,
+    tokenStore,
+    basePath,
+    logger: services.logger,
+    redirectUri: config.redirectUri,
+    openUrl: services.openUrl
+  })
 
-  if (apiKey && oauth) {
+  if (apiKey) {
     middleware.push(
       addTokenRefreshMiddleware({
         oauth
@@ -492,7 +392,8 @@ const initializeApis = ({
     basePath,
     // Static bearerToken takes precedence; otherwise use the dynamic store
     // so PKCE login can inject tokens after construction.
-    accessToken: bearerToken ?? tokenStore.asAccessTokenProvider()
+    accessToken:
+      bearerToken ?? (() => tokenStore.getAccessToken().then((t) => t ?? ''))
   })
 
   const tracks = new TracksApi(apiClientConfig, services)

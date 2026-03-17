@@ -1,8 +1,8 @@
 /**
  * PKCE (Proof Key for Code Exchange) helpers per RFC 7636.
- *
- * Works in both browser (Web Crypto) and Node ≥ 22 (built-in Web Crypto via `globalThis.crypto`).
  */
+
+import { sha256 } from '@noble/hashes/sha256'
 
 /**
  * Base64url-encode a byte array (no padding).
@@ -28,10 +28,9 @@ export function generateCodeVerifier(): string {
  * Derive the S256 code challenge from a code verifier.
  * `code_challenge = base64url(SHA-256(code_verifier))`
  */
-export async function generateCodeChallenge(verifier: string): Promise<string> {
+export function generateCodeChallenge(verifier: string): string {
   const data = new TextEncoder().encode(verifier)
-  const digest = await globalThis.crypto.subtle.digest('SHA-256', data)
-  return base64url(new Uint8Array(digest))
+  return base64url(sha256(data))
 }
 
 /**

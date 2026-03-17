@@ -47,39 +47,6 @@ export class WalletClient {
     return new PublicKey(address)
   }
 
-  /** Get user's current ETH Audio balance. Returns null on failure. */
-  async getCurrentBalance({
-    ethAddress
-  }: {
-    ethAddress: string
-  }): Promise<AudioWei | null> {
-    try {
-      const sdk = await this.audiusSdk()
-      const balance = await this.audiusBackendInstance.getBalance({
-        ethAddress,
-        sdk
-      })
-      return BigInt(balance?.toString() ?? 0) as AudioWei
-    } catch (err) {
-      console.error(err)
-      return null
-    }
-  }
-
-  /** Get user's current SOL Audio balance. Returns null on failure. */
-  async getCurrentWAudioBalance({
-    ethAddress
-  }: {
-    ethAddress: string
-  }): Promise<AudioWei | null> {
-    const sdk = await this.audiusSdk()
-    const balance = await this.audiusBackendInstance.getWAudioBalance({
-      ethAddress,
-      sdk
-    })
-    return balance ? (BigInt(balance.toString()) as AudioWei) : null
-  }
-
   async getAssociatedTokenAccountInfo({ address }: { address: string }) {
     try {
       const sdk = await this.audiusSdk()
@@ -120,24 +87,22 @@ export class WalletClient {
 
     if (!isNullOrUndefined(ercAudioBalance) && ercAudioBalance > BigInt(0)) {
       const balance = ercAudioBalance
-      const permitTxHash = await sdk.services.audiusTokenClient.permit({
-        args: {
-          value: balance,
-          spender: sdk.services.audiusWormholeClient.contractAddress
-        }
+
+      const ethereum = sdk.services.ethereum
+
+      const permitTxHash = await ethereum.permitAudioToken({
+        spender: ethereum.audiusWormhole.address,
+        value: balance
       })
       console.debug(
         `Permitted AudiusWormhole to transfer ${balance} tokens...`,
         { permitTxHash }
       )
-      const transferTxHash =
-        await sdk.services.audiusWormholeClient.transferTokens({
-          args: {
-            amount: balance,
-            recipientChain: 'Solana',
-            recipient: `0x${account.address.toBuffer().toString('hex')}`
-          }
-        })
+
+      const transferTxHash = await ethereum.wormholeTransferTokens({
+        amount: balance,
+        recipient: `0x${account.address.toBuffer().toString('hex')}`
+      })
       console.debug(
         `AudiusWormhole transferred ${balance} tokens into the Wormhole...`,
         { transferTxHash }

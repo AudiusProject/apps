@@ -59,21 +59,19 @@ const getWalletAudioBalanceQueryFn =
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
         const checksumWallet = getAddress(address)
-        const balance = await sdk.services.audiusTokenClient.balanceOf({
-          account: checksumWallet
-        })
+        const ethereum = sdk.services.ethereum
+        const balance = await ethereum.audiusToken.read.balanceOf([
+          checksumWallet
+        ])
         if (!includeStaked) {
           return AUDIO(balance).value
         }
-        const delegatedBalance =
-          await sdk.services.delegateManagerClient.getTotalDelegatorStake({
-            delegatorAddress: checksumWallet
-          })
-        const stakedBalance = await sdk.services.stakingClient.totalStakedFor({
-          account: checksumWallet
-        })
-
-        return AUDIO(balance + delegatedBalance + stakedBalance).value
+        const [stakedBalance, delegatedBalance] = await Promise.all([
+          ethereum.staking.read.totalStakedFor([checksumWallet]),
+          ethereum.delegateManager.read.getTotalDelegatorStake([checksumWallet])
+        ])
+        const fullBalance = balance + stakedBalance + delegatedBalance
+        return AUDIO(fullBalance).value
       } else {
         const wAudioSolBalance = await audiusBackend.getAddressWAudioBalance({
           address,

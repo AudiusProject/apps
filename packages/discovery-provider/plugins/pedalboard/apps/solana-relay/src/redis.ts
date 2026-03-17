@@ -78,7 +78,7 @@ export const getCachedContentNodes = async () => {
 
 const TOKEN_ACCOUNT_CREATION_USER_LIMIT = 2
 const TOKEN_ACCOUNT_CREATION_VERIFIED_USER_LIMIT = 5
-const TOKEN_ACCOUNT_CREATION_SYSTEM_LIMIT = 500
+const TOKEN_ACCOUNT_CREATION_SYSTEM_LIMIT = 10
 
 export const rateLimitTokenAccountCreation = async (
   wallet: string,

@@ -1,26 +1,14 @@
-import type { PublicClient, Transport, WalletClient } from 'viem'
-import type { mainnet } from 'viem/chains'
 import { z } from 'zod'
+import type { PublicClient, WalletClient } from 'viem'
 
+import type { OAuthTokenStore } from './oauth/tokenStore'
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
 import type { AntiAbuseOracleSelectorService } from './services/AntiAbuseOracleSelector/types'
 import type { ArchiverService } from './services/Archiver'
 import type { AudiusWalletClient } from './services/AudiusWalletClient'
 import { EmailEncryptionService } from './services/Encryption'
 import type { EntityManagerService } from './services/EntityManager'
-import {
-  AudiusTokenClient,
-  ClaimsManagerClient,
-  DelegateManagerClient,
-  EthRewardsManagerClient,
-  GovernanceClient,
-  RegistryClient,
-  ServiceProviderFactoryClient,
-  TrustedNotifierManagerClient,
-  AudiusWormholeClient
-} from './services/Ethereum'
-import { ServiceTypeManagerClient } from './services/Ethereum/contracts/ServiceTypeManager'
-import { StakingClient } from './services/Ethereum/contracts/Staking/StakingClient'
+import type { EthereumService } from './services/Ethereum'
 import type { LoggerService } from './services/Logger'
 import type {
   PaymentRouterClient,
@@ -32,6 +20,7 @@ import { RewardManagerClient } from './services/Solana/programs/RewardManagerCli
 import type { SolanaClient } from './services/Solana/programs/SolanaClient'
 import type { StorageService } from './services/Storage'
 import type { StorageNodeSelectorService } from './services/StorageNodeSelector'
+
 export type ServicesContainer = {
   /**
    * Service used to choose storage node
@@ -53,69 +42,24 @@ export type ServicesContainer = {
    */
   audiusWalletClient: AudiusWalletClient
 
-  ethWalletClient: WalletClient<Transport, typeof mainnet>
-
-  ethPublicClient: PublicClient<Transport, typeof mainnet>
-
-  /**
-   * Contract client to interact with the Audius token
-   */
-  audiusTokenClient: AudiusTokenClient
-
-  /**
-   * Contract client to interact with claiming rewards
-   */
-  claimsManagerClient: ClaimsManagerClient
-
-  /**
-   * Contract client to interact with staking and delegating stake
-   */
-  delegateManagerClient: DelegateManagerClient
-
-  /**
-   * Contract client to interact with the staking system
-   */
-  stakingClient: StakingClient
-
-  /**
-   * Contract client to interact with the trusted notifier services
-   */
-  trustedNotifierManagerClient: TrustedNotifierManagerClient
-
-  /**
-   * Contract client to interact with wormhole
-   */
-  audiusWormholeClient: AudiusWormholeClient
-
-  /**
-   * Contract client to interact with the eth contract registry
-   */
-  registryClient: RegistryClient
-
-  /**
-   * Contract client to interact with the governance contract
-   */
-  governanceClient: GovernanceClient
-
-  /**
-   * Contract client to interact with service types
-   */
-  serviceTypeManagerClient: ServiceTypeManagerClient
-
-  /**
-   * Contract client to interact with service provider info
-   */
-  serviceProviderFactoryClient: ServiceProviderFactoryClient
-
-  /**
-   * Contract client to interact with the ethereum rewards manager
-   */
-  ethRewardsManagerClient: EthRewardsManagerClient
-
   /**
    * Service used to log and set a desired log level
    */
   logger: LoggerService
+
+  /**
+   * Service used to store OAuth access and refresh tokens.
+   * Defaults to `TokenStoreLocalStorage` which persists to localStorage.
+   * Override to use in-memory, cookie-based, or other storage strategies.
+   */
+  tokenStore: OAuthTokenStore
+
+  /**
+   * Called with the OAuth URL when `login()` is invoked. Defaults to
+   * `window.open` (popup) or `window.location.href` (fullScreen) on web.
+   * Required on mobile — use `Linking.openURL` or a WebView.
+   */
+  openUrl?: (url: string) => void | Promise<void>
 
   /**
    * Service used to interact with the Solana relay
@@ -166,6 +110,23 @@ export type ServicesContainer = {
    * Service used to create and download track archives
    */
   archiverService?: ArchiverService
+
+  /**
+   * Service for interacting with Audius Ethereum contracts.
+   * Exposes viem contract instances for all protocol contracts,
+   * with optional per-environment address overrides.
+   */
+  ethereum: EthereumService
+
+  /**
+   * viem PublicClient for Ethereum reads.
+   */
+  ethPublicClient: PublicClient
+
+  /**
+   * viem WalletClient for Ethereum writes.
+   */
+  ethWalletClient: WalletClient
 }
 /**
  * SDK configuration schema that requires api key only (for read-only access with higher rate limits)
@@ -183,6 +144,10 @@ const ConfigWithApiKeySchema = z.object({
    * API key, required for writes
    */
   apiKey: z.string().min(1),
+  /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
   /**
    * Target environment
    * @internal
@@ -211,6 +176,10 @@ const ConfigWithApiSecretSchema = z.object({
    */
   apiSecret: z.string().min(1),
   /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
+  /**
    * Target environment
    * @internal
    */
@@ -238,6 +207,10 @@ const ConfigWithBearerTokenSchema = z.object({
    */
   bearerToken: z.string().min(1),
   /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
+  /**
    * Target environment
    * @internal
    */
@@ -256,6 +229,10 @@ const ConfigWithAppNameSchema = z.object({
    * Services injection
    */
   services: z.optional(z.custom<Partial<ServicesContainer>>()),
+  /**
+   * Default redirect URI used by `oauth.login()`. Can be overridden per-call.
+   */
+  redirectUri: z.string().optional(),
   /**
    * Target environment
    * @internal

@@ -33,6 +33,7 @@ import { UpdateRequiredScreen } from 'app/screens/update-required-screen'
 import { enterBackground, enterForeground } from 'app/store/lifecycle/actions'
 
 import { AppDrawerScreen } from '../app-drawer-screen'
+import { OAuthScreen } from '../oauth-screen/OAuthScreen'
 import { ResetPasswordModalScreen } from '../reset-password-screen'
 import { SignOnStack } from '../sign-on-screen'
 
@@ -54,6 +55,7 @@ export type RootScreenParamList = {
   SignIn: undefined
   SignOnStack: undefined
   ResetPassword: { login: string; email: string }
+  OAuthScreen: { search: string }
 }
 
 /**
@@ -174,6 +176,11 @@ export const RootScreen = () => {
           <Stack.Screen
             name='ResetPassword'
             component={ResetPasswordModalScreen}
+            options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name='OAuthScreen'
+            component={OAuthScreen}
             options={{ presentation: 'modal' }}
           />
           <Stack.Screen name='TokenPicker' options={{ presentation: 'modal' }}>

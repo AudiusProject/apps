@@ -89,6 +89,7 @@ export const initSdk = async () => {
       }
     })
   })
+
   const audiusSdk = createSdkWithServices({
     appName: env.APP_NAME,
     apiKey: env.API_KEY,

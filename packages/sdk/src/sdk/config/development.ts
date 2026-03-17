@@ -48,7 +48,11 @@ export const developmentConfig: SdkServicesConfig = {
       "audiusTokenAddress": "0xdcB2fC9469808630DD0744b0adf97C0003fC29B2",
       "audiusWormholeAddress": "0x",
       "delegateManagerAddress": "0x",
-      "stakingAddress": "0x"
+      "stakingAddress": "0x",
+      "governanceAddress": "0x",
+      "claimsManagerAddress": "0x",
+      "trustedNotifierManagerAddress": "0x",
+      "registryAddress": "0x"
     }
   }
 }

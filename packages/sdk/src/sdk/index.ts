@@ -1,5 +1,4 @@
 /* eslint-disable import/export */
-export { sdk } from './sdk'
 export { createSdk } from './createSdk'
 export {
   createSdkWithServices,

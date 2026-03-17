@@ -1,25 +1,10 @@
-import type { PublicClient } from 'viem'
-
 import { abi } from './abi'
-import { REGISTRY_CONTRACT_ADDRESS } from './constants'
 
-export class Registry {
-  client: PublicClient
-  address: `0x${string}`
-
-  constructor(
-    client: PublicClient,
-    { address }: { address?: `0x${string}` } = {}
-  ) {
-    this.client = client
-    this.address = address ?? REGISTRY_CONTRACT_ADDRESS
-  }
-
-  getContract = ({ registryKey }: { registryKey: `0x${string}` }) =>
-    this.client.readContract({
-      address: this.address,
-      abi,
-      functionName: 'getContract',
-      args: [registryKey]
-    })
+/**
+ * Central directory for the Audius protocol. Stores name-to-address mappings
+ * for all protocol contracts, enabling upgradability and external lookups.
+ */
+export const Registry = {
+  abi,
+  address: '0xd976d3b4f4e22a238c1A736b6612D22f17b6f64C' as const
 }
