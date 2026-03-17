@@ -27,7 +27,7 @@ export const addTokenRefreshMiddleware = ({
       }
 
       // Skip refresh when unauthenticated to avoid noisy error callbacks.
-      if (!oauth.hasRefreshToken) {
+      if (!(await oauth.hasRefreshToken())) {
         return context.response
       }
 

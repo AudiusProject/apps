@@ -34,9 +34,6 @@ export const DistributorCard = ({
     const distroSdk = sdk({
       apiKey: appKey
     })
-    distroSdk.oauth!.init({
-      successCallback: () => undefined
-    })
     distroSdk.oauth!.login({
       scope: 'write',
       redirectUri: `${url}/auth/redirect?redirect_uri=${encodeURIComponent(window.location.origin)}`,

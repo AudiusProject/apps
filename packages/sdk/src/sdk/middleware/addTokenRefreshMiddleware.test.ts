@@ -17,7 +17,7 @@ function createMockOAuth(
   hasRefreshToken = true
 ): OAuth {
   return {
-    hasRefreshToken,
+    hasRefreshToken: async () => hasRefreshToken,
     refreshAccessToken: refreshBehaviour
   } as unknown as OAuth
 }
