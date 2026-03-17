@@ -77,6 +77,8 @@ import { sdk } from '@audius/sdk'
 const audiusSdk = sdk({
   apiKey: 'Your API Key goes here',
   bearerToken: 'Your Bearer Token goes here',
+  // Required for OAuth — register this URI in your developer app settings
+  // redirectUri: 'https://yourapp.com/callback',
 })
 ```
 
@@ -125,6 +127,8 @@ import { sdk } from '@audius/sdk'
 const audiusSdk = sdk({
   apiKey: 'Your API Key goes here',
   bearerToken: 'Your Bearer Token goes here',
+  // Required for OAuth — register this URI in your developer app settings
+  // redirectUri: 'https://yourapp.com/callback',
 })
 
 const track = await audiusSdk.tracks.getTrack({ trackId: 'D7KyD' })

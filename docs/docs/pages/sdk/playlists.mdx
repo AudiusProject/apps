@@ -3,8 +3,6 @@ title: Playlists
 description: Audius Protocol Documentation
 ---
 
----
-
 ## getPlaylist
 
 > #### getPlaylist(`params`)
@@ -26,16 +24,15 @@ console.log(playlist)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type     | Description            | Required?    |
-| :----------- | :------- | :--------------------- | :----------- |
-| `playlistId` | `string` | The ID of the playlist | **Required** |
+| Name         | Type     | Description                           | Required?    |
+| :----------- | :------- | :------------------------------------ | :----------- |
+| `playlistId` | `string` | The ID of the playlist                | **Required** |
+| `userId`     | `string` | The ID of the user making the request | _Optional_   |
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`PlaylistResponse`](#playlistresponse) object.
-
----
 
 ## getBulkPlaylists
 
@@ -70,8 +67,6 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
----
-
 ## getPlaylistTracks
 
 > #### getPlaylistTracks(`params`)
@@ -101,8 +96,6 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
----
-
 ## getTrendingPlaylists
 
 > #### getTrendingPlaylists(`params?`)
@@ -122,16 +115,18 @@ console.log(playlists)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name   | Type                                                            | Description                                               | Required?  |
-| :----- | :-------------------------------------------------------------- | :-------------------------------------------------------- | :--------- |
-| `time` | [`GetTrendingPlaylistsTimeEnum`](#gettrendingplayliststimeenum) | The time period for trending playlists. Default: `'week'` | _Optional_ |
+| Name     | Type                                                            | Description                                               | Required?  |
+| :------- | :-------------------------------------------------------------- | :-------------------------------------------------------- | :--------- |
+| `time`   | [`GetTrendingPlaylistsTimeEnum`](#gettrendingplayliststimeenum) | The time period for trending playlists. Default: `'week'` | _Optional_ |
+| `offset` | `number`                                                        | The number of items to skip (for pagination)              | _Optional_ |
+| `limit`  | `number`                                                        | The number of items to fetch (for pagination)             | _Optional_ |
+| `userId` | `string`                                                        | The ID of the user making the request                     | _Optional_ |
+| `type`   | `string`                                                        | The type of trending playlists to return                  | _Optional_ |
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
-
----
 
 ## searchPlaylists
 
@@ -154,16 +149,14 @@ console.log(playlists)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name    | Type     | Description             | Required?    |
-| :------ | :------- | :---------------------- | :----------- |
-| `query` | `string` | The query to search for | **Required** |
+| Name    | Type     | Description             | Required?  |
+| :------ | :------- | :---------------------- | :--------- |
+| `query` | `string` | The query to search for | _Optional_ |
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
-
----
 
 ## createPlaylist
 
@@ -225,8 +218,6 @@ Returns a `Promise` resolving to an object with the following fields:
   transactionHash?: string
 }
 ```
-
----
 
 ## updatePlaylist
 
@@ -291,8 +282,6 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
 ## deletePlaylist
 
 > #### deletePlaylist(`params`, `requestInit?`)
@@ -331,8 +320,6 @@ Returns a `Promise` resolving to an object with the following fields:
   transactionHash?: string
 }
 ```
-
----
 
 ## favoritePlaylist
 
@@ -373,8 +360,6 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
 ## unfavoritePlaylist
 
 > #### unfavoritePlaylist(`params`, `requestInit?`)
@@ -413,8 +398,6 @@ Returns a `Promise` resolving to an object with the following fields:
   transactionHash?: string
 }
 ```
-
----
 
 ## repostPlaylist
 
@@ -455,8 +438,6 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
 ## unrepostPlaylist
 
 > #### unrepostPlaylist(`params`, `requestInit?`)
@@ -495,8 +476,6 @@ Returns a `Promise` resolving to an object with the following fields:
   transactionHash?: string
 }
 ```
-
----
 
 ## Type Reference
 

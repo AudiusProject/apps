@@ -3,8 +3,6 @@ title: Tracks
 description: Audius Protocol Documentation
 ---
 
----
-
 ## getTrack
 
 > #### getTrack(`params`, `requestInit?`)
@@ -39,8 +37,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`TrackResponse`](#trackresponse) object.
-
----
 
 ## getBulkTracks
 
@@ -78,8 +74,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
 ## getTrendingTracks
 
 > #### getTrendingTracks(`params`, `requestInit?`)
@@ -115,8 +109,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
 ## getUndergroundTrendingTracks
 
 > #### getUndergroundTrendingTracks(`params`, `requestInit?`)
@@ -149,8 +141,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
-
----
 
 ## searchTracks
 
@@ -196,8 +186,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
-
----
 
 ## createTrack
 
@@ -281,10 +269,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ````ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
   trackId?: string
 }
-
----
 
 ## updateTrack
 
@@ -332,10 +320,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## deleteTrack
 
@@ -373,10 +361,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## favoriteTrack
 
@@ -421,10 +409,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## unfavoriteTrack
 
@@ -462,10 +450,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## repostTrack
 
@@ -510,10 +498,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## unrepostTrack
 
@@ -551,10 +539,10 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
-
----
 
 ## Type Reference
 
@@ -583,8 +571,6 @@ Returns a `Promise` resolving to an object with the following fields:
 | `title`              | `string`                 | Track title                                               |
 | `trackCid`           | `string`                 | CID of the track audio                                    |
 | `user`               | `object`                 | The track owner (see [User](users))                       |
-
----
 
 ### CreateTrackRequestBody
 
@@ -635,8 +621,6 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | `copyrightLine`                | `CopyrightLine`                                         | Copyright line                                    | _Optional_   |
 | `producerCopyrightLine`        | `ProducerCopyrightLine`                                 | Producer copyright line                           | _Optional_   |
 
----
-
 ### UpdateTrackRequestBody
 
 Metadata object for updating an existing track. All fields are optional — only include the fields
@@ -673,8 +657,6 @@ you want to change. Omitted fields retain their current values.
 | `remixOf`             | [`RemixParentWrite`](#remixparentwrite) | Parent track(s) if this track is a remix          |
 | `parentalWarningType` | `string`                                | Parental warning type                             |
 | `ddexApp`             | `string`                                | DDEX application identifier                       |
-
----
 
 ### AccessGate
 
@@ -747,8 +729,6 @@ const metadata = {
 }
 ```
 
----
-
 ### FieldVisibility
 
 Controls which track fields are publicly visible. Each field is a `boolean`.
@@ -770,8 +750,6 @@ For public tracks, `genre`, `mood`, `tags`, `share`, and `playCount` are set to 
 For stream-gated (non-USDC) tracks, `remixes` is set to `false` by default.
 
 :::
-
----
 
 ### RemixParentWrite
 
@@ -798,8 +776,6 @@ const metadata = {
 }
 ```
 
----
-
 ### StemParent
 
 Identifies the parent track when uploading a stem (e.g. vocals, drums, bass).
@@ -810,8 +786,6 @@ Identifies the parent track when uploading a stem (e.g. vocals, drums, bass).
   parentTrackId: number // The numeric ID of the parent track
 }
 ```
-
----
 
 ### DdexResourceContributor
 
@@ -825,8 +799,6 @@ Represents a contributor to the track (used for DDEX metadata).
 }
 ```
 
----
-
 ### DdexRightsController
 
 Represents the rights controller for the track (used for DDEX metadata).
@@ -838,8 +810,6 @@ Represents the rights controller for the track (used for DDEX metadata).
   rightsShareUnknown?: string // Optional rights share info
 }
 ```
-
----
 
 ### Genre Values
 
@@ -853,8 +823,6 @@ Valid genre values for the `genre` field. Use these exact string values:
 `'Progressive House'`, `'Hardstyle'`, `'Glitch Hop'`, `'Trance'`, `'Future Bass'`, `'Future House'`,
 `'Tropical House'`, `'Downtempo'`, `'Drum & Bass'`, `'Dubstep'`, `'Jersey Club'`, `'Vaporwave'`,
 `'Moombahton'`
-
----
 
 ### Mood Values
 

@@ -6,8 +6,6 @@ description: Audius Protocol Documentation
 import { Tabs } from '../../components/Tabs.jsx'
 import { TabItem } from '../../components/Tabs.jsx'
 
----
-
 The Uploads API provides methods for uploading audio and image files to Audius storage nodes. These
 methods return CIDs (Content Identifiers) that you then pass to write methods like
 [`createTrack`](/sdk/tracks#createtrack) or
@@ -19,8 +17,6 @@ File uploads are a separate step from track/playlist creation. You first upload 
 Uploads API to get CIDs, then pass those CIDs as metadata when creating or updating content.
 
 :::
-
----
 
 ## createAudioUpload
 
@@ -45,7 +41,7 @@ Create an object with the following fields and pass it as the first argument.
 | Name                  | Type                                      | Description                                          | Required?    |
 | :-------------------- | :---------------------------------------- | :--------------------------------------------------- | :----------- |
 | `file`                | `File`                                    | The audio file to upload                             | **Required** |
-| `onProgress`          | `(loaded: number, total: number) => void` | A callback for tracking upload progress              | _Optional_   |
+| `onProgress`          | `(event: { loaded: number; total: number; transcode: number }) => void` | A callback for tracking upload progress              | _Optional_   |
 | `previewStartSeconds` | `number`                                  | Start time in seconds for generating a preview clip  | _Optional_   |
 | `placementHosts`      | `string[]`                                | A list of storage node hosts to prefer for placement | _Optional_   |
 
@@ -63,7 +59,7 @@ const upload = audiusSdk.uploads.createAudioUpload({
     name: 'track.mp3',
     type: 'audio/mpeg',
   },
-  onProgress: (loaded, total) => {
+  onProgress: ({ loaded, total }) => {
     console.log(`Upload progress: ${Math.round((loaded / total) * 100)}%`)
   },
   previewStartSeconds: 30,
@@ -99,8 +95,6 @@ The resolved value of `start()` contains:
 </TabItem>
 </Tabs>
 
----
-
 ## createImageUpload
 
 > #### createImageUpload(`params`)
@@ -124,7 +118,7 @@ Create an object with the following fields and pass it as the first argument.
 | Name             | Type                                      | Description                                                                   | Required?    |
 | :--------------- | :---------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
 | `file`           | `File`                                    | The image file to upload                                                      | **Required** |
-| `onProgress`     | `(loaded: number, total: number) => void` | A callback for tracking upload progress                                       | _Optional_   |
+| `onProgress`     | `(event: { loaded: number; total: number; transcode: number }) => void` | A callback for tracking upload progress                                       | _Optional_   |
 | `isBackdrop`     | `boolean`                                 | Set to `true` for wide/banner images (e.g. profile banners). Default: `false` | _Optional_   |
 | `placementHosts` | `string[]`                                | A list of storage node hosts to prefer for placement                          | _Optional_   |
 
@@ -159,8 +153,6 @@ The method returns an object with:
 
 </TabItem>
 </Tabs>
-
----
 
 ## Full Example: Upload and Create a Track
 

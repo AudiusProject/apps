@@ -3,12 +3,9 @@ title: Users
 description: Audius Protocol Documentation
 ---
 
-import { Tabs } from '../../components/Tabs.jsx'
-import { TabItem } from '../../components/Tabs.jsx'
+## getUser
 
-### getUser
-
-#### getUser(`params`)
+> #### getUser(`params`)
 
 Get a user.
 
@@ -71,11 +68,9 @@ user as described below.
 };
 ```
 
----
+## getBulkUsers
 
-### getBulkUsers
-
-#### getBulkUsers(`params`)
+> #### getBulkUsers(`params`)
 
 Gets a list of users.
 
@@ -103,11 +98,9 @@ example above.
 
 Returns an array of users, see [`getUser`](#getuser).
 
----
+## getAIAttributedTracksByUserHandle
 
-### getAIAttributedTracksByUserHandle
-
-#### getAIAttributedTracksByUserHandle(`params`)
+> #### getAIAttributedTracksByUserHandle(`params`)
 
 Get the AI generated tracks attributed to a user using the user's handle.
 
@@ -140,11 +133,9 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
----
+## getAuthorizedApps
 
-### getAuthorizedApps
-
-#### getAuthorizedApps(`params`)
+> #### getAuthorizedApps(`params`)
 
 Get the apps that a user has authorized to write to their account.
 
@@ -183,11 +174,9 @@ information about the authorized apps as described below.
 }[];
 ```
 
----
+## getConnectedWallets
 
-### getConnectedWallets
-
-#### getConnectedWallets(`params`)
+> #### getConnectedWallets(`params`)
 
 Get a user's connected ERC and SPL wallets.
 
@@ -222,11 +211,9 @@ information about the wallets as described below.
 };
 ```
 
----
+## getFavorites
 
-### getFavorites
-
-#### getFavorites(`params`)
+> #### getFavorites(`params`)
 
 Get a user's favorites.
 
@@ -260,15 +247,12 @@ information about the favorites as described below.
   favoriteItemId: string // The ID of the track, playlist, or album
   favoriteType: string // The type of favorite ("track", "playlist", or "album")
   userId: string
-}
-;[]
+}[]
 ```
 
----
+## getFollowers
 
-### getFollowers
-
-#### getFollowers(`params`)
+> #### getFollowers(`params`)
 
 Get a user's followers
 
@@ -334,11 +318,9 @@ information about the followers as described below.
 }[];
 ```
 
----
+## getFollowing
 
-### getFollowing
-
-#### getFollowing(`params`)
+> #### getFollowing(`params`)
 
 Get users that a user is following
 
@@ -368,11 +350,9 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
----
+## getRelatedUsers
 
-### getRelatedUsers
-
-#### getRelatedUsers(`params`)
+> #### getRelatedUsers(`params`)
 
 Get a list of users that might be of interest to followers of this user.
 
@@ -403,9 +383,9 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
----
+## getReposts
 
-#### getReposts(`params`)
+> #### getReposts(`params`)
 
 Get a user's reposts.
 
@@ -436,7 +416,6 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the reposts as described below.
 
-Return type:
 
 ```ts
 {
@@ -448,11 +427,9 @@ Return type:
 }[];
 ```
 
----
+## getSubscribers
 
-### getSubscribers
-
-#### getSubscribers(`params`)
+> #### getSubscribers(`params`)
 
 Get users that are subscribed to a user.
 
@@ -482,11 +459,9 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
----
+## getSupporters
 
-### getSupporters
-
-#### getSupporters(`params`)
+> #### getSupporters(`params`)
 
 Get users that are supporting a user (they have sent them a tip).
 
@@ -511,8 +486,6 @@ example above.
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
-
-#### Returns
 
 #### Returns
 
@@ -558,11 +531,9 @@ information about the supporters as described below.
 }[];
 ```
 
----
+## getSupportedUsers
 
-### getSupportedUsers
-
-#### getSupportedUsers(`params`)
+> #### getSupportedUsers(`params`)
 
 Get users that a user is supporting (they have sent them a tip).
 
@@ -632,11 +603,9 @@ information about the supported users as described below.
 }[];
 ```
 
----
+## getTopTrackTags
 
-### getTopTrackTags
-
-#### getTopTrackTags(`params`)
+> #### getTopTrackTags(`params`)
 
 Get the most used track tags by a user.
 
@@ -670,11 +639,9 @@ representing the tags
 string[]
 ```
 
----
+## getTracksByUser
 
-### getTracksByUser
-
-#### getTracksByUser(`params`)
+> #### getTracksByUser(`params`)
 
 Get a user's tracks.
 
@@ -707,11 +674,9 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
----
+## getUserByHandle
 
-### getUserByHandle
-
-#### getUserByHandle(`params`)
+> #### getUserByHandle(`params`)
 
 Get a user by their handle.
 
@@ -739,11 +704,9 @@ example above.
 
 The return type is the same as [`getUser`](#getuser)
 
----
+## searchUsers
 
-### searchUsers
-
-#### searchUsers(`params`)
+> #### searchUsers(`params`)
 
 Search for users.
 
@@ -775,11 +738,9 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
----
+## updateUser
 
-### updateUser
-
-#### updateUser(`params`, `requestInit?`)
+> #### updateUser(`params`, `requestInit?`)
 
 Update a user profile. To update a profile picture or cover photo, first upload the image via the
 [Uploads API](/sdk/uploads) and pass the resulting CID in `metadata`.
@@ -809,7 +770,7 @@ await audiusSdk.users.updateUser({
 })
 ```
 
-#### `params`
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -844,29 +805,25 @@ example above.
 | `splUsdcPayoutWallet` | `string`          | Solana USDC payout wallet address             |
 | `coinFlairMint`       | `string`          | Coin flair mint address                       |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` resolving to an object with the following fields:
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
+## followUser
 
-### followUser
-
-#### followUser(`params`, `requestInit?`)
+> #### followUser(`params`, `requestInit?`)
 
 Follow a user.
 
@@ -879,7 +836,7 @@ await audiusSdk.users.followUser({
 })
 ```
 
-#### `params`
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -889,29 +846,25 @@ example above.
 | `userId`         | `string` | The ID of the user           | **Required** |
 | `followeeUserId` | `string` | The ID of the user to follow | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` resolving to an object with the following fields:
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
+## unfollowUser
 
-### unfollowUser
-
-#### unfollowUser(`params`, `requestInit?`)
+> #### unfollowUser(`params`, `requestInit?`)
 
 Unfollow a user.
 
@@ -924,7 +877,7 @@ await audiusSdk.users.unfollowUser({
 })
 ```
 
-#### `params`
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -934,29 +887,25 @@ example above.
 | `userId`         | `string` | The ID of the user             | **Required** |
 | `followeeUserId` | `string` | The ID of the user to unfollow | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` resolving to an object with the following fields:
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
+## subscribeToUser
 
-### subscribeToUser
-
-#### subscribeToUser(`params`, `requestInit?`)
+> #### subscribeToUser(`params`, `requestInit?`)
 
 Subscribe to a user.
 
@@ -969,7 +918,7 @@ await audiusSdk.users.subscribeToUser({
 })
 ```
 
-#### `params`
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -979,29 +928,25 @@ example above.
 | `userId`           | `string` | The ID of the user                 | **Required** |
 | `subscribeeUserId` | `string` | The ID of the user to subscribe to | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` resolving to an object with the following fields:
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
+## unsubscribeFromUser
 
-### unsubscribeFromUser
-
-#### unsubscribeFromUser(`params`, `requestInit?`)
+> #### unsubscribeFromUser(`params`, `requestInit?`)
 
 Unsubscribe from a user.
 
@@ -1014,7 +959,7 @@ await audiusSdk.users.unsubscribeFromUser({
 })
 ```
 
-#### `params`
+#### Params
 
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
@@ -1024,20 +969,18 @@ example above.
 | `userId`           | `string` | The ID of the user                     | **Required** |
 | `subscribeeUserId` | `string` | The ID of the user to unsubscribe from | **Required** |
 
-> #### `requestInit`
-
 You can pass an optional
 [`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
 argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
-Returns a `Promise` containing an object with the block hash (`blockHash`) and block number
-(`blockNumber`) for the transaction.
+Returns a `Promise` resolving to an object with the following fields:
 
 ```ts
 {
-  blockHash: string
-  blockNumber: number
+  transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
