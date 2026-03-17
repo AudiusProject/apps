@@ -38,6 +38,7 @@ import {
   removeNullable
 } from '../../../utils'
 import { getContext } from '../../effects'
+import { inboxUnavailableModalActions } from '../../ui/modals/inbox-unavailable-modal'
 
 import * as chatSelectors from './selectors'
 import { actions as chatActions } from './slice'
@@ -93,6 +94,7 @@ const {
 const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
   chatSelectors
 const { toast } = toastActions
+const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
 const CHAT_PAGE_SIZE = 30
 const MESSAGES_PAGE_SIZE = 50
@@ -433,14 +435,34 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
       yield* call(track, make({ eventName: Name.CREATE_CHAT_SUCCESS }))
     }
   } catch (e) {
-    yield* put(
-      toast({
-        type: 'error',
-        content: 'Something went wrong. Failed to create chat.'
-      })
-    )
+    const isPermissionError = isResponseError(e) && e.response?.status === 403
+    if (isPermissionError && userIds.length === 1) {
+      // Keep permission/block state in sync so the unavailable modal has the
+      // right CTA (follow/unblock/none) for this recipient.
+      yield* call(doFetchBlockees)
+      yield* call(doFetchBlockers)
+      yield* call(doFetchPermissions, fetchPermissions({ userIds }))
+
+      // Undo optimistic navigation for permission failures.
+      if (!skipNavigation) {
+        yield* put(goToChat({}))
+      }
+      yield* put(
+        openInboxUnavailableModal({
+          userId: userIds[0],
+          presetMessage
+        })
+      )
+    } else {
+      yield* put(
+        toast({
+          type: 'error',
+          content: 'Something went wrong. Failed to create chat.'
+        })
+      )
+    }
     const reportToSentry = yield* getContext('reportToSentry')
-    if (!isResponseError(e) || e.response?.status !== 403) {
+    if (!isPermissionError) {
       reportToSentry({
         name: 'Chats',
         error: e as Error,
