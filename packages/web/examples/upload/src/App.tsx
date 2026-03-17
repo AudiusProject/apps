@@ -50,10 +50,49 @@ export default function App() {
   const audioInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
 
-  // Re-initialize SDK on mount to pick up any stored OAuth state from a
-  // previous page load (e.g. after a full-page redirect OAuth flow).
+  // On mount: restore an existing session or handle an OAuth popup callback.
   useEffect(() => {
-    getSDK()
+    const sdk = getSDK()
+
+    // If the URL contains ?code=&state=, this page is returning from an OAuth
+    // redirect. handleRedirect() handles both cases:
+    //   - popup:      window.opener exists → forwards the code to the parent
+    //                 and closes the popup. login() in the parent resolves.
+    //   - fullScreen: no opener → performs the PKCE exchange locally and
+    //                 stores the tokens. Call getUser() afterwards to get the
+    //                 profile.
+    if (sdk.oauth.hasRedirectResult()) {
+      setLoading(true)
+      sdk.oauth
+        .handleRedirect()
+        .then(() => sdk.oauth.getUser())
+        .then((user) => {
+          setProfile(user)
+          setScreen('signed-in')
+        })
+        .catch((e: unknown) => {
+          setError(e instanceof Error ? e.message : 'Sign-in failed')
+        })
+        .finally(() => setLoading(false))
+      return
+    }
+
+    // Otherwise, if a session is already stored from a previous login, restore
+    // the profile via getUser() so the user doesn't have to sign in again.
+    sdk.oauth.isAuthenticated().then((authenticated) => {
+      if (!authenticated) return
+      setLoading(true)
+      sdk.oauth
+        .getUser()
+        .then((user) => {
+          setProfile(user)
+          setScreen('signed-in')
+        })
+        .catch(() => {
+          // Token may be expired — silently fall back to the sign-in screen.
+        })
+        .finally(() => setLoading(false))
+    })
   }, [])
 
   const handleSignIn = useCallback(async () => {
@@ -61,18 +100,19 @@ export default function App() {
     setLoading(true)
     try {
       const sdk = getSDK()
-      if (!sdk.oauth) {
-        setError('OAuth not available — make sure VITE_AUDIUS_API_KEY is set.')
-        return
-      }
-      // loginAsync with scope='write' triggers the PKCE flow. The SDK opens
-      // a popup, exchanges the auth code for tokens internally, and resolves
-      // with the user profile. No server required.
-      const { profile: p } = await sdk.oauth.loginAsync({
+      // login opens a popup pointing to the Audius consent screen. The popup
+      // redirects to redirectUri (set in SDK config) after the user approves.
+      // handleRedirect() on that page detects window.opener, forwards the
+      // auth code back to this window, and closes the popup.
+      //
+      // To use a full-page redirect instead, change display to 'fullScreen'.
+      // login will navigate away; handleRedirect() on the next mount will
+      // complete the exchange and restore the signed-in state.
+      await sdk.oauth.login({
         scope: 'write',
-        redirectUri: 'postMessage',
         display: 'popup'
       })
+      const p = await sdk.oauth.getUser()
       setProfile(p)
       setScreen('signed-in')
       setResult(null)
@@ -85,7 +125,7 @@ export default function App() {
 
   const handleSignOut = useCallback(async () => {
     const sdk = getSDK()
-    await sdk.oauth?.logout().catch(() => {})
+    await sdk.oauth.logout().catch(() => {})
     setProfile(null)
     setAudioFile(null)
     setCoverFile(null)
