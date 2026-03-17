@@ -62,7 +62,7 @@ export const PermissionsSection = ({
             ) : (
               <Flex direction='row' gap='s'>
                 <Flex w={16} />
-                <Text variant='body' size='s' color='subdued' flex={1}>
+                <Text variant='body' size='s' color='subdued' flexShrink={1}>
                   {scope === 'write'
                     ? messages.writeAccessGrants
                     : messages.readOnlyGrants}
@@ -77,7 +77,7 @@ export const PermissionsSection = ({
               <Divider />
               <Flex direction='row' gap='s' alignItems='center'>
                 <IconInfo color='default' width={16} height={16} />
-                <Text variant='body' size='m' color='default' flex={1}>
+                <Text variant='body' size='m' color='default' flexShrink={1}>
                   {messages.yourAccountData}
                 </Text>
               </Flex>

@@ -1,9 +1,9 @@
-import { SolanaWalletAddress } from '@audius/common/models'
+import type { SolanaWalletAddress } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
 import queryString from 'query-string'
 
 import { messages } from '../messages'
-import { OAuthFlow, ParsedParams } from '../types'
+import type { OAuthFlow, ParsedParams } from '../types'
 import { collapseScope, getIsRedirectValid, isValidApiKey } from '../utils'
 
 export const useParsedParams = (search: string): ParsedParams => {

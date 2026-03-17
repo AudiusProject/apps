@@ -788,7 +788,10 @@ export const audiusBackend = ({
    * @param bustCache
    * @returns balance or null if error
    */
-  async function getAddressTotalStakedBalance(address: string, sdk: AudiusSdkWithServices) {
+  async function getAddressTotalStakedBalance(
+    address: string,
+    sdk: AudiusSdkWithServices
+  ) {
     if (!address) return null
 
     try {

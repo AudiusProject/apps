@@ -58,6 +58,5 @@ export const messages = {
   invalidRecipientError:
     'Whoops, this is an invalid link (recipient address is invalid).',
   invalidAmountError: 'Whoops, this is an invalid link (amount is invalid).',
-  missingMintError:
-    'Whoops, this is an invalid link (mint address is missing).'
+  missingMintError: 'Whoops, this is an invalid link (mint address is missing).'
 }

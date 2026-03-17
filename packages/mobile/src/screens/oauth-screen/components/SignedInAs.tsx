@@ -1,7 +1,6 @@
-import { Image } from 'react-native'
-
 import type { UserMetadata } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
+import { Image } from 'react-native'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
 import { useProfilePicture } from 'app/components/image/UserImage'
