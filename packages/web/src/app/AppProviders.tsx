@@ -1,5 +1,6 @@
 import { ReactNode, useState, useMemo } from 'react'
 
+import { ThemePalette } from '@audius/common/models'
 import { MediaProvider } from '@audius/harmony/src/contexts'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -35,7 +36,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
 
   const [{ store, persistor }] = useState(() => {
     const theme = getTheme()
-    const themePalette = getThemePaletteFromStorage()
+    const themePalette = getThemePaletteFromStorage() ?? ThemePalette.DEFAULT
     const themeMode = getThemeModeFromStorage()
     const initialStoreState = {
       ui: {
