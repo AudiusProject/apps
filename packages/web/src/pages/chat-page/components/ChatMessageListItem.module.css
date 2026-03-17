@@ -36,7 +36,7 @@
 }
 
 .isAuthor .bubble {
-  --bubble-color: var(--harmony-s-100);
+  --bubble-color: var(--harmony-s-300);
 }
 
 .isAuthor .bubble:hover {
