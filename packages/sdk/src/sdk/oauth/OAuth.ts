@@ -1,5 +1,5 @@
-import type { DecodedUserToken } from '../api/generated/default'
-import { FetchError, ResponseError } from '../api/generated/default/runtime'
+import { FetchError, ResponseError, UserFromJSON } from '../api/generated/default'
+import type { User } from '../api/generated/default'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid } from '../utils/oauthScope'
 
@@ -315,7 +315,7 @@ export class OAuth {
    * if no token is stored or the token has expired), or `FetchError` if the
    * request fails at the network level.
    */
-  async getUser(): Promise<DecodedUserToken> {
+  async getUser(): Promise<User> {
     const accessToken = await this.config.tokenStore.getAccessToken()
     const headers: Record<string, string> = {}
     if (accessToken) {
@@ -333,7 +333,8 @@ export class OAuth {
     if (!res.ok) {
       throw new ResponseError(res, 'Failed to fetch user profile.')
     }
-    return (await res.json()) as DecodedUserToken
+    const json = await res.json()
+    return UserFromJSON(json.data)
   }
 
   /**
