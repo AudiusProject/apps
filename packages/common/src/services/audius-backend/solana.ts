@@ -436,33 +436,38 @@ export const recoverUsdcFromRootWallet = async ({
 }
 
 /**
- * Swaps a small amount of USDC from the user's userbank to native SOL and
- * delivers the SOL to `keypair.publicKey`. Used to pre-fund the user's root
- * wallet so it can pay for destination ATA rent without going through the
- * relay's rate-limited token-account-creation path.
+ * Creates a destination ATA funded by the user's own USDC:
+ * 1. Swaps a small USDC fee from the userbank to native SOL via Jupiter (relay pays gas),
+ *    landing the SOL in the user's root wallet.
+ * 2. Uses that SOL to create the destination ATA directly from the root wallet,
+ *    completely bypassing the relay and its token-account-creation rate limit.
  */
-const prefundAtaCreationFromUsdc = async ({
+const createUserFundedAta = async ({
   sdk,
   connection,
   keypair,
   mint,
-  ethWallet
+  ethWallet,
+  destination,
+  destinationWallet
 }: {
   sdk: AudiusSdkWithServices
   connection: Connection
   keypair: Keypair
   mint: PublicKey
   ethWallet: string
+  destination: PublicKey
+  destinationWallet: PublicKey
 }): Promise<void> => {
   const feePayer = await sdk.services.solanaRelay.getFeePayer()
 
-  // How much SOL we need: ATA rent + small buffer for the surrounding tx fee
+  // SOL needed: ATA rent + buffer to cover the direct ATA creation tx fee
   const rentExemptLamports =
     await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
   const totalSolNeededLamports = rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
   const totalSolNeededUi = totalSolNeededLamports / 1e9
 
-  // Get a Jupiter quote: USDC → SOL, ExactOut so we receive exactly the rent amount
+  // ExactOut quote: receive exactly the rent amount, pay however much USDC it costs
   const { quoteResult: solQuote } = await getJupiterQuoteByMintWithRetry({
     inputMint: mint.toBase58(),
     outputMint: SOL_MINT,
@@ -475,12 +480,13 @@ const prefundAtaCreationFromUsdc = async ({
 
   const feeAmountUsdc = BigInt(solQuote.inputAmount.amountString)
   console.debug(
-    `prefundAtaCreationFromUsdc: swapping ${feeAmountUsdc} USDC for ${totalSolNeededLamports} lamports`
+    `createUserFundedAta: swapping ${feeAmountUsdc} USDC for ${totalSolNeededLamports} lamports`
   )
 
+  // --- TX 1 (via relay): USDC fee → native SOL in root wallet ---
   const prefundInstructions: TransactionInstruction[] = []
 
-  // Create root wallet's temporary USDC ATA (idempotent; relay pays rent, reclaimed at end)
+  // Temporary USDC ATA for the root wallet (relay pays rent, reclaimed at end)
   const rootWalletUsdcAta = getAssociatedTokenAddressSync(
     mint,
     keypair.publicKey,
@@ -495,7 +501,6 @@ const prefundAtaCreationFromUsdc = async ({
     )
   )
 
-  // Transfer USDC fee from userbank to root wallet's USDC ATA
   const secpFeeInstruction =
     await sdk.services.claimableTokensClient.createTransferSecpInstruction({
       amount: feeAmountUsdc,
@@ -514,7 +519,7 @@ const prefundAtaCreationFromUsdc = async ({
     })
   prefundInstructions.push(transferFeeInstruction)
 
-  // Internal transfer memo (required for USDC transfers)
+  // USDC internal-transfer memo
   prefundInstructions.push(
     new TransactionInstruction({
       keys: [{ pubkey: rootWalletUsdcAta, isSigner: false, isWritable: true }],
@@ -523,7 +528,7 @@ const prefundAtaCreationFromUsdc = async ({
     })
   )
 
-  // Jupiter swap: root wallet's USDC ATA → native SOL (unwrapped into keypair's wallet)
+  // Jupiter swap: USDC ATA → native SOL unwrapped into root wallet
   const swapRequest = {
     quoteResponse: solQuote.quote,
     userPublicKey: keypair.publicKey.toBase58(),
@@ -545,12 +550,11 @@ const prefundAtaCreationFromUsdc = async ({
   ])
   prefundInstructions.push(swapInstruction)
 
-  // Close the temporary USDC ATA (returns relay's rent to fee payer)
+  // Close the temporary USDC ATA, returning relay's rent to fee payer
   prefundInstructions.push(
     createCloseAccountInstruction(rootWalletUsdcAta, feePayer, keypair.publicKey)
   )
 
-  // Build, sign, and send via relay (relay pays gas; keypair signs as swap authority)
   const prefundTx = await sdk.services.solanaClient.buildTransaction({
     feePayer,
     instructions: prefundInstructions,
@@ -562,12 +566,31 @@ const prefundAtaCreationFromUsdc = async ({
   const prefundSig = await sdk.services.solanaClient.sendTransaction(prefundTx, {
     skipPreflight: true
   })
-
-  // Wait for the SOL to land before the next transaction tries to spend it
   await connection.confirmTransaction(prefundSig, 'confirmed')
-  console.debug(
-    `prefundAtaCreationFromUsdc: pre-fund tx confirmed: ${prefundSig}`
+  console.debug(`createUserFundedAta: pre-fund tx confirmed: ${prefundSig}`)
+
+  // --- TX 2 (direct, no relay): root wallet creates the destination ATA ---
+  // The relay never sees this transaction, so its rate limit is not involved.
+  const { blockhash } = await connection.getLatestBlockhash()
+  const createAtaTx = new Transaction({
+    recentBlockhash: blockhash,
+    feePayer: keypair.publicKey
+  })
+  createAtaTx.add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      keypair.publicKey,
+      destination,
+      destinationWallet,
+      mint
+    )
   )
+  createAtaTx.sign(keypair)
+  const ataSig = await connection.sendRawTransaction(
+    createAtaTx.serialize(),
+    { skipPreflight: true }
+  )
+  await connection.confirmTransaction(ataSig, 'confirmed')
+  console.debug(`createUserFundedAta: ATA creation confirmed: ${ataSig}`)
 }
 
 /**
@@ -676,24 +699,19 @@ export const transferFromUserBank = async ({
         )
 
         if (keypair) {
-          // User-funded ATA creation: swap USDC to SOL via Jupiter so the user's
-          // root wallet can pay for the destination ATA rent, bypassing relay limits.
-          await prefundAtaCreationFromUsdc({
+          // User-funded ATA creation: swap a USDC fee to SOL, then create the
+          // destination ATA directly from the root wallet — the relay never sees
+          // an unmatched create instruction, so its rate limit is not involved.
+          await createUserFundedAta({
             sdk,
             connection,
             keypair,
             mint,
-            ethWallet
+            ethWallet,
+            destination,
+            destinationWallet
           })
-          // Root wallet is now the ATA rent payer (relay only pays gas for the tx)
-          instructions.push(
-            createAssociatedTokenAccountIdempotentInstruction(
-              keypair.publicKey,
-              destination,
-              destinationWallet,
-              mint
-            )
-          )
+          // ATA now exists on-chain; no instruction needed in the main tx.
         } else {
           // Fallback: relay-funded ATA creation (subject to daily rate limit)
           const payerKey = await sdk.services.solanaRelay.getFeePayer()
@@ -746,13 +764,8 @@ export const transferFromUserBank = async ({
       instructions
     })
 
-    // Sign with keypair if creating user-funded ATA (as ATA rent payer) or as withdrawal signer
-    const signers = [signer, keypair && isCreatingTokenAccount ? keypair : null]
-      .filter((k): k is Keypair => k != null)
-      // Deduplicate in case signer === keypair
-      .filter((k, i, arr) => arr.findIndex(x => x.publicKey.equals(k.publicKey)) === i)
-    if (signers.length > 0) {
-      transaction.sign(signers)
+    if (signer) {
+      transaction.sign([signer])
     }
 
     const signature =

@@ -148,39 +148,28 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
       wallet &&
       matchingCreateInstructions.length !== matchingCloseInstructions.length
     ) {
-      // When the ATA rent payer is the relay fee payer, the relay is absorbing
-      // the cost, so rate limiting applies. When the payer is the user's own
-      // wallet (funded via a USDC→SOL swap earlier in the tx), no rate limit
-      // is needed – the user is paying for their own token account.
-      const ataPayerIsRelayFeePayer =
-        options?.feePayer &&
-        decodedInstruction.keys.payer.pubkey.toBase58() === options.feePayer
-
-      if (ataPayerIsRelayFeePayer) {
-        try {
-          let memo: string | undefined
-          if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
-            memo = PAYOUT_WALLET_MEMO
-          } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
-            memo = PREPARE_WITHDRAWAL_MEMO
-          }
-          const isAbusive = await isUserAbusive(wallet)
-          if (isAbusive) {
-            throw new InvalidRelayInstructionError(
-              instructionIndex,
-              'User is abusive'
-            )
-          }
-          // In this situation, we could be losing SOL because the user is allowed to
-          // close their own ATA and reclaim the rent that we've fronted, so
-          // rate limit it cautiously.
-          await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
-        } catch (e) {
-          const error = e as Error
-          throw new InvalidRelayInstructionError(instructionIndex, error.message)
+      try {
+        let memo: string | undefined
+        if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
+          memo = PAYOUT_WALLET_MEMO
+        } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
+          memo = PREPARE_WITHDRAWAL_MEMO
         }
+        const isAbusive = await isUserAbusive(wallet)
+        if (isAbusive) {
+          throw new InvalidRelayInstructionError(
+            instructionIndex,
+            'User is abusive'
+          )
+        }
+        // In this situation, we could be losing SOL because the user is allowed to
+        // close their own ATA and reclaim the rent that we've fronted, so
+        // rate limit it cautiously.
+        await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
+      } catch (e) {
+        const error = e as Error
+        throw new InvalidRelayInstructionError(instructionIndex, error.message)
       }
-      // else: user-funded ATA (payer = user's root wallet) – no rate limit needed
     } else if (
       matchingCreateInstructions.length !== matchingCloseInstructions.length
     ) {
