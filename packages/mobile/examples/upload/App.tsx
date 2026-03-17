@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+import type { DecodedUserToken } from '@audius/sdk'
+import * as DocumentPicker from 'expo-document-picker'
+import * as ImagePicker from 'expo-image-picker'
+import { StatusBar } from 'expo-status-bar'
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,17 +13,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { WebView } from 'react-native-webview'
-import { StatusBar } from 'expo-status-bar'
-import * as Linking from 'expo-linking'
-import * as DocumentPicker from 'expo-document-picker'
-import * as ImagePicker from 'expo-image-picker'
-import { buildOAuthUrl, randomState } from './src/oauth/buildOAuthUrl'
-import { getSDK } from './src/sdk'
-import { config } from './src/config'
 
-const REDIRECT_URI = 'http://localhost/oauth/callback'
-const REDIRECT_URI_OR_SCHEME = REDIRECT_URI
+import { config } from './src/config'
+import { getSDK } from './src/sdk'
 
 const GENRES = [
   'Electronic',
@@ -33,7 +30,7 @@ const GENRES = [
   'Classical'
 ] as const
 
-type Screen = 'home' | 'webview' | 'signed-in'
+type Screen = 'home' | 'signed-in'
 
 async function formatApiError(reason: unknown): Promise<string> {
   if (reason != null && typeof reason === 'object' && 'response' in reason) {
@@ -50,83 +47,67 @@ async function formatApiError(reason: unknown): Promise<string> {
   return reason instanceof Error ? reason.message : 'Request failed'
 }
 
-
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string; userId: string } | null>(null)
-  const [audioFile, setAudioFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null)
+  const [profile, setProfile] = useState<DecodedUserToken | null>(null)
+  const [audioFile, setAudioFile] =
+    useState<DocumentPicker.DocumentPickerAsset | null>(null)
   const [coverUri, setCoverUri] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [genre, setGenre] = useState<(typeof GENRES)[number]>('Electronic')
   const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
-  const oauthStateRef = useRef<string | null>(null)
 
-  const handleOpenAuth = useCallback(() => {
-    setError(null)
-    const state = randomState()
-    oauthStateRef.current = state
-    setScreen('webview')
+  // On mount: restore existing session.
+  useEffect(() => {
+    const sdk = getSDK()
+
+    // Restore a previously authenticated session.
+    sdk.oauth.isAuthenticated().then((authenticated) => {
+      if (!authenticated) return
+      setLoading(true)
+      sdk.oauth
+        .getUser()
+        .then((user) => {
+          setProfile(user)
+          setScreen('signed-in')
+        })
+        .catch(() => {
+          // Token expired — fall back to sign-in screen silently.
+        })
+        .finally(() => setLoading(false))
+    })
   }, [])
 
-  const handleRedirect = useCallback(async (url: string) => {
-    const isRedirect =
-      url.startsWith(REDIRECT_URI_OR_SCHEME) ||
-      url.startsWith('audiusauth://oauth/callback')
-    if (!isRedirect) return
-    setScreen('home')
-    setLoading(true)
+  const handleSignIn = useCallback(async () => {
+    const sdk = getSDK()
     setError(null)
+    setLoading(true)
     try {
-      const parsed = Linking.parse(url)
-      const query = (parsed.queryParams ?? {}) as Record<string, string>
-      const token =
-        query.token ??
-        query.access_token ??
-        (parsed.fragment ?? '').split('token=')[1]?.split('&')[0]
-      const state = query.state
-      if (!token) {
-        setError('No token in redirect')
-        return
-      }
-      if (state !== oauthStateRef.current) {
-        setError('State mismatch')
-        return
-      }
-      const verifyRes = await getSDK().users.verifyIDToken({ token })
-      const data = verifyRes.data
-      if (data) {
-        const userId = String(data.userId ?? data.sub ?? '')
-        setProfile({
-          handle: data.handle ?? data.sub ?? 'Unknown',
-          userId
-        })
-        setScreen('signed-in')
-        setResult(null)
-      } else {
-        setError('Invalid token')
-      }
+      // login() resolves after the full OAuth flow: expo-web-browser opens an
+      // isolated auth session, captures the redirect, exchanges the code for
+      // tokens, and settles the promise — no separate deep-link event needed.
+      await sdk.oauth.login({
+        scope: 'write',
+        display: 'fullScreen'
+      })
+      const user = await sdk.oauth.getUser()
+      setProfile(user)
+      setScreen('signed-in')
     } catch (e: unknown) {
-      setError(await formatApiError(e))
+      setError(e instanceof Error ? e.message : 'Sign-in failed')
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    const sub = Linking.addEventListener('url', (event) => {
-      handleRedirect(event.url)
-    })
-    Linking.getInitialURL().then((url) => {
-      if (url) handleRedirect(url)
-    })
-    return () => sub.remove()
-  }, [handleRedirect])
-
-  const handleSignOut = useCallback(() => {
+  const handleSignOut = useCallback(async () => {
+    await getSDK()
+      .oauth.logout()
+      .catch(() => {})
     setProfile(null)
     setAudioFile(null)
     setCoverUri(null)
@@ -155,14 +136,13 @@ export default function App() {
   const pickCover = useCallback(async () => {
     try {
       const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8
       })
       if (res.canceled) return
-      const uri = res.assets[0]?.uri
-      setCoverUri(uri ?? null)
+      setCoverUri(res.assets[0]?.uri ?? null)
       setResult(null)
     } catch (e) {
       setResult(e instanceof Error ? e.message : 'Failed to pick cover')
@@ -170,7 +150,7 @@ export default function App() {
   }, [])
 
   const handleUpload = useCallback(async () => {
-    if (!config.writeServerUrl || !profile) return
+    if (!profile) return
     if (!audioFile) {
       setResult('Please select an audio file')
       return
@@ -183,106 +163,74 @@ export default function App() {
     setResult(null)
     try {
       const sdk = getSDK()
-      const audioFileForSdk = {
-        uri: audioFile.uri,
-        name: audioFile.name ?? 'audio',
-        type: audioFile.mimeType ?? 'audio/mpeg'
-      }
-      const imageFileForSdk = coverUri
-        ? { uri: coverUri, name: 'cover.jpg', type: 'image/jpeg' as const }
-        : undefined
+
+      // Step 1 — upload audio
       setResult('Uploading audio...')
-      const task = sdk.tracks.uploadTrackFiles({
-        audioFile: audioFileForSdk,
-        imageFile: imageFileForSdk
+      const audioUpload = sdk.uploads.createAudioUpload({
+        file: {
+          uri: audioFile.uri,
+          name: audioFile.name ?? 'audio',
+          type: audioFile.mimeType ?? 'audio/mpeg'
+        }
       })
-      const { audioUploadResponse, imageUploadResponse } = await task.start()
-      if (!audioUploadResponse?.results?.['320']) {
-        setResult('Audio upload did not return track CID')
+
+      // Step 2 — upload cover art (optional)
+      const imageUpload = coverUri
+        ? sdk.uploads.createImageUpload({
+            file: { uri: coverUri, name: 'cover.jpg', type: 'image/jpeg' }
+          })
+        : undefined
+
+      if (coverUri) setResult('Uploading cover art...')
+      const [audioResult, coverArtSizes] = await Promise.all([
+        audioUpload.start(),
+        imageUpload?.start()
+      ])
+
+      if (!audioResult.trackCid) {
+        setResult('Audio upload did not return a track CID')
         return
       }
+
+      // Step 3 — create the track using the OAuth access token stored in the SDK.
       setResult('Creating track...')
-      const res = await fetch(`${config.writeServerUrl}/create-track`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: profile.userId,
-          metadata: {
-            title: title.trim(),
-            genre,
-            trackCid: audioUploadResponse.results['320'],
-            description: description.trim() || undefined,
-            duration:
-              parseInt(audioUploadResponse.probe?.format?.duration ?? '0', 10) || undefined,
-            origFileCid: audioUploadResponse.orig_file_cid,
-            origFilename: audioUploadResponse.orig_filename,
-            coverArtCid: imageUploadResponse?.orig_file_cid
-          }
-        })
+      const userId = String(profile.userId ?? profile.sub ?? '')
+      const res = await sdk.tracks.createTrack({
+        userId,
+        metadata: {
+          title: title.trim(),
+          genre,
+          ...audioResult,
+          trackCid: audioResult.trackCid,
+          description: description.trim() || undefined,
+          coverArtSizes
+        }
       })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        setResult(`Track created! ID: ${data.trackId ?? '—'}`)
-      } else {
-        setResult(data?.error ?? `Error ${res.status}`)
-      }
+      setResult(`Track created! ID: ${res?.trackId ?? '—'}`)
     } catch (e) {
       setResult(await formatApiError(e))
     } finally {
       setUploading(false)
     }
-  }, [profile, audioFile, title, genre, description, coverUri])
-
-  if (screen === 'webview') {
-    const state = oauthStateRef.current ?? randomState()
-    oauthStateRef.current = state
-    const oauthUrl = buildOAuthUrl({
-      scope: 'write',
-      redirectUri: REDIRECT_URI,
-      state,
-      responseMode: 'query',
-      display: 'fullScreen',
-      ...(config.apiKey ? { apiKey: config.apiKey } : { appName: 'UploadExample' })
-    })
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setScreen('home')}>
-          <Text style={styles.backBtnText}>← Cancel</Text>
-        </TouchableOpacity>
-        <WebView
-          source={{ uri: oauthUrl }}
-          style={styles.webview}
-          onShouldStartLoadWithRequest={(req) => {
-            const isRedirect =
-              req.url.startsWith(REDIRECT_URI_OR_SCHEME) ||
-              req.url.startsWith('audiusauth://oauth/callback')
-            if (isRedirect) {
-              handleRedirect(req.url)
-              return false
-            }
-            return true
-          }}
-        />
-        <StatusBar style="auto" />
-      </View>
-    )
-  }
+  }, [profile, audioFile, coverUri, title, genre, description])
 
   if (!config.isConfigured) {
     return (
       <View style={styles.container}>
         <View style={styles.card}>
-          <Text style={styles.title}>Upload track</Text>
-          <Text style={styles.required}>
-            Requires your server. Create a .env with:
+          <Text style={styles.title}>OAuth Upload</Text>
+          <Text style={styles.body}>
+            Requires an Audius developer app API key.
           </Text>
-          <Text style={styles.code}>EXPO_PUBLIC_AUDIUS_API_KEY=your_api_key</Text>
-          <Text style={styles.code}>EXPO_PUBLIC_WRITE_SERVER_URL=http://localhost:3003</Text>
-          <Text style={styles.required}>
-            Run the server with AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN. See README.
+          <Text style={styles.body}>Create a .env file with:</Text>
+          <Text style={styles.code}>
+            EXPO_PUBLIC_AUDIUS_API_KEY=your_api_key
+          </Text>
+          <Text style={styles.body}>
+            Get one at audius.co/settings → Developer Apps.
           </Text>
         </View>
-        <StatusBar style="auto" />
+        <StatusBar style='auto' />
       </View>
     )
   }
@@ -290,16 +238,22 @@ export default function App() {
   if (screen === 'signed-in' && profile) {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.profileRow}>
-            <Text style={styles.profileHandle}>@{profile.handle}</Text>
+            <Text style={styles.handle}>
+              @{profile.handle ?? profile.sub ?? 'user'}
+            </Text>
             <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
               <Text style={styles.signOutBtnText}>Sign out</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.title}>Upload track</Text>
           <Text style={styles.subtitle}>
-            Pick an audio file and add metadata. Server creates the track with your app bearer.
+            Pick an audio file and add metadata. The track is created directly
+            via the OAuth access token — no backend server needed.
           </Text>
 
           <TouchableOpacity style={styles.pickBtn} onPress={pickAudio}>
@@ -318,8 +272,8 @@ export default function App() {
 
           <TextInput
             style={styles.input}
-            placeholder="Track title"
-            placeholderTextColor="#888"
+            placeholder='Track title'
+            placeholderTextColor='#888'
             value={title}
             onChangeText={setTitle}
           />
@@ -333,7 +287,10 @@ export default function App() {
             {GENRES.map((g) => (
               <TouchableOpacity
                 key={g}
-                style={[styles.genreChip, genre === g && styles.genreChipActive]}
+                style={[
+                  styles.genreChip,
+                  genre === g && styles.genreChipActive
+                ]}
                 onPress={() => setGenre(g)}
               >
                 <Text
@@ -350,8 +307,8 @@ export default function App() {
 
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Description (optional)"
-            placeholderTextColor="#888"
+            placeholder='Description (optional)'
+            placeholderTextColor='#888'
             value={description}
             onChangeText={setDescription}
             multiline
@@ -364,17 +321,15 @@ export default function App() {
             disabled={uploading}
           >
             {uploading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size='small' color='#fff' />
             ) : (
               <Text style={styles.buttonText}>Upload</Text>
             )}
           </TouchableOpacity>
 
-          {result ? (
-            <Text style={styles.result}>{result}</Text>
-          ) : null}
+          {result ? <Text style={styles.result}>{result}</Text> : null}
         </ScrollView>
-        <StatusBar style="auto" />
+        <StatusBar style='auto' />
       </View>
     )
   }
@@ -382,16 +337,17 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.center}>
-        <Text style={styles.title}>Audius Upload</Text>
+        <Text style={styles.title}>Audius OAuth Upload</Text>
         <Text style={styles.subtitle}>
-          Sign in with Audius (write scope) to authorize the app, then upload a track.
+          Sign in with Audius (write scope) — uploads and track creation happen
+          entirely on-device using the OAuth access token.
         </Text>
         {loading ? (
-          <ActivityIndicator size="large" style={styles.loader} />
+          <ActivityIndicator size='large' style={styles.loader} />
         ) : (
           <TouchableOpacity
             style={styles.button}
-            onPress={handleOpenAuth}
+            onPress={handleSignIn}
             disabled={loading}
           >
             <Text style={styles.buttonText}>Sign in with Audius</Text>
@@ -399,7 +355,7 @@ export default function App() {
         )}
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
-      <StatusBar style="auto" />
+      <StatusBar style='auto' />
     </View>
   )
 }
@@ -407,8 +363,16 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingTop: 60 },
   center: { flex: 1, padding: 24, justifyContent: 'center' },
+  card: {
+    margin: 24,
+    padding: 24,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12
+  },
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#666', marginBottom: 24 },
+  body: { fontSize: 13, color: '#333', marginTop: 8 },
+  code: { fontFamily: 'monospace', fontSize: 12, color: '#555', marginTop: 6 },
   button: {
     backgroundColor: '#CC0FE0',
     paddingVertical: 14,
@@ -420,9 +384,6 @@ const styles = StyleSheet.create({
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   loader: { marginVertical: 16 },
   error: { color: '#d32f2f', marginTop: 12 },
-  backBtn: { padding: 16 },
-  backBtnText: { color: '#0066cc', fontSize: 16 },
-  webview: { flex: 1 },
   scroll: { flex: 1 },
   scrollContent: { padding: 24, paddingBottom: 48 },
   profileRow: {
@@ -431,7 +392,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16
   },
-  profileHandle: { fontSize: 16, color: '#333' },
+  handle: { fontSize: 16, color: '#333' },
   signOutBtn: { paddingVertical: 8, paddingHorizontal: 16 },
   signOutBtnText: { color: '#0066cc', fontSize: 16 },
   pickBtn: {
@@ -463,13 +424,5 @@ const styles = StyleSheet.create({
   genreChipActive: { backgroundColor: '#CC0FE0' },
   genreChipText: { fontSize: 14, color: '#333' },
   genreChipTextActive: { color: '#fff', fontWeight: '600' },
-  result: {
-    marginTop: 16,
-    fontSize: 13,
-    color: '#555',
-    lineHeight: 20
-  },
-  required: { fontSize: 13, color: '#333', marginTop: 12 },
-  code: { fontFamily: 'monospace', fontSize: 12, color: '#555', marginTop: 6 },
-  card: { margin: 24, padding: 24, backgroundColor: '#f5f5f5', borderRadius: 12 }
+  result: { marginTop: 16, fontSize: 13, color: '#555', lineHeight: 20 }
 })
