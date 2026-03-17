@@ -1,12 +1,15 @@
 import { promises } from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 import {
   EthRewardsManager,
   ServiceProviderFactory,
   ServiceTypeManager
 } from '@audius/eth'
-import { range } from 'lodash'
+import range from 'lodash/range.js'
 import { createPublicClient, hexToString, http } from 'viem'
 import { mainnet } from 'viem/chains'
 
