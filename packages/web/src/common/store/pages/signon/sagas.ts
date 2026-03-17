@@ -583,36 +583,58 @@ function* signUp() {
                 sdk.services.audiusWalletClient,
                 sdk.services.audiusWalletClient.getAddresses
               ])
+              const existingAccount = alreadyExisted
+                ? yield* call(getWalletAccountSaga, wallet, sdk, queryClient)
+                : null
 
-              const events: CreateUserRequestWithFiles['metadata']['events'] =
-                {}
-              if (referrer) {
-                events.referrer = OptionalId.parse(referrer)
-              }
-              if (isNativeMobile) {
-                events.isMobileUser = true
-              }
-
-              const createUserMetadata: CreateUserRequestWithFiles = {
-                profilePictureFile: signOn.profileImage?.file as File,
-                coverArtFile: signOn.coverPhoto?.file as File,
-                metadata: {
-                  location: location ?? undefined,
-                  name,
-                  events,
-                  handle,
-                  wallet
+              if (existingAccount) {
+                const updateUserMetadata: UpdateUserRequestWithFiles = {
+                  id: Id.parse(existingAccount.user.user_id),
+                  userId: Id.parse(existingAccount.user.user_id),
+                  profilePictureFile: signOn.profileImage?.file as File,
+                  coverArtFile: signOn.coverPhoto?.file as File,
+                  metadata: {
+                    location: location ?? undefined,
+                    name,
+                    ...(existingAccount.user.handle ? {} : { handle })
+                  }
                 }
-              }
+                yield* call(
+                  [sdk.users, sdk.users.updateUser],
+                  updateUserMetadata
+                )
+                userId = existingAccount.user.user_id
+              } else {
+                const events: CreateUserRequestWithFiles['metadata']['events'] =
+                  {}
+                if (referrer) {
+                  events.referrer = OptionalId.parse(referrer)
+                }
+                if (isNativeMobile) {
+                  events.isMobileUser = true
+                }
 
-              const { userId: returnedUserId } = yield* call(
-                [sdk.users, sdk.users.createUser],
-                createUserMetadata
-              )
-              if (!returnedUserId) {
-                throw new Error('User ID not returned from createUser')
+                const createUserMetadata: CreateUserRequestWithFiles = {
+                  profilePictureFile: signOn.profileImage?.file as File,
+                  coverArtFile: signOn.coverPhoto?.file as File,
+                  metadata: {
+                    location: location ?? undefined,
+                    name,
+                    events,
+                    handle,
+                    wallet
+                  }
+                }
+
+                const { userId: returnedUserId } = yield* call(
+                  [sdk.users, sdk.users.createUser],
+                  createUserMetadata
+                )
+                if (!returnedUserId) {
+                  throw new Error('User ID not returned from createUser')
+                }
+                userId = decodeHashId(returnedUserId)!
               }
-              userId = decodeHashId(returnedUserId)!
             }
 
             yield* put(
