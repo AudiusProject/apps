@@ -224,6 +224,30 @@ describe('Solana Relay', function () {
       await assertRelayAllowedInstructions(complexInstructions)
     })
 
+    it('should allow user-funded ATA creation without close (payer is not relay fee payer)', async function () {
+      const feePayer = getRandomPublicKey()
+      const userWallet = getRandomPublicKey()
+      const associatedToken = getRandomPublicKey()
+      const owner = getRandomPublicKey()
+      const wallet = 'some-eth-wallet'
+
+      // ATA payer is the user's root wallet (not the relay fee payer) – no rate limit, no close needed
+      const instructions = [
+        createAssociatedTokenAccountInstruction(
+          userWallet, // user's root wallet pays for ATA rent
+          associatedToken,
+          owner,
+          usdcMintKey
+        )
+      ]
+      await assert.doesNotReject(async () =>
+        assertRelayAllowedInstructions(instructions, {
+          user: { wallet, is_verified: false },
+          feePayer: feePayer.toBase58() // different from userWallet
+        })
+      )
+    })
+
     it('should not allow create token account without close', async function () {
       const payer = getRandomPublicKey()
       const associatedToken = getRandomPublicKey()
