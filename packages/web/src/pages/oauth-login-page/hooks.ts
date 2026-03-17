@@ -31,9 +31,9 @@ import {
   handleAuthorizeConnectDashboardWallet,
   handleAuthorizeDisconnectDashboardWallet,
   isValidApiKey,
-  validateWriteOnceParams,
-  WriteOnceParams,
-  WriteOnceTx
+  validateDashboardWalletParams,
+  type DashboardWalletTxParams,
+  type DashboardWalletTx
 } from './utils'
 
 // Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
@@ -50,7 +50,6 @@ const collapseScopes = (
     .flatMap((s) => (s != null ? s.split(/\s+/) : []))
     .filter((t) => t.length > 0)
   if (tokens.includes('write')) return 'write'
-  if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('read')) return 'read'
   return typeof raw === 'string' ? raw : null
 }
@@ -115,17 +114,13 @@ const useParsedQueryParams = () => {
 
   const { error, txParams } = useMemo(() => {
     let error: string | null = null
-    let txParams: WriteOnceParams | null = null // Only used for scope=write_once
+    let txParams: DashboardWalletTxParams | null = null
     if (isRedirectValid === false) {
       error = messages.redirectURIInvalidError
     } else if (parsedRedirectUri === 'postmessage' && !parsedOrigin) {
       // Only applicable if redirect URI set to `postMessage`
       error = messages.originInvalidError
-    } else if (
-      scope !== 'read' &&
-      scope !== 'write' &&
-      scope !== 'write_once'
-    ) {
+    } else if (scope !== 'read' && scope !== 'write') {
       error = messages.scopeError
     } else if (
       responseMode &&
@@ -153,18 +148,20 @@ const useParsedQueryParams = () => {
           error = messages.invalidCodeChallengeMethodError
         }
       }
-    } else if (scope === 'write_once') {
-      // Write-once scope-specific validations:
-      const { error: writeOnceParamsError, txParams: txParamsRes } =
-        validateWriteOnceParams({
-          tx,
-          params: rest,
-          willUsePostMessage: parsedRedirectUri === 'postmessage'
-        })
-      txParams = txParamsRes
-
-      if (writeOnceParamsError) {
-        error = writeOnceParamsError
+      // Parse tx params for connect_dashboard_wallet / disconnect_dashboard_wallet.
+      // These are write-once style flows: no persistent write grant is created.
+      if (!error && tx) {
+        const { error: txParamsError, txParams: txParamsRes } =
+          validateDashboardWalletParams({
+            tx,
+            params: rest,
+            willUsePostMessage: parsedRedirectUri === 'postmessage',
+            hasOrigin: parsedOrigin != null
+          })
+        txParams = txParamsRes
+        if (txParamsError) {
+          error = txParamsError
+        }
       }
     }
     return { txParams, error }
@@ -498,34 +495,12 @@ export const useOAuthSetup = ({
     let shouldCreateWriteGrant = false
 
     if (scope === 'write') {
-      try {
-        shouldCreateWriteGrant = !(await getIsAppAuthorized({
-          userId: Id.parse(account.user_id),
-          apiKey: apiKey as string
-        }))
-        if (shouldCreateWriteGrant) {
-          await authWrite({
-            userId: Id.parse(account.user_id),
-            appApiKey: apiKey as string
-          })
-        }
-      } catch (e: unknown) {
-        let error = 'Creating write grant failed'
-        if (typeof e === 'string') {
-          error = e.toUpperCase()
-        } else if (e instanceof Error) {
-          error = e.message
-        }
-        onError({
-          isUserError: false,
-          errorMessage: messages.miscError,
-          error: e instanceof Error ? e : new Error(error)
-        })
-        return
-      }
-    } else if (scope === 'write_once') {
-      // Note: Tx = 'connect_dashboard_wallet' since that's the only option available right now for write_once scope
-      if ((tx as WriteOnceTx) === 'connect_dashboard_wallet') {
+      // Connect/disconnect dashboard wallet: write-once style — no persistent grant.
+      // Only the specific tx is executed; the app does not receive ongoing write access.
+      if (
+        (tx as DashboardWalletTx) === 'connect_dashboard_wallet' &&
+        txParams != null
+      ) {
         const success = await handleAuthorizeConnectDashboardWallet({
           state,
           originUrl: parsedOrigin,
@@ -533,18 +508,48 @@ export const useOAuthSetup = ({
           onWaitForWalletSignature: onPendingTransactionApproval,
           onReceivedWalletSignature: onReceiveTransactionApproval,
           account,
-          txParams: txParams!
+          txParams
         })
         if (!success) {
           return
         }
-      } else if ((tx as WriteOnceTx) === 'disconnect_dashboard_wallet') {
+      } else if (
+        (tx as DashboardWalletTx) === 'disconnect_dashboard_wallet' &&
+        txParams != null
+      ) {
         const success = await handleAuthorizeDisconnectDashboardWallet({
           account,
-          txParams: txParams!,
+          txParams,
           onError
         })
         if (!success) {
+          return
+        }
+      } else {
+        // Standard write grant for general write scope
+        try {
+          shouldCreateWriteGrant = !(await getIsAppAuthorized({
+            userId: Id.parse(account.user_id),
+            apiKey: apiKey as string
+          }))
+          if (shouldCreateWriteGrant) {
+            await authWrite({
+              userId: Id.parse(account.user_id),
+              appApiKey: apiKey as string
+            })
+          }
+        } catch (e: unknown) {
+          let error = 'Creating write grant failed'
+          if (typeof e === 'string') {
+            error = e.toUpperCase()
+          } else if (e instanceof Error) {
+            error = e.message
+          }
+          onError({
+            isUserError: false,
+            errorMessage: messages.miscError,
+            error: e instanceof Error ? e : new Error(error)
+          })
           return
         }
       }
@@ -620,7 +625,7 @@ export const useOAuthSetup = ({
     userEmail,
     authorize,
     tx,
-    txParams: txParams as WriteOnceParams,
+    txParams: txParams as DashboardWalletTxParams,
     display
   }
 }

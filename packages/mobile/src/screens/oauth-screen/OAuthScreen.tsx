@@ -5,7 +5,6 @@ import { Flex, Text } from '@audius/harmony-native'
 import { ImplicitFlowScreen } from './ImplicitFlowScreen'
 import { PaymentFlowScreen } from './PaymentFlowScreen'
 import { PkceFlowScreen } from './PkceFlowScreen'
-import { WriteOnceFlowScreen } from './WriteOnceFlowScreen'
 import { useParsedParams } from './hooks/useParsedParams'
 
 export const OAuthScreen = () => {
@@ -34,8 +33,6 @@ export const OAuthScreen = () => {
       return <PaymentFlowScreen params={params} />
     case 'pkce':
       return <PkceFlowScreen params={params} />
-    case 'write_once':
-      return <WriteOnceFlowScreen params={params} />
     case 'implicit':
     default:
       return <ImplicitFlowScreen params={params} />

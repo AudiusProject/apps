@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { ApolloProvider } from '@apollo/client'
+import { audiusSdk } from 'services/Audius/sdk'
 import { ThemeProvider as HarmonyThemeProvider } from '@audius/harmony'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -75,6 +76,14 @@ const App = () => {
   const [apolloClient, setApolloClient] = useState(client)
   const [willReload, setWillReload] = useState(false)
   const { selectedNetworkId } = useWeb3ModalState()
+
+  // OAuth PKCE callback: when popup redirects here with ?code=&state=,
+  // handleRedirect forwards code to opener and closes the popup
+  useEffect(() => {
+    if (audiusSdk.oauth.hasRedirectResult()) {
+      audiusSdk.oauth.handleRedirect().catch(() => {})
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark')

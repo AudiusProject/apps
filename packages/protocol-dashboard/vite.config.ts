@@ -38,21 +38,28 @@ export default defineConfig({
   },
 
   resolve: {
-    alias: {
-      components: '/src/components',
-      containers: '/src/containers',
-      services: '/src/services',
-      utils: '/src/utils',
-      store: '/src/store',
-      hooks: '/src/hooks',
-      models: '/src/models',
-      types: '/src/types',
-      assets: '/src/assets',
-      '@audius/common/src': path.resolve(__dirname, '../common/src'),
-      '~': path.resolve(__dirname, '../../packages/common/src')
-      // '@audius/harmony/dist': path.resolve(__dirname, '../harmony/dist')
-      // '@audius/harmony': path.resolve(__dirname, '../harmony/src')
-    }
+    alias: [
+      // Force ethers v6 for @web3modal/ethers when importing bare 'ethers' (root has ethers v5 from libs).
+      // Use exact match so 'ethers/utils/abi-coder' (from web3-eth-abi) still resolves to nested ethers v4.
+      {
+        find: /^ethers$/,
+        replacement: path.resolve(__dirname, 'node_modules/ethers')
+      },
+      { find: 'components', replacement: '/src/components' },
+      { find: 'containers', replacement: '/src/containers' },
+      { find: 'services', replacement: '/src/services' },
+      { find: 'utils', replacement: '/src/utils' },
+      { find: 'store', replacement: '/src/store' },
+      { find: 'hooks', replacement: '/src/hooks' },
+      { find: 'models', replacement: '/src/models' },
+      { find: 'types', replacement: '/src/types' },
+      { find: 'assets', replacement: '/src/assets' },
+      {
+        find: '@audius/common/src',
+        replacement: path.resolve(__dirname, '../common/src')
+      },
+      { find: '~', replacement: path.resolve(__dirname, '../../packages/common/src') }
+    ]
   },
 
   server: {

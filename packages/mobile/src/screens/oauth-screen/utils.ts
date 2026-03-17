@@ -42,7 +42,6 @@ export const collapseScope = (
     .flatMap((s) => s.split(/\s+/))
     .filter(Boolean)
   if (tokens.includes('write')) return 'write'
-  if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('read')) return 'read'
   return typeof raw === 'string' ? raw : null
 }

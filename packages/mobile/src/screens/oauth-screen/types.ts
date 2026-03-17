@@ -1,8 +1,8 @@
-export type OAuthFlow = 'pkce' | 'implicit' | 'write_once' | 'payment'
+export type OAuthFlow = 'pkce' | 'implicit' | 'payment'
 
 export type ParsedParams = {
   flow: OAuthFlow
-  // Auth flows (pkce / implicit / write_once)
+  // Auth flows (pkce / implicit)
   scope: string | null
   apiKey: string | null
   appName: string | null

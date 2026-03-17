@@ -4,7 +4,6 @@ import {
   IconInfo,
   IconPencil,
   IconVisibilityPublic,
-  IconWallet,
   Paper,
   Text
 } from '@audius/harmony-native'
@@ -14,16 +13,19 @@ import { messages } from '../messages'
 type PermissionsSectionProps = {
   scope: string | null
   userEmail: string | null
-  /** wallet address for write_once/disconnect flows */
-  wallet?: string | null
+  /** Dashboard wallet connect/disconnect — write-once style, no persistent grant */
+  tx?: string | null
+  txParams?: { wallet: string } | null
 }
 
 export const PermissionsSection = ({
   scope,
   userEmail,
-  wallet
+  tx,
+  txParams
 }: PermissionsSectionProps) => {
-  const isWriteOnce = scope === 'write_once'
+  const isDashboardWalletFlow =
+    tx === 'disconnect_dashboard_wallet' && txParams?.wallet != null
 
   return (
     <Flex direction='column' gap='s'>
@@ -37,25 +39,23 @@ export const PermissionsSection = ({
             <Flex direction='row' gap='s' alignItems='center'>
               {scope === 'write' ? (
                 <IconPencil color='default' width={16} height={16} />
-              ) : isWriteOnce ? (
-                <IconWallet color='default' width={16} height={16} />
               ) : (
                 <IconVisibilityPublic color='default' width={16} height={16} />
               )}
               <Text variant='body' size='m' color='default'>
                 {scope === 'write'
-                  ? messages.writeAccountAccess
-                  : isWriteOnce
+                  ? isDashboardWalletFlow
                     ? messages.disconnectWalletAccess
-                    : messages.readOnlyAccountAccess}
+                    : messages.writeAccountAccess
+                  : messages.readOnlyAccountAccess}
               </Text>
             </Flex>
-            {isWriteOnce ? (
-              wallet ? (
+            {isDashboardWalletFlow ? (
+              txParams?.wallet ? (
                 <Flex direction='row' gap='s'>
                   <Flex w={16} />
                   <Text variant='body' size='s' color='subdued'>
-                    {wallet.slice(0, 6)}...{wallet.slice(-4)}
+                    {txParams.wallet.slice(0, 6)}...{txParams.wallet.slice(-4)}
                   </Text>
                 </Flex>
               ) : null
@@ -71,8 +71,8 @@ export const PermissionsSection = ({
             )}
           </Flex>
 
-          {/* Account data row — not shown for write_once */}
-          {!isWriteOnce && (
+          {/* Account data row — not shown for dashboard wallet flow */}
+          {!isDashboardWalletFlow && (
             <>
               <Divider />
               <Flex direction='row' gap='s' alignItems='center'>

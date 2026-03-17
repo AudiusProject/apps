@@ -34,7 +34,9 @@ export const PkceFlowScreen = ({ params }: Props) => {
     redirectUri,
     responseMode,
     codeChallenge,
-    codeChallengeMethod
+    codeChallengeMethod,
+    tx,
+    wallet
   } = params
 
   const { color, spacing } = useTheme()
@@ -77,7 +79,19 @@ export const PkceFlowScreen = ({ params }: Props) => {
     setIsSubmitting(true)
     setSubmitError(null)
     try {
-      if (scope === 'write' && apiKey && !userAlreadyWriteAuthorized) {
+      // disconnect_dashboard_wallet: write-once style — no persistent grant
+      if (tx === 'disconnect_dashboard_wallet' && wallet && scope === 'write') {
+        const sdk = await audiusSdk()
+        await sdk.dashboardWalletUsers.disconnectUserFromDashboardWallet({
+          wallet: wallet as `0x${string}`,
+          userId: Id.parse(account.user_id)
+        })
+      } else if (
+        scope === 'write' &&
+        apiKey &&
+        !userAlreadyWriteAuthorized &&
+        tx !== 'disconnect_dashboard_wallet'
+      ) {
         const sdk = await audiusSdk()
         await sdk.grants.createGrant({
           userId: Id.parse(account.user_id),
@@ -117,7 +131,9 @@ export const PkceFlowScreen = ({ params }: Props) => {
     userEmail,
     state,
     responseMode,
-    closeScreen
+    closeScreen,
+    tx,
+    wallet
   ])
 
   const handleCancel = useCallback(async () => {
@@ -197,8 +213,15 @@ export const PkceFlowScreen = ({ params }: Props) => {
       >
         <Flex direction='column' gap='xl'>
           <AppHeader appName={appName} appImageUri={appImage} />
-          {userAlreadyWriteAuthorized ? null : (
-            <PermissionsSection scope={scope} userEmail={userEmail} />
+          {userAlreadyWriteAuthorized && tx !== 'disconnect_dashboard_wallet' ? (
+            null
+          ) : (
+            <PermissionsSection
+              scope={scope}
+              userEmail={userEmail}
+              tx={tx}
+              txParams={wallet ? { wallet } : undefined}
+            />
           )}
           {account && <SignedInAs account={account} />}
           {submitError ? (

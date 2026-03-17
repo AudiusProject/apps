@@ -77,7 +77,7 @@ export const formOAuthResponse = async ({
   userEmail,
   apiKey,
   onError,
-  txSignature // Only applicable to scope = write_once
+  txSignature // For dashboard wallet connect: wallet sig from opener
 }: {
   account: UserMetadata
   userEmail?: string | null
@@ -214,7 +214,8 @@ export const getIsAppAuthorized = async ({
   )
   return foundIndex !== undefined && foundIndex > -1
 }
-export type WriteOnceTx =
+/** Dashboard wallet connect/disconnect — write-once style; no persistent grant. */
+export type DashboardWalletTx =
   | 'connect_dashboard_wallet'
   | 'disconnect_dashboard_wallet'
 
@@ -226,23 +227,26 @@ type DisconnectDashboardWalletParams = {
   wallet: string
 }
 
-export type WriteOnceParams =
+export type DashboardWalletTxParams =
   | ConnectDashboardWalletParams
   | DisconnectDashboardWalletParams
 
-export const validateWriteOnceParams = ({
+export const validateDashboardWalletParams = ({
   tx,
   params: rawParams,
-  willUsePostMessage
+  willUsePostMessage,
+  hasOrigin
 }: {
   tx: string | string[] | null
   params: any
   willUsePostMessage: boolean
+  /** For PKCE with URL redirect: origin is required for wallet sig exchange */
+  hasOrigin?: boolean
 }) => {
   let error = null
-  let txParams: WriteOnceParams | null = null
+  let txParams: DashboardWalletTxParams | null = null
   if (tx === 'connect_dashboard_wallet') {
-    if (!willUsePostMessage) {
+    if (!willUsePostMessage && !hasOrigin) {
       error = messages.connectWalletNoPostMessageError
     }
     if (!rawParams.wallet) {

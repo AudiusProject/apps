@@ -49,7 +49,3 @@
 .learnMore:active {
   transform: scale3d(0.99, 0.99, 0.99);
 }
-
-.rewardsCTABanner {
-  margin: 32px 0px 24px;
-}

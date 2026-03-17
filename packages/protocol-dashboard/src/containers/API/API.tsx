@@ -1,7 +1,6 @@
 import React from 'react'
 
 import Page from 'components/Page'
-import RewardsCTABanner from 'components/RewardsCTABanner'
 import TopAPIAppsChart from 'components/TopAPIAppsChart'
 import useOpenLink from 'hooks/useOpenLink'
 import { createStyles } from 'utils/mobile'
@@ -34,7 +33,6 @@ const API: React.FC<APIProps> = () => {
           {messages.cta}
         </a>
       </div>
-      <RewardsCTABanner className={styles.rewardsCTABanner} />
       <TopAPIAppsChart className={styles.topAPIAppsChart} />
     </Page>
   )

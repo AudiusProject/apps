@@ -13,7 +13,7 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from '../OAuthLoginPage.module.css'
 import { messages } from '../messages'
-import { WriteOnceParams, WriteOnceTx } from '../utils'
+import type { DashboardWalletTxParams, DashboardWalletTx } from '../utils'
 
 type PermissionDetailProps = PropsWithChildren<{}>
 const PermissionDetail = ({ children }: PermissionDetailProps) => {
@@ -26,7 +26,7 @@ const PermissionDetail = ({ children }: PermissionDetailProps) => {
   )
 }
 
-const getWriteOncePermissionTitle = (tx: WriteOnceTx | null) => {
+const getDashboardWalletPermissionTitle = (tx: DashboardWalletTx | null) => {
   switch (tx) {
     case 'connect_dashboard_wallet':
       return messages.connectDashboardWalletAccess
@@ -44,12 +44,13 @@ export const PermissionsSection = ({
   tx
 }: {
   scope: string | string[] | null
-  tx: WriteOnceTx | null
+  tx: DashboardWalletTx | null
   isLoggedIn: boolean
   isLoading: boolean
   userEmail: string | null
-  txParams?: WriteOnceParams
+  txParams?: DashboardWalletTxParams
 }) => {
+  const isDashboardWalletFlow = tx != null && txParams != null
   return (
     <Flex direction='column' gap='s'>
       <Text variant='body' size='m' color='subdued'>
@@ -60,7 +61,7 @@ export const PermissionsSection = ({
         <Flex direction='column' gap='s'>
           <Flex gap='l' alignItems='center'>
             <Flex css={{ flexShrink: 0 }}>
-              {scope === 'write' || scope === 'write_once' ? (
+              {scope === 'write' ? (
                 <IconPencil color='default' width={16} height={16} />
               ) : (
                 <IconVisibilityPublic color='default' width={16} height={16} />
@@ -68,18 +69,18 @@ export const PermissionsSection = ({
             </Flex>
             <Text variant='body' size='m' color='default'>
               {scope === 'write'
-                ? messages.writeAccountAccess
-                : scope === 'write_once'
-                  ? getWriteOncePermissionTitle(tx)
-                  : messages.readOnlyAccountAccess}
+                ? isDashboardWalletFlow
+                  ? getDashboardWalletPermissionTitle(tx)
+                  : messages.writeAccountAccess
+                : messages.readOnlyAccountAccess}
             </Text>
           </Flex>
-          {scope === 'write' ? (
+          {scope === 'write' && !isDashboardWalletFlow ? (
             <PermissionDetail>{messages.writeAccessGrants}</PermissionDetail>
           ) : null}
-          {scope === 'write_once' ? (
+          {isDashboardWalletFlow && txParams?.wallet ? (
             <PermissionDetail>
-              {txParams?.wallet.slice(0, 6)}...{txParams?.wallet.slice(-4)}
+              {txParams.wallet.slice(0, 6)}...{txParams.wallet.slice(-4)}
             </PermissionDetail>
           ) : null}
           {scope === 'read' ? (

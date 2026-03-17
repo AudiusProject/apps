@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import { DecodedUserToken, OAUTH_URL } from '@audius/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -8,27 +7,20 @@ import { getDashboardWalletUserQueryKey } from 'hooks/useDashboardWalletUsers'
 import { audiusSdk as sdk } from 'services/Audius/sdk'
 import { disableAudiusProfileRefetch } from 'store/account/slice'
 
-const env = import.meta.env.VITE_ENVIRONMENT
+/**
+ * Connect/disconnect Audius profile: write-once style flow.
+ * Only the specific action is authorized — no persistent write grant is created.
+ * The app does not receive ongoing write access to the user's account.
+ */
+const OAUTH_ORIGINS = [
+  'https://audius.co',
+  'https://staging.audius.co',
+  'http://localhost:3000'
+]
 
-let resolveUserHandle = null
-let receiveUserHandlePromise = null
-
-const receiveUserId = async (event: MessageEvent) => {
-  const oauthOrigin = new URL(OAUTH_URL[env]).origin
-  if (
-    event.origin !== oauthOrigin ||
-    event.source !== sdk.oauth.activePopupWindow ||
-    !event.data.state
-  ) {
-    return
-  }
-  if (sdk.oauth.getCsrfToken() !== event.data.state) {
-    console.error('State mismatch.')
-    return
-  }
-  if (event.data.userHandle != null) {
-    resolveUserHandle(event.data.userHandle)
-  }
+const messages = {
+  connectFailed: "Couldn't fetch Audius profile data.",
+  signRejected: 'Wallet signature was rejected.'
 }
 
 export const useConnectAudiusProfile = ({
@@ -41,72 +33,88 @@ export const useConnectAudiusProfile = ({
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const [isWaiting, setIsWaiting] = useState(false)
-  const handleConnectSuccess = async (profile: DecodedUserToken) => {
-    window.removeEventListener('message', receiveUserId)
-    // Optimistically set user
+
+  const handleConnectSuccess = useCallback(async () => {
     await queryClient.cancelQueries({
       queryKey: getDashboardWalletUserQueryKey(wallet)
     })
     dispatch(disableAudiusProfileRefetch())
 
     try {
-      const audiusUser = await sdk.users.getUser({ id: profile.userId })
-      if (audiusUser?.data) {
-        queryClient.setQueryData(getDashboardWalletUserQueryKey(wallet), {
-          wallet,
-          user: audiusUser.data
-        })
+      const profile = await sdk.oauth.getUser()
+      if (profile?.userId) {
+        const audiusUser = await sdk.users.getUser({ id: profile.userId })
+        if (audiusUser?.data) {
+          queryClient.setQueryData(getDashboardWalletUserQueryKey(wallet), {
+            wallet,
+            user: audiusUser.data
+          })
+        }
       }
-      setIsWaiting(false)
       onSuccess()
     } catch {
-      console.error("Couldn't fetch Audius profile data.")
+      console.error(messages.connectFailed)
+    } finally {
       setIsWaiting(false)
     }
-  }
+  }, [queryClient, dispatch, wallet, onSuccess])
 
   const connect = async () => {
     setIsWaiting(true)
-    sdk.oauth.init({
-      env,
-      successCallback: handleConnectSuccess,
-      errorCallback: (errorMessage: string) => {
-        window.removeEventListener('message', receiveUserId)
-        console.error(errorMessage)
-        setIsWaiting(false)
-      }
-    })
-    window.removeEventListener('message', receiveUserId)
-    receiveUserHandlePromise = new Promise((resolve) => {
-      resolveUserHandle = resolve
-    })
-    window.addEventListener('message', receiveUserId, false)
-    sdk.oauth.login({
-      scope: 'write_once',
-      params: {
-        tx: 'connect_dashboard_wallet',
-        wallet
-      }
-    })
 
-    // Leg 1: Receive Audius user id from OAuth popup
-    const userHandle = await receiveUserHandlePromise
-    // Sign wallet signature from EM transaction
-    const message = `Connecting Audius user @${userHandle} at ${Math.round(
-      new Date().getTime() / 1000
-    )}`
-    const signature = await window.audiusLibs.web3Manager.sign(message)
+    // OAuth page (audius.co) requests wallet signature via postMessage; we respond here
+    const walletSignatureHandler = async (event: MessageEvent) => {
+      if (
+        !OAUTH_ORIGINS.some((o) => event.origin === o) ||
+        !event.data?.state ||
+        event.data.userHandle == null
+      ) {
+        return
+      }
+      if (sdk.oauth.activePopupWindow != null) {
+        try {
+          const message = `Connecting Audius user @${event.data.userHandle} at ${Math.round(
+            new Date().getTime() / 1000
+          )}`
+          const signature =
+            await window.audiusLibs?.web3Manager?.sign?.(message)
+          if (signature != null && event.source != null) {
+            ;(event.source as Window).postMessage(
+              {
+                state: event.data.state,
+                walletSignature: { message, signature }
+              },
+              event.origin
+            )
+          }
+        } catch {
+          // Sign rejected by user
+        }
+      }
+    }
+    window.addEventListener('message', walletSignatureHandler, false)
 
-    const walletSignature = { message, signature }
-    // Leg 2: Send wallet signature to OAuth popup
-    sdk.oauth.activePopupWindow.postMessage(
-      { state: sdk.oauth.getCsrfToken(), walletSignature },
-      new URL(OAUTH_URL[env]).origin
-    )
+    try {
+      await sdk.oauth.login({
+        scope: 'write',
+        display: 'popup',
+        params: {
+          tx: 'connect_dashboard_wallet',
+          wallet
+        }
+      })
+      await handleConnectSuccess()
+    } catch (error) {
+      console.error(
+        error instanceof Error ? error.message : messages.signRejected
+      )
+      setIsWaiting(false)
+    } finally {
+      window.removeEventListener('message', walletSignatureHandler)
+    }
   }
 
   const handleDisconnectSuccess = async () => {
-    // Optimistically clear the connected user
     await queryClient.cancelQueries({
       queryKey: getDashboardWalletUserQueryKey(wallet)
     })
@@ -118,21 +126,22 @@ export const useConnectAudiusProfile = ({
 
   const disconnect = async () => {
     setIsWaiting(true)
-    sdk.oauth.init({
-      env,
-      successCallback: handleDisconnectSuccess,
-      errorCallback: (errorMessage: string) => {
-        console.error(errorMessage)
-        setIsWaiting(false)
-      }
-    })
-    sdk.oauth.login({
-      scope: 'write_once',
-      params: {
-        tx: 'disconnect_dashboard_wallet',
-        wallet
-      }
-    })
+    try {
+      await sdk.oauth.login({
+        scope: 'write',
+        display: 'popup',
+        params: {
+          tx: 'disconnect_dashboard_wallet',
+          wallet
+        }
+      })
+      await handleDisconnectSuccess()
+    } catch (error) {
+      console.error(
+        error instanceof Error ? error.message : messages.signRejected
+      )
+      setIsWaiting(false)
+    }
   }
 
   return { connect, disconnect, isWaiting }

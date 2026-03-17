@@ -84,7 +84,7 @@ export const useParsedParams = (search: string): ParsedParams => {
   // ── Auth flows ─────────────────────────────────────────────────────────────
   if (!getIsRedirectValid(redirectUriStr)) {
     error = messages.redirectURIInvalidError
-  } else if (scope !== 'read' && scope !== 'write' && scope !== 'write_once') {
+  } else if (scope !== 'read' && scope !== 'write') {
     error = messages.scopeError
   } else if (
     responseMode &&
@@ -99,17 +99,13 @@ export const useParsedParams = (search: string): ParsedParams => {
       error = messages.missingApiKeyError
     } else if (!isValidApiKey(apiKey)) {
       error = messages.invalidApiKeyError
-    }
-  } else if (scope === 'write_once') {
-    if (tx === 'connect_dashboard_wallet') {
+    } else if (tx === 'connect_dashboard_wallet') {
       // Requires postMessage back-channel — not possible in a native app
       error = messages.connectWalletNotSupportedError
     } else if (tx === 'disconnect_dashboard_wallet') {
       if (!wallet || typeof wallet !== 'string') {
         error = messages.writeOnceParamsError
       }
-    } else {
-      error = messages.writeOnceTxError
     }
   }
 
@@ -123,11 +119,7 @@ export const useParsedParams = (search: string): ParsedParams => {
   }
 
   const flow: OAuthFlow =
-    scope === 'write_once'
-      ? 'write_once'
-      : responseType === 'code'
-        ? 'pkce'
-        : 'implicit'
+    responseType === 'code' ? 'pkce' : 'implicit'
 
   return {
     flow,

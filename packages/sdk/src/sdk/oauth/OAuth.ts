@@ -71,7 +71,12 @@ export class OAuth {
     redirectUri,
     display = 'popup',
     responseMode = 'fragment',
-    openUrl
+    openUrl,
+    /**
+     * Additional query params for the authorize URL (e.g. tx, wallet for
+     * connect_dashboard_wallet flows). Passed through to the OAuth consent page.
+     */
+    params
   }: {
     scope?: OAuthScope
     /**
@@ -86,6 +91,7 @@ export class OAuth {
      * or `window.location.href` (fullScreen) on web.
      */
     openUrl?: (url: string) => void | Promise<void>
+    params?: Record<string, string>
   }): Promise<void> {
     if (this._currentLoginResolve != null) {
       throw new Error('A login is already in progress.')
@@ -156,8 +162,18 @@ export class OAuth {
       )
       const appIdURIParam = `${this.apiKey ? 'api_key' : 'app_name'}=${appIdURISafe}`
       const pkceParams = `&response_type=code&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`
+      const paramsString =
+        params != null
+          ? '&' +
+            Object.entries(params)
+              .map(
+                ([k, v]) =>
+                  `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+              )
+              .join('&')
+          : ''
 
-      const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}`
+      const fullOauthUrl = `${this.config.basePath}/oauth/authorize?scope=${effectiveScope}&state=${csrfToken}&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}${originParam}&response_mode=${responseMode}&${appIdURIParam}${pkceParams}&display=${display}${paramsString}`
 
       const resolvedOpenUrl = openUrl ?? this.config.openUrl
       if (resolvedOpenUrl) {
@@ -613,6 +629,12 @@ export class OAuth {
           e instanceof Error ? e : new Error('Token exchange failed.')
         )
       }
+      return
+    }
+
+    // Intermediate message (e.g. userHandle for connect_dashboard_wallet flow) —
+    // opener handles it and responds; do not settle the login
+    if (event.data.userHandle != null || event.data.userId != null) {
       return
     }
 
