@@ -58,7 +58,6 @@ import {
   decodeHashId,
   type UpdateUserRequestWithFiles
 } from '@audius/sdk'
-import { isEmpty } from 'lodash'
 import {
   all,
   call,
@@ -201,7 +200,7 @@ function* validateHandle(
     // Call fetch user by handle and do not retry if the user is not created, it will
     // return 404
     const user = yield* call(queryUserByHandle, handle)
-    const handleInUse = !isEmpty(user)
+    const handleInUse = !!user
     const handleCheckTimeout =
       remoteConfigInstance.getRemoteVar(
         IntKeys.HANDLE_VERIFICATION_TIMEOUT_MILLIS
