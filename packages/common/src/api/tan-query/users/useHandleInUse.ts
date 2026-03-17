@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { isEmpty } from 'lodash'
 
 import { useQueryContext } from '~/api/tan-query/utils'
 import { QueryContextType } from '~/api/tan-query/utils/QueryContext'
@@ -14,10 +13,10 @@ export const fetchHandleInUse = async (
   if (!handle) return false
   const sdk = await audiusSdk()
   try {
-    const { data: users = [] } = await sdk.users.getUserByHandle({
+    const { data: user } = await sdk.users.getUserByHandle({
       handle
     })
-    return !isEmpty(users[0])
+    return !!user
   } catch (e: any) {
     if ('response' in e && e.response.status === 404) {
       // Expect not found when handle is available
