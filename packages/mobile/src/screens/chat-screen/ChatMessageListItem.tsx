@@ -60,7 +60,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     borderTopEndRadius: 0
   },
   messageContainerAuthor: {
-    backgroundColor: palette.secondaryLight2
+    backgroundColor: palette.secondary
   },
   tail: {
     display: 'flex',
