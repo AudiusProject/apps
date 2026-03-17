@@ -182,12 +182,21 @@ const generateServicesConfig = async (
   const minVersion = hexToString(versionHex, { size: 32 })
 
   config.network.minVersion = minVersion
-  config.network.storageNodes = storageNodes.map(
-    ([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
+  // Filter to only *.audius.co storage nodes to improve upload success rates —
+  // third-party nodes have historically had lower reliability.
+  config.network.storageNodes = storageNodes
+    .filter(([_ownerWallet, endpoint]: any) => {
+      try {
+        const { hostname } = new URL(endpoint)
+        return hostname.endsWith('.audius.co')
+      } catch {
+        return false
+      }
+    })
+    .map(([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
       endpoint,
       delegateOwnerWallet
-    })
-  )
+    }))
   config.network.antiAbuseOracleNodes.registeredAddresses = [
     ...antiAbuseAddresses
   ]
