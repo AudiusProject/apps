@@ -60,8 +60,8 @@
     "sdk:config": "tsx ./src/sdk/scripts/generateServicesConfig.ts",
     "sdk:verify-user": "tsx ./src/sdk/scripts/verifyUser.ts",
     "gen": "npm run gen:prod",
-    "gen:dev": "node ./src/sdk/api/generator/gen.js --env dev",
-    "gen:prod": "node ./src/sdk/api/generator/gen.js",
+    "gen:dev": "node ./src/sdk/api/generator/gen.cjs --env dev",
+    "gen:prod": "node ./src/sdk/api/generator/gen.cjs",
     "prepare": "patch-package",
     "prepack": "turbo run build"
   },
