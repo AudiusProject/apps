@@ -15,7 +15,7 @@ import { SignedInAs } from './components/SignedInAs'
 import { useAppInfo } from './hooks/useAppInfo'
 import { useUserEmail } from './hooks/useUserEmail'
 import { messages } from './messages'
-import { ParsedParams } from './types'
+import type { ParsedParams } from './types'
 import { buildErrorUrl, buildRedirectUrl, buildUserJwt } from './utils'
 
 type Props = { params: ParsedParams }
@@ -38,14 +38,18 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
   const isLoggedIn = Boolean(account?.user_id)
   const userEmail = useUserEmail(isLoggedIn)
 
-  const { appName, appImage, loading: appInfoLoading, error: appInfoError } =
-    useAppInfo({
-      apiKey,
-      queryParamAppName,
-      scope: 'write_once',
-      userId: account?.user_id,
-      skip: false
-    })
+  const {
+    appName,
+    appImage,
+    loading: appInfoLoading,
+    error: appInfoError
+  } = useAppInfo({
+    apiKey,
+    queryParamAppName,
+    scope: 'write_once',
+    userId: account?.user_id,
+    skip: false
+  })
 
   // Verify the wallet is actually connected to some user on mount
   const [walletError, setWalletError] = useState<string | null>(null)
@@ -113,7 +117,16 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
     } finally {
       setIsSubmitting(false)
     }
-  }, [account, redirectUri, wallet, apiKey, userEmail, state, responseMode, closeScreen])
+  }, [
+    account,
+    redirectUri,
+    wallet,
+    apiKey,
+    userEmail,
+    state,
+    responseMode,
+    closeScreen
+  ])
 
   const handleCancel = useCallback(async () => {
     if (redirectUri) {
@@ -127,7 +140,13 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
   const error = appInfoError ?? walletError
   if (error) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' p='xl' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        p='xl'
+        backgroundColor='surface1'
+      >
         <Text variant='body' size='m' color='danger' textAlign='center'>
           {error}
         </Text>
@@ -137,7 +156,12 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
 
   if (appInfoLoading || walletChecking) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        backgroundColor='surface1'
+      >
         <ActivityIndicator size='large' color={color.primary.primary} />
       </Flex>
     )
@@ -145,7 +169,13 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
 
   if (!isLoggedIn) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' p='xl' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        p='xl'
+        backgroundColor='surface1'
+      >
         <Text variant='heading' size='s' color='default' textAlign='center'>
           {appName ? `${messages.allow} ${appName}` : 'Authorization Request'}
         </Text>
@@ -176,7 +206,11 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
       >
         <Flex direction='column' gap='xl'>
           <AppHeader appName={appName} appImageUri={appImage} />
-          <PermissionsSection scope='write_once' userEmail={null} wallet={wallet} />
+          <PermissionsSection
+            scope='write_once'
+            userEmail={null}
+            wallet={wallet}
+          />
           {account && <SignedInAs account={account} />}
           {submitError ? (
             <Text variant='body' size='s' color='danger'>

@@ -202,7 +202,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
     )
   }
 
-  if (coinLoading || balanceLoading) {
+  if (dataLoading || !tokenInfo) {
     return (
       <Flex
         flex={1}
@@ -231,7 +231,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
         <Flex mt='l'>
           <Text variant='body' size='m' color='subdued' textAlign='center'>
             -{formatAmount(amountBigInt)}{' '}
-            {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
+            {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
           </Text>
         </Flex>
       </Flex>
@@ -261,7 +261,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       }) ?? '0.00'}{' '}
-                      {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
+                      {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
                     </Text>
                   </Flex>
                   <Divider />
@@ -271,7 +271,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                     </Text>
                     <Text variant='body' size='m' color='default'>
                       {formatAmount(amountBigInt)}{' '}
-                      {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
+                      {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
                     </Text>
                   </Flex>
                   <Divider />
@@ -280,7 +280,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                       {messages.coin}
                     </Text>
                     <Text variant='body' size='m' color='default'>
-                      {tokenInfo?.name ?? ''}
+                      {tokenInfo.name ?? ''}
                     </Text>
                   </Flex>
                   <Divider />

@@ -90,7 +90,7 @@ export const useAppInfo = ({
   }, [apiKey, scope, userId, skip])
 
   return {
-    appName: registeredAppName ?? (queryParamAppName ?? undefined),
+    appName: registeredAppName ?? queryParamAppName ?? undefined,
     appImage,
     userAlreadyWriteAuthorized,
     loading,

@@ -15,7 +15,7 @@ import { SignedInAs } from './components/SignedInAs'
 import { useAppInfo } from './hooks/useAppInfo'
 import { useUserEmail } from './hooks/useUserEmail'
 import { messages } from './messages'
-import { ParsedParams } from './types'
+import type { ParsedParams } from './types'
 import { buildErrorUrl, buildRedirectUrl, buildUserJwt } from './utils'
 
 type Props = { params: ParsedParams }
@@ -103,7 +103,13 @@ export const ImplicitFlowScreen = ({ params }: Props) => {
 
   if (error) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' p='xl' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        p='xl'
+        backgroundColor='surface1'
+      >
         <Text variant='body' size='m' color='danger' textAlign='center'>
           {error}
         </Text>
@@ -113,7 +119,12 @@ export const ImplicitFlowScreen = ({ params }: Props) => {
 
   if (loading) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        backgroundColor='surface1'
+      >
         <ActivityIndicator size='large' color={color.primary.primary} />
       </Flex>
     )
@@ -121,7 +132,13 @@ export const ImplicitFlowScreen = ({ params }: Props) => {
 
   if (!isLoggedIn) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' p='xl' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        p='xl'
+        backgroundColor='surface1'
+      >
         <Text variant='heading' size='s' color='default' textAlign='center'>
           {appName ? `${messages.allow} ${appName}` : 'Authorization Request'}
         </Text>
