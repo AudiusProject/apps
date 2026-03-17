@@ -12,8 +12,6 @@ The Content Node source code is hosted on
 [registered Content Nodes](https://dashboard.audius.org/#/services/content-node) on the Audius
 Protocol Dashboard.
 
----
-
 ## Design Goals
 
 1. Surface the Audius Storage Protocol for storing and serving images and audio
@@ -27,8 +25,6 @@ The "Content Node" may be referred to as the "Creator Node". These services are 
 
 :::
 
----
-
 ## Web Server
 
 The Content Node core service is a web server with an HTTP API to process incoming requests and
@@ -41,8 +37,6 @@ perform the following functions:
 
 The web server is a [NodeJS](https://nodejs.org) [Express app](https://expressjs.com/).
 
----
-
 ## Persistent Storage
 
 It stores all data in a PostgreSQL database and all images and metadata objects on its file system.
@@ -52,8 +46,6 @@ Pointers to all content and metadata stored on disk are persisted in the Postgre
 Postgres is managed in the codebase using the [Sequelize ORM](https://sequelize.org/main/) which
 includes migrations, models and validations
 
----
-
 ## Redis
 
 A [Redis client](https://redis.io/) is used for resource locking, request rate limiting, and
@@ -61,15 +53,11 @@ limited caching and key storage.
 
 Redis is managed in the codebase through the [ioredis npm package](https://github.com/luin/ioredis)
 
----
-
 ## Track Segmenting
 
 As defined by the [Audius Whitepaper](/reference/whitepaper), the content node uses
 [FFMPEG](https://ffmpeg.org/ffmpeg.html) to segment & transcode all uploaded track files before
 storing/serving.
-
----
 
 ## Data Redundancy
 
