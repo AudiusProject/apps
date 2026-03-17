@@ -58,7 +58,6 @@ import {
   decodeHashId,
   type UpdateUserRequestWithFiles
 } from '@audius/sdk'
-import { isEmpty } from 'lodash'
 import {
   all,
   call,
