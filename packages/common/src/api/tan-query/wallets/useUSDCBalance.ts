@@ -131,6 +131,7 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
     status,
     isLoading: result.isLoading,
     isPending: result.isPending,
+    isError: result.isError,
     data,
     error: result.error,
     refresh: result.refetch,

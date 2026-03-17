@@ -8,7 +8,7 @@ import {
   useSendCoins
 } from '@audius/common/api'
 import { useUserbank } from '@audius/common/hooks'
-import { SolanaWalletAddress } from '@audius/common/models'
+import type { SolanaWalletAddress } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import { useNavigation } from '@react-navigation/native'
 import { ActivityIndicator, Linking, ScrollView } from 'react-native'
@@ -25,14 +25,20 @@ import {
 
 import { SignedInAs } from './components/SignedInAs'
 import { messages } from './messages'
-import { ParsedParams } from './types'
+import type { ParsedParams } from './types'
 import { buildRedirectUrl, buildErrorUrl } from './utils'
 
 type Props = { params: ParsedParams }
 
 export const PaymentFlowScreen = ({ params }: Props) => {
-  const { recipient, amount: amountStr, mint, state, redirectUri, responseMode } =
-    params
+  const {
+    recipient,
+    amount: amountStr,
+    mint,
+    state,
+    redirectUri,
+    responseMode
+  } = params
 
   const { color, spacing } = useTheme()
   const { bottom: bottomInset } = useSafeAreaInsets()
@@ -41,12 +47,20 @@ export const PaymentFlowScreen = ({ params }: Props) => {
   const { data: account } = useCurrentAccountUser()
   const isLoggedIn = Boolean(account?.user_id)
 
-  const { data: coin, isPending: coinLoading, isError: coinError } = useArtistCoin(mint ?? '')
+  const {
+    data: coin,
+    isPending: coinLoading,
+    isError: coinError
+  } = useArtistCoin(mint ?? '')
   const tokenInfo = useMemo(
     () => (coin ? transformArtistCoinToTokenInfo(coin) : undefined),
     [coin]
   )
-  const { data: tokenBalance, isPending: balanceLoading, isError: balanceError } = useCoinBalance({
+  const {
+    data: tokenBalance,
+    isPending: balanceLoading,
+    isError: balanceError
+  } = useCoinBalance({
     mint: mint ?? '',
     includeExternalWallets: false,
     includeStaked: false
@@ -132,7 +146,14 @@ export const PaymentFlowScreen = ({ params }: Props) => {
       ).catch(() => {})
     }
     closeScreen()
-  }, [transactionSignature, currentUserWallet, redirectUri, state, responseMode, closeScreen])
+  }, [
+    transactionSignature,
+    currentUserWallet,
+    redirectUri,
+    state,
+    responseMode,
+    closeScreen
+  ])
 
   const handleCancel = useCallback(async () => {
     if (redirectUri) {
@@ -159,11 +180,16 @@ export const PaymentFlowScreen = ({ params }: Props) => {
   }
 
   const dataLoading = coinLoading || balanceLoading
-  const dataError = coinError || balanceError || (!dataLoading && !tokenInfo)
 
-  if (dataError) {
+  if (coinError || balanceError || (!dataLoading && !tokenInfo)) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' p='xl' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        p='xl'
+        backgroundColor='surface1'
+      >
         <Text variant='body' size='m' color='danger' textAlign='center'>
           {messages.miscError}
         </Text>
@@ -176,9 +202,14 @@ export const PaymentFlowScreen = ({ params }: Props) => {
     )
   }
 
-  if (dataLoading) {
+  if (coinLoading || balanceLoading) {
     return (
-      <Flex flex={1} alignItems='center' justifyContent='center' backgroundColor='surface1'>
+      <Flex
+        flex={1}
+        alignItems='center'
+        justifyContent='center'
+        backgroundColor='surface1'
+      >
         <ActivityIndicator size='large' color={color.primary.primary} />
       </Flex>
     )
@@ -200,7 +231,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
         <Flex mt='l'>
           <Text variant='body' size='m' color='subdued' textAlign='center'>
             -{formatAmount(amountBigInt)}{' '}
-            {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
+            {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
           </Text>
         </Flex>
       </Flex>
@@ -230,7 +261,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                       }) ?? '0.00'}{' '}
-                      {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
+                      {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
                     </Text>
                   </Flex>
                   <Divider />
@@ -240,7 +271,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                     </Text>
                     <Text variant='body' size='m' color='default'>
                       {formatAmount(amountBigInt)}{' '}
-                      {tokenInfo.symbol ? `$${tokenInfo.symbol}` : ''}
+                      {tokenInfo?.symbol ? `$${tokenInfo.symbol}` : ''}
                     </Text>
                   </Flex>
                   <Divider />
@@ -249,7 +280,7 @@ export const PaymentFlowScreen = ({ params }: Props) => {
                       {messages.coin}
                     </Text>
                     <Text variant='body' size='m' color='default'>
-                      {tokenInfo.name ?? ''}
+                      {tokenInfo?.name ?? ''}
                     </Text>
                   </Flex>
                   <Divider />
