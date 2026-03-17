@@ -153,6 +153,11 @@ export class SearchApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/search/full`,
             method: 'GET',
@@ -241,6 +246,11 @@ export class SearchApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/search/autocomplete`,
             method: 'GET',
@@ -328,6 +338,11 @@ export class SearchApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/search/tags`,

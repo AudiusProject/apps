@@ -90,6 +90,11 @@ export class ChallengesApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/challenges/{challenge_id}/attest`.replace(`{${"challenge_id"}}`, encodeURIComponent(String(params.challengeId))),
             method: 'GET',
@@ -136,6 +141,11 @@ export class ChallengesApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/challenges/undisbursed`,

@@ -818,6 +818,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -866,6 +871,11 @@ export class UsersApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -986,6 +996,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -1030,6 +1045,11 @@ export class UsersApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -1086,6 +1106,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/purchases/download`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1126,6 +1151,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -1174,6 +1204,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/sales/download/json`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1217,6 +1252,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/withdrawals/download`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1254,6 +1294,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -1337,6 +1382,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/handle/{handle}/tracks/ai_attributed`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
             method: 'GET',
@@ -1394,6 +1444,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -1556,6 +1611,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users`,
             method: 'GET',
@@ -1630,6 +1690,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/followers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1672,6 +1737,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/following`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -1849,6 +1919,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/mutuals`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1908,6 +1983,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/playlists`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -1959,6 +2039,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/purchasers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2009,6 +2094,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/purchasers/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -2073,6 +2163,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/purchases`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2118,6 +2213,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -2167,6 +2267,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/related`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2214,6 +2319,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/remixers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2252,6 +2362,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/remixers/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -2296,6 +2411,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/reposts`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2338,6 +2458,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/handle/{handle}/reposts`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
@@ -2402,6 +2527,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/sales`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2453,6 +2583,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/sales/aggregate`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2500,6 +2635,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/sales/count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2542,6 +2682,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/subscribers`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -2586,6 +2731,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/supporting`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2624,6 +2774,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/supporters/{supporter_user_id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"supporter_user_id"}}`, encodeURIComponent(String(params.supporterUserId))),
@@ -2668,6 +2823,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/supporters`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2706,6 +2866,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/supporting/{supported_user_id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))).replace(`{${"supported_user_id"}}`, encodeURIComponent(String(params.supportedUserId))),
@@ -2747,6 +2912,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/tags`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2786,6 +2956,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/top`,
@@ -2901,6 +3076,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -2972,6 +3152,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/handle/{handle}/tracks`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
             method: 'GET',
@@ -3021,6 +3206,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -3176,6 +3366,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -3270,6 +3465,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/balance/history`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -3304,6 +3504,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/handle/{handle}`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))),
@@ -3488,6 +3693,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/comments`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -3577,6 +3787,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/favorites/tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -3674,6 +3889,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -3779,6 +3999,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/library/albums`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -3848,6 +4073,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/library/playlists`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -3915,6 +4145,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.encodedDataSignature !== undefined && params.encodedDataSignature !== null) {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
+        }
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
         const response = await this.request({
@@ -4012,6 +4247,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/recommended-tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -4054,6 +4294,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/users/{id}/tracks/remixed`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
@@ -4118,6 +4363,11 @@ export class UsersApi extends runtime.BaseAPI {
             headerParameters['Encoded-Data-Signature'] = String(params.encodedDataSignature);
         }
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/users/{id}/history/tracks`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
@@ -4156,6 +4406,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -4203,6 +4458,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -4248,6 +4508,11 @@ export class UsersApi extends runtime.BaseAPI {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -4350,6 +4615,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -4399,6 +4669,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -4450,6 +4725,11 @@ export class UsersApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -4499,6 +4779,11 @@ export class UsersApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -4555,6 +4840,11 @@ export class UsersApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);

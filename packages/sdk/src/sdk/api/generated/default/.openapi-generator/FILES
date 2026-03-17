@@ -8,6 +8,7 @@ apis/DeveloperAppsApi.ts
 apis/EventsApi.ts
 apis/ExploreApi.ts
 apis/NotificationsApi.ts
+apis/OauthApi.ts
 apis/PlaylistsApi.ts
 apis/PrizesApi.ts
 apis/ReactionsApi.ts
