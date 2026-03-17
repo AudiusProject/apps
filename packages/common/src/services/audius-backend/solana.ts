@@ -467,8 +467,9 @@ const createUserFundedAta = async ({
   const totalSolNeededLamports = rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
   const totalSolNeededUi = totalSolNeededLamports / 1e9
 
-  // ExactOut quote: receive exactly the rent amount, pay however much USDC it costs
-  const { quoteResult: solQuote } = await getJupiterQuoteByMintWithRetry({
+  // Step 1: ExactOut quote to determine how much USDC the user should pay.
+  // (ExactOut produces an exact_out_route instruction the relay doesn't recognize.)
+  const { quoteResult: costQuote } = await getJupiterQuoteByMintWithRetry({
     inputMint: mint.toBase58(),
     outputMint: SOL_MINT,
     inputDecimals: USDC_DECIMALS,
@@ -478,9 +479,30 @@ const createUserFundedAta = async ({
     onlyDirectRoutes: false
   })
 
-  const feeAmountUsdc = BigInt(solQuote.inputAmount.amountString)
+  const feeAmountUsdc = BigInt(costQuote.inputAmount.amountString)
+
+  // Step 2: ExactIn quote using that USDC amount — produces a route/sharedAccountsRoute
+  // instruction that the relay recognizes and allows.
+  const feeAmountUsdcUi = Number(feeAmountUsdc) / 10 ** USDC_DECIMALS
+  const { quoteResult: swapQuote } = await getJupiterQuoteByMintWithRetry({
+    inputMint: mint.toBase58(),
+    outputMint: SOL_MINT,
+    inputDecimals: USDC_DECIMALS,
+    outputDecimals: SOL_DECIMALS,
+    amountUi: feeAmountUsdcUi,
+    swapMode: 'ExactIn',
+    onlyDirectRoutes: false
+  })
+
+  const receivedLamports = Number(swapQuote.outputAmount.amountString)
+  if (receivedLamports < totalSolNeededLamports) {
+    throw new Error(
+      `ATA prefund swap output insufficient: got ${receivedLamports} lamports, needed ${totalSolNeededLamports}`
+    )
+  }
+
   console.debug(
-    `createUserFundedAta: swapping ${feeAmountUsdc} USDC for ${totalSolNeededLamports} lamports`
+    `createUserFundedAta: swapping ${feeAmountUsdc} USDC for ~${receivedLamports} lamports (need ${totalSolNeededLamports})`
   )
 
   // --- TX 1 (via relay): USDC fee → native SOL in root wallet ---
@@ -529,8 +551,9 @@ const createUserFundedAta = async ({
   )
 
   // Jupiter swap: USDC ATA → native SOL unwrapped into root wallet
+  // Uses ExactIn quote so the relay sees a route/sharedAccountsRoute instruction.
   const swapRequest = {
-    quoteResponse: solQuote.quote,
+    quoteResponse: swapQuote.quote,
     userPublicKey: keypair.publicKey.toBase58(),
     wrapAndUnwrapSol: true,
     dynamicSlippage: true
