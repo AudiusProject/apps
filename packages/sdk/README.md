@@ -163,7 +163,7 @@ console.log('Track favorited!')
 
 ## Log In with Audius (OAuth)
 
-For frontend apps, use the built-in OAuth 2.0 PKCE flow to authenticate users. This lets your users log in with their Audius account and authorize your app to act on their behalf — without ever exposing a bearer token in the browser.
+For frontend apps, use the built-in OAuth 2.0 PKCE flow to authenticate users. This lets your users log in with their Audius account and authorize your app to act on their behalf — without exposing your app's bearer token in client-side code.
 
 ```js title="In web page"
 const audiusSdk = window.audiusSdk({
