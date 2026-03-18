@@ -344,9 +344,11 @@ const initializeApis = ({
   services: ServicesContainer
 }) => {
   const apiEndpoint =
-    config.environment === 'development'
-      ? developmentConfig.network.apiEndpoint
-      : productionConfig.network.apiEndpoint
+    'apiEndpoint' in config && config.apiEndpoint != null
+      ? config.apiEndpoint
+      : config.environment === 'development'
+        ? developmentConfig.network.apiEndpoint
+        : productionConfig.network.apiEndpoint
   const basePath = `${apiEndpoint}/v1`
 
   const middleware = [

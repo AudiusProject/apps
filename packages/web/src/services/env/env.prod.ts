@@ -5,7 +5,7 @@ export const env: Env = {
   AMPLITUDE_API_KEY: '86760558b8bb1b3aae61656efd4ddacb',
   AMPLITUDE_PROXY: 'https://gain2.audius.co/2/httpapi',
   API_KEY: '8acf5eb7436ea403ee536a7334faa5e9ada4b50f',
-  API_URL: 'https://api.audius.co',
+  API_URL: process.env.VITE_API_URL ?? 'https://api.audius.co',
   APP_NAME: 'audius-client',
   ARCHIVE_ENDPOINT: 'https://api.audius.co',
   AUDIUS_NETWORK_CHAIN_ID: 31524,

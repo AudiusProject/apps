@@ -152,7 +152,11 @@ const ConfigWithApiKeySchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional(),
+  /**
+   * Override API base URL (e.g. http://localhost:1323 for local dev). When set, all API and archive requests use this base.
+   */
+  apiEndpoint: z.string().min(1).optional()
 })
 
 /**
@@ -183,7 +187,8 @@ const ConfigWithApiSecretSchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional(),
+  apiEndpoint: z.string().min(1).optional()
 })
 
 /**
@@ -214,7 +219,8 @@ const ConfigWithBearerTokenSchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional(),
+  apiEndpoint: z.string().min(1).optional()
 })
 
 /**
@@ -237,7 +243,8 @@ const ConfigWithAppNameSchema = z.object({
    * Target environment
    * @internal
    */
-  environment: z.enum(['development', 'production']).optional()
+  environment: z.enum(['development', 'production']).optional(),
+  apiEndpoint: z.string().min(1).optional()
 })
 
 export const SdkConfigSchema = z.union([

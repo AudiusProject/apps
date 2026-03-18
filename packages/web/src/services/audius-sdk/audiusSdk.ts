@@ -94,6 +94,7 @@ export const initSdk = async () => {
     appName: env.APP_NAME,
     apiKey: env.API_KEY,
     environment: env.ENVIRONMENT,
+    apiEndpoint: env.API_URL,
     services: {
       solanaRelay,
       audiusWalletClient,
