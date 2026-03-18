@@ -7,7 +7,8 @@ import {
   useTrackRank,
   useStems,
   useCurrentUserId,
-  useArtistCoin
+  useArtistCoin,
+  useTrackDownloadCount
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
@@ -55,6 +56,7 @@ import {
   removeNullable,
   dayjs
 } from '@audius/common/utils'
+import { encodeHashId } from '@audius/sdk'
 import type { FlatList } from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -251,6 +253,10 @@ export const TrackScreenDetailsTile = ({
     (!isOwner && isUnlisted) ||
     isStreamGated ||
     (!isOwner && (playCount ?? 0) <= 0)
+
+  const isDownloadable = (track as Track)?.is_downloadable ?? false
+  const trackIdHash = encodeHashId(trackId)
+  const { data: downloadCount = 0 } = useTrackDownloadCount(trackIdHash)
 
   const isTokenGated = isContentTokenGated(streamConditions)
   const { data: token } = useArtistCoin(
@@ -652,6 +658,8 @@ export const TrackScreenDetailsTile = ({
           hideRepostCount={shouldHideRepostCount}
           commentCount={commentCount}
           hideCommentCount={shouldHideCommentCount}
+          downloadCount={downloadCount}
+          hideDownloadCount={!isDownloadable}
           onPressFavorites={handlePressFavorites}
           onPressReposts={handlePressReposts}
           onPressComments={handlePressComments}

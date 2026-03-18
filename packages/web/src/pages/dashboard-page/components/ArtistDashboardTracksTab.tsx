@@ -24,7 +24,6 @@ const tracksTableColumns: TracksTableColumn[] = [
   'trackName',
   'releaseDate',
   'plays',
-  'downloads',
   'comments',
   'saves',
   'reposts',

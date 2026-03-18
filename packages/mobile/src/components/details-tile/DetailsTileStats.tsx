@@ -2,6 +2,7 @@ import { formatCount } from '@audius/common/utils'
 
 import {
   Flex,
+  IconCloudDownload,
   IconHeart,
   IconMessage,
   IconPlay,
@@ -15,10 +16,12 @@ type DetailsTileStatsProps = {
   repostCount?: number
   favoriteCount?: number
   commentCount?: number
+  downloadCount?: number
   hidePlayCount?: boolean
   hideRepostCount?: boolean
   hideFavoriteCount?: boolean
   hideCommentCount?: boolean
+  hideDownloadCount?: boolean
   onPressFavorites?: GestureResponderHandler
   onPressReposts?: GestureResponderHandler
   onPressComments?: GestureResponderHandler
@@ -32,10 +35,12 @@ export const DetailsTileStats = ({
   repostCount = 0,
   favoriteCount = 0,
   commentCount = 0,
+  downloadCount = 0,
   hidePlayCount,
   hideRepostCount,
   hideFavoriteCount,
   hideCommentCount,
+  hideDownloadCount = true,
   onPressFavorites,
   onPressReposts,
   onPressComments
@@ -44,11 +49,13 @@ export const DetailsTileStats = ({
   const shouldHideRepostCount = hideRepostCount || repostCount <= 0
   const shouldHideFavoriteCount = hideFavoriteCount || favoriteCount <= 0
   const shouldHideCommentCount = hideCommentCount || commentCount <= 0
+  const shouldHideDownloadCount = hideDownloadCount
   if (
     shouldHideFavoriteCount &&
     shouldHideRepostCount &&
     shouldHidePlayCount &&
-    shouldHideCommentCount
+    shouldHideCommentCount &&
+    shouldHideDownloadCount
   ) {
     return null
   }
@@ -77,6 +84,11 @@ export const DetailsTileStats = ({
       {shouldHideCommentCount ? null : (
         <PlainButton onPress={onPressComments} iconLeft={IconMessage}>
           {formatCount(commentCount)}
+        </PlainButton>
+      )}
+      {shouldHideDownloadCount ? null : (
+        <PlainButton iconLeft={IconCloudDownload}>
+          {formatCount(downloadCount)}
         </PlainButton>
       )}
     </Flex>

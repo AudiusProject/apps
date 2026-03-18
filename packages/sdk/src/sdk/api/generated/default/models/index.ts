@@ -396,6 +396,7 @@ export * from './UserResponseSingle';
 export * from './UserSearch';
 export * from './UserSubscribers';
 export * from './UserTrackListenCountsResponse';
+export * from './UserTracksDownloadCountResponse';
 export * from './UserTracksRemixedResponse';
 export * from './VerifyToken';
 export * from './VersionMetadata';

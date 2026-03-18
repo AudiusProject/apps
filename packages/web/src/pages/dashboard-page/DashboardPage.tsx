@@ -1,12 +1,20 @@
-import { useState, Suspense, ReactNode, useEffect, useCallback } from 'react'
+import {
+  useState,
+  Suspense,
+  ReactNode,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react'
 
 import {
   useCurrentAccountUser,
-  useTrackDownloadCounts
+  useUserTrackDownloadCountTotal
 } from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { themeSelectors } from '@audius/common/store'
 import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
+import { encodeHashId } from '@audius/sdk'
 import cn from 'classnames'
 import { each } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
@@ -65,17 +73,19 @@ export const DashboardPage = () => {
 
   const { data: accountUser } = useCurrentAccountUser()
   const { account, tracks, stats } = useSelector(makeGetDashboard(accountUser))
-  const trackIds = tracks.map((t) => t.id)
-  const { byId: downloadCountById } = useTrackDownloadCounts(trackIds)
-  const statsWithDownloads = account?.track_count
-    ? {
-        ...stats,
-        downloads: trackIds.reduce(
-          (sum, id) => sum + (downloadCountById[id] ?? 0),
-          0
-        )
-      }
-    : stats
+  const accountUserIdHash =
+    accountUser?.user_id != null ? encodeHashId(accountUser.user_id) : null
+  const { data: totalDownloads = 0 } = useUserTrackDownloadCountTotal(
+    accountUserIdHash,
+    { enabled: (account?.track_count ?? 0) > 0 }
+  )
+  const statsWithDownloads = useMemo(
+    () =>
+      account?.track_count != null
+        ? { ...stats, downloads: totalDownloads }
+        : stats,
+    [account?.track_count, stats, totalDownloads]
+  )
   const listenData = useSelector(getDashboardListenData)
   const dashboardStatus = useSelector(getDashboardStatus)
   const theme = useSelector(getTheme)
@@ -149,11 +159,7 @@ export const DashboardPage = () => {
     const statTiles: ReactNode[] = []
     each(statsWithDownloads, (stat, title) =>
       statTiles.push(
-        <StatTile
-          key={title}
-          title={statLabels[title] ?? title}
-          value={stat}
-        />
+        <StatTile key={title} title={statLabels[title] ?? title} value={stat} />
       )
     )
 

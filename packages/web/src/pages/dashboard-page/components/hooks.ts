@@ -3,8 +3,7 @@ import { useMemo } from 'react'
 import {
   useCurrentUserId,
   useUserAlbums,
-  useCurrentAccountUser,
-  useTrackDownloadCounts
+  useCurrentAccountUser
 } from '@audius/common/api'
 import {
   Collection,
@@ -40,11 +39,7 @@ const messages = {
 
 /** ------------------------ Tracks ------------------------ */
 
-const formatTrackMetadata = (
-  metadata: Track,
-  i: number,
-  downloadCountById?: Record<string, number>
-): DataSourceTrack => {
+const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   return {
     ...metadata,
     key: `${metadata.title}_${metadata.dateListened}_${i}`,
@@ -54,24 +49,19 @@ const formatTrackMetadata = (
     saves: metadata.save_count,
     reposts: metadata.repost_count,
     plays: metadata.play_count,
-    downloads: (downloadCountById ?? {})[metadata.id] ?? 0,
     comments: metadata.comment_count
   }
 }
 
-/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table */
+/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table. Download counts are not shown per-row; total downloads are in the stats tile only. */
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
   const { tracks } = useSelector(makeGetDashboard(accountUser))
-  const trackIds = useMemo(() => tracks.map((t) => t.id), [tracks])
-  const { byId: downloadCountById } = useTrackDownloadCounts(trackIds)
   const tracksFormatted = useMemo(() => {
     return tracks
-      .map((track: Track, i: number) =>
-        formatTrackMetadata(track, i, downloadCountById)
-      )
+      .map((track: Track, i: number) => formatTrackMetadata(track, i))
       .filter((meta) => !meta.is_invalid)
-  }, [tracks, downloadCountById])
+  }, [tracks])
   return tracksFormatted
 }
 

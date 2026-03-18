@@ -56,7 +56,6 @@ type RowInfo = UserTrack & {
   date: string
   time: number
   plays: number
-  downloads: number
   dateSaved: string
   dateAdded: string
   handle: string
@@ -77,7 +76,6 @@ export type TracksTableColumn =
   | 'overflowMenu'
   | 'playButton'
   | 'plays'
-  | 'downloads'
   | 'releaseDate'
   | 'reposts'
   | 'saves'
@@ -246,23 +244,6 @@ export const TracksTable = ({
       const isOwner = ownerId === userId
       if (!isOwner && (isStreamGated || isUnlisted || isDelete)) return null
       return formatCount(track.plays ?? track.play_count)
-    },
-    [userId]
-  )
-
-  const renderDownloadsCell = useCallback(
-    (cellInfo: TrackCell) => {
-      const track = cellInfo.row.original
-      const {
-        is_unlisted: isUnlisted,
-        is_delete: isDelete,
-        owner_id: ownerId,
-        is_stream_gated: isStreamGated
-      } = track
-      const isOwner = ownerId === userId
-      if (!isOwner && (isStreamGated || isUnlisted || isDelete)) return null
-      const count = track.downloads ?? track.download_count ?? 0
-      return formatCount(count)
     },
     [userId]
   )
@@ -685,18 +666,6 @@ export const TracksTable = ({
         sorter: numericSorter('plays'),
         align: 'right'
       },
-      downloads: {
-        id: 'downloads',
-        Header: 'Downloads',
-        accessor: 'downloads',
-        Cell: renderDownloadsCell,
-        maxWidth: 120,
-        width: 48,
-        minWidth: 48,
-        sortTitle: 'Downloads',
-        sorter: numericSorter('downloads'),
-        align: 'right'
-      },
       playButton: {
         id: 'playButton',
         Cell: renderPlayButtonCell,
@@ -791,7 +760,6 @@ export const TracksTable = ({
       renderReleaseDateCell,
       renderRepostsCell,
       renderPlaysCell,
-      renderDownloadsCell,
       renderPlayButtonCell,
       renderSavesCell,
       renderCommentsCell,

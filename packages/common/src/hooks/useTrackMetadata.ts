@@ -1,17 +1,19 @@
-import { Mood } from '@audius/sdk'
+import { encodeHashId, Mood } from '@audius/sdk'
 import { pick } from 'lodash'
 
-import { useTrack } from '~/api'
+import { useTrack, useTrackDownloadCount } from '~/api'
 import { ID } from '~/models'
 import { parseMusicalKey } from '~/utils/musicalKeys'
 import { searchPage } from '~/utils/route'
 
+import { formatCount } from '../utils/decimal'
 import { Genre, getCanonicalName } from '../utils/genres'
 import { formatDate, formatSecondsAsText } from '../utils/timeUtil'
 
 export enum TrackMetadataType {
   ALBUM = 'album',
   DURATION = 'duration',
+  DOWNLOADS = 'downloads',
   GENRE = 'genre',
   MOOD = 'mood',
   KEY = 'key',
@@ -45,9 +47,13 @@ export const useTrackMetadata = ({
         'musical_key',
         'bpm',
         'is_custom_bpm',
-        'album_backlink'
+        'album_backlink',
+        'is_downloadable'
       ])
   })
+
+  const trackIdHash = trackMetadata ? encodeHashId(trackId as number) : null
+  const { data: downloadCount = 0 } = useTrackDownloadCount(trackIdHash)
 
   if (!trackMetadata) return []
 
@@ -60,7 +66,8 @@ export const useTrackMetadata = ({
     musical_key,
     bpm,
     is_custom_bpm: isCustomBpm,
-    album_backlink
+    album_backlink,
+    is_downloadable: isDownloadable
   } = trackMetadata
 
   const parsedBpm = bpm
@@ -112,6 +119,12 @@ export const useTrackMetadata = ({
       id: TrackMetadataType.DURATION,
       label: 'Duration',
       value: formatSecondsAsText(duration ?? 0)
+    },
+    {
+      id: TrackMetadataType.DOWNLOADS,
+      label: 'Downloads',
+      value: isDownloadable ? formatCount(downloadCount) : '',
+      isHidden: !isDownloadable
     }
   ].filter(({ isHidden, value }) => !isHidden && !!value)
 

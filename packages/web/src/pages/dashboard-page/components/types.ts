@@ -8,7 +8,6 @@ export type DataSourceTrack = Track & {
   saves: number
   reposts: number
   plays: number
-  downloads: number
   comments: number
 }
 

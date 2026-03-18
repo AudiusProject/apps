@@ -417,6 +417,7 @@ models/UserResponseSingle.ts
 models/UserSearch.ts
 models/UserSubscribers.ts
 models/UserTrackListenCountsResponse.ts
+models/UserTracksDownloadCountResponse.ts
 models/UserTracksRemixedResponse.ts
 models/VerifyToken.ts
 models/VersionMetadata.ts

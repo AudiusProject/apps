@@ -10,11 +10,39 @@ import { entityCacheOptions } from '../utils/entityCacheOptions'
 
 export type TrackDownloadCount = { id: string; download_count: number }
 
+export const getTrackDownloadCountQueryKey = (trackId: string | null) =>
+  [QUERY_KEYS.trackDownloadCounts, trackId] as unknown as QueryKey<number>
+
 export const getTrackDownloadCountsQueryKey = (trackIds: string[]) => {
   const stable = [...trackIds].sort()
   return [QUERY_KEYS.trackDownloadCounts, stable] as unknown as QueryKey<
     TrackDownloadCount[]
   >
+}
+
+/**
+ * Single-track download count. Use for track page / metadata when you only need one track.
+ * For multiple tracks (e.g. summing), use useTrackDownloadCounts (bulk) instead.
+ */
+export const useTrackDownloadCount = (
+  trackId: string | null | undefined,
+  options?: QueryOptions<number>
+) => {
+  const { audiusSdk } = useQueryContext()
+
+  return useQuery({
+    queryKey: getTrackDownloadCountQueryKey(trackId ?? null),
+    queryFn: async () => {
+      const sdk = await audiusSdk()
+      const response = await sdk.tracks.getTrackDownloadCount({
+        trackId: trackId!
+      })
+      return response.data.downloadCount
+    },
+    ...options,
+    ...entityCacheOptions,
+    enabled: options?.enabled !== false && !!trackId
+  })
 }
 
 export const useTrackDownloadCounts = (
@@ -33,7 +61,19 @@ export const useTrackDownloadCounts = (
     queryKey: getTrackDownloadCountsQueryKey(uniqueIds),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      return sdk.tracks.getTrackDownloadCounts({ trackIds: uniqueIds })
+      const rows = await sdk.tracks.getTrackDownloadCounts({
+        trackIds: uniqueIds
+      })
+      const list = Array.isArray(rows)
+        ? rows
+        : (rows as { data: TrackDownloadCount[] }).data
+      return list.map((row) => ({
+        id: row.id,
+        download_count:
+          'download_count' in row
+            ? row.download_count
+            : (row as { downloadCount: number }).downloadCount
+      }))
     },
     ...options,
     ...entityCacheOptions,
