@@ -1,6 +1,6 @@
 {
   "name": "@audius/sdk",
-  "version": "14.1.0",
+  "version": "15.0.0",
   "type": "module",
   "audius": {
     "releaseSHA": "f1d70a2a0643c5c84d8ab053f70c1e0a2ec3ad49"
@@ -66,7 +66,7 @@
     "prepack": "turbo run build"
   },
   "dependencies": {
-    "@audius/eth": "0.1.0",
+    "@audius/eth": "1.0.0",
     "@audius/fixed-decimal": "0.2.1",
     "@audius/hedgehog": "3.0.0-alpha.1",
     "@audius/spl": "2.1.0",

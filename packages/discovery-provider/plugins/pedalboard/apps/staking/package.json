@@ -1,6 +1,6 @@
 {
   "name": "@pedalboard/staking",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "start": "npx tsx ./src/index.ts",
@@ -12,7 +12,7 @@
     "preset": "jest-presets/jest/node"
   },
   "dependencies": {
-    "@audius/eth": "0.1.0",
+    "@audius/eth": "1.0.0",
     "@audius/sdk": "*",
     "@pedalboard/basekit": "*",
     "@pedalboard/logger": "*",

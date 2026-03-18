@@ -1,6 +1,6 @@
 {
   "name": "@audius/protocol-dashboard",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "private": true,
   "type": "module",
   "homepage": "./",
@@ -39,8 +39,8 @@
     "@apollo/client": "3.3.7",
     "@audius/common": "*",
     "@audius/harmony": "*",
-    "@audius/sdk": "14.0.0",
-    "@audius/sdk-legacy": "6.0.23",
+    "@audius/sdk": "15.0.0",
+    "@audius/sdk-legacy": "6.0.24",
     "@audius/stems": "0.3.10",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
