@@ -7,7 +7,6 @@ import {
   useEffect,
   useState
 } from 'react'
-import { useSdk } from '../hooks/useSdk'
 import { Status } from './types'
 
 type AuthContext = {
@@ -17,7 +16,6 @@ type AuthContext = {
 }
 
 export const distributorAppKeyStorageKey = '@audius/distro/appKey'
-const tokenLocalStorageKey = '@audius/sdk/token'
 
 const AuthContext = createContext<AuthContext>({
   status: Status.IDLE,
@@ -25,12 +23,10 @@ const AuthContext = createContext<AuthContext>({
 })
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { sdk: audiusSdk } = useSdk()
   const [user, setUser] = useState<User | undefined>(undefined)
   const [status, setStatus] = useState(Status.IDLE)
 
   useEffect(() => {
-    if (!audiusSdk) return
     const fn = async () => {
       try {
         setStatus(Status.LOADING)
@@ -55,15 +51,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setStatus(Status.SUCCESS)
       } catch (e) {
         console.error(e)
-        localStorage.removeItem(tokenLocalStorageKey)
         setStatus(Status.ERROR)
       }
     }
     fn()
-  }, [audiusSdk])
+  }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(tokenLocalStorageKey)
     localStorage.removeItem(distributorAppKeyStorageKey)
     window.location.href = window.location.pathname
   }, [])
