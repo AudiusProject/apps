@@ -130,6 +130,11 @@ export class CommentsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -180,6 +185,11 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -266,6 +276,11 @@ export class CommentsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/comments/{comment_id}/replies`.replace(`{${"comment_id"}}`, encodeURIComponent(String(params.commentId))),
             method: 'GET',
@@ -338,6 +353,11 @@ export class CommentsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -395,6 +415,11 @@ export class CommentsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -445,6 +470,11 @@ export class CommentsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -501,6 +531,11 @@ export class CommentsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -559,6 +594,11 @@ export class CommentsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -615,6 +655,11 @@ export class CommentsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);

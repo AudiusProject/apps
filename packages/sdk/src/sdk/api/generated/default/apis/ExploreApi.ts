@@ -60,6 +60,11 @@ export class ExploreApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/explore/best-selling`,
             method: 'GET',

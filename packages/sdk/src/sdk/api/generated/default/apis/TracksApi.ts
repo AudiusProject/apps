@@ -29,6 +29,8 @@ import type {
   TrackCommentCountResponse,
   TrackCommentNotificationResponse,
   TrackCommentsResponse,
+  TrackDownloadCountResponse,
+  TrackDownloadCountsResponse,
   TrackDownloadRequestBody,
   TrackFavoritesResponse,
   TrackInspect,
@@ -70,6 +72,10 @@ import {
     TrackCommentNotificationResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
+    TrackDownloadCountResponseFromJSON,
+    TrackDownloadCountResponseToJSON,
+    TrackDownloadCountsResponseFromJSON,
+    TrackDownloadCountsResponseToJSON,
     TrackDownloadRequestBodyFromJSON,
     TrackDownloadRequestBodyToJSON,
     TrackFavoritesResponseFromJSON,
@@ -208,6 +214,14 @@ export interface GetTrackCommentsRequest {
     limit?: number;
     userId?: string;
     sortMethod?: GetTrackCommentsSortMethodEnum;
+}
+
+export interface GetTrackDownloadCountRequest {
+    trackId: string;
+}
+
+export interface GetTrackDownloadCountsRequest {
+    id: Array<string>;
 }
 
 export interface GetTrackRemixParentsRequest {
@@ -437,6 +451,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -487,6 +506,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -551,6 +575,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/download`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -591,6 +620,11 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -651,6 +685,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/best_new_releases`,
             method: 'GET',
@@ -693,6 +732,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks`,
@@ -737,6 +781,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/feeling-lucky`,
             method: 'GET',
@@ -775,6 +824,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/most_loved`,
@@ -819,6 +873,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/most-shared`,
             method: 'GET',
@@ -857,6 +916,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/recent-premium`,
@@ -904,6 +968,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/recommended`,
@@ -956,6 +1025,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/recommended/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
             method: 'GET',
@@ -995,6 +1069,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/remixables`,
             method: 'GET',
@@ -1029,6 +1108,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/{track_id}`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
@@ -1065,6 +1149,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/access-info`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -1100,6 +1189,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/comment_count`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -1134,6 +1228,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/{track_id}/comment_notification_setting`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
@@ -1182,6 +1281,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/comments`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -1197,6 +1301,82 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getTrackComments(params: GetTrackCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackCommentsResponse> {
         const response = await this.getTrackCommentsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the download count for a single track. Full track + all stems (parent) or stem-only (stem).
+     */
+    async getTrackDownloadCountRaw(params: GetTrackDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackDownloadCountResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getTrackDownloadCount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/download_count`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackDownloadCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the download count for a single track. Full track + all stems (parent) or stem-only (stem).
+     */
+    async getTrackDownloadCount(params: GetTrackDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackDownloadCountResponse> {
+        const response = await this.getTrackDownloadCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets download counts for tracks by ID. Use this instead of loading full track objects when only download counts are needed.
+     */
+    async getTrackDownloadCountsRaw(params: GetTrackDownloadCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackDownloadCountsResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getTrackDownloadCounts.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.id) {
+            queryParameters['id'] = params.id;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/tracks/download_counts`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackDownloadCountsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets download counts for tracks by ID. Use this instead of loading full track objects when only download counts are needed.
+     */
+    async getTrackDownloadCounts(params: GetTrackDownloadCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackDownloadCountsResponse> {
+        const response = await this.getTrackDownloadCountsRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1224,6 +1404,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/{track_id}/remixing`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
@@ -1279,6 +1464,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/{track_id}/remixes`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
@@ -1354,6 +1544,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/top_listeners`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -1392,6 +1587,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/recent-comments`,
@@ -1478,6 +1678,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/trending`,
@@ -1573,6 +1778,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/trending/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
             method: 'GET',
@@ -1619,6 +1829,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/usdc-purchase`,
@@ -1671,6 +1886,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/usdc-purchase/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
             method: 'GET',
@@ -1706,6 +1926,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/trending/underground/winners`,
             method: 'GET',
@@ -1740,6 +1965,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/trending/winners`,
@@ -1792,6 +2022,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/under_the_radar`,
             method: 'GET',
@@ -1830,6 +2065,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/trending/underground`,
@@ -1874,6 +2114,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/trending/underground/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
             method: 'GET',
@@ -1917,6 +2162,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/favorites`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -1959,6 +2209,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
 
         const response = await this.request({
             path: `/tracks/{track_id}/reposts`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
@@ -2075,6 +2330,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -2127,6 +2387,11 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -2258,6 +2523,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
+
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
@@ -2337,6 +2607,11 @@ export class TracksApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
         const response = await this.request({
             path: `/tracks/{track_id}/stream`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
             method: 'GET',
@@ -2376,6 +2651,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -2426,6 +2706,11 @@ export class TracksApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
@@ -2482,6 +2767,11 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+        }
 
         if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);

@@ -536,7 +536,7 @@ describe('OAuth.getUser', () => {
     const fetchSpy = vi
       .fn()
       .mockResolvedValueOnce(
-        new Response(JSON.stringify(userData), { status: 200 })
+        new Response(JSON.stringify({ data: userData }), { status: 200 })
       )
     vi.stubGlobal('fetch', fetchSpy)
 

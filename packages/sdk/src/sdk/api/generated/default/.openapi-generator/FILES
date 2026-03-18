@@ -342,6 +342,9 @@ models/TrackArtwork.ts
 models/TrackCommentCountResponse.ts
 models/TrackCommentNotificationResponse.ts
 models/TrackCommentsResponse.ts
+models/TrackDownloadCountResponse.ts
+models/TrackDownloadCountResponseData.ts
+models/TrackDownloadCountsResponse.ts
 models/TrackDownloadRequestBody.ts
 models/TrackElementWrite.ts
 models/TrackFavoritesResponse.ts
