@@ -402,6 +402,25 @@ def up(
         ),
     )
 
+    # Build openaudio/go-openaudio:dev from local go-openaudio clone if present
+    build_openaudio = protocol_dir / "dev-tools/scripts/build-openaudio.sh"
+    if build_openaudio.exists():
+        subprocess.run(
+            [str(build_openaudio)],
+            env={**os.environ, "PROJECT_ROOT": str(protocol_dir)},
+            cwd=str(protocol_dir),
+            check=False,
+        )
+    # If :dev image still doesn't exist, use :stable so pull/up succeed
+    if (
+        subprocess.run(
+            ["docker", "image", "inspect", "openaudio/go-openaudio:dev"],
+            capture_output=True,
+        ).returncode
+        != 0
+    ):
+        os.environ["OPENAUDIO_IMAGE"] = "openaudio/go-openaudio:stable"
+
     ctx.invoke(pull)
     sys.exit(
         subprocess.run(
@@ -419,6 +438,7 @@ def up(
                 *args,
                 *services,
             ],
+            env=os.environ,
         ).returncode
     )
 

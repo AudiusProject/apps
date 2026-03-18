@@ -84,6 +84,19 @@ Load environment variables
 audius-compose load-env discovery-provider prod
 ```
 
+# Open Audio Protocol (OAP) nodes
+
+The stack runs four Open Audio Protocol (OAP) validator nodes (openaudio-1–4) when using the `storage` and `discovery` profiles. They use the image `openaudio/go-openaudio:dev` by default (for local development).
+
+- **If you have a local [go-openaudio](https://github.com/OpenAudio/go-openaudio) clone:** Clone it as a sibling of the apps repo (e.g. `../go-openaudio`) or set `GO_OPENAUDIO_ROOT`. When you run `audius-compose up`, the script `dev-tools/scripts/build-openaudio.sh` will run and build `openaudio/go-openaudio:dev` via `make docker-dev` in that repo, so the stack uses your local build.
+- **If you don’t:** The stack automatically uses the public image `openaudio/go-openaudio:stable` so `audius-compose up` still works without building.
+
+To force a specific image (e.g. a custom tag), set `OPENAUDIO_IMAGE`:
+
+```bash
+OPENAUDIO_IMAGE=openaudio/go-openaudio:stable audius-compose up
+```
+
 # Troubleshooting
 
 ## Increase Docker Resource Requirements
