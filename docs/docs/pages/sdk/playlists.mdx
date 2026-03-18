@@ -29,6 +29,10 @@ example above.
 | `playlistId` | `string` | The ID of the playlist                | **Required** |
 | `userId`     | `string` | The ID of the user making the request | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` contains a
@@ -60,6 +64,10 @@ example above.
 | `upc`       | `string[]` | An array of UPC codes                 | _Optional_ |
 | `userId`    | `string`   | The ID of the user making the request | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
@@ -87,6 +95,10 @@ example above.
 | Name         | Type     | Description            | Required?    |
 | :----------- | :------- | :--------------------- | :----------- |
 | `playlistId` | `string` | The ID of the playlist | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -117,6 +129,10 @@ example above.
 | `userId` | `string`                                                        | The ID of the user making the request                     | _Optional_ |
 | `type`   | `string`                                                        | The type of trending playlists to return                  | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the first
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
@@ -144,6 +160,10 @@ example above.
 | Name    | Type     | Description             | Required?  |
 | :------ | :------- | :---------------------- | :--------- |
 | `query` | `string` | The query to search for | _Optional_ |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 

@@ -28,6 +28,10 @@ example above.
 | :--- | :------- | :----------------- | :----------- |
 | `id` | `string` | The ID of the user | **Required** |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` contains information about the
@@ -112,6 +116,10 @@ example above.
 | `id`     | `string[]` | The IDs of the users                  | _Optional_ |
 | `userId` | `string`   | The ID of the user making the request | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns an array of users, see [`getUser`](#getuser).
@@ -145,6 +153,10 @@ example above.
 | `sortDirection` | `GetAIAttributedTracksByUserHandleSortDirectionEnum` (can be imported from `@audius/sdk`)          | A sort direction to apply to the returned tracks. Default value is **GetAIAttributableTracksByUserHandleSortDirectionEnum.Asc** | _Optional_   |
 | `sortMethod`    | `GetAIAttributedTracksByUserTracksByUserHandleSortMethodEnum` (can be imported from `@audius/sdk`) | A sort method to apply to the returned tracks                                                                                   | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
@@ -171,6 +183,10 @@ example above.
 | Name | Type     | Description        | Required?    |
 | :--- | :------- | :----------------- | :----------- |
 | `id` | `string` | The ID of the user | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -211,6 +227,10 @@ example above.
 | :--- | :------- | :----------------- | :----------- |
 | `id` | `string` | The ID of the user | **Required** |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an object containing
@@ -245,6 +265,10 @@ example above.
 | Name | Type     | Description        | Required?    |
 | :--- | :------- | :----------------- | :----------- |
 | `id` | `string` | The ID of the user | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -285,6 +309,10 @@ example above.
 | `limit`  | `number` | The maximum number of followers to return. Default value is **10** | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -352,6 +380,10 @@ example above.
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 The return type is the same as [`getFollowers`](#getfollowers)
@@ -383,6 +415,10 @@ example above.
 | `userId`         | `string`  | The ID of the user making the request                              | _Optional_   |
 | `filterFollowed` | `boolean` | Filter to only users that the current user follows                 | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 The return type is the same as [`getFollowers`](#getfollowers)
@@ -412,6 +448,10 @@ example above.
 | `limit`  | `number` | The maximum number of reposts to return. Default value is **100**  | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -455,6 +495,10 @@ example above.
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 The return type is the same as [`getFollowers`](#getfollowers)
@@ -484,6 +528,10 @@ example above.
 | `limit`  | `number` | The maximum number of users to return. Default value is **10**     | _Optional_   |
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -555,6 +603,10 @@ example above.
 | `offset` | `number` | The offset to apply to the list of results. Default value is **0** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                              | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
@@ -624,6 +676,10 @@ example above.
 | `limit`  | `number` | The maximum number of tags to return. Default value is **10** | _Optional_   |
 | `userId` | `string` | The ID of the user making the request                         | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of strings
@@ -662,6 +718,10 @@ example above.
 | `sortDirection` | `GetTracksByUserSortDirectionEnum` (can be imported from `@audius/sdk`) | A sort direction to apply to the returned tracks. Default value is **GetTracksByUserSortDirectionEnum.Asc** | _Optional_   |
 | `sortMethod`    | `GetTracksByUserSortMethodEnum` (can be imported from `@audius/sdk`)    | A sort method to apply to the returned tracks                                                               | _Optional_   |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
@@ -689,6 +749,10 @@ example above.
 | :------- | :------- | :------------------------------------ | :----------- |
 | `handle` | `string` | The handle of the user                | **Required** |
 | `userId` | `string` | The ID of the user making the request | _Optional_   |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
@@ -721,6 +785,10 @@ example above.
 | `genre`      | [`Genre[]`](tracks#genre-values) | Array of genres to filter by                          | _Optional_ |
 | `sortMethod` | `string`                         | Sort method: `'relevant'`, `'popular'`, or `'recent'` | _Optional_ |
 | `isVerified` | `string`                         | Filter to only verified users                         | _Optional_ |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
