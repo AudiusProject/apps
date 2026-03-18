@@ -5,9 +5,7 @@ description: Audius Protocol Documentation
 
 # Playlists
 
-## getPlaylist
-
-> #### getPlaylist(`params`)
+## getPlaylist(`params`)
 
 Get a playlist by id.
 
@@ -36,9 +34,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`PlaylistResponse`](#playlistresponse) object.
 
-## getBulkPlaylists
-
-> #### getBulkPlaylists(`params`)
+## getBulkPlaylists(`params`)
 
 Get a list of playlists by ID, UPC, or permalink.
 
@@ -69,9 +65,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
-## getPlaylistTracks
-
-> #### getPlaylistTracks(`params`)
+## getPlaylistTracks(`params`)
 
 Get the tracks in a playlist.
 
@@ -98,9 +92,7 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
-## getTrendingPlaylists
-
-> #### getTrendingPlaylists(`params?`)
+## getTrendingPlaylists(`params?`)
 
 Get the top trending playlists on Audius.
 
@@ -130,9 +122,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
-## searchPlaylists
-
-> #### searchPlaylists(`params`)
+## searchPlaylists(`params`)
 
 Search for playlists.
 
@@ -160,9 +150,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
-## createPlaylist
-
-> #### createPlaylist(`params`, `requestInit?`)
+## createPlaylist(`params`, `requestInit?`)
 
 Create a new playlist.
 
@@ -221,9 +209,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## updatePlaylist
-
-> #### updatePlaylist(`params`, `requestInit?`)
+## updatePlaylist(`params`, `requestInit?`)
 
 Update an existing playlist's metadata. If any metadata fields are not provided, their values will
 be kept the same as before. To replace cover art, upload a new image via the
@@ -284,9 +270,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## deletePlaylist
-
-> #### deletePlaylist(`params`, `requestInit?`)
+## deletePlaylist(`params`, `requestInit?`)
 
 Delete a playlist.
 
@@ -323,9 +307,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## favoritePlaylist
-
-> #### favoritePlaylist(`params`, `requestInit?`)
+## favoritePlaylist(`params`, `requestInit?`)
 
 Favorite a playlist.
 
@@ -362,9 +344,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## unfavoritePlaylist
-
-> #### unfavoritePlaylist(`params`, `requestInit?`)
+## unfavoritePlaylist(`params`, `requestInit?`)
 
 Unfavorite a playlist.
 
@@ -401,9 +381,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## repostPlaylist
-
-> #### repostPlaylist(`params`, `requestInit?`)
+## repostPlaylist(`params`, `requestInit?`)
 
 Repost a playlist.
 
@@ -440,9 +418,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## unrepostPlaylist
-
-> #### unrepostPlaylist(`params`, `requestInit?`)
+## unrepostPlaylist(`params`, `requestInit?`)
 
 Unrepost a playlist.
 

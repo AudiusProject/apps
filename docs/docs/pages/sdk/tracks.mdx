@@ -5,9 +5,7 @@ description: Audius Protocol Documentation
 
 # Tracks
 
-## getTrack
-
-> #### getTrack(`params`, `requestInit?`)
+## getTrack(`params`, `requestInit?`)
 
 Get a track by id.
 
@@ -40,9 +38,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`TrackResponse`](#trackresponse) object.
 
-## getBulkTracks
-
-> #### getBulkTracks(`params`, `requestInit?`)
+## getBulkTracks(`params`, `requestInit?`)
 
 Get a list of tracks using their IDs or permalinks.
 
@@ -76,9 +72,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
-## getTrendingTracks
-
-> #### getTrendingTracks(`params`, `requestInit?`)
+## getTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending (most popular) tracks on Audius.
 
@@ -111,9 +105,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
-## getUndergroundTrendingTracks
-
-> #### getUndergroundTrendingTracks(`params`, `requestInit?`)
+## getUndergroundTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending underground tracks on Audius.
 
@@ -144,9 +136,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
-## searchTracks
-
-> #### searchTracks(`params`, `requestInit?`)
+## searchTracks(`params`, `requestInit?`)
 
 Search for tracks.
 
@@ -189,9 +179,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
-## createTrack
-
-> #### createTrack(`params`, `requestInit?`)
+## createTrack(`params`, `requestInit?`)
 
 Create a track by registering its metadata on the protocol. This method accepts metadata including
 CIDs (Content Identifiers) that reference previously uploaded files — it does **not** accept raw
@@ -276,9 +264,7 @@ Returns a `Promise` resolving to an object with the following fields:
   trackId?: string
 }
 
-## updateTrack
-
-> #### updateTrack(`params`, `requestInit?`)
+## updateTrack(`params`, `requestInit?`)
 
 Update a track's metadata. If any metadata fields are not provided, their values will be kept the
 same as before. To replace audio or cover art, upload new files via the
@@ -327,9 +313,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## deleteTrack
-
-> #### deleteTrack(`params`, `requestInit?`)
+## deleteTrack(`params`, `requestInit?`)
 
 Delete a track
 
@@ -368,9 +352,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## favoriteTrack
-
-> #### favoriteTrack(`params`, `requestInit?`)
+## favoriteTrack(`params`, `requestInit?`)
 
 Favorite a track
 
@@ -416,9 +398,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## unfavoriteTrack
-
-> #### unfavoriteTrack(`params`, `requestInit?`)
+## unfavoriteTrack(`params`, `requestInit?`)
 
 Unfavorite a track
 
@@ -457,9 +437,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## repostTrack
-
-> #### repostTrack(`params`, `requestInit?`)
+## repostTrack(`params`, `requestInit?`)
 
 Repost a track
 
@@ -505,9 +483,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## unrepostTrack
-
-> #### unrepostTrack(`params`, `requestInit?`)
+## unrepostTrack(`params`, `requestInit?`)
 
 Unrepost a track
 
@@ -546,9 +522,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
-## getTrackDownloadCount
-
-> #### getTrackDownloadCount(`params`, `requestInit?`)
+## getTrackDownloadCount(`params`, `requestInit?`)
 
 Get the download count for a single track.
 
@@ -579,9 +553,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field of type
 [`TrackDownloadCountResponseData`](#trackdownloadcountresponsedata).
 
-## getTrackDownloadCounts
-
-> #### getTrackDownloadCounts(`params`, `requestInit?`)
+## getTrackDownloadCounts(`params`, `requestInit?`)
 
 Get download counts for multiple tracks by ID.
 

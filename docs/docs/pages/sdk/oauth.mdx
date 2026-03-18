@@ -11,9 +11,7 @@ simply verify their identity and share their profile info (read-only). The SDK i
 
 For a step-by-step setup guide, see [Log in with Audius](/developers/guides/log-in-with-audius).
 
-## login
-
-> #### login(`params`)
+## login(`params`)
 
 Opens the Audius consent screen and runs the full PKCE authorization flow.
 
@@ -69,9 +67,7 @@ allow access to DMs or wallets.
 
 Returns `Promise<void>`.
 
-## getUser
-
-> #### getUser()
+## getUser()
 
 Fetches the authenticated user's profile from the server using the stored access token. Always
 makes a network request so the result reflects current server-side state.
@@ -105,9 +101,7 @@ type DecodedUserToken = {
 }
 ```
 
-## handleRedirect
-
-> #### handleRedirect(`url?`)
+## handleRedirect(`url?`)
 
 Completes an OAuth flow by processing the redirect URL. Call this on your callback page after
 `login()` redirects there.
@@ -147,9 +141,7 @@ await audiusSdk.oauth.handleRedirect()
 
 Returns `Promise<void>`.
 
-## isAuthenticated
-
-> #### isAuthenticated()
+## isAuthenticated()
 
 Returns `true` if an access token is currently stored. Tokens are persisted across sessions
 (localStorage on web, AsyncStorage on React Native), so this will be `true` on page/app reload if
@@ -167,9 +159,7 @@ if (await audiusSdk.oauth.isAuthenticated()) {
 
 Returns `Promise<boolean>`.
 
-## hasRefreshToken
-
-> #### hasRefreshToken()
+## hasRefreshToken()
 
 Returns `true` if a refresh token is stored and a refresh exchange could be attempted.
 
@@ -185,9 +175,7 @@ if (await audiusSdk.oauth.hasRefreshToken()) {
 
 Returns `Promise<boolean>`.
 
-## hasRedirectResult
-
-> #### hasRedirectResult(`url?`)
+## hasRedirectResult(`url?`)
 
 Synchronous check for whether the given URL (or current page URL on web) contains OAuth redirect
 params (`code` + `state`). No network requests or side effects. Useful for showing a loading state
@@ -213,9 +201,7 @@ if (audiusSdk.oauth.hasRedirectResult()) {
 
 Returns `boolean`.
 
-## refreshAccessToken
-
-> #### refreshAccessToken()
+## refreshAccessToken()
 
 Refreshes the access token using the stored refresh token. The SDK calls this automatically when
 API requests return `401`, but you can trigger it manually if needed.
@@ -233,9 +219,7 @@ if (!newToken) {
 
 Returns `Promise<string | null>` — the new access token, or `null` if the refresh failed.
 
-## logout
-
-> #### logout()
+## logout()
 
 Revokes the current refresh token server-side and clears all stored tokens and PKCE session state.
 After calling this, all SDK API calls revert to unauthenticated.
