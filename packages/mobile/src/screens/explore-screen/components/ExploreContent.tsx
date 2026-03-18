@@ -28,11 +28,11 @@ export const ExploreContent = () => {
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
+      {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <FeaturedArtistCoinTracks />}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}
-      {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <FeaturedRemixContests />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
