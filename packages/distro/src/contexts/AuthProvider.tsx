@@ -36,7 +36,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setStatus(Status.SUCCESS)
           return
         }
-        const distroSdk = sdk({ apiKey: appKey })
+        const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'prod'
+        const distroSdk = sdk({
+          apiKey: appKey,
+          appName: 'ddex',
+          environment: env === 'dev' ? 'development' : 'production'
+        })
 
         if (distroSdk.oauth.hasRedirectResult()) {
           await distroSdk.oauth.handleRedirect()
