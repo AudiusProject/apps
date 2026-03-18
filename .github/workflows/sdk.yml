@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - changeset-release/**
     paths:
       - 'packages/sdk/**'
       - 'packages/eth/**'
