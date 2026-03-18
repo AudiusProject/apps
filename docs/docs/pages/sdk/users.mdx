@@ -90,7 +90,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field with the same shape as
-[`getUser`](#getuser).
+[`getUser`](#getuserparams-requestinit).
 
 ## getBulkUsers(`params`, `requestInit?`)
 
@@ -122,7 +122,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-Returns an array of users, see [`getUser`](#getuser).
+Returns an array of users, see [`getUser`](#getuserparams-requestinit).
 
 ## getAIAttributedTracksByUserHandle(`params`, `requestInit?`)
 
@@ -159,7 +159,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
+The return type is the same as [`getBulkTracks`](/sdk/tracks#getbulktracksparams-requestinit)
 
 ## getAuthorizedApps(`params`, `requestInit?`)
 
@@ -281,7 +281,7 @@ information about the favorites as described below.
   favoriteItemId: string // The ID of the track, playlist, or album
   favoriteType: string // The type of favorite ("track", "playlist", or "album")
   userId: string
-}[]
+}
 ```
 
 ## getFollowers(`params`, `requestInit?`)
@@ -386,7 +386,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getFollowers`](#getfollowers)
+The return type is the same as [`getFollowers`](#getfollowersparams-requestinit)
 
 ## getRelatedUsers(`params`, `requestInit?`)
 
@@ -421,7 +421,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getFollowers`](#getfollowers)
+The return type is the same as [`getFollowers`](#getfollowersparams-requestinit)
 
 ## getReposts(`params`, `requestInit?`)
 
@@ -457,7 +457,6 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of items containing
 information about the reposts as described below.
-
 
 ```ts
 {
@@ -501,7 +500,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getFollowers`](#getfollowers)
+The return type is the same as [`getFollowers`](#getfollowersparams-requestinit)
 
 ## getSupporters(`params`, `requestInit?`)
 
@@ -724,7 +723,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
+The return type is the same as [`getBulkTracks`](/sdk/tracks#getbulktracksparams-requestinit)
 
 ## getUserByHandle(`params`, `requestInit?`)
 
@@ -756,7 +755,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getUser`](#getuser)
+The return type is the same as [`getUser`](#getuserparams-requestinit)
 
 ## searchUsers(`params`, `requestInit?`)
 
@@ -792,7 +791,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 
 #### Returns
 
-The return type is the same as [`getFollowers`](#getfollowers)
+The return type is the same as [`getFollowers`](#getfollowersparams-requestinit)
 
 ## updateUser(`params`, `requestInit?`)
 
