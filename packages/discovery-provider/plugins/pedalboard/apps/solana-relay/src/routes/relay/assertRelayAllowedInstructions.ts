@@ -79,6 +79,103 @@ const findSpecificMemo = (
   return null
 }
 
+/** Rent exemption for a 165-byte token account (lamports) */
+const RENT_EXEMPTION_TOKEN_ACCOUNT = 2_039_280
+
+/**
+ * Returns true if the tx contains an instruction that sends >= rent exemption
+ * lamports to the fee payer (System Transfer or Token CloseAccount).
+ */
+const feePayerReceivesRentExemptionOrMore = (
+  instructions: TransactionInstruction[],
+  feePayer: string
+): boolean => {
+  for (const instr of instructions) {
+    if (instr.programId.equals(SystemProgram.programId)) {
+      try {
+        const type = SystemInstruction.decodeInstructionType(instr)
+        if (type === 'Transfer') {
+          const decoded = SystemInstruction.decodeTransfer(instr)
+          if (
+            decoded.toPubkey.toBase58() === feePayer &&
+            decoded.lamports >= RENT_EXEMPTION_TOKEN_ACCOUNT
+          ) {
+            return true
+          }
+        }
+      } catch {
+        /* skip invalid */
+      }
+    } else if (instr.programId.equals(TOKEN_PROGRAM_ID)) {
+      try {
+        const decoded = decodeInstruction(instr)
+        if (
+          isCloseAccountInstruction(decoded) &&
+          decoded.keys.destination.pubkey.toBase58() === feePayer
+        ) {
+          return true
+        }
+      } catch {
+        /* skip invalid */
+      }
+    }
+  }
+  return false
+}
+
+/**
+ * Counts fee-payer-funded ATA creates that have no matching close.
+ */
+const countUnmatchedFeePayerCreates = (
+  instructions: TransactionInstruction[],
+  feePayer: string
+): number => {
+  const feePayerCreatesWithoutClose: Set<string> = new Set()
+  const allAtaCreates: Array<{ associatedToken: PublicKey; payer: PublicKey }> =
+    []
+
+  for (const instr of instructions) {
+    if (!instr.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)) continue
+    try {
+      const decoded = decodeAssociatedTokenAccountInstruction(instr)
+      if (
+        isCreateAssociatedTokenAccountInstruction(decoded) ||
+        isCreateAssociatedTokenAccountIdempotentInstruction(decoded)
+      ) {
+        const payer = decoded.keys.payer.pubkey.toBase58()
+        if (payer === feePayer) {
+          allAtaCreates.push({
+            associatedToken: decoded.keys.associatedToken.pubkey,
+            payer: decoded.keys.payer.pubkey
+          })
+        }
+      }
+    } catch {
+      /* skip */
+    }
+  }
+
+  for (const create of allAtaCreates) {
+    const hasMatchingClose = instructions.some((instr) => {
+      if (!instr.programId.equals(TOKEN_PROGRAM_ID)) return false
+      try {
+        const decoded = decodeInstruction(instr)
+        return (
+          isCloseAccountInstruction(decoded) &&
+          create.associatedToken.equals(decoded.keys.account.pubkey) &&
+          create.payer.equals(decoded.keys.destination.pubkey)
+        )
+      } catch {
+        return false
+      }
+    })
+    if (!hasMatchingClose) {
+      feePayerCreatesWithoutClose.add(create.associatedToken.toBase58())
+    }
+  }
+  return feePayerCreatesWithoutClose.size
+}
+
 /**
  * Only allow the createTokenAccount instruction of the Associated Token
  * Account program, provided it has matching close instructions.
@@ -152,38 +249,49 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
           )
       )
     if (
-      wallet &&
       matchingCreateInstructions.length !== matchingCloseInstructions.length
     ) {
-      try {
-        let memo: string | undefined
-        if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
-          memo = PAYOUT_WALLET_MEMO
-        } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
-          memo = PREPARE_WITHDRAWAL_MEMO
-        }
-        const isAbusive = await isUserAbusive(wallet)
-        if (isAbusive) {
+      // Reimbursement exception: allow exactly one fee-payer-funded create without
+      // matching close when fee payer receives >= rent exemption in the same tx.
+      if (
+        feePayer &&
+        feePayerReceivesRentExemptionOrMore(instructions, feePayer) &&
+        countUnmatchedFeePayerCreates(instructions, feePayer) === 1
+      ) {
+        return
+      }
+      if (wallet) {
+        try {
+          let memo: string | undefined
+          if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
+            memo = PAYOUT_WALLET_MEMO
+          } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
+            memo = PREPARE_WITHDRAWAL_MEMO
+          }
+          const isAbusive = await isUserAbusive(wallet)
+          if (isAbusive) {
+            throw new InvalidRelayInstructionError(
+              instructionIndex,
+              'User is abusive'
+            )
+          }
+          // In this situation, we could be losing SOL because the user is allowed to
+          // close their own ATA and reclaim the rent that we've fronted, so
+          // rate limit it cautiously.
+          await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
+        } catch (e) {
+          const error = e as Error
           throw new InvalidRelayInstructionError(
             instructionIndex,
-            'User is abusive'
+            error.message
           )
         }
-        // In this situation, we could be losing SOL because the user is allowed to
-        // close their own ATA and reclaim the rent that we've fronted, so
-        // rate limit it cautiously.
-        await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
-      } catch (e) {
-        const error = e as Error
-        throw new InvalidRelayInstructionError(instructionIndex, error.message)
+      } else {
+        throw new InvalidRelayInstructionError(
+          instructionIndex,
+          `Mismatched number of create and close instructions for account: ${decodedInstruction.keys.associatedToken.pubkey.toBase58()}`
+        )
       }
-    } else if (
-      matchingCreateInstructions.length !== matchingCloseInstructions.length
-    ) {
-      throw new InvalidRelayInstructionError(
-        instructionIndex,
-        `Mismatched number of create and close instructions for account: ${decodedInstruction.keys.associatedToken.pubkey.toBase58()}`
-      )
     }
   } else {
     throw new InvalidRelayInstructionError(
