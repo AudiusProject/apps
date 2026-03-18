@@ -5,7 +5,7 @@ description: Audius Protocol Documentation
 
 # Playlists
 
-## getPlaylist(`params`)
+## getPlaylist(`params`, `requestInit?`)
 
 Get a playlist by id.
 
@@ -34,7 +34,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`PlaylistResponse`](#playlistresponse) object.
 
-## getBulkPlaylists(`params`)
+## getBulkPlaylists(`params`, `requestInit?`)
 
 Get a list of playlists by ID, UPC, or permalink.
 
@@ -65,7 +65,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
-## getPlaylistTracks(`params`)
+## getPlaylistTracks(`params`, `requestInit?`)
 
 Get the tracks in a playlist.
 
@@ -92,7 +92,7 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
-## getTrendingPlaylists(`params?`)
+## getTrendingPlaylists(`params?`, `requestInit?`)
 
 Get the top trending playlists on Audius.
 
@@ -122,7 +122,7 @@ example above.
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
-## searchPlaylists(`params`)
+## searchPlaylists(`params`, `requestInit?`)
 
 Search for playlists.
 

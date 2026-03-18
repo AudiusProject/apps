@@ -5,7 +5,7 @@ description: Audius Protocol Documentation
 
 # Users
 
-## getUser(`params`)
+## getUser(`params`, `requestInit?`)
 
 Get a user.
 
@@ -88,7 +88,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field with the same shape as
 [`getUser`](#getuser).
 
-## getBulkUsers(`params`)
+## getBulkUsers(`params`, `requestInit?`)
 
 Gets a list of users.
 
@@ -116,7 +116,7 @@ example above.
 
 Returns an array of users, see [`getUser`](#getuser).
 
-## getAIAttributedTracksByUserHandle(`params`)
+## getAIAttributedTracksByUserHandle(`params`, `requestInit?`)
 
 Get the AI generated tracks attributed to a user using the user's handle.
 
@@ -149,7 +149,7 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
-## getAuthorizedApps(`params`)
+## getAuthorizedApps(`params`, `requestInit?`)
 
 Get the apps that a user has authorized to write to their account.
 
@@ -188,7 +188,7 @@ information about the authorized apps as described below.
 }[];
 ```
 
-## getConnectedWallets(`params`)
+## getConnectedWallets(`params`, `requestInit?`)
 
 Get a user's connected ERC and SPL wallets.
 
@@ -223,7 +223,7 @@ information about the wallets as described below.
 };
 ```
 
-## getFavorites(`params`)
+## getFavorites(`params`, `requestInit?`)
 
 Get a user's favorites.
 
@@ -260,7 +260,7 @@ information about the favorites as described below.
 }[]
 ```
 
-## getFollowers(`params`)
+## getFollowers(`params`, `requestInit?`)
 
 Get a user's followers
 
@@ -326,7 +326,7 @@ information about the followers as described below.
 }[];
 ```
 
-## getFollowing(`params`)
+## getFollowing(`params`, `requestInit?`)
 
 Get users that a user is following
 
@@ -356,7 +356,7 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
-## getRelatedUsers(`params`)
+## getRelatedUsers(`params`, `requestInit?`)
 
 Get a list of users that might be of interest to followers of this user.
 
@@ -387,7 +387,7 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
-## getReposts(`params`)
+## getReposts(`params`, `requestInit?`)
 
 Get a user's reposts.
 
@@ -429,7 +429,7 @@ information about the reposts as described below.
 }[];
 ```
 
-## getSubscribers(`params`)
+## getSubscribers(`params`, `requestInit?`)
 
 Get users that are subscribed to a user.
 
@@ -459,7 +459,7 @@ example above.
 
 The return type is the same as [`getFollowers`](#getfollowers)
 
-## getSupporters(`params`)
+## getSupporters(`params`, `requestInit?`)
 
 Get users that are supporting a user (they have sent them a tip).
 
@@ -529,7 +529,7 @@ information about the supporters as described below.
 }[];
 ```
 
-## getSupportedUsers(`params`)
+## getSupportedUsers(`params`, `requestInit?`)
 
 Get users that a user is supporting (they have sent them a tip).
 
@@ -599,7 +599,7 @@ information about the supported users as described below.
 }[];
 ```
 
-## getTopTrackTags(`params`)
+## getTopTrackTags(`params`, `requestInit?`)
 
 Get the most used track tags by a user.
 
@@ -633,7 +633,7 @@ representing the tags
 string[]
 ```
 
-## getTracksByUser(`params`)
+## getTracksByUser(`params`, `requestInit?`)
 
 Get a user's tracks.
 
@@ -666,7 +666,7 @@ example above.
 
 The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
 
-## getUserByHandle(`params`)
+## getUserByHandle(`params`, `requestInit?`)
 
 Get a user by their handle.
 
@@ -694,7 +694,7 @@ example above.
 
 The return type is the same as [`getUser`](#getuser)
 
-## searchUsers(`params`)
+## searchUsers(`params`, `requestInit?`)
 
 Search for users.
 
