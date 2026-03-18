@@ -164,7 +164,11 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         }
       }
     },
-    onError: (error, { amount, recipientWallet, source, recipientHandle }, context) => {
+    onError: (
+      error,
+      { amount, recipientWallet, source, recipientHandle },
+      context
+    ) => {
       if (context?.previousBalance) {
         const userId = currentUser?.user_id ?? null
         const queryKey = getUserCoinQueryKey(mint, userId)
