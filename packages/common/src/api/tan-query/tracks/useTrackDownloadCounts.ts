@@ -61,18 +61,12 @@ export const useTrackDownloadCounts = (
     queryKey: getTrackDownloadCountsQueryKey(uniqueIds),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const rows = await sdk.tracks.getTrackDownloadCounts({
-        trackIds: uniqueIds
+      const response = await sdk.tracks.getTrackDownloadCounts({
+        id: uniqueIds
       })
-      const list = Array.isArray(rows)
-        ? rows
-        : (rows as { data: TrackDownloadCount[] }).data
-      return list.map((row) => ({
+      return response.data.map((row) => ({
         id: row.id,
-        download_count:
-          'download_count' in row
-            ? row.download_count
-            : (row as { downloadCount: number }).downloadCount
+        download_count: row.downloadCount
       }))
     },
     ...options,
