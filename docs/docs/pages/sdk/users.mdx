@@ -66,6 +66,29 @@ user as described below.
 };
 ```
 
+## getMe
+
+> #### getMe(`requestInit?`)
+
+Get the currently authenticated user. Works with any auth method (OAuth PKCE, API key, wallet
+signature). Requires authentication.
+
+Example:
+
+```ts
+const { data: user } = await audiusSdk.users.getMe()
+console.log(user)
+```
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the first
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
+
+Returns a `Promise` containing an object with a `data` field with the same shape as
+[`getUser`](#getuser).
+
 ## getBulkUsers
 
 > #### getBulkUsers(`params`)

@@ -542,7 +542,80 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
+## getTrackDownloadCount
+
+> #### getTrackDownloadCount(`params`, `requestInit?`)
+
+Get the download count for a single track.
+
+Example:
+
+```ts
+const { data } = await audiusSdk.tracks.getTrackDownloadCount({
+  trackId: 'D7KyD',
+})
+console.log(data.downloadCount)
+```
+
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name      | Type     | Description         | Required?    |
+| :-------- | :------- | :------------------ | :----------- |
+| `trackId` | `string` | The ID of the track | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
+
+Returns a `Promise` containing an object with a `data` field of type
+[`TrackDownloadCountResponseData`](#trackdownloadcountresponsedata).
+
+## getTrackDownloadCounts
+
+> #### getTrackDownloadCounts(`params`, `requestInit?`)
+
+Get download counts for multiple tracks by ID.
+
+Example:
+
+```ts
+const { data } = await audiusSdk.tracks.getTrackDownloadCounts({
+  id: ['D7KyD', 'PjdWN', 'Jwo2A'],
+})
+console.log(data) // Array of { id, downloadCount }
+```
+
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name | Type       | Description                    | Required?    |
+| :--- | :--------- | :----------------------------- | :----------- |
+| `id` | `string[]` | An array of track IDs to query | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
+
+Returns a `Promise` containing an object with a `data` field that is an array of
+[`TrackDownloadCountResponseData`](#trackdownloadcountresponsedata).
+
 ## Type Reference
+
+### TrackDownloadCountResponseData
+
+| Field           | Type     | Description                        |
+| :-------------- | :------- | :--------------------------------- |
+| `id`            | `string` | Track ID                           |
+| `downloadCount` | `number` | Total number of downloads          |
 
 ### TrackResponse
 
