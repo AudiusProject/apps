@@ -29,6 +29,8 @@ import type {
   TrackCommentCountResponse,
   TrackCommentNotificationResponse,
   TrackCommentsResponse,
+  TrackDownloadCountResponse,
+  TrackDownloadCountsResponse,
   TrackDownloadRequestBody,
   TrackFavoritesResponse,
   TrackInspect,
@@ -70,6 +72,10 @@ import {
     TrackCommentNotificationResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
+    TrackDownloadCountResponseFromJSON,
+    TrackDownloadCountResponseToJSON,
+    TrackDownloadCountsResponseFromJSON,
+    TrackDownloadCountsResponseToJSON,
     TrackDownloadRequestBodyFromJSON,
     TrackDownloadRequestBodyToJSON,
     TrackFavoritesResponseFromJSON,
@@ -208,6 +214,14 @@ export interface GetTrackCommentsRequest {
     limit?: number;
     userId?: string;
     sortMethod?: GetTrackCommentsSortMethodEnum;
+}
+
+export interface GetTrackDownloadCountRequest {
+    trackId: string;
+}
+
+export interface GetTrackDownloadCountsRequest {
+    id: Array<string>;
 }
 
 export interface GetTrackRemixParentsRequest {
@@ -1287,6 +1301,82 @@ export class TracksApi extends runtime.BaseAPI {
      */
     async getTrackComments(params: GetTrackCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackCommentsResponse> {
         const response = await this.getTrackCommentsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the download count for a single track. Full track + all stems (parent) or stem-only (stem).
+     */
+    async getTrackDownloadCountRaw(params: GetTrackDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackDownloadCountResponse>> {
+        if (params.trackId === null || params.trackId === undefined) {
+            throw new runtime.RequiredError('trackId','Required parameter params.trackId was null or undefined when calling getTrackDownloadCount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/tracks/{track_id}/download_count`.replace(`{${"track_id"}}`, encodeURIComponent(String(params.trackId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackDownloadCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the download count for a single track. Full track + all stems (parent) or stem-only (stem).
+     */
+    async getTrackDownloadCount(params: GetTrackDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackDownloadCountResponse> {
+        const response = await this.getTrackDownloadCountRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets download counts for tracks by ID. Use this instead of loading full track objects when only download counts are needed.
+     */
+    async getTrackDownloadCountsRaw(params: GetTrackDownloadCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackDownloadCountsResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getTrackDownloadCounts.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.id) {
+            queryParameters['id'] = params.id;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/tracks/download_counts`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackDownloadCountsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets download counts for tracks by ID. Use this instead of loading full track objects when only download counts are needed.
+     */
+    async getTrackDownloadCounts(params: GetTrackDownloadCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackDownloadCountsResponse> {
+        const response = await this.getTrackDownloadCountsRaw(params, initOverrides);
         return await response.value();
     }
 

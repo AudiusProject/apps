@@ -1857,6 +1857,40 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Returns the full profile of the currently authenticated user based on the Bearer access token obtained via OAuth.
+     * Get authenticated user
+     */
+    async getMeRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponseSingle>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/me`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserResponseSingleFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns the full profile of the currently authenticated user based on the Bearer access token obtained via OAuth.
+     * Get authenticated user
+     */
+    async getMe(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserResponseSingle> {
+        const response = await this.getMeRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets users muted by the given user
      */
     async getMutedUsersRaw(params: GetMutedUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserResponse>> {

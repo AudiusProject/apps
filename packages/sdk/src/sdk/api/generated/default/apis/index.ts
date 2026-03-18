@@ -9,7 +9,6 @@ export * from './DeveloperAppsApi';
 export * from './EventsApi';
 export * from './ExploreApi';
 export * from './NotificationsApi';
-export * from './OauthApi';
 export * from './PlaylistsApi';
 export * from './PrizesApi';
 export * from './ReactionsApi';
