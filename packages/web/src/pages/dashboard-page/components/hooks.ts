@@ -53,7 +53,7 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   }
 }
 
-/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table */
+/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table. Download counts are not shown per-row; total downloads are in the stats tile only. */
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
   const { tracks } = useSelector(makeGetDashboard(accountUser))

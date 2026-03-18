@@ -71,6 +71,7 @@ import type {
   UserResponseSingle,
   UserSearch,
   UserTrackListenCountsResponse,
+  UserTracksDownloadCountResponse,
   UserTracksRemixedResponse,
   VerifyToken,
   WriteResponse,
@@ -188,6 +189,8 @@ import {
     UserSearchToJSON,
     UserTrackListenCountsResponseFromJSON,
     UserTrackListenCountsResponseToJSON,
+    UserTracksDownloadCountResponseFromJSON,
+    UserTracksDownloadCountResponseToJSON,
     UserTracksRemixedResponseFromJSON,
     UserTracksRemixedResponseToJSON,
     VerifyTokenFromJSON,
@@ -719,6 +722,10 @@ export interface GetUserRecommendedTracksRequest {
     limit?: number;
     userId?: string;
     timeRange?: GetUserRecommendedTracksTimeRangeEnum;
+}
+
+export interface GetUserTracksDownloadCountRequest {
+    id: string;
 }
 
 export interface GetUserTracksRemixedRequest {
@@ -4301,6 +4308,42 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getUserRecommendedTracks(params: GetUserRecommendedTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
         const response = await this.getUserRecommendedTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets the total download count for all tracks (and stems) owned by the user. Use for dashboard \"Downloads\" tile.
+     */
+    async getUserTracksDownloadCountRaw(params: GetUserTracksDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserTracksDownloadCountResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserTracksDownloadCount.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            // oauth required
+            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/tracks/download_count`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserTracksDownloadCountResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the total download count for all tracks (and stems) owned by the user. Use for dashboard \"Downloads\" tile.
+     */
+    async getUserTracksDownloadCount(params: GetUserTracksDownloadCountRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserTracksDownloadCountResponse> {
+        const response = await this.getUserTracksDownloadCountRaw(params, initOverrides);
         return await response.value();
     }
 

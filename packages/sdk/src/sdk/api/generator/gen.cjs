@@ -1,13 +1,12 @@
-const { exec } = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const util = require('util')
+import { exec } from 'child_process'
+import fs from 'fs'
+import path from 'path'
+import { promisify } from 'util'
+import { Command } from 'commander'
 
-const execAsync = util.promisify(exec)
+const execAsync = promisify(exec)
 
-const commander = require('commander')
-
-const program = new commander.Command()
+const program = new Command()
 
 const OUT_DIR = 'src/sdk/api/generator/out'
 

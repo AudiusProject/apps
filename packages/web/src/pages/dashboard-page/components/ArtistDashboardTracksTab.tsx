@@ -23,7 +23,6 @@ const tracksTableColumns: TracksTableColumn[] = [
   'spacer',
   'trackName',
   'releaseDate',
-  'length',
   'plays',
   'comments',
   'saves',

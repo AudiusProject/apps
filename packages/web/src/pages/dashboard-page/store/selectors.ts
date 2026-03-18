@@ -25,6 +25,7 @@ export const makeGetDashboard = (
           (totalPlays, track) => totalPlays + (track.play_count || 0),
           0
         ),
+        // downloads: fetched separately via useTrackDownloadCounts, merged in DashboardPage
         reposts: accountUser ? accountUser.repost_count : 0,
         followers: accountUser ? accountUser.follower_count : 0
       }

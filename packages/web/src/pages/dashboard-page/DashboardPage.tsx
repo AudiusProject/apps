@@ -1,9 +1,20 @@
-import { useState, Suspense, ReactNode, useEffect, useCallback } from 'react'
+import {
+  useState,
+  Suspense,
+  ReactNode,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react'
 
-import { useCurrentAccountUser } from '@audius/common/api'
+import {
+  useCurrentAccountUser,
+  useUserTrackDownloadCountTotal
+} from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { themeSelectors } from '@audius/common/store'
 import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
+import { encodeHashId } from '@audius/sdk'
 import cn from 'classnames'
 import { each } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
@@ -36,6 +47,17 @@ export const messages = {
   thisYear: 'This Year'
 }
 
+const statLabels: Record<string, string> = {
+  tracks: 'Tracks',
+  albums: 'Albums',
+  plays: 'Plays',
+  downloads: 'Downloads',
+  reposts: 'Reposts',
+  followers: 'Followers',
+  playlists: 'Playlists',
+  following: 'Following'
+}
+
 const StatTile = (props: { title: string; value: any }) => {
   return (
     <div className={styles.statTileContainer}>
@@ -51,6 +73,19 @@ export const DashboardPage = () => {
 
   const { data: accountUser } = useCurrentAccountUser()
   const { account, tracks, stats } = useSelector(makeGetDashboard(accountUser))
+  const accountUserIdHash =
+    accountUser?.user_id != null ? encodeHashId(accountUser.user_id) : null
+  const { data: totalDownloads = 0 } = useUserTrackDownloadCountTotal(
+    accountUserIdHash,
+    { enabled: (account?.track_count ?? 0) > 0 }
+  )
+  const statsWithDownloads = useMemo(
+    () =>
+      account?.track_count != null
+        ? { ...stats, downloads: totalDownloads }
+        : stats,
+    [account?.track_count, stats, totalDownloads]
+  )
   const listenData = useSelector(getDashboardListenData)
   const dashboardStatus = useSelector(getDashboardStatus)
   const theme = useSelector(getTheme)
@@ -122,12 +157,14 @@ export const DashboardPage = () => {
     if (!account) return null
 
     const statTiles: ReactNode[] = []
-    each(stats, (stat, title) =>
-      statTiles.push(<StatTile key={title} title={title} value={stat} />)
+    each(statsWithDownloads, (stat, title) =>
+      statTiles.push(
+        <StatTile key={title} title={statLabels[title] ?? title} value={stat} />
+      )
     )
 
     return <div className={styles.statsContainer}>{statTiles}</div>
-  }, [account, stats])
+  }, [account, statsWithDownloads])
 
   return (
     <Page
