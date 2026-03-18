@@ -313,11 +313,11 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent && (
               <RecommendedTracksSection />
             )}
+            {showPlaylistContent && <FeaturedPlaylistsSection />}
             {showTrackContent && <ArtistCoinTracksSection />}
             {showTrackContent && showUserContextualContent && (
               <RecentlyPlayedSection />
             )}
-            {showPlaylistContent && <FeaturedPlaylistsSection />}
             {showTrackContent && <FeaturedRemixContestsSection />}
             {showUserContent && <ArtistSpotlightSection />}
             {showUserContent && <LabelSpotlightSection />}
