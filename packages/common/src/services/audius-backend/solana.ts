@@ -34,11 +34,17 @@ import { AudiusBackend } from './AudiusBackend'
 
 const SOL_MINT = 'So11111111111111111111111111111111111111112'
 const USDC_DECIMALS = 6
+/** Jupiter swap lookup table - needed for swap instruction account resolution */
+const JUPITER_SWAP_LOOKUP_TABLE = new PublicKey(
+  '2WB87JxGZieRd7hi3y87wq6HAsPLyb9zrSx8B5z1QEzM'
+)
 const SOL_DECIMALS = 9
 // Token account size in bytes - used to compute rent exemption
 const TOKEN_ACCOUNT_SIZE = 165
 // Extra lamports for tx fees when pre-funding ATA creation
 const ATA_TX_FEE_BUFFER_LAMPORTS = 10_000
+// Buffer for quote variance between ExactOut cost quote and ExactIn swap output
+const ATA_PREFUND_QUOTE_BUFFER_LAMPORTS = 3000
 
 const DEFAULT_RETRY_DELAY = 1000
 const DEFAULT_MAX_RETRY_COUNT = 120
@@ -465,25 +471,64 @@ const createUserFundedAta = async ({
   const rentExemptLamports =
     await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
   const totalSolNeededLamports = rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
-  const totalSolNeededUi = totalSolNeededLamports / 1e9
 
   // Step 1: ExactOut quote to determine how much USDC the user should pay.
+  // Request slightly more SOL to absorb quote variance between cost quote and swap output.
   // (ExactOut produces an exact_out_route instruction the relay doesn't recognize.)
+  const costQuoteTargetLamports =
+    totalSolNeededLamports + ATA_PREFUND_QUOTE_BUFFER_LAMPORTS
   const { quoteResult: costQuote } = await getJupiterQuoteByMintWithRetry({
     inputMint: mint.toBase58(),
     outputMint: SOL_MINT,
     inputDecimals: USDC_DECIMALS,
     outputDecimals: SOL_DECIMALS,
-    amountUi: totalSolNeededUi,
+    amountUi: costQuoteTargetLamports / 1e9,
     swapMode: 'ExactOut',
     onlyDirectRoutes: false
   })
 
   const feeAmountUsdc = BigInt(costQuote.inputAmount.amountString)
-
-  // Step 2: ExactIn quote using that USDC amount — produces a route/sharedAccountsRoute
-  // instruction that the relay recognizes and allows.
   const feeAmountUsdcUi = Number(feeAmountUsdc) / 10 ** USDC_DECIMALS
+
+  // --- TX 1 (via relay): create ATA, transfer, swap, close ---
+  // Relay requires create and close in the same tx.
+  // Fetch swap quote fresh right before building to minimize staleness.
+  const rootWalletUsdcAta = getAssociatedTokenAddressSync(
+    mint,
+    keypair.publicKey,
+    true
+  )
+
+  const baseInstructions: TransactionInstruction[] = [
+    // Create ATA for root wallet USDC
+    createAssociatedTokenAccountIdempotentInstruction(
+      feePayer,
+      rootWalletUsdcAta,
+      keypair.publicKey,
+      mint
+    ),
+    // Transfer USDC fee from user bank to the root wallet USDC ATA
+    await sdk.services.claimableTokensClient.createTransferSecpInstruction({
+      amount: feeAmountUsdc,
+      ethWallet,
+      mint,
+      destination: rootWalletUsdcAta,
+      instructionIndex: 1
+    }),
+    await sdk.services.claimableTokensClient.createTransferInstruction({
+      ethWallet,
+      mint,
+      destination: rootWalletUsdcAta
+    }),
+    // Add memo to indicate internal transfer
+    new TransactionInstruction({
+      keys: [{ pubkey: rootWalletUsdcAta, isSigner: false, isWritable: true }],
+      programId: MEMO_PROGRAM_ID,
+      data: Buffer.from(INTERNAL_TRANSFER_MEMO_STRING)
+    })
+  ]
+
+  // Swap all USDC fee to SOL
   const { quoteResult: swapQuote } = await getJupiterQuoteByMintWithRetry({
     inputMint: mint.toBase58(),
     outputMint: SOL_MINT,
@@ -493,127 +538,69 @@ const createUserFundedAta = async ({
     swapMode: 'ExactIn',
     onlyDirectRoutes: false
   })
-
   const receivedLamports = Number(swapQuote.outputAmount.amountString)
   if (receivedLamports < totalSolNeededLamports) {
     throw new Error(
       `ATA prefund swap output insufficient: got ${receivedLamports} lamports, needed ${totalSolNeededLamports}`
     )
   }
-
   console.debug(
     `createUserFundedAta: swapping ${feeAmountUsdc} USDC for ~${receivedLamports} lamports (need ${totalSolNeededLamports})`
   )
-
-  // --- TX 1 (via relay): USDC fee → native SOL in root wallet ---
-  const prefundInstructions: TransactionInstruction[] = []
-
-  // Temporary USDC ATA for the root wallet (relay pays rent, reclaimed at end)
-  const rootWalletUsdcAta = getAssociatedTokenAddressSync(
-    mint,
-    keypair.publicKey,
-    true
-  )
-  prefundInstructions.push(
-    createAssociatedTokenAccountIdempotentInstruction(
-      feePayer,
-      rootWalletUsdcAta,
-      keypair.publicKey,
-      mint
-    )
-  )
-
-  const secpFeeInstruction =
-    await sdk.services.claimableTokensClient.createTransferSecpInstruction({
-      amount: feeAmountUsdc,
-      ethWallet,
-      mint,
-      destination: rootWalletUsdcAta,
-      instructionIndex: prefundInstructions.length
-    })
-  prefundInstructions.push(secpFeeInstruction)
-
-  const transferFeeInstruction =
-    await sdk.services.claimableTokensClient.createTransferInstruction({
-      ethWallet,
-      mint,
-      destination: rootWalletUsdcAta
-    })
-  prefundInstructions.push(transferFeeInstruction)
-
-  // USDC internal-transfer memo
-  prefundInstructions.push(
-    new TransactionInstruction({
-      keys: [{ pubkey: rootWalletUsdcAta, isSigner: false, isWritable: true }],
-      programId: MEMO_PROGRAM_ID,
-      data: Buffer.from(INTERNAL_TRANSFER_MEMO_STRING)
-    })
-  )
-
-  // Jupiter swap: USDC ATA → native SOL unwrapped into root wallet
-  // Uses ExactIn quote so the relay sees a route/sharedAccountsRoute instruction.
-  const swapRequest = {
-    quoteResponse: swapQuote.quote,
-    userPublicKey: keypair.publicKey.toBase58(),
-    wrapAndUnwrapSol: true,
-    dynamicSlippage: true
-  }
-  let swapInstructionsResult
-  try {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: { ...swapRequest, useSharedAccounts: true }
-    })
-  } catch {
-    swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
-      swapRequest: { ...swapRequest, useSharedAccounts: false }
-    })
-  }
-  const [swapInstruction] = convertJupiterInstructions([
-    swapInstructionsResult.swapInstruction
+  const swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
+    swapRequest: {
+      quoteResponse: swapQuote.quote,
+      userPublicKey: keypair.publicKey.toBase58(),
+      payer: keypair.publicKey.toBase58(),
+      nativeDestinationAccount: keypair.publicKey.toBase58(),
+      dynamicSlippage: true
+    }
+  })
+  const jupiterSwap = convertJupiterInstructions([
+    ...(swapInstructionsResult.otherInstructions ?? []),
+    ...(swapInstructionsResult.setupInstructions ?? []),
+    swapInstructionsResult.swapInstruction,
+    swapInstructionsResult.cleanupInstruction
   ])
-  prefundInstructions.push(swapInstruction)
 
-  // Close the temporary USDC ATA, returning relay's rent to fee payer
-  prefundInstructions.push(
-    createCloseAccountInstruction(rootWalletUsdcAta, feePayer, keypair.publicKey)
-  )
-
-  const prefundTx = await sdk.services.solanaClient.buildTransaction({
-    feePayer,
-    instructions: prefundInstructions,
-    addressLookupTables: swapInstructionsResult.addressLookupTableAddresses.map(
-      (addr: string) => new PublicKey(addr)
-    )
-  })
-  prefundTx.sign([keypair])
-  const prefundSig = await sdk.services.solanaClient.sendTransaction(prefundTx, {
-    skipPreflight: true
-  })
-  await connection.confirmTransaction(prefundSig, 'confirmed')
-  console.debug(`createUserFundedAta: pre-fund tx confirmed: ${prefundSig}`)
-
-  // --- TX 2 (direct, no relay): root wallet creates the destination ATA ---
-  // The relay never sees this transaction, so its rate limit is not involved.
-  const { blockhash } = await connection.getLatestBlockhash()
-  const createAtaTx = new Transaction({
-    recentBlockhash: blockhash,
-    feePayer: keypair.publicKey
-  })
-  createAtaTx.add(
+  // Combine all instructions into a single transaction
+  const prefundInstructions = [
+    ...baseInstructions,
+    ...jupiterSwap,
     createAssociatedTokenAccountIdempotentInstruction(
       keypair.publicKey,
       destination,
       destinationWallet,
       mint
+    ),
+    createCloseAccountInstruction(
+      rootWalletUsdcAta,
+      feePayer,
+      keypair.publicKey
     )
-  )
-  createAtaTx.sign(keypair)
-  const ataSig = await connection.sendRawTransaction(
-    createAtaTx.serialize(),
+  ]
+
+  const prefundTx = await sdk.services.solanaClient.buildTransaction({
+    feePayer,
+    instructions: prefundInstructions,
+    addressLookupTables: [
+      ...swapInstructionsResult.addressLookupTableAddresses.map(
+        (addr: string) => new PublicKey(addr)
+      ),
+      JUPITER_SWAP_LOOKUP_TABLE
+    ],
+    priorityFee: null,
+    computeLimit: null
+  })
+  prefundTx.sign([keypair])
+  const prefundSig = await sdk.services.solanaClient.sendTransaction(
+    prefundTx,
     { skipPreflight: true }
   )
-  await connection.confirmTransaction(ataSig, 'confirmed')
-  console.debug(`createUserFundedAta: ATA creation confirmed: ${ataSig}`)
+  await connection.confirmTransaction(prefundSig, 'confirmed')
+  console.debug(
+    `createUserFundedAta: prefund + ATA creation confirmed: ${prefundSig}`
+  )
 }
 
 /**

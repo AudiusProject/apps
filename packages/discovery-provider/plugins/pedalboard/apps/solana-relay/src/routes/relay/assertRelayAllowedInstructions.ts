@@ -88,7 +88,8 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
   instructionIndex: number,
   instruction: TransactionInstruction,
   instructions: TransactionInstruction[],
-  user?: Pick<Users, 'wallet' | 'is_verified'> | null
+  user?: Pick<Users, 'wallet' | 'is_verified'> | null,
+  feePayer?: string | null
 ) => {
   const { wallet, is_verified: isVerified } = user ?? {}
   const decodedInstruction =
@@ -114,6 +115,12 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
       decodedInstruction.keys.owner.pubkey.toBase58() ===
       PAYMENT_ROUTER_WALLET.toBase58()
     ) {
+      return
+    }
+
+    // If the user pays for the create (not feePayer), there's no drain risk — allow without rate limit.
+    const createPayer = decodedInstruction.keys.payer.pubkey.toBase58()
+    if (feePayer && createPayer !== feePayer) {
       return
     }
 
@@ -527,7 +534,8 @@ export const assertRelayAllowedInstructions = async (
           i,
           instruction,
           instructions,
-          options?.user
+          options?.user,
+          options?.feePayer
         )
         break
       case TOKEN_PROGRAM_ID.toBase58():

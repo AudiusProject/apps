@@ -2,10 +2,14 @@ import {
   ChangeEventHandler,
   FocusEventHandler,
   useCallback,
+  useMemo,
   useState
 } from 'react'
 
-import { useUSDCBalance } from '@audius/common/api'
+import {
+  useUSDCBalance,
+  useDestinationUsdcAccountCheck
+} from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
@@ -42,7 +46,7 @@ const WithdrawMethodOptions = [
 ]
 
 export const EnterTransferDetails = () => {
-  const { validateForm } = useFormikContext<WithdrawFormValues>()
+  const { validateForm, setFieldError } = useFormikContext<WithdrawFormValues>()
   const { data: balance } = useUSDCBalance()
   const { setData } = useWithdrawUSDCModal()
 
@@ -61,13 +65,37 @@ export const EnterTransferDetails = () => {
 
   const [
     { value },
-    { error: amountError },
+    { error: amountError, touched: amountTouched },
     { setValue: setAmount, setTouched: setAmountTouched }
   ] = useField(AMOUNT)
   const [{ value: methodValue }, _ignoredMethodMeta, { setValue: setMethod }] =
     useField<WithdrawMethod>(METHOD)
-  const [, { error: addressError }, { setTouched: setAddressTouched }] =
-    useField(ADDRESS)
+  const [
+    { value: addressValue },
+    { error: addressError, touched: addressTouched },
+    { setTouched: setAddressTouched }
+  ] = useField(ADDRESS)
+
+  const { data: destinationUsdcStatus } = useDestinationUsdcAccountCheck(
+    methodValue === WithdrawMethod.MANUAL_TRANSFER ? addressValue : null
+  )
+
+  const isInsufficientForAtaFee = useMemo(() => {
+    if (
+      methodValue !== WithdrawMethod.MANUAL_TRANSFER ||
+      !destinationUsdcStatus ||
+      destinationUsdcStatus.hasUsdcAccount
+    ) {
+      return false
+    }
+    const amountCents =
+      typeof value === 'string' ? filterDecimalString(value).value : value
+    const feeCents = Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
+    return (
+      amountCents < feeCents || amountCents + feeCents > balanceNumberCents
+    )
+  }, [methodValue, destinationUsdcStatus, value, balanceNumberCents])
+
   const [humanizedValue, setHumanizedValue] = useState(
     value ? decimalIntegerToHumanReadable(value) : '0'
   )
@@ -82,14 +110,23 @@ export const EnterTransferDetails = () => {
   const handleAmountBlur: FocusEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       setHumanizedValue(padDecimalValue(e.target.value))
+      setAmountTouched(true)
     },
-    [setHumanizedValue]
+    [setHumanizedValue, setAmountTouched]
   )
 
   const handleMaxPress = useCallback(() => {
-    setHumanizedValue(decimalIntegerToHumanReadable(balanceNumberCents))
-    setAmount(balanceNumberCents)
-  }, [balanceNumberCents, setAmount, setHumanizedValue])
+    const maxCents =
+      destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+        ? Math.max(
+            0,
+            balanceNumberCents -
+              Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
+          )
+        : balanceNumberCents
+    setHumanizedValue(decimalIntegerToHumanReadable(maxCents))
+    setAmount(maxCents)
+  }, [balanceNumberCents, destinationUsdcStatus, setAmount, setHumanizedValue])
 
   const handlePasteAddress = useCallback(
     (event: React.ClipboardEvent) => {
@@ -112,8 +149,51 @@ export const EnterTransferDetails = () => {
     }
     const errors = await validateForm()
     if (errors[AMOUNT] || errors[ADDRESS]) return
-    setData({ page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS })
-  }, [setData, methodValue, validateForm, setAmountTouched, setAddressTouched])
+
+    if (
+      methodValue === WithdrawMethod.MANUAL_TRANSFER &&
+      destinationUsdcStatus
+    ) {
+      if (!destinationUsdcStatus.hasUsdcAccount) {
+        const feeCents = Math.ceil(
+          destinationUsdcStatus.ataCreationFeeUsdc * 100
+        )
+        const amountCents =
+          typeof value === 'string' ? filterDecimalString(value).value : value
+        if (
+          amountCents < feeCents ||
+          amountCents + feeCents > balanceNumberCents
+        ) {
+          setFieldError(
+            AMOUNT,
+            walletMessages.errors.ataCreationFeeRequired(
+              destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+            )
+          )
+          return
+        }
+      }
+    }
+
+    setData({
+      page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS,
+      ...(destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+        ? {
+            ataCreationFeeUsdc: destinationUsdcStatus.ataCreationFeeUsdc
+          }
+        : {})
+    })
+  }, [
+    setData,
+    methodValue,
+    validateForm,
+    setAmountTouched,
+    setAddressTouched,
+    setFieldError,
+    destinationUsdcStatus,
+    value,
+    balanceNumberCents
+  ])
 
   return (
     <Flex column gap='xl'>
@@ -124,7 +204,6 @@ export const EnterTransferDetails = () => {
           <Text variant='heading' size='s' color='subdued'>
             {walletMessages.amountToWithdraw}
           </Text>
-          <Text variant='body'>{walletMessages.destinationDescription}</Text>
         </Flex>
         <Flex column gap='s'>
           <Flex gap='s' alignItems='center'>
@@ -137,16 +216,24 @@ export const EnterTransferDetails = () => {
               onChange={handleAmountChange}
               onBlur={handleAmountBlur}
               startAdornmentText={messages.dollars}
+              error={amountTouched && !!(amountError || (isInsufficientForAtaFee && destinationUsdcStatus))}
+              helperText={
+                amountTouched && (amountError || (isInsufficientForAtaFee && destinationUsdcStatus))
+                  ? (amountError ??
+                      (destinationUsdcStatus
+                        ? walletMessages.errors.ataCreationFeeRequired(
+                            destinationUsdcStatus.ataCreationFeeUsdc.toFixed(
+                              2
+                            )
+                          )
+                        : undefined))
+                  : undefined
+              }
             />
             <Button variant='secondary' onClick={handleMaxPress} size='large'>
               {walletMessages.max}
             </Button>
           </Flex>
-          {amountError && (
-            <Text variant='body' size='s' color='danger'>
-              {amountError}
-            </Text>
-          )}
         </Flex>
       </Flex>
       <Divider css={{ margin: 0 }} />
@@ -179,12 +266,20 @@ export const EnterTransferDetails = () => {
             name={ADDRESS}
             placeholder=''
           />
+          {destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount ? (
+            <Text variant='body' size='s' color='warning'>
+              {walletMessages.errors.noUsdcAccountFound(
+                !amountError && !isInsufficientForAtaFee
+                  ? destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                  : undefined
+              )}
+            </Text>
+          ) : null}
         </Flex>
       )}
       <Button
         variant='primary'
         fullWidth
-        disabled={!!addressError || !!amountError}
         onClick={handleContinue}
       >
         {walletMessages.continue}

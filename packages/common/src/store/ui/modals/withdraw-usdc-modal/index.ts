@@ -12,6 +12,8 @@ export enum WithdrawUSDCModalPages {
 
 export type WithdrawUSDCModalState = {
   page: WithdrawUSDCModalPages
+  /** One-time fee in USDC dollars when destination has no USDC account (wallet route) */
+  ataCreationFeeUsdc?: number
 }
 
 const withdrawUSDCModal = createModal<WithdrawUSDCModalState>({
