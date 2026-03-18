@@ -24,15 +24,25 @@ Audius is **not** just a crypto or blockchain project — it is a fully function
 
 ### Audius vs. other platforms
 
-| Feature | Audius | Spotify | SoundCloud | Apple Music |
-|---|---|---|---|---|
-| Free unlimited streaming | Yes | Ad-supported only | Limited | No |
-| Artist upload (no label needed) | Yes | No | Yes | No |
-| Artist revenue share | ~90%+ direct | ~30% via labels | ~55% via monetization | ~52% via labels |
-| Subscription required | No | Yes (for full) | Yes (for full) | Yes |
-| Open-source | Yes | No | No | No |
+| Feature | Audius | Spotify | SoundCloud |
+|---|---|---|---|
+| Streaming quality (free tier) | 320 kbps | 160 kbps | 128 kbps |
+| Unlimited uploads | Yes | Premium required | Premium required |
+| Ad-free interface | Yes | Premium required | Premium required |
+| Ad-free listening | Yes | Premium required | Premium required |
+| Comments on tracks | Yes | No | Yes |
+| Direct messages | Yes | No | Yes |
+| Scheduled releases | Yes | Controlled by distributor | Premium required |
+| Offline mode | Yes | Premium required | Premium required |
+| Remix features | Yes | No | Yes |
+| Gated content (pay/follow/NFT) | Yes | No | Certain tracks require Go+ |
+| Decentralized | Yes | No | No |
+| Rewards system | Yes | No | No |
+| Direct UGC upload | Yes | No | Yes |
+| Visualizer | Yes | No | No |
+| Developer SDK | Yes | Yes | No longer accepting new API applications |
 
-For a consumer-facing overview and blog, see [blog.audius.co](https://blog.audius.co) and its [llms.txt](https://blog.audius.co/llms.txt).
+For a full side-by-side comparison, see [compare.audius.co](https://compare.audius.co). For a consumer-facing overview and blog, see [blog.audius.co](https://blog.audius.co) and its [llms.txt](https://blog.audius.co/llms.txt).
 
 ---
 
