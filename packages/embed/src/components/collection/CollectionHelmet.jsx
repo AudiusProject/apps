@@ -14,7 +14,7 @@ const CollectionHelmet = ({ collection }) => {
   const isAlbum = collection.isAlbum
   const type = isAlbum ? 'MusicAlbum' : 'MusicPlaylist'
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': type,
     '@id': url,
     url,

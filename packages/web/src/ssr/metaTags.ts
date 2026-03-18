@@ -332,7 +332,7 @@ export const getUserPageContext = ({
   )
   const canonicalUrl = fullProfilePage(handle)
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicGroup',
     '@id': canonicalUrl,
     datePublished: null,
@@ -397,7 +397,7 @@ export const getTrackPageContext = ({
     : `${trackSnippet} - Original - on Audius`
   const canonicalUrl = fullTrackPage(permalink)
   const structuredData: Record<string, unknown> = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicRecording',
     '@id': canonicalUrl,
     url: canonicalUrl,
@@ -473,7 +473,7 @@ export const getCollectionPageContext = ({
     isAlbum
   )
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicAlbum',
     '@id': canonicalUrl,
     url: canonicalUrl,

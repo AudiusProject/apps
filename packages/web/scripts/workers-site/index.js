@@ -49,7 +49,7 @@ function isCrawler(val) {
     return false
   }
   const crawlerTest =
-    /forcessr|ahrefs(bot|siteaudit)|altavista|anthropic-ai|baiduspider|bingbot|chatgpt-user|claude-web|cohere-ai|discordbot|duckduckbot|embedly|facebookexternalhit|gigabot|googlebot|google-extended|google-inspectiontool|gptbot|ia_archiver|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|perplexitybot|reaper|slackbot|snap|telegrambot|twitterbot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|zend|zoominfobot/i
+    /forcessr|ahrefs(bot|siteaudit)|altavista|anthropic-ai|applebot|baiduspider|bingbot|bytespider|ccbot|chatgpt-user|claude-web|claudebot|claude-searchbot|claude-user|cohere-ai|dataforseobot|diffbot|discordbot|duckduckbot|embedly|facebookbot|facebookexternalhit|gigabot|google-extended|google-inspectiontool|googlebot|googleother|gptbot|ia_archiver|iaskspider|linkbot|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|oai-searchbot|omgili|petalbot|perplexitybot|perplexity-user|pinterestbot|reaper|redditbot|rogerbot|semrushbot|slackbot|snap|telegrambot|twitterbot|webpilot|whatsapp|whatsup|yahoo|yandex|yeti|yodaobot|youbot|zend|zoominfobot/i
   return crawlerTest.test(val)
 }
 
