@@ -73,7 +73,7 @@ const audiusSdk = sdk({
 
 ### HTML + JS (frontend) example
 
-In a browser context, initialize with your **API key only** — no bearer token. User authentication is handled via the [OAuth flow](#log-in-with-audius-oauth) described below.
+In a browser or mobile context, initialize with your **API key only** — no bearer token. User authentication is handled via the [OAuth flow](#log-in-with-audius-oauth) described below.
 
 ```js title="In web page"
 const audiusSdk = window.audiusSdk({
