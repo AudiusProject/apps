@@ -466,15 +466,12 @@ const createUserFundedAta = async ({
   destinationWallet: PublicKey
 }): Promise<void> => {
   const feePayer = await sdk.services.solanaRelay.getFeePayer()
+  const solMint = new PublicKey(SOL_MINT)
 
-  // SOL needed: ATA rent + buffer to cover the direct ATA creation tx fee
+  // Calculate the amount of USDC needed to create the destination ATA
   const rentExemptLamports =
     await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
   const totalSolNeededLamports = rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
-
-  // Step 1: ExactOut quote to determine how much USDC the user should pay.
-  // Request slightly more SOL to absorb quote variance between cost quote and swap output.
-  // (ExactOut produces an exact_out_route instruction the relay doesn't recognize.)
   const costQuoteTargetLamports =
     totalSolNeededLamports + ATA_PREFUND_QUOTE_BUFFER_LAMPORTS
   const { quoteResult: costQuote } = await getJupiterQuoteByMintWithRetry({
@@ -486,47 +483,22 @@ const createUserFundedAta = async ({
     swapMode: 'ExactOut',
     onlyDirectRoutes: false
   })
-
   const feeAmountUsdc = BigInt(costQuote.inputAmount.amountString)
   const feeAmountUsdcUi = Number(feeAmountUsdc) / 10 ** USDC_DECIMALS
 
-  // --- TX 1 (via relay): create ATA, transfer, swap, close ---
-  // Relay requires create and close in the same tx.
-  // Fetch swap quote fresh right before building to minimize staleness.
   const rootWalletUsdcAta = getAssociatedTokenAddressSync(
     mint,
     keypair.publicKey,
     true
   )
+  const rootWalletWsolAta = getAssociatedTokenAddressSync(
+    solMint,
+    keypair.publicKey,
+    true
+  )
 
-  const baseInstructions: TransactionInstruction[] = [
-    // Create ATA for root wallet USDC
-    createAssociatedTokenAccountIdempotentInstruction(
-      feePayer,
-      rootWalletUsdcAta,
-      keypair.publicKey,
-      mint
-    ),
-    // Transfer USDC fee from user bank to the root wallet USDC ATA
-    await sdk.services.claimableTokensClient.createTransferSecpInstruction({
-      amount: feeAmountUsdc,
-      ethWallet,
-      mint,
-      destination: rootWalletUsdcAta,
-      instructionIndex: 1
-    }),
-    await sdk.services.claimableTokensClient.createTransferInstruction({
-      ethWallet,
-      mint,
-      destination: rootWalletUsdcAta
-    }),
-    // Add memo to indicate internal transfer
-    new TransactionInstruction({
-      keys: [{ pubkey: rootWalletUsdcAta, isSigner: false, isWritable: true }],
-      programId: MEMO_PROGRAM_ID,
-      data: Buffer.from(INTERNAL_TRANSFER_MEMO_STRING)
-    })
-  ]
+  // const baseInstructions: TransactionInstruction[] = [
+  // ]
 
   // Swap all USDC fee to SOL
   const { quoteResult: swapQuote } = await getJupiterQuoteByMintWithRetry({
@@ -551,32 +523,70 @@ const createUserFundedAta = async ({
     swapRequest: {
       quoteResponse: swapQuote.quote,
       userPublicKey: keypair.publicKey.toBase58(),
-      payer: keypair.publicKey.toBase58(),
+      payer: feePayer.toBase58(),
       nativeDestinationAccount: keypair.publicKey.toBase58(),
       dynamicSlippage: true
     }
   })
-  const jupiterSwap = convertJupiterInstructions([
-    ...(swapInstructionsResult.otherInstructions ?? []),
-    ...(swapInstructionsResult.setupInstructions ?? []),
-    swapInstructionsResult.swapInstruction,
-    swapInstructionsResult.cleanupInstruction
-  ])
 
   // Combine all instructions into a single transaction
   const prefundInstructions = [
-    ...baseInstructions,
-    ...jupiterSwap,
+    // Create USDC ata on root wallet
+    createAssociatedTokenAccountIdempotentInstruction(
+      feePayer,
+      rootWalletUsdcAta,
+      keypair.publicKey,
+      mint
+    ),
+    // Create wSOL ATA on root wallet for Jupiter swap
+    createAssociatedTokenAccountIdempotentInstruction(
+      feePayer,
+      rootWalletWsolAta,
+      keypair.publicKey,
+      solMint
+    ),
+    // Transfer USDC fee from user bank to the root wallet USDC ATA
+    await sdk.services.claimableTokensClient.createTransferSecpInstruction({
+      amount: feeAmountUsdc,
+      ethWallet,
+      mint,
+      destination: rootWalletUsdcAta,
+      instructionIndex: 2
+    }),
+    await sdk.services.claimableTokensClient.createTransferInstruction({
+      ethWallet,
+      mint,
+      destination: rootWalletUsdcAta
+    }),
+    // Add memo to indicate internal transfer
+    new TransactionInstruction({
+      keys: [{ pubkey: rootWalletUsdcAta, isSigner: false, isWritable: true }],
+      programId: MEMO_PROGRAM_ID,
+      data: Buffer.from(INTERNAL_TRANSFER_MEMO_STRING)
+    }),
+    // Swap USDC on root wallet to SOL on root wallet
+    ...convertJupiterInstructions([
+      ...(swapInstructionsResult.otherInstructions ?? []),
+      swapInstructionsResult.swapInstruction
+    ]),
+    // Unwrap wSOL: close the wSOL ATA and send native SOL to the root wallet
+    createCloseAccountInstruction(
+      rootWalletWsolAta,
+      feePayer,
+      keypair.publicKey
+    ),
+    // Close USDC ATA on root wallet
+    createCloseAccountInstruction(
+      rootWalletUsdcAta,
+      feePayer,
+      keypair.publicKey
+    ),
+    // Create destination ATA on destination wallet
     createAssociatedTokenAccountIdempotentInstruction(
       keypair.publicKey,
       destination,
       destinationWallet,
       mint
-    ),
-    createCloseAccountInstruction(
-      rootWalletUsdcAta,
-      feePayer,
-      keypair.publicKey
     )
   ]
 
