@@ -1,4 +1,8 @@
-import { FetchError, ResponseError, UserFromJSON } from '../api/generated/default'
+import {
+  FetchError,
+  ResponseError,
+  UserFromJSON
+} from '../api/generated/default'
 import type { User } from '../api/generated/default'
 import { Logger, type LoggerService } from '../services/Logger'
 import { isOAuthScopeValid } from '../utils/oauthScope'

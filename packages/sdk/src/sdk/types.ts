@@ -1,5 +1,5 @@
-import { z } from 'zod'
 import type { PublicClient, WalletClient } from 'viem'
+import { z } from 'zod'
 
 import type { OAuthTokenStore } from './oauth/tokenStore'
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
