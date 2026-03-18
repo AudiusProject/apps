@@ -84,6 +84,7 @@ export * from './tan-query/search/useTopTags'
 // Tracks
 export * from './tan-query/tracks/useDeleteTrack'
 export * from './tan-query/tracks/useDownloadTrackStems'
+export * from './tan-query/tracks/useTrackDownloadCounts'
 export * from './tan-query/tracks/useFavoriteTrack'
 export * from './tan-query/tracks/useToggleFavoriteTrack'
 export * from './tan-query/tracks/useTrack'

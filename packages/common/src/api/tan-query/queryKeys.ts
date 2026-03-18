@@ -16,6 +16,7 @@ export const QUERY_KEYS = {
   exploreContent: 'exploreContent',
   trackCommentNotificationSetting: 'trackCommentNotificationSetting',
   trackCommentCount: 'trackCommentCount',
+  trackDownloadCounts: 'trackDownloadCounts',
   track: 'track',
   tracksByUser: 'tracksByUser',
   tracksByHandle: 'tracksByHandle',

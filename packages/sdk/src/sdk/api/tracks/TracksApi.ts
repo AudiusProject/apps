@@ -102,6 +102,24 @@ export class TracksApi extends GeneratedTracksApi {
   }
 
   /**
+   * Get download counts for tracks by ID (bulk). Use this instead of loading
+   * full track objects when only download counts are needed.
+   */
+  async getTrackDownloadCounts(params: {
+    trackIds: string[]
+  }): Promise<{ id: string; download_count: number }[]> {
+    if (!params.trackIds?.length) return []
+    const response = await this.request({
+      path: '/tracks/download_counts',
+      method: 'GET',
+      query: { id: params.trackIds }
+    })
+    const json = await response.json()
+    const data = json?.data ?? []
+    return Array.isArray(data) ? data : []
+  }
+
+  /**
    * Get the url of the track's streamable mp3 file
    */
   async getTrackStreamUrl(params: StreamTrackRequest): Promise<string> {

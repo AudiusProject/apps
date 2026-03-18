@@ -1,6 +1,9 @@
 import { useState, Suspense, ReactNode, useEffect, useCallback } from 'react'
 
-import { useCurrentAccountUser } from '@audius/common/api'
+import {
+  useCurrentAccountUser,
+  useTrackDownloadCounts
+} from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { themeSelectors } from '@audius/common/store'
 import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
@@ -36,6 +39,17 @@ export const messages = {
   thisYear: 'This Year'
 }
 
+const statLabels: Record<string, string> = {
+  tracks: 'Tracks',
+  albums: 'Albums',
+  plays: 'Plays',
+  downloads: 'Downloads',
+  reposts: 'Reposts',
+  followers: 'Followers',
+  playlists: 'Playlists',
+  following: 'Following'
+}
+
 const StatTile = (props: { title: string; value: any }) => {
   return (
     <div className={styles.statTileContainer}>
@@ -51,6 +65,17 @@ export const DashboardPage = () => {
 
   const { data: accountUser } = useCurrentAccountUser()
   const { account, tracks, stats } = useSelector(makeGetDashboard(accountUser))
+  const trackIds = tracks.map((t) => t.id)
+  const { byId: downloadCountById } = useTrackDownloadCounts(trackIds)
+  const statsWithDownloads = account?.track_count
+    ? {
+        ...stats,
+        downloads: trackIds.reduce(
+          (sum, id) => sum + (downloadCountById[id] ?? 0),
+          0
+        )
+      }
+    : stats
   const listenData = useSelector(getDashboardListenData)
   const dashboardStatus = useSelector(getDashboardStatus)
   const theme = useSelector(getTheme)
@@ -122,12 +147,18 @@ export const DashboardPage = () => {
     if (!account) return null
 
     const statTiles: ReactNode[] = []
-    each(stats, (stat, title) =>
-      statTiles.push(<StatTile key={title} title={title} value={stat} />)
+    each(statsWithDownloads, (stat, title) =>
+      statTiles.push(
+        <StatTile
+          key={title}
+          title={statLabels[title] ?? title}
+          value={stat}
+        />
+      )
     )
 
     return <div className={styles.statsContainer}>{statTiles}</div>
-  }, [account, stats])
+  }, [account, statsWithDownloads])
 
   return (
     <Page

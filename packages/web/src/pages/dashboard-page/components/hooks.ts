@@ -3,7 +3,8 @@ import { useMemo } from 'react'
 import {
   useCurrentUserId,
   useUserAlbums,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useTrackDownloadCounts
 } from '@audius/common/api'
 import {
   Collection,
@@ -39,7 +40,11 @@ const messages = {
 
 /** ------------------------ Tracks ------------------------ */
 
-const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
+const formatTrackMetadata = (
+  metadata: Track,
+  i: number,
+  downloadCountById?: Record<string, number>
+): DataSourceTrack => {
   return {
     ...metadata,
     key: `${metadata.title}_${metadata.dateListened}_${i}`,
@@ -49,6 +54,7 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
     saves: metadata.save_count,
     reposts: metadata.repost_count,
     plays: metadata.play_count,
+    downloads: (downloadCountById ?? {})[metadata.id] ?? 0,
     comments: metadata.comment_count
   }
 }
@@ -57,11 +63,15 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
   const { tracks } = useSelector(makeGetDashboard(accountUser))
+  const trackIds = useMemo(() => tracks.map((t) => t.id), [tracks])
+  const { byId: downloadCountById } = useTrackDownloadCounts(trackIds)
   const tracksFormatted = useMemo(() => {
     return tracks
-      .map((track: Track, i: number) => formatTrackMetadata(track, i))
+      .map((track: Track, i: number) =>
+        formatTrackMetadata(track, i, downloadCountById)
+      )
       .filter((meta) => !meta.is_invalid)
-  }, [tracks])
+  }, [tracks, downloadCountById])
   return tracksFormatted
 }
 
