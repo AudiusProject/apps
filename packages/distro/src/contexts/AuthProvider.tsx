@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const isAuthed = await distroSdk.oauth.isAuthenticated()
         if (isAuthed) {
-          const user = await distroSdk.oauth.getUser()
+          const { data: user } = await distroSdk.users.getMe()
           setUser(user)
         }
 
