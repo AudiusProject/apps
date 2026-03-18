@@ -1,5 +1,6 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
+import { useDestinationUsdcAccountCheck } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import {
   WithdrawUSDCModalPages,
@@ -10,7 +11,10 @@ import {
   ADDRESS,
   type WithdrawUSDCFormValues as WithdrawFormValues
 } from '@audius/common/store'
-import { decimalIntegerToHumanReadable } from '@audius/common/utils'
+import {
+  decimalIntegerToHumanReadable,
+  filterDecimalString
+} from '@audius/common/utils'
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet'
 import { useField, useFormikContext } from 'formik'
 
@@ -24,17 +28,47 @@ export const EnterTransferDetails = ({
 }: {
   balanceNumberCents: number
 }) => {
-  const { validateForm } = useFormikContext<WithdrawFormValues>()
+  const { validateForm, setFieldError } = useFormikContext<WithdrawFormValues>()
   const [
     { value: amountValue },
     { error: amountError, touched: amountTouched },
     { setValue: setAmount, setTouched: setAmountTouched }
   ] = useField(AMOUNT)
-  const [, { error: addressError }, { setTouched: setAddressTouched }] =
+  const [{ value: addressValue }, { error: addressError }, { setTouched: setAddressTouched }] =
     useField(ADDRESS)
+
+  const { data: destinationUsdcStatus } = useDestinationUsdcAccountCheck(
+    methodValue === WithdrawMethod.MANUAL_TRANSFER ? addressValue : null
+  )
+
   const { setData } = useWithdrawUSDCModal()
   const [{ value: methodValue }, _ignoredMethodMeta, { setValue: setMethod }] =
     useField<WithdrawMethod>(METHOD)
+
+  const isInsufficientForAtaFee = useMemo(() => {
+    if (
+      methodValue !== WithdrawMethod.MANUAL_TRANSFER ||
+      !destinationUsdcStatus ||
+      destinationUsdcStatus.hasUsdcAccount
+    ) {
+      return false
+    }
+    const amountCents =
+      typeof amountValue === 'string'
+        ? filterDecimalString(amountValue).value
+        : amountValue
+    const feeCents = Math.ceil(
+      destinationUsdcStatus.ataCreationFeeUsdc * 100
+    )
+    return (
+      amountCents < feeCents || amountCents + feeCents > balanceNumberCents
+    )
+  }, [
+    methodValue,
+    destinationUsdcStatus,
+    amountValue,
+    balanceNumberCents
+  ])
 
   const onContinuePress = useCallback(async () => {
     setAmountTouched(true)
@@ -43,13 +77,63 @@ export const EnterTransferDetails = ({
     }
     const errors = await validateForm()
     if (errors[AMOUNT] || errors[ADDRESS]) return
-    setData({ page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS })
-  }, [validateForm, setData, setAmountTouched, setAddressTouched, methodValue])
+
+    if (methodValue === WithdrawMethod.MANUAL_TRANSFER && destinationUsdcStatus) {
+      if (!destinationUsdcStatus.hasUsdcAccount) {
+        const feeCents = Math.ceil(
+          destinationUsdcStatus.ataCreationFeeUsdc * 100
+        )
+        const amountCents =
+          typeof amountValue === 'string'
+            ? filterDecimalString(amountValue).value
+            : amountValue
+        if (
+          amountCents < feeCents ||
+          amountCents + feeCents > balanceNumberCents
+        ) {
+          setFieldError(
+            AMOUNT,
+            walletMessages.errors.ataCreationFeeRequired(
+              destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+            )
+          )
+          return
+        }
+      }
+    }
+
+    setData({
+      page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS,
+      ...(destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+        ? {
+            ataCreationFeeUsdc: destinationUsdcStatus.ataCreationFeeUsdc
+          }
+        : {})
+    })
+  }, [
+    validateForm,
+    setData,
+    setAmountTouched,
+    setAddressTouched,
+    setFieldError,
+    methodValue,
+    destinationUsdcStatus,
+    amountValue,
+    balanceNumberCents
+  ])
 
   const handleMaxPress = useCallback(() => {
-    const maxHumanized = decimalIntegerToHumanReadable(balanceNumberCents)
+    const maxCents =
+      destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+        ? Math.max(
+            0,
+            balanceNumberCents -
+              Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
+          )
+        : balanceNumberCents
+    const maxHumanized = decimalIntegerToHumanReadable(maxCents)
     setAmount(maxHumanized)
-  }, [balanceNumberCents, setAmount])
+  }, [balanceNumberCents, destinationUsdcStatus, setAmount])
 
   const handleAmountFocus = useCallback(() => {
     // Clear the field if it contains the default value
@@ -98,11 +182,16 @@ export const EnterTransferDetails = ({
               {walletMessages.max}
             </Button>
           </Flex>
-          {amountTouched && amountError && (
+          {amountTouched &&
+          (amountError ||
+            (isInsufficientForAtaFee && destinationUsdcStatus)) ? (
             <Text variant='body' size='s' color='danger'>
-              {amountError}
+              {amountError ??
+                walletMessages.errors.ataCreationFeeRequired(
+                  destinationUsdcStatus!.ataCreationFeeUsdc.toFixed(2)
+                )}
             </Text>
-          )}
+          ) : null}
         </Flex>
       </Flex>
       <Divider orientation='horizontal' />
@@ -145,14 +234,19 @@ export const EnterTransferDetails = ({
             errorBeforeSubmit
             required
           />
+          {destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount ? (
+            <Text variant='body' size='s' color='warning'>
+              {walletMessages.errors.noUsdcAccountFound(
+                !amountError && !isInsufficientForAtaFee
+                  ? destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                  : undefined
+              )}
+            </Text>
+          ) : null}
         </Flex>
       )}
 
-      <Button
-        onPress={onContinuePress}
-        fullWidth
-        disabled={!!addressError || !!amountError}
-      >
+      <Button onPress={onContinuePress} fullWidth>
         {walletMessages.continue}
       </Button>
     </Flex>
