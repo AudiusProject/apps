@@ -12,7 +12,7 @@ the SDK to:
 
 - 🔍 Search and display users, tracks, and playlists
 - 🎵 Stream and upload tracks
-- ❤️ Favorite, repost, and curate playlists
+- ❤️ Favorite, repost, and curate playlists
 - ✍️ Allow your users to [log in with their Audius account](/developers/guides/log-in-with-audius)
   and act on their behalf
 
@@ -29,17 +29,14 @@ Audius offers two API plans:
 
 The Free plan is always free with no restrictions. For higher limits and support, contact [api@audius.co](mailto:api@audius.co) about the Unlimited plan.
 
-## Get Your API Key and Bearer Token
+## Get Your API Key
 
 1. Visit the [Audius API Plans page](https://api.audius.co/plans) and click "Create API Key" to generate your credentials.
 
-2. You will receive an **API Key** and a **Bearer Token**. Save both securely — treat them like passwords.
+2. You will receive an **API Key** and a **Bearer Token**.
 
-:::tip
-
-The bearer token is the recommended way to authenticate with the Audius API.
-
-:::
+- **API Key** — used in all contexts (frontend and backend). Safe to include in client-side code.
+- **Bearer Token** — backend only. Grants your app the ability to act on behalf of users who have authorized it. **Never expose this in browser or mobile code.**
 
 ## Install the SDK
 
@@ -67,9 +64,11 @@ Otherwise, include the SDK script tag in your web page. The Audius SDK will then
 
 ## Initialize the SDK
 
-Initialize the SDK with your API key and bearer token.
+How you initialize the SDK depends on whether you are running in a **backend** (Node.js) or **frontend** (browser/mobile) context.
 
-### Node.js example
+### Node.js (backend) example
+
+Include your API key and bearer token. The bearer token enables your app to perform actions on behalf of authorized users.
 
 ```js title="In Node.js environment"
 import { sdk } from '@audius/sdk'
@@ -77,12 +76,12 @@ import { sdk } from '@audius/sdk'
 const audiusSdk = sdk({
   apiKey: 'Your API Key goes here',
   bearerToken: 'Your Bearer Token goes here',
-  // Required for OAuth — register this URI in your developer app settings
-  // redirectUri: 'https://yourapp.com/callback',
 })
 ```
 
-### HTML + JS example
+### HTML + JS (frontend) example
+
+In a browser or mobile context, initialize with your **API key only** — no bearer token. User authentication is handled via the [OAuth flow](#log-in-with-audius-oauth) described below.
 
 ```js title="In web page"
 const audiusSdk = window.audiusSdk({
@@ -92,13 +91,13 @@ const audiusSdk = window.audiusSdk({
 
 :::warning
 
-DO NOT include the bearer token if you are running the SDK in the browser or anywhere on the client.
-The bearer token is what allows your app to write on behalf of the users that have authorized it to
-do so. Keep your bearer token secure and never expose it in client-side code that could be inspected.
+**Never include your bearer token in frontend code.** The bearer token allows your app to act on behalf of users who have authorized it. Exposing it in client-side code (browser or mobile) is a critical security risk — anyone who inspects your code could use it to impersonate your app.
+
+For frontend apps, use the [OAuth flow](#log-in-with-audius-oauth) instead.
 
 :::
 
-## Make your first API call using the SDK!
+## Make your first API call using the SDK
 
 Once you have the initialized SDK instance, it's smooth sailing to making your first API calls.
 
@@ -127,8 +126,6 @@ import { sdk } from '@audius/sdk'
 const audiusSdk = sdk({
   apiKey: 'Your API Key goes here',
   bearerToken: 'Your Bearer Token goes here',
-  // Required for OAuth — register this URI in your developer app settings
-  // redirectUri: 'https://yourapp.com/callback',
 })
 
 const track = await audiusSdk.tracks.getTrack({ trackId: 'D7KyD' })
@@ -172,16 +169,34 @@ console.log('Track favorited!')
 </html>
 ```
 
+## Log In with Audius (OAuth)
+
+For frontend apps, use the built-in OAuth 2.0 PKCE flow to authenticate users. This lets your users log in with their Audius account and authorize your app to act on their behalf — without exposing your app's bearer token in client-side code.
+
+```js title="In web page"
+const audiusSdk = window.audiusSdk({
+  apiKey: 'Your API Key goes here',
+  redirectUri: 'https://your-app.com/oauth/callback'
+})
+
+// Redirect the user to Audius to log in
+audiusSdk.oauth.login()
+
+// On your callback page, handle the redirect:
+await audiusSdk.oauth.handleRedirectCallback()
+```
+
+After the user logs in, the SDK stores their access token automatically and includes it in subsequent API calls. See the [Log In with Audius guide](/developers/guides/log-in-with-audius) for the full flow.
+
 ## What's next?
 
-- [Get authorization](/developers/guides/log-in-with-audius) to access your app's users' Audius
-  accounts
+- [Log in with Audius](/developers/guides/log-in-with-audius) — add OAuth authentication to your frontend app
 
 - [Explore the API docs](/sdk/tracks) to see what else you can do with the Audius SDK
 
 ## Direct API Access
 
-You can also access the Audius API directly without the SDK:
+You can also access the Audius API directly without the SDK. The examples below use a bearer token and are intended for **backend/server-side use only** — do not use your bearer token in browser or mobile code.
 
 **REST API:**
 
