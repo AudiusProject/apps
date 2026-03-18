@@ -96,6 +96,6 @@ export const checkIsCrawler = (userAgent: string) => {
     return false
   }
   const crawlerTest =
-    /forcessr|ahrefs(bot|siteaudit)|altavista|baiduspider|bingbot|duckduckbot|googlebot|google-inspectiontool|msnbot|nextgensearchbot|yahoo|yandex/i
+    /forcessr|ahrefs(bot|siteaudit)|altavista|anthropic-ai|applebot|baiduspider|bingbot|bytespider|ccbot|chatgpt-user|claude-web|claudebot|claude-searchbot|claude-user|cohere-ai|dataforseobot|diffbot|duckduckbot|facebookbot|facebookexternalhit|gigabot|google-extended|google-inspectiontool|googlebot|googleother|gptbot|ia_archiver|iaskspider|linkedinbot|meta-externalfetcher|msnbot|nextgensearchbot|oai-searchbot|omgili|petalbot|perplexitybot|perplexity-user|pinterestbot|redditbot|semrushbot|slackbot|telegrambot|twitterbot|webpilot|whatsapp|yahoo|yandex|yeti|youbot|zoominfobot/i
   return crawlerTest.test(userAgent)
 }
