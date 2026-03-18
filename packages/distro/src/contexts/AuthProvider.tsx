@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'prod'
         const distroSdk = sdk({
           apiKey: appKey,
-          appName: 'ddex',
           environment: env === 'dev' ? 'development' : 'production'
         })
 
