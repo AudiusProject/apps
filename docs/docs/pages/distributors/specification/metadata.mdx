@@ -12,8 +12,6 @@ Please note that exact DDEX fields will depend on the specific ERN version.
 
 :::
 
----
-
 ## General Metadata Mapping
 
 ### Required Fields
@@ -60,8 +58,6 @@ Not technically an Audius SDK metadata field, but uploaded as part of the track/
 1. checks each artist name (in order) against Audius database of OAuthed display names, and uses the
    first match
 
----
-
 ### Optional Fields
 
 The following fields are optional for content to be listed on Audius and are examined and pulled
@@ -83,8 +79,6 @@ The following fields are parsed and preserved from this field:
 #### description
 
 The DDEX standard includes a `MarketingComments` field that is rarely used, but is available.
-
----
 
 ### Unused Fields
 
@@ -117,8 +111,6 @@ store these child fields and they are not used.
 - `ResourceGroupContentItem/ResourceType`
 - `ResourceGroupContentItem/ReleaseResourceReference`
 - `ResourceGroupContentItem/IsInstantGratificationResource`
-
----
 
 ## Track Metadata Mapping
 
@@ -158,8 +150,6 @@ The `audioFile` maps to two DDEX Fields
 
 - `/ResourceList/SoundRecording/SoundDetailsByTerritory[TerritoryCode="Worldwide"]/TechnicalSoundRecordingDetails/File/FilePath`
 - `/ResourceList/SoundRecording/SoundDetailsByTerritory[TerritoryCode="Worldwide"]/TechnicalSoundRecordingDetails/File/FileName`
-
----
 
 ### Optional Fields
 
@@ -252,8 +242,6 @@ The following children elements are parsed and stored in Audius: `PartyName`/`Fu
 
 :::
 
----
-
 ## Album Metadata Mapping
 
 ### Required Fields
@@ -290,8 +278,6 @@ Metadata about each track in the album, not technically an Audius SDK metadata f
 as part of the album
 
 1. each `/ReleaseList/Release/` except the release with the attribute `IsMainRelease="true"`
-
----
 
 ### Optional Fields
 

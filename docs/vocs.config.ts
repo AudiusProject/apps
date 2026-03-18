@@ -54,7 +54,6 @@ export default defineConfig({
         { text: 'Albums', link: '/sdk/albums' },
         { text: 'Resolve', link: '/sdk/resolve' },
         { text: 'OAuth', link: '/sdk/oauth' },
-        { text: 'Progress Events', link: '/sdk/progress-events' },
         {
           text: 'Unreal Engine Plugin',
           link: '/sdk/community-projects/unreal-engine-plugin',

@@ -3,11 +3,9 @@ title: Playlists
 description: Audius Protocol Documentation
 ---
 
----
+# Playlists
 
-## getPlaylist
-
-> #### getPlaylist(`params`)
+## getPlaylist(`params`, `requestInit?`)
 
 Get a playlist by id.
 
@@ -26,20 +24,21 @@ console.log(playlist)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name         | Type     | Description            | Required?    |
-| :----------- | :------- | :--------------------- | :----------- |
-| `playlistId` | `string` | The ID of the playlist | **Required** |
+| Name         | Type     | Description                           | Required?    |
+| :----------- | :------- | :------------------------------------ | :----------- |
+| `playlistId` | `string` | The ID of the playlist                | **Required** |
+| `userId`     | `string` | The ID of the user making the request | _Optional_   |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`PlaylistResponse`](#playlistresponse) object.
 
----
-
-## getBulkPlaylists
-
-> #### getBulkPlaylists(`params`)
+## getBulkPlaylists(`params`, `requestInit?`)
 
 Get a list of playlists by ID, UPC, or permalink.
 
@@ -65,16 +64,16 @@ example above.
 | `upc`       | `string[]` | An array of UPC codes                 | _Optional_ |
 | `userId`    | `string`   | The ID of the user making the request | _Optional_ |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
----
-
-## getPlaylistTracks
-
-> #### getPlaylistTracks(`params`)
+## getPlaylistTracks(`params`, `requestInit?`)
 
 Get the tracks in a playlist.
 
@@ -97,15 +96,15 @@ example above.
 | :----------- | :------- | :--------------------- | :----------- |
 | `playlistId` | `string` | The ID of the playlist | **Required** |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
-The return type is the same as [`getBulkTracks`](tracks#getbulktracks)
+The return type is the same as [`getBulkTracks`](tracks#getbulktracksparams-requestinit)
 
----
-
-## getTrendingPlaylists
-
-> #### getTrendingPlaylists(`params?`)
+## getTrendingPlaylists(`params?`, `requestInit?`)
 
 Get the top trending playlists on Audius.
 
@@ -122,20 +121,24 @@ console.log(playlists)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name   | Type                                                            | Description                                               | Required?  |
-| :----- | :-------------------------------------------------------------- | :-------------------------------------------------------- | :--------- |
-| `time` | [`GetTrendingPlaylistsTimeEnum`](#gettrendingplayliststimeenum) | The time period for trending playlists. Default: `'week'` | _Optional_ |
+| Name     | Type                                                            | Description                                               | Required?  |
+| :------- | :-------------------------------------------------------------- | :-------------------------------------------------------- | :--------- |
+| `time`   | [`GetTrendingPlaylistsTimeEnum`](#gettrendingplayliststimeenum) | The time period for trending playlists. Default: `'week'` | _Optional_ |
+| `offset` | `number`                                                        | The number of items to skip (for pagination)              | _Optional_ |
+| `limit`  | `number`                                                        | The number of items to fetch (for pagination)             | _Optional_ |
+| `userId` | `string`                                                        | The ID of the user making the request                     | _Optional_ |
+| `type`   | `string`                                                        | The type of trending playlists to return                  | _Optional_ |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the first
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
----
-
-## searchPlaylists
-
-> #### searchPlaylists(`params`)
+## searchPlaylists(`params`, `requestInit?`)
 
 Search for playlists.
 
@@ -154,20 +157,20 @@ console.log(playlists)
 Create an object with the following fields and pass it as the first argument, as shown in the
 example above.
 
-| Name    | Type     | Description             | Required?    |
-| :------ | :------- | :---------------------- | :----------- |
-| `query` | `string` | The query to search for | **Required** |
+| Name    | Type     | Description             | Required?  |
+| :------ | :------- | :---------------------- | :--------- |
+| `query` | `string` | The query to search for | _Optional_ |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
 
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`PlaylistResponse`](#playlistresponse) objects.
 
----
-
-## createPlaylist
-
-> #### createPlaylist(`params`, `requestInit?`)
+## createPlaylist(`params`, `requestInit?`)
 
 Create a new playlist.
 
@@ -226,11 +229,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## updatePlaylist
-
-> #### updatePlaylist(`params`, `requestInit?`)
+## updatePlaylist(`params`, `requestInit?`)
 
 Update an existing playlist's metadata. If any metadata fields are not provided, their values will
 be kept the same as before. To replace cover art, upload a new image via the
@@ -291,11 +290,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## deletePlaylist
-
-> #### deletePlaylist(`params`, `requestInit?`)
+## deletePlaylist(`params`, `requestInit?`)
 
 Delete a playlist.
 
@@ -332,11 +327,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## favoritePlaylist
-
-> #### favoritePlaylist(`params`, `requestInit?`)
+## favoritePlaylist(`params`, `requestInit?`)
 
 Favorite a playlist.
 
@@ -373,11 +364,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## unfavoritePlaylist
-
-> #### unfavoritePlaylist(`params`, `requestInit?`)
+## unfavoritePlaylist(`params`, `requestInit?`)
 
 Unfavorite a playlist.
 
@@ -414,11 +401,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## repostPlaylist
-
-> #### repostPlaylist(`params`, `requestInit?`)
+## repostPlaylist(`params`, `requestInit?`)
 
 Repost a playlist.
 
@@ -455,11 +438,7 @@ Returns a `Promise` resolving to an object with the following fields:
 }
 ```
 
----
-
-## unrepostPlaylist
-
-> #### unrepostPlaylist(`params`, `requestInit?`)
+## unrepostPlaylist(`params`, `requestInit?`)
 
 Unrepost a playlist.
 
@@ -495,8 +474,6 @@ Returns a `Promise` resolving to an object with the following fields:
   transactionHash?: string
 }
 ```
-
----
 
 ## Type Reference
 

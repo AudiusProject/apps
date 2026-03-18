@@ -2,6 +2,8 @@
 title: Subgraph
 ---
 
+# Subgraph
+
 Audius has a GraphQL API Endpoint hosted by
 [The Graph](https://thegraph.com/docs/about/introduction#what-the-graph-is) called a subgraph for
 indexing and organizing data from the mainnet Ethereum contracts.
@@ -9,8 +11,6 @@ indexing and organizing data from the mainnet Ethereum contracts.
 This subgraph is can be used to query Audius data.
 
 Subgraph information is serviced by a decentralized group of server operators called Indexers.
-
----
 
 ## Ethereum Mainnet
 
@@ -20,8 +20,6 @@ Subgraph information is serviced by a decentralized group of server operators ca
 - Graphql Endpoint:
   `https://gateway.thegraph.com/api/[api-key]/subgraphs/id/F8TjrYuTLohz64J8uuDke9htSR1aY9TGCuEjJVVjUJaD`
 - [Code Repo](https://github.com/AudiusProject/audius-subgraph)
-
----
 
 ## Helpful Links
 
@@ -34,8 +32,6 @@ Below are some sample queries you can use to gather information from the Audius 
 
 You can build your own queries using a [GraphQL Explorer](https://graphiql-online.com/graphiql) and
 enter your endpoint to limit the data to exactly what you need.
-
----
 
 ### User
 
@@ -70,8 +66,6 @@ Description: Get users balance of claimable stake and delegation information.
   }
 }
 ```
-
----
 
 ### Audius Network
 
@@ -136,8 +130,6 @@ Description:
 | `requestCount`                    | BigInt |                                                                                                   |
 | `totalStaked`                     | BigInt |
 
----
-
 ## ClaimEvent
 
 Description:
@@ -149,8 +141,6 @@ Description:
 | `rewards`     | BigInt |             |
 | `newTotal`    | BigInt |             |
 | `blockNumber` | BigInt |             |
-
----
 
 ## ClaimProcessedEvent
 
@@ -165,8 +155,6 @@ Description:
 | `newTotal`    | BigInt |             |
 | `blockNumber` | BigInt |             |
 
----
-
 ## ClaimRound
 
 Description:
@@ -176,8 +164,6 @@ Description:
 | `id`          | ID     | The round number |
 | `fundAmount`  | BigInt |                  |
 | `blockNumber` | BigInt |                  |
-
----
 
 ## DecreaseStakeEvent
 
@@ -194,8 +180,6 @@ Description:
 | `decreaseAmount`     | BigInt       |             |
 | `newStakeAmount`     | BigInt       |             |
 
----
-
 ## Delegate
 
 Description:
@@ -208,8 +192,6 @@ Description:
 | `amount`          | BigInt | The amount delegated                                             |
 | `fromUser`        | User   | Reference to the user sending/delegating tokens                  |
 | `toUser`          | User   | Reference to the user receiving delegation                       |
-
----
 
 ## DeregisterProviderServicerEvent
 
@@ -226,8 +208,6 @@ Description:
 | `unstakeAmount` | BigInt      |             |
 | `blockNumber`   | BigInt      |             |
 
----
-
 ## GuardianTransactionExecutedEvent
 
 Description:
@@ -242,8 +222,6 @@ Description:
 | `returnData`            | Bytes  |             |
 | `blockNumber`           | BigInt |             |
 
----
-
 ## IncreasedDelegatedStakeEvent
 
 Description:
@@ -256,8 +234,6 @@ Description:
 | `increaseAmount`  | BigInt |             |
 | `blockNumber`     | BigInt |             |
 
----
-
 ## IncreasedStakeEvent
 
 Description:
@@ -269,8 +245,6 @@ Description:
 | `newStakeAmount` | BigInt |             |
 | `increaseAmount` | BigInt |             |
 | `blockNumber`    | BigInt |             |
-
----
 
 ## Proposal
 
@@ -294,8 +268,6 @@ Description:
 | `numVotes`                  | BigInt        | Number of votes                                                                |
 | `votes`                     | [Vote](#vote) | Derived from `field: "proposal"` - Reference to the votes - user & vote weight |
 
----
-
 ## ProposalOutcomeEvaluatedEvent
 
 Description:
@@ -310,8 +282,6 @@ Description:
 | `numVotes`        | BigInt   |             |
 | `blockNumber`     | BigInt   |             |
 
----
-
 ## ProposalSubmittedEvent
 
 Description:
@@ -324,8 +294,6 @@ Description:
 | `name`        | String   |             |
 | `description` | String   |
 
----
-
 ## ProposalTransactionExecutedEvent
 
 Description:
@@ -337,8 +305,6 @@ Description:
 | `success`     | Boolean  |             |
 | `returnData`  | Bytes    |             |
 | `blockNumber` | BigInt   |
-
----
 
 ## ProposalVoteSubmittedEvent
 
@@ -353,8 +319,6 @@ Description:
 | `currentVote` | VoteType |             |
 | `voterStake`  | BigInt   |             |
 | `blockNumber` | BigInt   |             |
-
----
 
 ## ProposalVoteUpdatedEvent
 
@@ -371,8 +335,6 @@ Description:
 | `previousVote` | VoteType |             |
 | `blockNumber`  | BigInt   |             |
 
----
-
 ## ProposalVetoedEvent
 
 Description:
@@ -382,8 +344,6 @@ Description:
 | `id`          | ID       |             |
 | `proposal`    | Proposal |             |
 | `blockNumber` | BigInt   |             |
-
----
 
 ## RegisterProviderServicerEvent
 
@@ -400,8 +360,6 @@ Description:
 | `stakeAmount` | BigInt      |             |
 | `blockNumber` | BigInt      |             |
 
----
-
 ## RemoveDelegatorEvent
 
 Description:
@@ -416,8 +374,6 @@ Description:
 | `endedBlockNumber`   | BigInt       |             |
 | `updatedCut`         | BigInt       |             |
 | `delegator`          | User         |             |
-
----
 
 ## ServiceNode
 
@@ -434,8 +390,6 @@ Description:
 | `createdAt`           | Int         | When the service node was created                                           |
 | `isRegistered`        | Boolean     | Boolean if th service is registered/deregistered                            |
 
----
-
 ## ServiceType
 
 Description:
@@ -448,8 +402,6 @@ Description:
 | `maxStake` | BigInt                                    | Max Token Stake to run the service       |
 | `versions` | [ServiceTypeVersion](#servicetypeversion) | Derived from `field: "serviceType"`      |
 
----
-
 ## ServiceTypeVersion
 
 Description:
@@ -460,8 +412,6 @@ Description:
 | `serviceType`    | ServiceType |             |
 | `serviceVersion` | String      |             |
 | `blockNumber`    | BigInt      |
-
----
 
 ## SlashEvent
 
@@ -474,8 +424,6 @@ Description:
 | `amount`      | BigInt |
 | `newTotal`    | BigInt |             |
 | `blockNumber` | BigInt |             |
-
----
 
 ## UndelegateStakeEvent
 
@@ -492,8 +440,6 @@ Description:
 | `serviceProvider`    | User         |             |
 | `amount`             | BigInt       |             |
 
----
-
 ## UpdateDeployerCutEvent
 
 Description: implements LockupEvent
@@ -507,8 +453,6 @@ Description: implements LockupEvent
 | `createdBlockNumber` | BigInt       |             |
 | `endedBlockNumber`   | BigInt       |             |
 | `updatedCut`         | BigInt       |             |
-
----
 
 ## User
 
@@ -539,8 +483,6 @@ Description:
 | `pendingUndelegateStake`            | UndelegateStakeEvent        | Reference to request to update undelegate stake                                            |
 | `votes`                             | [Vote](#vote)               | Derived from `field: "voter"` - Reference to votes by the user                             |
 | `createdAt`                         | BigInt                      |                                                                                            |
-
----
 
 ## Vote
 

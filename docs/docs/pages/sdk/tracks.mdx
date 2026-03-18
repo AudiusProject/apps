@@ -3,11 +3,9 @@ title: Tracks
 description: Audius Protocol Documentation
 ---
 
----
+# Tracks
 
-## getTrack
-
-> #### getTrack(`params`, `requestInit?`)
+## getTrack(`params`, `requestInit?`)
 
 Get a track by id.
 
@@ -40,11 +38,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` contains a
 [`TrackResponse`](#trackresponse) object.
 
----
-
-## getBulkTracks
-
-> #### getBulkTracks(`params`, `requestInit?`)
+## getBulkTracks(`params`, `requestInit?`)
 
 Get a list of tracks using their IDs or permalinks.
 
@@ -78,11 +72,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
-## getTrendingTracks
-
-> #### getTrendingTracks(`params`, `requestInit?`)
+## getTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending (most popular) tracks on Audius.
 
@@ -115,11 +105,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
-## getUndergroundTrendingTracks
-
-> #### getUndergroundTrendingTracks(`params`, `requestInit?`)
+## getUndergroundTrendingTracks(`params`, `requestInit?`)
 
 Get the top 100 trending underground tracks on Audius.
 
@@ -150,11 +136,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
-## searchTracks
-
-> #### searchTracks(`params`, `requestInit?`)
+## searchTracks(`params`, `requestInit?`)
 
 Search for tracks.
 
@@ -197,11 +179,7 @@ argument to customize the underlying fetch request (e.g. set custom headers, abo
 Returns a `Promise` containing an object with a `data` field. `data` is an array of
 [`TrackResponse`](#trackresponse) objects.
 
----
-
-## createTrack
-
-> #### createTrack(`params`, `requestInit?`)
+## createTrack(`params`, `requestInit?`)
 
 Create a track by registering its metadata on the protocol. This method accepts metadata including
 CIDs (Content Identifiers) that reference previously uploaded files — it does **not** accept raw
@@ -281,14 +259,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ````ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
   trackId?: string
 }
 
----
-
-## updateTrack
-
-> #### updateTrack(`params`, `requestInit?`)
+## updateTrack(`params`, `requestInit?`)
 
 Update a track's metadata. If any metadata fields are not provided, their values will be kept the
 same as before. To replace audio or cover art, upload new files via the
@@ -332,14 +308,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
-
-## deleteTrack
-
-> #### deleteTrack(`params`, `requestInit?`)
+## deleteTrack(`params`, `requestInit?`)
 
 Delete a track
 
@@ -373,14 +347,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
-
-## favoriteTrack
-
-> #### favoriteTrack(`params`, `requestInit?`)
+## favoriteTrack(`params`, `requestInit?`)
 
 Favorite a track
 
@@ -421,14 +393,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
-
-## unfavoriteTrack
-
-> #### unfavoriteTrack(`params`, `requestInit?`)
+## unfavoriteTrack(`params`, `requestInit?`)
 
 Unfavorite a track
 
@@ -462,14 +432,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
-
-## repostTrack
-
-> #### repostTrack(`params`, `requestInit?`)
+## repostTrack(`params`, `requestInit?`)
 
 Repost a track
 
@@ -510,14 +478,12 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
-
-## unrepostTrack
-
-> #### unrepostTrack(`params`, `requestInit?`)
+## unrepostTrack(`params`, `requestInit?`)
 
 Unrepost a track
 
@@ -551,12 +517,81 @@ Returns a `Promise` resolving to an object with the following fields:
 ```ts
 {
   transactionHash?: string
+  blockHash?: string
+  blockNumber?: number
 }
 ```
 
----
+## getTrackDownloadCount(`params`, `requestInit?`)
+
+Get the download count for a single track.
+
+Example:
+
+```ts
+const { data } = await audiusSdk.tracks.getTrackDownloadCount({
+  trackId: 'D7KyD',
+})
+console.log(data.downloadCount)
+```
+
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name      | Type     | Description         | Required?    |
+| :-------- | :------- | :------------------ | :----------- |
+| `trackId` | `string` | The ID of the track | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
+
+Returns a `Promise` containing an object with a `data` field of type
+[`TrackDownloadCountResponseData`](#trackdownloadcountresponsedata).
+
+## getTrackDownloadCounts(`params`, `requestInit?`)
+
+Get download counts for multiple tracks by ID.
+
+Example:
+
+```ts
+const { data } = await audiusSdk.tracks.getTrackDownloadCounts({
+  id: ['D7KyD', 'PjdWN', 'Jwo2A'],
+})
+console.log(data) // Array of { id, downloadCount }
+```
+
+#### Params
+
+Create an object with the following fields and pass it as the first argument, as shown in the
+example above.
+
+| Name | Type       | Description                    | Required?    |
+| :--- | :--------- | :----------------------------- | :----------- |
+| `id` | `string[]` | An array of track IDs to query | **Required** |
+
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
+#### Returns
+
+Returns a `Promise` containing an object with a `data` field that is an array of
+[`TrackDownloadCountResponseData`](#trackdownloadcountresponsedata).
 
 ## Type Reference
+
+### TrackDownloadCountResponseData
+
+| Field           | Type     | Description                        |
+| :-------------- | :------- | :--------------------------------- |
+| `id`            | `string` | Track ID                           |
+| `downloadCount` | `number` | Total number of downloads          |
 
 ### TrackResponse
 
@@ -583,8 +618,6 @@ Returns a `Promise` resolving to an object with the following fields:
 | `title`              | `string`                 | Track title                                               |
 | `trackCid`           | `string`                 | CID of the track audio                                    |
 | `user`               | `object`                 | The track owner (see [User](users))                       |
-
----
 
 ### CreateTrackRequestBody
 
@@ -635,8 +668,6 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | `copyrightLine`                | `CopyrightLine`                                         | Copyright line                                    | _Optional_   |
 | `producerCopyrightLine`        | `ProducerCopyrightLine`                                 | Producer copyright line                           | _Optional_   |
 
----
-
 ### UpdateTrackRequestBody
 
 Metadata object for updating an existing track. All fields are optional — only include the fields
@@ -673,8 +704,6 @@ you want to change. Omitted fields retain their current values.
 | `remixOf`             | [`RemixParentWrite`](#remixparentwrite) | Parent track(s) if this track is a remix          |
 | `parentalWarningType` | `string`                                | Parental warning type                             |
 | `ddexApp`             | `string`                                | DDEX application identifier                       |
-
----
 
 ### AccessGate
 
@@ -747,8 +776,6 @@ const metadata = {
 }
 ```
 
----
-
 ### FieldVisibility
 
 Controls which track fields are publicly visible. Each field is a `boolean`.
@@ -770,8 +797,6 @@ For public tracks, `genre`, `mood`, `tags`, `share`, and `playCount` are set to 
 For stream-gated (non-USDC) tracks, `remixes` is set to `false` by default.
 
 :::
-
----
 
 ### RemixParentWrite
 
@@ -798,8 +823,6 @@ const metadata = {
 }
 ```
 
----
-
 ### StemParent
 
 Identifies the parent track when uploading a stem (e.g. vocals, drums, bass).
@@ -810,8 +833,6 @@ Identifies the parent track when uploading a stem (e.g. vocals, drums, bass).
   parentTrackId: number // The numeric ID of the parent track
 }
 ```
-
----
 
 ### DdexResourceContributor
 
@@ -825,8 +846,6 @@ Represents a contributor to the track (used for DDEX metadata).
 }
 ```
 
----
-
 ### DdexRightsController
 
 Represents the rights controller for the track (used for DDEX metadata).
@@ -838,8 +857,6 @@ Represents the rights controller for the track (used for DDEX metadata).
   rightsShareUnknown?: string // Optional rights share info
 }
 ```
-
----
 
 ### Genre Values
 
@@ -853,8 +870,6 @@ Valid genre values for the `genre` field. Use these exact string values:
 `'Progressive House'`, `'Hardstyle'`, `'Glitch Hop'`, `'Trance'`, `'Future Bass'`, `'Future House'`,
 `'Tropical House'`, `'Downtempo'`, `'Drum & Bass'`, `'Dubstep'`, `'Jersey Club'`, `'Vaporwave'`,
 `'Moombahton'`
-
----
 
 ### Mood Values
 

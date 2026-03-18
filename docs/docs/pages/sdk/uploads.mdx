@@ -3,15 +3,12 @@ title: Uploads
 description: Audius Protocol Documentation
 ---
 
-import { Tabs } from '../../components/Tabs.jsx'
-import { TabItem } from '../../components/Tabs.jsx'
-
----
+# Uploads
 
 The Uploads API provides methods for uploading audio and image files to Audius storage nodes. These
 methods return CIDs (Content Identifiers) that you then pass to write methods like
-[`createTrack`](/sdk/tracks#createtrack) or
-[`updateTrack`](/sdk/tracks#updatetrack).
+[`createTrack`](/sdk/tracks#createtrackparams-requestinit) or
+[`updateTrack`](/sdk/tracks#updatetrackparams-requestinit).
 
 :::tip
 
@@ -20,37 +17,12 @@ Uploads API to get CIDs, then pass those CIDs as metadata when creating or updat
 
 :::
 
----
-
-## createAudioUpload
-
-> #### createAudioUpload(`params`)
+## createAudioUpload(`params`)
 
 Upload an audio file to a storage node. Returns the resulting CIDs and audio analysis metadata
 (duration, BPM, musical key).
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument.
-
-| Name                  | Type                                      | Description                                          | Required?    |
-| :-------------------- | :---------------------------------------- | :--------------------------------------------------- | :----------- |
-| `file`                | `File`                                    | The audio file to upload                             | **Required** |
-| `onProgress`          | `(loaded: number, total: number) => void` | A callback for tracking upload progress              | _Optional_   |
-| `previewStartSeconds` | `number`                                  | Start time in seconds for generating a preview clip  | _Optional_   |
-| `placementHosts`      | `string[]`                                | A list of storage node hosts to prefer for placement | _Optional_   |
-
-</TabItem>
-<TabItem value="example">
+Example:
 
 ```ts
 import fs from 'fs'
@@ -63,7 +35,7 @@ const upload = audiusSdk.uploads.createAudioUpload({
     name: 'track.mp3',
     type: 'audio/mpeg',
   },
-  onProgress: (loaded, total) => {
+  onProgress: ({ loaded, total }) => {
     console.log(`Upload progress: ${Math.round((loaded / total) * 100)}%`)
   },
   previewStartSeconds: 30,
@@ -73,16 +45,23 @@ const result = await upload.start()
 console.log(result)
 ```
 
-</TabItem>
-<TabItem value="response">
+#### Params
 
-The method returns an object with:
+Create an object with the following fields and pass it as the first argument.
+
+| Name                  | Type                                                                    | Description                                          | Required?    |
+| :-------------------- | :---------------------------------------------------------------------- | :--------------------------------------------------- | :----------- |
+| `file`                | `File`                                                                  | The audio file to upload                             | **Required** |
+| `onProgress`          | `(event: { loaded: number; total: number; transcode: number }) => void` | A callback for tracking upload progress              | _Optional_   |
+| `previewStartSeconds` | `number`                                                                | Start time in seconds for generating a preview clip  | _Optional_   |
+| `placementHosts`      | `string[]`                                                              | A list of storage node hosts to prefer for placement | _Optional_   |
+
+#### Returns
+
+Returns an object with:
 
 - `abort` — a function you can call to cancel the upload.
-- `start()` — a function that begins the upload and returns a `Promise` that resolves with the
-  upload result once complete.
-
-The resolved value of `start()` contains:
+- `start()` — a function that begins the upload and returns a `Promise` that resolves with:
 
 ```ts
 {
@@ -96,40 +75,12 @@ The resolved value of `start()` contains:
 }
 ```
 
-</TabItem>
-</Tabs>
-
----
-
-## createImageUpload
-
-> #### createImageUpload(`params`)
+## createImageUpload(`params`)
 
 Upload an image file (e.g. cover art or profile picture) to a storage node. Returns the resulting
 CID.
 
-<Tabs
-  block={true}
-  defaultValue="request"
-  values={[
-    { label: 'Params', value: 'request' },
-    { label: 'Example', value: 'example' },
-    { label: 'Response', value: 'response' },
-  ]}
->
-<TabItem value="request">
-
-Create an object with the following fields and pass it as the first argument.
-
-| Name             | Type                                      | Description                                                                   | Required?    |
-| :--------------- | :---------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
-| `file`           | `File`                                    | The image file to upload                                                      | **Required** |
-| `onProgress`     | `(loaded: number, total: number) => void` | A callback for tracking upload progress                                       | _Optional_   |
-| `isBackdrop`     | `boolean`                                 | Set to `true` for wide/banner images (e.g. profile banners). Default: `false` | _Optional_   |
-| `placementHosts` | `string[]`                                | A list of storage node hosts to prefer for placement                          | _Optional_   |
-
-</TabItem>
-<TabItem value="example">
+Example:
 
 ```ts
 import fs from 'fs'
@@ -148,19 +99,24 @@ const coverArtCid = await upload.start()
 console.log(coverArtCid) // CID string
 ```
 
-</TabItem>
-<TabItem value="response">
+#### Params
 
-The method returns an object with:
+Create an object with the following fields and pass it as the first argument.
+
+| Name             | Type                                                                    | Description                                                                   | Required?    |
+| :--------------- | :---------------------------------------------------------------------- | :---------------------------------------------------------------------------- | :----------- |
+| `file`           | `File`                                                                  | The image file to upload                                                      | **Required** |
+| `onProgress`     | `(event: { loaded: number; total: number; transcode: number }) => void` | A callback for tracking upload progress                                       | _Optional_   |
+| `isBackdrop`     | `boolean`                                                               | Set to `true` for wide/banner images (e.g. profile banners). Default: `false` | _Optional_   |
+| `placementHosts` | `string[]`                                                              | A list of storage node hosts to prefer for placement                          | _Optional_   |
+
+#### Returns
+
+Returns an object with:
 
 - `abort` — a function you can call to cancel the upload.
 - `start()` — a function that begins the upload and returns a `Promise` resolving with the CID of
   the uploaded image (`string`).
-
-</TabItem>
-</Tabs>
-
----
 
 ## Full Example: Upload and Create a Track
 

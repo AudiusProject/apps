@@ -13,8 +13,6 @@ The Discovery Node source code is hosted on
 see the [registered Discovery Nodes](https://dashboard.audius.org/#/services/discovery-node) on the
 Audius Protocol Dashboard.
 
----
-
 ## Design Goals
 
 1. Expose queryable endpoints which listeners/creators can interact with
@@ -26,8 +24,6 @@ Audius Protocol Dashboard.
 The "Discovery Node" may be referred to as the "Discovery Provider". These services are the same.
 
 :::
-
----
 
 ## Database
 
@@ -43,8 +39,6 @@ which is used by alembic to automatically generate the migrations under
 You can find the connection defined between alembic and the data models in
 [alembic/env.py](https://github.com/AudiusProject/apps/tree/main/packages/discovery-provider/alembic/env.py)
 
----
-
 ## Flask
 
 The Discovery Node web server serves as the entry point for reading data through the Audius
@@ -53,8 +47,6 @@ found in
 [src/queries](https://github.com/AudiusProject/apps/tree/main/packages/discovery-provider/src/queries).
 
 Some examples of queries include user-specific feeds, track data, playlist data, etc.
-
----
 
 ## Celery
 
@@ -120,8 +112,6 @@ container from the worker. Details about periodic task scheduling can be found i
 This is an identical container as the [Celery worker](#celery-worker) but is run as a 'beat
 scheduler' to ensure indexing is run at a periodic interval. By default this interval is
 `5 seconds`.
-
----
 
 ## Redis
 

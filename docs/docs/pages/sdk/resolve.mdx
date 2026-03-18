@@ -3,12 +3,9 @@ title: Resolve
 description: Audius Protocol Documentation
 ---
 
-import { Tabs } from '../../components/Tabs.jsx'
-import { TabItem } from '../../components/Tabs.jsx'
+# Resolve
 
-### resolve
-
-#### resolve(`params`)
+## resolve(`params`, `requestInit?`)
 
 Resolve a provided Audius app URL to the API resource it represents.
 
@@ -31,6 +28,10 @@ example above.
 | :---- | :------- | :--------------------------------- | :----------- |
 | `url` | `string` | The url of the resource to resolve | **Required** |
 
+You can pass an optional
+[`RequestInit`](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit) object as the second
+argument to customize the underlying fetch request (e.g. set custom headers, abort signal, etc.).
+
 #### Returns
 
 Returns a `Promise` containing an object with a `data` field. `data` is an object representing the
@@ -41,5 +42,3 @@ resolved resource as described below.
   data: Track | Playlist | Album
 }
 ```
-
----

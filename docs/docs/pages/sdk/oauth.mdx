@@ -6,120 +6,12 @@ description: Audius OAuth — Authorization Code Flow with PKCE
 # OAuth
 
 Audius OAuth lets users authorize your app to perform actions on their behalf (write permissions) or
-simply verify their identity and share their profile info (read-only).
+simply verify their identity and share their profile info (read-only). The SDK implements the
+**OAuth 2.0 Authorization Code Flow with PKCE** — no backend server or client secret is required.
 
-The SDK implements the **OAuth 2.0 Authorization Code Flow with PKCE** — no backend server or client
-secret is required.
+For a step-by-step setup guide, see [Log in with Audius](/developers/guides/log-in-with-audius).
 
-## Getting Started
-
-### 1. Get an API Key
-
-Create a developer app and obtain an API key from either:
-
-- **In-app settings** — [audius.co/settings](https://audius.co/settings) → Developer Apps
-- **Developer portal** — [api.audius.co/plans](https://api.audius.co/plans)
-
-### 2. Register a Redirect URI
-
-On the same page, register the **redirect URI(s)** your app will use. Audius validates the redirect
-URI in every authorization request against this list.
-
-- **Web popup / full-page redirect**: register your callback page URL (e.g. `https://yourapp.com/callback`)
-- **Mobile (React Native)**: register a custom URL scheme (e.g. `myapp://oauth/callback`)
-- **Local development**: register `http://localhost:PORT` (or the specific path you use)
-
-### 3. Initialize the SDK
-
-```ts
-import { sdk } from '@audius/sdk'
-
-const audiusSdk = sdk({
-  appName: 'My App',
-  apiKey: 'YOUR_API_KEY',
-  redirectUri: 'https://yourapp.com/callback',
-})
-```
-
-On **React Native / Expo** (requires React Native 0.71+ / Expo SDK 48+), import from `@audius/sdk`
-as normal — the native entry point is resolved automatically and configures `AsyncStorage`-backed
-token persistence and `expo-web-browser` for the OAuth browser session out of the box. Make sure
-both peer dependencies are installed:
-
-```sh
-npx expo install expo-web-browser @react-native-async-storage/async-storage
-```
-
-### 4. Log the User In
-
-Call `login()` with a registered `redirectUri`. The SDK runs the full PKCE exchange and stores the
-resulting access and refresh tokens automatically.
-
-```ts
-await audiusSdk.oauth.login({ scope: 'write' })
-
-const user = await audiusSdk.oauth.getUser()
-console.log('Signed in as', user.name)
-```
-
-### 5. Handle the Callback (web only)
-
-On your callback page (the `redirectUri`), initialize the SDK and call `handleRedirect()`. The SDK
-handles both flows automatically:
-
-- **Popup**: Detects `window.opener`, forwards the authorization code to the parent window, and
-  closes the popup. The parent's `login()` promise resolves.
-- **Full-page redirect**: Performs the PKCE token exchange and stores the tokens. Call `getUser()`
-  to retrieve the profile.
-
-```ts
-const audiusSdk = sdk({ appName: 'My App', apiKey: 'YOUR_API_KEY' })
-
-await audiusSdk.oauth.handleRedirect()
-// Popup: closes automatically, login() in parent resolves
-// Full-page redirect: token exchange complete, call getUser() next
-```
-
-:::tip
-
-On **mobile**, `handleRedirect()` is called automatically inside `login()` — your app does not
-need to call it at all.
-
-:::
-
-:::tip
-
-For the **popup flow**, the popup window must load your callback page before `handleRedirect()` can
-run. If your app has a large JavaScript bundle, users will see a spinner in the popup while it
-loads. To avoid this, use a dedicated lightweight callback page at your `redirectUri` that only
-initializes the SDK and calls `handleRedirect()` — rather than loading your full app.
-
-:::
-
-### 6. Restore an Existing Session
-
-On page/app load, check `isAuthenticated()` to avoid prompting the user to log in again.
-
-```ts
-if (await audiusSdk.oauth.isAuthenticated()) {
-  const user = await audiusSdk.oauth.getUser()
-  // restore UI
-}
-```
-
-### Full Example
-
-See the
-[web upload example](https://github.com/AudiusProject/audius-protocol/tree/main/packages/web/examples/upload)
-and the
-[React Native upload example](https://github.com/AudiusProject/audius-protocol/tree/main/packages/mobile/examples/upload)
-for complete, runnable apps that sign in with OAuth and upload a track — no backend required.
-
-## Methods
-
-### login
-
-#### login(`params`)
+## login(`params`)
 
 Opens the Audius consent screen and runs the full PKCE authorization flow.
 
@@ -134,7 +26,28 @@ Opens the Audius consent screen and runs the full PKCE authorization flow.
 
 Throws if the flow fails or the user cancels.
 
-**Params**
+Example (popup — recommended for web):
+
+```ts
+// redirectUri set once in sdk({ redirectUri: '...' })
+try {
+  await audiusSdk.oauth.login({ scope: 'write' })
+  const user = await audiusSdk.oauth.getUser()
+  console.log('Signed in as', user.name)
+} catch (err) {
+  console.error('Login failed or cancelled:', err.message)
+}
+```
+
+Example (mobile):
+
+```ts
+// redirectUri set once in sdk({ redirectUri: 'myapp://oauth/callback' })
+await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
+const user = await audiusSdk.oauth.getUser()
+```
+
+#### Params
 
 | Parameter    | Type                      | Default      | Description                                                                                                                    |
 | :----------- | :------------------------ | :----------- | :----------------------------------------------------------------------------------------------------------------------------- |
@@ -150,32 +63,11 @@ allow access to DMs or wallets.
 
 :::
 
-**Returns**: `Promise<void>`
+#### Returns
 
-**Example (popup — recommended for web)**
+Returns `Promise<void>`.
 
-```ts
-// redirectUri set once in sdk({ redirectUri: '...' })
-try {
-  await audiusSdk.oauth.login({ scope: 'write' })
-  const user = await audiusSdk.oauth.getUser()
-  console.log('Signed in as', user.name)
-} catch (err) {
-  console.error('Login failed or cancelled:', err.message)
-}
-```
-
-**Example (mobile)**
-
-```ts
-// redirectUri set once in sdk({ redirectUri: 'myapp://oauth/callback' })
-await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
-const user = await audiusSdk.oauth.getUser()
-```
-
-### getUser
-
-#### getUser()
+## getUser()
 
 Fetches the authenticated user's profile from the server using the stored access token. Always
 makes a network request so the result reflects current server-side state.
@@ -183,35 +75,33 @@ makes a network request so the result reflects current server-side state.
 Throws `ResponseError` (4xx/5xx) or `FetchError` (network failure) if the request fails. A `401`
 typically means no token is stored or the session has expired.
 
-**Returns**: `Promise<DecodedUserToken>`
-
-```ts
-type DecodedUserToken = {
-  userId: number       // unique Audius user identifier
-  email: string
-  name: string         // display name
-  handle: string
-  verified: boolean    // Audius verified checkmark
-  profilePicture:
-    | { '150x150': string; '480x480': string; '1000x1000': string }
-    | { misc: string }
-    | undefined
-    | null
-  sub: number          // alias for userId
-  iat: number          // unix timestamp of when the token was issued
-}
-```
-
-**Example**
+Example:
 
 ```ts
 const user = await audiusSdk.oauth.getUser()
 console.log(`@${user.handle}`)
 ```
 
-### handleRedirect
+#### Returns
 
-#### handleRedirect(`url?`)
+Returns `Promise<DecodedUserToken>`.
+
+```ts
+type DecodedUserToken = {
+  userId: number       // unique Audius user identifier
+  name: string         // display name
+  handle: string
+  verified: boolean    // Audius verified checkmark
+  profilePicture?: {
+    '150x150': string
+    '480x480': string
+    '1000x1000': string
+    mirrors: string[]
+  }
+}
+```
+
+## handleRedirect(`url?`)
 
 Completes an OAuth flow by processing the redirect URL. Call this on your callback page after
 `login()` redirects there.
@@ -231,9 +121,7 @@ The `redirectUri` used in the token exchange is resolved in this order:
 
 On **mobile**, this is called automatically inside `login()` — you do not need to call it.
 
-**Returns**: `Promise<void>`
-
-**Example**
+Example:
 
 ```ts
 // On your callback page:
@@ -243,17 +131,23 @@ await audiusSdk.oauth.handleRedirect()
 // Full-page: token stored — call getUser() to get the profile
 ```
 
-### isAuthenticated
+#### Params
 
-#### isAuthenticated()
+| Name  | Type     | Description                                                                       | Required?  |
+| :---- | :------- | :-------------------------------------------------------------------------------- | :--------- |
+| `url` | `string` | The redirect URL to process. Defaults to the current page URL on web. | _Optional_ |
+
+#### Returns
+
+Returns `Promise<void>`.
+
+## isAuthenticated()
 
 Returns `true` if an access token is currently stored. Tokens are persisted across sessions
 (localStorage on web, AsyncStorage on React Native), so this will be `true` on page/app reload if
 the user previously logged in.
 
-**Returns**: `Promise<boolean>`
-
-**Example**
+Example:
 
 ```ts
 if (await audiusSdk.oauth.isAuthenticated()) {
@@ -261,15 +155,15 @@ if (await audiusSdk.oauth.isAuthenticated()) {
 }
 ```
 
-### hasRefreshToken
+#### Returns
 
-#### hasRefreshToken()
+Returns `Promise<boolean>`.
+
+## hasRefreshToken()
 
 Returns `true` if a refresh token is stored and a refresh exchange could be attempted.
 
-**Returns**: `Promise<boolean>`
-
-**Example**
+Example:
 
 ```ts
 if (await audiusSdk.oauth.hasRefreshToken()) {
@@ -277,17 +171,17 @@ if (await audiusSdk.oauth.hasRefreshToken()) {
 }
 ```
 
-### hasRedirectResult
+#### Returns
 
-#### hasRedirectResult(`url?`)
+Returns `Promise<boolean>`.
+
+## hasRedirectResult(`url?`)
 
 Synchronous check for whether the given URL (or current page URL on web) contains OAuth redirect
 params (`code` + `state`). No network requests or side effects. Useful for showing a loading state
 before calling `handleRedirect()`.
 
-**Returns**: `boolean`
-
-**Example**
+Example:
 
 ```ts
 if (audiusSdk.oauth.hasRedirectResult()) {
@@ -297,16 +191,22 @@ if (audiusSdk.oauth.hasRedirectResult()) {
 }
 ```
 
-### refreshAccessToken
+#### Params
 
-#### refreshAccessToken()
+| Name  | Type     | Description                                                                    | Required?  |
+| :---- | :------- | :----------------------------------------------------------------------------- | :--------- |
+| `url` | `string` | The URL to check. Defaults to the current page URL on web. | _Optional_ |
+
+#### Returns
+
+Returns `boolean`.
+
+## refreshAccessToken()
 
 Refreshes the access token using the stored refresh token. The SDK calls this automatically when
 API requests return `401`, but you can trigger it manually if needed.
 
-**Returns**: `Promise<string | null>` — the new access token, or `null` if the refresh failed.
-
-**Example**
+Example:
 
 ```ts
 const newToken = await audiusSdk.oauth.refreshAccessToken()
@@ -315,17 +215,21 @@ if (!newToken) {
 }
 ```
 
-### logout
+#### Returns
 
-#### logout()
+Returns `Promise<string | null>` — the new access token, or `null` if the refresh failed.
+
+## logout()
 
 Revokes the current refresh token server-side and clears all stored tokens and PKCE session state.
 After calling this, all SDK API calls revert to unauthenticated.
 
-**Returns**: `Promise<void>`
-
-**Example**
+Example:
 
 ```ts
 await audiusSdk.oauth.logout()
 ```
+
+#### Returns
+
+Returns `Promise<void>`.
