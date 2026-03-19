@@ -167,7 +167,7 @@ export const useTrackPageLineup = (
       }
 
       // If there are no remixes, get recommended tracks based on genre
-      if (indices.remixesSection.index === null) {
+      if (indices.remixesSection.index === undefined) {
         const { data: trendingData } = await sdk.tracks.getTrendingTracks({
           genre: heroTrack.genre,
           limit: pageSize

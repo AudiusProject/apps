@@ -28,7 +28,8 @@ import {
   playerActions,
   playerSelectors,
   PlayerBehavior,
-  profilePageSelectors
+  profilePageSelectors,
+  trackPageSelectors
 } from '@audius/common/store'
 import { Uid, makeUid, waitForAccount, Nullable } from '@audius/common/utils'
 import { all, call, put, select, takeEvery, takeLatest } from 'typed-redux-saga'
@@ -42,6 +43,7 @@ import { getLocation } from 'store/routing/selectors'
 
 const {
   getId: getQueueTrackId,
+  getOrder,
   getIndex,
   getLength,
   getOvershot,
@@ -53,6 +55,7 @@ const {
 } = queueSelectors
 
 const { getProfileUserHandle } = profilePageSelectors
+const { getTrackId: getTrackPageTrackId } = trackPageSelectors
 
 const {
   getTrackId: getPlayerTrackId,
@@ -147,12 +150,25 @@ function* handleQueueAutoplay({
     isCloseToEndOfQueue &&
     !trackPageException
   ) {
+    const trackPageTrackId = yield* select(getTrackPageTrackId)
+    const trackPageExclusions =
+      source === QueueSource.TRACK_TRACKS && trackPageTrackId
+        ? [trackPageTrackId]
+        : []
+    const exclusionList = Array.from(
+      new Set(
+        track
+          ? [...trackPageExclusions, track.track_id]
+          : trackPageExclusions
+      )
+    )
+
     yield* waitForAccount()
     const userId = yield* call(queryCurrentUserId)
     yield* put(
       queueAutoplay({
         genre: track?.genre,
-        exclusionList: track ? [track.track_id] : [],
+        exclusionList,
         currentUserId: userId
       })
     )
@@ -429,11 +445,23 @@ function* watchQueueAutoplay() {
         exclusionList,
         currentUserId
       )
-      const recommendedTracks = tracks.map(({ track_id }) => ({
-        id: track_id,
-        uid: makeUid(Kind.TRACKS, track_id),
-        source: QueueSource.RECOMMENDED_TRACKS
-      }))
+      const excludedTrackIds = new Set(exclusionList)
+      const queueOrder = yield* select(getOrder)
+      queueOrder.forEach((entry) => {
+        if (typeof entry.id === 'number') {
+          excludedTrackIds.add(entry.id)
+        }
+      })
+
+      const recommendedTracks = tracks
+        .filter(({ track_id }) => !excludedTrackIds.has(track_id))
+        .map(({ track_id }) => ({
+          id: track_id,
+          uid: makeUid(Kind.TRACKS, track_id),
+          source: QueueSource.RECOMMENDED_TRACKS
+        }))
+
+      if (recommendedTracks.length === 0) return
       yield* put(add({ entries: recommendedTracks }))
     }
   )
