@@ -3,10 +3,18 @@ import { z } from 'zod'
 export const DEVELOPER_APP_DESCRIPTION_MAX_LENGTH = 128
 export const DEVELOPER_APP_NAME_MAX_LENGTH = 50
 export const DEVELOPER_APP_IMAGE_URL_MAX_LENGTH = 2000
-const URL_REGEX = /^(https?):\/\//i
 
 const messages = {
   invalidUrl: 'Invalid URL'
+}
+const IMAGE_URL_REGEX = /^(https?):\/\//i
+const REDIRECT_URI_REGEX = /^([a-z][a-z0-9+.-]*):\/\/\S+$/i
+const DISALLOWED_REDIRECT_SCHEMES = ['javascript:', 'data:', 'vbscript:']
+
+const isValidRedirectUri = (value: string) => {
+  if (!REDIRECT_URI_REGEX.test(value)) return false
+  const scheme = value.slice(0, value.indexOf(':') + 1).toLowerCase()
+  return !DISALLOWED_REDIRECT_SCHEMES.includes(scheme)
 }
 
 export type ApiAccessKey = {
@@ -33,7 +41,7 @@ export const developerAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_IMAGE_URL_MAX_LENGTH)
-      .refine((value) => URL_REGEX.test(value), {
+      .refine((value) => IMAGE_URL_REGEX.test(value), {
         message: messages.invalidUrl
       })
   ),
@@ -47,7 +55,7 @@ export const developerAppEditSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_IMAGE_URL_MAX_LENGTH)
-      .refine((value) => URL_REGEX.test(value), {
+      .refine((value) => IMAGE_URL_REGEX.test(value), {
         message: messages.invalidUrl
       })
   ),
@@ -57,7 +65,7 @@ export const developerAppEditSchema = z.object({
       z
         .string()
         .max(2000)
-        .refine((value) => URL_REGEX.test(value), {
+        .refine((value) => isValidRedirectUri(value), {
           message: messages.invalidUrl
         })
         .optional()

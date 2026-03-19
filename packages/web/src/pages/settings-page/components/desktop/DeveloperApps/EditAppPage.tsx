@@ -62,7 +62,8 @@ const messages = {
     'Allowed values for the redirect_uri query parameter when using OAuth2 to obtain user access tokens.',
   removeRedirectUri: 'Remove redirect URI',
   addRedirectUri: 'Add Redirect URI',
-  redirectUriPlaceholder: 'https://example.com/callback'
+  redirectUriPlaceholder:
+    'https://example.com/callback or myapp://oauth/callback'
 }
 
 const ImageField = ({ name }: { name: string }) => {
