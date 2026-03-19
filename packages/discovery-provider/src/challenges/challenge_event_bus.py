@@ -46,7 +46,6 @@ from src.challenges.send_first_tip_challenge import send_first_tip_challenge_man
 from src.challenges.tastemaker_challenge import tastemaker_challenge_manager
 from src.challenges.track_upload_challenge import track_upload_challenge_manager
 from src.challenges.trending_challenge import (
-    trending_playlist_challenge_manager,
     trending_track_challenge_manager,
     trending_underground_track_challenge_manager,
 )
@@ -294,9 +293,6 @@ def setup_challenge_bus():
     bus.register_listener(
         ChallengeEvent.trending_underground,
         trending_underground_track_challenge_manager,
-    )
-    bus.register_listener(
-        ChallengeEvent.trending_playlist, trending_playlist_challenge_manager
     )
     bus.register_listener(ChallengeEvent.send_tip, send_first_tip_challenge_manager)
     bus.register_listener(
