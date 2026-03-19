@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
 import { Notifications } from 'react-native-notifications'
 import type { Registered, Notification } from 'react-native-notifications'
-import { PERMISSIONS, request } from 'react-native-permissions'
+import { requestNotifications } from 'react-native-permissions'
 
 import { track, make } from 'app/services/analytics'
 import { EventNames } from 'app/types/analytics'
@@ -97,9 +97,9 @@ class PushNotifications {
     isRegistering = true
 
     if (Platform.OS === MobileOS.ANDROID) {
-      // For android, Notifications.registerRemoteNotifications is supposed to prompt user for permission but its currently not
-      // @ts-expect-error POST_NOTIFICATIONS might not be in types for this version but exists at runtime for Android 13+
-      await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
+      // Android 13+ needs POST_NOTIFICATIONS. Use requestNotifications — PERMISSIONS.ANDROID
+      // does not expose POST_NOTIFICATIONS in react-native-permissions v5, so request(undefined) crashed native code.
+      await requestNotifications()
     }
 
     Notifications.registerRemoteNotifications()
