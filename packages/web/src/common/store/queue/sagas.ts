@@ -157,9 +157,7 @@ function* handleQueueAutoplay({
         : []
     const exclusionList = Array.from(
       new Set(
-        track
-          ? [...trackPageExclusions, track.track_id]
-          : trackPageExclusions
+        track ? [...trackPageExclusions, track.track_id] : trackPageExclusions
       )
     )
 
