@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   StyleSheet,
@@ -6,17 +6,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { WebView } from 'react-native-webview'
 import { StatusBar } from 'expo-status-bar'
 import { Audio } from 'expo-av'
-import * as Linking from 'expo-linking'
-import { buildOAuthUrl, randomState } from './src/oauth/buildOAuthUrl'
-import { getSDK } from './src/sdk'
-import { config } from './src/config'
+import { getSDK, config } from './src/sdk'
 
-const REDIRECT_URI = 'http://localhost/oauth/callback'
-
-type Screen = 'home' | 'webview' | 'signed-in'
+type Screen = 'home' | 'signed-in'
 
 type Track = {
   id: string
@@ -27,10 +21,9 @@ type Track = {
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string } | null>(null)
+  const [profile, setProfile] = useState<{ handle: string; userId: string } | null>(null)
   const [track, setTrack] = useState<Track | null>(null)
   const [trackLoading, setTrackLoading] = useState(false)
   const [likeLoading, setLikeLoading] = useState(false)
@@ -39,68 +32,8 @@ export default function App() {
   const [reposted, setReposted] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null)
-  const oauthStateRef = useRef<string | null>(null)
-  const soundRef = useRef<Audio.Sound | null>(null)
 
-  const handleOpenAuth = useCallback(() => {
-    setError(null)
-    const state = randomState()
-    oauthStateRef.current = state
-    setScreen('webview')
-  }, [])
-
-  const handleRedirect = useCallback(
-    async (url: string) => {
-      if (!url.startsWith(REDIRECT_URI) && !url.startsWith('likerepost://oauth/callback')) return
-      setScreen('home')
-      setLoading(true)
-      setError(null)
-      try {
-        const parsed = Linking.parse(url)
-        const query = (parsed.queryParams ?? {}) as Record<string, string>
-        const token =
-          query.token ??
-          query.access_token ??
-          (parsed.fragment ?? '').split('token=')[1]?.split('&')[0]
-        const state = query.state
-        if (!token) {
-          setError('No token in redirect')
-          return
-        }
-        if (state !== oauthStateRef.current) {
-          setError('State mismatch')
-          return
-        }
-        const verifyRes = await getSDK().users.verifyIDToken({ token })
-        const data = verifyRes.data
-        if (!data) {
-          setError('Invalid token')
-          return
-        }
-        const uid = String(data.userId ?? data.sub ?? '')
-        setProfile({ handle: data.handle ?? data.sub ?? 'Unknown' })
-        setUserId(uid)
-        setScreen('signed-in')
-        setTrack(null)
-        setResult(null)
-      } catch (e: unknown) {
-        if (e && typeof e === 'object' && 'response' in e && e.response && typeof (e.response as Response).text === 'function') {
-          const res = e.response as Response
-          try {
-            const body = await res.text()
-            setError(`API error ${res.status}: ${body || res.statusText || 'Unknown'}`)
-          } catch {
-            setError(`API error ${res.status}`)
-          }
-        } else {
-          setError(e instanceof Error ? e.message : 'Sign-in failed')
-        }
-      } finally {
-        setLoading(false)
-      }
-    },
-    []
-  )
+  const audiusSdk = getSDK()
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -109,21 +42,58 @@ export default function App() {
       shouldDuckAndroid: true,
       playThroughEarpieceAndroid: false
     })
-    return () => {
-      soundRef.current?.unloadAsync().catch(() => {})
-    }
   }, [])
 
   useEffect(() => {
-    const sub = Linking.addEventListener('url', (event) => handleRedirect(event.url))
-    Linking.getInitialURL().then((url) => {
-      if (url) handleRedirect(url)
+    let cancelled = false
+    audiusSdk.oauth.isAuthenticated().then((authenticated) => {
+      if (cancelled) return
+      if (!authenticated) {
+        setLoading(false)
+        return
+      }
+      audiusSdk.oauth
+        .getUser()
+        .then((user) => {
+          if (cancelled) return
+          setProfile({
+            handle: user.handle ?? 'Unknown',
+            userId: String(user.userId ?? '')
+          })
+          setScreen('signed-in')
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
     })
-    return () => sub.remove()
-  }, [handleRedirect])
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const handleSignOut = useCallback(() => {
-    setUserId(null)
+  const handleSignIn = useCallback(async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
+      const user = await audiusSdk.oauth.getUser()
+      setProfile({
+        handle: user.handle ?? 'Unknown',
+        userId: String(user.userId ?? '')
+      })
+      setScreen('signed-in')
+      setTrack(null)
+      setResult(null)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Sign-in failed')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const handleSignOut = useCallback(async () => {
+    await audiusSdk.oauth.logout().catch(() => {})
     setProfile(null)
     setTrack(null)
     setLiked(false)
@@ -134,12 +104,11 @@ export default function App() {
   }, [])
 
   const fetchRandomTrack = useCallback(async () => {
-    const sdk = getSDK()
     setTrackLoading(true)
     setTrack(null)
     setResult(null)
     try {
-      const res = await sdk.tracks.getTrendingTracks({
+      const res = await audiusSdk.tracks.getTrendingTracks({
         limit: 20,
         offset: 0,
         time: 'week'
@@ -162,143 +131,81 @@ export default function App() {
         }
       }
     } catch (e: unknown) {
-      if (e && typeof e === 'object' && 'response' in e && e.response && typeof (e.response as Response).text === 'function') {
-        const res = e.response as Response
-        try {
-          const body = await res.text()
-          setResult(`API error ${res.status}: ${body || res.statusText || 'Unknown'}`)
-        } catch {
-          setResult(`API error ${res.status}`)
-        }
-      } else {
-        setResult(e instanceof Error ? e.message : 'Failed to fetch track')
-      }
+      const res = e && typeof e === 'object' && 'response' in e ? (e as { response: Response }).response : null
+      const body = res && typeof res.text === 'function' ? await res.text().catch(() => '') : ''
+      setResult(body ? `API error: ${body}` : e instanceof Error ? e.message : 'Failed to fetch track')
     } finally {
       setTrackLoading(false)
     }
   }, [])
 
   const handleLike = useCallback(async () => {
-    if (!config.writeServerUrl || !userId || !track) return
+    if (!profile || !track) return
     setLikeLoading(true)
     setResult(null)
     try {
-      const action = liked ? 'unfavorite' : 'favorite'
-      const res = await fetch(`${config.writeServerUrl}/like-repost`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, trackId: track.id, action })
-      })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        setLiked(!liked)
-        setResult(liked ? 'Unliked' : 'Liked!')
+      if (liked) {
+        await audiusSdk.tracks.unfavoriteTrack({ userId: profile.userId, trackId: track.id })
+        setLiked(false)
+        setResult('Unliked')
       } else {
-        setResult(data?.error ?? `Error ${res.status}`)
+        await audiusSdk.tracks.favoriteTrack({ userId: profile.userId, trackId: track.id })
+        setLiked(true)
+        setResult('Liked!')
       }
-    } catch (e) {
+    } catch (e: unknown) {
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setLikeLoading(false)
     }
-  }, [userId, track, liked])
+  }, [profile, track, liked])
 
   const handleRepost = useCallback(async () => {
-    if (!config.writeServerUrl || !userId || !track) return
+    if (!profile || !track) return
     setRepostLoading(true)
     setResult(null)
     try {
-      const action = reposted ? 'unrepost' : 'repost'
-      const res = await fetch(`${config.writeServerUrl}/like-repost`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, trackId: track.id, action })
-      })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        setReposted(!reposted)
-        setResult(reposted ? 'Unreposted' : 'Reposted!')
+      if (reposted) {
+        await audiusSdk.tracks.unrepostTrack({ userId: profile.userId, trackId: track.id })
+        setReposted(false)
+        setResult('Unreposted')
       } else {
-        setResult(data?.error ?? `Error ${res.status}`)
+        await audiusSdk.tracks.repostTrack({ userId: profile.userId, trackId: track.id })
+        setReposted(true)
+        setResult('Reposted!')
       }
-    } catch (e) {
+    } catch (e: unknown) {
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setRepostLoading(false)
     }
-  }, [userId, track, reposted])
+  }, [profile, track, reposted])
 
   const handlePlayTrack = useCallback(async () => {
     if (!track) return
     try {
-      if (playingTrackId === track.id && soundRef.current) {
-        await soundRef.current.stopAsync()
-        await soundRef.current.unloadAsync()
-        soundRef.current = null
-        setPlayingTrackId(null)
-        return
-      }
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync()
-        soundRef.current = null
-      }
-      setPlayingTrackId(track.id)
-      const sdk = getSDK()
-      const streamUrl = await sdk.tracks.getTrackStreamUrl({ trackId: track.id })
+      const streamUrl = await audiusSdk.tracks.getTrackStreamUrl({ trackId: track.id })
       const { sound } = await Audio.Sound.createAsync(
         { uri: streamUrl },
         { shouldPlay: true }
       )
-      soundRef.current = sound
+      setPlayingTrackId(track.id)
       await sound.setStatusAsync({ progressUpdateIntervalMillis: 500 })
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinishAndNotReset) {
           setPlayingTrackId(null)
-          soundRef.current = null
         }
       })
     } catch {
       setPlayingTrackId(null)
     }
-  }, [track, playingTrackId])
+  }, [track])
 
   useEffect(() => {
-    if (screen === 'signed-in' && userId && !track && !trackLoading) {
+    if (screen === 'signed-in' && profile && !track && !trackLoading) {
       fetchRandomTrack()
     }
-  }, [screen, userId, track, trackLoading, fetchRandomTrack])
-
-  if (screen === 'webview') {
-    const state = oauthStateRef.current ?? randomState()
-    oauthStateRef.current = state
-    const oauthUrl = buildOAuthUrl({
-      scope: 'write',
-      redirectUri: REDIRECT_URI,
-      state,
-      responseMode: 'query',
-      display: 'fullScreen',
-      ...(config.apiKey ? { apiKey: config.apiKey } : { appName: 'LikeRepostExample' })
-    })
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setScreen('home')}>
-          <Text style={styles.backBtnText}>← Cancel</Text>
-        </TouchableOpacity>
-        <WebView
-          source={{ uri: oauthUrl }}
-          style={styles.webview}
-          onShouldStartLoadWithRequest={(req) => {
-            if (req.url.startsWith(REDIRECT_URI) || req.url.startsWith('likerepost://oauth/callback')) {
-              handleRedirect(req.url)
-              return false
-            }
-            return true
-          }}
-        />
-        <StatusBar style="auto" />
-      </View>
-    )
-  }
+  }, [screen, profile, track, trackLoading, fetchRandomTrack])
 
   if (!config.isConfigured) {
     return (
@@ -306,12 +213,11 @@ export default function App() {
         <View style={styles.card}>
           <Text style={styles.title}>Like / Repost</Text>
           <Text style={styles.required}>
-            Requires your server. Create a .env with:
+            Create a .env with EXPO_PUBLIC_AUDIUS_API_KEY and register redirect
+            URI: likerepost://oauth/callback
           </Text>
-          <Text style={styles.code}>EXPO_PUBLIC_AUDIUS_API_KEY=your_api_key</Text>
-          <Text style={styles.code}>EXPO_PUBLIC_WRITE_SERVER_URL=http://localhost:3002</Text>
-          <Text style={styles.required}>
-            Run the server with AUDIUS_API_KEY and AUDIUS_BEARER_TOKEN. See README.
+          <Text style={styles.code}>
+            Get an API key at audius.co/settings → Developer Apps. No server needed — writes use OAuth from the device.
           </Text>
         </View>
         <StatusBar style="auto" />
@@ -319,7 +225,7 @@ export default function App() {
     )
   }
 
-  if (screen === 'signed-in' && userId && profile) {
+  if (screen === 'signed-in' && profile) {
     return (
       <View style={styles.container}>
         <View style={styles.card}>
@@ -331,7 +237,7 @@ export default function App() {
           </View>
           <Text style={styles.title}>Like / Repost a track</Text>
           <Text style={styles.subtitle}>
-            Get a random trending track and like or repost it.
+            Get a random trending track and like or repost it (OAuth writes from the app).
           </Text>
           <TouchableOpacity
             style={[styles.button, trackLoading && styles.buttonDisabled]}
@@ -399,14 +305,14 @@ export default function App() {
       <View style={styles.center}>
         <Text style={styles.title}>Like / Repost</Text>
         <Text style={styles.subtitle}>
-          Sign in with Audius (write scope) to authorize the app, then like or repost a track.
+          Sign in with Audius (write scope) to like or repost tracks directly from the app — no backend required.
         </Text>
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <TouchableOpacity
             style={styles.button}
-            onPress={handleOpenAuth}
+            onPress={handleSignIn}
             disabled={loading}
           >
             <Text style={styles.buttonText}>Sign in with Audius (write)</Text>
@@ -457,8 +363,5 @@ const styles = StyleSheet.create({
   actionBtnText: { fontSize: 14, fontWeight: '600', color: '#fff' },
   result: { fontSize: 13, color: '#333', marginTop: 12 },
   loader: { marginVertical: 16 },
-  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 },
-  backBtn: { padding: 16 },
-  backBtnText: { color: '#0066cc', fontSize: 16 },
-  webview: { flex: 1 }
+  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 }
 })

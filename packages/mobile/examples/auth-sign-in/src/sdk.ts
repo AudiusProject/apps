@@ -2,36 +2,33 @@ import type { AudiusSdk } from '@audius/sdk'
 import { sdk } from '@audius/sdk'
 
 const APP_NAME = 'AudiusAuthExample'
+const REDIRECT_URI = 'audiusauth://oauth/callback'
 
-let unauthenticatedSdk: AudiusSdk | null = null
-let authenticatedSdk: AudiusSdk | null = null
+const apiKey =
+  typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_AUDIUS_API_KEY != null
+    ? String(process.env.EXPO_PUBLIC_AUDIUS_API_KEY).trim()
+    : undefined
 
-/** Unauthenticated SDK (OAuth URL, verify token, public feed). */
+let sdkInstance: AudiusSdk | null = null
+
+/**
+ * Single SDK instance. When the user logs in via oauth.login(), the SDK stores
+ * access/refresh tokens (AsyncStorage on mobile) and automatically adds
+ * authorization headers to subsequent requests.
+ */
 export function getSDK(): AudiusSdk {
-  if (!unauthenticatedSdk) {
-    unauthenticatedSdk = sdk({ appName: APP_NAME })
+  if (!sdkInstance) {
+    sdkInstance = sdk({
+      appName: APP_NAME,
+      apiKey: apiKey ?? '0x0000000000000000000000000000000000000000',
+      redirectUri: REDIRECT_URI
+    })
   }
-  return unauthenticatedSdk
+  return sdkInstance
 }
 
-/** Authenticated SDK with bearer token (after OAuth). */
-export function getAuthenticatedSDK(bearerToken: string): AudiusSdk {
-  if (authenticatedSdk) {
-    return authenticatedSdk
-  }
-  authenticatedSdk = sdk({
-    appName: APP_NAME,
-    apiKey: '0x0000000000000000000000000000000000000000',
-    bearerToken
-  })
-  return authenticatedSdk
-}
-
-export function clearAuthenticatedSDK(): void {
-  authenticatedSdk = null
-}
-
-/** Returns the current authenticated SDK if the user has signed in; null otherwise. */
-export function getCurrentAuthenticatedSDK(): AudiusSdk | null {
-  return authenticatedSdk
+export const config = {
+  apiKey,
+  redirectUri: REDIRECT_URI,
+  isConfigured: Boolean(apiKey)
 }

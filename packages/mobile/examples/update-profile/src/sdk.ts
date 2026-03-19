@@ -1,31 +1,26 @@
 import type { AudiusSdk } from '@audius/sdk'
 import { sdk } from '@audius/sdk'
+
 import { config } from './config'
 
 const APP_NAME = 'UpdateProfileExample'
+const REDIRECT_URI = 'updateprofile://oauth/callback'
 
-let unauthenticatedSdk: AudiusSdk | null = null
-let authenticatedSdk: AudiusSdk | null = null
+let sdkInstance: AudiusSdk | null = null
 
+/**
+ * Single SDK instance. After oauth.login({ scope: 'write' }), the SDK stores
+ * tokens and automatically adds authorization headers (including updateUser).
+ */
 export function getSDK(): AudiusSdk {
-  if (!unauthenticatedSdk) {
-    unauthenticatedSdk = sdk(
-      config.apiKey ? { appName: APP_NAME, apiKey: config.apiKey } : { appName: APP_NAME }
-    )
+  if (!sdkInstance) {
+    sdkInstance = sdk({
+      appName: APP_NAME,
+      apiKey: config.apiKey ?? '',
+      redirectUri: REDIRECT_URI
+    })
   }
-  return unauthenticatedSdk
+  return sdkInstance
 }
 
-export function getAuthenticatedSDK(bearerToken: string): AudiusSdk {
-  if (authenticatedSdk) return authenticatedSdk
-  authenticatedSdk = sdk({
-    appName: APP_NAME,
-    apiKey: config.apiKey ?? '0x0000000000000000000000000000000000000000',
-    bearerToken
-  })
-  return authenticatedSdk
-}
-
-export function clearAuthenticatedSDK(): void {
-  authenticatedSdk = null
-}
+export { config }

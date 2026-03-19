@@ -1,18 +1,13 @@
 /**
- * Set in .env: EXPO_PUBLIC_WRITE_SERVER_URL, optionally EXPO_PUBLIC_AUDIUS_API_KEY
+ * Set EXPO_PUBLIC_AUDIUS_API_KEY in a .env file.
+ * Required for OAuth (PKCE) with write scope. Register redirect URI: likerepost://oauth/callback
  */
-const writeServerUrl =
-  typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_WRITE_SERVER_URL != null
-    ? String(process.env.EXPO_PUBLIC_WRITE_SERVER_URL).trim().replace(/\/$/, '')
-    : undefined
-
 const apiKey =
   typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_AUDIUS_API_KEY != null
     ? String(process.env.EXPO_PUBLIC_AUDIUS_API_KEY).trim()
     : undefined
 
 export const config = {
-  writeServerUrl,
   apiKey,
-  isConfigured: Boolean(writeServerUrl && apiKey)
+  isConfigured: Boolean(apiKey)
 }

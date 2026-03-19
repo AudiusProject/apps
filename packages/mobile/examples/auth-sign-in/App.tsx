@@ -7,17 +7,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { WebView } from 'react-native-webview'
 import { StatusBar } from 'expo-status-bar'
 import { Audio } from 'expo-av'
-import * as Linking from 'expo-linking'
-import { buildOAuthUrl, randomState } from './src/oauth/buildOAuthUrl'
-import { getAuthenticatedSDK, getSDK, clearAuthenticatedSDK } from './src/sdk'
+import { getSDK, config } from './src/sdk'
 
-// Audius OAuth only allows http/https redirect URIs (not custom schemes).
-// Using localhost so the WebView can intercept the redirect without a real server.
-const REDIRECT_URI = 'http://localhost/oauth/callback'
-const REDIRECT_URI_OR_SCHEME = REDIRECT_URI
+type Screen = 'home' | 'signed-in'
 
 async function formatApiError(reason: unknown): Promise<string> {
   if (reason != null && typeof reason === 'object' && 'response' in reason) {
@@ -25,7 +19,7 @@ async function formatApiError(reason: unknown): Promise<string> {
     if (res != null && typeof res.text === 'function') {
       try {
         const body = await res.text()
-        return `API ${res.status}: ${body || res.statusText || 'Unknown'}`
+        return `API ${res.status}: ${body ?? res.statusText ?? 'Unknown'}`
       } catch {
         return `API ${res.status}`
       }
@@ -34,81 +28,22 @@ async function formatApiError(reason: unknown): Promise<string> {
   return reason instanceof Error ? reason.message : 'Request failed'
 }
 
-type Screen = 'home' | 'webview' | 'signed-in'
+type Profile = { handle: string; name?: string; userId?: string }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string; name?: string; userId?: string } | null>(null)
-  const [feedItems, setFeedItems] = useState<Array<{ type: string; title: string; subtitle?: string; trackId?: string }>>([])
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [feedItems, setFeedItems] = useState<
+    Array<{ type: string; title: string; subtitle?: string; trackId?: string }>
+  >([])
   const [feedLoading, setFeedLoading] = useState(false)
   const [feedError, setFeedError] = useState<string | null>(null)
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null)
-  const oauthStateRef = useRef<string | null>(null)
   const soundRef = useRef<Audio.Sound | null>(null)
 
-  const handleOpenAuth = useCallback(() => {
-    setError(null)
-    const state = randomState()
-    oauthStateRef.current = state
-    setScreen('webview')
-  }, [])
-
-  const handleRedirect = useCallback(
-    async (url: string) => {
-      const isRedirect =
-        url.startsWith(REDIRECT_URI_OR_SCHEME) ||
-        url.startsWith('audiusauth://oauth/callback')
-      if (!isRedirect) return
-      setScreen('home')
-      setLoading(true)
-      setError(null)
-      try {
-        const parsed = Linking.parse(url)
-        const query = (parsed.queryParams ?? {}) as Record<string, string>
-        const token = query.token ?? query.access_token ?? (parsed.fragment ?? '').split('token=')[1]?.split('&')[0]
-        const state = query.state
-        if (!token) {
-          setError('No token in redirect')
-          return
-        }
-        if (state !== oauthStateRef.current) {
-          setError('State mismatch')
-          return
-        }
-        const audiusSdk = getAuthenticatedSDK(token)
-        // Verify token with unauthenticated SDK (verify_token expects only query param, not Bearer).
-        const verifyRes = await getSDK().users.verifyIDToken({ token })
-        const data = verifyRes.data
-        if (data) {
-          setProfile({
-            handle: data.handle ?? data.sub ?? 'Unknown',
-            name: data.name,
-            userId: data.userId ?? data.sub
-          })
-          setScreen('signed-in')
-        } else {
-          setError('Invalid token')
-        }
-      } catch (e: unknown) {
-        if (e && typeof e === 'object' && 'response' in e && e.response && typeof (e.response as Response).text === 'function') {
-          const res = e.response as Response
-          try {
-            const body = await res.text()
-            setError(`API error ${res.status}: ${body || res.statusText || 'Unknown'}`)
-          } catch {
-            setError(`API error ${res.status}`)
-          }
-        } else {
-          setError(e instanceof Error ? e.message : 'Sign-in failed')
-        }
-      } finally {
-        setLoading(false)
-      }
-    },
-    []
-  )
+  const audiusSdk = getSDK()
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -123,50 +58,92 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    const sub = Linking.addEventListener('url', (event) => {
-      handleRedirect(event.url)
-    })
-    Linking.getInitialURL().then((url) => {
-      if (url) handleRedirect(url)
-    })
-    return () => sub.remove()
-  }, [handleRedirect])
-
-  const handlePlayTrack = useCallback(async (trackId: string) => {
-    try {
-      if (playingTrackId === trackId && soundRef.current) {
-        await soundRef.current.stopAsync()
-        await soundRef.current.unloadAsync()
-        soundRef.current = null
-        setPlayingTrackId(null)
+    let cancelled = false
+    audiusSdk.oauth.isAuthenticated().then((authenticated) => {
+      if (cancelled) return
+      if (!authenticated) {
+        setLoading(false)
         return
       }
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync()
-        soundRef.current = null
-      }
-      setPlayingTrackId(trackId)
-      const sdk = getSDK()
-      const streamUrl = await sdk.tracks.getTrackStreamUrl({ trackId })
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: streamUrl },
-        { shouldPlay: true }
-      )
-      soundRef.current = sound
-      await sound.setStatusAsync({ progressUpdateIntervalMillis: 500 })
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinishAndNotReset) {
+      audiusSdk.oauth
+        .getUser()
+        .then((user) => {
+          if (cancelled) return
+          setProfile({
+            handle: user.handle ?? 'Unknown',
+            name: user.name,
+            userId: String(user.userId ?? '')
+          })
+          setScreen('signed-in')
+        })
+        .catch(() => {
+          if (!cancelled) setLoading(false)
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleSignIn = useCallback(async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      await audiusSdk.oauth.login({ scope: 'read', display: 'fullScreen' })
+      const user = await audiusSdk.oauth.getUser()
+      setProfile({
+        handle: user.handle ?? 'Unknown',
+        name: user.name,
+        userId: String(user.userId ?? '')
+      })
+      setScreen('signed-in')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Sign-in failed')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const handlePlayTrack = useCallback(
+    async (trackId: string) => {
+      try {
+        if (playingTrackId === trackId && soundRef.current) {
+          await soundRef.current.stopAsync()
+          await soundRef.current.unloadAsync()
+          soundRef.current = null
           setPlayingTrackId(null)
+          return
+        }
+        if (soundRef.current) {
+          await soundRef.current.unloadAsync()
           soundRef.current = null
         }
-      })
-    } catch {
-      setPlayingTrackId(null)
-    }
-  }, [playingTrackId])
+        setPlayingTrackId(trackId)
+        const streamUrl = await audiusSdk.tracks.getTrackStreamUrl({ trackId })
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: streamUrl },
+          { shouldPlay: true }
+        )
+        soundRef.current = sound
+        await sound.setStatusAsync({ progressUpdateIntervalMillis: 500 })
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinishAndNotReset) {
+            setPlayingTrackId(null)
+            soundRef.current = null
+          }
+        })
+      } catch {
+        setPlayingTrackId(null)
+      }
+    },
+    [playingTrackId]
+  )
 
-  const handleSignOut = useCallback(() => {
-    clearAuthenticatedSDK()
+  const handleSignOut = useCallback(async () => {
+    await audiusSdk.oauth.logout().catch(() => {})
     setProfile(null)
     setFeedItems([])
     setFeedError(null)
@@ -174,14 +151,12 @@ export default function App() {
     setError(null)
   }, [])
 
-  // Fetch my feed when signed in. Use unauthenticated SDK — user feed is public.
   useEffect(() => {
     if (screen !== 'signed-in' || !profile?.userId) return
-    const sdk = getSDK()
     let cancelled = false
     setFeedLoading(true)
     setFeedError(null)
-    sdk.users
+    audiusSdk.users
       .getUserFeed({ id: profile.userId })
       .then((res) => {
         if (cancelled) return
@@ -209,10 +184,7 @@ export default function App() {
         setFeedItems(items)
       })
       .catch(async (e) => {
-        if (!cancelled) {
-          const msg = await formatApiError(e)
-          if (!cancelled) setFeedError(msg)
-        }
+        if (!cancelled) setFeedError(await formatApiError(e))
       })
       .finally(() => {
         if (!cancelled) setFeedLoading(false)
@@ -222,39 +194,17 @@ export default function App() {
     }
   }, [screen, profile?.userId])
 
-  if (screen === 'webview') {
-    const state = oauthStateRef.current ?? randomState()
-    oauthStateRef.current = state
-    const oauthUrl = buildOAuthUrl({
-      scope: 'read',
-      redirectUri: REDIRECT_URI,
-      state,
-      responseMode: 'query',
-      display: 'fullScreen',
-      appName: 'AudiusAuthExample'
-    })
+  if (!config.isConfigured) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => setScreen('home')}
-        >
-          <Text style={styles.backBtnText}>← Cancel</Text>
-        </TouchableOpacity>
-        <WebView
-          source={{ uri: oauthUrl }}
-          style={styles.webview}
-          onShouldStartLoadWithRequest={(req) => {
-            const isRedirect =
-              req.url.startsWith(REDIRECT_URI_OR_SCHEME) ||
-              req.url.startsWith('audiusauth://oauth/callback')
-            if (isRedirect) {
-              handleRedirect(req.url)
-              return false
-            }
-            return true
-          }}
-        />
+        <View style={styles.center}>
+          <Text style={styles.title}>Audius OAuth</Text>
+          <Text style={styles.subtitle}>
+            Create a .env with EXPO_PUBLIC_AUDIUS_API_KEY and register redirect
+            URI: {config.redirectUri}
+          </Text>
+          <Text style={styles.code}>Get an API key at audius.co/settings → Developer Apps</Text>
+        </View>
         <StatusBar style="auto" />
       </View>
     )
@@ -319,14 +269,15 @@ export default function App() {
       <View style={styles.center}>
         <Text style={styles.title}>Audius OAuth</Text>
         <Text style={styles.subtitle}>
-          Sign in with Audius (OAuth), then use authenticated API calls in your code.
+          Sign in with Audius; the SDK stores tokens and adds auth headers to
+          subsequent requests.
         </Text>
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <TouchableOpacity
             style={styles.signInBtn}
-            onPress={handleOpenAuth}
+            onPress={handleSignIn}
             disabled={loading}
           >
             <Text style={styles.signInBtnText}>Sign in with Audius</Text>
@@ -344,6 +295,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, padding: 24, justifyContent: 'center' },
   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#666', marginBottom: 24 },
+  code: { fontFamily: 'monospace', fontSize: 12, color: '#555', marginTop: 8 },
   signInBtn: {
     backgroundColor: '#CC0FE0',
     paddingVertical: 14,
@@ -352,9 +304,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   signInBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  backBtn: { padding: 16 },
-  backBtnText: { color: '#0066cc', fontSize: 16 },
-  webview: { flex: 1 },
   loader: { marginVertical: 16 },
   error: { color: '#d32f2f', marginTop: 12 },
   profileCard: {
@@ -374,7 +323,13 @@ const styles = StyleSheet.create({
   signOutBtnText: { color: '#0066cc', fontSize: 16 },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 24 },
-  feedSection: { marginHorizontal: 24, marginTop: 16, padding: 16, backgroundColor: '#f5f5f5', borderRadius: 12 },
+  feedSection: {
+    marginHorizontal: 24,
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12
+  },
   feedTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
   feedLoader: { marginVertical: 8 },
   feedError: { fontSize: 13, color: '#d32f2f' },
