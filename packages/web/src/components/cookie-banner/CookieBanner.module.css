@@ -3,23 +3,28 @@
   bottom: 136px;
   right: 63px;
   opacity: 1;
-  border: 1px solid #fafafa;
-  border-radius: 4px;
-  background-color: var(--harmony-white);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.88);
   box-shadow:
-    0 2px 5px -2px rgba(133, 129, 153, 0.1),
-    0 16px 20px -5px rgba(133, 129, 153, 0.15);
+    0 4px 24px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(0, 0, 0, 0.2);
   display: inline-flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
   z-index: 10;
-  height: 85px;
+  min-height: 85px;
+  height: auto;
+  max-width: min(360px, calc(100vw - 48px));
+  box-sizing: border-box;
 }
 
 .description {
-  padding: 13px 0px 13px 15px;
-  max-width: 255px;
-  fill: var(--harmony-neutral);
+  flex: 1;
+  padding: 13px 0 13px 15px;
+  min-width: 0;
   font-size: var(--harmony-font-xs);
   line-height: 19px;
 }
@@ -27,13 +32,20 @@
 .link {
   cursor: pointer;
   margin-left: 3px;
-  color: var(--harmony-primary);
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+}
+
+.link:hover {
+  color: #fff;
+  text-decoration-color: rgba(255, 255, 255, 0.75);
 }
 
 .iconContainer {
-  align-self: stretch;
-  padding: 0px 15px 0px 0px;
-  height: 100%;
+  flex-shrink: 0;
+  padding: 0 15px 0 8px;
   display: flex;
   align-items: center;
 }
@@ -46,7 +58,7 @@
 }
 
 .iconRemove path {
-  fill: var(--harmony-n-400);
+  fill: rgba(255, 255, 255, 0.75);
 }
 
 .iconRemove:hover {
@@ -54,7 +66,7 @@
 }
 
 .iconRemove:hover path {
-  fill: var(--harmony-neutral);
+  fill: #fff;
 }
 
 .iconRemove:active {
@@ -68,6 +80,7 @@
   left: 0px;
   right: 0px;
   margin: 0px 12px;
+  max-width: none;
 }
 
 .isMobile.isPlaying {
