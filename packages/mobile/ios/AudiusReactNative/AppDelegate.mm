@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "RNBootSplash.h"
+#import <CodePush/CodePush.h>
 
 #import <GoogleCast/GoogleCast.h>
 #import <React/RCTBridge.h>
@@ -76,9 +77,7 @@
   NSLog(@"[AppDelegate] DEBUG mode - Using Metro URL: %@", url);
   return url;
 #else
-  NSURL *url = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  NSLog(@"[AppDelegate] RELEASE mode - Using bundled file: %@", url);
-  return url;
+  return [CodePush bundleURL];
 #endif
 }
 

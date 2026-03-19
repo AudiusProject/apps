@@ -35,7 +35,7 @@ require('react-native-url-polyfill/auto')
 // Needed to support micro-aes-gcm which looks for WebCrypto's SubtleCrypto
 global.crypto = new Crypto()
 
-const { App } = require('./src/app')
+const App = require('./src/app/ota-root').default
 
 // https://github.com/react-navigation/react-navigation/issues/9882
 LogBox.ignoreLogs(['new NativeEventEmitter'])
