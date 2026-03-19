@@ -44,6 +44,7 @@ import {
   Entity,
   Achievement
 } from '@audius/common/store'
+import { getPathFromAudiusUrl } from '@audius/common/utils'
 import { OptionalId } from '@audius/sdk'
 import { useLinkTo } from '@react-navigation/native'
 
@@ -196,7 +197,8 @@ export const useNotificationNavigation = () => {
         // TODO: Update this later, this will eventually be a bug
         navigation.navigate('CoinExploreScreen')
       } else {
-        linkTo(notification.route)
+        const route = getPathFromAudiusUrl(notification.route) ?? notification.route
+        linkTo(route)
       }
     },
     [navigation, linkTo]
