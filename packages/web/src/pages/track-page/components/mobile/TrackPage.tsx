@@ -79,6 +79,10 @@ const TrackPage = () => {
   const playing = useSelector(getPlaying)
   const previewing = useSelector(getPreviewing)
   const source = useSelector(trackPageSelectors.getSourceSelector)
+  const trackPageLineup = useSelector(trackPageSelectors.getLineup)
+  const heroTrackUid = trackPageLineup.entries.find(
+    (entry) => entry.id === track?.track_id
+  )?.uid
 
   const heroPlaying =
     playing &&
@@ -135,7 +139,8 @@ const TrackPage = () => {
       const isOwner = track.owner_id === accountUserId
       const shouldPreview = isPreview && isOwner
       const isSameTrack = currentTrack?.track_id === track.track_id
-      const trackUid = makeUid(Kind.TRACKS, track.track_id, source)
+      const trackUid =
+        heroTrackUid ?? makeUid(Kind.TRACKS, track.track_id, source)
 
       if (previewing !== isPreview || !isSameTrack) {
         dispatch(playerActions.stop({}))
@@ -166,7 +171,15 @@ const TrackPage = () => {
         )
       }
     },
-    [track, accountUserId, currentTrack, previewing, dispatch, source]
+    [
+      track,
+      accountUserId,
+      currentTrack,
+      previewing,
+      dispatch,
+      heroTrackUid,
+      source
+    ]
   )
 
   const onHeroRepost = useCallback(
