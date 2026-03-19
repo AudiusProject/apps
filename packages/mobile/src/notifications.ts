@@ -60,7 +60,7 @@ class PushNotifications {
     }
   }
 
-  async onRegister(event: Registered) {
+  onRegister = async (event: Registered) => {
     const token = { token: event.deviceToken, os: Platform.OS }
     this.token = token
     await AsyncStorage.setItem(DEVICE_TOKEN, JSON.stringify(token))
