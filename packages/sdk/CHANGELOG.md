@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 15.0.1
+
+### Patch Changes
+
+- 56dea87: Fix PKCE OAuth access token not being sent with Bearer prefix, and fix `getUser()` calling the wrong endpoint (`/oauth/me` → `/me`)
+
 ## 15.0.0
 
 ### Major Changes
