@@ -58,6 +58,22 @@ export default function ApiReference() {
         configuration={{
           url: '/openapi.yaml',
           darkMode,
+          authentication: {
+            preferredSecurityScheme: 'OAuth2',
+            securitySchemes: {
+              OAuth2: {
+                flows: {
+                  authorizationCode: {
+                    'x-usePkce': 'SHA-256',
+                    selectedScopes: ['read'],
+                    // Audius API key for the docs app
+                    'x-scalar-client-id': '2cc593fc814461263d282a84286fd4f72c79562e',
+                    clientSecret: '',
+                  },
+                },
+              },
+            },
+          },
         }}
       />
     </div>
