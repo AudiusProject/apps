@@ -405,7 +405,7 @@ export const useOAuthSetup = ({
             }
           }
         } else {
-          if (responseMode && responseMode === 'query') {
+          if (responseMode !== 'fragment') {
             if (state != null) {
               parsedRedirectUri!.searchParams.append('state', state as string)
             }
@@ -587,7 +587,7 @@ export const useOAuthSetup = ({
           })
         }
       } else if (parsedRedirectUri) {
-        if (responseMode === 'query') {
+        if (responseMode !== 'fragment') {
           if (state != null) {
             parsedRedirectUri.searchParams.append('state', state as string)
           }
