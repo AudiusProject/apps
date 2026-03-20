@@ -8,10 +8,11 @@ import type {
   ReleaseHistoryInterface,
   UpdateCheckRequest
 } from '@bravemobile/react-native-code-push'
-import Config from 'react-native-config'
 import { Platform } from 'react-native'
+import Config from 'react-native-config'
 
-const OTA_BASE_URL = (Config as { OTA_UPDATE_URL?: string }).OTA_UPDATE_URL ?? ''
+const OTA_BASE_URL =
+  (Config as { OTA_UPDATE_URL?: string }).OTA_UPDATE_URL ?? ''
 
 /**
  * Fetches release history for the current app version from your OTA server.
@@ -25,7 +26,8 @@ export async function releaseHistoryFetcher(
     return {}
   }
   const platform = Platform.OS as 'ios' | 'android'
-  const identifier = (Config as { OTA_CHANNEL?: string }).OTA_CHANNEL ?? 'production'
+  const identifier =
+    (Config as { OTA_CHANNEL?: string }).OTA_CHANNEL ?? 'production'
   const appVersion = updateRequest.app_version
   const url = `${OTA_BASE_URL.replace(/\/$/, '')}/histories/${platform}/${identifier}/${appVersion}.json`
   try {
