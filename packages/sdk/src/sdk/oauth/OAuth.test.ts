@@ -543,7 +543,7 @@ describe('OAuth.getUser', () => {
     const result = await oauth.getUser()
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      'https://api.example.com/oauth/me',
+      'https://api.example.com/me',
       expect.objectContaining({
         headers: { Authorization: 'Bearer my-access-token' }
       })
@@ -563,7 +563,7 @@ describe('OAuth.getUser', () => {
     await oauth.getUser()
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      'https://api.example.com/oauth/me',
+      'https://api.example.com/me',
       expect.objectContaining({ headers: {} })
     )
   })
