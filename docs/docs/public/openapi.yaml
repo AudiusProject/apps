@@ -62,6 +62,8 @@ tags:
     description: Rewards related operations
   - name: prizes
     description: Prize claiming related operations
+  - name: oauth
+    description: OAuth 2.0 authorization
 paths:
   /challenges/undisbursed:
     get:
@@ -2087,6 +2089,34 @@ paths:
         "500":
           description: Server error
           content: {}
+  /tracks/download_counts:
+    get:
+      tags:
+        - tracks
+      description: Gets download counts for tracks by ID. Use this instead of loading full track objects when only download counts are needed.
+      operationId: Get Track Download Counts
+      security:
+        - {}
+        - OAuth2:
+            - read
+      parameters:
+        - name: id
+          in: query
+          description: Track ID(s)
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/track_download_counts_response"
   /tracks/inspect:
     get:
       tags:
@@ -3106,6 +3136,30 @@ paths:
         "500":
           description: Server error
           content: {}
+  /tracks/{track_id}/download_count:
+    get:
+      tags:
+        - tracks
+      description: Gets the download count for a single track. Full track + all stems (parent) or stem-only (stem).
+      operationId: Get Track Download Count
+      security:
+        - {}
+        - OAuth2:
+            - read
+      parameters:
+        - name: track_id
+          in: path
+          description: A Track ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/track_download_count_response"
   /tracks/{track_id}/access-info:
     get:
       tags:
@@ -6671,6 +6725,33 @@ paths:
         "500":
           description: Server error
           content: {}
+  /users/{id}/tracks/download_count:
+    get:
+      tags:
+        - users
+      description: Gets the total download count for all tracks (and stems) owned by the user. Use for dashboard "Downloads" tile.
+      operationId: Get User Tracks Download Count
+      security:
+        - {}
+        - OAuth2:
+            - read
+      parameters:
+        - name: id
+          in: path
+          description: A User ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_tracks_download_count_response"
+        "500":
+          description: Server error
+          content: {}
   /users/{id}/tracks/remixed:
     get:
       tags:
@@ -9747,6 +9828,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/transaction_history_count_response"
+  /me:
+    get:
+      tags:
+        - users
+      summary: Get authenticated user
+      description: Returns the full profile of the currently authenticated user based on the Bearer access token obtained via OAuth.
+      operationId: Get Me
+      security:
+        - OAuth2:
+            - read
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user_response_single"
+        "401":
+          description: Missing or invalid access token
+          content: {}
+        "404":
+          description: User not found
+          content: {}
+        "500":
+          description: Server error
+          content: {}
 components:
   schemas:
     create_access_key_response:
@@ -11044,6 +11151,51 @@ components:
           $ref: "#/components/schemas/version_metadata"
         data:
           $ref: "#/components/schemas/track"
+    track_download_count_response:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          required:
+            - id
+            - download_count
+          properties:
+            id:
+              type: string
+              description: Track ID (hash)
+            download_count:
+              type: integer
+              description: Full track + all stems (parent) or stem-only (stem)
+    track_download_counts_response:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - download_count
+            properties:
+              id:
+                type: string
+                description: Track ID (hash)
+              download_count:
+                type: integer
+                description: Full track + all stems (parent) or stem-only (stem)
+    user_tracks_download_count_response:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: integer
+          format: int64
+          description: Total download count for all tracks (and stems) owned by the user
     create_user_response:
       type: object
       properties:
@@ -14179,6 +14331,12 @@ components:
           description:
             Whether or not the owner has restricted streaming behind an
             access gate
+        access_authorities:
+          type: array
+          nullable: true
+          items:
+            type: string
+          description: Wallet addresses that can sign to authorize stream access (programmable distribution). When empty or omitted, the track is public and validator/creator nodes can serve it.
         stream_conditions:
           type: object
           description: How to unlock stream access to the track

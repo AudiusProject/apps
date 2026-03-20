@@ -1,6 +1,13 @@
 import { defineConfig } from 'vocs'
 
 export default defineConfig({
+  vite: {
+    server: {
+      fs: {
+        allow: ['/Users/marcuspasell/apps/docs/node_modules'],
+      },
+    },
+  },
   title: 'Audius Developer Docs',
   description:
     'Audius is a fully decentralized music platform. Build on the largest open music catalog on the internet.',
