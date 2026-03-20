@@ -482,7 +482,8 @@ const NowPlaying = g(
             }
             style={{
               railListenedColor: 'var(--track-slider-rail)',
-              handleColor: 'var(--track-slider-handle)'
+              handleColor: 'var(--track-slider-handle)',
+              handleBorderColor: 'var(--track-slider-handle-border)'
             }}
           />
         </div>

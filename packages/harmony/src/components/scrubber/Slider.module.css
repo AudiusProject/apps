@@ -88,6 +88,7 @@
   margin-left: var(--harmony-negative-unit);
   height: var(--harmony-unit-2);
   width: var(--harmony-unit-2);
+  box-sizing: border-box;
   border-radius: 50%;
   background: var(--harmony-white);
   box-shadow:
