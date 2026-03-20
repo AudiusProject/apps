@@ -15,6 +15,7 @@
   /* Border */
   --harmony-border-default: var(--harmony-n-100);
   --harmony-border-strong: var(--harmony-n-150);
+  --harmony-border-negative: var(--harmony-white);
 
   /* Focus */
   --harmony-focus: var(--harmony-secondary);

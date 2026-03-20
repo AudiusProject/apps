@@ -22,6 +22,7 @@ export type ThemeColors = {
   backgroundSurface2: string
   borderDefault: string
   borderStrong: string
+  borderNegative: string
   primary: string
   primaryDark1: string
   primaryDark2: string
@@ -93,6 +94,7 @@ const createMobileThemeFromHarmony = (theme: {
     backgroundSurface2: color.background.surface2,
     borderDefault: color.border.default,
     borderStrong: color.border.strong,
+    borderNegative: color.border.negative,
     primary: color.primary.p300,
     primaryDark1: color.primary.p400,
     primaryDark2: color.primary.p500,

@@ -293,7 +293,8 @@ const PlayBar = () => {
                 totalSeconds={duration ?? 0}
                 style={{
                   railListenedColor: 'var(--track-slider-rail)',
-                  handleColor: 'var(--track-slider-handle)'
+                  handleColor: 'var(--track-slider-handle)',
+                  handleBorderColor: 'var(--track-slider-handle-border)'
                 }}
                 onScrubRelease={(position: number) =>
                   dispatch(seek({ seconds: position }))

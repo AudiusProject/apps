@@ -272,6 +272,11 @@ export const Slider = ({
     const s: CSSProperties = {}
     if (style) {
       if (style.handleColor) s.background = style.handleColor
+      if (style.handleBorderColor) {
+        s.borderColor = style.handleBorderColor
+        s.borderStyle = 'solid'
+        s.borderWidth = style.handleBorderWidth ?? '1px'
+      }
       if (style.handleShadow) s.boxShadow = style.handleShadow
     }
     return s

@@ -74,6 +74,8 @@ export type ScrubberProps = {
     railUnlistenedColor?: string
     showHandle?: boolean
     handleColor?: string
+    handleBorderColor?: string
+    handleBorderWidth?: string
     handleShadow?: string
     sliderMargin?: string
   }
