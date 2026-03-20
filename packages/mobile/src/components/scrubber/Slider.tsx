@@ -54,8 +54,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     height: spacing(4),
     width: spacing(4),
     borderRadius: spacing(2),
-    backgroundColor: palette.backgroundSurface2,
-    borderColor: palette.borderStrong,
+    backgroundColor: palette.neutralLight2,
+    borderColor: palette.borderNegative,
     borderWidth: 1,
     // Note: React-native-shadow-2 seems to lose fidelity
     // when styling such a small shadow.
