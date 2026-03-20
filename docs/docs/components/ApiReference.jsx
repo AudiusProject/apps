@@ -58,6 +58,8 @@ export default function ApiReference() {
         configuration={{
           url: '/openapi.yaml',
           darkMode,
+          operationTitleSource: 'path',
+          showOperationId: true,
           authentication: {
             preferredSecurityScheme: 'OAuth2',
             securitySchemes: {
