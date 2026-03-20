@@ -350,6 +350,13 @@ export const notificationFromSDK = (
     }
     case 'announcement': {
       const data = notification.actions[0].data
+      const dashboardAnnouncementId =
+        'dashboardAnnouncementId' in data &&
+        typeof (data as { dashboardAnnouncementId?: unknown })
+          .dashboardAnnouncementId === 'string'
+          ? (data as { dashboardAnnouncementId: string })
+              .dashboardAnnouncementId
+          : undefined
 
       return {
         type: NotificationType.Announcement,
@@ -357,6 +364,9 @@ export const notificationFromSDK = (
         shortDescription: data.shortDescription,
         longDescription: data.longDescription,
         route: data.route,
+        ...(dashboardAnnouncementId != null && dashboardAnnouncementId !== ''
+          ? { dashboardAnnouncementId }
+          : {}),
         ...formatBaseNotification(notification)
       }
     }

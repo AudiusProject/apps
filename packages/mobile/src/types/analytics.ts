@@ -44,6 +44,8 @@ type NotificationsOpenPushNotification = {
   eventName: MobileEventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
   title?: string
   body?: string
+  /** Supabase `announcements.id` when sent via notifications dashboard. */
+  dashboard_announcement_id?: string
 }
 
 type ShareToIGStory = {

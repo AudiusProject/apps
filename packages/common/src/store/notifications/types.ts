@@ -119,6 +119,8 @@ export type AnnouncementNotification = BaseNotification & {
   shortDescription: string
   longDescription?: string
   route: string
+  /** Present when the announcement was created via the internal notifications dashboard. */
+  dashboardAnnouncementId?: string
 }
 
 export type AnnouncementPushNotification = {

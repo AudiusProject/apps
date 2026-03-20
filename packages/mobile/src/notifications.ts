@@ -42,14 +42,22 @@ class PushNotifications {
   onNotification = (notification: Notification) => {
     console.info(`Received notification ${JSON.stringify(notification)}`)
     const { title, body, payload } = notification
+    const data = payload?.data?.data ?? payload?.data ?? payload
+    const rawDashboardId =
+      data && typeof data === 'object'
+        ? (data as Record<string, unknown>).dashboard_announcement_id
+        : undefined
+    const dashboardAnnouncementId =
+      typeof rawDashboardId === 'string' ? rawDashboardId : undefined
     track(
       make({
         eventName: EventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION,
         title,
-        body
+        body,
+        dashboard_announcement_id: dashboardAnnouncementId
       })
     )
-    this.navigation?.navigate(payload?.data?.data ?? payload?.data ?? payload)
+    this.navigation?.navigate(data)
   }
 
   // Method used to open the push notification that the user pressed while the app was closed

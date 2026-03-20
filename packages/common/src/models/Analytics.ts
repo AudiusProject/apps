@@ -1349,6 +1349,8 @@ type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
   kind: string
   link_to: string
+  /** Supabase notifications-dashboard `announcements.id` when present (manual sends). */
+  dashboard_announcement_id?: string
 }
 type NotificationsClickMilestone = {
   eventName: Name.NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE

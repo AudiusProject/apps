@@ -49,6 +49,12 @@ export interface AnnouncementNotificationActionData {
      * @memberof AnnouncementNotificationActionData
      */
     route: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementNotificationActionData
+     */
+    dashboardAnnouncementId?: string | null;
 }
 
 /**
@@ -80,6 +86,7 @@ export function AnnouncementNotificationActionDataFromJSONTyped(json: any, ignor
         'shortDescription': json['short_description'],
         'longDescription': json['long_description'],
         'route': json['route'],
+        'dashboardAnnouncementId': !exists(json, 'dashboard_announcement_id') ? undefined : json['dashboard_announcement_id'],
     };
 }
 
@@ -97,6 +104,7 @@ export function AnnouncementNotificationActionDataToJSON(value?: AnnouncementNot
         'short_description': value.shortDescription,
         'long_description': value.longDescription,
         'route': value.route,
+        'dashboard_announcement_id': value.dashboardAnnouncementId,
     };
 }
 

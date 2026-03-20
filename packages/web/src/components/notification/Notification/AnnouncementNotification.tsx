@@ -56,10 +56,16 @@ export const AnnouncementNotification = (
     record(
       make(Name.NOTIFICATIONS_CLICK_TILE, {
         kind: 'announcement',
-        link_to: notificationRoute
+        link_to: notificationRoute,
+        dashboard_announcement_id: notification.dashboardAnnouncementId
       })
     )
-  }, [dispatch, record, notificationRoute])
+  }, [
+    dispatch,
+    notification.dashboardAnnouncementId,
+    notificationRoute,
+    record
+  ])
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>
