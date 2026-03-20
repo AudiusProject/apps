@@ -395,7 +395,8 @@ const initializeApis = ({
     // Static bearerToken takes precedence; otherwise use the dynamic store
     // so PKCE login can inject tokens after construction.
     accessToken:
-      bearerToken ?? (() => tokenStore.getAccessToken().then((t) => t ?? ''))
+      bearerToken ??
+      (() => tokenStore.getAccessToken().then((t) => (t ? `Bearer ${t}` : '')))
   })
 
   const tracks = new TracksApi(apiClientConfig, services)

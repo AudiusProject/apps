@@ -327,7 +327,7 @@ export class OAuth {
     }
     let res: Response
     try {
-      res = await fetch(`${this.config.basePath}/oauth/me`, { headers })
+      res = await fetch(`${this.config.basePath}/me`, { headers })
     } catch (e) {
       throw new FetchError(
         e instanceof Error ? e : new Error(String(e)),
