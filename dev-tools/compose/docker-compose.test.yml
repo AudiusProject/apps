@@ -401,6 +401,37 @@ services:
       - tests
       - identity
 
+  # Pedalboard @pedalboard/notifications (Jest). Mount PEDALBOARD_ROOT or default ../pedalboard next to apps repo.
+  test-notifications:
+    user: ${DOCKER_UID:-root}:${DOCKER_GID:-root}
+    build:
+      context: .
+      dockerfile: Dockerfile.notifications-test
+    image: audius-test-notifications:local
+    working_dir: /pedalboard
+    volumes:
+      - ${PEDALBOARD_ROOT:-${PROJECT_ROOT}/../pedalboard}:/pedalboard
+    environment:
+      DN_DB_URL: 'postgresql://postgres:postgres@discovery-provider-db:5432/discovery_provider'
+      IDENTITY_DB_URL: 'postgresql://postgres:postgres@identity-service-db:5432/identity_service'
+      AUDIUS_REDIS_URL: 'redis://discovery-provider-redis:6379/0'
+    entrypoint: >-
+      sh -c '[ ! "$$1" = "test" ] && sleep inf ||
+      (shift; set -e; npm ci --no-audit --fund=false; cd apps/notifications; exec npm test -- "$$@")' -
+    command: ''
+    depends_on:
+      test-discovery-provider-migrations:
+        condition: service_completed_successfully
+      test-identity-service-migrations:
+        condition: service_completed_successfully
+      discovery-provider-redis:
+        condition: service_healthy
+    logging: *default-logging
+    deploy:
+      mode: global
+    profiles:
+      - tests
+
 volumes:
   poa-contracts-abis:
   eth-contracts-abis:
