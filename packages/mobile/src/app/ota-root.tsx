@@ -4,6 +4,7 @@
  */
 
 import CodePush from '@bravemobile/react-native-code-push'
+
 import { App } from './App'
 import { releaseHistoryFetcher } from './ota-updates'
 
