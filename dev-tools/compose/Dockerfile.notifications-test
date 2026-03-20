@@ -1,0 +1,8 @@
+# Jest deps (e.g. bufferutil via ws) need node-gyp → Python + build toolchain
+FROM node:18-bookworm-slim
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /pedalboard
