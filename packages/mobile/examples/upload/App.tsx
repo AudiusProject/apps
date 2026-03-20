@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import type { DecodedUserToken } from '@audius/sdk'
+import { ResponseError, type User } from '@audius/sdk'
 import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import { StatusBar } from 'expo-status-bar'
@@ -51,7 +51,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [profile, setProfile] = useState<DecodedUserToken | null>(null)
+  const [profile, setProfile] = useState<User | null>(null)
   const [audioFile, setAudioFile] =
     useState<DocumentPicker.DocumentPickerAsset | null>(null)
   const [coverUri, setCoverUri] = useState<string | null>(null)
@@ -72,10 +72,16 @@ export default function App() {
       sdk.oauth
         .getUser()
         .then((user) => {
-          setProfile(user)
+          setProfile(user ?? null)
           setScreen('signed-in')
         })
-        .catch(() => {
+        .catch((e) => {
+          console.error('Failed to get user', e)
+          if (e instanceof ResponseError) {
+            e.response.text().then((text) => {
+              console.error('Error response body:', text)
+            })
+          }
           // Token expired — fall back to sign-in screen silently.
         })
         .finally(() => setLoading(false))
@@ -194,7 +200,7 @@ export default function App() {
 
       // Step 3 — create the track using the OAuth access token stored in the SDK.
       setResult('Creating track...')
-      const userId = String(profile.userId ?? profile.sub ?? '')
+      const userId = String(profile.id ?? '')
       const res = await sdk.tracks.createTrack({
         userId,
         metadata: {
@@ -243,9 +249,7 @@ export default function App() {
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.profileRow}>
-            <Text style={styles.handle}>
-              @{profile.handle ?? profile.sub ?? 'user'}
-            </Text>
+            <Text style={styles.handle}>@{profile.handle ?? 'user'}</Text>
             <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
               <Text style={styles.signOutBtnText}>Sign out</Text>
             </TouchableOpacity>
