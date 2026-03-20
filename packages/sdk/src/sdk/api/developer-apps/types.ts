@@ -24,16 +24,7 @@ export const CreateDeveloperAppSchema = z.object({
       })
   ),
   userId: HashId,
-  redirectUris: z
-    .array(
-      z
-        .string()
-        .max(2000)
-        .refine((value) => URL_REGEX.test(value), {
-          message: 'Invalid URL'
-        })
-    )
-    .optional()
+  redirectUris: z.array(z.string().max(2000)).optional()
 })
 
 export type EntityManagerCreateDeveloperAppRequest = z.input<
@@ -55,16 +46,7 @@ export const UpdateDeveloperAppSchema = z.object({
       })
   ),
   userId: HashId,
-  redirectUris: z
-    .array(
-      z
-        .string()
-        .max(2000)
-        .refine((value) => URL_REGEX.test(value), {
-          message: 'Invalid URL'
-        })
-    )
-    .optional()
+  redirectUris: z.array(z.string().max(2000)).optional()
 })
 
 export type EntityManagerUpdateDeveloperAppRequest = z.input<
