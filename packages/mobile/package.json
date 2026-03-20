@@ -36,7 +36,10 @@
     "upload:ios": "xcrun altool --upload-app -type ios --file build/AudiusReactNative.ipa --username $APPLE_ID --password $APPLE_ID_PASSWORD",
     "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:lint:env\"",
     "analyze:ios": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-ios.js' --dev=false --platform='ios' --sourcemap-output='./bundle-ios.js.map' && npx --yes source-map-explorer './bundle-ios.js' './bundle-ios.js.map' --html bundle-analysis-ios.html --no-border-checks",
-    "analyze:android": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-android.js' --dev=false --platform='android' --sourcemap-output='./bundle-android.js.map' && npx --yes source-map-explorer './bundle-android.js' './bundle-android.js.map' --html bundle-analysis-android.html --no-border-checks"
+    "analyze:android": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-android.js' --dev=false --platform='android' --sourcemap-output='./bundle-android.js.map' && npx --yes source-map-explorer './bundle-android.js' './bundle-android.js.map' --html bundle-analysis-android.html --no-border-checks",
+    "ota:create-history": "code-push create-history",
+    "ota:release": "code-push release",
+    "ota:show-history": "code-push show-history"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.4.11",
@@ -87,7 +90,9 @@
     "bs58": "5.0.0",
     "color": "4.2.3",
     "dayjs": "1.10.7",
+    "expo": "^51.0.0",
     "expo-crypto": "9.2.0",
+    "@bravemobile/react-native-code-push": "^12.3.2",
     "ffmpeg-kit-react-native": "6.0.2",
     "formik": "2.4.6",
     "fxa-common-password-list": "0.0.4",

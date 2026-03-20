@@ -1,9 +1,15 @@
 PODS:
   - amplitude-react-native (1.4.11):
     - React-Core
+  - Base64 (1.1.2)
   - boost (1.84.0)
   - BVLinearGradient (2.8.3):
     - React-Core
+  - CodePush (12.3.2):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.12)
+    - React-Core
+    - SSZipArchive (~> 2.5.5)
   - DoubleConversion (1.1.6)
   - fast_float (6.1.4)
   - FBLazyVector (0.78.3)
@@ -18,6 +24,8 @@ PODS:
   - hermes-engine (0.78.3):
     - hermes-engine/Pre-built (= 0.78.3)
   - hermes-engine/Pre-built (0.78.3)
+  - JWT (3.0.0-beta.14):
+    - Base64 (~> 1.1.2)
   - lottie-ios (4.5.0)
   - lottie-react-native (7.3.4):
     - DoubleConversion
@@ -1329,7 +1337,7 @@ PODS:
     - React
     - react-native-google-cast/NoBluetoothArm (= 4.6.2)
   - react-native-google-cast/NoBluetoothArm (4.6.2):
-    - google-cast-sdk-dynamic-xcframework-no-bluetooth
+    - google-cast-sdk-dynamic-xcframework-no-bluetooth (= 4.7.1)
     - React
     - react-native-google-cast/RNGoogleCast
   - react-native-google-cast/RNGoogleCast (4.6.2):
@@ -2120,6 +2128,7 @@ DEPENDENCIES:
   - "amplitude-react-native (from `../../../node_modules/@amplitude/analytics-react-native`)"
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
+  - "CodePush (from `../../../node_modules/@bravemobile/react-native-code-push`)"
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -2236,8 +2245,10 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Base64
     - FingerprintPro
     - google-cast-sdk-dynamic-xcframework-no-bluetooth
+    - JWT
     - lottie-ios
     - nSure
     - PromisesObjC
@@ -2256,6 +2267,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
+  CodePush:
+    :path: "../../../node_modules/@bravemobile/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   fast_float:
@@ -2480,8 +2493,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   amplitude-react-native: 9d57e1bcc4175039e36283390aa3daeaea9441a5
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
+  CodePush: f52aac93456bc76d8219ca3673cc7ce81470429d
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: e053802577a711add20e45bbbf5dd1180b6ca62e
@@ -2492,6 +2507,7 @@ SPEC CHECKSUMS:
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   google-cast-sdk-dynamic-xcframework-no-bluetooth: 1fa9e267df3fd6f8a1c6e3345142ca5286297968
   hermes-engine: b5c9cfbe6415f1b0b24759f2942c8f33e9af6347
+  JWT: ef71dfb03e1f842081e64dc42eef0e164f35d251
   lottie-ios: a881093fab623c467d3bce374367755c272bdd59
   lottie-react-native: 04061d06c966a4179c9c1352aac63b699642c77e
   nSure: 2fc3fc973c44aa0be9a3446f84cb514adc475205
@@ -2532,7 +2548,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 4f90a074d1eb269e32d5563c53b70d469180cece
   react-native-fast-crypto: b30594570dab23aca7e74e206b2c03e28a006216
   react-native-get-random-values: 384787fd76976f5aec9465aff6fa9e9129af1e74
-  react-native-google-cast: 18b9b2fc518caabfa65d309409e160b3fc6d1733
+  react-native-google-cast: 0a82cf63114470403e41e04ffa2b13d6448b6112
   react-native-image-picker: f104798044ef2c9211c42a48025d0693b5f34981
   react-native-in-app-review: db8bb167a5f238e7ceca5c242d6b36ce8c4404a4
   react-native-keyboard-controller: 7c1271a9fe703b7ee588b75d6c486eda79e5081b

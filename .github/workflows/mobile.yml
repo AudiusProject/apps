@@ -14,6 +14,15 @@ on:
       - '.github/workflows/mobile.yml'
       - '.circleci/**'
   workflow_dispatch:
+    inputs:
+      ota_channel:
+        description: 'OTA channel for manual publish'
+        required: false
+        default: 'rc'
+        type: choice
+        options:
+          - rc
+          - production
 
 env:
   NODE_VERSION: '22.21.1'
@@ -88,12 +97,183 @@ jobs:
       - name: Lint & Typecheck
         run: npx turbo run verify --filter=@audius/mobile
 
+  mobile-version-check:
+    name: Mobile Version Change Check
+    runs-on: ubuntu-latest
+    needs: mobile-init
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    outputs:
+      current_version: ${{ steps.version-check.outputs.current_version }}
+      previous_version: ${{ steps.version-check.outputs.previous_version }}
+      version_changed: ${{ steps.version-check.outputs.version_changed }}
+      version_unchanged: ${{ steps.version-check.outputs.version_unchanged }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine version change
+        id: version-check
+        run: |
+          set -euo pipefail
+          CURRENT_VERSION=$(jq -r '.version' packages/mobile/package.json)
+          PREV_VERSION=$(git show HEAD^:packages/mobile/package.json | jq -r '.version')
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "previous_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$CURRENT_VERSION" == "$PREV_VERSION" ]]; then
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            echo "version_unchanged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            echo "version_unchanged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # OTA Release: publish JS bundle updates when native app version is unchanged
+  mobile-ota-release:
+    name: Mobile OTA Release (CodePush)
+    runs-on: ubuntu-latest
+    needs: [mobile-init, mobile-version-check]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.mobile-version-check.outputs.version_unchanged == 'true') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.ota_channel == 'rc' || github.event.inputs.ota_channel == ''))
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Determine OTA channel
+        id: ota-channel
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "channel=${{ github.event.inputs.ota_channel || 'rc' }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=rc" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish OTA updates (iOS + Android)
+        env:
+          OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
+          OTA_S3_PREFIX: mobile-ota
+          OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
+        run: |
+          set -euo pipefail
+          BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
+          OTA_CHANNEL="${{ steps.ota-channel.outputs.channel }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
+          # Keep OTA release versions above binary version while preserving semver format.
+          OTA_PATCH=$((PATCH + 100000 + GITHUB_RUN_NUMBER))
+          OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
+
+          cd packages/mobile
+          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ios --identifier "$OTA_CHANNEL" || true
+          npx code-push create-history --binary-version "$BINARY_VERSION" --platform android --identifier "$OTA_CHANNEL" || true
+
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform ios \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform android \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
+  # OTA Release (Production): manual + environment approval gate
+  mobile-ota-release-production:
+    name: Mobile OTA Release (Production, Approved)
+    runs-on: ubuntu-latest
+    needs: [mobile-init, mobile-version-check]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.ota_channel == 'production'
+    environment:
+      name: mobile-production-ota
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Publish OTA updates to production (iOS + Android)
+        env:
+          OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
+          OTA_S3_PREFIX: mobile-ota
+          OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
+        run: |
+          set -euo pipefail
+          BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
+          OTA_CHANNEL="production"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
+          OTA_PATCH=$((PATCH + 100000 + GITHUB_RUN_NUMBER))
+          OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
+
+          cd packages/mobile
+          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ios --identifier "$OTA_CHANNEL" || true
+          npx code-push create-history --binary-version "$BINARY_VERSION" --platform android --identifier "$OTA_CHANNEL" || true
+
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform ios \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform android \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
   # iOS Release Candidate: Build and upload
   mobile-build-upload-releasecandidate-ios:
     name: iOS Release Candidate Build & Upload
     runs-on: macos-15
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-init, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -133,6 +313,12 @@ jobs:
         run: |
           cd packages/mobile
           echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Configure release-candidate OTA channel
+        run: |
+          awk '!/^OTA_CHANNEL=/' packages/mobile/.env.prod > packages/mobile/.env.prod.tmp
+          mv packages/mobile/.env.prod.tmp packages/mobile/.env.prod
+          echo "OTA_CHANNEL=rc" >> packages/mobile/.env.prod
 
       - name: Install Python build dependencies
         run: |
@@ -260,8 +446,8 @@ jobs:
   mobile-build-upload-releasecandidate-android:
     name: Android Release Candidate Build & Upload
     runs-on: ubuntu-latest
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-init, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -385,6 +571,12 @@ jobs:
             npm ci --prefer-offline || npm install --prefer-offline
           fi
 
+      - name: Configure release-candidate OTA channel
+        run: |
+          awk '!/^OTA_CHANNEL=/' packages/mobile/.env.prod > packages/mobile/.env.prod.tmp
+          mv packages/mobile/.env.prod.tmp packages/mobile/.env.prod
+          echo "OTA_CHANNEL=rc" >> packages/mobile/.env.prod
+
       - name: Update bundler
         run: |
           sudo gem install bundler:2.5.16
@@ -470,8 +662,8 @@ jobs:
   mobile-build-upload-production-ios-main:
     name: iOS Production Build & Upload
     runs-on: macos-15
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-init, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     environment:
       name: mobile-production-ios
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -631,8 +823,8 @@ jobs:
   mobile-build-upload-production-android-main:
     name: Android Production Build & Upload
     runs-on: ubuntu-latest
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-init, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     environment:
       name: mobile-production-android
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
