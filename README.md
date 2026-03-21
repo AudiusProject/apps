@@ -1,24 +1,19 @@
 <p align="center">
   <br/>
-  <img src="./packages/harmony/src/assets/icons/AudiusLogoHorizontal.svg#gh-light-mode-only" alt="Audius" width="200">
-  <img src="./packages/web/src/assets/img/audiusLogoWhite.png#gh-dark-mode-only" alt="Audius" width="200">
+  <img src="./packages/web/src/assets/img/audiusLogoBlack.png#gh-light-mode-only" alt="Audius" width="300">
+  <img src="./packages/web/src/assets/img/audiusLogoStackedWhite.png#gh-dark-mode-only" alt="Audius" width="300">
   <br/>
   <br/>
   <b>The decentralized music streaming platform that puts power back into the hands of creators.</b>
   <br/>
   <br/>
-  <a href="https://docs.audius.co">docs.audius.co</a>
+  <a href="https://audius.co">audius.co</a> &nbsp;&bull;&nbsp; <a href="https://docs.audius.co">docs.audius.co</a>
 </p>
 
 <br/>
 
-[![web](https://github.com/AudiusProject/apps/actions/workflows/web.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/web.yml)
-[![sdk](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml)
-[![mobile](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml)
-[![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk)](https://www.npmjs.com/package/@audius/sdk)
-[![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony)](https://www.npmjs.com/package/@audius/harmony)
-[![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl)](https://www.npmjs.com/package/@audius/spl)
-[![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth)](https://www.npmjs.com/package/@audius/eth)
+[![web](https://github.com/AudiusProject/apps/actions/workflows/web.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/web.yml) [![sdk](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml) [![mobile](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml)
+[![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk)](https://www.npmjs.com/package/@audius/sdk) [![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony)](https://www.npmjs.com/package/@audius/harmony) [![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl)](https://www.npmjs.com/package/@audius/spl) [![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth)](https://www.npmjs.com/package/@audius/eth)
 
 Audius is a decentralized, community-owned music-sharing protocol. Artists and fans connect directly — no intermediaries, no gatekeepers. For API access, token details, and node operation, see [docs.audius.co](https://docs.audius.co/).
 
