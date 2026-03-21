@@ -13,7 +13,6 @@
 <br/>
 
 [![web](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/web.yml?label=web&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/web.yml) [![mobile](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/mobile.yml?label=mobile&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml) [![sdk](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/sdk.yml?label=sdk&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml)
-
 [![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk&style=for-the-badge)](https://www.npmjs.com/package/@audius/sdk) [![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony&style=for-the-badge)](https://www.npmjs.com/package/@audius/harmony) [![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl&style=for-the-badge)](https://www.npmjs.com/package/@audius/spl) [![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth&style=for-the-badge)](https://www.npmjs.com/package/@audius/eth)
 
 Audius is a decentralized, community-owned music-sharing protocol. Artists and fans connect directly — no intermediaries, no gatekeepers. For API access, token details, and node operation, see [docs.audius.co](https://docs.audius.co/).
