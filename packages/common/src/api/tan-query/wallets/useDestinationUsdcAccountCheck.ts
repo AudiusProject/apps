@@ -66,18 +66,21 @@ export const useDestinationUsdcAccountCheck = (
         rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
       const totalSolNeededUi = totalSolNeededLamports / 1e9
 
-      const { quoteResult: costQuote } = await getJupiterQuoteByMintWithRetry({
-        inputMint: mint.toBase58(),
-        outputMint: SOL_MINT,
-        inputDecimals: USDC_DECIMALS,
-        outputDecimals: SOL_DECIMALS,
-        amountUi: totalSolNeededUi,
-        swapMode: 'ExactOut',
-        onlyDirectRoutes: false
-      })
+      const { quoteResult: exactOutQuote } =
+        await getJupiterQuoteByMintWithRetry({
+          inputMint: mint.toBase58(),
+          outputMint: SOL_MINT,
+          inputDecimals: USDC_DECIMALS,
+          outputDecimals: SOL_DECIMALS,
+          amountUi: totalSolNeededUi,
+          swapMode: 'ExactOut',
+          onlyDirectRoutes: false
+        })
 
-      const ataCreationFeeUsdc =
-        Number(BigInt(costQuote.inputAmount.amountString)) / 10 ** USDC_DECIMALS
+      const estimatedFeeUsdc = BigInt(exactOutQuote.inputAmount.amountString)
+      const feeWithBuffer =
+        estimatedFeeUsdc + (estimatedFeeUsdc * BigInt(2)) / BigInt(100)
+      const ataCreationFeeUsdc = Number(feeWithBuffer) / 10 ** USDC_DECIMALS
 
       return { hasUsdcAccount: false, ataCreationFeeUsdc }
     },

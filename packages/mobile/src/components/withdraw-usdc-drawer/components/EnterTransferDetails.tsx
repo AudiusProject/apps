@@ -61,7 +61,7 @@ export const EnterTransferDetails = ({
       destinationUsdcStatus.ataCreationFeeUsdc * 100
     )
     return (
-      amountCents < feeCents || amountCents + feeCents > balanceNumberCents
+      amountCents < feeCents || amountCents > balanceNumberCents
     )
   }, [
     methodValue,
@@ -87,10 +87,7 @@ export const EnterTransferDetails = ({
           typeof amountValue === 'string'
             ? filterDecimalString(amountValue).value
             : amountValue
-        if (
-          amountCents < feeCents ||
-          amountCents + feeCents > balanceNumberCents
-        ) {
+        if (amountCents < feeCents || amountCents > balanceNumberCents) {
           setFieldError(
             AMOUNT,
             walletMessages.errors.ataCreationFeeRequired(
@@ -123,17 +120,9 @@ export const EnterTransferDetails = ({
   ])
 
   const handleMaxPress = useCallback(() => {
-    const maxCents =
-      destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
-        ? Math.max(
-            0,
-            balanceNumberCents -
-              Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
-          )
-        : balanceNumberCents
-    const maxHumanized = decimalIntegerToHumanReadable(maxCents)
+    const maxHumanized = decimalIntegerToHumanReadable(balanceNumberCents)
     setAmount(maxHumanized)
-  }, [balanceNumberCents, destinationUsdcStatus, setAmount])
+  }, [balanceNumberCents, setAmount])
 
   const handleAmountFocus = useCallback(() => {
     // Clear the field if it contains the default value
@@ -187,9 +176,11 @@ export const EnterTransferDetails = ({
             (isInsufficientForAtaFee && destinationUsdcStatus)) ? (
             <Text variant='body' size='s' color='danger'>
               {amountError ??
-                walletMessages.errors.ataCreationFeeRequired(
-                  destinationUsdcStatus!.ataCreationFeeUsdc.toFixed(2)
-                )}
+                (destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+                  ? walletMessages.errors.ataCreationFeeRequired(
+                      destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                    )
+                  : undefined)}
             </Text>
           ) : null}
         </Flex>

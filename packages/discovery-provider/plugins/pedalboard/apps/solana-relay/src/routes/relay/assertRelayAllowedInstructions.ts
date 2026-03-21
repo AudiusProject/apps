@@ -30,6 +30,7 @@ import {
 
 import { config } from '../../config'
 import { rateLimitTokenAccountCreation } from '../../redis'
+import { getConnection } from '../../utils/connections'
 
 import { InvalidRelayInstructionError } from './InvalidRelayInstructionError'
 import { isUserAbusive } from './antiAbuse'
@@ -79,8 +80,8 @@ const findSpecificMemo = (
   return null
 }
 
-/** Rent exemption for a 165-byte token account (lamports) */
-const RENT_EXEMPTION_TOKEN_ACCOUNT = 2_039_280
+/** Standard SPL token account data size (bytes) */
+const TOKEN_ACCOUNT_SIZE = 165
 
 /**
  * Returns true if the tx contains an instruction that sends >= rent exemption
@@ -88,7 +89,8 @@ const RENT_EXEMPTION_TOKEN_ACCOUNT = 2_039_280
  */
 const feePayerReceivesRentExemptionOrMore = (
   instructions: TransactionInstruction[],
-  feePayer: string
+  feePayer: string,
+  rentExemptionTokenAccountLamports: number
 ): boolean => {
   for (const instr of instructions) {
     if (instr.programId.equals(SystemProgram.programId)) {
@@ -98,7 +100,7 @@ const feePayerReceivesRentExemptionOrMore = (
           const decoded = SystemInstruction.decodeTransfer(instr)
           if (
             decoded.toPubkey.toBase58() === feePayer &&
-            decoded.lamports >= RENT_EXEMPTION_TOKEN_ACCOUNT
+            decoded.lamports >= rentExemptionTokenAccountLamports
           ) {
             return true
           }
@@ -185,6 +187,7 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
   instructionIndex: number,
   instruction: TransactionInstruction,
   instructions: TransactionInstruction[],
+  rentExemptionTokenAccountLamports: number,
   user?: Pick<Users, 'wallet' | 'is_verified'> | null,
   feePayer?: string | null
 ) => {
@@ -255,7 +258,11 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
       // matching close when fee payer receives >= rent exemption in the same tx.
       if (
         feePayer &&
-        feePayerReceivesRentExemptionOrMore(instructions, feePayer) &&
+        feePayerReceivesRentExemptionOrMore(
+          instructions,
+          feePayer,
+          rentExemptionTokenAccountLamports
+        ) &&
         countUnmatchedFeePayerCreates(instructions, feePayer) === 1
       ) {
         return
@@ -447,6 +454,10 @@ export const JUPITER_ROUTE_DISCRIMINANT =
   computeInstructionDiscriminant('route')
 export const JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT =
   computeInstructionDiscriminant('shared_accounts_route')
+export const JUPITER_EXACT_OUT_ROUTE_DISCRIMINANT =
+  computeInstructionDiscriminant('exact_out_route')
+export const JUPITER_SHARED_ACCOUNTS_EXACT_OUT_ROUTE_DISCRIMINANT =
+  computeInstructionDiscriminant('shared_accounts_exact_out_route')
 
 const getJupiterInstructionType = (
   instruction: TransactionInstruction
@@ -457,10 +468,19 @@ const getJupiterInstructionType = (
 
   const instructionDiscriminant = instruction.data.slice(0, 8)
 
-  if (instructionDiscriminant.equals(JUPITER_ROUTE_DISCRIMINANT)) {
+  if (
+    instructionDiscriminant.equals(JUPITER_ROUTE_DISCRIMINANT) ||
+    instructionDiscriminant.equals(JUPITER_EXACT_OUT_ROUTE_DISCRIMINANT)
+  ) {
     return 'route'
-  } else if (
-    instructionDiscriminant.equals(JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT)
+  }
+  if (
+    instructionDiscriminant.equals(
+      JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT
+    ) ||
+    instructionDiscriminant.equals(
+      JUPITER_SHARED_ACCOUNTS_EXACT_OUT_ROUTE_DISCRIMINANT
+    )
   ) {
     return 'sharedAccountRoute'
   }
@@ -634,6 +654,10 @@ export const assertRelayAllowedInstructions = async (
     feePayer?: string
   }
 ) => {
+  const connection = getConnection()
+  const rentExemptionTokenAccountLamports =
+    await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
+
   for (let i = 0; i < instructions.length; i++) {
     const instruction = instructions[i]
     switch (instruction.programId.toBase58()) {
@@ -642,6 +666,7 @@ export const assertRelayAllowedInstructions = async (
           i,
           instruction,
           instructions,
+          rentExemptionTokenAccountLamports,
           options?.user,
           options?.feePayer
         )

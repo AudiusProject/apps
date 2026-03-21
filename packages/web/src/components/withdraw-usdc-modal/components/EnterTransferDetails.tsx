@@ -72,7 +72,7 @@ export const EnterTransferDetails = () => {
     useField<WithdrawMethod>(METHOD)
   const [
     { value: addressValue },
-    { error: addressError, touched: addressTouched },
+    _ignoredAddressMeta,
     { setTouched: setAddressTouched }
   ] = useField(ADDRESS)
 
@@ -91,9 +91,7 @@ export const EnterTransferDetails = () => {
     const amountCents =
       typeof value === 'string' ? filterDecimalString(value).value : value
     const feeCents = Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
-    return (
-      amountCents < feeCents || amountCents + feeCents > balanceNumberCents
-    )
+    return amountCents < feeCents || amountCents > balanceNumberCents
   }, [methodValue, destinationUsdcStatus, value, balanceNumberCents])
 
   const [humanizedValue, setHumanizedValue] = useState(
@@ -116,17 +114,9 @@ export const EnterTransferDetails = () => {
   )
 
   const handleMaxPress = useCallback(() => {
-    const maxCents =
-      destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
-        ? Math.max(
-            0,
-            balanceNumberCents -
-              Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
-          )
-        : balanceNumberCents
-    setHumanizedValue(decimalIntegerToHumanReadable(maxCents))
-    setAmount(maxCents)
-  }, [balanceNumberCents, destinationUsdcStatus, setAmount, setHumanizedValue])
+    setHumanizedValue(decimalIntegerToHumanReadable(balanceNumberCents))
+    setAmount(balanceNumberCents)
+  }, [balanceNumberCents, setAmount, setHumanizedValue])
 
   const handlePasteAddress = useCallback(
     (event: React.ClipboardEvent) => {
@@ -160,10 +150,7 @@ export const EnterTransferDetails = () => {
         )
         const amountCents =
           typeof value === 'string' ? filterDecimalString(value).value : value
-        if (
-          amountCents < feeCents ||
-          amountCents + feeCents > balanceNumberCents
-        ) {
+        if (amountCents < feeCents || amountCents > balanceNumberCents) {
           setFieldError(
             AMOUNT,
             walletMessages.errors.ataCreationFeeRequired(
@@ -216,17 +203,24 @@ export const EnterTransferDetails = () => {
               onChange={handleAmountChange}
               onBlur={handleAmountBlur}
               startAdornmentText={messages.dollars}
-              error={amountTouched && !!(amountError || (isInsufficientForAtaFee && destinationUsdcStatus))}
+              error={
+                amountTouched &&
+                !!(
+                  amountError ||
+                  (isInsufficientForAtaFee && destinationUsdcStatus)
+                )
+              }
               helperText={
-                amountTouched && (amountError || (isInsufficientForAtaFee && destinationUsdcStatus))
+                amountTouched &&
+                (amountError ||
+                  (isInsufficientForAtaFee && destinationUsdcStatus))
                   ? (amountError ??
-                      (destinationUsdcStatus
-                        ? walletMessages.errors.ataCreationFeeRequired(
-                            destinationUsdcStatus.ataCreationFeeUsdc.toFixed(
-                              2
-                            )
-                          )
-                        : undefined))
+                    (destinationUsdcStatus &&
+                    !destinationUsdcStatus.hasUsdcAccount
+                      ? walletMessages.errors.ataCreationFeeRequired(
+                          destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                        )
+                      : undefined))
                   : undefined
               }
             />
@@ -277,11 +271,7 @@ export const EnterTransferDetails = () => {
           ) : null}
         </Flex>
       )}
-      <Button
-        variant='primary'
-        fullWidth
-        onClick={handleContinue}
-      >
+      <Button variant='primary' fullWidth onClick={handleContinue}>
         {walletMessages.continue}
       </Button>
     </Flex>

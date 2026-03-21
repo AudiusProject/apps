@@ -35,6 +35,12 @@ import {
   JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT
 } from './assertRelayAllowedInstructions'
 
+vi.mock('../../utils/connections', () => ({
+  getConnection: () => ({
+    getMinimumBalanceForRentExemption: async () => 2_039_280
+  })
+}))
+
 const CLAIMABLE_TOKEN_PROGRAM_ID = new PublicKey(config.claimableTokenProgramId)
 
 const REWARD_MANAGER_PROGRAM_ID = new PublicKey(config.rewardsManagerProgramId)

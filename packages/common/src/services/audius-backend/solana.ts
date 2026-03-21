@@ -43,8 +43,6 @@ const SOL_DECIMALS = 9
 const TOKEN_ACCOUNT_SIZE = 165
 // Extra lamports for tx fees when pre-funding ATA creation
 const ATA_TX_FEE_BUFFER_LAMPORTS = 10_000
-// Buffer for quote variance between ExactOut cost quote and ExactIn swap output
-const ATA_PREFUND_QUOTE_BUFFER_LAMPORTS = 3000
 
 const DEFAULT_RETRY_DELAY = 1000
 const DEFAULT_MAX_RETRY_COUNT = 120
@@ -464,59 +462,60 @@ const createUserFundedAta = async ({
   ethWallet: string
   destination: PublicKey
   destinationWallet: PublicKey
-}): Promise<void> => {
+}): Promise<bigint> => {
   const feePayer = await sdk.services.solanaRelay.getFeePayer()
   const solMint = new PublicKey(SOL_MINT)
 
-  // Calculate the amount of USDC needed to create the destination ATA
+  // Calculate the amount of USDC needed to create the destination ATA.
+  // Use ExactIn: we swap a fixed USDC amount for lamports. Swap consumes all input, no dust.
   const rentExemptLamports =
     await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
   const totalSolNeededLamports = rentExemptLamports + ATA_TX_FEE_BUFFER_LAMPORTS
-  const costQuoteTargetLamports =
-    totalSolNeededLamports + ATA_PREFUND_QUOTE_BUFFER_LAMPORTS
-  const { quoteResult: costQuote } = await getJupiterQuoteByMintWithRetry({
+  // Get fee estimate from ExactOut (how much USDC for lamports), then add 2% buffer
+  const { quoteResult: exactOutQuote } = await getJupiterQuoteByMintWithRetry({
     inputMint: mint.toBase58(),
     outputMint: SOL_MINT,
     inputDecimals: USDC_DECIMALS,
     outputDecimals: SOL_DECIMALS,
-    amountUi: costQuoteTargetLamports / 1e9,
+    amountUi: totalSolNeededLamports / 10 ** SOL_DECIMALS,
     swapMode: 'ExactOut',
-    onlyDirectRoutes: false
+    onlyDirectRoutes: true
   })
-  const feeAmountUsdc = BigInt(costQuote.inputAmount.amountString)
-  const feeAmountUsdcUi = Number(feeAmountUsdc) / 10 ** USDC_DECIMALS
+  const estimatedFeeUsdc = BigInt(exactOutQuote.inputAmount.amountString)
+  // Add 2% buffer so ExactIn yields enough lamports; use this for the swap
+  const feeAmountUsdc =
+    estimatedFeeUsdc + (estimatedFeeUsdc * BigInt(2)) / BigInt(100)
+
+  const { quoteResult: exactInQuote } = await getJupiterQuoteByMintWithRetry({
+    inputMint: mint.toBase58(),
+    outputMint: SOL_MINT,
+    inputDecimals: USDC_DECIMALS,
+    outputDecimals: SOL_DECIMALS,
+    amountUi: Number(feeAmountUsdc) / 10 ** USDC_DECIMALS,
+    swapMode: 'ExactIn',
+    onlyDirectRoutes: true
+  })
 
   const rootWalletUsdcAta = getAssociatedTokenAddressSync(
     mint,
     keypair.publicKey,
     true
   )
+  const rootWalletWsolAta = getAssociatedTokenAddressSync(
+    solMint,
+    keypair.publicKey,
+    true
+  )
   const feePayerWsolAta = getAssociatedTokenAddressSync(solMint, feePayer, true)
 
-  // Swap all USDC fee to SOL
-  const { quoteResult: swapQuote } = await getJupiterQuoteByMintWithRetry({
-    inputMint: mint.toBase58(),
-    outputMint: SOL_MINT,
-    inputDecimals: USDC_DECIMALS,
-    outputDecimals: SOL_DECIMALS,
-    amountUi: feeAmountUsdcUi,
-    swapMode: 'ExactIn',
-    onlyDirectRoutes: false
-  })
-  const receivedLamports = Number(swapQuote.outputAmount.amountString)
-  if (receivedLamports < totalSolNeededLamports) {
-    throw new Error(
-      `ATA prefund swap output insufficient: got ${receivedLamports} lamports, needed ${totalSolNeededLamports}`
-    )
-  }
   console.debug(
-    `createUserFundedAta: swapping ${feeAmountUsdc} USDC for ~${receivedLamports} lamports (need ${totalSolNeededLamports})`
+    `createUserFundedAta: ExactIn swap ${feeAmountUsdc} USDC for ~${exactInQuote.outputAmount.amountString} lamports`
   )
   const swapInstructionsResult = await jupiterInstance.swapInstructionsPost({
     swapRequest: {
-      quoteResponse: swapQuote.quote,
+      quoteResponse: exactInQuote.quote,
       userPublicKey: keypair.publicKey.toBase58(),
-      payer: keypair.publicKey.toBase58(),
+      payer: feePayer.toBase58(),
       destinationTokenAccount: feePayerWsolAta.toBase58(),
       wrapAndUnwrapSol: false,
       dynamicSlippage: true
@@ -532,15 +531,21 @@ const createUserFundedAta = async ({
       keypair.publicKey,
       mint
     ),
-    // Secp instruction (claimable transfer)
+    // Create wSOL ATA on fee payer
+    createAssociatedTokenAccountIdempotentInstruction(
+      feePayer,
+      rootWalletWsolAta,
+      keypair.publicKey,
+      solMint
+    ),
+    // Claimable transfer (fee USDC from user bank → root ATA)
     await sdk.services.claimableTokensClient.createTransferSecpInstruction({
       amount: feeAmountUsdc,
       ethWallet,
       mint,
       destination: rootWalletUsdcAta,
-      instructionIndex: 1
+      instructionIndex: 2
     }),
-    // Claimable transfer (fee USDC from user bank → root ATA)
     await sdk.services.claimableTokensClient.createTransferInstruction({
       ethWallet,
       mint,
@@ -560,8 +565,23 @@ const createUserFundedAta = async ({
       solMint
     ),
     // Jupiter swap (USDC → wSOL)
-    ...convertJupiterInstructions([swapInstructionsResult.swapInstruction]),
-    // Close wSOL ATA (unwrap to fee payer)
+    ...convertJupiterInstructions([
+      ...(swapInstructionsResult.setupInstructions ?? []),
+      swapInstructionsResult.swapInstruction
+    ]),
+    // Close root wallet wSOL ATA
+    createCloseAccountInstruction(
+      rootWalletWsolAta,
+      feePayer,
+      keypair.publicKey
+    ),
+    // Close root wallet USDC ATA
+    createCloseAccountInstruction(
+      rootWalletUsdcAta,
+      feePayer,
+      keypair.publicKey
+    ),
+    // Close fee payer wSOL ATA (unwrap to fee payer)
     createCloseAccountInstruction(feePayerWsolAta, feePayer, feePayer),
     // Create recipient USDC ATA (fee payer)
     createAssociatedTokenAccountIdempotentInstruction(
@@ -569,9 +589,7 @@ const createUserFundedAta = async ({
       destination,
       destinationWallet,
       mint
-    ),
-    // Close root USDC ATA (to fee payer)
-    createCloseAccountInstruction(rootWalletUsdcAta, feePayer, feePayer)
+    )
   ]
 
   const prefundTx = await sdk.services.solanaClient.buildTransaction({
@@ -587,14 +605,13 @@ const createUserFundedAta = async ({
     computeLimit: null
   })
   prefundTx.sign([keypair])
-  const prefundSig = await sdk.services.solanaClient.sendTransaction(
-    prefundTx,
-    { skipPreflight: true }
-  )
-  await connection.confirmTransaction(prefundSig, 'confirmed')
+  const signature =
+    await sdk.services.claimableTokensClient.sendTransaction(prefundTx)
+  await connection.confirmTransaction(signature, 'finalized')
   console.debug(
-    `createUserFundedAta: prefund + ATA creation confirmed: ${prefundSig}`
+    `createUserFundedAta: prefund + ATA creation confirmed: ${signature}`
   )
+  return feeAmountUsdc
 }
 
 /**
@@ -646,6 +663,7 @@ export const transferFromUserBank = async ({
   keypair
 }: TransferFromUserBankParams) => {
   let isCreatingTokenAccount = false
+  let transferAmount = amount
   try {
     const instructions: TransactionInstruction[] = []
 
@@ -706,7 +724,8 @@ export const transferFromUserBank = async ({
           // User-funded ATA creation: swap a USDC fee to SOL, then create the
           // destination ATA directly from the root wallet — the relay never sees
           // an unmatched create instruction, so its rate limit is not involved.
-          await createUserFundedAta({
+          // Fee is deducted from the transfer amount; recipient gets amount - fee.
+          const ataFeeAmount = await createUserFundedAta({
             sdk,
             connection,
             keypair,
@@ -715,7 +734,8 @@ export const transferFromUserBank = async ({
             destination,
             destinationWallet
           })
-          // ATA now exists on-chain; no instruction needed in the main tx.
+          // Reduce transfer amount by fee so total debit equals original amount
+          transferAmount = amount - ataFeeAmount
         } else {
           // Fallback: relay-funded ATA creation (subject to daily rate limit)
           const payerKey = await sdk.services.solanaRelay.getFeePayer()
@@ -733,7 +753,7 @@ export const transferFromUserBank = async ({
 
     const secpTransferInstruction =
       await sdk.services.claimableTokensClient.createTransferSecpInstruction({
-        amount,
+        amount: transferAmount,
         ethWallet,
         mint,
         destination,
