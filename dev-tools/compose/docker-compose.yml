@@ -11,9 +11,6 @@ x-common: &common
     driver: json-file
   extra_hosts:
     # Allows the containers can talk to each other via their hostnames routed through nginx
-    - "audius-comms-1:host-gateway"
-    - "audius-comms-2:host-gateway"
-    - "audius-comms-3:host-gateway"
     - "audius-creator-node-1:host-gateway"
     - "audius-creator-node-2:host-gateway"
     - "audius-creator-node-3:host-gateway"
@@ -153,13 +150,6 @@ services:
     extends:
       file: docker-compose.discovery.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: discovery-provider-openresty
-    <<: *common
-
-  comms:
-    # Used for pushing to docker hub in CI
-    extends:
-      file: docker-compose.discovery.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: comms
     <<: *common
 
   es-indexer:

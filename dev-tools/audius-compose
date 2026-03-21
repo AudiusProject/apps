@@ -15,7 +15,6 @@ import solders.keypair
 
 LOCALHOSTS = """
 127.0.0.1       ingress \
-audius-comms-discovery-1 audius-comms-discovery-2 audius-comms-discovery-3 audius-comms-discovery-4 audius-comms-discovery-5 \
 audius-discovery-provider-1 audius-discovery-provider-2 audius-discovery-provider-3 \
 audius-creator-node-1 audius-creator-node-2 audius-creator-node-3 \
 audius-identity-service-1 \
@@ -69,7 +68,6 @@ def get_git_commit(protocol_dir):
     )
 
 
-# TODO: Maybe clean up later to handle comms config (currently using explicit env vars in docker-compose.comms.yml)
 def generate_env(
     protocol_dir, discovery_provider_replicas, elasticsearch_replicas, prod=False
 ):
@@ -222,7 +220,6 @@ def build(
             "--profile=tests",
             "--profile=identity",
             "--profile=discovery",
-            "--profile=comms",
             "--profile=storage",
             "--profile=notifications",
             "--profile=elasticsearch",
@@ -393,7 +390,6 @@ def up(
         "--profile=solana",
         "--profile=identity",
         "--profile=discovery",
-        "--profile=comms",
         "--profile=chain",
         *(
             ["--file=" + str(AAO_DIR / "audius-compose.yml")]

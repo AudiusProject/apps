@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="250" viewBox="0 0 520 250" role="img" aria-label="Open Web">
+  <title>Open Web</title>
+  <rect width="520" height="250" rx="40" fill="#7E1BCC"/>
+  <g transform="translate(40 55)">
+    <!-- globe icon -->
+    <circle cx="60" cy="70" r="56" fill="none" stroke="#FFF" stroke-width="8"/>
+    <ellipse cx="60" cy="70" rx="56" ry="24" fill="none" stroke="#FFF" stroke-width="8"/>
+    <ellipse cx="60" cy="70" rx="20" ry="56" fill="none" stroke="#FFF" stroke-width="8"/>
+    <path d="M4 70h112M60 14v112" stroke="#FFF" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(170 80)" fill="#FFF">
+    <text x="0" y="50" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="72">Open Web</text>
+  </g>
+</svg>

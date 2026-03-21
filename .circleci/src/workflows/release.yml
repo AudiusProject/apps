@@ -8,7 +8,7 @@ jobs:
   - push-docker-image:
       name: push-discovery-provider
       context: [Vercel, dockerhub, slack-secrets]
-      service: discovery-provider discovery-provider-notifications discovery-provider-openresty trending-challenge-rewards relay solana-relay crm mri staking verified-notifications comms es-indexer anti-abuse archiver
+      service: discovery-provider discovery-provider-notifications discovery-provider-openresty trending-challenge-rewards relay solana-relay crm mri staking verified-notifications es-indexer anti-abuse archiver
       notify_slack_on_failure: true
   - commit-audius-docker-compose-and-notify:
       context: [slack-secrets, github]
@@ -36,4 +36,3 @@ jobs:
   #     context: discord
   #     requires:
   #       - release-audius-docker-compose-trigger
-

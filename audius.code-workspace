@@ -29,9 +29,6 @@
     },
     {
       "path": "monitoring"
-    },
-    {
-      "path": "comms"
     }
   ],
   "settings": {
@@ -41,7 +38,6 @@
       "monitoring",
       "discovery-provider",
       "eth-contracts",
-      "comms",
       "dev-tools",
       "service-commands",
       "contracts",

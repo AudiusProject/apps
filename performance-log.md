@@ -1,4 +1,0 @@
-- Improved list performance by around ~10% (replaced FlatList with FlashList & optimized flatlist props)
-- Improved app warm start by another 75% (trimmed 2 renders / ~150ms)
-- Improved app warm start by 83% (trimmed 21 rerenders / ~1785ms)
-- Improved profile screen render time by 50% (trimmed 2 renders / ~250ms)
