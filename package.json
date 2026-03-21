@@ -72,7 +72,7 @@
     "dashboard:stage": "npm run start:stage -w @audius/protocol-dashboard",
     "dashboard:prod": "npm run start:prod -w @audius/protocol-dashboard",
     "DOCS===========================================": "",
-    "docs:dev": "npm run dev -w docs-audius-org",
+    "docs": "npm run dev -w docs-audius-org",
     "docs:deploy": "npm run pages:deploy -w docs-audius-org",
     "docs:sync-api": "npm run gen:api-docs -w docs-audius-org",
     "PEDALBOARD======================================": "",

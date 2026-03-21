@@ -13,6 +13,23 @@ export default function ApiReference() {
     })
   }, [])
 
+  // Intercept cmd+k in capture phase so Vocs search never opens on this page.
+  // Instead, forward to Scalar's own search button.
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.stopImmediatePropagation()
+        e.preventDefault()
+        // Click Scalar's sidebar search button to open its search modal
+        const btn = document.querySelector('.t-doc__sidebar button[type="button"] .sidebar-search-placeholder, .scalar-api-reference button .sr-only')
+          ?.closest('button')
+        btn?.click()
+      }
+    }
+    window.addEventListener('keydown', handler, true)
+    return () => window.removeEventListener('keydown', handler, true)
+  }, [])
+
   // Vocs → Scalar: watch <html class="dark"> and push into Scalar via prop + localStorage
   useEffect(() => {
     const html = document.documentElement
@@ -60,6 +77,8 @@ export default function ApiReference() {
           darkMode,
           operationTitleSource: 'path',
           showOperationId: true,
+          agent: { disabled: true },
+          mcp: { disabled: true },
           authentication: {
             preferredSecurityScheme: 'OAuth2',
             securitySchemes: {
