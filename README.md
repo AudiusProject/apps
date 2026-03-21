@@ -3,6 +3,7 @@
   <img src="./packages/web/src/assets/img/audiusLogoBlack.png#gh-light-mode-only" alt="Audius" width="200">
   <img src="./packages/web/src/assets/img/audiusLogoStackedWhite.png#gh-dark-mode-only" alt="Audius" width="200">
   <br/>
+  <br/>
   <a href="https://audius.co">audius.co</a> &nbsp;&bull;&nbsp; <a href="https://docs.audius.co">docs.audius.co</a>
 </p>
 
@@ -11,7 +12,7 @@
 [![web](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/web.yml?label=web&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/web.yml) [![mobile](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/mobile.yml?label=mobile&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml) [![sdk](https://img.shields.io/github/actions/workflow/status/AudiusProject/apps/sdk.yml?label=sdk&style=for-the-badge)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml)</br>
 [![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk&style=for-the-badge)](https://www.npmjs.com/package/@audius/sdk) [![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony&style=for-the-badge)](https://www.npmjs.com/package/@audius/harmony) [![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl&style=for-the-badge)](https://www.npmjs.com/package/@audius/spl) [![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth&style=for-the-badge)](https://www.npmjs.com/package/@audius/eth)
 
-Community-run music platform and developer gateway to the internet's largest open music catalog, the [Open Audio Protocol](https://openaudio.org).
+Audius is the community-run music platform and developer gateway to the internet's largest open music catalog, the [Open Audio Protocol](https://openaudio.org).
 
 ## Packages
 
