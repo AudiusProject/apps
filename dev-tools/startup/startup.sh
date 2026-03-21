@@ -2,7 +2,7 @@
 
 # NOTE: This script is meant to be used from within docker containers
 
-name=$(nslookup $(hostname -i) | grep -o "\(discovery-provider\|identity-service\|comms\)-[0-9]\+")
+name=$(nslookup $(hostname -i) | grep -o "\(discovery-provider\|identity-service\)-[0-9]\+")
 replica=$(echo $name | grep -o "[0-9]\+")
 
 if [[ -f "/tmp/dev-tools/startup/$name.env" ]]; then

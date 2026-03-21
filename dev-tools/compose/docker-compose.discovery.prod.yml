@@ -1,4 +1,3 @@
-# TODO: Consolidate comms container here (used to push in CI) with the ones in docker-compose.comms.yml
 version: '3.9'
 
 services:
@@ -22,26 +21,6 @@ services:
     restart: unless-stopped
     profiles:
       - discovery
-
-  comms:
-    build:
-      context: ${PROJECT_ROOT}/comms
-      dockerfile: Dockerfile
-    command: sh -c ". /tmp/dev-tools/startup/startup.sh && comms discovery"
-    restart: unless-stopped
-    env_file: .env # used by the startup script
-    environment:
-      comms_dev_mode: true
-    depends_on:
-      db:
-        condition: service_healthy
-    deploy:
-      mode: replicated
-      replicas: '${DISCOVERY_PROVIDER_REPLICAS}'
-    volumes:
-      - ${PROJECT_ROOT}/dev-tools:/tmp/dev-tools
-    profiles:
-      - comms
 
   es-indexer:
     build:
