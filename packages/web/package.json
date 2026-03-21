@@ -83,7 +83,7 @@
     "@google/model-viewer": "3.3.0",
     "@hcaptcha/react-hcaptcha": "0.3.6",
     "@juggle/resize-observer": "^3.3.1",
-    "@jup-ag/api": "6.0.44",
+    "@jup-ag/api": "6.0.48",
     "@noble/hashes": "1.1.4",
     "@noble/secp256k1": "1.7.0",
     "@optimizely/optimizely-sdk": "4.9.2",
