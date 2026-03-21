@@ -1,52 +1,44 @@
 <p align="center">
   <br/>
-  <img src="./packages/web/src/assets/img/audiusLogoColored.png#gh-light-mode-only" alt="Audius Logo" width="200">
-  <img src="./packages/web/src/assets/img/audiusLogoWhite.png#gh-dark-mode-only" alt="Audius Logo" width="200">
-
+  <img src="./packages/harmony/src/assets/icons/AudiusLogoHorizontal.svg#gh-light-mode-only" alt="Audius" width="200">
+  <img src="./packages/web/src/assets/img/audiusLogoWhite.png#gh-dark-mode-only" alt="Audius" width="200">
   <br/>
-
-  <p align="center">
-    The Audius Monorepo
-    <br/>
-    🎧🎸🎹🤘🎶🥁🎷🎻🎤🔊
-  </p>
+  <br/>
+  <b>The decentralized music streaming platform that puts power back into the hands of creators.</b>
+  <br/>
+  <br/>
+  <a href="https://docs.audius.co">docs.audius.co</a>
 </p>
 
 <br/>
-<br/>
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/AudiusProject/apps/tree/main.svg?style=svg&circle-token=7813cfa60dbb92905f7fa2979eced3e33f1d77af)](https://dl.circleci.com/status-badge/redirect/gh/AudiusProject/apps/tree/main)
+[![web](https://github.com/AudiusProject/apps/actions/workflows/web.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/web.yml)
+[![sdk](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml)
+[![mobile](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml)
+[![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk)](https://www.npmjs.com/package/@audius/sdk)
+[![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony)](https://www.npmjs.com/package/@audius/harmony)
+[![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl)](https://www.npmjs.com/package/@audius/spl)
+[![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth)](https://www.npmjs.com/package/@audius/eth)
 
-Audius is a decentralized, community-owned music-sharing protocol
-
-For details on operating an Audius service, getting started with the Token and the API, see [docs.audius.co](https://docs.audius.co/).
+Audius is a decentralized, community-owned music-sharing protocol. Artists and fans connect directly — no intermediaries, no gatekeepers. For API access, token details, and node operation, see [docs.audius.co](https://docs.audius.co/).
 
 ## Packages
 
-| Name                                                                                            | Description                                                                                                                                                                           |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`web`](./packages/web)                                                                         | Web and desktop apps                                                                                                                                                                  |
-| [`mobile`](./packages/mobile)                                                                   | Mobile app                                                                                                                                                                            |
-| [`embed`](./packages/embed)                                                                     | Embed player that renders on third party sites (like X and Discord)                                                                                                                   |
-| [`sdk`](./packages/sdk)                                                                         | The `@audius/sdk` typescript SDK                                                                                                                                                      |
-| [`harmony`](./packages/harmony)                                                                 | The Audius design system                                                                                                                                                              |
-| [`common`](./packages/common)                                                                   | Shared code between web and mobile                                                                                                                                                    |
-| [`identity-service`](packages/identity-service)                                                 | Audius auth library                                                                                                                                                                   |
-| [`commands`](./packages/commands)                                                               | CLI to perform actions against the dev stack                                                                                                                                          |
-| [`compose`](./packages/compose)                                                                 | Defines dependencies for audius-compose                                                                                                                                               |
-| [`eslint-config-audius`](./packages/eslint-config-audius)                                       | Shared lint configuration                                                                                                                                                             |
-| [`spl`](./packages/spl)                                                                         | Handles Solana instructions for the Audius programs                                                                                                                                   |
-| [`eth`](./packages/eth)                                                                         | Handles interactions for the Audius Ethereum Governance & Staking Contracts                                                                                                           |
-
-### Required Dependencies
-
-We recommend using [homebrew](https://brew.sh/) to install the dependencies required to run Audius:
-
-```bash
-brew install nvm pyenv rbenv homebrew/cask/docker docker-compose
-```
-
-> You will need to add some shell configuration for [`nvm`](https://github.com/nvm-sh/nvm#installing-and-updating), [`pyenv`](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv), and [`rbenv`](https://github.com/rbenv/rbenv#basic-git-checkout). Please refer to the respective documentation and the installation output
+| Name | Description |
+| ---- | ----------- |
+| [`web`](./packages/web) | Web and desktop app |
+| [`mobile`](./packages/mobile) | iOS and Android app |
+| [`embed`](./packages/embed) | Embed player for third-party sites (X, Discord, etc.) |
+| [`sdk`](./packages/sdk) | `@audius/sdk` — TypeScript SDK for the Audius protocol |
+| [`harmony`](./packages/harmony) | Audius design system |
+| [`common`](./packages/common) | Shared state, models, and utilities for web and mobile |
+| [`spl`](./packages/spl) | Solana program instructions for Audius |
+| [`eth`](./packages/eth) | Ethereum governance and staking contract interactions |
+| [`fixed-decimal`](./packages/fixed-decimal) | Fixed-point decimal math utilities |
+| [`identity-service`](./packages/identity-service) | Auth and identity service |
+| [`commands`](./packages/commands) | CLI for performing actions against the dev stack |
+| [`compose`](./packages/compose) | audius-compose service definitions |
+| [`eslint-config-audius`](./packages/eslint-config-audius) | Shared ESLint configuration |
 
 ### Getting Started
 
@@ -60,14 +52,6 @@ This will do the following:
 - Install dependencies (npm packages, gems, pods, etc.)
 - Set up command line tools for interacting with the protocol ([dev-tools/README.md](./dev-tools/README.md))
 - Initialize git hooks
-
-### Running the Protocol
-
-```bash
-npm run protocol
-```
-
-For more details and troubleshooting please refer to [dev-tools/README.md](./dev-tools/README.md)
 
 ### Running the Apps
 
