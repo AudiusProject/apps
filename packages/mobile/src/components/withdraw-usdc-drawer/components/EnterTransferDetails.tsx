@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from 'react'
 
 import { useDestinationUsdcAccountCheck } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
+import { FeatureFlags } from '@audius/common/services'
 import {
   WithdrawUSDCModalPages,
   useWithdrawUSDCModal,
@@ -29,21 +31,26 @@ export const EnterTransferDetails = ({
   balanceNumberCents: number
 }) => {
   const { validateForm, setFieldError } = useFormikContext<WithdrawFormValues>()
+  const { setData } = useWithdrawUSDCModal()
   const [
     { value: amountValue },
     { error: amountError, touched: amountTouched },
     { setValue: setAmount, setTouched: setAmountTouched }
   ] = useField(AMOUNT)
-  const [{ value: addressValue }, { error: addressError }, { setTouched: setAddressTouched }] =
-    useField(ADDRESS)
+  const [{ value: methodValue }, _ignoredMethodMeta, { setValue: setMethod }] =
+    useField<WithdrawMethod>(METHOD)
+  const [
+    { value: addressValue },
+    _ignoredAddressMeta,
+    { setTouched: setAddressTouched }
+  ] = useField(ADDRESS)
 
   const { data: destinationUsdcStatus } = useDestinationUsdcAccountCheck(
     methodValue === WithdrawMethod.MANUAL_TRANSFER ? addressValue : null
   )
-
-  const { setData } = useWithdrawUSDCModal()
-  const [{ value: methodValue }, _ignoredMethodMeta, { setValue: setMethod }] =
-    useField<WithdrawMethod>(METHOD)
+  const { isEnabled: isCoinflowEnabled } = useFeatureFlag(
+    FeatureFlags.COINFLOW_OFFRAMP_ENABLED
+  )
 
   const isInsufficientForAtaFee = useMemo(() => {
     if (
@@ -57,18 +64,9 @@ export const EnterTransferDetails = ({
       typeof amountValue === 'string'
         ? filterDecimalString(amountValue).value
         : amountValue
-    const feeCents = Math.ceil(
-      destinationUsdcStatus.ataCreationFeeUsdc * 100
-    )
-    return (
-      amountCents < feeCents || amountCents > balanceNumberCents
-    )
-  }, [
-    methodValue,
-    destinationUsdcStatus,
-    amountValue,
-    balanceNumberCents
-  ])
+    const feeCents = Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
+    return amountCents < feeCents || amountCents > balanceNumberCents
+  }, [methodValue, destinationUsdcStatus, amountValue, balanceNumberCents])
 
   const onContinuePress = useCallback(async () => {
     setAmountTouched(true)
@@ -78,7 +76,10 @@ export const EnterTransferDetails = ({
     const errors = await validateForm()
     if (errors[AMOUNT] || errors[ADDRESS]) return
 
-    if (methodValue === WithdrawMethod.MANUAL_TRANSFER && destinationUsdcStatus) {
+    if (
+      methodValue === WithdrawMethod.MANUAL_TRANSFER &&
+      destinationUsdcStatus
+    ) {
       if (!destinationUsdcStatus.hasUsdcAccount) {
         const feeCents = Math.ceil(
           destinationUsdcStatus.ataCreationFeeUsdc * 100
@@ -186,26 +187,28 @@ export const EnterTransferDetails = ({
         </Flex>
       </Flex>
       <Divider orientation='horizontal' />
-      <SegmentedControl
-        options={[
-          {
-            key: WithdrawMethod.COINFLOW,
-            text: walletMessages.bankAccount
-          },
-          {
-            key: WithdrawMethod.MANUAL_TRANSFER,
-            text: walletMessages.crypto
-          }
-        ]}
-        selected={methodValue}
-        onSelectOption={(method) => setMethod(method)}
-        fullWidth
-        equalWidth
-      />
-      {methodValue === WithdrawMethod.COINFLOW && (
-        <Text variant='body'>{walletMessages.transferDescription}</Text>
-      )}
-      {methodValue === WithdrawMethod.MANUAL_TRANSFER && (
+      {isCoinflowEnabled ? (
+        <SegmentedControl
+          options={[
+            {
+              key: WithdrawMethod.COINFLOW,
+              text: walletMessages.bankAccount
+            },
+            {
+              key: WithdrawMethod.MANUAL_TRANSFER,
+              text: walletMessages.crypto
+            }
+          ]}
+          selected={methodValue}
+          onSelectOption={(method) => setMethod(method)}
+          fullWidth
+          equalWidth
+        />
+      ) : null}
+      {methodValue === WithdrawMethod.COINFLOW ? (
+        <Text variant='body'>{walletMessages.cashTransferDescription}</Text>
+      ) : null}
+      {methodValue === WithdrawMethod.MANUAL_TRANSFER ? (
         <Flex gap='m'>
           <Flex gap='s'>
             <Text variant='heading' size='s' color='subdued'>
@@ -235,7 +238,7 @@ export const EnterTransferDetails = ({
             </Text>
           ) : null}
         </Flex>
-      )}
+      ) : null}
 
       <Button onPress={onContinuePress} fullWidth>
         {walletMessages.continue}
