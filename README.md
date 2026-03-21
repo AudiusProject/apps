@@ -1,7 +1,7 @@
 <p align="center">
   <br/>
-  <img src="./packages/web/src/assets/img/audiusLogoBlack.png#gh-light-mode-only" alt="Audius" width="300">
-  <img src="./packages/web/src/assets/img/audiusLogoStackedWhite.png#gh-dark-mode-only" alt="Audius" width="300">
+  <img src="./packages/web/src/assets/img/audiusLogoBlack.png#gh-light-mode-only" alt="Audius" width="200">
+  <img src="./packages/web/src/assets/img/audiusLogoStackedWhite.png#gh-dark-mode-only" alt="Audius" width="200">
   <br/>
   <br/>
   <b>The decentralized music streaming platform that puts power back into the hands of creators.</b>
@@ -12,28 +12,29 @@
 
 <br/>
 
-[![web](https://github.com/AudiusProject/apps/actions/workflows/web.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/web.yml) [![sdk](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml) [![mobile](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml)
+[![web](https://github.com/AudiusProject/apps/actions/workflows/web.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/web.yml) [![mobile](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/mobile.yml) [![sdk](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml/badge.svg)](https://github.com/AudiusProject/apps/actions/workflows/sdk.yml)
+
 [![npm @audius/sdk](https://img.shields.io/npm/v/@audius/sdk?label=%40audius%2Fsdk)](https://www.npmjs.com/package/@audius/sdk) [![npm @audius/harmony](https://img.shields.io/npm/v/@audius/harmony?label=%40audius%2Fharmony)](https://www.npmjs.com/package/@audius/harmony) [![npm @audius/spl](https://img.shields.io/npm/v/@audius/spl?label=%40audius%2Fspl)](https://www.npmjs.com/package/@audius/spl) [![npm @audius/eth](https://img.shields.io/npm/v/@audius/eth?label=%40audius%2Feth)](https://www.npmjs.com/package/@audius/eth)
 
 Audius is a decentralized, community-owned music-sharing protocol. Artists and fans connect directly — no intermediaries, no gatekeepers. For API access, token details, and node operation, see [docs.audius.co](https://docs.audius.co/).
 
 ## Packages
 
-| Name | Description |
-| ---- | ----------- |
-| [`web`](./packages/web) | Web and desktop app |
-| [`mobile`](./packages/mobile) | iOS and Android app |
-| [`embed`](./packages/embed) | Embed player for third-party sites (X, Discord, etc.) |
-| [`sdk`](./packages/sdk) | `@audius/sdk` — TypeScript SDK for the Audius protocol |
-| [`harmony`](./packages/harmony) | Audius design system |
-| [`common`](./packages/common) | Shared state, models, and utilities for web and mobile |
-| [`spl`](./packages/spl) | Solana program instructions for Audius |
-| [`eth`](./packages/eth) | Ethereum governance and staking contract interactions |
-| [`fixed-decimal`](./packages/fixed-decimal) | Fixed-point decimal math utilities |
-| [`identity-service`](./packages/identity-service) | Auth and identity service |
-| [`commands`](./packages/commands) | CLI for performing actions against the dev stack |
-| [`compose`](./packages/compose) | audius-compose service definitions |
-| [`eslint-config-audius`](./packages/eslint-config-audius) | Shared ESLint configuration |
+| Name                                                      | Description                                            |
+| --------------------------------------------------------- | ------------------------------------------------------ |
+| [`web`](./packages/web)                                   | Web and desktop app                                    |
+| [`mobile`](./packages/mobile)                             | iOS and Android app                                    |
+| [`embed`](./packages/embed)                               | Embed player for third-party sites (X, Discord, etc.)  |
+| [`sdk`](./packages/sdk)                                   | `@audius/sdk` — TypeScript SDK for the Audius protocol |
+| [`harmony`](./packages/harmony)                           | Audius design system                                   |
+| [`common`](./packages/common)                             | Shared state, models, and utilities for web and mobile |
+| [`spl`](./packages/spl)                                   | Solana program instructions for Audius                 |
+| [`eth`](./packages/eth)                                   | Ethereum governance and staking contract interactions  |
+| [`fixed-decimal`](./packages/fixed-decimal)               | Fixed-point decimal math utilities                     |
+| [`identity-service`](./packages/identity-service)         | Auth and identity service                              |
+| [`commands`](./packages/commands)                         | CLI for performing actions against the dev stack       |
+| [`compose`](./packages/compose)                           | audius-compose service definitions                     |
+| [`eslint-config-audius`](./packages/eslint-config-audius) | Shared ESLint configuration                            |
 
 ### Getting Started
 
