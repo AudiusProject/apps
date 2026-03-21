@@ -1,11 +1,24 @@
 import { defineConfig } from 'vocs'
+import { resolve } from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   vite: {
-    server: {
-      fs: {
-        allow: ['/Users/marcuspasell/apps/docs/node_modules'],
+    resolve: {
+      alias: {
+        // Root monorepo has ajv@6; ajv-draft-04 (via @scalar) needs ajv@8.
+        'ajv': resolve(__dirname, 'node_modules/ajv'),
+        // Root monorepo has zod@3; @scalar/* and ai need zod@4 (zod/v4, zod/v3 subpaths).
+        'zod': resolve(__dirname, 'node_modules/zod'),
       },
+    },
+    optimizeDeps: {
+      // These are root monorepo deps (not docs deps) that import zod/v4 and
+      // zod/v3 sub-paths — which don't exist in the root's zod@3. Excluding
+      // them prevents vite from trying to pre-bundle them.
+      exclude: ['ai', '@ai-sdk/provider-utils', '@ai-sdk/gateway'],
     },
   },
   title: 'Audius Developer Docs',
@@ -34,7 +47,7 @@ export default defineConfig({
   },
   topNav: [
     { text: 'Welcome', link: '/' },
-    { text: 'API', link: '/api' },
+    { text: 'REST API', link: '/api' },
     { text: 'SDK', link: '/sdk' },
     { text: 'Guides', link: '/developers/introduction/overview' },
     { text: 'Distributors', link: '/distributors/introduction/overview' },
