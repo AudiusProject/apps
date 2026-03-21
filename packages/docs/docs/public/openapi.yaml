@@ -4686,6 +4686,58 @@ paths:
         "500":
           description: Server error
           content: {}
+  /grantees/{address}/users:
+    get:
+      tags:
+        - users
+      description: Get all users who have authorized a particular grantee (developer app) identified by their wallet address. Supports pagination.
+      operationId: Get Grantee Users
+      parameters:
+        - name: address
+          in: path
+          description: The wallet address of the grantee (developer app)
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: The number of items to skip. Useful for pagination (page number * limit)
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: The number of items to fetch
+          schema:
+            type: integer
+        - name: is_approved
+          in: query
+          description: If true, only return users where the grant has been approved. If false, only return users where the grant was not approved. If omitted, returns all users regardless of approval status.
+          schema:
+            type: boolean
+        - name: is_revoked
+          in: query
+          description: If true, only return users where the grant has been revoked. Defaults to false.
+          schema:
+            type: boolean
+            default: false
+        - name: user_id
+          in: query
+          description: The user ID of the user making the request
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/followers_response"
+        "400":
+          description: Bad request
+          content: {}
+        "500":
+          description: Server error
+          content: {}
   /users/{id}/balance/history:
     get:
       tags:

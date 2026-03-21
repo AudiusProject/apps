@@ -10,11 +10,14 @@ export default defineConfig({
       alias: {
         // Root monorepo has ajv@6; ajv-draft-04 (via @scalar) needs ajv@8.
         'ajv': resolve(__dirname, 'node_modules/ajv'),
-        // Root monorepo has zod@3; @scalar/* and ai need zod@4 (zod/v4, zod/v3 subpaths).
+        // Root monorepo has zod@3; @scalar/* needs zod@4.3.6 (pinned to match @scalar nested dep).
         'zod': resolve(__dirname, 'node_modules/zod'),
       },
     },
     optimizeDeps: {
+      // Force Scalar to pre-bundle upfront (it's lazily imported in ApiReference.jsx).
+      // This ensures zod v4 is inlined into the pre-bundled chunks.
+      include: ['@scalar/api-reference-react'],
       // These are root monorepo deps (not docs deps) that import zod/v4 and
       // zod/v3 sub-paths — which don't exist in the root's zod@3. Excluding
       // them prevents vite from trying to pre-bundle them.
@@ -47,7 +50,7 @@ export default defineConfig({
   },
   topNav: [
     { text: 'Welcome', link: '/' },
-    { text: 'REST API', link: '/api' },
+    { text: 'API', link: '/api' },
     { text: 'SDK', link: '/sdk' },
     { text: 'Guides', link: '/developers/introduction/overview' },
     { text: 'Distributors', link: '/distributors/introduction/overview' },
