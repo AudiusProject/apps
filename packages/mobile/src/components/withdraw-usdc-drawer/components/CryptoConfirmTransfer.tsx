@@ -24,6 +24,10 @@ export const CryptoConfirmTransfer = () => {
 
   const [touchedContinue, setTouchedContinue] = useState(false)
 
+  const handleGoBack = useCallback(() => {
+    setData({ page: WithdrawUSDCModalPages.ENTER_TRANSFER_DETAILS })
+  }, [setData])
+
   const handleConfirm = useCallback(() => {
     setTouchedContinue(true)
     if (confirmValue) {
@@ -82,9 +86,14 @@ export const CryptoConfirmTransfer = () => {
         ) : null}
       </Flex>
 
-      <Button onPress={handleConfirm} fullWidth>
-        {walletMessages.continue}
-      </Button>
+      <Flex row gap='s'>
+        <Button variant='secondary' onPress={handleGoBack} style={{ flex: 1 }}>
+          {walletMessages.back}
+        </Button>
+        <Button onPress={handleConfirm} style={{ flex: 1 }}>
+          {walletMessages.withdraw}
+        </Button>
+      </Flex>
     </Flex>
   )
 }

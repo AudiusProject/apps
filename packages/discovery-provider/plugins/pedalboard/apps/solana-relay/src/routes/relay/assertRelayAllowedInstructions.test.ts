@@ -9,6 +9,7 @@ import {
   NATIVE_MINT,
   TOKEN_PROGRAM_ID,
   createApproveInstruction,
+  createAssociatedTokenAccountIdempotentInstruction,
   createAssociatedTokenAccountInstruction,
   createCloseAccountInstruction,
   createInitializeAccountInstruction,
@@ -33,6 +34,12 @@ import {
   JUPITER_ROUTE_DISCRIMINANT,
   JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT
 } from './assertRelayAllowedInstructions'
+
+vi.mock('../../utils/connections', () => ({
+  getConnection: () => ({
+    getMinimumBalanceForRentExemption: async () => 2_039_280
+  })
+}))
 
 const CLAIMABLE_TOKEN_PROGRAM_ID = new PublicKey(config.claimableTokenProgramId)
 
@@ -300,6 +307,85 @@ describe('Solana Relay', function () {
         async () => assertRelayAllowedInstructions(instructions),
         InvalidRelayInstructionError,
         'Mint not allowed'
+      )
+    })
+
+    it('should allow exactly one fee-payer-funded create without matching close when fee payer receives rent exemption via System Transfer', async function () {
+      const wallet = '0xe42b199d864489387bf64262874fc6472bcbc151'
+      const feePayer = config.solanaFeePayerWallets[0].publicKey
+      const fromPubkey = getRandomPublicKey()
+      const recipientAta = getRandomPublicKey()
+      const recipientOwner = getRandomPublicKey()
+      const rentExemptionLamports = 2_039_280
+      const instructions = [
+        SystemProgram.transfer({
+          fromPubkey,
+          toPubkey: feePayer,
+          lamports: rentExemptionLamports
+        }),
+        createAssociatedTokenAccountIdempotentInstruction(
+          feePayer,
+          recipientAta,
+          recipientOwner,
+          usdcMintKey
+        )
+      ]
+      await assertRelayAllowedInstructions(instructions, {
+        user: { wallet, is_verified: false },
+        feePayer: feePayer.toBase58()
+      })
+    })
+
+    it('should not allow fee-payer-funded create when fee payer receives less than rent exemption via System Transfer', async function () {
+      const wallet = '0xe42b199d864489387bf64262874fc6472bcbc151'
+      const feePayer = config.solanaFeePayerWallets[0].publicKey
+      const fromPubkey = getRandomPublicKey()
+      const recipientAta = getRandomPublicKey()
+      const recipientOwner = getRandomPublicKey()
+      const belowRentExemptionLamports = 2_039_279
+      const instructions = [
+        SystemProgram.transfer({
+          fromPubkey,
+          toPubkey: feePayer,
+          lamports: belowRentExemptionLamports
+        }),
+        createAssociatedTokenAccountIdempotentInstruction(
+          feePayer,
+          recipientAta,
+          recipientOwner,
+          usdcMintKey
+        )
+      ]
+      await assert.rejects(
+        async () =>
+          assertRelayAllowedInstructions(instructions, {
+            user: { wallet, is_verified: false },
+            feePayer: feePayer.toBase58()
+          }),
+        InvalidRelayInstructionError,
+        'Mismatched number of create and close instructions'
+      )
+    })
+
+    it('should not allow fee-payer-funded create without matching close when there is no reimbursement', async function () {
+      const feePayer = config.solanaFeePayerWallets[0].publicKey
+      const recipientAta = getRandomPublicKey()
+      const recipientOwner = getRandomPublicKey()
+      const instructions = [
+        createAssociatedTokenAccountIdempotentInstruction(
+          feePayer,
+          recipientAta,
+          recipientOwner,
+          usdcMintKey
+        )
+      ]
+      await assert.rejects(
+        async () =>
+          assertRelayAllowedInstructions(instructions, {
+            feePayer: feePayer.toBase58()
+          }),
+        InvalidRelayInstructionError,
+        'Mismatched number of create and close instructions'
       )
     })
   })

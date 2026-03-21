@@ -151,6 +151,7 @@
     "cipher-base": "1.0.7"
   },
   "overrides": {
+    "@jup-ag/api": "6.0.48",
     "@types/prop-types": "15.7.5",
     "@types/react": "19.0.0",
     "@types/bn.js": "5.1.0",

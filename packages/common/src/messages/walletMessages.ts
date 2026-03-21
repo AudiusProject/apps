@@ -77,6 +77,12 @@ export const walletMessages = {
     amountTooLow: 'Amount must be greater than zero.',
     invalidAddress: 'A valid Solana USDC wallet address is required',
     minCashTransfer: 'A minimum of $5 is required for cash withdrawals.',
+    ataCreationFeeRequired: (feeDollars: string) =>
+      `Amount must cover the one-time account creation fee of $${feeDollars}`,
+    noUsdcAccountFound: (feeDollars?: string) =>
+      feeDollars != null
+        ? `No USDC account found. A one-time fee of $${feeDollars} will be deducted.`
+        : 'No USDC account found',
     pleaseConfirm:
       'Please confirm you have reviewed this transaction and accept responsibility for errors.',
     youMustConfirm:

@@ -30,6 +30,7 @@ import {
 
 import { config } from '../../config'
 import { rateLimitTokenAccountCreation } from '../../redis'
+import { getConnection } from '../../utils/connections'
 
 import { InvalidRelayInstructionError } from './InvalidRelayInstructionError'
 import { isUserAbusive } from './antiAbuse'
@@ -79,6 +80,104 @@ const findSpecificMemo = (
   return null
 }
 
+/** Standard SPL token account data size (bytes) */
+const TOKEN_ACCOUNT_SIZE = 165
+
+/**
+ * Returns true if the tx contains an instruction that sends >= rent exemption
+ * lamports to the fee payer (System Transfer or Token CloseAccount).
+ */
+const feePayerReceivesRentExemptionOrMore = (
+  instructions: TransactionInstruction[],
+  feePayer: string,
+  rentExemptionTokenAccountLamports: number
+): boolean => {
+  for (const instr of instructions) {
+    if (instr.programId.equals(SystemProgram.programId)) {
+      try {
+        const type = SystemInstruction.decodeInstructionType(instr)
+        if (type === 'Transfer') {
+          const decoded = SystemInstruction.decodeTransfer(instr)
+          if (
+            decoded.toPubkey.toBase58() === feePayer &&
+            decoded.lamports >= rentExemptionTokenAccountLamports
+          ) {
+            return true
+          }
+        }
+      } catch {
+        /* skip invalid */
+      }
+    } else if (instr.programId.equals(TOKEN_PROGRAM_ID)) {
+      try {
+        const decoded = decodeInstruction(instr)
+        if (
+          isCloseAccountInstruction(decoded) &&
+          decoded.keys.destination.pubkey.toBase58() === feePayer
+        ) {
+          return true
+        }
+      } catch {
+        /* skip invalid */
+      }
+    }
+  }
+  return false
+}
+
+/**
+ * Counts fee-payer-funded ATA creates that have no matching close.
+ */
+const countUnmatchedFeePayerCreates = (
+  instructions: TransactionInstruction[],
+  feePayer: string
+): number => {
+  const feePayerCreatesWithoutClose: Set<string> = new Set()
+  const allAtaCreates: Array<{ associatedToken: PublicKey; payer: PublicKey }> =
+    []
+
+  for (const instr of instructions) {
+    if (!instr.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID)) continue
+    try {
+      const decoded = decodeAssociatedTokenAccountInstruction(instr)
+      if (
+        isCreateAssociatedTokenAccountInstruction(decoded) ||
+        isCreateAssociatedTokenAccountIdempotentInstruction(decoded)
+      ) {
+        const payer = decoded.keys.payer.pubkey.toBase58()
+        if (payer === feePayer) {
+          allAtaCreates.push({
+            associatedToken: decoded.keys.associatedToken.pubkey,
+            payer: decoded.keys.payer.pubkey
+          })
+        }
+      }
+    } catch {
+      /* skip */
+    }
+  }
+
+  for (const create of allAtaCreates) {
+    const hasMatchingClose = instructions.some((instr) => {
+      if (!instr.programId.equals(TOKEN_PROGRAM_ID)) return false
+      try {
+        const decoded = decodeInstruction(instr)
+        return (
+          isCloseAccountInstruction(decoded) &&
+          create.associatedToken.equals(decoded.keys.account.pubkey) &&
+          create.payer.equals(decoded.keys.destination.pubkey)
+        )
+      } catch {
+        return false
+      }
+    })
+    if (!hasMatchingClose) {
+      feePayerCreatesWithoutClose.add(create.associatedToken.toBase58())
+    }
+  }
+  return feePayerCreatesWithoutClose.size
+}
+
 /**
  * Only allow the createTokenAccount instruction of the Associated Token
  * Account program, provided it has matching close instructions.
@@ -88,7 +187,9 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
   instructionIndex: number,
   instruction: TransactionInstruction,
   instructions: TransactionInstruction[],
-  user?: Pick<Users, 'wallet' | 'is_verified'> | null
+  rentExemptionTokenAccountLamports: number,
+  user?: Pick<Users, 'wallet' | 'is_verified'> | null,
+  feePayer?: string | null
 ) => {
   const { wallet, is_verified: isVerified } = user ?? {}
   const decodedInstruction =
@@ -114,6 +215,12 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
       decodedInstruction.keys.owner.pubkey.toBase58() ===
       PAYMENT_ROUTER_WALLET.toBase58()
     ) {
+      return
+    }
+
+    // If the user pays for the create (not feePayer), there's no drain risk — allow without rate limit.
+    const createPayer = decodedInstruction.keys.payer.pubkey.toBase58()
+    if (feePayer && createPayer !== feePayer) {
       return
     }
 
@@ -145,38 +252,53 @@ const assertAllowedAssociatedTokenAccountProgramInstruction = async (
           )
       )
     if (
-      wallet &&
       matchingCreateInstructions.length !== matchingCloseInstructions.length
     ) {
-      try {
-        let memo: string | undefined
-        if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
-          memo = PAYOUT_WALLET_MEMO
-        } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
-          memo = PREPARE_WITHDRAWAL_MEMO
-        }
-        const isAbusive = await isUserAbusive(wallet)
-        if (isAbusive) {
+      // Reimbursement exception: allow exactly one fee-payer-funded create without
+      // matching close when fee payer receives >= rent exemption in the same tx.
+      if (
+        feePayer &&
+        feePayerReceivesRentExemptionOrMore(
+          instructions,
+          feePayer,
+          rentExemptionTokenAccountLamports
+        ) &&
+        countUnmatchedFeePayerCreates(instructions, feePayer) === 1
+      ) {
+        return
+      }
+      if (wallet) {
+        try {
+          let memo: string | undefined
+          if (findSpecificMemo(instructions, PAYOUT_WALLET_MEMO)) {
+            memo = PAYOUT_WALLET_MEMO
+          } else if (findSpecificMemo(instructions, PREPARE_WITHDRAWAL_MEMO)) {
+            memo = PREPARE_WITHDRAWAL_MEMO
+          }
+          const isAbusive = await isUserAbusive(wallet)
+          if (isAbusive) {
+            throw new InvalidRelayInstructionError(
+              instructionIndex,
+              'User is abusive'
+            )
+          }
+          // In this situation, we could be losing SOL because the user is allowed to
+          // close their own ATA and reclaim the rent that we've fronted, so
+          // rate limit it cautiously.
+          await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
+        } catch (e) {
+          const error = e as Error
           throw new InvalidRelayInstructionError(
             instructionIndex,
-            'User is abusive'
+            error.message
           )
         }
-        // In this situation, we could be losing SOL because the user is allowed to
-        // close their own ATA and reclaim the rent that we've fronted, so
-        // rate limit it cautiously.
-        await rateLimitTokenAccountCreation(wallet, !!isVerified, memo)
-      } catch (e) {
-        const error = e as Error
-        throw new InvalidRelayInstructionError(instructionIndex, error.message)
+      } else {
+        throw new InvalidRelayInstructionError(
+          instructionIndex,
+          `Mismatched number of create and close instructions for account: ${decodedInstruction.keys.associatedToken.pubkey.toBase58()}`
+        )
       }
-    } else if (
-      matchingCreateInstructions.length !== matchingCloseInstructions.length
-    ) {
-      throw new InvalidRelayInstructionError(
-        instructionIndex,
-        `Mismatched number of create and close instructions for account: ${decodedInstruction.keys.associatedToken.pubkey.toBase58()}`
-      )
     }
   } else {
     throw new InvalidRelayInstructionError(
@@ -332,6 +454,10 @@ export const JUPITER_ROUTE_DISCRIMINANT =
   computeInstructionDiscriminant('route')
 export const JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT =
   computeInstructionDiscriminant('shared_accounts_route')
+export const JUPITER_EXACT_OUT_ROUTE_DISCRIMINANT =
+  computeInstructionDiscriminant('exact_out_route')
+export const JUPITER_SHARED_ACCOUNTS_EXACT_OUT_ROUTE_DISCRIMINANT =
+  computeInstructionDiscriminant('shared_accounts_exact_out_route')
 
 const getJupiterInstructionType = (
   instruction: TransactionInstruction
@@ -342,10 +468,19 @@ const getJupiterInstructionType = (
 
   const instructionDiscriminant = instruction.data.slice(0, 8)
 
-  if (instructionDiscriminant.equals(JUPITER_ROUTE_DISCRIMINANT)) {
+  if (
+    instructionDiscriminant.equals(JUPITER_ROUTE_DISCRIMINANT) ||
+    instructionDiscriminant.equals(JUPITER_EXACT_OUT_ROUTE_DISCRIMINANT)
+  ) {
     return 'route'
-  } else if (
-    instructionDiscriminant.equals(JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT)
+  }
+  if (
+    instructionDiscriminant.equals(
+      JUPITER_SHARED_ACCOUNTS_ROUTE_DISCRIMINANT
+    ) ||
+    instructionDiscriminant.equals(
+      JUPITER_SHARED_ACCOUNTS_EXACT_OUT_ROUTE_DISCRIMINANT
+    )
   ) {
     return 'sharedAccountRoute'
   }
@@ -519,6 +654,10 @@ export const assertRelayAllowedInstructions = async (
     feePayer?: string
   }
 ) => {
+  const connection = getConnection()
+  const rentExemptionTokenAccountLamports =
+    await connection.getMinimumBalanceForRentExemption(TOKEN_ACCOUNT_SIZE)
+
   for (let i = 0; i < instructions.length; i++) {
     const instruction = instructions[i]
     switch (instruction.programId.toBase58()) {
@@ -527,7 +666,9 @@ export const assertRelayAllowedInstructions = async (
           i,
           instruction,
           instructions,
-          options?.user
+          rentExemptionTokenAccountLamports,
+          options?.user,
+          options?.feePayer
         )
         break
       case TOKEN_PROGRAM_ID.toBase58():

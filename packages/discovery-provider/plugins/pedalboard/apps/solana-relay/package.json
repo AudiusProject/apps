@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@audius/spl": "*",
-    "@jup-ag/api": "6.0.44",
+    "@jup-ag/api": "6.0.48",
     "@metaplex-foundation/umi": "1.2.0",
     "@metaplex-foundation/umi-bundle-defaults": "1.2.0",
     "@metaplex-foundation/umi-uploader-irys": "1.2.0",
