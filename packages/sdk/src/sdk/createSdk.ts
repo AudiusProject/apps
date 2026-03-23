@@ -50,9 +50,10 @@ export const createSdk = (config: SdkConfig) => {
     })
 
   const apiEndpoint =
-    config.environment === 'development'
+    config.apiEndpoint ??
+    (config.environment === 'development'
       ? developmentConfig.network.apiEndpoint
-      : productionConfig.network.apiEndpoint
+      : productionConfig.network.apiEndpoint)
   const basePath = `${apiEndpoint}/v1`
 
   const middleware: Middleware[] = []
@@ -115,8 +116,7 @@ export const createSdk = (config: SdkConfig) => {
     // Static bearerToken takes precedence; otherwise use the dynamic store
     // so PKCE login can inject tokens after construction.
     accessToken:
-      bearerToken ??
-      (() => tokenStore.getAccessToken().then((t) => (t ? `Bearer ${t}` : '')))
+      bearerToken ?? (() => tokenStore.getAccessToken().then((t) => t || ''))
   })
 
   // Initialize API clients
