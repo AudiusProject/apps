@@ -63,7 +63,10 @@ export const AccountListContent = ({
     if (mainContentRef.current) {
       const { height } = mainContentRef.current.getBoundingClientRect()
       setContentHeight(height)
+      return
     }
+    // OAuth routes render outside WebPlayer main content, so fall back to viewport height.
+    setContentHeight(window.innerHeight)
   }, [mainContentRef])
 
   const onUserSelected = useCallback(
