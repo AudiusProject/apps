@@ -115,12 +115,14 @@ const config = {
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
       '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
-      // Like SDK: bundle from source; package.json main points at dist/.
+      // Workspace packages used by SDK (and similar) whose package.json main is
+      // dist/* — Metro must point at source so CI/CodePush works without turbo build.
       '@audius/fixed-decimal': path.resolve(
         __dirname,
         '../fixed-decimal/src/index.ts'
       ),
       '@audius/spl': path.resolve(__dirname, '../spl/src/index.ts'),
+      '@audius/eth': path.resolve(__dirname, '../eth/src/index.ts'),
 
       // The following imports are needed for @audius/common
       // and @audius/web to compile correctly
@@ -223,6 +225,13 @@ const config = {
       if (moduleName === '@audius/spl') {
         return {
           filePath: path.resolve(__dirname, '../spl/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/eth') {
+        return {
+          filePath: path.resolve(__dirname, '../eth/src/index.ts'),
           type: 'sourceFile'
         }
       }
