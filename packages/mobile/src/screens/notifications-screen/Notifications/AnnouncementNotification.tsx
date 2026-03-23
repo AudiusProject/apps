@@ -1,6 +1,8 @@
 import { useCallback } from 'react'
 
+import { Name } from '@audius/common/models'
 import type { AnnouncementNotification as AnnouncementNotificationType } from '@audius/common/store'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { View } from 'react-native'
 import Markdown from 'react-native-markdown-display'
 
@@ -41,14 +43,23 @@ export const AnnouncementNotification = (
   props: AnnouncementNotificationProps
 ) => {
   const { notification } = props
-  const { title, shortDescription } = notification
+  const { title, shortDescription, route, dashboardAnnouncementId } =
+    notification
   const styles = useStyles()
 
   const navigation = useNotificationNavigation()
+  const record = useRecord()
 
   const handlePress = useCallback(() => {
+    record(
+      make(Name.NOTIFICATIONS_CLICK_TILE, {
+        kind: 'announcement',
+        link_to: route ?? '',
+        dashboardAnnouncementId
+      })
+    )
     navigation.navigate(notification)
-  }, [navigation, notification])
+  }, [dashboardAnnouncementId, navigation, notification, record, route])
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
