@@ -50,11 +50,11 @@ export interface AnnouncementNotificationActionData {
      */
     route: string;
     /**
-     * Dashboard (Supabase) announcement id for analytics joins; API JSON uses snake_case.
+     * 
      * @type {string}
      * @memberof AnnouncementNotificationActionData
      */
-    dashboardAnnouncementId?: string;
+    dashboardAnnouncementId?: string | null;
 }
 
 /**
@@ -86,7 +86,7 @@ export function AnnouncementNotificationActionDataFromJSONTyped(json: any, ignor
         'shortDescription': json['short_description'],
         'longDescription': json['long_description'],
         'route': json['route'],
-        'dashboardAnnouncementId': json['dashboard_announcement_id'] ?? json['dashboardAnnouncementId'],
+        'dashboardAnnouncementId': !exists(json, 'dashboard_announcement_id') ? undefined : json['dashboard_announcement_id'],
     };
 }
 
@@ -104,7 +104,7 @@ export function AnnouncementNotificationActionDataToJSON(value?: AnnouncementNot
         'short_description': value.shortDescription,
         'long_description': value.longDescription,
         'route': value.route,
-        ...(value.dashboardAnnouncementId === undefined ? {} : { 'dashboard_announcement_id': value.dashboardAnnouncementId }),
+        'dashboard_announcement_id': value.dashboardAnnouncementId,
     };
 }
 
