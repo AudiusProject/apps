@@ -114,6 +114,11 @@ const config = {
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
       '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
+      // Like SDK: resolve from source so Metro does not need packages/fixed-decimal/dist (see package.json main).
+      '@audius/fixed-decimal': path.resolve(
+        __dirname,
+        '../fixed-decimal/src/index.ts'
+      ),
 
       // The following imports are needed for @audius/common
       // and @audius/web to compile correctly
@@ -180,6 +185,13 @@ const config = {
       if (moduleName === '@audius/sdk') {
         return {
           filePath: path.resolve(__dirname, '../sdk/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/fixed-decimal') {
+        return {
+          filePath: path.resolve(__dirname, '../fixed-decimal/src/index.ts'),
           type: 'sourceFile'
         }
       }

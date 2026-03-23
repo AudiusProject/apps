@@ -136,4 +136,10 @@ const Config: CliConfigInterface = {
   }
 }
 
+// CommonJS `require()` (used by the code-push CLI) only attaches named exports to `module.exports`.
+// A default export ends up as `.default`, so `config.setReleaseHistory` would be undefined without these.
+export const bundleUploader = Config.bundleUploader
+export const getReleaseHistory = Config.getReleaseHistory
+export const setReleaseHistory = Config.setReleaseHistory
+
 export default Config
