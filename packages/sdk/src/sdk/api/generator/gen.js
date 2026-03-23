@@ -2,6 +2,7 @@ import { exec } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import { promisify } from 'util'
+
 import { Command } from 'commander'
 
 const execAsync = promisify(exec)
