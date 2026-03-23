@@ -41,6 +41,7 @@ import {
 
 import { ArtistCoinTracksSection } from './ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
+import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
@@ -314,6 +315,7 @@ const SearchExplorePage = ({
               <RecommendedTracksSection />
             )}
             {showPlaylistContent && <FeaturedPlaylistsSection />}
+            {categoryKey === CategoryView.ALL && <FanClubsExploreSection />}
             {showTrackContent && <ArtistCoinTracksSection />}
             {showTrackContent && showUserContextualContent && (
               <RecentlyPlayedSection />

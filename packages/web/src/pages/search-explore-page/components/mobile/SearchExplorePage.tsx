@@ -40,6 +40,7 @@ import {
 } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
+import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
 import { FeelingLuckySection } from '../desktop/FeelingLuckySection'
@@ -242,6 +243,7 @@ const SearchExplorePage = ({
             <RecentlyPlayedSection />
           )}
           {showPlaylistContent && <FeaturedPlaylistsSection />}
+          {categoryKey === CategoryView.ALL && <FanClubsExploreSection />}
           {showTrackContent && <FeaturedRemixContestsSection />}
           {showUserContent && <ArtistSpotlightSection />}
           {showUserContent && <LabelSpotlightSection />}

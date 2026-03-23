@@ -5,6 +5,7 @@ export const exploreMessages = {
   artistCoinExclusives: 'Fan Club Exclusives',
   coinGatedTracks: 'Coin Gated Tracks',
   featuredPlaylists: 'Community Playlists',
+  fanClubs: 'Fan Clubs',
   featuredRemixContests: 'Featured Remix Contests',
   forYou: 'For You',
   artistSpotlight: 'Artist Spotlight',

@@ -4,59 +4,63 @@ import { useCurrentAccountUser, useArtistCreatedCoin } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
-import {
-  COINS_CREATE_PAGE,
-  AUDIUS_ARTIST_COINS_HELP_LINK
-} from '@audius/common/src/utils/route'
+import { COINS_CREATE_PAGE } from '@audius/common/src/utils/route'
 import {
   Box,
   Button,
   Flex,
-  IconCheck,
+  IconButton,
+  IconClose,
   IconVerified,
   Paper,
   Text,
   TextInput,
   TextInputSize,
-  IconQuestionCircle,
-  spacing,
-  PlainButton,
   IconSearch,
-  Tooltip
+  Tooltip,
+  useTheme
 } from '@audius/harmony'
 import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
-import { ExternalLink } from 'components/link'
 import Page from 'components/page/Page'
 import { isMobile } from 'utils/clientUtil'
+import zIndex from 'utils/zIndex'
 
 import { ArtistCoinsTable } from '../artist-coins-launchpad-page/components/ArtistCoinsTable'
 
 import { MobileArtistCoinsExplorePage } from './MobileArtistCoinsExplorePage'
 
 const SEARCH_WIDTH = 400
-const CHECKLIST_WIDTH = 340
 const MIN_WIDTH = 620
+
+const LAUNCH_BANNER_DISMISSED_KEY = 'audius:fan-clubs-launch-banner-dismissed'
+
+const readLaunchBannerDismissed = () => {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  return window.localStorage.getItem(LAUNCH_BANNER_DISMISSED_KEY) === '1'
+}
 
 const messages = {
   searchPlaceholder: 'Search',
   getStarted: 'Get Started',
   launchYourOwn: 'Launch Your Own Fan Club!',
+  launchYourClubFallback: 'Launch your club',
   required: 'Required',
-  checklistItems: [
-    'Launch your fan club token',
-    'Start collecting trading fees',
-    'Offer exclusive perks to your fans'
-  ],
-  help: 'Help',
-  getStartedTooltip: 'Verified users only. Request verification in settings.'
+  getStartedTooltip: 'Verified users only. Request verification in settings.',
+  dismissBanner: 'Dismiss'
 }
 
 // Desktop version
 const DesktopArtistCoinsExplorePage = () => {
   const navigate = useNavigate()
+  const { motion, spacing } = useTheme()
   const [searchValue, setSearchValue] = useState('')
+  const [isLaunchBannerDismissed, setIsLaunchBannerDismissed] = useState(
+    readLaunchBannerDismissed
+  )
   const { data: currentUser } = useCurrentAccountUser()
   const { data: createdCoin, isPending: isLoadingCreatedCoin } =
     useArtistCreatedCoin(currentUser?.user_id)
@@ -74,12 +78,34 @@ const DesktopArtistCoinsExplorePage = () => {
     setSearchValue(e.target.value)
   }, [])
 
+  const handleDismissLaunchBanner = useCallback(() => {
+    setIsLaunchBannerDismissed(true)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LAUNCH_BANNER_DISMISSED_KEY, '1')
+    }
+  }, [])
+
+  const shouldShowLaunchCta =
+    (!hasExistingArtistCoin && !isLoadingCreatedCoin) ||
+    !isLaunchpadVerificationEnabled
+
+  const launchCtaReserveY = shouldShowLaunchCta
+    ? spacing.xl +
+      (isLaunchBannerDismissed
+        ? spacing.unit22
+        : spacing['5xl'] + spacing['3xl'])
+    : 0
+
   return (
     <Page
       title={walletMessages.artistCoins.title}
       css={{ minWidth: MIN_WIDTH }}
     >
-      <Flex column gap='xl'>
+      <Flex
+        column
+        gap='xl'
+        css={{ paddingBottom: launchCtaReserveY }}
+      >
         <Flex
           p='3xl'
           direction='column'
@@ -113,100 +139,133 @@ const DesktopArtistCoinsExplorePage = () => {
           </Box>
         </Flex>
 
-        {(!hasExistingArtistCoin && !isLoadingCreatedCoin) ||
-        !isLaunchpadVerificationEnabled ? (
-          <Paper p='xl' gap='xl' border='default' borderRadius='m'>
-            <Flex gap='xl' w='100%' wrap='wrap'>
+        <ArtistCoinsTable searchQuery={searchValue} />
+      </Flex>
+
+      {shouldShowLaunchCta ? (
+        <Box
+          css={{
+            position: 'fixed',
+            bottom: 'calc(var(--play-bar-height) + 24px)',
+            left: 'calc(var(--nav-width) + 48px)',
+            right: 48,
+            zIndex: zIndex.NAVIGATOR_POPUP
+          }}
+        >
+          {isLaunchBannerDismissed ? (
+            <Flex
+              ph='xl'
+              pv='m'
+              justifyContent='flex-start'
+              backgroundColor='white'
+              border='strong'
+              borderRadius='m'
+            >
+              <Button
+                onClick={handleGetStarted}
+                variant='secondary'
+                color='coinGradient'
+              >
+                {messages.launchYourClubFallback}
+              </Button>
+            </Flex>
+          ) : (
+            <Paper
+              border='strong'
+              borderRadius='m'
+              shadow='mid'
+              w='100%'
+              css={{
+                position: 'relative',
+                overflow: 'hidden',
+                backdropFilter: 'blur(18px)',
+                WebkitBackdropFilter: 'blur(18px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                transition: `opacity ${motion.expressive}`
+              }}
+            >
+              <IconButton
+                size='s'
+                color='subdued'
+                icon={IconClose}
+                onClick={handleDismissLaunchBanner}
+                aria-label={messages.dismissBanner}
+                css={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  zIndex: 1
+                }}
+              />
               <Flex
-                column
+                ph='xl'
+                pv='l'
+                pr='3xl'
                 gap='l'
+                alignItems='center'
                 justifyContent='space-between'
-                flex='2 1 0'
-                css={{ minWidth: 'max-content' }}
+                w='100%'
+                css={{
+                  flexWrap: 'wrap',
+                  rowGap: 16,
+                  columnGap: 24
+                }}
               >
                 <Flex
-                  alignItems='center'
-                  justifyContent='space-between'
-                  wrap='nowrap'
+                  column
                   gap='s'
-                  css={{ minWidth: 'max-content' }}
+                  css={{ flex: '1 1 240px', minWidth: 0 }}
                 >
-                  <Text variant='heading'>{messages.launchYourOwn}</Text>
+                  <Text variant='heading' size='m'>
+                    {messages.launchYourOwn}
+                  </Text>
                   <Tooltip text={messages.getStartedTooltip} placement='top'>
                     <Flex
-                      pl='s'
-                      gap='s'
                       alignItems='center'
-                      border='default'
+                      gap='s'
+                      border='strong'
                       borderRadius='m'
-                      css={{ overflow: 'hidden' }}
+                      backgroundColor='white'
+                      css={{ alignSelf: 'flex-start', overflow: 'hidden' }}
                     >
-                      <Text variant='body' size='s'>
-                        {messages.required}
-                      </Text>
+                      <Flex ph='s' pv='xs'>
+                        <Text variant='body' size='s'>
+                          {messages.required}
+                        </Text>
+                      </Flex>
                       <Flex
                         ph='s'
                         pv='xs'
                         backgroundColor='surface2'
-                        borderLeft='default'
+                        borderLeft='strong'
                       >
                         <IconVerified size='s' />
                       </Flex>
                     </Flex>
                   </Tooltip>
                 </Flex>
-
-                <Flex>
+                <Box
+                  css={{
+                    flex: '1 1 200px',
+                    minWidth: 0,
+                    display: 'flex',
+                    justifyContent: 'flex-end'
+                  }}
+                >
                   <Button
                     onClick={handleGetStarted}
                     fullWidth
+                    css={{ maxWidth: 360 }}
                     color='coinGradient'
                   >
                     {messages.getStarted}
                   </Button>
-                </Flex>
+                </Box>
               </Flex>
-
-              <Box
-                border='default'
-                borderRadius='m'
-                p='l'
-                backgroundColor='surface1'
-                flex='1 1 0'
-                css={{ minWidth: CHECKLIST_WIDTH }}
-              >
-                <Flex column gap='s'>
-                  {messages.checklistItems.map((item) => (
-                    <Flex key={item} alignItems='center' gap='s'>
-                      <IconCheck size='s' color='default' />
-                      <Text variant='body' size='l'>
-                        {item}
-                      </Text>
-                    </Flex>
-                  ))}
-                </Flex>
-
-                {/* With absolute positioning, must be rendered after the checklist items to have higher z-index */}
-                <PlainButton
-                  iconLeft={IconQuestionCircle}
-                  asChild
-                  css={{
-                    position: 'absolute',
-                    top: spacing.l,
-                    right: spacing.l
-                  }}
-                >
-                  <ExternalLink to={AUDIUS_ARTIST_COINS_HELP_LINK}>
-                    {messages.help}
-                  </ExternalLink>
-                </PlainButton>
-              </Box>
-            </Flex>
-          </Paper>
-        ) : null}
-
-        <ArtistCoinsTable searchQuery={searchValue} />
-      </Flex>
+            </Paper>
+          )}
+        </Box>
+      ) : null}
     </Page>
   )
 }
