@@ -7,8 +7,8 @@ import { Notifications } from 'react-native-notifications'
 import type { Registered, Notification } from 'react-native-notifications'
 import { requestNotifications } from 'react-native-permissions'
 
-import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import { track, make } from 'app/services/analytics'
+import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import { queryClient } from 'app/services/query-client'
 import { audiusSdk } from 'app/services/sdk/audius-sdk'
 import { EventNames } from 'app/types/analytics'
@@ -40,9 +40,9 @@ type NotificationNavigation = { navigate: (notification: any) => void }
 async function reportNotificationCampaignPushOpen(
   campaignId: string
 ): Promise<void> {
-  const account = queryClient.getQueryData(
-    getCurrentAccountQueryKey()
-  ) as AccountState | undefined
+  const account = queryClient.getQueryData(getCurrentAccountQueryKey()) as
+    | AccountState
+    | undefined
   const userId = account?.userId
   if (userId == null) {
     return
