@@ -8,7 +8,8 @@ import {
 
 import {
   useUSDCBalance,
-  useDestinationUsdcAccountCheck
+  useDestinationUsdcAccountCheck,
+  useRootWalletUsdcAccountCheck
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
@@ -80,6 +81,10 @@ export const EnterTransferDetails = () => {
     methodValue === WithdrawMethod.MANUAL_TRANSFER ? addressValue : null
   )
 
+  const { data: rootWalletUsdcStatus } = useRootWalletUsdcAccountCheck({
+    enabled: methodValue === WithdrawMethod.COINFLOW
+  })
+
   const isInsufficientForAtaFee = useMemo(() => {
     if (
       methodValue !== WithdrawMethod.MANUAL_TRANSFER ||
@@ -93,6 +98,15 @@ export const EnterTransferDetails = () => {
     const feeCents = Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
     return amountCents < feeCents || amountCents > balanceNumberCents
   }, [methodValue, destinationUsdcStatus, value, balanceNumberCents])
+
+  const coinflowSetupFeeUsdc =
+    rootWalletUsdcStatus && !rootWalletUsdcStatus.hasUsdcAccount
+      ? rootWalletUsdcStatus.ataCreationFeeUsdc
+      : 0
+
+  // No separate minimum validation for the Coinflow setup fee — the fee is
+  // deducted from the withdrawal amount, and the existing $5 minimum still applies.
+  const isInsufficientForCoinflowSetup = false
 
   const [humanizedValue, setHumanizedValue] = useState(
     value ? decimalIntegerToHumanReadable(value) : '0'
@@ -168,6 +182,9 @@ export const EnterTransferDetails = () => {
         ? {
             ataCreationFeeUsdc: destinationUsdcStatus.ataCreationFeeUsdc
           }
+        : {}),
+      ...(coinflowSetupFeeUsdc > 0
+        ? { ataCreationFeeUsdc: coinflowSetupFeeUsdc }
         : {})
     })
   }, [
@@ -178,6 +195,7 @@ export const EnterTransferDetails = () => {
     setAddressTouched,
     setFieldError,
     destinationUsdcStatus,
+    coinflowSetupFeeUsdc,
     value,
     balanceNumberCents
   ])
@@ -207,20 +225,26 @@ export const EnterTransferDetails = () => {
                 amountTouched &&
                 !!(
                   amountError ||
-                  (isInsufficientForAtaFee && destinationUsdcStatus)
+                  (isInsufficientForAtaFee && destinationUsdcStatus) ||
+                  isInsufficientForCoinflowSetup
                 )
               }
               helperText={
                 amountTouched &&
                 (amountError ||
-                  (isInsufficientForAtaFee && destinationUsdcStatus))
+                  (isInsufficientForAtaFee && destinationUsdcStatus) ||
+                  isInsufficientForCoinflowSetup)
                   ? (amountError ??
-                    (destinationUsdcStatus &&
-                    !destinationUsdcStatus.hasUsdcAccount
-                      ? walletMessages.errors.ataCreationFeeRequired(
-                          destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                    (isInsufficientForCoinflowSetup
+                      ? walletMessages.errors.coinflowSetupFeeRequired(
+                          coinflowSetupFeeUsdc.toFixed(2)
                         )
-                      : undefined))
+                      : destinationUsdcStatus &&
+                          !destinationUsdcStatus.hasUsdcAccount
+                        ? walletMessages.errors.ataCreationFeeRequired(
+                            destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                          )
+                        : undefined))
                   : undefined
               }
             />
@@ -241,9 +265,18 @@ export const EnterTransferDetails = () => {
         />
       ) : null}
       {methodValue === WithdrawMethod.COINFLOW ? (
-        <Text variant='body' size='m'>
-          {walletMessages.cashTransferDescription}
-        </Text>
+        <Flex column gap='s'>
+          <Text variant='body' size='m'>
+            {walletMessages.cashTransferDescription}
+          </Text>
+          {coinflowSetupFeeUsdc > 0 ? (
+            <Text variant='body' size='s' color='warning'>
+              {walletMessages.cashTransferSetupFee(
+                coinflowSetupFeeUsdc.toFixed(2)
+              )}
+            </Text>
+          ) : null}
+        </Flex>
       ) : (
         <Flex column gap='l'>
           <Flex column gap='s'>

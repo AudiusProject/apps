@@ -93,6 +93,7 @@ export const QUERY_KEYS = {
   tokenPrice: 'tokenPrice',
   usdcBalance: 'usdcBalance',
   destinationUsdcAccount: 'destinationUsdcAccount',
+  rootWalletUsdcAccount: 'rootWalletUsdcAccount',
   fileSizes: 'fileSizes',
   sendTokens: 'sendTokens',
   managedAccounts: 'managedAccounts',

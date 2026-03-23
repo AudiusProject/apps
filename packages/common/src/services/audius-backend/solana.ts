@@ -593,22 +593,31 @@ const createUserFundedAta = async ({
       feePayer,
       keypair.publicKey
     ),
-    // Close root wallet USDC ATA
-    createCloseAccountInstruction(
-      rootWalletUsdcAta,
-      feePayer,
-      keypair.publicKey
-    ),
     // Close fee payer wSOL ATA (unwrap to fee payer)
-    createCloseAccountInstruction(feePayerWsolAta, feePayer, feePayer),
-    // Create recipient USDC ATA (fee payer)
-    createAssociatedTokenAccountIdempotentInstruction(
-      feePayer,
-      destination,
-      destinationWallet,
-      mint
-    )
+    createCloseAccountInstruction(feePayerWsolAta, feePayer, feePayer)
   ]
+
+  // When the destination IS the root wallet's own USDC ATA (e.g. Coinflow
+  // withdraw-to-bank), keep it open — Coinflow needs it for the withdrawal.
+  // Otherwise close it and create the separate destination ATA.
+  const isDestinationRootAta = destination.equals(rootWalletUsdcAta)
+  if (!isDestinationRootAta) {
+    prefundInstructions.push(
+      // Close root wallet USDC ATA (reclaim rent to fee payer)
+      createCloseAccountInstruction(
+        rootWalletUsdcAta,
+        feePayer,
+        keypair.publicKey
+      ),
+      // Create recipient USDC ATA (fee payer)
+      createAssociatedTokenAccountIdempotentInstruction(
+        feePayer,
+        destination,
+        destinationWallet,
+        mint
+      )
+    )
+  }
 
   const prefundTx = await sdk.services.solanaClient.buildTransaction({
     feePayer,

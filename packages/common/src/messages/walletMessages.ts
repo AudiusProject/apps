@@ -15,6 +15,8 @@ export const walletMessages = {
   transactionHistory: 'Transaction History',
   cashTransferDescription:
     'Transfer your cash balance to your bank account or debit card. $5 minimum.',
+  cashTransferSetupFee: (feeDollars: string) =>
+    `A one-time setup fee of $${feeDollars} will be deducted from your first withdrawal to cover account creation.`,
   back: 'Back',
   tryAgain: 'Try Again?',
   error: 'An error occured.',
@@ -77,6 +79,8 @@ export const walletMessages = {
     amountTooLow: 'Amount must be greater than zero.',
     invalidAddress: 'A valid Solana USDC wallet address is required',
     minCashTransfer: 'A minimum of $5 is required for cash withdrawals.',
+    coinflowSetupFeeRequired: (feeDollars: string) =>
+      `A one-time setup fee of $${feeDollars} will be deducted from your withdrawal amount.`,
     ataCreationFeeRequired: (feeDollars: string) =>
       `Amount must cover the one-time account creation fee of $${feeDollars}`,
     noUsdcAccountFound: (feeDollars?: string) =>
