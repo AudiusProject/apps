@@ -72,7 +72,7 @@ export default function App() {
           setProfile({
             handle: user.handle ?? 'Unknown',
             name: user.name,
-            userId: String(user.userId ?? '')
+            userId: String(user.id ?? '')
           })
           setScreen('signed-in')
         })
@@ -97,7 +97,7 @@ export default function App() {
       setProfile({
         handle: user.handle ?? 'Unknown',
         name: user.name,
-        userId: String(user.userId ?? '')
+        userId: String(user.id ?? '')
       })
       setScreen('signed-in')
     } catch (e: unknown) {

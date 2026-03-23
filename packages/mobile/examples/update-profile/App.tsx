@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   StyleSheet,
@@ -9,25 +9,131 @@ import {
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import * as Linking from 'expo-linking'
+import { type User } from '@audius/sdk'
+
 import { getSDK, config } from './src/sdk'
 
 type Screen = 'home' | 'signed-in'
+
+/** Stable ID for this app session — share with support when debugging. */
+function createSessionId(): string {
+  try {
+    const c = globalThis.crypto as Crypto | undefined
+    if (c?.randomUUID) {
+      return c.randomUUID().replace(/-/g, '').slice(0, 16)
+    }
+  } catch {
+    /* noop */
+  }
+  return `s${Math.random().toString(36).slice(2, 14)}`
+}
+
+function newOperationId(): string {
+  try {
+    const c = globalThis.crypto as Crypto | undefined
+    if (c?.randomUUID) {
+      return c.randomUUID().replace(/-/g, '').slice(0, 8)
+    }
+  } catch {
+    /* noop */
+  }
+  return Math.random().toString(36).slice(2, 10)
+}
+
+/** Headers API gateways often attach — helps match client logs to server traces. */
+function extractServerRequestIds(res: Response): Record<string, string> {
+  const out: Record<string, string> = {}
+  const priority = [
+    'x-request-id',
+    'x-correlation-id',
+    'cf-ray',
+    'x-amzn-requestid',
+    'x-envoy-decorator-operation',
+    'traceparent'
+  ]
+  for (const name of priority) {
+    const v = res.headers.get(name)
+    if (v) {
+      out[name] = v.trim()
+    }
+  }
+  res.headers.forEach((value, key) => {
+    if (/request.id|correlation|trace/i.test(key) && out[key] === undefined) {
+      out[key] = value.trim()
+    }
+  })
+  return out
+}
+
+function primaryRequestId(ids: Record<string, string>): string | undefined {
+  return (
+    ids['x-request-id'] ??
+    ids['x-correlation-id'] ??
+    ids['cf-ray'] ??
+    Object.values(ids)[0]
+  )
+}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string; userId: string } | null>(null)
+  const [profile, setProfile] = useState<User | null>(null)
   const [description, setDescription] = useState('')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+
+  const sessionIdRef = useRef(createSessionId())
+  const opIdRef = useRef(`boot-${newOperationId()}`)
 
   const audiusSdk = getSDK()
+  const formatErrorForDebug = useCallback(async (error: unknown) => {
+    const base = {
+      message: error instanceof Error ? error.message : String(error)
+    } as Record<string, unknown>
+
+    if (error != null && typeof error === 'object' && 'response' in error) {
+      const response = (error as { response?: Response }).response
+      if (response != null) {
+        const serverRequestIds = extractServerRequestIds(response)
+        const rid = primaryRequestId(serverRequestIds)
+        const bodyText = await response.text().catch(() => '')
+        return {
+          ...base,
+          status: response.status,
+          statusText: response.statusText,
+          bodyText,
+          serverRequestIds,
+          ...(rid !== undefined ? { requestId: rid } : {})
+        }
+      }
+    }
+    return base
+  }, [])
+
+  const logDebug = useCallback((message: string, payload?: unknown) => {
+    const timestamp = new Date().toISOString().slice(11, 19)
+    const details =
+      payload === undefined
+        ? ''
+        : ` ${JSON.stringify(
+            payload,
+            (_, value) => (value instanceof Error ? value.message : value),
+            2
+          )}`
+    const line = `[sess:${sessionIdRef.current}][op:${opIdRef.current}] [${timestamp}] ${message}${details}`
+    console.log(`[update-profile] ${line}`)
+    setDebugLogs((prev) => [...prev.slice(-79), line])
+  }, [])
 
   useEffect(() => {
     let cancelled = false
+    opIdRef.current = `restore-${newOperationId()}`
+    logDebug('Checking existing OAuth session')
     audiusSdk.oauth.isAuthenticated().then((authenticated) => {
+      logDebug('oauth.isAuthenticated resolved', { authenticated })
       if (cancelled) return
       if (!authenticated) {
         setLoading(false)
@@ -36,18 +142,30 @@ export default function App() {
       audiusSdk.oauth
         .getUser()
         .then((user) => {
-          if (cancelled) return
-          setProfile({
-            handle: user.handle ?? 'Unknown',
-            userId: String(user.userId ?? '')
+          logDebug('oauth.getUser succeeded (session restore)', {
+            handle: user.handle,
+            id: user.id
           })
+          if (cancelled) return
+          setProfile(user)
           setScreen('signed-in')
-          return audiusSdk.users.getUser({ id: String(user.userId ?? '') })
+          logDebug('Fetching profile via users.getUser (session restore)', {
+            id: user.id
+          })
+          return audiusSdk.users.getUser({ id: user.id })
         })
         .then((userRes) => {
+          logDebug('users.getUser resolved (session restore)', {
+            hasData: Boolean(userRes?.data),
+            bioLength: userRes?.data?.bio?.length ?? 0
+          })
           if (userRes?.data?.bio != null) setDescription(userRes.data.bio)
         })
-        .catch(() => {})
+        .catch(async (e) => {
+          console.error('Failed to get user', e)
+          const details = await formatErrorForDebug(e)
+          logDebug('Session restore failed', details)
+        })
         .finally(() => {
           if (!cancelled) setLoading(false)
         })
@@ -55,62 +173,91 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [audiusSdk.oauth, audiusSdk.users, formatErrorForDebug, logDebug])
 
   const handleSignIn = useCallback(async () => {
+    opIdRef.current = `signin-${newOperationId()}`
     setError(null)
     setLoading(true)
     try {
+      logDebug('Starting oauth.login')
       await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
-      const user = await audiusSdk.oauth.getUser()
-      setProfile({
-        handle: user.handle ?? 'Unknown',
-        userId: String(user.userId ?? '')
+      logDebug('oauth.login succeeded')
+      logDebug('Token state after login', {
+        isAuthenticated: await audiusSdk.oauth.isAuthenticated(),
+        hasRefreshToken: await audiusSdk.oauth.hasRefreshToken()
       })
+      const user = await audiusSdk.oauth.getUser()
+      logDebug('oauth.getUser succeeded (interactive sign-in)', {
+        handle: user.handle,
+        id: user.id
+      })
+      setProfile(user)
       setScreen('signed-in')
       try {
-        const userRes = await audiusSdk.users.getUser({ id: String(user.userId ?? '') })
+        logDebug('Fetching profile via users.getUser (interactive sign-in)', {
+          id: user.id
+        })
+        const userRes = await audiusSdk.users.getUser({ id: user.id })
+        logDebug('users.getUser resolved (interactive sign-in)', {
+          hasData: Boolean(userRes?.data),
+          bioLength: userRes?.data?.bio?.length ?? 0
+        })
         setDescription(userRes?.data?.bio ?? '')
-      } catch {
+      } catch (e) {
+        const details = await formatErrorForDebug(e)
+        logDebug('users.getUser failed after sign-in', details)
         setDescription('')
       }
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('Sign-in flow failed', details)
       setError(e instanceof Error ? e.message : 'Sign-in failed')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [audiusSdk.oauth, audiusSdk.users, formatErrorForDebug, logDebug])
 
   const handleSignOut = useCallback(async () => {
+    logDebug('Starting oauth.logout')
     await audiusSdk.oauth.logout().catch(() => {})
+    logDebug('oauth.logout completed')
     setProfile(null)
     setDescription('')
     setResult(null)
     setTxHash(null)
     setScreen('home')
     setError(null)
-  }, [])
+  }, [audiusSdk.oauth, logDebug])
 
   const handleUpdate = useCallback(async () => {
     if (!profile) return
+    opIdRef.current = `update-${newOperationId()}`
     setUpdateLoading(true)
     setResult(null)
     setTxHash(null)
     try {
+      logDebug('Calling users.updateUser', {
+        id: profile.id,
+        bioLength: description.trim().length
+      })
       const res = await audiusSdk.users.updateUser({
-        id: profile.userId,
-        userId: profile.userId,
+        id: profile.id,
+        userId: profile.id,
         metadata: { bio: description.trim() }
       })
       const hash = res?.transactionHash ?? (res as { transaction_hash?: string })?.transaction_hash ?? null
+      logDebug('users.updateUser succeeded', { transactionHash: hash })
       setTxHash(hash ?? null)
       setResult('Description updated.')
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('users.updateUser failed', details)
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setUpdateLoading(false)
     }
-  }, [profile, description])
+  }, [audiusSdk.users, description, logDebug, profile])
 
   if (!config.isConfigured) {
     return (
@@ -135,7 +282,7 @@ export default function App() {
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.profileRow}>
-            <Text style={styles.handle}>@{profile.handle}</Text>
+            <Text style={styles.handle}>@{profile.handle ?? 'user'}</Text>
             <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
               <Text style={styles.signOutBtnText}>Sign out</Text>
             </TouchableOpacity>
@@ -177,6 +324,21 @@ export default function App() {
               <Text style={styles.txLinkText}>View transaction</Text>
             </TouchableOpacity>
           ) : null}
+          <Text style={styles.debugTitle}>Debug Log</Text>
+          <Text style={styles.debugSession} selectable>
+            Session: {sessionIdRef.current} (share with support)
+          </Text>
+          <View style={styles.debugBox}>
+            {debugLogs.length === 0 ? (
+              <Text style={styles.debugLine}>No log entries yet</Text>
+            ) : (
+              debugLogs.slice(-10).map((line, index) => (
+                <Text key={`${line}-${index}`} style={styles.debugLine}>
+                  {line}
+                </Text>
+              ))
+            )}
+          </View>
         </View>
         <StatusBar style="auto" />
       </View>
@@ -242,6 +404,21 @@ const styles = StyleSheet.create({
   result: { fontSize: 13, color: '#333', marginTop: 12 },
   txLink: { marginTop: 8 },
   txLinkText: { fontSize: 14, color: '#0066cc', textDecorationLine: 'underline' },
+  debugTitle: { marginTop: 16, fontSize: 13, fontWeight: '600', color: '#333' },
+  debugSession: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    marginBottom: 6
+  },
+  debugBox: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#111',
+    maxHeight: 180
+  },
+  debugLine: { fontSize: 11, color: '#ddd', marginBottom: 4 },
   loader: { marginVertical: 16 },
   error: { color: '#d32f2f', marginTop: 12, fontSize: 13 }
 })

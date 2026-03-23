@@ -1,6 +1,11 @@
 const path = require('path')
+
 const { getDefaultConfig } = require('expo/metro-config')
 
+/**
+ * Metro config scoped to this example so the parent app's metro.config.js
+ * (packages/mobile) is not used.
+ */
 const projectRoot = __dirname
 const monorepoRoot = path.resolve(projectRoot, '../../../../')
 const sdkPath = path.resolve(monorepoRoot, 'packages/sdk')
@@ -25,6 +30,14 @@ config.resolver.extraNodeModules = {
   '@audius/fixed-decimal': path.resolve(packagesPath, 'fixed-decimal'),
   '@audius/eth': path.resolve(packagesPath, 'eth'),
   '@audius/spl': path.resolve(packagesPath, 'spl'),
+  // Force SDK source imports to use the example's installed version of
+  // expo-web-browser rather than the SDK's devDependency copy, so the JS
+  // bundle matches the native module that is actually linked in the build.
+  'expo-web-browser': path.resolve(
+    projectRoot,
+    'node_modules',
+    'expo-web-browser'
+  ),
   crypto: require.resolve('expo-crypto'),
   fs: path.resolve(projectRoot, 'polyfills/fs.js'),
   stream: require.resolve('stream-browserify'),

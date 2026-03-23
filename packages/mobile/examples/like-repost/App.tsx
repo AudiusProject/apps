@@ -58,7 +58,7 @@ export default function App() {
           if (cancelled) return
           setProfile({
             handle: user.handle ?? 'Unknown',
-            userId: String(user.userId ?? '')
+            userId: String(user.id ?? '')
           })
           setScreen('signed-in')
         })
@@ -80,7 +80,7 @@ export default function App() {
       const user = await audiusSdk.oauth.getUser()
       setProfile({
         handle: user.handle ?? 'Unknown',
-        userId: String(user.userId ?? '')
+        userId: String(user.id ?? '')
       })
       setScreen('signed-in')
       setTrack(null)
