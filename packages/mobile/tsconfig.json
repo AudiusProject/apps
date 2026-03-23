@@ -44,7 +44,7 @@
       "react-native": ["./node_modules/react-native"]
     },
     "strictNullChecks": true,
-    "types": ["vite/client", "jest"],
+    "types": ["vite/client", "jest", "node"],
     // Update these when no longer dependent on @audius/web.
     // Issue is due to absolute paths into @audius/web
     "strict": false
