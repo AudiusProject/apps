@@ -328,6 +328,15 @@ export interface GetFollowingRequest {
     userId?: string;
 }
 
+export interface GetGranteeUsersRequest {
+    address: string;
+    offset?: number;
+    limit?: number;
+    isApproved?: boolean;
+    isRevoked?: boolean;
+    userId?: string;
+}
+
 export interface GetManagedUsersRequest {
     id: string;
     isApproved?: boolean;
@@ -1765,6 +1774,57 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getFollowing(params: GetFollowingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowingResponse> {
         const response = await this.getFollowingRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get all users who have authorized a particular grantee (developer app) identified by their wallet address. Supports pagination.
+     */
+    async getGranteeUsersRaw(params: GetGranteeUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowersResponse>> {
+        if (params.address === null || params.address === undefined) {
+            throw new runtime.RequiredError('address','Required parameter params.address was null or undefined when calling getGranteeUsers.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.isApproved !== undefined) {
+            queryParameters['is_approved'] = params.isApproved;
+        }
+
+        if (params.isRevoked !== undefined) {
+            queryParameters['is_revoked'] = params.isRevoked;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/grantees/{address}/users`.replace(`{${"address"}}`, encodeURIComponent(String(params.address))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get all users who have authorized a particular grantee (developer app) identified by their wallet address. Supports pagination.
+     */
+    async getGranteeUsers(params: GetGranteeUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowersResponse> {
+        const response = await this.getGranteeUsersRaw(params, initOverrides);
         return await response.value();
     }
 

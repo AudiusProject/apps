@@ -257,6 +257,8 @@ export enum Name {
 
   // Notifications
   NOTIFICATIONS_OPEN = 'Notifications: Open',
+  /** Mobile: push open; also used in web dev to seed Amplitude event properties */
+  NOTIFICATIONS_OPEN_PUSH_NOTIFICATION = 'Notifications: Open Push Notification',
   NOTIFICATIONS_CLICK_TILE = 'Notifications: Clicked Tile',
   NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE = 'Notifications: Clicked Milestone Twitter Share',
   NOTIFICATIONS_CLICK_REMIX_CREATE_TWITTER_SHARE = 'Notifications: Clicked Remix Create Twitter Share',
@@ -1345,10 +1347,18 @@ type NotificationsOpen = {
   eventName: Name.NOTIFICATIONS_OPEN
   source: 'button' | 'push notifications'
 }
+type NotificationsOpenPushNotification = {
+  eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
+  title?: string
+  body?: string
+  dashboardAnnouncementId?: string
+}
 type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
   kind: string
   link_to: string
+  /** Supabase announcement id when kind is announcement */
+  dashboardAnnouncementId?: string
 }
 type NotificationsClickMilestone = {
   eventName: Name.NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE
@@ -3151,6 +3161,7 @@ export type AllTrackingEvents =
   | TrendingChangeView
   | FeedChangeView
   | NotificationsOpen
+  | NotificationsOpenPushNotification
   | NotificationsClickTile
   | NotificationsClickMilestone
   | NotificationsClickRemixCreate

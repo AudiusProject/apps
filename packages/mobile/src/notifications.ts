@@ -10,6 +10,16 @@ import { EventNames } from 'app/types/analytics'
 
 import { DEVICE_TOKEN } from './constants/storage-keys'
 
+function extractDashboardAnnouncementIdFromPayload(
+  payload: Notification['payload']
+): string | undefined {
+  const target = payload?.data?.data ?? payload?.data ?? payload ?? undefined
+  if (!target || typeof target !== 'object') return undefined
+  const o = target as Record<string, unknown>
+  const v = o.dashboard_announcement_id ?? o.dashboardAnnouncementId
+  return typeof v === 'string' && v.length > 0 ? v : undefined
+}
+
 type Token = {
   token: string
   os: string
@@ -42,11 +52,14 @@ class PushNotifications {
   onNotification = (notification: Notification) => {
     console.info(`Received notification ${JSON.stringify(notification)}`)
     const { title, body, payload } = notification
+    const dashboardAnnouncementId =
+      extractDashboardAnnouncementIdFromPayload(payload)
     track(
       make({
         eventName: EventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION,
         title,
-        body
+        body,
+        dashboardAnnouncementId
       })
     )
     this.navigation?.navigate(payload?.data?.data ?? payload?.data ?? payload)
