@@ -1,3 +1,4 @@
+const fs = require('fs')
 const path = require('path')
 
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
@@ -114,7 +115,7 @@ const config = {
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
       '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
-      // Like SDK: resolve from source so Metro does not need packages/fixed-decimal/dist (see package.json main).
+      // Like SDK: bundle from source; package.json main points at dist/.
       '@audius/fixed-decimal': path.resolve(
         __dirname,
         '../fixed-decimal/src/index.ts'
@@ -152,6 +153,28 @@ const config = {
       tls: resolveModule('tls-browserify')
     },
     resolveRequest: (context, moduleName, platform) => {
+      // TS packages often use NodeNext-style `./file.js` in source; Metro looks for
+      // that path literally. If only `./file.ts` exists, resolve to it.
+      if (
+        moduleName.startsWith('.') &&
+        moduleName.endsWith('.js') &&
+        context.originModulePath
+      ) {
+        const fromDir = path.dirname(context.originModulePath)
+        const candidateJs = path.resolve(fromDir, moduleName)
+        if (!fs.existsSync(candidateJs)) {
+          const base = candidateJs.replace(/\.js$/, '')
+          const candidateTs = `${base}.ts`
+          const candidateTsx = `${base}.tsx`
+          if (fs.existsSync(candidateTs)) {
+            return { filePath: candidateTs, type: 'sourceFile' }
+          }
+          if (fs.existsSync(candidateTsx)) {
+            return { filePath: candidateTsx, type: 'sourceFile' }
+          }
+        }
+      }
+
       if (moduleName === 'react') {
         return {
           filePath: `${resolveModule('react')}/index.js`,
