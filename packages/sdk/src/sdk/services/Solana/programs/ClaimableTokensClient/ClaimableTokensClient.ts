@@ -252,7 +252,9 @@ export class ClaimableTokensClient {
       const encodedNonceData = nonceAccount?.data
       if (encodedNonceData) {
         const nonceData =
-          ClaimableTokensProgram.layouts.nonceAccountData.decode(encodedNonceData)
+          ClaimableTokensProgram.layouts.nonceAccountData.decode(
+            encodedNonceData
+          )
         nonce = nonceData.nonce
       }
     }

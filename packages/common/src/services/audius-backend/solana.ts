@@ -831,11 +831,10 @@ export const transferFromUserBank = async ({
     // When the nonce was set explicitly (self-funded ATA path), the relay's
     // RPC node may not yet reflect the nonce increment from the prefund TX.
     // Skip preflight simulation on the relay to avoid a stale-nonce rejection.
-    const signature =
-      await sdk.services.claimableTokensClient.sendTransaction(
-        transaction,
-        nonceOverride != null ? { skipPreflight: true } : undefined
-      )
+    const signature = await sdk.services.claimableTokensClient.sendTransaction(
+      transaction,
+      nonceOverride != null ? { skipPreflight: true } : undefined
+    )
 
     if (isCreatingTokenAccount) {
       await track(

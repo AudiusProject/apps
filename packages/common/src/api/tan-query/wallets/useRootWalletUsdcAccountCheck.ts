@@ -42,9 +42,7 @@ export const useRootWalletUsdcAccountCheck = (
         throw new Error('Missing root Solana wallet')
       }
 
-      const mint = new PublicKey(
-        TOKEN_LISTING_MAP.USDC.address
-      )
+      const mint = new PublicKey(TOKEN_LISTING_MAP.USDC.address)
       const rootUsdcAta = getAssociatedTokenAddressSync(
         mint,
         keypair.publicKey,
