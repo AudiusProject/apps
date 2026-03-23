@@ -5,7 +5,7 @@ export const launchpadMessages = {
   modal: {
     congratsTitle: '🎉 Congrats!',
     congratsDescription:
-      'Congrats on launching your artist coin on Audius! Time to share the good news with your fans.',
+      'Congrats on launching your fan club on Audius! Time to share the good news with your fans.',
     purchaseSummaryTitle: 'Purchase Summary',
     yourCoinTitle: 'Your Coin',
     addressTitle: 'Coin Address',
@@ -13,7 +13,7 @@ export const launchpadMessages = {
     uploadCoinGatedTrack: 'Upload Coin Gated Track'
   },
   page: {
-    title: 'Create Your Artist Coin',
+    title: 'Create Your Fan Club',
     walletAdded: 'Wallet connected successfully'
   }
 }

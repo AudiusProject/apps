@@ -6,7 +6,7 @@ import { LeftNavLink } from '../LeftNavLink'
 const { COINS_EXPLORE_PAGE } = route
 
 const messages = {
-  title: 'Artist Coins'
+  title: 'Fan Clubs'
 }
 
 export const ArtistCoinsNavItem = () => {

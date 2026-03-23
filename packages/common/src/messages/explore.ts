@@ -2,7 +2,7 @@ export const exploreMessages = {
   explore: 'Explore',
   description: 'Discover new releases, fan favorites, and rising hits',
   searchPlaceholder: 'What do you want to listen to?',
-  artistCoinExclusives: 'Artist Coin Exclusives',
+  artistCoinExclusives: 'Fan Club Exclusives',
   coinGatedTracks: 'Coin Gated Tracks',
   featuredPlaylists: 'Community Playlists',
   featuredRemixContests: 'Featured Remix Contests',

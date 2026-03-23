@@ -113,7 +113,7 @@ export const walletMessages = {
   receiveTokensLoadingSubtitle: 'Setting up your wallet',
   becomeMemberTitle: 'Become a member',
   becomeMemberBody: (coinTicker: string) =>
-    `Buy $${coinTicker} to gain access to exclusive members-only perks!`,
+    `Buy $${coinTicker} to join the fan club and unlock members-only perks.`,
 
   // Linked Wallets messages
   linkedWallets: {
@@ -138,12 +138,12 @@ export const walletMessages = {
     }
   },
 
-  // Artist Coins messages
+  // Fan clubs (artist coin tokens)
   artistCoins: {
-    title: 'Discover Artist Coins',
-    searchPlaceholder: 'Search Artist Coins',
+    title: 'Discover Fan Clubs',
+    searchPlaceholder: 'Search fan clubs',
     noCoins: 'No results found',
-    noCoinsDescription: 'No Artist Coins were found matching your search.',
+    noCoinsDescription: 'No fan clubs matched your search.',
     sortTitle: 'SORT',
     sortAscending: 'Ascending',
     sortDescending: 'Descending',

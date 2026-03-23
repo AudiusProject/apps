@@ -42,10 +42,10 @@ const MIN_WIDTH = 620
 const messages = {
   searchPlaceholder: 'Search',
   getStarted: 'Get Started',
-  launchYourOwn: 'Launch Your Own Artist Coin!',
+  launchYourOwn: 'Launch Your Own Fan Club!',
   required: 'Required',
   checklistItems: [
-    'Launch your Coin',
+    'Launch your fan club token',
     'Start collecting trading fees',
     'Offer exclusive perks to your fans'
   ],

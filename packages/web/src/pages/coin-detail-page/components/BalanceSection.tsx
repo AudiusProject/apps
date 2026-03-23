@@ -57,16 +57,27 @@ type BalanceStateProps = {
 
 const BalanceSectionSkeletonContent = () => {
   return (
-    <Flex ph='xl' pv='l' w='100%'>
-      <Flex column gap='l' w='100%'>
-        <Flex gap='s' alignItems='center'>
-          <Skeleton width='64px' height='64px' />
-          <Skeleton width='120px' height='24px' />
+    <Flex column w='100%'>
+      <Flex p='l' w='100%'>
+        <Flex gap='s' alignItems='center' w='100%'>
+          <Skeleton width='48px' height='48px' />
+          <Flex column gap='xs' flex={1}>
+            <Skeleton width='100px' height='20px' />
+            <Skeleton width='140px' height='18px' />
+          </Flex>
+          <Skeleton width='56px' height='18px' />
         </Flex>
-        <Flex gap='s'>
-          <Skeleton width='100%' height='40px' />
-          <Skeleton width='100%' height='40px' />
-        </Flex>
+      </Flex>
+      <Divider />
+      <Flex column gap='m' p='l' w='100%'>
+        <Skeleton width='160px' height='16px' />
+        <Skeleton width='100%' height='20px' />
+        <Skeleton width='100%' height='20px' />
+      </Flex>
+      <Divider />
+      <Flex column gap='s' p='l' w='100%'>
+        <Skeleton width='100%' height='40px' />
+        <Skeleton width='100%' height='40px' />
         <Skeleton width='100%' height='40px' />
       </Flex>
     </Flex>
@@ -75,7 +86,7 @@ const BalanceSectionSkeletonContent = () => {
 
 const BalanceSectionSkeleton = () => {
   return (
-    <Paper>
+    <Paper borderRadius='l' border='default' shadow='mid' column w='100%' p={0}>
       <BalanceSectionSkeletonContent />
     </Paper>
   )
@@ -90,9 +101,10 @@ const TokenIcon = ({ logoURI }: { logoURI?: string }) => {
     <Artwork
       src={logoURI}
       hex
-      w={spacing.unit16}
-      h={spacing.unit16}
+      w={spacing.unit12}
+      h={spacing.unit12}
       borderWidth={0}
+      borderRadius='s'
     />
   )
 }
@@ -114,21 +126,21 @@ const ZeroBalanceState = ({
   const isManagerMode = useIsManagedAccount()
   return (
     <>
-      <Flex gap='s' alignItems='center' ph='xl'>
+      <Flex gap='s' alignItems='center' p='l' w='100%'>
         <TokenIcon logoURI={logoURI} />
-        <Flex column gap='xs'>
-          {coinName && (
-            <Text variant='heading' size='s'>
+        <Flex column gap='xs' flex={1} css={{ minWidth: 0 }}>
+          {coinName ? (
+            <Text variant='heading' size='l' maxLines={1}>
               {coinName}
             </Text>
-          )}
+          ) : null}
           <Text variant='title' size='l' color='subdued'>
             ${ticker}
           </Text>
         </Flex>
       </Flex>
       {!isCoinCreator ? (
-        <Flex ph='xl' w='100%'>
+        <Flex ph='l' w='100%'>
           <Paper
             ph='xl'
             pv='l'
@@ -148,7 +160,7 @@ const ZeroBalanceState = ({
           </Paper>
         </Flex>
       ) : null}
-      <Flex gap='s' ph='xl'>
+      <Flex column gap='s' p='l' w='100%'>
         <Tooltip
           disabled={isBuySellSupported && !isManagerMode}
           text={
@@ -221,45 +233,50 @@ const HasBalanceState = ({
 
   return (
     <>
-      <Flex ph='xl' alignItems='center' justifyContent='space-between' flex={1}>
-        <Flex alignItems='center' gap='l'>
-          <TokenIcon logoURI={logoURI} />
+      <Flex p='l' w='100%' alignItems='center' gap='s'>
+        <TokenIcon logoURI={logoURI} />
+        <Flex
+          direction='column'
+          gap='xs'
+          flex={1}
+          css={{
+            minWidth: 0,
+            opacity: isLoading ? 0 : 1,
+            transition: `opacity ${motion.expressive}`
+          }}
+        >
           <Flex
-            direction='column'
-            gap='2xs'
-            flex={1}
-            css={{
-              opacity: isLoading ? 0 : 1,
-              transition: `opacity ${motion.expressive}`
-            }}
+            alignItems='center'
+            justifyContent='space-between'
+            gap='s'
+            w='100%'
+            css={{ minWidth: 0 }}
           >
-            <Text variant='heading' size='s'>
+            <Text variant='heading' size='l' maxLines={1} css={{ minWidth: 0 }}>
               {coinName}
             </Text>
-            <Flex gap='xs' alignItems='center'>
-              <Text variant='heading' size='s'>
-                {coinBalanceFormatted}
-              </Text>
-              <Text variant='title' size='l' color='subdued'>
-                ${ticker}
-              </Text>
-            </Flex>
+            <Text variant='title' size='l' css={{ flexShrink: 0 }}>
+              {formattedHeldValue}
+            </Text>
+          </Flex>
+          <Flex gap='xs' alignItems='center' css={{ flexWrap: 'wrap' }}>
+            <Text variant='title' size='l'>
+              {coinBalanceFormatted}
+            </Text>
+            <Text variant='title' size='l' color='subdued'>
+              ${ticker}
+            </Text>
           </Flex>
         </Flex>
-        <Flex alignItems='center' gap='m'>
-          <Text variant='title' size='l' color='default'>
-            {formattedHeldValue}
-          </Text>
-        </Flex>
       </Flex>
-      {hasBreakdown && (
+      {hasBreakdown ? (
         <>
           <Divider />
-          <Flex direction='column' gap='s' w='100%' ph='xl'>
-            <Text variant='title' size='l'>
+          <Flex direction='column' gap='m' w='100%' p='l'>
+            <Text variant='title' size='m'>
               {coinDetailsMessages.externalWallets.hasBalanceTitle}
             </Text>
-            <Flex direction='column' gap='s' w='100%'>
+            <Flex direction='column' gap='m' w='100%'>
               {(inAppWallet || (isAudio && audioBuiltInBalance)) && (
                 <Flex
                   direction='row'
@@ -268,10 +285,10 @@ const HasBalanceState = ({
                   w='100%'
                   pv='2xs'
                 >
-                  <Text variant='body' size='l'>
+                  <Text variant='body' size='m'>
                     {coinDetailsMessages.externalWallets.builtIn}
                   </Text>
-                  <Text variant='body' size='l'>
+                  <Text variant='body' size='m'>
                     {isAudio
                       ? audioBuiltInBalance
                       : Math.trunc(
@@ -305,18 +322,18 @@ const HasBalanceState = ({
                         pv='2xs'
                       >
                         <Flex gap='xs' alignItems='center'>
-                          <Text variant='body' size='l'>
+                          <Text variant='body' size='m'>
                             {isMobile
                               ? walletMessages.linkedWallets.wallet(index)
                               : walletMessages.linkedWallets.linkedWallet(
                                   index
                                 )}
                           </Text>
-                          <Text variant='body' size='l' color='subdued'>
+                          <Text variant='body' size='m' color='subdued'>
                             ({shortenSPLAddress(walletBalance.address)})
                           </Text>
                         </Flex>
-                        <Text variant='body' size='l'>
+                        <Text variant='body' size='m'>
                           {balanceFormatted}
                         </Text>
                       </Flex>
@@ -333,16 +350,16 @@ const HasBalanceState = ({
                       pv='2xs'
                     >
                       <Flex gap='xs' alignItems='center'>
-                        <Text variant='body' size='l'>
+                        <Text variant='body' size='m'>
                           {isMobile
                             ? walletMessages.linkedWallets.wallet(index)
                             : walletMessages.linkedWallets.linkedWallet(index)}
                         </Text>
-                        <Text variant='body' size='l' color='subdued'>
+                        <Text variant='body' size='m' color='subdued'>
                           ({shortenSPLAddress(wallet.owner)})
                         </Text>
                       </Flex>
-                      <Text variant='body' size='l'>
+                      <Text variant='body' size='m'>
                         {Math.trunc(
                           wallet.balance / Math.pow(10, decimals ?? 0)
                         ).toLocaleString()}
@@ -351,10 +368,10 @@ const HasBalanceState = ({
                   ))}
             </Flex>
           </Flex>
-          <Divider />
         </>
-      )}
-      <Flex direction='column' gap='s' ph='xl'>
+      ) : null}
+      <Divider />
+      <Flex direction='column' gap='s' p='l' w='100%'>
         <Tooltip
           disabled={isBuySellSupported && !isManagerMode}
           text={
@@ -377,19 +394,17 @@ const HasBalanceState = ({
             </Button>
           </Box>
         </Tooltip>
-        <Flex gap='s'>
-          <Button
-            disabled={isManagerMode}
-            variant='secondary'
-            fullWidth
-            onClick={onSend}
-          >
-            {walletMessages.send}
-          </Button>
-          <Button variant='secondary' fullWidth onClick={onReceive}>
-            {walletMessages.receive}
-          </Button>
-        </Flex>
+        <Button
+          disabled={isManagerMode}
+          variant='secondary'
+          fullWidth
+          onClick={onSend}
+        >
+          {walletMessages.send}
+        </Button>
+        <Button variant='secondary' fullWidth onClick={onReceive}>
+          {walletMessages.receive}
+        </Button>
       </Flex>
     </>
   )
@@ -483,12 +498,12 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   const coinName = coin.name ?? ''
 
   return (
-    <Paper pv='l' border='default'>
-      <Flex column gap='l' w='100%'>
-        {tokenBalanceLoading ? (
-          <BalanceSectionSkeletonContent />
-        ) : !tokenBalance?.balance ||
-          Number(tokenBalance.balance.toString()) === 0 ? (
+    <Paper borderRadius='l' border='default' shadow='mid' column w='100%' p={0}>
+      {tokenBalanceLoading ? (
+        <BalanceSectionSkeletonContent />
+      ) : !tokenBalance?.balance ||
+        Number(tokenBalance.balance.toString()) === 0 ? (
+        <Flex column w='100%'>
           <ZeroBalanceState
             ticker={ticker}
             logoURI={logoURI}
@@ -499,27 +514,27 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
             isAnonymousUser={!currentUser}
             isCoinCreator={isCoinCreator}
           />
-        ) : (
-          <HasBalanceState
-            ticker={ticker}
-            logoURI={logoURI}
-            onBuy={isMobile ? onOpenOpenAppDrawer : handleBuySell}
-            onSend={handleSend}
-            onReceive={handleReceive}
-            mint={mint}
-            isBuySellSupported={isBuySellSupported}
-            coinName={coinName}
-            isMobile={isMobile}
-            isAudio={isAudio}
-          />
-        )}
-        {isMobile && (
-          <OpenAppDrawer
-            isOpen={isOpenAppDrawerOpen}
-            onClose={onCloseOpenAppDrawer}
-          />
-        )}
-      </Flex>
+        </Flex>
+      ) : (
+        <HasBalanceState
+          ticker={ticker}
+          logoURI={logoURI}
+          onBuy={isMobile ? onOpenOpenAppDrawer : handleBuySell}
+          onSend={handleSend}
+          onReceive={handleReceive}
+          mint={mint}
+          isBuySellSupported={isBuySellSupported}
+          coinName={coinName}
+          isMobile={isMobile}
+          isAudio={isAudio}
+        />
+      )}
+      {isMobile ? (
+        <OpenAppDrawer
+          isOpen={isOpenAppDrawerOpen}
+          onClose={onCloseOpenAppDrawer}
+        />
+      ) : null}
     </Paper>
   )
 }
@@ -529,7 +544,7 @@ export const BalanceSection = componentWithErrorBoundary(
   {
     name: 'BalanceSection',
     fallback: (
-      <Paper ph='xl' pv='l' border='default'>
+      <Paper borderRadius='l' ph='xl' pv='l' border='default' shadow='mid'>
         <Flex column gap='l' w='100%'>
           <Text variant='body' size='m' color='subdued'>
             {walletMessages.errors.unableToLoadBalance}

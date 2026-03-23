@@ -5,7 +5,7 @@ import { IconArtistCoin } from '@audius/harmony-native'
 import { LeftNavLink } from './LeftNavLink'
 
 const messages = {
-  artistCoins: 'Artist Coins'
+  artistCoins: 'Fan Clubs'
 }
 
 export const ArtistCoinsNavItem = () => {
