@@ -120,6 +120,7 @@ const config = {
         __dirname,
         '../fixed-decimal/src/index.ts'
       ),
+      '@audius/spl': path.resolve(__dirname, '../spl/src/index.ts'),
 
       // The following imports are needed for @audius/common
       // and @audius/web to compile correctly
@@ -215,6 +216,13 @@ const config = {
       if (moduleName === '@audius/fixed-decimal') {
         return {
           filePath: path.resolve(__dirname, '../fixed-decimal/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/spl') {
+        return {
+          filePath: path.resolve(__dirname, '../spl/src/index.ts'),
           type: 'sourceFile'
         }
       }
