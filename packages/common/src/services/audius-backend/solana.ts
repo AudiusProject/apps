@@ -462,7 +462,7 @@ const createUserFundedAta = async ({
   ethWallet: string
   destination: PublicKey
   destinationWallet: PublicKey
-}): Promise<bigint> => {
+}): Promise<{ feeAmountUsdc: bigint; nextNonce: bigint }> => {
   const feePayer = await sdk.services.solanaRelay.getFeePayer()
   const solMint = new PublicKey(SOL_MINT)
 
@@ -493,7 +493,11 @@ const createUserFundedAta = async ({
     outputDecimals: SOL_DECIMALS,
     amountUi: Number(feeAmountUsdc) / 10 ** USDC_DECIMALS,
     swapMode: 'ExactIn',
-    onlyDirectRoutes: true
+    onlyDirectRoutes: true,
+    // Use a generous slippage for this small ATA-funding swap. The amount is
+    // tiny (~$0.01 of USDC→SOL) so 500bps (5%) is acceptable and avoids
+    // SlippageToleranceExceeded failures from stale quotes.
+    slippageBps: 500
   })
 
   const rootWalletUsdcAta = getAssociatedTokenAddressSync(
@@ -522,6 +526,17 @@ const createUserFundedAta = async ({
     }
   })
 
+  // Read the nonce once and pass it explicitly to both the prefund TX (nonce N)
+  // and the subsequent transfer TX (nonce N+1). This avoids stale RPC reads
+  // between the two transactions that could return the same nonce value.
+  const currentNonce = await sdk.services.claimableTokensClient.getNonce({
+    ethWallet,
+    mint
+  })
+  console.debug(
+    `createUserFundedAta: current nonce=${currentNonce}, will use ${currentNonce} for prefund and ${currentNonce + BigInt(1)} for transfer`
+  )
+
   // Combine all instructions into a single transaction
   const prefundInstructions = [
     // Create root USDC ATA (fee payer)
@@ -539,12 +554,15 @@ const createUserFundedAta = async ({
       solMint
     ),
     // Claimable transfer (fee USDC from user bank → root ATA)
+    // Pass the nonce explicitly so both this TX and the subsequent transfer TX
+    // use deterministic nonce values (currentNonce here, currentNonce+1 there).
     await sdk.services.claimableTokensClient.createTransferSecpInstruction({
       amount: feeAmountUsdc,
       ethWallet,
       mint,
       destination: rootWalletUsdcAta,
-      instructionIndex: 2
+      instructionIndex: 2,
+      nonce: currentNonce
     }),
     await sdk.services.claimableTokensClient.createTransferInstruction({
       ethWallet,
@@ -607,11 +625,11 @@ const createUserFundedAta = async ({
   prefundTx.sign([keypair])
   const signature =
     await sdk.services.claimableTokensClient.sendTransaction(prefundTx)
-  await connection.confirmTransaction(signature, 'finalized')
+  await connection.confirmTransaction(signature, 'confirmed')
   console.debug(
     `createUserFundedAta: prefund + ATA creation confirmed: ${signature}`
   )
-  return feeAmountUsdc
+  return { feeAmountUsdc, nextNonce: currentNonce + BigInt(1) }
 }
 
 /**
@@ -664,6 +682,7 @@ export const transferFromUserBank = async ({
 }: TransferFromUserBankParams) => {
   let isCreatingTokenAccount = false
   let transferAmount = amount
+  let nonceOverride: bigint | undefined
   try {
     const instructions: TransactionInstruction[] = []
 
@@ -725,17 +744,20 @@ export const transferFromUserBank = async ({
           // destination ATA directly from the root wallet — the relay never sees
           // an unmatched create instruction, so its rate limit is not involved.
           // Fee is deducted from the transfer amount; recipient gets amount - fee.
-          const ataFeeAmount = await createUserFundedAta({
-            sdk,
-            connection,
-            keypair,
-            mint,
-            ethWallet,
-            destination,
-            destinationWallet
-          })
+          const { feeAmountUsdc: ataFeeAmount, nextNonce } =
+            await createUserFundedAta({
+              sdk,
+              connection,
+              keypair,
+              mint,
+              ethWallet,
+              destination,
+              destinationWallet
+            })
           // Reduce transfer amount by fee so total debit equals original amount
           transferAmount = amount - ataFeeAmount
+          // Pass the known next nonce to avoid stale RPC reads after the prefund TX
+          nonceOverride = nextNonce
         } else {
           // Fallback: relay-funded ATA creation (subject to daily rate limit)
           const payerKey = await sdk.services.solanaRelay.getFeePayer()
@@ -757,7 +779,8 @@ export const transferFromUserBank = async ({
         ethWallet,
         mint,
         destination,
-        instructionIndex: instructions.length
+        instructionIndex: instructions.length,
+        ...(nonceOverride != null ? { nonce: nonceOverride } : {})
       })
     instructions.push(secpTransferInstruction)
 
@@ -785,15 +808,25 @@ export const transferFromUserBank = async ({
     }
 
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions
+      instructions,
+      // When the nonce was overridden, the local RPC may also have stale state,
+      // causing the compute-unit simulation inside buildTransaction to fail.
+      // Use a fixed compute limit to skip the simulation in that case.
+      ...(nonceOverride != null ? { computeLimit: { units: 400_000 } } : {})
     })
 
     if (signer) {
       transaction.sign([signer])
     }
 
+    // When the nonce was set explicitly (self-funded ATA path), the relay's
+    // RPC node may not yet reflect the nonce increment from the prefund TX.
+    // Skip preflight simulation on the relay to avoid a stale-nonce rejection.
     const signature =
-      await sdk.services.claimableTokensClient.sendTransaction(transaction)
+      await sdk.services.claimableTokensClient.sendTransaction(
+        transaction,
+        nonceOverride != null ? { skipPreflight: true } : undefined
+      )
 
     if (isCreatingTokenAccount) {
       await track(

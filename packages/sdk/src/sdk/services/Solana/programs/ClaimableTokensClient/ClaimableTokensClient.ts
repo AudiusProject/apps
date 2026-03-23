@@ -230,7 +230,8 @@ export class ClaimableTokensClient {
       destination,
       amount,
       mint: mintOrToken,
-      instructionIndex
+      instructionIndex,
+      nonce: nonceOverride
     } = await parseParams(
       'createTransferSecpInstruction',
       CreateSecpSchema
@@ -239,17 +240,21 @@ export class ClaimableTokensClient {
     const mint = parseMint(mintOrToken, this.preconfiguredMints)
 
     let nonce = BigInt(0)
-    const nonceKey = ClaimableTokensProgram.deriveNonce({
-      ethAddress: ethWallet,
-      authority: this.deriveAuthority(mint),
-      programId: this.programId
-    })
-    const nonceAccount = await this.client.connection.getAccountInfo(nonceKey)
-    const encodedNonceData = nonceAccount?.data
-    if (encodedNonceData) {
-      const nonceData =
-        ClaimableTokensProgram.layouts.nonceAccountData.decode(encodedNonceData)
-      nonce = nonceData.nonce
+    if (nonceOverride != null) {
+      nonce = nonceOverride
+    } else {
+      const nonceKey = ClaimableTokensProgram.deriveNonce({
+        ethAddress: ethWallet,
+        authority: this.deriveAuthority(mint),
+        programId: this.programId
+      })
+      const nonceAccount = await this.client.connection.getAccountInfo(nonceKey)
+      const encodedNonceData = nonceAccount?.data
+      if (encodedNonceData) {
+        const nonceData =
+          ClaimableTokensProgram.layouts.nonceAccountData.decode(encodedNonceData)
+        nonce = nonceData.nonce
+      }
     }
     const data = ClaimableTokensProgram.createSignedTransferInstructionData({
       destination,
@@ -266,6 +271,34 @@ export class ClaimableTokensClient {
       recoveryId,
       instructionIndex
     })
+  }
+
+  /**
+   * Reads the current on-chain nonce for a user's claimable tokens account.
+   * Useful for callers that need to know the nonce before/after a transaction
+   * so they can pass it explicitly to subsequent {@link createTransferSecpInstruction} calls.
+   */
+  async getNonce({
+    ethWallet,
+    mint: mintOrToken
+  }: {
+    ethWallet: string
+    mint: PublicKey | TokenName
+  }): Promise<bigint> {
+    const mint = parseMint(mintOrToken, this.preconfiguredMints)
+    const nonceKey = ClaimableTokensProgram.deriveNonce({
+      ethAddress: ethWallet,
+      authority: this.deriveAuthority(mint),
+      programId: this.programId
+    })
+    const nonceAccount = await this.client.connection.getAccountInfo(nonceKey)
+    const encodedNonceData = nonceAccount?.data
+    if (encodedNonceData) {
+      const nonceData =
+        ClaimableTokensProgram.layouts.nonceAccountData.decode(encodedNonceData)
+      return nonceData.nonce
+    }
+    return BigInt(0)
   }
 
   /**
