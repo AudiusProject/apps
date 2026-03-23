@@ -27,7 +27,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~19.0.0",
-    "babel-preset-expo": "~13.0.0",
+    "babel-preset-expo": "~54.0.10",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
