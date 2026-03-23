@@ -3,7 +3,8 @@ import type { LocalStorage } from '@audius/hedgehog'
 import {
   type AudiusSdkWithServices,
   Id,
-  HedgehogWalletNotFoundError
+  HedgehogWalletNotFoundError,
+  encodeHashId
 } from '@audius/sdk'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -379,6 +380,52 @@ export const audiusBackend = ({
     const unixTs = Math.round(new Date().getTime() / 1000) // current unix timestamp (sec)
     const data = `Click sign to authenticate with identity service: ${unixTs}`
     return await signData({ sdk, data })
+  }
+
+  /**
+   * Records a first-party internal notification campaign push open in Discovery (API).
+   * Fire-and-forget; failures are logged and swallowed.
+   */
+  async function reportNotificationCampaignPushOpen({
+    sdk,
+    userId,
+    campaignId
+  }: {
+    sdk: AudiusSdkWithServices
+    userId: number
+    campaignId: string
+  }) {
+    try {
+      const { data, signature } = await signAPIRequest({ sdk })
+      if (!signature) {
+        return
+      }
+      const encodedUserId = encodeHashId(userId)
+      if (!encodedUserId) {
+        return
+      }
+      const base = env.API_URL.replace(/\/$/, '')
+      const annId = encodeURIComponent(campaignId)
+      const url = `${base}/v1/users/${encodedUserId}/notifications/campaigns/${annId}/open`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [AuthHeaders.Message]: data,
+          [AuthHeaders.Signature]: signature
+        }
+      })
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        console.warn(
+          'reportNotificationCampaignPushOpen failed',
+          res.status,
+          text.slice(0, 200)
+        )
+      }
+    } catch (e) {
+      console.warn('reportNotificationCampaignPushOpen', e)
+    }
   }
 
   async function signAPIRequest({
@@ -1155,6 +1202,7 @@ export const audiusBackend = ({
     identityServiceUrl,
     recordTrackListen,
     registerDeviceToken,
+    reportNotificationCampaignPushOpen,
     sendTokens,
     sendWelcomeEmail,
     signData,

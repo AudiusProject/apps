@@ -45,7 +45,7 @@ type NotificationsOpenPushNotification = {
   title?: string
   body?: string
   /** Matches Amplitude / engagement sync join key */
-  dashboardAnnouncementId?: string
+  notificationCampaignId?: string
 }
 
 type ShareToIGStory = {

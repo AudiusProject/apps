@@ -41,7 +41,7 @@ export const AnnouncementNotification = (
     timeLabel,
     isViewed,
     route: notificationRoute,
-    dashboardAnnouncementId
+    notificationCampaignId
   } = notification
   const record = useRecord()
   const { onOpen } = useAnnouncementModal()
@@ -58,10 +58,10 @@ export const AnnouncementNotification = (
       make(Name.NOTIFICATIONS_CLICK_TILE, {
         kind: 'announcement',
         link_to: notificationRoute,
-        dashboardAnnouncementId
+        notificationCampaignId
       })
     )
-  }, [dashboardAnnouncementId, dispatch, record, notificationRoute])
+  }, [notificationCampaignId, dispatch, record, notificationRoute])
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>
