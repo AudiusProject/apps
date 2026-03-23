@@ -204,9 +204,15 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
       return
     }
 
+    const canDownloadOriginal = Boolean(
+      initialValues.is_original_available && initialValues.orig_file_cid
+    )
+
     openWaitForDownload({
       trackIds: [initialValues.track_id],
-      quality: DownloadQuality.ORIGINAL
+      quality: canDownloadOriginal
+        ? DownloadQuality.ORIGINAL
+        : DownloadQuality.MP3
     })
 
     // Track Download event
@@ -216,7 +222,12 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
         trackId: initialValues.track_id
       })
     )
-  }, [openWaitForDownload, initialValues.track_id])
+  }, [
+    openWaitForDownload,
+    initialValues.track_id,
+    initialValues.is_original_available,
+    initialValues.orig_file_cid
+  ])
 
   const handlePressBack = useCallback(() => {
     if (!dirty) {

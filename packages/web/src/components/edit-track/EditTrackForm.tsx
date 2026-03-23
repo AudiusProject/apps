@@ -331,9 +331,16 @@ const TrackEditForm = (
       return
     }
 
+    const canDownloadOriginal = Boolean(
+      initialTrackValues.is_original_available &&
+        initialTrackValues.orig_file_cid
+    )
+
     openWaitforDownload({
       trackIds: [initialTrackValues.track_id],
-      quality: DownloadQuality.ORIGINAL
+      quality: canDownloadOriginal
+        ? DownloadQuality.ORIGINAL
+        : DownloadQuality.MP3
     })
 
     // Track Download event
@@ -343,7 +350,12 @@ const TrackEditForm = (
         trackId: initialTrackValues.track_id
       })
     )
-  }, [openWaitforDownload, initialTrackValues.track_id])
+  }, [
+    openWaitforDownload,
+    initialTrackValues.track_id,
+    initialTrackValues.is_original_available,
+    initialTrackValues.orig_file_cid
+  ])
 
   return (
     <Form id={formId}>
