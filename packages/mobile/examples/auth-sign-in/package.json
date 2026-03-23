@@ -16,7 +16,7 @@
     "expo": "~54.0.33",
     "expo-av": "~15.0.1",
     "expo-crypto": "^15.0.8",
-    "expo-linking": "~7.0.0",
+    "expo-linking": "~8.0.11",
     "expo-status-bar": "~3.0.9",
     "querystring-es3": "^0.2.1",
     "react": "19.1.0",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~19.1.0",
-    "babel-preset-expo": "~13.0.0",
+    "babel-preset-expo": "~54.0.10",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
