@@ -1,4 +1,4 @@
-import { modalsActions } from '@audius/common/store'
+import { modalsActions, useCoinSuccessModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   IconSolana,
   IconShieldCheck,
   IconDashboard,
+  IconArtistCoin,
   IconUser,
   Paper,
   Text,
@@ -88,9 +89,19 @@ const DevToolCard = (props: DevToolCardProps) => {
   )
 }
 
+const COIN_SUCCESS_MODAL_PREVIEW_DATA = {
+  mint: 'DLJDqsFSgA94QUuFjTbQtEu3oP3mLS1AAAAAAAAAAAAAAAA',
+  name: 'Breadcrumb The Golden',
+  ticker: 'BRED',
+  logoUri: 'https://picsum.photos/seed/audiuscoin/200/200',
+  amountUi: '2,612.2151391',
+  amountUsd: '2,134.67'
+} as const
+
 export const DevTools = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { onOpen: openCoinSuccessModal } = useCoinSuccessModal()
 
   const handleOpenFeatureFlags = () => {
     dispatch(
@@ -129,6 +140,10 @@ export const DevTools = () => {
 
   const handleOpenUserIdParser = () => {
     navigate(USER_ID_PARSER_PAGE)
+  }
+
+  const handleOpenCoinSuccessModalPreview = () => {
+    openCoinSuccessModal({ ...COIN_SUCCESS_MODAL_PREVIEW_DATA })
   }
 
   return (
@@ -193,6 +208,14 @@ export const DevTools = () => {
             description={messages.userIdParserDescription}
             buttonText={messages.userIdParserButton}
             onButtonClick={handleOpenUserIdParser}
+          />
+
+          <DevToolCard
+            icon={IconArtistCoin}
+            title={messages.coinSuccessModalPreviewTitle}
+            description={messages.coinSuccessModalPreviewDescription}
+            buttonText={messages.coinSuccessModalPreviewButton}
+            onButtonClick={handleOpenCoinSuccessModalPreview}
           />
         </Flex>
       </Box>

@@ -152,7 +152,7 @@ export const setupFormSchema = ({
       }),
       [FIELDS.termsAgreed]: z.boolean().refine((val) => val === true, {
         message:
-          'You must agree to the terms of service and Artist Coins terms to continue'
+          'You must agree to the Terms of Use, Artist Coin Terms, and Artist Coin Acceptable Use Policy to continue'
       })
     })
     .superRefine((values, context) => {

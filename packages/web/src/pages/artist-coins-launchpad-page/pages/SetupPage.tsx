@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react'
 
+import { launchpadMessages } from '@audius/common/messages'
 import { ErrorLevel, Feature, LaunchpadFormValues } from '@audius/common/models'
-import { route } from '@audius/common/utils'
 import { Flex, Paper, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
-import { ExternalTextLink } from 'components/link'
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import {
@@ -22,11 +21,9 @@ import { AMOUNT_OF_STEPS, MAX_IMAGE_SIZE } from '../constants'
 import { useLaunchpadAnalytics } from '../utils'
 
 const messages = {
-  stepInfo: `STEP 1 of ${AMOUNT_OF_STEPS}`,
-  title: 'Set Up Your Coin',
-  description:
-    'The Coin Name, Ticker Symbol, and Image cannot be changed once launched. Make sure you have the rights',
-  rightsLinkText: 'to use the Coin Name, Ticker Symbol, and Image',
+  stepInfo: launchpadMessages.setup.stepInfo(AMOUNT_OF_STEPS),
+  title: launchpadMessages.setup.title,
+  description: launchpadMessages.setup.description,
   errors: {
     invalidFileType: 'Please select a JPEG, PNG, or WebP image file',
     fileTooLarge: 'File size must be less than 15MB',
@@ -143,16 +140,7 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
               {messages.title}
             </Text>
             <Text variant='body' size='l' color='subdued'>
-              {messages.description}{' '}
-              <ExternalTextLink
-                to={route.ARTIST_COIN_TERMS}
-                variant='visible'
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                {messages.rightsLinkText}
-              </ExternalTextLink>
-              .
+              {messages.description}
             </Text>
           </Flex>
 

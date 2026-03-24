@@ -42,5 +42,9 @@ export const messages = {
   userIdParserTitle: 'User ID Parser',
   userIdParserDescription:
     'Parse hash IDs to decode them into numeric user IDs. Useful for debugging and development work with user identifiers.',
-  userIdParserButton: 'Open User ID Parser'
+  userIdParserButton: 'Open User ID Parser',
+  coinSuccessModalPreviewTitle: 'Coin success modal',
+  coinSuccessModalPreviewDescription:
+    'Open the post-launch fan club success dialog with sample coin data (UI preview only).',
+  coinSuccessModalPreviewButton: 'Open coin success modal'
 }

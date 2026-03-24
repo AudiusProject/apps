@@ -62,13 +62,11 @@ import { useLaunchpadAnalytics } from './utils'
 import { useLaunchpadFormSchema } from './validation'
 
 const messages = {
-  title: 'Create Your Artist Coin',
-  walletAdded: 'Wallet connected successfully',
   errors: {
-    coinCreationFailed: 'Coin creation failed. Please try again.',
-    firstBuyFailed: 'Coin purchase failed. Please try again.',
+    coinCreationFailed: 'Fan club creation failed. Please try again.',
+    firstBuyFailed: 'Purchase failed. Please try again.',
     firstBuyFailedToast:
-      'Coin created! Your purchase failed, please try again.',
+      'Fan club created! Your purchase failed, please try again.',
     unknownError:
       'An unknown error occurred. The Audius team has been notified.',
     noSolanaWalletFound: 'No Solana wallet found',
@@ -114,10 +112,14 @@ const fetchImageAsFile = async (imageUrl: string): Promise<File | null> => {
 
 const LaunchpadPageContent = ({
   submitErrorText,
-  submitButtonText
+  submitButtonText,
+  isVerified,
+  isLaunchpadVerificationEnabled
 }: {
   submitErrorText?: string
   submitButtonText?: string
+  isVerified: boolean
+  isLaunchpadVerificationEnabled: boolean
 }) => {
   const [phase, setPhase] = useState(Phase.SPLASH)
   const { resetForm, validateForm } = useFormikContext()
@@ -331,6 +333,8 @@ const LaunchpadPageContent = ({
           <SplashPage
             onContinue={handleSplashContinue}
             isPending={isWalletConnectPending}
+            isVerified={isVerified}
+            isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
           />
         )
       case Phase.SETUP:
@@ -360,6 +364,8 @@ const LaunchpadPageContent = ({
           <SplashPage
             onContinue={handleSplashContinue}
             isPending={isWalletConnectPending}
+            isVerified={isVerified}
+            isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
           />
         )
     }
@@ -733,6 +739,8 @@ export const LaunchpadPage = () => {
                 : undefined
           }
           submitButtonText={isFirstBuyError ? 'Continue' : undefined}
+          isVerified={currentUser?.is_verified ?? false}
+          isLaunchpadVerificationEnabled={isLaunchpadVerificationEnabled}
         />
       </Form>
     </Formik>

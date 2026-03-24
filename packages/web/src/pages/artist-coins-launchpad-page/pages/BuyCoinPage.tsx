@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useFirstBuyQuote, useWalletAudioBalance } from '@audius/common/api'
 import { useDebouncedCallback } from '@audius/common/hooks'
+import { launchpadMessages } from '@audius/common/messages'
 import { Chain, LaunchpadFormValues } from '@audius/common/models'
 import { AUDIO } from '@audius/fixed-decimal'
 import {
@@ -9,6 +10,7 @@ import {
   Button,
   Flex,
   Hint,
+  IconInfo,
   IconWallet,
   LoadingSpinner,
   Paper,
@@ -35,32 +37,8 @@ import { useLaunchpadAnalytics } from '../utils'
 import { FIELDS } from '../validation'
 
 const messages = {
-  stepInfo: `STEP 3 of ${AMOUNT_OF_STEPS}`,
-  title: 'Claim Your Share First',
-  optional: 'optional',
-  description:
-    'Before your Artist Coin goes live, do you want to buy some at the lowest price?',
-  youPay: 'You Pay',
-  youReceive: 'You Receive',
-  valueInUSDC: 'Value',
-  hintMessage:
-    "Buying now makes sure you can get in at the lowest price before others beat you to it. You'll still received your unlocked Artist Coins over time after your Coin reaches its graduation market cap (1M $AUDIO).",
-  back: 'Back',
-  errors: {
-    quoteError: 'Failed to get a quote. Please try again.',
-    valueTooHigh: 'Value is too high. Please enter a lower value.',
-    insufficientBalance: 'Insufficient $AUDIO balance.',
-    transactionFailed: 'Transaction failed. Please try again.'
-  },
-  createCoin: 'Create Coin',
-  max: 'MAX',
-  audioBalance: (balance: string) => `${balance} $AUDIO`,
-  buyAudio: 'Buy $AUDIO',
-  audioInputLabel: 'AUDIO',
-  radios: {
-    no: 'No, thanks.',
-    yes: 'Yes, I want to buy my Artist Coin.'
-  }
+  ...launchpadMessages.buy,
+  stepInfo: launchpadMessages.buy.stepInfo(AMOUNT_OF_STEPS)
 }
 
 // Not to be confused with AUDIO_DECIMALS - this is the amount of decimal places the input will alow you to enter
@@ -353,6 +331,8 @@ export const BuyCoinPage = ({
             </Flex>
           </RadioGroup>
 
+          <Hint icon={IconInfo}>{messages.hintMessage}</Hint>
+
           {values[FIELDS.wantsToBuy] === 'yes' ? (
             <>
               {/* You Pay Section */}
@@ -444,7 +424,6 @@ export const BuyCoinPage = ({
                   </Text>
                 )}
               </Flex>
-              <Hint>{messages.hintMessage}</Hint>
             </>
           ) : null}
         </Paper>
@@ -455,7 +434,7 @@ export const BuyCoinPage = ({
         onContinue={handleContinue}
         onBack={handleBack}
         submit
-        continueText={submitButtonText ?? messages.createCoin}
+        continueText={submitButtonText ?? messages.launchFanClub}
         errorText={submitFooterErrorText}
       />
     </>

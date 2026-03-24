@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { launchpadMessages } from '@audius/common/messages'
 import {
   LaunchpadFormValues,
   LaunchCoinErrorMetadata
@@ -25,38 +26,7 @@ import { AddressTile } from 'components/address-tile'
 import { ExternalTextLink } from 'components/link'
 import { env } from 'services/env'
 
-const messages = {
-  awaitingConfirmation: 'Awaiting Confirmation',
-  launchingCoinDescription: (numTxs: number) =>
-    `You have ${numTxs} transaction${numTxs > 1 ? 's' : ''} to sign. Please don't close this page.`,
-  couldTakeAMoment: 'This could take a moment.',
-  congratsTitle: '🎉 Congrats!',
-  title: 'Create Your Artist Coin',
-  congratsDescription:
-    'Congrats on launching your artist coin on Audius! Time to share the good news with your fans.',
-  purchaseSummary: 'Purchase Summary',
-  address: 'Coin Address',
-  addressTitle: 'Coin Address',
-  insufficientBalanceTitle: 'Check your wallet balance',
-  insufficientBalanceDescription:
-    "You'll need to add funds to your wallet before you can continue.",
-  solAmount: '0.03 SOL',
-  solDescription: ' — required to create your coin',
-  audioDescription:
-    '• Extra AUDIO if you want to make an initial buy of your coin (optional).',
-  hintText:
-    'Add SOL to your connected wallet, or send AUDIO from your Audius wallet',
-  learnHowToFund: 'Learn how to fund your wallet',
-  sendAudio: 'Send AUDIO',
-  errorMessages: {
-    notInAudiusBody:
-      "It's live on the blockchain but not showing in Audius yet. Use the address below to view it and check back later once it's connected.",
-    yourCoinIsLive: 'YOUR COIN IS LIVE! 🎉',
-    unknownErrorDescription: (coinLaunched: boolean) =>
-      `Something unexpected went wrong ${coinLaunched ? 'but your coin is live on the blockchain' : ''}`,
-    unknownErrorTitle: 'Something went wrong'
-  }
-}
+const messages = launchpadMessages.submitModal
 
 const LoadingState = ({ numTxs }: { numTxs: number }) => (
   <ModalContent>
@@ -77,7 +47,7 @@ const LoadingState = ({ numTxs }: { numTxs: number }) => (
             {messages.awaitingConfirmation}
           </Text>
           <Text variant='body' size='l'>
-            {messages.launchingCoinDescription(numTxs)}
+            {messages.launchingDescription(numTxs)}
           </Text>
         </Flex>
         <Text variant='body' size='l' color='subdued'>
@@ -94,12 +64,12 @@ const LoadingState = ({ numTxs }: { numTxs: number }) => (
 const CoinNotInAudiusState = ({ mintAddress }: { mintAddress: string }) => (
   <>
     <ModalHeader showDismissButton={false}>
-      <ModalTitle title={messages.errorMessages.yourCoinIsLive} />
+      <ModalTitle title={messages.errors.yourFanClubIsLive} />
     </ModalHeader>
     <ModalContent>
       <Flex column gap='2xl'>
         <Text variant='body' size='l' color='default'>
-          {messages.errorMessages.notInAudiusBody}
+          {messages.errors.notInAudiusBody}
         </Text>
         <Flex column gap='s'>
           <Text variant='label' size='l' color='subdued'>
@@ -127,12 +97,12 @@ const UnknownErrorState = ({
   return (
     <>
       <ModalHeader onClose={onClose}>
-        <ModalTitle title={messages.errorMessages.unknownErrorTitle} />
+        <ModalTitle title={messages.errors.unknownErrorTitle} />
       </ModalHeader>
       <ModalContent>
         <Flex column gap='2xl'>
           <Text variant='body' size='l' color='default'>
-            {messages.errorMessages.unknownErrorDescription(
+            {messages.errors.unknownErrorDescription(
               errorMetadata?.poolCreateConfirmed ?? false
             )}
           </Text>
