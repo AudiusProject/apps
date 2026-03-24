@@ -5,7 +5,9 @@ import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
-import landingImg from '../assets/landing.png'
+import landingImgPng from '../assets/landing.png'
+import landingImgWebp from '../assets/landing.webp'
+import { LANDING_2026_TEXT_CLASS } from '../landing2026TextClass'
 
 import styles from './Hero2026.module.css'
 
@@ -32,11 +34,23 @@ export const Hero2026 = (props: Hero2026Props) => {
   return (
     <section className={styles.section}>
       <div className={styles.bg}>
-        <img src={landingImg} alt='' />
+        <picture>
+          <source type='image/webp' srcSet={landingImgWebp} />
+          {/* eslint-disable react/no-unknown-property -- fetchPriority for LCP hero */}
+          <img
+            src={landingImgPng}
+            alt=''
+            width={1440}
+            height={1024}
+            decoding='async'
+            fetchPriority='high'
+          />
+          {/* eslint-enable react/no-unknown-property */}
+        </picture>
       </div>
       <div className={styles.contentWrap}>
         <div className={styles.content}>
-          <h1 className={styles.headline}>
+          <h1 className={`${styles.headline} ${LANDING_2026_TEXT_CLASS}`}>
             {messages.line1}
             <br />
             {messages.line2}

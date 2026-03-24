@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router'
 
 import { handleClickRoute } from 'public-site/components/handleClickRoute'
 
-import promoBg from '../assets/promo-bg.jpg'
+import promoBgJpg from '../assets/promo-bg.jpg'
+import promoBgWebp from '../assets/promo-bg.webp'
 
 import styles from './CreateFutureCTA.module.css'
 
@@ -31,7 +32,10 @@ export const CreateFutureCTA = (props: CreateFutureCTAProps) => {
   return (
     <section className={styles.section} aria-labelledby='cta-heading'>
       <div className={styles.bg} aria-hidden='true'>
-        <img src={promoBg} alt='' />
+        <picture>
+          <source type='image/webp' srcSet={promoBgWebp} />
+          <img src={promoBgJpg} alt='' loading='lazy' decoding='async' />
+        </picture>
         <div className={styles.bgOverlayDarken} />
         <div className={styles.bgOverlayBW} />
       </div>
