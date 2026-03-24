@@ -203,7 +203,10 @@ export class {{classname}} extends runtime.BaseAPI {
         {{/isApiKey}}
         {{#isOAuth}}
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}"{{^-last}}, {{/-last}}{{/scopes}}]);
+            const token = await this.configuration.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}"{{^-last}}, {{/-last}}{{/scopes}}]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         {{/isOAuth}}
