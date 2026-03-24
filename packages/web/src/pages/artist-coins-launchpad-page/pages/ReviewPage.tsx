@@ -5,6 +5,7 @@ import {
   useCurrentAccountUser,
   useQueryContext
 } from '@audius/common/api'
+import { launchpadMessages } from '@audius/common/messages'
 import type { LaunchpadFormValues } from '@audius/common/models'
 import { WidthSizes } from '@audius/common/models'
 import { formatCount } from '@audius/common/utils'
@@ -32,22 +33,11 @@ import type { PhasePageProps } from '../components/types'
 import { AMOUNT_OF_STEPS } from '../constants'
 
 const messages = {
-  stepInfo: `STEP 2 of ${AMOUNT_OF_STEPS}`,
-  title: 'Review Your Coin',
-  description: 'Make sure everything looks correct before creating your Coin.',
-  initialPrice: 'INITIAL PRICE',
-  coinDetails: 'Coin Details',
-  yourOwnership: 'Your Ownership',
-  totalSupply: 'Total Supply',
-  initialMarketCap: 'Initial Market Cap',
-  graduationMarketCap: 'Graduation Market Cap',
-  allocation: 'Allocation',
-  vesting: 'Unlocking',
-  tradingFees: 'Trading Fees',
-  back: 'Back',
-  hintMessage:
-    'Remember! This is your one and only coin and its details can’t be changed later.'
+  ...launchpadMessages.review,
+  stepInfo: launchpadMessages.review.stepInfo(AMOUNT_OF_STEPS)
 }
+
+const tooltipContent = launchpadMessages.review.tooltips
 
 // Helper functions for market cap calculations
 const formatAudioAmount = (amount: number): string => {
@@ -90,21 +80,6 @@ const defaultCoinDetails = {
   allocation: '50%',
   vesting: '5 years (Linear)',
   tradingFees: '50%'
-}
-
-const tooltipContent = {
-  totalSupply:
-    'The total number of your Artist Coins that will ever exist. This amount is fixed and never changes.',
-  initialMarketCap:
-    'The starting value of your Artist Coin at launch, based on the initial price and supply. These values are the same for all Artist Coins.',
-  graduationMarketCap:
-    'The market cap your Artist Coin will reach when it graduates into the open market.',
-  allocation:
-    "The percentage of your total Artist Coin supply reserved for you as the creator. You'll receive this gradually through unlocking.",
-  vesting:
-    "Once your Artist Coin graduates into the open market, your reserved Coins are unlocked daily over a 5-year period. You can claim your unlocked Coins every day, or let them accumulate as long as you'd like.",
-  tradingFees:
-    'You earn half of all trading fees for all trades of your Artist Coin. Trading fees are 1%.'
 }
 
 const useStyles = makeResponsiveStyles(({ theme }) => ({

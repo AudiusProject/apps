@@ -1,6 +1,4 @@
-import { useCurrentAccountUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
+import { launchpadMessages } from '@audius/common/messages'
 import {
   Button,
   LoadingSpinner,
@@ -18,25 +16,7 @@ import moneyWithWingsEmoji from 'assets/fonts/emojis/money-with-wings.png'
 
 import { WalletSetupCard, WhyCreateCard } from '../components/index'
 
-const messages = {
-  whyCreateTitle: 'Why Create a Coin?',
-  whyCreateDescription:
-    'Create new ways to earn, reward your fans, and grow your community — all powered by your Artist Coin.',
-  getPaidTitle: 'Get Paid',
-  getPaidDescription: 'Earn fees whenever fans buy or sell your Coin.',
-  rewardFansTitle: 'Reward Fans',
-  rewardFansDescription: 'Give holders exclusive content, music, or perks.',
-  growCommunityTitle: 'Grow Community',
-  growCommunityDescription: 'Strengthen bonds with your biggest supporters.',
-  leftColumnPlaceholder: 'Left Column Content (716px)',
-  launchPanelTitle: 'Ready to launch?',
-  launchPanelDescription:
-    'Connect your wallet to start creating your Artist Coin.',
-  launchPanelDescription2:
-    'It only takes a few steps to set things up and share it with your fans.',
-  launchPanelButtonText: 'Get Started!',
-  verifiedOnlyTooltip: 'Verified users only. Request verification in settings.'
-}
+const { splash: messages } = launchpadMessages
 
 const features = [
   {
@@ -55,9 +35,6 @@ const features = [
     imageSrc: globe
   }
 ]
-
-// Using flex ratios: 2 for left section, 1 for right section (2:1 ratio)
-// Based on Figma design with 1080px total width constraint
 
 const useStyles = makeResponsiveStyles(({ media, theme }) => {
   const hasEnoughSpaceForTwoColumns = media.matchesQuery(`(min-width: 1440px)`)
@@ -92,7 +69,6 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
         flexDirection: 'column',
         gap: theme.spacing.m,
         order: hasEnoughSpaceForTwoColumns ? 2 : 1,
-        // Make sticky on desktop with proper header offset
         ...(hasEnoughSpaceForTwoColumns && {
           position: 'sticky',
           top: '161px',
@@ -106,68 +82,63 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
 type SplashPageProps = {
   onContinue: () => void
   isPending: boolean
+  isVerified: boolean
+  isLaunchpadVerificationEnabled: boolean
 }
 
-export const SplashPage = ({ onContinue, isPending }: SplashPageProps) => {
+export const SplashPage = ({
+  onContinue,
+  isPending,
+  isVerified,
+  isLaunchpadVerificationEnabled
+}: SplashPageProps) => {
   const styles = useStyles()
-  const { data: currentUser } = useCurrentAccountUser()
-  const { isEnabled: isLaunchpadVerificationEnabled } = useFeatureFlag(
-    FeatureFlags.LAUNCHPAD_VERIFICATION
-  )
-  const isVerified = currentUser?.is_verified ?? false
 
   return (
     <Flex css={styles.container}>
       <Flex css={styles.leftSection}>
         <WhyCreateCard
-          title={messages.whyCreateTitle}
-          description={messages.whyCreateDescription}
+          title={messages.whyTitle}
+          description={messages.whyDescription}
           features={features}
         />
         <WalletSetupCard />
       </Flex>
       <Flex css={styles.rightSection}>
-        <Flex css={styles.rightSection}>
-          <Paper p='2xl' gap='xl' direction='column' w='100%' h='fit'>
-            <Flex direction='column' gap='s'>
-              <Text variant='heading' size='m' color='default'>
-                {messages.launchPanelTitle}
-              </Text>
-              <Text variant='body' color='subdued'>
-                {messages.launchPanelDescription}
-              </Text>
-              <Text variant='body' color='subdued'>
-                {messages.launchPanelDescription2}
-              </Text>
-            </Flex>
+        <Paper p='2xl' gap='xl' direction='column' w='100%' h='fit'>
+          <Flex direction='column' gap='s'>
+            <Text variant='heading' size='m' color='default'>
+              {messages.readyTitle}
+            </Text>
+            <Text variant='body' color='subdued'>
+              {messages.readyDescription}
+            </Text>
+            <Text variant='body' color='subdued'>
+              {messages.readyDescription2}
+            </Text>
+          </Flex>
 
-            <Tooltip
-              text={messages.verifiedOnlyTooltip}
-              placement='top'
-              disabled={isVerified && isLaunchpadVerificationEnabled}
-            >
-              {/* Need to wrap with Flex because disabled button doesn't capture mouse events */}
-              <Flex>
-                <Button
-                  variant='primary'
-                  fullWidth
-                  iconRight={isPending ? undefined : IconArrowRight}
-                  onClick={onContinue}
-                  disabled={
-                    isPending || (!isVerified && isLaunchpadVerificationEnabled)
-                  }
-                  color='coinGradient'
-                >
-                  {isPending ? (
-                    <LoadingSpinner />
-                  ) : (
-                    messages.launchPanelButtonText
-                  )}
-                </Button>
-              </Flex>
-            </Tooltip>
-          </Paper>
-        </Flex>
+          <Tooltip
+            text={messages.verifiedOnlyTooltip}
+            placement='top'
+            disabled={!isLaunchpadVerificationEnabled || isVerified}
+          >
+            <Flex>
+              <Button
+                variant='primary'
+                fullWidth
+                iconRight={isPending ? undefined : IconArrowRight}
+                onClick={onContinue}
+                disabled={
+                  isPending || (!isVerified && isLaunchpadVerificationEnabled)
+                }
+                color='coinGradient'
+              >
+                {isPending ? <LoadingSpinner /> : messages.getStarted}
+              </Button>
+            </Flex>
+          </Tooltip>
+        </Paper>
       </Flex>
     </Flex>
   )

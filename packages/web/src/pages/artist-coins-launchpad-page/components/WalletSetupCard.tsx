@@ -1,28 +1,13 @@
-import { AUDIUS_ARTIST_COINS_HELP_LINK } from '@audius/common/src/utils/route'
+import { launchpadMessages } from '@audius/common/messages'
+import { AUDIUS_ARTIST_COIN_HELP_LINK } from '@audius/common/src/utils/route'
+import { route } from '@audius/common/utils'
 import { Flex, IconCheck, Paper, Text, TextLink } from '@audius/harmony'
+
+import { TextLink as AppTextLink } from 'components/link'
 
 import { useLaunchpadAnalytics } from '../utils'
 
-const messages = {
-  title: 'How to Get Ready',
-  subtitle: 'Go through this checklist to prepare for launch.',
-  requirements: [
-    {
-      id: 'install-wallet',
-      text: 'Install your wallet (Phantom, MetaMask, etc.) on this browser & device.'
-    },
-    {
-      id: 'have-sol',
-      text: 'Have a little SOL (~.03) ready to cover setup costs.'
-    },
-    {
-      id: 'add-funds',
-      text: 'Add funds to your wallet if you plan to buy your Artist Coin early.'
-    }
-  ],
-  newtoWallets: 'New to wallets?',
-  learnMore: 'Learn more'
-}
+const { walletSetup: messages } = launchpadMessages
 
 export const WalletSetupCard = () => {
   const { trackSplashLearnMoreClicked } = useLaunchpadAnalytics()
@@ -45,24 +30,42 @@ export const WalletSetupCard = () => {
         border='default'
         borderRadius='m'
       >
-        {messages.requirements.map((requirement) => (
-          <Flex key={requirement.id} alignItems='center' gap='s'>
-            <Flex w='l' h='l' alignItems='center' justifyContent='center'>
-              <IconCheck size='s' color='default' />
-            </Flex>
-            <Text variant='body' color='default' size='m'>
-              {requirement.text}
-            </Text>
+        <Flex alignItems='center' gap='s'>
+          <Flex w='l' h='l' alignItems='center' justifyContent='center'>
+            <IconCheck size='s' color='default' />
           </Flex>
-        ))}
+          <Text variant='body' color='default' size='m'>
+            {messages.installWallet}
+          </Text>
+        </Flex>
+        <Flex alignItems='center' gap='s'>
+          <Flex w='l' h='l' alignItems='center' justifyContent='center'>
+            <IconCheck size='s' color='default' />
+          </Flex>
+          <Text variant='body' color='default' size='m'>
+            {messages.haveSol}
+          </Text>
+        </Flex>
+        <Flex alignItems='flex-start' gap='s'>
+          <Flex w='l' h='l' alignItems='center' justifyContent='center'>
+            <IconCheck size='s' color='default' />
+          </Flex>
+          <Text variant='body' color='default' size='m'>
+            {messages.addAudioPrefix}
+            <AppTextLink variant='visible' to={route.WALLET_AUDIO_PAGE}>
+              {messages.addAudioSend}
+            </AppTextLink>
+            {messages.addAudioSuffix}
+          </Text>
+        </Flex>
       </Flex>
 
       <Flex alignItems='center' gap='xs'>
-        <Text size='m'>{messages.newtoWallets}</Text>
+        <Text size='m'>{messages.newToWallets}</Text>
         <TextLink
           size='m'
           variant='active'
-          href={AUDIUS_ARTIST_COINS_HELP_LINK}
+          href={AUDIUS_ARTIST_COIN_HELP_LINK}
           onClick={trackSplashLearnMoreClicked}
         >
           {messages.learnMore}

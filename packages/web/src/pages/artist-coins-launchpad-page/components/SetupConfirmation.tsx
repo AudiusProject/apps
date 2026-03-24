@@ -1,5 +1,12 @@
+import { launchpadMessages } from '@audius/common/messages'
 import { Checkbox, Flex, Text } from '@audius/harmony'
 import { useField } from 'formik'
+
+const messages = {
+  lead: launchpadMessages.setup.confirmationLead,
+  strong: launchpadMessages.setup.confirmationStrong,
+  period: launchpadMessages.setup.confirmationPeriod
+}
 
 export const SetupConfirmation = () => {
   const [field, meta, helpers] = useField<boolean>('setupConfirmation')
@@ -17,9 +24,9 @@ export const SetupConfirmation = () => {
           }}
         />
         <Text variant='body' size='m' color='default'>
-          I have carefully reviewed my Artist Coin details, and understand they
-          are permanent and{' '}
-          <Text strength='strong'>cannot be changed later</Text>.
+          {messages.lead}
+          <Text strength='strong'>{messages.strong}</Text>
+          {messages.period}
         </Text>
       </Flex>
       {meta.error && meta.touched ? (
