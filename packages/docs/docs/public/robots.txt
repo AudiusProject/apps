@@ -8,5 +8,3 @@ Allow: /
 # See https://llmstxt.org for the specification
 # /llms.txt       - Index of all documentation pages
 # /llms-full.txt  - All documentation in a single file
-
-Sitemap: https://docs.audius.co/sitemap.xml
