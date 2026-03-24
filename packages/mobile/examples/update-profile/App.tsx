@@ -7,179 +7,212 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { WebView } from 'react-native-webview'
 import { StatusBar } from 'expo-status-bar'
 import * as Linking from 'expo-linking'
-import { buildOAuthUrl, randomState } from './src/oauth/buildOAuthUrl'
-import { getSDK } from './src/sdk'
-import { config } from './src/config'
+import { type User } from '@audius/sdk'
 
-const REDIRECT_URI = 'http://localhost/oauth/callback'
+import {
+  createSessionId,
+  formatErrorForDebug,
+  newOperationId
+} from '../shared/exampleDebug'
+import { getSDK, config } from './src/sdk'
 
-type Screen = 'home' | 'webview' | 'signed-in'
+type Screen = 'home' | 'signed-in'
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string } | null>(null)
+  const [profile, setProfile] = useState<User | null>(null)
   const [description, setDescription] = useState('')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
-  const oauthStateRef = useRef<string | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
 
-  const handleOpenAuth = useCallback(() => {
-    setError(null)
-    const state = randomState()
-    oauthStateRef.current = state
-    setScreen('webview')
+  const sessionIdRef = useRef(createSessionId())
+  const opIdRef = useRef(`boot-${newOperationId()}`)
+
+  const audiusSdk = getSDK()
+
+  const logDebug = useCallback((message: string, payload?: unknown) => {
+    const timestamp = new Date().toISOString().slice(11, 19)
+    const details =
+      payload === undefined
+        ? ''
+        : ` ${JSON.stringify(
+            payload,
+            (_, value) => (value instanceof Error ? value.message : value),
+            2
+          )}`
+    const line = `[sess:${sessionIdRef.current}][op:${opIdRef.current}] [${timestamp}] ${message}${details}`
+    console.log(`[update-profile] ${line}`)
+    setDebugLogs((prev) => [...prev.slice(-79), line])
   }, [])
 
-  const handleRedirect = useCallback(
-    async (url: string) => {
-      if (!url.startsWith(REDIRECT_URI) && !url.startsWith('updateprofile://oauth/callback')) return
-      setScreen('home')
-      setLoading(true)
-      setError(null)
-      try {
-        const parsed = Linking.parse(url)
-        const query = (parsed.queryParams ?? {}) as Record<string, string>
-        const token = query.token ?? query.access_token ?? (parsed.fragment ?? '').split('token=')[1]?.split('&')[0]
-        const state = query.state
-        if (!token) {
-          setError('No token in redirect')
-          return
-        }
-        if (state !== oauthStateRef.current) {
-          setError('State mismatch')
-          return
-        }
-        const verifyRes = await getSDK().users.verifyIDToken({ token })
-        const data = verifyRes.data
-        if (!data) {
-          setError('Invalid token')
-          return
-        }
-        const uid = data.userId ?? data.sub
-        setProfile({ handle: data.handle ?? data.sub ?? 'Unknown' })
-        setUserId(uid)
-        setScreen('signed-in')
-        // Prepopulate bio from current profile
-        try {
-          const userRes = await getSDK().users.getUser({ id: uid })
-          const bio = userRes.data?.bio
-          setDescription(bio ?? '')
-        } catch {
-          setDescription('')
-        }
-      } catch (e: unknown) {
-        if (e && typeof e === 'object' && 'response' in e && e.response && typeof (e.response as Response).text === 'function') {
-          const res = e.response as Response
-          try {
-            const body = await res.text()
-            setError(`API error ${res.status}: ${body || res.statusText || 'Unknown'}`)
-          } catch {
-            setError(`API error ${res.status}`)
-          }
-        } else {
-          setError(e instanceof Error ? e.message : 'Sign-in failed')
-        }
-      } finally {
-        setLoading(false)
-      }
-    },
-    []
-  )
-
   useEffect(() => {
-    const sub = Linking.addEventListener('url', (event) => handleRedirect(event.url))
-    Linking.getInitialURL().then((url) => { if (url) handleRedirect(url) })
-    return () => sub.remove()
-  }, [handleRedirect])
+    let cancelled = false
+    opIdRef.current = `restore-${newOperationId()}`
+    logDebug('Checking existing OAuth session')
+    audiusSdk.oauth.isAuthenticated().then((authenticated) => {
+      logDebug('oauth.isAuthenticated resolved', { authenticated })
+      if (cancelled) return
+      if (!authenticated) {
+        setLoading(false)
+        return
+      }
+      audiusSdk.oauth
+        .getUser()
+        .then((user) => {
+          logDebug('oauth.getUser succeeded (session restore)', {
+            handle: user.handle,
+            id: user.id
+          })
+          if (cancelled) return
+          setProfile(user)
+          setScreen('signed-in')
+          logDebug('Fetching profile via users.getUser (session restore)', {
+            id: user.id
+          })
+          return audiusSdk.users.getUser({ id: user.id })
+        })
+        .then((userRes) => {
+          logDebug('users.getUser resolved (session restore)', {
+            hasData: Boolean(userRes?.data),
+            bioLength: userRes?.data?.bio?.length ?? 0
+          })
+          if (userRes?.data?.bio != null) setDescription(userRes.data.bio)
+        })
+        .catch(async (e) => {
+          console.error('Failed to get user', e)
+          const details = await formatErrorForDebug(e)
+          logDebug('Session restore failed', details)
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [audiusSdk.oauth, audiusSdk.users, logDebug])
 
-  const handleSignOut = useCallback(() => {
-    setUserId(null)
+  const handleSignIn = useCallback(async () => {
+    opIdRef.current = `signin-${newOperationId()}`
+    setError(null)
+    setLoading(true)
+    try {
+      logDebug('Starting oauth.login')
+      await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
+      logDebug('oauth.login succeeded')
+      logDebug('Token state after login', {
+        isAuthenticated: await audiusSdk.oauth.isAuthenticated(),
+        hasRefreshToken: await audiusSdk.oauth.hasRefreshToken()
+      })
+      const user = await audiusSdk.oauth.getUser()
+      logDebug('oauth.getUser succeeded (interactive sign-in)', {
+        handle: user.handle,
+        id: user.id
+      })
+      setProfile(user)
+      setScreen('signed-in')
+      try {
+        logDebug('Fetching profile via users.getUser (interactive sign-in)', {
+          id: user.id
+        })
+        const userRes = await audiusSdk.users.getUser({ id: user.id })
+        logDebug('users.getUser resolved (interactive sign-in)', {
+          hasData: Boolean(userRes?.data),
+          bioLength: userRes?.data?.bio?.length ?? 0
+        })
+        setDescription(userRes?.data?.bio ?? '')
+      } catch (e) {
+        const details = await formatErrorForDebug(e)
+        logDebug('users.getUser failed after sign-in', details)
+        setDescription('')
+      }
+    } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('Sign-in flow failed', details)
+      setError(e instanceof Error ? e.message : 'Sign-in failed')
+    } finally {
+      setLoading(false)
+    }
+  }, [audiusSdk.oauth, audiusSdk.users, logDebug])
+
+  const handleSignOut = useCallback(async () => {
+    logDebug('Starting oauth.logout')
+    await audiusSdk.oauth.logout().catch(() => {})
+    logDebug('oauth.logout completed')
     setProfile(null)
     setDescription('')
     setResult(null)
     setTxHash(null)
     setScreen('home')
     setError(null)
-  }, [])
+  }, [audiusSdk.oauth, logDebug])
 
   const handleUpdate = useCallback(async () => {
-    if (!config.writeServerUrl || !userId) return
+    if (!profile) return
+    opIdRef.current = `update-${newOperationId()}`
     setUpdateLoading(true)
     setResult(null)
     setTxHash(null)
     try {
-      const res = await fetch(`${config.writeServerUrl}/update-description`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, description: description.trim() })
+      logDebug('Calling users.updateUser', {
+        id: profile.id,
+        bioLength: description.trim().length
       })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        const hash = data?.transaction_hash ?? data?.transactionHash
-        setTxHash(hash ?? null)
-        setResult(hash ? 'Description updated.' : 'Description updated.')
-      } else {
-        setResult(data?.error ?? `Error ${res.status}`)
-      }
-    } catch (e) {
+      const res = await audiusSdk.users.updateUser({
+        id: profile.id,
+        userId: profile.id,
+        metadata: { bio: description.trim() }
+      })
+      const hash = res?.transactionHash ?? (res as { transaction_hash?: string })?.transaction_hash ?? null
+      logDebug('users.updateUser succeeded', { transactionHash: hash })
+      setTxHash(hash ?? null)
+      setResult('Description updated.')
+    } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('users.updateUser failed', details)
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setUpdateLoading(false)
     }
-  }, [userId, description])
+  }, [audiusSdk.users, description, logDebug, profile])
 
-  if (screen === 'webview') {
-    const state = oauthStateRef.current ?? randomState()
-    oauthStateRef.current = state
-    const oauthUrl = buildOAuthUrl({
-      scope: 'write',
-      redirectUri: REDIRECT_URI,
-      state,
-      responseMode: 'query',
-      display: 'fullScreen',
-      ...(config.apiKey ? { apiKey: config.apiKey } : { appName: 'UpdateProfileExample' })
-    })
+  if (!config.isConfigured) {
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => setScreen('home')}>
-          <Text style={styles.backBtnText}>← Cancel</Text>
-        </TouchableOpacity>
-        <WebView
-          source={{ uri: oauthUrl }}
-          style={styles.webview}
-          onShouldStartLoadWithRequest={(req) => {
-            if (req.url.startsWith(REDIRECT_URI) || req.url.startsWith('updateprofile://oauth/callback')) {
-              handleRedirect(req.url)
-              return false
-            }
-            return true
-          }}
-        />
+        <View style={styles.card}>
+          <Text style={styles.title}>Update profile</Text>
+          <Text style={styles.required}>
+            Create a .env with EXPO_PUBLIC_AUDIUS_API_KEY and register redirect
+            URI: updateprofile://oauth/callback
+          </Text>
+          <Text style={styles.code}>
+            Get an API key at audius.co/settings → Developer Apps. No server needed — updates use OAuth from the app.
+          </Text>
+        </View>
         <StatusBar style="auto" />
       </View>
     )
   }
 
-  if (screen === 'signed-in' && userId && profile) {
+  if (screen === 'signed-in' && profile) {
     return (
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.profileRow}>
-            <Text style={styles.handle}>@{profile.handle}</Text>
+            <Text style={styles.handle}>@{profile.handle ?? 'user'}</Text>
             <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
               <Text style={styles.signOutBtnText}>Sign out</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.title}>Update description</Text>
           <Text style={styles.subtitle}>
-            Server uses your stored bearer to update your bio.
+            Your bio is updated via the OAuth access token — no backend required.
           </Text>
           <TextInput
             style={styles.input}
@@ -214,25 +247,21 @@ export default function App() {
               <Text style={styles.txLinkText}>View transaction</Text>
             </TouchableOpacity>
           ) : null}
-        </View>
-        <StatusBar style="auto" />
-      </View>
-    )
-  }
-
-  if (!config.isConfigured) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Update profile</Text>
-          <Text style={styles.required}>
-            Requires your server. Create a .env with:
+          <Text style={styles.debugTitle}>Debug Log</Text>
+          <Text style={styles.debugSession} selectable>
+            Session: {sessionIdRef.current} (share with support)
           </Text>
-          <Text style={styles.code}>EXPO_PUBLIC_AUDIUS_API_KEY=your_api_key</Text>
-          <Text style={styles.code}>EXPO_PUBLIC_WRITE_SERVER_URL=http://localhost:3001</Text>
-          <Text style={styles.required}>
-            Run the server with AUDIUS_API_KEY. See README.
-          </Text>
+          <View style={styles.debugBox}>
+            {debugLogs.length === 0 ? (
+              <Text style={styles.debugLine}>No log entries yet</Text>
+            ) : (
+              debugLogs.slice(-10).map((line, index) => (
+                <Text key={`${line}-${index}`} style={styles.debugLine}>
+                  {line}
+                </Text>
+              ))
+            )}
+          </View>
         </View>
         <StatusBar style="auto" />
       </View>
@@ -244,12 +273,16 @@ export default function App() {
       <View style={styles.center}>
         <Text style={styles.title}>Update profile</Text>
         <Text style={styles.subtitle}>
-          Sign in with Audius (write scope) to authorize the app, then update your description.
+          Sign in with Audius (write scope) to update your description directly from the app.
         </Text>
         {loading ? (
           <ActivityIndicator size="large" style={styles.loader} />
         ) : (
-          <TouchableOpacity style={styles.button} onPress={handleOpenAuth} disabled={loading}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSignIn}
+            disabled={loading}
+          >
             <Text style={styles.buttonText}>Sign in with Audius (write)</Text>
           </TouchableOpacity>
         )}
@@ -294,9 +327,21 @@ const styles = StyleSheet.create({
   result: { fontSize: 13, color: '#333', marginTop: 12 },
   txLink: { marginTop: 8 },
   txLinkText: { fontSize: 14, color: '#0066cc', textDecorationLine: 'underline' },
+  debugTitle: { marginTop: 16, fontSize: 13, fontWeight: '600', color: '#333' },
+  debugSession: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    marginBottom: 6
+  },
+  debugBox: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#111',
+    maxHeight: 180
+  },
+  debugLine: { fontSize: 11, color: '#ddd', marginBottom: 4 },
   loader: { marginVertical: 16 },
-  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 },
-  backBtn: { padding: 16 },
-  backBtnText: { color: '#0066cc', fontSize: 16 },
-  webview: { flex: 1 }
+  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 }
 })

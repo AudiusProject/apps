@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+
+import { formatErrorForDebug } from '../../../shared/exampleDebug'
 import { getSDK } from '../sdk'
 
 /**
@@ -14,13 +16,19 @@ export function useTrendingTracks() {
   return useQuery({
     queryKey: ['trending-tracks'],
     queryFn: async () => {
-      const response = await audiusSdk.tracks.getTrendingTracks({
-        limit: 20,
-        offset: 0,
-        time: 'week',
-      })
-      return response.data ?? []
+      try {
+        const response = await audiusSdk.tracks.getTrendingTracks({
+          limit: 20,
+          offset: 0,
+          time: 'week'
+        })
+        return response.data ?? []
+      } catch (e) {
+        const details = await formatErrorForDebug(e)
+        console.error('[trending] getTrendingTracks failed', JSON.stringify(details))
+        throw e
+      }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000
   })
 }

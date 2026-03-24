@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { ResponseError, type User } from '@audius/sdk'
+import { type User } from '@audius/sdk'
 import * as DocumentPicker from 'expo-document-picker'
 import * as ImagePicker from 'expo-image-picker'
 import { StatusBar } from 'expo-status-bar'
@@ -14,6 +14,11 @@ import {
   View
 } from 'react-native'
 
+import {
+  createSessionId,
+  formatErrorForDebug,
+  newOperationId
+} from '../shared/exampleDebug'
 import { config } from './src/config'
 import { getSDK } from './src/sdk'
 
@@ -32,21 +37,6 @@ const GENRES = [
 
 type Screen = 'home' | 'signed-in'
 
-async function formatApiError(reason: unknown): Promise<string> {
-  if (reason != null && typeof reason === 'object' && 'response' in reason) {
-    const res = (reason as { response: Response }).response
-    if (res != null && typeof res.text === 'function') {
-      try {
-        const body = await res.text()
-        return `API ${res.status}: ${body || res.statusText || 'Unknown'}`
-      } catch {
-        return `API ${res.status}`
-      }
-    }
-  }
-  return reason instanceof Error ? reason.message : 'Request failed'
-}
-
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [loading, setLoading] = useState(false)
@@ -60,13 +50,34 @@ export default function App() {
   const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+
+  const sessionIdRef = useRef(createSessionId())
+  const opIdRef = useRef(`boot-${newOperationId()}`)
+
+  const sdk = getSDK()
+
+  const logDebug = useCallback((message: string, payload?: unknown) => {
+    const timestamp = new Date().toISOString().slice(11, 19)
+    const details =
+      payload === undefined
+        ? ''
+        : ` ${JSON.stringify(
+            payload,
+            (_, value) => (value instanceof Error ? value.message : value),
+            2
+          )}`
+    const line = `[sess:${sessionIdRef.current}][op:${opIdRef.current}] [${timestamp}] ${message}${details}`
+    console.log(`[upload] ${line}`)
+    setDebugLogs((prev) => [...prev.slice(-79), line])
+  }, [])
 
   // On mount: restore existing session.
   useEffect(() => {
-    const sdk = getSDK()
-
-    // Restore a previously authenticated session.
+    opIdRef.current = `restore-${newOperationId()}`
+    logDebug('Checking existing OAuth session')
     sdk.oauth.isAuthenticated().then((authenticated) => {
+      logDebug('oauth.isAuthenticated resolved', { authenticated })
       if (!authenticated) return
       setLoading(true)
       sdk.oauth
@@ -74,46 +85,48 @@ export default function App() {
         .then((user) => {
           setProfile(user ?? null)
           setScreen('signed-in')
+          logDebug('oauth.getUser succeeded (session restore)', {
+            handle: user.handle,
+            id: user.id
+          })
         })
-        .catch((e) => {
+        .catch(async (e) => {
           console.error('Failed to get user', e)
-          if (e instanceof ResponseError) {
-            e.response.text().then((text) => {
-              console.error('Error response body:', text)
-            })
-          }
-          // Token expired — fall back to sign-in screen silently.
+          const details = await formatErrorForDebug(e)
+          logDebug('Session restore failed', details)
         })
         .finally(() => setLoading(false))
     })
-  }, [])
+  }, [sdk.oauth, logDebug])
 
   const handleSignIn = useCallback(async () => {
-    const sdk = getSDK()
+    opIdRef.current = `signin-${newOperationId()}`
     setError(null)
     setLoading(true)
     try {
-      // login() resolves after the full OAuth flow: expo-web-browser opens an
-      // isolated auth session, captures the redirect, exchanges the code for
-      // tokens, and settles the promise — no separate deep-link event needed.
+      logDebug('Starting oauth.login')
       await sdk.oauth.login({
         scope: 'write',
         display: 'fullScreen'
       })
+      logDebug('oauth.login succeeded')
       const user = await sdk.oauth.getUser()
+      logDebug('oauth.getUser succeeded', { handle: user.handle, id: user.id })
       setProfile(user)
       setScreen('signed-in')
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('Sign-in flow failed', details)
       setError(e instanceof Error ? e.message : 'Sign-in failed')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [sdk.oauth, logDebug])
 
   const handleSignOut = useCallback(async () => {
-    await getSDK()
-      .oauth.logout()
-      .catch(() => {})
+    logDebug('Starting oauth.logout')
+    await sdk.oauth.logout().catch(() => {})
+    logDebug('oauth.logout completed')
     setProfile(null)
     setAudioFile(null)
     setCoverUri(null)
@@ -123,7 +136,7 @@ export default function App() {
     setResult(null)
     setScreen('home')
     setError(null)
-  }, [])
+  }, [sdk.oauth, logDebug])
 
   const pickAudio = useCallback(async () => {
     try {
@@ -165,12 +178,12 @@ export default function App() {
       setResult('Please enter a title')
       return
     }
+    opIdRef.current = `upload-${newOperationId()}`
     setUploading(true)
     setResult(null)
     try {
-      const sdk = getSDK()
+      logDebug('Starting upload flow', { userId: profile.id, title: title.trim() })
 
-      // Step 1 — upload audio
       setResult('Uploading audio...')
       const audioUpload = sdk.uploads.createAudioUpload({
         file: {
@@ -180,7 +193,6 @@ export default function App() {
         }
       })
 
-      // Step 2 — upload cover art (optional)
       const imageUpload = coverUri
         ? sdk.uploads.createImageUpload({
             file: { uri: coverUri, name: 'cover.jpg', type: 'image/jpeg' }
@@ -194,11 +206,11 @@ export default function App() {
       ])
 
       if (!audioResult.trackCid) {
+        logDebug('Audio upload missing trackCid')
         setResult('Audio upload did not return a track CID')
         return
       }
 
-      // Step 3 — create the track using the OAuth access token stored in the SDK.
       setResult('Creating track...')
       const userId = String(profile.id ?? '')
       const res = await sdk.tracks.createTrack({
@@ -212,13 +224,20 @@ export default function App() {
           coverArtSizes
         }
       })
+      logDebug('tracks.createTrack succeeded', { trackId: res?.trackId })
       setResult(`Track created! ID: ${res?.trackId ?? '—'}`)
-    } catch (e) {
-      setResult(await formatApiError(e))
+    } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('Upload / createTrack failed', details)
+      const rid =
+        typeof details.requestId === 'string' ? ` (requestId: ${details.requestId})` : ''
+      setResult(
+        `${details.message ?? (e instanceof Error ? e.message : 'Request failed')}${rid}`
+      )
     } finally {
       setUploading(false)
     }
-  }, [profile, audioFile, coverUri, title, genre, description])
+  }, [profile, audioFile, coverUri, title, genre, description, sdk, logDebug])
 
   if (!config.isConfigured) {
     return (
@@ -236,7 +255,7 @@ export default function App() {
             Get one at audius.co/settings → Developer Apps.
           </Text>
         </View>
-        <StatusBar style='auto' />
+        <StatusBar style="auto" />
       </View>
     )
   }
@@ -276,8 +295,8 @@ export default function App() {
 
           <TextInput
             style={styles.input}
-            placeholder='Track title'
-            placeholderTextColor='#888'
+            placeholder="Track title"
+            placeholderTextColor="#888"
             value={title}
             onChangeText={setTitle}
           />
@@ -311,8 +330,8 @@ export default function App() {
 
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder='Description (optional)'
-            placeholderTextColor='#888'
+            placeholder="Description (optional)"
+            placeholderTextColor="#888"
             value={description}
             onChangeText={setDescription}
             multiline
@@ -325,15 +344,31 @@ export default function App() {
             disabled={uploading}
           >
             {uploading ? (
-              <ActivityIndicator size='small' color='#fff' />
+              <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Upload</Text>
             )}
           </TouchableOpacity>
 
           {result ? <Text style={styles.result}>{result}</Text> : null}
+
+          <Text style={styles.debugTitle}>Debug Log</Text>
+          <Text style={styles.debugSession} selectable>
+            Session: {sessionIdRef.current} (share with support)
+          </Text>
+          <View style={styles.debugBox}>
+            {debugLogs.length === 0 ? (
+              <Text style={styles.debugLine}>No log entries yet</Text>
+            ) : (
+              debugLogs.slice(-10).map((line, index) => (
+                <Text key={`${line}-${index}`} style={styles.debugLine}>
+                  {line}
+                </Text>
+              ))
+            )}
+          </View>
         </ScrollView>
-        <StatusBar style='auto' />
+        <StatusBar style="auto" />
       </View>
     )
   }
@@ -347,7 +382,7 @@ export default function App() {
           entirely on-device using the OAuth access token.
         </Text>
         {loading ? (
-          <ActivityIndicator size='large' style={styles.loader} />
+          <ActivityIndicator size="large" style={styles.loader} />
         ) : (
           <TouchableOpacity
             style={styles.button}
@@ -359,7 +394,7 @@ export default function App() {
         )}
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
-      <StatusBar style='auto' />
+      <StatusBar style="auto" />
     </View>
   )
 }
@@ -428,5 +463,20 @@ const styles = StyleSheet.create({
   genreChipActive: { backgroundColor: '#CC0FE0' },
   genreChipText: { fontSize: 14, color: '#333' },
   genreChipTextActive: { color: '#fff', fontWeight: '600' },
-  result: { marginTop: 16, fontSize: 13, color: '#555', lineHeight: 20 }
+  result: { marginTop: 16, fontSize: 13, color: '#555', lineHeight: 20 },
+  debugTitle: { marginTop: 16, fontSize: 13, fontWeight: '600', color: '#333' },
+  debugSession: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    marginBottom: 6
+  },
+  debugBox: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#111',
+    maxHeight: 180
+  },
+  debugLine: { fontSize: 11, color: '#ddd', marginBottom: 4 }
 })

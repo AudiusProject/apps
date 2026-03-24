@@ -12,7 +12,7 @@ const { getDefaultConfig } = require('expo/metro-config')
 const projectRoot = __dirname
 const monorepoRoot = path.resolve(projectRoot, '../../../..')
 const sdkPath = path.resolve(monorepoRoot, 'packages/sdk')
-const sdkSourcePath = path.resolve(sdkPath, 'src/index.ts')
+const sdkSourcePath = path.resolve(sdkPath, 'src/index.native.ts')
 
 const config = getDefaultConfig(projectRoot)
 
@@ -32,7 +32,7 @@ config.resolver.nodeModulesPaths = [
 // Node built-in stubs/polyfills for SDK deps (file-type -> strtok3 -> fs); see mobile-devkit apps/examples-expo
 config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,
-  '@audius/sdk': path.resolve(sdkPath, 'src/index.ts'),
+  '@audius/sdk': sdkSourcePath,
   '@audius/fixed-decimal': path.resolve(packagesPath, 'fixed-decimal'),
   '@audius/eth': path.resolve(packagesPath, 'eth'),
   '@audius/spl': path.resolve(packagesPath, 'spl'),

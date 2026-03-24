@@ -1,19 +1,31 @@
 import type { AudiusSdk } from '@audius/sdk'
 import { sdk } from '@audius/sdk'
+
 import { config } from './config'
 
 const APP_NAME = 'LikeRepostExample'
+const REDIRECT_URI = 'likerepost://oauth/callback'
 
-let unauthenticatedSdk: AudiusSdk | null = null
+let sdkInstance: AudiusSdk | null = null
 
-/** Unauthenticated SDK (OAuth URL, verify token, public reads like trending). */
+/**
+ * Single SDK instance. After oauth.login({ scope: 'write' }), the SDK stores
+ * tokens and automatically adds authorization headers to requests (including
+ * favoriteTrack, repostTrack, etc.).
+ */
 export function getSDK(): AudiusSdk {
-  if (!unauthenticatedSdk) {
-    unauthenticatedSdk = sdk(
+  if (!sdkInstance) {
+    sdkInstance = sdk(
       config.apiKey
-        ? { appName: APP_NAME, apiKey: config.apiKey }
-        : { appName: APP_NAME }
+        ? {
+            appName: APP_NAME,
+            apiKey: config.apiKey,
+            redirectUri: REDIRECT_URI
+          }
+        : { appName: APP_NAME, redirectUri: REDIRECT_URI }
     )
   }
-  return unauthenticatedSdk
+  return sdkInstance
 }
+
+export { config }

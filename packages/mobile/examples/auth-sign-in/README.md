@@ -7,7 +7,12 @@ Two ways to do **authentication** with Audius:
 
 ## Runnable OAuth example (this directory)
 
-Expo app: **Sign in with Audius** (OAuth) → see your handle and name → Sign out. No API key or .env required. Uses a WebView and localhost redirect so the OAuth callback is intercepted in-app.
+Expo app: **Sign in with Audius** using the SDK’s OAuth (PKCE). Tokens are stored in AsyncStorage and the SDK automatically adds authorization headers to subsequent requests. No WebView or manual redirect handling.
+
+### Requirements
+
+- **API key** from [audius.co/settings](https://audius.co/settings) → Developer Apps
+- **Redirect URI** registered for this example: `audiusauth://oauth/callback`
 
 ### How to run
 
@@ -17,11 +22,13 @@ From the **apps repo root**:
 npm install
 npm run build -w @audius/sdk
 cd packages/mobile/examples/auth-sign-in
+cp .env.example .env
+# Edit .env: set EXPO_PUBLIC_AUDIUS_API_KEY to your API key
 npm install
 npx expo start
 ```
 
-Press `i` (iOS) or `a` (Android). Tap **Sign in with Audius** → complete login in the WebView → you’ll see your profile and **Sign out**.
+Press `i` (iOS) or `a` (Android). Tap **Sign in with Audius** → complete login in the system browser (expo-web-browser) → you’ll see your profile and feed, and **Sign out**.
 
 Or from repo root: `npm run mobile:example:auth-sign-in` (after `npm install` in the example dir once).
 
@@ -29,11 +36,10 @@ Or from repo root: `npm run mobile:example:auth-sign-in` (after `npm install` in
 
 | File | Purpose |
 |------|--------|
-| `src/sdk.ts` | `getSDK()`, `getAuthenticatedSDK(token)` — SDK for OAuth, verify, feed. |
-| `src/oauth/buildOAuthUrl.ts` | Builds the Audius OAuth URL (SDK’s oauth is browser-only). |
-| `App.tsx` | Sign-in → WebView → intercept redirect → verify token → show profile. |
+| `src/sdk.ts` | `getSDK()` — single SDK instance with `apiKey` and `redirectUri`; OAuth tokens stored via AsyncStorage. |
+| `App.tsx` | `oauth.login()`, `oauth.getUser()`, `oauth.isAuthenticated()`, `oauth.logout()`; feed and playback. |
 
-Flow: open OAuth URL → user signs in at audius.co → redirect to localhost with token → verify token → show profile. Use `getCurrentAuthenticatedSDK()` in code to run authenticated GETs. See [Audius OAuth docs](https://docs.audius.org/developers/guides/log-in-with-audius).
+Flow: `oauth.login({ scope: 'read' })` opens the consent screen (expo-web-browser), completes PKCE, and stores tokens. Use `getSDK()` for all requests; the SDK adds auth headers when the user is signed in. See [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius).
 
 ---
 

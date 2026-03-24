@@ -13,27 +13,34 @@ npm run ios:dev      # iOS simulator
 npm run android:dev  # Android emulator
 ```
 
+Note: each example includes its own `.npmrc` with `legacy-peer-deps=true`,
+so `npm install` works without manually passing that flag.
+
 Environment: copy `packages/mobile/.env.dev` if needed; the app runs against staging by default.
 
 ## Available examples
 
+All OAuth examples use **Log in with Audius** (OAuth 2.0 PKCE): scoped, short-lived access tokens and refresh tokens stored in AsyncStorage; the SDK automatically adds authorization headers to requests. No backend server required for writes.
+
 | Example | Description | How to run in the app |
 |--------|-------------|------------------------|
 | [trending](./trending/) | **Expo app**: SDK setup + trending tracks (code example) | From repo root: `cd packages/mobile/examples/trending && npx expo start` or `npm run mobile:example:trending` |
-| [auth-sign-in](./auth-sign-in/) | **Expo app**: OAuth + bearer token (SDK). Main app: Hedgehog email/password. | OAuth example: `cd packages/mobile/examples/auth-sign-in && npx expo start` or `npm run mobile:example:auth-sign-in`. Main app: open app → sign-in. |
-| [like-repost](./like-repost/) | **Expo app + Node server**: Server holds developer app bearer; client OAuth → like/repost a random track. | Run server: `cd packages/mobile/examples/like-repost/server && npm install && npm start`. Run client: `cd packages/mobile/examples/like-repost && npx expo start`. Requires .env (see example README). |
-| [upload](./upload/) | **Expo app + Node server**: Server holds developer app bearer; client uploads audio via SDK, then POSTs metadata to server to create track. | Run server: `cd packages/mobile/examples/upload/server && npm install && npm start`. Run client: `cd packages/mobile/examples/upload && npx expo start`. Requires .env (see example README). |
-| [update-profile](./update-profile/) | **Expo app + Node server**: Server holds developer app bearer; client calls endpoint to update user description (e.g. bio). No client auth. | Run server: `cd packages/mobile/examples/update-profile/server && npm install && npm start`. Run client: `cd packages/mobile/examples/update-profile && npx expo start`. Requires .env (see example README). |
+| [auth-sign-in](./auth-sign-in/) | **Expo app**: Sign in with Audius (read scope), restore session, feed, sign out. Main app: Hedgehog email/password. | `cd packages/mobile/examples/auth-sign-in && cp .env.example .env` (set API key, register `audiusauth://oauth/callback`), then `npx expo start`. Main app: open app → sign-in. |
+| [like-repost](./like-repost/) | **Expo app (no server)**: OAuth write scope → like/repost a random track from the device. | `cd packages/mobile/examples/like-repost`, `.env` with API key, register `likerepost://oauth/callback`, `npx expo start`. |
+| [upload](./upload/) | **Expo app (no server)**: OAuth write scope → pick audio/cover, upload files, create track on-device. | `cd packages/mobile/examples/upload`, `.env` with API key, register `audiusupload://oauth/callback`, `npx expo start`. |
+| [update-profile](./update-profile/) | **Expo app (no server)**: OAuth write scope → update user description (bio) from the app. | `cd packages/mobile/examples/update-profile`, `.env` with API key, register `updateprofile://oauth/callback`, `npx expo start`. |
 
 ## For AI / code search
 
 - **SDK setup (mobile / Expo):** trending example, getSDK, sdk(appName), polyfills, Buffer process, trending tracks.
-- **Authentication**: sign-in, login, OAuth, bearer token, Hedgehog, identity service, `authService`, `createAuthService`, `sdk({ bearerToken })`, `oauth.login`.
-- **Like/repost**: `favoriteTrack`, `unfavoriteTrack`, `repostTrack`, `unrepostTrack`, write scope, OAuth.
-- **Upload**: file picker, metadata form, `uploadTrackFiles`, `createTrack`, wallet/Hedgehog (main app).
-- **Authenticated writes**: developer app bearer on server, `updateUser`, `sdk({ apiKey, bearerToken })`, update user description.
+- **Authentication**: sign-in, login, OAuth, Log in with Audius, `oauth.login`, `oauth.getUser`, `oauth.isAuthenticated`, `oauth.logout`, AsyncStorage, expo-web-browser, Hedgehog (main app), `authService`, `createAuthService`.
+- **Like/repost**: `favoriteTrack`, `unfavoriteTrack`, `repostTrack`, `unrepostTrack`, write scope, client-side OAuth.
+- **Upload**: file picker, metadata form, `createAudioUpload`, `createImageUpload`, `createTrack`, OAuth from device.
+- **Authenticated writes**: `updateUser`, OAuth from device, no server.
 
 Implementation lives in `packages/mobile/src` and `packages/common`; each example folder links to the exact files and entry points.
+
+- **Shared debug helpers:** [`shared/exampleDebug.ts`](./shared/exampleDebug.ts) — session / operation IDs, `formatErrorForDebug` (response `requestId` headers). Imported as `../shared/exampleDebug` from each example.
 
 ## Adding new examples
 
