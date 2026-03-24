@@ -64,33 +64,43 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     linkUrbanist.rel = 'stylesheet'
     linkUrbanist.href = urbanistHref
 
-    const maxWait = 1500
-    const finish = () => {
-      const ready = document.fonts?.ready
-        ? Promise.race([
-            document.fonts.ready,
-            new Promise<void>((resolve) => setTimeout(resolve, maxWait))
-          ])
-        : Promise.resolve()
-      ready.then(() => setFontsReady(true))
-    }
-
-    let loaded = 0
-    const maybeFinish = () => {
-      loaded += 1
-      if (loaded >= 2) finish()
-    }
-    linkFonts.onload = maybeFinish
-    linkFonts.onerror = maybeFinish
-    linkUrbanist.onload = maybeFinish
-    linkUrbanist.onerror = maybeFinish
-
     document.head.appendChild(linkFonts)
     document.head.appendChild(linkUrbanist)
 
-    const fallback = setTimeout(() => setFontsReady(true), maxWait + 500)
+    const maxWaitMs = 2500
+    let revealed = false
+    const reveal = () => {
+      if (revealed) return
+      revealed = true
+      window.clearTimeout(timeoutId)
+      setFontsReady(true)
+    }
+
+    const timeoutId = window.setTimeout(() => reveal(), maxWaitMs)
+
+    const loadDustBucerForHero = async () => {
+      try {
+        if (document.fonts?.load) {
+          await document.fonts.load('normal 200px "Dust Bucer"')
+        }
+      } catch {
+        /* empty */
+      } finally {
+        reveal()
+      }
+    }
+
+    linkFonts.addEventListener(
+      'load',
+      () => {
+        loadDustBucerForHero()
+      },
+      { once: true }
+    )
+    linkFonts.addEventListener('error', () => reveal(), { once: true })
+
     return () => {
-      clearTimeout(fallback)
+      window.clearTimeout(timeoutId)
       linkFonts.remove()
       linkUrbanist.remove()
     }

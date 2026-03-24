@@ -9,6 +9,21 @@ const SSR = true
 const DEBUG = false
 const BROWSER_CACHE_TTL_SECONDS = 60 * 60 * 24
 
+/**
+ * Valid Cache-Control values for static files. Hashed Vite assets under /assets
+ * should be cached long-term; previously a numeric value was set, which is not
+ * a valid header and led to "no cache" in Lighthouse / PSI.
+ */
+function cacheControlForPathname(pathname) {
+  if (pathname.startsWith('/assets/') || pathname.startsWith('/scripts/')) {
+    return 'public, max-age=31536000, immutable'
+  }
+  if (pathname.startsWith('/fonts/') || pathname.startsWith('/favicons/')) {
+    return 'public, max-age=31536000, immutable'
+  }
+  return `public, max-age=${BROWSER_CACHE_TTL_SECONDS}`
+}
+
 let h1 = null
 
 const routes = [
@@ -479,7 +494,10 @@ async function handleEvent(request, env, ctx) {
       const asset = await getAsset(request, env, ctx, aasaOptions)
       const response = new Response(asset.body, asset)
       response.headers.set('Content-Type', 'application/json')
-      response.headers.set('cache-control', BROWSER_CACHE_TTL_SECONDS)
+      response.headers.set(
+        'cache-control',
+        cacheControlForPathname(pathname)
+      )
       response.headers.set('Access-Control-Allow-Origin', '*')
       return response
     }
@@ -514,7 +532,10 @@ async function handleEvent(request, env, ctx) {
         response.headers.set('Access-Control-Allow-Origin', '*')
         response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
         response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
-        response.headers.set('cache-control', BROWSER_CACHE_TTL_SECONDS)
+        response.headers.set(
+          'cache-control',
+          cacheControlForPathname(pathname)
+        )
 
         return response
       }

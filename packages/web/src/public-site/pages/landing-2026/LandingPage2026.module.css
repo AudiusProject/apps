@@ -22,23 +22,23 @@
   z-index: -1;
 }
 
-/* Fade in text/content when fonts are ready (avoids FOUT, no FOIT) */
-.page .main,
-.page > nav,
-.page > footer {
-  transition: opacity 0.35s ease-out;
-}
-
-.page:not([data-fonts-ready]) .main,
-.page:not([data-fonts-ready]) .page > nav,
-.page:not([data-fonts-ready]) .page > footer {
+/*
+ * Hero headline only (Dust Bucer): `.landing2026-text` on Hero2026 `h1`.
+ * Nav, hero image, and “Get Started” stay visible immediately for LCP.
+ */
+.page:not([data-fonts-ready]) :global(.landing2026-text) {
   opacity: 0;
 }
 
-.page[data-fonts-ready] .main,
-.page[data-fonts-ready] .page > nav,
-.page[data-fonts-ready] .page > footer {
+.page[data-fonts-ready='true'] :global(.landing2026-text) {
   opacity: 1;
+  transition: opacity 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-fonts-ready='true'] :global(.landing2026-text) {
+    transition: none;
+  }
 }
 
 .main {

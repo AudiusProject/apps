@@ -18,7 +18,7 @@ import cn from 'classnames'
 import ReactDOM from 'react-dom'
 import { Link, useNavigate } from 'react-router'
 
-import navOverlayBackground from 'assets/img/hero-bg.jpg'
+import navOverlayBackground from 'assets/img/hero-bg.webp'
 
 import styles from './NavOverlay.module.css'
 import { handleClickRoute } from './handleClickRoute'
