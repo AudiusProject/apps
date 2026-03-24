@@ -17,7 +17,7 @@ import { BASE_URL } from 'utils/route'
 
 import { useCoinDetailTabs } from './CoinDetailTabs'
 
-const { COIN_DETAIL_PAGE, NOT_FOUND_PAGE } = route
+const { CLUBS_EXPLORE_PAGE, COIN_DETAIL_PAGE, NOT_FOUND_PAGE } = route
 
 const messages = coinDetailsMessages.metaTags
 
@@ -106,7 +106,7 @@ export const CoinDetailPage = () => {
   })
 
   if (!ticker) {
-    return <Navigate to='/coins' replace />
+    return <Navigate to={CLUBS_EXPLORE_PAGE} replace />
   }
 
   if (ticker !== formattedTicker) {

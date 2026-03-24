@@ -3,7 +3,7 @@ import { IconArtistCoin } from '@audius/harmony'
 
 import { LeftNavLink } from '../LeftNavLink'
 
-const { COINS_EXPLORE_PAGE } = route
+const { CLUBS_EXPLORE_PAGE } = route
 
 const messages = {
   title: 'Fan Clubs'
@@ -13,7 +13,7 @@ export const ArtistCoinsNavItem = () => {
   return (
     <LeftNavLink
       leftIcon={IconArtistCoin}
-      to={COINS_EXPLORE_PAGE}
+      to={CLUBS_EXPLORE_PAGE}
       additionalPathMatches={['/coins/']}
       restriction='none'
     >

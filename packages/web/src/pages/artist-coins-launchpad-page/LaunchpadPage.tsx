@@ -699,7 +699,7 @@ export const LaunchpadPage = () => {
   // Redirect if user is not verified or already has an artist coin
   if (hasExistingArtistCoin && isLaunchpadVerificationEnabled) {
     track(make({ eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN }))
-    return <Navigate to={route.COINS_EXPLORE_PAGE} replace />
+    return <Navigate to={route.CLUBS_EXPLORE_PAGE} replace />
   }
 
   return (

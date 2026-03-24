@@ -441,7 +441,7 @@ export const EditCoinDetailsPage = () => {
     isError ||
     (isSuccess && !coin)
   ) {
-    return <Navigate to='/coins' replace />
+    return <Navigate to={route.CLUBS_EXPLORE_PAGE} replace />
   }
 
   if (isPending) {

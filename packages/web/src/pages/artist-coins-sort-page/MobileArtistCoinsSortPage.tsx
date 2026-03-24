@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { walletMessages } from '@audius/common/messages'
+import { CLUBS_EXPLORE_PAGE } from '@audius/common/src/utils/route'
 import {
   Flex,
   Text,
@@ -79,7 +80,7 @@ export const MobileArtistCoinsSortPage = () => {
     )
 
   const handleBackPress = useCallback(() => {
-    navigate('/coins', {
+    navigate(CLUBS_EXPLORE_PAGE, {
       state: {
         sortMethod: selectedOption,
         sortDirection: selectedDirection

@@ -302,6 +302,7 @@ const {
   CASH_PAGE,
   COINS_CREATE_PAGE,
   COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   EDIT_COIN_DETAILS_PAGE,
   DEV_TOOLS_PAGE,
   SOLANA_TOOLS_PAGE,
@@ -921,6 +922,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={COINS_EXPLORE_PAGE}
+                  element={<Navigate to={CLUBS_EXPLORE_PAGE} replace />}
+                />
+                <Route
+                  path={CLUBS_EXPLORE_PAGE}
                   element={<ArtistCoinsExplorePage />}
                 />
                 <Route
@@ -1331,6 +1336,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={COINS_EXPLORE_PAGE}
+                  element={<Navigate to={CLUBS_EXPLORE_PAGE} replace />}
+                />
+                <Route
+                  path={CLUBS_EXPLORE_PAGE}
                   element={<ArtistCoinsExplorePage />}
                 />
                 <Route path={COINS_CREATE_PAGE} element={<LaunchpadPage />} />

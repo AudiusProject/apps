@@ -47,7 +47,7 @@ import { env } from 'services/env'
 import { AudioCoinCard } from './AudioCoinCard'
 import { CoinRow } from './CoinCard'
 
-const { COINS_EXPLORE_PAGE, CASH_PAGE } = route
+const { CLUBS_EXPLORE_PAGE, CASH_PAGE } = route
 
 const USDCCoinCard = () => {
   const { data: currentUserId } = useCurrentUserId()
@@ -314,7 +314,7 @@ export const WalletCoinsList = () => {
   const allCoins = [...coins, 'discover-artist-coins' as const]
 
   const handleDiscoverArtistCoins = useCallback(() => {
-    navigate(COINS_EXPLORE_PAGE)
+    navigate(CLUBS_EXPLORE_PAGE)
   }, [navigate])
 
   return (

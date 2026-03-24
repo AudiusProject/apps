@@ -13,7 +13,7 @@ import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   coinPage,
   coinRedeemPage,
-  COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   NOT_FOUND_PAGE
 } from '@audius/common/src/utils/route'
 import { formatTickerForUrl } from '@audius/common/utils'
@@ -203,7 +203,7 @@ export const CoinRedeemPage = () => {
     : coinRedeemAmountPending
 
   if (!ticker) {
-    return <Navigate to={COINS_EXPLORE_PAGE} />
+    return <Navigate to={CLUBS_EXPLORE_PAGE} />
   }
 
   if (ticker !== formattedTicker) {

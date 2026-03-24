@@ -29,6 +29,7 @@ const reservedPaths = new Set([
   'messages',
   'search',
   'coins',
+  'clubs',
   'cash',
   'wallet',
   'error'

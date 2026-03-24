@@ -218,8 +218,8 @@ const UserBadges = ({
     <Box
       onClick={handleStopPropagation}
       css={{
-        height: '100%',
         display: 'inline-flex',
+        alignSelf: 'center',
         position: 'relative',
         pointerEvents: 'auto'
       }}

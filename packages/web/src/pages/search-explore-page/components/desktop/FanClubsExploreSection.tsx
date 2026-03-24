@@ -5,7 +5,6 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
 import { GetCoinsSortDirectionEnum, GetCoinsSortMethodEnum } from '@audius/sdk'
-import { useNavigate } from 'react-router'
 
 import {
   FanClubCardSkeleton,
@@ -19,7 +18,6 @@ const FAN_CLUBS_PREVIEW_LIMIT = 12
 const FAN_CLUBS_SKELETON_COUNT = 4
 
 export const FanClubsExploreSection = () => {
-  const navigate = useNavigate()
   const { ref, inView } = useExploreSectionTracking('Fan Clubs')
   const { env } = useQueryContext()
 
@@ -50,7 +48,7 @@ export const FanClubsExploreSection = () => {
     <Carousel
       ref={ref}
       title={messages.fanClubs}
-      viewAllLink={route.COINS_EXPLORE_PAGE}
+      viewAllLink={route.CLUBS_EXPLORE_PAGE}
     >
       {!inView || isPending
         ? Array.from({ length: FAN_CLUBS_SKELETON_COUNT }).map((_, i) => (
@@ -60,12 +58,7 @@ export const FanClubsExploreSection = () => {
           ))
         : coins.map((coin) => (
             <Box key={coin.mint} css={{ width: 312, flexShrink: 0 }}>
-              <FanClubCoinCard
-                coin={coin}
-                onPress={() => {
-                  navigate(route.coinPage(coin.ticker!))
-                }}
-              />
+              <FanClubCoinCard coin={coin} />
             </Box>
           ))}
     </Carousel>

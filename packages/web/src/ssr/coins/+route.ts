@@ -1,3 +1,3 @@
 import { makePageRoute } from 'ssr/util'
 
-export default makePageRoute(['/coins'], 'Coins Page')
+export default makePageRoute(['/clubs', '/coins'], 'Fan Clubs Page')

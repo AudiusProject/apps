@@ -56,7 +56,7 @@ const messages = {
 // Desktop version
 const DesktopArtistCoinsExplorePage = () => {
   const navigate = useNavigate()
-  const { motion, spacing } = useTheme()
+  const { motion, spacing, color } = useTheme()
   const [searchValue, setSearchValue] = useState('')
   const [isLaunchBannerDismissed, setIsLaunchBannerDismissed] = useState(
     readLaunchBannerDismissed
@@ -153,7 +153,7 @@ const DesktopArtistCoinsExplorePage = () => {
               ph='xl'
               pv='m'
               justifyContent='flex-start'
-              backgroundColor='white'
+              backgroundColor='surface1'
               border='strong'
               borderRadius='m'
             >
@@ -176,7 +176,7 @@ const DesktopArtistCoinsExplorePage = () => {
                 overflow: 'hidden',
                 backdropFilter: 'blur(18px)',
                 WebkitBackdropFilter: 'blur(18px)',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                backgroundColor: color.background.surface1,
                 transition: `opacity ${motion.expressive}`
               }}
             >
@@ -217,7 +217,7 @@ const DesktopArtistCoinsExplorePage = () => {
                       gap='s'
                       border='strong'
                       borderRadius='m'
-                      backgroundColor='white'
+                      backgroundColor='surface1'
                       css={{ alignSelf: 'flex-start', overflow: 'hidden' }}
                     >
                       <Flex ph='s' pv='xs'>

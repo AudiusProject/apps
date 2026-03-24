@@ -1,6 +1,6 @@
 import { useCallback, useContext, useMemo } from 'react'
 
-import { COINS_EXPLORE_PAGE, WALLET_PAGE } from '@audius/common/src/utils/route'
+import { CLUBS_EXPLORE_PAGE, WALLET_PAGE } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
 
@@ -53,7 +53,7 @@ export const NavBarActionDrawer = ({
   }, [goToRoute, onClose])
 
   const goToArtistCoinsExplorePage = useCallback(() => {
-    setImmediate(() => goToRoute(COINS_EXPLORE_PAGE))
+    setImmediate(() => goToRoute(CLUBS_EXPLORE_PAGE))
     onClose()
   }, [goToRoute, onClose])
 

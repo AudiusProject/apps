@@ -383,11 +383,15 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
   }, [hasNextPage, isFetchingNextPage, loadNextPage])
 
   const getScrollableParent = useCallback(() => {
+    const mainEl = mainContentRef.current
+    if (mainEl) {
+      return mainEl
+    }
     if (!scrollContainerRef.current) {
       return null
     }
     return (getScrollParent(scrollContainerRef.current) as HTMLElement) ?? null
-  }, [])
+  }, [mainContentRef])
 
   const handleViewModeChange = useCallback((mode: FanClubsViewMode) => {
     setViewMode(mode)
@@ -510,7 +514,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
       alignItems='center'
       w='100%'
       borderBottom='default'
-      backgroundColor='white'
+      backgroundColor='surface1'
     >
       <Flex column gap='s' alignItems='flex-start'>
         <Text variant='label' size='s' color='subdued'>
@@ -519,18 +523,18 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
         <Flex gap='s' alignItems='center' css={{ flexWrap: 'wrap' }}>
           <SelectablePill
             size='large'
-            label={walletMessages.artistCoins.leaderboardView}
-            isSelected={viewMode === 'table'}
-            onClick={() => {
-              handleViewModeChange('table')
-            }}
-          />
-          <SelectablePill
-            size='large'
             label={walletMessages.artistCoins.cardView}
             isSelected={viewMode === 'cards'}
             onClick={() => {
               handleViewModeChange('cards')
+            }}
+          />
+          <SelectablePill
+            size='large'
+            label={walletMessages.artistCoins.leaderboardView}
+            isSelected={viewMode === 'table'}
+            onClick={() => {
+              handleViewModeChange('table')
             }}
           />
         </Flex>
@@ -548,7 +552,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
       w='100%'
       border='default'
       borderRadius='m'
-      backgroundColor='white'
+      backgroundColor='surface1'
       css={{ overflow: 'hidden' }}
     >
       {toolbar}
@@ -617,15 +621,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
               }}
             >
               {coins?.map((coin) => (
-                <FanClubCoinCard
-                  key={coin.mint}
-                  coin={coin}
-                  onPress={() => {
-                    if (coin.ticker) {
-                      navigate(route.coinPage(coin.ticker))
-                    }
-                  }}
-                />
+                <FanClubCoinCard key={coin.mint} coin={coin} />
               ))}
             </Flex>
             {isFetchingNextPage ? (

@@ -1,10 +1,12 @@
-import { useCallback, type KeyboardEvent } from 'react'
-
 import type { Coin } from '@audius/common/adapters'
 import { useUser } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
-import { formatCount, formatCurrencyWithSubscript } from '@audius/common/utils'
+import {
+  formatCount,
+  formatCurrencyWithSubscript,
+  route
+} from '@audius/common/utils'
 import {
   Box,
   Divider,
@@ -14,6 +16,7 @@ import {
   Text,
   useTheme
 } from '@audius/harmony'
+import { Link } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
@@ -24,10 +27,9 @@ const messages = walletMessages.artistCoins
 
 type FanClubCoinCardProps = {
   coin: Coin
-  onPress: () => void
 }
 
-export const FanClubCoinCard = ({ coin, onPress }: FanClubCoinCardProps) => {
+export const FanClubCoinCard = ({ coin }: FanClubCoinCardProps) => {
   const theme = useTheme()
   const { ownerId, bannerImageUrl, ticker, logoUri, displayPrice } = coin
 
@@ -44,26 +46,14 @@ export const FanClubCoinCard = ({ coin, onPress }: FanClubCoinCardProps) => {
     select: (user) => user?.name
   })
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        onPress()
-      }
-    },
-    [onPress]
-  )
-
   const rawPrice =
     (coin.price === 0 ? coin.dynamicBondingCurve?.priceUSD : coin.price) ?? 0
   const formattedPrice = formatCurrencyWithSubscript(displayPrice ?? rawPrice)
 
-  return (
+  const coinPath = ticker ? route.coinPage(ticker) : null
+
+  const card = (
     <Paper
-      role='button'
-      tabIndex={0}
-      onClick={onPress}
-      onKeyDown={handleKeyDown}
       border='default'
       borderRadius='l'
       shadow='mid'
@@ -71,11 +61,13 @@ export const FanClubCoinCard = ({ coin, onPress }: FanClubCoinCardProps) => {
       w='100%'
       css={{
         overflow: 'hidden',
-        cursor: 'pointer',
+        cursor: coinPath ? 'pointer' : 'default',
         outline: 'none',
-        ':focus-visible': {
-          boxShadow: `0 0 0 2px ${theme.color.secondary.secondary}`
-        }
+        ':focus-within': coinPath
+          ? {
+              boxShadow: `0 0 0 2px ${theme.color.secondary.secondary}`
+            }
+          : undefined
       }}
     >
       <Box
@@ -166,6 +158,22 @@ export const FanClubCoinCard = ({ coin, onPress }: FanClubCoinCardProps) => {
         </Paper>
       </Flex>
     </Paper>
+  )
+
+  return coinPath ? (
+    <Link
+      to={coinPath}
+      css={{
+        textDecoration: 'none',
+        color: 'inherit',
+        display: 'block',
+        width: '100%'
+      }}
+    >
+      {card}
+    </Link>
+  ) : (
+    card
   )
 }
 

@@ -207,7 +207,7 @@ export const MobileArtistCoinsExplorePage: React.FC = () => {
             setSearchValue={setSearchValue}
           />
 
-          <Paper column m='l' backgroundColor='white'>
+          <Paper column m='l' backgroundColor='surface1'>
             <Flex
               ph='l'
               pv='s'

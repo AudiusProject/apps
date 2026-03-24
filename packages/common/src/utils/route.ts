@@ -81,7 +81,10 @@ export const WALLET_PAGE = '/wallet'
 export const WALLET_GUIDE_PAGE = '/wallet/guide'
 export const CASH_PAGE = '/cash'
 export const COINS_CREATE_PAGE = '/coins/create'
+/** Legacy explore URL; app redirects to CLUBS_EXPLORE_PAGE. */
 export const COINS_EXPLORE_PAGE = '/coins'
+/** Fan club discovery (primary); same UI as legacy /coins. */
+export const CLUBS_EXPLORE_PAGE = '/clubs'
 export const PRIVATE_KEY_EXPORTER_SETTINGS_PAGE = '/settings/export-private-key'
 export const DEV_TOOLS_PAGE = '/dev-tools'
 export const SOLANA_TOOLS_PAGE = '/dev-tools/solana'
@@ -298,6 +301,7 @@ export const orderedRoutes = [
   WALLET_PAGE,
   CASH_PAGE,
   COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
   REWARDS_PAGE,
@@ -348,6 +352,7 @@ export const staticRoutes = new Set([
   WALLET_PAGE,
   WALLET_GUIDE_PAGE,
   COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
   CASH_PAGE,

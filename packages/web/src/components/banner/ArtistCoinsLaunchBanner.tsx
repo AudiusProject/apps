@@ -34,7 +34,7 @@ export const ArtistCoinsLaunchBanner = () => {
 
   const handleAccept = useCallback(() => {
     dispatch(make(Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED, {}))
-    navigate(route.COINS_EXPLORE_PAGE)
+    navigate(route.CLUBS_EXPLORE_PAGE)
     handleClose()
   }, [dispatch, handleClose, navigate])
 
