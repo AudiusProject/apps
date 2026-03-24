@@ -154,7 +154,10 @@ export class SearchApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -246,7 +249,10 @@ export class SearchApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -338,7 +344,10 @@ export class SearchApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({

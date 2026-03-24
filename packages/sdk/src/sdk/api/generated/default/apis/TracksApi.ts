@@ -452,7 +452,10 @@ export class TracksApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -507,7 +510,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -574,7 +580,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -619,7 +628,10 @@ export class TracksApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -682,7 +694,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -729,7 +744,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -776,7 +794,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -819,7 +840,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -866,7 +890,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -909,7 +936,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -960,7 +990,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1015,7 +1048,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1058,7 +1094,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1097,7 +1136,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1136,7 +1178,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1175,7 +1220,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1214,7 +1262,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1265,7 +1316,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1300,7 +1354,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1339,7 +1396,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1386,7 +1446,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1445,7 +1508,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1523,7 +1589,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1566,7 +1635,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1656,7 +1728,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1754,7 +1829,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1805,7 +1883,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1860,7 +1941,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1899,7 +1983,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1938,7 +2025,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -1993,7 +2083,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2036,7 +2129,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2083,7 +2179,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2130,7 +2229,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2177,7 +2279,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2296,7 +2401,10 @@ export class TracksApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -2353,7 +2461,10 @@ export class TracksApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -2487,7 +2598,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -2570,7 +2684,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         const response = await this.request({
@@ -2614,7 +2731,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -2668,7 +2788,10 @@ export class TracksApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
@@ -2728,7 +2851,10 @@ export class TracksApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {

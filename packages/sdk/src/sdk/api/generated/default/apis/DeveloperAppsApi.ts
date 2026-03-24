@@ -359,7 +359,10 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
