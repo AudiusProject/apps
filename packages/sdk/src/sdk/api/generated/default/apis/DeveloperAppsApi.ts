@@ -358,15 +358,14 @@ export class DeveloperAppsApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
-        if (this.configuration && this.configuration.accessToken) {
-            // oauth required
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
             headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["write"]);
         }
 
-        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
-        if (this.configuration && this.configuration.accessToken) {
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
             const tokenString = await token("BearerAuth", []);
 

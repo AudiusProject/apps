@@ -90,8 +90,7 @@ export class ChallengesApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        if (this.configuration && this.configuration.accessToken) {
-            // oauth required
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
             headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
@@ -142,8 +141,7 @@ export class ChallengesApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
-        if (this.configuration && this.configuration.accessToken) {
-            // oauth required
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
             headerParameters["Authorization"] = await this.configuration.accessToken("OAuth2", ["read"]);
         }
 
