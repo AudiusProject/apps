@@ -397,7 +397,9 @@ const initializeApis = ({
       if (name === 'OAuth2') {
         // For OAuth2, we need to return the token with the 'Bearer ' prefix ourselves
         // See: https://github.com/OpenAPITools/openapi-generator/issues/12514#issuecomment-1166293860
-        return tokenStore.getAccessToken().then((t) => (t ? `Bearer ${t}` : ''))
+        return tokenStore
+          .getAccessToken()
+          .then((t) => (t ? `Bearer ${t}` : undefined))
       }
       // 'BearerAuth' comes from the name in the securitySchemes in the OpenAPI spec
       else if (name === 'BearerAuth') {
