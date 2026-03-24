@@ -1,4 +1,6 @@
+import { getCurrentAccountQueryKey } from '@audius/common/api'
 import { MobileOS } from '@audius/common/models'
+import type { AccountState } from '@audius/common/store'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
 import { Notifications } from 'react-native-notifications'
@@ -6,17 +8,20 @@ import type { Registered, Notification } from 'react-native-notifications'
 import { requestNotifications } from 'react-native-permissions'
 
 import { track, make } from 'app/services/analytics'
+import { audiusBackendInstance } from 'app/services/audius-backend-instance'
+import { queryClient } from 'app/services/query-client'
+import { audiusSdk } from 'app/services/sdk/audius-sdk'
 import { EventNames } from 'app/types/analytics'
 
 import { DEVICE_TOKEN } from './constants/storage-keys'
 
-function extractDashboardAnnouncementIdFromPayload(
+function extractNotificationCampaignIdFromPayload(
   payload: Notification['payload']
 ): string | undefined {
   const target = payload?.data?.data ?? payload?.data ?? payload ?? undefined
   if (!target || typeof target !== 'object') return undefined
   const o = target as Record<string, unknown>
-  const v = o.dashboard_announcement_id ?? o.dashboardAnnouncementId
+  const v = o.notification_campaign_id
   return typeof v === 'string' && v.length > 0 ? v : undefined
 }
 
@@ -26,6 +31,25 @@ type Token = {
 }
 
 type NotificationNavigation = { navigate: (notification: any) => void }
+
+/** First-party Discovery campaign open — mobile remote push opens only. */
+async function reportNotificationCampaignPushOpen(
+  campaignId: string
+): Promise<void> {
+  const account = queryClient.getQueryData(getCurrentAccountQueryKey()) as
+    | AccountState
+    | undefined
+  const userId = account?.userId
+  if (userId == null) {
+    return
+  }
+  const sdk = await audiusSdk()
+  await audiusBackendInstance.reportNotificationCampaignPushOpen({
+    sdk,
+    userId,
+    campaignId
+  })
+}
 
 // Set to true while the push notification service is registering with the os
 let isRegistering = false
@@ -52,16 +76,21 @@ class PushNotifications {
   onNotification = (notification: Notification) => {
     console.info(`Received notification ${JSON.stringify(notification)}`)
     const { title, body, payload } = notification
-    const dashboardAnnouncementId =
-      extractDashboardAnnouncementIdFromPayload(payload)
+    const notificationCampaignId =
+      extractNotificationCampaignIdFromPayload(payload)
     track(
       make({
         eventName: EventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION,
         title,
         body,
-        dashboardAnnouncementId
+        notificationCampaignId
       })
     )
+    if (notificationCampaignId) {
+      Promise.resolve(
+        reportNotificationCampaignPushOpen(notificationCampaignId)
+      ).catch(() => {})
+    }
     this.navigation?.navigate(payload?.data?.data ?? payload?.data ?? payload)
   }
 

@@ -344,8 +344,7 @@ const assertCoinInfoSection = async ({
   ).toBeInTheDocument()
 
   // Check for Artist Earnings section
-  const artistEarningsRow =
-    within(onchain).getByTestId('artist-earnings')
+  const artistEarningsRow = within(onchain).getByTestId('artist-earnings')
   expect(artistEarningsRow).toBeInTheDocument()
   expect(
     within(artistEarningsRow).getByText(/artist earnings/i)
@@ -356,8 +355,7 @@ const assertCoinInfoSection = async ({
 
   if (isArtist) {
     // Check for Unclaimed Fees section (only visible to artist/coin creator)
-    const unclaimedFeesRow =
-      within(onchain).getByTestId('unclaimed-fees')
+    const unclaimedFeesRow = within(onchain).getByTestId('unclaimed-fees')
     expect(unclaimedFeesRow).toBeInTheDocument()
     expect(
       within(unclaimedFeesRow).getByText(/unclaimed earnings/i)

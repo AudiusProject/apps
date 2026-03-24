@@ -4,6 +4,14 @@
 /* global clients */
 
 /* eslint-disable max-len */
+
+function readNotificationCampaignId(raw) {
+  const target = raw?.data?.data ?? raw?.data ?? raw
+  if (!target || typeof target !== 'object') return null
+  const v = target.notification_campaign_id
+  return typeof v === 'string' && v.length > 0 ? v : null
+}
+
 // On Service Worker receiving a push notification.
 // eslint-disable-next-line
 self.addEventListener('push', function (event) {
@@ -25,7 +33,11 @@ event.waitUntil(self.registration.showNotification(pushEvent.title, options))
 self.addEventListener('notificationclick', function (event) {
   event.notification.close()
 
-  // NOTE: TODO: replace url with notifcation specific route
-  const notificationURL = '/feed?openNotifications=true'
+  const campaignId = readNotificationCampaignId(event.notification.data)
+  let notificationURL = '/feed?openNotifications=true'
+  if (campaignId) {
+    notificationURL +=
+      '&notificationCampaignId=' + encodeURIComponent(campaignId)
+  }
   event.waitUntil(clients.openWindow(notificationURL))
 })

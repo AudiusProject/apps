@@ -38,9 +38,7 @@ export const FanClubsExploreSection = () => {
       return []
     }
     return data.filter(
-      (coin) =>
-        coin.ticker &&
-        coin.mint !== env.WAUDIO_MINT_ADDRESS
+      (coin) => coin.ticker && coin.mint !== env.WAUDIO_MINT_ADDRESS
     )
   }, [data, env.WAUDIO_MINT_ADDRESS])
 

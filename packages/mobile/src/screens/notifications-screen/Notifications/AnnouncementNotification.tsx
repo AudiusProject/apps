@@ -43,7 +43,7 @@ export const AnnouncementNotification = (
   props: AnnouncementNotificationProps
 ) => {
   const { notification } = props
-  const { title, shortDescription, route, dashboardAnnouncementId } =
+  const { title, shortDescription, route, notificationCampaignId } =
     notification
   const styles = useStyles()
 
@@ -55,11 +55,11 @@ export const AnnouncementNotification = (
       make(Name.NOTIFICATIONS_CLICK_TILE, {
         kind: 'announcement',
         link_to: route ?? '',
-        dashboardAnnouncementId
+        notificationCampaignId
       })
     )
     navigation.navigate(notification)
-  }, [dashboardAnnouncementId, navigation, notification, record, route])
+  }, [notificationCampaignId, navigation, notification, record, route])
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>

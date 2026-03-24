@@ -119,8 +119,8 @@ export type AnnouncementNotification = BaseNotification & {
   shortDescription: string
   longDescription?: string
   route: string
-  /** Supabase announcement id; Amplitude property `dashboardAnnouncementId` */
-  dashboardAnnouncementId?: string
+  /** Internal notification campaign id (e.g. Supabase announcements / engagement sends) */
+  notificationCampaignId?: string
 }
 
 export type AnnouncementPushNotification = {
@@ -129,7 +129,7 @@ export type AnnouncementPushNotification = {
   shortDescription: string
   longDescription?: string
   route: string
-  dashboardAnnouncementId?: string
+  notificationCampaignId?: string
 }
 
 export type UserSubscriptionNotification = BaseNotification & {
