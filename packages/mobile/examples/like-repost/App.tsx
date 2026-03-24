@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   StyleSheet,
@@ -8,6 +8,13 @@ import {
 } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { Audio } from 'expo-av'
+import { type User } from '@audius/sdk'
+
+import {
+  createSessionId,
+  formatErrorForDebug,
+  newOperationId
+} from '../shared/exampleDebug'
 import { getSDK, config } from './src/sdk'
 
 type Screen = 'home' | 'signed-in'
@@ -23,7 +30,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [profile, setProfile] = useState<{ handle: string; userId: string } | null>(null)
+  const [profile, setProfile] = useState<User | null>(null)
   const [track, setTrack] = useState<Track | null>(null)
   const [trackLoading, setTrackLoading] = useState(false)
   const [likeLoading, setLikeLoading] = useState(false)
@@ -32,8 +39,27 @@ export default function App() {
   const [reposted, setReposted] = useState(false)
   const [result, setResult] = useState<string | null>(null)
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null)
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+
+  const sessionIdRef = useRef(createSessionId())
+  const opIdRef = useRef(`boot-${newOperationId()}`)
 
   const audiusSdk = getSDK()
+
+  const logDebug = useCallback((message: string, payload?: unknown) => {
+    const timestamp = new Date().toISOString().slice(11, 19)
+    const details =
+      payload === undefined
+        ? ''
+        : ` ${JSON.stringify(
+            payload,
+            (_, value) => (value instanceof Error ? value.message : value),
+            2
+          )}`
+    const line = `[sess:${sessionIdRef.current}][op:${opIdRef.current}] [${timestamp}] ${message}${details}`
+    console.log(`[like-repost] ${line}`)
+    setDebugLogs((prev) => [...prev.slice(-79), line])
+  }, [])
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -46,7 +72,10 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false
+    opIdRef.current = `restore-${newOperationId()}`
+    logDebug('Checking existing OAuth session')
     audiusSdk.oauth.isAuthenticated().then((authenticated) => {
+      logDebug('oauth.isAuthenticated resolved', { authenticated })
       if (cancelled) return
       if (!authenticated) {
         setLoading(false)
@@ -56,13 +85,14 @@ export default function App() {
         .getUser()
         .then((user) => {
           if (cancelled) return
-          setProfile({
-            handle: user.handle ?? 'Unknown',
-            userId: String(user.id ?? '')
-          })
+          logDebug('oauth.getUser succeeded (session restore)', { handle: user.handle, id: user.id })
+          setProfile(user)
           setScreen('signed-in')
         })
-        .catch(() => {})
+        .catch(async (e) => {
+          const details = await formatErrorForDebug(e)
+          logDebug('Session restore failed', details)
+        })
         .finally(() => {
           if (!cancelled) setLoading(false)
         })
@@ -70,30 +100,35 @@ export default function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [audiusSdk.oauth, logDebug])
 
   const handleSignIn = useCallback(async () => {
+    opIdRef.current = `signin-${newOperationId()}`
     setError(null)
     setLoading(true)
     try {
+      logDebug('Starting oauth.login')
       await audiusSdk.oauth.login({ scope: 'write', display: 'fullScreen' })
+      logDebug('oauth.login succeeded')
       const user = await audiusSdk.oauth.getUser()
-      setProfile({
-        handle: user.handle ?? 'Unknown',
-        userId: String(user.id ?? '')
-      })
+      logDebug('oauth.getUser succeeded', { handle: user.handle, id: user.id })
+      setProfile(user)
       setScreen('signed-in')
       setTrack(null)
       setResult(null)
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('Sign-in flow failed', details)
       setError(e instanceof Error ? e.message : 'Sign-in failed')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [audiusSdk.oauth, logDebug])
 
   const handleSignOut = useCallback(async () => {
+    logDebug('Starting oauth.logout')
     await audiusSdk.oauth.logout().catch(() => {})
+    logDebug('oauth.logout completed')
     setProfile(null)
     setTrack(null)
     setLiked(false)
@@ -101,18 +136,21 @@ export default function App() {
     setResult(null)
     setScreen('home')
     setError(null)
-  }, [])
+  }, [audiusSdk.oauth, logDebug])
 
   const fetchRandomTrack = useCallback(async () => {
+    opIdRef.current = `trending-${newOperationId()}`
     setTrackLoading(true)
     setTrack(null)
     setResult(null)
     try {
+      logDebug('Calling tracks.getTrendingTracks')
       const res = await audiusSdk.tracks.getTrendingTracks({
         limit: 20,
         offset: 0,
         time: 'week'
       })
+      logDebug('tracks.getTrendingTracks resolved', { count: res.data?.length ?? 0 })
       const list = res.data ?? []
       if (list.length > 0) {
         const randomIndex = Math.floor(Math.random() * list.length)
@@ -131,55 +169,77 @@ export default function App() {
         }
       }
     } catch (e: unknown) {
-      const res = e && typeof e === 'object' && 'response' in e ? (e as { response: Response }).response : null
-      const body = res && typeof res.text === 'function' ? await res.text().catch(() => '') : ''
-      setResult(body ? `API error: ${body}` : e instanceof Error ? e.message : 'Failed to fetch track')
+      const details = await formatErrorForDebug(e)
+      logDebug('tracks.getTrendingTracks failed', details)
+      setResult(
+        typeof details.requestId === 'string'
+          ? `API error (requestId: ${details.requestId})`
+          : e instanceof Error
+            ? e.message
+            : 'Failed to fetch track'
+      )
     } finally {
       setTrackLoading(false)
     }
-  }, [])
+  }, [audiusSdk.tracks, logDebug])
 
   const handleLike = useCallback(async () => {
     if (!profile || !track) return
+    opIdRef.current = `like-${newOperationId()}`
     setLikeLoading(true)
     setResult(null)
     try {
+      logDebug(liked ? 'Calling unfavoriteTrack' : 'Calling favoriteTrack', {
+        userId: profile.id,
+        trackId: track.id
+      })
       if (liked) {
-        await audiusSdk.tracks.unfavoriteTrack({ userId: profile.userId, trackId: track.id })
+        await audiusSdk.tracks.unfavoriteTrack({ userId: profile.id, trackId: track.id })
         setLiked(false)
         setResult('Unliked')
       } else {
-        await audiusSdk.tracks.favoriteTrack({ userId: profile.userId, trackId: track.id })
+        await audiusSdk.tracks.favoriteTrack({ userId: profile.id, trackId: track.id })
         setLiked(true)
         setResult('Liked!')
       }
+      logDebug('favorite/unfavorite succeeded')
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('favorite/unfavorite failed', details)
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setLikeLoading(false)
     }
-  }, [profile, track, liked])
+  }, [profile, track, liked, audiusSdk.tracks, logDebug])
 
   const handleRepost = useCallback(async () => {
     if (!profile || !track) return
+    opIdRef.current = `repost-${newOperationId()}`
     setRepostLoading(true)
     setResult(null)
     try {
+      logDebug(reposted ? 'Calling unrepostTrack' : 'Calling repostTrack', {
+        userId: profile.id,
+        trackId: track.id
+      })
       if (reposted) {
-        await audiusSdk.tracks.unrepostTrack({ userId: profile.userId, trackId: track.id })
+        await audiusSdk.tracks.unrepostTrack({ userId: profile.id, trackId: track.id })
         setReposted(false)
         setResult('Unreposted')
       } else {
-        await audiusSdk.tracks.repostTrack({ userId: profile.userId, trackId: track.id })
+        await audiusSdk.tracks.repostTrack({ userId: profile.id, trackId: track.id })
         setReposted(true)
         setResult('Reposted!')
       }
+      logDebug('repost/unrepost succeeded')
     } catch (e: unknown) {
+      const details = await formatErrorForDebug(e)
+      logDebug('repost/unrepost failed', details)
       setResult(e instanceof Error ? e.message : 'Request failed')
     } finally {
       setRepostLoading(false)
     }
-  }, [profile, track, reposted])
+  }, [profile, track, reposted, audiusSdk.tracks, logDebug])
 
   const handlePlayTrack = useCallback(async () => {
     if (!track) return
@@ -199,7 +259,7 @@ export default function App() {
     } catch {
       setPlayingTrackId(null)
     }
-  }, [track])
+  }, [track, audiusSdk.tracks])
 
   useEffect(() => {
     if (screen === 'signed-in' && profile && !track && !trackLoading) {
@@ -230,7 +290,7 @@ export default function App() {
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.profileRow}>
-            <Text style={styles.handle}>@{profile.handle}</Text>
+            <Text style={styles.handle}>@{profile.handle ?? 'user'}</Text>
             <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
               <Text style={styles.signOutBtnText}>Sign out</Text>
             </TouchableOpacity>
@@ -294,6 +354,21 @@ export default function App() {
             </View>
           ) : null}
           {result ? <Text style={styles.result}>{result}</Text> : null}
+          <Text style={styles.debugTitle}>Debug Log</Text>
+          <Text style={styles.debugSession} selectable>
+            Session: {sessionIdRef.current} (share with support)
+          </Text>
+          <View style={styles.debugBox}>
+            {debugLogs.length === 0 ? (
+              <Text style={styles.debugLine}>No log entries yet</Text>
+            ) : (
+              debugLogs.slice(-10).map((line, index) => (
+                <Text key={`${line}-${index}`} style={styles.debugLine}>
+                  {line}
+                </Text>
+              ))
+            )}
+          </View>
         </View>
         <StatusBar style="auto" />
       </View>
@@ -363,5 +438,20 @@ const styles = StyleSheet.create({
   actionBtnText: { fontSize: 14, fontWeight: '600', color: '#fff' },
   result: { fontSize: 13, color: '#333', marginTop: 12 },
   loader: { marginVertical: 16 },
-  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 }
+  error: { color: '#d32f2f', marginTop: 12, fontSize: 13 },
+  debugTitle: { marginTop: 16, fontSize: 13, fontWeight: '600', color: '#333' },
+  debugSession: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    marginBottom: 6
+  },
+  debugBox: {
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#111',
+    maxHeight: 180
+  },
+  debugLine: { fontSize: 11, color: '#ddd', marginBottom: 4 }
 })

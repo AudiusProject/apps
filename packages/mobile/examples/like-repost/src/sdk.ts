@@ -15,11 +15,15 @@ let sdkInstance: AudiusSdk | null = null
  */
 export function getSDK(): AudiusSdk {
   if (!sdkInstance) {
-    sdkInstance = sdk({
-      appName: APP_NAME,
-      apiKey: config.apiKey ?? '',
-      redirectUri: REDIRECT_URI
-    })
+    sdkInstance = sdk(
+      config.apiKey
+        ? {
+            appName: APP_NAME,
+            apiKey: config.apiKey,
+            redirectUri: REDIRECT_URI
+          }
+        : { appName: APP_NAME, redirectUri: REDIRECT_URI }
+    )
   }
   return sdkInstance
 }

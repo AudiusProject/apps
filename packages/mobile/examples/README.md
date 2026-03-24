@@ -40,6 +40,8 @@ All OAuth examples use **Log in with Audius** (OAuth 2.0 PKCE): scoped, short-li
 
 Implementation lives in `packages/mobile/src` and `packages/common`; each example folder links to the exact files and entry points.
 
+- **Shared debug helpers:** [`shared/exampleDebug.ts`](./shared/exampleDebug.ts) — session / operation IDs, `formatErrorForDebug` (response `requestId` headers). Imported as `../shared/exampleDebug` from each example.
+
 ## Adding new examples
 
 1. Add a new directory under `packages/mobile/examples/<example-name>/`.

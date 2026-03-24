@@ -10,12 +10,15 @@ import {
 } from 'react-native'
 import { Audio } from 'expo-av'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+import { createSessionId } from '../shared/exampleDebug'
 import { useTrendingTracks } from './src/hooks/useTrendingTracks'
 import { getSDK } from './src/sdk'
 
 const queryClient = new QueryClient()
 
 function TrendingScreen() {
+  const sessionIdRef = useRef(createSessionId())
   const { data: tracks, isPending, error } = useTrendingTracks()
   const [playingId, setPlayingId] = useState<string | null>(null)
   const soundRef = useRef<Audio.Sound | null>(null)
@@ -82,6 +85,9 @@ function TrendingScreen() {
         <Text style={styles.errorText}>
           Error: {error instanceof Error ? error.message : String(error)}
         </Text>
+        <Text style={styles.sessionHint} selectable>
+          Session: {sessionIdRef.current} (check Metro logs for requestId)
+        </Text>
       </View>
     )
   }
@@ -95,6 +101,9 @@ function TrendingScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Trending on Audius</Text>
       <Text style={styles.subtitle}>SDK + Expo example</Text>
+      <Text style={styles.sessionHint} selectable>
+        Session: {sessionIdRef.current}
+      </Text>
       <FlatList
         data={list}
         keyExtractor={(item) => trackIdForItem(item) || String(Math.random())}
@@ -173,6 +182,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#d32f2f',
     textAlign: 'center',
+  },
+  sessionHint: {
+    marginTop: 12,
+    fontSize: 11,
+    color: '#888',
+    fontFamily: 'monospace',
+    textAlign: 'center',
+    paddingHorizontal: 24,
   },
   list: {
     padding: 16,
