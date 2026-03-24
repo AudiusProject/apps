@@ -1351,14 +1351,14 @@ type NotificationsOpenPushNotification = {
   eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
   title?: string
   body?: string
-  dashboardAnnouncementId?: string
+  notificationCampaignId?: string
 }
 type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
   kind: string
   link_to: string
-  /** Supabase announcement id when kind is announcement */
-  dashboardAnnouncementId?: string
+  /** Internal campaign id when kind is announcement */
+  notificationCampaignId?: string
 }
 type NotificationsClickMilestone = {
   eventName: Name.NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE
