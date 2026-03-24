@@ -71,10 +71,10 @@ export const ExclusiveTracksSection = ({
     <Flex column gap='l' w='100%'>
       <Flex alignItems='center' justifyContent='space-between' w='100%'>
         <Flex alignItems='center' gap='s'>
-          <Text variant='heading' size='s' color='default'>
+          <Text variant='heading' size='m' color='default'>
             {messages.exclusiveTracks}
           </Text>
-          <Text variant='heading' size='s' color='subdued'>
+          <Text variant='heading' size='m' color='subdued'>
             ({totalCount})
           </Text>
         </Flex>

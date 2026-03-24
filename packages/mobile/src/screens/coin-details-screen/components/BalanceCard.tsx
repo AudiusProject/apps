@@ -178,10 +178,10 @@ const HasBalanceState = ({
                   w='100%'
                   pv='2xs'
                 >
-                  <Text variant='body' size='l'>
+                  <Text variant='body' size='m'>
                     {coinDetailsMessages.externalWallets.builtIn}
                   </Text>
-                  <Text variant='body' size='l'>
+                  <Text variant='body' size='m'>
                     {isAudio
                       ? audioBuiltInBalance
                       : Math.trunc(
@@ -215,14 +215,14 @@ const HasBalanceState = ({
                         pv='2xs'
                       >
                         <Flex gap='xs' alignItems='center' row>
-                          <Text variant='body' size='l'>
+                          <Text variant='body' size='m'>
                             {walletMessages.linkedWallets.wallet(index)}
                           </Text>
-                          <Text variant='body' size='l' color='subdued'>
+                          <Text variant='body' size='m' color='subdued'>
                             ({shortenSPLAddress(walletBalance.address)})
                           </Text>
                         </Flex>
-                        <Text variant='body' size='l'>
+                        <Text variant='body' size='m'>
                           {balanceFormatted}
                         </Text>
                       </Flex>
@@ -239,14 +239,14 @@ const HasBalanceState = ({
                       pv='2xs'
                     >
                       <Flex gap='xs' alignItems='center' row>
-                        <Text variant='body' size='l'>
+                        <Text variant='body' size='m'>
                           {walletMessages.linkedWallets.wallet(index)}
                         </Text>
-                        <Text variant='body' size='l' color='subdued'>
+                        <Text variant='body' size='m' color='subdued'>
                           ({shortenSPLAddress(wallet.owner)})
                         </Text>
                       </Flex>
-                      <Text variant='body' size='l'>
+                      <Text variant='body' size='m'>
                         {Math.trunc(
                           wallet.balance / Math.pow(10, decimals ?? 0)
                         ).toLocaleString()}

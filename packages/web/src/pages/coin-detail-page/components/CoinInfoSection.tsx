@@ -23,6 +23,7 @@ import {
 } from '@audius/common/utils'
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import {
+  Artwork,
   Flex,
   IconCopy,
   IconDiscord,
@@ -71,7 +72,7 @@ const messages = {
 const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
 
-const BANNER_HEIGHT = 120
+const BANNER_HEIGHT = 160
 
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
 // Below this threshold is considered "dust" and not worth claiming due to transaction fees
@@ -139,8 +140,9 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
   )
 }
 
-const CoinInfoSectionSkeleton = () => {
+const CoinInfoHeroSkeleton = () => {
   const theme = useTheme()
+  const { spacing } = theme
 
   return (
     <Paper
@@ -149,18 +151,26 @@ const CoinInfoSectionSkeleton = () => {
       column
       alignItems='flex-start'
       border='default'
+      data-testid='coin-info-hero'
     >
-      {/* Banner skeleton */}
       <Flex
-        column
-        alignItems='flex-start'
+        alignItems='flex-end'
         alignSelf='stretch'
         border='default'
-        h={BANNER_HEIGHT}
-        css={{ backgroundColor: theme.color.neutral.n100 }}
+        css={{
+          minHeight: BANNER_HEIGHT,
+          backgroundColor: theme.color.neutral.n100
+        }}
+        gap='s'
+        p='l'
+        w='100%'
       >
-        <Flex column alignItems='flex-start' alignSelf='stretch' p='l' gap='s'>
-          <Skeleton width='80px' height='16px' />
+        <Skeleton
+          width={`${spacing.unit24}px`}
+          height={`${spacing.unit24}px`}
+        />
+        <Flex column gap='xs' alignItems='flex-start' flex={1}>
+          <Skeleton width='80px' height='14px' />
           <Flex
             alignItems='center'
             gap='xs'
@@ -175,7 +185,6 @@ const CoinInfoSectionSkeleton = () => {
         </Flex>
       </Flex>
 
-      {/* Content skeleton */}
       <Flex column alignItems='flex-start' alignSelf='stretch' p='xl' gap='l'>
         <Skeleton width='200px' height='24px' />
         <Flex column gap='m'>
@@ -185,20 +194,37 @@ const CoinInfoSectionSkeleton = () => {
           <Skeleton width='80%' height='20px' />
         </Flex>
       </Flex>
+    </Paper>
+  )
+}
 
-      {/* Footer skeleton */}
+const CoinInfoOnchainSkeleton = () => {
+  return (
+    <Paper
+      borderRadius='l'
+      shadow='far'
+      column
+      alignItems='flex-start'
+      border='default'
+      data-testid='coin-onchain-details'
+    >
+      <Flex alignSelf='stretch' ph='l' pv='m' borderBottom='default'>
+        <Skeleton width='160px' height='20px' />
+      </Flex>
       <Flex
         alignItems='center'
         justifyContent='space-between'
         alignSelf='stretch'
-        p='xl'
-        borderTop='default'
+        p='l'
+        ph='xl'
+        borderBottom='default'
       >
-        <Flex alignItems='center' gap='s'>
-          <Skeleton width='24px' height='24px' />
-          <Skeleton width='100px' height='20px' />
-        </Flex>
-        <Skeleton width='120px' height='20px' />
+        <Skeleton width='140px' height='16px' />
+        <Skeleton width='88px' height='20px' />
+      </Flex>
+      <Flex column alignSelf='stretch' ph='xl' pv='l' gap='l'>
+        <Skeleton width='100%' height='20px' />
+        <Skeleton width='100%' height='20px' />
       </Flex>
     </Paper>
   )
@@ -211,6 +237,7 @@ type BannerSectionProps = {
 export const BannerSection = ({ mint }: BannerSectionProps) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const theme = useTheme()
+  const { spacing } = theme
   const { ownerId: ownerIdRaw } = coin ?? {}
   const ownerId =
     typeof ownerIdRaw === 'string' ? HashId.parse(ownerIdRaw) : ownerIdRaw
@@ -225,24 +252,39 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
   if (isLoading || !coin || !owner) {
     return (
       <Flex
-        column
-        alignItems='flex-start'
         alignSelf='stretch'
-        h={BANNER_HEIGHT}
-        css={{ backgroundColor: theme.color.neutral.n100 }}
+        css={{
+          position: 'relative',
+          minHeight: BANNER_HEIGHT,
+          backgroundColor: theme.color.neutral.n100
+        }}
+        data-testid='coin-cover-photo'
       >
-        <Flex column alignItems='flex-start' alignSelf='stretch' p='l' gap='s'>
-          <Skeleton width='80px' height='16px' />
-          <Flex
-            alignItems='center'
-            gap='xs'
-            p='xs'
-            backgroundColor='white'
-            borderRadius='circle'
-            border='default'
-          >
-            <Skeleton width='32px' height='32px' />
-            <Skeleton width='100px' height='20px' />
+        <Flex
+          alignItems='flex-end'
+          alignSelf='stretch'
+          gap='s'
+          p='l'
+          w='100%'
+          css={{ minHeight: BANNER_HEIGHT }}
+        >
+          <Skeleton
+            width={`${spacing.unit24}px`}
+            height={`${spacing.unit24}px`}
+          />
+          <Flex column gap='xs' alignItems='flex-start' flex={1}>
+            <Skeleton width='80px' height='14px' />
+            <Flex
+              alignItems='center'
+              gap='xs'
+              p='xs'
+              backgroundColor='white'
+              borderRadius='circle'
+              border='default'
+            >
+              <Skeleton width='32px' height='32px' />
+              <Skeleton width='100px' height='20px' />
+            </Flex>
           </Flex>
         </Flex>
       </Flex>
@@ -251,25 +293,69 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
 
   return (
     <Flex
-      column
-      alignItems='flex-start'
       alignSelf='stretch'
-      h={BANNER_HEIGHT}
       css={{
-        background: `linear-gradient(90deg, rgba(0, 0, 0, 0.05) 10%, rgba(0, 0, 0, 0.02) 20%, rgba(0, 0, 0, 0.01) 30%, rgba(0, 0, 0, 0) 45%), url("${bannerImage ?? ''}")`,
-        backgroundSize: 'auto, cover',
-        backgroundPosition: '0% 0%, 50% 50%',
-        backgroundRepeat: 'repeat, no-repeat',
-        position: 'relative'
+        position: 'relative',
+        minHeight: BANNER_HEIGHT,
+        overflow: 'hidden'
       }}
       data-testid='coin-cover-photo'
     >
-      <Flex column alignItems='flex-start' alignSelf='stretch' p='l' gap='s'>
-        <Text variant='label' size='m' color='staticWhite' shadow='emphasis'>
-          {messages.createdBy}
-        </Text>
-
-        {ownerId && <UserTokenBadge userId={ownerId} />}
+      <Flex
+        css={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: theme.color.neutral.n100,
+          backgroundImage: bannerImage ? `url("${bannerImage}")` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      <Flex
+        css={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(180deg, rgba(0, 0, 0, 0) 33.78%, rgba(0, 0, 0, 0.15) 42.99%, rgba(0, 0, 0, 0.3) 49.14%, rgba(0, 0, 0, 0.5) 55.28%)',
+          pointerEvents: 'none'
+        }}
+      />
+      <Flex
+        alignItems='flex-end'
+        gap='s'
+        p='l'
+        w='100%'
+        css={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: BANNER_HEIGHT,
+          boxSizing: 'border-box'
+        }}
+      >
+        {coin.logoUri ? (
+          <Artwork
+            src={coin.logoUri}
+            hex
+            w={spacing.unit24}
+            h={spacing.unit24}
+            borderWidth={0}
+            borderRadius='s'
+          />
+        ) : null}
+        <Flex column gap='xs' alignItems='flex-start' flex={1} css={{ minWidth: 0 }}>
+          <Text
+            variant='label'
+            size='s'
+            color='staticWhite'
+            shadow='emphasis'
+            css={{ letterSpacing: '0.5px' }}
+            style={{ textTransform: 'uppercase' }}
+          >
+            {messages.createdBy}
+          </Text>
+          {ownerId ? <UserTokenBadge userId={ownerId} /> : null}
+        </Flex>
       </Flex>
     </Flex>
   )
@@ -438,11 +524,14 @@ const ArtistVestingSection = ({
   )
 }
 
+export type CoinInfoSectionVariant = 'hero' | 'onchainDetails'
+
 type CoinInfoSectionProps = {
   mint: string
+  variant: CoinInfoSectionVariant
 }
 
-export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
+export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
@@ -790,7 +879,11 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     coin?.artistLocker?.claimable === 0
 
   if (isArtistCoinLoading || !coin) {
-    return <CoinInfoSectionSkeleton />
+    return variant === 'onchainDetails' ? (
+      <CoinInfoOnchainSkeleton />
+    ) : (
+      <CoinInfoHeroSkeleton />
+    )
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
@@ -800,78 +893,91 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
     !userTokenBalance || Number(userTokenBalance) <= 0
   const isClaimFeesDisabled = isClaimFeesPending || isManagerMode
 
-  return (
-    <Paper
-      borderRadius='l'
-      shadow='far'
-      column
-      alignItems='flex-start'
-      border='default'
-      data-testid='coin-info-section'
-    >
-      <BannerSection mint={mint} />
+  if (variant === 'hero') {
+    return (
+      <Paper
+        borderRadius='l'
+        shadow='far'
+        column
+        alignItems='flex-start'
+        border='default'
+        data-testid='coin-info-hero'
+      >
+        <BannerSection mint={mint} />
 
-      {coin.description ? (
-        <Flex
-          column
-          alignItems='flex-start'
-          alignSelf='stretch'
-          ph='xl'
-          pv='l'
-          gap='l'
-        >
-          <Flex column gap='m'>
-            <SocialLinksDisplay coin={coin} />
-            {descriptionParagraphs.map((paragraph) => {
-              if (paragraph.trim() === '') {
-                return null
-              }
+        {coin.description ? (
+          <Flex
+            column
+            alignItems='flex-start'
+            alignSelf='stretch'
+            ph='xl'
+            pv='l'
+            gap='l'
+          >
+            <Flex column gap='m'>
+              <SocialLinksDisplay coin={coin} />
+              {descriptionParagraphs.map((paragraph) => {
+                if (paragraph.trim() === '') {
+                  return null
+                }
 
-              return (
-                <UserGeneratedText
-                  key={paragraph.slice(0, 10)}
-                  variant='body'
-                  size='m'
-                  color='subdued'
-                >
-                  {paragraph}
-                </UserGeneratedText>
-              )
-            })}
+                return (
+                  <UserGeneratedText
+                    key={paragraph.slice(0, 10)}
+                    variant='body'
+                    size='m'
+                    color='default'
+                  >
+                    {paragraph}
+                  </UserGeneratedText>
+                )
+              })}
+            </Flex>
           </Flex>
-        </Flex>
-      ) : null}
+        ) : null}
 
-      {isWAudio || coin.website ? (
-        <Flex
-          alignItems='center'
-          justifyContent='space-between'
-          alignSelf='stretch'
-          p='l'
-          borderTop='default'
-        >
-          <Flex alignItems='center' justifyContent='center' gap='s'>
-            <PlainButton
-              onClick={isWAudio ? handleBrowseRewards : handleLearnMore}
-              iconLeft={CTAIcon}
-              variant='default'
-            >
-              {isWAudio ? messages.browseRewards : messages.learnMore}
-            </PlainButton>
+        {isWAudio || coin.website ? (
+          <Flex
+            alignItems='center'
+            justifyContent='space-between'
+            alignSelf='stretch'
+            p='l'
+            borderTop='default'
+          >
+            <Flex alignItems='center' justifyContent='center' gap='s'>
+              <PlainButton
+                onClick={isWAudio ? handleBrowseRewards : handleLearnMore}
+                iconLeft={CTAIcon}
+                variant='default'
+              >
+                {isWAudio ? messages.browseRewards : messages.learnMore}
+              </PlainButton>
+            </Flex>
           </Flex>
-        </Flex>
-      ) : null}
-      {userToken?.hasDiscord ? (
-        <Flex
-          alignItems='center'
-          justifyContent='space-between'
-          alignSelf='stretch'
-          p='l'
-          borderTop='default'
-        >
-          <Flex alignItems='center' justifyContent='center' gap='s'>
-            {isUserBalanceUnavailable ? (
-              <Tooltip text={messages.discordDisabledTooltip(coin?.ticker)}>
+        ) : null}
+        {userToken?.hasDiscord ? (
+          <Flex
+            alignItems='center'
+            justifyContent='space-between'
+            alignSelf='stretch'
+            p='l'
+            borderTop='default'
+          >
+            <Flex alignItems='center' justifyContent='center' gap='s'>
+              {isUserBalanceUnavailable ? (
+                <Tooltip text={messages.discordDisabledTooltip(coin?.ticker)}>
+                  <Flex style={{ cursor: 'pointer' }}>
+                    <PlainButton
+                      onClick={openDiscord}
+                      iconLeft={IconDiscord}
+                      variant='default'
+                      disabled={isUserBalanceUnavailable}
+                    >
+                      {messages.openDiscord}
+                    </PlainButton>
+                  </Flex>
+                </Tooltip>
+              ) : (
                 <Flex style={{ cursor: 'pointer' }}>
                   <PlainButton
                     onClick={openDiscord}
@@ -882,22 +988,34 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
                     {messages.openDiscord}
                   </PlainButton>
                 </Flex>
-              </Tooltip>
-            ) : (
-              <Flex style={{ cursor: 'pointer' }}>
-                <PlainButton
-                  onClick={openDiscord}
-                  iconLeft={IconDiscord}
-                  variant='default'
-                  disabled={isUserBalanceUnavailable}
-                >
-                  {messages.openDiscord}
-                </PlainButton>
-              </Flex>
-            )}
+              )}
+            </Flex>
           </Flex>
-        </Flex>
-      ) : null}
+        ) : null}
+      </Paper>
+    )
+  }
+
+  return (
+    <Paper
+      borderRadius='l'
+      shadow='far'
+      column
+      alignItems='flex-start'
+      border='default'
+      data-testid='coin-onchain-details'
+    >
+      <Flex
+        alignItems='center'
+        alignSelf='stretch'
+        ph='l'
+        pv='m'
+        borderBottom='default'
+      >
+        <Text variant='heading' size='s'>
+          {messages.fanClubDetailsTitle}
+        </Text>
+      </Flex>
 
       <Flex
         alignItems='center'
@@ -905,7 +1023,7 @@ export const CoinInfoSection = ({ mint }: CoinInfoSectionProps) => {
         alignSelf='stretch'
         p='l'
         ph='xl'
-        borderTop='default'
+        borderBottom='default'
       >
         <PlainButton
           onClick={handleCopyAddress}

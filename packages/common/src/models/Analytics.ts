@@ -1568,6 +1568,7 @@ export type ExploreSectionName =
   | 'Recently Played'
   | 'Quick Search'
   | 'Featured Playlists'
+  | 'Fan Clubs'
   | 'Featured Remix Contests'
   | 'Underground Trending Tracks'
   | 'Artist Spotlight'

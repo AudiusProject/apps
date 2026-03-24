@@ -15,7 +15,7 @@ const ARTIST_COIN_BANNER_LOCAL_STORAGE_KEY =
 
 const messages = {
   pill: 'New',
-  text: 'Artist Coins Are LIVE! Click Here To See If Your Favorite Artist Launched'
+  text: 'Fan Clubs Are LIVE! See If Your Favorite Artist Launched One'
 }
 
 export const ArtistCoinsLaunchBanner = () => {

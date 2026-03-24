@@ -164,7 +164,7 @@ export const ArtistCoinFlairSelector = ({
       selectedToken={selectedCoin}
       availableTokens={availableCoins}
       onTokenChange={handleTokenChange}
-      title='Select Artist Coin Flair'
+      title='Select Fan Club Flair'
     />
   )
 }

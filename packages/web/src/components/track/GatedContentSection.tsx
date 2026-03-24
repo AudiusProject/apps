@@ -59,7 +59,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   coinGated: 'COIN GATED',
   specialAccess: 'SPECIAL ACCESS',
   followArtist: 'Follow Artist',
-  buyArtistCoin: 'Buy Artist Coin',
+  buyArtistCoin: 'Buy Fan Club Token',
   period: '.',
   exclamationMark: '!',
   ownFollowGated: 'Users can unlock access by following your account!',
@@ -68,14 +68,14 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlockedFollowGatedContentSuffix: `! This ${contentType} is now available.`,
   thankYouForSupporting: 'Thank you for supporting',
   unlockWithPurchase: `Unlock this ${contentType} with a one-time purchase!`,
-  ofArtistsCoin: "of the artist's coin",
-  artistCoin: 'Artist coin',
+  ofArtistsCoin: "of the artist's fan club",
+  artistCoin: 'Fan club',
   unlockTokenGatedContentPrefix: (amount: number) =>
     `You must hold at least ${amount} `,
   unlockTokenGatedContentSuffix: ' in a connected wallet.',
   unlockedTokenGatedSuffix: ` was found in a linked wallet. This ${contentType} is now available.`,
   ownTokenGated:
-    'Fans can unlock access by linking a wallet containing your artist coin',
+    'Fans can unlock access by linking a wallet that holds your fan club token',
   purchased: `You've purchased this ${contentType}.`,
   buy: (price: string) => `Buy ${price}`,
   usersCanPurchase: (price: string) =>

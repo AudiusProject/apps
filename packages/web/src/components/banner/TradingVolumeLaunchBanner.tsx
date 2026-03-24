@@ -13,7 +13,7 @@ const TRADING_VOLUME_BANNER_LOCAL_STORAGE_KEY =
 
 const messages = {
   pill: 'New',
-  text: 'Collect Artist Coins to earn daily $AUDIO rewards! Season 1 is live now 🔥'
+  text: 'Collect fan club tokens to earn daily $AUDIO rewards! Season 1 is live now 🔥'
 }
 
 export const TradingVolumeLaunchBanner = () => {

@@ -7,7 +7,7 @@ import { Button, useTheme } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 const messages = {
-  title: 'Buy Artist Coin'
+  title: 'Buy Fan Club Token'
 }
 
 export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {

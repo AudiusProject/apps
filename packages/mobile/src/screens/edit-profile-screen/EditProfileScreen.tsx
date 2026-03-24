@@ -95,7 +95,7 @@ const EditProfileForm = (props: EditProfileFormProps) => {
           </ProfileInputCard>
 
           {/* Artist Coin Flair Section */}
-          <ProfileInputCard title='Artist Coin Flair'>
+          <ProfileInputCard title='Fan Club Flair'>
             <ArtistCoinFlairSelector
               selectedBadge={values.artist_coin_badge}
               onChange={handleArtistCoinBadgeChange}
