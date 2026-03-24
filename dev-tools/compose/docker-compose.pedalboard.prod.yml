@@ -146,15 +146,11 @@ services:
     profiles:
       - pedalboard
 
+  # Source + image build: AudiusProject/pedalboard (apps/verified-notifications). Prod: audius-k8s Pulumi app verified-notifications.
   verified-notifications:
     container_name: verified-notifications
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: verified-notifications
-        TURBO_TEAM: '${TURBO_TEAM:-}'
-        TURBO_TOKEN: '${TURBO_TOKEN:-}'
+    image: audius/verified-notifications:${VERIFIED_NOTIFICATIONS_TAG:-latest}
+    pull_policy: always
     restart: on-failure
     profiles:
       - pedalboard

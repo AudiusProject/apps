@@ -11,6 +11,10 @@ npm install
 
 There are two main directories where work is done. [Packages](./packages) and [Apps](./apps). Packages are modules and libraries that are useful across various plugins. Apps are code that gets compiled and run against the database and indexer.
 
+## Verified notifications
+
+The **verified-notifications** app is maintained in the **[pedalboard](https://github.com/AudiusProject/pedalboard)** repository (not under `apps/` here). Docker image `audius/verified-notifications`. Production deployment is defined in **[audius-k8s](https://github.com/AudiusProject/audius-k8s)** (Pulumi stack `verified-notifications`). Local compose uses the published image; see `dev-tools/compose/docker-compose.pedalboard.prod.yml`.
+
 # Starting a new application
 
 To create a new application copy and paste the [app-template](./apps/app-template/). Rename your directory and package json project name to what you'd like and you should be ready to start developing. The application template will have an example app for you to get started with.

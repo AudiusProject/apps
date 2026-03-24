@@ -84,10 +84,6 @@ services:
     extends:
       file: docker-compose.pedalboard.prod.yml
       service: verified-notifications
-    build:
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
-    volumes:
-      - ${PROJECT_ROOT}:/app
 
   archiver:
     user: ${DOCKER_UID:-root}:${DOCKER_GID:-root}

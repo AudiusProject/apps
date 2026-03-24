@@ -5,7 +5,7 @@
 # Get the replica number from the host name
 export replica=$(nslookup $(hostname -i) | sed -n "s/^.*audius-[A-z\-]*\([0-9]\)\+.*$/\1/p")
 
-# If non-replicated, default to 1 (for eg verified-notifications)
+# If non-replicated, default to 1
 if [ -z "$replica" ]; then
   replica=1
 fi
