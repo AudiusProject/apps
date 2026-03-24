@@ -14,6 +14,10 @@ import Config from 'react-native-config'
 const OTA_BASE_URL =
   (Config as { OTA_UPDATE_URL?: string }).OTA_UPDATE_URL ?? ''
 
+export function isOtaEnabled(): boolean {
+  return OTA_BASE_URL.length > 0
+}
+
 /**
  * Fetches release history for the current app version from your OTA server.
  * The server should host JSON at: {baseUrl}/histories/{platform}/{identifier}/{appVersion}.json

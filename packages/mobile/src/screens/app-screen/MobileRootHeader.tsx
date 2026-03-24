@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
 import { GradientText } from 'app/components/core'
+import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 
@@ -81,14 +82,17 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
           <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
         </View>
       ) : null}
-      <View style={[styles.row, { marginTop: insets.top }]}>
-        <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
-        <View style={styles.titleContainer}>
-          <GradientText accessibilityRole='header' style={styles.title}>
-            {title}
-          </GradientText>
+      <View style={{ marginTop: insets.top }}>
+        <OtaUpdateBanner />
+        <View style={styles.row}>
+          <AccountPictureHeader onPress={handleOpenLeftNavDrawer} />
+          <View style={styles.titleContainer}>
+            <GradientText accessibilityRole='header' style={styles.title}>
+              {title}
+            </GradientText>
+          </View>
+          {children}
         </View>
-        {children}
       </View>
       {showDivider ? <View style={styles.divider} /> : null}
     </View>
