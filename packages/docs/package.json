@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vocs dev",
-    "build": "vocs build",
+    "build": "node scripts/generate-llms-txt.cjs && vocs build",
+    "gen:llms-txt": "node scripts/generate-llms-txt.cjs",
     "preview": "vocs preview",
     "pages:dev": "npx wrangler pages dev --compatibility-date=2024-02-23 --proxy 5173 -- npm run dev",
     "pages:deploy": "npm run build && npx wrangler pages deploy ./docs/dist",

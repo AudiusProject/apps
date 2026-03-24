@@ -6,8 +6,8 @@ import { CoinInsights } from './components/CoinInsights'
 import { CoinLeaderboardCard } from './components/CoinLeaderboardCard'
 import { ExclusiveTracksSection } from './components/ExclusiveTracksSection'
 
-const LEFT_SECTION_WIDTH = '704px'
-const RIGHT_SECTION_WIDTH = '360px'
+const MAIN_SECTION_WIDTH = '704px'
+const SIDEBAR_SECTION_WIDTH = '360px'
 
 const useStyles = makeResponsiveStyles(({ media, theme }) => {
   const hasEnoughSpaceForTwoColumns = media.matchesQuery(`(min-width: 1440px)`)
@@ -19,28 +19,32 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
         gap: theme.spacing.l,
         width: '100%',
         maxWidth: hasEnoughSpaceForTwoColumns
-          ? `calc(${LEFT_SECTION_WIDTH} + ${RIGHT_SECTION_WIDTH} + ${theme.spacing.l})`
+          ? `calc(${MAIN_SECTION_WIDTH} + ${SIDEBAR_SECTION_WIDTH} + ${theme.spacing.l})`
           : '100%',
         margin: '0 auto',
         flexDirection: hasEnoughSpaceForTwoColumns ? 'row' : 'column',
         paddingBottom: hasEnoughSpaceForTwoColumns ? 0 : theme.spacing.m
       }
     },
-    leftSection: {
+    /** Primary column: fan club story + exclusive tracks (desktop left). */
+    mainColumn: {
       base: {
-        width: hasEnoughSpaceForTwoColumns ? LEFT_SECTION_WIDTH : '100%',
-        maxWidth: hasEnoughSpaceForTwoColumns ? LEFT_SECTION_WIDTH : '100%',
+        order: hasEnoughSpaceForTwoColumns ? 1 : 2,
+        width: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
+        maxWidth: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
         minWidth: 0,
         flex: hasEnoughSpaceForTwoColumns ? '0 0 auto' : '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.m
+        gap: theme.spacing.xl
       }
     },
-    rightSection: {
+    /** Sidebar: balance, leaderboard, insights, on-chain details (desktop right). */
+    sidebarColumn: {
       base: {
-        width: hasEnoughSpaceForTwoColumns ? RIGHT_SECTION_WIDTH : '100%',
-        maxWidth: hasEnoughSpaceForTwoColumns ? RIGHT_SECTION_WIDTH : '100%',
+        order: hasEnoughSpaceForTwoColumns ? 2 : 1,
+        width: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
+        maxWidth: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
         minWidth: 0,
         flex: hasEnoughSpaceForTwoColumns ? '0 0 auto' : '1 1 auto',
         display: 'flex',
@@ -60,16 +64,15 @@ export const CoinDetailContent = ({ mint }: CoinDetailContentProps) => {
 
   return (
     <Flex css={styles.container}>
-      <Flex css={styles.leftSection}>
-        <BalanceSection mint={mint} />
-        <CoinInfoSection mint={mint} />
-      </Flex>
-      <Flex css={styles.rightSection}>
-        <Flex column gap='m'>
-          <CoinInsights mint={mint} />
-          <CoinLeaderboardCard mint={mint} />
-        </Flex>
+      <Flex css={styles.mainColumn}>
+        <CoinInfoSection mint={mint} variant='hero' />
         <ExclusiveTracksSection mint={mint} />
+      </Flex>
+      <Flex css={styles.sidebarColumn}>
+        <BalanceSection mint={mint} />
+        <CoinLeaderboardCard mint={mint} />
+        <CoinInsights mint={mint} />
+        <CoinInfoSection mint={mint} variant='onchainDetails' />
       </Flex>
     </Flex>
   )

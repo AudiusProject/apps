@@ -207,7 +207,7 @@ const assertCoinBalanceSection = async ({
       ).toBeInTheDocument()
       expect(
         screen.getByText(
-          /buy \$MOCK to gain access to exclusive members-only perks!/i,
+          /buy \$MOCK to join the fan club and unlock members-only perks\./i,
           {
             exact: false
           }
@@ -219,7 +219,7 @@ const assertCoinBalanceSection = async ({
       ).not.toBeInTheDocument()
       expect(
         screen.queryByText(
-          /buy \$MOCK to gain access to exclusive members-only perks!/i,
+          /buy \$MOCK to join the fan club and unlock members-only perks\./i,
           {
             exact: false
           }
@@ -286,9 +286,10 @@ const assertCoinInfoSection = async ({
   isArtist,
   unclaimedFees
 }: { isArtist?: boolean; unclaimedFees?: string } = {}) => {
-  // Get the coin info section to scope all assertions within it
-  const coinInfoSection = screen.getByTestId('coin-info-section')
-  expect(coinInfoSection).toBeInTheDocument()
+  const hero = await screen.findByTestId('coin-info-hero')
+  const onchain = screen.getByTestId('coin-onchain-details')
+  expect(hero).toBeInTheDocument()
+  expect(onchain).toBeInTheDocument()
 
   // Check for "Created By" section
   await assertCreatedBySection()
@@ -296,12 +297,12 @@ const assertCoinInfoSection = async ({
   // Check for coin description
   if (mockArtistCoin.description) {
     expect(
-      within(coinInfoSection).getByText(mockArtistCoin.description)
+      within(hero).getByText(mockArtistCoin.description)
     ).toBeInTheDocument()
   }
 
   // Check for social links (link_2, link_3, link_4)
-  const allLinks = within(coinInfoSection).getAllByRole('link', {
+  const allLinks = within(hero).getAllByRole('link', {
     hidden: true
   })
 
@@ -331,7 +332,7 @@ const assertCoinInfoSection = async ({
 
   // Check for website "Learn More" button
   if (mockArtistCoin.website) {
-    const learnMoreButton = within(coinInfoSection).getByRole('button', {
+    const learnMoreButton = within(hero).getByRole('button', {
       name: /learn more/i
     })
     expect(learnMoreButton).toBeInTheDocument()
@@ -339,12 +340,12 @@ const assertCoinInfoSection = async ({
 
   // Check for Copy Coin Address button
   expect(
-    within(coinInfoSection).getByRole('button', { name: /copy coin address/i })
+    within(onchain).getByRole('button', { name: /copy coin address/i })
   ).toBeInTheDocument()
 
   // Check for Artist Earnings section
   const artistEarningsRow =
-    within(coinInfoSection).getByTestId('artist-earnings')
+    within(onchain).getByTestId('artist-earnings')
   expect(artistEarningsRow).toBeInTheDocument()
   expect(
     within(artistEarningsRow).getByText(/artist earnings/i)
@@ -356,7 +357,7 @@ const assertCoinInfoSection = async ({
   if (isArtist) {
     // Check for Unclaimed Fees section (only visible to artist/coin creator)
     const unclaimedFeesRow =
-      within(coinInfoSection).getByTestId('unclaimed-fees')
+      within(onchain).getByTestId('unclaimed-fees')
     expect(unclaimedFeesRow).toBeInTheDocument()
     expect(
       within(unclaimedFeesRow).getByText(/unclaimed earnings/i)

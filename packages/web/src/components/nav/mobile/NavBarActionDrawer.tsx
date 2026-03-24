@@ -18,7 +18,7 @@ type NavBarActionDrawerProps = {
 const messages = {
   wallet: 'Wallet',
   rewards: 'Rewards',
-  artistCoins: 'Artist Coins',
+  artistCoins: 'Fan Clubs',
   settings: 'Settings'
 }
 

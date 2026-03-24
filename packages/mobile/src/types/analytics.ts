@@ -1,13 +1,13 @@
 import type {
   ID,
-  AllTrackingEvents as CommonTrackingEvents
+  AllTrackingEvents as CommonTrackingEvents,
+  Name
 } from '@audius/common/models'
 import { Name as CommonEventNames } from '@audius/common/models'
 
 import type { OfflineJob } from 'app/store/offline-downloads/slice'
 
 enum MobileEventNames {
-  NOTIFICATIONS_OPEN_PUSH_NOTIFICATION = 'Notifications: Open Push Notification',
   APP_ERROR = 'App Unexpected Error',
   SHARE_TO_IG_STORY = 'Share to Instagram story - start',
   SHARE_TO_IG_STORY_CANCELLED = 'Share to Instagram story - cancelled',
@@ -41,9 +41,11 @@ enum MobileEventNames {
 export const EventNames = { ...CommonEventNames, ...MobileEventNames }
 
 type NotificationsOpenPushNotification = {
-  eventName: MobileEventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
+  eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
   title?: string
   body?: string
+  /** Matches Amplitude / engagement sync join key */
+  dashboardAnnouncementId?: string
 }
 
 type ShareToIGStory = {

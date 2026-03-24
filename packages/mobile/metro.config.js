@@ -1,3 +1,4 @@
+const fs = require('fs')
 const path = require('path')
 
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
@@ -114,6 +115,14 @@ const config = {
       '~': path.resolve(__dirname, '../common/src'),
       '~harmony': path.resolve(__dirname, '../harmony/src'),
       '@audius/sdk': path.resolve(__dirname, '../sdk/src/index.ts'),
+      // Workspace packages used by SDK (and similar) whose package.json main is
+      // dist/* — Metro must point at source so CI/CodePush works without turbo build.
+      '@audius/fixed-decimal': path.resolve(
+        __dirname,
+        '../fixed-decimal/src/index.ts'
+      ),
+      '@audius/spl': path.resolve(__dirname, '../spl/src/index.ts'),
+      '@audius/eth': path.resolve(__dirname, '../eth/src/index.ts'),
 
       // The following imports are needed for @audius/common
       // and @audius/web to compile correctly
@@ -147,6 +156,28 @@ const config = {
       tls: resolveModule('tls-browserify')
     },
     resolveRequest: (context, moduleName, platform) => {
+      // TS packages often use NodeNext-style `./file.js` in source; Metro looks for
+      // that path literally. If only `./file.ts` exists, resolve to it.
+      if (
+        moduleName.startsWith('.') &&
+        moduleName.endsWith('.js') &&
+        context.originModulePath
+      ) {
+        const fromDir = path.dirname(context.originModulePath)
+        const candidateJs = path.resolve(fromDir, moduleName)
+        if (!fs.existsSync(candidateJs)) {
+          const base = candidateJs.replace(/\.js$/, '')
+          const candidateTs = `${base}.ts`
+          const candidateTsx = `${base}.tsx`
+          if (fs.existsSync(candidateTs)) {
+            return { filePath: candidateTs, type: 'sourceFile' }
+          }
+          if (fs.existsSync(candidateTsx)) {
+            return { filePath: candidateTsx, type: 'sourceFile' }
+          }
+        }
+      }
+
       if (moduleName === 'react') {
         return {
           filePath: `${resolveModule('react')}/index.js`,
@@ -180,6 +211,27 @@ const config = {
       if (moduleName === '@audius/sdk') {
         return {
           filePath: path.resolve(__dirname, '../sdk/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/fixed-decimal') {
+        return {
+          filePath: path.resolve(__dirname, '../fixed-decimal/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/spl') {
+        return {
+          filePath: path.resolve(__dirname, '../spl/src/index.ts'),
+          type: 'sourceFile'
+        }
+      }
+
+      if (moduleName === '@audius/eth') {
+        return {
+          filePath: path.resolve(__dirname, '../eth/src/index.ts'),
           type: 'sourceFile'
         }
       }

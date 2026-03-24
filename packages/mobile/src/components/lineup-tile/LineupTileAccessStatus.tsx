@@ -47,7 +47,7 @@ const { setLockedContentId } = gatedContentActions
 const messages = {
   unlocking: 'Unlocking',
   locked: 'Locked',
-  buyArtistCoin: 'Buy Artist Coin',
+  buyArtistCoin: 'Buy Fan Club Token',
   price: (price: string) => `$${price}`
 }
 

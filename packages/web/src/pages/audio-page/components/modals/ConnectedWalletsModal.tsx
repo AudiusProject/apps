@@ -36,7 +36,7 @@ export const WALLET_COUNT_LIMIT = 5
 const messages = {
   title: 'Connected Wallets',
   description:
-    'Connect wallets to your account to display external $AUDIO balances and showcase your artist coins',
+    'Connect wallets to your account to display external $AUDIO balances and showcase your fan club tokens',
   connect: 'Connect Wallet',
   limit: `Reached Limit of ${WALLET_COUNT_LIMIT} Connected Wallets.`,
   noConnected: 'You haven’t connected any wallets yet.',

@@ -15,6 +15,8 @@ export const walletMessages = {
   transactionHistory: 'Transaction History',
   cashTransferDescription:
     'Transfer your cash balance to your bank account or debit card. $5 minimum.',
+  cashTransferSetupFee: (feeDollars: string) =>
+    `A one-time setup fee of $${feeDollars} will be deducted from your first withdrawal to cover account creation.`,
   back: 'Back',
   tryAgain: 'Try Again?',
   error: 'An error occured.',
@@ -77,6 +79,8 @@ export const walletMessages = {
     amountTooLow: 'Amount must be greater than zero.',
     invalidAddress: 'A valid Solana USDC wallet address is required',
     minCashTransfer: 'A minimum of $5 is required for cash withdrawals.',
+    coinflowSetupFeeRequired: (feeDollars: string) =>
+      `A one-time setup fee of $${feeDollars} will be deducted from your withdrawal amount.`,
     ataCreationFeeRequired: (feeDollars: string) =>
       `Amount must cover the one-time account creation fee of $${feeDollars}`,
     noUsdcAccountFound: (feeDollars?: string) =>
@@ -109,7 +113,7 @@ export const walletMessages = {
   receiveTokensLoadingSubtitle: 'Setting up your wallet',
   becomeMemberTitle: 'Become a member',
   becomeMemberBody: (coinTicker: string) =>
-    `Buy $${coinTicker} to gain access to exclusive members-only perks!`,
+    `Buy $${coinTicker} to join the fan club and unlock members-only perks.`,
 
   // Linked Wallets messages
   linkedWallets: {
@@ -134,12 +138,20 @@ export const walletMessages = {
     }
   },
 
-  // Artist Coins messages
+  // Fan clubs (artist coin tokens)
   artistCoins: {
-    title: 'Discover Artist Coins',
-    searchPlaceholder: 'Search Artist Coins',
+    title: 'Discover Fan Clubs',
+    searchPlaceholder: 'Search fan clubs',
     noCoins: 'No results found',
-    noCoinsDescription: 'No Artist Coins were found matching your search.',
+    noCoinsDescription: 'No fan clubs matched your search.',
+    view: 'View',
+    tableView: 'Table',
+    leaderboardView: 'Leaderboard',
+    cardView: 'Cards',
+    launchYourClub: 'Launch your club',
+    fanClubLabel: 'Fan Club',
+    members: 'Members',
+    price: 'Price',
     sortTitle: 'SORT',
     sortAscending: 'Ascending',
     sortDescending: 'Descending',
