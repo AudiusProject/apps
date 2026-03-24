@@ -343,7 +343,13 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
             borderRadius='s'
           />
         ) : null}
-        <Flex column gap='xs' alignItems='flex-start' flex={1} css={{ minWidth: 0 }}>
+        <Flex
+          column
+          gap='xs'
+          alignItems='flex-start'
+          flex={1}
+          css={{ minWidth: 0 }}
+        >
           <Text
             variant='label'
             size='s'

@@ -101,11 +101,7 @@ const DesktopArtistCoinsExplorePage = () => {
       title={walletMessages.artistCoins.title}
       css={{ minWidth: MIN_WIDTH }}
     >
-      <Flex
-        column
-        gap='xl'
-        css={{ paddingBottom: launchCtaReserveY }}
-      >
+      <Flex column gap='xl' css={{ paddingBottom: launchCtaReserveY }}>
         <Flex
           p='3xl'
           direction='column'
@@ -211,11 +207,7 @@ const DesktopArtistCoinsExplorePage = () => {
                   columnGap: 24
                 }}
               >
-                <Flex
-                  column
-                  gap='s'
-                  css={{ flex: '1 1 240px', minWidth: 0 }}
-                >
+                <Flex column gap='s' css={{ flex: '1 1 240px', minWidth: 0 }}>
                   <Text variant='heading' size='m'>
                     {messages.launchYourOwn}
                   </Text>

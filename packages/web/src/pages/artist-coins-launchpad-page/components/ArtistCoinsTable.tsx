@@ -21,7 +21,6 @@ import {
   Flex,
   IconSearch,
   LoadingSpinner,
-  Paper,
   SelectablePill,
   Skeleton,
   spacing,
@@ -39,8 +38,8 @@ import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { getScrollParent } from 'utils/scrollParent'
 
-import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
 import styles from './ArtistCoinsTable.module.css'
+import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
 
 const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
 
@@ -345,7 +344,8 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     externalAudioBalance
   })
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
-  const [viewMode, setViewMode] = useState<FanClubsViewMode>(readInitialViewMode)
+  const [viewMode, setViewMode] =
+    useState<FanClubsViewMode>(readInitialViewMode)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -365,7 +365,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     data: coinsData,
     isPending,
     hasNextPage,
-    fetchNextPage,
     isFetchingNextPage
   } = queryResult
   const coins = useMemo(
@@ -536,11 +535,7 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
           />
         </Flex>
       </Flex>
-      <Button
-        variant='secondary'
-        size='small'
-        onClick={handleLaunchYourClub}
-      >
+      <Button variant='secondary' size='small' onClick={handleLaunchYourClub}>
         {walletMessages.artistCoins.launchYourClub}
       </Button>
     </Flex>
