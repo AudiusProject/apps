@@ -32,28 +32,17 @@
   margin: 0 20px;
   position: relative;
   background: var(--harmony-gradient);
-  padding: 12px 64px;
+  padding: 12px 16px;
   box-shadow: 0px 16px 20px rgba(133, 129, 153, 0.15);
   border-radius: 8px;
   color: var(--harmony-white);
   font-size: var(--harmony-font-m);
   line-height: 22px;
-  text-align: center;
   font-weight: var(--harmony-font-bold);
 }
 
 .contentShow {
   pointer-events: all;
-}
-
-.iconRemove {
-  cursor: pointer;
-  position: absolute;
-  left: 16px;
-}
-
-.iconRemove path {
-  fill: var(--harmony-white);
 }
 
 .content i {
