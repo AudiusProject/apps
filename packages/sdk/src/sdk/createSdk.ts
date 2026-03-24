@@ -126,7 +126,8 @@ export const createSdk = (config: SdkConfig) => {
         // The template adds the 'Bearer ' prefix, so we don't need to add it here
         return bearerToken
       }
-      return undefined
+      // Default to bearerToken for any other auth schemes that require a token, for backward compatibility with older SDK versions
+      return bearerToken
     }
   })
 
