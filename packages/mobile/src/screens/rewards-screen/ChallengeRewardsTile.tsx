@@ -16,6 +16,7 @@ import type {
 } from '@audius/common/store'
 import type { dayjs } from '@audius/common/utils'
 import {
+  challengeRewardsConfig,
   isRewardOpenToAll,
   removeNullable,
   makeOptimisticChallengeSortComparator
@@ -139,6 +140,11 @@ export const ChallengeRewardsTile = () => {
   const rewardIdsSorted = useMemo(() => {
     const allRewardIds = Object.keys(userChallenges).filter((id) => {
       const challengeId = id as ChallengeRewardID
+      // Skip deprecated/unknown challenges (e.g. legacy trending-playlist `tp`)
+      // and any challenges intentionally hidden from the rewards grid.
+      if (!challengeRewardsConfig[challengeId]?.title) {
+        return false
+      }
       // The referred challenge only needs a tile if the user was referred
       if (challengeId === ChallengeName.Referred) {
         return userChallenges[challengeId]?.is_complete === true
