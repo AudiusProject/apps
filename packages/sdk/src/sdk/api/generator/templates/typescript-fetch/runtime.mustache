@@ -56,7 +56,7 @@ export class Configuration {
         return undefined;
     }
 
-    get accessToken(): ((name?: string, scopes?: string[]) => string | undefined | Promise<string | undefined>) {
+    get accessToken(): ((name?: string, scopes?: string[]) => string | undefined | Promise<string | undefined>) | undefined {
         const accessToken = this.configuration.accessToken;
         if (accessToken) {
             return typeof accessToken === 'function' ? accessToken : async () => accessToken;
