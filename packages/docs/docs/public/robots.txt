@@ -1,0 +1,12 @@
+# Audius Developer Docs - docs.audius.co
+# We encourage scraping and indexing of our documentation.
+
+User-agent: *
+Allow: /
+
+# LLM-friendly versions of our docs
+# See https://llmstxt.org for the specification
+# /llms.txt       - Index of all documentation pages
+# /llms-full.txt  - All documentation in a single file
+
+Sitemap: https://docs.audius.co/sitemap.xml

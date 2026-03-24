@@ -1,3 +1,8 @@
 merged.txt
 .wrangler
 build/
+
+# Generated LLM-friendly docs (built by scripts/generate-llms-txt.cjs)
+docs/public/llms.txt
+docs/public/llms-full.txt
+docs/public/docs/
