@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import CodePush from '@bravemobile/react-native-code-push'
+import { StyleSheet, View } from 'react-native'
+
 import {
   Flex,
   IconButton,
@@ -10,8 +12,6 @@ import {
   Text,
   useTheme
 } from '@audius/harmony-native'
-import { StyleSheet, View } from 'react-native'
-
 import { isOtaEnabled } from 'app/app/ota-updates'
 import { useEnterForeground } from 'app/hooks/useAppState'
 
@@ -69,7 +69,7 @@ export const OtaUpdateBanner = () => {
     const delaysMs = [0, 800, 2000, 4000]
     delaysMs.forEach((ms) => {
       const id = setTimeout(() => {
-        void refresh()
+        refresh().catch(() => {})
       }, ms)
       pollTimeoutsRef.current.push(id)
     })
@@ -92,14 +92,14 @@ export const OtaUpdateBanner = () => {
 
   useEnterForeground(() => {
     dismissedRef.current = false
-    void refresh()
-    void prefetchUpdate()
+    refresh().catch(() => {})
+    prefetchUpdate().catch(() => {})
     schedulePendingPolls()
   })
 
   useEffect(() => {
-    void refresh()
-    void prefetchUpdate()
+    refresh().catch(() => {})
+    prefetchUpdate().catch(() => {})
     schedulePendingPolls()
     return () => {
       pollTimeoutsRef.current.forEach(clearTimeout)
