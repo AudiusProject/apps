@@ -357,7 +357,7 @@ export const notificationFromSDK = (
         shortDescription: data.shortDescription,
         longDescription: data.longDescription,
         route: data.route,
-        notificationCampaignId: data.dashboardAnnouncementId ?? undefined,
+        notificationCampaignId: data.notificationCampaignId ?? undefined,
         ...formatBaseNotification(notification)
       }
     }
