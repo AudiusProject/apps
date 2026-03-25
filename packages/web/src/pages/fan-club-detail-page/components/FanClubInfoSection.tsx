@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import {
@@ -18,8 +18,7 @@ import {
   formatCurrencyWithSubscript,
   getTokenDecimalPlaces,
   removeNullable,
-  route,
-  shortenSPLAddress
+  route
 } from '@audius/common/utils'
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import {
@@ -28,7 +27,6 @@ import {
   Button,
   Flex,
   IconCloudUpload,
-  IconCopy,
   IconDiscord,
   IconExternalLink,
   IconGift,
@@ -67,7 +65,6 @@ import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { reportToSentry } from 'store/errors/reportToSentry'
-import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
 
 const { REWARDS_PAGE, UPLOAD_PAGE } = route
@@ -87,6 +84,12 @@ const fanClubCardMessages = walletMessages.artistCoins
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
 // Below this threshold is considered "dust" and not worth claiming due to transaction fees
 const MIN_CLAIMABLE_FEES = 1_000_000
+
+/**
+ * TEMP: Set to `true` to show artist-only on-chain fan club details (earnings,
+ * unclaimed, vesting claim UI) to any viewer. Set back to `false` before shipping.
+ */
+export const TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER = true
 
 // Helper function to detect platform from URL
 const detectPlatform = (
@@ -150,17 +153,17 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
   )
 }
 
-type CoinHeroCoverPhotoProps = {
+type FanClubHeroCoverPhotoProps = {
   bannerImage?: string
 }
 
-const CoinHeroCoverPhoto = ({ bannerImage }: CoinHeroCoverPhotoProps) => {
+const FanClubHeroCoverPhoto = ({ bannerImage }: FanClubHeroCoverPhotoProps) => {
   const theme = useTheme()
 
   return (
     <Box
       w='100%'
-      data-testid='coin-cover-photo'
+      data-testid='fan-club-cover-photo'
       css={{
         height: DISCOVERY_COVER_HEIGHT,
         flexShrink: 0,
@@ -178,7 +181,7 @@ const CoinHeroCoverPhoto = ({ bannerImage }: CoinHeroCoverPhotoProps) => {
   )
 }
 
-const CoinInfoHeroSkeleton = () => {
+const FanClubInfoHeroSkeleton = () => {
   const theme = useTheme()
 
   return (
@@ -188,7 +191,7 @@ const CoinInfoHeroSkeleton = () => {
       column
       alignItems='flex-start'
       border='default'
-      data-testid='coin-info-hero'
+      data-testid='fan-club-info-hero'
       css={{ overflow: 'hidden' }}
     >
       <Skeleton h={DISCOVERY_COVER_HEIGHT} w='100%' />
@@ -235,7 +238,7 @@ const CoinInfoHeroSkeleton = () => {
   )
 }
 
-const CoinInfoOnchainSkeleton = () => {
+const FanClubInfoOnchainSkeleton = () => {
   return (
     <Paper
       borderRadius='l'
@@ -243,7 +246,7 @@ const CoinInfoOnchainSkeleton = () => {
       column
       alignItems='flex-start'
       border='default'
-      data-testid='coin-onchain-details'
+      data-testid='fan-club-onchain-details-skeleton'
     >
       <Flex alignSelf='stretch' ph='l' pv='m' borderBottom='default'>
         <Skeleton width='160px' height='20px' />
@@ -267,11 +270,11 @@ const CoinInfoOnchainSkeleton = () => {
   )
 }
 
-type BannerSectionProps = {
+type FanClubBannerSectionProps = {
   mint: string
 }
 
-export const BannerSection = ({ mint }: BannerSectionProps) => {
+export const FanClubBannerSection = ({ mint }: FanClubBannerSectionProps) => {
   const { data: coin, isLoading } = useArtistCoin(mint)
   const theme = useTheme()
   const { spacing } = theme
@@ -295,7 +298,7 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
           minHeight: BANNER_HEIGHT,
           backgroundColor: theme.color.neutral.n100
         }}
-        data-testid='coin-cover-photo'
+        data-testid='fan-club-cover-photo'
       >
         <Flex
           alignItems='flex-end'
@@ -336,7 +339,7 @@ export const BannerSection = ({ mint }: BannerSectionProps) => {
         minHeight: BANNER_HEIGHT,
         overflow: 'hidden'
       }}
-      data-testid='coin-cover-photo'
+      data-testid='fan-club-cover-photo'
     >
       <Flex
         css={{
@@ -415,21 +418,69 @@ const formatBalance = (balance: number, coinDecimals: number) => {
   )
 }
 
-type ArtistVestingSectionProps = {
+/** Body-sized metric value; Harmony `body` default weight is medium — use regular for data. */
+const OnchainMetricValue = ({ children }: { children: ReactNode }) => {
+  const theme = useTheme()
+  return (
+    <Text
+      variant='body'
+      size='m'
+      color='default'
+      css={{ fontWeight: theme.typography.weight.regular }}
+    >
+      {children}
+    </Text>
+  )
+}
+
+const OnchainMetricCell = ({
+  label,
+  tooltip,
+  children
+}: {
+  label: string
+  tooltip?: string
+  children: ReactNode
+}) => (
+  <Flex column gap='xs' alignItems='flex-start' w='100%' css={{ minWidth: 0 }}>
+    <Flex alignItems='center' gap='xs'>
+      <Text variant='body' size='s' strength='strong' color='subdued'>
+        {label}
+      </Text>
+      {tooltip ? (
+        <Tooltip text={tooltip} mount='body'>
+          <IconInfo size='s' color='subdued' />
+        </Tooltip>
+      ) : null}
+    </Flex>
+    <Box css={{ minWidth: 0, width: '100%' }}>{children}</Box>
+  </Flex>
+)
+
+/** One metric per row, full width, left-aligned. */
+const OnchainMetricBlock = ({ children }: { children: ReactNode }) => (
+  <Box w='100%' css={{ alignSelf: 'stretch' }}>
+    {children}
+  </Box>
+)
+
+type FanClubOnchainLockerSectionProps = {
   coin: Coin
   handleClaimVestedCoinsClick: () => void
   isClaimVestedCoinsDisabled: boolean
   isClaimVestedCoinsPending: boolean
 }
 
-const ArtistVestingSection = ({
+const FanClubOnchainLockerSection = ({
   coin,
   handleClaimVestedCoinsClick,
   isClaimVestedCoinsDisabled,
   isClaimVestedCoinsPending
-}: ArtistVestingSectionProps) => {
+}: FanClubOnchainLockerSectionProps) => {
   const { data: currentUser } = useCurrentAccountUser()
-  const isOwner = currentUser?.user_id === coin.ownerId
+  const isOwner =
+    currentUser?.user_id === coin.ownerId ||
+    TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
   const isMobile = useIsMobile()
 
   const rewardsPoolBalance = formatBalance(
@@ -448,133 +499,94 @@ const ArtistVestingSection = ({
     coin.artistLocker?.claimable ?? 0,
     coin.decimals
   )
+
   return (
-    <Flex column gap='m' w='100%'>
-      <Divider orientation='horizontal' />
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.vestingSchedule}
-          </Text>
-          <Tooltip
-            text={overflowMessages.tooltips.vestingSchedule}
-            mount='body'
-          >
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s'>
-          {overflowMessages.vestingScheduleValue}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.locked}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.locked} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s'>
-          {messages.balance(lockedBalance, coin.ticker)}
-        </Text>
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.unlocked}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.unlocked} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s'>
-          {messages.balance(unlockedBalance, coin.ticker)}
-        </Text>
-      </Flex>
-      {isOwner ? (
-        <Flex
-          alignItems='center'
-          justifyContent='space-between'
-          alignSelf='stretch'
+    <Flex column gap='xl' w='100%' alignItems='flex-start'>
+      <OnchainMetricBlock>
+        <OnchainMetricCell
+          label={overflowMessages.vestingSchedule}
+          tooltip={overflowMessages.tooltips.vestingSchedule}
         >
-          <Flex alignItems='center' gap='s'>
-            <Text variant='body' size='s' strength='strong'>
-              {overflowMessages.availableToClaim}
-            </Text>
-            <Tooltip
-              text={overflowMessages.tooltips.availableToClaim}
-              mount='body'
-            >
-              <IconInfo size='s' color='subdued' />
-            </Tooltip>
-          </Flex>
-          <Flex alignItems='center' gap='s'>
-            {coin.artistLocker?.claimable &&
-            coin.artistLocker.claimable > 0 &&
-            !isMobile ? (
-              <Flex gap='xs' alignItems='center'>
-                <TextLink
-                  onClick={handleClaimVestedCoinsClick}
-                  variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
-                  disabled={isClaimVestedCoinsDisabled}
-                >
-                  {overflowMessages.claim}
-                </TextLink>
-                {isClaimVestedCoinsPending ? (
-                  <LoadingSpinner size='s' color='subdued' />
-                ) : null}
-              </Flex>
-            ) : null}
-            <Text variant='body' size='s'>
-              {messages.balance(claimableBalance, coin.ticker)}
-            </Text>
-          </Flex>
-        </Flex>
+          <OnchainMetricValue>
+            {overflowMessages.vestingScheduleValue}
+          </OnchainMetricValue>
+        </OnchainMetricCell>
+      </OnchainMetricBlock>
+      <OnchainMetricBlock>
+        <OnchainMetricCell
+          label={overflowMessages.locked}
+          tooltip={overflowMessages.tooltips.locked}
+        >
+          <OnchainMetricValue>
+            {messages.balance(lockedBalance, coin.ticker)}
+          </OnchainMetricValue>
+        </OnchainMetricCell>
+      </OnchainMetricBlock>
+      <OnchainMetricBlock>
+        <OnchainMetricCell
+          label={overflowMessages.unlocked}
+          tooltip={overflowMessages.tooltips.unlocked}
+        >
+          <OnchainMetricValue>
+            {messages.balance(unlockedBalance, coin.ticker)}
+          </OnchainMetricValue>
+        </OnchainMetricCell>
+      </OnchainMetricBlock>
+      {isOwner ? (
+        <OnchainMetricBlock>
+          <OnchainMetricCell
+            label={overflowMessages.availableToClaim}
+            tooltip={overflowMessages.tooltips.availableToClaim}
+          >
+            <Flex gap='s' alignItems='flex-start' w='100%'>
+              {coin.artistLocker?.claimable &&
+              coin.artistLocker.claimable > 0 &&
+              !isMobile ? (
+                <Flex gap='xs' alignItems='center'>
+                  <TextLink
+                    onClick={handleClaimVestedCoinsClick}
+                    variant={isClaimVestedCoinsDisabled ? 'subdued' : 'visible'}
+                    disabled={isClaimVestedCoinsDisabled}
+                  >
+                    {overflowMessages.claim}
+                  </TextLink>
+                  {isClaimVestedCoinsPending ? (
+                    <LoadingSpinner size='s' color='subdued' />
+                  ) : null}
+                </Flex>
+              ) : null}
+              <OnchainMetricValue>
+                {messages.balance(claimableBalance, coin.ticker)}
+              </OnchainMetricValue>
+            </Flex>
+          </OnchainMetricCell>
+        </OnchainMetricBlock>
       ) : null}
-      <Divider orientation='horizontal' />
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-      >
-        <Flex alignItems='center' gap='s'>
-          <Text variant='body' size='s' strength='strong'>
-            {overflowMessages.rewardsPool}
-          </Text>
-          <Tooltip text={overflowMessages.tooltips.rewardsPool} mount='body'>
-            <IconInfo size='s' color='subdued' />
-          </Tooltip>
-        </Flex>
-        <Text variant='body' size='s'>
-          {messages.balance(rewardsPoolBalance, coin.ticker)}
-        </Text>
-      </Flex>
+      <OnchainMetricBlock>
+        <OnchainMetricCell
+          label={overflowMessages.rewardsPool}
+          tooltip={overflowMessages.tooltips.rewardsPool}
+        >
+          <OnchainMetricValue>
+            {messages.balance(rewardsPoolBalance, coin.ticker)}
+          </OnchainMetricValue>
+        </OnchainMetricCell>
+      </OnchainMetricBlock>
     </Flex>
   )
 }
 
-export type CoinInfoSectionVariant = 'hero' | 'onchainDetails'
+export type FanClubInfoSectionVariant = 'hero' | 'onchainDetails'
 
-type CoinInfoSectionProps = {
+type FanClubInfoSectionProps = {
   mint: string
-  variant: CoinInfoSectionVariant
+  variant: FanClubInfoSectionVariant
 }
 
-export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
+export const FanClubInfoSection = ({
+  mint,
+  variant
+}: FanClubInfoSectionProps) => {
   const dispatch = useDispatch()
   const theme = useTheme()
   const { toast } = useContext(ToastContext)
@@ -590,13 +602,14 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
     size: WidthSizes.SIZE_640
   })
 
-  const { data: currentUser } = useCurrentAccountUser()
+  const { data: currentUser, isPending: isCurrentAccountPending } =
+    useCurrentAccountUser()
   const { data: userCoins } = useUserCoins({ userId: currentUser?.user_id })
   const userToken = useMemo(
     () => userCoins?.find((coin) => coin.mint === mint),
     [userCoins, mint]
   )
-  const isCoinCreator = coin?.ownerId === currentUser?.user_id
+  const isFanClubOwner = coin?.ownerId === currentUser?.user_id
   const getDiscordOAuthLink = useGetDiscordOAuthLink(coin?.ticker)
   const { balance: userTokenBalance } = userToken ?? {}
 
@@ -718,11 +731,6 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const handleUploadExclusiveTrack = useCallback(() => {
     dispatch(push(UPLOAD_PAGE))
   }, [dispatch])
-
-  const handleCopyAddress = useCallback(() => {
-    copyToClipboard(mint)
-    toast(overflowMessages.copiedToClipboard)
-  }, [mint, toast])
 
   // In some cases a custom-made coin will not have a dbc, so we should use the escrow recipient instead.
   // It's possible to transfer the recipient however, so this isn't a perfect solution.
@@ -933,10 +941,22 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
 
   if (isArtistCoinLoading || !coin) {
     return variant === 'onchainDetails' ? (
-      <CoinInfoOnchainSkeleton />
+      <FanClubInfoOnchainSkeleton />
     ) : (
-      <CoinInfoHeroSkeleton />
+      <FanClubInfoHeroSkeleton />
     )
+  }
+
+  if (variant === 'onchainDetails') {
+    if (
+      isCurrentAccountPending &&
+      !TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
+    ) {
+      return <FanClubInfoOnchainSkeleton />
+    }
+    if (!isFanClubOwner && !TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER) {
+      return null
+    }
   }
 
   const isWAudio = coin.mint === env.WAUDIO_MINT_ADDRESS
@@ -945,6 +965,9 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const isUserBalanceUnavailable =
     !userTokenBalance || Number(userTokenBalance) <= 0
   const isClaimFeesDisabled = isClaimFeesPending || isManagerMode
+  const showOwnerEarningsColumns =
+    (isFanClubOwner || TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER) &&
+    !isManagerMode
 
   if (variant === 'hero') {
     const bannerSrcForHero =
@@ -970,10 +993,10 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
         column
         alignItems='flex-start'
         border='default'
-        data-testid='coin-info-hero'
+        data-testid='fan-club-info-hero'
         css={{ overflow: 'hidden' }}
       >
-        <CoinHeroCoverPhoto bannerImage={bannerSrcForHero} />
+        <FanClubHeroCoverPhoto bannerImage={bannerSrcForHero} />
 
         <Flex
           column
@@ -1045,7 +1068,7 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
             </Flex>
           ) : null}
 
-          {isCoinCreator && !isManagerMode ? (
+          {isFanClubOwner && !isManagerMode ? (
             <Button
               variant='secondary'
               fullWidth
@@ -1124,7 +1147,7 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
       column
       alignItems='flex-start'
       border='default'
-      data-testid='coin-onchain-details'
+      data-testid='fan-club-onchain-details'
     >
       <Flex
         alignItems='center'
@@ -1138,98 +1161,61 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
         </Text>
       </Flex>
 
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-        p='l'
-        ph='xl'
-        borderBottom='default'
-      >
-        <PlainButton
-          onClick={handleCopyAddress}
-          iconLeft={IconCopy}
-          variant='default'
-        >
-          {overflowMessages.copyCoinAddress}
-        </PlainButton>
-        <Text variant='body' size='m' color='subdued'>
-          {shortenSPLAddress(mint)}
-        </Text>
-      </Flex>
       {!isWAudio ? (
         <Flex
-          direction='column'
+          column
           alignItems='flex-start'
           alignSelf='stretch'
           borderTop='default'
           ph='xl'
           pv='l'
-          gap='l'
+          gap='xl'
         >
-          <Flex
-            alignItems='center'
-            justifyContent='space-between'
-            alignSelf='stretch'
-            data-testid='artist-earnings'
-          >
-            <Flex alignItems='center' gap='s'>
-              <Text variant='body' size='s' strength='strong'>
-                {overflowMessages.artistEarnings}
-              </Text>
-              <Tooltip
-                text={overflowMessages.tooltips.artistEarnings}
-                mount='body'
+          <OnchainMetricBlock>
+            <Box data-testid='artist-earnings' w='100%' css={{ minWidth: 0 }}>
+              <OnchainMetricCell
+                label={overflowMessages.artistEarnings}
+                tooltip={overflowMessages.tooltips.artistEarnings}
               >
-                <IconInfo size='s' color='subdued' />
-              </Tooltip>
-            </Flex>
-            <Text variant='body' size='s'>
-              {formattedTotalArtistEarnings} {overflowMessages.$audio}
-            </Text>
-          </Flex>
-          {isCoinCreator && !isManagerMode ? (
-            <Flex
-              alignItems='center'
-              justifyContent='space-between'
-              alignSelf='stretch'
-              data-testid='unclaimed-fees'
-            >
-              <Flex alignItems='center' gap='s'>
-                <Text variant='body' size='s' strength='strong'>
-                  {overflowMessages.unclaimedEarnings}
-                </Text>
-                <Tooltip
-                  text={overflowMessages.tooltips.unclaimedEarnings}
-                  mount='body'
+                <OnchainMetricValue>
+                  {formattedTotalArtistEarnings} {overflowMessages.$audio}
+                </OnchainMetricValue>
+              </OnchainMetricCell>
+            </Box>
+          </OnchainMetricBlock>
+          {showOwnerEarningsColumns ? (
+            <OnchainMetricBlock>
+              <Box data-testid='unclaimed-fees' w='100%' css={{ minWidth: 0 }}>
+                <OnchainMetricCell
+                  label={overflowMessages.unclaimedEarnings}
+                  tooltip={overflowMessages.tooltips.unclaimedEarnings}
                 >
-                  <IconInfo size='s' color='subdued' />
-                </Tooltip>
-              </Flex>
-              <Flex alignItems='center' gap='s'>
-                {unclaimedFees >= MIN_CLAIMABLE_FEES && !isMobile ? (
-                  <Flex gap='xs' alignItems='center'>
-                    <TextLink
-                      onClick={handleClaimFeesClick}
-                      variant={isClaimFeesDisabled ? 'subdued' : 'visible'}
-                      disabled={isClaimFeesDisabled}
-                    >
-                      {overflowMessages.claim}
-                    </TextLink>
-                    {isClaimFeesPending ? (
-                      <LoadingSpinner size='s' color='subdued' />
+                  <Flex gap='s' alignItems='flex-start' w='100%'>
+                    {unclaimedFees >= MIN_CLAIMABLE_FEES && !isMobile ? (
+                      <Flex gap='xs' alignItems='center'>
+                        <TextLink
+                          onClick={handleClaimFeesClick}
+                          variant={isClaimFeesDisabled ? 'subdued' : 'visible'}
+                          disabled={isClaimFeesDisabled}
+                        >
+                          {overflowMessages.claim}
+                        </TextLink>
+                        {isClaimFeesPending ? (
+                          <LoadingSpinner size='s' color='subdued' />
+                        ) : null}
+                      </Flex>
                     ) : null}
+                    <OnchainMetricValue>
+                      {formattedUnclaimedFees} {overflowMessages.$audio}
+                    </OnchainMetricValue>
                   </Flex>
-                ) : null}
-
-                <Text variant='body' size='s'>
-                  {formattedUnclaimedFees} {overflowMessages.$audio}
-                </Text>
-              </Flex>
-            </Flex>
+                </OnchainMetricCell>
+              </Box>
+            </OnchainMetricBlock>
           ) : null}
+
           {!isManagerMode && hasGraduated && coin.artistLocker ? (
-            <ArtistVestingSection
+            <FanClubOnchainLockerSection
               coin={coin}
               handleClaimVestedCoinsClick={handleClaimVestedCoinsClick}
               isClaimVestedCoinsDisabled={isClaimVestedCoinsDisabled}

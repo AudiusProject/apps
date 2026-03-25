@@ -15,31 +15,31 @@ import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { BASE_URL } from 'utils/route'
 
-import { useCoinDetailTabs } from './CoinDetailTabs'
+import { useFanClubDetailTabs } from './FanClubDetailTabs'
 
 const { CLUBS_EXPLORE_PAGE, COIN_DETAIL_PAGE, NOT_FOUND_PAGE } = route
 
 const messages = coinDetailsMessages.metaTags
 
-type CoinDetailPageContentProps = {
+type FanClubDetailPageContentProps = {
   mint: string
   visualTitle: string
   ogTitle: string
   description: string
 }
 
-const DesktopCoinDetailPageContent = ({
+const DesktopFanClubDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
   description,
   ticker,
   isOwner
-}: CoinDetailPageContentProps & {
+}: FanClubDetailPageContentProps & {
   ticker: string
   isOwner: boolean
 }) => {
-  const { tabs, body, rightDecorator } = useCoinDetailTabs({
+  const { tabs, body, rightDecorator } = useFanClubDetailTabs({
     mint,
     ticker,
     isOwner
@@ -66,13 +66,13 @@ const DesktopCoinDetailPageContent = ({
   )
 }
 
-const MobileCoinDetailPageContent = ({
+const MobileFanClubDetailPageContent = ({
   mint,
   visualTitle,
   ogTitle,
   description
-}: CoinDetailPageContentProps) => {
-  const { body } = useCoinDetailTabs({ mint })
+}: FanClubDetailPageContentProps) => {
+  const { body } = useFanClubDetailTabs({ mint })
 
   return (
     <MobilePageContainer
@@ -88,7 +88,7 @@ const MobileCoinDetailPageContent = ({
   )
 }
 
-export const CoinDetailPage = () => {
+export const FanClubDetailPage = () => {
   const { ticker } = useParams<{ ticker?: string }>()
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
@@ -142,14 +142,14 @@ export const CoinDetailPage = () => {
   )
 
   return isMobile ? (
-    <MobileCoinDetailPageContent
+    <MobileFanClubDetailPageContent
       mint={coin?.mint ?? ''}
       visualTitle={visualTitle}
       ogTitle={ogTitle}
       description={description ?? ''}
     />
   ) : (
-    <DesktopCoinDetailPageContent
+    <DesktopFanClubDetailPageContent
       mint={coin?.mint ?? ''}
       visualTitle={visualTitle}
       ogTitle={ogTitle}

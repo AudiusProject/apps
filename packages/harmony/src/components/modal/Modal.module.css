@@ -145,8 +145,13 @@
   fill: var(--harmony-n-400);
 }
 
+/* Fixed dialog widths (see Modal `size` prop) */
 .sizeSmall {
   width: 488px;
+}
+
+.sizeLarge {
+  width: 600px;
 }
 
 .sizeMedium {

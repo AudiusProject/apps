@@ -121,6 +121,7 @@ export const coinDetailsMessages = {
     title: 'Fan Club Details',
     details: 'Details',
     coinAddress: 'Coin Address',
+    rewardsPoolAddress: 'Rewards Pool Address',
     onChainDescription: 'On-Chain Description',
     totalSupply: 'Total Supply',
     marketCap: 'Market Cap',

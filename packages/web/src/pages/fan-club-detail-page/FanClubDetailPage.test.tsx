@@ -1,4 +1,5 @@
 import { COIN_DETAIL_PAGE, coinPage } from '@audius/common/src/utils/route'
+import { shortenSPLAddress } from '@audius/common/utils'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import {
   describe,
@@ -38,7 +39,8 @@ import {
   saveDomToFile
 } from 'test/test-utils'
 
-import { CoinDetailPage } from './CoinDetailPage'
+import { TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER } from './components/FanClubInfoSection'
+import { FanClubDetailPage } from './FanClubDetailPage'
 
 // Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
 vi.mock('app/ReownAppKitModal', () => ({
@@ -49,7 +51,7 @@ vi.mock('app/ReownAppKitModal', () => ({
   wagmiAdapter: {}
 }))
 
-export function renderCoinDetailPage(
+export function renderFanClubDetailPage(
   coin: typeof mockArtistCoin = mockArtistCoin,
   options?: RenderOptions
 ) {
@@ -72,14 +74,14 @@ export function renderCoinDetailPage(
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
-        <Route path={COIN_DETAIL_PAGE} element={<CoinDetailPage />} />
+        <Route path={COIN_DETAIL_PAGE} element={<FanClubDetailPage />} />
       </Routes>
     </MemoryRouter>,
     { ...options, skipRouter: true }
   )
 }
 
-const assertCoinInsightsSection = async () => {
+const assertFanClubInsightsSection = async () => {
   await screen.findByRole('heading', { name: /insights/i })
 
   // Price: $0.0₅905 (formatted with subscript notation)
@@ -120,9 +122,18 @@ const assertCoinInsightsSection = async () => {
   const progressBar = within(graduationRow).getByRole('progressbar')
   expect(progressBar).toBeInTheDocument()
   expect(progressBar).toHaveAttribute('aria-valuenow', '1')
+
+  const copyAddressRow = screen.getByTestId('fan-club-copy-coin-address-row')
+  expect(copyAddressRow).toBeInTheDocument()
+  expect(
+    within(copyAddressRow).getByRole('button', { name: /copy coin address/i })
+  ).toBeInTheDocument()
+  expect(
+    within(copyAddressRow).getByText(shortenSPLAddress(mockArtistCoin.mint))
+  ).toBeInTheDocument()
 }
 
-const assertCoinLeaderboardSection = () => {
+const assertFanClubLeaderboardSection = () => {
   // Check for Members Leaderboard heading
   const leaderboardHeading = screen.getByRole('heading', {
     name: /members leaderboard/i
@@ -161,7 +172,7 @@ const assertHeader = async () => {
   expect(headings[0]).toBeInTheDocument()
 }
 
-const assertCoinBalanceSection = async ({
+const assertFanClubBalanceSection = async ({
   isAuthed = true,
   isArtist = false,
   hasBalance = false
@@ -261,18 +272,21 @@ const assertFanClubHeroSection = async () => {
 
   expect(screen.getByText(artistUser.name)).toBeInTheDocument()
 
-  const coverPhoto = screen.getByTestId('coin-cover-photo')
+  const coverPhoto = screen.getByTestId('fan-club-cover-photo')
   expect(coverPhoto).toBeInTheDocument()
 }
 
-const assertCoinInfoSection = async ({
+const assertFanClubInfoSection = async ({
   isArtist,
-  unclaimedFees
-}: { isArtist?: boolean; unclaimedFees?: string } = {}) => {
-  const hero = await screen.findByTestId('coin-info-hero')
-  const onchain = screen.getByTestId('coin-onchain-details')
+  unclaimedFees,
+  expectedArtistEarnings = '9.03'
+}: {
+  isArtist?: boolean
+  unclaimedFees?: string
+  expectedArtistEarnings?: string
+} = {}) => {
+  const hero = await screen.findByTestId('fan-club-info-hero')
   expect(hero).toBeInTheDocument()
-  expect(onchain).toBeInTheDocument()
 
   await assertFanClubHeroSection()
 
@@ -320,48 +334,70 @@ const assertCoinInfoSection = async ({
     expect(learnMoreButton).toBeInTheDocument()
   }
 
-  // Check for Copy Coin Address button
-  expect(
-    within(onchain).getByRole('button', { name: /copy coin address/i })
-  ).toBeInTheDocument()
+  const onchain = screen.queryByTestId('fan-club-onchain-details')
+  const showOnchainDetails =
+    isArtist || TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
 
-  // Check for Artist Earnings section
-  const artistEarningsRow = within(onchain).getByTestId('artist-earnings')
-  expect(artistEarningsRow).toBeInTheDocument()
-  expect(
-    within(artistEarningsRow).getByText(/artist earnings/i)
-  ).toBeInTheDocument()
-  // Artist fees total_fees: 903028316 (in smallest units) = 9.03 $AUDIO
-  expect(within(artistEarningsRow).getByText(/9\.03/)).toBeInTheDocument()
-  expect(within(artistEarningsRow).getByText(/\$AUDIO/)).toBeInTheDocument()
-
-  if (isArtist) {
+  if (showOnchainDetails) {
+    expect(onchain).toBeInTheDocument()
     expect(
-      within(hero).getByRole('button', { name: /upload exclusive track/i })
-    ).toBeInTheDocument()
+      within(onchain!).queryByRole('button', { name: /copy coin address/i })
+    ).not.toBeInTheDocument()
 
-    // Check for Unclaimed Fees section (only visible to artist/coin creator)
-    const unclaimedFeesRow = within(onchain).getByTestId('unclaimed-fees')
-    expect(unclaimedFeesRow).toBeInTheDocument()
+    if (isArtist) {
+      expect(
+        within(hero).getByRole('button', { name: /upload exclusive track/i })
+      ).toBeInTheDocument()
+    } else {
+      expect(
+        within(hero).queryByRole('button', {
+          name: /upload exclusive track/i
+        })
+      ).not.toBeInTheDocument()
+    }
+
+    const artistEarningsRow = within(onchain!).getByTestId('artist-earnings')
+    expect(artistEarningsRow).toBeInTheDocument()
     expect(
-      within(unclaimedFeesRow).getByText(/unclaimed earnings/i)
+      within(artistEarningsRow).getByText(/artist earnings/i)
     ).toBeInTheDocument()
-
-    // Check for Claim link within the unclaimed fees row
-    const claimButton = within(unclaimedFeesRow).getByRole('button', {
-      name: /claim/i
-    })
-    expect(claimButton).toBeInTheDocument()
-
-    // Verify the unclaimed amount appears in the unclaimed fees row
     expect(
-      within(unclaimedFeesRow).getByText(new RegExp(unclaimedFees ?? ''))
+      within(artistEarningsRow).getByText(
+        new RegExp(expectedArtistEarnings.replace(/\./g, '\\.'))
+      )
     ).toBeInTheDocument()
-    expect(within(unclaimedFeesRow).getByText(/\$AUDIO/)).toBeInTheDocument()
+    expect(within(artistEarningsRow).getByText(/\$AUDIO/)).toBeInTheDocument()
+
+    const unclaimedAmount =
+      unclaimedFees ??
+      (!isArtist && TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
+        ? '7.03'
+        : undefined)
+    if (unclaimedAmount !== undefined) {
+      const unclaimedFeesRow = within(onchain!).getByTestId('unclaimed-fees')
+      expect(unclaimedFeesRow).toBeInTheDocument()
+      expect(
+        within(unclaimedFeesRow).getByText(/unclaimed earnings/i)
+      ).toBeInTheDocument()
+
+      const claimButton = within(unclaimedFeesRow).getByRole('button', {
+        name: /claim/i
+      })
+      expect(claimButton).toBeInTheDocument()
+
+      expect(
+        within(unclaimedFeesRow).getByText(
+          new RegExp(unclaimedAmount.replace(/\./g, '\\.'))
+        )
+      ).toBeInTheDocument()
+      expect(within(unclaimedFeesRow).getByText(/\$AUDIO/)).toBeInTheDocument()
+    }
+  } else {
+    expect(onchain).not.toBeInTheDocument()
   }
 }
 
-describe('CoinDetailPage', () => {
+describe('FanClubDetailPage', () => {
   beforeEach(() => {
     // Mock any DOM methods if needed
     vi.clearAllMocks()
@@ -389,18 +425,18 @@ describe('CoinDetailPage', () => {
         mockUserCoinNoBalance
       )
     )
-    renderCoinDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockArtistCoin)
 
     await assertHeader()
 
-    await assertCoinBalanceSection({
+    await assertFanClubBalanceSection({
       isAuthed: true,
       isArtist: false,
       hasBalance: false
     })
-    await assertCoinInsightsSection()
-    await assertCoinInfoSection({ unclaimedFees: '7.03' })
-    assertCoinLeaderboardSection()
+    await assertFanClubInsightsSection()
+    await assertFanClubInfoSection()
+    assertFanClubLeaderboardSection()
   })
 
   it('Authed User - IS coin holder - NOT coin creator', async () => {
@@ -412,34 +448,34 @@ describe('CoinDetailPage', () => {
         mockUserCoinHasBalance
       )
     )
-    renderCoinDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockArtistCoin)
 
     await assertHeader()
 
-    await assertCoinInsightsSection()
-    await assertCoinBalanceSection({
+    await assertFanClubInsightsSection()
+    await assertFanClubBalanceSection({
       isAuthed: true,
       isArtist: false,
       hasBalance: true
     })
-    await assertCoinInfoSection()
-    assertCoinLeaderboardSection()
+    await assertFanClubInfoSection()
+    assertFanClubLeaderboardSection()
   })
 
   it('Unauthed User', async () => {
-    renderCoinDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockArtistCoin)
 
     await assertHeader()
 
-    await assertCoinBalanceSection({
+    await assertFanClubBalanceSection({
       isAuthed: false,
       isArtist: false,
       hasBalance: false
     })
 
-    await assertCoinInsightsSection()
-    await assertCoinInfoSection()
-    assertCoinLeaderboardSection()
+    await assertFanClubInsightsSection()
+    await assertFanClubInfoSection()
+    assertFanClubLeaderboardSection()
   })
 
   it('Coin Creator - NOT coin holder', async () => {
@@ -451,18 +487,18 @@ describe('CoinDetailPage', () => {
         mockUserCoinNoBalance
       )
     )
-    renderCoinDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockArtistCoin)
     await assertHeader()
 
-    await assertCoinBalanceSection({
+    await assertFanClubBalanceSection({
       isAuthed: true,
       isArtist: true,
       hasBalance: false
     })
 
-    await assertCoinInsightsSection()
-    assertCoinLeaderboardSection()
-    await assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+    await assertFanClubInsightsSection()
+    assertFanClubLeaderboardSection()
+    await assertFanClubInfoSection({ isArtist: true, unclaimedFees: '7.03' })
   })
 
   it('Coin Creator - IS coin holder - has unclaimed fees from DBC', async () => {
@@ -474,20 +510,20 @@ describe('CoinDetailPage', () => {
         mockUserCoinHasBalance
       )
     )
-    renderCoinDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockArtistCoin)
 
     await assertHeader()
 
-    await assertCoinBalanceSection({
+    await assertFanClubBalanceSection({
       isAuthed: true,
       isArtist: true,
       hasBalance: true
     })
 
-    await assertCoinInsightsSection()
-    assertCoinLeaderboardSection()
-    await assertCoinInfoSection({ isArtist: true, unclaimedFees: '7.03' })
-    saveDomToFile('CoinDetailPage-has-unclaimed-fees-from-dbc.html')
+    await assertFanClubInsightsSection()
+    assertFanClubLeaderboardSection()
+    await assertFanClubInfoSection({ isArtist: true, unclaimedFees: '7.03' })
+    saveDomToFile('FanClubDetailPage-has-unclaimed-fees-from-dbc.html')
   })
   it('Coin Creator - has unclaimed fees from both DBC & DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
@@ -495,7 +531,9 @@ describe('CoinDetailPage', () => {
       artist_fees: {
         ...mockArtistCoin.artist_fees,
         unclaimed_damm_v2_fees: 1000000000,
-        total_damm_v2_fees: 1000000000
+        total_damm_v2_fees: 1000000000,
+        unclaimed_fees: 703028314 + 1000000000,
+        total_fees: 903028316 + 1000000000
       }
     }
     mswServer.use(mockCurrentAccount(artistUser))
@@ -506,10 +544,13 @@ describe('CoinDetailPage', () => {
         mockUserCoinHasBalance
       )
     )
-    renderCoinDetailPage(mockCoinWithDammV2Fees)
+    renderFanClubDetailPage(mockCoinWithDammV2Fees)
 
     await assertHeader()
-    await assertCoinInfoSection({ unclaimedFees: '17.03' })
+    await assertFanClubInfoSection({
+      isArtist: true,
+      unclaimedFees: '17.03'
+    })
   })
   it('Coin Creator - has unclaimed fees from just DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
@@ -519,7 +560,9 @@ describe('CoinDetailPage', () => {
         unclaimed_dbc_fees: 0,
         total_dbc_fees: 0,
         unclaimed_damm_v2_fees: 110300000,
-        total_damm_v2_fees: 1103000000
+        total_damm_v2_fees: 1103000000,
+        unclaimed_fees: 1103000000,
+        total_fees: 1103000000
       }
     }
     mswServer.use(mockCurrentAccount(artistUser))
@@ -530,9 +573,13 @@ describe('CoinDetailPage', () => {
         mockUserCoinHasBalance
       )
     )
-    renderCoinDetailPage(mockCoinWithDammV2Fees)
+    renderFanClubDetailPage(mockCoinWithDammV2Fees)
 
     await assertHeader()
-    await assertCoinInfoSection({ unclaimedFees: '11.03' })
+    await assertFanClubInfoSection({
+      isArtist: true,
+      unclaimedFees: '11.03',
+      expectedArtistEarnings: '11.03'
+    })
   })
 })

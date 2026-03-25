@@ -122,8 +122,8 @@ export type ModalProps = {
    */
   'aria-labelledby'?: string
   /**
-   * If provided, conform to standard modal widths
-   * (only small currently implemented)
+   * If provided, sets a fixed modal body width (see Modal.module.css):
+   * small 488px, large 600px, medium 720px
    */
   size?: 'small' | 'medium' | 'large'
   className?: string
