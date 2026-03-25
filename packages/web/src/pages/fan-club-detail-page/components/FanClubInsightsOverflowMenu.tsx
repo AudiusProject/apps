@@ -21,7 +21,10 @@ import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 
-import { copyLinkToClipboard, getCopyableLink } from '../../../utils/clipboardUtil'
+import {
+  copyLinkToClipboard,
+  getCopyableLink
+} from '../../../utils/clipboardUtil'
 import { openXLink } from '../../../utils/xShare'
 
 import { ArtistFanClubDetailsModal } from './ArtistFanClubDetailsModal'

@@ -41,7 +41,6 @@ import {
   Text,
   TextLink,
   useTheme,
-  Divider,
   Tooltip
 } from '@audius/harmony'
 import { HashId } from '@audius/sdk'
@@ -84,12 +83,6 @@ const fanClubCardMessages = walletMessages.artistCoins
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
 // Below this threshold is considered "dust" and not worth claiming due to transaction fees
 const MIN_CLAIMABLE_FEES = 1_000_000
-
-/**
- * TEMP: Set to `true` to show artist-only on-chain fan club details (earnings,
- * unclaimed, vesting claim UI) to any viewer. Set back to `false` before shipping.
- */
-export const TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER = true
 
 // Helper function to detect platform from URL
 const detectPlatform = (
@@ -478,9 +471,7 @@ const FanClubOnchainLockerSection = ({
   isClaimVestedCoinsPending
 }: FanClubOnchainLockerSectionProps) => {
   const { data: currentUser } = useCurrentAccountUser()
-  const isOwner =
-    currentUser?.user_id === coin.ownerId ||
-    TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
+  const isOwner = currentUser?.user_id === coin.ownerId
   const isMobile = useIsMobile()
 
   const rewardsPoolBalance = formatBalance(
@@ -948,13 +939,10 @@ export const FanClubInfoSection = ({
   }
 
   if (variant === 'onchainDetails') {
-    if (
-      isCurrentAccountPending &&
-      !TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
-    ) {
+    if (isCurrentAccountPending) {
       return <FanClubInfoOnchainSkeleton />
     }
-    if (!isFanClubOwner && !TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER) {
+    if (!isFanClubOwner) {
       return null
     }
   }
@@ -965,9 +953,7 @@ export const FanClubInfoSection = ({
   const isUserBalanceUnavailable =
     !userTokenBalance || Number(userTokenBalance) <= 0
   const isClaimFeesDisabled = isClaimFeesPending || isManagerMode
-  const showOwnerEarningsColumns =
-    (isFanClubOwner || TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER) &&
-    !isManagerMode
+  const showUnclaimedEarningsRow = isFanClubOwner && !isManagerMode
 
   if (variant === 'hero') {
     const bannerSrcForHero =
@@ -1183,7 +1169,7 @@ export const FanClubInfoSection = ({
               </OnchainMetricCell>
             </Box>
           </OnchainMetricBlock>
-          {showOwnerEarningsColumns ? (
+          {showUnclaimedEarningsRow ? (
             <OnchainMetricBlock>
               <Box data-testid='unclaimed-fees' w='100%' css={{ minWidth: 0 }}>
                 <OnchainMetricCell

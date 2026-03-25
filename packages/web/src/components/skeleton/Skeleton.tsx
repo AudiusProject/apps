@@ -37,8 +37,7 @@ const Skeleton = ({
 }: SkeletonProps) => {
   const resolvedWidth = width ?? toCssSize(w)
   const resolvedHeight = height ?? toCssSize(h)
-  const resolvedBorderRadius =
-    borderRadius === 'circle' ? '50%' : borderRadius
+  const resolvedBorderRadius = borderRadius === 'circle' ? '50%' : borderRadius
 
   return (
     <div

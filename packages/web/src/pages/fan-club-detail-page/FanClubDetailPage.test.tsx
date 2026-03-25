@@ -39,7 +39,6 @@ import {
   saveDomToFile
 } from 'test/test-utils'
 
-import { TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER } from './components/FanClubInfoSection'
 import { FanClubDetailPage } from './FanClubDetailPage'
 
 // Mock appkitModal & wagmiAdapter to prevent errors in useExternalWalletAddress
@@ -335,8 +334,7 @@ const assertFanClubInfoSection = async ({
   }
 
   const onchain = screen.queryByTestId('fan-club-onchain-details')
-  const showOnchainDetails =
-    isArtist || TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
+  const showOnchainDetails = Boolean(isArtist)
 
   if (showOnchainDetails) {
     expect(onchain).toBeInTheDocument()
@@ -368,11 +366,7 @@ const assertFanClubInfoSection = async ({
     ).toBeInTheDocument()
     expect(within(artistEarningsRow).getByText(/\$AUDIO/)).toBeInTheDocument()
 
-    const unclaimedAmount =
-      unclaimedFees ??
-      (!isArtist && TEMP_PREVIEW_ONCHAIN_FAN_CLUB_DETAILS_AS_OWNER
-        ? '7.03'
-        : undefined)
+    const unclaimedAmount = unclaimedFees
     if (unclaimedAmount !== undefined) {
       const unclaimedFeesRow = within(onchain!).getByTestId('unclaimed-fees')
       expect(unclaimedFeesRow).toBeInTheDocument()

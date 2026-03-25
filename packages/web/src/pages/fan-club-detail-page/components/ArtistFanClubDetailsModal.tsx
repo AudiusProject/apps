@@ -84,7 +84,13 @@ const ModalLabeledValue = ({
   children: ReactNode
 }) => {
   return (
-    <Flex column gap='xs' alignItems='flex-start' flex={1} css={{ minWidth: 0 }}>
+    <Flex
+      column
+      gap='xs'
+      alignItems='flex-start'
+      flex={1}
+      css={{ minWidth: 0 }}
+    >
       <Flex alignItems='center' gap='xs'>
         <Text variant='body' size='s' strength='strong' color='subdued'>
           {label}
@@ -360,7 +366,9 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {formatModalTokenAmount(locker.locked, decimals)}{' '}
-                        {artistCoin.ticker != null ? `$${artistCoin.ticker}` : ''}
+                        {artistCoin.ticker != null
+                          ? `$${artistCoin.ticker}`
+                          : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
@@ -371,7 +379,9 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {formatModalTokenAmount(locker.unlocked, decimals)}{' '}
-                        {artistCoin.ticker != null ? `$${artistCoin.ticker}` : ''}
+                        {artistCoin.ticker != null
+                          ? `$${artistCoin.ticker}`
+                          : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
@@ -386,7 +396,9 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {rewardsPoolBalance}{' '}
-                        {artistCoin.ticker != null ? `$${artistCoin.ticker}` : ''}
+                        {artistCoin.ticker != null
+                          ? `$${artistCoin.ticker}`
+                          : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
@@ -396,7 +408,12 @@ export const ArtistFanClubDetailsModal = ({
               {artistCoin.rewardPool?.address ? (
                 <Flex column gap='xs' w='100%'>
                   <Flex alignItems='center' gap='xs'>
-                    <Text variant='body' size='m' strength='strong' color='subdued'>
+                    <Text
+                      variant='body'
+                      size='m'
+                      strength='strong'
+                      color='subdued'
+                    >
                       {artistCoinDetails.rewardsPoolAddress}
                     </Text>
                     <Tooltip
@@ -406,7 +423,12 @@ export const ArtistFanClubDetailsModal = ({
                       <IconInfo size='s' color='subdued' />
                     </Tooltip>
                   </Flex>
-                  <Flex alignItems='center' gap='s' w='100%' css={{ minWidth: 0 }}>
+                  <Flex
+                    alignItems='center'
+                    gap='s'
+                    w='100%'
+                    css={{ minWidth: 0 }}
+                  >
                     <Text variant='body' size='m' userSelect='text'>
                       {shortenSPLAddress(artistCoin.rewardPool.address, 20)}
                     </Text>

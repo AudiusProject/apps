@@ -248,6 +248,13 @@ export const FanClubInsights = ({ mint }: FanClubInsightsProps) => {
   const isPending = isCoinPending || (isAudio && isCoingeckoPending)
   const isError = isCoinError || (isAudio && isCoingeckoError)
 
+  const handleCopyMint = useCallback(() => {
+    if (coin?.mint) {
+      copyToClipboard(coin.mint)
+      toast(overflowMessages.copiedToClipboard)
+    }
+  }, [coin?.mint, toast])
+
   if (isPending || !coin) {
     return <FanClubInsightsSkeleton />
   }
@@ -285,13 +292,6 @@ export const FanClubInsights = ({ mint }: FanClubInsightsProps) => {
   const metrics = isAudio
     ? createAudioCoinMetrics(coingeckoResponse)
     : createCoinMetrics(coin)
-
-  const handleCopyMint = useCallback(() => {
-    if (coin.mint) {
-      copyToClipboard(coin.mint)
-      toast(overflowMessages.copiedToClipboard)
-    }
-  }, [coin.mint, toast])
 
   return (
     <Paper
