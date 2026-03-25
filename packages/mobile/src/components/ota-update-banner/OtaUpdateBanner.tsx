@@ -26,6 +26,31 @@ const messages = {
 
 type BannerPhase = 'none' | 'pending'
 
+function syncStatusLabel(status: CodePush.SyncStatus): string {
+  switch (status) {
+    case CodePush.SyncStatus.UP_TO_DATE:
+      return 'UP_TO_DATE'
+    case CodePush.SyncStatus.UPDATE_INSTALLED:
+      return 'UPDATE_INSTALLED'
+    case CodePush.SyncStatus.UPDATE_IGNORED:
+      return 'UPDATE_IGNORED'
+    case CodePush.SyncStatus.UNKNOWN_ERROR:
+      return 'UNKNOWN_ERROR'
+    case CodePush.SyncStatus.SYNC_IN_PROGRESS:
+      return 'SYNC_IN_PROGRESS'
+    case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+      return 'CHECKING_FOR_UPDATE'
+    case CodePush.SyncStatus.AWAITING_USER_ACTION:
+      return 'AWAITING_USER_ACTION'
+    case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+      return 'DOWNLOADING_PACKAGE'
+    case CodePush.SyncStatus.INSTALLING_UPDATE:
+      return 'INSTALLING_UPDATE'
+    default:
+      return `SyncStatus(${String(status)})`
+  }
+}
+
 /**
  * CodePush is configured in ota-root (ON_APP_RESUME) to fetch updates with
  * ON_NEXT_RESTART. We only surface UI when an update is already downloaded
@@ -35,6 +60,7 @@ export const OtaUpdateBanner = () => {
   const { color, spacing } = useTheme()
   const [phase, setPhase] = useState<BannerPhase>('none')
   const dismissedRef = useRef(false)
+  const pendingLoggedRef = useRef(false)
   const pollTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const refresh = useCallback(async () => {
@@ -51,11 +77,17 @@ export const OtaUpdateBanner = () => {
         CodePush.UpdateState.PENDING
       )
       if (pending) {
+        if (!dismissedRef.current && !pendingLoggedRef.current) {
+          pendingLoggedRef.current = true
+          console.warn('[OTA] Pending CodePush package ready (show banner)')
+        }
         setPhase(dismissedRef.current ? 'none' : 'pending')
         return
       }
+      pendingLoggedRef.current = false
       setPhase('none')
-    } catch {
+    } catch (e) {
+      console.warn('[OTA] getUpdateMetadata(PENDING) failed', e)
       setPhase('none')
     }
   }, [])
@@ -80,13 +112,27 @@ export const OtaUpdateBanner = () => {
       return
     }
     try {
-      await CodePush.sync({
-        installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-        mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE
-      })
+      const status = await CodePush.sync(
+        {
+          installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+          mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE
+        },
+        (syncStatus) => {
+          if (
+            syncStatus === CodePush.SyncStatus.UP_TO_DATE ||
+            syncStatus === CodePush.SyncStatus.SYNC_IN_PROGRESS
+          ) {
+            return
+          }
+          console.warn('[OTA] CodePush.sync:', syncStatusLabel(syncStatus))
+        }
+      )
+      if (status === CodePush.SyncStatus.UNKNOWN_ERROR) {
+        console.warn('[OTA] CodePush.sync finished with UNKNOWN_ERROR')
+      }
       await refresh()
-    } catch {
-      /* sync may fail or return SYNC_IN_PROGRESS; polling still runs */
+    } catch (e) {
+      console.warn('[OTA] CodePush.sync threw', e)
     }
   }, [refresh])
 
