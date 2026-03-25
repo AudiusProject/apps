@@ -12,7 +12,10 @@ import {
   Text,
   useTheme
 } from '@audius/harmony-native'
-import { isOtaEnabled } from 'app/app/ota-updates'
+import {
+  getOtaLastHistoryEndpointForLogs,
+  isOtaEnabled
+} from 'app/app/ota-updates'
 import { useEnterForeground } from 'app/hooks/useAppState'
 
 /** Set to `true` to always show the banner for layout preview; use `false` in production. */
@@ -24,32 +27,28 @@ const messages = {
   dismiss: 'Dismiss'
 }
 
-type BannerPhase = 'none' | 'pending'
-
 function syncStatusLabel(status: CodePush.SyncStatus): string {
   switch (status) {
-    case CodePush.SyncStatus.UP_TO_DATE:
-      return 'UP_TO_DATE'
-    case CodePush.SyncStatus.UPDATE_INSTALLED:
-      return 'UPDATE_INSTALLED'
-    case CodePush.SyncStatus.UPDATE_IGNORED:
-      return 'UPDATE_IGNORED'
-    case CodePush.SyncStatus.UNKNOWN_ERROR:
-      return 'UNKNOWN_ERROR'
-    case CodePush.SyncStatus.SYNC_IN_PROGRESS:
-      return 'SYNC_IN_PROGRESS'
     case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
       return 'CHECKING_FOR_UPDATE'
-    case CodePush.SyncStatus.AWAITING_USER_ACTION:
-      return 'AWAITING_USER_ACTION'
     case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
       return 'DOWNLOADING_PACKAGE'
     case CodePush.SyncStatus.INSTALLING_UPDATE:
       return 'INSTALLING_UPDATE'
+    case CodePush.SyncStatus.UP_TO_DATE:
+      return 'UP_TO_DATE'
+    case CodePush.SyncStatus.UPDATE_INSTALLED:
+      return 'UPDATE_INSTALLED'
+    case CodePush.SyncStatus.SYNC_IN_PROGRESS:
+      return 'SYNC_IN_PROGRESS'
+    case CodePush.SyncStatus.UNKNOWN_ERROR:
+      return 'UNKNOWN_ERROR'
     default:
-      return `SyncStatus(${String(status)})`
+      return `status_${status}`
   }
 }
+
+type BannerPhase = 'none' | 'pending'
 
 /**
  * CodePush is configured in ota-root (ON_APP_RESUME) to fetch updates with
@@ -79,7 +78,10 @@ export const OtaUpdateBanner = () => {
       if (pending) {
         if (!dismissedRef.current && !pendingLoggedRef.current) {
           pendingLoggedRef.current = true
-          console.warn('[OTA] Pending CodePush package ready (show banner)')
+          console.warn(
+            '[OTA] Pending CodePush package ready (show banner)',
+            `lastHistoryEndpoint=${getOtaLastHistoryEndpointForLogs()}`
+          )
         }
         setPhase(dismissedRef.current ? 'none' : 'pending')
         return
@@ -87,7 +89,11 @@ export const OtaUpdateBanner = () => {
       pendingLoggedRef.current = false
       setPhase('none')
     } catch (e) {
-      console.warn('[OTA] getUpdateMetadata(PENDING) failed', e)
+      console.warn(
+        '[OTA] getUpdateMetadata(PENDING) failed',
+        e,
+        `lastHistoryEndpoint=${getOtaLastHistoryEndpointForLogs()}`
+      )
       setPhase('none')
     }
   }, [])
@@ -117,22 +123,34 @@ export const OtaUpdateBanner = () => {
           installMode: CodePush.InstallMode.ON_NEXT_RESTART,
           mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE
         },
-        (syncStatus) => {
+        (progress) => {
+          const lastHistoryEndpoint = getOtaLastHistoryEndpointForLogs()
           if (
-            syncStatus === CodePush.SyncStatus.UP_TO_DATE ||
-            syncStatus === CodePush.SyncStatus.SYNC_IN_PROGRESS
+            progress === CodePush.SyncStatus.UP_TO_DATE ||
+            progress === CodePush.SyncStatus.SYNC_IN_PROGRESS
           ) {
             return
           }
-          console.warn('[OTA] CodePush.sync:', syncStatusLabel(syncStatus))
+          console.warn(
+            '[OTA] CodePush.sync status:',
+            syncStatusLabel(progress),
+            `lastHistoryEndpoint=${lastHistoryEndpoint}`
+          )
         }
       )
       if (status === CodePush.SyncStatus.UNKNOWN_ERROR) {
-        console.warn('[OTA] CodePush.sync finished with UNKNOWN_ERROR')
+        console.warn(
+          '[OTA] CodePush.sync finished with UNKNOWN_ERROR',
+          `lastHistoryEndpoint=${getOtaLastHistoryEndpointForLogs()}`
+        )
       }
       await refresh()
     } catch (e) {
-      console.warn('[OTA] CodePush.sync threw', e)
+      console.warn(
+        '[OTA] CodePush.sync threw',
+        e,
+        `lastHistoryEndpoint=${getOtaLastHistoryEndpointForLogs()}`
+      )
     }
   }, [refresh])
 

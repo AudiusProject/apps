@@ -7,7 +7,7 @@ module.exports = (api) => {
     [
       'module-resolver',
       {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         root: ['.'],
         alias: {
           '@audius/common/adapters': '../common/src/adapters',
