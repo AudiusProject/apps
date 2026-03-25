@@ -2,11 +2,7 @@ import type { Coin } from '@audius/common/adapters'
 import { useUser } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
-import {
-  formatCount,
-  formatCurrencyWithSubscript,
-  route
-} from '@audius/common/utils'
+import { formatCount, route } from '@audius/common/utils'
 import {
   Box,
   Divider,
@@ -31,7 +27,7 @@ type FanClubCoinCardProps = {
 
 export const FanClubCoinCard = ({ coin }: FanClubCoinCardProps) => {
   const theme = useTheme()
-  const { ownerId, bannerImageUrl, ticker, logoUri, displayPrice } = coin
+  const { ownerId, bannerImageUrl, ticker, logoUri } = coin
 
   const { image: ownerCoverPhoto } = useCoverPhoto({
     userId: ownerId,
@@ -46,9 +42,9 @@ export const FanClubCoinCard = ({ coin }: FanClubCoinCardProps) => {
     select: (user) => user?.name
   })
 
-  const rawPrice =
-    (coin.price === 0 ? coin.dynamicBondingCurve?.priceUSD : coin.price) ?? 0
-  const formattedPrice = formatCurrencyWithSubscript(displayPrice ?? rawPrice)
+  const formattedMarketCap = `${walletMessages.dollarSign}${formatCount(
+    Math.round(coin.marketCap ?? 0)
+  )}`
 
   const coinPath = ticker ? route.coinPage(ticker) : null
 
@@ -148,10 +144,10 @@ export const FanClubCoinCard = ({ coin }: FanClubCoinCardProps) => {
             </Flex>
             <Flex column gap='xs' css={{ minWidth: 72 }}>
               <Text variant='label' size='s' color='subdued'>
-                {messages.price}
+                {messages.marketCap}
               </Text>
               <Text variant='body' size='m'>
-                {formattedPrice}
+                {formattedMarketCap}
               </Text>
             </Flex>
           </Flex>

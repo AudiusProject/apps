@@ -248,36 +248,19 @@ const assertCoinBalanceSection = async ({
   }
 }
 
-const assertCreatedBySection = async () => {
-  // Check for "Created By" label
-  const createdByLabel = await screen.findByText(/created by/i)
-  expect(createdByLabel).toBeInTheDocument()
+const assertFanClubHeroSection = async () => {
+  // Discovery-style hero: "Fan Club" label + profile link + cover strip
+  const fanClubLabel = await screen.findByText(/^fan club$/i)
+  expect(fanClubLabel).toBeInTheDocument()
 
-  // Check for artist link with correct handle
   const artistLink = screen.getByRole('link', {
     name: new RegExp(artistUser.name, 'i')
   })
   expect(artistLink).toBeInTheDocument()
   expect(artistLink).toHaveAttribute('href', `/${artistUser.handle}`)
 
-  // Check for artist name
   expect(screen.getByText(artistUser.name)).toBeInTheDocument()
 
-  // Check for artist avatar/profile picture within the user token badge
-  const userTokenBadge = screen.getByTestId('user-token-badge')
-  expect(userTokenBadge).toBeInTheDocument()
-
-  // TODO: something is flaky with our image component here
-  // const profileImage = within(userTokenBadge).getByRole('img')
-  // expect(profileImage).toBeInTheDocument()
-
-  // Verify the profile image has a src attribute (actual URL from artistUser fixture)
-  // const profileSrc = profileImage.getAttribute('src')
-  // expect(profileSrc).toBeTruthy()
-
-  // Check for artist cover photo banner section
-  // The cover photo is applied as a background via CSS-in-JS using the artist's cover_photo
-  // The actual background rendering is handled by the BannerSection component
   const coverPhoto = screen.getByTestId('coin-cover-photo')
   expect(coverPhoto).toBeInTheDocument()
 }
@@ -291,8 +274,7 @@ const assertCoinInfoSection = async ({
   expect(hero).toBeInTheDocument()
   expect(onchain).toBeInTheDocument()
 
-  // Check for "Created By" section
-  await assertCreatedBySection()
+  await assertFanClubHeroSection()
 
   // Check for coin description
   if (mockArtistCoin.description) {
@@ -354,6 +336,10 @@ const assertCoinInfoSection = async ({
   expect(within(artistEarningsRow).getByText(/\$AUDIO/)).toBeInTheDocument()
 
   if (isArtist) {
+    expect(
+      within(hero).getByRole('button', { name: /upload exclusive track/i })
+    ).toBeInTheDocument()
+
     // Check for Unclaimed Fees section (only visible to artist/coin creator)
     const unclaimedFeesRow = within(onchain).getByTestId('unclaimed-fees')
     expect(unclaimedFeesRow).toBeInTheDocument()

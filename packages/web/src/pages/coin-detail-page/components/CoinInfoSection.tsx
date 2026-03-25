@@ -11,7 +11,7 @@ import {
   useGetDiscordOAuthLink,
   useIsManagedAccount
 } from '@audius/common/hooks'
-import { coinDetailsMessages } from '@audius/common/messages'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { Feature, Name, WidthSizes } from '@audius/common/models'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
 import {
@@ -24,7 +24,10 @@ import {
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import {
   Artwork,
+  Box,
+  Button,
   Flex,
+  IconCloudUpload,
   IconCopy,
   IconDiscord,
   IconExternalLink,
@@ -48,9 +51,13 @@ import { useDispatch } from 'react-redux'
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { make, useRecord } from 'common/store/analytics/actions'
+import { Avatar } from 'components/avatar/Avatar'
+import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { ExternalLink } from 'components/link/ExternalLink'
+import { UserLink } from 'components/link/UserLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
+import UserBadges from 'components/user-badges/UserBadges'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { UserTokenBadge } from 'components/user-token-badge/UserTokenBadge'
 import { useClaimFees } from 'hooks/useClaimFees'
@@ -63,7 +70,7 @@ import { reportToSentry } from 'store/errors/reportToSentry'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { push } from 'utils/navigation'
 
-const { REWARDS_PAGE } = route
+const { REWARDS_PAGE, UPLOAD_PAGE } = route
 
 const messages = {
   ...coinDetailsMessages.coinInfo,
@@ -73,6 +80,9 @@ const overflowMessages = coinDetailsMessages.overflowMenu
 const toastMessages = coinDetailsMessages.toasts
 
 const BANNER_HEIGHT = 160
+const DISCOVERY_COVER_HEIGHT = 96
+
+const fanClubCardMessages = walletMessages.artistCoins
 
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
 // Below this threshold is considered "dust" and not worth claiming due to transaction fees
@@ -140,58 +150,85 @@ const SocialLinksDisplay = ({ coin }: { coin: Coin }) => {
   )
 }
 
+type CoinHeroCoverPhotoProps = {
+  bannerImage?: string
+}
+
+const CoinHeroCoverPhoto = ({ bannerImage }: CoinHeroCoverPhotoProps) => {
+  const theme = useTheme()
+
+  return (
+    <Box
+      w='100%'
+      data-testid='coin-cover-photo'
+      css={{
+        height: DISCOVERY_COVER_HEIGHT,
+        flexShrink: 0,
+        borderBottom: `1px solid ${theme.color.border.default}`,
+        backgroundColor: theme.color.background.surface2,
+        ...(bannerImage
+          ? {
+              backgroundImage: `url("${bannerImage}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }
+          : {})
+      }}
+    />
+  )
+}
+
 const CoinInfoHeroSkeleton = () => {
   const theme = useTheme()
-  const { spacing } = theme
 
   return (
     <Paper
       borderRadius='l'
-      shadow='far'
+      shadow='mid'
       column
       alignItems='flex-start'
       border='default'
       data-testid='coin-info-hero'
+      css={{ overflow: 'hidden' }}
     >
+      <Skeleton h={DISCOVERY_COVER_HEIGHT} w='100%' />
       <Flex
-        alignItems='flex-end'
+        column
+        gap='l'
+        ph='l'
+        pb='l'
+        pt='l'
         alignSelf='stretch'
-        border='default'
-        css={{
-          minHeight: BANNER_HEIGHT,
-          backgroundColor: theme.color.neutral.n100
-        }}
-        gap='s'
-        p='l'
-        w='100%'
+        css={{ marginTop: -theme.spacing.unit9 }}
       >
-        <Skeleton
-          width={`${spacing.unit24}px`}
-          height={`${spacing.unit24}px`}
-        />
-        <Flex column gap='xs' alignItems='flex-start' flex={1}>
-          <Skeleton width='80px' height='14px' />
-          <Flex
-            alignItems='center'
-            gap='xs'
-            p='xs'
-            backgroundColor='white'
-            borderRadius='circle'
-            border='default'
-          >
-            <Skeleton width='32px' height='32px' />
-            <Skeleton width='100px' height='20px' />
+        <Flex gap='s' alignItems='flex-end' w='100%'>
+          <Skeleton borderRadius='circle' w={72} h={72} />
+          <Flex column gap='xs' flex={1}>
+            <Skeleton h={12} w={64} />
+            <Skeleton h={24} w='70%' />
           </Flex>
         </Flex>
-      </Flex>
-
-      <Flex column alignItems='flex-start' alignSelf='stretch' p='xl' gap='l'>
-        <Skeleton width='200px' height='24px' />
-        <Flex column gap='m'>
+        <Paper
+          border='default'
+          borderRadius='m'
+          p='m'
+          column
+          gap='m'
+          backgroundColor='surface1'
+          w='100%'
+        >
+          <Flex gap='m' alignItems='center'>
+            <Skeleton w={40} h={40} />
+            <Flex column gap='xs' flex={1}>
+              <Skeleton h={12} w={72} />
+              <Skeleton h={20} w={40} />
+            </Flex>
+          </Flex>
+        </Paper>
+        <Flex column gap='m' w='100%'>
           <Skeleton width='100%' height='20px' />
           <Skeleton width='90%' height='20px' />
           <Skeleton width='100%' height='20px' />
-          <Skeleton width='80%' height='20px' />
         </Flex>
       </Flex>
     </Paper>
@@ -539,6 +576,7 @@ type CoinInfoSectionProps = {
 
 export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const dispatch = useDispatch()
+  const theme = useTheme()
   const { toast } = useContext(ToastContext)
   const record = useRecord()
   const isMobile = useIsMobile()
@@ -546,6 +584,11 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const { onOpen: openClaimVestedCoinsModal } = useClaimVestedCoinsModal()
 
   const { data: coin, isLoading: isArtistCoinLoading } = useArtistCoin(mint)
+
+  const { image: ownerCoverPhoto } = useCoverPhoto({
+    userId: coin?.ownerId,
+    size: WidthSizes.SIZE_640
+  })
 
   const { data: currentUser } = useCurrentAccountUser()
   const { data: userCoins } = useUserCoins({ userId: currentUser?.user_id })
@@ -670,6 +713,10 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
 
   const handleBrowseRewards = useCallback(() => {
     dispatch(push(REWARDS_PAGE))
+  }, [dispatch])
+
+  const handleUploadExclusiveTrack = useCallback(() => {
+    dispatch(push(UPLOAD_PAGE))
   }, [dispatch])
 
   const handleCopyAddress = useCallback(() => {
@@ -900,28 +947,85 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
   const isClaimFeesDisabled = isClaimFeesPending || isManagerMode
 
   if (variant === 'hero') {
+    const bannerSrcForHero =
+      coin.bannerImageUrl && coin.bannerImageUrl.trim().length > 0
+        ? coin.bannerImageUrl
+        : ownerCoverPhoto
+
+    const hasSocialLinks = [
+      coin.link1,
+      coin.link2,
+      coin.link3,
+      coin.link4
+    ].some(removeNullable)
+
+    const hasDescriptionText = descriptionParagraphs.some(
+      (paragraph) => paragraph.trim() !== ''
+    )
+
     return (
       <Paper
         borderRadius='l'
-        shadow='far'
+        shadow='mid'
         column
         alignItems='flex-start'
         border='default'
         data-testid='coin-info-hero'
+        css={{ overflow: 'hidden' }}
       >
-        <BannerSection mint={mint} />
+        <CoinHeroCoverPhoto bannerImage={bannerSrcForHero} />
 
-        {coin.description ? (
-          <Flex
+        <Flex
+          column
+          gap='l'
+          ph='l'
+          pb='l'
+          pt='l'
+          alignSelf='stretch'
+          css={{ marginTop: -theme.spacing.unit9 }}
+        >
+          <Flex gap='s' alignItems='flex-end' w='100%' css={{ minWidth: 0 }}>
+            <Avatar userId={coin.ownerId} size='large' />
+            <Flex column gap='2xs' flex={1} css={{ minWidth: 0 }}>
+              <Text variant='label' size='s' color='subdued'>
+                {fanClubCardMessages.fanClubLabel}
+              </Text>
+              <Flex gap='xs' alignItems='center' w='100%' css={{ minWidth: 0 }}>
+                <UserLink userId={coin.ownerId} noBadges size='l' />
+                <Flex css={{ flexShrink: 0 }}>
+                  <UserBadges userId={coin.ownerId} size='m' mint={mint} />
+                </Flex>
+              </Flex>
+            </Flex>
+          </Flex>
+
+          {hasSocialLinks ? <SocialLinksDisplay coin={coin} /> : null}
+
+          <Paper
+            backgroundColor='surface1'
+            border='default'
+            borderRadius='m'
+            ph='l'
+            pv='m'
             column
-            alignItems='flex-start'
-            alignSelf='stretch'
-            ph='xl'
-            pv='l'
-            gap='l'
+            gap='m'
+            w='100%'
           >
-            <Flex column gap='m'>
-              <SocialLinksDisplay coin={coin} />
+            <Flex gap='m' alignItems='center' w='100%' css={{ minWidth: 0 }}>
+              <TokenIcon logoURI={coin.logoUri} size='xl' hex />
+              <Flex column gap='xs' flex={1} css={{ minWidth: 0 }}>
+                <Text variant='label' size='s' color='subdued'>
+                  {walletMessages.poweredBy}
+                </Text>
+                <Text variant='heading' size='s' ellipses>
+                  {coin.ticker ?? ''}
+                </Text>
+              </Flex>
+            </Flex>
+          </Paper>
+
+          {hasDescriptionText ? (
+            <Flex column gap='m' alignSelf='stretch'>
               {descriptionParagraphs.map((paragraph) => {
                 if (paragraph.trim() === '') {
                   return null
@@ -939,8 +1043,19 @@ export const CoinInfoSection = ({ mint, variant }: CoinInfoSectionProps) => {
                 )
               })}
             </Flex>
-          </Flex>
-        ) : null}
+          ) : null}
+
+          {isCoinCreator && !isManagerMode ? (
+            <Button
+              variant='secondary'
+              fullWidth
+              iconLeft={IconCloudUpload}
+              onClick={handleUploadExclusiveTrack}
+            >
+              {messages.uploadExclusiveTrack}
+            </Button>
+          ) : null}
+        </Flex>
 
         {isWAudio || coin.website ? (
           <Flex
