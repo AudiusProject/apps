@@ -39,15 +39,19 @@ import {
   ViewLayout
 } from 'pages/search-page/types'
 
+import { ArtistCoinTracksSection } from '../desktop/ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
 import { FeelingLuckySection } from '../desktop/FeelingLuckySection'
 import { LabelSpotlightSection } from '../desktop/LabelSpotlightSection'
+import { MoodGrid } from '../desktop/MoodGrid'
+import { QuickSearchGrid } from '../desktop/QuickSearchGrid'
 import { RecentSearchesSection } from '../desktop/RecentSearchesSection'
 import { RecentlyPlayedSection } from '../desktop/RecentlyPlayedSection'
 import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
+import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
   title: string
@@ -169,10 +173,15 @@ const SearchExplorePage = ({
   }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent = categoryKey === 'tracks' || categoryKey === 'all'
+  const showTrackContent =
+    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
   const showPlaylistContent =
-    categoryKey === 'playlists' || categoryKey === 'all'
-  const showUserContent = categoryKey === 'profiles' || categoryKey === 'all'
+    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
+  const showUserContent =
+    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
+  const isTracksTab = categoryKey === CategoryView.TRACKS
+  const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
+  const isAlbumsTab = categoryKey === CategoryView.ALBUMS
 
   return (
     <MobilePageContainer
@@ -236,21 +245,25 @@ const SearchExplorePage = ({
           gap='2xl'
           css={{ display: showSearchResults ? 'none' : undefined }}
         >
-          {showTrackContent && showUserContextualContent && (
+          {showTrackContent && showUserContextualContent ? (
             <RecommendedTracksSection />
-          )}
-          {showTrackContent && showUserContextualContent && (
+          ) : null}
+          {isTracksTab ? <QuickSearchGrid /> : null}
+          {showTrackContent ? <ArtistCoinTracksSection /> : null}
+          {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
-          )}
-          {showPlaylistContent && <FeaturedPlaylistsSection />}
-          {categoryKey === CategoryView.ALL && <FanClubsExploreSection />}
-          {showTrackContent && <FeaturedRemixContestsSection />}
-          {showUserContent && <ArtistSpotlightSection />}
-          {showUserContent && <LabelSpotlightSection />}
-          {showTrackContent && showUserContextualContent && (
+          ) : null}
+          {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
+          {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+          {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
+          {showUserContent ? <ArtistSpotlightSection /> : null}
+          {showUserContent ? <LabelSpotlightSection /> : null}
+          {isTracksTab || isPlaylistsTab || isAlbumsTab ? <MoodGrid /> : null}
+          {showTrackContent && showUserContextualContent ? (
             <FeelingLuckySection />
-          )}
-          {showUserContextualContent && <RecentSearchesSection />}
+          ) : null}
+          {showUserContextualContent ? <RecentSearchesSection /> : null}
         </Flex>
       </Flex>
     </MobilePageContainer>

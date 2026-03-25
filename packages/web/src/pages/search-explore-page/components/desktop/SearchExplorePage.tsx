@@ -46,9 +46,12 @@ import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
 import { LabelSpotlightSection } from './LabelSpotlightSection'
+import { MoodGrid } from './MoodGrid'
+import { QuickSearchGrid } from './QuickSearchGrid'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
+import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
   title: string
@@ -192,10 +195,15 @@ const SearchExplorePage = ({
   }, [])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent = categoryKey === 'tracks' || categoryKey === 'all'
+  const showTrackContent =
+    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
   const showPlaylistContent =
-    categoryKey === 'playlists' || categoryKey === 'all'
-  const showUserContent = categoryKey === 'profiles' || categoryKey === 'all'
+    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
+  const showUserContent =
+    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
+  const isTracksTab = categoryKey === CategoryView.TRACKS
+  const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
+  const isAlbumsTab = categoryKey === CategoryView.ALBUMS
 
   return (
     <Page
@@ -311,22 +319,27 @@ const SearchExplorePage = ({
             gap='3xl'
             css={{ display: showSearchResults ? 'none' : undefined }}
           >
-            {showTrackContent && showUserContextualContent && (
+            {showTrackContent && showUserContextualContent ? (
               <RecommendedTracksSection />
-            )}
-            {showPlaylistContent && <FeaturedPlaylistsSection />}
-            {categoryKey === CategoryView.ALL && <FanClubsExploreSection />}
-            {showTrackContent && <ArtistCoinTracksSection />}
-            {showTrackContent && showUserContextualContent && (
+            ) : null}
+            {isTracksTab ? <QuickSearchGrid /> : null}
+            {showTrackContent ? <ArtistCoinTracksSection /> : null}
+            {showTrackContent && showUserContextualContent ? (
               <RecentlyPlayedSection />
-            )}
-            {showTrackContent && <FeaturedRemixContestsSection />}
-            {showUserContent && <ArtistSpotlightSection />}
-            {showUserContent && <LabelSpotlightSection />}
-            {showTrackContent && showUserContextualContent && (
+            ) : null}
+            {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+            {categoryKey === CategoryView.ALL ? (
+              <FanClubsExploreSection />
+            ) : null}
+            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+            {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
+            {showUserContent ? <ArtistSpotlightSection /> : null}
+            {showUserContent ? <LabelSpotlightSection /> : null}
+            {isTracksTab || isPlaylistsTab || isAlbumsTab ? <MoodGrid /> : null}
+            {showTrackContent && showUserContextualContent ? (
               <FeelingLuckySection />
-            )}
-            {showUserContextualContent && <RecentSearchesSection />}
+            ) : null}
+            {showUserContextualContent ? <RecentSearchesSection /> : null}
           </Flex>
         </Flex>
       </Flex>
