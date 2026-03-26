@@ -83,7 +83,10 @@ def index_core_play(
 
         signature = tx_play.signature
         timestamp = tx_play.timestamp.ToDatetime()
-        track_id = int(tx_play.track_id)
+        try:
+            track_id = int(tx_play.track_id)
+        except:
+            continue
         user_id = user_id
         slot = next_slot
         city = tx_play.city
