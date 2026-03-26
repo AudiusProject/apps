@@ -6,15 +6,15 @@ from web3 import Web3
 from web3.datastructures import AttributeDict
 
 from integration_tests.challenges.index_helpers import UpdateTask
+from integration_tests.tasks.publish_scheduled_releases_helpers import (
+    publish_scheduled_releases_session,
+)
 from integration_tests.utils import populate_mock_db
 from src.challenges.challenge_event_bus import ChallengeEventBus, setup_challenge_bus
 from src.models.notifications.notification import Notification
 from src.models.tracks.track import Track
 from src.queries.get_notifications import NotificationType
 from src.tasks.entity_manager.entity_manager import entity_manager_update
-from integration_tests.tasks.publish_scheduled_releases_helpers import (
-    publish_scheduled_releases_session,
-)
 from src.utils.db_session import get_db
 
 logger = logging.getLogger(__name__)
