@@ -1,0 +1,327 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: #fff;
+  color: #1a1a1a;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 24px;
+}
+
+.card {
+  padding: 24px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+/* Ticker input */
+.tickerRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tickerInput {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+/* Coin info */
+.coinCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f0ff, #f0f0ff);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.coinLogo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ddd;
+}
+
+.coinInfo {
+  flex: 1;
+}
+
+.coinName {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.coinMeta {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+/* Auth section */
+.authSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.authStatus {
+  width: 100%;
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.button {
+  background-color: #cc0fe0;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #b00dc7;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.buttonSecondary {
+  background-color: #333;
+}
+
+.buttonSecondary:hover:not(:disabled) {
+  background-color: #555;
+}
+
+.buttonSmall {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.signOutBtn {
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.signOutBtn:hover {
+  text-decoration: underline;
+}
+
+.balanceBadge {
+  padding: 4px 10px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+/* Track list */
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.trackList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trackItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.trackItem:last-child {
+  border-bottom: none;
+}
+
+.trackInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackTitle {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackGate {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+}
+
+.accessGranted {
+  color: #2e7d32;
+}
+
+.accessDenied {
+  color: #c62828;
+}
+
+.lockIcon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.playBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #cc0fe0;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.playBtn:hover {
+  background: #b00dc7;
+}
+
+.playBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.playBtnActive {
+  background: #333;
+}
+
+/* Status messages */
+.error {
+  color: #d32f2f;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.loader {
+  margin: 16px 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #eee;
+  border-top-color: #cc0fe0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px;
+  color: #888;
+  font-size: 14px;
+}
+
+.required {
+  font-size: 13px;
+  color: #333;
+  margin-top: 12px;
+}
+
+.code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #555;
+  margin-top: 6px;
+}
+
+.nowPlaying {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #333;
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.nowPlaying .spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  border-top-color: #fff;
+}
