@@ -69,6 +69,39 @@ function useCoin(ticker: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Hooks: useCoinBalance
+// ---------------------------------------------------------------------------
+
+function useCoinBalance(
+  userId: string | undefined,
+  walletAddress: string | undefined,
+  coinMint: string | undefined
+) {
+  const sdk = getSDK()
+  // For OAuth users, look up by user ID; for wallet-only users, look up by wallet address
+  const key = userId ?? walletAddress
+  return useQuery({
+    queryKey: ['coin-balance', key, coinMint],
+    queryFn: async () => {
+      let coins: { mint?: string; decimals?: number; balance?: number }[]
+      if (userId) {
+        const res = await sdk.users.getUserCoins({ id: userId })
+        coins = (res.data ?? []) as { mint?: string; decimals?: number; balance?: number }[]
+      } else {
+        const res = await sdk.wallets.getWalletCoins({ walletId: walletAddress! })
+        coins = (res.data ?? []) as { mint?: string; decimals?: number; balance?: number }[]
+      }
+      const match = coins.find((c) => c.mint === coinMint)
+      if (!match) return null
+      const decimals = match.decimals ?? 0
+      const rawBalance = match.balance ?? 0
+      return rawBalance / Math.pow(10, decimals)
+    },
+    enabled: !!(userId || walletAddress) && !!coinMint
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Hooks: useGatedTracks
 // ---------------------------------------------------------------------------
 
@@ -154,6 +187,10 @@ export default function App() {
     isPending: tracksPending,
     error: tracksError
   } = useGatedTracks(artistId, userId)
+
+  // Balance for the active coin — works for both auth paths
+  const coinMint = coin?.mint ? String(coin.mint) : undefined
+  const { data: coinBalance } = useCoinBalance(userId, solWallet?.pubkey, coinMint)
 
   // -------------------------------------------------------------------------
   // OAuth session restore
@@ -397,6 +434,11 @@ export default function App() {
           ) : (
             <>
               <span>@{profile.handle ?? 'user'}</span>
+              {coinBalance != null && !solWallet && (
+                <span className='balanceBadge'>
+                  {coinBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${coinTicker}
+                </span>
+              )}
               <button className='signOutBtn' type='button' onClick={handleAudiusSignOut}>
                 Sign out
               </button>
@@ -416,6 +458,11 @@ export default function App() {
               <span title={solWallet.pubkey}>
                 {solWallet.pubkey.slice(0, 4)}...{solWallet.pubkey.slice(-4)}
               </span>
+              {coinBalance != null && (
+                <span className='balanceBadge'>
+                  {coinBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${coinTicker}
+                </span>
+              )}
               <button className='signOutBtn' type='button' onClick={handleDisconnectWallet}>
                 Disconnect
               </button>

@@ -163,6 +163,16 @@ body {
   text-decoration: underline;
 }
 
+.balanceBadge {
+  padding: 4px 10px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
 /* Track list */
 .sectionTitle {
   font-size: 16px;
