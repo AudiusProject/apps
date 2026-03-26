@@ -22,7 +22,7 @@ const { makeGetLineupMetadatas } = lineupSelectors
 const getFeedLineup = makeGetLineupMetadatas(getDiscoverFeedLineup)
 
 const messages = {
-  header: 'You Feed',
+  header: 'Your Feed',
   endOfFeed: "Looks like you've reached the end of your feed..."
 }
 
