@@ -12,7 +12,9 @@ from src.models.notifications.notification import Notification
 from src.models.tracks.track import Track
 from src.queries.get_notifications import NotificationType
 from src.tasks.entity_manager.entity_manager import entity_manager_update
-from src.tasks.publish_scheduled_releases import _publish_scheduled_releases
+from integration_tests.tasks.publish_scheduled_releases_helpers import (
+    publish_scheduled_releases_session,
+)
 from src.utils.db_session import get_db
 
 logger = logging.getLogger(__name__)
@@ -532,7 +534,7 @@ def test_fan_remix_contest_started_notification_on_scheduled_release(app):
         assert len(notifications) == 0
 
         # Run the scheduled release publish
-        _publish_scheduled_releases(session)
+        publish_scheduled_releases_session(session)
 
         # Verify track was made public
         track = session.query(Track).filter_by(track_id=TEST_TRACK_ID).first()
@@ -777,7 +779,7 @@ def test_fan_remix_contest_started_notification_no_duplicate_on_scheduled_releas
 
     with db.scoped_session() as session:
         # Run the scheduled release publish
-        _publish_scheduled_releases(session)
+        publish_scheduled_releases_session(session)
 
         # Verify track was made public
         track = session.query(Track).filter_by(track_id=TEST_TRACK_ID).first()
@@ -1049,7 +1051,7 @@ def test_fan_remix_contest_started_notification_no_duplicate_with_existing_on_sc
         assert notifications_before[0].user_ids == [FOLLOWER_ID]
 
         # Run the scheduled release publish
-        _publish_scheduled_releases(session)
+        publish_scheduled_releases_session(session)
 
         # Verify track was made public
         track = session.query(Track).filter_by(track_id=TEST_TRACK_ID).first()

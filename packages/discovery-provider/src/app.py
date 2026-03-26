@@ -301,7 +301,6 @@ def configure_celery(celery, test_config=None):
             "src.tasks.cache_current_nodes",
             "src.tasks.update_aggregates",
             "src.tasks.cache_entity_counts",
-            "src.tasks.publish_scheduled_releases",
             "src.tasks.create_engagement_notifications",
             "src.tasks.create_listen_streak_reminder_notifications",
             "src.tasks.create_remix_contest_notifications",
@@ -380,10 +379,6 @@ def configure_celery(celery, test_config=None):
                 "task": "update_aggregates",
                 "schedule": timedelta(minutes=10),
             },
-            "publish_scheduled_releases": {
-                "task": "publish_scheduled_releases",
-                "schedule": timedelta(minutes=1),
-            },
             "create_engagement_notifications": {
                 "task": "create_engagement_notifications",
                 "schedule": timedelta(minutes=10),
@@ -450,7 +445,6 @@ def configure_celery(celery, test_config=None):
     redis_inst.delete(UPDATE_DELIST_STATUSES_LOCK)
     redis_inst.delete(REPAIR_AUDIO_ANALYSES_LOCK)
     redis_inst.delete("update_aggregates_lock")
-    redis_inst.delete("publish_scheduled_releases_lock")
     redis_inst.delete("create_engagement_notifications")
     redis_inst.delete(index_core_lock_key)
     # delete cached final_poa_block in case it has changed
