@@ -12,8 +12,8 @@ export const AUDIO_REWARDS_IMAGE_URL =
 export const SIGNUP_REF_IMAGE_URL =
   'https://download.audius.co/static-resources/signup_referral.png'
 
-// Regex to detect Twitter/Discord bots that can embed players
-const CAN_EMBED_USER_AGENT_REGEX = /(twitter|discord)/i
+// Regex to detect Twitter bots that can embed player cards
+const CAN_EMBED_USER_AGENT_REGEX = /(twitter)/i
 
 export type PlayableType = 'track' | 'playlist' | 'album'
 
@@ -56,7 +56,7 @@ export const getEmbedUrl = (type: PlayableType, hashId: string): string => {
 }
 
 /**
- * Check if User-Agent can show embed player (Twitter/Discord bots)
+ * Check if User-Agent can show embed player (Twitter bot)
  */
 export const canEmbed = (userAgent: string): boolean => {
   return CAN_EMBED_USER_AGENT_REGEX.test(userAgent)
