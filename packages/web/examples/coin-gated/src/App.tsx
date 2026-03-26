@@ -367,7 +367,7 @@ export default function App() {
       {/* Header */}
       <h1 className='title'>Coin-Gated Tracks</h1>
       <p className='subtitle'>
-        Browse and stream token-gated tracks using an artist coin.
+        Browse and stream coin-gated tracks using an artist coin.
         Sign in with Audius or connect a Solana wallet.
       </p>
 
@@ -488,7 +488,7 @@ export default function App() {
       {/* Track list */}
       {coin && (
         <div className='card'>
-          <p className='sectionTitle'>Token-Gated Tracks</p>
+          <p className='sectionTitle'>Coin-Gated Tracks</p>
 
           {tracksPending ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
@@ -500,7 +500,7 @@ export default function App() {
             </p>
           ) : !tracks || tracks.length === 0 ? (
             <p className='emptyState'>
-              No token-gated tracks found for ${coinTicker}.
+              No coin-gated tracks found for ${coinTicker}.
             </p>
           ) : (
             <ul className='trackList'>
