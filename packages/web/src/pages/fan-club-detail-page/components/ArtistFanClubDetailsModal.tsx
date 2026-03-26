@@ -365,7 +365,7 @@ export const ArtistFanClubDetailsModal = ({
                       tooltip={overflowMenu.tooltips.locked}
                     >
                       <Text variant='body' size='m'>
-                        {formatModalTokenAmount(locker.locked, decimals)}{' '}
+                        {formatModalTokenAmount(locker.locked ?? 0, decimals)}{' '}
                         {artistCoin.ticker != null
                           ? `$${artistCoin.ticker}`
                           : ''}
@@ -378,7 +378,7 @@ export const ArtistFanClubDetailsModal = ({
                       tooltip={overflowMenu.tooltips.unlocked}
                     >
                       <Text variant='body' size='m'>
-                        {formatModalTokenAmount(locker.unlocked, decimals)}{' '}
+                        {formatModalTokenAmount(locker.unlocked ?? 0, decimals)}{' '}
                         {artistCoin.ticker != null
                           ? `$${artistCoin.ticker}`
                           : ''}
@@ -446,7 +446,7 @@ export const ArtistFanClubDetailsModal = ({
           </>
         ) : null}
 
-        <Flex w='100%' alignSelf='stretch' flexShrink={0} pt='m'>
+        <Flex w='100%' alignSelf='stretch' pt='m' css={{ flexShrink: 0 }}>
           <Button variant='primary' onClick={onClose} fullWidth>
             {artistCoinDetails.close}
           </Button>
