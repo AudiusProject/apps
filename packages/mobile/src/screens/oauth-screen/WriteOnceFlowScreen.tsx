@@ -46,6 +46,7 @@ export const WriteOnceFlowScreen = ({ params }: Props) => {
   } = useAppInfo({
     apiKey,
     queryParamAppName,
+    redirectUri,
     scope: 'write_once',
     userId: account?.user_id,
     skip: false

@@ -42,6 +42,7 @@ export const ImplicitFlowScreen = ({ params }: Props) => {
     useAppInfo({
       apiKey,
       queryParamAppName,
+      redirectUri,
       scope,
       userId: account?.user_id,
       skip: false

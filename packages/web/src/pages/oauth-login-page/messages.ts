@@ -51,6 +51,8 @@ export const messages = {
   signedInAs: `You’re Signed in as`,
   missingApiKeyError: 'Whoops, this is an invalid link (app API Key missing)',
   invalidApiKeyError: 'Whoops, this is an invalid link (app API Key invalid)',
+  redirectUriNotRegisteredError: (uri: string) =>
+    `Redirect URI not registered. Add "${uri}" to your app's allowed redirect URIs in Settings on audius.co.`,
   missingCodeChallengeError:
     'Whoops, this is an invalid link (code_challenge is required for PKCE flow).',
   invalidCodeChallengeMethodError:
