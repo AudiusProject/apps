@@ -1,32 +1,40 @@
+import { useCallback, useContext } from 'react'
+
 import type { Coin } from '@audius/common/adapters'
 import { useArtistCoin, useCoinGeckoCoin } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import {
   createAudioCoinMetrics,
   createCoinMetrics,
-  MetricData
+  MetricData,
+  shortenSPLAddress
 } from '@audius/common/utils'
 import {
   Flex,
+  IconCopy,
   IconInfo,
   IconSortDown,
   IconSortUp,
   Paper,
+  PlainButton,
   Text,
   Tooltip
 } from '@audius/harmony'
 
+import { ToastContext } from 'components/toast/ToastContext'
 import { env } from 'services/env'
+import { copyToClipboard } from 'utils/clipboardUtil'
 
 import { componentWithErrorBoundary } from '../../../components/error-wrapper/componentWithErrorBoundary'
 import Skeleton from '../../../components/skeleton/Skeleton'
 
-import { CoinInsightsOverflowMenu } from './CoinInsightsOverflowMenu'
+import { FanClubInsightsOverflowMenu } from './FanClubInsightsOverflowMenu'
 import { GraduationProgressBar } from './GraduationProgressBar'
 
 const messages = coinDetailsMessages.coinInsights
+const overflowMessages = coinDetailsMessages.overflowMenu
 
-const CoinInsightsSkeleton = () => {
+const FanClubInsightsSkeleton = () => {
   return (
     <Paper
       direction='column'
@@ -219,11 +227,12 @@ const MetricRow = componentWithErrorBoundary(MetricRowComponent, {
   name: 'MetricRow'
 })
 
-type CoinInsightsProps = {
+type FanClubInsightsProps = {
   mint: string
 }
 
-export const CoinInsights = ({ mint }: CoinInsightsProps) => {
+export const FanClubInsights = ({ mint }: FanClubInsightsProps) => {
+  const { toast } = useContext(ToastContext)
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const {
     data: coin,
@@ -239,8 +248,15 @@ export const CoinInsights = ({ mint }: CoinInsightsProps) => {
   const isPending = isCoinPending || (isAudio && isCoingeckoPending)
   const isError = isCoinError || (isAudio && isCoingeckoError)
 
+  const handleCopyMint = useCallback(() => {
+    if (coin?.mint) {
+      copyToClipboard(coin.mint)
+      toast(overflowMessages.copiedToClipboard)
+    }
+  }, [coin?.mint, toast])
+
   if (isPending || !coin) {
-    return <CoinInsightsSkeleton />
+    return <FanClubInsightsSkeleton />
   }
 
   if (isError || !coin) {
@@ -296,12 +312,42 @@ export const CoinInsights = ({ mint }: CoinInsightsProps) => {
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
-        <CoinInsightsOverflowMenu mint={mint} />
+        <FanClubInsightsOverflowMenu mint={mint} />
       </Flex>
 
       {metrics.map((metric) => (
         <MetricRow key={metric.label} metric={metric} coin={coin} />
       ))}
+
+      <Flex
+        row
+        alignItems='center'
+        justifyContent='space-between'
+        borderTop='default'
+        pv='m'
+        ph='l'
+        w='100%'
+        data-testid='fan-club-copy-coin-address-row'
+      >
+        <PlainButton
+          iconLeft={IconCopy}
+          variant='default'
+          onClick={handleCopyMint}
+        >
+          {overflowMessages.copyCoinAddress}
+        </PlainButton>
+        <Text
+          variant='body'
+          size='s'
+          color='subdued'
+          userSelect='text'
+          css={{
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace'
+          }}
+        >
+          {shortenSPLAddress(coin.mint)}
+        </Text>
+      </Flex>
     </Paper>
   )
 }

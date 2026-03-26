@@ -21,7 +21,6 @@ import {
   Flex,
   IconSearch,
   LoadingSpinner,
-  SelectablePill,
   Skeleton,
   spacing,
   Text
@@ -41,11 +40,11 @@ import { getScrollParent } from 'utils/scrollParent'
 import styles from './ArtistCoinsTable.module.css'
 import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
 
-const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
+export const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
 
-type FanClubsViewMode = 'table' | 'cards'
+export type FanClubsViewMode = 'table' | 'cards'
 
-const readInitialViewMode = (): FanClubsViewMode => {
+export const readInitialFanClubsViewMode = (): FanClubsViewMode => {
   if (typeof window === 'undefined') {
     return 'cards'
   }
@@ -316,6 +315,7 @@ const sortDirectionMap: Record<string, GetCoinsSortDirectionEnum> = {
 
 type ArtistCoinsTableProps = {
   searchQuery?: string
+  viewMode: FanClubsViewMode
 }
 
 const ARTIST_COINS_BATCH_SIZE = 50
@@ -324,7 +324,10 @@ const isEmptyRow = (row: any) => {
   return Boolean(!row?.original || Object.keys(row.original).length === 0)
 }
 
-export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
+export const ArtistCoinsTable = ({
+  searchQuery,
+  viewMode
+}: ArtistCoinsTableProps) => {
   const mainContentRef = useMainContentRef()
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
@@ -344,8 +347,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     externalAudioBalance
   })
   const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
-  const [viewMode, setViewMode] =
-    useState<FanClubsViewMode>(readInitialViewMode)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -392,13 +393,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     }
     return (getScrollParent(scrollContainerRef.current) as HTMLElement) ?? null
   }, [mainContentRef])
-
-  const handleViewModeChange = useCallback((mode: FanClubsViewMode) => {
-    setViewMode(mode)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(FAN_CLUBS_VIEW_STORAGE_KEY, mode)
-    }
-  }, [])
 
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
 
@@ -468,10 +462,6 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
     [sortMethod, sortDirection]
   )
 
-  const handleLaunchYourClub = useCallback(() => {
-    navigate(route.COINS_CREATE_PAGE)
-  }, [navigate])
-
   const handleBuy = useCallback(
     (ticker: string) => {
       openBuySellModal({
@@ -506,56 +496,8 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
 
   const showEmptyState = !isPending && (!coins || coins.length === 0)
 
-  const toolbar = (
-    <Flex
-      ph='l'
-      pv='l'
-      justifyContent='space-between'
-      alignItems='center'
-      w='100%'
-      borderBottom='default'
-      backgroundColor='surface1'
-    >
-      <Flex column gap='s' alignItems='flex-start'>
-        <Text variant='label' size='s' color='subdued'>
-          {walletMessages.artistCoins.view}
-        </Text>
-        <Flex gap='s' alignItems='center' css={{ flexWrap: 'wrap' }}>
-          <SelectablePill
-            size='large'
-            label={walletMessages.artistCoins.cardView}
-            isSelected={viewMode === 'cards'}
-            onClick={() => {
-              handleViewModeChange('cards')
-            }}
-          />
-          <SelectablePill
-            size='large'
-            label={walletMessages.artistCoins.leaderboardView}
-            isSelected={viewMode === 'table'}
-            onClick={() => {
-              handleViewModeChange('table')
-            }}
-          />
-        </Flex>
-      </Flex>
-      <Button variant='secondary' size='small' onClick={handleLaunchYourClub}>
-        {walletMessages.artistCoins.launchYourClub}
-      </Button>
-    </Flex>
-  )
-
   return (
-    <Flex
-      ref={setTableNode}
-      direction='column'
-      w='100%'
-      border='default'
-      borderRadius='m'
-      backgroundColor='surface1'
-      css={{ overflow: 'hidden' }}
-    >
-      {toolbar}
+    <>
       {showEmptyState ? (
         <Flex
           column
@@ -575,44 +517,34 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
         </Flex>
       ) : null}
       {!showEmptyState && viewMode === 'table' ? (
-        <Table
-          columns={columns}
-          data={coins ?? []}
-          isVirtualized
-          onSort={onSort}
-          onClickRow={handleRowClick}
-          loading={isPending}
-          isEmptyRow={isEmptyRow}
-          fetchMore={loadNextPage}
-          fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
-          tableHeaderClassName={styles.tableHeader}
-          scrollRef={mainContentRef}
-        />
+        <Flex
+          ref={setTableNode}
+          direction='column'
+          w='100%'
+          border='default'
+          borderRadius='m'
+          backgroundColor='surface1'
+          css={{ overflow: 'hidden' }}
+        >
+          <Table
+            columns={columns}
+            data={coins ?? []}
+            isVirtualized
+            onSort={onSort}
+            onClickRow={handleRowClick}
+            loading={isPending}
+            isEmptyRow={isEmptyRow}
+            fetchMore={loadNextPage}
+            fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
+            tableHeaderClassName={styles.tableHeader}
+            scrollRef={mainContentRef}
+          />
+        </Flex>
       ) : null}
       {!showEmptyState && viewMode === 'cards' ? (
-        isPending && (!coins || coins.length === 0) ? (
-          <Flex
-            p='l'
-            w='100%'
-            css={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: spacing.m
-            }}
-          >
-            {Array.from({ length: 6 }, (_, index) => (
-              <FanClubCardSkeleton key={index} />
-            ))}
-          </Flex>
-        ) : (
-          <InfiniteScroll
-            hasMore={hasNextPage ?? false}
-            loadMore={handleCardLoadMore}
-            getScrollParent={getScrollableParent}
-            useWindow={false}
-          >
+        <Flex ref={setTableNode} direction='column' w='100%'>
+          {isPending && (!coins || coins.length === 0) ? (
             <Flex
-              p='l'
               w='100%'
               css={{
                 display: 'grid',
@@ -620,18 +552,38 @@ export const ArtistCoinsTable = ({ searchQuery }: ArtistCoinsTableProps) => {
                 gap: spacing.m
               }}
             >
-              {coins?.map((coin) => (
-                <FanClubCoinCard key={coin.mint} coin={coin} />
+              {Array.from({ length: 6 }, (_, index) => (
+                <FanClubCardSkeleton key={index} />
               ))}
             </Flex>
-            {isFetchingNextPage ? (
-              <Flex justifyContent='center' p='l'>
-                <LoadingSpinner css={{ width: 24, height: 24 }} />
+          ) : (
+            <InfiniteScroll
+              hasMore={hasNextPage ?? false}
+              loadMore={handleCardLoadMore}
+              getScrollParent={getScrollableParent}
+              useWindow={false}
+            >
+              <Flex
+                w='100%'
+                css={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: spacing.m
+                }}
+              >
+                {coins?.map((coin) => (
+                  <FanClubCoinCard key={coin.mint} coin={coin} />
+                ))}
               </Flex>
-            ) : null}
-          </InfiniteScroll>
-        )
+              {isFetchingNextPage ? (
+                <Flex justifyContent='center' p='l'>
+                  <LoadingSpinner css={{ width: 24, height: 24 }} />
+                </Flex>
+              ) : null}
+            </InfiniteScroll>
+          )}
+        </Flex>
       ) : null}
-    </Flex>
+    </>
   )
 }

@@ -7,7 +7,6 @@ import { route } from '@audius/common/utils'
 import {
   PopupMenu,
   PopupMenuItem,
-  IconCopy,
   IconExternalLink,
   IconButton,
   IconKebabHorizontal,
@@ -24,12 +23,11 @@ import { env } from 'services/env'
 
 import {
   copyLinkToClipboard,
-  copyToClipboard,
   getCopyableLink
 } from '../../../utils/clipboardUtil'
 import { openXLink } from '../../../utils/xShare'
 
-import { ArtistCoinDetailsModal } from './ArtistCoinDetailsModal'
+import { ArtistFanClubDetailsModal } from './ArtistFanClubDetailsModal'
 
 // Mobile route helper function
 const coinDetailMobilePage = (ticker: string) =>
@@ -40,16 +38,16 @@ const coinDetailMobilePage = (ticker: string) =>
 
 const messages = coinDetailsMessages.overflowMenu
 
-type CoinInsightsOverflowMenuProps = {
+type FanClubInsightsOverflowMenuProps = {
   /**
    * The mint address of the artist coin
    */
   mint: string
 }
 
-export const CoinInsightsOverflowMenu = ({
+export const FanClubInsightsOverflowMenu = ({
   mint
-}: CoinInsightsOverflowMenuProps) => {
+}: FanClubInsightsOverflowMenuProps) => {
   const navigate = useNavigate()
   const { toast } = useContext(ToastContext)
   const { data: artistCoin } = useArtistCoin(mint)
@@ -60,13 +58,6 @@ export const CoinInsightsOverflowMenu = ({
   const [isMobileOverflowOpen, setIsMobileOverflowOpen] = useState(false)
 
   const isAudio = artistCoin?.mint === env.WAUDIO_MINT_ADDRESS
-
-  const onCopyCoinAddress = () => {
-    if (artistCoin?.mint) {
-      copyToClipboard(artistCoin.mint)
-      toast(messages.copiedToClipboard)
-    }
-  }
 
   const onCopyLink = () => {
     if (artistCoin?.ticker) {
@@ -123,11 +114,6 @@ export const CoinInsightsOverflowMenu = ({
   }, [setIsMobileOverflowOpen])
 
   const menuItems: PopupMenuItem[] = [
-    {
-      text: messages.copyCoinAddress,
-      icon: <IconCopy color='default' />,
-      onClick: onCopyCoinAddress
-    },
     {
       text: messages.openBirdeye,
       icon: <IconExternalLink color='default' />,
@@ -200,7 +186,7 @@ export const CoinInsightsOverflowMenu = ({
         )}
       />
 
-      <ArtistCoinDetailsModal
+      <ArtistFanClubDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         mint={mint}

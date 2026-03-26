@@ -37,7 +37,7 @@ import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { BannerSection } from 'pages/coin-detail-page/components/CoinInfoSection'
+import { FanClubBannerSection } from 'pages/fan-club-detail-page/components/FanClubInfoSection'
 
 const messages = {
   title: (ticker: string) => `Redeem $${ticker}`,
@@ -111,7 +111,7 @@ const PageContent = ({
         flex={1}
         css={{ minWidth: 320, maxWidth: 484 }}
       >
-        <BannerSection mint={coin?.mint ?? ''} />
+        <FanClubBannerSection mint={coin?.mint ?? ''} />
         <Flex column p='l' ph='xl' w='100%' gap='s'>
           <Text variant='heading'>{messages.claimRewards}</Text>
           {!isSignedIn ? (

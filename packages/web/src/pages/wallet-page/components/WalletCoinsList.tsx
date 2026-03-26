@@ -41,7 +41,7 @@ import { useBuySellRegionSupport } from 'components/buy-sell-modal'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
+import { OpenAppDrawer } from 'pages/fan-club-detail-page/components/OpenAppDrawer'
 import { env } from 'services/env'
 
 import { AudioCoinCard } from './AudioCoinCard'

@@ -29,6 +29,7 @@ export const coinDetailsMessages = {
     openDiscord: 'Open The Discord',
     refreshDiscordRole: 'Refresh Discord Role',
     browseRewards: 'Browse Rewards',
+    uploadExclusiveTrack: 'Upload Exclusive Track',
     rewardTiers: 'Reward Tiers',
     discordDisabledTooltip: (coinTicker: string = '') =>
       `Buy $${coinTicker} to access the members-only Discord`
@@ -120,6 +121,7 @@ export const coinDetailsMessages = {
     title: 'Fan Club Details',
     details: 'Details',
     coinAddress: 'Coin Address',
+    rewardsPoolAddress: 'Rewards Pool Address',
     onChainDescription: 'On-Chain Description',
     totalSupply: 'Total Supply',
     marketCap: 'Market Cap',

@@ -4,20 +4,16 @@ import {
   useArtistCoin
 } from '@audius/common/api'
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
-import { route } from '@audius/common/utils'
-import { Flex, PlainButton, Text } from '@audius/harmony'
-import { useNavigate } from 'react-router'
+import { Flex, Text } from '@audius/harmony'
 
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
-import { useIsMobile } from 'hooks/useIsMobile'
 
 const messages = {
-  exclusiveTracks: 'Exclusive Tracks',
-  viewAll: 'View All'
+  fanClubFeed: 'Fan Club Feed'
 }
 
-const MAX_PREVIEW_TRACKS = 3
+const FEED_PAGE_SIZE = 10
 
 type ExclusiveTracksSectionProps = {
   mint: string
@@ -26,12 +22,9 @@ type ExclusiveTracksSectionProps = {
 export const ExclusiveTracksSection = ({
   mint
 }: ExclusiveTracksSectionProps) => {
-  const navigate = useNavigate()
-  const isMobile = useIsMobile()
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
-  // Fetch exclusive tracks (token-gated) for the coin owner
   const {
     data,
     isFetching,
@@ -42,26 +35,17 @@ export const ExclusiveTracksSection = ({
     pause,
     loadNextPage,
     isPlaying,
-    lineup
+    lineup,
+    pageSize
   } = useExclusiveTracks({
     userId: ownerId,
-    pageSize: MAX_PREVIEW_TRACKS,
-    initialPageSize: MAX_PREVIEW_TRACKS
+    pageSize: FEED_PAGE_SIZE,
+    initialPageSize: FEED_PAGE_SIZE
   })
 
   const { data: totalCount = 0 } = useExclusiveTracksCount({
     userId: ownerId
   })
-
-  const handleViewAll = () => {
-    if (coin?.ticker) {
-      if (isMobile) {
-        navigate(`/coins/${coin.ticker}/exclusive-tracks/mobile`)
-      } else {
-        navigate(route.coinPage(coin.ticker) + '/exclusive-tracks')
-      }
-    }
-  }
 
   const shouldShowSection = totalCount > 0 && ownerId
 
@@ -69,18 +53,13 @@ export const ExclusiveTracksSection = ({
 
   return (
     <Flex column gap='l' w='100%'>
-      <Flex alignItems='center' justifyContent='space-between' w='100%'>
-        <Flex alignItems='center' gap='s'>
-          <Text variant='heading' size='m' color='default'>
-            {messages.exclusiveTracks}
-          </Text>
-          <Text variant='heading' size='m' color='subdued'>
-            ({totalCount})
-          </Text>
-        </Flex>
-        <PlainButton size='large' onClick={handleViewAll}>
-          {messages.viewAll}
-        </PlainButton>
+      <Flex alignItems='center' gap='s' w='100%'>
+        <Text variant='heading' size='m' color='default'>
+          {messages.fanClubFeed}
+        </Text>
+        <Text variant='heading' size='m' color='subdued'>
+          ({totalCount})
+        </Text>
       </Flex>
 
       <TanQueryLineup
@@ -95,11 +74,10 @@ export const ExclusiveTracksSection = ({
         isPlaying={isPlaying}
         lineup={lineup}
         actions={exclusiveTracksPageLineupActions}
-        pageSize={MAX_PREVIEW_TRACKS}
-        initialPageSize={MAX_PREVIEW_TRACKS}
+        pageSize={pageSize}
+        initialPageSize={FEED_PAGE_SIZE}
         variant={LineupVariant.SECTION}
-        shouldLoadMore={false}
-        maxEntries={MAX_PREVIEW_TRACKS}
+        shouldLoadMore
       />
     </Flex>
   )

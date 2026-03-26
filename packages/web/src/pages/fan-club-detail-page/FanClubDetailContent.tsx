@@ -1,10 +1,10 @@
 import { Flex, makeResponsiveStyles } from '@audius/harmony'
 
 import { BalanceSection } from './components/BalanceSection'
-import { CoinInfoSection } from './components/CoinInfoSection'
-import { CoinInsights } from './components/CoinInsights'
-import { CoinLeaderboardCard } from './components/CoinLeaderboardCard'
 import { ExclusiveTracksSection } from './components/ExclusiveTracksSection'
+import { FanClubInfoSection } from './components/FanClubInfoSection'
+import { FanClubInsights } from './components/FanClubInsights'
+import { FanClubLeaderboardCard } from './components/FanClubLeaderboardCard'
 
 const MAIN_SECTION_WIDTH = '704px'
 const SIDEBAR_SECTION_WIDTH = '360px'
@@ -55,24 +55,24 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
   }
 })
 
-type CoinDetailContentProps = {
+type FanClubDetailContentProps = {
   mint: string
 }
 
-export const CoinDetailContent = ({ mint }: CoinDetailContentProps) => {
+export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
   const styles = useStyles()
 
   return (
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
-        <CoinInfoSection mint={mint} variant='hero' />
+        <FanClubInfoSection mint={mint} variant='hero' />
         <ExclusiveTracksSection mint={mint} />
       </Flex>
       <Flex css={styles.sidebarColumn}>
         <BalanceSection mint={mint} />
-        <CoinLeaderboardCard mint={mint} />
-        <CoinInsights mint={mint} />
-        <CoinInfoSection mint={mint} variant='onchainDetails' />
+        <FanClubLeaderboardCard mint={mint} />
+        <FanClubInsights mint={mint} />
+        <FanClubInfoSection mint={mint} variant='onchainDetails' />
       </Flex>
     </Flex>
   )

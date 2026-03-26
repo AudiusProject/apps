@@ -152,6 +152,7 @@ export const walletMessages = {
     fanClubLabel: 'Fan Club',
     members: 'Members',
     price: 'Price',
+    marketCap: 'Market Cap',
     sortTitle: 'SORT',
     sortAscending: 'Ascending',
     sortDescending: 'Descending',

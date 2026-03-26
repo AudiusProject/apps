@@ -99,25 +99,27 @@ const CashPage = lazy(() =>
   import('pages/cash-page').then((m) => ({ default: m.CashPage }))
 )
 const ChatPage = lazy(() => import('pages/chat-page'))
-const CoinDetailPage = lazy(() =>
-  import('pages/coin-detail-page/CoinDetailPage').then((m) => ({
-    default: m.CoinDetailPage
+const FanClubDetailPage = lazy(() =>
+  import('pages/fan-club-detail-page/FanClubDetailPage').then((m) => ({
+    default: m.FanClubDetailPage
   }))
 )
 const ExclusiveTracksPage = lazy(() =>
-  import('pages/coin-detail-page/components/ExclusiveTracksPage').then((m) => ({
-    default: m.ExclusiveTracksPage
-  }))
-)
-const ArtistCoinDetailsPage = lazy(() =>
-  import('pages/coin-detail-page/components/mobile/ArtistCoinDetailsPage').then(
-    (m) => ({ default: m.ArtistCoinDetailsPage })
+  import('pages/fan-club-detail-page/components/ExclusiveTracksPage').then(
+    (m) => ({
+      default: m.ExclusiveTracksPage
+    })
   )
+)
+const ArtistFanClubDetailsPage = lazy(() =>
+  import(
+    'pages/fan-club-detail-page/components/mobile/ArtistFanClubDetailsPage'
+  ).then((m) => ({ default: m.ArtistFanClubDetailsPage }))
 )
 const MobileExclusiveTracksPage = lazy(() =>
-  import('pages/coin-detail-page/components/mobile/ExclusiveTracksPage').then(
-    (m) => ({ default: m.ExclusiveTracksPage })
-  )
+  import(
+    'pages/fan-club-detail-page/components/mobile/ExclusiveTracksPage'
+  ).then((m) => ({ default: m.ExclusiveTracksPage }))
 )
 const CoinRedeemPage = lazy(() =>
   import('pages/coin-redeem-page/CoinRedeemPage').then((m) => ({
@@ -380,11 +382,13 @@ const SearchPageRoute = ({ validSearchCategories }: SearchPageRouteProps) => {
   return <ExplorePage />
 }
 
-type CoinDetailPageRouteProps = {
+type FanClubDetailPageRouteProps = {
   mainContentRef: React.RefObject<HTMLDivElement>
 }
 
-const CoinDetailPageRoute = ({ mainContentRef }: CoinDetailPageRouteProps) => {
+const FanClubDetailPageRoute = ({
+  mainContentRef
+}: FanClubDetailPageRouteProps) => {
   const params = useParams<{ ticker?: string }>()
   const location = useLocation()
   const { ticker } = params
@@ -401,7 +405,7 @@ const CoinDetailPageRoute = ({ mainContentRef }: CoinDetailPageRouteProps) => {
       />
     )
   }
-  return <CoinDetailPage />
+  return <FanClubDetailPage />
 }
 
 const CoinExclusiveTracksMobileRoute = () => {
@@ -936,13 +940,13 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route
                   path={COIN_DETAIL_PAGE}
                   element={
-                    <CoinDetailPageRoute mainContentRef={mainContentRef} />
+                    <FanClubDetailPageRoute mainContentRef={mainContentRef} />
                   }
                 />
                 <Route
                   path={COIN_DETAIL_BUY_PAGE}
                   element={
-                    <CoinDetailPageRoute mainContentRef={mainContentRef} />
+                    <FanClubDetailPageRoute mainContentRef={mainContentRef} />
                   }
                 />
                 <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />
@@ -1179,7 +1183,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                     />
                     <Route
                       path={COIN_DETAIL_MOBILE_WEB_ROUTE}
-                      element={<ArtistCoinDetailsPage />}
+                      element={<ArtistFanClubDetailsPage />}
                     />
                     <Route path={EMPTY_PAGE} element={<EmptyPage />} />
                   </>
@@ -1346,13 +1350,13 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route
                   path={COIN_DETAIL_PAGE}
                   element={
-                    <CoinDetailPageRoute mainContentRef={mainContentRef} />
+                    <FanClubDetailPageRoute mainContentRef={mainContentRef} />
                   }
                 />
                 <Route
                   path={COIN_DETAIL_BUY_PAGE}
                   element={
-                    <CoinDetailPageRoute mainContentRef={mainContentRef} />
+                    <FanClubDetailPageRoute mainContentRef={mainContentRef} />
                   }
                 />
                 <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />

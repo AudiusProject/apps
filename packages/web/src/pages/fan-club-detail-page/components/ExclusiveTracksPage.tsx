@@ -16,7 +16,7 @@ export const ExclusiveTracksPage = () => {
   const ownerId = coin?.ownerId
   const coinName = coin?.name ?? ticker
 
-  const title = coinName ? `${coinName} Exclusive Tracks` : 'Exclusive Tracks'
+  const title = coinName ? `${coinName} Fan Club Feed` : 'Fan Club Feed'
 
   const {
     data,

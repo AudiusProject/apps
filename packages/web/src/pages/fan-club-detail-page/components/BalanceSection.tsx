@@ -116,11 +116,11 @@ const ZeroBalanceState = ({
   onReceive,
   coinName,
   isBuySellSupported,
-  isCoinCreator,
+  isFanClubOwner,
   isAnonymousUser
 }: BalanceStateProps & {
   isBuySellSupported: boolean
-  isCoinCreator: boolean
+  isFanClubOwner: boolean
   isAnonymousUser: boolean
 }) => {
   const isManagerMode = useIsManagedAccount()
@@ -139,7 +139,7 @@ const ZeroBalanceState = ({
           </Text>
         </Flex>
       </Flex>
-      {!isCoinCreator ? (
+      {!isFanClubOwner ? (
         <Flex ph='l' w='100%'>
           <Paper
             ph='xl'
@@ -410,11 +410,11 @@ const HasBalanceState = ({
   )
 }
 
-type CoinDetailProps = {
+type FanClubMintProps = {
   mint: string
 }
 
-const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
+const BalanceSectionContent = ({ mint }: FanClubMintProps) => {
   const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
   const { data: tokenBalance, isLoading: tokenBalanceLoading } = useCoinBalance(
     { mint }
@@ -442,7 +442,7 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
   const { onOpen: openReceiveTokensModal } = useReceiveTokensModal()
   const { onOpen: openSendTokensModal } = useSendTokensModal()
   const isMobile = useIsMobile()
-  const isCoinCreator = coin?.ownerId === currentUser?.user_id
+  const isFanClubOwner = coin?.ownerId === currentUser?.user_id
   const [isOpenAppDrawerOpen, setIsOpenAppDrawerOpen] = useState(false)
 
   const onOpenOpenAppDrawer = useCallback(() => {
@@ -512,7 +512,7 @@ const BalanceSectionContent = ({ mint }: CoinDetailProps) => {
             coinName={coinName}
             isBuySellSupported={isBuySellSupported}
             isAnonymousUser={!currentUser}
-            isCoinCreator={isCoinCreator}
+            isFanClubOwner={isFanClubOwner}
           />
         </Flex>
       ) : (

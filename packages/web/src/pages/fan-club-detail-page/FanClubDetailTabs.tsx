@@ -9,9 +9,9 @@ import useTabs from 'hooks/useTabs/useTabs'
 import { AudioWalletTransactions } from 'pages/audio-page/AudioWalletTransactions'
 import { env } from 'services/env'
 
-import { CoinDetailContent } from './CoinDetailContent'
+import { FanClubDetailContent } from './FanClubDetailContent'
 
-export enum CoinDetailTabType {
+export enum FanClubDetailTabType {
   HOME = 'home',
   TRANSACTIONS = 'transactions'
 }
@@ -22,22 +22,22 @@ const messages = {
   ...coinDetailsMessages
 }
 
-type UseCoinDetailTabsProps = {
+type UseFanClubDetailTabsProps = {
   mint: string
   ticker?: string
   isOwner?: boolean
 }
 
-export const useCoinDetailTabs = ({
+export const useFanClubDetailTabs = ({
   mint,
   ticker,
   isOwner = false
-}: UseCoinDetailTabsProps) => {
-  const [selectedTab, setSelectedTab] = useState(CoinDetailTabType.HOME)
+}: UseFanClubDetailTabsProps) => {
+  const [selectedTab, setSelectedTab] = useState(FanClubDetailTabType.HOME)
   const navigate = useNavigate()
 
   const handleTabChange = useCallback((_from: string, to: string) => {
-    setSelectedTab(to as CoinDetailTabType)
+    setSelectedTab(to as FanClubDetailTabType)
   }, [])
 
   const handleEditClick = useCallback(() => {
@@ -52,16 +52,16 @@ export const useCoinDetailTabs = ({
   const tabs = [
     {
       text: messages.home,
-      label: CoinDetailTabType.HOME
+      label: FanClubDetailTabType.HOME
     },
     {
       text: messages.transactions,
-      label: CoinDetailTabType.TRANSACTIONS
+      label: FanClubDetailTabType.TRANSACTIONS
     }
   ]
 
   const tabElements = [
-    <CoinDetailContent key='home' mint={mint} />,
+    <FanClubDetailContent key='home' mint={mint} />,
     <AudioWalletTransactions key='transactions' />
   ]
 
@@ -83,7 +83,7 @@ export const useCoinDetailTabs = ({
   if (!isWAudio) {
     return {
       tabs: null,
-      body: <CoinDetailContent mint={mint} />,
+      body: <FanClubDetailContent mint={mint} />,
       rightDecorator
     }
   }

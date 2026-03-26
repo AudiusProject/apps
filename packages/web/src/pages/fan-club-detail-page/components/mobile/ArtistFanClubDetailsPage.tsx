@@ -20,7 +20,7 @@ import { LAUNCHPAD_COIN_DESCRIPTION } from 'pages/artist-coins-launchpad-page/co
 import {
   convertCoinGeckoResponseToStatsDetailsProps,
   type TokenDetailsStatsSectionProps
-} from '../ArtistCoinDetailsModal'
+} from '../ArtistFanClubDetailsModal'
 
 const messages = {
   details: 'Details',
@@ -32,8 +32,7 @@ const messages = {
   totalSupply: 'Total Supply',
   marketCap: 'Market Cap',
   price: 'Current Price',
-  liquidity: 'Liquidity',
-  circulatingSupply: 'Circulating Supply'
+  liquidity: 'Liquidity'
 }
 
 const tooltipContent = {
@@ -43,12 +42,10 @@ const tooltipContent = {
     'The current total value of all your Artist Coins in circulation, calculated by multiplying the current price by the total supply.',
   price: 'The current price of a single artist coin in USD.',
   liquidity:
-    'The amount of funds available for trading your artist coin, which affects how easily it can be bought or sold.',
-  circulatingSupply:
-    'The number of Artist Coins currently available for trading, excluding any tokens that are locked or reserved.'
+    'The amount of funds available for trading your artist coin, which affects how easily it can be bought or sold.'
 }
 
-export const ArtistCoinDetailsPage = () => {
+export const ArtistFanClubDetailsPage = () => {
   const location = useLocation()
   // Locations should be in the format /coins/:ticker/details (COIN_DETAIL_MOBILE_WEB_ROUTE)
   const ticker = location.pathname.split('/')[2]
@@ -179,21 +176,6 @@ const TokenDetailsStatsSection = (props?: TokenDetailsStatsSectionProps) => {
         }
         hasTooltip
         tooltipContent={tooltipContent.liquidity}
-        variant='block'
-      />
-
-      <TokenInfoRow
-        label={messages.circulatingSupply}
-        value={
-          props?.circulatingSupply
-            ? new FixedDecimal(
-                props.circulatingSupply.toString(),
-                0
-              ).toLocaleString()
-            : messages.unknown
-        }
-        hasTooltip
-        tooltipContent={tooltipContent.circulatingSupply}
         variant='block'
       />
     </Flex>
