@@ -22,6 +22,7 @@ import {
   MessagesNavItem,
   WalletNavItem,
   RewardsNavItem,
+  DashboardNavItem,
   UploadNavItem,
   DevToolsNavItem,
   PlaylistsNavItem,
@@ -120,6 +121,7 @@ export const LeftNav = (props: OwnProps) => {
               <WalletNavItem />
               <ArtistCoinsNavItem />
               <RewardsNavItem />
+              <DashboardNavItem />
               <UploadNavItem />
               <DevToolsNavItem />
               <Box mv='s'>
