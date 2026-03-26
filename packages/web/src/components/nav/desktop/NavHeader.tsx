@@ -6,7 +6,11 @@ import {
   useHasAccount
 } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import { Flex, IconAudiusLogoHorizontalNew, IconSettings } from '@audius/harmony'
+import {
+  Flex,
+  IconAudiusLogoHorizontalNew,
+  IconSettings
+} from '@audius/harmony'
 import { Link } from 'react-router'
 
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
