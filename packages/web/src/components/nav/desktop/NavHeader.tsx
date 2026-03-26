@@ -6,12 +6,7 @@ import {
   useHasAccount
 } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import {
-  Flex,
-  IconAudiusLogoHorizontalNew,
-  IconDashboard,
-  IconSettings
-} from '@audius/harmony'
+import { Flex, IconAudiusLogoHorizontalNew, IconSettings } from '@audius/harmony'
 import { Link } from 'react-router'
 
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
@@ -19,11 +14,10 @@ import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 import { NavHeaderButton } from './NavHeaderButton'
 import { NotificationsButton } from './NotificationsButton'
 
-const { HOME_PAGE, SETTINGS_PAGE, DASHBOARD_PAGE } = route
+const { HOME_PAGE, SETTINGS_PAGE } = route
 
 const messages = {
   homeLink: 'Go to Home',
-  dashboardLabel: 'Go to Dashboard',
   settingsLabel: 'Go to Settings'
 }
 
@@ -72,10 +66,6 @@ const RestrictedLink = ({
 }
 
 export const NavHeader = () => {
-  const { data: trackCount } = useCurrentAccountUser({
-    select: (user) => user?.track_count
-  })
-
   return (
     <Flex
       alignItems='center'
@@ -90,15 +80,6 @@ export const NavHeader = () => {
         <IconAudiusLogoHorizontalNew color='subdued' size='m' width='auto' />
       </Link>
       <Flex justifyContent='center' alignItems='center'>
-        {trackCount ? (
-          <RestrictedLink to={DASHBOARD_PAGE} restriction='account'>
-            <NavHeaderButton
-              icon={IconDashboard}
-              aria-label={messages.dashboardLabel}
-              isActive={location.pathname === DASHBOARD_PAGE}
-            />
-          </RestrictedLink>
-        ) : null}
         <RestrictedLink to={SETTINGS_PAGE} restriction='account'>
           <NavHeaderButton
             icon={IconSettings}
