@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { createSolWalletSignatureMessage } from '@audius/sdk'
+import { createSolanaWalletSignatureMessage } from '@audius/sdk'
 import bs58 from 'bs58'
 
 import { config } from './config'
@@ -218,10 +218,10 @@ export default function App() {
       const { publicKey } = await phantom.connect()
       const pubkey = publicKey.toString()
 
-      const { message, messageBytes } = createSolWalletSignatureMessage()
+      const { message, messageBytes } = createSolanaWalletSignatureMessage()
       const { signature: sigBytes } = await phantom.signMessage(messageBytes, 'utf8')
       const signature = bs58.encode(sigBytes)
-      sdk.solWallet.setCredential({ publicKey: pubkey, message, signature })
+      sdk.solanaWallet.setCredential({ publicKey: pubkey, message, signature })
       setWalletConnected(true)
       setWalletPubkey(pubkey)
     } catch (e: unknown) {
@@ -233,7 +233,7 @@ export default function App() {
     const sdk = getSDK()
     const phantom = getPhantom()
     if (phantom) await phantom.disconnect().catch(() => {})
-    sdk.solWallet.clearCredential()
+    sdk.solanaWallet.clearCredential()
     setWalletConnected(false)
     setWalletPubkey(null)
   }, [])

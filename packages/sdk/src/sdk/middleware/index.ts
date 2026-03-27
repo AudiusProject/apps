@@ -1,4 +1,4 @@
 export { addAppInfoMiddleware } from './addAppInfoMiddleware'
 export { addRequestSignatureMiddleware } from './addRequestSignatureMiddleware'
-export { addSolWalletSignatureMiddleware } from './addSolWalletSignatureMiddleware'
+export { addSolanaWalletSignatureMiddleware } from './addSolanaWalletSignatureMiddleware'
 export { addTokenRefreshMiddleware } from './addTokenRefreshMiddleware'

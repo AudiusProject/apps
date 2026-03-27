@@ -27,11 +27,11 @@ import { productionConfig } from './config/production'
 import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware,
-  addSolWalletSignatureMiddleware,
+  addSolanaWalletSignatureMiddleware,
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
-import { SolWallet } from './solWallet'
+import { SolanaWallet } from './solanaWallet'
 import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
 import { Logger, Storage, StorageNodeSelector } from './services'
 import { SdkConfigSchema, type SdkConfig } from './types'
@@ -74,7 +74,7 @@ export const createSdk = (config: SdkConfig) => {
     openUrl: services?.openUrl
   })
 
-  const solWallet = new SolWallet()
+  const solanaWallet = new SolanaWallet()
 
   if (apiSecret || services?.audiusWalletClient) {
     middleware.push(
@@ -103,7 +103,7 @@ export const createSdk = (config: SdkConfig) => {
     )
   }
 
-  middleware.push(addSolWalletSignatureMiddleware({ solWallet }))
+  middleware.push(addSolanaWalletSignatureMiddleware({ solanaWallet }))
 
   // Auto-refresh middleware — intercepts 401s and retries with a fresh token.
   if (apiKey && oauth) {
@@ -143,7 +143,7 @@ export const createSdk = (config: SdkConfig) => {
 
   return {
     oauth,
-    solWallet,
+    solanaWallet,
     tokenStore,
     tracks: new TracksApi(apiConfig),
     users: usersApi,

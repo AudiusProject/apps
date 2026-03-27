@@ -3,7 +3,7 @@ import type {
   Middleware,
   RequestContext
 } from '../api/generated/default'
-import type { SolWallet } from '../solWallet'
+import type { SolanaWallet } from '../solanaWallet'
 
 /**
  * Injects X-Solana-* headers when a wallet credential is set.
@@ -11,26 +11,25 @@ import type { SolWallet } from '../solWallet'
  *
  * @example
  * ```ts
- * import { createSolWalletSignatureMessage } from '@audius/sdk'
+ * import { createSolanaWalletSignatureMessage } from '@audius/sdk'
  * import bs58 from 'bs58'
  *
  * const sdk = getSDK()
  * const { publicKey } = await phantom.connect()
- * const { message, messageBytes } = createSolWalletSignatureMessage()
+ * const { message, messageBytes } = createSolanaWalletSignatureMessage()
  * const { signature: sigBytes } = await phantom.signMessage(messageBytes, 'utf8')
  * const signature = bs58.encode(sigBytes)
  *
- * sdk.solWallet.setCredential({ publicKey: publicKey.toString(), message, signature })
- * // All subsequent SDK calls now include wallet auth headers automatically.
+ * sdk.solanaWallet.setCredential({ publicKey: publicKey.toString(), message, signature })
  * ```
  */
-export const addSolWalletSignatureMiddleware = ({
-  solWallet
+export const addSolanaWalletSignatureMiddleware = ({
+  solanaWallet
 }: {
-  solWallet: SolWallet
+  solanaWallet: SolanaWallet
 }): Middleware => ({
   pre: async (context: RequestContext): Promise<FetchParams> => {
-    const credential = solWallet.getCredential()
+    const credential = solanaWallet.getCredential()
     if (!credential) return context
 
     const headers = context.init.headers as Record<string, string>

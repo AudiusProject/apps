@@ -1,20 +1,20 @@
-export type SolWalletCredential = {
+export type SolanaWalletCredential = {
   publicKey: string
   message: string
   signature: string
 }
 
-export function createSolWalletSignatureMessage() {
+export function createSolanaWalletSignatureMessage() {
   const timestamp = Date.now()
-  const message = `audius:sol-wallet:${timestamp}`
+  const message = `audius:solana-wallet:${timestamp}`
   const messageBytes = new TextEncoder().encode(message)
   return { message, messageBytes, timestamp }
 }
 
-export class SolWallet {
-  private credential: SolWalletCredential | null = null
+export class SolanaWallet {
+  private credential: SolanaWalletCredential | null = null
 
-  setCredential(credential: SolWalletCredential) {
+  setCredential(credential: SolanaWalletCredential) {
     this.credential = credential
   }
 
@@ -22,7 +22,7 @@ export class SolWallet {
     this.credential = null
   }
 
-  getCredential(): SolWalletCredential | null {
+  getCredential(): SolanaWalletCredential | null {
     return this.credential
   }
 
