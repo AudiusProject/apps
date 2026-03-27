@@ -300,11 +300,21 @@ export const useOAuthSetup = ({
         setQueryParamsError(messages.invalidApiKeyError)
         return
       }
+      const registeredUris = developerApp.redirectUris
+      if (
+        registeredUris &&
+        registeredUris.length > 0 &&
+        typeof redirectUri === 'string' &&
+        !registeredUris.includes(redirectUri)
+      ) {
+        setQueryParamsError(messages.redirectUriNotRegisteredError(redirectUri))
+        return
+      }
       setRegisteredDeveloperAppName(developerApp.name)
       setAppImage(developerApp.imageUrl)
     }
     fetchDeveloperAppName()
-  }, [apiKey, queryParamAppName, queryParamsError, scope])
+  }, [apiKey, queryParamAppName, queryParamsError, scope, redirectUri])
 
   useEffect(() => {
     const getAndSetEmail = async () => {

@@ -21,12 +21,14 @@ type UseAppInfoResult = {
 export const useAppInfo = ({
   apiKey,
   queryParamAppName,
+  redirectUri,
   scope,
   userId,
   skip
 }: {
   apiKey: string | null
   queryParamAppName: string | null
+  redirectUri: string | null
   scope: string | null
   userId: number | undefined
   /** Skip all fetching (e.g. when there's already a param validation error). */
@@ -59,6 +61,16 @@ export const useAppInfo = ({
               setError(messages.invalidApiKeyError)
               return
             }
+            const registeredUris = res.data.redirectUris
+            if (
+              registeredUris &&
+              registeredUris.length > 0 &&
+              redirectUri != null &&
+              !registeredUris.includes(redirectUri)
+            ) {
+              setError(messages.redirectUriNotRegisteredError(redirectUri))
+              return
+            }
             setRegisteredAppName(res.data.name)
             if (res.data.imageUrl) setAppImage(res.data.imageUrl)
           } catch {
@@ -87,7 +99,7 @@ export const useAppInfo = ({
       }
     }
     setup()
-  }, [apiKey, scope, userId, skip])
+  }, [apiKey, redirectUri, scope, userId, skip])
 
   return {
     appName: registeredAppName ?? queryParamAppName ?? undefined,
