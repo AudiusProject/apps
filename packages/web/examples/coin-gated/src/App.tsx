@@ -267,8 +267,6 @@ export default function App() {
           return
         }
 
-        // streamTrack works for both auth paths — OAuth token or wallet
-        // headers are injected automatically by SDK middleware
         const sdk = getSDK()
         const res = await sdk.tracks.streamTrack({
           trackId,

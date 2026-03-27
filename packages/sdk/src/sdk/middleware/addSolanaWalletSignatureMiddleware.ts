@@ -11,16 +11,18 @@ import type { SolanaWallet } from '../solanaWallet'
  *
  * @example
  * ```ts
- * import { createSolanaWalletSignatureMessage } from '@audius/sdk'
+ * import { createSolanaWalletSignatureMessage, sdk as audiusSdk } from '@audius/sdk'
  * import bs58 from 'bs58'
  *
- * const sdk = getSDK()
- * const { publicKey } = await phantom.connect()
+ * const sdk = audiusSdk({ appName: APP_NAME })
+ * const wallet = window.solana
+ * const { publicKey } = await solanaWallet.connect()
  * const { message, messageBytes } = createSolanaWalletSignatureMessage()
- * const { signature: sigBytes } = await phantom.signMessage(messageBytes, 'utf8')
+ * const { signature: sigBytes } = await wallet.signMessage(messageBytes, 'utf8')
  * const signature = bs58.encode(sigBytes)
- *
  * sdk.solanaWallet.setCredential({ publicKey: publicKey.toString(), message, signature })
+ *
+ * sdk.tracks.getTrack({ id: '123' })
  * ```
  */
 export const addSolanaWalletSignatureMiddleware = ({
@@ -33,7 +35,7 @@ export const addSolanaWalletSignatureMiddleware = ({
     if (!credential) return context
 
     const headers = context.init.headers as Record<string, string>
-    if (headers['Authorization']) return context
+    if (headers.Authorization) return context
 
     return {
       ...context,
