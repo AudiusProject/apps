@@ -1,21 +1,26 @@
-import type { ReactNode } from 'react'
+import { useCallback, type ReactNode } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import { useArtistCoin, useCurrentUserId } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import {
   getTokenDecimalPlaces,
-  formatCurrencyWithSubscript
+  formatCurrencyWithSubscript,
+  shortenSPLAddress
 } from '@audius/common/utils'
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
+import Clipboard from '@react-native-clipboard/clipboard'
 
 import {
   Divider,
   Flex,
+  IconCopy,
   Paper,
+  PlainButton,
   Text
 } from '@audius/harmony-native'
 import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
+import { useToast } from 'app/hooks/useToast'
 import { env } from 'app/services/env'
 
 import { BalanceCard } from './BalanceCard'
@@ -97,7 +102,9 @@ const CoinDetailsSection = ({ coin }: { coin: Coin }) => {
       w='100%'
     >
       <Flex pv='m' ph='l' w='100%'>
-        <Text variant='heading' size='s'>Coin Details</Text>
+        <Text variant='heading' size='s'>
+          Coin Details
+        </Text>
       </Flex>
       <Divider style={{ width: '100%' }} />
 
@@ -163,6 +170,26 @@ const CoinDetailsSection = ({ coin }: { coin: Coin }) => {
   )
 }
 
+const CopyCoinAddress = ({ mint }: { mint: string }) => {
+  const { toast } = useToast()
+
+  const handleCopyAddress = useCallback(() => {
+    Clipboard.setString(mint)
+    toast({ content: overflowMessages.copiedToClipboard, type: 'info' })
+  }, [mint, toast])
+
+  return (
+    <Flex row w='100%' justifyContent='space-between' alignItems='center'>
+      <PlainButton onPress={handleCopyAddress} iconLeft={IconCopy}>
+        {overflowMessages.copyCoinAddress}
+      </PlainButton>
+      <Text variant='body' size='m' color='subdued'>
+        {shortenSPLAddress(mint)}
+      </Text>
+    </Flex>
+  )
+}
+
 export const CoinTab = ({ mint }: CoinTabProps) => {
   const { data: coin } = useArtistCoin(mint)
   const { data: currentUserId } = useCurrentUserId()
@@ -175,6 +202,9 @@ export const CoinTab = ({ mint }: CoinTabProps) => {
 
       {/* Insights section */}
       <CoinInsightsCard mint={mint} />
+
+      {/* Copy Coin Address */}
+      {mint ? <CopyCoinAddress mint={mint} /> : null}
 
       {/* Coin Details - Owner only */}
       {isOwner && coin ? <CoinDetailsSection coin={coin} /> : null}

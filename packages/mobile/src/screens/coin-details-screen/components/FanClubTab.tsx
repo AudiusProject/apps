@@ -1,17 +1,23 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin, useCoinBalance, useCurrentUserId } from '@audius/common/api'
-import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import {
+  useArtistCoin,
+  useCoinBalance,
+  useCurrentUserId,
+  useExclusiveTracks,
+  useExclusiveTracksCount
+} from '@audius/common/api'
 import {
   useBuySellInitialTab,
   useIsManagedAccount
 } from '@audius/common/hooks'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import {
+  exclusiveTracksPageLineupActions as exclusiveTracksActions,
   receiveTokensModalActions
 } from '@audius/common/store'
-import { useDispatch } from 'react-redux'
-
 import { TouchableOpacity } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 import {
   Button,
@@ -22,14 +28,13 @@ import {
   Text
 } from '@audius/harmony-native'
 import { TokenIcon } from 'app/components/core'
+import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { BannerSection } from './CoinInfoCard'
 import { CoinLeaderboardCard } from './CoinLeaderboardCard'
-import { ExclusiveTracksSection } from './ExclusiveTracksSection'
 
 const messages = {
-  fanClub: 'FAN CLUB',
   poweredBy: 'POWERED BY',
   uploadExclusiveTrack: coinDetailsMessages.coinInfo.uploadExclusiveTrack,
   becomeAMember: coinDetailsMessages.balance.becomeAMember,
@@ -37,8 +42,15 @@ const messages = {
   fanClubFeed: 'Fan Club Feed'
 }
 
+const MAX_PREVIEW_TRACKS = 3
+
+const itemStyles = {
+  paddingHorizontal: 0
+}
+
 type FanClubTabProps = {
   mint: string
+  onSwitchToCoinTab: () => void
 }
 
 const BecomeAMemberCard = ({
@@ -136,7 +148,55 @@ const CoinPill = ({
   )
 }
 
-export const FanClubTab = ({ mint }: FanClubTabProps) => {
+const FanClubFeed = ({ mint }: { mint: string }) => {
+  const { data: coin } = useArtistCoin(mint)
+  const ownerId = coin?.ownerId
+
+  const { data, lineup, pageSize, isFetching, loadNextPage, isPending } =
+    useExclusiveTracks({
+      userId: ownerId,
+      pageSize: MAX_PREVIEW_TRACKS
+    })
+
+  const { data: totalCount = 0 } = useExclusiveTracksCount({
+    userId: ownerId
+  })
+
+  const shouldShowCard = totalCount > 0 && ownerId
+  if (!shouldShowCard) return null
+
+  return (
+    <Flex column w='100%'>
+      <Flex row alignItems='center' gap='xs' pb='s'>
+        <Text variant='heading' size='s'>
+          {messages.fanClubFeed}
+        </Text>
+        {totalCount > 0 ? (
+          <Text variant='heading' size='s' color='subdued'>
+            ({totalCount})
+          </Text>
+        ) : null}
+      </Flex>
+      <TanQueryLineup
+        actions={exclusiveTracksActions}
+        lineup={lineup}
+        offset={0}
+        maxEntries={MAX_PREVIEW_TRACKS}
+        pageSize={pageSize}
+        includeLineupStatus
+        itemStyles={itemStyles}
+        isFetching={isFetching}
+        loadNextPage={loadNextPage}
+        hasMore={false}
+        isPending={isPending}
+        queryData={data}
+        hidePlayBarChin
+      />
+    </Flex>
+  )
+}
+
+export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
   const { data: coin } = useArtistCoin(mint)
   const { data: currentUserId } = useCurrentUserId()
   const { data: tokenBalance } = useCoinBalance({ mint })
@@ -145,11 +205,6 @@ export const FanClubTab = ({ mint }: FanClubTabProps) => {
   const isOwner = currentUserId === coin?.ownerId
   const hasBalance =
     tokenBalance?.balance && Number(tokenBalance.balance.toString()) > 0
-
-  const handleCoinPillPress = useCallback(() => {
-    // This will be handled by the parent to switch to Coin tab
-    // For now, navigate to the coin details
-  }, [])
 
   const handleUploadExclusive = useCallback(() => {
     navigation.navigate('Upload', {})
@@ -166,7 +221,7 @@ export const FanClubTab = ({ mint }: FanClubTabProps) => {
 
       {/* Coin Pill */}
       <Flex ph='l'>
-        <CoinPill mint={mint} onPress={handleCoinPillPress} />
+        <CoinPill mint={mint} onPress={onSwitchToCoinTab} />
       </Flex>
 
       {/* Description */}
@@ -204,15 +259,15 @@ export const FanClubTab = ({ mint }: FanClubTabProps) => {
       ) : null}
 
       {/* Members Leaderboard - for holders and owners */}
-      {(isOwner || hasBalance) ? (
+      {isOwner || hasBalance ? (
         <Flex ph='l'>
           <CoinLeaderboardCard mint={mint} />
         </Flex>
       ) : null}
 
       {/* Fan Club Feed */}
-      <Flex ph='l' column gap='m'>
-        <ExclusiveTracksSection mint={mint} />
+      <Flex ph='l'>
+        <FanClubFeed mint={mint} />
       </Flex>
     </Flex>
   )

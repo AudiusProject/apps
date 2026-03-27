@@ -9,6 +9,7 @@ import {
 } from '@audius/common/utils'
 import { FixedDecimal, wAUDIO } from '@audius/fixed-decimal'
 import Clipboard from '@react-native-clipboard/clipboard'
+import { ScrollView } from 'react-native'
 
 import {
   Flex,
@@ -175,8 +176,17 @@ export const ArtistCoinDetailsDrawer = () => {
   )
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} drawerHeader={renderHeader}>
-      <Flex direction='column' gap='l' ph='xl' pb='xl'>
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      drawerHeader={renderHeader}
+      isFullscreen
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <Flex direction='column' gap='l' ph='xl' pb='xl'>
         {/* Token Info with avatar */}
         <Flex row alignItems='center' gap='m'>
           <TokenIcon logoURI={artistCoin.logoUri} size={spacing['4xl']} />
@@ -361,6 +371,7 @@ export const ArtistCoinDetailsDrawer = () => {
           </Button>
         </Flex>
       </Flex>
+      </ScrollView>
     </Drawer>
   )
 }
