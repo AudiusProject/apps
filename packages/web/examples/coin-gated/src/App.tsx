@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { createAuthMessage } from '@audius/sdk'
+import { createSolWalletSignatureMessage } from '@audius/sdk'
 import bs58 from 'bs58'
 
 import { config } from './config'
@@ -218,13 +218,10 @@ export default function App() {
       const { publicKey } = await phantom.connect()
       const pubkey = publicKey.toString()
 
-      // SDK owns the message format; app just signs it
-      const { message, messageBytes } = createAuthMessage()
+      const { message, messageBytes } = createSolWalletSignatureMessage()
       const { signature: sigBytes } = await phantom.signMessage(messageBytes, 'utf8')
       const signature = bs58.encode(sigBytes)
-
-      // Hand credential to SDK — middleware injects headers automatically
-      sdk.walletAuth.setCredential({ publicKey: pubkey, message, signature })
+      sdk.solWallet.setCredential({ publicKey: pubkey, message, signature })
       setWalletConnected(true)
       setWalletPubkey(pubkey)
     } catch (e: unknown) {
@@ -236,7 +233,7 @@ export default function App() {
     const sdk = getSDK()
     const phantom = getPhantom()
     if (phantom) await phantom.disconnect().catch(() => {})
-    sdk.walletAuth.clearCredential()
+    sdk.solWallet.clearCredential()
     setWalletConnected(false)
     setWalletPubkey(null)
   }, [])
