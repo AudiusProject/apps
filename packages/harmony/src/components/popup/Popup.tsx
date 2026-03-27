@@ -324,12 +324,18 @@ export const PopupInternal = forwardRef<
     (scrollParent: Element, initialScrollPosition: number) => {
       const scrollTop = scrollParent.scrollTop
       if (wrapperRef.current) {
-        wrapperRef.current.style.top = `${
+        const nextTop =
           originalTopPosition.current - scrollTop + initialScrollPosition
-        }px`
+        const adjustedTop = disableAutoFlip
+          ? nextTop
+          : Math.min(
+              Math.max(0, nextTop),
+              Math.max(0, window.innerHeight - wrapperRef.current.offsetHeight)
+            )
+        wrapperRef.current.style.top = `${adjustedTop}px`
       }
     },
-    [wrapperRef, originalTopPosition]
+    [disableAutoFlip, wrapperRef, originalTopPosition]
   )
 
   // Set up scroll listeners
