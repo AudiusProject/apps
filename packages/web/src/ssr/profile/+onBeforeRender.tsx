@@ -25,10 +25,15 @@ export async function onBeforeRender(pageContext: PageContextServer) {
     }
 
     const json = await res.json()
-    if (!json.data || json.data.length === 0) {
+    const raw = json.data
+    if (raw == null) {
       throw new Error(`No user found for handle: ${handle}`)
     }
-    const user = json.data[0]
+    // Handle endpoint returns a single user object; other user routes may return an array
+    const user = Array.isArray(raw) ? raw[0] : raw
+    if (!user || typeof user !== 'object') {
+      throw new Error(`No user found for handle: ${handle}`)
+    }
 
     return {
       pageContext: {

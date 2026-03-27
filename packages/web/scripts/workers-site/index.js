@@ -113,6 +113,15 @@ async function getMetadata(pathname, apiEndpoint) {
       throw new Error(res.status)
     }
     const json = await res.json()
+    const data = json.data
+    // User-by-handle returns a single object; tracks/playlists return arrays
+    if (route.name === 'user') {
+      if (data == null || Array.isArray(data) || typeof data !== 'object') {
+        return { metadata: null, name: null }
+      }
+    } else if (!Array.isArray(data) || data.length === 0) {
+      return { metadata: null, name: null }
+    }
     return { metadata: json, name: route.name }
   } catch (e) {
     return { metadata: null, name: null }
@@ -152,7 +161,7 @@ class SEOHandlerHead {
       self.apiEndpoint
     )
 
-    if (!metadata || !name || !metadata.data || metadata.data.length === 0) {
+    if (!metadata || !name || !metadata.data) {
       // We didn't parse this to anything we have custom tags for, so just return the default tags
       const baseUrl = `https://${self.host}`
       const schemaLd = JSON.stringify({
@@ -283,14 +292,15 @@ class SEOHandlerHead {
     let title, description, ogDescription, image, permalink
     switch (name) {
       case 'user': {
-        title = `${metadata.data.name} • Audius`
-        h1 = metadata.data.name
-        description = `Play ${metadata.data.name} on Audius and discover followers on Audius | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
-        ogDescription = metadata.data.bio || description
-        image = metadata.data.profile_picture
-          ? metadata.data.profile_picture['480x480']
-          : ''
-        permalink = `/${metadata.data.handle}`
+        const u = metadata.data
+        const displayName =
+          (u.name && String(u.name).trim()) || u.handle || 'Artist'
+        title = `${displayName} • Audius`
+        h1 = displayName
+        description = `Play ${displayName} on Audius and discover followers on Audius | Listen and stream tracks, albums, and playlists from your favorite artists on desktop and mobile`
+        ogDescription = u.bio || description
+        image = u.profile_picture ? u.profile_picture['480x480'] : ''
+        permalink = `/${u.handle}`
         break
       }
       case 'track': {
@@ -403,7 +413,9 @@ async function getOEmbedResponse(url, apiEndpoint) {
   }
 
   // For user, return a simple link with thumbnail
-  const title = `${data.name} • Audius`
+  const userDisplayName =
+    (data.name && String(data.name).trim()) || data.handle || 'Artist'
+  const title = `${userDisplayName} • Audius`
   return new Response(
     JSON.stringify({
       version: '1.0',

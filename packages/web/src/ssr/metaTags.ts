@@ -325,9 +325,13 @@ export const getUserPageContext = ({
   bio: string
   hashId?: string
 }) => {
-  const pageTitle = userName
+  const displayName =
+    (userName && String(userName).trim()) ||
+    (handle && String(handle).trim()) ||
+    'Artist'
+  const pageTitle = displayName
   const pageDescription = createSeoDescription(
-    `Play ${userName} on Audius and discover followers on Audius`,
+    `Play ${displayName} on Audius and discover followers on Audius`,
     true
   )
   const canonicalUrl = fullProfilePage(handle)
@@ -337,7 +341,7 @@ export const getUserPageContext = ({
     '@id': canonicalUrl,
     datePublished: null,
     url: canonicalUrl,
-    name: userName,
+    name: displayName,
     description: bio || pageDescription,
     potentialAction: {
       '@type': 'ListenAction',

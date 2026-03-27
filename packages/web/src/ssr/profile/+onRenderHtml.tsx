@@ -23,11 +23,12 @@ type TrackPageContext = PageContextServer & {
 }
 
 export default function render(pageContext: TrackPageContext) {
-  const { pageProps, headers, urlPathname } = pageContext
+  const { pageProps, headers, urlPathname, routeParams } = pageContext
   const { user } = pageProps
   const { id, name, bio } = user ?? {}
+  const routeHandle = routeParams?.handle?.toLowerCase() ?? ''
   // Use lower case since cache lookup by handle will lowercase it
-  const handle = user?.handle?.toLowerCase() ?? ''
+  const handle = user?.handle?.toLowerCase() ?? routeHandle
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
