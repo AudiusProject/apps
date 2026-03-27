@@ -1,27 +1,35 @@
+import { useCallback } from 'react'
+
 import type { Coin } from '@audius/common/adapters'
 import { useArtistCoin, useCoinGeckoCoin } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import {
   createAudioCoinMetrics,
   createCoinMetrics,
+  shortenSPLAddress,
   type MetricData
 } from '@audius/common/utils'
+import Clipboard from '@react-native-clipboard/clipboard'
 
 import {
   Flex,
   IconCaretDown,
   IconCaretUp,
+  IconCopy,
   Paper,
+  PlainButton,
   Text,
   spacing
 } from '@audius/harmony-native'
 import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
+import { useToast } from 'app/hooks/useToast'
 import { env } from 'app/services/env'
 import { isIos } from 'app/utils/os'
 
 import { GraduationProgressBar } from './GraduationProgressBar'
 
 const messages = coinDetailsMessages.coinInsights
+const overflowMessages = coinDetailsMessages.overflowMenu
 
 const GraduatedPill = () => {
   return (
@@ -152,6 +160,34 @@ const MetricRow = ({ metric, coin }: { metric: MetricData; coin?: Coin }) => {
   )
 }
 
+const InsightsCopyMintRow = ({ mint }: { mint: string }) => {
+  const { toast } = useToast()
+
+  const handleCopyAddress = useCallback(() => {
+    Clipboard.setString(mint)
+    toast({ content: overflowMessages.copiedToClipboard, type: 'info' })
+  }, [mint, toast])
+
+  return (
+    <Flex
+      row
+      w='100%'
+      justifyContent='space-between'
+      alignItems='center'
+      borderTop='default'
+      ph='xl'
+      pv='l'
+    >
+      <PlainButton onPress={handleCopyAddress} iconLeft={IconCopy}>
+        {overflowMessages.copyCoinAddress}
+      </PlainButton>
+      <Text variant='body' size='m' color='subdued'>
+        {shortenSPLAddress(mint)}
+      </Text>
+    </Flex>
+  )
+}
+
 export const CoinInsightsCard = ({ mint }: { mint: string }) => {
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const {
@@ -198,7 +234,7 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
         </Text>
       </Flex>
 
-      {isError || !coin ? (
+      {isError ? (
         <Flex pv='xl' ph='l' w='100%' justifyContent='center'>
           <Text variant='body' color='subdued'>
             {messages.unableToLoad}
@@ -209,6 +245,7 @@ export const CoinInsightsCard = ({ mint }: { mint: string }) => {
           <MetricRow key={metric.label} metric={metric} coin={coin} />
         ))
       )}
+      {mint ? <InsightsCopyMintRow mint={mint} /> : null}
     </Paper>
   )
 }

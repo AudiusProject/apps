@@ -26,6 +26,7 @@ type UserLinkProps = Omit<TextLinkProps<ParamList>, 'to' | 'children'> & {
   textLinkStyle?: StyleProp<TextStyle>
   disabled?: boolean
   hideArtistCoinBadge?: boolean
+  mint?: string
 }
 
 export const UserLink = (props: UserLinkProps) => {
@@ -36,6 +37,7 @@ export const UserLink = (props: UserLinkProps) => {
     textLinkStyle,
     disabled,
     hideArtistCoinBadge,
+    mint,
     ...other
   } = props
   const navigation = useNavigation()
@@ -90,6 +92,7 @@ export const UserLink = (props: UserLinkProps) => {
         <UserBadges
           userId={userId}
           badgeSize={badgeSize}
+          mint={mint}
           hideArtistCoinBadge={hideArtistCoinBadge}
         />
       </AnimatedFlex>
