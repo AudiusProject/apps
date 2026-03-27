@@ -1,21 +1,4 @@
-const BASE58_ALPHABET =
-  '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-
-function encodeBase58(bytes: Uint8Array): string {
-  let result = ''
-  let value = BigInt(
-    '0x' + Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
-  )
-  while (value > 0n) {
-    result = BASE58_ALPHABET[Number(value % 58n)] + result
-    value /= 58n
-  }
-  for (const b of bytes) {
-    if (b !== 0) break
-    result = '1' + result
-  }
-  return result
-}
+import bs58 from 'bs58'
 
 export type SolanaWalletCredential = {
   publicKey: string
@@ -45,7 +28,6 @@ export function createSolanaWalletSignatureMessage() {
 export class SolanaWallet {
   private credential: SolanaWalletCredential | null = null
 
-  /** Connect a wallet, sign the auth message, and store the credential. */
   async auth(provider: SolanaWalletProvider) {
     const { publicKey } = await provider.connect()
     const { message, messageBytes } = createSolanaWalletSignatureMessage()
@@ -56,7 +38,7 @@ export class SolanaWallet {
     this.credential = {
       publicKey: publicKey.toString(),
       message,
-      signature: encodeBase58(sigBytes)
+      signature: bs58.encode(sigBytes)
     }
     return { publicKey: this.credential.publicKey }
   }
