@@ -20,9 +20,9 @@ import {
   PlainButton,
   useTheme
 } from '@audius/harmony-native'
+import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
 import { TokenIcon } from 'app/components/core'
 import Drawer from 'app/components/drawer/Drawer'
-import { TooltipInfoIcon } from 'app/components/buy-sell/TooltipInfoIcon'
 import { useToast } from 'app/hooks/useToast'
 import { env } from 'app/services/env'
 
@@ -74,13 +74,7 @@ const DetailRow = ({
   </Flex>
 )
 
-const StatRow = ({
-  left,
-  right
-}: {
-  left: ReactNode
-  right: ReactNode
-}) => (
+const StatRow = ({ left, right }: { left: ReactNode; right: ReactNode }) => (
   <Flex row gap='xl' w='100%' alignItems='flex-start'>
     <Flex flex={1}>{left}</Flex>
     <Flex flex={1}>{right}</Flex>
@@ -170,7 +164,11 @@ export const ArtistCoinDetailsDrawer = () => {
 
   const renderHeader = () => (
     <Flex pv='l' ph='xl' gap='m' mb='m'>
-      <DrawerHeader onClose={onClose} title={artistCoinDetails.details} />
+      <DrawerHeader
+        onClose={onClose}
+        title={artistCoinDetails.details}
+        isFullscreen
+      />
       <Divider />
     </Flex>
   )
@@ -181,196 +179,200 @@ export const ArtistCoinDetailsDrawer = () => {
       onClose={onClose}
       drawerHeader={renderHeader}
       isFullscreen
+      isGestureSupported={false}
     >
       <ScrollView
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps='handled'
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         <Flex direction='column' gap='l' ph='xl' pb='xl'>
-        {/* Token Info with avatar */}
-        <Flex row alignItems='center' gap='m'>
-          <TokenIcon logoURI={artistCoin.logoUri} size={spacing['4xl']} />
-          <Flex direction='column' gap='xs'>
-            <Text variant='title' size='l'>
-              {artistCoin.name}
-            </Text>
-            <Text variant='body' size='m' color='subdued'>
-              {ticker}
-            </Text>
+          {/* Token Info with avatar */}
+          <Flex row alignItems='center' gap='m'>
+            <TokenIcon logoURI={artistCoin.logoUri} size={spacing['4xl']} />
+            <Flex direction='column' gap='xs'>
+              <Text variant='title' size='l'>
+                {artistCoin.name}
+              </Text>
+              <Text variant='body' size='m' color='subdued'>
+                {ticker}
+              </Text>
+            </Flex>
+          </Flex>
+
+          <Divider />
+
+          {/* Coin Address */}
+          <DetailRow
+            label={artistCoinDetails.coinAddress}
+            tooltip={artistCoinDetails.tooltips.coinAddress}
+          >
+            <CopyableAddress
+              address={artistCoin.mint}
+              onCopy={handleCopyAddress}
+            />
+          </DetailRow>
+
+          {/* On-Chain Description */}
+          {!isAudio && artist?.handle ? (
+            <DetailRow
+              label={artistCoinDetails.onChainDescription}
+              tooltip={artistCoinDetails.tooltips.onChainDescription}
+            >
+              <Text variant='body' size='s'>
+                {LAUNCHPAD_COIN_DESCRIPTION(
+                  artist.handle,
+                  artistCoin.ticker ?? ''
+                )}
+              </Text>
+            </DetailRow>
+          ) : null}
+
+          <Divider />
+
+          {/* Market Stats */}
+          <Flex column gap='l' w='100%'>
+            <StatRow
+              left={
+                totalSupply != null ? (
+                  <DetailRow
+                    label={artistCoinDetails.totalSupply}
+                    tooltip={artistCoinDetails.tooltips.totalSupply}
+                  >
+                    <Text variant='body' size='m'>
+                      {totalSupply.toLocaleString()}
+                    </Text>
+                  </DetailRow>
+                ) : null
+              }
+              right={
+                marketCap != null ? (
+                  <DetailRow
+                    label={artistCoinDetails.marketCap}
+                    tooltip={artistCoinDetails.tooltips.marketCap}
+                  >
+                    <Text variant='body' size='m'>
+                      ${marketCap.toLocaleString()}
+                    </Text>
+                  </DetailRow>
+                ) : null
+              }
+            />
+            <StatRow
+              left={
+                price != null ? (
+                  <DetailRow
+                    label={artistCoinDetails.price}
+                    tooltip={artistCoinDetails.tooltips.price}
+                  >
+                    <Text variant='body' size='m'>
+                      {formatCurrencyWithSubscript(price)}
+                    </Text>
+                  </DetailRow>
+                ) : null
+              }
+              right={
+                liquidity != null ? (
+                  <DetailRow
+                    label={artistCoinDetails.liquidity}
+                    tooltip={artistCoinDetails.tooltips.liquidity}
+                  >
+                    <Text variant='body' size='m'>
+                      ${liquidity.toLocaleString()}
+                    </Text>
+                  </DetailRow>
+                ) : null
+              }
+            />
+          </Flex>
+
+          {/* Vesting / Locker Stats - Non-wAUDIO only */}
+          {!isAudio ? (
+            <>
+              <Divider />
+              <Flex column gap='l' w='100%'>
+                {/* Unlock Schedule */}
+                <DetailRow
+                  label={overflowMenu.vestingSchedule}
+                  tooltip={overflowMenu.tooltips.vestingSchedule}
+                >
+                  <Text variant='body' size='m'>
+                    {overflowMenu.vestingScheduleValue}
+                  </Text>
+                </DetailRow>
+
+                {/* Artist Earnings */}
+                {formattedArtistEarnings ? (
+                  <DetailRow
+                    label={overflowMenu.artistEarnings}
+                    tooltip={overflowMenu.tooltips.artistEarnings}
+                  >
+                    <Text variant='body' size='m'>
+                      {formattedArtistEarnings} {overflowMenu.$audio}
+                    </Text>
+                  </DetailRow>
+                ) : null}
+
+                {/* Locked / Unlocked */}
+                {showLockerStats && locker ? (
+                  <>
+                    <DetailRow
+                      label={overflowMenu.locked}
+                      tooltip={overflowMenu.tooltips.locked}
+                    >
+                      <Text variant='body' size='m'>
+                        {formatTokenAmount(locker.locked ?? 0, decimals)}{' '}
+                        {ticker}
+                      </Text>
+                    </DetailRow>
+                    <DetailRow
+                      label={overflowMenu.unlocked}
+                      tooltip={overflowMenu.tooltips.unlocked}
+                    >
+                      <Text variant='body' size='m'>
+                        {formatTokenAmount(locker.unlocked ?? 0, decimals)}{' '}
+                        {ticker}
+                      </Text>
+                    </DetailRow>
+                  </>
+                ) : null}
+
+                {/* Reward Pool */}
+                {rewardsPoolBalance != null ? (
+                  <DetailRow
+                    label={overflowMenu.rewardsPool}
+                    tooltip={overflowMenu.tooltips.rewardsPool}
+                  >
+                    <Text variant='body' size='m'>
+                      {rewardsPoolBalance} {ticker}
+                    </Text>
+                  </DetailRow>
+                ) : null}
+
+                {/* Rewards Pool Address */}
+                {artistCoin.rewardPool?.address ? (
+                  <DetailRow
+                    label={artistCoinDetails.rewardsPoolAddress}
+                    tooltip={overflowMenu.tooltips.rewardsPool}
+                  >
+                    <CopyableAddress
+                      address={artistCoin.rewardPool.address}
+                      onCopy={handleCopyRewardsPoolAddress}
+                    />
+                  </DetailRow>
+                ) : null}
+              </Flex>
+            </>
+          ) : null}
+
+          {/* Close Button */}
+          <Flex pt='m' w='100%'>
+            <Button variant='primary' fullWidth onPress={onClose}>
+              {artistCoinDetails.close}
+            </Button>
           </Flex>
         </Flex>
-
-        <Divider />
-
-        {/* Coin Address */}
-        <DetailRow
-          label={artistCoinDetails.coinAddress}
-          tooltip={artistCoinDetails.tooltips.coinAddress}
-        >
-          <CopyableAddress
-            address={artistCoin.mint}
-            onCopy={handleCopyAddress}
-          />
-        </DetailRow>
-
-        {/* On-Chain Description */}
-        {!isAudio && artist?.handle ? (
-          <DetailRow
-            label={artistCoinDetails.onChainDescription}
-            tooltip={artistCoinDetails.tooltips.onChainDescription}
-          >
-            <Text variant='body' size='s'>
-              {LAUNCHPAD_COIN_DESCRIPTION(
-                artist.handle,
-                artistCoin.ticker ?? ''
-              )}
-            </Text>
-          </DetailRow>
-        ) : null}
-
-        <Divider />
-
-        {/* Market Stats */}
-        <Flex column gap='l' w='100%'>
-          <StatRow
-            left={
-              totalSupply != null ? (
-                <DetailRow
-                  label={artistCoinDetails.totalSupply}
-                  tooltip={artistCoinDetails.tooltips.totalSupply}
-                >
-                  <Text variant='body' size='m'>
-                    {totalSupply.toLocaleString()}
-                  </Text>
-                </DetailRow>
-              ) : null
-            }
-            right={
-              marketCap != null ? (
-                <DetailRow
-                  label={artistCoinDetails.marketCap}
-                  tooltip={artistCoinDetails.tooltips.marketCap}
-                >
-                  <Text variant='body' size='m'>
-                    ${marketCap.toLocaleString()}
-                  </Text>
-                </DetailRow>
-              ) : null
-            }
-          />
-          <StatRow
-            left={
-              price != null ? (
-                <DetailRow
-                  label={artistCoinDetails.price}
-                  tooltip={artistCoinDetails.tooltips.price}
-                >
-                  <Text variant='body' size='m'>
-                    {formatCurrencyWithSubscript(price)}
-                  </Text>
-                </DetailRow>
-              ) : null
-            }
-            right={
-              liquidity != null ? (
-                <DetailRow
-                  label={artistCoinDetails.liquidity}
-                  tooltip={artistCoinDetails.tooltips.liquidity}
-                >
-                  <Text variant='body' size='m'>
-                    ${liquidity.toLocaleString()}
-                  </Text>
-                </DetailRow>
-              ) : null
-            }
-          />
-        </Flex>
-
-        {/* Vesting / Locker Stats - Non-wAUDIO only */}
-        {!isAudio ? (
-          <>
-            <Divider />
-            <Flex column gap='l' w='100%'>
-              {/* Unlock Schedule */}
-              <DetailRow
-                label={overflowMenu.vestingSchedule}
-                tooltip={overflowMenu.tooltips.vestingSchedule}
-              >
-                <Text variant='body' size='m'>
-                  {overflowMenu.vestingScheduleValue}
-                </Text>
-              </DetailRow>
-
-              {/* Artist Earnings */}
-              {formattedArtistEarnings ? (
-                <DetailRow
-                  label={overflowMenu.artistEarnings}
-                  tooltip={overflowMenu.tooltips.artistEarnings}
-                >
-                  <Text variant='body' size='m'>
-                    {formattedArtistEarnings} {overflowMenu.$audio}
-                  </Text>
-                </DetailRow>
-              ) : null}
-
-              {/* Locked / Unlocked */}
-              {showLockerStats && locker ? (
-                <>
-                  <DetailRow
-                    label={overflowMenu.locked}
-                    tooltip={overflowMenu.tooltips.locked}
-                  >
-                    <Text variant='body' size='m'>
-                      {formatTokenAmount(locker.locked ?? 0, decimals)} {ticker}
-                    </Text>
-                  </DetailRow>
-                  <DetailRow
-                    label={overflowMenu.unlocked}
-                    tooltip={overflowMenu.tooltips.unlocked}
-                  >
-                    <Text variant='body' size='m'>
-                      {formatTokenAmount(locker.unlocked ?? 0, decimals)}{' '}
-                      {ticker}
-                    </Text>
-                  </DetailRow>
-                </>
-              ) : null}
-
-              {/* Reward Pool */}
-              {rewardsPoolBalance != null ? (
-                <DetailRow
-                  label={overflowMenu.rewardsPool}
-                  tooltip={overflowMenu.tooltips.rewardsPool}
-                >
-                  <Text variant='body' size='m'>
-                    {rewardsPoolBalance} {ticker}
-                  </Text>
-                </DetailRow>
-              ) : null}
-
-              {/* Rewards Pool Address */}
-              {artistCoin.rewardPool?.address ? (
-                <DetailRow
-                  label={artistCoinDetails.rewardsPoolAddress}
-                  tooltip={overflowMenu.tooltips.rewardsPool}
-                >
-                  <CopyableAddress
-                    address={artistCoin.rewardPool.address}
-                    onCopy={handleCopyRewardsPoolAddress}
-                  />
-                </DetailRow>
-              ) : null}
-            </Flex>
-          </>
-        ) : null}
-
-        {/* Close Button */}
-        <Flex pt='m' w='100%'>
-          <Button variant='primary' fullWidth onPress={onClose}>
-            {artistCoinDetails.close}
-          </Button>
-        </Flex>
-      </Flex>
       </ScrollView>
     </Drawer>
   )

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 import { useArtistCoinByTicker } from '@audius/common/api'
 import { route } from '@audius/common/utils'
@@ -32,14 +32,15 @@ const messages = {
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   tabBar: {
-    backgroundColor: 'transparent',
+    backgroundColor: palette.white,
     height: spacing(10),
-    marginHorizontal: spacing(4),
     elevation: 0,
-    shadowOpacity: 0
+    shadowOpacity: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.borderDefault
   },
   tabIndicator: {
-    backgroundColor: palette.secondary,
+    backgroundColor: palette.focus,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     height: 3,
@@ -111,16 +112,24 @@ export const CoinDetailsScreen = () => {
     [mint, handleSwitchToCoinTab]
   )
 
-  const renderLabel = useCallback(
-    ({ route: tabRoute, focused }: { route: TabRoute; focused: boolean }) => (
-      <Text
-        variant='body'
-        strength='strong'
-        color={focused ? 'default' : 'subdued'}
-      >
-        {tabRoute.title}
-      </Text>
-    ),
+  const tabCommonOptions = useMemo(
+    () => ({
+      label: ({
+        focused,
+        route: tabRoute
+      }: {
+        focused: boolean
+        route: TabRoute
+      }) => (
+        <Text
+          variant='body'
+          strength={focused ? 'strong' : 'default'}
+          color={focused ? 'default' : 'subdued'}
+        >
+          {tabRoute.title}
+        </Text>
+      )
+    }),
     []
   )
 
@@ -134,10 +143,9 @@ export const CoinDetailsScreen = () => {
         inactiveColor={textIconSubdued}
         pressColor='transparent'
         pressOpacity={0.7}
-        renderLabel={renderLabel}
       />
     ),
-    [styles.tabBar, styles.tabIndicator, neutral, textIconSubdued, renderLabel]
+    [styles.tabBar, styles.tabIndicator, neutral, textIconSubdued]
   )
 
   return (
@@ -156,6 +164,7 @@ export const CoinDetailsScreen = () => {
           initialLayout={{ width: layout.width }}
           swipeEnabled
           style={{ flex: 1 }}
+          commonOptions={tabCommonOptions}
         />
       </ScreenContent>
     </Screen>

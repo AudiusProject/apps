@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
   useArtistCoin,
@@ -7,16 +7,14 @@ import {
   useExclusiveTracks,
   useExclusiveTracksCount
 } from '@audius/common/api'
-import {
-  useBuySellInitialTab,
-  useIsManagedAccount
-} from '@audius/common/hooks'
+import { useBuySellInitialTab, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import { WidthSizes } from '@audius/common/models'
 import {
   exclusiveTracksPageLineupActions as exclusiveTracksActions,
   receiveTokensModalActions
 } from '@audius/common/store'
-import { TouchableOpacity } from 'react-native'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import {
@@ -24,18 +22,25 @@ import {
   Flex,
   IconCaretRight,
   IconCloudUpload,
+  LoadingSpinner,
   Paper,
-  Text
+  Text,
+  spacing as harmonySpacing
 } from '@audius/harmony-native'
-import { TokenIcon } from 'app/components/core'
+import { ProfilePicture, TokenIcon } from 'app/components/core'
+import { useCoverPhoto } from 'app/components/image/CoverPhoto'
+import { primitiveToImageSource } from 'app/components/image/primitiveToImageSource'
 import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
+import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useThemeColors } from 'app/utils/theme'
 
-import { BannerSection } from './CoinInfoCard'
 import { CoinLeaderboardCard } from './CoinLeaderboardCard'
 
+const FAN_CLUB_COVER_HEIGHT = 96
+const FAN_CLUB_AVATAR_OVERLAP = -harmonySpacing.unit9
+
 const messages = {
-  poweredBy: 'POWERED BY',
   uploadExclusiveTrack: coinDetailsMessages.coinInfo.uploadExclusiveTrack,
   becomeAMember: coinDetailsMessages.balance.becomeAMember,
   hintDescription: coinDetailsMessages.balance.hintDescription,
@@ -111,44 +116,126 @@ const BecomeAMemberCard = ({
   )
 }
 
-const CoinPill = ({
-  mint,
-  onPress
-}: {
+type FanClubHeroTileProps = {
   mint: string
-  onPress: () => void
-}) => {
-  const { data: coin } = useArtistCoin(mint)
-  if (!coin) return null
+  onPoweredByPress: () => void
+}
+
+const FanClubHeroTile = ({ mint, onPoweredByPress }: FanClubHeroTileProps) => {
+  const { borderDefault } = useThemeColors()
+  const { data: coin, isLoading } = useArtistCoin(mint)
+  const ownerId = coin?.ownerId
+
+  const { source: coverPhotoSource } = useCoverPhoto({
+    userId: ownerId,
+    size: WidthSizes.SIZE_640
+  })
+
+  const bannerImageSource = useMemo(() => {
+    if (coin?.bannerImageUrl) {
+      return primitiveToImageSource(coin.bannerImageUrl)
+    }
+    return coverPhotoSource
+  }, [coin?.bannerImageUrl, coverPhotoSource])
+
+  if (isLoading || !coin || !ownerId) {
+    return null
+  }
+
+  const fanClubLabel = walletMessages.artistCoins.fanClubLabel
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Paper
-        row
-        alignItems='center'
-        gap='s'
-        ph='l'
-        pv='s'
-        borderRadius='l'
-        border='default'
-        shadow='flat'
+    <Paper
+      column
+      w='100%'
+      borderRadius='l'
+      shadow='mid'
+      border='default'
+      style={{ overflow: 'hidden' }}
+    >
+      <View
+        style={{
+          height: FAN_CLUB_COVER_HEIGHT,
+          width: '100%',
+          borderBottomWidth: 1,
+          borderBottomColor: borderDefault,
+          overflow: 'hidden'
+        }}
       >
-        <TokenIcon logoURI={coin.logoUri} size={24} />
-        <Flex row alignItems='center' gap='xs' flex={1}>
-          <Text variant='label' size='xs' color='subdued'>
-            {messages.poweredBy}
-          </Text>
-          <Text variant='title' size='m'>
-            {coin.name}
-          </Text>
+        {bannerImageSource ? (
+          <Image
+            source={bannerImageSource}
+            style={StyleSheet.absoluteFillObject}
+            resizeMode='cover'
+          />
+        ) : null}
+      </View>
+
+      <Flex
+        column
+        gap='l'
+        ph='l'
+        pb='l'
+        pt='l'
+        style={{ marginTop: FAN_CLUB_AVATAR_OVERLAP }}
+      >
+        <Flex row gap='s' alignItems='flex-end' w='100%'>
+          <ProfilePicture userId={ownerId} size='large' />
+          <Flex column gap='2xs' flex={1} style={{ minWidth: 0 }}>
+            <Text
+              variant='label'
+              size='s'
+              color='subdued'
+              style={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+            >
+              {fanClubLabel}
+            </Text>
+            <UserLink userId={ownerId} size='l' mint={mint} />
+          </Flex>
         </Flex>
-        <IconCaretRight size='s' color='subdued' />
-      </Paper>
-    </TouchableOpacity>
+
+        <TouchableOpacity onPress={onPoweredByPress} activeOpacity={0.7}>
+          <Paper
+            backgroundColor='surface1'
+            border='default'
+            borderRadius='m'
+            ph='l'
+            pv='m'
+            row
+            alignItems='center'
+            gap='m'
+            w='100%'
+          >
+            <TokenIcon logoURI={coin.logoUri} size='xl' />
+            <Flex column gap='xs' flex={1} style={{ minWidth: 0 }}>
+              <Text variant='label' size='s' color='subdued'>
+                {walletMessages.poweredBy}
+              </Text>
+              <Text variant='heading' size='s' numberOfLines={1}>
+                {coin.ticker ?? coin.name}
+              </Text>
+            </Flex>
+            <IconCaretRight size='s' color='subdued' />
+          </Paper>
+        </TouchableOpacity>
+
+        {coin.description ? (
+          <Text variant='body' size='m'>
+            {coin.description}
+          </Text>
+        ) : null}
+      </Flex>
+    </Paper>
   )
 }
 
-const FanClubFeed = ({ mint }: { mint: string }) => {
+const FanClubFeed = ({
+  mint,
+  forMemberView
+}: {
+  mint: string
+  forMemberView?: boolean
+}) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
@@ -158,12 +245,36 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
       pageSize: MAX_PREVIEW_TRACKS
     })
 
-  const { data: totalCount = 0 } = useExclusiveTracksCount({
-    userId: ownerId
-  })
+  const { data: totalCount = 0, isPending: isCountPending } =
+    useExclusiveTracksCount({
+      userId: ownerId
+    })
 
-  const shouldShowCard = totalCount > 0 && ownerId
-  if (!shouldShowCard) return null
+  if (!ownerId) {
+    return null
+  }
+
+  if (forMemberView) {
+    if (isCountPending) {
+      return (
+        <Flex column w='100%'>
+          <Flex row alignItems='center' gap='xs' pb='s'>
+            <Text variant='heading' size='s'>
+              {messages.fanClubFeed}
+            </Text>
+          </Flex>
+          <Flex alignItems='center' justifyContent='center' pv='xl' w='100%'>
+            <LoadingSpinner />
+          </Flex>
+        </Flex>
+      )
+    }
+    if (totalCount === 0) {
+      return null
+    }
+  } else if (totalCount === 0) {
+    return null
+  }
 
   return (
     <Flex column w='100%'>
@@ -198,13 +309,27 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
 
 export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
   const { data: coin } = useArtistCoin(mint)
-  const { data: currentUserId } = useCurrentUserId()
-  const { data: tokenBalance } = useCoinBalance({ mint })
+  const { data: currentUserId, isPending: isCurrentUserPending } =
+    useCurrentUserId()
+  const { data: tokenBalance, isPending: isBalancePending } = useCoinBalance({
+    mint
+  })
   const navigation = useNavigation()
 
-  const isOwner = currentUserId === coin?.ownerId
+  const isOwner =
+    !isCurrentUserPending &&
+    currentUserId != null &&
+    coin != null &&
+    currentUserId === coin.ownerId
+
   const hasBalance =
-    tokenBalance?.balance && Number(tokenBalance.balance.toString()) > 0
+    !isBalancePending &&
+    !!(tokenBalance?.balance && Number(tokenBalance.balance.toString()) > 0)
+
+  const membershipKnown =
+    coin != null && !isCurrentUserPending && (isOwner || !isBalancePending)
+
+  const isMemberOrOwner = isOwner || hasBalance
 
   const handleUploadExclusive = useCallback(() => {
     navigation.navigate('Upload', {})
@@ -215,60 +340,51 @@ export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
   const ticker = coin.ticker ?? ''
 
   return (
-    <Flex column gap='l' w='100%'>
-      {/* Banner */}
-      <BannerSection mint={mint} />
-
-      {/* Coin Pill */}
-      <Flex ph='l'>
-        <CoinPill mint={mint} onPress={onSwitchToCoinTab} />
-      </Flex>
-
-      {/* Description */}
-      {coin.description ? (
-        <Flex ph='l'>
-          <Text variant='body' size='m'>
-            {coin.description}
-          </Text>
-        </Flex>
-      ) : null}
+    <Flex column gap='l' w='100%' ph='l'>
+      <FanClubHeroTile mint={mint} onPoweredByPress={onSwitchToCoinTab} />
 
       {/* Upload Exclusive Track - Artist only */}
       {isOwner ? (
-        <Flex ph='l'>
-          <Button
-            variant='secondary'
-            fullWidth
-            iconLeft={IconCloudUpload}
-            onPress={handleUploadExclusive}
-          >
-            {messages.uploadExclusiveTrack}
-          </Button>
-        </Flex>
+        <Button
+          variant='secondary'
+          fullWidth
+          iconLeft={IconCloudUpload}
+          onPress={handleUploadExclusive}
+        >
+          {messages.uploadExclusiveTrack}
+        </Button>
       ) : null}
 
-      {/* Become a Member - Non-holder only */}
-      {!isOwner && !hasBalance ? (
-        <Flex ph='l'>
-          <BecomeAMemberCard
-            ticker={ticker}
-            mint={mint}
-            coinTicker={coin.ticker}
-          />
-        </Flex>
+      {/* Membership CTA / leaderboard: wait until account + balance are known to avoid CLS */}
+      {!membershipKnown ? (
+        <Paper
+          column
+          backgroundColor='surface2'
+          border='strong'
+          borderRadius='l'
+          shadow='flat'
+          alignItems='center'
+          justifyContent='center'
+          pv='2xl'
+          w='100%'
+        >
+          <LoadingSpinner />
+        </Paper>
+      ) : !isMemberOrOwner ? (
+        <BecomeAMemberCard
+          ticker={ticker}
+          mint={mint}
+          coinTicker={coin.ticker}
+        />
       ) : null}
 
-      {/* Members Leaderboard - for holders and owners */}
-      {isOwner || hasBalance ? (
-        <Flex ph='l'>
-          <CoinLeaderboardCard mint={mint} />
-        </Flex>
+      {membershipKnown && isMemberOrOwner ? (
+        <CoinLeaderboardCard mint={mint} />
       ) : null}
 
-      {/* Fan Club Feed */}
-      <Flex ph='l'>
-        <FanClubFeed mint={mint} />
-      </Flex>
+      {membershipKnown ? (
+        <FanClubFeed mint={mint} forMemberView={isMemberOrOwner} />
+      ) : null}
     </Flex>
   )
 }

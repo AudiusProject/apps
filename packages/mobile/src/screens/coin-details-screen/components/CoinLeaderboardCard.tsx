@@ -38,7 +38,14 @@ export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
     })
   }, [mint, navigation])
 
-  if (!mint || !users?.length) return null
+  if (!mint) {
+    return null
+  }
+
+  const memberCount = leaderboardUsers?.length ?? 0
+  if (!isLeaderboardPending && memberCount === 0) {
+    return null
+  }
 
   return (
     <Paper
@@ -69,7 +76,12 @@ export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
           w='100%'
         >
           {isPending ? (
-            <Flex alignItems='center' flex={1}>
+            <Flex
+              alignItems='center'
+              justifyContent='center'
+              flex={1}
+              style={{ minHeight: 56 }}
+            >
               <LoadingSpinner />
             </Flex>
           ) : (
