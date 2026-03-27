@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { createSolanaWalletSignatureMessage } from '@audius/sdk'
-import bs58 from 'bs58'
 
 import { config } from './config'
 import { getSDK } from './sdk'
@@ -29,19 +27,15 @@ type TrackItem = {
 }
 
 // ---------------------------------------------------------------------------
-// Phantom / Solana wallet adapter
+// Phantom wallet detection
 // ---------------------------------------------------------------------------
 
-interface PhantomProvider {
-  isPhantom?: boolean
-  connect(): Promise<{ publicKey: { toBytes(): Uint8Array; toString(): string } }>
-  signMessage(message: Uint8Array, encoding: string): Promise<{ signature: Uint8Array }>
-  disconnect(): Promise<void>
-}
-
-function getPhantom(): PhantomProvider | null {
+function getPhantom() {
   if (typeof window !== 'undefined' && 'solana' in window) {
-    const provider = (window as Record<string, unknown>).solana as PhantomProvider
+    const provider = (window as Record<string, unknown>).solana as {
+      isPhantom?: boolean
+      disconnect(): Promise<void>
+    }
     if (provider?.isPhantom) return provider
   }
   return null
@@ -208,22 +202,15 @@ export default function App() {
 
   const handleConnectWallet = useCallback(async () => {
     setError(null)
-    const phantom = getPhantom()
-    if (!phantom) {
+    if (!getPhantom()) {
       setError('Phantom wallet not found. Install phantom.app to use wallet sign-in.')
       return
     }
     try {
       const sdk = getSDK()
-      const { publicKey } = await phantom.connect()
-      const pubkey = publicKey.toString()
-
-      const { message, messageBytes } = createSolanaWalletSignatureMessage()
-      const { signature: sigBytes } = await phantom.signMessage(messageBytes, 'utf8')
-      const signature = bs58.encode(sigBytes)
-      sdk.solanaWallet.setCredential({ publicKey: pubkey, message, signature })
+      const { publicKey } = await sdk.solanaWallet.auth(window.solana)
       setWalletConnected(true)
-      setWalletPubkey(pubkey)
+      setWalletPubkey(publicKey)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Wallet connection failed')
     }

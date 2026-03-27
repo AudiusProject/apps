@@ -11,17 +11,10 @@ import type { SolanaWallet } from '../solanaWallet'
  *
  * @example
  * ```ts
- * import { createSolanaWalletSignatureMessage, sdk as audiusSdk } from '@audius/sdk'
- * import bs58 from 'bs58'
+ * import { sdk as audiusSdk } from '@audius/sdk'
  *
- * const sdk = audiusSdk({ appName: APP_NAME })
- * const wallet = window.solana
- * const { publicKey } = await solanaWallet.connect()
- * const { message, messageBytes } = createSolanaWalletSignatureMessage()
- * const { signature: sigBytes } = await wallet.signMessage(messageBytes, 'utf8')
- * const signature = bs58.encode(sigBytes)
- * sdk.solanaWallet.setCredential({ publicKey: publicKey.toString(), message, signature })
- *
+ * const sdk = audiusSdk({ appName: 'MyApp' })
+ * await sdk.solanaWallet.auth(window.solana)
  * sdk.tracks.getTrack({ id: '123' })
  * ```
  */
