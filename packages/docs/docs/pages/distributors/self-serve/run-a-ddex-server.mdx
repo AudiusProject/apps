@@ -86,20 +86,7 @@ distributor can pass to the artist, allowing them to claim their Audius account.
 
 ## Architecture
 
-The ddex-processor runs as two main processes — a **worker** and a **server** — backed by PostgreSQL:
-
-```mermaid
-flowchart TD
-    S3["S3 Bucket\n(Deliveries + Assets)"] --> Worker
-    subgraph ddex-processor
-        Worker["Worker\n- Poll S3\n- Parse XML\n- Publish"]
-        DB["PostgreSQL\n- Releases\n- Users\n- Assets"]
-        Server["Server (Web UI)\n:8989"]
-        Worker <--> DB
-        Server <--> DB
-    end
-    Worker --> SDK["Audius SDK\n(Publish)"]
-```
+The ddex-processor runs as two main processes — a **worker** and a **server** — backed by PostgreSQL.
 
 ### Worker
 
