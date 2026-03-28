@@ -1,12 +1,12 @@
 ---
 title: Ethereum Contracts
-description: Audius Protocol Documentation
+description: Open Audio Protocol Documentation
 ---
 
 
 ## Overview
 
-The Audius Ethereum contracts are meant to accomplish the following goals for the Audius protocol:
+The Audius Ethereum contracts are meant to accomplish the following goals for the Open Audio Protocol:
 
 - Create the Audius token through an ERC-20
 - Keep track of different service versions
@@ -31,7 +31,7 @@ to be performed through the [Governance contract](#governance).
 
 ### AudiusToken
 
-> This contract defines the Audius Protocol token, `$AUDIO`
+> This contract defines the Open Audio Protocol token, `$AUDIO`
 
 The `$AUDIO` token is a ERC-20 token contract with initial supply of 1 billion tokens, each
 divisible up to 18 decimal places, and is `Mintable`, `Pausable`, and `Burnable`.
@@ -161,7 +161,7 @@ stake.
 <details>
 <summary>A Note on Terminology</summary>
 
-Through out the Smart Contracts that define the Audius protocol, the term "service provider" is used
+Through out the Smart Contracts that define the Open Audio Protocol, the term "service provider" is used
 along with the "service endpoint(s)" that they operate.
 
 More current terminology is "Node Operator" and "Audius Node" respectively.
@@ -174,7 +174,7 @@ More current terminology is "Node Operator" and "Audius Node" respectively.
 ### ServiceTypeManager
 
 > This contract is responsible for maintaining known `service types`, associated versioning
-> information and service type stake requirements within the Audius Protocol.
+> information and service type stake requirements within the Open Audio Protocol.
 
 Service types are used to identify services being registered within the protocol, for example
 `creator-node` or `discovery-provider`.
@@ -193,7 +193,7 @@ given type that service providers register.
 <details>
 <summary>A Note on Terminology</summary>
 
-Through out the Smart Contracts that define the Audius protocol, the terms `creator-node` and
+Through out the Smart Contracts that define the Open Audio Protocol, the terms `creator-node` and
 `discovery-provider` are used to define `service types`.
 
 More current terminology is `content-node` and `discovery-node` are `Audius Node` types
@@ -206,9 +206,9 @@ respectively.
 
 ### Staking
 
-> This contract manages token staking functions and state across the Audius Protocol
+> This contract manages token staking functions and state across the Open Audio Protocol
 
-For every service provider address in Audius Protocol, this contract:
+For every service provider address in Open Audio Protocol, this contract:
 
 - Stores tokens and manages account balances
 - Tracks total stake history
@@ -238,7 +238,7 @@ up and adjust their selected trusted notifier accordingly.
 
 ### WormholeClient
 
-This contract serves as the interface between the Audius Protocol and
+This contract serves as the interface between the Open Audio Protocol and
 [Wormhole](https://solana.com/ecosystem/wormhole).
 
 | Mainnet Contract                                               | Sepolia Testnet Contract                                            |

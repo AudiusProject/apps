@@ -148,6 +148,15 @@ export default defineConfig({
           ],
         },
         {
+          text: 'Hosted',
+          items: [
+            {
+              text: 'Using ddex.audius.co',
+              link: '/distributors/hosted/using-ddex-audius-co',
+            },
+          ],
+        },
+        {
           text: 'Self Serve',
           items: [
             {
@@ -155,7 +164,7 @@ export default defineConfig({
               link: '/distributors/self-serve/overview',
             },
             {
-              text: 'Run a DDEX Server',
+              text: 'Running the DDEX Processor',
               link: '/distributors/self-serve/run-a-ddex-server',
             },
           ],

@@ -1,6 +1,6 @@
 ---
 title: Discovery Node
-description: Audius Protocol Documentation
+description: Open Audio Protocol Documentation
 ---
 
 An Audius Discovery Node is a service that indexes the metadata and availability of data across the
@@ -11,7 +11,7 @@ interval, and made available for clients via a [RESTful API](/api).
 The Discovery Node source code is hosted on
 [GitHub](https://github.com/AudiusProject/audius-docker-compose/tree/main/discovery-provider) and
 see the [registered Discovery Nodes](https://dashboard.audius.org/#/services/discovery-node) on the
-Audius Protocol Dashboard.
+Open Audio Protocol Dashboard.
 
 ## Design Goals
 
@@ -41,7 +41,7 @@ You can find the connection defined between alembic and the data models in
 
 ## Flask
 
-The Discovery Node web server serves as the entry point for reading data through the Audius
+The Discovery Node web server serves as the entry point for reading data through the Open Audio
 Protocol. All queries are returned as JSON objects parsed from SQLAlchemy query results, and can be
 found in
 [src/queries](https://github.com/AudiusProject/apps/tree/main/packages/discovery-provider/src/queries).

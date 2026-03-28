@@ -1,6 +1,6 @@
 ---
 title: Distributing Content to Audius
-description: Audius Protocol Documentation
+description: Open Audio Protocol Documentation
 ---
 
 
@@ -39,7 +39,7 @@ supply chain more efficiently by:
 ## Open Source
 
 All DDEX ingestion code & libraries are open source and available on
-[GitHub](https://github.com/AudiusProject/apps/tree/main/packages/ddex).
+[GitHub](https://github.com/AudiusProject/ddex-processor).
 
 You may clone and self-operate your own Audius compatible DDEX ingestion server, which provides a
 web interface to deliver files, manage uploads, and track success. Under the hood, DDEX ingestion
@@ -49,25 +49,27 @@ uses the [Audius SDK](/sdk) to process and upload tracks and is available in a
 **Example files**
 
 Example DDEX XML files are available on
-[GithHub](https://github.com/AudiusProject/apps/tree/main/packages/ddex/processor/fixtures).
+[GitHub](https://github.com/AudiusProject/ddex-processor/tree/main/fixtures).
 
-- [Delivery](https://github.com/AudiusProject/apps/blob/main/packages/ddex/processor/fixtures/01_delivery.xml)
-- [Update](https://github.com/AudiusProject/apps/blob/main/packages/ddex/processor/fixtures/02_update.xml)
-- [Delete (Purge Message)](https://github.com/AudiusProject/apps/blob/main/packages/ddex/processor/fixtures/03_delete.xml)
+- [Delivery](https://github.com/AudiusProject/ddex-processor/blob/main/fixtures/01_delivery.xml)
+- [Update](https://github.com/AudiusProject/ddex-processor/blob/main/fixtures/02_update.xml)
+- [Delete (Purge Message)](https://github.com/AudiusProject/ddex-processor/blob/main/fixtures/03_delete.xml)
 
 ## Partner Onboarding
 
-When delivering content to Audius, there are two options:
+When delivering content to Audius, there are three options:
 
-1. Run open source DDEX ingestion tooling yourself, starting
-   [here](/distributors/self-serve/overview).
-2. Work directly with a partner that will accept standard DDEX XML files via private delivery (S3,
-   SFTP) and upload releases to Audius
+1. Use the hosted [ddex.audius.co](https://ddex.audius.co) tool after onboarding with Tiki Labs —
+   see [Using ddex.audius.co](/distributors/hosted/using-ddex-audius-co) for details.
+2. Run the open source [ddex-processor](https://github.com/AudiusProject/ddex-processor) yourself —
+   see [Self Serve](/distributors/self-serve/overview) for details.
+3. Work directly with a partner that will accept standard DDEX XML files via private delivery (S3,
+   SFTP) and upload releases to Audius.
 
 #### Tiki Labs, Inc.
 
-Tiki Labs, Inc., one of the development teams behind the Audius protocol, offers a first-party
-service to run DDEX ingestion tooling on behalf of partners.
+Tiki Labs, Inc. facilitates distributing DDEX content directly to the Open Audio Protocol on behalf
+of partners.
 
 In order to get started with Tiki Labs, Inc. directly, reach out to ddex-support@audius.co and
 submit an [intake form](https://forms.gle/jCwLLWRJY7fCQM5ZA).
