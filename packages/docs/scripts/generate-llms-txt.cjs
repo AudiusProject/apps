@@ -102,7 +102,7 @@ function extractDescription(content) {
   if (fmMatch) {
     const desc = fmMatch[1].trim().replace(/^['"]|['"]$/g, '')
     // Skip generic descriptions
-    if (desc !== 'Audius Protocol Documentation') return desc
+    if (desc !== 'Open Audio Protocol Documentation') return desc
   }
   return null
 }

@@ -1,37 +1,174 @@
 ---
-title: Running a DDEX Ingestion Server
-description: Audius Protocol Documentation
+title: Running the DDEX Processor
+description: How to set up and run the open source DDEX ingestion server
 ---
 
+## Prerequisites
 
-:::info[Coming Soon!]
+- **Docker**
+- An S3-compatible bucket containing your DDEX deliveries
+- AWS credentials (key + secret) with read access to the bucket
+- An Audius SDK API key and secret (obtain from the
+  [Audius Developer Portal](https://audius.org/developer-apps))
+- A PostgreSQL database
 
-Under construction. Please use as your own risk! 🚧
+## Quick Start
 
-Check back soon for updates on how to run and operate own DDEX Ingestion Server.
+The ddex-processor is published as a Docker image at `audius/ddex:latest`. You can run it directly:
 
-:::
-
-## Instructions
-
-1. Provision a new machine following. We recommend:
-
-- Ubuntu
-- 8 CPUs
-- 16 to 32GB Memory
-
-2. Visit [audius-docker-compose](https://github.com/AudiusProject/audius-docker-compose) and run the
-   install script to set up your Audius environment on your provisioned machine.
-
-3. Follow the instructions in the
-   [apps](https://github.com/AudiusProject/apps/tree/main/packages/ddex)
-   repository to set the appropriate environment variables
-
-4. Start the DDEX Ingestion Server
-
-```
-audius-cli launch ddex
+```bash
+docker run -d \
+  -e DDEX_DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/ddex \
+  -e DDEX_PORT=8989 \
+  -e COOKIE_SECRET=your-random-secret \
+  -e ADMIN_HANDLES=your-audius-handle \
+  -p 8989:8989 \
+  -v $(pwd)/sources.json:/app/sources.json \
+  audius/ddex:latest
 ```
 
-Your server will now be available at localhost:80 and is exposed via self-signed SSL on :443 if
-`DDEX_URL` is set.
+Configure your `sources.json` before starting (see [Source Configuration](#source-configuration)
+below).
+
+The web UI will be available at `http://localhost:8989`.
+
+## Source Configuration
+
+Sources define where DDEX deliveries come from and how they should be published. Create a
+`sources.json` file in the project root:
+
+```json
+{
+  "sources": [
+    {
+      "env": "production",
+      "name": "my-label",
+      "ddexKey": "your-audius-app-api-key",
+      "ddexSecret": "your-audius-app-api-secret",
+      "autoPublish": false,
+      "awsKey": "your-aws-access-key",
+      "awsSecret": "your-aws-secret-key",
+      "awsRegion": "us-east-1",
+      "awsBucket": "my-ddex-deliveries"
+    }
+  ]
+}
+```
+
+### Source Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `env` | Yes | Audius environment: `production`, `staging`, or `development` |
+| `name` | Yes | Unique identifier for this source |
+| `ddexKey` | Yes | Your Audius app API key (used for OAuth and SDK publishing) |
+| `ddexSecret` | Yes | Your Audius app API secret |
+| `autoPublish` | No | When `true`, automatically publishes to claimable accounts without artist authorization. Default: `false` |
+| `awsKey` | Yes | AWS access key for S3 bucket |
+| `awsSecret` | Yes | AWS secret key for S3 bucket |
+| `awsRegion` | Yes | AWS region of the S3 bucket |
+| `awsBucket` | Yes | S3 bucket name containing DDEX deliveries |
+| `payoutUserId` | No | Encoded Audius user ID to receive payouts for paid releases |
+| `labelUserIds` | No | Object mapping label names to encoded Audius user IDs for payout splits |
+
+### Publishing Modes
+
+**Artist-Authorized (`autoPublish: false`)**
+
+Artists authorize your app via OAuth at `distro.audius.co`. The processor polls for authorized users
+and matches them to artist names in DDEX deliveries. Releases are only published once an artist has
+granted permission.
+
+**Auto-Publish (`autoPublish: true`)**
+
+Releases are published immediately to claimable accounts. A magic link is generated that the
+distributor can pass to the artist, allowing them to claim their Audius account.
+
+## Architecture
+
+The ddex-processor runs as two main processes — a **worker** and a **server** — backed by PostgreSQL.
+
+### Worker
+
+The worker runs on a 5-minute loop and handles:
+
+1. **S3 Polling** — scans configured S3 buckets for new DDEX XML files and assets using incremental
+   marker-based pagination
+2. **XML Parsing** — parses `NewReleaseMessage` (deliveries/updates) and `PurgeReleaseMessage`
+   (takedowns) in ERN 3.8 or ERN 4.0 format
+3. **User Polling** — checks for newly authorized artists via the Audius API
+4. **Publishing** — publishes pending releases via the Audius SDK when all preconditions are met
+   (artist authorized or auto-publish enabled, release date reached, assets available)
+5. **Reporting** — generates CLM reports and processes LSR files
+
+### Server
+
+The Hono-based web server provides:
+
+- A management UI for viewing and administering releases
+- OAuth login for artists to authorize publishing
+- Manual publish/retry controls
+- Sales and delivery reporting
+- Admin access controlled by the `ADMIN_HANDLES` environment variable
+
+## CLI Commands
+
+The processor includes a CLI for debugging and manual operations:
+
+```bash
+# Parse a DDEX XML file and print the result
+npx ts-node cli.ts parse <source-name> <path-to-xml>
+
+# Publish a specific release to a user
+npx ts-node cli.ts publish-to-user <release-id> <user-id>
+
+# Publish to a claimable account (auto-publish)
+npx ts-node cli.ts publish-to-claimable-account <release-id>
+
+# Poll S3 for new deliveries
+npx ts-node cli.ts poll-s3
+
+# Delete a published release
+npx ts-node cli.ts delete <release-id>
+
+# Start the server only (no background worker)
+npx ts-node cli.ts server
+
+# Start the worker only (no web UI)
+npx ts-node cli.ts worker
+
+# Start both server and worker
+npx ts-node cli.ts start
+```
+
+## Delivery Format
+
+The processor expects DDEX deliveries in your S3 bucket as either:
+
+- **ZIP files** containing a DDEX XML file and associated assets (audio files, artwork)
+- **Directories** with XML files and assets organized per the DDEX standard
+
+Supported message types:
+
+- `NewReleaseMessage` — deliver new releases or update existing ones
+- `PurgeReleaseMessage` — take down (delete) previously published releases
+
+See the [Specification](/distributors/specification/overview) section for details on supported
+metadata fields, deal types, and best practices.
+
+## Machine Recommendations
+
+For production deployments, we recommend:
+
+- **OS**: Ubuntu or any Linux distribution with Docker support
+- **CPU**: 4+ cores
+- **Memory**: 8-16 GB
+- **Storage**: Depends on delivery volume — assets are cached locally during processing
+
+## More Information
+
+- **Source code**: [github.com/AudiusProject/ddex-processor](https://github.com/AudiusProject/ddex-processor)
+- **Developer README**: See the
+  [README_DEV.md](https://github.com/AudiusProject/ddex-processor/blob/main/README_DEV.md) for
+  local development setup without Docker
+- **Issues & support**: [github.com/AudiusProject/ddex-processor/issues](https://github.com/AudiusProject/ddex-processor/issues)

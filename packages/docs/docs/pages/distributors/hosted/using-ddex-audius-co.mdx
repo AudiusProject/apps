@@ -1,0 +1,67 @@
+---
+title: Using ddex.audius.co
+description: Managing releases with the hosted DDEX tool
+---
+
+## Overview
+
+[ddex.audius.co](https://ddex.audius.co) is the hosted DDEX ingestion tool operated by Tiki Labs on
+behalf of the Open Audio Protocol. Once you've been onboarded as a distributor, you can log in to view,
+manage, and track all of your releases.
+
+To get started, reach out to **ddex-support@audius.co** or submit an
+[intake form](https://forms.gle/jCwLLWRJY7fCQM5ZA).
+
+## How It Works
+
+After onboarding, you deliver DDEX XML files and associated assets (audio, artwork) to a provided S3
+or SFTP bucket. The hosted tool automatically parses your deliveries, validates them against the
+Audius DDEX specification, and queues them for publishing.
+
+From the web interface at [ddex.audius.co](https://ddex.audius.co) you can:
+
+- View all parsed releases and their current status (pending, published, failed)
+- Inspect validation errors and fix delivery issues
+- Manually trigger or retry publishing
+- Manage artist account associations
+- View sales reports and delivery history
+
+## Publishing Modes
+
+There are two modes for how releases get published to artist accounts on Audius:
+
+### 1. Artist-Authorized (via distro.audius.co)
+
+In this mode, artists individually authorize your distributor to publish on their behalf by visiting
+[distro.audius.co](https://distro.audius.co) and granting access to their Audius account via OAuth.
+
+Once an artist has authorized your distributor:
+
+- Their Audius account is linked to the artist name in your DDEX deliveries
+- Releases are automatically published to the artist's existing Audius account
+- The artist retains full control of their account and can revoke access at any time
+
+This mode is best when artists already have Audius accounts and want to maintain direct control over
+their profiles.
+
+### 2. Auto-Publish with Magic Link
+
+In this mode, the tool automatically publishes releases without requiring prior artist authorization.
+When a release is delivered:
+
+- A new claimable account is created on Audius for the artist (if one doesn't already exist)
+- The release is published immediately to that account
+- The distributor receives a **magic link** that can be passed to the artist
+- The artist uses the magic link to claim ownership of their Audius account and manage their profile
+  going forward
+
+This mode is best for distributors who want to streamline onboarding — releases go live immediately,
+and artists can claim their accounts at their convenience.
+
+:::info[Choosing a Mode]
+
+The publishing mode is configured per-source during onboarding. You can use artist-authorized mode
+for some catalogs and auto-publish for others. Talk to the Tiki Labs team about which mode is best
+for your workflow.
+
+:::

@@ -1,14 +1,23 @@
 ---
-title: Overview
-description: Audius Protocol Documentation
+title: Self-Serve DDEX Ingestion
+description: Run your own DDEX ingestion server for Audius
 ---
 
+## Overview
 
----
+The backend powering [ddex.audius.co](https://ddex.audius.co) is fully open source and published as
+the [ddex-processor](https://github.com/AudiusProject/ddex-processor) — a Node.js application that
+parses DDEX XML deliveries and publishes music to Audius via the [Audius SDK](/sdk). You can run your
+own instance to manage DDEX ingestion independently.
 
-:::info
+It includes:
 
-Content can be ingested into the Audius network by directly operating your own DDEX ingestion
-server. More details soon.
+- **S3 polling** — automatically pulls new deliveries from configured S3 buckets
+- **DDEX XML parsing** — supports ERN 3.8 and ERN 4.0 message formats
+- **Web UI** — browser-based interface for managing releases, users, and publishing status
+- **CLI** — command-line tools for parsing, publishing, and debugging
+- **Auto-publish** — optionally publish to claimable accounts without prior artist authorization
+- **OAuth artist linking** — artists authorize your app to publish on their behalf
+- **Reporting** — sales reports and content lifecycle management (CLM) reports
 
-:::
+To get started, see [Running the DDEX Processor](/distributors/self-serve/run-a-ddex-server).
