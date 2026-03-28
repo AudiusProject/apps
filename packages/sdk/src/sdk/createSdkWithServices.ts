@@ -31,6 +31,7 @@ import { productionConfig } from './config/production'
 import {
   addAppInfoMiddleware,
   addRequestSignatureMiddleware,
+  addSolanaWalletSignatureMiddleware,
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
@@ -70,6 +71,7 @@ import {
   StorageNodeSelector,
   getDefaultStorageNodeSelectorConfig
 } from './services/StorageNodeSelector'
+import { SolanaWallet } from './solanaWallet'
 import { SdkConfig, SdkConfigSchema, ServicesContainer } from './types'
 import fetch from './utils/fetch'
 
@@ -351,6 +353,8 @@ const initializeApis = ({
         : productionConfig.network.apiEndpoint
   const basePath = `${apiEndpoint}/v1`
 
+  const solanaWallet = new SolanaWallet()
+
   const middleware = [
     addAppInfoMiddleware({
       apiKey,
@@ -362,7 +366,8 @@ const initializeApis = ({
       services,
       apiKey,
       apiSecret
-    })
+    }),
+    addSolanaWalletSignatureMiddleware({ solanaWallet })
   ]
 
   // Token store for PKCE flow — provides dynamic accessToken to Configuration
@@ -453,6 +458,7 @@ const initializeApis = ({
 
   return {
     oauth,
+    solanaWallet,
     tokenStore,
     tracks,
     users,

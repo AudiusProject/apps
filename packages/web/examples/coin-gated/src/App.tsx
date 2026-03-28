@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import bs58 from 'bs58'
 
 import { config } from './config'
 import { getSDK } from './sdk'
@@ -8,12 +7,6 @@ import { getSDK } from './sdk'
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-type SolanaWalletAuth = {
-  pubkey: string
-  message: string
-  signature: string // base58-encoded ed25519 signature
-}
 
 type UserProfile = {
   id?: string
@@ -34,19 +27,15 @@ type TrackItem = {
 }
 
 // ---------------------------------------------------------------------------
-// Phantom / Solana wallet adapter
+// Phantom wallet detection
 // ---------------------------------------------------------------------------
 
-interface PhantomProvider {
-  isPhantom?: boolean
-  connect(): Promise<{ publicKey: { toBytes(): Uint8Array; toString(): string } }>
-  signMessage(message: Uint8Array, encoding: string): Promise<{ signature: Uint8Array }>
-  disconnect(): Promise<void>
-}
-
-function getPhantom(): PhantomProvider | null {
+function getPhantom() {
   if (typeof window !== 'undefined' && 'solana' in window) {
-    const provider = (window as Record<string, unknown>).solana as PhantomProvider
+    const provider = (window as Record<string, unknown>).solana as {
+      isPhantom?: boolean
+      disconnect(): Promise<void>
+    }
     if (provider?.isPhantom) return provider
   }
   return null
@@ -82,7 +71,6 @@ function useCoinBalance(
     queryKey: ['coin-balance', userId ? 'user' : 'wallet', userId ?? walletAddress, coinMint],
     queryFn: async () => {
       if (userId) {
-        // Single-coin lookup by user ID + mint — no need to fetch all coins
         const res = await sdk.users.getUserCoin({ id: userId, mint: coinMint! })
         const coin = res.data as { decimals?: number; balance?: number } | undefined
         if (!coin) return null
@@ -90,7 +78,6 @@ function useCoinBalance(
         const rawBalance = coin.balance ?? 0
         return rawBalance / Math.pow(10, decimals)
       }
-      // Wallet path: no single-coin endpoint, fetch all and filter
       const res = await sdk.wallets.getWalletCoins({ walletId: walletAddress! })
       const match = (res.data ?? []).find(
         (c: { mint?: string }) => c.mint === coinMint
@@ -108,10 +95,10 @@ function useCoinBalance(
 // Hooks: useGatedTracks
 // ---------------------------------------------------------------------------
 
-function useGatedTracks(artistId: string | undefined, userId: string | undefined) {
+function useGatedTracks(artistId: string | undefined, userId: string | undefined, walletConnected: boolean) {
   const sdk = getSDK()
   return useQuery({
-    queryKey: ['gated-tracks', artistId, userId],
+    queryKey: ['gated-tracks', artistId, userId, walletConnected],
     queryFn: async () => {
       const res = await sdk.users.getTracksByUser({
         id: artistId!,
@@ -125,44 +112,6 @@ function useGatedTracks(artistId: string | undefined, userId: string | undefined
 }
 
 // ---------------------------------------------------------------------------
-// Stream helpers
-// ---------------------------------------------------------------------------
-
-async function streamWithOAuth(trackId: string, userId: string): Promise<string> {
-  // Use the generated streamTrack method which goes through the SDK middleware
-  // pipeline (adds Bearer token automatically). With noRedirect, the API
-  // returns a JSON object { data: "https://content-node/..." } instead of 302.
-  const sdk = getSDK()
-  const res = await sdk.tracks.streamTrack({ trackId, userId, noRedirect: true })
-  // res.data is the direct content node URL — use it as the audio src
-  return res.data
-}
-
-async function streamWithWallet(
-  trackId: string,
-  wallet: SolanaWalletAuth
-): Promise<string> {
-  // Build the stream URL manually and add Solana wallet headers.
-  // The middleware on the API verifies the ed25519 signature and checks
-  // on-chain token balances in real time.
-  const sdk = getSDK()
-  // Get the base URL from the SDK's configuration
-  const base = (sdk.tracks as unknown as { configuration: { basePath: string } })
-    .configuration.basePath
-  const url = `${base}/tracks/${encodeURIComponent(trackId)}/stream?no_redirect=true`
-  const res = await fetch(url, {
-    headers: {
-      'X-Solana-Wallet': wallet.pubkey,
-      'X-Solana-Message': wallet.message,
-      'X-Solana-Signature': wallet.signature
-    }
-  })
-  if (!res.ok) throw new Error(`Stream failed: ${res.status}`)
-  const json = await res.json()
-  return json.data
-}
-
-// ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
 
@@ -173,7 +122,8 @@ export default function App() {
 
   // Auth state
   const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [solWallet, setSolWallet] = useState<SolanaWalletAuth | null>(null)
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletPubkey, setWalletPubkey] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -181,6 +131,7 @@ export default function App() {
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [streamLoading, setStreamLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+
   // Data
   const { data: coin, isPending: coinPending, error: coinError } = useCoin(activeTicker)
   const userId = profile?.id ? String(profile.id) : undefined
@@ -189,11 +140,10 @@ export default function App() {
     data: tracks,
     isPending: tracksPending,
     error: tracksError
-  } = useGatedTracks(artistId, userId)
+  } = useGatedTracks(artistId, userId, walletConnected)
 
-  // Balance for the active coin — works for both auth paths
   const coinMint = coin?.mint
-  const { data: coinBalance } = useCoinBalance(userId, solWallet?.pubkey, coinMint)
+  const { data: coinBalance } = useCoinBalance(userId, walletPubkey ?? undefined, coinMint)
 
   // -------------------------------------------------------------------------
   // OAuth session restore
@@ -252,28 +202,27 @@ export default function App() {
 
   const handleConnectWallet = useCallback(async () => {
     setError(null)
-    const phantom = getPhantom()
-    if (!phantom) {
+    if (!getPhantom()) {
       setError('Phantom wallet not found. Install phantom.app to use wallet sign-in.')
       return
     }
     try {
-      const { publicKey } = await phantom.connect()
-      const pubkey = publicKey.toString()
-      const message = `Audius coin-gated access: ${Date.now()}`
-      const msgBytes = new TextEncoder().encode(message)
-      const { signature: sigBytes } = await phantom.signMessage(msgBytes, 'utf8')
-      const signature = bs58.encode(sigBytes)
-      setSolWallet({ pubkey, message, signature })
+      const sdk = getSDK()
+      const { publicKey } = await sdk.solanaWallet.auth(window.solana)
+      setWalletConnected(true)
+      setWalletPubkey(publicKey)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Wallet connection failed')
     }
   }, [])
 
   const handleDisconnectWallet = useCallback(async () => {
+    const sdk = getSDK()
     const phantom = getPhantom()
     if (phantom) await phantom.disconnect().catch(() => {})
-    setSolWallet(null)
+    sdk.solanaWallet.clearCredential()
+    setWalletConnected(false)
+    setWalletPubkey(null)
   }, [])
 
   // -------------------------------------------------------------------------
@@ -288,7 +237,6 @@ export default function App() {
 
   const handlePlay = useCallback(
     async (trackId: string) => {
-      // Toggle off
       if (playingId === trackId) {
         cleanupAudio()
         setPlayingId(null)
@@ -300,20 +248,22 @@ export default function App() {
       setError(null)
 
       try {
-        let streamUrl: string
-        if (profile?.id) {
-          streamUrl = await streamWithOAuth(trackId, String(profile.id))
-        } else if (solWallet) {
-          streamUrl = await streamWithWallet(trackId, solWallet)
-        } else {
+        if (!profile?.id && !walletConnected) {
           setError('Sign in with Audius or connect a Solana wallet to stream.')
           setStreamLoading(false)
           return
         }
 
+        const sdk = getSDK()
+        const res = await sdk.tracks.streamTrack({
+          trackId,
+          userId,
+          noRedirect: true
+        })
+
         if (!audioRef.current) audioRef.current = new Audio()
         const audio = audioRef.current
-        audio.src = streamUrl
+        audio.src = res.data
         audio.onended = () => {
           setPlayingId(null)
           cleanupAudio()
@@ -331,7 +281,7 @@ export default function App() {
         setStreamLoading(false)
       }
     },
-    [playingId, profile, solWallet, cleanupAudio]
+    [playingId, profile, walletConnected, userId, cleanupAudio]
   )
 
   // -------------------------------------------------------------------------
@@ -359,7 +309,7 @@ export default function App() {
   // -------------------------------------------------------------------------
   // Render: main
   // -------------------------------------------------------------------------
-  const isAuthed = !!profile || !!solWallet
+  const isAuthed = !!profile || walletConnected
   const coinTicker = coin?.ticker ?? activeTicker
 
   return (
@@ -443,7 +393,7 @@ export default function App() {
             </>
           )}
 
-          {!solWallet ? (
+          {!walletConnected ? (
             <button
               className='button buttonSecondary'
               type='button'
@@ -453,8 +403,8 @@ export default function App() {
             </button>
           ) : (
             <>
-              <span title={solWallet.pubkey}>
-                {solWallet.pubkey.slice(0, 4)}...{solWallet.pubkey.slice(-4)}
+              <span title={walletPubkey ?? ''}>
+                {walletPubkey?.slice(0, 4)}...{walletPubkey?.slice(-4)}
               </span>
               <button className='signOutBtn' type='button' onClick={handleDisconnectWallet}>
                 Disconnect
@@ -527,14 +477,10 @@ export default function App() {
                     <button
                       type='button'
                       className={`playBtn ${isPlaying ? 'playBtnActive' : ''}`}
-                      disabled={(!hasAccess && !solWallet) || streamLoading}
+                      disabled={!isAuthed || streamLoading}
                       onClick={() => handlePlay(id)}
                       aria-label={isPlaying ? 'Stop' : 'Play'}
-                      title={
-                        !hasAccess && !solWallet
-                          ? 'Sign in or connect wallet to stream'
-                          : undefined
-                      }
+                      title={!isAuthed ? 'Sign in or connect wallet to stream' : undefined}
                     >
                       {isPlaying ? '\u23F9' : '\u25B6'}
                     </button>
