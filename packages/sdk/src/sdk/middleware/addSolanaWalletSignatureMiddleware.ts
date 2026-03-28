@@ -7,7 +7,7 @@ import type { SolanaWallet } from '../solanaWallet'
 
 /**
  * Injects X-Solana-* headers when a wallet credential is set.
- * Skips if an Authorization header is already present (OAuth takes precedence).
+ * Works alongside OAuth — both can be present so the API merges balances.
  *
  * @example
  * ```ts
@@ -28,8 +28,6 @@ export const addSolanaWalletSignatureMiddleware = ({
     if (!credential) return context
 
     const headers = context.init.headers as Record<string, string>
-    if (headers.Authorization) return context
-
     return {
       ...context,
       init: {

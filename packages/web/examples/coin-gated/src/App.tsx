@@ -95,10 +95,10 @@ function useCoinBalance(
 // Hooks: useGatedTracks
 // ---------------------------------------------------------------------------
 
-function useGatedTracks(artistId: string | undefined, userId: string | undefined) {
+function useGatedTracks(artistId: string | undefined, userId: string | undefined, walletConnected: boolean) {
   const sdk = getSDK()
   return useQuery({
-    queryKey: ['gated-tracks', artistId, userId],
+    queryKey: ['gated-tracks', artistId, userId, walletConnected],
     queryFn: async () => {
       const res = await sdk.users.getTracksByUser({
         id: artistId!,
@@ -140,7 +140,7 @@ export default function App() {
     data: tracks,
     isPending: tracksPending,
     error: tracksError
-  } = useGatedTracks(artistId, userId)
+  } = useGatedTracks(artistId, userId, walletConnected)
 
   const coinMint = coin?.mint
   const { data: coinBalance } = useCoinBalance(userId, walletPubkey ?? undefined, coinMint)
