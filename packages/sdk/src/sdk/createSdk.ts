@@ -31,9 +31,9 @@ import {
   addTokenRefreshMiddleware
 } from './middleware'
 import { OAuth } from './oauth'
-import { SolanaWallet } from './solanaWallet'
 import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
 import { Logger, Storage, StorageNodeSelector } from './services'
+import { SolanaWallet } from './solanaWallet'
 import { SdkConfigSchema, type SdkConfig } from './types'
 
 export const createSdk = (config: SdkConfig) => {
