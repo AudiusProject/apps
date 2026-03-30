@@ -70,6 +70,9 @@ jobs:
       - name: Cache for Turbo
         uses: rharkor/caching-for-turbo@v2.2.1
 
+      - name: Lint
+        run: npx turbo run lint --filter=@audius/sdk
+
       - name: Typecheck
         run: npx turbo run typecheck --filter=@audius/sdk
 
