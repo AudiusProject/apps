@@ -13,10 +13,12 @@ import { DesktopServerCollectionPage } from 'pages/collection-page/DesktopServer
 import { MobileServerCollectionPage } from 'pages/collection-page/MobileServerCollectionPage'
 import {
   canEmbed,
+  DEFAULT_IMAGE_URL,
   getAppUrl,
   getCollectionPageContext,
   getEmbedUrl,
-  getWebUrl
+  getWebUrl,
+  isDiscord
 } from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
 
@@ -63,12 +65,22 @@ export default function render(pageContext: CollectionPageContext) {
   const appUrl = getAppUrl(urlPathname)
   const webUrl = getWebUrl(urlPathname)
 
+  // Discord uses a weird aspect ratio for OG unfurls, so serve artwork
+  // directly instead of the custom OG image
+  const discordBot = isDiscord(userAgent)
+  const discordImageOverride = discordBot
+    ? collection?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL
+    : undefined
+
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
       <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
         <>
           <MetaTags
             {...seoMetadata}
+            {...(discordImageOverride
+              ? { image: discordImageOverride, entityType: undefined, hashId: undefined }
+              : {})}
             embed={shouldEmbed}
             embedUrl={embedUrl}
             appUrl={appUrl}

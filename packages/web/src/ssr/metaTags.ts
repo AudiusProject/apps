@@ -15,6 +15,9 @@ export const SIGNUP_REF_IMAGE_URL =
 // Regex to detect Twitter/Discord bots that can embed players
 const CAN_EMBED_USER_AGENT_REGEX = /(twitter|discord)/i
 
+// Regex to detect Discord bot specifically
+const DISCORD_USER_AGENT_REGEX = /discord/i
+
 export type PlayableType = 'track' | 'playlist' | 'album'
 
 export interface ExploreInfo {
@@ -60,6 +63,15 @@ export const getEmbedUrl = (type: PlayableType, hashId: string): string => {
  */
 export const canEmbed = (userAgent: string): boolean => {
   return CAN_EMBED_USER_AGENT_REGEX.test(userAgent)
+}
+
+/**
+ * Check if User-Agent is Discord bot
+ * Discord uses a weird aspect ratio for OG unfurls, so we serve artwork
+ * directly instead of the custom OG image.
+ */
+export const isDiscord = (userAgent: string): boolean => {
+  return DISCORD_USER_AGENT_REGEX.test(userAgent)
 }
 
 /**
