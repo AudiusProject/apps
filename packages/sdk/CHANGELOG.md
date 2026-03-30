@@ -1,5 +1,15 @@
 # @audius/sdk
 
+## 15.1.0
+
+### Minor Changes
+
+- 500dccb: Add artist coin solana connection flow
+
+### Patch Changes
+
+- d0f653d: Fix duplicate Bearer header prefix
+
 ## 15.0.1
 
 ### Patch Changes
