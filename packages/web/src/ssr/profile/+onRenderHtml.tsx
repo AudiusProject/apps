@@ -59,7 +59,7 @@ export default function render(pageContext: TrackPageContext) {
   // picture directly instead of the custom OG image
   const discordBot = isDiscord(userAgent)
   const discordImageOverride = discordBot
-    ? user?.profile_picture?.['1000x1000'] ?? DEFAULT_IMAGE_URL
+    ? (user?.profile_picture?.['1000x1000'] ?? DEFAULT_IMAGE_URL)
     : undefined
 
   const pageHtml = renderToString(
@@ -69,7 +69,11 @@ export default function render(pageContext: TrackPageContext) {
           <MetaTags
             {...seoMetadata}
             {...(discordImageOverride
-              ? { image: discordImageOverride, entityType: undefined, hashId: undefined }
+              ? {
+                  image: discordImageOverride,
+                  entityType: undefined,
+                  hashId: undefined
+                }
               : {})}
             appUrl={appUrl}
             webUrl={webUrl}

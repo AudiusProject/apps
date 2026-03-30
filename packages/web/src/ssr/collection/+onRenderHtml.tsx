@@ -69,7 +69,7 @@ export default function render(pageContext: CollectionPageContext) {
   // directly instead of the custom OG image
   const discordBot = isDiscord(userAgent)
   const discordImageOverride = discordBot
-    ? collection?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL
+    ? (collection?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL)
     : undefined
 
   const pageHtml = renderToString(
@@ -79,7 +79,11 @@ export default function render(pageContext: CollectionPageContext) {
           <MetaTags
             {...seoMetadata}
             {...(discordImageOverride
-              ? { image: discordImageOverride, entityType: undefined, hashId: undefined }
+              ? {
+                  image: discordImageOverride,
+                  entityType: undefined,
+                  hashId: undefined
+                }
               : {})}
             embed={shouldEmbed}
             embedUrl={embedUrl}
