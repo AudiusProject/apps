@@ -35,17 +35,36 @@ fi
 
 if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   printf "${GREEN}Installing cocoapods...\n${NC}"
-  {
+  (
     cd ./packages/mobile/ios
 
     if command -v bundle >/dev/null; then
       bundle check || bundle install
     fi
     if command -v pod >/dev/null; then
-    RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
+      # Podfile.lock stays on fmt 11 for older Xcode; CI may use Xcode 16+ which would otherwise
+      # select fmt 12 in the Podfile and disagree with the lock. Default AUDIUS_FMT_LEGACY on CI
+      # unless the workflow already set it (e.g. when you intentionally move the lock to fmt 12).
+      if [[ -n "${CI}" ]] && [[ -z "${AUDIUS_FMT_LEGACY+x}" ]]; then
+        export AUDIUS_FMT_LEGACY=1
+      fi
+      # Avoid stale fmt (and other local podspec) JSON conflicting with the current podspec on disk.
+      rm -rf Pods/Local\ Podspecs 2>/dev/null || true
+      export RCT_NEW_ARCH_ENABLED=0
+      if [[ -n "${CI}" ]]; then
+        bundle exec pod install
+      else
+        # Xcode 16+ uses fmt 12 in the Podfile while Podfile.lock may still pin fmt 11 — first install
+        # can fail until the lock catches up. Refresh fmt, then install (may dirty Podfile.lock locally).
+        if ! bundle exec pod install; then
+          printf "${YELLOW}pod install failed; running pod update fmt then retrying...${NC}\n" >&2
+          bundle exec pod update fmt --no-repo-update
+          bundle exec pod install
+        fi
+      fi
     fi
     cd ../../..
-  } > /dev/null
+  ) > /dev/null
 fi
 
 if [[ -z "${SKIP_ANDROID_INSTALL}" ]]; then

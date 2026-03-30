@@ -1,3 +1,18 @@
+// Handle stale chunk errors after deploys by reloading once
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault()
+
+  const key = 'chunk-reload'
+  const lastReload = sessionStorage.getItem(key)
+  const now = Date.now()
+
+  // Only reload if we haven't reloaded in the last 10 seconds
+  if (!lastReload || now - Number(lastReload) > 10_000) {
+    sessionStorage.setItem(key, String(now))
+    window.location.reload()
+  }
+})
+
 import 'setimmediate'
 
 import { createRoot } from 'react-dom/client'
