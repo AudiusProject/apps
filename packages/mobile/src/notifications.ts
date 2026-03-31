@@ -21,7 +21,7 @@ function extractNotificationCampaignIdFromPayload(
   const target = payload?.data?.data ?? payload?.data ?? payload ?? undefined
   if (!target || typeof target !== 'object') return undefined
   const o = target as Record<string, unknown>
-  const v = o.notification_campaign_id
+  const v = o.notification_campaign_id ?? o.notificationCampaignId
   return typeof v === 'string' && v.length > 0 ? v : undefined
 }
 
