@@ -280,6 +280,7 @@ export const trackMetadataForUploadToSdk = (
         'is_download_gated',
         'is_downloadable',
         'is_original_available',
+        'is_playlist_upload',
         'is_scheduled_release',
         'bpm',
         'is_custom_bpm',
