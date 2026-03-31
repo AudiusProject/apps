@@ -844,6 +844,13 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     for track in tracks:
                         track_id = track.get("track") or track.get("track_id")
                         if track_id:
+                            if not isinstance(track_id, int):
+                                decoded = helpers.decode_string_id(str(track_id))
+                                if decoded is None:
+                                    raise IndexingValidationError(
+                                        f"Invalid track_id in playlist_contents: {track_id}"
+                                    )
+                                track_id = decoded
                             entities_to_fetch[EntityType.TRACK].add(track_id)
 
                 if entity_type == EntityType.TRACK:
