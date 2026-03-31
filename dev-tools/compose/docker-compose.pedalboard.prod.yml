@@ -58,32 +58,6 @@ services:
     profiles:
       - pedalboard
 
-  relay:
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: relay
-        TURBO_TEAM: '${TURBO_TEAM}'
-        TURBO_TOKEN: '${TURBO_TOKEN}'
-    env_file: .env
-    restart: always
-    deploy:
-      mode: replicated
-      replicas: '${DISCOVERY_PROVIDER_REPLICAS}'
-    profiles:
-      - discovery
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:6001/relay/health']
-      interval: 1s
-      timeout: 1s
-      retries: 120
-    depends_on:
-      db:
-        condition: service_healthy
-      discovery-provider-redis:
-        condition: service_healthy
-
   solana-relay:
     build:
       context: ${PROJECT_ROOT}
@@ -119,45 +93,6 @@ services:
         condition: service_healthy
       solana-test-validator:
         condition: service_healthy
-
-  crm:
-    container_name: crm
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: crm
-        TURBO_TEAM: '${TURBO_TEAM}'
-        TURBO_TOKEN: '${TURBO_TOKEN}'
-    restart: always
-    profiles:
-      - pedalboard
-
-  mri:
-    container_name: mri
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: mri
-        TURBO_TEAM: '${TURBO_TEAM}'
-        TURBO_TOKEN: '${TURBO_TOKEN}'
-    restart: always
-    profiles:
-      - pedalboard
-
-  verified-notifications:
-    container_name: verified-notifications
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: verified-notifications
-        TURBO_TEAM: '${TURBO_TEAM:-}'
-        TURBO_TOKEN: '${TURBO_TOKEN:-}'
-    restart: on-failure
-    profiles:
-      - pedalboard
 
   archiver:
     container_name: archiver

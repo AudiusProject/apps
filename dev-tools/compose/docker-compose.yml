@@ -178,40 +178,16 @@ services:
       service: staking
     <<: *common
 
-  relay:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: relay
-    <<: *common
-
   solana-relay:
     extends:
       file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: solana-relay
     <<: *common
 
-  crm:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: crm
-    <<: *common
-
-  mri:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: mri
-    <<: *common
-
   anti-abuse:
     extends:
       file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: anti-abuse
-    <<: *common
-
-  verified-notifications:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: verified-notifications
     <<: *common
 
   archiver:

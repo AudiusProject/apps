@@ -110,27 +110,6 @@ def _get_query_insights():
     return query_insights, False
 
 
-def _get_relay_health():
-    try:
-        relay_plugin = os.getenv(
-            "audius_relay_host",
-            "http://relay:6001/relay",
-        )
-        relay_health = requests.get(relay_plugin + "/health")
-        relay_res = relay_health.json()
-        return relay_res
-    except Exception as e:
-        logger.error(f"relay not reachable {e}")
-        return None
-
-
-def _is_relay_healthy(relay_health_res):
-    relay_status = relay_health_res["status"]
-    is_healthy = relay_status == "up"
-    relay_health_res["is_unhealthy"] = not is_healthy
-    return is_healthy
-
-
 class GetHealthArgs(TypedDict):
     # If True, returns db connection information
     verbose: Optional[bool]
@@ -409,12 +388,6 @@ def get_health(args: GetHealthArgs, use_redis_cache: bool = True) -> Tuple[Dict,
         # TODO - this will become strictly enforced in upcoming service versions and return with error
     else:
         health_results["meets_min_requirements"] = True
-
-    relay_health = _get_relay_health()
-    if relay_health is None or not _is_relay_healthy(relay_health):
-        errors.append("relay unhealthy")
-
-    health_results["relay"] = relay_health
 
     # Elasticsearch health
     # esclient = elasticdsl.get_esclient()

@@ -9,9 +9,7 @@
     "@audius/commands": "*",
     "@audius/sdk": "*",
     "@audius/spl": "*",
-    "@pedalboard/relay": "*",
     "@pedalboard/solana-relay": "*",
-    "@pedalboard/crm": "*",
     "@pedalboard/trending-challenge-rewards": "*",
     "@pedalboard/staking": "*",
     "@pedalboard/archiver": "*"

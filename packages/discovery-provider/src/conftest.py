@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import fakeredis
 import pytest
-import requests
 
 import src.utils.db_session
 import src.utils.elasticdsl
@@ -67,30 +66,5 @@ def get_monitors_mock(monkeypatch):
 
 
 @pytest.fixture
-def mock_requests(monkeypatch):
-    real_get = requests.get
-
-    def mock_relay_health(*args, **kwargs):
-        url = args[0]
-
-        # Check if the URL and endpoint match the ones you want to mock
-        if url == "http://relay:6001/relay/health":
-            # Create a dictionary representing the JSON response
-            json_response = {"status": "up"}
-
-            class MockResponse:
-                def __init__(self, json_data, status_code):
-                    self.json_data = json_data
-                    self.status_code = status_code
-
-                def json(self):
-                    return self.json_data
-
-            # Replace requests.get with a function that returns a mocked response with JSON
-            return MockResponse(json_response, 200)
-
-        # For all other URLs and endpoints, perform the actual request using requests.get
-        return real_get(*args, **kwargs)  # Call the original requests.get
-
-    # Apply the mock_get function to requests.get
-    monkeypatch.setattr(requests, "get", mock_relay_health)
+def mock_requests():
+    """No-op; retained for get_health tests that list this fixture."""

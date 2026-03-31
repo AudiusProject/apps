@@ -44,46 +44,10 @@ services:
     volumes:
       - ${PROJECT_ROOT}:/app
 
-  relay:
-    extends:
-      file: docker-compose.pedalboard.prod.yml
-      service: relay
-    build:
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
-    volumes:
-      - ${PROJECT_ROOT}:/app
-
   solana-relay:
     extends:
       file: docker-compose.pedalboard.prod.yml
       service: solana-relay
-    build:
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
-    volumes:
-      - ${PROJECT_ROOT}:/app
-
-  crm:
-    extends:
-      file: docker-compose.pedalboard.prod.yml
-      service: crm
-    build:
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
-    volumes:
-      - ${PROJECT_ROOT}:/app
-
-  mri:
-    extends:
-      file: docker-compose.pedalboard.prod.yml
-      service: mri
-    build:
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
-    volumes:
-      - ${PROJECT_ROOT}:/app
-
-  verified-notifications:
-    extends:
-      file: docker-compose.pedalboard.prod.yml
-      service: verified-notifications
     build:
       dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.dev
     volumes:

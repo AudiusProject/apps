@@ -91,7 +91,6 @@ jobs:
             - ./packages/ddex-entrypoint/node_modules
             - ./packages/create-audius-app/node_modules
             - ./packages/dotenv-linter/bin
-            - ./packages/discovery-provider/plugins/pedalboard/apps/relay/node_modules
             - ./packages/discovery-provider/plugins/pedalboard/apps/solana-relay/node_modules
 
   generate-release-branch:
