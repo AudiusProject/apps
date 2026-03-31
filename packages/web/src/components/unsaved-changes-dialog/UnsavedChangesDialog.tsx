@@ -41,7 +41,8 @@ export const UnsavedChangesDialog = () => {
   const hotkeyHookRef =
     useRef<(e: KeyboardEvent) => void | undefined>(undefined)
 
-  const addElectronListener = isElectron() && typeof window.require === 'function'
+  const addElectronListener =
+    isElectron() && typeof window.require === 'function'
   const ipcRef = useRef<any>(null)
 
   useEffect(() => {

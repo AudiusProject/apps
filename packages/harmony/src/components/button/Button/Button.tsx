@@ -25,6 +25,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hoverColor,
       variant = 'primary',
       size = 'default',
+      rounded,
       disabled,
       ...baseProps
     } = props
@@ -176,7 +177,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       color: themeColors.static.white,
       boxSizing: 'border-box',
       border: 'none',
-      borderRadius: cornerRadius.s,
+      borderRadius: rounded ? cornerRadius['2xl'] : cornerRadius.s,
       boxShadow: shadows.near,
 
       ...(isSmallOrXs

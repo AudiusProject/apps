@@ -104,22 +104,10 @@ const FanClubDetailPage = lazy(() =>
     default: m.FanClubDetailPage
   }))
 )
-const ExclusiveTracksPage = lazy(() =>
-  import('pages/fan-club-detail-page/components/ExclusiveTracksPage').then(
-    (m) => ({
-      default: m.ExclusiveTracksPage
-    })
-  )
-)
 const ArtistFanClubDetailsPage = lazy(() =>
   import(
     'pages/fan-club-detail-page/components/mobile/ArtistFanClubDetailsPage'
   ).then((m) => ({ default: m.ArtistFanClubDetailsPage }))
-)
-const MobileExclusiveTracksPage = lazy(() =>
-  import(
-    'pages/fan-club-detail-page/components/mobile/ExclusiveTracksPage'
-  ).then((m) => ({ default: m.ExclusiveTracksPage }))
 )
 const CoinRedeemPage = lazy(() =>
   import('pages/coin-redeem-page/CoinRedeemPage').then((m) => ({
@@ -408,10 +396,10 @@ const FanClubDetailPageRoute = ({
   return <FanClubDetailPage />
 }
 
-const CoinExclusiveTracksMobileRoute = () => {
+const CoinExclusiveTracksLegacyRedirect = () => {
   const params = useParams<{ ticker?: string }>()
-  const { ticker } = params
-  return <MobileExclusiveTracksPage ticker={ticker ?? ''} />
+  const ticker = (params.ticker ?? '').toUpperCase()
+  return <Navigate to={generatePath(COIN_DETAIL_PAGE, { ticker })} replace />
 }
 
 type HomePageRedirectProps = {
@@ -950,20 +938,13 @@ const WebPlayer = (props: WebPlayerProps) => {
                   }
                 />
                 <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />
-                {!isMobile ? (
-                  <Route
-                    path={COIN_EXCLUSIVE_TRACKS_PAGE}
-                    element={<ExclusiveTracksPage />}
-                  />
-                ) : (
-                  <Route
-                    path={COIN_EXCLUSIVE_TRACKS_PAGE}
-                    element={<Navigate to={TRENDING_PAGE} replace />}
-                  />
-                )}
+                <Route
+                  path={COIN_EXCLUSIVE_TRACKS_PAGE}
+                  element={<CoinExclusiveTracksLegacyRedirect />}
+                />
                 <Route
                   path={COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE}
-                  element={<CoinExclusiveTracksMobileRoute />}
+                  element={<CoinExclusiveTracksLegacyRedirect />}
                 />
                 <Route
                   path={EDIT_COIN_DETAILS_PAGE}
@@ -1362,7 +1343,11 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route path={COIN_REDEEM_PAGE} element={<CoinRedeemPage />} />
                 <Route
                   path={COIN_EXCLUSIVE_TRACKS_PAGE}
-                  element={<ExclusiveTracksPage />}
+                  element={<CoinExclusiveTracksLegacyRedirect />}
+                />
+                <Route
+                  path={COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE}
+                  element={<CoinExclusiveTracksLegacyRedirect />}
                 />
                 <Route
                   path={EDIT_COIN_DETAILS_PAGE}

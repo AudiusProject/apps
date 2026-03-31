@@ -1,7 +1,7 @@
 import { Flex, makeResponsiveStyles } from '@audius/harmony'
 
 import { BalanceSection } from './components/BalanceSection'
-import { ExclusiveTracksSection } from './components/ExclusiveTracksSection'
+import { FanClubFeedSection } from './components/FanClubFeedSection'
 import { FanClubInfoSection } from './components/FanClubInfoSection'
 import { FanClubInsights } from './components/FanClubInsights'
 import { FanClubLeaderboardCard } from './components/FanClubLeaderboardCard'
@@ -26,7 +26,7 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
         paddingBottom: hasEnoughSpaceForTwoColumns ? 0 : theme.spacing.m
       }
     },
-    /** Primary column: fan club story + exclusive tracks (desktop left). */
+    /** Primary column: fan club story + fan club feed (desktop left). */
     mainColumn: {
       base: {
         order: 1,
@@ -66,7 +66,7 @@ export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
         <FanClubInfoSection mint={mint} variant='hero' />
-        <ExclusiveTracksSection mint={mint} />
+        <FanClubFeedSection mint={mint} />
       </Flex>
       <Flex css={styles.sidebarColumn}>
         <BalanceSection mint={mint} />

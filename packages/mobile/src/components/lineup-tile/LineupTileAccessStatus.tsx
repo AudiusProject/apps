@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import type { FlexProps } from '@audius/harmony-native'
 import {
+  Button,
   Flex,
   IconLock,
   IconLockUnlocked,
@@ -180,6 +181,20 @@ export const LineupTileAccessStatus = ({
     style: { backgroundColor }
   }
 
+  if (isTokenGated && !hasStreamAccess && !isUnlocking) {
+    return (
+      <Button
+        variant='secondary'
+        size='small'
+        rounded
+        onPress={handlePressWithBlock}
+        style={{ height: 24 }}
+      >
+        {buttonText}
+      </Button>
+    )
+  }
+
   return (
     <TouchableOpacity onPressIn={blockTilePress} onPress={handlePressWithBlock}>
       <Flex
@@ -208,9 +223,9 @@ export const LineupTileAccessStatus = ({
             style={styles.loadingSpinner}
             fill={color.icon.staticWhite}
           />
-        ) : !isTokenGated ? (
+        ) : (
           <IconLock color='white' size='s' />
-        ) : null}
+        )}
         {showButtonText ? (
           <Text color='white' variant='label' size='m'>
             {buttonText}

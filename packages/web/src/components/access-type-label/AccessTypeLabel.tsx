@@ -57,7 +57,7 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
   [AccessType.TOKEN_GATED]: {
     icon: IconArtistCoin,
     label: 'Fan Club',
-    color: 'artistCoin'
+    color: 'subdued'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,

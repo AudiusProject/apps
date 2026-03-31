@@ -87,12 +87,28 @@ export const GatedConditionsPill = ({
     ]
   )
 
+  if (isTokenGated) {
+    return (
+      <Button
+        className={className}
+        variant='secondary'
+        size='small'
+        rounded
+        onClick={handleClick}
+        isLoading={unlocking}
+        css={{ height: '24px' }}
+      >
+        {message}
+      </Button>
+    )
+  }
+
   return (
     <Button
       className={className}
       size={buttonSize}
       onClick={handleClick}
-      color={isPurchase ? 'lightGreen' : isTokenGated ? 'coinGradient' : 'blue'}
+      color={isPurchase ? 'lightGreen' : 'blue'}
       isLoading={unlocking}
       iconLeft={showIcon ? IconLock : undefined}
       // TODO: Add 'xs' button size in harmony
