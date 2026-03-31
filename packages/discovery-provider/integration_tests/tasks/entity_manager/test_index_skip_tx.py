@@ -80,3 +80,81 @@ def test_skip_tx(app, mocker):
         ).first()
 
         assert skipped_transactions.txhash == "0x43726561746555736572"
+
+
+def test_skip_malformed_prefetch_metadata(app, mocker):
+    """
+    Ensures malformed metadata shapes in prefetch do not abort block indexing.
+    """
+    mocker.patch(
+        "src.tasks.entity_manager.entity_manager.create_user",
+        side_effect=Exception("Skip tx error"),
+        autospec=True,
+    )
+
+    def get_events_side_effect(_, tx_receipt):
+        return tx_receipts[tx_receipt["transactionHash"].decode("utf-8")]
+
+    mocker.patch(
+        "src.tasks.entity_manager.entity_manager.get_entity_manager_events_tx",
+        side_effect=get_events_side_effect,
+        autospec=True,
+    )
+
+    with app.app_context():
+        db = get_db()
+        web3 = Web3()
+        redis = get_redis()
+        challenge_event_bus: ChallengeEventBus = setup_challenge_bus()
+        update_task = UpdateTask(web3, challenge_event_bus, redis)
+
+    tx_receipts = {
+        # json.loads succeeds, but metadata is not an object
+        "MalformedDeveloperApp": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 1,
+                        "_entityType": "DeveloperApp",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": "[]",
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+        # should still be processed after malformed metadata tx
+        "CreateUser": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 1,
+                        "_entityType": "User",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": "",
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    entity_manager_txs = [
+        AttributeDict({"transactionHash": update_task.web3.to_bytes(text=tx_receipt)})
+        for tx_receipt in tx_receipts
+    ]
+    populate_mock_db_blocks(db, 0, 1)
+
+    with db.scoped_session() as session:
+        entity_manager_update(
+            update_task,
+            session,
+            entity_manager_txs,
+            block_number=0,
+            block_timestamp=1585336422,
+            block_hash=hex(0),
+        )
+        skipped_transactions = session.query(SkippedTransaction).all()
+        assert len(skipped_transactions) == 1
