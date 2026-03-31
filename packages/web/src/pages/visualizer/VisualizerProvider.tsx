@@ -478,6 +478,7 @@ const Visualizer = ({
             onClose()
           }}
           hasShadow={true}
+          fullTrackText
         />
       </div>
     ) : (

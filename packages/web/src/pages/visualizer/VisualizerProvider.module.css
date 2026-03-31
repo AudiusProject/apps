@@ -148,7 +148,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow: hidden;
+  /* Allow wrapped track/artist text to extend below the tile */
+  overflow: visible;
   transition:
     all ease-in-out 0.18s,
     opacity ease-in-out 0.5s;
