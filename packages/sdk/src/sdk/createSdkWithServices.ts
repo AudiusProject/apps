@@ -179,7 +179,9 @@ const initializeServices = ({
     new EntityManagerClient({
       ...getDefaultEntityManagerConfig(servicesConfig),
       audiusWalletClient,
-      logger
+      logger,
+      apiKey,
+      appName: 'appName' in config ? config.appName : undefined
     })
 
   const storage =

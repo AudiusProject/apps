@@ -26,6 +26,14 @@ export type EntityManagerConfigInternal = {
    * The endpoint to use for relays
    */
   endpoint: string
+  /**
+   * API key for rate limit identification on relay calls
+   */
+  apiKey?: string
+  /**
+   * App name for rate limit identification on relay calls
+   */
+  appName?: string
 }
 export type EntityManagerConfig = Partial<EntityManagerConfigInternal> & {
   audiusWalletClient: AudiusWalletClient

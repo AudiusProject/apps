@@ -40,6 +40,8 @@ export class EntityManagerClient implements EntityManagerService {
   private readonly chainId: number
   private readonly contractAddress: string
   private readonly endpoint: string
+  private readonly apiKey?: string
+  private readonly appName?: string
 
   constructor(config_: EntityManagerConfig) {
     const config = mergeConfigWithDefaults(
@@ -51,6 +53,8 @@ export class EntityManagerClient implements EntityManagerService {
     this.contractAddress = config.contractAddress
     this.logger = config.logger.createPrefixedLogger('[entity-manager]')
     this.endpoint = config.endpoint
+    this.apiKey = config.apiKey
+    this.appName = config.appName
   }
 
   /**
@@ -87,7 +91,11 @@ export class EntityManagerClient implements EntityManagerService {
     const [senderAddress] = await this.audiusWalletClient.getAddresses()
     const signature = await this.audiusWalletClient.signTypedData(typedData)
 
-    const url = `${this.endpoint}/relay`
+    const params = new URLSearchParams()
+    if (this.apiKey) params.set('api_key', this.apiKey)
+    if (this.appName) params.set('app_name', this.appName)
+    const qs = params.toString()
+    const url = `${this.endpoint}/relay${qs ? `?${qs}` : ''}`
     this.logger.info(`Making relay request to ${url}`)
     const response = await fetch(url, {
       method: 'POST',
