@@ -16,6 +16,11 @@
   display: block;
 }
 
+/* After idle, top controls fade; hide cursor until mouse moves (options menu keeps cursor) */
+.visualizerCursorHidden {
+  cursor: none;
+}
+
 .topControlsWrap {
   position: absolute;
   top: 22px;

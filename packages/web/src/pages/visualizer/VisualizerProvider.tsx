@@ -326,6 +326,9 @@ const Visualizer = ({
 
   const canBack = ButterchurnVisualizer?.canHistoryBack() ?? false
 
+  /** Top pill fades on idle regardless of auto-hide; hide cursor whenever that idle state is active */
+  const chromeIdleHidden = !showControls && !optionsOpen
+
   const currentTrack = useCurrentTrack()
   const { data: user } = useUser(currentTrack?.owner_id)
 
@@ -438,7 +441,8 @@ const Visualizer = ({
     <div
       className={cn(styles.visualizer, {
         [styles.fade]: fadeVisualizer,
-        [styles.show]: showVisualizer
+        [styles.show]: showVisualizer,
+        [styles.visualizerCursorHidden]: chromeIdleHidden
       })}
       onMouseMove={handleMouseMove}
     >
