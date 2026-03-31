@@ -41,6 +41,8 @@ export class EntityManagerClient implements EntityManagerService {
   private readonly contractAddress: string
   private readonly endpoint: string
   private readonly apiKey?: string
+  private readonly apiSecret?: string
+  private readonly bearerToken?: string
   private readonly appName?: string
 
   constructor(config_: EntityManagerConfig) {
@@ -54,6 +56,8 @@ export class EntityManagerClient implements EntityManagerService {
     this.logger = config.logger.createPrefixedLogger('[entity-manager]')
     this.endpoint = config.endpoint
     this.apiKey = config.apiKey
+    this.apiSecret = config.apiSecret
+    this.bearerToken = config.bearerToken
     this.appName = config.appName
   }
 
@@ -97,11 +101,22 @@ export class EntityManagerClient implements EntityManagerService {
     const qs = params.toString()
     const url = `${this.endpoint}/relay${qs ? `?${qs}` : ''}`
     this.logger.info(`Making relay request to ${url}`)
+
+    const headers = new Headers({
+      'Content-Type': 'application/json'
+    })
+
+    // Add auth header for API identification and rate limiting
+    if (this.bearerToken) {
+      headers.set('Authorization', `Bearer ${this.bearerToken}`)
+    } else if (this.apiKey && this.apiSecret) {
+      const credentials = btoa(`${this.apiKey}:${this.apiSecret}`)
+      headers.set('Authorization', `Basic ${credentials}`)
+    }
+
     const response = await fetch(url, {
       method: 'POST',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      }),
+      headers,
       body: JSON.stringify({
         contractAddress: this.contractAddress,
         contractRegistryKey: 'EntityManager',

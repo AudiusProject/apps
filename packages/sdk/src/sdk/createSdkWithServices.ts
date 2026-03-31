@@ -95,6 +95,7 @@ export const createSdkWithServices = (config: SdkConfig) => {
   let apiKey = 'apiKey' in config ? config.apiKey : undefined
   const appName = 'appName' in config ? config.appName : undefined
   const apiSecret = 'apiSecret' in config ? config.apiSecret : undefined
+  const bearerToken = 'bearerToken' in config ? config.bearerToken : undefined
 
   // Default apiKey to derived key from apiSecret if not provided
   if (apiSecret && !apiKey) {
@@ -102,7 +103,7 @@ export const createSdkWithServices = (config: SdkConfig) => {
   }
 
   // Initialize services
-  const services = initializeServices({ config, apiKey, apiSecret })
+  const services = initializeServices({ config, apiKey, apiSecret, bearerToken })
 
   // Warn if using private key in the browser
   if (apiSecret && isBrowser) {
@@ -145,11 +146,13 @@ export const createSdkWithServices = (config: SdkConfig) => {
 const initializeServices = ({
   config,
   apiKey,
-  apiSecret
+  apiSecret,
+  bearerToken
 }: {
   config: SdkConfig
   apiKey?: string
   apiSecret?: string
+  bearerToken?: string
 }) => {
   const servicesConfig =
     config.environment === 'development' ? developmentConfig : productionConfig
@@ -181,6 +184,8 @@ const initializeServices = ({
       audiusWalletClient,
       logger,
       apiKey,
+      apiSecret,
+      bearerToken,
       appName: 'appName' in config ? config.appName : undefined
     })
 
