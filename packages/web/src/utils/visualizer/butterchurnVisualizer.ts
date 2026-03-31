@@ -67,6 +67,16 @@ let presetHistoryPast: string[] = []
 let presetHistoryFuture: string[] = []
 let onHistoryChange: (() => void) | null = null
 
+/** Invalidates in-flight `bind` continuations after `loadButterchurnLib` (shared promise). */
+let bindGeneration = 0
+
+function sourceBelongsToContext(
+  source: MediaElementAudioSourceNode,
+  ctx: AudioContext
+): boolean {
+  return source.context === ctx
+}
+
 function trimHistory(arr: string[]) {
   while (arr.length > PRESET_HISTORY_MAX) {
     arr.shift()
@@ -169,7 +179,16 @@ function createVisualizerWithAudioContext(audioCtx: AudioContext) {
   boundAudioContext = audioCtx
 
   if (connectedAudioNode) {
-    visualizer.connectAudio(connectedAudioNode)
+    if (
+      connectedAudioNode instanceof MediaElementAudioSourceNode &&
+      sourceBelongsToContext(connectedAudioNode, audioCtx)
+    ) {
+      try {
+        visualizer.connectAudio(connectedAudioNode)
+      } catch {
+        /* cross-context or disposed node */
+      }
+    }
   }
 
   if (canvas.style.display !== 'none' && animFrameId === null) {
@@ -234,17 +253,30 @@ function hide() {
   }
 }
 
-function bindAfterLibLoaded(audioPlayer: AudioPlayerLike) {
+function bindAfterLibLoaded(
+  audioPlayer: AudioPlayerLike,
+  generation: number
+) {
+  if (generation !== bindGeneration) return
   if (!ButterchurnClass) return
-  if (!audioPlayer.audioCtx) return
+  const ctx = audioPlayer.audioCtx
+  if (!ctx) return
 
   const nextSource = audioPlayer.source
   if (!nextSource) return
 
-  const ctx = audioPlayer.audioCtx
-
-  if (boundAudioContext !== null && boundAudioContext !== ctx) {
+  if (
+    visualizer != null &&
+    (boundAudioContext == null || boundAudioContext !== ctx)
+  ) {
     teardownVisualizerForNewAudioContext()
+  } else if (
+    visualizer == null &&
+    boundAudioContext != null &&
+    boundAudioContext !== ctx
+  ) {
+    boundAudioContext = null
+    connectedAudioNode = null
   }
 
   if (
@@ -259,6 +291,10 @@ function bindAfterLibLoaded(audioPlayer: AudioPlayerLike) {
     }
   }
 
+  if (!sourceBelongsToContext(nextSource, ctx)) {
+    return
+  }
+
   connectedAudioNode = nextSource
 
   if (!canvas) {
@@ -270,13 +306,27 @@ function bindAfterLibLoaded(audioPlayer: AudioPlayerLike) {
     return
   }
 
-  visualizer.connectAudio(connectedAudioNode)
+  if (boundAudioContext !== ctx) {
+    teardownVisualizerForNewAudioContext()
+    connectedAudioNode = nextSource
+    createVisualizerWithAudioContext(ctx)
+    return
+  }
+
+  try {
+    visualizer.connectAudio(connectedAudioNode)
+  } catch {
+    teardownVisualizerForNewAudioContext()
+    connectedAudioNode = nextSource
+    createVisualizerWithAudioContext(ctx)
+  }
 }
 
 function bind(audioPlayer: AudioPlayerLike) {
+  const generation = ++bindGeneration
   void loadButterchurnLib().then((ok) => {
-    if (!ok) return
-    bindAfterLibLoaded(audioPlayer)
+    if (!ok || generation !== bindGeneration) return
+    bindAfterLibLoaded(audioPlayer, generation)
   })
 }
 
