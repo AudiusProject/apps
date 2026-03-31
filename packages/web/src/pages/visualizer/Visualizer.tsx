@@ -75,8 +75,8 @@ const Visualizer = ({
       27 /* ESC */: onCloseVisualizer,
       86 /* v */: onToggleVisibility,
       // Space (32) intentionally omitted — conflicts with global play/pause hotkey
-      39 /* Right Arrow */: onHistoryForward,
-      37 /* Left Arrow */: onHistoryBack,
+      190 /* . */: onHistoryForward,
+      188 /* , */: onHistoryBack,
       82 /* r */: onRandomPreset
     }),
     [
