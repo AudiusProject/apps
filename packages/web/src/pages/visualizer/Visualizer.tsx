@@ -1,4 +1,11 @@
-import { Suspense, useEffect, useState, useCallback, lazy } from 'react'
+import {
+  Suspense,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  lazy
+} from 'react'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
@@ -10,6 +17,7 @@ import styles from './Visualizer.module.css'
 import { useLocation } from 'react-router'
 import { useHotkeys } from '@audius/harmony'
 import { route } from '@audius/common/utils'
+import ButterchurnVisualizer from 'utils/visualizer/butterchurnVisualizer'
 
 const { UPLOAD_PAGE, UPLOAD_ALBUM_PAGE, UPLOAD_PLAYLIST_PAGE } = route
 export const NO_VISUALIZER_ROUTES = new Set([
@@ -46,13 +54,41 @@ const Visualizer = ({
   }, [toggleVisibility, pathname])
 
   const onCloseVisualizer = useCallback(() => {
+    if (!isVisible) return
     closeVisualizer()
-  }, [closeVisualizer, pathname])
+  }, [closeVisualizer, isVisible])
 
-  useHotkeys({
-    27 /* ESC */: onCloseVisualizer,
-    86 /* v */: onToggleVisibility
-  })
+  const onHistoryForward = useCallback(() => {
+    if (isVisible) ButterchurnVisualizer?.historyForwardOrNext()
+  }, [isVisible])
+
+  const onHistoryBack = useCallback(() => {
+    if (isVisible) ButterchurnVisualizer?.historyBack()
+  }, [isVisible])
+
+  const onRandomPreset = useCallback(() => {
+    if (isVisible) ButterchurnVisualizer?.randomPreset()
+  }, [isVisible])
+
+  const hotkeyMap = useMemo(
+    () => ({
+      27 /* ESC */: onCloseVisualizer,
+      86 /* v */: onToggleVisibility,
+      // Space (32) intentionally omitted — conflicts with global play/pause hotkey
+      39 /* Right Arrow */: onHistoryForward,
+      37 /* Left Arrow */: onHistoryBack,
+      82 /* r */: onRandomPreset
+    }),
+    [
+      onCloseVisualizer,
+      onToggleVisibility,
+      onHistoryForward,
+      onHistoryBack,
+      onRandomPreset
+    ]
+  )
+
+  useHotkeys(hotkeyMap)
 
   return isLoaded ? (
     <Suspense fallback={<div className={styles.fallback} />}>
