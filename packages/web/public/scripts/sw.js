@@ -8,7 +8,7 @@
 function readNotificationCampaignId(raw) {
   const target = raw?.data?.data ?? raw?.data ?? raw
   if (!target || typeof target !== 'object') return null
-  const v = target.notification_campaign_id
+  const v = target.notification_campaign_id ?? target.notificationCampaignId
   return typeof v === 'string' && v.length > 0 ? v : null
 }
 
