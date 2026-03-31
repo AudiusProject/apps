@@ -44,7 +44,7 @@ const messages = {
   uploadExclusiveTrack: coinDetailsMessages.coinInfo.uploadExclusiveTrack,
   becomeAMember: coinDetailsMessages.balance.becomeAMember,
   hintDescription: coinDetailsMessages.balance.hintDescription,
-  fanClubFeed: 'Fan Club Feed'
+  title: 'Fan Club Feed'
 }
 
 const MAX_PREVIEW_TRACKS = 3
@@ -260,7 +260,7 @@ const FanClubFeed = ({
         <Flex column w='100%'>
           <Flex row alignItems='center' gap='xs' pb='s'>
             <Text variant='heading' size='s'>
-              {messages.fanClubFeed}
+              {messages.title}
             </Text>
           </Flex>
           <Flex alignItems='center' justifyContent='center' pv='xl' w='100%'>
@@ -280,7 +280,7 @@ const FanClubFeed = ({
     <Flex column w='100%'>
       <Flex row alignItems='center' gap='xs' pb='s'>
         <Text variant='heading' size='s'>
-          {messages.fanClubFeed}
+          {messages.title}
         </Text>
         {totalCount > 0 ? (
           <Text variant='heading' size='s' color='subdued'>

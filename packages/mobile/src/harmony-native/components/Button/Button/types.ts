@@ -30,5 +30,10 @@ export type ButtonProps = {
    */
   size?: ButtonSize
 
+  /**
+   * When true, uses fully rounded (pill-shaped) corners
+   */
+  rounded?: boolean
+
   style?: StyleProp<ViewStyle>
 } & Omit<BaseButtonProps, 'styles'>

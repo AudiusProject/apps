@@ -9,8 +9,7 @@ import {
   IconColors,
   Flex,
   Text,
-  IconArtistCoin,
-  IconCoinGatedLabel
+  IconArtistCoin
 } from '@audius/harmony'
 
 type AccessTypeLabelProps = {
@@ -57,8 +56,8 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
   },
   [AccessType.TOKEN_GATED]: {
     icon: IconArtistCoin,
-    label: 'Coin Gated',
-    color: 'artistCoin'
+    label: 'Fan Club',
+    color: 'subdued'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,
@@ -76,15 +75,6 @@ export const AccessTypeLabel = (props: AccessTypeLabelProps) => {
     typeof config.label === 'function'
       ? config.label(scheduledReleaseDate)
       : config.label
-
-  // Use coin gated label svg instead of icon and text for token gated
-  if (type === AccessType.TOKEN_GATED) {
-    return (
-      <Flex alignItems='center'>
-        <IconCoinGatedLabel height={20} />
-      </Flex>
-    )
-  }
 
   return (
     <Flex gap='xs' alignItems='center'>

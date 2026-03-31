@@ -1,6 +1,7 @@
 import { useTrack } from '~/api'
 import {
   isContentSpecialAccess,
+  isContentTokenGated,
   isContentUSDCPurchaseGated,
   ID
 } from '~/models'
@@ -14,6 +15,7 @@ export const useIsTrackUnlockable = (trackId: ID) => {
 
   const isPurchaseable = isContentUSDCPurchaseGated(streamConditions)
   const isSpecialAccess = isContentSpecialAccess(streamConditions)
+  const isTokenGated = isContentTokenGated(streamConditions)
 
-  return isPurchaseable || isSpecialAccess
+  return isPurchaseable || isSpecialAccess || isTokenGated
 }

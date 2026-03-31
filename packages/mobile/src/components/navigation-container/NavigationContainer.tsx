@@ -186,9 +186,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         },
                         CoinRedeemScreen: {
                           path: 'coins/:ticker/redeem/:code?'
-                        },
-                        ExclusiveTracksScreen: {
-                          path: 'coins/:ticker/exclusive-tracks'
                         }
                       }
                     },

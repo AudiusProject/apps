@@ -32,8 +32,7 @@ import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
 import {
   CoinDetailsScreen,
-  EditCoinDetailsScreen,
-  ExclusiveTracksScreen
+  EditCoinDetailsScreen
 } from 'app/screens/coin-details-screen'
 import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
@@ -123,7 +122,6 @@ export type AppTabScreenParamList = {
   CoinDetailsScreen: { ticker: string }
   CoinRedeemScreen: { ticker: string; code?: string }
   EditCoinDetailsScreen: { ticker: string }
-  ExclusiveTracksScreen: { ticker: string }
   Upload: {
     initialMetadata?: Partial<TrackMetadataForUpload>
   }
@@ -245,10 +243,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
-      />
-      <Stack.Screen
-        name='ExclusiveTracksScreen'
-        component={ExclusiveTracksScreen}
       />
       <Stack.Screen
         name='ArtistCoinsExplore'

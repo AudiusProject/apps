@@ -10,18 +10,16 @@ import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
 
 const messages = {
-  fanClubFeed: 'Fan Club Feed'
+  title: 'Fan Club Feed'
 }
 
 const FEED_PAGE_SIZE = 10
 
-type ExclusiveTracksSectionProps = {
+type FanClubFeedSectionProps = {
   mint: string
 }
 
-export const ExclusiveTracksSection = ({
-  mint
-}: ExclusiveTracksSectionProps) => {
+export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
@@ -55,7 +53,7 @@ export const ExclusiveTracksSection = ({
     <Flex column gap='l' w='100%'>
       <Flex alignItems='center' gap='s' w='100%'>
         <Text variant='heading' size='m' color='default'>
-          {messages.fanClubFeed}
+          {messages.title}
         </Text>
         <Text variant='heading' size='m' color='subdued'>
           ({totalCount})
@@ -76,7 +74,7 @@ export const ExclusiveTracksSection = ({
         actions={exclusiveTracksPageLineupActions}
         pageSize={pageSize}
         initialPageSize={FEED_PAGE_SIZE}
-        variant={LineupVariant.SECTION}
+        variant={LineupVariant.MAIN}
         shouldLoadMore
       />
     </Flex>
