@@ -103,7 +103,12 @@ export const createSdkWithServices = (config: SdkConfig) => {
   }
 
   // Initialize services
-  const services = initializeServices({ config, apiKey, apiSecret, bearerToken })
+  const services = initializeServices({
+    config,
+    apiKey,
+    apiSecret,
+    bearerToken
+  })
 
   // Warn if using private key in the browser
   if (apiSecret && isBrowser) {
