@@ -92,6 +92,15 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         params.tracks
       )
 
+      const failedTracks = publishedTracks.filter(
+        (track) => track.error || !track.trackId
+      )
+      if (failedTracks.length > 0) {
+        throw new Error(
+          `Failed to publish ${failedTracks.length} of ${params.tracks.length} collection tracks`
+        )
+      }
+
       // For collection artwork, use the existing flow (not TUS) to keep things simple for now.
       const { artwork } = params.collectionMetadata
       const artworkBlob =
@@ -103,13 +112,11 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         const metadata = albumMetadataForCreateWithSDK(
           params.collectionMetadata
         )
-        metadata.playlistContents = publishedTracks
-          .filter((t) => !!t.trackId)
-          .map((t) => ({
-            timestamp: Math.round(Date.now() / 1000),
-            trackId: t.trackId!,
-            metadataTimestamp: Math.round(Date.now() / 1000)
-          }))
+        metadata.playlistContents = publishedTracks.map((track) => ({
+          timestamp: Math.round(Date.now() / 1000),
+          trackId: track.trackId!,
+          metadataTimestamp: Math.round(Date.now() / 1000)
+        }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
@@ -119,13 +126,11 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         const metadata = playlistMetadataForCreateWithSDK(
           params.collectionMetadata
         )
-        metadata.playlistContents = publishedTracks
-          .filter((t) => !!t.trackId)
-          .map((t) => ({
-            timestamp: Math.round(Date.now() / 1000),
-            trackId: t.trackId!,
-            metadataTimestamp: Math.round(Date.now() / 1000)
-          }))
+        metadata.playlistContents = publishedTracks.map((track) => ({
+          timestamp: Math.round(Date.now() / 1000),
+          trackId: track.trackId!,
+          metadataTimestamp: Math.round(Date.now() / 1000)
+        }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
