@@ -559,7 +559,7 @@ const WebPlayer = (props: WebPlayerProps) => {
   useEffect(() => {
     const client = getClient()
 
-    if (client === Client.ELECTRON) {
+    if (client === Client.ELECTRON && typeof window.require === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       ipcRef.current = window.require('electron').ipcRenderer
 

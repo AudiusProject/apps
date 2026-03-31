@@ -78,6 +78,9 @@ const toastMessages = coinDetailsMessages.toasts
 const BANNER_HEIGHT = 160
 const DISCOVERY_COVER_HEIGHT = 96
 
+/** Matches FanClubDetailContent two-column breakpoint; hero stacks coin header before artist row. */
+const HERO_STACKED_ORDER_RESET = '@media (min-width: 1440px)'
+
 const fanClubCardMessages = walletMessages.artistCoins
 
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
@@ -197,7 +200,15 @@ const FanClubInfoHeroSkeleton = () => {
         alignSelf='stretch'
         css={{ marginTop: -theme.spacing.unit9 }}
       >
-        <Flex gap='s' alignItems='flex-end' w='100%'>
+        <Flex
+          gap='s'
+          alignItems='flex-end'
+          w='100%'
+          css={{
+            order: 3,
+            [HERO_STACKED_ORDER_RESET]: { order: 0 }
+          }}
+        >
           <Skeleton borderRadius='circle' w={72} h={72} />
           <Flex column gap='xs' flex={1}>
             <Skeleton h={12} w={64} />
@@ -212,6 +223,10 @@ const FanClubInfoHeroSkeleton = () => {
           gap='m'
           backgroundColor='surface1'
           w='100%'
+          css={{
+            order: 1,
+            [HERO_STACKED_ORDER_RESET]: { order: 0 }
+          }}
         >
           <Flex gap='m' alignItems='center'>
             <Skeleton w={40} h={40} />
@@ -221,7 +236,15 @@ const FanClubInfoHeroSkeleton = () => {
             </Flex>
           </Flex>
         </Paper>
-        <Flex column gap='m' w='100%'>
+        <Flex
+          column
+          gap='m'
+          w='100%'
+          css={{
+            order: 2,
+            [HERO_STACKED_ORDER_RESET]: { order: 0 }
+          }}
+        >
           <Skeleton width='100%' height='20px' />
           <Skeleton width='90%' height='20px' />
           <Skeleton width='100%' height='20px' />
@@ -991,9 +1014,21 @@ export const FanClubInfoSection = ({
           pb='l'
           pt='l'
           alignSelf='stretch'
-          css={{ marginTop: -theme.spacing.unit9 }}
+          css={{
+            marginTop: -theme.spacing.unit9
+            // Below 1440px: coin header + description first, then artist + social (flex order on children).
+          }}
         >
-          <Flex gap='s' alignItems='flex-end' w='100%' css={{ minWidth: 0 }}>
+          <Flex
+            gap='s'
+            alignItems='flex-end'
+            w='100%'
+            css={{
+              minWidth: 0,
+              order: 3,
+              [HERO_STACKED_ORDER_RESET]: { order: 0 }
+            }}
+          >
             <Avatar userId={coin.ownerId} size='large' />
             <Flex column gap='2xs' flex={1} css={{ minWidth: 0 }}>
               <Text variant='label' size='s' color='subdued'>
@@ -1008,7 +1043,16 @@ export const FanClubInfoSection = ({
             </Flex>
           </Flex>
 
-          {hasSocialLinks ? <SocialLinksDisplay coin={coin} /> : null}
+          {hasSocialLinks ? (
+            <Flex
+              css={{
+                order: 4,
+                [HERO_STACKED_ORDER_RESET]: { order: 0 }
+              }}
+            >
+              <SocialLinksDisplay coin={coin} />
+            </Flex>
+          ) : null}
 
           <Paper
             backgroundColor='surface1'
@@ -1019,6 +1063,10 @@ export const FanClubInfoSection = ({
             column
             gap='m'
             w='100%'
+            css={{
+              order: 1,
+              [HERO_STACKED_ORDER_RESET]: { order: 0 }
+            }}
           >
             <Flex gap='m' alignItems='center' w='100%' css={{ minWidth: 0 }}>
               <TokenIcon logoURI={coin.logoUri} size='xl' hex />
@@ -1034,7 +1082,15 @@ export const FanClubInfoSection = ({
           </Paper>
 
           {hasDescriptionText ? (
-            <Flex column gap='m' alignSelf='stretch'>
+            <Flex
+              column
+              gap='m'
+              alignSelf='stretch'
+              css={{
+                order: 2,
+                [HERO_STACKED_ORDER_RESET]: { order: 0 }
+              }}
+            >
               {descriptionParagraphs.map((paragraph) => {
                 if (paragraph.trim() === '') {
                   return null
@@ -1060,6 +1116,10 @@ export const FanClubInfoSection = ({
               fullWidth
               iconLeft={IconCloudUpload}
               onClick={handleUploadExclusiveTrack}
+              css={{
+                order: 5,
+                [HERO_STACKED_ORDER_RESET]: { order: 0 }
+              }}
             >
               {messages.uploadExclusiveTrack}
             </Button>

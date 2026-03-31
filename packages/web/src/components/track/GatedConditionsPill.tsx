@@ -17,7 +17,7 @@ import { make, track } from 'services/analytics'
 const messages = {
   unlocking: 'Unlocking',
   locked: 'Locked',
-  buyArtistCoin: 'Buy Artist Coin'
+  unlock: 'Unlock'
 }
 
 export const GatedConditionsPill = ({
@@ -50,7 +50,7 @@ export const GatedConditionsPill = ({
     message = isPurchase
       ? USDC(streamConditions.usdc_purchase.price / 100).toLocaleString()
       : isTokenGated
-        ? messages.buyArtistCoin
+        ? messages.unlock
         : messages.locked
   }
 

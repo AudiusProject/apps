@@ -29,7 +29,7 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
     /** Primary column: fan club story + exclusive tracks (desktop left). */
     mainColumn: {
       base: {
-        order: hasEnoughSpaceForTwoColumns ? 1 : 2,
+        order: 1,
         width: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
         maxWidth: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
         minWidth: 0,
@@ -42,7 +42,7 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
     /** Sidebar: balance, leaderboard, insights, on-chain details (desktop right). */
     sidebarColumn: {
       base: {
-        order: hasEnoughSpaceForTwoColumns ? 2 : 1,
+        order: 2,
         width: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
         maxWidth: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
         minWidth: 0,

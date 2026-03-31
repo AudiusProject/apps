@@ -26,14 +26,13 @@ import { makeStyles, flexRowCentered, typography } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
 
-import { CoinGatedLabelSvg } from '../core/CoinGatedLabelSvg'
 import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
 
 const messages = {
   specialAccess: 'SPECIAL ACCESS',
   premiumTrack: 'PREMIUM TRACK',
-  coinGated: 'COIN GATED',
+  coinGated: 'FAN CLUB',
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
 }
 
@@ -142,26 +141,20 @@ export const TrackDetailsTile = ({
         <View style={styles.metadataContainer}>
           {showLabel ? (
             <View style={styles.streamContentLabelContainer}>
-              {isTokenGated ? (
-                <CoinGatedLabelSvg style={{ height: 28, width: 108 }} />
-              ) : (
-                <>
-                  <IconComponent
-                    fill={color}
-                    width={spacing(5)}
-                    height={spacing(5)}
-                  />
-                  <Text
-                    fontSize='small'
-                    colorValue={color}
-                    weight='demiBold'
-                    textTransform='uppercase'
-                    style={styles.streamContentLabel}
-                  >
-                    {title}
-                  </Text>
-                </>
-              )}
+              <IconComponent
+                fill={color}
+                width={spacing(5)}
+                height={spacing(5)}
+              />
+              <Text
+                fontSize='small'
+                colorValue={color}
+                weight='demiBold'
+                textTransform='uppercase'
+                style={styles.streamContentLabel}
+              >
+                {title}
+              </Text>
             </View>
           ) : null}
           <Text

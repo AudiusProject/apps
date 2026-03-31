@@ -47,7 +47,7 @@ const { setLockedContentId } = gatedContentActions
 const messages = {
   unlocking: 'Unlocking',
   locked: 'Locked',
-  buyArtistCoin: 'Buy Fan Club Token',
+  unlock: 'Unlock',
   price: (price: string) => `$${price}`
 }
 
@@ -148,7 +148,7 @@ export const LineupTileAccessStatus = ({
         USDC(streamConditions.usdc_purchase.price / 100).toLocaleString()
       )
     : isTokenGated
-      ? messages.buyArtistCoin
+      ? messages.unlock
       : isUnlocking
         ? messages.unlocking
         : messages.locked
