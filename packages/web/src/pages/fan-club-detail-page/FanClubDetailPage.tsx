@@ -16,6 +16,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { BASE_URL } from 'utils/route'
 
 import { useFanClubDetailTabs } from './FanClubDetailTabs'
+import { MobileFanClubDetailContent } from './MobileFanClubDetailContent'
 
 const { CLUBS_EXPLORE_PAGE, COIN_DETAIL_PAGE, NOT_FOUND_PAGE } = route
 
@@ -72,8 +73,6 @@ const MobileFanClubDetailPageContent = ({
   ogTitle,
   description
 }: FanClubDetailPageContentProps) => {
-  const { body } = useFanClubDetailTabs({ mint })
-
   return (
     <MobilePageContainer
       title={visualTitle}
@@ -81,9 +80,7 @@ const MobileFanClubDetailPageContent = ({
       description={description}
       canonicalUrl={`${BASE_URL}${COIN_DETAIL_PAGE}/${visualTitle}`}
     >
-      <Flex column w='100%' p='l'>
-        {body}
-      </Flex>
+      <MobileFanClubDetailContent mint={mint} />
     </MobilePageContainer>
   )
 }
