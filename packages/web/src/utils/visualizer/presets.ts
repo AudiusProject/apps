@@ -1,10 +1,5 @@
-// Lazy-loaded Milkdrop preset management for butterchurn.
-// The default `butterchurn-presets` entry only ships ~100 presets; additional
-// packs are merged so next/prev/random have hundreds of real presets to cycle.
-//
-// Curated names are only used to *order* favorites first when they exist in the
-// merged map — we never restrict cycling to curated-only (that caused a single-
-// preset bug when almost no curated strings matched the default pack).
+// Lazy-loaded Milkdrop presets — `butterchurn-presets` npm main bundle only (~100).
+// Extra / Extra2 / MD1 packs are omitted (lower average quality, lots of redundancy).
 
 type PresetMap = Record<string, object>
 
@@ -38,25 +33,8 @@ function mergePresetModule(m: Record<string, unknown>): PresetMap {
 export async function loadPresets(): Promise<PresetMap> {
   if (cachedPresets) return cachedPresets
 
-  const [
-    mainMod,
-    extraMod,
-    extra2Mod,
-    md1Mod
-  ] = await Promise.all([
-    import('butterchurn-presets'),
-    import('butterchurn-presets/lib/butterchurnPresetsExtra.min.js'),
-    import('butterchurn-presets/lib/butterchurnPresetsExtra2.min.js'),
-    import('butterchurn-presets/lib/butterchurnPresetsMD1.min.js')
-  ])
-
-  cachedPresets = {
-    ...mergePresetModule(mainMod as Record<string, unknown>),
-    ...mergePresetModule(extraMod as Record<string, unknown>),
-    ...mergePresetModule(extra2Mod as Record<string, unknown>),
-    ...mergePresetModule(md1Mod as Record<string, unknown>)
-  }
-
+  const mainMod = await import('butterchurn-presets')
+  cachedPresets = mergePresetModule(mainMod as Record<string, unknown>)
   return cachedPresets
 }
 
@@ -67,7 +45,6 @@ export function getPresetKeys(presets: PresetMap): string[] {
   )
   const curatedSet = new Set(curatedMatches)
   const remainder = allKeys.filter((k) => !curatedSet.has(k))
-  // Curated first (nicer defaults at the start of the list), then full library
   return [...curatedMatches, ...remainder]
 }
 

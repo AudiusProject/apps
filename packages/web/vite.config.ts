@@ -73,9 +73,6 @@ export default defineConfig(async ({ mode }) => {
         'react-dom',
         'butterchurn',
         'butterchurn-presets',
-        'butterchurn-presets/lib/butterchurnPresetsExtra.min.js',
-        'butterchurn-presets/lib/butterchurnPresetsExtra2.min.js',
-        'butterchurn-presets/lib/butterchurnPresetsMD1.min.js',
         ...(env.VITE_ENV === 'production' ? ['@audius/sdk'] : [])
       ],
       dedupe: ['react', 'react-dom'],
