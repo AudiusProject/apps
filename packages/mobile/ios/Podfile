@@ -1,3 +1,5 @@
+require 'fileutils'
+
 def node_require(script)
   # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
@@ -30,6 +32,51 @@ project 'AudiusReactNative',
 'Prod.Debug' => :debug,
 'Prod.Release' => :release
 
+# fmt must stay on 11.0.2 for older Xcode / committed Podfile.lock; Xcode 16+ needs fmt 12.1.0.
+# React Native pins fmt in fmt.podspec and many *.podspec dependencies — align all before resolution.
+# AUDIUS_FMT_LEGACY=1 → 11.0.2; AUDIUS_FMT_12=1 → 12.1.0 (ignores Xcode). Default: 12 iff Xcode >= 16.
+FMT_VERSION_LEGACY = '11.0.2'
+FMT_VERSION_NEW = '12.1.0'
+
+def audius_xcode_major_version
+  out = `xcodebuild -version 2>/dev/null`
+  (out =~ /Xcode (\d+)/) ? Regexp.last_match(1).to_i : 0
+end
+
+def audius_prepare_react_native_fmt!(react_native_root_abs)
+  dest = File.join(react_native_root_abs, 'third-party-podspecs', 'fmt.podspec')
+  unless File.file?(dest)
+    Pod::UI.warn "Audius: fmt.podspec missing at #{dest}, skipping fmt sync"
+    return
+  end
+
+  force_legacy = ENV['AUDIUS_FMT_LEGACY'] == '1'
+  force_12 = ENV['AUDIUS_FMT_12'] == '1'
+  major = audius_xcode_major_version
+  use_fmt_12 = !force_legacy && (force_12 || major >= 16)
+  version = use_fmt_12 ? FMT_VERSION_NEW : FMT_VERSION_LEGACY
+
+  src_name = use_fmt_12 ? 'fmt-12.1.0.podspec' : 'fmt-11.0.2.podspec'
+  src = File.join(__dir__, 'podspecs', src_name)
+  unless File.file?(src)
+    Pod::UI.warn "Audius: #{src} missing, skipping fmt sync"
+    return
+  end
+
+  FileUtils.cp(src, dest)
+
+  fmt_dep = /dependency "fmt", "[\d.]+"/
+  Dir.glob(File.join(react_native_root_abs, '**/*.podspec')).each do |podspec_path|
+    contents = File.read(podspec_path)
+    next unless contents.match?(fmt_dep)
+
+    updated = contents.gsub(fmt_dep, "dependency \"fmt\", \"#{version}\"")
+    File.write(podspec_path, updated) if updated != contents
+  end
+
+  Pod::UI.puts "Audius: fmt #{version} (xcode major #{major}, AUDIUS_FMT_LEGACY=#{ENV['AUDIUS_FMT_LEGACY']}, AUDIUS_FMT_12=#{ENV['AUDIUS_FMT_12']})"
+end
+
 target 'AudiusReactNative' do
   pod 'SRSRadialGradient', :path => '../../../node_modules/react-native-radial-gradient/ios'
   pod 'ffmpeg-kit-ios-full-gpl', :podspec => './ffmpeg-kit-ios-full-gpl.podspec'
@@ -38,6 +85,9 @@ target 'AudiusReactNative' do
   pod 'nSure'
 
   config = use_native_modules!
+
+  rn_root = File.expand_path(config[:reactNativePath], Pod::Config.instance.installation_root)
+  audius_prepare_react_native_fmt!(rn_root)
 
   use_react_native!(
     :path => config[:reactNativePath],
