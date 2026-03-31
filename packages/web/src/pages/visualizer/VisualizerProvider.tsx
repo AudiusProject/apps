@@ -66,6 +66,9 @@ const messages = {
   closeVisualizer: 'Close visualizer'
 }
 
+/** ms to keep the now-playing corner visible after `currentQueueItem.uid` changes while auto-hide is on */
+const TRACK_CHANGE_NOW_PLAYING_MS = 4500
+
 const Artwork = ({ track }: { track?: Track | null }) => {
   const { track_id } = track || {}
   const { imageUrl: image } = useTrackCoverArt({
@@ -226,18 +229,21 @@ const VisualizerTrackCorner = connect(
   })
 )(function VisualizerTrackCornerInner({
   showControls,
+  nowPlayingPeek,
   autoHideTrackDetails,
   children
 }: {
   showControls: boolean
+  nowPlayingPeek: boolean
   autoHideTrackDetails: boolean
   children: ReactNode
 }) {
-  const trackDetailsVisible = !autoHideTrackDetails ? true : showControls
+  const clusterVisible =
+    !autoHideTrackDetails || showControls || nowPlayingPeek
   return (
     <div
       className={cn(styles.trackCornerCluster, {
-        [styles.trackCornerClusterVisible]: trackDetailsVisible
+        [styles.trackCornerClusterVisible]: clusterVisible
       })}
     >
       {children}
@@ -257,6 +263,7 @@ const Visualizer = ({
   isVisible,
   currentQueueItem,
   playing,
+  autoHideTrackDetails,
   onClose,
   recordOpen,
   recordClose,
@@ -266,9 +273,12 @@ const Visualizer = ({
   const [fadeVisualizer, setFadeVisualizer] = useState<Nullable<Boolean>>(null)
   const [showVisualizer, setShowVisualizer] = useState(false)
   const [showControls, setShowControls] = useState(false)
+  const [nowPlayingPeek, setNowPlayingPeek] = useState(false)
   const [optionsOpen, setOptionsOpen] = useState(false)
   const [, setHistoryTick] = useState(0)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const trackFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevQueueUidRef = useRef<string | null>(null)
 
   const optionsAnchorRef = useRef<HTMLButtonElement>(null)
 
@@ -277,15 +287,19 @@ const Visualizer = ({
     optionsOpenRef.current = optionsOpen
   }, [optionsOpen])
 
-  const handleMouseMove = useCallback(() => {
+  const revealChromeForMs = useCallback((ms: number) => {
     setShowControls(true)
     if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
     controlsTimerRef.current = setTimeout(() => {
       if (!optionsOpenRef.current) {
         setShowControls(false)
       }
-    }, 3000)
+    }, ms)
   }, [])
+
+  const handleMouseMove = useCallback(() => {
+    revealChromeForMs(3000)
+  }, [revealChromeForMs])
 
   useEffect(() => {
     if (!isVisible || !showVisualizer) return
@@ -312,6 +326,47 @@ const Visualizer = ({
   }, [showControls])
 
   useEffect(() => {
+    if (!isVisible) {
+      prevQueueUidRef.current = null
+      setNowPlayingPeek(false)
+      if (trackFlashTimerRef.current) {
+        clearTimeout(trackFlashTimerRef.current)
+        trackFlashTimerRef.current = null
+      }
+    }
+  }, [isVisible])
+
+  const currentTrack = useCurrentTrack()
+
+  useEffect(() => {
+    if (!isVisible || !showVisualizer || !autoHideTrackDetails) return
+    const uid = currentQueueItem?.uid
+    if (!uid) return
+    if (prevQueueUidRef.current === uid) return
+    prevQueueUidRef.current = uid
+
+    setNowPlayingPeek(true)
+    if (trackFlashTimerRef.current) clearTimeout(trackFlashTimerRef.current)
+    trackFlashTimerRef.current = setTimeout(() => {
+      setNowPlayingPeek(false)
+      trackFlashTimerRef.current = null
+    }, TRACK_CHANGE_NOW_PLAYING_MS)
+  }, [
+    isVisible,
+    showVisualizer,
+    autoHideTrackDetails,
+    currentQueueItem?.uid
+  ])
+
+  useEffect(() => {
+    return () => {
+      if (trackFlashTimerRef.current) {
+        clearTimeout(trackFlashTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     ButterchurnVisualizer?.setOnHistoryChange?.(() =>
       setHistoryTick((t) => t + 1)
     )
@@ -326,10 +381,8 @@ const Visualizer = ({
 
   const canBack = ButterchurnVisualizer?.canHistoryBack() ?? false
 
-  /** Top pill fades on idle regardless of auto-hide; hide cursor whenever that idle state is active */
   const chromeIdleHidden = !showControls && !optionsOpen
 
-  const currentTrack = useCurrentTrack()
   const { data: user } = useUser(currentTrack?.owner_id)
 
   useEffect(() => {
@@ -403,10 +456,6 @@ const Visualizer = ({
 
   const renderTrackInfo = () => {
     const { uid } = currentQueueItem
-    const dominantColors = null
-    const dominantColor = dominantColors
-      ? dominantColors[0]
-      : { r: 0, g: 0, b: 0 }
     return currentTrack && user && uid ? (
       <div className={styles.trackInfoWrapper}>
         <PlayingTrackInfo
@@ -429,7 +478,6 @@ const Visualizer = ({
             onClose()
           }}
           hasShadow={true}
-          dominantColor={dominantColor}
         />
       </div>
     ) : (
@@ -498,7 +546,10 @@ const Visualizer = ({
       >
         <VisualizerOptionsForm canBack={canBack} />
       </Popup>
-      <VisualizerTrackCorner showControls={showControls}>
+      <VisualizerTrackCorner
+        showControls={showControls}
+        nowPlayingPeek={nowPlayingPeek}
+      >
         <div className={styles.infoOverlayTileShadow}></div>
         <div className={styles.infoOverlayTile}>
           <div
@@ -512,7 +563,9 @@ const Visualizer = ({
           >
             <Artwork track={currentTrack} />
           </div>
-          {renderTrackInfo()}
+          {!autoHideTrackDetails || showControls || nowPlayingPeek
+            ? renderTrackInfo()
+            : null}
         </div>
       </VisualizerTrackCorner>
       <Toast
@@ -532,7 +585,8 @@ const makeMapStateToProps = () => {
     const currentQueueItem = getCurrentQueueItem(state)
     return {
       currentQueueItem,
-      playing: getPlaying(state)
+      playing: getPlaying(state),
+      autoHideTrackDetails: getAutoHideTrackDetails(state)
     }
   }
   return mapStateToProps

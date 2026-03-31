@@ -1,13 +1,4 @@
-// Butterchurn (Milkdrop) visualizer engine singleton.
-// Drop-in replacement for the old visualizer-1.js with the same public API shape.
-//
-// butterchurn.createVisualizer(audioContext, canvas, opts) — audioContext must be
-// a Web Audio AudioContext, NOT a WebGL context. The visualizer is therefore created
-// lazily inside bind() once we have the AudioContext from the audio player.
-
-import butterchurn from 'butterchurn'
-// @ts-expect-error - butterchurn/lib/isSupported.min has no types
-import isSupported from 'butterchurn/lib/isSupported.min'
+// Milkdrop (butterchurn): singleton canvas, lazy `import()` until bind/show.
 
 import { loadPresets, getPresetKeys, getRandomPresetKey } from './presets'
 
@@ -16,11 +7,50 @@ const AUTO_CYCLE_MS = 45000 // auto-advance interval
 const PRESET_HISTORY_MAX = 10
 
 type AudioPlayerLike = {
-  source: AudioNode | null
+  source: MediaElementAudioSourceNode | null
   audioCtx: AudioContext | null
 }
 
 type PresetMap = Record<string, object>
+
+type ButterchurnDefault = (typeof import('butterchurn'))['default']
+
+let ButterchurnClass: ButterchurnDefault | null = null
+let libLoadPromise: Promise<boolean> | null = null
+
+function resolveButterchurnDefault(
+  bcMod: typeof import('butterchurn')
+): ButterchurnDefault | null {
+  const mod = bcMod as { default?: ButterchurnDefault } & Partial<ButterchurnDefault>
+  const ctor = mod.default ?? (mod as unknown as ButterchurnDefault)
+  return typeof ctor?.createVisualizer === 'function' ? ctor : null
+}
+
+/** Singleflight load; resolves false if import fails or `isSupported` is false */
+function loadButterchurnLib(): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false)
+  if (libLoadPromise) return libLoadPromise
+  libLoadPromise = (async () => {
+    try {
+      const [bcMod, { default: isSup }] = await Promise.all([
+        import('butterchurn'),
+        import('butterchurn/lib/isSupported.min')
+      ])
+      ButterchurnClass = resolveButterchurnDefault(bcMod)
+      if (!ButterchurnClass) {
+        return false
+      }
+      try {
+        return Boolean(isSup())
+      } catch {
+        return false
+      }
+    } catch {
+      return false
+    }
+  })()
+  return libLoadPromise
+}
 
 let canvas: HTMLCanvasElement | null = null
 let visualizer: any = null
@@ -31,6 +61,8 @@ let presetKeys: string[] = []
 let currentPresetIndex = -1
 let currentPresetName: string | null = null
 let connectedAudioNode: AudioNode | null = null
+/** Recreate the visualizer when this diverges from `audioPlayer.audioCtx` */
+let boundAudioContext: AudioContext | null = null
 let presetHistoryPast: string[] = []
 let presetHistoryFuture: string[] = []
 let onHistoryChange: (() => void) | null = null
@@ -53,15 +85,11 @@ function clearPresetHistory() {
 
 function createCanvas(): HTMLCanvasElement {
   const c = document.createElement('canvas')
-  // position:fixed ensures the canvas covers the full viewport regardless of
-  // where it lives in the DOM tree (avoids being clipped by positioned ancestors).
   c.style.position = 'fixed'
   c.style.top = '0'
   c.style.left = '0'
   c.style.width = '100vw'
   c.style.height = '100vh'
-  // Must not capture pointer events — otherwise overlay onMouseMove never runs and
-  // chrome (close, controls) tied to mouse activity stay hidden.
   c.style.pointerEvents = 'none'
   c.style.display = 'none'
   return c
@@ -69,7 +97,6 @@ function createCanvas(): HTMLCanvasElement {
 
 function handleResize() {
   if (!canvas || !visualizer) return
-  // clientWidth/Height may be 0 if canvas isn't in the DOM yet; fall back to window.
   const w = canvas.clientWidth || window.innerWidth
   const h = canvas.clientHeight || window.innerHeight
   const width = w * window.devicePixelRatio
@@ -107,12 +134,26 @@ async function initPresets() {
   }
 }
 
-// --- Public API ---
+function teardownVisualizerForNewAudioContext() {
+  if (animFrameId !== null) {
+    cancelAnimationFrame(animFrameId)
+    animFrameId = null
+  }
+  if (visualizer && connectedAudioNode) {
+    try {
+      visualizer.disconnectAudio(connectedAudioNode)
+    } catch {
+      // Stale node
+    }
+  }
+  visualizer = null
+  connectedAudioNode = null
+  boundAudioContext = null
+}
 
 function createVisualizerWithAudioContext(audioCtx: AudioContext) {
-  if (!canvas) return
+  if (!canvas || !ButterchurnClass) return
 
-  // Canvas may not be in the DOM yet when bind() fires before show(); use window as fallback.
   const w = canvas.clientWidth || window.innerWidth
   const h = canvas.clientHeight || window.innerHeight
   const width = Math.max(w * window.devicePixelRatio, 800)
@@ -120,53 +161,59 @@ function createVisualizerWithAudioContext(audioCtx: AudioContext) {
   canvas.width = width
   canvas.height = height
 
-  visualizer = butterchurn.createVisualizer(audioCtx, canvas, {
+  visualizer = ButterchurnClass.createVisualizer(audioCtx, canvas, {
     width,
     height,
     pixelRatio: window.devicePixelRatio || 1
   })
+  boundAudioContext = audioCtx
 
   if (connectedAudioNode) {
     visualizer.connectAudio(connectedAudioNode)
   }
 
-  // Start the render loop now that butterchurn exists
   if (canvas.style.display !== 'none' && animFrameId === null) {
     animFrameId = requestAnimationFrame(renderLoop)
   }
 
-  initPresets().then(() => {
-    if (presets && presetKeys.length > 0 && visualizer) {
-      const key = getRandomPresetKey(presets, currentPresetName)
-      const idx = presetKeys.indexOf(key)
-      loadPresetByIndex(idx >= 0 ? idx : 0, 0)
-    }
-  })
+  initPresets()
+    .then(() => {
+      if (presets && presetKeys.length > 0 && visualizer) {
+        const key = getRandomPresetKey(presets, currentPresetName)
+        const idx = presetKeys.indexOf(key)
+        loadPresetByIndex(idx >= 0 ? idx : 0, 0)
+      }
+    })
+    .catch(() => {
+      // Dynamic import / preset pack failed
+    })
 }
 
-function show() {
-  if (!isSupported()) return
-
+function applyShow() {
   if (!canvas) {
     canvas = createCanvas()
   }
 
-  // Re-attach if the React component remounted and the wrapper is a new node
   const visWrapper = document.querySelector('.visualizer')
   if (visWrapper && !visWrapper.contains(canvas)) {
     visWrapper.appendChild(canvas)
   }
 
-  // Un-hide without removing from DOM (removing causes WebGL context loss)
   canvas.style.display = 'block'
 
   window.addEventListener('resize', handleResize)
   handleResize()
 
-  // Only start the render loop once butterchurn is ready
   if (visualizer && animFrameId === null) {
     animFrameId = requestAnimationFrame(renderLoop)
   }
+}
+
+function show() {
+  void loadButterchurnLib().then((ok) => {
+    if (!ok) return
+    applyShow()
+  })
 }
 
 function hide() {
@@ -179,20 +226,26 @@ function hide() {
     window.removeEventListener('resize', handleResize)
     clearPresetHistory()
 
-    // Hide via CSS — never remove from DOM to avoid WebGL context loss
     if (canvas) {
       canvas.style.display = 'none'
     }
   } catch {
-    // Defensive: closing must never crash the shell
+    /* hide is best-effort */
   }
 }
 
-function bind(audioPlayer: AudioPlayerLike) {
+function bindAfterLibLoaded(audioPlayer: AudioPlayerLike) {
+  if (!ButterchurnClass) return
   if (!audioPlayer.audioCtx) return
 
   const nextSource = audioPlayer.source
   if (!nextSource) return
+
+  const ctx = audioPlayer.audioCtx
+
+  if (boundAudioContext !== null && boundAudioContext !== ctx) {
+    teardownVisualizerForNewAudioContext()
+  }
 
   if (
     visualizer &&
@@ -208,18 +261,23 @@ function bind(audioPlayer: AudioPlayerLike) {
 
   connectedAudioNode = nextSource
 
-  // Create canvas early if show() hasn't run yet. React fires this effect before
-  // the isVisible effect (component definition order), so canvas may be null here.
   if (!canvas) {
     canvas = createCanvas()
   }
 
   if (!visualizer) {
-    createVisualizerWithAudioContext(audioPlayer.audioCtx)
+    createVisualizerWithAudioContext(ctx)
     return
   }
 
   visualizer.connectAudio(connectedAudioNode)
+}
+
+function bind(audioPlayer: AudioPlayerLike) {
+  void loadButterchurnLib().then((ok) => {
+    if (!ok) return
+    bindAfterLibLoaded(audioPlayer)
+  })
 }
 
 function stop() {
@@ -230,9 +288,6 @@ function stop() {
   stopAutoCycle()
 }
 
-// No-op: Milkdrop presets have their own color systems
-function setDominantColors(_colors?: any) {}
-
 function pushCurrentOntoPastAndClearFuture() {
   if (currentPresetName) {
     presetHistoryPast.push(currentPresetName)
@@ -241,9 +296,8 @@ function pushCurrentOntoPastAndClearFuture() {
   presetHistoryFuture = []
 }
 
-/** New random preset; current moves into back history (for Back / auto-advance). */
 function randomPreset() {
-  if (!presets || presetKeys.length === 0) return
+  if (!visualizer || !presets || presetKeys.length === 0) return
   pushCurrentOntoPastAndClearFuture()
   const key = getRandomPresetKey(presets, currentPresetName)
   const idx = presetKeys.indexOf(key)
@@ -252,7 +306,7 @@ function randomPreset() {
 }
 
 function historyBack() {
-  if (presetHistoryPast.length === 0) return
+  if (!visualizer || presetHistoryPast.length === 0) return
   const key = presetHistoryPast.pop()!
   if (currentPresetName) {
     presetHistoryFuture.push(currentPresetName)
@@ -264,7 +318,7 @@ function historyBack() {
 }
 
 function historyForward() {
-  if (presetHistoryFuture.length === 0) return
+  if (!visualizer || presetHistoryFuture.length === 0) return
   const key = presetHistoryFuture.pop()!
   if (currentPresetName) {
     presetHistoryPast.push(currentPresetName)
@@ -275,7 +329,6 @@ function historyForward() {
   notifyHistory()
 }
 
-/** Redo along forward stack, or at the tip pick a new random preset (like browser forward). */
 function historyForwardOrNext() {
   if (presetHistoryFuture.length > 0) {
     historyForward()
@@ -306,21 +359,21 @@ function setOnHistoryChange(cb: (() => void) | null) {
   onHistoryChange = cb
 }
 
-const ButterchurnVisualizer = isSupported()
-  ? {
-      show,
-      hide,
-      bind,
-      stop,
-      setDominantColors,
-      randomPreset,
-      historyBack,
-      historyForwardOrNext,
-      canHistoryBack,
-      startAutoCycle,
-      stopAutoCycle,
-      setOnHistoryChange
-    }
-  : null
+const ButterchurnVisualizer =
+  typeof window === 'undefined'
+    ? null
+    : {
+        show,
+        hide,
+        bind,
+        stop,
+        randomPreset,
+        historyBack,
+        historyForwardOrNext,
+        canHistoryBack,
+        startAutoCycle,
+        stopAutoCycle,
+        setOnHistoryChange
+      }
 
 export default ButterchurnVisualizer

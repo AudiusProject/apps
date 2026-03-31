@@ -16,15 +16,11 @@ import { closeVisualizer, toggleVisibility } from './store/slice'
 import styles from './Visualizer.module.css'
 import { useLocation } from 'react-router'
 import { useHotkeys } from '@audius/harmony'
-import { route } from '@audius/common/utils'
 import ButterchurnVisualizer from 'utils/visualizer/butterchurnVisualizer'
 
-const { UPLOAD_PAGE, UPLOAD_ALBUM_PAGE, UPLOAD_PLAYLIST_PAGE } = route
-export const NO_VISUALIZER_ROUTES = new Set([
-  UPLOAD_PAGE,
-  UPLOAD_ALBUM_PAGE,
-  UPLOAD_PLAYLIST_PAGE
-])
+import { NO_VISUALIZER_ROUTES } from './constants'
+
+export { NO_VISUALIZER_ROUTES }
 
 const VisualizerProvider = lazy(() => import('./VisualizerProvider'))
 
@@ -47,7 +43,6 @@ const Visualizer = ({
   }, [isVisible])
 
   const onToggleVisibility = useCallback(() => {
-    // Don't toggle in the case that we are on a route that disables the visualizer
     if (NO_VISUALIZER_ROUTES.has(pathname)) return
 
     toggleVisibility()

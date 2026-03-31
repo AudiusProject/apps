@@ -1,0 +1,72 @@
+/* `Link` fills the tile; `.coverArtLink:hover` shows the pill (pill has `pointer-events: auto`) */
+.coverArtLink {
+  display: block;
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.artworkOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.visualizerPill {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.coverArtLink:hover .visualizerPill,
+.visualizerPill:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.visualizerPill:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.visualizerPill:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.98);
+}
+
+/* Legibility on very light or very dark artwork */
+.visualizerPillLabel {
+  color: rgba(255, 255, 255, 0.96) !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.visualizerPillIcon {
+  width: 14px;
+  height: 14px;
+  fill: rgba(255, 255, 255, 0.96);
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+}

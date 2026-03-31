@@ -1,5 +1,4 @@
-// Lazy-loaded Milkdrop presets — `butterchurn-presets` npm main bundle only (~100).
-// Extra / Extra2 / MD1 packs are omitted (lower average quality, lots of redundancy).
+// Presets: dynamic `import('butterchurn-presets')` (main export only).
 
 type PresetMap = Record<string, object>
 

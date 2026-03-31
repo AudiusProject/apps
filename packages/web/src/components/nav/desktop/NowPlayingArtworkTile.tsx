@@ -6,10 +6,10 @@ import { playerSelectors } from '@audius/common/store'
 import {
   IconImage,
   IconWaveForm as IconVisualizer,
-  IconButton,
   useTheme,
   Box,
-  Paper
+  Paper,
+  Text
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,15 +22,18 @@ import {
   useTrackCoverArt,
   useTrackCoverArtDominantColor
 } from 'hooks/useTrackCoverArt'
-import { NO_VISUALIZER_ROUTES } from 'pages/visualizer/Visualizer'
+import { NO_VISUALIZER_ROUTES } from 'pages/visualizer/constants'
 import { openVisualizer } from 'pages/visualizer/store/slice'
 import { fullTrackPage } from 'utils/route'
+
+import styles from './NowPlayingArtworkTile.module.css'
 
 const { getTrackId } = playerSelectors
 
 const messages = {
   viewTrack: 'View currently playing track',
-  showVisualizer: 'Show Visualizer'
+  visualizer: 'Visualizer',
+  openVisualizer: 'Open visualizer'
 }
 
 const AnimatedPaper = animated(Paper)
@@ -39,7 +42,7 @@ export const NowPlayingArtworkTile = () => {
   const dispatch = useDispatch()
   const location = useLocation()
   const { pathname } = location
-  const { color, spacing, motion } = useTheme()
+  const { motion } = useTheme()
 
   const { data: currentUserId } = useCurrentUserId()
   const trackId = useSelector(getTrackId)
@@ -64,6 +67,7 @@ export const NowPlayingArtworkTile = () => {
 
   const handleShowVisualizer = useCallback(
     (event: MouseEvent) => {
+      event.stopPropagation()
       if (NO_VISUALIZER_ROUTES.has(pathname)) return
       event.preventDefault()
       dispatch(openVisualizer())
@@ -100,41 +104,52 @@ export const NowPlayingArtworkTile = () => {
         }}
         style={slideInProps}
       >
-        <Link to={permalink} aria-label={messages.viewTrack}>
+        <Link
+          className={styles.coverArtLink}
+          to={permalink}
+          aria-label={messages.viewTrack}
+        >
           <DynamicImage
             key={trackId}
             useSkeleton={!hasNoArtwork}
             image={trackCoverArtImage}
           >
-            {hasNoArtwork ? (
-              <Box
-                css={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 2,
-                  '& svg path': { fill: 'var(--harmony-static-white)' }
-                }}
-              >
-                <IconImage width={48} height={48} />
-              </Box>
-            ) : null}
-            <IconButton
-              activeColor='active'
-              ripple
-              css={{
-                position: 'absolute',
-                bottom: spacing.unit2,
-                right: spacing.unit2,
-                backgroundColor: color.background.white
-              }}
-              aria-label={messages.showVisualizer}
-              onClick={handleShowVisualizer}
-              icon={IconVisualizer}
-              color='default'
-            />
+            <div className={styles.artworkOverlay}>
+              {hasNoArtwork ? (
+                <Box
+                  css={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2,
+                    '& svg path': { fill: 'var(--harmony-static-white)' }
+                  }}
+                >
+                  <IconImage width={48} height={48} />
+                </Box>
+              ) : null}
+              {NO_VISUALIZER_ROUTES.has(pathname) ? null : (
+                <button
+                  type='button'
+                  className={styles.visualizerPill}
+                  aria-label={messages.openVisualizer}
+                  onClick={handleShowVisualizer}
+                >
+                  <IconVisualizer className={styles.visualizerPillIcon} />
+                  <Text
+                    tag='span'
+                    variant='body'
+                    size='xs'
+                    strength='strong'
+                    className={styles.visualizerPillLabel}
+                  >
+                    {messages.visualizer}
+                  </Text>
+                </button>
+              )}
+            </div>
           </DynamicImage>
         </Link>
       </AnimatedPaper>
