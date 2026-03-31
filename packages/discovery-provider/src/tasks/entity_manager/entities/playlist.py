@@ -627,10 +627,9 @@ def process_playlist_contents(
         if not isinstance(track_id, int):
             decoded = helpers.decode_string_id(str(track_id))
             if decoded is None:
-                logger.warning(
-                    f"playlists.py | Skipping non-integer track_id in playlist_contents: {track_id}"
+                raise IndexingValidationError(
+                    f"Invalid track_id in playlist_contents: {track_id}"
                 )
-                continue
             track_id = decoded
 
         track_metadata = existing_track_records.get(track_id)
