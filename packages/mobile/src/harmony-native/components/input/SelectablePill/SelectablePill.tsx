@@ -123,6 +123,12 @@ export const SelectablePill = (props: SelectablePillProps) => {
     disableUnselectAnimation
   ])
 
+  // Force animated styles to re-evaluate when theme changes
+  // by re-setting the selected shared value with the current state
+  useEffect(() => {
+    selected.value = isSelected ? 1 : 0
+  }, [themeType, selected, isSelected])
+
   const animatedRootStyles = useAnimatedStyle(
     () => ({
       opacity: withTiming(disabled ? 0.45 : 1, motion.press),
