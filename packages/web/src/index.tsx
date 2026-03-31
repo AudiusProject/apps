@@ -1,4 +1,12 @@
 // Handle stale chunk errors after deploys by reloading once
+import 'setimmediate'
+
+import { createRoot } from 'react-dom/client'
+
+import './index.css'
+import RootWithProviders from 'ssr/RootWithProviders'
+import { registerErrorHmrHandler } from 'utils/hmr/errorHmrHandler'
+
 window.addEventListener('vite:preloadError', (event) => {
   event.preventDefault()
 
@@ -12,14 +20,6 @@ window.addEventListener('vite:preloadError', (event) => {
     window.location.reload()
   }
 })
-
-import 'setimmediate'
-
-import { createRoot } from 'react-dom/client'
-
-import './index.css'
-import RootWithProviders from 'ssr/RootWithProviders'
-import { registerErrorHmrHandler } from 'utils/hmr/errorHmrHandler'
 
 // @ts-ignore
 window.global ||= window
