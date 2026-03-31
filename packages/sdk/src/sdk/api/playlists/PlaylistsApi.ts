@@ -1,4 +1,3 @@
-import { pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 import type { z } from 'zod'
 
@@ -11,6 +10,7 @@ import {
   AdvancedOptions
 } from '../../services/EntityManager/types'
 import { decodeHashId, encodeHashId } from '../../utils/hashId'
+import { pick } from '../../utils/objectUtils'
 import { parseParams } from '../../utils/parseParams'
 import {
   Configuration,
@@ -695,7 +695,7 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UpdatePlaylistMetadataSchema.shape
     )
 
-    const picked = pick(playlist, supportedUpdateFields) as Record<
+    const picked = pick(playlist as unknown as Record<string, unknown>, supportedUpdateFields) as Record<
       string,
       unknown
     >

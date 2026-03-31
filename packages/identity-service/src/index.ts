@@ -2,12 +2,17 @@
 
 import { ethereumRouter } from './typed-routes/ethereum/ethRpc'
 import { solanaRouter } from './typed-routes/solana/solanaRelay'
-import { sdk } from '@audius/sdk'
 
 // Import libs before anything else becaues it takes a very long time to load.
 // Once it's imported once, it'll be in the cache and subsequent imports will be ~instant.
 // This first import is slow but makes it easier to debug timing issues since no other code will be slowed down by importing it.
+const path = require('path')
 const { libs } = require('@audius/sdk-legacy/dist/libs')
+const { loadAudiusSdk } = require(path.join(
+  __dirname,
+  '..',
+  'loadAudiusSdk.cjs'
+))
 
 const { setupTracing } = require('./tracer')
 setupTracing()
@@ -34,6 +39,7 @@ const start = async () => {
     | undefined
   logger.info('Starting SDK in environment:', environment)
 
+  const { sdk } = await loadAudiusSdk()
   const audiusSdk = sdk({
     appName: 'identity-service',
     environment: environment ?? 'development'

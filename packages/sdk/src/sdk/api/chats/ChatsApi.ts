@@ -3,7 +3,6 @@ import EventEmitter from 'events'
 import * as secp from '@noble/secp256k1'
 import { base64 } from '@scure/base'
 import WebSocket from 'isomorphic-ws'
-import { uniqBy } from 'lodash'
 import type TypedEmitter from 'typed-emitter'
 import { ulid } from 'ulid'
 
@@ -12,6 +11,7 @@ import type { LoggerService } from '../../services/Logger'
 import type { EventEmitterTarget } from '../../utils/EventEmitterTarget'
 import { CryptoUtils } from '../../utils/crypto'
 import { encodeHashId } from '../../utils/hashId'
+import { uniqBy } from '../../utils/objectUtils'
 import { parseParams } from '../../utils/parseParams'
 import {
   BaseAPI,

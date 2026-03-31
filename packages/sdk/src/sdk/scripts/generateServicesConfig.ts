@@ -9,7 +9,6 @@ import {
   ServiceProviderFactory,
   ServiceTypeManager
 } from '@audius/eth'
-import range from 'lodash/range.js'
 import { createPublicClient, hexToString, http } from 'viem'
 import { mainnet } from 'viem/chains'
 
@@ -148,7 +147,7 @@ const generateServicesConfig = async (
       args: [serviceType]
     })
     const list = await Promise.all(
-      range(1, Number(count) + 1).map((i) =>
+      Array.from({ length: Number(count) }, (_, i) => i + 1).map((i) =>
         ethPublicClient.readContract({
           address: spfAddress,
           abi: ServiceProviderFactory.abi,
