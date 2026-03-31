@@ -347,8 +347,10 @@ const Visualizer = ({
     }
   }, [showVisualizer])
 
+  const audioBindKey = `${audioPlayer?.audio?.currentSrc ?? ''}|${Boolean(audioPlayer?.audioCtx)}`
+
   useEffect(() => {
-    if (!audioPlayer || !playing) return
+    if (!isVisible || !audioPlayer || !playing) return
     const player = audioPlayer
 
     if (player.audioCtx) {
@@ -358,7 +360,7 @@ const Visualizer = ({
       player.audio.addEventListener('canplay', onCanPlay)
       return () => player.audio.removeEventListener('canplay', onCanPlay)
     }
-  }, [isVisible, playing])
+  }, [isVisible, playing, audioBindKey])
 
   useEffect(() => {
     if (isVisible) {

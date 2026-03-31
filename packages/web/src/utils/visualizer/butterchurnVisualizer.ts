@@ -189,9 +189,24 @@ function hide() {
 }
 
 function bind(audioPlayer: AudioPlayerLike) {
-  connectedAudioNode = audioPlayer.source
-
   if (!audioPlayer.audioCtx) return
+
+  const nextSource = audioPlayer.source
+  if (!nextSource) return
+
+  if (
+    visualizer &&
+    connectedAudioNode &&
+    connectedAudioNode !== nextSource
+  ) {
+    try {
+      visualizer.disconnectAudio(connectedAudioNode)
+    } catch {
+      // Stale node after track change / browser quirks
+    }
+  }
+
+  connectedAudioNode = nextSource
 
   // Create canvas early if show() hasn't run yet. React fires this effect before
   // the isVisible effect (component definition order), so canvas may be null here.
@@ -204,9 +219,7 @@ function bind(audioPlayer: AudioPlayerLike) {
     return
   }
 
-  if (connectedAudioNode) {
-    visualizer.connectAudio(connectedAudioNode)
-  }
+  visualizer.connectAudio(connectedAudioNode)
 }
 
 function stop() {
