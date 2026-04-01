@@ -237,12 +237,17 @@ const assertFanClubBalanceSection = async ({
       ).not.toBeInTheDocument()
     }
   } else {
-    // Check for action buttons
+    // Scope to balance card: fan feed composer also exposes a "Send" control (post).
+    const balanceSection = await screen.findByTestId('fan-club-balance-section')
     expect(
-      screen.getByRole('button', { name: /buy\/sell/i })
+      within(balanceSection).getByRole('button', { name: /buy\/sell/i })
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /receive/i })).toBeInTheDocument()
+    expect(
+      within(balanceSection).getByRole('button', { name: /send/i })
+    ).toBeInTheDocument()
+    expect(
+      within(balanceSection).getByRole('button', { name: /receive/i })
+    ).toBeInTheDocument()
 
     // Check for overall balance number (without dollar sign)
     expect(screen.getByText(/89,493,965\.32/)).toBeInTheDocument()

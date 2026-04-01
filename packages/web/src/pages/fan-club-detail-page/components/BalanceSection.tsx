@@ -498,7 +498,15 @@ const BalanceSectionContent = ({ mint }: FanClubMintProps) => {
   const coinName = coin.name ?? ''
 
   return (
-    <Paper borderRadius='l' border='default' shadow='mid' column w='100%' p={0}>
+    <Paper
+      borderRadius='l'
+      border='default'
+      shadow='mid'
+      column
+      w='100%'
+      p={0}
+      data-testid='fan-club-balance-section'
+    >
       {tokenBalanceLoading ? (
         <BalanceSectionSkeletonContent />
       ) : !tokenBalance?.balance ||
