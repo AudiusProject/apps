@@ -695,10 +695,10 @@ export class PlaylistsApi extends GeneratedPlaylistsApi {
       UpdatePlaylistMetadataSchema.shape
     )
 
-    const picked = pick(playlist as unknown as Record<string, unknown>, supportedUpdateFields) as Record<
-      string,
-      unknown
-    >
+    const picked = pick(
+      playlist as unknown as Record<string, unknown>,
+      supportedUpdateFields
+    ) as Record<string, unknown>
     const metadataForUpdate: EntityManagerUpdatePlaylistRequest['metadata'] = {
       ...picked,
       ...(picked.releaseDate != null
