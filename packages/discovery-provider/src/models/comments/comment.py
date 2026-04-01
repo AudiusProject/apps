@@ -3,6 +3,8 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text
 from src.models.base import Base
 from src.models.model_utils import RepresentableMixin
 
+FAN_CLUB_ENTITY_TYPE = "FanClub"
+
 
 class Comment(Base, RepresentableMixin):
     __tablename__ = "comments"

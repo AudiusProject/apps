@@ -7,6 +7,7 @@ from src.models.comments.comment_notification_setting import CommentNotification
 from src.models.comments.comment_reaction import CommentReaction
 from src.models.comments.comment_report import COMMENT_KARMA_THRESHOLD
 from src.models.moderation.muted_user import MutedUser
+from src.models.comments.comment import FAN_CLUB_ENTITY_TYPE
 from src.models.users.aggregate_user import AggregateUser
 from src.models.users.user import User
 from src.queries.query_helpers import get_tracks, get_users
@@ -428,6 +429,25 @@ def build_comments_query(
         query = query.having(
             (func.count(ReplyCountAlias.comment_id) > 0) | (Comment.is_delete == False),
         )
+    elif query_type == "coin":
+        query = query.filter(
+            Comment.entity_id == entity_id,
+            Comment.entity_type == FAN_CLUB_ENTITY_TYPE,
+            CommentThreadAlias.parent_comment_id == None,
+        )
+
+        ReplyCountAlias = aliased(CommentThread)
+        query = query.outerjoin(
+            ReplyCountAlias, Comment.comment_id == ReplyCountAlias.parent_comment_id
+        )
+        query = query.group_by(
+            Comment.comment_id,
+            react_count_subquery.c.react_count,
+            CommentNotificationSetting.is_muted,
+        )
+        query = query.having(
+            (func.count(ReplyCountAlias.comment_id) > 0) | (Comment.is_delete == False),
+        )
     elif query_type == "user":
         # For user comments
         query = query.filter(
@@ -701,6 +721,11 @@ def extract_ids_from_comments(formatted_comments):
         if comment.get("entity_type") == "Track" and comment.get("entity_id"):
             track_ids.add(decode_string_id(comment["entity_id"]))
 
+        if comment.get("entity_type") == FAN_CLUB_ENTITY_TYPE and comment.get(
+            "entity_id"
+        ):
+            user_ids.add(decode_string_id(comment["entity_id"]))
+
         # If we have replies, collect their IDs too
         if comment.get("replies"):
             for reply in comment["replies"]:
@@ -720,6 +745,11 @@ def extract_ids_from_comments(formatted_comments):
 
                 if reply.get("entity_type") == "Track" and reply_entity_id:
                     track_ids.add(reply_entity_id)
+
+                if reply.get("entity_type") == FAN_CLUB_ENTITY_TYPE and reply.get(
+                    "entity_id"
+                ):
+                    user_ids.add(decode_string_id(reply["entity_id"]))
 
     return list(user_ids), list(track_ids)
 

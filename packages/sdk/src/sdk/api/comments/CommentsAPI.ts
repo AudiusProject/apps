@@ -18,8 +18,17 @@ import {
   type UnpinCommentRequest,
   type ReactToCommentRequest,
   type UnreactToCommentRequest,
-  type ReportCommentRequest
+  type ReportCommentRequest,
+  type CreateCommentRequestBody,
+  type ReactCommentRequestBody,
+  type UpdateCommentRequestBody
 } from '../generated/default'
+import {
+  CommentFromJSON,
+  TrackFromJSON,
+  UserFromJSON
+} from '../generated/default/models'
+import * as runtime from '../generated/default/runtime'
 
 import {
   CreateCommentSchema,
@@ -34,7 +43,8 @@ import {
   EntityManagerPinCommentRequest,
   EntityManagerReactCommentRequest,
   EntityManagerReportCommentRequest,
-  type CommentsApiServicesConfig
+  type CommentsApiServicesConfig,
+  type FanClubFeedResponse
 } from './types'
 
 export class CommentsApi extends GeneratedCommentsApi {
@@ -66,11 +76,35 @@ export class CommentsApi extends GeneratedCommentsApi {
       'createComment',
       CreateCommentSchema
     )(params)
-    const { userId, entityType = EntityType.TRACK, commentId } = metadata
+    const {
+      userId,
+      entityType = 'Track',
+      commentId,
+      body,
+      mentions,
+      parentCommentId,
+      trackTimestampS,
+      entityId
+    } = metadata
     const newCommentId = commentId ?? (await this.generateCommentId())
 
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
+    }
+    const data: Record<string, unknown> = {
+      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      body,
+      entity_id: entityId
+    }
+    if (mentions !== undefined && mentions.length > 0) {
+      data.mentions = mentions
+    }
+    if (parentCommentId !== undefined) {
+      data.parent_id = parentCommentId
+      data.parent_comment_id = parentCommentId
+    }
+    if (trackTimestampS !== undefined) {
+      data.track_timestamp_s = trackTimestampS
     }
     const res = await this.entityManager.manageEntity({
       userId,
@@ -79,7 +113,7 @@ export class CommentsApi extends GeneratedCommentsApi {
       action: Action.CREATE,
       metadata: JSON.stringify({
         cid: '',
-        data: snakecaseKeys({ entityType, ...metadata })
+        data
       })
     })
     return {
@@ -94,10 +128,23 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId } = params
+      const md = metadata as CreateCommentRequestBody
+      if (md.entityType === 'FanClub') {
+        return await this.createCommentWithEntityManager({
+          userId,
+          entityType: 'FanClub',
+          entityId: encodeHashId(metadata.entityId) ?? '',
+          body: md.body,
+          commentId: md.commentId,
+          parentCommentId: md.parentId,
+          trackTimestampS: md.trackTimestampS,
+          mentions: md.mentions
+        })
+      }
       return await this.createCommentWithEntityManager({
         userId,
         entityId: encodeHashId(metadata.entityId) ?? '',
-        entityType: metadata.entityType,
+        entityType: 'Track',
         body: metadata.body,
         commentId: metadata.commentId,
         parentCommentId: metadata.parentId,
@@ -118,9 +165,24 @@ export class CommentsApi extends GeneratedCommentsApi {
       'updateComment',
       UpdateCommentSchema
     )(params)
-    const { userId, entityId, trackId, body } = metadata
+    const {
+      userId,
+      entityId,
+      trackId,
+      body,
+      entityType = 'Track',
+      mentions
+    } = metadata
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
+    }
+    const data: Record<string, unknown> = {
+      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      body,
+      entity_id: trackId
+    }
+    if (mentions !== undefined && mentions.length > 0) {
+      data.mentions = mentions
     }
     return await this.entityManager.manageEntity({
       userId,
@@ -129,7 +191,7 @@ export class CommentsApi extends GeneratedCommentsApi {
       action: Action.UPDATE,
       metadata: JSON.stringify({
         cid: '',
-        data: snakecaseKeys({ body, entityId: trackId })
+        data
       })
     })
   }
@@ -140,11 +202,24 @@ export class CommentsApi extends GeneratedCommentsApi {
   ) {
     if (this.entityManager) {
       const { metadata, userId, commentId } = params
+      const md = metadata as UpdateCommentRequestBody
+      if (md.entityType === 'FanClub') {
+        return await this.updateCommentWithEntityManager({
+          userId,
+          entityId: commentId,
+          entityType: 'FanClub',
+          trackId: encodeHashId(md.entityId) ?? '',
+          body: md.body,
+          mentions: md.mentions
+        })
+      }
       return await this.updateCommentWithEntityManager({
         userId,
         entityId: commentId,
+        entityType: 'Track',
         trackId: encodeHashId(metadata.entityId) ?? '',
-        body: metadata.body
+        body: metadata.body,
+        mentions: md.mentions
       })
     }
     return super.updateComment(params, requestInit)
@@ -197,9 +272,19 @@ export class CommentsApi extends GeneratedCommentsApi {
       'reactComment',
       ReactCommentSchema
     )(params)
-    const { userId, commentId, isLiked, trackId } = metadata
+    const {
+      userId,
+      commentId,
+      isLiked,
+      trackId,
+      entityType = 'Track'
+    } = metadata
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
+    }
+    const data: Record<string, unknown> = {
+      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      entity_id: trackId
     }
     return await this.entityManager.manageEntity({
       userId,
@@ -208,7 +293,7 @@ export class CommentsApi extends GeneratedCommentsApi {
       action: isLiked ? Action.REACT : Action.UNREACT,
       metadata: JSON.stringify({
         cid: '',
-        data: snakecaseKeys({ entityId: trackId, entityType: EntityType.TRACK })
+        data
       })
     })
   }
@@ -218,11 +303,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
+      const md = params.metadata as ReactCommentRequestBody
       const metadata: EntityManagerReactCommentRequest = {
         userId: params.userId,
         commentId: params.commentId,
         isLiked: true,
-        trackId: params.commentId // trackId represents the entity being commented on
+        entityType: md.entityType === 'FanClub' ? 'FanClub' : 'Track',
+        trackId: encodeHashId(md.entityId) ?? ''
       }
       return await this.reactToCommentWithEntityManager(metadata)
     }
@@ -234,11 +321,13 @@ export class CommentsApi extends GeneratedCommentsApi {
     requestInit?: RequestInit
   ) {
     if (this.entityManager) {
+      const md = params.metadata as ReactCommentRequestBody
       const metadata: EntityManagerReactCommentRequest = {
         userId: params.userId,
         commentId: params.commentId,
         isLiked: false,
-        trackId: params.commentId
+        entityType: md.entityType === 'FanClub' ? 'FanClub' : 'Track',
+        trackId: encodeHashId(md.entityId) ?? ''
       }
       return await this.reactToCommentWithEntityManager(metadata)
     }
@@ -367,5 +456,92 @@ export class CommentsApi extends GeneratedCommentsApi {
       ...config,
       metadata: ''
     })
+  }
+
+  /**
+   * Fan-club feed: text posts (root `Coin` comments) + tracks stream-gated on this mint
+   * (`stream_conditions.token_gate.token_mint`). API enforces holder gate.
+   */
+  async getFanClubFeed(
+    params: {
+      mint: string
+      userId?: string
+      limit?: number
+      offset?: number
+      sortMethod?: 'top' | 'newest' | 'timestamp'
+    },
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<FanClubFeedResponse> {
+    const queryParameters: Record<string, string | number> = {
+      mint: params.mint
+    }
+    if (params.offset !== undefined) {
+      queryParameters.offset = params.offset
+    }
+    if (params.limit !== undefined) {
+      queryParameters.limit = params.limit
+    }
+    if (params.userId !== undefined) {
+      queryParameters.user_id = params.userId
+    }
+    if (params.sortMethod !== undefined) {
+      queryParameters.sort_method = params.sortMethod
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+    if (
+      !headerParameters.Authorization &&
+      this.configuration &&
+      this.configuration.accessToken
+    ) {
+      const token = await this.configuration.accessToken('OAuth2', ['read'])
+      if (token) {
+        headerParameters.Authorization = token
+      }
+    }
+
+    const response = await this.request(
+      {
+        path: '/fan_club/feed',
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(
+      response,
+      (jsonValue): FanClubFeedResponse => {
+        const o = jsonValue as Record<string, unknown>
+        const rawData = (o.data as unknown[]) ?? []
+        const data = rawData.map((item) => {
+          const it = item as Record<string, unknown>
+          if (it.item_type === 'text_post') {
+            return {
+              item_type: 'text_post' as const,
+              comment: CommentFromJSON(it.comment)
+            }
+          }
+          if (it.item_type === 'track') {
+            return {
+              item_type: 'track' as const,
+              track: TrackFromJSON(it.track)
+            }
+          }
+          return it as FanClubFeedResponse['data'][number]
+        })
+        const rel = (o.related as Record<string, unknown>) ?? {}
+        return {
+          data,
+          related: {
+            users: ((rel.users as unknown[]) ?? []).map((u) => UserFromJSON(u)),
+            tracks: ((rel.tracks as unknown[]) ?? []).map((t) =>
+              TrackFromJSON(t)
+            )
+          }
+        }
+      }
+    ).value()
   }
 }

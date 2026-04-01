@@ -1,8 +1,8 @@
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 from src.challenges.challenge_event import ChallengeEvent
 from src.exceptions import IndexingValidationError
-from src.models.comments.comment import Comment
+from src.models.comments.comment import FAN_CLUB_ENTITY_TYPE, Comment
 from src.models.comments.comment_mention import CommentMention
 from src.models.comments.comment_notification_setting import CommentNotificationSetting
 from src.models.comments.comment_reaction import CommentReaction
@@ -27,6 +27,14 @@ from src.utils.structured_logger import StructuredLogger
 logger = StructuredLogger(__name__)
 
 
+def get_coin_owner_user_id(session, artist_user_id: int):
+    row = session.execute(
+        text("SELECT user_id FROM artist_coins WHERE user_id = :u LIMIT 1"),
+        {"u": artist_user_id},
+    ).scalar()
+    return int(row) if row is not None else None
+
+
 def validate_delete_comment_tx(params: ManageEntityParameters):
     validate_signer(params)
     comment_id = params.entity_id
@@ -36,15 +44,18 @@ def validate_delete_comment_tx(params: ManageEntityParameters):
             f"Cannot delete comment {comment_id} that does not exist"
         )
     comment = params.existing_records[EntityType.COMMENT.value][comment_id]
-    track_owner_id = (
-        params.session.query(Track.owner_id)
-        .filter(Track.track_id == comment.entity_id)
-        .scalar()
-    )
+    if comment.entity_type == FAN_CLUB_ENTITY_TYPE:
+        entity_owner_id = comment.entity_id
+    else:
+        entity_owner_id = (
+            params.session.query(Track.owner_id)
+            .filter(Track.track_id == comment.entity_id)
+            .scalar()
+        )
 
-    if user_id != comment.user_id and user_id != track_owner_id:
+    if user_id != comment.user_id and user_id != entity_owner_id:
         raise IndexingValidationError(
-            f"Only track owner or comment owner can delete comment {comment_id}"
+            f"Only entity owner or comment owner can delete comment {comment_id}"
         )
 
 
@@ -63,29 +74,62 @@ def validate_write_comment_tx(params: ManageEntityParameters):
                 f"Cannot update comment {comment_id} that does not exist"
             )
 
-    # Entity type only supports track at the moment
-    if "entity_type" in params.metadata and params.metadata["entity_type"] != "Track":
+    entity_type_meta = params.metadata.get("entity_type", EntityType.TRACK.value)
+    if entity_type_meta not in (EntityType.TRACK.value, FAN_CLUB_ENTITY_TYPE):
         raise IndexingValidationError(
-            f"Entity type {params.metadata['entity_type']} does not exist"
+            f"Entity type {entity_type_meta} is not supported for comments"
         )
-    if params.metadata["entity_id"] is None:
-        raise IndexingValidationError(
-            "Entitiy id for a track is required to create comment"
-        )
-    if (
-        params.metadata["entity_id"]
-        not in params.existing_records[EntityType.TRACK.value]
-    ):
-        raise IndexingValidationError(
-            f"Track {params.metadata['entity_id']} does not exist"
-        )
+    raw_entity_id = params.metadata.get("entity_id")
+    if raw_entity_id is None:
+        raise IndexingValidationError("entity_id is required to create or update comment")
+
+    track_entity_id = None
+    coin_entity_id = None
+    if entity_type_meta == EntityType.TRACK.value:
+        if not isinstance(raw_entity_id, int):
+            raise IndexingValidationError("Track entity_id must be an integer")
+        track_entity_id = raw_entity_id
+        if track_entity_id not in params.existing_records[EntityType.TRACK.value]:
+            raise IndexingValidationError(f"Track {track_entity_id} does not exist")
+    else:
+        if not isinstance(raw_entity_id, int):
+            raise IndexingValidationError("Fan club entity_id must be an integer")
+        coin_entity_id = raw_entity_id
+        if get_coin_owner_user_id(params.session, coin_entity_id) is None:
+            raise IndexingValidationError(
+                f"Unknown artist coin owner user id {coin_entity_id}"
+            )
+        # Fan club threads: only the artist (entity_id) may create or update comments.
+        if params.user_id != coin_entity_id:
+            raise IndexingValidationError(
+                "Only the fan club owner may comment on fan club threads"
+            )
+
+    if params.action == Action.UPDATE:
+        existing_c = params.existing_records[EntityType.COMMENT.value][comment_id]
+        if existing_c.entity_type == EntityType.TRACK.value:
+            if entity_type_meta != EntityType.TRACK.value or track_entity_id != existing_c.entity_id:
+                raise IndexingValidationError(
+                    "Cannot change comment entity from metadata on update"
+                )
+        elif existing_c.entity_type == FAN_CLUB_ENTITY_TYPE:
+            if (
+                entity_type_meta != FAN_CLUB_ENTITY_TYPE
+                or coin_entity_id != existing_c.entity_id
+            ):
+                raise IndexingValidationError(
+                    "Cannot change comment fan club entity_id from metadata on update"
+                )
+
     if params.metadata["body"] is None or params.metadata["body"] == "":
         raise IndexingValidationError("Comment body is empty")
     if len(params.metadata["body"]) > COMMENT_BODY_LIMIT:
         raise IndexingValidationError("Comment body is empty")
 
-    # Validate parent_comment_id if it exists
-    parent_comment_id = params.metadata.get("parent_comment_id")
+    # Validate parent_comment_id if it exists (API may send parent_id)
+    parent_comment_id = params.metadata.get("parent_comment_id") or params.metadata.get(
+        "parent_id"
+    )
     if parent_comment_id:
         if not isinstance(parent_comment_id, int):
             raise IndexingValidationError(
@@ -101,6 +145,23 @@ def validate_write_comment_tx(params: ManageEntityParameters):
             raise IndexingValidationError(
                 f"comment_thread {(parent_comment_id, comment_id)} already exists"
             )
+        parent_c = params.existing_records[EntityType.COMMENT.value][parent_comment_id]
+        if entity_type_meta == EntityType.TRACK.value:
+            if (
+                parent_c.entity_type != EntityType.TRACK.value
+                or parent_c.entity_id != track_entity_id
+            ):
+                raise IndexingValidationError(
+                    "parent_comment_id does not belong to the same track thread"
+                )
+        else:
+            if (
+                parent_c.entity_type != FAN_CLUB_ENTITY_TYPE
+                or parent_c.entity_id != coin_entity_id
+            ):
+                raise IndexingValidationError(
+                    "parent_comment_id does not belong to the same fan club thread"
+                )
 
     mentions = params.metadata.get("mentions")
     if mentions and not all(isinstance(i, int) for i in mentions):
@@ -113,14 +174,29 @@ def create_comment(params: ManageEntityParameters):
     existing_records = params.existing_records
     metadata = params.metadata
     user_id = params.user_id
-    entity_id = metadata.get("entity_id")
-    entity_type = metadata.get("entity_type", EntityType.TRACK.value)
-    entity_user_id = existing_records[EntityType.TRACK.value][entity_id].owner_id
+    raw_entity_type = metadata.get("entity_type", EntityType.TRACK.value)
+    if raw_entity_type == FAN_CLUB_ENTITY_TYPE:
+        entity_type = FAN_CLUB_ENTITY_TYPE
+        entity_user_id = int(metadata.get("entity_id"))
+        stored_entity_id = entity_user_id
+        notification_entity_type = FAN_CLUB_ENTITY_TYPE
+        notification_entity_id = entity_user_id
+        data_entity_ref = entity_user_id
+    else:
+        entity_type = EntityType.TRACK.value
+        track_entity_id = metadata.get("entity_id")
+        entity_user_id = existing_records[EntityType.TRACK.value][
+            track_entity_id
+        ].owner_id
+        stored_entity_id = track_entity_id
+        notification_entity_type = "Track"
+        notification_entity_id = track_entity_id
+        data_entity_ref = track_entity_id
     mentions = set(
         list(metadata.get("mentions") or [])[:10]
     )  # Only persist the first 10 mentions
     is_owner_mentioned = entity_user_id in mentions
-    parent_comment_id = metadata.get("parent_comment_id")
+    parent_comment_id = metadata.get("parent_comment_id") or metadata.get("parent_id")
     parent_comment = (
         existing_records[EntityType.COMMENT.value][parent_comment_id]
         if parent_comment_id
@@ -142,8 +218,8 @@ def create_comment(params: ManageEntityParameters):
     track_owner_notifications_off = params.session.query(
         params.session.query(CommentNotificationSetting)
         .filter(
-            CommentNotificationSetting.entity_type == "Track",
-            CommentNotificationSetting.entity_id == entity_id,
+            CommentNotificationSetting.entity_type == notification_entity_type,
+            CommentNotificationSetting.entity_id == notification_entity_id,
             CommentNotificationSetting.user_id == entity_user_id,
             CommentNotificationSetting.is_muted == True,
         )
@@ -163,7 +239,7 @@ def create_comment(params: ManageEntityParameters):
         user_id=user_id,
         text=metadata["body"],
         entity_type=entity_type,
-        entity_id=entity_id,
+        entity_id=stored_entity_id,
         track_timestamp_s=metadata["track_timestamp_s"],
         txhash=params.txhash,
         blockhash=params.event_blockhash,
@@ -196,10 +272,10 @@ def create_comment(params: ManageEntityParameters):
             timestamp=params.block_datetime,
             type="comment",
             specifier=str(comment_id),
-            group_id=f"comment:{entity_id}:type:{entity_type}",
+            group_id=f"comment:{data_entity_ref}:type:{entity_type}",
             data={
                 "type": entity_type,
-                "entity_id": entity_id,
+                "entity_id": data_entity_ref,
                 "comment_user_id": user_id,
                 "comment_id": comment_id,
             },
@@ -250,7 +326,7 @@ def create_comment(params: ManageEntityParameters):
                     group_id=f"comment_mention:{comment_id}",
                     data={
                         "type": entity_type,
-                        "entity_id": entity_id,
+                        "entity_id": data_entity_ref,
                         "entity_user_id": entity_user_id,
                         "comment_user_id": user_id,
                         "comment_id": comment_id,
@@ -314,7 +390,7 @@ def create_comment(params: ManageEntityParameters):
                 group_id=f"comment_thread:{parent_comment_id}",
                 data={
                     "type": entity_type,
-                    "entity_id": entity_id,
+                    "entity_id": data_entity_ref,
                     "entity_user_id": entity_user_id,
                     "comment_user_id": user_id,
                     "comment_id": comment_id,
@@ -335,9 +411,20 @@ def update_comment(params: ManageEntityParameters):
     comment_id = params.entity_id
     existing_comment = existing_records[EntityType.COMMENT.value][comment_id]
     user_id = params.user_id
-    entity_id = metadata.get("entity_id")
     entity_type = metadata.get("entity_type", EntityType.TRACK.value)
-    entity_user_id = existing_records[EntityType.TRACK.value][entity_id].owner_id
+    if existing_comment.entity_type == FAN_CLUB_ENTITY_TYPE:
+        entity_user_id = existing_comment.entity_id
+        notification_entity_type = FAN_CLUB_ENTITY_TYPE
+        notification_entity_id = entity_user_id
+        data_entity_ref = existing_comment.entity_id
+    else:
+        track_entity_id = metadata.get("entity_id")
+        entity_user_id = existing_records[EntityType.TRACK.value][
+            track_entity_id
+        ].owner_id
+        notification_entity_type = "Track"
+        notification_entity_id = track_entity_id
+        data_entity_ref = track_entity_id
 
     comment_reports = (
         params.session.query(CommentReport)
@@ -358,7 +445,7 @@ def update_comment(params: ManageEntityParameters):
     mentions = set(
         list(metadata.get("mentions") or [])[:10]
     )  # Only persist the first 10 mentions
-    parent_comment_id = metadata.get("parent_comment_id")
+    parent_comment_id = metadata.get("parent_comment_id") or metadata.get("parent_id")
     parent_comment = existing_records[EntityType.COMMENT.value].get(parent_comment_id)
     parent_comment_user_id = parent_comment.user_id if parent_comment else None
 
@@ -374,8 +461,8 @@ def update_comment(params: ManageEntityParameters):
     track_owner_notifications_off = params.session.query(
         params.session.query(CommentNotificationSetting)
         .filter(
-            CommentNotificationSetting.entity_type == "Track",
-            CommentNotificationSetting.entity_id == entity_id,
+            CommentNotificationSetting.entity_type == notification_entity_type,
+            CommentNotificationSetting.entity_id == notification_entity_id,
             CommentNotificationSetting.user_id == entity_user_id,
             CommentNotificationSetting.is_muted == True,
         )
@@ -485,7 +572,7 @@ def update_comment(params: ManageEntityParameters):
                         group_id=f"comment_mention:{comment_id}",
                         data={
                             "type": entity_type,
-                            "entity_id": entity_id,
+                            "entity_id": data_entity_ref,
                             "entity_user_id": entity_user_id,
                             "comment_user_id": user_id,
                             "comment_id": comment_id,
@@ -555,7 +642,6 @@ def react_comment(params: ManageEntityParameters):
     comment_id = params.entity_id
     user_id = params.user_id
     metadata = params.metadata
-    entity_id = metadata.get("entity_id")
     entity_type = metadata.get("entity_type", EntityType.TRACK.value)
 
     existing_reaction = params.existing_records[EntityType.COMMENT_REACTION.value].get(
@@ -591,86 +677,95 @@ def react_comment(params: ManageEntityParameters):
         (user_id, comment_id), comment_reaction_record, EntityType.COMMENT_REACTION
     )
 
-    if entity_id:
+    comment_row = params.existing_records[EntityType.COMMENT.value][comment_id]
+    if comment_row.entity_type == FAN_CLUB_ENTITY_TYPE:
+        entity_user_id = comment_row.entity_id
+        data_entity_ref = comment_row.entity_id
+        notification_entity_type = FAN_CLUB_ENTITY_TYPE
+        notification_entity_id = entity_user_id
+    else:
+        track_entity_id = comment_row.entity_id
         entity_user_id = params.existing_records[EntityType.TRACK.value][
-            entity_id
+            track_entity_id
         ].owner_id
-        comment_user_id = params.existing_records[EntityType.COMMENT.value][
-            comment_id
-        ].user_id
+        data_entity_ref = track_entity_id
+        notification_entity_type = "Track"
+        notification_entity_id = track_entity_id
 
-        comment_owner_notifications_off = params.session.query(
-            params.session.query(CommentNotificationSetting)
-            .filter(
-                CommentNotificationSetting.entity_type == EntityType.COMMENT.value,
-                CommentNotificationSetting.entity_id == comment_id,
-                CommentNotificationSetting.user_id == comment_user_id,
-                CommentNotificationSetting.is_muted == True,
-            )
-            .exists()
-            | params.session.query(MutedUser)
-            .filter(
-                MutedUser.muted_user_id == user_id,
-                MutedUser.user_id == comment_user_id,
-                MutedUser.is_delete == False,
-            )
-            .exists()
-        ).scalar()
+    comment_user_id = comment_row.user_id
 
-        is_muted_by_karma = (
-            params.session.query(MutedUser.muted_user_id)
-            .join(AggregateUser, MutedUser.user_id == AggregateUser.user_id)
-            .filter(MutedUser.muted_user_id == user_id)
-            .group_by(MutedUser.muted_user_id)
-            .having(func.sum(AggregateUser.follower_count) > COMMENT_KARMA_THRESHOLD)
-            .scalar()
-        ) is not None
+    comment_owner_notifications_off = params.session.query(
+        params.session.query(CommentNotificationSetting)
+        .filter(
+            CommentNotificationSetting.entity_type == EntityType.COMMENT.value,
+            CommentNotificationSetting.entity_id == comment_id,
+            CommentNotificationSetting.user_id == comment_user_id,
+            CommentNotificationSetting.is_muted == True,
+        )
+        .exists()
+        | params.session.query(MutedUser)
+        .filter(
+            MutedUser.muted_user_id == user_id,
+            MutedUser.user_id == comment_user_id,
+            MutedUser.is_delete == False,
+        )
+        .exists()
+    ).scalar()
 
-        track_owner_notifications_off = params.session.query(
-            params.session.query(CommentNotificationSetting)
-            .filter(
-                CommentNotificationSetting.entity_type == "Track",
-                CommentNotificationSetting.entity_id == entity_id,
-                CommentNotificationSetting.user_id == entity_user_id,
-                CommentNotificationSetting.is_muted == True,
-            )
-            .exists()
-            | params.session.query(MutedUser)
-            .filter(
-                MutedUser.muted_user_id == user_id,
-                MutedUser.user_id == entity_user_id,
-                MutedUser.is_delete == False,
-            )
-            .exists()
-        ).scalar()
+    is_muted_by_karma = (
+        params.session.query(MutedUser.muted_user_id)
+        .join(AggregateUser, MutedUser.user_id == AggregateUser.user_id)
+        .filter(MutedUser.muted_user_id == user_id)
+        .group_by(MutedUser.muted_user_id)
+        .having(func.sum(AggregateUser.follower_count) > COMMENT_KARMA_THRESHOLD)
+        .scalar()
+    ) is not None
 
-        track_owner_mention_mute = (
-            comment_user_id == entity_user_id and track_owner_notifications_off
+    track_owner_notifications_off = params.session.query(
+        params.session.query(CommentNotificationSetting)
+        .filter(
+            CommentNotificationSetting.entity_type == notification_entity_type,
+            CommentNotificationSetting.entity_id == notification_entity_id,
+            CommentNotificationSetting.user_id == entity_user_id,
+            CommentNotificationSetting.is_muted == True,
+        )
+        .exists()
+        | params.session.query(MutedUser)
+        .filter(
+            MutedUser.muted_user_id == user_id,
+            MutedUser.user_id == entity_user_id,
+            MutedUser.is_delete == False,
+        )
+        .exists()
+    ).scalar()
+
+    track_owner_mention_mute = (
+        comment_user_id == entity_user_id and track_owner_notifications_off
+    )
+
+    if (
+        user_id != comment_user_id
+        and not comment_owner_notifications_off
+        and not is_muted_by_karma
+        and not track_owner_mention_mute
+    ):
+        comment_reaction_notification = Notification(
+            blocknumber=params.block_number,
+            user_ids=[comment_user_id],
+            timestamp=params.block_datetime,
+            type="comment_reaction",
+            specifier=str(user_id),
+            group_id=f"comment_reaction:{comment_id}",
+            data={
+                "type": entity_type,
+                "entity_id": data_entity_ref,
+                "entity_user_id": entity_user_id,
+                "comment_id": comment_id,
+                "reacter_user_id": user_id,
+            },
         )
 
-        if (
-            user_id != comment_user_id
-            and not comment_owner_notifications_off
-            and not is_muted_by_karma
-            and not track_owner_mention_mute
-        ):
-            comment_reaction_notification = Notification(
-                blocknumber=params.block_number,
-                user_ids=[comment_user_id],
-                timestamp=params.block_datetime,
-                type="comment_reaction",
-                specifier=str(user_id),
-                group_id=f"comment_reaction:{comment_id}",
-                data={
-                    "type": entity_type,
-                    "entity_id": entity_id,
-                    "entity_user_id": entity_user_id,
-                    "comment_id": comment_id,
-                    "reacter_user_id": user_id,
-                },
-            )
-
-            safe_add_notification(params.session, comment_reaction_notification)
+        safe_add_notification(params.session, comment_reaction_notification)
 
 
 def unreact_comment(params: ManageEntityParameters):
