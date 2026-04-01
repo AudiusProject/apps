@@ -75,9 +75,17 @@ export const useNotificationEntities = <T extends Notification>(
 
   // For entity-based notifications
   const entityIds = 'entityIds' in notification ? notification.entityIds : []
+  // For UserSubscription notifications, limit to first entity to avoid
+  // fetching extra tracks
+  // The UI only uses entities[0] for single uploads and just shows the count
+  // for multi-uploads.
+  const isUserSubscription =
+    notification.type === NotificationType.UserSubscription
+  const trackEntityIds =
+    isUserSubscription && entityIds.length > 1 ? [entityIds[0]] : entityIds
   const { data: tracks } = useTracks(
     'entityType' in notification && notification.entityType === Entity.Track
-      ? entityIds
+      ? trackEntityIds
       : null
   )
 
