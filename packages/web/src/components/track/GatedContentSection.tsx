@@ -59,7 +59,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   coinGated: 'COIN GATED',
   specialAccess: 'SPECIAL ACCESS',
   followArtist: 'Follow Artist',
-  buyArtistCoin: 'Buy Fan Club Token',
+  buyArtistCoin: 'Buy Coins',
   period: '.',
   exclamationMark: '!',
   ownFollowGated: 'Users can unlock access by following your account!',

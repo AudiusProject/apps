@@ -107,6 +107,7 @@ const FanClubTabContent = ({ mint }: FanClubTabContentProps) => {
   return (
     <Flex column gap='l' w='100%' p='l'>
       <FanClubInfoSection mint={mint} variant='hero' />
+      <BalanceSection mint={mint} />
       {isMemberOrOwner ? <FanClubLeaderboardCard mint={mint} /> : null}
       <FanClubFeedSection mint={mint} />
     </Flex>

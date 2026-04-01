@@ -98,7 +98,7 @@ export const FanClubLeaderboardCard = ({
         </Text>
         {membersCount ? (
           <Text variant='heading' size='s' color='subdued'>
-            ({membersCount})
+            ({membersCount.toLocaleString()})
           </Text>
         ) : null}
       </Flex>

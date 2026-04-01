@@ -66,11 +66,11 @@ export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
         <FanClubInfoSection mint={mint} variant='hero' />
+        <BalanceSection mint={mint} />
+        <FanClubLeaderboardCard mint={mint} />
         <FanClubFeedSection mint={mint} />
       </Flex>
       <Flex css={styles.sidebarColumn}>
-        <BalanceSection mint={mint} />
-        <FanClubLeaderboardCard mint={mint} />
         <FanClubInsights mint={mint} />
         <FanClubInfoSection mint={mint} variant='onchainDetails' />
       </Flex>
