@@ -86,8 +86,11 @@ export const CollectionScreen = () => {
     slug
   } = params ?? {}
 
-  // Use useCollectionByParams to handle both ID-based and permalink-based collection fetching
-  const collectionParams = id ? { collectionId: id } : { handle, slug }
+  // Use useCollectionByParams to handle both ID-based and permalink-based collection fetching.
+  // collectionType comes from linking (e.g. ?collectionType=playlist) and is required for permalinks.
+  const collectionParams = id
+    ? { collectionId: id }
+    : { handle, slug, collectionType }
 
   const { data: cachedCollection } = useCollectionByParams(collectionParams)
   const { data: cachedUser } = useUser(cachedCollection?.playlist_owner_id)
