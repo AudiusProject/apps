@@ -58,6 +58,24 @@ export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const linkTo = useLinkTo()
 
+  const parseEntityType = useCallback(
+    (entityType: unknown): Entity | undefined => {
+      if (entityType === Entity.Track) return Entity.Track
+      if (entityType === Entity.Album) return Entity.Album
+      if (entityType === Entity.Playlist) return Entity.Playlist
+
+      if (typeof entityType === 'string') {
+        const normalizedEntityType = entityType.toLowerCase()
+        if (normalizedEntityType === 'track') return Entity.Track
+        if (normalizedEntityType === 'album') return Entity.Album
+        if (normalizedEntityType === 'playlist') return Entity.Playlist
+      }
+
+      return undefined
+    },
+    []
+  )
+
   const socialActionHandler = useCallback(
     (
       notification:
@@ -189,6 +207,93 @@ export const useNotificationNavigation = () => {
     [navigation]
   )
 
+  type CreatePushNotification = {
+    type:
+      | PushNotificationType.CreateTrack
+      | PushNotificationType.CreateAlbum
+      | PushNotificationType.CreatePlaylist
+    entityId?: unknown
+    initiator?: unknown
+    entityType?: unknown
+    metadata?: {
+      entityId?: unknown
+      entity_id?: unknown
+      entityType?: unknown
+      entity_type?: unknown
+      trackId?: unknown
+      track_id?: unknown
+      playlistId?: unknown
+      playlist_id?: unknown
+    }
+    actions?: Array<{
+      actionEntityId?: unknown
+      actionEntityType?: unknown
+    }>
+  }
+
+  const createPushNotificationHandler = useCallback(
+    (notification: CreatePushNotification) => {
+      const defaultEntityType =
+        notification.type === PushNotificationType.CreateTrack
+          ? Entity.Track
+          : notification.type === PushNotificationType.CreateAlbum
+            ? Entity.Album
+            : Entity.Playlist
+
+      const actionEntityIds =
+        notification.actions
+          ?.filter((action) => {
+            const actionEntityType = parseEntityType(action.actionEntityType)
+            return actionEntityType === defaultEntityType
+          })
+          .map((action) => OptionalId.parse(action.actionEntityId))
+          .filter((id): id is number => id != null) ?? []
+
+      const candidateEntityIds = [
+        OptionalId.parse(notification.entityId),
+        OptionalId.parse(notification.metadata?.entityId),
+        OptionalId.parse(notification.metadata?.entity_id),
+        OptionalId.parse(notification.metadata?.trackId),
+        OptionalId.parse(notification.metadata?.track_id),
+        OptionalId.parse(notification.metadata?.playlistId),
+        OptionalId.parse(notification.metadata?.playlist_id),
+        ...actionEntityIds
+      ].filter((id): id is number => id != null)
+
+      const entityId = candidateEntityIds[0]
+
+      const entityType =
+        parseEntityType(notification.entityType) ??
+        parseEntityType(notification.metadata?.entityType) ??
+        parseEntityType(notification.metadata?.entity_type) ??
+        defaultEntityType
+
+      if (entityId != null) {
+        if (entityType === Entity.Track) {
+          navigation.navigate('Track', {
+            trackId: entityId,
+            canBeUnlisted: false
+          })
+          return
+        }
+
+        if (entityType === Entity.Album || entityType === Entity.Playlist) {
+          navigation.navigate('Collection', {
+            id: entityId,
+            canBeUnlisted: false
+          })
+          return
+        }
+      }
+
+      const initiatorId = OptionalId.parse(notification.initiator)
+      if (initiatorId != null) {
+        navigation.navigate('Profile', { id: initiatorId })
+      }
+    },
+    [navigation, parseEntityType]
+  )
+
   const announcementHandler = useCallback(
     (notification: AnnouncementNotification | AnnouncementPushNotification) => {
       if (!notification.route) {
@@ -279,22 +384,32 @@ export const useNotificationNavigation = () => {
         notification: UserSubscriptionNotification
       ) => {
         // TODO: Need to handle the payload from identity
-        const multiUpload = notification.entityIds.length > 1
+        const uniqueEntityIds = [...new Set(notification.entityIds)]
+        const firstEntityId = uniqueEntityIds[0]
+        const multiUpload = uniqueEntityIds.length > 1
 
         if (notification.entityType === Entity.Track && multiUpload) {
           navigation.navigate('Profile', { id: notification.userId })
-        } else if (notification.entityType === Entity.Track) {
+        } else if (
+          notification.entityType === Entity.Track &&
+          firstEntityId != null
+        ) {
           navigation.navigate('Track', {
-            trackId: notification.entityIds[0],
+            trackId: firstEntityId,
+            canBeUnlisted: false
+          })
+        } else if (firstEntityId != null) {
+          navigation.navigate('Collection', {
+            id: firstEntityId,
             canBeUnlisted: false
           })
         } else {
-          navigation.navigate('Collection', {
-            id: notification.entityIds[0],
-            canBeUnlisted: false
-          })
+          navigation.navigate('Profile', { id: notification.userId })
         }
       },
+      [PushNotificationType.CreateTrack]: createPushNotificationHandler,
+      [PushNotificationType.CreatePlaylist]: createPushNotificationHandler,
+      [PushNotificationType.CreateAlbum]: createPushNotificationHandler,
       [NotificationType.Tastemaker]: entityHandler,
       [NotificationType.USDCPurchaseBuyer]: entityHandler,
       [NotificationType.USDCPurchaseSeller]: entityHandler,
@@ -327,6 +442,7 @@ export const useNotificationNavigation = () => {
       milestoneHandler,
       userIdHandler,
       messagesHandler,
+      createPushNotificationHandler,
       navigation
     ]
   )
