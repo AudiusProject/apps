@@ -95,3 +95,28 @@
   position: relative;
   top: 1px;
 }
+
+/* Overlay (e.g. visualizer): full title and artist on one line each, no ellipsis */
+.fullTrackText {
+  width: max-content;
+  max-width: none;
+}
+
+.fullTrackText .text {
+  min-width: max-content;
+}
+
+.fullTrackText .trackTitleContainer {
+  width: max-content;
+  max-width: none;
+}
+
+.fullTrackText .trackTitle,
+.fullTrackText .artistName {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.fullTrackText .artistNameWrapper {
+  max-width: none;
+}

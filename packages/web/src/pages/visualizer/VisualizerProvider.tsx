@@ -1,44 +1,73 @@
 import {
   queueSelectors,
-  themeSelectors,
   playerSelectors
 } from '@audius/common/store'
 import { Nullable, route } from '@audius/common/utils'
 import { Name, SquareSizes, Track } from '@audius/common/models'
-import { useEffect, useState, useCallback } from 'react'
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  type ReactNode
+} from 'react'
 import { push } from 'utils/navigation'
 import { AppState } from 'store/types'
 import { Dispatch } from 'redux'
 import { connect } from 'react-redux'
 import cn from 'classnames'
 
-import Visualizer1 from 'utils/visualizer/visualizer-1.js'
+import ButterchurnVisualizer from 'utils/visualizer/butterchurnVisualizer'
 import Toast from 'components/toast/Toast'
 
 import styles from './VisualizerProvider.module.css'
 
-import { shouldShowDark } from 'utils/theme/theme'
 import { make, TrackEvent } from 'common/store/analytics/actions'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import PlayingTrackInfo from 'components/play-bar/desktop/components/PlayingTrackInfo'
-import { webglSupported } from './utils'
+import { webgl2Supported } from './utils'
 import {
-  IconAudiusLogoHorizontal,
-  useTheme,
-  IconClose as IconRemove
+  IconAudiusLogoHorizontalNew,
+  IconClose as IconRemove,
+  IconCaretLeft,
+  IconCaretRight,
+  IconKebabHorizontal,
+  Flex,
+  Switch,
+  Text,
+  Popup
 } from '@audius/harmony'
-import {
-  useTrackCoverArt,
-  useTrackCoverArtDominantColors
-} from 'hooks/useTrackCoverArt'
+import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { audioPlayer } from 'services/audio-player'
 import { useCurrentTrack } from '@audius/common/hooks'
 import { useUser } from '@audius/common/api'
+import { toggleAutoCycle, toggleAutoHideTrackDetails } from './store/slice'
+import {
+  getIsVisible,
+  getIsAutoCycling,
+  getAutoHideTrackDetails
+} from './store/selectors'
 
 const { profilePage } = route
 const { makeGetCurrent } = queueSelectors
 const { getPlaying } = playerSelectors
-const { getTheme } = themeSelectors
+
+const messages = {
+  browserUnsupported: (browser: string) =>
+    `Heads Up! Visualizer is not fully supported in ${browser} 😢 Please switch to a different browser like Chrome to view!`,
+  optionsTriggerLabel: 'Open visualizer options',
+  optionsHeading: 'Visualizer Options',
+  previous: 'Previous visualizer',
+  next: 'Next visualizer',
+  autoAdvance: 'Auto-advance',
+  autoAdvanceHint: 'New visualizer every 45s',
+  autoHideTrackDetails: 'Auto-hide Now Playing',
+  autoHideTrackDetailsHint: 'Fades when mouse is idle',
+  closeVisualizer: 'Close visualizer'
+}
+
+/** ms to keep the now-playing corner visible after `currentQueueItem.uid` changes while auto-hide is on */
+const TRACK_CHANGE_NOW_PLAYING_MS = 4500
 
 const Artwork = ({ track }: { track?: Track | null }) => {
   const { track_id } = track || {}
@@ -49,41 +78,319 @@ const Artwork = ({ track }: { track?: Track | null }) => {
   return <DynamicImage wrapperClassName={styles.artwork} image={image} />
 }
 
+const VisualizerAutoCycleSync = connect((state: AppState) => ({
+  isVisible: getIsVisible(state),
+  isAutoCycling: getIsAutoCycling(state)
+}))(function VisualizerAutoCycleSyncInner({
+  isVisible,
+  isAutoCycling
+}: {
+  isVisible: boolean
+  isAutoCycling: boolean
+}) {
+  useEffect(() => {
+    if (isVisible && isAutoCycling) {
+      ButterchurnVisualizer?.startAutoCycle()
+    } else {
+      ButterchurnVisualizer?.stopAutoCycle()
+    }
+  }, [isVisible, isAutoCycling])
+  return null
+})
+
+const VisualizerOptionsForm = connect(
+  (state: AppState) => ({
+    isAutoCycling: getIsAutoCycling(state),
+    autoHideTrackDetails: getAutoHideTrackDetails(state)
+  }),
+  { toggleAutoCycle, toggleAutoHideTrackDetails }
+)(function VisualizerOptionsFormInner({
+  isAutoCycling,
+  autoHideTrackDetails,
+  toggleAutoCycle: onToggleAutoCycle,
+  toggleAutoHideTrackDetails: onToggleAutoHideTrackDetails,
+  canBack
+}: {
+  isAutoCycling: boolean
+  autoHideTrackDetails: boolean
+  toggleAutoCycle: () => void
+  toggleAutoHideTrackDetails: () => void
+  canBack: boolean
+}) {
+  return (
+    <Flex column gap='m' className={styles.optionsPanel}>
+      <Flex
+        alignItems='center'
+        justifyContent='space-between'
+        gap='m'
+        className={styles.panelHeader}
+      >
+        <Text
+          variant='title'
+          size='s'
+          strength='strong'
+          color='staticWhite'
+          className={styles.panelTitle}
+        >
+          {messages.optionsHeading}
+        </Text>
+      </Flex>
+      <div
+        className={styles.optionsNavRail}
+        role='group'
+        aria-label={messages.optionsHeading}
+      >
+        <button
+          type='button'
+          className={styles.optionsNavCell}
+          aria-label={messages.previous}
+          disabled={!canBack}
+          onClick={() => ButterchurnVisualizer?.historyBack()}
+        >
+          <IconCaretLeft className={styles.navIcon} aria-hidden />
+        </button>
+        <div className={styles.optionsNavDivider} aria-hidden />
+        <button
+          type='button'
+          className={styles.optionsNavCell}
+          aria-label={messages.next}
+          onClick={() => ButterchurnVisualizer?.historyForwardOrNext()}
+        >
+          <IconCaretRight className={styles.navIcon} aria-hidden />
+        </button>
+      </div>
+      <div className={styles.autoAdvanceBlock}>
+        <Flex column gap='xs'>
+          <Text
+            variant='body'
+            size='s'
+            strength='strong'
+            color='staticWhite'
+          >
+            {messages.autoAdvance}
+          </Text>
+          <Text
+            variant='body'
+            size='xs'
+            strength='default'
+            color='staticWhite'
+            className={styles.autoAdvanceHint}
+          >
+            {messages.autoAdvanceHint}
+          </Text>
+        </Flex>
+        <div className={styles.autoSwitch}>
+          <Switch
+            checked={isAutoCycling}
+            onChange={() => {
+              onToggleAutoCycle()
+            }}
+            aria-label={messages.autoAdvance}
+          />
+        </div>
+      </div>
+      <div className={styles.autoAdvanceBlock}>
+        <Flex column gap='xs'>
+          <Text
+            variant='body'
+            size='s'
+            strength='strong'
+            color='staticWhite'
+          >
+            {messages.autoHideTrackDetails}
+          </Text>
+          <Text
+            variant='body'
+            size='xs'
+            strength='default'
+            color='staticWhite'
+            className={styles.autoAdvanceHint}
+          >
+            {messages.autoHideTrackDetailsHint}
+          </Text>
+        </Flex>
+        <div className={styles.autoSwitch}>
+          <Switch
+            checked={autoHideTrackDetails}
+            onChange={() => {
+              onToggleAutoHideTrackDetails()
+            }}
+            aria-label={messages.autoHideTrackDetails}
+          />
+        </div>
+      </div>
+    </Flex>
+  )
+})
+
+const VisualizerTrackCorner = connect(
+  (state: AppState) => ({
+    autoHideTrackDetails: getAutoHideTrackDetails(state)
+  })
+)(function VisualizerTrackCornerInner({
+  showControls,
+  nowPlayingPeek,
+  autoHideTrackDetails,
+  children
+}: {
+  showControls: boolean
+  nowPlayingPeek: boolean
+  autoHideTrackDetails: boolean
+  children: ReactNode
+}) {
+  const clusterVisible =
+    !autoHideTrackDetails || showControls || nowPlayingPeek
+  return (
+    <div
+      className={cn(styles.trackCornerCluster, {
+        [styles.trackCornerClusterVisible]: clusterVisible
+      })}
+    >
+      {children}
+    </div>
+  )
+})
+
 type VisualizerProps = {
   isVisible: boolean
   onClose: () => void
 } & ReturnType<typeof mapDispatchToProps> &
   ReturnType<ReturnType<typeof makeMapStateToProps>>
 
-const webGLExists = webglSupported()
-const messages = (browser: string) => ({
-  notSupported: `Heads Up! Visualizer is not fully supported in ${browser} 😢 Please switch to a different browser like Chrome to view!`
-})
+const webGL2Exists = webgl2Supported()
 
 const Visualizer = ({
   isVisible,
   currentQueueItem,
   playing,
-  theme,
+  autoHideTrackDetails,
   onClose,
   recordOpen,
   recordClose,
   goToRoute
 }: VisualizerProps) => {
   const [toastText, setToastText] = useState('')
-  const { spacing } = useTheme()
-  // Used to fadeIn/Out the visualizer (opacity 0 -> 1) through a css class
   const [fadeVisualizer, setFadeVisualizer] = useState<Nullable<Boolean>>(null)
-  // Used to show/hide the visualizer (display: block/none) through a css class
   const [showVisualizer, setShowVisualizer] = useState(false)
+  const [showControls, setShowControls] = useState(false)
+  const [nowPlayingPeek, setNowPlayingPeek] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const [, setHistoryTick] = useState(0)
+  const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const trackFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevQueueUidRef = useRef<string | null>(null)
+
+  const optionsAnchorRef = useRef<HTMLButtonElement>(null)
+
+  const optionsOpenRef = useRef(optionsOpen)
+  useEffect(() => {
+    optionsOpenRef.current = optionsOpen
+  }, [optionsOpen])
+
+  const revealChromeForMs = useCallback((ms: number) => {
+    setShowControls(true)
+    if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
+    controlsTimerRef.current = setTimeout(() => {
+      if (!optionsOpenRef.current) {
+        setShowControls(false)
+      }
+    }, ms)
+  }, [])
+
+  const handleMouseMove = useCallback(() => {
+    revealChromeForMs(3000)
+  }, [revealChromeForMs])
+
+  useEffect(() => {
+    if (!isVisible || !showVisualizer) return
+    const onMove = () => handleMouseMove()
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [isVisible, showVisualizer, handleMouseMove])
+
+  useEffect(() => {
+    if (!isVisible || !showVisualizer) return
+    handleMouseMove()
+  }, [isVisible, showVisualizer, handleMouseMove])
+
+  useEffect(() => {
+    if (!optionsOpen && showControls) {
+      handleMouseMove()
+    }
+  }, [optionsOpen, showControls, handleMouseMove])
+
+  useEffect(() => {
+    if (!showControls) {
+      setOptionsOpen(false)
+    }
+  }, [showControls])
+
+  useEffect(() => {
+    if (!isVisible) {
+      prevQueueUidRef.current = null
+      setNowPlayingPeek(false)
+      if (trackFlashTimerRef.current) {
+        clearTimeout(trackFlashTimerRef.current)
+        trackFlashTimerRef.current = null
+      }
+    }
+  }, [isVisible])
 
   const currentTrack = useCurrentTrack()
+
+  useEffect(() => {
+    if (!isVisible || !showVisualizer || !autoHideTrackDetails) return
+    const uid = currentQueueItem?.uid
+    if (!uid) return
+    if (prevQueueUidRef.current === uid) return
+    prevQueueUidRef.current = uid
+
+    setNowPlayingPeek(true)
+    if (trackFlashTimerRef.current) clearTimeout(trackFlashTimerRef.current)
+    trackFlashTimerRef.current = setTimeout(() => {
+      setNowPlayingPeek(false)
+      trackFlashTimerRef.current = null
+    }, TRACK_CHANGE_NOW_PLAYING_MS)
+  }, [
+    isVisible,
+    showVisualizer,
+    autoHideTrackDetails,
+    currentQueueItem?.uid
+  ])
+
+  useEffect(() => {
+    return () => {
+      if (trackFlashTimerRef.current) {
+        clearTimeout(trackFlashTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    ButterchurnVisualizer?.setOnHistoryChange?.(() =>
+      setHistoryTick((t) => t + 1)
+    )
+    return () => ButterchurnVisualizer?.setOnHistoryChange?.(null)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
+    }
+  }, [])
+
+  const canBack = ButterchurnVisualizer?.canHistoryBack() ?? false
+
+  const chromeIdleHidden = !showControls && !optionsOpen
+
   const { data: user } = useUser(currentTrack?.owner_id)
 
   useEffect(() => {
     if (showVisualizer) {
-      let browser
-      if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      let browser: string | undefined
+      if (!webGL2Exists) {
+        browser = 'your browser'
+      } else if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
         browser = 'Safari'
       } else if (/MSIE/i.test(navigator.userAgent)) {
         browser = 'Internet Explorer'
@@ -91,62 +398,47 @@ const Visualizer = ({
         browser = 'your browser'
       }
       if (browser) {
-        setToastText(messages(browser).notSupported)
+        setToastText(messages.browserUnsupported(browser))
       }
     }
   }, [showVisualizer])
 
-  // Update Colors
-  const dominantColors = useTrackCoverArtDominantColors({
-    trackId: currentTrack?.track_id
-  })
-  useEffect(() => {
-    if (dominantColors !== null) {
-      Visualizer1?.setDominantColors(dominantColors)
-    }
-  }, [isVisible, dominantColors, playing])
+  const audioBindKey = `${audioPlayer?.audio?.currentSrc ?? ''}|${Boolean(audioPlayer?.audioCtx)}`
 
-  // Rebind audio
   useEffect(() => {
-    if (!audioPlayer) {
-      return
+    if (!isVisible || !audioPlayer || !playing) return
+    const player = audioPlayer
+
+    if (player.audioCtx) {
+      ButterchurnVisualizer?.bind(player)
+    } else {
+      const onCanPlay = () => ButterchurnVisualizer?.bind(player)
+      player.audio.addEventListener('canplay', onCanPlay)
+      return () => player.audio.removeEventListener('canplay', onCanPlay)
     }
-    if (playing) {
-      if (audioPlayer.audioCtx) {
-        Visualizer1?.bind(audioPlayer)
-      } else {
-        audioPlayer.audio.addEventListener('canplay', () => {
-          Visualizer1?.bind(audioPlayer)
-        })
-      }
-    }
-  }, [isVisible, playing])
+  }, [isVisible, playing, audioBindKey])
 
   useEffect(() => {
     if (isVisible) {
-      const darkMode = shouldShowDark(theme)
-      Visualizer1?.show(darkMode)
+      ButterchurnVisualizer?.show()
       recordOpen()
       setShowVisualizer(true)
-      // Fade in after a 50ms delay because setting showVisualizer() and fadeVisualizer() at the
-      // same time leads to a race condition resulting in the animation not fading in sometimes
       setTimeout(() => {
         setFadeVisualizer(true)
       }, 50)
     } else {
       setFadeVisualizer(false)
     }
-  }, [isVisible, theme])
+  }, [isVisible])
 
-  // On Closing of visualizer -> fadeOut
-  // Wait some time before removing the wrapper DOM element to allow time for fading out animation.
   useEffect(() => {
     if (fadeVisualizer === false) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setShowVisualizer(false)
-        Visualizer1?.hide()
+        ButterchurnVisualizer?.hide()
         recordClose()
       }, 400)
+      return () => clearTimeout(timer)
     }
   }, [fadeVisualizer])
 
@@ -164,9 +456,6 @@ const Visualizer = ({
 
   const renderTrackInfo = () => {
     const { uid } = currentQueueItem
-    const dominantColor = dominantColors
-      ? dominantColors[0]
-      : { r: 0, g: 0, b: 0 }
     return currentTrack && user && uid ? (
       <div className={styles.trackInfoWrapper}>
         <PlayingTrackInfo
@@ -189,7 +478,7 @@ const Visualizer = ({
             onClose()
           }}
           hasShadow={true}
-          dominantColor={dominantColor}
+          fullTrackText
         />
       </div>
     ) : (
@@ -201,43 +490,85 @@ const Visualizer = ({
     <div
       className={cn(styles.visualizer, {
         [styles.fade]: fadeVisualizer,
-        [styles.show]: showVisualizer
+        [styles.show]: showVisualizer,
+        [styles.visualizerCursorHidden]: chromeIdleHidden
       })}
+      onMouseMove={handleMouseMove}
     >
+      <VisualizerAutoCycleSync />
       <div className='visualizer' />
       <div className={styles.logoWrapper}>
-        <IconAudiusLogoHorizontal
-          width='auto'
-          sizeH='l'
-          color='default'
-          css={{
-            display: 'block',
-            marginTop: spacing.l,
-            marginBottom: spacing.l,
-            opacity: 0.4
-          }}
-        />
-      </div>
-      <IconRemove
-        color='white'
-        className={styles.closeButtonIcon}
-        onClick={onClose}
-      />
-      <div className={styles.infoOverlayTileShadow}></div>
-      <div className={styles.infoOverlayTile}>
-        <div
-          className={cn(styles.artworkWrapper, {
-            [styles.playing]: currentTrack
-          })}
-          onClick={() => {
-            goToTrackPage()
-            onClose()
-          }}
-        >
-          <Artwork track={currentTrack} />
+        <div className={styles.logoMark}>
+          <IconAudiusLogoHorizontalNew
+            width={140}
+            sizeH='l'
+            css={{
+              display: 'block',
+              color: '#ffffff',
+              fill: '#ffffff'
+            }}
+          />
         </div>
-        {renderTrackInfo()}
       </div>
+      <div
+        className={cn(styles.topControlsWrap, {
+          [styles.topControlsWrapVisible]: showControls
+        })}
+      >
+        <button
+          type='button'
+          className={styles.pillButton}
+          onClick={onClose}
+          aria-label={messages.closeVisualizer}
+        >
+          <IconRemove className={styles.pillIcon} aria-hidden />
+        </button>
+        <div className={styles.pillDivider} role='presentation' />
+        <button
+          type='button'
+          ref={optionsAnchorRef}
+          className={styles.pillButton}
+          onClick={() => setOptionsOpen(!optionsOpen)}
+          aria-label={messages.optionsTriggerLabel}
+          aria-expanded={optionsOpen}
+          aria-haspopup='dialog'
+        >
+          <IconKebabHorizontal className={styles.pillIcon} aria-hidden />
+        </button>
+      </div>
+      <Popup
+        isVisible={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        anchorRef={optionsAnchorRef}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        className={styles.optionsPopup}
+        zIndex={20}
+      >
+        <VisualizerOptionsForm canBack={canBack} />
+      </Popup>
+      <VisualizerTrackCorner
+        showControls={showControls}
+        nowPlayingPeek={nowPlayingPeek}
+      >
+        <div className={styles.infoOverlayTileShadow}></div>
+        <div className={styles.infoOverlayTile}>
+          <div
+            className={cn(styles.artworkWrapper, {
+              [styles.playing]: currentTrack
+            })}
+            onClick={() => {
+              goToTrackPage()
+              onClose()
+            }}
+          >
+            <Artwork track={currentTrack} />
+          </div>
+          {!autoHideTrackDetails || showControls || nowPlayingPeek
+            ? renderTrackInfo()
+            : null}
+        </div>
+      </VisualizerTrackCorner>
       <Toast
         open={isVisible && !!toastText}
         text={toastText || ''}
@@ -256,7 +587,7 @@ const makeMapStateToProps = () => {
     return {
       currentQueueItem,
       playing: getPlaying(state),
-      theme: getTheme(state)
+      autoHideTrackDetails: getAutoHideTrackDetails(state)
     }
   }
   return mapStateToProps

@@ -71,6 +71,8 @@ export default defineConfig(async ({ mode }) => {
       include: [
         'react',
         'react-dom',
+        'butterchurn',
+        'butterchurn-presets',
         ...(env.VITE_ENV === 'production' ? ['@audius/sdk'] : [])
       ],
       dedupe: ['react', 'react-dom'],

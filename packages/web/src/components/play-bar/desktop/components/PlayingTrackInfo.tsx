@@ -35,6 +35,8 @@ interface PlayingTrackInfoProps {
   artistHandle: string
   hasShadow: boolean
   dominantColor?: Color
+  /** When true, title and artist wrap instead of single-line ellipsis (e.g. visualizer overlay). */
+  fullTrackText?: boolean
   onClickTrackTitle: () => void
   onClickArtistName: () => void
 }
@@ -58,7 +60,8 @@ const PlayingTrackInfo = ({
   isTrackUnlisted,
   isStreamGated,
   hasShadow,
-  dominantColor
+  dominantColor,
+  fullTrackText
 }: PlayingTrackInfoProps) => {
   const { data: track } = useTrack(trackId)
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -107,7 +110,11 @@ const PlayingTrackInfo = ({
   }
 
   return (
-    <div className={styles.info}>
+    <div
+      className={cn(styles.info, {
+        [styles.fullTrackText]: fullTrackText
+      })}
+    >
       <div className={styles.profilePictureWrapper}>
         <DynamicImage
           image={profileImage}
