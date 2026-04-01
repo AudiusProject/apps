@@ -5,7 +5,9 @@ import {
   useCoinBalance,
   useCurrentUserId,
   useExclusiveTracks,
-  useExclusiveTracksCount
+  useExclusiveTracksCount,
+  useFanClubFeed,
+  type FanClubFeedItem
 } from '@audius/common/api'
 import { useBuySellInitialTab, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
@@ -36,6 +38,8 @@ import { useNavigation } from 'app/hooks/useNavigation'
 import { useThemeColors } from 'app/utils/theme'
 
 import { CoinLeaderboardCard } from './CoinLeaderboardCard'
+import { PostUpdateCard } from './PostUpdateCard'
+import { TextPostCard } from './TextPostCard'
 
 const FAN_CLUB_COVER_HEIGHT = 96
 const FAN_CLUB_AVATAR_OVERLAP = -harmonySpacing.unit9
@@ -250,12 +254,25 @@ const FanClubFeed = ({
       userId: ownerId
     })
 
+  const { data: feedItems, isPending: isFeedPending } = useFanClubFeed({
+    mint,
+    sortMethod: 'newest',
+    enabled: !!mint
+  })
+
+  const textPosts = feedItems?.filter(
+    (item): item is Extract<FanClubFeedItem, { itemType: 'text_post' }> =>
+      item.itemType === 'text_post'
+  )
+
+  const hasTextPosts = textPosts && textPosts.length > 0
+
   if (!ownerId) {
     return null
   }
 
   if (forMemberView) {
-    if (isCountPending) {
+    if (isCountPending && isFeedPending) {
       return (
         <Flex column w='100%'>
           <Flex row alignItems='center' gap='xs' pb='s'>
@@ -269,40 +286,46 @@ const FanClubFeed = ({
         </Flex>
       )
     }
-    if (totalCount === 0) {
+    if (totalCount === 0 && !hasTextPosts) {
       return null
     }
-  } else if (totalCount === 0) {
+  } else if (totalCount === 0 && !hasTextPosts) {
     return null
   }
 
   return (
-    <Flex column w='100%'>
+    <Flex column w='100%' gap='m'>
       <Flex row alignItems='center' gap='xs' pb='s'>
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
-        {totalCount > 0 ? (
-          <Text variant='heading' size='s' color='subdued'>
-            ({totalCount})
-          </Text>
-        ) : null}
       </Flex>
-      <TanQueryLineup
-        actions={exclusiveTracksActions}
-        lineup={lineup}
-        offset={0}
-        maxEntries={MAX_PREVIEW_TRACKS}
-        pageSize={pageSize}
-        includeLineupStatus
-        itemStyles={itemStyles}
-        isFetching={isFetching}
-        loadNextPage={loadNextPage}
-        hasMore={false}
-        isPending={isPending}
-        queryData={data}
-        hidePlayBarChin
-      />
+
+      <PostUpdateCard mint={mint} />
+
+      {hasTextPosts
+        ? textPosts.map((item) => (
+            <TextPostCard key={item.commentId} commentId={item.commentId} />
+          ))
+        : null}
+
+      {totalCount > 0 ? (
+        <TanQueryLineup
+          actions={exclusiveTracksActions}
+          lineup={lineup}
+          offset={0}
+          maxEntries={MAX_PREVIEW_TRACKS}
+          pageSize={pageSize}
+          includeLineupStatus
+          itemStyles={itemStyles}
+          isFetching={isFetching}
+          loadNextPage={loadNextPage}
+          hasMore={false}
+          isPending={isPending}
+          queryData={data}
+          hidePlayBarChin
+        />
+      ) : null}
     </Flex>
   )
 }
