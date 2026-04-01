@@ -128,5 +128,6 @@ export const QUERY_KEYS = {
   exclusiveTracksCount: 'exclusiveTracksCount',
   coinRedeemAmount: 'coinRedeemAmount',
   coinRedeemCodeAmount: 'coinRedeemCodeAmount',
-  uploadStatus: 'uploadStatus'
+  uploadStatus: 'uploadStatus',
+  fanClubFeed: 'fanClubFeed'
 } as const

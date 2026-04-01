@@ -1,16 +1,24 @@
+import { useCallback } from 'react'
+
 import {
   useExclusiveTracks,
   useExclusiveTracksCount,
-  useArtistCoin
+  useArtistCoin,
+  useFanClubFeed,
+  type FanClubFeedItem
 } from '@audius/common/api'
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
-import { Flex, Text } from '@audius/harmony'
+import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
 
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
 
+import { PostUpdateCard } from './PostUpdateCard'
+import { TextPostCard } from './TextPostCard'
+
 const messages = {
-  title: 'Fan Club Feed'
+  title: 'Fan Club Feed',
+  loadMore: 'Load More'
 }
 
 const FEED_PAGE_SIZE = 10
@@ -23,15 +31,16 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
+  // Exclusive tracks lineup
   const {
-    data,
-    isFetching,
-    isPending,
-    isError,
-    hasNextPage,
+    data: tracksData,
+    isFetching: isTracksFetching,
+    isPending: isTracksPending,
+    isError: isTracksError,
+    hasNextPage: hasNextTracksPage,
     play,
     pause,
-    loadNextPage,
+    loadNextPage: loadNextTracksPage,
     isPlaying,
     lineup,
     pageSize
@@ -41,11 +50,38 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     initialPageSize: FEED_PAGE_SIZE
   })
 
-  const { data: totalCount = 0 } = useExclusiveTracksCount({
+  const { data: totalTrackCount = 0 } = useExclusiveTracksCount({
     userId: ownerId
   })
 
-  const shouldShowSection = totalCount > 0 && ownerId
+  // Fan club feed (text posts)
+  const {
+    data: feedItems,
+    isPending: isFeedPending,
+    hasNextPage: hasNextFeedPage,
+    fetchNextPage: fetchNextFeedPage,
+    isFetchingNextPage
+  } = useFanClubFeed({
+    mint,
+    sortMethod: 'newest',
+    pageSize: FEED_PAGE_SIZE,
+    enabled: !!mint
+  })
+
+  const textPosts = feedItems?.filter(
+    (item): item is Extract<FanClubFeedItem, { itemType: 'text_post' }> =>
+      item.itemType === 'text_post'
+  )
+
+  const handleLoadMoreFeed = useCallback(() => {
+    if (hasNextFeedPage) {
+      fetchNextFeedPage()
+    }
+  }, [hasNextFeedPage, fetchNextFeedPage])
+
+  const hasTextPosts = textPosts && textPosts.length > 0
+  const hasTracks = totalTrackCount > 0
+  const shouldShowSection = hasTextPosts || hasTracks || !!ownerId
 
   if (!shouldShowSection) return null
 
@@ -55,28 +91,53 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         <Text variant='heading' size='m' color='default'>
           {messages.title}
         </Text>
-        <Text variant='heading' size='m' color='subdued'>
-          ({totalCount})
-        </Text>
       </Flex>
 
-      <TanQueryLineup
-        data={data}
-        isFetching={isFetching}
-        isPending={isPending}
-        isError={isError}
-        hasNextPage={hasNextPage}
-        play={play}
-        pause={pause}
-        loadNextPage={loadNextPage}
-        isPlaying={isPlaying}
-        lineup={lineup}
-        actions={exclusiveTracksPageLineupActions}
-        pageSize={pageSize}
-        initialPageSize={FEED_PAGE_SIZE}
-        variant={LineupVariant.MAIN}
-        shouldLoadMore
-      />
+      <PostUpdateCard mint={mint} />
+
+      {/* Text posts */}
+      {isFeedPending ? (
+        <Flex justifyContent='center' pv='l'>
+          <LoadingSpinner />
+        </Flex>
+      ) : hasTextPosts ? (
+        <Flex column gap='m'>
+          {textPosts.map((item) => (
+            <TextPostCard key={item.commentId} commentId={item.commentId} />
+          ))}
+          {hasNextFeedPage ? (
+            <Button
+              variant='secondary'
+              size='small'
+              onClick={handleLoadMoreFeed}
+              disabled={isFetchingNextPage}
+            >
+              {messages.loadMore}
+            </Button>
+          ) : null}
+        </Flex>
+      ) : null}
+
+      {/* Exclusive tracks */}
+      {hasTracks && ownerId ? (
+        <TanQueryLineup
+          data={tracksData}
+          isFetching={isTracksFetching}
+          isPending={isTracksPending}
+          isError={isTracksError}
+          hasNextPage={hasNextTracksPage}
+          play={play}
+          pause={pause}
+          loadNextPage={loadNextTracksPage}
+          isPlaying={isPlaying}
+          lineup={lineup}
+          actions={exclusiveTracksPageLineupActions}
+          pageSize={pageSize}
+          initialPageSize={FEED_PAGE_SIZE}
+          variant={LineupVariant.MAIN}
+          shouldLoadMore
+        />
+      ) : null}
     </Flex>
   )
 }
