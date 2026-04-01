@@ -39,7 +39,6 @@ if (!AAO_AUTH_PASSWORD) {
   )
 }
 
-const rewardAmountRatio = 10
 const openRewards = [
   'dvl', // daily volume rewards
   't',   // tastemaker
@@ -415,10 +414,6 @@ app.get('/attestation/ui/user', async (c) => {
             </div>
           </div>
         </div>
-        <h3 class='text-lg mt-4'>
-          Allowed to claim up to{' '}
-          <b>{rewardAmountRatio * userScore.overallScore} $AUDIO</b> per reward.
-        </h3>
         <h2 class='text-xl font-bold mt-4'>Score Breakdown</h2>
         <table>
           <thead>
