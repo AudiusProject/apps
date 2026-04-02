@@ -305,7 +305,11 @@ const FanClubFeed = ({
 
       {hasTextPosts
         ? textPosts.map((item) => (
-            <TextPostCard key={item.commentId} commentId={item.commentId} />
+            <TextPostCard
+              key={item.commentId}
+              commentId={item.commentId}
+              mint={mint}
+            />
           ))
         : null}
 
