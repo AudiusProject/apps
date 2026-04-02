@@ -224,7 +224,7 @@ describe('ProfilePage', () => {
     // TODO
   })
 
-  it('shows buy coin UI when the profile belongs to an artist with an owned coin', async () => {
+  it('shows fan club UI when the profile belongs to an artist with an owned coin', async () => {
     mswServer.use(mockUserCreatedCoin(artistUser.id, mockArtistCoin))
 
     // Mock a different current user to simulate viewing another user's profile
@@ -247,10 +247,10 @@ describe('ProfilePage', () => {
     ).toBeInTheDocument()
 
     // Verify that coin-related elements are present when user has coins
-    const buyButton = await screen.findByRole('button', {
-      name: 'Buy Coins'
+    const viewFanClubButton = await screen.findByRole('button', {
+      name: 'View Fan Club'
     })
-    expect(buyButton).toBeInTheDocument()
+    expect(viewFanClubButton).toBeInTheDocument()
     expect(await screen.findByText('$MOCK')).toBeInTheDocument()
     expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()
   })
