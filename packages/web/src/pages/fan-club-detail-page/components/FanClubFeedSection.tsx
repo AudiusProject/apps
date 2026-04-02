@@ -100,7 +100,11 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
       ) : hasTextPosts ? (
         <Flex column gap='m'>
           {textPosts.map((item) => (
-            <TextPostCard key={item.commentId} commentId={item.commentId} mint={mint} />
+            <TextPostCard
+              key={item.commentId}
+              commentId={item.commentId}
+              mint={mint}
+            />
           ))}
           {hasNextFeedPage ? (
             <Button

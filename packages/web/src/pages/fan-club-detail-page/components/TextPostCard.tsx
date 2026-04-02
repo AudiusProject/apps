@@ -190,9 +190,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
           <Flex alignItems='center' gap='xs'>
             <IconButton
               icon={IconHeart}
-              color={
-                comment.isCurrentUserReacted ? 'active' : 'subdued'
-              }
+              color={comment.isCurrentUserReacted ? 'active' : 'subdued'}
               aria-label='Heart post'
               size='s'
             />
