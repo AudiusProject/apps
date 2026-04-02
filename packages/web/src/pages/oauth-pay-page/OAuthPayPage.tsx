@@ -310,25 +310,8 @@ export const OAuthPayPage = () => {
                 </Flex>
               </Flex>
 
-              {/* Error Messages */}
-              {!userHoldsMint && (
-                <Hint css={{ marginTop: 'var(--harmony-unit-4)' }}>
-                  <Text variant='body' size='s' color='danger'>
-                    {messages.userDoesNotHoldMint}
-                    <a
-                      href='https://audius.co/wallet'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      style={{ color: 'inherit' }}
-                    >
-                      {messages.walletLink}
-                    </a>
-                    .
-                  </Text>
-                </Hint>
-              )}
-
-              {userHoldsMint && !hasSufficientBalance && (
+              {/* Insufficient / no balance message — shown before confirm */}
+              {!hasSufficientBalance && (
                 <Hint css={{ marginTop: 'var(--harmony-unit-4)' }}>
                   <Text variant='body' size='s' color='danger'>
                     {messages.insufficientBalance}
@@ -336,7 +319,10 @@ export const OAuthPayPage = () => {
                       href='https://audius.co/wallet'
                       target='_blank'
                       rel='noopener noreferrer'
-                      style={{ color: 'inherit' }}
+                      style={{
+                        color: 'inherit',
+                        textDecoration: 'underline'
+                      }}
                     >
                       {messages.walletLink}
                     </a>

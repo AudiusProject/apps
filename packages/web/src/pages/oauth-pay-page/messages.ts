@@ -8,7 +8,7 @@ export const messages = {
   confirm: 'Confirm',
   cancel: 'Cancel',
   invalidRecipient: 'Invalid recipient',
-  insufficientBalance: 'Insufficient balance. Add funds on your ',
+  insufficientBalance: 'Not enough balance, add funds on your ',
   missingParamsError:
     'Whoops, this is an invalid link (missing required parameters).',
   handleAndRecipientError:
@@ -32,7 +32,7 @@ export const messages = {
   transactionFailed: 'Transaction failed',
   loading: 'Loading...',
   sendingTransaction: 'Sending transaction...',
-  userDoesNotHoldMint: 'You do not hold this coin. Add funds on your ',
+  userDoesNotHoldMint: 'Not enough balance, add funds on your ',
   walletLink: 'wallet',
   transactionComplete: 'Your transaction is complete!',
   sent: 'Sent',
