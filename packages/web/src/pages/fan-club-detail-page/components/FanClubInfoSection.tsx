@@ -931,18 +931,11 @@ export const FanClubInfoSection = ({
     coin?.artistLocker?.claimable === 0
 
   if (isArtistCoinLoading || !coin) {
-    return variant === 'onchainDetails' ? (
-      <FanClubInfoOnchainSkeleton />
-    ) : (
-      <FanClubInfoHeroSkeleton />
-    )
+    return variant === 'onchainDetails' ? null : <FanClubInfoHeroSkeleton />
   }
 
   if (variant === 'onchainDetails') {
-    if (isCurrentAccountPending) {
-      return <FanClubInfoOnchainSkeleton />
-    }
-    if (!isFanClubOwner) {
+    if (isCurrentAccountPending || !isFanClubOwner) {
       return null
     }
   }
