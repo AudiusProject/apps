@@ -99,27 +99,55 @@ export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
   return (
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.heroSection]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.heroSection]}
+        >
           <FanClubInfoSection mint={mint} variant='hero' />
         </Flex>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.postUpdateCard]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.postUpdateCard]}
+        >
           <PostUpdateCard mint={mint} />
         </Flex>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.feedSection]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.feedSection]}
+        >
           <FanClubFeedSection mint={mint} />
         </Flex>
       </Flex>
       <Flex css={styles.sidebarColumn}>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.balanceSection]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.balanceSection]}
+        >
           <BalanceSection mint={mint} />
         </Flex>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.leaderboard]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.leaderboard]}
+        >
           <FanClubLeaderboardCard mint={mint} />
         </Flex>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.insights]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.insights]}
+        >
           <FanClubInsights mint={mint} />
         </Flex>
-        <Flex direction='column' w='100%' css={[styles.itemWrapper, styles.onchainDetails]}>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.onchainDetails]}
+        >
           <FanClubInfoSection mint={mint} variant='onchainDetails' />
         </Flex>
       </Flex>
