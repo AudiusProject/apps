@@ -7,6 +7,8 @@ import {
   useFanClubFeed,
   type FanClubFeedItem
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
 
@@ -29,6 +31,9 @@ type FanClubFeedSectionProps = {
 export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
+  const { isEnabled: isTextPostsEnabled } = useFeatureFlag(
+    FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
+  )
 
   // Exclusive tracks lineup
   const {
@@ -64,7 +69,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     mint,
     sortMethod: 'newest',
     pageSize: FEED_PAGE_SIZE,
-    enabled: !!mint
+    enabled: !!mint && isTextPostsEnabled
   })
 
   const textPosts = feedItems?.filter(
@@ -92,8 +97,8 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         </Text>
       </Flex>
 
-      {/* Text posts */}
-      {isFeedPending ? (
+      {/* Text posts (feature-flagged) */}
+      {!isTextPostsEnabled ? null : isFeedPending ? (
         <Flex justifyContent='center' pv='l'>
           <LoadingSpinner />
         </Flex>
