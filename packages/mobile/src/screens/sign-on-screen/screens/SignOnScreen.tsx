@@ -91,7 +91,8 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
   }, [guestEmail, routeOnCompletion, screenParam])
 
   const colorScheme = useColorScheme()
-  const signOnThemeName = colorScheme === 'dark' ? 'default-dark' : 'default-light'
+  const signOnThemeName =
+    colorScheme === 'dark' ? 'default-dark' : 'default-light'
 
   if (!isSplashScreenDismissed) return null
 
