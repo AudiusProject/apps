@@ -12,12 +12,13 @@ const SIDEBAR_SECTION_WIDTH = '360px'
 
 const useStyles = makeResponsiveStyles(({ media, theme }) => {
   const hasEnoughSpaceForTwoColumns = media.matchesQuery(`(min-width: 1440px)`)
+  const isSingleColumn = !hasEnoughSpaceForTwoColumns
 
   return {
     container: {
       base: {
         display: 'flex',
-        gap: theme.spacing.l,
+        gap: isSingleColumn ? theme.spacing.xl : theme.spacing.l,
         width: '100%',
         maxWidth: hasEnoughSpaceForTwoColumns
           ? `calc(${MAIN_SECTION_WIDTH} + ${SIDEBAR_SECTION_WIDTH} + ${theme.spacing.l})`
@@ -29,29 +30,61 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
     },
     /** Primary column: fan club story + fan club feed (desktop left). */
     mainColumn: {
-      base: {
-        order: 1,
-        width: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
-        maxWidth: hasEnoughSpaceForTwoColumns ? MAIN_SECTION_WIDTH : '100%',
-        minWidth: 0,
-        flex: hasEnoughSpaceForTwoColumns ? '0 0 auto' : '1 1 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.xl
-      }
+      base: isSingleColumn
+        ? { display: 'contents' as const }
+        : {
+            order: 1,
+            width: MAIN_SECTION_WIDTH,
+            maxWidth: MAIN_SECTION_WIDTH,
+            minWidth: 0,
+            flex: '0 0 auto',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            gap: theme.spacing.xl
+          }
     },
     /** Sidebar: balance, leaderboard, insights, on-chain details (desktop right). */
     sidebarColumn: {
+      base: isSingleColumn
+        ? { display: 'contents' as const }
+        : {
+            order: 2,
+            width: SIDEBAR_SECTION_WIDTH,
+            maxWidth: SIDEBAR_SECTION_WIDTH,
+            minWidth: 0,
+            flex: '0 0 auto',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            gap: theme.spacing.xl
+          }
+    },
+    /** Item wrappers – collapse when the child component renders null. */
+    itemWrapper: {
       base: {
-        order: 2,
-        width: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
-        maxWidth: hasEnoughSpaceForTwoColumns ? SIDEBAR_SECTION_WIDTH : '100%',
-        minWidth: 0,
-        flex: hasEnoughSpaceForTwoColumns ? '0 0 auto' : '1 1 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.xl
+        '&:empty': { display: 'none' }
       }
+    },
+    /** Single-column ordering for interleaved layout */
+    heroSection: {
+      base: isSingleColumn ? { order: 1 } : {}
+    },
+    postUpdateCard: {
+      base: isSingleColumn ? { order: 2 } : {}
+    },
+    balanceSection: {
+      base: isSingleColumn ? { order: 3 } : {}
+    },
+    leaderboard: {
+      base: isSingleColumn ? { order: 4 } : {}
+    },
+    feedSection: {
+      base: isSingleColumn ? { order: 5 } : {}
+    },
+    insights: {
+      base: isSingleColumn ? { order: 6 } : {}
+    },
+    onchainDetails: {
+      base: isSingleColumn ? { order: 7 } : {}
     }
   }
 })
@@ -66,15 +99,57 @@ export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
   return (
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
-        <FanClubInfoSection mint={mint} variant='hero' />
-        <PostUpdateCard mint={mint} />
-        <FanClubFeedSection mint={mint} />
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.heroSection]}
+        >
+          <FanClubInfoSection mint={mint} variant='hero' />
+        </Flex>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.postUpdateCard]}
+        >
+          <PostUpdateCard mint={mint} />
+        </Flex>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.feedSection]}
+        >
+          <FanClubFeedSection mint={mint} />
+        </Flex>
       </Flex>
       <Flex css={styles.sidebarColumn}>
-        <BalanceSection mint={mint} />
-        <FanClubLeaderboardCard mint={mint} />
-        <FanClubInsights mint={mint} />
-        <FanClubInfoSection mint={mint} variant='onchainDetails' />
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.balanceSection]}
+        >
+          <BalanceSection mint={mint} />
+        </Flex>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.leaderboard]}
+        >
+          <FanClubLeaderboardCard mint={mint} />
+        </Flex>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.insights]}
+        >
+          <FanClubInsights mint={mint} />
+        </Flex>
+        <Flex
+          direction='column'
+          w='100%'
+          css={[styles.itemWrapper, styles.onchainDetails]}
+        >
+          <FanClubInfoSection mint={mint} variant='onchainDetails' />
+        </Flex>
       </Flex>
     </Flex>
   )
