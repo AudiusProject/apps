@@ -85,7 +85,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
 
   const hasTextPosts = textPosts && textPosts.length > 0
   const hasTracks = totalTrackCount > 0
-  const shouldShowSection = hasTextPosts || hasTracks || !!ownerId
+  const shouldShowSection = hasTextPosts || hasTracks
 
   if (!shouldShowSection) return null
 
