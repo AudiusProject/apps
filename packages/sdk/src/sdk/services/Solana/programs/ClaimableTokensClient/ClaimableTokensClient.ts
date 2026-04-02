@@ -183,6 +183,51 @@ export class ClaimableTokensClient {
   }
 
   /**
+   * Returns a create-user-bank instruction if the user bank does not yet exist,
+   * or null if it already does.  Does NOT send a transaction — the caller is
+   * expected to include the instruction in its own transaction.
+   */
+  async createUserBankIfNeededInstruction(
+    params: GetOrCreateUserBankRequest
+  ): Promise<{
+    userBank: PublicKey
+    instruction: ReturnType<
+      typeof ClaimableTokensProgram.createAccountInstruction
+    > | null
+  }> {
+    const args = await parseParams(
+      'createUserBankIfNeededInstruction',
+      GetOrCreateUserBankSchema
+    )(params)
+    const {
+      ethWallet = await this.getDefaultWalletAddress(),
+      feePayer: feePayerOverride
+    } = args
+    const mint = parseMint(args.mint, this.preconfiguredMints)
+    const feePayer = feePayerOverride ?? (await this.client.getFeePayer())
+    const userBank = await this.deriveUserBank(args)
+
+    const userBankAccount =
+      await this.client.connection.getAccountInfo(userBank)
+    if (!userBankAccount) {
+      this.logger.debug(
+        `User bank ${userBank} does not exist. Returning create instruction.`
+      )
+      const instruction = ClaimableTokensProgram.createAccountInstruction({
+        ethAddress: ethWallet,
+        payer: feePayer,
+        mint,
+        authority: this.deriveAuthority(mint),
+        userBank,
+        programId: this.programId
+      })
+      return { userBank, instruction }
+    }
+    this.logger.debug(`User bank ${userBank} already exists.`)
+    return { userBank, instruction: null }
+  }
+
+  /**
    * Creates a claimable tokens program transfer instruction using configured
    * program ID, mint addresses, derived nonce, and derived authorities.
    *

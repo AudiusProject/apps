@@ -41,7 +41,7 @@ import {
 } from '../../store'
 import { getErrorMessage, uuid, Maybe, Nullable } from '../../utils'
 
-import { MintName, createUserBankIfNeeded } from './solana'
+import { MintName } from './solana'
 
 type DisplayEncoding = 'utf8' | 'hex'
 type PhantomEvent = 'disconnect' | 'connect' | 'accountChanged'
@@ -990,33 +990,43 @@ export const audiusBackend = ({
     mint: PublicKey
     recipientEthAddress?: string // When provided, derives user-bank ATA for the recipient
   }) {
-    let tokenAccountAddress: PublicKey
-
     if (recipientEthAddress) {
-      // When sending to a user, ensure their user-bank account exists
-      // This will create it if needed (in a separate transaction)
-      tokenAccountAddress = await createUserBankIfNeeded(sdk, {
-        ethAddress: recipientEthAddress,
-        mint: mint as any,
-        recordAnalytics: () => {} // Analytics handled elsewhere
+      // When sending to a user by ETH address, derive their user bank and
+      // combine account creation (if needed) + transfer in a single tx.
+      const { userBank, instruction: createInstruction } =
+        await sdk.services.claimableTokensClient.createUserBankIfNeededInstruction(
+          {
+            ethWallet: recipientEthAddress,
+            mint: mint as any
+          }
+        )
+
+      const res = await transferTokens({
+        destination: userBank,
+        amount,
+        ethAddress,
+        sdk,
+        mint,
+        prefixInstructions: createInstruction ? [createInstruction] : []
       })
+      return { res, error: null }
     } else {
       // When sending to a Solana wallet address directly, use regular ATA logic
-      tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
+      const tokenAccountAddress = await getOrCreateAssociatedTokenAccount({
         address,
         sdk,
         mint
       })
-    }
 
-    const res = await transferTokens({
-      destination: tokenAccountAddress,
-      amount,
-      ethAddress,
-      sdk,
-      mint
-    })
-    return { res, error: null }
+      const res = await transferTokens({
+        destination: tokenAccountAddress,
+        amount,
+        ethAddress,
+        sdk,
+        mint
+      })
+      return { res, error: null }
+    }
   }
 
   async function transferTokens({
@@ -1024,13 +1034,15 @@ export const audiusBackend = ({
     destination,
     amount,
     sdk,
-    mint
+    mint,
+    prefixInstructions = []
   }: {
     ethAddress: string
     destination: PublicKey
     amount: AudioWei
     sdk: AudiusSdkWithServices
     mint: MintName | PublicKey
+    prefixInstructions?: import('@solana/web3.js').TransactionInstruction[]
   }) {
     console.info(
       `Transferring ${amount.toString()} tokens with mint ${mint} to ${destination.toBase58()}`
@@ -1041,7 +1053,8 @@ export const audiusBackend = ({
         amount,
         ethWallet: ethAddress,
         mint,
-        destination
+        destination,
+        instructionIndex: prefixInstructions.length
       })
     const transferInstruction =
       await sdk.services.claimableTokensClient.createTransferInstruction({
@@ -1072,7 +1085,11 @@ export const audiusBackend = ({
     }
 
     const transaction = await sdk.services.solanaClient.buildTransaction({
-      instructions: [secpTransactionInstruction, transferInstruction],
+      instructions: [
+        ...prefixInstructions,
+        secpTransactionInstruction,
+        transferInstruction
+      ],
       recentBlockhash
     })
     const signature =
