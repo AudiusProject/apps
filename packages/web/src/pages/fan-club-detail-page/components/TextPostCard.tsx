@@ -39,8 +39,26 @@ const messages = {
   edited: '(edited)'
 }
 
-const LOCKED_PLACEHOLDER_TEXT =
-  'This content is exclusively available for coin holders. Purchase coins to unlock access to this post and other exclusive content.'
+/**
+ * Generate a deterministic pseudo-random placeholder string for locked posts
+ * so each post looks visually distinct behind the blur.
+ */
+const generatePlaceholder = (commentId: ID) => {
+  // Simple hash from commentId to get a stable length between 5 and 25 words
+  const seed = typeof commentId === 'string' ? commentId.length : Number(commentId)
+  const wordCount = 5 + (seed % 21) // 5–25 words
+  const words = []
+  const pool = 'abcdefghijklmnopqrstuvwxyz'
+  for (let i = 0; i < wordCount; i++) {
+    const len = 3 + ((seed * (i + 1) * 7) % 8) // 3–10 chars per word
+    let word = ''
+    for (let j = 0; j < len; j++) {
+      word += pool[(seed * (i + 1) * (j + 1) * 13) % pool.length]
+    }
+    words.push(word)
+  }
+  return words.join(' ')
+}
 
 type TextPostCardProps = {
   commentId: ID
@@ -165,7 +183,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
                   pointerEvents: 'none'
                 }}
               >
-                {LOCKED_PLACEHOLDER_TEXT}
+                {generatePlaceholder(commentId)}
               </Text>
               <Flex
                 row
