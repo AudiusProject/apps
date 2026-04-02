@@ -5,7 +5,8 @@ import {
   useCurrentUserId,
   usePostTextUpdate
 } from '@audius/common/api'
-
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Flex, Paper, Text } from '@audius/harmony-native'
 import { ComposerInput } from 'app/components/composer-input'
 
@@ -24,6 +25,9 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: coin } = useArtistCoin(mint)
   const { mutate: postTextUpdate } = usePostTextUpdate()
+  const { isEnabled: isTextPostPostingEnabled } = useFeatureFlag(
+    FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
+  )
 
   const isOwner = currentUserId != null && coin?.ownerId === currentUserId
 
@@ -42,7 +46,7 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
     [currentUserId, coin?.ownerId, mint, postTextUpdate]
   )
 
-  if (!isOwner) return null
+  if (!isOwner || !isTextPostPostingEnabled) return null
 
   return (
     <Paper
