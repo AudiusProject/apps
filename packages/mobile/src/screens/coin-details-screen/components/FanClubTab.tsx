@@ -233,13 +233,7 @@ const FanClubHeroTile = ({ mint, onPoweredByPress }: FanClubHeroTileProps) => {
   )
 }
 
-const FanClubFeed = ({
-  mint,
-  forMemberView
-}: {
-  mint: string
-  forMemberView?: boolean
-}) => {
+const FanClubFeed = ({ mint }: { mint: string }) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
 
@@ -249,12 +243,11 @@ const FanClubFeed = ({
       pageSize: MAX_PREVIEW_TRACKS
     })
 
-  const { data: totalCount = 0, isPending: isCountPending } =
-    useExclusiveTracksCount({
-      userId: ownerId
-    })
+  const { data: totalCount = 0 } = useExclusiveTracksCount({
+    userId: ownerId
+  })
 
-  const { data: feedItems, isPending: isFeedPending } = useFanClubFeed({
+  const { data: feedItems } = useFanClubFeed({
     mint,
     sortMethod: 'newest',
     enabled: !!mint
@@ -266,30 +259,9 @@ const FanClubFeed = ({
   )
 
   const hasTextPosts = textPosts && textPosts.length > 0
+  const hasContent = totalCount > 0 || hasTextPosts
 
-  if (!ownerId) {
-    return null
-  }
-
-  if (forMemberView) {
-    if (isCountPending && isFeedPending) {
-      return (
-        <Flex column w='100%'>
-          <Flex row alignItems='center' gap='xs' pb='s'>
-            <Text variant='heading' size='s'>
-              {messages.title}
-            </Text>
-          </Flex>
-          <Flex alignItems='center' justifyContent='center' pv='xl' w='100%'>
-            <LoadingSpinner />
-          </Flex>
-        </Flex>
-      )
-    }
-    if (totalCount === 0 && !hasTextPosts) {
-      return null
-    }
-  } else if (totalCount === 0 && !hasTextPosts) {
+  if (!ownerId || !hasContent) {
     return null
   }
 
@@ -406,7 +378,7 @@ export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
       ) : null}
 
       {membershipKnown ? (
-        <FanClubFeed mint={mint} forMemberView={isMemberOrOwner} />
+        <FanClubFeed mint={mint} />
       ) : null}
     </Flex>
   )
