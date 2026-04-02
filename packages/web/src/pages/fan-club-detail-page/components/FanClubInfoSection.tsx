@@ -231,38 +231,6 @@ const FanClubInfoHeroSkeleton = () => {
   )
 }
 
-const FanClubInfoOnchainSkeleton = () => {
-  return (
-    <Paper
-      borderRadius='l'
-      shadow='far'
-      column
-      alignItems='flex-start'
-      border='default'
-      data-testid='fan-club-onchain-details-skeleton'
-    >
-      <Flex alignSelf='stretch' ph='l' pv='m' borderBottom='default'>
-        <Skeleton width='160px' height='20px' />
-      </Flex>
-      <Flex
-        alignItems='center'
-        justifyContent='space-between'
-        alignSelf='stretch'
-        p='l'
-        ph='xl'
-        borderBottom='default'
-      >
-        <Skeleton width='140px' height='16px' />
-        <Skeleton width='88px' height='20px' />
-      </Flex>
-      <Flex column alignSelf='stretch' ph='xl' pv='l' gap='l'>
-        <Skeleton width='100%' height='20px' />
-        <Skeleton width='100%' height='20px' />
-      </Flex>
-    </Paper>
-  )
-}
-
 type FanClubBannerSectionProps = {
   mint: string
 }
