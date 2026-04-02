@@ -11,8 +11,7 @@ import {
 import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useAppState } from '@react-native-community/hooks'
-import { useDarkMode } from 'react-native-dynamic'
+import { Appearance, useColorScheme } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
@@ -82,7 +81,9 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
           : ThemeMode.AUTO)
     const sysAppearance =
       systemAppearance ??
-      (theme === Theme.DARK ? SystemAppearance.DARK : SystemAppearance.LIGHT)
+      (Appearance.getColorScheme() === 'dark'
+        ? SystemAppearance.DARK
+        : SystemAppearance.LIGHT)
     return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
   }
 
@@ -95,22 +96,24 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
     case Theme.MATRIX:
       return 'matrix'
     case Theme.AUTO:
-    default:
-      switch (systemAppearance) {
-        case SystemAppearance.DARK:
-          return 'default-dark'
-        case SystemAppearance.LIGHT:
-        default:
-          return 'default-light'
-      }
+    default: {
+      const resolvedAppearance =
+        systemAppearance ??
+        (Appearance.getColorScheme() === 'dark'
+          ? SystemAppearance.DARK
+          : SystemAppearance.LIGHT)
+      return resolvedAppearance === SystemAppearance.DARK
+        ? 'default-dark'
+        : 'default-light'
+    }
   }
 }
 
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  const isDarkMode = useDarkMode()
+  const colorScheme = useColorScheme()
+  const isDarkMode = colorScheme === 'dark'
   const dispatch = useDispatch()
-  const appState = useAppState()
   const theme = useSelector(selectHarmonyTheme)
 
   useAsync(async () => {
@@ -160,17 +163,14 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    // react-native-dynamic incorrectly sets dark-mode when in background
-    if (appState === 'active') {
-      dispatch(
-        setSystemAppearance({
-          systemAppearance: isDarkMode
-            ? SystemAppearance.DARK
-            : SystemAppearance.LIGHT
-        })
-      )
-    }
-  }, [isDarkMode, dispatch, appState])
+    dispatch(
+      setSystemAppearance({
+        systemAppearance: isDarkMode
+          ? SystemAppearance.DARK
+          : SystemAppearance.LIGHT
+      })
+    )
+  }, [isDarkMode, dispatch])
 
   return (
     <HarmonyThemeProvider themeName={theme}>{children}</HarmonyThemeProvider>

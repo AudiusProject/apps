@@ -8,7 +8,7 @@ import {
   updateRouteOnCompletion,
   setValueField
 } from 'common/store/pages/signon/actions'
-import { useDarkMode } from 'react-native-dynamic'
+import { useColorScheme } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
@@ -90,8 +90,8 @@ export const SignOnScreen = (props: SignOnScreenProps) => {
     setScreen(screenParam)
   }, [guestEmail, routeOnCompletion, screenParam])
 
-  const isDarkMode = useDarkMode()
-  const signOnThemeName = isDarkMode ? 'default-dark' : 'default-light'
+  const colorScheme = useColorScheme()
+  const signOnThemeName = colorScheme === 'dark' ? 'default-dark' : 'default-light'
 
   if (!isSplashScreenDismissed) return null
 
