@@ -8,6 +8,7 @@ import {
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { Checkbox, Flex, Paper, Text } from '@audius/harmony'
+
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 
 const messages = {
