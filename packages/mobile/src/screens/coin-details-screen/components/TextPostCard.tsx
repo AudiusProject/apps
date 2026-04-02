@@ -28,7 +28,7 @@ const messages = {
 const generatePlaceholder = (commentId: ID) => {
   const seed = Number(commentId)
   const wordCount = 5 + (seed % 21) // 5–25 words
-  const words = []
+  const words: string[] = []
   const pool = 'abcdefghijklmnopqrstuvwxyz'
   for (let i = 0; i < wordCount; i++) {
     const len = 3 + ((seed * (i + 1) * 7) % 8) // 3–10 chars per word
@@ -47,7 +47,7 @@ type TextPostCardProps = {
 
 export const TextPostCard = ({ commentId }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
-  const { color, spacing, cornerRadius } = useTheme()
+  const { color } = useTheme()
 
   if (isPending) {
     return (
@@ -102,18 +102,11 @@ export const TextPostCard = ({ commentId }: TextPostCardProps) => {
       {isLocked ? (
         <Flex column gap='m'>
           <View style={{ position: 'relative', overflow: 'hidden' }}>
-            <Text
-              variant='body'
-              size='m'
-              style={{ opacity: 0.4 }}
-            >
+            <Text variant='body' size='m' style={{ opacity: 0.4 }}>
               {generatePlaceholder(commentId)}
             </Text>
             <LinearGradient
-              colors={[
-                'transparent',
-                color.background.white
-              ]}
+              colors={['transparent', color.background.white]}
               style={{
                 position: 'absolute',
                 top: 0,
