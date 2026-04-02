@@ -43,10 +43,7 @@ export const LockedTextPostModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='small'>
       <ModalHeader onClose={onClose}>
-        <ModalTitle
-          title={messages.howToUnlock}
-          icon={<IconLock />}
-        />
+        <ModalTitle title={messages.howToUnlock} icon={<IconLock />} />
       </ModalHeader>
       <ModalContent>
         <Flex column gap='l' alignItems='center' p='l'>
