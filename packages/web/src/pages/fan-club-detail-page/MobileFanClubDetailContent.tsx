@@ -12,6 +12,7 @@ import { FanClubFeedSection } from './components/FanClubFeedSection'
 import { FanClubInfoSection } from './components/FanClubInfoSection'
 import { FanClubInsights } from './components/FanClubInsights'
 import { FanClubLeaderboardCard } from './components/FanClubLeaderboardCard'
+import { PostUpdateCard } from './components/PostUpdateCard'
 
 enum TabType {
   FAN_CLUB = 'fanClub',
@@ -107,6 +108,7 @@ const FanClubTabContent = ({ mint }: FanClubTabContentProps) => {
   return (
     <Flex column gap='l' w='100%' p='l'>
       <FanClubInfoSection mint={mint} variant='hero' />
+      <PostUpdateCard mint={mint} />
       <BalanceSection mint={mint} />
       {isMemberOrOwner ? <FanClubLeaderboardCard mint={mint} /> : null}
       <FanClubFeedSection mint={mint} />

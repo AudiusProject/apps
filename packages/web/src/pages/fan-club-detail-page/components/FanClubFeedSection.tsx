@@ -7,13 +7,14 @@ import {
   useFanClubFeed,
   type FanClubFeedItem
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { exclusiveTracksPageLineupActions } from '@audius/common/store'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
 
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
 
-import { PostUpdateCard } from './PostUpdateCard'
 import { TextPostCard } from './TextPostCard'
 
 const messages = {
@@ -30,6 +31,9 @@ type FanClubFeedSectionProps = {
 export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const { data: coin } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
+  const { isEnabled: isTextPostsEnabled } = useFeatureFlag(
+    FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
+  )
 
   // Exclusive tracks lineup
   const {
@@ -65,7 +69,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     mint,
     sortMethod: 'newest',
     pageSize: FEED_PAGE_SIZE,
-    enabled: !!mint
+    enabled: !!mint && isTextPostsEnabled
   })
 
   const textPosts = feedItems?.filter(
@@ -93,17 +97,19 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         </Text>
       </Flex>
 
-      <PostUpdateCard mint={mint} />
-
-      {/* Text posts */}
-      {isFeedPending ? (
+      {/* Text posts (feature-flagged) */}
+      {!isTextPostsEnabled ? null : isFeedPending ? (
         <Flex justifyContent='center' pv='l'>
           <LoadingSpinner />
         </Flex>
       ) : hasTextPosts ? (
         <Flex column gap='m'>
           {textPosts.map((item) => (
-            <TextPostCard key={item.commentId} commentId={item.commentId} />
+            <TextPostCard
+              key={item.commentId}
+              commentId={item.commentId}
+              mint={mint}
+            />
           ))}
           {hasNextFeedPage ? (
             <Button
