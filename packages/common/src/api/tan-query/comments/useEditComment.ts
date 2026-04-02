@@ -1,4 +1,4 @@
-import { EntityType, CommentMention, Id } from '@audius/sdk'
+import { CommentMention, Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -16,7 +16,7 @@ export type EditCommentArgs = {
   mentions?: CommentMention[]
   trackId: ID
   currentSort: any
-  entityType?: EntityType
+  entityType?: 'Track' | 'FanClub'
 }
 
 export const useEditComment = () => {
@@ -29,7 +29,8 @@ export const useEditComment = () => {
       userId,
       newMessage,
       trackId,
-      mentions
+      mentions,
+      entityType = 'Track'
     }: EditCommentArgs) => {
       const sdk = await audiusSdk()
       await sdk.comments.updateComment({
@@ -38,7 +39,7 @@ export const useEditComment = () => {
         metadata: {
           body: newMessage,
           entityId: trackId,
-          entityType: 'Track',
+          entityType,
           mentions: mentions?.map((mention) => mention.userId) ?? []
         }
       })

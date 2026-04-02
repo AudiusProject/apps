@@ -13,7 +13,6 @@ import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
 
-import { PostUpdateCard } from './PostUpdateCard'
 import { TextPostCard } from './TextPostCard'
 
 const messages = {
@@ -93,8 +92,6 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         </Text>
       </Flex>
 
-      <PostUpdateCard mint={mint} />
-
       {/* Text posts */}
       {isFeedPending ? (
         <Flex justifyContent='center' pv='l'>
@@ -103,7 +100,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
       ) : hasTextPosts ? (
         <Flex column gap='m'>
           {textPosts.map((item) => (
-            <TextPostCard key={item.commentId} commentId={item.commentId} />
+            <TextPostCard key={item.commentId} commentId={item.commentId} mint={mint} />
           ))}
           {hasNextFeedPage ? (
             <Button
