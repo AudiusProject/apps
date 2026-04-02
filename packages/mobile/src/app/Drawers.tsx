@@ -30,6 +30,7 @@ import { HostRemixContestDrawer } from 'app/components/host-remix-contest-drawer
 import { InboxUnavailableDrawer } from 'app/components/inbox-unavailable-drawer/InboxUnavailableDrawer'
 import { LeavingAudiusDrawer } from 'app/components/leaving-audius-drawer'
 import { LockedContentDrawer } from 'app/components/locked-content-drawer'
+import { LockedTextPostDrawer } from 'app/components/locked-text-post-drawer'
 import { ManagerModeDrawer } from 'app/components/manager-mode-drawer/ManagerModeDrawer'
 import { OverflowMenuDrawer } from 'app/components/overflow-menu-drawer'
 import { PlaybackRateDrawer } from 'app/components/playback-rate-drawer'
@@ -163,6 +164,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   RemoveDownloadedFavorites: RemoveDownloadedFavoritesDrawer,
   UnfavoriteDownloadedCollection: UnfavoriteDownloadedCollectionDrawer,
   LockedContent: LockedContentDrawer,
+  LockedTextPost: LockedTextPostDrawer,
   ChatActions: ChatActionsDrawer,
   CreateChatActions: CreateChatActionsDrawer,
   BlockMessages: BlockMessagesDrawer,

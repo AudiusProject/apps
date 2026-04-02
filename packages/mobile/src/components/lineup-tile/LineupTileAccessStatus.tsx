@@ -33,7 +33,6 @@ import {
 } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
-import { useNavigation } from 'app/hooks/useNavigation'
 import { make, track } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
@@ -84,7 +83,6 @@ export const LineupTileAccessStatus = ({
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
-  const navigation = useNavigation()
 
   const { data: token } = useArtistCoin(
     (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
@@ -120,13 +118,6 @@ export const LineupTileAccessStatus = ({
           source: determineModalSource()
         }
       )
-    } else if (isTokenGated) {
-      if (token?.ticker) {
-        navigation.push('BuySell', {
-          initialTab: 'buy',
-          coinTicker: token.ticker
-        })
-      }
     } else if (contentId) {
       dispatch(setLockedContentId({ id: contentId }))
       dispatch(setVisibility({ drawer: 'LockedContent', visible: true }))
@@ -134,13 +125,10 @@ export const LineupTileAccessStatus = ({
   }, [
     hasStreamAccess,
     isUSDCPurchase,
-    isTokenGated,
     contentId,
     contentType,
     openPremiumContentPurchaseModal,
     tileSource,
-    token?.ticker,
-    navigation,
     dispatch
   ])
 

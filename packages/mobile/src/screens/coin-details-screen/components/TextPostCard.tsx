@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
-import { useArtistCoin, useComment } from '@audius/common/api'
+import { useComment } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { getLargestTimeUnitText } from '@audius/common/utils'
-import { TouchableOpacity } from 'react-native'
+import { View } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 
 import {
   Button,
@@ -16,13 +17,31 @@ import {
 } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
-import { useNavigation } from 'app/hooks/useNavigation'
+import { useDrawer } from 'app/hooks/useDrawer'
 
 const messages = {
-  locked: 'Hold this coin to unlock',
-  howToUnlock: 'How To Unlock',
-  description: 'To unlock this post, you need to hold',
-  buyCoins: 'Buy Coins'
+  unlock: 'Unlock',
+  membersOnly: 'Members Only'
+}
+
+/**
+ * Generate a deterministic pseudo-random placeholder string for locked posts
+ * so each post looks visually distinct behind the blur.
+ */
+const generatePlaceholder = (commentId: ID) => {
+  const seed = Number(commentId)
+  const wordCount = 5 + (seed % 21) // 5–25 words
+  const words: string[] = []
+  const pool = 'abcdefghijklmnopqrstuvwxyz'
+  for (let i = 0; i < wordCount; i++) {
+    const len = 3 + ((seed * (i + 1) * 7) % 8) // 3–10 chars per word
+    let word = ''
+    for (let j = 0; j < len; j++) {
+      word += pool[(seed * (i + 1) * (j + 1) * 13) % pool.length]
+    }
+    words.push(word)
+  }
+  return words.join(' ')
 }
 
 type TextPostCardProps = {
@@ -32,20 +51,12 @@ type TextPostCardProps = {
 
 export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
-  const { data: coin } = useArtistCoin(mint)
-  const { color, spacing, cornerRadius } = useTheme()
-  const navigation = useNavigation()
-  const [showUnlock, setShowUnlock] = useState(false)
+  const { color } = useTheme()
+  const { onOpen: openLockedTextPostDrawer } = useDrawer('LockedTextPost')
 
-  const handleBuyCoins = useCallback(() => {
-    if (coin?.ticker) {
-      navigation.navigate('BuySell', {
-        initialTab: 'buy',
-        coinTicker: coin.ticker
-      })
-      setShowUnlock(false)
-    }
-  }, [coin?.ticker, navigation])
+  const handleUnlock = useCallback(() => {
+    openLockedTextPostDrawer({ mint })
+  }, [openLockedTextPostDrawer, mint])
 
   if (isPending) {
     return (
@@ -99,59 +110,34 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
 
       {isLocked ? (
         <Flex column gap='m'>
-          <TouchableOpacity
-            onPress={() => setShowUnlock(true)}
-            activeOpacity={0.7}
-          >
-            <Flex
-              row
-              alignItems='center'
-              gap='s'
+          <View style={{ position: 'relative', overflow: 'hidden' }}>
+            <Text variant='body' size='m' style={{ opacity: 0.4 }}>
+              {generatePlaceholder(commentId)}
+            </Text>
+            <LinearGradient
+              colors={['transparent', color.background.white]}
               style={{
-                padding: spacing.m,
-                borderRadius: cornerRadius.s,
-                backgroundColor: color.background.surface2
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0
               }}
-            >
-              <IconLock size='s' color='subdued' />
-              <Text variant='body' size='s' color='subdued'>
-                {messages.locked}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </View>
+          <Flex row alignItems='center' justifyContent='space-between'>
+            <Button variant='secondary' size='small' onPress={handleUnlock}>
+              {messages.unlock}
+            </Button>
+            <Flex row alignItems='center' gap='xs' onTouchEnd={handleUnlock}>
+              <IconLock size='s' color='default' />
+              <Text variant='body' size='s' strength='strong'>
+                {messages.membersOnly}
               </Text>
             </Flex>
-          </TouchableOpacity>
-          {showUnlock ? (
-            <Flex
-              column
-              gap='m'
-              style={{
-                padding: spacing.l,
-                borderRadius: cornerRadius.m,
-                backgroundColor: color.background.surface1
-              }}
-            >
-              <Flex row alignItems='center' gap='s'>
-                <IconLock size='s' color='default' />
-                <Text variant='label' size='m'>
-                  {messages.howToUnlock}
-                </Text>
-              </Flex>
-              <Text variant='body' size='m'>
-                {messages.description}{' '}
-                <Text variant='body' size='m' strength='strong'>
-                  {coin?.ticker ? `$${coin.ticker}` : "the artist's coins"}
-                </Text>
-                .
-              </Text>
-              <Button
-                variant='primary'
-                color='coinGradient'
-                fullWidth
-                onPress={handleBuyCoins}
-              >
-                {messages.buyCoins}
-              </Button>
-            </Flex>
-          ) : null}
+          </Flex>
         </Flex>
       ) : (
         <Text variant='body' size='m'>
