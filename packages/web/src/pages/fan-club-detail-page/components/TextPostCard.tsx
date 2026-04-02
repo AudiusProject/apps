@@ -44,8 +44,7 @@ const messages = {
  * so each post looks visually distinct behind the blur.
  */
 const generatePlaceholder = (commentId: ID) => {
-  // Simple hash from commentId to get a stable length between 5 and 25 words
-  const seed = typeof commentId === 'string' ? commentId.length : Number(commentId)
+  const seed = Number(commentId)
   const wordCount = 5 + (seed % 21) // 5–25 words
   const words = []
   const pool = 'abcdefghijklmnopqrstuvwxyz'
