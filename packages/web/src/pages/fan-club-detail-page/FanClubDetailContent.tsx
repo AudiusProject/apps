@@ -93,27 +93,27 @@ export const FanClubDetailContent = ({ mint }: FanClubDetailContentProps) => {
   return (
     <Flex css={styles.container}>
       <Flex css={styles.mainColumn}>
-        <Flex css={styles.heroSection}>
+        <Flex direction='column' w='100%' css={styles.heroSection}>
           <FanClubInfoSection mint={mint} variant='hero' />
         </Flex>
-        <Flex css={styles.postUpdateCard}>
+        <Flex direction='column' w='100%' css={styles.postUpdateCard}>
           <PostUpdateCard mint={mint} />
         </Flex>
-        <Flex css={styles.feedSection}>
+        <Flex direction='column' w='100%' css={styles.feedSection}>
           <FanClubFeedSection mint={mint} />
         </Flex>
       </Flex>
       <Flex css={styles.sidebarColumn}>
-        <Flex css={styles.balanceSection}>
+        <Flex direction='column' w='100%' css={styles.balanceSection}>
           <BalanceSection mint={mint} />
         </Flex>
-        <Flex css={styles.leaderboard}>
+        <Flex direction='column' w='100%' css={styles.leaderboard}>
           <FanClubLeaderboardCard mint={mint} />
         </Flex>
-        <Flex css={styles.insights}>
+        <Flex direction='column' w='100%' css={styles.insights}>
           <FanClubInsights mint={mint} />
         </Flex>
-        <Flex css={styles.onchainDetails}>
+        <Flex direction='column' w='100%' css={styles.onchainDetails}>
           <FanClubInfoSection mint={mint} variant='onchainDetails' />
         </Flex>
       </Flex>
