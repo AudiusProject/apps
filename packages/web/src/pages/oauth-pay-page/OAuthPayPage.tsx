@@ -30,6 +30,9 @@ export const OAuthPayPage = () => {
 
   const {
     recipient,
+    handleUser,
+    handleLoading,
+    handleError,
     amount,
     mint,
     tokenInfo,
@@ -50,6 +53,8 @@ export const OAuthPayPage = () => {
       setError(errorMessage)
     }
   })
+
+  const recipientDisplayName = handleUser ? `@${handleUser.handle}` : undefined
 
   const formatAmount = (amount: bigint | null) => {
     if (!amount || !tokenInfo) return '0'
@@ -74,10 +79,12 @@ export const OAuthPayPage = () => {
     !userHoldsMint ||
     isSubmitting ||
     !!queryParamsError ||
-    !!error
+    !!error ||
+    handleLoading ||
+    !!handleError
 
   // Determine error message to show
-  const displayError = queryParamsError || error
+  const displayError = queryParamsError || handleError || error
 
   // Auto-close success screen after 1 second
   useEffect(() => {
@@ -100,7 +107,7 @@ export const OAuthPayPage = () => {
     )
   }
 
-  if (balanceLoading || !tokenInfo) {
+  if (balanceLoading || !tokenInfo || handleLoading) {
     return (
       <ContentWrapper display={display ?? 'popup'}>
         <Flex p='4xl' alignItems='center' justifyContent='center'>
@@ -143,14 +150,30 @@ export const OAuthPayPage = () => {
                 <Text variant='heading' size='s' color='subdued'>
                   {messages.recipient}
                 </Text>
-                <Text
-                  variant='body'
-                  size='m'
-                  color='default'
-                  css={{ wordBreak: 'break-all' }}
-                >
-                  {recipient}
-                </Text>
+                {recipientDisplayName ? (
+                  <Flex direction='column' gap='xs'>
+                    <Text variant='body' size='m' color='default'>
+                      {recipientDisplayName}
+                    </Text>
+                    <Text
+                      variant='body'
+                      size='s'
+                      color='subdued'
+                      css={{ wordBreak: 'break-all' }}
+                    >
+                      {recipient}
+                    </Text>
+                  </Flex>
+                ) : (
+                  <Text
+                    variant='body'
+                    size='m'
+                    color='default'
+                    css={{ wordBreak: 'break-all' }}
+                  >
+                    {recipient}
+                  </Text>
+                )}
                 <PlainButton
                   variant='subdued'
                   css={{ alignSelf: 'flex-start' }}
@@ -236,13 +259,29 @@ export const OAuthPayPage = () => {
                   <Text variant='heading' size='s' color='subdued'>
                     {messages.recipient}
                   </Text>
-                  <Text
-                    variant='body'
-                    size='l'
-                    css={{ wordBreak: 'break-all' }}
-                  >
-                    {recipient}
-                  </Text>
+                  {recipientDisplayName ? (
+                    <Flex direction='column' gap='xs'>
+                      <Text variant='body' size='l'>
+                        {recipientDisplayName}
+                      </Text>
+                      <Text
+                        variant='body'
+                        size='s'
+                        color='subdued'
+                        css={{ wordBreak: 'break-all' }}
+                      >
+                        {recipient}
+                      </Text>
+                    </Flex>
+                  ) : (
+                    <Text
+                      variant='body'
+                      size='l'
+                      css={{ wordBreak: 'break-all' }}
+                    >
+                      {recipient}
+                    </Text>
+                  )}
                 </Flex>
 
                 <Flex direction='column' gap='xs'>

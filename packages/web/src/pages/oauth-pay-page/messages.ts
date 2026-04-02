@@ -11,8 +11,12 @@ export const messages = {
   insufficientBalance: 'Insufficient balance',
   missingParamsError:
     'Whoops, this is an invalid link (missing required parameters).',
+  handleAndRecipientError:
+    'Whoops, this is an invalid link (cannot specify both handle and recipient).',
   invalidRecipientError:
     'Whoops, this is an invalid link (recipient address is invalid).',
+  handleNotFoundError: 'Could not find a user with that handle.',
+  handleResolvingError: 'Failed to resolve user bank for the given handle.',
   invalidAmountError: 'Whoops, this is an invalid link (amount is invalid).',
   missingMintError:
     'Whoops, this is an invalid link (mint address is missing).',
