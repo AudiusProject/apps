@@ -123,7 +123,8 @@ export const CoinDetailsScreen = () => {
       }) => (
         <Text
           variant='body'
-          strength={focused ? 'strong' : 'default'}
+          size='xs'
+          strength='strong'
           color={focused ? 'default' : 'subdued'}
         >
           {tabRoute.title}
