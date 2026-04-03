@@ -1,8 +1,8 @@
+import { useCallback } from 'react'
+
 import { useComment } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { getLargestTimeUnitText } from '@audius/common/utils'
-import { View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 import {
   Button,
@@ -10,44 +10,29 @@ import {
   IconLock,
   Paper,
   Skeleton,
-  Text,
-  useTheme
+  Text
 } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
 import { UserLink } from 'app/components/user-link'
+import { useDrawer } from 'app/hooks/useDrawer'
 
 const messages = {
   unlock: 'Unlock',
   membersOnly: 'Members Only'
 }
 
-/**
- * Generate a deterministic pseudo-random placeholder string for locked posts
- * so each post looks visually distinct behind the blur.
- */
-const generatePlaceholder = (commentId: ID) => {
-  const seed = Number(commentId)
-  const wordCount = 5 + (seed % 21) // 5–25 words
-  const words: string[] = []
-  const pool = 'abcdefghijklmnopqrstuvwxyz'
-  for (let i = 0; i < wordCount; i++) {
-    const len = 3 + ((seed * (i + 1) * 7) % 8) // 3–10 chars per word
-    let word = ''
-    for (let j = 0; j < len; j++) {
-      word += pool[(seed * (i + 1) * (j + 1) * 13) % pool.length]
-    }
-    words.push(word)
-  }
-  return words.join(' ')
-}
-
 type TextPostCardProps = {
   commentId: ID
+  mint: string
 }
 
-export const TextPostCard = ({ commentId }: TextPostCardProps) => {
+export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
-  const { color } = useTheme()
+  const { onOpen: openLockedTextPostDrawer } = useDrawer('LockedTextPost')
+
+  const handleUnlock = useCallback(() => {
+    openLockedTextPostDrawer({ mint })
+  }, [openLockedTextPostDrawer, mint])
 
   if (isPending) {
     return (
@@ -100,34 +85,21 @@ export const TextPostCard = ({ commentId }: TextPostCardProps) => {
       </Flex>
 
       {isLocked ? (
-        <Flex column gap='m'>
-          <View style={{ position: 'relative', overflow: 'hidden' }}>
-            <Text variant='body' size='m' style={{ opacity: 0.4 }}>
-              {generatePlaceholder(commentId)}
+        <Flex row alignItems='center' justifyContent='space-between'>
+          <Button
+            variant='secondary'
+            size='small'
+            rounded
+            onPress={handleUnlock}
+            style={{ height: 24 }}
+          >
+            {messages.unlock}
+          </Button>
+          <Flex row alignItems='center' gap='xs' onTouchEnd={handleUnlock}>
+            <IconLock size='s' color='default' />
+            <Text variant='body' size='s' strength='strong'>
+              {messages.membersOnly}
             </Text>
-            <LinearGradient
-              colors={['transparent', color.background.white]}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0
-              }}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            />
-          </View>
-          <Flex row alignItems='center' justifyContent='space-between'>
-            <Button variant='secondary' size='small'>
-              {messages.unlock}
-            </Button>
-            <Flex row alignItems='center' gap='xs'>
-              <IconLock size='s' color='default' />
-              <Text variant='body' size='s' strength='strong'>
-                {messages.membersOnly}
-              </Text>
-            </Flex>
           </Flex>
         </Flex>
       ) : (

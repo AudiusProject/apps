@@ -28,6 +28,8 @@ import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { ConfirmationModal } from 'components/confirmation-modal'
 import { UserLink } from 'components/link'
 
+import { LockedTextPostModal } from './LockedTextPostModal'
+
 const messages = {
   unlock: 'Unlock',
   membersOnly: 'Members Only',
@@ -74,6 +76,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editMessageId, setEditMessageId] = useState(0)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showUnlockModal, setShowUnlockModal] = useState(false)
 
   const isOwner = currentUserId != null && comment?.userId === currentUserId
   const isCoinOwner = currentUserId != null && coin?.ownerId === currentUserId
@@ -196,10 +199,17 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
                   size='small'
                   rounded
                   css={{ height: '24px' }}
+                  onClick={() => setShowUnlockModal(true)}
                 >
                   {messages.unlock}
                 </Button>
-                <Flex row alignItems='center' gap='s'>
+                <Flex
+                  row
+                  alignItems='center'
+                  gap='s'
+                  onClick={() => setShowUnlockModal(true)}
+                  css={{ cursor: 'pointer' }}
+                >
                   <IconLock size='s' color='default' />
                   <Text variant='body' size='s' strength='strong'>
                     {messages.membersOnly}
@@ -283,6 +293,12 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
         isOpen={showDeleteConfirm}
         onConfirm={handleDelete}
         onClose={() => setShowDeleteConfirm(false)}
+      />
+
+      <LockedTextPostModal
+        isOpen={showUnlockModal}
+        onClose={() => setShowUnlockModal(false)}
+        mint={mint}
       />
     </Paper>
   )

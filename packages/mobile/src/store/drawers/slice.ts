@@ -35,6 +35,7 @@ export type Drawer =
   | 'PickWinners'
   | 'CoinInsightsOverflowMenu'
   | 'WalletRowOverflowMenu'
+  | 'LockedTextPost'
 
 export type DrawerData = {
   EnablePushNotifications: undefined
@@ -77,6 +78,7 @@ export type DrawerData = {
   Comment: { userId: ID; entityId: ID; isEntityOwner: boolean; artistId: ID }
   EditTrackFormOverflowMenu: undefined
   PickWinners: undefined
+  LockedTextPost: { mint: string }
   CoinInsightsOverflowMenu: { mint: string }
   WalletRowOverflowMenu: {
     address: string
@@ -117,6 +119,7 @@ const initialState: DrawersState = {
   Comment: false,
   EditTrackFormOverflowMenu: false,
   PickWinners: false,
+  LockedTextPost: false,
   CoinInsightsOverflowMenu: false,
   WalletRowOverflowMenu: false,
   data: {}

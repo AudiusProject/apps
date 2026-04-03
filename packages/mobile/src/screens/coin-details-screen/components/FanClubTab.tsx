@@ -277,7 +277,11 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
 
       {hasTextPosts
         ? textPosts.map((item) => (
-            <TextPostCard key={item.commentId} commentId={item.commentId} />
+            <TextPostCard
+              key={item.commentId}
+              commentId={item.commentId}
+              mint={mint}
+            />
           ))
         : null}
 
@@ -377,9 +381,7 @@ export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
         <CoinLeaderboardCard mint={mint} />
       ) : null}
 
-      {membershipKnown ? (
-        <FanClubFeed mint={mint} />
-      ) : null}
+      {membershipKnown ? <FanClubFeed mint={mint} /> : null}
     </Flex>
   )
 }
