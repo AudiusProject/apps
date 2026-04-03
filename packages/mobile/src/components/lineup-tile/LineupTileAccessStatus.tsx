@@ -1,11 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
-import type {
-  ID,
-  AccessConditions,
-  TokenGatedConditions
-} from '@audius/common/models'
+import type { ID, AccessConditions } from '@audius/common/models'
 import {
   ModalSource,
   isContentTokenGated,
@@ -83,11 +78,6 @@ export const LineupTileAccessStatus = ({
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
-
-  const { data: token } = useArtistCoin(
-    (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
-    { enabled: isTokenGated }
-  )
 
   const handlePress = useCallback(() => {
     if (hasStreamAccess) {

@@ -65,12 +65,7 @@ export const LockedTextPostDrawer = () => {
             width={spacing(6)}
             height={spacing(6)}
           />
-          <Text
-            variant='label'
-            size='xl'
-            strength='strong'
-            color='subdued'
-          >
+          <Text variant='label' size='xl' strength='strong' color='subdued'>
             {messages.howToUnlock}
           </Text>
         </View>
