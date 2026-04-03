@@ -135,10 +135,10 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
             <FavoriteButton
               onPress={handleReact}
               isActive={comment.isCurrentUserReacted}
-              wrapperStyle={{ height: 20, width: 20 }}
+              wrapperStyle={{ height: 24, width: 24 }}
             />
             {comment.reactCount > 0 ? (
-              <Text variant='body' size='s'>
+              <Text variant='body' size='s' strength='default'>
                 {comment.reactCount}
               </Text>
             ) : null}

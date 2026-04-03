@@ -461,9 +461,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
         // If the path has two parts
         if (path.match(/^\/[^/]+\/[^/]+$/)) {
           // If the path doesn't match a profile tab, it's a track
-          if (
-            !path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)
-          ) {
+          if (!path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)) {
             path = `/track${path}`
           }
         }

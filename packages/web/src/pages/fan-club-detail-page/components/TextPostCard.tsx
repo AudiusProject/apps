@@ -268,11 +268,11 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
                   icon={IconHeart}
                   color={comment.isCurrentUserReacted ? 'active' : 'subdued'}
                   aria-label='Heart post'
-                  size='s'
+                  size='l'
                   onClick={handleReact}
                 />
                 {comment.reactCount > 0 ? (
-                  <Text variant='body' size='s'>
+                  <Text variant='body' size='m' strength='default'>
                     {comment.reactCount}
                   </Text>
                 ) : null}
