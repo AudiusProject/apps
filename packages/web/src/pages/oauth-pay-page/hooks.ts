@@ -9,6 +9,7 @@ import {
   useUserByHandle,
   useQueryContext
 } from '@audius/common/api'
+import { FixedDecimal } from '@audius/fixed-decimal'
 import { useUserbank } from '@audius/common/hooks'
 import { SolanaWalletAddress } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
@@ -236,11 +237,16 @@ export const useOAuthPaySetup = ({
     }
   }, [amount])
 
-  // Check if user has sufficient balance
+  // Check if user has sufficient balance.
+  // The balance FixedDecimal may use different decimals (e.g. 18 for AUDIO)
+  // than the URL amount (which uses tokenInfo.decimals, e.g. 8). Convert
+  // the amount to the balance's decimal scale before comparing.
   const hasSufficientBalance = useMemo(() => {
-    if (!tokenBalance || !amountBigInt) return false
-    return tokenBalance.balance.value >= amountBigInt
-  }, [tokenBalance, amountBigInt])
+    if (!tokenBalance || !amountBigInt || !tokenInfo) return false
+    const amountFD = new FixedDecimal(amountBigInt, tokenInfo.decimals)
+    const normalizedAmount = new FixedDecimal(amountFD, tokenBalance.decimals)
+    return tokenBalance.balance.value >= normalizedAmount.value
+  }, [tokenBalance, amountBigInt, tokenInfo])
 
   // Check if user holds the mint at all
   const userHoldsMint = useMemo(() => {
