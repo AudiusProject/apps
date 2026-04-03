@@ -1,9 +1,10 @@
 import { useArtistCreatedCoin } from '@audius/common/api'
-import { useBuySellModal } from '@audius/common/store'
+import { route } from '@audius/common/utils'
 import { Button } from '@audius/harmony'
+import { useNavigate } from 'react-router'
 
 const messages = {
-  buyArtistCoin: 'Buy Artist Coin'
+  viewFanClub: 'View Fan Club'
 }
 
 type BuyArtistCoinButtonProps = {
@@ -13,11 +14,11 @@ type BuyArtistCoinButtonProps = {
 export const BuyArtistCoinButton = ({ userId }: BuyArtistCoinButtonProps) => {
   const { data: artistCoin, isPending: isArtistCoinLoading } =
     useArtistCreatedCoin(userId)
-  const { onOpen: openBuySellModal } = useBuySellModal()
+  const navigate = useNavigate()
 
-  const handleBuyCoins = () => {
+  const handleViewFanClub = () => {
     if (artistCoin?.ticker) {
-      openBuySellModal({ ticker: artistCoin.ticker, isOpen: true })
+      navigate(route.coinPage(artistCoin.ticker))
     }
   }
 
@@ -31,9 +32,9 @@ export const BuyArtistCoinButton = ({ userId }: BuyArtistCoinButtonProps) => {
       fullWidth
       size='small'
       color='coinGradient'
-      onClick={handleBuyCoins}
+      onClick={handleViewFanClub}
     >
-      {messages.buyArtistCoin}
+      {messages.viewFanClub}
     </Button>
   )
 }
