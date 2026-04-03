@@ -6,8 +6,10 @@ import {
   getArtistCoinQueryKey,
   updateAudioBalanceOptimistically,
   useCurrentAccountUser,
-  useQueryContext
+  useQueryContext,
+  getFanClubFeedQueryKey
 } from '~/api'
+import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
 import type { QueryContextType } from '~/api/tan-query/utils/QueryContext'
 import { Feature } from '~/models'
 import type { User } from '~/models/User'
@@ -188,6 +190,22 @@ export const optimisticallyUpdateSwapBalances = (
       queryKey: getArtistCoinQueryKey(outputMint)
     })
   }
+
+  // Invalidate fan club feed and comment queries so locked content is re-evaluated
+  if (inputMint && !isInputAudio) {
+    queryClient.invalidateQueries({
+      queryKey: getFanClubFeedQueryKey({ mint: inputMint })
+    })
+  }
+  if (outputMint && !isOutputAudio) {
+    queryClient.invalidateQueries({
+      queryKey: getFanClubFeedQueryKey({ mint: outputMint })
+    })
+  }
+  // Invalidate individual comment queries so locked posts refetch with access
+  queryClient.invalidateQueries({
+    queryKey: [QUERY_KEYS.comment]
+  })
 
   // Invalidate user query to ensure user data is fresh after swap
   queryClient.invalidateQueries({

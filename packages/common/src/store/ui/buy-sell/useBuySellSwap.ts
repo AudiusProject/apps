@@ -6,7 +6,8 @@ import {
   SLIPPAGE_BPS,
   useArtistCoin,
   useCurrentAccountUser,
-  getArtistCoinQueryKey
+  getArtistCoinQueryKey,
+  getFanClubFeedQueryKey
 } from '~/api'
 import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
@@ -131,6 +132,22 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
           queryKey: getArtistCoinQueryKey(quoteCoin.mint)
         })
       }
+
+      // Invalidate fan club feed and comment queries so locked content is re-evaluated
+      if (baseCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getFanClubFeedQueryKey({ mint: baseCoin.mint })
+        })
+      }
+      if (quoteCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getFanClubFeedQueryKey({ mint: quoteCoin.mint })
+        })
+      }
+      // Invalidate individual comment queries so locked posts refetch with access
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.comment]
+      })
 
       // Invalidate track queries to provide track access if the user has traded the artist coin
       const baseOwnerId = baseCoin?.ownerId ?? null
