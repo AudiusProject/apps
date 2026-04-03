@@ -15,6 +15,42 @@ import { EventNames } from 'app/types/analytics'
 
 import { DEVICE_TOKEN } from './constants/storage-keys'
 
+/**
+ * On Android, FCM delivers all `data` payload values as strings.
+ * This means numeric IDs like `initiator` and `entityId` arrive as "123"
+ * instead of 123, and nested objects/arrays arrive as stringified JSON.
+ * This function restores the original types so notification handlers
+ * can navigate correctly.
+ */
+function parseAndroidNotificationData(data: Record<string, any>): any {
+  const parsed: Record<string, any> = {}
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== 'string') {
+      parsed[key] = value
+      continue
+    }
+    // Try parsing stringified JSON (for nested objects/arrays like actions, metadata)
+    if (
+      (value.startsWith('{') && value.endsWith('}')) ||
+      (value.startsWith('[') && value.endsWith(']'))
+    ) {
+      try {
+        parsed[key] = JSON.parse(value)
+        continue
+      } catch {
+        // Not valid JSON, keep as string
+      }
+    }
+    // Convert pure numeric strings to numbers (for IDs like initiator, entityId)
+    if (/^\d+$/.test(value)) {
+      parsed[key] = Number(value)
+      continue
+    }
+    parsed[key] = value
+  }
+  return parsed
+}
+
 function extractNotificationCampaignIdFromPayload(
   payload: Notification['payload']
 ): string | undefined {
@@ -91,7 +127,13 @@ class PushNotifications {
         reportNotificationCampaignPushOpen(notificationCampaignId)
       ).catch(() => {})
     }
-    this.navigation?.navigate(payload?.data?.data ?? payload?.data ?? payload)
+    let data = payload?.data?.data ?? payload?.data ?? payload
+    // On Android, FCM delivers all data values as strings, breaking
+    // numeric ID fields and nested objects. Parse them back.
+    if (Platform.OS === MobileOS.ANDROID && data && typeof data === 'object') {
+      data = parseAndroidNotificationData(data)
+    }
+    this.navigation?.navigate(data)
   }
 
   // Method used to open the push notification that the user pressed while the app was closed
