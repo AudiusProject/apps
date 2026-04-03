@@ -16,6 +16,7 @@ export type ReactToCommentArgs = {
   currentSort: any
   trackId: ID
   isEntityOwner?: boolean
+  entityType?: 'Track' | 'FanClub'
 }
 
 export const useReactToComment = () => {
@@ -27,20 +28,21 @@ export const useReactToComment = () => {
       userId,
       commentId,
       isLiked,
-      trackId
+      trackId,
+      entityType = 'Track'
     }: ReactToCommentArgs) => {
       const sdk = await audiusSdk()
       if (isLiked) {
         await sdk.comments.reactToComment({
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
-          metadata: { entityId: trackId, entityType: 'Track' }
+          metadata: { entityId: trackId, entityType }
         })
       } else {
         await sdk.comments.unreactToComment({
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
-          metadata: { entityId: trackId, entityType: 'Track' }
+          metadata: { entityId: trackId, entityType }
         })
       }
     },

@@ -5,6 +5,7 @@ import {
   useCurrentUserId,
   useEditComment,
   useDeleteTextPost,
+  useReactToComment,
   useArtistCoin
 } from '@audius/common/api'
 import { ID } from '@audius/common/models'
@@ -72,6 +73,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: coin } = useArtistCoin(mint)
   const { mutate: editComment } = useEditComment()
   const { mutate: deleteTextPost } = useDeleteTextPost()
+  const { mutate: reactToComment } = useReactToComment()
 
   const [isEditing, setIsEditing] = useState(false)
   const [editMessageId, setEditMessageId] = useState(0)
@@ -81,6 +83,19 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const isOwner = currentUserId != null && comment?.userId === currentUserId
   const isCoinOwner = currentUserId != null && coin?.ownerId === currentUserId
   const canModify = isOwner || isCoinOwner
+
+  const handleReact = useCallback(() => {
+    if (!currentUserId || !comment) return
+    reactToComment({
+      commentId,
+      userId: currentUserId,
+      isLiked: !comment.isCurrentUserReacted,
+      currentSort: 'newest',
+      trackId: comment.entityId,
+      isEntityOwner: isCoinOwner,
+      entityType: 'FanClub'
+    })
+  }, [currentUserId, comment, commentId, reactToComment, isCoinOwner])
 
   const handleEdit = useCallback(() => {
     setEditMessageId((prev) => prev + 1)
@@ -254,6 +269,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
                   color={comment.isCurrentUserReacted ? 'active' : 'subdued'}
                   aria-label='Heart post'
                   size='s'
+                  onClick={handleReact}
                 />
                 {comment.reactCount > 0 ? (
                   <Text variant='body' size='s'>

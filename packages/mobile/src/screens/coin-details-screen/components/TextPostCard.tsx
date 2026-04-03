@@ -1,6 +1,11 @@
 import { useCallback } from 'react'
 
-import { useComment } from '@audius/common/api'
+import {
+  useComment,
+  useCurrentUserId,
+  useReactToComment,
+  useArtistCoin
+} from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { getLargestTimeUnitText } from '@audius/common/utils'
 
@@ -13,6 +18,7 @@ import {
   Text
 } from '@audius/harmony-native'
 import { ProfilePicture } from 'app/components/core'
+import { FavoriteButton } from 'app/components/favorite-button'
 import { UserLink } from 'app/components/user-link'
 import { useDrawer } from 'app/hooks/useDrawer'
 
@@ -28,7 +34,25 @@ type TextPostCardProps = {
 
 export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: coin } = useArtistCoin(mint)
+  const { mutate: reactToComment } = useReactToComment()
   const { onOpen: openLockedTextPostDrawer } = useDrawer('LockedTextPost')
+
+  const isCoinOwner = currentUserId != null && coin?.ownerId === currentUserId
+
+  const handleReact = useCallback(() => {
+    if (!currentUserId || !comment) return
+    reactToComment({
+      commentId,
+      userId: currentUserId,
+      isLiked: !comment.isCurrentUserReacted,
+      currentSort: 'newest',
+      trackId: comment.entityId,
+      isEntityOwner: isCoinOwner,
+      entityType: 'FanClub'
+    })
+  }, [currentUserId, comment, commentId, reactToComment, isCoinOwner])
 
   const handleUnlock = useCallback(() => {
     openLockedTextPostDrawer({ mint })
@@ -103,9 +127,23 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
           </Flex>
         </Flex>
       ) : (
-        <Text variant='body' size='m'>
-          {comment.message}
-        </Text>
+        <>
+          <Text variant='body' size='m'>
+            {comment.message}
+          </Text>
+          <Flex direction='row' alignItems='center' gap='xs'>
+            <FavoriteButton
+              onPress={handleReact}
+              isActive={comment.isCurrentUserReacted}
+              wrapperStyle={{ height: 20, width: 20 }}
+            />
+            {comment.reactCount > 0 ? (
+              <Text variant='body' size='s'>
+                {comment.reactCount}
+              </Text>
+            ) : null}
+          </Flex>
+        </>
       )}
     </Paper>
   )
