@@ -460,12 +460,8 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       } else {
         // If the path has two parts
         if (path.match(/^\/[^/]+\/[^/]+$/)) {
-          // If the path is to audio-nft-playlist, reroute to feed
-          if (path.match(/^\/[^/]+\/audio-nft-playlist$/)) {
-            path = '/trending'
-          }
           // If the path doesn't match a profile tab, it's a track
-          else if (
+          if (
             !path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)
           ) {
             path = `/track${path}`
