@@ -56,16 +56,16 @@ const createAppTabState = (
   ]
 })
 
-const createFeedStackState = (route): PartialState<NavigationState> =>
+const createTrendingStackState = (route): PartialState<NavigationState> =>
   createAppTabState({
     routes: [
       {
-        name: 'feed',
+        name: 'trending',
         state: {
           index: 1,
           routes: [
             {
-              name: 'Feed'
+              name: 'Trending'
             },
             route
           ]
@@ -153,7 +153,13 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                     feed: {
                       initialRouteName: 'Feed',
                       screens: {
-                        Feed: 'feed',
+                        Feed: 'feed'
+                      }
+                    },
+                    trending: {
+                      initialRouteName: 'Trending',
+                      screens: {
+                        Trending: 'trending',
                         Collection: ':handle/collection/:slug',
                         TrackRemixes: ':handle/:slug/remixes',
                         Track: 'track/:handle/:slug',
@@ -187,12 +193,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         CoinRedeemScreen: {
                           path: 'coins/:ticker/redeem/:code?'
                         }
-                      }
-                    },
-                    trending: {
-                      initialRouteName: 'Trending',
-                      screens: {
-                        Trending: 'trending'
                       }
                     },
                     explore: {
@@ -294,7 +294,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       if (path.match(connectPath)) {
         path = `${path.replace(
           connectPath,
-          routeNameRef.current ?? '/feed'
+          routeNameRef.current ?? '/trending'
         )}&path=connect`
       }
 
@@ -329,7 +329,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       // /tracks/Nz9yBb4
       if (path.match(/^\/tracks\//)) {
         const id = OptionalHashId.parse(pathPart(path)(2))
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'Track',
           params: {
             id
@@ -340,7 +340,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       // /users/Nz9yBb4
       if (path.match(/^\/users\//)) {
         const id = OptionalHashId.parse(pathPart(path)(2))
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'Profile',
           params: {
             id
@@ -351,7 +351,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       // /playlists/Nz9yBb4
       if (path.match(/^\/playlists\//)) {
         const id = OptionalHashId.parse(pathPart(path)(2))
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'Profile',
           params: {
             id
@@ -360,13 +360,13 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       }
 
       if (path.match(/^\/rewards/)) {
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'RewardsScreen'
         })
       }
 
       if (path.match(/^\/wallet(?:\/|\?|$)/)) {
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'wallet'
         })
       }
@@ -381,7 +381,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
           const normalizedTicker = ticker.toUpperCase()
 
           if (coinRoute === 'redeem') {
-            return createFeedStackState({
+            return createTrendingStackState({
               name: 'CoinRedeemScreen',
               params: {
                 ticker: normalizedTicker,
@@ -390,13 +390,13 @@ const NavigationContainer = (props: NavigationContainerProps) => {
             })
           }
 
-          return createFeedStackState({
+          return createTrendingStackState({
             name: 'CoinDetailsScreen',
             params: { ticker: normalizedTicker }
           })
         }
 
-        return createFeedStackState({
+        return createTrendingStackState({
           name: 'ArtistCoinsExplore'
         })
       }
@@ -460,12 +460,8 @@ const NavigationContainer = (props: NavigationContainerProps) => {
       } else {
         // If the path has two parts
         if (path.match(/^\/[^/]+\/[^/]+$/)) {
-          // If the path is to audio-nft-playlist, reroute to feed
-          if (path.match(/^\/[^/]+\/audio-nft-playlist$/)) {
-            path = '/feed'
-          }
           // If the path doesn't match a profile tab, it's a track
-          else if (
+          if (
             !path.match(/^\/[^/]+\/(tracks|albums|playlists|reposts)$/)
           ) {
             path = `/track${path}`
