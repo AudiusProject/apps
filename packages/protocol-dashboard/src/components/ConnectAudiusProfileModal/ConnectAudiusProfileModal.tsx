@@ -13,7 +13,7 @@ const messages = {
   connectAudiusProfileDescriptionP1:
     'Help other users identify you by connecting your Audius account.',
   connectAudiusProfileDescriptionP2:
-    'Once you’ve linked your Audius account, your Profile Picture and Display Name will be visible to users throughout the protocol dashboard.',
+    "Once you've linked your Audius account, your Profile Picture and Display Name will be visible to users throughout the protocol dashboard.",
   connectProfileButton: 'Connect Profile',
   disconnectAudiusProfileTitle: 'Disconnect Audius Profile',
   disconnectProfileButton: 'Disconnect Audius Profile',
@@ -27,6 +27,7 @@ type ConnectAudiusProfileModalProps = {
   isOpen: boolean
   onClose: () => void
   wallet: string
+  walletProvider?: any
   action: 'disconnect' | 'connect'
 }
 
@@ -34,10 +35,12 @@ export const ConnectAudiusProfileModal = ({
   isOpen,
   onClose,
   wallet,
+  walletProvider,
   action
 }: ConnectAudiusProfileModalProps) => {
   const { connect, disconnect, isWaiting } = useConnectAudiusProfile({
     wallet,
+    walletProvider,
     onSuccess: onClose
   })
   const isConnect = action === 'connect'

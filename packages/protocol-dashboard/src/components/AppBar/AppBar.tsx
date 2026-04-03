@@ -195,7 +195,13 @@ const UserAccountSnippet = ({ wallet }: UserAccountSnippetProps) => {
   )
 }
 
-const ConnectAudiusProfileButton = ({ wallet }: { wallet: string }) => {
+const ConnectAudiusProfileButton = ({
+  wallet,
+  walletProvider
+}: {
+  wallet: string
+  walletProvider?: any
+}) => {
   const { isOpen, onClick, onClose } = useModalControls()
   return (
     <>
@@ -210,6 +216,7 @@ const ConnectAudiusProfileButton = ({ wallet }: { wallet: string }) => {
       <ConnectAudiusProfileModal
         action='connect'
         wallet={wallet}
+        walletProvider={walletProvider}
         isOpen={isOpen}
         onClose={onClose}
       />
@@ -298,7 +305,7 @@ const AppBar: React.FC<AppBarProps> = () => {
           !wallet ||
           !isLoggedIn ||
           audiusProfileDataStatus === 'pending' ? null : (
-            <ConnectAudiusProfileButton wallet={wallet} />
+            <ConnectAudiusProfileButton wallet={wallet} walletProvider={walletProvider} />
           )}
           <div
             className={clsx({

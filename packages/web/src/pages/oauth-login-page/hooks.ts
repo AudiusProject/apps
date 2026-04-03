@@ -153,6 +153,19 @@ const useParsedQueryParams = () => {
           error = messages.invalidCodeChallengeMethodError
         }
       }
+      // Optional dashboard wallet tx params (write scope also supports tx param)
+      if (!error && tx) {
+        const { error: txParamsError, txParams: txParamsRes } =
+          validateWriteOnceParams({
+            tx,
+            params: rest,
+            willUsePostMessage: parsedRedirectUri === 'postmessage'
+          })
+        txParams = txParamsRes
+        if (txParamsError) {
+          error = txParamsError
+        }
+      }
     } else if (scope === 'write_once') {
       // Write-once scope-specific validations:
       const { error: writeOnceParamsError, txParams: txParamsRes } =
@@ -532,6 +545,33 @@ export const useOAuthSetup = ({
           error: e instanceof Error ? e : new Error(error)
         })
         return
+      }
+
+      // Handle dashboard wallet tx if present with write scope
+      if (tx && txParams) {
+        if ((tx as WriteOnceTx) === 'connect_dashboard_wallet') {
+          const success = await handleAuthorizeConnectDashboardWallet({
+            state,
+            originUrl: parsedOrigin,
+            onError,
+            onWaitForWalletSignature: onPendingTransactionApproval,
+            onReceivedWalletSignature: onReceiveTransactionApproval,
+            account,
+            txParams: txParams!
+          })
+          if (!success) {
+            return
+          }
+        } else if ((tx as WriteOnceTx) === 'disconnect_dashboard_wallet') {
+          const success = await handleAuthorizeDisconnectDashboardWallet({
+            account,
+            txParams: txParams!,
+            onError
+          })
+          if (!success) {
+            return
+          }
+        }
       }
     } else if (scope === 'write_once') {
       // Note: Tx = 'connect_dashboard_wallet' since that's the only option available right now for write_once scope
