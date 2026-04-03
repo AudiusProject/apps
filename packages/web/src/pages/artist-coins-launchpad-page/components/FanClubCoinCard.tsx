@@ -46,7 +46,7 @@ export const FanClubCoinCard = ({ coin }: FanClubCoinCardProps) => {
     Math.round(coin.marketCap ?? 0)
   )}`
 
-  const coinPath = ticker ? route.coinPage(ticker) : null
+  const coinPath = ticker ? route.clubPage(ticker) : null
 
   const card = (
     <Paper

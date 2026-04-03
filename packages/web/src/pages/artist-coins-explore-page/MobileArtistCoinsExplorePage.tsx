@@ -174,7 +174,7 @@ export const MobileArtistCoinsExplorePage: React.FC = () => {
 
   const handleCoinPress = useCallback(
     (ticker: string) => {
-      navigate(route.coinPage(ticker))
+      navigate(route.clubPage(ticker))
     },
     [navigate]
   )

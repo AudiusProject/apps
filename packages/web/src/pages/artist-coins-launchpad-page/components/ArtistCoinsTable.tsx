@@ -68,7 +68,7 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
     return null
   }
 
-  const assetDetailUrl = route.coinPage(coin.ticker)
+  const assetDetailUrl = route.clubPage(coin.ticker)
 
   return (
     <Flex
@@ -477,7 +477,7 @@ export const ArtistCoinsTable = ({
     (e: React.MouseEvent<HTMLTableRowElement>, rowInfo: any) => {
       const coin = rowInfo.original
       if (coin?.ticker) {
-        navigate(route.coinPage(coin.ticker))
+        navigate(route.clubPage(coin.ticker))
       }
     },
     [navigate]
