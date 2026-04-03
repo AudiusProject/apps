@@ -377,9 +377,7 @@ export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
         <CoinLeaderboardCard mint={mint} />
       ) : null}
 
-      {membershipKnown ? (
-        <FanClubFeed mint={mint} />
-      ) : null}
+      {membershipKnown ? <FanClubFeed mint={mint} /> : null}
     </Flex>
   )
 }

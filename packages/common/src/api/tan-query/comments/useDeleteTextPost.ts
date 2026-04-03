@@ -39,10 +39,7 @@ export const useDeleteTextPost = () => {
           newState.pages = newState.pages.map((page: FanClubFeedItem[]) =>
             page.filter(
               (item) =>
-                !(
-                  item.itemType === 'text_post' &&
-                  item.commentId === commentId
-                )
+                !(item.itemType === 'text_post' && item.commentId === commentId)
             )
           )
         }
@@ -69,9 +66,7 @@ export const useDeleteTextPost = () => {
         name: 'Comments',
         feature: Feature.Comments
       })
-      dispatch(
-        toast({ content: 'There was an error deleting the post.' })
-      )
+      dispatch(toast({ content: 'There was an error deleting the post.' }))
       // Reset to server state
       queryClient.invalidateQueries({
         queryKey: getFanClubFeedQueryKey({
