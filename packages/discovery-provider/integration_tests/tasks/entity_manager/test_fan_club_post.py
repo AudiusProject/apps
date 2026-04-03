@@ -689,3 +689,166 @@ def test_fan_club_post_and_track_comments_coexist(app, mocker):
         ).all()
         assert len(notifs) == 1
         assert notifs[0].group_id == "comment:1:type:Track"
+
+
+# ---------------------------------------------------------------------------
+# FAN CLUB TEXT POST NOTIFICATION
+# ---------------------------------------------------------------------------
+
+
+def test_fan_club_text_post_notification_sent_to_followers(app, mocker):
+    """
+    When an artist creates a root-level fan club text post, each follower
+    receives a fan_club_text_post notification.
+    """
+    entities_with_follows = {
+        **fan_club_post_entities,
+        "follows": [
+            {"follower_user_id": 2, "followee_user_id": 1},
+            {"follower_user_id": 3, "followee_user_id": 1},
+        ],
+    }
+
+    tx_receipts = {
+        "ArtistFanClubPost": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 1,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_post_metadata_json}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, entities_with_follows, tx_receipts)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        # Should create one notification per follower
+        notifs = (
+            session.query(Notification)
+            .filter(Notification.type == "fan_club_text_post")
+            .all()
+        )
+        assert len(notifs) == 2
+
+        notif_user_ids = sorted([n.user_ids[0] for n in notifs])
+        assert notif_user_ids == [2, 3]
+
+        # Verify notification data
+        for notif in notifs:
+            assert notif.data["entity_user_id"] == 1
+            assert notif.data["comment_id"] == 1
+            assert notif.group_id == "fan_club_text_post:1:user:1"
+
+        # No "comment" notification since artist is posting on their own fan club
+        comment_notifs = (
+            session.query(Notification)
+            .filter(Notification.type == "comment")
+            .all()
+        )
+        assert len(comment_notifs) == 0
+
+
+def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
+    """
+    Replies within a fan club thread should NOT send fan_club_text_post
+    notifications (only root-level posts do).
+    """
+    reply_entities = {
+        **fan_club_post_entities,
+        "follows": [
+            {"follower_user_id": 2, "followee_user_id": 1},
+        ],
+        "comments": [
+            {
+                "comment_id": 1,
+                "user_id": 1,
+                "entity_id": 1,
+                "entity_type": "FanClub",
+            }
+        ],
+    }
+
+    reply_metadata = json.dumps({
+        **fan_club_post_metadata,
+        "body": "replying to my own post",
+        "parent_comment_id": 1,
+    })
+
+    tx_receipts = {
+        "ArtistReply": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 2,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {reply_metadata}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, reply_entities, tx_receipts)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        # No fan_club_text_post notifications for replies
+        notifs = (
+            session.query(Notification)
+            .filter(Notification.type == "fan_club_text_post")
+            .all()
+        )
+        assert len(notifs) == 0
+
+
+def test_fan_club_text_post_notification_no_followers(app, mocker):
+    """
+    If the artist has no followers, no fan_club_text_post notifications
+    are created (but the post itself is still indexed).
+    """
+    tx_receipts = {
+        "ArtistPostNoFollowers": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 1,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_post_metadata_json}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, fan_club_post_entities, tx_receipts)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        # Post is created
+        comments = session.query(Comment).all()
+        assert len(comments) == 1
+
+        # No notifications
+        notifs = (
+            session.query(Notification)
+            .filter(Notification.type == "fan_club_text_post")
+            .all()
+        )
+        assert len(notifs) == 0

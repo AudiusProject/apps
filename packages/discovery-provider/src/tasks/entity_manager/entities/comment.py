@@ -10,6 +10,7 @@ from src.models.comments.comment_report import COMMENT_KARMA_THRESHOLD, CommentR
 from src.models.comments.comment_thread import CommentThread
 from src.models.moderation.muted_user import MutedUser
 from src.models.notifications.notification import Notification
+from src.models.social.follow import Follow
 from src.models.tracks.track import Track
 from src.models.users.aggregate_user import AggregateUser
 from src.models.users.user import User
@@ -282,6 +283,33 @@ def create_comment(params: ManageEntityParameters):
         )
 
         safe_add_notification(params.session, comment_notification)
+
+    # Notify followers when an artist creates a root-level fan club text post
+    if entity_type == FAN_CLUB_ENTITY_TYPE and not is_reply:
+        follower_user_ids = (
+            params.session.query(Follow.follower_user_id)
+            .filter(
+                Follow.followee_user_id == entity_user_id,
+                Follow.is_current == True,
+                Follow.is_delete == False,
+            )
+            .all()
+        )
+        for (follower_id,) in follower_user_ids:
+            fan_club_notification = Notification(
+                blocknumber=params.block_number,
+                user_ids=[follower_id],
+                timestamp=params.block_datetime,
+                type="fan_club_text_post",
+                specifier=str(follower_id),
+                group_id=f"fan_club_text_post:{comment_id}:user:{entity_user_id}",
+                data={
+                    "entity_user_id": entity_user_id,
+                    "comment_id": comment_id,
+                },
+            )
+            safe_add_notification(params.session, fan_club_notification)
+
     if mentions:
         mention_mutes = (
             params.session.query(MutedUser)
