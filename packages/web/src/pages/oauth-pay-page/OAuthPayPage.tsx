@@ -14,9 +14,11 @@ import {
   PlainButton
 } from '@audius/harmony'
 import cn from 'classnames'
+import { useLocation } from 'react-router'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { ProfileInfo } from 'components/profile-info/ProfileInfo'
+import { useRequiresAccount } from 'hooks/useRequiresAccount'
 
 import { ContentWrapper } from '../oauth-login-page/components/ContentWrapper'
 
@@ -26,7 +28,11 @@ import { messages } from './messages'
 
 export const OAuthPayPage = () => {
   const { data: account } = useCurrentAccountUser()
+  const location = useLocation()
   const [error, setError] = useState<string | null>(null)
+
+  // Redirect logged-out users to sign up, returning here after account creation
+  useRequiresAccount(`${location.pathname}${location.search}`)
 
   const {
     recipient,
@@ -212,7 +218,7 @@ export const OAuthPayPage = () => {
         </Flex>
 
         <div className={styles.formArea}>
-          {isLoggedIn ? (
+          {isLoggedIn && (
             <div className={styles.userInfoContainer}>
               <Text
                 variant='body'
@@ -304,19 +310,23 @@ export const OAuthPayPage = () => {
                 </Flex>
               </Flex>
 
-              {/* Error Messages */}
-              {!userHoldsMint && (
-                <Hint css={{ marginTop: 'var(--harmony-unit-4)' }}>
-                  <Text variant='body' size='s' color='danger'>
-                    {messages.userDoesNotHoldMint}
-                  </Text>
-                </Hint>
-              )}
-
-              {userHoldsMint && !hasSufficientBalance && (
+              {/* Insufficient / no balance message — shown before confirm */}
+              {!hasSufficientBalance && (
                 <Hint css={{ marginTop: 'var(--harmony-unit-4)' }}>
                   <Text variant='body' size='s' color='danger'>
                     {messages.insufficientBalance}
+                    <a
+                      href='https://audius.co/wallet'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      style={{
+                        color: 'inherit',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      {messages.walletLink}
+                    </a>
+                    .
                   </Text>
                 </Hint>
               )}
@@ -347,12 +357,6 @@ export const OAuthPayPage = () => {
                   {messages.confirm}
                 </Button>
               </Flex>
-            </div>
-          ) : (
-            <div className={styles.userInfoContainer}>
-              <Text variant='body' size='m' color='subdued'>
-                Please sign in to confirm this transaction.
-              </Text>
             </div>
           )}
         </div>
