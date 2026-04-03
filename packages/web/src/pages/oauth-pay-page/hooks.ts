@@ -9,10 +9,10 @@ import {
   useUserByHandle,
   useQueryContext
 } from '@audius/common/api'
-import { FixedDecimal } from '@audius/fixed-decimal'
 import { useUserbank } from '@audius/common/hooks'
 import { SolanaWalletAddress } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
+import { FixedDecimal } from '@audius/fixed-decimal'
 import { useQuery } from '@tanstack/react-query'
 import * as queryString from 'query-string'
 import { useLocation } from 'react-router'
