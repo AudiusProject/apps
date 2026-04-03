@@ -1,13 +1,12 @@
 import { useCallback } from 'react'
 
 import { useArtistCreatedCoin } from '@audius/common/api'
-import { useBuySellInitialTab } from '@audius/common/hooks'
 
 import { Button, useTheme } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 const messages = {
-  title: 'Buy Fan Club Token'
+  viewFanClub: 'View Fan Club'
 }
 
 export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
@@ -15,16 +14,14 @@ export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
   const navigation = useNavigation()
 
   const { data: artistCoin } = useArtistCreatedCoin(userId)
-  const initialTab = useBuySellInitialTab()
 
   const handlePress = useCallback(() => {
     if (artistCoin?.ticker) {
-      navigation.navigate('BuySell', {
-        initialTab,
-        coinTicker: artistCoin.ticker
+      navigation.navigate('CoinDetailsScreen', {
+        ticker: artistCoin.ticker
       })
     }
-  }, [navigation, artistCoin?.ticker, initialTab])
+  }, [navigation, artistCoin?.ticker])
 
   // Don't render if user doesn't own a coin
   if (!artistCoin?.mint) {
@@ -38,7 +35,7 @@ export const BuyArtistCoinButton = ({ userId }: { userId: number }) => {
       fullWidth
       onPress={handlePress}
     >
-      {messages.title}
+      {messages.viewFanClub}
     </Button>
   )
 }

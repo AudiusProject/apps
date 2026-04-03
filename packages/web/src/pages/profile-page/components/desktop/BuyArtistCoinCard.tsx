@@ -1,9 +1,11 @@
 import { useArtistCoin } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import { Button, Flex, Paper, Text } from '@audius/harmony'
+import { Button, Flex, IconArtistCoin, Paper, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
+
+import { ProfilePageNavSectionTitle } from './ProfilePageNavSectionTitle'
 
 const messages = {
   fanClub: 'Fan Club',
@@ -25,9 +27,10 @@ export const BuyArtistCoinCard = ({ mint }: { mint: string }) => {
   }
   return (
     <Flex column gap='s'>
-      <Text variant='title' size='l'>
-        {messages.fanClub}
-      </Text>
+      <ProfilePageNavSectionTitle
+        title={messages.fanClub}
+        Icon={IconArtistCoin}
+      />
       <Paper
         column
         gap='s'
