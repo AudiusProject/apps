@@ -77,10 +77,17 @@ export const COIN_DETAIL_BUY_PAGE = '/coins/:ticker/buy'
 export const COIN_REDEEM_PAGE = '/coins/:ticker/redeem/:code?'
 export const COIN_EXCLUSIVE_TRACKS_PAGE = '/coins/:ticker/exclusive-tracks'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
+/** Primary club detail route */
+export const CLUB_DETAIL_PAGE = '/clubs/:ticker'
+export const CLUB_DETAIL_BUY_PAGE = '/clubs/:ticker/buy'
+export const CLUB_REDEEM_PAGE = '/clubs/:ticker/redeem/:code?'
+export const CLUB_EXCLUSIVE_TRACKS_PAGE = '/clubs/:ticker/exclusive-tracks'
+export const EDIT_CLUB_DETAILS_PAGE = '/clubs/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
 export const WALLET_GUIDE_PAGE = '/wallet/guide'
 export const CASH_PAGE = '/cash'
 export const COINS_CREATE_PAGE = '/coins/create'
+export const CLUBS_CREATE_PAGE = '/clubs/create'
 /** Legacy explore URL; app redirects to CLUBS_EXPLORE_PAGE. */
 export const COINS_EXPLORE_PAGE = '/coins'
 /** Fan club discovery (primary); same UI as legacy /coins. */
@@ -160,8 +167,11 @@ export const FOLLOWING_USERS_ROUTE = '/following'
 export const FOLLOWERS_USERS_ROUTE = '/followers'
 export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
 export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
+export const CLUB_DETAIL_MOBILE_WEB_ROUTE = '/clubs/:ticker/details'
 export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
   '/coins/:ticker/exclusive-tracks/mobile'
+export const CLUB_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
+  '/clubs/:ticker/exclusive-tracks/mobile'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
 export const NOTIFICATION_SETTINGS_PAGE = '/settings/notifications'
 export const ABOUT_SETTINGS_PAGE = '/settings/about'
@@ -243,6 +253,7 @@ export const authenticatedRoutes = [
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
   CASH_PAGE
 ]
@@ -297,12 +308,15 @@ export const orderedRoutes = [
   AUDIO_PAGE,
   WALLET_AUDIO_PAGE,
   COIN_DETAIL_PAGE,
+  CLUB_DETAIL_PAGE,
   EDIT_COIN_DETAILS_PAGE,
+  EDIT_CLUB_DETAILS_PAGE,
   WALLET_PAGE,
   CASH_PAGE,
   COINS_EXPLORE_PAGE,
   CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
   REWARDS_PAGE,
   SETTINGS_PAGE,
@@ -354,6 +368,7 @@ export const staticRoutes = new Set([
   COINS_EXPLORE_PAGE,
   CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
   CASH_PAGE,
   REWARDS_PAGE,
@@ -466,5 +481,11 @@ export const searchPage = (searchOptions: SearchOptions) => {
 export const coinPage = (ticker: string) =>
   `/coins/${formatTickerForUrl(ticker)}`
 
+export const clubPage = (ticker: string) =>
+  `/clubs/${formatTickerForUrl(ticker)}`
+
 export const coinRedeemPage = (ticker: string, code?: string) =>
   `/coins/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`
+
+export const clubRedeemPage = (ticker: string, code?: string) =>
+  `/clubs/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`

@@ -4,10 +4,10 @@ import {
   useUser
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { coinPage } from '@audius/common/src/utils/route'
+import { coinPage, clubPage } from '@audius/common/src/utils/route'
 import { formatTickerForUrl, route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
-import { Navigate, useParams } from 'react-router'
+import { Navigate, useLocation, useParams } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -87,9 +87,11 @@ const MobileFanClubDetailPageContent = ({
 
 export const FanClubDetailPage = () => {
   const { ticker } = useParams<{ ticker?: string }>()
+  const location = useLocation()
   const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
   const formattedTicker = formatTickerForUrl(ticker ?? '')
+  const isClubsRoute = location.pathname.startsWith('/clubs')
 
   const {
     data: coin,
@@ -107,7 +109,8 @@ export const FanClubDetailPage = () => {
   }
 
   if (ticker !== formattedTicker) {
-    return <Navigate to={coinPage(formattedTicker)} replace />
+    const detailPage = isClubsRoute ? clubPage : coinPage
+    return <Navigate to={detailPage(formattedTicker)} replace />
   }
 
   if (isError || (isSuccess && !coin)) {
