@@ -32,8 +32,7 @@ import {
   handleAuthorizeDisconnectDashboardWallet,
   isValidApiKey,
   validateDashboardWalletParams,
-  DashboardWalletParams,
-  DashboardWalletTx
+  DashboardWalletParams
 } from './utils'
 
 // Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
