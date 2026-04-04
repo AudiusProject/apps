@@ -235,6 +235,12 @@ def create_comment(params: ManageEntityParameters):
     ).scalar()
 
     comment_id = params.entity_id
+    # Only fan club posts can be members-only; track comments are never gated.
+    is_members_only = (
+        bool(metadata.get("is_members_only", True))
+        if entity_type == FAN_CLUB_ENTITY_TYPE
+        else False
+    )
     comment_record = Comment(
         comment_id=comment_id,
         user_id=user_id,
@@ -242,6 +248,7 @@ def create_comment(params: ManageEntityParameters):
         entity_type=entity_type,
         entity_id=stored_entity_id,
         track_timestamp_s=metadata["track_timestamp_s"],
+        is_members_only=bool(is_members_only),
         txhash=params.txhash,
         blockhash=params.event_blockhash,
         blocknumber=params.block_number,

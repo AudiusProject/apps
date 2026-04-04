@@ -23,6 +23,7 @@ type PostUpdateCardProps = {
 
 export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const [messageId, setMessageId] = useState(0)
+  const [isMembersOnly, setIsMembersOnly] = useState(true)
   const { data: currentUserId } = useCurrentUserId()
   const { data: coin } = useArtistCoin(mint)
   const { mutate: postTextUpdate, isPending } = usePostTextUpdate()
@@ -40,11 +41,12 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
         userId: currentUserId,
         entityId: coin.ownerId,
         body: value.trim(),
-        mint
+        mint,
+        isMembersOnly
       })
       setMessageId((prev) => prev + 1)
     },
-    [currentUserId, coin?.ownerId, mint, postTextUpdate]
+    [currentUserId, coin?.ownerId, mint, postTextUpdate, isMembersOnly]
   )
 
   if (!isOwner || !isTextPostPostingEnabled) return null
@@ -76,7 +78,10 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
           <Text variant='label' size='s'>
             {messages.membersOnly}
           </Text>
-          <Checkbox checked disabled />
+          <Checkbox
+            checked={isMembersOnly}
+            onChange={() => setIsMembersOnly((prev) => !prev)}
+          />
         </Flex>
       </Flex>
     </Paper>

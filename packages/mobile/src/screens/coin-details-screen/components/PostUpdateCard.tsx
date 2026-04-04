@@ -9,6 +9,7 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
+import { Switch } from 'app/components/core'
 import { ComposerInput } from 'app/components/composer-input'
 
 const messages = {
@@ -23,6 +24,7 @@ type PostUpdateCardProps = {
 
 export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const [messageId, setMessageId] = useState(0)
+  const [isMembersOnly, setIsMembersOnly] = useState(true)
   const { data: currentUserId } = useCurrentUserId()
   const { data: coin } = useArtistCoin(mint)
   const { mutate: postTextUpdate } = usePostTextUpdate()
@@ -40,11 +42,12 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
         userId: currentUserId,
         entityId: coin.ownerId,
         body: value.trim(),
-        mint
+        mint,
+        isMembersOnly
       })
       setMessageId((prev) => prev + 1)
     },
-    [currentUserId, coin?.ownerId, mint, postTextUpdate]
+    [currentUserId, coin?.ownerId, mint, postTextUpdate, isMembersOnly]
   )
 
   if (!isOwner || !isTextPostPostingEnabled) return null
@@ -75,6 +78,10 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
           <Text variant='label' size='s'>
             {messages.membersOnly}
           </Text>
+          <Switch
+            value={isMembersOnly}
+            onValueChange={setIsMembersOnly}
+          />
         </Flex>
       </Flex>
     </Paper>

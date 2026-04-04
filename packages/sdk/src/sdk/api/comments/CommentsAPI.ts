@@ -84,7 +84,8 @@ export class CommentsApi extends GeneratedCommentsApi {
       mentions,
       parentCommentId,
       trackTimestampS,
-      entityId
+      entityId,
+      isMembersOnly
     } = metadata
     const newCommentId = commentId ?? (await this.generateCommentId())
 
@@ -95,6 +96,9 @@ export class CommentsApi extends GeneratedCommentsApi {
       entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
       body,
       entity_id: entityId
+    }
+    if (isMembersOnly !== undefined) {
+      data.is_members_only = isMembersOnly
     }
     if (mentions !== undefined && mentions.length > 0) {
       data.mentions = mentions
@@ -138,7 +142,8 @@ export class CommentsApi extends GeneratedCommentsApi {
           commentId: md.commentId,
           parentCommentId: md.parentId,
           trackTimestampS: md.trackTimestampS,
-          mentions: md.mentions
+          mentions: md.mentions,
+          isMembersOnly: (md as any).isMembersOnly
         })
       }
       return await this.createCommentWithEntityManager({
