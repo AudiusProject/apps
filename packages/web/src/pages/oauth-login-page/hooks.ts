@@ -120,10 +120,7 @@ const useParsedQueryParams = () => {
     } else if (parsedRedirectUri === 'postmessage' && !parsedOrigin) {
       // Only applicable if redirect URI set to `postMessage`
       error = messages.originInvalidError
-    } else if (
-      scope !== 'read' &&
-      scope !== 'write'
-    ) {
+    } else if (scope !== 'read' && scope !== 'write') {
       error = messages.scopeError
     } else if (
       responseMode &&
