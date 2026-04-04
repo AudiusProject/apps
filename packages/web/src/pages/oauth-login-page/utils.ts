@@ -77,7 +77,7 @@ export const formOAuthResponse = async ({
   userEmail,
   apiKey,
   onError,
-  txSignature // Only applicable to scope = write_once
+  txSignature
 }: {
   account: UserMetadata
   userEmail?: string | null
@@ -214,7 +214,7 @@ export const getIsAppAuthorized = async ({
   )
   return foundIndex !== undefined && foundIndex > -1
 }
-export type WriteOnceTx =
+export type DashboardWalletTx =
   | 'connect_dashboard_wallet'
   | 'disconnect_dashboard_wallet'
 
@@ -226,11 +226,11 @@ type DisconnectDashboardWalletParams = {
   wallet: string
 }
 
-export type WriteOnceParams =
+export type DashboardWalletParams =
   | ConnectDashboardWalletParams
   | DisconnectDashboardWalletParams
 
-export const validateWriteOnceParams = ({
+export const validateDashboardWalletParams = ({
   tx,
   params: rawParams,
   willUsePostMessage
@@ -240,13 +240,13 @@ export const validateWriteOnceParams = ({
   willUsePostMessage: boolean
 }) => {
   let error = null
-  let txParams: WriteOnceParams | null = null
+  let txParams: DashboardWalletParams | null = null
   if (tx === 'connect_dashboard_wallet') {
     if (!willUsePostMessage) {
       error = messages.connectWalletNoPostMessageError
     }
     if (!rawParams.wallet) {
-      error = messages.writeOnceParamsError
+      error = messages.txParamsError
       return { error, txParams }
     }
     txParams = {
@@ -254,7 +254,7 @@ export const validateWriteOnceParams = ({
     }
   } else if (tx === 'disconnect_dashboard_wallet') {
     if (!rawParams.wallet) {
-      error = messages.writeOnceParamsError
+      error = messages.txParamsError
       return { error, txParams }
     }
     txParams = {
@@ -262,7 +262,7 @@ export const validateWriteOnceParams = ({
     }
   } else {
     // Unknown 'tx' value
-    error = messages.writeOnceTxError
+    error = messages.txError
   }
   return { error, txParams }
 }
