@@ -50,7 +50,6 @@ import {
 import { Pages as SignOnPages } from 'common/store/pages/signon/types'
 import AnimatedSwitch from 'components/animated-switch/AnimatedSwitch'
 import AppRedirectListener from 'components/app-redirect-popover/AppRedirectListener'
-import { AppRedirectPopover } from 'components/app-redirect-popover/components/AppRedirectPopover'
 import { AppBannerWrapper } from 'components/banner/AppBannerWrapper'
 import { DownloadAppBanner } from 'components/banner/DownloadAppBanner'
 import { UpdateAppBanner } from 'components/banner/UpdateAppBanner'
@@ -73,10 +72,6 @@ import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
 import { SsrContext } from 'ssr/SsrContext'
 import { getShowCookieBanner } from 'store/application/ui/cookieBanner/selectors'
-import {
-  decrementScrollCount as decrementScrollCountAction,
-  incrementScrollCount as incrementScrollCountAction
-} from 'store/application/ui/scrollLock/actions'
 import { getClient } from 'utils/clientUtil'
 import 'utils/redirect'
 import { getPathname } from 'utils/route'
@@ -503,16 +498,6 @@ const WebPlayer = (props: WebPlayerProps) => {
       page: string | null = null,
       fields: Record<string, unknown> = {}
     ) => dispatch(openSignOnAction(signIn, page, fields)),
-    [dispatch]
-  )
-
-  const handleIncrementScroll = useCallback(
-    () => dispatch(incrementScrollCountAction()),
-    [dispatch]
-  )
-
-  const handleDecrementScroll = useCallback(
-    () => dispatch(decrementScrollCountAction()),
     [dispatch]
   )
 
@@ -1607,12 +1592,6 @@ const WebPlayer = (props: WebPlayerProps) => {
         <RewardClaimedToast />
         {!isMobile ? <Visualizer /> : null}
         {!isMobile ? <DevModeMananger /> : null}
-        {isMobile ? (
-          <AppRedirectPopover
-            incrementScroll={handleIncrementScroll}
-            decrementScroll={handleDecrementScroll}
-          />
-        ) : null}
       </div>
     </div>
   )

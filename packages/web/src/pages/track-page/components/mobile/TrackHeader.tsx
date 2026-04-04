@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback } from 'react'
 
 import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
 import {
@@ -30,7 +30,6 @@ import IconVisibilityHidden from '@audius/harmony/src/assets/icons/VisibilityHid
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
-import { DownloadMobileAppDrawer } from 'components/download-mobile-app-drawer/DownloadMobileAppDrawer'
 import { UserLink } from 'components/link'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import { GatedContentSection } from 'components/track/GatedContentSection'
@@ -327,11 +326,6 @@ const TrackHeader = ({
     )
   }
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const handleDrawerClose = useCallback(() => {
-    setIsDrawerOpen(false)
-  }, [setIsDrawerOpen])
-
   const trendingRank = useTrackRank(trackId)
 
   return (
@@ -452,10 +446,6 @@ const TrackHeader = ({
             </Suspense>
           </Box>
         ) : null}
-        <DownloadMobileAppDrawer
-          isOpen={isDrawerOpen}
-          onClose={handleDrawerClose}
-        />
       </Flex>
     </Box>
   )
