@@ -1,11 +1,10 @@
 import { useState, useCallback } from 'react'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { BrowserProvider } from 'ethers'
 import { useDispatch } from 'react-redux'
 
 import { getDashboardWalletUserQueryKey } from 'hooks/useDashboardWalletUsers'
-import { audiusSdk as sdk, apiEndpoint } from 'services/Audius/sdk'
+import { audiusSdk, apiEndpoint } from 'services/Audius/sdk'
 import { disableAudiusProfileRefetch } from 'store/account/slice'
 
 const API_KEY = '2cc593fc814461263d282a84286fd4f72c79562e'
@@ -13,7 +12,7 @@ const API_KEY = '2cc593fc814461263d282a84286fd4f72c79562e'
 const AUDIUS_URL = import.meta.env.VITE_AUDIUS_URL || 'https://audius.co'
 const OAUTH_BASE_URL = `${AUDIUS_URL}/oauth/auth`
 
-// --- PKCE helpers (inlined from @audius/sdk since they aren't exported) ---
+// --- PKCE helpers ---
 
 function base64url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes))
@@ -40,9 +39,7 @@ function generateState(): string {
   return base64url(arr)
 }
 
-// --- End PKCE helpers ---
-
-type OAuthPopupMessage = {
+type PopupMessage = {
   state?: string
   userHandle?: string
   userId?: string
@@ -66,13 +63,12 @@ export const useConnectAudiusProfile = ({
     setIsWaiting(true)
 
     try {
-      // 1. Generate PKCE params
       const state = generateState()
       const codeVerifier = generateCodeVerifier()
       const codeChallenge = await generateCodeChallenge(codeVerifier)
       const origin = window.location.origin
+      const oauthOrigin = new URL(OAUTH_BASE_URL).origin
 
-      // 2. Construct OAuth URL with write scope + dashboard wallet tx
       const params = new URLSearchParams({
         scope: 'write',
         api_key: API_KEY,
@@ -86,71 +82,67 @@ export const useConnectAudiusProfile = ({
         tx: 'connect_dashboard_wallet',
         wallet
       })
-      const oauthUrl = `${OAUTH_BASE_URL}?${params.toString()}`
 
-      // 3. Open popup
       const popup = window.open(
-        oauthUrl,
+        `${OAUTH_BASE_URL}?${params.toString()}`,
         '',
         'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=375, height=785, top=100, left=100'
       )
       if (!popup) {
-        throw new Error(
-          'The login popup was blocked. Please allow popups for this site and try again.'
-        )
+        throw new Error('The login popup was blocked.')
       }
 
-      // 4. Wait for messages from popup
-      const oauthOrigin = new URL(OAUTH_BASE_URL).origin
+      // Listen for ALL messages from popup (userHandle, then code)
+      const { userHandle } = await new Promise<{ userHandle: string }>(
+        (resolve, reject) => {
+          const closeCheck = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(closeCheck)
+              reject(new Error('The login popup was closed.'))
+            }
+          }, 500)
 
-      // First message: user handle (after user authenticates)
-      const { userHandle } = await new Promise<{
-        userHandle: string
-      }>((resolve, reject) => {
-        const closeCheck = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(closeCheck)
-            reject(new Error('The login popup was closed.'))
+          const handler = (event: MessageEvent<PopupMessage>) => {
+            if (
+              event.origin !== oauthOrigin ||
+              event.source !== popup ||
+              event.data?.state !== state
+            ) {
+              return
+            }
+            if (event.data.userHandle != null) {
+              window.removeEventListener('message', handler)
+              clearInterval(closeCheck)
+              resolve({ userHandle: event.data.userHandle })
+            }
           }
-        }, 500)
-
-        const handler = (event: MessageEvent<OAuthPopupMessage>) => {
-          if (
-            event.origin !== oauthOrigin ||
-            event.source !== popup ||
-            event.data?.state !== state
-          ) {
-            return
-          }
-          if (event.data.userHandle != null) {
-            window.removeEventListener('message', handler)
-            clearInterval(closeCheck)
-            resolve({ userHandle: event.data.userHandle })
-          }
+          window.addEventListener('message', handler, false)
         }
-        window.addEventListener('message', handler, false)
-      })
+      )
 
-      // 5. Sign wallet signature using ethers
+      // Sign with connected Ethereum wallet
       if (!walletProvider) {
         throw new Error('Wallet provider not available')
       }
-      const provider = new BrowserProvider(walletProvider)
-      const signer = await provider.getSigner()
       const timestamp = Math.round(new Date().getTime() / 1000)
       const message = `Connecting Audius user @${userHandle} at ${timestamp}`
-      const signature = await signer.signMessage(message)
+      const hexMessage =
+        '0x' +
+        Array.from(new TextEncoder().encode(message))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('')
+      const signature = await walletProvider.request({
+        method: 'personal_sign',
+        params: [hexMessage, wallet]
+      })
 
-      // 6. Send wallet signature back to popup
+      // Send wallet signature to popup for EntityManager tx
       popup.postMessage(
-        {
-          state,
-          walletSignature: { message, signature }
-        },
+        { state, walletSignature: { message, signature } },
         oauthOrigin
       )
 
-      // 7. Wait for auth code from popup (after EntityManager tx completes)
+      // Wait for auth code from popup (after EntityManager tx + PKCE exchange)
       const { code } = await new Promise<{ code: string }>(
         (resolve, reject) => {
           const closeCheck = setInterval(() => {
@@ -160,7 +152,7 @@ export const useConnectAudiusProfile = ({
             }
           }, 500)
 
-          const handler = (event: MessageEvent<OAuthPopupMessage>) => {
+          const handler = (event: MessageEvent<PopupMessage>) => {
             if (
               event.origin !== oauthOrigin ||
               event.source !== popup ||
@@ -178,7 +170,7 @@ export const useConnectAudiusProfile = ({
         }
       )
 
-      // 8. Exchange code for tokens
+      // Exchange code for tokens
       const tokenRes = await fetch(`${apiEndpoint}/v1/oauth/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -192,12 +184,12 @@ export const useConnectAudiusProfile = ({
       })
 
       if (!tokenRes.ok) {
-        throw new Error('Token exchange failed')
+        throw new Error(`Token exchange failed: ${tokenRes.status}`)
       }
 
       const tokens = await tokenRes.json()
 
-      // 9. Fetch user profile and update cache
+      // Fetch user profile and update cache
       const meRes = await fetch(`${apiEndpoint}/v1/me`, {
         headers: { Authorization: `Bearer ${tokens.access_token}` }
       })
@@ -215,6 +207,7 @@ export const useConnectAudiusProfile = ({
         }
       }
 
+      popup.close()
       setIsWaiting(false)
       onSuccess()
     } catch (e) {
@@ -227,13 +220,12 @@ export const useConnectAudiusProfile = ({
     setIsWaiting(true)
 
     try {
-      // Generate PKCE params
       const state = generateState()
       const codeVerifier = generateCodeVerifier()
       const codeChallenge = await generateCodeChallenge(codeVerifier)
       const origin = window.location.origin
+      const oauthOrigin = new URL(OAUTH_BASE_URL).origin
 
-      // Construct OAuth URL for disconnect
       const params = new URLSearchParams({
         scope: 'write',
         api_key: API_KEY,
@@ -247,11 +239,9 @@ export const useConnectAudiusProfile = ({
         tx: 'disconnect_dashboard_wallet',
         wallet
       })
-      const oauthUrl = `${OAUTH_BASE_URL}?${params.toString()}`
 
-      // Open popup
       const popup = window.open(
-        oauthUrl,
+        `${AUDIUS_URL}/oauth/auth?${params.toString()}`,
         '',
         'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=375, height=785, top=100, left=100'
       )
@@ -259,9 +249,7 @@ export const useConnectAudiusProfile = ({
         throw new Error('The login popup was blocked.')
       }
 
-      const oauthOrigin = new URL(OAUTH_BASE_URL).origin
-
-      // Wait for auth code (disconnect doesn't need wallet signature exchange)
+      // Wait for auth code (disconnect doesn't need wallet signature)
       await new Promise<void>((resolve, reject) => {
         const closeCheck = setInterval(() => {
           if (popup.closed) {
@@ -270,7 +258,7 @@ export const useConnectAudiusProfile = ({
           }
         }, 500)
 
-        const handler = (event: MessageEvent<OAuthPopupMessage>) => {
+        const handler = (event: MessageEvent<PopupMessage>) => {
           if (
             event.origin !== oauthOrigin ||
             event.source !== popup ||
@@ -287,12 +275,13 @@ export const useConnectAudiusProfile = ({
         window.addEventListener('message', handler, false)
       })
 
-      // Optimistically clear the connected user
+      // Clear the connected user
       await queryClient.cancelQueries({
         queryKey: getDashboardWalletUserQueryKey(wallet)
       })
       dispatch(disableAudiusProfileRefetch())
       queryClient.setQueryData(getDashboardWalletUserQueryKey(wallet), null)
+      popup.close()
       setIsWaiting(false)
       onSuccess()
     } catch (e) {

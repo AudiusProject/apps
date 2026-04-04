@@ -52,13 +52,10 @@
   width: 56px;
   border-radius: 4px;
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   flex-shrink: 0;
-}
-
-.artworkImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .playlist .text {

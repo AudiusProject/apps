@@ -251,7 +251,6 @@ export type Track = {
   title: string
   handle: string
   artwork: string
-  artworkUrls: string[]
   url: string
   userUrl: string
 }
@@ -260,7 +259,6 @@ export type Playlist = {
   title: string
   handle: string
   artwork: string
-  artworkUrls: string[]
   plays: number
   url: string
 }
@@ -269,7 +267,6 @@ export type Album = {
   title: string
   handle: string
   artwork: string
-  artworkUrls: string[]
   plays: number
   url: string
 }

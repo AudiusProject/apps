@@ -2,24 +2,14 @@ import React, { useCallback } from 'react'
 
 import Error from 'components/Error'
 import Loading from 'components/Loading'
-import MirrorImage from 'components/MirrorImage/MirrorImage'
 import Paper from 'components/Paper'
 import { useTopAlbums } from 'store/cache/music/hooks'
 import { MusicError } from 'store/cache/music/slice'
-import { Playlist } from 'types'
 
 import styles from './TopAlbums.module.css'
 
 const messages = {
   title: 'Top Albums This Week'
-}
-
-const AlbumArtwork = ({ album }: { album: Playlist }) => {
-  const urls =
-    album.artworkUrls.length > 0 ? album.artworkUrls : [album.artwork]
-  return (
-    <MirrorImage urls={urls} alt={album.title} className={styles.artworkImg} />
-  )
 }
 
 type TopAlbumsProps = {}
@@ -35,9 +25,13 @@ const TopAlbums: React.FC<TopAlbumsProps> = () => {
     return topAlbums ? (
       topAlbums.map((p, i) => (
         <div key={i} className={styles.album} onClick={() => goToUrl(p.url)}>
-          <div className={styles.artwork} onClick={() => goToUrl(p.url)}>
-            <AlbumArtwork album={p} />
-          </div>
+          <div
+            className={styles.artwork}
+            onClick={() => goToUrl(p.url)}
+            style={{
+              backgroundImage: `url(${p.artwork})`
+            }}
+          />
           <div className={styles.text}>
             <div className={styles.albumTitle}>{p.title}</div>
             <div className={styles.handle}>{p.handle}</div>

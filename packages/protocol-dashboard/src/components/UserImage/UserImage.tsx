@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react'
 
 import clsx from 'clsx'
 
-import MirrorImage from 'components/MirrorImage/MirrorImage'
 import { useUserProfile } from 'store/cache/user/hooks'
 import { Address } from 'types'
-import { getImageUrls } from 'utils/imageUrls'
 
 import styles from './UserImage.module.css'
 
@@ -18,6 +16,14 @@ type UserImageProps = {
   useSkeleton?: boolean
 }
 
+const preload = async (image: string, cb: () => void) => {
+  await new Promise((resolve) => {
+    const i = new Image()
+    i.src = image
+    i.onload = cb
+  })
+}
+
 const UserImage = ({
   imgClassName,
   className,
@@ -26,18 +32,12 @@ const UserImage = ({
   hasLoaded,
   useSkeleton = true
 }: UserImageProps) => {
-  const { image, profilePicture } = useUserProfile({ wallet })
-  const [loaded, setLoaded] = useState(false)
-
-  // Build mirror URLs from the profilePicture object if available
-  const mirrorUrls = profilePicture
-    ? getImageUrls(profilePicture as Record<string, any>)
-    : []
-
-  // Use mirror URLs if available, otherwise fall back to single image
-  const urls = mirrorUrls.length > 0 ? mirrorUrls : image ? [image] : []
-
+  const { image } = useUserProfile({ wallet })
+  const [preloaded, setPreloaded] = useState(false)
   useEffect(() => {
+    if (image) {
+      preload(image, () => setPreloaded(true))
+    }
     if (image && hasLoaded) hasLoaded()
   }, [image, hasLoaded])
 
@@ -47,13 +47,12 @@ const UserImage = ({
         [styles.noSkeleton]: !useSkeleton
       })}
     >
-      <MirrorImage
-        urls={urls}
-        alt={alt}
+      <img
         className={clsx(className, imgClassName, {
-          [styles.show]: urls.length > 0 && loaded
+          [styles.show]: !!image && preloaded
         })}
-        onLoad={() => setLoaded(true)}
+        src={image || undefined}
+        alt={alt}
       />
     </div>
   )

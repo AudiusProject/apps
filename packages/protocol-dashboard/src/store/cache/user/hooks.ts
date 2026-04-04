@@ -476,9 +476,6 @@ export const useUserProfile = ({ wallet }: UseUserProfile) => {
       ? (audiusProfile?.profilePicture?._480x480 ?? user.image)
       : undefined
 
-  const profilePicture =
-    status !== Status.Loading ? (audiusProfile?.profilePicture ?? null) : null
-
   const dispatch: ThunkDispatch<AppState, Audius, AnyAction> = useDispatch()
   useEffect(() => {
     if (user && !inFlight.has(wallet)) {
@@ -488,12 +485,7 @@ export const useUserProfile = ({ wallet }: UseUserProfile) => {
   }, [dispatch, user, wallet])
 
   if (user) {
-    return {
-      image,
-      profilePicture,
-      name: audiusProfile?.name ?? user.name,
-      status
-    }
+    return { image, name: audiusProfile?.name ?? user.name, status }
   }
   return {}
 }

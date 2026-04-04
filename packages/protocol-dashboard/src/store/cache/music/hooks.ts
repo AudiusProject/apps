@@ -10,7 +10,6 @@ import Audius from 'services/Audius'
 import { audiusSdk } from 'services/Audius/sdk'
 import AppState from 'store/types'
 import { Playlist, Track } from 'types'
-import { getImageUrls } from 'utils/imageUrls'
 
 import {
   MusicError,
@@ -43,7 +42,6 @@ export function fetchTopTracks(): ThunkAction<
         title: d.title,
         handle: d.user.handle,
         artwork: d.artwork?._480x480 ?? imageBlank,
-        artworkUrls: getImageUrls(d.artwork as Record<string, any>),
         url: `${AUDIUS_URL}/tracks/${d.id}`,
         userUrl: `${AUDIUS_URL}/users/${d.user.id}`
       }))
@@ -72,7 +70,6 @@ export function fetchTopPlaylists(): ThunkAction<
         title: d.playlistName,
         handle: d.user.handle,
         artwork: d.artwork?._480x480 ?? imageBlank,
-        artworkUrls: getImageUrls(d.artwork as Record<string, any>),
         plays: d.totalPlayCount,
         url: `${AUDIUS_URL}/playlists/${d.id}`
       }))
@@ -102,7 +99,6 @@ export function fetchTopAlbums(): ThunkAction<
         title: d.playlistName,
         handle: d.user.handle,
         artwork: d.artwork?._480x480 ?? imageBlank,
-        artworkUrls: getImageUrls(d.artwork as Record<string, any>),
         plays: d.totalPlayCount,
         url: `${AUDIUS_URL}/playlists/${d.id}`
       }))

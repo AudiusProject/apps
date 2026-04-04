@@ -22,14 +22,11 @@
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 8px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   transition: all 0.17s ease-in-out;
   cursor: pointer;
-}
-
-.artworkImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .artwork:hover {
