@@ -129,13 +129,17 @@ export const RewardsTimingCard = () => {
             </Box>
           </Flex>
           {isLoggedIn ? (
-            <Button
-              type={canInitiateRound ? ButtonType.PRIMARY : ButtonType.DISABLED}
-              text={messages.startNextRound}
-              rightIcon={isSubmitting ? <LoadingSpinner /> : undefined}
-              isDisabled={!canInitiateRound || isSubmitting}
-              onClick={handleClickInitiateRound}
-            />
+            <Box css={{ flexShrink: 0 }}>
+              <Button
+                type={
+                  canInitiateRound ? ButtonType.PRIMARY : ButtonType.DISABLED
+                }
+                text={messages.startNextRound}
+                rightIcon={isSubmitting ? <LoadingSpinner /> : undefined}
+                isDisabled={!canInitiateRound || isSubmitting}
+                onClick={handleClickInitiateRound}
+              />
+            </Box>
           ) : null}
         </Card>
       </Flex>
