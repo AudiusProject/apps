@@ -31,9 +31,8 @@ import {
   handleAuthorizeConnectDashboardWallet,
   handleAuthorizeDisconnectDashboardWallet,
   isValidApiKey,
-  validateWriteOnceParams,
-  WriteOnceParams,
-  WriteOnceTx
+  validateDashboardWalletParams,
+  DashboardWalletParams
 } from './utils'
 
 // Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
@@ -50,7 +49,6 @@ const collapseScopes = (
     .flatMap((s) => (s != null ? s.split(/\s+/) : []))
     .filter((t) => t.length > 0)
   if (tokens.includes('write')) return 'write'
-  if (tokens.includes('write_once')) return 'write_once'
   if (tokens.includes('read')) return 'read'
   return typeof raw === 'string' ? raw : null
 }
@@ -115,17 +113,13 @@ const useParsedQueryParams = () => {
 
   const { error, txParams } = useMemo(() => {
     let error: string | null = null
-    let txParams: WriteOnceParams | null = null // Only used for scope=write_once
+    let txParams: DashboardWalletParams | null = null
     if (isRedirectValid === false) {
       error = messages.redirectURIInvalidError
     } else if (parsedRedirectUri === 'postmessage' && !parsedOrigin) {
       // Only applicable if redirect URI set to `postMessage`
       error = messages.originInvalidError
-    } else if (
-      scope !== 'read' &&
-      scope !== 'write' &&
-      scope !== 'write_once'
-    ) {
+    } else if (scope !== 'read' && scope !== 'write') {
       error = messages.scopeError
     } else if (
       responseMode &&
@@ -153,18 +147,18 @@ const useParsedQueryParams = () => {
           error = messages.invalidCodeChallengeMethodError
         }
       }
-    } else if (scope === 'write_once') {
-      // Write-once scope-specific validations:
-      const { error: writeOnceParamsError, txParams: txParamsRes } =
-        validateWriteOnceParams({
-          tx,
-          params: rest,
-          willUsePostMessage: parsedRedirectUri === 'postmessage'
-        })
-      txParams = txParamsRes
-
-      if (writeOnceParamsError) {
-        error = writeOnceParamsError
+      // Optional dashboard wallet tx params
+      if (!error && tx) {
+        const { error: txParamsError, txParams: txParamsRes } =
+          validateDashboardWalletParams({
+            tx,
+            params: rest,
+            willUsePostMessage: parsedRedirectUri === 'postmessage'
+          })
+        txParams = txParamsRes
+        if (txParamsError) {
+          error = txParamsError
+        }
       }
     }
     return { txParams, error }
@@ -243,7 +237,7 @@ export const useOAuthSetup = ({
   const [queryParamsError, setQueryParamsError] = useState<string | null>(
     initError
   )
-  /** The fetched developer app name if write OAuth (we use `queryParamAppName` if read or writeOnce OAuth and no API key is given) */
+  /** The fetched developer app name if write OAuth (we use `queryParamAppName` if read OAuth and no API key is given) */
   const [registeredDeveloperAppName, setRegisteredDeveloperAppName] =
     useState<string>()
   const appName = registeredDeveloperAppName ?? queryParamAppName
@@ -533,29 +527,31 @@ export const useOAuthSetup = ({
         })
         return
       }
-    } else if (scope === 'write_once') {
-      // Note: Tx = 'connect_dashboard_wallet' since that's the only option available right now for write_once scope
-      if ((tx as WriteOnceTx) === 'connect_dashboard_wallet') {
-        const success = await handleAuthorizeConnectDashboardWallet({
-          state,
-          originUrl: parsedOrigin,
-          onError,
-          onWaitForWalletSignature: onPendingTransactionApproval,
-          onReceivedWalletSignature: onReceiveTransactionApproval,
-          account,
-          txParams: txParams!
-        })
-        if (!success) {
-          return
-        }
-      } else if ((tx as WriteOnceTx) === 'disconnect_dashboard_wallet') {
-        const success = await handleAuthorizeDisconnectDashboardWallet({
-          account,
-          txParams: txParams!,
-          onError
-        })
-        if (!success) {
-          return
+
+      // Handle dashboard wallet tx if present
+      if (tx && txParams) {
+        if (tx === 'connect_dashboard_wallet') {
+          const success = await handleAuthorizeConnectDashboardWallet({
+            state,
+            originUrl: parsedOrigin,
+            onError,
+            onWaitForWalletSignature: onPendingTransactionApproval,
+            onReceivedWalletSignature: onReceiveTransactionApproval,
+            account,
+            txParams
+          })
+          if (!success) {
+            return
+          }
+        } else if (tx === 'disconnect_dashboard_wallet') {
+          const success = await handleAuthorizeDisconnectDashboardWallet({
+            account,
+            txParams,
+            onError
+          })
+          if (!success) {
+            return
+          }
         }
       }
     }
@@ -630,7 +626,7 @@ export const useOAuthSetup = ({
     userEmail,
     authorize,
     tx,
-    txParams: txParams as WriteOnceParams,
+    txParams,
     display
   }
 }

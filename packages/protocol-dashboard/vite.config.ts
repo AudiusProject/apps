@@ -33,7 +33,27 @@ export default defineConfig({
 
   optimizeDeps: {
     esbuildOptions: {
-      plugins: [fixReactVirtualized]
+      plugins: [
+        fixReactVirtualized,
+        {
+          name: 'resolve-ethers-v6-for-web3modal',
+          setup(build) {
+            // @web3modal/ethers expects ethers v6 but root node_modules has v5.
+            // Redirect bare 'ethers' imports from @web3modal to the local v6.
+            build.onResolve({ filter: /^ethers$/ }, (args) => {
+              if (args.importer.includes('@web3modal')) {
+                return {
+                  path: path.resolve(
+                    __dirname,
+                    'node_modules/ethers/lib.esm/index.js'
+                  )
+                }
+              }
+              return undefined
+            })
+          }
+        }
+      ]
     }
   },
 

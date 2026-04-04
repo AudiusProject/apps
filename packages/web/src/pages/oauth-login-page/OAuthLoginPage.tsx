@@ -43,7 +43,7 @@ import { ContentWrapper } from './components/ContentWrapper'
 import { PermissionsSection } from './components/PermissionsSection'
 import { useOAuthSetup } from './hooks'
 import { messages } from './messages'
-import { WriteOnceTx } from './utils'
+import { DashboardWalletTx } from './utils'
 
 const { signOut } = signOutActions
 
@@ -391,11 +391,11 @@ export const OAuthLoginPage = () => {
           {userAlreadyWriteAuthorized ? null : (
             <PermissionsSection
               scope={scope}
-              tx={tx as WriteOnceTx}
+              tx={tx as DashboardWalletTx}
               userEmail={isInManagerMode ? userEmail : null}
               isLoggedIn={isLoggedIn}
               isLoading={userEmail === null}
-              txParams={txParams}
+              txParams={txParams ?? undefined}
             />
           )}
 

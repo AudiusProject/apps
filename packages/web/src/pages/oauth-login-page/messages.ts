@@ -38,9 +38,9 @@ export const messages = {
     'Whoops, this is an invalid link (the specified wallet is already connected to an Audius account).',
   disconnectWalletNotConnectedError:
     'Whoops, this is an invalid link (the specified wallet is not connected to an Audius account).',
-  writeOnceParamsError:
+  txParamsError:
     'Whoops, this is an invalid link (transaction params missing or invalid).',
-  writeOnceTxError: `Whoops, this is an invalid link ('tx' missing or invalid).`,
+  txError: `Whoops, this is an invalid link ('tx' missing or invalid).`,
   missingFieldError: 'Whoops, you must enter both your email and password.',
   originInvalidError:
     'Whoops, this is an invalid link (redirect URI is set to `postMessage` but origin is missing).',
