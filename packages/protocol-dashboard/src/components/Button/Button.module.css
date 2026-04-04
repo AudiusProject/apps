@@ -1,3 +1,7 @@
+.btnContainer {
+  display: inline-flex;
+}
+
 /* Primary */
 .btnContainer .primary {
   padding: 12px 16px;
@@ -140,6 +144,8 @@
 /* Disabled */
 .btnContainer .isDisabled {
   cursor: default;
+  padding: 12px 16px;
+  border-radius: 8px;
 }
 
 .btnContainer .isTextDisabled,
