@@ -95,6 +95,7 @@ export const RewardsTimingCard = () => {
           p='xl'
           css={{ flexGrow: 1 }}
           justifyContent='space-between'
+          alignItems='center'
           wrap='wrap'
           gap='l'
         >
@@ -129,17 +130,13 @@ export const RewardsTimingCard = () => {
             </Box>
           </Flex>
           {isLoggedIn ? (
-            <Box css={{ flexShrink: 0 }}>
-              <Button
-                type={
-                  canInitiateRound ? ButtonType.PRIMARY : ButtonType.DISABLED
-                }
-                text={messages.startNextRound}
-                rightIcon={isSubmitting ? <LoadingSpinner /> : undefined}
-                isDisabled={!canInitiateRound || isSubmitting}
-                onClick={handleClickInitiateRound}
-              />
-            </Box>
+            <Button
+              type={canInitiateRound ? ButtonType.PRIMARY : ButtonType.DISABLED}
+              text={messages.startNextRound}
+              rightIcon={isSubmitting ? <LoadingSpinner /> : undefined}
+              isDisabled={!canInitiateRound || isSubmitting}
+              onClick={handleClickInitiateRound}
+            />
           ) : null}
         </Card>
       </Flex>
