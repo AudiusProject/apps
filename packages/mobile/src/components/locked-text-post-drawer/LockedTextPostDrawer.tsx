@@ -9,7 +9,6 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles, flexRowCentered } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
-import { useColor } from 'app/utils/theme'
 
 const DRAWER_NAME = 'LockedTextPost'
 
@@ -40,7 +39,6 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 
 export const LockedTextPostDrawer = () => {
   const styles = useStyles()
-  const neutralLight2 = useColor('neutralLight2')
   const navigation = useNavigation()
   const { data, onClose } = useDrawer('LockedTextPost')
   const mint = (data as { mint: string } | undefined)?.mint
@@ -60,12 +58,8 @@ export const LockedTextPostDrawer = () => {
     <NativeDrawer drawerName={DRAWER_NAME}>
       <View style={styles.drawer}>
         <View style={styles.titleContainer}>
-          <IconLock
-            fill={neutralLight2}
-            width={spacing(6)}
-            height={spacing(6)}
-          />
-          <Text variant='label' size='xl' strength='strong' color='subdued'>
+          <IconLock width={spacing(6)} height={spacing(6)} />
+          <Text variant='label' size='xl' strength='strong' color='default'>
             {messages.howToUnlock}
           </Text>
         </View>
