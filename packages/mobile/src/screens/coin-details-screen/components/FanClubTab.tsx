@@ -4,18 +4,18 @@ import {
   useArtistCoin,
   useCoinBalance,
   useCurrentUserId,
-  useExclusiveTracks,
-  useExclusiveTracksCount,
-  useFanClubFeed,
-  type FanClubFeedItem
+  useFanClubFeed
 } from '@audius/common/api'
-import { useBuySellInitialTab, useIsManagedAccount } from '@audius/common/hooks'
-import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
-import { WidthSizes } from '@audius/common/models'
 import {
-  exclusiveTracksPageLineupActions as exclusiveTracksActions,
-  receiveTokensModalActions
-} from '@audius/common/store'
+  useBuySellInitialTab,
+  useIsManagedAccount,
+  useToggleTrack
+} from '@audius/common/hooks'
+import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
+import { Kind, WidthSizes } from '@audius/common/models'
+import type { ID } from '@audius/common/models'
+import { QueueSource, receiveTokensModalActions } from '@audius/common/store'
+import { makeUid } from '@audius/common/utils'
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useDispatch } from 'react-redux'
 
@@ -32,7 +32,8 @@ import {
 import { ProfilePicture, TokenIcon } from 'app/components/core'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { primitiveToImageSource } from 'app/components/image/primitiveToImageSource'
-import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
+import { TrackTile } from 'app/components/lineup-tile'
+import { LineupTileSource } from 'app/components/lineup-tile/types'
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useThemeColors } from 'app/utils/theme'
@@ -43,18 +44,14 @@ import { TextPostCard } from './TextPostCard'
 
 const FAN_CLUB_COVER_HEIGHT = 96
 const FAN_CLUB_AVATAR_OVERLAP = -harmonySpacing.unit9
+const FEED_PAGE_SIZE = 10
 
 const messages = {
   uploadExclusiveTrack: coinDetailsMessages.coinInfo.uploadExclusiveTrack,
   becomeAMember: coinDetailsMessages.balance.becomeAMember,
   hintDescription: coinDetailsMessages.balance.hintDescription,
-  title: 'Fan Club Feed'
-}
-
-const MAX_PREVIEW_TRACKS = 3
-
-const itemStyles = {
-  paddingHorizontal: 0
+  title: 'Fan Club Feed',
+  loadMore: 'Load More'
 }
 
 type FanClubTabProps = {
@@ -233,37 +230,55 @@ const FanClubHeroTile = ({ mint, onPoweredByPress }: FanClubHeroTileProps) => {
   )
 }
 
-const FanClubFeed = ({ mint }: { mint: string }) => {
-  const { data: coin } = useArtistCoin(mint)
-  const ownerId = coin?.ownerId
+const FeedTrackTile = ({
+  trackId,
+  index
+}: {
+  trackId: ID
+  index: number
+}) => {
+  const uid = useMemo(() => makeUid(Kind.TRACKS, trackId), [trackId])
 
-  const { data, lineup, pageSize, isFetching, loadNextPage, isPending } =
-    useExclusiveTracks({
-      userId: ownerId,
-      pageSize: MAX_PREVIEW_TRACKS
-    })
-
-  const { data: totalCount = 0 } = useExclusiveTracksCount({
-    userId: ownerId
+  const { togglePlay } = useToggleTrack({
+    id: trackId,
+    uid,
+    source: QueueSource.FAN_CLUB_FEED
   })
 
-  const { data: feedItems } = useFanClubFeed({
+  return (
+    <TrackTile
+      id={trackId}
+      uid={uid}
+      index={index}
+      togglePlay={togglePlay}
+      isTrending={false}
+      source={LineupTileSource.LINEUP_TRACK}
+      style={{ paddingHorizontal: 0 }}
+    />
+  )
+}
+
+const FanClubFeed = ({ mint }: { mint: string }) => {
+  const {
+    data: feedItems,
+    isPending,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useFanClubFeed({
     mint,
     sortMethod: 'newest',
+    pageSize: FEED_PAGE_SIZE,
     enabled: !!mint
   })
 
-  const textPosts = feedItems?.filter(
-    (item): item is Extract<FanClubFeedItem, { itemType: 'text_post' }> =>
-      item.itemType === 'text_post'
-  )
+  const hasContent = feedItems && feedItems.length > 0
 
-  const hasTextPosts = textPosts && textPosts.length > 0
-  const hasContent = totalCount > 0 || hasTextPosts
-
-  if (!ownerId || !hasContent) {
+  if (!hasContent && !isPending) {
     return null
   }
+
+  let trackIndex = 0
 
   return (
     <Flex column w='100%' gap='m'>
@@ -275,33 +290,52 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
 
       <PostUpdateCard mint={mint} />
 
-      {hasTextPosts
-        ? textPosts.map((item) => (
-            <TextPostCard
-              key={item.commentId}
-              commentId={item.commentId}
-              mint={mint}
-            />
-          ))
-        : null}
+      {isPending ? (
+        <Flex justifyContent='center' pv='l'>
+          <LoadingSpinner />
+        </Flex>
+      ) : (
+        <Flex column gap='m'>
+          {feedItems?.map((item) => {
+            if (item.itemType === 'text_post') {
+              return (
+                <TextPostCard
+                  key={`post-${item.commentId}`}
+                  commentId={item.commentId}
+                  mint={mint}
+                />
+              )
+            }
 
-      {totalCount > 0 ? (
-        <TanQueryLineup
-          actions={exclusiveTracksActions}
-          lineup={lineup}
-          offset={0}
-          maxEntries={MAX_PREVIEW_TRACKS}
-          pageSize={pageSize}
-          includeLineupStatus
-          itemStyles={itemStyles}
-          isFetching={isFetching}
-          loadNextPage={loadNextPage}
-          hasMore={false}
-          isPending={isPending}
-          queryData={data}
-          hidePlayBarChin
-        />
-      ) : null}
+            const currentTrackIndex = trackIndex++
+            return (
+              <FeedTrackTile
+                key={`track-${item.trackId}`}
+                trackId={item.trackId}
+                index={currentTrackIndex}
+              />
+            )
+          })}
+
+          {hasNextPage ? (
+            <Flex justifyContent='center' pb='m'>
+              <Button
+                variant='secondary'
+                size='small'
+                fullWidth
+                onPress={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? (
+                  <LoadingSpinner />
+                ) : (
+                  messages.loadMore
+                )}
+              </Button>
+            </Flex>
+          ) : null}
+        </Flex>
+      )}
     </Flex>
   )
 }
