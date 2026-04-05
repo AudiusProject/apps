@@ -47,7 +47,7 @@ const messages = {
   unlockingFollowGatedSuffix: '!',
   lockedTokenGatedPrefix: 'You must hold at least ',
   lockedTokenGatedSuffix: ' in a connected wallet.',
-  buyArtistCoin: 'Buy Fan Club Token',
+  buyArtistCoin: 'Buy Coins',
   lockedUSDCPurchase: 'Unlock access with a one-time purchase!'
 }
 
