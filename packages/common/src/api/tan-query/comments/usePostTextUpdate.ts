@@ -13,6 +13,7 @@ export type PostTextUpdateArgs = {
   entityId: ID // artist user_id (coin owner)
   body: string
   mint: string
+  isMembersOnly?: boolean
 }
 
 export const usePostTextUpdate = () => {
@@ -29,12 +30,13 @@ export const usePostTextUpdate = () => {
           entityId: args.entityId,
           entityType: 'FanClub',
           body: args.body,
-          mentions: []
-        }
+          mentions: [],
+          isMembersOnly: args.isMembersOnly ?? true
+        } as any
       })
     },
     onMutate: async (args: PostTextUpdateArgs & { newId?: ID }) => {
-      const { userId, body, entityId, mint } = args
+      const { userId, body, entityId, mint, isMembersOnly } = args
       const sdk = await audiusSdk()
       const newId = await sdk.comments.generateCommentId()
       args.newId = newId
@@ -52,7 +54,8 @@ export const usePostTextUpdate = () => {
         replyCount: 0,
         replies: undefined,
         createdAt: new Date().toISOString(),
-        updatedAt: undefined
+        updatedAt: undefined,
+        isMembersOnly: isMembersOnly ?? true
       }
 
       // Prime the individual comment cache

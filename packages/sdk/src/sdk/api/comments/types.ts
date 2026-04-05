@@ -53,7 +53,8 @@ export const CreateCommentSchema = z
     commentId: z.optional(z.number()),
     parentCommentId: z.optional(z.number()),
     trackTimestampS: z.optional(z.number()),
-    mentions: z.optional(z.array(z.number()))
+    mentions: z.optional(z.array(z.number())),
+    isMembersOnly: z.optional(z.boolean())
   })
   .strict()
   .refine(

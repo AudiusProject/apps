@@ -141,11 +141,17 @@ export interface Comment {
      */
     replies?: Array<ReplyComment>;
     /**
-     * 
+     *
      * @type {number}
      * @memberof Comment
      */
     parentCommentId?: number;
+    /**
+     * Whether this post is gated to coin holders only
+     * @type {boolean}
+     * @memberof Comment
+     */
+    isMembersOnly?: boolean;
 }
 
 /**
@@ -193,6 +199,7 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
         'replies': !exists(json, 'replies') ? undefined : ((json['replies'] as Array<any>).map(ReplyCommentFromJSON)),
         'parentCommentId': !exists(json, 'parent_comment_id') ? undefined : json['parent_comment_id'],
+        'isMembersOnly': !exists(json, 'is_members_only') ? undefined : json['is_members_only'],
     };
 }
 
@@ -223,6 +230,7 @@ export function CommentToJSON(value?: Comment | null): any {
         'updated_at': value.updatedAt,
         'replies': value.replies === undefined ? undefined : ((value.replies as Array<any>).map(ReplyCommentToJSON)),
         'parent_comment_id': value.parentCommentId,
+        'is_members_only': value.isMembersOnly,
     };
 }
 

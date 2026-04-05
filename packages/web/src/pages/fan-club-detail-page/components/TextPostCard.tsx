@@ -263,6 +263,14 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
           {/* Footer: React count + Kebab menu */}
           {!isLocked ? (
             <Flex row alignItems='center' gap='l'>
+              {comment.isMembersOnly !== false ? (
+                <Flex row alignItems='center' gap='xs'>
+                  <IconLock size='s' color='subdued' />
+                  <Text variant='body' size='xs' color='subdued'>
+                    {messages.membersOnly}
+                  </Text>
+                </Flex>
+              ) : null}
               <Flex alignItems='center' gap='xs'>
                 <IconButton
                   icon={IconHeart}

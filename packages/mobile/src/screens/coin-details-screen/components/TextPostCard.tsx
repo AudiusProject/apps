@@ -131,7 +131,15 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
           <Text variant='body' size='m'>
             {comment.message}
           </Text>
-          <Flex direction='row' alignItems='center' gap='xs'>
+          <Flex direction='row' alignItems='center' gap='s'>
+            {comment.isMembersOnly !== false ? (
+              <Flex row alignItems='center' gap='xs'>
+                <IconLock size='s' color='subdued' />
+                <Text variant='body' size='xs' color='subdued'>
+                  {messages.membersOnly}
+                </Text>
+              </Flex>
+            ) : null}
             <FavoriteButton
               onPress={handleReact}
               isActive={comment.isCurrentUserReacted}

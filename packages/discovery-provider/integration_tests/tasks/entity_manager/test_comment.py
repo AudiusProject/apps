@@ -2,6 +2,7 @@ import json
 import logging  # pylint: disable=C0302
 from typing import List
 
+from sqlalchemy import text as sa_text
 from web3 import Web3
 from web3.datastructures import AttributeDict
 
@@ -1735,3 +1736,201 @@ def test_comment_reaction_validation(app, mocker):
             .all()
         )
         assert len(reaction_notifications) == 0
+
+
+fan_club_entities = {
+    "users": [
+        {"user_id": 1, "wallet": "user1wallet"},
+        {"user_id": 2, "wallet": "user2wallet"},
+    ],
+    "tracks": [{"track_id": 1, "owner_id": 1}],
+}
+
+
+def _seed_artist_coin(db, user_id):
+    """Create artist_coins table (if absent) and insert a row so fan club validation passes."""
+    with db.scoped_session() as session:
+        session.execute(
+            sa_text(
+                "CREATE TABLE IF NOT EXISTS artist_coins ("
+                "  user_id integer PRIMARY KEY,"
+                "  mint text NOT NULL,"
+                "  decimals integer NOT NULL DEFAULT 6,"
+                "  ticker text"
+                ")"
+            )
+        )
+        session.execute(
+            sa_text(
+                "INSERT INTO artist_coins (user_id, mint, decimals, ticker) "
+                "VALUES (:uid, :mint, 6, 'TST') ON CONFLICT DO NOTHING"
+            ),
+            {"uid": user_id, "mint": f"TestMint{user_id}"},
+        )
+
+
+def test_fan_club_comment_is_members_only_default(app, mocker):
+    """
+    Fan club comments default to is_members_only=True when the field is omitted.
+    """
+    fan_club_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "FanClub",
+            "body": "exclusive update",
+        }
+    )
+
+    tx_receipts = {
+        "CreateFanClubComment": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 100,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_metadata}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, fan_club_entities, tx_receipts)
+    _seed_artist_coin(db, 1)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        comment = session.query(Comment).filter(Comment.comment_id == 100).first()
+        assert comment is not None
+        assert comment.is_members_only is True
+        assert comment.entity_type == "FanClub"
+
+
+def test_fan_club_comment_is_members_only_false(app, mocker):
+    """
+    Fan club comments respect is_members_only=false from metadata.
+    """
+    fan_club_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "FanClub",
+            "body": "public announcement",
+            "is_members_only": False,
+        }
+    )
+
+    tx_receipts = {
+        "CreatePublicFanClubComment": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 101,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_metadata}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, fan_club_entities, tx_receipts)
+    _seed_artist_coin(db, 1)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        comment = session.query(Comment).filter(Comment.comment_id == 101).first()
+        assert comment is not None
+        assert comment.is_members_only is False
+        assert comment.entity_type == "FanClub"
+        assert comment.text == "public announcement"
+
+
+def test_fan_club_comment_is_members_only_true_explicit(app, mocker):
+    """
+    Fan club comments respect is_members_only=true from metadata.
+    """
+    fan_club_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "FanClub",
+            "body": "vip content",
+            "is_members_only": True,
+        }
+    )
+
+    tx_receipts = {
+        "CreateMembersOnlyComment": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 102,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_metadata}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, fan_club_entities, tx_receipts)
+    _seed_artist_coin(db, 1)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        comment = session.query(Comment).filter(Comment.comment_id == 102).first()
+        assert comment is not None
+        assert comment.is_members_only is True
+
+
+def test_track_comment_is_members_only_always_false(app, mocker):
+    """
+    Track comments always have is_members_only=False, even if metadata
+    contains is_members_only=true.
+    """
+    track_comment_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "Track",
+            "body": "great track",
+            "is_members_only": True,  # should be ignored for track comments
+        }
+    )
+
+    tx_receipts = {
+        "CreateTrackComment": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 103,
+                        "_entityType": "Comment",
+                        "_userId": 2,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {track_comment_metadata}}}',
+                        "_signer": "user2wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, fan_club_entities, tx_receipts)
+
+    with db.scoped_session() as session:
+        index_transaction(session)
+
+        comment = session.query(Comment).filter(Comment.comment_id == 103).first()
+        assert comment is not None
+        assert comment.is_members_only is False
+        assert comment.entity_type == "Track"
