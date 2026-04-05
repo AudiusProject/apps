@@ -16,7 +16,7 @@ export const coinDetailsMessages = {
     loading: 'Loading...',
     createdBy: 'Created By',
     description1: (title: string) =>
-      `${title} is a fan club token on Audius. Use it to support the artist, unlock exclusive content, and take part in the community.`,
+      `${title} is a coin on Audius. Use it to support the artist, unlock exclusive content, and take part in the community.`,
     description2: (title: string) =>
       `Holding ${title} gives you fan club access and helps support your favorite artists on Audius.`,
     fanClubDetailsTitle: 'Fan Club Details',
@@ -104,17 +104,17 @@ export const coinDetailsMessages = {
       rewardsPool:
         'Artists can use this balance to incentivize challenges and reward loyal fans.',
       vestingSchedule:
-        "Once a fan club token graduates into the open market, the artist's reserved tokens are unlocked daily over a 5-year period. Artists can claim unlocked tokens every day or let them accumulate.",
+        "Once a coin graduates into the open market, the artist's reserved tokens are unlocked daily over a 5-year period. Artists can claim unlocked tokens every day or let them accumulate.",
       artistEarnings:
-        'The total revenue this artist has earned from trading fees on their fan club token.',
+        'The total revenue this artist has earned from trading fees on their coin.',
       unclaimedEarnings:
         'The amount of trading fees you are currently able to claim.',
       locked:
-        'The amount of your reserved fan club tokens that are still locked and not yet available to claim.',
+        'The amount of your reserved coins that are still locked and not yet available to claim.',
       unlocked:
-        'The total amount of your reserved fan club tokens that have unlocked since graduation.',
+        'The total amount of your reserved coins that have unlocked since graduation.',
       availableToClaim:
-        'The amount of unlocked fan club tokens you can claim right now. This increases daily over the 5-year vesting period.'
+        'The amount of unlocked coins you can claim right now. This increases daily over the 5-year vesting period.'
     }
   },
   artistCoinDetails: {
@@ -132,16 +132,16 @@ export const coinDetailsMessages = {
     copied: 'Copied to clipboard!',
     tooltips: {
       coinAddress:
-        'A unique address that identifies this fan club token on the Solana blockchain to prevent imposters.',
+        'A unique address that identifies this coin on the Solana blockchain to prevent imposters.',
       onChainDescription:
-        'A simple description of this fan club token on the Solana blockchain to prevent imposters.',
+        'A simple description of this coin on the Solana blockchain to prevent imposters.',
       totalSupply:
-        'The total number of this fan club token that will ever exist. This amount is fixed and never changes.',
+        'The total number of this coin that will ever exist. This amount is fixed and never changes.',
       marketCap:
-        'The current total value of this fan club token, calculated by multiplying the current price by the total supply.',
-      price: 'The current price of a single fan club token in USD.',
+        'The current total value of this coin, calculated by multiplying the current price by the total supply.',
+      price: 'The current price of a single coin in USD.',
       liquidity:
-        'The amount of funds available for trading this fan club token, which affects how easily it can be bought and sold.'
+        'The amount of funds available for trading this coin, which affects how easily it can be bought and sold.'
     }
   },
   editCoinDetails: {
@@ -176,7 +176,7 @@ export const coinDetailsMessages = {
       rewardsPoolAllocation:
         'Choose what percentage of your unlocked coins you want to allocate to the community rewards pool. The remaining percentage will be claimed directly to your built-in wallet.',
       claimable:
-        'The total amount of your reserved fan club tokens that have unlocked and are available to claim now.',
+        'The total amount of your reserved coins that have unlocked and are available to claim now.',
       yourShare:
         'The amount of unlocked coins that will be claimed directly to your built-in wallet based on your allocation percentage.',
       rewardsPool:

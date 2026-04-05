@@ -75,7 +75,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlockTokenGatedContentSuffix: ' in a connected wallet.',
   unlockedTokenGatedSuffix: ` was found in a linked wallet. This ${contentType} is now available.`,
   ownTokenGated:
-    'Fans can unlock access by linking a wallet that holds your fan club token',
+    'Fans can unlock access by linking a wallet that holds your coin',
   purchased: `You've purchased this ${contentType}.`,
   buy: (price: string) => `Buy ${price}`,
   usersCanPurchase: (price: string) =>
