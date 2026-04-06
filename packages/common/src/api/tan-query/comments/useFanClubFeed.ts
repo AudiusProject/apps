@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 
+import { OptionalHashId } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -81,9 +82,9 @@ export const useFanClubFeed = ({
             feedItems.push({ itemType: 'text_post', commentId: comment.id })
           }
         } else if (item.item_type === 'track') {
-          const trackId = item.track?.id
+          const trackId = OptionalHashId.parse(item.track?.id)
           if (trackId) {
-            feedItems.push({ itemType: 'track', trackId: Number(trackId) })
+            feedItems.push({ itemType: 'track', trackId })
           }
         }
       }

@@ -1,21 +1,40 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import {
-  useExclusiveTracks,
-  useExclusiveTracksCount,
-  useArtistCoin,
   useFanClubFeed,
-  type FanClubFeedItem
+  type FanClubFeedItem,
+  mapLineupDataToFullLineupItems
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import {
+  Name,
+  PlaybackSource,
+  UID,
+  ID,
+  ModalSource
+} from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { exclusiveTracksPageLineupActions } from '@audius/common/store'
+import {
+  exclusiveTracksPageLineupActions,
+  exclusiveTracksPageSelectors,
+  playerSelectors,
+  queueSelectors
+} from '@audius/common/store'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
+import { EntityType } from '@audius/sdk'
+import { useQueryClient } from '@tanstack/react-query'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
-import { LineupVariant } from 'components/lineup/types'
+import { make } from 'common/store/analytics/actions'
+import { TrackTile as TrackTileDesktop } from 'components/track/desktop/TrackTile'
+import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
+import { TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
 
 import { TextPostCard } from './TextPostCard'
+
+const { getBuffering } = playerSelectors
+const { makeGetCurrent } = queueSelectors
 
 const messages = {
   title: 'Fan Club Feed',
@@ -29,65 +48,113 @@ type FanClubFeedSectionProps = {
 }
 
 export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
-  const { data: coin } = useArtistCoin(mint)
-  const ownerId = coin?.ownerId
+  const dispatch = useDispatch()
+  const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const { isEnabled: isTextPostsEnabled } = useFeatureFlag(
     FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
   )
 
-  // Exclusive tracks lineup
-  const {
-    data: tracksData,
-    isFetching: isTracksFetching,
-    isPending: isTracksPending,
-    isError: isTracksError,
-    hasNextPage: hasNextTracksPage,
-    play,
-    pause,
-    loadNextPage: loadNextTracksPage,
-    isPlaying,
-    lineup,
-    pageSize
-  } = useExclusiveTracks({
-    userId: ownerId,
-    pageSize: FEED_PAGE_SIZE,
-    initialPageSize: FEED_PAGE_SIZE
-  })
-
-  const { data: totalTrackCount = 0 } = useExclusiveTracksCount({
-    userId: ownerId
-  })
-
-  // Fan club feed (text posts)
+  // Single chronological feed for both tracks and text posts
   const {
     data: feedItems,
     isPending: isFeedPending,
-    hasNextPage: hasNextFeedPage,
-    fetchNextPage: fetchNextFeedPage,
+    hasNextPage,
+    fetchNextPage,
     isFetchingNextPage
   } = useFanClubFeed({
     mint,
     sortMethod: 'newest',
     pageSize: FEED_PAGE_SIZE,
-    enabled: !!mint && isTextPostsEnabled
+    enabled: !!mint
   })
 
-  const textPosts = feedItems?.filter(
-    (item): item is Extract<FanClubFeedItem, { itemType: 'text_post' }> =>
-      item.itemType === 'text_post'
+  // Extract track items for lineup (playback ordering)
+  const trackLineupData = useMemo(
+    () =>
+      feedItems
+        ?.filter(
+          (item): item is Extract<FanClubFeedItem, { itemType: 'track' }> =>
+            item.itemType === 'track'
+        )
+        .map((item) => ({ id: item.trackId, type: EntityType.TRACK })) ?? [],
+    [feedItems]
   )
 
-  const handleLoadMoreFeed = useCallback(() => {
-    if (hasNextFeedPage) {
-      fetchNextFeedPage()
+  // Lineup state for sequential track playback
+  const lineup = useSelector(exclusiveTracksPageSelectors.getLineup)
+  const isPlaying = useSelector(playerSelectors.getPlaying)
+  const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
+  const currentQueueItem = useSelector(getCurrentQueueItem)
+  const isBuffering = useSelector(getBuffering)
+  const playingUid = currentQueueItem?.uid
+  const playingSource = currentQueueItem?.source
+
+  // Sync lineup with track data from the feed
+  const prevTrackCount = useRef(0)
+  useEffect(() => {
+    if (trackLineupData.length !== prevTrackCount.current) {
+      dispatch(exclusiveTracksPageLineupActions.reset())
+      if (trackLineupData.length > 0) {
+        const fullTracks = mapLineupDataToFullLineupItems(
+          trackLineupData,
+          queryClient,
+          () => {},
+          lineup.prefix
+        )
+        dispatch(
+          exclusiveTracksPageLineupActions.fetchLineupMetadatas(
+            0,
+            fullTracks.length,
+            false,
+            { items: fullTracks }
+          )
+        )
+      }
+      prevTrackCount.current = trackLineupData.length
     }
-  }, [hasNextFeedPage, fetchNextFeedPage])
+  }, [trackLineupData, dispatch, queryClient, lineup.prefix])
 
-  const hasTextPosts = textPosts && textPosts.length > 0
-  const hasTracks = totalTrackCount > 0
-  const shouldShowSection = hasTextPosts || hasTracks
+  // Playback controls
+  const togglePlay = useCallback(
+    (uid: UID, id: ID) => {
+      if (uid !== playingUid || (uid === playingUid && !isPlaying)) {
+        dispatch(exclusiveTracksPageLineupActions.play(uid))
+        dispatch(
+          make(Name.PLAYBACK_PLAY, {
+            id,
+            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
+          })
+        )
+      } else {
+        dispatch(exclusiveTracksPageLineupActions.pause())
+        dispatch(
+          make(Name.PLAYBACK_PAUSE, {
+            id,
+            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
+          })
+        )
+      }
+    },
+    [playingUid, isPlaying, dispatch]
+  )
 
-  if (!shouldShowSection) return null
+  const TrackTile = isMobile ? MobileTrackTile : TrackTileDesktop
+
+  // Precompute mapping from feed index to lineup entry index for tracks
+  const feedItemsWithLineupIndex = useMemo(() => {
+    let trackIdx = 0
+    return (
+      feedItems?.map((item) => ({
+        ...item,
+        lineupIndex: item.itemType === 'track' ? trackIdx++ : -1
+      })) ?? []
+    )
+  }, [feedItems])
+
+  const hasContent = feedItemsWithLineupIndex.length > 0
+
+  if (!hasContent && !isFeedPending) return null
 
   return (
     <Flex column gap='l' w='100%'>
@@ -97,53 +164,62 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         </Text>
       </Flex>
 
-      {/* Text posts (feature-flagged) */}
-      {!isTextPostsEnabled ? null : isFeedPending ? (
+      {isFeedPending ? (
         <Flex justifyContent='center' pv='l'>
           <LoadingSpinner />
         </Flex>
-      ) : hasTextPosts ? (
+      ) : (
         <Flex column gap='m'>
-          {textPosts.map((item) => (
-            <TextPostCard
-              key={item.commentId}
-              commentId={item.commentId}
-              mint={mint}
-            />
-          ))}
-          {hasNextFeedPage ? (
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleLoadMoreFeed}
-              disabled={isFetchingNextPage}
-            >
-              {messages.loadMore}
-            </Button>
+          {feedItemsWithLineupIndex.map((item) => {
+            if (item.itemType === 'text_post') {
+              if (!isTextPostsEnabled) return null
+              return (
+                <TextPostCard
+                  key={`post-${item.commentId}`}
+                  commentId={item.commentId}
+                  mint={mint}
+                />
+              )
+            }
+
+            // Track item — render using lineup entry for playback state
+            const lineupEntry: any = lineup.entries[item.lineupIndex]
+            if (!lineupEntry) return null
+
+            return (
+              <TrackTile
+                key={`track-${item.trackId}`}
+                {...lineupEntry}
+                uid={lineupEntry.uid}
+                id={lineupEntry.id ?? item.trackId}
+                index={item.lineupIndex}
+                ordered={false}
+                togglePlay={togglePlay}
+                size={TrackTileSize.LARGE}
+                statSize='large'
+                isLoading={false}
+                isTrending={false}
+                source={ModalSource.LineUpTrackTile}
+                isBuffering={isBuffering}
+                playingSource={playingSource}
+              />
+            )
+          })}
+
+          {hasNextPage ? (
+            <Flex justifyContent='center'>
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? <LoadingSpinner /> : messages.loadMore}
+              </Button>
+            </Flex>
           ) : null}
         </Flex>
-      ) : null}
-
-      {/* Exclusive tracks */}
-      {hasTracks && ownerId ? (
-        <TanQueryLineup
-          data={tracksData}
-          isFetching={isTracksFetching}
-          isPending={isTracksPending}
-          isError={isTracksError}
-          hasNextPage={hasNextTracksPage}
-          play={play}
-          pause={pause}
-          loadNextPage={loadNextTracksPage}
-          isPlaying={isPlaying}
-          lineup={lineup}
-          actions={exclusiveTracksPageLineupActions}
-          pageSize={pageSize}
-          initialPageSize={FEED_PAGE_SIZE}
-          variant={LineupVariant.MAIN}
-          shouldLoadMore
-        />
-      ) : null}
+      )}
     </Flex>
   )
 }
