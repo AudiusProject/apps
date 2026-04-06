@@ -149,6 +149,7 @@ export const walletMessages = {
     leaderboardView: 'Leaderboard',
     cardView: 'Cards',
     launchYourClub: 'Launch your club',
+    viewYourClub: 'View your club',
     fanClubLabel: 'Fan Club',
     members: 'Members',
     price: 'Price',

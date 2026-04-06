@@ -4,7 +4,7 @@ import { useCurrentAccountUser, useArtistCreatedCoin } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
-import { COINS_CREATE_PAGE } from '@audius/common/src/utils/route'
+import { COINS_CREATE_PAGE, clubPage } from '@audius/common/src/utils/route'
 import { convertHexToRGBA } from '@audius/common/utils'
 import {
   Box,
@@ -78,10 +78,23 @@ const DesktopArtistCoinsExplorePage = () => {
     FeatureFlags.LAUNCHPAD_VERIFICATION
   )
   const hasExistingArtistCoin = !!createdCoin
+  const existingClubTicker = createdCoin?.ticker ?? null
+  const canViewExistingClub =
+    hasExistingArtistCoin &&
+    existingClubTicker !== null &&
+    existingClubTicker !== ''
 
   const handleGetStarted = useCallback(() => {
     navigate(COINS_CREATE_PAGE)
   }, [navigate])
+
+  const handleHeaderClubCta = useCallback(() => {
+    if (canViewExistingClub) {
+      navigate(clubPage(existingClubTicker))
+      return
+    }
+    navigate(COINS_CREATE_PAGE)
+  }, [canViewExistingClub, existingClubTicker, navigate])
 
   const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value)
@@ -198,8 +211,14 @@ const DesktopArtistCoinsExplorePage = () => {
                 />
               </Flex>
             </Flex>
-            <Button variant='secondary' size='small' onClick={handleGetStarted}>
-              {walletMessages.artistCoins.launchYourClub}
+            <Button
+              variant='secondary'
+              size='small'
+              onClick={handleHeaderClubCta}
+            >
+              {canViewExistingClub
+                ? walletMessages.artistCoins.viewYourClub
+                : walletMessages.artistCoins.launchYourClub}
             </Button>
           </Flex>
         </Flex>
