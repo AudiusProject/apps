@@ -8,6 +8,7 @@ export * from './DashboardWalletUsersApi';
 export * from './DeveloperAppsApi';
 export * from './EventsApi';
 export * from './ExploreApi';
+export * from './FanClubApi';
 export * from './NotificationsApi';
 export * from './PlaylistsApi';
 export * from './PrizesApi';

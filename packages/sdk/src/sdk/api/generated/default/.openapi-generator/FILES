@@ -7,6 +7,7 @@ apis/DashboardWalletUsersApi.ts
 apis/DeveloperAppsApi.ts
 apis/EventsApi.ts
 apis/ExploreApi.ts
+apis/FanClubApi.ts
 apis/NotificationsApi.ts
 apis/PlaylistsApi.ts
 apis/PrizesApi.ts
@@ -160,6 +161,9 @@ models/ExtendedPaymentSplit.ts
 models/ExtendedPurchaseGate.ts
 models/ExtendedTokenGate.ts
 models/ExtendedUsdcGate.ts
+models/FanClubTextPostNotification.ts
+models/FanClubTextPostNotificationAction.ts
+models/FanClubTextPostNotificationActionData.ts
 models/FanRemixContestEndedNotification.ts
 models/FanRemixContestEndedNotificationAction.ts
 models/FanRemixContestEndedNotificationActionData.ts

@@ -121,6 +121,12 @@ export interface Comment {
      * @type {boolean}
      * @memberof Comment
      */
+    isMembersOnly?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Comment
+     */
     isMuted?: boolean;
     /**
      * 
@@ -141,17 +147,11 @@ export interface Comment {
      */
     replies?: Array<ReplyComment>;
     /**
-     *
+     * 
      * @type {number}
      * @memberof Comment
      */
     parentCommentId?: number;
-    /**
-     * Whether this post is gated to coin holders only
-     * @type {boolean}
-     * @memberof Comment
-     */
-    isMembersOnly?: boolean;
 }
 
 /**
@@ -194,12 +194,12 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         'isCurrentUserReacted': !exists(json, 'is_current_user_reacted') ? undefined : json['is_current_user_reacted'],
         'isArtistReacted': !exists(json, 'is_artist_reacted') ? undefined : json['is_artist_reacted'],
         'isTombstone': !exists(json, 'is_tombstone') ? undefined : json['is_tombstone'],
+        'isMembersOnly': !exists(json, 'is_members_only') ? undefined : json['is_members_only'],
         'isMuted': !exists(json, 'is_muted') ? undefined : json['is_muted'],
         'createdAt': json['created_at'],
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
         'replies': !exists(json, 'replies') ? undefined : ((json['replies'] as Array<any>).map(ReplyCommentFromJSON)),
         'parentCommentId': !exists(json, 'parent_comment_id') ? undefined : json['parent_comment_id'],
-        'isMembersOnly': !exists(json, 'is_members_only') ? undefined : json['is_members_only'],
     };
 }
 
@@ -225,12 +225,12 @@ export function CommentToJSON(value?: Comment | null): any {
         'is_current_user_reacted': value.isCurrentUserReacted,
         'is_artist_reacted': value.isArtistReacted,
         'is_tombstone': value.isTombstone,
+        'is_members_only': value.isMembersOnly,
         'is_muted': value.isMuted,
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,
         'replies': value.replies === undefined ? undefined : ((value.replies as Array<any>).map(ReplyCommentToJSON)),
         'parent_comment_id': value.parentCommentId,
-        'is_members_only': value.isMembersOnly,
     };
 }
 
