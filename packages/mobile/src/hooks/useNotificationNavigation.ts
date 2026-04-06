@@ -36,7 +36,8 @@ import type {
   CommentMentionNotification,
   CommentThreadNotification,
   CommentReactionNotification,
-  AnnouncementPushNotification
+  AnnouncementPushNotification,
+  FanClubTextPostNotification
 } from '@audius/common/store'
 import {
   NotificationType,
@@ -318,7 +319,12 @@ export const useNotificationNavigation = () => {
       [NotificationType.FanRemixContestEnded]: entityHandler,
       [NotificationType.FanRemixContestEndingSoon]: entityHandler,
       [NotificationType.FanRemixContestWinnersSelected]: entityHandler,
-      [NotificationType.ArtistRemixContestEnded]: entityHandler
+      [NotificationType.ArtistRemixContestEnded]: entityHandler,
+      [NotificationType.FanClubTextPost]: (
+        notification: FanClubTextPostNotification
+      ) => {
+        navigation.navigate('Profile', { id: notification.entityUserId })
+      }
     }),
     [
       announcementHandler,

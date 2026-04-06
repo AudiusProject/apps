@@ -291,24 +291,40 @@ def create_comment(params: ManageEntityParameters):
 
         safe_add_notification(params.session, comment_notification)
 
-    # Notify followers when an artist creates a root-level fan club text post
+    # Notify followers and coin holders when an artist creates a root-level fan club text post
     if entity_type == FAN_CLUB_ENTITY_TYPE and not is_reply:
-        follower_user_ids = (
-            params.session.query(Follow.follower_user_id)
+        follower_user_ids = {
+            row[0]
+            for row in params.session.query(Follow.follower_user_id)
             .filter(
                 Follow.followee_user_id == entity_user_id,
                 Follow.is_current == True,
                 Follow.is_delete == False,
             )
             .all()
-        )
-        for (follower_id,) in follower_user_ids:
+        }
+        coin_holder_rows = params.session.execute(
+            text(
+                """
+                SELECT sub.user_id
+                FROM sol_user_balances sub
+                JOIN artist_coins ac ON ac.mint = sub.mint
+                WHERE ac.user_id = :artist_user_id
+                  AND sub.balance > 0
+                  AND sub.user_id != :artist_user_id
+                """
+            ),
+            {"artist_user_id": entity_user_id},
+        ).fetchall()
+        coin_holder_user_ids = {row[0] for row in coin_holder_rows}
+        recipient_user_ids = (follower_user_ids | coin_holder_user_ids) - {entity_user_id}
+        for recipient_id in recipient_user_ids:
             fan_club_notification = Notification(
                 blocknumber=params.block_number,
-                user_ids=[follower_id],
+                user_ids=[recipient_id],
                 timestamp=params.block_datetime,
                 type="fan_club_text_post",
-                specifier=str(follower_id),
+                specifier=str(recipient_id),
                 group_id=f"fan_club_text_post:{comment_id}:user:{entity_user_id}",
                 data={
                     "entity_user_id": entity_user_id,

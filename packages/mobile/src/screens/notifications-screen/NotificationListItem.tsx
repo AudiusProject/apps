@@ -32,6 +32,7 @@ import {
 } from './Notifications'
 import { ArtistRemixContestEndingSoonNotification } from './Notifications/ArtistRemixContestEndingSoonNotification'
 import { ArtistRemixContestSubmissionsNotification } from './Notifications/ArtistRemixContestSubmissionsNotification'
+import { FanClubTextPostNotification } from './Notifications/FanClubTextPostNotification'
 import { FanRemixContestEndedNotification } from './Notifications/FanRemixContestEndedNotification'
 import { FanRemixContestEndingSoonNotification } from './Notifications/FanRemixContestEndingSoonNotification'
 import { FanRemixContestStartedNotification } from './Notifications/FanRemixContestStartedNotification'
@@ -131,6 +132,8 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
             notification={notification}
           />
         )
+      case NotificationType.FanClubTextPost:
+        return <FanClubTextPostNotification notification={notification} />
       default:
         return null
     }

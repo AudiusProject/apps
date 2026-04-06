@@ -696,16 +696,32 @@ def test_fan_club_post_and_track_comments_coexist(app, mocker):
 # ---------------------------------------------------------------------------
 
 
-def test_fan_club_text_post_notification_sent_to_followers(app, mocker):
+def _seed_coin_holders(session, artist_user_id=1, holder_user_ids=None, mint=COIN_MINT):
+    """Insert sol_user_balances rows so coin holders are discoverable."""
+    if holder_user_ids is None:
+        holder_user_ids = []
+    for uid in holder_user_ids:
+        session.execute(
+            text(
+                "INSERT INTO sol_user_balances (user_id, mint, balance) "
+                "VALUES (:user_id, :mint, :balance) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {"user_id": uid, "mint": mint, "balance": 1000000},
+        )
+    session.flush()
+
+
+def test_fan_club_text_post_notification_sent_to_followers_and_coin_holders(app, mocker):
     """
-    When an artist creates a root-level fan club text post, each follower
-    receives a fan_club_text_post notification.
+    When an artist creates a root-level fan club text post, both followers
+    and coin holders receive a fan_club_text_post notification (deduplicated).
     """
+    # User 2 is a follower, User 3 is a coin holder, both should get notified
     entities_with_follows = {
         **fan_club_post_entities,
         "follows": [
             {"follower_user_id": 2, "followee_user_id": 1},
-            {"follower_user_id": 3, "followee_user_id": 1},
         ],
     }
 
@@ -729,9 +745,10 @@ def test_fan_club_text_post_notification_sent_to_followers(app, mocker):
     db, index_transaction = setup_test(app, mocker, entities_with_follows, tx_receipts)
 
     with db.scoped_session() as session:
+        # User 3 is a coin holder (not a follower)
+        _seed_coin_holders(session, artist_user_id=1, holder_user_ids=[3])
         index_transaction(session)
 
-        # Should create one notification per follower
         notifs = (
             session.query(Notification)
             .filter(Notification.type == "fan_club_text_post")
@@ -757,6 +774,50 @@ def test_fan_club_text_post_notification_sent_to_followers(app, mocker):
         assert len(comment_notifs) == 0
 
 
+def test_fan_club_text_post_notification_deduplicates(app, mocker):
+    """
+    A user who is both a follower and a coin holder receives only one notification.
+    """
+    entities_with_follows = {
+        **fan_club_post_entities,
+        "follows": [
+            {"follower_user_id": 2, "followee_user_id": 1},
+        ],
+    }
+
+    tx_receipts = {
+        "ArtistFanClubPost": [
+            {
+                "args": AttributeDict(
+                    {
+                        "_entityId": 1,
+                        "_entityType": "Comment",
+                        "_userId": 1,
+                        "_action": "Create",
+                        "_metadata": f'{{"cid": "", "data": {fan_club_post_metadata_json}}}',
+                        "_signer": "user1wallet",
+                    }
+                )
+            },
+        ],
+    }
+
+    db, index_transaction = setup_test(app, mocker, entities_with_follows, tx_receipts)
+
+    with db.scoped_session() as session:
+        # User 2 is both a follower AND a coin holder
+        _seed_coin_holders(session, artist_user_id=1, holder_user_ids=[2])
+        index_transaction(session)
+
+        notifs = (
+            session.query(Notification)
+            .filter(Notification.type == "fan_club_text_post")
+            .all()
+        )
+        assert len(notifs) == 1
+        assert notifs[0].user_ids == [2]
+
+
 def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
     """
     Replies within a fan club thread should NOT send fan_club_text_post
@@ -764,9 +825,6 @@ def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
     """
     reply_entities = {
         **fan_club_post_entities,
-        "follows": [
-            {"follower_user_id": 2, "followee_user_id": 1},
-        ],
         "comments": [
             {
                 "comment_id": 1,
@@ -803,6 +861,7 @@ def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
     db, index_transaction = setup_test(app, mocker, reply_entities, tx_receipts)
 
     with db.scoped_session() as session:
+        _seed_coin_holders(session, artist_user_id=1, holder_user_ids=[2])
         index_transaction(session)
 
         # No fan_club_text_post notifications for replies
@@ -814,10 +873,10 @@ def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
         assert len(notifs) == 0
 
 
-def test_fan_club_text_post_notification_no_followers(app, mocker):
+def test_fan_club_text_post_notification_no_followers_or_coin_holders(app, mocker):
     """
-    If the artist has no followers, no fan_club_text_post notifications
-    are created (but the post itself is still indexed).
+    If the artist has no followers or coin holders, no fan_club_text_post
+    notifications are created (but the post itself is still indexed).
     """
     tx_receipts = {
         "ArtistPostNoFollowers": [

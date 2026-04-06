@@ -652,6 +652,18 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    case 'fan_club_text_post': {
+      const data = notification.actions[0].data as {
+        entityUserId: string
+        commentId: string
+      }
+      return {
+        type: NotificationType.FanClubTextPost,
+        entityUserId: HashId.parse(data.entityUserId),
+        commentId: HashId.parse(data.commentId),
+        ...formatBaseNotification(notification)
+      }
+    }
     default:
       return undefined
   }

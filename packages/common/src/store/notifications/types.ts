@@ -44,7 +44,8 @@ export enum NotificationType {
   ListenStreakReminder = 'ListenStreakReminder',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
-  ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions'
+  ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
+  FanClubTextPost = 'FanClubTextPost'
 }
 
 export enum PushNotificationType {
@@ -86,7 +87,8 @@ export enum PushNotificationType {
   CommentThread = 'CommentThread',
   CommentMention = 'CommentMention',
   CommentReaction = 'CommentReaction',
-  ListenStreakReminder = 'ListenStreakReminder'
+  ListenStreakReminder = 'ListenStreakReminder',
+  FanClubTextPost = 'FanClubTextPost'
 }
 
 export enum Entity {
@@ -624,6 +626,12 @@ export type ArtistRemixContestSubmissionsNotification = BaseNotification & {
   entityType: Entity.Track
 }
 
+export type FanClubTextPostNotification = BaseNotification & {
+  type: NotificationType.FanClubTextPost
+  entityUserId: ID
+  commentId: ID
+}
+
 export type Notification =
   | AnnouncementNotification
   | UserSubscriptionNotification
@@ -659,6 +667,7 @@ export type Notification =
   | FanRemixContestWinnersSelectedNotification
   | ArtistRemixContestEndingSoonNotification
   | ArtistRemixContestSubmissionsNotification
+  | FanClubTextPostNotification
 
 export type IdentityNotification = Omit<Notification, 'timestamp'> & {
   timestamp: string

@@ -17,6 +17,7 @@ import { CommentMentionNotification } from './CommentMentionNotification'
 import { CommentNotification } from './CommentNotification'
 import { CommentReactionNotification } from './CommentReactionNotification'
 import { CommentThreadNotification } from './CommentThreadNotification'
+import { FanClubTextPostNotification } from './FanClubTextPostNotification'
 import { FanRemixContestEndedNotification } from './FanRemixContestEndedNotification'
 import { FanRemixContestEndingSoonNotification } from './FanRemixContestEndingSoonNotification'
 import { FanRemixContestStartedNotification } from './FanRemixContestStartedNotification'
@@ -170,6 +171,9 @@ export const Notification = (props: NotificationProps) => {
             notification={notification}
           />
         )
+      }
+      case NotificationType.FanClubTextPost: {
+        return <FanClubTextPostNotification notification={notification} />
       }
       default: {
         return null
