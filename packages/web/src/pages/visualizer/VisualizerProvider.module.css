@@ -156,8 +156,9 @@
   position: absolute;
   bottom: 0px;
   left: 0px;
-  color: var(--harmony-n-950);
-  text-shadow: 0px 2px 4px rgba(85, 84, 89, 0.2);
+  /* Visualizer overlay text should stay legible regardless of active app theme. */
+  color: var(--harmony-static-white);
+  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 .artworkWrapper {
@@ -191,7 +192,7 @@
 
 .trackInfoWrapper {
   margin-top: 20px;
-  color: var(--harmony-white);
+  color: var(--harmony-static-white);
 }
 
 .emptyTrackInfoWrapper {
