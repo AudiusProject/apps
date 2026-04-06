@@ -9,8 +9,8 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
-import { Switch } from 'app/components/core'
 import { ComposerInput } from 'app/components/composer-input'
+import { Switch } from 'app/components/core'
 
 const messages = {
   postUpdate: 'Post Update',
@@ -78,10 +78,7 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
           <Text variant='label' size='s'>
             {messages.membersOnly}
           </Text>
-          <Switch
-            value={isMembersOnly}
-            onValueChange={setIsMembersOnly}
-          />
+          <Switch value={isMembersOnly} onValueChange={setIsMembersOnly} />
         </Flex>
       </Flex>
     </Paper>

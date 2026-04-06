@@ -305,7 +305,10 @@ const AppBar: React.FC<AppBarProps> = () => {
           !wallet ||
           !isLoggedIn ||
           audiusProfileDataStatus === 'pending' ? null : (
-            <ConnectAudiusProfileButton wallet={wallet} walletProvider={walletProvider} />
+            <ConnectAudiusProfileButton
+              wallet={wallet}
+              walletProvider={walletProvider}
+            />
           )}
           <div
             className={clsx({

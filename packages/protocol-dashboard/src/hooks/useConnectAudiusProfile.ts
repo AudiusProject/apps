@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { getDashboardWalletUserQueryKey } from 'hooks/useDashboardWalletUsers'
-import { audiusSdk, apiEndpoint } from 'services/Audius/sdk'
+import { apiEndpoint } from 'services/Audius/sdk'
 import { disableAudiusProfileRefetch } from 'store/account/slice'
 
 const API_KEY = '2cc593fc814461263d282a84286fd4f72c79562e'

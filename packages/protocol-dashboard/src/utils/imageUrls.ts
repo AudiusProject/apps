@@ -7,7 +7,7 @@ export function getImageUrls(
   size = '_480x480'
 ): string[] {
   if (!artworkObj) return []
-  const primary: string | undefined = artworkObj[size] || artworkObj['_150x150']
+  const primary: string | undefined = artworkObj[size] || artworkObj._150x150
   if (!primary) return []
   const mirrors: string[] = Array.isArray(artworkObj.mirrors)
     ? artworkObj.mirrors
