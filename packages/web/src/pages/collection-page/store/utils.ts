@@ -16,6 +16,7 @@ export const computeCollectionMetadataProps = (
     metadata &&
     (trackCount === 0 ||
       (tracks.status === Status.SUCCESS &&
+        tracks.entries.length > 0 &&
         tracks.entries.every((t) => t.is_delete)))
   const lastModifiedDate = metadata ? metadata.updated_at || Date.now() : ''
   const releaseDate = metadata ? metadata.created_at || Date.now() : ''

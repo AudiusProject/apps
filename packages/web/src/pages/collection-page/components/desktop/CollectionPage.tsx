@@ -302,13 +302,13 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       <Paper column mb='unit-10' css={{ minWidth: 774 }}>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
-        {!collectionLoading && isEmpty ? (
+        {!collectionLoading && !tracksLoading && isEmpty ? (
           <EmptyContent
             isOwner={isOwner}
             isAlbum={isAlbum}
             text={customEmptyText}
           />
-        ) : !collectionLoading && dataSource.length === 0 ? (
+        ) : !collectionLoading && !tracksLoading && dataSource.length === 0 ? (
           <NoSearchResultsContent />
         ) : (
           <div className={styles.tableWrapper}>
@@ -318,7 +318,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               wrapperClassName={styles.tracksTableWrapper}
               key={playlistName}
               scrollRef={mainContentRef}
-              loading={collectionLoading}
+              loading={collectionLoading || tracksLoading}
               userId={accountUserId}
               playing={playing}
               activeIndex={activeIndex}
