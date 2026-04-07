@@ -1,6 +1,11 @@
 import { useCallback } from 'react'
 
-import { useCurrentAccount, useDeleteCollection } from '@audius/common/api'
+import {
+  useCurrentAccount,
+  useCurrentUserId,
+  useDeleteCollection,
+  useUser
+} from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { useNavigate } from 'react-router'
@@ -8,9 +13,8 @@ import { SetRequired } from 'type-fest'
 
 import { DeleteConfirmationModal } from 'components/delete-confirmation'
 import { DeleteConfirmationModalProps } from 'components/delete-confirmation/DeleteConfirmationModal'
-import { useLastLocation } from 'hooks/useLastLocation'
 
-const { FEED_PAGE } = route
+const { profilePage } = route
 
 const messages = {
   edit: 'Edit',
@@ -36,12 +40,13 @@ export const DeleteCollectionConfirmationModal = (
   props: DeleteCollectionConfirmationModalProps
 ) => {
   const navigate = useNavigate()
-  const lastLocation = useLastLocation()
   const { collectionId, visible, onCancel, onDelete } = props
   const { data: accountCollection } = useCurrentAccount({
     select: (account) => account?.collections?.[collectionId]
   })
-  const { is_album, permalink } = accountCollection ?? {}
+  const { is_album } = accountCollection ?? {}
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: currentUser } = useUser(currentUserId)
   const { mutateAsync: deleteCollection, isPending: isDeleting } =
     useDeleteCollection()
 
@@ -52,10 +57,8 @@ export const DeleteCollectionConfirmationModal = (
         source: 'delete_collection_confirmation_modal'
       })
       onDelete?.()
-
-      if (lastLocation?.pathname === permalink) {
-        navigate(FEED_PAGE, { replace: true })
-      }
+      const tab = is_album ? 'albums' : 'playlists'
+      navigate(`${profilePage(currentUser?.handle)}/${tab}`, { replace: true })
     } catch (error) {
       console.error('Failed to delete collection:', error)
       // Error is handled by the mutation's onError callback
@@ -64,8 +67,8 @@ export const DeleteCollectionConfirmationModal = (
     deleteCollection,
     collectionId,
     onDelete,
-    lastLocation?.pathname,
-    permalink,
+    is_album,
+    currentUser?.handle,
     navigate
   ])
 
