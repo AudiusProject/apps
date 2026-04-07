@@ -214,7 +214,7 @@ export const Tooltip = ({
       if (isValidElement(children)) {
         const originalOnClick = (
           children as ReactElement<{ onClick?: any }>
-        ).props?.onClick()
+        ).props?.onClick
         if (typeof originalOnClick === 'function') {
           originalOnClick(event)
         }
