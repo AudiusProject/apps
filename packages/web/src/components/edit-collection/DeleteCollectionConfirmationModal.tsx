@@ -63,7 +63,14 @@ export const DeleteCollectionConfirmationModal = (
       console.error('Failed to delete collection:', error)
       // Error is handled by the mutation's onError callback
     }
-  }, [deleteCollection, collectionId, onDelete, is_album, currentUser?.handle, navigate])
+  }, [
+    deleteCollection,
+    collectionId,
+    onDelete,
+    is_album,
+    currentUser?.handle,
+    navigate
+  ])
 
   const entity = is_album ? messages.type.album : messages.type.playlist
   const title = `${messages.delete} ${is_album ? messages.title.album : messages.title.playlist}`
