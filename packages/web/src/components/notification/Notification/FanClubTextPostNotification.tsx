@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useUser } from '@audius/common/api'
 import { FanClubTextPostNotification as FanClubTextPostNotificationType } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { IconCoinGatedLabel } from '@audius/harmony'
+import { Artwork, Flex, IconArtistCoin } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { push } from 'utils/navigation'
@@ -18,7 +18,6 @@ import { UserNameLink } from './components/UserNameLink'
 const { coinPage } = route
 
 const messages = {
-  title: 'New Fan Club Post',
   body: ' posted a message to their fan club.'
 }
 
@@ -45,8 +44,15 @@ export const FanClubTextPostNotification = (
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>
-      <NotificationHeader icon={<IconCoinGatedLabel color='accent' />}>
-        <ProfilePicture user={user} />
+      <NotificationHeader icon={<IconArtistCoin color='accent' />}>
+        <Flex direction='row' alignItems='center' pr='s'>
+          <Flex css={{ marginRight: -8, zIndex: 1 }}>
+            <ProfilePicture user={user} />
+          </Flex>
+          {user.artist_coin_badge?.logo_uri ? (
+            <Artwork src={user.artist_coin_badge.logo_uri} hex w={40} h={40} />
+          ) : null}
+        </Flex>
       </NotificationHeader>
       <NotificationBody>
         <UserNameLink user={user} notification={notification} />

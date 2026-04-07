@@ -3,19 +3,19 @@ import { useCallback } from 'react'
 import { useUser } from '@audius/common/api'
 import type { FanClubTextPostNotification as FanClubTextPostNotificationType } from '@audius/common/store'
 
-import { IconCoinGatedLabel } from '@audius/harmony-native'
+import { Flex, IconArtistCoin } from '@audius/harmony-native'
+import { TokenIcon } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import {
   NotificationHeader,
+  NotificationProfilePicture,
   NotificationText,
   NotificationTile,
-  NotificationTitle,
   UserNameLink
 } from '../Notification'
 
 const messages = {
-  title: 'New Fan Club Post',
   body: ' posted a message to their fan club.'
 }
 
@@ -44,11 +44,20 @@ export const FanClubTextPostNotification = (
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
-      <NotificationHeader icon={IconCoinGatedLabel}>
-        <NotificationTitle>{messages.title}</NotificationTitle>
+      <NotificationHeader icon={IconArtistCoin}>
+        <Flex row alignItems='center' style={{ paddingRight: 8 }}>
+          <NotificationProfilePicture
+            profile={user}
+            style={{ marginRight: -8, zIndex: 1 }}
+          />
+          {user.artist_coin_badge?.logo_uri ? (
+            <TokenIcon logoURI={user.artist_coin_badge.logo_uri} size={40} />
+          ) : null}
+        </Flex>
       </NotificationHeader>
       <NotificationText>
-        <UserNameLink user={user} /> {messages.body}
+        <UserNameLink user={user} />
+        {messages.body}
       </NotificationText>
     </NotificationTile>
   )

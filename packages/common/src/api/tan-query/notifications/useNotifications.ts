@@ -149,6 +149,9 @@ const collectEntityIds = (notifications: Notification[]): EntityIds => {
       trackIds.add(notification.parentTrackId)
       trackIds.add(notification.childTrackId)
     }
+    if (type === NotificationType.FanClubTextPost) {
+      userIds.add(notification.entityUserId)
+    }
   })
 
   return {
