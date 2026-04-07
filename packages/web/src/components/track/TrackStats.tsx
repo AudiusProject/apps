@@ -1,20 +1,17 @@
 import {
   useCurrentUserId,
-  useTrack,
-  useTrackDownloadCount
+  useTrack
 } from '@audius/common/api'
 import { ID, Name } from '@audius/common/models'
 import { formatCount, isLongFormContent, pluralize } from '@audius/common/utils'
 import {
   Flex,
-  IconCloudDownload,
   IconHeart,
   IconMessage,
   IconPlay,
   IconRepost,
   PlainButton
 } from '@audius/harmony'
-import { encodeHashId } from '@audius/sdk'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
@@ -29,8 +26,7 @@ const messages = {
   repost: 'Repost',
   favorite: 'Favorite',
   comment: 'Comment',
-  play: 'Play',
-  download: 'Download'
+  play: 'Play'
 }
 
 type TrackStatsProps = {
@@ -51,13 +47,10 @@ export const TrackStats = (props: TrackStatsProps) => {
         'is_unlisted',
         'play_count',
         'comments_disabled',
-        'genre',
-        'is_downloadable'
+        'genre'
       ])
   })
   const { data: currentUserId } = useCurrentUserId()
-  const trackIdHash = partialTrack ? encodeHashId(trackId as number) : null
-  const { data: downloadCount = 0 } = useTrackDownloadCount(trackIdHash)
   const dispatch = useDispatch()
   const comment_count = partialTrack?.comment_count ?? 0
 
@@ -70,8 +63,7 @@ export const TrackStats = (props: TrackStatsProps) => {
     play_count,
     is_stream_gated,
     owner_id,
-    is_unlisted,
-    is_downloadable
+    is_unlisted
   } = partialTrack
 
   const isOwner = currentUserId === owner_id
@@ -149,16 +141,6 @@ export const TrackStats = (props: TrackStatsProps) => {
       (isOwner || !is_stream_gated) ? (
         <PlainButton iconLeft={IconPlay}>
           {formatCount(play_count)} {pluralize(messages.play, play_count)}
-        </PlainButton>
-      ) : null}
-      {is_downloadable ? (
-        <PlainButton
-          iconLeft={IconCloudDownload}
-          size='large'
-          variant='subdued'
-        >
-          {formatCount(downloadCount)}{' '}
-          {pluralize(messages.download, downloadCount)}
         </PlainButton>
       ) : null}
     </Flex>
