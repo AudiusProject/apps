@@ -8,7 +8,6 @@ import { SetRequired } from 'type-fest'
 
 import { DeleteConfirmationModal } from 'components/delete-confirmation'
 import { DeleteConfirmationModalProps } from 'components/delete-confirmation/DeleteConfirmationModal'
-import { useLastLocation } from 'hooks/useLastLocation'
 
 const { FEED_PAGE } = route
 
@@ -36,12 +35,11 @@ export const DeleteCollectionConfirmationModal = (
   props: DeleteCollectionConfirmationModalProps
 ) => {
   const navigate = useNavigate()
-  const lastLocation = useLastLocation()
   const { collectionId, visible, onCancel, onDelete } = props
   const { data: accountCollection } = useCurrentAccount({
     select: (account) => account?.collections?.[collectionId]
   })
-  const { is_album, permalink } = accountCollection ?? {}
+  const { is_album } = accountCollection ?? {}
   const { mutateAsync: deleteCollection, isPending: isDeleting } =
     useDeleteCollection()
 
@@ -52,22 +50,12 @@ export const DeleteCollectionConfirmationModal = (
         source: 'delete_collection_confirmation_modal'
       })
       onDelete?.()
-
-      if (lastLocation?.pathname === permalink) {
-        navigate(FEED_PAGE, { replace: true })
-      }
+      navigate(FEED_PAGE, { replace: true })
     } catch (error) {
       console.error('Failed to delete collection:', error)
       // Error is handled by the mutation's onError callback
     }
-  }, [
-    deleteCollection,
-    collectionId,
-    onDelete,
-    lastLocation?.pathname,
-    permalink,
-    navigate
-  ])
+  }, [deleteCollection, collectionId, onDelete, navigate])
 
   const entity = is_album ? messages.type.album : messages.type.playlist
   const title = `${messages.delete} ${is_album ? messages.title.album : messages.title.playlist}`
