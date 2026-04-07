@@ -5,6 +5,6 @@ module.exports = {
   replaceAttrValues: {
     red: '{props.fill}',
     '#FF0000': '{props.fill}',
-    '#000000': '{props.fillSecondary}'
+    '#000000': '{fillSecondary}'
   }
 }
