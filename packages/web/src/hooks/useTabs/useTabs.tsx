@@ -192,6 +192,7 @@ const TabBar = memo(
       }
 
       const immediate = !getDidPositionTab()
+      // @ts-ignore - react-spring types don't infer `to` on setter when initializer uses `from`
       setAccentProps({ to: accentTransforms, immediate })
       setDidPositionTab(true)
     }, [
