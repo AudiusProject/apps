@@ -173,12 +173,10 @@ const SearchExplorePage = ({
   }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent =
-    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
-  const showPlaylistContent =
-    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
-  const showUserContent =
-    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
+  const isAllTab = categoryKey === CategoryView.ALL
+  const showTrackContent = categoryKey === CategoryView.TRACKS
+  const showPlaylistContent = categoryKey === CategoryView.PLAYLISTS
+  const showUserContent = categoryKey === CategoryView.PROFILES
   const isTracksTab = categoryKey === CategoryView.TRACKS
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
@@ -254,7 +252,7 @@ const SearchExplorePage = ({
             <RecentlyPlayedSection />
           ) : null}
           {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
-          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
+          {showUserContent ? <FanClubsExploreSection /> : null}
           {showTrackContent ? <FeaturedRemixContestsSection /> : null}
           {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
           {showUserContent ? <ArtistSpotlightSection /> : null}
@@ -263,7 +261,9 @@ const SearchExplorePage = ({
           {showTrackContent && showUserContextualContent ? (
             <FeelingLuckySection />
           ) : null}
-          {showUserContextualContent ? <RecentSearchesSection /> : null}
+          {!isAllTab && showUserContextualContent ? (
+            <RecentSearchesSection />
+          ) : null}
         </Flex>
       </Flex>
     </MobilePageContainer>

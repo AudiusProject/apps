@@ -21,9 +21,10 @@ export const ExploreContent = () => {
     useCurrentUserId()
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent = category === 'tracks' || category === 'all'
-  const showPlaylistContent = category === 'playlists' || category === 'all'
-  const showUserContent = category === 'users' || category === 'all'
+  const isAllTab = category === 'all'
+  const showTrackContent = category === 'tracks'
+  const showPlaylistContent = category === 'playlists'
+  const showUserContent = category === 'users'
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
@@ -37,7 +38,7 @@ export const ExploreContent = () => {
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
       {showTrackContent && showUserContextualContent && <FeelingLucky />}
-      {showUserContextualContent && <RecentSearches />}
+      {!isAllTab && showUserContextualContent && <RecentSearches />}
     </Flex>
   )
 }
