@@ -321,9 +321,15 @@ export const useNotificationNavigation = () => {
       [NotificationType.FanRemixContestWinnersSelected]: entityHandler,
       [NotificationType.ArtistRemixContestEnded]: entityHandler,
       [NotificationType.FanClubTextPost]: (
-        notification: FanClubTextPostNotification
+        notification: FanClubTextPostNotification & { ticker?: string }
       ) => {
-        navigation.navigate('Profile', { id: notification.entityUserId })
+        if (notification.ticker) {
+          navigation.navigate('CoinDetailsScreen', {
+            ticker: notification.ticker
+          })
+        } else {
+          navigation.navigate('Profile', { id: notification.entityUserId })
+        }
       }
     }),
     [
