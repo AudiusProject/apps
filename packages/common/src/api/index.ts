@@ -32,7 +32,6 @@ export * from './tan-query/events'
 
 // Explore
 export * from './tan-query/collection/useExploreContent'
-export * from './tan-query/collection/useFeaturedArtistCoinTracks'
 
 // Lineups
 export * from './tan-query/lineups/useFeed'
@@ -44,7 +43,6 @@ export * from './tan-query/lineups/useTrendingUnderground'
 export * from './tan-query/lineups/useTrendingWinners'
 export * from './tan-query/lineups/useTrackPageLineup'
 export * from './tan-query/lineups/useLineupQuery'
-export * from './tan-query/lineups/useExclusiveTracks'
 
 // Notifications
 export * from './tan-query/notifications/useMarkNotificationsAsViewed'
