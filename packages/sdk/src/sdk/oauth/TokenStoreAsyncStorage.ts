@@ -18,12 +18,16 @@ export class TokenStoreAsyncStorage implements OAuthTokenStore {
 
   async getAccessTokenExpiry(): Promise<number | null> {
     const raw = await AsyncStorage.getItem(AS_ACCESS_TOKEN_EXPIRY_KEY)
-    return raw ? Number(raw) : null
+    if (raw == null) return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
   }
 
   async getRefreshTokenExpiry(): Promise<number | null> {
     const raw = await AsyncStorage.getItem(AS_REFRESH_TOKEN_EXPIRY_KEY)
-    return raw ? Number(raw) : null
+    if (raw == null) return null
+    const n = Number(raw)
+    return Number.isFinite(n) ? n : null
   }
 
   async setTokens(

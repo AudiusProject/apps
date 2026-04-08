@@ -29,7 +29,9 @@ export class TokenStoreLocalStorage implements OAuthTokenStore {
   async getAccessTokenExpiry(): Promise<number | null> {
     try {
       const raw = window.localStorage.getItem(LS_ACCESS_TOKEN_EXPIRY_KEY)
-      return raw ? Number(raw) : null
+      if (raw == null) return null
+      const n = Number(raw)
+      return Number.isFinite(n) ? n : null
     } catch {
       return null
     }
@@ -38,7 +40,9 @@ export class TokenStoreLocalStorage implements OAuthTokenStore {
   async getRefreshTokenExpiry(): Promise<number | null> {
     try {
       const raw = window.localStorage.getItem(LS_REFRESH_TOKEN_EXPIRY_KEY)
-      return raw ? Number(raw) : null
+      if (raw == null) return null
+      const n = Number(raw)
+      return Number.isFinite(n) ? n : null
     } catch {
       return null
     }
