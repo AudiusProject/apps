@@ -85,7 +85,8 @@ export class CommentsApi extends GeneratedCommentsApi {
       parentCommentId,
       trackTimestampS,
       entityId,
-      isMembersOnly
+      isMembersOnly,
+      videoUrl
     } = metadata
     const newCommentId = commentId ?? (await this.generateCommentId())
 
@@ -109,6 +110,9 @@ export class CommentsApi extends GeneratedCommentsApi {
     }
     if (trackTimestampS !== undefined) {
       data.track_timestamp_s = trackTimestampS
+    }
+    if (videoUrl !== undefined) {
+      data.video_url = videoUrl
     }
     const res = await this.entityManager.manageEntity({
       userId,
@@ -143,7 +147,8 @@ export class CommentsApi extends GeneratedCommentsApi {
           parentCommentId: md.parentId,
           trackTimestampS: md.trackTimestampS,
           mentions: md.mentions,
-          isMembersOnly: (md as any).isMembersOnly
+          isMembersOnly: (md as any).isMembersOnly,
+          videoUrl: (md as any).videoUrl
         })
       }
       return await this.createCommentWithEntityManager({

@@ -27,6 +27,7 @@ reply_comment_model = ns.model(
         "is_artist_reacted": fields.Boolean(required=False),
         "created_at": fields.String(required=True),
         "updated_at": fields.String(required=False),
+        "video_url": fields.String(required=False),
     },
 )
 
@@ -55,6 +56,7 @@ comment_model = ns.model(
         "created_at": fields.String(required=True),
         "updated_at": fields.String(required=False),
         "replies": fields.List(fields.Nested(reply_comment_model), require=True),
+        "video_url": fields.String(required=False),
     },
 )
 

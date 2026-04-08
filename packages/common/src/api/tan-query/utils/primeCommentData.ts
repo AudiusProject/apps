@@ -17,7 +17,6 @@ export const primeCommentData = ({
 }) => {
   // Populate individual comment cache
   comments.forEach((comment) => {
-    // Prime the main comment
     queryClient.setQueryData(getCommentQueryKey(comment.id), comment)
 
     // Prime any replies if they exist

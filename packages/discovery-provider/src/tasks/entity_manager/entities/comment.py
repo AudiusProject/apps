@@ -82,7 +82,9 @@ def validate_write_comment_tx(params: ManageEntityParameters):
         )
     raw_entity_id = params.metadata.get("entity_id")
     if raw_entity_id is None:
-        raise IndexingValidationError("entity_id is required to create or update comment")
+        raise IndexingValidationError(
+            "entity_id is required to create or update comment"
+        )
 
     track_entity_id = None
     coin_entity_id = None
@@ -109,7 +111,10 @@ def validate_write_comment_tx(params: ManageEntityParameters):
     if params.action == Action.UPDATE:
         existing_c = params.existing_records[EntityType.COMMENT.value][comment_id]
         if existing_c.entity_type == EntityType.TRACK.value:
-            if entity_type_meta != EntityType.TRACK.value or track_entity_id != existing_c.entity_id:
+            if (
+                entity_type_meta != EntityType.TRACK.value
+                or track_entity_id != existing_c.entity_id
+            ):
                 raise IndexingValidationError(
                     "Cannot change comment entity from metadata on update"
                 )
@@ -241,6 +246,7 @@ def create_comment(params: ManageEntityParameters):
         if entity_type == FAN_CLUB_ENTITY_TYPE
         else False
     )
+    video_url = metadata.get("video_url")
     comment_record = Comment(
         comment_id=comment_id,
         user_id=user_id,
@@ -249,6 +255,7 @@ def create_comment(params: ManageEntityParameters):
         entity_id=stored_entity_id,
         track_timestamp_s=metadata["track_timestamp_s"],
         is_members_only=bool(is_members_only),
+        video_url=video_url if video_url else None,
         txhash=params.txhash,
         blockhash=params.event_blockhash,
         blocknumber=params.block_number,
@@ -317,7 +324,9 @@ def create_comment(params: ManageEntityParameters):
             {"artist_user_id": entity_user_id},
         ).fetchall()
         coin_holder_user_ids = {row[0] for row in coin_holder_rows}
-        recipient_user_ids = (follower_user_ids | coin_holder_user_ids) - {entity_user_id}
+        recipient_user_ids = (follower_user_ids | coin_holder_user_ids) - {
+            entity_user_id
+        }
         for recipient_id in recipient_user_ids:
             fan_club_notification = Notification(
                 blocknumber=params.block_number,

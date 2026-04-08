@@ -54,7 +54,8 @@ export const CreateCommentSchema = z
     parentCommentId: z.optional(z.number()),
     trackTimestampS: z.optional(z.number()),
     mentions: z.optional(z.array(z.number())),
-    isMembersOnly: z.optional(z.boolean())
+    isMembersOnly: z.optional(z.boolean()),
+    videoUrl: z.optional(z.string())
   })
   .strict()
   .refine(

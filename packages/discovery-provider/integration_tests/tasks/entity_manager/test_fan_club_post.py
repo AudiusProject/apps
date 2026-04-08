@@ -9,6 +9,7 @@ import logging
 from typing import List
 
 from sqlalchemy import text
+from web3 import Web3
 from web3.datastructures import AttributeDict
 
 from integration_tests.challenges.index_helpers import UpdateTask
@@ -21,8 +22,6 @@ from src.models.comments.comment_thread import CommentThread
 from src.models.notifications.notification import Notification
 from src.tasks.entity_manager.entity_manager import entity_manager_update
 from src.utils.db_session import get_db
-
-from web3 import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -158,9 +157,9 @@ def test_create_fan_club_post(app, mocker):
         assert comments[0].entity_id == 1
         assert comments[0].user_id == 1
 
-        notifications = session.query(Notification).filter(
-            Notification.type == "comment"
-        ).all()
+        notifications = (
+            session.query(Notification).filter(Notification.type == "comment").all()
+        )
         assert len(notifications) == 0
 
 
@@ -169,12 +168,14 @@ def test_create_fan_club_post_invalid_no_artist_coin(app, mocker):
     Creating a fan club post for a user_id that has no artist coin should be
     silently skipped (validation error).
     """
-    bad_metadata = json.dumps({
-        "entity_id": 99,  # user 99 doesn't exist and has no coin
-        "entity_type": "FanClub",
-        "body": "should fail",
-        "parent_comment_id": None,
-    })
+    bad_metadata = json.dumps(
+        {
+            "entity_id": 99,  # user 99 doesn't exist and has no coin
+            "entity_type": "FanClub",
+            "body": "should fail",
+            "parent_comment_id": None,
+        }
+    )
 
     tx_receipts = {
         "BadFanClubPost": [
@@ -223,11 +224,13 @@ def test_fan_club_post_reply(app, mocker):
         ],
     }
 
-    reply_metadata = json.dumps({
-        **fan_club_post_metadata,
-        "body": "replying to your post",
-        "parent_comment_id": 1,
-    })
+    reply_metadata = json.dumps(
+        {
+            **fan_club_post_metadata,
+            "body": "replying to your post",
+            "parent_comment_id": 1,
+        }
+    )
 
     tx_receipts = {
         "FanClubPostReply": [
@@ -283,12 +286,14 @@ def test_fan_club_post_reply_non_owner_rejected(app, mocker):
         ],
     }
 
-    cross_thread_metadata = json.dumps({
-        "entity_id": 1,
-        "entity_type": "FanClub",
-        "body": "cross-thread reply",
-        "parent_comment_id": 1,  # parent is a Track comment, not fan club
-    })
+    cross_thread_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "FanClub",
+            "body": "cross-thread reply",
+            "parent_comment_id": 1,  # parent is a Track comment, not fan club
+        }
+    )
 
     tx_receipts = {
         "CrossThreadReply": [
@@ -537,11 +542,13 @@ def test_update_fan_club_post(app, mocker):
         ],
     }
 
-    update_metadata = json.dumps({
-        "entity_id": 1,
-        "entity_type": "FanClub",
-        "body": "edited text",
-    })
+    update_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "FanClub",
+            "body": "edited text",
+        }
+    )
 
     tx_receipts = {
         "EditFanClubPost": [
@@ -578,11 +585,13 @@ def test_update_fan_club_post(app, mocker):
 
 def test_fan_club_post_with_mention(app, mocker):
     """Mentions in a fan club text post generate mention notifications."""
-    mention_metadata = json.dumps({
-        **fan_club_post_metadata,
-        "body": "hey @user3 check this out",
-        "mentions": [3],
-    })
+    mention_metadata = json.dumps(
+        {
+            **fan_club_post_metadata,
+            "body": "hey @user3 check this out",
+            "mentions": [3],
+        }
+    )
 
     tx_receipts = {
         "FanClubPostMention": [
@@ -629,12 +638,14 @@ def test_fan_club_post_and_track_comments_coexist(app, mocker):
     Creating both a fan club post and a Track comment in the same block
     produces the correct entity_type on each and independent notifications.
     """
-    track_comment_metadata = json.dumps({
-        "entity_id": 1,
-        "entity_type": "Track",
-        "body": "great track!",
-        "parent_comment_id": None,
-    })
+    track_comment_metadata = json.dumps(
+        {
+            "entity_id": 1,
+            "entity_type": "Track",
+            "body": "great track!",
+            "parent_comment_id": None,
+        }
+    )
 
     tx_receipts = {
         "FanClubPost": [
@@ -684,9 +695,9 @@ def test_fan_club_post_and_track_comments_coexist(app, mocker):
         assert track_comment.entity_id == 1
 
         # Fan club owner self-post does not notify; track comment notifies track owner.
-        notifs = session.query(Notification).filter(
-            Notification.type == "comment"
-        ).all()
+        notifs = (
+            session.query(Notification).filter(Notification.type == "comment").all()
+        )
         assert len(notifs) == 1
         assert notifs[0].group_id == "comment:1:type:Track"
 
@@ -712,7 +723,9 @@ def _seed_coin_holders(session, artist_user_id=1, holder_user_ids=None, mint=COI
     session.flush()
 
 
-def test_fan_club_text_post_notification_sent_to_followers_and_coin_holders(app, mocker):
+def test_fan_club_text_post_notification_sent_to_followers_and_coin_holders(
+    app, mocker
+):
     """
     When an artist creates a root-level fan club text post, both followers
     and coin holders receive a fan_club_text_post notification (deduplicated).
@@ -767,9 +780,7 @@ def test_fan_club_text_post_notification_sent_to_followers_and_coin_holders(app,
 
         # No "comment" notification since artist is posting on their own fan club
         comment_notifs = (
-            session.query(Notification)
-            .filter(Notification.type == "comment")
-            .all()
+            session.query(Notification).filter(Notification.type == "comment").all()
         )
         assert len(comment_notifs) == 0
 
@@ -835,11 +846,13 @@ def test_fan_club_text_post_notification_not_sent_for_replies(app, mocker):
         ],
     }
 
-    reply_metadata = json.dumps({
-        **fan_club_post_metadata,
-        "body": "replying to my own post",
-        "parent_comment_id": 1,
-    })
+    reply_metadata = json.dumps(
+        {
+            **fan_club_post_metadata,
+            "body": "replying to my own post",
+            "parent_comment_id": 1,
+        }
+    )
 
     tx_receipts = {
         "ArtistReply": [
