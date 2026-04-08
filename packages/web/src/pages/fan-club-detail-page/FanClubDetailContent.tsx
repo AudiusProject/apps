@@ -7,56 +7,71 @@ import { FanClubInsights } from './components/FanClubInsights'
 import { FanClubLeaderboardCard } from './components/FanClubLeaderboardCard'
 import { PostUpdateCard } from './components/PostUpdateCard'
 
-const MAIN_SECTION_WIDTH = '704px'
-const SIDEBAR_SECTION_WIDTH = '360px'
+const MAIN_SECTION_MAX_WIDTH = 704
+const SIDEBAR_SECTION_WIDTH = 360
+const DESKTOP_NAV_WIDTH = 240
 
-const useStyles = makeResponsiveStyles(({ media, theme }) => {
-  const hasEnoughSpaceForTwoColumns = media.matchesQuery(`(min-width: 1440px)`)
-  const isSingleColumn = !hasEnoughSpaceForTwoColumns
+const useStyles = makeResponsiveStyles(({ theme }) => {
+  // Keep sidebar fixed; allow the main column to shrink until both columns
+  // are equal width, then collapse to single-column.
+  const pageInsetHorizontalPadding = theme.spacing.unit15 * 2
+  const twoColumnMinViewportWidth =
+    SIDEBAR_SECTION_WIDTH +
+    SIDEBAR_SECTION_WIDTH +
+    theme.spacing.l +
+    pageInsetHorizontalPadding +
+    DESKTOP_NAV_WIDTH
+  const twoColumnMediaQuery = `@media (min-width: ${twoColumnMinViewportWidth}px)`
 
   return {
     container: {
       base: {
         display: 'flex',
-        gap: isSingleColumn ? theme.spacing.xl : theme.spacing.l,
+        gap: theme.spacing.xl,
         width: '100%',
-        maxWidth: hasEnoughSpaceForTwoColumns
-          ? `calc(${MAIN_SECTION_WIDTH} + ${SIDEBAR_SECTION_WIDTH} + ${theme.spacing.l})`
-          : '100%',
+        maxWidth: '100%',
         margin: '0 auto',
-        flexDirection: hasEnoughSpaceForTwoColumns ? 'row' : 'column',
-        paddingBottom: hasEnoughSpaceForTwoColumns ? 0 : theme.spacing.m
+        flexDirection: 'column',
+        paddingBottom: theme.spacing.m,
+        [twoColumnMediaQuery]: {
+          gap: theme.spacing.l,
+          maxWidth: `calc(${MAIN_SECTION_MAX_WIDTH}px + ${SIDEBAR_SECTION_WIDTH}px + ${theme.spacing.l}px)`,
+          flexDirection: 'row',
+          paddingBottom: 0
+        }
       }
     },
     /** Primary column: fan club story + fan club feed (desktop left). */
     mainColumn: {
-      base: isSingleColumn
-        ? { display: 'contents' as const }
-        : {
-            order: 1,
-            width: MAIN_SECTION_WIDTH,
-            maxWidth: MAIN_SECTION_WIDTH,
-            minWidth: 0,
-            flex: '0 0 auto',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            gap: theme.spacing.xl
-          }
+      base: {
+        display: 'contents' as const,
+        [twoColumnMediaQuery]: {
+          order: 1,
+          width: 'auto',
+          maxWidth: `${MAIN_SECTION_MAX_WIDTH}px`,
+          minWidth: `${SIDEBAR_SECTION_WIDTH}px`,
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column' as const,
+          gap: theme.spacing.xl
+        }
+      }
     },
     /** Sidebar: balance, leaderboard, insights, on-chain details (desktop right). */
     sidebarColumn: {
-      base: isSingleColumn
-        ? { display: 'contents' as const }
-        : {
-            order: 2,
-            width: SIDEBAR_SECTION_WIDTH,
-            maxWidth: SIDEBAR_SECTION_WIDTH,
-            minWidth: 0,
-            flex: '0 0 auto',
-            display: 'flex',
-            flexDirection: 'column' as const,
-            gap: theme.spacing.xl
-          }
+      base: {
+        display: 'contents' as const,
+        [twoColumnMediaQuery]: {
+          order: 2,
+          width: `${SIDEBAR_SECTION_WIDTH}px`,
+          maxWidth: `${SIDEBAR_SECTION_WIDTH}px`,
+          minWidth: 0,
+          flex: '0 0 auto',
+          display: 'flex',
+          flexDirection: 'column' as const,
+          gap: theme.spacing.xl
+        }
+      }
     },
     /** Item wrappers – collapse when the child component renders null. */
     itemWrapper: {
@@ -66,25 +81,25 @@ const useStyles = makeResponsiveStyles(({ media, theme }) => {
     },
     /** Single-column ordering for interleaved layout */
     heroSection: {
-      base: isSingleColumn ? { order: 1 } : {}
+      base: { order: 1 }
     },
     postUpdateCard: {
-      base: isSingleColumn ? { order: 2 } : {}
+      base: { order: 2 }
     },
     balanceSection: {
-      base: isSingleColumn ? { order: 3 } : {}
+      base: { order: 3 }
     },
     leaderboard: {
-      base: isSingleColumn ? { order: 4 } : {}
+      base: { order: 4 }
     },
     feedSection: {
-      base: isSingleColumn ? { order: 5 } : {}
+      base: { order: 5 }
     },
     insights: {
-      base: isSingleColumn ? { order: 6 } : {}
+      base: { order: 6 }
     },
     onchainDetails: {
-      base: isSingleColumn ? { order: 7 } : {}
+      base: { order: 7 }
     }
   }
 })
