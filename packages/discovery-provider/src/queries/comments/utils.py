@@ -2,12 +2,12 @@ import logging
 
 from sqlalchemy import func
 
+from src.models.comments.comment import FAN_CLUB_ENTITY_TYPE
 from src.models.comments.comment_mention import CommentMention
 from src.models.comments.comment_notification_setting import CommentNotificationSetting
 from src.models.comments.comment_reaction import CommentReaction
 from src.models.comments.comment_report import COMMENT_KARMA_THRESHOLD
 from src.models.moderation.muted_user import MutedUser
-from src.models.comments.comment import FAN_CLUB_ENTITY_TYPE
 from src.models.users.aggregate_user import AggregateUser
 from src.models.users.user import User
 from src.queries.query_helpers import get_tracks, get_users
