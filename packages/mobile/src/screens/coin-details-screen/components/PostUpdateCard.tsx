@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 import {
   useArtistCoin,
@@ -12,7 +12,20 @@ import {
   getVideoThumbnailUrl,
   isValidVideoUrl
 } from '@audius/common/utils'
-import { Image, Modal, Pressable, View } from 'react-native'
+import {
+  Animated,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  useWindowDimensions
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   Button,
@@ -44,6 +57,34 @@ const messages = {
 type PostUpdateCardProps = {
   mint: string
 }
+
+const styles = StyleSheet.create({
+  modalRoot: {
+    flex: 1
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000'
+  },
+  keyboardAvoiding: {
+    flex: 1,
+    justifyContent: 'flex-end'
+  },
+  sheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16
+  },
+  sheetDivider: {
+    alignSelf: 'stretch',
+    height: 1,
+    backgroundColor: '#e6e8ec'
+  },
+  drawerScrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16
+  }
+})
 
 export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const [messageId, setMessageId] = useState(0)
@@ -93,17 +134,73 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
     ]
   )
 
+  const { height: windowHeight } = useWindowDimensions()
+  const { bottom: safeBottom } = useSafeAreaInsets()
+  const backdropAnim = useRef(new Animated.Value(0)).current
+  const sheetTranslateY = useRef(new Animated.Value(0)).current
+
+  const backdropOpacity = backdropAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.5]
+  })
+
+  const dismissAttachModal = useCallback(() => {
+    Keyboard.dismiss()
+    Animated.parallel([
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true
+      }),
+      Animated.timing(sheetTranslateY, {
+        toValue: windowHeight,
+        duration: 220,
+        useNativeDriver: true
+      })
+    ]).start(({ finished }) => {
+      if (finished) {
+        setAttachUrl('')
+        setShowAttachModal(false)
+      }
+    })
+  }, [backdropAnim, sheetTranslateY, windowHeight])
+
+  useLayoutEffect(() => {
+    if (!showAttachModal) return
+
+    backdropAnim.setValue(0)
+    sheetTranslateY.setValue(windowHeight)
+
+    const openAnim = Animated.parallel([
+      Animated.timing(backdropAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true
+      }),
+      Animated.spring(sheetTranslateY, {
+        toValue: 0,
+        friction: 9,
+        tension: 65,
+        useNativeDriver: true
+      })
+    ])
+
+    openAnim.start()
+    return () => {
+      openAnim.stop()
+    }
+  }, [showAttachModal, windowHeight, backdropAnim, sheetTranslateY])
+
   const handleAttach = useCallback(() => {
     if (!isAttachUrlValid) return
     setVideoUrl(attachUrl.trim())
     setAttachUrl('')
-    setShowAttachModal(false)
-  }, [isAttachUrlValid, attachUrl])
+    dismissAttachModal()
+  }, [isAttachUrlValid, attachUrl, dismissAttachModal])
 
   const handleCloseModal = useCallback(() => {
-    setAttachUrl('')
-    setShowAttachModal(false)
-  }, [])
+    dismissAttachModal()
+  }, [dismissAttachModal])
 
   if (!isOwner || !isTextPostPostingEnabled) return null
 
@@ -202,89 +299,114 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
       <Modal
         visible={showAttachModal}
         transparent
-        animationType='slide'
+        animationType='none'
         onRequestClose={handleCloseModal}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16
-            }}
+        <View style={styles.modalRoot}>
+          <Animated.View
+            pointerEvents='box-none'
+            style={[styles.backdrop, { opacity: backdropOpacity }]}
           >
-            {/* Title + Divider */}
-            <Flex ph='l' pv='l' alignItems='center'>
-              <Text
-                variant='label'
-                size='xl'
-                strength='strong'
-                textAlign='center'
-              >
-                {messages.attachVideoTitle}
-              </Text>
-            </Flex>
-            <View
-              style={{
-                height: 1,
-                backgroundColor: '#e6e8ec',
-                marginHorizontal: 16
-              }}
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={handleCloseModal}
             />
+          </Animated.View>
 
-            {/* Content */}
-            <Flex ph='l' pv='l' column gap='l'>
-              <Text variant='body' size='l'>
-                {messages.attachVideoDescription}
-              </Text>
-              <Flex row gap='m' alignItems='center'>
-                <Flex flex={1}>
-                  <TextInput
-                    label={messages.videoUrlLabel}
-                    value={attachUrl}
-                    onChangeText={setAttachUrl}
-                    autoCapitalize='none'
-                    autoCorrect={false}
-                  />
-                </Flex>
-                {parsedAttachUrl ? (
-                  <Flex alignItems='center' justifyContent='center'>
-                    <IconValidationCheck size='l' color='default' />
+          <KeyboardAvoidingView
+            pointerEvents='box-none'
+            style={styles.keyboardAvoiding}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <Animated.View
+              style={[
+                styles.sheet,
+                {
+                  transform: [{ translateY: sheetTranslateY }],
+                  maxHeight: windowHeight * 0.92,
+                  paddingBottom: safeBottom
+                }
+              ]}
+            >
+              <ScrollView
+                contentContainerStyle={styles.drawerScrollContent}
+                keyboardShouldPersistTaps='handled'
+                keyboardDismissMode={
+                  Platform.OS === 'ios' ? 'interactive' : 'on-drag'
+                }
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+              >
+                <Flex column>
+                  <Flex pv='l' alignItems='center'>
+                    <Text
+                      variant='label'
+                      size='xl'
+                      strength='strong'
+                      textAlign='center'
+                    >
+                      {messages.attachVideoTitle}
+                    </Text>
                   </Flex>
-                ) : null}
-              </Flex>
-              <Paper
-                backgroundColor='surface2'
-                shadow='flat'
-                border='strong'
-                ph='l'
-                pv='m'
-              >
-                <Text variant='body'>{messages.attachVideoHint}</Text>
-              </Paper>
-            </Flex>
+                  <View style={styles.sheetDivider} />
 
-            {/* Actions */}
-            <Flex ph='l' pv='l' column gap='m'>
-              <Button
-                variant='primary'
-                onPress={handleAttach}
-                disabled={!isAttachUrlValid}
-                fullWidth
-              >
-                {messages.attach}
-              </Button>
-              <Button variant='secondary' onPress={handleCloseModal} fullWidth>
-                {messages.cancel}
-              </Button>
-            </Flex>
-          </View>
+                  <Flex pv='l' column gap='l'>
+                    <Text variant='body' size='l'>
+                      {messages.attachVideoDescription}
+                    </Text>
+                    <Flex row gap='m' alignItems='center'>
+                      <Flex flex={1}>
+                        <TextInput
+                          label={messages.videoUrlLabel}
+                          value={attachUrl}
+                          onChangeText={setAttachUrl}
+                          autoCapitalize='none'
+                          autoCorrect={false}
+                          returnKeyType='done'
+                          onSubmitEditing={
+                            isAttachUrlValid ? handleAttach : undefined
+                          }
+                        />
+                      </Flex>
+                      {parsedAttachUrl ? (
+                        <Flex alignItems='center' justifyContent='center'>
+                          <IconValidationCheck size='l' color='default' />
+                        </Flex>
+                      ) : null}
+                    </Flex>
+                    <Paper
+                      backgroundColor='surface2'
+                      shadow='flat'
+                      border='strong'
+                      ph='l'
+                      pv='m'
+                    >
+                      <Text variant='body'>{messages.attachVideoHint}</Text>
+                    </Paper>
+                  </Flex>
+
+                  <Flex pb='l' pt='s' column gap='m'>
+                    <Button
+                      variant='primary'
+                      fullWidth
+                      accessibilityState={{ disabled: !isAttachUrlValid }}
+                      style={isAttachUrlValid ? undefined : { opacity: 0.45 }}
+                      onPress={handleAttach}
+                    >
+                      {messages.attach}
+                    </Button>
+                    <Button
+                      variant='secondary'
+                      onPress={handleCloseModal}
+                      fullWidth
+                    >
+                      {messages.cancel}
+                    </Button>
+                  </Flex>
+                </Flex>
+              </ScrollView>
+            </Animated.View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </Paper>

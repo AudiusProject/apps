@@ -20,7 +20,6 @@ import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
-import { UploadTrackButton } from '../UploadTrackButton'
 
 import { ArtistProfilePicture } from './ArtistProfilePicture'
 import { Bio } from './Bio'
@@ -151,9 +150,7 @@ export const ProfileHeader = memo(() => {
             <ArtistRecommendations onClose={handleCloseArtistRecs} />
           )}
           <Flex pointerEvents='box-none' mt='s' gap='s'>
-            {isOwner ? (
-              <UploadTrackButton />
-            ) : !isArtistCoinLoading && userId && artistCoin?.mint ? (
+            {!isArtistCoinLoading && userId && artistCoin?.mint ? (
               <BuyArtistCoinButton userId={userId} />
             ) : null}
           </Flex>

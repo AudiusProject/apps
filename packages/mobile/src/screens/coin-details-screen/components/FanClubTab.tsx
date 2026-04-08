@@ -123,9 +123,16 @@ const BecomeAMemberCard = ({
 type FanClubHeroTileProps = {
   mint: string
   onPoweredByPress: () => void
+  isOwner: boolean
+  onUploadExclusive: () => void
 }
 
-const FanClubHeroTile = ({ mint, onPoweredByPress }: FanClubHeroTileProps) => {
+const FanClubHeroTile = ({
+  mint,
+  onPoweredByPress,
+  isOwner,
+  onUploadExclusive
+}: FanClubHeroTileProps) => {
   const { borderDefault } = useThemeColors()
   const { data: coin, isLoading } = useArtistCoin(mint)
   const ownerId = coin?.ownerId
@@ -228,6 +235,17 @@ const FanClubHeroTile = ({ mint, onPoweredByPress }: FanClubHeroTileProps) => {
             {coin.description}
           </Text>
         ) : null}
+
+        {isOwner ? (
+          <Button
+            variant='secondary'
+            size='small'
+            iconLeft={IconCloudUpload}
+            onPress={onUploadExclusive}
+          >
+            {messages.uploadExclusiveTrack}
+          </Button>
+        ) : null}
       </Flex>
     </Paper>
   )
@@ -272,8 +290,6 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
           {messages.title}
         </Text>
       </Flex>
-
-      <PostUpdateCard mint={mint} />
 
       {hasTextPosts
         ? textPosts.map((item) => (
@@ -340,21 +356,16 @@ export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
 
   return (
     <Flex column gap='l' w='100%' ph='l'>
-      <FanClubHeroTile mint={mint} onPoweredByPress={onSwitchToCoinTab} />
+      <FanClubHeroTile
+        mint={mint}
+        onPoweredByPress={onSwitchToCoinTab}
+        isOwner={isOwner}
+        onUploadExclusive={handleUploadExclusive}
+      />
 
-      {/* Upload Exclusive Track - Artist only */}
-      {isOwner ? (
-        <Button
-          variant='secondary'
-          fullWidth
-          iconLeft={IconCloudUpload}
-          onPress={handleUploadExclusive}
-        >
-          {messages.uploadExclusiveTrack}
-        </Button>
-      ) : null}
+      {membershipKnown ? <PostUpdateCard mint={mint} /> : null}
 
-      {/* Membership CTA / leaderboard: wait until account + balance are known to avoid CLS */}
+      {/* Membership CTA: wait until account + balance are known to avoid CLS */}
       {!membershipKnown ? (
         <Paper
           column
