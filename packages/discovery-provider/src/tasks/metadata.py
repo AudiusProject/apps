@@ -255,6 +255,8 @@ comment_metadata_format = {
     "parent_comment_id": None,
     "mentions": None,
     "track_timestamp_s": None,
+    "is_members_only": None,
+    "video_url": None,
 }
 
 encrypted_email_metadata_format = {
