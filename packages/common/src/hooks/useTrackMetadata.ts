@@ -123,7 +123,8 @@ export const useTrackMetadata = ({
     {
       id: TrackMetadataType.DOWNLOADS,
       label: 'Downloads',
-      value: isDownloadable ? formatCount(downloadCount) : '',
+      value:
+        isDownloadable && downloadCount > 0 ? formatCount(downloadCount) : '',
       isHidden: !isDownloadable
     }
   ].filter(({ isHidden, value }) => !isHidden && !!value)

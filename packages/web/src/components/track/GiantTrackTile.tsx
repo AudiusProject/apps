@@ -1,10 +1,9 @@
-import { Suspense, lazy, useCallback, useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 
 import {
   useTrackRank,
   useRemixContest,
   useToggleFavoriteTrack,
-  useStems,
   useTrack
 } from '@audius/common/api'
 import {
@@ -71,12 +70,6 @@ import { PlayPauseButton } from './PlayPauseButton'
 import { TrackDogEar } from './TrackDogEar'
 import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
-
-const DownloadSection = lazy(() =>
-  import('./DownloadSection').then((module) => ({
-    default: module.DownloadSection
-  }))
-)
 
 const BUTTON_COLLAPSE_WIDTHS = {
   first: 1095,
@@ -219,8 +212,6 @@ export const GiantTrackTile = ({
   const { data: track } = useTrack(trackId, {
     select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
   })
-  const { data: stems = [] } = useStems(trackId)
-  const hasDownloadableAssets = track?.is_downloadable || stems.length > 0
   // Preview button is shown for USDC-gated tracks if user does not have access
   // or is the owner
   const showPreview =
@@ -692,13 +683,6 @@ export const GiantTrackTile = ({
         ) : null}
 
         {renderTags()}
-        {hasDownloadableAssets ? (
-          <Box w='100%'>
-            <Suspense>
-              <DownloadSection trackId={trackId} />
-            </Suspense>
-          </Box>
-        ) : null}
       </Flex>
     </Paper>
   )
