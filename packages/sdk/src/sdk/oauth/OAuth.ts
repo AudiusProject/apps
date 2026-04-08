@@ -294,11 +294,34 @@ export class OAuth {
   }
 
   /**
-   * Returns true if the user is currently authenticated (i.e. an access
-   * token is present in the token store).
+   * Returns true if the user has a valid session. Checks the access token
+   * expiry when available — if the token has expired but a refresh token
+   * exists, a silent refresh is attempted. Returns false only when no
+   * usable session remains.
    */
   async isAuthenticated(): Promise<boolean> {
-    return !!(await this.config.tokenStore.getAccessToken())
+    const store = this.config.tokenStore
+
+    // If the refresh token is known-expired, the session is dead
+    const refreshExpiry = await store.getRefreshTokenExpiry()
+    if (refreshExpiry != null && Date.now() >= refreshExpiry) {
+      return false
+    }
+
+    const accessToken = await store.getAccessToken()
+    if (!accessToken) {
+      // No access token but we may still have a valid refresh token
+      return !!(await store.getRefreshToken())
+    }
+
+    const accessExpiry = await store.getAccessTokenExpiry()
+    if (accessExpiry != null && Date.now() >= accessExpiry) {
+      // Access token expired — try a silent refresh
+      const refreshed = await this.refreshAccessToken()
+      return refreshed != null
+    }
+
+    return true
   }
 
   /**
@@ -315,30 +338,42 @@ export class OAuth {
    * current server-side state (useful for detecting revoked sessions or
    * refreshing stale profile data on page load).
    *
+   * If the access token has expired, a single token refresh is attempted
+   * before failing.
+   *
    * Throws `ResponseError` if the server returns a non-2xx response (e.g. 401
    * if no token is stored or the token has expired), or `FetchError` if the
    * request fails at the network level.
    */
   async getUser(): Promise<User> {
-    const accessToken = await this.config.tokenStore.getAccessToken()
-    const headers: Record<string, string> = {}
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`
-    }
-    let res: Response
-    try {
-      res = await fetch(`${this.config.basePath}/me`, { headers })
-    } catch (e) {
-      throw new FetchError(
-        e instanceof Error ? e : new Error(String(e)),
-        'Failed to fetch user profile.'
-      )
+    let res = await this._fetchMe()
+    if (res.status === 401) {
+      const newToken = await this.refreshAccessToken()
+      if (newToken) {
+        res = await this._fetchMe()
+      }
     }
     if (!res.ok) {
       throw new ResponseError(res, 'Failed to fetch user profile.')
     }
     const json = await res.json()
     return UserFromJSON(json.data)
+  }
+
+  private async _fetchMe(): Promise<Response> {
+    const accessToken = await this.config.tokenStore.getAccessToken()
+    const headers: Record<string, string> = {}
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`
+    }
+    try {
+      return await fetch(`${this.config.basePath}/me`, { headers })
+    } catch (e) {
+      throw new FetchError(
+        e instanceof Error ? e : new Error(String(e)),
+        'Failed to fetch user profile.'
+      )
+    }
   }
 
   /**
@@ -369,7 +404,9 @@ export class OAuth {
       if (tokens.access_token && tokens.refresh_token) {
         await this.config.tokenStore.setTokens(
           tokens.access_token,
-          tokens.refresh_token
+          tokens.refresh_token,
+          tokens.expires_in,
+          tokens.refresh_expires_in
         )
         return tokens.access_token
       }
@@ -433,7 +470,9 @@ export class OAuth {
     const tokens = await tokenRes.json()
     await this.config.tokenStore.setTokens(
       tokens.access_token,
-      tokens.refresh_token
+      tokens.refresh_token,
+      tokens.expires_in,
+      tokens.refresh_expires_in
     )
   }
 

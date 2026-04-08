@@ -34,6 +34,8 @@ describe('TokenStoreLocalStorage — localStorage persistence', () => {
     const store = new TokenStoreLocalStorage()
     expect(await store.getAccessToken()).toBeNull()
     expect(await store.getRefreshToken()).toBeNull()
+    expect(await store.getAccessTokenExpiry()).toBeNull()
+    expect(await store.getRefreshTokenExpiry()).toBeNull()
   })
 
   it('setTokens writes to localStorage', async () => {
@@ -49,7 +51,43 @@ describe('TokenStoreLocalStorage — localStorage persistence', () => {
     )
   })
 
-  it('clear removes tokens from localStorage', async () => {
+  it('setTokens writes expiry keys when provided', async () => {
+    const store = new TokenStoreLocalStorage()
+    await store.setTokens('at', 'rt', 3600, 2592000)
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+      'audius_access_token_expiry',
+      expect.any(String)
+    )
+    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
+      'audius_refresh_token_expiry',
+      expect.any(String)
+    )
+  })
+
+  it('setTokens removes expiry keys when not provided', async () => {
+    const store = new TokenStoreLocalStorage()
+    await store.setTokens('at', 'rt')
+    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+      'audius_access_token_expiry'
+    )
+    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+      'audius_refresh_token_expiry'
+    )
+  })
+
+  it('reads persisted expiry from localStorage', async () => {
+    const futureMs = String(Date.now() + 3600000)
+    mockLocalStorage.getItem.mockImplementation((key: string) => {
+      if (key === 'audius_access_token_expiry') return futureMs
+      if (key === 'audius_refresh_token_expiry') return futureMs
+      return null
+    })
+    const store = new TokenStoreLocalStorage()
+    expect(await store.getAccessTokenExpiry()).toBe(Number(futureMs))
+    expect(await store.getRefreshTokenExpiry()).toBe(Number(futureMs))
+  })
+
+  it('clear removes all keys from localStorage', async () => {
     const store = new TokenStoreLocalStorage()
     await store.setTokens('at', 'rt')
     await store.clear()
@@ -58,6 +96,12 @@ describe('TokenStoreLocalStorage — localStorage persistence', () => {
     )
     expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
       'audius_refresh_token'
+    )
+    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+      'audius_access_token_expiry'
+    )
+    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith(
+      'audius_refresh_token_expiry'
     )
   })
 })
