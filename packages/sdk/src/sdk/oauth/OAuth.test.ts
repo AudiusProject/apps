@@ -493,11 +493,15 @@ describe('OAuth._receiveMessage (popup parent handler)', () => {
 // ---------------------------------------------------------------------------
 
 describe('OAuth.isAuthenticated / hasRefreshToken', () => {
-  it('isAuthenticated is false when no token store is configured', async () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('isAuthenticated is false when no tokens are stored', async () => {
     expect(await makeOAuth().isAuthenticated()).toBe(false)
   })
 
-  it('isAuthenticated is false when token store has no access token', async () => {
+  it('isAuthenticated is false when token store has no access token and no refresh token', async () => {
     const tokenStore = new TokenStoreMemory()
     expect(await makeOAuth({ tokenStore }).isAuthenticated()).toBe(false)
   })
@@ -506,6 +510,60 @@ describe('OAuth.isAuthenticated / hasRefreshToken', () => {
     const tokenStore = new TokenStoreMemory()
     await tokenStore.setTokens('at', 'rt')
     expect(await makeOAuth({ tokenStore }).isAuthenticated()).toBe(true)
+  })
+
+  it('isAuthenticated is true when access token is missing but refresh token exists', async () => {
+    const tokenStore = new TokenStoreMemory()
+    await tokenStore.setTokens('at', 'rt')
+    // Simulate cleared access token but refresh token remains
+    ;(tokenStore as any)._accessToken = null
+    expect(await makeOAuth({ tokenStore }).isAuthenticated()).toBe(true)
+  })
+
+  it('isAuthenticated attempts refresh when access token is expired', async () => {
+    const tokenStore = new TokenStoreMemory()
+    // Set tokens with 1-second expiry, then backdate
+    await tokenStore.setTokens('at', 'rt', 1)
+    ;(tokenStore as any)._accessTokenExpiry = Date.now() - 1000
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: 'new-at',
+            refresh_token: 'new-rt',
+            expires_in: 3600
+          }),
+          { status: 200 }
+        )
+      )
+    )
+
+    const oauth = makeOAuth({ tokenStore })
+    expect(await oauth.isAuthenticated()).toBe(true)
+    expect(await tokenStore.getAccessToken()).toBe('new-at')
+  })
+
+  it('isAuthenticated returns false when access token expired and refresh fails', async () => {
+    const tokenStore = new TokenStoreMemory()
+    await tokenStore.setTokens('at', 'rt', 1)
+    ;(tokenStore as any)._accessTokenExpiry = Date.now() - 1000
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce(new Response(null, { status: 401 }))
+    )
+
+    expect(await makeOAuth({ tokenStore }).isAuthenticated()).toBe(false)
+  })
+
+  it('isAuthenticated returns false when refresh token is expired', async () => {
+    const tokenStore = new TokenStoreMemory()
+    await tokenStore.setTokens('at', 'rt', 3600, 1)
+    ;(tokenStore as any)._refreshTokenExpiry = Date.now() - 1000
+
+    expect(await makeOAuth({ tokenStore }).isAuthenticated()).toBe(false)
   })
 
   it('hasRefreshToken is false when no token store is configured', async () => {
@@ -568,11 +626,59 @@ describe('OAuth.getUser', () => {
     )
   })
 
-  it('throws ResponseError on non-2xx response', async () => {
+  it('retries after refreshing token on 401', async () => {
+    const tokenStore = new TokenStoreMemory()
+    await tokenStore.setTokens('expired-at', 'valid-rt')
+    const oauth = makeOAuth({ tokenStore })
+    const userData = { id: '1', handle: 'foo' }
+    const fetchSpy = vi
+      .fn()
+      // First call: 401
+      .mockResolvedValueOnce(new Response(null, { status: 401 }))
+      // Refresh call: success
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            access_token: 'new-at',
+            refresh_token: 'new-rt',
+            expires_in: 3600
+          }),
+          { status: 200 }
+        )
+      )
+      // Retry call: success
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: userData }), { status: 200 })
+      )
+    vi.stubGlobal('fetch', fetchSpy)
+
+    const result = await oauth.getUser()
+    expect(result).toEqual(userData)
+    expect(fetchSpy).toHaveBeenCalledTimes(3)
+  })
+
+  it('throws ResponseError on non-2xx response when refresh also fails', async () => {
+    const tokenStore = new TokenStoreMemory()
+    await tokenStore.setTokens('expired-at', 'bad-rt')
+    const oauth = makeOAuth({ tokenStore })
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        // First call: 401
+        .mockResolvedValueOnce(new Response(null, { status: 401 }))
+        // Refresh call: fails
+        .mockResolvedValueOnce(new Response(null, { status: 401 }))
+    )
+
+    await expect(oauth.getUser()).rejects.toBeInstanceOf(ResponseError)
+  })
+
+  it('throws ResponseError on non-401 error without retrying', async () => {
     const oauth = makeOAuth()
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValueOnce(new Response(null, { status: 401 }))
+      vi.fn().mockResolvedValueOnce(new Response(null, { status: 500 }))
     )
 
     await expect(oauth.getUser()).rejects.toBeInstanceOf(ResponseError)
