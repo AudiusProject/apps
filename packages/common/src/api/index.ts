@@ -35,6 +35,7 @@ export * from './tan-query/collection/useExploreContent'
 
 // Lineups
 export * from './tan-query/lineups/useFeed'
+export * from './tan-query/lineups/useExclusiveTracks'
 export * from './tan-query/lineups/useLibraryTracks'
 export * from './tan-query/lineups/useProfileReposts'
 export * from './tan-query/lineups/useProfileTracks'
