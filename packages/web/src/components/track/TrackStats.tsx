@@ -1,7 +1,4 @@
-import {
-  useCurrentUserId,
-  useTrack
-} from '@audius/common/api'
+import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { ID, Name } from '@audius/common/models'
 import { formatCount, isLongFormContent, pluralize } from '@audius/common/utils'
 import {
