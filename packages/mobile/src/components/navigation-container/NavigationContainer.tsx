@@ -1,7 +1,14 @@
 import { useRef, type ReactNode } from 'react'
 import { useEffect } from 'react'
 
-import { useCurrentAccountUser, useHasAccount } from '@audius/common/api'
+import {
+  getCollectionByPermalinkQueryFn,
+  getCollectionByPermalinkQueryKey,
+  useCurrentAccountUser,
+  useCurrentUserId,
+  useHasAccount,
+  useQueryContext
+} from '@audius/common/api'
 import { Status } from '@audius/common/models'
 import { OptionalHashId } from '@audius/sdk'
 import type {
@@ -14,6 +21,7 @@ import {
   createNavigationContainerRef,
   getStateFromPath
 } from '@react-navigation/native'
+import { useQueryClient } from '@tanstack/react-query'
 import queryString from 'query-string'
 import { useAccountStatus } from '~/api/tan-query/users/account/useAccountStatus'
 
@@ -105,8 +113,35 @@ const NavigationContainer = (props: NavigationContainerProps) => {
   const hasAccount = useHasAccount()
   const { data: accountStatus } = useAccountStatus()
   const hasCompletedInitialLoad = useRef(false)
+  const queryClient = useQueryClient()
+  const { audiusSdk } = useQueryContext()
+  const { data: currentUserId } = useCurrentUserId()
 
   const routeNameRef = useRef<string | undefined>(undefined)
+
+  // Kick off the network request for a collection as soon as we see a
+  // playlist/album deep link, before the screen has mounted. By the time
+  // CollectionScreen runs `useCollectionByPermalink`, the query will already
+  // be in-flight (or resolved), saving a render cycle worth of latency on
+  // the deep link cold path.
+  const prefetchCollectionByPermalink = (permalink: string) => {
+    queryClient
+      .prefetchQuery({
+        queryKey: getCollectionByPermalinkQueryKey(permalink),
+        queryFn: async () => {
+          const sdk = await audiusSdk()
+          return getCollectionByPermalinkQueryFn(
+            permalink,
+            currentUserId,
+            queryClient,
+            sdk
+          )
+        }
+      })
+      .catch(() => {
+        // Ignore prefetch failures; the screen's own query will surface them.
+      })
+  }
 
   // Ensure that the user's account data is fully loaded before rendering the app.
   // This prevents the NavigationContainer from rendering prematurely, which relies
@@ -467,6 +502,12 @@ const NavigationContainer = (props: NavigationContainerProps) => {
         }
 
         if (path.match(/^\/[^/]+\/playlist\/[^/]+$/)) {
+          // Fire off the collection fetch now so it's in-flight by the time
+          // CollectionScreen mounts. The permalink matches the format
+          // `useCollectionByPermalink` expects (strip any query string).
+          const queryStart = path.indexOf('?')
+          const permalink = queryStart > -1 ? path.slice(0, queryStart) : path
+          prefetchCollectionByPermalink(permalink)
           // set the path as `collection`
           path = path.replace(
             /(^\/[^/]+\/)(playlist)(\/[^/]+$)/,
@@ -474,6 +515,9 @@ const NavigationContainer = (props: NavigationContainerProps) => {
           )
           path = `${path}?collectionType=playlist`
         } else if (path.match(/^\/[^/]+\/album\/[^/]+$/)) {
+          const queryStart = path.indexOf('?')
+          const permalink = queryStart > -1 ? path.slice(0, queryStart) : path
+          prefetchCollectionByPermalink(permalink)
           // set the path as `collection`
           path = path.replace(/(^\/[^/]+\/)(album)(\/[^/]+$)/, '$1collection$3')
           path = `${path}?collectionType=album`

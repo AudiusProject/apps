@@ -286,9 +286,10 @@ export const CollectionScreenDetailsTile = ({
   const shouldShowPreview =
     isUSDCPurchaseGated && !hasStreamAccess && !shouldShowPlay
 
-  useEffect(() => {
-    dispatch(resetCollection())
-  }, [dispatch])
+  // Note: resetCollection is dispatched by handleFetchCollection in the
+  // CollectionTrackList below via useFetchCollectionLineup, so we don't
+  // need a separate mount-time reset here (it would just double the
+  // saga churn on deep links).
 
   useRefetchLineupOnTrackAdd(collectionId)
 
