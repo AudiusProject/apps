@@ -1,12 +1,15 @@
 import { ReactNode, Ref } from 'react'
 
 import { CSSObject } from '@emotion/react'
+import cn from 'classnames'
 
 import { Flex, FlexProps } from '~harmony/components/layout/Flex'
 import { Paper, PaperProps } from '~harmony/components/layout/Paper'
 import { Popup } from '~harmony/components/popup/Popup'
 import { PopupProps } from '~harmony/components/popup/types'
 import { WithCSS } from '~harmony/foundations'
+
+import styles from './Menu.module.css'
 
 // TODO menu label
 
@@ -27,10 +30,14 @@ export type MenuContentProps = {
 }
 
 export const Menu = (props: MenuProps) => {
-  const { children, PaperProps, ...other } = props
+  const { children, PaperProps, className, ...other } = props
 
   return (
-    <Popup {...other}>
+    <Popup
+      {...other}
+      className={cn(styles.popup, className)}
+      shadow='flat'
+    >
       <Paper mt='s' border='strong' shadow='far' {...PaperProps}>
         {children}
       </Paper>
