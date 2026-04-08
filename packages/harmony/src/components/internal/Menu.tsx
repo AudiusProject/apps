@@ -30,7 +30,7 @@ export const Menu = (props: MenuProps) => {
   const { children, PaperProps, ...other } = props
 
   return (
-    <Popup {...other}>
+    <Popup {...other} disableDefaultStyles>
       <Paper mt='s' border='strong' shadow='far' {...PaperProps}>
         {children}
       </Paper>

@@ -205,7 +205,8 @@ export const PopupInternal = forwardRef<
     shadow = 'mid',
     fixed,
     takeWidthOfAnchor,
-    disableAutoFlip = false
+    disableAutoFlip = false,
+    disableDefaultStyles = false
   } = props
   const { spring, shadows } = useTheme()
 
@@ -421,8 +422,14 @@ export const PopupInternal = forwardRef<
                 const AnimatedDiv = animatedAny.div as any
                 return (
                   <AnimatedDiv
-                    className={cn(styles.popup, className)}
-                    css={{ boxShadow: shadows[shadow] }}
+                    className={cn({
+                      [styles.popup]: !disableDefaultStyles
+                    }, className)}
+                    css={
+                      disableDefaultStyles
+                        ? undefined
+                        : { boxShadow: shadows[shadow] }
+                    }
                     ref={popupRef}
                     key={key}
                     style={{
