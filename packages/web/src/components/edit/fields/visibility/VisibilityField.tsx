@@ -27,6 +27,14 @@ import { mergeReleaseDateValues } from './mergeReleaseDateValues'
 
 const messages = {
   ...visibilityMessages,
+  title: (entityType: 'track' | 'album' | 'playlist') =>
+    `${entityType === 'track' ? 'Track' : entityType === 'album' ? 'Album' : 'Playlist'} Privacy`,
+  description: (entityType: 'track' | 'album' | 'playlist') =>
+    entityType === 'track'
+      ? 'Adjust your track’s visibility or schedule it for later release.'
+      : entityType === 'album'
+        ? 'Adjust your album’s visibility or schedule it for later release.'
+        : 'Adjust your playlist’s visibility.',
   scheduled: (date: string) => `Scheduled for ${formatCalendarTime(date)}`,
   emptyPlaylistTooltipText: 'You must add at least 1 song.'
 }
@@ -76,6 +84,8 @@ const visibilitySchema = z
 
 export const VisibilityField = (props: VisibilityFieldProps) => {
   const { entityType, isUpload, isPublishable = true } = props
+  const title = messages.title(entityType)
+  const description = messages.description(entityType)
   const useEntityField = entityType === 'track' ? useTrackField : useField
   const [
     { value: isHidden },
@@ -134,9 +144,9 @@ export const VisibilityField = (props: VisibilityFieldProps) => {
 
   return (
     <ContextualMenu
-      label={messages.title}
+      label={title}
       icon={<IconVisibilityPublic />}
-      description={messages.description}
+      description={description}
       renderValue={renderValue}
       initialValues={initialValues}
       validationSchema={toFormikValidationSchema(visibilitySchema)}
@@ -177,6 +187,7 @@ export const VisibilityField = (props: VisibilityFieldProps) => {
       menuFields={
         <VisibilityMenuFields
           entityType={entityType}
+          title={title}
           initiallyPublic={!initiallyHidden && !isUpload}
           isPublishable={isPublishable}
         />
@@ -187,16 +198,17 @@ export const VisibilityField = (props: VisibilityFieldProps) => {
 
 type VisibilityMenuFieldsProps = {
   entityType: 'track' | 'album' | 'playlist'
+  title: string
   initiallyPublic?: boolean
   isPublishable?: boolean
 }
 
 const VisibilityMenuFields = (props: VisibilityMenuFieldsProps) => {
-  const { initiallyPublic, isPublishable = true, entityType } = props
+  const { initiallyPublic, isPublishable = true, entityType, title } = props
   const [field] = useField<VisibilityType>('visibilityType')
 
   return (
-    <RadioGroup {...field} aria-label={messages.title}>
+    <RadioGroup {...field} aria-label={title}>
       <ModalRadioItem
         value='public'
         label={messages.public}
