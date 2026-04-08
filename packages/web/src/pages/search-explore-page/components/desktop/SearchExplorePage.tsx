@@ -39,7 +39,6 @@ import {
   viewLayoutOptions
 } from 'pages/search-page/types'
 
-import { ArtistCoinTracksSection } from './ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
 import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
@@ -322,14 +321,13 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent ? (
               <RecommendedTracksSection />
             ) : null}
-            {isTracksTab ? <QuickSearchGrid /> : null}
-            {showTrackContent ? <ArtistCoinTracksSection /> : null}
-            {showTrackContent && showUserContextualContent ? (
-              <RecentlyPlayedSection />
-            ) : null}
             {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
             {categoryKey === CategoryView.ALL ? (
               <FanClubsExploreSection />
+            ) : null}
+            {isTracksTab ? <QuickSearchGrid /> : null}
+            {showTrackContent && showUserContextualContent ? (
+              <RecentlyPlayedSection />
             ) : null}
             {showTrackContent ? <FeaturedRemixContestsSection /> : null}
             {isTracksTab ? <UndergroundTrendingTracksSection /> : null}

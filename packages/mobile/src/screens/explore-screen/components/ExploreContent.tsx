@@ -7,7 +7,6 @@ import { RecentSearches } from 'app/screens/search-screen/RecentSearches'
 import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ArtistSpotlight } from './ArtistSpotlight'
-import { FeaturedArtistCoinTracks } from './FeaturedArtistCoinTracks'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -29,7 +28,6 @@ export const ExploreContent = () => {
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
       {showPlaylistContent && <FeaturedPlaylists />}
-      {showTrackContent && <FeaturedArtistCoinTracks />}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}
