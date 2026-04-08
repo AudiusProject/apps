@@ -284,8 +284,10 @@ export const TrackTile = ({
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
-  const trackId = isStreamGated ? id : null
-  const gatedTrackStatus = trackId ? gatedTrackStatusMap[trackId] : undefined
+  const gatedTrackId = isStreamGated ? id : null
+  const gatedTrackStatus = gatedTrackId
+    ? gatedTrackStatusMap[gatedTrackId]
+    : undefined
   const isPurchase = isContentUSDCPurchaseGated(streamConditions)
 
   const onToggleRepost = useCallback(() => toggleRepost(id), [toggleRepost, id])
@@ -293,16 +295,15 @@ export const TrackTile = ({
   const onClickShare = useCallback(
     (e?: MouseEvent) => {
       e?.stopPropagation()
-      if (!trackId) return
       dispatch(
         requestOpenShareModal({
           type: 'track',
-          trackId,
+          trackId: id,
           source: ShareSource.TILE
         })
       )
     },
-    [dispatch, trackId]
+    [dispatch, id]
   )
 
   const onClickOverflowMenu = useCallback(
@@ -311,24 +312,27 @@ export const TrackTile = ({
   )
 
   const openLockedContentModal = useCallback(() => {
-    if (trackId) {
-      dispatch(setLockedContentId({ id: trackId }))
+    if (gatedTrackId) {
+      dispatch(setLockedContentId({ id: gatedTrackId }))
       setModalVisibility(true)
     }
-  }, [trackId, dispatch, setModalVisibility])
+  }, [gatedTrackId, dispatch, setModalVisibility])
 
   const onClickPill = useCallback(() => {
-    if (isPurchase && trackId) {
+    if (isPurchase && gatedTrackId) {
       openPremiumContentPurchaseModal(
-        { contentId: trackId, contentType: PurchaseableContentType.TRACK },
+        {
+          contentId: gatedTrackId,
+          contentType: PurchaseableContentType.TRACK
+        },
         { source: source ?? ModalSource.TrackTile }
       )
-    } else if (trackId && !hasStreamAccess) {
+    } else if (gatedTrackId && !hasStreamAccess) {
       openLockedContentModal()
     }
   }, [
     isPurchase,
-    trackId,
+    gatedTrackId,
     hasStreamAccess,
     openPremiumContentPurchaseModal,
     source,
@@ -349,7 +353,7 @@ export const TrackTile = ({
   const handleClick = useCallback(() => {
     if (loading) return
 
-    if (trackId && !hasStreamAccess && !preview_cid) {
+    if (gatedTrackId && !hasStreamAccess && !preview_cid) {
       openLockedContentModal()
       return
     }
@@ -360,7 +364,7 @@ export const TrackTile = ({
     togglePlay,
     uid,
     id,
-    trackId,
+    gatedTrackId,
     hasStreamAccess,
     preview_cid,
     openLockedContentModal
