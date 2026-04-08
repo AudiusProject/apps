@@ -9,7 +9,11 @@ import {
   useArtistCoin
 } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { getLargestTimeUnitText } from '@audius/common/utils'
+import {
+  getLargestTimeUnitText,
+  parseVideoUrl,
+  getVideoEmbedUrl
+} from '@audius/common/utils'
 import {
   Button,
   Flex,
@@ -153,6 +157,9 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
 
   const isLocked = comment.message === null
 
+  const parsedVideo = comment.videoUrl ? parseVideoUrl(comment.videoUrl) : null
+  const videoEmbedUrl = parsedVideo ? getVideoEmbedUrl(parsedVideo) : null
+
   const popupMenuItems = [
     isOwner && {
       onClick: handleEdit,
@@ -202,6 +209,29 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
               >
                 {generatePlaceholder(commentId)}
               </Text>
+              {parsedVideo ? (
+                <Flex
+                  css={(theme) => ({
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '480 / 264',
+                    borderRadius: theme.cornerRadius.m,
+                    overflow: 'hidden',
+                    border: `1px solid ${theme.color.border.strong}`,
+                    backgroundColor: theme.color.neutral.n200,
+                    cursor: 'pointer'
+                  })}
+                  onClick={() => setShowUnlockModal(true)}
+                >
+                  <Flex
+                    alignItems='center'
+                    justifyContent='center'
+                    css={{ position: 'absolute', inset: 0 }}
+                  >
+                    <IconLock size='2xl' color='subdued' />
+                  </Flex>
+                </Flex>
+              ) : null}
               <Flex
                 row
                 alignItems='center'
@@ -249,15 +279,45 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
               </PlainButton>
             </Flex>
           ) : (
-            <Text variant='body' size='m'>
-              {comment.message}
-              {comment.isEdited ? (
-                <Text variant='body' size='xs' color='subdued'>
-                  {' '}
-                  {messages.edited}
-                </Text>
+            <>
+              <Text variant='body' size='m'>
+                {comment.message}
+                {comment.isEdited ? (
+                  <Text variant='body' size='xs' color='subdued'>
+                    {' '}
+                    {messages.edited}
+                  </Text>
+                ) : null}
+              </Text>
+              {videoEmbedUrl ? (
+                <Flex
+                  css={(theme) => ({
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    borderRadius: theme.cornerRadius.m,
+                    overflow: 'hidden',
+                    border: `1px solid ${theme.color.border.strong}`,
+                    backgroundColor: theme.color.neutral.n800
+                  })}
+                >
+                  <iframe
+                    src={videoEmbedUrl}
+                    title='Embedded video'
+                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                    allowFullScreen
+                    css={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 'none'
+                    }}
+                  />
+                </Flex>
               ) : null}
-            </Text>
+            </>
           )}
 
           {/* Footer: React count + Kebab menu */}

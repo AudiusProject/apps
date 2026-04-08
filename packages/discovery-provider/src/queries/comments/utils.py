@@ -145,6 +145,7 @@ def _format_comment_response(
         "created_at": str(comment.created_at),
         "updated_at": str(comment.updated_at),
         "is_muted": is_muted if is_muted is not None else False,
+        "video_url": getattr(comment, "video_url", None),
     }
 
     # Check if we need to include replies (either explicitly provided or need to fetch them)
@@ -878,6 +879,7 @@ def get_comment_replies(
             "created_at": str(reply.created_at),
             "updated_at": str(reply.updated_at),
             "is_muted": False,  # Replies don't have mute status
+            "video_url": getattr(reply, "video_url", None),
             "is_artist_reacted": (
                 reactions_map.get((artist_id, reply.comment_id), False)
                 if reactions_map

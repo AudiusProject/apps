@@ -14,6 +14,7 @@ export type PostTextUpdateArgs = {
   body: string
   mint: string
   isMembersOnly?: boolean
+  videoUrl?: string
 }
 
 export const usePostTextUpdate = () => {
@@ -31,12 +32,13 @@ export const usePostTextUpdate = () => {
           entityType: 'FanClub',
           body: args.body,
           mentions: [],
-          isMembersOnly: args.isMembersOnly ?? true
+          isMembersOnly: args.isMembersOnly ?? true,
+          videoUrl: args.videoUrl
         } as any
       })
     },
     onMutate: async (args: PostTextUpdateArgs & { newId?: ID }) => {
-      const { userId, body, entityId, mint, isMembersOnly } = args
+      const { userId, body, entityId, mint, isMembersOnly, videoUrl } = args
       const sdk = await audiusSdk()
       const newId = await sdk.comments.generateCommentId()
       args.newId = newId
@@ -55,7 +57,8 @@ export const usePostTextUpdate = () => {
         replies: undefined,
         createdAt: new Date().toISOString(),
         updatedAt: undefined,
-        isMembersOnly: isMembersOnly ?? true
+        isMembersOnly: isMembersOnly ?? true,
+        videoUrl
       }
 
       // Prime the individual comment cache

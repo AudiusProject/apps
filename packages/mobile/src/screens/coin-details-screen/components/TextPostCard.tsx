@@ -7,7 +7,13 @@ import {
   useArtistCoin
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { getLargestTimeUnitText } from '@audius/common/utils'
+import {
+  getLargestTimeUnitText,
+  parseVideoUrl,
+  getVideoEmbedUrl
+} from '@audius/common/utils'
+import { Pressable, View } from 'react-native'
+import WebView from 'react-native-webview'
 
 import {
   Button,
@@ -82,6 +88,9 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
 
   const isLocked = comment.message === null
 
+  const parsedVideo = comment.videoUrl ? parseVideoUrl(comment.videoUrl) : null
+  const videoEmbedUrl = parsedVideo ? getVideoEmbedUrl(parsedVideo) : null
+
   return (
     <Paper
       column
@@ -109,28 +118,67 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
       </Flex>
 
       {isLocked ? (
-        <Flex row alignItems='center' justifyContent='space-between'>
-          <Button
-            variant='secondary'
-            size='small'
-            rounded
-            onPress={handleUnlock}
-            style={{ height: 24 }}
-          >
-            {messages.unlock}
-          </Button>
-          <Flex row alignItems='center' gap='xs' onTouchEnd={handleUnlock}>
-            <IconLock size='s' color='default' />
-            <Text variant='body' size='s' strength='strong'>
-              {messages.membersOnly}
-            </Text>
+        <>
+          {parsedVideo ? (
+            <Pressable onPress={handleUnlock}>
+              <View
+                style={{
+                  width: '100%',
+                  aspectRatio: 331 / 170,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  borderWidth: 1,
+                  borderColor: '#d8dbe2',
+                  backgroundColor: '#c7ccd6',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconLock size='2xl' color='subdued' />
+              </View>
+            </Pressable>
+          ) : null}
+          <Flex row alignItems='center' justifyContent='space-between'>
+            <Button
+              variant='secondary'
+              size='small'
+              rounded
+              onPress={handleUnlock}
+              style={{ height: 24 }}
+            >
+              {messages.unlock}
+            </Button>
+            <Flex row alignItems='center' gap='xs' onTouchEnd={handleUnlock}>
+              <IconLock size='s' color='default' />
+            </Flex>
           </Flex>
-        </Flex>
+        </>
       ) : (
         <>
           <Text variant='body' size='m'>
             {comment.message}
           </Text>
+          {videoEmbedUrl ? (
+            <View
+              style={{
+                width: '100%',
+                aspectRatio: 16 / 9,
+                borderRadius: 12,
+                overflow: 'hidden',
+                borderWidth: 1,
+                borderColor: '#d8dbe2',
+                backgroundColor: '#1a1a2e'
+              }}
+            >
+              <WebView
+                source={{ uri: videoEmbedUrl }}
+                style={{ flex: 1 }}
+                allowsInlineMediaPlayback
+                mediaPlaybackRequiresUserAction={false}
+                javaScriptEnabled
+              />
+            </View>
+          ) : null}
           <Flex direction='row' alignItems='center' gap='s'>
             {comment.isMembersOnly !== false ? (
               <Flex row alignItems='center' gap='xs'>

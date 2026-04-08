@@ -21,6 +21,7 @@ class Comment(Base, RepresentableMixin):
     is_visible = Column(Boolean, default=True)
     is_edited = Column(Boolean, default=False)
     is_members_only = Column(Boolean, default=False, nullable=False)
+    video_url = Column(Text, nullable=True)
     txhash = Column(Text, nullable=False)
     blockhash = Column(Text, nullable=False)
     blocknumber = Column(Integer, ForeignKey("blocks.number"), nullable=False)

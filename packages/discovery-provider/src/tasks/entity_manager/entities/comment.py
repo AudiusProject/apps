@@ -241,6 +241,7 @@ def create_comment(params: ManageEntityParameters):
         if entity_type == FAN_CLUB_ENTITY_TYPE
         else False
     )
+    video_url = metadata.get("video_url")
     comment_record = Comment(
         comment_id=comment_id,
         user_id=user_id,
@@ -249,6 +250,7 @@ def create_comment(params: ManageEntityParameters):
         entity_id=stored_entity_id,
         track_timestamp_s=metadata["track_timestamp_s"],
         is_members_only=bool(is_members_only),
+        video_url=video_url if video_url else None,
         txhash=params.txhash,
         blockhash=params.event_blockhash,
         blocknumber=params.block_number,
