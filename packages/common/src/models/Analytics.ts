@@ -288,6 +288,7 @@ export enum Name {
   // Playback
   PLAYBACK_PLAY = 'Playback: Play',
   PLAYBACK_PAUSE = 'Playback: Pause',
+  PLAYLIST_PLAY = 'Playlist: Play',
   // Playback performance metrics
   BUFFERING_TIME = 'Buffering Time',
 
@@ -1479,6 +1480,15 @@ type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE
   id?: string
   source: PlaybackSource
+}
+
+type PlaylistPlay = {
+  eventName: Name.PLAYLIST_PLAY
+  id: string
+  source: PlaybackSource
+  isAlbum?: boolean
+  trackCount?: number
+  isPreview?: boolean
 }
 
 type BufferingTime = {
@@ -3185,6 +3195,7 @@ export type AllTrackingEvents =
   | TrackPagePlayMore
   | PlaybackPlay
   | PlaybackPause
+  | PlaylistPlay
   | BufferingTime
   | Follow
   | Unfollow
