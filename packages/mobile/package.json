@@ -1,6 +1,6 @@
 {
   "name": "@audius/mobile",
-  "version": "1.5.176",
+  "version": "1.5.174",
   "private": true,
   "scripts": {
     "android:dev": "ENVFILE=.env.dev turbo run android -- --mode=prodDebug",
