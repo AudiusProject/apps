@@ -381,7 +381,7 @@ export const TrackTile = ({
         { [styles.readonly]: isReadonly },
         containerClassName
       )}
-      css={{ width: '100%' }}
+      css={{ width: '100%', containerType: 'inline-size' }}
     >
       <TrackDogEar trackId={track_id} hideUnlocked />
       <div className={styles.mainContent} onClick={handleClick}>
