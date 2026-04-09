@@ -548,6 +548,17 @@ export const useCollectionPage = (
             source: PlaybackSource.PLAYLIST_PAGE
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       } else if (tracks.entries.length > 0) {
         dispatch(playerActions.stop({}))
         dispatch(
@@ -562,6 +573,17 @@ export const useCollectionPage = (
             source: PlaybackSource.PLAYLIST_PAGE
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       }
     },
     [
@@ -572,6 +594,8 @@ export const useCollectionPage = (
       accountUserId,
       tracks.entries,
       getPlayingId,
+      playlistId,
+      trackCount,
       dispatch
     ]
   )
