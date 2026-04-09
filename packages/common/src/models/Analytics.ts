@@ -969,7 +969,8 @@ export enum FollowSource {
   EMPTY_FEED = 'empty feed',
   HOW_TO_UNLOCK_TRACK_PAGE = 'how to unlock track page',
   HOW_TO_UNLOCK_MODAL = 'how to unlock modal',
-  SIGN_UP = 'sign up'
+  SIGN_UP = 'sign up',
+  ARTIST_COIN_PURCHASE = 'artist coin purchase'
 }
 
 type Share = {
