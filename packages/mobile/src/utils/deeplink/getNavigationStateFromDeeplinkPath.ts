@@ -18,6 +18,15 @@ type GetNavigationStateFromDeeplinkPathArgs = {
   getStateFromPath: GetStateFromPath
 }
 
+const isProfilePathForHandle = (path: string, handle: string) => {
+  const normalizedHandle = handle.replace(/^@/, '')
+  const escaped = normalizedHandle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return (
+    path.match(new RegExp(`^/${escaped}$`, 'i')) ||
+    path.match(new RegExp(`^/${escaped}/(tracks|albums|playlists|reposts)$`, 'i'))
+  )
+}
+
 const createAppTabState = (
   state: any
 ): any => ({
@@ -276,9 +285,9 @@ export const getNavigationStateFromDeeplinkPath = ({
     const queryParams =
       queryParamsStart > -1 ? `&${path.slice(queryParamsStart + 1)}` : ''
     path = `/settings${subpathParam}${queryParams}`
-  } else if (path.match(`^/${accountHandle}(/|$)`)) {
-    // If the path is the current user and set path as `/profile`
-    path = path.replace(`/${accountHandle}`, '/profile')
+  } else if (accountHandle && isProfilePathForHandle(path, accountHandle)) {
+    // If the path is explicitly a profile URL for the current user, rewrite to `/profile`
+    path = path.replace(new RegExp(`^/${accountHandle.replace(/^@/, '')}`, 'i'), '/profile')
   } else {
     // If the path has two parts
     if (path.match(/^\/[^/]+\/[^/]+$/)) {
