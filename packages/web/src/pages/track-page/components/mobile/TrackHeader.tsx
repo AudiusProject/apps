@@ -22,7 +22,7 @@ import {
   Button,
   MusicBadge,
   Text,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
@@ -304,7 +304,7 @@ const TrackHeader = ({
         IconComponent = IconCart
         titleMessage = messages.premiumTrack
       } else if (isContentTokenGated(streamConditions)) {
-        IconComponent = IconArtistCoin
+        IconComponent = IconFanClub
         titleMessage = messages.coinGated
       }
       return (

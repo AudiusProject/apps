@@ -97,14 +97,14 @@ async function executeMeteoraSwap(
       )
     }
 
-    // Which token are we swapping to? Artist coin for buys, audio for sells
+    // Which token are we swapping to? Fan club for buys, audio for sells
     const inputTokenInfo =
       swapDirection === 'audioToCoin'
         ? tokenConfigsResult.outputTokenConfig // audio
-        : tokenConfigsResult.inputTokenConfig // artist coin
+        : tokenConfigsResult.inputTokenConfig // fan club
     const outputTokenInfo =
       swapDirection === 'audioToCoin'
-        ? tokenConfigsResult.inputTokenConfig // artist coin
+        ? tokenConfigsResult.inputTokenConfig // fan club
         : tokenConfigsResult.outputTokenConfig // audio
     const inputTokenDecimals =
       swapDirection === 'audioToCoin' ? AUDIO_DECIMALS : TOKEN_DECIMALS
@@ -121,7 +121,7 @@ async function executeMeteoraSwap(
 
     const { transaction, outputAmount, includedFeeInputAmount } = swapResult
 
-    // Transfer tokens from user bank to ATA (AUDIO for buys, artist coin for sells)
+    // Transfer tokens from user bank to ATA (AUDIO for buys, fan club for sells)
     // Use exact consumed amount from quote to avoid leftovers
     const transferAmount = includedFeeInputAmount
       ? BigInt(includedFeeInputAmount)
@@ -137,7 +137,7 @@ async function executeMeteoraSwap(
       instructions
     })
 
-    // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, artist coin for sells)
+    // Ensure user bank is prepared for receiving the tokens we're about to move (AUDIO for buys, fan club for sells)
     const userBankResult =
       await sdk.services.claimableTokensClient.getOrCreateUserBank({
         ethWallet: ethAddress,
@@ -152,7 +152,7 @@ async function executeMeteoraSwap(
       true
     )
 
-    // Create the temporary token account for our artist coin
+    // Create the temporary token account for our fan club
     instructions.push(
       createAssociatedTokenAccountIdempotentInstruction(
         feePayer,

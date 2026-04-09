@@ -6,7 +6,7 @@ export const settingsMessages = {
   copyright: `Copyright © ${currentYear} Audius`,
   terms: 'Terms of Service',
   privacy: 'Privacy Policy',
-  artistCoinTerms: 'Fan Club Terms',
+  fanClubTerms: 'Fan Club Terms',
   apiTerms: 'API Terms',
   emailSent: 'Email Sent!',
   emailNotSent: 'Something broke! Please try again!',

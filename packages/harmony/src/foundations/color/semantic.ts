@@ -20,7 +20,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
-    artistCoin: primitives.special.coinGradient
+    fanClub: primitives.special.coinGradient
   },
   icon: {
     default: primitives.neutral.n800,
@@ -40,7 +40,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
-    artistCoin: primitives.special.coinGradient
+    fanClub: primitives.special.coinGradient
   },
   link: {
     default: primitives.neutral.n800,
@@ -55,7 +55,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     white: primitives.special.white,
     primary: primitives.primary.p300,
     gradient: primitives.special.gradient,
-    artistCoin: primitives.special.coinGradient,
+    fanClub: primitives.special.coinGradient,
 
     // Legacy compatibility
     accent: primitives.secondary.s300

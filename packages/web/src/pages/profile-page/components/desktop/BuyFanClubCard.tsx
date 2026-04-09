@@ -1,0 +1,62 @@
+import { useFanClub } from '@audius/common/api'
+import { route } from '@audius/common/utils'
+import { Button, Flex, IconFanClub, Paper, Text } from '@audius/harmony'
+import { useNavigate } from 'react-router'
+
+import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
+
+import { ProfilePageNavSectionTitle } from './ProfilePageNavSectionTitle'
+
+const messages = {
+  fanClub: 'Fan Club',
+  viewFanClub: 'View Fan Club'
+}
+
+export const BuyFanClubCard = ({ mint }: { mint: string }) => {
+  const { data: fanClub, isLoading } = useFanClub(mint)
+  const navigate = useNavigate()
+
+  const handleViewFanClub = () => {
+    if (fanClub?.ticker) {
+      navigate(route.coinPage(fanClub.ticker))
+    }
+  }
+
+  if (isLoading || !fanClub) {
+    return null
+  }
+  return (
+    <Flex column gap='s'>
+      <ProfilePageNavSectionTitle title={messages.fanClub} Icon={IconFanClub} />
+      <Paper
+        column
+        gap='s'
+        ph='m'
+        pv='s'
+        onClick={handleViewFanClub}
+        css={{ cursor: 'pointer' }}
+        border='default'
+      >
+        <Flex gap='s' alignItems='center'>
+          <TokenIcon logoURI={fanClub.logoUri} size='xl' hex />
+          <Flex column gap='2xs'>
+            <Text variant='title' size='l'>
+              {fanClub.name}
+            </Text>
+            <Text variant='title' size='s' color='subdued'>
+              {`$${fanClub.ticker}`}
+            </Text>
+          </Flex>
+        </Flex>
+        <Button
+          size='small'
+          onClick={handleViewFanClub}
+          color='coinGradient'
+          fullWidth
+        >
+          {messages.viewFanClub}
+        </Button>
+      </Paper>
+    </Flex>
+  )
+}

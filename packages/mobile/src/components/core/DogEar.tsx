@@ -3,7 +3,7 @@ import type { ViewStyle } from 'react-native'
 import { View } from 'react-native'
 
 import {
-  IconArtistCoin,
+  IconFanClub,
   IconCart,
   IconReceive,
   IconSparkles
@@ -71,7 +71,7 @@ export const DogEar = (props: DogEarProps) => {
       colors: [accentBlue, accentBlue]
     },
     [DogEarType.TOKEN_GATED]: {
-      icon: IconArtistCoin
+      icon: IconFanClub
     },
     [DogEarType.USDC_PURCHASE]: {
       icon: IconCart,

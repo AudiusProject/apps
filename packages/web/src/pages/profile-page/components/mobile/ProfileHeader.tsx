@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
-import { useArtistCreatedCoin } from '@audius/common/api'
+import { useArtistCreatedFanClub } from '@audius/common/api'
 import {
   imageCoverPhotoBlank,
   imageProfilePicEmpty
@@ -41,7 +41,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
-import { BuyArtistCoinButton } from './BuyArtistCoinButton'
+import { BuyFanClubButton } from './BuyFanClubButton'
 import GrowingCoverPhoto from './GrowingCoverPhoto'
 import styles from './ProfileHeader.module.css'
 import { SocialLink } from './SocialLink'
@@ -215,9 +215,9 @@ const ProfileHeader = ({
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Artist coin detection
-  const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  // Fan club detection
+  const { data: fanClub, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
 
   const record = useRecord()
 
@@ -453,9 +453,9 @@ const ProfileHeader = ({
             onClose={onCloseArtistRecommendations}
           />
 
-          {/* Artist coin buy button or tip button */}
-          {mode !== 'owner' && !isArtistCoinLoading && artistCoin?.mint && (
-            <BuyArtistCoinButton userId={userId} />
+          {/* Fan club buy button or tip button */}
+          {mode !== 'owner' && !isFanClubLoading && fanClub?.mint && (
+            <BuyFanClubButton userId={userId} />
           )}
         </div>
       )}

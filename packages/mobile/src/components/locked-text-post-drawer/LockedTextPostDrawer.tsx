@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { View } from 'react-native'
 
 import { Button, Flex, IconLock, Text } from '@audius/harmony-native'
@@ -42,7 +42,7 @@ export const LockedTextPostDrawer = () => {
   const navigation = useNavigation()
   const { data, onClose } = useDrawer('LockedTextPost')
   const mint = (data as { mint: string } | undefined)?.mint
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
 
   const handleBuyCoins = useCallback(() => {
     if (coin?.ticker) {

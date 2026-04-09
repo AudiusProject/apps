@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useArtistCoinsList, useQueryContext } from '@audius/common/api'
+import { useFanClubsList, useQueryContext } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
@@ -9,7 +9,7 @@ import { GetCoinsSortDirectionEnum, GetCoinsSortMethodEnum } from '@audius/sdk'
 import {
   FanClubCardSkeleton,
   FanClubCoinCard
-} from 'pages/artist-coins-launchpad-page/components/FanClubCoinCard'
+} from 'pages/fan-clubs-launchpad-page/components/FanClubCoinCard'
 
 import { Carousel } from './Carousel'
 import { useExploreSectionTracking } from './useExploreSectionTracking'
@@ -21,7 +21,7 @@ export const FanClubsExploreSection = () => {
   const { ref, inView } = useExploreSectionTracking('Fan Clubs')
   const { env } = useQueryContext()
 
-  const { data, isPending, isError, isSuccess } = useArtistCoinsList(
+  const { data, isPending, isError, isSuccess } = useFanClubsList(
     {
       limit: FAN_CLUBS_PREVIEW_LIMIT,
       offset: 0,

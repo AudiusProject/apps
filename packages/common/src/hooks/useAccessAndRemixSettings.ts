@@ -1,4 +1,4 @@
-import { useArtistCreatedCoin, useCurrentUserId } from '~/api/'
+import { useArtistCreatedFanClub, useCurrentUserId } from '~/api/'
 
 type UseAccessAndRemixSettingsProps = {
   isUpload: boolean
@@ -11,7 +11,7 @@ type UseAccessAndRemixSettingsProps = {
 
 export const useHasNoTokens = () => {
   const { data: userId } = useCurrentUserId()
-  const { data: coin, isLoading } = useArtistCreatedCoin(userId)
+  const { data: coin, isLoading } = useArtistCreatedFanClub(userId)
 
   return !isLoading && !coin
 }

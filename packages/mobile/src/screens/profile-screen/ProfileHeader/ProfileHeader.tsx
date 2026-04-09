@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentUserId,
   useUserComments,
   useProfileUser
@@ -16,7 +16,7 @@ import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { zIndex } from 'app/utils/zIndex'
 
 import { ArtistRecommendations } from '../ArtistRecommendations'
-import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
+import { BuyFanClubButton } from '../BuyFanClubButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
@@ -60,8 +60,8 @@ export const ProfileHeader = memo(() => {
     userId: userId || 0,
     pageSize: 1
   })
-  const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  const { data: fanClub, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
   const { tier } = useTierAndVerifiedForUser(userId)
   const hasTier = tier !== 'none'
   const isOwner = userId === accountId
@@ -150,8 +150,8 @@ export const ProfileHeader = memo(() => {
             <ArtistRecommendations onClose={handleCloseArtistRecs} />
           )}
           <Flex pointerEvents='box-none' mt='s' gap='s'>
-            {!isArtistCoinLoading && userId && artistCoin?.mint ? (
-              <BuyArtistCoinButton userId={userId} />
+            {!isFanClubLoading && userId && fanClub?.mint ? (
+              <BuyFanClubButton userId={userId} />
             ) : null}
           </Flex>
         </OnlineOnly>

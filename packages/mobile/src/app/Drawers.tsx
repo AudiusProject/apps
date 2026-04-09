@@ -6,7 +6,6 @@ import type { Modals } from '@audius/common/store'
 import { AddCashDrawer } from 'app/components/add-funds-drawer/AddCashDrawer'
 import { AddToCollectionDrawer } from 'app/components/add-to-collection-drawer'
 import { ApiRewardsDrawer } from 'app/components/api-rewards-drawer/ApiRewardsDrawer'
-import { ArtistCoinDetailsDrawer } from 'app/components/artist-coin-details-drawer/ArtistCoinDetailsDrawer'
 import { AudioBreakdownDrawer } from 'app/components/audio-breakdown-drawer'
 import { TiersExplainerDrawer } from 'app/components/audio-rewards'
 import { BlockMessagesDrawer } from 'app/components/block-messages-drawer'
@@ -24,6 +23,7 @@ import { ArtistPickConfirmationDrawer } from 'app/components/drawers/ArtistPickC
 import { MuteCommentsConfirmationDrawer } from 'app/components/drawers/MuteCommentsConfirmationDrawer'
 import { DuplicateAddConfirmationDrawer } from 'app/components/duplicate-add-confirmation-drawer'
 import { EnablePushNotificationsDrawer } from 'app/components/enable-push-notifications-drawer'
+import { FanClubDetailsDrawer } from 'app/components/fan-club-details-drawer/FanClubDetailsDrawer'
 import { FeedFilterDrawer } from 'app/components/feed-filter-drawer'
 import { ForgotPasswordDrawer } from 'app/components/forgot-password-drawer'
 import { HostRemixContestDrawer } from 'app/components/host-remix-contest-drawer/HostRemixContestDrawer'
@@ -146,7 +146,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   WithdrawUSDCModal: WithdrawUSDCDrawer,
   ReceiveTokensModal: ReceiveTokensDrawer,
   SendTokensModal: SendTokensDrawer,
-  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer,
+  FanClubDetailsModal: FanClubDetailsDrawer,
   VerificationSuccess: VerificationSuccessDrawer,
   VerificationError: VerificationErrorDrawer
 }

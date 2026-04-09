@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   getUserCoinQueryKey,
   getUserQueryKey,
-  getArtistCoinQueryKey,
+  getFanClubQueryKey,
   updateAudioBalanceOptimistically,
   useCurrentAccountUser,
   useQueryContext,
@@ -114,7 +114,7 @@ export const optimisticallyUpdateSwapBalances = (
   const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
   const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
 
-  // Handle artist coin optimistic updates (not AUDIO)
+  // Handle fan club optimistic updates (not AUDIO)
   if (inputMint && !isInputAudio) {
     queryClient.setQueryData(
       getUserCoinQueryKey(inputMint, user?.user_id),
@@ -179,15 +179,15 @@ export const optimisticallyUpdateSwapBalances = (
     })
   }
 
-  // Invalidate artist coin queries to refresh fee claiming and graduation progress
+  // Invalidate fan club queries to refresh fee claiming and graduation progress
   if (inputMint && !isInputAudio) {
     queryClient.invalidateQueries({
-      queryKey: getArtistCoinQueryKey(inputMint)
+      queryKey: getFanClubQueryKey(inputMint)
     })
   }
   if (outputMint && !isOutputAudio) {
     queryClient.invalidateQueries({
-      queryKey: getArtistCoinQueryKey(outputMint)
+      queryKey: getFanClubQueryKey(outputMint)
     })
   }
 

@@ -5,7 +5,7 @@ export const launchpadMessages = {
   modal: {
     congratsTitle: '🎉 CONGRATS!',
     congratsDescription:
-      'Your Fan Club on Audius is now live, powered by your new artist coin. Time to share the good news with your fans.',
+      'Your Fan Club on Audius is now live, powered by your new fan club. Time to share the good news with your fans.',
     purchaseSummaryTitle: 'PURCHASE SUMMARY',
     addressTitle: 'COIN ADDRESS',
     shareToX: 'Share to X',
@@ -19,7 +19,7 @@ export const launchpadMessages = {
   splash: {
     whyTitle: 'Why Create a Fan Club?',
     whyDescription:
-      'Create new ways to earn, reward your fans, and grow your community – all powered by your artist coin.',
+      'Create new ways to earn, reward your fans, and grow your community – all powered by your fan club.',
     getPaidTitle: 'Get Paid',
     getPaidDescription: 'Earn fees whenever fans buy or sell your coin.',
     rewardFansTitle: 'Reward Fans',
@@ -28,7 +28,7 @@ export const launchpadMessages = {
     growCommunityDescription: 'Strengthen bonds with your biggest supporters.',
     readyTitle: 'Ready to launch?',
     readyDescription:
-      'Connect your wallet to launch a Fan Club powered by your artist coin.',
+      'Connect your wallet to launch a Fan Club powered by your fan club.',
     readyDescription2:
       'It only takes a few steps to set things up and share it with your fans.',
     getStarted: 'Get Started!',
@@ -76,17 +76,17 @@ export const launchpadMessages = {
       "Remember! This is your one and only coin and its details can't be changed later.",
     tooltips: {
       totalSupply:
-        'The total number of your artist coins that will ever exist. This amount is fixed and never changes.',
+        'The total number of your fan clubs that will ever exist. This amount is fixed and never changes.',
       initialMarketCap:
-        'The starting value of your artist coin at launch, based on the initial price and supply. These values are the same for all artist coins.',
+        'The starting value of your fan club at launch, based on the initial price and supply. These values are the same for all fan clubs.',
       graduationMarketCap:
-        'The market cap your artist coin will reach when it graduates into the open market.',
+        'The market cap your fan club will reach when it graduates into the open market.',
       allocation:
-        "The percentage of your total artist coin supply reserved for you as the creator. You'll receive this gradually through unlocking.",
+        "The percentage of your total fan club supply reserved for you as the creator. You'll receive this gradually through unlocking.",
       vesting:
-        "Once your artist coin graduates into the open market, your reserved coins are unlocked daily over a 5-year period. You can claim your unlocked coins every day, or let them accumulate as long as you'd like.",
+        "Once your fan club graduates into the open market, your reserved coins are unlocked daily over a 5-year period. You can claim your unlocked coins every day, or let them accumulate as long as you'd like.",
       tradingFees:
-        'You earn half of all trading fees for all trades of your artist coin. Trading fees are 1%.'
+        'You earn half of all trading fees for all trades of your fan club. Trading fees are 1%.'
     }
   },
   buy: {
@@ -94,7 +94,7 @@ export const launchpadMessages = {
     title: 'Claim Your Share First',
     optional: 'optional',
     description:
-      'Before your artist coin goes live, do you want to buy some at the lowest price?',
+      'Before your fan club goes live, do you want to buy some at the lowest price?',
     youPay: 'You Pay',
     youReceive: 'You Receive',
     valueInUSDC: 'Value',
@@ -114,7 +114,7 @@ export const launchpadMessages = {
     audioInputLabel: 'AUDIO',
     radios: {
       no: 'No, thanks.',
-      yes: 'Yes, I want to buy my artist coin.'
+      yes: 'Yes, I want to buy my fan club.'
     }
   },
   submitModal: {
@@ -127,9 +127,9 @@ export const launchpadMessages = {
     insufficientBalanceDescription:
       "You'll need to add funds to your wallet before you can continue.",
     solAmount: '0.03 SOL',
-    solDescription: ' — required to create your artist coin',
+    solDescription: ' — required to create your fan club',
     audioDescription:
-      '• Extra $AUDIO if you want to make an initial buy of your artist coin (optional).',
+      '• Extra $AUDIO if you want to make an initial buy of your fan club (optional).',
     hintText:
       'Add SOL to your connected wallet, or send $AUDIO from your Audius wallet',
     learnHowToFund: 'Learn how to fund your wallet',

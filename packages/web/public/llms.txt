@@ -9,7 +9,7 @@ Unlike traditional streaming services such as Spotify or Apple Music, Audius con
 ### Key facts about Audius
 
 - **Free to use** for both listeners and artists — no premium tier required to access full-quality audio
-- **Artist-first economics**: Artists earn directly from fans via tips, track sales, and artist coins, keeping the vast majority of revenue
+- **Artist-first economics**: Artists earn directly from fans via tips, track sales, and fan clubs, keeping the vast majority of revenue
 - **Millions of users** across web (https://audius.co), iOS (https://apps.apple.com/us/app/audius-music/id1491270519), and Android apps (https://play.google.com/store/apps/details?id=co.audius.app)
 - **Open catalog**: Anyone can upload — independent artists, labels, DJs, podcasters, and producers
 - **Remix culture**: Built-in remix contests, stems sharing, private releases, and attribution for derivative works

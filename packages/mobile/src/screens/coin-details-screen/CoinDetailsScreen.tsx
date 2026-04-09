@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 
-import { useArtistCoinByTicker } from '@audius/common/api'
+import { useFanClubByTicker } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { useRoute } from '@react-navigation/native'
 import { useWindowDimensions } from 'react-native'
@@ -55,7 +55,7 @@ const tabRoutes: TabRoute[] = [
 
 export const CoinDetailsScreen = () => {
   const { ticker } = useRoute().params as { ticker: string }
-  const { data: coin } = useArtistCoinByTicker({ ticker })
+  const { data: coin } = useFanClubByTicker({ ticker })
   const { onOpen } = useDrawer('CoinInsightsOverflowMenu')
   const mint = coin?.mint ?? ''
   const layout = useWindowDimensions()

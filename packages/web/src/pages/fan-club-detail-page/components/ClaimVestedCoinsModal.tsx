@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useArtistCoinByTicker } from '@audius/common/api'
+import { useFanClubByTicker } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -24,7 +24,7 @@ const DEFAULT_REWARDS_POOL_PERCENT = 50
 export const ClaimVestedCoinsModal = () => {
   const { isOpen, onClose, data } = useClaimVestedCoinsModal()
   const { ticker, claimable, onClaim, isClaimPending } = data ?? {}
-  const { data: coin } = useArtistCoinByTicker({ ticker: data?.ticker })
+  const { data: coin } = useFanClubByTicker({ ticker: data?.ticker })
   const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(
     DEFAULT_REWARDS_POOL_PERCENT
   )

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinPair,
   useSwapCoins,
   useTradeableCoins
@@ -236,9 +236,7 @@ export const useBuySellFlow = ({
     selectedPair: safeSelectedPair
   })
 
-  const { data: outputCoin } = useArtistCoin(
-    swapTokens.outputTokenInfo?.address
-  )
+  const { data: outputCoin } = useFanClub(swapTokens.outputTokenInfo?.address)
   const pricePerBaseToken = useMemo(() => {
     return outputCoin?.price !== undefined && outputCoin.price !== 0
       ? outputCoin.price

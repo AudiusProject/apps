@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
-import { useArtistCoin, useCoinGeckoCoin } from '@audius/common/api'
+import { useFanClub, useCoinGeckoCoin } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import {
   createAudioCoinMetrics,
@@ -238,7 +238,7 @@ export const FanClubInsights = ({ mint }: FanClubInsightsProps) => {
     data: coin,
     isPending: isCoinPending,
     isError: isCoinError
-  } = useArtistCoin(mint)
+  } = useFanClub(mint)
   const {
     data: coingeckoResponse,
     isPending: isCoingeckoPending,

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
-  TEMP_ARTIST_COINS_PAGE_SIZE,
-  transformArtistCoinsToTokenInfoMap,
-  useArtistCoin,
-  useArtistCoins,
+  TEMP_FAN_CLUBS_PAGE_SIZE,
+  transformFanClubsToTokenInfoMap,
+  useFanClub,
+  useFanClubs,
   useCurrentAccountUser
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
@@ -44,8 +44,9 @@ export const BuyTab = ({
     )
   }, [baseToken.symbol, baseToken])
 
-  const { data: tokenPriceData, isPending: isTokenPriceLoading } =
-    useArtistCoin(selectedOutputToken.address)
+  const { data: tokenPriceData, isPending: isTokenPriceLoading } = useFanClub(
+    selectedOutputToken.address
+  )
 
   const decimalPlaces = useMemo(() => {
     if (!tokenPriceData?.price) return 2
@@ -71,11 +72,11 @@ export const BuyTab = ({
     externalWalletAddress: externalWalletAccount?.address
   })
 
-  const { data: coins } = useArtistCoins({
-    pageSize: TEMP_ARTIST_COINS_PAGE_SIZE
+  const { data: coins } = useFanClubs({
+    pageSize: TEMP_FAN_CLUBS_PAGE_SIZE
   })
-  const artistCoins: CoinInfo[] = useMemo(() => {
-    return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
+  const fanClubs: CoinInfo[] = useMemo(() => {
+    return Object.values(transformFanClubsToTokenInfoMap(coins ?? []))
   }, [coins])
 
   // Token change handlers
@@ -129,7 +130,7 @@ export const BuyTab = ({
             tokenPrice={tokenPriceData?.price?.toString() ?? null}
             isTokenPriceLoading={isTokenPriceLoading}
             tokenPriceDecimalPlaces={decimalPlaces}
-            availableTokens={artistCoins}
+            availableTokens={fanClubs}
             onTokenChange={handleOutputTokenChange}
           />
           <BuySellTerms />

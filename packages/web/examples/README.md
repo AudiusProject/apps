@@ -10,7 +10,7 @@ Runnable examples for building Audius-style web features (Vite + React). Use the
 | [update-profile](./update-profile/) | **Vite + React + Node server**: OAuth (write scope) + server-side update of user description (mirrors mobile update-profile example). | Run server first (see example README). Then `cd packages/web/examples/update-profile && npm install && npm run dev` or `npm run web:example:update-profile`. Requires .env. |
 | [upload](./upload/) | **Vite + React + Node server**: OAuth popup + uploadTrackFiles + server create-track (mirrors mobile upload example). | Run server first. Then `cd packages/web/examples/upload && npm run dev` or `npm run web:example:upload`. Requires .env. |
 | [gated-upload](./gated-upload/) | **Vite + React + Node server**: Same as upload + geo-gated streaming (ip-api.com). Server gates /stream/:trackId by IP/country. | Run server first. Then `cd packages/web/examples/gated-upload && npm run dev` or `npm run web:example:gated-upload`. Requires .env. |
-| [coin-gated](./coin-gated/) | **Vite + React**: Browse artist coins, sign in via OAuth or Phantom wallet, stream coin-gated tracks. | `cd packages/web/examples/coin-gated && npm install && npm run dev`. Requires .env with `VITE_AUDIUS_API_KEY`. |
+| [coin-gated](./coin-gated/) | **Vite + React**: Browse fan clubs, sign in via OAuth or Phantom wallet, stream coin-gated tracks. | `cd packages/web/examples/coin-gated && npm install && npm run dev`. Requires .env with `VITE_AUDIUS_API_KEY`. |
 
 ## Quick start
 

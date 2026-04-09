@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 
 import {
-  useArtistCoinMembers,
-  useArtistCoinMembersCount,
+  useFanClubMembers,
+  useFanClubMembersCount,
   useUsers
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
@@ -25,12 +25,12 @@ const messages = coinDetailsMessages.coinLeaderboard
 export const CoinLeaderboardCard = ({ mint }: { mint: string }) => {
   const navigation = useNavigation()
   const { data: leaderboardUsers, isPending: isLeaderboardPending } =
-    useArtistCoinMembers({ mint })
+    useFanClubMembers({ mint })
   const { data: users, isPending: isUsersPending } = useUsers(
     leaderboardUsers?.map((user) => user.userId)
   )
   const isPending = isLeaderboardPending || isUsersPending
-  const { data: membersCount = 0 } = useArtistCoinMembersCount({ mint })
+  const { data: membersCount = 0 } = useFanClubMembersCount({ mint })
 
   const handleViewLeaderboard = useCallback(() => {
     navigation.navigate('CoinLeaderboard', {

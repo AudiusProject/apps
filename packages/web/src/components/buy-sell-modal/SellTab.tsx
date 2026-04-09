@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import type { CoinInfo } from '@audius/common/store'
 import { useCoinSwapForm } from '@audius/common/store'
@@ -37,8 +37,9 @@ export const SellTab = ({
     )
   }, [baseToken.symbol, baseToken])
 
-  const { data: tokenPriceData, isPending: isTokenPriceLoading } =
-    useArtistCoin(selectedInputToken.address)
+  const { data: tokenPriceData, isPending: isTokenPriceLoading } = useFanClub(
+    selectedInputToken.address
+  )
 
   const decimalPlaces = useMemo(() => {
     if (!tokenPriceData?.price) return 2

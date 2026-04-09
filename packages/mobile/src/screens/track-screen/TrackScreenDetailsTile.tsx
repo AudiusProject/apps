@@ -7,7 +7,7 @@ import {
   useTrackRank,
   useStems,
   useCurrentUserId,
-  useArtistCoin,
+  useFanClub,
   useTrackDownloadCount
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
@@ -74,7 +74,7 @@ import {
   MusicBadge,
   Paper,
   Text,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony-native'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import { Tag } from 'app/components/core'
@@ -259,7 +259,7 @@ export const TrackScreenDetailsTile = ({
   const { data: downloadCount = 0 } = useTrackDownloadCount(trackIdHash)
 
   const isTokenGated = isContentTokenGated(streamConditions)
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
     { enabled: isTokenGated }
   )
@@ -559,7 +559,7 @@ export const TrackScreenDetailsTile = ({
       <TrackDogEar trackId={trackId} />
       <Flex p='l' gap='l' alignItems='center' w='100%'>
         <Flex row gap='xs' alignItems='center'>
-          {isTokenGated ? <IconArtistCoin size='s' color='subdued' /> : null}
+          {isTokenGated ? <IconFanClub size='s' color='subdued' /> : null}
           <Text
             variant='label'
             size='m'

@@ -1,4 +1,4 @@
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import type {
   ID,
   AccessConditions,
@@ -34,7 +34,7 @@ export const DetailsTileGatedAccess = ({
   contentType
 }: DetailsTileGatedAccessProps) => {
   const isTokenGated = isContentTokenGated(streamConditions)
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
     { enabled: isTokenGated }
   )

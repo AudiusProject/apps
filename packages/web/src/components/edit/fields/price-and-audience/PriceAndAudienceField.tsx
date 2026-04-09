@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { useArtistCoin, useCurrentUserId } from '@audius/common/api'
+import { useFanClub, useCurrentUserId } from '@audius/common/api'
 import { useUSDCPurchaseConfig } from '@audius/common/hooks'
 import { priceAndAudienceMessages } from '@audius/common/messages'
 import {
@@ -381,7 +381,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     ]
   )
 
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     tempStreamConditions.token_gate?.token_mint ?? ''
   )
 

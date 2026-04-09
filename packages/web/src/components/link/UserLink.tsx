@@ -22,7 +22,7 @@ type UserLinkProps = Omit<TextLinkProps, 'to' | 'popover'> & {
   noOverflow?: boolean
   center?: boolean
   fullWidth?: boolean
-  hideArtistCoinBadge?: boolean
+  hideFanClubBadge?: boolean
 }
 
 export const UserLink = (props: UserLinkProps) => {
@@ -36,7 +36,7 @@ export const UserLink = (props: UserLinkProps) => {
     noOverflow,
     center,
     fullWidth,
-    hideArtistCoinBadge,
+    hideFanClubBadge,
     ...other
   } = props
   const { spacing } = useTheme()
@@ -62,7 +62,7 @@ export const UserLink = (props: UserLinkProps) => {
         display: 'inline-flex',
         verticalAlign: 'middle'
       }}
-      hideArtistCoinBadge={hideArtistCoinBadge}
+      hideFanClubBadge={hideFanClubBadge}
     />
   )
 

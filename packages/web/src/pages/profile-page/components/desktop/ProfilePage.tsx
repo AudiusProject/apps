@@ -96,7 +96,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     instagramVerified,
     tikTokVerified,
     website,
-    artistCoinBadge,
+    fanClubBadge,
     hasProfilePicture,
     mode,
     stats,
@@ -144,7 +144,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updateInstagramHandle,
     updateTikTokHandle,
     updateWebsite,
-    updateArtistCoinBadge,
+    updateFanClubBadge,
     updateCoverPhoto,
     didChangeTabsFrom,
     onCloseArtistRecommendations,
@@ -573,7 +573,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
                   instagramVerified={instagramVerified}
                   tikTokVerified={tikTokVerified}
                   website={website}
-                  artistCoinBadge={artistCoinBadge}
+                  fanClubBadge={fanClubBadge}
                   created={created}
                   onUpdateBio={updateBio}
                   onUpdateLocation={updateLocation}
@@ -581,7 +581,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
                   onUpdateInstagramHandle={updateInstagramHandle}
                   onUpdateTikTokHandle={updateTikTokHandle}
                   onUpdateWebsite={updateWebsite}
-                  onUpdateArtistCoinBadge={updateArtistCoinBadge}
+                  onUpdateFanClubBadge={updateFanClubBadge}
                 />
                 <Box flex='1 1 100%'>{body}</Box>
               </Flex>

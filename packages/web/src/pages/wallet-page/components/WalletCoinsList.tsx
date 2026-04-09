@@ -2,8 +2,8 @@ import { useCallback, useContext, useState } from 'react'
 
 import {
   UserCoin,
-  useArtistCoin,
-  useArtistCreatedCoin,
+  useFanClub,
+  useArtistCreatedFanClub,
   useCoinBalance,
   useCurrentUserId,
   useQueryContext,
@@ -74,7 +74,7 @@ const USDCCoinCard = () => {
   )
 }
 
-const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
+const DiscoverFanClubsCard = ({ onClick }: { onClick: () => void }) => {
   const { color } = useTheme()
 
   return (
@@ -91,7 +91,7 @@ const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
       }}
     >
       <Text variant='heading' size='s'>
-        {walletMessages.artistCoins.title}
+        {walletMessages.fanClubs.title}
       </Text>
       <Flex alignItems='center' gap='m'>
         <IconCaretRight size='l' color='subdued' />
@@ -251,9 +251,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     formattedHeldValue
   } = useFormattedCoinBalance(coin.mint)
 
-  const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(
-    coin.mint
-  )
+  const { data: coinData, isPending: coinsDataLoading } = useFanClub(coin.mint)
 
   const isLoading =
     isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
@@ -287,14 +285,14 @@ export const WalletCoinsList = () => {
     setIsOpenAppDrawerOpen(false)
   }, [])
 
-  const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
+  const { data: fanClubs, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
-  const audioCoin = artistCoins?.find(
+  const { data: artistOwnedCoin } = useArtistCreatedFanClub(currentUserId)
+  const audioCoin = fanClubs?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
-  const otherCoins = artistCoins?.filter(
+  const otherCoins = fanClubs?.filter(
     (coin) =>
       coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
       coin?.mint !== artistOwnedCoin?.mint &&
@@ -310,10 +308,10 @@ export const WalletCoinsList = () => {
   // Show audio coin card when no coins are available
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
-  // Add discover artist coins card at the end
-  const allCoins = [...coins, 'discover-artist-coins' as const]
+  // Add discover fan clubs card at the end
+  const allCoins = [...coins, 'discover-fan-clubs' as const]
 
-  const handleDiscoverArtistCoins = useCallback(() => {
+  const handleDiscoverFanClubs = useCallback(() => {
     navigate(CLUBS_EXPLORE_PAGE)
   }, [navigate])
 
@@ -338,10 +336,8 @@ export const WalletCoinsList = () => {
             <Divider />
             {allCoins.map((item, idx) => (
               <Box key={typeof item === 'string' ? item : item.mint}>
-                {item === 'discover-artist-coins' ? (
-                  <DiscoverArtistCoinsCard
-                    onClick={handleDiscoverArtistCoins}
-                  />
+                {item === 'discover-fan-clubs' ? (
+                  <DiscoverFanClubsCard onClick={handleDiscoverFanClubs} />
                 ) : item === 'audio-coin' ? (
                   <AudioCoinCard />
                 ) : (

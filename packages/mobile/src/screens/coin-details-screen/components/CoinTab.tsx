@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
-import { useArtistCoin, useCurrentUserId } from '@audius/common/api'
+import { useFanClub, useCurrentUserId } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import {
   getTokenDecimalPlaces,
@@ -161,7 +161,7 @@ const CoinDetailsSection = ({ coin }: { coin: Coin }) => {
 }
 
 export const CoinTab = ({ mint }: CoinTabProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { data: currentUserId } = useCurrentUserId()
   const isOwner = currentUserId === coin?.ownerId
 

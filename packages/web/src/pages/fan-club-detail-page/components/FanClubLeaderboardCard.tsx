@@ -1,6 +1,6 @@
 import {
-  useArtistCoinMembers,
-  useArtistCoinMembersCount,
+  useFanClubMembers,
+  useFanClubMembersCount,
   useUsers
 } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
@@ -52,7 +52,7 @@ export const FanClubLeaderboardCard = ({
   const { isMedium: isSmallScreen } = useMedia() // <1024px
   const numUsersShowing = isSmallScreen ? 6 : 8
   const { data: leaderboardUsers, isPending: isLeaderboardPending } =
-    useArtistCoinMembers({ mint })
+    useFanClubMembers({ mint })
   const userListUserIds = leaderboardUsers
     ?.slice(0, numUsersShowing)
     .map((user) => user.userId)
@@ -62,7 +62,7 @@ export const FanClubLeaderboardCard = ({
   const isPending = isLeaderboardPending || isUsersPending
   const isMobile = useIsMobile()
 
-  const { data: membersCount = 0 } = useArtistCoinMembersCount({ mint })
+  const { data: membersCount = 0 } = useFanClubMembersCount({ mint })
 
   const handleViewLeaderboard = () => {
     if (isMobile) {

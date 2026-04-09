@@ -64,8 +64,8 @@ import {
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
 
-import { ArtistCoinSortScreen } from '../artist-coin-sort-screen/ArtistCoinSortScreen'
-import { ArtistCoinsExploreScreen } from '../artist-coins-explore-screen/ArtistCoinsExploreScreen'
+import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
+import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
 
@@ -112,8 +112,8 @@ export type AppTabScreenParamList = {
 
   AudioScreen: undefined
   RewardsScreen: undefined
-  ArtistCoinsExplore: undefined
-  ArtistCoinSort: {
+  FanClubsExplore: undefined
+  FanClubSort: {
     initialSortMethod?: GetCoinsSortMethodEnum
     initialSortDirection?: GetCoinsSortDirectionEnum
   }
@@ -244,11 +244,8 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
       />
-      <Stack.Screen
-        name='ArtistCoinsExplore'
-        component={ArtistCoinsExploreScreen}
-      />
-      <Stack.Screen name='ArtistCoinSort' component={ArtistCoinSortScreen} />
+      <Stack.Screen name='FanClubsExplore' component={FanClubsExploreScreen} />
+      <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
 
       <Stack.Group>
         <Stack.Screen name='EditProfile' component={EditProfileScreen} />

@@ -1,8 +1,8 @@
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentAccountUser,
   useCurrentUserId,
-  useArtistCoinMembersCount
+  useFanClubMembersCount
 } from '@audius/common/api'
 import {
   useFirstAvailableBlastAudience,
@@ -322,11 +322,11 @@ const RemixCreatorsMessageField = () => {
 const CoinHoldersMessageField = () => {
   const { data: currentUserId } = useCurrentUserId()
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
-  const { data: coin } = useArtistCreatedCoin(currentUserId)
+  const { data: coin } = useArtistCreatedFanClub(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
-  const { data: coinMembersCount } = useArtistCoinMembersCount({
+  const { data: coinMembersCount } = useFanClubMembersCount({
     mint: coin?.mint
   })
   const isDisabled = coinMembersCount === 0

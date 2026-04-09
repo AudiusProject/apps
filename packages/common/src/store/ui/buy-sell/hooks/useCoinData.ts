@@ -68,7 +68,7 @@ export const useCoinData = ({
     : isInternalWalletBalanceLoading
 
   // Get token price for calculations (currently unused but may be needed for future features)
-  // const { data: tokenPriceData } = useArtistCoin({ mint: inputCoin.address })
+  // const { data: tokenPriceData } = useFanClub({ mint: inputCoin.address })
 
   // Calculate safe amount for exchange rate API
   const safeExchangeRateAmount = useMemo(() => {

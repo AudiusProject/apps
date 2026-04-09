@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
   useCurrentUserId,
   useExclusiveTracks,
@@ -134,7 +134,7 @@ const FanClubHeroTile = ({
   onUploadExclusive
 }: FanClubHeroTileProps) => {
   const { borderDefault } = useThemeColors()
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading } = useFanClub(mint)
   const ownerId = coin?.ownerId
 
   const { source: coverPhotoSource } = useCoverPhoto({
@@ -153,7 +153,7 @@ const FanClubHeroTile = ({
     return null
   }
 
-  const fanClubLabel = walletMessages.artistCoins.fanClubLabel
+  const fanClubLabel = walletMessages.fanClubs.fanClubLabel
 
   return (
     <Paper
@@ -252,7 +252,7 @@ const FanClubHeroTile = ({
 }
 
 const FanClubFeed = ({ mint }: { mint: string }) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const ownerId = coin?.ownerId
 
   const { data, lineup, pageSize, isFetching, loadNextPage, isPending } =
@@ -323,7 +323,7 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
 }
 
 export const FanClubTab = ({ mint, onSwitchToCoinTab }: FanClubTabProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { data: currentUserId, isPending: isCurrentUserPending } =
     useCurrentUserId()
   const { data: tokenBalance, isPending: isBalancePending } = useCoinBalance({

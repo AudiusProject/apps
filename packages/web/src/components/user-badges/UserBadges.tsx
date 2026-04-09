@@ -28,8 +28,8 @@ import {
 import { Origin } from '@audius/harmony/src/components/popup/types'
 import cn from 'classnames'
 
-import { ArtistCoinHoverCard } from 'components/hover-card/ArtistCoinHoverCard'
 import { AudioHoverCard } from 'components/hover-card/AudioHoverCard'
+import { FanClubHoverCard } from 'components/hover-card/FanClubHoverCard'
 import { env } from 'services/env'
 
 import styles from './UserBadges.module.css'
@@ -62,12 +62,12 @@ type UserBadgesProps = {
   isVerifiedOverride?: boolean
   overrideTier?: BadgeTier
 
-  // Optional mint address for displaying specific artist coin
-  // If provided, shows the artist coin badge for that token
+  // Optional mint address for displaying specific fan club
+  // If provided, shows the fan club badge for that token
   mint?: string
 
-  // Optional flag to hide the artist coin badge
-  hideArtistCoinBadge?: boolean
+  // Optional flag to hide the fan club badge
+  hideFanClubBadge?: boolean
 }
 
 /**
@@ -83,23 +83,23 @@ const UserBadges = ({
   isVerifiedOverride,
   overrideTier,
   mint,
-  hideArtistCoinBadge = false
+  hideFanClubBadge = false
 }: UserBadgesProps) => {
   const { tier: currentTier, isVerified } = useTierAndVerifiedForUser(userId)
   const { data: user } = useUser(userId, {
     select: (user) => ({
-      artistCoinBadge: user?.artist_coin_badge
+      fanClubBadge: user?.fan_club_badge
     })
   })
 
-  const { artistCoinBadge: userArtistCoinBadge } = user ?? {}
+  const { fanClubBadge: userFanClubBadge } = user ?? {}
 
   const displayMint = useMemo(() => {
-    // Priority: explicit mint prop > user's artist_coin_badge > null
+    // Priority: explicit mint prop > user's fan_club_badge > null
     if (mint) return mint
-    if (userArtistCoinBadge?.mint) return userArtistCoinBadge.mint
+    if (userFanClubBadge?.mint) return userFanClubBadge.mint
     return null
-  }, [mint, userArtistCoinBadge?.mint])
+  }, [mint, userFanClubBadge?.mint])
 
   const tier = overrideTier || currentTier
   const isUserVerified = isVerifiedOverride ?? isVerified
@@ -169,16 +169,16 @@ const UserBadges = ({
     )
   }, [tier, userId, anchorOrigin, transformOrigin, size])
 
-  const shouldShowArtistCoinBadge =
-    !hideArtistCoinBadge &&
+  const shouldShowFanClubBadge =
+    !hideFanClubBadge &&
     !!displayMint &&
     displayMint !== env.WAUDIO_MINT_ADDRESS
 
-  const artistCoinBadge = useMemo(() => {
-    if (!shouldShowArtistCoinBadge) return null
+  const fanClubBadge = useMemo(() => {
+    if (!shouldShowFanClubBadge) return null
 
     return (
-      <ArtistCoinHoverCard
+      <FanClubHoverCard
         userId={userId}
         anchorOrigin={anchorOrigin}
         transformOrigin={transformOrigin}
@@ -194,21 +194,21 @@ const UserBadges = ({
           }}
         >
           <Artwork
-            src={userArtistCoinBadge?.logo_uri ?? ''}
+            src={userFanClubBadge?.logo_uri ?? ''}
             hex
             w={iconSizes[size]}
             h={iconSizes[size]}
             borderWidth={0}
           />
         </Flex>
-      </ArtistCoinHoverCard>
+      </FanClubHoverCard>
     )
   }, [
-    shouldShowArtistCoinBadge,
+    shouldShowFanClubBadge,
     userId,
     anchorOrigin,
     transformOrigin,
-    userArtistCoinBadge?.logo_uri,
+    userFanClubBadge?.logo_uri,
     size
   ])
 
@@ -235,7 +235,7 @@ const UserBadges = ({
       >
         {verifiedBadge}
         {tierBadge}
-        {artistCoinBadge}
+        {fanClubBadge}
       </span>
     </Box>
   )

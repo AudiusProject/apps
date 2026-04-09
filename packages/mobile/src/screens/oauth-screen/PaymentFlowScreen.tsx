@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   useCurrentAccountUser,
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo,
+  transformFanClubToTokenInfo,
   useSendCoins
 } from '@audius/common/api'
 import { useUserbank } from '@audius/common/hooks'
@@ -51,9 +51,9 @@ export const PaymentFlowScreen = ({ params }: Props) => {
     data: coin,
     isPending: coinLoading,
     isError: coinError
-  } = useArtistCoin(mint ?? '')
+  } = useFanClub(mint ?? '')
   const tokenInfo = useMemo(
-    () => (coin ? transformArtistCoinToTokenInfo(coin) : undefined),
+    () => (coin ? transformFanClubToTokenInfo(coin) : undefined),
     [coin]
   )
   const {

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
   useCurrentUserId
 } from '@audius/common/api'
@@ -95,7 +95,7 @@ type FanClubTabContentProps = {
 }
 
 const FanClubTabContent = ({ mint }: FanClubTabContentProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { data: currentUserId } = useCurrentUserId()
   const { data: tokenBalance } = useCoinBalance({ mint })
 
