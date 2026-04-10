@@ -73,9 +73,9 @@ describe('responsiveColumns', () => {
         64
       )
     ).toBe(120)
-    expect(getColumnBaseWidth({ id: 'b', maxWidth: 140, minWidth: 80 }, 64)).toBe(
-      140
-    )
+    expect(
+      getColumnBaseWidth({ id: 'b', maxWidth: 140, minWidth: 80 }, 64)
+    ).toBe(140)
     expect(getColumnBaseWidth({ id: 'c', minWidth: 90 }, 64)).toBe(90)
     expect(getColumnBaseWidth({ id: 'd' }, 64)).toBe(64)
   })
@@ -207,7 +207,12 @@ describe('responsiveColumns', () => {
   it('drops fixed utility columns while keeping track column visible', () => {
     const hidden = getHiddenResponsiveColumns({
       columns: [
-        { id: 'trackName', minWidth: 220, width: 260, maxWidth: Number.MAX_SAFE_INTEGER },
+        {
+          id: 'trackName',
+          minWidth: 220,
+          width: 260,
+          maxWidth: Number.MAX_SAFE_INTEGER
+        },
         { id: 'dateReleased', minWidth: 104, width: 104, maxWidth: 104 },
         { id: 'time', minWidth: 80, width: 80, maxWidth: 80 },
         { id: 'dateSaved', minWidth: 104, width: 104, maxWidth: 104 },
@@ -229,7 +234,12 @@ describe('responsiveColumns', () => {
   it('accounts for rendered per-column chrome when budgeting drops', () => {
     const hidden = getHiddenResponsiveColumns({
       columns: [
-        { id: 'trackName', minWidth: 320, width: 320, maxWidth: Number.MAX_SAFE_INTEGER },
+        {
+          id: 'trackName',
+          minWidth: 320,
+          width: 320,
+          maxWidth: Number.MAX_SAFE_INTEGER
+        },
         { id: 'reposts', minWidth: 80, width: 80, maxWidth: 80 },
         { id: 'plays', minWidth: 80, width: 80, maxWidth: 80 },
         { id: 'trackActions', minWidth: 140, width: 140, maxWidth: 140 }

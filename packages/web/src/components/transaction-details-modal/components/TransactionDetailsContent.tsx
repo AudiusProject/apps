@@ -175,8 +175,9 @@ export const TransactionDetailsContent = ({
           <div className={styles.flexHorizontal}>
             <Block header={messages.transaction}>
               {transactionDescriptions[transactionDetails.transactionType] +
-                ((transactionDetails.transactionType === TransactionType.TRANSFER ||
-                  transactionDetails.transactionType === TransactionType.TIP)
+                (transactionDetails.transactionType ===
+                  TransactionType.TRANSFER ||
+                transactionDetails.transactionType === TransactionType.TIP
                   ? formatCapitalizeString(transactionDetails.method)
                   : '')}
             </Block>
