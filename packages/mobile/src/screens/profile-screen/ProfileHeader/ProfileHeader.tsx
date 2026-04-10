@@ -9,6 +9,7 @@ import {
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { LayoutAnimation } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useToggle } from 'react-use'
 
 import { Box, Divider, Flex, useTheme } from '@audius/harmony-native'
@@ -101,6 +102,7 @@ export const ProfileHeader = memo(() => {
   }, [isExpanded, setIsExpanded])
 
   const { spacing } = useTheme()
+  const insets = useSafeAreaInsets()
 
   return (
     <>
@@ -108,8 +110,8 @@ export const ProfileHeader = memo(() => {
       <Box
         style={css({
           position: 'absolute',
-          top: spacing.unit13,
-          left: spacing.unit3,
+          top: insets.top + spacing.unit12,
+          left: spacing.unit4,
           zIndex: zIndex.PROFILE_PAGE_PROFILE_PICTURE
         })}
       >
