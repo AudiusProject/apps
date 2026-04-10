@@ -125,29 +125,28 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
   const isPremium =
     isStreamGated && isContentUSDCPurchaseGated(streamConditions)
 
+  const renderTypeLabel = () =>
+    isLoading ? (
+      <Skeleton height='16px' width='84px' />
+    ) : (
+      <Flex gap='s' mt='s' alignItems='center'>
+        {isPremium ? <IconCart size='s' color='subdued' /> : null}
+        <Text variant='label' color='subdued'>
+          {isPremium ? `${messages.premiumLabel} ` : ''}
+          {type}
+        </Text>
+      </Flex>
+    )
+
   const topSection = (
     <div className={styles.topSection}>
+      <div className={styles.typeLabelCompact}>{renderTypeLabel()}</div>
       <div className={styles.artworkSection}>
         <Artwork collectionId={collectionId} isOwner={isOwner} />
       </div>
       <Flex direction='column' gap='xl' className={styles.infoSection}>
         <Flex direction='column' gap='xl'>
-          {isLoading ? (
-            <Skeleton height='24px' width='200px' />
-          ) : (
-            <Flex
-              gap='s'
-              mt='s'
-              alignItems='center'
-              className={styles.typeLabelRow}
-            >
-              {isPremium ? <IconCart size='s' color='subdued' /> : null}
-              <Text variant='label' color='subdued'>
-                {isPremium ? `${messages.premiumLabel} ` : ''}
-                {type}
-              </Text>
-            </Flex>
-          )}
+          <div className={styles.typeLabelRow}>{renderTypeLabel()}</div>
           <Flex
             direction='column'
             gap='s'
