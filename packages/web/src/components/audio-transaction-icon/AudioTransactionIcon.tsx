@@ -30,6 +30,7 @@ const typeIconSvgMap: Record<TransactionType, IconComponent | null> = {
   [TransactionType.CHALLENGE_REWARD]: IconTrophy,
   [TransactionType.PURCHASE]: null, // Not needed, AppLogo is used for purchases
   [TransactionType.TRANSFER]: IconTransaction,
+  [TransactionType.TIP]: IconTransaction,
   [TransactionType.TRENDING_REWARD]: IconTrophy
 } as const
 
@@ -54,6 +55,7 @@ const typeIconMap: Record<
   [TransactionType.CHALLENGE_REWARD]: TypeIcon,
   [TransactionType.PURCHASE]: AppLogo,
   [TransactionType.TRANSFER]: TypeIcon,
+  [TransactionType.TIP]: TypeIcon,
   [TransactionType.TRENDING_REWARD]: TypeIcon
 } as const
 

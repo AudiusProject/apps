@@ -20,6 +20,7 @@ import styles from './AudioTransactionsTable.module.css'
 
 const transactionTypeLabelMap: Record<TransactionType, string> = {
   [TransactionType.TRANSFER]: '$AUDIO',
+  [TransactionType.TIP]: 'Tip',
   [TransactionType.CHALLENGE_REWARD]: '$AUDIO Reward Earned',
   [TransactionType.TRENDING_REWARD]: 'Trending Competition Award',
   [TransactionType.PURCHASE]: 'Purchased $AUDIO'
@@ -75,14 +76,16 @@ const renderTransactionTypeCell = (cellInfo: TransactionCell) => {
   const methodText =
     transactionMethodLabelMap[method as TransactionMethod] ?? ''
 
-  const isTransferType = transactionType === TransactionType.TRANSFER
+  const isMethodType =
+    transactionType === TransactionType.TRANSFER ||
+    transactionType === TransactionType.TIP
   return (
     <>
       <div className={styles.icon}>
         <AudioTransactionIcon type={transactionType} method={method} />
       </div>
       <span className={styles.typeText}>
-        {`${typeText} ${isTransferType ? methodText : ''}`.trim()}
+        {`${typeText} ${isMethodType ? methodText : ''}`.trim()}
       </span>
     </>
   )
