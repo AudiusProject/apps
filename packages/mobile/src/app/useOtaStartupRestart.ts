@@ -4,14 +4,14 @@
  * On every app launch (including from a push notification tap):
  * 1. If a previously-downloaded update is pending → restart immediately
  * 2. Otherwise, sync with the server to check/download/install a new update.
- *    If the sync completes within a timeout window (while the splash screen is
- *    still visible), restart to apply it. If it takes too long, the update is
- *    staged as pending and will be applied on the next cold start (or via the
- *    banner's Restart button).
+ *    If the sync completes within the timeout, restart to apply it. If it
+ *    takes too long, the update is staged as pending and will be applied on
+ *    the next cold start (or via the banner's Restart button).
  *
- * Push-notification deep links survive the restart because
- * `getInitialNotification()` is held at the native layer and persists across
- * JS-only CodePush restarts.
+ * The splash screen waits on `otaStartupComplete` before dismissing, so any
+ * restart happens while the splash is still visible. Push-notification deep
+ * links survive the restart because `getInitialNotification()` is held at the
+ * native layer and persists across JS-only CodePush restarts.
  */
 
 import { useEffect, useRef } from 'react'
@@ -23,16 +23,37 @@ import { isOtaEnabled } from './ota-updates'
 /** Max time (ms) to wait for an OTA download before giving up and loading normally. */
 const OTA_STARTUP_TIMEOUT_MS = 10_000
 
+let _resolveStartup: () => void
+
+/**
+ * Resolves when the cold-start OTA check is complete (no update, update
+ * applied, or timeout). The splash screen gates on this so it stays
+ * visible during any OTA restart.
+ */
+export const otaStartupComplete = new Promise<void>((resolve) => {
+  _resolveStartup = resolve
+})
+
+// Safety net: always resolve even if the hook never executes (e.g. crash
+// during provider initialization). Prevents the app from hanging forever.
+setTimeout(_resolveStartup, OTA_STARTUP_TIMEOUT_MS + 5_000)
+
 export function useOtaStartupRestart() {
   const didRunRef = useRef(false)
 
   useEffect(() => {
-    if (didRunRef.current || !isOtaEnabled()) return
+    if (didRunRef.current) return
     didRunRef.current = true
+
+    if (!isOtaEnabled()) {
+      _resolveStartup()
+      return
+    }
 
     let expired = false
     const timer = setTimeout(() => {
       expired = true
+      _resolveStartup()
       console.warn(
         `[OTA] Cold-start sync exceeded ${OTA_STARTUP_TIMEOUT_MS}ms — update will apply on next restart`
       )
@@ -51,6 +72,8 @@ export function useOtaStartupRestart() {
           )
           CodePush.allowRestart()
           CodePush.restartApp(true)
+          // If restart didn't take effect, resolve so the app isn't stuck
+          _resolveStartup()
           return
         }
 
@@ -67,9 +90,7 @@ export function useOtaStartupRestart() {
               syncStatus !== CodePush.SyncStatus.UP_TO_DATE &&
               syncStatus !== CodePush.SyncStatus.SYNC_IN_PROGRESS
             ) {
-              console.warn(
-                `[OTA] Cold-start sync status: ${syncStatus}`
-              )
+              console.warn(`[OTA] Cold-start sync status: ${syncStatus}`)
             }
           }
         )
@@ -77,16 +98,23 @@ export function useOtaStartupRestart() {
         clearTimeout(timer)
 
         // 3. If the update was downloaded+installed before the timeout,
-        //    restart now (splash screen should still be visible).
+        //    restart now (splash screen is held open via otaStartupComplete).
         if (status === CodePush.SyncStatus.UPDATE_INSTALLED && !expired) {
           console.warn(
             '[OTA] Update installed on cold start within timeout — restarting'
           )
           CodePush.allowRestart()
           CodePush.restartApp(true)
+          // If restart didn't take effect, resolve so the app isn't stuck
+          _resolveStartup()
+          return
         }
+
+        // No update found or timeout already expired — let the app load
+        _resolveStartup()
       } catch (e) {
         clearTimeout(timer)
+        _resolveStartup()
         console.warn('[OTA] Cold-start sync failed', e)
       }
     })()

@@ -24,6 +24,7 @@ import {
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { otaStartupComplete } from 'app/app/useOtaStartupRestart'
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -76,6 +77,7 @@ export const RootScreen = () => {
   const welcomeModalShown = useSelector(getWelcomeModalShown)
   const isAndroid = Platform.OS === MobileOS.ANDROID
 
+  const [isOtaReady, setIsOtaReady] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isSplashScreenDismissed, setIsSplashScreenDismissed] = useState(false)
   const { navigate } = useNavigation()
@@ -90,9 +92,22 @@ export const RootScreen = () => {
 
   useResetNotificationBadgeCount()
 
+  // Wait for the cold-start OTA check to finish (or time out) so any
+  // restart happens while the splash screen is still visible.
+  useEffect(() => {
+    let cancelled = false
+    otaStartupComplete.then(() => {
+      if (!cancelled) setIsOtaReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   useEffect(() => {
     if (
       !isLoaded &&
+      isOtaReady &&
       (accountStatus === Status.SUCCESS || accountStatus === Status.ERROR)
     ) {
       // Reset the player when the app is loaded for the first time. Fixes an issue
@@ -100,7 +115,7 @@ export const RootScreen = () => {
       dispatch(reset({ shouldAutoplay: false }))
       setIsLoaded(true)
     }
-  }, [accountStatus, setIsLoaded, isLoaded, dispatch])
+  }, [accountStatus, setIsLoaded, isLoaded, isOtaReady, dispatch])
 
   // Connect to chats websockets and prefetch chats
   useEffect(() => {
