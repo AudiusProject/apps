@@ -91,7 +91,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
   const [filterText, setFilterText] = useState('')
 
   const hasStreamAccess = access?.stream
-  const shouldShowStats = type !== 'album' && (!isPrivate || isOwner)
+  const shouldShowStats = !isPrivate || isOwner
   const shouldShowScheduledRelease =
     isScheduledRelease && releaseDate && dayjs(releaseDate).isAfter(dayjs())
 
@@ -104,7 +104,10 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     [onFilterChange]
   )
 
-  const renderStatsRow = (isLoading: boolean) => {
+  const renderStatsRow = (
+    isLoading: boolean,
+    forceMobileStyle: boolean = false
+  ) => {
     if (isLoading) return <Skeleton height='20px' width='120px' />
     return shouldShowStats ? (
       <RepostsFavoritesStats
@@ -112,6 +115,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
         saveCount={saves}
         onClickReposts={onClickReposts}
         onClickFavorites={onClickFavorites}
+        forceMobileStyle={forceMobileStyle}
       />
     ) : null
   }
@@ -122,19 +126,21 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     isStreamGated && isContentUSDCPurchaseGated(streamConditions)
 
   const topSection = (
-    <Flex gap='xl' p='l' backgroundColor='white'>
-      <Artwork collectionId={collectionId} isOwner={isOwner} />
-      <Flex
-        direction='column'
-        gap='xl'
-        justifyContent='space-between'
-        css={{ minWidth: 400 }}
-      >
+    <div className={styles.topSection}>
+      <div className={styles.artworkSection}>
+        <Artwork collectionId={collectionId} isOwner={isOwner} />
+      </div>
+      <Flex direction='column' gap='xl' className={styles.infoSection}>
         <Flex direction='column' gap='xl'>
           {isLoading ? (
             <Skeleton height='24px' width='200px' />
           ) : (
-            <Flex gap='s' mt='s' alignItems='center'>
+            <Flex
+              gap='s'
+              mt='s'
+              alignItems='center'
+              className={styles.typeLabelRow}
+            >
               {isPremium ? <IconCart size='s' color='subdued' /> : null}
               <Text variant='label' color='subdued'>
                 {isPremium ? `${messages.premiumLabel} ` : ''}
@@ -142,7 +148,11 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
               </Text>
             </Flex>
           )}
-          <Flex direction='column' gap='s'>
+          <Flex
+            direction='column'
+            gap='s'
+            className={styles.titleArtistSection}
+          >
             <Flex
               as={isOwner ? Link : 'span'}
               css={{ background: 0, border: 0, padding: 0, margin: 0 }}
@@ -186,6 +196,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
                   alignItems: 'center',
                   gap: spacing.xs
                 }}
+                className={styles.artistRow}
                 variant='title'
                 strength='weak'
                 tag='h2'
@@ -196,9 +207,10 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
               </Text>
             ) : null}
           </Flex>
-          <div>{renderStatsRow(isLoading)}</div>
+          <div className={styles.statsDesktop}>{renderStatsRow(isLoading)}</div>
         </Flex>
-
+      </Flex>
+      <div className={styles.actionsSection}>
         {isLoading ? (
           <Skeleton height='64px' width='100%' />
         ) : (
@@ -214,12 +226,12 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             onPreview={onPreview}
           />
         )}
-      </Flex>
+      </div>
       <Flex
         w='240px'
         gap='s'
         justifyContent='flex-end'
-        css={{ position: 'absolute', right: spacing.l, top: spacing.l }}
+        className={styles.searchSection}
       >
         {!isPublished ? (
           shouldShowScheduledRelease ? (
@@ -266,7 +278,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
           />
         ) : null}
       </Flex>
-    </Flex>
+    </div>
   )
 
   const descriptionSection = (
@@ -290,7 +302,11 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
           source={ModalSource.CollectionDetails}
         />
       ) : null}
-
+      {shouldShowStats ? (
+        <div className={styles.statsInDescription}>
+          {renderStatsRow(isLoading, true)}
+        </div>
+      ) : null}
       {isLoading ? (
         <Skeleton height='40px' width='100%' />
       ) : (
