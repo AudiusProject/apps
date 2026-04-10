@@ -7,6 +7,7 @@ import { RecentSearches } from 'app/screens/search-screen/RecentSearches'
 import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ArtistSpotlight } from './ArtistSpotlight'
+import { FeaturedArtistCoinTracks } from './FeaturedArtistCoinTracks'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -21,6 +22,7 @@ export const ExploreContent = () => {
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = category === 'tracks' || category === 'all'
+  const isTracksTab = category === 'tracks'
   const showPlaylistContent = category === 'playlists' || category === 'all'
   const showUserContent = category === 'users' || category === 'all'
 
@@ -28,6 +30,7 @@ export const ExploreContent = () => {
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
       {showPlaylistContent && <FeaturedPlaylists />}
+      {isTracksTab && <FeaturedArtistCoinTracks />}
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}

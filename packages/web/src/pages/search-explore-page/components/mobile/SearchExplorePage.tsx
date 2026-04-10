@@ -39,6 +39,7 @@ import {
   ViewLayout
 } from 'pages/search-page/types'
 
+import { ArtistCoinTracksSection } from '../desktop/ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
@@ -248,6 +249,7 @@ const SearchExplorePage = ({
             <RecommendedTracksSection />
           ) : null}
           {isTracksTab ? <QuickSearchGrid /> : null}
+          {isTracksTab ? <ArtistCoinTracksSection /> : null}
           {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
           ) : null}
