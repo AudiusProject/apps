@@ -33,6 +33,7 @@ import { Drawers } from './Drawers'
 import ErrorBoundary from './ErrorBoundary'
 import { ThemeProvider } from './ThemeProvider'
 import { initSentry, navigationIntegration } from './sentry'
+import { useOtaStartupRestart } from './useOtaStartupRestart'
 
 initSentry()
 
@@ -52,6 +53,8 @@ if (Platform.OS === 'android') {
 incrementSessionCount()
 
 const App = () => {
+  useOtaStartupRestart()
+
   useEffectOnce(() => {
     subscribeToNetworkStatusUpdates()
     TrackPlayer.setupPlayer({ autoHandleInterruptions: true })
