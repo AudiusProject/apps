@@ -1,4 +1,5 @@
-import { HedgehogWalletNotFoundError, Id } from '@audius/sdk'
+import { HedgehogWalletNotFoundError } from '@audius/sdk/full'
+import { Id } from '@audius/sdk'
 import { SagaIterator } from 'redux-saga'
 import {
   call,

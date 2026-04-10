@@ -1,4 +1,4 @@
-import { Hex } from 'viem'
+import type { Hex } from 'viem'
 
 import type { AudiusWalletClient } from '../AudiusWalletClient'
 import type { LoggerService } from '../Logger'

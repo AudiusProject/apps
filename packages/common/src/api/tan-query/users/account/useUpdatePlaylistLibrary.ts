@@ -1,4 +1,4 @@
-import { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { useQueryClient, useMutation, QueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from 'redux'

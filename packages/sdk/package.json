@@ -20,7 +20,37 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "browser": {
-    "./dist/index.esm.js": "./dist/index.browser.esm.js"
+    "./dist/index.esm.js": "./dist/index.browser.esm.js",
+    "./dist/full.esm.js": "./dist/full.browser.esm.js"
+  },
+  "exports": {
+    ".": {
+      "react-native": "./dist/index.native.js",
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.browser.esm.js"
+      },
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "default": "./dist/index.esm.js"
+    },
+    "./full": {
+      "react-native": "./dist/full.native.js",
+      "browser": {
+        "types": "./dist/full.d.ts",
+        "default": "./dist/full.browser.esm.js"
+      },
+      "types": "./dist/full.d.ts",
+      "import": "./dist/full.esm.js",
+      "default": "./dist/full.esm.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "full": [
+        "./dist/full.d.ts"
+      ]
+    }
   },
   "browserslist": {
     "production": [

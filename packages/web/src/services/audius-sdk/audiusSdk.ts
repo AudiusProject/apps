@@ -4,7 +4,7 @@ import {
   Configuration,
   SolanaRelay,
   ArchiverService
-} from '@audius/sdk'
+} from '@audius/sdk/full'
 import { createWalletClient, custom, RpcRequestError } from 'viem'
 import { mainnet } from 'viem/chains'
 import { getHttpRpcClient } from 'viem/utils'

@@ -133,6 +133,98 @@ export const outputConfigs = {
   },
 
   /**
+   * Full SDK Node Package (ES Module)
+   * Includes createSdkWithServices, all services, Solana programs, etc.
+   * Used by internal consumers (web, mobile, commands) via @audius/sdk/full
+   */
+  sdkFullConfigEs: {
+    input: 'src/full.ts',
+    output: [
+      {
+        dir: 'dist',
+        format: 'es',
+        sourcemap: true,
+        entryFileNames: 'full.esm.js'
+      }
+    ],
+    plugins: [
+      resolve({ extensions, preferBuiltins: true }),
+      commonjs({ extensions }),
+      babel({ babelHelpers: 'bundled', extensions }),
+      json(),
+      pluginTypescript
+    ],
+    external
+  },
+
+  /**
+   * Full SDK React Native Package
+   * Used by the Audius React Native client via @audius/sdk/full
+   */
+  sdkFullConfigReactNative: {
+    input: { full: 'src/full.native.ts' },
+    output: [
+      {
+        dir: 'dist',
+        format: 'es',
+        sourcemap: true,
+        entryFileNames: '[name].native.js'
+      }
+    ],
+    plugins: [
+      ignore(['graceful-fs', 'node-localstorage']),
+      resolve({ extensions, preferBuiltins: true }),
+      commonjs({ extensions }),
+      alias({
+        entries: [{ find: 'stream', replacement: 'stream-browserify' }]
+      }),
+      babel({ babelHelpers: 'bundled', extensions, plugins: [] }),
+      json(),
+      pluginTypescript
+    ],
+    external
+  },
+
+  /**
+   * Full SDK Browser Package (ES Module)
+   * Used by the Audius Web Client via @audius/sdk/full
+   */
+  sdkFullBrowserConfigEs: {
+    input: 'src/full.ts',
+    output: [
+      {
+        dir: 'dist',
+        format: 'es',
+        sourcemap: true,
+        entryFileNames: 'full.browser.esm.js'
+      }
+    ],
+    plugins: [
+      ignore(['graceful-fs', 'node-localstorage']),
+      resolve({ extensions, preferBuiltins: false }),
+      commonjs({
+        extensions,
+        transformMixedEsModules: true
+      }),
+      alias({
+        entries: [
+          { find: 'stream', replacement: 'stream-browserify' },
+          { find: 'crypto', replacement: 'crypto-browserify' }
+        ]
+      }),
+      nodePolyfills(),
+      babel({ babelHelpers: 'bundled', extensions }),
+      json(),
+      pluginTypescript,
+      visualizer({
+        filename: 'dist/sdk.full.browser.esm.html',
+        template: 'sunburst'
+      })
+    ],
+    external: external.filter((dep) => !browserInternal.includes(dep))
+  },
+
+  /**
    * SDK Browser Distributable
    * Meant to be used directly in the browser without any module resolver
    * - Includes polyfills for node libraries

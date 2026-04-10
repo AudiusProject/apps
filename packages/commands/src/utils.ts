@@ -8,7 +8,7 @@ import {
   decodeHashId,
   ResponseError,
   type LoggerService
-} from '@audius/sdk'
+} from '@audius/sdk/full'
 
 import {
   Hedgehog,

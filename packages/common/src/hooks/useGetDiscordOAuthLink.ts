@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { AudiusSdkWithServices } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 
 import { useQueryContext } from '~/api'
 import { Env } from '~/services/env'

@@ -1,36 +1,25 @@
+/**
+ * Full SDK entry point for React Native — includes everything from the full
+ * barrel plus native-specific defaults (AsyncStorage, expo-web-browser).
+ *
+ * Internal React Native consumers should import from '@audius/sdk/full'.
+ */
 import type { AudiusSdk } from './sdk'
 import { createSdk } from './sdk/createSdk'
 import { TokenStoreAsyncStorage } from './sdk/oauth/TokenStoreAsyncStorage'
 import type { SdkConfig } from './sdk/types'
 
-export * from './sdk/index.lite'
+export * from './sdk'
 
-/**
- * Creates the Audius SDK configured for React Native / Expo.
- *
- * Defaults:
- * - `tokenStore`: AsyncStorage-backed (tokens survive app restarts)
- * - `openUrl`: `expo-web-browser` openAuthSessionAsync, which opens an
- *   isolated ASWebAuthenticationSession (iOS) / Chrome Custom Tab (Android).
- *   This bypasses OS universal-link interception so the Audius native app
- *   never intercepts the OAuth consent page, and the redirect URL is returned
- *   directly to the SDK without relying on a Linking deep-link event.
- */
 export const sdk = (config: SdkConfig): AudiusSdk => {
   const tokenStore = new TokenStoreAsyncStorage()
 
-  // `let` with a definite-assignment assertion is required here because
-  // defaultOpenUrl closes over sdkInstance, which is assigned on the very
-  // next line. login() can only be called after sdk() returns, so
-  // sdkInstance is always initialised before defaultOpenUrl is invoked.
   // eslint-disable-next-line prefer-const
   let sdkInstance!: AudiusSdk
 
   const defaultOpenUrl = async (url: string) => {
     let WebBrowser: any
     try {
-      // Use require() instead of dynamic import() so Metro can resolve the
-      // module statically via extraNodeModules / resolveRequest at bundle time.
       WebBrowser = require('expo-web-browser')
     } catch (error) {
       const message =

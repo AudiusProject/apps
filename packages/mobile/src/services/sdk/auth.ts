@@ -2,7 +2,7 @@ import {
   createAuthService,
   createHedgehogSolanaWalletService
 } from '@audius/common/services'
-import { createHedgehogWalletClient } from '@audius/sdk'
+import { createHedgehogWalletClient } from '@audius/sdk/full'
 
 import { env } from 'app/services/env'
 

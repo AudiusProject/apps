@@ -6,7 +6,7 @@ import {
   createSdkWithServices,
   type AudiusSdkWithServices,
   ArchiverService
-} from '@audius/sdk'
+} from '@audius/sdk/full'
 
 import { env } from 'app/services/env'
 
