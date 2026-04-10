@@ -36,6 +36,7 @@ import {
   IconShare,
   IconRocket,
   Button,
+  IconButton,
   MusicBadge,
   Paper,
   PlainButton,
@@ -86,8 +87,6 @@ const messages = {
   makePublic: 'MAKE PUBLIC',
   releaseNow: 'RELEASE NOW',
   isPublishing: 'PUBLISHING',
-  repostButtonText: 'repost',
-  repostedButtonText: 'reposted',
   unplayed: 'Unplayed',
   timeLeft: 'left',
   played: 'Played',
@@ -274,14 +273,15 @@ export const GiantTrackTile = ({
     const shouldShow =
       (!isUnlisted && !isPublishing) || fieldVisibility.share || isOwner
     return shouldShow ? (
-      <Button
-        variant='secondary'
-        iconLeft={IconShare}
-        widthToHideText={BUTTON_COLLAPSE_WIDTHS.first}
-        onClick={onShare}
-      >
-        share
-      </Button>
+      <Tooltip text='Share'>
+        <IconButton
+          aria-label='Share'
+          icon={IconShare}
+          color='subdued'
+          size='2xl'
+          onClick={onShare}
+        />
+      </Tooltip>
     ) : null
   }
 
@@ -344,18 +344,15 @@ export const GiantTrackTile = ({
             text={isReposted ? 'Unrepost' : 'Repost'}
           >
             <div>
-              <Button
-                variant={isReposted ? 'primary' : 'secondary'}
+              <IconButton
+                aria-label={isReposted ? 'Unrepost' : 'Repost'}
                 name='repost'
                 disabled={isOwner}
-                widthToHideText={BUTTON_COLLAPSE_WIDTHS.second}
-                iconLeft={IconRepost}
+                icon={IconRepost}
+                color={isReposted ? 'active' : 'subdued'}
+                size='2xl'
                 onClick={onRepost}
-              >
-                {isReposted
-                  ? messages.repostedButtonText
-                  : messages.repostButtonText}
-              </Button>
+              />
             </div>
           </Tooltip>
         </Toast>
@@ -379,16 +376,15 @@ export const GiantTrackTile = ({
             text={isSaved ? 'Unfavorite' : 'Favorite'}
           >
             <div>
-              <Button
+              <IconButton
+                aria-label={isSaved ? 'Unfavorite' : 'Favorite'}
                 name='favorite'
                 disabled={isOwner}
-                variant={isSaved ? 'primary' : 'secondary'}
-                widthToHideText={BUTTON_COLLAPSE_WIDTHS.third}
-                iconLeft={IconHeart}
+                icon={IconHeart}
+                color={isSaved ? 'active' : 'subdued'}
+                size='2xl'
                 onClick={toggleSaveTrack}
-              >
-                {isSaved ? 'favorited' : 'favorite'}
-              </Button>
+              />
             </div>
           </Tooltip>
         </Toast>
@@ -568,32 +564,35 @@ export const GiantTrackTile = ({
             </Flex>
           </Flex>
           {isUnlisted && !isOwner ? null : (
-            <div
-              className={cn(styles.actionButtons, fadeIn)}
+            <Flex
+              gap='2xl'
+              alignItems='center'
+              className={cn(fadeIn)}
               role='group'
               aria-label={messages.actionGroupLabel}
             >
-              {renderShareButton()}
-              {renderMakePublicButton()}
               {hasStreamAccess && renderRepostButton()}
               {hasStreamAccess && renderFavoriteButton()}
+              {renderShareButton()}
+              {renderMakePublicButton()}
               <span>
                 {/* prop types for overflow menu don't work correctly
               so we need to cast here */}
                 <Menu {...(overflowMenu as any)}>
                   {(ref, triggerPopup) => (
                     <div className={cn(styles.menuKebabContainer)} ref={ref}>
-                      <Button
-                        variant='secondary'
+                      <IconButton
                         aria-label='More options'
-                        iconLeft={IconKebabHorizontal}
+                        icon={IconKebabHorizontal}
+                        color='subdued'
+                        size='2xl'
                         onClick={() => triggerPopup()}
                       />
                     </div>
                   )}
                 </Menu>
               </span>
-            </div>
+            </Flex>
           )}
         </Flex>
         <Flex
@@ -638,9 +637,8 @@ export const GiantTrackTile = ({
         backgroundColor='surface1'
         borderTop='default'
         className={cn(fadeIn)}
-        gap='m'
+        gap='l'
       >
-        <TrackMetadataList trackId={trackId} />
         {description ? (
           <Flex column gap='m'>
             {/* Container with height transition */}
@@ -681,6 +679,8 @@ export const GiantTrackTile = ({
             )}
           </Flex>
         ) : null}
+
+        <TrackMetadataList trackId={trackId} />
 
         {renderTags()}
       </Flex>
