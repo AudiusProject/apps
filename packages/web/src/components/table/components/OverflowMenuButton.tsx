@@ -30,7 +30,13 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     uid,
     ...other
   } = props
-  const { includeEdit = true, isFavorited, isOwnerDeactivated, trackId } = other
+  const {
+    includeDelete = true,
+    includeEdit = true,
+    isFavorited,
+    isOwnerDeactivated,
+    trackId
+  } = other
 
   const removeMenuItem = {
     text: removeText,
@@ -45,6 +51,7 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     ...other,
     type: 'track' as const,
     mount: 'page',
+    includeDelete: onRemove ? false : includeDelete,
     includeEdit,
     extraMenuItems: onRemove ? [removeMenuItem] : []
   }
