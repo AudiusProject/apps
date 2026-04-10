@@ -224,7 +224,7 @@ const renderBuyCell = (
 const tableColumnMap = {
   tokenName: {
     id: 'tokenName',
-    Header: () => <Flex css={{ paddingLeft: 36 }}>Coin</Flex>,
+    Header: () => <Flex css={{ paddingLeft: 24 }}>Coin</Flex>,
     accessor: 'name',
     Cell: renderTokenNameCell,
     minWidth: 220,
@@ -235,7 +235,7 @@ const tableColumnMap = {
   },
   artist: {
     id: 'artist',
-    Header: () => <Flex css={{ paddingLeft: 12 }}>Artist</Flex>,
+    Header: () => <Flex css={{ paddingLeft: 0 }}>Artist</Flex>,
     accessor: 'ownerId',
     Cell: renderArtistCell,
     minWidth: 140,

@@ -196,10 +196,7 @@ export const Table = ({
 
   const getColumnId = (column: any) => {
     if (typeof column?.id === 'string' && column.id.length > 0) return column.id
-    if (
-      typeof column?.accessor === 'string' &&
-      column.accessor.length > 0
-    ) {
+    if (typeof column?.accessor === 'string' && column.accessor.length > 0) {
       return column.accessor
     }
     return null

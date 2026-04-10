@@ -82,17 +82,11 @@ export const getHiddenResponsiveColumns = ({
 
     if (!activeBreakpoint) return new Set<string>()
 
-    return new Set(
-      activeBreakpoint.hide.filter((id) => !alwaysVisible.has(id))
-    )
+    return new Set(activeBreakpoint.hide.filter((id) => !alwaysVisible.has(id)))
   }
 
   const hideOrder = responsiveColumns.hideOrder ?? []
-  if (
-    !hideOrder.length ||
-    !isNumber(containerWidth) ||
-    containerWidth <= 0
-  ) {
+  if (!hideOrder.length || !isNumber(containerWidth) || containerWidth <= 0) {
     return new Set<string>()
   }
 

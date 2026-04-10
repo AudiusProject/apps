@@ -11,7 +11,10 @@ import styles from '../PayAndEarnPage.module.css'
 import { PurchaseCell, PurchaseRow } from '../types'
 import { isEmptyPurchaseRow } from '../utils'
 
-import { PurchaseArtistLink, TrackNameWithArtwork } from './TrackNameWithArtwork'
+import {
+  PurchaseArtistLink,
+  TrackNameWithArtwork
+} from './TrackNameWithArtwork'
 import artworkStyles from './TrackNameWithArtwork.module.css'
 
 export type PurchasesTableColumn =
@@ -77,7 +80,9 @@ const renderValueCell = (cellInfo: PurchaseCell) => {
 const tableColumnMap = {
   contentName: {
     id: 'contentName',
-    Header: <span className={artworkStyles.contentHeaderWithArtwork}>Purchases</span>,
+    Header: (
+      <span className={artworkStyles.contentHeaderWithArtwork}>Purchases</span>
+    ),
     accessor: 'contentId',
     Cell: renderContentNameCell,
     width: 480,

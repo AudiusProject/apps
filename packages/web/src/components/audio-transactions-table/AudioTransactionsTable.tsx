@@ -14,8 +14,8 @@ import { Cell, Row } from 'react-table'
 
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { Table } from 'components/table'
-import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TableProps } from 'components/table/Table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 
 import styles from './AudioTransactionsTable.module.css'
 

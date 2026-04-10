@@ -78,37 +78,35 @@ type MiniTrackArtworkProps = {
   isLocked: boolean
 }
 
-const MiniTrackArtwork = memo(({
-  trackId,
-  isPlaying,
-  isLocked
-}: MiniTrackArtworkProps) => {
-  const { imageUrl, hasNoArtwork } = useTrackCoverArt({
-    trackId,
-    size: SquareSizes.SIZE_150_BY_150
-  })
+const MiniTrackArtwork = memo(
+  ({ trackId, isPlaying, isLocked }: MiniTrackArtworkProps) => {
+    const { imageUrl, hasNoArtwork } = useTrackCoverArt({
+      trackId,
+      size: SquareSizes.SIZE_150_BY_150
+    })
 
-  const IconComponent = hasNoArtwork
-    ? IconImage
-    : isLocked
-      ? IconLock
-      : isPlaying
-        ? IconPause
-        : IconPlay
+    const IconComponent = hasNoArtwork
+      ? IconImage
+      : isLocked
+        ? IconLock
+        : isPlaying
+          ? IconPause
+          : IconPlay
 
-  return (
-    <div className={styles.inlineArtworkContainer}>
-      <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
-      <div
-        className={cn(styles.inlineArtworkIcon, {
-          [styles.inlineArtworkIconActive]: isPlaying
-        })}
-      >
-        <IconComponent size='m' color='staticWhite' />
+    return (
+      <div className={styles.inlineArtworkContainer}>
+        <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
+        <div
+          className={cn(styles.inlineArtworkIcon, {
+            [styles.inlineArtworkIconActive]: isPlaying
+          })}
+        >
+          <IconComponent size='m' color='staticWhite' />
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 MiniTrackArtwork.displayName = 'MiniTrackArtwork'
 
 export type TracksTableColumn =
@@ -207,30 +205,27 @@ export const TracksTable = ({
   const [, setGatedModalVisibility] = useModalState('LockedContent')
 
   // Cell Render Functions
-  const renderPlayButtonCell = useCallback(
-    (cellInfo: TrackCell) => {
-      const index = cellInfo.row.index
-      const active = index === activeIndexRef.current
-      const track = cellInfo.row.original
-      const isTrackPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
-      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+  const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
+    const index = cellInfo.row.index
+    const active = index === activeIndexRef.current
+    const track = cellInfo.row.original
+    const isTrackPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+    const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
+      track.track_id
+    ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+    const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
-      return (
-        <TablePlayButton
-          className={cn(styles.tablePlayButton, { [styles.active]: active })}
-          paused={!playingRef.current}
-          playing={active}
-          hideDefault={false}
-          isTrackPremium={isTrackPremium}
-          isLocked={isLocked}
-        />
-      )
-    },
-    []
-  )
+    return (
+      <TablePlayButton
+        className={cn(styles.tablePlayButton, { [styles.active]: active })}
+        paused={!playingRef.current}
+        playing={active}
+        hideDefault={false}
+        isTrackPremium={isTrackPremium}
+        isLocked={isLocked}
+      />
+    )
+  }, [])
 
   const renderTrackNameCell = useCallback(
     (cellInfo: TrackCell) => {
@@ -241,11 +236,11 @@ export const TracksTable = ({
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
       const user = track.user
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
       const artistRow = showArtistInTrackNameColumn ? (
@@ -348,33 +343,30 @@ export const TracksTable = ({
     [showArtistInTrackNameColumn]
   )
 
-  const renderArtistNameCell = useCallback(
-    (cellInfo: TrackCell) => {
-      const { original: track, index } = cellInfo.row
-      const { user } = track
-      if (!user) {
-        return 'Unknown'
-      }
-      if (user?.is_deactivated) {
-        return `${user?.name} [Deactivated]`
-      }
+  const renderArtistNameCell = useCallback((cellInfo: TrackCell) => {
+    const { original: track, index } = cellInfo.row
+    const { user } = track
+    if (!user) {
+      return 'Unknown'
+    }
+    if (user?.is_deactivated) {
+      return `${user?.name} [Deactivated]`
+    }
 
-      return (
-        <div className={styles.artistCellContainer}>
-          <UserLink
-            className={styles.textCell}
-            userId={user.user_id}
-            size='s'
-            strength='strong'
-            variant={index === activeIndexRef.current ? 'visible' : 'default'}
-            badgeSize='xs'
-            popover
-          />
-        </div>
-      )
-    },
-    []
-  )
+    return (
+      <div className={styles.artistCellContainer}>
+        <UserLink
+          className={styles.textCell}
+          userId={user.user_id}
+          size='s'
+          strength='strong'
+          variant={index === activeIndexRef.current ? 'visible' : 'default'}
+          badgeSize='xs'
+          popover
+        />
+      </div>
+    )
+  }, [])
 
   const renderPlaysCell = useCallback(
     (cellInfo: TrackCell) => {
@@ -474,11 +466,11 @@ export const TracksTable = ({
   const renderFavoriteButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -512,11 +504,11 @@ export const TracksTable = ({
   const renderRepostButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -555,11 +547,11 @@ export const TracksTable = ({
       const track = cellInfo.row.original
       const { stream_conditions: streamConditions, is_unlisted: isUnlisted } =
         track
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isOwner = track.owner_id === userId
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isDdex = !!track.ddex_app
@@ -631,13 +623,7 @@ export const TracksTable = ({
         </>
       )
     },
-    [
-      shouldShowGatedType,
-      disabledTrackEdit,
-      isAlbumPage,
-      removeText,
-      userId
-    ]
+    [shouldShowGatedType, disabledTrackEdit, isAlbumPage, removeText, userId]
   )
 
   const onClickPremiumPill = useCallback(
@@ -664,11 +650,11 @@ export const TracksTable = ({
   const renderLockedButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isLockedPremium =
         isLocked && isContentUSDCPurchaseGated(track.stream_conditions)
@@ -697,21 +683,17 @@ export const TracksTable = ({
         />
       )
     },
-    [
-      onClickGatedPill,
-      onClickPremiumPill,
-      userId
-    ]
+    [onClickGatedPill, onClickPremiumPill, userId]
   )
 
   const renderTrackActions = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
       return (
@@ -957,6 +939,7 @@ export const TracksTable = ({
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,
+      showArtistInTrackNameColumn,
       renderTrackNameCell,
       renderSavedDateCell
     ]
@@ -970,11 +953,11 @@ export const TracksTable = ({
   const handleClickRow = useCallback(
     (e: MouseEvent<HTMLTableRowElement>, rowInfo: TrackRow, index: number) => {
       const track = rowInfo.original
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
       const deleted =
@@ -991,25 +974,23 @@ export const TracksTable = ({
     []
   )
 
-  const getRowClassName = useCallback(
-    (rowIndex: number) => {
-      const track = dataRef.current[rowIndex]
-      const { isFetchingNFTAccess, hasStreamAccess } =
-        trackAccessMapRef.current[track.track_id] ?? {
-          isFetchingNFTAccess: false,
-          hasStreamAccess: true
-        }
-      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-      const deleted =
-        track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
-      const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      return cn(styles.tableRow, {
-        [styles.disabled]: deleted,
-        [styles.lockedRow]: isLocked && !deleted && !isPremium
-      })
-    },
-    []
-  )
+  const getRowClassName = useCallback((rowIndex: number) => {
+    const track = dataRef.current[rowIndex]
+    const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
+      track.track_id
+    ] ?? {
+      isFetchingNFTAccess: false,
+      hasStreamAccess: true
+    }
+    const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+    const deleted =
+      track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
+    const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+    return cn(styles.tableRow, {
+      [styles.disabled]: deleted,
+      [styles.lockedRow]: isLocked && !deleted && !isPremium
+    })
+  }, [])
 
   return (
     <Table

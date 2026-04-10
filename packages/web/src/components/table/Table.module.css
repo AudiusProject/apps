@@ -72,6 +72,7 @@
 
 .tableHeader.leftAlign .headerContent {
   justify-content: flex-start;
+  padding-left: 12px;
 }
 
 .tableHeader.rightAlign .headerContent {
