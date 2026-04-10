@@ -522,6 +522,23 @@ export const AudioPlayer = () => {
             }
           }
         }
+      } else if (playerIndex === queueIndex) {
+        // Manual skip (next/previous button): queue index was already updated
+        // by the reducer, so playerIndex === queueIndex. Update player info
+        // directly to avoid relying on the saga chain (which uses a web audio
+        // shim that is a no-op on mobile).
+        const { track, playerBehavior } = queueTracks[playerIndex] ?? {}
+        if (track && queueTrackUids[playerIndex] !== uid) {
+          const { shouldPreview } = calculatePlayerBehavior(
+            track,
+            playerBehavior
+          )
+          updatePlayerInfo({
+            previewing: shouldPreview,
+            trackId: track.track_id,
+            uid: queueTrackUids[playerIndex]
+          })
+        }
       }
 
       const isLongFormContent =

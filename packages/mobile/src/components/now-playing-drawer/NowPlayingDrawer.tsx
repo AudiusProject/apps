@@ -243,9 +243,8 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       dispatch(seek({ seconds: Math.min(track.duration, newPosition) }))
     } else {
       dispatch(next({ skip: true }))
-      setMediaKey((mediaKey) => mediaKey + 1)
     }
-  }, [dispatch, setMediaKey, track])
+  }, [dispatch, track])
 
   const onPrevious = useCallback(async () => {
     const { position: currentPosition } = await TrackPlayer.getProgress()
@@ -258,12 +257,11 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       const shouldGoToPrevious = currentPosition < RESTART_THRESHOLD_SEC
       if (shouldGoToPrevious) {
         dispatch(previous())
-        setMediaKey((mediaKey) => mediaKey + 1)
       } else {
         dispatch(reset({ shouldAutoplay: true }))
       }
     }
-  }, [dispatch, setMediaKey, track])
+  }, [dispatch, track])
 
   const onPressScrubberIn = useCallback(() => {
     setIsGestureEnabled(false)
