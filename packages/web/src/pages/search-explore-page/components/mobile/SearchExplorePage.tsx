@@ -172,15 +172,11 @@ const SearchExplorePage = ({
   }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent =
-    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
-  const showPlaylistContent =
-    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
-  const showUserContent =
-    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
   const isTracksTab = categoryKey === CategoryView.TRACKS
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
+  const isProfilesTab = categoryKey === CategoryView.PROFILES
+  const isSubPage = categoryKey !== CategoryView.ALL
 
   return (
     <MobilePageContainer
@@ -244,24 +240,26 @@ const SearchExplorePage = ({
           gap='2xl'
           css={{ display: showSearchResults ? 'none' : undefined }}
         >
-          {showTrackContent && showUserContextualContent ? (
+          {isTracksTab && showUserContextualContent ? (
             <RecommendedTracksSection />
           ) : null}
           {isTracksTab ? <QuickSearchGrid /> : null}
-          {showTrackContent && showUserContextualContent ? (
+          {isTracksTab && showUserContextualContent ? (
             <RecentlyPlayedSection />
           ) : null}
-          {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
-          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
-          {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+          {isPlaylistsTab ? <FeaturedPlaylistsSection /> : null}
+          {isProfilesTab ? <FanClubsExploreSection /> : null}
+          {isTracksTab ? <FeaturedRemixContestsSection /> : null}
           {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
-          {showUserContent ? <ArtistSpotlightSection /> : null}
-          {showUserContent ? <LabelSpotlightSection /> : null}
+          {isProfilesTab ? <ArtistSpotlightSection /> : null}
+          {isProfilesTab ? <LabelSpotlightSection /> : null}
           {isTracksTab || isPlaylistsTab || isAlbumsTab ? <MoodGrid /> : null}
-          {showTrackContent && showUserContextualContent ? (
+          {isTracksTab && showUserContextualContent ? (
             <FeelingLuckySection />
           ) : null}
-          {showUserContextualContent ? <RecentSearchesSection /> : null}
+          {isSubPage && showUserContextualContent ? (
+            <RecentSearchesSection />
+          ) : null}
         </Flex>
       </Flex>
     </MobilePageContainer>
