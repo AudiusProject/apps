@@ -418,13 +418,11 @@ function* watchNext() {
               playerBehavior
             })
           )
-          const queueCollectionId = yield* select(getCollectionId)
+          const collId = yield* select(getCollectionId)
           const event = make(Name.PLAYBACK_PLAY, {
             id: `${id}`,
             source: PlaybackSource.PASSIVE,
-            ...(queueCollectionId
-              ? { collectionId: queueCollectionId }
-              : {})
+            ...(collId ? { collectionId: collId } : {})
           })
           yield* put(event)
         }
@@ -512,13 +510,11 @@ function* watchPrevious() {
               playerBehavior
             })
           )
-          const queueCollectionId = yield* select(getCollectionId)
+          const collId = yield* select(getCollectionId)
           const event = make(Name.PLAYBACK_PLAY, {
             id: `${id}`,
             source: PlaybackSource.PASSIVE,
-            ...(queueCollectionId
-              ? { collectionId: queueCollectionId }
-              : {})
+            ...(collId ? { collectionId: collId } : {})
           })
           yield* put(event)
         } else {
