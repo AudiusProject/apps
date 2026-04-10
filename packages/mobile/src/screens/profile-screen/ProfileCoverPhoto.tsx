@@ -2,10 +2,7 @@ import { useCallback } from 'react'
 
 import { useCurrentUserId, useProfileUser } from '@audius/common/api'
 import { ShareSource } from '@audius/common/models'
-import {
-  modalsActions,
-  shareModalUIActions
-} from '@audius/common/store'
+import { modalsActions, shareModalUIActions } from '@audius/common/store'
 import { BlurView } from '@react-native-community/blur'
 import { StyleSheet } from 'react-native'
 import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'

@@ -17,6 +17,7 @@ import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryCo
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { OfflinePlaceholder } from 'app/components/offline-placeholder'
 import { useRoute } from 'app/hooks/useRoute'
+import { useStatusBarStyle } from 'app/hooks/useStatusBarStyle'
 import { makeStyles } from 'app/styles'
 
 import { DeactivatedProfileTombstone } from './DeactivatedProfileTombstone'
@@ -92,6 +93,7 @@ export const ProfileScreen = () => {
   )
 
   useFocusEffect(setCurrentUser)
+  useStatusBarStyle('light-content')
 
   const renderHeader = useCallback(() => <ProfileHeader />, [])
 
