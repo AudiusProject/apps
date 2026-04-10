@@ -75,12 +75,16 @@ const useParsedQueryParams = () => {
 
   const scope = collapseScopes(rawScope)
 
-  const apiKey =
-    typeof api_key === 'string'
-      ? api_key
-      : typeof client_id === 'string'
-        ? client_id
-        : undefined
+  const apiKey = (() => {
+    const raw =
+      typeof api_key === 'string'
+        ? api_key
+        : typeof client_id === 'string'
+          ? client_id
+          : undefined
+    if (raw?.toLowerCase().startsWith('0x')) return raw.slice(2)
+    return raw
+  })()
 
   const parsedRedirectUri = useMemo<'postmessage' | URL | null>(() => {
     if (redirectUri && typeof redirectUri === 'string') {

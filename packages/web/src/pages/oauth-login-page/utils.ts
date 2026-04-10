@@ -41,11 +41,12 @@ export const getIsRedirectValid = ({
 
 export const isValidApiKey = (key: string | string[]) => {
   if (Array.isArray(key)) return false
-  if (key.length !== 40) {
+  const normalized = key.toLowerCase().startsWith('0x') ? key.slice(2) : key
+  if (normalized.length !== 40) {
     return false
   }
   const hexadecimalRegex = /^[0-9a-fA-F]+$/
-  return hexadecimalRegex.test(key)
+  return hexadecimalRegex.test(normalized)
 }
 
 const getFormattedAppAddress = ({
