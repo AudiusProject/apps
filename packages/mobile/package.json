@@ -217,8 +217,13 @@
   },
   "jest": {
     "preset": "react-native",
-    "setupFilesAfterEnv": [
-      "@testing-library/jest-native/extend-expect"
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "moduleNameMapper": {
+      "^react-native$": "<rootDir>/node_modules/react-native",
+      "^@testing-library/react-native$": "<rootDir>/node_modules/@testing-library/react-native"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-reanimated)/)"
     ],
     "moduleFileExtensions": [
       "ts",
