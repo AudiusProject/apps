@@ -7,8 +7,9 @@ import { audiusSdk } from 'app/services/sdk/audius-sdk'
 // ─── URL / key validation ─────────────────────────────────────────────────────
 
 export const isValidApiKey = (key: string) => {
-  if (key.length !== 40) return false
-  return /^[0-9a-fA-F]+$/.test(key)
+  const normalized = key.toLowerCase().startsWith('0x') ? key.slice(2) : key
+  if (normalized.length !== 40) return false
+  return /^[0-9a-fA-F]+$/.test(normalized)
 }
 
 export const getIsRedirectValid = (
