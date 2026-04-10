@@ -11,6 +11,7 @@ import { Cell, Row } from 'react-table'
 
 import { TextLink } from 'components/link'
 import { Table, alphaSorter, dateSorter, numericSorter } from 'components/table'
+import type { TableProps } from 'components/table/Table'
 
 import styles from './CollectionsTable.module.css'
 import { CollectionsTableOverflowMenuButton } from './CollectionsTableOverflowMenuButton'
@@ -48,6 +49,7 @@ type CollectionsTableProps = {
   showMoreLimit?: number
   totalRowCount?: number
   tableHeaderClassName?: string
+  responsiveColumns?: TableProps['responsiveColumns']
 }
 
 const defaultColumns: CollectionsTableColumn[] = [
@@ -75,7 +77,8 @@ export const CollectionsTable = ({
   scrollRef,
   showMoreLimit,
   totalRowCount,
-  tableHeaderClassName
+  tableHeaderClassName,
+  responsiveColumns
 }: CollectionsTableProps) => {
   // Cell Render Functions
   const renderNameCell = useCallback((cellInfo: CollectionCell) => {
@@ -262,6 +265,7 @@ export const CollectionsTable = ({
       showMoreLimit={showMoreLimit}
       totalRowCount={totalRowCount}
       tableHeaderClassName={tableHeaderClassName}
+      responsiveColumns={responsiveColumns}
     />
   )
 }

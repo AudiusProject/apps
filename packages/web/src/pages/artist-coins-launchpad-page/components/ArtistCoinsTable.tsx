@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
@@ -33,6 +33,7 @@ import { Cell } from 'react-table'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { getScrollParent } from 'utils/scrollParent'
@@ -332,7 +333,6 @@ export const ArtistCoinsTable = ({
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
   const { env } = useQueryContext()
-  const tableRef = useRef<HTMLDivElement | null>(null)
   const externalWalletAddress = useExternalWalletAddress()
   const { data: externalUsdcBalance } = useExternalWalletBalance({
     mint: env.USDC_MINT_ADDRESS,
@@ -346,7 +346,6 @@ export const ArtistCoinsTable = ({
     externalUsdcBalance,
     externalAudioBalance
   })
-  const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -394,61 +393,8 @@ export const ArtistCoinsTable = ({
     return (getScrollParent(scrollContainerRef.current) as HTMLElement) ?? null
   }, [mainContentRef])
 
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
-
-  const updateColumnVisibility = useCallback(() => {
-    if (!tableRef.current) return
-    const width = tableRef.current.offsetWidth
-    if (width < 728) {
-      setHiddenColumns([
-        tableColumnMap.totalVolumeUSD.id,
-        tableColumnMap.marketCap.id,
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 866) {
-      setHiddenColumns([
-        tableColumnMap.marketCap.id,
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 972) {
-      setHiddenColumns([
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 1074) {
-      setHiddenColumns([tableColumnMap.holders.id])
-    } else {
-      setHiddenColumns(null)
-    }
-  }, [])
-
-  const setTableNode = useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollContainerRef.current = node
-      if (resizeObserverRef.current && tableRef.current) {
-        resizeObserverRef.current.unobserve(tableRef.current)
-      }
-      tableRef.current = node
-      if (!node) return
-
-      if (!resizeObserverRef.current) {
-        resizeObserverRef.current = new ResizeObserver(() => {
-          updateColumnVisibility()
-        })
-      }
-      resizeObserverRef.current.observe(node)
-      updateColumnVisibility()
-    },
-    [updateColumnVisibility]
-  )
-
-  useEffect(() => {
-    return () => {
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-    }
+  const setTableNode = useCallback((node: HTMLDivElement | null) => {
+    scrollContainerRef.current = node
   }, [])
 
   const onSort = useCallback(
@@ -489,10 +435,8 @@ export const ArtistCoinsTable = ({
       ...baseColumns.buy,
       Cell: (cellInfo: CoinCell) => renderBuyCell(cellInfo, handleBuy)
     }
-    return Object.values(baseColumns).filter(
-      (column) => !hiddenColumns?.includes(column.id)
-    )
-  }, [handleBuy, hiddenColumns])
+    return Object.values(baseColumns)
+  }, [handleBuy])
 
   const showEmptyState = !isPending && (!coins || coins.length === 0)
 
@@ -537,6 +481,7 @@ export const ArtistCoinsTable = ({
             fetchMore={loadNextPage}
             fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
             tableHeaderClassName={styles.tableHeader}
+            responsiveColumns={RESPONSIVE_TABLE_POLICIES.artistCoinsLeaderboard}
             scrollRef={mainContentRef}
           />
         </Flex>

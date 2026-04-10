@@ -42,5 +42,6 @@ export type TracksTableProps = {
   onReorder?: (source: number, destination: number) => void
   onSort?: (...props: any[]) => void
   columns?: TracksTableColumn[]
+  showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: TrackWithUID, index: number) => void
 } & Omit<TableProps, 'onClickRow' | 'columns'>

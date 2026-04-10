@@ -1,8 +1,11 @@
+import { ReactNode } from 'react'
+
 import { useCollection, useTrack } from '@audius/common/api'
 import { SquareSizes, USDCContentPurchaseType } from '@audius/common/models'
 import { Skeleton, Text } from '@audius/harmony'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { UserLink } from 'components/link'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -10,10 +13,12 @@ import styles from './TrackNameWithArtwork.module.css'
 
 export const TrackNameWithArtwork = ({
   id,
-  contentType
+  contentType,
+  secondary
 }: {
   id: number
   contentType: USDCContentPurchaseType
+  secondary?: ReactNode
 }) => {
   const isTrack = contentType === USDCContentPurchaseType.TRACK
   const { data: trackTitle, isPending: isTrackPending } = useTrack(id, {
@@ -43,9 +48,26 @@ export const TrackNameWithArtwork = ({
       ) : (
         <>
           <DynamicImage wrapperClassName={styles.artwork} image={image} />
-          <Text ellipses>{title}</Text>
+          <div className={styles.textContainer}>
+            <Text className={styles.titleText} ellipses>
+              {title}
+            </Text>
+            {secondary}
+          </div>
         </>
       )}
     </div>
   )
 }
+
+export const PurchaseArtistLink = ({ userId }: { userId: number }) => (
+  <UserLink
+    className={styles.artistText}
+    userId={userId}
+    popover
+    size='s'
+    strength='default'
+    variant='default'
+    fullWidth
+  />
+)

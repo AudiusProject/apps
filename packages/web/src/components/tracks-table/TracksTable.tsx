@@ -3,6 +3,7 @@ import { MouseEvent, useCallback, useMemo, useRef } from 'react'
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import {
   ModalSource,
+  SquareSizes,
   Track,
   UID,
   UserTrack,
@@ -19,9 +20,13 @@ import { formatCount, formatSeconds, dayjs } from '@audius/common/utils'
 import {
   IconVisibilityHidden,
   IconLock,
+  IconPlaybackPlay as IconPlay,
+  IconPlaybackPause as IconPause,
+  IconImage,
   Flex,
   IconSparkles,
   IconCart,
+  Artwork,
   Text,
   Tooltip
 } from '@audius/harmony'
@@ -43,6 +48,7 @@ import {
 } from 'components/table'
 import type { TableProps } from 'components/table/Table'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
+import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { isDescendantElementOf } from 'utils/domUtils'
 
 import styles from './TracksTable.module.css'
@@ -65,6 +71,40 @@ type RowInfo = UserTrack & {
 type TrackCell = Cell<RowInfo>
 
 type TrackRow = Row<RowInfo>
+
+type MiniTrackArtworkProps = {
+  trackId: number
+  isPlaying: boolean
+  isLocked: boolean
+}
+
+const MiniTrackArtwork = ({
+  trackId,
+  isPlaying,
+  isLocked
+}: MiniTrackArtworkProps) => {
+  const { imageUrl, hasNoArtwork } = useTrackCoverArt({
+    trackId,
+    size: SquareSizes.SIZE_150_BY_150
+  })
+
+  const IconComponent = hasNoArtwork
+    ? IconImage
+    : isLocked
+      ? IconLock
+      : isPlaying
+        ? IconPause
+        : IconPlay
+
+  return (
+    <div className={styles.inlineArtworkContainer}>
+      <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
+      <div className={styles.inlineArtworkIcon}>
+        <IconComponent size='m' />
+      </div>
+    </div>
+  )
+}
 
 export type TracksTableColumn =
   | 'addedDate'
@@ -103,6 +143,7 @@ type TracksTableProps = {
   onReorder?: (source: number, destination: number) => void
   onSort?: (...props: any[]) => void
   columns?: TracksTableColumn[]
+  showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
@@ -127,6 +168,7 @@ export const TracksTable = ({
   onClickRepost,
   playing = false,
   removeText,
+  showArtistInTrackNameColumn = false,
   userId,
   columns = defaultColumns,
   data,
@@ -172,36 +214,116 @@ export const TracksTable = ({
       const track = cellInfo.row.original
       const index = cellInfo.row.index
       const active = index === activeIndex
+      const isTrackPlaying = active && playing
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
+      const user = track.user
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
+        track.track_id
+      ] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
+      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+
+      const artistRow = showArtistInTrackNameColumn ? (
+        user?.is_deactivated ? (
+          <Text
+            variant='body'
+            size='s'
+            strength='default'
+            color='subdued'
+            css={{
+              display: 'block',
+              lineHeight: '125%',
+              width: '100%',
+              minWidth: 0
+            }}
+            ellipses
+          >
+            {`${user.name} [Deactivated]`}
+          </Text>
+        ) : user?.user_id ? (
+          <UserLink
+            className={styles.stackedArtistText}
+            userId={user.user_id}
+            size='s'
+            strength='default'
+            variant={active ? 'visible' : 'default'}
+            badgeSize='xs'
+            popover
+          />
+        ) : (
+          <Text
+            variant='body'
+            size='s'
+            strength='default'
+            color='subdued'
+            css={{
+              display: 'block',
+              lineHeight: '125%',
+              width: '100%',
+              minWidth: 0
+            }}
+            ellipses
+          >
+            Unknown
+          </Text>
+        )
+      ) : null
 
       return (
-        <div className={styles.textContainer} css={{ overflow: 'hidden' }}>
-          {deleted ? (
-            <Text
-              variant='title'
-              size='s'
-              strength='weak'
-              css={{ display: 'block', lineHeight: '125%' }}
-              ellipses
-            >{`${track.name} [Deleted By Artist]`}</Text>
-          ) : (
-            <TextLink
-              to={deleted ? '' : track.permalink}
-              isActive={active}
-              textVariant='title'
-              size='s'
-              strength='weak'
-              css={{ display: 'block', lineHeight: '125%' }}
-              ellipses
-            >
-              {track.name ?? track.title}
-            </TextLink>
-          )}
-        </div>
+        <Flex className={styles.trackInfoContainer}>
+          {showArtistInTrackNameColumn && track.track_id ? (
+            <MiniTrackArtwork
+              trackId={track.track_id}
+              isPlaying={isTrackPlaying}
+              isLocked={isLocked}
+            />
+          ) : null}
+          <Flex
+            direction='column'
+            justifyContent='center'
+            className={styles.textContainer}
+            css={{ overflow: 'hidden', width: '100%', minWidth: 0 }}
+          >
+            {deleted ? (
+              <Text
+                variant='title'
+                size='s'
+                strength='weak'
+                css={{
+                  display: 'block',
+                  lineHeight: '125%',
+                  width: '100%',
+                  minWidth: 0
+                }}
+                ellipses
+              >{`${track.name} [Deleted By Artist]`}</Text>
+            ) : (
+              <TextLink
+                to={deleted ? '' : track.permalink}
+                isActive={active}
+                textVariant='title'
+                size='s'
+                strength='weak'
+                css={{
+                  display: 'block',
+                  lineHeight: '125%',
+                  width: '100%',
+                  minWidth: 0
+                }}
+                ellipses
+              >
+                {track.name ?? track.title}
+              </TextLink>
+            )}
+            {artistRow}
+          </Flex>
+        </Flex>
       )
     },
-    [activeIndex]
+    [activeIndex, playing, showArtistInTrackNameColumn, trackAccessMap]
   )
 
   const renderArtistNameCell = useCallback(
@@ -598,6 +720,8 @@ export const TracksTable = ({
         Header: 'Added',
         accessor: 'dateAdded',
         Cell: renderAddedDateCell,
+        minWidth: 104,
+        width: 120,
         maxWidth: 160,
         sortTitle: 'Date Added',
         sorter: dateSorter('dateAdded'),
@@ -608,8 +732,9 @@ export const TracksTable = ({
         Header: 'Artist',
         accessor: 'artist',
         Cell: renderArtistNameCell,
+        minWidth: 140,
+        width: 180,
         maxWidth: 300,
-        width: 120,
         sortTitle: 'Artist Name',
         sorter: alphaSorter('artist'),
         align: 'left'
@@ -619,6 +744,8 @@ export const TracksTable = ({
         Header: 'Date',
         accessor: 'date',
         Cell: renderDateCell,
+        minWidth: 104,
+        width: 120,
         maxWidth: 160,
         sortTitle: 'Date Listened',
         sorter: dateSorter('date'),
@@ -629,6 +756,8 @@ export const TracksTable = ({
         Header: 'Played',
         accessor: 'dateListened',
         Cell: renderListenDateCell,
+        minWidth: 104,
+        width: 120,
         maxWidth: 160,
         sortTitle: 'Date Listened',
         sorter: dateSorter('dateListened'),
@@ -639,6 +768,8 @@ export const TracksTable = ({
         Header: 'Released',
         accessor: 'created_at',
         Cell: renderReleaseDateCell,
+        minWidth: 104,
+        width: 120,
         maxWidth: 160,
         sortTitle: 'Date Released',
         sorter: dateSorter('created_at'),
@@ -649,6 +780,8 @@ export const TracksTable = ({
         Header: 'Reposts',
         accessor: 'repost_count',
         Cell: renderRepostsCell,
+        minWidth: 88,
+        width: 104,
         maxWidth: 160,
         sortTitle: 'Reposts',
         sorter: numericSorter('repost_count'),
@@ -659,9 +792,9 @@ export const TracksTable = ({
         Header: 'Plays',
         accessor: 'plays',
         Cell: renderPlaysCell,
+        minWidth: 88,
+        width: 104,
         maxWidth: 120,
-        width: 48,
-        minWidth: 48,
         sortTitle: 'Plays',
         sorter: numericSorter('plays'),
         align: 'right'
@@ -679,6 +812,8 @@ export const TracksTable = ({
         Header: 'Favorites',
         accessor: 'save_count',
         Cell: renderSavesCell,
+        minWidth: 88,
+        width: 104,
         maxWidth: 160,
         sortTitle: 'Favorites',
         sorter: numericSorter('save_count'),
@@ -689,6 +824,8 @@ export const TracksTable = ({
         Header: 'Comments',
         accessor: 'comment_count',
         Cell: renderCommentsCell,
+        minWidth: 88,
+        width: 104,
         maxWidth: 160,
         sortTitle: 'Comments',
         sorter: numericSorter('comment_count'),
@@ -717,6 +854,8 @@ export const TracksTable = ({
         Header: 'Length',
         accessor: 'time',
         Cell: renderLengthCell,
+        minWidth: 80,
+        width: 96,
         maxWidth: 160,
         sortTitle: 'Track Length',
         sorter: numericSorter('time'),
@@ -725,11 +864,12 @@ export const TracksTable = ({
       },
       trackName: {
         id: 'trackName',
-        Header: 'Track Name',
+        Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        maxWidth: 300,
-        width: 120,
+        minWidth: 220,
+        width: 260,
+        maxWidth: 520,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
         align: 'left'
@@ -739,6 +879,8 @@ export const TracksTable = ({
         Header: 'Saved',
         accessor: 'dateSaved',
         Cell: renderSavedDateCell,
+        minWidth: 104,
+        width: 120,
         maxWidth: 160,
         sortTitle: 'Date Saved',
         sorter: dateSorter('dateSaved'),

@@ -4,27 +4,23 @@ import { USDCPurchaseDetails } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 
-import { UserLink } from 'components/link'
 import { Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 
 import styles from '../PayAndEarnPage.module.css'
 import { PurchaseCell, PurchaseRow } from '../types'
 import { isEmptyPurchaseRow } from '../utils'
 
-import { TrackNameWithArtwork } from './TrackNameWithArtwork'
+import { PurchaseArtistLink, TrackNameWithArtwork } from './TrackNameWithArtwork'
 
 export type PurchasesTableColumn =
   | 'contentName'
-  | 'artist'
   | 'date'
   | 'value'
   | 'spacerLeft'
   | 'spacerRight'
 
-export type PurchasesTableSortMethod =
-  | 'contentId'
-  | 'sellerUserId'
-  | 'createdAt'
+export type PurchasesTableSortMethod = 'contentId' | 'createdAt'
 export type PurchasesTableSortDirection = 'asc' | 'desc'
 
 type PurchasesTableProps = {
@@ -46,7 +42,6 @@ type PurchasesTableProps = {
 const defaultColumns: PurchasesTableColumn[] = [
   'spacerLeft',
   'contentName',
-  'artist',
   'date',
   'value',
   'spacerRight'
@@ -54,13 +49,14 @@ const defaultColumns: PurchasesTableColumn[] = [
 
 // Cell Render Functions
 const renderContentNameCell = (cellInfo: PurchaseCell) => {
-  const { contentId, contentType } = cellInfo.row.original
-  return <TrackNameWithArtwork id={contentId} contentType={contentType} />
-}
-
-const renderArtistCell = (cellInfo: PurchaseCell) => {
-  const { sellerUserId } = cellInfo.row.original
-  return <UserLink popover userId={sellerUserId} />
+  const { contentId, contentType, sellerUserId } = cellInfo.row.original
+  return (
+    <TrackNameWithArtwork
+      id={contentId}
+      contentType={contentType}
+      secondary={<PurchaseArtistLink userId={sellerUserId} />}
+    />
+  )
 }
 
 const renderDateCell = (cellInfo: PurchaseCell) => {
@@ -85,15 +81,6 @@ const tableColumnMap = {
     accessor: 'contentId',
     Cell: renderContentNameCell,
     width: 480,
-    disableSortBy: false,
-    align: 'left'
-  },
-  artist: {
-    id: 'artist',
-    Header: 'Artist',
-    accessor: 'sellerUserId',
-    Cell: renderArtistCell,
-    maxWidth: 200,
     disableSortBy: false,
     align: 'left'
   },
@@ -174,6 +161,7 @@ export const PurchasesTable = ({
       scrollRef={scrollRef}
       fetchBatchSize={fetchBatchSize}
       wrapperClassName={styles.tableWrapper}
+      responsiveColumns={RESPONSIVE_TABLE_POLICIES.purchases}
     />
   )
 }

@@ -1,11 +1,63 @@
 .textContainer {
   position: relative;
-  display: inline-flex;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
 }
 
+.trackInfoContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.inlineArtworkContainer {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border: 1px solid var(--harmony-n-100);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.inlineArtworkIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  transition: opacity 0.12s ease-in-out;
+  pointer-events: none;
+}
+
+.inlineArtworkIcon :global(svg) {
+  width: 20px;
+  height: 20px;
+}
+
+.inlineArtworkIcon :global(path),
+.inlineArtworkIcon :global(circle) {
+  fill: var(--harmony-static-white) !important;
+}
+
+.tableRow:hover .inlineArtworkIcon,
+.tableRow.active .inlineArtworkIcon {
+  opacity: 0.75;
+}
+
 .textCell {
+  width: 100%;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -32,6 +84,17 @@
 
 .artistCellContainer {
   width: 100%;
+  min-width: 0;
+}
+
+.stackedArtistText {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--harmony-n-500);
 }
 
 .badges {

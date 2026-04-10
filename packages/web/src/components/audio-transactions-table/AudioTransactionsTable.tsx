@@ -14,6 +14,7 @@ import { Cell, Row } from 'react-table'
 
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TableProps } from 'components/table/Table'
 
 import styles from './AudioTransactionsTable.module.css'
@@ -210,6 +211,7 @@ export const AudioTransactionsTable = ({
       columns={tableColumns}
       onClickRow={handleClickRow}
       isEmptyRow={isEmptyRow}
+      responsiveColumns={RESPONSIVE_TABLE_POLICIES.audioTransactions}
       {...other}
     />
   )

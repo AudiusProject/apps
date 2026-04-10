@@ -24,6 +24,7 @@ import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
 import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable } from 'components/tracks-table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useMainContentRef } from 'pages/MainContentContext'
@@ -161,9 +162,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   // useMemo must be called before any conditional returns
   const tracksTableColumns = useMemo(() => {
     const columns = [
-      'playButton',
+      isAlbum ? 'playButton' : undefined,
       'trackName',
-      isAlbum ? undefined : 'artistName',
       isAlbum ? 'date' : 'addedDate',
       'length',
       areAllTracksPremium ? undefined : 'plays',
@@ -330,6 +330,12 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               onClickPurchase={openPurchaseModal}
               onReorder={onReorderTracks}
               onSort={onSortTracks}
+              showArtistInTrackNameColumn={!isAlbum}
+              responsiveColumns={
+                isAlbum
+                  ? RESPONSIVE_TABLE_POLICIES.collectionAlbumTracks
+                  : RESPONSIVE_TABLE_POLICIES.collectionPlaylistTracks
+              }
               isReorderable={
                 accountUserId !== null &&
                 accountUserId === playlistOwnerId &&

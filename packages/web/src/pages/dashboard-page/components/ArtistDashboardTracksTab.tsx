@@ -6,6 +6,7 @@ import { Nullable } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
@@ -88,6 +89,7 @@ export const ArtistDashboardTracksTab = ({
         loading={tracksStatus === Status.LOADING}
         isPaginated
         tableHeaderClassName={styles.tableHeader}
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.dashboardTracks}
         shouldShowGatedType
       />
     </Flex>

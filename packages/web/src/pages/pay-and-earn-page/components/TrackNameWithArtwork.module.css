@@ -3,6 +3,7 @@
   align-items: center;
   gap: var(--harmony-unit-6);
   max-width: 100%;
+  min-width: 0;
 }
 
 .artwork {
@@ -11,4 +12,23 @@
   border-radius: var(--harmony-unit-1);
   border: 1px solid var(--harmony-border-default);
   overflow: hidden;
+  flex-shrink: 0;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--harmony-unit-1);
+}
+
+.titleText {
+  line-height: 125%;
+}
+
+.artistText {
+  display: block;
+  max-width: 100%;
+  color: var(--harmony-n-500);
+  line-height: 125%;
 }
