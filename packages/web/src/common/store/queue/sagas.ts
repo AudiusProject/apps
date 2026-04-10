@@ -51,7 +51,8 @@ const {
   getShuffle,
   getSource,
   getUid,
-  getUndershot
+  getUndershot,
+  getCollectionId
 } = queueSelectors
 
 const { getProfileUserHandle } = profilePageSelectors
@@ -417,9 +418,13 @@ function* watchNext() {
               playerBehavior
             })
           )
+          const queueCollectionId = yield* select(getCollectionId)
           const event = make(Name.PLAYBACK_PLAY, {
             id: `${id}`,
-            source: PlaybackSource.PASSIVE
+            source: PlaybackSource.PASSIVE,
+            ...(queueCollectionId
+              ? { collectionId: queueCollectionId }
+              : {})
           })
           yield* put(event)
         }
@@ -507,9 +512,13 @@ function* watchPrevious() {
               playerBehavior
             })
           )
+          const queueCollectionId = yield* select(getCollectionId)
           const event = make(Name.PLAYBACK_PLAY, {
             id: `${id}`,
-            source: PlaybackSource.PASSIVE
+            source: PlaybackSource.PASSIVE,
+            ...(queueCollectionId
+              ? { collectionId: queueCollectionId }
+              : {})
           })
           yield* put(event)
         } else {

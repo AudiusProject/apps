@@ -244,7 +244,8 @@ export const CollectionTile = ({
             record(
               make(Name.PLAYBACK_PLAY, {
                 id: `${playingTrackId}`,
-                source: PlaybackSource.PLAYLIST_TILE_TRACK
+                source: PlaybackSource.PLAYLIST_TILE_TRACK,
+                collectionId: `${id}`
               })
             )
             record(
@@ -265,7 +266,8 @@ export const CollectionTile = ({
             record(
               make(Name.PLAYBACK_PLAY, {
                 id: `${trackId}`,
-                source: PlaybackSource.PLAYLIST_TILE_TRACK
+                source: PlaybackSource.PLAYLIST_TILE_TRACK,
+                collectionId: `${id}`
               })
             )
             record(

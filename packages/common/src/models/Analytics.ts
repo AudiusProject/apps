@@ -1476,6 +1476,7 @@ type PlaybackPlay = {
   id?: string
   isPreview?: boolean
   source: PlaybackSource
+  collectionId?: string
 }
 type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE
