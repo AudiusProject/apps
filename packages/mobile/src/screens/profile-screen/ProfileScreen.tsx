@@ -1,12 +1,9 @@
 import { useCallback } from 'react'
 
-import { useCurrentUserId, useUserByParams } from '@audius/common/api'
-import { ShareSource } from '@audius/common/models'
+import { useUserByParams } from '@audius/common/api'
 import {
   profilePageActions,
   reachabilitySelectors,
-  shareModalUIActions,
-  modalsActions,
   ProfilePageTabs
 } from '@audius/common/store'
 import { encodeUrlName } from '@audius/common/utils'
@@ -15,11 +12,6 @@ import { useFocusEffect, useNavigationState } from '@react-navigation/native'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  IconButton,
-  IconKebabHorizontal,
-  IconShare
-} from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
@@ -32,10 +24,8 @@ import { ProfileHeader } from './ProfileHeader'
 import { ProfileScreenSkeleton } from './ProfileScreenSkeleton'
 import { ProfileTabNavigator } from './ProfileTabs/ProfileTabNavigator'
 import { useRefreshProfile } from './useRefreshProfile'
-const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { setCurrentUser: setCurrentUserAction } = profilePageActions
 const { getIsReachable } = reachabilitySelectors
-const { setVisibility } = modalsActions
 
 const useStyles = makeStyles(() => ({
   navigator: {
@@ -59,8 +49,6 @@ export const ProfileScreen = () => {
   const handle =
     userHandle && userHandle !== 'accountUser' ? userHandle : profile?.handle
   const handleLower = handle?.toLowerCase() ?? ''
-  const { data: accountUserId } = useCurrentUserId()
-  const isOwner = accountUserId === profile?.user_id
   const dispatch = useDispatch()
   const isNotReachable = useSelector(getIsReachable) === false
 
@@ -105,42 +93,10 @@ export const ProfileScreen = () => {
 
   useFocusEffect(setCurrentUser)
 
-  const handlePressTopRight = useCallback(() => {
-    if (profile) {
-      if (!isOwner) {
-        dispatch(
-          setVisibility({
-            modal: 'ProfileActions',
-            visible: true
-          })
-        )
-      } else {
-        dispatch(
-          requestOpenShareModal({
-            type: 'profile',
-            profileId: profile.user_id,
-            source: ShareSource.PAGE
-          })
-        )
-      }
-    }
-  }, [profile, dispatch, isOwner])
-
-  const topbarRight = (
-    <IconButton
-      color='subdued'
-      icon={!isOwner ? IconKebabHorizontal : IconShare}
-      onPress={handlePressTopRight}
-    />
-  )
-
   const renderHeader = useCallback(() => <ProfileHeader />, [])
 
   return (
-    <Screen
-      topbarRight={topbarRight}
-      url={handle && `/${encodeUrlName(handle)}`}
-    >
+    <Screen url={handle && `/${encodeUrlName(handle)}`}>
       <ScreenContent isOfflineCapable>
         {!profile ? (
           <ProfileScreenSkeleton />
