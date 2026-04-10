@@ -1,12 +1,12 @@
-import { DeveloperAppsApi } from '../api/developer-apps/DeveloperAppsApi'
 import {
+  DeveloperAppsApi,
   type Middleware,
   type RequestContext,
   type FetchParams,
   Configuration,
   querystring
 } from '../api/generated/default'
-import type { ServicesContainer } from '../types'
+import type { AudiusWalletClient } from '../services/AudiusWalletClient/types'
 import fetch from '../utils/fetch'
 
 let appName: string | undefined
@@ -20,14 +20,12 @@ let apiKey: string | undefined
 export const addAppInfoMiddleware = ({
   apiKey: providedApiKey,
   appName: providedAppName,
-  services,
+  audiusWalletClient,
   basePath
 }: {
   apiKey?: string
   appName?: string
-  services: Partial<
-    Pick<ServicesContainer, 'audiusWalletClient' | 'entityManager'>
-  >
+  audiusWalletClient?: AudiusWalletClient
   basePath: string
 }): Middleware => {
   apiKey = providedApiKey
@@ -40,11 +38,11 @@ export const addAppInfoMiddleware = ({
           fetchApi: fetch,
           basePath
         })
-        const developerApps = new DeveloperAppsApi(apiClientConfig, services)
+        const developerApps = new DeveloperAppsApi(apiClientConfig)
 
         apiKey =
           providedApiKey ??
-          (await services.audiusWalletClient?.getAddresses())?.[0]
+          (await audiusWalletClient?.getAddresses())?.[0]
         if (apiKey) {
           appName = (
             await developerApps.getDeveloperApp({

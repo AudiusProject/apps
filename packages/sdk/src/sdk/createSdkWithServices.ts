@@ -371,7 +371,7 @@ const initializeApis = ({
     addAppInfoMiddleware({
       apiKey,
       appName,
-      services,
+      audiusWalletClient: services.audiusWalletClient,
       basePath
     }),
     addRequestSignatureMiddleware({

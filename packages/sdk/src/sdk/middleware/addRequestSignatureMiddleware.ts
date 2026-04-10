@@ -5,11 +5,9 @@ import {
   type RequestContext,
   type FetchParams
 } from '../api/generated/default'
-import {
-  HedgehogWalletNotFoundError,
-  createAppWalletClient,
-  type AudiusWalletClient
-} from '../services/AudiusWalletClient'
+import { createAppWalletClient } from '../services/AudiusWalletClient/createAppWalletClient'
+import { HedgehogWalletNotFoundError } from '../services/AudiusWalletClient/errors'
+import type { AudiusWalletClient } from '../services/AudiusWalletClient/types'
 import { ServicesContainer } from '../types'
 
 const SIGNATURE_EXPIRY_MS =

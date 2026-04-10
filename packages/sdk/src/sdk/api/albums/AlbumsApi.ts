@@ -19,13 +19,15 @@ import { PlaylistsApi } from '../playlists/PlaylistsApi'
 import type { UploadPlaylistRequest } from '../playlists/types'
 
 import {
+  GetPurchaseAlbumInstructionsSchema,
+  PurchaseAlbumSchema,
+  type GetPurchaseAlbumInstructionsRequest,
+  type PurchaseAlbumRequest
+} from './purchaseTypes'
+import {
   getAlbumRequest,
   getAlbumsRequest,
   getAlbumTracksRequest,
-  GetPurchaseAlbumInstructionsRequest,
-  GetPurchaseAlbumInstructionsSchema,
-  PurchaseAlbumRequest,
-  PurchaseAlbumSchema,
   UploadAlbumRequest,
   UploadAlbumSchema,
   CreateAlbumRequestWithFiles,

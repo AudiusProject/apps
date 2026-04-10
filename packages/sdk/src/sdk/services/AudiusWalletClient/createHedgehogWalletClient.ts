@@ -14,16 +14,13 @@ import {
   getSharedSecret,
   type GetSharedSecretParameters
 } from './actions/getSharedSecret'
+import { HedgehogWalletNotFoundError } from './errors'
 import { sign, type SignParameters } from './actions/sign'
 import { localTransport } from './localTransport'
 import { privateKeyToAudiusAccount } from './privateKeyToAudiusAccount'
 import type { AudiusAccount, AudiusWalletClient } from './types'
 
-export class HedgehogWalletNotFoundError extends Error {
-  constructor() {
-    super('Hedgehog wallet not found. Is the user logged in?')
-  }
-}
+export { HedgehogWalletNotFoundError }
 
 /**
  * Creates a Viem client that uses a local Hedgehog instance to do all the wallet methods.

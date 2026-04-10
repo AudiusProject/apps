@@ -40,6 +40,12 @@ import {
 import type { UpdateTrackRequest as GeneratedUpdateTrackRequest } from '../generated/default/apis/TracksApi'
 import { RequiredError } from '../generated/default/runtime'
 
+import {
+  PurchaseTrackSchema,
+  GetPurchaseTrackInstructionsSchema,
+  type PurchaseTrackRequest,
+  type GetPurchaseTrackInstructionsRequest
+} from './purchaseTypes'
 import { TrackUploadHelper } from './TrackUploadHelper'
 import {
   EntityManagerDeleteTrackRequest,
@@ -53,10 +59,6 @@ import {
   EntityManagerUnfavoriteTrackRequest,
   UnfavoriteTrackSchema,
   EntityManagerUpdateTrackRequest,
-  PurchaseTrackRequest,
-  PurchaseTrackSchema,
-  GetPurchaseTrackInstructionsRequest,
-  GetPurchaseTrackInstructionsSchema,
   EntityManagerRecordTrackDownloadRequest,
   RecordTrackDownloadSchema,
   UploadTrackFilesRequest,

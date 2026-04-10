@@ -32,7 +32,9 @@ import {
 } from './middleware'
 import { OAuth } from './oauth'
 import { TokenStoreLocalStorage } from './oauth/TokenStoreLocalStorage'
-import { Logger, Storage, StorageNodeSelector } from './services'
+import { Logger } from './services/Logger'
+import { Storage } from './services/Storage'
+import { StorageNodeSelector } from './services/StorageNodeSelector'
 import { SolanaWallet } from './solanaWallet'
 import { SdkConfigSchema, type SdkConfig } from './types'
 
@@ -95,10 +97,7 @@ export const createSdk = (config: SdkConfig) => {
         appName,
         apiKey,
         basePath,
-        services: {
-          audiusWalletClient: services?.audiusWalletClient,
-          entityManager: services?.entityManager
-        }
+        audiusWalletClient: services?.audiusWalletClient
       })
     )
   }

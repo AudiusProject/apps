@@ -1,4 +1,5 @@
 export * from './types'
+export * from './errors'
 export * from './createHedgehogWalletClient'
 export * from './createAppWalletClient'
 export * from './decorators/audiusWallet'
