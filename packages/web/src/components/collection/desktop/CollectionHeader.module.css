@@ -123,17 +123,7 @@
   }
 }
 
-@container (max-width: 760px) {
-  .playbackButtonLabel {
-    display: none;
-  }
-
-  .searchSection {
-    display: none;
-  }
-}
-
-@container (max-width: 552px) {
+@container (max-width: 740px) {
   .topSection {
     grid-template-columns: 1fr;
     row-gap: var(--harmony-unit-5);
