@@ -14,7 +14,7 @@ import {
   playerSelectors
 } from '@audius/common/store'
 import { route, NestedNonNullable } from '@audius/common/utils'
-import { Button, IconUser } from '@audius/harmony'
+import { TextLink } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
@@ -40,11 +40,13 @@ const { makeGetLineupMetadatas } = lineupSelectors
 
 const messages = {
   trackDeleted: 'Track [Deleted]',
-  trackDeletedByArtist: 'Track [Deleted By Artist]',
-  playlistDeleted: 'Playlist [Deleted by Artist]',
-  albumDeleted: 'Album [Deleted By Artist]',
-  checkOut: (name: string) => `Check out more by ${name}`,
-  moreBy: (name: string) => `More by ${name}`
+  trackDeletedByArtist: 'Track [Removed By User]',
+  playlistDeleted: 'Playlist [Deleted]',
+  playlistDeletedByArtist: 'Playlist [Removed By User]',
+  albumDeleted: 'Album [Deleted]',
+  albumDeletedByArtist: 'Album [Removed By User]',
+  moreBy: (name: string) => `More by ${name}`,
+  helpCenter: 'Visit Audius Help Center'
 }
 
 const TrackArt = ({ trackId }: { trackId: ID }) => {
@@ -71,6 +73,8 @@ export type DeletedPageProps = {
   deletedByArtist: boolean
   playable: Playable
   user: User
+  helpLink?: { href: string; text: string }
+  secondaryHelpLink?: { href: string; text: string }
 }
 
 const g = withNullGuard(
@@ -87,6 +91,8 @@ const DeletedPage = g(
     structuredData,
     playable,
     deletedByArtist = true,
+    helpLink,
+    secondaryHelpLink,
     user
   }) => {
     const dispatch = useDispatch()
@@ -139,8 +145,12 @@ const DeletedPage = g(
 
     const headingText = isPlaylist
       ? isAlbum
-        ? messages.albumDeleted
-        : messages.playlistDeleted
+        ? deletedByArtist
+          ? messages.albumDeletedByArtist
+          : messages.albumDeleted
+        : deletedByArtist
+          ? messages.playlistDeletedByArtist
+          : messages.playlistDeleted
       : deletedByArtist
         ? messages.trackDeletedByArtist
         : messages.trackDeleted
@@ -176,13 +186,18 @@ const DeletedPage = g(
               </h2>
             </ArtistPopover>
           </div>
-          <Button
-            variant='secondary'
-            iconLeft={IconUser}
-            onClick={goToArtistPage}
-          >
-            {messages.checkOut(user.name)}
-          </Button>
+          {helpLink ? (
+            <div className={styles.helpLinks}>
+              <TextLink href={helpLink.href} isExternal>
+                {helpLink.text || messages.helpCenter}
+              </TextLink>
+              {secondaryHelpLink ? (
+                <TextLink href={secondaryHelpLink.href} isExternal>
+                  {secondaryHelpLink.text}
+                </TextLink>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       )
     }

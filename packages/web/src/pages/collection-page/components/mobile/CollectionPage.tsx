@@ -193,8 +193,12 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   const areAllTracksDeleted = trackList.every((track) => track.isDeleted)
   const isPlayable = !areAllTracksDeleted && numTracks > 0
 
-  // Handle deleted collections
-  if ((metadata?.is_delete || metadata?._marked_deleted) && user) {
+  // Handle deleted or unavailable collections
+  if (
+    metadata &&
+    user &&
+    (metadata.is_delete || metadata._marked_deleted || user.is_deactivated)
+  ) {
     return (
       <DeletedPage
         title={title ?? ''}
@@ -206,6 +210,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
           type: metadata?.is_album ? PlayableType.ALBUM : PlayableType.PLAYLIST
         }}
         user={user}
+        deletedByArtist={!user?.is_deactivated}
       />
     )
   }

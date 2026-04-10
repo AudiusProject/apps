@@ -33,7 +33,7 @@ import {
   RepostType
 } from '@audius/common/store'
 import { formatDate, route, makeUid } from '@audius/common/utils'
-import { Flex } from '@audius/harmony'
+import { Flex, Text, TextLink } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
@@ -59,6 +59,21 @@ import TrackPageHeader from './TrackHeader'
 import { RemixContestSection } from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
+const COPYRIGHT_POLICIES_LINK =
+  'https://help.audius.co/product/what-are-the-audius-copyright-policies-and-processes'
+const COPYRIGHT_IN_MUSIC_LINK =
+  'https://help.audius.co/product/what-is-copyright-in-music'
+const FORCE_TAKEDOWN_QUERY_KEY = 'test_takedown'
+
+const messages = {
+  takedownTitle: 'This Track Is No Longer Available',
+  takedownDescription:
+    'This track has been taken down and can no longer be played on Audius.',
+  copyrightPolicies: 'Audius Copyright Policies & Processes',
+  copyrightBasics: 'What Is Copyright In Music?',
+  helpCenter: 'Visit Audius Help Center'
+}
+
 const { getPlaying, getPreviewing } = playerSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
@@ -250,6 +265,40 @@ const TrackPage = () => {
   }
 
   const defaults = getTrackDefaults(track as Track | null)
+  const queryParams = new URLSearchParams(location.search)
+  const isForcedCopyrightStrike =
+    queryParams.get(FORCE_TAKEDOWN_QUERY_KEY) === 'copyright'
+  const isTrackDeleted = !!(track?.is_delete || track?._marked_deleted)
+  const isTrackDeletedOrForced = isTrackDeleted || isForcedCopyrightStrike
+  const isCopyrightTakedown =
+    !!track &&
+    (isForcedCopyrightStrike || (isTrackDeleted && !!track?._blocked))
+  const isOwnerRemoved = !!user?.is_deactivated
+  const shouldShowOwnerCopyrightTakedown =
+    !!track &&
+    !!user &&
+    isOwner &&
+    isTrackDeletedOrForced &&
+    isCopyrightTakedown &&
+    !isOwnerRemoved
+
+  const helpLink = isCopyrightTakedown
+    ? {
+        href: COPYRIGHT_POLICIES_LINK,
+        text: messages.copyrightPolicies
+      }
+    : isTrackDeletedOrForced
+      ? {
+          href: route.AUDIUS_HELP_LINK,
+          text: messages.helpCenter
+        }
+      : undefined
+  const secondaryHelpLink = isCopyrightTakedown
+    ? {
+        href: COPYRIGHT_IN_MUSIC_LINK,
+        text: messages.copyrightBasics
+      }
+    : undefined
 
   // SEO fields (isRemix so original vs remix snippet/structured data is correct)
   const releaseDate = track ? track.release_date || track.created_at : ''
@@ -261,8 +310,44 @@ const TrackPage = () => {
     isRemix: !!track?.remix_of
   })
 
-  // Handle deleted track
-  if ((track?.is_delete || track?._marked_deleted) && user) {
+  if (shouldShowOwnerCopyrightTakedown) {
+    return (
+      <MobilePageContainer
+        title={seoFields.title ?? ''}
+        description={seoFields.description ?? ''}
+        canonicalUrl={seoFields.canonicalUrl ?? ''}
+        structuredData={seoFields.structuredData}
+        entityType='track'
+        hashId={track?.track_id ? Id.parse(track.track_id) : undefined}
+      >
+        <Flex
+          column
+          alignItems='center'
+          gap='l'
+          p='xl'
+          css={{ textAlign: 'center' }}
+        >
+          <Text variant='heading' size='m'>
+            {messages.takedownTitle}
+          </Text>
+          <Text variant='body' size='m' color='subdued'>
+            {messages.takedownDescription}
+          </Text>
+          <Flex column gap='s'>
+            <TextLink href={COPYRIGHT_POLICIES_LINK} isExternal>
+              {messages.copyrightPolicies}
+            </TextLink>
+            <TextLink href={COPYRIGHT_IN_MUSIC_LINK} isExternal>
+              {messages.copyrightBasics}
+            </TextLink>
+          </Flex>
+        </Flex>
+      </MobilePageContainer>
+    )
+  }
+
+  // Handle deleted or unavailable track
+  if ((isTrackDeletedOrForced || isOwnerRemoved) && user) {
     return (
       <DeletedPage
         title={seoFields.title ?? ''}
@@ -274,7 +359,11 @@ const TrackPage = () => {
           type: PlayableType.TRACK
         }}
         user={user ?? null}
-        deletedByArtist={!track._blocked && track.is_available}
+        deletedByArtist={
+          !isOwnerRemoved && isTrackDeletedOrForced && !isCopyrightTakedown
+        }
+        helpLink={helpLink}
+        secondaryHelpLink={secondaryHelpLink}
       />
     )
   }

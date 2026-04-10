@@ -95,7 +95,7 @@ const Artwork = ({
 }
 
 const getMessages = ({ isDeleted = false }: { isDeleted?: boolean } = {}) => ({
-  deleted: isDeleted ? ' [Deleted By Artist]' : '',
+  deleted: isDeleted ? ' [Removed By User]' : '',
   locked: 'Locked'
 })
 

@@ -98,7 +98,10 @@ export const useTrackHistory = (
           return track
         }
       )
-      primeTrackData({ tracks, queryClient })
+      const filteredTracks = tracks.filter(
+        (track) => !track.is_delete && !track.user?.is_deactivated
+      )
+      primeTrackData({ tracks: filteredTracks, queryClient })
 
       // Update lineup when new data arrives
       // TODO: can this inside useLineupQuery?
@@ -107,11 +110,11 @@ export const useTrackHistory = (
           pageParam,
           pageSize,
           false,
-          { items: tracks }
+          { items: filteredTracks }
         )
       )
 
-      return tracks.map((t) => ({
+      return filteredTracks.map((t) => ({
         id: t.track_id,
         type: EntityType.TRACK
       }))

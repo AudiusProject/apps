@@ -139,10 +139,11 @@ const LibraryPage = () => {
     status === Status.SUCCESS || entries.length
       ? getTracksTableData()
       : [[], -1]
+  const [visibleEntries] = getFilteredData(entries)
 
   const isEmpty =
-    entries.length === 0 ||
-    !entries.some((entry: LibraryPageTrack) => Boolean(entry.track_id))
+    visibleEntries.length === 0 ||
+    !visibleEntries.some((entry: LibraryPageTrack) => Boolean(entry.track_id))
   const tracksLoading =
     (status === Status.IDLE || status === Status.LOADING) && isEmpty
   const queuedAndPlaying = playing && isQueued

@@ -29,7 +29,7 @@ import styles from './TrackListItem.module.css'
 const { profilePage } = route
 
 const makeStrings = ({ deleted }: { deleted: boolean }) => ({
-  deleted: deleted ? ` [Deleted By Artist]` : '',
+  deleted: deleted ? ` [Removed By User]` : '',
   by: 'by'
 })
 

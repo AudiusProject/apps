@@ -5,6 +5,11 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import DeletedPageDesktopContent from './components/desktop/DeletedPage'
 import DeletedPageMobileContent from './components/mobile/DeletedPage'
 
+export type DeletedPageHelpLink = {
+  href: string
+  text: string
+}
+
 type DeletedPageProps = {
   title: string
   description: string
@@ -13,6 +18,8 @@ type DeletedPageProps = {
   playable: Playable
   user: User
   deletedByArtist?: boolean
+  helpLink?: DeletedPageHelpLink
+  secondaryHelpLink?: DeletedPageHelpLink
 }
 
 const DeletedPage = ({
@@ -22,7 +29,9 @@ const DeletedPage = ({
   structuredData,
   playable,
   user,
-  deletedByArtist = true
+  deletedByArtist = true,
+  helpLink,
+  secondaryHelpLink
 }: DeletedPageProps) => {
   const isMobile = useIsMobile()
 
@@ -33,7 +42,9 @@ const DeletedPage = ({
     structuredData,
     playable,
     user,
-    deletedByArtist
+    deletedByArtist,
+    helpLink,
+    secondaryHelpLink
   }
 
   return isMobile ? (

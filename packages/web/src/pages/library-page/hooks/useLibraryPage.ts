@@ -434,18 +434,39 @@ export const useLibraryPage = () => {
     [handleFetchSavedTracks]
   )
 
-  const formatMetadata = useCallback((trackMetadatas: LibraryPageTrack[]) => {
-    return trackMetadatas.map((entry, i) => ({
-      ...entry,
-      key: `${entry.title}_${entry.uid}_${i}`,
-      name: entry.title,
-      artist: entry.user?.name ?? '',
-      handle: entry.user?.handle ?? '',
-      date: entry.dateSaved,
-      time: entry.duration,
-      plays: entry.play_count
-    }))
-  }, [])
+  const formatMetadata = useCallback(
+    (trackMetadatas: LibraryPageTrack[]) => {
+      const shouldIncludeInLibrary = (track: LibraryPageTrack) => {
+        const isOwner = track.owner_id === account?.userId
+        const isBlocked = !!track._blocked
+        const isArtistDeleted =
+          !!track.is_delete && !isBlocked && track.is_available
+        const isRemovedForNonArtistReason =
+          isBlocked || (!!track.is_delete && !isArtistDeleted)
+        const shouldKeepOwnRemovedTombstone =
+          isOwner && isRemovedForNonArtistReason
+
+        if (track._marked_deleted) return false
+        if (track.user?.is_deactivated) return false
+        if (isArtistDeleted) return false
+        if (isRemovedForNonArtistReason && !shouldKeepOwnRemovedTombstone)
+          return false
+        return true
+      }
+
+      return trackMetadatas.filter(shouldIncludeInLibrary).map((entry, i) => ({
+        ...entry,
+        key: `${entry.title}_${entry.uid}_${i}`,
+        name: entry.title,
+        artist: entry.user?.name ?? '',
+        handle: entry.user?.handle ?? '',
+        date: entry.dateSaved,
+        time: entry.duration,
+        plays: entry.play_count
+      }))
+    },
+    [account?.userId]
+  )
 
   const isQueued = useCallback(() => {
     return tracks.entries.some(
@@ -486,13 +507,11 @@ export const useLibraryPage = () => {
       const activeIndex = tracks.entries.findIndex(
         ({ uid }: any) => uid === playingUid
       )
-      const filteredMetadata = formatMetadata(trackMetadatas)
-        .filter((item) => !item._marked_deleted && !item.is_delete)
-        .filter(
-          (item) =>
-            item.title?.toLowerCase().indexOf(filterText.toLowerCase()) > -1 ||
-            item.user?.name.toLowerCase().indexOf(filterText.toLowerCase()) > -1
-        )
+      const filteredMetadata = formatMetadata(trackMetadatas).filter(
+        (item) =>
+          item.title?.toLowerCase().indexOf(filterText.toLowerCase()) > -1 ||
+          item.user?.name.toLowerCase().indexOf(filterText.toLowerCase()) > -1
+      )
       const filteredIndex =
         activeIndex > -1
           ? filteredMetadata.findIndex(

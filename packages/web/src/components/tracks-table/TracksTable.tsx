@@ -184,7 +184,7 @@ export const TracksTable = ({
               strength='weak'
               css={{ display: 'block', lineHeight: '125%' }}
               ellipses
-            >{`${track.name} [Deleted By Artist]`}</Text>
+            >{`${track.name} [Removed By User]`}</Text>
           ) : (
             <TextLink
               to={deleted ? '' : track.permalink}

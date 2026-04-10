@@ -66,7 +66,7 @@
   font-weight: var(--harmony-font-bold);
   width: 100%;
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 
 .artistWrapper :global(.artistPopover) {
@@ -106,4 +106,11 @@
 
 .verified {
   margin-left: 4px;
+}
+
+.helpLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
 }

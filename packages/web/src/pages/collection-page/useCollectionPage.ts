@@ -67,7 +67,7 @@ import {
   UserListEntityType
 } from 'store/application/ui/userListModal/types'
 import { replace } from 'utils/navigation'
-import { getPathname, collectionPage, profilePage } from 'utils/route'
+import { getPathname, collectionPage } from 'utils/route'
 import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
@@ -239,13 +239,6 @@ export const useCollectionPage = (
       }
     }
   }, [status, params, playlistId, collection, accountUserId, navigate])
-
-  // Redirect if user deactivated
-  useEffect(() => {
-    if (user?.is_deactivated) {
-      navigate(profilePage(user.handle))
-    }
-  }, [user, navigate])
 
   // Handle collection moved
   useEffect(() => {
