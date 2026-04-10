@@ -12,6 +12,7 @@ import { PurchaseCell, PurchaseRow } from '../types'
 import { isEmptyPurchaseRow } from '../utils'
 
 import { PurchaseArtistLink, TrackNameWithArtwork } from './TrackNameWithArtwork'
+import artworkStyles from './TrackNameWithArtwork.module.css'
 
 export type PurchasesTableColumn =
   | 'contentName'
@@ -40,7 +41,6 @@ type PurchasesTableProps = {
 }
 
 const defaultColumns: PurchasesTableColumn[] = [
-  'spacerLeft',
   'contentName',
   'date',
   'value',
@@ -77,7 +77,7 @@ const renderValueCell = (cellInfo: PurchaseCell) => {
 const tableColumnMap = {
   contentName: {
     id: 'contentName',
-    Header: 'Purchases',
+    Header: <span className={artworkStyles.contentHeaderWithArtwork}>Purchases</span>,
     accessor: 'contentId',
     Cell: renderContentNameCell,
     width: 480,

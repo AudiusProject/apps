@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
   useCurrentUserId,
@@ -125,19 +125,19 @@ const LibraryPage = () => {
     }
   })
 
-  const getTracksTableData = (): [LibraryPageTrack[], number] => {
-    let [data, activeIndex] = getFilteredData(entries)
-    if (!hasReachedEnd) {
-      // Add in some empty rows to show user that more are loading in
-      data = data.concat(new Array(5).fill({ kind: Kind.EMPTY }))
+  const { trackRows, activeIndex } = useMemo(() => {
+    if (!(status === Status.SUCCESS || entries.length)) {
+      return { trackRows: [] as LibraryPageTrack[], activeIndex: -1 }
     }
-    return [data, activeIndex]
-  }
+    const [rows, index] = getFilteredData(entries)
+    return { trackRows: rows, activeIndex: index }
+  }, [status, entries, getFilteredData])
 
-  const [dataSource, activeIndex] =
-    status === Status.SUCCESS || entries.length
-      ? getTracksTableData()
-      : [[], -1]
+  const dataSource = useMemo(() => {
+    if (hasReachedEnd) return trackRows
+    // Add in some empty rows to show user that more are loading in.
+    return trackRows.concat(new Array(5).fill({ kind: Kind.EMPTY }))
+  }, [hasReachedEnd, trackRows])
 
   const isEmpty =
     entries.length === 0 ||

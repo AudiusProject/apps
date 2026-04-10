@@ -38,7 +38,6 @@ import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { getScrollParent } from 'utils/scrollParent'
 
-import styles from './ArtistCoinsTable.module.css'
 import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
 
 export const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
@@ -63,7 +62,6 @@ type CoinCell = Cell<Coin>
 
 const renderTokenNameCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
-  const { ownerId } = coin
 
   if (!coin || !coin.ticker) {
     return null
@@ -94,9 +92,8 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
         alignItems='center'
         css={{
           overflow: 'hidden',
-          flex: '0 0 clamp(80px, 24ch, 180px)',
-          minWidth: 'clamp(80px, 24ch, 180px)',
-          maxWidth: 'clamp(80px, 24ch, 180px)'
+          flex: '1 1 0',
+          minWidth: 0
         }}
       >
         <TokenIcon
@@ -127,29 +124,28 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
           </TextLink>
         </Flex>
       </Flex>
-      <Flex
-        justifyContent='flex-start'
-        css={{
-          overflow: 'hidden',
-          flex: '1 1 0',
-          minWidth: '140px'
-        }}
-      >
-        {ownerId ? (
-          <UserLink
-            userId={ownerId}
-            size='s'
-            badgeSize='xs'
-            ellipses
-            fullWidth
-            hideArtistCoinBadge
-            popover
-          />
-        ) : (
-          <Skeleton h='24px' w='100px' />
-        )}
-      </Flex>
     </Flex>
+  )
+}
+
+const renderArtistCell = (cellInfo: CoinCell) => {
+  const coin = cellInfo.row.original
+  const { ownerId } = coin
+
+  if (!ownerId) {
+    return <Skeleton h='24px' w='100px' />
+  }
+
+  return (
+    <UserLink
+      userId={ownerId}
+      size='s'
+      badgeSize='xs'
+      ellipses
+      fullWidth
+      hideArtistCoinBadge
+      popover
+    />
   )
 }
 
@@ -228,11 +224,25 @@ const renderBuyCell = (
 const tableColumnMap = {
   tokenName: {
     id: 'tokenName',
-    Header: () => <Flex css={{ paddingLeft: spacing.unit8 }}>Coin</Flex>,
+    Header: () => <Flex css={{ paddingLeft: 36 }}>Coin</Flex>,
     accessor: 'name',
     Cell: renderTokenNameCell,
-    minWidth: 150,
+    minWidth: 220,
+    width: 220,
+    maxWidth: Number.MAX_SAFE_INTEGER,
     disableSortBy: true,
+    align: 'left'
+  },
+  artist: {
+    id: 'artist',
+    Header: () => <Flex css={{ paddingLeft: 12 }}>Artist</Flex>,
+    accessor: 'ownerId',
+    Cell: renderArtistCell,
+    minWidth: 140,
+    width: 140,
+    maxWidth: 140,
+    disableSortBy: true,
+    disableResizing: true,
     align: 'left'
   },
   price: {
@@ -242,8 +252,10 @@ const tableColumnMap = {
     Cell: renderPriceCell,
     disableSortBy: false,
     align: 'right',
-    width: 50,
-    minWidth: 50,
+    width: 104,
+    minWidth: 104,
+    maxWidth: 104,
+    disableResizing: true,
     sorter: numericSorter('price')
   },
   totalVolumeUSD: {
@@ -253,8 +265,10 @@ const tableColumnMap = {
     Cell: renderTotalVolumeUSDCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 120,
+    minWidth: 120,
+    maxWidth: 120,
+    disableResizing: true,
     sorter: numericSorter('totalVolumeUSD')
   },
   marketCap: {
@@ -264,8 +278,10 @@ const tableColumnMap = {
     Cell: renderMarketCapCell,
     disableSortBy: false,
     align: 'right',
-    width: 50,
-    minWidth: 50,
+    width: 120,
+    minWidth: 120,
+    maxWidth: 120,
+    disableResizing: true,
     sorter: numericSorter('marketCap')
   },
   createdDate: {
@@ -275,8 +291,10 @@ const tableColumnMap = {
     Cell: renderCreatedDateCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 104,
+    minWidth: 104,
+    maxWidth: 104,
+    disableResizing: true,
     sorter: dateSorter('createdAt')
   },
   holders: {
@@ -286,8 +304,10 @@ const tableColumnMap = {
     Cell: renderHoldersCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 88,
+    minWidth: 88,
+    maxWidth: 88,
+    disableResizing: true,
     sorter: numericSorter('holder')
   },
   buy: {
@@ -296,8 +316,10 @@ const tableColumnMap = {
     Cell: renderBuyCell,
     disableSortBy: true,
     align: 'right',
-    width: 30,
-    minWidth: 30
+    width: 112,
+    minWidth: 112,
+    maxWidth: 112,
+    disableResizing: true
   }
 }
 
@@ -435,7 +457,16 @@ export const ArtistCoinsTable = ({
       ...baseColumns.buy,
       Cell: (cellInfo: CoinCell) => renderBuyCell(cellInfo, handleBuy)
     }
-    return Object.values(baseColumns)
+    return [
+      baseColumns.tokenName,
+      baseColumns.artist,
+      baseColumns.price,
+      baseColumns.totalVolumeUSD,
+      baseColumns.marketCap,
+      baseColumns.createdDate,
+      baseColumns.holders,
+      baseColumns.buy
+    ]
   }, [handleBuy])
 
   const showEmptyState = !isPending && (!coins || coins.length === 0)
@@ -480,7 +511,6 @@ export const ArtistCoinsTable = ({
             isEmptyRow={isEmptyRow}
             fetchMore={loadNextPage}
             fetchBatchSize={ARTIST_COINS_BATCH_SIZE}
-            tableHeaderClassName={styles.tableHeader}
             responsiveColumns={RESPONSIVE_TABLE_POLICIES.artistCoinsLeaderboard}
             scrollRef={mainContentRef}
           />

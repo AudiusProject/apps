@@ -1,4 +1,4 @@
-import { MouseEvent, useCallback, useMemo, useRef } from 'react'
+import { memo, MouseEvent, useCallback, useMemo, useRef } from 'react'
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import {
@@ -20,8 +20,8 @@ import { formatCount, formatSeconds, dayjs } from '@audius/common/utils'
 import {
   IconVisibilityHidden,
   IconLock,
-  IconPlaybackPlay as IconPlay,
-  IconPlaybackPause as IconPause,
+  IconPlay,
+  IconPause,
   IconImage,
   Flex,
   IconSparkles,
@@ -78,7 +78,7 @@ type MiniTrackArtworkProps = {
   isLocked: boolean
 }
 
-const MiniTrackArtwork = ({
+const MiniTrackArtwork = memo(({
   trackId,
   isPlaying,
   isLocked
@@ -99,12 +99,17 @@ const MiniTrackArtwork = ({
   return (
     <div className={styles.inlineArtworkContainer}>
       <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
-      <div className={styles.inlineArtworkIcon}>
-        <IconComponent size='m' />
+      <div
+        className={cn(styles.inlineArtworkIcon, {
+          [styles.inlineArtworkIconActive]: isPlaying
+        })}
+      >
+        <IconComponent size='m' color='staticWhite' />
       </div>
     </div>
   )
-}
+})
+MiniTrackArtwork.displayName = 'MiniTrackArtwork'
 
 export type TracksTableColumn =
   | 'addedDate'
@@ -176,9 +181,27 @@ export const TracksTable = ({
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
+  const activeIndexRef = useRef(activeIndex)
+  activeIndexRef.current = activeIndex
+  const playingRef = useRef(playing)
+  playingRef.current = playing
   const dispatch = useDispatch()
   const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
+  const gatedTrackStatusMapRef = useRef(gatedTrackStatusMap)
+  gatedTrackStatusMapRef.current = gatedTrackStatusMap
   const trackAccessMap = useGatedContentAccessMap(data)
+  const trackAccessMapRef = useRef(trackAccessMap)
+  trackAccessMapRef.current = trackAccessMap
+  const dataRef = useRef(data)
+  dataRef.current = data
+  const onClickRowRef = useRef(onClickRow)
+  onClickRowRef.current = onClickRow
+  const onClickFavoriteRef = useRef(onClickFavorite)
+  onClickFavoriteRef.current = onClickFavorite
+  const onClickRepostRef = useRef(onClickRepost)
+  onClickRepostRef.current = onClickRepost
+  const onClickRemoveRef = useRef(onClickRemove)
+  onClickRemoveRef.current = onClickRemove
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const [, setGatedModalVisibility] = useModalState('LockedContent')
@@ -187,10 +210,10 @@ export const TracksTable = ({
   const renderPlayButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const index = cellInfo.row.index
-      const active = index === activeIndex
+      const active = index === activeIndexRef.current
       const track = cellInfo.row.original
       const isTrackPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
         track.track_id
       ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
@@ -198,7 +221,7 @@ export const TracksTable = ({
       return (
         <TablePlayButton
           className={cn(styles.tablePlayButton, { [styles.active]: active })}
-          paused={!playing}
+          paused={!playingRef.current}
           playing={active}
           hideDefault={false}
           isTrackPremium={isTrackPremium}
@@ -206,24 +229,23 @@ export const TracksTable = ({
         />
       )
     },
-    [playing, activeIndex, trackAccessMap]
+    []
   )
 
   const renderTrackNameCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
       const index = cellInfo.row.index
-      const active = index === activeIndex
-      const isTrackPlaying = active && playing
+      const active = index === activeIndexRef.current
+      const isTrackPlaying = active && playingRef.current
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
       const user = track.user
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? {
-        isFetchingNFTAccess: false,
-        hasStreamAccess: true
-      }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
       const artistRow = showArtistInTrackNameColumn ? (
@@ -323,7 +345,7 @@ export const TracksTable = ({
         </Flex>
       )
     },
-    [activeIndex, playing, showArtistInTrackNameColumn, trackAccessMap]
+    [showArtistInTrackNameColumn]
   )
 
   const renderArtistNameCell = useCallback(
@@ -344,14 +366,14 @@ export const TracksTable = ({
             userId={user.user_id}
             size='s'
             strength='strong'
-            variant={index === activeIndex ? 'visible' : 'default'}
+            variant={index === activeIndexRef.current ? 'visible' : 'default'}
             badgeSize='xs'
             popover
           />
         </div>
       )
     },
-    [activeIndex]
+    []
   )
 
   const renderPlaysCell = useCallback(
@@ -452,9 +474,11 @@ export const TracksTable = ({
   const renderFavoriteButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -474,23 +498,25 @@ export const TracksTable = ({
               className={cn(styles.tableActionButton, {
                 [styles.active]: track.has_current_user_saved
               })}
-              onClick={() => onClickFavorite?.(track)}
+              onClick={() => onClickFavoriteRef.current?.(track)}
               favorited={track.has_current_user_saved}
             />
           </div>
         </Tooltip>
       )
     },
-    [trackAccessMap, onClickFavorite, userId]
+    [userId]
   )
 
   const repostButtonRef = useRef<HTMLDivElement>(null)
   const renderRepostButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -511,7 +537,7 @@ export const TracksTable = ({
                 [styles.active]: track.has_current_user_reposted
               })}
               onClick={(e) => {
-                onClickRepost?.(track)
+                onClickRepostRef.current?.(track)
                 e.stopPropagation()
               }}
               reposted={track.has_current_user_reposted}
@@ -520,7 +546,7 @@ export const TracksTable = ({
         </Tooltip>
       )
     },
-    [trackAccessMap, onClickRepost, userId]
+    [userId]
   )
 
   const overflowMenuRef = useRef<HTMLDivElement>(null)
@@ -529,9 +555,11 @@ export const TracksTable = ({
       const track = cellInfo.row.original
       const { stream_conditions: streamConditions, is_unlisted: isUnlisted } =
         track
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isOwner = track.owner_id === userId
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isDdex = !!track.ddex_app
@@ -583,7 +611,7 @@ export const TracksTable = ({
             includeEmbed: !isUnlisted,
             includeEdit: !disabledTrackEdit,
             includeAddToPlaylist: !isUnlisted || isOwner,
-            onRemove: onClickRemove,
+            onRemove: onClickRemoveRef.current,
             removeText
           }
 
@@ -604,11 +632,9 @@ export const TracksTable = ({
       )
     },
     [
-      trackAccessMap,
       shouldShowGatedType,
       disabledTrackEdit,
       isAlbumPage,
-      onClickRemove,
       removeText,
       userId
     ]
@@ -638,13 +664,15 @@ export const TracksTable = ({
   const renderLockedButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isLockedPremium =
         isLocked && isContentUSDCPurchaseGated(track.stream_conditions)
-      const gatedTrackStatus = gatedTrackStatusMap[track.track_id]
+      const gatedTrackStatus = gatedTrackStatusMapRef.current[track.track_id]
       const isOwner = track.owner_id === userId
 
       const deleted =
@@ -670,10 +698,8 @@ export const TracksTable = ({
       )
     },
     [
-      gatedTrackStatusMap,
       onClickGatedPill,
       onClickPremiumPill,
-      trackAccessMap,
       userId
     ]
   )
@@ -681,9 +707,11 @@ export const TracksTable = ({
   const renderTrackActions = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
       return (
@@ -704,7 +732,6 @@ export const TracksTable = ({
       )
     },
     [
-      trackAccessMap,
       renderFavoriteButtonCell,
       renderOverflowMenuCell,
       renderLockedButtonCell,
@@ -721,10 +748,11 @@ export const TracksTable = ({
         accessor: 'dateAdded',
         Cell: renderAddedDateCell,
         minWidth: 104,
-        width: 120,
-        maxWidth: 160,
+        width: 104,
+        maxWidth: 104,
         sortTitle: 'Date Added',
         sorter: dateSorter('dateAdded'),
+        disableResizing: true,
         align: 'right'
       },
       artistName: {
@@ -732,11 +760,12 @@ export const TracksTable = ({
         Header: 'Artist',
         accessor: 'artist',
         Cell: renderArtistNameCell,
-        minWidth: 140,
+        minWidth: 180,
         width: 180,
-        maxWidth: 300,
+        maxWidth: 180,
         sortTitle: 'Artist Name',
         sorter: alphaSorter('artist'),
+        disableResizing: true,
         align: 'left'
       },
       date: {
@@ -745,10 +774,11 @@ export const TracksTable = ({
         accessor: 'date',
         Cell: renderDateCell,
         minWidth: 104,
-        width: 120,
-        maxWidth: 160,
+        width: 104,
+        maxWidth: 104,
         sortTitle: 'Date Listened',
         sorter: dateSorter('date'),
+        disableResizing: true,
         align: 'right'
       },
       listenDate: {
@@ -757,10 +787,11 @@ export const TracksTable = ({
         accessor: 'dateListened',
         Cell: renderListenDateCell,
         minWidth: 104,
-        width: 120,
-        maxWidth: 160,
+        width: 104,
+        maxWidth: 104,
         sortTitle: 'Date Listened',
         sorter: dateSorter('dateListened'),
+        disableResizing: true,
         align: 'right'
       },
       releaseDate: {
@@ -769,10 +800,11 @@ export const TracksTable = ({
         accessor: 'created_at',
         Cell: renderReleaseDateCell,
         minWidth: 104,
-        width: 120,
-        maxWidth: 160,
+        width: 104,
+        maxWidth: 104,
         sortTitle: 'Date Released',
         sorter: dateSorter('created_at'),
+        disableResizing: true,
         align: 'right'
       },
       reposts: {
@@ -780,11 +812,12 @@ export const TracksTable = ({
         Header: 'Reposts',
         accessor: 'repost_count',
         Cell: renderRepostsCell,
-        minWidth: 88,
-        width: 104,
-        maxWidth: 160,
+        minWidth: 80,
+        width: 80,
+        maxWidth: 80,
         sortTitle: 'Reposts',
         sorter: numericSorter('repost_count'),
+        disableResizing: true,
         align: 'right'
       },
       plays: {
@@ -792,11 +825,12 @@ export const TracksTable = ({
         Header: 'Plays',
         accessor: 'plays',
         Cell: renderPlaysCell,
-        minWidth: 88,
-        width: 104,
-        maxWidth: 120,
+        minWidth: 80,
+        width: 80,
+        maxWidth: 80,
         sortTitle: 'Plays',
         sorter: numericSorter('plays'),
+        disableResizing: true,
         align: 'right'
       },
       playButton: {
@@ -812,11 +846,12 @@ export const TracksTable = ({
         Header: 'Favorites',
         accessor: 'save_count',
         Cell: renderSavesCell,
-        minWidth: 88,
-        width: 104,
-        maxWidth: 160,
+        minWidth: 80,
+        width: 80,
+        maxWidth: 80,
         sortTitle: 'Favorites',
         sorter: numericSorter('save_count'),
+        disableResizing: true,
         align: 'right'
       },
       comments: {
@@ -824,19 +859,20 @@ export const TracksTable = ({
         Header: 'Comments',
         accessor: 'comment_count',
         Cell: renderCommentsCell,
-        minWidth: 88,
-        width: 104,
-        maxWidth: 160,
+        minWidth: 80,
+        width: 80,
+        maxWidth: 80,
         sortTitle: 'Comments',
         sorter: numericSorter('comment_count'),
+        disableResizing: true,
         align: 'right'
       },
       overflowActions: {
         id: 'trackActions',
         Cell: renderTrackActions,
-        minWidth: 140,
-        maxWidth: 140,
-        width: 140,
+        minWidth: 120,
+        maxWidth: 120,
+        width: 120,
         disableResizing: true,
         disableSortBy: true
       },
@@ -855,21 +891,32 @@ export const TracksTable = ({
         accessor: 'time',
         Cell: renderLengthCell,
         minWidth: 80,
-        width: 96,
-        maxWidth: 160,
+        width: 80,
+        maxWidth: 80,
         sortTitle: 'Track Length',
         sorter: numericSorter('time'),
         disableSortBy: isVirtualized,
+        disableResizing: true,
         align: 'right'
       },
       trackName: {
         id: 'trackName',
-        Header: 'Track',
+        Header: showArtistInTrackNameColumn ? (
+          <span className={styles.trackHeaderWithArtwork}>
+            <span
+              className={styles.trackHeaderArtworkSpacer}
+              aria-hidden='true'
+            />
+            <span>Track</span>
+          </span>
+        ) : (
+          'Track'
+        ),
         accessor: 'title',
         Cell: renderTrackNameCell,
-        minWidth: 220,
-        width: 260,
-        maxWidth: 520,
+        minWidth: showArtistInTrackNameColumn ? 320 : 260,
+        width: showArtistInTrackNameColumn ? 320 : 260,
+        maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
         align: 'left'
@@ -880,10 +927,11 @@ export const TracksTable = ({
         accessor: 'dateSaved',
         Cell: renderSavedDateCell,
         minWidth: 104,
-        width: 120,
-        maxWidth: 160,
+        width: 104,
+        maxWidth: 104,
         sortTitle: 'Date Saved',
         sorter: dateSorter('dateSaved'),
+        disableResizing: true,
         align: 'right'
       },
       spacer: {
@@ -922,9 +970,11 @@ export const TracksTable = ({
   const handleClickRow = useCallback(
     (e: MouseEvent<HTMLTableRowElement>, rowInfo: TrackRow, index: number) => {
       const track = rowInfo.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
       const deleted =
@@ -936,17 +986,19 @@ export const TracksTable = ({
       ].some((ref) => isDescendantElementOf(e?.target, ref.current))
 
       if ((isLocked && !isPremium) || deleted || clickedActionButton) return
-      onClickRow?.(track, index)
+      onClickRowRef.current?.(track, index)
     },
-    [trackAccessMap, onClickRow]
+    []
   )
 
   const getRowClassName = useCallback(
     (rowIndex: number) => {
-      const track = data[rowIndex]
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const track = dataRef.current[rowIndex]
+      const { isFetchingNFTAccess, hasStreamAccess } =
+        trackAccessMapRef.current[track.track_id] ?? {
+          isFetchingNFTAccess: false,
+          hasStreamAccess: true
+        }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -956,7 +1008,7 @@ export const TracksTable = ({
         [styles.lockedRow]: isLocked && !deleted && !isPremium
       })
     },
-    [trackAccessMap, data]
+    []
   )
 
   return (

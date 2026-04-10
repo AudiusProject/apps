@@ -1,14 +1,14 @@
 .container {
   display: inline-flex;
   align-items: center;
-  gap: var(--harmony-unit-6);
+  gap: var(--harmony-unit-2);
   max-width: 100%;
   min-width: 0;
 }
 
 .artwork {
-  height: var(--harmony-unit-10);
-  width: var(--harmony-unit-10);
+  height: 48px;
+  width: 48px;
   border-radius: var(--harmony-unit-1);
   border: 1px solid var(--harmony-border-default);
   overflow: hidden;
@@ -18,17 +18,30 @@
 .textContainer {
   display: flex;
   flex-direction: column;
+  width: 100%;
   min-width: 0;
   gap: var(--harmony-unit-1);
 }
 
 .titleText {
+  display: block;
+  width: 100%;
+  min-width: 0;
   line-height: 125%;
 }
 
 .artistText {
   display: block;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--harmony-n-500);
   line-height: 125%;
+}
+
+.contentHeaderWithArtwork {
+  padding-left: 68px;
 }

@@ -15,13 +15,14 @@
   gap: 8px;
   width: 100%;
   min-width: 0;
+  user-select: none;
 }
 
 .inlineArtworkContainer {
   position: relative;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   border: 1px solid var(--harmony-n-100);
   border-radius: 4px;
   overflow: hidden;
@@ -45,14 +46,24 @@
   height: 20px;
 }
 
-.inlineArtworkIcon :global(path),
-.inlineArtworkIcon :global(circle) {
-  fill: var(--harmony-static-white) !important;
-}
-
 .tableRow:hover .inlineArtworkIcon,
 .tableRow.active .inlineArtworkIcon {
   opacity: 0.75;
+}
+
+.inlineArtworkIconActive {
+  opacity: 0.75;
+}
+
+.trackHeaderWithArtwork {
+  display: inline-flex;
+  align-items: center;
+}
+
+.trackHeaderArtworkSpacer {
+  width: 56px;
+  min-width: 56px;
+  display: inline-block;
 }
 
 .textCell {
@@ -67,11 +78,13 @@
 .trackCell {
   composes: textCell;
   display: block;
+  user-select: none;
 }
 
 .trackName {
   display: flex;
   align-items: center;
+  user-select: none;
 }
 
 .trackName:hover:not(:has(.locked)) {
@@ -95,6 +108,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--harmony-n-500);
+  user-select: none;
 }
 
 .badges {

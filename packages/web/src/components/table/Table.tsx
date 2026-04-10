@@ -51,6 +51,9 @@ import {
 const FETCH_THRESHOLD = 40
 // Number of rows to fetch in each batch
 const FETCH_BATCH_SIZE = 80
+// Table cells/headers add 12px left + 12px right padding in CSS.
+// Include this chrome in collapse budgeting to avoid clipping before drop.
+const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
 
 // Column Sort Functions
 export const numericSorter = (accessor: string) => (rowA: any, rowB: any) => {
@@ -176,6 +179,40 @@ export const Table = ({
     return Math.floor(totalRowCount / pageSize)
   }, [pageSize, totalRowCount])
 
+  const tableResizeObserverRef = useRef<ResizeObserver | null>(null)
+  const tableResizeHandlerRef = useRef<(() => void) | null>(null)
+  const [tableWidth, setTableWidth] = useState<number>(0)
+
+  const hiddenResponsiveColumnIds = useMemo(() => {
+    if (!responsiveColumns) return new Set<string>()
+    return getHiddenResponsiveColumns({
+      columns,
+      containerWidth: tableWidth,
+      responsiveColumns,
+      fallbackColumnWidth: defaultColumn.width,
+      columnChromeWidth: TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH
+    })
+  }, [columns, defaultColumn.width, responsiveColumns, tableWidth])
+
+  const getColumnId = (column: any) => {
+    if (typeof column?.id === 'string' && column.id.length > 0) return column.id
+    if (
+      typeof column?.accessor === 'string' &&
+      column.accessor.length > 0
+    ) {
+      return column.accessor
+    }
+    return null
+  }
+
+  const visibleColumns = useMemo(() => {
+    if (!hiddenResponsiveColumnIds.size) return columns
+    return columns.filter((column) => {
+      const id = getColumnId(column)
+      return id == null || !hiddenResponsiveColumnIds.has(id)
+    })
+  }, [columns, hiddenResponsiveColumnIds])
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -185,7 +222,7 @@ export const Table = ({
     state: { sortBy }
   } = useTable(
     {
-      columns,
+      columns: visibleColumns,
       data,
       defaultColumn,
       autoResetSortBy: false,
@@ -194,10 +231,6 @@ export const Table = ({
     useSortBy,
     useFlexLayout
   )
-
-  const tableResizeObserverRef = useRef<ResizeObserver | null>(null)
-  const tableResizeHandlerRef = useRef<(() => void) | null>(null)
-  const [tableWidth, setTableWidth] = useState<number>(0)
 
   const setTableWrapperNode = useCallback((node: HTMLDivElement | null) => {
     if (tableResizeObserverRef.current) {
@@ -236,16 +269,6 @@ export const Table = ({
       }
     }
   }, [])
-
-  const hiddenResponsiveColumnIds = useMemo(() => {
-    if (!responsiveColumns) return new Set<string>()
-    return getHiddenResponsiveColumns({
-      columns,
-      containerWidth: tableWidth,
-      responsiveColumns,
-      fallbackColumnWidth: defaultColumn.width
-    })
-  }, [columns, defaultColumn.width, responsiveColumns, tableWidth])
 
   const isEndColumn = useCallback(
     (id: string) => id === 'trackActions' || id === 'overflowMenu',

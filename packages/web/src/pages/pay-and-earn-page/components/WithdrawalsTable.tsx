@@ -48,7 +48,6 @@ type WithdrawalsTableProps = {
 }
 
 const defaultColumns: WithdrawalsTableColumn[] = [
-  'spacerLeft',
   'destination',
   'date',
   'amount',
@@ -93,7 +92,7 @@ const renderAmountCell = (cellInfo: TransactionCell) => {
 const tableColumnMap = {
   destination: {
     id: 'destination',
-    Header: 'Method',
+    Header: <span className={styles.methodHeader}>Method</span>,
     accessor: 'metadata',
     Cell: renderDestinationCell,
     width: 480,

@@ -22,6 +22,7 @@ type GetHiddenResponsiveColumnsArgs = {
   containerWidth: number
   responsiveColumns: ResponsiveColumns
   fallbackColumnWidth: number
+  columnChromeWidth?: number
 }
 
 const isNumber = (value: unknown): value is number =>
@@ -49,11 +50,10 @@ const getResponsiveBudgetWidth = (
   column: ColumnWithSize,
   fallbackColumnWidth: number
 ) => {
-  if (isNumber(column.width) && isNumber(column.minWidth)) {
-    return Math.max(column.width, column.minWidth)
-  }
-  if (isNumber(column.width)) return column.width
+  // For responsive collapse decisions, use the column's minimum visible width
+  // first, so columns shrink before they are dropped.
   if (isNumber(column.minWidth)) return column.minWidth
+  if (isNumber(column.width)) return column.width
   if (isNumber(column.maxWidth)) return column.maxWidth
   return fallbackColumnWidth
 }
@@ -62,7 +62,8 @@ export const getHiddenResponsiveColumns = ({
   columns,
   containerWidth,
   responsiveColumns,
-  fallbackColumnWidth
+  fallbackColumnWidth,
+  columnChromeWidth = 0
 }: GetHiddenResponsiveColumnsArgs) => {
   const alwaysVisible = new Set(responsiveColumns.alwaysVisibleIds ?? [])
 
@@ -101,7 +102,8 @@ export const getHiddenResponsiveColumns = ({
   for (const column of columns) {
     const id = getColumnId(column)
     if (!id) continue
-    const width = getResponsiveBudgetWidth(column, fallbackColumnWidth)
+    const width =
+      getResponsiveBudgetWidth(column, fallbackColumnWidth) + columnChromeWidth
     widthById.set(id, width)
     totalWidth += width
   }

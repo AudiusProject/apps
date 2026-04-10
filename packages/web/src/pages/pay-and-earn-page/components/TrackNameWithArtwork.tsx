@@ -49,7 +49,13 @@ export const TrackNameWithArtwork = ({
         <>
           <DynamicImage wrapperClassName={styles.artwork} image={image} />
           <div className={styles.textContainer}>
-            <Text className={styles.titleText} ellipses>
+            <Text
+              className={styles.titleText}
+              variant='title'
+              size='s'
+              strength='weak'
+              ellipses
+            >
               {title}
             </Text>
             {secondary}

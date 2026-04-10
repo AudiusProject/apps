@@ -203,4 +203,46 @@ describe('responsiveColumns', () => {
 
     expect(Array.from(hidden)).toEqual(['reposts', 'plays'])
   })
+
+  it('drops fixed utility columns while keeping track column visible', () => {
+    const hidden = getHiddenResponsiveColumns({
+      columns: [
+        { id: 'trackName', minWidth: 220, width: 260, maxWidth: Number.MAX_SAFE_INTEGER },
+        { id: 'dateReleased', minWidth: 104, width: 104, maxWidth: 104 },
+        { id: 'time', minWidth: 80, width: 80, maxWidth: 80 },
+        { id: 'dateSaved', minWidth: 104, width: 104, maxWidth: 104 },
+        { id: 'reposts', minWidth: 80, width: 80, maxWidth: 80 },
+        { id: 'plays', minWidth: 80, width: 80, maxWidth: 80 },
+        { id: 'trackActions', minWidth: 140, width: 140, maxWidth: 140 }
+      ],
+      containerWidth: 700,
+      responsiveColumns: {
+        hideOrder: ['dateReleased', 'time', 'dateSaved', 'reposts', 'plays'],
+        alwaysVisibleIds: ['trackName', 'trackActions']
+      },
+      fallbackColumnWidth: 64
+    })
+
+    expect(Array.from(hidden)).toEqual(['dateReleased', 'time'])
+  })
+
+  it('accounts for rendered per-column chrome when budgeting drops', () => {
+    const hidden = getHiddenResponsiveColumns({
+      columns: [
+        { id: 'trackName', minWidth: 320, width: 320, maxWidth: Number.MAX_SAFE_INTEGER },
+        { id: 'reposts', minWidth: 80, width: 80, maxWidth: 80 },
+        { id: 'plays', minWidth: 80, width: 80, maxWidth: 80 },
+        { id: 'trackActions', minWidth: 140, width: 140, maxWidth: 140 }
+      ],
+      containerWidth: 700,
+      responsiveColumns: {
+        hideOrder: ['reposts', 'plays'],
+        alwaysVisibleIds: ['trackName', 'trackActions']
+      },
+      fallbackColumnWidth: 64,
+      columnChromeWidth: 24
+    })
+
+    expect(Array.from(hidden)).toEqual(['reposts'])
+  })
 })
