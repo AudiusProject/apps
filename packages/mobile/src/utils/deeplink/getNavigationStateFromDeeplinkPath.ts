@@ -4,10 +4,7 @@ const parseOptionalHashId = (raw: string | undefined) => {
   return raw == null || raw === '' ? null : raw
 }
 
-type GetStateFromPath = (
-  path: string,
-  options: any
-) => any
+type GetStateFromPath = (path: string, options: any) => any
 
 type GetNavigationStateFromDeeplinkPathArgs = {
   path: string
@@ -23,13 +20,13 @@ const isProfilePathForHandle = (path: string, handle: string) => {
   const escaped = normalizedHandle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return (
     path.match(new RegExp(`^/${escaped}$`, 'i')) ||
-    path.match(new RegExp(`^/${escaped}/(tracks|albums|playlists|reposts)$`, 'i'))
+    path.match(
+      new RegExp(`^/${escaped}/(tracks|albums|playlists|reposts)$`, 'i')
+    )
   )
 }
 
-const createAppTabState = (
-  state: any
-): any => ({
+const createAppTabState = (state: any): any => ({
   routes: [
     {
       name: 'HomeStack',
@@ -287,7 +284,10 @@ export const getNavigationStateFromDeeplinkPath = ({
     path = `/settings${subpathParam}${queryParams}`
   } else if (accountHandle && isProfilePathForHandle(path, accountHandle)) {
     // If the path is explicitly a profile URL for the current user, rewrite to `/profile`
-    path = path.replace(new RegExp(`^/${accountHandle.replace(/^@/, '')}`, 'i'), '/profile')
+    path = path.replace(
+      new RegExp(`^/${accountHandle.replace(/^@/, '')}`, 'i'),
+      '/profile'
+    )
   } else {
     // If the path has two parts
     if (path.match(/^\/[^/]+\/[^/]+$/)) {
@@ -299,10 +299,7 @@ export const getNavigationStateFromDeeplinkPath = ({
 
     if (path.match(/^\/[^/]+\/playlist\/[^/]+$/)) {
       // set the path as `collection`
-      path = path.replace(
-        /(^\/[^/]+\/)(playlist)(\/[^/]+$)/,
-        '$1collection$3'
-      )
+      path = path.replace(/(^\/[^/]+\/)(playlist)(\/[^/]+$)/, '$1collection$3')
       path = `${path}?collectionType=playlist`
     } else if (path.match(/^\/[^/]+\/album\/[^/]+$/)) {
       // set the path as `collection`
@@ -334,4 +331,3 @@ export const getNavigationStateFromDeeplinkPath = ({
 
   return getStateFromPath(path, options)
 }
-

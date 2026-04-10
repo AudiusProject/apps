@@ -3,11 +3,7 @@ import { useEffect } from 'react'
 
 import { useCurrentAccountUser, useHasAccount } from '@audius/common/api'
 import { Status } from '@audius/common/models'
-import type {
-  LinkingOptions,
-  NavigationState,
-  PartialState
-} from '@react-navigation/native'
+import type { LinkingOptions } from '@react-navigation/native'
 import {
   NavigationContainer as RNNavigationContainer,
   createNavigationContainerRef,
@@ -20,8 +16,9 @@ import { screen } from 'app/services/analytics'
 import { getPrimaryRoute } from 'app/utils/navigation'
 import { useThemeVariant } from 'app/utils/theme'
 
-import { navigationThemes } from './navigationThemes'
 import { getNavigationStateFromDeeplinkPath } from '../../utils/deeplink/getNavigationStateFromDeeplinkPath'
+
+import { navigationThemes } from './navigationThemes'
 
 type NavigationContainerProps = {
   children: ReactNode
@@ -29,67 +26,6 @@ type NavigationContainerProps = {
 }
 
 export const navigationRef = createNavigationContainerRef()
-
-const createAppTabState = (
-  state: PartialState<NavigationState>
-): PartialState<NavigationState> => ({
-  routes: [
-    {
-      name: 'HomeStack',
-      state: {
-        routes: [
-          {
-            name: 'App',
-            state: {
-              routes: [
-                {
-                  name: 'AppTabs',
-                  state
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  ]
-})
-
-const createTrendingStackState = (route): PartialState<NavigationState> =>
-  createAppTabState({
-    routes: [
-      {
-        name: 'trending',
-        state: {
-          index: 1,
-          routes: [
-            {
-              name: 'Trending'
-            },
-            route
-          ]
-        }
-      }
-    ]
-  })
-
-const createExploreStackState = (route): PartialState<NavigationState> =>
-  createAppTabState({
-    routes: [
-      {
-        name: 'explore',
-        state: {
-          index: 1,
-          routes: [
-            {
-              name: 'Explore'
-            },
-            route
-          ]
-        }
-      }
-    ]
-  })
 
 /**
  * NavigationContainer contains the react-navigation context

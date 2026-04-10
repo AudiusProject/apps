@@ -58,4 +58,3 @@ describe('getNavigationStateFromDeeplinkPath', () => {
     expect(getLeafRouteName(state)).toBe('Collection')
   })
 })
-
