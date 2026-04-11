@@ -11,7 +11,6 @@ import { Flex, Text, IconArrowRight, Paper, Box } from '@audius/harmony-native'
 import { UserBalanceHistoryGraph } from 'app/components/user-balance-history-graph'
 
 type AccountBalanceProps = {
-  width?: number
   height?: number
 }
 
@@ -29,7 +28,6 @@ const formatPercentage = (value: number): string => {
 }
 
 export const AccountBalance = ({
-  width = 350,
   height = 204
 }: AccountBalanceProps) => {
   const { data: currentUserId } = useCurrentUserId()
@@ -37,7 +35,7 @@ export const AccountBalance = ({
     data: historyData,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: currentUserId })
+  } = useUserBalanceHistory({ userId: currentUserId, granularity: 'daily' })
 
   const {
     totalBalance: currentBalance,
@@ -148,7 +146,7 @@ export const AccountBalance = ({
         </Flex>
       </Flex>
 
-      <UserBalanceHistoryGraph width={width} height={height} />
+      <UserBalanceHistoryGraph height={height} />
     </Paper>
   )
 }

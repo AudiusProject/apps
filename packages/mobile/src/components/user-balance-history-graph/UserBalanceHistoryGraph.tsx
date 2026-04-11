@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   useCurrentUserId,
@@ -7,7 +7,7 @@ import {
 } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { convertHexToRGBA } from '@audius/common/utils'
-import { View } from 'react-native'
+import { type LayoutChangeEvent, View } from 'react-native'
 import { LineChart } from 'react-native-gifted-charts'
 import type { lineDataItem } from 'react-native-gifted-charts'
 
@@ -18,7 +18,6 @@ import { useNavigation } from 'app/hooks/useNavigation'
 const messages = walletMessages.balanceHistory
 
 type UserBalanceHistoryGraphProps = {
-  width?: number
   height?: number
 }
 
@@ -43,22 +42,25 @@ const formatShortCurrency = (value: number): string => {
 
 const formatTooltipDate = (timestamp: number): string => {
   const date = new Date(timestamp)
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
-  const hour = date
-    .toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      hour12: true
+  return date
+    .toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
     })
-    .toLowerCase()
-  return `${weekday} ${hour}`.toUpperCase()
+    .toUpperCase()
 }
 
 export const UserBalanceHistoryGraph = ({
-  width = 350,
   height = 191
 }: UserBalanceHistoryGraphProps) => {
+  const [containerWidth, setContainerWidth] = useState(0)
   const { color, spacing } = useTheme()
   const navigation = useNavigation()
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width)
+  }, [])
   useEffect(() => {
     navigation.setOptions({ fullScreenGestureEnabled: false })
     return () => {
@@ -73,7 +75,7 @@ export const UserBalanceHistoryGraph = ({
     data: historyDataFetched,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: currentUserId })
+  } = useUserBalanceHistory({ userId: currentUserId, granularity: 'daily' })
 
   const {
     totalBalance: currentBalance,
@@ -179,6 +181,11 @@ export const UserBalanceHistoryGraph = ({
     return null
   }
 
+  // Wait for layout measurement before rendering the chart
+  if (containerWidth === 0) {
+    return <Flex pv='xs' onLayout={handleLayout} style={{ minHeight: height }} />
+  }
+
   const values = chartData.map((d) => d.value as number)
   // Safe to assert: we know chartData.length > 0 from check above
   const maxValue = Math.max(...values)
@@ -188,7 +195,7 @@ export const UserBalanceHistoryGraph = ({
   const chartHorizontalPadding = 48
   const chartInitialSpacing = 10
   const chartEndSpacing = 10
-  const chartWidth = Math.max(width - chartHorizontalPadding, 0)
+  const chartWidth = Math.max(containerWidth - chartHorizontalPadding, 0)
   const spacingBetweenPoints =
     chartData.length > 1
       ? Math.max(
@@ -206,7 +213,7 @@ export const UserBalanceHistoryGraph = ({
   }
 
   return (
-    <Flex pv='xs'>
+    <Flex pv='xs' onLayout={handleLayout}>
       <View>
         <LineChart
           data={chartData}
