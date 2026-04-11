@@ -30,6 +30,7 @@ export const CollapsibleTabNavigator = ({
   children,
   screenOptions,
   headerHeight,
+  minHeaderHeight,
   renderTabBar
 }: CollapsibleTabNavigatorProps) => {
   const { state, navigation, descriptors } = useNavigationBuilder(TabRouter, {
@@ -63,6 +64,7 @@ export const CollapsibleTabNavigator = ({
       }}
       renderHeader={renderHeader}
       headerHeight={headerHeight}
+      minHeaderHeight={minHeaderHeight}
       snapThreshold={null}
       renderTabBar={(props) =>
         renderTabBar({
