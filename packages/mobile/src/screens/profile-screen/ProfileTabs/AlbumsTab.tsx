@@ -5,6 +5,7 @@ import {
   useUserAlbums,
   useProfileUser
 } from '@audius/common/api'
+import { CreatePlaylistSource } from '@audius/common/models'
 import { useIsFocused } from '@react-navigation/native'
 
 import { CollectionList } from 'app/components/collection-list/CollectionList'
@@ -50,6 +51,9 @@ export const AlbumsTab = () => {
       disableTopTabScroll
       showsVerticalScrollIndicator={false}
       totalCount={album_count}
+      collectionType='album'
+      showCreateCollectionTile={isOwner}
+      createPlaylistSource={CreatePlaylistSource.PROFILE_PAGE}
       isLoading={isPending}
       onEndReached={handleEndReached}
       isLoadingMore={isFetchingNextPage}

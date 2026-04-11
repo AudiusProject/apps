@@ -218,10 +218,14 @@ function* confirmEditPlaylist(
         )
         return playlist?.[0] ? userCollectionMetadataFromSDK(playlist[0]) : null
       },
-      function* (confirmedPlaylist: Collection) {
+      function* (_confirmedPlaylist: Collection) {
         const done = yield* isPlaylistConfirmerDone(playlistId)
         if (!done) return
-        yield* call(updateCollectionData, [confirmedPlaylist])
+        // Don't use the API-fetched confirmedPlaylist - the backend may not have
+        // propagated the edit yet, and a refetch would overwrite our optimistic
+        // cache with stale data (reverting the user's edits).
+        // Our local state is correct since we just sent it to the API.
+        yield* call(updateCollectionData, [formFields])
       },
       function* ({ error, timeout, message }) {
         yield* put(

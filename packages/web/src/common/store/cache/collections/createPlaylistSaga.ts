@@ -3,6 +3,7 @@ import {
   userCollectionMetadataFromSDK
 } from '@audius/common/adapters'
 import {
+  addCollectionToUserList,
   primeCollectionDataSaga,
   queryAccountUser,
   queryCollection,
@@ -147,6 +148,7 @@ function* optimisticallySavePlaylist(
   )
 
   yield* call(primeCollectionDataSaga, [playlist as CollectionMetadata])
+  yield* call(addCollectionToUserList, user_id, playlistId, !!playlist.is_album)
 
   yield* put(
     accountActions.addAccountPlaylist({

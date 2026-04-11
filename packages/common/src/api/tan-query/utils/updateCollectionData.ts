@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, InfiniteData } from '@tanstack/react-query'
 import { mergeWith } from 'lodash'
 import { getContext } from 'typed-redux-saga'
 
@@ -6,6 +6,7 @@ import { ID, Collection } from '~/models'
 import { mergeCustomizer } from '~/store/cache/mergeCustomizer'
 
 import { getCollectionQueryKey } from '../collection/useCollection'
+import { QUERY_KEYS } from '../queryKeys'
 
 import { primeCollectionData } from './primeCollectionData'
 
@@ -40,4 +41,35 @@ export const updateCollectionData = function* (
     queryClient,
     forceReplace: true
   })
+}
+
+/**
+ * Optimistically adds a newly created collection ID to the user's
+ * albums or playlists infinite query so it appears immediately in the profile.
+ */
+export const addCollectionToUserList = function* (
+  userId: ID,
+  collectionId: ID,
+  isAlbum: boolean
+) {
+  const queryClient = yield* getContext<QueryClient>('queryClient')
+  const queryKey = [
+    isAlbum ? QUERY_KEYS.userAlbums : QUERY_KEYS.userPlaylists,
+    userId
+  ]
+
+  // Find all matching infinite queries for this user and prepend the new ID
+  queryClient.setQueriesData<InfiniteData<ID[]>>(
+    { queryKey },
+    (oldData) => {
+      if (!oldData) return oldData
+      const firstPage = oldData.pages[0] ?? []
+      // Don't add if already present
+      if (firstPage.includes(collectionId)) return oldData
+      return {
+        ...oldData,
+        pages: [[collectionId, ...firstPage], ...oldData.pages.slice(1)]
+      }
+    }
+  )
 }

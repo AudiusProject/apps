@@ -9,7 +9,8 @@ import {
   queryUser,
   queryCurrentUserId,
   updateCollectionData,
-  primeCollectionDataSaga
+  primeCollectionDataSaga,
+  addCollectionToUserList
 } from '@audius/common/api'
 import {
   Name,
@@ -133,6 +134,7 @@ function* optimisticallySaveAlbum(
   )
 
   yield* call(primeCollectionDataSaga, [album as CollectionMetadata])
+  yield* call(addCollectionToUserList, user_id, albumId, true)
 
   yield* put(
     accountActions.addAccountPlaylist({
