@@ -685,9 +685,11 @@ export const GiantTrackTile = ({
         <TrackMetadataList trackId={trackId} />
 
         {renderTags()}
-      </Flex>
 
-      {shouldShowDownloadSection ? <DownloadSection trackId={trackId} /> : null}
+        {shouldShowDownloadSection ? (
+          <DownloadSection trackId={trackId} />
+        ) : null}
+      </Flex>
     </Paper>
   )
 }
