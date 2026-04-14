@@ -22,6 +22,7 @@ type UseToggleTrack = {
   isPreview?: boolean
   recordAnalytics?: RecordAnalytics
   id?: Nullable<ID>
+  entries?: Queueable[]
 }
 
 /**
@@ -122,7 +123,8 @@ export const useToggleTrack = ({
   uid,
   source,
   recordAnalytics,
-  id
+  id,
+  entries: entriesProp
 }: UseToggleTrack) => {
   const currentQueueItem = useSelector(makeGetCurrent())
   const currentTrack = useCurrentTrack()
@@ -144,10 +146,10 @@ export const useToggleTrack = ({
       playTrack({
         id,
         uid,
-        entries: [{ id, uid, source }]
+        entries: entriesProp ?? [{ id, uid, source }]
       })
     }
-  }, [playTrack, pauseTrack, isTrackPlaying, id, uid, source])
+  }, [playTrack, pauseTrack, isTrackPlaying, id, uid, source, entriesProp])
 
   return { togglePlay, isTrackPlaying }
 }
