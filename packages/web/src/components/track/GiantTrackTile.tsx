@@ -63,6 +63,7 @@ import Toast from 'components/toast/Toast'
 import { UserGeneratedText } from 'components/user-generated-text'
 
 import { CardTitle } from './CardTitle'
+import { DownloadSection } from './DownloadSection'
 import { GatedContentSection } from './GatedContentSection'
 import GiantArtwork from './GiantArtwork'
 import styles from './GiantTrackTile.module.css'
@@ -211,6 +212,7 @@ export const GiantTrackTile = ({
   const { data: track } = useTrack(trackId, {
     select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
   })
+  const shouldShowDownloadSection = !!track?.is_downloadable
   // Preview button is shown for USDC-gated tracks if user does not have access
   // or is the owner
   const showPreview =
@@ -684,6 +686,8 @@ export const GiantTrackTile = ({
 
         {renderTags()}
       </Flex>
+
+      {shouldShowDownloadSection ? <DownloadSection trackId={trackId} /> : null}
     </Paper>
   )
 }
