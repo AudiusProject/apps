@@ -185,8 +185,7 @@ export const ProfileNavOverlay = () => {
           <UserLink
             userId={user_id}
             textVariant='title'
-            size='s'
-            badgeSize='2xs'
+            size='m'
             disabled
           />
         </Animated.View>
