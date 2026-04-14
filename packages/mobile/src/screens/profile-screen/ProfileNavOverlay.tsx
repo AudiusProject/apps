@@ -17,8 +17,10 @@ import {
   IconButton,
   IconCaretLeft,
   IconKebabHorizontal,
-  IconShare
+  IconShare,
+  Text
 } from '@audius/harmony-native'
+import { UserBadges } from 'app/components/user-badges'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 
@@ -55,6 +57,16 @@ const useStyles = makeStyles(({ spacing }) => ({
     paddingHorizontal: spacing(4),
     paddingVertical: spacing(2)
   },
+  title: {
+    ...StyleSheet.absoluteFillObject,
+    // Leave space for the icon buttons on either side of the row so the
+    // title doesn't visually collide with them when it fades in.
+    paddingHorizontal: spacing(14),
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: spacing(1)
+  },
   iconStack: {
     // Wrapper so the two stacked IconButton layers occupy the same space.
     position: 'relative'
@@ -72,9 +84,12 @@ export const ProfileNavOverlay = () => {
   const scrollY = useProfileScrollY()
 
   const { data: accountId } = useCurrentUserId()
-  const { user_id } =
+  const { user_id, name } =
     useProfileUser({
-      select: (user) => ({ user_id: user.user_id })
+      select: (user) => ({
+        user_id: user.user_id,
+        name: user.name
+      })
     }).user ?? {}
 
   const isOwner = !!user_id && user_id === accountId
@@ -101,6 +116,17 @@ export const ProfileNavOverlay = () => {
 
   // Neutral icons fade in as the user scrolls past the cover photo.
   const neutralIconsStyle = useAnimatedStyle(() => ({
+    opacity: scrollY
+      ? interpolate(scrollY.value, [0, FADE_DISTANCE], [0, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp'
+        })
+      : 0
+  }))
+
+  // Title fades in alongside the blur background so it only appears once
+  // the cover photo has scrolled away.
+  const titleStyle = useAnimatedStyle(() => ({
     opacity: scrollY
       ? interpolate(scrollY.value, [0, FADE_DISTANCE], [0, 1], {
           extrapolateLeft: 'clamp',
@@ -156,6 +182,23 @@ export const ProfileNavOverlay = () => {
         pointerEvents='box-none'
         style={[styles.actionsRow, { top: insets.top }]}
       >
+        <Animated.View
+          pointerEvents='none'
+          style={[styles.title, titleStyle]}
+        >
+          {name ? (
+            <Text
+              variant='title'
+              size='s'
+              color='default'
+              numberOfLines={1}
+              ellipsizeMode='tail'
+            >
+              {name}
+            </Text>
+          ) : null}
+          <UserBadges userId={user_id} badgeSize='xs' />
+        </Animated.View>
         <View style={styles.iconStack}>
           <Animated.View style={whiteIconsStyle}>
             <IconButton
