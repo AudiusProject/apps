@@ -17,10 +17,9 @@ import {
   IconButton,
   IconCaretLeft,
   IconKebabHorizontal,
-  IconShare,
-  Text
+  IconShare
 } from '@audius/harmony-native'
-import { UserBadges } from 'app/components/user-badges'
+import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 
@@ -84,12 +83,9 @@ export const ProfileNavOverlay = () => {
   const scrollY = useProfileScrollY()
 
   const { data: accountId } = useCurrentUserId()
-  const { user_id, name } =
+  const { user_id } =
     useProfileUser({
-      select: (user) => ({
-        user_id: user.user_id,
-        name: user.name
-      })
+      select: (user) => ({ user_id: user.user_id })
     }).user ?? {}
 
   const isOwner = !!user_id && user_id === accountId
@@ -186,18 +182,13 @@ export const ProfileNavOverlay = () => {
           pointerEvents='none'
           style={[styles.title, titleStyle]}
         >
-          {name ? (
-            <Text
-              variant='title'
-              size='s'
-              color='default'
-              numberOfLines={1}
-              ellipsizeMode='tail'
-            >
-              {name}
-            </Text>
-          ) : null}
-          <UserBadges userId={user_id} badgeSize='xs' />
+          <UserLink
+            userId={user_id}
+            textVariant='title'
+            size='s'
+            badgeSize='2xs'
+            disabled
+          />
         </Animated.View>
         <View style={styles.iconStack}>
           <Animated.View style={whiteIconsStyle}>
