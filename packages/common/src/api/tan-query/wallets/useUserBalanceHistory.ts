@@ -34,6 +34,36 @@ const getDefaultStartTime = (): Date => {
   return date
 }
 
+/**
+ * Buckets hourly balance-history points into one point per UTC day, keeping
+ * the latest (end-of-day) value for each day.
+ *
+ * The backend's `granularity=daily` option currently sums the 24 hourly
+ * snapshots for each day instead of returning the closing balance, so we fetch
+ * hourly data and downsample client-side. Swap this out for a direct daily
+ * fetch once the API is fixed.
+ */
+const bucketHourlyPointsByDay = (
+  points: BalanceHistoryDataPoint[]
+): BalanceHistoryDataPoint[] => {
+  if (points.length === 0) return points
+
+  const latestByDay = new Map<number, BalanceHistoryDataPoint>()
+  for (const point of points) {
+    const dayStart = new Date(point.timestamp)
+    dayStart.setUTCHours(0, 0, 0, 0)
+    const dayKey = dayStart.getTime()
+    const existing = latestByDay.get(dayKey)
+    if (!existing || point.timestamp > existing.timestamp) {
+      latestByDay.set(dayKey, point)
+    }
+  }
+
+  return Array.from(latestByDay.values()).sort(
+    (a, b) => a.timestamp - b.timestamp
+  )
+}
+
 export const getUserBalanceHistoryQueryKey = (
   params: UseUserBalanceHistoryParams
 ) =>
@@ -57,9 +87,8 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
 ) => {
   const { audiusSdk } = useQueryContext()
 
-  // Default to a 7-day window when the caller doesn't specify one. We fill it
-  // in here (rather than relying on the API default) so that daily-granularity
-  // queries get a consistent 7-day range instead of the full history.
+  // Default to a 7-day window when the caller doesn't specify one, rounded to
+  // the start of the day so that the query key stays stable across renders.
   const resolvedStartTime = params.startTime ?? getDefaultStartTime()
   const resolvedParams: UseUserBalanceHistoryParams = {
     ...params,
@@ -103,12 +132,14 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
 
       // Map from SDK response format to our hook's return type (SDK uses camelCase)
       // Convert timestamp from seconds to milliseconds for JavaScript Date
-      return (
+      const hourlyPoints =
         response.data?.map((point) => ({
           timestamp: point.timestamp * 1000,
           balanceUsd: point.balanceUsd
         })) ?? []
-      )
+
+      // Downsample hourly points to one end-of-day point per UTC day.
+      return bucketHourlyPointsByDay(hourlyPoints)
     },
     enabled: options?.enabled !== false && !!resolvedParams.userId,
     ...options
