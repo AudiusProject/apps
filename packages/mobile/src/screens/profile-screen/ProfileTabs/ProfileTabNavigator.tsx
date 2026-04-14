@@ -17,6 +17,8 @@ import {
 } from 'app/components/top-tab-bar'
 import { useRoute } from 'app/hooks/useRoute'
 
+import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileCoverPhoto'
+
 import { AlbumsTab } from './AlbumsTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { RepostsTab } from './RepostsTab'
@@ -93,7 +95,7 @@ export const ProfileTabNavigator = ({
       <CollapsibleTabNavigator
         renderHeader={renderHeader}
         headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
-        minHeaderHeight={insets.top}
+        minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
       >
         {trackScreen}
         {albumsScreen}
@@ -107,7 +109,7 @@ export const ProfileTabNavigator = ({
     <CollapsibleTabNavigator
       renderHeader={renderHeader}
       headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
-      minHeaderHeight={insets.top}
+      minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
     >
       {repostsScreen}
       {playlistsScreen}
