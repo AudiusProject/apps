@@ -10,8 +10,9 @@ import { useAnimatedReaction } from 'react-native-reanimated'
  * live OUTSIDE the collapsible `Tabs.Container` (e.g. `ProfileNavOverlay`),
  * where `useCurrentTabScrollY` is unavailable.
  */
-export const ProfileScrollContext =
-  createContext<SharedValue<number> | null>(null)
+export const ProfileScrollContext = createContext<SharedValue<number> | null>(
+  null
+)
 
 export const useProfileScrollY = () => useContext(ProfileScrollContext)
 

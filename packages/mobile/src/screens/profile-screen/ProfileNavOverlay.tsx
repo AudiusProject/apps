@@ -178,16 +178,8 @@ export const ProfileNavOverlay = () => {
         pointerEvents='box-none'
         style={[styles.actionsRow, { top: insets.top }]}
       >
-        <Animated.View
-          pointerEvents='none'
-          style={[styles.title, titleStyle]}
-        >
-          <UserLink
-            userId={user_id}
-            textVariant='title'
-            size='m'
-            disabled
-          />
+        <Animated.View pointerEvents='none' style={[styles.title, titleStyle]}>
+          <UserLink userId={user_id} textVariant='title' size='m' disabled />
         </Animated.View>
         <View style={styles.iconStack}>
           <Animated.View style={whiteIconsStyle}>
