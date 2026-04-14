@@ -75,7 +75,7 @@ export const UserBalanceHistoryGraph = ({
     data: historyDataFetched,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: currentUserId })
+  } = useUserBalanceHistory({ userId: currentUserId, granularity: 'daily' })
 
   const {
     totalBalance: currentBalance,
