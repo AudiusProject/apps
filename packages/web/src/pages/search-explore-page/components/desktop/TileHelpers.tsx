@@ -4,7 +4,7 @@ import { useToggleTrack } from '@audius/common/hooks'
 import { ID, Kind, UID } from '@audius/common/models'
 import type { Queueable } from '@audius/common/store'
 import { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import { makeStableUid } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
@@ -84,7 +84,7 @@ export const TilePairs = ({
     () =>
       data.map((id) => ({
         id,
-        uid: makeUid(Kind.TRACKS, id, source),
+        uid: makeStableUid(Kind.TRACKS, id, source),
         source
       })),
     [data, source]

@@ -129,15 +129,10 @@ export const useToggleTrack = ({
   const currentQueueItem = useSelector(makeGetCurrent())
   const currentTrack = useCurrentTrack()
   const playing = useSelector(getPlaying)
-  // Match by queue UID when possible (necessary for lineups with duplicate
-  // tracks), but fall back to matching by track ID so the playing indicator
-  // persists across component remounts. On remount, makeUid generates fresh
-  // UIDs via a module-level counter so the tile's UID no longer matches the
-  // queue entry's UID, even though the same track is still playing.
   const isTrackPlaying = !!(
     playing &&
     currentTrack &&
-    (currentQueueItem.uid === uid || currentTrack.track_id === id)
+    currentQueueItem.uid === uid
   )
 
   const playTrack = usePlayTrack(recordAnalytics)

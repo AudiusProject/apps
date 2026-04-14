@@ -3,7 +3,7 @@ import React, { useMemo } from 'react'
 import { useToggleTrack } from '@audius/common/hooks'
 import { Kind } from '@audius/common/models'
 import type { Queueable, QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import { makeStableUid } from '@audius/common/utils'
 import { ScrollView } from 'react-native'
 
 import { Flex } from '@audius/harmony-native'
@@ -57,7 +57,7 @@ export const TrackTileCarousel = ({
     if (!tracks) return []
     return tracks.map((id) => ({
       id,
-      uid: makeUid(Kind.TRACKS, id, source),
+      uid: makeStableUid(Kind.TRACKS, id, source),
       source
     }))
   }, [tracks, source])
