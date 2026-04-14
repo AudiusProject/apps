@@ -19,6 +19,21 @@ export type UseUserBalanceHistoryParams = {
   granularity?: GetUserBalanceHistoryGranularityEnum
 }
 
+const DEFAULT_HISTORY_DAYS = 7
+
+/**
+ * Returns the default start time for balance history queries: midnight UTC,
+ * `DEFAULT_HISTORY_DAYS` days ago. Rounded to the day so that repeated calls
+ * within the same day produce the same value — this keeps the query key stable
+ * and lets react-query share the cache across components.
+ */
+const getDefaultStartTime = (): Date => {
+  const date = new Date()
+  date.setUTCHours(0, 0, 0, 0)
+  date.setUTCDate(date.getUTCDate() - DEFAULT_HISTORY_DAYS)
+  return date
+}
+
 export const getUserBalanceHistoryQueryKey = (
   params: UseUserBalanceHistoryParams
 ) =>
@@ -42,10 +57,19 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
 ) => {
   const { audiusSdk } = useQueryContext()
 
+  // Default to a 7-day window when the caller doesn't specify one. We fill it
+  // in here (rather than relying on the API default) so that daily-granularity
+  // queries get a consistent 7-day range instead of the full history.
+  const resolvedStartTime = params.startTime ?? getDefaultStartTime()
+  const resolvedParams: UseUserBalanceHistoryParams = {
+    ...params,
+    startTime: resolvedStartTime
+  }
+
   return useQuery({
-    queryKey: getUserBalanceHistoryQueryKey(params),
+    queryKey: getUserBalanceHistoryQueryKey(resolvedParams),
     queryFn: async () => {
-      if (!params.userId) {
+      if (!resolvedParams.userId) {
         return []
       }
 
@@ -56,23 +80,23 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
         endTime?: Date
         granularity?: GetUserBalanceHistoryGranularityEnum
       } = {
-        id: Id.parse(params.userId)
+        id: Id.parse(resolvedParams.userId)
       }
 
-      if (params.startTime) {
+      if (resolvedParams.startTime) {
         requestParams.startTime =
-          typeof params.startTime === 'string'
-            ? new Date(params.startTime)
-            : params.startTime
+          typeof resolvedParams.startTime === 'string'
+            ? new Date(resolvedParams.startTime)
+            : resolvedParams.startTime
       }
-      if (params.endTime) {
+      if (resolvedParams.endTime) {
         requestParams.endTime =
-          typeof params.endTime === 'string'
-            ? new Date(params.endTime)
-            : params.endTime
+          typeof resolvedParams.endTime === 'string'
+            ? new Date(resolvedParams.endTime)
+            : resolvedParams.endTime
       }
-      if (params.granularity) {
-        requestParams.granularity = params.granularity
+      if (resolvedParams.granularity) {
+        requestParams.granularity = resolvedParams.granularity
       }
 
       const response = await sdk.users.getUserBalanceHistory(requestParams)
@@ -86,7 +110,7 @@ export const useUserBalanceHistory = <TResult = BalanceHistoryDataPoint[]>(
         })) ?? []
       )
     },
-    enabled: options?.enabled !== false && !!params.userId,
+    enabled: options?.enabled !== false && !!resolvedParams.userId,
     ...options
   })
 }
