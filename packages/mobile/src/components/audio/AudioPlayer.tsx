@@ -777,17 +777,29 @@ export const AudioPlayer = () => {
       await enqueueTracksJobRef.current
       enqueueTracksJobRef.current = undefined
     } else {
-      await TrackPlayer.reset()
+      // Wrap the full queue setup (reset, play, first track load, middle-out
+      // enqueue) in a single promise and assign it to enqueueTracksJobRef
+      // BEFORE any awaits. This ensures that if the user presses next/previous
+      // before the queue is done building, handleQueueIdxChange awaits this
+      // promise and defers the skip until the RNTP queue is ready. Without
+      // this, there was a window where enqueueTracksJobRef was undefined,
+      // handleQueueIdxChange's await resolved immediately, and the skip was
+      // silently dropped because queueIndex was beyond the (still empty)
+      // RNTP queue length.
+      const setupPromise = (async () => {
+        await TrackPlayer.reset()
 
-      await TrackPlayer.play()
+        await TrackPlayer.play()
 
-      const firstTrack = newQueueTracks[queueIndex]
-      if (!firstTrack) return
+        const firstTrack = newQueueTracks[queueIndex]
+        if (!firstTrack) return
 
-      await TrackPlayer.add(await makeTrackData(firstTrack))
+        await TrackPlayer.add(await makeTrackData(firstTrack))
 
-      enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
-      await enqueueTracksJobRef.current
+        await enqueueTracks(newQueueTracks, queueIndex)
+      })()
+      enqueueTracksJobRef.current = setupPromise
+      await setupPromise
       enqueueTracksJobRef.current = undefined
     }
   }, [
