@@ -17,19 +17,19 @@ interface TrackTileCarouselProps {
 
 const CarouselItem = ({
   id,
+  uid,
   pairIndex,
   trackIndex,
   source,
   entries
 }: {
   id: number
+  uid: string
   pairIndex: number
   trackIndex: number
   source: QueueSource
   entries: Queueable[]
 }) => {
-  const uid = useMemo(() => makeUid(Kind.TRACKS, id, source), [id, source])
-
   const { togglePlay } = useToggleTrack({
     id,
     uid,
@@ -108,16 +108,20 @@ export const TrackTileCarousel = ({
             w={343}
             mr={pairIndex < trackPairs.length - 1 ? 16 : 0}
           >
-            {pair.map((track, trackIndex) => (
-              <CarouselItem
-                key={track}
-                id={track}
-                pairIndex={pairIndex}
-                trackIndex={trackIndex}
-                source={source}
-                entries={entries}
-              />
-            ))}
+            {pair.map((track, trackIndex) => {
+              const entryIndex = pairIndex * 2 + trackIndex
+              return (
+                <CarouselItem
+                  key={track}
+                  id={track}
+                  uid={entries[entryIndex].uid}
+                  pairIndex={pairIndex}
+                  trackIndex={trackIndex}
+                  source={source}
+                  entries={entries}
+                />
+              )
+            })}
           </Flex>
         ))}
       </ScrollView>
