@@ -10,6 +10,7 @@ import { encodeUrlName } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
 import { useFocusEffect, useNavigationState } from '@react-navigation/native'
 import { View } from 'react-native'
+import { useSharedValue } from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Screen, ScreenContent } from 'app/components/core'
@@ -22,7 +23,9 @@ import { makeStyles } from 'app/styles'
 
 import { DeactivatedProfileTombstone } from './DeactivatedProfileTombstone'
 import { ProfileHeader } from './ProfileHeader'
+import { ProfileNavOverlay } from './ProfileNavOverlay'
 import { ProfileScreenSkeleton } from './ProfileScreenSkeleton'
+import { ProfileScrollContext } from './ProfileScrollContext'
 import { ProfileTabNavigator } from './ProfileTabs/ProfileTabNavigator'
 import { useRefreshProfile } from './useRefreshProfile'
 const { setCurrentUser: setCurrentUserAction } = profilePageActions
@@ -97,6 +100,11 @@ export const ProfileScreen = () => {
 
   const renderHeader = useCallback(() => <ProfileHeader />, [])
 
+  // Shared value that tracks the current tab's scroll position. Written to
+  // from inside the collapsible header via `ProfileScrollBridge` and read by
+  // `ProfileNavOverlay` to animate its blur background and icon colors.
+  const scrollY = useSharedValue(0)
+
   return (
     <Screen url={handle && `/${encodeUrlName(handle)}`}>
       <ScreenContent isOfflineCapable>
@@ -105,7 +113,7 @@ export const ProfileScreen = () => {
         ) : profile.is_deactivated ? (
           <DeactivatedProfileTombstone />
         ) : (
-          <>
+          <ProfileScrollContext.Provider value={scrollY}>
             <View style={styles.navigator}>
               {isNotReachable ? (
                 <>
@@ -122,11 +130,12 @@ export const ProfileScreen = () => {
                       refreshing={isRefreshing}
                       onRefresh={handleRefresh}
                     />
+                    <ProfileNavOverlay />
                   </ScreenSecondaryContent>
                 </>
               )}
             </View>
-          </>
+          </ProfileScrollContext.Provider>
         )}
       </ScreenContent>
     </Screen>

@@ -17,7 +17,7 @@ import {
 } from 'app/components/top-tab-bar'
 import { useRoute } from 'app/hooks/useRoute'
 
-import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileCoverPhoto'
+import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileNavOverlay'
 
 import { AlbumsTab } from './AlbumsTab'
 import { PlaylistsTab } from './PlaylistsTab'

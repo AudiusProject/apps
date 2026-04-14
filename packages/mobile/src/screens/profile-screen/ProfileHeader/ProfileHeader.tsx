@@ -21,6 +21,7 @@ import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
+import { ProfileScrollBridge } from '../ProfileScrollContext'
 
 import { ArtistProfilePicture } from './ArtistProfilePicture'
 import { Bio } from './Bio'
@@ -106,6 +107,7 @@ export const ProfileHeader = memo(() => {
 
   return (
     <>
+      <ProfileScrollBridge />
       <ProfileCoverPhoto />
       <Box
         style={css({
