@@ -45,7 +45,10 @@ export const getLottieThemeColors = (
   /** Legacy theme - used when palette is null */
   legacyTheme?: Theme | null
 ): LottieThemeColors => {
-  if (palette === ThemePalette.MATRIX || legacyTheme === Theme.MATRIX) {
+  if (
+    palette === ThemePalette.MATRIX ||
+    (palette == null && legacyTheme === Theme.MATRIX)
+  ) {
     const m = primitiveTheme.matrix
     return {
       primary: m.primary.default,
