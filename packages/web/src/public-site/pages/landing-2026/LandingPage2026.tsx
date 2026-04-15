@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { ThemeProvider } from '@audius/harmony'
+import { Helmet } from 'react-helmet'
 
 import { CookieBanner } from 'components/cookie-banner/CookieBanner'
 import { MetaTags } from 'components/meta-tags/MetaTags'
@@ -24,6 +25,11 @@ const MOBILE_MEDIA_QUERY =
   typeof window !== 'undefined'
     ? window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`)
     : null
+const BASE_PUBLIC_PATH = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
+const LANDING_FONTS_CSS_HREF = `${BASE_PUBLIC_PATH}/fonts-landing-2026.css`
+const URBANIST_HREF =
+  'https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap'
+const DUST_BUCER_OTF_HREF = `${BASE_PUBLIC_PATH}/fonts/DustBucer.otf`
 
 type LandingPage2026Props = {
   isMobile: boolean
@@ -51,26 +57,19 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
   }, [])
 
   useEffect(() => {
-    const base = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
-    const fontsCssHref = `${base}/fonts-landing-2026.css`
-    const urbanistHref =
-      'https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap'
-
     const linkFonts = document.createElement('link')
     linkFonts.rel = 'stylesheet'
-    linkFonts.href = fontsCssHref
+    linkFonts.href = LANDING_FONTS_CSS_HREF
 
     const linkUrbanist = document.createElement('link')
     linkUrbanist.rel = 'stylesheet'
-    linkUrbanist.href = urbanistHref
-
-    document.head.appendChild(linkFonts)
-    document.head.appendChild(linkUrbanist)
+    linkUrbanist.href = URBANIST_HREF
 
     const maxWaitMs = 2500
     let revealed = false
+    let cancelled = false
     const reveal = () => {
-      if (revealed) return
+      if (cancelled || revealed) return
       revealed = true
       window.clearTimeout(timeoutId)
       setFontsReady(true)
@@ -93,13 +92,23 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     linkFonts.addEventListener(
       'load',
       () => {
-        loadDustBucerForHero()
+        void loadDustBucerForHero()
       },
       { once: true }
     )
     linkFonts.addEventListener('error', () => reveal(), { once: true })
+    linkUrbanist.addEventListener('error', () => reveal(), { once: true })
+
+    // Register listeners before append to avoid missing cached stylesheet load events.
+    document.head.appendChild(linkFonts)
+    document.head.appendChild(linkUrbanist)
+
+    if (linkFonts.sheet) {
+      void loadDustBucerForHero()
+    }
 
     return () => {
+      cancelled = true
       window.clearTimeout(timeoutId)
       linkFonts.remove()
       linkUrbanist.remove()
@@ -134,6 +143,18 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
         canonicalUrl={`${homepageUrl}/`}
         structuredData={faqPageStructuredData}
       />
+      <Helmet>
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='' />
+        <link rel='preload' as='style' href={LANDING_FONTS_CSS_HREF} />
+        <link
+          rel='preload'
+          as='font'
+          href={DUST_BUCER_OTF_HREF}
+          type='font/otf'
+          crossOrigin=''
+        />
+      </Helmet>
       <div
         id='landing-page-2026'
         className={styles.page}
