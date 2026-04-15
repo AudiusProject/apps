@@ -1,11 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useTheme } from '@emotion/react'
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming
-} from 'react-native-reanimated'
 
 import { Image } from './Image/Image'
 import type { ImageProps } from './Image/Image'
@@ -13,8 +8,6 @@ import { Skeleton } from './Skeleton'
 import { Box } from './layout/Box/Box'
 import type { BoxProps } from './layout/Box/types'
 import { Flex } from './layout/Flex/Flex'
-
-const AnimatedImage = Animated.createAnimatedComponent(Image)
 
 export type ArtworkProps = {
   isLoading?: boolean
@@ -46,7 +39,7 @@ export const Artwork = (props: ArtworkProps) => {
   } = props
   const [isLoadingState, setIsLoadingState] = useState(true)
   const isLoading = isLoadingProp ?? isLoadingState
-  const { color, cornerRadius, motion } = useTheme()
+  const { color, cornerRadius } = useTheme()
 
   const imageSource = !source
     ? source
@@ -57,23 +50,6 @@ export const Artwork = (props: ArtworkProps) => {
         : { uri: source.uri }
 
   const hasImageSource = typeof imageSource === 'number' || imageSource?.uri
-
-  // Create shared value for opacity
-  const opacity = useSharedValue(0)
-
-  // Create animated style
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value
-  }))
-
-  // Animate opacity when loading state changes
-  useEffect(() => {
-    if (!isLoading) {
-      opacity.value = withTiming(1, motion.expressive)
-    } else {
-      opacity.value = 0
-    }
-  }, [isLoading, opacity, motion.expressive])
 
   return (
     <Box {...other}>
@@ -107,19 +83,16 @@ export const Artwork = (props: ArtworkProps) => {
           }}
         />
         {hasImageSource ? (
-          <AnimatedImage
+          <Image
             testID={testId}
-            style={[
-              {
-                height: '100%',
-                width: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                borderRadius: cornerRadius[borderRadius]
-              },
-              animatedStyle
-            ]}
+            style={{
+              height: '100%',
+              width: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              borderRadius: cornerRadius[borderRadius]
+            }}
             onLoad={(event) => {
               setIsLoadingState(false)
               onLoad?.(event)
@@ -139,8 +112,6 @@ export const Artwork = (props: ArtworkProps) => {
               position: 'absolute',
               top: 0,
               left: 0,
-              backgroundColor: hasImageSource ? color.static.black : undefined,
-              opacity: hasImageSource ? 0.4 : undefined,
               zIndex: 1
             }}
           >
