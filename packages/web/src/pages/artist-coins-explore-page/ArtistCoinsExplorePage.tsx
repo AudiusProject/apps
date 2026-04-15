@@ -54,7 +54,7 @@ const messages = {
   searchPlaceholder: 'Search',
   getStarted: 'Get Started',
   launchYourOwn: 'Launch Your Own Fan Club!',
-  required: 'Required',
+  required: 'Verification Required',
   getStartedTooltip: 'Verified users only. Request verification in settings.',
   dismissBanner: 'Dismiss'
 }
