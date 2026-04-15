@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import {
   Theme,
@@ -12,7 +12,7 @@ import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAppState } from '@react-native-community/hooks'
-import { useDarkMode } from 'react-native-dynamic'
+import { useColorScheme } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
@@ -108,10 +108,11 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
 
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  const isDarkMode = useDarkMode()
+  const colorScheme = useColorScheme()
   const dispatch = useDispatch()
   const appState = useAppState()
   const theme = useSelector(selectHarmonyTheme)
+  const didInitSystemAppearanceRef = useRef(false)
 
   useAsync(async () => {
     const [savedTheme, savedPalette, savedMode] = await Promise.all([
@@ -160,17 +161,28 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    // react-native-dynamic incorrectly sets dark-mode when in background
-    if (appState === 'active') {
-      dispatch(
-        setSystemAppearance({
-          systemAppearance: isDarkMode
+    const isInitial = !didInitSystemAppearanceRef.current
+    didInitSystemAppearanceRef.current = true
+
+    // On subsequent changes, ignore appearance updates while in the background:
+    // iOS briefly toggles the reported appearance when generating the app
+    // switcher screenshot, which leaves the hook reporting a stale value.
+    // On initial mount, always dispatch — when the app is launched directly
+    // from a killed state (e.g. tapping a push notification),
+    // AppState.currentState may not yet report 'active', and gating the first
+    // dispatch would leave the theme stuck on light until the next foreground
+    // transition.
+    if (!isInitial && appState !== 'active') return
+
+    dispatch(
+      setSystemAppearance({
+        systemAppearance:
+          colorScheme === 'dark'
             ? SystemAppearance.DARK
             : SystemAppearance.LIGHT
-        })
-      )
-    }
-  }, [isDarkMode, dispatch, appState])
+      })
+    )
+  }, [colorScheme, dispatch, appState])
 
   return (
     <HarmonyThemeProvider themeName={theme}>{children}</HarmonyThemeProvider>
