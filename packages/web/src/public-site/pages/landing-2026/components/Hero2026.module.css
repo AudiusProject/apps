@@ -55,6 +55,7 @@
   color: #fff;
   margin: 0;
   width: 100%;
+  min-height: calc(208px * 0.72 * 2);
   font-feature-settings: 'salt' 1;
 }
 
@@ -118,6 +119,7 @@
 
   .headline {
     font-size: 120px;
+    min-height: calc(120px * 0.72 * 2);
   }
 
   .content {
