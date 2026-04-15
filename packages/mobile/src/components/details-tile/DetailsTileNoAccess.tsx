@@ -233,7 +233,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     [navigation]
   )
 
-  const renderLockedSpecialAccessDescription = useCallback(
+  const renderLockedFollowGatedDescription = useCallback(
     (args: { entity: User; prefix: string; suffix?: string }) => {
       const { entity, prefix, suffix } = args
       return (
@@ -258,7 +258,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
       if (!followee) return null
       return (
         <>
-          {renderLockedSpecialAccessDescription({
+          {renderLockedFollowGatedDescription({
             entity: followee,
             prefix: messages.lockedFollowGatedPrefix
           })}
@@ -330,7 +330,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     styles.description,
     styles.name,
     followee,
-    renderLockedSpecialAccessDescription,
+    renderLockedFollowGatedDescription,
     handleFollowArtist,
     handleTokenPress,
     token?.ticker,
@@ -339,7 +339,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
     handlePurchasePress
   ])
 
-  const renderUnlockingSpecialAccessDescription = useCallback(
+  const renderUnlockingFollowGatedDescription = useCallback(
     (args: { entity: User; prefix: string; suffix: string }) => {
       const { entity, prefix, suffix } = args
       return (
@@ -363,7 +363,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
 
   const renderUnlockingDescription = useCallback(() => {
     if (followee) {
-      return renderUnlockingSpecialAccessDescription({
+      return renderUnlockingFollowGatedDescription({
         entity: followee,
         prefix: messages.unlockingFollowGatedPrefix,
         suffix: messages.unlockingFollowGatedSuffix
@@ -374,7 +374,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
       'No entity for stream conditions... should not have reached here.'
     )
     return null
-  }, [followee, renderUnlockingSpecialAccessDescription])
+  }, [followee, renderUnlockingFollowGatedDescription])
 
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
 

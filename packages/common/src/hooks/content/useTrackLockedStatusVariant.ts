@@ -1,7 +1,7 @@
 import { useTrack } from '~/api'
 import {
   ID,
-  isContentSpecialAccess,
+  isContentFollowGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '~/models'
@@ -15,13 +15,13 @@ export const useTrackLockedStatusVariant = (trackId: ID) => {
   })
 
   const isPurchaseable = isContentUSDCPurchaseGated(streamConditions)
-  const isSpecialAccess = isContentSpecialAccess(streamConditions)
+  const isFollowGated = isContentFollowGated(streamConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
 
   let variant: Nullable<LockedStatusVariant> = null
   if (isPurchaseable) {
     variant = 'premium'
-  } else if (isSpecialAccess) {
+  } else if (isFollowGated) {
     variant = 'gated'
   } else if (isTokenGated) {
     variant = 'tokenGated'

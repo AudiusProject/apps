@@ -4,7 +4,7 @@ import { StreamTrackAvailabilityType } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   RadioGroup,
-  IconSparkles,
+  IconUserFollowing,
   IconQuestionCircle,
   Hint
 } from '@audius/harmony'
@@ -15,7 +15,6 @@ import { SingleTrackEditValues } from 'components/edit-track/types'
 import layoutStyles from 'components/layout/layout.module.css'
 import { ModalRadioItem } from 'components/modal-radio/ModalRadioItem'
 
-import { SpecialAccessFields } from '../stream-availability/SpecialAccessFields'
 import { TokenGatedRadioField } from '../stream-availability/token-gated/TokenGatedRadioField'
 import { UsdcPurchaseGatedRadioField } from '../stream-availability/usdc-purchase-gated/UsdcPurchaseGatedRadioField'
 import { STREAM_AVAILABILITY_TYPE, STREAM_CONDITIONS } from '../types'
@@ -48,15 +47,14 @@ export const PriceAndAudienceMenuFields = (
 
   const [availabilityField] = useField({ name: STREAM_AVAILABILITY_TYPE })
 
-  const { disableSpecialAccessGate, disableSpecialAccessGateFields } =
-    useAccessAndRemixSettings({
-      isUpload: !!isUpload,
-      isRemix,
-      isAlbum,
-      isInitiallyUnlisted: !!isInitiallyUnlisted,
-      isScheduledRelease: !!isScheduledRelease,
-      isPublishDisabled
-    })
+  const { disableFollowGate } = useAccessAndRemixSettings({
+    isUpload: !!isUpload,
+    isRemix,
+    isAlbum,
+    isInitiallyUnlisted: !!isInitiallyUnlisted,
+    isScheduledRelease: !!isScheduledRelease,
+    isPublishDisabled
+  })
 
   return (
     <div className={cn(layoutStyles.col, layoutStyles.gap4)}>
@@ -85,14 +83,11 @@ export const PriceAndAudienceMenuFields = (
 
         {!isAlbum ? (
           <ModalRadioItem
-            icon={<IconSparkles />}
-            label={messages.specialAccessRadio.title}
-            description={messages.specialAccessRadio.description}
-            value={StreamTrackAvailabilityType.SPECIAL_ACCESS}
-            disabled={disableSpecialAccessGate}
-            checkedContent={
-              <SpecialAccessFields disabled={disableSpecialAccessGateFields} />
-            }
+            icon={<IconUserFollowing />}
+            label={messages.followersOnlyRadio.title}
+            description={messages.followersOnlyRadio.description}
+            value={StreamTrackAvailabilityType.FOLLOW_GATED}
+            disabled={disableFollowGate}
             tooltipText={messages.fromFreeHint(
               isAlbum ? 'album' : 'track',
               'gated'

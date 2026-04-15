@@ -1,6 +1,6 @@
 import { DogEarType } from '@audius/common/models'
 import {
-  IconSparkles,
+  IconUserFollowing,
   IconCart,
   IconLock,
   IconReceive,
@@ -29,15 +29,15 @@ const getIcon = (type: DogEarType) => {
       return IconReceive
     case DogEarType.TOKEN_GATED:
       return IconArtistCoin
-    case DogEarType.SPECIAL_ACCESS:
+    case DogEarType.FOLLOW_GATED:
     default:
-      return IconSparkles
+      return IconUserFollowing
   }
 }
 
 const getColor = (type: DogEarType, color: ColorTheme['day']) => {
   switch (type) {
-    case DogEarType.SPECIAL_ACCESS:
+    case DogEarType.FOLLOW_GATED:
     case DogEarType.LOCKED:
       return color.special.blue
     case DogEarType.USDC_PURCHASE:

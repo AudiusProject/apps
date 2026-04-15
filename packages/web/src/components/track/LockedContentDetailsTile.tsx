@@ -12,7 +12,7 @@ import {
   Text,
   IconCart,
   IconComponent,
-  IconSparkles
+  IconUserFollowing
 } from '@audius/harmony'
 
 import { CollectionDogEar } from 'components/collection'
@@ -26,7 +26,7 @@ import { TrackDogEar } from './TrackDogEar'
 
 const messages = {
   by: 'By',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: (contentType: 'track' | 'album') =>
     `PREMIUM ${contentType.toUpperCase()}`,
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
@@ -76,8 +76,8 @@ export const LockedContentDetailsTile = ({
     IconComponent = null
     message = null
   } else {
-    IconComponent = IconSparkles
-    message = messages.specialAccess
+    IconComponent = IconUserFollowing
+    message = messages.followersOnly
   }
 
   return (

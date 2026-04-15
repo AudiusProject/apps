@@ -7,10 +7,6 @@ import {
 } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
 
-export enum SpecialAccessType {
-  FOLLOW = 'follow'
-}
-
 type GateKeeperField = 'accessAndSale' | 'stemsAndDownloads'
 export type GateKeeper = {
   access: GateKeeperField // who last changed the access gates
@@ -33,7 +29,6 @@ export const DOWNLOAD_CONDITIONS = 'download_conditions'
 export const DOWNLOAD_PRICE = 'download_conditions.usdc_purchase.price'
 export const DOWNLOAD_PRICE_HUMANIZED = 'download_price_humanized'
 export const STEMS = 'stems'
-export const SPECIAL_ACCESS_TYPE = 'special_access_type'
 export const IS_UNLISTED = 'is_unlisted'
 export const IS_PRIVATE = 'is_private'
 export const FIELD_VISIBILITY = 'field_visibility'
@@ -47,7 +42,6 @@ export type AccessAndSaleFormValues = {
   [IS_UNLISTED]: boolean
   [STREAM_AVAILABILITY_TYPE]: StreamTrackAvailabilityType
   [STREAM_CONDITIONS]: Nullable<AccessConditions>
-  [SPECIAL_ACCESS_TYPE]: Nullable<SpecialAccessType>
   [FIELD_VISIBILITY]: FieldVisibility
   [PRICE_HUMANIZED]: string
   [PREVIEW]?: number
