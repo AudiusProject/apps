@@ -25,7 +25,8 @@ const MOBILE_MEDIA_QUERY =
   typeof window !== 'undefined'
     ? window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`)
     : null
-const BASE_PUBLIC_PATH = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
+const BASE_PUBLIC_PATH =
+  (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
 const LANDING_FONTS_CSS_HREF = `${BASE_PUBLIC_PATH}/fonts-landing-2026.css`
 const URBANIST_HREF =
   'https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap'
@@ -92,7 +93,7 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     linkFonts.addEventListener(
       'load',
       () => {
-        void loadDustBucerForHero()
+        loadDustBucerForHero().catch(() => {})
       },
       { once: true }
     )
@@ -104,7 +105,7 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
     document.head.appendChild(linkUrbanist)
 
     if (linkFonts.sheet) {
-      void loadDustBucerForHero()
+      loadDustBucerForHero().catch(() => {})
     }
 
     return () => {
@@ -145,7 +146,11 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
       />
       <Helmet>
         <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='' />
+        <link
+          rel='preconnect'
+          href='https://fonts.gstatic.com'
+          crossOrigin=''
+        />
         <link rel='preload' as='style' href={LANDING_FONTS_CSS_HREF} />
         <link
           rel='preload'
