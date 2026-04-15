@@ -54,7 +54,7 @@ const messages = {
   searchPlaceholder: 'Search',
   getStarted: 'Get Started',
   launchYourOwn: 'Launch Your Own Fan Club!',
-  required: 'Required',
+  badgeRequired: 'Badge Required',
   getStartedTooltip: 'Verified users only. Request verification in settings.',
   dismissBanner: 'Dismiss'
 }
@@ -300,7 +300,7 @@ const DesktopArtistCoinsExplorePage = () => {
                   >
                     <Flex ph='s' pv='xs'>
                       <Text variant='body' size='s'>
-                        {messages.required}
+                        {messages.badgeRequired}
                       </Text>
                     </Flex>
                     <Flex
