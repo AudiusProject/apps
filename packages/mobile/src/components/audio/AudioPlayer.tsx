@@ -786,17 +786,25 @@ export const AudioPlayer = () => {
       // handleQueueIdxChange's await resolved immediately, and the skip was
       // silently dropped because queueIndex was beyond the (still empty)
       // RNTP queue length.
+      //
+      // The body is wrapped in try/catch so that a failing RNTP call doesn't
+      // leave enqueueTracksJobRef pointing at a rejected promise, which would
+      // make subsequent awaits in handleQueueIdxChange throw silently.
       const setupPromise = (async () => {
-        await TrackPlayer.reset()
+        try {
+          await TrackPlayer.reset()
 
-        await TrackPlayer.play()
+          await TrackPlayer.play()
 
-        const firstTrack = newQueueTracks[queueIndex]
-        if (!firstTrack) return
+          const firstTrack = newQueueTracks[queueIndex]
+          if (!firstTrack) return
 
-        await TrackPlayer.add(await makeTrackData(firstTrack))
+          await TrackPlayer.add(await makeTrackData(firstTrack))
 
-        await enqueueTracks(newQueueTracks, queueIndex)
+          await enqueueTracks(newQueueTracks, queueIndex)
+        } catch (e) {
+          console.warn('handleQueueChange setup error:', e)
+        }
       })()
       enqueueTracksJobRef.current = setupPromise
       await setupPromise
@@ -822,7 +830,17 @@ export const AudioPlayer = () => {
       queueIndex !== playerIdx &&
       queueIndex < queue.length
     ) {
-      await TrackPlayer.skip(queueIndex)
+      try {
+        await TrackPlayer.skip(queueIndex)
+        // RNTP v4's skip() does not reliably continue playback when called
+        // shortly after queue setup; it can leave the player in a Ready
+        // state instead of Playing. Explicitly call play() to ensure the
+        // new track actually plays. This is the audio-switch that the
+        // saga chain cannot do on mobile (audioPlayer is a no-op shim).
+        await TrackPlayer.play()
+      } catch (e) {
+        console.warn('TrackPlayer.skip failed:', e)
+      }
     }
   }, [queueIndex])
 
