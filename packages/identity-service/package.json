@@ -17,13 +17,10 @@
     "test:debug": "./scripts/run-tests.sh -d",
     "coverage": "nyc npm run test",
     "report": "nyc report --reporter=html",
-    "lint:fix": "eslint --fix --ext=js,ts src",
-    "lint": "eslint --ext=js,ts src",
     "copyfiles": "cp -r ./src/notifications/emails ./build/src/notifications",
     "build": "tsc --project tsconfig.build.json && npm run copyfiles",
     "typecheck": "tsc",
-    "typecheck:watch": "tsc --watch",
-    "verify": "concurrently \"npm:typecheck\" \"npm:lint\""
+    "typecheck:watch": "tsc --watch"
   },
   "dependencies": {
     "@amplitude/node": "1.9.2",

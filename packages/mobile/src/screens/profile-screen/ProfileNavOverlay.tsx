@@ -168,7 +168,6 @@ export const ProfileNavOverlay = () => {
       <AnimatedBlurView
         blurType='light'
         blurAmount={20}
-        reducedTransparencyFallbackColor='white'
         style={[styles.blurBackground, blurBackgroundStyle]}
       />
       <Flex
