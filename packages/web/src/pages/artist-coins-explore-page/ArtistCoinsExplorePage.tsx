@@ -302,11 +302,7 @@ const DesktopArtistCoinsExplorePage = () => {
                         {messages.required}
                       </Text>
                     </Flex>
-                    <Flex
-                      p='s'
-                      backgroundColor='surface2'
-                      borderLeft='strong'
-                    >
+                    <Flex p='s' backgroundColor='surface2' borderLeft='strong'>
                       <IconVerified size='s' />
                     </Flex>
                   </Flex>
