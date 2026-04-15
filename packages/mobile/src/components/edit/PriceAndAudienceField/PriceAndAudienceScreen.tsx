@@ -28,7 +28,7 @@ import { ExpandableRadioGroup } from '../ExpandableRadioGroup'
 import { PremiumRadioField } from './PremiumRadioField/PremiumRadioField'
 import { TRACK_PREVIEW } from './PremiumRadioField/TrackPreviewField'
 import { TRACK_PRICE } from './PremiumRadioField/TrackPriceField'
-import { SpecialAccessRadioField } from './SpecialAccessRadioField'
+import { FollowersOnlyRadioField } from './FollowersOnlyRadioField'
 import { TokenGatedRadioField } from './TokenGatedRadioField'
 
 const publicAvailability = StreamTrackAvailabilityType.PUBLIC
@@ -131,7 +131,7 @@ export const PriceAndAudienceScreen = () => {
     'follow' | undefined
   >(undefined)
 
-  // Set the special access type based on stream conditions.
+  // Set the follow-gated type based on stream conditions.
   useEffect(() => {
     if (isContentFollowGated(streamConditions)) {
       setSpecialAccessType('follow')
@@ -197,7 +197,7 @@ export const PriceAndAudienceScreen = () => {
           />
         ) : null}
         {entityType === 'track' ? (
-          <SpecialAccessRadioField
+          <FollowersOnlyRadioField
             disabled={
               disableSpecialAccessGate || disableSpecialAccessGateFields
             }

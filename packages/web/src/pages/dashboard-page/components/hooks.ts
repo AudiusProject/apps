@@ -32,7 +32,7 @@ import {
 const messages = {
   public: 'Public',
   premium: 'Premium',
-  specialAcess: 'SpecialAccess',
+  followersOnly: 'Followers Only',
   gated: 'Gated',
   hidden: 'Hidden'
 }
@@ -67,7 +67,7 @@ export const useFormattedTrackData = () => {
 
 /**
  * Returns a set of arrays that contain the logged-in user's tracks filtered by
- * whether the tracks are public, special access, hidden, or premium.
+ * whether the tracks are public, followers only, hidden, or premium.
  * Also returns a boolean indicating whether the user has only one type of track.
  */
 const useSegregatedTrackData = () => {
@@ -206,7 +206,7 @@ export const useArtistDashboardTrackFilters = () => {
     if (specialAccessTracks.length) {
       filterButtonTrackOptions.push({
         id: TrackFilters.SPECIAL_ACCESS,
-        label: messages.specialAcess,
+        label: messages.followersOnly,
         icon: IconSparkles,
         value: TrackFilters.SPECIAL_ACCESS
       })

@@ -18,14 +18,13 @@ export const visibilityMessages = {
 export const priceAndAudienceMessages = {
   title: 'Price & Audience',
   freePremiumDescription: 'Control who can access your track.',
-  specialAccessDescription:
+  followersOnlyDescription:
     "Customize your music's audience and create gated experiences for your fans.",
   free: 'Free for Everyone',
   premium: 'Premium',
-  specialAccess: 'Special Access',
+  followersOnly: 'Followers Only',
   coinGated: 'Coin Gated',
   hidden: 'Hidden',
-  followersOnly: 'Followers Only',
   markedAsRemix:
     'This track is marked as a remix. To enable additional availability options, unmark within Remix Settings.',
   done: 'Done',
@@ -49,10 +48,9 @@ export const priceAndAudienceMessages = {
     join: 'Join the Waitlist',
     comingSoon: 'Coming Soon'
   },
-  specialAccessRadio: {
-    title: 'Special Access',
-    description: 'Anyone who meets your selected criteria can stream.',
-    followersOnly: 'Followers Only'
+  followersOnlyRadio: {
+    title: 'Followers Only',
+    description: 'Only your followers can stream.'
   },
   tokenGatedRadio: {
     title: 'Coin Gated',

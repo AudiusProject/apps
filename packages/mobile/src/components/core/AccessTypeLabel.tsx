@@ -52,7 +52,7 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
   },
   [AccessType.SPECIAL_ACCESS]: {
     icon: IconSparkles,
-    label: 'Special Access',
+    label: 'Followers Only',
     color: 'special'
   },
   [AccessType.TOKEN_GATED]: {

@@ -26,7 +26,7 @@ import { TrackDogEar } from './TrackDogEar'
 
 const messages = {
   by: 'By',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: (contentType: 'track' | 'album') =>
     `PREMIUM ${contentType.toUpperCase()}`,
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
@@ -77,7 +77,7 @@ export const LockedContentDetailsTile = ({
     message = null
   } else {
     IconComponent = IconSparkles
-    message = messages.specialAccess
+    message = messages.followersOnly
   }
 
   return (

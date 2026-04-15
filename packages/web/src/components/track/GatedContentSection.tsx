@@ -57,7 +57,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlocking: 'unlocking',
   unlocked: 'unlocked',
   coinGated: 'COIN GATED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   followArtist: 'Follow Artist',
   buyArtistCoin: 'Buy Coins',
   period: '.',
@@ -476,7 +476,7 @@ const UnlockedGatedContentSection = ({
   }
 
   let IconComponent = IconSparkles
-  let gatedConditionTitle = messages.specialAccess
+  let gatedConditionTitle = messages.followersOnly
 
   if (isContentUSDCPurchaseGated(streamConditions)) {
     IconComponent = IconCart

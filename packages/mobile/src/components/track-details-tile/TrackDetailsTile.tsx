@@ -30,7 +30,7 @@ import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
 
 const messages = {
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: 'PREMIUM TRACK',
   coinGated: 'FAN CLUB',
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
@@ -106,7 +106,7 @@ export const TrackDetailsTile = ({
   } = useMemo(() => {
     return {
       [GatedContentType.SPECIAL_ACCESS]: {
-        message: messages.specialAccess,
+        message: messages.followersOnly,
         icon: IconSparkles,
         color: accentBlue
       },

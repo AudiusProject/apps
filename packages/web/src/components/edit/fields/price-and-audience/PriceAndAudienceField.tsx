@@ -388,8 +388,8 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
   const renderValue = useCallback(() => {
     let selectedValues: (SelectedValueProps | string)[] = []
 
-    const specialAccessValue = {
-      label: messages.specialAccess,
+    const followersOnlyValue = {
+      label: messages.followersOnly,
       icon: IconSparkles
     }
 
@@ -420,7 +420,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         })
       }
     } else if (isContentFollowGated(savedStreamConditions)) {
-      selectedValues = [specialAccessValue, messages.followersOnly]
+      selectedValues = [followersOnlyValue]
     } else if (isContentTokenGated(savedStreamConditions)) {
       selectedValues = [
         {
@@ -459,7 +459,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       label={messages.title}
       description={
         isFollowGated
-          ? messages.specialAccessDescription
+          ? messages.followersOnlyDescription
           : messages.freePremiumDescription
       }
       icon={<IconHidden />}

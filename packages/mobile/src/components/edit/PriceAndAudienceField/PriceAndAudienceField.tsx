@@ -40,7 +40,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       return [messages.premium, amountLabel]
     }
     if (isContentFollowGated(streamConditions)) {
-      return [messages.specialAccess, messages.followersOnly]
+      return [messages.followersOnly]
     }
     if (isContentTokenGated(streamConditions)) {
       return [messages.coinGated]

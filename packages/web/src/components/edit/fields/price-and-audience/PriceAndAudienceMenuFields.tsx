@@ -15,7 +15,7 @@ import { SingleTrackEditValues } from 'components/edit-track/types'
 import layoutStyles from 'components/layout/layout.module.css'
 import { ModalRadioItem } from 'components/modal-radio/ModalRadioItem'
 
-import { SpecialAccessFields } from '../stream-availability/SpecialAccessFields'
+import { FollowersOnlyFields } from '../stream-availability/FollowersOnlyFields'
 import { TokenGatedRadioField } from '../stream-availability/token-gated/TokenGatedRadioField'
 import { UsdcPurchaseGatedRadioField } from '../stream-availability/usdc-purchase-gated/UsdcPurchaseGatedRadioField'
 import { STREAM_AVAILABILITY_TYPE, STREAM_CONDITIONS } from '../types'
@@ -48,15 +48,14 @@ export const PriceAndAudienceMenuFields = (
 
   const [availabilityField] = useField({ name: STREAM_AVAILABILITY_TYPE })
 
-  const { disableSpecialAccessGate, disableSpecialAccessGateFields } =
-    useAccessAndRemixSettings({
-      isUpload: !!isUpload,
-      isRemix,
-      isAlbum,
-      isInitiallyUnlisted: !!isInitiallyUnlisted,
-      isScheduledRelease: !!isScheduledRelease,
-      isPublishDisabled
-    })
+  const { disableSpecialAccessGate } = useAccessAndRemixSettings({
+    isUpload: !!isUpload,
+    isRemix,
+    isAlbum,
+    isInitiallyUnlisted: !!isInitiallyUnlisted,
+    isScheduledRelease: !!isScheduledRelease,
+    isPublishDisabled
+  })
 
   return (
     <div className={cn(layoutStyles.col, layoutStyles.gap4)}>
@@ -86,13 +85,11 @@ export const PriceAndAudienceMenuFields = (
         {!isAlbum ? (
           <ModalRadioItem
             icon={<IconSparkles />}
-            label={messages.specialAccessRadio.title}
-            description={messages.specialAccessRadio.description}
+            label={messages.followersOnlyRadio.title}
+            description={messages.followersOnlyRadio.description}
             value={StreamTrackAvailabilityType.SPECIAL_ACCESS}
             disabled={disableSpecialAccessGate}
-            checkedContent={
-              <SpecialAccessFields disabled={disableSpecialAccessGateFields} />
-            }
+            checkedContent={<FollowersOnlyFields />}
             tooltipText={messages.fromFreeHint(
               isAlbum ? 'album' : 'track',
               'gated'

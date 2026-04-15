@@ -29,7 +29,7 @@ import { useColor } from 'app/utils/theme'
 
 const messages = {
   unlocked: 'UNLOCKED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   payToUnlock: 'Pay to Unlock',
   coinGated: 'COIN GATED',
   artistCoin: "This artist's coin",
@@ -110,7 +110,7 @@ const DetailsTileOwnerSection = ({
       >
         <View style={[styles.titleContainer, styles.ownerTitleContainer]}>
           <IconSparkles fill={neutral} width={16} height={16} />
-          <Text style={styles.title}>{messages.specialAccess}</Text>
+          <Text style={styles.title}>{messages.followersOnly}</Text>
         </View>
         <View style={styles.descriptionContainer}>
           <Text>

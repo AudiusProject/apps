@@ -40,9 +40,9 @@ const getMessages = (props: DownloadAvailabilityProps) => ({
     premium: `You're ${
       props.isUpload ? 'uploading' : 'editing'
     } a Premium track. By default, purchasers will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
-    specialAccess: `You're ${
+    followersOnly: `You're ${
       props.isUpload ? 'uploading' : 'editing'
-    } a Special Access track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
+    } a Followers Only track. By default, users who unlock your track will be able to download your available files. If you'd like to sell your files, set your track to Public or Hidden in the`,
     priceAndAudience: 'Price & Audience Settings'
   }
 })
@@ -61,22 +61,22 @@ export const DownloadAvailability = (props: DownloadAvailabilityProps) => {
   const [{ value: streamConditions }] =
     useTrackField<Nullable<AccessConditions>>(STREAM_CONDITIONS)
   const isUsdcGated = isContentUSDCPurchaseGated(streamConditions)
-  const isSpecialAccess = isContentFollowGated(streamConditions)
-  const shouldRenderCallout = isUsdcGated || isSpecialAccess
+  const isFollowersOnly = isContentFollowGated(streamConditions)
+  const shouldRenderCallout = isUsdcGated || isFollowersOnly
 
   const getCalloutMessage = useCallback(() => {
     if (isUsdcGated) {
       return messages.callout.premium
     }
-    if (isSpecialAccess) {
-      return messages.callout.specialAccess
+    if (isFollowersOnly) {
+      return messages.callout.followersOnly
     }
     return ''
   }, [
-    isSpecialAccess,
+    isFollowersOnly,
     isUsdcGated,
     messages.callout.premium,
-    messages.callout.specialAccess
+    messages.callout.followersOnly
   ])
 
   const handleCalloutClick = useCallback(() => {
