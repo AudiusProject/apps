@@ -287,7 +287,6 @@ const DesktopArtistCoinsExplorePage = () => {
                 <Tooltip text={messages.getStartedTooltip} placement='top'>
                   <Flex
                     alignItems='center'
-                    gap='s'
                     border='strong'
                     borderRadius='m'
                     css={{
@@ -304,8 +303,7 @@ const DesktopArtistCoinsExplorePage = () => {
                       </Text>
                     </Flex>
                     <Flex
-                      ph='s'
-                      pv='xs'
+                      p='s'
                       backgroundColor='surface2'
                       borderLeft='strong'
                     >
