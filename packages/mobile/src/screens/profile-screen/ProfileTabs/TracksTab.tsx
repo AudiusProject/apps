@@ -20,15 +20,14 @@ export const TracksTab = () => {
     user_id,
     track_count = 0,
     artist_pick_track_id
-  } =
-    useProfileUser({
-      select: (user) => ({
-        handle: user.handle,
-        user_id: user.user_id,
-        track_count: user.track_count,
-        artist_pick_track_id: user.artist_pick_track_id
-      })
-    }).user ?? {}
+  } = useProfileUser({
+    select: (user) => ({
+      handle: user.handle,
+      user_id: user.user_id,
+      track_count: user.track_count,
+      artist_pick_track_id: user.artist_pick_track_id
+    })
+  }).user ?? {}
 
   const handleLower = handle?.toLowerCase()
 
