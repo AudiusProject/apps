@@ -8,6 +8,7 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Flex,
+  IconAudiusLogo,
   IconAudiusLogoHorizontalNew,
   IconSettings
 } from '@audius/harmony'
@@ -17,6 +18,7 @@ import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 
 import { NavHeaderButton } from './NavHeaderButton'
 import { NotificationsButton } from './NotificationsButton'
+import { useNavSidebar } from './NavSidebarContext'
 
 const { HOME_PAGE, SETTINGS_PAGE } = route
 
@@ -70,6 +72,46 @@ const RestrictedLink = ({
 }
 
 export const NavHeader = () => {
+  const { isCollapsed } = useNavSidebar()
+
+  if (isCollapsed) {
+    return (
+      <Flex
+        direction='column'
+        backgroundColor='surface1'
+        flex={0}
+        css={{ minHeight: 58 }}
+      >
+        {/* Row 1: actions (settings + bell) */}
+        <Flex
+          alignItems='center'
+          justifyContent='space-around'
+          ph='xs'
+          css={{ height: 26, paddingTop: 4 }}
+        >
+          <RestrictedLink to={SETTINGS_PAGE} restriction='account'>
+            <NavHeaderButton
+              icon={IconSettings}
+              aria-label={messages.settingsLabel}
+              isActive={location.pathname === SETTINGS_PAGE}
+            />
+          </RestrictedLink>
+          <NotificationsButton />
+        </Flex>
+        {/* Row 2: Audius triangle logo */}
+        <Flex
+          alignItems='center'
+          justifyContent='center'
+          css={{ height: 32 }}
+        >
+          <Link to={HOME_PAGE} aria-label={messages.homeLink}>
+            <IconAudiusLogo color='subdued' size='m' />
+          </Link>
+        </Flex>
+      </Flex>
+    )
+  }
+
   return (
     <Flex
       alignItems='center'

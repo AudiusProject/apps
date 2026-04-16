@@ -1,4 +1,4 @@
-import { MouseEvent, useCallback } from 'react'
+import { MouseEvent, useCallback, useRef } from 'react'
 
 import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
@@ -38,7 +38,11 @@ const messages = {
 
 const AnimatedPaper = animated(Paper)
 
-export const NowPlayingArtworkTile = () => {
+type NowPlayingArtworkTileProps = {
+  size?: number
+}
+
+export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps) => {
   const dispatch = useDispatch()
   const location = useLocation()
   const { pathname } = location
@@ -79,12 +83,25 @@ export const NowPlayingArtworkTile = () => {
     trackId: trackId ?? undefined
   })
 
+  const isTrackVisible = !!(permalink && trackId)
+  const prevIsTrackVisible = useRef(isTrackVisible)
+  const trackVisibilityChanged = prevIsTrackVisible.current !== isTrackVisible
+  prevIsTrackVisible.current = isTrackVisible
+
+  // `from` seeds the spring on mount. If the track is already playing when this
+  // component mounts (e.g. sidebar toggled), start at the visible state so there
+  // is no flash. `from` is ignored on subsequent renders — the spring continues
+  // from its current animated value.
   const slideInProps = useSpring({
-    from: { opacity: 0, height: 0 },
-    to:
-      permalink && trackId
-        ? { opacity: 1, height: 208 }
-        : { opacity: 0, height: 0 }
+    from: {
+      opacity: isTrackVisible ? 1 : 0,
+      height: isTrackVisible ? size : 0
+    },
+    to: {
+      opacity: isTrackVisible ? 1 : 0,
+      height: isTrackVisible ? size : 0
+    },
+    immediate: !trackVisibilityChanged
   })
 
   if (!permalink || !trackId) return null
@@ -138,15 +155,17 @@ export const NowPlayingArtworkTile = () => {
                   onClick={handleShowVisualizer}
                 >
                   <IconVisualizer className={styles.visualizerPillIcon} />
-                  <Text
-                    tag='span'
-                    variant='body'
-                    size='xs'
-                    strength='strong'
-                    className={styles.visualizerPillLabel}
-                  >
-                    {messages.visualizer}
-                  </Text>
+                  {size >= 100 ? (
+                    <Text
+                      tag='span'
+                      variant='body'
+                      size='xs'
+                      strength='strong'
+                      className={styles.visualizerPillLabel}
+                    >
+                      {messages.visualizer}
+                    </Text>
+                  ) : null}
                 </button>
               )}
             </div>
@@ -157,7 +176,7 @@ export const NowPlayingArtworkTile = () => {
   }
 
   const content = (
-    <Box mh='auto' mb={0} css={{ position: 'relative' }} h={208} w={208}>
+    <Box mh='auto' mb={0} css={{ position: 'relative' }} h={size} w={size}>
       <TrackDogEar trackId={trackId} />
       {renderCoverArt()}
     </Box>

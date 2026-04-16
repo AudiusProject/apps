@@ -10,12 +10,14 @@ import { useIsManagedAccount } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Box, Flex, Skeleton, Text, useTheme } from '@audius/harmony'
+import { Link } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { TextLink, UserLink } from 'components/link'
 import { backgroundOverlay } from 'utils/styleUtils'
 
 import { AccountSwitcher } from './AccountSwitcher/AccountSwitcher'
+import { useNavSidebar } from './NavSidebarContext'
 
 const { SIGN_IN_PAGE, SIGN_UP_PAGE, profilePage } = route
 const messages = {
@@ -201,7 +203,48 @@ const LoadingView = () => {
   )
 }
 
+type CollapsedAccountDetailsProps = {
+  userId: number | null
+  linkTo?: string
+  isManagedAccount?: boolean
+}
+
+const CollapsedAccountDetails = ({
+  userId,
+  linkTo,
+  isManagedAccount
+}: CollapsedAccountDetailsProps) => {
+  const { color } = useTheme()
+
+  // When userId is present, Avatar already renders a UserLink internally —
+  // wrapping in another Link would create nested <a> tags.
+  const inner = (
+    <Flex
+      w='64px'
+      alignItems='center'
+      justifyContent='center'
+      pv='s'
+      css={
+        isManagedAccount
+          ? {
+              ...backgroundOverlay({
+                color: color.background.accent,
+                opacity: 0.03
+              })
+            }
+          : undefined
+      }
+    >
+      <Avatar userId={userId} h={48} w={48} disableLink={!!linkTo && !userId} />
+    </Flex>
+  )
+
+  // Only wrap in a Link when the Avatar won't provide its own (signed-out/guest)
+  return linkTo && !userId ? <Link to={linkTo}>{inner}</Link> : inner
+}
+
 export const AccountDetails = () => {
+  const { isCollapsed } = useNavSidebar()
   const { data: user } = useCurrentAccountUser({
     select: (user) => ({
       userId: user?.user_id,
@@ -217,6 +260,29 @@ export const AccountDetails = () => {
     select: selectIsAccountComplete
   })
   const isManagedAccount = useIsManagedAccount()
+
+  if (isCollapsed) {
+    if (userId && accountHandle) {
+      return (
+        <CollapsedAccountDetails
+          userId={userId}
+          linkTo={profilePage(accountHandle)}
+          isManagedAccount={isManagedAccount}
+        />
+      )
+    }
+    if (!hasCompletedAccount && guestEmail) {
+      return <CollapsedAccountDetails userId={null} linkTo={SIGN_UP_PAGE} />
+    }
+    if (accountStatus === Status.LOADING || accountStatus === Status.SUCCESS) {
+      return (
+        <Flex w='64px' alignItems='center' justifyContent='center' pv='s'>
+          <Skeleton w={48} h={48} css={{ borderRadius: '50%' }} />
+        </Flex>
+      )
+    }
+    return <CollapsedAccountDetails userId={null} linkTo={SIGN_IN_PAGE} />
+  }
 
   // Determine which state to show
   if (userId && accountHandle) {

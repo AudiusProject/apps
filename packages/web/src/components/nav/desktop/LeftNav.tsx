@@ -12,6 +12,7 @@ import { ProfileCompletionPanel } from 'components/profile-progress/ProfileCompl
 import { AccountDetails } from './AccountDetails'
 import { LeftNavCTA } from './LeftNavCTA'
 import { NavHeader } from './NavHeader'
+import { useNavSidebar } from './NavSidebarContext'
 import { NowPlayingArtworkTile } from './NowPlayingArtworkTile'
 import { RouteNav } from './RouteNav'
 import {
@@ -30,6 +31,7 @@ import {
 } from './nav-items'
 
 export const LEFT_NAV_WIDTH = 240
+export const LEFT_NAV_COLLAPSED_WIDTH = 64
 
 type OwnProps = {
   isElectron: boolean
@@ -37,6 +39,7 @@ type OwnProps = {
 
 export const LeftNav = (props: OwnProps) => {
   const { isElectron } = props
+  const { isCollapsed } = useNavSidebar()
   const { data: accountStatus } = useAccountStatus()
   const [navBodyContainerMeasureRef, navBodyContainerBoundaries] = useMeasure({
     polyfill: ResizeObserver
@@ -71,10 +74,11 @@ export const LeftNav = (props: OwnProps) => {
       id='leftNav'
       direction='column'
       h='100%'
-      w='100%'
       css={{
+        width: isCollapsed ? LEFT_NAV_COLLAPSED_WIDTH : LEFT_NAV_WIDTH,
         userSelect: 'none',
-        overflow: 'visible'
+        overflow: 'visible',
+        flexShrink: 0
       }}
     >
       {isElectron ? <RouteNav /> : null}
@@ -101,6 +105,7 @@ export const LeftNav = (props: OwnProps) => {
           containerRef={(el: HTMLElement) => {
             scrollbarRef.current = el
           }}
+          isHidden
         >
           <DragAutoscroller
             containerBoundaries={navBodyContainerBoundaries}
@@ -124,19 +129,29 @@ export const LeftNav = (props: OwnProps) => {
               <DashboardNavItem />
               <UploadNavItem />
               <DevToolsNavItem />
-              <Box mv='s'>
-                <Divider />
-              </Box>
-              <PlaylistsNavItem />
+              {!isCollapsed ? (
+                <>
+                  <Box mv='s'>
+                    <Divider />
+                  </Box>
+                  <PlaylistsNavItem />
+                </>
+              ) : null}
             </Flex>
           </DragAutoscroller>
         </Scrollbar>
       </Flex>
-      {navLoaded ? (
+      {navLoaded && !isCollapsed ? (
         <Flex direction='column' alignItems='center' gap='s'>
           <ProfileCompletionPanel />
           <LeftNavCTA />
           <NowPlayingArtworkTile />
+        </Flex>
+      ) : null}
+      {navLoaded && isCollapsed ? (
+        <Flex direction='column' alignItems='center' gap='s' pb='s'>
+          <NowPlayingArtworkTile size={48} />
+          <LeftNavCTA />
         </Flex>
       ) : null}
     </Flex>

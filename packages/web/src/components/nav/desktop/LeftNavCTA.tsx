@@ -15,17 +15,22 @@ import { Link } from 'react-router'
 import { make, useRecord } from 'common/store/analytics/actions'
 import { SignOnLink } from 'components/SignOnLink'
 
+import { useNavSidebar } from './NavSidebarContext'
+
 const { SIGN_UP_PAGE } = route
 
 const messages = {
   signUp: 'Sign up',
   uploadTrack: 'Upload Track',
   uploading: 'Uploading...',
-  finishSignUp: 'Finish Signing Up'
+  finishSignUp: 'Finish Signing Up',
+  signUpLabel: 'Create an account',
+  finishSignUpLabel: 'Finish signing up'
 }
 
 export const LeftNavCTA = () => {
   const record = useRecord()
+  const { isCollapsed } = useNavSidebar()
   const isSignedIn = useHasAccount()
   const { data: accountStatus } = useAccountStatus()
   const { data: hasCompletedAccount } = useCurrentAccountUser({
@@ -44,48 +49,70 @@ export const LeftNavCTA = () => {
     record(make(Name.CREATE_ACCOUNT_OPEN, { source: 'nav button' }))
   }, [record])
 
-  let button
-  switch (status) {
-    case 'signedIn':
-    case 'uploading':
-      button = null
-      break
-    case 'loading':
-      button = null
-      break
-    case 'guest':
-      button = (
-        <Box p='l' w='100%'>
+  if (status === 'signedIn' || status === 'uploading' || status === 'loading') {
+    return null
+  }
+
+  if (isCollapsed) {
+    if (status === 'guest') {
+      return (
+        <Box ph='xs' pb='s' w='100%'>
           <Button
             variant='primary'
-            size='small'
+            size='xs'
             asChild
-            iconRight={IconArrowRight}
             fullWidth
+            css={{ fontSize: 12 }}
           >
             <SignOnLink signUp>{messages.finishSignUp}</SignOnLink>
           </Button>
         </Box>
       )
-      break
-    case 'signedOut':
-    default:
-      button = (
-        <Box p='l' w='100%'>
-          <Button
-            variant='primary'
-            size='small'
-            asChild
-            iconRight={IconArrowRight}
-            fullWidth
-            onClick={handleSignup}
-          >
-            <Link to={SIGN_UP_PAGE}>{messages.signUp}</Link>
-          </Button>
-        </Box>
-      )
-      break
+    }
+    return (
+      <Box ph='xs' pb='s' w='100%'>
+        <Button
+          variant='primary'
+          size='xs'
+          asChild
+          fullWidth
+          onClick={handleSignup}
+          css={{ fontSize: 12 }}
+        >
+          <Link to={SIGN_UP_PAGE}>{messages.signUp}</Link>
+        </Button>
+      </Box>
+    )
   }
 
-  return button
+  if (status === 'guest') {
+    return (
+      <Box p='l' w='100%'>
+        <Button
+          variant='primary'
+          size='small'
+          asChild
+          iconRight={IconArrowRight}
+          fullWidth
+        >
+          <SignOnLink signUp>{messages.finishSignUp}</SignOnLink>
+        </Button>
+      </Box>
+    )
+  }
+
+  return (
+    <Box p='l' w='100%'>
+      <Button
+        variant='primary'
+        size='small'
+        asChild
+        iconRight={IconArrowRight}
+        fullWidth
+        onClick={handleSignup}
+      >
+        <Link to={SIGN_UP_PAGE}>{messages.signUp}</Link>
+      </Button>
+    </Box>
+  )
 }

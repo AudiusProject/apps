@@ -31,7 +31,7 @@
 
 .notificationWrapper {
   position: absolute;
-  left: 256px;
+  left: calc(var(--nav-width) + 16px);
   top: 56px;
   z-index: 5;
 }
