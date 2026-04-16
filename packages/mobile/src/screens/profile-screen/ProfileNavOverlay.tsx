@@ -36,7 +36,7 @@ export const PROFILE_NAV_CONTROLS_HEIGHT = 56
 
 // Scroll distance (in px) over which the blur background fades in and the
 // button icons transition from white to the neutral theme color.
-const FADE_DISTANCE = 60
+export const PROFILE_NAV_SCROLL_FADE_PX = 60
 
 const useStyles = makeStyles(({ spacing }) => ({
   root: {
@@ -93,7 +93,7 @@ export const ProfileNavOverlay = () => {
 
   const blurBackgroundStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, FADE_DISTANCE], [0, 1], {
+      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
@@ -103,7 +103,7 @@ export const ProfileNavOverlay = () => {
   // White icons fade out as the user scrolls past the cover photo.
   const whiteIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, FADE_DISTANCE], [1, 0], {
+      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [1, 0], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
@@ -113,7 +113,7 @@ export const ProfileNavOverlay = () => {
   // Neutral icons fade in as the user scrolls past the cover photo.
   const neutralIconsStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, FADE_DISTANCE], [0, 1], {
+      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
@@ -124,7 +124,7 @@ export const ProfileNavOverlay = () => {
   // the cover photo has scrolled away.
   const titleStyle = useAnimatedStyle(() => ({
     opacity: scrollY
-      ? interpolate(scrollY.value, [0, FADE_DISTANCE], [0, 1], {
+      ? interpolate(scrollY.value, [0, PROFILE_NAV_SCROLL_FADE_PX], [0, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp'
         })
