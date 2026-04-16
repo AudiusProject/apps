@@ -16,9 +16,7 @@ import { CollectionList } from 'app/components/collection-list'
 import { VirtualizedScrollView } from 'app/components/core'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
 
-import { LoadingMoreSpinner } from './LoadingMoreSpinner'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 import { useLibraryCollections } from './useLibraryCollections'
@@ -64,7 +62,6 @@ export const PlaylistsTab = () => {
     }
   }, [isReachable, loadNextPage])
 
-  const loadingSpinner = <LoadingMoreSpinner />
   const noItemsLoaded =
     !isPending && !collectionIds?.length && !debouncedFilterValue
 
@@ -100,24 +97,20 @@ export const PlaylistsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <WithLoader loading={isPending}>
-            <Animated.View layout={Layout}>
-              <CollectionList
-                collectionType='playlist'
-                onEndReached={handleEndReached}
-                onEndReachedThreshold={0.5}
-                scrollEnabled={false}
-                collectionIds={collectionIds}
-                ListFooterComponent={
-                  isFetchingNextPage && hasNextPage && collectionIds?.length > 0
-                    ? loadingSpinner
-                    : null
-                }
-                showCreateCollectionTile={!!isReachable}
-                createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
-              />
-            </Animated.View>
-          </WithLoader>
+          <Animated.View layout={Layout}>
+            <CollectionList
+              collectionType='playlist'
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.5}
+              scrollEnabled={false}
+              collectionIds={collectionIds ?? []}
+              isLoadingMore={isFetchingNextPage && hasNextPage}
+              showCreateCollectionTile={!!isReachable}
+              createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
+              isLoading={isPending && (collectionIds?.length ?? 0) === 0}
+              totalCount={12}
+            />
+          </Animated.View>
         </>
       )}
     </VirtualizedScrollView>

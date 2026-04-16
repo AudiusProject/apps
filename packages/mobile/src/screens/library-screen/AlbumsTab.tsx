@@ -14,9 +14,7 @@ import { CollectionList } from 'app/components/collection-list'
 import { VirtualizedScrollView } from 'app/components/core'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
 
-import { LoadingMoreSpinner } from './LoadingMoreSpinner'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 import { useLibraryCollections } from './useLibraryCollections'
@@ -78,7 +76,6 @@ export const AlbumsTab = () => {
     }
   })
 
-  const loadingSpinner = <LoadingMoreSpinner />
   const noItemsLoaded =
     !isPending && !collectionIds?.length && !debouncedFilterValue
 
@@ -101,21 +98,17 @@ export const AlbumsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <WithLoader loading={isPending}>
-            <CollectionList
-              collectionType='album'
-              onEndReached={handleEndReached}
-              onEndReachedThreshold={0.5}
-              scrollEnabled={false}
-              collectionIds={collectionIds}
-              showCreateCollectionTile={!!isReachable}
-              ListFooterComponent={
-                isFetchingNextPage && hasNextPage && collectionIds?.length > 0
-                  ? loadingSpinner
-                  : null
-              }
-            />
-          </WithLoader>
+          <CollectionList
+            collectionType='album'
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.5}
+            scrollEnabled={false}
+            collectionIds={collectionIds ?? []}
+            showCreateCollectionTile={!!isReachable}
+            isLoading={isPending && (collectionIds?.length ?? 0) === 0}
+            isLoadingMore={isFetchingNextPage && hasNextPage}
+            totalCount={12}
+          />
         </>
       )}
     </VirtualizedScrollView>

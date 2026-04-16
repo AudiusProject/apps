@@ -29,8 +29,15 @@ export type CardListProps<ItemT> = Omit<FlatListProps<ItemT>, 'data'> & {
 
 export type LoadingCard = { _loading: true }
 
-const getSkeletonData = (skeletonCount = 6): LoadingCard[] => {
-  return Array(Math.min(skeletonCount, 6)).fill({ _loading: true })
+const MAX_INITIAL_SKELETON_CARDS = 12
+
+const getSkeletonData = (requestedCount?: number): LoadingCard[] => {
+  const defaultCount = 6
+  const count = Math.min(
+    Math.max(requestedCount ?? defaultCount, defaultCount),
+    MAX_INITIAL_SKELETON_CARDS
+  )
+  return Array.from({ length: count }, () => ({ _loading: true }))
 }
 
 const DefaultLoadingCard = () => null
@@ -87,7 +94,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
 
   const data = useMemo(() => {
     const skeletonData = isLoading ? getSkeletonData(totalCount) : []
-    const moreSkeletonData = isLoadingMore ? getSkeletonData(2) : []
+    const moreSkeletonData = isLoadingMore ? getSkeletonData(6) : []
 
     return [...(dataProp ?? []), ...skeletonData, ...moreSkeletonData]
   }, [dataProp, isLoading, isLoadingMore, totalCount])

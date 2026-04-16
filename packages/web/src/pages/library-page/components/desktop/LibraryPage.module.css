@@ -31,6 +31,8 @@
 
 /* Albums */
 .cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--harmony-unit-6) var(--harmony-unit-4);
   margin-bottom: var(--harmony-unit-4);
 }
