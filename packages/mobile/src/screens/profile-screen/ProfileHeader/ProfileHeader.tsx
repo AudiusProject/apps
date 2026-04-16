@@ -105,6 +105,10 @@ export const ProfileHeader = memo(() => {
   const { spacing } = useTheme()
   const insets = useSafeAreaInsets()
 
+  const hasArtistCoinButton =
+    !isArtistCoinLoading && !!userId && !!artistCoin?.mint
+  const hasBottomSection = hasUserFollowed || hasArtistCoinButton
+
   return (
     <>
       <ProfileScrollBridge />
@@ -149,15 +153,19 @@ export const ProfileHeader = memo(() => {
               onPress={handleToggleExpand}
             />
           ) : null}
-          <Divider mh={-12} />
-          {!hasUserFollowed ? null : (
-            <ArtistRecommendations onClose={handleCloseArtistRecs} />
-          )}
-          <Flex pointerEvents='box-none' mt='s' gap='s'>
-            {!isArtistCoinLoading && userId && artistCoin?.mint ? (
-              <BuyArtistCoinButton userId={userId} />
-            ) : null}
-          </Flex>
+          {hasBottomSection ? (
+            <>
+              <Divider mh={-12} />
+              {!hasUserFollowed ? null : (
+                <ArtistRecommendations onClose={handleCloseArtistRecs} />
+              )}
+              {hasArtistCoinButton ? (
+                <Flex pointerEvents='box-none' mt='s' gap='s'>
+                  <BuyArtistCoinButton userId={userId!} />
+                </Flex>
+              ) : null}
+            </>
+          ) : null}
         </OnlineOnly>
       </Flex>
     </>
