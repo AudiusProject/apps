@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Children, useEffect, useState } from 'react'
 
 import { useTheme } from '@emotion/react'
 import Animated, {
@@ -57,6 +57,7 @@ export const Artwork = (props: ArtworkProps) => {
         : { uri: source.uri }
 
   const hasImageSource = typeof imageSource === 'number' || imageSource?.uri
+  const hasChildren = Children.toArray(children).length > 0
 
   // Create shared value for opacity
   const opacity = useSharedValue(0)
@@ -100,9 +101,8 @@ export const Artwork = (props: ArtworkProps) => {
           pt='100%'
           borderRadius={borderRadius}
           style={{
-            backgroundColor: hasImageSource
-              ? undefined
-              : children
+            backgroundColor:
+              !hasImageSource && hasChildren
                 ? color.neutral.n100
                 : color.background.surface2
           }}
@@ -129,7 +129,7 @@ export const Artwork = (props: ArtworkProps) => {
             source={imageSource}
           />
         ) : null}
-        {children ? (
+        {hasChildren ? (
           <Flex
             alignItems='center'
             justifyContent='center'
