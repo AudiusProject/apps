@@ -50,7 +50,7 @@ export const AlbumsTab = () => {
       disableTopTabScroll
       showsVerticalScrollIndicator={false}
       totalCount={album_count}
-      isLoading={isPending}
+      isLoading={album_count > 0 && isPending}
       onEndReached={handleEndReached}
       isLoadingMore={isFetchingNextPage}
     />
