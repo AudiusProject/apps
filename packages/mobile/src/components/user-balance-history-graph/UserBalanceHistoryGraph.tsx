@@ -183,7 +183,9 @@ export const UserBalanceHistoryGraph = ({
 
   // Wait for layout measurement before rendering the chart
   if (containerWidth === 0) {
-    return <Flex pv='xs' onLayout={handleLayout} style={{ minHeight: height }} />
+    return (
+      <Flex pv='xs' onLayout={handleLayout} style={{ minHeight: height }} />
+    )
   }
 
   const values = chartData.map((d) => d.value as number)

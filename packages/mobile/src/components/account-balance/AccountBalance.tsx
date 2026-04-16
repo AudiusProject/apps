@@ -27,9 +27,7 @@ const formatPercentage = (value: number): string => {
   return `${value.toFixed(2)}%`
 }
 
-export const AccountBalance = ({
-  height = 204
-}: AccountBalanceProps) => {
+export const AccountBalance = ({ height = 204 }: AccountBalanceProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const {
     data: historyData,
