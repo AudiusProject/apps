@@ -100,8 +100,9 @@ export const Artwork = (props: ArtworkProps) => {
           pt='100%'
           borderRadius={borderRadius}
           style={{
-            backgroundColor:
-              !hasImageSource && children
+            backgroundColor: hasImageSource
+              ? undefined
+              : children
                 ? color.neutral.n100
                 : color.background.surface2
           }}
