@@ -61,8 +61,8 @@ export const TrackInfo = (props: TrackInfoProps) => {
 
   const handlePressArtist = useCallback(() => {
     if (user?.user_id) {
-      onClose()
       navigation?.push('Profile', { id: user.user_id })
+      onClose()
     }
   }, [navigation, user?.user_id, onClose])
 
