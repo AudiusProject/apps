@@ -499,11 +499,7 @@ export const GiantTrackTile = ({
           />
         </div>
         <Flex column gap='xl' className={styles.infoSection}>
-          <Flex
-            column
-            gap='l'
-            className={cn(styles.titleArtistSection)}
-          >
+          <Flex column gap='l' className={styles.titleArtistSection}>
             {renderCardTitle(cn(fadeIn))}
             <Box>
               <Text
