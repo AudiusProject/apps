@@ -490,134 +490,139 @@ export const GiantTrackTile = ({
       css={{ maxWidth: 1080, textAlign: 'left' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
-      <div className={styles.topSection}>
-        <div className={styles.typeLabelCompact}>
-          {renderCardTitle(cn(fadeIn))}
-        </div>
-        <div className={styles.artworkSection}>
-          <GiantArtwork
-            trackId={trackId}
-            coSign={coSign}
-            callback={onArtworkLoad}
-          />
-        </div>
-        <Flex column gap='xl' className={styles.infoSection}>
-          <Flex column gap='l' className={styles.titleArtistSection}>
-            <div className={styles.typeLabelRow}>
-              {renderCardTitle(cn(fadeIn))}
-            </div>
-            <Box>
-              <Text
-                variant='heading'
-                size='xl'
-                className={cn(fadeIn, styles.titleHeader)}
-              >
-                {trackTitle}
-              </Text>
-              {isLoading && <Skeleton width='686px' height='96px' />}
-            </Box>
-            <Flex className={styles.artistRow}>
-              {isLoading && <Skeleton width='200px' height='24px' />}
-              <Text
-                variant='title'
-                strength='weak'
-                tag='h2'
-                className={cn(fadeIn)}
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Text color='subdued'>By </Text>
-                <UserLink userId={userId} popover />
-              </Text>
+      <div className={styles.topSectionWrapper}>
+        <div className={styles.topSection}>
+          <div className={styles.typeLabelCompact}>
+            {renderCardTitle(cn(fadeIn))}
+          </div>
+          <div className={styles.artworkSection}>
+            <GiantArtwork
+              trackId={trackId}
+              coSign={coSign}
+              callback={onArtworkLoad}
+            />
+          </div>
+          <Flex column gap='xl' className={styles.infoSection}>
+            <Flex column gap='l' className={styles.titleArtistSection}>
+              <div className={styles.typeLabelRow}>
+                {renderCardTitle(cn(fadeIn))}
+              </div>
+              <Box>
+                <Text
+                  variant='heading'
+                  size='xl'
+                  className={cn(fadeIn, styles.titleHeader)}
+                >
+                  {trackTitle}
+                </Text>
+                {isLoading && <Skeleton width='686px' height='96px' />}
+              </Box>
+              <Flex className={styles.artistRow}>
+                {isLoading && <Skeleton width='200px' height='24px' />}
+                <Text
+                  variant='title'
+                  strength='weak'
+                  tag='h2'
+                  className={cn(fadeIn)}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Text color='subdued'>By </Text>
+                  <UserLink userId={userId} popover />
+                </Text>
+              </Flex>
+              <div className={cn(fadeIn, styles.trackStatsRow)}>
+                <TrackStats
+                  trackId={trackId}
+                  scrollToCommentSection={scrollToCommentSection}
+                />
+              </div>
             </Flex>
-            <div className={cn(fadeIn, styles.trackStatsRow)}>
-              <TrackStats
-                trackId={trackId}
-                scrollToCommentSection={scrollToCommentSection}
-              />
-            </div>
-          </Flex>
 
-          <Flex
-            gap='xl'
-            alignItems='center'
-            className={cn(fadeIn, styles.playSection)}
-          >
-            {showPlay ? (
-              <PlayPauseButton
-                disabled={!hasStreamAccess}
-                playing={playing && !previewing}
-                onPlay={onPlay}
-                trackId={trackId}
-              />
-            ) : null}
-            {showPreview ? (
-              <PlayPauseButton
-                playing={playing && previewing}
-                onPlay={onPreview}
-                trackId={trackId}
-                isPreview
-              />
-            ) : null}
-            {isLongFormContent ? (
-              <GiantTrackTileProgressInfo
-                duration={duration}
-                trackId={trackId}
-              />
-            ) : (
-              renderListenCount()
-            )}
+            <Flex
+              gap='xl'
+              alignItems='center'
+              className={cn(fadeIn, styles.playSection)}
+            >
+              {showPlay ? (
+                <PlayPauseButton
+                  disabled={!hasStreamAccess}
+                  playing={playing && !previewing}
+                  onPlay={onPlay}
+                  trackId={trackId}
+                />
+              ) : null}
+              {showPreview ? (
+                <PlayPauseButton
+                  playing={playing && previewing}
+                  onPlay={onPreview}
+                  trackId={trackId}
+                  isPreview
+                />
+              ) : null}
+              {isLongFormContent ? (
+                <GiantTrackTileProgressInfo
+                  duration={duration}
+                  trackId={trackId}
+                />
+              ) : (
+                renderListenCount()
+              )}
+            </Flex>
           </Flex>
-        </Flex>
-        {isUnlisted && !isOwner ? null : (
-          <Flex
-            gap='2xl'
-            alignItems='center'
-            className={cn(fadeIn, styles.actionsSection)}
-            role='group'
-            aria-label={messages.actionGroupLabel}
-          >
-            {hasStreamAccess && renderRepostButton()}
-            {hasStreamAccess && renderFavoriteButton()}
-            {renderShareButton()}
-            {renderMakePublicButton()}
-            <span>
-              {/* prop types for overflow menu don't work correctly
+          {isUnlisted && !isOwner ? null : (
+            <Flex
+              gap='2xl'
+              alignItems='center'
+              className={cn(fadeIn, styles.actionsSection)}
+              role='group'
+              aria-label={messages.actionGroupLabel}
+            >
+              {hasStreamAccess && renderRepostButton()}
+              {hasStreamAccess && renderFavoriteButton()}
+              {renderShareButton()}
+              {renderMakePublicButton()}
+              <span>
+                {/* prop types for overflow menu don't work correctly
               so we need to cast here */}
-              <Menu {...(overflowMenu as any)}>
-                {(ref, triggerPopup) => (
-                  <div className={cn(styles.menuKebabContainer)} ref={ref}>
-                    <IconButton
-                      aria-label='More options'
-                      icon={IconKebabHorizontal}
-                      color='subdued'
-                      size='2xl'
-                      onClick={() => triggerPopup()}
-                    />
-                  </div>
-                )}
-              </Menu>
-            </span>
-          </Flex>
-        )}
-        <div className={styles.badgesSection}>
-          {trendingRank ? (
-            <MusicBadge color='blue' icon={IconTrending}>
-              {trendingRank}
-            </MusicBadge>
-          ) : null}
-          {shouldShowScheduledRelease ? (
-            <MusicBadge variant='accent' icon={IconCalendarMonth}>
-              {messages.releases(releaseDate)}
-            </MusicBadge>
-          ) : isUnlisted ? (
-            <MusicBadge icon={IconVisibilityHidden}>
-              {messages.hidden}
-            </MusicBadge>
-          ) : null}
+                <Menu {...(overflowMenu as any)}>
+                  {(ref, triggerPopup) => (
+                    <div
+                      className={cn(styles.menuKebabContainer)}
+                      ref={ref}
+                    >
+                      <IconButton
+                        aria-label='More options'
+                        icon={IconKebabHorizontal}
+                        color='subdued'
+                        size='2xl'
+                        onClick={() => triggerPopup()}
+                      />
+                    </div>
+                  )}
+                </Menu>
+              </span>
+            </Flex>
+          )}
+          <div className={styles.badgesSection}>
+            {trendingRank ? (
+              <MusicBadge color='blue' icon={IconTrending}>
+                {trendingRank}
+              </MusicBadge>
+            ) : null}
+            {shouldShowScheduledRelease ? (
+              <MusicBadge variant='accent' icon={IconCalendarMonth}>
+                {messages.releases(releaseDate)}
+              </MusicBadge>
+            ) : isUnlisted ? (
+              <MusicBadge icon={IconVisibilityHidden}>
+                {messages.hidden}
+              </MusicBadge>
+            ) : null}
+          </div>
         </div>
       </div>
 

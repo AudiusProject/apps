@@ -1,3 +1,7 @@
+.topSectionWrapper {
+  container-type: inline-size;
+}
+
 .topSection {
   position: relative;
   display: grid;
@@ -5,7 +9,6 @@
   column-gap: var(--harmony-unit-6);
   row-gap: var(--harmony-unit-6);
   padding: var(--harmony-unit-4);
-  container-type: inline-size;
 }
 
 .artworkSection {
@@ -337,8 +340,9 @@
   }
 
   .playSection > :first-child {
-    flex: 1 0 100%;
-    width: 100%;
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 
   .actionsSection {
