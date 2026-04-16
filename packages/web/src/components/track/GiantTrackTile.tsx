@@ -590,10 +590,7 @@ export const GiantTrackTile = ({
               so we need to cast here */}
                 <Menu {...(overflowMenu as any)}>
                   {(ref, triggerPopup) => (
-                    <div
-                      className={cn(styles.menuKebabContainer)}
-                      ref={ref}
-                    >
+                    <div className={cn(styles.menuKebabContainer)} ref={ref}>
                       <IconButton
                         aria-label='More options'
                         icon={IconKebabHorizontal}
