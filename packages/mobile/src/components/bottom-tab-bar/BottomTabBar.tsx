@@ -110,7 +110,6 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
         backgroundColor='surface1'
         wrap='nowrap'
         justifyContent='space-evenly'
-        pt='s'
         pb={insets.bottom}
       >
         {routes.map(({ name, key }, index) => {
