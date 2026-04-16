@@ -6,6 +6,8 @@ import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 
+import { RunYourOwnContestBanner } from './RunYourOwnContestBanner'
+
 const CONTEST_HOSTING_HELP_URL =
   'https://help.audius.co/artists/hosting-a-remix-contest'
 
@@ -118,6 +120,8 @@ export const ContestsPage = () => {
             ) : null}
           </Flex>
         )}
+
+        {!showEmpty ? <RunYourOwnContestBanner /> : null}
       </Flex>
     </Page>
   )
