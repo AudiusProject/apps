@@ -91,7 +91,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
   const [filterText, setFilterText] = useState('')
 
   const hasStreamAccess = access?.stream
-  const shouldShowStats = type !== 'album' && (!isPrivate || isOwner)
+  const shouldShowStats = !isPrivate || isOwner
   const shouldShowScheduledRelease =
     isScheduledRelease && releaseDate && dayjs(releaseDate).isAfter(dayjs())
 
