@@ -490,118 +490,115 @@ export const GiantTrackTile = ({
       css={{ maxWidth: 1080, textAlign: 'left' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
-      <Flex p='l' gap='xl'>
-        <GiantArtwork
-          trackId={trackId}
-          coSign={coSign}
-          callback={onArtworkLoad}
-        />
-        <Flex
-          column
-          justifyContent='space-between'
-          flex={1}
-          css={{ minWidth: '386px', flexBasis: '386px' }}
-        >
-          <Flex column gap='2xl'>
-            <Flex column gap='xl'>
-              <Flex column gap='l' alignItems='flex-start'>
-                {renderCardTitle(cn(fadeIn))}
-                <Box>
-                  <Text variant='heading' size='xl' className={cn(fadeIn)}>
-                    {trackTitle}
-                  </Text>
-                  {isLoading && <Skeleton width='686px' height='96px' />}
-                </Box>
-                <Flex>
-                  {isLoading && <Skeleton width='200px' height='24px' />}
-                  <Text
-                    variant='title'
-                    strength='weak'
-                    tag='h2'
-                    className={cn(fadeIn)}
-                    css={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Text color='subdued'>By </Text>
-                    <UserLink userId={userId} popover />
-                  </Text>
-                </Flex>
-                <div className={cn(fadeIn)}>
-                  <TrackStats
-                    trackId={trackId}
-                    scrollToCommentSection={scrollToCommentSection}
-                  />
-                </div>
-              </Flex>
-
-              <Flex gap='xl' alignItems='center' className={cn(fadeIn)}>
-                {showPlay ? (
-                  <PlayPauseButton
-                    disabled={!hasStreamAccess}
-                    playing={playing && !previewing}
-                    onPlay={onPlay}
-                    trackId={trackId}
-                  />
-                ) : null}
-                {showPreview ? (
-                  <PlayPauseButton
-                    playing={playing && previewing}
-                    onPlay={onPreview}
-                    trackId={trackId}
-                    isPreview
-                  />
-                ) : null}
-                {isLongFormContent ? (
-                  <GiantTrackTileProgressInfo
-                    duration={duration}
-                    trackId={trackId}
-                  />
-                ) : (
-                  renderListenCount()
-                )}
-              </Flex>
+      <div className={styles.topSection}>
+        <div className={styles.artworkSection}>
+          <GiantArtwork
+            trackId={trackId}
+            coSign={coSign}
+            callback={onArtworkLoad}
+          />
+        </div>
+        <Flex column gap='xl' className={styles.infoSection}>
+          <Flex
+            column
+            gap='l'
+            className={cn(styles.titleArtistSection)}
+          >
+            {renderCardTitle(cn(fadeIn))}
+            <Box>
+              <Text variant='heading' size='xl' className={cn(fadeIn)}>
+                {trackTitle}
+              </Text>
+              {isLoading && <Skeleton width='686px' height='96px' />}
+            </Box>
+            <Flex>
+              {isLoading && <Skeleton width='200px' height='24px' />}
+              <Text
+                variant='title'
+                strength='weak'
+                tag='h2'
+                className={cn(fadeIn)}
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Text color='subdued'>By </Text>
+                <UserLink userId={userId} popover />
+              </Text>
             </Flex>
+            <div className={cn(fadeIn)}>
+              <TrackStats
+                trackId={trackId}
+                scrollToCommentSection={scrollToCommentSection}
+              />
+            </div>
           </Flex>
-          {isUnlisted && !isOwner ? null : (
-            <Flex
-              gap='2xl'
-              alignItems='center'
-              className={cn(fadeIn)}
-              role='group'
-              aria-label={messages.actionGroupLabel}
-            >
-              {hasStreamAccess && renderRepostButton()}
-              {hasStreamAccess && renderFavoriteButton()}
-              {renderShareButton()}
-              {renderMakePublicButton()}
-              <span>
-                {/* prop types for overflow menu don't work correctly
-              so we need to cast here */}
-                <Menu {...(overflowMenu as any)}>
-                  {(ref, triggerPopup) => (
-                    <div className={cn(styles.menuKebabContainer)} ref={ref}>
-                      <IconButton
-                        aria-label='More options'
-                        icon={IconKebabHorizontal}
-                        color='subdued'
-                        size='2xl'
-                        onClick={() => triggerPopup()}
-                      />
-                    </div>
-                  )}
-                </Menu>
-              </span>
-            </Flex>
-          )}
+
+          <Flex
+            gap='xl'
+            alignItems='center'
+            className={cn(fadeIn, styles.playSection)}
+          >
+            {showPlay ? (
+              <PlayPauseButton
+                disabled={!hasStreamAccess}
+                playing={playing && !previewing}
+                onPlay={onPlay}
+                trackId={trackId}
+              />
+            ) : null}
+            {showPreview ? (
+              <PlayPauseButton
+                playing={playing && previewing}
+                onPlay={onPreview}
+                trackId={trackId}
+                isPreview
+              />
+            ) : null}
+            {isLongFormContent ? (
+              <GiantTrackTileProgressInfo
+                duration={duration}
+                trackId={trackId}
+              />
+            ) : (
+              renderListenCount()
+            )}
+          </Flex>
         </Flex>
-        <Flex
-          gap='s'
-          justifyContent='flex-end'
-          css={{ position: 'absolute', right: 'var(--harmony-unit-6)' }}
-        >
+        {isUnlisted && !isOwner ? null : (
+          <Flex
+            gap='2xl'
+            alignItems='center'
+            className={cn(fadeIn, styles.actionsSection)}
+            role='group'
+            aria-label={messages.actionGroupLabel}
+          >
+            {hasStreamAccess && renderRepostButton()}
+            {hasStreamAccess && renderFavoriteButton()}
+            {renderShareButton()}
+            {renderMakePublicButton()}
+            <span>
+              {/* prop types for overflow menu don't work correctly
+              so we need to cast here */}
+              <Menu {...(overflowMenu as any)}>
+                {(ref, triggerPopup) => (
+                  <div className={cn(styles.menuKebabContainer)} ref={ref}>
+                    <IconButton
+                      aria-label='More options'
+                      icon={IconKebabHorizontal}
+                      color='subdued'
+                      size='2xl'
+                      onClick={() => triggerPopup()}
+                    />
+                  </div>
+                )}
+              </Menu>
+            </span>
+          </Flex>
+        )}
+        <div className={styles.badgesSection}>
           {trendingRank ? (
             <MusicBadge color='blue' icon={IconTrending}>
               {trendingRank}
@@ -616,8 +613,8 @@ export const GiantTrackTile = ({
               {messages.hidden}
             </MusicBadge>
           ) : null}
-        </Flex>
-      </Flex>
+        </div>
+      </div>
 
       {isStreamGated && streamConditions ? (
         <Box p='l' pb='xl' w='100%' backgroundColor='surface1'>
