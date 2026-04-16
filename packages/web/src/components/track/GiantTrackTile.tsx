@@ -506,12 +506,16 @@ export const GiantTrackTile = ({
           >
             {renderCardTitle(cn(fadeIn))}
             <Box>
-              <Text variant='heading' size='xl' className={cn(fadeIn)}>
+              <Text
+                variant='heading'
+                size='xl'
+                className={cn(fadeIn, styles.titleHeader)}
+              >
                 {trackTitle}
               </Text>
               {isLoading && <Skeleton width='686px' height='96px' />}
             </Box>
-            <Flex>
+            <Flex className={styles.artistRow}>
               {isLoading && <Skeleton width='200px' height='24px' />}
               <Text
                 variant='title'
@@ -528,7 +532,7 @@ export const GiantTrackTile = ({
                 <UserLink userId={userId} popover />
               </Text>
             </Flex>
-            <div className={cn(fadeIn)}>
+            <div className={cn(fadeIn, styles.trackStatsRow)}>
               <TrackStats
                 trackId={trackId}
                 scrollToCommentSection={scrollToCommentSection}

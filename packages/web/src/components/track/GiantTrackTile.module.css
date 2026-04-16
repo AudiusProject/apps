@@ -285,24 +285,50 @@
     grid-column: 1;
     grid-row: 2;
     align-items: center;
+    width: 100%;
   }
 
   .titleArtistSection {
     align-items: center;
     text-align: center;
+    width: 100%;
+  }
+
+  .titleHeader {
+    text-align: center !important;
+  }
+
+  .artistRow {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .trackStatsRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 
   .playSection {
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: var(--harmony-unit-3) !important;
+  }
+
+  .playSection > :first-child {
+    flex: 1 0 100%;
     width: 100%;
   }
 
   .actionsSection {
     grid-column: 1;
     grid-row: 3;
-    justify-self: center;
+    justify-self: stretch;
+    width: 100%;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--harmony-unit-6) !important;
   }
 
