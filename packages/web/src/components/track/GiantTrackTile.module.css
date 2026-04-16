@@ -301,6 +301,20 @@
     grid-column: 1;
     grid-row: 2;
     justify-self: center;
+    width: min(338px, 70cqi);
+    aspect-ratio: 1;
+  }
+
+  .artworkSection > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .artworkSection > div > div {
+    width: 100% !important;
+    height: 100% !important;
   }
 
   .infoSection {
