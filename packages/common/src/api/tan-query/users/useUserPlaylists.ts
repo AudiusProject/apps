@@ -82,12 +82,22 @@ export const useUserPlaylists = (
     enabled: options?.enabled !== false && !!userId
   })
 
-  const { data: collections } = useCollections(queryRes.data)
+  const {
+    data: collections,
+    isPending: isCollectionsPending,
+    isLoading: isCollectionsLoading
+  } = useCollections(queryRes.data)
+
+  // The ID query can resolve before the per-collection entity queries do; if
+  // we only reported `queryRes.isPending` the consumer would see an empty
+  // `data` array in that gap and flash a "no playlists" state.
+  const hasPendingCollections =
+    (queryRes.data?.length ?? 0) > 0 && isCollectionsPending
 
   return {
     data: collections,
-    isPending: queryRes.isPending,
-    isLoading: queryRes.isLoading,
+    isPending: queryRes.isPending || hasPendingCollections,
+    isLoading: queryRes.isLoading || (hasPendingCollections && isCollectionsLoading),
     hasNextPage: queryRes.hasNextPage,
     isFetchingNextPage: queryRes.isFetchingNextPage,
     fetchNextPage: queryRes.fetchNextPage

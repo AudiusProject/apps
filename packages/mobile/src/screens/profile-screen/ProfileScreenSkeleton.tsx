@@ -2,22 +2,21 @@ import { useMemo } from 'react'
 
 import { times, random } from 'lodash'
 import { View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex } from '@audius/harmony-native'
 import Skeleton, { StaticSkeleton } from 'app/components/skeleton'
 import { makeStyles } from 'app/styles'
 
+import { COVER_PHOTO_CONTENT_HEIGHT } from './ProfileCoverPhoto'
+
 const useStyles = makeStyles(({ palette, spacing }) => ({
   root: {
     marginBottom: 40
   },
-  coverPhoto: {
-    height: 96
-  },
   profilePicture: {
     position: 'absolute',
-    top: 52,
-    left: 12,
+    left: spacing(4),
     zIndex: 101,
 
     height: 82,
@@ -147,12 +146,14 @@ export const ExpandableSectionSkeleton = () => {
 
 export const ProfileHeaderSkeleton = () => {
   const styles = useStyles()
+  const insets = useSafeAreaInsets()
   const statSkeleton = <StaticSkeleton style={styles.stat} />
+  const coverPhotoHeight = insets.top + COVER_PHOTO_CONTENT_HEIGHT
 
   return (
     <Flex backgroundColor='white'>
-      <StaticSkeleton height={96} />
-      <Skeleton style={styles.profilePicture} />
+      <StaticSkeleton height={coverPhotoHeight} />
+      <Skeleton style={[styles.profilePicture, { top: insets.top + 48 }]} />
       <Flex p='l' gap='s' backgroundColor='white'>
         <Flex row justifyContent='space-between' backgroundColor='white'>
           <Flex mt='3xl'>
