@@ -8,7 +8,6 @@
 
 /* Body Content Wrapper */
 .bodyWrapper {
-  min-width: 774px;
   margin-bottom: var(--harmony-unit-10);
   overflow: hidden;
 }
@@ -32,11 +31,12 @@
 }
 
 /* Top Header Section Wrapper */
-.bodyWrapper .topSectionWrapper {
+.topSectionWrapper {
   background-color: var(--harmony-n-25);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 /* Track Table */
@@ -45,7 +45,7 @@
   margin: 0;
 }
 
-.bodyWrapper .tableWrapper {
+.tableWrapper {
   background-color: var(--harmony-n-25);
   width: 100%;
 }

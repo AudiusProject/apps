@@ -16,6 +16,7 @@ type RepostsFavoritesStatsProps = {
   onClickReposts?: () => void
   onClickFavorites?: () => void
   className?: string
+  forceMobileStyle?: boolean
 }
 
 const messages = {
@@ -29,9 +30,11 @@ export const RepostsFavoritesStats = ({
   repostCount,
   saveCount,
   onClickReposts,
-  onClickFavorites
+  onClickFavorites,
+  forceMobileStyle = false
 }: RepostsFavoritesStatsProps) => {
   const isMobile = useIsMobile()
+  const shouldUseMobileStyle = isMobile || forceMobileStyle
   const handleOnClickReposts = useCallback(
     (e: MouseEvent) => {
       e.preventDefault()
@@ -50,11 +53,11 @@ export const RepostsFavoritesStats = ({
   )
 
   return !!repostCount || !!saveCount ? (
-    <Flex alignItems='center' gap={isMobile ? 'xl' : 'l'}>
+    <Flex alignItems='center' gap={shouldUseMobileStyle ? 'xl' : 'l'}>
       {!!repostCount && (
         <PlainButton
-          size={isMobile ? 'default' : 'large'}
-          variant={isMobile ? 'default' : 'subdued'}
+          size={shouldUseMobileStyle ? 'default' : 'large'}
+          variant={shouldUseMobileStyle ? 'default' : 'subdued'}
           iconLeft={IconRepost}
           onClick={handleOnClickReposts}
           css={{ padding: 0 }}
@@ -67,8 +70,8 @@ export const RepostsFavoritesStats = ({
       )}
       {!!saveCount && (
         <PlainButton
-          size={isMobile ? 'default' : 'large'}
-          variant={isMobile ? 'default' : 'subdued'}
+          size={shouldUseMobileStyle ? 'default' : 'large'}
+          variant={shouldUseMobileStyle ? 'default' : 'subdued'}
           iconLeft={IconFavorite}
           onClick={handleOnClickFavorites}
           css={{ padding: 0 }}

@@ -300,7 +300,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       fromOpacity={1}
       scrollableSearch
     >
-      <Paper column mb='unit-10' css={{ minWidth: 774 }}>
+      <Paper column mb='unit-10'>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
         {!pageLoading && isEmpty ? (
@@ -353,7 +353,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       </Paper>
 
       {playlistId != null && isOwner && !isAlbum ? (
-        <Flex column gap='2xl' pv='2xl' w='100%' css={{ minWidth: 774 }}>
+        <Flex column gap='2xl' pv='2xl' w='100%'>
           <Divider />
           <SuggestedTracks collectionId={playlistId} />
         </Flex>
