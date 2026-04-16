@@ -322,6 +322,7 @@ const SearchExplorePage = ({
               <RecommendedTracksSection />
             ) : null}
             {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
             {categoryKey === CategoryView.ALL ? (
               <FanClubsExploreSection />
             ) : null}
@@ -329,7 +330,6 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent ? (
               <RecentlyPlayedSection />
             ) : null}
-            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
             {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
             {showUserContent ? <ArtistSpotlightSection /> : null}
             {showUserContent ? <LabelSpotlightSection /> : null}

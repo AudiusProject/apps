@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { useExploreContent, useTracks } from '@audius/common/api'
+import { useExploreContent } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 
 import { useTheme } from '@audius/harmony-native'
+import { ContestCard } from 'app/components/contest-card'
 import { CardList } from 'app/components/core'
-import { RemixContestCard } from 'app/components/remix-carousel/RemixContestCard'
 import { TrackCardSkeleton } from 'app/components/track/TrackCardSkeleton'
 
 import { useDeferredElement } from '../../../hooks/useDeferredElement'
@@ -16,22 +16,21 @@ export const FeaturedRemixContests = () => {
   const { spacing } = useTheme()
   const { InViewWrapper, inView } = useDeferredElement()
 
-  const { data: exploreContent } = useExploreContent({ enabled: inView })
-  const { data: remixContests } = useTracks(
-    exploreContent?.featuredRemixContests,
-    { enabled: inView }
-  )
+  const { data: exploreContent, isPending } = useExploreContent({
+    enabled: inView
+  })
 
   return (
     <InViewWrapper>
-      <ExploreSection title={messages.featuredRemixContests}>
+      <ExploreSection title={messages.contests}>
         <CardList
-          data={remixContests?.map((track) => ({ trackId: track.track_id }))}
-          renderItem={({ item }) => {
-            return <RemixContestCard trackId={item.trackId} />
-          }}
+          data={exploreContent?.featuredRemixContests?.map((trackId) => ({
+            trackId
+          }))}
+          renderItem={({ item }) => <ContestCard trackId={item.trackId} />}
           horizontal
           carouselSpacing={spacing.l}
+          isLoading={isPending}
           LoadingCardComponent={TrackCardSkeleton}
         />
       </ExploreSection>

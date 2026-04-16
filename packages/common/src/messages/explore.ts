@@ -6,6 +6,7 @@ export const exploreMessages = {
   featuredPlaylists: 'Community Playlists',
   fanClubs: 'Fan Clubs',
   featuredRemixContests: 'Featured Remix Contests',
+  contests: 'Contests',
   forYou: 'For You',
   recentlyListedForSale: 'Recently Listed for Sale',
   bestSelling: 'Best Selling',

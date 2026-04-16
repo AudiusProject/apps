@@ -1,4 +1,5 @@
 export { ProfileNavItem } from '../ProfileNavItem'
+export { ContestsNavItem } from '../ContestsNavItem'
 export { MessagesNavItem } from '../MessagesNavItem'
 export { WalletNavItem } from '../WalletNavItem'
 export { ArtistCoinsNavItem } from '../ArtistCoinsNavItem'
