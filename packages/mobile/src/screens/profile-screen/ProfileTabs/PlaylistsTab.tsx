@@ -53,7 +53,7 @@ export const PlaylistsTab = () => {
       totalCount={playlist_count}
       showCreateCollectionTile={isOwner}
       createPlaylistSource={CreatePlaylistSource.PROFILE_PAGE}
-      isLoading={isPending}
+      isLoading={playlist_count > 0 && isPending}
       onEndReached={handleEndReached}
       isLoadingMore={isFetchingNextPage}
     />
