@@ -491,6 +491,9 @@ export const GiantTrackTile = ({
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
       <div className={styles.topSection}>
+        <div className={styles.typeLabelCompact}>
+          {renderCardTitle(cn(fadeIn))}
+        </div>
         <div className={styles.artworkSection}>
           <GiantArtwork
             trackId={trackId}
@@ -500,7 +503,9 @@ export const GiantTrackTile = ({
         </div>
         <Flex column gap='xl' className={styles.infoSection}>
           <Flex column gap='l' className={styles.titleArtistSection}>
-            {renderCardTitle(cn(fadeIn))}
+            <div className={styles.typeLabelRow}>
+              {renderCardTitle(cn(fadeIn))}
+            </div>
             <Box>
               <Text
                 variant='heading'

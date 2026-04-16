@@ -42,6 +42,14 @@
   justify-content: flex-end;
 }
 
+.typeLabelCompact {
+  display: none;
+}
+
+.typeLabelRow {
+  display: block;
+}
+
 .gatedContent .typeLabel {
   letter-spacing: 2px;
 }
@@ -275,15 +283,26 @@
     padding: var(--harmony-unit-6);
   }
 
-  .artworkSection {
+  .typeLabelCompact {
+    display: flex;
     grid-column: 1;
     grid-row: 1;
+    justify-content: center;
+  }
+
+  .typeLabelRow {
+    display: none;
+  }
+
+  .artworkSection {
+    grid-column: 1;
+    grid-row: 2;
     justify-self: center;
   }
 
   .infoSection {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     align-items: center;
     width: 100%;
   }
@@ -324,7 +343,7 @@
 
   .actionsSection {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 4;
     justify-self: stretch;
     width: 100%;
     flex-wrap: wrap;
