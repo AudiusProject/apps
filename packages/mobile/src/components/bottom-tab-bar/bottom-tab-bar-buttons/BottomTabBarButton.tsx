@@ -8,7 +8,10 @@ import { Pressable, StyleSheet } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { usePrevious } from 'react-use'
 
-import { BOTTOM_BAR_BUTTON_HEIGHT } from '../constants'
+import {
+  BOTTOM_BAR_BUTTON_HEIGHT,
+  BOTTOM_BAR_TOP_PADDING
+} from '../constants'
 
 export type BaseBottomTabBarButtonProps = {
   name: string
@@ -27,7 +30,8 @@ export type BottomTabBarButtonProps = BaseBottomTabBarButtonProps & {
 const styles = StyleSheet.create({
   root: {
     width: '20%',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingTop: BOTTOM_BAR_TOP_PADDING
   },
   iconWrapper: {
     width: 28,
@@ -35,7 +39,7 @@ const styles = StyleSheet.create({
   },
   underlay: {
     width: '100%',
-    height: BOTTOM_BAR_BUTTON_HEIGHT,
+    height: BOTTOM_BAR_BUTTON_HEIGHT + BOTTOM_BAR_TOP_PADDING,
     position: 'absolute'
   }
 })
