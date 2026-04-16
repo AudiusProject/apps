@@ -490,86 +490,94 @@ export const GiantTrackTile = ({
       css={{ maxWidth: 1080, textAlign: 'left' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
-      <Flex p='l' gap='xl'>
-        <GiantArtwork
-          trackId={trackId}
-          coSign={coSign}
-          callback={onArtworkLoad}
-        />
-        <Flex
-          column
-          justifyContent='space-between'
-          flex={1}
-          css={{ minWidth: '386px', flexBasis: '386px' }}
-        >
-          <Flex column gap='2xl'>
-            <Flex column gap='xl'>
-              <Flex column gap='l' alignItems='flex-start'>
+      <div className={styles.topSectionWrapper}>
+        <div className={styles.topSection}>
+          <div className={styles.typeLabelCompact}>
+            {renderCardTitle(cn(fadeIn))}
+          </div>
+          <div className={styles.artworkSection}>
+            <GiantArtwork
+              trackId={trackId}
+              coSign={coSign}
+              callback={onArtworkLoad}
+            />
+          </div>
+          <Flex column gap='xl' className={styles.infoSection}>
+            <Flex column gap='l' className={styles.titleArtistSection}>
+              <div className={styles.typeLabelRow}>
                 {renderCardTitle(cn(fadeIn))}
-                <Box>
-                  <Text variant='heading' size='xl' className={cn(fadeIn)}>
-                    {trackTitle}
-                  </Text>
-                  {isLoading && <Skeleton width='686px' height='96px' />}
-                </Box>
-                <Flex>
-                  {isLoading && <Skeleton width='200px' height='24px' />}
-                  <Text
-                    variant='title'
-                    strength='weak'
-                    tag='h2'
-                    className={cn(fadeIn)}
-                    css={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Text color='subdued'>By </Text>
-                    <UserLink userId={userId} popover />
-                  </Text>
-                </Flex>
-                <div className={cn(fadeIn)}>
-                  <TrackStats
-                    trackId={trackId}
-                    scrollToCommentSection={scrollToCommentSection}
-                  />
-                </div>
+              </div>
+              <Box>
+                <Text
+                  variant='heading'
+                  size='xl'
+                  className={cn(fadeIn, styles.titleHeader)}
+                >
+                  {trackTitle}
+                </Text>
+                {isLoading && <Skeleton width='686px' height='96px' />}
+              </Box>
+              <Flex className={styles.artistRow}>
+                {isLoading && <Skeleton width='200px' height='24px' />}
+                <Text
+                  variant='title'
+                  strength='weak'
+                  tag='h2'
+                  className={cn(fadeIn)}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Text color='subdued'>By </Text>
+                  <UserLink userId={userId} popover />
+                </Text>
               </Flex>
+              <div className={cn(fadeIn, styles.trackStatsRow)}>
+                <TrackStats
+                  trackId={trackId}
+                  scrollToCommentSection={scrollToCommentSection}
+                />
+              </div>
+            </Flex>
 
-              <Flex gap='xl' alignItems='center' className={cn(fadeIn)}>
-                {showPlay ? (
-                  <PlayPauseButton
-                    disabled={!hasStreamAccess}
-                    playing={playing && !previewing}
-                    onPlay={onPlay}
-                    trackId={trackId}
-                  />
-                ) : null}
-                {showPreview ? (
-                  <PlayPauseButton
-                    playing={playing && previewing}
-                    onPlay={onPreview}
-                    trackId={trackId}
-                    isPreview
-                  />
-                ) : null}
-                {isLongFormContent ? (
-                  <GiantTrackTileProgressInfo
-                    duration={duration}
-                    trackId={trackId}
-                  />
-                ) : (
-                  renderListenCount()
-                )}
-              </Flex>
+            <Flex
+              gap='xl'
+              alignItems='center'
+              className={cn(fadeIn, styles.playSection)}
+            >
+              {showPlay ? (
+                <PlayPauseButton
+                  disabled={!hasStreamAccess}
+                  playing={playing && !previewing}
+                  onPlay={onPlay}
+                  trackId={trackId}
+                />
+              ) : null}
+              {showPreview ? (
+                <PlayPauseButton
+                  playing={playing && previewing}
+                  onPlay={onPreview}
+                  trackId={trackId}
+                  isPreview
+                />
+              ) : null}
+              {isLongFormContent ? (
+                <GiantTrackTileProgressInfo
+                  duration={duration}
+                  trackId={trackId}
+                />
+              ) : (
+                renderListenCount()
+              )}
             </Flex>
           </Flex>
           {isUnlisted && !isOwner ? null : (
             <Flex
               gap='2xl'
               alignItems='center'
-              className={cn(fadeIn)}
+              className={cn(fadeIn, styles.actionsSection)}
               role='group'
               aria-label={messages.actionGroupLabel}
             >
@@ -596,28 +604,24 @@ export const GiantTrackTile = ({
               </span>
             </Flex>
           )}
-        </Flex>
-        <Flex
-          gap='s'
-          justifyContent='flex-end'
-          css={{ position: 'absolute', right: 'var(--harmony-unit-6)' }}
-        >
-          {trendingRank ? (
-            <MusicBadge color='blue' icon={IconTrending}>
-              {trendingRank}
-            </MusicBadge>
-          ) : null}
-          {shouldShowScheduledRelease ? (
-            <MusicBadge variant='accent' icon={IconCalendarMonth}>
-              {messages.releases(releaseDate)}
-            </MusicBadge>
-          ) : isUnlisted ? (
-            <MusicBadge icon={IconVisibilityHidden}>
-              {messages.hidden}
-            </MusicBadge>
-          ) : null}
-        </Flex>
-      </Flex>
+          <div className={styles.badgesSection}>
+            {trendingRank ? (
+              <MusicBadge color='blue' icon={IconTrending}>
+                {trendingRank}
+              </MusicBadge>
+            ) : null}
+            {shouldShowScheduledRelease ? (
+              <MusicBadge variant='accent' icon={IconCalendarMonth}>
+                {messages.releases(releaseDate)}
+              </MusicBadge>
+            ) : isUnlisted ? (
+              <MusicBadge icon={IconVisibilityHidden}>
+                {messages.hidden}
+              </MusicBadge>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
       {isStreamGated && streamConditions ? (
         <Box p='l' pb='xl' w='100%' backgroundColor='surface1'>
