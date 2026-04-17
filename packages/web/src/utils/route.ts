@@ -61,6 +61,13 @@ export const fullPickWinnersPage = (permalink: string) => {
   return `${fullTrackPage(permalink)}/pick-winners`
 }
 
+export const contestPage = (permalink: string) => {
+  return `${permalink}/contest`
+}
+export const fullContestPage = (permalink: string) => {
+  return `${fullTrackPage(permalink)}/contest`
+}
+
 export const fullAiPage = (handle: string) => {
   return `${fullProfilePage(handle)}/ai`
 }

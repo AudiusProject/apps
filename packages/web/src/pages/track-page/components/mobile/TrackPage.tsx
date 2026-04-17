@@ -56,7 +56,7 @@ import { parseTrackRoute } from 'utils/route/trackRouteParser'
 import { TrackPageLineup } from '../TrackPageLineup'
 
 import TrackPageHeader from './TrackHeader'
-import { RemixContestSection } from './remix-contests/RemixContestSection'
+import { RemixContestTeaser } from '../shared/RemixContestTeaser'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
 const { getPlaying, getPreviewing } = playerSelectors
@@ -334,7 +334,7 @@ const TrackPage = () => {
             goToRepostsPage={goToRepostsPage}
           />
         </Flex>
-        <RemixContestSection trackId={defaults.trackId} isOwner={isOwner} />
+        <RemixContestTeaser trackId={defaults.trackId} />
         {isCommentingEnabled ? (
           <CommentPreview entityId={defaults.trackId} />
         ) : null}

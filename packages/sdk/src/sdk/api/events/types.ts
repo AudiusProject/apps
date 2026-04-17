@@ -37,7 +37,24 @@ export const DeleteEventSchema = EventMetadataSchema.pick({
   eventId: true
 })
 
+// Entity-manager-shaped follow/unfollow: numeric IDs, submitted client-side
+// through the entity manager. Distinct from the generated HTTP-shaped
+// FollowEventRequest (which uses string hashids and hits /events/{id}/follow
+// via OAuth auth). Mirrors the user-follow pattern in UsersApi.
+export const EntityManagerFollowEventSchema = z.object({
+  userId: z.number(),
+  eventId: z.number()
+})
+
+export const EntityManagerUnfollowEventSchema = EntityManagerFollowEventSchema
+
 // Request types
 export type CreateEventRequest = z.infer<typeof CreateEventSchema>
 export type UpdateEventRequest = z.infer<typeof UpdateEventSchema>
 export type DeleteEventRequest = z.infer<typeof DeleteEventSchema>
+export type EntityManagerFollowEventRequest = z.infer<
+  typeof EntityManagerFollowEventSchema
+>
+export type EntityManagerUnfollowEventRequest = z.infer<
+  typeof EntityManagerUnfollowEventSchema
+>

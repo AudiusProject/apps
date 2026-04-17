@@ -15,15 +15,29 @@
 
 import * as runtime from '../runtime';
 import type {
+  EventFollowStateResponse,
   EventsResponse,
+  TrackCommentsResponse,
   UnclaimedIdResponse,
+  WriteResponse,
 } from '../models';
 import {
+    EventFollowStateResponseFromJSON,
+    EventFollowStateResponseToJSON,
     EventsResponseFromJSON,
     EventsResponseToJSON,
+    TrackCommentsResponseFromJSON,
+    TrackCommentsResponseToJSON,
     UnclaimedIdResponseFromJSON,
     UnclaimedIdResponseToJSON,
+    WriteResponseFromJSON,
+    WriteResponseToJSON,
 } from '../models';
+
+export interface FollowEventRequest {
+    eventId: string;
+    userId: string;
+}
 
 export interface GetAllEventsRequest {
     offset?: number;
@@ -48,16 +62,96 @@ export interface GetEntityEventsRequest {
     filterDeleted?: boolean;
 }
 
+export interface GetEventCommentsRequest {
+    eventId: string;
+    userId?: string;
+    sortMethod?: GetEventCommentsSortMethodEnum;
+    offset?: number;
+    limit?: number;
+}
+
+export interface GetEventFollowStateRequest {
+    eventId: string;
+    userId?: string;
+}
+
+export interface GetEventFollowStateAliasRequest {
+    eventId: string;
+    userId?: string;
+}
+
 export interface GetRemixContestsRequest {
     offset?: number;
     limit?: number;
     status?: GetRemixContestsStatusEnum;
 }
 
+export interface UnfollowEventRequest {
+    eventId: string;
+    userId: string;
+}
+
 /**
  * 
  */
 export class EventsApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Subscribe (follow) a remix-contest event to get notifications when the event\'s artist posts an update. Backed by a Subscribe/Event ManageEntity transaction.
+     */
+    async followEventRaw(params: FollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling followEvent.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling followEvent.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/events/{eventId}/follow`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Subscribe (follow) a remix-contest event to get notifications when the event\'s artist posts an update. Backed by a Subscribe/Event ManageEntity transaction.
+     */
+    async followEvent(params: FollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.followEventRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -227,6 +321,144 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Get the comment stream for a remix-contest event. Returns top-level comments only; replies come back nested inside each comment. A comment whose user_id matches the event\'s owner user_id is a \"post update\" (decided client-side via the related event_user_id field).
+     */
+    async getEventCommentsRaw(params: GetEventCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackCommentsResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling getEventComments.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
+        }
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/events/{eventId}/comments`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrackCommentsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the comment stream for a remix-contest event. Returns top-level comments only; replies come back nested inside each comment. A comment whose user_id matches the event\'s owner user_id is a \"post update\" (decided client-side via the related event_user_id field).
+     */
+    async getEventComments(params: GetEventCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackCommentsResponse> {
+        const response = await this.getEventCommentsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns whether the current user is subscribed to (follows) a given remix-contest event, plus the total follower count. Useful for rendering the Follow / Following button.
+     */
+    async getEventFollowStateRaw(params: GetEventFollowStateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventFollowStateResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling getEventFollowState.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/events/{eventId}/follow_state`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EventFollowStateResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns whether the current user is subscribed to (follows) a given remix-contest event, plus the total follower count. Useful for rendering the Follow / Following button.
+     */
+    async getEventFollowState(params: GetEventFollowStateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventFollowStateResponse> {
+        const response = await this.getEventFollowStateRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Hyphenated alias of /events/{eventId}/follow_state.
+     */
+    async getEventFollowStateAliasRaw(params: GetEventFollowStateAliasRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventFollowStateResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling getEventFollowStateAlias.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/events/{eventId}/follow-state`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EventFollowStateResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Hyphenated alias of /events/{eventId}/follow_state.
+     */
+    async getEventFollowStateAlias(params: GetEventFollowStateAliasRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventFollowStateResponse> {
+        const response = await this.getEventFollowStateAliasRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Get remix contest events ordered with currently-active contests first (by soonest-ending), followed by ended contests (most-recently-ended first). Active contests are those whose end_date is null or in the future.
      * Get all remix contests
      */
@@ -300,6 +532,63 @@ export class EventsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * @hidden
+     * Unfollow a remix-contest event.
+     */
+    async unfollowEventRaw(params: UnfollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling unfollowEvent.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unfollowEvent.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/events/{eventId}/follow`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfollow a remix-contest event.
+     */
+    async unfollowEvent(params: UnfollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unfollowEventRaw(params, initOverrides);
+        return await response.value();
+    }
+
 }
 
 /**
@@ -337,6 +626,15 @@ export const GetEntityEventsEntityTypeEnum = {
     User: 'user'
 } as const;
 export type GetEntityEventsEntityTypeEnum = typeof GetEntityEventsEntityTypeEnum[keyof typeof GetEntityEventsEntityTypeEnum];
+/**
+ * @export
+ */
+export const GetEventCommentsSortMethodEnum = {
+    Top: 'top',
+    Newest: 'newest',
+    Timestamp: 'timestamp'
+} as const;
+export type GetEventCommentsSortMethodEnum = typeof GetEventCommentsSortMethodEnum[keyof typeof GetEventCommentsSortMethodEnum];
 /**
  * @export
  */

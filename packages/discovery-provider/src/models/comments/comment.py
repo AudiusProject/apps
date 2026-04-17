@@ -4,6 +4,7 @@ from src.models.base import Base
 from src.models.model_utils import RepresentableMixin
 
 FAN_CLUB_ENTITY_TYPE = "FanClub"
+EVENT_ENTITY_TYPE = "Event"
 
 
 class Comment(Base, RepresentableMixin):

@@ -51,7 +51,8 @@ import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
 
-import { RemixContestSection } from './RemixContestSection'
+import { RemixContestTeaser } from '../shared/RemixContestTeaser'
+
 import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
@@ -349,10 +350,9 @@ const TrackPage = () => {
           gap='unit12'
         >
           {renderGiantTrackTile()}
-          <RemixContestSection
-            trackId={track?.track_id ?? 0}
-            isOwner={isOwner}
-          />
+          {track?.track_id ? (
+            <RemixContestTeaser trackId={track.track_id} />
+          ) : null}
           <Box w='100%' className={styles.commentsAndLineupContainer}>
             <Flex
               gap='2xl'

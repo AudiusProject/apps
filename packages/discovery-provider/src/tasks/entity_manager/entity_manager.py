@@ -661,7 +661,11 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                 entities_to_fetch[EntityType.EVENT].add(entity_id)
                 entities_to_fetch[EntityType.USER].add(user_id)
 
-                if action != Action.DELETE:
+                # Only Event CREATE/UPDATE carry metadata referencing a
+                # related Track. Subscribe / Unsubscribe / Delete all ship
+                # with empty metadata (follow-event has nothing to parse),
+                # so json.loads("") must not run for those actions.
+                if action in (Action.CREATE, Action.UPDATE):
                     try:
                         json_metadata = json.loads(metadata)
                     except Exception as e:
@@ -692,8 +696,17 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                         )
                         # skip invalid metadata
                         continue
-                    track_id = json_metadata.get("data", {}).get("entity_id")
-                    entities_to_fetch[EntityType.TRACK].add(track_id)
+                    comment_target_id = json_metadata.get("data", {}).get("entity_id")
+                    comment_target_type = json_metadata.get("data", {}).get(
+                        "entity_type"
+                    )
+                    if comment_target_type == EntityType.EVENT.value:
+                        entities_to_fetch[EntityType.EVENT].add(comment_target_id)
+                    else:
+                        # Track and FanClub comments pre-fetch Tracks for is_artist_reacted
+                        # resolution; FanClub lookups don't need track rows, but the query
+                        # is cheap and the key may be None anyway.
+                        entities_to_fetch[EntityType.TRACK].add(comment_target_id)
                     entities_to_fetch[EntityType.COMMENT_NOTIFICATION_SETTING].add(
                         (user_id, entity_id, entity_type)
                     )
@@ -1191,13 +1204,19 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
         subscriptions_to_fetch: Set[Tuple] = entities_to_fetch["Subscription"]
         and_queries = []
         for subscription_to_fetch in subscriptions_to_fetch:
-            user_id = subscription_to_fetch[0]
-            # subscriptions does not need entity type in subscription_to_fetch[1]
-            entity_id = subscription_to_fetch[2]
+            subscriber = subscription_to_fetch[0]
+            sub_entity_type = subscription_to_fetch[1]
+            sub_target_id = subscription_to_fetch[2]
             and_queries.append(
                 and_(
-                    Subscription.subscriber_id == user_id,
-                    Subscription.user_id == entity_id,
+                    Subscription.subscriber_id == subscriber,
+                    Subscription.user_id == sub_target_id,
+                    Subscription.entity_type
+                    == (
+                        "Event"
+                        if sub_entity_type == EntityType.EVENT
+                        else "User"
+                    ),
                     Subscription.is_current == True,
                 )
             )
@@ -1209,15 +1228,27 @@ def fetch_existing_entities(session: Session, entities_to_fetch: EntitiesToFetch
             .filter(or_(*and_queries))
             .all()
         )
+
+        def _sub_entity_type_for_record(entity_type_str):
+            return (
+                EntityType.EVENT
+                if entity_type_str == "Event"
+                else EntityType.USER
+            )
+
         existing_entities[EntityType.SUBSCRIPTION] = {
             get_record_key(
-                subscription.subscriber_id, EntityType.USER, subscription.user_id
+                subscription.subscriber_id,
+                _sub_entity_type_for_record(subscription.entity_type),
+                subscription.user_id,
             ): subscription
             for subscription, _ in subscriptions
         }
         existing_entities_in_json[EntityType.SUBSCRIPTION] = {
             get_record_key(
-                sub_json["subscriber_id"], EntityType.USER, sub_json["user_id"]
+                sub_json["subscriber_id"],
+                _sub_entity_type_for_record(sub_json.get("entity_type", "User")),
+                sub_json["user_id"],
             ): sub_json
             for _, sub_json in subscriptions
         }

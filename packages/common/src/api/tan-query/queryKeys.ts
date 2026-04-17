@@ -133,5 +133,7 @@ export const QUERY_KEYS = {
   coinRedeemAmount: 'coinRedeemAmount',
   coinRedeemCodeAmount: 'coinRedeemCodeAmount',
   uploadStatus: 'uploadStatus',
-  fanClubFeed: 'fanClubFeed'
+  fanClubFeed: 'fanClubFeed',
+  eventComments: 'eventComments',
+  eventFollowState: 'eventFollowState'
 } as const

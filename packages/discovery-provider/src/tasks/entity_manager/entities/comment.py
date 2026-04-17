@@ -2,15 +2,21 @@ from sqlalchemy import func, text
 
 from src.challenges.challenge_event import ChallengeEvent
 from src.exceptions import IndexingValidationError
-from src.models.comments.comment import FAN_CLUB_ENTITY_TYPE, Comment
+from src.models.comments.comment import (
+    EVENT_ENTITY_TYPE,
+    FAN_CLUB_ENTITY_TYPE,
+    Comment,
+)
 from src.models.comments.comment_mention import CommentMention
 from src.models.comments.comment_notification_setting import CommentNotificationSetting
 from src.models.comments.comment_reaction import CommentReaction
 from src.models.comments.comment_report import COMMENT_KARMA_THRESHOLD, CommentReport
 from src.models.comments.comment_thread import CommentThread
+from src.models.events.event import Event
 from src.models.moderation.muted_user import MutedUser
 from src.models.notifications.notification import Notification
 from src.models.social.follow import Follow
+from src.models.social.subscription import Subscription
 from src.models.tracks.track import Track
 from src.models.users.aggregate_user import AggregateUser
 from src.models.users.user import User
@@ -36,6 +42,15 @@ def get_coin_owner_user_id(session, artist_user_id: int):
     return int(row) if row is not None else None
 
 
+def get_event_owner_user_id(session, event_id: int):
+    """Return the user_id of the artist that owns a given event (contest), or None."""
+    row = session.execute(
+        text("SELECT user_id FROM events WHERE event_id = :e AND is_deleted = false LIMIT 1"),
+        {"e": event_id},
+    ).scalar()
+    return int(row) if row is not None else None
+
+
 def validate_delete_comment_tx(params: ManageEntityParameters):
     validate_signer(params)
     comment_id = params.entity_id
@@ -47,6 +62,8 @@ def validate_delete_comment_tx(params: ManageEntityParameters):
     comment = params.existing_records[EntityType.COMMENT.value][comment_id]
     if comment.entity_type == FAN_CLUB_ENTITY_TYPE:
         entity_owner_id = comment.entity_id
+    elif comment.entity_type == EVENT_ENTITY_TYPE:
+        entity_owner_id = get_event_owner_user_id(params.session, comment.entity_id)
     else:
         entity_owner_id = (
             params.session.query(Track.owner_id)
@@ -76,7 +93,11 @@ def validate_write_comment_tx(params: ManageEntityParameters):
             )
 
     entity_type_meta = params.metadata.get("entity_type", EntityType.TRACK.value)
-    if entity_type_meta not in (EntityType.TRACK.value, FAN_CLUB_ENTITY_TYPE):
+    if entity_type_meta not in (
+        EntityType.TRACK.value,
+        FAN_CLUB_ENTITY_TYPE,
+        EVENT_ENTITY_TYPE,
+    ):
         raise IndexingValidationError(
             f"Entity type {entity_type_meta} is not supported for comments"
         )
@@ -88,13 +109,14 @@ def validate_write_comment_tx(params: ManageEntityParameters):
 
     track_entity_id = None
     coin_entity_id = None
+    event_entity_id = None
     if entity_type_meta == EntityType.TRACK.value:
         if not isinstance(raw_entity_id, int):
             raise IndexingValidationError("Track entity_id must be an integer")
         track_entity_id = raw_entity_id
         if track_entity_id not in params.existing_records[EntityType.TRACK.value]:
             raise IndexingValidationError(f"Track {track_entity_id} does not exist")
-    else:
+    elif entity_type_meta == FAN_CLUB_ENTITY_TYPE:
         if not isinstance(raw_entity_id, int):
             raise IndexingValidationError("Fan club entity_id must be an integer")
         coin_entity_id = raw_entity_id
@@ -106,6 +128,23 @@ def validate_write_comment_tx(params: ManageEntityParameters):
         if params.user_id != coin_entity_id:
             raise IndexingValidationError(
                 "Only the fan club owner may comment on fan club threads"
+            )
+    else:
+        # EVENT_ENTITY_TYPE — comments and replies on contest/event threads.
+        # Anyone may post a top-level comment; the distinction between a
+        # "post update" and a regular comment is resolved at read time by
+        # comparing comment.user_id to the event's owner user_id.
+        if not isinstance(raw_entity_id, int):
+            raise IndexingValidationError("Event entity_id must be an integer")
+        event_entity_id = raw_entity_id
+        if event_entity_id not in params.existing_records[EntityType.EVENT.value]:
+            raise IndexingValidationError(
+                f"Event {event_entity_id} does not exist"
+            )
+        event_row = params.existing_records[EntityType.EVENT.value][event_entity_id]
+        if getattr(event_row, "is_deleted", False):
+            raise IndexingValidationError(
+                f"Event {event_entity_id} is deleted"
             )
 
     if params.action == Action.UPDATE:
@@ -125,6 +164,14 @@ def validate_write_comment_tx(params: ManageEntityParameters):
             ):
                 raise IndexingValidationError(
                     "Cannot change comment fan club entity_id from metadata on update"
+                )
+        elif existing_c.entity_type == EVENT_ENTITY_TYPE:
+            if (
+                entity_type_meta != EVENT_ENTITY_TYPE
+                or event_entity_id != existing_c.entity_id
+            ):
+                raise IndexingValidationError(
+                    "Cannot change comment event entity_id from metadata on update"
                 )
 
     if params.metadata["body"] is None or params.metadata["body"] == "":
@@ -160,13 +207,21 @@ def validate_write_comment_tx(params: ManageEntityParameters):
                 raise IndexingValidationError(
                     "parent_comment_id does not belong to the same track thread"
                 )
-        else:
+        elif entity_type_meta == FAN_CLUB_ENTITY_TYPE:
             if (
                 parent_c.entity_type != FAN_CLUB_ENTITY_TYPE
                 or parent_c.entity_id != coin_entity_id
             ):
                 raise IndexingValidationError(
                     "parent_comment_id does not belong to the same fan club thread"
+                )
+        else:
+            if (
+                parent_c.entity_type != EVENT_ENTITY_TYPE
+                or parent_c.entity_id != event_entity_id
+            ):
+                raise IndexingValidationError(
+                    "parent_comment_id does not belong to the same event thread"
                 )
 
     mentions = params.metadata.get("mentions")
@@ -188,6 +243,15 @@ def create_comment(params: ManageEntityParameters):
         notification_entity_type = FAN_CLUB_ENTITY_TYPE
         notification_entity_id = entity_user_id
         data_entity_ref = entity_user_id
+    elif raw_entity_type == EVENT_ENTITY_TYPE:
+        entity_type = EVENT_ENTITY_TYPE
+        event_id = int(metadata.get("entity_id"))
+        event_row = existing_records[EntityType.EVENT.value][event_id]
+        entity_user_id = event_row.user_id
+        stored_entity_id = event_id
+        notification_entity_type = EVENT_ENTITY_TYPE
+        notification_entity_id = event_id
+        data_entity_ref = event_id
     else:
         entity_type = EntityType.TRACK.value
         track_entity_id = metadata.get("entity_id")
@@ -240,7 +304,7 @@ def create_comment(params: ManageEntityParameters):
     ).scalar()
 
     comment_id = params.entity_id
-    # Only fan club posts can be members-only; track comments are never gated.
+    # Only fan club posts can be members-only; track and event comments are never gated.
     # Note: parse_metadata normalizes missing fields to None (not absent), so we can't
     # rely on dict.get's default — we must explicitly treat None as "field omitted".
     is_members_only_meta = metadata.get("is_members_only")
@@ -300,6 +364,46 @@ def create_comment(params: ManageEntityParameters):
         )
 
         safe_add_notification(params.session, comment_notification)
+
+    # Notify event followers when the event owner writes a root-level "post update"
+    # on their own contest/event. Replies by the artist are NOT post updates —
+    # they're just normal replies — and do not trigger this notification.
+    if (
+        entity_type == EVENT_ENTITY_TYPE
+        and not is_reply
+        and user_id == entity_user_id
+    ):
+        event_follower_rows = (
+            params.session.query(Subscription.subscriber_id)
+            .filter(
+                Subscription.entity_type == EVENT_ENTITY_TYPE,
+                Subscription.user_id == stored_entity_id,
+                Subscription.is_current == True,
+                Subscription.is_delete == False,
+            )
+            .all()
+        )
+        event_follower_user_ids = {
+            row[0] for row in event_follower_rows if row[0] != entity_user_id
+        }
+        for recipient_id in event_follower_user_ids:
+            event_update_notification = Notification(
+                blocknumber=params.block_number,
+                user_ids=[recipient_id],
+                timestamp=params.block_datetime,
+                type="remix_contest_update",
+                specifier=str(recipient_id),
+                group_id=(
+                    f"remix_contest_update:{comment_id}"
+                    f":event:{stored_entity_id}"
+                ),
+                data={
+                    "event_id": stored_entity_id,
+                    "event_user_id": entity_user_id,
+                    "comment_id": comment_id,
+                },
+            )
+            safe_add_notification(params.session, event_update_notification)
 
     # Notify followers and coin holders when an artist creates a root-level fan club text post
     if entity_type == FAN_CLUB_ENTITY_TYPE and not is_reply:
@@ -480,6 +584,18 @@ def update_comment(params: ManageEntityParameters):
         notification_entity_type = FAN_CLUB_ENTITY_TYPE
         notification_entity_id = entity_user_id
         data_entity_ref = existing_comment.entity_id
+    elif existing_comment.entity_type == EVENT_ENTITY_TYPE:
+        event_id = existing_comment.entity_id
+        event_row = existing_records[EntityType.EVENT.value].get(event_id)
+        # Fall back to DB lookup if the event isn't pre-fetched for this update tx.
+        entity_user_id = (
+            event_row.user_id
+            if event_row is not None
+            else get_event_owner_user_id(params.session, event_id)
+        )
+        notification_entity_type = EVENT_ENTITY_TYPE
+        notification_entity_id = event_id
+        data_entity_ref = event_id
     else:
         track_entity_id = metadata.get("entity_id")
         entity_user_id = existing_records[EntityType.TRACK.value][
@@ -746,6 +862,17 @@ def react_comment(params: ManageEntityParameters):
         data_entity_ref = comment_row.entity_id
         notification_entity_type = FAN_CLUB_ENTITY_TYPE
         notification_entity_id = entity_user_id
+    elif comment_row.entity_type == EVENT_ENTITY_TYPE:
+        event_id = comment_row.entity_id
+        event_row = params.existing_records[EntityType.EVENT.value].get(event_id)
+        entity_user_id = (
+            event_row.user_id
+            if event_row is not None
+            else get_event_owner_user_id(params.session, event_id)
+        )
+        data_entity_ref = event_id
+        notification_entity_type = EVENT_ENTITY_TYPE
+        notification_entity_id = event_id
     else:
         track_entity_id = comment_row.entity_id
         entity_user_id = params.existing_records[EntityType.TRACK.value][
