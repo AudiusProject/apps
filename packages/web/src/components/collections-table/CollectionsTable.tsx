@@ -159,8 +159,9 @@ export const CollectionsTable = ({
         Header: 'Album Name',
         accessor: 'title',
         Cell: renderNameCell,
-        maxWidth: 300,
-        width: 120,
+        minWidth: 240,
+        width: 240,
+        maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Album Name',
         sorter: alphaSorter('title'),
         align: 'left'

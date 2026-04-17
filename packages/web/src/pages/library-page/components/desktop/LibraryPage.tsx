@@ -138,13 +138,13 @@ const LibraryPage = () => {
     }
   })
 
-  const { trackRows, activeIndex } = useMemo(() => {
-    if (!(status === Status.SUCCESS || entries.length)) {
-      return { trackRows: [] as LibraryPageTrack[], activeIndex: -1 }
+  const getTracksTableData = (): [LibraryPageTrack[], number] => {
+    let [data, activeIndex] = getFilteredData(entries)
+    if (!hasReachedEnd) {
+      data = data.concat(new Array(5).fill({ kind: Kind.EMPTY }))
     }
-    const [rows, index] = getFilteredData(entries)
-    return { trackRows: rows, activeIndex: index }
-  }, [status, entries, getFilteredData])
+    return [data, activeIndex]
+  }
 
   const isEmpty =
     entries.length === 0 ||

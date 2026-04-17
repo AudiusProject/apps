@@ -883,21 +883,11 @@ export const TracksTable = ({
       },
       trackName: {
         id: 'trackName',
-        Header: showArtistInTrackNameColumn ? (
-          <span className={styles.trackHeaderWithArtwork}>
-            <span
-              className={styles.trackHeaderArtworkSpacer}
-              aria-hidden='true'
-            />
-            <span>Track</span>
-          </span>
-        ) : (
-          'Track'
-        ),
+        Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        minWidth: showArtistInTrackNameColumn ? 320 : 260,
-        width: showArtistInTrackNameColumn ? 320 : 260,
+        minWidth: 180,
+        width: 180,
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
@@ -939,7 +929,6 @@ export const TracksTable = ({
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,
-      showArtistInTrackNameColumn,
       renderTrackNameCell,
       renderSavedDateCell
     ]
