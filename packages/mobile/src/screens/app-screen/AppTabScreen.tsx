@@ -219,7 +219,11 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='Track' component={TrackScreen} />
       <Stack.Screen name='TrackRemixes' component={TrackRemixesScreen} />
       <Stack.Screen name='Collection' component={CollectionScreen} />
-      <Stack.Screen name='Profile' component={ProfileScreen} />
+      <Stack.Screen
+        name='Profile'
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Group>
         <Stack.Screen name='Followers' component={FollowersScreen} />
         <Stack.Screen name='Following' component={FollowingScreen} />

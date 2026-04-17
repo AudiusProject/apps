@@ -2,8 +2,9 @@ import React, { useCallback, useMemo } from 'react'
 
 import { useToggleTrack } from '@audius/common/hooks'
 import { ID, Kind, UID } from '@audius/common/models'
+import type { Queueable } from '@audius/common/store'
 import { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import { makeStableUid } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
@@ -16,21 +17,25 @@ import { MOBILE_TILE_WIDTH, TILE_WIDTH } from './constants'
 // Wrapper component to make tiles playable
 export const PlayableTile = ({
   id,
+  uid,
   index,
-  source = QueueSource.EXPLORE
+  source = QueueSource.EXPLORE,
+  entries
 }: {
   id: ID
+  uid: UID
   index: number
   source?: QueueSource
+  entries?: Queueable[]
 }) => {
   const isMobile = useIsMobile()
   const Tile = isMobile ? MobileTrackTile : DesktopTrackTile
-  const uid = useMemo(() => makeUid(Kind.TRACKS, id, source), [id, source])
 
   const { togglePlay, isTrackPlaying } = useToggleTrack({
     id,
     uid,
-    source
+    source,
+    entries
   })
 
   // Create lineup-style togglePlay function that TrackTile expects
@@ -74,6 +79,17 @@ export const TilePairs = ({
   for (let i = 0; i < data.length; i += 2) {
     pairs.push(data.slice(i, i + 2))
   }
+
+  const entries = useMemo(
+    () =>
+      data.map((id) => ({
+        id,
+        uid: makeStableUid(Kind.TRACKS, id, source),
+        source
+      })),
+    [data, source]
+  )
+
   return (
     <>
       {pairs.map((pair, pairIndex) => (
@@ -83,14 +99,19 @@ export const TilePairs = ({
           gap='m'
           css={{ minWidth: tileWidth, width: tileWidth }}
         >
-          {pair.map((id, idIndex) => (
-            <PlayableTile
-              key={id}
-              id={id}
-              index={pairIndex * 2 + idIndex}
-              source={source}
-            />
-          ))}
+          {pair.map((id, idIndex) => {
+            const entryIndex = pairIndex * 2 + idIndex
+            return (
+              <PlayableTile
+                key={id}
+                id={id}
+                uid={entries[entryIndex].uid}
+                index={entryIndex}
+                source={source}
+                entries={entries}
+              />
+            )
+          })}
         </Flex>
       ))}
     </>

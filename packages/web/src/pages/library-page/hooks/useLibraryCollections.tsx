@@ -84,6 +84,7 @@ export const useLibraryCollections = ({
     loadNextPage,
     collectionIds,
     isPending,
-    isFetchingNextPage
+    isFetchingNextPage,
+    localCollectionCount: locallyAddedCollectionIds.length
   }
 }

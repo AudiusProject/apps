@@ -73,8 +73,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: true,
-        disableSpecialAccessGate: true,
-        disableSpecialAccessGateFields: true,
+        disableFollowGate: true,
         disableTokenGate: true,
         disableTokenGateFields: true,
         disableHidden: false
@@ -93,8 +92,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
+        disableFollowGate: false,
         disableTokenGate: false,
         disableTokenGateFields: false,
         disableHidden: false
@@ -111,8 +109,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
+        disableFollowGate: false,
         disableTokenGate: false,
         disableTokenGateFields: false,
         disableHidden: true
@@ -129,8 +126,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
+        disableFollowGate: false,
         disableTokenGate: false,
         disableTokenGateFields: false,
         disableHidden: false
@@ -147,8 +143,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
+        disableFollowGate: false,
         disableTokenGate: false,
         disableTokenGateFields: false,
         disableHidden: false
@@ -165,8 +160,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: false,
-        disableSpecialAccessGateFields: false,
+        disableFollowGate: false,
         disableTokenGate: false,
         disableTokenGateFields: false,
         disableHidden: false
@@ -185,8 +179,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: true,
-        disableSpecialAccessGateFields: true,
+        disableFollowGate: true,
         disableTokenGate: true,
         disableTokenGateFields: true,
         disableHidden: true
@@ -205,8 +198,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: true,
-        disableSpecialAccessGateFields: true,
+        disableFollowGate: true,
         disableTokenGate: true,
         disableTokenGateFields: true,
         disableHidden: true
@@ -223,8 +215,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: true,
-        disableSpecialAccessGateFields: true,
+        disableFollowGate: true,
         disableTokenGate: true,
         disableTokenGateFields: true,
         disableHidden: true
@@ -241,8 +232,7 @@ describe('useAccessAndRemixSettings', () => {
       })
       const expected = {
         disableUsdcGate: false,
-        disableSpecialAccessGate: true,
-        disableSpecialAccessGateFields: true,
+        disableFollowGate: true,
         disableTokenGate: true,
         disableTokenGateFields: true,
         disableHidden: true

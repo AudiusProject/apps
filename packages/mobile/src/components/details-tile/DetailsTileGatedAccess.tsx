@@ -6,7 +6,6 @@ import type {
 } from '@audius/common/models'
 import {
   isContentFollowGated,
-  isContentSpecialAccess,
   isContentUSDCPurchaseGated,
   isContentTokenGated
 } from '@audius/common/models'
@@ -41,7 +40,6 @@ export const DetailsTileGatedAccess = ({
   const shouldDisplay =
     isContentFollowGated(streamConditions) ||
     isContentTokenGated(streamConditions) ||
-    isContentSpecialAccess(streamConditions) ||
     isContentUSDCPurchaseGated(streamConditions)
 
   if (!shouldDisplay) return null
@@ -61,7 +59,7 @@ export const DetailsTileGatedAccess = ({
   return (
     <DetailsTileNoAccess
       trackId={trackId}
-      // Currently only special-access tracks are supported
+      // Currently only follow-gated tracks are supported
       contentType={PurchaseableContentType.TRACK}
       streamConditions={streamConditions}
       token={token}

@@ -6,6 +6,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex } from '@audius/harmony-native'
 import BadgeArtist from 'app/assets/images/badgeArtist.svg'
@@ -14,19 +15,26 @@ import { makeStyles } from 'app/styles'
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
+// Height below the status bar. The avatar is 80px tall and is positioned so
+// it extends ~32px below the cover photo, matching the Figma spec.
+export const COVER_PHOTO_CONTENT_HEIGHT = 96
+
 const useStyles = makeStyles(({ spacing }) => ({
-  coverPhoto: {
-    height: 96
+  darkOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)'
   },
   artistBadge: {
     position: 'absolute',
-    top: spacing(3),
-    right: spacing(3)
+    right: spacing(4),
+    bottom: spacing(2)
   }
 }))
 
 export const ProfileCoverPhoto = () => {
   const styles = useStyles()
+  const insets = useSafeAreaInsets()
+
   const { user_id, track_count } =
     useProfileUser({
       select: (user) => ({
@@ -37,7 +45,8 @@ export const ProfileCoverPhoto = () => {
 
   const scrollY = useCurrentTabScrollY()
 
-  const isArtist = track_count && track_count > 0
+  const isArtist = !!track_count && track_count > 0
+  const coverPhotoHeight = insets.top + COVER_PHOTO_CONTENT_HEIGHT
 
   const blurViewStyle = useAnimatedStyle(() => ({
     ...StyleSheet.absoluteFillObject,
@@ -49,7 +58,6 @@ export const ProfileCoverPhoto = () => {
   }))
 
   const badgeStyle = useAnimatedStyle(() => ({
-    ...styles.artistBadge,
     transform: [
       {
         translateY: interpolate(scrollY.value, [-200, 0], [-200, 0], {
@@ -63,16 +71,21 @@ export const ProfileCoverPhoto = () => {
   if (!user_id) return null
 
   return (
-    <Flex pointerEvents='none' h={96} backgroundColor='surface2'>
-      <CoverPhoto style={styles.coverPhoto} userId={user_id}>
+    <Flex
+      pointerEvents='box-none'
+      h={coverPhotoHeight}
+      backgroundColor='surface2'
+    >
+      <CoverPhoto style={{ height: coverPhotoHeight }} userId={user_id}>
         <AnimatedBlurView
           blurType='dark'
           blurAmount={100}
           style={blurViewStyle}
         />
+        {isArtist ? <Animated.View style={styles.darkOverlay} /> : null}
       </CoverPhoto>
       {isArtist ? (
-        <Animated.View style={badgeStyle}>
+        <Animated.View style={[styles.artistBadge, badgeStyle]}>
           <BadgeArtist />
         </Animated.View>
       ) : null}

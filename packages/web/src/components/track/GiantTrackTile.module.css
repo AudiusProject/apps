@@ -1,3 +1,58 @@
+.topSectionWrapper {
+  container-type: inline-size;
+}
+
+.topSection {
+  position: relative;
+  display: grid;
+  grid-template-columns: 338px minmax(0, 1fr);
+  column-gap: var(--harmony-unit-6);
+  row-gap: var(--harmony-unit-6);
+  padding: var(--harmony-unit-4);
+}
+
+.artworkSection {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.infoSection {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.actionsSection {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+}
+
+.titleArtistSection {
+  align-items: flex-start;
+}
+
+.playSection {
+  align-items: center;
+}
+
+.badgesSection {
+  position: absolute;
+  right: var(--harmony-unit-6);
+  top: var(--harmony-unit-4);
+  display: flex;
+  gap: var(--harmony-unit-2);
+  justify-content: flex-end;
+}
+
+.typeLabelCompact {
+  display: none;
+}
+
+.typeLabelRow {
+  display: block;
+}
+
 .gatedContent .typeLabel {
   letter-spacing: 2px;
 }
@@ -21,10 +76,6 @@
   color: var(--harmony-n-400);
   font-size: var(--harmony-unit-3);
   font-weight: 600;
-}
-
-.playSection > * {
-  margin-top: var(--harmony-unit-4);
 }
 
 .infoSection .numberOfListens {
@@ -225,5 +276,100 @@
 
   .gatedContentSectionButton {
     width: 100%;
+  }
+}
+
+@container (max-width: 740px) {
+  .topSection {
+    grid-template-columns: 1fr;
+    row-gap: var(--harmony-unit-5);
+    padding: var(--harmony-unit-6);
+  }
+
+  .typeLabelCompact {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+  }
+
+  .typeLabelRow {
+    display: none;
+  }
+
+  .artworkSection {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+    width: min(338px, 70cqi);
+    aspect-ratio: 1;
+  }
+
+  .artworkSection > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .artworkSection > div > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .infoSection {
+    grid-column: 1;
+    grid-row: 3;
+    align-items: center;
+    width: 100%;
+  }
+
+  .titleArtistSection {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .titleHeader {
+    text-align: center !important;
+  }
+
+  .artistRow {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .trackStatsRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .playSection {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: var(--harmony-unit-3) !important;
+  }
+
+  .playSection > :first-child {
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .actionsSection {
+    grid-column: 1;
+    grid-row: 4;
+    justify-self: stretch;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--harmony-unit-6) !important;
+  }
+
+  .badgesSection {
+    display: none;
   }
 }

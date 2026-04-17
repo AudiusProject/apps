@@ -241,8 +241,11 @@ def create_comment(params: ManageEntityParameters):
 
     comment_id = params.entity_id
     # Only fan club posts can be members-only; track comments are never gated.
+    # Note: parse_metadata normalizes missing fields to None (not absent), so we can't
+    # rely on dict.get's default — we must explicitly treat None as "field omitted".
+    is_members_only_meta = metadata.get("is_members_only")
     is_members_only = (
-        bool(metadata.get("is_members_only", True))
+        (True if is_members_only_meta is None else bool(is_members_only_meta))
         if entity_type == FAN_CLUB_ENTITY_TYPE
         else False
     )

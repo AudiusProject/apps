@@ -9,7 +9,7 @@ import {
   IconVisibilityHidden,
   IconCart,
   IconReceive,
-  IconSparkles,
+  IconUserFollowing,
   IconArtistCoin
 } from '@audius/harmony-native'
 
@@ -50,9 +50,9 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     label: 'Extras',
     color: 'premium'
   },
-  [AccessType.SPECIAL_ACCESS]: {
-    icon: IconSparkles,
-    label: 'Special Access',
+  [AccessType.FOLLOW_GATED]: {
+    icon: IconUserFollowing,
+    label: 'Followers Only',
     color: 'special'
   },
   [AccessType.TOKEN_GATED]: {

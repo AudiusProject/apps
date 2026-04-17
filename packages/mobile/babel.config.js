@@ -10,6 +10,7 @@ module.exports = (api) => {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         root: ['.'],
         alias: {
+          app: './src',
           '@audius/common/adapters': '../common/src/adapters',
           '@audius/common/messages': '../common/src/messages',
           '@audius/common/hooks': '../common/src/hooks',

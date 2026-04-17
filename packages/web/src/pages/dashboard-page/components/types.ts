@@ -14,7 +14,7 @@ export type DataSourceTrack = Track & {
 export enum TrackFilters {
   PUBLIC = 'Public',
   PREMIUM = 'Premium',
-  SPECIAL_ACCESS = 'SpecialAccess',
+  FOLLOW_GATED = 'FollowGated',
   HIDDEN = 'Hidden'
 }
 

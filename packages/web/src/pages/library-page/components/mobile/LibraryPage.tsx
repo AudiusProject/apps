@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react'
@@ -22,19 +23,20 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  Flex,
   IconAlbum,
   IconFilter,
   IconNote,
-  IconPlaylists
+  IconPlaylists,
+  Skeleton
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
 
-import { CollectionCard } from 'components/collection'
+import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useMainPageHeader } from 'components/nav/mobile/NavContext'
 import TrackList from 'components/track/mobile/TrackList'
@@ -51,7 +53,34 @@ import styles from './LibraryPage.module.css'
 import NewCollectionButton from './NewCollectionButton'
 
 const { TRENDING_PAGE } = route
-const { getCategory } = libraryPageSelectors
+const { getCategory, getTrackSaves, getSelectedCategoryLocalTrackAdds } =
+  libraryPageSelectors
+
+const INITIAL_MOBILE_TRACK_SKELETON_ROWS = 10
+
+type LibraryTrackSkeletonPlaceholderProps = {
+  rowCount: number
+}
+
+const LibraryTrackSkeletonPlaceholder = (
+  props: LibraryTrackSkeletonPlaceholderProps
+) => {
+  const { rowCount } = props
+  const n =
+    rowCount > 0
+      ? Math.min(rowCount, INITIAL_MOBILE_TRACK_SKELETON_ROWS)
+      : INITIAL_MOBILE_TRACK_SKELETON_ROWS
+  return (
+    <Flex column gap='m' p='l' w='100%'>
+      {Array.from({ length: n }).map((_, i) => (
+        <Flex key={i} column gap='xs'>
+          <Skeleton h={16} w='55%' noShimmer />
+          <Skeleton h={14} w='32%' noShimmer />
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
 
 const emptyTabMessages = {
   afterSaved: "Once you have, this is where you'll find them!",
@@ -184,6 +213,12 @@ const TracksLineup = ({
   queuedAndPlaying: boolean
   onTogglePlay: (uid: UID, trackId: ID) => void
 }) => {
+  const trackSaveIds = useSelector(getTrackSaves)
+  const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
+  const expectedTrackCount = useMemo(
+    () => trackSaveIds.length + Object.keys(localTrackAdds).length,
+    [trackSaveIds, localTrackAdds]
+  )
   const [trackEntries] = getFilteredData(tracks.entries)
   const trackAccessMap = useGatedContentAccessMap(trackEntries)
   const trackList = trackEntries
@@ -270,7 +305,7 @@ const TracksLineup = ({
           </div>
         )}
         {isLoadingInitial ? (
-          <LoadingSpinner className={styles.spinner} />
+          <LibraryTrackSkeletonPlaceholder rowCount={expectedTrackCount} />
         ) : null}
         {trackList.length > 0 && (
           <div className={styles.trackListContainer}>
@@ -338,6 +373,17 @@ const AlbumCardLineup = () => {
   const albumCards = albumIds?.map((id) => {
     return <CollectionCard key={id} id={id} size='xs' />
   })
+  const albumCardsWithLoading = isFetchingNextPage
+    ? (albumCards ?? []).concat(
+        Array.from({ length: 6 }, (_, i) => (
+          <CollectionCardSkeleton
+            key={`loading-album-${i}`}
+            size='xs'
+            noShimmer
+          />
+        ))
+      )
+    : albumCards
 
   const noSavedAlbums = !isPending && albumIds?.length === 0 && !filterText
 
@@ -375,15 +421,20 @@ const AlbumCardLineup = () => {
               </div>
             </div>
           )}
-          {isPending ? <LoadingSpinner className={styles.spinner} /> : null}
+          {isPending ? (
+            <div className={styles.skeletonCardGrid}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <CollectionCardSkeleton key={i} size='xs' noShimmer />
+              ))}
+            </div>
+          ) : null}
           {albumIds?.length > 0 ? (
             <div className={styles.cardsContainer}>
               <InfiniteCardLineup
                 hasMore={hasNextPage}
                 loadMore={loadNextPage}
                 cardsClassName={styles.cardLineup}
-                cards={albumCards}
-                isLoadingMore={isFetchingNextPage}
+                cards={albumCardsWithLoading}
               />
             </div>
           ) : null}
@@ -458,6 +509,17 @@ const PlaylistCardLineup = ({
       />
     )
   })
+  const playlistCardsWithLoading = isFetchingNextPage
+    ? (playlistCards ?? []).concat(
+        Array.from({ length: 6 }, (_, i) => (
+          <CollectionCardSkeleton
+            key={`loading-playlist-${i}`}
+            size='xs'
+            noShimmer
+          />
+        ))
+      )
+    : playlistCards
 
   const containerRef = useTabContainerRef({
     resultsLength: playlistIds?.length,
@@ -495,15 +557,20 @@ const PlaylistCardLineup = ({
             </div>
           )}
           <NewCollectionButton collectionType='playlist' />
-          {isPending ? <LoadingSpinner className={styles.spinner} /> : null}
+          {isPending ? (
+            <div className={styles.skeletonCardGrid}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <CollectionCardSkeleton key={i} size='xs' noShimmer />
+              ))}
+            </div>
+          ) : null}
           {playlistIds?.length > 0 ? (
             <div className={styles.cardsContainer}>
               <InfiniteCardLineup
                 hasMore={hasNextPage}
                 loadMore={loadNextPage}
                 cardsClassName={styles.cardLineup}
-                cards={playlistCards}
-                isLoadingMore={isFetchingNextPage}
+                cards={playlistCardsWithLoading}
               />
             </div>
           ) : null}

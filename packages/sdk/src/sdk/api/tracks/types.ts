@@ -194,6 +194,7 @@ export const UploadTrackMetadataSchema = z.object({
   coverArtSizes: z.optional(z.string()),
   isDownloadable: z.optional(z.boolean()),
   isOriginalAvailable: z.optional(z.boolean()),
+  isPlaylistUpload: z.optional(z.boolean()),
   ddexReleaseIds: z.optional(z.record(z.string()).nullable()),
   ddexApp: z.optional(z.string()).nullable(),
   artists: z.optional(z.array(DDEXResourceContributor)).nullable(),

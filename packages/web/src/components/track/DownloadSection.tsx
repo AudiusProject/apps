@@ -231,7 +231,12 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   }
 
   return (
-    <Box border='default' borderRadius='m' css={{ overflow: 'hidden' }}>
+    <Box
+      border='default'
+      borderRadius='m'
+      backgroundColor='white'
+      css={{ overflow: 'hidden' }}
+    >
       <Flex column>
         <Flex
           gap='m'

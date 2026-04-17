@@ -190,6 +190,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   const tracksLoading =
     trackCount > 0 &&
     (tracks.status === Status.LOADING || tracks.status === Status.IDLE)
+  const pageLoading = collectionLoading || tracksLoading
 
   const duration =
     dataSource.reduce(
@@ -299,16 +300,18 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       fromOpacity={1}
       scrollableSearch
     >
-      <Paper column mb='unit-10' css={{ minWidth: 774 }}>
+      <Paper column mb='unit-10'>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
-        {!collectionLoading && isEmpty ? (
+        {!pageLoading && isEmpty ? (
           <EmptyContent
             isOwner={isOwner}
             isAlbum={isAlbum}
             text={customEmptyText}
           />
-        ) : !collectionLoading && dataSource.length === 0 ? (
+        ) : !pageLoading &&
+          tracks.status === Status.SUCCESS &&
+          dataSource.length === 0 ? (
           <NoSearchResultsContent />
         ) : (
           <div className={styles.tableWrapper}>
@@ -318,7 +321,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               wrapperClassName={styles.tracksTableWrapper}
               key={playlistName}
               scrollRef={mainContentRef}
-              loading={collectionLoading}
+              loading={pageLoading}
               userId={accountUserId}
               playing={playing}
               activeIndex={activeIndex}
@@ -356,7 +359,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       </Paper>
 
       {playlistId != null && isOwner && !isAlbum ? (
-        <Flex column gap='2xl' pv='2xl' w='100%' css={{ minWidth: 774 }}>
+        <Flex column gap='2xl' pv='2xl' w='100%'>
           <Divider />
           <SuggestedTracks collectionId={playlistId} />
         </Flex>

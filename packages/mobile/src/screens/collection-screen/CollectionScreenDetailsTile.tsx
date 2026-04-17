@@ -167,12 +167,19 @@ type CollectionScreenDetailsTileProps = {
   | 'contentType'
 >
 
-const recordPlay = (id: Maybe<number>, play = true) => {
+const recordPlay = (
+  id: Maybe<number>,
+  play = true,
+  collectionId?: Maybe<number>
+) => {
   track(
     make({
       eventName: play ? Name.PLAYBACK_PLAY : Name.PLAYBACK_PAUSE,
       id: String(id),
-      source: PlaybackSource.PLAYLIST_PAGE
+      source: PlaybackSource.PLAYLIST_PAGE,
+      ...(play && collectionId != null
+        ? { collectionId: String(collectionId) }
+        : {})
     })
   )
 }
@@ -337,7 +344,7 @@ export const CollectionScreenDetailsTile = ({
         recordPlay(playingTrackId, false)
       } else if (!isPlaying && isQueued) {
         dispatch(tracksActions.play())
-        recordPlay(playingTrackId)
+        recordPlay(playingTrackId, true, numericCollectionId)
         recordPlaylistPlay({
           collectionId: numericCollectionId,
           isAlbum: !!isAlbum,
@@ -347,7 +354,7 @@ export const CollectionScreenDetailsTile = ({
       } else if (trackCount > 0 && firstTrack) {
         dispatch(queueActions.clear({}))
         dispatch(tracksActions.play(firstTrack.uid, { isPreview }))
-        recordPlay(firstTrack.id)
+        recordPlay(firstTrack.id, true, numericCollectionId)
         recordPlaylistPlay({
           collectionId: numericCollectionId,
           isAlbum: !!isAlbum,
@@ -582,13 +589,13 @@ const CollectionTrackList = ({
         recordPlay(id, false)
       } else if (playingUid !== uid) {
         dispatch(tracksActions.play(uid))
-        recordPlay(id)
+        recordPlay(id, true, numericCollectionId)
       } else {
         dispatch(tracksActions.play())
-        recordPlay(id)
+        recordPlay(id, true, numericCollectionId)
       }
     },
-    [dispatch, isPlaying, playingUid]
+    [dispatch, isPlaying, playingUid, numericCollectionId]
   )
   return (
     <TrackList

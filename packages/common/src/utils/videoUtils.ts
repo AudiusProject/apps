@@ -32,9 +32,7 @@ export const parseVideoUrl = (url: string): ParsedVideo | null => {
  * Get the thumbnail URL for a video. Only YouTube provides static thumbnail URLs.
  * Vimeo requires an API call, so returns null.
  */
-export const getVideoThumbnailUrl = (
-  parsed: ParsedVideo
-): string | null => {
+export const getVideoThumbnailUrl = (parsed: ParsedVideo): string | null => {
   if (parsed.platform === 'youtube') {
     return `https://img.youtube.com/vi/${parsed.videoId}/hqdefault.jpg`
   }

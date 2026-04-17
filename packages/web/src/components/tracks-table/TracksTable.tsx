@@ -24,7 +24,7 @@ import {
   IconPause,
   IconImage,
   Flex,
-  IconSparkles,
+  IconUserFollowing,
   IconCart,
   Artwork,
   Text,
@@ -566,7 +566,7 @@ export const TracksTable = ({
           : isContentUSDCPurchaseGated(streamConditions)
             ? IconCart
             : isContentFollowGated(streamConditions)
-              ? IconSparkles
+              ? IconUserFollowing
               : null
       } else {
         Icon = !hasStreamAccess

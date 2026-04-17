@@ -113,7 +113,7 @@ const messages = {
   track: 'track',
   podcast: 'podcast',
   remix: 'remix',
-  specialAccess: 'special access',
+  followersOnly: 'followers only',
   premiumTrack: 'premium track',
   coinGated: 'coin gated',
   generatedWithAi: 'generated with ai',
@@ -275,7 +275,7 @@ export const TrackScreenDetailsTile = ({
     } else if (isTokenGated) {
       headerText = messages.coinGated
     } else {
-      headerText = messages.specialAccess
+      headerText = messages.followersOnly
     }
   } else {
     headerText = messages.track

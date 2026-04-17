@@ -17,7 +17,7 @@ import {
   Flex,
   IconArtistCoin,
   IconCart,
-  IconSparkles
+  IconUserFollowing
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
 import { UserBadges } from 'app/components/user-badges'
@@ -30,7 +30,7 @@ import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
 
 const messages = {
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: 'PREMIUM TRACK',
   coinGated: 'FAN CLUB',
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
@@ -95,7 +95,7 @@ export const TrackDetailsTile = ({
     ? GatedContentType.USDC_PURCHASE
     : isTokenGated
       ? GatedContentType.TOKEN_GATED
-      : GatedContentType.SPECIAL_ACCESS
+      : GatedContentType.FOLLOW_GATED
 
   const headerAttributes: {
     [k in GatedContentType]: {
@@ -105,9 +105,9 @@ export const TrackDetailsTile = ({
     }
   } = useMemo(() => {
     return {
-      [GatedContentType.SPECIAL_ACCESS]: {
-        message: messages.specialAccess,
-        icon: IconSparkles,
+      [GatedContentType.FOLLOW_GATED]: {
+        message: messages.followersOnly,
+        icon: IconUserFollowing,
         color: accentBlue
       },
       [GatedContentType.TOKEN_GATED]: {

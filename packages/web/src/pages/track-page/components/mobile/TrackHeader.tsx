@@ -16,7 +16,7 @@ import {
   Flex,
   IconPause,
   IconPlay,
-  IconSparkles,
+  IconUserFollowing,
   IconCart,
   Box,
   Button,
@@ -55,7 +55,7 @@ const messages = {
   preview: 'PREVIEW',
   pause: 'PAUSE',
   premiumTrack: 'PREMIUM TRACK',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   coinGated: 'COIN GATED',
   generatedWithAi: 'Generated With AI',
   artworkAltText: 'Track Artwork',
@@ -298,8 +298,8 @@ const TrackHeader = ({
     }
 
     if (isStreamGated) {
-      let IconComponent = IconSparkles
-      let titleMessage = messages.specialAccess
+      let IconComponent = IconUserFollowing
+      let titleMessage = messages.followersOnly
       if (isContentUSDCPurchaseGated(streamConditions)) {
         IconComponent = IconCart
         titleMessage = messages.premiumTrack
