@@ -1,5 +1,8 @@
 import { useAllRemixContests } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { Box, Button, Flex, IconRemix, Text } from '@audius/harmony'
+import { Navigate } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
 import { Header } from 'components/header/desktop/Header'
@@ -24,7 +27,16 @@ const GRID_SKELETON_COUNT = 11
 
 export const ContestsPage = () => {
   const isMobile = useIsMobile()
-  const { data, isPending, isError, isSuccess } = useAllRemixContests()
+  const { isEnabled: isContestsPageEnabled, isLoaded: isFlagLoaded } =
+    useFeatureFlag(FeatureFlags.CONTESTS_PAGE)
+  const { data, isPending, isError, isSuccess } = useAllRemixContests(
+    undefined,
+    { enabled: isContestsPageEnabled }
+  )
+
+  if (isFlagLoaded && !isContestsPageEnabled) {
+    return <Navigate to='/' replace />
+  }
 
   const contests = data ?? []
   const showSkeletons = isPending || (!isSuccess && !isError)

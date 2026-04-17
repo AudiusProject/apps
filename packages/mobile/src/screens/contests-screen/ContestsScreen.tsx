@@ -1,6 +1,8 @@
 import React from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 
 import { Flex, IconRemix, Text } from '@audius/harmony-native'
 import { ContestCard } from 'app/components/contest-card'
@@ -12,9 +14,14 @@ const messages = {
 }
 
 export const ContestsScreen = () => {
-  const { data, isSuccess } = useAllRemixContests()
+  const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
+    FeatureFlags.CONTESTS_PAGE
+  )
+  const { data, isSuccess } = useAllRemixContests(undefined, {
+    enabled: isContestsPageEnabled
+  })
 
-  const contests = data ?? []
+  const contests = isContestsPageEnabled ? (data ?? []) : []
   const [heroTrackId, ...gridTrackIds] = contests
   const showEmpty = isSuccess && contests.length === 0
 
