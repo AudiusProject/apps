@@ -42,8 +42,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: -4px;
-  width: 8px;
+  right: -6px;
+  width: 12px;
   z-index: 15;
   transition: background-color 0.15s ease;
 }

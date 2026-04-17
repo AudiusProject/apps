@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 
 import { Client } from '@audius/common/models'
 import cn from 'classnames'
@@ -7,8 +13,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { getClient } from 'utils/clientUtil'
 
 import styles from './Navigator.module.css'
-import { NavSidebarContext } from './desktop/NavSidebarContext'
 import { LeftNav } from './desktop/LeftNav'
+import { NavSidebarContext } from './desktop/NavSidebarContext'
 import ConnectedNavBar from './mobile/ConnectedNavBar'
 
 // Extend Window interface for React Native WebView
@@ -44,8 +50,13 @@ const Navigator = ({ className }: OwnProps) => {
   })
   const [isDragging, setIsDragging] = useState(false)
 
+  // Width is always the committed state — no intermediate values during drag.
+  // The sidebar stays put while dragging; on release it animates to the new state.
+  const navWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
+
   const dragStartX = useRef(0)
   const dragStartCollapsed = useRef(false)
+  const previousNavWidth = useRef(navWidth)
 
   const setIsCollapsed = useCallback((collapsed: boolean) => {
     setIsCollapsedState(collapsed)
@@ -54,17 +65,30 @@ const Navigator = ({ className }: OwnProps) => {
     } catch {}
   }, [])
 
-  // Width is always the committed state — no intermediate values during drag.
-  // The sidebar stays put while dragging; on release it animates to the new state.
-  const navWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
-
-  // Update --nav-width on the app element before paint to avoid flash
+  // Update app-level nav vars before paint. When nav width changes, use FLIP:
+  // commit the new layout width once, then animate a transform back to zero.
   useLayoutEffect(() => {
     const appEl = document.getElementById('webPlayer')
     if (!appEl) return
+
+    const previousWidth = previousNavWidth.current
+    const didWidthChange = previousWidth !== navWidth
+    const shiftDelta = previousWidth - navWidth
+
     appEl.style.setProperty('--nav-width', `${navWidth}px`)
     appEl.style.setProperty('--nav-width-minus-border', `${navWidth - 1}px`)
-  }, [navWidth])
+
+    if (!isMobile && didWidthChange) {
+      appEl.style.setProperty('--nav-shift', `${shiftDelta}px`)
+      // Flush the starting transform before animating back to zero.
+      appEl.getBoundingClientRect()
+      appEl.style.setProperty('--nav-shift', '0px')
+    } else {
+      appEl.style.setProperty('--nav-shift', '0px')
+    }
+
+    previousNavWidth.current = navWidth
+  }, [isMobile, navWidth])
 
   const handleDragStart = useCallback(
     (e: React.MouseEvent) => {
@@ -87,9 +111,11 @@ const Navigator = ({ className }: OwnProps) => {
         // Treat as a click — toggle the sidebar
         commit = !dragStartCollapsed.current
       } else {
+        // was collapsed: stay unless dragged right past threshold
+        // was expanded: collapse only if dragged left past threshold
         commit = dragStartCollapsed.current
-          ? delta <= SNAP_DELTA   // was collapsed: stay unless dragged right past threshold
-          : delta < -SNAP_DELTA  // was expanded: collapse only if dragged left past threshold
+          ? delta <= SNAP_DELTA
+          : delta < -SNAP_DELTA
       }
       setIsCollapsed(commit)
       setIsDragging(false)

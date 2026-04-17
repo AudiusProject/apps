@@ -98,7 +98,8 @@ export const NotificationsButton = ({ size }: NotificationsButtonProps) => {
     handleToggleNotificationPanel,
     isOpen,
     shouldShowCount,
-    onOpen
+    onOpen,
+    size
   ])
 
   return (

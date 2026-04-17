@@ -38,7 +38,9 @@ export const ProfileCompletionPanel = () => {
 
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
-      return localStorage.getItem('profile-completion-panel-dismissed') === 'true'
+      return (
+        localStorage.getItem('profile-completion-panel-dismissed') === 'true'
+      )
     } catch {
       return false
     }

@@ -17,10 +17,12 @@ import { Link, useLocation } from 'react-router'
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 
 import { NavHeaderButton } from './NavHeaderButton'
-import { NotificationsButton } from './NotificationsButton'
 import { useNavSidebar } from './NavSidebarContext'
+import { NotificationsButton } from './NotificationsButton'
 
 const { HOME_PAGE, SETTINGS_PAGE } = route
+const EXPANDED_HEADER_WIDTH = 240
+const COLLAPSED_HEADER_WIDTH = 64
 
 const messages = {
   homeLink: 'Go to Home',
@@ -81,13 +83,13 @@ export const NavHeader = () => {
         direction='column'
         backgroundColor='surface1'
         flex={0}
-        css={{ minHeight: 58 }}
+        css={{ minHeight: 58, width: COLLAPSED_HEADER_WIDTH, flexShrink: 0 }}
       >
         {/* Row 1: actions (settings + bell) */}
         <Flex
           alignItems='center'
-          justifyContent='space-around'
-          ph='xs'
+          justifyContent='center'
+          gap='xs'
           css={{ height: 26, paddingTop: 4 }}
         >
           <RestrictedLink to={SETTINGS_PAGE} restriction='account'>
@@ -101,11 +103,7 @@ export const NavHeader = () => {
           <NotificationsButton size='m' />
         </Flex>
         {/* Row 2: Audius triangle logo */}
-        <Flex
-          alignItems='center'
-          justifyContent='center'
-          css={{ height: 32 }}
-        >
+        <Flex alignItems='center' justifyContent='center' css={{ height: 32 }}>
           <Link to={HOME_PAGE} aria-label={messages.homeLink}>
             <IconAudiusLogo color='subdued' size='m' />
           </Link>
@@ -122,7 +120,7 @@ export const NavHeader = () => {
       pv='l'
       ph='m'
       flex={0}
-      css={{ minHeight: 58 }}
+      css={{ minHeight: 58, width: EXPANDED_HEADER_WIDTH, flexShrink: 0 }}
     >
       <Link to={HOME_PAGE} aria-label={messages.homeLink}>
         <IconAudiusLogoHorizontalNew color='subdued' size='m' width='auto' />

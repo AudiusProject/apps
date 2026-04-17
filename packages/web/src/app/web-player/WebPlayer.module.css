@@ -12,16 +12,10 @@
   align-items: stretch;
 }
 
-/* Register --nav-width as an animatable length so consumers (margin-left, left) transition */
-@property --nav-width {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 240px;
-}
-
 .app {
   --nav-width: 240px;
   --nav-width-minus-border: 239px;
+  --nav-shift: 0px;
   --mobile-min-width: 280px;
   --play-bar-height: 88px;
   position: relative;
@@ -29,12 +23,6 @@
   height: 100%;
   display: flex;
   overflow: hidden;
-  transition: --nav-width 0.2s ease;
-}
-
-/* Suppress --nav-width transition during drag so snaps stay instant */
-.app[data-nav-dragging='true'] {
-  transition: none;
 }
 
 .app.mobileApp {
@@ -47,12 +35,16 @@
   left: calc(var(--nav-width) + 16px);
   top: 56px;
   z-index: 5;
+  transform: translateX(var(--nav-shift));
+  transition: transform 0.2s ease;
 }
 
 .mainContentWrapper {
   margin-left: var(--nav-width);
   margin-bottom: 88px;
   width: 100%;
+  transform: translateX(var(--nav-shift));
+  transition: transform 0.2s ease;
   /* Use theme background - ensures classic-dark/default-dark etc. apply correctly */
   background-color: var(--harmony-background);
   /* Show scrollbar always so the page doesn't jump around. */

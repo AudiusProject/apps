@@ -98,7 +98,12 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
   if (isCollapsed && leftIcon) {
     return (
       <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
-        <CollapsedNavItem icon={leftIcon} isSelected={isSelected} disabled={disabled} hasNotification={hasNotification} />
+        <CollapsedNavItem
+          icon={leftIcon}
+          isSelected={isSelected}
+          disabled={disabled}
+          hasNotification={hasNotification}
+        />
       </NavLink>
     )
   }

@@ -114,7 +114,8 @@ const SignedInAccountDetails = ({
   const { isCollapsed } = useNavSidebar()
   const { color } = useTheme()
   const profileLink = profilePage(handle)
-  const [isAccountSwitcherVisible, setIsAccountSwitcherVisible] = useState(false)
+  const [isAccountSwitcherVisible, setIsAccountSwitcherVisible] =
+    useState(false)
 
   return (
     <Flex direction='column' pb='unit1' w='100%'>

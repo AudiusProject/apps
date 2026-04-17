@@ -44,7 +44,9 @@ type NowPlayingArtworkTileProps = {
 
 const isSmall = (size: number) => size < 100
 
-export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps) => {
+export const NowPlayingArtworkTile = ({
+  size = 208
+}: NowPlayingArtworkTileProps) => {
   const dispatch = useDispatch()
   const location = useLocation()
   const { pathname } = location

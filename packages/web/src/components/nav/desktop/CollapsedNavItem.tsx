@@ -1,5 +1,4 @@
 import { Flex, NotificationCount, useTheme } from '@audius/harmony'
-
 import type { IconComponent } from '@audius/harmony'
 
 type CollapsedNavItemProps = {
@@ -30,7 +29,10 @@ export const CollapsedNavItem = ({
       alignItems='center'
       justifyContent='center'
       pv='xs'
-      css={{ cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.5 : 1 }}
+      css={{
+        cursor: disabled ? 'default' : 'pointer',
+        opacity: disabled ? 0.5 : 1
+      }}
       onClick={onClick}
     >
       <Flex

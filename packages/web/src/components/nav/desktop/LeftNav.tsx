@@ -43,7 +43,8 @@ export const LeftNav = (props: OwnProps) => {
   const { isCollapsed } = useNavSidebar()
   const { data: accountStatus } = useAccountStatus()
   const [navBodyContainerMeasureRef, navBodyContainerBoundaries] = useMeasure({
-    polyfill: ResizeObserver
+    polyfill: ResizeObserver,
+    debounce: { scroll: 0, resize: 80 }
   })
   const scrollbarRef = useRef<HTMLElement | null>(null)
   const [dragScrollingDirection, setDragScrollingDirection] = useState<
