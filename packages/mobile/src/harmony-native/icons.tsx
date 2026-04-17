@@ -161,7 +161,7 @@ export { default as IconPin } from '@audius/harmony/src/assets/icons/Pin.svg'
 export { default as IconPaperAirplane } from '@audius/harmony/src/assets/icons/PaperAirplane.svg'
 export { default as IconArrowUpToLine } from '@audius/harmony/src/assets/icons/ArrowUpToLine.svg'
 export { default as IconJupiterLogo } from '@audius/harmony/src/assets/icons/JupiterLogo.svg'
-export { default as IconArtistCoin } from '@audius/harmony/src/assets/icons/ArtistCoin.svg'
+export { default as IconFanClub } from '@audius/harmony/src/assets/icons/FanClub.svg'
 export { default as IconCoinGatedLabel } from '@audius/harmony/src/assets/icons/CoinGatedLabel.svg'
 
 // Two Tone / Special Styling

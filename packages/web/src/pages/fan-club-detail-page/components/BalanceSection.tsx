@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
   useCoinBalanceBreakdown,
   useCurrentAccountUser,
@@ -415,7 +415,7 @@ type FanClubMintProps = {
 }
 
 const BalanceSectionContent = ({ mint }: FanClubMintProps) => {
-  const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
+  const { data: coin, isPending: coinsLoading } = useFanClub(mint)
   const { data: tokenBalance, isLoading: tokenBalanceLoading } = useCoinBalance(
     { mint }
   )

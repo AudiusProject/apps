@@ -1,5 +1,5 @@
 import {
-  getArtistCoinQueryKey,
+  getFanClubQueryKey,
   useCurrentAccountUser,
   useQueryContext,
   pollUntilAudioBalanceChanges
@@ -97,16 +97,16 @@ export const useClaimFees = (
       // Call the original onError if provided
       reportToSentry({
         error,
-        feature: Feature.ArtistCoins,
-        name: 'Artist coin fees claim error',
+        feature: Feature.FanClubs,
+        name: 'Fan club fees claim error',
         additionalInfo: {
           ...params
         }
       })
     },
     onSuccess: async (data, variables, context) => {
-      // Invalidate the artist coin query to refetch the updated fees
-      const queryKey = getArtistCoinQueryKey(variables.tokenMint)
+      // Invalidate the fan club query to refetch the updated fees
+      const queryKey = getFanClubQueryKey(variables.tokenMint)
       await queryClient.setQueryData(queryKey, (oldData) => {
         if (!oldData) return oldData
         return {

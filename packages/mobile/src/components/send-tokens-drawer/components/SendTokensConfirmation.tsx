@@ -1,7 +1,4 @@
-import {
-  useArtistCoin,
-  transformArtistCoinToTokenInfo
-} from '@audius/common/api'
+import { useFanClub, transformFanClubToTokenInfo } from '@audius/common/api'
 import type { User } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { FixedDecimal } from '@audius/fixed-decimal'
@@ -49,8 +46,8 @@ export const SendTokensConfirmation = ({
   onBack
 }: SendTokensConfirmationProps) => {
   // Get token data
-  const { data: coin } = useArtistCoin(mint)
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const { data: coin } = useFanClub(mint)
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   const profilePicture = useProfilePicture({
     userId: selectedUser?.user_id,

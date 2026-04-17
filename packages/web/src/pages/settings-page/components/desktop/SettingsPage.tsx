@@ -4,7 +4,7 @@ import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
-import { API_TERMS, ARTIST_COIN_TERMS } from '@audius/common/src/utils/route'
+import { API_TERMS, FAN_CLUB_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
   EmailFrequency,
@@ -627,11 +627,11 @@ export const SettingsPage = () => {
           -{' '}
           <Link
             className={styles.link}
-            to={ARTIST_COIN_TERMS}
+            to={FAN_CLUB_TERMS}
             target='_blank'
             rel='noreferrer'
           >
-            {settingsMessages.artistCoinTerms}
+            {settingsMessages.fanClubTerms}
           </Link>
         </span>
         {!isManagedAccount ? (

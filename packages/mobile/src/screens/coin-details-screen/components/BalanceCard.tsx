@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import {
   useCoinBalance,
-  useArtistCoin,
+  useFanClub,
   useCoinBalanceBreakdown
 } from '@audius/common/api'
 import {
@@ -286,7 +286,7 @@ const HasBalanceState = ({
 export const BalanceCard = ({ mint }: { mint: string }) => {
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const { data: coin, isPending: coinsLoading } = useArtistCoin(mint)
+  const { data: coin, isPending: coinsLoading } = useFanClub(mint)
   const { data: tokenBalance } = useCoinBalance({ mint })
   const initialTab = useBuySellInitialTab()
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS

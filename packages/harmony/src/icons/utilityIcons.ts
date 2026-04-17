@@ -7,7 +7,6 @@ import IconArrowLeftSVG from '../assets/icons/ArrowLeft.svg'
 import IconArrowRightSVG from '../assets/icons/ArrowRight.svg'
 import IconArrowRotateSVG from '../assets/icons/ArrowRotate.svg'
 import IconArrowUpToLineSVG from '../assets/icons/ArrowUpToLine.svg'
-import IconArtistCoinSVG from '../assets/icons/ArtistCoin.svg'
 import IconBlogSVG from '../assets/icons/Blog.svg'
 import IconBoxHeartSVG from '../assets/icons/BoxHeart.svg'
 import IconCalendarDaySVG from '../assets/icons/CalendarDay.svg'
@@ -46,6 +45,7 @@ import IconEmbedSVG from '../assets/icons/Embed.svg'
 import IconErrorSVG from '../assets/icons/Error.svg'
 import IconExploreSVG from '../assets/icons/Explore.svg'
 import IconExternalLinkSVG from '../assets/icons/ExternalLink.svg'
+import IconFanClubSVG from '../assets/icons/FanClub.svg'
 import IconFeedSVG from '../assets/icons/Feed.svg'
 import IconFilterSVG from '../assets/icons/Filter.svg'
 import IconFolderSVG from '../assets/icons/Folder.svg'
@@ -309,5 +309,5 @@ export const IconPlaybackPause = IconPlaybackPauseSVG as IconComponent
 export const IconPlaybackPlay = IconPlaybackPlaySVG as IconComponent
 export const IconQrCode = IconQrCodeSVG as IconComponent
 export const IconJupiterLogo = IconJupiterLogoSVG as IconComponent
-export const IconArtistCoin = IconArtistCoinSVG as IconComponent
+export const IconFanClub = IconFanClubSVG as IconComponent
 export const IconCoinGatedLabel = IconCoinGatedLabelSVG as IconComponent

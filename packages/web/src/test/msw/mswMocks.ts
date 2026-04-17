@@ -9,12 +9,12 @@ import { developmentConfig, HashId } from '@audius/sdk'
 import { http, HttpResponse } from 'msw'
 
 import { queryClient } from 'services/query-client'
+import { testCollection } from 'test/mocks/fixtures/collections'
 import {
-  mockArtistCoin,
+  mockFanClub,
   mockUserCoinHasBalance,
   mockCoinMembers
-} from 'test/mocks/fixtures/artistCoins'
-import { testCollection } from 'test/mocks/fixtures/collections'
+} from 'test/mocks/fixtures/fanClubs'
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 
@@ -105,14 +105,14 @@ export const mockEvents = (/* todo: */) =>
   )
 
 /**
- * Artist Coins
+ * Fan Clubs
  */
-export const mockCoinByMint = (coin: typeof mockArtistCoin) =>
+export const mockCoinByMint = (coin: typeof mockFanClub) =>
   http.get(`${apiEndpoint}/v1/coins/${coin.mint}`, () =>
     HttpResponse.json({ data: coin })
   )
 
-export const mockCoinByTicker = (coin: typeof mockArtistCoin) =>
+export const mockCoinByTicker = (coin: typeof mockFanClub) =>
   http.get(`${apiEndpoint}/v1/coins/ticker/${coin.ticker}`, () =>
     HttpResponse.json({ data: coin })
   )
@@ -140,7 +140,7 @@ export const mockCoinMembersList = (
   )
 export const mockUserCreatedCoin = (
   userId: string,
-  coin: typeof mockArtistCoin
+  coin: typeof mockFanClub
 ) => {
   return http.get(`${apiEndpoint}/v1/coins`, ({ request }) => {
     const url = new URL(request.url)

@@ -138,8 +138,8 @@ export const walletMessages = {
     }
   },
 
-  // Fan clubs (artist coin tokens)
-  artistCoins: {
+  // Fan clubs (fan club tokens)
+  fanClubs: {
     title: 'Discover Fan Clubs',
     searchPlaceholder: 'Search fan clubs',
     noCoins: 'No results found',

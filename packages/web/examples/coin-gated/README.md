@@ -56,4 +56,4 @@ Vite + React app that lets users browse and stream **coin-gated tracks** on Audi
 
 ## Keywords (for search / AI)
 
-Coin-gated, token-gated, artist coin, Phantom wallet, Solana wallet, OAuth, PKCE, streaming, getCoinByTicker, getTracksByUser, streamTrack, getUserCoin, getWalletCoins, Audius SDK, web example, React Query.
+Coin-gated, token-gated, fan club, Phantom wallet, Solana wallet, OAuth, PKCE, streaming, getCoinByTicker, getTracksByUser, streamTrack, getUserCoin, getWalletCoins, Audius SDK, web example, React Query.

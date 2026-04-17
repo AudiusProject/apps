@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import type { AccessConditions } from '@audius/common/models'
 import {
@@ -26,7 +26,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
   const [{ value: streamConditions }] =
     useField<Nullable<AccessConditions>>('stream_conditions')
 
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     isContentTokenGated(streamConditions)
       ? streamConditions.token_gate.token_mint
       : ''

@@ -47,7 +47,7 @@ const messages = {
   unlockingFollowGatedSuffix: '!',
   lockedTokenGatedPrefix: 'You must hold at least ',
   lockedTokenGatedSuffix: ' in a connected wallet.',
-  buyArtistCoin: 'Buy Coins',
+  buyFanClub: 'Buy Coins',
   lockedUSDCPurchase: 'Unlock access with a one-time purchase!'
 }
 
@@ -298,7 +298,7 @@ export const DetailsTileNoAccess = (props: DetailsTileNoAccessProps) => {
             onPress={handleBuyTokenPress}
             gradient={color.special.coinGradient}
           >
-            {messages.buyArtistCoin}
+            {messages.buyFanClub}
           </Button>
         </Flex>
       )

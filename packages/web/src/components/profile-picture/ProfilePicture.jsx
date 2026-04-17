@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useMemo } from 'react'
 
-import { useArtistCreatedCoin } from '@audius/common/api'
+import { useArtistCreatedFanClub } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { useTheme } from '@audius/harmony'
@@ -44,7 +44,7 @@ const ProfilePicture = ({
   const [processing, setProcessing] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const { data: ownedCoin } = useArtistCreatedCoin(userId)
+  const { data: ownedCoin } = useArtistCreatedFanClub(userId)
   const navigate = useNavigate()
 
   const handleCoinClick = () => {
@@ -53,7 +53,7 @@ const ProfilePicture = ({
     }
   }
 
-  const shouldShowArtistCoinBadge = useMemo(() => {
+  const shouldShowFanClubBadge = useMemo(() => {
     if (!ownedCoin?.mint || !ownedCoin?.logoUri) {
       return false
     }
@@ -130,7 +130,7 @@ const ProfilePicture = ({
             source='ProfilePicture'
           />
         ) : null}
-        {shouldShowArtistCoinBadge && (
+        {shouldShowFanClubBadge && (
           <TokenIcon
             logoURI={ownedCoin?.logoUri}
             css={{

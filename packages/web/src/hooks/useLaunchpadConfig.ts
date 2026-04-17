@@ -8,7 +8,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 import {
   AUDIO_DECIMALS,
   TOKEN_DECIMALS
-} from 'pages/artist-coins-launchpad-page/constants'
+} from 'pages/fan-clubs-launchpad-page/constants'
 
 type LaunchpadConfigHookResponse = {
   maxAudioInputAmount: number

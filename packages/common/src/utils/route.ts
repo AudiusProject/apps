@@ -8,8 +8,8 @@ import { convertGenreLabelToValue, type GenreLabel } from './genres'
 // External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
-export const ARTIST_COIN_TERMS = '/legal/artist-coin-terms'
-export const ARTIST_COIN_ACCEPTABLE_USE = '/legal/artist-coin-acceptable-use'
+export const FAN_CLUB_TERMS = '/legal/fan-club-terms'
+export const FAN_CLUB_ACCEPTABLE_USE = '/legal/fan-club-acceptable-use'
 export const API_TERMS = '/legal/api-terms'
 export const DOWNLOAD_START_LINK = '/download?start_download=true'
 export const DOWNLOAD_LINK = '/download'
@@ -220,8 +220,8 @@ export const AUDIUS_DEV_STAKER_LINK = 'https://audius.org/protocol'
 export const AUDIUS_HOT_AND_NEW =
   '/audius/playlist/hot-new-on-audius-%F0%9F%94%A5-4281'
 export const AUDIUS_HELP_LINK = 'https://help.audius.co/'
-export const AUDIUS_ARTIST_COIN_HELP_LINK =
-  'https://help.audius.co/product/artist-coins'
+export const AUDIUS_FAN_CLUB_HELP_LINK =
+  'https://help.audius.co/product/fan-clubs'
 
 export const AUDIUS_CAREERS_LINK = 'https://www.tikilabs.com/careers'
 export const AUDIUS_PODCAST_LINK =
@@ -229,8 +229,8 @@ export const AUDIUS_PODCAST_LINK =
 export const AUDIUS_CYPHER_LINK = 'https://discord.gg/audius'
 export const AUDIUS_API_LINK = 'https://audius.org/api'
 
-export const AUDIUS_ARTIST_COINS_HELP_LINK =
-  'https://help.audius.co/product/artist-coins'
+export const AUDIUS_FAN_CLUBS_HELP_LINK =
+  'https://help.audius.co/product/fan-clubs'
 
 // Birdeye Links
 export const BIRDEYE_BASE_URL = 'https://birdeye.so'
@@ -272,8 +272,8 @@ export const publicSiteRoutes = [
   TERMS_OF_SERVICE,
   PRIVACY_POLICY,
   API_TERMS,
-  ARTIST_COIN_TERMS,
-  ARTIST_COIN_ACCEPTABLE_USE,
+  FAN_CLUB_TERMS,
+  FAN_CLUB_ACCEPTABLE_USE,
   DOWNLOAD_LINK,
   AUTH_REDIRECT
 ]

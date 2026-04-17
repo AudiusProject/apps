@@ -12,10 +12,10 @@ import {
 } from 'vitest'
 
 import {
-  mockArtistCoin,
+  mockFanClub,
   mockUserCoinHasBalance,
   mockUserCoinNoBalance
-} from 'test/mocks/fixtures/artistCoins'
+} from 'test/mocks/fixtures/fanClubs'
 import {
   artistUser,
   generateRandomTestUsers,
@@ -51,7 +51,7 @@ vi.mock('app/ReownAppKitModal', () => ({
 }))
 
 export function renderFanClubDetailPage(
-  coin: typeof mockArtistCoin = mockArtistCoin,
+  coin: typeof mockFanClub = mockFanClub,
   options?: RenderOptions
 ) {
   const randomUsers = generateRandomTestUsers(10)
@@ -128,7 +128,7 @@ const assertFanClubInsightsSection = async () => {
     within(copyAddressRow).getByRole('button', { name: /copy coin address/i })
   ).toBeInTheDocument()
   expect(
-    within(copyAddressRow).getByText(shortenSPLAddress(mockArtistCoin.mint))
+    within(copyAddressRow).getByText(shortenSPLAddress(mockFanClub.mint))
   ).toBeInTheDocument()
 }
 
@@ -165,7 +165,7 @@ const assertHeader = async () => {
 
   // Check that the coin name is rendered in the header (h1)
   const headings = screen.getAllByRole('heading', {
-    name: mockArtistCoin.name
+    name: mockFanClub.name
   })
   expect(headings.length).toBeGreaterThan(0)
   expect(headings[0]).toBeInTheDocument()
@@ -295,10 +295,8 @@ const assertFanClubInfoSection = async ({
   await assertFanClubHeroSection()
 
   // Check for coin description
-  if (mockArtistCoin.description) {
-    expect(
-      within(hero).getByText(mockArtistCoin.description)
-    ).toBeInTheDocument()
+  if (mockFanClub.description) {
+    expect(within(hero).getByText(mockFanClub.description)).toBeInTheDocument()
   }
 
   // Check for social links (link_2, link_3, link_4)
@@ -306,32 +304,32 @@ const assertFanClubInfoSection = async ({
     hidden: true
   })
 
-  if (mockArtistCoin.link_2) {
+  if (mockFanClub.link_2) {
     const link2 = allLinks.find(
-      (link) => link.getAttribute('href') === mockArtistCoin.link_2
+      (link) => link.getAttribute('href') === mockFanClub.link_2
     )
     expect(link2).toBeDefined()
-    expect(link2).toHaveAttribute('href', mockArtistCoin.link_2)
+    expect(link2).toHaveAttribute('href', mockFanClub.link_2)
   }
 
-  if (mockArtistCoin.link_3) {
+  if (mockFanClub.link_3) {
     const twitterLink = allLinks.find(
-      (link) => link.getAttribute('href') === mockArtistCoin.link_3
+      (link) => link.getAttribute('href') === mockFanClub.link_3
     )
     expect(twitterLink).toBeDefined()
-    expect(twitterLink).toHaveAttribute('href', mockArtistCoin.link_3)
+    expect(twitterLink).toHaveAttribute('href', mockFanClub.link_3)
   }
 
-  if (mockArtistCoin.link_4) {
+  if (mockFanClub.link_4) {
     const instagramLink = allLinks.find(
-      (link) => link.getAttribute('href') === mockArtistCoin.link_4
+      (link) => link.getAttribute('href') === mockFanClub.link_4
     )
     expect(instagramLink).toBeDefined()
-    expect(instagramLink).toHaveAttribute('href', mockArtistCoin.link_4)
+    expect(instagramLink).toHaveAttribute('href', mockFanClub.link_4)
   }
 
   // Check for website "Learn More" button
-  if (mockArtistCoin.website) {
+  if (mockFanClub.website) {
     const learnMoreButton = within(hero).getByRole('button', {
       name: /learn more/i
     })
@@ -420,11 +418,11 @@ describe('FanClubDetailPage', () => {
     mswServer.use(
       mockUserCoinsByMint(
         nonArtistUser.id,
-        mockArtistCoin.mint,
+        mockFanClub.mint,
         mockUserCoinNoBalance
       )
     )
-    renderFanClubDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockFanClub)
 
     await assertHeader()
 
@@ -443,11 +441,11 @@ describe('FanClubDetailPage', () => {
     mswServer.use(
       mockUserCoinsByMint(
         nonArtistUser.id,
-        mockArtistCoin.mint,
+        mockFanClub.mint,
         mockUserCoinHasBalance
       )
     )
-    renderFanClubDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockFanClub)
 
     await assertHeader()
 
@@ -462,7 +460,7 @@ describe('FanClubDetailPage', () => {
   })
 
   it('Unauthed User', async () => {
-    renderFanClubDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockFanClub)
 
     await assertHeader()
 
@@ -482,11 +480,11 @@ describe('FanClubDetailPage', () => {
     mswServer.use(
       mockUserCoinsByMint(
         artistUser.id,
-        mockArtistCoin.mint,
+        mockFanClub.mint,
         mockUserCoinNoBalance
       )
     )
-    renderFanClubDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockFanClub)
     await assertHeader()
 
     await assertFanClubBalanceSection({
@@ -505,11 +503,11 @@ describe('FanClubDetailPage', () => {
     mswServer.use(
       mockUserCoinsByMint(
         artistUser.id,
-        mockArtistCoin.mint,
+        mockFanClub.mint,
         mockUserCoinHasBalance
       )
     )
-    renderFanClubDetailPage(mockArtistCoin)
+    renderFanClubDetailPage(mockFanClub)
 
     await assertHeader()
 
@@ -526,9 +524,9 @@ describe('FanClubDetailPage', () => {
   })
   it('Coin Creator - has unclaimed fees from both DBC & DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
-      ...mockArtistCoin,
+      ...mockFanClub,
       artist_fees: {
-        ...mockArtistCoin.artist_fees,
+        ...mockFanClub.artist_fees,
         unclaimed_damm_v2_fees: 1000000000,
         total_damm_v2_fees: 1000000000,
         unclaimed_fees: 703028314 + 1000000000,
@@ -553,9 +551,9 @@ describe('FanClubDetailPage', () => {
   })
   it('Coin Creator - has unclaimed fees from just DAMM v2', async () => {
     const mockCoinWithDammV2Fees = {
-      ...mockArtistCoin,
+      ...mockFanClub,
       artist_fees: {
-        ...mockArtistCoin.artist_fees,
+        ...mockFanClub.artist_fees,
         unclaimed_dbc_fees: 0,
         total_dbc_fees: 0,
         unclaimed_damm_v2_fees: 110300000,

@@ -1,5 +1,5 @@
 import {
-  useArtistCoinByTicker,
+  useFanClubByTicker,
   useCurrentUserId,
   useUser
 } from '@audius/common/api'
@@ -98,7 +98,7 @@ export const FanClubDetailPage = () => {
     isPending: coinPending,
     isError,
     isSuccess
-  } = useArtistCoinByTicker({ ticker: formattedTicker })
+  } = useFanClubByTicker({ ticker: formattedTicker })
 
   const { data: owner } = useUser(coin?.ownerId, {
     enabled: !!coin?.ownerId

@@ -21,11 +21,11 @@ import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGenerate
 
 import ChatTail from '../../../assets/img/ChatTail.svg'
 
-import { ArtistCoinHeader } from './ArtistCoinHeader'
 import { CONTENT_EXPANDED_LISTENER_KEY } from './ChatMessageList'
 import styles from './ChatMessageListItem.module.css'
 import { ChatMessagePlaylist } from './ChatMessagePlaylist'
 import { ChatMessageTrack } from './ChatMessageTrack'
+import { FanClubHeader } from './FanClubHeader'
 import { LinkPreview } from './LinkPreview'
 import { ReactionPopupMenu } from './ReactionPopupMenu'
 
@@ -188,10 +188,7 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       >
         <Flex className={styles.bubbleCorners}>
           <Flex column>
-            <ArtistCoinHeader
-              userId={senderUserId}
-              audience={message.audience}
-            />
+            <FanClubHeader userId={senderUserId} audience={message.audience} />
             {isCollectionUrl(linkValue) ? (
               <ChatMessagePlaylist
                 className={styles.unfurl}

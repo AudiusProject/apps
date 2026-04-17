@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { useArtistCoin, useArtistCoinMembers } from '@audius/common/api'
+import { useFanClub, useFanClubMembers } from '@audius/common/api'
 import {
   coinLeaderboardUserListActions,
   coinLeaderboardUserListSelectors
@@ -22,10 +22,10 @@ export const CoinLeaderboardScreen = () => {
   const { params } = useRoute<'CoinLeaderboard'>()
   const { mint } = params
   const reduxMint = useSelector(coinLeaderboardUserListSelectors.getMint)
-  const { data: coin } = useArtistCoin(reduxMint ?? mint)
+  const { data: coin } = useFanClub(reduxMint ?? mint)
 
   const { data, isFetchingNextPage, fetchNextPage, isPending } =
-    useArtistCoinMembers({ mint: reduxMint ?? mint })
+    useFanClubMembers({ mint: reduxMint ?? mint })
 
   useEffect(() => {
     if (mint) {

@@ -2,7 +2,7 @@ import { useCallback, useContext, useMemo, type ReactNode } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import {
-  useArtistCoin,
+  useFanClub,
   useUser,
   useUserCoins,
   useCurrentAccountUser
@@ -78,7 +78,7 @@ const toastMessages = coinDetailsMessages.toasts
 const BANNER_HEIGHT = 160
 const DISCOVERY_COVER_HEIGHT = 96
 
-const fanClubCardMessages = walletMessages.artistCoins
+const fanClubCardMessages = walletMessages.fanClubs
 
 // Minimum claimable fee amount (0.01 $AUDIO = 10^6 in smallest denomination with 8 decimals)
 // Below this threshold is considered "dust" and not worth claiming due to transaction fees
@@ -236,7 +236,7 @@ type FanClubBannerSectionProps = {
 }
 
 export const FanClubBannerSection = ({ mint }: FanClubBannerSectionProps) => {
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading } = useFanClub(mint)
   const theme = useTheme()
   const { spacing } = theme
   const { ownerId: ownerIdRaw } = coin ?? {}
@@ -554,7 +554,7 @@ export const FanClubInfoSection = ({
 
   const { onOpen: openClaimVestedCoinsModal } = useClaimVestedCoinsModal()
 
-  const { data: coin, isLoading: isArtistCoinLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading: isFanClubLoading } = useFanClub(mint)
 
   const { image: ownerCoverPhoto } = useCoverPhoto({
     userId: coin?.ownerId,
@@ -591,8 +591,8 @@ export const FanClubInfoSection = ({
     onError: (error) => {
       reportToSentry({
         error,
-        feature: Feature.ArtistCoins,
-        name: 'Failed to claim artist coin fees',
+        feature: Feature.FanClubs,
+        name: 'Failed to claim fan club fees',
         additionalInfo: {
           coin,
           tokenMint: mint,
@@ -632,8 +632,8 @@ export const FanClubInfoSection = ({
       onError: (error) => {
         reportToSentry({
           error,
-          feature: Feature.ArtistCoins,
-          name: 'Failed to claim vested artist coins',
+          feature: Feature.FanClubs,
+          name: 'Failed to claim vested fan clubs',
           additionalInfo: {
             coin,
             tokenMint: mint
@@ -898,7 +898,7 @@ export const FanClubInfoSection = ({
     coin?.artistLocker === null ||
     coin?.artistLocker?.claimable === 0
 
-  if (isArtistCoinLoading || !coin) {
+  if (isFanClubLoading || !coin) {
     return variant === 'onchainDetails' ? null : <FanClubInfoHeroSkeleton />
   }
 

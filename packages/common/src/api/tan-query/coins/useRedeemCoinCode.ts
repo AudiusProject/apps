@@ -8,7 +8,7 @@ import { QUERY_KEYS } from '../queryKeys'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext } from '../utils/QueryContext'
 
-import { getArtistCoinQueryKey } from './useArtistCoin'
+import { getFanClubQueryKey } from './useFanClub'
 
 type RedeemCoinCodeParams = {
   mint: string
@@ -43,10 +43,10 @@ export const useRedeemCoinCode = () => {
         queryKey: [QUERY_KEYS.userCoins]
       })
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.artistCoinMembers, mint]
+        queryKey: [QUERY_KEYS.fanClubMembers, mint]
       })
       queryClient.invalidateQueries({
-        queryKey: getArtistCoinQueryKey(mint)
+        queryKey: getFanClubQueryKey(mint)
       })
     },
     onError: (error: Error, args, _context) => {
@@ -54,7 +54,7 @@ export const useRedeemCoinCode = () => {
         error,
         additionalInfo: args,
         name: 'RedeemCoinCode',
-        feature: Feature.ArtistCoins
+        feature: Feature.FanClubs
       })
 
       // TODO: Should 'Please try again' be added to the end of the message?

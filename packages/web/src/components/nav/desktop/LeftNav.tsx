@@ -28,7 +28,7 @@ import {
   UploadNavItem,
   DevToolsNavItem,
   PlaylistsNavItem,
-  ArtistCoinsNavItem
+  FanClubsNavItem
 } from './nav-items'
 
 export const LEFT_NAV_WIDTH = 240
@@ -130,7 +130,7 @@ export const LeftNav = (props: OwnProps) => {
               <LibraryNavItem />
               <MessagesNavItem />
               <WalletNavItem />
-              <ArtistCoinsNavItem />
+              <FanClubsNavItem />
               <RewardsNavItem />
               <DashboardNavItem />
               <UploadNavItem />

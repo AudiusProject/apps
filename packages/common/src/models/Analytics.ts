@@ -573,14 +573,14 @@ export enum Name {
   ANDROID_APP_RESTART_STALE = 'Android App: Restart Due to Stale Time',
   ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit',
 
-  // Artist Coins
-  BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+  // Fan Clubs
+  BANNER_FAN_CLUBS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
   BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
   BANNER_YAK_COIN_LAUNCH_CLICKED = 'Banner Yak Coin Launch Clicked',
 
-  // Artist Coin Launchpad
+  // Fan Club Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
-  LAUNCHPAD_HAS_EXISTING_ARTIST_COIN = 'Launchpad: Has Existing Artist Coin',
+  LAUNCHPAD_HAS_EXISTING_FAN_CLUB = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
   LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
   LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
@@ -2287,8 +2287,8 @@ type BannerTOSClicked = {
   eventName: Name.BANNER_TOS_CLICKED
 }
 
-type BannerArtistCoinsLaunchClicked = {
-  eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
+type BannerFanClubsLaunchClicked = {
+  eventName: Name.BANNER_FAN_CLUBS_LAUNCH_CLICKED
 }
 
 type BannerTradingVolumeLaunchClicked = {
@@ -2813,13 +2813,13 @@ export type AndroidAppRestartForceQuit = {
   eventName: Name.ANDROID_APP_RESTART_FORCE_QUIT
 }
 
-// Artist Coin Launchpad
+// Fan Club Launchpad
 export type LaunchpadSplashGetStarted = {
   eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
 }
 
-export type LaunchpadHasExistingArtistCoin = {
-  eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN
+export type LaunchpadHasExistingFanClub = {
+  eventName: Name.LAUNCHPAD_HAS_EXISTING_FAN_CLUB
 }
 
 export type LaunchpadSplashLearnMoreClicked = {
@@ -3324,7 +3324,7 @@ export type AllTrackingEvents =
   | PurchaseContentTOSClicked
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
-  | BannerArtistCoinsLaunchClicked
+  | BannerFanClubsLaunchClicked
   | BannerTradingVolumeLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
@@ -3432,7 +3432,7 @@ export type AllTrackingEvents =
   | AndroidAppRestartStale
   | AndroidAppRestartForceQuit
   | LaunchpadSplashGetStarted
-  | LaunchpadHasExistingArtistCoin
+  | LaunchpadHasExistingFanClub
   | LaunchpadSplashLearnMoreClicked
   | LaunchpadWalletConnectSuccess
   | LaunchpadWalletInsufficientBalance

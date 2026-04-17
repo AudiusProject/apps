@@ -1,6 +1,6 @@
 import { useCallback, useContext, useState } from 'react'
 
-import { useArtistCoin, useCurrentUserId, useUser } from '@audius/common/api'
+import { useFanClub, useCurrentUserId, useUser } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { COIN_DETAIL_MOBILE_WEB_ROUTE } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
@@ -40,7 +40,7 @@ const messages = coinDetailsMessages.overflowMenu
 
 type FanClubInsightsOverflowMenuProps = {
   /**
-   * The mint address of the artist coin
+   * The mint address of the fan club
    */
   mint: string
 }
@@ -50,27 +50,27 @@ export const FanClubInsightsOverflowMenu = ({
 }: FanClubInsightsOverflowMenuProps) => {
   const navigate = useNavigate()
   const { toast } = useContext(ToastContext)
-  const { data: artistCoin } = useArtistCoin(mint)
+  const { data: fanClub } = useFanClub(mint)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: artist } = useUser(artistCoin?.ownerId)
+  const { data: artist } = useUser(fanClub?.ownerId)
   const isMobile = useIsMobile()
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isMobileOverflowOpen, setIsMobileOverflowOpen] = useState(false)
 
-  const isAudio = artistCoin?.mint === env.WAUDIO_MINT_ADDRESS
+  const isAudio = fanClub?.mint === env.WAUDIO_MINT_ADDRESS
 
   const onCopyLink = () => {
-    if (artistCoin?.ticker) {
-      copyLinkToClipboard(route.coinPage(artistCoin.ticker))
+    if (fanClub?.ticker) {
+      copyLinkToClipboard(route.coinPage(fanClub.ticker))
       toast(messages.copiedLinkToClipboard)
     }
   }
 
   const onOpenBirdeye = () => {
-    if (artistCoin?.mint) {
+    if (fanClub?.mint) {
       window.open(
         route.birdeyeUrl(
-          isAudio ? env.ETH_TOKEN_ADDRESS : artistCoin.mint,
+          isAudio ? env.ETH_TOKEN_ADDRESS : fanClub.mint,
           isAudio ? 'ethereum' : 'solana'
         ),
         '_blank',
@@ -81,8 +81,8 @@ export const FanClubInsightsOverflowMenu = ({
 
   const onOpenDetails = () => {
     if (isMobile) {
-      if (artistCoin?.ticker) {
-        navigate(coinDetailMobilePage(artistCoin.ticker))
+      if (fanClub?.ticker) {
+        navigate(coinDetailMobilePage(fanClub.ticker))
       }
     } else {
       setIsDetailsModalOpen(true)
@@ -90,18 +90,14 @@ export const FanClubInsightsOverflowMenu = ({
   }
 
   const onShareToX = () => {
-    if (!artistCoin?.ticker || !artistCoin?.mint || !artist?.handle) return
+    if (!fanClub?.ticker || !fanClub?.mint || !artist?.handle) return
 
-    const isArtistOwner = currentUserId === artistCoin.ownerId
-    const coinUrl = getCopyableLink(route.coinPage(artistCoin.ticker))
+    const isArtistOwner = currentUserId === fanClub.ownerId
+    const coinUrl = getCopyableLink(route.coinPage(fanClub.ticker))
 
     const shareText = isArtistOwner
-      ? messages.shareToXArtistCopy(artistCoin.ticker, artistCoin.mint)
-      : messages.shareToXUserCopy(
-          artistCoin.ticker,
-          artist.handle,
-          artistCoin.mint
-        )
+      ? messages.shareToXArtistCopy(fanClub.ticker, fanClub.mint)
+      : messages.shareToXUserCopy(fanClub.ticker, artist.handle, fanClub.mint)
 
     openXLink(coinUrl, shareText)
   }
@@ -140,8 +136,8 @@ export const FanClubInsightsOverflowMenu = ({
     }
   ]
 
-  // Don't render if no artist coin data
-  if (!artistCoin?.mint) {
+  // Don't render if no fan club data
+  if (!fanClub?.mint) {
     return null
   }
 

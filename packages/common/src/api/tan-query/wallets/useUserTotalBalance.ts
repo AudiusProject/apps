@@ -16,7 +16,7 @@ type UseUserTotalBalanceResult = {
 /**
  * Hook to get the total USD balance for the current user including all coins and USDC.
  * Combines balances from:
- * - Artist coins (via useUserCoins)
+ * - Fan clubs (via useUserCoins)
  * - AUDIO (via useUserCoins)
  * - USDC (via useUSDCBalance)
  *
@@ -40,7 +40,7 @@ export const useUserTotalBalance = (): UseUserTotalBalanceResult => {
   const totalBalance = useMemo(() => {
     let total = 0
 
-    // Add all artist coins + AUDIO
+    // Add all fan clubs + AUDIO
     if (userCoins) {
       total += userCoins.reduce((sum, coin) => sum + (coin.balanceUsd ?? 0), 0)
     }

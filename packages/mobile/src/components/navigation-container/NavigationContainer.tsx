@@ -119,7 +119,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         CashScreen: {
                           path: 'cash'
                         },
-                        ArtistCoinsExplore: {
+                        FanClubsExplore: {
                           path: 'coins'
                         },
                         CoinDetailsScreen: {

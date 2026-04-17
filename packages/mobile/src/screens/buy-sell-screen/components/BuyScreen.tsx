@@ -1,9 +1,9 @@
 import React, { useMemo, useRef } from 'react'
 
 import {
-  transformArtistCoinsToTokenInfoMap,
-  useArtistCoin,
-  useArtistCoins
+  transformFanClubsToTokenInfoMap,
+  useFanClub,
+  useFanClubs
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import type { CoinInfo, CoinPair } from '@audius/common/store'
@@ -79,8 +79,9 @@ export const BuyScreen = ({
   availableOutputTokens,
   onOutputTokenChange
 }: BuyScreenProps) => {
-  const { data: tokenPriceData, isPending: isTokenPriceLoading } =
-    useArtistCoin(tokenPair?.baseToken?.address)
+  const { data: tokenPriceData, isPending: isTokenPriceLoading } = useFanClub(
+    tokenPair?.baseToken?.address
+  )
 
   const decimalPlaces = useMemo(() => {
     if (!tokenPriceData?.price) return 2
@@ -105,9 +106,9 @@ export const BuyScreen = ({
     onInputValueChange
   })
 
-  const { data: coins } = useArtistCoins()
-  const artistCoins: CoinInfo[] = useMemo(() => {
-    return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
+  const { data: coins } = useFanClubs()
+  const fanClubs: CoinInfo[] = useMemo(() => {
+    return Object.values(transformFanClubsToTokenInfoMap(coins ?? []))
   }, [coins])
 
   // Track if an exchange rate has ever been successfully fetched
@@ -151,7 +152,7 @@ export const BuyScreen = ({
             tokenPrice={tokenPriceData?.price?.toString() ?? null}
             isTokenPriceLoading={isTokenPriceLoading}
             tokenPriceDecimalPlaces={decimalPlaces}
-            availableTokens={availableOutputTokens ?? artistCoins}
+            availableTokens={availableOutputTokens ?? fanClubs}
             onTokenChange={onOutputTokenChange}
           />
           <BuySellTerms />

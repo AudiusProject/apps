@@ -526,9 +526,9 @@ export const getCollectionPageContext = ({
  * Coins page meta tag context
  */
 export const getCoinsPageContext = () => {
-  const pageTitle = 'Discover Artist Coins'
+  const pageTitle = 'Discover Fan Clubs • Audius'
   const pageDescription =
-    'Explore Artist Coins on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
+    'Explore Artist Fan Clubs on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
   const canonicalUrl = 'https://audius.co/coins'
 
   return {
@@ -547,7 +547,7 @@ export const getCoinsPageContext = () => {
 export const getWalletPageContext = () => {
   const pageTitle = 'Wallet'
   const pageDescription =
-    'Manage your Audius wallet. View your cash balance, artist coins, and linked wallets all in one place.'
+    'Manage your Audius wallet. View your cash balance, fan clubs, and linked wallets all in one place.'
   const canonicalUrl = 'https://audius.co/wallet'
 
   return {

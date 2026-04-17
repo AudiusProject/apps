@@ -8,7 +8,7 @@ import { QUERY_KEYS } from '../queryKeys'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useQueryContext } from '../utils/QueryContext'
 
-import { getArtistCoinQueryKey } from './useArtistCoin'
+import { getFanClubQueryKey } from './useFanClub'
 
 type RedeemCoinParams = {
   mint: string
@@ -41,10 +41,10 @@ export const useRedeemCoin = () => {
         queryKey: [QUERY_KEYS.userCoins]
       })
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.artistCoinMembers, mint]
+        queryKey: [QUERY_KEYS.fanClubMembers, mint]
       })
       queryClient.invalidateQueries({
-        queryKey: getArtistCoinQueryKey(mint)
+        queryKey: getFanClubQueryKey(mint)
       })
     },
     onError: (error: Error, args, _context) => {
@@ -52,7 +52,7 @@ export const useRedeemCoin = () => {
         error,
         additionalInfo: args,
         name: 'RedeemCoin',
-        feature: Feature.ArtistCoins
+        feature: Feature.FanClubs
       })
 
       // Toast generic error message

@@ -5,7 +5,7 @@ import { coinFromSdk } from '~/adapters/coin'
 import {
   getUserCoinQueryKey,
   getUserQueryKey,
-  getArtistCoinQueryKey,
+  getFanClubQueryKey,
   updateAudioBalanceOptimistically,
   useCurrentAccountUser,
   useQueryContext,
@@ -17,9 +17,9 @@ import { Feature } from '~/models'
 import { FollowSource } from '~/models/Analytics'
 import type { User } from '~/models/User'
 import { JupiterQuoteResult } from '~/services/Jupiter'
-import { NON_ARTIST_COIN_MINTS } from '~/store/ui/shared/tokenConstants'
+import { NON_FAN_CLUB_MINTS } from '~/store/ui/shared/tokenConstants'
 
-import { getArtistCoinQueryFn } from '../coins/useArtistCoin'
+import { getFanClubQueryFn } from '../coins/useFanClub'
 import { useTradeableCoins } from '../coins/useTradeableCoins'
 import { useFollowUser } from '../users/useFollowUser'
 import { entityCacheOptions } from '../utils/entityCacheOptions'
@@ -121,7 +121,7 @@ export const optimisticallyUpdateSwapBalances = (
   const isInputAudio = inputMint === env.WAUDIO_MINT_ADDRESS
   const isOutputAudio = outputMint === env.WAUDIO_MINT_ADDRESS
 
-  // Handle artist coin optimistic updates (not AUDIO)
+  // Handle fan club optimistic updates (not AUDIO)
   if (inputMint && !isInputAudio) {
     queryClient.setQueryData(
       getUserCoinQueryKey(inputMint, user?.user_id),
@@ -186,15 +186,15 @@ export const optimisticallyUpdateSwapBalances = (
     })
   }
 
-  // Invalidate artist coin queries to refresh fee claiming and graduation progress
+  // Invalidate fan club queries to refresh fee claiming and graduation progress
   if (inputMint && !isInputAudio) {
     queryClient.invalidateQueries({
-      queryKey: getArtistCoinQueryKey(inputMint)
+      queryKey: getFanClubQueryKey(inputMint)
     })
   }
   if (outputMint && !isOutputAudio) {
     queryClient.invalidateQueries({
-      queryKey: getArtistCoinQueryKey(outputMint)
+      queryKey: getFanClubQueryKey(outputMint)
     })
   }
 
@@ -240,16 +240,16 @@ const autoFollowArtistOnCoinPurchase = async ({
   followUser: ReturnType<typeof useFollowUser>['mutate']
   reportToSentry: QueryContextType['reportToSentry']
 }) => {
-  if (!outputMint || NON_ARTIST_COIN_MINTS.includes(outputMint)) {
+  if (!outputMint || NON_FAN_CLUB_MINTS.includes(outputMint)) {
     return
   }
 
   try {
     const coin = await queryClient.fetchQuery({
-      queryKey: getArtistCoinQueryKey(outputMint),
+      queryKey: getFanClubQueryKey(outputMint),
       queryFn: async () => {
         const sdk = await audiusSdk()
-        const rawCoin = await getArtistCoinQueryFn(
+        const rawCoin = await getFanClubQueryFn(
           outputMint,
           queryClient,
           sdk,

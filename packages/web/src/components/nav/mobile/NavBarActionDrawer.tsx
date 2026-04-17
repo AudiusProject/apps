@@ -18,7 +18,7 @@ type NavBarActionDrawerProps = {
 const messages = {
   wallet: 'Wallet',
   rewards: 'Rewards',
-  artistCoins: 'Fan Clubs',
+  fanClubs: 'Fan Clubs',
   settings: 'Settings'
 }
 
@@ -52,7 +52,7 @@ export const NavBarActionDrawer = ({
     onClose()
   }, [goToRoute, onClose])
 
-  const goToArtistCoinsExplorePage = useCallback(() => {
+  const goToFanClubsExplorePage = useCallback(() => {
     setImmediate(() => goToRoute(CLUBS_EXPLORE_PAGE))
     onClose()
   }, [goToRoute, onClose])
@@ -64,8 +64,8 @@ export const NavBarActionDrawer = ({
         onClick: goToWalletPage
       },
       {
-        text: messages.artistCoins,
-        onClick: goToArtistCoinsExplorePage
+        text: messages.fanClubs,
+        onClick: goToFanClubsExplorePage
       },
       {
         text: messages.rewards,
@@ -76,12 +76,7 @@ export const NavBarActionDrawer = ({
         onClick: goToSettingsPage
       }
     ],
-    [
-      goToRewardsPage,
-      goToSettingsPage,
-      goToWalletPage,
-      goToArtistCoinsExplorePage
-    ]
+    [goToRewardsPage, goToSettingsPage, goToWalletPage, goToFanClubsExplorePage]
   )
 
   return <ActionDrawer actions={actions} onClose={onClose} isOpen={isOpen} />

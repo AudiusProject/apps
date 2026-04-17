@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentUserId,
   useUserComments,
   useProfileUser
@@ -17,7 +17,7 @@ import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { zIndex } from 'app/utils/zIndex'
 
 import { ArtistRecommendations } from '../ArtistRecommendations'
-import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
+import { BuyFanClubButton } from '../BuyFanClubButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
@@ -62,8 +62,8 @@ export const ProfileHeader = memo(() => {
     userId: userId || 0,
     pageSize: 1
   })
-  const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  const { data: fanClub, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
   const { tier } = useTierAndVerifiedForUser(userId)
   const hasTier = tier !== 'none'
   const isOwner = userId === accountId
@@ -105,9 +105,8 @@ export const ProfileHeader = memo(() => {
   const { spacing } = useTheme()
   const insets = useSafeAreaInsets()
 
-  const hasArtistCoinButton =
-    !isArtistCoinLoading && !!userId && !!artistCoin?.mint
-  const hasBottomSection = hasUserFollowed || hasArtistCoinButton
+  const hasFanClubButton = !isFanClubLoading && !!userId && !!fanClub?.mint
+  const hasBottomSection = hasUserFollowed || hasFanClubButton
 
   return (
     <>
@@ -159,9 +158,9 @@ export const ProfileHeader = memo(() => {
               {!hasUserFollowed ? null : (
                 <ArtistRecommendations onClose={handleCloseArtistRecs} />
               )}
-              {hasArtistCoinButton ? (
+              {hasFanClubButton ? (
                 <Flex pointerEvents='box-none' mt='s' gap='s'>
-                  <BuyArtistCoinButton userId={userId!} />
+                  <BuyFanClubButton userId={userId!} />
                 </Flex>
               ) : null}
             </>

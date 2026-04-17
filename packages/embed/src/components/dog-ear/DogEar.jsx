@@ -2,7 +2,7 @@ import {
   IconCart,
   IconUserFollowing,
   IconReceive,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 import cn from 'classnames'
 
@@ -14,7 +14,7 @@ const VARIANT_TO_ICON = {
   purchase: IconCart,
   special: IconUserFollowing,
   extras: IconReceive,
-  coin: IconArtistCoin
+  coin: IconFanClub
 }
 
 export const DogEar = ({ size, variant }) => {

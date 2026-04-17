@@ -33,7 +33,7 @@ export const RESPONSIVE_TABLE_POLICIES = {
     ['spacer', 'reposts', 'saves', 'dateReleased'],
     ['name', 'overflowMenu']
   ),
-  artistCoinsLeaderboard: makeHideOrderPolicy(
+  fanClubsLeaderboard: makeHideOrderPolicy(
     ['holders', 'createdDate', 'marketCap', 'totalVolumeUSD', 'artist'],
     ['tokenName', 'price', 'buy']
   ),

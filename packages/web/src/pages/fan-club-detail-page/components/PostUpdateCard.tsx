@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCurrentUserId,
   usePostTextUpdate
 } from '@audius/common/api'
@@ -39,7 +39,7 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const [videoUrl, setVideoUrl] = useState<string | undefined>()
   const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { mutate: postTextUpdate, isPending } = usePostTextUpdate()
   const { isEnabled: isTextPostPostingEnabled } = useFeatureFlag(
     FeatureFlags.FAN_CLUB_TEXT_POST_POSTING

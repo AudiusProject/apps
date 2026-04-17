@@ -1,7 +1,4 @@
-import {
-  transformArtistCoinToTokenInfo,
-  useArtistCoin
-} from '@audius/common/api'
+import { transformFanClubToTokenInfo, useFanClub } from '@audius/common/api'
 import { useFormattedCoinBalance } from '@audius/common/hooks'
 
 import { Flex, Text } from '@audius/harmony-native'
@@ -36,8 +33,8 @@ export const BalanceSection = ({
       !internalWalletOnly // includeStaked
     )
 
-  const { data: coin, isPending: isCoinLoading } = useArtistCoin(mint)
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const { data: coin, isPending: isCoinLoading } = useFanClub(mint)
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   const isLoading =
     isCoinBalanceLoading || isCoinPriceLoading || (!!mint && isCoinLoading)

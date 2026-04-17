@@ -1,6 +1,6 @@
 import { type Coin } from '@audius/common/adapters'
 import {
-  getArtistCoinQueryKey,
+  getFanClubQueryKey,
   getUserCoinQueryKey,
   useCurrentAccountUser,
   useQueryContext,
@@ -33,8 +33,8 @@ export type ClaimVestedCoinsResult = {
 }
 
 /**
- * Hook for claiming vested/unlocked artist coins from the vesting schedule.
- * After an artist coin graduates, the artist's reserved coins unlock daily over a 5-year period.
+ * Hook for claiming vested/unlocked fan clubs from the vesting schedule.
+ * After a fan club graduates, the artist's reserved coins unlock daily over a 5-year period.
  * This gets the TX from solana relay, then signs and sends the claim vested coins transaction.
  * NOTE: This is a web feature only because the user must sign with the same external wallet they used to launch the coin (wallet connect wallet).
  */
@@ -126,8 +126,8 @@ export const useClaimVestedCoins = (
     onError: (error, params) => {
       reportToSentry({
         error,
-        feature: Feature.ArtistCoins,
-        name: 'Artist coin vested coins claim error',
+        feature: Feature.FanClubs,
+        name: 'Fan club vested coins claim error',
         additionalInfo: {
           ...params
         }
@@ -136,7 +136,7 @@ export const useClaimVestedCoins = (
     },
     onSuccess: (data: ClaimVestedCoinsResult, variables, context) => {
       // Optimistically update the coin data with new locker amounts
-      const queryKey = getArtistCoinQueryKey(variables.tokenMint)
+      const queryKey = getFanClubQueryKey(variables.tokenMint)
       queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
         if (
           !existingCoin ||

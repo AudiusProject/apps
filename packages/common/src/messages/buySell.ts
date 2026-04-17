@@ -59,7 +59,7 @@ export const buySellMessages = {
       // For very small amounts (like SOL), show up to 6 decimal places and remove trailing zeros
       formattedMin = min.toFixed(6).replace(/\.?0+$/, '')
     } else if (min >= 1) {
-      // For whole numbers (like artist coins), show as integer
+      // For whole numbers (like fan clubs), show as integer
       formattedMin = min % 1 === 0 ? min.toString() : min.toFixed(2)
     } else {
       // For amounts between 0.01 and 1, show 2 decimal places

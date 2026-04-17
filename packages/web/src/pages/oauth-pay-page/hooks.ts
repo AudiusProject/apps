@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo,
+  transformFanClubToTokenInfo,
   useSendCoins,
   useCurrentAccountUser,
   useUserByHandle,
@@ -209,8 +209,8 @@ export const useOAuthPaySetup = ({
   const currentUserWallet = userBankAddress
 
   // Get token info
-  const { data: coin } = useArtistCoin(mint ?? '')
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const { data: coin } = useFanClub(mint ?? '')
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Get user balance for the mint
   const { data: tokenBalance, isLoading: balanceLoading } = useCoinBalance({

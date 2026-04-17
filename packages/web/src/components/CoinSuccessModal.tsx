@@ -66,7 +66,7 @@ export const CoinSuccessModal = () => {
     if (!coinData?.ticker || !coinData?.mint) return
 
     const coinUrl = `https://audius.co${route.coinPage(coinData.ticker)}`
-    const shareText = `My artist coin $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
+    const shareText = `My fan club $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
     openXLink(coinUrl, shareText)
   }, [coinData])
 
