@@ -30,6 +30,7 @@ import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Status } from '~/models/Status'
 import * as toastActions from '~/store/ui/toast/slice'
+import { inboxUnavailableModalActions } from '~/store/ui/modals'
 import dayjs from '~/utils/dayjs'
 
 import {
@@ -93,6 +94,7 @@ const {
 const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
   chatSelectors
 const { toast } = toastActions
+const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
 const CHAT_PAGE_SIZE = 30
 const MESSAGES_PAGE_SIZE = 50
@@ -433,14 +435,29 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
       yield* call(track, make({ eventName: Name.CREATE_CHAT_SUCCESS }))
     }
   } catch (e) {
-    yield* put(
-      toast({
-        type: 'error',
-        content: 'Something went wrong. Failed to create chat.'
-      })
-    )
+    const isForbiddenError = isResponseError(e) && e.response?.status === 403
+    if (isForbiddenError && userIds.length === 1) {
+      // Refresh chat permissions and block state so InboxUnavailable can show
+      // the right next action for the target user.
+      yield* put(fetchBlockees())
+      yield* put(fetchBlockers())
+      yield* put(fetchPermissions({ userIds }))
+      yield* put(
+        openInboxUnavailableModal({
+          userId: userIds[0],
+          presetMessage
+        })
+      )
+    } else {
+      yield* put(
+        toast({
+          type: 'error',
+          content: 'Something went wrong. Failed to create chat.'
+        })
+      )
+    }
     const reportToSentry = yield* getContext('reportToSentry')
-    if (!isResponseError(e) || e.response?.status !== 403) {
+    if (!isForbiddenError) {
       reportToSentry({
         name: 'Chats',
         error: e as Error,
