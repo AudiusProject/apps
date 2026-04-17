@@ -1,36 +1,53 @@
-import { Id, UserCoinWithAccounts } from '@audius/sdk'
-import { useQuery } from '@tanstack/react-query'
+import { UserCoinWithAccounts } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
+import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useDispatch } from 'react-redux'
+import { AnyAction, Dispatch } from 'redux'
 
 import { ID } from '~/models'
 
-import { QUERY_KEYS } from '../queryKeys'
-import { QueryKey, SelectableQueryOptions } from '../types'
+import { getUserCoinBatcher } from '../batchers/getUserCoinBatcher'
+import { SelectableQueryOptions } from '../types'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useQueryContext } from '../utils'
+
+import { getUserCoinQueryKey } from './userCoinQueryKey'
+
+export { getUserCoinQueryKey } from './userCoinQueryKey'
 
 export interface UseUserCoinParams {
   mint: string
   userId?: ID | null
 }
 
-export const getUserCoinQueryKey = (mint: string, userId?: ID | null) =>
-  [
-    QUERY_KEYS.userCoin,
-    userId,
-    mint
-  ] as unknown as QueryKey<UserCoinWithAccounts | null>
-
 export type UseUserCoinOptions<TResult> = SelectableQueryOptions<
   UserCoinWithAccounts | null,
   TResult
 >
+
+export const getUserCoinQueryFn = async (
+  mint: string,
+  userId: ID,
+  queryClient: QueryClient,
+  sdk: AudiusSdkWithServices,
+  dispatch: Dispatch<AnyAction>
+) => {
+  const batchGetUserCoin = getUserCoinBatcher({
+    sdk,
+    currentUserId: null,
+    queryClient,
+    dispatch
+  })
+  return batchGetUserCoin.fetch({ userId, mint })
+}
 
 export const useUserCoin = <TResult = UserCoinWithAccounts | null>(
   params: UseUserCoinParams,
   options?: UseUserCoinOptions<TResult>
 ) => {
   const { audiusSdk, env } = useQueryContext()
-  // Default to current user if no userId is provided
+  const queryClient = useQueryClient()
+  const dispatch = useDispatch()
   const { data: currentUser } = useCurrentAccountUser({
     enabled: !params.userId
   })
@@ -40,13 +57,13 @@ export const useUserCoin = <TResult = UserCoinWithAccounts | null>(
     queryKey: getUserCoinQueryKey(params.mint, userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-
-      const response = await sdk.users.getUserCoin({
-        id: Id.parse(userId),
-        mint: params.mint
-      })
-
-      return response.data ?? null
+      return getUserCoinQueryFn(
+        params.mint,
+        userId!,
+        queryClient,
+        sdk,
+        dispatch
+      )
     },
     ...options,
     enabled:

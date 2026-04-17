@@ -42,15 +42,9 @@ export const HexagonalSkeleton = () => {
 export type CoinCardProps = {
   mint: string
   showUserBalance?: boolean
-  /** Use one `getUserCoins` request for aggregate balances (wallet list) */
-  useListBalanceForAggregate?: boolean
 }
 
-export const CoinCard = ({
-  mint,
-  showUserBalance = true,
-  useListBalanceForAggregate = false
-}: CoinCardProps) => {
+export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   const navigation = useNavigation()
 
   const { data: coinData, isPending: coinsDataLoading } = useFanClub(mint)
@@ -67,15 +61,7 @@ export const CoinCard = ({
     isCoinBalanceLoading,
     isCoinPriceLoading,
     formattedHeldValue
-  } = useFormattedCoinBalance(
-    mint,
-    'en-US',
-    undefined,
-    undefined,
-    true,
-    true,
-    useListBalanceForAggregate
-  )
+  } = useFormattedCoinBalance(mint)
 
   const isLoading =
     isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading

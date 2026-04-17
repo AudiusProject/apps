@@ -250,15 +250,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     isCoinBalanceLoading,
     isCoinPriceLoading,
     formattedHeldValue
-  } = useFormattedCoinBalance(
-    coin.mint,
-    'en-US',
-    undefined,
-    undefined,
-    true,
-    true,
-    true
-  )
+  } = useFormattedCoinBalance(coin.mint)
 
   const { data: coinData, isPending: coinsDataLoading } = useFanClub(coin.mint)
 
