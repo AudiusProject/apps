@@ -15,12 +15,40 @@
   top: 0;
   bottom: 0;
   margin-bottom: 88px;
-  width: var(--nav-width);
-  /* Keep bottom of album art shadow from getting cut off */
-  overflow: visible;
+  /* Width is managed via inline style in Navigator.tsx */
+  overflow-x: clip;
+  overflow-y: visible;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+
+/* Suppress width transition during drag so snaps stay instant */
+.leftNavWrapper.isDragging {
+  transition: none;
+}
+
+/* Suppress text selection during drag */
+.isDragging {
+  user-select: none;
 }
 
 /* Position the navbar over any banners on electron/desktop app */
 .isElectron {
   position: fixed;
+}
+
+/* Drag handle on the right edge of the sidebar */
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -6px;
+  width: 12px;
+  z-index: 15;
+  transition: background-color 0.15s ease;
+}
+
+.resizeHandle:hover,
+.isDragging .resizeHandle {
+  background-color: var(--harmony-n-100);
 }

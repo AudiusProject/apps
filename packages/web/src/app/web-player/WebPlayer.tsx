@@ -751,7 +751,10 @@ const WebPlayer = (props: WebPlayerProps) => {
       </AppBannerWrapper>
       <ChatListener />
       <USDCBalanceFetcher />
-      <div className={cn(styles.app, { [styles.mobileApp]: isMobile })}>
+      <div
+        id='webPlayer'
+        className={cn(styles.app, { [styles.mobileApp]: isMobile })}
+      >
         {showCookieBanner ? <CookieBanner /> : null}
         <Notice shouldPadTop={false} />
         <Navigator />

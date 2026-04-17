@@ -12,6 +12,9 @@ import {
 } from 'hooks/useRequiresAccount'
 import { removeNullable } from 'utils/typeUtils'
 
+import { CollapsedNavItem } from './CollapsedNavItem'
+import { useNavSidebar } from './NavSidebarContext'
+
 /**
  * Helper function to check if the current path matches any of the provided paths
  * @param params - Object containing path matching parameters
@@ -56,10 +59,14 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     restriction,
     exact = false,
     additionalPathMatches = [],
+    leftIcon,
+    rightIcon,
+    hasNotification,
     ...other
   } = props
   const location = useLocation()
   const dispatch = useDispatch()
+  const { isCollapsed } = useNavSidebar()
   const isSelected = useMemo(() => {
     const pathsToMatch = [to, ...additionalPathMatches].filter(removeNullable)
     return isPathMatch({
@@ -88,10 +95,26 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     restriction
   )
 
+  if (isCollapsed && leftIcon) {
+    return (
+      <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
+        <CollapsedNavItem
+          icon={leftIcon}
+          isSelected={isSelected}
+          disabled={disabled}
+          hasNotification={hasNotification}
+        />
+      </NavLink>
+    )
+  }
+
   return (
     <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
       <NavItem
         {...other}
+        leftIcon={leftIcon}
+        rightIcon={rightIcon}
+        hasNotification={hasNotification}
         isSelected={isSelected}
         css={{
           opacity: disabled ? 0.5 : 1,
