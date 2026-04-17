@@ -1,5 +1,6 @@
 // Queries
 export * from './useAllEvents'
+export * from './useAllRemixContests'
 export * from './useEvent'
 export * from './useEvents'
 export * from './useEventsByEntityId'

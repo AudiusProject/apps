@@ -66,6 +66,7 @@ import { WalletScreen } from 'app/screens/wallet-screen'
 
 import { ArtistCoinSortScreen } from '../artist-coin-sort-screen/ArtistCoinSortScreen'
 import { ArtistCoinsExploreScreen } from '../artist-coins-explore-screen/ArtistCoinsExploreScreen'
+import { ContestsScreen } from '../contests-screen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
 
@@ -112,6 +113,7 @@ export type AppTabScreenParamList = {
 
   AudioScreen: undefined
   RewardsScreen: undefined
+  Contests: undefined
   ArtistCoinsExplore: undefined
   ArtistCoinSort: {
     initialSortMethod?: GetCoinsSortMethodEnum
@@ -240,6 +242,7 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
 
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
+      <Stack.Screen name='Contests' component={ContestsScreen} />
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
