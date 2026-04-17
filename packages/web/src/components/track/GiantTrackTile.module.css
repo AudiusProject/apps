@@ -50,12 +50,36 @@
   justify-content: flex-end;
 }
 
+.badgesSectionCompact {
+  display: none;
+}
+
 .typeLabelCompact {
   display: none;
 }
 
 .typeLabelRow {
   display: block;
+}
+
+.statsDesktop {
+  display: block;
+}
+
+.headerTrackStats :global([data-track-stat-label='social']) {
+  display: inline;
+}
+
+.statsInDescription {
+  display: none;
+}
+
+.listenCountDesktop {
+  display: block;
+}
+
+.playbackButton {
+  min-width: 0 !important;
 }
 
 .gatedContent .typeLabel {
@@ -203,11 +227,6 @@
   top: 2px;
 }
 
-.makePublicButton {
-  width: 166px;
-  flex-shrink: 0;
-}
-
 .downloadableIconContainer {
   margin-left: 10px;
   position: relative;
@@ -284,6 +303,12 @@
   }
 }
 
+@container (max-width: 856px) {
+  .headerTrackStats :global([data-track-stat-label='social']) {
+    display: none;
+  }
+}
+
 @container (max-width: 740px) {
   .topSection {
     grid-template-columns: 1fr;
@@ -298,13 +323,22 @@
     justify-content: center;
   }
 
+  .badgesSectionCompact {
+    display: flex;
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: center;
+    gap: var(--harmony-unit-2);
+    flex-wrap: wrap;
+  }
+
   .typeLabelRow {
     display: none;
   }
 
   .artworkSection {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     justify-self: center;
     width: min(338px, 70cqi);
     aspect-ratio: 1;
@@ -317,14 +351,14 @@
     min-height: 0 !important;
   }
 
-  .artworkSection > div > div {
+  .artworkSection > div > :first-child {
     width: 100% !important;
     height: 100% !important;
   }
 
   .infoSection {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 4;
     align-items: center;
     width: 100%;
   }
@@ -350,6 +384,18 @@
     width: 100%;
   }
 
+  .statsDesktop {
+    display: none;
+  }
+
+  .statsInDescription {
+    display: block;
+  }
+
+  .listenCountDesktop {
+    display: none;
+  }
+
   .playSection {
     flex-wrap: wrap;
     justify-content: center;
@@ -364,9 +410,21 @@
     min-width: 0 !important;
   }
 
+  .playbackButton {
+    height: var(--harmony-unit-12) !important;
+    font-size: var(--harmony-font-l) !important;
+    line-height: var(--harmony-line-height-l) !important;
+    padding-inline: var(--harmony-unit-4) !important;
+  }
+
+  .playbackButton svg {
+    width: var(--harmony-unit-5) !important;
+    height: var(--harmony-unit-5) !important;
+  }
+
   .actionsSection {
     grid-column: 1;
-    grid-row: 4;
+    grid-row: 5;
     justify-self: stretch;
     width: 100%;
     flex-wrap: wrap;

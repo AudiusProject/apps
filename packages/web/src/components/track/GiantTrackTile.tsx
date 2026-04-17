@@ -35,7 +35,6 @@ import {
   IconKebabHorizontal,
   IconShare,
   IconRocket,
-  Button,
   IconButton,
   MusicBadge,
   Paper,
@@ -73,11 +72,6 @@ import { TrackDogEar } from './TrackDogEar'
 import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
 
-const BUTTON_COLLAPSE_WIDTHS = {
-  first: 1095,
-  second: 1190,
-  third: 1286
-}
 // Toast timeouts in ms
 const REPOST_TIMEOUT = 1000
 const SAVED_TIMEOUT = 1000
@@ -292,40 +286,45 @@ export const GiantTrackTile = ({
     useEarlyReleaseConfirmationModal()
 
   const renderMakePublicButton = () => {
+    if (!(isUnlisted || isPublishing) || !isOwner) {
+      return null
+    }
+
     let text = messages.isPublishing
     if (isUnlisted && !isPublishing) {
       text = isScheduledRelease ? messages.releaseNow : messages.makePublic
     }
 
     return (
-      (isUnlisted || isPublishing) &&
-      isOwner && (
-        <Button
-          variant='secondary'
-          isLoading={isPublishing}
-          iconLeft={IconRocket}
-          widthToHideText={BUTTON_COLLAPSE_WIDTHS.second}
-          onClick={() => {
-            if (isScheduledRelease) {
-              openEarlyReleaseConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            } else {
-              openPublishConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            }
-          }}
-        >
-          {text}
-        </Button>
-      )
+      <Tooltip text={text}>
+        <span>
+          <IconButton
+            aria-label={text}
+            icon={IconRocket}
+            color='subdued'
+            size='2xl'
+            isLoading={isPublishing}
+            disabled={isPublishing}
+            onClick={() => {
+              if (isScheduledRelease) {
+                openEarlyReleaseConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              } else {
+                openPublishConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              }
+            }}
+          />
+        </span>
+      </Tooltip>
     )
   }
 
@@ -480,6 +479,22 @@ export const GiantTrackTile = ({
   }
 
   const trendingRank = useTrackRank(trackId)
+  const renderBadges = () => (
+    <>
+      {trendingRank ? (
+        <MusicBadge color='blue' icon={IconTrending}>
+          {trendingRank}
+        </MusicBadge>
+      ) : null}
+      {shouldShowScheduledRelease ? (
+        <MusicBadge variant='accent' icon={IconCalendarMonth}>
+          {messages.releases(releaseDate)}
+        </MusicBadge>
+      ) : isUnlisted ? (
+        <MusicBadge icon={IconVisibilityHidden}>{messages.hidden}</MusicBadge>
+      ) : null}
+    </>
+  )
 
   return (
     <Paper
@@ -487,13 +502,16 @@ export const GiantTrackTile = ({
       w='100%'
       justifyContent='center'
       mh='auto'
-      css={{ maxWidth: 1080, textAlign: 'left' }}
+      css={{ maxWidth: 1080, textAlign: 'left', containerType: 'inline-size' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
       <div className={styles.topSectionWrapper}>
         <div className={styles.topSection}>
           <div className={styles.typeLabelCompact}>
             {renderCardTitle(cn(fadeIn))}
+          </div>
+          <div className={cn(fadeIn, styles.badgesSectionCompact)}>
+            {renderBadges()}
           </div>
           <div className={styles.artworkSection}>
             <GiantArtwork
@@ -534,10 +552,17 @@ export const GiantTrackTile = ({
                   <UserLink userId={userId} popover />
                 </Text>
               </Flex>
-              <div className={cn(fadeIn, styles.trackStatsRow)}>
+              <div
+                className={cn(
+                  fadeIn,
+                  styles.trackStatsRow,
+                  styles.statsDesktop
+                )}
+              >
                 <TrackStats
                   trackId={trackId}
                   scrollToCommentSection={scrollToCommentSection}
+                  className={styles.headerTrackStats}
                 />
               </div>
             </Flex>
@@ -549,6 +574,7 @@ export const GiantTrackTile = ({
             >
               {showPlay ? (
                 <PlayPauseButton
+                  className={styles.playbackButton}
                   disabled={!hasStreamAccess}
                   playing={playing && !previewing}
                   onPlay={onPlay}
@@ -557,6 +583,7 @@ export const GiantTrackTile = ({
               ) : null}
               {showPreview ? (
                 <PlayPauseButton
+                  className={styles.playbackButton}
                   playing={playing && previewing}
                   onPlay={onPreview}
                   trackId={trackId}
@@ -569,7 +596,9 @@ export const GiantTrackTile = ({
                   trackId={trackId}
                 />
               ) : (
-                renderListenCount()
+                <div className={styles.listenCountDesktop}>
+                  {renderListenCount()}
+                </div>
               )}
             </Flex>
           </Flex>
@@ -604,22 +633,7 @@ export const GiantTrackTile = ({
               </span>
             </Flex>
           )}
-          <div className={styles.badgesSection}>
-            {trendingRank ? (
-              <MusicBadge color='blue' icon={IconTrending}>
-                {trendingRank}
-              </MusicBadge>
-            ) : null}
-            {shouldShowScheduledRelease ? (
-              <MusicBadge variant='accent' icon={IconCalendarMonth}>
-                {messages.releases(releaseDate)}
-              </MusicBadge>
-            ) : isUnlisted ? (
-              <MusicBadge icon={IconVisibilityHidden}>
-                {messages.hidden}
-              </MusicBadge>
-            ) : null}
-          </div>
+          <div className={styles.badgesSection}>{renderBadges()}</div>
         </div>
       </div>
 
@@ -645,6 +659,14 @@ export const GiantTrackTile = ({
         className={cn(fadeIn)}
         gap='l'
       >
+        <div className={styles.statsInDescription}>
+          <TrackStats
+            trackId={trackId}
+            scrollToCommentSection={scrollToCommentSection}
+            showPlayCount
+            forceMobileStyle
+          />
+        </div>
         {description ? (
           <Flex column gap='m'>
             {/* Container with height transition */}

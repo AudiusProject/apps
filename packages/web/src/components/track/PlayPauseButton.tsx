@@ -17,6 +17,7 @@ const { getTrackId } = playerSelectors
 const { getTrackPosition } = playbackPositionSelectors
 
 type PlayPauseButtonProps = {
+  className?: string
   disabled?: boolean
   isPreview?: boolean
   playing: boolean
@@ -33,6 +34,7 @@ const messages = {
 }
 
 export const PlayPauseButton = ({
+  className,
   disabled,
   isPreview = false,
   playing,
@@ -71,7 +73,7 @@ export const PlayPauseButton = ({
       variant={isPreview ? 'secondary' : 'primary'}
       iconLeft={playing ? IconPause : PlayIconComponent}
       onClick={onPlay}
-      minWidth={180}
+      className={className}
       disabled={disabled}
       translate='no'
     >
