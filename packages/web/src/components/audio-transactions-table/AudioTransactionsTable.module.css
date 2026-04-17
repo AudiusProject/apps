@@ -12,17 +12,15 @@
   line-height: 1.2;
 }
 
-.icon {
-  margin-right: 22px;
-}
-
-.changeCell.increase {
-  color: var(--harmony-green);
-}
-.changeCell.decrease {
-  color: var(--harmony-orange);
-}
-
 .typeText {
   line-height: 150%;
+}
+
+.tableWrapper {
+  padding-bottom: 0;
+  margin-bottom: 96px;
+}
+
+.tableWrapper :global([class*='showMoreContainer']) {
+  background-color: transparent;
 }

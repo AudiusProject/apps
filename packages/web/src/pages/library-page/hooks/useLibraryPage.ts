@@ -447,6 +447,22 @@ export const useLibraryPage = () => {
     }))
   }, [])
 
+  const formattedEntries = useMemo(
+    () => formatMetadata(tracks.entries),
+    [formatMetadata, tracks.entries]
+  )
+
+  const filteredFormattedEntries = useMemo(() => {
+    const filterText = (state.filterText ?? '').toLowerCase()
+    return formattedEntries
+      .filter((item) => !item._marked_deleted && !item.is_delete)
+      .filter(
+        (item) =>
+          item.title?.toLowerCase().indexOf(filterText) > -1 ||
+          item.user?.name.toLowerCase().indexOf(filterText) > -1
+      )
+  }, [formattedEntries, state.filterText])
+
   const isQueued = useCallback(() => {
     return tracks.entries.some(
       (entry: any) => currentQueueItem.uid === entry.uid
@@ -464,44 +480,44 @@ export const useLibraryPage = () => {
   const getFormattedData = useCallback(
     (trackMetadatas: LibraryPageTrack[]): [LibraryPageTrack[], number] => {
       const playingUid = getPlayingUid()
-      const activeIndex = tracks.entries.findIndex(
-        ({ uid }: any) => uid === playingUid
-      )
-      const filteredMetadata = formatMetadata(trackMetadatas)
-      const filteredIndex =
-        activeIndex > -1
-          ? filteredMetadata.findIndex(
-              (metadata) => metadata.uid === playingUid
-            )
-          : activeIndex
+      const filteredMetadata =
+        trackMetadatas === tracks.entries
+          ? formattedEntries
+          : formatMetadata(trackMetadatas)
+      const filteredIndex = playingUid
+        ? filteredMetadata.findIndex((metadata) => metadata.uid === playingUid)
+        : -1
       return [filteredMetadata, filteredIndex]
     },
-    [getPlayingUid, tracks.entries, formatMetadata]
+    [getPlayingUid, tracks.entries, formattedEntries, formatMetadata]
   )
 
   const getFilteredData = useCallback(
     (trackMetadatas: LibraryPageTrack[]): [LibraryPageTrack[], number] => {
-      const filterText = state.filterText ?? ''
       const playingUid = getPlayingUid()
-      const activeIndex = tracks.entries.findIndex(
-        ({ uid }: any) => uid === playingUid
-      )
-      const filteredMetadata = formatMetadata(trackMetadatas)
-        .filter((item) => !item._marked_deleted && !item.is_delete)
-        .filter(
-          (item) =>
-            item.title?.toLowerCase().indexOf(filterText.toLowerCase()) > -1 ||
-            item.user?.name.toLowerCase().indexOf(filterText.toLowerCase()) > -1
-        )
-      const filteredIndex =
-        activeIndex > -1
-          ? filteredMetadata.findIndex(
-              (metadata) => metadata.uid === playingUid
-            )
-          : activeIndex
+      const filterText = (state.filterText ?? '').toLowerCase()
+      const filteredMetadata =
+        trackMetadatas === tracks.entries
+          ? filteredFormattedEntries
+          : formatMetadata(trackMetadatas)
+              .filter((item) => !item._marked_deleted && !item.is_delete)
+              .filter(
+                (item) =>
+                  item.title?.toLowerCase().indexOf(filterText) > -1 ||
+                  item.user?.name.toLowerCase().indexOf(filterText) > -1
+              )
+      const filteredIndex = playingUid
+        ? filteredMetadata.findIndex((metadata) => metadata.uid === playingUid)
+        : -1
       return [filteredMetadata, filteredIndex]
     },
-    [state.filterText, getPlayingUid, tracks.entries, formatMetadata]
+    [
+      state.filterText,
+      getPlayingUid,
+      tracks.entries,
+      filteredFormattedEntries,
+      formatMetadata
+    ]
   )
 
   const onClickRow = useCallback(

@@ -7,7 +7,8 @@ export enum TransactionType {
   PURCHASE = 'PURCHASE',
   CHALLENGE_REWARD = 'CHALLENGE_REWARD',
   TRENDING_REWARD = 'TRENDING_REWARD',
-  TRANSFER = 'TRANSFER'
+  TRANSFER = 'TRANSFER',
+  TIP = 'TIP'
 }
 
 export enum TransactionMethod {
@@ -50,7 +51,7 @@ export type TransactionDetails =
     }
   | {
       signature: string
-      transactionType: TransactionType.TRANSFER
+      transactionType: TransactionType.TRANSFER | TransactionType.TIP
       method: TransactionMethod.SEND | TransactionMethod.RECEIVE
       date: string
       change: StringAudio
