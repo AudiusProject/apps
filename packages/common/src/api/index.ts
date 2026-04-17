@@ -32,6 +32,9 @@ export * from './tan-query/events'
 
 // Explore
 export * from './tan-query/collection/useExploreContent'
+export * from './tan-query/collection/useTrendingAlbums'
+export * from './tan-query/collection/useNewAlbumReleases'
+export * from './tan-query/collection/useBestSellingAlbums'
 
 // Lineups
 export * from './tan-query/lineups/useFeed'
