@@ -16,6 +16,7 @@ import {
 } from '@audius/common/store'
 import {
   challengeRewardsConfig,
+  convertHexToRGBA,
   isRewardOpenToAll,
   makeOptimisticChallengeSortComparator
 } from '@audius/common/utils'
@@ -73,6 +74,11 @@ export const ChallengeRewardsTile = ({
   const navigate = useNavigate()
   const { spacing, color } = useTheme()
   const { isVerified } = useTierAndVerifiedForUser(currentUser?.user_id)
+  const lockedRewardsOverlayColor =
+    typeof color.background.white === 'string' &&
+    color.background.white.startsWith('#')
+      ? convertHexToRGBA(color.background.white, 0.15)
+      : 'color-mix(in srgb, var(--harmony-bg-white) 15%, transparent)'
 
   useEffect(() => {
     if (!userChallengesLoading && !haveChallengesLoaded) {
@@ -262,7 +268,7 @@ export const ChallengeRewardsTile = ({
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: color.special.glassOverlay,
+                    backgroundColor: lockedRewardsOverlayColor,
                     backdropFilter: 'blur(5px)',
                     borderRadius: spacing.l,
                     zIndex: 10,
