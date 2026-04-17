@@ -142,7 +142,7 @@ export const YourCoins = () => {
               ) : item === 'audio-coin' ? (
                 <AudioCoinCard />
               ) : (
-                <CoinCard mint={item.mint} />
+                <CoinCard mint={item.mint} useListBalanceForAggregate />
               )}
               {idx !== cards.length - 1 && <Divider />}
             </Box>

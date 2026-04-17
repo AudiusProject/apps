@@ -39,7 +39,8 @@ export const useFormattedCoinBalance = (
   isPolling?: boolean,
   pollingInterval?: number,
   includeExternalWallets: boolean = true,
-  includeStaked: boolean = true
+  includeStaked: boolean = true,
+  userCoinsListBalanceOverride?: boolean
 ): UseFormattedCoinBalanceReturn => {
   const { data: coinBalance, isPending: isCoinBalanceLoading } = useCoinBalance(
     {
@@ -47,7 +48,8 @@ export const useFormattedCoinBalance = (
       isPolling,
       pollingInterval,
       includeExternalWallets,
-      includeStaked
+      includeStaked,
+      userCoinsListBalanceOverride
     }
   )
 
