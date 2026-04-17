@@ -94,9 +94,10 @@ export const NavHeader = () => {
               icon={IconSettings}
               aria-label={messages.settingsLabel}
               isActive={location.pathname === SETTINGS_PAGE}
+              size='m'
             />
           </RestrictedLink>
-          <NotificationsButton />
+          <NotificationsButton size='m' />
         </Flex>
         {/* Row 2: Audius triangle logo */}
         <Flex

@@ -36,7 +36,13 @@ export const ProfileCompletionPanel = () => {
   const isAccountLoaded = useIsAccountLoaded()
   const isLoggedIn = useHasAccount()
 
-  const [isDismissed, setIsDismissed] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('profile-completion-panel-dismissed') === 'true'
+    } catch {
+      return false
+    }
+  })
   const [isTooltipDisabled, setIsTooltipDisabled] = useState(false)
 
   const onDismiss = () => {
@@ -46,6 +52,9 @@ export const ProfileCompletionPanel = () => {
     setIsTooltipDisabled(true)
     setTimeout(() => {
       setIsDismissed(true)
+      try {
+        localStorage.setItem('profile-completion-panel-dismissed', 'true')
+      } catch {}
     }, 200)
   }
 

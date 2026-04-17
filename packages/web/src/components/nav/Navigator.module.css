@@ -16,8 +16,15 @@
   bottom: 0;
   margin-bottom: 88px;
   /* Width is managed via inline style in Navigator.tsx */
-  overflow: visible;
+  overflow-x: clip;
+  overflow-y: visible;
   flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+
+/* Suppress width transition during drag so snaps stay instant */
+.leftNavWrapper.isDragging {
+  transition: none;
 }
 
 /* Suppress text selection during drag */
@@ -35,8 +42,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: -3px;
-  width: 6px;
+  right: -4px;
+  width: 8px;
   z-index: 15;
   transition: background-color 0.15s ease;
 }

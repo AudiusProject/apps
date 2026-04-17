@@ -12,6 +12,13 @@
   align-items: stretch;
 }
 
+/* Register --nav-width as an animatable length so consumers (margin-left, left) transition */
+@property --nav-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 240px;
+}
+
 .app {
   --nav-width: 240px;
   --nav-width-minus-border: 239px;
@@ -22,6 +29,12 @@
   height: 100%;
   display: flex;
   overflow: hidden;
+  transition: --nav-width 0.2s ease;
+}
+
+/* Suppress --nav-width transition during drag so snaps stay instant */
+.app[data-nav-dragging='true'] {
+  transition: none;
 }
 
 .app.mobileApp {

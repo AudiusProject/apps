@@ -42,6 +42,8 @@ type NowPlayingArtworkTileProps = {
   size?: number
 }
 
+const isSmall = (size: number) => size < 100
+
 export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps) => {
   const dispatch = useDispatch()
   const location = useLocation()
@@ -110,6 +112,7 @@ export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps
     return (
       <AnimatedPaper
         border='default'
+        borderRadius={isSmall(size) ? 's' : 'm'}
         css={{
           display: 'block',
           transition: `opacity ${motion.quick}, box-shadow ${motion.quick}`,
@@ -147,7 +150,7 @@ export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps
                   <IconImage width={48} height={48} />
                 </Box>
               ) : null}
-              {NO_VISUALIZER_ROUTES.has(pathname) ? null : (
+              {!isSmall(size) && !NO_VISUALIZER_ROUTES.has(pathname) ? (
                 <button
                   type='button'
                   className={styles.visualizerPill}
@@ -155,19 +158,17 @@ export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps
                   onClick={handleShowVisualizer}
                 >
                   <IconVisualizer className={styles.visualizerPillIcon} />
-                  {size >= 100 ? (
-                    <Text
-                      tag='span'
-                      variant='body'
-                      size='xs'
-                      strength='strong'
-                      className={styles.visualizerPillLabel}
-                    >
-                      {messages.visualizer}
-                    </Text>
-                  ) : null}
+                  <Text
+                    tag='span'
+                    variant='body'
+                    size='xs'
+                    strength='strong'
+                    className={styles.visualizerPillLabel}
+                  >
+                    {messages.visualizer}
+                  </Text>
                 </button>
-              )}
+              ) : null}
             </div>
           </DynamicImage>
         </Link>
@@ -177,7 +178,22 @@ export const NowPlayingArtworkTile = ({ size = 208 }: NowPlayingArtworkTileProps
 
   const content = (
     <Box mh='auto' mb={0} css={{ position: 'relative' }} h={size} w={size}>
-      <TrackDogEar trackId={trackId} />
+      {isSmall(size) ? (
+        <Box
+          css={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transform: 'scale(0.5)',
+            transformOrigin: 'top left',
+            zIndex: 11
+          }}
+        >
+          <TrackDogEar trackId={trackId} />
+        </Box>
+      ) : (
+        <TrackDogEar trackId={trackId} />
+      )}
       {renderCoverArt()}
     </Box>
   )

@@ -76,8 +76,10 @@ export const LeftNav = (props: OwnProps) => {
       h='100%'
       css={{
         width: isCollapsed ? LEFT_NAV_COLLAPSED_WIDTH : LEFT_NAV_WIDTH,
+        transition: 'width 0.2s ease',
         userSelect: 'none',
-        overflow: 'visible',
+        overflowX: 'clip',
+        overflowY: 'visible',
         flexShrink: 0
       }}
     >
@@ -106,6 +108,7 @@ export const LeftNav = (props: OwnProps) => {
             scrollbarRef.current = el
           }}
           isHidden
+          options={{ suppressScrollX: true }}
         >
           <DragAutoscroller
             containerBoundaries={navBodyContainerBoundaries}
@@ -141,17 +144,17 @@ export const LeftNav = (props: OwnProps) => {
           </DragAutoscroller>
         </Scrollbar>
       </Flex>
-      {navLoaded && !isCollapsed ? (
-        <Flex direction='column' alignItems='center' gap='s'>
-          <ProfileCompletionPanel />
-          <LeftNavCTA />
-          <NowPlayingArtworkTile />
-        </Flex>
-      ) : null}
-      {navLoaded && isCollapsed ? (
-        <Flex direction='column' alignItems='center' gap='s' pb='s'>
-          <NowPlayingArtworkTile size={48} />
-          <LeftNavCTA />
+      {navLoaded ? (
+        <Flex
+          direction='column'
+          alignItems='center'
+          gap='s'
+          pb={isCollapsed ? 's' : undefined}
+        >
+          {!isCollapsed ? <ProfileCompletionPanel /> : null}
+          {!isCollapsed ? <LeftNavCTA /> : null}
+          <NowPlayingArtworkTile size={isCollapsed ? 56 : undefined} />
+          {isCollapsed ? <LeftNavCTA /> : null}
         </Flex>
       ) : null}
     </Flex>

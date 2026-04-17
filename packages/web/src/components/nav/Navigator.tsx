@@ -26,7 +26,8 @@ interface OwnProps {
 
 const EXPANDED_WIDTH = 240
 const COLLAPSED_WIDTH = 64
-const SNAP_DELTA = 20 // px of drag needed to commit a state change
+// px of drag needed to commit to the other state on release
+const SNAP_DELTA = 15
 const STORAGE_KEY = 'nav-sidebar-collapsed'
 
 const Navigator = ({ className }: OwnProps) => {
@@ -41,7 +42,6 @@ const Navigator = ({ className }: OwnProps) => {
       return false
     }
   })
-  const [dragWidth, setDragWidth] = useState<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
   const dragStartX = useRef(0)
@@ -54,7 +54,9 @@ const Navigator = ({ className }: OwnProps) => {
     } catch {}
   }, [])
 
-  const navWidth = dragWidth ?? (isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH)
+  // Width is always the committed state — no intermediate values during drag.
+  // The sidebar stays put while dragging; on release it animates to the new state.
+  const navWidth = isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
   // Update --nav-width on the app element before paint to avoid flash
   useLayoutEffect(() => {
@@ -77,32 +79,17 @@ const Navigator = ({ className }: OwnProps) => {
   useEffect(() => {
     if (!isDragging) return
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const newWidth = Math.max(
-        COLLAPSED_WIDTH,
-        Math.min(EXPANDED_WIDTH, e.clientX)
-      )
-      setDragWidth(newWidth)
-    }
-
     const handleMouseUp = (e: MouseEvent) => {
-      setIsDragging(false)
-      setDragWidth(null)
-
       const delta = e.clientX - dragStartX.current
-      if (dragStartCollapsed.current) {
-        // Was collapsed: expand if dragged right far enough
-        if (delta > SNAP_DELTA) setIsCollapsed(false)
-      } else {
-        // Was expanded: collapse if dragged left far enough
-        if (delta < -SNAP_DELTA) setIsCollapsed(true)
-      }
+      const commit = dragStartCollapsed.current
+        ? delta <= SNAP_DELTA   // was collapsed: stay unless dragged right past threshold
+        : delta < -SNAP_DELTA  // was expanded: collapse only if dragged left past threshold
+      setIsCollapsed(commit)
+      setIsDragging(false)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
   }, [isDragging, setIsCollapsed])
@@ -119,14 +106,7 @@ const Navigator = ({ className }: OwnProps) => {
           [styles.isElectron]: isElectron,
           [styles.isDragging]: isDragging
         })}
-        style={
-          !isMobile
-            ? {
-                width: navWidth,
-                overflow: isDragging ? 'hidden' : undefined
-              }
-            : undefined
-        }
+        style={!isMobile ? { width: navWidth } : undefined}
       >
         {isMobile ? (
           <ConnectedNavBar />
