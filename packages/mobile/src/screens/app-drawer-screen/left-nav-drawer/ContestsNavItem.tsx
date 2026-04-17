@@ -13,7 +13,7 @@ const messages = {
 
 export const ContestsNavItem = () => {
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS_PAGE
+    FeatureFlags.CONTESTS
   )
 
   if (!isContestsPageEnabled) return null

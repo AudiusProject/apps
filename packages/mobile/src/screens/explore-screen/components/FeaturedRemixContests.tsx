@@ -19,7 +19,7 @@ export const FeaturedRemixContests = () => {
   const { spacing } = useTheme()
   const { InViewWrapper, inView } = useDeferredElement()
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS_PAGE
+    FeatureFlags.CONTESTS
   )
 
   const { data: exploreContent, isPending: isExplorePending } =

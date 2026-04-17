@@ -25,7 +25,7 @@ export const FeaturedRemixContestsSection = () => {
   })
   const isMobile = useIsMobile()
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS_PAGE
+    FeatureFlags.CONTESTS
   )
 
   if (isError || (isSuccess && !data?.featuredRemixContests?.length)) {

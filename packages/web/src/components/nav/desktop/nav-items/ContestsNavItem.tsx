@@ -13,7 +13,7 @@ const { CONTESTS_PAGE } = route
 
 export const ContestsNavItem = () => {
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS_PAGE
+    FeatureFlags.CONTESTS
   )
   const playingFromRoute = useNavSourcePlayingStatus()
 

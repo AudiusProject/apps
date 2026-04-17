@@ -16,7 +16,7 @@ export enum FeatureFlags {
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
   FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
-  CONTESTS_PAGE = 'contests_page'
+  CONTESTS = 'contests'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -27,7 +27,7 @@ export const environmentFlagDefaults: Record<
 > = {
   development: {
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
-    [FeatureFlags.CONTESTS_PAGE]: true
+    [FeatureFlags.CONTESTS]: true
   },
   production: {}
 }
@@ -50,5 +50,5 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
-  [FeatureFlags.CONTESTS_PAGE]: false
+  [FeatureFlags.CONTESTS]: false
 }

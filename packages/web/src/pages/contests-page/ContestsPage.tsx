@@ -28,7 +28,7 @@ const GRID_SKELETON_COUNT = 11
 export const ContestsPage = () => {
   const isMobile = useIsMobile()
   const { isEnabled: isContestsPageEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.CONTESTS_PAGE)
+    useFeatureFlag(FeatureFlags.CONTESTS)
   const { data, isPending, isError, isSuccess } = useAllRemixContests(
     undefined,
     { enabled: isContestsPageEnabled }

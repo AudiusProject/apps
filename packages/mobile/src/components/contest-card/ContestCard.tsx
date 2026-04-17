@@ -71,6 +71,60 @@ type NavigationProp = NativeStackNavigationProp<AppTabScreenParamList>
 
 const COVER_HEIGHT = 96
 
+/**
+ * The mobile Skeleton component fills its parent via position:absolute, so each
+ * skeleton placeholder needs a relatively-positioned sizing container.
+ */
+const SkeletonBlock = ({
+  height,
+  width,
+  borderRadius
+}: {
+  height: number
+  width: number | `${number}%`
+  borderRadius?: number
+}) => (
+  <View style={{ height, width, position: 'relative', borderRadius }}>
+    <Skeleton style={{ borderRadius }} />
+  </View>
+)
+
+export const ContestCardSkeleton = (
+  props: { variant?: ContestCardVariant } & Omit<PaperProps, 'variant'>
+) => {
+  return (
+    <Paper
+      border='default'
+      shadow='mid'
+      style={{ overflow: 'hidden', borderRadius: 14 }}
+      {...props}
+    >
+      <View
+        style={{ height: COVER_HEIGHT, width: '100%', position: 'relative' }}
+      >
+        <Skeleton />
+      </View>
+      <Flex direction='column' gap='l' p='xl'>
+        <Flex direction='row' gap='s' alignItems='center'>
+          <SkeletonBlock height={40} width={40} borderRadius={20} />
+          <Flex direction='column' gap='2xs' style={{ flex: 1, minWidth: 0 }}>
+            <SkeletonBlock height={12} width='30%' />
+            <SkeletonBlock height={18} width='60%' />
+          </Flex>
+        </Flex>
+        <Divider orientation='horizontal' />
+        <Flex direction='column' gap='s'>
+          <SkeletonBlock height={28} width='80%' />
+          <Flex direction='row' gap='s'>
+            <SkeletonBlock height={22} width={72} />
+            <SkeletonBlock height={22} width={120} />
+          </Flex>
+        </Flex>
+      </Flex>
+    </Paper>
+  )
+}
+
 const Pill = ({
   label,
   tone = 'subdued'
