@@ -252,8 +252,8 @@ const SearchExplorePage = ({
             <RecentlyPlayedSection />
           ) : null}
           {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
-          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
           {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
           {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
           {showUserContent ? <ArtistSpotlightSection /> : null}
           {showUserContent ? <LabelSpotlightSection /> : null}

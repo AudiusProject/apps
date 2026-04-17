@@ -17,7 +17,7 @@ const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
 // Height below the status bar. The avatar is 80px tall and is positioned so
 // it extends ~32px below the cover photo, matching the Figma spec.
-const COVER_PHOTO_CONTENT_HEIGHT = 96
+export const COVER_PHOTO_CONTENT_HEIGHT = 96
 
 const useStyles = makeStyles(({ spacing }) => ({
   darkOverlay: {

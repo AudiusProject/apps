@@ -24,6 +24,7 @@ import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
 import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable } from 'components/tracks-table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useMainContentRef } from 'pages/MainContentContext'
@@ -161,9 +162,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   // useMemo must be called before any conditional returns
   const tracksTableColumns = useMemo(() => {
     const columns = [
-      'playButton',
+      isAlbum ? 'playButton' : undefined,
       'trackName',
-      isAlbum ? undefined : 'artistName',
       isAlbum ? 'date' : 'addedDate',
       'length',
       areAllTracksPremium ? undefined : 'plays',
@@ -300,7 +300,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       fromOpacity={1}
       scrollableSearch
     >
-      <Paper column mb='unit-10' css={{ minWidth: 774 }}>
+      <Paper column mb='unit-10'>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
         {!pageLoading && isEmpty ? (
@@ -333,6 +333,12 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               onClickPurchase={openPurchaseModal}
               onReorder={onReorderTracks}
               onSort={onSortTracks}
+              showArtistInTrackNameColumn={!isAlbum}
+              responsiveColumns={
+                isAlbum
+                  ? RESPONSIVE_TABLE_POLICIES.collectionAlbumTracks
+                  : RESPONSIVE_TABLE_POLICIES.collectionPlaylistTracks
+              }
               isReorderable={
                 accountUserId !== null &&
                 accountUserId === playlistOwnerId &&
@@ -353,7 +359,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       </Paper>
 
       {playlistId != null && isOwner && !isAlbum ? (
-        <Flex column gap='2xl' pv='2xl' w='100%' css={{ minWidth: 774 }}>
+        <Flex column gap='2xl' pv='2xl' w='100%'>
           <Divider />
           <SuggestedTracks collectionId={playlistId} />
         </Flex>

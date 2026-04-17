@@ -1,4 +1,5 @@
 export { Table, alphaSorter, dateSorter, numericSorter } from './Table'
+export { COLUMN_WIDTHS } from './columnWidths'
 export { OverflowMenuButton } from './components/OverflowMenuButton'
 export { TableFavoriteButton } from './components/TableFavoriteButton'
 export { TablePlayButton } from './components/TablePlayButton'

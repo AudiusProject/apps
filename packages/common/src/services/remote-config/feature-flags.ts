@@ -15,7 +15,8 @@ export enum FeatureFlags {
   REACT_QUERY_SYNC = 'react_query_sync',
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
-  FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting'
+  FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
+  CONTESTS = 'contests'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -25,7 +26,8 @@ export const environmentFlagDefaults: Record<
   Partial<FlagDefaults>
 > = {
   development: {
-    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true
+    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
+    [FeatureFlags.CONTESTS]: true
   },
   production: {}
 }
@@ -47,5 +49,6 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.REACT_QUERY_SYNC]: false,
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
-  [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false
+  [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
+  [FeatureFlags.CONTESTS]: false
 }

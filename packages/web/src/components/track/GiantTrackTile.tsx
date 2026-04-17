@@ -35,7 +35,6 @@ import {
   IconKebabHorizontal,
   IconShare,
   IconRocket,
-  Button,
   IconButton,
   MusicBadge,
   Paper,
@@ -73,11 +72,6 @@ import { TrackDogEar } from './TrackDogEar'
 import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
 
-const BUTTON_COLLAPSE_WIDTHS = {
-  first: 1095,
-  second: 1190,
-  third: 1286
-}
 // Toast timeouts in ms
 const REPOST_TIMEOUT = 1000
 const SAVED_TIMEOUT = 1000
@@ -292,40 +286,45 @@ export const GiantTrackTile = ({
     useEarlyReleaseConfirmationModal()
 
   const renderMakePublicButton = () => {
+    if (!(isUnlisted || isPublishing) || !isOwner) {
+      return null
+    }
+
     let text = messages.isPublishing
     if (isUnlisted && !isPublishing) {
       text = isScheduledRelease ? messages.releaseNow : messages.makePublic
     }
 
     return (
-      (isUnlisted || isPublishing) &&
-      isOwner && (
-        <Button
-          variant='secondary'
-          isLoading={isPublishing}
-          iconLeft={IconRocket}
-          widthToHideText={BUTTON_COLLAPSE_WIDTHS.second}
-          onClick={() => {
-            if (isScheduledRelease) {
-              openEarlyReleaseConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            } else {
-              openPublishConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            }
-          }}
-        >
-          {text}
-        </Button>
-      )
+      <Tooltip text={text}>
+        <span>
+          <IconButton
+            aria-label={text}
+            icon={IconRocket}
+            color='subdued'
+            size='2xl'
+            isLoading={isPublishing}
+            disabled={isPublishing}
+            onClick={() => {
+              if (isScheduledRelease) {
+                openEarlyReleaseConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              } else {
+                openPublishConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              }
+            }}
+          />
+        </span>
+      </Tooltip>
     )
   }
 
@@ -480,6 +479,22 @@ export const GiantTrackTile = ({
   }
 
   const trendingRank = useTrackRank(trackId)
+  const renderBadges = () => (
+    <>
+      {trendingRank ? (
+        <MusicBadge color='blue' icon={IconTrending}>
+          {trendingRank}
+        </MusicBadge>
+      ) : null}
+      {shouldShowScheduledRelease ? (
+        <MusicBadge variant='accent' icon={IconCalendarMonth}>
+          {messages.releases(releaseDate)}
+        </MusicBadge>
+      ) : isUnlisted ? (
+        <MusicBadge icon={IconVisibilityHidden}>{messages.hidden}</MusicBadge>
+      ) : null}
+    </>
+  )
 
   return (
     <Paper
@@ -487,89 +502,111 @@ export const GiantTrackTile = ({
       w='100%'
       justifyContent='center'
       mh='auto'
-      css={{ maxWidth: 1080, textAlign: 'left' }}
+      css={{ maxWidth: 1080, textAlign: 'left', containerType: 'inline-size' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
-      <Flex p='l' gap='xl'>
-        <GiantArtwork
-          trackId={trackId}
-          coSign={coSign}
-          callback={onArtworkLoad}
-        />
-        <Flex
-          column
-          justifyContent='space-between'
-          flex={1}
-          css={{ minWidth: '386px', flexBasis: '386px' }}
-        >
-          <Flex column gap='2xl'>
-            <Flex column gap='xl'>
-              <Flex column gap='l' alignItems='flex-start'>
+      <div className={styles.topSectionWrapper}>
+        <div className={styles.topSection}>
+          <div className={styles.typeLabelCompact}>
+            {renderCardTitle(cn(fadeIn))}
+          </div>
+          <div className={cn(fadeIn, styles.badgesSectionCompact)}>
+            {renderBadges()}
+          </div>
+          <div className={styles.artworkSection}>
+            <GiantArtwork
+              trackId={trackId}
+              coSign={coSign}
+              callback={onArtworkLoad}
+            />
+          </div>
+          <Flex column gap='xl' className={styles.infoSection}>
+            <Flex column gap='l' className={styles.titleArtistSection}>
+              <div className={styles.typeLabelRow}>
                 {renderCardTitle(cn(fadeIn))}
-                <Box>
-                  <Text variant='heading' size='xl' className={cn(fadeIn)}>
-                    {trackTitle}
-                  </Text>
-                  {isLoading && <Skeleton width='686px' height='96px' />}
-                </Box>
-                <Flex>
-                  {isLoading && <Skeleton width='200px' height='24px' />}
-                  <Text
-                    variant='title'
-                    strength='weak'
-                    tag='h2'
-                    className={cn(fadeIn)}
-                    css={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <Text color='subdued'>By </Text>
-                    <UserLink userId={userId} popover />
-                  </Text>
-                </Flex>
-                <div className={cn(fadeIn)}>
-                  <TrackStats
-                    trackId={trackId}
-                    scrollToCommentSection={scrollToCommentSection}
-                  />
-                </div>
+              </div>
+              <Box>
+                <Text
+                  variant='heading'
+                  size='xl'
+                  className={cn(fadeIn, styles.titleHeader)}
+                >
+                  {trackTitle}
+                </Text>
+                {isLoading && <Skeleton width='686px' height='96px' />}
+              </Box>
+              <Flex className={styles.artistRow}>
+                {isLoading && <Skeleton width='200px' height='24px' />}
+                <Text
+                  variant='title'
+                  strength='weak'
+                  tag='h2'
+                  className={cn(fadeIn)}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Text color='subdued'>By </Text>
+                  <UserLink userId={userId} popover />
+                </Text>
               </Flex>
-
-              <Flex gap='xl' alignItems='center' className={cn(fadeIn)}>
-                {showPlay ? (
-                  <PlayPauseButton
-                    disabled={!hasStreamAccess}
-                    playing={playing && !previewing}
-                    onPlay={onPlay}
-                    trackId={trackId}
-                  />
-                ) : null}
-                {showPreview ? (
-                  <PlayPauseButton
-                    playing={playing && previewing}
-                    onPlay={onPreview}
-                    trackId={trackId}
-                    isPreview
-                  />
-                ) : null}
-                {isLongFormContent ? (
-                  <GiantTrackTileProgressInfo
-                    duration={duration}
-                    trackId={trackId}
-                  />
-                ) : (
-                  renderListenCount()
+              <div
+                className={cn(
+                  fadeIn,
+                  styles.trackStatsRow,
+                  styles.statsDesktop
                 )}
-              </Flex>
+              >
+                <TrackStats
+                  trackId={trackId}
+                  scrollToCommentSection={scrollToCommentSection}
+                  className={styles.headerTrackStats}
+                />
+              </div>
+            </Flex>
+
+            <Flex
+              gap='xl'
+              alignItems='center'
+              className={cn(fadeIn, styles.playSection)}
+            >
+              {showPlay ? (
+                <PlayPauseButton
+                  className={styles.playbackButton}
+                  disabled={!hasStreamAccess}
+                  playing={playing && !previewing}
+                  onPlay={onPlay}
+                  trackId={trackId}
+                />
+              ) : null}
+              {showPreview ? (
+                <PlayPauseButton
+                  className={styles.playbackButton}
+                  playing={playing && previewing}
+                  onPlay={onPreview}
+                  trackId={trackId}
+                  isPreview
+                />
+              ) : null}
+              {isLongFormContent ? (
+                <GiantTrackTileProgressInfo
+                  duration={duration}
+                  trackId={trackId}
+                />
+              ) : (
+                <div className={styles.listenCountDesktop}>
+                  {renderListenCount()}
+                </div>
+              )}
             </Flex>
           </Flex>
           {isUnlisted && !isOwner ? null : (
             <Flex
               gap='2xl'
               alignItems='center'
-              className={cn(fadeIn)}
+              className={cn(fadeIn, styles.actionsSection)}
               role='group'
               aria-label={messages.actionGroupLabel}
             >
@@ -596,28 +633,9 @@ export const GiantTrackTile = ({
               </span>
             </Flex>
           )}
-        </Flex>
-        <Flex
-          gap='s'
-          justifyContent='flex-end'
-          css={{ position: 'absolute', right: 'var(--harmony-unit-6)' }}
-        >
-          {trendingRank ? (
-            <MusicBadge color='blue' icon={IconTrending}>
-              {trendingRank}
-            </MusicBadge>
-          ) : null}
-          {shouldShowScheduledRelease ? (
-            <MusicBadge variant='accent' icon={IconCalendarMonth}>
-              {messages.releases(releaseDate)}
-            </MusicBadge>
-          ) : isUnlisted ? (
-            <MusicBadge icon={IconVisibilityHidden}>
-              {messages.hidden}
-            </MusicBadge>
-          ) : null}
-        </Flex>
-      </Flex>
+          <div className={styles.badgesSection}>{renderBadges()}</div>
+        </div>
+      </div>
 
       {isStreamGated && streamConditions ? (
         <Box p='l' pb='xl' w='100%' backgroundColor='surface1'>
@@ -641,6 +659,14 @@ export const GiantTrackTile = ({
         className={cn(fadeIn)}
         gap='l'
       >
+        <div className={styles.statsInDescription}>
+          <TrackStats
+            trackId={trackId}
+            scrollToCommentSection={scrollToCommentSection}
+            showPlayCount
+            forceMobileStyle
+          />
+        </div>
         {description ? (
           <Flex column gap='m'>
             {/* Container with height transition */}

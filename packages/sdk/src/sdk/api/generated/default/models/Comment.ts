@@ -123,6 +123,12 @@ export interface Comment {
      */
     isMembersOnly?: boolean;
     /**
+     * Optional URL for a video attachment on this comment
+     * @type {string}
+     * @memberof Comment
+     */
+    videoUrl?: string | null;
+    /**
      * 
      * @type {boolean}
      * @memberof Comment
@@ -147,17 +153,11 @@ export interface Comment {
      */
     replies?: Array<ReplyComment>;
     /**
-     *
+     * 
      * @type {number}
      * @memberof Comment
      */
     parentCommentId?: number;
-    /**
-     *
-     * @type {string}
-     * @memberof Comment
-     */
-    videoUrl?: string;
 }
 
 /**
@@ -201,12 +201,12 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         'isArtistReacted': !exists(json, 'is_artist_reacted') ? undefined : json['is_artist_reacted'],
         'isTombstone': !exists(json, 'is_tombstone') ? undefined : json['is_tombstone'],
         'isMembersOnly': !exists(json, 'is_members_only') ? undefined : json['is_members_only'],
+        'videoUrl': !exists(json, 'video_url') ? undefined : json['video_url'],
         'isMuted': !exists(json, 'is_muted') ? undefined : json['is_muted'],
         'createdAt': json['created_at'],
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
         'replies': !exists(json, 'replies') ? undefined : ((json['replies'] as Array<any>).map(ReplyCommentFromJSON)),
         'parentCommentId': !exists(json, 'parent_comment_id') ? undefined : json['parent_comment_id'],
-        'videoUrl': !exists(json, 'video_url') ? undefined : json['video_url'],
     };
 }
 
@@ -233,12 +233,12 @@ export function CommentToJSON(value?: Comment | null): any {
         'is_artist_reacted': value.isArtistReacted,
         'is_tombstone': value.isTombstone,
         'is_members_only': value.isMembersOnly,
+        'video_url': value.videoUrl,
         'is_muted': value.isMuted,
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,
         'replies': value.replies === undefined ? undefined : ((value.replies as Array<any>).map(ReplyCommentToJSON)),
         'parent_comment_id': value.parentCommentId,
-        'video_url': value.videoUrl,
     };
 }
 

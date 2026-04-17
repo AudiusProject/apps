@@ -12,7 +12,6 @@ import { pick } from 'lodash'
 import styles from './CollectionHeader.module.css'
 import { OwnerActionButtons } from './OwnerActionButtons'
 import { ViewerActionButtons } from './ViewerActionButtons'
-import { BUTTON_COLLAPSE_WIDTHS } from './utils'
 
 const messages = {
   actionGroupLabel: 'collection actions',
@@ -80,10 +79,13 @@ export const CollectionActionButtons = (props: CollectionActionButtonProps) => {
       variant='primary'
       iconLeft={isPlaying ? IconPause : IconPlay}
       onClick={onPlay}
-      widthToHideText={BUTTON_COLLAPSE_WIDTHS.first}
       size='large'
+      className={styles.playbackButton}
+      aria-label={isPlaying ? messages.pause : messages.play}
     >
-      {isPlaying ? messages.pause : messages.play}
+      <span className={styles.playbackButtonLabel}>
+        {isPlaying ? messages.pause : messages.play}
+      </span>
     </Button>
   )
 
@@ -92,16 +94,20 @@ export const CollectionActionButtons = (props: CollectionActionButtonProps) => {
       variant='secondary'
       iconLeft={isPlaying ? IconPause : IconPlay}
       onClick={onPreview}
-      widthToHideText={BUTTON_COLLAPSE_WIDTHS.first}
       size='large'
+      className={styles.playbackButton}
+      aria-label={isPlaying ? messages.pause : messages.preview}
     >
-      {isPlaying ? messages.pause : messages.preview}
+      <span className={styles.playbackButtonLabel}>
+        {isPlaying ? messages.pause : messages.preview}
+      </span>
     </Button>
   )
 
   return (
     <Flex
       className={cn({
+        [styles.actionButtons]: true,
         [styles.show]: !tracksLoading,
         [styles.hide]: tracksLoading
       })}

@@ -1,8 +1,9 @@
-import { MouseEvent, useCallback, useMemo, useRef } from 'react'
+import { memo, MouseEvent, useCallback, useMemo, useRef } from 'react'
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import {
   ModalSource,
+  SquareSizes,
   Track,
   UID,
   UserTrack,
@@ -19,9 +20,13 @@ import { formatCount, formatSeconds, dayjs } from '@audius/common/utils'
 import {
   IconVisibilityHidden,
   IconLock,
+  IconPlay,
+  IconPause,
+  IconImage,
   Flex,
   IconUserFollowing,
   IconCart,
+  Artwork,
   Text,
   Tooltip
 } from '@audius/harmony'
@@ -33,6 +38,7 @@ import { useModalState } from 'common/hooks/useModalState'
 import { TextLink, UserLink } from 'components/link'
 import {
   Table,
+  COLUMN_WIDTHS,
   OverflowMenuButton,
   TableFavoriteButton,
   TablePlayButton,
@@ -43,6 +49,7 @@ import {
 } from 'components/table'
 import type { TableProps } from 'components/table/Table'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
+import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { isDescendantElementOf } from 'utils/domUtils'
 
 import styles from './TracksTable.module.css'
@@ -65,6 +72,43 @@ type RowInfo = UserTrack & {
 type TrackCell = Cell<RowInfo>
 
 type TrackRow = Row<RowInfo>
+
+type MiniTrackArtworkProps = {
+  trackId: number
+  isPlaying: boolean
+  isLocked: boolean
+}
+
+const MiniTrackArtwork = memo(
+  ({ trackId, isPlaying, isLocked }: MiniTrackArtworkProps) => {
+    const { imageUrl, hasNoArtwork } = useTrackCoverArt({
+      trackId,
+      size: SquareSizes.SIZE_150_BY_150
+    })
+
+    const IconComponent = hasNoArtwork
+      ? IconImage
+      : isLocked
+        ? IconLock
+        : isPlaying
+          ? IconPause
+          : IconPlay
+
+    return (
+      <div className={styles.inlineArtworkContainer}>
+        <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
+        <div
+          className={cn(styles.inlineArtworkIcon, {
+            [styles.inlineArtworkIconActive]: isPlaying
+          })}
+        >
+          <IconComponent size='m' color='staticWhite' />
+        </div>
+      </div>
+    )
+  }
+)
+MiniTrackArtwork.displayName = 'MiniTrackArtwork'
 
 export type TracksTableColumn =
   | 'addedDate'
@@ -103,6 +147,7 @@ type TracksTableProps = {
   onReorder?: (source: number, destination: number) => void
   onSort?: (...props: any[]) => void
   columns?: TracksTableColumn[]
+  showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
@@ -127,6 +172,7 @@ export const TracksTable = ({
   onClickRepost,
   playing = false,
   removeText,
+  showArtistInTrackNameColumn = false,
   userId,
   columns = defaultColumns,
   data,
@@ -134,103 +180,206 @@ export const TracksTable = ({
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
+  const activeIndexRef = useRef(activeIndex)
+  activeIndexRef.current = activeIndex
+  const playingRef = useRef(playing)
+  playingRef.current = playing
   const dispatch = useDispatch()
   const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
+  const gatedTrackStatusMapRef = useRef(gatedTrackStatusMap)
+  gatedTrackStatusMapRef.current = gatedTrackStatusMap
   const trackAccessMap = useGatedContentAccessMap(data)
+  const trackAccessMapRef = useRef(trackAccessMap)
+  trackAccessMapRef.current = trackAccessMap
+  const dataRef = useRef(data)
+  dataRef.current = data
+  const onClickRowRef = useRef(onClickRow)
+  onClickRowRef.current = onClickRow
+  const onClickFavoriteRef = useRef(onClickFavorite)
+  onClickFavoriteRef.current = onClickFavorite
+  const onClickRepostRef = useRef(onClickRepost)
+  onClickRepostRef.current = onClickRepost
+  const onClickRemoveRef = useRef(onClickRemove)
+  onClickRemoveRef.current = onClickRemove
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const [, setGatedModalVisibility] = useModalState('LockedContent')
 
   // Cell Render Functions
-  const renderPlayButtonCell = useCallback(
-    (cellInfo: TrackCell) => {
-      const index = cellInfo.row.index
-      const active = index === activeIndex
-      const track = cellInfo.row.original
-      const isTrackPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
-      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+  const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
+    const index = cellInfo.row.index
+    const active = index === activeIndexRef.current
+    const track = cellInfo.row.original
+    const isTrackPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+    const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
+      track.track_id
+    ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+    const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
-      return (
-        <TablePlayButton
-          className={cn(styles.tablePlayButton, { [styles.active]: active })}
-          paused={!playing}
-          playing={active}
-          hideDefault={false}
-          isTrackPremium={isTrackPremium}
-          isLocked={isLocked}
-        />
-      )
-    },
-    [playing, activeIndex, trackAccessMap]
-  )
+    return (
+      <TablePlayButton
+        className={cn(styles.tablePlayButton, { [styles.active]: active })}
+        paused={!playingRef.current}
+        playing={active}
+        hideDefault={false}
+        isTrackPremium={isTrackPremium}
+        isLocked={isLocked}
+      />
+    )
+  }, [])
 
   const renderTrackNameCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
       const index = cellInfo.row.index
-      const active = index === activeIndex
+      const active = index === activeIndexRef.current
+      const isTrackPlaying = active && playingRef.current
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
-
-      return (
-        <div className={styles.textContainer} css={{ overflow: 'hidden' }}>
-          {deleted ? (
-            <Text
-              variant='title'
-              size='s'
-              strength='weak'
-              css={{ display: 'block', lineHeight: '125%' }}
-              ellipses
-            >{`${track.name} [Deleted By Artist]`}</Text>
-          ) : (
-            <TextLink
-              to={deleted ? '' : track.permalink}
-              isActive={active}
-              textVariant='title'
-              size='s'
-              strength='weak'
-              css={{ display: 'block', lineHeight: '125%' }}
-              ellipses
-            >
-              {track.name ?? track.title}
-            </TextLink>
-          )}
-        </div>
-      )
-    },
-    [activeIndex]
-  )
-
-  const renderArtistNameCell = useCallback(
-    (cellInfo: TrackCell) => {
-      const { original: track, index } = cellInfo.row
-      const { user } = track
-      if (!user) {
-        return 'Unknown'
+      const user = track.user
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
       }
-      if (user?.is_deactivated) {
-        return `${user?.name} [Deactivated]`
-      }
+      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
-      return (
-        <div className={styles.artistCellContainer}>
+      const artistRow = showArtistInTrackNameColumn ? (
+        user?.is_deactivated ? (
+          <Text
+            variant='body'
+            size='s'
+            strength='default'
+            color='subdued'
+            css={{
+              display: 'block',
+              lineHeight: '125%',
+              width: '100%',
+              minWidth: 0
+            }}
+            ellipses
+          >
+            {`${user.name} [Deactivated]`}
+          </Text>
+        ) : user?.user_id ? (
           <UserLink
-            className={styles.textCell}
+            className={styles.stackedArtistText}
             userId={user.user_id}
             size='s'
-            strength='strong'
-            variant={index === activeIndex ? 'visible' : 'default'}
+            strength='default'
+            variant={active ? 'visible' : 'default'}
             badgeSize='xs'
             popover
           />
-        </div>
+        ) : (
+          <Text
+            variant='body'
+            size='s'
+            strength='default'
+            color='subdued'
+            css={{
+              display: 'block',
+              lineHeight: '125%',
+              width: '100%',
+              minWidth: 0
+            }}
+            ellipses
+          >
+            Unknown
+          </Text>
+        )
+      ) : null
+
+      return (
+        <Flex className={styles.trackInfoContainer}>
+          {showArtistInTrackNameColumn && track.track_id ? (
+            <MiniTrackArtwork
+              trackId={track.track_id}
+              isPlaying={isTrackPlaying}
+              isLocked={isLocked}
+            />
+          ) : null}
+          <Flex
+            direction='column'
+            justifyContent='center'
+            className={styles.textContainer}
+            css={{ overflow: 'hidden', width: '100%', minWidth: 0 }}
+          >
+            {deleted ? (
+              <Tooltip
+                text={`${track.name} [Deleted By Artist]`}
+                mount='page'
+                mouseEnterDelay={1}
+              >
+                <Text
+                  variant='title'
+                  size='s'
+                  strength='weak'
+                  css={{
+                    display: 'block',
+                    lineHeight: '125%',
+                    width: '100%',
+                    minWidth: 0
+                  }}
+                  ellipses
+                >{`${track.name} [Deleted By Artist]`}</Text>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                text={track.name ?? track.title}
+                mount='page'
+                mouseEnterDelay={1}
+              >
+                <TextLink
+                  to={deleted ? '' : track.permalink}
+                  isActive={active}
+                  textVariant='title'
+                  size='s'
+                  strength='weak'
+                  css={{
+                    display: 'block',
+                    lineHeight: '125%',
+                    width: '100%',
+                    minWidth: 0
+                  }}
+                  ellipses
+                >
+                  {track.name ?? track.title}
+                </TextLink>
+              </Tooltip>
+            )}
+            {artistRow}
+          </Flex>
+        </Flex>
       )
     },
-    [activeIndex]
+    [showArtistInTrackNameColumn]
   )
+
+  const renderArtistNameCell = useCallback((cellInfo: TrackCell) => {
+    const { original: track, index } = cellInfo.row
+    const { user } = track
+    if (!user) {
+      return 'Unknown'
+    }
+    if (user?.is_deactivated) {
+      return `${user?.name} [Deactivated]`
+    }
+
+    return (
+      <div className={styles.artistCellContainer}>
+        <UserLink
+          className={styles.textCell}
+          userId={user.user_id}
+          size='s'
+          strength='strong'
+          variant={index === activeIndexRef.current ? 'visible' : 'default'}
+          badgeSize='xs'
+          popover
+        />
+      </div>
+    )
+  }, [])
 
   const renderPlaysCell = useCallback(
     (cellInfo: TrackCell) => {
@@ -330,9 +479,11 @@ export const TracksTable = ({
   const renderFavoriteButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -352,23 +503,25 @@ export const TracksTable = ({
               className={cn(styles.tableActionButton, {
                 [styles.active]: track.has_current_user_saved
               })}
-              onClick={() => onClickFavorite?.(track)}
+              onClick={() => onClickFavoriteRef.current?.(track)}
               favorited={track.has_current_user_saved}
             />
           </div>
         </Tooltip>
       )
     },
-    [trackAccessMap, onClickFavorite, userId]
+    [userId]
   )
 
   const repostButtonRef = useRef<HTMLDivElement>(null)
   const renderRepostButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const deleted =
         track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
@@ -389,7 +542,7 @@ export const TracksTable = ({
                 [styles.active]: track.has_current_user_reposted
               })}
               onClick={(e) => {
-                onClickRepost?.(track)
+                onClickRepostRef.current?.(track)
                 e.stopPropagation()
               }}
               reposted={track.has_current_user_reposted}
@@ -398,7 +551,7 @@ export const TracksTable = ({
         </Tooltip>
       )
     },
-    [trackAccessMap, onClickRepost, userId]
+    [userId]
   )
 
   const overflowMenuRef = useRef<HTMLDivElement>(null)
@@ -407,9 +560,11 @@ export const TracksTable = ({
       const track = cellInfo.row.original
       const { stream_conditions: streamConditions, is_unlisted: isUnlisted } =
         track
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isOwner = track.owner_id === userId
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isDdex = !!track.ddex_app
@@ -461,7 +616,7 @@ export const TracksTable = ({
             includeEmbed: !isUnlisted,
             includeEdit: !disabledTrackEdit,
             includeAddToPlaylist: !isUnlisted || isOwner,
-            onRemove: onClickRemove,
+            onRemove: onClickRemoveRef.current,
             removeText
           }
 
@@ -481,15 +636,7 @@ export const TracksTable = ({
         </>
       )
     },
-    [
-      trackAccessMap,
-      shouldShowGatedType,
-      disabledTrackEdit,
-      isAlbumPage,
-      onClickRemove,
-      removeText,
-      userId
-    ]
+    [shouldShowGatedType, disabledTrackEdit, isAlbumPage, removeText, userId]
   )
 
   const onClickPremiumPill = useCallback(
@@ -516,13 +663,15 @@ export const TracksTable = ({
   const renderLockedButtonCell = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isLockedPremium =
         isLocked && isContentUSDCPurchaseGated(track.stream_conditions)
-      const gatedTrackStatus = gatedTrackStatusMap[track.track_id]
+      const gatedTrackStatus = gatedTrackStatusMapRef.current[track.track_id]
       const isOwner = track.owner_id === userId
 
       const deleted =
@@ -547,21 +696,17 @@ export const TracksTable = ({
         />
       )
     },
-    [
-      gatedTrackStatusMap,
-      onClickGatedPill,
-      onClickPremiumPill,
-      trackAccessMap,
-      userId
-    ]
+    [onClickGatedPill, onClickPremiumPill, userId]
   )
 
   const renderTrackActions = useCallback(
     (cellInfo: TrackCell) => {
       const track = cellInfo.row.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
       return (
@@ -582,7 +727,6 @@ export const TracksTable = ({
       )
     },
     [
-      trackAccessMap,
       renderFavoriteButtonCell,
       renderOverflowMenuCell,
       renderLockedButtonCell,
@@ -598,9 +742,12 @@ export const TracksTable = ({
         Header: 'Added',
         accessor: 'dateAdded',
         Cell: renderAddedDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Added',
         sorter: dateSorter('dateAdded'),
+        disableResizing: true,
         align: 'right'
       },
       artistName: {
@@ -608,10 +755,12 @@ export const TracksTable = ({
         Header: 'Artist',
         accessor: 'artist',
         Cell: renderArtistNameCell,
-        maxWidth: 300,
-        width: 120,
+        minWidth: COLUMN_WIDTHS.artistName,
+        width: COLUMN_WIDTHS.artistName,
+        maxWidth: COLUMN_WIDTHS.artistName,
         sortTitle: 'Artist Name',
         sorter: alphaSorter('artist'),
+        disableResizing: true,
         align: 'left'
       },
       date: {
@@ -619,9 +768,12 @@ export const TracksTable = ({
         Header: 'Date',
         accessor: 'date',
         Cell: renderDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Listened',
         sorter: dateSorter('date'),
+        disableResizing: true,
         align: 'right'
       },
       listenDate: {
@@ -629,9 +781,12 @@ export const TracksTable = ({
         Header: 'Played',
         accessor: 'dateListened',
         Cell: renderListenDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Listened',
         sorter: dateSorter('dateListened'),
+        disableResizing: true,
         align: 'right'
       },
       releaseDate: {
@@ -639,9 +794,12 @@ export const TracksTable = ({
         Header: 'Released',
         accessor: 'created_at',
         Cell: renderReleaseDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Released',
         sorter: dateSorter('created_at'),
+        disableResizing: true,
         align: 'right'
       },
       reposts: {
@@ -649,9 +807,12 @@ export const TracksTable = ({
         Header: 'Reposts',
         accessor: 'repost_count',
         Cell: renderRepostsCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Reposts',
         sorter: numericSorter('repost_count'),
+        disableResizing: true,
         align: 'right'
       },
       plays: {
@@ -659,18 +820,19 @@ export const TracksTable = ({
         Header: 'Plays',
         accessor: 'plays',
         Cell: renderPlaysCell,
-        maxWidth: 120,
-        width: 48,
-        minWidth: 48,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Plays',
         sorter: numericSorter('plays'),
+        disableResizing: true,
         align: 'right'
       },
       playButton: {
         id: 'playButton',
         Cell: renderPlayButtonCell,
-        minWidth: 48,
-        maxWidth: 48,
+        minWidth: COLUMN_WIDTHS.playButton,
+        maxWidth: COLUMN_WIDTHS.playButton,
         disableResizing: true,
         disableSortBy: true
       },
@@ -679,9 +841,12 @@ export const TracksTable = ({
         Header: 'Favorites',
         accessor: 'save_count',
         Cell: renderSavesCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Favorites',
         sorter: numericSorter('save_count'),
+        disableResizing: true,
         align: 'right'
       },
       comments: {
@@ -689,26 +854,29 @@ export const TracksTable = ({
         Header: 'Comments',
         accessor: 'comment_count',
         Cell: renderCommentsCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Comments',
         sorter: numericSorter('comment_count'),
+        disableResizing: true,
         align: 'right'
       },
       overflowActions: {
         id: 'trackActions',
         Cell: renderTrackActions,
-        minWidth: 140,
-        maxWidth: 140,
-        width: 140,
+        minWidth: COLUMN_WIDTHS.trackActions,
+        maxWidth: COLUMN_WIDTHS.trackActions,
+        width: COLUMN_WIDTHS.trackActions,
         disableResizing: true,
         disableSortBy: true
       },
       overflowMenu: {
         id: 'overflowMenu',
         Cell: renderOverflowMenuCell,
-        minWidth: 64,
-        maxWidth: 64,
-        width: 64,
+        minWidth: COLUMN_WIDTHS.overflowMenu,
+        maxWidth: COLUMN_WIDTHS.overflowMenu,
+        width: COLUMN_WIDTHS.overflowMenu,
         disableResizing: true,
         disableSortBy: true
       },
@@ -717,19 +885,23 @@ export const TracksTable = ({
         Header: 'Length',
         accessor: 'time',
         Cell: renderLengthCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Track Length',
         sorter: numericSorter('time'),
         disableSortBy: isVirtualized,
+        disableResizing: true,
         align: 'right'
       },
       trackName: {
         id: 'trackName',
-        Header: 'Track Name',
+        Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        maxWidth: 300,
-        width: 120,
+        minWidth: COLUMN_WIDTHS.artistName,
+        width: COLUMN_WIDTHS.artistName,
+        maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
         align: 'left'
@@ -739,15 +911,18 @@ export const TracksTable = ({
         Header: 'Saved',
         accessor: 'dateSaved',
         Cell: renderSavedDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Saved',
         sorter: dateSorter('dateSaved'),
+        disableResizing: true,
         align: 'right'
       },
       spacer: {
         id: 'spacer',
-        maxWidth: 24,
-        minWidth: 24,
+        maxWidth: COLUMN_WIDTHS.spacer,
+        minWidth: COLUMN_WIDTHS.spacer,
         disableSortBy: true,
         disableResizing: true
       }
@@ -780,9 +955,11 @@ export const TracksTable = ({
   const handleClickRow = useCallback(
     (e: MouseEvent<HTMLTableRowElement>, rowInfo: TrackRow, index: number) => {
       const track = rowInfo.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
+        .current[track.track_id] ?? {
+        isFetchingNFTAccess: false,
+        hasStreamAccess: true
+      }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
       const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
       const deleted =
@@ -794,28 +971,28 @@ export const TracksTable = ({
       ].some((ref) => isDescendantElementOf(e?.target, ref.current))
 
       if ((isLocked && !isPremium) || deleted || clickedActionButton) return
-      onClickRow?.(track, index)
+      onClickRowRef.current?.(track, index)
     },
-    [trackAccessMap, onClickRow]
+    []
   )
 
-  const getRowClassName = useCallback(
-    (rowIndex: number) => {
-      const track = data[rowIndex]
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-        track.track_id
-      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
-      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-      const deleted =
-        track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
-      const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      return cn(styles.tableRow, {
-        [styles.disabled]: deleted,
-        [styles.lockedRow]: isLocked && !deleted && !isPremium
-      })
-    },
-    [trackAccessMap, data]
-  )
+  const getRowClassName = useCallback((rowIndex: number) => {
+    const track = dataRef.current[rowIndex]
+    const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
+      track.track_id
+    ] ?? {
+      isFetchingNFTAccess: false,
+      hasStreamAccess: true
+    }
+    const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+    const deleted =
+      track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
+    const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+    return cn(styles.tableRow, {
+      [styles.disabled]: deleted,
+      [styles.lockedRow]: isLocked && !deleted && !isPremium
+    })
+  }, [])
 
   return (
     <Table

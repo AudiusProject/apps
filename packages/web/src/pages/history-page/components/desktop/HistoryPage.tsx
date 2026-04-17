@@ -21,7 +21,8 @@ import FilterInput from 'components/filter-input/FilterInput'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { dateSorter } from 'components/table'
-import { TrackTableLineup } from 'components/tracks-table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
+import { TrackTableLineup, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import { useMainContentRef } from 'pages/MainContentContext'
 
@@ -39,6 +40,15 @@ export type HistoryPageProps = {
 }
 
 const pageSize = 50
+const historyTableColumns: TracksTableColumn[] = [
+  'trackName',
+  'releaseDate',
+  'listenDate',
+  'length',
+  'plays',
+  'reposts',
+  'overflowActions'
+]
 
 export const HistoryPage = ({ title, description }: HistoryPageProps) => {
   const { spacing } = useTheme()
@@ -148,8 +158,11 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
         ) : (
           <TrackTableLineup
             lineupQueryData={lineupQueryData}
+            columns={historyTableColumns}
             userId={currentUserId}
             defaultSorter={defaultSorter}
+            showArtistInTrackNameColumn
+            responsiveColumns={RESPONSIVE_TABLE_POLICIES.historyTracks}
             scrollRef={mainContentRef}
             isVirtualized
             onSort={handleSort}

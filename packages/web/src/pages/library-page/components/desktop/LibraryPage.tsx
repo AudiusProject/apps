@@ -29,6 +29,7 @@ import FilterInput from 'components/filter-input/FilterInput'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { dateSorter } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import useTabs from 'hooks/useTabs/useTabs'
@@ -61,9 +62,7 @@ const messages = {
 }
 
 const tableColumns: TracksTableColumn[] = [
-  'playButton',
   'trackName',
-  'artistName',
   'releaseDate',
   'savedDate',
   'length',
@@ -142,7 +141,6 @@ const LibraryPage = () => {
   const getTracksTableData = (): [LibraryPageTrack[], number] => {
     let [data, activeIndex] = getFilteredData(entries)
     if (!hasReachedEnd) {
-      // Add in some empty rows to show user that more are loading in
       data = data.concat(new Array(5).fill({ kind: Kind.EMPTY }))
     }
     return [data, activeIndex]
@@ -270,6 +268,8 @@ const LibraryPage = () => {
           onSort={allTracksFetched ? onSortTracks : onSortChange}
           playing={queuedAndPlaying}
           activeIndex={activeIndex}
+          showArtistInTrackNameColumn
+          responsiveColumns={RESPONSIVE_TABLE_POLICIES.libraryTracks}
           scrollRef={mainContentRef}
           useLocalSort={allTracksFetched}
           fetchBatchSize={50}

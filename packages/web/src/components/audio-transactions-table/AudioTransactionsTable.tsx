@@ -9,17 +9,17 @@ import {
 import { dayjs } from '@audius/common/utils'
 import { wAUDIO } from '@audius/fixed-decimal'
 import { Tooltip } from '@audius/harmony'
-import cn from 'classnames'
 import { Cell, Row } from 'react-table'
 
-import { AudioTransactionIcon } from 'components/audio-transaction-icon'
 import { Table } from 'components/table'
 import { TableProps } from 'components/table/Table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 
 import styles from './AudioTransactionsTable.module.css'
 
 const transactionTypeLabelMap: Record<TransactionType, string> = {
   [TransactionType.TRANSFER]: '$AUDIO',
+  [TransactionType.TIP]: 'Tip',
   [TransactionType.CHALLENGE_REWARD]: '$AUDIO Reward Earned',
   [TransactionType.TRENDING_REWARD]: 'Trending Competition Award',
   [TransactionType.PURCHASE]: 'Purchased $AUDIO'
@@ -75,16 +75,13 @@ const renderTransactionTypeCell = (cellInfo: TransactionCell) => {
   const methodText =
     transactionMethodLabelMap[method as TransactionMethod] ?? ''
 
-  const isTransferType = transactionType === TransactionType.TRANSFER
+  const isMethodType =
+    transactionType === TransactionType.TRANSFER ||
+    transactionType === TransactionType.TIP
   return (
-    <>
-      <div className={styles.icon}>
-        <AudioTransactionIcon type={transactionType} method={method} />
-      </div>
-      <span className={styles.typeText}>
-        {`${typeText} ${isTransferType ? methodText : ''}`.trim()}
-      </span>
-    </>
+    <span className={styles.typeText}>
+      {`${typeText} ${isMethodType ? methodText : ''}`.trim()}
+    </span>
   )
 }
 
@@ -113,12 +110,7 @@ const renderChangeCell = (cellInfo: TransactionCell) => {
       })} $AUDIO`}
       mount={'body'}
     >
-      <div
-        className={cn(
-          styles.changeCell,
-          isChangePositive(tx) ? styles.increase : styles.decrease
-        )}
-      >
+      <div>
         {wAUDIO(BigInt(change)).toLocaleString('en-US', {
           maximumFractionDigits: 0
         })}
@@ -210,6 +202,8 @@ export const AudioTransactionsTable = ({
       columns={tableColumns}
       onClickRow={handleClickRow}
       isEmptyRow={isEmptyRow}
+      responsiveColumns={RESPONSIVE_TABLE_POLICIES.audioTransactions}
+      wrapperClassName={styles.tableWrapper}
       {...other}
     />
   )

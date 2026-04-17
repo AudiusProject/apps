@@ -9,6 +9,7 @@ import {
   CollectionsTable,
   CollectionsTableColumn
 } from 'components/collections-table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import styles from '../DashboardPage.module.css'
@@ -69,6 +70,7 @@ export const ArtistDashboardAlbumsTab = ({
         showMoreLimit={SHOW_MORE_LIMIT}
         totalRowCount={account.track_count}
         tableHeaderClassName={styles.tableHeader}
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.dashboardAlbums}
       />
     </Flex>
   )

@@ -50,8 +50,7 @@ const sortMethods: {
   [k in PurchasesTableSortMethod]: GetPurchasesSortMethodEnum
 } = {
   contentId: GetPurchasesSortMethodEnum.ContentTitle,
-  createdAt: GetPurchasesSortMethodEnum.Date,
-  sellerUserId: GetPurchasesSortMethodEnum.ArtistName
+  createdAt: GetPurchasesSortMethodEnum.Date
 }
 
 const sortDirections: {
