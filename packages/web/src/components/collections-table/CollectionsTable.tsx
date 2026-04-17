@@ -10,7 +10,13 @@ import cn from 'classnames'
 import { Cell, Row } from 'react-table'
 
 import { TextLink } from 'components/link'
-import { Table, alphaSorter, dateSorter, numericSorter } from 'components/table'
+import {
+  Table,
+  COLUMN_WIDTHS,
+  alphaSorter,
+  dateSorter,
+  numericSorter
+} from 'components/table'
 import type { TableProps } from 'components/table/Table'
 
 import styles from './CollectionsTable.module.css'
@@ -159,8 +165,8 @@ export const CollectionsTable = ({
         Header: 'Album Name',
         accessor: 'title',
         Cell: renderNameCell,
-        minWidth: 240,
-        width: 240,
+        minWidth: COLUMN_WIDTHS.artistName,
+        width: COLUMN_WIDTHS.artistName,
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Album Name',
         sorter: alphaSorter('title'),
@@ -171,9 +177,12 @@ export const CollectionsTable = ({
         Header: 'Released',
         accessor: 'created_at',
         Cell: renderReleaseDateCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Released',
         sorter: dateSorter('created_at'),
+        disableResizing: true,
         align: 'right'
       },
       reposts: {
@@ -181,9 +190,12 @@ export const CollectionsTable = ({
         Header: 'Reposts',
         accessor: 'repost_count',
         Cell: renderRepostsCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Reposts',
         sorter: numericSorter('repost_count'),
+        disableResizing: true,
         align: 'right'
       },
       saves: {
@@ -191,24 +203,27 @@ export const CollectionsTable = ({
         Header: 'Favorites',
         accessor: 'save_count',
         Cell: renderSavesCell,
-        maxWidth: 160,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Favorites',
         sorter: numericSorter('save_count'),
+        disableResizing: true,
         align: 'right'
       },
       overflowMenu: {
         id: 'overflowMenu',
         Cell: renderOverflowMenuCell,
-        minWidth: 64,
-        maxWidth: 64,
-        width: 64,
+        minWidth: COLUMN_WIDTHS.overflowMenu,
+        maxWidth: COLUMN_WIDTHS.overflowMenu,
+        width: COLUMN_WIDTHS.overflowMenu,
         disableResizing: true,
         disableSortBy: true
       },
       spacer: {
         id: 'spacer',
-        maxWidth: 24,
-        minWidth: 24,
+        maxWidth: COLUMN_WIDTHS.spacer,
+        minWidth: COLUMN_WIDTHS.spacer,
         disableSortBy: true,
         disableResizing: true
       }

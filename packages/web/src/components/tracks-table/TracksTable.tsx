@@ -38,6 +38,7 @@ import { useModalState } from 'common/hooks/useModalState'
 import { TextLink, UserLink } from 'components/link'
 import {
   Table,
+  COLUMN_WIDTHS,
   OverflowMenuButton,
   TableFavoriteButton,
   TablePlayButton,
@@ -305,35 +306,47 @@ export const TracksTable = ({
             css={{ overflow: 'hidden', width: '100%', minWidth: 0 }}
           >
             {deleted ? (
-              <Text
-                variant='title'
-                size='s'
-                strength='weak'
-                css={{
-                  display: 'block',
-                  lineHeight: '125%',
-                  width: '100%',
-                  minWidth: 0
-                }}
-                ellipses
-              >{`${track.name} [Deleted By Artist]`}</Text>
-            ) : (
-              <TextLink
-                to={deleted ? '' : track.permalink}
-                isActive={active}
-                textVariant='title'
-                size='s'
-                strength='weak'
-                css={{
-                  display: 'block',
-                  lineHeight: '125%',
-                  width: '100%',
-                  minWidth: 0
-                }}
-                ellipses
+              <Tooltip
+                text={`${track.name} [Deleted By Artist]`}
+                mount='page'
+                mouseEnterDelay={1}
               >
-                {track.name ?? track.title}
-              </TextLink>
+                <Text
+                  variant='title'
+                  size='s'
+                  strength='weak'
+                  css={{
+                    display: 'block',
+                    lineHeight: '125%',
+                    width: '100%',
+                    minWidth: 0
+                  }}
+                  ellipses
+                >{`${track.name} [Deleted By Artist]`}</Text>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                text={track.name ?? track.title}
+                mount='page'
+                mouseEnterDelay={1}
+              >
+                <TextLink
+                  to={deleted ? '' : track.permalink}
+                  isActive={active}
+                  textVariant='title'
+                  size='s'
+                  strength='weak'
+                  css={{
+                    display: 'block',
+                    lineHeight: '125%',
+                    width: '100%',
+                    minWidth: 0
+                  }}
+                  ellipses
+                >
+                  {track.name ?? track.title}
+                </TextLink>
+              </Tooltip>
             )}
             {artistRow}
           </Flex>
@@ -729,9 +742,9 @@ export const TracksTable = ({
         Header: 'Added',
         accessor: 'dateAdded',
         Cell: renderAddedDateCell,
-        minWidth: 104,
-        width: 104,
-        maxWidth: 104,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Added',
         sorter: dateSorter('dateAdded'),
         disableResizing: true,
@@ -742,9 +755,9 @@ export const TracksTable = ({
         Header: 'Artist',
         accessor: 'artist',
         Cell: renderArtistNameCell,
-        minWidth: 180,
-        width: 180,
-        maxWidth: 180,
+        minWidth: COLUMN_WIDTHS.artistName,
+        width: COLUMN_WIDTHS.artistName,
+        maxWidth: COLUMN_WIDTHS.artistName,
         sortTitle: 'Artist Name',
         sorter: alphaSorter('artist'),
         disableResizing: true,
@@ -755,9 +768,9 @@ export const TracksTable = ({
         Header: 'Date',
         accessor: 'date',
         Cell: renderDateCell,
-        minWidth: 104,
-        width: 104,
-        maxWidth: 104,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Listened',
         sorter: dateSorter('date'),
         disableResizing: true,
@@ -768,9 +781,9 @@ export const TracksTable = ({
         Header: 'Played',
         accessor: 'dateListened',
         Cell: renderListenDateCell,
-        minWidth: 104,
-        width: 104,
-        maxWidth: 104,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Listened',
         sorter: dateSorter('dateListened'),
         disableResizing: true,
@@ -781,9 +794,9 @@ export const TracksTable = ({
         Header: 'Released',
         accessor: 'created_at',
         Cell: renderReleaseDateCell,
-        minWidth: 104,
-        width: 104,
-        maxWidth: 104,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Released',
         sorter: dateSorter('created_at'),
         disableResizing: true,
@@ -794,9 +807,9 @@ export const TracksTable = ({
         Header: 'Reposts',
         accessor: 'repost_count',
         Cell: renderRepostsCell,
-        minWidth: 80,
-        width: 80,
-        maxWidth: 80,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Reposts',
         sorter: numericSorter('repost_count'),
         disableResizing: true,
@@ -807,9 +820,9 @@ export const TracksTable = ({
         Header: 'Plays',
         accessor: 'plays',
         Cell: renderPlaysCell,
-        minWidth: 80,
-        width: 80,
-        maxWidth: 80,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Plays',
         sorter: numericSorter('plays'),
         disableResizing: true,
@@ -818,8 +831,8 @@ export const TracksTable = ({
       playButton: {
         id: 'playButton',
         Cell: renderPlayButtonCell,
-        minWidth: 48,
-        maxWidth: 48,
+        minWidth: COLUMN_WIDTHS.playButton,
+        maxWidth: COLUMN_WIDTHS.playButton,
         disableResizing: true,
         disableSortBy: true
       },
@@ -828,9 +841,9 @@ export const TracksTable = ({
         Header: 'Favorites',
         accessor: 'save_count',
         Cell: renderSavesCell,
-        minWidth: 80,
-        width: 80,
-        maxWidth: 80,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Favorites',
         sorter: numericSorter('save_count'),
         disableResizing: true,
@@ -841,9 +854,9 @@ export const TracksTable = ({
         Header: 'Comments',
         accessor: 'comment_count',
         Cell: renderCommentsCell,
-        minWidth: 80,
-        width: 80,
-        maxWidth: 80,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Comments',
         sorter: numericSorter('comment_count'),
         disableResizing: true,
@@ -852,18 +865,18 @@ export const TracksTable = ({
       overflowActions: {
         id: 'trackActions',
         Cell: renderTrackActions,
-        minWidth: 120,
-        maxWidth: 120,
-        width: 120,
+        minWidth: COLUMN_WIDTHS.trackActions,
+        maxWidth: COLUMN_WIDTHS.trackActions,
+        width: COLUMN_WIDTHS.trackActions,
         disableResizing: true,
         disableSortBy: true
       },
       overflowMenu: {
         id: 'overflowMenu',
         Cell: renderOverflowMenuCell,
-        minWidth: 64,
-        maxWidth: 64,
-        width: 64,
+        minWidth: COLUMN_WIDTHS.overflowMenu,
+        maxWidth: COLUMN_WIDTHS.overflowMenu,
+        width: COLUMN_WIDTHS.overflowMenu,
         disableResizing: true,
         disableSortBy: true
       },
@@ -872,9 +885,9 @@ export const TracksTable = ({
         Header: 'Length',
         accessor: 'time',
         Cell: renderLengthCell,
-        minWidth: 80,
-        width: 80,
-        maxWidth: 80,
+        minWidth: COLUMN_WIDTHS.numeric,
+        width: COLUMN_WIDTHS.numeric,
+        maxWidth: COLUMN_WIDTHS.numeric,
         sortTitle: 'Track Length',
         sorter: numericSorter('time'),
         disableSortBy: isVirtualized,
@@ -886,8 +899,8 @@ export const TracksTable = ({
         Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        minWidth: 180,
-        width: 180,
+        minWidth: COLUMN_WIDTHS.artistName,
+        width: COLUMN_WIDTHS.artistName,
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
@@ -898,9 +911,9 @@ export const TracksTable = ({
         Header: 'Saved',
         accessor: 'dateSaved',
         Cell: renderSavedDateCell,
-        minWidth: 104,
-        width: 104,
-        maxWidth: 104,
+        minWidth: COLUMN_WIDTHS.date,
+        width: COLUMN_WIDTHS.date,
+        maxWidth: COLUMN_WIDTHS.date,
         sortTitle: 'Date Saved',
         sorter: dateSorter('dateSaved'),
         disableResizing: true,
@@ -908,8 +921,8 @@ export const TracksTable = ({
       },
       spacer: {
         id: 'spacer',
-        maxWidth: 24,
-        minWidth: 24,
+        maxWidth: COLUMN_WIDTHS.spacer,
+        minWidth: COLUMN_WIDTHS.spacer,
         disableSortBy: true,
         disableResizing: true
       }
