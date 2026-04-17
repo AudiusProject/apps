@@ -18,6 +18,7 @@ import {
   FeedNavItem,
   TrendingNavItem,
   ExploreNavItem,
+  ContestsNavItem,
   LibraryNavItem,
   MessagesNavItem,
   WalletNavItem,
@@ -116,6 +117,7 @@ export const LeftNav = (props: OwnProps) => {
               <TrendingNavItem />
               <FeedNavItem />
               <ExploreNavItem />
+              <ContestsNavItem />
               <LibraryNavItem />
               <MessagesNavItem />
               <WalletNavItem />

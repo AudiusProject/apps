@@ -1,6 +1,7 @@
 export { FeedNavItem } from './FeedNavItem'
 export { TrendingNavItem } from './TrendingNavItem'
 export { ExploreNavItem } from './ExploreNavItem'
+export { ContestsNavItem } from './ContestsNavItem'
 export { LibraryNavItem } from './LibraryNavItem'
 export { MessagesNavItem } from './MessagesNavItem'
 export { WalletNavItem } from './WalletNavItem'

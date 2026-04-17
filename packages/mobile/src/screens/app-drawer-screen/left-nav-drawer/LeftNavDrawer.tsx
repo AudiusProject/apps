@@ -13,6 +13,7 @@ import { AccountDetails } from './AccountDetails'
 import { VanityMetrics } from './VanityMetrics'
 import {
   ProfileNavItem,
+  ContestsNavItem,
   MessagesNavItem,
   WalletNavItem,
   FanClubsNavItem,
@@ -48,6 +49,7 @@ const WrappedLeftNavDrawer = () => {
         <AccountDetails />
         <VanityMetrics />
         <ProfileNavItem />
+        <ContestsNavItem />
         <MessagesNavItem />
         <WalletNavItem />
         <FanClubsNavItem />
