@@ -40,16 +40,19 @@ import {
 } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
+import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
 import { FeelingLuckySection } from '../desktop/FeelingLuckySection'
 import { LabelSpotlightSection } from '../desktop/LabelSpotlightSection'
 import { MoodGrid } from '../desktop/MoodGrid'
+import { NewAlbumReleasesSection } from '../desktop/NewAlbumReleasesSection'
 import { QuickSearchGrid } from '../desktop/QuickSearchGrid'
 import { RecentSearchesSection } from '../desktop/RecentSearchesSection'
 import { RecentlyPlayedSection } from '../desktop/RecentlyPlayedSection'
 import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
+import { TopAlbumsThisMonthSection } from '../desktop/TopAlbumsThisMonthSection'
 import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
@@ -181,6 +184,7 @@ const SearchExplorePage = ({
   const isTracksTab = categoryKey === CategoryView.TRACKS
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
+  const showAlbumContent = categoryKey === CategoryView.ALL || isAlbumsTab
 
   return (
     <MobilePageContainer
@@ -252,6 +256,9 @@ const SearchExplorePage = ({
             <RecentlyPlayedSection />
           ) : null}
           {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+          {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}
+          {showAlbumContent ? <NewAlbumReleasesSection /> : null}
+          {showAlbumContent ? <BestSellingAlbumsSection /> : null}
           {showTrackContent ? <FeaturedRemixContestsSection /> : null}
           {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
           {isTracksTab ? <UndergroundTrendingTracksSection /> : null}

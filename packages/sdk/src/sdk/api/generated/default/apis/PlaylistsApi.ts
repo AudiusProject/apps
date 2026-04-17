@@ -92,6 +92,12 @@ export interface GetPlaylistTracksRequest {
     playlistId: string;
 }
 
+export interface GetPlaylistsNewReleasesRequest {
+    offset?: number;
+    limit?: number;
+    type?: GetPlaylistsNewReleasesTypeEnum;
+}
+
 export interface GetTrendingPlaylistsRequest {
     offset?: number;
     limit?: number;
@@ -505,6 +511,52 @@ export class PlaylistsApi extends runtime.BaseAPI {
      */
     async getPlaylistTracks(params: GetPlaylistTracksRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PlaylistTracksResponse> {
         const response = await this.getPlaylistTracksRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns recently released playlists or albums
+     */
+    async getPlaylistsNewReleasesRaw(params: GetPlaylistsNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.type !== undefined) {
+            queryParameters['type'] = params.type;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/playlists/new-releases`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingPlaylistsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns recently released playlists or albums
+     */
+    async getPlaylistsNewReleases(params: GetPlaylistsNewReleasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
+        const response = await this.getPlaylistsNewReleasesRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -1076,6 +1128,14 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
 }
 
+/**
+ * @export
+ */
+export const GetPlaylistsNewReleasesTypeEnum = {
+    Playlist: 'playlist',
+    Album: 'album'
+} as const;
+export type GetPlaylistsNewReleasesTypeEnum = typeof GetPlaylistsNewReleasesTypeEnum[keyof typeof GetPlaylistsNewReleasesTypeEnum];
 /**
  * @export
  */
