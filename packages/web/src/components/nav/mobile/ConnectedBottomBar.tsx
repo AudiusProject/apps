@@ -7,7 +7,9 @@ import { useLocation, useNavigate } from 'react-router'
 
 import {
   openSignOn,
-  showRequiresAccountToast
+  showRequiresAccountToast,
+  updateRouteOnCompletion,
+  updateRouteOnExit
 } from 'common/store/pages/signon/actions'
 import BottomBar from 'components/bottom-bar/BottomBar'
 import { getPathname } from 'utils/route'
@@ -69,9 +71,12 @@ const ConnectedBottomBar = () => {
   )
 
   const handleOpenSignOn = useCallback(() => {
+    const currentPath = getPathname(location)
+    dispatch(updateRouteOnCompletion(currentPath))
+    dispatch(updateRouteOnExit(currentPath))
     dispatch(openSignOn(false))
     dispatch(showRequiresAccountToast())
-  }, [dispatch])
+  }, [dispatch, location])
 
   const goToFeed = useCallback(() => {
     if (!handle) {

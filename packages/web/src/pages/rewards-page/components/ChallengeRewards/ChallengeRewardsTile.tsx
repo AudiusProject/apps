@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { useCurrentAccountUser, useCurrentAccount } from '@audius/common/api'
+import {
+  useCurrentAccountUser,
+  useCurrentAccount,
+  useAccountStatus
+} from '@audius/common/api'
+import { Status } from '@audius/common/models'
 import {
   ChallengeName,
   ChallengeRewardID
 } from '@audius/common/src/models/AudioRewards'
-import { SETTINGS_PAGE } from '@audius/common/src/utils/route'
+import { REWARDS_PAGE, SETTINGS_PAGE } from '@audius/common/src/utils/route'
 import {
   audioRewardsPageActions,
   audioRewardsPageSelectors,
@@ -37,6 +42,7 @@ import { useNavigate } from 'react-router'
 import { useSetVisibility } from 'common/hooks/useModalState'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 import { getChallengeConfig } from 'pages/rewards-page/config'
 
@@ -46,6 +52,7 @@ import { ClaimAllRewardsPanel } from '../ClaimAllRewardsPanel'
 import { Tile } from '../Tile'
 
 import { RewardPanel } from './RewardPanel'
+import { useRewardIds } from './hooks/useRewardIds'
 
 const { getUserChallenges, getUserChallengesLoading } =
   audioRewardsPageSelectors
@@ -66,11 +73,16 @@ export const ChallengeRewardsTile = ({
   const userChallenges = useSelector(getUserChallenges)
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
+  const { data: accountStatus } = useAccountStatus()
+  const isAuthLoading =
+    accountStatus === Status.LOADING || accountStatus === Status.IDLE
+  const isAuthenticated = !isAuthLoading && !!currentUser
   const optimisticUserChallenges = useSelector((state: CommonState) =>
     getOptimisticUserChallenges(state, currentAccount, currentUser)
   )
   const [haveChallengesLoaded, setHaveChallengesLoaded] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
+  const remoteConfigRewardIds = useRewardIds({})
   const navigate = useNavigate()
   const { spacing, color } = useTheme()
   const { isVerified } = useTierAndVerifiedForUser(currentUser?.user_id)
@@ -91,12 +103,25 @@ export const ChallengeRewardsTile = ({
     dispatch(fetchUserChallenges())
   }, [dispatch])
 
-  const openModal = (modalType: ChallengeRewardsModalType) => {
-    dispatch(setChallengeRewardsModalType({ modalType }))
-    setVisibility('ChallengeRewards')(true)
-  }
+  const openModal = useRequiresAccountCallback(
+    (modalType: ChallengeRewardsModalType) => {
+      dispatch(setChallengeRewardsModalType({ modalType }))
+      setVisibility('ChallengeRewards')(true)
+    },
+    [dispatch, setVisibility],
+    undefined,
+    REWARDS_PAGE
+  )
 
   const rewardIdsSorted = useMemo(() => {
+    if (!isAuthenticated) {
+      // Show remote-config reward IDs for unauthenticated users, same as unverified view
+      return remoteConfigRewardIds.filter(
+        (id) =>
+          id !== ChallengeName.Referred && !!challengeRewardsConfig[id]?.title
+      )
+    }
+
     // Get all challenge IDs directly from userChallenges (from API)
     // userChallenges is keyed by challenge_id
     const allRewardIds = Object.keys(userChallenges).filter((id) => {
@@ -117,11 +142,17 @@ export const ChallengeRewardsTile = ({
     return allRewardIds.sort(
       makeOptimisticChallengeSortComparator(optimisticUserChallenges)
     )
-  }, [optimisticUserChallenges, userChallenges])
+  }, [
+    isAuthenticated,
+    remoteConfigRewardIds,
+    optimisticUserChallenges,
+    userChallenges
+  ])
 
   // Filter completed rewards based on toggle
   const filteredRewardIds = useMemo(() => {
-    if (showCompleted) {
+    // No disbursement data available without auth — show all
+    if (!isAuthenticated || showCompleted) {
       return rewardIdsSorted
     }
     return rewardIdsSorted.filter((id) => {
@@ -133,7 +164,12 @@ export const ChallengeRewardsTile = ({
           challenge.disbursed_amount > 0)
       return !hasDisbursed
     })
-  }, [rewardIdsSorted, optimisticUserChallenges, showCompleted])
+  }, [
+    isAuthenticated,
+    rewardIdsSorted,
+    optimisticUserChallenges,
+    showCompleted
+  ])
 
   // When verified, combine all rewards and sort by claimability
   // When not verified, separate into open-to-all and verified-only
@@ -234,7 +270,8 @@ export const ChallengeRewardsTile = ({
             </Box>
           ) : null}
         </Flex>
-        {userChallengesLoading && !haveChallengesLoaded ? (
+        {isAuthLoading ||
+        (isAuthenticated && userChallengesLoading && !haveChallengesLoaded) ? (
           <LoadingSpinner className={wm(styles.loadingRewardsTile)} />
         ) : (
           <>
@@ -290,7 +327,7 @@ export const ChallengeRewardsTile = ({
                     }}
                   >
                     <Text variant='body' size='s'>
-                      Required
+                      Verification Required
                     </Text>
                     <Flex
                       ph='s'

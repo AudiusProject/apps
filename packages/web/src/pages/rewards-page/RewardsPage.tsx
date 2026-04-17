@@ -14,13 +14,12 @@ import NavContext, {
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useRemoteVar } from 'hooks/useRemoteConfig'
-import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { BASE_URL } from 'utils/route'
 
 import styles from './RewardsPage.module.css'
 import Tiers from './Tiers'
 import { ChallengeRewardsTile } from './components/ChallengeRewards/ChallengeRewardsTile'
-const { REWARDS_PAGE, TRENDING_PAGE } = route
+const { REWARDS_PAGE } = route
 
 const messages = {
   title: 'Rewards & Perks',
@@ -31,8 +30,6 @@ const RewardsContent = () => {
   const audioFeaturesDegradedText = useRemoteVar(
     StringKeys.AUDIO_FEATURES_DEGRADED_TEXT
   )
-
-  useRequiresAccount(TRENDING_PAGE)
 
   return (
     <>

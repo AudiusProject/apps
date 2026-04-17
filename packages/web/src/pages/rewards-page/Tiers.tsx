@@ -150,14 +150,12 @@ const TierFeatureValue = ({
   feature,
   current,
   onClickDiscord,
-  showNoBalance,
   isMobileCard
 }: {
   tier: BadgeTier
   feature: TierFeature
   current?: boolean
   onClickDiscord: () => void
-  showNoBalance?: boolean
   isMobileCard?: boolean
 }) => {
   const { color } = useTheme()
@@ -170,7 +168,7 @@ const TierFeatureValue = ({
   if (feature === 'balance') {
     return (
       <Flex h={24} alignItems='center' justifyContent='center'>
-        {minAudio !== '0' || showNoBalance ? (
+        {minAudio !== '0' ? (
           <Text
             variant={isMobileCard ? 'body' : 'label'}
             size='s'
