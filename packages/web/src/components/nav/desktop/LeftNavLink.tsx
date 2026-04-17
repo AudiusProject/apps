@@ -61,6 +61,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     additionalPathMatches = [],
     leftIcon,
     rightIcon,
+    hasNotification,
     ...other
   } = props
   const location = useLocation()
@@ -97,7 +98,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
   if (isCollapsed && leftIcon) {
     return (
       <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
-        <CollapsedNavItem icon={leftIcon} isSelected={isSelected} disabled={disabled} />
+        <CollapsedNavItem icon={leftIcon} isSelected={isSelected} disabled={disabled} hasNotification={hasNotification} />
       </NavLink>
     )
   }
@@ -108,6 +109,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
         {...other}
         leftIcon={leftIcon}
         rightIcon={rightIcon}
+        hasNotification={hasNotification}
         isSelected={isSelected}
         css={{
           opacity: disabled ? 0.5 : 1,

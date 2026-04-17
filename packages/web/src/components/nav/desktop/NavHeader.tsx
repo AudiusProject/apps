@@ -12,7 +12,7 @@ import {
   IconAudiusLogoHorizontalNew,
   IconSettings
 } from '@audius/harmony'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 
@@ -73,6 +73,7 @@ const RestrictedLink = ({
 
 export const NavHeader = () => {
   const { isCollapsed } = useNavSidebar()
+  const { pathname } = useLocation()
 
   if (isCollapsed) {
     return (
@@ -93,7 +94,7 @@ export const NavHeader = () => {
             <NavHeaderButton
               icon={IconSettings}
               aria-label={messages.settingsLabel}
-              isActive={location.pathname === SETTINGS_PAGE}
+              isActive={pathname === SETTINGS_PAGE}
               size='m'
             />
           </RestrictedLink>
@@ -131,7 +132,7 @@ export const NavHeader = () => {
           <NavHeaderButton
             icon={IconSettings}
             aria-label={messages.settingsLabel}
-            isActive={location.pathname === SETTINGS_PAGE}
+            isActive={pathname === SETTINGS_PAGE}
           />
         </RestrictedLink>
         <NotificationsButton />

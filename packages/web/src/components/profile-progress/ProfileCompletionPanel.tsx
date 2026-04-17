@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useHasAccount, useIsAccountLoaded } from '@audius/common/api'
 import {
@@ -45,7 +45,7 @@ export const ProfileCompletionPanel = () => {
   })
   const [isTooltipDisabled, setIsTooltipDisabled] = useState(false)
 
-  const onDismiss = () => {
+  const onDismiss = useCallback(() => {
     // disable the tooltip before we dismiss,
     // otherwise it gets scaled in the dismiss animation
     // and looks super jenk
@@ -56,7 +56,7 @@ export const ProfileCompletionPanel = () => {
         localStorage.setItem('profile-completion-panel-dismissed', 'true')
       } catch {}
     }, 200)
-  }
+  }, [])
 
   const { isHidden, didCompleteThisSession, shouldNeverShow } =
     useProfileCompletionDismissal({

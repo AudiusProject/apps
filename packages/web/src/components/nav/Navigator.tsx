@@ -81,9 +81,16 @@ const Navigator = ({ className }: OwnProps) => {
 
     const handleMouseUp = (e: MouseEvent) => {
       const delta = e.clientX - dragStartX.current
-      const commit = dragStartCollapsed.current
-        ? delta <= SNAP_DELTA   // was collapsed: stay unless dragged right past threshold
-        : delta < -SNAP_DELTA  // was expanded: collapse only if dragged left past threshold
+      const absDelta = Math.abs(delta)
+      let commit: boolean
+      if (absDelta < SNAP_DELTA) {
+        // Treat as a click — toggle the sidebar
+        commit = !dragStartCollapsed.current
+      } else {
+        commit = dragStartCollapsed.current
+          ? delta <= SNAP_DELTA   // was collapsed: stay unless dragged right past threshold
+          : delta < -SNAP_DELTA  // was expanded: collapse only if dragged left past threshold
+      }
       setIsCollapsed(commit)
       setIsDragging(false)
     }
