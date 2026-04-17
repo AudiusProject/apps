@@ -7,7 +7,8 @@ import {
   useCoinBalance,
   useCurrentUserId,
   useQueryContext,
-  useUserCoins
+  useUserCoins,
+  USER_COINS_WALLET_LIST_PARAMS
 } from '@audius/common/api'
 import {
   useFormattedCoinBalance,
@@ -294,7 +295,8 @@ export const WalletCoinsList = () => {
   }, [])
 
   const { data: fanClubs, isPending: isLoadingCoins } = useUserCoins({
-    userId: currentUserId
+    userId: currentUserId,
+    ...USER_COINS_WALLET_LIST_PARAMS
   })
   const { data: artistOwnedCoin } = useArtistCreatedFanClub(currentUserId)
   const audioCoin = fanClubs?.find(

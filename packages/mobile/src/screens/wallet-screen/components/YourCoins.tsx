@@ -4,7 +4,8 @@ import {
   useArtistCreatedFanClub,
   useCurrentUserId,
   useQueryContext,
-  useUserCoins
+  useUserCoins,
+  USER_COINS_WALLET_LIST_PARAMS
 } from '@audius/common/api'
 import { buySellMessages, walletMessages } from '@audius/common/messages'
 import { AUDIO_TICKER } from '@audius/common/store'
@@ -97,7 +98,8 @@ export const YourCoins = () => {
   const { env } = useQueryContext()
 
   const { data: fanClubs, isPending: isLoadingCoins } = useUserCoins({
-    userId: currentUserId
+    userId: currentUserId,
+    ...USER_COINS_WALLET_LIST_PARAMS
   })
   const { data: artistOwnedCoin } = useArtistCreatedFanClub(currentUserId)
   const audioCoin = fanClubs?.find(

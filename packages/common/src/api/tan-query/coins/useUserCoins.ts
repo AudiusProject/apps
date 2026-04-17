@@ -8,6 +8,12 @@ import { QUERY_KEYS } from '../queryKeys'
 import { SelectableQueryOptions } from '../types'
 import { useQueryContext } from '../utils'
 
+/** Matches OpenAPI max; use for wallet-style lists that need one stable query key. */
+export const USER_COINS_WALLET_LIST_PARAMS = {
+  limit: 100,
+  offset: 0
+} as const
+
 export interface UseUserCoinsParams {
   userId: ID | undefined | null
   limit?: number

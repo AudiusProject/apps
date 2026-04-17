@@ -11,6 +11,7 @@ import {
   type UseAudioBalanceOptions,
   type UseUserCoinOptions
 } from '~/api'
+import { USER_COINS_WALLET_LIST_PARAMS } from '../coins/useUserCoins'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
 
@@ -71,7 +72,7 @@ export const useCoinBalance = ({
     !isAudio
 
   const userCoinsListQuery = useUserCoins(
-    { userId: effectiveUserId, limit: 100, offset: 0 },
+    { userId: effectiveUserId, ...USER_COINS_WALLET_LIST_PARAMS },
     {
       enabled:
         !!useListBalance &&
