@@ -628,6 +628,24 @@ entity_types_to_fetch = set(
 )
 
 
+def parse_metadata_json_dict(metadata: str, action: str, entity_type: str):
+    try:
+        json_metadata = json.loads(metadata)
+    except Exception as e:
+        logger.error(
+            f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
+        )
+        return None
+
+    if not isinstance(json_metadata, dict):
+        logger.error(
+            f"tasks | entity_manager.py | Invalid {action} {entity_type} metadata shape, expected object"
+        )
+        return None
+
+    return json_metadata
+
+
 def collect_entities_to_fetch(update_task, entity_manager_txs):
     entities_to_fetch: Dict[EntityType, Set] = defaultdict(set)
 
@@ -662,13 +680,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                 entities_to_fetch[EntityType.USER].add(user_id)
 
                 if action != Action.DELETE:
-                    try:
-                        json_metadata = json.loads(metadata)
-                    except Exception as e:
-                        logger.error(
-                            f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                        )
-                        # skip invalid metadata
+                    json_metadata = parse_metadata_json_dict(
+                        metadata, str(action), str(entity_type)
+                    )
+                    if not json_metadata:
                         continue
 
                     event_entity_type = json_metadata.get("data", {}).get("entity_type")
@@ -684,13 +699,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     or action == Action.UNPIN
                     or action == Action.REACT
                 ):
-                    try:
-                        json_metadata = json.loads(metadata)
-                    except Exception as e:
-                        logger.error(
-                            f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                        )
-                        # skip invalid metadata
+                    json_metadata = parse_metadata_json_dict(
+                        metadata, str(action), str(entity_type)
+                    )
+                    if not json_metadata:
                         continue
                     track_id = json_metadata.get("data", {}).get("entity_id")
                     entities_to_fetch[EntityType.TRACK].add(track_id)
@@ -734,13 +746,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                 entities_to_fetch[EntityType.DEVELOPER_APP].add(signer.lower())
                 entities_to_fetch[EntityType.USER_WALLET].add(signer.lower())
             if entity_type == EntityType.DEVELOPER_APP:
-                try:
-                    json_metadata = json.loads(metadata)
-                except Exception as e:
-                    logger.error(
-                        f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                    )
-                    # skip invalid metadata
+                json_metadata = parse_metadata_json_dict(
+                    metadata, str(action), str(entity_type)
+                )
+                if not json_metadata:
                     continue
 
                 raw_address = json_metadata.get("address", None)
@@ -763,13 +772,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                             "tasks | entity_manager.py | Missing address or valid app signature in metadata required for add developer app tx"
                         )
             if entity_type == EntityType.GRANT:
-                try:
-                    json_metadata = json.loads(metadata)
-                except Exception as e:
-                    logger.error(
-                        f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                    )
-                    # skip invalid metadata
+                json_metadata = parse_metadata_json_dict(
+                    metadata, str(action), str(entity_type)
+                )
+                if not json_metadata:
                     continue
 
                 raw_grantee_address = json_metadata.get("grantee_address", None)
@@ -799,13 +805,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                         (signer.lower(), raw_grantor_user_id)
                     )
             if entity_type == EntityType.DASHBOARD_WALLET_USER:
-                try:
-                    json_metadata = json.loads(metadata)
-                except Exception as e:
-                    logger.error(
-                        f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                    )
-                    # skip invalid metadata
+                json_metadata = parse_metadata_json_dict(
+                    metadata, str(action), str(entity_type)
+                )
+                if not json_metadata:
                     continue
 
                 raw_wallet = json_metadata.get("wallet", None)
@@ -865,13 +868,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     entities_to_fetch[EntityType.USER].add(user_id)
 
             if entity_type == EntityType.ENCRYPTED_EMAIL:
-                try:
-                    json_metadata = json.loads(metadata)
-                except Exception as e:
-                    logger.error(
-                        f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                    )
-                    # skip invalid metadata
+                json_metadata = parse_metadata_json_dict(
+                    metadata, str(action), str(entity_type)
+                )
+                if not json_metadata:
                     continue
 
                 # Add email owner's record to fetch
@@ -882,13 +882,10 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     )
 
             if entity_type == EntityType.EMAIL_ACCESS and action == Action.UPDATE:
-                try:
-                    json_metadata = json.loads(metadata)
-                except Exception as e:
-                    logger.error(
-                        f"tasks | entity_manager.py | Exception deserializing {action} {entity_type} event metadata: {e}"
-                    )
-                    # skip invalid metadata
+                json_metadata = parse_metadata_json_dict(
+                    metadata, str(action), str(entity_type)
+                )
+                if not json_metadata:
                     continue
 
                 # Add email access record to fetch
