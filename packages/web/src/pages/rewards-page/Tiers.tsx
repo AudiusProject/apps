@@ -76,7 +76,7 @@ const audioTierMapSvg: {
 
 const BADGE_LOCAL_STORAGE_KEY = 'last_badge_tier'
 
-const LEARN_MORE_URL = 'http://blog.audius.co/posts/community-meet-audio'
+const LEARN_MORE_URL = 'https://help.audius.co'
 
 const useShowConfetti = (tier: BadgeTier) => {
   // No tier or no local storage, never show confetti
