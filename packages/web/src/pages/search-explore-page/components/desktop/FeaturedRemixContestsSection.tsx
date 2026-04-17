@@ -38,7 +38,9 @@ export const FeaturedRemixContestsSection = () => {
     <Carousel
       ref={ref}
       title={
-        isContestsPageEnabled ? messages.contests : messages.featuredRemixContests
+        isContestsPageEnabled
+          ? messages.contests
+          : messages.featuredRemixContests
       }
     >
       {isContestsPageEnabled
