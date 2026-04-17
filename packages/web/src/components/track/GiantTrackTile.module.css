@@ -222,11 +222,6 @@
   top: 2px;
 }
 
-.makePublicButton {
-  width: 166px;
-  flex-shrink: 0;
-}
-
 .downloadableIconContainer {
   margin-left: 10px;
   position: relative;
@@ -351,7 +346,7 @@
     min-height: 0 !important;
   }
 
-  .artworkSection > div > div {
+  .artworkSection > div > :first-child {
     width: 100% !important;
     height: 100% !important;
   }

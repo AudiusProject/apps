@@ -35,7 +35,6 @@ import {
   IconKebabHorizontal,
   IconShare,
   IconRocket,
-  Button,
   IconButton,
   MusicBadge,
   Paper,
@@ -73,11 +72,6 @@ import { TrackDogEar } from './TrackDogEar'
 import { TrackMetadataList } from './TrackMetadataList'
 import { TrackStats } from './TrackStats'
 
-const BUTTON_COLLAPSE_WIDTHS = {
-  first: 1095,
-  second: 1190,
-  third: 1286
-}
 // Toast timeouts in ms
 const REPOST_TIMEOUT = 1000
 const SAVED_TIMEOUT = 1000
@@ -292,40 +286,45 @@ export const GiantTrackTile = ({
     useEarlyReleaseConfirmationModal()
 
   const renderMakePublicButton = () => {
+    if (!(isUnlisted || isPublishing) || !isOwner) {
+      return null
+    }
+
     let text = messages.isPublishing
     if (isUnlisted && !isPublishing) {
       text = isScheduledRelease ? messages.releaseNow : messages.makePublic
     }
 
     return (
-      (isUnlisted || isPublishing) &&
-      isOwner && (
-        <Button
-          variant='secondary'
-          isLoading={isPublishing}
-          iconLeft={IconRocket}
-          widthToHideText={BUTTON_COLLAPSE_WIDTHS.second}
-          onClick={() => {
-            if (isScheduledRelease) {
-              openEarlyReleaseConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            } else {
-              openPublishConfirmation({
-                contentType: 'track',
-                confirmCallback: () => {
-                  onMakePublic(trackId)
-                }
-              })
-            }
-          }}
-        >
-          {text}
-        </Button>
-      )
+      <Tooltip text={text}>
+        <span>
+          <IconButton
+            aria-label={text}
+            icon={IconRocket}
+            color='subdued'
+            size='2xl'
+            isLoading={isPublishing}
+            disabled={isPublishing}
+            onClick={() => {
+              if (isScheduledRelease) {
+                openEarlyReleaseConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              } else {
+                openPublishConfirmation({
+                  contentType: 'track',
+                  confirmCallback: () => {
+                    onMakePublic(trackId)
+                  }
+                })
+              }
+            }}
+          />
+        </span>
+      </Tooltip>
     )
   }
 

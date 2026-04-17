@@ -74,6 +74,8 @@ export const TrackStats = (props: TrackStatsProps) => {
 
   const isOwner = currentUserId === owner_id
 
+  if (is_unlisted) return null
+
   const handleClickReposts = () => {
     dispatch(
       userListActions.setUsers({
