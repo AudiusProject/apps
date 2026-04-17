@@ -422,9 +422,12 @@ export const PopupInternal = forwardRef<
                 const AnimatedDiv = animatedAny.div as any
                 return (
                   <AnimatedDiv
-                    className={cn({
-                      [styles.popup]: !disableDefaultStyles
-                    }, className)}
+                    className={cn(
+                      {
+                        [styles.popup]: !disableDefaultStyles
+                      },
+                      className
+                    )}
                     css={
                       disableDefaultStyles
                         ? undefined

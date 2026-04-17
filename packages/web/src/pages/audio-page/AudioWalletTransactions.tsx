@@ -61,7 +61,6 @@ const Disclaimer = () => {
 }
 
 export const AudioWalletTransactions = () => {
-  const [page, setPage] = useState(0)
   const [sortMethod, setSortMethod] =
     useState<GetAudioTransactionsSortMethodEnum>(
       GetAudioTransactionsSortMethodEnum.Date
@@ -74,18 +73,24 @@ export const AudioWalletTransactions = () => {
   const dispatch = useDispatch()
   const setVisibility = useSetVisibility()
 
+  const { data: audioTransactionsCount = 0, isPending: isCountLoading } =
+    useAudioTransactionsCount()
+
+  const requestedPageSize =
+    audioTransactionsCount > 0
+      ? audioTransactionsCount
+      : DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE
+
   const { data: audioTransactions = [], isPending: isTransactionsLoading } =
     useAudioTransactions(
       {
-        page,
+        page: 0,
+        pageSize: requestedPageSize,
         sortMethod,
         sortDirection
       },
       { refetchOnMount: 'always' }
     )
-
-  const { data: audioTransactionsCount = 0, isPending: isCountLoading } =
-    useAudioTransactionsCount()
 
   // Defaults: sort method = date, sort direction = desc
   const onSort = useCallback(
@@ -100,8 +105,6 @@ export const AudioWalletTransactions = () => {
           ? GetAudioTransactionsSortDirectionEnum.Asc
           : GetAudioTransactionsSortDirectionEnum.Desc
       setSortDirection(sortDirectionRes)
-      // Reset page when sorting changes
-      setPage(0)
     },
     [setSortMethod, setSortDirection]
   )
@@ -118,10 +121,6 @@ export const AudioWalletTransactions = () => {
     },
     [dispatch, setVisibility]
   )
-
-  const handleFetchPage = useCallback((newPage: number) => {
-    setPage(newPage)
-  }, [])
 
   const tableLoading = isTransactionsLoading || isCountLoading
   const isEmpty = audioTransactions.length === 0
@@ -140,11 +139,7 @@ export const AudioWalletTransactions = () => {
           loading={tableLoading}
           onSort={onSort}
           onClickRow={onClickRow}
-          fetchPage={handleFetchPage}
-          pageSize={DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE}
-          isPaginated
           showMoreLimit={AUDIO_TRANSACTIONS_SHOW_MORE_LIMIT}
-          totalRowCount={audioTransactionsCount}
           scrollRef={mainContentRef}
         />
       )}

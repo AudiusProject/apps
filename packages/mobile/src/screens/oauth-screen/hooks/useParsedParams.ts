@@ -26,12 +26,16 @@ export const useParsedParams = (search: string): ParsedParams => {
   } = queryString.parse(search)
 
   const scope = collapseScope(rawScope)
-  const apiKey =
-    typeof api_key === 'string'
-      ? api_key
-      : typeof client_id === 'string'
-        ? client_id
-        : null
+  const apiKey = (() => {
+    const raw =
+      typeof api_key === 'string'
+        ? api_key
+        : typeof client_id === 'string'
+          ? client_id
+          : null
+    if (raw?.toLowerCase().startsWith('0x')) return raw.slice(2)
+    return raw
+  })()
   const redirectUriStr = typeof redirectUri === 'string' ? redirectUri : null
 
   let error: string | null = null

@@ -239,6 +239,8 @@ function combineMetadata(
   // Set download & hidden status
   metadata.is_downloadable = !!collectionMetadata.is_downloadable
 
+  // Marks child tracks so backend suppresses per-track follower create notifications.
+  metadata.is_playlist_upload = true
   metadata.is_unlisted = !!collectionMetadata.is_private
   if (collectionMetadata.is_private && collectionMetadata.field_visibility) {
     // Convert any undefined values to booleans

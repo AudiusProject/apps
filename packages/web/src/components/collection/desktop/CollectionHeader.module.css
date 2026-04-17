@@ -12,6 +12,21 @@
   text-align: left;
 }
 
+.topSection {
+  position: relative;
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr);
+  column-gap: var(--harmony-unit-6);
+  row-gap: var(--harmony-unit-6);
+  padding: var(--harmony-unit-4);
+  background-color: var(--harmony-white);
+}
+
+.artworkSection {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
 .coverArtWrapper {
   height: 272px;
   width: 272px;
@@ -31,8 +46,32 @@
 }
 
 .infoSection {
-  margin-left: 38px;
-  width: 100%;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.actionsSection {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.statsDesktop {
+  display: block;
+}
+
+.statsInDescription {
+  display: none;
+}
+
+.typeLabelCompact {
+  display: none;
+}
+
+.searchSection {
+  position: absolute;
+  right: var(--harmony-unit-4);
+  top: var(--harmony-unit-4);
 }
 
 .typeLabel {
@@ -81,5 +120,112 @@
 .searchInput {
   & label {
     background: none;
+  }
+}
+
+@container (max-width: 740px) {
+  .topSection {
+    grid-template-columns: 1fr;
+    row-gap: var(--harmony-unit-5);
+    padding: var(--harmony-unit-6);
+  }
+
+  .typeLabelCompact {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+  }
+
+  .artworkSection {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  .coverArtWrapper {
+    width: 224px;
+    height: 224px;
+    min-width: 224px;
+    min-height: 224px;
+  }
+
+  .infoSection {
+    grid-column: 1;
+    grid-row: 3;
+    align-items: center;
+  }
+
+  .typeLabelRow {
+    display: none;
+  }
+
+  .titleArtistSection {
+    align-items: center;
+  }
+
+  .titleArtistSection .editableTitle {
+    justify-content: center;
+  }
+
+  .titleHeader {
+    text-align: center !important;
+  }
+
+  .artistRow {
+    justify-content: center;
+    text-align: center !important;
+  }
+
+  .actionsSection {
+    grid-column: 1;
+    grid-row: 4;
+    width: 100%;
+  }
+
+  .actionButtons {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--harmony-unit-2);
+  }
+
+  .actionButtons > :first-child {
+    flex: 1 0 100%;
+    width: 100%;
+  }
+
+  .playbackButtonLabel {
+    display: inline;
+  }
+
+  .playbackButton {
+    height: var(--harmony-unit-12) !important;
+    font-size: var(--harmony-font-l) !important;
+    line-height: var(--harmony-line-height-l) !important;
+    padding-inline: var(--harmony-unit-4) !important;
+  }
+
+  .playbackButton svg {
+    width: var(--harmony-unit-5) !important;
+    height: var(--harmony-unit-5) !important;
+  }
+
+  .actionButtons > :not(:first-child) {
+    transform: scale(0.94);
+    transform-origin: center;
+  }
+
+  .statsDesktop {
+    display: none;
+  }
+
+  .statsInDescription {
+    display: block;
+  }
+
+  .searchSection {
+    display: none;
   }
 }

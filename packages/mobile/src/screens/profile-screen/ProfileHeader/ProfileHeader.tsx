@@ -9,6 +9,7 @@ import {
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { LayoutAnimation } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useToggle } from 'react-use'
 
 import { Box, Divider, Flex, useTheme } from '@audius/harmony-native'
@@ -20,6 +21,7 @@ import { BuyFanClubButton } from '../BuyFanClubButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
+import { ProfileScrollBridge } from '../ProfileScrollContext'
 
 import { ArtistProfilePicture } from './ArtistProfilePicture'
 import { Bio } from './Bio'
@@ -101,15 +103,20 @@ export const ProfileHeader = memo(() => {
   }, [isExpanded, setIsExpanded])
 
   const { spacing } = useTheme()
+  const insets = useSafeAreaInsets()
+
+  const hasFanClubButton = !isFanClubLoading && !!userId && !!fanClub?.mint
+  const hasBottomSection = hasUserFollowed || hasFanClubButton
 
   return (
     <>
+      <ProfileScrollBridge />
       <ProfileCoverPhoto />
       <Box
         style={css({
           position: 'absolute',
-          top: spacing.unit13,
-          left: spacing.unit3,
+          top: insets.top + spacing.unit12,
+          left: spacing.unit4,
           zIndex: zIndex.PROFILE_PAGE_PROFILE_PICTURE
         })}
       >
@@ -145,15 +152,19 @@ export const ProfileHeader = memo(() => {
               onPress={handleToggleExpand}
             />
           ) : null}
-          <Divider mh={-12} />
-          {!hasUserFollowed ? null : (
-            <ArtistRecommendations onClose={handleCloseArtistRecs} />
-          )}
-          <Flex pointerEvents='box-none' mt='s' gap='s'>
-            {!isFanClubLoading && userId && fanClub?.mint ? (
-              <BuyFanClubButton userId={userId} />
-            ) : null}
-          </Flex>
+          {hasBottomSection ? (
+            <>
+              <Divider mh={-12} />
+              {!hasUserFollowed ? null : (
+                <ArtistRecommendations onClose={handleCloseArtistRecs} />
+              )}
+              {hasFanClubButton ? (
+                <Flex pointerEvents='box-none' mt='s' gap='s'>
+                  <BuyFanClubButton userId={userId!} />
+                </Flex>
+              ) : null}
+            </>
+          ) : null}
         </OnlineOnly>
       </Flex>
     </>

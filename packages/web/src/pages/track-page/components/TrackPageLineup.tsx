@@ -146,11 +146,11 @@ export const TrackPageLineup = ({
   return (
     <Flex
       direction='column'
-      alignItems={isCommentingEnabled && isDesktop ? 'flex-start' : 'center'}
+      alignItems={isCommentingEnabled ? 'flex-start' : 'center'}
       gap='2xl'
       flex={1}
       css={{
-        minWidth: 330,
+        minWidth: isCommentingEnabled ? 330 : 0,
         maxWidth: isCommentingEnabled ? '100%' : 774
       }}
     >

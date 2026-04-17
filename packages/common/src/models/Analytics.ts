@@ -288,6 +288,7 @@ export enum Name {
   // Playback
   PLAYBACK_PLAY = 'Playback: Play',
   PLAYBACK_PAUSE = 'Playback: Pause',
+  PLAYLIST_PLAY = 'Playlist: Play',
   // Playback performance metrics
   BUFFERING_TIME = 'Buffering Time',
 
@@ -573,13 +574,13 @@ export enum Name {
   ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit',
 
   // Fan Clubs
-  BANNER_FAN_CLUBS_LAUNCH_CLICKED = 'Banner Fan Clubs Launch Clicked',
+  BANNER_FAN_CLUBS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
   BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
   BANNER_YAK_COIN_LAUNCH_CLICKED = 'Banner Yak Coin Launch Clicked',
 
   // Fan Club Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
-  LAUNCHPAD_HAS_EXISTING_FAN_CLUB = 'Launchpad: Has Existing Fan Club',
+  LAUNCHPAD_HAS_EXISTING_FAN_CLUB = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
   LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
   LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
@@ -968,7 +969,8 @@ export enum FollowSource {
   EMPTY_FEED = 'empty feed',
   HOW_TO_UNLOCK_TRACK_PAGE = 'how to unlock track page',
   HOW_TO_UNLOCK_MODAL = 'how to unlock modal',
-  SIGN_UP = 'sign up'
+  SIGN_UP = 'sign up',
+  ARTIST_COIN_PURCHASE = 'artist coin purchase'
 }
 
 type Share = {
@@ -1474,11 +1476,21 @@ type PlaybackPlay = {
   id?: string
   isPreview?: boolean
   source: PlaybackSource
+  collectionId?: string
 }
 type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE
   id?: string
   source: PlaybackSource
+}
+
+type PlaylistPlay = {
+  eventName: Name.PLAYLIST_PLAY
+  id: string
+  source: PlaybackSource
+  isAlbum?: boolean
+  trackCount?: number
+  isPreview?: boolean
 }
 
 type BufferingTime = {
@@ -1564,7 +1576,7 @@ type SearchResultSelect = {
 // Explore
 export type ExploreSectionName =
   | 'Recommended Tracks'
-  | 'Fan Club Tracks'
+  | 'Artist Coin Tracks'
   | 'Recently Played'
   | 'Quick Search'
   | 'Featured Playlists'
@@ -3185,6 +3197,7 @@ export type AllTrackingEvents =
   | TrackPagePlayMore
   | PlaybackPlay
   | PlaybackPause
+  | PlaylistPlay
   | BufferingTime
   | Follow
   | Unfollow

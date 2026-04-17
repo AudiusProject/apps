@@ -3,6 +3,7 @@ import type { ReactElement } from 'react'
 import { useProfileUser } from '@audius/common/api'
 import { useIsArtist } from '@audius/common/hooks'
 import { ProfilePageTabs } from '@audius/common/store'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   IconAlbum,
@@ -15,6 +16,8 @@ import {
   CollapsibleTabNavigator
 } from 'app/components/top-tab-bar'
 import { useRoute } from 'app/hooks/useRoute'
+
+import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileNavOverlay'
 
 import { AlbumsTab } from './AlbumsTab'
 import { PlaylistsTab } from './PlaylistsTab'
@@ -38,6 +41,7 @@ export const ProfileTabNavigator = ({
   refreshing,
   onRefresh
 }: ProfileTabNavigatorProps) => {
+  const insets = useSafeAreaInsets()
   const { user_id } =
     useProfileUser({
       select: (user) => ({ user_id: user.user_id })
@@ -91,6 +95,7 @@ export const ProfileTabNavigator = ({
       <CollapsibleTabNavigator
         renderHeader={renderHeader}
         headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
+        minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
       >
         {trackScreen}
         {albumsScreen}
@@ -104,6 +109,7 @@ export const ProfileTabNavigator = ({
     <CollapsibleTabNavigator
       renderHeader={renderHeader}
       headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
+      minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
     >
       {repostsScreen}
       {playlistsScreen}

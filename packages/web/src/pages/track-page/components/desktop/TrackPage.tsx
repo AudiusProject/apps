@@ -50,14 +50,15 @@ import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
-import { useTrackPageSize } from '../useTrackPageSize'
 
 import { RemixContestSection } from './RemixContestSection'
+import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
 const { getPlaying, getPreviewing } = playerSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { tracksActions } = trackPageLineupActions
+const COLLECTION_PAGE_MIN_WIDTH_PX = 460
 
 const TrackPage = () => {
   const location = useLocation()
@@ -96,7 +97,6 @@ const TrackPage = () => {
       dispatch(trackPageActions.resetTrackPage())
     }
   }, [dispatch])
-  const { isDesktop } = useTrackPageSize()
   const isOwner = track?.owner_id === accountUserId
   const following = user?.does_current_user_follow ?? false
   const isSaved = track?.has_current_user_saved ?? false
@@ -331,7 +331,7 @@ const TrackPage = () => {
       fromOpacity={1}
       noIndex={defaults.isUnlisted}
     >
-      <FlushPageContainer>
+      <FlushPageContainer contentMinWidthPx={COLLECTION_PAGE_MIN_WIDTH_PX}>
         <RemixContestCountdown trackId={track?.track_id ?? 0} />
       </FlushPageContainer>
       <Box w='100%' css={{ position: 'absolute', height: '376px' }}>
@@ -339,7 +339,7 @@ const TrackPage = () => {
         <EmptyStatBanner />
         <EmptyNavBanner />
       </Box>
-      <FlushPageContainer>
+      <FlushPageContainer contentMinWidthPx={COLLECTION_PAGE_MIN_WIDTH_PX}>
         <Flex
           direction='column'
           w='100%'
@@ -353,29 +353,29 @@ const TrackPage = () => {
             trackId={track?.track_id ?? 0}
             isOwner={isOwner}
           />
-          <Flex
-            gap='2xl'
-            w='100%'
-            direction={isDesktop ? 'row' : 'column'}
-            mh='auto'
-            css={{ maxWidth: 1080 }}
-            justifyContent='center'
-          >
-            {isCommentingEnabled ? (
-              <Flex flex='3'>
-                <CommentSection
-                  entityId={defaults.trackId}
-                  // @ts-ignore
-                  commentSectionRef={commentSectionRef}
-                />
-              </Flex>
-            ) : null}
-            <TrackPageLineup
-              user={user ?? null}
-              trackId={track?.track_id}
-              commentsDisabled={track?.comments_disabled}
-            />
-          </Flex>
+          <Box w='100%' className={styles.commentsAndLineupContainer}>
+            <Flex
+              gap='2xl'
+              w='100%'
+              className={styles.commentsAndLineupSection}
+              justifyContent='center'
+            >
+              {isCommentingEnabled ? (
+                <Flex flex='3'>
+                  <CommentSection
+                    entityId={defaults.trackId}
+                    // @ts-ignore
+                    commentSectionRef={commentSectionRef}
+                  />
+                </Flex>
+              ) : null}
+              <TrackPageLineup
+                user={user ?? null}
+                trackId={track?.track_id}
+                commentsDisabled={track?.comments_disabled}
+              />
+            </Flex>
+          </Box>
         </Flex>
       </FlushPageContainer>
     </Page>

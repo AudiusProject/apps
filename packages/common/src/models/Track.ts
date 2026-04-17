@@ -93,7 +93,7 @@ export type AccessPermissions = {
 }
 
 export enum GatedContentType {
-  SPECIAL_ACCESS = 'special access',
+  FOLLOW_GATED = 'follow gated',
   USDC_PURCHASE = 'usdc purchase',
   TOKEN_GATED = 'token gated'
 }
@@ -119,11 +119,6 @@ export const isContentNftGated = (
   gatedConditions?: Nullable<AccessConditions>
 ): gatedConditions is NftGatedConditions =>
   !!gatedConditions && 'nft_collection' in (gatedConditions ?? {})
-
-export const isContentSpecialAccess = (
-  gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is FollowGatedConditions =>
-  isContentFollowGated(gatedConditions)
 
 export const isContentUSDCPurchaseGated = (
   gatedConditions?: Nullable<

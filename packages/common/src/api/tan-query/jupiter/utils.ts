@@ -490,7 +490,7 @@ export const getIsDirectSwappable = (
   ) {
     return true
   }
-  // At this point we know one of our mints is an fan club - so to be a direct swap, the other mint must be AUDIO
+  // At this point we know one of our mints is a fan club - so to be a direct swap, the other mint must be AUDIO
   return inputMint === AUDIO_MINT || outputMint === AUDIO_MINT
 }
 

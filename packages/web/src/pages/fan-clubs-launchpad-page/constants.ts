@@ -13,7 +13,7 @@ export const LAUNCHPAD_COIN_DESCRIPTION = (
   artistHandle: string,
   coinTicker: string
 ) => {
-  return `$${coinTicker?.toUpperCase()} is an fan club created by @${artistHandle} on Audius. Learn more at https://audius.co/coins/${coinTicker?.toUpperCase()}`
+  return `$${coinTicker?.toUpperCase()} is an artist coin created by @${artistHandle} on Audius. Learn more at https://audius.co/coins/${coinTicker?.toUpperCase()}`
 }
 
 export const SOLANA_DECIMALS = 9

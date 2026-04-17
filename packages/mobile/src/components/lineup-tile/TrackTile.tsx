@@ -1,4 +1,4 @@
-import { memo, useCallback, useRef } from 'react'
+import { memo, useCallback, useContext, useRef } from 'react'
 
 import {
   useCurrentUserId,
@@ -32,10 +32,10 @@ import {
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
 import { Genre, removeNullable } from '@audius/common/utils'
-import { useNavigationState } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Paper, type ImageProps } from '@audius/harmony-native'
+import { LineupContext } from 'app/components/lineup/LineupContext'
 import type { TrackTileProps } from 'app/components/lineup-tile/types'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -69,11 +69,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
 
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const isOnArtistsTracksTab = useNavigationState((state) => {
-    // @ts-expect-error -- history returning unknown[]
-    const currentScreen = state.history?.[0].key
-    return currentScreen?.includes('Tracks')
-  })
+  const { isOnArtistsTracksTab } = useContext(LineupContext)
   const { data: currentUserId } = useCurrentUserId()
   const { onOpen: openPublishModal } = usePublishConfirmationModal()
   const { onOpen: openPremiumContentPurchaseModal } =

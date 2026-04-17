@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useDispatch } from 'react-redux'
 
+import { coinFromSdk } from '~/adapters/coin'
 import {
   getUserCoinQueryKey,
   getUserQueryKey,
@@ -12,10 +14,15 @@ import {
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
 import type { QueryContextType } from '~/api/tan-query/utils/QueryContext'
 import { Feature } from '~/models'
+import { FollowSource } from '~/models/Analytics'
 import type { User } from '~/models/User'
 import { JupiterQuoteResult } from '~/services/Jupiter'
+import { NON_FAN_CLUB_MINTS } from '~/store/ui/shared/tokenConstants'
 
+import { getFanClubQueryFn } from '../coins/useFanClub'
 import { useTradeableCoins } from '../coins/useTradeableCoins'
+import { useFollowUser } from '../users/useFollowUser'
+import { entityCacheOptions } from '../utils/entityCacheOptions'
 
 import { SwapOrchestrator } from './orchestrator'
 import {
@@ -214,6 +221,70 @@ export const optimisticallyUpdateSwapBalances = (
 }
 
 /**
+ * Auto-follows the owning artist of a coin after a successful purchase.
+ * Skips if the output mint is not an artist coin, the user already follows
+ * the artist, or the coin's owner can't be resolved.
+ */
+const autoFollowArtistOnCoinPurchase = async ({
+  outputMint,
+  queryClient,
+  audiusSdk,
+  dispatch,
+  followUser,
+  reportToSentry
+}: {
+  outputMint: string
+  queryClient: ReturnType<typeof useQueryClient>
+  audiusSdk: QueryContextType['audiusSdk']
+  dispatch: ReturnType<typeof useDispatch>
+  followUser: ReturnType<typeof useFollowUser>['mutate']
+  reportToSentry: QueryContextType['reportToSentry']
+}) => {
+  if (!outputMint || NON_FAN_CLUB_MINTS.includes(outputMint)) {
+    return
+  }
+
+  try {
+    const coin = await queryClient.fetchQuery({
+      queryKey: getFanClubQueryKey(outputMint),
+      queryFn: async () => {
+        const sdk = await audiusSdk()
+        const rawCoin = await getFanClubQueryFn(
+          outputMint,
+          queryClient,
+          sdk,
+          dispatch
+        )
+        return coinFromSdk(rawCoin)
+      },
+      ...entityCacheOptions
+    })
+
+    if (!coin?.ownerId) {
+      return
+    }
+
+    // Skip if the current user already follows the artist
+    const artistUser = queryClient.getQueryData(getUserQueryKey(coin.ownerId))
+    if (artistUser?.does_current_user_follow) {
+      return
+    }
+
+    followUser({
+      followeeUserId: coin.ownerId,
+      source: FollowSource.ARTIST_COIN_PURCHASE
+    })
+  } catch (error) {
+    reportToSentry({
+      name: 'AutoFollowArtistOnCoinPurchaseError',
+      error: error as Error,
+      feature: Feature.TanQuery,
+      additionalInfo: { outputMint }
+    })
+  }
+}
+
+/**
  * Hook for executing coin swaps using Jupiter.
  * Swaps any supported SPL token (or SOL) for another.
  */
@@ -223,6 +294,8 @@ export const useSwapCoins = () => {
     useQueryContext()
   const { data: user } = useCurrentAccountUser()
   const { coins } = useTradeableCoins()
+  const dispatch = useDispatch()
+  const { mutate: followUser } = useFollowUser()
 
   return useMutation<SwapTokensResult, Error, SwapTokensParams>({
     mutationFn: async (params): Promise<SwapTokensResult> => {
@@ -304,6 +377,15 @@ export const useSwapCoins = () => {
     },
     onSuccess: (result, params) => {
       optimisticallyUpdateSwapBalances(params, result, queryClient, user, env)
+      // Auto-follow the artist whose coin was just purchased
+      autoFollowArtistOnCoinPurchase({
+        outputMint: params.outputMint,
+        queryClient,
+        audiusSdk,
+        dispatch,
+        followUser,
+        reportToSentry
+      })
     },
     onMutate: () => {
       return { status: SwapStatus.SENDING_TRANSACTION }

@@ -799,7 +799,7 @@ def test_comment_reaction(app, mocker):
 
     reaction_entities = {
         **entities,
-        "comments": [{"comment_id": 1, "user_id": 2}],
+        "comments": [{"comment_id": 1, "user_id": 2, "entity_id": 1}],
     }
 
     tx_receipts = {

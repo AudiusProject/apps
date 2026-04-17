@@ -27,7 +27,17 @@ export const TrackLockedStatusBadge = (props: TrackLockedStatusBadgeProps) => {
     return (
       <Flex gap='xs' alignItems='center' justifyContent='center'>
         <IconLock size='s' color='default' />
-        <Text variant='body' size='s' strength='strong' color='default'>
+        <Text
+          variant='body'
+          size='s'
+          strength='strong'
+          color='default'
+          css={{
+            '@container (max-width: 640px)': {
+              display: 'none'
+            }
+          }}
+        >
           {messages.membersOnly}
         </Text>
       </Flex>

@@ -44,14 +44,11 @@ const formatDate = (timestamp: number): string => {
 
 const formatTooltipDate = (timestamp: number): string => {
   const date = new Date(timestamp)
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
-  const hour = date
-    .toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      hour12: true
-    })
-    .toLowerCase()
-  return `${weekday} ${hour}`
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
 const getChartData = (
@@ -232,7 +229,7 @@ export const UserBalanceHistoryGraph = () => {
     data: historyDataFetched,
     isLoading: isHistoryLoading,
     isError: isHistoryError
-  } = useUserBalanceHistory({ userId: currentUserId })
+  } = useUserBalanceHistory({ userId: currentUserId, granularity: 'daily' })
 
   const {
     totalBalance: currentBalance,

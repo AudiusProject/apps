@@ -57,7 +57,7 @@ const messages = {
   searchPlaceholder: 'Search',
   getStarted: 'Get Started',
   launchYourOwn: 'Launch Your Own Fan Club!',
-  required: 'Required',
+  required: 'Verification Required',
   getStartedTooltip: 'Verified users only. Request verification in settings.',
   dismissBanner: 'Dismiss',
   pageDescription:
@@ -290,7 +290,6 @@ const DesktopFanClubsExplorePage = () => {
                 <Tooltip text={messages.getStartedTooltip} placement='top'>
                   <Flex
                     alignItems='center'
-                    gap='s'
                     border='strong'
                     borderRadius='m'
                     css={{
@@ -306,12 +305,7 @@ const DesktopFanClubsExplorePage = () => {
                         {messages.required}
                       </Text>
                     </Flex>
-                    <Flex
-                      ph='s'
-                      pv='xs'
-                      backgroundColor='surface2'
-                      borderLeft='strong'
-                    >
+                    <Flex p='s' backgroundColor='surface2' borderLeft='strong'>
                       <IconVerified size='s' />
                     </Flex>
                   </Flex>

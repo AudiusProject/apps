@@ -19,7 +19,7 @@ import {
   HexagonalIcon,
   IconFanClub,
   IconCart,
-  IconSparkles
+  IconUserFollowing
 } from '@audius/harmony-native'
 import { LockedStatusBadge, Text } from 'app/components/core'
 import { UserBadges } from 'app/components/user-badges'
@@ -29,14 +29,14 @@ import { useColor } from 'app/utils/theme'
 
 const messages = {
   unlocked: 'UNLOCKED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   payToUnlock: 'Pay to Unlock',
   coinGated: 'COIN GATED',
   fanClub: "This artist's coin",
   unlockedTokenGatedSuffix: (contentType: PurchaseableContentType) =>
     ` was found in a linked wallet. This ${contentType} is now available.`,
   ownerTokenGated:
-    'Fans can unlock access by linking a wallet containing your fan club',
+    'Fans can unlock access by linking a wallet containing your artist coin',
   unlockedFollowGatedPrefix: 'Thank you for following ',
   unlockedFollowGatedSuffix: (contentType: PurchaseableContentType) =>
     `! This ${contentType} is now available.`,
@@ -109,8 +109,8 @@ const DetailsTileOwnerSection = ({
         borderRadius='m'
       >
         <View style={[styles.titleContainer, styles.ownerTitleContainer]}>
-          <IconSparkles fill={neutral} width={16} height={16} />
-          <Text style={styles.title}>{messages.specialAccess}</Text>
+          <IconUserFollowing fill={neutral} width={16} height={16} />
+          <Text style={styles.title}>{messages.followersOnly}</Text>
         </View>
         <View style={styles.descriptionContainer}>
           <Text>
@@ -216,7 +216,7 @@ export const DetailsTileHasAccess = ({
     }
   }, [navigation, token?.ticker])
 
-  const renderUnlockedSpecialAccessDescription = useCallback(
+  const renderUnlockedDescriptionForEntity = useCallback(
     (args: {
       entity: Pick<User, 'user_id' | 'name' | 'is_verified' | 'handle'>
       prefix: string
@@ -245,7 +245,7 @@ export const DetailsTileHasAccess = ({
   const renderUnlockedDescription = useCallback(() => {
     if (isContentFollowGated(streamConditions)) {
       if (!followee) return null
-      return renderUnlockedSpecialAccessDescription({
+      return renderUnlockedDescriptionForEntity({
         entity: followee,
         prefix: messages.unlockedFollowGatedPrefix,
         suffix: messages.unlockedFollowGatedSuffix(contentType)
@@ -253,7 +253,7 @@ export const DetailsTileHasAccess = ({
     }
     if (isContentUSDCPurchaseGated(streamConditions)) {
       if (!trackArtist) return null
-      return renderUnlockedSpecialAccessDescription({
+      return renderUnlockedDescriptionForEntity({
         entity: trackArtist,
         prefix: messages.unlockedUSDCPurchasePrefix(contentType),
         suffix: messages.unlockedUSDCPurchaseSuffix
@@ -286,7 +286,7 @@ export const DetailsTileHasAccess = ({
     styles.name,
     contentType,
     followee,
-    renderUnlockedSpecialAccessDescription,
+    renderUnlockedDescriptionForEntity,
     trackArtist,
     handleTokenPress,
     token?.ticker

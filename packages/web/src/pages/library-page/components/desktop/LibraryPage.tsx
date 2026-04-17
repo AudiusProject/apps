@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
   useCurrentUserId,
@@ -29,6 +29,7 @@ import FilterInput from 'components/filter-input/FilterInput'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { dateSorter } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import useTabs from 'hooks/useTabs/useTabs'
@@ -42,7 +43,14 @@ import { LibraryCategorySelectionMenu } from './LibraryCategorySelectionMenu'
 import styles from './LibraryPage.module.css'
 import { PlaylistsTabPage } from './PlaylistsTabPage'
 
-const { getInitialFetchStatus, getCategory } = libraryPageSelectors
+const {
+  getInitialFetchStatus,
+  getCategory,
+  getTrackSaves,
+  getSelectedCategoryLocalTrackAdds
+} = libraryPageSelectors
+
+const INITIAL_TRACK_SKELETON_ROWS = 10
 
 const messages = {
   libraryHeader: 'Library',
@@ -54,9 +62,7 @@ const messages = {
 }
 
 const tableColumns: TracksTableColumn[] = [
-  'playButton',
   'trackName',
-  'artistName',
   'releaseDate',
   'savedDate',
   'length',
@@ -90,6 +96,12 @@ const LibraryPage = () => {
   } = useLibraryPage()
   const mainContentRef = useMainContentRef()
   const initFetch = useSelector(getInitialFetchStatus)
+  const trackSaveIds = useSelector(getTrackSaves)
+  const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
+  const expectedTrackCount = useMemo(
+    () => trackSaveIds.length + Object.keys(localTrackAdds).length,
+    [trackSaveIds, localTrackAdds]
+  )
   const { data: currentUserId } = useCurrentUserId()
 
   const { mutate: favoriteTrack } = useFavoriteTrack()
@@ -129,27 +141,47 @@ const LibraryPage = () => {
   const getTracksTableData = (): [LibraryPageTrack[], number] => {
     let [data, activeIndex] = getFilteredData(entries)
     if (!hasReachedEnd) {
-      // Add in some empty rows to show user that more are loading in
       data = data.concat(new Array(5).fill({ kind: Kind.EMPTY }))
     }
     return [data, activeIndex]
   }
 
-  const [dataSource, activeIndex] =
-    status === Status.SUCCESS || entries.length
-      ? getTracksTableData()
-      : [[], -1]
-
   const isEmpty =
     entries.length === 0 ||
     !entries.some((entry: LibraryPageTrack) => Boolean(entry.track_id))
+  const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
+    Boolean(entry.track_id)
+  )
   const tracksLoading =
     (status === Status.IDLE || status === Status.LOADING) && isEmpty
+  const showTrackTableSkeletons =
+    (tracksLoading || initFetch) && !hasResolvedTrackRows
+  const tracksTableShowsSpinner =
+    (tracksLoading || initFetch) && !showTrackTableSkeletons
+  const trackSkeletonRowCount =
+    expectedTrackCount > 0
+      ? Math.min(expectedTrackCount, INITIAL_TRACK_SKELETON_ROWS)
+      : INITIAL_TRACK_SKELETON_ROWS
+  const [dataSource, activeIndex]: [LibraryPageTrack[], number] =
+    showTrackTableSkeletons
+      ? [
+          Array.from(
+            {
+              length: trackSkeletonRowCount
+            },
+            () => ({ kind: Kind.EMPTY })
+          ) as unknown as LibraryPageTrack[],
+          -1
+        ]
+      : status === Status.SUCCESS || entries.length
+        ? getTracksTableData()
+        : [[], -1]
+
   const queuedAndPlaying = playing && isQueued
 
   // Setup play button
   const playButtonActive =
-    currentTab === LibraryPageTabs.TRACKS && !tracksLoading
+    currentTab === LibraryPageTabs.TRACKS && !tracksLoading && !initFetch
   const playAllButton = (
     <div
       className={styles.playButtonContainer}
@@ -229,13 +261,15 @@ const LibraryPage = () => {
           fetchMore={fetchMoreTracks}
           isVirtualized
           key='favorites'
-          loading={tracksLoading || initFetch}
+          loading={tracksTableShowsSpinner}
           onClickFavorite={toggleSaveTrack}
           onClickRepost={onClickRepost}
           onClickRow={onClickRow}
           onSort={allTracksFetched ? onSortTracks : onSortChange}
           playing={queuedAndPlaying}
           activeIndex={activeIndex}
+          showArtistInTrackNameColumn
+          responsiveColumns={RESPONSIVE_TABLE_POLICIES.libraryTracks}
           scrollRef={mainContentRef}
           useLocalSort={allTracksFetched}
           fetchBatchSize={50}

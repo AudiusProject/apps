@@ -1,5 +1,11 @@
 # @audius/harmony
 
+## 0.5.3
+
+### Patch Changes
+
+- 1ec251b: Fix SegmentedControl text color being subdued on initial render when selected value doesn't match any option key
+
 ## 0.5.2
 
 ### Patch Changes

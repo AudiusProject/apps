@@ -195,7 +195,7 @@ export function* pollGatedContent({
  * 3. Poll for access for those tracks
  * 4. When access is returned, set those track statuses as 'UNLOCKED'
  */
-function* updateSpecialAccessTracks(
+function* updateFollowGatedTracks(
   trackOwnerId: ID,
   sourceTrackId?: Nullable<ID>
 ) {
@@ -286,7 +286,7 @@ function* handleUnfollowUser(
 function* handleFollowUser(
   action: ReturnType<typeof usersSocialActions.followUser>
 ) {
-  yield* call(updateSpecialAccessTracks, action.userId, action.trackId)
+  yield* call(updateFollowGatedTracks, action.userId, action.trackId)
 }
 
 /**

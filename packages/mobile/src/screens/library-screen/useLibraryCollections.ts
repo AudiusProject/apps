@@ -133,6 +133,7 @@ export const useLibraryCollections = ({
     status,
     isPending,
     isLoading,
-    isFetchingNextPage
+    isFetchingNextPage,
+    localCollectionCount: localCollectionIds.length
   }
 }

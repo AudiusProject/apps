@@ -25,7 +25,7 @@ import {
   Flex,
   Text,
   IconCart,
-  IconSparkles,
+  IconUserFollowing,
   Button,
   IconUserFollow,
   IconFanClub
@@ -57,7 +57,7 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlocking: 'unlocking',
   unlocked: 'unlocked',
   coinGated: 'COIN GATED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   followArtist: 'Follow Artist',
   buyFanClub: 'Buy Coins',
   period: '.',
@@ -475,8 +475,8 @@ const UnlockedGatedContentSection = ({
     return null
   }
 
-  let IconComponent = IconSparkles
-  let gatedConditionTitle = messages.specialAccess
+  let IconComponent = IconUserFollowing
+  let gatedConditionTitle = messages.followersOnly
 
   if (isContentUSDCPurchaseGated(streamConditions)) {
     IconComponent = IconCart

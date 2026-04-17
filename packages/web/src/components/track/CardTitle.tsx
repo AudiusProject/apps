@@ -7,7 +7,7 @@ import { Nullable } from '@audius/common/utils'
 import {
   Text,
   IconCart,
-  IconSparkles,
+  IconUserFollowing,
   Flex,
   IconFanClub
 } from '@audius/harmony'
@@ -18,7 +18,7 @@ const messages = {
   remixTitle: 'REMIX',
   hiddenTrackTooltip: 'Anyone with a link to this page will be able to see it',
   coinGated: 'COIN GATED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: 'PREMIUM TRACK',
   remixContest: 'REMIX CONTEST'
 }
@@ -60,8 +60,8 @@ export const CardTitle = ({
       icon = <IconFanClub size='s' color='subdued' />
       message = messages.coinGated
     } else {
-      icon = <IconSparkles size='s' color='subdued' />
-      message = messages.specialAccess
+      icon = <IconUserFollowing size='s' color='subdued' />
+      message = messages.followersOnly
     }
     content = (
       <Flex gap='s' alignItems='center' justifyContent='center'>

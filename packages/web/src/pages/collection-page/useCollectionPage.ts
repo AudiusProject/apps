@@ -444,7 +444,8 @@ export const useCollectionPage = (
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${trackRecord.track_id}`,
-            source: PlaybackSource.PLAYLIST_TRACK
+            source: PlaybackSource.PLAYLIST_TRACK,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
       } else {
@@ -452,12 +453,13 @@ export const useCollectionPage = (
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${trackRecord.track_id}`,
-            source: PlaybackSource.PLAYLIST_TRACK
+            source: PlaybackSource.PLAYLIST_TRACK,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
       }
     },
-    [playing, getPlayingUid, dispatch]
+    [playing, getPlayingUid, dispatch, playlistId]
   )
 
   const onClickRepostTrack = useCallback(
@@ -545,9 +547,21 @@ export const useCollectionPage = (
           make(Name.PLAYBACK_PLAY, {
             id: `${playingId}`,
             isPreview: shouldPreview,
-            source: PlaybackSource.PLAYLIST_PAGE
+            source: PlaybackSource.PLAYLIST_PAGE,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       } else if (tracks.entries.length > 0) {
         dispatch(playerActions.stop({}))
         dispatch(
@@ -559,9 +573,21 @@ export const useCollectionPage = (
           make(Name.PLAYBACK_PLAY, {
             id: `${tracks.entries[0].track_id}`,
             isPreview: shouldPreview,
-            source: PlaybackSource.PLAYLIST_PAGE
+            source: PlaybackSource.PLAYLIST_PAGE,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       }
     },
     [
@@ -572,6 +598,8 @@ export const useCollectionPage = (
       accountUserId,
       tracks.entries,
       getPlayingId,
+      playlistId,
+      trackCount,
       dispatch
     ]
   )

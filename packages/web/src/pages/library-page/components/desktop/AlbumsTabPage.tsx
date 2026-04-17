@@ -9,9 +9,8 @@ import {
 import { route } from '@audius/common/utils'
 import { useSelector } from 'react-redux'
 
-import { CollectionCard } from 'components/collection'
+import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useLibraryCollections } from 'pages/library-page/hooks/useLibraryCollections'
@@ -56,13 +55,26 @@ export const AlbumsTabPage = () => {
   const noResults = !isPending && albumIds?.length === 0
 
   const cards = useMemo(() => {
-    return albumIds?.map((albumId) => {
-      return <CollectionCard key={albumId} id={albumId} size='m' />
-    })
-  }, [albumIds])
+    const loadedCards =
+      albumIds?.map((albumId) => {
+        return <CollectionCard key={albumId} id={albumId} size='m' />
+      }) ?? []
+    if (!isFetchingNextPage) return loadedCards
+    return loadedCards.concat(
+      Array.from({ length: 6 }, (_, i) => (
+        <CollectionCardSkeleton key={`loading-${i}`} size='m' noShimmer />
+      ))
+    )
+  }, [albumIds, isFetchingNextPage])
 
   if (isPending) {
-    return <LoadingSpinner className={styles.spinner} />
+    return (
+      <div className={styles.cardsContainer}>
+        {Array.from({ length: 12 }, (_, i) => (
+          <CollectionCardSkeleton key={i} size='m' noShimmer />
+        ))}
+      </div>
+    )
   }
 
   // TODO(nkang) - Add separate error state
@@ -83,7 +95,6 @@ export const AlbumsTabPage = () => {
       loadMore={loadNextPage}
       cards={cards}
       cardsClassName={styles.cardsContainer}
-      isLoadingMore={isFetchingNextPage}
     />
   )
 }

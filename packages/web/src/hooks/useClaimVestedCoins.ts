@@ -34,7 +34,7 @@ export type ClaimVestedCoinsResult = {
 
 /**
  * Hook for claiming vested/unlocked fan clubs from the vesting schedule.
- * After an fan club graduates, the artist's reserved coins unlock daily over a 5-year period.
+ * After a fan club graduates, the artist's reserved coins unlock daily over a 5-year period.
  * This gets the TX from solana relay, then signs and sends the claim vested coins transaction.
  * NOTE: This is a web feature only because the user must sign with the same external wallet they used to launch the coin (wallet connect wallet).
  */

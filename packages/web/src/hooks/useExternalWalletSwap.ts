@@ -66,7 +66,7 @@ const getDirectSwapTx = async (quote: QuoteResponse, walletAddress: string) => {
 }
 
 /**
- * Checks if a mint is an fan club (not in NON_FAN_CLUB_MINTS)
+ * Checks if a mint is a fan club (not in NON_FAN_CLUB_MINTS)
  */
 const isFanClubMint = (mint: string): boolean => {
   return !NON_FAN_CLUB_MINTS.includes(mint)
@@ -398,7 +398,7 @@ const getMeteoraSwapTx = async ({
 
   if (!isInputAudio && !isOutputAudio) {
     throw new Error(
-      'Meteora swaps only support swaps between AUDIO and fan clubs'
+      'Meteora swaps only support swaps between AUDIO and artist coins'
     )
   }
 

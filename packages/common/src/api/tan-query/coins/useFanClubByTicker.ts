@@ -80,7 +80,7 @@ const getFanClubByTickerQueryFn =
   }
 
 /**
- * Helper function to get the query options for fetching an fan club by ticker.
+ * Helper function to get the query options for fetching a fan club by ticker.
  * Useful for getting the query key tagged with the data type stored in the cache.
  */
 export const getFanClubByTickerOptions = (

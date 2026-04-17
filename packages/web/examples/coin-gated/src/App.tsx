@@ -317,7 +317,7 @@ export default function App() {
       {/* Header */}
       <h1 className='title'>Coin-Gated Tracks</h1>
       <p className='subtitle'>
-        Browse and stream coin-gated tracks using an fan club.
+        Browse and stream coin-gated tracks using an artist coin.
         Sign in with Audius or connect a Solana wallet.
       </p>
 

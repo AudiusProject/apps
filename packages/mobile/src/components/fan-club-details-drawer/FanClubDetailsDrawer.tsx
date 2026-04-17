@@ -31,7 +31,7 @@ import { DrawerHeader } from '../drawer/DrawerHeader'
 const { fanClubDetails, overflowMenu } = coinDetailsMessages
 
 const LAUNCHPAD_COIN_DESCRIPTION = (handle: string, ticker: string) =>
-  `{${ticker}} is an fan club created by {${handle}} on Audius. Learn more at https://audius.co/coin/{${ticker}}`
+  `{${ticker}} is an artist coin created by {${handle}} on Audius. Learn more at https://audius.co/coin/{${ticker}}`
 
 const formatTokenAmount = (balance: number, coinDecimals: number) => {
   const decimals = getTokenDecimalPlaces(balance)

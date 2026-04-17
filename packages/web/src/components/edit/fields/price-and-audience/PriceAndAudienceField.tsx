@@ -23,7 +23,7 @@ import {
   IconCart,
   IconVisibilityHidden as IconHidden,
   IconNote,
-  IconSparkles,
+  IconUserFollowing,
   Artwork
 } from '@audius/harmony'
 import { useField, useFormikContext } from 'formik'
@@ -59,10 +59,8 @@ import {
   LAST_GATE_KEEPER,
   PREVIEW,
   PRICE_HUMANIZED,
-  SPECIAL_ACCESS_TYPE,
   STREAM_AVAILABILITY_TYPE,
-  STREAM_CONDITIONS,
-  SpecialAccessType
+  STREAM_CONDITIONS
 } from '../types'
 
 import styles from './PriceAndAudienceField.module.css'
@@ -229,7 +227,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
       )
     }
     if (isFollowGated) {
-      availabilityType = StreamTrackAvailabilityType.SPECIAL_ACCESS
+      availabilityType = StreamTrackAvailabilityType.FOLLOW_GATED
     }
     if (isTokenGated) {
       availabilityType = StreamTrackAvailabilityType.TOKEN_GATED
@@ -237,11 +235,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
     set(initialValues, STREAM_AVAILABILITY_TYPE, availabilityType)
     set(initialValues, FIELD_VISIBILITY, fieldVisibility)
     set(initialValues, PREVIEW, preview ?? 0)
-    set(
-      initialValues,
-      SPECIAL_ACCESS_TYPE,
-      isFollowGated ? SpecialAccessType.FOLLOW : null
-    )
     return initialValues as AccessAndSaleFormValues
   }, [
     isHiddenFieldName,
@@ -313,7 +306,7 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
           })
           break
         }
-        case StreamTrackAvailabilityType.SPECIAL_ACCESS: {
+        case StreamTrackAvailabilityType.FOLLOW_GATED: {
           const { follow_user_id } = streamConditions as FollowGatedConditions
           setStreamConditionsValue({ follow_user_id })
           setDownloadConditionsValue({ follow_user_id })
@@ -388,11 +381,6 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
   const renderValue = useCallback(() => {
     let selectedValues: (SelectedValueProps | string)[] = []
 
-    const specialAccessValue = {
-      label: messages.specialAccess,
-      icon: IconSparkles
-    }
-
     if (isContentUSDCPurchaseGated(savedStreamConditions)) {
       selectedValues = [
         { label: messages.premium },
@@ -420,7 +408,9 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
         })
       }
     } else if (isContentFollowGated(savedStreamConditions)) {
-      selectedValues = [specialAccessValue, messages.followersOnly]
+      selectedValues = [
+        { label: messages.followersOnly, icon: IconUserFollowing }
+      ]
     } else if (isContentTokenGated(savedStreamConditions)) {
       selectedValues = [
         {
@@ -457,19 +447,14 @@ export const PriceAndAudienceField = (props: PriceAndAudienceFieldProps) => {
   return (
     <ContextualMenu
       label={messages.title}
-      description={
-        isFollowGated
-          ? messages.specialAccessDescription
-          : messages.freePremiumDescription
-      }
+      description={messages.freePremiumDescription}
       icon={<IconHidden />}
       initialValues={initialValues}
       onSubmit={(values) => {
         const availabilityType = get(values, STREAM_AVAILABILITY_TYPE)
         const usersMayLoseAccess = getUsersMayLoseAccess({
           availability: availabilityType,
-          initialStreamConditions: parentFormInitialStreamConditions,
-          specialAccessType: 'follow'
+          initialStreamConditions: parentFormInitialStreamConditions
         })
 
         if (!isUpload && usersMayLoseAccess) {

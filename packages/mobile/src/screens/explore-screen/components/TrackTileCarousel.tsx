@@ -2,8 +2,8 @@ import React, { useMemo } from 'react'
 
 import { useToggleTrack } from '@audius/common/hooks'
 import { Kind } from '@audius/common/models'
-import type { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import type { Queueable, QueueSource } from '@audius/common/store'
+import { makeStableUid } from '@audius/common/utils'
 import { ScrollView } from 'react-native'
 
 import { Flex } from '@audius/harmony-native'
@@ -17,21 +17,24 @@ interface TrackTileCarouselProps {
 
 const CarouselItem = ({
   id,
+  uid,
   pairIndex,
   trackIndex,
-  source
+  source,
+  entries
 }: {
   id: number
+  uid: string
   pairIndex: number
   trackIndex: number
   source: QueueSource
+  entries: Queueable[]
 }) => {
-  const uid = useMemo(() => makeUid(Kind.TRACKS, id, source), [id, source])
-
   const { togglePlay } = useToggleTrack({
     id,
     uid,
-    source
+    source,
+    entries
   })
 
   return (
@@ -50,6 +53,15 @@ export const TrackTileCarousel = ({
   isLoading,
   source
 }: TrackTileCarouselProps) => {
+  const entries = useMemo(() => {
+    if (!tracks) return []
+    return tracks.map((id) => ({
+      id,
+      uid: makeStableUid(Kind.TRACKS, id, source),
+      source
+    }))
+  }, [tracks, source])
+
   if (isLoading || !tracks) {
     return (
       <Flex direction='row' mh={-16}>
@@ -96,15 +108,20 @@ export const TrackTileCarousel = ({
             w={343}
             mr={pairIndex < trackPairs.length - 1 ? 16 : 0}
           >
-            {pair.map((track, trackIndex) => (
-              <CarouselItem
-                key={track}
-                id={track}
-                pairIndex={pairIndex}
-                trackIndex={trackIndex}
-                source={source}
-              />
-            ))}
+            {pair.map((track, trackIndex) => {
+              const entryIndex = pairIndex * 2 + trackIndex
+              return (
+                <CarouselItem
+                  key={track}
+                  id={track}
+                  uid={entries[entryIndex].uid}
+                  pairIndex={pairIndex}
+                  trackIndex={trackIndex}
+                  source={source}
+                  entries={entries}
+                />
+              )
+            })}
           </Flex>
         ))}
       </ScrollView>

@@ -1,3 +1,87 @@
+.topSectionWrapper {
+  container-type: inline-size;
+}
+
+.topSection {
+  position: relative;
+  display: grid;
+  grid-template-columns: 338px minmax(0, 1fr);
+  column-gap: var(--harmony-unit-6);
+  row-gap: var(--harmony-unit-6);
+  padding: var(--harmony-unit-4);
+}
+
+.artworkSection {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.infoSection {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.actionsSection {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+}
+
+.titleArtistSection {
+  align-items: flex-start;
+}
+
+.titleHeader {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.playSection {
+  align-items: center;
+}
+
+.badgesSection {
+  position: absolute;
+  right: var(--harmony-unit-6);
+  top: var(--harmony-unit-4);
+  display: flex;
+  gap: var(--harmony-unit-2);
+  justify-content: flex-end;
+}
+
+.badgesSectionCompact {
+  display: none;
+}
+
+.typeLabelCompact {
+  display: none;
+}
+
+.typeLabelRow {
+  display: block;
+}
+
+.statsDesktop {
+  display: block;
+}
+
+.headerTrackStats :global([data-track-stat-label='social']) {
+  display: inline;
+}
+
+.statsInDescription {
+  display: none;
+}
+
+.listenCountDesktop {
+  display: block;
+}
+
+.playbackButton {
+  min-width: 0 !important;
+}
+
 .gatedContent .typeLabel {
   letter-spacing: 2px;
 }
@@ -21,10 +105,6 @@
   color: var(--harmony-n-400);
   font-size: var(--harmony-unit-3);
   font-weight: 600;
-}
-
-.playSection > * {
-  margin-top: var(--harmony-unit-4);
 }
 
 .infoSection .numberOfListens {
@@ -147,11 +227,6 @@
   top: 2px;
 }
 
-.makePublicButton {
-  width: 166px;
-  flex-shrink: 0;
-}
-
 .downloadableIconContainer {
   margin-left: 10px;
   position: relative;
@@ -225,5 +300,139 @@
 
   .gatedContentSectionButton {
     width: 100%;
+  }
+}
+
+@container (max-width: 856px) {
+  .headerTrackStats :global([data-track-stat-label='social']) {
+    display: none;
+  }
+}
+
+@container (max-width: 740px) {
+  .topSection {
+    grid-template-columns: 1fr;
+    row-gap: var(--harmony-unit-5);
+    padding: var(--harmony-unit-6);
+  }
+
+  .typeLabelCompact {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+  }
+
+  .badgesSectionCompact {
+    display: flex;
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: center;
+    gap: var(--harmony-unit-2);
+    flex-wrap: wrap;
+  }
+
+  .typeLabelRow {
+    display: none;
+  }
+
+  .artworkSection {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: center;
+    width: min(338px, 70cqi);
+    aspect-ratio: 1;
+  }
+
+  .artworkSection > div {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .artworkSection > div > :first-child {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .infoSection {
+    grid-column: 1;
+    grid-row: 4;
+    align-items: center;
+    width: 100%;
+  }
+
+  .titleArtistSection {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .titleHeader {
+    text-align: center !important;
+  }
+
+  .artistRow {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .trackStatsRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .statsDesktop {
+    display: none;
+  }
+
+  .statsInDescription {
+    display: block;
+  }
+
+  .listenCountDesktop {
+    display: none;
+  }
+
+  .playSection {
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: var(--harmony-unit-3) !important;
+  }
+
+  .playSection > :first-child {
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .playbackButton {
+    height: var(--harmony-unit-12) !important;
+    font-size: var(--harmony-font-l) !important;
+    line-height: var(--harmony-line-height-l) !important;
+    padding-inline: var(--harmony-unit-4) !important;
+  }
+
+  .playbackButton svg {
+    width: var(--harmony-unit-5) !important;
+    height: var(--harmony-unit-5) !important;
+  }
+
+  .actionsSection {
+    grid-column: 1;
+    grid-row: 5;
+    justify-self: stretch;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--harmony-unit-6) !important;
+  }
+
+  .badgesSection {
+    display: none;
   }
 }

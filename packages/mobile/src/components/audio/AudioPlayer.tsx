@@ -783,22 +783,56 @@ export const AudioPlayer = () => {
     makeTrackData
   ])
 
-  const handleQueueIdxChange = useCallback(async () => {
-    await enqueueTracksJobRef.current
-    const playerIdx = await TrackPlayer.getActiveTrackIndex()
-    const queue = await TrackPlayer.getQueue()
+  // Tracks the most-recently-requested queueIndex so older in-flight
+  // handleQueueIdxChange invocations (from rapid "next" taps) can bail out
+  // instead of racing and skipping out of order.
+  const latestQueueIdxRef = useRef<number>(-1)
 
-    if (
-      queueIndex !== -1 &&
-      queueIndex !== playerIdx &&
-      queueIndex < queue.length
+  const handleQueueIdxChange = useCallback(async () => {
+    if (queueIndex === -1) return
+    latestQueueIdxRef.current = queueIndex
+
+    // TrackPlayer's native queue is populated asynchronously by the middle-out
+    // enqueueTracks loop in handleQueueChange. If the user presses "next"
+    // before our target index has been added, TrackPlayer.skip(queueIndex) is
+    // silently dropped (the old code's `queueIndex < queue.length` check
+    // fails). Poll until the target is reachable, then skip. Without this,
+    // pressing next within ~5s of play leaves audio stuck on the first track
+    // even though the redux-driven artwork updates.
+    const POLL_INTERVAL_MS = 100
+    const MAX_WAIT_MS = 30000
+    const startTime = Date.now()
+    let queue = await TrackPlayer.getQueue()
+    while (
+      queueIndex >= queue.length &&
+      Date.now() - startTime < MAX_WAIT_MS &&
+      latestQueueIdxRef.current === queueIndex
     ) {
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
+      queue = await TrackPlayer.getQueue()
+    }
+
+    // Bail if a newer next/prev press superseded this one while polling.
+    if (latestQueueIdxRef.current !== queueIndex) return
+
+    const playerIdx = await TrackPlayer.getActiveTrackIndex()
+    if (queueIndex !== playerIdx && queueIndex < queue.length) {
       await TrackPlayer.skip(queueIndex)
     }
   }, [queueIndex])
 
+  // Tracks the latest handleQueueIdxChange invocation so handleTogglePlay can
+  // wait for a pending skip before calling TrackPlayer.play(). Without this,
+  // when resuming into a different track than was paused, TrackPlayer.play()
+  // briefly resumes the previously-loaded (paused) track for a moment before
+  // the skip to the new index lands.
+  const queueIdxChangeJobRef = useRef<Promise<void> | undefined>(undefined)
+
   const handleTogglePlay = useCallback(async () => {
     if (playing) {
+      // Ensure any pending skip completes before we unpause, otherwise the
+      // previously-paused track resumes for a frame on the native player.
+      await queueIdxChangeJobRef.current
       await TrackPlayer.play()
     } else {
       await TrackPlayer.pause()
@@ -853,7 +887,9 @@ export const AudioPlayer = () => {
 
   useEffect(() => {
     if (isAudioSetup) {
-      handleQueueIdxChange()
+      // Store the promise so handleTogglePlay can await the skip before
+      // calling TrackPlayer.play() on a resume-into-different-track.
+      queueIdxChangeJobRef.current = handleQueueIdxChange()
     }
   }, [handleQueueIdxChange, queueIndex, isAudioSetup])
 

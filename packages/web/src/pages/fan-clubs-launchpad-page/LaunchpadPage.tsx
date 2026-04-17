@@ -690,7 +690,7 @@ export const LaunchpadPage = () => {
     ]
   )
 
-  // Redirect if user is not verified or already has an fan club
+  // Redirect if user is not verified or already has a fan club
   if (hasExistingFanClub && isLaunchpadVerificationEnabled) {
     track(make({ eventName: Name.LAUNCHPAD_HAS_EXISTING_FAN_CLUB }))
     return <Navigate to={route.CLUBS_EXPLORE_PAGE} replace />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
@@ -33,12 +33,12 @@ import { Cell } from 'react-table'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { getScrollParent } from 'utils/scrollParent'
 
 import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
-import styles from './FanClubsTable.module.css'
 
 export const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
 
@@ -62,7 +62,6 @@ type CoinCell = Cell<Coin>
 
 const renderTokenNameCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
-  const { ownerId } = coin
 
   if (!coin || !coin.ticker) {
     return null
@@ -93,9 +92,8 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
         alignItems='center'
         css={{
           overflow: 'hidden',
-          flex: '0 0 clamp(80px, 24ch, 180px)',
-          minWidth: 'clamp(80px, 24ch, 180px)',
-          maxWidth: 'clamp(80px, 24ch, 180px)'
+          flex: '1 1 0',
+          minWidth: 0
         }}
       >
         <TokenIcon
@@ -126,29 +124,28 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
           </TextLink>
         </Flex>
       </Flex>
-      <Flex
-        justifyContent='flex-start'
-        css={{
-          overflow: 'hidden',
-          flex: '1 1 0',
-          minWidth: '140px'
-        }}
-      >
-        {ownerId ? (
-          <UserLink
-            userId={ownerId}
-            size='s'
-            badgeSize='xs'
-            ellipses
-            fullWidth
-            hideFanClubBadge
-            popover
-          />
-        ) : (
-          <Skeleton h='24px' w='100px' />
-        )}
-      </Flex>
     </Flex>
+  )
+}
+
+const renderArtistCell = (cellInfo: CoinCell) => {
+  const coin = cellInfo.row.original
+  const { ownerId } = coin
+
+  if (!ownerId) {
+    return <Skeleton h='24px' w='100px' />
+  }
+
+  return (
+    <UserLink
+      userId={ownerId}
+      size='s'
+      badgeSize='xs'
+      ellipses
+      fullWidth
+      hideFanClubBadge
+      popover
+    />
   )
 }
 
@@ -227,11 +224,25 @@ const renderBuyCell = (
 const tableColumnMap = {
   tokenName: {
     id: 'tokenName',
-    Header: () => <Flex css={{ paddingLeft: spacing.unit8 }}>Coin</Flex>,
+    Header: () => <Flex css={{ paddingLeft: 24 }}>Coin</Flex>,
     accessor: 'name',
     Cell: renderTokenNameCell,
-    minWidth: 150,
+    minWidth: 220,
+    width: 220,
+    maxWidth: Number.MAX_SAFE_INTEGER,
     disableSortBy: true,
+    align: 'left'
+  },
+  artist: {
+    id: 'artist',
+    Header: () => <Flex css={{ paddingLeft: 0 }}>Artist</Flex>,
+    accessor: 'ownerId',
+    Cell: renderArtistCell,
+    minWidth: 140,
+    width: 140,
+    maxWidth: 140,
+    disableSortBy: true,
+    disableResizing: true,
     align: 'left'
   },
   price: {
@@ -241,8 +252,10 @@ const tableColumnMap = {
     Cell: renderPriceCell,
     disableSortBy: false,
     align: 'right',
-    width: 50,
-    minWidth: 50,
+    width: 104,
+    minWidth: 104,
+    maxWidth: 104,
+    disableResizing: true,
     sorter: numericSorter('price')
   },
   totalVolumeUSD: {
@@ -252,8 +265,10 @@ const tableColumnMap = {
     Cell: renderTotalVolumeUSDCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 120,
+    minWidth: 120,
+    maxWidth: 120,
+    disableResizing: true,
     sorter: numericSorter('totalVolumeUSD')
   },
   marketCap: {
@@ -263,8 +278,10 @@ const tableColumnMap = {
     Cell: renderMarketCapCell,
     disableSortBy: false,
     align: 'right',
-    width: 50,
-    minWidth: 50,
+    width: 120,
+    minWidth: 120,
+    maxWidth: 120,
+    disableResizing: true,
     sorter: numericSorter('marketCap')
   },
   createdDate: {
@@ -274,8 +291,10 @@ const tableColumnMap = {
     Cell: renderCreatedDateCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 104,
+    minWidth: 104,
+    maxWidth: 104,
+    disableResizing: true,
     sorter: dateSorter('createdAt')
   },
   holders: {
@@ -285,8 +304,10 @@ const tableColumnMap = {
     Cell: renderHoldersCell,
     disableSortBy: false,
     align: 'right',
-    width: 40,
-    minWidth: 40,
+    width: 88,
+    minWidth: 88,
+    maxWidth: 88,
+    disableResizing: true,
     sorter: numericSorter('holder')
   },
   buy: {
@@ -295,8 +316,10 @@ const tableColumnMap = {
     Cell: renderBuyCell,
     disableSortBy: true,
     align: 'right',
-    width: 30,
-    minWidth: 30
+    width: 112,
+    minWidth: 112,
+    maxWidth: 112,
+    disableResizing: true
   }
 }
 
@@ -332,7 +355,6 @@ export const FanClubsTable = ({
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
   const { env } = useQueryContext()
-  const tableRef = useRef<HTMLDivElement | null>(null)
   const externalWalletAddress = useExternalWalletAddress()
   const { data: externalUsdcBalance } = useExternalWalletBalance({
     mint: env.USDC_MINT_ADDRESS,
@@ -346,7 +368,6 @@ export const FanClubsTable = ({
     externalUsdcBalance,
     externalAudioBalance
   })
-  const [hiddenColumns, setHiddenColumns] = useState<string[] | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
@@ -394,61 +415,8 @@ export const FanClubsTable = ({
     return (getScrollParent(scrollContainerRef.current) as HTMLElement) ?? null
   }, [mainContentRef])
 
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
-
-  const updateColumnVisibility = useCallback(() => {
-    if (!tableRef.current) return
-    const width = tableRef.current.offsetWidth
-    if (width < 728) {
-      setHiddenColumns([
-        tableColumnMap.totalVolumeUSD.id,
-        tableColumnMap.marketCap.id,
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 866) {
-      setHiddenColumns([
-        tableColumnMap.marketCap.id,
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 972) {
-      setHiddenColumns([
-        tableColumnMap.createdDate.id,
-        tableColumnMap.holders.id
-      ])
-    } else if (width < 1074) {
-      setHiddenColumns([tableColumnMap.holders.id])
-    } else {
-      setHiddenColumns(null)
-    }
-  }, [])
-
-  const setTableNode = useCallback(
-    (node: HTMLDivElement | null) => {
-      scrollContainerRef.current = node
-      if (resizeObserverRef.current && tableRef.current) {
-        resizeObserverRef.current.unobserve(tableRef.current)
-      }
-      tableRef.current = node
-      if (!node) return
-
-      if (!resizeObserverRef.current) {
-        resizeObserverRef.current = new ResizeObserver(() => {
-          updateColumnVisibility()
-        })
-      }
-      resizeObserverRef.current.observe(node)
-      updateColumnVisibility()
-    },
-    [updateColumnVisibility]
-  )
-
-  useEffect(() => {
-    return () => {
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-    }
+  const setTableNode = useCallback((node: HTMLDivElement | null) => {
+    scrollContainerRef.current = node
   }, [])
 
   const onSort = useCallback(
@@ -489,10 +457,17 @@ export const FanClubsTable = ({
       ...baseColumns.buy,
       Cell: (cellInfo: CoinCell) => renderBuyCell(cellInfo, handleBuy)
     }
-    return Object.values(baseColumns).filter(
-      (column) => !hiddenColumns?.includes(column.id)
-    )
-  }, [handleBuy, hiddenColumns])
+    return [
+      baseColumns.tokenName,
+      baseColumns.artist,
+      baseColumns.price,
+      baseColumns.totalVolumeUSD,
+      baseColumns.marketCap,
+      baseColumns.createdDate,
+      baseColumns.holders,
+      baseColumns.buy
+    ]
+  }, [handleBuy])
 
   const showEmptyState = !isPending && (!coins || coins.length === 0)
 
@@ -536,7 +511,7 @@ export const FanClubsTable = ({
             isEmptyRow={isEmptyRow}
             fetchMore={loadNextPage}
             fetchBatchSize={FAN_CLUBS_BATCH_SIZE}
-            tableHeaderClassName={styles.tableHeader}
+            responsiveColumns={RESPONSIVE_TABLE_POLICIES.fanClubsLeaderboard}
             scrollRef={mainContentRef}
           />
         </Flex>

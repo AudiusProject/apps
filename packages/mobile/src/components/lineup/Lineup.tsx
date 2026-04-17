@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { PlaybackSource, ID, UID } from '@audius/common/models'
 import { Kind, Status } from '@audius/common/models'
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect, useNavigationState } from '@react-navigation/native'
 import { range } from 'lodash'
 import type { SectionList as RNSectionList, ViewStyle } from 'react-native'
 import { Dimensions, StyleSheet, View } from 'react-native'
@@ -18,6 +18,7 @@ import { useReachableEffect } from 'app/hooks/useReachabilityEffect'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
 import { Delineator } from './Delineator'
+import { LineupContext } from './LineupContext'
 import { delineateByTime } from './delineate'
 import type {
   LineupProps,
@@ -286,6 +287,19 @@ export const Lineup = ({
   const { status, entries, inView: lineupInView } = lineup
   const lineupLength = entries.length
   const inView = lazy ? lineupInView : true
+
+  // Subscribe once at the lineup level instead of per-tile. Propagated to
+  // every TrackTile via LineupContext so every tile gets the same value
+  // without each one registering its own navigation-state listener.
+  const isOnArtistsTracksTab = useNavigationState((state) => {
+    // @ts-expect-error -- history returning unknown[]
+    const currentScreen = state.history?.[0]?.key
+    return currentScreen?.includes('Tracks') ?? false
+  })
+  const lineupContextValue = useMemo(
+    () => ({ isOnArtistsTracksTab }),
+    [isOnArtistsTracksTab]
+  )
 
   const handleRefresh = useCallback(() => {
     if (!refreshing) {
@@ -621,41 +635,50 @@ export const Lineup = ({
   const handleEndReached = useCallback(() => handleLoadMore(), [handleLoadMore])
 
   return (
-    <View style={styles.root}>
-      <SectionList
-        {...listProps}
-        {...pullToRefreshProps}
-        ref={ref}
-        onScroll={handleScroll}
-        ListHeaderComponent={
-          hideHeaderOnEmpty && areSectionsEmpty ? undefined : header
-        }
-        ListFooterComponent={lineup.hasMore ? null : ListFooterComponent}
-        ListEmptyComponent={LineupEmptyComponent}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={LOAD_MORE_THRESHOLD}
-        sections={areSectionsEmpty ? [] : sections}
-        stickySectionHeadersEnabled={false}
-        keyExtractor={(item, index) => `${item?.id}-${index}`}
-        renderItem={renderItem}
-        renderSectionHeader={({ section }) => {
-          if (section.delineate) {
-            if (section.hasLeadingElement && leadingElementDelineator) {
-              return leadingElementDelineator
-            }
-            return <Delineator text={section.title} />
+    <LineupContext.Provider value={lineupContextValue}>
+      <View style={styles.root}>
+        <SectionList
+          {...listProps}
+          {...pullToRefreshProps}
+          ref={ref}
+          onScroll={handleScroll}
+          ListHeaderComponent={
+            hideHeaderOnEmpty && areSectionsEmpty ? undefined : header
           }
-          return null
-        }}
-        scrollIndicatorInsets={{ right: Number.MIN_VALUE }}
-        // Perf optimizations
-        initialNumToRender={5} // note: this will only affect loading skeletons
-        maxToRenderPerBatch={5}
-        windowSize={4}
-        updateCellsBatchingPeriod={50}
-        removeClippedSubviews={true}
-        getItemLayout={getItemLayout}
-      />
-    </View>
+          ListFooterComponent={lineup.hasMore ? null : ListFooterComponent}
+          ListEmptyComponent={LineupEmptyComponent}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={LOAD_MORE_THRESHOLD}
+          sections={areSectionsEmpty ? [] : sections}
+          stickySectionHeadersEnabled={false}
+          // Real items get a stable per-occurrence `uid`; loading skeletons
+          // fall back to index since they have no identity. Previously this
+          // used `${item?.id}-${index}`, which changed every time an item
+          // shifted position, forcing React to unmount+remount every tile on
+          // any list-level change.
+          keyExtractor={(item, index) =>
+            item && 'uid' in item ? item.uid : `loading-${index}`
+          }
+          renderItem={renderItem}
+          renderSectionHeader={({ section }) => {
+            if (section.delineate) {
+              if (section.hasLeadingElement && leadingElementDelineator) {
+                return leadingElementDelineator
+              }
+              return <Delineator text={section.title} />
+            }
+            return null
+          }}
+          scrollIndicatorInsets={{ right: Number.MIN_VALUE }}
+          // Perf optimizations
+          initialNumToRender={5} // note: this will only affect loading skeletons
+          maxToRenderPerBatch={5}
+          windowSize={4}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={true}
+          getItemLayout={getItemLayout}
+        />
+      </View>
+    </LineupContext.Provider>
   )
 }

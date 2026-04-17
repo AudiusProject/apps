@@ -310,6 +310,7 @@ export const TrackTile = ({
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         {
           height: size === TrackTileSize.LARGE ? 144 : 128,
+          containerType: 'inline-size',
           '&:hover .artworkIcon': { opacity: 0.75 }
         }
       ]}

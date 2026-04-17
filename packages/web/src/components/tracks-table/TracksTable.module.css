@@ -1,11 +1,74 @@
 .textContainer {
   position: relative;
-  display: inline-flex;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
 }
 
+.trackInfoContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  user-select: none;
+}
+
+.inlineArtworkContainer {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border: 1px solid var(--harmony-n-100);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.inlineArtworkIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  transition: opacity 0.12s ease-in-out;
+  pointer-events: none;
+}
+
+.inlineArtworkIcon :global(svg) {
+  width: 20px;
+  height: 20px;
+}
+
+.tableRow:hover .inlineArtworkIcon,
+.tableRow.active .inlineArtworkIcon {
+  opacity: 0.75;
+}
+
+.inlineArtworkIconActive {
+  opacity: 0.75;
+}
+
+.trackHeaderWithArtwork {
+  display: inline-flex;
+  align-items: center;
+}
+
+.trackHeaderArtworkSpacer {
+  width: 56px;
+  min-width: 56px;
+  display: inline-block;
+}
+
 .textCell {
+  width: 100%;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -15,11 +78,13 @@
 .trackCell {
   composes: textCell;
   display: block;
+  user-select: none;
 }
 
 .trackName {
   display: flex;
   align-items: center;
+  user-select: none;
 }
 
 .trackName:hover:not(:has(.locked)) {
@@ -32,6 +97,18 @@
 
 .artistCellContainer {
   width: 100%;
+  min-width: 0;
+}
+
+.stackedArtistText {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--harmony-n-500);
+  user-select: none;
 }
 
 .badges {

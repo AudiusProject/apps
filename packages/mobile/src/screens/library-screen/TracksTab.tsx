@@ -24,7 +24,6 @@ import { WithLoader } from 'app/components/with-loader/WithLoader'
 import { getIsDoneLoadingFromDisk } from 'app/store/offline-downloads/selectors'
 import { makeStyles } from 'app/styles'
 
-import { LoadingMoreSpinner } from './LoadingMoreSpinner'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 import { useFavoritesLineup } from './useFavoritesLineup'
@@ -52,6 +51,11 @@ const messages = {
 
 const useStyles = makeStyles(({ spacing }) => ({
   container: {
+    marginBottom: spacing(4),
+    marginHorizontal: spacing(3)
+  },
+  containerWithTopSpacing: {
+    marginTop: spacing(3),
     marginBottom: spacing(4),
     marginHorizontal: spacing(3)
   },
@@ -107,6 +111,10 @@ export const TracksTab = () => {
   const saveCount = useMemo(
     () => saves.length + Object.keys(localAdditions).length,
     [saves, localAdditions]
+  )
+  const trackSkeletonRowCount = useMemo(
+    () => (saveCount > 0 ? Math.min(saveCount, 10) : 10),
+    [saveCount]
   )
 
   const fetchSaves = useCallback(() => {
@@ -200,9 +208,9 @@ export const TracksTab = () => {
     savedTracksStatus !== Status.SUCCESS ||
     isLoadingTracks
 
-  const loadingSpinner = <LoadingMoreSpinner />
-
-  const shouldShowFilterInput = trackUids.length > 0 || filterValue
+  const showTrackSkeletonList = isPending && filteredTrackUids.length === 0
+  const shouldShowFilterInput =
+    trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
   const renderContent = () => {
     if (filteredTrackUids.length === 0 && !isPending) {
@@ -216,22 +224,35 @@ export const TracksTab = () => {
     }
 
     return (
-      <WithLoader loading={initialFetch}>
+      <WithLoader
+        loading={initialFetch && saveCount === 0 && !showTrackSkeletonList}
+      >
         <Animated.View layout={Layout}>
-          {filteredTrackUids.length ? (
-            <Tile styles={{ tile: styles.container }}>
+          {showTrackSkeletonList || filteredTrackUids.length > 0 ? (
+            <Tile
+              styles={{
+                tile:
+                  showTrackSkeletonList && !shouldShowFilterInput
+                    ? styles.containerWithTopSpacing
+                    : styles.container
+              }}
+            >
               <TrackList
                 style={styles.trackList}
                 hideArt
+                showSkeleton={showTrackSkeletonList}
+                skeletonRowCount={trackSkeletonRowCount}
+                hasNextPage={
+                  isFetchingMore && !allTracksFetched && isReachable === true
+                }
                 onEndReached={handleMoreFetchSaves}
                 onEndReachedThreshold={1.5}
                 togglePlay={togglePlay}
                 trackItemAction='overflow'
-                uids={filteredTrackUids}
+                uids={showTrackSkeletonList ? undefined : filteredTrackUids}
               />
             </Tile>
           ) : null}
-          {filteredTrackUids.length > 0 && isPending ? loadingSpinner : null}
         </Animated.View>
       </WithLoader>
     )
