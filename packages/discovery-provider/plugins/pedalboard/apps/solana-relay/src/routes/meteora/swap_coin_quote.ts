@@ -1,4 +1,4 @@
-import { CpAmm } from '@meteora-ag/cp-amm-sdk'
+import { CpAmm, SwapMode as DammSwapMode } from '@meteora-ag/cp-amm-sdk'
 import {
   DynamicBondingCurveClient,
   SwapMode
@@ -97,13 +97,17 @@ const getDammPoolQuote = async (
   const inputTokenMint =
     swapDirection === 'audioToCoin' ? audioMintPubkey : coinMintPubkey
 
-  const quote = await cpAmm.getQuote({
-    inAmount: inputAmountBN,
+  const currentSlot = await connection.getSlot()
+  const currentPoint = poolState.activationType
+    ? new BN(new Date().getTime())
+    : new BN(currentSlot)
+
+  const quote = cpAmm.getQuote2({
+    amountIn: inputAmountBN,
     inputTokenMint,
     slippage: 2,
     poolState,
-    currentTime: new Date().getTime(),
-    currentSlot: await connection.getSlot(),
+    currentPoint,
     inputTokenInfo: {
       mint: tokenAMintInfo,
       currentEpoch
@@ -113,10 +117,12 @@ const getDammPoolQuote = async (
       currentEpoch
     },
     tokenADecimal: tokenAMintInfo.decimals,
-    tokenBDecimal: tokenBMintInfo.decimals
+    tokenBDecimal: tokenBMintInfo.decimals,
+    swapMode: DammSwapMode.PartialFill,
+    hasReferral: false
   })
 
-  return quote.swapOutAmount.toString()
+  return quote.outputAmount.toString()
 }
 /**
  * Gets a quote for swapping AUDIO to/from an artist coin using Meteora's DBC
