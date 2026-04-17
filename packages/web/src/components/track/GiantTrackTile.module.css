@@ -32,6 +32,11 @@
   align-items: flex-start;
 }
 
+.titleHeader {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .playSection {
   align-items: center;
 }
