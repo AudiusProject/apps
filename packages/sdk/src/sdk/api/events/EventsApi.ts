@@ -122,9 +122,7 @@ export class EventsApi extends GeneratedEventsApi {
    * entity_type='Event'; next time the event owner posts an update, the
    * follower receives a notification.
    */
-  async followEventWithEntityManager(
-    params: EntityManagerFollowEventRequest
-  ) {
+  async followEventWithEntityManager(params: EntityManagerFollowEventRequest) {
     const { userId, eventId } = await parseParams(
       'followEvent',
       EntityManagerFollowEventSchema

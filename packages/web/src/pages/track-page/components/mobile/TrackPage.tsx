@@ -54,9 +54,9 @@ import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
+import { RemixContestTeaser } from '../shared/RemixContestTeaser'
 
 import TrackPageHeader from './TrackHeader'
-import { RemixContestTeaser } from '../shared/RemixContestTeaser'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
 const { getPlaying, getPreviewing } = playerSelectors

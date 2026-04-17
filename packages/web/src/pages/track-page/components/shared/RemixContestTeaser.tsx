@@ -18,7 +18,8 @@ import { contestPage } from 'utils/route'
 const messages = {
   badge: 'Remix Contest',
   viewContest: 'View Contest',
-  endsOn: (deadline?: string) => `Ends ${formatContestDeadline(deadline, 'short')}`,
+  endsOn: (deadline?: string) =>
+    `Ends ${formatContestDeadline(deadline, 'short')}`,
   ended: 'Contest ended'
 }
 
@@ -37,9 +38,7 @@ type RemixContestTeaserProps = {
  * to drop into every track-page view unconditionally.
  */
 export const RemixContestTeaser = ({ trackId }: RemixContestTeaserProps) => {
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS
-  )
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
   const { data: track } = useTrack(trackId)
   const { data: contest } = useRemixContest(trackId)
 

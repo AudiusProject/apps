@@ -2,6 +2,9 @@ import { describe, expect, vi, beforeEach } from 'vitest'
 
 import { fireEvent, render, screen, it } from 'test/test-utils'
 
+// Must import after mocks are set up.
+import { ContestCommentsSection } from './ContestCommentsSection'
+
 // ContestCommentsSection stitches four hooks together:
 //   - useCurrentUserId         → who's looking at the page
 //   - useEventComments         → the feed (top-level comments + nested replies)
@@ -38,9 +41,6 @@ vi.mock('components/link/UserLink', () => ({
     <span data-testid='user-link'>user-{userId}</span>
   )
 }))
-
-// Must import after mocks are set up.
-import { ContestCommentsSection } from './ContestCommentsSection'
 
 const EVENT_ID = 100
 const EVENT_OWNER_ID = 1
@@ -130,7 +130,9 @@ describe('ContestCommentsSection', () => {
       />
     )
     expect(screen.getByText(/sign in to comment/i)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^post$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^post$/i })
+    ).not.toBeInTheDocument()
     // Case-sensitive exact match so we don't pick up the subheading text
     // "Post updates from the artist…" (lowercase 'u').
     expect(

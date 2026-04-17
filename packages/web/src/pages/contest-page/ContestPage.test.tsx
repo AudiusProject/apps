@@ -1,8 +1,13 @@
+import { createRef, type RefObject } from 'react'
+
 import { FeatureFlags } from '@audius/common/services'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, vi, beforeEach } from 'vitest'
 
 import { render, screen, it } from 'test/test-utils'
+
+// Import the page AFTER all the mocks are registered.
+import ContestPage from './ContestPage'
 
 // We mock the `@audius/common/api` surface for ContestPage because the page
 // reads from 9 hooks whose combined state would be painful to prime through
@@ -62,12 +67,9 @@ vi.mock('components/lineup/TanQueryLineup', () => ({
 
 // The nested remix-contest details/prizes tabs are verified by their own
 // tests upstream. Here they're irrelevant layout fillers; stub them.
-vi.mock(
-  'pages/track-page/components/desktop/RemixContestDetailsTab',
-  () => ({
-    RemixContestDetailsTab: () => <div data-testid='details-tab' />
-  })
-)
+vi.mock('pages/track-page/components/desktop/RemixContestDetailsTab', () => ({
+  RemixContestDetailsTab: () => <div data-testid='details-tab' />
+}))
 vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
   RemixContestPrizesTab: () => <div data-testid='prizes-tab' />
 }))
@@ -77,9 +79,6 @@ vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
 vi.mock('./components/ContestCommentsSection', () => ({
   ContestCommentsSection: () => <div data-testid='contest-comments-section' />
 }))
-
-// Import the page AFTER all the mocks are registered.
-import ContestPage from './ContestPage'
 
 const track = {
   track_id: 1,
@@ -106,15 +105,20 @@ const contest = {
   }
 }
 
-const renderContestPage = (
-  opts?: { featureFlags?: Partial<Record<FeatureFlags, boolean>> }
-) =>
-  render(
+const renderContestPage = (opts?: {
+  featureFlags?: Partial<Record<FeatureFlags, boolean>>
+}) => {
+  const containerRef = createRef<HTMLDivElement>()
+  return render(
     <MemoryRouter initialEntries={['/Protohype/ready-to-love/contest']}>
       <Routes>
         <Route
           path='/:handle/:slug/contest'
-          element={<ContestPage />}
+          element={
+            <ContestPage
+              containerRef={containerRef as RefObject<HTMLDivElement>}
+            />
+          }
         />
         {/* Target of the redirect when the CONTESTS flag is off —
             needs to match MemoryRouter's initial entries tree. */}
@@ -132,6 +136,7 @@ const renderContestPage = (
       reduxState: { remoteConfig: { remoteConfigLoaded: true } }
     }
   )
+}
 
 describe('ContestPage', () => {
   beforeEach(() => {
@@ -196,16 +201,24 @@ describe('ContestPage', () => {
     // The main layout sections should NOT render in the fallback branch.
     expect(screen.queryByTestId('details-tab')).not.toBeInTheDocument()
     expect(screen.queryByTestId('prizes-tab')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('contest-comments-section')).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('contest-comments-section')
+    ).not.toBeInTheDocument()
   })
 
   it('renders the details / prizes / submissions / feed sections when a contest exists', () => {
     renderContestPage()
 
     // All four main section headings present
-    expect(screen.getByRole('heading', { name: /^details$/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^prizes$/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^submissions$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^details$/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^prizes$/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^submissions$/i })
+    ).toBeInTheDocument()
 
     // Stubbed subsections rendered
     expect(screen.getByTestId('details-tab')).toBeInTheDocument()
@@ -220,8 +233,12 @@ describe('ContestPage', () => {
     })
     renderContestPage()
 
-    expect(screen.getByRole('button', { name: /follow contest/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^following$/i })).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /follow contest/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^following$/i })
+    ).not.toBeInTheDocument()
   })
 
   it('renders "Following" when the viewer is already subscribed to the contest', () => {
@@ -230,7 +247,9 @@ describe('ContestPage', () => {
     })
     renderContestPage()
 
-    expect(screen.getByRole('button', { name: /^following$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /^following$/i })
+    ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /follow contest/i })
     ).not.toBeInTheDocument()

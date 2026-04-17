@@ -554,5 +554,4 @@ export class CommentsApi extends GeneratedCommentsApi {
       }
     ).value()
   }
-
 }

@@ -17,7 +17,6 @@ import {
   remixesPageLineupActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { dayjs } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -187,7 +186,9 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         header={renderHeader()}
       >
         <Flex column gap='l' p='xl' css={{ minWidth: MIN_PAGE_WIDTH_PX }}>
-          <Text variant='body'>No contest is currently running for this track.</Text>
+          <Text variant='body'>
+            No contest is currently running for this track.
+          </Text>
         </Flex>
       </Page>
     )

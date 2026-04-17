@@ -1,4 +1,7 @@
-import { CONTEST_PAGE, TRACK_REMIXES_PAGE } from '@audius/common/src/utils/route'
+import {
+  CONTEST_PAGE,
+  TRACK_REMIXES_PAGE
+} from '@audius/common/src/utils/route'
 import { describe, expect, it } from 'vitest'
 
 import { contestPage, fullContestPage, BASE_URL } from './route'

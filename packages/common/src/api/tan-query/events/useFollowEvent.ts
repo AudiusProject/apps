@@ -1,9 +1,5 @@
 import { Id, encodeHashId } from '@audius/sdk'
-import {
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
 import { Feature, ID } from '~/models'
@@ -17,9 +13,7 @@ export type EventFollowState = {
   followerCount: number
 }
 
-export const getEventFollowStateQueryKey = (
-  eventId: ID | null | undefined
-) => {
+export const getEventFollowStateQueryKey = (eventId: ID | null | undefined) => {
   return [
     QUERY_KEYS.eventFollowState,
     eventId
@@ -64,13 +58,7 @@ export const useFollowEvent = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      eventId
-    }: {
-      userId: ID
-      eventId: ID
-    }) => {
+    mutationFn: async ({ userId, eventId }: { userId: ID; eventId: ID }) => {
       const sdk = await audiusSdk()
       return await sdk.events.followEvent({
         userId: Id.parse(userId)!,
@@ -112,13 +100,7 @@ export const useUnfollowEvent = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      eventId
-    }: {
-      userId: ID
-      eventId: ID
-    }) => {
+    mutationFn: async ({ userId, eventId }: { userId: ID; eventId: ID }) => {
       const sdk = await audiusSdk()
       return await sdk.events.unfollowEvent({
         userId: Id.parse(userId)!,

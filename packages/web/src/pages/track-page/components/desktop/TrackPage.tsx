@@ -50,7 +50,6 @@ import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
-
 import { RemixContestTeaser } from '../shared/RemixContestTeaser'
 
 import styles from './TrackPage.module.css'

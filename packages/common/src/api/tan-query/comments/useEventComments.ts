@@ -107,7 +107,8 @@ export const useEventComments = ({
       })
       dispatch(
         toast({
-          content: 'There was an error loading the contest feed. Please try again.'
+          content:
+            'There was an error loading the contest feed. Please try again.'
         })
       )
     }

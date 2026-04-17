@@ -106,10 +106,7 @@ describe('RemixContestTeaser', () => {
     // The "View Contest" button is rendered as an anchor (Button asChild + Link).
     const link = screen.getByRole('link', { name: /view contest/i })
     expect(link).toBeInTheDocument()
-    expect(link).toHaveAttribute(
-      'href',
-      '/Protohype/ready-to-love/contest'
-    )
+    expect(link).toHaveAttribute('href', '/Protohype/ready-to-love/contest')
   })
 
   it('shows "Ends <date>" for an active contest', () => {

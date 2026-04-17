@@ -40,9 +40,7 @@ describe('TrackPage contest wiring (Phase 5)', () => {
     // The full tabbed contest experience moved to /contest. If someone
     // re-adds it to the track page, the UX regresses to the old duplicated
     // layout.
-    expect(desktopSource).not.toMatch(
-      /import\s*\{\s*RemixContestSection\s*\}/
-    )
+    expect(desktopSource).not.toMatch(/import\s*\{\s*RemixContestSection\s*\}/)
     expect(desktopSource).not.toMatch(/<RemixContestSection\b/)
   })
 
@@ -57,9 +55,7 @@ describe('TrackPage contest wiring (Phase 5)', () => {
   })
 
   it('mobile TrackPage does NOT import the old RemixContestSection', () => {
-    expect(mobileSource).not.toMatch(
-      /import\s*\{\s*RemixContestSection\s*\}/
-    )
+    expect(mobileSource).not.toMatch(/import\s*\{\s*RemixContestSection\s*\}/)
     expect(mobileSource).not.toMatch(/<RemixContestSection\b/)
   })
 
