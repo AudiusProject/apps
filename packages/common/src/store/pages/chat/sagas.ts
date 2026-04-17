@@ -29,8 +29,8 @@ import { Name } from '~/models/Analytics'
 import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Status } from '~/models/Status'
-import * as toastActions from '~/store/ui/toast/slice'
 import { inboxUnavailableModalActions } from '~/store/ui/modals'
+import * as toastActions from '~/store/ui/toast/slice'
 import dayjs from '~/utils/dayjs'
 
 import {

@@ -8,10 +8,7 @@ import { Pressable, StyleSheet } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { usePrevious } from 'react-use'
 
-import {
-  BOTTOM_BAR_BUTTON_HEIGHT,
-  BOTTOM_BAR_TOP_PADDING
-} from '../constants'
+import { BOTTOM_BAR_BUTTON_HEIGHT, BOTTOM_BAR_TOP_PADDING } from '../constants'
 
 export type BaseBottomTabBarButtonProps = {
   name: string

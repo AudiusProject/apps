@@ -111,6 +111,12 @@ export interface ReplyComment {
      */
     updatedAt?: string;
     /**
+     * Optional URL for a video attachment on this reply
+     * @type {string}
+     * @memberof ReplyComment
+     */
+    videoUrl?: string | null;
+    /**
      * 
      * @type {number}
      * @memberof ReplyComment
@@ -158,6 +164,7 @@ export function ReplyCommentFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'isArtistReacted': !exists(json, 'is_artist_reacted') ? undefined : json['is_artist_reacted'],
         'createdAt': json['created_at'],
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
+        'videoUrl': !exists(json, 'video_url') ? undefined : json['video_url'],
         'parentCommentId': !exists(json, 'parent_comment_id') ? undefined : json['parent_comment_id'],
     };
 }
@@ -184,6 +191,7 @@ export function ReplyCommentToJSON(value?: ReplyComment | null): any {
         'is_artist_reacted': value.isArtistReacted,
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,
+        'video_url': value.videoUrl,
         'parent_comment_id': value.parentCommentId,
     };
 }
