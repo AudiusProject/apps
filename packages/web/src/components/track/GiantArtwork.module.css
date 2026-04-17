@@ -1,8 +1,10 @@
 .giantArtwork {
   height: 338px;
   width: 338px;
-  min-height: 338px;
-  min-width: 338px;
+  min-height: 0;
+  min-width: 0;
+  max-height: 100%;
+  max-width: 100%;
   user-select: none;
 }
 
@@ -11,8 +13,10 @@
   border: 1px solid var(--harmony-n-100);
   overflow: hidden;
   position: relative;
-  width: 338px;
-  height: 338px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* Empty artwork: subdued image icon on gray background (no skeleton) */

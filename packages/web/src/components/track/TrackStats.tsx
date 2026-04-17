@@ -29,10 +29,19 @@ const messages = {
 type TrackStatsProps = {
   trackId: ID
   scrollToCommentSection: () => void
+  showPlayCount?: boolean
+  forceMobileStyle?: boolean
+  className?: string
 }
 
 export const TrackStats = (props: TrackStatsProps) => {
-  const { trackId, scrollToCommentSection } = props
+  const {
+    trackId,
+    scrollToCommentSection,
+    showPlayCount = false,
+    forceMobileStyle = false,
+    className
+  } = props
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) =>
       pick(track, [
@@ -64,8 +73,6 @@ export const TrackStats = (props: TrackStatsProps) => {
   } = partialTrack
 
   const isOwner = currentUserId === owner_id
-
-  if (is_unlisted) return null
 
   const handleClickReposts = () => {
     dispatch(
@@ -100,44 +107,137 @@ export const TrackStats = (props: TrackStatsProps) => {
     )
   }
 
+  const shouldUseMobileRules = forceMobileStyle
+
+  const shouldShowRepostCount = shouldUseMobileRules
+    ? !is_unlisted
+    : !is_unlisted && repost_count > 0
+  const shouldShowFavoriteCount = shouldUseMobileRules
+    ? !is_unlisted
+    : !is_unlisted && save_count > 0
+  const shouldShowCommentCount = shouldUseMobileRules
+    ? !is_unlisted && !comments_disabled
+    : !is_unlisted && !comments_disabled && comment_count > 0
+  const shouldShowPlayCount =
+    shouldUseMobileRules || showPlayCount
+      ? isOwner || (!is_stream_gated && !is_unlisted)
+      : play_count > 0 &&
+        isLongFormContent(partialTrack) &&
+        (isOwner || !is_stream_gated)
+
+  if (
+    !shouldShowRepostCount &&
+    !shouldShowFavoriteCount &&
+    !shouldShowCommentCount &&
+    !shouldShowPlayCount
+  ) {
+    return null
+  }
+
+  const buttonSize = forceMobileStyle ? 'default' : 'large'
+  const buttonVariant = forceMobileStyle ? 'default' : 'subdued'
+
+  const renderStatLabel = (
+    count: number,
+    singular: string,
+    hideLabelInCompactHeader = false
+  ) =>
+    forceMobileStyle
+      ? formatCount(count)
+      : hideLabelInCompactHeader
+        ? [
+            formatCount(count),
+            <span key='label' data-track-stat-label='social'>
+              {` ${pluralize(singular, count)}`}
+            </span>
+          ]
+        : `${formatCount(count)} ${pluralize(singular, count)}`
+
+  if (forceMobileStyle) {
+    return (
+      <Flex gap='xl' justifyContent='flex-start' className={className}>
+        {shouldShowPlayCount ? (
+          <PlainButton
+            iconLeft={IconPlay}
+            size={buttonSize}
+            variant={buttonVariant}
+          >
+            {renderStatLabel(play_count, messages.play)}
+          </PlainButton>
+        ) : null}
+        {shouldShowRepostCount ? (
+          <PlainButton
+            iconLeft={IconRepost}
+            onClick={handleClickReposts}
+            size={buttonSize}
+            variant={buttonVariant}
+          >
+            {renderStatLabel(repost_count, messages.repost, true)}
+          </PlainButton>
+        ) : null}
+        {shouldShowFavoriteCount ? (
+          <PlainButton
+            iconLeft={IconHeart}
+            onClick={handleClickFavorites}
+            size={buttonSize}
+            variant={buttonVariant}
+          >
+            {renderStatLabel(save_count, messages.favorite, true)}
+          </PlainButton>
+        ) : null}
+        {shouldShowCommentCount ? (
+          <PlainButton
+            iconLeft={IconMessage}
+            onClick={handleClickComments}
+            size={buttonSize}
+            variant={buttonVariant}
+          >
+            {renderStatLabel(comment_count, messages.comment, true)}
+          </PlainButton>
+        ) : null}
+      </Flex>
+    )
+  }
+
   return (
-    <Flex gap='l'>
-      {repost_count === 0 ? null : (
+    <Flex gap={forceMobileStyle ? 'xl' : 'l'} className={className}>
+      {shouldShowRepostCount ? (
         <PlainButton
           iconLeft={IconRepost}
           onClick={handleClickReposts}
-          size='large'
-          variant='subdued'
+          size={buttonSize}
+          variant={buttonVariant}
         >
-          {formatCount(repost_count)} {pluralize(messages.repost, repost_count)}
+          {renderStatLabel(repost_count, messages.repost, true)}
         </PlainButton>
-      )}
-      {save_count === 0 ? null : (
+      ) : null}
+      {shouldShowFavoriteCount ? (
         <PlainButton
           iconLeft={IconHeart}
           onClick={handleClickFavorites}
-          size='large'
-          variant='subdued'
+          size={buttonSize}
+          variant={buttonVariant}
         >
-          {formatCount(save_count)} {pluralize(messages.favorite, save_count)}
+          {renderStatLabel(save_count, messages.favorite, true)}
         </PlainButton>
-      )}
-      {comments_disabled || comment_count === 0 ? null : (
+      ) : null}
+      {shouldShowCommentCount ? (
         <PlainButton
           iconLeft={IconMessage}
           onClick={handleClickComments}
-          size='large'
-          variant='subdued'
+          size={buttonSize}
+          variant={buttonVariant}
         >
-          {formatCount(comment_count)}{' '}
-          {pluralize(messages.comment, comment_count)}
+          {renderStatLabel(comment_count, messages.comment, true)}
         </PlainButton>
-      )}
-      {play_count > 0 &&
-      isLongFormContent(partialTrack) &&
-      (isOwner || !is_stream_gated) ? (
-        <PlainButton iconLeft={IconPlay}>
-          {formatCount(play_count)} {pluralize(messages.play, play_count)}
+      ) : null}
+      {shouldShowPlayCount ? (
+        <PlainButton
+          iconLeft={IconPlay}
+          size={buttonSize}
+          variant={buttonVariant}
+        >
+          {renderStatLabel(play_count, messages.play)}
         </PlainButton>
       ) : null}
     </Flex>
