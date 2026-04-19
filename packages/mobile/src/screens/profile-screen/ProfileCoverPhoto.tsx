@@ -68,26 +68,28 @@ export const ProfileCoverPhoto = () => {
     ]
   }))
 
-  if (!user_id) return null
-
   return (
     <Flex
       pointerEvents='box-none'
       h={coverPhotoHeight}
       backgroundColor='surface2'
     >
-      <CoverPhoto style={{ height: coverPhotoHeight }} userId={user_id}>
-        <AnimatedBlurView
-          blurType='dark'
-          blurAmount={100}
-          style={blurViewStyle}
-        />
-        {isArtist ? <Animated.View style={styles.darkOverlay} /> : null}
-      </CoverPhoto>
-      {isArtist ? (
-        <Animated.View style={[styles.artistBadge, badgeStyle]}>
-          <BadgeArtist />
-        </Animated.View>
+      {user_id ? (
+        <>
+          <CoverPhoto style={{ height: coverPhotoHeight }} userId={user_id}>
+            <AnimatedBlurView
+              blurType='dark'
+              blurAmount={100}
+              style={blurViewStyle}
+            />
+            {isArtist ? <Animated.View style={styles.darkOverlay} /> : null}
+          </CoverPhoto>
+          {isArtist ? (
+            <Animated.View style={[styles.artistBadge, badgeStyle]}>
+              <BadgeArtist />
+            </Animated.View>
+          ) : null}
+        </>
       ) : null}
     </Flex>
   )
