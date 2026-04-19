@@ -1,5 +1,5 @@
 import { Id } from '@audius/sdk'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userCoinListFromSDK, type UserCoin } from '~/adapters/coin'
 import { ID } from '~/models'
@@ -7,6 +7,8 @@ import { ID } from '~/models'
 import { QUERY_KEYS } from '../queryKeys'
 import { SelectableQueryOptions } from '../types'
 import { useQueryContext } from '../utils'
+
+import { getUserCoinQueryKey } from './useUserCoin'
 
 export interface UseUserCoinsParams {
   userId: ID | undefined | null
@@ -21,6 +23,7 @@ export const useUserCoins = <TResult = UserCoin[]>(
   options?: SelectableQueryOptions<UserCoin[], TResult>
 ) => {
   const { audiusSdk } = useQueryContext()
+  const queryClient = useQueryClient()
 
   return useQuery({
     queryKey: [QUERY_KEYS.userCoins, params],
@@ -32,7 +35,26 @@ export const useUserCoins = <TResult = UserCoin[]>(
         offset: params.offset
       })
       if (response.data) {
-        return userCoinListFromSDK(response.data)
+        const coins = userCoinListFromSDK(response.data)
+        // Prime per-mint caches so CoinCardWithBalance rows don't each fetch
+        // their own aggregate. Activates once the plural endpoint returns
+        // `accounts[]`; until then this loop is a no-op.
+        coins.forEach((coin) => {
+          if (!coin.accounts) return
+          queryClient.setQueryData(
+            getUserCoinQueryKey(coin.mint, params.userId ?? null),
+            {
+              mint: coin.mint,
+              ticker: coin.ticker,
+              decimals: coin.decimals,
+              logoUri: coin.logoUri,
+              balance: coin.balance,
+              balanceUsd: coin.balanceUsd,
+              accounts: coin.accounts
+            }
+          )
+        })
+        return coins
       }
       return []
     },
