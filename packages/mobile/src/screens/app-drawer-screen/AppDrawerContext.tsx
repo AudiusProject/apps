@@ -9,6 +9,7 @@ type AppDrawerContextType = {
   drawerNavigation?: NavigationProp<any>
   gesturesDisabled?: boolean
   setGesturesDisabled?: (gestureDisabled: boolean) => void
+  setIsAtStackRoot?: (isAtStackRoot: boolean) => void
 }
 
 type AppDrawerContextValue = AppDrawerContextType | Record<string, never>
@@ -27,7 +28,8 @@ export const AppDrawerContextProvider = (
     drawerHelpers,
     drawerNavigation,
     gesturesDisabled,
-    setGesturesDisabled
+    setGesturesDisabled,
+    setIsAtStackRoot
   } = props
 
   const context = useMemo(
@@ -35,9 +37,16 @@ export const AppDrawerContextProvider = (
       drawerHelpers,
       drawerNavigation,
       gesturesDisabled,
-      setGesturesDisabled
+      setGesturesDisabled,
+      setIsAtStackRoot
     }),
-    [drawerHelpers, drawerNavigation, gesturesDisabled, setGesturesDisabled]
+    [
+      drawerHelpers,
+      drawerNavigation,
+      gesturesDisabled,
+      setGesturesDisabled,
+      setIsAtStackRoot
+    ]
   )
   return (
     <AppDrawerContext.Provider value={context}>

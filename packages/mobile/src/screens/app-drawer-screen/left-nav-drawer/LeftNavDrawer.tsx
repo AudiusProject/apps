@@ -26,6 +26,7 @@ import {
 type AccountDrawerProps = DrawerContentComponentProps & {
   gesturesDisabled: boolean
   setGesturesDisabled: (disabled: boolean) => void
+  setIsAtStackRoot: (isAtStackRoot: boolean) => void
 }
 
 export const LeftNavDrawer = (props: AccountDrawerProps) => {
