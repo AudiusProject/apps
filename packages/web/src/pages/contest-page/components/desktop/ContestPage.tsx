@@ -428,7 +428,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               alignItems='flex-start'
               pv='l'
             >
-              {/* Left column: About + Prizes */}
+              {/* Left column: About + Prizes + Updates feed */}
               <Flex
                 direction='column'
                 gap='2xl'
@@ -449,6 +449,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                   </Text>
                   <RemixContestPrizesTab trackId={trackId!} />
                 </Flex>
+
+                <Divider />
+
+                {/* Updates feed: host top-level posts only. Composer is
+                    scoped to the host via the same `mode='updates'`. */}
+                <ContestCommentsSection
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                  mode='updates'
+                />
               </Flex>
 
               {/* Right column: Stems & Downloads / Followers / Comments */}
@@ -489,6 +499,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 <ContestCommentsSection
                   eventId={eventId}
                   eventOwnerUserId={contest?.userId}
+                  mode='comments'
                 />
               </Flex>
             </Flex>

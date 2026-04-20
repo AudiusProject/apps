@@ -23,8 +23,13 @@ import { UserLink } from 'components/link/UserLink'
 
 const messages = {
   heading: 'Contest Feed',
+  commentsHeading: 'Comments',
+  updatesHeading: 'Updates',
   subheading: 'Post updates from the artist and comments from the community.',
   empty: 'No posts yet. Be the first to start the conversation.',
+  emptyUpdates:
+    'No updates yet. The contest host will post announcements here.',
+  emptyComments: 'No comments yet. Be the first to start the conversation.',
   composePlaceholder: 'Add a comment…',
   composePostUpdatePlaceholder: 'Post an update to your contest followers…',
   post: 'Post',
@@ -34,9 +39,20 @@ const messages = {
   signInToComment: 'Sign in to comment.'
 }
 
+/**
+ * - `feed` is the legacy single-pane layout (updates + comments together).
+ *   Kept for the mobile contest page which hasn't been redesigned yet.
+ * - `updates` renders only host-authored top-level posts; composer shown
+ *   only to the host.
+ * - `comments` renders everything that *isn't* a host post-update
+ *   (community comments + replies). Composer shown to every signed-in user.
+ */
+type ContestCommentsSectionMode = 'feed' | 'updates' | 'comments'
+
 type ContestCommentsSectionProps = {
   eventId: ID
   eventOwnerUserId: ID | undefined
+  mode?: ContestCommentsSectionMode
 }
 
 /**
@@ -54,13 +70,39 @@ type ContestCommentsSectionProps = {
  */
 export const ContestCommentsSection = ({
   eventId,
-  eventOwnerUserId
+  eventOwnerUserId,
+  mode = 'feed'
 }: ContestCommentsSectionProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const isEventOwner =
     currentUserId !== null &&
     eventOwnerUserId !== undefined &&
     currentUserId === eventOwnerUserId
+
+  const showComposer =
+    currentUserId !== null &&
+    (mode === 'feed' || mode === 'comments' || isEventOwner)
+  const composerLabel =
+    mode === 'updates' || (mode === 'feed' && isEventOwner)
+      ? messages.postUpdate
+      : messages.post
+  const composerPlaceholder =
+    mode === 'updates' || (mode === 'feed' && isEventOwner)
+      ? messages.composePostUpdatePlaceholder
+      : messages.composePlaceholder
+  const heading =
+    mode === 'updates'
+      ? messages.updatesHeading
+      : mode === 'comments'
+        ? messages.commentsHeading
+        : messages.heading
+  const showSubheading = mode === 'feed'
+  const emptyMessage =
+    mode === 'updates'
+      ? messages.emptyUpdates
+      : mode === 'comments'
+        ? messages.emptyComments
+        : messages.empty
 
   const {
     data: feedItems,
@@ -93,17 +135,18 @@ export const ContestCommentsSection = ({
     <Flex direction='column' gap='l'>
       <Flex direction='column' gap='xs'>
         <Text variant='heading' size='s'>
-          {messages.heading}
+          {heading}
         </Text>
-        <Text variant='body' size='s' color='subdued'>
-          {messages.subheading}
-        </Text>
+        {showSubheading ? (
+          <Text variant='body' size='s' color='subdued'>
+            {messages.subheading}
+          </Text>
+        ) : null}
       </Flex>
 
-      {/* Compose box — always visible when signed in. The same box
-          serves both "post update" and "normal comment" — whether the
-          result is tagged as a post update is decided server-side. */}
-      {currentUserId ? (
+      {/* Compose box. In "updates" mode only the host sees it; in
+          "comments"/"feed" every signed-in user sees it. */}
+      {showComposer ? (
         <Paper
           direction='column'
           p='l'
@@ -118,11 +161,7 @@ export const ContestCommentsSection = ({
                 label=''
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={
-                  isEventOwner
-                    ? messages.composePostUpdatePlaceholder
-                    : messages.composePlaceholder
-                }
+                placeholder={composerPlaceholder}
               />
               <Flex justifyContent='flex-end'>
                 <Button
@@ -131,13 +170,13 @@ export const ContestCommentsSection = ({
                   size='small'
                   disabled={!draft.trim() || isPosting}
                 >
-                  {isEventOwner ? messages.postUpdate : messages.post}
+                  {composerLabel}
                 </Button>
               </Flex>
             </Flex>
           </form>
         </Paper>
-      ) : (
+      ) : currentUserId ? null : (
         <Box p='m'>
           <Text variant='body' size='s' color='subdued'>
             {messages.signInToComment}
@@ -155,7 +194,7 @@ export const ContestCommentsSection = ({
       ) : !feedItems || feedItems.length === 0 ? (
         <Box p='l'>
           <Text variant='body' size='s' color='subdued'>
-            {messages.empty}
+            {emptyMessage}
           </Text>
         </Box>
       ) : (
@@ -165,6 +204,7 @@ export const ContestCommentsSection = ({
               key={commentId}
               commentId={commentId}
               eventOwnerUserId={eventOwnerUserId}
+              mode={mode}
             />
           ))}
           {hasNextPage ? (
@@ -188,16 +228,21 @@ export const ContestCommentsSection = ({
 type ContestCommentRowProps = {
   commentId: ID
   eventOwnerUserId: ID | undefined
+  mode: ContestCommentsSectionMode
 }
 
 /**
  * A single comment card. If the author is the event owner AND this is a
  * top-level comment (parent_comment_id null), render a "Post Update" badge.
  * Replies (even by the event owner) are plain.
+ *
+ * Honors `mode` so the same feed can be filtered down to "updates only"
+ * (host top-level posts) or "comments only" (everything else).
  */
 const ContestCommentRow = ({
   commentId,
-  eventOwnerUserId
+  eventOwnerUserId,
+  mode
 }: ContestCommentRowProps) => {
   const { data: comment } = useComment(commentId)
   const { data: author } = useUser(comment?.userId)
@@ -210,6 +255,12 @@ const ContestCommentRow = ({
     // Parent id is unset on top-level comments. Replies authored by the
     // artist are *not* post updates.
     !('parentCommentId' in comment && comment.parentCommentId)
+
+  // Client-side filter: updates-only panel drops non-updates, and the
+  // comments panel drops updates so they don't double-appear alongside
+  // the dedicated Updates feed.
+  if (mode === 'updates' && !isPostUpdate) return null
+  if (mode === 'comments' && isPostUpdate) return null
 
   return (
     <Paper
