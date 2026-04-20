@@ -30,8 +30,8 @@ import NavContext, {
 } from 'components/nav/mobile/NavContext'
 import { getIsIOS } from 'utils/browser'
 
-import styles from './NavBar.module.css'
 import { LeftNavDrawer } from './LeftNavDrawer'
+import styles from './NavBar.module.css'
 
 const { SIGN_UP_PAGE, TRENDING_PAGE } = route
 

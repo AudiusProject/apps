@@ -46,11 +46,7 @@ const StaticBottomButton = ({
         justifyContent: 'center'
       }}
     >
-      <Icon
-        width={28}
-        height={28}
-        color={isActive ? 'active' : 'default'}
-      />
+      <Icon width={28} height={28} color={isActive ? 'active' : 'default'} />
       {badge}
     </div>
   )

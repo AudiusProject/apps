@@ -28,8 +28,8 @@ import {
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Avatar } from 'components/avatar/Avatar'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
+import { Avatar } from 'components/avatar/Avatar'
 import { usePortal } from 'hooks/usePortal'
 import { push } from 'utils/navigation'
 
