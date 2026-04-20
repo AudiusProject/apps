@@ -1,0 +1,66 @@
+.drawer {
+  z-index: 22;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 75%;
+  max-width: 320px;
+  background: var(--harmony-white);
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.15);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translate3d(-100%, 0, 0);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.drawerOpen {
+  transform: translate3d(0, 0, 0);
+}
+
+.background {
+  z-index: 21;
+  background-color: black;
+  position: fixed;
+  right: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease-in-out;
+}
+
+.backgroundOpen {
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--harmony-text-default);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: var(--harmony-font-family);
+  font-size: var(--harmony-font-m);
+  font-weight: var(--harmony-font-medium);
+  width: 100%;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.navItem:hover,
+.navItem:active {
+  background-color: var(--harmony-n-50);
+}

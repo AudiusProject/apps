@@ -31,7 +31,7 @@ import NavContext, {
 import { getIsIOS } from 'utils/browser'
 
 import styles from './NavBar.module.css'
-import { NavBarActionDrawer } from './NavBarActionDrawer'
+import { LeftNavDrawer } from './LeftNavDrawer'
 
 const { SIGN_UP_PAGE, TRENDING_PAGE } = route
 
@@ -65,7 +65,7 @@ const NavBar = ({
 
   const { setStackReset } = useContext(RouterContext)
 
-  const [isActionDrawerOpen, setIsActionDrawerOpen] = useState(false)
+  const [isLeftNavOpen, setIsLeftNavOpen] = useState(false)
 
   const { setSlideDirection } = useContext(RouterContext)
 
@@ -181,7 +181,7 @@ const NavBar = ({
             <Flex mr='s' alignItems='center'>
               <Avatar
                 userId={currentUserId}
-                onClick={() => setIsActionDrawerOpen(true)}
+                onClick={() => setIsLeftNavOpen(true)}
                 size='small'
                 disableLink
                 aria-label='menu'
@@ -193,7 +193,7 @@ const NavBar = ({
                 aria-label='menu'
                 icon={IconKebabHorizontal}
                 color-='subdued'
-                onClick={() => setIsActionDrawerOpen(true)}
+                onClick={() => setIsLeftNavOpen(true)}
               />
             </Flex>
           )
@@ -201,9 +201,9 @@ const NavBar = ({
           rightElement
         )}
       </Flex>
-      <NavBarActionDrawer
-        isOpen={isActionDrawerOpen}
-        onClose={() => setIsActionDrawerOpen(false)}
+      <LeftNavDrawer
+        isOpen={isLeftNavOpen}
+        onClose={() => setIsLeftNavOpen(false)}
       />
     </Flex>
   )
