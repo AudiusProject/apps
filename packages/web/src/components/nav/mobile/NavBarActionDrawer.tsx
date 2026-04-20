@@ -1,5 +1,6 @@
 import { useCallback, useContext, useMemo } from 'react'
 
+import { useCurrentAccountUser } from '@audius/common/api'
 import { CLUBS_EXPLORE_PAGE, WALLET_PAGE } from '@audius/common/src/utils/route'
 import { route } from '@audius/common/utils'
 import { useDispatch } from 'react-redux'
@@ -8,7 +9,7 @@ import ActionDrawer from 'components/action-drawer/ActionDrawer'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { push } from 'utils/navigation'
 
-const { SETTINGS_PAGE, REWARDS_PAGE } = route
+const { SETTINGS_PAGE, REWARDS_PAGE, profilePage } = route
 
 type NavBarActionDrawerProps = {
   isOpen: boolean
@@ -16,6 +17,7 @@ type NavBarActionDrawerProps = {
 }
 
 const messages = {
+  profile: 'Profile',
   wallet: 'Wallet',
   rewards: 'Rewards',
   fanClubs: 'Fan Clubs',
@@ -28,6 +30,9 @@ export const NavBarActionDrawer = ({
 }: NavBarActionDrawerProps) => {
   const dispatch = useDispatch()
   const { setStackReset } = useContext(RouterContext)
+  const { data: handle } = useCurrentAccountUser({
+    select: (user) => user?.handle
+  })
 
   const goToRoute = useCallback(
     (route: string) => {
@@ -35,6 +40,12 @@ export const NavBarActionDrawer = ({
     },
     [dispatch]
   )
+
+  const goToProfilePage = useCallback(() => {
+    if (!handle) return
+    setImmediate(() => goToRoute(profilePage(handle)))
+    onClose()
+  }, [goToRoute, onClose, handle])
 
   const goToWalletPage = useCallback(() => {
     setImmediate(() => goToRoute(WALLET_PAGE))
@@ -59,6 +70,14 @@ export const NavBarActionDrawer = ({
 
   const actions = useMemo(
     () => [
+      ...(handle
+        ? [
+            {
+              text: messages.profile,
+              onClick: goToProfilePage
+            }
+          ]
+        : []),
       {
         text: messages.wallet,
         onClick: goToWalletPage
@@ -76,7 +95,14 @@ export const NavBarActionDrawer = ({
         onClick: goToSettingsPage
       }
     ],
-    [goToRewardsPage, goToSettingsPage, goToWalletPage, goToFanClubsExplorePage]
+    [
+      handle,
+      goToProfilePage,
+      goToRewardsPage,
+      goToSettingsPage,
+      goToWalletPage,
+      goToFanClubsExplorePage
+    ]
   )
 
   return <ActionDrawer actions={actions} onClose={onClose} isOpen={isOpen} />

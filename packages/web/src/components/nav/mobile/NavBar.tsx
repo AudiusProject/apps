@@ -1,6 +1,9 @@
 import { useState, useContext, useCallback } from 'react'
 
-import { useNotificationUnreadCount } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useNotificationUnreadCount
+} from '@audius/common/api'
 import { formatCount, route } from '@audius/common/utils'
 import {
   IconAudiusLogoHorizontal,
@@ -19,6 +22,7 @@ import {
   RouterContext,
   SlideDirection
 } from 'components/animated-switch/RouterContextProvider'
+import { Avatar } from 'components/avatar/Avatar'
 import NavContext, {
   LeftPreset,
   CenterPreset,
@@ -57,6 +61,7 @@ const NavBar = ({
 }: NavBarProps) => {
   const { leftElement, centerElement, rightElement } = useContext(NavContext)!
   const { data: notificationCount = 0 } = useNotificationUnreadCount()
+  const { data: currentUserId } = useCurrentUserId()
 
   const { setStackReset } = useContext(RouterContext)
 
@@ -172,14 +177,26 @@ const NavBar = ({
         })}
       >
         {rightElement === RightPreset.KEBAB ? (
-          <Flex mr='s'>
-            <IconButton
-              aria-label='menu'
-              icon={IconKebabHorizontal}
-              color-='subdued'
-              onClick={() => setIsActionDrawerOpen(true)}
-            />
-          </Flex>
+          isSignedIn && currentUserId ? (
+            <Flex mr='s' alignItems='center'>
+              <Avatar
+                userId={currentUserId}
+                onClick={() => setIsActionDrawerOpen(true)}
+                size='small'
+                disableLink
+                aria-label='menu'
+              />
+            </Flex>
+          ) : (
+            <Flex mr='s'>
+              <IconButton
+                aria-label='menu'
+                icon={IconKebabHorizontal}
+                color-='subdued'
+                onClick={() => setIsActionDrawerOpen(true)}
+              />
+            </Flex>
+          )
         ) : (
           rightElement
         )}
