@@ -90,8 +90,7 @@ export const Header = (props: HeaderProps) => {
                 {primary}
               </Text>
             </Flex>
-            {/* Padding to help align heading */}
-            <Flex pt={6}>
+            <Flex alignItems='center'>
               {typeof secondary === 'string' ? (
                 <Text
                   variant='body'

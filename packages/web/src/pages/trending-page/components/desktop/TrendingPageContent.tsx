@@ -342,7 +342,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const bottomBar = (
     <div ref={bottomBarRef} style={{ width: '100%' }}>
       {isCondensedBar ? (
-        <Flex w='100%' alignItems='center' gap='s' p='l'>
+        <Flex w='100%' alignItems='center' gap='s' pb='l'>
           <FilterButton
             label={messages.tracks}
             value={category}
@@ -377,7 +377,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
           alignItems='center'
           justifyContent='space-between'
           gap='m'
-          p='l'
+          pb='l'
         >
           <Flex gap='s' role='tablist'>
             <SelectablePill

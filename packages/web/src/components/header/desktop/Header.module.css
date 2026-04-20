@@ -16,7 +16,9 @@
 }
 
 .rightDecorator {
-  margin: 0px 0px 3px auto;
+  display: flex;
+  align-items: center;
+  margin: 0px 0px 0px auto;
 }
 
 /* Single line, full title visible — no wrap, no ellipsis */

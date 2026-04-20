@@ -1,6 +1,7 @@
 .tableWrapper {
   position: relative;
   width: 100%;
+  min-width: 288px;
   border-radius: 8px;
   box-shadow: var(--harmony-shadow-mid);
   background-color: var(--harmony-white);
@@ -12,7 +13,7 @@
   position: relative;
   overflow: hidden;
   width: 100%;
-  min-width: 0px !important;
+  min-width: 288px !important;
   background-color: var(--harmony-white);
 
   display: flex;
@@ -52,7 +53,7 @@
   background-color: var(--harmony-white);
   padding-left: 0px;
   padding-right: 12px;
-  line-height: 41px;
+  line-height: normal;
   user-select: none;
 }
 
@@ -68,6 +69,7 @@
   gap: 4px;
   width: 100%;
   min-width: 0;
+  min-height: 41px;
 }
 
 .tableHeader.leftAlign .headerContent {
