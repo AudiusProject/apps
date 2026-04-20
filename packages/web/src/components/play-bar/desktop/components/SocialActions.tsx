@@ -4,7 +4,6 @@ import { useToggleFavoriteTrack, useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   ModalSource,
-  Theme,
   ID,
   UID,
   RepostSource,
@@ -24,12 +23,12 @@ import FavoriteButton from 'components/alt-button/FavoriteButton'
 import RepostButton from 'components/alt-button/RepostButton'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { shouldShowDark } from 'utils/theme/theme'
+import { shouldShowDark, useIsMatrix } from 'utils/theme/theme'
 
 import styles from './SocialActions.module.css'
 
-const { getTheme } = themeSelectors
 const { getGatedContentStatusMap } = gatedContentSelectors
+const { getTheme } = themeSelectors
 
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 
@@ -74,7 +73,7 @@ export const SocialActions = ({
   const { hasStreamAccess } = useGatedContentAccess(track)
 
   const theme = useSelector(getTheme)
-  const matrix = theme === Theme.MATRIX
+  const matrix = useIsMatrix()
 
   const onToggleRepost = useCallback(
     (reposted: boolean, trackId: number) => {

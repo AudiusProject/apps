@@ -81,7 +81,18 @@ export const getSystemAppearance = () =>
   doesPreferDarkMode() ? SystemAppearance.DARK : SystemAppearance.LIGHT
 
 export const isDarkMode = () => shouldShowDark(getTheme())
-export const isMatrix = () => getTheme() === Theme.MATRIX
+const isMatrixTheme = (
+  themePalette: ThemePalette | null,
+  theme: Theme | null
+) => {
+  return themePalette != null
+    ? themePalette === ThemePalette.MATRIX
+    : theme === Theme.MATRIX
+}
+
+export const isMatrix = () => {
+  return isMatrixTheme(getThemePaletteFromStorage(), getTheme())
+}
 
 export const useIsDarkMode = () => {
   const theme = useSelector(themeSelectors.getTheme)
@@ -89,8 +100,9 @@ export const useIsDarkMode = () => {
 }
 
 export const useIsMatrix = () => {
+  const themePalette = useSelector(themeSelectors.getThemePalette)
   const theme = useSelector(themeSelectors.getTheme)
-  return theme === Theme.MATRIX
+  return isMatrixTheme(themePalette, theme)
 }
 
 export const useThemePalette = (): ThemePalette | null => {
