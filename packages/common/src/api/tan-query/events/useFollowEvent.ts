@@ -1,4 +1,4 @@
-import { Id, encodeHashId } from '@audius/sdk'
+import { encodeHashId } from '@audius/sdk'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
@@ -7,16 +7,21 @@ import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 export type EventFollowState = {
   isFollowed: boolean
   followerCount: number
 }
 
-export const getEventFollowStateQueryKey = (eventId: ID | null | undefined) => {
+export const getEventFollowStateQueryKey = (
+  eventId: ID | null | undefined,
+  currentUserId?: ID | null
+) => {
   return [
     QUERY_KEYS.eventFollowState,
-    eventId
+    eventId,
+    currentUserId ?? null
   ] as unknown as QueryKey<EventFollowState>
 }
 
@@ -30,9 +35,10 @@ export const getEventFollowStateQueryKey = (eventId: ID | null | undefined) => {
  */
 export const useEventFollowState = (eventId: ID | null | undefined) => {
   const { audiusSdk } = useQueryContext()
+  const { data: currentUserId } = useCurrentUserId()
 
   return useQuery({
-    queryKey: getEventFollowStateQueryKey(eventId),
+    queryKey: getEventFollowStateQueryKey(eventId, currentUserId),
     enabled: !!eventId,
     queryFn: async (): Promise<EventFollowState> => {
       if (!eventId) {
@@ -42,8 +48,13 @@ export const useEventFollowState = (eventId: ID | null | undefined) => {
       // The generated response is already camelCased by the openapi
       // generator (see EventFollowState.ts), so no snake_case adaptation
       // needed here.
+      //
+      // The api uses the `user_id` query param to decide whose follow
+      // state to return; without it, the endpoint returns isFollowed=false
+      // for signed-in users and the button sticks on "Follow Contest".
       const response = await sdk.events.getEventFollowState({
-        eventId: encodeHashId(eventId)!
+        eventId: encodeHashId(eventId)!,
+        userId: currentUserId ? encodeHashId(currentUserId)! : undefined
       })
       return {
         isFollowed: !!response.data?.isFollowed,
@@ -60,14 +71,19 @@ export const useFollowEvent = () => {
   return useMutation({
     mutationFn: async ({ userId, eventId }: { userId: ID; eventId: ID }) => {
       const sdk = await audiusSdk()
+      // Pass numeric ids so the EventsApi override dispatches to the
+      // entity-manager (client-signed) path. Handing hashid strings via
+      // Id.parse here would route to the generated HTTP endpoint, which
+      // requires an OAuth Authorization header that the web app doesn't
+      // supply.
       return await sdk.events.followEvent({
-        userId: Id.parse(userId)!,
-        eventId: Id.parse(eventId)!
+        userId,
+        eventId
       })
     },
-    onMutate: async ({ eventId }) => {
+    onMutate: async ({ userId, eventId }) => {
       // Optimistic: flip the button immediately.
-      const key = getEventFollowStateQueryKey(eventId)
+      const key = getEventFollowStateQueryKey(eventId, userId)
       const prev = queryClient.getQueryData<EventFollowState>(key)
       queryClient.setQueryData(key, {
         isFollowed: true,
@@ -75,9 +91,9 @@ export const useFollowEvent = () => {
       })
       return { prev }
     },
-    onError: (error: Error, { eventId }, ctx) => {
+    onError: (error: Error, { userId, eventId }, ctx) => {
       queryClient.setQueryData(
-        getEventFollowStateQueryKey(eventId),
+        getEventFollowStateQueryKey(eventId, userId),
         ctx?.prev ?? { isFollowed: false, followerCount: 0 }
       )
       reportToSentry({
@@ -87,9 +103,9 @@ export const useFollowEvent = () => {
       })
       toast({ content: 'Could not follow contest. Please try again.' })
     },
-    onSettled: (_data, _err, { eventId }) => {
+    onSettled: (_data, _err, { userId, eventId }) => {
       queryClient.invalidateQueries({
-        queryKey: getEventFollowStateQueryKey(eventId)
+        queryKey: getEventFollowStateQueryKey(eventId, userId)
       })
     }
   })
@@ -103,12 +119,12 @@ export const useUnfollowEvent = () => {
     mutationFn: async ({ userId, eventId }: { userId: ID; eventId: ID }) => {
       const sdk = await audiusSdk()
       return await sdk.events.unfollowEvent({
-        userId: Id.parse(userId)!,
-        eventId: Id.parse(eventId)!
+        userId,
+        eventId
       })
     },
-    onMutate: async ({ eventId }) => {
-      const key = getEventFollowStateQueryKey(eventId)
+    onMutate: async ({ userId, eventId }) => {
+      const key = getEventFollowStateQueryKey(eventId, userId)
       const prev = queryClient.getQueryData<EventFollowState>(key)
       queryClient.setQueryData(key, {
         isFollowed: false,
@@ -116,9 +132,9 @@ export const useUnfollowEvent = () => {
       })
       return { prev }
     },
-    onError: (error: Error, { eventId }, ctx) => {
+    onError: (error: Error, { userId, eventId }, ctx) => {
       queryClient.setQueryData(
-        getEventFollowStateQueryKey(eventId),
+        getEventFollowStateQueryKey(eventId, userId),
         ctx?.prev ?? { isFollowed: true, followerCount: 0 }
       )
       reportToSentry({
@@ -128,9 +144,9 @@ export const useUnfollowEvent = () => {
       })
       toast({ content: 'Could not unfollow contest. Please try again.' })
     },
-    onSettled: (_data, _err, { eventId }) => {
+    onSettled: (_data, _err, { userId, eventId }) => {
       queryClient.invalidateQueries({
-        queryKey: getEventFollowStateQueryKey(eventId)
+        queryKey: getEventFollowStateQueryKey(eventId, userId)
       })
     }
   })
