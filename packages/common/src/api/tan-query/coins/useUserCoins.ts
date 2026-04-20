@@ -40,19 +40,20 @@ export const useUserCoins = <TResult = UserCoin[]>(
         // rows) read from this bulk response instead of each firing their own
         // request.
         coins.forEach((coin) => {
-          if (!coin.accounts) return
-          queryClient.setQueryData(
-            getUserCoinQueryKey(coin.mint, params.userId ?? null),
-            {
-              mint: coin.mint,
-              ticker: coin.ticker,
-              decimals: coin.decimals,
-              logoUri: coin.logoUri,
-              balance: coin.balance,
-              balanceUsd: coin.balanceUsd,
-              accounts: coin.accounts
-            }
-          )
+          if (coin.accounts) {
+            queryClient.setQueryData(
+              getUserCoinQueryKey(coin.mint, params.userId ?? null),
+              {
+                mint: coin.mint,
+                ticker: coin.ticker,
+                decimals: coin.decimals,
+                logoUri: coin.logoUri,
+                balance: coin.balance,
+                balanceUsd: coin.balanceUsd,
+                accounts: coin.accounts
+              }
+            )
+          }
         })
         return coins
       }
