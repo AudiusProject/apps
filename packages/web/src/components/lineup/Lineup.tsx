@@ -50,11 +50,17 @@ const Lineup = ({
 }: LineupProps) => {
   const isMobile = useIsMobile()
   const containerRef = useRef<HTMLDivElement>(null)
-  const isNarrow = useIsContainerNarrow(containerRef, NARROW_CONTAINER_THRESHOLD_PX)
+  const isNarrow = useIsContainerNarrow(
+    containerRef,
+    NARROW_CONTAINER_THRESHOLD_PX
+  )
 
-  const useCompactTile = isMobile || variant === LineupVariant.SECTION || isNarrow
+  const useCompactTile =
+    isMobile || variant === LineupVariant.SECTION || isNarrow
   const trackTile = useCompactTile ? MobileTrackTile : DesktopTrackTile
-  const playlistTile = useCompactTile ? MobileCollectionTile : DesktopCollectionTile
+  const playlistTile = useCompactTile
+    ? MobileCollectionTile
+    : DesktopCollectionTile
 
   const providerProps = {
     lineup,

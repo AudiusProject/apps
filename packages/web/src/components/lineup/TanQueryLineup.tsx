@@ -202,9 +202,13 @@ export const TanQueryLineup = ({
 
   const isMobile = useIsMobile()
   const scrollContainer = useRef<HTMLDivElement>(null)
-  const isNarrow = useIsContainerNarrow(scrollContainer, NARROW_CONTAINER_THRESHOLD_PX)
+  const isNarrow = useIsContainerNarrow(
+    scrollContainer,
+    NARROW_CONTAINER_THRESHOLD_PX
+  )
 
-  const isSmallTrackTile = isMobile || variant === LineupVariant.SECTION || isNarrow
+  const isSmallTrackTile =
+    isMobile || variant === LineupVariant.SECTION || isNarrow
 
   // Memoize component selection based on device type
   const { TrackTile, PlaylistTile } = useMemo(() => {

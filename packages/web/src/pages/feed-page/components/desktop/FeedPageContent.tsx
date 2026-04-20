@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 
 import { useCurrentTrack } from '@audius/common/hooks'
 import { Name, FeedFilter } from '@audius/common/models'
-import { FilterButton, Flex, IconFeed } from '@audius/harmony'
 import {
   lineupSelectors,
   feedPageLineupActions as feedActions,
@@ -11,11 +10,11 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
+import { FilterButton, IconFeed } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Header } from 'components/header/desktop/Header'
-import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
 import {
@@ -24,6 +23,7 @@ import {
 } from 'components/lineup/LineupProvider'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
 
 import { FeedFilters } from './FeedFilters'
