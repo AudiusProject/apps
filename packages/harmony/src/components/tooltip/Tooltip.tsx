@@ -3,6 +3,7 @@ import {
   useCallback,
   useRef,
   useEffect,
+  useLayoutEffect,
   ReactElement,
   cloneElement,
   isValidElement
@@ -147,6 +148,7 @@ export const Tooltip = ({
   const [isVisible, setIsVisible] = useState(false)
   const [isHiddenOverride, setIsHiddenOverride] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [isPositionReady, setIsPositionReady] = useState(false)
 
   const triggerRef = useRef<HTMLElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -165,9 +167,11 @@ export const Tooltip = ({
 
     if (mouseEnterDelay > 0) {
       enterDelayTimerRef.current = setTimeout(() => {
+        setIsPositionReady(false)
         setIsVisible(true)
       }, mouseEnterDelay * 1000)
     } else {
+      setIsPositionReady(false)
       setIsVisible(true)
     }
   }, [disabled, isHiddenOverride, mouseEnterDelay])
@@ -183,10 +187,12 @@ export const Tooltip = ({
 
     if (mouseLeaveDelay > 0) {
       leaveDelayTimerRef.current = setTimeout(() => {
+        setIsPositionReady(false)
         setIsVisible(false)
         setIsHiddenOverride(false)
       }, mouseLeaveDelay * 1000)
     } else {
+      setIsPositionReady(false)
       setIsVisible(false)
       setIsHiddenOverride(false)
     }
@@ -222,134 +228,107 @@ export const Tooltip = ({
       // Handle tooltip dismissal
       if (shouldDismissOnClick) {
         setIsHiddenOverride(true)
+        setIsPositionReady(false)
         setIsVisible(false)
       }
     },
     [shouldDismissOnClick, children]
   )
 
-  // Calculate tooltip position
+  const calculatePosition = useCallback(() => {
+    const triggerRect = triggerRef.current?.getBoundingClientRect()
+    const tooltipRect = tooltipRef.current?.getBoundingClientRect()
+
+    if (!triggerRect || !tooltipRect) return null
+
+    const { anchorOrigin, transformOrigin } = placementToOrigins(placement)
+    const anchorTranslation = getOriginTranslation(anchorOrigin, triggerRect)
+    const tooltipTranslation = getOriginTranslation(
+      transformOrigin,
+      tooltipRect
+    )
+
+    const top = triggerRect.y + anchorTranslation.y - tooltipTranslation.y
+    const left = triggerRect.x + anchorTranslation.x - tooltipTranslation.x
+
+    const arrowOffset = ARROW_SIZE
+    let adjustedTop = top
+    let adjustedLeft = left
+
+    if (placement.startsWith('top')) {
+      adjustedTop -= arrowOffset
+    } else if (placement.startsWith('bottom')) {
+      adjustedTop += arrowOffset
+    } else if (placement.startsWith('left')) {
+      adjustedLeft -= arrowOffset
+    } else if (placement.startsWith('right')) {
+      adjustedLeft += arrowOffset
+    }
+
+    const viewportHeight = window.innerHeight
+    const viewportWidth = window.innerWidth
+    const padding = 8
+
+    adjustedTop = Math.max(
+      padding,
+      Math.min(adjustedTop, viewportHeight - tooltipRect.height - padding)
+    )
+    adjustedLeft = Math.max(
+      padding,
+      Math.min(adjustedLeft, viewportWidth - tooltipRect.width - padding)
+    )
+
+    return { top: adjustedTop, left: adjustedLeft }
+  }, [placement])
+
+  const updatePosition = useCallback(() => {
+    const nextPosition = calculatePosition()
+    if (!nextPosition) return
+    setPosition((current) =>
+      current.top === nextPosition.top && current.left === nextPosition.left
+        ? current
+        : nextPosition
+    )
+    setIsPositionReady(true)
+  }, [calculatePosition])
+
+  // Measure position before paint to avoid flashing stale coordinates.
+  useLayoutEffect(() => {
+    if (!isVisible || !triggerRef.current || !tooltipRef.current) return
+    updatePosition()
+  }, [isVisible, text, updatePosition])
+
+  // Keep tooltip synced with scrolling/resizing and short-lived layout transitions
+  // (e.g. sidebar resize/translate animations).
   useEffect(() => {
     if (!isVisible || !triggerRef.current || !tooltipRef.current) return
 
-    const updatePosition = () => {
-      const triggerRect = triggerRef.current?.getBoundingClientRect()
-      const tooltipRect = tooltipRef.current?.getBoundingClientRect()
-
-      if (!triggerRect || !tooltipRect) return
-
-      const { anchorOrigin, transformOrigin } = placementToOrigins(placement)
-
-      const anchorTranslation = getOriginTranslation(anchorOrigin, triggerRect)
-      const tooltipTranslation = getOriginTranslation(
-        transformOrigin,
-        tooltipRect
-      )
-
-      const top = triggerRect.y + anchorTranslation.y - tooltipTranslation.y
-      const left = triggerRect.x + anchorTranslation.x - tooltipTranslation.x
-
-      // Add arrow offset
-      const arrowOffset = ARROW_SIZE
-      let adjustedTop = top
-      let adjustedLeft = left
-
-      if (placement.startsWith('top')) {
-        adjustedTop -= arrowOffset
-      } else if (placement.startsWith('bottom')) {
-        adjustedTop += arrowOffset
-      } else if (placement.startsWith('left')) {
-        adjustedLeft -= arrowOffset
-      } else if (placement.startsWith('right')) {
-        adjustedLeft += arrowOffset
-      }
-
-      // Ensure tooltip stays within viewport bounds
-      const viewportHeight = window.innerHeight
-      const viewportWidth = window.innerWidth
-      const padding = 8
-
-      adjustedTop = Math.max(
-        padding,
-        Math.min(adjustedTop, viewportHeight - tooltipRect.height - padding)
-      )
-      adjustedLeft = Math.max(
-        padding,
-        Math.min(adjustedLeft, viewportWidth - tooltipRect.width - padding)
-      )
-
-      setPosition({ top: adjustedTop, left: adjustedLeft })
-    }
-
-    // Small delay to ensure tooltip is rendered
-    requestAnimationFrame(() => {
-      updatePosition()
-    })
-  }, [isVisible, placement])
-
-  // Fixed positioning doesn't need scroll handling since it's relative to viewport
-  // But we update position on scroll to keep tooltip aligned with trigger
-  useEffect(() => {
-    if (!isVisible || !triggerRef.current || !tooltipRef.current) return
-
-    const updatePositionOnScroll = () => {
-      const triggerRect = triggerRef.current?.getBoundingClientRect()
-      const tooltipRect = tooltipRef.current?.getBoundingClientRect()
-
-      if (!triggerRect || !tooltipRect) return
-
-      const { anchorOrigin, transformOrigin } = placementToOrigins(placement)
-      const anchorTranslation = getOriginTranslation(anchorOrigin, triggerRect)
-      const tooltipTranslation = getOriginTranslation(
-        transformOrigin,
-        tooltipRect
-      )
-
-      const top = triggerRect.y + anchorTranslation.y - tooltipTranslation.y
-      const left = triggerRect.x + anchorTranslation.x - tooltipTranslation.x
-
-      const arrowOffset = ARROW_SIZE
-      let adjustedTop = top
-      let adjustedLeft = left
-
-      if (placement.startsWith('top')) {
-        adjustedTop -= arrowOffset
-      } else if (placement.startsWith('bottom')) {
-        adjustedTop += arrowOffset
-      } else if (placement.startsWith('left')) {
-        adjustedLeft -= arrowOffset
-      } else if (placement.startsWith('right')) {
-        adjustedLeft += arrowOffset
-      }
-
-      const viewportHeight = window.innerHeight
-      const viewportWidth = window.innerWidth
-      const padding = 8
-
-      adjustedTop = Math.max(
-        padding,
-        Math.min(adjustedTop, viewportHeight - tooltipRect.height - padding)
-      )
-      adjustedLeft = Math.max(
-        padding,
-        Math.min(adjustedLeft, viewportWidth - tooltipRect.width - padding)
-      )
-
-      if (tooltipRef.current) {
-        tooltipRef.current.style.top = `${adjustedTop}px`
-        tooltipRef.current.style.left = `${adjustedLeft}px`
-      }
-    }
+    updatePosition()
 
     // Update on scroll
-    window.addEventListener('scroll', updatePositionOnScroll, true)
-    window.addEventListener('resize', updatePositionOnScroll)
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+
+    // Keep tracking briefly to absorb nearby layout transitions.
+    const transitionTrackingMs = 400
+    const startedAt = performance.now()
+    let animationFrame = 0
+    const trackTransition = () => {
+      updatePosition()
+      if (performance.now() - startedAt < transitionTrackingMs) {
+        animationFrame = requestAnimationFrame(trackTransition)
+      }
+    }
+    animationFrame = requestAnimationFrame(trackTransition)
 
     return () => {
-      window.removeEventListener('scroll', updatePositionOnScroll, true)
-      window.removeEventListener('resize', updatePositionOnScroll)
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
     }
-  }, [isVisible, placement])
+  }, [isVisible, updatePosition])
 
   // Get portal container
   const getPortalContainer = useCallback((): HTMLElement => {
@@ -374,7 +353,9 @@ export const Tooltip = ({
         }
         return page ?? document.body
       case 'page':
-        return page ?? document.body
+        // `#page` may be translated by app layout (e.g. resizable sidebar),
+        // which skews fixed-position tooltip coordinates.
+        return document.body
       case 'body':
         return document.body
       default:
@@ -428,7 +409,8 @@ export const Tooltip = ({
             style={{
               top: `${position.top}px`,
               left: `${position.left}px`,
-              visibility: isHiddenOverride ? 'hidden' : 'visible',
+              visibility:
+                isHiddenOverride || !isPositionReady ? 'hidden' : 'visible',
               zIndex: zIndex ?? undefined
             }}
             onMouseEnter={handleTooltipMouseEnter}

@@ -13,3 +13,33 @@
   justify-content: center;
   align-items: center;
 }
+
+.iconButton {
+  display: flex;
+  height: var(--harmony-unit-6);
+  width: var(--harmony-unit-6);
+  align-items: center;
+  transform: scale3d(1, 1, 1);
+  transition: all 0.12s ease-in-out !important;
+}
+
+.iconButton path {
+  fill: var(--harmony-n-400) !important;
+}
+
+.iconButtonActive path {
+  fill: var(--harmony-p-300) !important;
+}
+
+.iconButton:hover {
+  transform: scale3d(1.18, 1.18, 1.18);
+}
+
+.iconButton:active {
+  transform: scale3d(0.95, 0.95, 0.95);
+}
+
+.iconButtonRepost {
+  transform: scale(1.15);
+  transform-origin: center;
+}
