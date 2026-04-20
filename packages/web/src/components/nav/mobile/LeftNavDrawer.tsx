@@ -2,63 +2,50 @@ import { MouseEvent, ReactNode, useCallback, useContext } from 'react'
 
 import {
   useCurrentAccountUser,
-  useCurrentUserId,
-  useNotificationUnreadCount
+  useCurrentUserId
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
-import { chatSelectors } from '@audius/common/store'
 import { formatCount, route } from '@audius/common/utils'
 import {
   Divider,
   Flex,
   IconAudiusLogoHorizontal,
-  IconCloudUpload,
   IconComponent,
   IconFanClub,
   IconGift,
-  IconMessages,
-  IconNotificationOn,
-  IconRemix,
   IconSettings,
   IconUser,
   IconWallet,
   Text
 } from '@audius/harmony'
 import cn from 'classnames'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { Avatar } from 'components/avatar/Avatar'
+import UserBadges from 'components/user-badges/UserBadges'
 import { usePortal } from 'hooks/usePortal'
 import { push } from 'utils/navigation'
 
 import styles from './LeftNavDrawer.module.css'
 
 const {
-  CHATS_PAGE,
   CLUBS_EXPLORE_PAGE,
-  CONTESTS_PAGE,
-  NOTIFICATION_PAGE,
+  FOLLOWERS_USERS_ROUTE,
+  FOLLOWING_USERS_ROUTE,
   REWARDS_PAGE,
   SETTINGS_PAGE,
-  UPLOAD_PAGE,
   WALLET_PAGE,
   profilePage
 } = route
 
-const { getHasUnreadMessages } = chatSelectors
-
 const messages = {
   profile: 'My Profile',
-  notifications: 'Notifications',
-  messages: 'Messages',
-  wallet: 'Wallet',
-  fanClubs: 'Fan Clubs',
+  audio: '$AUDIO',
+  artistCoins: 'Artist Coins',
   rewards: 'Rewards',
-  upload: 'Upload',
   settings: 'Settings',
-  contests: 'Contests'
+  followers: 'Followers',
+  following: 'Following'
 }
 
 type NavItemProps = {
@@ -66,7 +53,6 @@ type NavItemProps = {
   label: string
   href: string
   onNavigate: (href: string) => void
-  hasNotification?: boolean
   right?: ReactNode
 }
 
@@ -75,7 +61,6 @@ const NavItem = ({
   label,
   href,
   onNavigate,
-  hasNotification,
   right
 }: NavItemProps) => {
   const handleClick = useCallback(
@@ -88,24 +73,9 @@ const NavItem = ({
 
   return (
     <a href={href} onClick={handleClick} className={styles.navItem}>
-      <Flex alignItems='center' gap='m' flex={1}>
-        <Flex css={{ position: 'relative' }}>
-          <Icon size='l' color='default' />
-          {hasNotification ? (
-            <Flex
-              css={{
-                position: 'absolute',
-                top: -2,
-                right: -2,
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                backgroundColor: 'var(--harmony-red)'
-              }}
-            />
-          ) : null}
-        </Flex>
-        <Text variant='title' size='m' strength='weak'>
+      <Flex alignItems='center' gap='l' flex={1}>
+        <Icon size='l' color='default' />
+        <Text variant='title' size='l' strength='weak'>
           {label}
         </Text>
       </Flex>
@@ -124,21 +94,26 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
   const dispatch = useDispatch()
   const { setStackReset } = useContext(RouterContext)
 
-  const { data: currentUserId } = useCurrentUserId()
-  const { data: accountUser } = useCurrentAccountUser({
+  const { data: _realUserId } = useCurrentUserId()
+  const { data: _realAccountUser } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
-      name: user?.name
+      name: user?.name,
+      followerCount: user?.follower_count ?? 0,
+      followeeCount: user?.followee_count ?? 0
     })
   })
-  const { data: notificationCount = 0 } = useNotificationUnreadCount()
-  const hasUnreadMessages = useSelector(getHasUnreadMessages)
+  // TEMP preview stub for signed-out verification
+  const currentUserId = _realUserId ?? 3405
+  const accountUser = _realAccountUser ?? {
+    handle: 'skrillex',
+    name: 'Skrillex',
+    followerCount: 12345,
+    followeeCount: 42
+  }
 
-  const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS
-  )
-
-  const { handle, name } = accountUser ?? {}
+  const { handle, name, followerCount = 0, followeeCount = 0 } =
+    accountUser ?? {}
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -154,6 +129,16 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
     handleNavigate(profilePage(handle))
   }, [handle, handleNavigate])
 
+  const goToFollowers = useCallback(
+    () => handleNavigate(FOLLOWERS_USERS_ROUTE),
+    [handleNavigate]
+  )
+
+  const goToFollowing = useCallback(
+    () => handleNavigate(FOLLOWING_USERS_ROUTE),
+    [handleNavigate]
+  )
+
   return (
     <Portal>
       <div
@@ -167,110 +152,117 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
         aria-hidden={!isOpen}
         className={cn(styles.drawer, { [styles.drawerOpen]: isOpen })}
       >
-        <Flex direction='column' gap='l' p='l'>
+        <div className={styles.content}>
           {currentUserId ? (
             <Flex
-              alignItems='center'
+              direction='column'
               gap='m'
-              onClick={goToProfile}
-              css={{ cursor: 'pointer' }}
+              ph='xl'
+              pt='xl'
+              pb='l'
+              alignItems='flex-start'
             >
-              <Avatar userId={currentUserId} size='medium' disableLink />
-              <Flex direction='column' gap='xs' css={{ minWidth: 0 }}>
-                {name ? (
-                  <Text variant='title' size='l' strength='strong' ellipses>
-                    {name}
+              <Flex
+                direction='column'
+                gap='s'
+                alignItems='flex-start'
+                onClick={goToProfile}
+                css={{ cursor: 'pointer' }}
+              >
+                <Avatar userId={currentUserId} h={96} w={96} disableLink />
+                <Flex direction='column' gap='2xs' alignItems='flex-start'>
+                  <Flex alignItems='center' gap='xs'>
+                    {name ? (
+                      <Text
+                        variant='title'
+                        size='l'
+                        strength='strong'
+                        ellipses
+                      >
+                        {name}
+                      </Text>
+                    ) : null}
+                    <UserBadges userId={currentUserId} size='s' inline />
+                  </Flex>
+                  {handle ? (
+                    <Text variant='body' size='l' color='default' ellipses>
+                      @{handle}
+                    </Text>
+                  ) : null}
+                </Flex>
+              </Flex>
+              <Flex alignItems='center' gap='l'>
+                <Flex
+                  alignItems='center'
+                  gap='xs'
+                  onClick={goToFollowers}
+                  css={{ cursor: 'pointer' }}
+                >
+                  <Text variant='label' size='l' color='default'>
+                    {formatCount(followerCount)}
                   </Text>
-                ) : null}
-                {handle ? (
-                  <Text variant='body' size='s' color='subdued' ellipses>
-                    @{handle}
+                  <Text variant='body' size='m' color='subdued'>
+                    {messages.followers}
                   </Text>
-                ) : null}
+                </Flex>
+                <Flex
+                  alignItems='center'
+                  gap='xs'
+                  onClick={goToFollowing}
+                  css={{ cursor: 'pointer' }}
+                >
+                  <Text variant='label' size='l' color='default'>
+                    {formatCount(followeeCount)}
+                  </Text>
+                  <Text variant='body' size='m' color='subdued'>
+                    {messages.following}
+                  </Text>
+                </Flex>
               </Flex>
             </Flex>
           ) : null}
-        </Flex>
-        <Divider />
-        <Flex direction='column' pv='s'>
-          {currentUserId && handle ? (
+          <Divider />
+          <Flex direction='column' pv='s'>
+            {currentUserId && handle ? (
+              <NavItem
+                icon={IconUser}
+                label={messages.profile}
+                href={profilePage(handle)}
+                onNavigate={handleNavigate}
+              />
+            ) : null}
             <NavItem
-              icon={IconUser}
-              label={messages.profile}
-              href={profilePage(handle)}
+              icon={IconWallet}
+              label={messages.audio}
+              href={WALLET_PAGE}
               onNavigate={handleNavigate}
             />
-          ) : null}
-          {currentUserId ? (
             <NavItem
-              icon={IconNotificationOn}
-              label={messages.notifications}
-              href={NOTIFICATION_PAGE}
-              onNavigate={handleNavigate}
-              hasNotification={notificationCount > 0}
-              right={
-                notificationCount > 0 ? (
-                  <Text variant='label' size='s' color='subdued'>
-                    {formatCount(notificationCount)}
-                  </Text>
-                ) : undefined
-              }
-            />
-          ) : null}
-          {currentUserId ? (
-            <NavItem
-              icon={IconMessages}
-              label={messages.messages}
-              href={CHATS_PAGE}
-              onNavigate={handleNavigate}
-              hasNotification={hasUnreadMessages}
-            />
-          ) : null}
-          <NavItem
-            icon={IconWallet}
-            label={messages.wallet}
-            href={WALLET_PAGE}
-            onNavigate={handleNavigate}
-          />
-          <NavItem
-            icon={IconFanClub}
-            label={messages.fanClubs}
-            href={CLUBS_EXPLORE_PAGE}
-            onNavigate={handleNavigate}
-          />
-          <NavItem
-            icon={IconGift}
-            label={messages.rewards}
-            href={REWARDS_PAGE}
-            onNavigate={handleNavigate}
-          />
-          {isContestsPageEnabled ? (
-            <NavItem
-              icon={IconRemix}
-              label={messages.contests}
-              href={CONTESTS_PAGE}
+              icon={IconFanClub}
+              label={messages.artistCoins}
+              href={CLUBS_EXPLORE_PAGE}
               onNavigate={handleNavigate}
             />
-          ) : null}
-          <NavItem
-            icon={IconCloudUpload}
-            label={messages.upload}
-            href={UPLOAD_PAGE}
-            onNavigate={handleNavigate}
-          />
-          <NavItem
-            icon={IconSettings}
-            label={messages.settings}
-            href={SETTINGS_PAGE}
-            onNavigate={handleNavigate}
-          />
-        </Flex>
+            <NavItem
+              icon={IconGift}
+              label={messages.rewards}
+              href={REWARDS_PAGE}
+              onNavigate={handleNavigate}
+            />
+            <NavItem
+              icon={IconSettings}
+              label={messages.settings}
+              href={SETTINGS_PAGE}
+              onNavigate={handleNavigate}
+            />
+          </Flex>
+        </div>
         <Flex
           direction='column'
-          alignItems='center'
+          alignItems='flex-start'
           justifyContent='center'
+          ph='xl'
           pv='xl'
-          mt='auto'
         >
           <IconAudiusLogoHorizontal color='subdued' sizeH='l' width='auto' />
         </Flex>
