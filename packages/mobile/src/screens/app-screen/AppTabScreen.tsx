@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect, useRef } from 'react'
 
 import type {
   FavoriteType,
@@ -17,6 +17,7 @@ import type {
   GetCoinsSortDirectionEnum
 } from '@audius/sdk'
 import type { EventArg, NavigationState } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { FilterButtonScreen } from '@audius/harmony-native'
@@ -176,23 +177,32 @@ type AppTabScreenProps = {
  */
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
-  const { drawerNavigation } = useContext(AppDrawerContext)
+  const { drawerNavigation, setIsAtStackRoot } = useContext(AppDrawerContext)
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
+  const isFocused = useIsFocused()
+  const isAtStackRootRef = useRef(true)
+
+  // NowPlayingDrawer calls setOptions({swipeEnabled: false}) imperatively, and
+  // imperative options beat screenOptions, so we must also re-apply imperatively.
+  const applyDrawerSwipe = useCallback(
+    (isAtRoot: boolean) => {
+      setIsAtStackRoot?.(isAtRoot)
+      drawerNavigation?.setOptions({
+        swipeEnabled: isAtRoot && !isNowPlayingDrawerOpen
+      })
+    },
+    [drawerNavigation, isNowPlayingDrawerOpen, setIsAtStackRoot]
+  )
 
   const handleChangeState = useCallback(
     (event: NavigationStateEvent) => {
-      const stackRoutes = event?.data?.state?.routes
-      const isStackUnopened = stackRoutes.length === 1
-      const isStackOpened = stackRoutes.length === 2
-
-      if (isStackUnopened) {
-        drawerNavigation?.setOptions({ swipeEnabled: true })
-      }
-      if (isStackOpened) {
-        drawerNavigation?.setOptions({ swipeEnabled: false })
-      }
+      // Nested navigator state changes bubble up; only act on the outer stack.
+      if (event?.data?.state?.type !== 'stack') return
+      const isAtRoot = event.data.state.routes.length === 1
+      isAtStackRootRef.current = isAtRoot
+      if (isFocused) applyDrawerSwipe(isAtRoot)
     },
-    [drawerNavigation]
+    [isFocused, applyDrawerSwipe]
   )
 
   /**
@@ -205,9 +215,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     setLastNavAction(undefined)
   }, [])
 
+  // Re-apply on tab focus so the drawer reflects the active tab's stack depth.
   useEffect(() => {
-    drawerNavigation?.setOptions({ swipeEnabled: !isNowPlayingDrawerOpen })
-  }, [drawerNavigation, isNowPlayingDrawerOpen])
+    if (isFocused) applyDrawerSwipe(isAtStackRootRef.current)
+  }, [isFocused, applyDrawerSwipe])
 
   return (
     <Stack.Navigator
