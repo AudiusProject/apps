@@ -155,7 +155,7 @@ function* confirmUpdateProfile(userId, metadata) {
         // Invalidate the user query to refetch fresh data from the server
         // This ensures we get the canonical data including:
         // - Processed image sizes (cover photo, profile picture)
-        // - Computed artist_coin_badge (based on coin_flair_mint and user's coins)
+        // - Computed fan_club_badge (based on coin_flair_mint and user's coins)
         queryClient.invalidateQueries({
           queryKey: getUserQueryKey(confirmedUser.user_id)
         })

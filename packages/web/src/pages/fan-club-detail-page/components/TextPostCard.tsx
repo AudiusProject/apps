@@ -6,7 +6,7 @@ import {
   useEditComment,
   useDeleteTextPost,
   useReactToComment,
-  useArtistCoin
+  useFanClub
 } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import {
@@ -74,7 +74,7 @@ type TextPostCardProps = {
 export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { mutate: editComment } = useEditComment()
   const { mutate: deleteTextPost } = useDeleteTextPost()
   const { mutate: reactToComment } = useReactToComment()

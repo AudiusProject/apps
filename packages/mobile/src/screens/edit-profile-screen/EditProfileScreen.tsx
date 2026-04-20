@@ -25,11 +25,11 @@ import { makeStyles } from 'app/styles'
 import type { Image } from 'app/types/image'
 import { isImageUriSource } from 'app/utils/image'
 
-import { ArtistCoinFlairSelector } from './ArtistCoinFlairSelector'
+import { FanClubFlairSelector } from './FanClubFlairSelector'
 import { FormScreen } from './FormScreen'
 import { ProfileHeader } from './ProfileHeader'
 import { ProfileInputCard } from './ProfileInputCard'
-import type { ArtistCoinBadge, ProfileValues, UpdatedProfile } from './types'
+import type { FanClubBadge, ProfileValues, UpdatedProfile } from './types'
 
 const { updateProfile } = profilePageActions
 
@@ -60,9 +60,9 @@ const EditProfileForm = (props: EditProfileFormProps) => {
   } = props
   const styles = useStyles()
 
-  const handleArtistCoinBadgeChange = useCallback(
-    (badge: ArtistCoinBadge | null) => {
-      setFieldValue('artist_coin_badge', badge)
+  const handleFanClubBadgeChange = useCallback(
+    (badge: FanClubBadge | null) => {
+      setFieldValue('fan_club_badge', badge)
     },
     [setFieldValue]
   )
@@ -94,11 +94,11 @@ const EditProfileForm = (props: EditProfileFormProps) => {
             </Flex>
           </ProfileInputCard>
 
-          {/* Artist Coin Flair Section */}
+          {/* Fan Club Flair Section */}
           <ProfileInputCard title='Fan Club Flair'>
-            <ArtistCoinFlairSelector
-              selectedBadge={values.artist_coin_badge}
-              onChange={handleArtistCoinBadgeChange}
+            <FanClubFlairSelector
+              selectedBadge={values.fan_club_badge}
+              onChange={handleFanClubBadgeChange}
             />
           </ProfileInputCard>
 
@@ -166,7 +166,7 @@ export const EditProfileScreen = () => {
         'instagram_handle',
         'tiktok_handle',
         'website',
-        'artist_coin_badge'
+        'fan_club_badge'
       ])
   })
 
@@ -185,7 +185,7 @@ export const EditProfileScreen = () => {
   const handleSubmit = useCallback(
     (values: ProfileValues) => {
       if (!profile) return
-      const { cover_photo, profile_picture, artist_coin_badge, ...restValues } =
+      const { cover_photo, profile_picture, fan_club_badge, ...restValues } =
         values
 
       // @ts-ignore typing is hard here, will come back
@@ -201,17 +201,17 @@ export const EditProfileScreen = () => {
         newProfile.updatedProfilePicture = profile_picture
       }
 
-      // Handle artist coin badge
-      if (artist_coin_badge) {
+      // Handle fan club badge
+      if (fan_club_badge) {
         if (
-          artist_coin_badge.mint === '__default__' ||
-          artist_coin_badge.mint === '__none__'
+          fan_club_badge.mint === '__default__' ||
+          fan_club_badge.mint === '__none__'
         ) {
           // Set to null for default/none
-          newProfile.artist_coin_badge = null
+          newProfile.fan_club_badge = null
         } else {
           // Set the actual badge
-          newProfile.artist_coin_badge = artist_coin_badge
+          newProfile.fan_club_badge = fan_club_badge
         }
       }
 
@@ -234,7 +234,7 @@ export const EditProfileScreen = () => {
     instagram_handle = null,
     tiktok_handle = null,
     website = null,
-    artist_coin_badge = null
+    fan_club_badge = null
   } = profile
 
   const initialValues: ProfileValues = {
@@ -245,7 +245,7 @@ export const EditProfileScreen = () => {
     instagram_handle,
     tiktok_handle,
     website,
-    artist_coin_badge,
+    fan_club_badge,
     cover_photo: {
       url:
         coverPhotoSource && isImageUriSource(coverPhotoSource)

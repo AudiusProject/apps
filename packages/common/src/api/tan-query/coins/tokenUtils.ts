@@ -14,17 +14,17 @@ const coinMetadataToTokenInfo = (coin: CoinMetadata): CoinInfo => ({
   isStablecoin: false // API tokens are never stablecoins, only USDC is (which is frontend-only)
 })
 
-export const transformArtistCoinToTokenInfo = (artistCoin: Coin): CoinInfo => {
-  const coinMetadata = coinMetadataFromCoin(artistCoin)
+export const transformFanClubToTokenInfo = (fanClub: Coin): CoinInfo => {
+  const coinMetadata = coinMetadataFromCoin(fanClub)
   return coinMetadataToTokenInfo(coinMetadata)
 }
 
-export const transformArtistCoinsToTokenInfoMap = (
-  artistCoins: Coin[]
+export const transformFanClubsToTokenInfoMap = (
+  fanClubs: Coin[]
 ): Record<string, CoinInfo> => {
   const tokenMap: Record<string, CoinInfo> = {}
 
-  artistCoins.forEach((coin) => {
+  fanClubs.forEach((coin) => {
     const coinMetadata = coinMetadataFromCoin(coin)
     const ticker = coinMetadata.ticker || ''
     if (ticker) {

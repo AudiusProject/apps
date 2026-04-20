@@ -26,7 +26,6 @@ import {
   Row,
   TableRowProps,
   useFlexLayout,
-  useResizeColumns,
   useSortBy,
   useTable
 } from 'react-table'
@@ -42,12 +41,19 @@ import Skeleton from 'components/skeleton/Skeleton'
 
 import styles from './Table.module.css'
 import { TableLoadingSpinner } from './components/TableLoadingSpinner'
+import {
+  ResponsiveColumns,
+  getHiddenResponsiveColumns
+} from './responsiveColumns'
 
 // - Infinite scroll constants -
 // Fetch the next group of rows when the user scroll within X rows of the bottom
 const FETCH_THRESHOLD = 40
 // Number of rows to fetch in each batch
 const FETCH_BATCH_SIZE = 80
+// Table cells/headers add 12px left + 12px right padding in CSS.
+// Include this chrome in collapse budgeting to avoid clipping before drop.
+const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
 
 // Column Sort Functions
 export const numericSorter = (accessor: string) => (rowA: any, rowB: any) => {
@@ -111,6 +117,7 @@ export type TableProps = {
   totalRowCount?: number
   useLocalSort?: boolean
   wrapperClassName?: string
+  responsiveColumns?: ResponsiveColumns
 }
 
 export const Table = ({
@@ -141,6 +148,7 @@ export const Table = ({
   totalRowCount,
   useLocalSort = false,
   wrapperClassName,
+  responsiveColumns,
   ...other
 }: TableProps) => {
   const trackAccessMap = useGatedContentAccessMap(isTracksTable ? data : [])
@@ -171,6 +179,37 @@ export const Table = ({
     return Math.floor(totalRowCount / pageSize)
   }, [pageSize, totalRowCount])
 
+  const tableResizeObserverRef = useRef<ResizeObserver | null>(null)
+  const tableResizeHandlerRef = useRef<(() => void) | null>(null)
+  const [tableWidth, setTableWidth] = useState<number>(0)
+
+  const hiddenResponsiveColumnIds = useMemo(() => {
+    if (!responsiveColumns) return new Set<string>()
+    return getHiddenResponsiveColumns({
+      columns,
+      containerWidth: tableWidth,
+      responsiveColumns,
+      fallbackColumnWidth: defaultColumn.width,
+      columnChromeWidth: TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH
+    })
+  }, [columns, defaultColumn.width, responsiveColumns, tableWidth])
+
+  const getColumnId = (column: any) => {
+    if (typeof column?.id === 'string' && column.id.length > 0) return column.id
+    if (typeof column?.accessor === 'string' && column.accessor.length > 0) {
+      return column.accessor
+    }
+    return null
+  }
+
+  const visibleColumns = useMemo(() => {
+    if (!hiddenResponsiveColumnIds.size) return columns
+    return columns.filter((column) => {
+      const id = getColumnId(column)
+      return id == null || !hiddenResponsiveColumnIds.has(id)
+    })
+  }, [columns, hiddenResponsiveColumnIds])
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -180,16 +219,62 @@ export const Table = ({
     state: { sortBy }
   } = useTable(
     {
-      columns,
+      columns: visibleColumns,
       data,
       defaultColumn,
       autoResetSortBy: false,
-      autoResetResize: false,
       manualSortBy: Boolean(onSort)
     },
     useSortBy,
-    useResizeColumns,
     useFlexLayout
+  )
+
+  const setTableWrapperNode = useCallback((node: HTMLDivElement | null) => {
+    if (tableResizeObserverRef.current) {
+      tableResizeObserverRef.current.disconnect()
+      tableResizeObserverRef.current = null
+    }
+    if (tableResizeHandlerRef.current) {
+      window.removeEventListener('resize', tableResizeHandlerRef.current)
+      tableResizeHandlerRef.current = null
+    }
+
+    if (!node) return
+
+    const measure = () => setTableWidth(node.clientWidth)
+    measure()
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const resizeObserver = new ResizeObserver(() => {
+        measure()
+      })
+      resizeObserver.observe(node)
+      tableResizeObserverRef.current = resizeObserver
+    } else {
+      window.addEventListener('resize', measure)
+      tableResizeHandlerRef.current = measure
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (tableResizeObserverRef.current) {
+        tableResizeObserverRef.current.disconnect()
+      }
+      if (tableResizeHandlerRef.current) {
+        window.removeEventListener('resize', tableResizeHandlerRef.current)
+      }
+    }
+  }, [])
+
+  const isEndColumn = useCallback(
+    (id: string) => id === 'trackActions' || id === 'overflowMenu',
+    []
+  )
+
+  const isColumnVisible = useCallback(
+    (id: string) => !hiddenResponsiveColumnIds.has(id),
+    [hiddenResponsiveColumnIds]
   )
 
   const [showMore, setShowMore] = useState(
@@ -260,7 +345,11 @@ export const Table = ({
         key={key}
       >
         {/* Sorting Container */}
-        <div {...column.getSortByToggleProps()} title=''>
+        <div
+          {...column.getSortByToggleProps()}
+          title=''
+          className={styles.headerContent}
+        >
           <div className={styles.textCell}>
             {column.sortTitle ? (
               <Tooltip text={column.sortTitle} mount='page'>
@@ -281,19 +370,6 @@ export const Table = ({
             </div>
           ) : null}
         </div>
-        {/* Resizing Container */}
-        {!column.disableResizing ? (
-          <div
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-            {...column.getResizerProps()}
-            className={cn(styles.resizer, {
-              [styles.isResizing]: column.isResizing
-            })}
-          />
-        ) : null}
       </th>
     )
   }, [])
@@ -301,11 +377,11 @@ export const Table = ({
   const renderHeaders = useCallback(() => {
     return headerGroups.map((headerGroup) => {
       const headers = headerGroup.headers.filter(
-        (header) => header.id !== 'trackActions' && header.id !== 'overflowMenu'
+        (header) => isColumnVisible(header.id) && !isEndColumn(header.id)
       )
       // Should only be one or the other
       const endHeaders = headerGroup.headers.filter(
-        (header) => header.id === 'trackActions' || header.id === 'overflowMenu'
+        (header) => isColumnVisible(header.id) && isEndColumn(header.id)
       )
 
       const { key: headerGroupKey, ...headerGroupProps } =
@@ -323,7 +399,7 @@ export const Table = ({
         </tr>
       )
     })
-  }, [headerGroups, renderTableHeader])
+  }, [headerGroups, isColumnVisible, isEndColumn, renderTableHeader])
 
   const renderCell = useCallback(
     (cell: Cell, isEnd?: boolean) => {
@@ -363,12 +439,12 @@ export const Table = ({
     (row: Row, key: string, props: TableRowProps, className = '') => {
       const cells = row.cells.filter(
         (cell: Cell) =>
-          cell.column.id !== 'trackActions' && cell.column.id !== 'overflowMenu'
+          isColumnVisible(cell.column.id) && !isEndColumn(cell.column.id)
       )
       // Should only be one or the other
       const endCells = row.cells.filter(
         (cell: Cell) =>
-          cell.column.id === 'trackActions' || cell.column.id === 'overflowMenu'
+          isColumnVisible(cell.column.id) && isEndColumn(cell.column.id)
       )
 
       const Row = isVirtualized ? 'div' : 'tr'
@@ -406,6 +482,8 @@ export const Table = ({
       trackAccessMap,
       activeIndex,
       getRowClassName,
+      isColumnVisible,
+      isEndColumn,
       onClickRow,
       renderCell,
       isVirtualized
@@ -414,6 +492,9 @@ export const Table = ({
 
   const renderSkeletonRow = useCallback(
     (row: Row, key: string, props: TableRowProps) => {
+      const cells = row.cells.filter((cell: Cell) =>
+        isColumnVisible(cell.column.id)
+      )
       return (
         <tr
           className={cn(
@@ -427,11 +508,11 @@ export const Table = ({
           {...props}
           key={key}
         >
-          {row.cells.map((cell) => renderSkeletonCell(cell))}
+          {cells.map((cell) => renderSkeletonCell(cell))}
         </tr>
       )
     },
-    [activeIndex, getRowClassName, renderSkeletonCell]
+    [activeIndex, getRowClassName, isColumnVisible, renderSkeletonCell]
   )
 
   const onDragEnd = useCallback(
@@ -664,7 +745,10 @@ export const Table = ({
 
   const renderContent = useCallback(() => {
     return (
-      <div className={cn(styles.tableWrapper, wrapperClassName)}>
+      <div
+        className={cn(styles.tableWrapper, wrapperClassName)}
+        ref={setTableWrapperNode}
+      >
         <table
           className={cn(styles.table, tableClassName)}
           {...getTableProps()}
@@ -688,6 +772,7 @@ export const Table = ({
     renderPaginationControls,
     renderRows,
     renderShowMoreControl,
+    setTableWrapperNode,
     tableClassName,
     tableHeaderClassName,
     wrapperClassName
@@ -720,7 +805,10 @@ export const Table = ({
                 onChildScroll,
                 scrollTop
               }) => (
-                <div className={cn(styles.tableWrapper, wrapperClassName)}>
+                <div
+                  className={cn(styles.tableWrapper, wrapperClassName)}
+                  ref={setTableWrapperNode}
+                >
                   <table
                     className={cn(styles.table, tableClassName)}
                     {...getTableProps()}
@@ -779,6 +867,7 @@ export const Table = ({
     loadMoreRows,
     totalRowCount,
     rows.length,
+    setTableWrapperNode,
     fetchThreshold,
     fetchBatchSize,
     scrollRef,

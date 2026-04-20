@@ -1,13 +1,8 @@
 .bottomBar {
   user-select: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  width: 100%;
   border-top: 1px solid var(--harmony-n-100);
   background: var(--harmony-n-25);
-  /* Above the play bar so it can slide up from underneath */
-  z-index: 12;
 
   padding: 0px;
   padding: 0px env(safe-area-inset-right, 0px) 0px

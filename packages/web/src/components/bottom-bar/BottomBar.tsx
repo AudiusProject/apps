@@ -7,7 +7,7 @@ import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import ExploreButton from 'components/bottom-bar/buttons/ExploreButton'
 import FeedButton from 'components/bottom-bar/buttons/FeedButton'
 import LibraryButton from 'components/bottom-bar/buttons/LibraryButton'
-import ProfileButton from 'components/bottom-bar/buttons/ProfileButton'
+import NotificationsButton from 'components/bottom-bar/buttons/NotificationsButton'
 import TrendingButton from 'components/bottom-bar/buttons/TrendingButton'
 
 import styles from './BottomBar.module.css'
@@ -20,29 +20,33 @@ declare global {
   }
 }
 
-const { FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, FAVORITES_PAGE, LIBRARY_PAGE } =
-  route
+const {
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  FAVORITES_PAGE,
+  LIBRARY_PAGE,
+  NOTIFICATION_PAGE
+} = route
 
 type Props = {
   currentPage: string
-  userProfilePageRoute: string | null
   onClickFeed: () => void
   onClickTrending: () => void
   onClickExplore: () => void
   onClickLibrary: () => void
-  onClickProfile: () => void
+  onClickNotifications: () => void
   isDarkMode: boolean
   isMatrixMode: boolean
 }
 
 const BottomBar = ({
   currentPage,
-  userProfilePageRoute,
   onClickFeed,
   onClickTrending,
   onClickExplore,
   onClickLibrary,
-  onClickProfile,
+  onClickNotifications,
   isDarkMode,
   isMatrixMode
 }: Props) => {
@@ -98,13 +102,13 @@ const BottomBar = ({
         isMatrixMode={isMatrixMode}
         aria-label='Library Page'
       />
-      <ProfileButton
-        isActive={currentPage === userProfilePageRoute}
+      <NotificationsButton
+        isActive={currentPage === NOTIFICATION_PAGE}
         darkMode={isDarkMode}
-        onClick={onClick(onClickProfile, userProfilePageRoute)}
-        href={userProfilePageRoute || undefined}
+        onClick={onClick(onClickNotifications, NOTIFICATION_PAGE)}
+        href={NOTIFICATION_PAGE}
         isMatrixMode={isMatrixMode}
-        aria-label='Profile Page'
+        aria-label='Notifications Page'
       />
     </div>
   )

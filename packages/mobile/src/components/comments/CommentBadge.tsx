@@ -3,13 +3,13 @@ import { useIsCoinMember } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 
 import type { IconComponent } from '@audius/harmony-native'
-import { Flex, IconArtistCoin, IconStar, Text } from '@audius/harmony-native'
+import { Flex, IconFanClub, IconStar, Text } from '@audius/harmony-native'
 
 type BadgeType = 'artist' | 'coinMember'
 
 const iconMap: Record<BadgeType, IconComponent> = {
   artist: IconStar,
-  coinMember: IconArtistCoin
+  coinMember: IconFanClub
 }
 const messages: Record<BadgeType, string> = {
   artist: 'Artist',

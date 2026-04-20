@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCurrentUserId,
   usePostTextUpdate
 } from '@audius/common/api'
@@ -93,7 +93,7 @@ export const PostUpdateCard = ({ mint }: PostUpdateCardProps) => {
   const [showAttachModal, setShowAttachModal] = useState(false)
   const [attachUrl, setAttachUrl] = useState('')
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { mutate: postTextUpdate } = usePostTextUpdate()
   const { isEnabled: isTextPostPostingEnabled } = useFeatureFlag(
     FeatureFlags.FAN_CLUB_TEXT_POST_POSTING

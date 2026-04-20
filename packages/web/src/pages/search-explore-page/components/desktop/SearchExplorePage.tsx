@@ -40,16 +40,19 @@ import {
 } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
+import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
 import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
 import { LabelSpotlightSection } from './LabelSpotlightSection'
 import { MoodGrid } from './MoodGrid'
+import { NewAlbumReleasesSection } from './NewAlbumReleasesSection'
 import { QuickSearchGrid } from './QuickSearchGrid'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
+import { TopAlbumsThisMonthSection } from './TopAlbumsThisMonthSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
@@ -203,6 +206,7 @@ const SearchExplorePage = ({
   const isTracksTab = categoryKey === CategoryView.TRACKS
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
+  const showAlbumContent = categoryKey === CategoryView.ALL || isAlbumsTab
 
   return (
     <Page
@@ -322,6 +326,10 @@ const SearchExplorePage = ({
               <RecommendedTracksSection />
             ) : null}
             {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+            {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}
+            {showAlbumContent ? <NewAlbumReleasesSection /> : null}
+            {showAlbumContent ? <BestSellingAlbumsSection /> : null}
+            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
             {categoryKey === CategoryView.ALL ? (
               <FanClubsExploreSection />
             ) : null}
@@ -329,7 +337,6 @@ const SearchExplorePage = ({
             {showTrackContent && showUserContextualContent ? (
               <RecentlyPlayedSection />
             ) : null}
-            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
             {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
             {showUserContent ? <ArtistSpotlightSection /> : null}
             {showUserContent ? <LabelSpotlightSection /> : null}

@@ -15,7 +15,7 @@ import type { SvgProps } from 'react-native-svg'
 
 import {
   Flex,
-  IconArtistCoin,
+  IconFanClub,
   IconCart,
   IconUserFollowing
 } from '@audius/harmony-native'
@@ -112,7 +112,7 @@ export const TrackDetailsTile = ({
       },
       [GatedContentType.TOKEN_GATED]: {
         message: messages.coinGated,
-        icon: IconArtistCoin,
+        icon: IconFanClub,
         color: accentBlue
       },
       [GatedContentType.USDC_PURCHASE]: {

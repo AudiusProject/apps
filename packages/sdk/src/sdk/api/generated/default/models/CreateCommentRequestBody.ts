@@ -68,6 +68,12 @@ export interface CreateCommentRequestBody {
      * @memberof CreateCommentRequestBody
      */
     mentions?: Array<number>;
+    /**
+     * Optional URL for a video attachment (stored on the comment record)
+     * @type {string}
+     * @memberof CreateCommentRequestBody
+     */
+    videoUrl?: string | null;
 }
 
 /**
@@ -99,6 +105,7 @@ export function CreateCommentRequestBodyFromJSONTyped(json: any, ignoreDiscrimin
         'parentId': !exists(json, 'parentId') ? undefined : json['parentId'],
         'trackTimestampS': !exists(json, 'trackTimestampS') ? undefined : json['trackTimestampS'],
         'mentions': !exists(json, 'mentions') ? undefined : json['mentions'],
+        'videoUrl': !exists(json, 'videoUrl') ? undefined : json['videoUrl'],
     };
 }
 
@@ -118,6 +125,7 @@ export function CreateCommentRequestBodyToJSON(value?: CreateCommentRequestBody 
         'parentId': value.parentId,
         'trackTimestampS': value.trackTimestampS,
         'mentions': value.mentions,
+        'videoUrl': value.videoUrl,
     };
 }
 

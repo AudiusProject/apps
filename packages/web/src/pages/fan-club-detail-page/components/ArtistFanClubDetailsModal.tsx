@@ -2,7 +2,7 @@ import { useCallback, type ReactNode } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinGeckoCoin,
   useUser,
   type CoinGeckoCoinResponse
@@ -34,9 +34,9 @@ import { copyToClipboard } from 'utils/clipboardUtil'
 
 import { TokenIcon } from '../../../components/buy-sell-modal/TokenIcon'
 import ResponsiveModal from '../../../components/modal/ResponsiveModal'
-import { LAUNCHPAD_COIN_DESCRIPTION } from '../../artist-coins-launchpad-page/constants'
+import { LAUNCHPAD_COIN_DESCRIPTION } from '../../fan-clubs-launchpad-page/constants'
 
-const { artistCoinDetails, overflowMenu } = coinDetailsMessages
+const { fanClubDetails, overflowMenu } = coinDetailsMessages
 
 type ArtistFanClubDetailsModalProps = {
   /**
@@ -48,7 +48,7 @@ type ArtistFanClubDetailsModalProps = {
    */
   onClose: () => void
   /**
-   * The mint address of the artist coin
+   * The mint address of the fan club
    */
   mint: string
 }
@@ -127,9 +127,9 @@ export const ArtistFanClubDetailsModal = ({
   const dispatch = useDispatch()
   const isAudio = mint === env.WAUDIO_MINT_ADDRESS
   const { spacing } = useTheme()
-  const { data: artistCoin } = useArtistCoin(mint)
+  const { data: fanClub } = useFanClub(mint)
 
-  const { data: artistHandle } = useUser(artistCoin?.ownerId, {
+  const { data: artistHandle } = useUser(fanClub?.ownerId, {
     select: (user) => {
       return user.handle
     }
@@ -140,40 +140,40 @@ export const ArtistFanClubDetailsModal = ({
   )
 
   const handleCopyMint = useCallback(() => {
-    if (artistCoin?.mint) {
-      copyToClipboard(artistCoin.mint)
+    if (fanClub?.mint) {
+      copyToClipboard(fanClub.mint)
       dispatch(toast({ content: overflowMenu.copiedToClipboard, type: 'info' }))
     }
-  }, [artistCoin?.mint, dispatch])
+  }, [fanClub?.mint, dispatch])
 
   const handleCopyRewardsPoolAddress = useCallback(() => {
-    if (artistCoin?.rewardPool?.address) {
-      copyToClipboard(artistCoin.rewardPool.address)
+    if (fanClub?.rewardPool?.address) {
+      copyToClipboard(fanClub.rewardPool.address)
       dispatch(toast({ content: overflowMenu.copiedToClipboard, type: 'info' }))
     }
-  }, [artistCoin?.rewardPool?.address, dispatch])
+  }, [fanClub?.rewardPool?.address, dispatch])
 
   const marketProps = isAudio
     ? convertCoinGeckoResponseToStatsDetailsProps(coingeckoResponse)
-    : artistCoin
+    : fanClub
 
-  const decimals = artistCoin?.decimals ?? 9
-  const hasGraduated = artistCoin?.dynamicBondingCurve?.isMigrated ?? false
-  const locker = artistCoin?.artistLocker
+  const decimals = fanClub?.decimals ?? 9
+  const hasGraduated = fanClub?.dynamicBondingCurve?.isMigrated ?? false
+  const locker = fanClub?.artistLocker
   const showLockerStats = !isAudio && hasGraduated && !!locker
-  const formattedArtistEarnings = artistCoin?.artistFees?.totalFees
-    ? formatModalFeeNumber(Math.trunc(artistCoin.artistFees.totalFees))
+  const formattedArtistEarnings = fanClub?.artistFees?.totalFees
+    ? formatModalFeeNumber(Math.trunc(fanClub.artistFees.totalFees))
     : null
   const rewardsPoolBalance =
-    artistCoin?.rewardPool?.balance != null
-      ? formatModalTokenAmount(artistCoin.rewardPool.balance, decimals)
+    fanClub?.rewardPool?.balance != null
+      ? formatModalTokenAmount(fanClub.rewardPool.balance, decimals)
       : null
 
   return (
     <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
-      title={artistCoinDetails.details}
+      title={fanClubDetails.details}
       Icon={IconInfo}
       size='l'
       isFullscreen
@@ -188,33 +188,30 @@ export const ArtistFanClubDetailsModal = ({
       >
         <Flex alignItems='center' gap='m'>
           <TokenIcon
-            logoURI={artistCoin?.logoUri}
+            logoURI={fanClub?.logoUri}
             w={spacing.unit16}
             h={spacing.unit16}
             hex
           />
           <Flex direction='column' gap='2xs'>
             <Text variant='title' size='l'>
-              {artistCoin?.name}
+              {fanClub?.name}
             </Text>
             <Text variant='body' size='m' color='subdued'>
-              ${artistCoin?.ticker}
+              ${fanClub?.ticker}
             </Text>
           </Flex>
         </Flex>
 
         <Divider />
 
-        {artistCoin?.mint ? (
+        {fanClub?.mint ? (
           <Flex column gap='xs' w='100%'>
             <Flex alignItems='center' gap='xs'>
               <Text variant='body' size='m' strength='strong' color='subdued'>
-                {artistCoinDetails.coinAddress}
+                {fanClubDetails.coinAddress}
               </Text>
-              <Tooltip
-                text={artistCoinDetails.tooltips.coinAddress}
-                mount='body'
-              >
+              <Tooltip text={fanClubDetails.tooltips.coinAddress} mount='body'>
                 <IconInfo size='s' color='subdued' />
               </Tooltip>
             </Flex>
@@ -230,7 +227,7 @@ export const ArtistFanClubDetailsModal = ({
                   wordBreak: 'break-all'
                 }}
               >
-                {artistCoin.mint}
+                {fanClub.mint}
               </Text>
               <IconButton
                 aria-label={overflowMenu.copyCoinAddress}
@@ -243,21 +240,21 @@ export const ArtistFanClubDetailsModal = ({
           </Flex>
         ) : null}
 
-        {artistCoin?.ticker && artistHandle && !isAudio ? (
+        {fanClub?.ticker && artistHandle && !isAudio ? (
           <Flex column gap='xs' w='100%'>
             <Flex alignItems='center' gap='xs'>
               <Text variant='body' size='m' strength='strong' color='subdued'>
-                {artistCoinDetails.onChainDescription}
+                {fanClubDetails.onChainDescription}
               </Text>
               <Tooltip
-                text={artistCoinDetails.tooltips.onChainDescription}
+                text={fanClubDetails.tooltips.onChainDescription}
                 mount='body'
               >
                 <IconInfo size='s' color='subdued' />
               </Tooltip>
             </Flex>
             <Text variant='body' size='m' userSelect='text'>
-              {LAUNCHPAD_COIN_DESCRIPTION(artistHandle, artistCoin.ticker)}
+              {LAUNCHPAD_COIN_DESCRIPTION(artistHandle, fanClub.ticker)}
             </Text>
           </Flex>
         ) : null}
@@ -269,8 +266,8 @@ export const ArtistFanClubDetailsModal = ({
             left={
               marketProps?.totalSupply != null ? (
                 <ModalLabeledValue
-                  label={artistCoinDetails.totalSupply}
-                  tooltip={artistCoinDetails.tooltips.totalSupply}
+                  label={fanClubDetails.totalSupply}
+                  tooltip={fanClubDetails.tooltips.totalSupply}
                 >
                   <Text variant='body' size='m' userSelect='text'>
                     {marketProps.totalSupply.toLocaleString()}
@@ -283,8 +280,8 @@ export const ArtistFanClubDetailsModal = ({
             right={
               marketProps?.displayPrice != null ? (
                 <ModalLabeledValue
-                  label={artistCoinDetails.price}
-                  tooltip={artistCoinDetails.tooltips.price}
+                  label={fanClubDetails.price}
+                  tooltip={fanClubDetails.tooltips.price}
                 >
                   <Text variant='body' size='m' userSelect='text'>
                     {formatCurrencyWithSubscript(marketProps.displayPrice)}
@@ -299,8 +296,8 @@ export const ArtistFanClubDetailsModal = ({
             left={
               marketProps?.displayMarketCap != null ? (
                 <ModalLabeledValue
-                  label={artistCoinDetails.marketCap}
-                  tooltip={artistCoinDetails.tooltips.marketCap}
+                  label={fanClubDetails.marketCap}
+                  tooltip={fanClubDetails.tooltips.marketCap}
                 >
                   <Text variant='body' size='m' userSelect='text'>
                     ${marketProps.displayMarketCap.toLocaleString()}
@@ -313,8 +310,8 @@ export const ArtistFanClubDetailsModal = ({
             right={
               marketProps?.liquidity != null ? (
                 <ModalLabeledValue
-                  label={artistCoinDetails.liquidity}
-                  tooltip={artistCoinDetails.tooltips.liquidity}
+                  label={fanClubDetails.liquidity}
+                  tooltip={fanClubDetails.tooltips.liquidity}
                 >
                   <Text variant='body' size='m' userSelect='text'>
                     ${marketProps.liquidity.toLocaleString()}
@@ -327,7 +324,7 @@ export const ArtistFanClubDetailsModal = ({
           />
         </Flex>
 
-        {!isAudio && artistCoin ? (
+        {!isAudio && fanClub ? (
           <>
             <Divider />
             <Flex column gap='l' w='100%'>
@@ -366,9 +363,7 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {formatModalTokenAmount(locker.locked ?? 0, decimals)}{' '}
-                        {artistCoin.ticker != null
-                          ? `$${artistCoin.ticker}`
-                          : ''}
+                        {fanClub.ticker != null ? `$${fanClub.ticker}` : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
@@ -379,9 +374,7 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {formatModalTokenAmount(locker.unlocked ?? 0, decimals)}{' '}
-                        {artistCoin.ticker != null
-                          ? `$${artistCoin.ticker}`
-                          : ''}
+                        {fanClub.ticker != null ? `$${fanClub.ticker}` : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
@@ -396,16 +389,14 @@ export const ArtistFanClubDetailsModal = ({
                     >
                       <Text variant='body' size='m'>
                         {rewardsPoolBalance}{' '}
-                        {artistCoin.ticker != null
-                          ? `$${artistCoin.ticker}`
-                          : ''}
+                        {fanClub.ticker != null ? `$${fanClub.ticker}` : ''}
                       </Text>
                     </ModalLabeledValue>
                   }
                   right={<Box />}
                 />
               ) : null}
-              {artistCoin.rewardPool?.address ? (
+              {fanClub.rewardPool?.address ? (
                 <Flex column gap='xs' w='100%'>
                   <Flex alignItems='center' gap='xs'>
                     <Text
@@ -414,7 +405,7 @@ export const ArtistFanClubDetailsModal = ({
                       strength='strong'
                       color='subdued'
                     >
-                      {artistCoinDetails.rewardsPoolAddress}
+                      {fanClubDetails.rewardsPoolAddress}
                     </Text>
                     <Tooltip
                       text={overflowMenu.tooltips.rewardsPool}
@@ -430,7 +421,7 @@ export const ArtistFanClubDetailsModal = ({
                     css={{ minWidth: 0 }}
                   >
                     <Text variant='body' size='m' userSelect='text'>
-                      {shortenSPLAddress(artistCoin.rewardPool.address, 20)}
+                      {shortenSPLAddress(fanClub.rewardPool.address, 20)}
                     </Text>
                     <IconButton
                       aria-label='Copy rewards pool address'
@@ -448,7 +439,7 @@ export const ArtistFanClubDetailsModal = ({
 
         <Flex w='100%' alignSelf='stretch' pt='m' css={{ flexShrink: 0 }}>
           <Button variant='primary' onClick={onClose} fullWidth>
-            {artistCoinDetails.close}
+            {fanClubDetails.close}
           </Button>
         </Flex>
       </Flex>

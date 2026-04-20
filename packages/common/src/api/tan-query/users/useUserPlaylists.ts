@@ -97,7 +97,8 @@ export const useUserPlaylists = (
   return {
     data: collections,
     isPending: queryRes.isPending || hasPendingCollections,
-    isLoading: queryRes.isLoading || (hasPendingCollections && isCollectionsLoading),
+    isLoading:
+      queryRes.isLoading || (hasPendingCollections && isCollectionsLoading),
     hasNextPage: queryRes.hasNextPage,
     isFetchingNextPage: queryRes.isFetchingNextPage,
     fetchNextPage: queryRes.fetchNextPage

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { useCurrentAccountUser, useProfileUser } from '@audius/common/api'
+import { useCurrentAccountUser, useUserByParams } from '@audius/common/api'
 import { FollowSource, statusIsNotFinalized } from '@audius/common/models'
 import {
   chatActions,
@@ -38,8 +38,20 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
   })
   const dispatch = useDispatch()
 
-  const { user } = useProfileUser()
-  const profileUserId = user?.user_id
+  // Read user from the route-params cache directly so it's available on
+  // the first render. `useProfileUser` depends on Redux state that is set
+  // in a focus effect, which races with the component's initial render and
+  // caused the whole header section to briefly collapse.
+  const { data: paramsUser } = useUserByParams(params, {
+    select: (user) => ({
+      user_id: user.user_id,
+      handle: user.handle,
+      does_current_user_follow: user.does_current_user_follow
+    })
+  })
+
+  const { user_id, handle, does_current_user_follow } = paramsUser ?? {}
+  const profileUserId = user_id
   const { canCreateChat } = useCanCreateChat(profileUserId)
   const chatPermissionStatus = useSelector(getChatPermissionsStatus)
 
@@ -53,15 +65,6 @@ export const ProfileInfo = (props: ProfileInfoProps) => {
       dispatch(fetchPermissions({ userIds: [profileUserId] }))
     }
   }, [dispatch, profileUserId])
-
-  const { user_id, handle, does_current_user_follow } =
-    useProfileUser({
-      select: (user) => ({
-        user_id: user.user_id,
-        handle: user.handle,
-        does_current_user_follow: user.does_current_user_follow
-      })
-    }).user ?? {}
 
   if (!user_id) {
     return null

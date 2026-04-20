@@ -8,7 +8,7 @@ import {
   IconSolana,
   IconShieldCheck,
   IconDashboard,
-  IconArtistCoin,
+  IconFanClub,
   IconUser,
   Paper,
   Text,
@@ -211,7 +211,7 @@ export const DevTools = () => {
           />
 
           <DevToolCard
-            icon={IconArtistCoin}
+            icon={IconFanClub}
             title={messages.coinSuccessModalPreviewTitle}
             description={messages.coinSuccessModalPreviewDescription}
             buttonText={messages.coinSuccessModalPreviewButton}

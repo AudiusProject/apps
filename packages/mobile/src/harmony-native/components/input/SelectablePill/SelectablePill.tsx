@@ -46,13 +46,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
   const isIconOnly = !('label' in props) && !!Icon
   const displayLabel = label
   const a11yLabel = ariaLabel ?? accessibilityLabelProp
-  const {
-    color,
-    motion,
-    cornerRadius,
-    typography,
-    type: themeType
-  } = useTheme()
+  const { color, motion, cornerRadius, typography } = useTheme()
   const [isPressing, setIsPressing] = useState(false)
   const [isSelected, setIsSelected] = useControlled({
     controlledProp: isSelectedProp,
@@ -123,12 +117,6 @@ export const SelectablePill = (props: SelectablePillProps) => {
     disableUnselectAnimation
   ])
 
-  // Force animated styles to re-evaluate when theme changes
-  // by re-setting the selected shared value with the current state
-  useEffect(() => {
-    selected.value = isSelected ? 1 : 0
-  }, [themeType, selected, isSelected])
-
   const animatedRootStyles = useAnimatedStyle(
     () => ({
       opacity: withTiming(disabled ? 0.45 : 1, motion.press),
@@ -144,7 +132,12 @@ export const SelectablePill = (props: SelectablePillProps) => {
       ),
       transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
     }),
-    [disabled, themeType]
+    [
+      disabled,
+      color.background.white,
+      color.secondary.s400,
+      color.border.strong
+    ]
   )
 
   const animatedTextStyles = useAnimatedStyle(
@@ -155,7 +148,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
         [color.text.default, color.static.white]
       )
     }),
-    [themeType]
+    [color.text.default, color.static.white]
   )
 
   return (

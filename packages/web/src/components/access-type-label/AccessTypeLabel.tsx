@@ -9,7 +9,7 @@ import {
   IconColors,
   Flex,
   Text,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 
 type AccessTypeLabelProps = {
@@ -55,7 +55,7 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     color: 'special'
   },
   [AccessType.TOKEN_GATED]: {
-    icon: IconArtistCoin,
+    icon: IconFanClub,
     label: 'Fan Club',
     color: 'subdued'
   },

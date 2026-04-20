@@ -163,7 +163,7 @@ export const useConnectExternalWallets = (
           reportToSentry({
             error: new Error('No wallets found to connect'),
             name: 'Connect Wallet Error',
-            feature: Feature.ArtistCoins
+            feature: Feature.FanClubs
           })
         }
 
@@ -187,7 +187,7 @@ export const useConnectExternalWallets = (
         reportToSentry({
           error: new Error('Connect Wallet Error'),
           name: 'Connect Wallet Error',
-          feature: Feature.ArtistCoins,
+          feature: Feature.FanClubs,
           additionalInfo: {
             error: String(event.data)
           }

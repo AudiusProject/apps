@@ -50,25 +50,10 @@
 .tableHeader {
   position: relative;
   background-color: var(--harmony-white);
-  padding-left: 12px;
+  padding-left: 0px;
   padding-right: 12px;
   line-height: 41px;
   user-select: none;
-}
-
-.tableHeader.hasSorter .textCell {
-  padding-right: 6px;
-}
-
-.titleHeader + .titleHeader::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 1px;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  background-color: var(--harmony-n-100);
 }
 
 .textCell {
@@ -77,13 +62,32 @@
   text-overflow: ellipsis;
 }
 
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.tableHeader.leftAlign .headerContent {
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+.tableHeader.rightAlign .headerContent {
+  justify-content: flex-end;
+}
+
+.tableHeader:not(.leftAlign):not(.rightAlign) .headerContent {
+  justify-content: center;
+}
+
 .sortCaretContainer {
-  position: absolute;
   display: flex;
   flex-direction: column;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
+  justify-content: center;
 }
 
 .sortCaret {
@@ -257,15 +261,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.resizer {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  right: -2px;
-  width: 6px;
 }
 
 .leftAlign {

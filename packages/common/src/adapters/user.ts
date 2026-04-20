@@ -103,8 +103,8 @@ export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
     location: input.location ?? null,
     profile_picture_sizes: input.profilePictureSizes ?? null,
 
-    // Explicit handling for artist_coin_badge to convert nested logoUri to logo_uri
-    artist_coin_badge: input.artistCoinBadge
+    // Explicit handling for fan_club_badge to convert nested logoUri to logo_uri
+    fan_club_badge: input.artistCoinBadge
       ? {
           mint: input.artistCoinBadge.mint ?? '',
           logo_uri: input.artistCoinBadge.logoUri ?? '',

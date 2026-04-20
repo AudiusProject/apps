@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import { createDrawerNavigator } from '@react-navigation/drawer'
@@ -22,6 +22,7 @@ type AppTabScreenProps = {
   navigation: DrawerContentComponentProps['navigation']
   gesturesDisabled: boolean
   setGesturesDisabled: (gesturesDisabled: boolean) => void
+  setIsAtStackRoot: (isAtStackRoot: boolean) => void
 }
 
 /**
@@ -31,7 +32,8 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
   const {
     navigation: drawerHelpers,
     gesturesDisabled,
-    setGesturesDisabled
+    setGesturesDisabled,
+    setIsAtStackRoot
   } = props
 
   const drawerNavigation = useNavigation() as any
@@ -42,6 +44,7 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
       drawerHelpers={drawerHelpers}
       gesturesDisabled={gesturesDisabled}
       setGesturesDisabled={setGesturesDisabled}
+      setIsAtStackRoot={setIsAtStackRoot}
     >
       <AppScreen />
     </AppDrawerContextProvider>
@@ -50,10 +53,19 @@ const AppStack = memo(function AppStack(props: AppTabScreenProps) {
 
 export const AppDrawerScreen = memo(() => {
   const [gesturesDisabled, setGesturesDisabled] = useState(false)
+  const [isAtStackRoot, setIsAtStackRootState] = useState(true)
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const drawerHelpersRef = useRef<
     DrawerContentComponentProps['navigation'] | null
   >(null)
+
+  // Drawer swipe only when at stack root; otherwise the stack's swipe-back wins.
+  const setIsAtStackRoot = useCallback((next: boolean) => {
+    setIsAtStackRootState((prev) => (prev === next ? prev : next))
+  }, [])
+
+  const canSwipeDrawer =
+    isAtStackRoot && !gesturesDisabled && !isNowPlayingDrawerOpen
 
   const drawerScreenOptions = useMemo(
     () => ({
@@ -61,12 +73,12 @@ export const AppDrawerScreen = memo(() => {
       swipeEdgeWidth: SCREEN_WIDTH,
       drawerType: 'slide' as const,
       drawerStyle: { width: '75%' as const },
-      swipeEnabled: !gesturesDisabled && !isNowPlayingDrawerOpen,
+      swipeEnabled: canSwipeDrawer,
       gestureHandlerProps: {
-        enabled: !gesturesDisabled && !isNowPlayingDrawerOpen
+        enabled: canSwipeDrawer
       }
     }),
-    [gesturesDisabled, isNowPlayingDrawerOpen]
+    [canSwipeDrawer]
   )
 
   // Close the left nav drawer if it's open when the now-playing drawer opens
@@ -76,7 +88,11 @@ export const AppDrawerScreen = memo(() => {
     }
   }, [isNowPlayingDrawerOpen])
 
-  const gestureProps = { gesturesDisabled, setGesturesDisabled }
+  const gestureProps = {
+    gesturesDisabled,
+    setGesturesDisabled,
+    setIsAtStackRoot
+  }
 
   return (
     <>

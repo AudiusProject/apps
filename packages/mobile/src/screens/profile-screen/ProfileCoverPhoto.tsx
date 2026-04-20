@@ -1,4 +1,4 @@
-import { useProfileUser } from '@audius/common/api'
+import { useUserByParams } from '@audius/common/api'
 import { BlurView } from '@react-native-community/blur'
 import { StyleSheet } from 'react-native'
 import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Flex } from '@audius/harmony-native'
 import BadgeArtist from 'app/assets/images/badgeArtist.svg'
 import { CoverPhoto } from 'app/components/image/CoverPhoto'
+import { useRoute } from 'app/hooks/useRoute'
 import { makeStyles } from 'app/styles'
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
@@ -35,13 +36,17 @@ export const ProfileCoverPhoto = () => {
   const styles = useStyles()
   const insets = useSafeAreaInsets()
 
-  const { user_id, track_count } =
-    useProfileUser({
-      select: (user) => ({
-        user_id: user.user_id,
-        track_count: user.track_count
-      })
-    }).user ?? {}
+  // Read from the route-params cache directly so user data is available on
+  // the first render, avoiding the Redux-state race in `useProfileUser`
+  // that caused the cover photo to pop in late and shift layout.
+  const { params } = useRoute<'Profile'>()
+  const { data: paramsUser } = useUserByParams(params, {
+    select: (user) => ({
+      user_id: user.user_id,
+      track_count: user.track_count
+    })
+  })
+  const { user_id, track_count } = paramsUser ?? {}
 
   const scrollY = useCurrentTabScrollY()
 
@@ -68,26 +73,28 @@ export const ProfileCoverPhoto = () => {
     ]
   }))
 
-  if (!user_id) return null
-
   return (
     <Flex
       pointerEvents='box-none'
       h={coverPhotoHeight}
       backgroundColor='surface2'
     >
-      <CoverPhoto style={{ height: coverPhotoHeight }} userId={user_id}>
-        <AnimatedBlurView
-          blurType='dark'
-          blurAmount={100}
-          style={blurViewStyle}
-        />
-        {isArtist ? <Animated.View style={styles.darkOverlay} /> : null}
-      </CoverPhoto>
-      {isArtist ? (
-        <Animated.View style={[styles.artistBadge, badgeStyle]}>
-          <BadgeArtist />
-        </Animated.View>
+      {user_id ? (
+        <>
+          <CoverPhoto style={{ height: coverPhotoHeight }} userId={user_id}>
+            <AnimatedBlurView
+              blurType='dark'
+              blurAmount={100}
+              style={blurViewStyle}
+            />
+            {isArtist ? <Animated.View style={styles.darkOverlay} /> : null}
+          </CoverPhoto>
+          {isArtist ? (
+            <Animated.View style={[styles.artistBadge, badgeStyle]}>
+              <BadgeArtist />
+            </Animated.View>
+          ) : null}
+        </>
       ) : null}
     </Flex>
   )

@@ -225,7 +225,7 @@ export const getNavigationStateFromDeeplinkPath = ({
     }
 
     return createTrendingStackState({
-      name: 'ArtistCoinsExplore'
+      name: 'FanClubsExplore'
     })
   }
 

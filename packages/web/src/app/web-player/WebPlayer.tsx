@@ -81,22 +81,20 @@ const TrendingGenreSelectionPage = lazy(
   () => import('components/trending-genre-selection/TrendingGenreSelectionPage')
 )
 // Lazy load heavy page components for code-splitting
-const ArtistCoinsExplorePage = lazy(() =>
-  import('pages/artist-coins-explore-page/ArtistCoinsExplorePage').then(
-    (m) => ({ default: m.ArtistCoinsExplorePage })
-  )
+const FanClubsExplorePage = lazy(() =>
+  import('pages/fan-clubs-explore-page/FanClubsExplorePage').then((m) => ({
+    default: m.FanClubsExplorePage
+  }))
 )
 const LaunchpadPage = lazy(() =>
-  import('pages/artist-coins-launchpad-page').then((m) => ({
+  import('pages/fan-clubs-launchpad-page').then((m) => ({
     default: m.LaunchpadPage
   }))
 )
-const MobileArtistCoinsSortPage = lazy(() =>
-  import('pages/artist-coins-sort-page/MobileArtistCoinsSortPage').then(
-    (m) => ({
-      default: m.MobileArtistCoinsSortPage
-    })
-  )
+const MobileFanClubsSortPage = lazy(() =>
+  import('pages/fan-clubs-sort-page/MobileFanClubsSortPage').then((m) => ({
+    default: m.MobileFanClubsSortPage
+  }))
 )
 const CashPage = lazy(() =>
   import('pages/cash-page').then((m) => ({ default: m.CashPage }))
@@ -201,6 +199,11 @@ const ExplorePage = lazy(() =>
     default: m.ExplorePage
   }))
 )
+const ContestsPage = lazy(() =>
+  import('pages/contests-page/ContestsPage').then((m) => ({
+    default: m.ContestsPage
+  }))
+)
 const SettingsPage = lazy(() => import('pages/settings-page/SettingsPage'))
 const TrackCommentsPage = lazy(() =>
   import('pages/track-page/TrackCommentsPage').then((m) => ({
@@ -220,6 +223,7 @@ const {
   NOTIFICATION_PAGE,
   NOTIFICATION_USERS_PAGE,
   EXPLORE_PAGE,
+  CONTESTS_PAGE,
   SAVED_PAGE,
   LIBRARY_PAGE,
   LIBRARY_TRACKS_PAGE,
@@ -745,7 +749,10 @@ const WebPlayer = (props: WebPlayerProps) => {
       </AppBannerWrapper>
       <ChatListener />
       <USDCBalanceFetcher />
-      <div className={cn(styles.app, { [styles.mobileApp]: isMobile })}>
+      <div
+        id='webPlayer'
+        className={cn(styles.app, { [styles.mobileApp]: isMobile })}
+      >
         {showCookieBanner ? <CookieBanner /> : null}
         <Notice shouldPadTop={false} />
         <Navigator />
@@ -817,6 +824,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<Navigate to={TRENDING_PAGE} replace />}
                 />
                 <Route path={EXPLORE_PAGE} element={<ExplorePage />} />
+                <Route path={CONTESTS_PAGE} element={<ContestsPage />} />
                 <Route
                   path={SEARCH_CATEGORY_PAGE_LEGACY}
                   element={<SearchCategoryLegacyRedirect />}
@@ -917,15 +925,15 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={CLUBS_EXPLORE_PAGE}
-                  element={<ArtistCoinsExplorePage />}
+                  element={<FanClubsExplorePage />}
                 />
                 <Route
                   path='/coins/sort'
-                  element={<MobileArtistCoinsSortPage />}
+                  element={<MobileFanClubsSortPage />}
                 />
                 <Route
                   path='/clubs/sort'
-                  element={<MobileArtistCoinsSortPage />}
+                  element={<MobileFanClubsSortPage />}
                 />
                 <Route path={COINS_CREATE_PAGE} element={<LaunchpadPage />} />
                 <Route path={CLUBS_CREATE_PAGE} element={<LaunchpadPage />} />
@@ -1289,6 +1297,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<Navigate to={TRENDING_PAGE} replace />}
                 />
                 <Route path={EXPLORE_PAGE} element={<ExplorePage />} />
+                <Route path={CONTESTS_PAGE} element={<ContestsPage />} />
                 <Route
                   path={SEARCH_CATEGORY_PAGE_LEGACY}
                   element={<SearchCategoryLegacyRedirect />}
@@ -1362,7 +1371,7 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={CLUBS_EXPLORE_PAGE}
-                  element={<ArtistCoinsExplorePage />}
+                  element={<FanClubsExplorePage />}
                 />
                 <Route path={COINS_CREATE_PAGE} element={<LaunchpadPage />} />
                 <Route path={CLUBS_CREATE_PAGE} element={<LaunchpadPage />} />

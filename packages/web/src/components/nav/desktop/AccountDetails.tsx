@@ -10,12 +10,14 @@ import { useIsManagedAccount } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Box, Flex, Skeleton, Text, useTheme } from '@audius/harmony'
+import { Link } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { TextLink, UserLink } from 'components/link'
 import { backgroundOverlay } from 'utils/styleUtils'
 
 import { AccountSwitcher } from './AccountSwitcher/AccountSwitcher'
+import { useNavSidebar } from './NavSidebarContext'
 
 const { SIGN_IN_PAGE, SIGN_UP_PAGE, profilePage } = route
 const messages = {
@@ -96,63 +98,108 @@ const AccountInfo = ({ children }: AccountInfoProps) => (
   </Flex>
 )
 
-type SignedInViewProps = {
+// Unified signed-in component — Avatar stays mounted across collapse/expand so
+// the image never reloads.
+type SignedInAccountDetailsProps = {
   userId: number
   handle: string
   isManagedAccount: boolean
 }
 
-const SignedInView = ({
+const SignedInAccountDetails = ({
   userId,
   handle,
   isManagedAccount
-}: SignedInViewProps) => {
+}: SignedInAccountDetailsProps) => {
+  const { isCollapsed } = useNavSidebar()
   const { color } = useTheme()
   const profileLink = profilePage(handle)
-
   const [isAccountSwitcherVisible, setIsAccountSwitcherVisible] =
     useState(false)
 
   return (
-    <AccountContentWrapper>
-      <Avatar userId={userId} h={48} w={48} />
-      <AccountInfo>
-        <Flex alignItems='center' justifyContent='space-between' gap='s' h={20}>
-          <Flex
-            css={{
-              maxWidth: isAccountSwitcherVisible ? '85%' : '100%',
-              overflow: 'hidden'
-            }}
-          >
-            <UserLink
-              popover
-              textVariant='title'
-              size='s'
-              userId={userId}
-              badgeSize='xs'
-              ellipses
-              css={{
-                ...(isManagedAccount && {
-                  color: color.secondary.s500,
-                  '&:hover': { color: color.secondary.s500 }
+    <Flex direction='column' pb='unit1' w='100%'>
+      {isManagedAccount && !isCollapsed ? (
+        <Box pv='xs' ph='m' backgroundColor='accent'>
+          <Text variant='label' size='xs' color='white'>
+            {messages.managedAccount}
+          </Text>
+        </Box>
+      ) : null}
+      <Flex
+        pv='s'
+        pr={isCollapsed ? undefined : 's'}
+        pl={isCollapsed ? undefined : 'm'}
+        alignItems='center'
+        w={isCollapsed ? '64px' : undefined}
+        justifyContent={isCollapsed ? 'center' : 'flex-start'}
+        gap={isCollapsed ? undefined : 's'}
+        {...(isManagedAccount
+          ? {
+              borderTop: isCollapsed ? 'strong' : undefined,
+              borderBottom: 'strong',
+              css: {
+                ...backgroundOverlay({
+                  color: color.background.accent,
+                  opacity: 0.03
                 })
-              }}
-            />
-          </Flex>
-          <AccountSwitcher onVisibilityChange={setIsAccountSwitcherVisible} />
-        </Flex>
-        <TextLink
-          size='s'
-          to={profileLink}
-          css={
-            isManagedAccount && {
-              color: color.secondary.s500,
-              '&:hover': { color: color.secondary.s500 }
+              }
             }
-          }
-        >{`@${handle}`}</TextLink>
-      </AccountInfo>
-    </AccountContentWrapper>
+          : undefined)}
+      >
+        {/* Avatar is always at position 0 here — never remounts on collapse/expand */}
+        <Avatar userId={userId} h={48} w={48} />
+        {!isCollapsed ? (
+          <AccountInfo>
+            <Flex
+              alignItems='center'
+              justifyContent='space-between'
+              gap='s'
+              h={20}
+            >
+              <Flex
+                css={{
+                  maxWidth: isAccountSwitcherVisible ? '85%' : '100%',
+                  overflow: 'hidden'
+                }}
+              >
+                <UserLink
+                  popover
+                  textVariant='title'
+                  size='s'
+                  userId={userId}
+                  badgeSize='xs'
+                  ellipses
+                  css={
+                    isManagedAccount
+                      ? {
+                          color: color.secondary.s500,
+                          '&:hover': { color: color.secondary.s500 }
+                        }
+                      : undefined
+                  }
+                />
+              </Flex>
+              <AccountSwitcher
+                onVisibilityChange={setIsAccountSwitcherVisible}
+              />
+            </Flex>
+            <TextLink
+              size='s'
+              to={profileLink}
+              css={
+                isManagedAccount
+                  ? {
+                      color: color.secondary.s500,
+                      '&:hover': { color: color.secondary.s500 }
+                    }
+                  : undefined
+              }
+            >{`@${handle}`}</TextLink>
+          </AccountInfo>
+        ) : null}
+      </Flex>
+    </Flex>
   )
 }
 
@@ -201,7 +248,45 @@ const LoadingView = () => {
   )
 }
 
+type CollapsedAccountDetailsProps = {
+  userId: number | null
+  linkTo?: string
+  isManagedAccount?: boolean
+}
+
+const CollapsedAccountDetails = ({
+  userId,
+  linkTo,
+  isManagedAccount
+}: CollapsedAccountDetailsProps) => {
+  const { color } = useTheme()
+
+  const inner = (
+    <Flex
+      w='64px'
+      alignItems='center'
+      justifyContent='center'
+      pv='s'
+      css={
+        isManagedAccount
+          ? {
+              ...backgroundOverlay({
+                color: color.background.accent,
+                opacity: 0.03
+              })
+            }
+          : undefined
+      }
+    >
+      <Avatar userId={userId} h={48} w={48} disableLink={!!linkTo && !userId} />
+    </Flex>
+  )
+
+  return linkTo && !userId ? <Link to={linkTo}>{inner}</Link> : inner
+}
+
 export const AccountDetails = () => {
+  const { isCollapsed } = useNavSidebar()
   const { data: user } = useCurrentAccountUser({
     select: (user) => ({
       userId: user?.user_id,
@@ -218,19 +303,33 @@ export const AccountDetails = () => {
   })
   const isManagedAccount = useIsManagedAccount()
 
-  // Determine which state to show
+  // Signed-in: single component handles both collapsed/expanded so Avatar stays mounted
   if (userId && accountHandle) {
     return (
-      <AccountDetailsContainer isManagedAccount={isManagedAccount}>
-        <SignedInView
-          userId={userId}
-          handle={accountHandle}
-          isManagedAccount={isManagedAccount}
-        />
-      </AccountDetailsContainer>
+      <SignedInAccountDetails
+        userId={userId}
+        handle={accountHandle}
+        isManagedAccount={isManagedAccount}
+      />
     )
   }
 
+  // Non-signed-in collapsed states
+  if (isCollapsed) {
+    if (!hasCompletedAccount && guestEmail) {
+      return <CollapsedAccountDetails userId={null} linkTo={SIGN_UP_PAGE} />
+    }
+    if (accountStatus === Status.LOADING || accountStatus === Status.SUCCESS) {
+      return (
+        <Flex w='64px' alignItems='center' justifyContent='center' pv='s'>
+          <Skeleton w={48} h={48} css={{ borderRadius: '50%' }} />
+        </Flex>
+      )
+    }
+    return <CollapsedAccountDetails userId={null} linkTo={SIGN_IN_PAGE} />
+  }
+
+  // Non-signed-in expanded states
   if (!hasCompletedAccount && guestEmail) {
     return (
       <AccountDetailsContainer>
@@ -239,7 +338,6 @@ export const AccountDetails = () => {
     )
   }
 
-  // Only shows briefly when the account is currently being loaded in during sign in
   if (accountStatus === Status.LOADING || accountStatus === Status.SUCCESS) {
     return (
       <AccountDetailsContainer>

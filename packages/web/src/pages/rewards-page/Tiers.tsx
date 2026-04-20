@@ -33,16 +33,14 @@ import {
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
-
 import styles from './Tiers.module.css'
 const { show } = musicConfettiActions
 
 const messages = {
   title: 'Perks',
   subtitle: 'Keep $AUDIO in your wallet to enjoy perks and exclusive features.',
-  noTier: 'No tier',
-  currentTier: 'CURRENT TIER',
+  noTier: 'Everyone',
+  currentTier: 'Current',
   tierLevel: (amount: string) => `${Number(amount).toLocaleString()}+`,
   updateRole: 'Update Role',
   features: featureMessages,
@@ -56,6 +54,15 @@ const BADGE_SIZE = 24
 
 // Tiers as they are listed here, in order
 const tiers: AudioTiers[] = ['bronze', 'silver', 'gold', 'platinum']
+const displayTiers: BadgeTier[] = [
+  'none',
+  'bronze',
+  'silver',
+  'gold',
+  'platinum'
+]
+type TierFeature = keyof typeof featureMessages
+const featureKeys = Object.keys(featureMessages) as TierFeature[]
 
 // Mapping for large icons
 const audioTierMapSvg: {
@@ -69,7 +76,7 @@ const audioTierMapSvg: {
 
 const BADGE_LOCAL_STORAGE_KEY = 'last_badge_tier'
 
-const LEARN_MORE_URL = 'http://blog.audius.co/posts/community-meet-audio'
+const LEARN_MORE_URL = 'https://help.audius.co'
 
 const useShowConfetti = (tier: BadgeTier) => {
   // No tier or no local storage, never show confetti
@@ -130,23 +137,7 @@ const TierBox = ({ tier, message }: { tier: BadgeTier; message?: string }) => {
         size='m'
         color='default'
         textTransform='capitalize'
-        css={{
-          minHeight: '1.5em',
-          ...(tier !== 'none' && {
-            WebkitTextFillColor: 'transparent',
-            WebkitBackgroundClip: 'text',
-            backgroundImage:
-              tier === 'bronze'
-                ? 'linear-gradient(to right, rgba(141, 48, 8, 0.5), rgb(182, 97, 11))'
-                : tier === 'silver'
-                  ? 'linear-gradient(to right, rgba(179, 182, 185, 0.5), rgb(189, 189, 189))'
-                  : tier === 'gold'
-                    ? 'linear-gradient(to right, rgb(236, 173, 11), rgb(236, 173, 11))'
-                    : tier === 'platinum'
-                      ? 'linear-gradient(to right, rgb(179, 236, 249), rgb(87, 194, 215))'
-                      : 'inherit'
-          })
-        }}
+        css={{ minHeight: '1.5em' }}
       >
         {tier !== 'none' ? tier : message}
       </Text>
@@ -154,21 +145,83 @@ const TierBox = ({ tier, message }: { tier: BadgeTier; message?: string }) => {
   )
 }
 
+const TierFeatureValue = ({
+  tier,
+  feature,
+  current,
+  onClickDiscord,
+  isMobileCard
+}: {
+  tier: BadgeTier
+  feature: TierFeature
+  current?: boolean
+  onClickDiscord: () => void
+  isMobileCard?: boolean
+}) => {
+  const { color } = useTheme()
+  const tierFeatures =
+    tier !== 'none' ? tierFeatureMap[tier] : tierFeatureMap.none
+  const minAudio =
+    badgeTiers.find((b) => b.tier === tier)?.humanReadableAmount?.toString() ??
+    '0'
+
+  if (feature === 'balance') {
+    return (
+      <Flex h={24} alignItems='center' justifyContent='center'>
+        {minAudio !== '0' ? (
+          <Text
+            variant={isMobileCard ? 'body' : 'label'}
+            size='s'
+          >{`${formatNumberCommas(minAudio)}+`}</Text>
+        ) : null}
+      </Flex>
+    )
+  }
+
+  if (tierFeatures[feature]) {
+    return (
+      <Flex h={24} direction='row' alignItems='center' gap='m'>
+        {feature === 'customDiscordRole' && current ? (
+          <Tooltip text={messages.refreshDiscordRole}>
+            <Button
+              size='small'
+              variant='secondary'
+              iconLeft={IconRefresh}
+              onClick={onClickDiscord}
+            />
+          </Tooltip>
+        ) : null}
+        <IconValidationCheck />
+      </Flex>
+    )
+  }
+
+  return (
+    <Flex h={24} w={24} alignItems='center' justifyContent='center'>
+      <Flex
+        h={16}
+        w={16}
+        borderRadius='circle'
+        border='strong'
+        css={{
+          borderWidth: 2,
+          borderColor: color.border.default
+        }}
+      />
+    </Flex>
+  )
+}
+
 const TierColumn = ({
   tier,
   current,
-  isNextTier,
   onClickDiscord
 }: {
   tier: BadgeTier
   current?: boolean
-  isNextTier?: boolean
   onClickDiscord: () => void
 }) => {
   const { color } = useTheme()
-
-  const tierFeatures =
-    tier !== 'none' ? tierFeatureMap[tier] : tierFeatureMap.none
 
   return (
     <Flex
@@ -178,12 +231,12 @@ const TierColumn = ({
       shadow={current ? 'mid' : undefined}
       css={{
         overflow: 'hidden',
-        minWidth: '120px',
-        '@media (max-width: 1200px)': {
-          display: current || isNextTier ? 'flex' : 'none'
+        minWidth: '108px',
+        '@media (max-width: 1280px)': {
+          minWidth: '96px'
         },
-        '@media (max-width: 1000px)': {
-          display: current ? 'flex' : 'none'
+        '@media (max-width: 1120px)': {
+          minWidth: '84px'
         }
       }}
       mt={current ? '-49px' : undefined} // Move current tier up to align columns
@@ -194,7 +247,9 @@ const TierColumn = ({
           pv='m'
           mb='m'
           css={{
-            background: color.special.gradient
+            background: color.special.gradient,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0
           }}
         >
           <Text variant='label' size='s' color='white'>
@@ -206,63 +261,139 @@ const TierColumn = ({
         tier={tier as AudioTiers}
         message={tier === 'none' ? messages.noTier : undefined}
       />
-      {(
-        Object.keys(messages.features) as Array<keyof typeof messages.features>
-      ).map((feature) => {
-        const minAudio =
-          badgeTiers
-            .find((b) => b.tier === tier)
-            ?.humanReadableAmount?.toString() ?? '0'
+      {featureKeys.map((feature) => (
+        <Flex key={feature} pv='m' borderTop='default' justifyContent='center'>
+          <TierFeatureValue
+            tier={tier}
+            feature={feature}
+            current={current}
+            onClickDiscord={onClickDiscord}
+          />
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
 
-        return (
-          <Flex
-            key={feature}
-            pv='m'
-            borderTop='default'
-            justifyContent='center'
-          >
-            <Text>
-              {feature === 'balance' ? (
-                <Flex h={24} alignItems='center' justifyContent='center'>
-                  {minAudio !== '0' ? (
-                    <Text
-                      variant='label'
-                      size='s'
-                    >{`${formatNumberCommas(minAudio)}+`}</Text>
-                  ) : null}
-                </Flex>
-              ) : tierFeatures[feature] ? (
-                <Flex h={24} direction='row' alignItems='center' gap='m'>
-                  <IconValidationCheck />
-                  {feature === 'customDiscordRole' && current ? (
-                    <Tooltip text={messages.refreshDiscordRole}>
-                      <Button
-                        size='small'
-                        variant='secondary'
-                        iconLeft={IconRefresh}
-                        onClick={onClickDiscord}
-                      />
-                    </Tooltip>
-                  ) : null}
-                </Flex>
-              ) : (
-                <Flex h={24} w={24} alignItems='center' justifyContent='center'>
-                  <Flex
-                    h={16}
-                    w={16}
-                    borderRadius='circle'
-                    border='strong'
-                    css={{
-                      borderWidth: 2,
-                      borderColor: color.border.default
-                    }}
-                  />
-                </Flex>
-              )}
+const TierRowLabel = ({
+  tier,
+  current,
+  isMobileCard
+}: {
+  tier: BadgeTier
+  current: boolean
+  isMobileCard?: boolean
+}) => {
+  return (
+    <Flex direction='row' alignItems='center' gap='s'>
+      {tier !== 'none' ? (
+        audioTierMapSvg[tier as AudioTiers]
+      ) : (
+        <Flex
+          h={BADGE_SIZE}
+          w={BADGE_SIZE}
+          alignItems='center'
+          justifyContent='center'
+        >
+          <Flex h={16} w={16} borderRadius='circle' border='strong' />
+        </Flex>
+      )}
+      <Text
+        variant={isMobileCard ? 'body' : 'label'}
+        size='s'
+        strength={isMobileCard ? 'strong' : undefined}
+        color='default'
+        textTransform='capitalize'
+      >
+        {tier === 'none' ? messages.noTier : tier}
+      </Text>
+      {current ? (
+        <Text
+          variant={isMobileCard ? 'body' : 'label'}
+          size='s'
+          color='subdued'
+        >
+          {messages.currentTier}
+        </Text>
+      ) : null}
+    </Flex>
+  )
+}
+
+const FeatureCards = ({
+  tier,
+  onClickDiscord
+}: {
+  tier: BadgeTier
+  onClickDiscord: () => void
+}) => {
+  const { color } = useTheme()
+
+  return (
+    <Flex
+      direction='column'
+      w='100%'
+      gap='m'
+      p='m'
+      css={{
+        display: 'none',
+        '@media (max-width: 980px)': {
+          display: 'flex'
+        }
+      }}
+    >
+      {featureKeys.map((feature) => (
+        <Flex
+          key={feature}
+          direction='column'
+          w='100%'
+          border='default'
+          css={{
+            overflow: 'hidden',
+            borderRadius: 12,
+            backgroundColor: color.background.surface1
+          }}
+        >
+          <Flex p='l' pb='m' w='100%'>
+            <Text variant='title' size='l' color='default'>
+              {messages.features[feature]}
             </Text>
           </Flex>
-        )
-      })}
+          {(feature === 'balance'
+            ? displayTiers.filter((displayTier) => displayTier !== 'none')
+            : displayTiers
+          ).map((displayTier) => {
+            const isCurrentTier = displayTier === tier
+            return (
+              <Flex
+                key={displayTier}
+                w='100%'
+                pv='m'
+                ph='l'
+                borderTop='default'
+                justifyContent='space-between'
+                alignItems='center'
+                css={{
+                  gap: 'var(--harmony-unit-4)'
+                }}
+              >
+                <TierRowLabel
+                  tier={displayTier}
+                  current={isCurrentTier}
+                  isMobileCard
+                />
+                <TierFeatureValue
+                  tier={displayTier}
+                  feature={feature}
+                  current={isCurrentTier}
+                  onClickDiscord={onClickDiscord}
+                  isMobileCard
+                />
+              </Flex>
+            )
+          })}
+        </Flex>
+      ))}
     </Flex>
   )
 }
@@ -274,36 +405,59 @@ const TierTable = ({
   tier: BadgeTier
   onClickDiscord: () => void
 }) => {
-  const tiers = ['none', 'bronze', 'silver', 'gold', 'platinum'] as BadgeTier[]
   return (
-    <Flex w='100%' justifyContent='space-between' p='xl'>
-      <Flex direction='column' flex='1 1 300px'>
-        <TierBox tier='none' />
-        {Object.values(messages.features).map((feature) => (
+    <>
+      <Flex
+        w='100%'
+        justifyContent='space-between'
+        p='xl'
+        css={{
+          gap: 'var(--harmony-unit-2)',
+          '@media (max-width: 1280px)': {
+            padding: 'var(--harmony-unit-6)'
+          },
+          '@media (max-width: 1120px)': {
+            padding: 'var(--harmony-unit-4)',
+            gap: 'var(--harmony-unit-1)'
+          },
+          '@media (max-width: 980px)': {
+            display: 'none'
+          }
+        }}
+      >
+        <Flex direction='column' flex='1 1 260px' css={{ minWidth: '160px' }}>
+          <TierBox tier='none' />
+          {featureKeys.map((feature) => (
+            <Flex
+              key={feature}
+              pv='m'
+              borderTop='default'
+              justifyContent='flex-end'
+              pr='xl'
+            >
+              <Text variant='title' size='m' color='default' ellipses>
+                {messages.features[feature]}
+              </Text>
+            </Flex>
+          ))}
+        </Flex>
+        {displayTiers.map((displayTier) => (
           <Flex
-            key={feature}
-            pv='m'
-            borderTop='default'
-            justifyContent='flex-end'
-            pr='xl'
+            key={displayTier}
+            direction='column'
+            flex='1 1 160px'
+            css={{ minWidth: 0 }}
           >
-            <Text variant='title' size='m' color='default' ellipses>
-              {feature}
-            </Text>
+            <TierColumn
+              tier={displayTier}
+              current={displayTier === tier}
+              onClickDiscord={onClickDiscord}
+            />
           </Flex>
         ))}
       </Flex>
-      {tiers.map((displayTier) => (
-        <Flex key={displayTier} direction='column' flex='1 1 200px'>
-          <TierColumn
-            tier={displayTier}
-            current={displayTier === tier}
-            isNextTier={displayTier === tiers[tiers.indexOf(tier) + 1] || false}
-            onClickDiscord={onClickDiscord}
-          />
-        </Flex>
-      ))}
-    </Flex>
+      <FeatureCards tier={tier} onClickDiscord={onClickDiscord} />
+    </>
   )
 }
 
@@ -332,21 +486,24 @@ const Tiers = () => {
     }
   }, [showConfetti, dispatch])
 
-  const wm = useWithMobileStyle(styles.mobile)
-
   return (
     <>
       <div className={styles.container}>
-        <div className={wm(styles.titleContainer)}>
-          <Text variant='display' size='s' className={wm(styles.title)}>
+        <div className={styles.titleContainer}>
+          <Text variant='display' size='s' className={styles.title}>
             {messages.title}
           </Text>
-          <Text variant='body' strength='strong' size='l'>
+          <Text
+            variant='body'
+            strength='strong'
+            size='l'
+            className={styles.subtitle}
+          >
             {messages.subtitle}
           </Text>
         </div>
         <TierTable tier={tier} onClickDiscord={onClickDiscord} />
-        <div className={wm(styles.buttonContainer)}>
+        <div className={styles.buttonContainer}>
           <Button variant='secondary' onClick={onClickExplainMore}>
             {messages.learnMore}
           </Button>

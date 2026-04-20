@@ -1,6 +1,6 @@
 import {
   QUERY_KEYS,
-  getArtistCreatedCoinQueryKey,
+  getArtistCreatedFanClubQueryKey,
   getConnectedWalletsQueryOptions,
   getCurrentAccountQueryKey,
   getUserQueryKey,
@@ -158,7 +158,7 @@ export const useLaunchCoin = () => {
             reportToSentry({
               error: e instanceof Error ? e : new Error(e as string),
               name: 'Confirm Launch Failure',
-              feature: Feature.ArtistCoins,
+              feature: Feature.FanClubs,
               additionalInfo: errorMetadata
             })
           }
@@ -230,7 +230,7 @@ export const useLaunchCoin = () => {
               link2: sanitizedLinks[1],
               link3: sanitizedLinks[2],
               link4: sanitizedLinks[3]
-              // intentionally don't send description to prevent the Artist Coin page from referencing itself
+              // intentionally don't send description to prevent the Fan Club page from referencing itself
             }
           })
           errorMetadata.sdkCoinAdded = true
@@ -240,7 +240,7 @@ export const useLaunchCoin = () => {
             reportToSentry({
               error: e instanceof Error ? e : new Error(e as string),
               name: 'SDK Create Coin Failure',
-              feature: Feature.ArtistCoins,
+              feature: Feature.FanClubs,
               additionalInfo: errorMetadata
             })
           }
@@ -257,7 +257,7 @@ export const useLaunchCoin = () => {
           reportToSentry({
             error: error instanceof Error ? error : new Error(error as string),
             name: 'Launch Coin Failure',
-            feature: Feature.ArtistCoins,
+            feature: Feature.FanClubs,
             additionalInfo: errorMetadata
           })
         }
@@ -265,7 +265,7 @@ export const useLaunchCoin = () => {
       }
     },
     onSuccess: (_result, params, _context) => {
-      // Invalidate the list of artist coins to add it to the list
+      // Invalidate the list of fan clubs to add it to the list
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coins] })
       // Invalidate the user to refresh their badge info
       queryClient.invalidateQueries({
@@ -277,7 +277,7 @@ export const useLaunchCoin = () => {
       // Invalidate our user - this will refresh their badge info
       // NOTE: this will eventually move to the users metadata
       queryClient.invalidateQueries({
-        queryKey: getArtistCreatedCoinQueryKey(params.userId)
+        queryKey: getArtistCreatedFanClubQueryKey(params.userId)
       })
       // The confirmation call will associate the external wallet, so we need to invalidate the connected wallets query
       queryClient.invalidateQueries({

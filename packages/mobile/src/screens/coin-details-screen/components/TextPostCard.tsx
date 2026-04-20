@@ -4,7 +4,7 @@ import {
   useComment,
   useCurrentUserId,
   useReactToComment,
-  useArtistCoin
+  useFanClub
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import {
@@ -41,7 +41,7 @@ type TextPostCardProps = {
 export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
   const { data: comment, isPending } = useComment(commentId)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { mutate: reactToComment } = useReactToComment()
   const { onOpen: openLockedTextPostDrawer } = useDrawer('LockedTextPost')
 

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
-  useArtistCoinByTicker,
+  useFanClubByTicker,
   useCoinRedeemAmount,
   useCoinRedeemCodeAmount,
   useCurrentUserId,
@@ -182,7 +182,7 @@ export const CoinRedeemPage = () => {
     isPending: coinPending,
     isError,
     isSuccess
-  } = useArtistCoinByTicker({ ticker: formattedTicker })
+  } = useFanClubByTicker({ ticker: formattedTicker })
 
   const { data: coinRedeemAmount, isPending: coinRedeemAmountPending } =
     useCoinRedeemAmount({ mint: coin?.mint })

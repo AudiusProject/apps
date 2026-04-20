@@ -19,6 +19,18 @@ const isDevEnvironment =
   window.localStorage.getItem('FORCE_DEV') === 'true'
 
 /**
+ * Opening the welcome modal must not run synchronously inside
+ * `determineAllowedRoute` — that function is invoked from `SignUpRoute` during
+ * render. Updating modal state while rendering violates React's rules and can
+ * crash the app or hit the global error boundary after sign-up completes.
+ */
+const openWelcomeModalAfterRender = (setOpen: (open: boolean) => void) => {
+  queueMicrotask(() => {
+    setOpen(true)
+  })
+}
+
+/**
  * Checks against existing sign up redux state,
  * then determines if the requested path should be allowed or not
  * if not allowed, also returns furthest step possible based on existing state
@@ -47,7 +59,7 @@ export const useDetermineAllowedRoute = () => {
     correctedRoute: string
   } => {
     if (followeeCount && followeeCount >= 3) {
-      setIsWelcomeModalOpen(true)
+      openWelcomeModalAfterRender(setIsWelcomeModalOpen)
       return {
         allowedRoutes: [],
         isAllowedRoute: false,
@@ -158,9 +170,8 @@ export const useDetermineAllowedRoute = () => {
       correctedPath = SignUpPath.selectGenres
     }
 
-    if (correctedPath === SignUpPath.completedRedirect) {
-      setIsWelcomeModalOpen(true)
-    }
+    // Welcome modal after sign-up success is opened from `SignOnPage` (see
+    // `useLayoutEffect` there): the success path never renders this tree.
 
     return {
       allowedRoutes,

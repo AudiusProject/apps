@@ -158,7 +158,7 @@ export const useProfilePage = (
     null
   )
   const [updatedWebsite, setUpdatedWebsite] = useState<string | null>(null)
-  const [updatedArtistCoinBadge, setUpdatedArtistCoinBadge] = useState<
+  const [updatedFanClubBadge, setUpdatedFanClubBadge] = useState<
     Nullable<{
       mint: string
       logo_uri: string
@@ -245,7 +245,7 @@ export const useProfilePage = (
     setUpdatedInstagramHandle(null)
     setUpdatedTikTokHandle(null)
     setUpdatedWebsite(null)
-    setUpdatedArtistCoinBadge(null)
+    setUpdatedFanClubBadge(null)
     setAreArtistRecommendationsVisible(false)
   }, [profile?.handle, params?.tab])
 
@@ -352,26 +352,26 @@ export const useProfilePage = (
       ? updatedWebsite
       : (profile?.website ?? '')
 
-  // Determine artist coin badge
-  let artistCoinBadge = null
+  // Determine fan club badge
+  let fanClubBadge = null
   if (profile) {
-    if (updatedArtistCoinBadge !== null) {
-      artistCoinBadge = updatedArtistCoinBadge
+    if (updatedFanClubBadge !== null) {
+      fanClubBadge = updatedFanClubBadge
     } else {
       if (profile.coin_flair_mint === '') {
-        artistCoinBadge = {
+        fanClubBadge = {
           mint: '__none__',
           logo_uri: '',
           ticker: ''
         }
       } else if (profile.coin_flair_mint === null) {
-        artistCoinBadge = {
+        fanClubBadge = {
           mint: '__default__',
           logo_uri: '',
           ticker: ''
         }
       } else {
-        artistCoinBadge = profile.artist_coin_badge || null
+        fanClubBadge = profile.fan_club_badge || null
       }
     }
   }
@@ -595,7 +595,7 @@ export const useProfilePage = (
     setUpdatedInstagramHandle(null)
     setUpdatedTikTokHandle(null)
     setUpdatedWebsite(null)
-    setUpdatedArtistCoinBadge(null)
+    setUpdatedFanClubBadge(null)
   }, [])
 
   const onCancel = useCallback(() => {
@@ -605,7 +605,7 @@ export const useProfilePage = (
     setUpdatedProfilePicture(null)
     setUpdatedBio(null)
     setUpdatedLocation(null)
-    setUpdatedArtistCoinBadge(null)
+    setUpdatedFanClubBadge(null)
   }, [])
 
   const updateName = useCallback((name: string) => setUpdatedName(name), [])
@@ -667,7 +667,7 @@ export const useProfilePage = (
     [updatedCoverPhoto]
   )
 
-  const updateArtistCoinBadge = useCallback(
+  const updateFanClubBadge = useCallback(
     async (
       badge: Nullable<{
         mint: string
@@ -675,7 +675,7 @@ export const useProfilePage = (
         ticker: string
       }>
     ) => {
-      setUpdatedArtistCoinBadge(badge)
+      setUpdatedFanClubBadge(badge)
 
       // Optimistically update the user cache
       if (profile?.user_id && queryClient) {
@@ -724,19 +724,19 @@ export const useProfilePage = (
           (prevUser: any) => {
             if (!prevUser) return undefined
 
-            let artistCoinBadge = null
+            let fanClubBadge = null
             let coinFlairMint = null
 
             if (optimisticBadge) {
               if (optimisticBadge.mint === '__default__') {
                 coinFlairMint = null
-                artistCoinBadge = null
+                fanClubBadge = null
               } else if (optimisticBadge.mint === '__none__') {
                 coinFlairMint = ''
-                artistCoinBadge = null
+                fanClubBadge = null
               } else {
                 coinFlairMint = optimisticBadge.mint
-                artistCoinBadge = {
+                fanClubBadge = {
                   mint: optimisticBadge.mint,
                   logo_uri: optimisticBadge.logo_uri,
                   ticker: optimisticBadge.ticker
@@ -747,7 +747,7 @@ export const useProfilePage = (
             return {
               ...prevUser,
               coin_flair_mint: coinFlairMint,
-              artist_coin_badge: artistCoinBadge
+              fan_club_badge: fanClubBadge
             }
           }
         )
@@ -806,34 +806,34 @@ export const useProfilePage = (
       updatedMetadata.website = updatedWebsite
     }
 
-    let artistCoinBadgeValue = null
-    if (updatedArtistCoinBadge !== null) {
-      artistCoinBadgeValue = updatedArtistCoinBadge
+    let fanClubBadgeValue = null
+    if (updatedFanClubBadge !== null) {
+      fanClubBadgeValue = updatedFanClubBadge
     } else {
       if (profile.coin_flair_mint === '') {
-        artistCoinBadgeValue = {
+        fanClubBadgeValue = {
           mint: '__none__',
           logo_uri: '',
           ticker: ''
         }
       } else if (profile.coin_flair_mint === null) {
-        artistCoinBadgeValue = {
+        fanClubBadgeValue = {
           mint: '__default__',
           logo_uri: '',
           ticker: ''
         }
       } else {
-        artistCoinBadgeValue = profile.artist_coin_badge || null
+        fanClubBadgeValue = profile.fan_club_badge || null
       }
     }
 
-    if (artistCoinBadgeValue) {
-      if (artistCoinBadgeValue.mint === '__default__') {
+    if (fanClubBadgeValue) {
+      if (fanClubBadgeValue.mint === '__default__') {
         updatedMetadata.coin_flair_mint = null
-      } else if (artistCoinBadgeValue.mint === '__none__') {
+      } else if (fanClubBadgeValue.mint === '__none__') {
         updatedMetadata.coin_flair_mint = ''
       } else {
-        updatedMetadata.coin_flair_mint = artistCoinBadgeValue.mint
+        updatedMetadata.coin_flair_mint = fanClubBadgeValue.mint
       }
     } else {
       updatedMetadata.coin_flair_mint = null
@@ -851,7 +851,7 @@ export const useProfilePage = (
     updatedInstagramHandle,
     updatedTikTokHandle,
     updatedWebsite,
-    updatedArtistCoinBadge,
+    updatedFanClubBadge,
     updateProfile,
     dispatch
   ])
@@ -945,7 +945,7 @@ export const useProfilePage = (
     updatedInstagramHandle !== null ||
     updatedTikTokHandle !== null ||
     updatedWebsite !== null ||
-    updatedArtistCoinBadge !== null ||
+    updatedFanClubBadge !== null ||
     updatedCoverPhoto !== null ||
     updatedProfilePicture !== null
 
@@ -981,7 +981,7 @@ export const useProfilePage = (
     instagramVerified,
     tikTokVerified,
     website,
-    artistCoinBadge,
+    fanClubBadge,
     hasProfilePicture: !!hasProfilePicture,
     following,
     mode,
@@ -1055,7 +1055,7 @@ export const useProfilePage = (
     updateInstagramHandle,
     updateTikTokHandle,
     updateWebsite,
-    updateArtistCoinBadge,
+    updateFanClubBadge,
     updateCoverPhoto,
     updateProfile,
     didChangeTabsFrom,

@@ -6,9 +6,13 @@ export const exploreMessages = {
   featuredPlaylists: 'Community Playlists',
   fanClubs: 'Fan Clubs',
   featuredRemixContests: 'Featured Remix Contests',
+  contests: 'Contests',
   forYou: 'For You',
   recentlyListedForSale: 'Recently Listed for Sale',
   bestSelling: 'Best Selling',
+  topAlbumsThisMonth: 'Top Albums This Month',
+  newAlbumReleases: 'New Album Releases',
+  bestSellingAlbums: 'Best Selling Albums',
   exploreByMood: (category?: string) =>
     `Explore${category ? ` ${category}` : ''} by Mood`,
   quickSearch: 'Quick Search',

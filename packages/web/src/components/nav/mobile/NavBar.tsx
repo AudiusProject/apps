@@ -1,12 +1,11 @@
 import { useState, useContext, useCallback } from 'react'
 
-import { useNotificationUnreadCount } from '@audius/common/api'
-import { formatCount, route } from '@audius/common/utils'
+import { useCurrentUserId } from '@audius/common/api'
+import { route } from '@audius/common/utils'
 import {
   IconAudiusLogoHorizontal,
   IconCaretLeft,
   IconClose,
-  IconNotificationOn,
   IconButton,
   Flex,
   IconKebabHorizontal
@@ -19,6 +18,7 @@ import {
   RouterContext,
   SlideDirection
 } from 'components/animated-switch/RouterContextProvider'
+import { Avatar } from 'components/avatar/Avatar'
 import NavContext, {
   LeftPreset,
   CenterPreset,
@@ -26,8 +26,8 @@ import NavContext, {
 } from 'components/nav/mobile/NavContext'
 import { getIsIOS } from 'utils/browser'
 
+import { LeftNavDrawer } from './LeftNavDrawer'
 import styles from './NavBar.module.css'
-import { NavBarActionDrawer } from './NavBarActionDrawer'
 
 const { SIGN_UP_PAGE, TRENDING_PAGE } = route
 
@@ -56,11 +56,11 @@ const NavBar = ({
   goBack
 }: NavBarProps) => {
   const { leftElement, centerElement, rightElement } = useContext(NavContext)!
-  const { data: notificationCount = 0 } = useNotificationUnreadCount()
+  const { data: currentUserId } = useCurrentUserId()
 
   const { setStackReset } = useContext(RouterContext)
 
-  const [isActionDrawerOpen, setIsActionDrawerOpen] = useState(false)
+  const [isLeftNavOpen, setIsLeftNavOpen] = useState(false)
 
   const { setSlideDirection } = useContext(RouterContext)
 
@@ -111,38 +111,21 @@ const NavBar = ({
       </Link>
     )
   } else if (leftElement === LeftPreset.NOTIFICATION && isSignedIn) {
-    left = (
-      <Flex gap='s'>
-        <Flex>
-          <IconButton
-            aria-label='notifications'
-            color={notificationCount > 0 ? 'warning' : 'subdued'}
-            icon={IconNotificationOn}
-            onClick={goToNotificationPage}
-          />
-          {notificationCount > 0 && (
-            <Flex
-              css={{
-                position: 'absolute',
-                top: 0,
-                right: 6,
-                backgroundColor: 'var(--harmony-red)',
-                color: 'var(--harmony-white)',
-                fontSize: '11px',
-                fontWeight: 'bold',
-                letterSpacing: '0.07px',
-                lineHeight: '14px',
-                textTransform: 'uppercase',
-                padding: '0px 6px',
-                transform: 'translateX(50%)',
-                borderRadius: '8px'
-              }}
-            >
-              {formatCount(notificationCount)}
-            </Flex>
-          )}
-        </Flex>
-      </Flex>
+    left = currentUserId ? (
+      <Avatar
+        userId={currentUserId}
+        onClick={() => setIsLeftNavOpen(true)}
+        size='small'
+        disableLink
+        aria-label='menu'
+      />
+    ) : (
+      <IconButton
+        aria-label='menu'
+        icon={IconKebabHorizontal}
+        color='subdued'
+        onClick={() => setIsLeftNavOpen(true)}
+      />
     )
   } else {
     left = leftElement
@@ -171,22 +154,11 @@ const NavBar = ({
           [styles.isLoading]: isLoading
         })}
       >
-        {rightElement === RightPreset.KEBAB ? (
-          <Flex mr='s'>
-            <IconButton
-              aria-label='menu'
-              icon={IconKebabHorizontal}
-              color-='subdued'
-              onClick={() => setIsActionDrawerOpen(true)}
-            />
-          </Flex>
-        ) : (
-          rightElement
-        )}
+        {rightElement === RightPreset.KEBAB ? null : rightElement}
       </Flex>
-      <NavBarActionDrawer
-        isOpen={isActionDrawerOpen}
-        onClose={() => setIsActionDrawerOpen(false)}
+      <LeftNavDrawer
+        isOpen={isLeftNavOpen}
+        onClose={() => setIsLeftNavOpen(false)}
       />
     </Flex>
   )

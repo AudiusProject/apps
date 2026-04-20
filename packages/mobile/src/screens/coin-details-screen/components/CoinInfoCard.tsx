@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import type { Coin } from '@audius/common/adapters'
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
 import { shortenSPLAddress } from '@audius/common/utils'
@@ -69,7 +69,7 @@ const getPlatformIcon = (platform: string) => {
 }
 
 export const BannerSection = ({ mint }: { mint: string }) => {
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading } = useFanClub(mint)
   const { ownerId } = coin ?? {}
 
   const { source: coverPhotoSource } = useCoverPhoto({
@@ -225,7 +225,7 @@ const SocialLinksSection = ({ coin }: { coin: Coin }) => {
 }
 
 export const CoinInfoCard = ({ mint }: { mint: string }) => {
-  const { data: coin, isLoading } = useArtistCoin(mint)
+  const { data: coin, isLoading } = useFanClub(mint)
   const navigation = useNavigation()
   const { toast } = useToast()
 

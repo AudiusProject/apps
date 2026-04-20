@@ -1,5 +1,5 @@
 import {
-  useArtistCoinByTicker,
+  useFanClubByTicker,
   useCoinGeckoCoin,
   useUser
 } from '@audius/common/api'
@@ -14,8 +14,8 @@ import { useLocation } from 'react-router'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGeneratedTextV2'
-import { TokenInfoRow } from 'pages/artist-coins-launchpad-page/components'
-import { LAUNCHPAD_COIN_DESCRIPTION } from 'pages/artist-coins-launchpad-page/constants'
+import { TokenInfoRow } from 'pages/fan-clubs-launchpad-page/components'
+import { LAUNCHPAD_COIN_DESCRIPTION } from 'pages/fan-clubs-launchpad-page/constants'
 
 import {
   convertCoinGeckoResponseToStatsDetailsProps,
@@ -49,10 +49,10 @@ export const ArtistFanClubDetailsPage = () => {
   const location = useLocation()
   // Locations should be in the format /coins/:ticker/details (COIN_DETAIL_MOBILE_WEB_ROUTE)
   const ticker = location.pathname.split('/')[2]
-  const { data: artistCoin } = useArtistCoinByTicker({
+  const { data: fanClub } = useFanClubByTicker({
     ticker
   })
-  const { data: artist } = useUser(artistCoin?.ownerId)
+  const { data: artist } = useUser(fanClub?.ownerId)
   const { spacing } = useTheme()
   const isAudio = formatTickerForUrl(ticker) === 'AUDIO'
   const { data: coingeckoResponse } = useCoinGeckoCoin(
@@ -69,21 +69,21 @@ export const ArtistFanClubDetailsPage = () => {
             <Flex alignItems='center' gap='m'>
               {/* Token Icon */}
               <TokenIcon
-                logoURI={artistCoin?.logoUri}
+                logoURI={fanClub?.logoUri}
                 w={spacing['4xl']}
                 h={spacing['4xl']}
                 hex
               />
               <Flex direction='column' gap='xs'>
                 <Text variant='title' size='l'>
-                  {artistCoin?.name ?? messages.unknownToken}
+                  {fanClub?.name ?? messages.unknownToken}
                 </Text>
                 <Text
-                  variant={artistCoin?.name ? 'body' : 'title'}
-                  size={artistCoin?.name ? 'm' : 'l'}
-                  color={artistCoin?.name ? 'subdued' : 'default'}
+                  variant={fanClub?.name ? 'body' : 'title'}
+                  size={fanClub?.name ? 'm' : 'l'}
+                  color={fanClub?.name ? 'subdued' : 'default'}
                 >
-                  {artistCoin?.ticker ?? messages.unknownTicker}
+                  {fanClub?.ticker ?? messages.unknownTicker}
                 </Text>
               </Flex>
             </Flex>
@@ -97,7 +97,7 @@ export const ArtistFanClubDetailsPage = () => {
               {messages.coinAddress}
             </Text>
             <Text variant='body' size='s' color='default'>
-              {artistCoin?.mint ?? messages.unknown}
+              {fanClub?.mint ?? messages.unknown}
             </Text>
           </Flex>
 
@@ -109,7 +109,7 @@ export const ArtistFanClubDetailsPage = () => {
             <UserGeneratedTextV2 variant='body' size='s' color='default'>
               {LAUNCHPAD_COIN_DESCRIPTION(
                 artist?.handle ?? '',
-                artistCoin?.ticker ?? ''
+                fanClub?.ticker ?? ''
               )}
             </UserGeneratedTextV2>
           </Flex>
@@ -120,7 +120,7 @@ export const ArtistFanClubDetailsPage = () => {
           <TokenDetailsStatsSection
             {...(isAudio
               ? convertCoinGeckoResponseToStatsDetailsProps(coingeckoResponse)
-              : artistCoin)}
+              : fanClub)}
           />
         </Flex>
       </Flex>

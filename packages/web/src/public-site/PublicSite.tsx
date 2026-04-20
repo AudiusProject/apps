@@ -29,14 +29,11 @@ const DownloadPage = lazy(() => import('./pages/download-page/DownloadPage'))
 const TermsOfUsePage = lazy(
   () => import('./pages/terms-of-use-page/TermsOfUsePage')
 )
-const ArtistCoinTermsPage = lazy(
-  () => import('./pages/artist-coin-terms-page/ArtistCoinTermsPage')
+const FanClubTermsPage = lazy(
+  () => import('./pages/fan-club-terms-page/FanClubTermsPage')
 )
-const ArtistCoinAcceptableUsePage = lazy(
-  () =>
-    import(
-      './pages/artist-coin-acceptable-use-page/ArtistCoinAcceptableUsePage'
-    )
+const FanClubAcceptableUsePage = lazy(
+  () => import('./pages/fan-club-acceptable-use-page/FanClubAcceptableUsePage')
 )
 
 const ROOT_ID = 'root'
@@ -152,9 +149,9 @@ export const PublicSite = (props: PublicSiteProps) => {
                         }
                       />
                       <Route
-                        path='/legal/artist-coin-terms'
+                        path='/legal/fan-club-terms'
                         element={
-                          <ArtistCoinTermsPage
+                          <FanClubTermsPage
                             isMobile={isMobileOrNarrow}
                             openNavScreen={openNavScreen}
                             setRenderPublicSite={setRenderPublicSite}
@@ -162,9 +159,9 @@ export const PublicSite = (props: PublicSiteProps) => {
                         }
                       />
                       <Route
-                        path='/legal/artist-coin-acceptable-use'
+                        path='/legal/fan-club-acceptable-use'
                         element={
-                          <ArtistCoinAcceptableUsePage
+                          <FanClubAcceptableUsePage
                             isMobile={isMobileOrNarrow}
                             openNavScreen={openNavScreen}
                             setRenderPublicSite={setRenderPublicSite}

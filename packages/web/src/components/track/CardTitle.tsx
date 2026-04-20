@@ -9,7 +9,7 @@ import {
   IconCart,
   IconUserFollowing,
   Flex,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 
 const messages = {
@@ -57,7 +57,7 @@ export const CardTitle = ({
       icon = <IconCart size='s' color='subdued' />
       message = messages.premiumTrack
     } else if (isContentTokenGated(streamConditions)) {
-      icon = <IconArtistCoin size='s' color='subdued' />
+      icon = <IconFanClub size='s' color='subdued' />
       message = messages.coinGated
     } else {
       icon = <IconUserFollowing size='s' color='subdued' />

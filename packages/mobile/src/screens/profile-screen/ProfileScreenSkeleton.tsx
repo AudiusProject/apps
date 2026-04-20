@@ -1,7 +1,3 @@
-import { useMemo } from 'react'
-
-import { times, random } from 'lodash'
-import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex } from '@audius/harmony-native'
@@ -19,8 +15,8 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     left: spacing(4),
     zIndex: 101,
 
-    height: 82,
-    width: 82,
+    height: 80,
+    width: 80,
     borderRadius: 1000,
     borderWidth: 2,
     borderStyle: 'solid',
@@ -40,8 +36,7 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
   name: {
     height: spacing(5),
-    width: 100,
-    marginBottom: spacing(3)
+    width: 100
   },
   handle: {
     height: spacing(4),
@@ -104,41 +99,19 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   }
 }))
 
-const BioSkeleton = () => {
-  const baseStyle = {
-    height: 12,
-    marginRight: 4,
-    marginBottom: 8
-  }
-
-  const elements = useMemo(
-    () => times(random(5, 10), () => random(20, 100)),
-    []
-  )
-
-  return (
-    <>
-      {elements.map((elementWidth: number, i) => (
-        <StaticSkeleton key={i} style={[baseStyle, { width: elementWidth }]} />
-      ))}
-    </>
-  )
-}
-
 export const ExpandableSectionSkeleton = () => {
-  const styles = useStyles()
+  const baseStyle = { height: 12, marginRight: 4, marginBottom: 8 }
+  // Matches the initial CollapsedSection: a 2-line bio. We don't render tier
+  // + full socials here because they only appear once the user expands the
+  // header, so reserving that space would cause a skeleton→content shift.
   return (
-    <Flex column gap='s' backgroundColor='white' p='l'>
+    <Flex column gap='s' backgroundColor='white' ph='m' pb='s'>
       <Flex row wrap='wrap'>
-        <BioSkeleton />
-      </Flex>
-      <Flex style={styles.tierAndSocials}>
-        <StaticSkeleton style={styles.tier} />
-        <View style={styles.socialLinks}>
-          <StaticSkeleton style={styles.socialLink} />
-          <StaticSkeleton style={styles.socialLink} />
-          <StaticSkeleton style={styles.socialLink} />
-        </View>
+        <StaticSkeleton style={[baseStyle, { width: 80 }]} />
+        <StaticSkeleton style={[baseStyle, { width: 60 }]} />
+        <StaticSkeleton style={[baseStyle, { width: 100 }]} />
+        <StaticSkeleton style={[baseStyle, { width: 70 }]} />
+        <StaticSkeleton style={[baseStyle, { width: 90 }]} />
       </Flex>
     </Flex>
   )
@@ -154,15 +127,17 @@ export const ProfileHeaderSkeleton = () => {
     <Flex backgroundColor='white'>
       <StaticSkeleton height={coverPhotoHeight} />
       <Skeleton style={[styles.profilePicture, { top: insets.top + 48 }]} />
-      <Flex p='l' gap='s' backgroundColor='white'>
-        <Flex row justifyContent='space-between' backgroundColor='white'>
-          <Flex mt='3xl'>
-            <StaticSkeleton style={styles.name} />
-            <StaticSkeleton style={styles.handle} />
-          </Flex>
-          <Flex row gap='s'>
+      {/* Matches the real ProfileHeader structure so the skeleton→content
+      transition doesn't cause layout shift. */}
+      <Flex column pv='s' ph='m' backgroundColor='white' style={{ gap: 9 }}>
+        <Flex column pv='s' gap='s'>
+          <Flex row justifyContent='flex-end' gap='xs'>
             <StaticSkeleton height={32} width={32} />
             <StaticSkeleton height={32} width={120} />
+          </Flex>
+          <Flex alignItems='flex-start' gap='2xs'>
+            <StaticSkeleton style={styles.name} />
+            <StaticSkeleton style={styles.handle} />
           </Flex>
         </Flex>
         <Flex row>

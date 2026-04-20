@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useLayoutEffect } from 'react'
 
 import { SystemAppearance } from '@audius/common/models'
 import { FEED_PAGE } from '@audius/common/src/utils/route'
@@ -25,16 +25,20 @@ import {
 } from 'react-router'
 import { useEffectOnce, useLocalStorage } from 'react-use'
 
+import { useModalState } from 'common/hooks/useModalState'
 import {
   fetchReferrer,
   setField,
   setValueField,
+  setWelcomeModalShown,
   updateRouteOnCompletion
 } from 'common/store/pages/signon/actions'
 import {
   getRouteOnCompletion,
   getRouteOnExit,
-  getStatus
+  getStartedSignUpProcess,
+  getStatus,
+  getWelcomeModalShown
 } from 'common/store/pages/signon/selectors'
 import { EditingStatus } from 'common/store/pages/signon/types'
 import { useMedia } from 'hooks/useMedia'
@@ -224,6 +228,29 @@ export const SignOnPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [guestEmailLocalStorage] = useLocalStorage('guestEmail', '')
+  const startedSignUpProcess = useSelector(getStartedSignUpProcess)
+  const welcomeModalShown = useSelector(getWelcomeModalShown)
+  const [, setWelcomeModalOpen] = useModalState('Welcome')
+
+  // Welcome modal must open here, not from `/signup/completed`: when sign-up
+  // succeeds we short-circuit below with `<Navigate />` and never render
+  // `<SignUpPage />`, so that URL (and hooks inside it) are skipped entirely.
+  useLayoutEffect(() => {
+    if (
+      signOnStatus === EditingStatus.SUCCESS &&
+      startedSignUpProcess &&
+      !welcomeModalShown
+    ) {
+      setWelcomeModalOpen(true)
+      dispatch(setWelcomeModalShown(true))
+    }
+  }, [
+    signOnStatus,
+    startedSignUpProcess,
+    welcomeModalShown,
+    setWelcomeModalOpen,
+    dispatch
+  ])
 
   // Add ESC key handler
   useEffect(() => {

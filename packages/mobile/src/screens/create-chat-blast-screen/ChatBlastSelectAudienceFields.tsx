@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 
 import {
-  useArtistCoinMembersCount,
-  useArtistCreatedCoin,
+  useFanClubMembersCount,
+  useArtistCreatedFanClub,
   useCurrentAccountUser,
   useCurrentUserId
 } from '@audius/common/api'
@@ -223,8 +223,8 @@ const CoinHoldersMessageField = () => {
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
   const { data: currentUserId } = useCurrentUserId()
-  const { data: coin } = useArtistCreatedCoin(currentUserId)
-  const { data: coinMembersCount } = useArtistCoinMembersCount({
+  const { data: coin } = useArtistCreatedFanClub(currentUserId)
+  const { data: coinMembersCount } = useFanClubMembersCount({
     mint: coin?.mint
   })
   const coinSymbol = coin?.ticker ?? ''

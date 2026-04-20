@@ -12,7 +12,7 @@ import {
   beforeEach
 } from 'vitest'
 
-import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
+import { mockFanClub } from 'test/mocks/fixtures/fanClubs'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 import {
   mockUserByHandle,
@@ -225,7 +225,7 @@ describe('ProfilePage', () => {
   })
 
   it('shows fan club UI when the profile belongs to an artist with an owned coin', async () => {
-    mswServer.use(mockUserCreatedCoin(artistUser.id, mockArtistCoin))
+    mswServer.use(mockUserCreatedCoin(artistUser.id, mockFanClub))
 
     // Mock a different current user to simulate viewing another user's profile
     renderProfilePage(

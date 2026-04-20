@@ -110,51 +110,51 @@ const semanticOverrides = {
   defaultLight: {
     text: {
       heading: primitiveOverrides.defaultLight.special.gradient,
-      artistCoin: primitiveOverrides.defaultLight.special.coinGradient
+      fanClub: primitiveOverrides.defaultLight.special.coinGradient
     },
     icon: {
       heading: primitiveOverrides.defaultLight.special.gradient,
-      artistCoin: primitiveOverrides.defaultLight.special.coinGradient
+      fanClub: primitiveOverrides.defaultLight.special.coinGradient
     }
   },
   defaultDark: {
     text: {
       heading: primitiveOverrides.defaultDark.special.gradient,
-      artistCoin: primitiveOverrides.defaultDark.special.coinGradient
+      fanClub: primitiveOverrides.defaultDark.special.coinGradient
     },
     icon: {
       heading: primitiveOverrides.defaultDark.special.gradient,
-      artistCoin: primitiveOverrides.defaultDark.special.coinGradient
+      fanClub: primitiveOverrides.defaultDark.special.coinGradient
     }
   },
   day: {
     text: {
       heading: primitiveOverrides.day.special.gradient,
-      artistCoin: primitiveOverrides.day.special.coinGradient
+      fanClub: primitiveOverrides.day.special.coinGradient
     },
     icon: {
       heading: primitiveOverrides.day.special.gradient,
-      artistCoin: primitiveOverrides.day.special.coinGradient
+      fanClub: primitiveOverrides.day.special.coinGradient
     }
   },
   dark: {
     text: {
       heading: primitiveOverrides.dark.special.gradient,
-      artistCoin: primitiveOverrides.dark.special.coinGradient
+      fanClub: primitiveOverrides.dark.special.coinGradient
     },
     icon: {
       heading: primitiveOverrides.dark.special.gradient,
-      artistCoin: primitiveOverrides.dark.special.coinGradient
+      fanClub: primitiveOverrides.dark.special.coinGradient
     }
   },
   matrix: {
     text: {
       heading: primitiveOverrides.matrix.special.gradient,
-      artistCoin: primitiveOverrides.matrix.special.coinGradient
+      fanClub: primitiveOverrides.matrix.special.coinGradient
     },
     icon: {
       heading: primitiveOverrides.matrix.special.gradient,
-      artistCoin: primitiveOverrides.matrix.special.coinGradient
+      fanClub: primitiveOverrides.matrix.special.coinGradient
     }
   }
 }

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCreatedCoin } from '@audius/common/api'
+import { useArtistCreatedFanClub } from '@audius/common/api'
 import { css } from '@emotion/native'
 import { TouchableOpacity } from 'react-native'
 
@@ -10,7 +10,7 @@ import { env } from 'app/services/env'
 import { zIndex } from 'app/utils/zIndex'
 
 const messages = {
-  artistCoinBadge: 'Artist coin badge'
+  fanClubBadge: 'Fan club badge'
 }
 
 export type ArtistProfilePictureProps = {
@@ -20,9 +20,9 @@ export type ArtistProfilePictureProps = {
 export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   const navigation = useNavigation()
 
-  const { data: ownedCoin } = useArtistCreatedCoin(userId)
+  const { data: ownedCoin } = useArtistCreatedFanClub(userId)
 
-  const shouldShowArtistCoinBadge =
+  const shouldShowFanClubBadge =
     !!ownedCoin?.mint &&
     !!ownedCoin?.logoUri &&
     ownedCoin.mint !== env.WAUDIO_MINT_ADDRESS
@@ -38,10 +38,10 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
   return (
     <>
       <ProfilePicture userId={userId} size='xl' />
-      {shouldShowArtistCoinBadge && (
+      {shouldShowFanClubBadge && (
         <TouchableOpacity
           onPress={handleCoinPress}
-          accessibilityLabel={messages.artistCoinBadge}
+          accessibilityLabel={messages.fanClubBadge}
           style={css({
             position: 'absolute',
             bottom: 0,

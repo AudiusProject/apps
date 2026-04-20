@@ -117,7 +117,7 @@ export const coinDetailsMessages = {
         'The amount of unlocked coins you can claim right now. This increases daily over the 5-year vesting period.'
     }
   },
-  artistCoinDetails: {
+  fanClubDetails: {
     title: 'Fan Club Details',
     details: 'Details',
     coinAddress: 'Coin Address',

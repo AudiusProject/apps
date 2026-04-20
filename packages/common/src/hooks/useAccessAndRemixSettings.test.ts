@@ -15,7 +15,7 @@ vi.mock('react-redux', () => {
 vi.mock('~/api/', () => ({
   useCurrentUserId: () => ({ data: 123 }),
   useHasNoTokens: () => ({ data: false }),
-  useArtistCreatedCoin: () => ({
+  useArtistCreatedFanClub: () => ({
     data: [
       {
         name: 'dank coin',
@@ -31,7 +31,7 @@ vi.mock('~/api/', () => ({
     ],
     isLoading: false
   }),
-  useArtistCoins: () => ({
+  useFanClubs: () => ({
     data: [
       {
         name: 'dank coin',

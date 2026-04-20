@@ -8,8 +8,8 @@ import {
 } from 'react'
 
 import {
-  useArtistCoinByTicker,
-  useUpdateArtistCoin,
+  useFanClubByTicker,
+  useUpdateFanClub,
   useCurrentUserId,
   useCurrentAccountUser
 } from '@audius/common/api'
@@ -53,7 +53,7 @@ import {
   resizeImage
 } from 'utils/imageProcessingUtil'
 
-import { MAX_IMAGE_SIZE } from '../artist-coins-launchpad-page/constants'
+import { MAX_IMAGE_SIZE } from '../fan-clubs-launchpad-page/constants'
 
 // Local scroll context for the coin details form
 const EditFormScrollContext = createContext(() => {})
@@ -276,7 +276,7 @@ export const EditCoinDetailsPage = () => {
     isPending,
     isSuccess,
     isError
-  } = useArtistCoinByTicker({ ticker: ticker ?? '' })
+  } = useFanClubByTicker({ ticker: ticker ?? '' })
 
   const { image: defaultBannerImageUrl } = useCoverPhoto({
     userId: currentUser?.user_id,
@@ -290,7 +290,7 @@ export const EditCoinDetailsPage = () => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const updateCoinMutation = useUpdateArtistCoin()
+  const updateCoinMutation = useUpdateFanClub()
 
   const bannerFileInputRef = useRef<HTMLInputElement>(null)
   const [bannerImageFile, setBannerImageFile] = useState<File | null>(null)

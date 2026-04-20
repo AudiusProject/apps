@@ -311,7 +311,7 @@ export const showRequiresAccountToast = (isAccountIncomplete?: boolean) =>
   toastActions.toast({
     content: isAccountIncomplete
       ? 'Finish setting up your account to continue'
-      : 'Oops, it looks like you need an account to do that!'
+      : 'You need an account to do that!'
   })
 
 /**

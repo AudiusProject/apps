@@ -7,7 +7,7 @@ import {
   useTheme,
   ColorTheme,
   Box,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 
 import Rectangle from 'assets/img/dogEarRectangle.svg'
@@ -28,7 +28,7 @@ const getIcon = (type: DogEarType) => {
     case DogEarType.USDC_EXTRAS:
       return IconReceive
     case DogEarType.TOKEN_GATED:
-      return IconArtistCoin
+      return IconFanClub
     case DogEarType.FOLLOW_GATED:
     default:
       return IconUserFollowing

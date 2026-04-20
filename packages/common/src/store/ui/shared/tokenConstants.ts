@@ -46,7 +46,7 @@ export const AUDIO_MINT = '9LzCMqDgTKYz9Drzqnpgee3SGa89up3a247ypMj2xrqM'
 export const SOL_MINT = 'So11111111111111111111111111111111111111112'
 export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
-export const NON_ARTIST_COIN_MINTS = [AUDIO_MINT, SOL_MINT, USDC_MINT]
+export const NON_FAN_CLUB_MINTS = [AUDIO_MINT, SOL_MINT, USDC_MINT]
 
 /**
  * Legacy token listing map with hardcoded addresses for backward compatibility

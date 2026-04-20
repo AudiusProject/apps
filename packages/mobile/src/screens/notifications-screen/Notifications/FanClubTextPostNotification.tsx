@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { useUser } from '@audius/common/api'
 import type { FanClubTextPostNotification as FanClubTextPostNotificationType } from '@audius/common/store'
 
-import { Flex, IconArtistCoin } from '@audius/harmony-native'
+import { Flex, IconFanClub } from '@audius/harmony-native'
 import { TokenIcon } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
 
@@ -33,9 +33,9 @@ export const FanClubTextPostNotification = (
   const { data: user } = useUser(entityUserId)
 
   const handlePress = useCallback(() => {
-    if (user?.artist_coin_badge?.ticker) {
+    if (user?.fan_club_badge?.ticker) {
       navigation.push('CoinDetailsScreen', {
-        ticker: user.artist_coin_badge.ticker
+        ticker: user.fan_club_badge.ticker
       })
     }
   }, [user, navigation])
@@ -44,14 +44,14 @@ export const FanClubTextPostNotification = (
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
-      <NotificationHeader icon={IconArtistCoin}>
+      <NotificationHeader icon={IconFanClub}>
         <Flex row alignItems='center' style={{ paddingRight: 8 }}>
           <NotificationProfilePicture
             profile={user}
             style={{ marginRight: -8, zIndex: 1 }}
           />
-          {user.artist_coin_badge?.logo_uri ? (
-            <TokenIcon logoURI={user.artist_coin_badge.logo_uri} size={40} />
+          {user.fan_club_badge?.logo_uri ? (
+            <TokenIcon logoURI={user.fan_club_badge.logo_uri} size={40} />
           ) : null}
         </Flex>
       </NotificationHeader>

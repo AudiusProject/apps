@@ -97,7 +97,7 @@ export { default as searchUsersModalSagas } from './search-users-modal/sagas'
 export * from './buy-sell'
 export {
   TOKEN_LISTING_MAP,
-  NON_ARTIST_COIN_MINTS,
+  NON_FAN_CLUB_MINTS,
   AUDIO_MINT,
   SOL_MINT,
   USDC_MINT

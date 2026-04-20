@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCoinByTicker,
-  useUpdateArtistCoin,
+  useFanClubByTicker,
+  useUpdateFanClub,
   useCurrentUserId,
   useCurrentAccountUser
 } from '@audius/common/api'
@@ -255,7 +255,7 @@ export const EditCoinDetailsScreen = () => {
     isPending,
     isSuccess,
     isError
-  } = useArtistCoinByTicker({ ticker })
+  } = useFanClubByTicker({ ticker })
 
   const { source: defaultBannerImageSource } = useCoverPhoto({
     userId: currentUser?.user_id,
@@ -268,7 +268,7 @@ export const EditCoinDetailsScreen = () => {
       ? defaultBannerImageSource.uri
       : null
 
-  const updateCoinMutation = useUpdateArtistCoin()
+  const updateCoinMutation = useUpdateFanClub()
 
   const [bannerImageFile, setBannerImageFile] = useState<Image | null>(null)
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)

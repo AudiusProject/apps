@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { useBuySellModal } from '@audius/common/store'
 import {
   Button,
   Flex,
-  IconArtistCoin,
+  IconFanClub,
   IconLock,
   Modal,
   ModalContent,
@@ -31,7 +31,7 @@ export const LockedTextPostModal = ({
   onClose,
   mint
 }: LockedTextPostModalProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { onOpen: openBuySellModal } = useBuySellModal()
 
   const handleBuyCoins = useCallback(() => {
@@ -62,7 +62,7 @@ export const LockedTextPostModal = ({
             variant='primary'
             color='coinGradient'
             onClick={handleBuyCoins}
-            iconLeft={IconArtistCoin}
+            iconLeft={IconFanClub}
             fullWidth
           >
             {messages.buyCoins}

@@ -1,9 +1,6 @@
 import { useCallback, useContext } from 'react'
 
-import {
-  transformArtistCoinToTokenInfo,
-  useArtistCoin
-} from '@audius/common/api'
+import { transformFanClubToTokenInfo, useFanClub } from '@audius/common/api'
 import {
   useFormattedCoinBalance,
   useUserbank,
@@ -40,7 +37,7 @@ export const ReceiveTokensModal = () => {
   const { isMobile } = useMedia()
   const { isOpen, onClose, data } = useReceiveTokensModal()
   const { mint } = data ?? {}
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { coinBalanceFormatted: balance } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
@@ -50,7 +47,7 @@ export const ReceiveTokensModal = () => {
   const { userBankAddress, loading: userBankLoading } = useUserbank(mint)
   const { rootWalletAddress, loading: rootWalletLoading } =
     useRootWalletAddress()
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Use root wallet address for USDC, user bank for others
   const isUsdc = mint === env.USDC_MINT_ADDRESS
@@ -101,7 +98,7 @@ export const ReceiveTokensModal = () => {
       icon={IconError}
       actions={
         <ExternalTextLink
-          to={route.AUDIUS_ARTIST_COINS_HELP_LINK}
+          to={route.AUDIUS_FAN_CLUBS_HELP_LINK}
           variant='visible'
           showUnderline
         >

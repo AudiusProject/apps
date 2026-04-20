@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useFormik } from 'formik'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { useArtistCoin } from '~/api'
+import { useFanClub } from '~/api'
 
 import { useCoinData } from './hooks/useCoinData'
 import { useSwapCalculations } from './hooks/useSwapCalculations'
@@ -81,7 +81,7 @@ export const useCoinSwapForm = ({
   externalWalletAddress
 }: CoinSwapFormProps) => {
   // Get token price for USD-based limit calculations
-  const { data: tokenPriceData } = useArtistCoin(inputCoin.address)
+  const { data: tokenPriceData } = useFanClub(inputCoin.address)
   const tokenPrice = tokenPriceData?.price ? Number(tokenPriceData.price) : null
 
   // Calculate min/max based on USD limits and current price

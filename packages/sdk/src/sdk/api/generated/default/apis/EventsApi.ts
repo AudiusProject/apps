@@ -48,6 +48,12 @@ export interface GetEntityEventsRequest {
     filterDeleted?: boolean;
 }
 
+export interface GetRemixContestsRequest {
+    offset?: number;
+    limit?: number;
+    status?: GetRemixContestsStatusEnum;
+}
+
 /**
  * 
  */
@@ -221,6 +227,54 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Get remix contest events ordered with currently-active contests first (by soonest-ending), followed by ended contests (most-recently-ended first). Active contests are those whose end_date is null or in the future.
+     * Get all remix contests
+     */
+    async getRemixContestsRaw(params: GetRemixContestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventsResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.status !== undefined) {
+            queryParameters['status'] = params.status;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/events/remix-contests`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => EventsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get remix contest events ordered with currently-active contests first (by soonest-ending), followed by ended contests (most-recently-ended first). Active contests are those whose end_date is null or in the future.
+     * Get all remix contests
+     */
+    async getRemixContests(params: GetRemixContestsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventsResponse> {
+        const response = await this.getRemixContestsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets an unclaimed blockchain event ID
      */
     async getUnclaimedEventIDRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UnclaimedIdResponse>> {
@@ -283,3 +337,12 @@ export const GetEntityEventsEntityTypeEnum = {
     User: 'user'
 } as const;
 export type GetEntityEventsEntityTypeEnum = typeof GetEntityEventsEntityTypeEnum[keyof typeof GetEntityEventsEntityTypeEnum];
+/**
+ * @export
+ */
+export const GetRemixContestsStatusEnum = {
+    Active: 'active',
+    Ended: 'ended',
+    All: 'all'
+} as const;
+export type GetRemixContestsStatusEnum = typeof GetRemixContestsStatusEnum[keyof typeof GetRemixContestsStatusEnum];

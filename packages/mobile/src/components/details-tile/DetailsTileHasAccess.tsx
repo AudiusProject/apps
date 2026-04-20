@@ -17,7 +17,7 @@ import {
   Flex,
   Text as HarmonyText,
   HexagonalIcon,
-  IconArtistCoin,
+  IconFanClub,
   IconCart,
   IconUserFollowing
 } from '@audius/harmony-native'
@@ -32,7 +32,7 @@ const messages = {
   followersOnly: 'FOLLOWERS ONLY',
   payToUnlock: 'Pay to Unlock',
   coinGated: 'COIN GATED',
-  artistCoin: "This artist's coin",
+  fanClub: "This artist's coin",
   unlockedTokenGatedSuffix: (contentType: PurchaseableContentType) =>
     ` was found in a linked wallet. This ${contentType} is now available.`,
   ownerTokenGated:
@@ -130,7 +130,7 @@ const DetailsTileOwnerSection = ({
         borderRadius='m'
       >
         <Flex row alignItems='center' gap='s'>
-          <IconArtistCoin fill={neutral} width={16} height={16} />
+          <IconFanClub fill={neutral} width={16} height={16} />
           <HarmonyText variant='title' size='m' strength='strong'>
             {messages.coinGated}
           </HarmonyText>
@@ -269,7 +269,7 @@ export const DetailsTileHasAccess = ({
               style={[styles.description, styles.name]}
               onPress={handleTokenPress}
             >
-              {token?.ticker ? `$${token.ticker}` : messages.artistCoin}
+              {token?.ticker ? `$${token.ticker}` : messages.fanClub}
             </Text>
             <Text style={styles.description}>
               {messages.unlockedTokenGatedSuffix(contentType)}

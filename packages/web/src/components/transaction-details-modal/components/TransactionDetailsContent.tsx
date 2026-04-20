@@ -41,6 +41,7 @@ const messages = {
   trendingRewardDescription: 'Trending Competition Award',
   challengeRewardHeader: 'Challenge Completed',
   challengeRewardDescription: '$AUDIO Reward Earned',
+  tipDescription: 'Tip',
   transferDescription: '$AUDIO ',
   transferSentHeader: 'Destination Wallet',
   transferReceivedHeader: 'Origin Wallet',
@@ -50,6 +51,7 @@ const messages = {
 const transactionDescriptions: Record<TransactionType, string> = {
   [TransactionType.PURCHASE]: messages.purchaseDescription,
   [TransactionType.TRANSFER]: messages.transferDescription,
+  [TransactionType.TIP]: messages.tipDescription,
   [TransactionType.TRENDING_REWARD]: messages.trendingRewardDescription,
   [TransactionType.CHALLENGE_REWARD]: messages.challengeRewardDescription
 }
@@ -124,6 +126,15 @@ const dateAndMetadataBlocks = ({
         </>
       )
     }
+    case TransactionType.TIP: {
+      return (
+        <>
+          <Block header={messages.dateTransaction}>
+            {transactionDetails.date}
+          </Block>
+        </>
+      )
+    }
     default:
       return <></>
   }
@@ -164,7 +175,9 @@ export const TransactionDetailsContent = ({
           <div className={styles.flexHorizontal}>
             <Block header={messages.transaction}>
               {transactionDescriptions[transactionDetails.transactionType] +
-                (transactionDetails.transactionType === TransactionType.TRANSFER
+                (transactionDetails.transactionType ===
+                  TransactionType.TRANSFER ||
+                transactionDetails.transactionType === TransactionType.TIP
                   ? formatCapitalizeString(transactionDetails.method)
                   : '')}
             </Block>
