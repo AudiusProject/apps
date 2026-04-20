@@ -21,31 +21,23 @@
   text-align: center;
 }
 
-.title.mobile {
-  font-size: 30px;
-}
-
 .subtitle {
+  display: block;
   font-size: 20px;
   line-height: 35.2px;
   font-weight: 600;
   text-align: center;
-}
-
-.subtitle.mobile {
-  font-size: var(--harmony-font-xs);
-  line-height: 19px;
-  padding: 0px 10px;
+  width: 100%;
 }
 
 .titleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 70px;
   max-width: 840px;
   padding: 0 28px;
-}
-
-.titleContainer.mobile {
-  margin-bottom: 48px;
+  text-align: center;
 }
 
 .tierNumberText {
@@ -61,17 +53,8 @@
   margin: 48px 0px;
 }
 
-.buttonContainer.mobile {
-  flex-direction: column;
-  margin-top: 24px;
-}
-
-.buttonContainer:not(.mobile) > *:first-child {
+.buttonContainer > *:first-child {
   margin-right: 16px;
-}
-
-.buttonContainer.mobile > *:first-child {
-  margin-bottom: 16px;
 }
 
 .tierLevel {
@@ -79,4 +62,24 @@
   font-weight: 700;
   font-size: 14px;
   line-height: 17px;
+}
+
+@media (max-width: 980px) {
+  .subtitle {
+    padding: 0px 10px;
+  }
+
+  .titleContainer {
+    margin-bottom: 48px;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    margin-top: 24px;
+  }
+
+  .buttonContainer > *:first-child {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
 }
