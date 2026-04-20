@@ -129,13 +129,7 @@ export const ProfileHeaderSkeleton = () => {
       <Skeleton style={[styles.profilePicture, { top: insets.top + 48 }]} />
       {/* Matches the real ProfileHeader structure so the skeleton→content
       transition doesn't cause layout shift. */}
-      <Flex
-        column
-        pv='s'
-        ph='m'
-        backgroundColor='white'
-        style={{ gap: 9 }}
-      >
+      <Flex column pv='s' ph='m' backgroundColor='white' style={{ gap: 9 }}>
         <Flex column pv='s' gap='s'>
           <Flex row justifyContent='flex-end' gap='xs'>
             <StaticSkeleton height={32} width={32} />
