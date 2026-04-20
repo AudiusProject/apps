@@ -273,10 +273,35 @@ export const uploadTrackCommand = new Command('upload')
       audiusSdk
     })
 
-    const metadata = await audiusSdk.tracks.uploadTrack({
+    const parsedPreviewStartSeconds = previewStartSeconds
+      ? Number(previewStartSeconds)
+      : undefined
+
+    const uploadTask = audiusSdk.tracks.uploadTrackFiles({
+      audioFile: {
+        buffer: await readStreamToBuffer(trackStream),
+        name: 'track.mp3',
+        type: 'audio/mpeg'
+      },
+      imageFile: {
+        buffer: createRandomImage(),
+        name: 'coverart.bmp',
+        type: 'image/bmp'
+      },
+      fileMetadata:
+        parsedPreviewStartSeconds !== undefined
+          ? { previewStartSeconds: parsedPreviewStartSeconds }
+          : undefined
+    })
+    const { audioUploadResponse, imageUploadResponse } =
+      await uploadTask.start()
+
+    if (!audioUploadResponse || !imageUploadResponse) {
+      throw new Error('Track or cover art upload failed')
+    }
+
+    const metadata = await audiusSdk.tracks.publishTrack({
       userId,
-      coverArtFile: { buffer: createRandomImage(), name: 'coverart' },
-      trackFile: { buffer: await readStreamToBuffer(trackStream) },
       metadata: {
         title,
         description,
@@ -288,11 +313,13 @@ export const uploadTrackCommand = new Command('upload')
         downloadConditions: parsedDownloadConditions,
         streamConditions: parsedStreamConditions,
         tags: tags?.join(','),
-        previewStartSeconds,
+        previewStartSeconds: parsedPreviewStartSeconds,
         isDownloadable,
         remixOf: remixOf ? { tracks: [{ parentTrackId: remixOf }] } : undefined,
         isUnlisted
-      }
+      },
+      audioUploadResponse,
+      imageUploadResponse
     })
     const { trackId } = metadata
 
