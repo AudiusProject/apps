@@ -7,7 +7,9 @@
   width: 85%;
   max-width: 360px;
   background: var(--harmony-white);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08), 0 0 4px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 0 4px rgba(0, 0, 0, 0.04);
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left: env(safe-area-inset-left, 0px);

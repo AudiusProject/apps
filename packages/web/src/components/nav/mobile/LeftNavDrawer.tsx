@@ -1,9 +1,6 @@
 import { MouseEvent, ReactNode, useCallback, useContext } from 'react'
 
-import {
-  useCurrentAccountUser,
-  useCurrentUserId
-} from '@audius/common/api'
+import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
 import { formatCount, route } from '@audius/common/utils'
 import {
   Divider,
@@ -94,8 +91,8 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
   const dispatch = useDispatch()
   const { setStackReset } = useContext(RouterContext)
 
-  const { data: _realUserId } = useCurrentUserId()
-  const { data: _realAccountUser } = useCurrentAccountUser({
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: accountUser } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
       name: user?.name,
@@ -103,17 +100,13 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
       followeeCount: user?.followee_count ?? 0
     })
   })
-  // TEMP preview stub for signed-out verification
-  const currentUserId = _realUserId ?? 3405
-  const accountUser = _realAccountUser ?? {
-    handle: 'skrillex',
-    name: 'Skrillex',
-    followerCount: 12345,
-    followeeCount: 42
-  }
 
-  const { handle, name, followerCount = 0, followeeCount = 0 } =
-    accountUser ?? {}
+  const {
+    handle,
+    name,
+    followerCount = 0,
+    followeeCount = 0
+  } = accountUser ?? {}
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -173,12 +166,7 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
                 <Flex direction='column' gap='2xs' alignItems='flex-start'>
                   <Flex alignItems='center' gap='xs'>
                     {name ? (
-                      <Text
-                        variant='title'
-                        size='l'
-                        strength='strong'
-                        ellipses
-                      >
+                      <Text variant='title' size='l' strength='strong' ellipses>
                         {name}
                       </Text>
                     ) : null}
