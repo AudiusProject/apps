@@ -94,7 +94,10 @@ export class CommentsApi extends GeneratedCommentsApi {
       throw new UninitializedEntityManagerError()
     }
     const data: Record<string, unknown> = {
-      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      entity_type:
+        entityType === 'FanClub' || entityType === 'Event'
+          ? entityType
+          : 'Track',
       body,
       entity_id: entityId
     }
@@ -187,7 +190,10 @@ export class CommentsApi extends GeneratedCommentsApi {
       throw new UninitializedEntityManagerError()
     }
     const data: Record<string, unknown> = {
-      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      entity_type:
+        entityType === 'FanClub' || entityType === 'Event'
+          ? entityType
+          : 'Track',
       body,
       entity_id: trackId
     }
@@ -293,7 +299,10 @@ export class CommentsApi extends GeneratedCommentsApi {
       throw new UninitializedEntityManagerError()
     }
     const data: Record<string, unknown> = {
-      entity_type: entityType === 'FanClub' ? 'FanClub' : 'Track',
+      entity_type:
+        entityType === 'FanClub' || entityType === 'Event'
+          ? entityType
+          : 'Track',
       entity_id: trackId
     }
     return await this.entityManager.manageEntity({
