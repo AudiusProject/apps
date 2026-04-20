@@ -6,7 +6,7 @@ import { useSsrContext } from 'ssr/SsrContext'
  * This supports SSR by pulling the value from SsrContext
  */
 export const useIsMobile = () => {
-  const { isMobile: _isMobile } = useSsrContext()
+  const { isMobile: isMobileIgnored } = useSsrContext()
   // TEMP preview override
   return true
 }

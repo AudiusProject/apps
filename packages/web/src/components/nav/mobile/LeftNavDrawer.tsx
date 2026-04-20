@@ -1,9 +1,6 @@
 import { MouseEvent, ReactNode, useCallback, useContext } from 'react'
 
-import {
-  useCurrentAccountUser,
-  useCurrentUserId
-} from '@audius/common/api'
+import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
 import { formatCount, route } from '@audius/common/utils'
 import {
   Divider,
@@ -112,8 +109,12 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
     followeeCount: 42
   }
 
-  const { handle, name, followerCount = 0, followeeCount = 0 } =
-    accountUser ?? {}
+  const {
+    handle,
+    name,
+    followerCount = 0,
+    followeeCount = 0
+  } = accountUser ?? {}
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -173,12 +174,7 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
                 <Flex direction='column' gap='2xs' alignItems='flex-start'>
                   <Flex alignItems='center' gap='xs'>
                     {name ? (
-                      <Text
-                        variant='title'
-                        size='l'
-                        strength='strong'
-                        ellipses
-                      >
+                      <Text variant='title' size='l' strength='strong' ellipses>
                         {name}
                       </Text>
                     ) : null}
