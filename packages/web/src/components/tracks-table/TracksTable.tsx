@@ -1,4 +1,11 @@
-import { memo, MouseEvent, useCallback, useMemo, useRef } from 'react'
+import {
+  ReactNode,
+  memo,
+  MouseEvent,
+  useCallback,
+  useMemo,
+  useRef
+} from 'react'
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import {
@@ -149,6 +156,7 @@ type TracksTableProps = {
   columns?: TracksTableColumn[]
   showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
+  trackActionsHeader?: ReactNode
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
 const defaultColumns: TracksTableColumn[] = [
@@ -177,6 +185,7 @@ export const TracksTable = ({
   columns = defaultColumns,
   data,
   activeIndex,
+  trackActionsHeader,
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
@@ -864,12 +873,16 @@ export const TracksTable = ({
       },
       overflowActions: {
         id: 'trackActions',
+        Header: trackActionsHeader ? (
+          <div className={styles.trackActionsHeader}>{trackActionsHeader}</div>
+        ) : null,
         Cell: renderTrackActions,
         minWidth: COLUMN_WIDTHS.trackActions,
         maxWidth: COLUMN_WIDTHS.trackActions,
         width: COLUMN_WIDTHS.trackActions,
         disableResizing: true,
-        disableSortBy: true
+        disableSortBy: true,
+        align: 'right'
       },
       overflowMenu: {
         id: 'overflowMenu',
@@ -939,6 +952,7 @@ export const TracksTable = ({
       renderSavesCell,
       renderCommentsCell,
       renderTrackActions,
+      trackActionsHeader,
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,

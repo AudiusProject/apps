@@ -7,9 +7,18 @@
   justify-content: left;
 }
 
-.filterContainer {
-  transition: all 0.5s;
-  padding-bottom: var(--harmony-unit-5);
+.tableHeaderFilterContainer {
+  width: calc(100% - 8px);
+  max-width: 100%;
+  margin-left: 8px;
+}
+
+.tableHeaderFilterContainer > div {
+  width: 100%;
+}
+
+.tableHeaderFilterContainer > div > div {
+  width: 100%;
 }
 
 /* Body Content Wrapper */
@@ -84,6 +93,6 @@
 
 .headerBottomBarContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: end;
 }
