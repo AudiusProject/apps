@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { UserCoinAccount } from './UserCoinAccount';
+import {
+    UserCoinAccountFromJSON,
+    UserCoinAccountFromJSONTyped,
+    UserCoinAccountToJSON,
+} from './UserCoinAccount';
+
 /**
  * 
  * @export
@@ -73,6 +80,12 @@ export interface UserCoin {
      * @memberof UserCoin
      */
     balanceUsd: number;
+    /**
+     * Per-token-account breakdown of the user's holdings for this coin. Populated by GET /v1/users/{id}/coins; omitted by GET /v1/wallet/{walletId}/coins.
+     * @type {Array<UserCoinAccount>}
+     * @memberof UserCoin
+     */
+    accounts?: Array<UserCoinAccount>;
 }
 
 /**
@@ -110,6 +123,7 @@ export function UserCoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'hasDiscord': json['has_discord'],
         'balance': json['balance'],
         'balanceUsd': json['balance_usd'],
+        'accounts': !exists(json, 'accounts') ? undefined : ((json['accounts'] as Array<any>).map(UserCoinAccountFromJSON)),
     };
 }
 
@@ -131,6 +145,7 @@ export function UserCoinToJSON(value?: UserCoin | null): any {
         'has_discord': value.hasDiscord,
         'balance': value.balance,
         'balance_usd': value.balanceUsd,
+        'accounts': value.accounts === undefined ? undefined : ((value.accounts as Array<any>).map(UserCoinAccountToJSON)),
     };
 }
 
