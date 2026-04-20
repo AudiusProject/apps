@@ -36,9 +36,9 @@ export const useUserCoins = <TResult = UserCoin[]>(
       })
       if (response.data) {
         const coins = userCoinListFromSDK(response.data)
-        // Prime per-mint caches so CoinCardWithBalance rows don't each fetch
-        // their own aggregate. Activates once the plural endpoint returns
-        // `accounts[]`; until then this loop is a no-op.
+        // Prime per-mint caches so consumers of useUserCoin (e.g. wallet-page
+        // rows) read from this bulk response instead of each firing their own
+        // request.
         coins.forEach((coin) => {
           if (!coin.accounts) return
           queryClient.setQueryData(

@@ -1,8 +1,7 @@
 import {
   HashId,
   type Coin as CoinSDK,
-  type UserCoin as UserCoinSdk,
-  type UserCoinAccount
+  type UserCoin as UserCoinSdk
 } from '@audius/sdk'
 
 import { ID } from '~/models'
@@ -27,7 +26,6 @@ export type Coin = Omit<CoinSDK, 'ownerId'> & {
 // Define a UserCoin model with ownerId converted to number
 export type UserCoin = Omit<UserCoinSdk, 'ownerId'> & {
   ownerId: ID
-  accounts?: UserCoinAccount[]
 }
 
 /**
@@ -108,13 +106,9 @@ export const userCoinFromSdk = (input: UserCoinSdk): UserCoin | undefined => {
   }
 
   const { ownerId: _ignored, ...rest } = input
-  // Forward accounts when present (optional on the plural endpoint).
-  const accounts = (input as UserCoinSdk & { accounts?: UserCoinAccount[] })
-    .accounts
   return {
     ...rest,
-    ownerId: decodedOwnerId,
-    ...(accounts ? { accounts } : {})
+    ownerId: decodedOwnerId
   }
 }
 
