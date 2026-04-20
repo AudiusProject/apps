@@ -3,8 +3,8 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import {
   useArtistCreatedFanClub,
   useCurrentUserId,
-  useUserComments,
-  useProfileUser
+  useUserByParams,
+  useUserComments
 } from '@audius/common/api'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
@@ -14,6 +14,7 @@ import { useToggle } from 'react-use'
 
 import { Box, Divider, Flex, useTheme } from '@audius/harmony-native'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
+import { useRoute } from 'app/hooks/useRoute'
 import { zIndex } from 'app/utils/zIndex'
 
 import { ArtistRecommendations } from '../ArtistRecommendations'
@@ -37,15 +38,12 @@ export const ProfileHeader = memo(() => {
   const [isExpanded, setIsExpanded] = useToggle(false)
   const [isExpandable, setIsExpandable] = useState(false)
 
-  const {
-    user_id: userId,
-    does_current_user_follow: doesCurrentUserFollow,
-    current_user_followee_follow_count: currentUserFolloweeFollowCount,
-    website,
-    twitter_handle: twitterHandle,
-    instagram_handle: instagramHandle,
-    tiktok_handle: tikTokHandle
-  } = useProfileUser({
+  // Read from the route-params cache directly so user data is available on
+  // the first render. `useProfileUser` depends on Redux state set in a
+  // focus effect, which races with the component's initial render and
+  // otherwise caused the avatar and follow-state-derived UI to pop in.
+  const { params } = useRoute<'Profile'>()
+  const { data: paramsUser } = useUserByParams(params, {
     select: (user) => ({
       user_id: user.user_id,
       does_current_user_follow: user.does_current_user_follow,
@@ -56,7 +54,17 @@ export const ProfileHeader = memo(() => {
       instagram_handle: user.instagram_handle,
       tiktok_handle: user.tiktok_handle
     })
-  }).user ?? {}
+  })
+
+  const {
+    user_id: userId,
+    does_current_user_follow: doesCurrentUserFollow,
+    current_user_followee_follow_count: currentUserFolloweeFollowCount,
+    website,
+    twitter_handle: twitterHandle,
+    instagram_handle: instagramHandle,
+    tiktok_handle: tikTokHandle
+  } = paramsUser ?? {}
 
   const { data: comments } = useUserComments({
     userId: userId || 0,
