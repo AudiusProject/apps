@@ -6,6 +6,8 @@ import {
   useFollowEvent,
   useRemixContest,
   useRemixesLineup,
+  useStems,
+  useTrack,
   useTrackByPermalink,
   useUnfollowEvent,
   useUser
@@ -30,6 +32,7 @@ import {
   Flex,
   IconUserFollow,
   IconUserFollowing,
+  Paper,
   SelectablePill,
   Text
 } from '@audius/harmony'
@@ -39,6 +42,7 @@ import { Navigate, useParams } from 'react-router'
 import { Avatar } from 'components/avatar/Avatar'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
+import { DownloadSection } from 'components/track/DownloadSection'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
@@ -74,6 +78,8 @@ export const CONTEST_PAGE_SIZE = 10
 
 const HERO_HEIGHT = 288
 const MAX_CONTENT_WIDTH = 1080
+const RIGHT_COLUMN_WIDTH_PX = 400
+const COLUMN_GAP_PX = 24
 
 type ContestTab = 'details' | 'submissions'
 
@@ -193,6 +199,18 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
+
+  // Only render the Stems & Downloads panel when the track actually has
+  // downloadable content. The DownloadSection component assumes a
+  // downloadable track and its internal useFileSizes query throws for
+  // non-downloadable tracks, blowing up the whole page via the error
+  // boundary.
+  const { data: downloadableFlag } = useTrack(trackId, {
+    select: (t) => t?.is_downloadable
+  })
+  const { data: trackStems } = useStems(trackId)
+  const hasDownloads =
+    !!downloadableFlag || (!!trackStems && trackStems.length > 0)
 
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
 
@@ -405,29 +423,74 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           pb='2xl'
         >
           {activeTab === 'details' ? (
-            <Flex direction='column' gap='2xl' pv='l'>
-              <Flex direction='column' gap='l'>
-                <Text variant='heading' size='s'>
-                  {messages.details}
-                </Text>
-                <RemixContestDetailsTab trackId={trackId!} />
+            <Flex
+              gap={`${COLUMN_GAP_PX}px` as any}
+              alignItems='flex-start'
+              pv='l'
+            >
+              {/* Left column: About + Prizes */}
+              <Flex
+                direction='column'
+                gap='2xl'
+                css={{ flex: '1 1 auto', minWidth: 0 }}
+              >
+                <Flex direction='column' gap='l'>
+                  <Text variant='heading' size='s'>
+                    {messages.details}
+                  </Text>
+                  <RemixContestDetailsTab trackId={trackId!} />
+                </Flex>
+
+                <Divider />
+
+                <Flex direction='column' gap='l'>
+                  <Text variant='heading' size='s'>
+                    {messages.prizes}
+                  </Text>
+                  <RemixContestPrizesTab trackId={trackId!} />
+                </Flex>
               </Flex>
 
-              <Divider />
+              {/* Right column: Stems & Downloads / Followers / Comments */}
+              <Flex
+                direction='column'
+                gap='l'
+                css={{
+                  flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
+                  width: RIGHT_COLUMN_WIDTH_PX
+                }}
+              >
+                {/* DownloadSection already renders its own "Stems &
+                    Downloads" title, stems list, expand/collapse, and
+                    access/gating state. Only mount it when the track
+                    is downloadable — the component assumes that and
+                    its useFileSizes query errors otherwise. */}
+                {hasDownloads ? <DownloadSection trackId={trackId!} /> : null}
 
-              <Flex direction='column' gap='l'>
-                <Text variant='heading' size='s'>
-                  {messages.prizes}
-                </Text>
-                <RemixContestPrizesTab trackId={trackId!} />
+                {/* Followers card. Until there's an
+                    /events/:eventId/followers list endpoint, we render
+                    just the count (no avatar stack / leaderboard). */}
+                <Paper
+                  direction='column'
+                  borderRadius='m'
+                  border='default'
+                  css={{ backgroundColor: 'var(--harmony-white)' }}
+                >
+                  <Flex p='l' gap='xs' alignItems='baseline'>
+                    <Text variant='heading' size='s'>
+                      {messages.followers}
+                    </Text>
+                    <Text variant='heading' size='s' color='subdued'>
+                      ({formatCount(followState?.followerCount ?? 0)})
+                    </Text>
+                  </Flex>
+                </Paper>
+
+                <ContestCommentsSection
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                />
               </Flex>
-
-              <Divider />
-
-              <ContestCommentsSection
-                eventId={eventId}
-                eventOwnerUserId={contest?.userId}
-              />
             </Flex>
           ) : (
             <Flex direction='column' gap='l' pv='l'>
