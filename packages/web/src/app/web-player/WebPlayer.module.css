@@ -64,4 +64,7 @@
   overflow-x: visible;
   margin-top: calc(env(safe-area-inset-top, 0px) + 40px);
   margin-bottom: 0;
+  /* Avoid creating a containing block for the fixed mobile Header */
+  transform: none;
+  transition: none;
 }
