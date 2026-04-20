@@ -10,7 +10,6 @@ import {
   FavoriteSource
 } from '@audius/common/models'
 import {
-  themeSelectors,
   usePremiumContentPurchaseModal,
   gatedContentSelectors,
   PurchaseableContentType,
@@ -19,16 +18,16 @@ import {
 import { Flex, Tooltip } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
-import FavoriteButton from 'components/alt-button/FavoriteButton'
-import RepostButton from 'components/alt-button/RepostButton'
+import AnimatedIconButton, {
+  AnimatedIconType
+} from 'components/animated-button/AnimatedIconButton'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { shouldShowDark, useIsMatrix } from 'utils/theme/theme'
+import { useIsMatrix } from 'utils/theme/theme'
 
 import styles from './SocialActions.module.css'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
-const { getTheme } = themeSelectors
 
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 
@@ -72,7 +71,6 @@ export const SocialActions = ({
 
   const { hasStreamAccess } = useGatedContentAccess(track)
 
-  const theme = useSelector(getTheme)
   const matrix = useIsMatrix()
 
   const onToggleRepost = useCallback(
@@ -117,15 +115,19 @@ export const SocialActions = ({
             >
               <Flex>
                 {!isUnlisted ? (
-                  <RepostButton
+                  <AnimatedIconButton
                     aria-label={repostText}
+                    icon={AnimatedIconType.REPOST}
                     onClick={() => onToggleRepost(reposted, trackId)}
                     isActive={reposted}
                     isDisabled={
                       isFavoriteAndRepostDisabled || track?.is_unlisted
                     }
-                    isDarkMode={shouldShowDark(theme)}
-                    isMatrixMode={matrix}
+                    isMatrix={matrix}
+                    className={styles.iconButton}
+                    activeClassName={styles.iconButtonActive}
+                    wrapperClassName={styles.iconButtonRepost}
+                    stopPropagation
                   />
                 ) : null}
               </Flex>
@@ -141,14 +143,18 @@ export const SocialActions = ({
             >
               <Flex>
                 {!isUnlisted ? (
-                  <FavoriteButton
+                  <AnimatedIconButton
+                    aria-label={favoriteText}
+                    icon={AnimatedIconType.FAVORITE}
                     isDisabled={
                       isFavoriteAndRepostDisabled || track?.is_unlisted
                     }
-                    isMatrixMode={matrix}
                     isActive={favorited}
-                    isDarkMode={shouldShowDark(theme)}
                     onClick={onToggleFavorite}
+                    isMatrix={matrix}
+                    className={styles.iconButton}
+                    activeClassName={styles.iconButtonActive}
+                    stopPropagation
                   />
                 ) : null}
               </Flex>

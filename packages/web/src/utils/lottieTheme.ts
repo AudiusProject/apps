@@ -20,6 +20,8 @@ export type LottieThemeColors = {
   gradientStop2: string
   /** Neutral/inactive - for outlines, inactive states (optional, grays often kept) */
   neutral?: string
+  /** Theme white token - can vary by theme (e.g. default-dark) */
+  white?: string
 }
 
 const hexToRgba = (hex: string): [number, number, number, number] => {
@@ -37,7 +39,7 @@ const hexToRgba = (hex: string): [number, number, number, number] => {
  *
  * When palette is null (legacy theme model), legacyTheme is used:
  * - MATRIX → matrix palette
- * - LIGHT/DARK/AUTO → classic palette with appropriate mode
+ * - LIGHT/DARK/AUTO (or null) → default palette with appropriate mode
  */
 export const getLottieThemeColors = (
   palette: ThemePalette | null,
@@ -55,29 +57,30 @@ export const getLottieThemeColors = (
       secondary: m.secondary.default,
       gradientStop1: m.special.gradientStop1,
       gradientStop2: m.special.gradientStop2,
-      neutral: m.neutral.n400
+      neutral: m.neutral.n400,
+      white: m.special.white
     }
   }
-  const useClassic =
-    palette === ThemePalette.CLASSIC || (palette == null && legacyTheme != null)
-  if (useClassic) {
+  if (palette === ThemePalette.CLASSIC) {
     const p = isDark ? primitiveTheme.classicDark : primitiveTheme.classicLight
     return {
       primary: p.primary.default,
       secondary: p.secondary.default,
       gradientStop1: p.special.gradientStop1,
       gradientStop2: p.special.gradientStop2,
-      neutral: p.neutral.n400
+      neutral: p.neutral.n400,
+      white: p.special.white
     }
   }
-  // ThemePalette.DEFAULT or null with no legacy theme
+  // ThemePalette.DEFAULT or null fallback (legacy LIGHT/DARK/AUTO)
   const p = isDark ? primitiveTheme.defaultDark : primitiveTheme.defaultLight
   return {
     primary: p.primary.default,
     secondary: p.secondary.default,
     gradientStop1: p.special.gradientStop1,
     gradientStop2: p.special.gradientStop2,
-    neutral: p.neutral.n400
+    neutral: p.neutral.n400,
+    white: p.special.white
   }
 }
 
@@ -89,6 +92,18 @@ const isGray = (rgba: number[]): boolean => {
   const min = Math.min(r, g, b)
   const saturation = max === 0 ? 0 : (max - min) / max
   return saturation < 0.15
+}
+
+const isNearWhite = (rgba: number[]): boolean => {
+  if (rgba.length < 3) return false
+  const [r, g, b] = rgba
+  return r >= 0.97 && g >= 0.97 && b >= 0.97
+}
+
+const isNearBlack = (rgba: number[]): boolean => {
+  if (rgba.length < 3) return false
+  const [r, g, b] = rgba
+  return r <= 0.03 && g <= 0.03 && b <= 0.03
 }
 
 /** 'accent' = active/on state (primary/gradient), 'neutral' = off state, 'primary' = solid primary for consistency */
@@ -110,6 +125,13 @@ const replaceColorsInValue = (
       value.length === 4 &&
       value.every((x) => typeof x === 'number' && x >= 0 && x <= 1.01)
     ) {
+      // Preserve black details; map white details to theme white token.
+      if (isNearWhite(value as number[]) && colors.white) {
+        return [...hexToRgba(colors.white)]
+      }
+      if (isNearBlack(value as number[])) {
+        return [...(value as number[])]
+      }
       const isGrayColor = isGray(value as number[])
       if (isGrayColor && colors.neutral) {
         return [...hexToRgba(colors.neutral)]
@@ -137,7 +159,10 @@ const replaceColorsInValue = (
         const newC = { ...c }
         if (Array.isArray(c.k) && c.k.length > 0) {
           const first = c.k[0]
-          if (Array.isArray(first) && typeof first[0] === 'number') {
+          if (typeof first === 'number') {
+            // Static color array, e.g. c.k = [r, g, b, a]
+            newC.k = replaceColorsInValue(c.k, colors, ctx, variant)
+          } else if (Array.isArray(first) && typeof first[0] === 'number') {
             newC.k = replaceColorsInValue(c.k, colors, ctx, variant)
           } else if (first && typeof first === 'object' && 's' in first) {
             newC.k = (c.k as { s?: number[]; e?: number[] }[]).map((kf) => {
