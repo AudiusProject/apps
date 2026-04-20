@@ -86,6 +86,7 @@ export const TrackTile = ({
   uid,
   id,
   index,
+  order,
   size,
   ordered,
   trackTileStyles,
@@ -371,6 +372,8 @@ export const TrackTile = ({
   ])
 
   const isReadonly = variant === 'readonly'
+  const tileOrder =
+    order ?? (ordered && index !== undefined ? index + 1 : undefined)
 
   if (is_delete || is_deactivated) return null
 
@@ -458,8 +461,7 @@ export const TrackTile = ({
         </div>
         <TrackTileStats
           trackId={track_id}
-          isTrending={isTrending}
-          rankIndex={index}
+          rankIndex={tileOrder !== undefined ? index : undefined}
           size={TrackTileSize.SMALL}
           isLoading={loading}
           noShimmer={noShimmer}

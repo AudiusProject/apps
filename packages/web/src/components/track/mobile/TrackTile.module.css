@@ -2,6 +2,7 @@
   --border-width: 1px;
   position: relative;
   min-height: 152px;
+  min-width: 288px;
   flex: 1 1 152px;
   border: var(--border-width) solid var(--harmony-n-100);
   background-color: var(--harmony-white);

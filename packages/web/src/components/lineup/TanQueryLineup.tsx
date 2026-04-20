@@ -37,6 +37,7 @@ import {
   TrackTileSize,
   TileProps
 } from 'components/track/types'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import styles from './Lineup.module.css'
@@ -44,6 +45,8 @@ import { delineateByTime } from './delineate'
 import { LineupVariant } from './types'
 const { getBuffering } = playerSelectors
 const { makeGetCurrent } = queueSelectors
+
+const NARROW_CONTAINER_THRESHOLD_PX = 600
 
 export interface TanQueryLineupProps {
   /** Query data should be fetched one component above and passed through here */
@@ -199,8 +202,9 @@ export const TanQueryLineup = ({
 
   const isMobile = useIsMobile()
   const scrollContainer = useRef<HTMLDivElement>(null)
+  const isNarrow = useIsContainerNarrow(scrollContainer, NARROW_CONTAINER_THRESHOLD_PX)
 
-  const isSmallTrackTile = isMobile || variant === LineupVariant.SECTION
+  const isSmallTrackTile = isMobile || variant === LineupVariant.SECTION || isNarrow
 
   // Memoize component selection based on device type
   const { TrackTile, PlaylistTile } = useMemo(() => {

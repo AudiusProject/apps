@@ -403,7 +403,6 @@ export const TrackTile = ({
           </Flex>
           <TrackTileStats
             trackId={trackId}
-            rankIndex={tileOrder}
             size={size}
             isLoading={isLoading}
             noShimmer={noShimmer}

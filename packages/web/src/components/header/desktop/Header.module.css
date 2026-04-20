@@ -1,27 +1,25 @@
 .container {
   position: relative;
-  display: inline-flex;
-  justify-content: space-between;
-  align-items: baseline;
   width: 100%;
-  min-width: 720px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
 .bottomBarContainer {
-  display: flex;
-  justify-content: center;
   width: 100%;
-  min-width: 780px;
 }
 
 .bottomBar {
   max-width: 1080px;
-  flex: 1;
+  margin: 0 auto;
 }
 
 .rightDecorator {
   margin: 0px 0px 3px auto;
+}
+
+/* Single line, full title visible — no wrap, no ellipsis */
+.pageTitle {
+  white-space: nowrap;
 }

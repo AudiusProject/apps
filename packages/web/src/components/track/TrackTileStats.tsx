@@ -18,7 +18,6 @@ import { TrackTileSize } from './types'
 
 type TrackTileStatsProps = {
   trackId: ID
-  isTrending?: boolean
   rankIndex?: number
   size: TrackTileSize
   isLoading?: boolean
@@ -26,7 +25,7 @@ type TrackTileStatsProps = {
 }
 
 export const TrackTileStats = (props: TrackTileStatsProps) => {
-  const { trackId, isTrending, rankIndex, size, isLoading, noShimmer } = props
+  const { trackId, rankIndex, size, isLoading, noShimmer } = props
 
   const isUnlockable = useIsTrackUnlockable(trackId)
   const isMobile = useIsMobile()
@@ -52,7 +51,7 @@ export const TrackTileStats = (props: TrackTileStatsProps) => {
       pv={isMobile ? 's' : 'xs'}
     >
       <Flex gap='l' h={size === TrackTileSize.LARGE ? 'xl' : 'm'}>
-        {isTrending ? <EntityRank index={rankIndex!} /> : null}
+        {rankIndex != null ? <EntityRank index={rankIndex} /> : null}
         <TrackAccessTypeLabel trackId={trackId} />
         {isUnlisted ? null : (
           <>

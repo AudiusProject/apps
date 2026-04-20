@@ -1,13 +1,18 @@
+import { useRef } from 'react'
+
 import { Status } from '@audius/common/models'
 
 import { CollectionTile as DesktopCollectionTile } from 'components/track/desktop/CollectionTile'
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
 import { CollectionTile as MobileCollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import LineupProvider, { LineupProviderProps } from './LineupProvider'
 import { LineupVariant } from './types'
+
+const NARROW_CONTAINER_THRESHOLD_PX = 600
 
 export type LineupProps = Omit<
   LineupProviderProps,
@@ -44,11 +49,12 @@ const Lineup = ({
   ...otherProps
 }: LineupProps) => {
   const isMobile = useIsMobile()
-  const trackTile =
-    isMobile || variant === LineupVariant.SECTION
-      ? MobileTrackTile
-      : DesktopTrackTile
-  const playlistTile = isMobile ? MobileCollectionTile : DesktopCollectionTile
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isNarrow = useIsContainerNarrow(containerRef, NARROW_CONTAINER_THRESHOLD_PX)
+
+  const useCompactTile = isMobile || variant === LineupVariant.SECTION || isNarrow
+  const trackTile = useCompactTile ? MobileTrackTile : DesktopTrackTile
+  const playlistTile = useCompactTile ? MobileCollectionTile : DesktopCollectionTile
 
   const providerProps = {
     lineup,
@@ -65,7 +71,11 @@ const Lineup = ({
     ...otherProps
   }
 
-  return <LineupProvider {...providerProps} />
+  return (
+    <div ref={containerRef} style={{ width: '100%' }}>
+      <LineupProvider {...providerProps} />
+    </div>
+  )
 }
 
 export default Lineup

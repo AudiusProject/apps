@@ -22,6 +22,7 @@ export type HeaderProps = {
   isChromeOrSafari?: boolean
   scrollBarWidth?: number
   headerContainerRef?: React.RefObject<HTMLDivElement>
+  titleRowRef?: React.RefObject<HTMLDivElement>
   icon?: IconComponent
 }
 
@@ -40,6 +41,7 @@ export const Header = (props: HeaderProps) => {
     isChromeOrSafari,
     scrollBarWidth,
     headerContainerRef,
+    titleRowRef,
     icon: Icon
   } = props
 
@@ -62,10 +64,11 @@ export const Header = (props: HeaderProps) => {
           gap='l'
           mt='2xl'
           mb='l'
-          css={{ maxWidth: 1080 }}
+          css={{ maxWidth: 1080, marginLeft: 'auto', marginRight: 'auto' }}
         >
           {topLeftElement || null}
           <Flex
+            ref={titleRowRef}
             alignItems='center'
             justifyContent='space-between'
             w='100%'
@@ -77,6 +80,7 @@ export const Header = (props: HeaderProps) => {
             <Flex alignItems='center' gap='m'>
               {Icon ? <Icon size='2xl' color='heading' /> : null}
               <Text
+                className={styles.pageTitle}
                 variant='heading'
                 tag='h1'
                 strength='default'

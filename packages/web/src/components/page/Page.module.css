@@ -18,11 +18,9 @@
 }
 
 .inset.medium > .pageContent {
-  min-width: 460px;
   max-width: 1080px;
 }
 .inset.large > .pageContent {
-  min-width: 720px;
   max-width: 1080px;
 }
 

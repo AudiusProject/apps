@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 
 import { useCurrentTrack } from '@audius/common/hooks'
 import { Name, FeedFilter } from '@audius/common/models'
+import { FilterButton, Flex, IconFeed } from '@audius/harmony'
 import {
   lineupSelectors,
   feedPageLineupActions as feedActions,
@@ -10,11 +11,11 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
-import { IconFeed } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Header } from 'components/header/desktop/Header'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
 import {
@@ -42,9 +43,17 @@ type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
+const feedFilterOptions = [
+  { label: 'All Posts', value: FeedFilter.ALL },
+  { label: 'Original Posts', value: FeedFilter.ORIGINAL },
+  { label: 'Reposts', value: FeedFilter.REPOST }
+]
+
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const dispatch = useDispatch()
   const currentTrack = useCurrentTrack()
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const isCondensedHeader = useIsContainerNarrow(titleRowRef, 560)
 
   const getFeedLineup = useRef(
     makeGetLineupMetadatas(getDiscoverFeedLineup)
@@ -131,13 +140,24 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
 
   const header = (
     <Header
+      titleRowRef={titleRowRef}
       icon={IconFeed}
       primary={messages.feedHeaderTitle}
       rightDecorator={
-        <FeedFilters
-          currentFilter={feedFilter}
-          didSelectFilter={didSelectFilter}
-        />
+        isCondensedHeader ? (
+          <FilterButton
+            label='All Posts'
+            value={feedFilter}
+            variant='replaceLabel'
+            onChange={(value) => didSelectFilter(value as FeedFilter)}
+            options={feedFilterOptions}
+          />
+        ) : (
+          <FeedFilters
+            currentFilter={feedFilter}
+            didSelectFilter={didSelectFilter}
+          />
+        )
       }
     />
   )
