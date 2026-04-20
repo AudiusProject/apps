@@ -29,6 +29,8 @@ import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
 import Page from 'components/page/Page'
+import { usePortal } from 'hooks/usePortal'
+import { useMainContentRef } from 'pages/MainContentContext'
 import { isMobile } from 'utils/clientUtil'
 import zIndex from 'utils/zIndex'
 
@@ -68,6 +70,10 @@ const messages = {
 const DesktopFanClubsExplorePage = () => {
   const navigate = useNavigate()
   const { motion, spacing, color } = useTheme()
+  const mainContentRef = useMainContentRef()
+  const Portal = usePortal({
+    container: mainContentRef.current?.parentElement ?? undefined
+  })
   const [searchValue, setSearchValue] = useState('')
   const [isLaunchBannerDismissed, setIsLaunchBannerDismissed] = useState(
     readLaunchBannerDismissed
@@ -232,106 +238,112 @@ const DesktopFanClubsExplorePage = () => {
         <FanClubsTable searchQuery={searchValue} viewMode={fanClubsViewMode} />
       </Flex>
 
-      {shouldShowLaunchCta && !isLaunchBannerDismissed ? (
-        <Box
-          css={{
-            position: 'fixed',
-            bottom: 'calc(var(--play-bar-height) + 24px)',
-            left: 'calc(var(--nav-width) + 48px)',
-            right: 48,
-            zIndex: zIndex.NAVIGATOR_POPUP
-          }}
-        >
-          <Paper
-            border='strong'
-            borderRadius='m'
-            shadow='mid'
-            w='100%'
+      <Portal>
+        {shouldShowLaunchCta && !isLaunchBannerDismissed ? (
+          <Box
             css={{
-              position: 'relative',
-              overflow: 'hidden',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              backgroundColor: bannerSurface,
-              transition: `opacity ${motion.expressive}`
+              position: 'fixed',
+              bottom: 'calc(var(--play-bar-height) + 24px)',
+              left: 'calc(var(--nav-width) + 48px)',
+              right: 48,
+              zIndex: zIndex.NAVIGATOR_POPUP
             }}
           >
-            <IconButton
-              size='s'
-              color='subdued'
-              icon={IconClose}
-              onClick={handleDismissLaunchBanner}
-              aria-label={messages.dismissBanner}
-              css={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
-                zIndex: 1
-              }}
-            />
-            <Flex
-              ph='xl'
-              pv='l'
-              pr='3xl'
-              gap='l'
-              alignItems='center'
-              justifyContent='space-between'
+            <Paper
+              border='strong'
+              borderRadius='m'
+              shadow='mid'
               w='100%'
               css={{
-                flexWrap: 'wrap',
-                rowGap: 16,
-                columnGap: 24
+                position: 'relative',
+                overflow: 'hidden',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                backgroundColor: bannerSurface,
+                transition: `opacity ${motion.expressive}`
               }}
             >
-              <Flex column gap='s' css={{ flex: '1 1 240px', minWidth: 0 }}>
-                <Text variant='heading' size='m'>
-                  {messages.launchYourOwn}
-                </Text>
-                <Tooltip text={messages.getStartedTooltip} placement='top'>
-                  <Flex
-                    alignItems='center'
-                    border='strong'
-                    borderRadius='m'
-                    css={{
-                      alignSelf: 'flex-start',
-                      overflow: 'hidden',
-                      backgroundColor: bannerSurface,
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)'
-                    }}
-                  >
-                    <Flex ph='s' pv='xs'>
-                      <Text variant='body' size='s'>
-                        {messages.required}
-                      </Text>
-                    </Flex>
-                    <Flex p='s' backgroundColor='surface2' borderLeft='strong'>
-                      <IconVerified size='s' />
-                    </Flex>
-                  </Flex>
-                </Tooltip>
-              </Flex>
-              <Box
+              <IconButton
+                size='s'
+                color='subdued'
+                icon={IconClose}
+                onClick={handleDismissLaunchBanner}
+                aria-label={messages.dismissBanner}
                 css={{
-                  flex: '1 1 200px',
-                  minWidth: 0,
-                  display: 'flex',
-                  justifyContent: 'flex-end'
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  zIndex: 1
+                }}
+              />
+              <Flex
+                ph='xl'
+                pv='l'
+                pr='3xl'
+                gap='l'
+                alignItems='center'
+                justifyContent='space-between'
+                w='100%'
+                css={{
+                  flexWrap: 'wrap',
+                  rowGap: 16,
+                  columnGap: 24
                 }}
               >
-                <Button
-                  onClick={handleGetStarted}
-                  fullWidth
-                  css={{ maxWidth: 360 }}
-                  color='coinGradient'
+                <Flex column gap='s' css={{ flex: '1 1 240px', minWidth: 0 }}>
+                  <Text variant='heading' size='m'>
+                    {messages.launchYourOwn}
+                  </Text>
+                  <Tooltip text={messages.getStartedTooltip} placement='top'>
+                    <Flex
+                      alignItems='center'
+                      border='strong'
+                      borderRadius='m'
+                      css={{
+                        alignSelf: 'flex-start',
+                        overflow: 'hidden',
+                        backgroundColor: bannerSurface,
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)'
+                      }}
+                    >
+                      <Flex ph='s' pv='xs'>
+                        <Text variant='body' size='s'>
+                          {messages.required}
+                        </Text>
+                      </Flex>
+                      <Flex
+                        p='s'
+                        backgroundColor='surface2'
+                        borderLeft='strong'
+                      >
+                        <IconVerified size='s' />
+                      </Flex>
+                    </Flex>
+                  </Tooltip>
+                </Flex>
+                <Box
+                  css={{
+                    flex: '1 1 200px',
+                    minWidth: 0,
+                    display: 'flex',
+                    justifyContent: 'flex-end'
+                  }}
                 >
-                  {messages.getStarted}
-                </Button>
-              </Box>
-            </Flex>
-          </Paper>
-        </Box>
-      ) : null}
+                  <Button
+                    onClick={handleGetStarted}
+                    fullWidth
+                    css={{ maxWidth: 360 }}
+                    color='coinGradient'
+                  >
+                    {messages.getStarted}
+                  </Button>
+                </Box>
+              </Flex>
+            </Paper>
+          </Box>
+        ) : null}
+      </Portal>
     </Page>
   )
 }
