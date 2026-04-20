@@ -12,8 +12,13 @@ import {
 import BottomBar from 'components/bottom-bar/BottomBar'
 import { getPathname } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
-const { FEED_PAGE, TRENDING_PAGE, EXPLORE_PAGE, profilePage, LIBRARY_PAGE } =
-  route
+const {
+  FEED_PAGE,
+  TRENDING_PAGE,
+  EXPLORE_PAGE,
+  LIBRARY_PAGE,
+  NOTIFICATION_PAGE
+} = route
 
 const ConnectedBottomBar = () => {
   const location = useLocation()
@@ -28,17 +33,17 @@ const ConnectedBottomBar = () => {
     })
   })
   const { handle, isGuestAccount } = accountData ?? {}
-  const userProfilePage = handle ? profilePage(handle) : null
 
   // Memoize navRoutes to avoid recreating Set on every render
-  // Filter out null values to ensure Set stability
   const navRoutes = useMemo(() => {
-    const routes = [TRENDING_PAGE, FEED_PAGE, EXPLORE_PAGE, LIBRARY_PAGE]
-    if (userProfilePage) {
-      routes.push(userProfilePage)
-    }
-    return new Set(routes)
-  }, [userProfilePage])
+    return new Set([
+      TRENDING_PAGE,
+      FEED_PAGE,
+      EXPLORE_PAGE,
+      LIBRARY_PAGE,
+      NOTIFICATION_PAGE
+    ])
+  }, [])
 
   // Use ref to track last nav route synchronously (avoids render loops)
   // This is critical for React Router v7 compatibility where location updates
@@ -97,23 +102,22 @@ const ConnectedBottomBar = () => {
     }
   }, [goToRoute, handle, isGuestAccount, handleOpenSignOn])
 
-  const goToProfile = useCallback(() => {
+  const goToNotifications = useCallback(() => {
     if (!handle) {
       handleOpenSignOn()
     } else {
-      goToRoute(profilePage(handle))
+      goToRoute(NOTIFICATION_PAGE)
     }
   }, [goToRoute, handle, handleOpenSignOn])
 
   return (
     <BottomBar
       currentPage={currentPage}
-      userProfilePageRoute={userProfilePage}
       onClickFeed={goToFeed}
       onClickTrending={goToTrending}
       onClickExplore={goToExplore}
       onClickLibrary={goToLibrary}
-      onClickProfile={goToProfile}
+      onClickNotifications={goToNotifications}
       isDarkMode={isDarkMode}
       isMatrixMode={isMatrixMode}
     />
