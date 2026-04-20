@@ -74,7 +74,9 @@ const tableColumns: TracksTableColumn[] = [
 
 const LibraryPage = () => {
   const titleRowRef = useRef<HTMLDivElement>(null)
+  const tabContainerRef = useRef<HTMLDivElement>(null)
   const isCondensedHeader = useIsContainerNarrow(titleRowRef, 720)
+  const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 352)
   const { spacing } = useTheme()
   const {
     title,
@@ -227,17 +229,20 @@ const LibraryPage = () => {
       {
         icon: <IconNote />,
         text: LibraryPageTabs.TRACKS,
-        label: LibraryPageTabs.TRACKS
+        label: LibraryPageTabs.TRACKS,
+        hideText: shouldHideTabText
       },
       {
         icon: <IconAlbum />,
         text: LibraryPageTabs.ALBUMS,
-        label: LibraryPageTabs.ALBUMS
+        label: LibraryPageTabs.ALBUMS,
+        hideText: shouldHideTabText
       },
       {
         icon: <IconPlaylists />,
         text: LibraryPageTabs.PLAYLISTS,
-        label: LibraryPageTabs.PLAYLISTS
+        label: LibraryPageTabs.PLAYLISTS,
+        hideText: shouldHideTabText
       }
     ],
     elements: [
@@ -278,7 +283,9 @@ const LibraryPage = () => {
   })
 
   const headerBottomBar = (
-    <div className={styles.headerBottomBarContainer}>{tabs}</div>
+    <div ref={tabContainerRef} className={styles.headerBottomBarContainer}>
+      {tabs}
+    </div>
   )
 
   const header = (

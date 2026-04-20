@@ -67,12 +67,17 @@ export const PlaylistsTabPage = () => {
 
   const cards = useMemo(() => {
     const createPlaylistCard = (
-      <UploadChip
-        type='playlist'
-        variant='card'
-        cardStyle='fluid'
-        source={CreatePlaylistSource.LIBRARY_PAGE}
-      />
+      <div
+        key='create-playlist-card'
+        className={styles.createPlaylistCardContainer}
+      >
+        <UploadChip
+          type='playlist'
+          variant='card'
+          cardStyle='fluid'
+          source={CreatePlaylistSource.LIBRARY_PAGE}
+        />
+      </div>
     )
     const loadedCards = [
       createPlaylistCard,

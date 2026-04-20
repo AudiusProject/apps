@@ -46,11 +46,16 @@
   flex-wrap: wrap;
   gap: var(--harmony-unit-6) var(--harmony-unit-4);
   margin-bottom: var(--harmony-unit-4);
+  min-width: 180px;
 }
 
 .cardsContainer > * {
   flex: 0 0 calc((100% - (var(--harmony-unit-4) * 3)) / 4);
   max-width: calc((100% - (var(--harmony-unit-4) * 3)) / 4);
+}
+
+.createPlaylistCardContainer {
+  width: 100%;
 }
 
 @container library-content (max-width: 880px) {
@@ -71,6 +76,11 @@
   .cardsContainer > * {
     flex: 0 0 100%;
     max-width: 100%;
+  }
+
+  .createPlaylistCardContainer button {
+    aspect-ratio: auto;
+    height: auto;
   }
 }
 

@@ -31,6 +31,7 @@ export type TabHeader = {
   icon?: ReactNode
   text: string
   label: string
+  hideText?: boolean
   disabled?: boolean
   disabledTooltipText?: string
   to?: string
@@ -44,12 +45,23 @@ type TabProps = {
   icon?: ReactNode
   text: string
   label: string
+  hideText?: boolean
   disabled: boolean
 }
 
 const Tab = forwardRef(
   (
-    { onClick, icon, text, isActive, isMobile, isMobileV2, disabled }: TabProps,
+    {
+      onClick,
+      icon,
+      text,
+      label,
+      hideText,
+      isActive,
+      isMobile,
+      isMobileV2,
+      disabled
+    }: TabProps,
     ref?: Ref<HTMLDivElement>
   ) => (
     <div
@@ -58,14 +70,16 @@ const Tab = forwardRef(
         { [styles.tabMobile]: isMobile },
         { [styles.tabMobileV2]: isMobileV2 },
         { [styles.tabDesktop]: !isMobile && !isMobileV2 },
+        { [styles.tabDesktopIconOnly]: !isMobile && !isMobileV2 && hideText },
         { [styles.tabActive]: isActive },
         { [styles.tabDisabled]: disabled }
       )}
       onClick={() => !disabled && onClick?.()}
+      aria-label={label}
       ref={ref}
     >
       {icon && <div className={styles.icon}>{icon}</div>}
-      {isMobile ? (
+      {hideText ? null : isMobile ? (
         <Text variant='body' size='xs' strength='strong' color='inherit'>
           {text}
         </Text>
@@ -258,9 +272,13 @@ const TabBar = memo(
         />
         {tabs.map((tab, i) => {
           const isActive = activeIndex === i
-          const tooltipActive =
-            (!!disabledTabTooltipText || !!tab.disabledTooltipText) &&
-            tab.disabled
+          const showIconOnlyTooltip = !!tab.hideText && !isMobile && !isMobileV2
+          const isDesktopIconOnly = !!tab.hideText && !isMobile && !isMobileV2
+          const tooltipText =
+            (tab.disabled
+              ? tab.disabledTooltipText || disabledTabTooltipText
+              : undefined) || (showIconOnlyTooltip ? tab.text : undefined)
+          const tooltipActive = !!tooltipText
 
           const tabElement = (
             <Tab
@@ -274,6 +292,7 @@ const TabBar = memo(
               icon={tab.icon}
               label={tab.label}
               text={tab.text}
+              hideText={tab.hideText}
             />
           )
 
@@ -282,14 +301,16 @@ const TabBar = memo(
           const rootProps = {
             role: 'tab',
             className: cn(styles.tabWrapper, {
-              [styles.tabWrapperMobile]: isMobile
+              [styles.tabWrapperMobile]: isMobile,
+              [styles.tabWrapperDesktopIconOnly]: isDesktopIconOnly
             })
           }
 
           return (
             <Tooltip
-              text={tab.disabledTooltipText || disabledTabTooltipText}
+              text={tooltipText}
               placement='bottom'
+              mount='body'
               disabled={!tooltipActive}
               key={i}
             >
