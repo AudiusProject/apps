@@ -135,5 +135,6 @@ export const QUERY_KEYS = {
   uploadStatus: 'uploadStatus',
   fanClubFeed: 'fanClubFeed',
   eventComments: 'eventComments',
-  eventFollowState: 'eventFollowState'
+  eventFollowState: 'eventFollowState',
+  eventFollowers: 'eventFollowers'
 } as const

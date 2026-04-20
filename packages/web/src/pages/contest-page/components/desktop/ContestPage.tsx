@@ -50,6 +50,7 @@ import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/Remix
 import { fullContestPage } from 'utils/route'
 
 import { ContestCommentsSection } from '../ContestCommentsSection'
+import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
   title: 'Remix Contest',
@@ -477,24 +478,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                     its useFileSizes query errors otherwise. */}
                 {hasDownloads ? <DownloadSection trackId={trackId!} /> : null}
 
-                {/* Followers card. Until there's an
-                    /events/:eventId/followers list endpoint, we render
-                    just the count (no avatar stack / leaderboard). */}
-                <Paper
-                  direction='column'
-                  borderRadius='m'
-                  border='default'
-                  css={{ backgroundColor: 'var(--harmony-white)' }}
-                >
-                  <Flex p='l' gap='xs' alignItems='baseline'>
-                    <Text variant='heading' size='s'>
-                      {messages.followers}
-                    </Text>
-                    <Text variant='heading' size='s' color='subdued'>
-                      ({formatCount(followState?.followerCount ?? 0)})
-                    </Text>
-                  </Flex>
-                </Paper>
+                {/* Followers card — avatar stack + (N) count, backed by
+                    /v1/events/:eventId/followers. */}
+                <EventFollowersCard
+                  eventId={eventId}
+                  followerCount={followState?.followerCount ?? 0}
+                />
 
                 <ContestCommentsSection
                   eventId={eventId}

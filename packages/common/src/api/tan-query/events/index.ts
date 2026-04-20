@@ -2,6 +2,7 @@
 export * from './useAllEvents'
 export * from './useAllRemixContests'
 export * from './useEvent'
+export * from './useEventFollowers'
 export * from './useEvents'
 export * from './useEventsByEntityId'
 export * from './useFollowEvent'
