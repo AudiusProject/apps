@@ -153,12 +153,27 @@ function* initializeMetricsForUser({
       }
     }
 
+    const isArtist = accountUser.track_count > 0
+    const accountType: 'listener' | 'artist' | 'managed' = managerUserId
+      ? 'managed'
+      : isArtist
+        ? 'artist'
+        : 'listener'
+
     const traits = {
-      isVerified: accountUser.is_verified,
-      trackCount: accountUser.track_count,
       handle: accountUser.handle,
       name: accountUser.name,
       userId: accountUser.user_id,
+      isVerified: accountUser.is_verified,
+      isArtist,
+      accountType,
+      accountCreatedAt: accountUser.created_at,
+      trackCount: accountUser.track_count,
+      followerCount: accountUser.follower_count,
+      followingCount: accountUser.followee_count,
+      playlistCount: accountUser.playlist_count,
+      hasUploaded: accountUser.track_count > 0,
+      walletConnected: Boolean(solanaWallet),
       managerHandle,
       managerUserId,
       solanaWallet

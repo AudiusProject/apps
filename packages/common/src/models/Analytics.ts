@@ -21,6 +21,28 @@ export type IdentifyTraits = {
   name?: string
   email?: string
   userId?: ID
+  // Account type / role
+  isVerified?: boolean
+  isArtist?: boolean
+  accountType?: 'listener' | 'artist' | 'managed'
+  // Lifecycle
+  signupSource?: string
+  signupDate?: string
+  accountCreatedAt?: string
+  lastActiveAt?: string
+  // Engagement counts (enables cohorting in Amplitude)
+  trackCount?: number
+  followerCount?: number
+  followingCount?: number
+  playlistCount?: number
+  // Monetization / web3
+  hasUploaded?: boolean
+  hasPurchased?: boolean
+  walletConnected?: boolean
+  solanaWallet?: string
+  // Manager mode
+  managerHandle?: string
+  managerUserId?: ID
 }
 
 export type AnalyticsEvent = {
@@ -33,6 +55,17 @@ export type AnalyticsEvent = {
 export enum Name {
   APP_ERROR = 'App Error', // Generic app error
   SESSION_START = 'Session Start',
+  // Activation — fired at most once per user, the first time each action occurs.
+  // Used for cohort activation analysis and retention curves.
+  ACTIVATION_FIRST_LISTEN = 'Activation: First Listen',
+  ACTIVATION_FIRST_LISTEN_COMPLETED = 'Activation: First Listen Completed',
+  ACTIVATION_FIRST_FAVORITE = 'Activation: First Favorite',
+  ACTIVATION_FIRST_REPOST = 'Activation: First Repost',
+  ACTIVATION_FIRST_FOLLOW = 'Activation: First Follow',
+  ACTIVATION_FIRST_PLAYLIST_CREATED = 'Activation: First Playlist Created',
+  ACTIVATION_FIRST_UPLOAD_COMPLETE = 'Activation: First Upload Complete',
+  ACTIVATION_FIRST_PURCHASE = 'Activation: First Purchase',
+  ACTIVATION_FIRST_TIP_SENT = 'Activation: First Tip Sent',
   // Account creation
   // When the user opens the create account page
   CREATE_ACCOUNT_OPEN = 'Create Account: Open',
@@ -630,6 +663,62 @@ type PageView = {
 type AppError = {
   eventName: Name.APP_ERROR
   errorMessage: string
+}
+
+// Activation events — fired at most once per user, the first time each action
+// occurs. These power activation and retention analysis in Amplitude and
+// should be gated on a client-side flag so they never double-fire.
+export type ActivationFirstListen = {
+  eventName: Name.ACTIVATION_FIRST_LISTEN
+  trackId: ID
+  source?: string
+}
+
+export type ActivationFirstListenCompleted = {
+  eventName: Name.ACTIVATION_FIRST_LISTEN_COMPLETED
+  trackId: ID
+  durationListenedSec: number
+}
+
+export type ActivationFirstFavorite = {
+  eventName: Name.ACTIVATION_FIRST_FAVORITE
+  kind: 'track' | 'playlist' | 'album'
+  id: ID
+}
+
+export type ActivationFirstRepost = {
+  eventName: Name.ACTIVATION_FIRST_REPOST
+  kind: 'track' | 'playlist' | 'album'
+  id: ID
+}
+
+export type ActivationFirstFollow = {
+  eventName: Name.ACTIVATION_FIRST_FOLLOW
+  followeeUserId: ID
+  source?: string
+}
+
+export type ActivationFirstPlaylistCreated = {
+  eventName: Name.ACTIVATION_FIRST_PLAYLIST_CREATED
+  playlistId: ID
+}
+
+export type ActivationFirstUploadComplete = {
+  eventName: Name.ACTIVATION_FIRST_UPLOAD_COMPLETE
+  trackId: ID
+}
+
+export type ActivationFirstPurchase = {
+  eventName: Name.ACTIVATION_FIRST_PURCHASE
+  contentId: ID
+  contentType: 'track' | 'album'
+  priceUsd: number
+}
+
+export type ActivationFirstTipSent = {
+  eventName: Name.ACTIVATION_FIRST_TIP_SENT
+  recipientUserId: ID
+  amountAudio: number
 }
 
 // Create Account
@@ -3071,6 +3160,15 @@ export type BaseAnalyticsEvent = { type: typeof ANALYTICS_TRACK_EVENT }
 
 export type AllTrackingEvents =
   | AppError
+  | ActivationFirstListen
+  | ActivationFirstListenCompleted
+  | ActivationFirstFavorite
+  | ActivationFirstRepost
+  | ActivationFirstFollow
+  | ActivationFirstPlaylistCreated
+  | ActivationFirstUploadComplete
+  | ActivationFirstPurchase
+  | ActivationFirstTipSent
   | CreateAccountOpen
   | CreateAccountCompleteEmail
   | CreateAccountCompletePassword
