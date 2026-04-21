@@ -21,8 +21,8 @@ export type HeaderProps = {
   children?: ReactNode
   isChromeOrSafari?: boolean
   scrollBarWidth?: number
-  headerContainerRef?: React.RefObject<HTMLDivElement>
-  titleRowRef?: React.RefObject<HTMLDivElement>
+  headerContainerRef?: React.RefObject<HTMLDivElement | null>
+  titleRowRef?: React.RefObject<HTMLDivElement | null>
   icon?: IconComponent
 }
 

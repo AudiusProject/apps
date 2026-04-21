@@ -10,7 +10,7 @@ const BACKGROUND_ELEMENT_ID = 'headerPadding'
 
 type HeaderGutterProps = {
   isChromeOrSafari?: boolean
-  headerContainerRef?: React.RefObject<HTMLDivElement>
+  headerContainerRef?: React.RefObject<HTMLDivElement | null>
   scrollBarWidth?: number
   className?: string
 }
