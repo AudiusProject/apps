@@ -55,7 +55,7 @@ const INITIAL_TRACK_SKELETON_ROWS = 10
 
 const messages = {
   libraryHeader: 'Library',
-  filterPlaceholder: 'Filter Tracks',
+  filterPlaceholder: 'Filter...',
   emptyTracksBody: "Once you have, this is where you'll find them!",
   goToTrending: 'Go to Trending',
   title: 'Library',
