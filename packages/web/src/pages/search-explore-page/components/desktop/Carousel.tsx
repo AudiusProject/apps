@@ -54,7 +54,8 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     const contentInset = 8
     // Scroll containers clip overflow; keep a generous internal vertical buffer
     // so card shadows (including hover states) are not cut between carousels.
-    const railShadowPadding = isMobile ? 12 : 20
+    const railShadowPaddingTop = isMobile ? 12 : 10
+    const railShadowPaddingBottom = isMobile ? 12 : 20
     const handleScrollBy = useCallback(
       (direction: -1 | 1) => {
         const container = scrollContainerRef.current
@@ -75,7 +76,7 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     )
 
     return (
-      <Flex ref={ref} direction='column' gap={isMobile ? 'l' : 'xl'} w='100%'>
+      <Flex ref={ref} direction='column' gap={isMobile ? 'l' : 'l'} w='100%'>
         <Flex
           gap='m'
           alignItems='center'
@@ -86,36 +87,56 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
           <Text
             variant={isMobile ? 'title' : 'heading'}
             size={isMobile ? 'l' : 'm'}
+            css={
+              isMobile
+                ? undefined
+                : {
+                    fontSize: 'clamp(1.375rem, 2.6vw, 1.5rem)',
+                    lineHeight: 'clamp(1.875rem, 3vw, 2rem)'
+                  }
+            }
           >
             {title}
           </Text>
           {canScrollLeft || canScrollRight || viewAllLink ? (
-            <Flex gap='l' alignItems='center'>
+            <Flex
+              gap='l'
+              alignItems='center'
+              css={
+                isMobile
+                  ? undefined
+                  : { flexShrink: 0, minWidth: 'max-content' }
+              }
+            >
               {viewAllLink && (
                 <PlainButton size={isMobile ? 'default' : 'large'} asChild>
                   <Link to={viewAllLink}>View All</Link>
                 </PlainButton>
               )}
               {!isMobile && (
-                <Flex gap='l'>
-                  <IconButton
-                    ripple
-                    icon={IconCaretLeft}
-                    color={canScrollLeft ? 'default' : 'disabled'}
-                    aria-label={`${title} scroll left`}
-                    onClick={() => {
-                      handleScrollBy(-1)
-                    }}
-                  />
-                  <IconButton
-                    ripple
-                    icon={IconCaretRight}
-                    color={canScrollRight ? 'default' : 'disabled'}
-                    aria-label={`${title} scroll right`}
-                    onClick={() => {
-                      handleScrollBy(1)
-                    }}
-                  />
+                <Flex gap='l' css={{ flexShrink: 0 }}>
+                  <Flex css={{ flexShrink: 0 }}>
+                    <IconButton
+                      ripple
+                      icon={IconCaretLeft}
+                      color={canScrollLeft ? 'default' : 'disabled'}
+                      aria-label={`${title} scroll left`}
+                      onClick={() => {
+                        handleScrollBy(-1)
+                      }}
+                    />
+                  </Flex>
+                  <Flex css={{ flexShrink: 0 }}>
+                    <IconButton
+                      ripple
+                      icon={IconCaretRight}
+                      color={canScrollRight ? 'default' : 'disabled'}
+                      aria-label={`${title} scroll right`}
+                      onClick={() => {
+                        handleScrollBy(1)
+                      }}
+                    />
+                  </Flex>
                 </Flex>
               )}
             </Flex>
@@ -138,8 +159,8 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
             marginRight: -railInset,
             paddingLeft: railInset,
             paddingRight: railInset,
-            paddingTop: railShadowPadding,
-            paddingBottom: railShadowPadding
+            paddingTop: railShadowPaddingTop,
+            paddingBottom: railShadowPaddingBottom
           }}
         >
           <Flex

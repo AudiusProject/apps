@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
@@ -20,25 +20,24 @@ import {
   Button,
   Flex,
   IconSearch,
-  LoadingSpinner,
   Skeleton,
   spacing,
   Text
 } from '@audius/harmony'
 import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
-import InfiniteScroll from 'react-infinite-scroller'
 import { useNavigate } from 'react-router'
 import { Cell } from 'react-table'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
+import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
 import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useExternalWalletAddress } from 'hooks/useExternalWalletAddress'
 import { useMainContentRef } from 'pages/MainContentContext'
-import { getScrollParent } from 'utils/scrollParent'
 
 import { FanClubCardSkeleton, FanClubCoinCard } from './FanClubCoinCard'
+import styles from './FanClubsTable.module.css'
 
 export const FAN_CLUBS_VIEW_STORAGE_KEY = 'audius:fan-clubs-explore-view'
 
@@ -316,9 +315,9 @@ const tableColumnMap = {
     Cell: renderBuyCell,
     disableSortBy: true,
     align: 'right',
-    width: 112,
-    minWidth: 112,
-    maxWidth: 112,
+    width: 64,
+    minWidth: 64,
+    maxWidth: 64,
     disableResizing: true
   }
 }
@@ -368,7 +367,6 @@ export const FanClubsTable = ({
     externalUsdcBalance,
     externalAudioBalance
   })
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
   const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
     GetCoinsSortMethodEnum.MarketCap
   )
@@ -403,21 +401,6 @@ export const FanClubsTable = ({
       loadNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, loadNextPage])
-
-  const getScrollableParent = useCallback(() => {
-    const mainEl = mainContentRef.current
-    if (mainEl) {
-      return mainEl
-    }
-    if (!scrollContainerRef.current) {
-      return null
-    }
-    return (getScrollParent(scrollContainerRef.current) as HTMLElement) ?? null
-  }, [mainContentRef])
-
-  const setTableNode = useCallback((node: HTMLDivElement | null) => {
-    scrollContainerRef.current = node
-  }, [])
 
   const onSort = useCallback(
     (method: string, direction: string) => {
@@ -468,6 +451,12 @@ export const FanClubsTable = ({
       baseColumns.buy
     ]
   }, [handleBuy])
+  const cards = useMemo(
+    () =>
+      coins?.map((coin) => <FanClubCoinCard key={coin.mint} coin={coin} />) ??
+      [],
+    [coins]
+  )
 
   const showEmptyState = !isPending && (!coins || coins.length === 0)
 
@@ -491,73 +480,39 @@ export const FanClubsTable = ({
           </Text>
         </Flex>
       ) : null}
-      {!showEmptyState && viewMode === 'table' ? (
-        <Flex
-          ref={setTableNode}
-          direction='column'
-          w='100%'
-          border='default'
-          borderRadius='m'
-          backgroundColor='surface1'
-          css={{ overflow: 'hidden' }}
-        >
-          <Table
-            columns={columns}
-            data={coins ?? []}
-            isVirtualized
-            onSort={onSort}
-            onClickRow={handleRowClick}
-            loading={isPending}
-            isEmptyRow={isEmptyRow}
-            fetchMore={loadNextPage}
-            fetchBatchSize={FAN_CLUBS_BATCH_SIZE}
-            responsiveColumns={RESPONSIVE_TABLE_POLICIES.fanClubsLeaderboard}
-            scrollRef={mainContentRef}
-          />
-        </Flex>
-      ) : null}
-      {!showEmptyState && viewMode === 'cards' ? (
-        <Flex ref={setTableNode} direction='column' w='100%'>
-          {isPending && (!coins || coins.length === 0) ? (
-            <Flex
-              w='100%'
-              css={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: spacing.m
-              }}
-            >
-              {Array.from({ length: 6 }, (_, index) => (
+      {!showEmptyState ? (
+        <div className={styles.bodyWrapper}>
+          {viewMode === 'table' ? (
+            <Table
+              columns={columns}
+              data={coins ?? []}
+              isVirtualized
+              onSort={onSort}
+              onClickRow={handleRowClick}
+              loading={isPending}
+              isEmptyRow={isEmptyRow}
+              fetchMore={loadNextPage}
+              fetchBatchSize={FAN_CLUBS_BATCH_SIZE}
+              responsiveColumns={RESPONSIVE_TABLE_POLICIES.fanClubsLeaderboard}
+              scrollRef={mainContentRef}
+              wrapperClassName={styles.tableWrapper}
+            />
+          ) : isPending && cards.length === 0 ? (
+            <div className={styles.cardsContainer}>
+              {Array.from({ length: 12 }, (_, index) => (
                 <FanClubCardSkeleton key={index} />
               ))}
-            </Flex>
+            </div>
           ) : (
-            <InfiniteScroll
+            <InfiniteCardLineup
               hasMore={hasNextPage ?? false}
               loadMore={handleCardLoadMore}
-              getScrollParent={getScrollableParent}
-              useWindow={false}
-            >
-              <Flex
-                w='100%'
-                css={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: spacing.m
-                }}
-              >
-                {coins?.map((coin) => (
-                  <FanClubCoinCard key={coin.mint} coin={coin} />
-                ))}
-              </Flex>
-              {isFetchingNextPage ? (
-                <Flex justifyContent='center' p='l'>
-                  <LoadingSpinner css={{ width: 24, height: 24 }} />
-                </Flex>
-              ) : null}
-            </InfiniteScroll>
+              cards={cards}
+              cardsClassName={styles.cardsContainer}
+              isLoadingMore={isFetchingNextPage}
+            />
           )}
-        </Flex>
+        </div>
       ) : null}
     </>
   )

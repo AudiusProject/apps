@@ -120,10 +120,13 @@ const SearchExplorePage = ({
   const showSearchResults = useShowSearchResults()
   const [tracksLayout, setTracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
+  const pageContentRef = useRef<HTMLDivElement>(null)
   const tabContainerRef = useRef<HTMLDivElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
   const { motion } = useTheme()
+  const isNarrowLayout = useIsContainerNarrow(pageContentRef, 760)
+  const isExtraNarrowLayout = useIsContainerNarrow(pageContentRef, 520)
   const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 552)
   const handleSearchTab = useCallback(
     (newTab: string) => {
@@ -306,6 +309,12 @@ const SearchExplorePage = ({
     }
   ]
 
+  const headerHeroPaddingX = isExtraNarrowLayout
+    ? 'l'
+    : isNarrowLayout
+      ? 'xl'
+      : 'unit14'
+
   return (
     <Page
       title={pageTitle}
@@ -313,15 +322,16 @@ const SearchExplorePage = ({
       size='large'
       variant='flush'
     >
-      <Flex justifyContent='center' w='100%'>
+      <Flex justifyContent='flex-start' w='100%'>
         <Flex
+          ref={pageContentRef}
           direction='column'
           pv='3xl'
           ph='unit8'
           gap='3xl'
           alignItems='stretch'
           css={{
-            minWidth: 0,
+            minWidth: 332,
             width: '100%',
             maxWidth: NORMAL_WIDTH
           }}
@@ -330,10 +340,10 @@ const SearchExplorePage = ({
           <Paper
             alignItems='center'
             direction='column'
-            gap='xl'
             pv='xl'
-            ph='unit14'
+            ph={headerHeroPaddingX}
             css={{
+              minWidth: 332,
               backgroundImage: `url(${exploreHeaderLanding})`,
               backgroundPosition: 'center',
               backgroundSize: 'cover',
@@ -344,18 +354,34 @@ const SearchExplorePage = ({
             borderRadius='l'
             alignSelf='stretch'
           >
-            <Text variant='display' size='s' color='staticWhite'>
-              {messages.explore}
-            </Text>
-            <Text
-              variant='heading'
-              size='s'
-              color='staticWhite'
-              textAlign='center'
-            >
-              {messages.description}
-            </Text>
-            <Flex w='100%' css={{ maxWidth: 400 }}>
+            <Flex direction='column' gap='m' alignItems='center'>
+              <Text
+                variant='display'
+                size='s'
+                color='staticWhite'
+                textAlign='center'
+                css={{
+                  fontSize: 'clamp(1.75rem, 5vw, 2.25rem)',
+                  lineHeight: 'clamp(2rem, 5.4vw, 2.5rem)'
+                }}
+              >
+                {messages.explore}
+              </Text>
+              <Text
+                variant='heading'
+                size='s'
+                color='staticWhite'
+                textAlign='center'
+                css={{
+                  fontSize: 'clamp(1rem, 2.8vw, 1.5rem)',
+                  lineHeight: 'clamp(1.25rem, 3.4vw, 1.75rem)',
+                  fontWeight: 'var(--harmony-font-demi-bold)'
+                }}
+              >
+                {messages.description}
+              </Text>
+            </Flex>
+            <Flex mt='xl' w='100%' css={{ maxWidth: 400 }}>
               <TextInput
                 ref={searchBarRef}
                 label={messages.searchPlaceholder}
@@ -369,7 +395,7 @@ const SearchExplorePage = ({
           </Paper>
 
           {/* Tabs and Filters */}
-          <Flex direction='column' gap='l'>
+          <Flex direction='column' gap='l' css={{ minWidth: 332 }}>
             <Flex direction='column'>
               <Flex
                 ref={tabContainerRef}
@@ -423,7 +449,7 @@ const SearchExplorePage = ({
             direction='column'
             gap='3xl'
             css={{
-              minWidth: 0,
+              minWidth: 332,
               overflowX: 'clip',
               overflowY: 'visible',
               display: showSearchResults ? 'none' : undefined
