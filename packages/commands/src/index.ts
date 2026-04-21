@@ -23,6 +23,7 @@ import { albumCommand } from './album/index.js'
 import { entropyCommand } from './misc/entropy.js'
 import { aaoCommand } from './misc/aao.js'
 import { commentCommand } from './comments/index.js'
+import { eventCommand } from './event/index.js'
 
 async function main() {
   program.name('audius-cmd')
@@ -34,6 +35,7 @@ async function main() {
   program.addCommand(playlistCommand)
   program.addCommand(albumCommand)
   program.addCommand(commentCommand)
+  program.addCommand(eventCommand)
   program.addCommand(managerCommand)
   program.addCommand(developerAppCommand)
   program.addCommand(authHeadersCommand)

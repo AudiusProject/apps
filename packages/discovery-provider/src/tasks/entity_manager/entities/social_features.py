@@ -8,7 +8,11 @@ from src.models.social.follow import Follow
 from src.models.social.repost import Repost
 from src.models.social.save import Save
 from src.models.social.share import Share
-from src.models.social.subscription import Subscription
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    SUBSCRIPTION_USER_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.tracks.remix import Remix
 from src.models.tracks.track import Track
 from src.tasks.entity_manager.utils import (
@@ -30,6 +34,13 @@ action_to_record_types = {
     Action.SUBSCRIBE: [EntityType.SUBSCRIPTION],
     Action.UNSUBSCRIBE: [EntityType.SUBSCRIPTION],
 }
+
+
+def _subscription_kind(params: ManageEntityParameters) -> str:
+    """Map the tx entity_type to the stored subscription.entity_type discriminator."""
+    if params.entity_type == EntityType.EVENT:
+        return SUBSCRIPTION_EVENT_ENTITY_TYPE
+    return SUBSCRIPTION_USER_ENTITY_TYPE
 
 action_to_challenge_event = {
     Action.FOLLOW: ChallengeEvent.follow,
@@ -81,6 +92,11 @@ def create_social_record(params: ManageEntityParameters):
         elif record_type == EntityType.SHARE:
             create_record = create_share(params)
         elif record_type == EntityType.SUBSCRIPTION:
+            subscription_kind = _subscription_kind(params)
+            # For Event subscriptions, mirror the event_id into the legacy
+            # user_id column so existing (subscriber_id, user_id) uniqueness
+            # constraints keep working. entity_id carries the same value for
+            # new-shape queries.
             create_record = Subscription(
                 blockhash=params.event_blockhash,
                 blocknumber=params.block_number,
@@ -90,6 +106,12 @@ def create_social_record(params: ManageEntityParameters):
                 subscriber_id=params.user_id,
                 is_current=True,
                 is_delete=False,
+                entity_type=subscription_kind,
+                entity_id=(
+                    params.entity_id
+                    if subscription_kind != SUBSCRIPTION_USER_ENTITY_TYPE
+                    else None
+                ),
             )
 
         if create_record:
@@ -252,6 +274,7 @@ def delete_social_record(params):
                 is_delete=True,
             )
         elif record_type == EntityType.SUBSCRIPTION:
+            subscription_kind = _subscription_kind(params)
             deleted_record = Subscription(
                 blockhash=params.event_blockhash,
                 blocknumber=params.block_number,
@@ -261,6 +284,12 @@ def delete_social_record(params):
                 subscriber_id=params.user_id,
                 is_current=True,
                 is_delete=True,
+                entity_type=subscription_kind,
+                entity_id=(
+                    params.entity_id
+                    if subscription_kind != SUBSCRIPTION_USER_ENTITY_TYPE
+                    else None
+                ),
             )
 
         if deleted_record:
@@ -284,26 +313,36 @@ def validate_social_feature(params: ManageEntityParameters):
     if params.entity_id not in params.existing_records[params.entity_type]:
         raise IndexingValidationError(f"Entity {params.entity_id} does not exist")
 
-    # User cannot use social feature on themself
+    # Self-action checks come in two flavors depending on the action type.
     if params.action in (
         Action.FOLLOW,
         Action.UNFOLLOW,
         Action.SUBSCRIBE,
         Action.UNSUBSCRIBE,
     ):
-        if params.user_id == params.entity_id:
+        # Follow / subscribe: the "cannot follow yourself" rule only applies
+        # when the target is another User. Event / Track / Playlist IDs live
+        # in separate ID spaces — a numeric collision between (say) user_id=5
+        # and event_id=5 is NOT a self-reference, and the Event row has its
+        # own owner via events.user_id anyway.
+        if (
+            params.entity_type == EntityType.USER
+            and params.user_id == params.entity_id
+        ):
             raise IndexingValidationError(
                 f"User {params.user_id} cannot {params.action} themself"
             )
     else:
+        # SAVE / REPOST / SHARE: prevent the user from reposting / favoriting
+        # / sharing their own Track or Playlist.
         target_entity = params.existing_records[params.entity_type][params.entity_id]
+        owner_id = None
         if params.entity_type == EntityType.PLAYLIST:
             assert isinstance(target_entity, Playlist)
             owner_id = target_entity.playlist_owner_id
-        else:
-            if hasattr(target_entity, "owner_id"):
-                owner_id = target_entity.owner_id
-        if params.user_id == owner_id:
+        elif hasattr(target_entity, "owner_id"):
+            owner_id = target_entity.owner_id
+        if owner_id is not None and params.user_id == owner_id:
             raise IndexingValidationError(
                 f"User {params.user_id} cannot {params.action} themself"
             )

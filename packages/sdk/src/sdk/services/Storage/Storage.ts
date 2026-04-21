@@ -62,7 +62,18 @@ export class Storage implements StorageService {
                 reject(new Error('No node available'))
                 return
               }
-              upload = new tus.Upload(file as File, {
+              // In Node, tus-js-client accepts Buffer or fs.ReadStream as the
+              // source. When the caller passes a NodeFile wrapper
+              // (`{ buffer, name, type }`) — which is what the zod
+              // CrossPlatformFile schema validates in Node — unwrap it so the
+              // underlying Buffer reaches tus instead of the plain object.
+              const tusSource =
+                (file as any) &&
+                typeof Buffer !== 'undefined' &&
+                Buffer.isBuffer((file as any).buffer)
+                  ? (file as any).buffer
+                  : file
+              upload = new tus.Upload(tusSource as File, {
                 endpoint: `${selectedNode}/files/`,
                 retryDelays: [0, 3000, 5000, 10000, 20000],
                 chunkSize: 100_000_000, // 100MB

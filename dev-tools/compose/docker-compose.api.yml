@@ -3,7 +3,11 @@ services:
     container_name: api
     image: audius/api:latest
     restart: unless-stopped
-    pull_policy: always
+    # "missing" lets local dev override audius/api:latest with a
+    # locally-built image (e.g. when iterating on the Go api) without
+    # compose clobbering it on each `up` via a pull from the registry.
+    # First bring-up still pulls if the image isn't present locally.
+    pull_policy: missing
     profiles:
       - discovery
     depends_on:
