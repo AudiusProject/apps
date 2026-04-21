@@ -138,13 +138,20 @@ const TabBar = memo(
       left: 0,
       width: 0
     })
+    const accentPositionRef = useRef(accentPosition)
     const [getDidPositionTab, setDidPositionTab] = useInstanceVar(false)
 
     const refsArr = useRef<any[]>([])
 
-    if (!refsArr.current || !refsArr.current.length) {
-      tabs.forEach(() => refsArr.current.push(createRef()))
+    if (refsArr.current.length !== tabs.length) {
+      refsArr.current = tabs.map((_, index) => {
+        return refsArr.current[index] ?? createRef()
+      })
     }
+
+    useEffect(() => {
+      accentPositionRef.current = accentPosition
+    }, [accentPosition])
 
     // @ts-ignore
     const [{ top, left, width }, setAccentProps] = useSpring(() => ({
@@ -185,10 +192,11 @@ const TabBar = memo(
       })()
 
       newLeft += gestureOffset
+      const previousAccentPosition = accentPositionRef.current
       if (
-        newTop === accentPosition.top &&
-        newLeft === accentPosition.left &&
-        width === accentPosition.width
+        newTop === previousAccentPosition.top &&
+        newLeft === previousAccentPosition.left &&
+        width === previousAccentPosition.width
       ) {
         return
       }
@@ -211,7 +219,6 @@ const TabBar = memo(
       setDidPositionTab(true)
     }, [
       activeIndex,
-      accentPosition,
       fractionalOffset,
       getDidPositionTab,
       setAccentProps,
@@ -226,7 +233,40 @@ const TabBar = memo(
       return () => {
         window.removeEventListener('resize', resizeTabs)
       }
-    })
+    }, [resizeTabs])
+
+    // On desktop, tab widths can animate when switching between icon+text and
+    // icon-only modes. Recalculate while tab sizes are changing so the accent
+    // tracks the transition.
+    useEffect(() => {
+      if (isMobile || isMobileV2 || typeof ResizeObserver === 'undefined') {
+        return
+      }
+
+      let frameId: number | null = null
+      const scheduleResize = () => {
+        if (frameId !== null) cancelAnimationFrame(frameId)
+        frameId = requestAnimationFrame(() => {
+          frameId = null
+          resizeTabs()
+        })
+      }
+
+      const observer = new ResizeObserver(() => {
+        scheduleResize()
+      })
+
+      refsArr.current.forEach((tabRef) => {
+        const tabNode = tabRef?.current
+        if (tabNode) observer.observe(tabNode)
+      })
+      scheduleResize()
+
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId)
+        observer.disconnect()
+      }
+    }, [isMobile, isMobileV2, resizeTabs, tabs])
 
     useEffect(() => {
       resizeTabs()
@@ -252,6 +292,11 @@ const TabBar = memo(
       return `scale(${scaleX}, 1)`
     }
 
+    // Desktop tabs are variable width, so the legacy stretch interpolation
+    // (which assumes fixed spacing) can leave the accent visually misaligned.
+    // Keep stretch behavior on mobile variants only.
+    const shouldStretchAccent = isMobile || isMobileV2
+
     return (
       <div
         className={cn(
@@ -267,7 +312,9 @@ const TabBar = memo(
             top: top.interpolate(interpPx),
             left: left.interpolate(interpPx),
             width: width.interpolate(interpPx),
-            transform: left.interpolate(interpolateScale)
+            transform: shouldStretchAccent
+              ? left.interpolate(interpolateScale)
+              : undefined
           }}
         />
         {tabs.map((tab, i) => {
