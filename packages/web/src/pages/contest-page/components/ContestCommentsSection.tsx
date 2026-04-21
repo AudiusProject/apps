@@ -15,6 +15,7 @@ import {
   Flex,
   LoadingSpinner,
   Paper,
+  SelectablePill,
   Text,
   TextInput
 } from '@audius/harmony'
@@ -25,6 +26,8 @@ const messages = {
   heading: 'Contest Feed',
   commentsHeading: 'Comments',
   updatesHeading: 'Updates',
+  sortTop: 'Top',
+  sortNewest: 'Newest',
   subheading: 'Post updates from the artist and comments from the community.',
   empty: 'No posts yet. Be the first to start the conversation.',
   emptyUpdates:
@@ -82,6 +85,10 @@ export const ContestCommentsSection = ({
   const showComposer =
     currentUserId !== null &&
     (mode === 'feed' || mode === 'comments' || isEventOwner)
+  // The Top/Newest sort toggle only makes sense on the Comments panel.
+  // Updates is owner-curated and Feed is the legacy single-pane mobile
+  // view; both pin to newest-first.
+  const showSortTabs = mode === 'comments'
   const composerLabel =
     mode === 'updates' || (mode === 'feed' && isEventOwner)
       ? messages.postUpdate
@@ -104,13 +111,17 @@ export const ContestCommentsSection = ({
         ? messages.emptyComments
         : messages.empty
 
+  const [sortMethod, setSortMethod] = useState<'top' | 'newest'>(
+    mode === 'comments' ? 'top' : 'newest'
+  )
+
   const {
     data: feedItems,
     isPending,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
-  } = useEventComments({ eventId, sortMethod: 'newest' })
+  } = useEventComments({ eventId, sortMethod })
 
   const { mutate: postComment, isPending: isPosting } = usePostEventComment()
 
@@ -143,6 +154,25 @@ export const ContestCommentsSection = ({
           </Text>
         ) : null}
       </Flex>
+
+      {showSortTabs ? (
+        <Flex gap='s'>
+          <SelectablePill
+            type='button'
+            size='small'
+            isSelected={sortMethod === 'top'}
+            label={messages.sortTop}
+            onClick={() => setSortMethod('top')}
+          />
+          <SelectablePill
+            type='button'
+            size='small'
+            isSelected={sortMethod === 'newest'}
+            label={messages.sortNewest}
+            onClick={() => setSortMethod('newest')}
+          />
+        </Flex>
+      ) : null}
 
       {/* Compose box. In "updates" mode only the host sees it; in
           "comments"/"feed" every signed-in user sees it. */}
