@@ -111,7 +111,7 @@ export const TrackResults = (props: TrackResultsProps) => {
               display: isTrackGridLayout ? 'grid' : 'flex',
               flexDirection: isTrackGridLayout ? undefined : 'column',
               gridTemplateColumns: isTrackGridLayout
-                ? 'repeat(auto-fit, minmax(450px, 1fr))' // wrap columns to fit
+                ? 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))'
                 : undefined,
               gap: '4px 16px',
               justifyContent: 'space-between'
@@ -127,11 +127,12 @@ type TrackResultsPageProps = {
 }
 
 export const TrackResultsPage = ({ layout }: TrackResultsPageProps) => {
+  const isMobile = useIsMobile()
   const searchParams = useSearchParams()
   const { isPending, isFetching, isError } = useSearchTrackResults(searchParams)
 
   return (
-    <Flex p={'l'} css={{ backgroundColor: 'default' }}>
+    <Flex p={isMobile ? 'l' : undefined} css={{ backgroundColor: 'default' }}>
       <TrackResults
         viewLayout={layout}
         isPending={isPending}

@@ -6,8 +6,7 @@ import {
   IconCaretLeft,
   IconCaretRight,
   Text,
-  PlainButton,
-  useMedia
+  PlainButton
 } from '@audius/harmony'
 import { Link } from 'react-router'
 
@@ -24,7 +23,6 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     const [canScrollLeft, setCanScrollLeft] = useState(false)
     const [canScrollRight, setCanScrollRight] = useState(true)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
-    const { isLarge } = useMedia()
     const isMobile = useIsMobile()
 
     const updateScrollButtons = useCallback(() => {
@@ -38,7 +36,6 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
       }
     }, [])
 
-    // TODO: More efficient resize handling
     useEffect(() => {
       const container = scrollContainerRef.current
       if (!container) return
@@ -51,7 +48,32 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
         container.removeEventListener('scroll', updateScrollButtons)
         window.removeEventListener('resize', updateScrollButtons)
       }
-    })
+    }, [updateScrollButtons])
+
+    const railInset = isMobile ? 16 : 18
+    const contentInset = 8
+    // Scroll containers clip overflow; keep a generous internal vertical buffer
+    // so card shadows (including hover states) are not cut between carousels.
+    const railShadowPadding = isMobile ? 12 : 20
+    const handleScrollBy = useCallback(
+      (direction: -1 | 1) => {
+        const container = scrollContainerRef.current
+        if (!container) return
+
+        // Scroll by nearly one viewport of rail content so nav remains aligned
+        // across responsive widths without hardcoded pixel jumps.
+        const scrollAmount = Math.max(
+          240,
+          container.clientWidth - (railInset + contentInset) * 2 - 24
+        )
+        container.scrollBy({
+          left: direction * scrollAmount,
+          behavior: 'smooth'
+        })
+      },
+      [railInset]
+    )
+
     return (
       <Flex ref={ref} direction='column' gap={isMobile ? 'l' : 'xl'} w='100%'>
         <Flex
@@ -82,10 +104,7 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
                     color={canScrollLeft ? 'default' : 'disabled'}
                     aria-label={`${title} scroll left`}
                     onClick={() => {
-                      scrollContainerRef.current?.scrollBy({
-                        left: -648,
-                        behavior: 'smooth'
-                      })
+                      handleScrollBy(-1)
                     }}
                   />
                   <IconButton
@@ -94,10 +113,7 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
                     color={canScrollRight ? 'default' : 'disabled'}
                     aria-label={`${title} scroll right`}
                     onClick={() => {
-                      scrollContainerRef.current?.scrollBy({
-                        left: 648,
-                        behavior: 'smooth'
-                      })
+                      handleScrollBy(1)
                     }}
                   />
                 </Flex>
@@ -106,52 +122,36 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
           ) : null}
         </Flex>
         <Flex
-          css={
-            isLarge
-              ? {
-                  marginRight: '-50vw',
-                  marginLeft: '-50vw',
-                  overflow: 'visible'
-                }
-              : null
-          }
+          ref={scrollContainerRef}
+          css={{
+            overflowX: 'auto',
+
+            scrollbarWidth: 'none', // Firefox
+            msOverflowStyle: 'none', // IE/Edge
+            '&::-webkit-scrollbar': {
+              display: 'none' // Chrome/Safari
+            },
+            overscrollBehaviorX: 'contain', // prevents back gesture on chrome
+
+            // Keep edge clipping behavior while preserving room for card shadows.
+            marginLeft: -railInset,
+            marginRight: -railInset,
+            paddingLeft: railInset,
+            paddingRight: railInset,
+            paddingTop: railShadowPadding,
+            paddingBottom: railShadowPadding
+          }}
         >
           <Flex
-            ref={scrollContainerRef}
+            gap='m'
             css={{
-              overflowX: 'auto',
-
-              scrollbarWidth: 'none', // Firefox
-              msOverflowStyle: 'none', // IE/Edge
-              '&::-webkit-scrollbar': {
-                display: 'none' // Chrome/Safari
-              },
-              overscrollBehaviorX: 'contain', // prevents back gesture on chrome
-
-              // Some logic to make sure card shadows are not cut off
-              marginLeft: !canScrollLeft && !isLarge ? -18 : undefined,
-              paddingRight: isMobile
-                ? 'calc(50vw + 16px)'
-                : isLarge
-                  ? '50vw'
-                  : undefined,
-              paddingLeft: isMobile
-                ? 'calc(50vw + 16px)'
-                : isLarge
-                  ? 'calc(50vw + 2px)'
-                  : !canScrollLeft
-                    ? 18
-                    : undefined,
-              paddingTop: 2
+              minWidth: 'max-content',
+              overflow: 'visible',
+              paddingLeft: contentInset,
+              paddingRight: contentInset
             }}
           >
-            <Flex
-              gap='m'
-              css={{ minWidth: 'max-content', overflow: 'visible' }}
-              pv='2xs'
-            >
-              {children}
-            </Flex>
+            {children}
           </Flex>
         </Flex>
       </Flex>

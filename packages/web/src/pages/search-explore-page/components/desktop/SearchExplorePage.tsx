@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import {
+  Fragment,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
@@ -15,8 +23,7 @@ import {
   IconUser,
   Divider,
   FilterButton,
-  useTheme,
-  useMedia
+  useTheme
 } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
@@ -24,6 +31,7 @@ import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import exploreHeaderLanding from 'assets/img/explore-header-landing.png'
 import Page from 'components/page/Page'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import useTabs from 'hooks/useTabs/useTabs'
 import { filters } from 'pages/search-page/SearchFilters'
 import { SearchResults } from 'pages/search-page/SearchResults'
@@ -97,7 +105,6 @@ const tabHeaders = [
 ]
 
 const DEBOUNCE_MS = 200
-const MIN_WIDTH = 840
 const NORMAL_WIDTH = 1200
 
 const SearchExplorePage = ({
@@ -113,10 +120,11 @@ const SearchExplorePage = ({
   const showSearchResults = useShowSearchResults()
   const [tracksLayout, setTracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
+  const tabContainerRef = useRef<HTMLDivElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
   const { motion } = useTheme()
-  const { isLarge } = useMedia()
+  const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 552)
   const handleSearchTab = useCallback(
     (newTab: string) => {
       setCategory(newTab.toLowerCase() as CategoryView)
@@ -176,6 +184,15 @@ const SearchExplorePage = ({
 
   const filterKeys: string[] = categories[categoryKey].filters
 
+  const tabsWithDisplayMode = useMemo(
+    () =>
+      tabHeaders.map((tab) => ({
+        ...tab,
+        hideText: shouldHideTabText
+      })),
+    [shouldHideTabText]
+  )
+
   const tabElements = useMemo(
     () => tabHeaders.map((tab) => <Flex key={tab.label}>{tab.text}</Flex>),
     []
@@ -183,7 +200,7 @@ const SearchExplorePage = ({
 
   const { tabs } = useTabs({
     isMobile: false,
-    tabs: tabHeaders,
+    tabs: tabsWithDisplayMode,
     elements: tabElements,
     onTabClick: handleSearchTab,
     selectedTabLabel: capitalize(categoryKey)
@@ -207,6 +224,87 @@ const SearchExplorePage = ({
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
   const showAlbumContent = categoryKey === CategoryView.ALL || isAlbumsTab
+  const sectionConfigs: {
+    key: string
+    shouldRender: boolean
+    element: ReactNode
+  }[] = [
+    {
+      key: 'recommendedTracks',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <RecommendedTracksSection />
+    },
+    {
+      key: 'featuredPlaylists',
+      shouldRender: showPlaylistContent,
+      element: <FeaturedPlaylistsSection />
+    },
+    {
+      key: 'topAlbumsThisMonth',
+      shouldRender: showAlbumContent,
+      element: <TopAlbumsThisMonthSection />
+    },
+    {
+      key: 'newAlbumReleases',
+      shouldRender: showAlbumContent,
+      element: <NewAlbumReleasesSection />
+    },
+    {
+      key: 'bestSellingAlbums',
+      shouldRender: showAlbumContent,
+      element: <BestSellingAlbumsSection />
+    },
+    {
+      key: 'featuredRemixContests',
+      shouldRender: showTrackContent,
+      element: <FeaturedRemixContestsSection />
+    },
+    {
+      key: 'fanClubs',
+      shouldRender: categoryKey === CategoryView.ALL,
+      element: <FanClubsExploreSection />
+    },
+    {
+      key: 'quickSearch',
+      shouldRender: isTracksTab,
+      element: <QuickSearchGrid />
+    },
+    {
+      key: 'recentlyPlayed',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <RecentlyPlayedSection />
+    },
+    {
+      key: 'undergroundTrendingTracks',
+      shouldRender: isTracksTab,
+      element: <UndergroundTrendingTracksSection />
+    },
+    {
+      key: 'artistSpotlight',
+      shouldRender: showUserContent,
+      element: <ArtistSpotlightSection />
+    },
+    {
+      key: 'labelSpotlight',
+      shouldRender: showUserContent,
+      element: <LabelSpotlightSection />
+    },
+    {
+      key: 'moodGrid',
+      shouldRender: isTracksTab || isPlaylistsTab || isAlbumsTab,
+      element: <MoodGrid />
+    },
+    {
+      key: 'feelingLucky',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <FeelingLuckySection />
+    },
+    {
+      key: 'recentSearches',
+      shouldRender: showUserContextualContent,
+      element: <RecentSearchesSection />
+    }
+  ]
 
   return (
     <Page
@@ -215,12 +313,7 @@ const SearchExplorePage = ({
       size='large'
       variant='flush'
     >
-      <Flex
-        justifyContent='center'
-        css={{
-          minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH
-        }}
-      >
+      <Flex justifyContent='center' w='100%'>
         <Flex
           direction='column'
           pv='3xl'
@@ -228,8 +321,9 @@ const SearchExplorePage = ({
           gap='3xl'
           alignItems='stretch'
           css={{
-            minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH,
-            maxWidth: isLarge ? '100%' : NORMAL_WIDTH
+            minWidth: 0,
+            width: '100%',
+            maxWidth: NORMAL_WIDTH
           }}
         >
           {/* Header Section */}
@@ -277,7 +371,15 @@ const SearchExplorePage = ({
           {/* Tabs and Filters */}
           <Flex direction='column' gap='l'>
             <Flex direction='column'>
-              <Flex alignSelf='flex-start'>{tabs}</Flex>
+              <Flex
+                ref={tabContainerRef}
+                alignSelf='stretch'
+                css={{
+                  minWidth: 0
+                }}
+              >
+                <Flex alignSelf='flex-start'>{tabs}</Flex>
+              </Flex>
               <Divider orientation='horizontal' />
             </Flex>
             {filterKeys.length ? (
@@ -320,31 +422,16 @@ const SearchExplorePage = ({
           <Flex
             direction='column'
             gap='3xl'
-            css={{ display: showSearchResults ? 'none' : undefined }}
+            css={{
+              minWidth: 0,
+              overflowX: 'clip',
+              overflowY: 'visible',
+              display: showSearchResults ? 'none' : undefined
+            }}
           >
-            {showTrackContent && showUserContextualContent ? (
-              <RecommendedTracksSection />
-            ) : null}
-            {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
-            {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}
-            {showAlbumContent ? <NewAlbumReleasesSection /> : null}
-            {showAlbumContent ? <BestSellingAlbumsSection /> : null}
-            {showTrackContent ? <FeaturedRemixContestsSection /> : null}
-            {categoryKey === CategoryView.ALL ? (
-              <FanClubsExploreSection />
-            ) : null}
-            {isTracksTab ? <QuickSearchGrid /> : null}
-            {showTrackContent && showUserContextualContent ? (
-              <RecentlyPlayedSection />
-            ) : null}
-            {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
-            {showUserContent ? <ArtistSpotlightSection /> : null}
-            {showUserContent ? <LabelSpotlightSection /> : null}
-            {isTracksTab || isPlaylistsTab || isAlbumsTab ? <MoodGrid /> : null}
-            {showTrackContent && showUserContextualContent ? (
-              <FeelingLuckySection />
-            ) : null}
-            {showUserContextualContent ? <RecentSearchesSection /> : null}
+            {sectionConfigs.map(({ key, shouldRender, element }) =>
+              shouldRender ? <Fragment key={key}>{element}</Fragment> : null
+            )}
           </Flex>
         </Flex>
       </Flex>

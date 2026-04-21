@@ -16,6 +16,8 @@ import { useMainContentRef } from 'pages/MainContentContext'
 import { NoResultsTile } from '../NoResultsTile'
 import { useSearchParams } from '../hooks'
 
+import styles from './CardResults.module.css'
+
 const { addItem: addRecentSearch } = searchActions
 
 type AlbumResultsProps = {
@@ -32,14 +34,17 @@ const AlbumResultsSkeletons = ({
   skeletonCount: number
 }) => {
   const isMobile = useIsMobile()
+  const cardSize = isMobile ? 'xs' : 'm'
+  const cardStyles = isMobile ? { maxWidth: 320 } : undefined
   return (
     <>
       {range(skeletonCount).map((_, i) => (
         <CollectionCard
           key={`album_card_skeleton_${i}`}
           id={0}
-          size={isMobile ? 'xs' : 's'}
-          css={isMobile ? { maxWidth: 320 } : undefined}
+          size={cardSize}
+          w={isMobile ? undefined : '100%'}
+          css={cardStyles}
           loading={true}
         />
       ))}
@@ -86,35 +91,46 @@ export const AlbumResults = (props: AlbumResultsProps) => {
   const shouldShowMoreSkeletons =
     isFetching && !isPending && (limit === undefined || data?.length < limit)
 
+  const resultCards = !truncatedResults.length
+    ? [
+        <AlbumResultsSkeletons
+          key='initial-skeletons'
+          skeletonCount={skeletonCount}
+        />
+      ]
+    : truncatedResults.map((album) => (
+        <CollectionCard
+          key={album.playlist_id}
+          id={album.playlist_id}
+          size={isMobile ? 'xs' : 'm'}
+          w={isMobile ? undefined : '100%'}
+          css={isMobile ? { maxWidth: 320 } : undefined}
+          onClick={() => handleClick(album.playlist_id)}
+          onCollectionLinkClick={() => handleClick(album.playlist_id)}
+        />
+      ))
+
   return (
-    <Box
-      css={{
-        display: 'grid',
-        gridTemplateColumns: isMobile
-          ? 'repeat(auto-fill, minmax(150px, 1fr))'
-          : 'repeat(auto-fill, 200px)',
-        justifyContent: 'space-between',
-        gap: 16
-      }}
-      p={isMobile ? 'm' : undefined}
-    >
-      {!truncatedResults.length ? (
-        <AlbumResultsSkeletons skeletonCount={skeletonCount} />
-      ) : (
-        truncatedResults.map((album) => (
-          <CollectionCard
-            key={album.playlist_id}
-            id={album.playlist_id}
-            size={isMobile ? 'xs' : 's'}
-            css={isMobile ? { maxWidth: 320 } : undefined}
-            onClick={() => handleClick(album.playlist_id)}
-            onCollectionLinkClick={() => handleClick(album.playlist_id)}
-          />
-        ))
-      )}
-      {shouldShowMoreSkeletons ? (
-        <AlbumResultsSkeletons skeletonCount={skeletonCount} />
-      ) : null}
+    <Box className={isMobile ? undefined : styles.cardsLayoutWrapper}>
+      <Box
+        className={isMobile ? undefined : styles.cardsContainer}
+        css={
+          isMobile
+            ? {
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                justifyContent: 'space-between',
+                gap: 16
+              }
+            : undefined
+        }
+        p={isMobile ? 'm' : undefined}
+      >
+        {resultCards}
+        {shouldShowMoreSkeletons ? (
+          <AlbumResultsSkeletons skeletonCount={skeletonCount} />
+        ) : null}
+      </Box>
     </Box>
   )
 }

@@ -29,9 +29,11 @@ export const MoodGrid = () => {
   return (
     <Flex
       direction='column'
-      mh='l'
+      ph='l'
       gap={isMobile ? 'l' : 'xl'}
       alignItems='center'
+      w='100%'
+      css={{ minWidth: 0, boxSizing: 'border-box' }}
     >
       <Text
         variant={isMobile ? 'title' : 'heading'}
@@ -43,15 +45,20 @@ export const MoodGrid = () => {
       </Text>
       <Flex
         gap={isMobile ? 'm' : 's'}
-        justifyContent='center'
-        alignItems='flex-start'
+        justifyContent='space-between'
+        alignItems='stretch'
         wrap='wrap'
+        css={{
+          width: '100%',
+          minWidth: 0
+        }}
       >
         {Object.entries(MOODS)
           .sort()
           .map(([mood, moodInfo]) => (
             <Paper
               key={mood}
+              flex={isMobile ? '1 1 132px' : '1 1 156px'}
               pv='l'
               ph='xl'
               gap='s'
@@ -60,6 +67,9 @@ export const MoodGrid = () => {
               backgroundColor='white'
               onClick={() => handleMoodPress(moodInfo.value)}
               css={{
+                minWidth: isMobile ? 132 : 156,
+                justifyContent: 'center',
+                alignItems: 'center',
                 ':hover': {
                   background: color.neutral.n25,
                   border: `1px solid ${color.neutral.n150}`
