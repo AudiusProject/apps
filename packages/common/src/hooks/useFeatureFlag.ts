@@ -93,24 +93,31 @@ export const createUseFeatureFlagHook =
     )
 
     const [isLocallyEnabled, setIsLocallyOverriden] = useState<Maybe<boolean>>()
+    const [hasReadOverride, setHasReadOverride] = useState(
+      () => getLocalStorageItem == null
+    )
 
     useEffectOnce(() => {
-      const getOverride = async () => {
-        const override = await getLocalStorageItem?.(overrideKey)
-        if (override === 'enabled') {
-          setIsLocallyOverriden(true)
-        }
-        if (override === 'disabled') {
-          setIsLocallyOverriden(false)
-        }
-
-        return undefined
+      if (!getLocalStorageItem) {
+        return
       }
-      getOverride()
+      const getOverride = async () => {
+        try {
+          const override = await getLocalStorageItem(overrideKey)
+          if (override === 'enabled') {
+            setIsLocallyOverriden(true)
+          } else if (override === 'disabled') {
+            setIsLocallyOverriden(false)
+          }
+        } finally {
+          setHasReadOverride(true)
+        }
+      }
+      void getOverride()
     })
 
     return {
-      isLoaded: configLoaded,
+      isLoaded: configLoaded && hasReadOverride,
       isEnabled: isLocallyEnabled ?? isEnabled,
       setOverride
     }
@@ -143,21 +150,26 @@ export const useFeatureFlag = (
   )
 
   const [isLocallyEnabled, setIsLocallyOverriden] = useState<Maybe<boolean>>()
+  const [hasReadOverride, setHasReadOverride] = useState(false)
 
   useEffectOnce(() => {
     const getOverride = async () => {
-      const override = await localStorage.getItem(overrideKey)
-      if (override === 'enabled') {
-        setIsLocallyOverriden(true)
-      } else if (override === 'disabled') {
-        setIsLocallyOverriden(false)
+      try {
+        const override = await localStorage.getItem(overrideKey)
+        if (override === 'enabled') {
+          setIsLocallyOverriden(true)
+        } else if (override === 'disabled') {
+          setIsLocallyOverriden(false)
+        }
+      } finally {
+        setHasReadOverride(true)
       }
     }
-    getOverride()
+    void getOverride()
   })
 
   return {
-    isLoaded: configLoaded,
+    isLoaded: configLoaded && hasReadOverride,
     isEnabled: isLocallyEnabled ?? isEnabled,
     setOverride
   }
