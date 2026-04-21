@@ -55,12 +55,7 @@ export const EventFollowersCard = ({
       border='default'
       css={{ backgroundColor: 'var(--harmony-white)' }}
     >
-      <Flex
-        p='l'
-        gap='m'
-        alignItems='center'
-        justifyContent='space-between'
-      >
+      <Flex p='l' gap='m' alignItems='center' justifyContent='space-between'>
         <Flex gap='xs' alignItems='baseline'>
           <Text variant='heading' size='s'>
             {messages.followers}

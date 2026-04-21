@@ -21,11 +21,7 @@ import {
   remixesPageSelectors,
   useHostRemixContestModal
 } from '@audius/common/store'
-import {
-  dayjs,
-  formatContestDeadline,
-  formatCount
-} from '@audius/common/utils'
+import { dayjs, formatContestDeadline, formatCount } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -33,7 +29,6 @@ import {
   Flex,
   IconUserFollow,
   IconUserFollowing,
-  Paper,
   SelectablePill,
   Text
 } from '@audius/harmony'
@@ -267,11 +262,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     if (isOwner) {
       return (
         <Flex gap='s'>
-          <Button
-            size='small'
-            variant='secondary'
-            onClick={handleEditContest}
-          >
+          <Button size='small' variant='secondary' onClick={handleEditContest}>
             Edit Contest
           </Button>
           <Button size='small' onClick={handlePickWinners}>
@@ -396,8 +387,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                     {user.name}
                   </Text>
                   <Text variant='body' size='s' color='subdued'>
-                    {formatCount(user.follower_count ?? 0)}{' '}
-                    {messages.followers}
+                    {formatCount(user.follower_count ?? 0)} {messages.followers}
                   </Text>
                 </Flex>
               </Flex>

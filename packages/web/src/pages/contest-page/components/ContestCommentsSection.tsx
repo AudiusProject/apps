@@ -328,7 +328,7 @@ const ContestCommentRow = ({
   if (mode === 'comments' && isPostUpdate) return null
 
   const videoUrl: string | undefined =
-    'videoUrl' in comment ? (comment as any).videoUrl ?? undefined : undefined
+    'videoUrl' in comment ? ((comment as any).videoUrl ?? undefined) : undefined
 
   return (
     <Paper
