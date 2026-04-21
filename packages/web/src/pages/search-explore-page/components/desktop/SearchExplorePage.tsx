@@ -317,7 +317,7 @@ const SearchExplorePage = ({
         <Flex
           direction='column'
           pv='3xl'
-          ph='unit15'
+          ph='unit8'
           gap='3xl'
           alignItems='stretch'
           css={{

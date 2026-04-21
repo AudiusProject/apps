@@ -4,8 +4,9 @@ import { Flex, FlexProps } from '@audius/harmony'
 
 export const Frosted = ({
   children,
+  contentPaddingInline = 'var(--harmony-unit-15)',
   ...props
-}: { children: ReactNode } & FlexProps) => {
+}: { children: ReactNode; contentPaddingInline?: string } & FlexProps) => {
   // Only Safari & Chrome support the CSS
   // frosted glasss effect.
   const [isChromeOrSafari, setIsChromeOrSafari] = useState(false)
@@ -26,7 +27,7 @@ export const Frosted = ({
         backdropFilter: 'blur(10px)',
         zIndex: 10,
         position: 'relative',
-        paddingInline: 'var(--harmony-unit-15)',
+        paddingInline: contentPaddingInline,
         // Need to set a different gradient for
         // browsers that don't support the
         // backdrop-filter frosted glass effect.

@@ -4,7 +4,7 @@
 }
 
 .pageContainer .inset {
-  padding: 0px var(--harmony-unit-15) var(--harmony-unit-15);
+  padding: 0px var(--harmony-unit-8) var(--harmony-unit-15);
 }
 
 .pageContainer .flush {
@@ -43,5 +43,5 @@
 .searchWrapper {
   position: absolute;
   top: var(--harmony-unit-8);
-  left: var(--harmony-unit-15);
+  left: var(--harmony-unit-8);
 }

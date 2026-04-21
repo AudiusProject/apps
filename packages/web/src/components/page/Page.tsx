@@ -23,7 +23,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
 
   return (
     <div className={styles.headerContainer}>
-      <Frosted>
+      <Frosted contentPaddingInline='var(--harmony-unit-8)'>
         {cloneElement(header as any, {
           headerContainerRef,
           topLeftElement: showSearch ? <DesktopSearchBar /> : null
