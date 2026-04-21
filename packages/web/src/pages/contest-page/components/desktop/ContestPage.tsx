@@ -82,18 +82,16 @@ export const CONTEST_PAGE_SIZE = 10
 
 const HERO_HEIGHT = 288
 const MAX_CONTENT_WIDTH = 1080
-const RIGHT_COLUMN_WIDTH_PX = 400
+const RIGHT_COLUMN_WIDTH_PX = 360
 const COLUMN_GAP_PX = 24
 
 type ContestTab = 'details' | 'submissions'
 
-// Inline countdown pill matching the Figma/track-page treatment.
-// A single rounded dark pill containing four unit columns separated
-// by vertical dividers. The track-page `RemixContestCountdown`
-// absolutely positions itself over the hero banner and renders
-// semi-transparent white over a purple gradient — here we want a
-// solid readable pill against the gray page background, so we
-// render our own with inverse text on a dark Paper.
+// Figma-aligned countdown: four plain columns on the page background,
+// NO dark pill wrapper. Large heading numerals on top, uppercase
+// labels beneath. Leading-zero units are subdued so the most-
+// significant non-zero unit reads first. Reference:
+// Figma node 2857-99124 (remix-contest empty-state desktop).
 const CountdownTile = ({
   value,
   label,
@@ -103,15 +101,15 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  <Flex direction='column' alignItems='center' gap='2xs' w={48}>
+  <Flex direction='column' alignItems='center' gap='xs' w={56}>
     <Text
       variant='heading'
-      size='s'
-      color={isSubdued ? 'subdued' : 'staticWhite'}
+      size='l'
+      color={isSubdued ? 'subdued' : 'default'}
     >
       {String(value).padStart(2, '0')}
     </Text>
-    <Text variant='label' size='xs' color='subdued'>
+    <Text variant='label' size='xs' color='subdued' strength='strong'>
       {label}
     </Text>
   </Flex>
@@ -132,64 +130,29 @@ const HeaderCountdown = ({ endDate }: { endDate: string }) => {
   const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000))
   const secs = Math.floor((diffMs % (60 * 1000)) / 1000)
 
-  // Subdue leading zeros so the most-significant non-zero unit reads first.
   const daysSubdued = days === 0
   const hoursSubdued = daysSubdued && hours === 0
   const minsSubdued = hoursSubdued && mins === 0
 
   return (
-    <Paper
-      pv='s'
-      ph='l'
-      gap='l'
-      alignItems='center'
-      borderRadius='l'
-      shadow='near'
-      css={{
-        backgroundColor: 'var(--harmony-static-neutral, #1A1818)'
-      }}
-    >
+    <Flex gap='xl' alignItems='center'>
       <CountdownTile
         value={days}
         label={messages.days}
         isSubdued={daysSubdued}
-      />
-      <Divider
-        orientation='vertical'
-        css={{
-          height: 32,
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          borderColor: 'rgba(255,255,255,0.2)'
-        }}
       />
       <CountdownTile
         value={hours}
         label={messages.hours}
         isSubdued={hoursSubdued}
       />
-      <Divider
-        orientation='vertical'
-        css={{
-          height: 32,
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          borderColor: 'rgba(255,255,255,0.2)'
-        }}
-      />
       <CountdownTile
         value={mins}
         label={messages.mins}
         isSubdued={minsSubdued}
       />
-      <Divider
-        orientation='vertical'
-        css={{
-          height: 32,
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          borderColor: 'rgba(255,255,255,0.2)'
-        }}
-      />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
-    </Paper>
+    </Flex>
   )
 }
 
@@ -409,251 +372,214 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
       canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
-      <Box w='100%'>
-        {/* Hero banner: track artwork blown up and cropped. This is the */}
-        {/* closest analog to the "Explore Banner" in the design without */}
-        {/* introducing a new per-contest cover-photo field. */}
+      {/* Content is centered to MAX_CONTENT_WIDTH and sits on the
+          page background. The hero banner is contained inside this
+          column (rounded corners, full column-width) instead of
+          bleeding full-page-width — matches the Figma node 2857-99124. */}
+      <Box
+        css={{
+          maxWidth: MAX_CONTENT_WIDTH,
+          margin: '0 auto',
+          width: '100%'
+        }}
+        ph='2xl'
+        pv='xl'
+      >
+        {/* Contained hero banner. Rounded corners, max-column-width,
+            so the page background frames it on all four sides. */}
         <Box
           w='100%'
           h={HERO_HEIGHT}
           css={{
             backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
             backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
+            borderRadius: 'var(--harmony-unit-3, 12px)',
+            overflow: 'hidden'
           }}
         />
 
-        {/* Centered content column. Sits BELOW the hero on the page
-            background — the header content (chip, title, hosted by,
-            countdown) renders in default dark text on the gray page,
-            and the main tile starts below. Keeps the layout predictable
-            without fighting white-on-white states when text happens to
-            fall on the main tile. */}
-        <Box
-          css={{
-            maxWidth: MAX_CONTENT_WIDTH,
-            margin: '0 auto',
-            width: '100%'
-          }}
-          ph='2xl'
-          pv='xl'
-        >
-          {/* Header content block. */}
-          <Box pb='xl'>
-            {/* Row 1: Submissions Due purple chip + actions */}
-            <Flex
-              justifyContent='space-between'
-              alignItems='flex-start'
-              gap='l'
-            >
-              <Box
-                ph='m'
-                pv='xs'
-                borderRadius='s'
-                css={{
-                  backgroundColor: 'var(--harmony-accent-purple, #7E1BCC)'
-                }}
-              >
-                <Text
-                  variant='label'
-                  size='s'
-                  color='staticWhite'
-                  strength='strong'
-                >
-                  {isEnded
-                    ? messages.contestEnded
-                    : dueLabel
-                      ? `${messages.submissionsDue} ${dueLabel}`
-                      : messages.submissionsDue}
-                </Text>
-              </Box>
-              {renderActions()}
-            </Flex>
-
-            {/* Title */}
-            <Box mt='l'>
-              <Text variant='display' size='s'>
-                {track.title} {messages.title}
+        {/* Header content block — sits below the hero, no outer tile. */}
+        <Box pt='xl' pb='xl'>
+          {/* Row 1: Submissions Due plain label + actions. Per Figma
+              this is not a chip — just uppercase label text with the
+              due date below it. */}
+          <Flex justifyContent='space-between' alignItems='flex-start' gap='l'>
+            <Flex direction='column' gap='2xs'>
+              <Text variant='label' size='s' color='subdued' strength='strong'>
+                {isEnded ? messages.contestEnded : messages.submissionsDue}
               </Text>
-            </Box>
+              {dueLabel ? (
+                <Text variant='label' size='l' strength='strong'>
+                  {dueLabel}
+                </Text>
+              ) : null}
+            </Flex>
+            {renderActions()}
+          </Flex>
 
-            {/* Hosted By row + Countdown */}
+          {/* Title */}
+          <Box mt='l'>
+            <Text variant='display' size='s'>
+              {track.title} {messages.title}
+            </Text>
+          </Box>
+
+          {/* Hosted By row + Countdown (4 plain columns, not a pill) */}
+          <Flex
+            justifyContent='space-between'
+            alignItems='center'
+            gap='xl'
+            mt='xl'
+          >
+            <Flex direction='column' gap='s'>
+              <Text variant='label' size='s' color='subdued' strength='strong'>
+                {messages.hostedBy}
+              </Text>
+              <Flex gap='m' alignItems='center'>
+                <Avatar userId={user.user_id} h={56} w={56} />
+                <Flex direction='column'>
+                  <Text variant='title' size='m'>
+                    {user.name}
+                  </Text>
+                  <Text variant='body' size='s' color='subdued'>
+                    @{user.handle}
+                  </Text>
+                </Flex>
+              </Flex>
+            </Flex>
+            {!isEnded && contest.endDate ? (
+              <HeaderCountdown endDate={contest.endDate} />
+            ) : null}
+          </Flex>
+        </Box>
+
+        {/* Tabs — only when there are submissions (Figma 1-track variant
+            has no tabs). */}
+        {submissionsCount && submissionsCount > 0 ? (
+          <Flex gap='s' pb='m'>
+            <SelectablePill
+              size='large'
+              isSelected={activeTab === 'details'}
+              label={messages.contestDetails}
+              onClick={() => setActiveTab('details')}
+            />
+            <SelectablePill
+              size='large'
+              isSelected={activeTab === 'submissions'}
+              label={messages.submissionsTab(submissionsCount)}
+              onClick={() => setActiveTab('submissions')}
+            />
+          </Flex>
+        ) : null}
+
+        {/* Tab body — 2-column layout matching Figma. Left column is
+            wider (flex 1) and holds About + Prizes as stacked cards.
+            Right column is fixed width and holds Stems/Followers/
+            Comments as stacked cards. Each section is its OWN Paper
+            with its own border; there's no single outer tile. */}
+        {activeTab === 'details' ? (
+          <Flex gap={`${COLUMN_GAP_PX}px` as any} alignItems='flex-start'>
+            {/* Left column: About + Prizes (and Updates if we add
+                host-feed parity later). Cards sit on the page
+                background. */}
             <Flex
-              justifyContent='space-between'
-              alignItems='center'
-              gap='xl'
-              mt='xl'
+              direction='column'
+              gap='l'
+              css={{ flex: '1 1 auto', minWidth: 0 }}
             >
-              <Flex direction='column' gap='s'>
+              <Paper
+                direction='column'
+                p='xl'
+                gap='l'
+                borderRadius='l'
+                border='default'
+                backgroundColor='white'
+                shadow='flat'
+              >
                 <Text
                   variant='label'
                   size='s'
                   color='subdued'
                   strength='strong'
                 >
-                  {messages.hostedBy}
+                  {messages.aboutThisContest}
                 </Text>
-                <Flex gap='m' alignItems='center'>
-                  <Avatar userId={user.user_id} h={56} w={56} />
-                  <Flex direction='column'>
-                    <Text variant='title' size='m'>
-                      {user.name}
-                    </Text>
-                    <Text variant='body' size='s' color='subdued'>
-                      @{user.handle}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-              {!isEnded && contest.endDate ? (
-                <HeaderCountdown endDate={contest.endDate} />
-              ) : null}
-            </Flex>
-          </Box>
+                <RemixContestDetailsTab trackId={trackId!} />
+              </Paper>
 
-          {/* Tabs — sit above the main tile, on page background. */}
-          {submissionsCount && submissionsCount > 0 ? (
-            <Flex gap='s' pb='m'>
-              <SelectablePill
-                size='large'
-                isSelected={activeTab === 'details'}
-                label={messages.contestDetails}
-                onClick={() => setActiveTab('details')}
-              />
-              <SelectablePill
-                size='large'
-                isSelected={activeTab === 'submissions'}
-                label={messages.submissionsTab(submissionsCount)}
-                onClick={() => setActiveTab('submissions')}
-              />
-            </Flex>
-          ) : null}
-
-          {/* Tab body */}
-          {activeTab === 'details' ? (
-            <Flex direction='column' gap='l'>
-              {/* Main details tile: About + Prizes (left) and the
-                  Stems/Followers stack (right), all wrapped in a
-                  single elevated Paper tile. Matches the track
-                  page's main-tile treatment. */}
               <Paper
                 direction='column'
                 p='xl'
+                gap='l'
                 borderRadius='l'
                 border='default'
-                shadow='mid'
                 backgroundColor='white'
+                shadow='flat'
               >
-                <Flex
-                  gap={`${COLUMN_GAP_PX}px` as any}
-                  alignItems='flex-start'
+                <Text
+                  variant='label'
+                  size='s'
+                  color='subdued'
+                  strength='strong'
                 >
-                  {/* Left column: About + Prizes */}
-                  <Flex
-                    direction='column'
-                    gap='2xl'
-                    css={{ flex: '1 1 auto', minWidth: 0 }}
-                  >
-                    <Flex direction='column' gap='l'>
-                      <Text
-                        variant='label'
-                        size='s'
-                        color='subdued'
-                        strength='strong'
-                      >
-                        {messages.aboutThisContest}
-                      </Text>
-                      <RemixContestDetailsTab trackId={trackId!} />
-                    </Flex>
-
-                    <Divider />
-
-                    <Flex direction='column' gap='l'>
-                      <Text
-                        variant='label'
-                        size='s'
-                        color='subdued'
-                        strength='strong'
-                      >
-                        {messages.prizes}
-                      </Text>
-                      <RemixContestPrizesTab trackId={trackId!} />
-                    </Flex>
-                  </Flex>
-
-                  {/* Right column: Stems & Downloads + Followers.
-                      Each is already a Paper on its own, so inside the
-                      outer tile they read as nested sub-cards — the
-                      track page treats the downloadable section the
-                      same way. */}
-                  <Flex
-                    direction='column'
-                    gap='l'
-                    css={{
-                      flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
-                      width: RIGHT_COLUMN_WIDTH_PX
-                    }}
-                  >
-                    {hasDownloads ? (
-                      <DownloadSection trackId={trackId!} />
-                    ) : null}
-
-                    <EventFollowersCard
-                      eventId={eventId}
-                      followerCount={followState?.followerCount ?? 0}
-                    />
-                  </Flex>
-                </Flex>
+                  {messages.prizes}
+                </Text>
+                <RemixContestPrizesTab trackId={trackId!} />
               </Paper>
+            </Flex>
 
-              {/* Comments tile — matches the track-page Comments
-                  preview: IconMessage + "Comments (N)" header, Paper
-                  tile, avatar + ComposerInput composer, sort pills,
-                  and avatar-led rows with an Artist badge for the
-                  event host. */}
+            {/* Right column: Stems & Downloads + Followers + Comments. */}
+            <Flex
+              direction='column'
+              gap='l'
+              css={{
+                flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
+                width: RIGHT_COLUMN_WIDTH_PX
+              }}
+            >
+              {hasDownloads ? <DownloadSection trackId={trackId!} /> : null}
+
+              <EventFollowersCard
+                eventId={eventId}
+                followerCount={followState?.followerCount ?? 0}
+              />
+
+              {/* Comments tile — in-column Figma card. */}
               <ContestCommentsTile
                 eventId={eventId}
                 eventOwnerUserId={contest?.userId}
                 mode='comments'
               />
-
-              {/* Updates tile — host-curated feed using the same
-                  visual vocabulary. Composer is host-only (IconCamera
-                  Attach Video affordance). */}
-              <ContestCommentsTile
-                eventId={eventId}
-                eventOwnerUserId={contest?.userId}
-                mode='updates'
-              />
             </Flex>
-          ) : null}
+          </Flex>
+        ) : null}
 
-          {activeTab === 'submissions' ? (
-            <Paper
-              direction='column'
-              p='xl'
-              borderRadius='l'
-              border='default'
-              shadow='mid'
-              backgroundColor='white'
-            >
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
-            </Paper>
-          ) : null}
-        </Box>
+        {activeTab === 'submissions' ? (
+          <Paper
+            direction='column'
+            p='xl'
+            borderRadius='l'
+            border='default'
+            shadow='flat'
+            backgroundColor='white'
+          >
+            <TanQueryLineup
+              data={lineup.data}
+              isFetching={lineup.isFetching}
+              isPending={lineup.isPending}
+              isError={lineup.isError}
+              hasNextPage={lineup.hasNextPage}
+              play={lineup.play}
+              pause={lineup.pause}
+              loadNextPage={lineup.loadNextPage}
+              isPlaying={lineup.isPlaying}
+              lineup={lineup.lineup}
+              pageSize={CONTEST_PAGE_SIZE}
+              actions={remixesPageLineupActions}
+            />
+          </Paper>
+        ) : null}
       </Box>
     </Page>
   )

@@ -236,11 +236,12 @@ describe('ContestPage', () => {
     // Stubbed subsections rendered by the Details tab
     expect(screen.getByTestId('details-tab')).toBeInTheDocument()
     expect(screen.getByTestId('prizes-tab')).toBeInTheDocument()
-    // ContestCommentsSection mounts twice on the Details tab — once for
-    // the Updates feed (left column or full-width depending on the
-    // Stems & Downloads panel being present) and once for the Comments
-    // panel on the right.
-    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(2)
+    // The details tab now renders a single ContestCommentsTile in the
+    // right column (matches Figma node 2857-99124). The Updates feed
+    // isn't in the Figma — the Phase-2 host-updates tile was removed
+    // for parity and will come back as its own separate design once
+    // specced.
+    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(1)
     // The submissions lineup lives under the Submissions tab, not the
     // Details tab; it renders after flipping the pill.
     expect(screen.queryByTestId('tan-query-lineup')).not.toBeInTheDocument()
