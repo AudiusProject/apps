@@ -2,14 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   useCurrentUserId,
-  useEventFollowState,
   useRemixContest,
   useRemixesLineup,
   useTrackByParams,
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { remixesPageLineupActions } from '@audius/common/store'
 import { dayjs, formatContestDeadline } from '@audius/common/utils'
@@ -98,7 +96,11 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   return (
     <Flex direction='row' alignItems='center'>
       <CountdownTile value={days} label={messages.days} isSubdued={daysSub} />
-      <CountdownTile value={hours} label={messages.hours} isSubdued={hoursSub} />
+      <CountdownTile
+        value={hours}
+        label={messages.hours}
+        isSubdued={hoursSub}
+      />
       <CountdownTile value={mins} label={messages.mins} isSubdued={minsSub} />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
     </Flex>
@@ -134,9 +136,7 @@ const TabBar = ({
               alignItems: 'center',
               paddingVertical: 10,
               borderBottomWidth: 2,
-              borderBottomColor: isActive
-                ? 'rgb(125, 47, 219)'
-                : 'transparent'
+              borderBottomColor: isActive ? 'rgb(125, 47, 219)' : 'transparent'
             }}
           >
             <Text
@@ -171,7 +171,6 @@ export const ContestScreen = () => {
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
-  const { data: followState } = useEventFollowState(eventId)
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
@@ -289,12 +288,7 @@ export const ContestScreen = () => {
 
             {/* Submissions Due */}
             <Flex direction='column' gap='xs'>
-              <Text
-                variant='label'
-                size='s'
-                color='subdued'
-                strength='strong'
-              >
+              <Text variant='label' size='s' color='subdued' strength='strong'>
                 {isEnded ? messages.contestEnded : messages.submissionsDue}
               </Text>
               {dueLabel ? (
@@ -313,12 +307,7 @@ export const ContestScreen = () => {
 
             {/* Hosted By */}
             <Flex direction='column' gap='s'>
-              <Text
-                variant='label'
-                size='s'
-                color='subdued'
-                strength='strong'
-              >
+              <Text variant='label' size='s' color='subdued' strength='strong'>
                 {messages.hostedBy}
               </Text>
               <UserLink userId={user.user_id} size='l' />

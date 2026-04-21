@@ -114,7 +114,11 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   return (
     <Flex alignItems='center' w='100%'>
       <CountdownTile value={days} label={messages.days} isSubdued={daysSub} />
-      <CountdownTile value={hours} label={messages.hours} isSubdued={hoursSub} />
+      <CountdownTile
+        value={hours}
+        label={messages.hours}
+        isSubdued={hoursSub}
+      />
       <CountdownTile value={mins} label={messages.mins} isSubdued={minsSub} />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
     </Flex>
@@ -186,7 +190,9 @@ type MobileContestPageProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-const ContestPage = ({ containerRef: _containerRef }: MobileContestPageProps) => {
+const ContestPage = ({
+  containerRef: _containerRef
+}: MobileContestPageProps) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
@@ -510,10 +516,7 @@ const DetailsTab = ({
         <SectionLabel>
           {`${messages.followers} (${formatCount(followerCount)})`}
         </SectionLabel>
-        <EventFollowersCard
-          eventId={eventId}
-          followerCount={followerCount}
-        />
+        <EventFollowersCard eventId={eventId} followerCount={followerCount} />
       </Flex>
 
       {/* Stems & Downloads */}
