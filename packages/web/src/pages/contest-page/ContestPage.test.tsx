@@ -209,22 +209,30 @@ describe('ContestPage', () => {
   it('renders the details / prizes / submissions / feed sections when a contest exists', () => {
     renderContestPage()
 
-    // All four main section headings present
+    // The Details pill is the default-selected tab, so Details + Prizes
+    // section headings render; Submissions is surfaced as a pill toggle
+    // rather than an always-on section heading.
     expect(
       screen.getByRole('heading', { name: /^details$/i })
     ).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: /^prizes$/i })
     ).toBeInTheDocument()
+    // Label renders as "Submissions" when the lineup hasn't loaded yet
+    // (data=undefined in the mocks) or "Submissions (N)" once data lands.
     expect(
-      screen.getByRole('heading', { name: /^submissions$/i })
+      screen.getByRole('button', { name: /^submissions( \(\d+\))?$/i })
     ).toBeInTheDocument()
 
-    // Stubbed subsections rendered
+    // Stubbed subsections rendered by the Details tab
     expect(screen.getByTestId('details-tab')).toBeInTheDocument()
     expect(screen.getByTestId('prizes-tab')).toBeInTheDocument()
-    expect(screen.getByTestId('tan-query-lineup')).toBeInTheDocument()
-    expect(screen.getByTestId('contest-comments-section')).toBeInTheDocument()
+    // ContestCommentsSection mounts twice on the Details tab — once for the
+    // Updates feed on the left, once for the Comments panel on the right.
+    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(2)
+    // The submissions lineup lives under the Submissions tab, not the
+    // Details tab; it renders after flipping the pill.
+    expect(screen.queryByTestId('tan-query-lineup')).not.toBeInTheDocument()
   })
 
   it('renders "Follow Contest" when the viewer is NOT already following', () => {
@@ -257,11 +265,11 @@ describe('ContestPage', () => {
 
   it('includes the track title in the page header when the contest is attached to a track', () => {
     renderContestPage()
-    // Header is rendered via the Page component; just check the title
-    // shows up somewhere on the page (the desktop Header renders the primary
-    // prop as text).
+    // The redesigned hero composes the display title as
+    // "<track title> Remix Contest" (track title first, then the label),
+    // rather than the old "Remix Contest: <title>" form.
     expect(
-      screen.getByText(/Remix Contest: Ready To Love/i)
+      screen.getByText(/Ready To Love\s+Remix Contest/i)
     ).toBeInTheDocument()
   })
 
