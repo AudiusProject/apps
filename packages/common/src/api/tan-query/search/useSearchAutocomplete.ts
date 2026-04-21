@@ -52,7 +52,6 @@ export const useSearchAutocomplete = (
       })
       return searchResultsFromSDK(data, queryClient)
     },
-    placeholderData: (prev) => (query === '' ? undefined : prev),
     ...options,
     enabled: options?.enabled !== false && query.length > 0
   })
