@@ -461,7 +461,7 @@ export const TrackTile = ({
         </div>
         <TrackTileStats
           trackId={track_id}
-          rankIndex={tileOrder !== undefined ? index : undefined}
+          rankIndex={isTrending && tileOrder !== undefined ? index : undefined}
           size={TrackTileSize.SMALL}
           isLoading={loading}
           noShimmer={noShimmer}
