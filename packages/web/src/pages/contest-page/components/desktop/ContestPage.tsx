@@ -15,20 +15,24 @@ import {
 import { useFeatureFlag } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
+import { ShareSource } from '@audius/common/models'
 import {
   remixesPageActions,
   remixesPageLineupActions,
   remixesPageSelectors,
+  shareModalUIActions,
   useHostRemixContestModal
 } from '@audius/common/store'
-import { dayjs, formatContestDeadline, formatCount } from '@audius/common/utils'
+import { dayjs, formatContestDeadline } from '@audius/common/utils'
 import {
   Box,
   Button,
   Divider,
   Flex,
-  IconUserFollow,
-  IconUserFollowing,
+  IconButton,
+  IconNotificationOff,
+  IconNotificationOn,
+  IconShare,
   SelectablePill,
   Text
 } from '@audius/harmony'
@@ -50,8 +54,10 @@ import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
   title: 'Remix Contest',
-  follow: 'Follow Contest',
+  follow: 'Follow',
   following: 'Following',
+  enterContest: 'Enter Contest',
+  share: 'Share contest',
   submissionsDue: 'Submissions Due:',
   contestEnded: 'Contest Ended',
   hostedBy: 'Hosted By',
@@ -59,8 +65,8 @@ const messages = {
   contestDetails: 'Contest Details',
   submissionsTab: (n?: number) =>
     n === undefined || n === null ? 'Submissions' : `Submissions (${n})`,
-  details: 'Details',
-  prizes: 'Prizes',
+  aboutThisContest: 'ABOUT THIS CONTEST',
+  prizes: 'PRIZES',
   postUpdates: 'Contest Feed',
   days: 'Days',
   hours: 'Hours',
@@ -257,6 +263,25 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     navigate(pickWinnersPage(track.permalink))
   }, [track?.permalink, navigate])
 
+  const handleEnterContest = useRequiresAccountCallback(() => {
+    if (!trackId) return
+    // Deep-link into the upload flow with remix_of pre-filled so the
+    // resulting track is linked back to the contest track. No dedicated
+    // "enter-contest" route today.
+    navigate(`/upload?remix_of=${trackId}`)
+  }, [trackId, navigate])
+
+  const handleShareContest = useCallback(() => {
+    if (!trackId) return
+    dispatch(
+      shareModalUIActions.requestOpen({
+        type: 'track',
+        trackId,
+        source: ShareSource.PAGE
+      })
+    )
+  }, [dispatch, trackId])
+
   const renderActions = useCallback(() => {
     if (!eventId) return null
     if (isOwner) {
@@ -271,26 +296,47 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         </Flex>
       )
     }
+    // Public view: Share icon + Follow pill (notification-style bell) +
+    // Enter Contest primary CTA, per the Figma. Enter Contest is hidden
+    // once the contest has ended — "entering" isn't meaningful anymore.
     return (
-      <Button
-        size='small'
-        variant={followState?.isFollowed ? 'secondary' : 'primary'}
-        iconLeft={followState?.isFollowed ? IconUserFollowing : IconUserFollow}
-        disabled={isFollowing || isUnfollowing}
-        onClick={handleToggleFollow}
-      >
-        {followState?.isFollowed ? messages.following : messages.follow}
-      </Button>
+      <Flex gap='s' alignItems='center'>
+        <IconButton
+          icon={IconShare}
+          color='default'
+          aria-label={messages.share}
+          onClick={handleShareContest}
+        />
+        <Button
+          size='small'
+          variant={followState?.isFollowed ? 'secondary' : 'secondary'}
+          iconLeft={
+            followState?.isFollowed ? IconNotificationOn : IconNotificationOff
+          }
+          disabled={isFollowing || isUnfollowing}
+          onClick={handleToggleFollow}
+        >
+          {followState?.isFollowed ? messages.following : messages.follow}
+        </Button>
+        {!isEnded ? (
+          <Button size='small' onClick={handleEnterContest}>
+            {messages.enterContest}
+          </Button>
+        ) : null}
+      </Flex>
     )
   }, [
     eventId,
     isOwner,
+    isEnded,
     followState?.isFollowed,
     isFollowing,
     isUnfollowing,
     handleToggleFollow,
     handleEditContest,
-    handlePickWinners
+    handlePickWinners,
+    handleShareContest,
+    handleEnterContest
   ])
 
   // Flag gate
@@ -387,7 +433,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                     {user.name}
                   </Text>
                   <Text variant='body' size='s' color='subdued'>
-                    {formatCount(user.follower_count ?? 0)} {messages.followers}
+                    @{user.handle}
                   </Text>
                 </Flex>
               </Flex>
@@ -408,20 +454,26 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           ph='2xl'
           pv='m'
         >
-          <Flex gap='s'>
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'details'}
-              label={messages.contestDetails}
-              onClick={() => setActiveTab('details')}
-            />
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'submissions'}
-              label={messages.submissionsTab(submissionsCount)}
-              onClick={() => setActiveTab('submissions')}
-            />
-          </Flex>
+          {/* Only surface the tab toggle once at least one submission has
+              landed. The Figma 1-track variant has no tabs at all —
+              before anyone has entered, there's nothing meaningful to
+              flip to. */}
+          {submissionsCount && submissionsCount > 0 ? (
+            <Flex gap='s'>
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'details'}
+                label={messages.contestDetails}
+                onClick={() => setActiveTab('details')}
+              />
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'submissions'}
+                label={messages.submissionsTab(submissionsCount)}
+                onClick={() => setActiveTab('submissions')}
+              />
+            </Flex>
+          ) : null}
         </Box>
 
         {/* Tab body */}
@@ -440,15 +492,20 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               alignItems='flex-start'
               pv='l'
             >
-              {/* Left column: About + Prizes + Updates feed */}
+              {/* Left column: About + Prizes + (maybe) Updates feed */}
               <Flex
                 direction='column'
                 gap='2xl'
                 css={{ flex: '1 1 auto', minWidth: 0 }}
               >
                 <Flex direction='column' gap='l'>
-                  <Text variant='heading' size='s'>
-                    {messages.details}
+                  <Text
+                    variant='label'
+                    size='s'
+                    color='subdued'
+                    strength='strong'
+                  >
+                    {messages.aboutThisContest}
                   </Text>
                   <RemixContestDetailsTab trackId={trackId!} />
                 </Flex>
@@ -456,21 +513,34 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 <Divider />
 
                 <Flex direction='column' gap='l'>
-                  <Text variant='heading' size='s'>
+                  <Text
+                    variant='label'
+                    size='s'
+                    color='subdued'
+                    strength='strong'
+                  >
                     {messages.prizes}
                   </Text>
                   <RemixContestPrizesTab trackId={trackId!} />
                 </Flex>
 
-                <Divider />
-
-                {/* Updates feed: host top-level posts only. Composer is
-                    scoped to the host via the same `mode='updates'`. */}
-                <ContestCommentsSection
-                  eventId={eventId}
-                  eventOwnerUserId={contest?.userId}
-                  mode='updates'
-                />
+                {/* Updates feed lives in the left column alongside
+                    Prizes only when there's a right-side Stems &
+                    Downloads panel to balance against. When the
+                    contest has no source tracks we shift Updates to
+                    full-width below both columns (handled further
+                    down); Figma's no-tracks variant renders it
+                    that way. */}
+                {hasDownloads ? (
+                  <>
+                    <Divider />
+                    <ContestCommentsSection
+                      eventId={eventId}
+                      eventOwnerUserId={contest?.userId}
+                      mode='updates'
+                    />
+                  </>
+                ) : null}
               </Flex>
 
               {/* Right column: Stems & Downloads / Followers / Comments */}
@@ -503,7 +573,24 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 />
               </Flex>
             </Flex>
-          ) : (
+          ) : null}
+
+          {/* Updates feed at full width, below the two-column grid.
+              Only rendered when the right-column Stems & Downloads panel
+              is absent — otherwise the Updates feed lives in the left
+              column under Prizes (see above). Matches the Figma
+              "no-tracks" variant where Updates take the full page width. */}
+          {activeTab === 'details' && !hasDownloads ? (
+            <Box pv='l'>
+              <ContestCommentsSection
+                eventId={eventId}
+                eventOwnerUserId={contest?.userId}
+                mode='updates'
+              />
+            </Box>
+          ) : null}
+
+          {activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pv='l'>
               <TanQueryLineup
                 data={lineup.data}
@@ -520,7 +607,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 actions={remixesPageLineupActions}
               />
             </Flex>
-          )}
+          ) : null}
         </Box>
       </Box>
     </Page>
