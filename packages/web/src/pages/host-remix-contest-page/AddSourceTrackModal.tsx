@@ -68,8 +68,7 @@ export const AddSourceTrackModal = ({
   )
 
   const [search, setSearch] = useState('')
-  const [selectedIds, setSelectedIds] =
-    useState<number[]>(initialSelectedIds)
+  const [selectedIds, setSelectedIds] = useState<number[]>(initialSelectedIds)
   const [viewOnlySelected, setViewOnlySelected] = useState(false)
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds])

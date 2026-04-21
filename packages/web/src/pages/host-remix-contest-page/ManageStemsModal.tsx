@@ -32,8 +32,7 @@ const messages = {
   followers: 'Followers',
   premium: 'Premium',
   uploadHeading: 'Upload Additional Files',
-  uploadHelper:
-    'Provide FLAC, WAV, ALAC, or AIFF for highest audio quality.',
+  uploadHelper: 'Provide FLAC, WAV, ALAC, or AIFF for highest audio quality.',
   uploadPlaceholder: 'Drag-and-drop audio files here, or ',
   browseToUpload: 'browse to upload',
   uploadComingSoon:
@@ -107,7 +106,9 @@ export const ManageStemsModal = ({
     // the user should go through the full track edit page — link
     // in-modal rather than silently failing.
     const nextConditions: AccessConditions | null =
-      availability === 'public' ? null : (trackMeta?.download_conditions ?? null)
+      availability === 'public'
+        ? null
+        : (trackMeta?.download_conditions ?? null)
 
     updateTrack({
       trackId,

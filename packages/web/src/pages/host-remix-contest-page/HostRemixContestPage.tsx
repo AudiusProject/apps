@@ -18,7 +18,6 @@ import { dayjs } from '@audius/common/utils'
 import {
   Box,
   Button,
-  Divider,
   Flex,
   IconCloudUpload,
   IconKebabHorizontal,
@@ -42,7 +41,10 @@ import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { track, make } from 'services/analytics'
 import { fullContestPage, fullTrackPage } from 'utils/route'
 
-import { TimeInput, parseTime } from '../../components/host-remix-contest-modal/TimeInput'
+import {
+  TimeInput,
+  parseTime
+} from '../../components/host-remix-contest-modal/TimeInput'
 
 import { AddSourceTrackModal } from './AddSourceTrackModal'
 import { ManageStemsModal } from './ManageStemsModal'
@@ -62,15 +64,13 @@ const messages = {
     'Tell artists what the contest is about, rules, judging criteria…',
   videoLabel: 'Video Link',
   videoHelper: 'Add a YouTube or Vimeo link to embed it on your page.',
-  videoPlaceholder:
-    'https://www.youtube.com/watch?v=...',
+  videoPlaceholder: 'https://www.youtube.com/watch?v=...',
   deadlineLabel: 'Submission Deadline',
   deadlineHelper:
     'Remixes submitted after this date will not be accepted. Local timezone applies.',
   coverPhotoLabel: 'Cover Photo',
   coverPhotoHelper: 'This image will represent your remix contest.',
-  coverPhotoPlaceholder:
-    'Drag-and-drop an image here, or browse to upload',
+  coverPhotoPlaceholder: 'Drag-and-drop an image here, or browse to upload',
   coverPhotoComingSoon:
     'Upload coming soon — temporarily paste an image URL below to override the track artwork default.',
   coverPhotoUrlLabel: 'Cover image URL (optional)',
@@ -297,8 +297,7 @@ export const HostRemixContestPage = () => {
       title: title.trim() || undefined,
       videoUrl: videoUrl.trim() || undefined,
       coverPhotoUrl: coverPhotoUrl.trim() || undefined,
-      sourceTrackIds:
-        sourceTrackIds.length > 0 ? sourceTrackIds : undefined
+      sourceTrackIds: sourceTrackIds.length > 0 ? sourceTrackIds : undefined
     }
 
     if (isEdit && remixContest) {
@@ -575,7 +574,7 @@ export const HostRemixContestPage = () => {
               onDrop={(e) => {
                 e.preventDefault()
                 const file = e.dataTransfer?.files?.[0]
-                if (file) void handleCoverFileSelected(file)
+                if (file) handleCoverFileSelected(file).catch(() => {})
               }}
               css={{
                 border: '1px dashed var(--harmony-border-default)',
@@ -616,7 +615,7 @@ export const HostRemixContestPage = () => {
               style={{ display: 'none' }}
               onChange={(e) => {
                 const file = e.target.files?.[0] ?? null
-                void handleCoverFileSelected(file)
+                handleCoverFileSelected(file).catch(() => {})
                 // Reset so the same file can be re-selected after a mistake.
                 e.target.value = ''
               }}
