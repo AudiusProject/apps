@@ -18,7 +18,8 @@ import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
   remixesPageLineupActions,
-  remixesPageSelectors
+  remixesPageSelectors,
+  useHostRemixContestModal
 } from '@audius/common/store'
 import {
   dayjs,
@@ -37,7 +38,7 @@ import {
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { Navigate, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
@@ -47,7 +48,7 @@ import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
-import { fullContestPage } from 'utils/route'
+import { fullContestPage, pickWinnersPage } from 'utils/route'
 
 import { ContestCommentsSection } from '../ContestCommentsSection'
 import { EventFollowersCard } from '../EventFollowersCard'
@@ -158,6 +159,8 @@ type ContestPageProps = {
 
 const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { onOpen: openHostRemixContest } = useHostRemixContestModal()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
 
   const { isEnabled: isContestsEnabled, isLoaded: isFlagLoaded } =
@@ -249,15 +252,31 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const submissionsCount = lineup.data?.length
 
+  const handleEditContest = useCallback(() => {
+    if (!trackId) return
+    openHostRemixContest({ trackId })
+  }, [trackId, openHostRemixContest])
+
+  const handlePickWinners = useCallback(() => {
+    if (!track?.permalink) return
+    navigate(pickWinnersPage(track.permalink))
+  }, [track?.permalink, navigate])
+
   const renderActions = useCallback(() => {
     if (!eventId) return null
     if (isOwner) {
       return (
         <Flex gap='s'>
-          <Button size='small' variant='secondary'>
+          <Button
+            size='small'
+            variant='secondary'
+            onClick={handleEditContest}
+          >
             Edit Contest
           </Button>
-          <Button size='small'>Pick Winners</Button>
+          <Button size='small' onClick={handlePickWinners}>
+            Pick Winners
+          </Button>
         </Flex>
       )
     }
@@ -278,7 +297,9 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     followState?.isFollowed,
     isFollowing,
     isUnfollowing,
-    handleToggleFollow
+    handleToggleFollow,
+    handleEditContest,
+    handlePickWinners
   ])
 
   // Flag gate
