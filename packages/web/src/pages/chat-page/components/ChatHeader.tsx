@@ -15,7 +15,6 @@ import {
   IconMessages
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
-import { useMedia } from 'react-use'
 
 import { useModalState } from 'common/hooks/useModalState'
 
@@ -33,20 +32,19 @@ const CHAT_LIST_WIDTH_PX = 400
 
 type ChatHeaderProps = {
   currentChatId?: string
+  isNarrowLayout?: boolean
   scrollBarWidth?: number
   headerContainerRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
-  ({ currentChatId, scrollBarWidth, headerContainerRef }, ref) => {
+  ({ currentChatId, isNarrowLayout }, ref) => {
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
     const chat = useSelector((state: CommonState) =>
       chatSelectors.getChat(state, currentChatId ?? '')
     )
     const isBlast = chat?.is_blast
-    const isSmallScreen = useMedia('(max-width: 1080px)')
-    const hasChat = Boolean(currentChatId && chat)
 
     const handleComposeClicked = useCallback(() => {
       openCreateChatModal()
@@ -75,33 +73,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       </Flex>
     )
 
-    if (isSmallScreen) {
-      return (
-        <Paper
-          shadow='flat'
-          ref={ref}
-          w='100%'
-          ph={CHAT_HEADER_PADDING_PX}
-          borderBottom='default'
-        >
-          <Flex column w='100%' css={{ minWidth: 0 }}>
-            <Flex w='100%' h={112} alignItems='flex-end' css={{ minWidth: 0 }}>
-              {headerContent}
-            </Flex>
-            {hasChat ? (
-              <Flex p='l' pt='s' w='100%' css={{ minWidth: 0 }}>
-                {isBlast ? (
-                  <ChatBlastHeader chat={chat} />
-                ) : (
-                  <UserChatHeader chatId={chat?.chat_id} />
-                )}
-              </Flex>
-            ) : null}
-          </Flex>
-        </Paper>
-      )
-    }
-
     return (
       <Paper
         shadow='flat'
@@ -109,19 +80,27 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
         w='100%'
         ph={CHAT_HEADER_PADDING_PX}
         h={112}
+        css={{ borderRadius: 0 }}
         borderBottom='default'
       >
         <Flex w='100%' h='100%' css={{ minWidth: 0 }}>
-          <Flex w={CHAT_LIST_WIDTH_PX} css={{ flexShrink: 0 }}>
+          <Flex
+            w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
+            css={{ flexShrink: 0 }}
+          >
             {headerContent}
           </Flex>
-          <Flex p='l' flex={1} alignItems='flex-end' css={{ minWidth: 0 }}>
-            {isBlast ? (
-              <ChatBlastHeader chat={chat} />
-            ) : (
-              <UserChatHeader chatId={chat?.chat_id} />
-            )}
-          </Flex>
+          {isNarrowLayout ? null : (
+            <Flex p='l' flex={1} alignItems='flex-end' css={{ minWidth: 0 }}>
+              {chat ? (
+                isBlast ? (
+                  <ChatBlastHeader chat={chat} />
+                ) : (
+                  <UserChatHeader chatId={chat.chat_id} />
+                )
+              ) : null}
+            </Flex>
+          )}
         </Flex>
       </Paper>
     )

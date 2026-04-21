@@ -1,6 +1,9 @@
 .page {
   width: 100%;
   height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   max-width: none !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -10,15 +13,32 @@
 }
 
 .page :global(#page) {
-  margin-top: -37px;
   width: 100% !important;
   max-width: none !important;
-  height: calc(100% - 80px);
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page > :first-child {
+  flex-shrink: 0;
+  margin-bottom: -5px;
+}
+
+.page > :nth-child(2) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding-bottom: 0 !important;
 }
 
 .layout {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 
   display: flex;
   align-items: stretch;
@@ -27,18 +47,35 @@
 
 .chatList {
   width: 400px;
-  height: 100%;
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.chatListCompact {
+  width: 96px;
 }
 
 .chatArea {
-  height: 100%;
   flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-@media (max-width: 1080px) {
-  .chatList {
-    width: 96px;
-  }
+.chatPaneHeader {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.messageList {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.composer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--harmony-n-150);
 }

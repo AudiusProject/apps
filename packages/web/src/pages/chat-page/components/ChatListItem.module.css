@@ -79,20 +79,3 @@
 .root.compact .minimizedUnreadIndicatorTag {
   display: flex;
 }
-
-@media (max-width: 1080px) {
-  .headingContainer {
-    justify-content: center;
-  }
-
-  .messagePreview,
-  .userText,
-  .unreadIndicatorTag,
-  .blastPreview {
-    display: none;
-  }
-
-  .minimizedUnreadIndicatorTag {
-    display: flex;
-  }
-}
