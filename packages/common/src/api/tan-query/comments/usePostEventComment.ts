@@ -14,6 +14,12 @@ export type PostEventCommentArgs = {
   body: string
   parentCommentId?: ID
   mentions?: ID[]
+  /**
+   * Optional video URL to attach to the comment. Only meaningful on
+   * post-updates from the event owner today, but carried through on all
+   * comments so the backend can surface the same affordance later.
+   */
+  videoUrl?: string
 }
 
 /**
@@ -37,7 +43,8 @@ export const usePostEventComment = () => {
           entityType: 'Event',
           body: args.body,
           parentCommentId: args.parentCommentId,
-          mentions: args.mentions ?? []
+          mentions: args.mentions ?? [],
+          videoUrl: args.videoUrl
         } as any
       })
     },

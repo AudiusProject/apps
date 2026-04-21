@@ -13,8 +13,10 @@ import {
   Button,
   Divider,
   Flex,
+  IconCamera,
   LoadingSpinner,
   Paper,
+  PlainButton,
   SelectablePill,
   Text,
   TextInput
@@ -37,6 +39,8 @@ const messages = {
   composePostUpdatePlaceholder: 'Post an update to your contest followers…',
   post: 'Post',
   postUpdate: 'Post Update',
+  attachVideo: 'Attach Video',
+  videoUrlPlaceholder: 'Paste a video URL (MP4 or HLS)',
   postUpdateBadge: 'Post Update',
   loadMore: 'Load more',
   signInToComment: 'Sign in to comment.'
@@ -126,20 +130,31 @@ export const ContestCommentsSection = ({
   const { mutate: postComment, isPending: isPosting } = usePostEventComment()
 
   const [draft, setDraft] = useState('')
+  const [videoUrlOpen, setVideoUrlOpen] = useState(false)
+  const [videoUrlDraft, setVideoUrlDraft] = useState('')
+
+  // Attach-video is only meaningful on the Updates feed (host-authored
+  // post-updates). Hide the affordance on plain community comments.
+  const showAttachVideo =
+    mode === 'updates' || (mode === 'feed' && isEventOwner)
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
       const body = draft.trim()
       if (!body || !currentUserId) return
+      const videoUrl = videoUrlDraft.trim()
       postComment({
         userId: currentUserId,
         eventId,
-        body
+        body,
+        videoUrl: videoUrl.length > 0 ? videoUrl : undefined
       })
       setDraft('')
+      setVideoUrlDraft('')
+      setVideoUrlOpen(false)
     },
-    [draft, currentUserId, eventId, postComment]
+    [draft, currentUserId, eventId, postComment, videoUrlDraft]
   )
 
   return (
@@ -193,7 +208,27 @@ export const ContestCommentsSection = ({
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={composerPlaceholder}
               />
-              <Flex justifyContent='flex-end'>
+              {videoUrlOpen ? (
+                <TextInput
+                  label=''
+                  value={videoUrlDraft}
+                  onChange={(e) => setVideoUrlDraft(e.target.value)}
+                  placeholder={messages.videoUrlPlaceholder}
+                />
+              ) : null}
+              <Flex justifyContent='space-between' alignItems='center'>
+                {showAttachVideo ? (
+                  <PlainButton
+                    type='button'
+                    variant='subdued'
+                    iconLeft={IconCamera}
+                    onClick={() => setVideoUrlOpen((v) => !v)}
+                  >
+                    {messages.attachVideo}
+                  </PlainButton>
+                ) : (
+                  <Box />
+                )}
                 <Button
                   type='submit'
                   variant='primary'
@@ -292,6 +327,9 @@ const ContestCommentRow = ({
   if (mode === 'updates' && !isPostUpdate) return null
   if (mode === 'comments' && isPostUpdate) return null
 
+  const videoUrl: string | undefined =
+    'videoUrl' in comment ? (comment as any).videoUrl ?? undefined : undefined
+
   return (
     <Paper
       direction='column'
@@ -312,6 +350,18 @@ const ContestCommentRow = ({
       <Text variant='body' size='m'>
         {comment.message}
       </Text>
+      {videoUrl ? (
+        <video
+          controls
+          src={videoUrl}
+          style={{
+            width: '100%',
+            maxHeight: 340,
+            borderRadius: 8,
+            backgroundColor: '#000'
+          }}
+        />
+      ) : null}
     </Paper>
   )
 }
