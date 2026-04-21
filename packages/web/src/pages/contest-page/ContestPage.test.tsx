@@ -4,7 +4,7 @@ import { FeatureFlags } from '@audius/common/services'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, vi, beforeEach } from 'vitest'
 
-import { render, screen, it } from 'test/test-utils'
+import { render, screen, it, waitFor } from 'test/test-utils'
 
 // Import the page AFTER all the mocks are registered.
 import ContestPage from './ContestPage'
@@ -273,15 +273,19 @@ describe('ContestPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('redirects home when the CONTESTS feature flag is OFF', () => {
+  it('redirects home when the CONTESTS feature flag is OFF', async () => {
     // Matches the ContestsPage (discovery) behaviour: once the flag is
     // loaded and disabled, <Navigate to='/' replace /> kicks in so the
     // contest URL is never reachable in a gated rollout.
     renderContestPage({ featureFlags: { [FeatureFlags.CONTESTS]: false } })
 
+    // `useFeatureFlag` sets isLoaded only after the async localStorage
+    // override read finishes, so the redirect is not synchronous.
+    await waitFor(() => {
+      expect(screen.getByTestId('home-page')).toBeInTheDocument()
+    })
     // The placeholder element on the '/' route should be visible;
     // none of the ContestPage sections should render.
-    expect(screen.getByTestId('home-page')).toBeInTheDocument()
     expect(screen.queryByTestId('details-tab')).not.toBeInTheDocument()
     expect(screen.queryByTestId('prizes-tab')).not.toBeInTheDocument()
     expect(
