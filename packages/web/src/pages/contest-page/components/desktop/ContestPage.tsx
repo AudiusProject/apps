@@ -28,6 +28,7 @@ import {
   Box,
   Button,
   Divider,
+  FilterButton,
   Flex,
   IconButton,
   IconNotificationOff,
@@ -43,14 +44,16 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 import { Avatar } from 'components/avatar/Avatar'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
-import { DownloadSection } from 'components/track/DownloadSection'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
 import { ContestCommentsTile } from '../ContestCommentsTile'
+import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
@@ -72,7 +75,11 @@ const messages = {
   days: 'Days',
   hours: 'Hours',
   mins: 'Mins',
-  secs: 'Secs'
+  secs: 'Secs',
+  coSigned: 'Co-Signed',
+  sortRecent: 'Most Recent',
+  sortPlays: 'Most Plays',
+  sortFavorites: 'Most Favorites'
 }
 
 const { getTrackId } = remixesPageSelectors
@@ -221,13 +228,22 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
 
+  // Submissions tab filter state — reads from + writes to URL search
+  // params so deep links + back/forward work the same way they do on
+  // the track-page `RemixesPage` (the reference component for this
+  // filter bar).
+  const { sortMethod, isCosign } = useRemixPageParams()
+  const updateSortParam = useUpdateSearchParams('sortMethod')
+  const updateIsCosignParam = useUpdateSearchParams('isCosign')
+
   // Lineup for the submissions tab — full TrackTile treatment.
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
     includeOriginal: false,
     includeWinners: true,
     isContestEntry: true,
-    sortMethod: 'recent'
+    sortMethod,
+    isCosign
   })
 
   useEffect(() => {
@@ -373,9 +389,11 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
       variant='flush'
     >
       {/* Content is centered to MAX_CONTENT_WIDTH and sits on the
-          page background. The hero banner is contained inside this
-          column (rounded corners, full column-width) instead of
-          bleeding full-page-width — matches the Figma node 2857-99124. */}
+          page background. Per Figma node 2857-99152 the entire header
+          (hero banner + submissions due + actions + title + divider +
+          hosted by + countdown) lives inside a single rounded Paper
+          tile — the hero is the top "photo" of the Paper, body content
+          sits below it with matching padding. */}
       <Box
         css={{
           maxWidth: MAX_CONTENT_WIDTH,
@@ -385,74 +403,101 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         ph='2xl'
         pv='xl'
       >
-        {/* Contained hero banner. Rounded corners, max-column-width,
-            so the page background frames it on all four sides. */}
-        <Box
-          w='100%'
-          h={HERO_HEIGHT}
-          css={{
-            backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            borderRadius: 'var(--harmony-unit-3, 12px)',
-            overflow: 'hidden'
-          }}
-        />
+        <Paper
+          direction='column'
+          borderRadius='l'
+          border='default'
+          shadow='flat'
+          backgroundColor='white'
+          css={{ overflow: 'hidden' }}
+        >
+          {/* Hero banner at the top of the Paper. The Paper's
+              `overflow: hidden` clips the banner to the outer
+              rounded corners so the top edge matches the Paper
+              radius. */}
+          <Box
+            w='100%'
+            h={HERO_HEIGHT}
+            css={{
+              backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
 
-        {/* Header content block — sits below the hero, no outer tile. */}
-        <Box pt='xl' pb='xl'>
-          {/* Row 1: Submissions Due plain label + actions. Per Figma
-              this is not a chip — just uppercase label text with the
-              due date below it. */}
-          <Flex justifyContent='space-between' alignItems='flex-start' gap='l'>
-            <Flex direction='column' gap='2xs'>
-              <Text variant='label' size='s' color='subdued' strength='strong'>
-                {isEnded ? messages.contestEnded : messages.submissionsDue}
-              </Text>
-              {dueLabel ? (
-                <Text variant='label' size='l' strength='strong'>
-                  {dueLabel}
+          {/* Header body content — padded section below the hero. */}
+          <Box p='xl'>
+            {/* Row 1: Submissions Due plain label + actions. Per Figma
+                this is not a chip — just uppercase label text with the
+                due date below it. */}
+            <Flex
+              justifyContent='space-between'
+              alignItems='flex-start'
+              gap='l'
+            >
+              <Flex direction='column' gap='2xs'>
+                <Text
+                  variant='label'
+                  size='s'
+                  color='subdued'
+                  strength='strong'
+                >
+                  {isEnded ? messages.contestEnded : messages.submissionsDue}
                 </Text>
-              ) : null}
+                {dueLabel ? (
+                  <Text variant='label' size='l' strength='strong'>
+                    {dueLabel}
+                  </Text>
+                ) : null}
+              </Flex>
+              {renderActions()}
             </Flex>
-            {renderActions()}
-          </Flex>
 
-          {/* Title */}
-          <Box mt='l'>
-            <Text variant='display' size='s'>
-              {track.title} {messages.title}
-            </Text>
-          </Box>
-
-          {/* Hosted By row + Countdown (4 plain columns, not a pill) */}
-          <Flex
-            justifyContent='space-between'
-            alignItems='center'
-            gap='xl'
-            mt='xl'
-          >
-            <Flex direction='column' gap='s'>
-              <Text variant='label' size='s' color='subdued' strength='strong'>
-                {messages.hostedBy}
+            {/* Title */}
+            <Box mt='l'>
+              <Text variant='display' size='s'>
+                {track.title} {messages.title}
               </Text>
-              <Flex gap='m' alignItems='center'>
-                <Avatar userId={user.user_id} h={56} w={56} />
-                <Flex direction='column'>
-                  <Text variant='title' size='m'>
-                    {user.name}
-                  </Text>
-                  <Text variant='body' size='s' color='subdued'>
-                    @{user.handle}
-                  </Text>
+            </Box>
+
+            {/* Horizontal divider separating title from host row. */}
+            <Box mv='l'>
+              <Divider />
+            </Box>
+
+            {/* Hosted By row + Countdown (4 plain columns, not a pill) */}
+            <Flex justifyContent='space-between' alignItems='center' gap='xl'>
+              <Flex direction='column' gap='s'>
+                <Text
+                  variant='label'
+                  size='s'
+                  color='subdued'
+                  strength='strong'
+                >
+                  {messages.hostedBy}
+                </Text>
+                <Flex gap='m' alignItems='center'>
+                  <Avatar userId={user.user_id} h={56} w={56} />
+                  <Flex direction='column'>
+                    <Text variant='title' size='m'>
+                      {user.name}
+                    </Text>
+                    <Text variant='body' size='s' color='subdued'>
+                      @{user.handle}
+                    </Text>
+                  </Flex>
                 </Flex>
               </Flex>
+              {!isEnded && contest.endDate ? (
+                <HeaderCountdown endDate={contest.endDate} />
+              ) : null}
             </Flex>
-            {!isEnded && contest.endDate ? (
-              <HeaderCountdown endDate={contest.endDate} />
-            ) : null}
-          </Flex>
-        </Box>
+          </Box>
+        </Paper>
+
+        {/* Spacer between the header Paper and the tab row below. */}
+        <Box pt='xl' />
+
 
         {/* Tabs — only when there are submissions (Figma 1-track variant
             has no tabs). */}
@@ -538,7 +583,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 width: RIGHT_COLUMN_WIDTH_PX
               }}
             >
-              {hasDownloads ? <DownloadSection trackId={trackId!} /> : null}
+              {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
 
               <EventFollowersCard
                 eventId={eventId}
@@ -559,11 +604,40 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           <Paper
             direction='column'
             p='xl'
+            gap='l'
             borderRadius='l'
             border='default'
             shadow='flat'
             backgroundColor='white'
           >
+            {/* Filter bar — same controls the track-page `RemixesPage`
+                exposes above its remixes lineup: a Co-Signed toggle
+                plus a Most Recent / Most Plays / Most Favorites sort
+                dropdown. Co-signed surfaces entries the host has
+                endorsed; the sort drives the underlying
+                `useRemixesLineup` query. */}
+            <Flex justifyContent='space-between' alignItems='center' gap='s'>
+              <Text variant='heading' size='s'>
+                {messages.submissionsTab(submissionsCount)}
+              </Text>
+              <Flex gap='s'>
+                <FilterButton
+                  label={messages.coSigned}
+                  value={isCosign ? 'true' : null}
+                  onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+                />
+                <FilterButton
+                  value={sortMethod ?? 'recent'}
+                  variant='replaceLabel'
+                  onChange={updateSortParam}
+                  options={[
+                    { label: messages.sortRecent, value: 'recent' },
+                    { label: messages.sortPlays, value: 'plays' },
+                    { label: messages.sortFavorites, value: 'likes' }
+                  ]}
+                />
+              </Flex>
+            </Flex>
             <TanQueryLineup
               data={lineup.data}
               isFetching={lineup.isFetching}
