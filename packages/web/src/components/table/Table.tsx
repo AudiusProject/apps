@@ -330,6 +330,10 @@ export const Table = ({
 
   const renderTableHeader = useCallback((column: any, endHeader?: boolean) => {
     const { key, colSpan, role, style } = column.getHeaderProps()
+    const hasExplicitNullHeader =
+      column?.Header === null || column?.Header === false
+    const headerContent = hasExplicitNullHeader ? null : column.render('Header')
+
     return (
       <th
         className={cn(styles.tableHeader, {
@@ -351,12 +355,12 @@ export const Table = ({
           className={styles.headerContent}
         >
           <div className={styles.textCell}>
-            {column.sortTitle ? (
+            {column.sortTitle && headerContent ? (
               <Tooltip text={column.sortTitle} mount='page'>
-                {column.render('Header')}
+                {headerContent}
               </Tooltip>
             ) : (
-              column.render('Header')
+              headerContent
             )}
           </div>
           {!column.disableSortBy ? (
