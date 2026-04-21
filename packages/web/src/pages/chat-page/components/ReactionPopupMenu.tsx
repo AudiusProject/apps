@@ -44,8 +44,9 @@ export const ReactionPopupMenu = (props: ReactionPopupMenuProps) => {
   )
 
   const preferredDirection: 'left' | 'right' = isAuthor ? 'right' : 'left'
-  const [openDirection, setOpenDirection] =
-    useState<'left' | 'right'>(preferredDirection)
+  const [openDirection, setOpenDirection] = useState<'left' | 'right'>(
+    preferredDirection
+  )
 
   useEffect(() => {
     if (!isVisible) return
@@ -73,8 +74,7 @@ export const ReactionPopupMenu = (props: ReactionPopupMenuProps) => {
       const margin = 8
 
       const fitsLeft = anchorRect.left - popupWidth >= margin
-      const fitsRight =
-        anchorRect.right + popupWidth <= viewportWidth - margin
+      const fitsRight = anchorRect.right + popupWidth <= viewportWidth - margin
 
       let next = preferredDirection
       if (preferredDirection === 'left' && !fitsLeft && fitsRight) {

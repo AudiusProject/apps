@@ -178,9 +178,8 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
           isAuthor={isAuthor}
           onSelected={handleReactionSelected}
           userReaction={
-            (message.reactions?.find(
-              (r) => r.user_id === Id.parse(userId)
-            )?.reaction as ReactionTypes | undefined) ?? null
+            (message.reactions?.find((r) => r.user_id === Id.parse(userId))
+              ?.reaction as ReactionTypes | undefined) ?? null
           }
         />
       </Flex>

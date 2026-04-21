@@ -83,8 +83,7 @@ export const Reaction = (props: ReactionProps) => {
   const lottieRef = useRef<LottieRefCurrentProps>(null)
   useEffect(() => {
     if (!lottieRef.current) return
-    const shouldPlay =
-      isInteracting || (!onlyPlayOnHover && isActive !== false)
+    const shouldPlay = isInteracting || (!onlyPlayOnHover && isActive !== false)
     if (shouldPlay) {
       lottieRef.current.play()
     } else {

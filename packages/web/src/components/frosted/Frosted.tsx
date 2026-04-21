@@ -15,8 +15,7 @@ export const Frosted = ({
         zIndex: 10,
         position: 'relative',
         paddingInline: contentPaddingInline,
-        background:
-          'color-mix(in srgb, var(--harmony-n-25) 60%, transparent)'
+        background: 'color-mix(in srgb, var(--harmony-n-25) 60%, transparent)'
       }}
       {...props}
     >
