@@ -55,6 +55,9 @@ export type AnalyticsEvent = {
 export enum Name {
   APP_ERROR = 'App Error', // Generic app error
   SESSION_START = 'Session Start',
+  // Experimentation — fired the first time a flag/variant is evaluated for a
+  // user in a session, so Amplitude cohorts can be split by experiment arm.
+  EXPERIMENT_EXPOSURE = 'Experiment: Exposure',
   // Activation — fired at most once per user, the first time each action occurs.
   // Used for cohort activation analysis and retention curves.
   ACTIVATION_FIRST_LISTEN = 'Activation: First Listen',
@@ -663,6 +666,16 @@ type PageView = {
 type AppError = {
   eventName: Name.APP_ERROR
   errorMessage: string
+}
+
+export type ExperimentExposure = {
+  eventName: Name.EXPERIMENT_EXPOSURE
+  experimentKey: string
+  variant: 'treatment' | 'control'
+  // The ID Optimizely was bucketed against (real userId when signed in,
+  // session ID when anonymous).
+  bucketingId: string
+  isAnonymous: boolean
 }
 
 // Activation events — fired at most once per user, the first time each action
@@ -3160,6 +3173,7 @@ export type BaseAnalyticsEvent = { type: typeof ANALYTICS_TRACK_EVENT }
 
 export type AllTrackingEvents =
   | AppError
+  | ExperimentExposure
   | ActivationFirstListen
   | ActivationFirstListenCompleted
   | ActivationFirstFavorite

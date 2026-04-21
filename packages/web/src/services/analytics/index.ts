@@ -1,7 +1,8 @@
 import {
   AnalyticsEvent,
   AllTrackingEvents,
-  IdentifyTraits
+  IdentifyTraits,
+  Name
 } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
 
@@ -24,6 +25,12 @@ const didInit = new Promise((resolve, reject) => {
 
 export const init = async (isMobile: boolean) => {
   try {
+    remoteConfigInstance.listenForExposure((exposure) => {
+      track({
+        eventName: Name.EXPERIMENT_EXPOSURE,
+        properties: exposure
+      })
+    })
     await remoteConfigInstance.waitForRemoteConfig()
     await amplitude.init(isMobile)
     if (resolveCallback) {

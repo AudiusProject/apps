@@ -222,6 +222,47 @@ export const remoteConfig = <
     )
   }
 
+  // Tracks (bucketingId, flag) pairs already reported as exposures so we fire
+  // at most once per user per flag per session. Cleared when the bucketing ID
+  // changes (e.g. on login).
+  const exposedKeys = new Set<string>()
+  let lastExposedId: Nullable<number> = null
+
+  function emitExposureIfNeeded(flag: FeatureFlags, enabled: boolean) {
+    if (!state.didInitialize || !state.id) return
+    if (state.id !== lastExposedId) {
+      exposedKeys.clear()
+      lastExposedId = state.id
+    }
+    const dedupeKey = `${state.id}:${flag}`
+    if (exposedKeys.has(dedupeKey)) return
+    exposedKeys.add(dedupeKey)
+    emitter.emit('exposure', {
+      experimentKey: flag,
+      variant: enabled ? 'treatment' : 'control',
+      bucketingId: state.id.toString(),
+      isAnonymous: !state.didInitializeUser
+    })
+  }
+
+  /**
+   * Register a callback that fires the first time each feature flag is
+   * evaluated for the current user in this session. Used by analytics to
+   * record experiment exposure as an Amplitude event so treatment vs control
+   * cohorts can be compared downstream.
+   */
+  function listenForExposure(
+    cb: (exposure: {
+      experimentKey: string
+      variant: 'treatment' | 'control'
+      bucketingId: string
+      isAnonymous: boolean
+    }) => void
+  ) {
+    emitter.addListener('exposure', cb)
+    return () => emitter.removeListener('exposure', cb)
+  }
+
   /**
    * Gets whether a given feature flag is enabled.
    * Accepts a fallback flag which will be checked if the primary flag is disabled
@@ -252,11 +293,15 @@ export const remoteConfig = <
 
     try {
       if (state.didInitialize) {
-        return (
-          (isFeatureEnabled(flag) ||
-            (fallbackFlag && isFeatureEnabled(fallbackFlag))) ??
-          defaultVal
-        )
+        const primary = isFeatureEnabled(flag)
+        const fellBackToFallback =
+          !primary && fallbackFlag ? isFeatureEnabled(fallbackFlag) : undefined
+        const enabled = (primary || fellBackToFallback) ?? defaultVal
+        emitExposureIfNeeded(flag, !!enabled)
+        if (fallbackFlag && !primary) {
+          emitExposureIfNeeded(fallbackFlag, !!fellBackToFallback)
+        }
+        return enabled
       }
       return defaultVal
     } catch (err) {
@@ -320,7 +365,8 @@ export const remoteConfig = <
     waitForRemoteConfig,
     waitForUserRemoteConfig,
     listenForUserId,
-    unlistenForUserId
+    unlistenForUserId,
+    listenForExposure
   }
 
   // Generate negative ints for session IDs

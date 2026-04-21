@@ -7,9 +7,11 @@ import {
   Types as AmplitudeTypes
 } from '@amplitude/analytics-react-native'
 import type { IdentifyTraits } from '@audius/common/models'
+import { Name } from '@audius/common/models'
 import VersionNumber from 'react-native-version-number'
 
 import { env } from 'app/services/env'
+import { remoteConfigInstance } from 'app/services/remote-config/remote-config-instance'
 
 import packageInfo from '../../package.json'
 import type { Track, Screen, AllEvents } from '../types/analytics'
@@ -25,6 +27,12 @@ const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production'
 
 export const init = async () => {
   try {
+    remoteConfigInstance.listenForExposure((exposure) => {
+      track({
+        eventName: Name.EXPERIMENT_EXPOSURE,
+        properties: exposure
+      })
+    })
     if (AmplitudeWriteKey && AmplitudeProxy) {
       await amplitudeInit(AmplitudeWriteKey, undefined, {
         serverUrl: AmplitudeProxy,
