@@ -276,7 +276,8 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   }
 
   const mainLineupProps = {
-    variant: LineupVariant.MAIN
+    variant: LineupVariant.MAIN,
+    isTrending: true
   }
 
   const record = useRecord()

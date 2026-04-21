@@ -16,6 +16,7 @@ import {
   tracksSocialActions
 } from '@audius/common/store'
 import { Flex, Tooltip } from '@audius/harmony'
+import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import AnimatedIconButton, {
@@ -35,6 +36,7 @@ type SocialActionsProps = {
   trackId: ID
   uid: UID
   isOwner: boolean
+  compact?: boolean
 }
 
 const messages = {
@@ -47,7 +49,8 @@ const messages = {
 export const SocialActions = ({
   trackId,
   uid,
-  isOwner
+  isOwner,
+  compact = false
 }: SocialActionsProps) => {
   const { data: track } = useTrack(trackId)
   const dispatch = useDispatch()
@@ -92,7 +95,7 @@ export const SocialActions = ({
   })
 
   return (
-    <Flex className={styles.root}>
+    <Flex className={cn(styles.root, { [styles.compact]: compact })}>
       {track?.stream_conditions &&
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess ? (

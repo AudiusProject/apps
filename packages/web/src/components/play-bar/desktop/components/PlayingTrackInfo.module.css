@@ -46,6 +46,10 @@
   justify-content: center;
 }
 
+.noArt .text {
+  margin-left: 0;
+}
+
 .trackTitle,
 .artistName {
   user-select: none;
@@ -69,7 +73,8 @@
 .trackTitleContainer {
   display: flex;
   gap: var(--harmony-unit-2);
-  width: 180px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .trackTitle {

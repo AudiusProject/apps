@@ -33,10 +33,12 @@ const getLibraryVolume = (defaultVolume) => {
 const VolumeBar = ({
   defaultValue = 100,
   onChange = (value) => {},
-  granularity
+  granularity,
+  compact = false
 }) => {
   const [volumeLevel, setVolumeLevel] = useState(getLibraryVolume(defaultValue))
   const volumeBarRef = useRef()
+  const preMuteVolumeRef = useRef(getLibraryVolume(defaultValue))
 
   const volumeChange = useCallback(
     (value, persist = true) => {
@@ -68,12 +70,12 @@ const VolumeBar = ({
   }, [volumeChange, volumeLevel])
 
   const mute = () => {
+    preMuteVolumeRef.current = volumeLevel
     volumeChange(0, false)
   }
 
   const unmute = () => {
-    const unmuteVolume = Math.max(10, getLibraryVolume(defaultValue))
-    volumeChange(unmuteVolume)
+    volumeChange(Math.max(10, preMuteVolumeRef.current))
   }
 
   const onClick = () => {
@@ -85,22 +87,25 @@ const VolumeBar = ({
   return (
     <div className={styles.volumeBarWrapper}>
       <VolumeIcon onClick={onClick} className={styles.volumeIcon} />
-      <div ref={volumeBarRef} className={styles.volumeBar}>
-        <Slider
-          defaultValue={defaultValue}
-          value={volumeLevel}
-          max={granularity}
-          showHandle={false}
-          onChange={volumeChange}
-        />
-      </div>
+      {!compact && (
+        <div ref={volumeBarRef} className={styles.volumeBar}>
+          <Slider
+            defaultValue={defaultValue}
+            value={volumeLevel}
+            max={granularity}
+            showHandle={false}
+            onChange={volumeChange}
+          />
+        </div>
+      )}
     </div>
   )
 }
 
 VolumeBar.propTypes = {
   defaultValue: PropTypes.number,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  compact: PropTypes.bool
 }
 
 export default VolumeBar
