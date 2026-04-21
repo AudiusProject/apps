@@ -1,4 +1,4 @@
-import { encodeHashId } from '@audius/sdk'
+import { encodeHashId, OptionalId } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataListFromSDK } from '~/adapters/user'
@@ -7,6 +7,7 @@ import { Feature, ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUsers } from '../users/useUsers'
 import { primeUserData } from '../utils/primeUserData'
 
@@ -24,18 +25,17 @@ export const getEventFollowersQueryKey = ({
   [QUERY_KEYS.eventFollowers, eventId, { limit }] as unknown as QueryKey<ID[]>
 
 /**
- * Hook returning the user IDs subscribed to a remix-contest event — feeds the
- * "Followers (N)" avatar stack on the contest page.
+ * Hook returning the user IDs subscribed to a remix-contest event — feeds
+ * the "Followers (N)" avatar stack on the contest page.
  *
- * Uses a raw fetch against `/v1/events/:eventId/followers` on the api host;
- * the endpoint exists in the Go api but isn't in the OpenAPI spec / SDK yet,
- * so we can't go through `sdk.events.*` here.
+ * Backed by `GET /v1/events/:eventId/followers` via the generated SDK.
  */
 export const useEventFollowers = (
   { eventId, limit = DEFAULT_LIMIT }: UseEventFollowersArgs,
   options?: QueryOptions
 ) => {
-  const { env, reportToSentry } = useQueryContext()
+  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
 
   const queryRes = useQuery({
@@ -44,11 +44,14 @@ export const useEventFollowers = (
     queryFn: async (): Promise<ID[]> => {
       if (!eventId) return []
       try {
-        const url = `${env.API_URL.replace(/\/$/, '')}/v1/events/${encodeHashId(eventId)}/followers?limit=${limit}&offset=0`
-        const res = await fetch(url)
-        if (!res.ok) return []
-        const json = (await res.json()) as { data?: unknown[] }
-        const users = userMetadataListFromSDK(json.data ?? [])
+        const sdk = await audiusSdk()
+        const { data = [] } = await sdk.events.getEventFollowers({
+          eventId: encodeHashId(eventId)!,
+          limit,
+          offset: 0,
+          userId: OptionalId.parse(currentUserId ?? undefined)
+        })
+        const users = userMetadataListFromSDK(data)
         if (users.length) primeUserData({ users, queryClient })
         return users.map((u) => u.user_id)
       } catch (error) {
