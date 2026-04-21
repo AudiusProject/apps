@@ -184,6 +184,9 @@ const PickWinnersPage = lazy(() =>
 const ProfilePage = lazy(() => import('pages/profile-page/ProfilePage'))
 const RemixesPage = lazy(() => import('pages/remixes-page/RemixesPage'))
 const ContestPage = lazy(() => import('pages/contest-page/ContestPage'))
+const HostRemixContestPage = lazy(
+  () => import('pages/host-remix-contest-page/HostRemixContestPage')
+)
 const RepostsPage = lazy(() => import('pages/reposts-page/RepostsPage'))
 const RequiresUpdate = lazy(() =>
   import('pages/requires-update/RequiresUpdate').then((m) => ({
@@ -250,6 +253,7 @@ const {
   TRACK_REMIXES_PAGE,
   PICK_WINNERS_PAGE,
   CONTEST_PAGE,
+  HOST_REMIX_CONTEST_PAGE,
   PROFILE_PAGE,
   authenticatedRoutes,
   EMPTY_PAGE,
@@ -1182,6 +1186,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={CONTEST_PAGE}
                   element={<ContestPage containerRef={mainContentRef} />}
                 />
+                <Route
+                  path={HOST_REMIX_CONTEST_PAGE}
+                  element={<HostRemixContestPage />}
+                />
                 <Route path={PICK_WINNERS_PAGE} element={<PickWinnersPage />} />
                 {isMobile ? (
                   <>
@@ -1555,6 +1563,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route
                   path={CONTEST_PAGE}
                   element={<ContestPage containerRef={mainContentRef} />}
+                />
+                <Route
+                  path={HOST_REMIX_CONTEST_PAGE}
+                  element={<HostRemixContestPage />}
                 />
                 <Route path={PICK_WINNERS_PAGE} element={<PickWinnersPage />} />
                 <Route
