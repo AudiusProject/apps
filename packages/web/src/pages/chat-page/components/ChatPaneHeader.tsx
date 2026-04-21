@@ -1,10 +1,12 @@
 import { ComponentPropsWithoutRef } from 'react'
 
 import { chatSelectors, CommonState } from '@audius/common/store'
-import { Flex, Paper } from '@audius/harmony'
+import { Flex } from '@audius/harmony'
 import type { ChatBlast } from '@audius/sdk'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
+
+import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
 import { UserChatHeader } from './UserChatHeader'
@@ -27,22 +29,25 @@ export const ChatPaneHeader = (props: ChatPaneHeaderProps) => {
   if (!chatId) return null
 
   return (
-    <Paper
-      shadow='flat'
+    <Frosted
       w='100%'
       h={isNarrowLayout ? undefined : CHAT_PANE_HEADER_HEIGHT_PX}
-      ph={CHAT_PANE_HEADER_PADDING_PX}
-      css={{ borderRadius: 0 }}
+      contentPaddingInline='0px'
+      css={{
+        borderRadius: 0,
+        minWidth: 0,
+        ...(isNarrowLayout && { boxShadow: 'var(--box-shadow-mid)' })
+      }}
       borderBottom='default'
       className={cn(className)}
+      alignItems='center'
       {...other}
     >
       <Flex
         w='100%'
-        h={isNarrowLayout ? undefined : '100%'}
-        ph='l'
+        ph={CHAT_PANE_HEADER_PADDING_PX}
         pv='l'
-        alignItems={isNarrowLayout ? 'center' : 'flex-end'}
+        alignItems='center'
         css={{ minWidth: 0 }}
       >
         {chat ? (
@@ -53,6 +58,6 @@ export const ChatPaneHeader = (props: ChatPaneHeaderProps) => {
           )
         ) : null}
       </Flex>
-    </Paper>
+    </Frosted>
   )
 }

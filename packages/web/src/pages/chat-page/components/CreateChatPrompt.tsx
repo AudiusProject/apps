@@ -15,7 +15,7 @@ const messages = {
   newTitle: 'Start a Conversation!',
   newSubtitle:
     'Connect with other Audius users by starting a private direct message!',
-  writeMessage: 'Write a Message'
+  writeMessage: 'New Message'
 }
 
 export const CreateChatPrompt = () => {

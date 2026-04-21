@@ -1,11 +1,64 @@
-.root {
+.popup {
+  position: absolute;
+  /* Popup's top edge aligns with the button's bottom edge */
+  top: 100%;
   display: flex;
   align-items: center;
-  cursor: pointer;
-  /* Setting explicit height to make the emojis pop out of the popup */
+  /* Explicit height so the emojis can overflow the popup surface */
   height: var(--harmony-unit-18);
+  padding: 0 var(--harmony-unit-2);
+  background-color: var(--harmony-white);
+  border: 1px solid var(--harmony-border-strong);
+  border-radius: var(--harmony-unit-16);
+  box-shadow: var(--harmony-shadow-mid);
+  user-select: none;
+  cursor: pointer;
+  z-index: 1;
+  animation: reactionPopupFadeIn 180ms ease-out;
 }
 
-.popup {
-  border-radius: var(--harmony-unit-16);
+/* Shrinks each emoji's hover/click hitbox while leaving the Lottie visuals
+ * at their intentional size. The Lottie overflows the hitbox on all sides,
+ * and we block pointer events on the child so hovers only register inside
+ * the smaller 68px box. */
+.reactionButton {
+  width: var(--harmony-unit-17);
+  height: var(--harmony-unit-17);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.reactionButton > div {
+  pointer-events: none;
+}
+
+@keyframes reactionPopupFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Popup extends to the left of the trigger button, tucking its top-right
+ * corner under the button's bottom-left corner. Used for received messages
+ * by default, and as the fallback when a sent message would clip off the
+ * right edge of the viewport. */
+.popup.openLeft {
+  right: 100%;
+  margin-top: calc(-1 * var(--harmony-unit-3));
+  margin-right: calc(-1 * var(--harmony-unit-3));
+}
+
+/* Popup extends to the right of the trigger button, tucking its top-left
+ * corner under the button's bottom-right corner. Used for sent messages by
+ * default, and as the fallback when a received message would clip off the
+ * left edge of the viewport. */
+.popup.openRight {
+  left: 100%;
+  margin-top: calc(-1 * var(--harmony-unit-3));
+  margin-left: calc(-1 * var(--harmony-unit-3));
 }

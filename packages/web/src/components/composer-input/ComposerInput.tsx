@@ -522,6 +522,7 @@ export const ComposerInput = (props: ComposerInputProps) => {
       css={{
         '&&': {
           paddingBlock: 6,
+          backgroundColor: 'var(--harmony-bg-white)',
           border: `1px solid ${
             focused ? color.border.accent : color.border.default
           }`

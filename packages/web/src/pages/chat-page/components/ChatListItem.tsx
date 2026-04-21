@@ -40,7 +40,11 @@ export const ChatListItem = (props: ChatListItemProps) => {
       })}
       onClick={handleClick}
     >
-      <ChatUser user={users[0]} textClassName={styles.userText}>
+      <ChatUser
+        user={users[0]}
+        textClassName={styles.userText}
+        disableNavigation
+      >
         {chat.unread_message_count > 0 ? (
           <>
             <div className={styles.minimizedUnreadIndicatorTag} />

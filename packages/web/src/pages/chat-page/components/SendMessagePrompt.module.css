@@ -3,9 +3,11 @@
   align-items: center;
   gap: var(--harmony-unit-6);
 
-  width: calc(100% - var(--harmony-unit-24));
+  min-width: 220px;
   max-width: 700px;
-  margin: var(--harmony-unit-12) auto;
+  margin-top: var(--harmony-unit-8);
+  margin-left: var(--harmony-unit-8);
+  margin-right: var(--harmony-unit-8);
   padding: var(--harmony-unit-6);
 
   border-radius: var(--harmony-unit-2);

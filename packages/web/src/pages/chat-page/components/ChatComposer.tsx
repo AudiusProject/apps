@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 
 import { useSelector } from 'common/hooks/useSelector'
 import { ComposerInput } from 'components/composer-input/ComposerInput'
+import { Frosted } from 'components/frosted/Frosted'
 
 import { ComposerCollectionInfo, ComposerTrackInfo } from './ComposePreviewInfo'
 
@@ -62,7 +63,7 @@ export const ChatComposer = (props: ChatComposerProps) => {
   }, [chatId, dispatch, onMessageSent, value, chat?.audience])
 
   return (
-    <Box backgroundColor='white' className={props.className}>
+    <Frosted contentPaddingInline='0px' className={props.className}>
       {trackId ? (
         <ComposerTrackInfo trackId={trackId} />
       ) : collectionId ? (
@@ -78,6 +79,6 @@ export const ChatComposer = (props: ChatComposerProps) => {
           presetMessage={presetMessage}
         />
       </Box>
-    </Box>
+    </Frosted>
   )
 }

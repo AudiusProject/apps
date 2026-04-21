@@ -9,7 +9,6 @@ import {
   IconCompose,
   IconSettings,
   IconButton,
-  Paper,
   Flex,
   Text,
   IconMessages
@@ -55,54 +54,53 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     }, [setInboxSettingsVisible])
 
     const headerContent = (
-      <Flex p='l' alignItems='flex-end' gap='m'>
+      <Flex p='l' alignItems='center' gap='m'>
         <IconMessages size='2xl' color='heading' />
         <Text variant='heading' strength='default' size='l' color='heading'>
           {messages.header}
         </Text>
-        <IconButton
-          aria-label={messages.settings}
-          icon={IconSettings}
-          onClick={handleSettingsClicked}
-        />
-        <IconButton
-          aria-label={messages.compose}
-          icon={IconCompose}
-          onClick={handleComposeClicked}
-        />
+        <Flex gap='m' css={{ marginLeft: 'auto' }}>
+          <IconButton
+            aria-label={messages.settings}
+            icon={IconSettings}
+            onClick={handleSettingsClicked}
+          />
+          <IconButton
+            aria-label={messages.compose}
+            icon={IconCompose}
+            onClick={handleComposeClicked}
+          />
+        </Flex>
       </Flex>
     )
 
     return (
-      <Paper
-        shadow='flat'
+      <Flex
         ref={ref}
         w='100%'
-        ph={CHAT_HEADER_PADDING_PX}
         h={112}
-        css={{ borderRadius: 0 }}
+        ph={CHAT_HEADER_PADDING_PX}
+        css={{ minWidth: 0, borderRadius: 0 }}
         borderBottom='default'
       >
-        <Flex w='100%' h='100%' css={{ minWidth: 0 }}>
-          <Flex
-            w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
-            css={{ flexShrink: 0 }}
-          >
-            {headerContent}
-          </Flex>
-          {isNarrowLayout ? null : (
-            <Flex p='l' flex={1} alignItems='flex-end' css={{ minWidth: 0 }}>
-              {chat ? (
-                isBlast ? (
-                  <ChatBlastHeader chat={chat} />
-                ) : (
-                  <UserChatHeader chatId={chat.chat_id} />
-                )
-              ) : null}
-            </Flex>
-          )}
+        <Flex
+          w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
+          css={{ flexShrink: 0 }}
+        >
+          {headerContent}
         </Flex>
-      </Paper>
+        {isNarrowLayout ? null : (
+          <Flex p='l' flex={1} alignItems='center' css={{ minWidth: 0 }}>
+            {chat ? (
+              isBlast ? (
+                <ChatBlastHeader chat={chat} />
+              ) : (
+                <UserChatHeader chatId={chat.chat_id} />
+              )
+            ) : null}
+          </Flex>
+        )}
+      </Flex>
     )
   }
 )

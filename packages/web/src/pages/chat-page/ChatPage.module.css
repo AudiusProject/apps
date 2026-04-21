@@ -27,6 +27,10 @@
   margin-bottom: -5px;
 }
 
+.narrowActiveChat > :first-child > :last-child {
+  box-shadow: none;
+}
+
 .page > :nth-child(2) {
   flex: 1;
   min-height: 0;
@@ -57,15 +61,26 @@
 
 .chatArea {
   flex: 1;
-  min-width: 0;
+  min-width: 284px;
   min-height: 0;
   display: flex;
   flex-direction: column;
+
+  /* Heights consumed by the message list's negative margins / padding so
+   * it can scroll behind the frosted header and composer. Matched against
+   * ChatPaneHeader (112px in the wide layout, smaller in narrow) and
+   * ChatComposer (grows with the track/collection preview, base ~88px). */
+  --chat-pane-header-height: 112px;
+  --chat-composer-height: 88px;
+}
+
+.chatAreaNarrow {
+  --chat-pane-header-height: 60px;
 }
 
 .chatPaneHeader {
   position: relative;
-  z-index: 2;
+  z-index: 6;
   flex-shrink: 0;
 }
 
@@ -76,6 +91,8 @@
 }
 
 .composer {
+  position: relative;
+  z-index: 6;
   flex-shrink: 0;
   border-top: 1px solid var(--harmony-n-150);
 }

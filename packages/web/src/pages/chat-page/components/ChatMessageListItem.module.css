@@ -24,14 +24,18 @@
   min-width: 0;
   max-width: min(448px, 100%);
   filter: var(--drop-shadow-near);
-  transition:
-    background-color var(--harmony-expressive),
-    filter var(--harmony-expressive);
+  transition: filter var(--harmony-quick);
 }
 
 .bubbleCorners {
   border-radius: var(--harmony-unit-3);
   overflow: hidden;
+}
+
+.bubbleContent {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .bubble:not(.nonInteractive):hover {
@@ -44,22 +48,64 @@
 }
 
 .isAuthor .bubble:hover {
-  --bubble-color: var(--harmony-s-200);
+  --bubble-color: var(--harmony-s-400);
+  filter: var(--drop-shadow-far);
 }
 
 .unfurl {
-  border-radius: 0;
-  flex: 1 1;
+  border-radius: var(--harmony-unit-3) var(--harmony-unit-3) 0 0 !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+  border-bottom: 1px solid var(--harmony-n-150) !important;
+}
+
+.unfurl > div:last-child {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.trackUnfurl {
+  border: none !important;
+  border-bottom: 1px solid var(--harmony-n-150) !important;
+  box-shadow: none !important;
+}
+
+.playlistUnfurl {
+}
+
+.bubble.hideMessage .unfurl {
+  border-radius: var(--harmony-unit-3) !important;
+}
+
+.bubble.hideMessage {
+  display: block;
+  width: min(448px, 100%);
+  min-width: min(288px, 100%);
+}
+
+.bubble.hideMessage .unfurl {
+  width: 100%;
+  min-width: 0 !important;
 }
 
 .textWrapper {
   background-color: var(--bubble-color);
+  transition: background-color var(--harmony-quick);
   text-align: left;
   min-width: 0;
-  max-width: min(448px, 100%);
+  width: 100%;
+  max-width: 100%;
 }
 
 .text {
+  min-width: 0;
+  max-width: 100%;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -134,23 +180,29 @@
   opacity: 1;
 }
 
-.reactionsContainer:not(.hasReaction) path {
-  width: var(--harmony-unit-6);
-  height: var(--harmony-unit-6);
-  fill: var(--harmony-secondary);
+.reactionsContainer:not(.hasReaction) .reactionsButton path {
+  fill: var(--harmony-text-subdued);
   transition: fill var(--harmony-quick);
 }
 
+.addReactionIcon {
+  transition: transform var(--harmony-quick) ease-out;
+}
+
+.reactionsContainer.isOpened .addReactionIcon {
+  transform: rotate(45deg);
+}
+
 .reactionsContainer:not(.hasReaction):hover .reactionsButton {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .reactionsContainer:not(.hasReaction):hover .reactionsButton path {
-  fill: var(--harmony-s-500);
+  fill: var(--harmony-text-default);
 }
 
-.reactionsContainer:not(.hasReaction):active .reactionsButton {
-  transform: scale(0.6);
+.reactionsContainer:not(.hasReaction) .reactionsButton:active {
+  transform: scale(0.9);
 }
 
 .reactionEmoji {

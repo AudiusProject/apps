@@ -110,7 +110,9 @@ export const ChatPage = () => {
       title={`${firstOtherUser ? firstOtherUser.name + ' •' : ''} ${
         messages.messages
       }`}
-      containerClassName={styles.page}
+      containerClassName={cn(styles.page, {
+        [styles.narrowActiveChat]: isNarrowLayout && !!currentChatId
+      })}
       contentClassName={styles.pageContent}
       showSearch={false}
       headerPadding={0}
@@ -131,7 +133,11 @@ export const ChatPage = () => {
             onChatClicked={handleChatClicked}
           />
         </div>
-        <div className={styles.chatArea}>
+        <div
+          className={cn(styles.chatArea, {
+            [styles.chatAreaNarrow]: isNarrowLayout
+          })}
+        >
           {currentChatId ? (
             <>
               {isNarrowLayout ? (
