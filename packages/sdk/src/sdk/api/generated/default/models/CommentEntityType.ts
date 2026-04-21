@@ -19,8 +19,7 @@
  */
 export const CommentEntityType = {
     Track: 'Track',
-    FanClub: 'FanClub',
-    Event: 'Event'
+    FanClub: 'FanClub'
 } as const;
 export type CommentEntityType = typeof CommentEntityType[keyof typeof CommentEntityType];
 

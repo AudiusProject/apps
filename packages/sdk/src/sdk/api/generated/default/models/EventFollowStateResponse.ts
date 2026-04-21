@@ -31,7 +31,7 @@ export interface EventFollowStateResponse {
      * @type {EventFollowState}
      * @memberof EventFollowStateResponse
      */
-    data: EventFollowState;
+    data?: EventFollowState;
 }
 
 /**
@@ -39,7 +39,6 @@ export interface EventFollowStateResponse {
  */
 export function instanceOfEventFollowStateResponse(value: object): value is EventFollowStateResponse {
     let isInstance = true;
-    isInstance = isInstance && "data" in value && value["data"] !== undefined;
 
     return isInstance;
 }
@@ -54,7 +53,7 @@ export function EventFollowStateResponseFromJSONTyped(json: any, ignoreDiscrimin
     }
     return {
         
-        'data': EventFollowStateFromJSON(json['data']),
+        'data': !exists(json, 'data') ? undefined : EventFollowStateFromJSON(json['data']),
     };
 }
 

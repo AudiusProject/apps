@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   EventFollowStateResponse,
   EventsResponse,
+  FollowersResponse,
   TrackCommentsResponse,
   UnclaimedIdResponse,
   WriteResponse,
@@ -26,6 +27,8 @@ import {
     EventFollowStateResponseToJSON,
     EventsResponseFromJSON,
     EventsResponseToJSON,
+    FollowersResponseFromJSON,
+    FollowersResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
     UnclaimedIdResponseFromJSON,
@@ -64,10 +67,10 @@ export interface GetEntityEventsRequest {
 
 export interface GetEventCommentsRequest {
     eventId: string;
-    userId?: string;
-    sortMethod?: GetEventCommentsSortMethodEnum;
     offset?: number;
     limit?: number;
+    userId?: string;
+    sortMethod?: GetEventCommentsSortMethodEnum;
 }
 
 export interface GetEventFollowStateRequest {
@@ -77,6 +80,13 @@ export interface GetEventFollowStateRequest {
 
 export interface GetEventFollowStateAliasRequest {
     eventId: string;
+    userId?: string;
+}
+
+export interface GetEventFollowersRequest {
+    eventId: string;
+    offset?: number;
+    limit?: number;
     userId?: string;
 }
 
@@ -98,7 +108,8 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Subscribe (follow) a remix-contest event to get notifications when the event\'s artist posts an update. Backed by a Subscribe/Event ManageEntity transaction.
+     * Subscribe to a remix-contest event. Emits a Subscribe/Event ManageEntity transaction so the indexer records the follow.
+     * Follow event
      */
     async followEventRaw(params: FollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
         if (params.eventId === null || params.eventId === undefined) {
@@ -146,7 +157,8 @@ export class EventsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Subscribe (follow) a remix-contest event to get notifications when the event\'s artist posts an update. Backed by a Subscribe/Event ManageEntity transaction.
+     * Subscribe to a remix-contest event. Emits a Subscribe/Event ManageEntity transaction so the indexer records the follow.
+     * Follow event
      */
     async followEvent(params: FollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
         const response = await this.followEventRaw(params, initOverrides);
@@ -321,7 +333,8 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Get the comment stream for a remix-contest event. Returns top-level comments only; replies come back nested inside each comment. A comment whose user_id matches the event\'s owner user_id is a \"post update\" (decided client-side via the related event_user_id field).
+     * Paginated stream of top-level comments (with nested replies) for a remix-contest event. Host-authored top-level comments represent \"post updates\"; everything else is a community comment.
+     * Get event comments
      */
     async getEventCommentsRaw(params: GetEventCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrackCommentsResponse>> {
         if (params.eventId === null || params.eventId === undefined) {
@@ -330,20 +343,20 @@ export class EventsApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        if (params.sortMethod !== undefined) {
-            queryParameters['sort_method'] = params.sortMethod;
-        }
-
         if (params.offset !== undefined) {
             queryParameters['offset'] = params.offset;
         }
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.sortMethod !== undefined) {
+            queryParameters['sort_method'] = params.sortMethod;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -366,7 +379,8 @@ export class EventsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get the comment stream for a remix-contest event. Returns top-level comments only; replies come back nested inside each comment. A comment whose user_id matches the event\'s owner user_id is a \"post update\" (decided client-side via the related event_user_id field).
+     * Paginated stream of top-level comments (with nested replies) for a remix-contest event. Host-authored top-level comments represent \"post updates\"; everything else is a community comment.
+     * Get event comments
      */
     async getEventComments(params: GetEventCommentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrackCommentsResponse> {
         const response = await this.getEventCommentsRaw(params, initOverrides);
@@ -376,6 +390,7 @@ export class EventsApi extends runtime.BaseAPI {
     /**
      * @hidden
      * Returns whether the current user is subscribed to (follows) a given remix-contest event, plus the total follower count. Useful for rendering the Follow / Following button.
+     * Get event follow state
      */
     async getEventFollowStateRaw(params: GetEventFollowStateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventFollowStateResponse>> {
         if (params.eventId === null || params.eventId === undefined) {
@@ -409,6 +424,7 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * Returns whether the current user is subscribed to (follows) a given remix-contest event, plus the total follower count. Useful for rendering the Follow / Following button.
+     * Get event follow state
      */
     async getEventFollowState(params: GetEventFollowStateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventFollowStateResponse> {
         const response = await this.getEventFollowStateRaw(params, initOverrides);
@@ -418,6 +434,7 @@ export class EventsApi extends runtime.BaseAPI {
     /**
      * @hidden
      * Hyphenated alias of /events/{eventId}/follow_state.
+     * Get event follow state (hyphenated alias)
      */
     async getEventFollowStateAliasRaw(params: GetEventFollowStateAliasRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventFollowStateResponse>> {
         if (params.eventId === null || params.eventId === undefined) {
@@ -451,9 +468,62 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * Hyphenated alias of /events/{eventId}/follow_state.
+     * Get event follow state (hyphenated alias)
      */
     async getEventFollowStateAlias(params: GetEventFollowStateAliasRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventFollowStateResponse> {
         const response = await this.getEventFollowStateAliasRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns the list of users subscribed to a given remix-contest event, ordered by each follower\'s own follower count so the most-followed fans surface first. Used by the contest page\'s Followers card (avatar stack + leaderboard).
+     * Get event followers
+     */
+    async getEventFollowersRaw(params: GetEventFollowersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowersResponse>> {
+        if (params.eventId === null || params.eventId === undefined) {
+            throw new runtime.RequiredError('eventId','Required parameter params.eventId was null or undefined when calling getEventFollowers.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/events/{eventId}/followers`.replace(`{${"eventId"}}`, encodeURIComponent(String(params.eventId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowersResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns the list of users subscribed to a given remix-contest event, ordered by each follower\'s own follower count so the most-followed fans surface first. Used by the contest page\'s Followers card (avatar stack + leaderboard).
+     * Get event followers
+     */
+    async getEventFollowers(params: GetEventFollowersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowersResponse> {
+        const response = await this.getEventFollowersRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -534,7 +604,8 @@ export class EventsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Unfollow a remix-contest event.
+     * Unsubscribe from a remix-contest event. Emits an Unsubscribe/Event ManageEntity transaction.
+     * Unfollow event
      */
     async unfollowEventRaw(params: UnfollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
         if (params.eventId === null || params.eventId === undefined) {
@@ -582,7 +653,8 @@ export class EventsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Unfollow a remix-contest event.
+     * Unsubscribe from a remix-contest event. Emits an Unsubscribe/Event ManageEntity transaction.
+     * Unfollow event
      */
     async unfollowEvent(params: UnfollowEventRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
         const response = await this.unfollowEventRaw(params, initOverrides);

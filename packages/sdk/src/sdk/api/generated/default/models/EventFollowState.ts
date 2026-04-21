@@ -20,13 +20,13 @@ import { exists, mapValues } from '../runtime';
  */
 export interface EventFollowState {
     /**
-     * Whether the requesting user is currently subscribed to the event. False when the request is unauthenticated or the user has no active subscription.
+     * Whether the authenticated / requested user is currently subscribed to this event.
      * @type {boolean}
      * @memberof EventFollowState
      */
     isFollowed: boolean;
     /**
-     * Total number of active followers for this event.
+     * Total number of users following this event.
      * @type {number}
      * @memberof EventFollowState
      */
