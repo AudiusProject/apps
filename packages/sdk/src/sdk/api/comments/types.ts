@@ -48,7 +48,7 @@ export const CreateCommentSchema = z
   .object({
     userId: HashId,
     entityId: z.optional(HashId),
-    entityType: z.optional(z.enum(['Track', 'FanClub'])),
+    entityType: z.optional(z.enum(['Track', 'FanClub', 'Event'])),
     body: z.optional(z.string()),
     commentId: z.optional(z.number()),
     parentCommentId: z.optional(z.number()),
@@ -76,7 +76,7 @@ export const UpdateCommentSchema = z
     userId: HashId,
     entityId: HashId,
     trackId: z.optional(HashId),
-    entityType: z.optional(z.enum(['Track', 'FanClub'])),
+    entityType: z.optional(z.enum(['Track', 'FanClub', 'Event'])),
     body: z.string(),
     mentions: z.optional(z.array(z.number()))
   })
@@ -122,7 +122,7 @@ export const ReactCommentSchema = z
     commentId: HashId,
     isLiked: z.boolean(),
     trackId: z.optional(HashId),
-    entityType: z.optional(z.enum(['Track', 'FanClub']))
+    entityType: z.optional(z.enum(['Track', 'FanClub', 'Event']))
   })
   .strict()
   .refine(

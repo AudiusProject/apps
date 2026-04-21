@@ -155,6 +155,8 @@ models/DynamicBondingCurveInsights.ts
 models/EmailAccess.ts
 models/EmailAccessResponse.ts
 models/Event.ts
+models/EventFollowState.ts
+models/EventFollowStateResponse.ts
 models/EventsResponse.ts
 models/ExtendedAccessGate.ts
 models/ExtendedPaymentSplit.ts

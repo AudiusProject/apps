@@ -133,6 +133,8 @@ export * from './DynamicBondingCurveInsights';
 export * from './EmailAccess';
 export * from './EmailAccessResponse';
 export * from './Event';
+export * from './EventFollowState';
+export * from './EventFollowStateResponse';
 export * from './EventsResponse';
 export * from './ExtendedAccessGate';
 export * from './ExtendedPaymentSplit';

@@ -11,7 +11,7 @@ export const exploreMessages = {
   recentlyListedForSale: 'Recently Listed for Sale',
   bestSelling: 'Best Selling',
   topAlbumsThisMonth: 'Top Albums This Month',
-  newAlbumReleases: 'New Album Releases',
+  newAlbumReleases: 'New & Noteworthy Albums',
   bestSellingAlbums: 'Best Selling Albums',
   exploreByMood: (category?: string) =>
     `Explore${category ? ` ${category}` : ''} by Mood`,

@@ -133,11 +133,11 @@ const RecentSearchesEmptyState = () => (
 export const DesktopSearchBar = () => {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialQuery = searchParams.get('query') || ''
+  const queryParam = searchParams.get('query') || ''
   const searchHistory = useSelector(getSearchHistory)
   const dispatch = useDispatch()
 
-  const [inputValue, setInputValue] = useState(initialQuery)
+  const [inputValue, setInputValue] = useState(queryParam)
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   useDebounce(
     () => {
@@ -158,15 +158,28 @@ export const DesktopSearchBar = () => {
 
   const isSearchPage = !!matchPath(SEARCH_PAGE, location.pathname)
 
-  const { data, isLoading } = useSearchAutocomplete(
+  const { data, isFetching } = useSearchAutocomplete(
     { query: debouncedValue, limit: DEFAULT_LIMIT },
     { enabled: !isSearchPage }
   )
+  const previousQueryParam = usePrevious(queryParam)
   const previousDebouncedValue = usePrevious(debouncedValue)
+
+  useEffect(() => {
+    if (queryParam !== previousQueryParam) {
+      setInputValue(queryParam)
+      setDebouncedValue(queryParam)
+    }
+  }, [previousQueryParam, queryParam])
+
   useEffect(() => {
     if (isSearchPage && debouncedValue !== previousDebouncedValue) {
       const newParams = new URLSearchParams(searchParams)
-      newParams.set('query', debouncedValue)
+      if (debouncedValue) {
+        newParams.set('query', debouncedValue)
+      } else {
+        newParams.delete('query')
+      }
       setSearchParams(newParams, { replace: true })
     }
   }, [
@@ -344,14 +357,26 @@ export const DesktopSearchBar = () => {
     return flat
   }, [options])
 
+  const submitSearchPageQuery = useCallback(
+    (query: string) => {
+      const newParams = new URLSearchParams(searchParams)
+      if (query) {
+        newParams.set('query', query)
+      } else {
+        newParams.delete('query')
+      }
+      setSearchParams(newParams, { replace: true })
+      setDebouncedValue(query)
+    },
+    [searchParams, setSearchParams]
+  )
+
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (!shouldShowMenu) {
         if (event.key === 'Enter') {
           if (isSearchPage) {
-            const newParams = new URLSearchParams(searchParams)
-            newParams.set('query', debouncedValue)
-            setSearchParams(newParams, { replace: true })
+            submitSearchPageQuery(inputValue)
           } else {
             navigate(searchResultsPage('all', inputValue))
           }
@@ -410,9 +435,7 @@ export const DesktopSearchBar = () => {
         } else {
           // No selection, navigate to search page
           if (isSearchPage) {
-            const newParams = new URLSearchParams(searchParams)
-            newParams.set('query', debouncedValue)
-            setSearchParams(newParams, { replace: true })
+            submitSearchPageQuery(inputValue)
           } else {
             navigate(searchResultsPage('all', inputValue))
           }
@@ -430,11 +453,9 @@ export const DesktopSearchBar = () => {
       inputValue,
       navigate,
       isSearchPage,
-      searchParams,
-      setSearchParams,
-      debouncedValue,
       dispatch,
-      handleSelect
+      handleSelect,
+      submitSearchPageQuery
     ]
   )
 
@@ -614,7 +635,7 @@ export const DesktopSearchBar = () => {
           autoComplete='off'
           type='search'
           startIcon={IconSearch}
-          onClear={!isLoading && inputValue ? handleClear : undefined}
+          onClear={!isFetching && inputValue ? handleClear : undefined}
           css={{
             width: '100%',
             '& input': {
@@ -634,7 +655,7 @@ export const DesktopSearchBar = () => {
             }
           }}
         />
-        {isLoading && inputValue && (
+        {isFetching && inputValue && (
           <Flex
             css={{
               position: 'absolute',

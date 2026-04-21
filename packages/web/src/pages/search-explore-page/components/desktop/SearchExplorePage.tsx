@@ -226,7 +226,7 @@ const SearchExplorePage = ({
   const isTracksTab = categoryKey === CategoryView.TRACKS
   const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
   const isAlbumsTab = categoryKey === CategoryView.ALBUMS
-  const showAlbumContent = categoryKey === CategoryView.ALL || isAlbumsTab
+  const showAlbumContent = isAlbumsTab
   const sectionConfigs: {
     key: string
     shouldRender: boolean

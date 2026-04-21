@@ -491,6 +491,8 @@ def populate_mock_db(db, entities, block_offset=None):
                 is_current=subscription_meta.get("is_current", True),
                 is_delete=subscription_meta.get("is_delete", False),
                 created_at=subscription_meta.get("created_at", datetime.now()),
+                entity_type=subscription_meta.get("entity_type", "User"),
+                entity_id=subscription_meta.get("entity_id", None),
             )
             session.add(subscription)
         for i, repost_meta in enumerate(reposts):
