@@ -43,7 +43,11 @@ import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
-import { fullContestPage, pickWinnersPage } from 'utils/route'
+import {
+  fullContestPage,
+  hostRemixContestPage,
+  pickWinnersPage
+} from 'utils/route'
 
 import { ContestCommentsSection } from '../ContestCommentsSection'
 import { EventFollowersCard } from '../EventFollowersCard'
@@ -248,9 +252,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const submissionsCount = lineup.data?.length
 
   const handleEditContest = useCallback(() => {
-    if (!trackId) return
-    openHostRemixContest({ trackId })
-  }, [trackId, openHostRemixContest])
+    if (track?.permalink) {
+      navigate(hostRemixContestPage(track.permalink))
+      return
+    }
+    if (trackId) {
+      // Fallback to the legacy modal if we somehow don't have a permalink
+      // for the track (which the page navigation route is built from).
+      openHostRemixContest({ trackId })
+    }
+  }, [track?.permalink, trackId, navigate, openHostRemixContest])
 
   const handlePickWinners = useCallback(() => {
     if (!track?.permalink) return

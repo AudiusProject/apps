@@ -68,6 +68,13 @@ export const fullContestPage = (permalink: string) => {
   return `${fullTrackPage(permalink)}/contest`
 }
 
+export const hostRemixContestPage = (permalink: string) => {
+  return `${permalink}/host-contest`
+}
+export const fullHostRemixContestPage = (permalink: string) => {
+  return `${fullTrackPage(permalink)}/host-contest`
+}
+
 export const fullAiPage = (handle: string) => {
   return `${fullProfilePage(handle)}/ai`
 }

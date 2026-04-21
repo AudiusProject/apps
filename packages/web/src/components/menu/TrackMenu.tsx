@@ -34,7 +34,7 @@ import { Dispatch } from 'redux'
 import * as embedModalActions from 'components/embed-modal/store/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { push } from 'utils/navigation'
-import { albumPage } from 'utils/route'
+import { albumPage, hostRemixContestPage } from 'utils/route'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
@@ -309,7 +309,14 @@ const TrackMenu = ({
         ? messages.editRemixContest
         : messages.hostRemixContest,
       onClick: () => {
-        openHostRemixContest({ trackId })
+        const permalink = trackPermalink || partialTrack?.permalink
+        if (permalink) {
+          goToRoute(hostRemixContestPage(permalink))
+        } else {
+          // Fallback for call sites that don't pass a permalink — keep the
+          // modal as a safety net until every entry point is migrated.
+          openHostRemixContest({ trackId })
+        }
       }
     }
 
