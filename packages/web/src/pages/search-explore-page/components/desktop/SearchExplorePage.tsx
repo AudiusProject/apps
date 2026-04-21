@@ -322,7 +322,7 @@ const SearchExplorePage = ({
       size='large'
       variant='flush'
     >
-      <Flex justifyContent='flex-start' w='100%'>
+      <Flex justifyContent='center' w='100%'>
         <Flex
           ref={pageContentRef}
           direction='column'
@@ -331,7 +331,7 @@ const SearchExplorePage = ({
           gap='3xl'
           alignItems='stretch'
           css={{
-            minWidth: 332,
+            minWidth: 0,
             width: '100%',
             maxWidth: NORMAL_WIDTH
           }}
