@@ -76,8 +76,8 @@ vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
 
 // The comments feed is its own universe — stub with a marker. (Phase 4/5
 // tests cover the feed directly.)
-vi.mock('./components/ContestCommentsSection', () => ({
-  ContestCommentsSection: () => <div data-testid='contest-comments-section' />
+vi.mock('./components/ContestCommentsTile', () => ({
+  ContestCommentsTile: () => <div data-testid='contest-comments-section' />
 }))
 
 const track = {

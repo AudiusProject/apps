@@ -50,7 +50,7 @@ import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/Remi
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
-import { ContestCommentsSection } from '../ContestCommentsSection'
+import { ContestCommentsTile } from '../ContestCommentsTile'
 import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
@@ -606,39 +606,25 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 </Flex>
               </Paper>
 
-              {/* Comments tile — full width below the main tile. */}
-              <Paper
-                direction='column'
-                p='xl'
-                borderRadius='l'
-                border='default'
-                shadow='mid'
-                backgroundColor='white'
-              >
-                <ContestCommentsSection
-                  eventId={eventId}
-                  eventOwnerUserId={contest?.userId}
-                  mode='comments'
-                />
-              </Paper>
+              {/* Comments tile — matches the track-page Comments
+                  preview: IconMessage + "Comments (N)" header, Paper
+                  tile, avatar + ComposerInput composer, sort pills,
+                  and avatar-led rows with an Artist badge for the
+                  event host. */}
+              <ContestCommentsTile
+                eventId={eventId}
+                eventOwnerUserId={contest?.userId}
+                mode='comments'
+              />
 
-              {/* Updates tile — full width below Comments. The host posts
-                  contest updates here; these fan out as notifications to
-                  contest followers via the event-comments indexer. */}
-              <Paper
-                direction='column'
-                p='xl'
-                borderRadius='l'
-                border='default'
-                shadow='mid'
-                backgroundColor='white'
-              >
-                <ContestCommentsSection
-                  eventId={eventId}
-                  eventOwnerUserId={contest?.userId}
-                  mode='updates'
-                />
-              </Paper>
+              {/* Updates tile — host-curated feed using the same
+                  visual vocabulary. Composer is host-only (IconCamera
+                  Attach Video affordance). */}
+              <ContestCommentsTile
+                eventId={eventId}
+                eventOwnerUserId={contest?.userId}
+                mode='updates'
+              />
             </Flex>
           ) : null}
 
