@@ -12,7 +12,8 @@ import {
   IconUser,
   IconTrash,
   IconError,
-  IconKebabHorizontal
+  IconKebabHorizontal,
+  Flex
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -103,23 +104,27 @@ export const UserChatHeader = ({ chatId }: { chatId?: string }) => {
   ]
   return (
     <>
-      {user ? <ChatUser user={user} key={user.user_id} /> : null}
       {user ? (
         <>
-          <PopupMenu
-            items={overflowItems}
-            transformOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            renderTrigger={(ref, trigger) => (
-              <IconButton
-                ref={ref}
-                aria-label={messages.chatSettings}
-                icon={IconKebabHorizontal}
-                color='default'
-                onClick={() => trigger()}
-              />
-            )}
-          />
+          <Flex alignItems='center' gap='m' w='100%' css={{ minWidth: 0 }}>
+            <Flex flex={1} css={{ minWidth: 0 }}>
+              <ChatUser user={user} key={user.user_id} />
+            </Flex>
+            <PopupMenu
+              items={overflowItems}
+              transformOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              renderTrigger={(ref, trigger) => (
+                <IconButton
+                  ref={ref}
+                  aria-label={messages.chatSettings}
+                  icon={IconKebabHorizontal}
+                  color='default'
+                  onClick={() => trigger()}
+                />
+              )}
+            />
+          </Flex>
           <UnblockUserConfirmationModal
             user={user}
             isVisible={isUnblockUserModalVisible}

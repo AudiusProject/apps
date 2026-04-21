@@ -16,10 +16,11 @@ type ChatListItemProps = {
   currentChatId?: string
   chat: UserChat
   onChatClicked: (chatId: string) => void
+  isCompact?: boolean
 }
 
 export const ChatListItem = (props: ChatListItemProps) => {
-  const { chat, currentChatId, onChatClicked } = props
+  const { chat, currentChatId, onChatClicked, isCompact } = props
   const isCurrentChat = currentChatId && currentChatId === chat.chat_id
 
   const users = useOtherChatUsersFromChat(chat)
@@ -33,7 +34,10 @@ export const ChatListItem = (props: ChatListItemProps) => {
   }
   return (
     <div
-      className={cn(styles.root, { [styles.active]: isCurrentChat })}
+      className={cn(styles.root, {
+        [styles.active]: isCurrentChat,
+        [styles.compact]: isCompact
+      })}
       onClick={handleClick}
     >
       <ChatUser user={users[0]} textClassName={styles.userText}>

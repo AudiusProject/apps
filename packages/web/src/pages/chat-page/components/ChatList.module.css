@@ -4,6 +4,10 @@
   border-right: 1px solid var(--harmony-n-150);
 }
 
+.compact {
+  border-right: 1px solid var(--harmony-n-150);
+}
+
 .empty {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,6 @@
 .root {
   flex: 1;
+  min-width: 0;
   overflow-y: scroll;
 }
 
@@ -10,6 +11,7 @@
   gap: 8px;
   padding: 32px;
   height: 100%;
+  min-width: 0;
 }
 
 .separator {

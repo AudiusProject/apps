@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: var(--harmony-unit-2);
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .root.isAuthor {
@@ -18,7 +21,8 @@
   position: relative;
   z-index: 1;
   display: inline-block;
-  max-width: 448px;
+  min-width: 0;
+  max-width: min(448px, 100%);
   filter: var(--drop-shadow-near);
   transition:
     background-color var(--harmony-expressive),
@@ -51,11 +55,13 @@
 .textWrapper {
   background-color: var(--bubble-color);
   text-align: left;
-  max-width: 448px;
+  min-width: 0;
+  max-width: min(448px, 100%);
 }
 
 .text {
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-break: break-word;
   user-select: text;
 }

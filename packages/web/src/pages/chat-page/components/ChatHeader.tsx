@@ -28,10 +28,13 @@ const messages = {
   compose: 'Compose'
 }
 
+const CHAT_HEADER_PADDING_PX = 20
+const CHAT_LIST_WIDTH_PX = 400
+
 type ChatHeaderProps = {
   currentChatId?: string
   scrollBarWidth?: number
-  headerContainerRef?: React.RefObject<HTMLDivElement>
+  headerContainerRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
@@ -42,6 +45,8 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       chatSelectors.getChat(state, currentChatId ?? '')
     )
     const isBlast = chat?.is_blast
+    const isSmallScreen = useMedia('(max-width: 1080px)')
+    const hasChat = Boolean(currentChatId && chat)
 
     const handleComposeClicked = useCallback(() => {
       openCreateChatModal()
@@ -50,8 +55,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     const handleSettingsClicked = useCallback(() => {
       setInboxSettingsVisible(true)
     }, [setInboxSettingsVisible])
-
-    const isSmallScreen = useMedia('(max-width: 1080px)')
 
     const headerContent = (
       <Flex p='l' alignItems='flex-end' gap='m'>
@@ -72,18 +75,53 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       </Flex>
     )
 
+    if (isSmallScreen) {
+      return (
+        <Paper
+          shadow='flat'
+          ref={ref}
+          w='100%'
+          ph={CHAT_HEADER_PADDING_PX}
+          borderBottom='default'
+        >
+          <Flex column w='100%' css={{ minWidth: 0 }}>
+            <Flex w='100%' h={112} alignItems='flex-end' css={{ minWidth: 0 }}>
+              {headerContent}
+            </Flex>
+            {hasChat ? (
+              <Flex p='l' pt='s' w='100%' css={{ minWidth: 0 }}>
+                {isBlast ? (
+                  <ChatBlastHeader chat={chat} />
+                ) : (
+                  <UserChatHeader chatId={chat?.chat_id} />
+                )}
+              </Flex>
+            ) : null}
+          </Flex>
+        </Paper>
+      )
+    }
+
     return (
-      <Paper shadow='flat' ref={ref} ph={20} mh={-80} h={112}>
-        <Flex w={isSmallScreen ? 96 : 400} borderRight='default'>
-          {isSmallScreen ? null : headerContent}
-        </Flex>
-        {isSmallScreen ? headerContent : null}
-        <Flex p='l' flex={1} alignItems='flex-end'>
-          {isBlast ? (
-            <ChatBlastHeader chat={chat} />
-          ) : (
-            <UserChatHeader chatId={chat?.chat_id} />
-          )}
+      <Paper
+        shadow='flat'
+        ref={ref}
+        w='100%'
+        ph={CHAT_HEADER_PADDING_PX}
+        h={112}
+        borderBottom='default'
+      >
+        <Flex w='100%' h='100%' css={{ minWidth: 0 }}>
+          <Flex w={CHAT_LIST_WIDTH_PX} css={{ flexShrink: 0 }}>
+            {headerContent}
+          </Flex>
+          <Flex p='l' flex={1} alignItems='flex-end' css={{ minWidth: 0 }}>
+            {isBlast ? (
+              <ChatBlastHeader chat={chat} />
+            ) : (
+              <UserChatHeader chatId={chat?.chat_id} />
+            )}
+          </Flex>
         </Flex>
       </Paper>
     )

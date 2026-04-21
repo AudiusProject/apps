@@ -1,6 +1,7 @@
 .page {
   width: 100%;
   height: 100%;
+  max-width: none !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   padding-bottom: 0 !important;
@@ -8,10 +9,10 @@
   font-weight: var(--harmony-font-medium);
 }
 
-.page > :global(#page).pageContent {
+.page :global(#page) {
   margin-top: -37px;
-  width: 100%;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: none !important;
   height: calc(100% - 80px);
 }
 

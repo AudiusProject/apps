@@ -106,6 +106,7 @@ export const ChatPage = () => {
       containerClassName={styles.page}
       contentClassName={styles.pageContent}
       showSearch={false}
+      headerContentPaddingInline='0px'
       header={<ChatHeader ref={headerRef} currentChatId={currentChatId} />}
     >
       <div className={styles.layout}>

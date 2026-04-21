@@ -30,10 +30,11 @@ const messages = {
 type ChatListProps = {
   currentChatId?: string
   onChatClicked: (chatId: string) => void
+  isCompact?: boolean
 } & ComponentPropsWithoutRef<'div'>
 
 export const ChatList = (props: ChatListProps) => {
-  const { currentChatId, onChatClicked } = props
+  const { currentChatId, onChatClicked, isCompact } = props
   const dispatch = useDispatch()
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
   const chats = useSelector(getChats)
@@ -51,7 +52,11 @@ export const ChatList = (props: ChatListProps) => {
   }, [status, setHasLoadedOnce])
 
   return (
-    <div className={cn(styles.root, props.className)}>
+    <div
+      className={cn(styles.root, props.className, {
+        [styles.compact]: isCompact
+      })}
+    >
       <InfiniteScroll
         pageStart={0}
         initialLoad={true}
@@ -75,6 +80,7 @@ export const ChatList = (props: ChatListProps) => {
                 chat={chat}
                 onChatClicked={onChatClicked}
                 currentChatId={currentChatId}
+                isCompact={isCompact}
               />
             ) : (
               <ChatListItem
@@ -82,6 +88,7 @@ export const ChatList = (props: ChatListProps) => {
                 currentChatId={currentChatId}
                 chat={chat}
                 onChatClicked={onChatClicked}
+                isCompact={isCompact}
               />
             )
           )

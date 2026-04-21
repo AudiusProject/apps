@@ -65,6 +65,21 @@
   line-height: 130%;
 }
 
+.root.compact .headingContainer {
+  justify-content: center;
+}
+
+.root.compact .messagePreview,
+.root.compact .userText,
+.root.compact .unreadIndicatorTag,
+.root.compact .blastPreview {
+  display: none;
+}
+
+.root.compact .minimizedUnreadIndicatorTag {
+  display: flex;
+}
+
 @media (max-width: 1080px) {
   .headingContainer {
     justify-content: center;
