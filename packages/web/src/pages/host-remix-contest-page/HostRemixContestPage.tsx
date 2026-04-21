@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import {
   useCreateEvent,
@@ -22,6 +22,7 @@ import {
   IconCloudUpload,
   IconKebabHorizontal,
   IconTrophy,
+  LoadingSpinner,
   PopupMenu,
   Paper,
   Select,
@@ -41,6 +42,10 @@ import { track, make } from 'services/analytics'
 import { fullContestPage, fullTrackPage } from 'utils/route'
 
 import { TimeInput, parseTime } from '../../components/host-remix-contest-modal/TimeInput'
+
+import { AddSourceTrackModal } from './AddSourceTrackModal'
+import { ManageStemsModal } from './ManageStemsModal'
+import { useUploadContestCover } from './useUploadContestCover'
 
 const messages = {
   pageTitle: 'Create Contest',
@@ -178,14 +183,32 @@ export const HostRemixContestPage = () => {
     existingEventData.sourceTrackIds ?? (trackId ? [trackId] : [])
   )
 
+  // Modal state
+  const [isAddTracksOpen, setIsAddTracksOpen] = useState(false)
+  const [manageStemsTargetId, setManageStemsTargetId] = useState<number | null>(
+    null
+  )
+
   // ---------------------------------------------------------------------------
-  // Cover-photo fallback to track artwork
+  // Cover-photo upload + fallback to track artwork
   // ---------------------------------------------------------------------------
   const { imageUrl: trackArtworkUrl } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
   const resolvedCoverUrl = coverPhotoUrl || trackArtworkUrl
+  const { upload: uploadCover, isUploading: isCoverUploading } =
+    useUploadContestCover()
+  const coverFileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleCoverFileSelected = useCallback(
+    async (file: File | null) => {
+      if (!file) return
+      const url = await uploadCover(file)
+      if (url) setCoverPhotoUrl(url)
+    },
+    [uploadCover]
+  )
 
   // ---------------------------------------------------------------------------
   // Handlers
@@ -217,14 +240,18 @@ export const HostRemixContestPage = () => {
   }, [])
 
   const handleAddSourceTrack = useCallback(() => {
-    // Chunk 2 — wire the AddSourceTrackModal.
-    // Stubbed so the button is clickable but noops for now.
-    // eslint-disable-next-line no-console
-    console.info('Add Source Track modal coming in follow-up')
+    setIsAddTracksOpen(true)
   }, [])
 
   const handleRemoveSourceTrack = useCallback((id: number) => {
     setSourceTrackIds((prev) => prev.filter((x) => x !== id))
+  }, [])
+
+  const handleSourceTracksSelected = useCallback((ids: number[]) => {
+    setSourceTrackIds((prev) => {
+      const merged = Array.from(new Set([...prev, ...ids]))
+      return merged
+    })
   }, [])
 
   const handleCancel = useCallback(() => {
@@ -540,6 +567,15 @@ export const HostRemixContestPage = () => {
             </Flex>
             <Box
               h={COVER_PHOTO_HEIGHT}
+              onClick={() => coverFileInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault()
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                const file = e.dataTransfer?.files?.[0]
+                if (file) void handleCoverFileSelected(file)
+              }}
               css={{
                 border: '1px dashed var(--harmony-border-default)',
                 borderRadius: 8,
@@ -550,14 +586,19 @@ export const HostRemixContestPage = () => {
                 backgroundPosition: 'center',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                cursor: isCoverUploading ? 'wait' : 'pointer'
               }}
             >
               <Flex direction='column' alignItems='center' gap='s'>
-                <IconCloudUpload
-                  size='2xl'
-                  color={resolvedCoverUrl ? 'staticWhite' : 'subdued'}
-                />
+                {isCoverUploading ? (
+                  <LoadingSpinner />
+                ) : (
+                  <IconCloudUpload
+                    size='2xl'
+                    color={resolvedCoverUrl ? 'staticWhite' : 'subdued'}
+                  />
+                )}
                 <Text
                   variant='body'
                   size='s'
@@ -567,20 +608,18 @@ export const HostRemixContestPage = () => {
                 </Text>
               </Flex>
             </Box>
-            {/* Chunk 2: wire real mediorum upload. For now, expose a URL
-                input as a stop-gap so the form can persist a cover. */}
-            <Flex direction='column' gap='xs'>
-              <Text variant='body' size='s' color='subdued'>
-                {messages.coverPhotoComingSoon}
-              </Text>
-              <TextInput
-                label={messages.coverPhotoUrlLabel}
-                hideLabel
-                placeholder='https://…'
-                value={coverPhotoUrl}
-                onChange={(e) => setCoverPhotoUrl(e.target.value)}
-              />
-            </Flex>
+            <input
+              ref={coverFileInputRef}
+              type='file'
+              accept='image/*'
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null
+                void handleCoverFileSelected(file)
+                // Reset so the same file can be re-selected after a mistake.
+                e.target.value = ''
+              }}
+            />
           </Paper>
 
           {/* Section: Prizes */}
@@ -649,6 +688,7 @@ export const HostRemixContestPage = () => {
                       key={id}
                       sourceTrackId={id}
                       onRemove={() => handleRemoveSourceTrack(id)}
+                      onManageStems={() => setManageStemsTargetId(id)}
                     />
                   ))}
                 </Flex>
@@ -683,6 +723,18 @@ export const HostRemixContestPage = () => {
           </Flex>
         </Flex>
       </Box>
+
+      <AddSourceTrackModal
+        isOpen={isAddTracksOpen}
+        onClose={() => setIsAddTracksOpen(false)}
+        initialSelectedIds={sourceTrackIds}
+        onDone={handleSourceTracksSelected}
+      />
+      <ManageStemsModal
+        isOpen={manageStemsTargetId !== null}
+        onClose={() => setManageStemsTargetId(null)}
+        trackId={manageStemsTargetId}
+      />
     </Page>
   )
 }
@@ -692,15 +744,22 @@ export const HostRemixContestPage = () => {
 type SourceTrackRowProps = {
   sourceTrackId: number
   onRemove: () => void
+  onManageStems: () => void
 }
 
-const SourceTrackRow = ({ sourceTrackId, onRemove }: SourceTrackRowProps) => {
+const SourceTrackRow = ({
+  sourceTrackId,
+  onRemove,
+  onManageStems
+}: SourceTrackRowProps) => {
+  const navigate = useNavigate()
   const { data: trackData } = useTrack(sourceTrackId, {
     select: (t) =>
       t
         ? {
             title: t.title,
             owner_id: t.owner_id,
+            permalink: t.permalink,
             is_downloadable: t.is_downloadable,
             stem_of: t.stem_of
           }
@@ -712,8 +771,8 @@ const SourceTrackRow = ({ sourceTrackId, onRemove }: SourceTrackRowProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Real stems count comes from useStems — Chunk 2 wires the full fetch +
-  // pluralisation. For now surface a simple flag derived from the track.
+  // TODO(contest): fetch exact stems count via useStems(sourceTrackId).
+  // For now we signal "No Stems" / "0 Stems" solely from is_downloadable.
   const stemsLabel = trackData?.is_downloadable
     ? messages.stemsCount(0)
     : messages.noStems
@@ -756,20 +815,20 @@ const SourceTrackRow = ({ sourceTrackId, onRemove }: SourceTrackRowProps) => {
             {
               text: messages.visitTrack,
               onClick: () => {
-                /* Chunk 2: navigate */
+                if (trackData?.permalink) navigate(trackData.permalink)
               }
             },
             {
               text: messages.editTrack,
               onClick: () => {
-                /* Chunk 2: open edit-track */
+                if (trackData?.permalink) {
+                  navigate(`${trackData.permalink}/edit`)
+                }
               }
             },
             {
               text: messages.manageStems,
-              onClick: () => {
-                /* Chunk 2: open ManageStemsModal */
-              }
+              onClick: onManageStems
             },
             { text: messages.remove, onClick: onRemove }
           ]}
