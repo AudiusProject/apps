@@ -6,6 +6,7 @@ import {
   useDeleteEvent,
   useRemixContest,
   useRemixesLineup,
+  useStems,
   useTrack,
   useTrackByPermalink,
   useUpdateEvent,
@@ -770,12 +771,23 @@ const SourceTrackRow = ({
     trackId: sourceTrackId,
     size: SquareSizes.SIZE_150_BY_150
   })
+  // getTrackStems is a fast one-shot query that returns the full stem
+  // tracks; caching means subsequent rows hit the warm slot. Null when
+  // the request hasn't resolved so we can distinguish "still loading"
+  // from "actually 0 stems" if we want to.
+  const { data: stems } = useStems(sourceTrackId)
+  const stemsCount = stems?.length ?? 0
 
-  // TODO(contest): fetch exact stems count via useStems(sourceTrackId).
-  // For now we signal "No Stems" / "0 Stems" solely from is_downloadable.
-  const stemsLabel = trackData?.is_downloadable
-    ? messages.stemsCount(0)
-    : messages.noStems
+  // Label matches the Figma's three states: "X Stems" when there are
+  // stems, "No Stems" otherwise. Until useStems resolves we render
+  // nothing — avoids a flash of "No Stems" on tracks that turn out to
+  // have stems.
+  const stemsLabel =
+    stems === undefined
+      ? ''
+      : stemsCount > 0
+        ? messages.stemsCount(stemsCount)
+        : messages.noStems
 
   return (
     <Flex
