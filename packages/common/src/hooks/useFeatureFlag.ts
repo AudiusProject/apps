@@ -113,7 +113,7 @@ export const createUseFeatureFlagHook =
           setHasReadOverride(true)
         }
       }
-      void getOverride()
+      getOverride().catch(() => {})
     })
 
     return {
@@ -165,7 +165,7 @@ export const useFeatureFlag = (
         setHasReadOverride(true)
       }
     }
-    void getOverride()
+    getOverride().catch(() => {})
   })
 
   return {
