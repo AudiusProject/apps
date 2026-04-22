@@ -28,7 +28,11 @@
 
 .title {
   font-weight: var(--harmony-font-bold);
-  font-size: clamp(var(--harmony-font-l), 2.5cqi + 14px, var(--harmony-font-2xl));
+  font-size: clamp(
+    var(--harmony-font-l),
+    2.5cqi + 14px,
+    var(--harmony-font-2xl)
+  );
   line-height: 130%;
 }
 
