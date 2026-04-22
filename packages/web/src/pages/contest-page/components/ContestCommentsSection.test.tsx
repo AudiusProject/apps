@@ -237,7 +237,9 @@ describe('ContestCommentsSection', () => {
         eventOwnerUserId={EVENT_OWNER_ID}
       />
     )
-    expect(screen.getByText(/no posts yet/i)).toBeInTheDocument()
+    // Two-line empty state: heading + sub. Assert the heading — the
+    // sub changes per mode and is covered by copy snapshots elsewhere.
+    expect(screen.getByText(/^nothing here yet$/i)).toBeInTheDocument()
   })
 
   it('shows a loading spinner while the feed is pending', () => {
