@@ -11,9 +11,11 @@
   width: 100%;
   min-width: 328px;
   border-radius: 8px;
+  border: 1px solid var(--harmony-n-100);
   box-shadow: 0 2px 5px -2px rgba(133, 129, 153, 0.25);
   background-color: var(--harmony-white);
   padding-bottom: 5px;
+  margin-bottom: 52px;
   overflow: hidden;
 }
 
