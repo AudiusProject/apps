@@ -29,7 +29,7 @@ import { getXShareText } from './utils'
 
 const { getShareState } = shareModalUISelectors
 const { shareUser } = usersSocialActions
-const { shareTrack } = tracksSocialActions
+const { shareTrack, shareContest } = tracksSocialActions
 const { shareCollection } = collectionsSocialActions
 const { setVisibility } = modalsActions
 
@@ -47,7 +47,8 @@ export const ShareModal = () => {
   const isManagerMode = useIsManagedAccount()
 
   const isOwner =
-    content?.type === 'track' && accountUserId === content.artist.user_id
+    (content?.type === 'track' || content?.type === 'contest') &&
+    accountUserId === content.artist.user_id
 
   const handleShareToDirectMessage = useCallback(async () => {
     if (!content) return
@@ -74,6 +75,12 @@ export const ShareModal = () => {
     switch (content.type) {
       case 'track':
         dispatch(shareTrack(content.track.track_id, source))
+        break
+      case 'contest':
+        // Contest copy-link uses the dedicated `shareContest` saga,
+        // which writes the contest URL (`{permalink}/contest`) to
+        // the clipboard rather than the track permalink.
+        dispatch(shareContest(content.track.track_id, source))
         break
       case 'profile':
         dispatch(shareUser(content.profile.user_id, source))

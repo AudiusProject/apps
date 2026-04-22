@@ -74,7 +74,7 @@ export const TabItem = ({
         testID={options.tabBarTestID}
       >
         <View>{icon}</View>
-        <Text size='xs' strength='strong'>
+        <Text variant='body' size='xs' strength='strong'>
           {label}
         </Text>
       </TouchableOpacity>

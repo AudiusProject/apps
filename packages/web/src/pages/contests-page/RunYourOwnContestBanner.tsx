@@ -23,10 +23,12 @@ const messages = {
 }
 
 /**
- * Desktop-only bottom-of-page CTA encouraging viewers to host their own remix
- * contest. Hidden on mobile-width viewports. Dismissable for the rest of the
- * session (state is not persisted across reloads — flip to localStorage if we
- * want it to stick).
+ * Desktop-only CTA encouraging viewers to host their own remix
+ * contest. Hidden on mobile-width viewports. Pinned to the bottom of
+ * the viewport (position: fixed) so it hovers over scrolled content
+ * rather than getting buried at the end of the page. Dismissable for
+ * the rest of the session (state is not persisted across reloads —
+ * flip to localStorage if we want it to stick).
  */
 export const RunYourOwnContestBanner = () => {
   const isMobile = useIsMobile()
@@ -43,7 +45,20 @@ export const RunYourOwnContestBanner = () => {
       p='l'
       border='default'
       shadow='mid'
-      css={{ position: 'relative', borderRadius: 16 }}
+      css={{
+        // Hovering bottom dock — sits above the global playbar's
+        // 60-80px chin (safe offset: 96px). Left + right are pinned
+        // to the main content column; the sidebar anchors the left
+        // edge via its fixed width of 240px in the app shell.
+        position: 'fixed',
+        bottom: 96,
+        left: 264,
+        right: 24,
+        borderRadius: 16,
+        // Float above track tiles + other page content but below
+        // modals (which use higher z-index tiers).
+        zIndex: 10
+      }}
     >
       <Flex direction='column' gap='xs' css={{ flex: '1 1 auto', minWidth: 0 }}>
         <Text variant='heading' size='s'>

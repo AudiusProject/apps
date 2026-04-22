@@ -1,7 +1,7 @@
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
-import { Box, Button, Flex, IconRemix, Text } from '@audius/harmony'
+import { Box, Button, Flex, IconTrophy, Text } from '@audius/harmony'
 import { Navigate } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
@@ -46,7 +46,7 @@ export const ContestsPage = () => {
 
   const header = (
     <Header
-      icon={IconRemix}
+      icon={IconTrophy}
       primary={messages.title}
       rightDecorator={
         <Button

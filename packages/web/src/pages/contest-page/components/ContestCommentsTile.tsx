@@ -6,6 +6,7 @@ import {
   useCurrentUserId,
   useEventComments,
   usePostEventComment,
+  useReactToComment,
   useUser
 } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
@@ -324,6 +325,7 @@ export const ContestCommentsTile = ({
             <ContestCommentRow
               key={commentId}
               commentId={commentId}
+              eventId={eventId}
               eventOwnerUserId={eventOwnerUserId}
               mode={mode}
             />
@@ -348,6 +350,7 @@ export const ContestCommentsTile = ({
 
 type ContestCommentRowProps = {
   commentId: ID
+  eventId: ID
   eventOwnerUserId: ID | undefined
   mode: ContestCommentsMode
 }
@@ -364,11 +367,14 @@ type ContestCommentRowProps = {
  */
 const ContestCommentRow = ({
   commentId,
+  eventId,
   eventOwnerUserId,
   mode
 }: ContestCommentRowProps) => {
   const { data: comment } = useComment(commentId)
   const { data: author } = useUser(comment?.userId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { mutate: reactToComment } = useReactToComment()
 
   if (!comment || !author) return null
 
@@ -427,14 +433,47 @@ const ContestCommentRow = ({
             />
           </Box>
         ) : null}
-        {/* Reaction placeholder. The track-page `CommentActionBar`
-            hard-depends on track context (pinned_comment_id,
-            track.permalink, etc.), so we render a visual-only
-            heart stub for now. Wiring event comment reactions is a
-            separate server feature. */}
+        {/* Like button. `useReactToComment` already drives the
+            react/unreact flow on track comments — we reuse it here
+            with `entityType: 'Event'` so contest comments get the
+            same optimistic cache update + toast-on-failure behavior
+            without reinventing any of it. Current user's reaction
+            state (`isCurrentUserReacted`) controls the filled/outline
+            icon and the like count comes straight off the comment. */}
         <Flex gap='m' alignItems='center' pt='xs'>
-          <Flex gap='xs' alignItems='center'>
-            <IconHeart color='subdued' size='s' />
+          <Flex
+            gap='xs'
+            alignItems='center'
+            onClick={() => {
+              if (!currentUserId) return
+              const nextIsLiked = !(comment as any).isCurrentUserReacted
+              reactToComment({
+                commentId,
+                userId: currentUserId,
+                isLiked: nextIsLiked,
+                // `trackId` is what the mutation calls the entity ID
+                // — for events it carries the eventId instead.
+                trackId: eventId,
+                entityType: 'Event',
+                isEntityOwner:
+                  eventOwnerUserId !== undefined &&
+                  currentUserId === eventOwnerUserId,
+                currentSort: undefined
+              })
+            }}
+            css={{ cursor: currentUserId ? 'pointer' : 'default' }}
+          >
+            <IconHeart
+              color={
+                (comment as any).isCurrentUserReacted ? 'active' : 'subdued'
+              }
+              size='s'
+            />
+            {(comment as any).reactCount > 0 ? (
+              <Text variant='body' size='s' color='subdued'>
+                {(comment as any).reactCount}
+              </Text>
+            ) : null}
           </Flex>
         </Flex>
       </Flex>

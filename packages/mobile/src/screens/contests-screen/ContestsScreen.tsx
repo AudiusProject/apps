@@ -4,7 +4,7 @@ import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
-import { Flex, IconRemix, Text } from '@audius/harmony-native'
+import { Flex, IconTrophy, Text } from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
 
@@ -35,7 +35,7 @@ export const ContestsScreen = () => {
     <Screen
       url='/contests'
       variant='secondary'
-      icon={IconRemix}
+      icon={IconTrophy}
       title={messages.title}
     >
       <ScreenContent>

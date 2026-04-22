@@ -1,4 +1,8 @@
-import { Id } from '@audius/sdk'
+import {
+  CommentEntityType,
+  Id,
+  type ReactCommentRequestBody
+} from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -16,7 +20,7 @@ export type ReactToCommentArgs = {
   currentSort: any
   trackId: ID
   isEntityOwner?: boolean
-  entityType?: 'Track' | 'FanClub'
+  entityType?: CommentEntityType
 }
 
 export const useReactToComment = () => {
@@ -29,20 +33,24 @@ export const useReactToComment = () => {
       commentId,
       isLiked,
       trackId,
-      entityType = 'Track'
+      entityType = CommentEntityType.Track
     }: ReactToCommentArgs) => {
       const sdk = await audiusSdk()
+      const metadata: ReactCommentRequestBody = {
+        entityId: trackId,
+        entityType
+      }
       if (isLiked) {
         await sdk.comments.reactToComment({
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
-          metadata: { entityId: trackId, entityType }
+          metadata
         })
       } else {
         await sdk.comments.unreactToComment({
           userId: Id.parse(userId)!,
           commentId: Id.parse(commentId)!,
-          metadata: { entityId: trackId, entityType }
+          metadata
         })
       }
     },

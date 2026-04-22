@@ -797,6 +797,38 @@ function* watchShareTrack() {
   )
 }
 
+// Contest share variant — same query + analytics kind as track, but
+// the clipboard + social link point at the contest page on the
+// parent track's permalink. Mirrors how the contest page itself
+// routes (`{permalink}/contest`) so a shared URL opens the same
+// surface the sender is on.
+function* watchShareContest() {
+  yield* takeEvery(
+    socialActions.SHARE_CONTEST,
+    function* (action: ReturnType<typeof socialActions.shareContest>) {
+      const { trackId } = action
+
+      const track = yield* queryTrack(trackId)
+      if (!track) return
+
+      const user = yield* queryUser(track.owner_id)
+      if (!user) return
+
+      const link = `${track.permalink}/contest`
+      const share = yield* getContext('share')
+      share(link, formatShareText(track.title, user.name))
+
+      const event = make(Name.SHARE, {
+        kind: 'track',
+        source: action.source,
+        id: trackId,
+        url: link
+      })
+      yield* put(event)
+    }
+  )
+}
+
 const sagas = () => {
   return [
     watchRepostTrack,
@@ -809,6 +841,7 @@ const sagas = () => {
     watchDownloadTrack,
     watchDownloadFinished,
     watchShareTrack,
+    watchShareContest,
     watchTrackErrors
   ]
 }

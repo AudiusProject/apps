@@ -22,7 +22,7 @@ import {
   shareModalUIActions,
   useHostRemixContestModal
 } from '@audius/common/store'
-import { dayjs, formatContestDeadline } from '@audius/common/utils'
+import { dayjs, getLocalTimezone, route } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -40,15 +40,16 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
+import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar/Avatar'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
+import UserBadges from 'components/user-badges/UserBadges'
+import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
-import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import {
   fullContestPage,
   hostRemixContestPage,
@@ -56,6 +57,7 @@ import {
 } from 'utils/route'
 
 import { ContestCommentsTile } from '../ContestCommentsTile'
+import { ContestFollowersModal } from '../ContestFollowersModal'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
@@ -228,6 +230,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     !!downloadableFlag || (!!trackStems && trackStems.length > 0)
 
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false)
 
   // Submissions tab filter state — reads from + writes to URL search
   // params so deep links + back/forward work the same way they do on
@@ -265,9 +268,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  const dueLabel = useMemo(() => {
-    if (!contest?.endDate) return ''
-    return formatContestDeadline(contest.endDate, 'long')
+  // Split the deadline into date + time so each part can be styled
+  // independently — Figma 2888-131667 shows the date in strong
+  // uppercase next to a lighter subdued time.
+  const deadlineParts = useMemo(() => {
+    if (!contest?.endDate) return null
+    const d = dayjs(contest.endDate)
+    return {
+      date: d.format('MMM D, YYYY').toUpperCase(),
+      time: `${d.format('h:mm A')} (${getLocalTimezone()})`
+    }
   }, [contest?.endDate])
 
   const submissionsCount = lineup.data?.length
@@ -299,9 +309,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const handleShareContest = useCallback(() => {
     if (!trackId) return
+    // `type: 'contest'` routes through the contest share content
+    // variant so the modal's copy-link + X share use the contest
+    // URL (`{permalink}/contest`) rather than the parent track.
     dispatch(
       shareModalUIActions.requestOpen({
-        type: 'track',
+        type: 'contest',
         trackId,
         source: ShareSource.PAGE
       })
@@ -444,18 +457,19 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               gap='l'
             >
               <Flex direction='column' gap='2xs'>
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {isEnded ? messages.contestEnded : messages.submissionsDue}
                 </Text>
-                {dueLabel ? (
-                  <Text variant='label' size='l' strength='strong'>
-                    {dueLabel}
-                  </Text>
+                {deadlineParts ? (
+                  <Flex alignItems='baseline' gap='s' wrap='wrap'>
+                    {/* label / l / regular — matches native + Figma spec. */}
+                    <Text variant='label' size='l'>
+                      {deadlineParts.date}
+                    </Text>
+                    <Text variant='label' size='l' color='subdued'>
+                      {deadlineParts.time}
+                    </Text>
+                  </Flex>
                 ) : null}
               </Flex>
               {renderActions()}
@@ -473,28 +487,39 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               <Divider />
             </Box>
 
-            {/* Hosted By row + Countdown (4 plain columns, not a pill) */}
+            {/* Hosted By row + Countdown (4 plain columns, not a pill).
+                The avatar + name/@handle stack is wrapped in
+                `ArtistPopover` so hovering surfaces the standard
+                artist tile used throughout Audius (profile preview,
+                follow button). Avatar + name link directly to the
+                profile page. Without this the host row was a plain
+                visual with no navigation or hover card. */}
             <Flex justifyContent='space-between' alignItems='center' gap='xl'>
               <Flex direction='column' gap='s'>
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {messages.hostedBy}
                 </Text>
-                <Flex gap='m' alignItems='center'>
-                  <Avatar userId={user.user_id} h={56} w={56} />
-                  <Flex direction='column'>
-                    <Text variant='title' size='m'>
-                      {user.name}
-                    </Text>
-                    <Text variant='body' size='s' color='subdued'>
-                      @{user.handle}
-                    </Text>
+                <ArtistPopover handle={user.handle}>
+                  <Flex
+                    gap='m'
+                    alignItems='center'
+                    onClick={() => navigate(route.profilePage(user.handle))}
+                    css={{ cursor: 'pointer' }}
+                  >
+                    <Avatar userId={user.user_id} h={56} w={56} />
+                    <Flex direction='column'>
+                      <Flex gap='xs' alignItems='center'>
+                        <Text variant='title' size='m'>
+                          {user.name}
+                        </Text>
+                        <UserBadges userId={user.user_id} size='s' />
+                      </Flex>
+                      <Text variant='body' size='s' color='subdued'>
+                        @{user.handle}
+                      </Text>
+                    </Flex>
                   </Flex>
-                </Flex>
+                </ArtistPopover>
               </Flex>
               {!isEnded && contest.endDate ? (
                 <HeaderCountdown endDate={contest.endDate} />
@@ -540,6 +565,11 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               gap='l'
               css={{ flex: '1 1 auto', minWidth: 0 }}
             >
+              {/* About — render description inline (same pattern as
+                  mobile-web). Using the shared `RemixContestDetailsTab`
+                  here previously double-padded the card AND prepended a
+                  "Submission Due:" row that duplicated the page
+                  header's deadline. */}
               <Paper
                 direction='column'
                 p='xl'
@@ -552,7 +582,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 <Text variant='label' size='m' color='subdued'>
                   {messages.aboutThisContest}
                 </Text>
-                <RemixContestDetailsTab trackId={trackId!} />
+                <UserGeneratedText variant='body'>
+                  {(contest.eventData as any)?.description ??
+                    'Enter my remix contest before the deadline for your chance to win!'}
+                </UserGeneratedText>
               </Paper>
 
               <Paper
@@ -567,7 +600,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 <Text variant='label' size='m' color='subdued'>
                   {messages.prizes}
                 </Text>
-                <RemixContestPrizesTab trackId={trackId!} />
+                {/* Inline prize info — avoids the `p='xl'` the
+                    track-page `RemixContestPrizesTab` adds, which
+                    double-padded this card. */}
+                <UserGeneratedText variant='body'>
+                  {(contest.eventData as any)?.prizeInfo ?? ''}
+                </UserGeneratedText>
               </Paper>
             </Flex>
 
@@ -585,6 +623,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               <EventFollowersCard
                 eventId={eventId}
                 followerCount={followState?.followerCount ?? 0}
+                onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
               />
 
               {/* Comments tile — in-column Figma card. */}
@@ -596,6 +635,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
             </Flex>
           </Flex>
         ) : null}
+
+        <ContestFollowersModal
+          eventId={eventId}
+          isOpen={isFollowersModalOpen}
+          onClose={() => setIsFollowersModalOpen(false)}
+        />
 
         {activeTab === 'submissions' ? (
           <Paper
@@ -614,7 +659,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 endorsed; the sort drives the underlying
                 `useRemixesLineup` query. */}
             <Flex justifyContent='space-between' alignItems='center' gap='s'>
-              <Text variant='heading' size='s'>
+              <Text variant='label' size='m' color='subdued'>
                 {messages.submissionsTab(submissionsCount)}
               </Text>
               <Flex gap='s'>

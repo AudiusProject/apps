@@ -35,7 +35,7 @@ export const RemixContestDetailsTab = ({
   return (
     <Flex column gap='l' p='xl'>
       <Flex row gap='s'>
-        <Text variant='title' size='m' color='accent'>
+        <Text variant='label' size='m' color='subdued'>
           {isContestEnded ? messages.ended : messages.due}
         </Text>
         <Text variant='body'>{messages.deadline(remixContest?.endDate)}</Text>

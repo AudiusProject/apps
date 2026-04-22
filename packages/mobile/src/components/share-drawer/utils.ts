@@ -3,6 +3,7 @@ import { makeXShareUrl, getXShareHandle } from '@audius/common/utils'
 
 import {
   getCollectionRoute,
+  getContestRoute,
   getTrackRoute,
   getUserRoute
 } from 'app/utils/routes'
@@ -14,6 +15,13 @@ export const getContentUrl = (content: ShareContent) => {
     case 'track': {
       const { track } = content
       return getTrackRoute(track, true)
+    }
+    case 'contest': {
+      // Contest shares point at the parent track's contest page —
+      // `{permalink}/contest` — so sharing copies the contest URL
+      // rather than the underlying track.
+      const { track } = content
+      return getContestRoute(track, true)
     }
     case 'profile': {
       const { profile } = content
@@ -38,6 +46,13 @@ export const getXShareText = async (content: ShareContent) => {
         artist
       } = content
       return messages.trackShareText(title, getXShareHandle(artist))
+    }
+    case 'contest': {
+      const {
+        track: { title },
+        artist
+      } = content
+      return messages.contestShareText(title, getXShareHandle(artist))
     }
     case 'profile': {
       const { profile } = content

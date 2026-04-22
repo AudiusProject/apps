@@ -17,12 +17,15 @@ import { ShareModalRequestOpenAction } from './types'
 
 function* handleRequestOpen(action: ShareModalRequestOpenAction) {
   switch (action.payload.type) {
-    case 'track': {
+    case 'track':
+    case 'contest': {
       const { trackId, source, type } = action.payload
       const track = yield* queryTrack(trackId)
       if (!track) return
       const artist = yield* queryUser(track.owner_id)
       if (!artist) return
+      // Both `track` and `contest` share the same fetch shape; the
+      // type distinguishes which URL + share text to use downstream.
       yield put(open({ type, track, source, artist }))
       break
     }

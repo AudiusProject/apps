@@ -255,8 +255,9 @@ export const ContestCard = (props: ContestCardProps) => {
         : SquareSizes.SIZE_480_BY_480
   })
 
+  // Count-only: API returns full total in `count` even when limit=0 (no track rows).
   const { data: remixesData } = useRemixes(
-    { trackId, pageSize: 1, isContestEntry: true },
+    { trackId, pageSize: 0, isContestEntry: true },
     { enabled: !!trackId }
   )
   const entriesCount = remixesData?.pages?.[0]?.count ?? 0
@@ -288,7 +289,7 @@ export const ContestCard = (props: ContestCardProps) => {
     >
       {/* Cover banner */}
       <ContestCover source={coverSource}>
-        <Pill label={status} tone='default' />
+        <Pill label={status} tone='subdued' />
       </ContestCover>
 
       {/* Content */}
@@ -299,7 +300,7 @@ export const ContestCard = (props: ContestCardProps) => {
             style={{ width: 40, height: 40, flexShrink: 0 }}
           />
           <Flex direction='column' gap='2xs' style={{ flex: 1, minWidth: 0 }}>
-            <Text variant='label' size='s' color='subdued' strength='strong'>
+            <Text variant='label' size='m' color='subdued'>
               {messages.hostedBy}
             </Text>
             <Flex direction='row' alignItems='center' gap='2xs'>

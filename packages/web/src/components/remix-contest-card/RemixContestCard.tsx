@@ -114,7 +114,7 @@ export const RemixContestCard = forwardRef(
           </CardContent>
         </Flex>
         <CardFooter>
-          <Text strength='strong' size='s' color='subdued'>
+          <Text variant='label' size='m' color='subdued'>
             {messages.deadline(remixContest?.endDate)}
           </Text>
         </CardFooter>

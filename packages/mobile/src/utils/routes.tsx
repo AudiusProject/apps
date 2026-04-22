@@ -15,6 +15,14 @@ export const getTrackRoute = (
   return fullUrl ? `${AUDIUS_URL}${route}` : route
 }
 
+export const getContestRoute = (
+  track: { permalink: string },
+  fullUrl = false
+) => {
+  const route = `${track.permalink}/contest`
+  return fullUrl ? `${AUDIUS_URL}${route}` : route
+}
+
 export const getUserRoute = (user: UserHandle, fullUrl = false) => {
   const route = `/${encodeUrlName(user.handle)}`
   return fullUrl ? `${AUDIUS_URL}${route}` : route
