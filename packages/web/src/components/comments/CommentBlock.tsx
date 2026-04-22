@@ -141,7 +141,12 @@ const CommentBlockInternal = (
             </Flex>
           ) : null}
           {!isTombstone ? (
-            <Flex justifyContent='space-between' alignItems='center' w='100%' gap='s'>
+            <Flex
+              justifyContent='space-between'
+              alignItems='center'
+              w='100%'
+              gap='s'
+            >
               <Flex
                 gap='s'
                 alignItems='center'

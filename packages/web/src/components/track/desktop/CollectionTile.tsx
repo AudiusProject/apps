@@ -518,11 +518,16 @@ export const CollectionTile = ({
     <Paper
       direction='column'
       className={containerClassName}
+      border='default'
       css={[
         isLoading && { opacity: 0.6 },
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         { minHeight: size === TrackTileSize.LARGE ? 180 : 120 },
-        { '&:hover .artworkIcon': { opacity: 0.75 } }
+        {
+          '&:hover .artworkIcon': { opacity: 0.75 },
+          '&:hover': { transform: 'scale(1.004)' },
+          '&:active': { transform: 'scale(1.004)' }
+        }
       ]}
       mb='l'
       onClick={!isLoading && !disableActions ? onTogglePlay : undefined}
@@ -618,8 +623,8 @@ export const CollectionTile = ({
       {/* Track list and bottom bar remain unchanged */}
       <Flex
         backgroundColor='surface1'
-        borderTop='strong'
-        borderBottom='strong'
+        borderTop='default'
+        borderBottom='default'
         direction='column'
         flex={1}
         css={{ minHeight: 0 }}

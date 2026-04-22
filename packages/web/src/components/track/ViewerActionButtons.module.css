@@ -54,9 +54,15 @@
   width: var(--harmony-unit-6);
 }
 
-/* Repost Lottie has more whitespace – scale up to match favorite/share */
+/* Repost Lottie has heavy internal whitespace – scale up to match the 24px icons */
 .iconButtonRepost {
-  transform: scale(1.15);
+  transform: scale(1.25);
+  transform-origin: center;
+}
+
+/* Favorite Lottie sits slightly high in its viewBox – nudge down and scale to match */
+.iconButtonFavorite {
+  transform: translateY(1px) scale(0.95);
   transform-origin: center;
 }
 

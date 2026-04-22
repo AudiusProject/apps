@@ -211,7 +211,7 @@ export const PopupInternal = forwardRef<
     title,
     zIndex,
     containerRef,
-    portalLocation = document.body,
+    portalLocation: rawPortalLocation = document.body,
     shadow = 'mid',
     fixed,
     takeWidthOfAnchor,
@@ -219,6 +219,11 @@ export const PopupInternal = forwardRef<
     disableDefaultStyles = false
   } = props
   const { spring, shadows } = useTheme()
+
+  // Refs (e.g. mainContentRef.current) are often null on first render; default
+  // only applies to undefined, so null must fall back to document.body.
+  const portalLocation: HTMLElement =
+    rawPortalLocation != null ? rawPortalLocation : document.body
 
   const isVisible = popupState !== 'closed'
   const previousIsVisible = usePrevious(isVisible)

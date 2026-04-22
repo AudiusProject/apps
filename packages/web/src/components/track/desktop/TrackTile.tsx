@@ -311,10 +311,13 @@ export const TrackTile = ({
         {
           height: size === TrackTileSize.LARGE ? 144 : 128,
           containerType: 'inline-size',
-          '&:hover .artworkIcon': { opacity: 0.75 }
+          '&:hover .artworkIcon': { opacity: 0.75 },
+          '&:hover': { transform: 'scale(1.004)' },
+          '&:active': { transform: 'scale(1.004)' }
         }
       ]}
       className={containerClassName}
+      border='default'
       mb={size === TrackTileSize.LARGE ? 'l' : 's'}
       p='s'
       gap='l'
@@ -410,7 +413,7 @@ export const TrackTile = ({
         </Flex>
         {isOwner ? (
           <Flex column gap='s'>
-            <Divider orientation='horizontal' />
+            <Divider orientation='horizontal' color='default' />
             <OwnerActionButtons
               contentId={trackId}
               contentType='track'
@@ -425,7 +428,7 @@ export const TrackTile = ({
           </Flex>
         ) : (
           <Flex column gap='s'>
-            <Divider orientation='horizontal' />
+            <Divider orientation='horizontal' color='default' />
             <ViewerActionButtons
               contentId={trackId}
               contentType='track'

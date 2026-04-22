@@ -47,13 +47,16 @@ import { useModalState } from 'common/hooks/useModalState'
 import { useRecord, make } from 'common/store/analytics/actions'
 import { CollectionDogEar } from 'components/collection'
 import { CollectionTileStats } from 'components/collection/CollectionTileStats'
+import { Draggable } from 'components/dragndrop'
 import { TextLink, UserLink } from 'components/link'
 import { OwnProps as CollectionMenuProps } from 'components/menu/CollectionMenu'
 import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
 import { push } from 'utils/navigation'
+import { fullTrackPage } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { DesktopCollectionTileProps } from '../desktop/CollectionTile'
@@ -184,6 +187,8 @@ const TrackList = ({
   trackCount,
   noShimmer
 }: TrackListProps) => {
+  const isMobile = useIsMobile()
+
   if (!tracks.length && isLoading && numLoadingSkeletonRows) {
     return (
       <Box backgroundColor='surface1'>
@@ -203,16 +208,32 @@ const TrackList = ({
 
   return (
     <Box backgroundColor='surface1' onClick={goToCollectionPage}>
-      {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
-        <TrackItem
-          key={track.uid}
-          active={activeTrackUid === track.uid}
-          deleted={track.is_delete}
-          index={index}
-          isAlbum={isAlbum}
-          track={track}
-        />
-      ))}
+      {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => {
+        const item = (
+          <TrackItem
+            active={activeTrackUid === track.uid}
+            deleted={track.is_delete}
+            index={index}
+            isAlbum={isAlbum}
+            track={track}
+          />
+        )
+        // On desktop web, allow dragging each row onto a playlist/queue target.
+        // Skip on native mobile (no drag) and for deleted tracks.
+        return isMobile || track.is_delete ? (
+          <div key={track.uid}>{item}</div>
+        ) : (
+          <Draggable
+            key={track.uid}
+            text={track.title}
+            kind='track'
+            id={track.track_id}
+            link={fullTrackPage(track.permalink)}
+          >
+            {item}
+          </Draggable>
+        )
+      })}
       {trackCount && trackCount > DISPLAY_TRACK_COUNT ? (
         <>
           <div className={styles.trackItemDivider}></div>
@@ -245,6 +266,7 @@ export const CollectionTile = ({
   noShimmer
 }: OwnProps) => {
   const dispatch = useDispatch()
+  const isMobile = useIsMobile()
 
   const { data: collectionWithoutFallback } = useCollection(id)
   const collection = getCollectionWithFallback(collectionWithoutFallback)
@@ -639,6 +661,7 @@ export const CollectionTile = ({
             <UserLink
               userId={collection.playlist_owner_id}
               badgeSize='xs'
+              popover={!isMobile}
               css={{ marginTop: '-4px' }}
             >
               {!shouldShow ? (

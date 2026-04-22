@@ -414,20 +414,19 @@ const SearchExplorePage = ({
               <Divider orientation='horizontal' />
             </Flex>
             {filterKeys.length ? (
-              <Flex
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                css={{ flexWrap: 'wrap' }}
-              >
-                <Flex direction='row' gap='s' mv='m' css={{ flexWrap: 'wrap' }}>
+              isNarrowLayout ? (
+                <Flex
+                  direction='row'
+                  alignItems='center'
+                  gap='s'
+                  wrap='wrap'
+                  mv='m'
+                >
                   {filterKeys.map((filterKey) => {
                     const FilterComponent =
                       filters[filterKey as keyof typeof filters]
                     return <FilterComponent key={filterKey} />
                   })}
-                </Flex>
-                <Flex gap='s'>
                   <SortMethodFilterButton />
                   {categoryKey === CategoryView.TRACKS ? (
                     <FilterButton
@@ -439,7 +438,34 @@ const SearchExplorePage = ({
                     />
                   ) : null}
                 </Flex>
-              </Flex>
+              ) : (
+                <Flex
+                  direction='row'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  wrap='wrap'
+                >
+                  <Flex direction='row' gap='s' mv='m' wrap='wrap'>
+                    {filterKeys.map((filterKey) => {
+                      const FilterComponent =
+                        filters[filterKey as keyof typeof filters]
+                      return <FilterComponent key={filterKey} />
+                    })}
+                  </Flex>
+                  <Flex gap='s'>
+                    <SortMethodFilterButton />
+                    {categoryKey === CategoryView.TRACKS ? (
+                      <FilterButton
+                        value={tracksLayout}
+                        variant='replaceLabel'
+                        optionsLabel={messages.layoutOptionsLabel}
+                        onChange={setTracksLayout}
+                        options={viewLayoutOptions}
+                      />
+                    ) : null}
+                  </Flex>
+                </Flex>
+              )
             ) : null}
           </Flex>
 
