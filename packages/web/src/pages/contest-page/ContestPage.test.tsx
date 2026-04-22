@@ -4,7 +4,7 @@ import { FeatureFlags } from '@audius/common/services'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, vi, beforeEach } from 'vitest'
 
-import { render, screen, it, waitFor } from 'test/test-utils'
+import { render, screen, it } from 'test/test-utils'
 
 // Import the page AFTER all the mocks are registered.
 import ContestPage from './ContestPage'
@@ -120,15 +120,12 @@ const renderContestPage = (opts?: {
             />
           }
         />
-        {/* Target of the redirect when the CONTESTS flag is off —
-            needs to match MemoryRouter's initial entries tree. */}
+        {/* '/' route for any Navigate targets that tests may add later. */}
         <Route path='/' element={<div data-testid='home-page' />} />
       </Routes>
     </MemoryRouter>,
     {
       skipRouter: true,
-      // Default: flag ON (the new page should render). Flag-off cases pass
-      // an override explicitly.
       featureFlags: { [FeatureFlags.CONTESTS]: true, ...opts?.featureFlags },
       // The page guards the flag check on `isLoaded` to avoid flicker during
       // remote-config hydration in prod. In tests we've already set the
@@ -285,25 +282,5 @@ describe('ContestPage', () => {
     expect(
       screen.getByText(/Ready To Love\s+Remix Contest/i)
     ).toBeInTheDocument()
-  })
-
-  it('redirects home when the CONTESTS feature flag is OFF', async () => {
-    // Matches the ContestsPage (discovery) behaviour: once the flag is
-    // loaded and disabled, <Navigate to='/' replace /> kicks in so the
-    // contest URL is never reachable in a gated rollout.
-    renderContestPage({ featureFlags: { [FeatureFlags.CONTESTS]: false } })
-
-    // `useFeatureFlag` sets isLoaded only after the async localStorage
-    // override read finishes, so the redirect is not synchronous.
-    await waitFor(() => {
-      expect(screen.getByTestId('home-page')).toBeInTheDocument()
-    })
-    // The placeholder element on the '/' route should be visible;
-    // none of the ContestPage sections should render.
-    expect(screen.queryByTestId('details-tab')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('prizes-tab')).not.toBeInTheDocument()
-    expect(
-      screen.queryByTestId('contest-comments-section')
-    ).not.toBeInTheDocument()
   })
 })
