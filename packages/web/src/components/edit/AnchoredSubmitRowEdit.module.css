@@ -9,11 +9,10 @@
 
   width: calc(100% - var(--nav-width));
 
-  padding: var(--harmony-unit-3);
+  background: var(--harmony-bg-surface-1);
+  padding-top: var(--harmony-unit-3);
+  padding-bottom: var(--harmony-unit-3);
   border-top: 1px solid var(--harmony-border-strong);
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   z-index: 2; /* zIndex.ts: SVG_BUTTON_ICONS+1 */
 }
