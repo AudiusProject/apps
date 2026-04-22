@@ -46,6 +46,7 @@ import Page from 'components/page/Page'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import {

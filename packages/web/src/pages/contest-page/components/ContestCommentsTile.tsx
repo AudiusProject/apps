@@ -66,6 +66,12 @@ type ContestCommentsTileProps = {
   eventId: ID
   eventOwnerUserId: ID | undefined
   mode: ContestCommentsMode
+  /**
+   * Hide the top-of-Paper `COMMENTS (N)` / `UPDATES (N)` label. Used by the
+   * mobile Updates tab where the tab title already reads "Updates" — the
+   * inner card label would double up. Defaults to false (label shown).
+   */
+  hideHeading?: boolean
 }
 
 /**
@@ -89,7 +95,8 @@ type ContestCommentsTileProps = {
 export const ContestCommentsTile = ({
   eventId,
   eventOwnerUserId,
-  mode
+  mode,
+  hideHeading = false
 }: ContestCommentsTileProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const isEventOwner =
@@ -194,17 +201,21 @@ export const ContestCommentsTile = ({
     >
       {/* Title line — "COMMENTS (N)" uppercase label, mirrors FOLLOWERS
           and STEMS & DOWNLOADS treatment. No IconMessage: the Figma
-          right-column tile uses just the label. */}
-      <Flex gap='xs' alignItems='baseline'>
-        <Text variant='label' size='m' color='subdued'>
-          {heading.toUpperCase()}
-        </Text>
-        {filteredItems.length > 0 ? (
+          right-column tile uses just the label. Hidden when the caller
+          already provides a title (e.g. mobile Updates tab, where the
+          tab itself is labeled "Updates"). */}
+      {hideHeading ? null : (
+        <Flex gap='xs' alignItems='baseline'>
           <Text variant='label' size='m' color='subdued'>
-            ({filteredItems.length})
+            {heading.toUpperCase()}
           </Text>
-        ) : null}
-      </Flex>
+          {filteredItems.length > 0 ? (
+            <Text variant='label' size='m' color='subdued'>
+              ({filteredItems.length})
+            </Text>
+          ) : null}
+        </Flex>
+      )}
 
       {/* Composer */}
       {showComposer ? (

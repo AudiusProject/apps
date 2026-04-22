@@ -4,6 +4,8 @@ import {
   useCurrentUserId,
   useRemixContest,
   useRemixesLineup,
+  useStems,
+  useTrack,
   useTrackByParams,
   useUser
 } from '@audius/common/api'
@@ -27,6 +29,7 @@ import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
 import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
 
+import { DownloadSection } from '../track-screen/DownloadSection'
 import { RemixContestDetailsTab } from '../track-screen/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from '../track-screen/RemixContestPrizesTab'
 
@@ -57,7 +60,9 @@ const CONTEST_PAGE_SIZE = 10
 type ContestTab = 'details' | 'updates' | 'submissions' | 'comments'
 
 // -----------------------------------------------------------------------------
-// Countdown row
+// Countdown row. Matches Figma nodes 2888-131647 + 2857-99182: number and
+// label share the same text color; thin vertical dividers between the four
+// unit columns.
 // -----------------------------------------------------------------------------
 const CountdownTile = ({
   value,
@@ -68,11 +73,11 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  <Flex direction='column' alignItems='center' flex={1} gap='xs'>
+  <Flex direction='column' alignItems='center' flex={1} gap='2xs'>
     <Text variant='heading' size='l' color={isSubdued ? 'subdued' : 'default'}>
       {String(value).padStart(2, '0')}
     </Text>
-    <Text variant='label' size='xs' color='subdued'>
+    <Text variant='label' size='xs' color={isSubdued ? 'subdued' : 'default'}>
       {label}
     </Text>
   </Flex>
@@ -94,14 +99,17 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   const hoursSub = daysSub && hours === 0
   const minsSub = hoursSub && mins === 0
   return (
-    <Flex direction='row' alignItems='center'>
+    <Flex direction='row' alignItems='center' gap='s'>
       <CountdownTile value={days} label={messages.days} isSubdued={daysSub} />
+      <Divider orientation='vertical' />
       <CountdownTile
         value={hours}
         label={messages.hours}
         isSubdued={hoursSub}
       />
+      <Divider orientation='vertical' />
       <CountdownTile value={mins} label={messages.mins} isSubdued={minsSub} />
+      <Divider orientation='vertical' />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
     </Flex>
   )
@@ -174,6 +182,16 @@ export const ContestScreen = () => {
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 
   const [activeTab, setActiveTab] = useState<ContestTab>('details')
+
+  // Only render the Stems & Downloads section when the track actually has
+  // downloadable content — DownloadSection assumes a downloadable track
+  // and its file-sizes query errors otherwise.
+  const { data: downloadableFlag } = useTrack(trackId, {
+    select: (t) => t?.is_downloadable
+  })
+  const { data: trackStems } = useStems(trackId)
+  const hasDownloads =
+    !!downloadableFlag || (!!trackStems && trackStems.length > 0)
 
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
@@ -287,8 +305,8 @@ export const ContestScreen = () => {
             </Flex>
 
             {/* Submissions Due */}
-            <Flex direction='column' gap='xs'>
-              <Text variant='label' size='s' color='subdued' strength='strong'>
+            <Flex direction='column' gap='2xs'>
+              <Text variant='label' size='m' color='subdued'>
                 {isEnded ? messages.contestEnded : messages.submissionsDue}
               </Text>
               {dueLabel ? (
@@ -307,7 +325,7 @@ export const ContestScreen = () => {
 
             {/* Hosted By */}
             <Flex direction='column' gap='s'>
-              <Text variant='label' size='s' color='subdued' strength='strong'>
+              <Text variant='label' size='m' color='subdued'>
                 {messages.hostedBy}
               </Text>
               <UserLink userId={user.user_id} size='l' />
@@ -322,25 +340,21 @@ export const ContestScreen = () => {
           <Flex ph='l' pb='2xl' gap='l'>
             {activeTab === 'details' && trackId != null ? (
               <>
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {messages.aboutThisContest}
                 </Text>
                 <RemixContestDetailsTab trackId={trackId} />
 
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {messages.prizes}
                 </Text>
                 <RemixContestPrizesTab trackId={trackId} />
+
+                {/* Stems & Downloads — mirror of the web
+                    ContestStemsCard footprint. The native
+                    DownloadSection already renders its own
+                    "Stems & Downloads" title + Download All flow. */}
+                {hasDownloads ? <DownloadSection trackId={trackId} /> : null}
               </>
             ) : activeTab === 'submissions' ? (
               <TanQueryLineup
@@ -354,9 +368,12 @@ export const ContestScreen = () => {
                 actions={remixesPageLineupActions}
               />
             ) : (
-              // Updates + Comments: native-side ContestCommentsSection
-              // doesn't exist yet. Placeholder until the RN port of the
-              // comments feed lands.
+              // Updates + Comments: native-side contest comments feed
+              // doesn't exist yet. The web-side `ContestCommentsTile`
+              // uses `ComposerInput` + `useEventComments`; the native
+              // port is a separate task because CommentSectionProvider
+              // is track-scoped and the ComposerInput also lives web-
+              // side only.
               <Text variant='body' color='subdued'>
                 {messages.tabComingSoon}
               </Text>

@@ -18,16 +18,16 @@ import {
   remixesPageLineupActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { dayjs, formatContestDeadline, formatCount } from '@audius/common/utils'
+import { dayjs, formatContestDeadline } from '@audius/common/utils'
 import {
   Box,
   Button,
   Divider,
+  FilterButton,
   Flex,
   IconArrowLeft,
   IconButton,
   IconKebabHorizontal,
-  Paper,
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
@@ -36,14 +36,16 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 import { Avatar } from 'components/avatar/Avatar'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
-import { DownloadSection } from 'components/track/DownloadSection'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { useRemixPageParams } from 'pages/remixes-page/hooks'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
-import { ContestCommentsSection } from '../ContestCommentsSection'
+import { ContestCommentsTile } from '../ContestCommentsTile'
+import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
@@ -61,10 +63,13 @@ const messages = {
   hours: 'HOURS',
   mins: 'MINS',
   secs: 'SECS',
-  stemsAndDownloads: 'STEMS & DOWNLOADS',
   prizes: 'PRIZES',
   aboutThisContest: 'ABOUT THIS CONTEST',
-  followers: 'FOLLOWERS',
+  submissions: 'SUBMISSIONS',
+  coSigned: 'Co-Signs',
+  sortRecent: 'Most Recent',
+  sortPlays: 'Most Plays',
+  sortFavorites: 'Most Favorites',
   loading: 'Loading…',
   noRemixes: 'No submissions yet.'
 }
@@ -75,7 +80,9 @@ export const CONTEST_PAGE_SIZE = 10
 type MobileContestTab = 'details' | 'updates' | 'submissions' | 'comments'
 
 // -----------------------------------------------------------------------------
-// Countdown — horizontal tile row, one tile per unit, dividers between.
+// Countdown — horizontal tile row, one tile per unit, divider between tiles.
+// Matches Figma node 2888-131647 / 2857-99182: number and label share the
+// same text color (both default, both subdued on a leading zero unit).
 // -----------------------------------------------------------------------------
 const CountdownTile = ({
   value,
@@ -86,11 +93,11 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  <Flex direction='column' alignItems='center' gap='xs' css={{ flex: 1 }}>
+  <Flex direction='column' alignItems='center' gap='2xs' css={{ flex: 1 }}>
     <Text variant='heading' size='l' color={isSubdued ? 'subdued' : 'default'}>
       {String(value).padStart(2, '0')}
     </Text>
-    <Text variant='label' size='xs' color='subdued'>
+    <Text variant='label' size='xs' color={isSubdued ? 'subdued' : 'default'}>
       {label}
     </Text>
   </Flex>
@@ -112,21 +119,28 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
   const hoursSub = daysSub && hours === 0
   const minsSub = hoursSub && mins === 0
   return (
-    <Flex alignItems='center' w='100%'>
+    <Flex alignItems='center' w='100%' gap='s'>
       <CountdownTile value={days} label={messages.days} isSubdued={daysSub} />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile
         value={hours}
         label={messages.hours}
         isSubdued={hoursSub}
       />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile value={mins} label={messages.mins} isSubdued={minsSub} />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
     </Flex>
   )
 }
 
 // -----------------------------------------------------------------------------
-// Tab bar
+// Tab bar. Matches Figma mobile node 2888-131647: title-case labels
+// (Details / Updates / Submissions / Comments), accent color + purple
+// underline on the active tab, subdued on inactive. Uses `title` variant
+// so the text renders mixed case (the `label` variant would force
+// uppercase).
 // -----------------------------------------------------------------------------
 const TabBar = ({
   active,
@@ -160,10 +174,10 @@ const TabBar = ({
             }}
           >
             <Text
-              variant='label'
+              variant='title'
               size='s'
               color={isActive ? 'accent' : 'subdued'}
-              strength='strong'
+              strength={isActive ? 'strong' : 'default'}
             >
               {t.label}
             </Text>
@@ -175,10 +189,12 @@ const TabBar = ({
 }
 
 // -----------------------------------------------------------------------------
-// Section label
+// Section label. Matches the desktop treatment: label size='m' subdued, no
+// extra-bold strength — Figma 2888-131647 uses a regular-weight uppercase
+// label for ABOUT THIS CONTEST, PRIZES, SUBMISSIONS, etc.
 // -----------------------------------------------------------------------------
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <Text variant='label' size='s' color='subdued' strength='strong'>
+  <Text variant='label' size='m' color='subdued'>
     {children}
   </Text>
 )
@@ -233,13 +249,20 @@ const ContestPage = ({
 
   const [activeTab, setActiveTab] = useState<MobileContestTab>('details')
 
+  // Submissions tab filter state — URL-backed so deep links + back/forward
+  // work the same way as the track-page RemixesPage (the reference).
+  const { sortMethod, isCosign } = useRemixPageParams()
+  const updateSortParam = useUpdateSearchParams('sortMethod')
+  const updateIsCosignParam = useUpdateSearchParams('isCosign')
+
   // Submissions lineup — driven on demand by the Submissions tab.
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
     includeOriginal: false,
     includeWinners: true,
     isContestEntry: true,
-    sortMethod: 'recent'
+    sortMethod,
+    isCosign
   })
   const submissionsCount = lineup.data?.length
 
@@ -413,21 +436,45 @@ const ContestPage = ({
               contestOwnerId={contest.userId}
               hasDownloads={hasDownloads}
               followerCount={followState?.followerCount ?? 0}
-              isOwner={isOwner}
             />
           ) : activeTab === 'updates' ? (
-            <ContestCommentsSection
-              eventId={eventId}
-              eventOwnerUserId={contest.userId}
-              mode='updates'
-            />
+            <Box pt='l'>
+              <ContestCommentsTile
+                eventId={eventId}
+                eventOwnerUserId={contest.userId}
+                mode='updates'
+                hideHeading
+              />
+            </Box>
           ) : activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pt='l'>
-              <SectionLabel>
-                {submissionsCount != null
-                  ? `${submissionsCount} SUBMISSIONS`
-                  : 'SUBMISSIONS'}
-              </SectionLabel>
+              {/* Filter bar — same controls track-page RemixesPage exposes
+                  above its remixes lineup: a Co-Signed toggle + a sort
+                  dropdown (Recent / Plays / Favorites). */}
+              <Flex justifyContent='space-between' alignItems='center'>
+                <SectionLabel>
+                  {submissionsCount != null
+                    ? `${submissionsCount} ${messages.submissions}`
+                    : messages.submissions}
+                </SectionLabel>
+                <Flex gap='xs'>
+                  <FilterButton
+                    label={messages.coSigned}
+                    value={isCosign ? 'true' : null}
+                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+                  />
+                  <FilterButton
+                    value={sortMethod ?? 'recent'}
+                    variant='replaceLabel'
+                    onChange={updateSortParam}
+                    options={[
+                      { label: messages.sortRecent, value: 'recent' },
+                      { label: messages.sortPlays, value: 'plays' },
+                      { label: messages.sortFavorites, value: 'likes' }
+                    ]}
+                  />
+                </Flex>
+              </Flex>
               <TanQueryLineup
                 data={lineup.data}
                 isFetching={lineup.isFetching}
@@ -444,11 +491,13 @@ const ContestPage = ({
               />
             </Flex>
           ) : (
-            <ContestCommentsSection
-              eventId={eventId}
-              eventOwnerUserId={contest.userId}
-              mode='comments'
-            />
+            <Box pt='l'>
+              <ContestCommentsTile
+                eventId={eventId}
+                eventOwnerUserId={contest.userId}
+                mode='comments'
+              />
+            </Box>
           )}
         </Box>
       </Box>
@@ -457,8 +506,10 @@ const ContestPage = ({
 }
 
 // -----------------------------------------------------------------------------
-// Details tab — the biggest chunk. Owner sees a Post Update composer at the
-// top; both owner and public see About / Prizes / Followers / Stems below.
+// Details tab — About / Prizes / Followers / Stems stacked vertically.
+// Matches Figma node 2888-131647: the Updates tab owns the post-update feed
+// and composer, so Details is purely informational for both owner and
+// public viewers.
 // -----------------------------------------------------------------------------
 type DetailsTabProps = {
   trackId: number
@@ -466,39 +517,16 @@ type DetailsTabProps = {
   contestOwnerId: number | undefined
   hasDownloads: boolean
   followerCount: number
-  isOwner: boolean
 }
 
 const DetailsTab = ({
   trackId,
   eventId,
-  contestOwnerId,
   hasDownloads,
-  followerCount,
-  isOwner
+  followerCount
 }: DetailsTabProps) => {
   return (
     <Flex direction='column' gap='l' pt='l'>
-      {/* Owner-only Post Update composer, at the top of Details. Rendering
-          the same ContestCommentsSection in 'updates' mode forces the
-          composer while hiding non-owner comments. The full Updates feed
-          lives under the Updates tab — here we show composer only. */}
-      {isOwner ? (
-        <Paper
-          direction='column'
-          p='m'
-          border='default'
-          borderRadius='m'
-          css={{ backgroundColor: 'var(--harmony-white)' }}
-        >
-          <ContestCommentsSection
-            eventId={eventId}
-            eventOwnerUserId={contestOwnerId}
-            mode='updates'
-          />
-        </Paper>
-      ) : null}
-
       {/* About this contest */}
       <Flex direction='column' gap='s'>
         <SectionLabel>{messages.aboutThisContest}</SectionLabel>
@@ -511,21 +539,14 @@ const DetailsTab = ({
         <RemixContestPrizesTab trackId={trackId} />
       </Flex>
 
-      {/* Followers */}
-      <Flex direction='column' gap='s'>
-        <SectionLabel>
-          {`${messages.followers} (${formatCount(followerCount)})`}
-        </SectionLabel>
-        <EventFollowersCard eventId={eventId} followerCount={followerCount} />
-      </Flex>
+      {/* Followers — card renders its own FOLLOWERS (N) label inside the
+          Paper, so no wrapper label here. */}
+      <EventFollowersCard eventId={eventId} followerCount={followerCount} />
 
-      {/* Stems & Downloads */}
-      {hasDownloads ? (
-        <Flex direction='column' gap='s'>
-          <SectionLabel>{messages.stemsAndDownloads}</SectionLabel>
-          <DownloadSection trackId={trackId} />
-        </Flex>
-      ) : null}
+      {/* Stems & Downloads — enriched card (artwork + Public Free + artist
+          + N Stems chip + Download All). Renders its own title inside the
+          Paper, so no wrapper label. */}
+      {hasDownloads ? <ContestStemsCard trackId={trackId} /> : null}
     </Flex>
   )
 }
