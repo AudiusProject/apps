@@ -90,7 +90,6 @@ export const CONTEST_PAGE_SIZE = 10
 const HERO_HEIGHT = 288
 const MAX_CONTENT_WIDTH = 1080
 const RIGHT_COLUMN_WIDTH_PX = 360
-const COLUMN_GAP_PX = 24
 
 type ContestTab = 'details' | 'submissions'
 
@@ -531,7 +530,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
             Comments as stacked cards. Each section is its OWN Paper
             with its own border; there's no single outer tile. */}
         {activeTab === 'details' ? (
-          <Flex gap={`${COLUMN_GAP_PX}px` as any} alignItems='flex-start'>
+          <Flex gap='xl' alignItems='flex-start'>
             {/* Left column: About + Prizes (and Updates if we add
                 host-feed parity later). Cards sit on the page
                 background. */}
