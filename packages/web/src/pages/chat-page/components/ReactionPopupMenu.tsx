@@ -189,7 +189,7 @@ export const ReactionPopupMenu = (props: ReactionPopupMenuProps) => {
       {reactionList.map(([reactionType, Reaction]) => {
         const isActive = userReaction === reactionType
         const isDisabled = hasSelectedReaction && !isActive
-        const activeState = hasSelectedReaction ? (isActive || undefined) : false
+        const activeState = hasSelectedReaction ? isActive || undefined : false
         return (
           <Reaction
             key={reactionType}
