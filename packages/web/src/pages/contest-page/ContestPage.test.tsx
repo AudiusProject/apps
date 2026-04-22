@@ -236,14 +236,9 @@ describe('ContestPage', () => {
       screen.getByRole('button', { name: /^submissions( \(\d+\))?$/i })
     ).toBeInTheDocument()
 
-    // Stubbed subsections rendered by the Details tab
-    expect(screen.getByTestId('details-tab')).toBeInTheDocument()
-    expect(screen.getByTestId('prizes-tab')).toBeInTheDocument()
-    // The details tab now renders a single ContestCommentsTile in the
-    // right column (matches Figma node 2857-99124). The Updates feed
-    // isn't in the Figma — the Phase-2 host-updates tile was removed
-    // for parity and will come back as its own separate design once
-    // specced.
+    // Contest details internals differ across desktop/mobile layouts.
+    // Assert on layout-agnostic sections instead of desktop-only tab internals.
+    // The page renders a single ContestCommentsTile in the details view.
     expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(1)
     // The submissions lineup lives under the Submissions tab, not the
     // Details tab; it renders after flipping the pill.
