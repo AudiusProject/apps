@@ -29,7 +29,11 @@ export const environmentFlagDefaults: Record<
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
     [FeatureFlags.CONTESTS]: true
   },
-  production: {}
+  // TEMPORARY: CONTESTS forced on in production. Revert along with
+  // the surrounding commit.
+  production: {
+    [FeatureFlags.CONTESTS]: true
+  }
 }
 
 /**
@@ -50,5 +54,6 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
-  [FeatureFlags.CONTESTS]: false
+  // TEMPORARY: forced on. Revert along with the surrounding commit.
+  [FeatureFlags.CONTESTS]: true
 }

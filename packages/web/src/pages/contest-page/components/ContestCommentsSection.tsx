@@ -31,10 +31,12 @@ const messages = {
   sortTop: 'Top',
   sortNewest: 'Newest',
   subheading: 'Post updates from the artist and comments from the community.',
-  empty: 'No posts yet. Be the first to start the conversation.',
-  emptyUpdates:
-    'No updates yet. The contest host will post announcements here.',
-  emptyComments: 'No comments yet. Be the first to start the conversation.',
+  empty: 'Nothing here yet',
+  emptySub: 'Be the first to start the conversation on this contest!',
+  emptyUpdates: 'No updates yet',
+  emptyUpdatesSub: 'The contest host will post announcements here.',
+  emptyComments: 'Nothing here yet',
+  emptyCommentsSub: 'Be the first to comment on this contest!',
   composePlaceholder: 'Add a comment…',
   composePostUpdatePlaceholder: 'Post an update to your contest followers…',
   post: 'Post',
@@ -114,6 +116,12 @@ export const ContestCommentsSection = ({
       : mode === 'comments'
         ? messages.emptyComments
         : messages.empty
+  const emptySubMessage =
+    mode === 'updates'
+      ? messages.emptyUpdatesSub
+      : mode === 'comments'
+        ? messages.emptyCommentsSub
+        : messages.emptySub
 
   const [sortMethod, setSortMethod] = useState<'top' | 'newest'>(
     mode === 'comments' ? 'top' : 'newest'
@@ -257,11 +265,14 @@ export const ContestCommentsSection = ({
           <LoadingSpinner />
         </Flex>
       ) : !feedItems || feedItems.length === 0 ? (
-        <Box p='l'>
-          <Text variant='body' size='s' color='subdued'>
+        <Flex direction='column' alignItems='center' gap='xs' p='xl'>
+          <Text variant='body' size='m' color='default' strength='strong'>
             {emptyMessage}
           </Text>
-        </Box>
+          <Text variant='body' size='s' color='subdued'>
+            {emptySubMessage}
+          </Text>
+        </Flex>
       ) : (
         <Flex direction='column' gap='m'>
           {feedItems.map(({ commentId }) => (

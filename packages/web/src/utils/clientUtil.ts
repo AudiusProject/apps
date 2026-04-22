@@ -30,6 +30,20 @@ export const isMobile = () => {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') {
     return false
   }
+
+  // Dev-only override: setting `localStorage.__FORCE_MOBILE__ = '1'` forces
+  // the client into mobile mode regardless of the real user agent, so
+  // engineers + designers can preview the mobile-web layout from a desktop
+  // browser without toggling Chrome DevTools device mode. Unset the key (or
+  // assign any other value) to disable.
+  try {
+    if (window.localStorage?.getItem('__FORCE_MOBILE__') === '1') {
+      return true
+    }
+  } catch {
+    // localStorage may be unavailable (private mode, SSR); fall through.
+  }
+
   let check = false
   if (
     // @ts-ignore -- TODO fix mobile imports causing type errors

@@ -76,8 +76,8 @@ vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
 
 // The comments feed is its own universe — stub with a marker. (Phase 4/5
 // tests cover the feed directly.)
-vi.mock('./components/ContestCommentsSection', () => ({
-  ContestCommentsSection: () => <div data-testid='contest-comments-section' />
+vi.mock('./components/ContestCommentsTile', () => ({
+  ContestCommentsTile: () => <div data-testid='contest-comments-section' />
 }))
 
 const track = {
@@ -207,19 +207,28 @@ describe('ContestPage', () => {
   })
 
   it('renders the details / prizes / submissions / feed sections when a contest exists', () => {
+    // Provide a non-empty lineup so the Submissions pill renders (the
+    // tab toggle is hidden while no submissions exist).
+    mocks.useRemixesLineup.mockReturnValue({
+      data: [{ id: 1 }],
+      isFetching: false,
+      isPending: false,
+      isError: false,
+      hasNextPage: false,
+      play: vi.fn(),
+      pause: vi.fn(),
+      loadNextPage: vi.fn(),
+      isPlaying: false,
+      lineup: { entries: [], order: {} }
+    })
     renderContestPage()
 
-    // The Details pill is the default-selected tab, so Details + Prizes
-    // section headings render; Submissions is surfaced as a pill toggle
-    // rather than an always-on section heading.
-    expect(
-      screen.getByRole('heading', { name: /^details$/i })
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: /^prizes$/i })
-    ).toBeInTheDocument()
-    // Label renders as "Submissions" when the lineup hasn't loaded yet
-    // (data=undefined in the mocks) or "Submissions (N)" once data lands.
+    // About + Prizes are now rendered as uppercase label-style section
+    // headings, not <h*> headings. Match by visible text instead.
+    expect(screen.getByText(/^about this contest$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^prizes$/i)).toBeInTheDocument()
+
+    // Submissions is surfaced as a SelectablePill toggle.
     expect(
       screen.getByRole('button', { name: /^submissions( \(\d+\))?$/i })
     ).toBeInTheDocument()
@@ -227,22 +236,27 @@ describe('ContestPage', () => {
     // Stubbed subsections rendered by the Details tab
     expect(screen.getByTestId('details-tab')).toBeInTheDocument()
     expect(screen.getByTestId('prizes-tab')).toBeInTheDocument()
-    // ContestCommentsSection mounts twice on the Details tab — once for the
-    // Updates feed on the left, once for the Comments panel on the right.
-    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(2)
+    // The details tab now renders a single ContestCommentsTile in the
+    // right column (matches Figma node 2857-99124). The Updates feed
+    // isn't in the Figma — the Phase-2 host-updates tile was removed
+    // for parity and will come back as its own separate design once
+    // specced.
+    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(1)
     // The submissions lineup lives under the Submissions tab, not the
     // Details tab; it renders after flipping the pill.
     expect(screen.queryByTestId('tan-query-lineup')).not.toBeInTheDocument()
   })
 
-  it('renders "Follow Contest" when the viewer is NOT already following', () => {
+  it('renders "Follow" when the viewer is NOT already following', () => {
     mocks.useEventFollowState.mockReturnValue({
       data: { isFollowed: false, followerCount: 12 }
     })
     renderContestPage()
 
+    // The Figma-aligned public header surfaces a notification-style
+    // Follow pill (bell icon). Copy is just "Follow" / "Following".
     expect(
-      screen.getByRole('button', { name: /follow contest/i })
+      screen.getByRole('button', { name: /^follow$/i })
     ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /^following$/i })
@@ -259,7 +273,7 @@ describe('ContestPage', () => {
       screen.getByRole('button', { name: /^following$/i })
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('button', { name: /follow contest/i })
+      screen.queryByRole('button', { name: /^follow$/i })
     ).not.toBeInTheDocument()
   })
 

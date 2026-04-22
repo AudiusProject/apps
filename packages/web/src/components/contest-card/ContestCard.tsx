@@ -240,14 +240,20 @@ export const ContestCard = forwardRef(
     )
     const entriesCount = remixesData?.pages?.[0]?.count ?? 0
 
-    const permalink = track?.permalink ?? ''
-    const handleNavigate = useLinkClickHandler<HTMLDivElement>(permalink)
+    // Land on the dedicated contest page rather than the host's track page
+    // — the contest page is the actual destination readers are trying to
+    // reach from the Explore grid.
+    const contestDestination = track?.permalink
+      ? `${track.permalink}/contest`
+      : ''
+    const handleNavigate =
+      useLinkClickHandler<HTMLDivElement>(contestDestination)
     const handleClick = useCallback(
       (e: MouseEvent<HTMLDivElement>) => {
         onClick?.(e)
-        if (permalink) handleNavigate(e)
+        if (contestDestination) handleNavigate(e)
       },
-      [handleNavigate, onClick, permalink]
+      [handleNavigate, onClick, contestDestination]
     )
 
     if (!track || !user || !remixContest) {

@@ -97,6 +97,7 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         Trending: 'trending',
                         Collection: ':handle/collection/:slug',
                         TrackRemixes: ':handle/:slug/remixes',
+                        Contest: ':handle/:slug/contest',
                         Track: 'track/:handle/:slug',
                         Profile: {
                           path: ':handle',
