@@ -60,10 +60,8 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     trackId,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const {
-    price,
-    shouldDisplayPremiumDownloadLocked
-  } = useDownloadableContentAccess({ trackId })
+  const { price, shouldDisplayPremiumDownloadLocked } =
+    useDownloadableContentAccess({ trackId })
   const formattedPrice = price ? USDC(price / 100).toLocaleString() : undefined
 
   const { onOpen: openPremiumContentPurchaseModal } =
@@ -140,11 +138,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               flexShrink: 0
             }}
           />
-          <Flex
-            direction='column'
-            gap='2xs'
-            css={{ flex: 1, minWidth: 0 }}
-          >
+          <Flex direction='column' gap='2xs' css={{ flex: 1, minWidth: 0 }}>
             <Text variant='label' size='s' color='default' strength='strong'>
               {accessLabel}
             </Text>

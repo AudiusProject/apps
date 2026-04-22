@@ -8,7 +8,6 @@ import {
   usePostEventComment,
   useUser
 } from '@audius/common/api'
-import { useQueryClient } from '@tanstack/react-query'
 import { ID, SquareSizes } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
 import {
@@ -27,6 +26,7 @@ import {
   TextInput
 } from '@audius/harmony'
 import { EntityType } from '@audius/sdk'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { UserLink } from 'components/link/UserLink'
@@ -394,9 +394,7 @@ const ContestCommentRow = ({
           <UserLink userId={author.user_id} />
           {isAuthorEventOwner ? (
             <Text variant='label' size='xs' color='accent' strength='strong'>
-              {isPostUpdate
-                ? messages.postUpdateBadge
-                : messages.artistBadge}
+              {isPostUpdate ? messages.postUpdateBadge : messages.artistBadge}
             </Text>
           ) : null}
           {createdAt ? <Timestamp time={createdAt} /> : null}
@@ -447,9 +445,6 @@ const UserAvatar = ({ userId }: UserAvatarProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
   return (
-    <HarmonyAvatar
-      src={src}
-      css={{ width: 40, height: 40, flexShrink: 0 }}
-    />
+    <HarmonyAvatar src={src} css={{ width: 40, height: 40, flexShrink: 0 }} />
   )
 }

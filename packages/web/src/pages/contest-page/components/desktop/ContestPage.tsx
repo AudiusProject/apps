@@ -13,9 +13,8 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { SquareSizes } from '@audius/common/models'
+import { SquareSizes, ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { ShareSource } from '@audius/common/models'
 import {
   remixesPageActions,
   remixesPageLineupActions,
@@ -111,18 +110,10 @@ const CountdownTile = ({
   isSubdued?: boolean
 }) => (
   <Flex direction='column' alignItems='center' gap='2xs' w={56}>
-    <Text
-      variant='heading'
-      size='l'
-      color={isSubdued ? 'subdued' : 'default'}
-    >
+    <Text variant='heading' size='l' color={isSubdued ? 'subdued' : 'default'}>
       {String(value).padStart(2, '0')}
     </Text>
-    <Text
-      variant='label'
-      size='xs'
-      color={isSubdued ? 'subdued' : 'default'}
-    >
+    <Text variant='label' size='xs' color={isSubdued ? 'subdued' : 'default'}>
       {label}
     </Text>
   </Flex>
@@ -513,7 +504,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
         {/* Spacer between the header Paper and the tab row below. */}
         <Box pt='xl' />
-
 
         {/* Tabs — only when there are submissions (Figma 1-track variant
             has no tabs). */}
