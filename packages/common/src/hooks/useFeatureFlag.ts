@@ -116,12 +116,30 @@ export const createUseFeatureFlagHook =
       getOverride().catch(() => {})
     })
 
+    // Hard-code overrides — see note on `HARDCODED_ENABLED_FLAGS` below.
+    if (HARDCODED_ENABLED_FLAGS[flag]) {
+      return {
+        isLoaded: true,
+        isEnabled: true,
+        setOverride
+      }
+    }
+
     return {
       isLoaded: configLoaded && hasReadOverride,
       isEnabled: isLocallyEnabled ?? isEnabled,
       setOverride
     }
   }
+
+/**
+ * Flags that are currently hard-coded to enabled regardless of Optimizely,
+ * environment defaults, or local override state. TEMPORARY — revert the
+ * surrounding commit before shipping.
+ */
+const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {
+  [FeatureFlags.CONTESTS]: true
+}
 
 /** Fetches enabled status of a given feature flag with fallback. Result is memoized. */
 export const useFeatureFlag = (
@@ -167,6 +185,18 @@ export const useFeatureFlag = (
     }
     getOverride().catch(() => {})
   })
+
+  // Hard-code overrides win over every other source — Optimizely,
+  // environment defaults, local storage overrides, fallback flag —
+  // so the feature is on for every caller on web/mobile-web/native.
+  // TEMPORARY: revert this along with the surrounding commit.
+  if (HARDCODED_ENABLED_FLAGS[flag]) {
+    return {
+      isLoaded: true,
+      isEnabled: true,
+      setOverride
+    }
+  }
 
   return {
     isLoaded: configLoaded && hasReadOverride,
