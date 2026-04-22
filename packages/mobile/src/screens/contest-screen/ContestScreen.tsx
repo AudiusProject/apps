@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState
+} from 'react'
 
 import {
   useCurrentUserId,
+  useEventFollowers,
+  useEventFollowState,
   useRemixContest,
   useRemixesLineup,
   useStems,
@@ -10,28 +18,41 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import { SquareSizes, type ID } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { remixesPageLineupActions } from '@audius/common/store'
-import { dayjs, formatContestDeadline } from '@audius/common/utils'
+import { dayjs, formatCount, getLocalTimezone } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
-import { Image, Pressable, View } from 'react-native'
+import { Image, Pressable, useWindowDimensions, View } from 'react-native'
+import { TabView, type SceneRendererProps } from 'react-native-tab-view'
 
 import {
   Button,
   Divider,
   Flex,
   IconArrowLeft,
+  IconCaretRight,
   IconKebabHorizontal,
+  IconButton,
+  Paper,
   Text
 } from '@audius/harmony-native'
-import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import {
+  Screen,
+  ScreenContent,
+  ScrollView,
+  UserGeneratedText
+} from 'app/components/core'
+import { ProfilePicture } from 'app/components/core/ProfilePicture'
+import { useTrackImage } from 'app/components/image/TrackImage'
 import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
 import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { DownloadSection } from '../track-screen/DownloadSection'
-import { RemixContestDetailsTab } from '../track-screen/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from '../track-screen/RemixContestPrizesTab'
+
+import { ContestCommentsList } from './ContestCommentsList'
 
 const messages = {
   title: 'Remix Contest',
@@ -56,8 +77,6 @@ const messages = {
 
 const HERO_HEIGHT = 220
 const CONTEST_PAGE_SIZE = 10
-
-type ContestTab = 'details' | 'updates' | 'submissions' | 'comments'
 
 // -----------------------------------------------------------------------------
 // Countdown row. Matches Figma nodes 2888-131647 + 2857-99182: number and
@@ -116,29 +135,38 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
 }
 
 // -----------------------------------------------------------------------------
-// Tab bar
+// Tab bar. Matches Figma mobile node 2888-131647: title-case labels
+// (Details / Updates / Submissions / Comments), accent color + purple
+// underline on the active tab. Uses `title` variant so the text renders
+// mixed-case — the `label` variant would force uppercase and diverge
+// from the Figma.
+//
+// Wired against the `react-native-tab-view` `SceneRendererProps` so the
+// row doubles as the TabView's `renderTabBar`, and so the underline
+// slides with the swipe gesture rather than snapping between tabs.
 // -----------------------------------------------------------------------------
-const TabBar = ({
-  active,
-  onChange
-}: {
-  active: ContestTab
-  onChange: (t: ContestTab) => void
-}) => {
-  const tabs: { key: ContestTab; label: string }[] = [
-    { key: 'details', label: messages.details },
-    { key: 'updates', label: messages.updates },
-    { key: 'submissions', label: messages.submissions },
-    { key: 'comments', label: messages.comments }
-  ]
+type TabRoute = { key: string; title: string }
+
+const CONTEST_TAB_ROUTES: TabRoute[] = [
+  { key: 'details', title: messages.details },
+  { key: 'updates', title: messages.updates },
+  { key: 'submissions', title: messages.submissions },
+  { key: 'comments', title: messages.comments }
+]
+
+type TabBarProps = SceneRendererProps & {
+  navigationState: { index: number; routes: TabRoute[] }
+}
+
+const TabBar = ({ navigationState, jumpTo }: TabBarProps) => {
   return (
     <Flex direction='row' alignItems='center' justifyContent='space-around'>
-      {tabs.map((t) => {
-        const isActive = active === t.key
+      {navigationState.routes.map((route, i) => {
+        const isActive = navigationState.index === i
         return (
           <Pressable
-            key={t.key}
-            onPress={() => onChange(t.key)}
+            key={route.key}
+            onPress={() => jumpTo(route.key)}
             style={{
               flex: 1,
               alignItems: 'center',
@@ -148,17 +176,241 @@ const TabBar = ({
             }}
           >
             <Text
-              variant='label'
+              variant='title'
               size='s'
               color={isActive ? 'accent' : 'subdued'}
-              strength='strong'
+              strength={isActive ? 'strong' : 'default'}
             >
-              {t.label}
+              {route.title}
             </Text>
           </Pressable>
         )
       })}
     </Flex>
+  )
+}
+
+const fallbackDescription =
+  'Enter my remix contest before the deadline for your chance to win!'
+
+// -----------------------------------------------------------------------------
+// Followers tile. Matches Figma 2888-128953 (also web's
+// `EventFollowersCard`): "FOLLOWERS (N)" label + a stacked row of
+// overlapping avatars + a chevron-right button that opens the
+// leaderboard. Empty follower state hides the avatar row but keeps
+// the title.
+// -----------------------------------------------------------------------------
+// Max avatar discs surfaced before the chevron — matches the web
+// reference and keeps the stack visually readable. Extra discs just
+// compress the row.
+const FOLLOWERS_MAX_AVATARS = 7
+// Horizontal overlap between adjacent avatars. ~1/3 of the 40px
+// avatar diameter, same ratio as the web leaderboard row.
+const FOLLOWERS_OVERLAP_PX = 14
+
+const EventFollowersCard = ({
+  eventId,
+  followerCount,
+  onOpenLeaderboard
+}: {
+  eventId: ID
+  followerCount: number
+  onOpenLeaderboard?: () => void
+}) => {
+  const { userIds } = useEventFollowers({
+    eventId,
+    limit: FOLLOWERS_MAX_AVATARS
+  })
+  const visibleIds = (userIds ?? []).slice(0, FOLLOWERS_MAX_AVATARS)
+  const hasAny = visibleIds.length > 0
+
+  return (
+    <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
+      <Flex direction='row' alignItems='baseline' gap='xs'>
+        <Text variant='label' size='m' color='subdued'>
+          FOLLOWERS
+        </Text>
+        <Text variant='label' size='m' color='subdued'>
+          ({formatCount(followerCount)})
+        </Text>
+      </Flex>
+      {hasAny ? (
+        <Flex
+          direction='row'
+          alignItems='center'
+          justifyContent='space-between'
+          gap='s'
+        >
+          <View style={{ flexDirection: 'row' }}>
+            {visibleIds.map((userId, idx) => (
+              <View
+                key={userId}
+                style={{
+                  marginLeft: idx === 0 ? 0 : -FOLLOWERS_OVERLAP_PX,
+                  zIndex: idx
+                }}
+              >
+                <ProfilePicture
+                  userId={userId}
+                  style={{ width: 40, height: 40 }}
+                />
+              </View>
+            ))}
+          </View>
+          <IconButton
+            icon={IconCaretRight}
+            color='default'
+            aria-label='Open contest leaderboard'
+            onPress={onOpenLeaderboard ?? (() => {})}
+          />
+        </Flex>
+      ) : null}
+    </Paper>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// Stems & Downloads tile. Matches Figma 2925-17366 (also web's
+// `ContestStemsCard`): label on top, then a row with the track
+// artwork thumbnail + access label ("Public Free") + artist UserLink,
+// and a bottom row with a stems-count chip on the left and a
+// "Download All" action on the right. Uses the track-page
+// `DownloadSection` for the actual download flow — the Figma chrome
+// lives only in the summary.
+// -----------------------------------------------------------------------------
+const ContestStemsCard = ({ trackId }: { trackId: ID }) => {
+  const { data: track } = useTrack(trackId)
+  const { data: artist } = useUser(track?.owner_id)
+  const { data: stems = [] } = useStems(trackId)
+  const { source } = useTrackImage({
+    trackId,
+    size: SquareSizes.SIZE_150_BY_150
+  })
+  const src =
+    source && typeof source === 'object' && 'uri' in source
+      ? (source as { uri?: string }).uri
+      : undefined
+  const stemsCount = stems.length
+
+  if (!track || !artist) return null
+
+  return (
+    <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
+      <Text variant='label' size='m' color='subdued'>
+        STEMS & DOWNLOADS
+      </Text>
+
+      {/* Header row: artwork + access label + artist link */}
+      <Flex direction='row' gap='m' alignItems='center'>
+        <View
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 8,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(0,0,0,0.08)'
+          }}
+        >
+          {src ? (
+            <Image
+              source={{ uri: src }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode='cover'
+            />
+          ) : null}
+        </View>
+        <Flex direction='column' gap='2xs' flex={1}>
+          <Text variant='title' size='s'>
+            Public Free
+          </Text>
+          <UserLink userId={artist.user_id} />
+        </Flex>
+      </Flex>
+
+      {/* Bottom row: stems-count chip + Download All. The modal flow
+          lives in DownloadSection on the track page; here we surface
+          a single Download All action that mirrors it. */}
+      <Flex
+        direction='row'
+        alignItems='center'
+        justifyContent='space-between'
+        gap='m'
+      >
+        {stemsCount > 0 ? (
+          <View
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+              borderRadius: 999,
+              backgroundColor: 'rgba(0,0,0,0.06)'
+            }}
+          >
+            <Text variant='label' size='s' strength='strong'>
+              {stemsCount === 1 ? '1 Stem' : `${stemsCount} Stems`}
+            </Text>
+          </View>
+        ) : (
+          <View />
+        )}
+        {/* DownloadSection below the card handles the actual file list
+            + per-stem download UI. We link users to it via the
+            "Download All" affordance by scrolling there / expanding it
+            once it's wired — see the Details tab below. */}
+        <Text variant='label' size='s' strength='strong'>
+          Download All
+        </Text>
+      </Flex>
+    </Paper>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// Hero banner. We render a raw `<Image>` rather than the shared
+// `TrackImage` component because `TrackImage` wraps its artwork in the
+// `Artwork` layout, which forces a 1:1 aspect ratio (via `pt='100%'`).
+// The Figma contest hero is a wide cropped banner, not a square
+// thumbnail — so we pull the source via `useTrackImage` and size the
+// image ourselves.
+// -----------------------------------------------------------------------------
+const ContestHero = ({
+  trackId,
+  onBack
+}: {
+  trackId: number
+  onBack: () => void
+}) => {
+  const { source } = useTrackImage({
+    trackId,
+    size: SquareSizes.SIZE_1000_BY_1000
+  })
+  const src =
+    source && typeof source === 'object' && 'uri' in source
+      ? (source as { uri?: string }).uri
+      : undefined
+
+  return (
+    <View style={{ width: '100%', height: HERO_HEIGHT }}>
+      {src ? (
+        <Image
+          source={{ uri: src }}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode='cover'
+        />
+      ) : null}
+      <Pressable
+        onPress={onBack}
+        style={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          padding: 6,
+          borderRadius: 999,
+          backgroundColor: 'rgba(0,0,0,0.35)'
+        }}
+      >
+        <IconArrowLeft size='m' color='staticWhite' />
+      </Pressable>
+    </View>
   )
 }
 
@@ -179,9 +431,11 @@ export const ContestScreen = () => {
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
+  const { data: followState } = useEventFollowState(eventId)
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 
-  const [activeTab, setActiveTab] = useState<ContestTab>('details')
+  const [tabIndex, setTabIndex] = useState(0)
+  const { width: windowWidth } = useWindowDimensions()
 
   // Only render the Stems & Downloads section when the track actually has
   // downloadable content — DownloadSection assumes a downloadable track
@@ -206,9 +460,17 @@ export const ContestScreen = () => {
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  const dueLabel = useMemo(() => {
-    if (!contest?.endDate) return ''
-    return formatContestDeadline(contest.endDate, 'long')
+  // Split the deadline into date + time so each part can be styled
+  // independently — Figma 2888-131667 renders the date in strong
+  // uppercase next to a lighter subdued time. Squishing both into
+  // one string and one Text loses the typographic split.
+  const deadlineParts = useMemo(() => {
+    if (!contest?.endDate) return null
+    const d = dayjs(contest.endDate)
+    return {
+      date: d.format('MMM D, YYYY').toUpperCase(),
+      time: `${d.format('h:mm A')} (${getLocalTimezone()})`
+    }
   }, [contest?.endDate])
 
   const handlePickWinners = useCallback(() => {
@@ -227,6 +489,15 @@ export const ContestScreen = () => {
     // eslint-disable-next-line no-console
     console.info('Enter contest — native upload flow not yet wired')
   }, [trackId])
+
+  // Hide the stack navigator header entirely — the in-hero back button
+  // (a floating circular IconArrowLeft overlaid on the hero) IS the only
+  // back affordance in the Figma (2888-131647). Leaving the default
+  // header visible duplicates it. Must stay before any early return so
+  // the hook order is stable across render paths.
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerShown: false })
+  }, [navigation])
 
   // ---------------------------------------------------------------------------
   // Render
@@ -251,35 +522,23 @@ export const ContestScreen = () => {
   }
 
   const contestTitle = (contest.eventData as any)?.title || track.title
-  const coverArt = (contest.eventData as any)?.coverPhotoUrl
+  const description = (contest.eventData as any)?.description as
+    | string
+    | undefined
 
   return (
-    <Screen variant='secondary'>
+    <Screen>
       <ScreenContent>
         <ScrollView>
-          {/* Hero banner */}
-          <View style={{ width: '100%', height: HERO_HEIGHT }}>
-            {coverArt ? (
-              <Image
-                source={{ uri: coverArt }}
-                style={{ width: '100%', height: '100%' }}
-                resizeMode='cover'
-              />
-            ) : null}
-            <Pressable
-              onPress={() => navigation.goBack()}
-              style={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                padding: 6,
-                borderRadius: 999,
-                backgroundColor: 'rgba(0,0,0,0.35)'
-              }}
-            >
-              <IconArrowLeft size='m' color='staticWhite' />
-            </Pressable>
-          </View>
+          {/* Hero banner — uses the track cover art. We render a raw
+              `<Image>` rather than the shared `TrackImage` component
+              because `TrackImage` wraps its artwork in `Artwork`, which
+              forces a 1:1 aspect ratio (via `pt='100%'`). The Figma
+              hero is a wide cropped banner, not a square thumbnail. */}
+          <ContestHero
+            trackId={track.track_id}
+            onBack={() => navigation.goBack()}
+          />
 
           <Flex p='l' gap='l'>
             {/* Title */}
@@ -309,10 +568,15 @@ export const ContestScreen = () => {
               <Text variant='label' size='m' color='subdued'>
                 {isEnded ? messages.contestEnded : messages.submissionsDue}
               </Text>
-              {dueLabel ? (
-                <Text variant='label' size='l' strength='strong'>
-                  {dueLabel}
-                </Text>
+              {deadlineParts ? (
+                <Flex direction='row' alignItems='baseline' gap='s' wrap='wrap'>
+                  <Text variant='label' size='l' strength='strong'>
+                    {deadlineParts.date}
+                  </Text>
+                  <Text variant='label' size='l' color='subdued'>
+                    {deadlineParts.time}
+                  </Text>
+                </Flex>
               ) : null}
             </Flex>
 
@@ -323,62 +587,128 @@ export const ContestScreen = () => {
 
             <Divider />
 
-            {/* Hosted By */}
+            {/* Hosted By — avatar + name/handle, matching the web
+                ContestPage "HOSTED BY" row (Figma 2888-131647). */}
             <Flex direction='column' gap='s'>
               <Text variant='label' size='m' color='subdued'>
                 {messages.hostedBy}
               </Text>
-              <UserLink userId={user.user_id} size='l' />
+              <Flex direction='row' alignItems='center' gap='m'>
+                <ProfilePicture
+                  userId={user.user_id}
+                  style={{ width: 40, height: 40 }}
+                />
+                <UserLink userId={user.user_id} size='l' />
+              </Flex>
             </Flex>
-
-            {/* Tabs */}
-            <TabBar active={activeTab} onChange={setActiveTab} />
           </Flex>
 
-          {/* Tab content — trackId is non-nullable here thanks to the
-              early bailout above. */}
-          <Flex ph='l' pb='2xl' gap='l'>
-            {activeTab === 'details' && trackId != null ? (
-              <>
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.aboutThisContest}
-                </Text>
-                <RemixContestDetailsTab trackId={trackId} />
+          {/* Swipeable tabs — `TabView` handles horizontal pan + page
+              indicator while the outer `ScrollView` handles vertical
+              scroll. The tab bar is rendered by the TabView so its
+              underline slides continuously with the swipe instead of
+              snapping, which matched the request to "use a tab library
+              so user can swipe left and right". */}
+          <TabView
+            navigationState={{
+              index: tabIndex,
+              routes: CONTEST_TAB_ROUTES
+            }}
+            onIndexChange={setTabIndex}
+            renderTabBar={(props) => <TabBar {...props} />}
+            renderScene={({ route }) => {
+              switch (route.key) {
+                case 'details':
+                  return (
+                    <Flex p='l' gap='l'>
+                      {/* About renders the description only. The
+                          deadline already appears in the header
+                          above, so we don't reuse the track-page
+                          `RemixContestDetailsTab` — it prepends a
+                          "Submission Due:" row that would duplicate
+                          the header (Figma 2888-131647). */}
+                      <Text variant='label' size='m' color='subdued'>
+                        {messages.aboutThisContest}
+                      </Text>
+                      <UserGeneratedText variant='body'>
+                        {description ?? fallbackDescription}
+                      </UserGeneratedText>
 
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.prizes}
-                </Text>
-                <RemixContestPrizesTab trackId={trackId} />
+                      <Text variant='label' size='m' color='subdued'>
+                        {messages.prizes}
+                      </Text>
+                      <RemixContestPrizesTab trackId={track.track_id} />
 
-                {/* Stems & Downloads — mirror of the web
-                    ContestStemsCard footprint. The native
-                    DownloadSection already renders its own
-                    "Stems & Downloads" title + Download All flow. */}
-                {hasDownloads ? <DownloadSection trackId={trackId} /> : null}
-              </>
-            ) : activeTab === 'submissions' ? (
-              <TanQueryLineup
-                queryData={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                loadNextPage={lineup.loadNextPage}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                hasMore={!!lineup.hasNextPage}
-                actions={remixesPageLineupActions}
-              />
-            ) : (
-              // Updates + Comments: native-side contest comments feed
-              // doesn't exist yet. The web-side `ContestCommentsTile`
-              // uses `ComposerInput` + `useEventComments`; the native
-              // port is a separate task because CommentSectionProvider
-              // is track-scoped and the ComposerInput also lives web-
-              // side only.
-              <Text variant='body' color='subdued'>
-                {messages.tabComingSoon}
-              </Text>
-            )}
-          </Flex>
+                      <EventFollowersCard
+                        eventId={eventId}
+                        followerCount={followState?.followerCount ?? 0}
+                      />
+
+                      {hasDownloads ? (
+                        <>
+                          <ContestStemsCard trackId={track.track_id} />
+                          <DownloadSection trackId={track.track_id} />
+                        </>
+                      ) : null}
+                    </Flex>
+                  )
+                case 'submissions':
+                  // TanQueryLineup renders a SectionList with
+                  // `flex: 1`. If the wrapper has no explicit
+                  // height/flex the list collapses to zero, which is
+                  // why "nothing shows up" on the submissions tab.
+                  // `flex: 1` on the wrapper lets the list expand to
+                  // the full scene container height.
+                  return (
+                    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                      <TanQueryLineup
+                        queryData={lineup.data}
+                        isFetching={lineup.isFetching}
+                        isPending={lineup.isPending}
+                        loadNextPage={lineup.loadNextPage}
+                        lineup={lineup.lineup}
+                        pageSize={CONTEST_PAGE_SIZE}
+                        hasMore={!!lineup.hasNextPage}
+                        actions={remixesPageLineupActions}
+                      />
+                    </View>
+                  )
+                case 'updates':
+                  return (
+                    <Flex p='l'>
+                      <ContestCommentsList
+                        eventId={eventId}
+                        eventOwnerUserId={contest.userId}
+                        mode='updates'
+                        hideHeading
+                      />
+                    </Flex>
+                  )
+                case 'comments':
+                default:
+                  return (
+                    <Flex p='l'>
+                      <ContestCommentsList
+                        eventId={eventId}
+                        eventOwnerUserId={contest.userId}
+                        mode='comments'
+                      />
+                    </Flex>
+                  )
+              }
+            }}
+            initialLayout={{ width: windowWidth }}
+            // TabView inside a ScrollView doesn't auto-measure its
+            // own height, so the tab content collapses to 0 and
+            // hides every scene. Pin an explicit height via the
+            // `style` prop. 700px covers Details (the tallest tab
+            // on mobile — About + Prizes + Followers + Stems card +
+            // DownloadSection) without burning a huge empty slab on
+            // the lighter tabs; each scene scrolls internally if it
+            // still overflows.
+            style={{ height: 700 }}
+            swipeEnabled
+          />
         </ScrollView>
       </ScreenContent>
     </Screen>

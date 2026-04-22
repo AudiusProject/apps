@@ -264,7 +264,11 @@ export const ContestCard = (props: ContestCardProps) => {
   const navigation = useNavigation<NavigationProp>()
   const handlePress = useCallback(() => {
     if (noNavigation || !trackId) return
-    navigation.navigate('Track', { trackId })
+    // Match the web-side ContestCard change: tapping the card goes to
+    // the dedicated Contest screen (the redesigned remix-contest surface
+    // with countdown / About / Prizes / Submissions / Updates / Comments
+    // tabs), not the underlying track screen.
+    navigation.navigate('Contest', { trackId })
   }, [navigation, trackId, noNavigation])
 
   if (!track || !user || !remixContest) {
