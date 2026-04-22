@@ -89,13 +89,7 @@ export const TrendingRewardsTile = ({
 
   return (
     <Tile className={wm(styles.rewardsTile, className)}>
-      <Flex
-        column
-        gap='s'
-        alignItems='center'
-        w='100%'
-        mb='3xl'
-      >
+      <Flex column gap='s' alignItems='center' w='100%' mb='3xl'>
         <Text variant='display' size='s' className={wm(styles.title)}>
           {messages.title}
         </Text>
