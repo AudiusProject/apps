@@ -41,7 +41,7 @@
   opacity: 1;
 }
 
-.reactionButton>div {
+.reactionButton > div {
   pointer-events: none;
 }
 
@@ -85,5 +85,6 @@
   top: calc(100% + var(--harmony-unit-1));
   left: 50%;
   transform-origin: top center;
-  transform: translateX(calc(-50% + var(--reaction-popup-shift-x))) scale(var(--reaction-popup-scale));
+  transform: translateX(calc(-50% + var(--reaction-popup-shift-x)))
+    scale(var(--reaction-popup-scale));
 }

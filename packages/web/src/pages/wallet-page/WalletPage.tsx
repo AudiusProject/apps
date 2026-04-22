@@ -43,7 +43,8 @@ export const WalletPage = () => {
       p={isMobile ? 'l' : undefined}
       w='100%'
       css={{
-        minWidth: 332,
+        minWidth: isMobile ? 0 : 332,
+        maxWidth: '100%',
         containerType: 'inline-size',
         containerName: 'wallet',
         '@media (min-width: 768px) and (max-width: 1024px)': {
