@@ -3,6 +3,7 @@
 }
 
 .pageContent {
+  min-width: 328px;
   max-width: calc(1080px + var(--harmony-unit-4)) !important;
 }
 

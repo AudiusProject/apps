@@ -20,6 +20,7 @@ import {
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
@@ -524,7 +525,9 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
       size='large'
       header={header}
     >
-      {pageContent}
+      <Flex w='100%' css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}>
+        {pageContent}
+      </Flex>
     </Page>
   )
 }

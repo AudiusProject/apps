@@ -10,10 +10,11 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
-import { FilterButton, IconFeed } from '@audius/harmony'
+import { FilterButton, Flex, IconFeed } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
@@ -169,12 +170,14 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       size='large'
       header={header}
     >
-      <Lineup
-        emptyElement={<EmptyFeed />}
-        endOfLineup={<EndOfLineup />}
-        {...feedLineupProps}
-        {...mainLineupProps}
-      />
+      <Flex w='100%' css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}>
+        <Lineup
+          emptyElement={<EmptyFeed />}
+          endOfLineup={<EndOfLineup />}
+          {...feedLineupProps}
+          {...mainLineupProps}
+        />
+      </Flex>
     </Page>
   )
 }

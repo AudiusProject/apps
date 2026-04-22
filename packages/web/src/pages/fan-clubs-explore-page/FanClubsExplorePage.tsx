@@ -29,6 +29,7 @@ import {
 import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { usePortal } from 'hooks/usePortal'
@@ -101,6 +102,7 @@ const DesktopFanClubsExplorePage = () => {
   )
   const hasExistingFanClub = !!createdCoin
   const existingClubTicker = createdCoin?.ticker ?? null
+  const condensedHeaderControlHeightPx = spacing.unit8 + 2
   const canViewExistingClub =
     hasExistingFanClub &&
     existingClubTicker !== null &&
@@ -190,7 +192,7 @@ const DesktopFanClubsExplorePage = () => {
           gap='3xl'
           alignItems='stretch'
           css={{
-            minWidth: 0,
+            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
             width: '100%',
             maxWidth: NORMAL_WIDTH,
             paddingBottom: launchCtaReserveY
@@ -200,7 +202,7 @@ const DesktopFanClubsExplorePage = () => {
             direction='column'
             w='100%'
             css={{
-              minWidth: 332,
+              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
               overflow: 'hidden',
               boxShadow:
                 '0px 0px 4px 0px rgba(0, 0, 0, 0.04), 0px 4px 8px 0px rgba(0, 0, 0, 0.06)'
@@ -304,6 +306,11 @@ const DesktopFanClubsExplorePage = () => {
               <Button
                 variant='secondary'
                 size='small'
+                css={
+                  isCondensedControls
+                    ? { height: condensedHeaderControlHeightPx }
+                    : undefined
+                }
                 onClick={handleHeaderClubCta}
               >
                 {canViewExistingClub

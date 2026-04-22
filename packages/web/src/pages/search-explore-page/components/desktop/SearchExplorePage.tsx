@@ -30,6 +30,7 @@ import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import exploreHeaderLanding from 'assets/img/explore-header-landing.png'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import useTabs from 'hooks/useTabs/useTabs'
@@ -331,7 +332,7 @@ const SearchExplorePage = ({
           gap='3xl'
           alignItems='stretch'
           css={{
-            minWidth: 0,
+            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
             width: '100%',
             maxWidth: NORMAL_WIDTH
           }}
@@ -343,7 +344,7 @@ const SearchExplorePage = ({
             pv='xl'
             ph={headerHeroPaddingX}
             css={{
-              minWidth: 332,
+              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
               backgroundImage: `url(${exploreHeaderLanding})`,
               backgroundPosition: 'center',
               backgroundSize: 'cover',
@@ -395,7 +396,11 @@ const SearchExplorePage = ({
           </Paper>
 
           {/* Tabs and Filters */}
-          <Flex direction='column' gap='l' css={{ minWidth: 332 }}>
+          <Flex
+            direction='column'
+            gap='l'
+            css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}
+          >
             <Flex direction='column'>
               <Flex
                 ref={tabContainerRef}
@@ -449,7 +454,7 @@ const SearchExplorePage = ({
             direction='column'
             gap='3xl'
             css={{
-              minWidth: 332,
+              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
               overflowX: 'clip',
               overflowY: 'visible',
               display: showSearchResults ? 'none' : undefined

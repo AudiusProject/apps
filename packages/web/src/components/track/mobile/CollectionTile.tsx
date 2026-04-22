@@ -34,6 +34,8 @@ import { formatLineupTileDuration, route } from '@audius/common/utils'
 import {
   Box,
   Flex,
+  IconButton,
+  IconKebabHorizontal,
   IconVolumeLevel2 as IconVolume,
   Text
 } from '@audius/harmony'
@@ -46,6 +48,8 @@ import { useRecord, make } from 'common/store/analytics/actions'
 import { CollectionDogEar } from 'components/collection'
 import { CollectionTileStats } from 'components/collection/CollectionTileStats'
 import { TextLink, UserLink } from 'components/link'
+import { OwnProps as CollectionMenuProps } from 'components/menu/CollectionMenu'
+import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileSize } from 'components/track/types'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
@@ -409,6 +413,44 @@ export const CollectionTile = ({
     )
   }, [hasStreamAccess, collection, isOwner, clickOverflow])
 
+  const renderOverflowMenu = useCallback(() => {
+    const menu: Omit<CollectionMenuProps, 'children'> = {
+      handle: handle ?? '',
+      isFavorited: collection.has_current_user_saved,
+      isReposted: collection.has_current_user_reposted,
+      type: collection.is_album ? 'album' : 'playlist',
+      playlistId: collection.playlist_id,
+      playlistName: collection.playlist_name,
+      isPublic: !collection.is_private,
+      isOwner,
+      includeEmbed: !collection.is_private && !collection.is_stream_gated,
+      includeShare: true,
+      includeRepost: hasStreamAccess,
+      includeFavorite: hasStreamAccess,
+      includeVisitPage: true,
+      extraMenuItems: [],
+      permalink: collection.permalink || ''
+    }
+
+    return (
+      <Menu menu={menu}>
+        {(ref, triggerPopup) => (
+          <IconButton
+            ref={ref}
+            aria-label='More options'
+            icon={IconKebabHorizontal}
+            color='subdued'
+            size='l'
+            onClick={(e) => {
+              e.stopPropagation()
+              triggerPopup()
+            }}
+          />
+        )}
+      </Menu>
+    )
+  }, [collection, handle, hasStreamAccess, isOwner])
+
   const togglePlay = useCallback(() => {
     if (uploading) return
 
@@ -636,6 +678,7 @@ export const CollectionTile = ({
               toggleRepost={toggleRepost}
               onShare={onShare}
               onClickOverflow={onClickOverflow}
+              renderOverflow={renderOverflowMenu}
               onClickGatedUnlockPill={onClickGatedUnlockPill}
               isLoading={isActive && isBuffering}
               isOwner={isOwner}

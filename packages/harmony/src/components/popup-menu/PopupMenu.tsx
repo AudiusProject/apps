@@ -25,6 +25,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
       className,
       zIndex,
       containerRef,
+      portalLocation,
       anchorOrigin,
       transformOrigin,
       id,
@@ -121,6 +122,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
           title={title ?? ''}
           zIndex={zIndex}
           containerRef={containerRef}
+          portalLocation={portalLocation}
           transformOrigin={transformOrigin}
           anchorOrigin={anchorOrigin}
           className={className}

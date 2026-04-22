@@ -9,7 +9,7 @@
 
 .tableWrapper {
   width: 100%;
-  min-width: 332px;
+  min-width: 328px;
   border-radius: 8px;
   box-shadow: 0 2px 5px -2px rgba(133, 129, 153, 0.25);
   background-color: var(--harmony-white);
@@ -22,7 +22,7 @@
   flex-wrap: wrap;
   gap: var(--harmony-unit-6) var(--harmony-unit-4);
   margin-bottom: var(--harmony-unit-4);
-  min-width: 332px;
+  min-width: 328px;
 }
 
 .cardsContainer > * {

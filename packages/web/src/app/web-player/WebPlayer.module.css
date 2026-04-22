@@ -40,6 +40,7 @@
 }
 
 .mainContentWrapper {
+  position: relative;
   margin-left: var(--nav-width);
   margin-bottom: 88px;
   width: 100%;

@@ -1,6 +1,6 @@
 .pageContainer {
   user-select: none;
-  min-width: 0;
+  min-width: 328px;
 }
 
 .contentContainer {

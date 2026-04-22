@@ -170,6 +170,7 @@ const defaultColumns: TracksTableColumn[] = [
   'reposts',
   'overflowActions'
 ]
+const ALBUM_TRACK_NAME_COLUMN_WIDTH = 168
 
 export const TracksTable = ({
   disabledTrackEdit = false,
@@ -213,6 +214,9 @@ export const TracksTable = ({
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const [, setGatedModalVisibility] = useModalState('LockedContent')
+  const trackNameColumnWidth = isAlbumPage
+    ? ALBUM_TRACK_NAME_COLUMN_WIDTH
+    : COLUMN_WIDTHS.artistName
 
   // Cell Render Functions
   const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
@@ -912,8 +916,8 @@ export const TracksTable = ({
         Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        minWidth: COLUMN_WIDTHS.artistName,
-        width: COLUMN_WIDTHS.artistName,
+        minWidth: trackNameColumnWidth,
+        width: trackNameColumnWidth,
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
@@ -956,6 +960,7 @@ export const TracksTable = ({
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,
+      trackNameColumnWidth,
       renderTrackNameCell,
       renderSavedDateCell
     ]
