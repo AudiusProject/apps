@@ -120,7 +120,7 @@ export const walletMessages = {
     titleHasWallets: 'Linked Wallets ',
     titleNoWallets: 'Link External Wallet',
     count: (count: number) => `(${count}/5)`,
-    addWallet: 'Add Linked Wallet',
+    addWallet: 'Add',
     copied: 'Copied To Clipboard!',
     copy: 'Copy Address',
     remove: 'Remove Wallet',

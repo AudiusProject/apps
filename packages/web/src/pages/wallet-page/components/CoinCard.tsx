@@ -58,23 +58,9 @@ export const CoinRow = ({
 }: CoinCardProps) => {
   const { color, spacing } = useTheme()
 
-  const iconWrapperCss = {
-    width: spacing.unit16,
-    height: spacing.unit16,
-    flexShrink: 0,
-    '& > *, & > svg, & > img': {
-      width: '100% !important',
-      height: '100% !important'
-    },
-    '@container wallet (max-width: 420px)': {
-      width: spacing.unit12,
-      height: spacing.unit12
-    }
-  } as const
-
   const renderIcon = () => {
-    const inner =
-      typeof icon === 'string' ? (
+    if (typeof icon === 'string') {
+      return (
         <Artwork
           src={icon}
           hex
@@ -82,21 +68,10 @@ export const CoinRow = ({
           h={spacing.unit16}
           borderWidth={0}
         />
-      ) : (
-        icon
       )
-    return (
-      <Flex alignItems='center' justifyContent='center' css={iconWrapperCss}>
-        {inner}
-      </Flex>
-    )
+    }
+    return icon
   }
-
-  const heldValueText = !loading ? (
-    <Text variant='title' size='l' color='default'>
-      {heldValue ?? dollarValue}
-    </Text>
-  ) : null
 
   return (
     <Flex
@@ -108,35 +83,11 @@ export const CoinRow = ({
       css={{
         cursor: onClick ? 'pointer' : 'default',
         minWidth: 0,
-        gap: spacing.l,
-        '@container wallet (max-width: 420px)': {
-          gap: spacing.m
-        },
         '&:hover': onClick ? { backgroundColor: color.background.surface2 } : {}
       }}
     >
-      <Flex
-        alignItems='center'
-        css={{
-          minWidth: 0,
-          flex: 1,
-          gap: spacing.l,
-          '@container wallet (max-width: 420px)': {
-            gap: spacing.m
-          }
-        }}
-      >
-        {loading ? (
-          <Flex
-            alignItems='center'
-            justifyContent='center'
-            css={iconWrapperCss}
-          >
-            <HexagonSkeleton />
-          </Flex>
-        ) : (
-          renderIcon()
-        )}
+      <Flex alignItems='center' gap='l' css={{ minWidth: 0, flex: 1 }}>
+        {loading ? <HexagonSkeleton /> : renderIcon()}
         <Flex direction='column' gap='2xs' flex={1} css={{ minWidth: 0 }}>
           {loading ? (
             <CoinCardSkeleton />
@@ -150,7 +101,13 @@ export const CoinRow = ({
                   <Text
                     variant='title'
                     size='l'
-                    css={{ wordWrap: 'break-word' }}
+                    strength='weak'
+                    css={{
+                      wordWrap: 'break-word',
+                      '@container wallet (max-width: 420px)': {
+                        fontSize: 16
+                      }
+                    }}
                   >
                     {balance}
                   </Text>
@@ -158,8 +115,14 @@ export const CoinRow = ({
                 <Text
                   variant='title'
                   size='l'
+                  strength='weak'
                   color='subdued'
-                  css={{ wordWrap: 'break-word' }}
+                  css={{
+                    wordWrap: 'break-word',
+                    '@container wallet (max-width: 420px)': {
+                      fontSize: 16
+                    }
+                  }}
                 >
                   {noDollarSignPrefix ? symbol : `$${symbol}`}
                 </Text>
@@ -176,6 +139,7 @@ export const CoinRow = ({
                 <Text
                   variant='title'
                   size='m'
+                  strength='weak'
                   color='default'
                   css={{ wordWrap: 'break-word' }}
                 >
@@ -192,7 +156,11 @@ export const CoinRow = ({
             '@container wallet (max-width: 420px)': { display: 'none' }
           }}
         >
-          {heldValueText}
+          {!loading && (
+            <Text variant='title' size='l' strength='weak' color='default'>
+              {heldValue ?? dollarValue}
+            </Text>
+          )}
         </Box>
         {onClick ? <IconCaretRight size='l' color='subdued' /> : null}
       </Flex>

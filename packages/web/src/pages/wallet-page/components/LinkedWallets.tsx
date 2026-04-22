@@ -190,12 +190,24 @@ const WalletEmptyState = ({
   isPending: boolean
 }) => {
   return (
-    <Flex column pv='m' ph='l' w='100%' gap='l'>
+    <Flex
+      pv='m'
+      ph='l'
+      w='100%'
+      gap='l'
+      alignItems='center'
+      justifyContent='space-between'
+      css={{
+        '@container wallet (max-width: 420px)': {
+          flexDirection: 'column',
+          alignItems: 'stretch'
+        }
+      }}
+    >
       <Text variant='body' size='m' color='subdued'>
         {walletMessages.linkedWallets.linkWallet}
       </Text>
       <Button
-        fullWidth
         variant='secondary'
         size='small'
         onClick={() => {
@@ -203,6 +215,10 @@ const WalletEmptyState = ({
         }}
         isLoading={isPending}
         disabled={isPending}
+        css={{
+          flexShrink: 0,
+          '@container wallet (max-width: 420px)': { width: '100%' }
+        }}
       >
         {walletMessages.linkedWallets.addWallet}
       </Button>

@@ -49,13 +49,14 @@ const DesktopChangeIndicator = ({
   return (
     <Flex gap='s' alignItems='center'>
       <Box
-        w='unit12'
-        h='unit12'
         css={css({
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          width: 'clamp(32px, 8cqi, 48px)',
+          height: 'clamp(32px, 8cqi, 48px)',
+          flexShrink: 0
         })}
       >
         <Box
@@ -73,17 +74,27 @@ const DesktopChangeIndicator = ({
         <IconArrowRight
           css={css({
             position: 'relative',
-            transform: `rotate(${rotation}deg)`
+            transform: `rotate(${rotation}deg)`,
+            width: 'clamp(16px, 4cqi, 24px)',
+            height: 'clamp(16px, 4cqi, 24px)'
           })}
-          size='l'
           color={changeColor}
         />
       </Box>
-      <Flex column gap='2xs'>
-        <Text variant='title' size='l'>
+      <Flex column gap='2xs' css={{ minWidth: 0 }}>
+        <Text
+          variant='title'
+          size='l'
+          css={{ fontSize: 'clamp(14px, 3.2cqi, 18px)' }}
+        >
           {messages.changeLabel}
         </Text>
-        <Text variant='body' size='l' color={changeColor}>
+        <Text
+          variant='body'
+          size='l'
+          color={changeColor}
+          css={{ fontSize: 'clamp(13px, 3cqi, 18px)' }}
+        >
           {formatCurrency(Math.abs(changeAmount))} (
           {formatPercentage(Math.abs(changePercentage))})
         </Text>
@@ -210,20 +221,7 @@ const AccountBalanceContent = () => {
           <Text variant='heading' size={isMobile ? 's' : 'm'} color='default'>
             {messages.title}
           </Text>
-          <Text
-            variant='display'
-            size={isMobile ? 's' : 'm'}
-            css={
-              isMobile
-                ? undefined
-                : {
-                    '@container wallet (max-width: 640px)': {
-                      fontSize: 'clamp(28px, 9cqi, 48px)',
-                      lineHeight: 1.1
-                    }
-                  }
-            }
-          >
+          <Text variant='display' size={isMobile ? 's' : 'm'}>
             {formatCurrency(0, 2)}
           </Text>
         </Flex>
@@ -265,21 +263,12 @@ const AccountBalanceContent = () => {
             }
           }}
         >
-          <Flex column gap='s'>
+          <Flex column gap='s' css={{ minWidth: 0 }}>
             <Text variant='heading' size='m' color='default'>
               {messages.title}
             </Text>
             {changeStats.balance !== null ? (
-              <Text
-                variant='display'
-                size='m'
-                css={{
-                  '@container wallet (max-width: 640px)': {
-                    fontSize: 'clamp(28px, 9cqi, 48px)',
-                    lineHeight: 1.1
-                  }
-                }}
-              >
+              <Text variant='display' size='m'>
                 {formatCurrency(changeStats.balance, 2)}
               </Text>
             ) : null}
