@@ -25,7 +25,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
   const headerContainerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className={styles.headerContainer}>
+    <div ref={headerContainerRef} className={styles.headerContainer}>
       <Frosted contentPaddingInline={headerContentPaddingInline}>
         {cloneElement(header as any, {
           headerContainerRef,

@@ -11,10 +11,13 @@
   margin-right: var(--harmony-unit-8);
   padding: var(--harmony-unit-6);
 
+  border: 1px solid var(--harmony-border-default);
   border-radius: var(--harmony-unit-2);
   box-shadow: var(--box-shadow-near);
   background-color: var(--harmony-white);
   text-align: start;
+
+  container-type: inline-size;
 }
 
 .header {
@@ -25,12 +28,12 @@
 
 .title {
   font-weight: var(--harmony-font-bold);
-  font-size: var(--harmony-font-2xl);
+  font-size: clamp(var(--harmony-font-l), 2.5cqi + 14px, var(--harmony-font-2xl));
   line-height: 130%;
 }
 
 .subtitle {
   font-weight: var(--harmony-font-medium);
-  font-size: var(--harmony-font-l);
+  font-size: clamp(var(--harmony-font-s), 1.5cqi + 11px, var(--harmony-font-l));
   line-height: 130%;
 }

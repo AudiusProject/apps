@@ -30,14 +30,18 @@
   left: 0;
   right: 0;
   z-index: 13;
+  border-bottom: 1px solid var(--harmony-n-100);
 }
 
+/* Pull up overlaps scrollbar; negative margin cancels the 5px flow box so the header border sits flush. */
 .headerBoxShadow {
   height: 5px;
   width: 100%;
   box-shadow: var(--box-shadow-mid);
   position: relative;
   top: -5px;
+  margin-bottom: -5px;
+  pointer-events: none;
 }
 
 .searchWrapper {

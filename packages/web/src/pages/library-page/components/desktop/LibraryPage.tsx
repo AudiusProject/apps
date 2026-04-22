@@ -257,6 +257,7 @@ const LibraryPage = () => {
         <TracksTable
           columns={tableColumns}
           data={dataSource}
+          wrapperClassName={styles.libraryTrackTableWrapper}
           trackActionsHeader={trackTableHeaderFilter}
           defaultSorter={dateSorter('dateSaved')}
           fetchMore={fetchMoreTracks}

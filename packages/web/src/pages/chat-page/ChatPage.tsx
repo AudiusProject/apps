@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useCanSendMessage } from '@audius/common/hooks'
+import { Status } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
@@ -24,7 +25,7 @@ import { CreateChatPrompt } from './components/CreateChatPrompt'
 import { SkeletonChatPage as MobileChatPage } from './components/mobile/SkeletonChatPage'
 
 const { fetchPermissions } = chatActions
-const { getChat } = chatSelectors
+const { getChat, getChats, getChatsStatus } = chatSelectors
 
 const messages = {
   messages: 'Messages'
@@ -54,6 +55,14 @@ export const ChatPage = () => {
     NARROW_LAYOUT_THRESHOLD_PX
   )
   const messagesRef = useRef<HTMLDivElement>(null)
+
+  const chats = useSelector(getChats)
+  const chatsStatus = useSelector(getChatsStatus)
+  // Only collapse the sidebar once we know for sure the account has no chats.
+  // During LOADING / IDLE we keep the sidebar visible so the skeleton loader
+  // still renders and we don't flash a layout shift.
+  const hideChatList =
+    chatsStatus === Status.SUCCESS && (chats?.length ?? 0) === 0
 
   const chatListClassName = cn(styles.chatList, {
     [styles.chatListCompact]: isNarrowLayout
@@ -125,14 +134,16 @@ export const ChatPage = () => {
       }
     >
       <div className={styles.layout} ref={layoutRef}>
-        <div className={chatListClassName}>
-          <ChatList
-            className={chatListClassName}
-            currentChatId={currentChatId}
-            isCompact={isNarrowLayout}
-            onChatClicked={handleChatClicked}
-          />
-        </div>
+        {hideChatList ? null : (
+          <div className={chatListClassName}>
+            <ChatList
+              className={chatListClassName}
+              currentChatId={currentChatId}
+              isCompact={isNarrowLayout}
+              onChatClicked={handleChatClicked}
+            />
+          </div>
+        )}
         <div
           className={cn(styles.chatArea, {
             [styles.chatAreaNarrow]: isNarrowLayout
@@ -162,7 +173,7 @@ export const ChatPage = () => {
               ) : null}
             </>
           ) : (
-            <CreateChatPrompt />
+            <CreateChatPrompt hasChats={!hideChatList} />
           )}
         </div>
       </div>

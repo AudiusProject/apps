@@ -61,7 +61,7 @@
 
 .chatArea {
   flex: 1;
-  min-width: 284px;
+  min-width: 232px;
   min-height: 0;
   display: flex;
   flex-direction: column;

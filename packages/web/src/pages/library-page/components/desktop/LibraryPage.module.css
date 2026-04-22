@@ -40,6 +40,10 @@
   overflow: hidden;
 }
 
+.libraryTrackTableWrapper {
+  border: 1px solid var(--harmony-n-100);
+}
+
 /* Albums */
 .cardsContainer {
   display: flex;

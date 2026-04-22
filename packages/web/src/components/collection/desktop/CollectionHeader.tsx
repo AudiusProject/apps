@@ -158,6 +158,10 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
                     size='xl'
                     className={cn(styles.titleHeader)}
                     textAlign='left'
+                    css={{
+                      fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
+                      lineHeight: 1.33
+                    }}
                   >
                     {title}
                   </Text>

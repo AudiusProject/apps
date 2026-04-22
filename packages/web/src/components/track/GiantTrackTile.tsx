@@ -502,6 +502,7 @@ export const GiantTrackTile = ({
       w='100%'
       justifyContent='center'
       mh='auto'
+      border='default'
       css={{ maxWidth: 1080, textAlign: 'left', containerType: 'inline-size' }}
     >
       <TrackDogEar trackId={trackId} borderOffset={0} />
@@ -530,6 +531,10 @@ export const GiantTrackTile = ({
                   variant='heading'
                   size='xl'
                   className={cn(fadeIn, styles.titleHeader)}
+                  css={{
+                    fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
+                    lineHeight: 1.33
+                  }}
                 >
                   {trackTitle}
                 </Text>

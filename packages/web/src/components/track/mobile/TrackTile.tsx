@@ -423,6 +423,7 @@ export const TrackTile = ({
           />
           <Flex
             direction='column'
+            justifyContent='center'
             gap='xs'
             pv='xs'
             mr='m'

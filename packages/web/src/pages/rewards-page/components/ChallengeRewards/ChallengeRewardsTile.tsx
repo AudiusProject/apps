@@ -240,7 +240,8 @@ export const ChallengeRewardsTile = ({
         <Flex
           css={{
             position: 'relative',
-            marginBottom: spacing.l,
+            /* Room before reward tiles; title ↔ subtitle is gap='s' on the inner flex */
+            marginBottom: spacing['3xl'],
             width: '100%',
             paddingTop: isMobile ? spacing.m : 0
           }}
@@ -249,7 +250,13 @@ export const ChallengeRewardsTile = ({
             <Text variant='display' size='s' className={wm(styles.title)}>
               {messages.title}
             </Text>
-            <Text variant='body' strength='strong' size='l' textAlign='center'>
+            <Text
+              variant='body'
+              strength='strong'
+              size='l'
+              textAlign='center'
+              className={wm(styles.tileSubtitle)}
+            >
               {messages.description1}
             </Text>
           </Flex>

@@ -313,7 +313,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       fromOpacity={1}
       scrollableSearch
     >
-      <Paper column mb='unit-10'>
+      <Paper column mb='unit-10' border='default'>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
         {!pageLoading && isEmpty ? (
