@@ -37,7 +37,12 @@ export const ChatUser = ({
         [styles.nonInteractive]: disableNavigation
       })}
     >
-      <ProfilePicture user={user} className={styles.profilePicture} />
+      <ProfilePicture
+        user={user}
+        className={styles.profilePicture}
+        disableClick={disableNavigation}
+        disablePopover={disableNavigation}
+      />
       <div className={cn(styles.text, textClassName)}>
         <div className={styles.nameAndBadge}>
           {disableNavigation ? (
