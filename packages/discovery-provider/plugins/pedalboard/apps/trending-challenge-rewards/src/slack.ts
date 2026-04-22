@@ -5,7 +5,7 @@ import { Err, Ok, Result } from 'ts-results'
 import { SharedData } from './config'
 import { onDisburse } from './rewards'
 import { ChallengeDisbursementUserbankFriendly } from './queries'
-import { announceTopFiveTrending } from './trending'
+import { announceTopTrending } from './trending'
 import { isValidDate } from './utils'
 
 export const establishSlackConnection = async (app: App<SharedData>) => {
@@ -80,9 +80,9 @@ const trending = async (
   await ack()
   const text = command.text
   if (text !== undefined && text.trim() !== '')
-    await announceTopFiveTrending(app, text)
+    await announceTopTrending(app, text)
   else {
-    await announceTopFiveTrending(app)
+    await announceTopTrending(app)
   }
 }
 

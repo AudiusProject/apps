@@ -3,14 +3,14 @@ import { App } from '@pedalboard/basekit'
 import { SharedData, initSharedData } from './config'
 import { disburseTrendingRewards } from './rewards'
 import { establishSlackConnection } from './slack'
-import { announceTopFiveTrending } from './trending'
+import { announceTopTrending } from './trending'
 
 const onDemandRun = async (app: App<SharedData>) => {
   // Run on demand only if runNow is true
   const { runNow } = app.viewAppData()
   if (runNow) {
     // Uncomment to also announce to slack
-    await announceTopFiveTrending(app)
+    await announceTopTrending(app)
     await disburseTrendingRewards(app)
   }
 }
@@ -35,7 +35,7 @@ cron.schedule(
         data.dryRun = false
         return data
       })
-      announceTopFiveTrending(appData).catch((e) =>
+      announceTopTrending(appData).catch((e) =>
         console.error('Announcement failed: ', e)
       )
       disburseTrendingRewards(appData).catch((e) =>

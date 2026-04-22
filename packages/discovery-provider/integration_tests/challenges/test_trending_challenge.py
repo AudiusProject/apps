@@ -8,7 +8,6 @@ from integration_tests.utils import populate_mock_db
 from src.challenges.challenge_event_bus import ChallengeEvent, ChallengeEventBus
 from src.challenges.trending_challenge import (
     should_trending_challenge_update,
-    trending_playlist_challenge_manager,
     trending_track_challenge_manager,
     trending_underground_track_challenge_manager,
 )
@@ -124,111 +123,6 @@ def test_trending_challenge_job(app):
             {"track_id": 14, "owner_id": 4},
             {"track_id": 15, "owner_id": 5},
         ],
-        "playlists": [
-            {
-                "playlist_id": 1,
-                "playlist_owner_id": 1,
-                "playlist_name": "name",
-                "description": "description",
-                "playlist_contents": {
-                    "track_ids": [
-                        {"track": 1, "time": 1},
-                        {"track": 2, "time": 2},
-                        {"track": 3, "time": 3},
-                        {"track": 4, "time": 4},
-                        {"track": 5, "time": 5},
-                    ]
-                },
-            },
-            {
-                "playlist_id": 2,
-                "playlist_owner_id": 2,
-                "playlist_name": "name",
-                "description": "description",
-                "playlist_contents": {
-                    "track_ids": [
-                        {"track": 1, "time": 1},
-                        {"track": 2, "time": 2},
-                        {"track": 3, "time": 3},
-                        {"track": 4, "time": 4},
-                        {"track": 5, "time": 5},
-                    ]
-                },
-            },
-            # ineligible playlist
-            {
-                "playlist_id": 3,
-                "is_album": True,
-                "playlist_owner_id": 3,
-                "playlist_name": "name",
-                "description": "description",
-                "playlist_contents": {
-                    "track_ids": [
-                        {"track": 1, "time": 1},
-                        {"track": 2, "time": 2},
-                        {"track": 3, "time": 3},
-                        {"track": 4, "time": 4},
-                        {"track": 5, "time": 5},
-                    ]
-                },
-            },
-            # ineligible playlist
-            {
-                "playlist_id": 4,
-                "playlist_owner_id": 4,
-                "playlist_name": "name",
-                "description": "description",
-                "playlist_contents": {
-                    "track_ids": [
-                        {"track": 1, "time": 1},
-                        {"track": 2, "time": 2},
-                        {"track": 3, "time": 3},
-                        {"track": 4, "time": 4},
-                    ]
-                },
-            },
-            {
-                "playlist_id": 5,
-                "playlist_owner_id": 5,
-                "playlist_name": "name",
-                "description": "description",
-                "playlist_contents": {
-                    "track_ids": [
-                        {"track": 1, "time": 1},
-                        {"track": 2, "time": 2},
-                        {"track": 3, "time": 3},
-                        {"track": 4, "time": 4},
-                        {"track": 5, "time": 5},
-                    ]
-                },
-            },
-        ],
-        "playlist_tracks": [
-            {"playlist_id": 1, "track_id": 1, "is_removed": False},
-            {"playlist_id": 1, "track_id": 2, "is_removed": False},
-            {"playlist_id": 1, "track_id": 3, "is_removed": False},
-            {"playlist_id": 1, "track_id": 4, "is_removed": False},
-            {"playlist_id": 1, "track_id": 5, "is_removed": False},
-            {"playlist_id": 2, "track_id": 1, "is_removed": False},
-            {"playlist_id": 2, "track_id": 2, "is_removed": False},
-            {"playlist_id": 2, "track_id": 3, "is_removed": False},
-            {"playlist_id": 2, "track_id": 4, "is_removed": False},
-            {"playlist_id": 2, "track_id": 5, "is_removed": False},
-            {"playlist_id": 3, "track_id": 1, "is_removed": False},
-            {"playlist_id": 3, "track_id": 2, "is_removed": False},
-            {"playlist_id": 3, "track_id": 3, "is_removed": False},
-            {"playlist_id": 3, "track_id": 4, "is_removed": False},
-            {"playlist_id": 3, "track_id": 5, "is_removed": False},
-            {"playlist_id": 4, "track_id": 1, "is_removed": False},
-            {"playlist_id": 4, "track_id": 2, "is_removed": False},
-            {"playlist_id": 4, "track_id": 3, "is_removed": False},
-            {"playlist_id": 4, "track_id": 4, "is_removed": False},
-            {"playlist_id": 5, "track_id": 1, "is_removed": False},
-            {"playlist_id": 5, "track_id": 2, "is_removed": False},
-            {"playlist_id": 5, "track_id": 3, "is_removed": False},
-            {"playlist_id": 5, "track_id": 4, "is_removed": False},
-            {"playlist_id": 5, "track_id": 5, "is_removed": False},
-        ],
         "users": [
             {"user_id": 1, "handle": "user1"},
             {"user_id": 2, "handle": "user2"},
@@ -280,9 +174,7 @@ def test_trending_challenge_job(app):
         ],
         "reposts": [
             {"repost_item_id": 1, "repost_type": "track", "user_id": 2},
-            {"repost_item_id": 1, "repost_type": "playlist", "user_id": 2},
             {"repost_item_id": 3, "repost_type": "track", "user_id": 3},
-            {"repost_item_id": 1, "repost_type": "playlist", "user_id": 3},
             {"repost_item_id": 4, "repost_type": "track", "user_id": 1},
             {"repost_item_id": 5, "repost_type": "track", "user_id": 1},
             {"repost_item_id": 6, "repost_type": "track", "user_id": 1},
@@ -293,11 +185,6 @@ def test_trending_challenge_job(app):
             {"save_item_id": 4, "save_type": "track", "user_id": 1},
             {"save_item_id": 5, "save_type": "track", "user_id": 1},
             {"save_item_id": 6, "save_type": "track", "user_id": 1},
-            {"save_item_id": 1, "save_type": "playlist", "user_id": 4},
-            {"save_item_id": 2, "save_type": "playlist", "user_id": 3},
-            {"save_item_id": 3, "save_type": "playlist", "user_id": 2},
-            {"save_item_id": 4, "save_type": "playlist", "user_id": 1},
-            {"save_item_id": 5, "save_type": "playlist", "user_id": 2},
         ],
         "plays": [{"item_id": 1} for _ in range(55)]
         + [{"item_id": 2} for _ in range(60)]
@@ -323,9 +210,6 @@ def test_trending_challenge_job(app):
     bus.register_listener(
         ChallengeEvent.trending_track, trending_track_challenge_manager
     )
-    bus.register_listener(
-        ChallengeEvent.trending_playlist, trending_playlist_challenge_manager
-    )
 
     trending_date = datetime.fromisoformat("2021-08-20")
 
@@ -336,21 +220,11 @@ def test_trending_challenge_job(app):
             TrendingType.TRACKS
         ).keys()
 
-        trending_playlist_versions = trending_strategy_factory.get_versions_for_type(
-            TrendingType.PLAYLISTS
-        ).keys()
-
         for version in trending_track_versions:
             strategy = trending_strategy_factory.get_strategy(
                 TrendingType.TRACKS, version
             )
             strategy.update_track_score_query(session)
-
-        for version in trending_playlist_versions:
-            strategy = trending_strategy_factory.get_strategy(
-                TrendingType.PLAYLISTS, version
-            )
-            strategy.update_playlist_score_query(session)
 
         session.commit()
         core = MockCore()
@@ -359,7 +233,6 @@ def test_trending_challenge_job(app):
     with db.scoped_session() as session:
         session.query(Challenge).filter(
             or_(
-                Challenge.id == "tp",
                 Challenge.id == "tt",
                 Challenge.id == "tut",
             )
@@ -371,28 +244,30 @@ def test_trending_challenge_job(app):
             .filter(TrendingResult.type == str(TrendingType.TRACKS))
             .all()
         )
-        assert len(trending_tracks) == 5
+        assert len(trending_tracks) == 10
 
         user_trending_tracks_challenges = (
             session.query(UserChallenge)
             .filter(UserChallenge.challenge_id == "tt")
             .all()
         )
-        assert len(user_trending_tracks_challenges) == 5
-        ranks = {
-            "2021-08-20:1",
-            "2021-08-20:2",
-            "2021-08-20:3",
-            "2021-08-20:4",
-            "2021-08-20:5",
+        assert len(user_trending_tracks_challenges) == 10
+        # Ranks 1-5 earn 1000 $AUDIO each; ranks 6-10 earn 100 $AUDIO each.
+        expected_amount_by_rank = {
+            1: 1000,
+            2: 1000,
+            3: 1000,
+            4: 1000,
+            5: 1000,
+            6: 100,
+            7: 100,
+            8: 100,
+            9: 100,
+            10: 100,
         }
+        ranks = {f"2021-08-20:{rank}" for rank in expected_amount_by_rank}
         for challenge in user_trending_tracks_challenges:
             assert challenge.specifier in ranks
+            rank = int(challenge.specifier.split(":")[1])
+            assert int(challenge.amount) == expected_amount_by_rank[rank]
             ranks.remove(challenge.specifier)
-
-        trending_playlists = (
-            session.query(TrendingResult)
-            .filter(TrendingResult.type == str(TrendingType.PLAYLISTS))
-            .all()
-        )
-        assert len(trending_playlists) == 3

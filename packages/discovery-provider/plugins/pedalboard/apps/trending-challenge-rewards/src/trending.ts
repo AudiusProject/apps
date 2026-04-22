@@ -16,7 +16,7 @@ type TrendingEntry = {
   rank: number
 }
 
-export const announceTopFiveTrending = async (
+export const announceTopTrending = async (
   app: App<SharedData>,
   maybeWeek?: string
 ) => {
@@ -24,7 +24,7 @@ export const announceTopFiveTrending = async (
 
   console.log('getting top trending for week ', week)
 
-  const [tracks, undergroundTracks] = await queryTopFiveTrending(
+  const [tracks, undergroundTracks] = await queryTopTrending(
     discoveryDb,
     week
   )
@@ -46,12 +46,12 @@ export const announceTopFiveTrending = async (
   console.log('underground entries', JSON.stringify(undergroundEntries))
 
   const trendingTracksTweet = composeTweet(
-    'Top 5 Trending Tracks 🔥',
+    'Top 10 Trending Tracks 🔥',
     week,
     trackEntries
   )
   const trendingUndergroundTweet = composeTweet(
-    'Top 5 Trending Underground 🎵',
+    'Top 10 Trending Underground 🎵',
     week,
     undergroundEntries
   )
@@ -65,7 +65,7 @@ export const announceTopFiveTrending = async (
   )
 }
 
-export const queryTopFiveTrending = async (
+export const queryTopTrending = async (
   discoveryDb: Knex,
   week: string
 ): Promise<TrendingResults[][]> => {
@@ -73,7 +73,7 @@ export const queryTopFiveTrending = async (
     .where('type', '=', TrendingTypes.Tracks)
     .where('week', '=', week)
     .orderBy('rank')
-    .limit(5)
+    .limit(10)
 
   const undergroundTracks = await discoveryDb<TrendingResults>(
     Table.TrendingResults
@@ -81,7 +81,7 @@ export const queryTopFiveTrending = async (
     .where('type', '=', TrendingTypes.UndergroundTracks)
     .where('week', '=', week)
     .orderBy('rank')
-    .limit(5)
+    .limit(10)
 
   return [tracks, undergroundTracks]
 }
