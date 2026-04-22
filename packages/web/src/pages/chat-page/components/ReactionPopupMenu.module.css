@@ -15,6 +15,8 @@
   cursor: pointer;
   z-index: 1;
   animation: reactionPopupFadeIn 180ms ease-out;
+  --reaction-popup-scale: 1;
+  --reaction-popup-shift-x: 0px;
 }
 
 /* Shrinks each emoji's hover/click hitbox while leaving the Lottie visuals
@@ -30,7 +32,16 @@
   overflow: visible;
 }
 
-.reactionButton > div {
+.popup.noSelectedReaction .reactionButton {
+  opacity: 0.5;
+}
+
+.popup.noSelectedReaction .reactionButton:hover,
+.popup.noSelectedReaction .reactionButton:active {
+  opacity: 1;
+}
+
+.reactionButton>div {
   pointer-events: none;
 }
 
@@ -38,6 +49,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -51,6 +63,8 @@
   right: 100%;
   margin-top: calc(-1 * var(--harmony-unit-3));
   margin-right: calc(-1 * var(--harmony-unit-3));
+  transform-origin: top right;
+  transform: scale(var(--reaction-popup-scale));
 }
 
 /* Popup extends to the right of the trigger button, tucking its top-left
@@ -61,4 +75,15 @@
   left: 100%;
   margin-top: calc(-1 * var(--harmony-unit-3));
   margin-left: calc(-1 * var(--harmony-unit-3));
+  transform-origin: top left;
+  transform: scale(var(--reaction-popup-scale));
+}
+
+/* Fallback when neither side has room: place below trigger, centered by
+ * default, then nudge horizontally to stay inside clipping bounds. */
+.popup.openBelow {
+  top: calc(100% + var(--harmony-unit-1));
+  left: 50%;
+  transform-origin: top center;
+  transform: translateX(calc(-50% + var(--reaction-popup-shift-x))) scale(var(--reaction-popup-scale));
 }
