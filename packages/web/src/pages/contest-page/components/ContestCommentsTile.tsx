@@ -15,10 +15,10 @@ import {
   Avatar as HarmonyAvatar,
   Box,
   Button,
+  Divider,
   Flex,
   IconCamera,
   IconHeart,
-  IconMessage,
   LoadingSpinner,
   Paper,
   PlainButton,
@@ -182,147 +182,156 @@ export const ContestCommentsTile = ({
   })
 
   return (
-    <Flex direction='column' gap='s' w='100%' alignItems='flex-start'>
-      <Flex direction='row' w='100%' justifyContent='space-between'>
-        <Flex gap='s' alignItems='center'>
-          <IconMessage color='default' />
-          <Text variant='title' size='l'>
-            {heading}
-            {filteredItems.length > 0 ? (
-              <Text color='subdued'>&nbsp;({filteredItems.length})</Text>
-            ) : null}
+    <Paper
+      w='100%'
+      direction='column'
+      gap='m'
+      p='l'
+      borderRadius='m'
+      border='default'
+      backgroundColor='white'
+      shadow='flat'
+    >
+      {/* Title line — "COMMENTS (N)" uppercase label, mirrors FOLLOWERS
+          and STEMS & DOWNLOADS treatment. No IconMessage: the Figma
+          right-column tile uses just the label. */}
+      <Flex gap='xs' alignItems='baseline'>
+        <Text variant='label' size='m' color='subdued'>
+          {heading.toUpperCase()}
+        </Text>
+        {filteredItems.length > 0 ? (
+          <Text variant='label' size='m' color='subdued'>
+            ({filteredItems.length})
           </Text>
-        </Flex>
+        ) : null}
       </Flex>
 
-      <Paper
-        w='100%'
-        direction='column'
-        gap='l'
-        p='l'
-        border='default'
-        backgroundColor='white'
-      >
-        {/* Composer */}
-        {showComposer ? (
-          <Flex direction='column' gap='m' w='100%'>
-            <Flex w='100%' gap='m' alignItems='center'>
-              <HarmonyAvatar
-                size='auto'
-                isLoading={false}
-                src={profileImage}
-                css={{ width: 44, height: 44, flexShrink: 0 }}
+      {/* Composer */}
+      {showComposer ? (
+        <Flex direction='column' gap='m' w='100%'>
+          <Flex w='100%' gap='s' alignItems='center'>
+            <HarmonyAvatar
+              size='auto'
+              isLoading={false}
+              src={profileImage}
+              css={{ width: 32, height: 32, flexShrink: 0 }}
+            />
+            <Box css={{ flex: 1, minWidth: 0 }}>
+              {/* ComposerInput renders its own send affordance + Enter
+                  submit, so no external send button is needed. Matches
+                  the track-page CommentForm. */}
+              <ComposerInput
+                messageId={messageId}
+                entityId={eventId}
+                entityType={EntityType.EVENT}
+                placeholder={composerPlaceholder}
+                maxLength={400}
+                maxMentions={10}
+                onSubmit={(value) => handleComposerSubmit(value)}
+                disabled={isPosting}
+                blurOnSubmit
               />
-              <Box css={{ flex: 1, minWidth: 0 }}>
-                {/* ComposerInput renders its own send affordance + Enter
-                    submit, so no external send button is needed. Matches
-                    the track-page CommentForm. */}
-                <ComposerInput
-                  messageId={messageId}
-                  entityId={eventId}
-                  entityType={EntityType.EVENT}
-                  placeholder={composerPlaceholder}
-                  maxLength={400}
-                  maxMentions={10}
-                  onSubmit={(value) => handleComposerSubmit(value)}
-                  disabled={isPosting}
-                  blurOnSubmit
+            </Box>
+          </Flex>
+
+          {showAttachVideo ? (
+            <Flex direction='column' gap='s' w='100%'>
+              <PlainButton
+                type='button'
+                variant='subdued'
+                iconLeft={IconCamera}
+                onClick={() => setVideoUrlOpen((v) => !v)}
+                css={{ alignSelf: 'flex-start' }}
+              >
+                {messages.attachVideo}
+              </PlainButton>
+              {videoUrlOpen ? (
+                <TextInput
+                  label=''
+                  value={videoUrlDraft}
+                  onChange={(e) => setVideoUrlDraft(e.target.value)}
+                  placeholder={messages.videoUrlPlaceholder}
                 />
-              </Box>
+              ) : null}
             </Flex>
+          ) : null}
+        </Flex>
+      ) : currentUserId ? null : (
+        <Box p='m'>
+          <Text variant='body' size='s' color='subdued'>
+            {messages.signInToComment}
+          </Text>
+        </Box>
+      )}
 
-            {showAttachVideo ? (
-              <Flex direction='column' gap='s' w='100%'>
-                <PlainButton
-                  type='button'
-                  variant='subdued'
-                  iconLeft={IconCamera}
-                  onClick={() => setVideoUrlOpen((v) => !v)}
-                  css={{ alignSelf: 'flex-start' }}
-                >
-                  {messages.attachVideo}
-                </PlainButton>
-                {videoUrlOpen ? (
-                  <TextInput
-                    label=''
-                    value={videoUrlDraft}
-                    onChange={(e) => setVideoUrlDraft(e.target.value)}
-                    placeholder={messages.videoUrlPlaceholder}
-                  />
-                ) : null}
-              </Flex>
-            ) : null}
-          </Flex>
-        ) : currentUserId ? null : (
-          <Box p='m'>
-            <Text variant='body' size='s' color='subdued'>
-              {messages.signInToComment}
-            </Text>
-          </Box>
-        )}
+      {/* Divider between composer and feed — matches the thin
+          separator in Figma node 2857-99394. Only shown when there's
+          a composer above; otherwise the feed runs straight under the
+          title. */}
+      {showComposer ? <Divider /> : null}
 
-        {/* Sort pills (comments panel only) */}
-        {showSortTabs ? (
-          <Flex gap='s'>
-            <SelectablePill
-              type='button'
-              size='small'
-              isSelected={sortMethod === 'top'}
-              label={messages.sortTop}
-              onClick={() => setSortMethod('top')}
+      {/* Sort pills (comments panel only, and only once there are items
+          worth sorting — Figma empty-state has no pills). */}
+      {showSortTabs && filteredItems.length > 0 ? (
+        <Flex gap='s'>
+          <SelectablePill
+            type='button'
+            size='small'
+            isSelected={sortMethod === 'top'}
+            label={messages.sortTop}
+            onClick={() => setSortMethod('top')}
+          />
+          <SelectablePill
+            type='button'
+            size='small'
+            isSelected={sortMethod === 'newest'}
+            label={messages.sortNewest}
+            onClick={() => setSortMethod('newest')}
+          />
+        </Flex>
+      ) : null}
+
+      {/* Feed */}
+      {isPending ? (
+        <Flex justifyContent='center' p='xl'>
+          <LoadingSpinner />
+        </Flex>
+      ) : !filteredItems.length ? (
+        <Flex direction='column' alignItems='center' gap='xs' pv='2xl' ph='l'>
+          <Text variant='body' size='m' color='default'>
+            {messages.empty}
+          </Text>
+          <Text variant='body' size='s' color='subdued'>
+            {mode === 'updates'
+              ? messages.emptyUpdatesSub
+              : messages.emptyCommentsSub}
+          </Text>
+        </Flex>
+      ) : (
+        <Flex direction='column' gap='l' w='100%'>
+          {filteredItems.map(({ commentId }) => (
+            <ContestCommentRow
+              key={commentId}
+              commentId={commentId}
+              eventOwnerUserId={eventOwnerUserId}
+              mode={mode}
             />
-            <SelectablePill
-              type='button'
-              size='small'
-              isSelected={sortMethod === 'newest'}
-              label={messages.sortNewest}
-              onClick={() => setSortMethod('newest')}
-            />
-          </Flex>
-        ) : null}
-
-        {/* Feed */}
-        {isPending ? (
-          <Flex justifyContent='center' p='xl'>
-            <LoadingSpinner />
-          </Flex>
-        ) : !filteredItems.length ? (
-          <Flex direction='column' alignItems='center' gap='xs' p='xl'>
-            <Text variant='body' size='m' color='default' strength='strong'>
-              {messages.empty}
-            </Text>
-            <Text variant='body' size='s' color='subdued'>
-              {mode === 'updates'
-                ? messages.emptyUpdatesSub
-                : messages.emptyCommentsSub}
-            </Text>
-          </Flex>
-        ) : (
-          <Flex direction='column' gap='l' w='100%'>
-            {filteredItems.map(({ commentId }) => (
-              <ContestCommentRow
-                key={commentId}
-                commentId={commentId}
-                eventOwnerUserId={eventOwnerUserId}
-                mode={mode}
-              />
-            ))}
-            {hasNextPage ? (
-              <Flex justifyContent='center' pt='s'>
-                <Button
-                  variant='secondary'
-                  size='small'
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                >
-                  {messages.loadMore}
-                </Button>
-              </Flex>
-            ) : null}
-          </Flex>
-        )}
-      </Paper>
-    </Flex>
+          ))}
+          {hasNextPage ? (
+            <Flex justifyContent='center' pt='s'>
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {messages.loadMore}
+              </Button>
+            </Flex>
+          ) : null}
+        </Flex>
+      )}
+    </Paper>
   )
 }
 

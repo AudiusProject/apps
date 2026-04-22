@@ -107,19 +107,23 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
       : messages.publicFree
 
   return (
-    <Flex direction='column' gap='s' w='100%'>
-      <Text variant='label' size='s' color='subdued' strength='strong'>
-        {messages.heading}
-      </Text>
-
-      <Paper
-        direction='column'
-        borderRadius='m'
-        border='default'
-        backgroundColor='white'
-        shadow='flat'
-        css={{ overflow: 'hidden' }}
-      >
+    <Paper
+      direction='column'
+      borderRadius='m'
+      border='default'
+      backgroundColor='white'
+      shadow='flat'
+      css={{ overflow: 'hidden' }}
+    >
+      {/* STEMS & DOWNLOADS label + enriched content row, both inside
+          the Paper. Label sits in the top padding slot, content below
+          with a divider between. */}
+      <Box pt='l' ph='l'>
+        <Text variant='label' size='m' color='subdued'>
+          {messages.heading}
+        </Text>
+      </Box>
+      <Flex direction='column'>
         {/* Header row: artwork + label/name. No expand affordance —
             the card is a stems summary + Download All; per-file
             granular download lives on the track page proper for now. */}
@@ -191,9 +195,8 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             </PlainButton>
           )}
         </Flex>
-
-      </Paper>
-    </Flex>
+      </Flex>
+    </Paper>
   )
 }
 

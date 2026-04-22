@@ -94,11 +94,11 @@ const COLUMN_GAP_PX = 24
 
 type ContestTab = 'details' | 'submissions'
 
-// Figma-aligned countdown: four plain columns on the page background,
-// NO dark pill wrapper. Large heading numerals on top, uppercase
-// labels beneath. Leading-zero units are subdued so the most-
-// significant non-zero unit reads first. Reference:
-// Figma node 2857-99124 (remix-contest empty-state desktop).
+// Figma-aligned countdown (node 2857-99182). Four plain columns
+// separated by thin vertical dividers. Number and label share the
+// same text color (both `default`, or both `subdued` when the unit
+// is a leading zero). Leading-zero units read as subdued so the
+// most-significant non-zero unit pulls focus.
 const CountdownTile = ({
   value,
   label,
@@ -108,7 +108,7 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  <Flex direction='column' alignItems='center' gap='xs' w={56}>
+  <Flex direction='column' alignItems='center' gap='2xs' w={56}>
     <Text
       variant='heading'
       size='l'
@@ -116,7 +116,11 @@ const CountdownTile = ({
     >
       {String(value).padStart(2, '0')}
     </Text>
-    <Text variant='label' size='xs' color='subdued' strength='strong'>
+    <Text
+      variant='label'
+      size='xs'
+      color={isSubdued ? 'subdued' : 'default'}
+    >
       {label}
     </Text>
   </Flex>
@@ -142,22 +146,25 @@ const HeaderCountdown = ({ endDate }: { endDate: string }) => {
   const minsSubdued = hoursSubdued && mins === 0
 
   return (
-    <Flex gap='xl' alignItems='center'>
+    <Flex gap='l' alignItems='center'>
       <CountdownTile
         value={days}
         label={messages.days}
         isSubdued={daysSubdued}
       />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile
         value={hours}
         label={messages.hours}
         isSubdued={hoursSubdued}
       />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile
         value={mins}
         label={messages.mins}
         isSubdued={minsSubdued}
       />
+      <Divider orientation='vertical' css={{ height: 40 }} />
       <CountdownTile value={secs} label={messages.secs} isSubdued={false} />
     </Flex>
   )
@@ -542,12 +549,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 backgroundColor='white'
                 shadow='flat'
               >
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {messages.aboutThisContest}
                 </Text>
                 <RemixContestDetailsTab trackId={trackId!} />
@@ -562,12 +564,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 backgroundColor='white'
                 shadow='flat'
               >
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
+                <Text variant='label' size='m' color='subdued'>
                   {messages.prizes}
                 </Text>
                 <RemixContestPrizesTab trackId={trackId!} />
