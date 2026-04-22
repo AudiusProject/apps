@@ -55,6 +55,12 @@ const getComputedOrigins = (
 ) => {
   if (!anchorRect || !wrapperRect) return { anchorOrigin, transformOrigin }
 
+  const flipHorizontalOrigin = (horizontal: Origin['horizontal']) => {
+    if (horizontal === 'left') return 'right'
+    if (horizontal === 'right') return 'left'
+    return horizontal
+  }
+
   // Avoid mutating caller-provided origin objects across opens.
   const computedAnchorOrigin = { ...anchorOrigin }
   const computedTransformOrigin = { ...transformOrigin }
@@ -87,14 +93,15 @@ const getComputedOrigins = (
   const overflowBottom = wrapperY + wrapperRect.height > containerHeight
   const overflowTop = wrapperY < 0
 
-  // For all overflows, flip the position
-  if (overflowRight) {
-    computedAnchorOrigin.horizontal = 'left'
-    computedTransformOrigin.horizontal = 'right'
-  }
-  if (overflowLeft) {
-    computedAnchorOrigin.horizontal = 'right'
-    computedTransformOrigin.horizontal = 'left'
+  // On horizontal overflow, mirror both origins so the popup flips direction
+  // while remaining aligned to the trigger edge.
+  if (overflowRight !== overflowLeft) {
+    computedAnchorOrigin.horizontal = flipHorizontalOrigin(
+      computedAnchorOrigin.horizontal
+    )
+    computedTransformOrigin.horizontal = flipHorizontalOrigin(
+      computedTransformOrigin.horizontal
+    )
   }
   if (overflowTop) {
     computedAnchorOrigin.vertical = 'bottom'
