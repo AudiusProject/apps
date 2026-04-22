@@ -136,7 +136,11 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
 }
 
 // -----------------------------------------------------------------------------
-// Tab bar
+// Tab bar. Matches Figma mobile node 2888-131647: title-case labels
+// (Details / Updates / Submissions / Comments), accent color + purple
+// underline on the active tab, subdued on inactive. Uses `title` variant
+// so the text renders mixed case (the `label` variant would force
+// uppercase).
 // -----------------------------------------------------------------------------
 const TabBar = ({
   active,
@@ -170,10 +174,10 @@ const TabBar = ({
             }}
           >
             <Text
-              variant='label'
+              variant='title'
               size='s'
               color={isActive ? 'accent' : 'subdued'}
-              strength='strong'
+              strength={isActive ? 'strong' : 'default'}
             >
               {t.label}
             </Text>
@@ -439,6 +443,7 @@ const ContestPage = ({
                 eventId={eventId}
                 eventOwnerUserId={contest.userId}
                 mode='updates'
+                hideHeading
               />
             </Box>
           ) : activeTab === 'submissions' ? (
