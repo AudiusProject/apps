@@ -1,6 +1,13 @@
 import { ReactNode } from 'react'
 
-import { Flex, Text, useTheme, IconCaretRight, Artwork } from '@audius/harmony'
+import {
+  Box,
+  Flex,
+  Text,
+  useTheme,
+  IconCaretRight,
+  Artwork
+} from '@audius/harmony'
 import { roundedHexClipPath } from '@audius/harmony/src/icons/SVGDefs'
 
 import Skeleton from 'components/skeleton/Skeleton'
@@ -51,9 +58,23 @@ export const CoinRow = ({
 }: CoinCardProps) => {
   const { color, spacing } = useTheme()
 
+  const iconWrapperCss = {
+    width: spacing.unit16,
+    height: spacing.unit16,
+    flexShrink: 0,
+    '& > *, & > svg, & > img': {
+      width: '100% !important',
+      height: '100% !important'
+    },
+    '@container wallet (max-width: 420px)': {
+      width: spacing.unit12,
+      height: spacing.unit12
+    }
+  } as const
+
   const renderIcon = () => {
-    if (typeof icon === 'string') {
-      return (
+    const inner =
+      typeof icon === 'string' ? (
         <Artwork
           src={icon}
           hex
@@ -61,10 +82,21 @@ export const CoinRow = ({
           h={spacing.unit16}
           borderWidth={0}
         />
+      ) : (
+        icon
       )
-    }
-    return icon
+    return (
+      <Flex alignItems='center' justifyContent='center' css={iconWrapperCss}>
+        {inner}
+      </Flex>
+    )
   }
+
+  const heldValueText = !loading ? (
+    <Text variant='title' size='l' color='default'>
+      {heldValue ?? dollarValue}
+    </Text>
+  ) : null
 
   return (
     <Flex
@@ -76,11 +108,35 @@ export const CoinRow = ({
       css={{
         cursor: onClick ? 'pointer' : 'default',
         minWidth: 0,
+        gap: spacing.l,
+        '@container wallet (max-width: 420px)': {
+          gap: spacing.m
+        },
         '&:hover': onClick ? { backgroundColor: color.background.surface2 } : {}
       }}
     >
-      <Flex alignItems='center' gap='l' css={{ minWidth: 0, flex: 1 }}>
-        {loading ? <HexagonSkeleton /> : renderIcon()}
+      <Flex
+        alignItems='center'
+        css={{
+          minWidth: 0,
+          flex: 1,
+          gap: spacing.l,
+          '@container wallet (max-width: 420px)': {
+            gap: spacing.m
+          }
+        }}
+      >
+        {loading ? (
+          <Flex
+            alignItems='center'
+            justifyContent='center'
+            css={iconWrapperCss}
+          >
+            <HexagonSkeleton />
+          </Flex>
+        ) : (
+          renderIcon()
+        )}
         <Flex direction='column' gap='2xs' flex={1} css={{ minWidth: 0 }}>
           {loading ? (
             <CoinCardSkeleton />
@@ -108,16 +164,36 @@ export const CoinRow = ({
                   {noDollarSignPrefix ? symbol : `$${symbol}`}
                 </Text>
               </Flex>
+              {/* Relocated heldValue — only shown in the left column at narrow widths */}
+              <Box
+                css={{
+                  display: 'none',
+                  '@container wallet (max-width: 420px)': {
+                    display: 'block'
+                  }
+                }}
+              >
+                <Text
+                  variant='title'
+                  size='m'
+                  color='default'
+                  css={{ wordWrap: 'break-word' }}
+                >
+                  {heldValue ?? dollarValue}
+                </Text>
+              </Box>
             </>
           )}
         </Flex>
       </Flex>
       <Flex alignItems='center' gap='m' css={{ flexShrink: 0 }}>
-        {!loading && (
-          <Text variant='title' size='l' color='default'>
-            {heldValue ?? dollarValue}
-          </Text>
-        )}
+        <Box
+          css={{
+            '@container wallet (max-width: 420px)': { display: 'none' }
+          }}
+        >
+          {heldValueText}
+        </Box>
         {onClick ? <IconCaretRight size='l' color='subdued' /> : null}
       </Flex>
     </Flex>

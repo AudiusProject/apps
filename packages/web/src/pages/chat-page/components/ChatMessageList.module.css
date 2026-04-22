@@ -2,14 +2,17 @@
   flex: 1;
   min-width: 0;
   overflow-y: scroll;
+  box-sizing: border-box;
 
   /* Extend the scroll container behind the frosted header and composer so
    * there is real content behind them for backdrop-filter to blur. The
-   * matching padding lives on `.listRoot` so messages can still scroll
-   * fully into view without being permanently hidden. Heights cascade in
-   * from `.chatArea` (ChatPage.module.css) and adapt with narrow layout. */
+   * scroll-padding properties keep the inner content 32px clear of the
+   * chrome once scrolled to either edge, while letting the backdrop-filter
+   * still pick up messages flowing behind them mid-scroll. */
   margin-top: calc(-1 * var(--chat-pane-header-height, 112px));
   margin-bottom: calc(-1 * var(--chat-composer-height, 88px));
+  padding-top: calc(var(--chat-pane-header-height, 112px) + 32px);
+  padding-bottom: calc(var(--chat-composer-height, 88px) + 32px);
 }
 
 .listRoot {
@@ -17,10 +20,8 @@
   flex-direction: column-reverse;
   justify-content: flex-end;
   gap: 8px;
-  padding: 32px;
-  padding-top: calc(32px + var(--chat-pane-header-height, 112px));
-  padding-bottom: calc(32px + var(--chat-composer-height, 88px));
-  height: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
   min-width: 0;
 }
 

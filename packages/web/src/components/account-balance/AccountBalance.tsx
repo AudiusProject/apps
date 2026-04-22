@@ -210,7 +210,20 @@ const AccountBalanceContent = () => {
           <Text variant='heading' size={isMobile ? 's' : 'm'} color='default'>
             {messages.title}
           </Text>
-          <Text variant='display' size={isMobile ? 's' : 'm'}>
+          <Text
+            variant='display'
+            size={isMobile ? 's' : 'm'}
+            css={
+              isMobile
+                ? undefined
+                : {
+                    '@container wallet (max-width: 640px)': {
+                      fontSize: 'clamp(28px, 9cqi, 48px)',
+                      lineHeight: 1.1
+                    }
+                  }
+            }
+          >
             {formatCurrency(0, 2)}
           </Text>
         </Flex>
@@ -241,13 +254,32 @@ const AccountBalanceContent = () => {
           />
         </Flex>
       ) : (
-        <Flex justifyContent='space-between' alignItems='flex-start'>
+        <Flex
+          justifyContent='space-between'
+          alignItems='flex-start'
+          gap='m'
+          css={{
+            '@container wallet (max-width: 640px)': {
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }
+          }}
+        >
           <Flex column gap='s'>
             <Text variant='heading' size='m' color='default'>
               {messages.title}
             </Text>
             {changeStats.balance !== null ? (
-              <Text variant='display' size='m'>
+              <Text
+                variant='display'
+                size='m'
+                css={{
+                  '@container wallet (max-width: 640px)': {
+                    fontSize: 'clamp(28px, 9cqi, 48px)',
+                    lineHeight: 1.1
+                  }
+                }}
+              >
                 {formatCurrency(changeStats.balance, 2)}
               </Text>
             ) : null}
