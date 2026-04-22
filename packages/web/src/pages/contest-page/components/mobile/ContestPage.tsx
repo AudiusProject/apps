@@ -18,7 +18,7 @@ import {
   remixesPageLineupActions,
   remixesPageSelectors
 } from '@audius/common/store'
-import { dayjs, formatContestDeadline } from '@audius/common/utils'
+import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -28,19 +28,21 @@ import {
   IconArrowLeft,
   IconButton,
   IconKebabHorizontal,
+  spacing,
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
+import { CollapsibleContent } from 'components/collapsible-content'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
+import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { RemixContestDetailsTab } from 'pages/track-page/components/desktop/RemixContestDetailsTab'
 import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
@@ -284,9 +286,16 @@ const ContestPage = ({
     return dayjs(contest.endDate).isBefore(dayjs())
   }, [contest?.endDate])
 
-  const dueLabel = useMemo(() => {
-    if (!contest?.endDate) return ''
-    return formatContestDeadline(contest.endDate, 'long')
+  // Split the deadline into date + time so each part can be styled
+  // independently — Figma 2888-131667 shows the date in strong
+  // uppercase next to a lighter subdued time.
+  const deadlineParts = useMemo(() => {
+    if (!contest?.endDate) return null
+    const d = dayjs(contest.endDate)
+    return {
+      date: d.format('MMM D, YYYY').toUpperCase(),
+      time: `${d.format('h:mm A')} (${getLocalTimezone()})`
+    }
   }, [contest?.endDate])
 
   const handlePickWinners = useCallback(() => {
@@ -393,10 +402,15 @@ const ContestPage = ({
             <Text variant='label' size='s' color='subdued' strength='strong'>
               {isEnded ? messages.contestEnded : messages.submissionsDue}
             </Text>
-            {dueLabel ? (
-              <Text variant='label' size='l' strength='strong'>
-                {dueLabel}
-              </Text>
+            {deadlineParts ? (
+              <Flex alignItems='baseline' gap='s' wrap='wrap'>
+                <Text variant='label' size='l' strength='strong'>
+                  {deadlineParts.date}
+                </Text>
+                <Text variant='label' size='l' color='subdued'>
+                  {deadlineParts.time}
+                </Text>
+              </Flex>
             ) : null}
           </Flex>
 
@@ -436,6 +450,9 @@ const ContestPage = ({
               contestOwnerId={contest.userId}
               hasDownloads={hasDownloads}
               followerCount={followState?.followerCount ?? 0}
+              description={
+                (contest.eventData as any)?.description as string | undefined
+              }
             />
           ) : activeTab === 'updates' ? (
             <Box pt='l'>
@@ -510,27 +527,47 @@ const ContestPage = ({
 // Matches Figma node 2888-131647: the Updates tab owns the post-update feed
 // and composer, so Details is purely informational for both owner and
 // public viewers.
+//
+// About section renders the description only. The deadline already appears
+// in the page header above the tabs, so we deliberately do not reuse
+// `RemixContestDetailsTab` here (that desktop tab prepends a "Submission
+// Due:" row that would duplicate the header on mobile).
 // -----------------------------------------------------------------------------
+// 10 lines of text — matches the desktop RemixContestDetailsTab collapse.
+const ABOUT_COLLAPSED_HEIGHT = 10 * spacing.m
+
+const fallbackDescription =
+  'Enter my remix contest before the deadline for your chance to win!'
+
 type DetailsTabProps = {
   trackId: number
   eventId: number
   contestOwnerId: number | undefined
   hasDownloads: boolean
   followerCount: number
+  description: string | undefined
 }
 
 const DetailsTab = ({
   trackId,
   eventId,
   hasDownloads,
-  followerCount
+  followerCount,
+  description
 }: DetailsTabProps) => {
   return (
     <Flex direction='column' gap='l' pt='l'>
       {/* About this contest */}
       <Flex direction='column' gap='s'>
         <SectionLabel>{messages.aboutThisContest}</SectionLabel>
-        <RemixContestDetailsTab trackId={trackId} />
+        <CollapsibleContent
+          id='contest-about'
+          collapsedHeight={ABOUT_COLLAPSED_HEIGHT}
+        >
+          <UserGeneratedText variant='body'>
+            {description ?? fallbackDescription}
+          </UserGeneratedText>
+        </CollapsibleContent>
       </Flex>
 
       {/* Prizes */}
