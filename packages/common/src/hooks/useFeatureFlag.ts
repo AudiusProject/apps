@@ -137,7 +137,9 @@ export const createUseFeatureFlagHook =
  * local overrides are skipped). Add entries only for short-lived release
  * toggles; remove when remote config is updated.
  */
-const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {}
+const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {
+  [FeatureFlags.CONTESTS]: true
+}
 
 /** Fetches enabled status of a given feature flag with fallback. Result is memoized. */
 export const useFeatureFlag = (
