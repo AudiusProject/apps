@@ -8,6 +8,7 @@ export const createMockRemoteConfig = (
       featureFlags[flag] ?? featureFlags[fallbackFlag as FeatureFlags] ?? false
     )
   },
+  getPlatform: () => 'web' as const,
   getRemoteVar: () => null,
   waitForRemoteConfig: async () => {},
   waitForUserRemoteConfig: async () => {},
