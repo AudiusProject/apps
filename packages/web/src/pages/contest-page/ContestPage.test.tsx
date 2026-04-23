@@ -65,15 +65,6 @@ vi.mock('components/lineup/TanQueryLineup', () => ({
   TanQueryLineup: () => <div data-testid='tan-query-lineup' />
 }))
 
-// The nested remix-contest details/prizes tabs are verified by their own
-// tests upstream. Here they're irrelevant layout fillers; stub them.
-vi.mock('pages/track-page/components/desktop/RemixContestDetailsTab', () => ({
-  RemixContestDetailsTab: () => <div data-testid='details-tab' />
-}))
-vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
-  RemixContestPrizesTab: () => <div data-testid='prizes-tab' />
-}))
-
 // The comments feed is its own universe — stub with a marker. (Phase 4/5
 // tests cover the feed directly.)
 vi.mock('./components/ContestCommentsTile', () => ({
@@ -233,9 +224,6 @@ describe('ContestPage', () => {
       screen.getByRole('button', { name: /^submissions( \(\d+\))?$/i })
     ).toBeInTheDocument()
 
-    // Stubbed subsections rendered by the Details tab
-    expect(screen.getByTestId('details-tab')).toBeInTheDocument()
-    expect(screen.getByTestId('prizes-tab')).toBeInTheDocument()
     // The details tab now renders a single ContestCommentsTile in the
     // right column (matches Figma node 2857-99124). The Updates feed
     // isn't in the Figma — the Phase-2 host-updates tile was removed
