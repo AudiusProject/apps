@@ -116,8 +116,11 @@ export const createUseFeatureFlagHook =
       getOverride().catch(() => {})
     })
 
-    // Hard-code overrides — see `HARDCODED_ENABLED_FLAGS` below.
-    if (HARDCODED_ENABLED_FLAGS[flag]) {
+    // Hard-code overrides, mobile only — see `HARDCODED_ENABLED_FLAGS` below.
+    if (
+      HARDCODED_ENABLED_FLAGS[flag] &&
+      remoteConfigInstance.getPlatform() === 'mobile'
+    ) {
       return {
         isLoaded: true,
         isEnabled: true,
@@ -133,11 +136,14 @@ export const createUseFeatureFlagHook =
   }
 
 /**
- * Optional flags that are hard-coded to enabled (Optimizely, env defaults, and
- * local overrides are skipped). Add entries only for short-lived release
+ * Mobile-only flags that are hard-coded to enabled (Optimizely, env defaults,
+ * and local overrides are skipped on native). Web/desktop continue to honor
+ * Optimizely and env defaults. Add entries only for short-lived release
  * toggles; remove when remote config is updated.
  */
-const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {}
+const HARDCODED_ENABLED_FLAGS: Partial<Record<FeatureFlags, true>> = {
+  [FeatureFlags.CONTESTS]: true
+}
 
 /** Fetches enabled status of a given feature flag with fallback. Result is memoized. */
 export const useFeatureFlag = (
@@ -184,7 +190,10 @@ export const useFeatureFlag = (
     getOverride().catch(() => {})
   })
 
-  if (HARDCODED_ENABLED_FLAGS[flag]) {
+  if (
+    HARDCODED_ENABLED_FLAGS[flag] &&
+    remoteConfig.getPlatform() === 'mobile'
+  ) {
     return {
       isLoaded: true,
       isEnabled: true,
