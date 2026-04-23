@@ -3,7 +3,7 @@ import React from 'react'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { IconRemix } from '@audius/harmony'
+import { IconTrophy } from '@audius/harmony'
 
 import { LeftNavLink } from '../LeftNavLink'
 import { NavSpeakerIcon } from '../NavSpeakerIcon'
@@ -21,7 +21,7 @@ export const ContestsNavItem = () => {
 
   return (
     <LeftNavLink
-      leftIcon={IconRemix}
+      leftIcon={IconTrophy}
       to={CONTESTS_PAGE}
       restriction='none'
       rightIcon={

@@ -1,6 +1,8 @@
 import { MouseEvent, ReactNode, useCallback, useContext } from 'react'
 
 import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { formatCount, route } from '@audius/common/utils'
 import {
   Divider,
@@ -10,6 +12,7 @@ import {
   IconFanClub,
   IconGift,
   IconSettings,
+  IconTrophy,
   IconUser,
   IconWallet,
   Text
@@ -27,6 +30,7 @@ import styles from './LeftNavDrawer.module.css'
 
 const {
   CLUBS_EXPLORE_PAGE,
+  CONTESTS_PAGE,
   FOLLOWERS_USERS_ROUTE,
   FOLLOWING_USERS_ROUTE,
   REWARDS_PAGE,
@@ -39,6 +43,7 @@ const messages = {
   profile: 'My Profile',
   audio: '$AUDIO',
   artistCoins: 'Artist Coins',
+  contests: 'Contests',
   rewards: 'Rewards',
   settings: 'Settings',
   followers: 'Followers',
@@ -92,6 +97,7 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
   const { setStackReset } = useContext(RouterContext)
 
   const { data: currentUserId } = useCurrentUserId()
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
   const { data: accountUser } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
@@ -231,6 +237,14 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
               href={CLUBS_EXPLORE_PAGE}
               onNavigate={handleNavigate}
             />
+            {isContestsEnabled ? (
+              <NavItem
+                icon={IconTrophy}
+                label={messages.contests}
+                href={CONTESTS_PAGE}
+                onNavigate={handleNavigate}
+              />
+            ) : null}
             <NavItem
               icon={IconGift}
               label={messages.rewards}

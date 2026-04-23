@@ -28,14 +28,13 @@ import {
   IconArrowLeft,
   IconButton,
   IconKebabHorizontal,
-  spacing,
+  Paper,
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
-import { CollapsibleContent } from 'components/collapsible-content'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
@@ -43,7 +42,6 @@ import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { RemixContestPrizesTab } from 'pages/track-page/components/desktop/RemixContestPrizesTab'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
 import { ContestCommentsTile } from '../ContestCommentsTile'
@@ -348,7 +346,17 @@ const ContestPage = ({
       canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
-      <Box w='100%' pb='xl'>
+      {/* Mobile header block now inherits the same `white` surface
+          token the Paper cards use, so the hero + title + deadline
+          + countdown + hosted-by stack reads as the same background
+          color as the sections below it. Matches Figma 2925-18102
+          where the whole contest header sits on a single dark
+          (dark-mode) / white (light-mode) surface. */}
+      <Box
+        w='100%'
+        pb='xl'
+        css={(theme) => ({ backgroundColor: theme.color.background.white })}
+      >
         {/* Hero banner */}
         <Box
           w='100%'
@@ -399,12 +407,13 @@ const ContestPage = ({
 
           {/* Submissions Due */}
           <Flex direction='column' gap='xs'>
-            <Text variant='label' size='s' color='subdued' strength='strong'>
+            <Text variant='label' size='m' color='subdued'>
               {isEnded ? messages.contestEnded : messages.submissionsDue}
             </Text>
             {deadlineParts ? (
               <Flex alignItems='baseline' gap='s' wrap='wrap'>
-                <Text variant='label' size='l' strength='strong'>
+                {/* label / l / regular — matches native. */}
+                <Text variant='label' size='l'>
                   {deadlineParts.date}
                 </Text>
                 <Text variant='label' size='l' color='subdued'>
@@ -452,6 +461,9 @@ const ContestPage = ({
               followerCount={followState?.followerCount ?? 0}
               description={
                 (contest.eventData as any)?.description as string | undefined
+              }
+              prizeInfo={
+                (contest.eventData as any)?.prizeInfo as string | undefined
               }
             />
           ) : activeTab === 'updates' ? (
@@ -533,9 +545,6 @@ const ContestPage = ({
 // `RemixContestDetailsTab` here (that desktop tab prepends a "Submission
 // Due:" row that would duplicate the header on mobile).
 // -----------------------------------------------------------------------------
-// 10 lines of text — matches the desktop RemixContestDetailsTab collapse.
-const ABOUT_COLLAPSED_HEIGHT = 10 * spacing.m
-
 const fallbackDescription =
   'Enter my remix contest before the deadline for your chance to win!'
 
@@ -546,6 +555,7 @@ type DetailsTabProps = {
   hasDownloads: boolean
   followerCount: number
   description: string | undefined
+  prizeInfo: string | undefined
 }
 
 const DetailsTab = ({
@@ -553,36 +563,56 @@ const DetailsTab = ({
   eventId,
   hasDownloads,
   followerCount,
-  description
+  description,
+  prizeInfo
 }: DetailsTabProps) => {
   return (
     <Flex direction='column' gap='l' pt='l'>
-      {/* About this contest */}
-      <Flex direction='column' gap='s'>
+      {/* About — wrapped in a Paper card so the section reads as a
+          unit matching Figma 2925-18101 (every other Details block
+          is a card; bare text sitting on the page background broke
+          the hierarchy). */}
+      <Paper
+        direction='column'
+        p='l'
+        gap='m'
+        borderRadius='m'
+        border='default'
+        backgroundColor='white'
+        shadow='flat'
+      >
         <SectionLabel>{messages.aboutThisContest}</SectionLabel>
-        <CollapsibleContent
-          id='contest-about'
-          collapsedHeight={ABOUT_COLLAPSED_HEIGHT}
-        >
-          <UserGeneratedText variant='body'>
-            {description ?? fallbackDescription}
-          </UserGeneratedText>
-        </CollapsibleContent>
-      </Flex>
+        <UserGeneratedText variant='body'>
+          {description ?? fallbackDescription}
+        </UserGeneratedText>
+      </Paper>
 
-      {/* Prizes */}
-      <Flex direction='column' gap='s'>
+      {/* Prizes — inline prize info inside its own Paper card.
+          Previously `RemixContestPrizesTab` was dropped in here but
+          that component adds its own `p='xl'` which double-padded
+          the wrapper. */}
+      <Paper
+        direction='column'
+        p='l'
+        gap='m'
+        borderRadius='m'
+        border='default'
+        backgroundColor='white'
+        shadow='flat'
+      >
         <SectionLabel>{messages.prizes}</SectionLabel>
-        <RemixContestPrizesTab trackId={trackId} />
-      </Flex>
+        {prizeInfo ? (
+          <UserGeneratedText variant='body'>{prizeInfo}</UserGeneratedText>
+        ) : null}
+      </Paper>
 
-      {/* Followers — card renders its own FOLLOWERS (N) label inside the
-          Paper, so no wrapper label here. */}
+      {/* Followers — card renders its own FOLLOWERS (N) label inside
+          the Paper, so no wrapper label here. */}
       <EventFollowersCard eventId={eventId} followerCount={followerCount} />
 
-      {/* Stems & Downloads — enriched card (artwork + Public Free + artist
-          + N Stems chip + Download All). Renders its own title inside the
-          Paper, so no wrapper label. */}
+      {/* Stems & Downloads — enriched card (artwork + Public Free +
+          artist + N Stems chip + Download All + expandable file
+          list). Renders its own title inside the Paper. */}
       {hasDownloads ? <ContestStemsCard trackId={trackId} /> : null}
     </Flex>
   )

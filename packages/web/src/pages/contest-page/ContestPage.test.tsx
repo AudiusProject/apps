@@ -65,15 +65,6 @@ vi.mock('components/lineup/TanQueryLineup', () => ({
   TanQueryLineup: () => <div data-testid='tan-query-lineup' />
 }))
 
-// The nested remix-contest details/prizes tabs are verified by their own
-// tests upstream. Here they're irrelevant layout fillers; stub them.
-vi.mock('pages/track-page/components/desktop/RemixContestDetailsTab', () => ({
-  RemixContestDetailsTab: () => <div data-testid='details-tab' />
-}))
-vi.mock('pages/track-page/components/desktop/RemixContestPrizesTab', () => ({
-  RemixContestPrizesTab: () => <div data-testid='prizes-tab' />
-}))
-
 // The comments feed is its own universe — stub with a marker. (Phase 4/5
 // tests cover the feed directly.)
 vi.mock('./components/ContestCommentsTile', () => ({
@@ -231,8 +222,8 @@ describe('ContestPage', () => {
     ).toBeInTheDocument()
 
     // Contest details internals differ across desktop/mobile layouts.
-    // Assert on layout-agnostic sections instead of desktop-only tab internals.
-    // The page renders a single ContestCommentsTile in the details view.
+    // Assert on the layout-agnostic behavior: exactly one comments tile
+    // appears in the details view.
     expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(1)
     // The submissions lineup lives under the Submissions tab, not the
     // Details tab; it renders after flipping the pill.

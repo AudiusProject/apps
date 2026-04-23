@@ -35,8 +35,7 @@ const messages = {
   endsToday: 'ENDS TODAY',
   ended: 'ENDED',
   daysLeft: (n: number) => `${n} ${n === 1 ? 'DAY' : 'DAYS'} LEFT`,
-  entries: (n: number) => `${n} ${n === 1 ? 'ENTRY' : 'ENTRIES'}`,
-  prizesAvailable: 'PRIZES AVAILABLE'
+  entries: (n: number) => `${n} ${n === 1 ? 'ENTRY' : 'ENTRIES'}`
 }
 
 const formatStatus = (endDate?: string | null): string => {
@@ -173,7 +172,7 @@ const StatusPill = ({ children }: { children: ReactNode }) => {
       <Text
         variant='label'
         size='m'
-        color='default'
+        color='subdued'
         css={{ textTransform: 'uppercase' }}
       >
         {children}
@@ -234,11 +233,19 @@ export const ContestCard = forwardRef(
           : SquareSizes.SIZE_480_BY_480
     })
 
+    // Count-only: API returns full total in `count` even when limit=0 (no track rows).
     const { data: remixesData } = useRemixes(
-      { trackId, pageSize: 1, isContestEntry: true },
+      { trackId, pageSize: 0, isContestEntry: true },
       { enabled: !!trackId }
     )
     const entriesCount = remixesData?.pages?.[0]?.count ?? 0
+    // Line-height for heading/m + heading/l respectively, pulled from
+    // Harmony typography. We pin the title row to exactly two lines so
+    // cards in the grid line up regardless of title length (Figma
+    // reference: the tile grid is visibly uniform even when some
+    // titles wrap to two lines and others don't).
+    const titleLineHeight = variant === 'hero' ? 40 : 32
+    const titleBlockHeight = titleLineHeight * 2
 
     // Land on the dedicated contest page rather than the host's track page
     // — the contest page is the actual destination readers are trying to
@@ -260,7 +267,6 @@ export const ContestCard = forwardRef(
       return <ContestCardSkeleton variant={variant} {...other} />
     }
 
-    const prizeInfo = remixContest.eventData?.prizeInfo
     const status = formatStatus(remixContest.endDate)
 
     return (
@@ -296,9 +302,8 @@ export const ContestCard = forwardRef(
             >
               <Text
                 variant='label'
-                size='s'
+                size='m'
                 color='subdued'
-                strength='strong'
                 css={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
               >
                 {messages.hostedBy}
@@ -309,14 +314,30 @@ export const ContestCard = forwardRef(
 
           <Divider orientation='horizontal' />
 
-          <Flex direction='column' gap='s'>
-            <Text
-              variant='heading'
-              size={variant === 'hero' ? 'l' : 'm'}
-              ellipses
+          <Flex direction='column' gap='s' css={{ flex: '1 1 auto' }}>
+            {/* Pin the title area to exactly two lines + vertically
+                center the content. Titles that wrap use both lines;
+                shorter titles sit in the middle of the reserved
+                block. This is what keeps every tile in the grid the
+                same height regardless of title length. */}
+            <Flex
+              alignItems='center'
+              css={{ height: titleBlockHeight, flexShrink: 0 }}
             >
-              {track.title}
-            </Text>
+              <Text
+                variant='heading'
+                size={variant === 'hero' ? 'l' : 'm'}
+                css={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  wordBreak: 'break-word'
+                }}
+              >
+                {track.title}
+              </Text>
+            </Flex>
             <Flex
               gap='s'
               wrap='nowrap'
@@ -331,9 +352,6 @@ export const ContestCard = forwardRef(
               }}
             >
               <CardPill>{messages.entries(entriesCount)}</CardPill>
-              {prizeInfo ? (
-                <CardPill>{messages.prizesAvailable}</CardPill>
-              ) : null}
             </Flex>
           </Flex>
         </Flex>

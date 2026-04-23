@@ -64,10 +64,10 @@ export const RemixContestTeaser = ({ trackId }: RemixContestTeaserProps) => {
       <Flex gap='m' alignItems='center'>
         <IconTrophy size='l' color='accent' />
         <Flex direction='column' gap='xs'>
-          <Text variant='label' size='m' color='accent'>
+          <Text variant='label' size='m' color='subdued'>
             {messages.badge}
           </Text>
-          <Text variant='body' size='s' color='subdued'>
+          <Text variant='label' size='m' color='subdued'>
             {isEnded ? messages.ended : messages.endsOn(contest.endDate)}
           </Text>
         </Flex>
