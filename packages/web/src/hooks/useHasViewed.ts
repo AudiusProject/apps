@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
 /**
- * `useHasViewed` is checks if the reference element has been viewed on the page
- *  by checking the reference object's top against the page scroll
- * @param {number} [pageOffset] Multiplies the window inner height for when to trigger element in view
+ * `useHasViewed` checks if the reference element has scrolled into view.
+ * @param {number} [pageOffset] Multiplies the viewport height to set the
+ *   trigger boundary. 1 (default) = full viewport; 0.5 = top half only;
+ *   values > 1 trigger before the element reaches the visible area.
  */
 const useHasViewed = (
   pageOffset = 1
@@ -11,32 +12,27 @@ const useHasViewed = (
   const [hasViewed, setHasViewed] = useState(false)
 
   const startAnimation = useRef<HTMLDivElement | null>(null)
-  const refInView = useCallback(() => {
-    if (startAnimation.current) {
-      const refBounding = startAnimation.current.getBoundingClientRect()
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const elementTop = refBounding.top + scrollTop
-      const windowScrollingBottom = window.innerHeight * pageOffset + scrollTop
-      if (elementTop < windowScrollingBottom) {
-        setHasViewed(true)
-      }
-    }
-    return false
-  }, [pageOffset])
 
-  const setStartAnimation = useCallback(
-    (node: HTMLDivElement) => {
-      startAnimation.current = node
-      refInView()
-    },
-    [refInView]
-  )
+  const setStartAnimation = useCallback((node: HTMLDivElement) => {
+    startAnimation.current = node
+  }, [])
 
   useEffect(() => {
-    refInView()
-    window.addEventListener('scroll', refInView)
-    return () => window.removeEventListener('scroll', refInView)
-  }, [refInView])
+    const node = startAnimation.current
+    if (!node || hasViewed) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setHasViewed(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: `0px 0px ${(pageOffset - 1) * 100}% 0px` }
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [hasViewed, pageOffset])
 
   return [hasViewed, setStartAnimation]
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { route } from '@audius/common/utils'
 import {
@@ -66,10 +66,14 @@ const NavBanner = (props: NavBannerProps) => {
     initialValue: props.isMobile
   })
   const [isScrolling, setIsScrolling] = useState(false)
+  const isScrollingRef = useRef(false)
   const setScrolling = useCallback(() => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const isScrolling = scrollTop > 20
-    setIsScrolling(isScrolling)
+    const nowScrolling = scrollTop > 20
+    if (nowScrolling !== isScrollingRef.current) {
+      isScrollingRef.current = nowScrolling
+      setIsScrolling(nowScrolling)
+    }
   }, [])
 
   useEffect(() => {
