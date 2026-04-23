@@ -90,9 +90,21 @@ const { fetchTrackSucceeded, reset } = remixesPageActions
 
 export const CONTEST_PAGE_SIZE = 10
 
-const HERO_HEIGHT = 288
+// Fluid hero: clamps between the mobile-web height (≈220) and the design
+// spec height (288). The `cqi` unit is relative to the named `contest`
+// container so the hero tracks the real content width (collapsed sidebar,
+// resizable nav) rather than the viewport.
+const HERO_MIN_HEIGHT = 220
+const HERO_MAX_HEIGHT = 288
 const MAX_CONTENT_WIDTH = 1080
 const RIGHT_COLUMN_WIDTH_PX = 360
+// Container-query breakpoints. These stack the header rows and the
+// details two-column layout when the desktop shell gets narrow
+// (collapsed sidebar, short window, resizable main pane) without
+// needing a viewport-based `useIsMobile()` check. Mobile web still
+// renders the dedicated mobile file via the parent router.
+const DETAILS_STACK_BREAKPOINT_PX = 900
+const HEADER_STACK_BREAKPOINT_PX = 640
 
 type ContestTab = 'details' | 'submissions'
 
@@ -110,7 +122,7 @@ const CountdownTile = ({
   label: string
   isSubdued?: boolean
 }) => (
-  <Flex direction='column' alignItems='center' gap='2xs' w={56}>
+  <Flex direction='column' alignItems='center' gap='2xs' css={{ flex: 1 }}>
     <Text variant='heading' size='l' color={isSubdued ? 'subdued' : 'default'}>
       {String(value).padStart(2, '0')}
     </Text>
@@ -140,7 +152,20 @@ const HeaderCountdown = ({ endDate }: { endDate: string }) => {
   const minsSubdued = hoursSubdued && mins === 0
 
   return (
-    <Flex gap='l' alignItems='center'>
+    <Flex
+      gap='l'
+      alignItems='center'
+      css={{
+        // When the header stacks below `HEADER_STACK_BREAKPOINT_PX` the
+        // countdown sits on its own row and should fill the row instead
+        // of hugging the right edge.
+        [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]: {
+          width: '100%',
+          justifyContent: 'space-between',
+          gap: 'var(--harmony-unit-2)'
+        }
+      }}
+    >
       <CountdownTile
         value={days}
         label={messages.days}
@@ -312,7 +337,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     if (!eventId) return null
     if (isOwner) {
       return (
-        <Flex gap='s'>
+        <Flex gap='s' wrap='wrap'>
           <Button size='small' variant='secondary' onClick={handleEditContest}>
             Edit Contest
           </Button>
@@ -326,7 +351,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     // Enter Contest primary CTA, per the Figma. Enter Contest is hidden
     // once the contest has ended — "entering" isn't meaningful anymore.
     return (
-      <Flex gap='s' alignItems='center'>
+      <Flex gap='s' alignItems='center' wrap='wrap'>
         <IconButton
           icon={IconShare}
           color='default'
@@ -401,256 +426,338 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           (hero banner + submissions due + actions + title + divider +
           hosted by + countdown) lives inside a single rounded Paper
           tile — the hero is the top "photo" of the Paper, body content
-          sits below it with matching padding. */}
+          sits below it with matching padding.
+
+          `containerType: inline-size` + a named container turn this box
+          into the responsive anchor. Every descendant queries
+          `@container contest (max-width: …)` rather than the viewport,
+          so the layout tracks the real content width the sidebar/nav
+          hand us (collapsed vs expanded left rail, resizable pane)
+          rather than guessing from `useIsMobile()`. Container queries
+          can't self-match, so responsive padding lives on an inner
+          wrapper below. */}
       <Box
         css={{
           maxWidth: MAX_CONTENT_WIDTH,
           margin: '0 auto',
-          width: '100%'
+          width: '100%',
+          containerType: 'inline-size',
+          containerName: 'contest'
         }}
-        ph='2xl'
-        pv='xl'
       >
-        <Paper
-          direction='column'
-          borderRadius='l'
-          border='default'
-          shadow='flat'
-          backgroundColor='white'
-          css={{ overflow: 'hidden' }}
+        <Box
+          css={{
+            paddingInline: 'var(--harmony-unit-8)',
+            paddingBlock: 'var(--harmony-unit-6)',
+            // Tighten the gutter on phone-sized containers so the header
+            // Paper can breathe at the edges instead of the gutter
+            // eating most of the row.
+            [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+              {
+                paddingInline: 'var(--harmony-unit-4)'
+              }
+          }}
         >
-          {/* Hero banner at the top of the Paper. The Paper's
-              `overflow: hidden` clips the banner to the outer
-              rounded corners so the top edge matches the Paper
-              radius. */}
-          <Box
-            w='100%'
-            h={HERO_HEIGHT}
-            css={{
-              backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          />
-
-          {/* Header body content — padded section below the hero. */}
-          <Box p='xl'>
-            {/* Row 1: Submissions Due plain label + actions. Per Figma
-                this is not a chip — just uppercase label text with the
-                due date below it. */}
-            <Flex
-              justifyContent='space-between'
-              alignItems='flex-start'
-              gap='l'
-            >
-              <Flex direction='column' gap='2xs'>
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
-                  {isEnded ? messages.contestEnded : messages.submissionsDue}
-                </Text>
-                {dueLabel ? (
-                  <Text variant='label' size='l' strength='strong'>
-                    {dueLabel}
-                  </Text>
-                ) : null}
-              </Flex>
-              {renderActions()}
-            </Flex>
-
-            {/* Title */}
-            <Box mt='l'>
-              <Text variant='display' size='s'>
-                {track.title} {messages.title}
-              </Text>
-            </Box>
-
-            {/* Horizontal divider separating title from host row. */}
-            <Box mv='l'>
-              <Divider />
-            </Box>
-
-            {/* Hosted By row + Countdown (4 plain columns, not a pill) */}
-            <Flex justifyContent='space-between' alignItems='center' gap='xl'>
-              <Flex direction='column' gap='s'>
-                <Text
-                  variant='label'
-                  size='s'
-                  color='subdued'
-                  strength='strong'
-                >
-                  {messages.hostedBy}
-                </Text>
-                <Flex gap='m' alignItems='center'>
-                  <Avatar userId={user.user_id} h={56} w={56} />
-                  <Flex direction='column'>
-                    <Text variant='title' size='m'>
-                      {user.name}
-                    </Text>
-                    <Text variant='body' size='s' color='subdued'>
-                      @{user.handle}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Flex>
-              {!isEnded && contest.endDate ? (
-                <HeaderCountdown endDate={contest.endDate} />
-              ) : null}
-            </Flex>
-          </Box>
-        </Paper>
-
-        {/* Spacer between the header Paper and the tab row below. */}
-        <Box pt='xl' />
-
-        {/* Tabs — only when there are submissions (Figma 1-track variant
-            has no tabs). */}
-        {submissionsCount && submissionsCount > 0 ? (
-          <Flex gap='s' pb='m'>
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'details'}
-              label={messages.contestDetails}
-              onClick={() => setActiveTab('details')}
-            />
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'submissions'}
-              label={messages.submissionsTab(submissionsCount)}
-              onClick={() => setActiveTab('submissions')}
-            />
-          </Flex>
-        ) : null}
-
-        {/* Tab body — 2-column layout matching Figma. Left column is
-            wider (flex 1) and holds About + Prizes as stacked cards.
-            Right column is fixed width and holds Stems/Followers/
-            Comments as stacked cards. Each section is its OWN Paper
-            with its own border; there's no single outer tile. */}
-        {activeTab === 'details' ? (
-          <Flex gap='xl' alignItems='flex-start'>
-            {/* Left column: About + Prizes (and Updates if we add
-                host-feed parity later). Cards sit on the page
-                background. */}
-            <Flex
-              direction='column'
-              gap='l'
-              css={{ flex: '1 1 auto', minWidth: 0 }}
-            >
-              <Paper
-                direction='column'
-                p='xl'
-                gap='l'
-                borderRadius='l'
-                border='default'
-                backgroundColor='white'
-                shadow='flat'
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.aboutThisContest}
-                </Text>
-                <RemixContestDetailsTab trackId={trackId!} />
-              </Paper>
-
-              <Paper
-                direction='column'
-                p='xl'
-                gap='l'
-                borderRadius='l'
-                border='default'
-                backgroundColor='white'
-                shadow='flat'
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.prizes}
-                </Text>
-                <RemixContestPrizesTab trackId={trackId!} />
-              </Paper>
-            </Flex>
-
-            {/* Right column: Stems & Downloads + Followers + Comments. */}
-            <Flex
-              direction='column'
-              gap='l'
-              css={{
-                flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
-                width: RIGHT_COLUMN_WIDTH_PX
-              }}
-            >
-              {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
-
-              <EventFollowersCard
-                eventId={eventId}
-                followerCount={followState?.followerCount ?? 0}
-              />
-
-              {/* Comments tile — in-column Figma card. */}
-              <ContestCommentsTile
-                eventId={eventId}
-                eventOwnerUserId={contest?.userId}
-                mode='comments'
-              />
-            </Flex>
-          </Flex>
-        ) : null}
-
-        {activeTab === 'submissions' ? (
           <Paper
             direction='column'
-            p='xl'
-            gap='l'
             borderRadius='l'
             border='default'
             shadow='flat'
             backgroundColor='white'
+            css={{ overflow: 'hidden' }}
           >
-            {/* Filter bar — same controls the track-page `RemixesPage`
+            {/* Hero banner at the top of the Paper. The Paper's
+              `overflow: hidden` clips the banner to the outer
+              rounded corners so the top edge matches the Paper
+              radius. The height fluidly tracks the content width
+              (via `cqi` relative to the `contest` container) so
+              narrow desktop shells get a shorter hero without a
+              hard mobile/desktop breakpoint. */}
+            <Box
+              w='100%'
+              css={{
+                height: `clamp(${HERO_MIN_HEIGHT}px, 30cqi, ${HERO_MAX_HEIGHT}px)`,
+                backgroundImage: coverArtUrl
+                  ? `url(${coverArtUrl})`
+                  : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            />
+
+            {/* Header body content — padded section below the hero. */}
+            <Box p='xl'>
+              {/* Row 1: Submissions Due plain label + actions. Per Figma
+                this is not a chip — just uppercase label text with the
+                due date below it. Row stacks on narrow containers so
+                the action cluster can wrap without squeezing the due
+                date. */}
+              <Flex
+                justifyContent='space-between'
+                alignItems='flex-start'
+                gap='l'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch'
+                    }
+                }}
+              >
+                <Flex direction='column' gap='2xs'>
+                  <Text
+                    variant='label'
+                    size='s'
+                    color='subdued'
+                    strength='strong'
+                  >
+                    {isEnded ? messages.contestEnded : messages.submissionsDue}
+                  </Text>
+                  {dueLabel ? (
+                    <Text variant='label' size='l' strength='strong'>
+                      {dueLabel}
+                    </Text>
+                  ) : null}
+                </Flex>
+                {renderActions()}
+              </Flex>
+
+              {/* Title */}
+              <Box mt='l'>
+                <Text variant='display' size='s'>
+                  {track.title} {messages.title}
+                </Text>
+              </Box>
+
+              {/* Horizontal divider separating title from host row. */}
+              <Box mv='l'>
+                <Divider />
+              </Box>
+
+              {/* Hosted By row + Countdown (4 plain columns, not a pill).
+                Stacks below `HEADER_STACK_BREAKPOINT_PX` so the
+                countdown sits under the host card instead of cramping
+                it. */}
+              <Flex
+                justifyContent='space-between'
+                alignItems='center'
+                gap='xl'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      gap: 'var(--harmony-unit-4)'
+                    }
+                }}
+              >
+                <Flex direction='column' gap='s'>
+                  <Text
+                    variant='label'
+                    size='s'
+                    color='subdued'
+                    strength='strong'
+                  >
+                    {messages.hostedBy}
+                  </Text>
+                  <Flex gap='m' alignItems='center'>
+                    <Avatar userId={user.user_id} h={56} w={56} />
+                    <Flex direction='column'>
+                      <Text variant='title' size='m'>
+                        {user.name}
+                      </Text>
+                      <Text variant='body' size='s' color='subdued'>
+                        @{user.handle}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                </Flex>
+                {!isEnded && contest.endDate ? (
+                  <HeaderCountdown endDate={contest.endDate} />
+                ) : null}
+              </Flex>
+            </Box>
+          </Paper>
+
+          {/* Spacer between the header Paper and the tab row below. */}
+          <Box pt='xl' />
+
+          {/* Tabs — only when there are submissions (Figma 1-track variant
+            has no tabs). */}
+          {submissionsCount && submissionsCount > 0 ? (
+            <Flex gap='s' pb='m'>
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'details'}
+                label={messages.contestDetails}
+                onClick={() => setActiveTab('details')}
+              />
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'submissions'}
+                label={messages.submissionsTab(submissionsCount)}
+                onClick={() => setActiveTab('submissions')}
+              />
+            </Flex>
+          ) : null}
+
+          {/* Tab body — 2-column layout matching Figma. Left column is
+            wider (flex 1) and holds About + Prizes as stacked cards.
+            Right column is fixed width and holds Stems/Followers/
+            Comments as stacked cards. Each section is its OWN Paper
+            with its own border; there's no single outer tile. The
+            right column collapses under the left below
+            `DETAILS_STACK_BREAKPOINT_PX` so a narrow desktop shell
+            doesn't squeeze the sidebar cards into a too-thin rail. */}
+          {activeTab === 'details' ? (
+            <Flex
+              gap='xl'
+              alignItems='flex-start'
+              css={{
+                [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
+                  {
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    gap: 'var(--harmony-unit-4)'
+                  }
+              }}
+            >
+              {/* Left column: About + Prizes (and Updates if we add
+                host-feed parity later). Cards sit on the page
+                background. */}
+              <Flex
+                direction='column'
+                gap='l'
+                css={{ flex: '1 1 auto', minWidth: 0 }}
+              >
+                <Paper
+                  direction='column'
+                  p='xl'
+                  gap='l'
+                  borderRadius='l'
+                  border='default'
+                  backgroundColor='white'
+                  shadow='flat'
+                >
+                  <Text variant='label' size='m' color='subdued'>
+                    {messages.aboutThisContest}
+                  </Text>
+                  <RemixContestDetailsTab trackId={trackId!} />
+                </Paper>
+
+                <Paper
+                  direction='column'
+                  p='xl'
+                  gap='l'
+                  borderRadius='l'
+                  border='default'
+                  backgroundColor='white'
+                  shadow='flat'
+                >
+                  <Text variant='label' size='m' color='subdued'>
+                    {messages.prizes}
+                  </Text>
+                  <RemixContestPrizesTab trackId={trackId!} />
+                </Paper>
+              </Flex>
+
+              {/* Right column: Stems & Downloads + Followers + Comments. */}
+              <Flex
+                direction='column'
+                gap='l'
+                css={{
+                  flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
+                  width: RIGHT_COLUMN_WIDTH_PX,
+                  [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flex: '1 1 auto',
+                      width: '100%'
+                    }
+                }}
+              >
+                {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
+
+                <EventFollowersCard
+                  eventId={eventId}
+                  followerCount={followState?.followerCount ?? 0}
+                />
+
+                {/* Comments tile — in-column Figma card. */}
+                <ContestCommentsTile
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                  mode='comments'
+                />
+              </Flex>
+            </Flex>
+          ) : null}
+
+          {activeTab === 'submissions' ? (
+            <Paper
+              direction='column'
+              p='xl'
+              gap='l'
+              borderRadius='l'
+              border='default'
+              shadow='flat'
+              backgroundColor='white'
+            >
+              {/* Filter bar — same controls the track-page `RemixesPage`
                 exposes above its remixes lineup: a Co-Signed toggle
                 plus a Most Recent / Most Plays / Most Favorites sort
                 dropdown. Co-signed surfaces entries the host has
                 endorsed; the sort drives the underlying
                 `useRemixesLineup` query. */}
-            <Flex justifyContent='space-between' alignItems='center' gap='s'>
-              <Text variant='heading' size='s'>
-                {messages.submissionsTab(submissionsCount)}
-              </Text>
-              <Flex gap='s'>
-                <FilterButton
-                  label={messages.coSigned}
-                  value={isCosign ? 'true' : null}
-                  onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
-                />
-                <FilterButton
-                  value={sortMethod ?? 'recent'}
-                  variant='replaceLabel'
-                  onChange={updateSortParam}
-                  options={[
-                    { label: messages.sortRecent, value: 'recent' },
-                    { label: messages.sortPlays, value: 'plays' },
-                    { label: messages.sortFavorites, value: 'likes' }
-                  ]}
-                />
+              <Flex
+                justifyContent='space-between'
+                alignItems='center'
+                gap='s'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch'
+                    }
+                }}
+              >
+                <Text variant='heading' size='s'>
+                  {messages.submissionsTab(submissionsCount)}
+                </Text>
+                <Flex gap='s' wrap='wrap'>
+                  <FilterButton
+                    label={messages.coSigned}
+                    value={isCosign ? 'true' : null}
+                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+                  />
+                  <FilterButton
+                    value={sortMethod ?? 'recent'}
+                    variant='replaceLabel'
+                    onChange={updateSortParam}
+                    options={[
+                      { label: messages.sortRecent, value: 'recent' },
+                      { label: messages.sortPlays, value: 'plays' },
+                      { label: messages.sortFavorites, value: 'likes' }
+                    ]}
+                  />
+                </Flex>
               </Flex>
-            </Flex>
-            <TanQueryLineup
-              data={lineup.data}
-              isFetching={lineup.isFetching}
-              isPending={lineup.isPending}
-              isError={lineup.isError}
-              hasNextPage={lineup.hasNextPage}
-              play={lineup.play}
-              pause={lineup.pause}
-              loadNextPage={lineup.loadNextPage}
-              isPlaying={lineup.isPlaying}
-              lineup={lineup.lineup}
-              pageSize={CONTEST_PAGE_SIZE}
-              actions={remixesPageLineupActions}
-            />
-          </Paper>
-        ) : null}
+              <TanQueryLineup
+                data={lineup.data}
+                isFetching={lineup.isFetching}
+                isPending={lineup.isPending}
+                isError={lineup.isError}
+                hasNextPage={lineup.hasNextPage}
+                play={lineup.play}
+                pause={lineup.pause}
+                loadNextPage={lineup.loadNextPage}
+                isPlaying={lineup.isPlaying}
+                lineup={lineup.lineup}
+                pageSize={CONTEST_PAGE_SIZE}
+                actions={remixesPageLineupActions}
+              />
+            </Paper>
+          ) : null}
+        </Box>
       </Box>
     </Page>
   )

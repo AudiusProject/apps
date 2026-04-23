@@ -59,12 +59,6 @@ vi.mock('hooks/useRequiresAccount', async () => {
   }
 })
 
-// Pin this suite to the desktop contest layout. CI runs tests in parallel and
-// shared SSR/mobile context can leak across files, making this branch flaky.
-vi.mock('hooks/useIsMobile', () => ({
-  useIsMobile: () => false
-}))
-
 // TanQueryLineup pulls in a giant subtree of player state and lineup sagas
 // that we don't care about here — stub it with a tiny marker component.
 vi.mock('components/lineup/TanQueryLineup', () => ({
