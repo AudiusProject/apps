@@ -2,6 +2,12 @@ from datetime import datetime, timedelta
 
 from src.models.events.event import Event, EventType
 from src.models.notifications.notification import Notification
+from src.models.social.follow import Follow
+from src.models.social.save import Save, SaveType
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.tracks.track import Track
 from src.utils.structured_logger import StructuredLogger
 
@@ -47,7 +53,55 @@ def create_fan_remix_contest_ended_notifications(session, now=None):
             .all()
         )
         remixer_user_ids = {row[0] for row in remixers}
-        for user_id in remixer_user_ids:
+        event_follower_user_ids = {
+            row[0]
+            for row in (
+                session.query(Subscription.subscriber_id)
+                .filter(
+                    Subscription.user_id == event.event_id,
+                    Subscription.entity_type == SUBSCRIPTION_EVENT_ENTITY_TYPE,
+                    Subscription.is_current == True,
+                    Subscription.is_delete == False,
+                )
+                .all()
+            )
+        }
+        # Followers of the contest host artist
+        host_follower_user_ids = {
+            row[0]
+            for row in (
+                session.query(Follow.follower_user_id)
+                .filter(
+                    Follow.followee_user_id == event.user_id,
+                    Follow.is_current == True,
+                    Follow.is_delete == False,
+                )
+                .all()
+            )
+        }
+        # Users who favorited the parent contest track
+        favoriter_user_ids = {
+            row[0]
+            for row in (
+                session.query(Save.user_id)
+                .filter(
+                    Save.save_item_id == contest_track_id,
+                    Save.save_type == SaveType.track,
+                    Save.is_current == True,
+                    Save.is_delete == False,
+                )
+                .all()
+            )
+        }
+        notified_user_ids = (
+            remixer_user_ids
+            | event_follower_user_ids
+            | host_follower_user_ids
+            | favoriter_user_ids
+        )
+        # Exclude the contest host — they have artist_remix_contest_ended.
+        notified_user_ids.discard(event.user_id)
+        for user_id in notified_user_ids:
             group_id = get_fan_remix_contest_ended_group_id(event.event_id)
             parent_track = (
                 session.query(Track)

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict, List, Union
 
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.orm.session import Session
 from sqlalchemy.sql import null
 
@@ -15,11 +15,16 @@ from src.gated_content.content_access_checker import (
 )
 from src.models.tracks.remix import Remix
 from src.models.tracks.stem import Stem
+from src.models.events.event import Event, EventType
 from src.models.tracks.track import Track
 from src.models.tracks.track_download import TrackDownload
 from src.models.tracks.track_price_history import TrackPriceHistory
 from src.models.tracks.track_route import TrackRoute
 from src.models.users.usdc_purchase import PurchaseAccessType
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.users.user import User
 from src.tasks.entity_manager.utils import (
     CHARACTER_LIMIT_DESCRIPTION,
@@ -595,6 +600,62 @@ def create_remix_contest_notification_helper(
     )
 
 
+def auto_subscribe_to_contest_on_submission(
+    params: ManageEntityParameters, track_record: Track
+) -> None:
+    if track_record.stem_of is not None or not track_record.remix_of:
+        return
+    parent_ids = get_remix_parent_track_ids(params.metadata)
+    if not parent_ids:
+        return
+    parent_track_id = parent_ids[0]
+    now = params.block_datetime
+    event = (
+        params.session.query(Event)
+        .filter(
+            Event.event_type == EventType.remix_contest,
+            Event.entity_id == parent_track_id,
+            Event.is_deleted == False,
+        )
+        .filter(or_(Event.end_date == None, Event.end_date > now))
+        .first()
+    )
+    if not event:
+        return
+    uploader_id = track_record.owner_id
+    if uploader_id == event.user_id:
+        return
+    existing = (
+        params.session.query(Subscription)
+        .filter(
+            Subscription.subscriber_id == uploader_id,
+            Subscription.user_id == event.event_id,
+            Subscription.entity_type == SUBSCRIPTION_EVENT_ENTITY_TYPE,
+            Subscription.is_current == True,
+            Subscription.is_delete == False,
+        )
+        .first()
+    )
+    if existing:
+        return
+    # Synthetic tx: unique per (contest, upload tx) so reindexing stays idempotent
+    sub_tx = f"auto_e{event.event_id}_{params.txhash}"[:200]
+    params.session.add(
+        Subscription(
+            blockhash=params.event_blockhash,
+            blocknumber=params.block_number,
+            created_at=params.block_datetime,
+            txhash=sub_tx,
+            user_id=event.event_id,
+            subscriber_id=uploader_id,
+            is_current=True,
+            is_delete=False,
+            entity_type=SUBSCRIPTION_EVENT_ENTITY_TYPE,
+            entity_id=event.event_id,
+        )
+    )
+
+
 def create_track(params: ManageEntityParameters):
     handle = get_handle(params)
     validate_track_tx(params)
@@ -633,6 +694,8 @@ def create_track(params: ManageEntityParameters):
     dispatch_challenge_track_upload(
         params.challenge_bus, params.block_number, params.block_datetime, track_record
     )
+
+    auto_subscribe_to_contest_on_submission(params, track_record)
 
     params.add_record(track_id, track_record)
 

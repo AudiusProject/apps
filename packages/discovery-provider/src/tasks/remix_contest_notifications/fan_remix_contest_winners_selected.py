@@ -2,6 +2,12 @@ from datetime import datetime
 
 from src.models.events.event import Event, EventType
 from src.models.notifications.notification import Notification
+from src.models.social.follow import Follow
+from src.models.social.save import Save, SaveType
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.tracks.track import Track
 from src.models.users.user import User
 from src.tasks.entity_manager.utils import safe_add_notification
@@ -90,11 +96,67 @@ def create_fan_remix_contest_winners_selected_notification(session, event_id, no
 
     remixer_user_ids = [user_id[0] for user_id in remixer_user_ids]
 
-    if not remixer_user_ids:
-        logger.info(f"No remixers found for contest {event_id}")
+    event_follower_user_ids = [
+        row[0]
+        for row in (
+            session.query(Subscription.subscriber_id)
+            .filter(
+                Subscription.user_id == event_id,
+                Subscription.entity_type == SUBSCRIPTION_EVENT_ENTITY_TYPE,
+                Subscription.is_current == True,
+                Subscription.is_delete == False,
+            )
+            .all()
+        )
+    ]
+
+    # Followers of the contest host artist
+    host_follower_user_ids = [
+        row[0]
+        for row in (
+            session.query(Follow.follower_user_id)
+            .filter(
+                Follow.followee_user_id == event.user_id,
+                Follow.is_current == True,
+                Follow.is_delete == False,
+            )
+            .all()
+        )
+    ]
+
+    # Users who favorited the parent contest track
+    favoriter_user_ids = [
+        row[0]
+        for row in (
+            session.query(Save.user_id)
+            .filter(
+                Save.save_item_id == contest_track_id,
+                Save.save_type == SaveType.track,
+                Save.is_current == True,
+                Save.is_delete == False,
+            )
+            .all()
+        )
+    ]
+
+    recipient_user_ids = list(
+        set(
+            remixer_user_ids
+            + event_follower_user_ids
+            + host_follower_user_ids
+            + favoriter_user_ids
+        )
+    )
+    # Exclude the contest host themselves — they have artist_remix_contest_*
+    # notifications and shouldn't get the "fan" version.
+    recipient_user_ids = [u for u in recipient_user_ids if u != event.user_id]
+    if not recipient_user_ids:
+        logger.info(
+            f"No recipients to notify for contest {event_id}"
+        )
         return
 
-    for user_id in remixer_user_ids:
+    for user_id in recipient_user_ids:
         # Create unique group_id per user to prevent conflicts
         user_group_id = f"{group_id}:user:{user_id}"
         safe_add_notification(
@@ -114,5 +176,5 @@ def create_fan_remix_contest_winners_selected_notification(session, event_id, no
         )
 
     logger.info(
-        f"Created {len(remixer_user_ids)} winners selected notifications for event {event_id}"
+        f"Created {len(recipient_user_ids)} winners selected notifications for event {event_id}"
     )

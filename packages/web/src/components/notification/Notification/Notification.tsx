@@ -21,12 +21,14 @@ import { FanClubTextPostNotification } from './FanClubTextPostNotification'
 import { FanRemixContestEndedNotification } from './FanRemixContestEndedNotification'
 import { FanRemixContestEndingSoonNotification } from './FanRemixContestEndingSoonNotification'
 import { FanRemixContestStartedNotification } from './FanRemixContestStartedNotification'
+import { FanRemixContestSubmissionNotification } from './FanRemixContestSubmissionNotification'
 import { FanRemixContestWinnersSelectedNotification } from './FanRemixContestWinnersSelectedNotification'
 import { FavoriteNotification } from './FavoriteNotification'
 import { FavoriteOfRepostNotification } from './FavoriteOfRepostNotification'
 import { FollowNotification } from './FollowNotification'
 import { ListenStreakReminderNotification } from './ListenStreakReminderNotification'
 import { MilestoneNotification } from './MilestoneNotification'
+import { RemixContestUpdateNotification } from './RemixContestUpdateNotification'
 import { RemixCosignNotification } from './RemixCosignNotification'
 import { RemixCreateNotification } from './RemixCreateNotification'
 import { RepostNotification } from './RepostNotification'
@@ -170,6 +172,14 @@ export const Notification = (props: NotificationProps) => {
           <FanRemixContestWinnersSelectedNotification
             notification={notification}
           />
+        )
+      }
+      case NotificationType.RemixContestUpdate: {
+        return <RemixContestUpdateNotification notification={notification} />
+      }
+      case NotificationType.FanRemixContestSubmission: {
+        return (
+          <FanRemixContestSubmissionNotification notification={notification} />
         )
       }
       case NotificationType.FanClubTextPost: {

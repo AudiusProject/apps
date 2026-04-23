@@ -219,7 +219,8 @@ def test_create_event_comment_by_owner_is_post_update(app, mocker):
         assert recipient_ids == [2, 3]
         for notif in update_notifs:
             assert notif.data["event_id"] == 100
-            assert notif.data["event_user_id"] == 1
+            assert notif.data["entity_id"] == 1
+            assert notif.data["entity_user_id"] == 1
             assert notif.data["comment_id"] == 500
 
 
