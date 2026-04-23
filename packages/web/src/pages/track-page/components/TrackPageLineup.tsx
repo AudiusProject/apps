@@ -1,5 +1,7 @@
 import { useRemixContest, useTrackPageLineup } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { User } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { tracksActions } from '@audius/common/src/store/pages/track/lineup/actions'
 import { Flex, Text, IconRemix } from '@audius/harmony'
 import type { IconComponent } from '@audius/harmony'
@@ -50,7 +52,8 @@ export const TrackPageLineup = ({
 }: TrackPageLineupProps) => {
   const { indices, ...lineupData } = useTrackPageLineup({ trackId })
   const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = !!remixContest
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const suppressRemixLineupForContest = !!remixContest && isContestsEnabled
 
   const { isDesktop, isMobile } = useTrackPageSize()
 
@@ -61,7 +64,7 @@ export const TrackPageLineup = ({
       : LineupVariant.CONDENSED
 
   const hasRemixSection =
-    !isRemixContest &&
+    !suppressRemixLineupForContest &&
     (indices?.remixParentSection.index !== undefined ||
       indices?.remixesSection.index !== undefined)
 
@@ -154,8 +157,8 @@ export const TrackPageLineup = ({
         maxWidth: isCommentingEnabled ? '100%' : 774
       }}
     >
-      {!isRemixContest ? renderRemixParentSection() : null}
-      {!isRemixContest ? renderRemixesSection() : null}
+      {!suppressRemixLineupForContest ? renderRemixParentSection() : null}
+      {!suppressRemixLineupForContest ? renderRemixesSection() : null}
       {renderMoreBySection()}
       {renderRecommendedSection()}
     </Flex>

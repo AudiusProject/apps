@@ -26,14 +26,9 @@ export const environmentFlagDefaults: Record<
   Partial<FlagDefaults>
 > = {
   development: {
-    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
-    [FeatureFlags.CONTESTS]: true
+    [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true
   },
-  // TEMPORARY: CONTESTS forced on in production. Revert along with
-  // the surrounding commit.
-  production: {
-    [FeatureFlags.CONTESTS]: true
-  }
+  production: {}
 }
 
 /**
@@ -54,6 +49,5 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
-  // TEMPORARY: forced on. Revert along with the surrounding commit.
-  [FeatureFlags.CONTESTS]: true
+  [FeatureFlags.CONTESTS]: false
 }

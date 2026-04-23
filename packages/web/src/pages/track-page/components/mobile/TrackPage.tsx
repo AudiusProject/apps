@@ -6,7 +6,11 @@ import {
   useToggleFavoriteTrack,
   useUser
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useFeatureFlag,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   FavoriteSource,
   ID,
@@ -19,6 +23,7 @@ import {
   PlaybackSource,
   FavoriteType
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   OverflowAction,
   trackPageLineupActions,
@@ -57,6 +62,7 @@ import { TrackPageLineup } from '../TrackPageLineup'
 import { RemixContestTeaser } from '../shared/RemixContestTeaser'
 
 import TrackPageHeader from './TrackHeader'
+import { RemixContestSection } from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
 const { getPlaying, getPreviewing } = playerSelectors
@@ -119,6 +125,7 @@ const TrackPage = () => {
   const isCommentingEnabled = !track?.comments_disabled
 
   const loading = !track || isFetchingNFTAccess
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const toggleSaveTrack = useToggleFavoriteTrack({
     trackId: track?.track_id,
@@ -334,7 +341,11 @@ const TrackPage = () => {
             goToRepostsPage={goToRepostsPage}
           />
         </Flex>
-        <RemixContestTeaser trackId={defaults.trackId} />
+        {isContestsEnabled ? (
+          <RemixContestTeaser trackId={defaults.trackId} />
+        ) : (
+          <RemixContestSection trackId={defaults.trackId} isOwner={isOwner} />
+        )}
         {isCommentingEnabled ? (
           <CommentPreview entityId={defaults.trackId} />
         ) : null}
