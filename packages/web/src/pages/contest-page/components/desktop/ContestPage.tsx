@@ -470,151 +470,151 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
             backgroundColor='white'
             css={{ overflow: 'hidden' }}
           >
-          {/* Hero banner at the top of the Paper. The Paper's
+            {/* Hero banner at the top of the Paper. The Paper's
               `overflow: hidden` clips the banner to the outer
               rounded corners so the top edge matches the Paper
               radius. The height fluidly tracks the content width
               (via `cqi` relative to the `contest` container) so
               narrow desktop shells get a shorter hero without a
               hard mobile/desktop breakpoint. */}
-          <Box
-            w='100%'
-            css={{
-              height: `clamp(${HERO_MIN_HEIGHT}px, 30cqi, ${HERO_MAX_HEIGHT}px)`,
-              backgroundImage: coverArtUrl
-                ? `url(${coverArtUrl})`
-                : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          />
+            <Box
+              w='100%'
+              css={{
+                height: `clamp(${HERO_MIN_HEIGHT}px, 30cqi, ${HERO_MAX_HEIGHT}px)`,
+                backgroundImage: coverArtUrl
+                  ? `url(${coverArtUrl})`
+                  : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            />
 
-          {/* Header body content — padded section below the hero. */}
-          <Box p='xl'>
-            {/* Row 1: Submissions Due plain label + actions. Per Figma
+            {/* Header body content — padded section below the hero. */}
+            <Box p='xl'>
+              {/* Row 1: Submissions Due plain label + actions. Per Figma
                 this is not a chip — just uppercase label text with the
                 due date below it. Row stacks on narrow containers so
                 the action cluster can wrap without squeezing the due
                 date. */}
-            <Flex
-              justifyContent='space-between'
-              alignItems='flex-start'
-              gap='l'
-              css={{
-                [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
-                  {
-                    flexDirection: 'column',
-                    alignItems: 'stretch'
-                  }
-              }}
-            >
-              <Flex direction='column' gap='2xs'>
-                <Text variant='label' size='m' color='subdued'>
-                  {isEnded ? messages.contestEnded : messages.submissionsDue}
-                </Text>
-                {deadlineParts ? (
-                  <Flex alignItems='baseline' gap='s' wrap='wrap'>
-                    {/* label / l / regular — matches native + Figma spec. */}
-                    <Text variant='label' size='l'>
-                      {deadlineParts.date}
-                    </Text>
-                    <Text variant='label' size='l' color='subdued'>
-                      {deadlineParts.time}
-                    </Text>
-                  </Flex>
-                ) : null}
+              <Flex
+                justifyContent='space-between'
+                alignItems='flex-start'
+                gap='l'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch'
+                    }
+                }}
+              >
+                <Flex direction='column' gap='2xs'>
+                  <Text variant='label' size='m' color='subdued'>
+                    {isEnded ? messages.contestEnded : messages.submissionsDue}
+                  </Text>
+                  {deadlineParts ? (
+                    <Flex alignItems='baseline' gap='s' wrap='wrap'>
+                      {/* label / l / regular — matches native + Figma spec. */}
+                      <Text variant='label' size='l'>
+                        {deadlineParts.date}
+                      </Text>
+                      <Text variant='label' size='l' color='subdued'>
+                        {deadlineParts.time}
+                      </Text>
+                    </Flex>
+                  ) : null}
+                </Flex>
+                {renderActions()}
               </Flex>
-              {renderActions()}
-            </Flex>
 
-            {/* Title */}
-            <Box mt='l'>
-              <Text variant='display' size='s'>
-                {track.title} {messages.title}
-              </Text>
-            </Box>
+              {/* Title */}
+              <Box mt='l'>
+                <Text variant='display' size='s'>
+                  {track.title} {messages.title}
+                </Text>
+              </Box>
 
-            {/* Horizontal divider separating title from host row. */}
-            <Box mv='l'>
-              <Divider />
-            </Box>
+              {/* Horizontal divider separating title from host row. */}
+              <Box mv='l'>
+                <Divider />
+              </Box>
 
-            {/* Hosted By row + Countdown (4 plain columns, not a pill).
+              {/* Hosted By row + Countdown (4 plain columns, not a pill).
                 The avatar + name/@handle stack is wrapped in
                 `ArtistPopover` so hovering surfaces the standard
                 artist tile used throughout Audius (profile preview,
                 follow button). Avatar + name link directly to the
                 profile page. Without this the host row was a plain
                 visual with no navigation or hover card. */}
-            <Flex
-              justifyContent='space-between'
-              alignItems='center'
-              gap='xl'
-              css={{
-                [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
-                  {
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                    gap: 'var(--harmony-unit-4)'
-                  }
-              }}
-            >
-              <Flex direction='column' gap='s'>
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.hostedBy}
-                </Text>
-                <ArtistPopover handle={user.handle}>
-                  <Flex
-                    gap='m'
-                    alignItems='center'
-                    onClick={() => navigate(route.profilePage(user.handle))}
-                    css={{ cursor: 'pointer' }}
-                  >
-                    <Avatar userId={user.user_id} h={56} w={56} />
-                    <Flex direction='column'>
-                      <Flex gap='xs' alignItems='center'>
-                        <Text variant='title' size='m'>
-                          {user.name}
+              <Flex
+                justifyContent='space-between'
+                alignItems='center'
+                gap='xl'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      gap: 'var(--harmony-unit-4)'
+                    }
+                }}
+              >
+                <Flex direction='column' gap='s'>
+                  <Text variant='label' size='m' color='subdued'>
+                    {messages.hostedBy}
+                  </Text>
+                  <ArtistPopover handle={user.handle}>
+                    <Flex
+                      gap='m'
+                      alignItems='center'
+                      onClick={() => navigate(route.profilePage(user.handle))}
+                      css={{ cursor: 'pointer' }}
+                    >
+                      <Avatar userId={user.user_id} h={56} w={56} />
+                      <Flex direction='column'>
+                        <Flex gap='xs' alignItems='center'>
+                          <Text variant='title' size='m'>
+                            {user.name}
+                          </Text>
+                          <UserBadges userId={user.user_id} size='s' />
+                        </Flex>
+                        <Text variant='body' size='s' color='subdued'>
+                          @{user.handle}
                         </Text>
-                        <UserBadges userId={user.user_id} size='s' />
                       </Flex>
-                      <Text variant='body' size='s' color='subdued'>
-                        @{user.handle}
-                      </Text>
                     </Flex>
-                  </Flex>
-                </ArtistPopover>
+                  </ArtistPopover>
+                </Flex>
+                {!isEnded && contest.endDate ? (
+                  <HeaderCountdown endDate={contest.endDate} />
+                ) : null}
               </Flex>
-              {!isEnded && contest.endDate ? (
-                <HeaderCountdown endDate={contest.endDate} />
-              ) : null}
-            </Flex>
-          </Box>
-        </Paper>
+            </Box>
+          </Paper>
 
-        {/* Spacer between the header Paper and the tab row below. */}
-        <Box pt='xl' />
+          {/* Spacer between the header Paper and the tab row below. */}
+          <Box pt='xl' />
 
-        {/* Tabs — only when there are submissions (Figma 1-track variant
+          {/* Tabs — only when there are submissions (Figma 1-track variant
             has no tabs). */}
-        {submissionsCount && submissionsCount > 0 ? (
-          <Flex gap='s' pb='m'>
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'details'}
-              label={messages.contestDetails}
-              onClick={() => setActiveTab('details')}
-            />
-            <SelectablePill
-              size='large'
-              isSelected={activeTab === 'submissions'}
-              label={messages.submissionsTab(submissionsCount)}
-              onClick={() => setActiveTab('submissions')}
-            />
-          </Flex>
-        ) : null}
+          {submissionsCount && submissionsCount > 0 ? (
+            <Flex gap='s' pb='m'>
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'details'}
+                label={messages.contestDetails}
+                onClick={() => setActiveTab('details')}
+              />
+              <SelectablePill
+                size='large'
+                isSelected={activeTab === 'submissions'}
+                label={messages.submissionsTab(submissionsCount)}
+                onClick={() => setActiveTab('submissions')}
+              />
+            </Flex>
+          ) : null}
 
-        {/* Tab body — 2-column layout matching Figma. Left column is
+          {/* Tab body — 2-column layout matching Figma. Left column is
             wider (flex 1) and holds About + Prizes as stacked cards.
             Right column is fixed width and holds Stems/Followers/
             Comments as stacked cards. Each section is its OWN Paper
@@ -622,174 +622,174 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
             right column collapses under the left below
             `DETAILS_STACK_BREAKPOINT_PX` so a narrow desktop shell
             doesn't squeeze the sidebar cards into a too-thin rail. */}
-        {activeTab === 'details' ? (
-          <Flex
-            gap='xl'
-            alignItems='flex-start'
-            css={{
-              [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
-                {
-                  flexDirection: 'column',
-                  alignItems: 'stretch',
-                  gap: 'var(--harmony-unit-4)'
-                }
-            }}
-          >
-            {/* Left column: About + Prizes (and Updates if we add
+          {activeTab === 'details' ? (
+            <Flex
+              gap='xl'
+              alignItems='flex-start'
+              css={{
+                [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
+                  {
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    gap: 'var(--harmony-unit-4)'
+                  }
+              }}
+            >
+              {/* Left column: About + Prizes (and Updates if we add
                 host-feed parity later). Cards sit on the page
                 background. */}
-            <Flex
-              direction='column'
-              gap='l'
-              css={{ flex: '1 1 auto', minWidth: 0 }}
-            >
-              {/* About — render description inline (same pattern as
+              <Flex
+                direction='column'
+                gap='l'
+                css={{ flex: '1 1 auto', minWidth: 0 }}
+              >
+                {/* About — render description inline (same pattern as
                   mobile-web). Using the shared `RemixContestDetailsTab`
                   here previously double-padded the card AND prepended a
                   "Submission Due:" row that duplicated the page
                   header's deadline. */}
-              <Paper
-                direction='column'
-                p='xl'
-                gap='l'
-                borderRadius='l'
-                border='default'
-                backgroundColor='white'
-                shadow='flat'
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.aboutThisContest}
-                </Text>
-                <UserGeneratedText variant='body'>
-                  {(contest.eventData as any)?.description ??
-                    'Enter my remix contest before the deadline for your chance to win!'}
-                </UserGeneratedText>
-              </Paper>
+                <Paper
+                  direction='column'
+                  p='xl'
+                  gap='l'
+                  borderRadius='l'
+                  border='default'
+                  backgroundColor='white'
+                  shadow='flat'
+                >
+                  <Text variant='label' size='m' color='subdued'>
+                    {messages.aboutThisContest}
+                  </Text>
+                  <UserGeneratedText variant='body'>
+                    {(contest.eventData as any)?.description ??
+                      'Enter my remix contest before the deadline for your chance to win!'}
+                  </UserGeneratedText>
+                </Paper>
 
-              <Paper
-                direction='column'
-                p='xl'
-                gap='l'
-                borderRadius='l'
-                border='default'
-                backgroundColor='white'
-                shadow='flat'
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.prizes}
-                </Text>
-                {/* Inline prize info — avoids the `p='xl'` the
+                <Paper
+                  direction='column'
+                  p='xl'
+                  gap='l'
+                  borderRadius='l'
+                  border='default'
+                  backgroundColor='white'
+                  shadow='flat'
+                >
+                  <Text variant='label' size='m' color='subdued'>
+                    {messages.prizes}
+                  </Text>
+                  {/* Inline prize info — avoids the `p='xl'` the
                     track-page `RemixContestPrizesTab` adds, which
                     double-padded this card. */}
-                <UserGeneratedText variant='body'>
-                  {(contest.eventData as any)?.prizeInfo ?? ''}
-                </UserGeneratedText>
-              </Paper>
-            </Flex>
+                  <UserGeneratedText variant='body'>
+                    {(contest.eventData as any)?.prizeInfo ?? ''}
+                  </UserGeneratedText>
+                </Paper>
+              </Flex>
 
-            {/* Right column: Stems & Downloads + Followers + Comments. */}
-            <Flex
+              {/* Right column: Stems & Downloads + Followers + Comments. */}
+              <Flex
+                direction='column'
+                gap='l'
+                css={{
+                  flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
+                  width: RIGHT_COLUMN_WIDTH_PX,
+                  [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flex: '1 1 auto',
+                      width: '100%'
+                    }
+                }}
+              >
+                {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
+
+                <EventFollowersCard
+                  eventId={eventId}
+                  followerCount={followState?.followerCount ?? 0}
+                  onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
+                />
+
+                {/* Comments tile — in-column Figma card. */}
+                <ContestCommentsTile
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                  mode='comments'
+                />
+              </Flex>
+            </Flex>
+          ) : null}
+
+          <ContestFollowersModal
+            eventId={eventId}
+            isOpen={isFollowersModalOpen}
+            onClose={() => setIsFollowersModalOpen(false)}
+          />
+
+          {activeTab === 'submissions' ? (
+            <Paper
               direction='column'
+              p='xl'
               gap='l'
-              css={{
-                flex: `0 0 ${RIGHT_COLUMN_WIDTH_PX}px`,
-                width: RIGHT_COLUMN_WIDTH_PX,
-                [`@container contest (max-width: ${DETAILS_STACK_BREAKPOINT_PX}px)`]:
-                  {
-                    flex: '1 1 auto',
-                    width: '100%'
-                  }
-              }}
+              borderRadius='l'
+              border='default'
+              shadow='flat'
+              backgroundColor='white'
             >
-              {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
-
-              <EventFollowersCard
-                eventId={eventId}
-                followerCount={followState?.followerCount ?? 0}
-                onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
-              />
-
-              {/* Comments tile — in-column Figma card. */}
-              <ContestCommentsTile
-                eventId={eventId}
-                eventOwnerUserId={contest?.userId}
-                mode='comments'
-              />
-            </Flex>
-          </Flex>
-        ) : null}
-
-        <ContestFollowersModal
-          eventId={eventId}
-          isOpen={isFollowersModalOpen}
-          onClose={() => setIsFollowersModalOpen(false)}
-        />
-
-        {activeTab === 'submissions' ? (
-          <Paper
-            direction='column'
-            p='xl'
-            gap='l'
-            borderRadius='l'
-            border='default'
-            shadow='flat'
-            backgroundColor='white'
-          >
-            {/* Filter bar — same controls the track-page `RemixesPage`
+              {/* Filter bar — same controls the track-page `RemixesPage`
                 exposes above its remixes lineup: a Co-Signed toggle
                 plus a Most Recent / Most Plays / Most Favorites sort
                 dropdown. Co-signed surfaces entries the host has
                 endorsed; the sort drives the underlying
                 `useRemixesLineup` query. */}
-            <Flex
-              justifyContent='space-between'
-              alignItems='center'
-              gap='s'
-              css={{
-                [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
-                  {
-                    flexDirection: 'column',
-                    alignItems: 'stretch'
-                  }
-              }}
-            >
-              <Text variant='label' size='m' color='subdued'>
-                {messages.submissionsTab(submissionsCount)}
-              </Text>
-              <Flex gap='s' wrap='wrap'>
-                <FilterButton
-                  label={messages.coSigned}
-                  value={isCosign ? 'true' : null}
-                  onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
-                />
-                <FilterButton
-                  value={sortMethod ?? 'recent'}
-                  variant='replaceLabel'
-                  onChange={updateSortParam}
-                  options={[
-                    { label: messages.sortRecent, value: 'recent' },
-                    { label: messages.sortPlays, value: 'plays' },
-                    { label: messages.sortFavorites, value: 'likes' }
-                  ]}
-                />
+              <Flex
+                justifyContent='space-between'
+                alignItems='center'
+                gap='s'
+                css={{
+                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                    {
+                      flexDirection: 'column',
+                      alignItems: 'stretch'
+                    }
+                }}
+              >
+                <Text variant='label' size='m' color='subdued'>
+                  {messages.submissionsTab(submissionsCount)}
+                </Text>
+                <Flex gap='s' wrap='wrap'>
+                  <FilterButton
+                    label={messages.coSigned}
+                    value={isCosign ? 'true' : null}
+                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+                  />
+                  <FilterButton
+                    value={sortMethod ?? 'recent'}
+                    variant='replaceLabel'
+                    onChange={updateSortParam}
+                    options={[
+                      { label: messages.sortRecent, value: 'recent' },
+                      { label: messages.sortPlays, value: 'plays' },
+                      { label: messages.sortFavorites, value: 'likes' }
+                    ]}
+                  />
+                </Flex>
               </Flex>
-            </Flex>
-            <TanQueryLineup
-              data={lineup.data}
-              isFetching={lineup.isFetching}
-              isPending={lineup.isPending}
-              isError={lineup.isError}
-              hasNextPage={lineup.hasNextPage}
-              play={lineup.play}
-              pause={lineup.pause}
-              loadNextPage={lineup.loadNextPage}
-              isPlaying={lineup.isPlaying}
-              lineup={lineup.lineup}
-              pageSize={CONTEST_PAGE_SIZE}
-              actions={remixesPageLineupActions}
-            />
-          </Paper>
-        ) : null}
+              <TanQueryLineup
+                data={lineup.data}
+                isFetching={lineup.isFetching}
+                isPending={lineup.isPending}
+                isError={lineup.isError}
+                hasNextPage={lineup.hasNextPage}
+                play={lineup.play}
+                pause={lineup.pause}
+                loadNextPage={lineup.loadNextPage}
+                isPlaying={lineup.isPlaying}
+                lineup={lineup.lineup}
+                pageSize={CONTEST_PAGE_SIZE}
+                actions={remixesPageLineupActions}
+              />
+            </Paper>
+          ) : null}
         </Box>
       </Box>
     </Page>
