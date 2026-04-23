@@ -4,6 +4,10 @@ from src.models.events.event import Event, EventType
 from src.models.notifications.notification import Notification
 from src.models.social.follow import Follow
 from src.models.social.save import Save, SaveType
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.tracks.track import Track
 from src.utils.structured_logger import StructuredLogger
 
@@ -71,7 +75,22 @@ def create_fan_remix_contest_ending_soon_notifications(session, now=None):
             )
             .all()
         )
-        notified_user_ids = follower_user_ids | favoriter_user_ids
+        event_follower_user_ids = set(
+            row[0]
+            for row in session.query(Subscription.subscriber_id)
+            .filter(
+                Subscription.user_id == event.event_id,
+                Subscription.entity_type == SUBSCRIPTION_EVENT_ENTITY_TYPE,
+                Subscription.is_current == True,
+                Subscription.is_delete == False,
+            )
+            .all()
+        )
+        notified_user_ids = (
+            follower_user_ids | favoriter_user_ids | event_follower_user_ids
+        )
+        # Exclude the contest host — they have artist_remix_contest_ending_soon.
+        notified_user_ids.discard(event.user_id)
         parent_track_owner_id = parent_track.owner_id if parent_track else None
         group_id = get_fan_remix_contest_ending_soon_group_id(event.event_id)
         for user_id in notified_user_ids:

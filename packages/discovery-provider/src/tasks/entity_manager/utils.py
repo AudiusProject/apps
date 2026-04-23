@@ -33,7 +33,10 @@ from src.models.social.follow import Follow
 from src.models.social.repost import Repost
 from src.models.social.save import Save
 from src.models.social.share import Share
-from src.models.social.subscription import Subscription
+from src.models.social.subscription import (
+    SUBSCRIPTION_EVENT_ENTITY_TYPE,
+    Subscription,
+)
 from src.models.tracks.track import Track
 from src.models.tracks.track_route import TrackRoute
 from src.models.users.associated_wallet import AssociatedWallet
@@ -670,6 +673,24 @@ def safe_add_notification(session: Session, notification: Notification):
         session.add(notification)
 
 
+def get_remix_contest_event_subscriber_user_ids(session: Session, event: Event) -> List[int]:
+    """
+    user_id on `subscriptions` is the event_id for Event subscriptions
+    (see subscription row shape for entity_type = 'Event').
+    """
+    rows = (
+        session.query(Subscription.subscriber_id)
+        .filter(
+            Subscription.user_id == event.event_id,
+            Subscription.entity_type == SUBSCRIPTION_EVENT_ENTITY_TYPE,
+            Subscription.is_current == True,
+            Subscription.is_delete == False,
+        )
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
 def create_remix_contest_notification(
     session: Session,
     track: Track,
@@ -722,11 +743,16 @@ def create_remix_contest_notification(
         .all()
     )
 
+    contest_follower_user_ids = get_remix_contest_event_subscriber_user_ids(
+        session, remix_contest_event
+    )
+
     # Combine and deduplicate user IDs
     user_ids = list(
         set(
             [user_id for (user_id,) in follower_user_ids]
             + [user_id for (user_id,) in save_user_ids]
+            + contest_follower_user_ids
         )
     )
 

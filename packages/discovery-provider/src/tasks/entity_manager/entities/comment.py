@@ -386,6 +386,12 @@ def create_comment(params: ManageEntityParameters):
         event_follower_user_ids = {
             row[0] for row in event_follower_rows if row[0] != entity_user_id
         }
+        event_row = (
+            params.session.query(Event)
+            .filter(Event.event_id == stored_entity_id)
+            .first()
+        )
+        contest_track_id = event_row.entity_id if event_row else None
         for recipient_id in event_follower_user_ids:
             event_update_notification = Notification(
                 blocknumber=params.block_number,
@@ -399,7 +405,8 @@ def create_comment(params: ManageEntityParameters):
                 ),
                 data={
                     "event_id": stored_entity_id,
-                    "event_user_id": entity_user_id,
+                    "entity_id": contest_track_id,
+                    "entity_user_id": entity_user_id,
                     "comment_id": comment_id,
                 },
             )

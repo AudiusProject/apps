@@ -662,6 +662,47 @@ export const notificationFromSDK = (
       }
     }
     default:
+      // Types below may arrive before the SDK is regenerated
+      {
+        const n = notification as unknown as {
+          type: string
+          actions: typeof notification.actions
+        }
+        if (n.type === 'remix_contest_update') {
+          const data = n.actions[0].data as unknown as Record<string, string>
+          return {
+            type: NotificationType.RemixContestUpdate,
+            eventId: HashId.parse(data.eventId ?? data.event_id),
+            entityId: HashId.parse(data.entityId ?? data.entity_id),
+            entityUserId: HashId.parse(
+              data.entityUserId ?? data.entity_user_id
+            ),
+            commentId: HashId.parse(data.commentId ?? data.comment_id),
+            userIds: [],
+            entityType: Entity.Track,
+            ...formatBaseNotification(notification)
+          }
+        }
+        if (n.type === 'fan_remix_contest_submission') {
+          const data = n.actions[0].data as unknown as Record<string, string>
+          return {
+            type: NotificationType.FanRemixContestSubmission,
+            eventId: HashId.parse(data.eventId ?? data.event_id),
+            entityId: HashId.parse(data.entityId ?? data.entity_id),
+            entityUserId: HashId.parse(
+              data.entityUserId ?? data.entity_user_id
+            ),
+            submissionTrackId: HashId.parse(
+              data.submissionTrackId ?? data.submission_track_id
+            ),
+            userIds: [
+              HashId.parse(data.submitterUserId ?? data.submitter_user_id)
+            ].filter(removeNullable),
+            entityType: Entity.Track,
+            ...formatBaseNotification(notification)
+          }
+        }
+      }
       return undefined
   }
 }

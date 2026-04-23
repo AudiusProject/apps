@@ -25,6 +25,8 @@ export enum NotificationType {
   FanRemixContestEnded = 'FanRemixContestEnded',
   FanRemixContestEndingSoon = 'FanRemixContestEndingSoon',
   FanRemixContestWinnersSelected = 'FanRemixContestWinnersSelected',
+  RemixContestUpdate = 'RemixContestUpdate',
+  FanRemixContestSubmission = 'FanRemixContestSubmission',
   Tastemaker = 'Tastemaker',
   TrendingTrack = 'TrendingTrack',
   TrendingUnderground = 'TrendingUnderground',
@@ -612,6 +614,26 @@ export type FanRemixContestWinnersSelectedNotification = BaseNotification & {
   entityType: Entity.Track
 }
 
+export type RemixContestUpdateNotification = BaseNotification & {
+  type: NotificationType.RemixContestUpdate
+  eventId: ID
+  entityId: ID
+  entityUserId: ID
+  commentId: ID
+  userIds: ID[]
+  entityType: Entity.Track
+}
+
+export type FanRemixContestSubmissionNotification = BaseNotification & {
+  type: NotificationType.FanRemixContestSubmission
+  eventId: ID
+  entityId: ID
+  entityUserId: ID
+  submissionTrackId: ID
+  userIds: ID[]
+  entityType: Entity.Track
+}
+
 export type ArtistRemixContestEndingSoonNotification = BaseNotification & {
   type: NotificationType.ArtistRemixContestEndingSoon
   entityId: ID
@@ -665,6 +687,8 @@ export type Notification =
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification
+  | RemixContestUpdateNotification
+  | FanRemixContestSubmissionNotification
   | ArtistRemixContestEndingSoonNotification
   | ArtistRemixContestSubmissionsNotification
   | FanClubTextPostNotification
