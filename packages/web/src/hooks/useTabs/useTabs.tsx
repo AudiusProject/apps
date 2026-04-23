@@ -148,6 +148,11 @@ const TabBar = memo(
         return refsArr.current[index] ?? createRef()
       })
     }
+    const tabDisplayModeSignature = useMemo(
+      () =>
+        tabs.map((tab) => `${tab.label}:${tab.hideText ? '1' : '0'}`).join('|'),
+      [tabs]
+    )
 
     useEffect(() => {
       accentPositionRef.current = accentPosition
@@ -225,7 +230,7 @@ const TabBar = memo(
       isMobileV2,
       setAccentProps,
       setDidPositionTab,
-      tabs
+      tabs.length
     ])
 
     // If we resize the window we'd better resposition
@@ -268,11 +273,17 @@ const TabBar = memo(
         if (frameId !== null) cancelAnimationFrame(frameId)
         observer.disconnect()
       }
-    }, [isMobile, isMobileV2, resizeTabs, tabs])
+    }, [isMobile, isMobileV2, resizeTabs, tabDisplayModeSignature])
 
     useEffect(() => {
+      // Tab content can switch between icon+text and icon-only at responsive
+      // breakpoints. Re-measure on the next frame to catch post-layout sizing.
       resizeTabs()
-    }, [activeIndex, tabs, resizeTabs, fractionalOffset])
+      const frameId = requestAnimationFrame(() => {
+        resizeTabs()
+      })
+      return () => cancelAnimationFrame(frameId)
+    }, [activeIndex, resizeTabs, fractionalOffset, tabDisplayModeSignature])
 
     // Stretchy effect while translating.
     // Ask Michael to explain this if necessary.
@@ -436,7 +447,7 @@ const useContainerDimensions = (
   useEffect(() => {
     window.addEventListener('resize', updateSize)
     updateSize()
-    return window.removeEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
   }, [updateSize, activeIndex, dimensionsAreDirty])
 
   return {
