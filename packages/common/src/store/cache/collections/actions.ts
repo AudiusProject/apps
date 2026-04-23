@@ -84,9 +84,10 @@ export function createPlaylistFailed(
 
 export function editPlaylist(
   playlistId: number,
-  formFields: EditCollectionValues
+  formFields: EditCollectionValues,
+  onComplete?: (success: boolean, error?: Error) => void
 ) {
-  return { type: EDIT_PLAYLIST, playlistId, formFields }
+  return { type: EDIT_PLAYLIST, playlistId, formFields, onComplete }
 }
 
 export function editPlaylistSucceeded() {
