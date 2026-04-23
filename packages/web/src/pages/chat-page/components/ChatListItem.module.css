@@ -65,19 +65,17 @@
   line-height: 130%;
 }
 
-@media (max-width: 1080px) {
-  .headingContainer {
-    justify-content: center;
-  }
+.root.compact .headingContainer {
+  justify-content: center;
+}
 
-  .messagePreview,
-  .userText,
-  .unreadIndicatorTag,
-  .blastPreview {
-    display: none;
-  }
+.root.compact .messagePreview,
+.root.compact .userText,
+.root.compact .unreadIndicatorTag,
+.root.compact .blastPreview {
+  display: none;
+}
 
-  .minimizedUnreadIndicatorTag {
-    display: flex;
-  }
+.root.compact .minimizedUnreadIndicatorTag {
+  display: flex;
 }

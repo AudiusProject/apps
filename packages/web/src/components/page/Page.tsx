@@ -14,16 +14,19 @@ import styles from './Page.module.css'
 const HEADER_MARGIN_PX = 32
 
 // Responsible for positioning the header
-type HeaderContainerProps = Pick<PageProps, 'header' | 'showSearch'>
+type HeaderContainerProps = Pick<
+  PageProps,
+  'header' | 'showSearch' | 'headerContentPaddingInline'
+>
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { header, showSearch } = props
+  const { header, showSearch, headerContentPaddingInline } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className={styles.headerContainer}>
-      <Frosted>
+    <div ref={headerContainerRef} className={styles.headerContainer}>
+      <Frosted contentPaddingInline={headerContentPaddingInline}>
         {cloneElement(header as any, {
           headerContainerRef,
           topLeftElement: showSearch ? <DesktopSearchBar /> : null
@@ -48,6 +51,7 @@ type PageProps = {
   fromOpacity?: number
   fadeDuration?: number
   header?: ReactNode
+  headerContentPaddingInline?: string
 
   // There are some pages which don't have a fixed header but still display
   // a search bar that scrolls with the page.
@@ -74,6 +78,7 @@ export const Page = (props: PageProps) => {
     fadeDuration = 200,
     fromOpacity = 0.2,
     header,
+    headerContentPaddingInline = 'var(--harmony-unit-8)',
     image,
     noIndex = false,
     ogDescription,
@@ -116,7 +121,13 @@ export const Page = (props: PageProps) => {
           props.className
         )}
       >
-        {header && <HeaderContainer header={header} showSearch={showSearch} />}
+        {header && (
+          <HeaderContainer
+            header={header}
+            showSearch={showSearch}
+            headerContentPaddingInline={headerContentPaddingInline}
+          />
+        )}
         <div
           className={cn({
             [styles.inset]: variant === 'inset',

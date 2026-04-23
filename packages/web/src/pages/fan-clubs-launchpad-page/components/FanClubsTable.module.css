@@ -1,0 +1,47 @@
+.bodyWrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  container-name: fan-clubs-content;
+}
+
+.tableWrapper {
+  width: 100%;
+  min-width: 328px;
+  border-radius: 8px;
+  border: 1px solid var(--harmony-n-100);
+  box-shadow: 0 2px 5px -2px rgba(133, 129, 153, 0.25);
+  background-color: var(--harmony-white);
+  padding-bottom: 5px;
+  margin-bottom: 52px;
+  overflow: hidden;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--harmony-unit-6) var(--harmony-unit-4);
+  margin-bottom: var(--harmony-unit-4);
+  min-width: 328px;
+}
+
+.cardsContainer > * {
+  flex: 0 0 calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+  max-width: calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+}
+
+@container fan-clubs-content (max-width: 900px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - var(--harmony-unit-4)) / 2);
+    max-width: calc((100% - var(--harmony-unit-4)) / 2);
+  }
+}
+
+@container fan-clubs-content (max-width: 640px) {
+  .cardsContainer > * {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

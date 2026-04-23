@@ -1,0 +1,40 @@
+.cardsLayoutWrapper {
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+  container-name: search-card-results;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--harmony-unit-6) var(--harmony-unit-4);
+  margin-bottom: var(--harmony-unit-4);
+  min-width: 180px;
+}
+
+.cardsContainer > * {
+  flex: 0 0 calc((100% - (var(--harmony-unit-4) * 3)) / 4);
+  max-width: calc((100% - (var(--harmony-unit-4) * 3)) / 4);
+}
+
+@container search-card-results (max-width: 880px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+    max-width: calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+  }
+}
+
+@container search-card-results (max-width: 640px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - var(--harmony-unit-4)) / 2);
+    max-width: calc((100% - var(--harmony-unit-4)) / 2);
+  }
+}
+
+@container search-card-results (max-width: 380px) {
+  .cardsContainer > * {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

@@ -49,13 +49,14 @@ const DesktopChangeIndicator = ({
   return (
     <Flex gap='s' alignItems='center'>
       <Box
-        w='unit12'
-        h='unit12'
         css={css({
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          width: 'clamp(32px, 8cqi, 48px)',
+          height: 'clamp(32px, 8cqi, 48px)',
+          flexShrink: 0
         })}
       >
         <Box
@@ -73,17 +74,27 @@ const DesktopChangeIndicator = ({
         <IconArrowRight
           css={css({
             position: 'relative',
-            transform: `rotate(${rotation}deg)`
+            transform: `rotate(${rotation}deg)`,
+            width: 'clamp(16px, 4cqi, 24px)',
+            height: 'clamp(16px, 4cqi, 24px)'
           })}
-          size='l'
           color={changeColor}
         />
       </Box>
-      <Flex column gap='2xs'>
-        <Text variant='title' size='l'>
+      <Flex column gap='2xs' css={{ minWidth: 0 }}>
+        <Text
+          variant='title'
+          size='l'
+          css={{ fontSize: 'clamp(14px, 3.2cqi, 18px)' }}
+        >
           {messages.changeLabel}
         </Text>
-        <Text variant='body' size='l' color={changeColor}>
+        <Text
+          variant='body'
+          size='l'
+          color={changeColor}
+          css={{ fontSize: 'clamp(13px, 3cqi, 18px)' }}
+        >
           {formatCurrency(Math.abs(changeAmount))} (
           {formatPercentage(Math.abs(changePercentage))})
         </Text>
@@ -241,8 +252,18 @@ const AccountBalanceContent = () => {
           />
         </Flex>
       ) : (
-        <Flex justifyContent='space-between' alignItems='flex-start'>
-          <Flex column gap='s'>
+        <Flex
+          justifyContent='space-between'
+          alignItems='flex-start'
+          gap='m'
+          css={{
+            '@container wallet (max-width: 640px)': {
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }
+          }}
+        >
+          <Flex column gap='s' css={{ minWidth: 0 }}>
             <Text variant='heading' size='m' color='default'>
               {messages.title}
             </Text>

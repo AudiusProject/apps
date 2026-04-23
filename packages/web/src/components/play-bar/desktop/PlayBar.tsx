@@ -12,6 +12,7 @@ import {
 } from '@audius/common/store'
 import { Genre, route } from '@audius/common/utils'
 import { removeHotkeys, setupHotkeys, Scrubber } from '@audius/harmony'
+import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
@@ -21,6 +22,7 @@ import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvid
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
 import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
 import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { audioPlayer } from 'services/audio-player'
 import { push } from 'utils/navigation'
 
@@ -81,6 +83,8 @@ const PlayBar = () => {
 
   const hotkeysHook = useRef<any>(null)
   const seekInterval = useRef<number | undefined>(undefined)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const isNarrow = useIsContainerNarrow(wrapperRef, 720)
 
   // Memoized values
   const trackTitle = currentTrack?.title || ''
@@ -255,7 +259,12 @@ const PlayBar = () => {
 
   return (
     <div className={styles.playBar}>
-      <div className={styles.playBarContentWrapper}>
+      <div
+        className={cn(styles.playBarContentWrapper, {
+          [styles.narrow]: isNarrow
+        })}
+        ref={wrapperRef}
+      >
         <div className={styles.playBarPlayingInfo}>
           {trackId && artistUserId ? (
             <PlayingTrackInfo
@@ -272,6 +281,7 @@ const PlayBar = () => {
               onClickTrackTitle={goToTrackPage}
               onClickArtistName={goToArtistPage}
               hasShadow={false}
+              hideArt={isNarrow}
             />
           ) : null}
         </div>
@@ -344,10 +354,23 @@ const PlayBar = () => {
             defaultValue={100}
             granularity={VOLUME_GRANULARITY}
             onChange={updateVolume}
+            compact={isNarrow}
           />
-          {trackId && uid ? (
-            <SocialActions trackId={trackId} uid={uid} isOwner={isOwner} />
-          ) : null}
+          <div
+            className={styles.socialActionsWrapper}
+            style={trackId && uid ? undefined : { visibility: 'hidden' }}
+          >
+            {trackId && uid ? (
+              <SocialActions
+                trackId={trackId}
+                uid={uid}
+                isOwner={isOwner}
+                compact={isNarrow}
+              />
+            ) : (
+              <div className={styles.socialActionsPlaceholder} />
+            )}
+          </div>
         </div>
       </div>
     </div>

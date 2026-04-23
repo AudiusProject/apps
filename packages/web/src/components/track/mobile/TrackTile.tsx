@@ -32,7 +32,6 @@ import {
   IconVolumeLevel2 as IconVolume,
   Text,
   Flex,
-  Box,
   IconButton,
   IconKebabHorizontal
 } from '@audius/harmony'
@@ -40,11 +39,15 @@ import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
+import { Draggable } from 'components/dragndrop'
 import { TextLink, UserLink } from 'components/link'
 import Menu from 'components/menu/Menu'
 import { OwnProps as TrackMenuProps } from 'components/menu/TrackMenu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileProps, TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { DragDropKind } from 'store/dragndrop/slice'
+import { fullTrackPage } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { TrackDogEar } from '../TrackDogEar'
@@ -80,12 +83,13 @@ type ConnectedTrackTileProps = Omit<
   | 'hasCurrentUserSaved'
   | 'artistIsVerified'
   | 'isPlaying'
->
+> & { dragKind?: DragDropKind }
 
 export const TrackTile = ({
   uid,
   id,
   index,
+  order,
   size,
   ordered,
   trackTileStyles,
@@ -98,9 +102,11 @@ export const TrackTile = ({
   containerClassName,
   isFeed = false,
   source,
-  noShimmer
+  noShimmer,
+  dragKind
 }: ConnectedTrackTileProps) => {
   const dispatch = useDispatch()
+  const isMobile = useIsMobile()
 
   const { data: track } = useTrack(id)
   const { data: partialUser } = useUser(track?.owner_id, {
@@ -212,18 +218,17 @@ export const TrackTile = ({
     return (
       <Menu menu={menu}>
         {(ref, triggerPopup) => (
-          <Box>
-            <IconButton
-              ref={ref}
-              icon={IconKebabHorizontal}
-              onClick={(e) => {
-                e.stopPropagation()
-                triggerPopup()
-              }}
-              aria-label='More'
-              color='subdued'
-            />
-          </Box>
+          <IconButton
+            ref={ref}
+            aria-label='More'
+            icon={IconKebabHorizontal}
+            color='subdued'
+            size='l'
+            onClick={(e) => {
+              e.stopPropagation()
+              triggerPopup()
+            }}
+          />
         )}
       </Menu>
     )
@@ -371,10 +376,12 @@ export const TrackTile = ({
   ])
 
   const isReadonly = variant === 'readonly'
+  const tileOrder =
+    order ?? (ordered && index !== undefined ? index + 1 : undefined)
 
   if (is_delete || is_deactivated) return null
 
-  return (
+  const tileContent = (
     <div
       className={cn(
         styles.container,
@@ -416,6 +423,7 @@ export const TrackTile = ({
           />
           <Flex
             direction='column'
+            justifyContent='center'
             gap='xs'
             pv='xs'
             mr='m'
@@ -441,6 +449,7 @@ export const TrackTile = ({
             <UserLink
               userId={user_id}
               badgeSize='xs'
+              popover={!isMobile}
               css={{ marginTop: '-4px' }}
             >
               {loading ? (
@@ -458,8 +467,7 @@ export const TrackTile = ({
         </div>
         <TrackTileStats
           trackId={track_id}
-          isTrending={isTrending}
-          rankIndex={index}
+          rankIndex={isTrending && tileOrder !== undefined ? index : undefined}
           size={TrackTileSize.SMALL}
           isLoading={loading}
           noShimmer={noShimmer}
@@ -490,5 +498,21 @@ export const TrackTile = ({
         )}
       </div>
     </div>
+  )
+
+  if (isMobile || isReadonly || isStreamGated) return tileContent
+
+  return (
+    <Draggable
+      asChild
+      text={title}
+      kind={dragKind ?? 'track'}
+      id={track_id}
+      isOwner={isOwner}
+      isDisabled={loading}
+      link={fullTrackPage(permalink)}
+    >
+      {tileContent}
+    </Draggable>
   )
 }

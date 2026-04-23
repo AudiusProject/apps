@@ -1,4 +1,4 @@
-import { MouseEvent, memo } from 'react'
+import { MouseEvent, ReactElement, memo } from 'react'
 
 import {
   isContentUSDCPurchaseGated,
@@ -6,10 +6,16 @@ import {
   GatedContentStatus
 } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { Flex, IconButton, IconShare, Text } from '@audius/harmony'
+import {
+  Flex,
+  IconButton,
+  IconKebabHorizontal,
+  IconShare,
+  Text,
+  Tooltip
+} from '@audius/harmony'
 import cn from 'classnames'
 
-import MoreButton from 'components/alt-button/MoreButton'
 import AnimatedIconButton, {
   AnimatedIconType
 } from 'components/animated-button/AnimatedIconButton'
@@ -19,6 +25,14 @@ import { useIsUSDCEnabled } from 'hooks/useIsUSDCEnabled'
 import { GatedConditionsPill } from '../GatedConditionsPill'
 
 import styles from './BottomButtons.module.css'
+
+const messages = {
+  repost: 'Repost',
+  unrepost: 'Unrepost',
+  favorite: 'Favorite',
+  unfavorite: 'Unfavorite',
+  share: 'Share'
+}
 
 type BottomButtonsProps = {
   hasSaved: boolean
@@ -50,6 +64,20 @@ const BottomButtons = (props: BottomButtonsProps) => {
   const isUSDCPurchase =
     isUSDCEnabled && isContentUSDCPurchaseGated(props.streamConditions)
 
+  // Wrap with a Harmony Tooltip on desktop web; skip on native mobile (no hover)
+  const withTooltip = (
+    label: string,
+    disabled: boolean,
+    children: ReactElement
+  ) =>
+    isMobile ? (
+      children
+    ) : (
+      <Tooltip text={label} placement='top' mount='page' disabled={disabled}>
+        <Flex css={{ position: 'relative' }}>{children}</Flex>
+      </Tooltip>
+    )
+
   // Readonly variant only renders content for locked USDC tracks
   if (!!props.readonly && (!isUSDCPurchase || props.hasStreamAccess)) {
     return null
@@ -59,12 +87,15 @@ const BottomButtons = (props: BottomButtonsProps) => {
     !isMobile && props.renderOverflow ? (
       props.renderOverflow()
     ) : (
-      <MoreButton
-        wrapperClassName={styles.button}
-        className={styles.buttonContent}
-        onClick={props.onClickOverflow}
-        isDarkMode={props.isDarkMode}
-        isMatrixMode={props.isMatrixMode}
+      <IconButton
+        icon={IconKebabHorizontal}
+        onClick={(e) => {
+          e.stopPropagation()
+          props.onClickOverflow()
+        }}
+        size='l'
+        color='subdued'
+        aria-label='More'
       />
     )
 
@@ -73,10 +104,10 @@ const BottomButtons = (props: BottomButtonsProps) => {
     return (
       <Flex
         ph={props.isTrack ? undefined : 's'}
+        pt='s'
         pb={props.isTrack ? undefined : 's'}
         direction='row'
-        h='100%'
-        alignItems='flex-end'
+        alignItems='center'
         justifyContent='space-between'
         borderTop='default'
       >
@@ -94,7 +125,9 @@ const BottomButtons = (props: BottomButtonsProps) => {
     )
   }
 
-  const shareButton = (
+  const shareButton = withTooltip(
+    messages.share,
+    false,
     <div
       className={cn(styles.button, {
         [styles.shareHidden]: props.isShareHidden
@@ -105,7 +138,7 @@ const BottomButtons = (props: BottomButtonsProps) => {
         onClick={props.onShare}
         size='l'
         color='subdued'
-        aria-label='Share'
+        aria-label={messages.share}
       />
     </div>
   )
@@ -114,7 +147,8 @@ const BottomButtons = (props: BottomButtonsProps) => {
     return (
       <Flex
         ph='s'
-        pv='s'
+        pt='s'
+        pb='s'
         direction='row'
         alignItems='center'
         justifyContent='flex-end'
@@ -128,42 +162,51 @@ const BottomButtons = (props: BottomButtonsProps) => {
   return (
     <Flex
       ph={props.isTrack ? undefined : 's'}
+      pt='s'
       pb={props.isTrack ? undefined : 's'}
       direction='row'
-      alignItems='flex-end'
+      alignItems='center'
       justifyContent='space-between'
       borderTop='default'
     >
       <Flex
-        gap='2xl'
+        gap='xl'
         direction='row'
         alignItems='center'
         justifyContent='space-between'
       >
-        <AnimatedIconButton
-          icon={AnimatedIconType.REPOST}
-          wrapperClassName={cn(styles.button, styles.repostButton)}
-          className={styles.buttonContent}
-          activeClassName={styles.activeButton}
-          disabledClassName={styles.disabledButton}
-          onClick={props.toggleRepost}
-          isActive={props.hasReposted}
-          isDisabled={props.isOwner}
-          isMatrix={props.isMatrixMode}
-          stopPropagation
-        />
-        <AnimatedIconButton
-          icon={AnimatedIconType.FAVORITE}
-          wrapperClassName={styles.button}
-          className={styles.buttonContent}
-          activeClassName={styles.activeButton}
-          disabledClassName={styles.disabledButton}
-          onClick={props.toggleSave}
-          isActive={props.hasSaved}
-          isDisabled={props.isOwner}
-          isMatrix={props.isMatrixMode}
-          stopPropagation
-        />
+        {withTooltip(
+          props.hasReposted ? messages.unrepost : messages.repost,
+          props.isOwner,
+          <AnimatedIconButton
+            icon={AnimatedIconType.REPOST}
+            wrapperClassName={cn(styles.button, styles.repostButton)}
+            className={styles.buttonContent}
+            activeClassName={styles.activeButton}
+            disabledClassName={styles.disabledButton}
+            onClick={props.toggleRepost}
+            isActive={props.hasReposted}
+            isDisabled={props.isOwner}
+            isMatrix={props.isMatrixMode}
+            stopPropagation
+          />
+        )}
+        {withTooltip(
+          props.hasSaved ? messages.unfavorite : messages.favorite,
+          props.isOwner,
+          <AnimatedIconButton
+            icon={AnimatedIconType.FAVORITE}
+            wrapperClassName={cn(styles.button, styles.favoriteButton)}
+            className={styles.buttonContent}
+            activeClassName={styles.activeButton}
+            disabledClassName={styles.disabledButton}
+            onClick={props.toggleSave}
+            isActive={props.hasSaved}
+            isDisabled={props.isOwner}
+            isMatrix={props.isMatrixMode}
+            stopPropagation
+          />
+        )}
         {shareButton}
       </Flex>
       {moreButton}

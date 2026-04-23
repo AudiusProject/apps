@@ -1,6 +1,12 @@
 .root {
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
   background-color: var(--harmony-n-50);
+  border-right: 1px solid var(--harmony-n-150);
+}
+
+.compact {
   border-right: 1px solid var(--harmony-n-150);
 }
 

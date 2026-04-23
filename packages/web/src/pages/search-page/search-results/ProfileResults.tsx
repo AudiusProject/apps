@@ -16,6 +16,8 @@ import { useMainContentRef } from 'pages/MainContentContext'
 import { NoResultsTile } from '../NoResultsTile'
 import { useSearchParams } from '../hooks'
 
+import styles from './CardResults.module.css'
+
 const { addItem: addRecentSearch } = searchActions
 
 type ProfileResultsProps = {
@@ -32,14 +34,17 @@ const ProfileResultsSkeletons = ({
   skeletonCount: number
 }) => {
   const isMobile = useIsMobile()
+  const cardSize = isMobile ? 'xs' : 'm'
+  const cardStyles = isMobile ? { maxWidth: 320 } : undefined
   return (
     <>
       {range(skeletonCount).map((_, i) => (
         <UserCard
           key={`user_card_sekeleton_${i}`}
           id={0}
-          size={isMobile ? 'xs' : 's'}
-          css={isMobile ? { maxWidth: 320 } : undefined}
+          size={cardSize}
+          w={isMobile ? undefined : '100%'}
+          css={cardStyles}
           loading={true}
         />
       ))}
@@ -85,35 +90,46 @@ export const ProfileResultsTiles = (props: ProfileResultsProps) => {
   const shouldShowMoreSkeletons =
     isFetching && !isPending && (limit === undefined || data?.length < limit)
 
+  const resultCards = !truncatedIds.length
+    ? [
+        <ProfileResultsSkeletons
+          key='initial-skeletons'
+          skeletonCount={skeletonCount}
+        />
+      ]
+    : truncatedIds.map((id) => (
+        <UserCard
+          key={id}
+          id={id}
+          size={isMobile ? 'xs' : 'm'}
+          w={isMobile ? undefined : '100%'}
+          css={isMobile ? { maxWidth: 320 } : undefined}
+          onClick={() => handleClick(id)}
+          onUserLinkClick={() => handleClick(id)}
+        />
+      ))
+
   return (
-    <Box
-      css={{
-        display: 'grid',
-        gridTemplateColumns: isMobile
-          ? 'repeat(auto-fill, minmax(150px, 1fr))'
-          : 'repeat(auto-fill, 200px)',
-        justifyContent: 'space-between',
-        gap: 16
-      }}
-      p={isMobile ? 'm' : undefined}
-    >
-      {!truncatedIds.length ? (
-        <ProfileResultsSkeletons skeletonCount={skeletonCount} />
-      ) : (
-        truncatedIds.map((id) => (
-          <UserCard
-            key={id}
-            id={id}
-            size={isMobile ? 'xs' : 's'}
-            css={isMobile ? { maxWidth: 320 } : undefined}
-            onClick={() => handleClick(id)}
-            onUserLinkClick={() => handleClick(id)}
-          />
-        ))
-      )}
-      {shouldShowMoreSkeletons ? (
-        <ProfileResultsSkeletons skeletonCount={skeletonCount} />
-      ) : null}
+    <Box className={isMobile ? undefined : styles.cardsLayoutWrapper}>
+      <Box
+        className={isMobile ? undefined : styles.cardsContainer}
+        css={
+          isMobile
+            ? {
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                justifyContent: 'space-between',
+                gap: 16
+              }
+            : undefined
+        }
+        p={isMobile ? 'm' : undefined}
+      >
+        {resultCards}
+        {shouldShowMoreSkeletons ? (
+          <ProfileResultsSkeletons skeletonCount={skeletonCount} />
+        ) : null}
+      </Box>
     </Box>
   )
 }

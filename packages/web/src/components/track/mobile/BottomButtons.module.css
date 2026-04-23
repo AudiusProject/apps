@@ -1,24 +1,51 @@
+/* Inner Lottie wrapper – sized so the SVG renders at the 24px icon footprint */
 .button {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  width: var(--harmony-unit-8);
-  height: var(--harmony-unit-8);
-}
-
-.buttonContent {
   width: var(--harmony-unit-6);
   height: var(--harmony-unit-6);
 }
 
-/* Repost Lottie has more whitespace – scale up slightly to match favorite/share */
+/* Outer <button> element – matches desktop iconButton behavior */
+.buttonContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--harmony-unit-6);
+  height: var(--harmony-unit-6);
+  transform: scale3d(1, 1, 1);
+  transition: all 0.12s ease-in-out !important;
+}
+
+.buttonContent:hover {
+  transform: scale3d(1.18, 1.18, 1.18);
+}
+
+.buttonContent:active {
+  transform: scale3d(0.95, 0.95, 0.95);
+}
+
+.disabledButton,
+.disabledButton:hover,
+.disabledButton:active {
+  transform: scale3d(1, 1, 1);
+}
+
+/* Repost Lottie has heavy internal whitespace – scale up to match the 24px icons */
 .repostButton {
-  transform: scale(1.15);
+  transform: scale(1.25);
+  transform-origin: center;
+}
+
+/* Favorite Lottie sits slightly high in its viewBox – nudge down and scale to match */
+.favoriteButton {
+  transform: translateY(1px) scale(0.95);
   transform-origin: center;
 }
 
 /* Subdued inactive state - matches share icon */
-.button path {
+.buttonContent path {
   fill: var(--harmony-n-400) !important;
 }
 
@@ -36,12 +63,22 @@
 
 .share {
   position: relative;
-  top: -1px;
-  height: var(--harmony-unit-8);
-  width: var(--harmony-unit-8);
   display: flex;
   align-items: center;
   justify-content: center;
+  height: var(--harmony-unit-6);
+  width: var(--harmony-unit-6);
+  transform: scale3d(1, 1, 1);
+  transition: all 0.12s ease-in-out !important;
+}
+
+/* Match repost/favorite 1.18 hover total – Harmony IconButton already scales svg on hover */
+.share:hover {
+  transform: scale3d(1.07, 1.07, 1.07);
+}
+
+.share:active {
+  transform: scale3d(0.95, 0.95, 0.95);
 }
 
 .shareHidden {
@@ -49,8 +86,8 @@
 }
 
 .overflow {
-  height: var(--harmony-unit-8);
-  width: var(--harmony-unit-8);
+  height: var(--harmony-unit-6);
+  width: var(--harmony-unit-6);
 }
 
 .gatedContent {

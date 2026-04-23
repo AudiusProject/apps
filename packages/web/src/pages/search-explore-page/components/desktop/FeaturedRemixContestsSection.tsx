@@ -12,9 +12,9 @@ import {
 import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
+import { CONTEST_CARD_WIDTH } from './constants'
 import { useExploreSectionTracking } from './useExploreSectionTracking'
 
-const NEW_CARD_WIDTH = 320
 const SKELETON_COUNT = 6
 
 export const FeaturedRemixContestsSection = () => {
@@ -46,12 +46,12 @@ export const FeaturedRemixContestsSection = () => {
       {isContestsPageEnabled
         ? showLoading
           ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <Box key={i} w={NEW_CARD_WIDTH} css={{ flexShrink: 0 }}>
+              <Box key={i} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
                 <ContestCardSkeleton variant='grid' />
               </Box>
             ))
           : data.featuredRemixContests.map((trackId) => (
-              <Box key={trackId} w={NEW_CARD_WIDTH} css={{ flexShrink: 0 }}>
+              <Box key={trackId} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
                 <ContestCard trackId={trackId} variant='grid' />
               </Box>
             ))

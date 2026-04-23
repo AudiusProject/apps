@@ -1,5 +1,3 @@
-import { ChangeEvent, useCallback, useState } from 'react'
-
 import { useCollection, useCurrentUserId } from '@audius/common/api'
 import { ModalSource, isContentUSDCPurchaseGated } from '@audius/common/models'
 import { PurchaseableContentType } from '@audius/common/store'
@@ -9,9 +7,6 @@ import {
   IconVisibilityHidden,
   IconPencil,
   Flex,
-  TextInput,
-  TextInputSize,
-  IconSearch,
   IconCart,
   useTheme,
   MusicBadge,
@@ -35,8 +30,6 @@ import { CollectionActionButtons } from './CollectionActionButtons'
 import styles from './CollectionHeader.module.css'
 
 const messages = {
-  filterPlaylist: 'Search in playlist...',
-  filterAlbum: 'Search in album...',
   premiumLabel: 'premium',
   by: 'By ',
   hidden: 'Hidden',
@@ -62,7 +55,6 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     onPlay,
     onPreview,
     userId,
-    onFilterChange,
     reposts,
     saves,
     onClickReposts,
@@ -88,21 +80,11 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     permalink,
     is_private: isPrivate
   } = partialCollection ?? {}
-  const [filterText, setFilterText] = useState('')
 
   const hasStreamAccess = access?.stream
   const shouldShowStats = !isPrivate || isOwner
   const shouldShowScheduledRelease =
     isScheduledRelease && releaseDate && dayjs(releaseDate).isAfter(dayjs())
-
-  const handleFilterChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const newFilterText = e.target.value
-      setFilterText(newFilterText)
-      onFilterChange?.(e)
-    },
-    [onFilterChange]
-  )
 
   const renderStatsRow = (
     isLoading: boolean,
@@ -176,6 +158,10 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
                     size='xl'
                     className={cn(styles.titleHeader)}
                     textAlign='left'
+                    css={{
+                      fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
+                      lineHeight: 1.33
+                    }}
                   >
                     {title}
                   </Text>
@@ -226,14 +212,14 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
           />
         )}
       </div>
-      <Flex
-        w='240px'
-        gap='s'
-        justifyContent='flex-end'
-        className={styles.searchSection}
-      >
-        {!isPublished ? (
-          shouldShowScheduledRelease ? (
+      {!isPublished ? (
+        <Flex
+          w='240px'
+          gap='s'
+          justifyContent='flex-end'
+          className={styles.searchSection}
+        >
+          {shouldShowScheduledRelease ? (
             <MusicBadge variant='accent' icon={IconCalendarMonth}>
               {messages.releases(releaseDate)}
             </MusicBadge>
@@ -241,42 +227,9 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             <MusicBadge icon={IconVisibilityHidden}>
               {messages.hidden}
             </MusicBadge>
-          )
-        ) : onFilterChange ? (
-          <TextInput
-            label={
-              type === 'album' ? messages.filterAlbum : messages.filterPlaylist
-            }
-            placeholder={
-              type === 'album' ? messages.filterAlbum : messages.filterPlaylist
-            }
-            startIcon={IconSearch}
-            onChange={handleFilterChange}
-            value={filterText}
-            size={TextInputSize.EXTRA_SMALL}
-            className={styles.searchInput}
-            css={{
-              width: '100%',
-              '& input': {
-                fontSize: 'var(--harmony-font-xs)',
-                fontWeight: 'var(--harmony-font-medium)',
-                marginLeft: '2px',
-                background: 'unset !important',
-                color: 'var(--harmony-neutral) !important'
-              },
-              '& .contentContainer': {
-                background: 'var(--harmony-white)',
-                boxShadow: '0 2px 5px 0 var(--search-bar-shadow)',
-                borderRadius: '4px',
-                border: 'none',
-                padding: '0 12px',
-                height: '32px',
-                minHeight: '32px'
-              }
-            }}
-          />
-        ) : null}
-      </Flex>
+          )}
+        </Flex>
+      ) : null}
     </div>
   )
 

@@ -9,6 +9,7 @@ type ApplicablePopupProps = Pick<
   | 'hideCloseButton'
   | 'zIndex'
   | 'containerRef'
+  | 'portalLocation'
   | 'transformOrigin'
   | 'anchorOrigin'
   | 'fixed'

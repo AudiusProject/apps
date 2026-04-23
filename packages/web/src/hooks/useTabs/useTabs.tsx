@@ -31,6 +31,7 @@ export type TabHeader = {
   icon?: ReactNode
   text: string
   label: string
+  hideText?: boolean
   disabled?: boolean
   disabledTooltipText?: string
   to?: string
@@ -44,12 +45,23 @@ type TabProps = {
   icon?: ReactNode
   text: string
   label: string
+  hideText?: boolean
   disabled: boolean
 }
 
 const Tab = forwardRef(
   (
-    { onClick, icon, text, isActive, isMobile, isMobileV2, disabled }: TabProps,
+    {
+      onClick,
+      icon,
+      text,
+      label,
+      hideText,
+      isActive,
+      isMobile,
+      isMobileV2,
+      disabled
+    }: TabProps,
     ref?: Ref<HTMLDivElement>
   ) => (
     <div
@@ -58,14 +70,16 @@ const Tab = forwardRef(
         { [styles.tabMobile]: isMobile },
         { [styles.tabMobileV2]: isMobileV2 },
         { [styles.tabDesktop]: !isMobile && !isMobileV2 },
+        { [styles.tabDesktopIconOnly]: !isMobile && !isMobileV2 && hideText },
         { [styles.tabActive]: isActive },
         { [styles.tabDisabled]: disabled }
       )}
       onClick={() => !disabled && onClick?.()}
+      aria-label={label}
       ref={ref}
     >
       {icon && <div className={styles.icon}>{icon}</div>}
-      {isMobile ? (
+      {hideText ? null : isMobile ? (
         <Text variant='body' size='xs' strength='strong' color='inherit'>
           {text}
         </Text>
@@ -124,13 +138,20 @@ const TabBar = memo(
       left: 0,
       width: 0
     })
+    const accentPositionRef = useRef(accentPosition)
     const [getDidPositionTab, setDidPositionTab] = useInstanceVar(false)
 
     const refsArr = useRef<any[]>([])
 
-    if (!refsArr.current || !refsArr.current.length) {
-      tabs.forEach(() => refsArr.current.push(createRef()))
+    if (refsArr.current.length !== tabs.length) {
+      refsArr.current = tabs.map((_, index) => {
+        return refsArr.current[index] ?? createRef()
+      })
     }
+
+    useEffect(() => {
+      accentPositionRef.current = accentPosition
+    }, [accentPosition])
 
     // @ts-ignore
     const [{ top, left, width }, setAccentProps] = useSpring(() => ({
@@ -171,10 +192,11 @@ const TabBar = memo(
       })()
 
       newLeft += gestureOffset
+      const previousAccentPosition = accentPositionRef.current
       if (
-        newTop === accentPosition.top &&
-        newLeft === accentPosition.left &&
-        width === accentPosition.width
+        newTop === previousAccentPosition.top &&
+        newLeft === previousAccentPosition.left &&
+        width === previousAccentPosition.width
       ) {
         return
       }
@@ -191,15 +213,16 @@ const TabBar = memo(
         width
       }
 
-      const immediate = !getDidPositionTab()
+      const immediate = !isMobile && !isMobileV2 ? true : !getDidPositionTab()
       // @ts-ignore - react-spring types don't infer `to` on setter when initializer uses `from`
       setAccentProps({ to: accentTransforms, immediate })
       setDidPositionTab(true)
     }, [
       activeIndex,
-      accentPosition,
       fractionalOffset,
       getDidPositionTab,
+      isMobile,
+      isMobileV2,
       setAccentProps,
       setDidPositionTab,
       tabs
@@ -212,7 +235,40 @@ const TabBar = memo(
       return () => {
         window.removeEventListener('resize', resizeTabs)
       }
-    })
+    }, [resizeTabs])
+
+    // On desktop, tab widths can animate when switching between icon+text and
+    // icon-only modes. Recalculate while tab sizes are changing so the accent
+    // tracks the transition.
+    useEffect(() => {
+      if (isMobile || isMobileV2 || typeof ResizeObserver === 'undefined') {
+        return
+      }
+
+      let frameId: number | null = null
+      const scheduleResize = () => {
+        if (frameId !== null) cancelAnimationFrame(frameId)
+        frameId = requestAnimationFrame(() => {
+          frameId = null
+          resizeTabs()
+        })
+      }
+
+      const observer = new ResizeObserver(() => {
+        scheduleResize()
+      })
+
+      refsArr.current.forEach((tabRef) => {
+        const tabNode = tabRef?.current
+        if (tabNode) observer.observe(tabNode)
+      })
+      scheduleResize()
+
+      return () => {
+        if (frameId !== null) cancelAnimationFrame(frameId)
+        observer.disconnect()
+      }
+    }, [isMobile, isMobileV2, resizeTabs, tabs])
 
     useEffect(() => {
       resizeTabs()
@@ -238,6 +294,11 @@ const TabBar = memo(
       return `scale(${scaleX}, 1)`
     }
 
+    // Desktop tabs are variable width, so the legacy stretch interpolation
+    // (which assumes fixed spacing) can leave the accent visually misaligned.
+    // Keep stretch behavior on mobile variants only.
+    const shouldStretchAccent = isMobile || isMobileV2
+
     return (
       <div
         className={cn(
@@ -253,14 +314,20 @@ const TabBar = memo(
             top: top.interpolate(interpPx),
             left: left.interpolate(interpPx),
             width: width.interpolate(interpPx),
-            transform: left.interpolate(interpolateScale)
+            transform: shouldStretchAccent
+              ? left.interpolate(interpolateScale)
+              : undefined
           }}
         />
         {tabs.map((tab, i) => {
           const isActive = activeIndex === i
-          const tooltipActive =
-            (!!disabledTabTooltipText || !!tab.disabledTooltipText) &&
-            tab.disabled
+          const showIconOnlyTooltip = !!tab.hideText && !isMobile && !isMobileV2
+          const isDesktopIconOnly = !!tab.hideText && !isMobile && !isMobileV2
+          const tooltipText =
+            (tab.disabled
+              ? tab.disabledTooltipText || disabledTabTooltipText
+              : undefined) || (showIconOnlyTooltip ? tab.text : undefined)
+          const tooltipActive = !!tooltipText
 
           const tabElement = (
             <Tab
@@ -274,6 +341,7 @@ const TabBar = memo(
               icon={tab.icon}
               label={tab.label}
               text={tab.text}
+              hideText={tab.hideText}
             />
           )
 
@@ -282,14 +350,16 @@ const TabBar = memo(
           const rootProps = {
             role: 'tab',
             className: cn(styles.tabWrapper, {
-              [styles.tabWrapperMobile]: isMobile
+              [styles.tabWrapperMobile]: isMobile,
+              [styles.tabWrapperDesktopIconOnly]: isDesktopIconOnly
             })
           }
 
           return (
             <Tooltip
-              text={tab.disabledTooltipText || disabledTabTooltipText}
+              text={tooltipText}
               placement='bottom'
+              mount='body'
               disabled={!tooltipActive}
               key={i}
             >

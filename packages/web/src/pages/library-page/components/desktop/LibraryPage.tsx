@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import {
   useCurrentUserId,
@@ -32,6 +32,7 @@ import { dateSorter } from 'components/table'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import useTabs from 'hooks/useTabs/useTabs'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
@@ -54,7 +55,7 @@ const INITIAL_TRACK_SKELETON_ROWS = 10
 
 const messages = {
   libraryHeader: 'Library',
-  filterPlaceholder: 'Filter Tracks',
+  filterPlaceholder: 'Filter...',
   emptyTracksBody: "Once you have, this is where you'll find them!",
   goToTrending: 'Go to Trending',
   title: 'Library',
@@ -72,6 +73,10 @@ const tableColumns: TracksTableColumn[] = [
 ]
 
 const LibraryPage = () => {
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const tabContainerRef = useRef<HTMLDivElement>(null)
+  const isCondensedHeader = useIsContainerNarrow(titleRowRef, 720)
+  const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 352)
   const { spacing } = useTheme()
   const {
     title,
@@ -202,16 +207,8 @@ const LibraryPage = () => {
     </div>
   )
 
-  // Setup filter
-  const filterActive = currentTab === LibraryPageTabs.TRACKS
-  const filter = (
-    <div
-      className={styles.filterContainer}
-      style={{
-        opacity: filterActive ? 1 : 0,
-        pointerEvents: filterActive ? 'auto' : 'none'
-      }}
-    >
+  const trackTableHeaderFilter = (
+    <div className={styles.tableHeaderFilterContainer}>
       <FilterInput
         placeholder={messages.filterPlaceholder}
         onChange={onFilterChange}
@@ -232,17 +229,20 @@ const LibraryPage = () => {
       {
         icon: <IconNote />,
         text: LibraryPageTabs.TRACKS,
-        label: LibraryPageTabs.TRACKS
+        label: LibraryPageTabs.TRACKS,
+        hideText: shouldHideTabText
       },
       {
         icon: <IconAlbum />,
         text: LibraryPageTabs.ALBUMS,
-        label: LibraryPageTabs.ALBUMS
+        label: LibraryPageTabs.ALBUMS,
+        hideText: shouldHideTabText
       },
       {
         icon: <IconPlaylists />,
         text: LibraryPageTabs.PLAYLISTS,
-        label: LibraryPageTabs.PLAYLISTS
+        label: LibraryPageTabs.PLAYLISTS,
+        hideText: shouldHideTabText
       }
     ],
     elements: [
@@ -257,6 +257,8 @@ const LibraryPage = () => {
         <TracksTable
           columns={tableColumns}
           data={dataSource}
+          wrapperClassName={styles.libraryTrackTableWrapper}
+          trackActionsHeader={trackTableHeaderFilter}
           defaultSorter={dateSorter('dateSaved')}
           fetchMore={fetchMoreTracks}
           isVirtualized
@@ -282,18 +284,23 @@ const LibraryPage = () => {
   })
 
   const headerBottomBar = (
-    <div className={styles.headerBottomBarContainer}>
+    <div ref={tabContainerRef} className={styles.headerBottomBarContainer}>
       {tabs}
-      {filter}
     </div>
   )
 
   const header = (
     <Header
+      titleRowRef={titleRowRef}
       icon={IconLibrary}
       primary={messages.libraryHeader}
       secondary={isEmpty ? null : playAllButton}
-      rightDecorator={<LibraryCategorySelectionMenu currentTab={currentTab} />}
+      rightDecorator={
+        <LibraryCategorySelectionMenu
+          currentTab={currentTab}
+          mode={isCondensedHeader ? 'dropdown' : 'pills'}
+        />
+      }
       containerStyles={styles.libraryPageHeader}
       bottomBar={headerBottomBar}
     />

@@ -2,7 +2,7 @@ import {
   ChallengeRewardID,
   OptimisticUserChallenge
 } from '@audius/common/models'
-import { Box, Flex, Paper, Text, useTheme } from '@audius/harmony'
+import { Box, Flex, Paper, Text } from '@audius/harmony'
 
 export type RewardPanelProps = {
   title: string
@@ -16,19 +16,18 @@ export const RewardPanel = ({
   description,
   onClickButton
 }: RewardPanelProps) => {
-  const { spacing } = useTheme()
+  const MIN_PANEL_WIDTH_PX = 272
 
   return (
     <Paper
       onClick={onClickButton}
       ph='s'
-      flex={`0 0 calc(50% - ${spacing.unit4}px)`}
+      flex={`1 1 ${MIN_PANEL_WIDTH_PX}px`}
       direction='column'
-      m='s'
       shadow='flat'
       border='strong'
       css={{
-        minWidth: '336px'
+        minWidth: `${MIN_PANEL_WIDTH_PX}px`
       }}
       pv='unit10'
     >

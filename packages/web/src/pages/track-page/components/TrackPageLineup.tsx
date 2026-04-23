@@ -6,6 +6,7 @@ import { tracksActions } from '@audius/common/src/store/pages/track/lineup/actio
 import { Flex, Text, IconRemix } from '@audius/harmony'
 import type { IconComponent } from '@audius/harmony'
 
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import { LineupVariant } from 'components/lineup/types'
 
@@ -153,7 +154,7 @@ export const TrackPageLineup = ({
       gap='2xl'
       flex={1}
       css={{
-        minWidth: isCommentingEnabled ? 330 : 0,
+        minWidth: isCommentingEnabled ? MIN_DESKTOP_CONTENT_WIDTH_PX : 0,
         maxWidth: isCommentingEnabled ? '100%' : 774
       }}
     >

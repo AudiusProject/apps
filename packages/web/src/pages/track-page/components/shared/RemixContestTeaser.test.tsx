@@ -12,8 +12,10 @@ import { render, screen, it } from 'test/test-utils'
 
 import { RemixContestTeaser } from './RemixContestTeaser'
 
-// Phase-5 teaser rendering is gated on the CONTESTS feature flag. Every test
-// that expects the teaser to render must pass this option to `render()`.
+// Teaser is gated on CONTESTS; tests pass the flag in `render` for parity with
+// other track UI. (While `useFeatureFlag` still lists CONTESTS in
+// `HARDCODED_ENABLED_FLAGS`, "flag off" is not testable through the app context
+// mock — the hook always returns enabled for that flag.)
 const withContestsFlag = { featureFlags: { [FeatureFlags.CONTESTS]: true } }
 
 // Minimal track shape; useTrack just returns whatever we put in the cache,
@@ -133,23 +135,5 @@ describe('RemixContestTeaser', () => {
 
     render(<RemixContestTeaser trackId={track.track_id} />, withContestsFlag)
     expect(screen.getByText(/contest ended/i)).toBeInTheDocument()
-  })
-
-  it('renders nothing when the CONTESTS feature flag is OFF, even if a contest exists', () => {
-    // The teaser piggybacks on the same flag that gates the /contests
-    // discovery page and the dedicated /contest detail page. With the flag
-    // off the target page is unreachable, so surfacing a CTA would be a
-    // dead-end.
-    const track = makeTrack()
-    primeContestCache(track, makeContestEvent())
-
-    render(<RemixContestTeaser trackId={track.track_id} />, {
-      featureFlags: { [FeatureFlags.CONTESTS]: false }
-    })
-
-    expect(screen.queryByText('Remix Contest')).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('link', { name: /view contest/i })
-    ).not.toBeInTheDocument()
   })
 })

@@ -3,6 +3,7 @@
 }
 
 .pageContent {
+  min-width: 328px;
   max-width: calc(1080px + var(--harmony-unit-4)) !important;
 }
 
@@ -47,6 +48,20 @@
 
 .tableWrapper {
   background-color: var(--harmony-n-25);
+  width: 100%;
+}
+
+.tableHeaderFilterContainer {
+  width: calc(100% - 8px);
+  max-width: 100%;
+  margin-left: 8px;
+}
+
+.tableHeaderFilterContainer > div {
+  width: 100%;
+}
+
+.tableHeaderFilterContainer > div > div {
   width: 100%;
 }
 

@@ -69,12 +69,23 @@ const WalletRowContent = ({
       css={{ opacity: isRemovingWallet ? 0.5 : 1 }}
       justifyContent='space-between'
     >
-      <Flex alignItems='center' gap='s'>
+      <Flex alignItems='center' gap='s' css={{ minWidth: 0, flex: 1 }}>
         {chain === Chain.Eth ? <IconLogoCircleETH /> : <IconLogoCircleSOL />}
         <Text variant='body' size='m' strength='strong'>
           {walletMessages.linkedWallets.linkedWallet(index)}
         </Text>
-        <Text variant='body' size='m' strength='strong' color='subdued'>
+        <Text
+          variant='body'
+          size='m'
+          strength='strong'
+          color='subdued'
+          css={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0
+          }}
+        >
           {shortenSPLAddress(address)}
         </Text>
       </Flex>
@@ -179,12 +190,24 @@ const WalletEmptyState = ({
   isPending: boolean
 }) => {
   return (
-    <Flex column pv='m' ph='l' w='100%' gap='l'>
+    <Flex
+      pv='m'
+      ph='l'
+      w='100%'
+      gap='l'
+      alignItems='center'
+      justifyContent='space-between'
+      css={{
+        '@container wallet (max-width: 420px)': {
+          flexDirection: 'column',
+          alignItems: 'stretch'
+        }
+      }}
+    >
       <Text variant='body' size='m' color='subdued'>
         {walletMessages.linkedWallets.linkWallet}
       </Text>
       <Button
-        fullWidth
         variant='secondary'
         size='small'
         onClick={() => {
@@ -192,6 +215,10 @@ const WalletEmptyState = ({
         }}
         isLoading={isPending}
         disabled={isPending}
+        css={{
+          flexShrink: 0,
+          '@container wallet (max-width: 420px)': { width: '100%' }
+        }}
       >
         {walletMessages.linkedWallets.addWallet}
       </Button>
@@ -257,8 +284,19 @@ export const LinkedWallets = () => {
       border='default'
     >
       <Flex column pv='l' ph='l' w='100%'>
-        <Flex alignItems='center' justifyContent='space-between' w='100%'>
-          <Flex alignItems='center' gap='s'>
+        <Flex
+          alignItems='center'
+          justifyContent='space-between'
+          gap='m'
+          w='100%'
+          css={{
+            '@container wallet (max-width: 420px)': {
+              flexDirection: 'column',
+              alignItems: 'stretch'
+            }
+          }}
+        >
+          <Flex alignItems='center' gap='s' css={{ minWidth: 0 }}>
             <Text variant='heading' size='m' color='default'>
               {hasWallets
                 ? walletMessages.linkedWallets.titleHasWallets
@@ -279,6 +317,9 @@ export const LinkedWallets = () => {
               }}
               isLoading={isConnectingWallets}
               disabled={isConnectingWallets || isAtOrAboveLimit}
+              css={{
+                '@container wallet (max-width: 420px)': { width: '100%' }
+              }}
             >
               {walletMessages.linkedWallets.addWallet}
             </Button>

@@ -1,7 +1,7 @@
 import { ChallengeRewardID } from '@audius/common/models'
 import { REWARDS_PAGE } from '@audius/common/src/utils/route'
 import { audioRewardsPageActions } from '@audius/common/store'
-import { Box, Text } from '@audius/harmony'
+import { Flex, Text } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { useSetVisibility } from 'common/hooks/useModalState'
@@ -89,14 +89,19 @@ export const TrendingRewardsTile = ({
 
   return (
     <Tile className={wm(styles.rewardsTile, className)}>
-      <Text variant='display' size='s' className={wm(styles.title)}>
-        {messages.title}
-      </Text>
-      <Box mb='3xl'>
-        <Text variant='body' size='l' strength='strong'>
+      <Flex column gap='s' alignItems='center' w='100%' mb='3xl'>
+        <Text variant='display' size='s' className={wm(styles.title)}>
+          {messages.title}
+        </Text>
+        <Text
+          variant='body'
+          size='l'
+          strength='strong'
+          className={styles.tileSubtitle}
+        >
           {messages.description1}
         </Text>
-      </Box>
+      </Flex>
       <div className={styles.rewardsContainer}>{rewardsTiles}</div>
     </Tile>
   )

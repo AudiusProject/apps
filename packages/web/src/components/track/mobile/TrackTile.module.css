@@ -2,20 +2,25 @@
   --border-width: 1px;
   position: relative;
   min-height: 152px;
+  min-width: 288px;
   flex: 1 1 152px;
   border: var(--border-width) solid var(--harmony-n-100);
   background-color: var(--harmony-white);
-  box-shadow:
-    0 0 1px 0 var(--tile-shadow-1),
-    0 1px 0 0 var(--tile-shadow-2),
-    0 2px 5px -2px var(--tile-shadow-3);
+  box-shadow: var(--harmony-shadow-mid);
   display: flex;
   padding: var(--harmony-unit-2);
   border-radius: var(--harmony-unit-2);
   cursor: pointer;
-  transition: all 0.2 ease-in-out;
+  transition: var(--harmony-hover);
   user-select: none;
   margin: 0px auto var(--harmony-unit-3);
+  overflow: hidden;
+}
+
+.container:hover,
+.container:active {
+  transform: scale(1.004);
+  box-shadow: var(--harmony-shadow-far);
 }
 
 .container.readonly {
@@ -27,7 +32,18 @@
   box-shadow: none;
 }
 
-.container .artworkIcon,
+.container .artworkIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: var(--harmony-unit-1);
+  opacity: 0;
+  transition: opacity 0.18s ease-in-out;
+}
+
 .container .artworkIcon circle {
   opacity: 0;
 }
@@ -38,12 +54,6 @@
 
 .container .artworkIcon path {
   fill: var(--harmony-static-white);
-}
-
-.container:active {
-  box-shadow:
-    0 0 1px 0 var(--tile-shadow-1),
-    0 2px 3px -2px var(--tile-shadow-3);
 }
 
 .mainContent {

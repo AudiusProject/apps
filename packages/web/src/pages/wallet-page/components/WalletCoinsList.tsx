@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
   UserCoin,
@@ -26,7 +26,11 @@ import {
   Button,
   Divider,
   Flex,
+  IconButton,
+  IconKebabHorizontal,
   Paper,
+  PopupMenu,
+  PopupMenuItem,
   Text,
   useMedia,
   useTheme,
@@ -140,6 +144,7 @@ const messages = {
   ...buySellMessages,
   withdrawCash: 'Withdraw Cash',
   addCash: 'Add Cash',
+  cashActions: 'Cash actions',
   managedAccount: "You can't do that as a managed user",
   buySellNotSupported: 'This is not supported in your region'
 }
@@ -176,33 +181,71 @@ const YourCoinsHeader = ({
     }
   }, [isManagedAccount, openBuySellModal, toast])
 
+  const cashMenuItems: PopupMenuItem[] = useMemo(
+    () => [
+      { text: messages.addCash, onClick: handleAddCashClick },
+      { text: messages.withdrawCash, onClick: handleWithdrawClick }
+    ],
+    [handleAddCashClick, handleWithdrawClick]
+  )
+
   return (
     <Flex
       alignItems='center'
       justifyContent='space-between'
+      gap='s'
       p='l'
       borderBottom='default'
     >
       <Text variant='heading' size='m' color='default'>
         {messages.assets}
       </Text>
-      <Flex gap='s'>
+      <Flex gap='s' alignItems='center'>
         {showCashButtons ? (
           <>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleAddCashClick}
+            <Flex
+              gap='s'
+              css={{
+                '@container wallet (max-width: 640px)': { display: 'none' }
+              }}
             >
-              {messages.addCash}
-            </Button>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleWithdrawClick}
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={handleAddCashClick}
+              >
+                {messages.addCash}
+              </Button>
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={handleWithdrawClick}
+              >
+                {messages.withdrawCash}
+              </Button>
+            </Flex>
+            <Box
+              css={{
+                display: 'none',
+                '@container wallet (max-width: 640px)': {
+                  display: 'inline-flex'
+                }
+              }}
             >
-              {messages.withdrawCash}
-            </Button>
+              <PopupMenu
+                items={cashMenuItems}
+                renderTrigger={(ref, trigger) => (
+                  <IconButton
+                    ref={ref}
+                    icon={IconKebabHorizontal}
+                    size='s'
+                    color='subdued'
+                    onClick={() => trigger()}
+                    aria-label={messages.cashActions}
+                  />
+                )}
+              />
+            </Box>
           </>
         ) : null}
 

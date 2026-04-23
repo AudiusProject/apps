@@ -67,22 +67,35 @@ export const PlaylistsTabPage = () => {
 
   const cards = useMemo(() => {
     const createPlaylistCard = (
-      <UploadChip
-        type='playlist'
-        variant='card'
-        source={CreatePlaylistSource.LIBRARY_PAGE}
-      />
+      <div
+        key='create-playlist-card'
+        className={styles.createPlaylistCardContainer}
+      >
+        <UploadChip
+          type='playlist'
+          variant='card'
+          cardStyle='fluid'
+          source={CreatePlaylistSource.LIBRARY_PAGE}
+        />
+      </div>
     )
     const loadedCards = [
       createPlaylistCard,
       ...playlistIds?.map((playlistId) => {
-        return <CollectionCard key={playlistId} id={playlistId} size='m' />
+        return (
+          <CollectionCard key={playlistId} id={playlistId} size='m' w='100%' />
+        )
       })
     ]
     if (!isFetchingNextPage) return loadedCards
     return loadedCards.concat(
       Array.from({ length: 6 }, (_, i) => (
-        <CollectionCardSkeleton key={`loading-${i}`} size='m' noShimmer />
+        <CollectionCardSkeleton
+          key={`loading-${i}`}
+          size='m'
+          w='100%'
+          noShimmer
+        />
       ))
     )
   }, [playlistIds, isFetchingNextPage])
@@ -91,7 +104,7 @@ export const PlaylistsTabPage = () => {
     return (
       <div className={styles.cardsContainer}>
         {Array.from({ length: 12 }, (_, i) => (
-          <CollectionCardSkeleton key={i} size='m' noShimmer />
+          <CollectionCardSkeleton key={i} size='m' w='100%' noShimmer />
         ))}
       </div>
     )

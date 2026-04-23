@@ -4,6 +4,7 @@ import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
+import { Tooltip } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
@@ -37,6 +38,7 @@ interface PlayingTrackInfoProps {
   dominantColor?: Color
   /** When true, title and artist wrap instead of single-line ellipsis (e.g. visualizer overlay). */
   fullTrackText?: boolean
+  hideArt?: boolean
   onClickTrackTitle: () => void
   onClickArtistName: () => void
 }
@@ -61,7 +63,8 @@ const PlayingTrackInfo = ({
   isStreamGated,
   hasShadow,
   dominantColor,
-  fullTrackText
+  fullTrackText,
+  hideArt = false
 }: PlayingTrackInfoProps) => {
   const { data: track } = useTrack(trackId)
   const { hasStreamAccess } = useGatedContentAccess(track)
@@ -88,14 +91,16 @@ const PlayingTrackInfo = ({
   const renderTrackTitle = () => {
     return (
       <animated.div style={spring} className={styles.trackTitleContainer}>
-        <div
-          className={cn(styles.trackTitle, {
-            [styles.textShadow]: hasShadow
-          })}
-          onClick={onClickTrackTitle}
-        >
-          {trackTitle}
-        </div>
+        <Tooltip text={trackTitle} placement='top' mount='body'>
+          <div
+            className={cn(styles.trackTitle, {
+              [styles.textShadow]: hasShadow
+            })}
+            onClick={onClickTrackTitle}
+          >
+            {trackTitle}
+          </div>
+        </Tooltip>
         {shouldShowPreviewLock ? (
           <LockedStatusBadge
             locked
@@ -112,20 +117,23 @@ const PlayingTrackInfo = ({
   return (
     <div
       className={cn(styles.info, {
-        [styles.fullTrackText]: fullTrackText
+        [styles.fullTrackText]: fullTrackText,
+        [styles.noArt]: hideArt
       })}
     >
-      <div className={styles.profilePictureWrapper}>
-        <DynamicImage
-          image={profileImage}
-          onClick={onClickArtistName}
-          className={cn(styles.profilePicture, {
-            [styles.isDefault]: !!trackId
-          })}
-          imageStyle={boxShadowStyle}
-          usePlaceholder={false}
-        />
-      </div>
+      {!hideArt && (
+        <div className={styles.profilePictureWrapper}>
+          <DynamicImage
+            image={profileImage}
+            onClick={onClickArtistName}
+            className={cn(styles.profilePicture, {
+              [styles.isDefault]: !!trackId
+            })}
+            imageStyle={boxShadowStyle}
+            usePlaceholder={false}
+          />
+        </div>
+      )}
       <div className={styles.text}>
         {isStreamGated ? (
           renderTrackTitle()

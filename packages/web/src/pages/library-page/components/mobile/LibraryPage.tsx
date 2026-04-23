@@ -581,9 +581,9 @@ const PlaylistCardLineup = ({
 }
 
 const filterMessages = {
-  filterTracks: 'Filter Tracks',
-  filterAlbums: 'Filter Albums',
-  filterPlaylists: 'Filter Playlists'
+  filterTracks: 'Filter...',
+  filterAlbums: 'Filter...',
+  filterPlaylists: 'Filter...'
 }
 
 const tabHeaders = [

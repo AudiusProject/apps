@@ -10,10 +10,11 @@ import {
   queueSelectors,
   playerSelectors
 } from '@audius/common/store'
-import { IconFeed } from '@audius/harmony'
+import { FilterButton, Flex, IconFeed } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
@@ -23,6 +24,7 @@ import {
 } from 'components/lineup/LineupProvider'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
 
 import { FeedFilters } from './FeedFilters'
@@ -42,9 +44,17 @@ type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
+const feedFilterOptions = [
+  { label: 'All Posts', value: FeedFilter.ALL },
+  { label: 'Original Posts', value: FeedFilter.ORIGINAL },
+  { label: 'Reposts', value: FeedFilter.REPOST }
+]
+
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const dispatch = useDispatch()
   const currentTrack = useCurrentTrack()
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const isCondensedHeader = useIsContainerNarrow(titleRowRef, 560)
 
   const getFeedLineup = useRef(
     makeGetLineupMetadatas(getDiscoverFeedLineup)
@@ -131,13 +141,24 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
 
   const header = (
     <Header
+      titleRowRef={titleRowRef}
       icon={IconFeed}
       primary={messages.feedHeaderTitle}
       rightDecorator={
-        <FeedFilters
-          currentFilter={feedFilter}
-          didSelectFilter={didSelectFilter}
-        />
+        isCondensedHeader ? (
+          <FilterButton
+            label='All Posts'
+            value={feedFilter}
+            variant='replaceLabel'
+            onChange={(value) => didSelectFilter(value as FeedFilter)}
+            options={feedFilterOptions}
+          />
+        ) : (
+          <FeedFilters
+            currentFilter={feedFilter}
+            didSelectFilter={didSelectFilter}
+          />
+        )
       }
     />
   )
@@ -149,12 +170,14 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       size='large'
       header={header}
     >
-      <Lineup
-        emptyElement={<EmptyFeed />}
-        endOfLineup={<EndOfLineup />}
-        {...feedLineupProps}
-        {...mainLineupProps}
-      />
+      <Flex w='100%' css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}>
+        <Lineup
+          emptyElement={<EmptyFeed />}
+          endOfLineup={<EndOfLineup />}
+          {...feedLineupProps}
+          {...mainLineupProps}
+        />
+      </Flex>
     </Page>
   )
 }

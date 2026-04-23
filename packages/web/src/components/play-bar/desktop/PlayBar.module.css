@@ -19,8 +19,9 @@
 }
 
 .playBarPlayingInfo {
-  flex: 0 0 230px;
+  flex: 0 1 230px;
   min-width: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -73,7 +74,34 @@
 }
 
 .optionsRight {
-  flex: 0 0 230px;
+  flex: 0 1 230px;
   display: inline-flex;
   align-items: center;
+}
+
+.narrow .playBarPlayingInfo {
+  flex: 0 1 160px;
+}
+
+.narrow .timeControls {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.socialActionsWrapper {
+  display: contents;
+}
+
+.socialActionsPlaceholder {
+  width: 72px;
+  margin-left: var(--harmony-unit-9);
+}
+
+.narrow .socialActionsPlaceholder {
+  margin-left: var(--harmony-unit-2);
+}
+
+.narrow .optionsRight {
+  flex: 0 0 auto;
+  padding-right: 16px;
 }

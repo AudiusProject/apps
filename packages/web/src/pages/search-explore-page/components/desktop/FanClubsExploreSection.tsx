@@ -12,6 +12,7 @@ import {
 } from 'pages/fan-clubs-launchpad-page/components/FanClubCoinCard'
 
 import { Carousel } from './Carousel'
+import { FAN_CLUB_CARD_WIDTH } from './constants'
 import { useExploreSectionTracking } from './useExploreSectionTracking'
 
 const FAN_CLUBS_PREVIEW_LIMIT = 12
@@ -52,12 +53,15 @@ export const FanClubsExploreSection = () => {
     >
       {!inView || isPending
         ? Array.from({ length: FAN_CLUBS_SKELETON_COUNT }).map((_, i) => (
-            <Box key={i} css={{ width: 312, flexShrink: 0 }}>
+            <Box key={i} css={{ width: FAN_CLUB_CARD_WIDTH, flexShrink: 0 }}>
               <FanClubCardSkeleton />
             </Box>
           ))
         : coins.map((coin) => (
-            <Box key={coin.mint} css={{ width: 312, flexShrink: 0 }}>
+            <Box
+              key={coin.mint}
+              css={{ width: FAN_CLUB_CARD_WIDTH, flexShrink: 0 }}
+            >
               <FanClubCoinCard coin={coin} />
             </Box>
           ))}

@@ -63,6 +63,7 @@ export type TrackTileProps = TileProps & {
   isFeed?: boolean
   isPlaying?: boolean
   isBuffering?: boolean
+  order?: number
   ordered?: boolean
   uploading?: boolean
   uploadPercent?: number

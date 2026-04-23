@@ -120,6 +120,14 @@
   opacity: 0;
 }
 
+.trackActionsHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-transform: none;
+}
+
 .trackActionsContainer {
   margin-left: 0px;
 }

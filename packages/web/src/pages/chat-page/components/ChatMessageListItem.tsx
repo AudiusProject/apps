@@ -48,6 +48,7 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
 
   // Refs
   const reactionButtonRef = useRef<HTMLDivElement>(null)
+  const bubbleRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch()
 
   // State
@@ -69,6 +70,14 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
   const linkValue = link?.value
   const isUnfurlOnly = linkValue === message.message.trim()
   const hideMessage = isUnfurlOnly && !emptyUnfurl
+  const hasRenderedUnfurl = !!linkValue && !emptyUnfurl
+  const currentUserId = userId == null ? null : userId
+  const currentUserHashId = userId == null ? null : Id.parse(userId)
+  const currentUserReaction =
+    currentUserHashId == null
+      ? null
+      : ((message.reactions?.find((r) => r.user_id === currentUserHashId)
+          ?.reaction as ReactionTypes | undefined) ?? null)
 
   // Callbacks
   const handleOpenReactionPopupButtonClicked = useCallback(
@@ -81,23 +90,26 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
   )
   const handleReactionSelected = useCallback(
     (reaction: ReactionTypes) => {
-      if (userId) {
+      if (currentUserId != null) {
         dispatch(
           setMessageReaction({
-            userId,
+            userId: currentUserId,
             chatId,
             messageId: message.message_id,
-            reaction:
-              message.reactions?.find((r) => r.user_id === Id.parse(userId))
-                ?.reaction === reaction
-                ? null
-                : reaction
+            reaction: currentUserReaction === reaction ? null : reaction
           })
         )
       }
       handleCloseReactionPopup()
     },
-    [dispatch, handleCloseReactionPopup, userId, chatId, message]
+    [
+      dispatch,
+      currentUserId,
+      chatId,
+      message.message_id,
+      currentUserReaction,
+      handleCloseReactionPopup
+    ]
   )
 
   const handleResendClicked = useCallback(() => {
@@ -166,9 +178,17 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
           })
         ) : (
           <Flex className={cn(styles.reactionsButton)}>
-            <IconPlus className={styles.addReactionIcon} />
+            <IconPlus size='m' className={styles.addReactionIcon} />
           </Flex>
         )}
+        <ReactionPopupMenu
+          anchorRef={reactionButtonRef}
+          isVisible={isReactionPopupVisible}
+          onClose={handleCloseReactionPopup}
+          isAuthor={isAuthor}
+          onSelected={handleReactionSelected}
+          userReaction={currentUserReaction}
+        />
       </Flex>
     )
   }
@@ -181,24 +201,25 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       })}
     >
       <Flex
+        ref={bubbleRef}
         className={cn(styles.bubble, {
           [styles.nonInteractive]: !canSendMessage,
           [styles.hideMessage]: hideMessage
         })}
       >
         <Flex className={styles.bubbleCorners}>
-          <Flex column>
+          <Flex column className={styles.bubbleContent}>
             <FanClubHeader userId={senderUserId} audience={message.audience} />
             {isCollectionUrl(linkValue) ? (
               <ChatMessagePlaylist
-                className={styles.unfurl}
+                className={cn(styles.unfurl, styles.playlistUnfurl)}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
               />
             ) : isTrackUrl(linkValue) ? (
               <ChatMessageTrack
-                className={styles.unfurl}
+                className={cn(styles.unfurl, styles.trackUnfurl)}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
@@ -214,7 +235,12 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
               />
             ) : null}
             {!hideMessage ? (
-              <Flex p='l' className={styles.textWrapper}>
+              <Flex
+                ph='l'
+                pb='l'
+                pt={hasRenderedUnfurl ? '8px' : 'l'}
+                className={styles.textWrapper}
+              >
                 <UserGeneratedTextV2
                   className={styles.text}
                   color={isAuthor ? 'white' : 'default'}
@@ -237,15 +263,6 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
           </Flex>
         ) : null}
       </Flex>
-      {canSendMessage && !chat?.is_blast ? (
-        <ReactionPopupMenu
-          anchorRef={reactionButtonRef}
-          isVisible={isReactionPopupVisible}
-          onClose={handleCloseReactionPopup}
-          isAuthor={isAuthor}
-          onSelected={handleReactionSelected}
-        />
-      ) : null}
       {message.status === Status.ERROR ? (
         <Flex
           className={cn(styles.meta, styles.error)}

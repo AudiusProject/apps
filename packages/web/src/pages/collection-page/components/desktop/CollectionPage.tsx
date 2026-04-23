@@ -22,6 +22,7 @@ import { Id } from '@audius/sdk'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
+import FilterInput from 'components/filter-input/FilterInput'
 import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
@@ -35,7 +36,9 @@ import DeletedPage from 'pages/deleted-page/DeletedPage'
 import styles from './CollectionPage.module.css'
 
 const messages = {
-  noFilterMatches: 'No tracks match your search...'
+  noFilterMatches: 'No tracks match your search...',
+  filterPlaylist: 'Filter...',
+  filterAlbum: 'Filter...'
 }
 
 const getMessages = (collectionType: 'album' | 'playlist') => ({
@@ -101,6 +104,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     allowReordering,
     isQueued,
     getFilteredData,
+    filterText,
     onFilterChange,
     onPlay,
     onPreview,
@@ -267,7 +271,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       playing={queuedAndPlaying}
       previewing={queuedAndPreviewing}
       // Actions
-      onFilterChange={onFilterChange}
       onPlay={onPlay}
       onPreview={onPreview}
       onClickReposts={onClickReposts}
@@ -286,7 +289,17 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     />
   )
 
-  const messages = getMessages(isAlbum ? 'album' : 'playlist')
+  const trackTableHeaderFilter = !isPrivate ? (
+    <div className={styles.tableHeaderFilterContainer}>
+      <FilterInput
+        placeholder={isAlbum ? messages.filterAlbum : messages.filterPlaylist}
+        onChange={onFilterChange}
+        value={filterText}
+      />
+    </div>
+  ) : null
+
+  const collectionMessages = getMessages(isAlbum ? 'album' : 'playlist')
   return (
     <Page
       title={title}
@@ -300,7 +313,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       fromOpacity={1}
       scrollableSearch
     >
-      <Paper column mb='unit-10'>
+      <Paper column mb='unit-10' border='default'>
         <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
         <div className={styles.topSectionWrapper}>{topSection}</div>
         {!pageLoading && isEmpty ? (
@@ -333,6 +346,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
               onClickPurchase={openPurchaseModal}
               onReorder={onReorderTracks}
               onSort={onSortTracks}
+              trackActionsHeader={trackTableHeaderFilter}
               showArtistInTrackNameColumn={!isAlbum}
               responsiveColumns={
                 isAlbum
@@ -344,8 +358,10 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
                 accountUserId === playlistOwnerId &&
                 allowReordering
               }
-              removeText={`${messages.remove} ${
-                isAlbum ? messages.type.album : messages.type.playlist
+              removeText={`${collectionMessages.remove} ${
+                isAlbum
+                  ? collectionMessages.type.album
+                  : collectionMessages.type.playlist
               }`}
               isAlbumPage={isAlbum}
               isAlbumPremium={

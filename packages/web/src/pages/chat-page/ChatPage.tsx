@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useCanSendMessage } from '@audius/common/hooks'
+import { Status } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
-import { ResizeObserver } from '@juggle/resize-observer'
+import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router'
-import useMeasure from 'react-use-measure'
 
 import Page from 'components/page/Page'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useManagedAccountNotAllowedRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
 import { push } from 'utils/navigation'
@@ -19,15 +20,18 @@ import { ChatComposer } from './components/ChatComposer'
 import { ChatHeader } from './components/ChatHeader'
 import { ChatList } from './components/ChatList'
 import { ChatMessageList } from './components/ChatMessageList'
+import { ChatPaneHeader } from './components/ChatPaneHeader'
 import { CreateChatPrompt } from './components/CreateChatPrompt'
 import { SkeletonChatPage as MobileChatPage } from './components/mobile/SkeletonChatPage'
 
 const { fetchPermissions } = chatActions
-const { getChat } = chatSelectors
+const { getChat, getChats, getChatsStatus } = chatSelectors
 
 const messages = {
   messages: 'Messages'
 }
+
+const NARROW_LAYOUT_THRESHOLD_PX = 1080
 
 export const ChatPage = () => {
   useManagedAccountNotAllowedRedirect()
@@ -45,12 +49,24 @@ export const ChatPage = () => {
   const { firstOtherUser, canSendMessage } = useCanSendMessage(currentChatId)
   const chat = useSelector((state) => getChat(state, currentChatId ?? ''))
 
-  // Get the height of the header so we can slide the messages list underneath it for the blur effect
-  const [headerRef, headerBounds] = useMeasure({
-    polyfill: ResizeObserver,
-    offsetSize: true
-  })
+  const layoutRef = useRef<HTMLDivElement>(null)
+  const isNarrowLayout = useIsContainerNarrow(
+    layoutRef,
+    NARROW_LAYOUT_THRESHOLD_PX
+  )
   const messagesRef = useRef<HTMLDivElement>(null)
+
+  const chats = useSelector(getChats)
+  const chatsStatus = useSelector(getChatsStatus)
+  // Only collapse the sidebar once we know for sure the account has no chats.
+  // During LOADING / IDLE we keep the sidebar visible so the skeleton loader
+  // still renders and we don't flash a layout shift.
+  const hideChatList =
+    chatsStatus === Status.SUCCESS && (chats?.length ?? 0) === 0
+
+  const chatListClassName = cn(styles.chatList, {
+    [styles.chatListCompact]: isNarrowLayout
+  })
 
   // Navigate to new chats
   // Scroll to bottom if active chat is clicked again
@@ -103,34 +119,53 @@ export const ChatPage = () => {
       title={`${firstOtherUser ? firstOtherUser.name + ' •' : ''} ${
         messages.messages
       }`}
-      containerClassName={styles.page}
+      containerClassName={cn(styles.page, {
+        [styles.narrowActiveChat]: isNarrowLayout && !!currentChatId
+      })}
       contentClassName={styles.pageContent}
       showSearch={false}
-      header={<ChatHeader ref={headerRef} currentChatId={currentChatId} />}
+      headerPadding={0}
+      headerContentPaddingInline='0px'
+      header={
+        <ChatHeader
+          currentChatId={currentChatId}
+          isNarrowLayout={isNarrowLayout}
+        />
+      }
     >
-      <div className={styles.layout}>
-        <div className={styles.chatList}>
-          <ChatList
-            className={styles.chatList}
-            currentChatId={currentChatId}
-            onChatClicked={handleChatClicked}
-          />
-        </div>
-        <div className={styles.chatArea}>
+      <div className={styles.layout} ref={layoutRef}>
+        {hideChatList ? null : (
+          <div className={chatListClassName}>
+            <ChatList
+              className={chatListClassName}
+              currentChatId={currentChatId}
+              isCompact={isNarrowLayout}
+              onChatClicked={handleChatClicked}
+            />
+          </div>
+        )}
+        <div
+          className={cn(styles.chatArea, {
+            [styles.chatAreaNarrow]: isNarrowLayout
+          })}
+        >
           {currentChatId ? (
             <>
+              {isNarrowLayout ? (
+                <ChatPaneHeader
+                  className={styles.chatPaneHeader}
+                  isNarrowLayout
+                  chatId={currentChatId}
+                />
+              ) : null}
               <ChatMessageList
                 ref={messagesRef}
-                style={{
-                  marginTop: `-${headerBounds.height}px`,
-                  paddingTop: `${headerBounds.height}px`,
-                  scrollPaddingTop: `${headerBounds.height}px`
-                }}
                 className={styles.messageList}
                 chatId={currentChatId}
               />
               {chat?.is_blast || (canSendMessage && chat) ? (
                 <ChatComposer
+                  className={styles.composer}
                   chatId={currentChatId}
                   onMessageSent={handleMessageSent}
                   presetMessage={presetMessage}
@@ -138,7 +173,7 @@ export const ChatPage = () => {
               ) : null}
             </>
           ) : (
-            <CreateChatPrompt />
+            <CreateChatPrompt hasChats={!hideChatList} />
           )}
         </div>
       </div>

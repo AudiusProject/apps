@@ -41,6 +41,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { CommentSection } from 'components/comments/CommentSection'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -64,7 +65,6 @@ const { NOT_FOUND_PAGE } = route
 const { getPlaying, getPreviewing } = playerSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { tracksActions } = trackPageLineupActions
-const COLLECTION_PAGE_MIN_WIDTH_PX = 460
 
 const TrackPage = () => {
   const location = useLocation()
@@ -338,7 +338,7 @@ const TrackPage = () => {
       fromOpacity={1}
       noIndex={defaults.isUnlisted}
     >
-      <FlushPageContainer contentMinWidthPx={COLLECTION_PAGE_MIN_WIDTH_PX}>
+      <FlushPageContainer contentMinWidthPx={MIN_DESKTOP_CONTENT_WIDTH_PX}>
         <RemixContestCountdown trackId={track?.track_id ?? 0} />
       </FlushPageContainer>
       <Box w='100%' css={{ position: 'absolute', height: '376px' }}>
@@ -346,7 +346,7 @@ const TrackPage = () => {
         <EmptyStatBanner />
         <EmptyNavBanner />
       </Box>
-      <FlushPageContainer contentMinWidthPx={COLLECTION_PAGE_MIN_WIDTH_PX}>
+      <FlushPageContainer contentMinWidthPx={MIN_DESKTOP_CONTENT_WIDTH_PX}>
         <Flex
           direction='column'
           w='100%'

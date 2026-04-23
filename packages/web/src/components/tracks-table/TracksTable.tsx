@@ -1,4 +1,11 @@
-import { memo, MouseEvent, useCallback, useMemo, useRef } from 'react'
+import {
+  ReactNode,
+  memo,
+  MouseEvent,
+  useCallback,
+  useMemo,
+  useRef
+} from 'react'
 
 import { useGatedContentAccessMap } from '@audius/common/hooks'
 import {
@@ -149,6 +156,7 @@ type TracksTableProps = {
   columns?: TracksTableColumn[]
   showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
+  trackActionsHeader?: ReactNode
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
 const defaultColumns: TracksTableColumn[] = [
@@ -162,6 +170,7 @@ const defaultColumns: TracksTableColumn[] = [
   'reposts',
   'overflowActions'
 ]
+const ALBUM_TRACK_NAME_COLUMN_WIDTH = 168
 
 export const TracksTable = ({
   disabledTrackEdit = false,
@@ -177,6 +186,7 @@ export const TracksTable = ({
   columns = defaultColumns,
   data,
   activeIndex,
+  trackActionsHeader,
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
@@ -204,6 +214,9 @@ export const TracksTable = ({
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const [, setGatedModalVisibility] = useModalState('LockedContent')
+  const trackNameColumnWidth = isAlbumPage
+    ? ALBUM_TRACK_NAME_COLUMN_WIDTH
+    : COLUMN_WIDTHS.artistName
 
   // Cell Render Functions
   const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
@@ -864,12 +877,16 @@ export const TracksTable = ({
       },
       overflowActions: {
         id: 'trackActions',
+        Header: trackActionsHeader ? (
+          <div className={styles.trackActionsHeader}>{trackActionsHeader}</div>
+        ) : null,
         Cell: renderTrackActions,
         minWidth: COLUMN_WIDTHS.trackActions,
         maxWidth: COLUMN_WIDTHS.trackActions,
         width: COLUMN_WIDTHS.trackActions,
         disableResizing: true,
-        disableSortBy: true
+        disableSortBy: true,
+        align: 'right'
       },
       overflowMenu: {
         id: 'overflowMenu',
@@ -899,8 +916,8 @@ export const TracksTable = ({
         Header: 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
-        minWidth: COLUMN_WIDTHS.artistName,
-        width: COLUMN_WIDTHS.artistName,
+        minWidth: trackNameColumnWidth,
+        width: trackNameColumnWidth,
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
@@ -939,9 +956,11 @@ export const TracksTable = ({
       renderSavesCell,
       renderCommentsCell,
       renderTrackActions,
+      trackActionsHeader,
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,
+      trackNameColumnWidth,
       renderTrackNameCell,
       renderSavedDateCell
     ]

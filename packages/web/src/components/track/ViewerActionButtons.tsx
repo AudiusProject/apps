@@ -190,7 +190,7 @@ const BaseViewerActionButtons = ({
     <Flex justifyContent='space-between' w='100%' alignItems='center'>
       {bottomBar}
       {!isLoading && showIconButtons && !isUnlisted ? (
-        <Flex gap='2xl'>
+        <Flex gap='xl'>
           <Tooltip
             text={repostLabel}
             disabled={isDisabled}
@@ -230,6 +230,7 @@ const BaseViewerActionButtons = ({
                 isMatrix={isMatrixMode}
                 className={styles.iconButton}
                 activeClassName={styles.iconButtonActive}
+                wrapperClassName={styles.iconButtonFavorite}
                 stopPropagation
               />
             </Flex>

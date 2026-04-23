@@ -12,7 +12,7 @@ import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
 import { TrackTileSize } from 'components/track/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 
-import { MOBILE_TILE_WIDTH, TILE_WIDTH } from './constants'
+import { DESKTOP_RESPONSIVE_TILE_WIDTH, MOBILE_TILE_WIDTH } from './constants'
 
 // Wrapper component to make tiles playable
 export const PlayableTile = ({
@@ -74,7 +74,7 @@ export const TilePairs = ({
   source?: QueueSource
 }) => {
   const isMobile = useIsMobile()
-  const tileWidth = isMobile ? MOBILE_TILE_WIDTH : TILE_WIDTH
+  const tileWidth = isMobile ? MOBILE_TILE_WIDTH : DESKTOP_RESPONSIVE_TILE_WIDTH
   const pairs = []
   for (let i = 0; i < data.length; i += 2) {
     pairs.push(data.slice(i, i + 2))
@@ -121,7 +121,7 @@ export const TilePairs = ({
 export const TileSkeletons = ({ noShimmer }: { noShimmer?: boolean }) => {
   const isMobile = useIsMobile()
   const Tile = isMobile ? MobileTrackTile : DesktopTrackTile
-  const tileWidth = isMobile ? MOBILE_TILE_WIDTH : TILE_WIDTH
+  const tileWidth = isMobile ? MOBILE_TILE_WIDTH : DESKTOP_RESPONSIVE_TILE_WIDTH
 
   const tileProps = {
     togglePlay: () => {},

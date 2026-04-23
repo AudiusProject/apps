@@ -144,11 +144,11 @@ export const CollectionCard = forwardRef(
             size={cardSizeToCoverArtSizeMap[size]}
             data-testid={`cover-art-${id}`}
           />
-          <CardContent gap='xs'>
+          <CardContent gap='xs' css={{ minWidth: 0 }}>
             <TextLink
               to={permalink}
               textVariant='title'
-              css={{ justifyContent: 'center' }}
+              css={{ justifyContent: 'center', width: '100%', minWidth: 0 }}
               onClick={onCollectionLinkClick}
             >
               <Text ellipses>{playlist_name}</Text>
@@ -159,6 +159,7 @@ export const CollectionCard = forwardRef(
               center
               fullWidth
               ellipses
+              css={{ minWidth: 0 }}
             />
           </CardContent>
         </Flex>

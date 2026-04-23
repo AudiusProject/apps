@@ -1,7 +1,8 @@
 .root {
   display: flex;
   flex-direction: column;
-  max-width: 448px;
+  min-width: 0;
+  max-width: min(448px, 100%);
   overflow: hidden;
 
   background: var(--harmony-white);
@@ -18,7 +19,7 @@
 
 .thumbnail {
   display: block;
-  max-width: 448px;
+  max-width: min(448px, 100%);
   max-height: 200px;
   overflow: hidden;
   display: flex;
@@ -34,7 +35,7 @@
 
 .image {
   display: block;
-  max-width: 448px;
+  max-width: min(448px, 100%);
 }
 
 .domain {
@@ -62,6 +63,7 @@
 
 .description {
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }

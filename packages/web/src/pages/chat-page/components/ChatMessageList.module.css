@@ -1,6 +1,18 @@
 .root {
   flex: 1;
+  min-width: 0;
   overflow-y: scroll;
+  box-sizing: border-box;
+
+  /* Extend the scroll container behind the frosted header and composer so
+   * there is real content behind them for backdrop-filter to blur. The
+   * scroll-padding properties keep the inner content 32px clear of the
+   * chrome once scrolled to either edge, while letting the backdrop-filter
+   * still pick up messages flowing behind them mid-scroll. */
+  margin-top: calc(-1 * var(--chat-pane-header-height, 112px));
+  margin-bottom: calc(-1 * var(--chat-composer-height, 88px));
+  padding-top: calc(var(--chat-pane-header-height, 112px) + 32px);
+  padding-bottom: calc(var(--chat-composer-height, 88px) + 32px);
 }
 
 .listRoot {
@@ -8,8 +20,9 @@
   flex-direction: column-reverse;
   justify-content: flex-end;
   gap: 8px;
-  padding: 32px;
-  height: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+  min-width: 0;
 }
 
 .separator {

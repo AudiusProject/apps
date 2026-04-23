@@ -1,4 +1,4 @@
-import { useCallback, useState, ChangeEvent } from 'react'
+import { useCallback, useRef, useState, ChangeEvent } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -12,6 +12,7 @@ import { convertHexToRGBA } from '@audius/common/utils'
 import {
   Box,
   Button,
+  FilterButton,
   Flex,
   IconButton,
   IconClose,
@@ -28,7 +29,9 @@ import {
 import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import Page from 'components/page/Page'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { usePortal } from 'hooks/usePortal'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { isMobile } from 'utils/clientUtil'
@@ -44,7 +47,8 @@ import {
 import { MobileFanClubsExplorePage } from './MobileFanClubsExplorePage'
 
 const SEARCH_WIDTH = 400
-const MIN_WIDTH = 620
+const CONDENSED_CONTROLS_BREAKPOINT = 420
+const NORMAL_WIDTH = 1200
 
 const LAUNCH_BANNER_DISMISSED_KEY = 'audius:fan-clubs-launch-banner-dismissed'
 
@@ -70,6 +74,14 @@ const messages = {
 const DesktopFanClubsExplorePage = () => {
   const navigate = useNavigate()
   const { motion, spacing, color } = useTheme()
+  const pageContentRef = useRef<HTMLDivElement>(null)
+  const controlsRowRef = useRef<HTMLDivElement>(null)
+  const isNarrowLayout = useIsContainerNarrow(pageContentRef, 760)
+  const isExtraNarrowLayout = useIsContainerNarrow(pageContentRef, 520)
+  const isCondensedControls = useIsContainerNarrow(
+    controlsRowRef,
+    CONDENSED_CONTROLS_BREAKPOINT
+  )
   const mainContentRef = useMainContentRef()
   const Portal = usePortal({
     container: mainContentRef.current?.parentElement ?? undefined
@@ -90,6 +102,7 @@ const DesktopFanClubsExplorePage = () => {
   )
   const hasExistingFanClub = !!createdCoin
   const existingClubTicker = createdCoin?.ticker ?? null
+  const condensedHeaderControlHeightPx = spacing.unit8 + 2
   const canViewExistingClub =
     hasExistingFanClub &&
     existingClubTicker !== null &&
@@ -140,102 +153,177 @@ const DesktopFanClubsExplorePage = () => {
       ? convertHexToRGBA(color.background.surface1, 0.78)
       : 'rgba(255, 255, 255, 0.78)'
 
+  const viewModeOptions = [
+    {
+      label: walletMessages.fanClubs.cardView,
+      value: 'cards'
+    },
+    {
+      label: walletMessages.fanClubs.leaderboardView,
+      value: 'table'
+    }
+  ]
+
+  const headerControlsPaddingX = isExtraNarrowLayout
+    ? 's'
+    : isNarrowLayout
+      ? 'm'
+      : 'xl'
+  const headerHeroPaddingX = isExtraNarrowLayout
+    ? 'l'
+    : isNarrowLayout
+      ? 'xl'
+      : '3xl'
+  const headerControlsGap = isExtraNarrowLayout ? 'm' : 'l'
+
   return (
     <Page
       title={walletMessages.fanClubs.title}
       description={messages.pageDescription}
-      css={{ minWidth: MIN_WIDTH }}
+      size='large'
+      variant='flush'
     >
-      <Flex column gap='xl' css={{ paddingBottom: launchCtaReserveY }}>
+      <Flex justifyContent='center' w='100%'>
         <Flex
+          ref={pageContentRef}
           direction='column'
-          w='100%'
-          borderRadius='m'
-          border='default'
+          pv='3xl'
+          ph='unit8'
+          gap='3xl'
+          alignItems='stretch'
           css={{
-            overflow: 'hidden',
-            boxShadow:
-              '0px 0px 4px 0px rgba(0, 0, 0, 0.04), 0px 4px 8px 0px rgba(0, 0, 0, 0.06)'
+            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
+            width: '100%',
+            maxWidth: NORMAL_WIDTH,
+            paddingBottom: launchCtaReserveY
           }}
         >
           <Flex
-            p='3xl'
             direction='column'
-            alignItems='center'
-            justifyContent='center'
-            gap='xl'
             w='100%'
             css={{
-              backgroundImage: `url(${imageCoinsBackgroundImage})`,
-              backgroundSize: 'cover, cover',
-              backgroundPosition: '0% 0%, 50% 50%',
-              backgroundRepeat: 'no-repeat, no-repeat'
+              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
+              overflow: 'hidden',
+              boxShadow:
+                '0px 0px 4px 0px rgba(0, 0, 0, 0.04), 0px 4px 8px 0px rgba(0, 0, 0, 0.06)'
             }}
+            borderRadius='l'
+            border='default'
           >
-            <Text variant='display' size='s' color='staticWhite'>
-              {walletMessages.fanClubs.title}
-            </Text>
-
-            <Box w='100%' css={{ maxWidth: SEARCH_WIDTH }}>
-              <TextInput
-                label={messages.searchPlaceholder}
-                placeholder={messages.searchPlaceholder}
-                value={searchValue}
-                onChange={handleSearchChange}
-                startIcon={IconSearch}
-                size={TextInputSize.SMALL}
-              />
-            </Box>
-          </Flex>
-
-          <Flex
-            w='100%'
-            borderTop='strong'
-            backgroundColor='surface1'
-            ph='xl'
-            pt='l'
-            pb='l'
-            justifyContent='space-between'
-            alignItems='flex-end'
-            gap='l'
-            css={{ flexWrap: 'wrap' }}
-          >
-            <Flex column gap='s' alignItems='flex-start'>
-              <Text variant='label' size='s' color='subdued'>
-                {walletMessages.fanClubs.view}
-              </Text>
-              <Flex gap='s' alignItems='center' css={{ flexWrap: 'wrap' }}>
-                <SelectablePill
-                  size='large'
-                  label={walletMessages.fanClubs.cardView}
-                  isSelected={fanClubsViewMode === 'cards'}
-                  onClick={() => {
-                    handleFanClubsViewModeChange('cards')
-                  }}
-                />
-                <SelectablePill
-                  size='large'
-                  label={walletMessages.fanClubs.leaderboardView}
-                  isSelected={fanClubsViewMode === 'table'}
-                  onClick={() => {
-                    handleFanClubsViewModeChange('table')
-                  }}
-                />
-              </Flex>
-            </Flex>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleHeaderClubCta}
+            <Flex
+              pv='3xl'
+              ph={headerHeroPaddingX}
+              direction='column'
+              alignItems='center'
+              justifyContent='center'
+              gap='xl'
+              w='100%'
+              css={{
+                backgroundImage: `url(${imageCoinsBackgroundImage})`,
+                backgroundSize: 'cover, cover',
+                backgroundPosition: '0% 0%, 50% 50%',
+                backgroundRepeat: 'no-repeat, no-repeat'
+              }}
             >
-              {canViewExistingClub
-                ? walletMessages.fanClubs.viewYourClub
-                : walletMessages.fanClubs.launchYourClub}
-            </Button>
-          </Flex>
-        </Flex>
+              <Text
+                variant='display'
+                size='s'
+                color='staticWhite'
+                textAlign='center'
+                css={{
+                  fontSize: 'clamp(1.75rem, 5vw, 2.25rem)',
+                  lineHeight: 'clamp(2rem, 5.4vw, 2.5rem)'
+                }}
+              >
+                {walletMessages.fanClubs.title}
+              </Text>
 
-        <FanClubsTable searchQuery={searchValue} viewMode={fanClubsViewMode} />
+              <Box w='100%' css={{ maxWidth: SEARCH_WIDTH }}>
+                <TextInput
+                  label={messages.searchPlaceholder}
+                  placeholder={messages.searchPlaceholder}
+                  value={searchValue}
+                  onChange={handleSearchChange}
+                  startIcon={IconSearch}
+                  size={TextInputSize.SMALL}
+                />
+              </Box>
+            </Flex>
+
+            <Flex
+              ref={controlsRowRef}
+              w='100%'
+              borderTop='strong'
+              backgroundColor='surface1'
+              ph={headerControlsPaddingX}
+              pt='l'
+              pb='l'
+              justifyContent='space-between'
+              alignItems='flex-end'
+              gap={headerControlsGap}
+              css={{ flexWrap: 'wrap' }}
+            >
+              <Flex
+                column
+                gap='s'
+                alignItems='flex-start'
+                css={{ minWidth: 0 }}
+              >
+                <Text variant='label' size='s' color='subdued'>
+                  {walletMessages.fanClubs.view}
+                </Text>
+                {isCondensedControls ? (
+                  <FilterButton
+                    label={walletMessages.fanClubs.cardView}
+                    value={fanClubsViewMode}
+                    variant='replaceLabel'
+                    onChange={(value) => {
+                      handleFanClubsViewModeChange(value as FanClubsViewMode)
+                    }}
+                    options={viewModeOptions}
+                  />
+                ) : (
+                  <Flex gap='s' alignItems='center' css={{ flexWrap: 'wrap' }}>
+                    <SelectablePill
+                      size='large'
+                      label={walletMessages.fanClubs.cardView}
+                      isSelected={fanClubsViewMode === 'cards'}
+                      onClick={() => {
+                        handleFanClubsViewModeChange('cards')
+                      }}
+                    />
+                    <SelectablePill
+                      size='large'
+                      label={walletMessages.fanClubs.leaderboardView}
+                      isSelected={fanClubsViewMode === 'table'}
+                      onClick={() => {
+                        handleFanClubsViewModeChange('table')
+                      }}
+                    />
+                  </Flex>
+                )}
+              </Flex>
+              <Button
+                variant='secondary'
+                size='small'
+                css={
+                  isCondensedControls
+                    ? { height: condensedHeaderControlHeightPx }
+                    : undefined
+                }
+                onClick={handleHeaderClubCta}
+              >
+                {canViewExistingClub
+                  ? walletMessages.fanClubs.viewYourClub
+                  : walletMessages.fanClubs.launchYourClub}
+              </Button>
+            </Flex>
+          </Flex>
+          <FanClubsTable
+            searchQuery={searchValue}
+            viewMode={fanClubsViewMode}
+          />
+        </Flex>
       </Flex>
 
       <Portal>

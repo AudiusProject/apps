@@ -72,6 +72,7 @@ export const UserLink = (props: UserLinkProps) => {
     lineHeight: 'normal',
     display: 'inline-flex',
     width: fullWidth ? '100%' : undefined,
+    minWidth: 0,
     overflow: 'hidden'
   }
 
@@ -81,7 +82,9 @@ export const UserLink = (props: UserLinkProps) => {
       <TextLink
         to={url}
         css={{
-          lineHeight: 'normal'
+          lineHeight: 'normal',
+          minWidth: 0,
+          maxWidth: '100%'
         }}
         {...other}
       >
@@ -105,11 +108,16 @@ export const UserLink = (props: UserLinkProps) => {
         <ArtistPopover
           css={{
             display: 'inline-flex',
+            minWidth: 0,
             overflow: noOverflow ? 'visible' : 'hidden'
           }}
           handle={handle}
         >
-          <TextLink to={url} {...other}>
+          <TextLink
+            to={url}
+            css={{ lineHeight: 'normal', minWidth: 0, maxWidth: '100%' }}
+            {...other}
+          >
             <Text ellipses>{name}</Text>
           </TextLink>
         </ArtistPopover>

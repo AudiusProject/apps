@@ -44,6 +44,18 @@
   margin-right: 4px;
 }
 
+.tabDesktopIconOnly svg {
+  margin-right: 0;
+}
+
+.tabDesktopIconOnly {
+  margin-right: 0;
+}
+
+.tabWrapperDesktopIconOnly {
+  margin-right: 16px;
+}
+
 .tab path {
   fill: var(--harmony-text-subdued);
   transition: all 0.18s ease-in-out;

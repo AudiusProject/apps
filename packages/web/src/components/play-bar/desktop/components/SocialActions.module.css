@@ -6,6 +6,10 @@
   align-items: center;
 }
 
+.compact {
+  margin-left: var(--harmony-unit-2);
+}
+
 .toggleRepostContainer,
 .toggleFavoriteContainer {
   position: relative;

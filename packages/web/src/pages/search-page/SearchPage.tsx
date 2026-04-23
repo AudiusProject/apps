@@ -4,6 +4,7 @@ import { SearchCategory } from '@audius/common/api'
 import { Flex, useTheme } from '@audius/harmony'
 import { useSearchParams } from 'react-router'
 
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
   CenterPreset,
@@ -55,6 +56,7 @@ export const SearchPage = () => {
         direction='column'
         w='100%'
         h='100%'
+        css={{ minWidth: isMobile ? 0 : MIN_DESKTOP_CONTENT_WIDTH_PX }}
         style={isMobile ? { backgroundColor: color.background.white } : {}}
       >
         {isMobile ? header : null}

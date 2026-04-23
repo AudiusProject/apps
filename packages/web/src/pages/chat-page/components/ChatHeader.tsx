@@ -9,13 +9,11 @@ import {
   IconCompose,
   IconSettings,
   IconButton,
-  Paper,
   Flex,
   Text,
   IconMessages
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
-import { useMedia } from 'react-use'
 
 import { useModalState } from 'common/hooks/useModalState'
 
@@ -28,14 +26,18 @@ const messages = {
   compose: 'Compose'
 }
 
+const CHAT_HEADER_PADDING_PX = 20
+const CHAT_LIST_WIDTH_PX = 400
+
 type ChatHeaderProps = {
   currentChatId?: string
+  isNarrowLayout?: boolean
   scrollBarWidth?: number
-  headerContainerRef?: React.RefObject<HTMLDivElement>
+  headerContainerRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
-  ({ currentChatId, scrollBarWidth, headerContainerRef }, ref) => {
+  ({ currentChatId, isNarrowLayout }, ref) => {
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
     const chat = useSelector((state: CommonState) =>
@@ -51,41 +53,54 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       setInboxSettingsVisible(true)
     }, [setInboxSettingsVisible])
 
-    const isSmallScreen = useMedia('(max-width: 1080px)')
-
     const headerContent = (
-      <Flex p='l' alignItems='flex-end' gap='m'>
+      <Flex p='l' alignItems='center' gap='m'>
         <IconMessages size='2xl' color='heading' />
         <Text variant='heading' strength='default' size='l' color='heading'>
           {messages.header}
         </Text>
-        <IconButton
-          aria-label={messages.settings}
-          icon={IconSettings}
-          onClick={handleSettingsClicked}
-        />
-        <IconButton
-          aria-label={messages.compose}
-          icon={IconCompose}
-          onClick={handleComposeClicked}
-        />
+        <Flex gap='m' css={{ marginLeft: 'auto' }}>
+          <IconButton
+            aria-label={messages.settings}
+            icon={IconSettings}
+            onClick={handleSettingsClicked}
+          />
+          <IconButton
+            aria-label={messages.compose}
+            icon={IconCompose}
+            onClick={handleComposeClicked}
+          />
+        </Flex>
       </Flex>
     )
 
     return (
-      <Paper shadow='flat' ref={ref} ph={20} mh={-80} h={112}>
-        <Flex w={isSmallScreen ? 96 : 400} borderRight='default'>
-          {isSmallScreen ? null : headerContent}
+      <Flex
+        ref={ref}
+        w='100%'
+        h={112}
+        ph={CHAT_HEADER_PADDING_PX}
+        css={{ minWidth: 0, borderRadius: 0 }}
+        borderBottom='default'
+      >
+        <Flex
+          w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
+          css={{ flexShrink: 0 }}
+        >
+          {headerContent}
         </Flex>
-        {isSmallScreen ? headerContent : null}
-        <Flex p='l' flex={1} alignItems='flex-end'>
-          {isBlast ? (
-            <ChatBlastHeader chat={chat} />
-          ) : (
-            <UserChatHeader chatId={chat?.chat_id} />
-          )}
-        </Flex>
-      </Paper>
+        {isNarrowLayout ? null : (
+          <Flex p='l' flex={1} alignItems='center' css={{ minWidth: 0 }}>
+            {chat ? (
+              isBlast ? (
+                <ChatBlastHeader chat={chat} />
+              ) : (
+                <UserChatHeader chatId={chat.chat_id} />
+              )
+            ) : null}
+          </Flex>
+        )}
+      </Flex>
     )
   }
 )

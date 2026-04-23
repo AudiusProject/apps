@@ -57,12 +57,17 @@ export const AlbumsTabPage = () => {
   const cards = useMemo(() => {
     const loadedCards =
       albumIds?.map((albumId) => {
-        return <CollectionCard key={albumId} id={albumId} size='m' />
+        return <CollectionCard key={albumId} id={albumId} size='m' w='100%' />
       }) ?? []
     if (!isFetchingNextPage) return loadedCards
     return loadedCards.concat(
       Array.from({ length: 6 }, (_, i) => (
-        <CollectionCardSkeleton key={`loading-${i}`} size='m' noShimmer />
+        <CollectionCardSkeleton
+          key={`loading-${i}`}
+          size='m'
+          w='100%'
+          noShimmer
+        />
       ))
     )
   }, [albumIds, isFetchingNextPage])
@@ -71,7 +76,7 @@ export const AlbumsTabPage = () => {
     return (
       <div className={styles.cardsContainer}>
         {Array.from({ length: 12 }, (_, i) => (
-          <CollectionCardSkeleton key={i} size='m' noShimmer />
+          <CollectionCardSkeleton key={i} size='m' w='100%' noShimmer />
         ))}
       </div>
     )
