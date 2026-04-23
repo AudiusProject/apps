@@ -18,6 +18,7 @@ import { TrackMetadataForUpload } from '~/store/upload'
 
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
+import { addPremiumMetadata } from '../upload/usePublishTracks'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { handleStemUpdates } from '../utils/handleStemUpdates'
 import { primeTrackData } from '../utils/primeTrackData'
@@ -58,9 +59,14 @@ export const useUpdateTrack = () => {
       const previousMetadata = queryClient.getQueryData(
         getTrackQueryKey(trackId)
       )
-      const sdkMetadata = trackMetadataForUploadToSdk(
+      if (!userId) {
+        throw new Error('useUpdateTrack: missing current userId')
+      }
+      const metadataWithSplits = addPremiumMetadata(
+        userId,
         metadata as TrackMetadataForUpload
       )
+      const sdkMetadata = trackMetadataForUploadToSdk(metadataWithSplits)
 
       const response = await sdk.tracks.updateTrack({
         audioFile,
