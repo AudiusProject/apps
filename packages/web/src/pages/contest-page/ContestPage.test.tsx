@@ -134,7 +134,7 @@ describe('ContestPage', () => {
     // Sensible defaults every test can override.
     mocks.useTrackByPermalink.mockReturnValue({ data: track })
     mocks.useUser.mockReturnValue({ data: user })
-    mocks.useRemixContest.mockReturnValue({ data: contest })
+    mocks.useRemixContest.mockReturnValue({ data: contest, isPending: false })
     mocks.useCurrentUserId.mockReturnValue({ data: 2 })
     mocks.useEventFollowState.mockReturnValue({
       data: { isFollowed: false, followerCount: 0 }
@@ -184,7 +184,7 @@ describe('ContestPage', () => {
   })
 
   it('renders the "no contest" fallback when the track has no remix contest', () => {
-    mocks.useRemixContest.mockReturnValue({ data: null })
+    mocks.useRemixContest.mockReturnValue({ data: null, isPending: false })
     renderContestPage()
     expect(
       screen.getByText(/no contest is currently running for this track/i)

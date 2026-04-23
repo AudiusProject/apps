@@ -41,13 +41,19 @@ export const useRemixContest = (
 
   const remixContestId = eventsQuery.data?.[0]
 
-  const { data: remixContest } = useEvent<RemixContestEvent>(
-    remixContestId,
-    options
-  )
+  const eventQuery = useEvent<RemixContestEvent>(remixContestId, options)
+
+  const isPending =
+    eventsQuery.isPending || (remixContestId != null && eventQuery.isPending)
+
+  const isFetching =
+    eventsQuery.isFetching || (remixContestId != null && eventQuery.isFetching)
 
   return {
     ...eventsQuery,
-    data: remixContest
+    data: eventQuery.data,
+    isPending,
+    isFetching,
+    isLoading: isPending
   }
 }

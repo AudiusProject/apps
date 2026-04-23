@@ -20,17 +20,20 @@ import { FeatureFlags } from '@audius/common/services'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
 import { Pressable, View } from 'react-native'
+import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   Button,
   Divider,
   Flex,
+  IconArrowLeft,
   IconKebabHorizontal,
   Text
 } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
+import Skeleton from 'app/components/skeleton'
 import {
   CollapsibleTabNavigator,
   collapsibleTabScreen
@@ -59,7 +62,8 @@ const messages = {
   days: 'DAYS',
   hours: 'HOURS',
   mins: 'MINS',
-  secs: 'SECS'
+  secs: 'SECS',
+  noContestForTrack: 'No contest is currently running for this track.'
 }
 
 // -----------------------------------------------------------------------------
@@ -137,6 +141,109 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
 const EmptyTabIcon = () => null
 
 // -----------------------------------------------------------------------------
+// Loading skeleton — matches the real header stack (hero, title, actions,
+// tab row) so the transition into content feels like the same page.
+// -----------------------------------------------------------------------------
+const ContestScreenSkeleton = ({ onBack }: { onBack: () => void }) => (
+  <Flex direction='column' w='100%' flex={1}>
+    <View
+      style={{
+        width: '100%',
+        height: CONTEST_HERO_HEIGHT,
+        position: 'relative',
+        backgroundColor: 'rgba(0,0,0,0.06)'
+      }}
+    >
+      <View style={{ position: 'absolute', top: 12, left: 12, zIndex: 2 }}>
+        <Pressable
+          onPress={onBack}
+          style={{
+            padding: 6,
+            borderRadius: 999,
+            backgroundColor: 'rgba(0,0,0,0.35)'
+          }}
+        >
+          <IconArrowLeft size='m' color='staticWhite' />
+        </Pressable>
+      </View>
+      <Skeleton width='100%' height='100%' />
+    </View>
+    <Flex p='xl' gap='l' direction='column' pointerEvents='none'>
+      <Skeleton width='75%' height={32} style={{ borderRadius: 6 }} />
+      <Flex direction='row' alignItems='center' gap='s'>
+        <Skeleton height={40} style={{ flex: 1, borderRadius: 8 }} />
+        <Skeleton width={40} height={40} style={{ borderRadius: 8 }} />
+      </Flex>
+      <Flex direction='column' gap='xs'>
+        <Skeleton width={100} height={10} style={{ borderRadius: 4 }} />
+        <Skeleton width={200} height={16} style={{ borderRadius: 4 }} />
+      </Flex>
+      <Flex
+        direction='row'
+        alignItems='center'
+        gap='s'
+        w='100%'
+        style={{ marginTop: 4 }}
+      >
+        <Flex flex={1} alignItems='center' direction='column' gap='2xs'>
+          <Skeleton width={28} height={24} style={{ borderRadius: 4 }} />
+          <Skeleton width={32} height={8} style={{ borderRadius: 4 }} />
+        </Flex>
+        <View
+          style={{ width: 1, height: 32, backgroundColor: 'rgba(0,0,0,0.1)' }}
+        />
+        <Flex flex={1} alignItems='center' direction='column' gap='2xs'>
+          <Skeleton width={28} height={24} style={{ borderRadius: 4 }} />
+          <Skeleton width={36} height={8} style={{ borderRadius: 4 }} />
+        </Flex>
+        <View
+          style={{ width: 1, height: 32, backgroundColor: 'rgba(0,0,0,0.1)' }}
+        />
+        <Flex flex={1} alignItems='center' direction='column' gap='2xs'>
+          <Skeleton width={28} height={24} style={{ borderRadius: 4 }} />
+          <Skeleton width={32} height={8} style={{ borderRadius: 4 }} />
+        </Flex>
+      </Flex>
+      <View
+        style={{
+          width: '100%',
+          height: 1,
+          backgroundColor: 'rgba(0,0,0,0.1)',
+          marginTop: 4
+        }}
+      />
+      <Flex
+        direction='row'
+        alignItems='center'
+        gap='m'
+        style={{ marginTop: 4 }}
+      >
+        <Skeleton width={40} height={40} style={{ borderRadius: 999 }} />
+        <Flex direction='column' gap='xs' style={{ flex: 1 }}>
+          <Skeleton width={120} height={16} style={{ borderRadius: 4 }} />
+          <Skeleton width={80} height={12} style={{ borderRadius: 4 }} />
+        </Flex>
+      </Flex>
+      <Flex
+        alignItems='center'
+        justifyContent='space-around'
+        w='100%'
+        style={{ marginTop: 8 }}
+      >
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton
+            key={i}
+            width={56}
+            height={16}
+            style={{ borderRadius: 4 }}
+          />
+        ))}
+      </Flex>
+    </Flex>
+  </Flex>
+)
+
+// -----------------------------------------------------------------------------
 // Screen
 // -----------------------------------------------------------------------------
 export const ContestScreen = () => {
@@ -150,7 +257,8 @@ export const ContestScreen = () => {
   const { data: track } = useTrackByParams(params ?? {})
   const trackId = track?.track_id
   const { data: user } = useUser(track?.owner_id)
-  const { data: contest } = useRemixContest(trackId)
+  const { data: contest, isPending: isRemixContestPending } =
+    useRemixContest(trackId)
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
@@ -209,13 +317,36 @@ export const ContestScreen = () => {
     return null
   }
 
-  if (!track || !user || !contest || !eventId || trackId == null) {
+  if (!track || !user || trackId == null) {
     return (
       <Screen>
         <ScreenContent>
-          <Flex p='xl'>
-            <Text variant='body'>Loading contest…</Text>
-          </Flex>
+          <ContestScreenSkeleton onBack={() => navigation.goBack()} />
+        </ScreenContent>
+      </Screen>
+    )
+  }
+
+  if (isRemixContestPending) {
+    return (
+      <Screen>
+        <ScreenContent>
+          <ContestScreenSkeleton onBack={() => navigation.goBack()} />
+        </ScreenContent>
+      </Screen>
+    )
+  }
+
+  if (!contest || !eventId) {
+    return (
+      <Screen>
+        <ScreenContent>
+          <Animated.View
+            entering={FadeIn.duration(320)}
+            style={{ flex: 1, padding: 20 }}
+          >
+            <Text variant='body'>{messages.noContestForTrack}</Text>
+          </Animated.View>
         </ScreenContent>
       </Screen>
     )
@@ -392,8 +523,9 @@ export const ContestScreen = () => {
   return (
     <Screen>
       <ScreenContent>
-        <ContestPageProvider value={contextValue}>
-          {/* Explicit `height: '100%'` wrapper mirrors the
+        <Animated.View entering={FadeIn.duration(320)} style={{ flex: 1 }}>
+          <ContestPageProvider value={contextValue}>
+            {/* Explicit `height: '100%'` wrapper mirrors the
               `ProfileScreen` pattern (`styles.navigator`). Without
               it, `CollapsibleTabNavigator` can't establish its own
               scroll container height and the header stops tracking
@@ -401,26 +533,27 @@ export const ContestScreen = () => {
               on the contest page. With the wrapper the navigator
               fills the remaining space below any chrome and the
               header slides normally. */}
-          <View style={{ height: '100%' }}>
-            <CollapsibleTabNavigator
-              renderHeader={renderHeader}
-              // Hero + title + CTA + countdown + hosted-by stack.
-              // This is the seed height the collapsible navigator
-              // uses before its on-mount measurement kicks in —
-              // over-estimating is fine (the measured value takes
-              // over), but underestimating causes a visible jump.
-              headerHeight={CONTEST_HERO_HEIGHT + 460}
-              // Keep enough of the header visible at full-collapse
-              // for the status bar inset.
-              minHeaderHeight={insets.top}
-            >
-              {detailsScreen}
-              {updatesScreen}
-              {submissionsScreen}
-              {commentsScreen}
-            </CollapsibleTabNavigator>
-          </View>
-        </ContestPageProvider>
+            <View style={{ height: '100%' }}>
+              <CollapsibleTabNavigator
+                renderHeader={renderHeader}
+                // Hero + title + CTA + countdown + hosted-by stack.
+                // This is the seed height the collapsible navigator
+                // uses before its on-mount measurement kicks in —
+                // over-estimating is fine (the measured value takes
+                // over), but underestimating causes a visible jump.
+                headerHeight={CONTEST_HERO_HEIGHT + 460}
+                // Keep enough of the header visible at full-collapse
+                // for the status bar inset.
+                minHeaderHeight={insets.top}
+              >
+                {detailsScreen}
+                {updatesScreen}
+                {submissionsScreen}
+                {commentsScreen}
+              </CollapsibleTabNavigator>
+            </View>
+          </ContestPageProvider>
+        </Animated.View>
       </ScreenContent>
     </Screen>
   )

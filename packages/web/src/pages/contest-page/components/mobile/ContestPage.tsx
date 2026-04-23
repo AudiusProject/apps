@@ -23,7 +23,6 @@ import {
   Box,
   Button,
   Divider,
-  FilterButton,
   Flex,
   IconArrowLeft,
   IconButton,
@@ -35,7 +34,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
@@ -44,7 +42,12 @@ import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
+import {
+  ContestFadeIn,
+  ContestPageMobileSkeleton
+} from '../../ContestPageSkeletons'
 import { ContestCommentsTile } from '../ContestCommentsTile'
+import { ContestRemixesStyleSubmissions } from '../ContestRemixesStyleSubmissions'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
@@ -71,7 +74,8 @@ const messages = {
   sortPlays: 'Most Plays',
   sortFavorites: 'Most Favorites',
   loading: 'Loading…',
-  noRemixes: 'No submissions yet.'
+  noRemixes: 'No submissions yet.',
+  noContestForTrack: 'No contest is currently running for this track.'
 }
 
 const HERO_HEIGHT = 220
@@ -224,7 +228,8 @@ const ContestPage = ({
   const trackId = track?.track_id ?? originalTrackId ?? undefined
   const { data: user } = useUser(track?.owner_id)
 
-  const { data: contest } = useRemixContest(trackId)
+  const { data: contest, isPending: isRemixContestPending } =
+    useRemixContest(trackId)
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
@@ -251,20 +256,21 @@ const ContestPage = ({
 
   // Submissions tab filter state — URL-backed so deep links + back/forward
   // work the same way as the track-page RemixesPage (the reference).
-  const { sortMethod, isCosign } = useRemixPageParams()
+  const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
+  const updateIsContestEntryParam = useUpdateSearchParams('isContestEntry')
 
-  // Submissions lineup — driven on demand by the Submissions tab.
+  // Submissions lineup — RemixesPage-style (original + winners + filters).
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
-    includeOriginal: false,
+    includeOriginal: true,
     includeWinners: true,
-    isContestEntry: true,
+    isContestEntry,
     sortMethod,
     isCosign
   })
-  const submissionsCount = lineup.data?.length
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
 
   useEffect(() => {
     if (trackId) {
@@ -317,14 +323,22 @@ const ContestPage = ({
     return null
   }
 
+  if (isRemixContestPending) {
+    return (
+      <Page title={messages.title} variant='flush'>
+        <ContestPageMobileSkeleton />
+      </Page>
+    )
+  }
+
   if (!contest || !eventId) {
     return (
       <Page title={messages.title} variant='flush'>
-        <Box p='xl'>
-          <Text variant='body'>
-            No contest is currently running for this track.
-          </Text>
-        </Box>
+        <ContestFadeIn>
+          <Box p='xl'>
+            <Text variant='body'>{messages.noContestForTrack}</Text>
+          </Box>
+        </ContestFadeIn>
       </Page>
     )
   }
@@ -346,190 +360,172 @@ const ContestPage = ({
       canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
-      {/* Mobile header block now inherits the same `white` surface
+      <ContestFadeIn>
+        {/* Mobile header block now inherits the same `white` surface
           token the Paper cards use, so the hero + title + deadline
           + countdown + hosted-by stack reads as the same background
           color as the sections below it. Matches Figma 2925-18102
           where the whole contest header sits on a single dark
           (dark-mode) / white (light-mode) surface. */}
-      <Box
-        w='100%'
-        pb='xl'
-        css={(theme) => ({ backgroundColor: theme.color.background.white })}
-      >
-        {/* Hero banner */}
         <Box
           w='100%'
-          h={HERO_HEIGHT}
-          css={{
-            backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative'
-          }}
+          pb='xl'
+          css={(theme) => ({ backgroundColor: theme.color.background.white })}
         >
+          {/* Hero banner */}
           <Box
+            w='100%'
+            h={HERO_HEIGHT}
             css={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              borderRadius: '50%',
-              backgroundColor: 'rgba(0,0,0,0.35)',
-              backdropFilter: 'blur(8px)'
+              backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'relative'
             }}
           >
-            <IconButton
-              icon={IconArrowLeft}
-              color='staticWhite'
-              aria-label='Back'
-              onClick={() => navigate(-1)}
-            />
-          </Box>
-        </Box>
-
-        {/* Title + primary action + kebab */}
-        <Box p='xl' css={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Text variant='display' size='s'>
-            {contestTitle}
-          </Text>
-          <Flex gap='s' alignItems='center'>
-            <Box css={{ flex: 1 }}>{primaryAction}</Box>
-            <IconButton
-              icon={IconKebabHorizontal}
-              color='default'
-              aria-label='Contest actions'
-              onClick={() => {
-                /* TODO: hook overflow drawer. For now this is a visual
-                   placeholder — artist gets Edit/Share, public gets Share. */
+            <Box
+              css={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.35)',
+                backdropFilter: 'blur(8px)'
               }}
-            />
-          </Flex>
-
-          {/* Submissions Due */}
-          <Flex direction='column' gap='xs'>
-            <Text variant='label' size='m' color='subdued'>
-              {isEnded ? messages.contestEnded : messages.submissionsDue}
-            </Text>
-            {deadlineParts ? (
-              <Flex alignItems='baseline' gap='s' wrap='wrap'>
-                {/* label / l / regular — matches native. */}
-                <Text variant='label' size='l'>
-                  {deadlineParts.date}
-                </Text>
-                <Text variant='label' size='l' color='subdued'>
-                  {deadlineParts.time}
-                </Text>
-              </Flex>
-            ) : null}
-          </Flex>
-
-          {/* Countdown */}
-          {!isEnded && contest.endDate ? (
-            <MobileCountdown endDate={contest.endDate} />
-          ) : null}
-
-          <Divider />
-
-          {/* Hosted By */}
-          <Flex direction='column' gap='s'>
-            <SectionLabel>{messages.hostedBy}</SectionLabel>
-            <Flex gap='m' alignItems='center'>
-              <Avatar userId={user.user_id} h={40} w={40} />
-              <Flex direction='column'>
-                <Text variant='title' size='m'>
-                  {user.name}
-                </Text>
-                <Text variant='body' size='s' color='subdued'>
-                  @{user.handle}
-                </Text>
-              </Flex>
-            </Flex>
-          </Flex>
-
-          {/* Tabs */}
-          <TabBar active={activeTab} onChange={setActiveTab} />
-        </Box>
-
-        {/* Tab content */}
-        <Box ph='xl' pb='2xl'>
-          {activeTab === 'details' ? (
-            <DetailsTab
-              trackId={trackId!}
-              eventId={eventId}
-              contestOwnerId={contest.userId}
-              hasDownloads={hasDownloads}
-              followerCount={followState?.followerCount ?? 0}
-              description={
-                (contest.eventData as any)?.description as string | undefined
-              }
-              prizeInfo={
-                (contest.eventData as any)?.prizeInfo as string | undefined
-              }
-            />
-          ) : activeTab === 'updates' ? (
-            <Box pt='l'>
-              <ContestCommentsTile
-                eventId={eventId}
-                eventOwnerUserId={contest.userId}
-                mode='updates'
-                hideHeading
+            >
+              <IconButton
+                icon={IconArrowLeft}
+                color='staticWhite'
+                aria-label='Back'
+                onClick={() => navigate(-1)}
               />
             </Box>
-          ) : activeTab === 'submissions' ? (
-            <Flex direction='column' gap='l' pt='l'>
-              {/* Filter bar — same controls track-page RemixesPage exposes
-                  above its remixes lineup: a Co-Signed toggle + a sort
-                  dropdown (Recent / Plays / Favorites). */}
-              <Flex justifyContent='space-between' alignItems='center'>
-                <SectionLabel>
-                  {submissionsCount != null
-                    ? `${submissionsCount} ${messages.submissions}`
-                    : messages.submissions}
-                </SectionLabel>
-                <Flex gap='xs'>
-                  <FilterButton
-                    label={messages.coSigned}
-                    value={isCosign ? 'true' : null}
-                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
-                  />
-                  <FilterButton
-                    value={sortMethod ?? 'recent'}
-                    variant='replaceLabel'
-                    onChange={updateSortParam}
-                    options={[
-                      { label: messages.sortRecent, value: 'recent' },
-                      { label: messages.sortPlays, value: 'plays' },
-                      { label: messages.sortFavorites, value: 'likes' }
-                    ]}
-                  />
+          </Box>
+
+          {/* Title + primary action + kebab */}
+          <Box
+            p='xl'
+            css={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+          >
+            <Text variant='display' size='s'>
+              {contestTitle}
+            </Text>
+            <Flex gap='s' alignItems='center'>
+              <Box css={{ flex: 1 }}>{primaryAction}</Box>
+              <IconButton
+                icon={IconKebabHorizontal}
+                color='default'
+                aria-label='Contest actions'
+                onClick={() => {
+                  /* TODO: hook overflow drawer. For now this is a visual
+                   placeholder — artist gets Edit/Share, public gets Share. */
+                }}
+              />
+            </Flex>
+
+            {/* Submissions Due */}
+            <Flex direction='column' gap='xs'>
+              <Text variant='label' size='m' color='subdued'>
+                {isEnded ? messages.contestEnded : messages.submissionsDue}
+              </Text>
+              {deadlineParts ? (
+                <Flex alignItems='baseline' gap='s' wrap='wrap'>
+                  {/* label / l / regular — matches native. */}
+                  <Text variant='label' size='l'>
+                    {deadlineParts.date}
+                  </Text>
+                  <Text variant='label' size='l' color='subdued'>
+                    {deadlineParts.time}
+                  </Text>
+                </Flex>
+              ) : null}
+            </Flex>
+
+            {/* Countdown */}
+            {!isEnded && contest.endDate ? (
+              <MobileCountdown endDate={contest.endDate} />
+            ) : null}
+
+            <Divider />
+
+            {/* Hosted By */}
+            <Flex direction='column' gap='s'>
+              <SectionLabel>{messages.hostedBy}</SectionLabel>
+              <Flex gap='m' alignItems='center'>
+                <Avatar userId={user.user_id} h={40} w={40} />
+                <Flex direction='column'>
+                  <Text variant='title' size='m'>
+                    {user.name}
+                  </Text>
+                  <Text variant='body' size='s' color='subdued'>
+                    @{user.handle}
+                  </Text>
                 </Flex>
               </Flex>
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
             </Flex>
-          ) : (
-            <Box pt='l'>
-              <ContestCommentsTile
+
+            {/* Tabs */}
+            <TabBar active={activeTab} onChange={setActiveTab} />
+          </Box>
+
+          {/* Tab content */}
+          <Box ph='xl' pb='2xl'>
+            {activeTab === 'details' ? (
+              <DetailsTab
+                trackId={trackId!}
                 eventId={eventId}
-                eventOwnerUserId={contest.userId}
-                mode='comments'
+                contestOwnerId={contest.userId}
+                hasDownloads={hasDownloads}
+                followerCount={followState?.followerCount ?? 0}
+                description={
+                  (contest.eventData as any)?.description as string | undefined
+                }
+                prizeInfo={
+                  (contest.eventData as any)?.prizeInfo as string | undefined
+                }
               />
-            </Box>
-          )}
+            ) : activeTab === 'updates' ? (
+              <Box pt='l'>
+                <ContestCommentsTile
+                  eventId={eventId}
+                  eventOwnerUserId={contest.userId}
+                  mode='updates'
+                  hideHeading
+                />
+              </Box>
+            ) : activeTab === 'submissions' ? (
+              // Drop the outer `N SUBMISSIONS` section label — the
+              // selected tab label already reads "Submissions" right
+              // above this block, and the lineup itself leads with
+              // the "Original Track" + winners + filter bar via its
+              // `delineatorMap`. An inline duplicate heading just
+              // noised up the top of the tab.
+              <Flex direction='column' gap='l' pt='l'>
+                <ContestRemixesStyleSubmissions
+                  lineup={lineup}
+                  pageSize={CONTEST_PAGE_SIZE}
+                  winnerCount={winnerCount}
+                  sortMethod={sortMethod}
+                  isCosign={isCosign}
+                  isContestEntry={isContestEntry}
+                  updateSortParam={updateSortParam}
+                  updateIsCosignParam={updateIsCosignParam}
+                  updateIsContestEntryParam={updateIsContestEntryParam}
+                  headingVariant='title'
+                />
+              </Flex>
+            ) : (
+              <Box pt='l'>
+                <ContestCommentsTile
+                  eventId={eventId}
+                  eventOwnerUserId={contest.userId}
+                  mode='comments'
+                />
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Box>
+      </ContestFadeIn>
     </Page>
   )
 }
