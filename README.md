@@ -47,19 +47,19 @@ This will do the following:
 
 ### Running the Apps
 
-Environments:
-
-- `\*:dev` runs against local services
-- `\*:stage` runs against the staging testnet
-- `\*:prod` runs against production infrastructure
-
-For example:
+The bare app name (e.g. `web`, `ios`, `android`, `embed`, `dashboard`) runs against production — this is what you typically want:
 
 ```bash
-npm run web:prod
+npm run web
 ```
 
-For all available commands please see the [package.json scripts](https://github.com/AudiusProject/apps/blob/f850434ddca7d697f78a58d971f9bba1aba7f24d/package.json#L10) and the relevant package READMEs.
+The `*:dev` variants are a special option that runs the app against a locally-running protocol stack (see [Running the protocol locally](./dev-tools/README.md)). Use these only when you have the full stack running on your machine.
+
+```bash
+npm run web:dev
+```
+
+For all available commands please see the [package.json scripts](https://github.com/AudiusProject/apps/blob/main/package.json) and the relevant package READMEs.
 
 ## Contributing
 

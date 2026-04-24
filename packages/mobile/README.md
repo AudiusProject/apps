@@ -27,11 +27,9 @@ npm run bundle:ios
 # Start the react-native server
 npm run mobile
 
-# Run a simulator using a prod configuration
+# Run a simulator against production (typical default)
 npm run ios
-# Run a simulator using a stage configuration
-npm run ios:stage
-# Run a simulator using a dev configuration
+# Run a simulator against a locally-running protocol stack (special option)
 npm run ios:dev
 
 # Run the app on a device
@@ -46,11 +44,9 @@ xcrun xctrace list devices
 # Start the react-native server
 npm run mobile
 
-# Run a simulator using a prod configuration
+# Run a simulator against production (typical default)
 npm run android
-# Run a simulator using a stage configuration
-npm run android:stage
-# Run a simulator using a dev configuration
+# Run a simulator against a locally-running protocol stack (special option)
 npm run android:dev
 
 # Look at android devices

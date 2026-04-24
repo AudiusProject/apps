@@ -22,20 +22,24 @@ Only run these commands in the directories related to the changes being made. Do
 # Install dependencies and setup development environment
 npm install
 
-# Run the protocol stack locally (requires Docker)
-npm run protocol
+# Run web application against production (the typical default)
+npm run web
 
-# Connect client to local protocol
+# Run mobile applications against production
+npm run ios
+npm run android
+
+# Special: run against a locally-running protocol stack (requires Docker + `npm run protocol`)
+# Only use these when you have explicitly started the full stack locally — they are NOT the default.
+npm run web:dev
+npm run ios:dev
+npm run android:dev
+
+# Run the protocol stack locally (only needed for the *:dev variants above)
+npm run protocol
 audius-compose connect
 
-# Run web application
-npm run web:dev      # Against local services
-npm run web:stage    # Against staging
-npm run web:prod     # Against production
-
-# Run mobile applications
-npm run ios:dev      # iOS local development
-npm run android:dev  # Android local development
+# NOTE: There is no longer a staging environment. Do not look for or run *:stage scripts.
 
 # Testing
 npm run test         # Run all tests via Turbo
