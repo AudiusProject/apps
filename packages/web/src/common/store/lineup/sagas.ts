@@ -20,7 +20,6 @@ import { StringKeys, FeatureFlags } from '@audius/common/services'
 import {
   cacheActions,
   lineupActions as baseLineupActions,
-  premiumTracksPageLineupActions,
   queueActions,
   queueSelectors,
   getContext,
@@ -91,17 +90,6 @@ function* filterDeletes<T extends Track | Collection>(
         !isUSDCGatedContentEnabled &&
         metadata.is_stream_gated &&
         isContentUSDCPurchaseGated(metadata.stream_conditions)
-      ) {
-        return null
-      }
-
-      // Filter out known test accounts from premium explore page.
-      if (
-        lineupPrefix === premiumTracksPageLineupActions.prefix &&
-        'track_id' in metadata &&
-        metadata.is_stream_gated &&
-        isContentUSDCPurchaseGated(metadata.stream_conditions) &&
-        deniedHandles?.includes(users[metadata.owner_id].handle)
       ) {
         return null
       }

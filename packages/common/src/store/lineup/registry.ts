@@ -6,8 +6,6 @@ import {
   feedPageSelectors,
   historyPageSelectors,
   historyPageTracksLineupActions,
-  premiumTracksPageLineupActions,
-  premiumTracksPageLineupSelectors,
   profilePageFeedLineupActions,
   profilePageSelectors,
   profilePageTracksLineupActions,
@@ -38,10 +36,6 @@ export const lineupRegistry: Record<string, LineupEntry> = {
   [historyPageTracksLineupActions.prefix]: {
     actions: historyPageTracksLineupActions,
     selector: historyPageSelectors.getHistoryTracksLineup
-  },
-  [premiumTracksPageLineupActions.prefix]: {
-    actions: premiumTracksPageLineupActions,
-    selector: premiumTracksPageLineupSelectors.getLineup
   },
   [profilePageFeedLineupActions.prefix]: {
     actions: profilePageFeedLineupActions,

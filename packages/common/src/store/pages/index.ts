@@ -100,10 +100,6 @@ export * from './deactivate-account'
 
 export * from './chat'
 
-export { default as premiumTracksPageLineupReducer } from './premium-tracks/lineup/reducer'
-export * as premiumTracksPageLineupSelectors from './premium-tracks/lineup/selectors'
-export { premiumTracksActions as premiumTracksPageLineupActions } from './premium-tracks/lineup/actions'
-
 export {
   default as exclusiveTracksPageLineupReducer,
   initialState as exclusiveTracksPageLineupInitialState

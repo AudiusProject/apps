@@ -33,7 +33,6 @@ import exclusiveTracksSagas from 'common/store/pages/exclusive-tracks/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
 import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
-import premiumTracksSagas from 'common/store/pages/premium-tracks/sagas'
 import remixesSagas from 'common/store/pages/remixes-page/sagas'
 import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
@@ -116,7 +115,6 @@ export default function* rootSaga() {
     ...historySagas(),
     ...rewardsPageSagas(),
     ...settingsSagas(),
-    ...premiumTracksSagas(),
     ...exclusiveTracksSagas(),
     ...searchTracksLineupSagas(),
 

@@ -30,7 +30,6 @@ import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
 import { persistedLibraryPageReducer } from './pages/library-page/reducer'
 import pickWinners from './pages/pick-winners/slice'
-import premiumTracks from './pages/premium-tracks/slice'
 import profileReducer from './pages/profile/reducer'
 import { ProfilePageState } from './pages/profile/types'
 import remixes from './pages/remixes/slice'
@@ -188,8 +187,7 @@ export const reducers = (storage: Storage, history?: History) => ({
     trending: trending(history),
     settings,
     remixes,
-    exclusiveTracks,
-    premiumTracks
+    exclusiveTracks
   }),
   search: searchReducer(storage),
   stemsUpload,
@@ -289,7 +287,6 @@ export type CommonState = {
     trending: TrendingPageState
     remixes: ReturnType<typeof remixes>
     exclusiveTracks: ReturnType<typeof exclusiveTracks>
-    premiumTracks: ReturnType<typeof premiumTracks>
   }
   search: SearchState
 
