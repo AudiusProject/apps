@@ -16,12 +16,12 @@ npm run dashboard
 To run against locally-running contracts, you'll also need to run this [setup script](https://github.com/AudiusProject/apps/blob/master/service-commands/scripts/setup.js) e.g. `node setup.js run eth-contracts up`, then:
 
 ```
-npm run dashboard:dev
+npm run dashboard:local
 ```
 
 To start:
 1. Install Dependencies `npm install`
-2. Run the Application `npm run dashboard` (or `npm run dashboard:dev` for local)
+2. Run the Application `npm run dashboard` (or `npm run dashboard:local` for local)
 
 To Deploy:
 Make sure the DASHBOARD_BASE_URL env var is unset on the machine you are deploying on. Build the application using `npm run build:prod` and serve the static `dist` folder as a simple page app via `npm run serve`

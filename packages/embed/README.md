@@ -14,7 +14,7 @@ npm run embed
 To run against a locally-running protocol stack:
 
 ```
-npm run embed:dev
+npm run embed:local
 ```
 
 ## Deploying

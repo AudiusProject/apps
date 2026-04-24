@@ -31,15 +31,16 @@ npm run android
 
 # Special: run against a locally-running protocol stack (requires Docker + `npm run protocol`)
 # Only use these when you have explicitly started the full stack locally — they are NOT the default.
-npm run web:dev
-npm run ios:dev
-npm run android:dev
+# The `:local` suffix means "against my local stack", NOT "dev mode" — do not run these by default.
+npm run web:local
+npm run ios:local
+npm run android:local
 
-# Run the protocol stack locally (only needed for the *:dev variants above)
+# Run the protocol stack locally (only needed for the *:local variants above)
 npm run protocol
 audius-compose connect
 
-# NOTE: There is no longer a staging environment. Do not look for or run *:stage scripts.
+# NOTE: There is no longer a staging environment. Do not look for or run *:stage or *:dev scripts at the root.
 
 # Testing
 npm run test         # Run all tests via Turbo

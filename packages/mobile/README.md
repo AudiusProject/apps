@@ -30,7 +30,7 @@ npm run mobile
 # Run a simulator against production (typical default)
 npm run ios
 # Run a simulator against a locally-running protocol stack (special option)
-npm run ios:dev
+npm run ios:local
 
 # Run the app on a device
 npm run ios:device "Raymond's iPhone"
@@ -47,7 +47,7 @@ npm run mobile
 # Run a simulator against production (typical default)
 npm run android
 # Run a simulator against a locally-running protocol stack (special option)
-npm run android:dev
+npm run android:local
 
 # Look at android devices
 adb devices
@@ -111,5 +111,5 @@ npm start -- --reset-cache
 # first manually close all running instances of metro
 watchman watch-del-all
 npm start -- --reset-cache
-npm run ios:dev
+npm run ios
 ```

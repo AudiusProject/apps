@@ -53,10 +53,10 @@ The bare app name (e.g. `web`, `ios`, `android`, `embed`, `dashboard`) runs agai
 npm run web
 ```
 
-The `*:dev` variants are a special option that runs the app against a locally-running protocol stack (see [Running the protocol locally](./dev-tools/README.md)). Use these only when you have the full stack running on your machine.
+The `*:local` variants are a special option that runs the app against a locally-running protocol stack (see [Running the protocol locally](./dev-tools/README.md)). Use these only when you have the full stack running on your machine.
 
 ```bash
-npm run web:dev
+npm run web:local
 ```
 
 For all available commands please see the [package.json scripts](https://github.com/AudiusProject/apps/blob/main/package.json) and the relevant package READMEs.
