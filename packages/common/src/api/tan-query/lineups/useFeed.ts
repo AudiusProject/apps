@@ -1,6 +1,5 @@
 import { EntityType, Id, type GetUserFeedFilterEnum } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { transformAndCleanList, userFeedItemFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
@@ -8,19 +7,16 @@ import {
   FeedFilter,
   UserCollectionMetadata,
   ID,
-  UserTrackMetadata,
-  PlaybackSource
+  UserTrackMetadata
 } from '~/models'
-import { feedPageSelectors, feedPageLineupActions } from '~/store/pages'
 import { Nullable } from '~/utils/typeUtils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeCollectionData } from '../utils/primeCollectionData'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const filterMap: { [k in FeedFilter]: GetUserFeedFilterEnum } = {
   [FeedFilter.ALL]: 'all',
@@ -29,7 +25,7 @@ const filterMap: { [k in FeedFilter]: GetUserFeedFilterEnum } = {
 }
 
 type FeedArgs = {
-  userId: Nullable<ID> | undefined
+  userId?: Nullable<ID> | undefined
   filter?: FeedFilter
   initialPageSize?: number
   loadMorePageSize?: number
@@ -55,9 +51,10 @@ export const useFeed = (
   const { data: currentUserId } = useCurrentUserId()
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
-  const queryData = useInfiniteQuery({
+  const queryKey = getFeedQueryKey({ userId: currentUserId, filter })
+
+  const query = useInfiniteQuery({
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       const isFirstPage = allPages.length === 1
@@ -65,7 +62,7 @@ export const useFeed = (
       if (lastPage.length < currentPageSize) return undefined
       return allPages.reduce((total, page) => total + page.length, 0)
     },
-    queryKey: getFeedQueryKey({ userId: currentUserId, filter }),
+    queryKey,
     queryFn: async ({ pageParam }) => {
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
@@ -103,16 +100,6 @@ export const useFeed = (
       primeTrackData({ tracks, queryClient })
       primeCollectionData({ collections, queryClient })
 
-      // Pass the data to lineup sagas
-      dispatch(
-        feedPageLineupActions.fetchLineupMetadatas(
-          pageParam,
-          currentPageSize,
-          false,
-          { items: feed }
-        )
-      )
-
       return feed.map((item) =>
         'track_id' in item
           ? { id: item.track_id, type: EntityType.TRACK }
@@ -124,17 +111,24 @@ export const useFeed = (
     enabled: currentUserId !== null
   })
 
-  return useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getFeedQueryKey({
-      userId: currentUserId,
-      filter
-    }),
-    lineupActions: feedPageLineupActions,
-    lineupSelector: feedPageSelectors.getDiscoverFeedLineup,
-    playbackSource: PlaybackSource.TRACK_TILE_LINEUP,
-    pageSize: loadMorePageSize,
-    initialPageSize
-  })
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+    refetch: query.refetch,
+    queryKey
+  }
 }

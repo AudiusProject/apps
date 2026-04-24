@@ -1013,6 +1013,8 @@ export const useProfilePage = (
       status: Status.LOADING,
       hasMore: false
     },
+    tracksLineupOrder,
+    handleLower,
 
     // State
     editMode,

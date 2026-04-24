@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api'
 import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
+import { ID } from '~/models'
 import { PlaybackSource } from '~/models/Analytics'
 import {
   remixesPageLineupActions,
@@ -164,8 +165,18 @@ export const useRemixesLineup = (
     pageSize
   })
 
+  const trackIds = useMemo(
+    () =>
+      processedLineupData
+        .filter((d) => d.type === EntityType.TRACK)
+        .map((d) => d.id as ID),
+    [processedLineupData]
+  )
+
   return {
     ...lineupData,
-    count: queryData.data?.pages[0]?.count
+    count: queryData.data?.pages[0]?.count,
+    trackIds,
+    queryKey
   }
 }

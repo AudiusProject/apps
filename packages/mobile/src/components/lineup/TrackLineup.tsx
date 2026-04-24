@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef } from 'react'
+import { memo, useCallback, useMemo, useRef, type ReactElement } from 'react'
 
 import { useDebouncedCallback } from '@audius/common/hooks'
 import {
@@ -97,6 +97,15 @@ export type TrackLineupProps = {
   disableTopTabScroll?: boolean
   onPressItem?: (id: ID) => void
   playbackSource?: PlaybackSource
+
+  /**
+   * Map of indices (into `trackIds`) to JSX elements rendered after the
+   * tile at that index. Mirrors the web TrackLineup / legacy
+   * TanQueryLineup delineator pattern — used for inline section labels
+   * (e.g. WINNERS / SUBMISSIONS headers on the contest submissions
+   * lineup).
+   */
+  delineatorMap?: Record<number, ReactElement>
 }
 
 /**
@@ -127,7 +136,8 @@ export const TrackLineup = ({
   itemStyles,
   pullToRefresh,
   disableTopTabScroll,
-  onPressItem
+  onPressItem,
+  delineatorMap
 }: TrackLineupProps) => {
   const dispatch = useDispatch()
   const ref = useRef<RNSectionList>(null)
@@ -217,21 +227,32 @@ export const TrackLineup = ({
         return <SkeletonTileView itemStyles={itemStyles} />
       }
       const entry = item as Entry
+      const delineator = delineatorMap?.[index] ?? null
       return (
-        <View style={[styles.item, itemStyles]}>
-          <TrackTile
-            id={entry.trackId}
-            uid={entry.uid}
-            index={index}
-            isTrending={isTrending}
-            togglePlay={togglePlay}
-            onPress={onPressItem}
-            showArtistPick={showArtistPick}
-          />
-        </View>
+        <>
+          <View style={[styles.item, itemStyles]}>
+            <TrackTile
+              id={entry.trackId}
+              uid={entry.uid}
+              index={index}
+              isTrending={isTrending}
+              togglePlay={togglePlay}
+              onPress={onPressItem}
+              showArtistPick={showArtistPick}
+            />
+          </View>
+          {delineator}
+        </>
       )
     },
-    [itemStyles, isTrending, togglePlay, onPressItem, showArtistPick]
+    [
+      itemStyles,
+      isTrending,
+      togglePlay,
+      onPressItem,
+      showArtistPick,
+      delineatorMap
+    ]
   )
 
   const debouncedLoadNextPage = useDebouncedCallback(

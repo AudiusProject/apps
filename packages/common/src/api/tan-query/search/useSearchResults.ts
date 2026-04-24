@@ -11,8 +11,8 @@ import { searchResultsFromSDK } from '~/adapters'
 import { useCurrentUserId } from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils'
 import {
+  ID,
   Name,
-  PlaybackSource,
   SearchSource,
   UserMetadata,
   UserCollectionMetadata,
@@ -21,10 +21,8 @@ import {
 import { FeatureFlags } from '~/services'
 import { SearchKind, SearchSortMethod } from '~/store'
 import { tracksActions as searchResultsPageTracksLineupActions } from '~/store/pages/search-results/lineup/tracks/actions'
-import { getSearchTracksLineup } from '~/store/pages/search-results/selectors'
 import { Genre, formatMusicalKey } from '~/utils'
 
-import { useLineupQuery } from '../lineups/useLineupQuery'
 import { QUERY_KEYS } from '../queryKeys'
 import {
   FlatUseInfiniteQueryResult,
@@ -366,8 +364,15 @@ export const useSearchTrackResults = (
     options
   )
 
-  const queryData = useInfiniteQuery({
+  const queryKey = getSearchResultsQueryKey({
+    ...searchArgs,
+    category: 'tracks',
+    pageSize
+  })
+
+  const query = useInfiniteQuery({
     ...queryProps,
+    queryKey,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
       return allPages.length * pageSize
@@ -384,19 +389,26 @@ export const useSearchTrackResults = (
     }
   })
 
-  return useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getSearchResultsQueryKey({
-      ...searchArgs,
-      category: 'tracks',
-      pageSize
-    }),
-    lineupActions: searchResultsPageTracksLineupActions,
-    lineupSelector: getSearchTracksLineup,
-    playbackSource: PlaybackSource.SEARCH_PAGE,
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+    queryKey,
     pageSize
-  })
+  }
 }
 
 export const useSearchUserResults = (

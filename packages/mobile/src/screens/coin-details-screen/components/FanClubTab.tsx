@@ -7,15 +7,13 @@ import {
   useExclusiveTracks,
   useExclusiveTracksCount,
   useFanClubFeed,
+  getExclusiveTracksQueryKey,
   type FanClubFeedItem
 } from '@audius/common/api'
 import { useBuySellInitialTab, useIsManagedAccount } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
 import { WidthSizes } from '@audius/common/models'
-import {
-  exclusiveTracksPageLineupActions as exclusiveTracksActions,
-  receiveTokensModalActions
-} from '@audius/common/store'
+import { receiveTokensModalActions } from '@audius/common/store'
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useDispatch } from 'react-redux'
 
@@ -32,7 +30,7 @@ import {
 import { ProfilePicture, TokenIcon } from 'app/components/core'
 import { useCoverPhoto } from 'app/components/image/CoverPhoto'
 import { primitiveToImageSource } from 'app/components/image/primitiveToImageSource'
-import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useThemeColors } from 'app/utils/theme'
@@ -255,11 +253,23 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
   const { data: coin } = useFanClub(mint)
   const ownerId = coin?.ownerId
 
-  const { data, lineup, pageSize, isFetching, loadNextPage, isPending } =
-    useExclusiveTracks({
+  const queryArgs = useMemo(
+    () => ({
       userId: ownerId,
       pageSize: MAX_PREVIEW_TRACKS
-    })
+    }),
+    [ownerId]
+  )
+
+  const { trackIds, isFetching, hasNextPage, loadNextPage, isPending } =
+    useExclusiveTracks(queryArgs)
+
+  const querySource = useMemo(
+    () => ({
+      queryKey: [...getExclusiveTracksQueryKey(queryArgs)] as unknown[]
+    }),
+    [queryArgs]
+  )
 
   const { data: totalCount = 0 } = useExclusiveTracksCount({
     userId: ownerId
@@ -302,20 +312,17 @@ const FanClubFeed = ({ mint }: { mint: string }) => {
         : null}
 
       {totalCount > 0 ? (
-        <TanQueryLineup
-          actions={exclusiveTracksActions}
-          lineup={lineup}
-          offset={0}
+        <TrackLineup
+          trackIds={trackIds}
+          source='EXCLUSIVE_TRACKS'
+          querySource={querySource}
           maxEntries={MAX_PREVIEW_TRACKS}
-          pageSize={pageSize}
-          includeLineupStatus
-          itemStyles={itemStyles}
-          isFetching={isFetching}
-          loadNextPage={loadNextPage}
-          hasMore={false}
+          pageSize={MAX_PREVIEW_TRACKS}
           isPending={isPending}
-          queryData={data}
-          hidePlayBarChin
+          isFetching={isFetching}
+          hasNextPage={hasNextPage}
+          loadNextPage={loadNextPage}
+          itemStyles={itemStyles}
         />
       ) : null}
     </Flex>

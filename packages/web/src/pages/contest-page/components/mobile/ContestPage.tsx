@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
+  getRemixesQueryKey,
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
@@ -15,11 +16,11 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import type { ID } from '@audius/common/models'
 import { ShareSource, SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
-  remixesPageLineupActions,
   remixesPageSelectors,
   shareModalUIActions
 } from '@audius/common/store'
@@ -46,7 +47,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
@@ -355,23 +356,37 @@ const ContestPage = ({
   // listeners can compare against the source remixes are built on
   // without jumping back out, matching the track-page `RemixesPage`
   // and the desktop contest page.
-  const lineup = useRemixesLineup({
-    trackId: trackId ?? undefined,
-    includeOriginal: true,
-    includeWinners: true,
-    isContestEntry: true,
-    sortMethod,
-    isCosign
-  })
+  const remixesLineupArgs = useMemo(
+    () => ({
+      trackId: trackId ?? undefined,
+      includeOriginal: true,
+      includeWinners: true,
+      isContestEntry: true,
+      pageSize: CONTEST_PAGE_SIZE,
+      sortMethod,
+      isCosign
+    }),
+    [trackId, sortMethod, isCosign]
+  )
+  const lineup = useRemixesLineup(remixesLineupArgs)
+  const lineupTrackIds = useMemo(
+    () => (lineup.data ?? []).map((d) => d.id as ID),
+    [lineup.data]
+  )
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesLineupArgs)] as unknown[]
+    }),
+    [remixesLineupArgs]
+  )
   // Total lineup length includes the original + winners + remixes.
   // The "N Submissions" label should show the number of *actual*
   // submissions (remixes), not the whole lineup.
-  const lineupLength = lineup.data?.length
+  const lineupLength = lineupTrackIds.length
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const submissionsCount =
-    lineupLength === undefined
-      ? undefined
-      : Math.max(0, lineupLength - 1 - winnerCount)
+  const submissionsCount = lineup.isPending
+    ? undefined
+    : Math.max(0, lineupLength - 1 - winnerCount)
 
   useEffect(() => {
     if (trackId) {
@@ -382,7 +397,6 @@ const ContestPage = ({
   useEffect(() => {
     return function cleanup() {
       dispatch(remixesPageActions.reset())
-      dispatch(remixesPageLineupActions.reset())
     }
   }, [dispatch])
 
@@ -685,19 +699,16 @@ const ContestPage = ({
                         0: submissionsDelineator
                       }
                 return (
-                  <TanQueryLineup
-                    data={lineup.data}
-                    isFetching={lineup.isFetching}
+                  <TrackLineup
+                    trackIds={lineupTrackIds}
+                    source='CONTEST_SUBMISSIONS'
+                    querySource={submissionsQuerySource}
                     isPending={lineup.isPending}
+                    isFetching={lineup.isFetching}
                     isError={lineup.isError}
                     hasNextPage={lineup.hasNextPage}
-                    play={lineup.play}
-                    pause={lineup.pause}
                     loadNextPage={lineup.loadNextPage}
-                    isPlaying={lineup.isPlaying}
-                    lineup={lineup.lineup}
                     pageSize={CONTEST_PAGE_SIZE}
-                    actions={remixesPageLineupActions}
                     delineatorMap={delineatorMap}
                   />
                 )

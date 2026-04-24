@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  getRemixesQueryKey,
   useCurrentUserId,
   useEventFollowState,
   useFollowEvent,
@@ -13,11 +14,11 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import type { ID } from '@audius/common/models'
 import { SquareSizes, ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
-  remixesPageLineupActions,
   remixesPageSelectors,
   shareModalUIActions,
   useHostRemixContestModal
@@ -41,7 +42,7 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar/Avatar'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import UserBadges from 'components/user-badges/UserBadges'
 import { UserGeneratedText } from 'components/user-generated-text'
@@ -266,14 +267,29 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // the original (parent) track at the top of the lineup so viewers can
   // compare the source the remixes are built on without jumping back out
   // to the track page, matching the track-page `RemixesPage`.
-  const lineup = useRemixesLineup({
-    trackId: trackId ?? undefined,
-    includeOriginal: true,
-    includeWinners: true,
-    isContestEntry: true,
-    sortMethod,
-    isCosign
-  })
+  const remixesLineupArgs = useMemo(
+    () => ({
+      trackId: trackId ?? undefined,
+      includeOriginal: true,
+      includeWinners: true,
+      isContestEntry: true,
+      pageSize: CONTEST_PAGE_SIZE,
+      sortMethod,
+      isCosign
+    }),
+    [trackId, sortMethod, isCosign]
+  )
+  const lineup = useRemixesLineup(remixesLineupArgs)
+  const lineupTrackIds = useMemo(
+    () => (lineup.data ?? []).map((d) => d.id as ID),
+    [lineup.data]
+  )
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesLineupArgs)] as unknown[]
+    }),
+    [remixesLineupArgs]
+  )
 
   useEffect(() => {
     if (trackId) {
@@ -284,7 +300,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   useEffect(() => {
     return function cleanup() {
       dispatch(reset())
-      dispatch(remixesPageLineupActions.reset())
     }
   }, [dispatch])
 
@@ -310,12 +325,11 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // submissions (remixes), not the whole lineup. Subtract one for
   // the original (always included when `includeOriginal: true`) and
   // the number of winners from the contest event data.
-  const lineupLength = lineup.data?.length
+  const lineupLength = lineupTrackIds.length
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const submissionsCount =
-    lineupLength === undefined
-      ? undefined
-      : Math.max(0, lineupLength - 1 - winnerCount)
+  const submissionsCount = lineup.isPending
+    ? undefined
+    : Math.max(0, lineupLength - 1 - winnerCount)
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {
@@ -808,19 +822,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                         0: submissionsDelineator
                       }
                 return (
-                  <TanQueryLineup
-                    data={lineup.data}
-                    isFetching={lineup.isFetching}
+                  <TrackLineup
+                    trackIds={lineupTrackIds}
+                    source='CONTEST_SUBMISSIONS'
+                    querySource={submissionsQuerySource}
                     isPending={lineup.isPending}
+                    isFetching={lineup.isFetching}
                     isError={lineup.isError}
                     hasNextPage={lineup.hasNextPage}
-                    play={lineup.play}
-                    pause={lineup.pause}
                     loadNextPage={lineup.loadNextPage}
-                    isPlaying={lineup.isPlaying}
-                    lineup={lineup.lineup}
                     pageSize={CONTEST_PAGE_SIZE}
-                    actions={remixesPageLineupActions}
                     delineatorMap={delineatorMap}
                   />
                 )

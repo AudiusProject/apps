@@ -1,10 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { useRemixContest, useRemixesLineup } from '@audius/common/api'
-import { remixesPageLineupActions } from '@audius/common/store'
+import {
+  getRemixesQueryKey,
+  useRemixContest,
+  useRemixesLineup
+} from '@audius/common/api'
+import type { ID } from '@audius/common/models'
 
 import { Divider, FilterButton, Flex, Text } from '@audius/harmony-native'
-import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { useContestPage } from '../ContestPageContext'
 
@@ -64,28 +68,38 @@ export const ContestSubmissionsTab = () => {
     setSortMethod((value as 'recent' | 'plays' | 'likes') ?? 'recent')
   }, [])
 
-  const lineup = useRemixesLineup({
-    trackId,
-    includeOriginal: true,
-    includeWinners: true,
-    isContestEntry: true,
-    sortMethod,
-    isCosign
-  })
+  const remixesLineupArgs = useMemo(
+    () => ({
+      trackId,
+      includeOriginal: true,
+      includeWinners: true,
+      isContestEntry: true,
+      pageSize: CONTEST_PAGE_SIZE,
+      sortMethod,
+      isCosign
+    }),
+    [trackId, sortMethod, isCosign]
+  )
+  const lineup = useRemixesLineup(remixesLineupArgs)
+  const lineupTrackIds = useMemo(
+    () => (lineup.data ?? []).map((d) => d.id as ID),
+    [lineup.data]
+  )
 
-  const { loadCachedDataIntoLineup, data } = lineup
-  const hasData = (data?.length ?? 0) > 0
-
-  useEffect(() => {
-    if (hasData) {
-      loadCachedDataIntoLineup()
-    }
-  }, [hasData, loadCachedDataIntoLineup])
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesLineupArgs)] as unknown[]
+    }),
+    [remixesLineupArgs]
+  )
 
   // Total lineup length includes original + winners + remixes. The
   // number of actual submissions (remixes) is the remainder once we
   // pull off the original (1 entry) and the winners.
-  const submissionsCount = Math.max(0, (data?.length ?? 0) - 1 - winnerCount)
+  const submissionsCount = Math.max(
+    0,
+    lineupTrackIds.length - 1 - winnerCount
+  )
 
   const winnersDelineator = useMemo(
     () => (
@@ -150,15 +164,15 @@ export const ContestSubmissionsTab = () => {
         }
 
   return (
-    <TanQueryLineup
-      queryData={lineup.data}
-      isFetching={lineup.isFetching}
+    <TrackLineup
+      trackIds={lineupTrackIds}
+      source='CONTEST_SUBMISSIONS'
+      querySource={submissionsQuerySource}
       isPending={lineup.isPending}
+      isFetching={lineup.isFetching}
       loadNextPage={lineup.loadNextPage}
-      lineup={lineup.lineup}
       pageSize={CONTEST_PAGE_SIZE}
-      hasMore={!!lineup.hasNextPage}
-      actions={remixesPageLineupActions}
+      hasNextPage={!!lineup.hasNextPage}
       delineatorMap={delineatorMap}
     />
   )

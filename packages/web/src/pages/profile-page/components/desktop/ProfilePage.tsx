@@ -1,14 +1,16 @@
-import { memo, ReactNode, useEffect, useState, RefObject } from 'react'
+import { memo, ReactNode, useEffect, useMemo, useState, RefObject } from 'react'
 
-import { useMutedUsers } from '@audius/common/api'
+import {
+  useMutedUsers,
+  useProfileTracks,
+  useProfileReposts,
+  getProfileTracksQueryKey,
+  getProfileRepostsQueryKey
+} from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
 import { commentsMessages } from '@audius/common/messages'
 import { Status } from '@audius/common/models'
-import {
-  profilePageFeedLineupActions as feedActions,
-  profilePageTracksLineupActions as tracksActions,
-  ProfilePageTabs
-} from '@audius/common/store'
+import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Box,
@@ -28,7 +30,7 @@ import cn from 'classnames'
 
 import { ConfirmationModal } from 'components/confirmation-modal'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import Lineup from 'components/lineup/Lineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import Mask from 'components/mask/Mask'
 import NavBanner, { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -106,9 +108,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updatedCoverPhoto,
     updatedProfilePicture,
 
-    // Lineups
-    artistTracks,
-    userFeed,
+    // Lineups (legacy redux lineups — no longer read here; tanquery below)
+    tracksLineupOrder,
+    handleLower,
 
     // State
     editMode,
@@ -121,15 +123,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
     // Handlers
     changeTab,
-    getLineupProps,
     onSortByRecent,
     onSortByPopular,
-    loadMoreArtistTracks,
-    loadMoreUserFeed,
-    playArtistTrack,
-    pauseArtistTrack,
-    playUserFeedTrack,
-    pauseUserFeedTrack,
     onFollow,
     onUnfollow,
     onShare,
@@ -161,6 +156,34 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   }
 
   const isDeactivated = !!profile?.is_deactivated
+
+  // --- Tanquery lineups replace legacy redux lineups --------------------------
+  // Reposts may include collections (playlist reposts); TrackLineup only renders
+  // tracks today, so collections are dropped on the hook side (trackIds filter).
+  const tracksArgs = useMemo(
+    () => ({ handle: handleLower ?? '', sort: tracksLineupOrder }),
+    [handleLower, tracksLineupOrder]
+  )
+  const artistTracksQuery = useProfileTracks(tracksArgs, {
+    enabled: !!handleLower
+  })
+  const tracksQuerySource = useMemo(
+    () => ({ queryKey: [...getProfileTracksQueryKey(tracksArgs)] as unknown[] }),
+    [tracksArgs]
+  )
+
+  const repostsArgs = useMemo(
+    () => ({ handle: handleLower ?? '' }),
+    [handleLower]
+  )
+  const userRepostsQuery = useProfileReposts(repostsArgs, {
+    enabled: !!handleLower
+  })
+  const repostsQuerySource = useMemo(
+    () =>
+      ({ queryKey: [...getProfileRepostsQueryKey(repostsArgs)] as unknown[] }),
+    [repostsArgs]
+  )
 
   const getArtistProfileContent = () => {
     if (!profile) return { headers: [], elements: [] }
@@ -200,12 +223,17 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         to: 'reposts'
       }
     ]
+    const tracksEmpty =
+      artistTracksQuery.isSuccess && artistTracksQuery.trackIds.length === 0
+    const repostsEmpty =
+      (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
+      profile.repost_count === 0
+
     const elements = [
       <Box w='100%' key={ProfilePageTabs.TRACKS}>
         {renderProfileCompletionCard()}
         {status === Status.SUCCESS ? (
-          artistTracks.status === Status.SUCCESS &&
-          artistTracks.entries.length === 0 ? (
+          tracksEmpty ? (
             <>
               {isOwner ? (
                 <UploadChip
@@ -222,18 +250,23 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               />
             </>
           ) : (
-            <Lineup
-              {...getLineupProps(artistTracks)}
-              extraPrecedingElement={trackUploadChip ?? undefined}
-              animateLeadingElement
-              leadingElementId={profile.artist_pick_track_id ?? undefined}
-              showArtistPick={true}
-              loadMore={loadMoreArtistTracks}
-              playTrack={playArtistTrack}
-              pauseTrack={pauseArtistTrack}
-              actions={tracksActions}
-              variant={LineupVariant.GRID}
-            />
+            <>
+              {trackUploadChip}
+              <TrackLineup
+                trackIds={artistTracksQuery.trackIds}
+                source='PROFILE_TRACKS'
+                querySource={tracksQuerySource}
+                isPending={artistTracksQuery.isPending}
+                isFetching={artistTracksQuery.isFetching}
+                isError={artistTracksQuery.isError}
+                hasNextPage={artistTracksQuery.hasNextPage}
+                loadNextPage={artistTracksQuery.loadNextPage}
+                variant={LineupVariant.GRID}
+                leadingElementId={profile.artist_pick_track_id ?? undefined}
+                showArtistPick
+                scrollParent={containerRef?.current ?? null}
+              />
+            </>
           )
         ) : null}
       </Box>,
@@ -245,21 +278,24 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       </Box>,
       <Box w='100%' key={ProfilePageTabs.REPOSTS}>
         {status === Status.SUCCESS ? (
-          (userFeed.status === Status.SUCCESS &&
-            userFeed.entries.length === 0) ||
-          profile.repost_count === 0 ? (
+          repostsEmpty ? (
             <EmptyTab
               isOwner={isOwner}
               name={profile.name}
               text={'reposted anything'}
             />
           ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
+            <TrackLineup
+              trackIds={userRepostsQuery.trackIds}
+              source='PROFILE_FEED'
+              querySource={repostsQuerySource}
+              isPending={userRepostsQuery.isPending}
+              isFetching={userRepostsQuery.isFetching}
+              isError={userRepostsQuery.isError}
+              hasNextPage={userRepostsQuery.hasNextPage}
+              loadNextPage={userRepostsQuery.loadNextPage}
+              variant={LineupVariant.CONDENSED}
+              scrollParent={containerRef?.current ?? null}
             />
           )
         ) : null}
@@ -286,25 +322,32 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         to: 'playlists'
       }
     ]
+    const userRepostsEmpty =
+      (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
+      profile.repost_count === 0
+
     const elements = [
       <Box w='100%' key={ProfilePageTabs.REPOSTS}>
         {renderProfileCompletionCard()}
-        {(userFeed.status === Status.SUCCESS &&
-          userFeed.entries.length === 0) ||
-        profile.repost_count === 0 ? (
+        {userRepostsEmpty ? (
           <EmptyTab
             isOwner={isOwner}
             name={profile.name}
             text={'reposted anything'}
           />
         ) : (
-          <Lineup
-            {...getLineupProps(userFeed)}
-            count={profile.repost_count}
-            loadMore={loadMoreUserFeed}
-            playTrack={playUserFeedTrack}
-            pauseTrack={pauseUserFeedTrack}
-            actions={feedActions}
+          <TrackLineup
+            trackIds={userRepostsQuery.trackIds}
+            source='PROFILE_FEED'
+            querySource={repostsQuerySource}
+            isPending={userRepostsQuery.isPending}
+            isFetching={userRepostsQuery.isFetching}
+            isError={userRepostsQuery.isError}
+            hasNextPage={userRepostsQuery.hasNextPage}
+            loadNextPage={userRepostsQuery.loadNextPage}
+            variant={LineupVariant.CONDENSED}
+            maxEntries={profile.repost_count}
+            scrollParent={containerRef?.current ?? null}
           />
         )}
       </Box>,

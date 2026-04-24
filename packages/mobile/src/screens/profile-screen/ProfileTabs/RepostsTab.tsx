@@ -1,29 +1,21 @@
 import { useMemo } from 'react'
 
-import { useProfileUser } from '@audius/common/api'
-import { useProxySelector } from '@audius/common/hooks'
-import { Status } from '@audius/common/models'
 import {
-  profilePageFeedLineupActions as feedActions,
-  profilePageSelectors
-} from '@audius/common/store'
-import { useRoute } from '@react-navigation/native'
+  useProfileUser,
+  useProfileReposts,
+  getProfileRepostsQueryKey
+} from '@audius/common/api'
 
-import { Lineup } from 'app/components/lineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
-import type { ProfileTabRoutes } from '../routes'
 
-const { getProfileFeedLineup } = profilePageSelectors
-
+// Note: the reposts API returns both tracks and collections (playlist reposts).
+// The new TrackLineup renders tracks only, so collections are filtered out by
+// `trackIds` on the hook side. This is a known limitation introduced by the
+// tanquery migration.
 export const RepostsTab = () => {
-  const { params } = useRoute<ProfileTabRoutes<'Reposts'>>()
-  const { lazy } = params
-  const {
-    handle,
-    user_id,
-    repost_count = 0
-  } = useProfileUser({
+  const { handle, repost_count = 0 } = useProfileUser({
     select: (user) => ({
       handle: user.handle,
       user_id: user.user_id,
@@ -31,33 +23,44 @@ export const RepostsTab = () => {
     })
   }).user ?? {}
 
-  const lineup = useProxySelector(
-    (state) => getProfileFeedLineup(state, handle),
-    [handle]
+  const handleLower = handle?.toLowerCase() ?? ''
+
+  const queryArgs = useMemo(() => ({ handle: handleLower }), [handleLower])
+
+  const {
+    trackIds,
+    isPending,
+    isFetching,
+    hasNextPage,
+    loadNextPage,
+    refetch
+  } = useProfileReposts(queryArgs, { enabled: !!handleLower })
+
+  const querySource = useMemo(
+    () =>
+      ({ queryKey: [...getProfileRepostsQueryKey(queryArgs)] as unknown[] }),
+    [queryArgs]
   )
 
-  const fetchPayload = useMemo(() => ({ userId: user_id }), [user_id])
-  const extraFetchOptions = useMemo(() => ({ handle }), [handle])
-
-  // This prevents showing empty tile before lineup has started to fetch content
-  const canShowEmptyTile = repost_count === 0 || lineup.status !== Status.IDLE
+  const canShowEmptyTile = repost_count === 0 || (!isPending && !isFetching)
 
   return (
-    <Lineup
-      selfLoad
-      isCollapsible
-      lazy={lazy}
+    <TrackLineup
+      trackIds={trackIds}
+      source='PROFILE_FEED'
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={isFetching}
+      hasNextPage={hasNextPage}
+      loadNextPage={loadNextPage}
       pullToRefresh
-      actions={feedActions}
-      lineup={lineup}
-      fetchPayload={fetchPayload}
-      extraFetchOptions={extraFetchOptions}
-      limit={repost_count}
+      refresh={() => {
+        refetch()
+      }}
       disableTopTabScroll
       LineupEmptyComponent={
         canShowEmptyTile ? <EmptyProfileTile tab='reposts' /> : undefined
       }
-      showsVerticalScrollIndicator={false}
     />
   )
 }

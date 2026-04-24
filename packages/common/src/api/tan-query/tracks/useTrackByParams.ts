@@ -44,7 +44,7 @@ export const useTrackByParams = (
 
   const fetchTrackId = track?.track_id
   const { isPending } = useTrackPageLineup(
-    { trackId: fetchTrackId, disableAutomaticCacheHandling: true },
+    { trackId: fetchTrackId },
     { enabled: false }
   )
 

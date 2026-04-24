@@ -121,18 +121,33 @@ export const useTrackHistory = (
     enabled: options?.enabled !== false && !!currentUserId
   })
 
-  return useLineupQuery({
+  const queryKey = getTrackHistoryQueryKey(currentUserId, {
+    pageSize,
+    query,
+    sortMethod,
+    sortDirection
+  })
+
+  const lineupQueryData = useLineupQuery({
     lineupData: queryData.data ?? [],
     queryData,
-    queryKey: getTrackHistoryQueryKey(currentUserId, {
-      pageSize,
-      query,
-      sortMethod,
-      sortDirection
-    }),
+    queryKey,
     lineupActions: historyPageTracksLineupActions,
     lineupSelector: historyPageSelectors.getHistoryTracksLineup,
     playbackSource: PlaybackSource.HISTORY_PAGE,
     pageSize
   })
+
+  // Additive tanquery-first fields so the caller can drive <TrackLineup>
+  // directly without reading from the redux lineup bridge.
+  const lineupData = queryData.data ?? []
+  const trackIds = lineupData
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    ...lineupQueryData,
+    trackIds,
+    queryKey
+  }
 }
