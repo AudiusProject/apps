@@ -126,6 +126,7 @@ export const ChatPage = () => {
       showSearch={false}
       headerPadding={0}
       headerContentPaddingInline='0px'
+      disableHeaderFrosted
       header={
         <ChatHeader
           currentChatId={currentChatId}
@@ -173,7 +174,9 @@ export const ChatPage = () => {
               ) : null}
             </>
           ) : (
-            <CreateChatPrompt hasChats={!hideChatList} />
+            <div className={styles.emptyState}>
+              <CreateChatPrompt hasChats={!hideChatList} />
+            </div>
           )}
         </div>
       </div>

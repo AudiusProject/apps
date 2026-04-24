@@ -31,7 +31,11 @@ export const ChatPaneHeader = (props: ChatPaneHeaderProps) => {
   return (
     <Frosted
       w='100%'
-      h={isNarrowLayout ? undefined : CHAT_PANE_HEADER_HEIGHT_PX}
+      h={
+        isNarrowLayout
+          ? 'var(--chat-pane-header-height, 80px)'
+          : CHAT_PANE_HEADER_HEIGHT_PX
+      }
       contentPaddingInline='0px'
       css={{
         borderRadius: 0,
