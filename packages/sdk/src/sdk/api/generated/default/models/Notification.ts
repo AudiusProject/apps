@@ -132,6 +132,13 @@ import {
     FanRemixContestStartedNotificationToJSON,
 } from './FanRemixContestStartedNotification';
 import {
+    FanRemixContestSubmissionNotification,
+    instanceOfFanRemixContestSubmissionNotification,
+    FanRemixContestSubmissionNotificationFromJSON,
+    FanRemixContestSubmissionNotificationFromJSONTyped,
+    FanRemixContestSubmissionNotificationToJSON,
+} from './FanRemixContestSubmissionNotification';
+import {
     FanRemixContestWinnersSelectedNotification,
     instanceOfFanRemixContestWinnersSelectedNotification,
     FanRemixContestWinnersSelectedNotificationFromJSON,
@@ -173,6 +180,13 @@ import {
     ReceiveTipNotificationFromJSONTyped,
     ReceiveTipNotificationToJSON,
 } from './ReceiveTipNotification';
+import {
+    RemixContestUpdateNotification,
+    instanceOfRemixContestUpdateNotification,
+    RemixContestUpdateNotificationFromJSON,
+    RemixContestUpdateNotificationFromJSONTyped,
+    RemixContestUpdateNotificationToJSON,
+} from './RemixContestUpdateNotification';
 import {
     RemixNotification,
     instanceOfRemixNotification,
@@ -305,7 +319,7 @@ import {
  * 
  * @export
  */
-export type Notification = { type: 'announcement' } & AnnouncementNotification | { type: 'approve_manager_request' } & ApproveManagerRequestNotification | { type: 'artist_remix_contest_ended' } & ArtistRemixContestEndedNotification | { type: 'artist_remix_contest_ending_soon' } & ArtistRemixContestEndingSoonNotification | { type: 'artist_remix_contest_submissions' } & ArtistRemixContestSubmissionsNotification | { type: 'challenge_reward' } & ChallengeRewardNotification | { type: 'claimable_reward' } & ClaimableRewardNotification | { type: 'comment' } & CommentNotification | { type: 'comment_mention' } & CommentMentionNotification | { type: 'comment_reaction' } & CommentReactionNotification | { type: 'comment_thread' } & CommentThreadNotification | { type: 'cosign' } & CosignNotification | { type: 'create' } & CreateNotification | { type: 'fan_club_text_post' } & FanClubTextPostNotification | { type: 'fan_remix_contest_ended' } & FanRemixContestEndedNotification | { type: 'fan_remix_contest_ending_soon' } & FanRemixContestEndingSoonNotification | { type: 'fan_remix_contest_started' } & FanRemixContestStartedNotification | { type: 'fan_remix_contest_winners_selected' } & FanRemixContestWinnersSelectedNotification | { type: 'follow' } & FollowNotification | { type: 'listen_streak_reminder' } & ListenStreakReminderNotification | { type: 'milestone' } & MilestoneNotification | { type: 'reaction' } & ReactionNotification | { type: 'remix' } & RemixNotification | { type: 'repost' } & RepostNotification | { type: 'repost_of_repost' } & RepostOfRepostNotification | { type: 'request_manager' } & RequestManagerNotification | { type: 'save' } & SaveNotification | { type: 'save_of_repost' } & SaveOfRepostNotification | { type: 'supporter_dethroned' } & SupporterDethronedNotification | { type: 'supporter_rank_up' } & SupporterRankUpNotification | { type: 'supporting_rank_up' } & SupporterRankUpNotification | { type: 'tastemaker' } & TastemakerNotification | { type: 'tier_change' } & TierChangeNotification | { type: 'tip_receive' } & ReceiveTipNotification | { type: 'tip_send' } & SendTipNotification | { type: 'track_added_to_playlist' } & TrackAddedToPlaylistNotification | { type: 'track_added_to_purchased_album' } & TrackAddedToPurchasedAlbumNotification | { type: 'trending' } & TrendingNotification | { type: 'trending_playlist' } & TrendingPlaylistNotification | { type: 'trending_underground' } & TrendingUndergroundNotification | { type: 'usdc_purchase_buyer' } & UsdcPurchaseBuyerNotification | { type: 'usdc_purchase_seller' } & UsdcPurchaseSellerNotification;
+export type Notification = { type: 'announcement' } & AnnouncementNotification | { type: 'approve_manager_request' } & ApproveManagerRequestNotification | { type: 'artist_remix_contest_ended' } & ArtistRemixContestEndedNotification | { type: 'artist_remix_contest_ending_soon' } & ArtistRemixContestEndingSoonNotification | { type: 'artist_remix_contest_submissions' } & ArtistRemixContestSubmissionsNotification | { type: 'challenge_reward' } & ChallengeRewardNotification | { type: 'claimable_reward' } & ClaimableRewardNotification | { type: 'comment' } & CommentNotification | { type: 'comment_mention' } & CommentMentionNotification | { type: 'comment_reaction' } & CommentReactionNotification | { type: 'comment_thread' } & CommentThreadNotification | { type: 'cosign' } & CosignNotification | { type: 'create' } & CreateNotification | { type: 'fan_club_text_post' } & FanClubTextPostNotification | { type: 'fan_remix_contest_ended' } & FanRemixContestEndedNotification | { type: 'fan_remix_contest_ending_soon' } & FanRemixContestEndingSoonNotification | { type: 'fan_remix_contest_started' } & FanRemixContestStartedNotification | { type: 'fan_remix_contest_submission' } & FanRemixContestSubmissionNotification | { type: 'fan_remix_contest_winners_selected' } & FanRemixContestWinnersSelectedNotification | { type: 'follow' } & FollowNotification | { type: 'listen_streak_reminder' } & ListenStreakReminderNotification | { type: 'milestone' } & MilestoneNotification | { type: 'reaction' } & ReactionNotification | { type: 'remix' } & RemixNotification | { type: 'remix_contest_update' } & RemixContestUpdateNotification | { type: 'repost' } & RepostNotification | { type: 'repost_of_repost' } & RepostOfRepostNotification | { type: 'request_manager' } & RequestManagerNotification | { type: 'save' } & SaveNotification | { type: 'save_of_repost' } & SaveOfRepostNotification | { type: 'supporter_dethroned' } & SupporterDethronedNotification | { type: 'supporter_rank_up' } & SupporterRankUpNotification | { type: 'supporting_rank_up' } & SupporterRankUpNotification | { type: 'tastemaker' } & TastemakerNotification | { type: 'tier_change' } & TierChangeNotification | { type: 'tip_receive' } & ReceiveTipNotification | { type: 'tip_send' } & SendTipNotification | { type: 'track_added_to_playlist' } & TrackAddedToPlaylistNotification | { type: 'track_added_to_purchased_album' } & TrackAddedToPurchasedAlbumNotification | { type: 'trending' } & TrendingNotification | { type: 'trending_playlist' } & TrendingPlaylistNotification | { type: 'trending_underground' } & TrendingUndergroundNotification | { type: 'usdc_purchase_buyer' } & UsdcPurchaseBuyerNotification | { type: 'usdc_purchase_seller' } & UsdcPurchaseSellerNotification;
 
 export function NotificationFromJSON(json: any): Notification {
     return NotificationFromJSONTyped(json, false);
@@ -350,6 +364,8 @@ export function NotificationFromJSONTyped(json: any, ignoreDiscriminator: boolea
             return {...FanRemixContestEndingSoonNotificationFromJSONTyped(json, true), type: 'fan_remix_contest_ending_soon'};
         case 'fan_remix_contest_started':
             return {...FanRemixContestStartedNotificationFromJSONTyped(json, true), type: 'fan_remix_contest_started'};
+        case 'fan_remix_contest_submission':
+            return {...FanRemixContestSubmissionNotificationFromJSONTyped(json, true), type: 'fan_remix_contest_submission'};
         case 'fan_remix_contest_winners_selected':
             return {...FanRemixContestWinnersSelectedNotificationFromJSONTyped(json, true), type: 'fan_remix_contest_winners_selected'};
         case 'follow':
@@ -362,6 +378,8 @@ export function NotificationFromJSONTyped(json: any, ignoreDiscriminator: boolea
             return {...ReactionNotificationFromJSONTyped(json, true), type: 'reaction'};
         case 'remix':
             return {...RemixNotificationFromJSONTyped(json, true), type: 'remix'};
+        case 'remix_contest_update':
+            return {...RemixContestUpdateNotificationFromJSONTyped(json, true), type: 'remix_contest_update'};
         case 'repost':
             return {...RepostNotificationFromJSONTyped(json, true), type: 'repost'};
         case 'repost_of_repost':
@@ -447,6 +465,8 @@ export function NotificationToJSON(value?: Notification | null): any {
             return FanRemixContestEndingSoonNotificationToJSON(value);
         case 'fan_remix_contest_started':
             return FanRemixContestStartedNotificationToJSON(value);
+        case 'fan_remix_contest_submission':
+            return FanRemixContestSubmissionNotificationToJSON(value);
         case 'fan_remix_contest_winners_selected':
             return FanRemixContestWinnersSelectedNotificationToJSON(value);
         case 'follow':
@@ -459,6 +479,8 @@ export function NotificationToJSON(value?: Notification | null): any {
             return ReactionNotificationToJSON(value);
         case 'remix':
             return RemixNotificationToJSON(value);
+        case 'remix_contest_update':
+            return RemixContestUpdateNotificationToJSON(value);
         case 'repost':
             return RepostNotificationToJSON(value);
         case 'repost_of_repost':

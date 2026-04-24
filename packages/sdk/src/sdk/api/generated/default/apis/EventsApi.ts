@@ -18,6 +18,7 @@ import type {
   EventFollowStateResponse,
   EventsResponse,
   FollowersResponse,
+  RemixContestsResponse,
   TrackCommentsResponse,
   UnclaimedIdResponse,
   WriteResponse,
@@ -29,6 +30,8 @@ import {
     EventsResponseToJSON,
     FollowersResponseFromJSON,
     FollowersResponseToJSON,
+    RemixContestsResponseFromJSON,
+    RemixContestsResponseToJSON,
     TrackCommentsResponseFromJSON,
     TrackCommentsResponseToJSON,
     UnclaimedIdResponseFromJSON,
@@ -532,7 +535,7 @@ export class EventsApi extends runtime.BaseAPI {
      * Get remix contest events ordered with currently-active contests first (by soonest-ending), followed by ended contests (most-recently-ended first). Active contests are those whose end_date is null or in the future.
      * Get all remix contests
      */
-    async getRemixContestsRaw(params: GetRemixContestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<EventsResponse>> {
+    async getRemixContestsRaw(params: GetRemixContestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixContestsResponse>> {
         const queryParameters: any = {};
 
         if (params.offset !== undefined) {
@@ -563,14 +566,14 @@ export class EventsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => EventsResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => RemixContestsResponseFromJSON(jsonValue));
     }
 
     /**
      * Get remix contest events ordered with currently-active contests first (by soonest-ending), followed by ended contests (most-recently-ended first). Active contests are those whose end_date is null or in the future.
      * Get all remix contests
      */
-    async getRemixContests(params: GetRemixContestsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<EventsResponse> {
+    async getRemixContests(params: GetRemixContestsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixContestsResponse> {
         const response = await this.getRemixContestsRaw(params, initOverrides);
         return await response.value();
     }

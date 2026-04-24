@@ -234,9 +234,14 @@ export const ContestCard = forwardRef(
     })
 
     // Count-only: API returns full total in `count` even when limit=0 (no track rows).
+    // staleTime lets the discovery endpoint's primed cache (see
+    // useAllRemixContests) satisfy this query without an extra count-only
+    // round-trip per card. 60s is loose enough to skip redundant refetches
+    // during a single visit, tight enough that a returning user sees
+    // near-live counts.
     const { data: remixesData } = useRemixes(
       { trackId, pageSize: 0, isContestEntry: true },
-      { enabled: !!trackId }
+      { enabled: !!trackId, staleTime: 60_000 }
     )
     const entriesCount = remixesData?.pages?.[0]?.count ?? 0
     // Line-height for heading/m + heading/l respectively, pulled from

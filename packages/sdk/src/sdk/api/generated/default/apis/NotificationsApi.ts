@@ -166,8 +166,11 @@ export const GetNotificationsTypesEnum = {
     FanRemixContestEnded: 'fan_remix_contest_ended',
     FanRemixContestEndingSoon: 'fan_remix_contest_ending_soon',
     FanRemixContestWinnersSelected: 'fan_remix_contest_winners_selected',
+    FanRemixContestSubmission: 'fan_remix_contest_submission',
     ArtistRemixContestEnded: 'artist_remix_contest_ended',
     ArtistRemixContestEndingSoon: 'artist_remix_contest_ending_soon',
-    ArtistRemixContestSubmissions: 'artist_remix_contest_submissions'
+    ArtistRemixContestSubmissions: 'artist_remix_contest_submissions',
+    FanClubTextPost: 'fan_club_text_post',
+    RemixContestUpdate: 'remix_contest_update'
 } as const;
 export type GetNotificationsTypesEnum = typeof GetNotificationsTypesEnum[keyof typeof GetNotificationsTypesEnum];

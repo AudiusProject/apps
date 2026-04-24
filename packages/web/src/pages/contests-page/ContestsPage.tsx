@@ -1,14 +1,25 @@
+import { useCallback } from 'react'
+
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { Box, Button, Flex, IconTrophy, Text } from '@audius/harmony'
+import {
+  Box,
+  Button,
+  Flex,
+  IconTrophy,
+  Text,
+  LoadingSpinner
+} from '@audius/harmony'
+import InfiniteScroll from 'react-infinite-scroller'
 import { Link, Navigate } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { useMainContentRef } from 'pages/MainContentContext'
 
 import styles from './ContestsPage.module.css'
 import { RunYourOwnContestBanner } from './RunYourOwnContestBanner'
@@ -25,15 +36,36 @@ const messages = {
 
 const HERO_SKELETON_COUNT = 1
 const GRID_SKELETON_COUNT = 11
+const PAGE_SIZE = 12
 
 export const ContestsPage = () => {
   const isMobile = useIsMobile()
+  const mainContentRef = useMainContentRef()
   const { isEnabled: isContestsPageEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.CONTESTS)
-  const { data, isPending, isError, isSuccess } = useAllRemixContests(
-    undefined,
+  const {
+    data,
+    isPending,
+    isError,
+    isSuccess,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useAllRemixContests(
+    { pageSize: PAGE_SIZE },
     { enabled: isContestsPageEnabled }
   )
+
+  const getScrollParent = useCallback(
+    () => mainContentRef.current ?? null,
+    [mainContentRef]
+  )
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   if (isFlagLoaded && !isContestsPageEnabled) {
     return <Navigate to='/' replace />
@@ -94,18 +126,31 @@ export const ContestsPage = () => {
             </div>
           </Flex>
         ) : (
-          <Flex direction='column' gap='l' className={styles.bodyWrapper}>
-            {heroTrackId != null ? (
-              <ContestCard trackId={heroTrackId} variant='hero' />
-            ) : null}
-            {gridTrackIds.length > 0 ? (
-              <div className={styles.cardsContainer}>
-                {gridTrackIds.map((id) => (
-                  <ContestCard key={id} trackId={id} variant='grid' />
-                ))}
-              </div>
-            ) : null}
-          </Flex>
+          <InfiniteScroll
+            hasMore={hasNextPage ?? false}
+            loadMore={handleLoadMore}
+            getScrollParent={getScrollParent}
+            useWindow={false}
+            threshold={400}
+          >
+            <Flex direction='column' gap='l' className={styles.bodyWrapper}>
+              {heroTrackId != null ? (
+                <ContestCard trackId={heroTrackId} variant='hero' />
+              ) : null}
+              {gridTrackIds.length > 0 ? (
+                <div className={styles.cardsContainer}>
+                  {gridTrackIds.map((id) => (
+                    <ContestCard key={id} trackId={id} variant='grid' />
+                  ))}
+                </div>
+              ) : null}
+              {isFetchingNextPage ? (
+                <Flex justifyContent='center' pt='xl'>
+                  <LoadingSpinner />
+                </Flex>
+              ) : null}
+            </Flex>
+          </InfiniteScroll>
         )}
 
         {!showEmpty ? <RunYourOwnContestBanner /> : null}
