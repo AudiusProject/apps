@@ -14,6 +14,7 @@ import { ID } from '~/models/Identifiers'
 import { CommonState } from '~/store/commonStore'
 import { stemsUploadSelectors } from '~/store/stems-upload'
 import { replaceTrackProgressModalActions } from '~/store/ui/modals/replace-track-progress-modal'
+import { toast } from '~/store/ui/toast/slice'
 import { TrackMetadataForUpload } from '~/store/upload'
 
 import { TQTrack } from '../models'
@@ -146,6 +147,7 @@ export const useUpdateTrack = () => {
       queryClient.invalidateQueries({
         queryKey: getTrackQueryKey(params.trackId)
       })
+      dispatch(toast({ content: 'Changes saved!' }))
     },
     onError: (error, { trackId, metadata }, context?: MutationContext) => {
       // If the mutation fails, roll back track data
