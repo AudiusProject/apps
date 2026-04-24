@@ -14,7 +14,7 @@ import {
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
 import { Name, SquareSizes } from '@audius/common/models'
-import { dayjs } from '@audius/common/utils'
+import { dayjs, route } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -49,6 +49,8 @@ import {
 import { AddSourceTrackModal } from './AddSourceTrackModal'
 import { ManageStemsModal } from './ManageStemsModal'
 import { useUploadContestCover } from './useUploadContestCover'
+
+const { CONTESTS_PAGE } = route
 
 const messages = {
   pageTitle: 'Create Contest',
@@ -111,30 +113,38 @@ type ContestEventData = {
 
 /**
  * Full-page Create / Edit Remix Contest flow. Replaces the legacy
- * HostRemixContestModal. Route: /:handle/:slug/host-contest.
+ * HostRemixContestModal.
+ *
+ * Routes:
+ *   /:handle/:slug/host-contest — track-scoped entry (from a track page).
+ *   /host-contest               — track-less entry (from the contests
+ *                                 discovery page). User picks exactly one
+ *                                 Source Track, which becomes the event's
+ *                                 `entity_id`.
  *
  * When the target track already has a remix_contest event, the form
  * loads into "edit" mode pre-filled from event_data.
  *
  * New fields (Title, Video Link, Cover Photo, Source Tracks) live as
  * extra keys inside event_data — the backend entity_manager accepts
- * arbitrary JSON, so no schema change is required. The single
- * `entity_id` still points at the primary track; additional source
- * tracks live in `event_data.sourceTrackIds`.
+ * arbitrary JSON, so no schema change is required. `entity_id` points
+ * at the primary / first source track.
  */
 export const HostRemixContestPage = () => {
   const navigate = useNavigate()
   useRequiresAccount()
-  const { handle, slug } = useParams<{ handle: string; slug: string }>()
+  const { handle, slug } = useParams<{ handle?: string; slug?: string }>()
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: primaryTrack } = useTrackByPermalink(
     handle && slug ? `/${handle}/${slug}` : null
   )
-  const trackId = primaryTrack?.track_id
-  const { data: remixContest } = useRemixContest(trackId)
+  const primaryTrackId = primaryTrack?.track_id
+  // Only track-scoped entry (primaryTrack present) can show an existing
+  // contest in edit mode. Track-less entry is always create-mode.
+  const { data: remixContest } = useRemixContest(primaryTrackId)
   const { data: remixes, isLoading: remixesLoading } = useRemixesLineup({
-    trackId,
+    trackId: primaryTrackId,
     isContestEntry: true
   })
 
@@ -181,8 +191,19 @@ export const HostRemixContestPage = () => {
   )
 
   const [sourceTrackIds, setSourceTrackIds] = useState<number[]>(
-    existingEventData.sourceTrackIds ?? (trackId ? [trackId] : [])
+    existingEventData.sourceTrackIds ?? (primaryTrackId ? [primaryTrackId] : [])
   )
+
+  // The event's backing track: prefer the URL-scoped primary track, and
+  // fall back to the (required) first Source Track when entering from the
+  // track-less /host-contest route. This is the `entity_id` on create /
+  // update and drives the navigation target after save.
+  const entityTrackId = primaryTrackId ?? sourceTrackIds[0]
+  const { data: entityTrackPermalink } = useTrack(
+    !primaryTrack ? (sourceTrackIds[0] ?? null) : null,
+    { select: (t) => t?.permalink }
+  )
+  const effectivePermalink = primaryPermalink || entityTrackPermalink || ''
 
   // Modal state
   const [isAddTracksOpen, setIsAddTracksOpen] = useState(false)
@@ -194,7 +215,7 @@ export const HostRemixContestPage = () => {
   // Cover-photo upload + fallback to track artwork
   // ---------------------------------------------------------------------------
   const { imageUrl: trackArtworkUrl } = useTrackCoverArt({
-    trackId,
+    trackId: entityTrackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
   const resolvedCoverUrl = coverPhotoUrl || trackArtworkUrl
@@ -249,15 +270,17 @@ export const HostRemixContestPage = () => {
   }, [])
 
   const handleSourceTracksSelected = useCallback((ids: number[]) => {
+    // Only one Source Track supported today — take the first new pick.
     setSourceTrackIds((prev) => {
-      const merged = Array.from(new Set([...prev, ...ids]))
-      return merged
+      if (prev.length > 0) return prev
+      return ids.slice(0, 1)
     })
   }, [])
 
   const handleCancel = useCallback(() => {
+    // Track-less flow: fall back to the contests discovery page.
     if (!primaryPermalink) {
-      navigate(-1)
+      navigate(CONTESTS_PAGE)
       return
     }
     navigate(
@@ -287,7 +310,9 @@ export const HostRemixContestPage = () => {
     setEndDateTouched(true)
     setEndDateError(hasDateError)
     setDescriptionError(hasDescriptionError)
-    if (hasError || !trackId || !currentUserId) return
+    // entityTrackId is required on both track-scoped and track-less entry —
+    // on track-less entry it comes from the (required) first Source Track.
+    if (hasError || !entityTrackId || !currentUserId) return
 
     const endDate = parsedDate.toISOString()
     const eventData: ContestEventData = {
@@ -312,14 +337,14 @@ export const HostRemixContestPage = () => {
         make({
           eventName: Name.REMIX_CONTEST_UPDATE,
           remixContestId: remixContest.eventId,
-          trackId
+          trackId: entityTrackId
         })
       )
     } else {
       createEvent({
         eventType: EventEventTypeEnum.RemixContest,
         entityType: EventEntityTypeEnum.Track,
-        entityId: trackId,
+        entityId: entityTrackId,
         eventData,
         endDate,
         userId: currentUserId
@@ -328,13 +353,15 @@ export const HostRemixContestPage = () => {
       track(
         make({
           eventName: Name.REMIX_CONTEST_CREATE,
-          trackId
+          trackId: entityTrackId
         })
       )
     }
 
-    if (primaryPermalink) {
-      navigate(fullContestPage(primaryPermalink))
+    if (effectivePermalink) {
+      navigate(fullContestPage(effectivePermalink))
+    } else {
+      navigate(CONTESTS_PAGE)
     }
   }, [
     timeValue,
@@ -348,13 +375,13 @@ export const HostRemixContestPage = () => {
     sourceTrackIds,
     existingEventData.winners,
     contestMinDate,
-    trackId,
+    entityTrackId,
     currentUserId,
     isEdit,
     remixContest,
     updateEvent,
     createEvent,
-    primaryPermalink,
+    effectivePermalink,
     navigate
   ])
 
@@ -362,12 +389,12 @@ export const HostRemixContestPage = () => {
     if (!remixContest || !currentUserId) return
     deleteEvent({ eventId: remixContest.eventId, userId: currentUserId })
 
-    if (trackId) {
+    if (primaryTrackId) {
       track(
         make({
           eventName: Name.REMIX_CONTEST_DELETE,
           remixContestId: remixContest.eventId,
-          trackId
+          trackId: primaryTrackId
         })
       )
     }
@@ -378,15 +405,15 @@ export const HostRemixContestPage = () => {
     remixContest,
     currentUserId,
     deleteEvent,
-    trackId,
+    primaryTrackId,
     primaryPermalink,
     navigate
   ])
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
-  if (!primaryTrack) {
+  // Track-scoped URL (/:handle/:slug/host-contest) but the track hasn't
+  // resolved yet — avoid flashing an empty form against the wrong track.
+  // Track-less entry (/host-contest) skips this and renders immediately.
+  if (handle && slug && !primaryTrack) {
     return null
   }
 
@@ -665,18 +692,23 @@ export const HostRemixContestPage = () => {
                 {messages.sourceTracksHelper}
               </Text>
             </Flex>
-            <Flex gap='s'>
-              <Button
-                variant='primary'
-                fullWidth
-                onClick={handleAddSourceTrack}
-              >
-                {messages.addTrack}
-              </Button>
-              <Button variant='secondary' iconLeft={IconCloudUpload}>
-                {messages.uploadNow}
-              </Button>
-            </Flex>
+            {/* For now only one Source Track is supported. Once one has
+                been picked, both Add Track and Upload Now are locked out
+                — users can Remove the existing row to swap. */}
+            {sourceTrackIds.length === 0 ? (
+              <Flex gap='s'>
+                <Button
+                  variant='primary'
+                  fullWidth
+                  onClick={handleAddSourceTrack}
+                >
+                  {messages.addTrack}
+                </Button>
+                <Button variant='secondary' iconLeft={IconCloudUpload}>
+                  {messages.uploadNow}
+                </Button>
+              </Flex>
+            ) : null}
             {sourceTrackIds.length > 0 ? (
               <Flex direction='column' gap='xs'>
                 <Text variant='label' size='s' color='subdued'>
@@ -715,7 +747,12 @@ export const HostRemixContestPage = () => {
               <Button
                 variant='primary'
                 onClick={handleSubmit}
-                disabled={!contestEndDate || endDateError || timeError}
+                disabled={
+                  !contestEndDate ||
+                  endDateError ||
+                  timeError ||
+                  sourceTrackIds.length === 0
+                }
               >
                 {isEdit ? messages.save : messages.launch}
               </Button>

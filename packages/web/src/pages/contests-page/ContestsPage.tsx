@@ -1,8 +1,9 @@
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
+import { route } from '@audius/common/utils'
 import { Box, Button, Flex, IconTrophy, Text } from '@audius/harmony'
-import { Navigate } from 'react-router'
+import { Link, Navigate } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
 import { Header } from 'components/header/desktop/Header'
@@ -12,8 +13,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import styles from './ContestsPage.module.css'
 import { RunYourOwnContestBanner } from './RunYourOwnContestBanner'
 
-const CONTEST_HOSTING_HELP_URL =
-  'https://help.audius.co/artists/hosting-a-remix-contest'
+const { HOST_REMIX_CONTEST_ROOT_PAGE } = route
 
 const messages = {
   title: 'Contests',
@@ -50,20 +50,10 @@ export const ContestsPage = () => {
       icon={IconTrophy}
       primary={messages.title}
       rightDecorator={
-        <Button
-          variant='primary'
-          size='small'
-          asChild
-          // TODO: Link to the in-app contest creation flow once it exists
-          // outside of the per-track HostRemixContestModal.
-        >
-          <a
-            href={CONTEST_HOSTING_HELP_URL}
-            target='_blank'
-            rel='noopener noreferrer'
-          >
+        <Button variant='primary' size='small' asChild>
+          <Link to={HOST_REMIX_CONTEST_ROOT_PAGE}>
             {messages.createContest}
-          </a>
+          </Link>
         </Button>
       }
     />

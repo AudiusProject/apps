@@ -9,17 +9,17 @@ import { SquareSizes } from '@audius/common/models'
 import {
   Box,
   Button,
-  Checkbox,
   Flex,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
   ModalTitle,
+  Radio,
+  RadioGroup,
   TextInput,
   Text,
-  IconSearch,
-  TextLink
+  IconSearch
 } from '@audius/harmony'
 
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -29,7 +29,6 @@ const messages = {
   search: 'Search for Tracks',
   done: 'Done',
   cancel: 'Cancel',
-  viewSelection: 'View Selection',
   selectedCount: (n: number) => `${n} Track${n === 1 ? '' : 's'} Selected`,
   empty: 'No tracks found.',
   loading: 'Loading tracks…'
@@ -38,16 +37,19 @@ const messages = {
 type AddSourceTrackModalProps = {
   isOpen: boolean
   onClose: () => void
-  /** Tracks already selected on the parent form, pre-checked in the picker. */
+  /** Tracks already selected on the parent form. First entry pre-selects the radio. */
   initialSelectedIds: number[]
   /** Called with the final set of selected track IDs when "Done" is clicked. */
   onDone: (selectedIds: number[]) => void
 }
 
 /**
- * Multi-select track picker modal used by the Host Remix Contest page's
+ * Single-select track picker modal used by the Host Remix Contest page's
  * Source Tracks section. Searches over the signed-in user's own tracks
- * (client-side filter for now; falls back to fetch-all).
+ * (client-side filter for now; falls back to fetch-all). Contests only
+ * support one Source Track today — the API returns the selection as an
+ * array so the wiring can expand to multi-select later without a
+ * caller-facing shape change.
  */
 export const AddSourceTrackModal = ({
   isOpen,
@@ -59,39 +61,36 @@ export const AddSourceTrackModal = ({
   const { data: currentUser } = useUser(currentUserId)
   const handle = currentUser?.handle
 
-  // Fetch the host's public + unlisted tracks. Page size is generous — we
-  // filter client-side and assume the host's own catalog fits. If we see
-  // real perf issues we'll swap this for a server-side search hook.
+  // Fetch the host's public + unlisted tracks. 100 is the discovery-node
+  // max per page; we filter client-side and assume the host's recent
+  // catalog fits. If someone has >100 tracks and can't find an older one,
+  // we'll swap this for a server-side search / paged fetch.
   const { data: tracks, isPending } = useUserTracksByHandle(
-    { handle, filterTracks: 'all', limit: 200 },
+    { handle, filterTracks: 'all', limit: 100 },
     { enabled: !!handle }
   )
 
   const [search, setSearch] = useState('')
-  const [selectedIds, setSelectedIds] = useState<number[]>(initialSelectedIds)
-  const [viewOnlySelected, setViewOnlySelected] = useState(false)
-
-  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds])
+  const [selectedId, setSelectedId] = useState<number | null>(
+    initialSelectedIds[0] ?? null
+  )
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
     return (tracks ?? []).filter((t) => {
-      if (viewOnlySelected && !selectedSet.has(t.track_id)) return false
       if (!term) return true
       return t.title.toLowerCase().includes(term)
     })
-  }, [tracks, search, viewOnlySelected, selectedSet])
+  }, [tracks, search])
 
-  const toggle = useCallback((id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
+  const handleSelect = useCallback((id: number) => {
+    setSelectedId(id)
   }, [])
 
   const handleDone = useCallback(() => {
-    onDone(selectedIds)
+    onDone(selectedId != null ? [selectedId] : [])
     onClose()
-  }, [selectedIds, onDone, onClose])
+  }, [selectedId, onDone, onClose])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='medium'>
@@ -128,16 +127,22 @@ export const AddSourceTrackModal = ({
                 </Text>
               </Flex>
             ) : (
-              filtered.map((t) => (
-                <TrackRow
-                  key={t.track_id}
-                  trackId={t.track_id}
-                  title={t.title}
-                  ownerName={currentUser?.name ?? ''}
-                  checked={selectedSet.has(t.track_id)}
-                  onToggle={() => toggle(t.track_id)}
-                />
-              ))
+              <RadioGroup
+                name='source-track-picker'
+                value={selectedId != null ? String(selectedId) : null}
+                css={{ gap: 0 }}
+              >
+                {filtered.map((t) => (
+                  <TrackRow
+                    key={t.track_id}
+                    trackId={t.track_id}
+                    title={t.title}
+                    ownerName={currentUser?.name ?? ''}
+                    checked={selectedId === t.track_id}
+                    onSelect={() => handleSelect(t.track_id)}
+                  />
+                ))}
+              </RadioGroup>
             )}
           </Box>
         </Flex>
@@ -149,19 +154,9 @@ export const AddSourceTrackModal = ({
           gap='m'
           w='100%'
         >
-          <Flex gap='m' alignItems='center'>
-            <Text variant='body' size='s' color='subdued'>
-              {messages.selectedCount(selectedIds.length)}
-            </Text>
-            {selectedIds.length > 0 ? (
-              <TextLink
-                variant='visible'
-                onClick={() => setViewOnlySelected((v) => !v)}
-              >
-                {messages.viewSelection}
-              </TextLink>
-            ) : null}
-          </Flex>
+          <Text variant='body' size='s' color='subdued'>
+            {messages.selectedCount(selectedId != null ? 1 : 0)}
+          </Text>
           <Flex gap='s'>
             <Button variant='secondary' onClick={onClose}>
               {messages.cancel}
@@ -169,7 +164,7 @@ export const AddSourceTrackModal = ({
             <Button
               variant='primary'
               onClick={handleDone}
-              disabled={selectedIds.length === 0}
+              disabled={selectedId == null}
             >
               {messages.done}
             </Button>
@@ -187,7 +182,7 @@ type TrackRowProps = {
   title: string
   ownerName: string
   checked: boolean
-  onToggle: () => void
+  onSelect: () => void
 }
 
 const TrackRow = ({
@@ -195,7 +190,7 @@ const TrackRow = ({
   title,
   ownerName,
   checked,
-  onToggle
+  onSelect
 }: TrackRowProps) => {
   const { imageUrl } = useTrackCoverArt({
     trackId,
@@ -210,7 +205,7 @@ const TrackRow = ({
         borderBottom: '1px solid var(--harmony-border-default)',
         cursor: 'pointer'
       }}
-      onClick={onToggle}
+      onClick={onSelect}
     >
       <Box
         css={{
@@ -231,7 +226,12 @@ const TrackRow = ({
           {ownerName}
         </Text>
       </Flex>
-      <Checkbox checked={checked} onChange={onToggle} aria-label={title} />
+      <Radio
+        value={String(trackId)}
+        checked={checked}
+        onChange={onSelect}
+        aria-label={title}
+      />
     </Flex>
   )
 }

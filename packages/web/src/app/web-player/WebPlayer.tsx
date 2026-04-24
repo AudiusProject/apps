@@ -254,6 +254,7 @@ const {
   PICK_WINNERS_PAGE,
   CONTEST_PAGE,
   HOST_REMIX_CONTEST_PAGE,
+  HOST_REMIX_CONTEST_ROOT_PAGE,
   PROFILE_PAGE,
   authenticatedRoutes,
   EMPTY_PAGE,
@@ -1189,6 +1190,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<ContestPage containerRef={mainContentRef} />}
                 />
                 <Route
+                  path={HOST_REMIX_CONTEST_ROOT_PAGE}
+                  element={<HostRemixContestPage />}
+                />
+                <Route
                   path={HOST_REMIX_CONTEST_PAGE}
                   element={<HostRemixContestPage />}
                 />
@@ -1565,6 +1570,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route
                   path={CONTEST_PAGE}
                   element={<ContestPage containerRef={mainContentRef} />}
+                />
+                <Route
+                  path={HOST_REMIX_CONTEST_ROOT_PAGE}
+                  element={<HostRemixContestPage />}
                 />
                 <Route
                   path={HOST_REMIX_CONTEST_PAGE}
