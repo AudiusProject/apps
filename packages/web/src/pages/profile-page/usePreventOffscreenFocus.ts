@@ -51,15 +51,13 @@ const suppressTabIndex = (element: HTMLElement) => {
 }
 
 const syncOffscreenFocusables = (root: HTMLElement) => {
-  root
-    .querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-    .forEach((element) => {
-      if (isHorizontallyVisible(element, root)) {
-        restoreTabIndex(element)
-      } else {
-        suppressTabIndex(element)
-      }
-    })
+  root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach((element) => {
+    if (isHorizontallyVisible(element, root)) {
+      restoreTabIndex(element)
+    } else {
+      suppressTabIndex(element)
+    }
+  })
 }
 
 export const usePreventOffscreenFocus = (

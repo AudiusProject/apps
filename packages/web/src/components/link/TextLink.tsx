@@ -1,10 +1,4 @@
-import {
-  Ref,
-  forwardRef,
-  useCallback,
-  MouseEvent,
-  ComponentType
-} from 'react'
+import { Ref, forwardRef, useCallback, MouseEvent, ComponentType } from 'react'
 
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
@@ -85,12 +79,7 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
   }
 
   return (
-    <HarmonyTextLink
-      ref={ref}
-      asChild
-      onClick={handleClick}
-      {...other}
-    >
+    <HarmonyTextLink ref={ref} asChild onClick={handleClick} {...other}>
       {to ? (
         <LinkComponent {...linkProps}>{children}</LinkComponent>
       ) : (

@@ -166,7 +166,9 @@ export const Nav2026 = (props: Nav2026Props) => {
 
   return (
     <>
-      <div className={`${styles.container}${isScrolled ? ` ${styles.scrolled}` : ''}`}>
+      <div
+        className={`${styles.container}${isScrolled ? ` ${styles.scrolled}` : ''}`}
+      >
         <nav className={styles.nav}>
           <div className={styles.inner}>
             <a

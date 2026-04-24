@@ -98,11 +98,7 @@ export const UserLink = (props: UserLinkProps) => {
   // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
     <Flex justifyContent={center ? 'center' : undefined} css={containerStyles}>
-      <TextLink
-        to={url}
-        {...other}
-        css={[linkStyles, cssProp]}
-      >
+      <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
         <Text ellipses>{name}</Text>
       </TextLink>
       {badges}
@@ -128,11 +124,7 @@ export const UserLink = (props: UserLinkProps) => {
           }}
           handle={handle}
         >
-          <TextLink
-            to={url}
-            {...other}
-            css={[linkStyles, cssProp]}
-          >
+          <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
             <Text ellipses>{name}</Text>
           </TextLink>
         </ArtistPopover>
