@@ -170,12 +170,16 @@
 }
 
 .tableRow:hover .tablePlayButton,
+.tableRow:focus-within .tablePlayButton,
 .tableRow:hover .trackActionsContainer .tableActionButton,
-.tableRow:hover .purchaseButton {
+.tableRow:focus-within .trackActionsContainer .tableActionButton,
+.tableRow:hover .purchaseButton,
+.tableRow:focus-within .purchaseButton {
   opacity: 1;
 }
 
-.tableRow:hover .hiddenIcon {
+.tableRow:hover .hiddenIcon,
+.tableRow:focus-within .hiddenIcon {
   opacity: 0;
   pointer-events: none;
 }
@@ -247,11 +251,13 @@
   position: absolute;
 }
 
-.tableRow:hover .typeIcon {
+.tableRow:hover .typeIcon,
+.tableRow:focus-within .typeIcon {
   opacity: 0;
 }
 
-.tableRow:hover .overflowMenu {
+.tableRow:hover .overflowMenu,
+.tableRow:focus-within .overflowMenu {
   opacity: 1;
 }
 

@@ -1,24 +1,26 @@
 import { PROFILE_PAGE, TRACK_PAGE } from '@audius/common/src/utils/route'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
+import { describe, expect, beforeAll, afterEach, afterAll, vi } from 'vitest'
 
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser } from 'test/mocks/fixtures/users'
 import { mockTrackById, mockEvents, mockUsers } from 'test/msw/mswMocks'
-import { mswServer, render, screen, it } from 'test/test-utils'
+import { fireEvent, mswServer, render, screen, it } from 'test/test-utils'
 
 import { TrackTileSize } from '../types'
 
 import { TrackTile } from './TrackTile'
 
-function renderTrackTile(overrides = {}) {
+function renderTrackTile(overrides = {}, propOverrides = {}) {
+  const togglePlay = vi.fn()
+
   mswServer.use(
     mockTrackById({ ...testTrack, ...overrides }),
     mockEvents(),
     mockUsers([artistUser])
   )
 
-  return render(
+  render(
     <MemoryRouter initialEntries={['/']}>
       <Routes>
         <Route
@@ -31,11 +33,12 @@ function renderTrackTile(overrides = {}) {
               size={TrackTileSize.SMALL}
               statSize='small'
               ordered={false}
-              togglePlay={() => {}}
+              togglePlay={togglePlay}
               isLoading={false}
               hasLoaded={() => {}}
               isTrending={false}
               isFeed={false}
+              {...propOverrides}
             />
           }
         />
@@ -45,6 +48,8 @@ function renderTrackTile(overrides = {}) {
     </MemoryRouter>,
     { skipRouter: true }
   )
+
+  return { togglePlay }
 }
 
 describe('TrackTile', () => {
@@ -65,14 +70,10 @@ describe('TrackTile', () => {
     expect(await screen.findByText('Test Track')).toBeInTheDocument()
     expect(await screen.findByText('Test User')).toBeInTheDocument()
     expect(await screen.findByText('1 Plays')).toBeInTheDocument()
+    expect(await screen.findByText('5')).toBeInTheDocument()
+    expect(await screen.findByText('10')).toBeInTheDocument()
     expect(
-      await screen.findByRole('button', { name: /reposts 5/i })
-    ).toBeInTheDocument()
-    expect(
-      await screen.findByRole('button', { name: /favorites 10/i })
-    ).toBeInTheDocument()
-    expect(
-      await screen.findByRole('button', { name: /comments 15/i })
+      await screen.findByRole('link', { name: /comments 15/i })
     ).toBeInTheDocument()
     expect(await screen.findByText('3:00')).toBeInTheDocument()
   })
@@ -127,5 +128,33 @@ describe('TrackTile', () => {
     const artistLink = await screen.findByRole('link', { name: 'Test User' })
     artistLink.focus()
     expect(artistLink).toHaveFocus()
+  })
+
+  it('plays from the artwork without stealing track tile action clicks', async () => {
+    const { togglePlay } = renderTrackTile()
+
+    const playButton = await screen.findByRole('button', {
+      name: 'Play Test Track'
+    })
+    fireEvent.click(playButton)
+    expect(togglePlay).toHaveBeenCalledTimes(1)
+
+    const favoriteButton = await screen.findByRole('button', {
+      name: /^Favorite$/i
+    })
+    fireEvent.click(favoriteButton)
+    expect(togglePlay).toHaveBeenCalledTimes(1)
+
+    const repostButton = await screen.findByRole('button', {
+      name: /^Repost$/i
+    })
+    fireEvent.click(repostButton)
+    expect(togglePlay).toHaveBeenCalledTimes(1)
+
+    const shareButton = await screen.findByRole('button', {
+      name: /^Share$/i
+    })
+    fireEvent.click(shareButton)
+    expect(togglePlay).toHaveBeenCalledTimes(1)
   })
 })

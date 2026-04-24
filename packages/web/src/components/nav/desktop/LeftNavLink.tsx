@@ -1,4 +1,11 @@
-import { KeyboardEvent, ReactNode, useCallback, useMemo, useState } from 'react'
+import {
+  KeyboardEvent,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import { Name } from '@audius/common/models'
 import { NavItem, NavItemProps } from '@audius/harmony'
@@ -75,6 +82,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
   const dispatch = useDispatch()
   const { isCollapsed } = useNavSidebar()
   const [isFocusVisible, setIsFocusVisible] = useState(false)
+  const isPointerFocusRef = useRef(false)
   const isSelected = useMemo(() => {
     const pathsToMatch = [to, ...additionalPathMatches].filter(removeNullable)
     return isPathMatch({
@@ -112,8 +120,14 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     }
   }, [])
 
+  const handlePointerDown = useCallback(() => {
+    isPointerFocusRef.current = true
+    setIsFocusVisible(false)
+  }, [])
+
   const handleFocus = useCallback(() => {
-    setIsFocusVisible(true)
+    setIsFocusVisible(!isPointerFocusRef.current)
+    isPointerFocusRef.current = false
   }, [])
 
   const handleBlur = useCallback(() => {
@@ -126,6 +140,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
         to={to ?? ''}
         onClick={requiresAccountOnClick}
         onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
         onFocus={handleFocus}
         onBlur={handleBlur}
         className={styles.navLink}
@@ -150,6 +165,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
       to={to ?? ''}
       onClick={requiresAccountOnClick}
       onKeyDown={handleKeyDown}
+      onPointerDown={handlePointerDown}
       onFocus={handleFocus}
       onBlur={handleBlur}
       className={styles.navLink}

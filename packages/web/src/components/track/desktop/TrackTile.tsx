@@ -1,4 +1,4 @@
-import { useCallback, useEffect, MouseEvent, useRef } from 'react'
+import { useCallback, useEffect, MouseEvent } from 'react'
 
 import { useCurrentUserId, useTrack, useUser } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
@@ -38,7 +38,6 @@ import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackArtwork } from 'components/track/Artwork'
 import { DragDropKind } from 'store/dragndrop/slice'
-import { isDescendantElementOf } from 'utils/domUtils'
 import { fullTrackPage } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
@@ -143,7 +142,6 @@ export const TrackTile = ({
   const loading = isLoading || isFetchingNFTAccess || isPending
 
   const [, setLockedContentVisibility] = useModalState('LockedContent')
-  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!loading && hasLoaded) {
@@ -228,28 +226,20 @@ export const TrackTile = ({
     setLockedContentVisibility(true)
   }, [dispatch, trackId, setLockedContentVisibility])
 
-  const onTogglePlay = useCallback(
-    (e?: MouseEvent /* click event within TrackTile */) => {
-      const shouldSkipTogglePlay = isDescendantElementOf(
-        e?.target,
-        menuRef.current
-      )
-      if (shouldSkipTogglePlay) return
-      if (trackId && !hasStreamAccess && !isPreviewable) {
-        openLockedContentModal()
-        return
-      }
-      togglePlay(uid, trackId)
-    },
-    [
-      togglePlay,
-      isPreviewable,
-      uid,
-      trackId,
-      hasStreamAccess,
-      openLockedContentModal
-    ]
-  )
+  const onTogglePlay = useCallback(() => {
+    if (trackId && !hasStreamAccess && !isPreviewable) {
+      openLockedContentModal()
+      return
+    }
+    togglePlay(uid, trackId)
+  }, [
+    togglePlay,
+    isPreviewable,
+    uid,
+    trackId,
+    hasStreamAccess,
+    openLockedContentModal
+  ])
 
   const renderOverflowMenu = () => {
     const menu: Omit<import('components/menu/TrackMenu').OwnProps, 'children'> =
@@ -302,6 +292,10 @@ export const TrackTile = ({
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
   const disableActions = false
   const showSkeleton = loading
+  const artworkActionLabel =
+    trackId && !hasStreamAccess && !isPreviewable
+      ? `Unlock ${title || 'track'}`
+      : `${isTrackPlaying ? 'Pause' : 'Play'} ${title || 'track'}`
 
   const tileContent = (
     <Paper
@@ -321,7 +315,6 @@ export const TrackTile = ({
       mb={size === TrackTileSize.LARGE ? 'l' : 's'}
       p='s'
       gap='l'
-      onClick={!isLoading && !disableActions ? onTogglePlay : undefined}
     >
       <Flex gap='s'>
         {/* prefix ordering */}
@@ -340,18 +333,43 @@ export const TrackTile = ({
           h={size === TrackTileSize.LARGE ? 128 : 108}
           w={size === TrackTileSize.LARGE ? 128 : 108}
         >
-          <TrackArtwork
-            id={trackId}
-            coSign={coSign || undefined}
-            size='large'
-            isBuffering={isTrackBuffering}
-            isPlaying={isTrackPlaying}
-            artworkIconClassName='artworkIcon'
-            showArtworkIcon={!loading}
-            showSkeleton={loading}
-            noShimmer={noShimmer}
-            hasStreamAccess={hasStreamAccess || isPreviewable}
-          />
+          <button
+            type='button'
+            aria-label={artworkActionLabel}
+            disabled={isLoading || disableActions}
+            onClick={onTogglePlay}
+            css={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              padding: 0,
+              border: 0,
+              background: 'transparent',
+              cursor: isLoading || disableActions ? 'default' : 'pointer',
+              '&:focus': {
+                outline: 'none'
+              },
+              '&:focus-visible': {
+                borderRadius: 6,
+                outline:
+                  '2px solid var(--harmony-focus, var(--harmony-secondary))',
+                outlineOffset: 3
+              }
+            }}
+          >
+            <TrackArtwork
+              id={trackId}
+              coSign={coSign || undefined}
+              size='large'
+              isBuffering={isTrackBuffering}
+              isPlaying={isTrackPlaying}
+              artworkIconClassName='artworkIcon'
+              showArtworkIcon={!loading}
+              showSkeleton={loading}
+              noShimmer={noShimmer}
+              hasStreamAccess={hasStreamAccess || isPreviewable}
+            />
+          </button>
         </Box>
       </Flex>
       <TrackDogEar trackId={trackId} hideUnlocked />

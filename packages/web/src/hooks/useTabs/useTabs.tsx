@@ -10,7 +10,9 @@ import {
   CSSProperties,
   RefObject,
   Ref,
-  createRef
+  createRef,
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
@@ -38,7 +40,6 @@ export type TabHeader = {
 }
 
 type TabProps = {
-  onClick: () => void
   isActive: boolean
   isMobile: boolean
   isMobileV2: boolean
@@ -52,7 +53,6 @@ type TabProps = {
 const Tab = forwardRef(
   (
     {
-      onClick,
       icon,
       text,
       label,
@@ -74,7 +74,6 @@ const Tab = forwardRef(
         { [styles.tabActive]: isActive },
         { [styles.tabDisabled]: disabled }
       )}
-      onClick={() => !disabled && onClick?.()}
       aria-label={label}
       ref={ref}
     >
@@ -340,9 +339,59 @@ const TabBar = memo(
               : undefined) || (showIconOnlyTooltip ? tab.text : undefined)
           const tooltipActive = !!tooltipText
 
+          const selectTab = (
+            event?:
+              | ReactMouseEvent<HTMLElement>
+              | ReactKeyboardEvent<HTMLElement>
+          ) => {
+            if (tab.disabled) {
+              event?.preventDefault()
+              return
+            }
+            onClick(i)
+          }
+
+          const focusTabAtIndex = (index: number) => {
+            refsArr.current[index]?.current?.closest('[role="tab"]')?.focus()
+          }
+
+          const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+            if (
+              event.key === 'Enter' ||
+              event.key === ' ' ||
+              event.key === 'Spacebar'
+            ) {
+              event.preventDefault()
+              selectTab(event)
+              return
+            }
+
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+              event.preventDefault()
+              const direction = event.key === 'ArrowRight' ? 1 : -1
+              const nextIndex = (i + direction + tabs.length) % tabs.length
+              focusTabAtIndex(nextIndex)
+              if (!tabs[nextIndex]?.disabled) onClick(nextIndex)
+              return
+            }
+
+            if (event.key === 'Home') {
+              event.preventDefault()
+              focusTabAtIndex(0)
+              if (!tabs[0]?.disabled) onClick(0)
+              return
+            }
+
+            if (event.key === 'End') {
+              event.preventDefault()
+              const lastIndex = tabs.length - 1
+              focusTabAtIndex(lastIndex)
+              if (!tabs[lastIndex]?.disabled) onClick(lastIndex)
+            }
+          }
+
           const tabElement = (
             <Tab
-              onClick={() => onClick(i)}
               ref={refsArr.current[i]}
               isActive={isActive}
               key={tab.label}
@@ -360,10 +409,15 @@ const TabBar = memo(
 
           const rootProps = {
             role: 'tab',
+            tabIndex: tab.disabled ? -1 : 0,
+            'aria-selected': isActive,
+            'aria-disabled': tab.disabled || undefined,
             className: cn(styles.tabWrapper, {
               [styles.tabWrapperMobile]: isMobile,
               [styles.tabWrapperDesktopIconOnly]: isDesktopIconOnly
-            })
+            }),
+            onClick: selectTab,
+            onKeyDown: handleTabKeyDown
           }
 
           return (

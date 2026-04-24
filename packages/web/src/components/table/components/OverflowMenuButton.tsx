@@ -1,3 +1,5 @@
+import { KeyboardEvent } from 'react'
+
 import { IconKebabHorizontal as IconOptions } from '@audius/harmony'
 import cn from 'classnames'
 
@@ -60,16 +62,31 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     return null
   }
 
+  const handleTriggerKeyDown = (
+    e: KeyboardEvent<HTMLDivElement>,
+    triggerPopup: () => void
+  ) => {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault()
+      e.stopPropagation()
+      triggerPopup()
+    }
+  }
+
   return (
     <div onClick={onClick} className={cn(styles.tableOptionsButton, className)}>
       <Menu menu={overflowMenu}>
         {(ref, triggerPopup) => (
           <div
             className={tabStyles.iconKebabHorizontalWrapper}
+            role='button'
+            tabIndex={0}
+            aria-label='Open track actions'
             onClick={(e) => {
               e.stopPropagation()
               triggerPopup()
             }}
+            onKeyDown={(e) => handleTriggerKeyDown(e, triggerPopup)}
           >
             <div ref={ref}>
               <IconOptions
