@@ -85,6 +85,12 @@
   justify-content: center;
 }
 
+.root.compact {
+  height: var(--chat-row-height, 80px);
+  box-sizing: border-box;
+  justify-content: center;
+}
+
 .root.compact .messagePreview,
 .root.compact .userText,
 .root.compact .unreadIndicatorTag,

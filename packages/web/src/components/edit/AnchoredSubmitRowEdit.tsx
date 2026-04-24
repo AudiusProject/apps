@@ -53,7 +53,7 @@ export const AnchoredSubmitRowEdit = ({
     <>
       <Portal>
         <div className={styles.buttonRow}>
-          <Frosted alignItems='center' gap='m'>
+          <Frosted className={styles.frosted} alignItems='center' gap='m'>
             <Flex gap='l'>
               <Button
                 variant='secondary'

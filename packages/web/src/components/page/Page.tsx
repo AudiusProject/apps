@@ -16,22 +16,35 @@ const HEADER_MARGIN_PX = 32
 // Responsible for positioning the header
 type HeaderContainerProps = Pick<
   PageProps,
-  'header' | 'showSearch' | 'headerContentPaddingInline'
+  | 'header'
+  | 'showSearch'
+  | 'headerContentPaddingInline'
+  | 'disableHeaderFrosted'
 >
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { header, showSearch, headerContentPaddingInline } = props
+  const {
+    header,
+    showSearch,
+    headerContentPaddingInline,
+    disableHeaderFrosted
+  } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
+  const headerElement = cloneElement(header as any, {
+    headerContainerRef,
+    topLeftElement: showSearch ? <DesktopSearchBar /> : null
+  })
 
   return (
     <div ref={headerContainerRef} className={styles.headerContainer}>
-      <Frosted contentPaddingInline={headerContentPaddingInline}>
-        {cloneElement(header as any, {
-          headerContainerRef,
-          topLeftElement: showSearch ? <DesktopSearchBar /> : null
-        })}
-      </Frosted>
+      {disableHeaderFrosted ? (
+        headerElement
+      ) : (
+        <Frosted contentPaddingInline={headerContentPaddingInline}>
+          {headerElement}
+        </Frosted>
+      )}
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}
@@ -52,6 +65,7 @@ type PageProps = {
   fadeDuration?: number
   header?: ReactNode
   headerContentPaddingInline?: string
+  disableHeaderFrosted?: boolean
 
   // There are some pages which don't have a fixed header but still display
   // a search bar that scrolls with the page.
@@ -79,6 +93,7 @@ export const Page = (props: PageProps) => {
     fromOpacity = 0.2,
     header,
     headerContentPaddingInline = 'var(--harmony-unit-8)',
+    disableHeaderFrosted = false,
     image,
     noIndex = false,
     ogDescription,
@@ -126,6 +141,7 @@ export const Page = (props: PageProps) => {
             header={header}
             showSearch={showSearch}
             headerContentPaddingInline={headerContentPaddingInline}
+            disableHeaderFrosted={disableHeaderFrosted}
           />
         )}
         <div

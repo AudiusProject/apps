@@ -12,6 +12,13 @@ export enum ThemePalette {
   MATRIX = 'matrix'
 }
 
+export enum FrostedSurfaceIntensity {
+  OFF = 'off',
+  SUBTLE = 'subtle',
+  DEFAULT = 'default',
+  STRONG = 'strong'
+}
+
 /**
  * @deprecated Use ThemePalette + ThemeMode. Legacy theme enum.
  * - LIGHT/DARK/AUTO = mode (map to ThemeMode)

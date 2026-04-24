@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 import {
+  FrostedSurfaceIntensity,
   SystemAppearance,
   Theme,
   ThemeMode,
@@ -15,6 +16,7 @@ export type ThemeState = {
   themePalette: Nullable<ThemePalette>
   /** Mode selected in segmented control: auto, light, dark. Ignored when palette is matrix. */
   themeMode: Nullable<ThemeMode>
+  frostedSurfaceIntensity: Nullable<FrostedSurfaceIntensity>
   systemAppearance: Nullable<SystemAppearance>
 }
 
@@ -30,6 +32,10 @@ export type SetThemeModeAction = PayloadAction<{
   themeMode: ThemeMode
 }>
 
+export type SetFrostedSurfaceIntensityAction = PayloadAction<{
+  frostedSurfaceIntensity: FrostedSurfaceIntensity
+}>
+
 export type SetSystemAppearanceAction = PayloadAction<{
   systemAppearance: SystemAppearance
 }>
@@ -38,6 +44,7 @@ const initialState: ThemeState = {
   theme: null,
   themePalette: null,
   themeMode: null,
+  frostedSurfaceIntensity: null,
   systemAppearance: null
 }
 
@@ -78,13 +85,24 @@ const themeSlice = createSlice({
             ? Theme.DARK
             : Theme.AUTO
     },
+    setFrostedSurfaceIntensity: (
+      state,
+      action: SetFrostedSurfaceIntensityAction
+    ) => {
+      state.frostedSurfaceIntensity = action.payload.frostedSurfaceIntensity
+    },
     setSystemAppearance: (state, action: SetSystemAppearanceAction) => {
       state.systemAppearance = action.payload.systemAppearance
     }
   }
 })
 
-export const { setTheme, setThemePalette, setThemeMode, setSystemAppearance } =
-  themeSlice.actions
+export const {
+  setTheme,
+  setThemePalette,
+  setThemeMode,
+  setFrostedSurfaceIntensity,
+  setSystemAppearance
+} = themeSlice.actions
 export default themeSlice.reducer
 export const actions = themeSlice.actions

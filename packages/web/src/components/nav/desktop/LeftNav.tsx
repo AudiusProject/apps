@@ -70,7 +70,6 @@ export const LeftNav = (props: OwnProps) => {
 
   return (
     <Flex
-      backgroundColor='surface1'
       borderRight='default'
       as='nav'
       aria-label='Primary navigation'
@@ -83,7 +82,12 @@ export const LeftNav = (props: OwnProps) => {
         userSelect: 'none',
         overflowX: 'clip',
         overflowY: 'visible',
-        flexShrink: 0
+        flexShrink: 0,
+        backdropFilter: 'var(--frosted-surface-backdrop-filter, blur(10px))',
+        WebkitBackdropFilter:
+          'var(--frosted-surface-backdrop-filter, blur(10px))',
+        background:
+          'var(--frosted-surface-background, color-mix(in srgb, var(--frosted-surface-background-color, var(--harmony-n-25)) var(--frosted-surface-opacity, 65%), transparent))'
       }}
     >
       {isElectron ? <RouteNav /> : null}

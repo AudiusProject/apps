@@ -18,11 +18,35 @@
   --nav-shift: 0px;
   --mobile-min-width: 280px;
   --play-bar-height: 88px;
+  --frosted-surface-backdrop-filter: blur(10px);
+  --frosted-surface-background-color: var(--harmony-n-25);
+  --frosted-surface-opacity: 65%;
+  --frosted-surface-background: color-mix(
+    in srgb,
+    var(--frosted-surface-background-color) var(--frosted-surface-opacity),
+    transparent
+  );
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   overflow: hidden;
+}
+
+.app:not(.mobileApp)[data-frosted-surface-intensity='off'] {
+  --frosted-surface-backdrop-filter: none;
+  --frosted-surface-background-color: var(--harmony-bg-surface-1);
+  --frosted-surface-opacity: 100%;
+}
+
+.app:not(.mobileApp)[data-frosted-surface-intensity='subtle'] {
+  --frosted-surface-backdrop-filter: blur(6px);
+  --frosted-surface-opacity: 85%;
+}
+
+.app:not(.mobileApp)[data-frosted-surface-intensity='strong'] {
+  --frosted-surface-backdrop-filter: blur(18px);
+  --frosted-surface-opacity: 50%;
 }
 
 .app.mobileApp {
@@ -42,8 +66,10 @@
 .mainContentWrapper {
   position: relative;
   margin-left: var(--nav-width);
-  margin-bottom: 88px;
+  margin-bottom: 0;
   width: 100%;
+  padding-bottom: var(--play-bar-height);
+  box-sizing: border-box;
   transform: translateX(var(--nav-shift));
   transition: transform 0.2s ease;
   /* Use theme background - ensures classic-dark/default-dark etc. apply correctly */

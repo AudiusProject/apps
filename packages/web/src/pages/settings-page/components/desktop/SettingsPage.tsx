@@ -3,7 +3,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
-import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
+import {
+  FrostedSurfaceIntensity,
+  Name,
+  Theme,
+  ThemeMode,
+  ThemePalette
+} from '@audius/common/models'
 import { API_TERMS, FAN_CLUB_TERMS } from '@audius/common/src/utils/route'
 import {
   BrowserNotificationSetting,
@@ -67,7 +73,12 @@ import {
 import { isElectron } from 'utils/clientUtil'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
-import { THEME_KEY, THEME_MODE_KEY, THEME_PALETTE_KEY } from 'utils/theme/theme'
+import {
+  FROSTED_SURFACE_INTENSITY_KEY,
+  THEME_KEY,
+  THEME_MODE_KEY,
+  THEME_PALETTE_KEY
+} from 'utils/theme/theme'
 
 import packageInfo from '../../../../../package.json'
 
@@ -85,8 +96,10 @@ import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard
 
 const { show } = musicConfettiActions
 const { signOut: signOutAction } = signOutActions
-const { setTheme, setThemePalette, setThemeMode } = themeActions
-const { getTheme, getThemePalette, getThemeMode } = themeSelectors
+const { setTheme, setThemePalette, setThemeMode, setFrostedSurfaceIntensity } =
+  themeActions
+const { getTheme, getThemePalette, getThemeMode, getFrostedSurfaceIntensity } =
+  themeSelectors
 const { getBrowserNotificationSettings, getEmailFrequency } =
   settingsPageSelectors
 const {
@@ -141,6 +154,7 @@ export const SettingsPage = () => {
   const theme = useSelector(getTheme)
   const themePalette = useSelector(getThemePalette)
   const themeMode = useSelector(getThemeMode)
+  const frostedSurfaceIntensity = useSelector(getFrostedSurfaceIntensity)
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
   const { tier } = useTierAndVerifiedForUser(userId)
@@ -349,6 +363,8 @@ export const SettingsPage = () => {
       : theme === Theme.DARK
         ? ThemeMode.DARK
         : ThemeMode.AUTO)
+  const effectiveFrostedSurfaceIntensity =
+    frostedSurfaceIntensity ?? FrostedSurfaceIntensity.DEFAULT
 
   const onPaletteChange = (value: ThemePalette) => {
     dispatch(setThemePalette({ themePalette: value }))
@@ -390,6 +406,17 @@ export const SettingsPage = () => {
     )
   }
 
+  const onFrostedSurfaceIntensityChange = (value: FrostedSurfaceIntensity) => {
+    dispatch(
+      setFrostedSurfaceIntensity({
+        frostedSurfaceIntensity: value
+      })
+    )
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(FROSTED_SURFACE_INTENSITY_KEY, value)
+    }
+  }
+
   const paletteOptions = useMemo(() => {
     const options: { value: ThemePalette; label: string }[] = [
       { value: ThemePalette.DEFAULT, label: settingsMessages.defaultPalette },
@@ -413,6 +440,28 @@ export const SettingsPage = () => {
     []
   )
 
+  const frostedSurfaceIntensityOptions = useMemo(
+    () => [
+      {
+        key: FrostedSurfaceIntensity.OFF,
+        text: settingsMessages.surfaceStyleSolid
+      },
+      {
+        key: FrostedSurfaceIntensity.SUBTLE,
+        text: settingsMessages.surfaceStyleSubtle
+      },
+      {
+        key: FrostedSurfaceIntensity.DEFAULT,
+        text: settingsMessages.surfaceStyleDefault
+      },
+      {
+        key: FrostedSurfaceIntensity.STRONG,
+        text: settingsMessages.surfaceStyleStrong
+      }
+    ],
+    []
+  )
+
   const isMobile = useIsMobile()
   const isDownloadDesktopEnabled = !isMobile && !isElectron()
 
@@ -432,27 +481,70 @@ export const SettingsPage = () => {
             title={settingsMessages.appearanceTitle}
             description={settingsMessages.appearanceDescription}
             isFull={true}
-            headerAction={
-              <FilterButton<ThemePalette>
-                label={settingsMessages.appearanceTitle}
-                value={effectivePalette}
-                options={paletteOptions}
-                onChange={(value) => onPaletteChange(value)}
-                variant='replaceLabel'
-                optionsLabel='Theme'
-              />
-            }
           >
-            {effectivePalette !== ThemePalette.MATRIX ? (
-              <SegmentedControl
-                fullWidth
-                label='Color mode'
-                options={modeOptions}
-                selected={effectiveMode}
-                onSelectOption={(option) => onModeChange(option)}
-                key={`tab-slider-${effectivePalette}`}
-              />
-            ) : null}
+            <Flex column gap='l' className={styles.appearanceControls}>
+              <div className={styles.appearanceControlRow}>
+                <Flex
+                  column
+                  gap='s'
+                  className={cn(
+                    styles.appearanceControl,
+                    styles.appearanceThemeControl
+                  )}
+                >
+                  <Text variant='label' size='s' textAlign='left'>
+                    {settingsMessages.themeLabel}
+                  </Text>
+                  <FilterButton<ThemePalette>
+                    label={settingsMessages.themeLabel}
+                    value={effectivePalette}
+                    options={paletteOptions}
+                    onChange={(value) => onPaletteChange(value)}
+                    variant='replaceLabel'
+                    optionsLabel={settingsMessages.themeLabel}
+                  />
+                </Flex>
+                <Flex
+                  column
+                  gap='s'
+                  className={cn(styles.appearanceControl, {
+                    [styles.matrixDisabledControl]:
+                      effectivePalette === ThemePalette.MATRIX
+                  })}
+                >
+                  <Text variant='label' size='s' textAlign='left'>
+                    {settingsMessages.colorModeLabel}
+                  </Text>
+                  <SegmentedControl
+                    fullWidth
+                    disabled={effectivePalette === ThemePalette.MATRIX}
+                    className={cn({
+                      [styles.matrixDisabledSegmentedControl]:
+                        effectivePalette === ThemePalette.MATRIX
+                    })}
+                    label={settingsMessages.colorModeLabel}
+                    options={modeOptions}
+                    selected={effectiveMode}
+                    onSelectOption={(option) => onModeChange(option)}
+                    key={`tab-slider-${effectivePalette}`}
+                  />
+                </Flex>
+              </div>
+              <Flex column gap='s' className={styles.appearanceControl}>
+                <Text variant='label' size='s' textAlign='left'>
+                  {settingsMessages.surfaceStyleLabel}
+                </Text>
+                <SegmentedControl
+                  fullWidth
+                  label={settingsMessages.surfaceStyleLabel}
+                  options={frostedSurfaceIntensityOptions}
+                  selected={effectiveFrostedSurfaceIntensity}
+                  onSelectOption={(option) =>
+                    onFrostedSurfaceIntensityChange(option)
+                  }
+                />
+              </Flex>
+            </Flex>
           </SettingsCard>
         ) : null}
         {!isManagedAccount ? (

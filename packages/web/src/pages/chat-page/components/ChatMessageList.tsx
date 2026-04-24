@@ -238,11 +238,18 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     }, [dispatch, chatId, chat, chatMessages])
 
     const unreadMessageCount = chatFrozenRef.current?.unread_message_count ?? 0
+    const showSendMessagePrompt =
+      chat?.messagesStatus === Status.SUCCESS &&
+      chatMessages?.length === 0 &&
+      !chat?.is_blast
+
     return (
       <StickyScrollList
         ref={mergeRefs([forwardedRef, ref])}
         onScroll={throttledScrollHandler}
-        className={cn(styles.root, classNameProp)}
+        className={cn(styles.root, classNameProp, {
+          [styles.emptyStateRoot]: showSendMessagePrompt
+        })}
         resetKey={chatId}
         updateKey={chatMessages}
         stickToBottom
@@ -250,18 +257,19 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
         tabIndex={-1}
         {...other}
       >
-        <div className={styles.listRoot} ref={messageListRef}>
+        <div
+          className={cn(styles.listRoot, {
+            [styles.emptyListRoot]: showSendMessagePrompt
+          })}
+          ref={messageListRef}
+        >
           {!canSendMessage && firstOtherUser ? (
             <InboxUnavailableMessage
               user={firstOtherUser}
               action={callToAction}
             />
           ) : null}
-          {chat?.messagesStatus === Status.SUCCESS &&
-          chatMessages?.length === 0 &&
-          !chat?.is_blast ? (
-            <SendMessagePrompt />
-          ) : null}
+          {showSendMessagePrompt ? <SendMessagePrompt /> : null}
           {chatId &&
             chatMessages?.map((message, i) => (
               <Fragment key={message.message_id}>
