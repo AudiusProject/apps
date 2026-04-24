@@ -15,7 +15,8 @@ import { useDispatch } from 'react-redux'
 import {
   IconShare,
   IconUserFollow,
-  IconUserFollowing
+  IconUserFollowing,
+  useTheme
 } from '@audius/harmony-native'
 import ActionDrawer from 'app/components/action-drawer'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -45,8 +46,16 @@ const messages = {
  */
 export const ContestActionsDrawer = () => {
   const dispatch = useDispatch()
+  const { color } = useTheme()
   const { data } = useDrawer('ContestActions')
   const { eventId, trackId } = data ?? {}
+
+  // ActionDrawer's default Text color is `secondary` (accent purple).
+  // The Figma spec for the contest overflow calls for the action
+  // labels to match their icons in the neutral/default text color,
+  // so pass an explicit override style on each row — `style` is
+  // spread onto the row's Text inside `ActionDrawer`.
+  const rowStyle = { color: color.text.default }
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: track } = useTrack(trackId ?? null)
@@ -104,15 +113,17 @@ export const ContestActionsDrawer = () => {
       ) : (
         <IconUserFollow size='l' color='default' />
       ),
-      callback: handleToggleFollow
+      callback: handleToggleFollow,
+      style: rowStyle
     }
     const share = {
       text: messages.share,
       icon: <IconShare size='l' color='default' />,
-      callback: handleShare
+      callback: handleShare,
+      style: rowStyle
     }
     return isOwner ? [share] : [follow, share]
-  }, [followState?.isFollowed, handleToggleFollow, handleShare, isOwner])
+  }, [followState?.isFollowed, handleToggleFollow, handleShare, isOwner, rowStyle])
 
   return <ActionDrawer drawerName={CONTEST_ACTIONS_DRAWER_NAME} rows={rows} />
 }
