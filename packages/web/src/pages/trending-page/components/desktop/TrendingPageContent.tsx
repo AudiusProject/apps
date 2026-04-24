@@ -2,16 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   getTrendingQueryKey,
+  getTrendingUndergroundQueryKey,
   TRENDING_INITIAL_PAGE_SIZE,
   TRENDING_LOAD_MORE_PAGE_SIZE,
-  useTrending
+  useTrending,
+  useTrendingUnderground
 } from '@audius/common/api'
 import { Name, TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
-  trendingPageSelectors,
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
+  trendingPageSelectors
 } from '@audius/common/store'
 import {
   getCanonicalName,
@@ -32,9 +32,7 @@ import { openSignOn } from 'common/store/pages/signon/actions'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
-import Lineup from 'components/lineup/Lineup'
 import { TrackLineup } from 'components/lineup/TrackLineup'
-import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
@@ -51,7 +49,6 @@ import {
 } from 'pages/trending-page/utils'
 import { push as pushRoute, replace as replaceRoute } from 'utils/navigation'
 
-const { getLineup } = trendingUndergroundPageLineupSelectors
 const { getTrendingGenre, getTrendingTimeRange } = trendingPageSelectors
 
 const messages = {
@@ -87,19 +84,7 @@ const getRangesToDisable = (timeRange: TimeRange): TimeRange[] => {
   }
 }
 
-// --- Underground still uses the legacy `<Lineup>` for now -------------------
-const useTrendingUndergroundLineup = (
-  scrollParent: HTMLElement | undefined
-) => {
-  return useLineupProps({
-    actions: trendingUndergroundPageLineupActions,
-    getLineupSelector: getLineup,
-    variant: LineupVariant.MAIN,
-    scrollParent: scrollParent ?? undefined,
-    isTrending: true,
-    isOrdered: true
-  })
-}
+const UNDERGROUND_PAGE_SIZE = 10
 
 const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const dispatch = useDispatch()
@@ -140,8 +125,16 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     ...trendingArgs
   })
 
-  const undergroundLineupProps = useTrendingUndergroundLineup(
-    containerRef?.current ?? undefined
+  const undergroundQuery = useTrendingUnderground({
+    pageSize: UNDERGROUND_PAGE_SIZE
+  })
+  const undergroundQuerySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingUndergroundQueryKey({ pageSize: UNDERGROUND_PAGE_SIZE })
+      ] as unknown[]
+    }),
+    []
   )
 
   // ----- URL param sync ------------------------------------------------------
@@ -172,13 +165,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   useEffect(() => {
     updateGenreUrlParam(trendingGenre, replaceRouteCallback)
   }, [trendingGenre, replaceRouteCallback])
-
-  // ----- Underground cleanup on unmount --------------------------------------
-  useEffect(() => {
-    return () => {
-      dispatch(trendingUndergroundPageLineupActions.reset())
-    }
-  }, [dispatch])
 
   const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
   const record = useRecord()
@@ -453,13 +439,24 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         containerRef={containerRef}
       />
     ) : (
-      <Lineup
+      <TrackLineup
         aria-label='underground trending tracks'
-        {...undergroundLineupProps}
-        endOfLineup={
+        trackIds={undergroundQuery.trackIds}
+        source='DISCOVER_TRENDING_UNDERGROUND'
+        querySource={undergroundQuerySource}
+        isPending={undergroundQuery.isPending}
+        isFetching={undergroundQuery.isFetching}
+        isError={undergroundQuery.isError}
+        hasNextPage={undergroundQuery.hasNextPage}
+        loadNextPage={undergroundQuery.loadNextPage}
+        pageSize={UNDERGROUND_PAGE_SIZE}
+        ordered
+        isTrending
+        variant={LineupVariant.MAIN}
+        scrollParent={containerRef?.current ?? null}
+        endOfLineupElement={
           <EndOfLineup description={messages.endOfLineupDescription} />
         }
-        variant={LineupVariant.MAIN}
       />
     )
 

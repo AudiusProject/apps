@@ -1,9 +1,3 @@
-export { default as trendingUndergroundLineupPageReducer } from './trending-underground/lineup/reducer'
-export * as trendingUndergroundPageLineupSelectors from './trending-underground/lineup/selectors'
-export { trendingUndergroundPageLineupActions } from './trending-underground/lineup/actions'
-
-export { default as trendingUndergroundPageReducer } from './trending-underground/slice'
-
 export * as trendingWinnersPageLineupSelectors from './trending-winners/lineup/selectors'
 export { trendingWinnersPageLineupActions } from './trending-winners/lineup/actions'
 export { default as trendingWinnersPageReducer } from './trending-winners/slice'

@@ -43,7 +43,6 @@ import track from './pages/track/reducer'
 import { TrackPageState } from './pages/track/types'
 import trending from './pages/trending/reducer'
 import { TrendingPageState } from './pages/trending/types'
-import trendingUnderground from './pages/trending-underground/slice'
 import trendingWinners from './pages/trending-winners/slice'
 import playback from './playback/slice'
 import { PlaybackState } from './playback/types'
@@ -188,7 +187,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     tokenDashboard: tokenDashboardSlice.reducer,
     track,
     trending: trending(history),
-    trendingUnderground,
     trendingWinners,
     settings,
     remixes,
@@ -291,7 +289,6 @@ export type CommonState = {
     searchResults: SearchPageState
     settings: SettingsPageState
     trending: TrendingPageState
-    trendingUnderground: ReturnType<typeof trendingUnderground>
     trendingWinners: ReturnType<typeof trendingWinners>
     remixes: ReturnType<typeof remixes>
     exclusiveTracks: ReturnType<typeof exclusiveTracks>

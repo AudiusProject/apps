@@ -16,9 +16,7 @@ import {
   libraryPageSelectors,
   libraryPageTracksLineupActions,
   searchResultsPageSelectors,
-  searchResultsPageTracksLineupActions,
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
+  searchResultsPageTracksLineupActions
 } from '~/store/pages'
 
 import { CommonState } from '..'
@@ -64,9 +62,5 @@ export const lineupRegistry: Record<string, LineupEntry> = {
   [searchResultsPageTracksLineupActions.prefix]: {
     actions: searchResultsPageTracksLineupActions,
     selector: searchResultsPageSelectors.getSearchTracksLineup
-  },
-  [trendingUndergroundPageLineupActions.prefix]: {
-    actions: trendingUndergroundPageLineupActions,
-    selector: trendingUndergroundPageLineupSelectors.getLineup
   }
 }

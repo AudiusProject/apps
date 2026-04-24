@@ -2,16 +2,16 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import {
   getTrendingQueryKey,
+  getTrendingUndergroundQueryKey,
   TRENDING_INITIAL_PAGE_SIZE,
   TRENDING_LOAD_MORE_PAGE_SIZE,
-  useTrending
+  useTrending,
+  useTrendingUnderground
 } from '@audius/common/api'
 import { Name, TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
-  trendingPageSelectors,
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
+  trendingPageSelectors
 } from '@audius/common/store'
 import { getCanonicalName, route, toTrendingGenre } from '@audius/common/utils'
 import {
@@ -27,9 +27,7 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { EndOfLineup } from 'components/lineup/EndOfLineup'
-import Lineup from 'components/lineup/Lineup'
 import { TrackLineup } from 'components/lineup/TrackLineup'
-import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
@@ -55,8 +53,9 @@ import { scrollWindowToTop } from 'utils/scroll'
 import styles from './TrendingPageContent.module.css'
 
 const { TRENDING_PAGE, TRENDING_GENRES: TRENDING_GENRES_ROUTE } = route
-const { getLineup } = trendingUndergroundPageLineupSelectors
 const { getTrendingGenre, getTrendingTimeRange } = trendingPageSelectors
+
+const UNDERGROUND_PAGE_SIZE = 10
 
 const messages = {
   trending: 'Trending',
@@ -75,19 +74,6 @@ type TrendingCategory = 'tracks' | 'underground' | 'winners'
 
 type TrendingPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
-}
-
-const useTrendingUndergroundLineup = (
-  scrollParent: HTMLElement | undefined
-) => {
-  return useLineupProps({
-    actions: trendingUndergroundPageLineupActions,
-    getLineupSelector: getLineup,
-    variant: LineupVariant.MAIN,
-    scrollParent: scrollParent ?? undefined,
-    isTrending: true,
-    isOrdered: true
-  })
 }
 
 const TrendingPageMobileContent = ({
@@ -127,8 +113,16 @@ const TrendingPageMobileContent = ({
     ...trendingArgs
   })
 
-  const undergroundLineupProps = useTrendingUndergroundLineup(
-    containerRef?.current ?? undefined
+  const undergroundQuery = useTrendingUnderground({
+    pageSize: UNDERGROUND_PAGE_SIZE
+  })
+  const undergroundQuerySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingUndergroundQueryKey({ pageSize: UNDERGROUND_PAGE_SIZE })
+      ] as unknown[]
+    }),
+    []
   )
 
   const replaceRouteCallback = useCallback(
@@ -160,12 +154,6 @@ const TrendingPageMobileContent = ({
   useEffect(() => {
     updateGenreUrlParam(trendingGenre, replaceRouteCallback)
   }, [trendingGenre, replaceRouteCallback])
-
-  useEffect(() => {
-    return () => {
-      dispatch(trendingUndergroundPageLineupActions.reset())
-    }
-  }, [dispatch])
 
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
@@ -320,13 +308,23 @@ const TrendingPageMobileContent = ({
       />
     ) : (
       <div className={cn(styles.lineupContainer)}>
-        <Lineup
+        <TrackLineup
           aria-label='underground trending tracks'
-          {...undergroundLineupProps}
-          endOfLineup={
+          trackIds={undergroundQuery.trackIds}
+          source='DISCOVER_TRENDING_UNDERGROUND'
+          querySource={undergroundQuerySource}
+          isPending={undergroundQuery.isPending}
+          isFetching={undergroundQuery.isFetching}
+          isError={undergroundQuery.isError}
+          hasNextPage={undergroundQuery.hasNextPage}
+          loadNextPage={undergroundQuery.loadNextPage}
+          pageSize={UNDERGROUND_PAGE_SIZE}
+          ordered
+          isTrending
+          variant={LineupVariant.MAIN}
+          endOfLineupElement={
             <EndOfLineup description={messages.endOfLineupDescription} />
           }
-          variant={LineupVariant.MAIN}
         />
       </div>
     )
