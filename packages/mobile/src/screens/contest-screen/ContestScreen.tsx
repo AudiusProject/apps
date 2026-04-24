@@ -294,8 +294,15 @@ export const ContestScreen = () => {
   // UserLink, ContestHero's back button) still capture their own
   // taps because they're explicit touch targets — only empty space
   // becomes scroll-transparent.
+  // Theme-aware `backgroundColor='white'` on the outermost wrapper so
+  // the header reacts when the app theme flips (e.g. system light→dark).
+  // Without it, `Tabs.Container`'s internal `topContainer` style
+  // hardcodes `backgroundColor: 'white'` (literal) behind the header,
+  // leaving the title / submissions-due / hosted-by block stuck on a
+  // white backdrop after a theme change. Same pattern `ProfileHeader`
+  // uses to cover the library default.
   const renderHeader = () => (
-    <View pointerEvents='box-none'>
+    <Flex backgroundColor='white' pointerEvents='box-none'>
       {/* Scroll bridge — lives inside the collapsible header so
           `useCurrentTabScrollY` resolves to the current tab's scroll
           value. It writes the scroll value into the outer
@@ -408,7 +415,7 @@ export const ContestScreen = () => {
             of running directly into the host's name. */}
         <Divider />
       </Flex>
-    </View>
+    </Flex>
   )
 
   const contextValue = {
