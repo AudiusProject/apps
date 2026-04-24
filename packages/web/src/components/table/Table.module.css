@@ -286,7 +286,9 @@
 }
 
 .tableRow:hover:not(.skeletonRow),
-.tableRow:hover > .tableCell {
+.tableRow:focus-within:not(.skeletonRow),
+.tableRow:hover > .tableCell,
+.tableRow:focus-within > .tableCell {
   z-index: 3;
   box-shadow:
     0 1px 0 0 var(--harmony-n-100),

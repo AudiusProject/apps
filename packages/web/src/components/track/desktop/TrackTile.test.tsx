@@ -20,7 +20,7 @@ function renderTrackTile(overrides = {}, propOverrides = {}) {
     mockUsers([artistUser])
   )
 
-  render(
+  const renderResult = render(
     <MemoryRouter initialEntries={['/']}>
       <Routes>
         <Route
@@ -49,7 +49,7 @@ function renderTrackTile(overrides = {}, propOverrides = {}) {
     { skipRouter: true }
   )
 
-  return { togglePlay }
+  return { ...renderResult, togglePlay }
 }
 
 describe('TrackTile', () => {
@@ -91,7 +91,7 @@ describe('TrackTile', () => {
       overrides: {},
       assert: async () => {
         expect(
-          await screen.findByRole('link', { name: 'Test Track' })
+          await screen.findByRole('link', { name: /View track: Test Track/ })
         ).toBeInTheDocument()
         expect(
           await screen.findByRole('link', { name: 'Test User' })
@@ -121,13 +121,36 @@ describe('TrackTile', () => {
   it('keeps the track and artist links focusable', async () => {
     renderTrackTile()
 
-    const trackLink = await screen.findByRole('link', { name: 'Test Track' })
+    const trackLink = await screen.findByRole('link', {
+      name: /View track: Test Track/
+    })
     trackLink.focus()
     expect(trackLink).toHaveFocus()
 
     const artistLink = await screen.findByRole('link', { name: 'Test User' })
     artistLink.focus()
     expect(artistLink).toHaveFocus()
+  })
+
+  it('activates track and artist links with Space without scrolling the page', async () => {
+    const { unmount } = renderTrackTile()
+
+    const trackLink = await screen.findByRole('link', {
+      name: /View track: Test Track/
+    })
+    fireEvent.keyDown(trackLink, { key: ' ' })
+    expect(
+      await screen.findByRole('heading', { name: 'Mock Track Page' })
+    ).toBeInTheDocument()
+
+    unmount()
+    renderTrackTile()
+
+    const artistLink = await screen.findByRole('link', { name: 'Test User' })
+    fireEvent.keyDown(artistLink, { key: ' ' })
+    expect(
+      await screen.findByRole('heading', { name: 'Mock User Page' })
+    ).toBeInTheDocument()
   })
 
   it('plays from the artwork without stealing track tile action clicks', async () => {

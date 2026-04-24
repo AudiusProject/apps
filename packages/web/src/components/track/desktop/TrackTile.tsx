@@ -393,6 +393,8 @@ export const TrackTile = ({
                       applyHoverStylesToInnerSvg
                       onClick={onClickTitle}
                       disabled={disableActions}
+                      tabIndex={0}
+                      aria-label={`View track: ${title}`}
                       ellipses
                     >
                       <Text ellipses>{title}</Text>
@@ -406,6 +408,8 @@ export const TrackTile = ({
                       userId={user_id}
                       badgeSize='xs'
                       isActive={isActive}
+                      aria-label={partialUser?.name}
+                      tabIndex={0}
                       popover
                       css={{ marginTop: '-4px' }}
                     />

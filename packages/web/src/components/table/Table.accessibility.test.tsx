@@ -33,18 +33,18 @@ const data = [
 ]
 
 describe('Table accessibility', () => {
-  it('keeps clickable rows focusable and keyboard activatable', () => {
+  it('keeps clickable rows out of the tab order while preserving mouse click', () => {
     const handleClickRow = vi.fn()
     render(<Table columns={columns} data={data} onClickRow={handleClickRow} />)
 
     const row = screen.getByRole('row', { name: /track one/i })
-    row.focus()
-    expect(row).toHaveFocus()
+    expect(row).not.toHaveAttribute('tabindex')
 
+    fireEvent.click(row)
     fireEvent.keyDown(row, { key: 'Enter' })
     fireEvent.keyDown(row, { key: ' ' })
 
-    expect(handleClickRow).toHaveBeenCalledTimes(2)
+    expect(handleClickRow).toHaveBeenCalledTimes(1)
   })
 
   it('keeps sortable headers and table controls in the tab order', () => {

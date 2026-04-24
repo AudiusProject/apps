@@ -505,27 +505,6 @@ export const Table = ({
         (row.original as any).track_id
       ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-      const isInteractiveRow = Boolean(onClickRow)
-
-      const handleRowKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
-        onRowPropsKeyDown?.(e)
-        if (
-          e.defaultPrevented ||
-          e.target !== e.currentTarget ||
-          !isKeyboardActivationKey(e)
-        ) {
-          return
-        }
-
-        e.preventDefault()
-        e.stopPropagation()
-        onClickRow?.(
-          e as unknown as MouseEvent<HTMLTableRowElement>,
-          row,
-          row.index
-        )
-      }
-
       return (
         <Row
           className={cn(
@@ -539,11 +518,10 @@ export const Table = ({
           )}
           {...rowProps}
           key={key}
-          tabIndex={isInteractiveRow ? 0 : undefined}
           onClick={(e: MouseEvent<HTMLTableRowElement>) =>
             onClickRow?.(e, row, row.index)
           }
-          onKeyDown={isInteractiveRow ? handleRowKeyDown : onRowPropsKeyDown}
+          onKeyDown={onRowPropsKeyDown}
         >
           {cells.map((cell) => renderCell(cell))}
           {endCells.length
