@@ -1,13 +1,26 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useRemixesLineup } from '@audius/common/api'
 import { remixesPageLineupActions } from '@audius/common/store'
 
+import { FilterButton, Flex, Text } from '@audius/harmony-native'
 import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
 
 import { useContestPage } from '../ContestPageContext'
 
 const CONTEST_PAGE_SIZE = 10
+
+const messages = {
+  submissions: 'SUBMISSIONS',
+  coSigned: 'Co-Signed',
+  sort: 'Sort'
+}
+
+const SORT_OPTIONS = [
+  { label: 'Most Recent', value: 'recent' as const },
+  { label: 'Most Plays', value: 'plays' as const },
+  { label: 'Most Favorites', value: 'likes' as const }
+]
 
 /**
  * Submissions body — remix lineup for the parent track's contest.
@@ -15,6 +28,13 @@ const CONTEST_PAGE_SIZE = 10
  * which auto-switches to `CollapsibleSectionList` when hosted in a
  * `CollapsibleTabNavigator`, so the surrounding header slides away
  * as the user scrolls through submissions.
+ *
+ * The lineup now includes the original (parent) track at the top
+ * (`includeOriginal: true`) so listeners can compare against the
+ * source without jumping back out — same behaviour as the track-page
+ * `RemixesPage` and the web contest page. A filter bar above the
+ * lineup exposes Co-Signed + sort controls (recent/plays/favorites),
+ * matching the web `RemixesPage` QA round.
  *
  * We manually call `loadCachedDataIntoLineup()` once the tan-query
  * page has data. `useRemixesLineup` opts out of automatic cache
@@ -28,12 +48,23 @@ const CONTEST_PAGE_SIZE = 10
  */
 export const ContestSubmissionsTab = () => {
   const { trackId } = useContestPage()
+
+  const [sortMethod, setSortMethod] = useState<'recent' | 'plays' | 'likes'>(
+    'recent'
+  )
+  const [isCosign, setIsCosign] = useState(false)
+
+  const handleSortChange = useCallback((value: string | undefined) => {
+    setSortMethod((value as 'recent' | 'plays' | 'likes') ?? 'recent')
+  }, [])
+
   const lineup = useRemixesLineup({
     trackId,
-    includeOriginal: false,
+    includeOriginal: true,
     includeWinners: true,
     isContestEntry: true,
-    sortMethod: 'recent'
+    sortMethod,
+    isCosign
   })
 
   const { loadCachedDataIntoLineup, data } = lineup
@@ -45,6 +76,42 @@ export const ContestSubmissionsTab = () => {
     }
   }, [hasData, loadCachedDataIntoLineup])
 
+  const submissionsCount = data?.length ?? 0
+
+  // Header above the lineup — SUBMISSIONS label + filter row. Rendered
+  // via `header` so it scrolls with the list (the collapsible tab
+  // header already handles its own sticky behaviour; keeping this one
+  // in-flow matches the web treatment).
+  const renderHeader = () => (
+    <Flex ph='l' pt='l' gap='m'>
+      <Flex row justifyContent='space-between' alignItems='center' gap='s'>
+        <Text variant='label' size='m' color='subdued'>
+          {submissionsCount > 0
+            ? `${submissionsCount} ${messages.submissions}`
+            : messages.submissions}
+        </Text>
+      </Flex>
+      <Flex row gap='s' wrap='wrap'>
+        <FilterButton
+          label={messages.coSigned}
+          value={isCosign ? 'true' : undefined}
+          onPress={() => setIsCosign((prev) => !prev)}
+          onChange={(v) => setIsCosign(v === 'true')}
+          size='small'
+        />
+        <FilterButton
+          label={messages.sort}
+          value={sortMethod}
+          variant='replaceLabel'
+          onChange={handleSortChange}
+          options={SORT_OPTIONS}
+          disableSearch
+          size='small'
+        />
+      </Flex>
+    </Flex>
+  )
+
   return (
     <TanQueryLineup
       queryData={lineup.data}
@@ -55,6 +122,7 @@ export const ContestSubmissionsTab = () => {
       pageSize={CONTEST_PAGE_SIZE}
       hasMore={!!lineup.hasNextPage}
       actions={remixesPageLineupActions}
+      header={renderHeader}
     />
   )
 }

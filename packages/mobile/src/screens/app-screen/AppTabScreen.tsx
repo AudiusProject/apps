@@ -65,7 +65,7 @@ import {
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
 
-import { ContestScreen } from '../contest-screen'
+import { ContestFollowersScreen, ContestScreen } from '../contest-screen'
 import { ContestsScreen } from '../contests-screen'
 import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
 import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
@@ -81,6 +81,7 @@ export type AppTabScreenParamList = {
   } & ({ handle: string; slug: string } | { trackId: ID })
   TrackRemixes: { trackId: ID } | { handle: string; slug: string }
   Contest: { trackId: ID } | { handle: string; slug: string }
+  ContestFollowers: { eventId: ID }
   Profile: { handle: string; id?: ID } | { handle?: string; id: ID }
   Collection: {
     id?: ID
@@ -257,6 +258,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='Contests' component={ContestsScreen} />
       <Stack.Screen name='Contest' component={ContestScreen} />
+      <Stack.Screen
+        name='ContestFollowers'
+        component={ContestFollowersScreen}
+      />
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />

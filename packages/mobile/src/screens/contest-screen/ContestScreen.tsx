@@ -19,16 +19,11 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
+import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import {
-  Button,
-  Divider,
-  Flex,
-  IconKebabHorizontal,
-  Text
-} from '@audius/harmony-native'
+import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
 import {
@@ -39,7 +34,15 @@ import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
+import {
+  ContestNavOverlay,
+  CONTEST_NAV_CONTROLS_HEIGHT
+} from './ContestNavOverlay'
 import { ContestPageProvider } from './ContestPageContext'
+import {
+  ContestScrollBridge,
+  ContestScrollContext
+} from './ContestScrollContext'
 import { ContestCommentsTab } from './tabs/ContestCommentsTab'
 import { ContestDetailsTab } from './tabs/ContestDetailsTab'
 import { ContestSubmissionsTab } from './tabs/ContestSubmissionsTab'
@@ -157,6 +160,12 @@ export const ContestScreen = () => {
   const { data: followState } = useEventFollowState(eventId)
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 
+  // Shared scroll value bridged into the contest tabs via
+  // `ContestScrollBridge`. Read by `ContestNavOverlay` so the
+  // floating nav bar's blur background + icon colors fade in as the
+  // hero scrolls out of view — same pattern `ProfileScreen` uses.
+  const scrollY = useSharedValue(0)
+
   // Only render the Stems & Downloads section when the track actually
   // has downloadable content — DownloadSection assumes a downloadable
   // track and its file-sizes query errors otherwise.
@@ -246,10 +255,13 @@ export const ContestScreen = () => {
   // becomes scroll-transparent.
   const renderHeader = () => (
     <View pointerEvents='box-none'>
-      <ContestHero
-        trackId={track.track_id}
-        onBack={() => navigation.goBack()}
-      />
+      {/* Scroll bridge — lives inside the collapsible header so
+          `useCurrentTabScrollY` resolves to the current tab's scroll
+          value. It writes the scroll value into the outer
+          `ContestScrollContext` so `ContestNavOverlay` (which sits
+          outside the tab navigator) can animate on it. */}
+      <ContestScrollBridge />
+      <ContestHero trackId={track.track_id} />
 
       <Flex p='l' gap='l' pointerEvents='box-none'>
         {/* Title — pure display; `pointerEvents='none'` wrapper so
@@ -260,7 +272,10 @@ export const ContestScreen = () => {
           </Text>
         </Flex>
 
-        {/* Primary CTA + kebab — the only interactive row. */}
+        {/* Primary CTA — sits in the scrolling header. Overflow lives
+            in the floating `ContestNavOverlay` kebab, matching the
+            profile screen pattern (one kebab, always reachable at
+            the top of the screen). */}
         <Flex
           direction='row'
           alignItems='center'
@@ -277,9 +292,6 @@ export const ContestScreen = () => {
               {isOwner ? messages.pickWinners : messages.enterContest}
             </Button>
           </Flex>
-          <Pressable style={{ padding: 8 }} onPress={() => {}}>
-            <IconKebabHorizontal size='m' color='default' />
-          </Pressable>
         </Flex>
 
         {/* Submissions Due block — pure display; wrap the entire
@@ -393,33 +405,37 @@ export const ContestScreen = () => {
     <Screen>
       <ScreenContent>
         <ContestPageProvider value={contextValue}>
-          {/* Explicit `height: '100%'` wrapper mirrors the
-              `ProfileScreen` pattern (`styles.navigator`). Without
-              it, `CollapsibleTabNavigator` can't establish its own
-              scroll container height and the header stops tracking
-              the scroll — this was the "header doesn't scroll" bug
-              on the contest page. With the wrapper the navigator
-              fills the remaining space below any chrome and the
-              header slides normally. */}
-          <View style={{ height: '100%' }}>
-            <CollapsibleTabNavigator
-              renderHeader={renderHeader}
-              // Hero + title + CTA + countdown + hosted-by stack.
-              // This is the seed height the collapsible navigator
-              // uses before its on-mount measurement kicks in —
-              // over-estimating is fine (the measured value takes
-              // over), but underestimating causes a visible jump.
-              headerHeight={CONTEST_HERO_HEIGHT + 460}
-              // Keep enough of the header visible at full-collapse
-              // for the status bar inset.
-              minHeaderHeight={insets.top}
-            >
-              {detailsScreen}
-              {updatesScreen}
-              {submissionsScreen}
-              {commentsScreen}
-            </CollapsibleTabNavigator>
-          </View>
+          <ContestScrollContext.Provider value={scrollY}>
+            {/* Explicit `height: '100%'` wrapper mirrors the
+                `ProfileScreen` pattern (`styles.navigator`). Without
+                it, `CollapsibleTabNavigator` can't establish its own
+                scroll container height and the header stops tracking
+                the scroll — this was the "header doesn't scroll" bug
+                on the contest page. With the wrapper the navigator
+                fills the remaining space below any chrome and the
+                header slides normally. */}
+            <View style={{ height: '100%' }}>
+              <CollapsibleTabNavigator
+                renderHeader={renderHeader}
+                // Hero + title + CTA + countdown + hosted-by stack.
+                // This is the seed height the collapsible navigator
+                // uses before its on-mount measurement kicks in —
+                // over-estimating is fine (the measured value takes
+                // over), but underestimating causes a visible jump.
+                headerHeight={CONTEST_HERO_HEIGHT + 460}
+                // Reserve enough space at full-collapse for the
+                // status bar inset + our floating nav bar so the
+                // overlay never overlaps the tab strip.
+                minHeaderHeight={insets.top + CONTEST_NAV_CONTROLS_HEIGHT}
+              >
+                {detailsScreen}
+                {updatesScreen}
+                {submissionsScreen}
+                {commentsScreen}
+              </CollapsibleTabNavigator>
+              <ContestNavOverlay title={contestTitle} />
+            </View>
+          </ContestScrollContext.Provider>
         </ContestPageProvider>
       </ScreenContent>
     </Screen>

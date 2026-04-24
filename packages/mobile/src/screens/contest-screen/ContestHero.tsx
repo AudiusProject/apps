@@ -1,8 +1,7 @@
 import type { ID } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
-import { Image, Pressable, View } from 'react-native'
+import { Image, View } from 'react-native'
 
-import { IconArrowLeft } from '@audius/harmony-native'
 import { useTrackImage } from 'app/components/image/TrackImage'
 
 /**
@@ -12,15 +11,19 @@ import { useTrackImage } from 'app/components/image/TrackImage'
  * (via `pt='100%'`). The Figma contest hero is a wide cropped
  * banner, not a square thumbnail — so we pull the source via
  * `useTrackImage` and size the image ourselves.
+ *
+ * The back control used to live in the hero as a dark translucent
+ * disc. That moved into `ContestNavOverlay`, which floats above the
+ * hero with a profile-style white/neutral icon that fades on scroll
+ * — so the hero now only renders the cover image.
  */
 export const CONTEST_HERO_HEIGHT = 220
 
 type ContestHeroProps = {
   trackId: ID
-  onBack: () => void
 }
 
-export const ContestHero = ({ trackId, onBack }: ContestHeroProps) => {
+export const ContestHero = ({ trackId }: ContestHeroProps) => {
   const { source } = useTrackImage({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
@@ -30,49 +33,22 @@ export const ContestHero = ({ trackId, onBack }: ContestHeroProps) => {
       ? (source as { uri?: string }).uri
       : undefined
 
-  // `pointerEvents='box-none'` on the outer View — scroll gestures
-  // on the hero propagate up to the collapsible scroll view, but
-  // the back-button `Pressable` still captures its own tap. The
-  // cover `Image` is additionally wrapped in a
-  // `pointerEvents='none'` View so the image itself doesn't catch
-  // pans — `Image` in React Native is a touch target by default.
-  // Matches the `ProfileCoverPhoto` pattern.
+  // `pointerEvents='none'` on the outer View — the hero is purely
+  // decorative now that the back button lives in the overlay, so
+  // any touches should pass through to the underlying collapsible
+  // scroll view instead of being swallowed.
   return (
     <View
-      pointerEvents='box-none'
+      pointerEvents='none'
       style={{ width: '100%', height: CONTEST_HERO_HEIGHT }}
     >
       {src ? (
-        <View
-          pointerEvents='none'
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0
-          }}
-        >
-          <Image
-            source={{ uri: src }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode='cover'
-          />
-        </View>
+        <Image
+          source={{ uri: src }}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode='cover'
+        />
       ) : null}
-      <Pressable
-        onPress={onBack}
-        style={{
-          position: 'absolute',
-          top: 12,
-          left: 12,
-          padding: 6,
-          borderRadius: 999,
-          backgroundColor: 'rgba(0,0,0,0.35)'
-        }}
-      >
-        <IconArrowLeft size='m' color='staticWhite' />
-      </Pressable>
     </View>
   )
 }
