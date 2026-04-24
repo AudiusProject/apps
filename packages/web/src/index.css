@@ -139,8 +139,14 @@ table {
   box-sizing: border-box;
 }
 
-*:focus {
-  outline: none !important;
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
 }
 
 /* End Reset.css */

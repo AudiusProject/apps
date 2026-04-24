@@ -1,6 +1,6 @@
 import { ReactNode, useState, useMemo } from 'react'
 
-import { ThemePalette } from '@audius/common/models'
+import { FrostedSurfaceIntensity, ThemePalette } from '@audius/common/models'
 import { MediaProvider } from '@audius/harmony/src/contexts'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -18,6 +18,7 @@ import { env } from 'services/env'
 import { queryClient } from 'services/query-client'
 import { configureStore } from 'store/configureStore'
 import {
+  getFrostedSurfaceIntensityFromStorage,
   getSystemAppearance,
   getTheme,
   getThemeModeFromStorage,
@@ -38,12 +39,15 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     const theme = getTheme()
     const themePalette = getThemePaletteFromStorage() ?? ThemePalette.DEFAULT
     const themeMode = getThemeModeFromStorage()
+    const frostedSurfaceIntensity =
+      getFrostedSurfaceIntensityFromStorage() ?? FrostedSurfaceIntensity.DEFAULT
     const initialStoreState = {
       ui: {
         theme: {
           theme,
           themePalette,
           themeMode,
+          frostedSurfaceIntensity,
           systemAppearance: getSystemAppearance()
         }
       }

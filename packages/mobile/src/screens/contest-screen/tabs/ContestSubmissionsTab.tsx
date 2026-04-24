@@ -150,15 +150,21 @@ export const ContestSubmissionsTab = () => {
   //   after the last winner (index `winnerCount`).
   // - Without winners: SUBMISSIONS after original (index 0).
   // Same pattern the legacy `TrackRemixesScreen` uses.
-  const delineatorMap =
-    winnerCount > 0
-      ? {
-          0: winnersDelineator,
-          [winnerCount]: submissionsDelineator
-        }
-      : {
-          0: submissionsDelineator
-        }
+  // Memoized so the reference stays stable across renders — the map
+  // feeds `TanQueryLineup`'s `renderItem` deps, and a fresh object
+  // each render would force the whole list to re-render.
+  const delineatorMap = useMemo(
+    () =>
+      winnerCount > 0
+        ? {
+            0: winnersDelineator,
+            [winnerCount]: submissionsDelineator
+          }
+        : {
+            0: submissionsDelineator
+          },
+    [winnerCount, winnersDelineator, submissionsDelineator]
+  )
 
   return (
     <TrackLineup

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { useFocusEffect } from '@react-navigation/native'
 import type { StatusBarProps } from 'react-native-bars'
@@ -6,17 +6,24 @@ import { NavigationBar, StatusBar as RNStatusBar } from 'react-native-bars'
 import type { SharedValue } from 'react-native-reanimated'
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated'
 
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
+
 import { PROFILE_NAV_SCROLL_FADE_PX } from './ProfileNavOverlay'
 
 /**
- * Status bar / nav bar style for profile: light icons over the cover at the top,
- * default (dark) system bar content once the header has scrolled up — matching
- * `ProfileNavOverlay` icon transition.
+ * Status bar / nav bar style for profile: light icons over the cover at the
+ * top, then switch to icons that contrast with the blurred nav bar surface
+ * once the header has scrolled up — dark icons on the light-blur surface in
+ * light mode, light icons on the dark-blur surface in dark mode.
  */
 export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
   const statusBarEntryRef = useRef<StatusBarProps | null>(null)
   const navigationBarEntryRef = useRef<StatusBarProps | null>(null)
   const lastBarStyleRef = useRef<'light-content' | 'dark-content' | null>(null)
+  const isDarkMode = isDarkTheme(useThemeVariant())
+  const scrolledBarStyle: 'light-content' | 'dark-content' = isDarkMode
+    ? 'light-content'
+    : 'dark-content'
 
   const applyBarStyle = useCallback(
     (barStyle: 'light-content' | 'dark-content') => {
@@ -54,7 +61,7 @@ export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
         const barStyle =
           scrollY.value < PROFILE_NAV_SCROLL_FADE_PX
             ? 'light-content'
-            : 'dark-content'
+            : scrolledBarStyle
         applyBarStyle(barStyle)
       })
 
@@ -69,20 +76,28 @@ export const useProfileScrollStatusBar = (scrollY: SharedValue<number>) => {
           navigationBarEntryRef.current = null
         }
       }
-    }, [applyBarStyle, scrollY])
+    }, [applyBarStyle, scrollY, scrolledBarStyle])
   )
 
   useAnimatedReaction(
     () => scrollY.value,
     (y, prev) => {
       const atTop = y < PROFILE_NAV_SCROLL_FADE_PX
-      const barStyle = atTop ? 'light-content' : 'dark-content'
+      const barStyle = atTop ? 'light-content' : scrolledBarStyle
       const prevY = prev ?? 0
       const prevAtTop = prevY < PROFILE_NAV_SCROLL_FADE_PX
       if (atTop !== prevAtTop) {
         runOnJS(applyBarStyle)(barStyle)
       }
     },
-    [applyBarStyle]
+    [applyBarStyle, scrolledBarStyle]
   )
+
+  // Re-apply when the theme changes while the screen is already scrolled —
+  // otherwise the status bar stays on the previous mode's content style
+  // until the user scrolls across the fade threshold again.
+  useEffect(() => {
+    if (scrollY.value < PROFILE_NAV_SCROLL_FADE_PX) return
+    applyBarStyle(scrolledBarStyle)
+  }, [applyBarStyle, scrolledBarStyle, scrollY])
 }

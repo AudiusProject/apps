@@ -58,4 +58,8 @@
   .settingsCardFull {
     text-align: center;
   }
+
+  .description {
+    text-align: left;
+  }
 }

@@ -18,6 +18,7 @@ export const NavItem = ({
   leftIcon: LeftIcon,
   rightIcon: RightIcon,
   isSelected = false,
+  isFocusVisible = false,
   onClick,
   textSize = 'l',
   hasNotification = false,
@@ -75,6 +76,10 @@ export const NavItem = ({
         borderRadius='m'
         css={{
           backgroundColor,
+          ...(isFocusVisible && {
+            boxShadow:
+              'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
+          }),
           transition: `opacity ${motion.quick}`,
           '&:hover': {
             backgroundColor: isSelected ? undefined : color.background.surface2,

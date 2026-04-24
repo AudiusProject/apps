@@ -52,6 +52,7 @@ import { ContestCommentsTab } from './tabs/ContestCommentsTab'
 import { ContestDetailsTab } from './tabs/ContestDetailsTab'
 import { ContestSubmissionsTab } from './tabs/ContestSubmissionsTab'
 import { ContestUpdatesTab } from './tabs/ContestUpdatesTab'
+import { useContestScrollStatusBar } from './useContestScrollStatusBar'
 
 const messages = {
   title: 'Remix Contest',
@@ -171,6 +172,7 @@ export const ContestScreen = () => {
   // floating nav bar's blur background + icon colors fade in as the
   // hero scrolls out of view — same pattern `ProfileScreen` uses.
   const scrollY = useSharedValue(0)
+  useContestScrollStatusBar(scrollY)
 
   // Updates tab visibility — for non-hosts, hide the tab until
   // there's at least one host-authored top-level post (a "post
@@ -294,8 +296,15 @@ export const ContestScreen = () => {
   // UserLink, ContestHero's back button) still capture their own
   // taps because they're explicit touch targets — only empty space
   // becomes scroll-transparent.
+  // Theme-aware `backgroundColor='white'` on the outermost wrapper so
+  // the header reacts when the app theme flips (e.g. system light→dark).
+  // Without it, `Tabs.Container`'s internal `topContainer` style
+  // hardcodes `backgroundColor: 'white'` (literal) behind the header,
+  // leaving the title / submissions-due / hosted-by block stuck on a
+  // white backdrop after a theme change. Same pattern `ProfileHeader`
+  // uses to cover the library default.
   const renderHeader = () => (
-    <View pointerEvents='box-none'>
+    <Flex backgroundColor='white' pointerEvents='box-none'>
       {/* Scroll bridge — lives inside the collapsible header so
           `useCurrentTabScrollY` resolves to the current tab's scroll
           value. It writes the scroll value into the outer
@@ -316,24 +325,27 @@ export const ContestScreen = () => {
         {/* Primary CTA — sits in the scrolling header. Overflow lives
             in the floating `ContestNavOverlay` kebab, matching the
             profile screen pattern (one kebab, always reachable at
-            the top of the screen). */}
-        <Flex
-          direction='row'
-          alignItems='center'
-          gap='s'
-          pointerEvents='box-none'
-        >
-          <Flex flex={1} pointerEvents='box-none'>
-            <Button
-              variant='primary'
-              size='small'
-              onPress={isOwner ? handlePickWinners : handleEnterContest}
-              fullWidth
-            >
-              {isOwner ? messages.pickWinners : messages.enterContest}
-            </Button>
+            the top of the screen). "Enter Contest" is hidden once
+            the contest ends — entering isn't meaningful anymore. */}
+        {isOwner || !isEnded ? (
+          <Flex
+            direction='row'
+            alignItems='center'
+            gap='s'
+            pointerEvents='box-none'
+          >
+            <Flex flex={1} pointerEvents='box-none'>
+              <Button
+                variant='primary'
+                size='small'
+                onPress={isOwner ? handlePickWinners : handleEnterContest}
+                fullWidth
+              >
+                {isOwner ? messages.pickWinners : messages.enterContest}
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
+        ) : null}
 
         {/* Submissions Due block — pure display; wrap the entire
             label + date + time group in `pointerEvents='none'`. */}
@@ -408,7 +420,7 @@ export const ContestScreen = () => {
             of running directly into the host's name. */}
         <Divider />
       </Flex>
-    </View>
+    </Flex>
   )
 
   const contextValue = {

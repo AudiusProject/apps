@@ -18,5 +18,9 @@
   --harmony-border-negative: var(--harmony-white);
 
   /* Focus */
-  --harmony-focus: var(--harmony-secondary);
+  --harmony-focus: color-mix(
+    in srgb,
+    var(--harmony-secondary) 70%,
+    transparent
+  );
 }

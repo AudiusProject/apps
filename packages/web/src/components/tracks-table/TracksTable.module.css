@@ -23,10 +23,26 @@
   width: 48px;
   height: 48px;
   min-width: 48px;
+  padding: 0;
+  background: transparent;
   border: 1px solid var(--harmony-n-100);
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
+  cursor: pointer;
+}
+
+.inlineArtworkContainer:disabled {
+  cursor: default;
+}
+
+.inlineArtworkContainer:focus {
+  outline: none;
+}
+
+.inlineArtworkContainer:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
 }
 
 .inlineArtworkIcon {
@@ -47,6 +63,7 @@
 }
 
 .tableRow:hover .inlineArtworkIcon,
+.tableRow:focus-within .inlineArtworkIcon,
 .tableRow.active .inlineArtworkIcon {
   opacity: 0.75;
 }
@@ -79,6 +96,16 @@
   composes: textCell;
   display: block;
   user-select: none;
+}
+
+.trackTitleLink:focus {
+  outline: none;
+}
+
+.trackTitleLink:focus-visible {
+  border-radius: 4px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary));
 }
 
 .trackName {
@@ -170,12 +197,16 @@
 }
 
 .tableRow:hover .tablePlayButton,
+.tableRow:focus-within .tablePlayButton,
 .tableRow:hover .trackActionsContainer .tableActionButton,
-.tableRow:hover .purchaseButton {
+.tableRow:focus-within .trackActionsContainer .tableActionButton,
+.tableRow:hover .purchaseButton,
+.tableRow:focus-within .purchaseButton {
   opacity: 1;
 }
 
-.tableRow:hover .hiddenIcon {
+.tableRow:hover .hiddenIcon,
+.tableRow:focus-within .hiddenIcon {
   opacity: 0;
   pointer-events: none;
 }
@@ -247,11 +278,13 @@
   position: absolute;
 }
 
-.tableRow:hover .typeIcon {
+.tableRow:hover .typeIcon,
+.tableRow:focus-within .typeIcon {
   opacity: 0;
 }
 
-.tableRow:hover .overflowMenu {
+.tableRow:hover .overflowMenu,
+.tableRow:focus-within .overflowMenu {
   opacity: 1;
 }
 

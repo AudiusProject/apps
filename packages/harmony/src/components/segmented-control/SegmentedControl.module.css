@@ -27,6 +27,14 @@
   gap: 10px;
 }
 
+.tab.selected {
+  background-color: var(--harmony-white);
+}
+
+.tab:has(input:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary));
+}
+
 .tab.isMobile {
   padding: var(--harmony-unit-1) var(--harmony-unit-3);
 }

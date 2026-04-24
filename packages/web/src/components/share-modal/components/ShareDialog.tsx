@@ -49,6 +49,8 @@ export const ShareDialog = ({
   shareType,
   isPrivate
 }: ShareDialogProps) => {
+  const shouldFocusXAction = !onShareToDirectMessage
+
   return (
     <Modal size='small' isOpen={isOpen} onClose={onClose} onClosed={onClosed}>
       <ModalHeader onClose={onClose}>
@@ -67,13 +69,18 @@ export const ShareDialog = ({
           <ul className={styles.actionList}>
             {onShareToDirectMessage ? (
               <ShareActionListItem
+                data-autofocus
                 iconLeft={IconMessage}
                 onClick={onShareToDirectMessage}
               >
                 {messages.directMessage}
               </ShareActionListItem>
             ) : null}
-            <ShareActionListItem iconLeft={IconX} onClick={onShareToX}>
+            <ShareActionListItem
+              data-autofocus={shouldFocusXAction ? true : undefined}
+              iconLeft={IconX}
+              onClick={onShareToX}
+            >
               {messages.x}
             </ShareActionListItem>
             <ShareActionListItem iconLeft={IconLink} onClick={onCopyLink}>

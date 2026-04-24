@@ -22,6 +22,7 @@ export const HoverCardHeader = ({
     },
     [onClick, onClose]
   )
+  const detailsLabel = `View ${title} details`
 
   return (
     <Flex
@@ -41,7 +42,7 @@ export const HoverCardHeader = ({
             icon={iconLeft}
             color='subdued'
             size='l'
-            aria-label={''}
+            aria-label={detailsLabel}
             onClick={handleClick}
           />
         ) : null}

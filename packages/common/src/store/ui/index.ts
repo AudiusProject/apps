@@ -61,6 +61,7 @@ export type {
   SetThemeAction,
   SetThemePaletteAction,
   SetThemeModeAction,
+  SetFrostedSurfaceIntensityAction,
   SetSystemAppearanceAction
 } from './theme/slice'
 export * as themeSelectors from './theme/selectors'

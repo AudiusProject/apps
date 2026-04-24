@@ -3,9 +3,8 @@
   align-items: center;
   height: 80px;
   width: 100%;
-  position: fixed;
+  position: sticky;
   top: 0px;
-  bottom: 80px;
   z-index: 100;
   transition: all 0.15s ease-in-out;
   background-color: rgba(255, 255, 255, 0);
@@ -254,15 +253,14 @@
 
 /* Mobile Styles */
 .mobileContainer {
-  position: fixed;
-  width: 100%;
+  position: sticky;
   top: 0px;
+  width: 100%;
   padding: 0px 22px;
   height: 80px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  bottom: 72px;
   z-index: 100;
   transition: all 0.15s ease-in-out;
   background-color: rgba(255, 255, 255, 0);

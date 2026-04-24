@@ -16,6 +16,7 @@
     "install-git-secrets": "sh ./scripts/install-git-secrets.sh",
     "lint:fix": "turbo run lint:fix",
     "lint": "turbo run lint",
+    "lint:a11y-empty-labels": "if rg -n \"aria-label=\\{''\\}|aria-label=''|aria-label=\\\"\\\"\" packages/web/src packages/harmony/src packages/mobile/src -g '*.{ts,tsx,js,jsx}'; then exit 1; fi",
     "lint:discovery": "cd packages/discovery-provider && ./scripts/lint.sh",
     "patch-package": "bash ./scripts/patch-package.sh",
     "postinstall": "bash ./scripts/postinstall.sh",

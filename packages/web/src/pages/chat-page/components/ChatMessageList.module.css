@@ -1,5 +1,6 @@
 .root {
-  flex: 1;
+  flex: 0 0 auto;
+  height: calc(100% + var(--chat-header-height, 112px));
   min-width: 0;
   overflow-y: scroll;
   box-sizing: border-box;
@@ -9,10 +10,19 @@
    * scroll-padding properties keep the inner content 32px clear of the
    * chrome once scrolled to either edge, while letting the backdrop-filter
    * still pick up messages flowing behind them mid-scroll. */
-  margin-top: calc(-1 * var(--chat-pane-header-height, 112px));
+  margin-top: calc(-1 * var(--chat-message-overlap-top, 112px));
   margin-bottom: calc(-1 * var(--chat-composer-height, 88px));
-  padding-top: calc(var(--chat-pane-header-height, 112px) + 32px);
+  padding-top: calc(var(--chat-message-overlap-top, 112px) + 32px);
   padding-bottom: calc(var(--chat-composer-height, 88px) + 32px);
+}
+
+.emptyStateRoot {
+  flex: 1;
+  height: auto;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .listRoot {
@@ -23,6 +33,18 @@
   padding-left: 32px;
   padding-right: 32px;
   min-width: 0;
+}
+
+.emptyListRoot {
+  flex-direction: column;
+  min-height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptyListRoot > * {
+  margin: 0;
+  width: 100%;
 }
 
 .separator {

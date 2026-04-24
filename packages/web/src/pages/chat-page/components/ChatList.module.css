@@ -1,9 +1,20 @@
 .root {
-  height: 100%;
+  /* calc(100% + header) compensates for the negative margin-top so the
+   * scroll container spans from behind the ChatHeader all the way to the
+   * bottom of the layout. box-sizing: border-box absorbs padding-top into
+   * the declared height rather than adding to it. */
+  height: calc(100% + var(--chat-header-height, 112px));
+  box-sizing: border-box;
   min-height: 0;
   overflow-y: auto;
   background-color: var(--harmony-n-50);
   border-right: 1px solid var(--harmony-n-150);
+
+  /* Extend scroll container behind the frosted ChatHeader so
+   * backdrop-filter has real content to blur (same pattern as ChatMessageList). */
+  margin-top: calc(-1 * var(--chat-header-height, 112px));
+  padding-top: var(--chat-header-height, 112px);
+  scroll-padding-top: var(--chat-header-height, 112px);
 }
 
 .compact {

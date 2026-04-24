@@ -110,6 +110,10 @@ export const NowPlayingArtworkTile = ({
 
   if (!permalink || !trackId) return null
 
+  const viewTrackLabel = title
+    ? `View currently playing track: ${title}`
+    : messages.viewTrack
+
   const renderCoverArt = () => {
     return (
       <AnimatedPaper
@@ -129,7 +133,7 @@ export const NowPlayingArtworkTile = ({
         <Link
           className={styles.coverArtLink}
           to={permalink}
-          aria-label={messages.viewTrack}
+          aria-label={viewTrackLabel}
         >
           <DynamicImage
             key={trackId}

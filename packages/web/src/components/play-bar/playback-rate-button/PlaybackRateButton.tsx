@@ -82,6 +82,7 @@ export const PlaybackRateButton = ({ isMobile }: PlaybackRateButtonProps) => {
   const renderButton = useCallback(
     (ref: MutableRefObject<any>, triggerPopup: () => void) => (
       <button
+        aria-label='Playback speed'
         className={cn(styles.button, styles.playbackRateButton, {
           [styles.buttonFixedSize]: isMobile
         })}

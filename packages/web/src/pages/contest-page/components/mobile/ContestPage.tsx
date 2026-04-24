@@ -455,11 +455,11 @@ const ContestPage = ({
     <Button variant='primary' size='small' onClick={handlePickWinners}>
       {messages.pickWinners}
     </Button>
-  ) : (
+  ) : !isEnded ? (
     <Button variant='primary' size='small' onClick={handleEnterContest}>
       {messages.enterContest}
     </Button>
-  )
+  ) : null
 
   // Overflow menu items. Host gets Share only (follow doesn't apply to
   // your own contest); public gets Follow/Unfollow + Share. Wired

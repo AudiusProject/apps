@@ -23,17 +23,22 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     const [canScrollLeft, setCanScrollLeft] = useState(false)
     const [canScrollRight, setCanScrollRight] = useState(true)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
+    const rafRef = useRef<number | null>(null)
     const isMobile = useIsMobile()
 
     const updateScrollButtons = useCallback(() => {
-      const container = scrollContainerRef.current
-      if (container) {
-        setCanScrollLeft(container.scrollLeft > 0)
-        setCanScrollRight(
-          container.scrollLeft + container.clientWidth <
-            container.scrollWidth - 1
-        )
-      }
+      if (rafRef.current !== null) return
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        const container = scrollContainerRef.current
+        if (container) {
+          setCanScrollLeft(container.scrollLeft > 0)
+          setCanScrollRight(
+            container.scrollLeft + container.clientWidth <
+              container.scrollWidth - 1
+          )
+        }
+      })
     }, [])
 
     useEffect(() => {

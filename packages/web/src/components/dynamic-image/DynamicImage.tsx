@@ -165,12 +165,19 @@ const DynamicImage = ({
     setIsFirstActive,
     immediate
   ])
+
+  const accessibilityProps =
+    alt === undefined
+      ? {}
+      : alt === ''
+        ? { 'aria-hidden': true as const }
+        : { role: 'img' as const, 'aria-label': alt }
+
   return (
     <Box
       className={cn(styles.wrapper, wrapperClassName)}
       {...other}
-      role='img'
-      aria-label={alt}
+      {...accessibilityProps}
       css={{
         '&:before': {
           content: '""',

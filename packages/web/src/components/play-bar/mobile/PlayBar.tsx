@@ -15,7 +15,11 @@ import {
   tracksSocialActions,
   playerSelectors
 } from '@audius/common/store'
-import { IconImage, IconLock } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  IconImage,
+  IconLock
+} from '@audius/harmony'
 import cn from 'classnames'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -114,6 +118,7 @@ const PlayBar = ({
   } = track
 
   const { name } = user
+  const infoLabel = `View current track: ${title} by ${name}`
 
   let playButtonStatus
   if (isBuffering) {
@@ -159,7 +164,16 @@ const PlayBar = ({
               className={styles.favorite}
             />
           )}
-          <div className={styles.info} onClick={onClickInfo}>
+          <div
+            className={styles.info}
+            onClick={onClickInfo}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickInfo
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={infoLabel}
+          >
             {track?.track_id ? (
               <TrackFlair
                 className={styles.artwork}

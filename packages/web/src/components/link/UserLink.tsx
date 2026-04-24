@@ -23,6 +23,7 @@ type UserLinkProps = Omit<TextLinkProps, 'to' | 'popover'> & {
   center?: boolean
   fullWidth?: boolean
   hideFanClubBadge?: boolean
+  css?: CSSObject | CSSObject[]
 }
 
 export const UserLink = (props: UserLinkProps) => {
@@ -37,9 +38,21 @@ export const UserLink = (props: UserLinkProps) => {
     center,
     fullWidth,
     hideFanClubBadge,
+    css: cssProp,
     ...other
   } = props
   const { spacing } = useTheme()
+  const focusStyles: CSSObject = {
+    ':focus': {
+      outline: 'none'
+    },
+    ':focus-visible': {
+      borderRadius: spacing.xs,
+      outline: 'none',
+      boxShadow:
+        'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
+    }
+  }
 
   const { data: partialUser } = useUser(userId, {
     select: (user) => {
@@ -75,19 +88,17 @@ export const UserLink = (props: UserLinkProps) => {
     minWidth: 0,
     overflow: 'hidden'
   }
+  const linkStyles: CSSObject = {
+    lineHeight: 'normal',
+    minWidth: 0,
+    maxWidth: '100%',
+    ...focusStyles
+  }
 
   // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
     <Flex justifyContent={center ? 'center' : undefined} css={containerStyles}>
-      <TextLink
-        to={url}
-        css={{
-          lineHeight: 'normal',
-          minWidth: 0,
-          maxWidth: '100%'
-        }}
-        {...other}
-      >
+      <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
         <Text ellipses>{name}</Text>
       </TextLink>
       {badges}
@@ -113,11 +124,7 @@ export const UserLink = (props: UserLinkProps) => {
           }}
           handle={handle}
         >
-          <TextLink
-            to={url}
-            css={{ lineHeight: 'normal', minWidth: 0, maxWidth: '100%' }}
-            {...other}
-          >
+          <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
             <Text ellipses>{name}</Text>
           </TextLink>
         </ArtistPopover>
