@@ -27,8 +27,6 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
 
-import { setVisibility } from 'app/store/drawers/slice'
-
 import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
@@ -38,6 +36,7 @@ import {
 } from 'app/components/top-tab-bar'
 import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
+import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
 import {

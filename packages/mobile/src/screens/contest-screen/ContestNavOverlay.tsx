@@ -156,12 +156,7 @@ export const ContestNavOverlay = ({
         style={[styles.actionsRow, { top: insets.top }]}
       >
         <Animated.View pointerEvents='none' style={[styles.title, titleStyle]}>
-          <Text
-            variant='title'
-            size='m'
-            numberOfLines={1}
-            ellipsizeMode='tail'
-          >
+          <Text variant='title' size='m' numberOfLines={1} ellipsizeMode='tail'>
             {title}
           </Text>
         </Animated.View>

@@ -274,8 +274,8 @@ const ContestPage = ({
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
-  const { mutate: followEvent, isPending: isFollowing } = useFollowEvent()
-  const { mutate: unfollowEvent, isPending: isUnfollowing } = useUnfollowEvent()
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
 
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 

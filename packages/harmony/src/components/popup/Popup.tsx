@@ -79,7 +79,10 @@ const getComputedOrigins = (
   }
 
   // Get new wrapper position
-  const anchorTranslation = getOriginTranslation(computedAnchorOrigin, anchorRect)
+  const anchorTranslation = getOriginTranslation(
+    computedAnchorOrigin,
+    anchorRect
+  )
   const wrapperTranslation = getOriginTranslation(
     computedTransformOrigin,
     wrapperRect
@@ -302,68 +305,82 @@ export const PopupInternal = forwardRef<
     )
   }, [anchorRef, portalLocation])
 
-  const updatePosition = useCallback((recomputeOrigins = false) => {
-    const [anchorRect, wrapperRect] = [anchorRef, wrapperRef].map((r) =>
-      r?.current?.getBoundingClientRect()
-    )
-    if (!anchorRect || !wrapperRect) return
+  const updatePosition = useCallback(
+    (recomputeOrigins = false) => {
+      const [anchorRect, wrapperRect] = [anchorRef, wrapperRef].map((r) =>
+        r?.current?.getBoundingClientRect()
+      )
+      if (!anchorRect || !wrapperRect) return
 
-    if (recomputeOrigins || !computedOriginsRef.current) {
-      computedOriginsRef.current = disableAutoFlip
-        ? { anchorOrigin, transformOrigin }
-        : getComputedOrigins(
-            anchorOrigin,
-            transformOrigin,
-            anchorRect,
-            wrapperRect,
-            portalLocation,
-            containerRef
-          )
-    }
+      if (recomputeOrigins || !computedOriginsRef.current) {
+        computedOriginsRef.current = disableAutoFlip
+          ? { anchorOrigin, transformOrigin }
+          : getComputedOrigins(
+              anchorOrigin,
+              transformOrigin,
+              anchorRect,
+              wrapperRect,
+              portalLocation,
+              containerRef
+            )
+      }
 
-    const {
-      anchorOrigin: anchorOriginComputed,
-      transformOrigin: transformOriginComputed
-    } = computedOriginsRef.current
+      const {
+        anchorOrigin: anchorOriginComputed,
+        transformOrigin: transformOriginComputed
+      } = computedOriginsRef.current
 
-    setComputedTransformOrigin(transformOriginComputed)
+      setComputedTransformOrigin(transformOriginComputed)
 
-    const anchorTranslation = getOriginTranslation(anchorOriginComputed, anchorRect)
-    const wrapperTranslation = getOriginTranslation(
-      transformOriginComputed,
-      wrapperRect
-    )
+      const anchorTranslation = getOriginTranslation(
+        anchorOriginComputed,
+        anchorRect
+      )
+      const wrapperTranslation = getOriginTranslation(
+        transformOriginComputed,
+        wrapperRect
+      )
 
-    const viewportTop = anchorRect.y + anchorTranslation.y - wrapperTranslation.y
-    const viewportLeft = anchorRect.x + anchorTranslation.x - wrapperTranslation.x
-    const isBodyPortal =
-      typeof document !== 'undefined' && portalLocation === document.body
+      const viewportTop =
+        anchorRect.y + anchorTranslation.y - wrapperTranslation.y
+      const viewportLeft =
+        anchorRect.x + anchorTranslation.x - wrapperTranslation.x
+      const isBodyPortal =
+        typeof document !== 'undefined' && portalLocation === document.body
 
-    let top = viewportTop
-    let left = viewportLeft
-    if (!isBodyPortal) {
-      const portalRect = portalLocation.getBoundingClientRect()
-      top = viewportTop - portalRect.top + portalLocation.scrollTop
-      left = viewportLeft - portalRect.left + portalLocation.scrollLeft
-    }
+      let top = viewportTop
+      let left = viewportLeft
+      if (!isBodyPortal) {
+        const portalRect = portalLocation.getBoundingClientRect()
+        top = viewportTop - portalRect.top + portalLocation.scrollTop
+        left = viewportLeft - portalRect.left + portalLocation.scrollLeft
+      }
 
-    if (!disableAutoFlip && isBodyPortal) {
-      top = Math.min(Math.max(0, top), window.innerHeight - wrapperRect.height)
-      left = Math.min(Math.max(0, left), window.innerWidth - wrapperRect.width)
-    }
+      if (!disableAutoFlip && isBodyPortal) {
+        top = Math.min(
+          Math.max(0, top),
+          window.innerHeight - wrapperRect.height
+        )
+        left = Math.min(
+          Math.max(0, left),
+          window.innerWidth - wrapperRect.width
+        )
+      }
 
-    if (wrapperRef.current) {
-      wrapperRef.current.style.top = `${top}px`
-      wrapperRef.current.style.left = `${left}px`
-    }
-  }, [
-    anchorRef,
-    anchorOrigin,
-    containerRef,
-    disableAutoFlip,
-    portalLocation,
-    transformOrigin
-  ])
+      if (wrapperRef.current) {
+        wrapperRef.current.style.top = `${top}px`
+        wrapperRef.current.style.left = `${left}px`
+      }
+    },
+    [
+      anchorRef,
+      anchorOrigin,
+      containerRef,
+      disableAutoFlip,
+      portalLocation,
+      transformOrigin
+    ]
+  )
 
   // On visible, set the position
   useEffect(() => {
@@ -431,7 +448,14 @@ export const PopupInternal = forwardRef<
     }
 
     return () => {}
-  }, [anchorRef, handleClose, isAnchorVisible, isVisible, portalLocation, updatePosition])
+  }, [
+    anchorRef,
+    handleClose,
+    isAnchorVisible,
+    isVisible,
+    portalLocation,
+    updatePosition
+  ])
 
   // Set up key listeners
   useEffect(() => {

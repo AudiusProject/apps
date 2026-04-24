@@ -123,7 +123,13 @@ export const ContestActionsDrawer = () => {
       style: rowStyle
     }
     return isOwner ? [share] : [follow, share]
-  }, [followState?.isFollowed, handleToggleFollow, handleShare, isOwner, rowStyle])
+  }, [
+    followState?.isFollowed,
+    handleToggleFollow,
+    handleShare,
+    isOwner,
+    rowStyle
+  ])
 
   return <ActionDrawer drawerName={CONTEST_ACTIONS_DRAWER_NAME} rows={rows} />
 }

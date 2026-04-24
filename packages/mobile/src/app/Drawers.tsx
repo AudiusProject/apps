@@ -49,12 +49,12 @@ import { VerificationSuccessDrawer } from 'app/components/verification-success-d
 import { WaitForDownloadDrawer } from 'app/components/wait-for-download-drawer'
 import { WithdrawUSDCDrawer } from 'app/components/withdraw-usdc-drawer/WithdrawUSDCDrawer'
 import { CoinInsightsOverflowMenu } from 'app/screens/coin-details-screen/components/CoinInsightsOverflowMenu'
+import { ContestActionsDrawer } from 'app/screens/contest-screen/ContestActionsDrawer'
 import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/components'
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
-import { ContestActionsDrawer } from 'app/screens/contest-screen/ContestActionsDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
   TrendingCombinedFilterDrawer,
