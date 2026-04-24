@@ -17,8 +17,6 @@ import {
   libraryPageTracksLineupActions,
   searchResultsPageSelectors,
   searchResultsPageTracksLineupActions,
-  trendingPageLineupActions,
-  trendingPageSelectors,
   trendingUndergroundPageLineupActions,
   trendingUndergroundPageLineupSelectors
 } from '~/store/pages'
@@ -66,18 +64,6 @@ export const lineupRegistry: Record<string, LineupEntry> = {
   [searchResultsPageTracksLineupActions.prefix]: {
     actions: searchResultsPageTracksLineupActions,
     selector: searchResultsPageSelectors.getSearchTracksLineup
-  },
-  [trendingPageLineupActions.trendingWeekActions.prefix]: {
-    actions: trendingPageLineupActions.trendingWeekActions,
-    selector: trendingPageSelectors.getDiscoverTrendingWeekLineup
-  },
-  [trendingPageLineupActions.trendingMonthActions.prefix]: {
-    actions: trendingPageLineupActions.trendingMonthActions,
-    selector: trendingPageSelectors.getDiscoverTrendingMonthLineup
-  },
-  [trendingPageLineupActions.trendingAllTimeActions.prefix]: {
-    actions: trendingPageLineupActions.trendingAllTimeActions,
-    selector: trendingPageSelectors.getDiscoverTrendingAllTimeLineup
   },
   [trendingUndergroundPageLineupActions.prefix]: {
     actions: trendingUndergroundPageLineupActions,

@@ -1,13 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Name, Status, TimeRange } from '@audius/common/models'
 import {
-  trendingPageLineupActions,
+  getTrendingQueryKey,
+  TRENDING_INITIAL_PAGE_SIZE,
+  TRENDING_LOAD_MORE_PAGE_SIZE,
+  useTrending
+} from '@audius/common/api'
+import { Name, TimeRange } from '@audius/common/models'
+import {
+  trendingPageActions,
+  trendingPageSelectors,
   trendingUndergroundPageLineupActions,
   trendingUndergroundPageLineupSelectors
 } from '@audius/common/store'
 import {
   getCanonicalName,
+  route,
   toTrendingGenre,
   TRENDING_GENRES
 } from '@audius/common/utils'
@@ -17,32 +25,34 @@ import {
   IconTrending,
   SelectablePill
 } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
+import { openSignOn } from 'common/store/pages/signon/actions'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import Lineup from 'components/lineup/Lineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { useLineupProps } from 'components/lineup/hooks'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
 import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
-import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
-import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
-import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
-import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
-import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
 import {
   updateWinnersWeekParam,
   isValidWinnersWeek,
-  parseUrlParams
+  parseUrlParams,
+  updateTimeRangeUrlParam,
+  updateGenreUrlParam,
+  isValidGenre,
+  isValidTimeRange
 } from 'pages/trending-page/utils'
-const { trendingAllTimeActions, trendingMonthActions, trendingWeekActions } =
-  trendingPageLineupActions
+import { push as pushRoute, replace as replaceRoute } from 'utils/navigation'
+
 const { getLineup } = trendingUndergroundPageLineupSelectors
+const { getTrendingGenre, getTrendingTimeRange } = trendingPageSelectors
 
 const messages = {
   tracks: 'Tracks',
@@ -53,8 +63,7 @@ const messages = {
   allTime: 'All Time',
   allGenres: 'All Genres',
   genres: 'Genres',
-  endOfLineupDescription: "Looks like you've reached the end of this list...",
-  disabledTabTooltip: 'Nothing available'
+  endOfLineupDescription: "Looks like you've reached the end of this list..."
 }
 
 type TrendingCategory = 'tracks' | 'underground' | 'winners'
@@ -63,27 +72,22 @@ type TrendingPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-// Creates a unique cache key for a time range & genre combination
-const getTimeGenreCacheKey = (timeRange: TimeRange, genre: string | null) => {
-  const newGenre = genre || 'all'
-  return `${timeRange}-${newGenre}`
-}
+// Keeps track of (timeRange,genre) combinations known to be empty so we can
+// skip to the next non-empty tab without re-fetching.
+const getTimeGenreCacheKey = (timeRange: TimeRange, genre: string | null) =>
+  `${timeRange}-${genre || 'all'}`
 
-// For a given timeRange with no tracks,
-// what other time ranges do we need to disable?
-const getRangesToDisable = (timeRange: TimeRange) => {
+const getRangesToDisable = (timeRange: TimeRange): TimeRange[] => {
   switch (timeRange) {
     case TimeRange.ALL_TIME:
     case TimeRange.MONTH:
-      // In the case of TimeRangeALL_TIME,
-      // we don't want to return ALL_TIME because
-      // we don't want to disable ALL_TIME (it's the only possible tab left, even if it's empty).
       return [TimeRange.MONTH, TimeRange.WEEK]
     case TimeRange.WEEK:
       return [TimeRange.WEEK]
   }
 }
 
+// --- Underground still uses the legacy `<Lineup>` for now -------------------
 const useTrendingUndergroundLineup = (
   scrollParent: HTMLElement | undefined
 ) => {
@@ -101,6 +105,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const dispatch = useDispatch()
   const bottomBarRef = useRef<HTMLDivElement>(null)
   const isCondensedBar = useIsContainerNarrow(bottomBarRef, 640)
+
   const [category, setCategory] = useState<TrendingCategory>(() => {
     const { week } = parseUrlParams()
     return isValidWinnersWeek(week) ? 'winners' : 'tracks'
@@ -112,34 +117,63 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const [winnersSubFilter, setWinnersSubFilter] = useState<
     'tracks' | 'underground'
   >('tracks')
-  const trendingPageState = useTrendingPageState()
-  const actions = useTrendingActions()
-  const lineups = useTrendingLineups({
-    trendingPageState,
-    containerRef: containerRef || undefined
+
+  const trendingGenre = useSelector(getTrendingGenre)
+  const trendingTimeRange = useSelector(getTrendingTimeRange)
+
+  // ----- Three tanquery streams, one per time range -----
+  const trendingArgs = useMemo(
+    () => ({
+      initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
+      loadMorePageSize: TRENDING_LOAD_MORE_PAGE_SIZE,
+      genre: trendingGenre
+    }),
+    [trendingGenre]
+  )
+  const weekQuery = useTrending({ timeRange: TimeRange.WEEK, ...trendingArgs })
+  const monthQuery = useTrending({
+    timeRange: TimeRange.MONTH,
+    ...trendingArgs
   })
+  const allTimeQuery = useTrending({
+    timeRange: TimeRange.ALL_TIME,
+    ...trendingArgs
+  })
+
   const undergroundLineupProps = useTrendingUndergroundLineup(
     containerRef?.current ?? undefined
   )
 
-  useTrendingUrlParams({
-    trendingPageState,
-    setTrendingGenre: actions.setTrendingGenre,
-    setTrendingTimeRange: actions.setTrendingTimeRange,
-    replaceRoute: actions.replaceRoute
-  })
-
-  useTrendingPageCleanup({ trendingPageState, actions })
+  // ----- URL param sync ------------------------------------------------------
+  const replaceRouteCallback = useCallback(
+    (route: { search: string }) => {
+      dispatch(replaceRoute(route))
+    },
+    [dispatch]
+  )
 
   useEffect(() => {
-    if (category === 'winners') {
-      const { week } = parseUrlParams()
-      if (isValidWinnersWeek(week)) {
-        setWinnersWeek(week)
-      }
+    const { genre, timeRange } = parseUrlParams()
+    if (trendingGenre) {
+      updateGenreUrlParam(trendingGenre, replaceRouteCallback)
+    } else if (isValidGenre(genre)) {
+      dispatch(trendingPageActions.setTrendingGenre(genre as any))
     }
-  }, [category])
+    if (isValidTimeRange(timeRange)) {
+      dispatch(trendingPageActions.setTrendingTimeRange(timeRange as TimeRange))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
+  useEffect(() => {
+    updateTimeRangeUrlParam(trendingTimeRange, replaceRouteCallback)
+  }, [trendingTimeRange, replaceRouteCallback])
+
+  useEffect(() => {
+    updateGenreUrlParam(trendingGenre, replaceRouteCallback)
+  }, [trendingGenre, replaceRouteCallback])
+
+  // ----- Underground cleanup on unmount --------------------------------------
   useEffect(() => {
     return () => {
       dispatch(trendingUndergroundPageLineupActions.reset())
@@ -147,175 +181,95 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   }, [dispatch])
 
   const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
-  const {
-    trendingWeek,
-    trendingMonth,
-    trendingAllTime,
-    getLineupProps,
-    getLineupForRange,
-    scrollToTop
-  } = lineups
-  const { trendingGenre, trendingTimeRange, lastFetchedTrendingGenre } =
-    trendingPageState
-  const {
-    makeLoadMore,
-    makePlayTrack,
-    makePauseTrack,
-    makeSetInView,
-    makeResetTrending,
-    setTrendingGenre,
-    setTrendingTimeRange
-  } = actions
+  const record = useRecord()
 
-  const weekProps = getLineupProps(trendingWeek)
-  const monthProps = getLineupProps(trendingMonth)
-  const allTimeProps = getLineupProps(trendingAllTime)
-
-  // Maintain a set of combinations of time range & genre that
-  // have no tracks.
-  const emptyTimeGenreSet = useRef(new Set())
-
-  const getLimit = useCallback(
-    (timeRange: TimeRange) => {
-      return getLineupForRange(timeRange).lineup.total
+  // ----- Tab logic -----------------------------------------------------------
+  const queryForRange = useCallback(
+    (tr: TimeRange) => {
+      if (tr === TimeRange.WEEK) return weekQuery
+      if (tr === TimeRange.MONTH) return monthQuery
+      return allTimeQuery
     },
-    [getLineupForRange]
+    [weekQuery, monthQuery, allTimeQuery]
   )
 
-  const reloadAndSwitchTabs = (timeRange: TimeRange) => {
-    makeResetTrending(timeRange)()
-    setTrendingTimeRange(timeRange)
-    scrollToTop(timeRange)
-    const offset = 0
-    makeLoadMore(timeRange)(offset, getLimit(timeRange), true)
-  }
+  const emptyTimeGenreSet = useRef(new Set<string>())
+  const cacheKey = getTimeGenreCacheKey(trendingTimeRange, trendingGenre)
+  const currentQuery = queryForRange(trendingTimeRange)
 
-  // Called when we have an empty state
-  const moveToNextTab = () => {
+  // If a time range resolves empty (for the current genre), auto-advance to
+  // a richer tab.
+  const shouldMoveToNextTab =
+    (emptyTimeGenreSet.current.has(cacheKey) && !currentQuery.isFetching) ||
+    (currentQuery.isSuccess &&
+      currentQuery.trackIds.length === 0 &&
+      trendingGenre !== null)
+
+  const setTrendingTimeRange = useCallback(
+    (tr: TimeRange) => {
+      dispatch(trendingPageActions.setTrendingTimeRange(tr))
+    },
+    [dispatch]
+  )
+
+  const setTrendingGenre = useCallback(
+    (genre: string | null) => {
+      dispatch(trendingPageActions.setTrendingGenre(toTrendingGenre(genre)))
+    },
+    [dispatch]
+  )
+
+  if (shouldMoveToNextTab) {
+    // Mark every equally-or-more-restrictive range empty so we don't bounce.
+    getRangesToDisable(trendingTimeRange)
+      .map((r) => getTimeGenreCacheKey(r, trendingGenre))
+      .forEach((k) => emptyTimeGenreSet.current.add(k))
+
     switch (trendingTimeRange) {
       case TimeRange.WEEK: {
-        // If week is empty, month might also be empty (because we accessed it previously.)
-        // If month is also empty, jump straight to all time.
         const monthAlsoEmpty = emptyTimeGenreSet.current.has(
-          getTimeGenreCacheKey(TimeRange.MONTH, trendingGenre!)
+          getTimeGenreCacheKey(TimeRange.MONTH, trendingGenre)
         )
-        const newTimeRange = monthAlsoEmpty
-          ? TimeRange.ALL_TIME
-          : TimeRange.MONTH
-        reloadAndSwitchTabs(newTimeRange)
+        setTrendingTimeRange(
+          monthAlsoEmpty ? TimeRange.ALL_TIME : TimeRange.MONTH
+        )
         break
       }
       case TimeRange.MONTH:
-        reloadAndSwitchTabs(TimeRange.ALL_TIME)
+        setTrendingTimeRange(TimeRange.ALL_TIME)
         break
       case TimeRange.ALL_TIME:
       default:
-      // Nothing to do for all time
+        break
     }
   }
 
-  const setGenreAndRefresh = useCallback(
-    (genre: string | null) => {
-      setTrendingGenre(toTrendingGenre(genre))
-
-      // Call reset to change everything everything to skeleton tiles
-      makeResetTrending(TimeRange.WEEK)()
-      makeResetTrending(TimeRange.MONTH)()
-      makeResetTrending(TimeRange.ALL_TIME)()
-
-      scrollToTop(trendingTimeRange)
-
-      const limit = getLimit(trendingTimeRange)
-      const offset = 0
-      makeLoadMore(trendingTimeRange)(offset, limit, true)
-    },
-    [
-      setTrendingGenre,
-      makeLoadMore,
-      trendingTimeRange,
-      scrollToTop,
-      makeResetTrending,
-      getLimit
-    ]
-  )
-
-  const cacheKey = getTimeGenreCacheKey(trendingTimeRange, trendingGenre)
-  const currentLineup = getLineupForRange(trendingTimeRange)
-
-  // We switch genres slightly before we fetch new lineup metadata, so if we're on a dead page
-  // (e.g. some obscure genre with no All Time tracks), and then switch to a more popular genre
-  // we will briefly be in a state with the New Genre set, but lineup status === Success and an empty
-  // entries list. This would errantly cause us to think the lineup was empty and insert it into the cache.
-  const unfetchedLineup = trendingGenre !== lastFetchedTrendingGenre
-
-  // Should move to next tab if:
-  //  - We've already seen this tab is empty AND we're not in the loading state
-  //  OR
-  //  - The current lineup was the last lineup fetched
-  //    AND
-  //  - The current lineup has finished fetching
-  //    AND
-  //  - The current lineup has no trending order (to ensure we're not in the middle of resetting/refretching)
-  //    AND
-  //  - We're not in the all genres (genre = null) state
-  const shouldMoveToNextTab =
-    (emptyTimeGenreSet.current.has(cacheKey) &&
-      currentLineup.lineup.status !== Status.LOADING) ||
-    (!unfetchedLineup &&
-      currentLineup.lineup.status === Status.SUCCESS &&
-      !currentLineup.lineup.entries.length &&
-      trendingGenre !== null)
-
-  if (shouldMoveToNextTab) {
-    getRangesToDisable(trendingTimeRange)
-      .map((r) => getTimeGenreCacheKey(r, trendingGenre))
-      .forEach((k) => {
-        emptyTimeGenreSet.current.add(k)
-      })
-
-    moveToNextTab()
-  }
-
-  const mainLineupProps = {
-    variant: LineupVariant.MAIN,
-    isTrending: true
-  }
-
-  const record = useRecord()
-
-  const setGenre = useCallback(
-    (genre: string | null) => {
-      setGenreAndRefresh(genre)
-      record(
-        make(Name.TRENDING_CHANGE_VIEW, {
-          timeframe: trendingTimeRange,
-          genre: genre ?? ''
-        })
-      )
-    },
-    [setGenreAndRefresh, record, trendingTimeRange]
-  )
-
   const handleTimeRangeChange = useCallback(
     (value: string) => {
-      const timeRange = value as TimeRange
-      setTrendingTimeRange(timeRange)
-      scrollToTop(timeRange)
+      const tr = value as TimeRange
+      setTrendingTimeRange(tr)
       record(
         make(Name.TRENDING_CHANGE_VIEW, {
-          timeframe: timeRange,
+          timeframe: tr,
           genre: trendingGenre ?? ''
         })
       )
     },
-    [setTrendingTimeRange, scrollToTop, record, trendingGenre]
+    [setTrendingTimeRange, record, trendingGenre]
   )
 
   const handleGenreChange = useCallback(
     (value: string) => {
-      setGenre(value === 'all' ? null : value)
+      const next = value === 'all' ? null : value
+      setTrendingGenre(next)
+      record(
+        make(Name.TRENDING_CHANGE_VIEW, {
+          timeframe: trendingTimeRange,
+          genre: next ?? ''
+        })
+      )
     },
-    [setGenre]
+    [setTrendingGenre, record, trendingTimeRange]
   )
 
   const timeRangeOptions = [
@@ -338,9 +292,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     { label: messages.winners, value: 'winners' as TrendingCategory }
   ]
 
-  // Bottom bar: category tabs (Tracks | Underground | Winners) on left;
-  // when Tracks, dropdown buttons for time range + genres on right (per design).
-  // Below 640px the pills collapse into a category FilterButton, all left-aligned.
   const bottomBar = (
     <div ref={bottomBarRef} style={{ width: '100%' }}>
       {isCondensedBar ? (
@@ -431,67 +382,61 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     </div>
   )
 
-  // Setup Header
   const header = (
     <Header icon={IconTrending} primary={trendingTitle} bottomBar={bottomBar} />
   )
 
-  const getTracksLineupForRange = (timeRange: TimeRange) => {
-    const lineupMap = {
-      [TimeRange.WEEK]: (
-        <Lineup
-          key={`weekly-trending-tracks-${trendingGenre}`}
-          aria-label='weekly trending tracks'
-          ordered
-          {...weekProps}
-          setInView={makeSetInView(TimeRange.WEEK)}
-          loadMore={makeLoadMore(TimeRange.WEEK)}
-          playTrack={makePlayTrack(TimeRange.WEEK)}
-          pauseTrack={makePauseTrack(TimeRange.WEEK)}
-          actions={trendingWeekActions}
-          endOfLineup={
-            <EndOfLineup description={messages.endOfLineupDescription} />
-          }
-          {...mainLineupProps}
-        />
-      ),
-      [TimeRange.MONTH]: (
-        <Lineup
-          key={`monthly-trending-tracks-${trendingGenre}`}
-          aria-label='monthly trending tracks'
-          ordered
-          {...monthProps}
-          setInView={makeSetInView(TimeRange.MONTH)}
-          loadMore={makeLoadMore(TimeRange.MONTH)}
-          playTrack={makePlayTrack(TimeRange.MONTH)}
-          pauseTrack={makePauseTrack(TimeRange.MONTH)}
-          endOfLineup={
-            <EndOfLineup description={messages.endOfLineupDescription} />
-          }
-          actions={trendingMonthActions}
-          {...mainLineupProps}
-        />
-      ),
-      [TimeRange.ALL_TIME]: (
-        <Lineup
-          key={`all-time-trending-tracks-${trendingGenre}`}
-          aria-label='all-time trending tracks'
-          ordered
-          {...allTimeProps}
-          setInView={makeSetInView(TimeRange.ALL_TIME)}
-          loadMore={makeLoadMore(TimeRange.ALL_TIME)}
-          playTrack={makePlayTrack(TimeRange.ALL_TIME)}
-          pauseTrack={makePauseTrack(TimeRange.ALL_TIME)}
-          actions={trendingAllTimeActions}
-          endOfLineup={
-            <EndOfLineup description={messages.endOfLineupDescription} />
-          }
-          {...mainLineupProps}
-        />
-      )
-    }
-    return lineupMap[timeRange]
+  const querySourceFor = (timeRange: TimeRange) => ({
+    queryKey: [
+      ...getTrendingQueryKey({ timeRange, ...trendingArgs })
+    ] as unknown[]
+  })
+
+  const sourceFor = (timeRange: TimeRange) => {
+    if (timeRange === TimeRange.WEEK) return 'DISCOVER_TRENDING_WEEK'
+    if (timeRange === TimeRange.MONTH) return 'DISCOVER_TRENDING_MONTH'
+    return 'DISCOVER_TRENDING_ALL_TIME'
   }
+
+  const getTracksLineupForRange = (timeRange: TimeRange) => {
+    const q = queryForRange(timeRange)
+    return (
+      <TrackLineup
+        key={`trending-${timeRange}-${trendingGenre ?? 'all'}`}
+        aria-label={`${timeRange} trending tracks`}
+        trackIds={q.trackIds}
+        source={sourceFor(timeRange)}
+        querySource={querySourceFor(timeRange)}
+        ordered
+        isTrending
+        variant={LineupVariant.MAIN}
+        isPending={q.isPending}
+        isFetching={q.isFetching}
+        isError={q.isError}
+        hasNextPage={q.hasNextPage}
+        loadNextPage={q.loadNextPage}
+        pageSize={TRENDING_LOAD_MORE_PAGE_SIZE}
+        initialPageSize={TRENDING_INITIAL_PAGE_SIZE}
+        scrollParent={containerRef?.current ?? null}
+        endOfLineupElement={
+          <EndOfLineup description={messages.endOfLineupDescription} />
+        }
+      />
+    )
+  }
+
+  const goToSignUp = useCallback(() => {
+    dispatch(openSignOn(false))
+  }, [dispatch])
+  // Preserve shape of previous actions export for WinnersView which may use it
+  const actions = useMemo(
+    () => ({
+      replaceRoute: replaceRouteCallback,
+      goToSignUp,
+      goToGenreSelection: () => dispatch(pushRoute(route.TRENDING_GENRES))
+    }),
+    [replaceRouteCallback, goToSignUp, dispatch]
+  )
 
   const pageContent =
     category === 'tracks' ? (

@@ -45,6 +45,8 @@ import trending from './pages/trending/reducer'
 import { TrendingPageState } from './pages/trending/types'
 import trendingUnderground from './pages/trending-underground/slice'
 import trendingWinners from './pages/trending-winners/slice'
+import playback from './playback/slice'
+import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
 import player, { PlayerState } from './player/slice'
@@ -123,6 +125,7 @@ export const reducers = (storage: Storage, history?: History) => ({
   // Playback
   queue,
   player,
+  playback,
   playbackPosition,
 
   // Wallet
@@ -227,6 +230,7 @@ export type CommonState = {
   // Playback
   queue: ReturnType<typeof queue>
   player: PlayerState
+  playback: PlaybackState
   playbackPosition: PlaybackPositionState
 
   // Wallet

@@ -1,6 +1,5 @@
 import { TimeRange } from '@audius/common/models'
 import {
-  trendingPageLineupActions,
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
@@ -17,10 +16,9 @@ import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
 
 import TrendingGenreSelectionPage from './components/TrendingGenreSelectionPage'
+
 const { TRENDING_PAGE } = route
 const { getTrendingGenre, getTrendingTimeRange } = trendingPageSelectors
-const { trendingMonthActions, trendingWeekActions, trendingAllTimeActions } =
-  trendingPageLineupActions
 
 type ConnectedTrendingGenreSelectionPageProps = {} & ReturnType<
   typeof mapStateToProps
@@ -28,17 +26,17 @@ type ConnectedTrendingGenreSelectionPageProps = {} & ReturnType<
   ReturnType<typeof mapDispatchToProps>
 
 // Mobile page for selecting a genre by which to filter trending.
+// Genre change triggers a fresh tanquery fetch (query key includes the
+// genre), so no explicit lineup reset is needed.
 const ConnectedTrendingGenreSelectionPage = ({
   setTrendingGenre,
   genre,
   timeRange,
   setTrendingTimeRange,
-  goToTrending,
-  resetAllTrending
+  goToTrending
 }: ConnectedTrendingGenreSelectionPageProps) => {
   const setTrimmedGenre = (genre: string | null) => {
     setTrendingGenre(toTrendingGenre(genre))
-    resetAllTrending()
     setTrendingTimeRange(timeRange)
     goToTrending()
   }
@@ -64,12 +62,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
       dispatch(trendingPageActions.setTrendingGenre(genre)),
     setTrendingTimeRange: (timeRange: TimeRange) =>
       dispatch(trendingPageActions.setTrendingTimeRange(timeRange)),
-    goToTrending: () => dispatch(push(TRENDING_PAGE)),
-    resetAllTrending: () => {
-      dispatch(trendingWeekActions.reset())
-      dispatch(trendingMonthActions.reset())
-      dispatch(trendingAllTimeActions.reset())
-    }
+    goToTrending: () => dispatch(push(TRENDING_PAGE))
   }
 }
 

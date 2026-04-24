@@ -4,7 +4,6 @@ import { TimeRange } from '@audius/common/models'
 import {
   modalsActions,
   trendingPageActions,
-  trendingPageLineupActions,
   trendingPageSelectors as trendingSelectors
 } from '@audius/common/store'
 import { ALL_GENRES } from '@audius/common/utils'
@@ -99,26 +98,12 @@ export const TrendingCombinedFilterDrawer = () => {
   const genre = useSelector(trendingSelectors.getTrendingGenre) ?? ALL_GENRES
 
   useDrawerState(TRENDING_FILTER_MODAL)
-  const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
-    trendingPageLineupActions
-
-  const resetLineups = useCallback(() => {
-    dispatch(trendingWeekActions.reset())
-    dispatch(trendingMonthActions.reset())
-    dispatch(trendingAllTimeActions.reset())
-  }, [
-    dispatch,
-    trendingWeekActions,
-    trendingMonthActions,
-    trendingAllTimeActions
-  ])
 
   const handleSelectTimeRange = useCallback(
     (range: TimeRange) => {
       dispatch(trendingPageActions.setTrendingTimeRange(range))
-      resetLineups()
     },
-    [dispatch, resetLineups]
+    [dispatch]
   )
 
   const handleOpenGenrePicker = useCallback(() => {

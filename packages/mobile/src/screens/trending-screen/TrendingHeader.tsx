@@ -5,7 +5,6 @@ import type { Modals, TrendingCategory } from '@audius/common/store'
 import {
   modalsActions,
   trendingPageActions,
-  trendingPageLineupActions,
   trendingPageSelectors
 } from '@audius/common/store'
 import { ALL_GENRES } from '@audius/common/utils'
@@ -27,8 +26,6 @@ import { makeStyles } from 'app/styles'
 const { getTrendingCategory } = trendingPageSelectors
 const { setTrendingCategory } = trendingPageActions
 const { setVisibility } = modalsActions
-const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
-  trendingPageLineupActions
 
 const categoryLabels: Record<TrendingCategory, string> = {
   tracks: 'Tracks',
@@ -116,11 +113,8 @@ export const TrendingHeader = (props: TrendingHeaderProps) => {
   const handleCategoryChange = (value: string, isSelected: boolean) => {
     const newCategory = isSelected ? (value as TrendingCategory) : 'tracks'
     dispatch(setTrendingCategory(newCategory))
-    if (newCategory !== 'winners') {
-      dispatch(trendingWeekActions.reset())
-      dispatch(trendingMonthActions.reset())
-      dispatch(trendingAllTimeActions.reset())
-    }
+    // No lineup reset needed — tanquery re-fetches when the active time
+    // range + genre change.
   }
 
   const rootStyle = showTitleRow
