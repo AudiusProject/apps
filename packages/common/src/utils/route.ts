@@ -151,6 +151,7 @@ export const TRACK_COMMENTS_PAGE = '/:handle/:slug/comments'
 export const PICK_WINNERS_PAGE = '/:handle/:slug/pick-winners'
 export const CONTEST_PAGE = '/:handle/:slug/contest'
 export const HOST_REMIX_CONTEST_PAGE = '/:handle/:slug/host-contest'
+export const HOST_REMIX_CONTEST_ROOT_PAGE = '/host-contest'
 export const PROFILE_PAGE = '/:handle'
 export const PROFILE_PAGE_TRACKS = '/:handle/tracks'
 export const PROFILE_PAGE_ALBUMS = '/:handle/albums'
@@ -352,6 +353,7 @@ export const staticRoutes = new Set([
   TRENDING_PAGE,
   EXPLORE_PAGE,
   CONTESTS_PAGE,
+  HOST_REMIX_CONTEST_ROOT_PAGE,
   TRENDING_PLAYLISTS_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   TRENDING_UNDERGROUND_PAGE,
