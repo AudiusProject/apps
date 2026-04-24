@@ -184,6 +184,11 @@ const StatusPill = ({ children }: { children: ReactNode }) => {
 export const ContestCardSkeleton = (
   props: { variant?: ContestCardVariant } & Omit<PaperProps, 'variant'>
 ) => {
+  const { variant = 'grid', ...rest } = props
+  // Match the real card's reserved 2-line title block so swapping the
+  // skeleton for the populated card never shifts the layout.
+  const titleLineHeight = variant === 'hero' ? 40 : 32
+  const titleBlockHeight = titleLineHeight * 2
   return (
     <Paper
       direction='column'
@@ -191,7 +196,7 @@ export const ContestCardSkeleton = (
       shadow='mid'
       w='100%'
       css={{ overflow: 'hidden', borderRadius: 14 }}
-      {...props}
+      {...rest}
     >
       <Skeleton h={COVER_HEIGHT} w='100%' />
       <Flex direction='column' gap='l' p='xl'>
@@ -204,9 +209,13 @@ export const ContestCardSkeleton = (
         </Flex>
         <Divider orientation='horizontal' />
         <Flex direction='column' gap='s'>
-          <Skeleton h={28} w='80%' />
+          <Flex
+            alignItems='center'
+            css={{ height: titleBlockHeight, flexShrink: 0 }}
+          >
+            <Skeleton h={titleLineHeight - 8} w='80%' />
+          </Flex>
           <Flex gap='s'>
-            <Skeleton h={22} w={72} />
             <Skeleton h={22} w={120} />
           </Flex>
         </Flex>

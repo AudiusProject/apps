@@ -15,7 +15,7 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { ShareSource, SquareSizes } from '@audius/common/models'
+import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
@@ -50,12 +50,12 @@ import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
 import { ContestCommentsTile } from '../ContestCommentsTile'
+import { ContestHeroImage } from '../ContestHeroImage'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
@@ -305,11 +305,6 @@ const ContestPage = ({
     )
   }, [dispatch, trackId])
 
-  const { imageUrl: coverArtUrl } = useTrackCoverArt({
-    trackId,
-    size: SquareSizes.SIZE_1000_BY_1000
-  })
-
   // Updates tab visibility — for non-hosts, hide the tab until there's
   // at least one host-authored top-level post (a "post update"). The
   // host always sees the tab so they have somewhere to compose from.
@@ -477,17 +472,11 @@ const ContestPage = ({
         w='100%'
         css={(theme) => ({ backgroundColor: theme.color.background.white })}
       >
-        {/* Hero banner */}
-        <Box
-          w='100%'
-          h={HERO_HEIGHT}
-          css={{
-            backgroundImage: coverArtUrl ? `url(${coverArtUrl})` : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative'
-          }}
-        >
+        {/* Hero banner — ContestHeroImage shows a skeleton + progressive
+            (small→large) fade-in so the banner is never blank. The back
+            button is layered on top via absolute positioning. */}
+        <Box w='100%' css={{ position: 'relative' }}>
+          <ContestHeroImage trackId={trackId} height={HERO_HEIGHT} />
           {/* Back button — white disc with an elevation shadow for
               emphasis instead of the previous translucent dark circle.
               Reads cleanly against both light and dark cover art. */}
@@ -498,7 +487,8 @@ const ContestPage = ({
               left: 12,
               borderRadius: '50%',
               backgroundColor: theme.color.background.white,
-              boxShadow: theme.shadows.mid
+              boxShadow: theme.shadows.mid,
+              zIndex: 3
             })}
           >
             <IconButton

@@ -272,7 +272,10 @@ export const ContestCard = (props: ContestCardProps) => {
   }, [navigation, trackId, noNavigation])
 
   if (!track || !user || !remixContest) {
-    return null
+    // Return a skeleton rather than null so the outer list doesn't collapse
+    // to an empty row between when the contest IDs resolve and when each
+    // card's per-track queries finish — prevents the "blank gap" flash.
+    return <ContestCardSkeleton variant={variant} {...other} />
   }
 
   const status = formatStatus(remixContest.endDate)

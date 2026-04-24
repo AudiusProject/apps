@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 
 import { Flex, IconTrophy, Text } from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
@@ -15,13 +16,26 @@ const messages = {
 
 const HERO_SKELETON_COUNT = 1
 const GRID_SKELETON_COUNT = 4
+// Bounded first page so we don't fan out 25 concurrent image requests on
+// mount; the rest load as the user scrolls.
+const CONTEST_PAGE_SIZE = 6
+// Pixels from the bottom at which we trigger the next page fetch.
+const END_REACHED_THRESHOLD = 400
 
 export const ContestsScreen = () => {
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
     FeatureFlags.CONTESTS
   )
-  const { data, isPending, isError, isSuccess } = useAllRemixContests(
-    undefined,
+  const {
+    data,
+    isPending,
+    isError,
+    isSuccess,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useAllRemixContests(
+    { pageSize: CONTEST_PAGE_SIZE },
     { enabled: isContestsPageEnabled }
   )
 
@@ -31,6 +45,19 @@ export const ContestsScreen = () => {
     isContestsPageEnabled && (isPending || (!isSuccess && !isError))
   const showEmpty = isSuccess && contests.length === 0
 
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!hasNextPage || isFetchingNextPage) return
+      const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent
+      const distanceFromBottom =
+        contentSize.height - (contentOffset.y + layoutMeasurement.height)
+      if (distanceFromBottom <= END_REACHED_THRESHOLD) {
+        fetchNextPage()
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  )
+
   return (
     <Screen
       url='/contests'
@@ -39,7 +66,7 @@ export const ContestsScreen = () => {
       title={messages.title}
     >
       <ScreenContent>
-        <ScrollView>
+        <ScrollView onScroll={handleScroll} scrollEventThrottle={200}>
           <Flex direction='column' gap='l' mv='l' mh='m'>
             {showSkeletons ? (
               <Flex direction='column' gap='l'>
@@ -68,6 +95,14 @@ export const ContestsScreen = () => {
                 {gridTrackIds.map((id) => (
                   <ContestCard key={id} trackId={id} variant='grid' />
                 ))}
+                {isFetchingNextPage
+                  ? Array.from({ length: CONTEST_PAGE_SIZE }).map((_, i) => (
+                      <ContestCardSkeleton
+                        key={`load-more-skeleton-${i}`}
+                        variant='grid'
+                      />
+                    ))
+                  : null}
               </Flex>
             )}
           </Flex>

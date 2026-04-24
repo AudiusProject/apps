@@ -1,13 +1,17 @@
+import { useCallback } from 'react'
+
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { Box, Button, Flex, IconTrophy, Text } from '@audius/harmony'
+import InfiniteScroll from 'react-infinite-scroller'
 import { Navigate } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { useMainContentRef } from 'pages/MainContentContext'
 
 import styles from './ContestsPage.module.css'
 import { RunYourOwnContestBanner } from './RunYourOwnContestBanner'
@@ -24,16 +28,39 @@ const messages = {
 }
 
 const HERO_SKELETON_COUNT = 1
-const GRID_SKELETON_COUNT = 11
+const GRID_SKELETON_COUNT = 8
+// Initial page deliberately small so the first paint fires a bounded number
+// of per-card image requests. Subsequent pages load as the user scrolls.
+const CONTEST_PAGE_SIZE = 8
 
 export const ContestsPage = () => {
   const isMobile = useIsMobile()
+  const containerRef = useMainContentRef()
   const { isEnabled: isContestsPageEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.CONTESTS)
-  const { data, isPending, isError, isSuccess } = useAllRemixContests(
-    undefined,
+  const {
+    data,
+    isPending,
+    isError,
+    isSuccess,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useAllRemixContests(
+    { pageSize: CONTEST_PAGE_SIZE },
     { enabled: isContestsPageEnabled }
   )
+
+  const getScrollParent = useCallback(
+    () => containerRef.current ?? null,
+    [containerRef]
+  )
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   if (isFlagLoaded && !isContestsPageEnabled) {
     return <Navigate to='/' replace />
@@ -109,11 +136,27 @@ export const ContestsPage = () => {
               <ContestCard trackId={heroTrackId} variant='hero' />
             ) : null}
             {gridTrackIds.length > 0 ? (
-              <div className={styles.cardsContainer}>
-                {gridTrackIds.map((id) => (
-                  <ContestCard key={id} trackId={id} variant='grid' />
-                ))}
-              </div>
+              <InfiniteScroll
+                hasMore={hasNextPage}
+                loadMore={handleLoadMore}
+                getScrollParent={getScrollParent}
+                useWindow={false}
+                threshold={400}
+              >
+                <div className={styles.cardsContainer}>
+                  {gridTrackIds.map((id) => (
+                    <ContestCard key={id} trackId={id} variant='grid' />
+                  ))}
+                  {isFetchingNextPage
+                    ? Array.from({ length: CONTEST_PAGE_SIZE }).map((_, i) => (
+                        <ContestCardSkeleton
+                          key={`load-more-skeleton-${i}`}
+                          variant='grid'
+                        />
+                      ))
+                    : null}
+                </div>
+              </InfiniteScroll>
             ) : null}
           </Flex>
         )}

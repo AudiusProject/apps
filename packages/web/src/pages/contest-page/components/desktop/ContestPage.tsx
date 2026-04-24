@@ -13,7 +13,7 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { SquareSizes, ShareSource } from '@audius/common/models'
+import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
@@ -46,7 +46,6 @@ import Page from 'components/page/Page'
 import UserBadges from 'components/user-badges/UserBadges'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import {
@@ -57,6 +56,7 @@ import {
 
 import { ContestCommentsTile } from '../ContestCommentsTile'
 import { ContestFollowersModal } from '../ContestFollowersModal'
+import { ContestHeroImage } from '../ContestHeroImage'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
 
@@ -233,11 +233,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     followEvent,
     unfollowEvent
   ])
-
-  const { imageUrl: coverArtUrl } = useTrackCoverArt({
-    trackId,
-    size: SquareSizes.SIZE_1000_BY_1000
-  })
 
   // Only render the Stems & Downloads panel when the track actually has
   // downloadable content. The DownloadSection component assumes a
@@ -484,17 +479,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               radius. The height fluidly tracks the content width
               (via `cqi` relative to the `contest` container) so
               narrow desktop shells get a shorter hero without a
-              hard mobile/desktop breakpoint. */}
-            <Box
-              w='100%'
-              css={{
-                height: `clamp(${HERO_MIN_HEIGHT}px, 30cqi, ${HERO_MAX_HEIGHT}px)`,
-                backgroundImage: coverArtUrl
-                  ? `url(${coverArtUrl})`
-                  : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
+              hard mobile/desktop breakpoint. ContestHeroImage
+              handles the skeleton + progressive (small→large)
+              fade-in so the banner is never blank. */}
+            <ContestHeroImage
+              trackId={trackId}
+              height={`clamp(${HERO_MIN_HEIGHT}px, 30cqi, ${HERO_MAX_HEIGHT}px)`}
             />
 
             {/* Header body content — padded section below the hero. */}
