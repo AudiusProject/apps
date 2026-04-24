@@ -10,7 +10,6 @@ import {
   Kind,
   Name,
   PlaybackSource,
-  Status,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import type { ID, UID, AccessConditions } from '@audius/common/models'
@@ -559,7 +558,6 @@ const CollectionTrackList = ({
 }: CollectionTrackListProps) => {
   const styles = useStyles()
   const dispatch = useDispatch()
-  const playingUid = useSelector(playerSelectors.getUid)
   const messages = getMessages(isAlbum ? 'album' : 'playlist')
 
   const numericCollectionId =

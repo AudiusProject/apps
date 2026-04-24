@@ -18,8 +18,7 @@ import {
   OverflowSource,
   usePremiumContentPurchaseModal,
   playbackPositionSelectors,
-  PurchaseableContentType,
-  playerSelectors
+  PurchaseableContentType
 } from '@audius/common/store'
 import { Genre, removeNullable } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
@@ -47,7 +46,6 @@ import { useCommentDrawer } from '../comments/CommentDrawerContext'
 import { FavoriteButton } from './FavoriteButton'
 import { RepostButton } from './RepostButton'
 
-const { getUid } = playerSelectors
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { updateMethod } = castActions
@@ -119,7 +117,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   const isUnlisted = track?.is_unlisted
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const uid = useSelector(getUid)
 
   const handlePurchasePress = useCallback(() => {
     if (track?.track_id) {
