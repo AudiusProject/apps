@@ -64,21 +64,19 @@ export const AppDrawerScreen = memo(() => {
     setIsAtStackRootState((prev) => (prev === next ? prev : next))
   }, [])
 
-  const canSwipeDrawer =
-    isAtStackRoot && !gesturesDisabled && !isNowPlayingDrawerOpen
-
+  // Shrink the drawer's swipe area to zero (instead of disabling the gesture
+  // handler) so the native stack's fullScreenGestureEnabled back gesture keeps
+  // responding across the whole screen; fully disabling the drawer's
+  // PanGestureHandler narrows swipe-back to the left edge.
   const drawerScreenOptions = useMemo(
     () => ({
       headerShown: false,
-      swipeEdgeWidth: SCREEN_WIDTH,
+      swipeEdgeWidth: isAtStackRoot ? SCREEN_WIDTH : 0,
       drawerType: 'slide' as const,
       drawerStyle: { width: '75%' as const },
-      swipeEnabled: canSwipeDrawer,
-      gestureHandlerProps: {
-        enabled: canSwipeDrawer
-      }
+      swipeEnabled: !gesturesDisabled && !isNowPlayingDrawerOpen
     }),
-    [canSwipeDrawer]
+    [isAtStackRoot, gesturesDisabled, isNowPlayingDrawerOpen]
   )
 
   // Close the left nav drawer if it's open when the now-playing drawer opens
