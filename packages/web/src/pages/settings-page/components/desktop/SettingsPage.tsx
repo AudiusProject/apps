@@ -96,18 +96,10 @@ import { WormholeConversionSettingsCard } from './WormholeConversionSettingsCard
 
 const { show } = musicConfettiActions
 const { signOut: signOutAction } = signOutActions
-const {
-  setTheme,
-  setThemePalette,
-  setThemeMode,
-  setFrostedSurfaceIntensity
-} = themeActions
-const {
-  getTheme,
-  getThemePalette,
-  getThemeMode,
-  getFrostedSurfaceIntensity
-} = themeSelectors
+const { setTheme, setThemePalette, setThemeMode, setFrostedSurfaceIntensity } =
+  themeActions
+const { getTheme, getThemePalette, getThemeMode, getFrostedSurfaceIntensity } =
+  themeSelectors
 const { getBrowserNotificationSettings, getEmailFrequency } =
   settingsPageSelectors
 const {
@@ -414,9 +406,7 @@ export const SettingsPage = () => {
     )
   }
 
-  const onFrostedSurfaceIntensityChange = (
-    value: FrostedSurfaceIntensity
-  ) => {
+  const onFrostedSurfaceIntensityChange = (value: FrostedSurfaceIntensity) => {
     dispatch(
       setFrostedSurfaceIntensity({
         frostedSurfaceIntensity: value

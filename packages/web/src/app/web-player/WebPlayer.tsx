@@ -16,7 +16,6 @@ import {
 } from '@audius/common/api'
 import { Client, FrostedSurfaceIntensity, Status } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
-import { themeSelectors } from '@audius/common/store'
 import {
   COIN_DETAIL_BUY_PAGE,
   CLUB_DETAIL_PAGE,
@@ -29,6 +28,7 @@ import {
   CLUBS_CREATE_PAGE,
   guestRoutes
 } from '@audius/common/src/utils/route'
+import { themeSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'

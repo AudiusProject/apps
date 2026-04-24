@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import type { Interpolation, Theme } from '@emotion/react'
 import { Flex, FlexProps } from '@audius/harmony'
+import type { Interpolation, Theme } from '@emotion/react'
 
 export const Frosted = ({
   children,

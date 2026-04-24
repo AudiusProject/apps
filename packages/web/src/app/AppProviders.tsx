@@ -40,8 +40,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     const themePalette = getThemePaletteFromStorage() ?? ThemePalette.DEFAULT
     const themeMode = getThemeModeFromStorage()
     const frostedSurfaceIntensity =
-      getFrostedSurfaceIntensityFromStorage() ??
-      FrostedSurfaceIntensity.DEFAULT
+      getFrostedSurfaceIntensityFromStorage() ?? FrostedSurfaceIntensity.DEFAULT
     const initialStoreState = {
       ui: {
         theme: {

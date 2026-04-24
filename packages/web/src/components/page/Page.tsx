@@ -16,12 +16,19 @@ const HEADER_MARGIN_PX = 32
 // Responsible for positioning the header
 type HeaderContainerProps = Pick<
   PageProps,
-  'header' | 'showSearch' | 'headerContentPaddingInline' | 'disableHeaderFrosted'
+  | 'header'
+  | 'showSearch'
+  | 'headerContentPaddingInline'
+  | 'disableHeaderFrosted'
 >
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { header, showSearch, headerContentPaddingInline, disableHeaderFrosted } =
-    props
+  const {
+    header,
+    showSearch,
+    headerContentPaddingInline,
+    disableHeaderFrosted
+  } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
   const headerElement = cloneElement(header as any, {
