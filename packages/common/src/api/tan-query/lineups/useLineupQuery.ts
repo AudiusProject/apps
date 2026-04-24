@@ -143,7 +143,12 @@ export const useLineupQuery = <T>({
   const prevQueryKey = usePrevious(queryKey)
   const hasQueryKeyChanged = !isEqual(prevQueryKey, queryKey)
 
-  // Function to handle loading cached data into the lineup
+  // Only depend on the stable `prefix` string rather than the full
+  // lineup state object — otherwise every Redux lineup update (including
+  // the ones this callback itself dispatches) gives us a new `lineup`
+  // reference, re-creates the callback, and retriggers consumers'
+  // effects that list it as a dep, causing redundant dispatches.
+  const lineupPrefix = lineup.prefix
   const loadCachedDataIntoLineup = useCallback(() => {
     // Any time this function is run we reset the lineup.
     // If there's already data in our query cache it will get put back into the lineup below.
@@ -159,7 +164,7 @@ export const useLineupQuery = <T>({
         lineupData,
         queryClient,
         reportToSentry,
-        lineup.prefix
+        lineupPrefix
       )
       // Put the full entities in the lineup
       dispatch(
@@ -168,7 +173,14 @@ export const useLineupQuery = <T>({
         })
       )
     }
-  }, [dispatch, lineupActions, lineupData, queryClient, reportToSentry, lineup])
+  }, [
+    dispatch,
+    lineupActions,
+    lineupData,
+    queryClient,
+    reportToSentry,
+    lineupPrefix
+  ])
 
   // Normally we prime the redux lineup store with the lineupData from the queryFn.
   // However this doesnt work for cache hits, so here we check for cache hits.
