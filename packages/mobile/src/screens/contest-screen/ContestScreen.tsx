@@ -323,24 +323,27 @@ export const ContestScreen = () => {
         {/* Primary CTA — sits in the scrolling header. Overflow lives
             in the floating `ContestNavOverlay` kebab, matching the
             profile screen pattern (one kebab, always reachable at
-            the top of the screen). */}
-        <Flex
-          direction='row'
-          alignItems='center'
-          gap='s'
-          pointerEvents='box-none'
-        >
-          <Flex flex={1} pointerEvents='box-none'>
-            <Button
-              variant='primary'
-              size='small'
-              onPress={isOwner ? handlePickWinners : handleEnterContest}
-              fullWidth
-            >
-              {isOwner ? messages.pickWinners : messages.enterContest}
-            </Button>
+            the top of the screen). "Enter Contest" is hidden once
+            the contest ends — entering isn't meaningful anymore. */}
+        {isOwner || !isEnded ? (
+          <Flex
+            direction='row'
+            alignItems='center'
+            gap='s'
+            pointerEvents='box-none'
+          >
+            <Flex flex={1} pointerEvents='box-none'>
+              <Button
+                variant='primary'
+                size='small'
+                onPress={isOwner ? handlePickWinners : handleEnterContest}
+                fullWidth
+              >
+                {isOwner ? messages.pickWinners : messages.enterContest}
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
+        ) : null}
 
         {/* Submissions Due block — pure display; wrap the entire
             label + date + time group in `pointerEvents='none'`. */}
