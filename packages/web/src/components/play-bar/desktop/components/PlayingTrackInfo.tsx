@@ -1,10 +1,10 @@
-import { KeyboardEvent, memo } from 'react'
+import { memo } from 'react'
 
 import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { Tooltip } from '@audius/harmony'
+import { createKeyboardActivationHandler, Tooltip } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
@@ -21,17 +21,6 @@ const { getPreviewing } = playerSelectors
 
 const messages = {
   preview: 'Preview'
-}
-
-const handleKeyboardActivation = (
-  event: KeyboardEvent<HTMLDivElement>,
-  callback: () => void
-) => {
-  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
-    event.stopPropagation()
-    event.preventDefault()
-    callback()
-  }
 }
 
 interface PlayingTrackInfoProps {
@@ -108,9 +97,9 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickTrackTitle}
-            onKeyDown={(event) =>
-              handleKeyboardActivation(event, onClickTrackTitle)
-            }
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickTrackTitle
+            })}
             role='button'
             tabIndex={0}
             aria-label={`View track: ${trackTitle}`}
@@ -172,9 +161,9 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickArtistName}
-            onKeyDown={(event) =>
-              handleKeyboardActivation(event, onClickArtistName)
-            }
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickArtistName
+            })}
             role='button'
             tabIndex={0}
             aria-label={`View artist: ${artistName}`}

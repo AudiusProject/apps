@@ -3,7 +3,6 @@ import {
   forwardRef,
   useCallback,
   MouseEvent,
-  KeyboardEvent,
   ComponentType
 } from 'react'
 
@@ -40,7 +39,6 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
     children,
     stopPropagation = true,
     onClick,
-    onKeyDown,
     restriction,
     isExternal,
     ...other
@@ -54,22 +52,6 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
       onClick?.(e)
     },
     [stopPropagation, onClick]
-  )
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLElement>) => {
-      onKeyDown?.(e as KeyboardEvent<HTMLAnchorElement>)
-      if (e.defaultPrevented) return
-
-      if (e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault()
-        if (stopPropagation) {
-          e.stopPropagation()
-        }
-        e.currentTarget.click()
-      }
-    },
-    [stopPropagation, onKeyDown]
   )
 
   let LinkComponent: ComponentType<any> = Link
@@ -95,7 +77,6 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
         isExternal={isExternal}
         href={to as string}
         onClick={handleClick}
-        onKeyDown={handleKeyDown}
         {...other}
       >
         {children}
@@ -108,7 +89,6 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
       ref={ref}
       asChild
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
       {...other}
     >
       {to ? (

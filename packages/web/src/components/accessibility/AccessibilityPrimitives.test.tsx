@@ -1,11 +1,13 @@
 import { useState, type KeyboardEvent } from 'react'
 
 import {
+  createKeyboardActivationHandler,
   ExpandableNavItem,
   HoverCardHeader,
   IconArrowRight,
   IconTokenAUDIO,
   IconTrending,
+  isKeyboardActivationKey,
   Modal,
   ModalHeader,
   ModalTitle,
@@ -18,6 +20,7 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, vi } from 'vitest'
 
 import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { TextLink as WebTextLink } from 'components/link/TextLink'
 import { LeftNavLink } from 'components/nav/desktop/LeftNavLink'
 import { fireEvent, render, screen, it, waitFor } from 'test/test-utils'
 
@@ -39,6 +42,104 @@ describe('accessibility primitives', () => {
       removeHotkeys(hotkeyHook)
       hotkeyHook = null
     }
+  })
+
+  describe('keyboard activation utility', () => {
+    it('recognizes Enter, Space, and legacy Spacebar as activation keys', () => {
+      expect(isKeyboardActivationKey({ key: 'Enter' })).toBe(true)
+      expect(isKeyboardActivationKey({ key: ' ' })).toBe(true)
+      expect(isKeyboardActivationKey({ key: 'Spacebar' })).toBe(true)
+      expect(isKeyboardActivationKey({ key: 'Escape' })).toBe(false)
+    })
+
+    it('activates for keyboard activation keys only', () => {
+      const handleActivate = vi.fn()
+      render(
+        <div
+          role='button'
+          tabIndex={0}
+          onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+            onActivate: handleActivate
+          })}
+        >
+          Activate utility
+        </div>
+      )
+
+      const button = screen.getByRole('button', { name: 'Activate utility' })
+      fireEvent.keyDown(button, { key: 'Enter' })
+      fireEvent.keyDown(button, { key: ' ' })
+      fireEvent.keyDown(button, { key: 'Spacebar' })
+      fireEvent.keyDown(button, { key: 'Escape' })
+
+      expect(handleActivate).toHaveBeenCalledTimes(3)
+    })
+
+    it('does not activate when disabled', () => {
+      const handleActivate = vi.fn()
+      render(
+        <div
+          role='button'
+          tabIndex={0}
+          onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+            onActivate: handleActivate,
+            disabled: true
+          })}
+        >
+          Disabled utility
+        </div>
+      )
+
+      fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' })
+
+      expect(handleActivate).not.toHaveBeenCalled()
+    })
+
+    it('runs custom key handling first and respects preventDefault', () => {
+      const handleActivate = vi.fn()
+      const handleKeyDown = vi.fn((event: KeyboardEvent<HTMLDivElement>) => {
+        event.preventDefault()
+      })
+      render(
+        <div
+          role='button'
+          tabIndex={0}
+          onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+            onActivate: handleActivate,
+            onKeyDown: handleKeyDown
+          })}
+        >
+          Custom utility
+        </div>
+      )
+
+      fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' })
+
+      expect(handleKeyDown).toHaveBeenCalledTimes(1)
+      expect(handleActivate).not.toHaveBeenCalled()
+    })
+
+    it('ignores descendant key events by default', () => {
+      const handleActivate = vi.fn()
+      render(
+        <div
+          role='button'
+          aria-label='Parent utility'
+          tabIndex={0}
+          onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+            onActivate: handleActivate
+          })}
+        >
+          <button type='button'>Nested action</button>
+        </div>
+      )
+
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Nested action' }), {
+        key: 'Enter'
+      })
+
+      expect(handleActivate).not.toHaveBeenCalled()
+    })
   })
 
   describe('DynamicImage', () => {
@@ -104,6 +205,21 @@ describe('accessibility primitives', () => {
       fireEvent.keyDown(paper, { key: 'Enter' })
 
       expect(handleKeyDown).toHaveBeenCalledTimes(1)
+      expect(handleClick).not.toHaveBeenCalled()
+    })
+
+    it('does not activate from a focused nested control', () => {
+      const handleClick = vi.fn()
+      render(
+        <Paper onClick={handleClick} aria-label='Parent paper'>
+          <button type='button'>Nested action</button>
+        </Paper>
+      )
+
+      const childButton = screen.getByRole('button', { name: 'Nested action' })
+      fireEvent.keyDown(childButton, { key: 'Enter' })
+      fireEvent.keyDown(childButton, { key: ' ' })
+
       expect(handleClick).not.toHaveBeenCalled()
     })
   })
@@ -219,6 +335,49 @@ describe('accessibility primitives', () => {
 
       link.focus()
       expect(link).toHaveFocus()
+    })
+
+    it('does not manually activate nav links with Space', () => {
+      const handleClick = vi.fn()
+      render(
+        <MemoryRouter>
+          <LeftNavLink
+            to='/trending'
+            leftIcon={IconTrending}
+            restriction='none'
+            onClick={handleClick}
+          >
+            Trending
+          </LeftNavLink>
+        </MemoryRouter>,
+        { skipRouter: true }
+      )
+
+      fireEvent.keyDown(screen.getByRole('link', { name: 'Trending' }), {
+        key: ' '
+      })
+
+      expect(handleClick).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('TextLink', () => {
+    it('does not manually activate links with Space', () => {
+      const handleClick = vi.fn()
+      render(
+        <MemoryRouter>
+          <WebTextLink to='/tracks/test' onClick={handleClick}>
+            Track
+          </WebTextLink>
+        </MemoryRouter>,
+        { skipRouter: true }
+      )
+
+      fireEvent.keyDown(screen.getByRole('link', { name: 'Track' }), {
+        key: ' '
+      })
+
+      expect(handleClick).not.toHaveBeenCalled()
     })
   })
 

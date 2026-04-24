@@ -18,6 +18,7 @@ import {
   IconCaretLeft,
   IconCaretRight,
   IconCaretUp,
+  isKeyboardActivationKey,
   Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -55,9 +56,6 @@ const FETCH_BATCH_SIZE = 80
 // Table cells/headers add 12px left + 12px right padding in CSS.
 // Include this chrome in collapse budgeting to avoid clipping before drop.
 const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
-
-const isKeyboardActivationKey = (e: ReactKeyboardEvent<HTMLElement>) =>
-  e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'
 
 const getColumnSortLabel = (column: any, headerContent: unknown) => {
   if (typeof column.sortTitle === 'string') return column.sortTitle

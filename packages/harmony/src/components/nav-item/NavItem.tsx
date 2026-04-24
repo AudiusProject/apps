@@ -77,8 +77,8 @@ export const NavItem = ({
         css={{
           backgroundColor,
           ...(isFocusVisible && {
-            outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
-            outlineOffset: 3
+            boxShadow:
+              'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
           }),
           transition: `opacity ${motion.quick}`,
           '&:hover': {

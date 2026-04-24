@@ -395,7 +395,6 @@ export const TrackTile = ({
                       onClick={onClickTitle}
                       disabled={disableActions}
                       className={styles.trackTitleLink}
-                      tabIndex={0}
                       aria-label={`View track: ${title}`}
                       ellipses
                     >
@@ -411,7 +410,6 @@ export const TrackTile = ({
                       badgeSize='xs'
                       isActive={isActive}
                       aria-label={partialUser?.name}
-                      tabIndex={0}
                       popover
                       css={{ marginTop: '-4px' }}
                     />

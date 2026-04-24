@@ -182,8 +182,29 @@
   background-size: 100%;
 }
 
-.albumArtContainer {
+.albumArtButton {
+  flex: 0 0 74px;
+  width: 74px;
+  height: 74px;
   margin-right: var(--harmony-unit-2);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.albumArtButton:focus {
+  outline: none;
+}
+
+.albumArtButton:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
+}
+
+.albumArtButton:disabled {
+  cursor: default;
 }
 
 .iconVerified {

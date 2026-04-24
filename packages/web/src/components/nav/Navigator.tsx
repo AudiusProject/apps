@@ -1,13 +1,13 @@
 import {
   useCallback,
   useEffect,
-  KeyboardEvent,
   useLayoutEffect,
   useRef,
   useState
 } from 'react'
 
 import { Client } from '@audius/common/models'
+import { createKeyboardActivationHandler } from '@audius/harmony'
 import cn from 'classnames'
 
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -101,16 +101,14 @@ const Navigator = ({ className }: OwnProps) => {
     [isCollapsed]
   )
 
-  const handleResizeHandleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-        e.stopPropagation()
-        e.preventDefault()
-        setIsCollapsed(!isCollapsed)
-      }
-    },
-    [isCollapsed, setIsCollapsed]
-  )
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed(!isCollapsed)
+  }, [isCollapsed, setIsCollapsed])
+
+  const handleResizeHandleKeyDown =
+    createKeyboardActivationHandler<HTMLDivElement>({
+      onActivate: toggleCollapsed
+    })
 
   useEffect(() => {
     if (!isDragging) return

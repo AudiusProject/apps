@@ -1,7 +1,8 @@
-import { KeyboardEvent, forwardRef } from 'react'
+import { forwardRef } from 'react'
 
 import { useTheme } from '@emotion/react'
 
+import { createKeyboardActivationHandler } from '../../../utils/keyboard'
 import { Flex } from '../Flex'
 
 import type { PaperProps } from './types'
@@ -44,21 +45,10 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
     }
   }
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    onKeyDown?.(event)
-
-    if (event.defaultPrevented || !onClick) return
-
-    if (
-      event.key === 'Enter' ||
-      event.key === ' ' ||
-      event.key === 'Spacebar'
-    ) {
-      event.stopPropagation()
-      event.preventDefault()
-      event.currentTarget.click()
-    }
-  }
+  const handleKeyDown = createKeyboardActivationHandler<HTMLDivElement>({
+    onKeyDown,
+    onActivate: (event) => event.currentTarget.click()
+  })
 
   return (
     <Flex

@@ -16,7 +16,7 @@ import {
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { Text, Tooltip } from '@audius/harmony'
+import { isKeyboardActivationKey, Text, Tooltip } from '@audius/harmony'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 import cn from 'classnames'
 import { throttle } from 'lodash'
@@ -356,11 +356,7 @@ const TabBar = memo(
           }
 
           const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
-            if (
-              event.key === 'Enter' ||
-              event.key === ' ' ||
-              event.key === 'Spacebar'
-            ) {
+            if (isKeyboardActivationKey(event)) {
               event.preventDefault()
               selectTab(event)
               return

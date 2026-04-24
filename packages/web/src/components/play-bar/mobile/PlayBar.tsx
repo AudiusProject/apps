@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useToggleFavoriteTrack, useUser } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
@@ -15,7 +15,11 @@ import {
   tracksSocialActions,
   playerSelectors
 } from '@audius/common/store'
-import { IconImage, IconLock } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  IconImage,
+  IconLock
+} from '@audius/harmony'
 import cn from 'classnames'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -116,18 +120,6 @@ const PlayBar = ({
   const { name } = user
   const infoLabel = `View current track: ${title} by ${name}`
 
-  const handleInfoKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (
-      event.key === 'Enter' ||
-      event.key === ' ' ||
-      event.key === 'Spacebar'
-    ) {
-      event.stopPropagation()
-      event.preventDefault()
-      onClickInfo()
-    }
-  }
-
   let playButtonStatus
   if (isBuffering) {
     playButtonStatus = PlayButtonStatus.LOAD
@@ -175,7 +167,9 @@ const PlayBar = ({
           <div
             className={styles.info}
             onClick={onClickInfo}
-            onKeyDown={handleInfoKeyDown}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickInfo
+            })}
             role='button'
             tabIndex={0}
             aria-label={infoLabel}

@@ -1,4 +1,4 @@
-import { KeyboardEvent, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { useTheme, CSSObject } from '@emotion/react'
 import { ResizeObserver } from '@juggle/resize-observer'
@@ -6,6 +6,7 @@ import useMeasure from 'react-use-measure'
 
 import { HarmonyTheme } from '../../foundations/theme'
 import { IconCaretRight } from '../../icons'
+import { createKeyboardActivationHandler } from '../../utils/keyboard'
 import { Box } from '../layout/Box'
 import { Flex } from '../layout/Flex'
 import { Text } from '../text'
@@ -85,26 +86,17 @@ export const ExpandableNavItem = ({
   )
 
   const handleClick = useCallback(() => {
+    if (disabled) return
     if (canUnfurl) {
       setIsOpen(!isOpen)
     }
     onClick?.(!isOpen)
-  }, [canUnfurl, isOpen, onClick])
+  }, [canUnfurl, disabled, isOpen, onClick])
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (
-        event.key === 'Enter' ||
-        event.key === ' ' ||
-        event.key === 'Spacebar'
-      ) {
-        event.stopPropagation()
-        event.preventDefault()
-        handleClick()
-      }
-    },
-    [handleClick]
-  )
+  const handleKeyDown = createKeyboardActivationHandler<HTMLDivElement>({
+    onActivate: handleClick,
+    disabled
+  })
 
   const styles = useMemo(
     () => ({
@@ -113,8 +105,9 @@ export const ExpandableNavItem = ({
       transition: `opacity ${theme.motion.quick}, background-color ${theme.motion.hover}`,
       '&:focus-visible': {
         borderRadius: theme.cornerRadius.m,
-        outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
-        outlineOffset: 3
+        outline: 'none',
+        boxShadow:
+          'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
       }
     }),
     [theme, disabled, isMainActive]
@@ -220,7 +213,8 @@ export const ExpandableNavItem = ({
             onClick={handleClick}
             onKeyDown={handleKeyDown}
             role='button'
-            tabIndex={0}
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
             aria-expanded={isOpen}
             aria-controls={`${label}-content`}
             aria-label={`${label} navigation section`}

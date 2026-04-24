@@ -1,11 +1,4 @@
-import {
-  KeyboardEvent,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 
 import { Name } from '@audius/common/models'
 import { NavItem, NavItemProps } from '@audius/harmony'
@@ -112,14 +105,6 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     restriction
   )
 
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLAnchorElement>) => {
-    if (e.key === ' ' || e.key === 'Spacebar') {
-      e.preventDefault()
-      e.stopPropagation()
-      e.currentTarget.click()
-    }
-  }, [])
-
   const handlePointerDown = useCallback(() => {
     isPointerFocusRef.current = true
     setIsFocusVisible(false)
@@ -139,15 +124,15 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
       <NavLink
         to={to ?? ''}
         onClick={requiresAccountOnClick}
-        onKeyDown={handleKeyDown}
         onPointerDown={handlePointerDown}
         onFocus={handleFocus}
         onBlur={handleBlur}
         className={styles.navLink}
         draggable={false}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         aria-label={accessibleLabel}
         aria-current={isSelected ? 'page' : undefined}
+        aria-disabled={disabled || undefined}
       >
         <CollapsedNavItem
           icon={leftIcon}
@@ -164,14 +149,14 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     <NavLink
       to={to ?? ''}
       onClick={requiresAccountOnClick}
-      onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}
       onFocus={handleFocus}
       onBlur={handleBlur}
       className={styles.navLink}
       draggable={false}
-      tabIndex={0}
+      tabIndex={disabled ? -1 : 0}
       aria-current={isSelected ? 'page' : undefined}
+      aria-disabled={disabled || undefined}
     >
       <NavItem
         {...other}

@@ -39,7 +39,6 @@ export const UserLink = (props: UserLinkProps) => {
     fullWidth,
     hideFanClubBadge,
     css: cssProp,
-    tabIndex = 0,
     ...other
   } = props
   const { spacing } = useTheme()
@@ -103,7 +102,6 @@ export const UserLink = (props: UserLinkProps) => {
         to={url}
         {...other}
         css={[linkStyles, cssProp]}
-        tabIndex={tabIndex}
       >
         <Text ellipses>{name}</Text>
       </TextLink>
@@ -134,7 +132,6 @@ export const UserLink = (props: UserLinkProps) => {
             to={url}
             {...other}
             css={[linkStyles, cssProp]}
-            tabIndex={tabIndex}
           >
             <Text ellipses>{name}</Text>
           </TextLink>

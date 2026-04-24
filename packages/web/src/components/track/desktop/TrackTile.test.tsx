@@ -152,7 +152,7 @@ describe('TrackTile', () => {
     )
   })
 
-  it('activates track and artist links with Space without scrolling the page', async () => {
+  it('does not manually activate track and artist links with Space', async () => {
     const { unmount } = renderTrackTile()
 
     const trackLink = await screen.findByRole('link', {
@@ -160,8 +160,8 @@ describe('TrackTile', () => {
     })
     fireEvent.keyDown(trackLink, { key: ' ' })
     expect(
-      await screen.findByRole('heading', { name: 'Mock Track Page' })
-    ).toBeInTheDocument()
+      screen.queryByRole('heading', { name: 'Mock Track Page' })
+    ).not.toBeInTheDocument()
 
     unmount()
     renderTrackTile()
@@ -169,8 +169,8 @@ describe('TrackTile', () => {
     const artistLink = await screen.findByRole('link', { name: 'Test User' })
     fireEvent.keyDown(artistLink, { key: ' ' })
     expect(
-      await screen.findByRole('heading', { name: 'Mock User Page' })
-    ).toBeInTheDocument()
+      screen.queryByRole('heading', { name: 'Mock User Page' })
+    ).not.toBeInTheDocument()
   })
 
   it('plays from the artwork without stealing track tile action clicks', async () => {

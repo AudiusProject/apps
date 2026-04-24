@@ -1,6 +1,7 @@
-import { KeyboardEvent } from 'react'
-
-import { IconKebabHorizontal as IconOptions } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  IconKebabHorizontal as IconOptions
+} from '@audius/harmony'
 import cn from 'classnames'
 
 import tabStyles from 'components/actions-tab/ActionsTab.module.css'
@@ -62,17 +63,6 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     return null
   }
 
-  const handleTriggerKeyDown = (
-    e: KeyboardEvent<HTMLDivElement>,
-    triggerPopup: () => void
-  ) => {
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-      e.preventDefault()
-      e.stopPropagation()
-      triggerPopup()
-    }
-  }
-
   return (
     <div onClick={onClick} className={cn(styles.tableOptionsButton, className)}>
       <Menu menu={overflowMenu}>
@@ -86,7 +76,9 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
               e.stopPropagation()
               triggerPopup()
             }}
-            onKeyDown={(e) => handleTriggerKeyDown(e, triggerPopup)}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: () => triggerPopup()
+            })}
           >
             <div ref={ref}>
               <IconOptions

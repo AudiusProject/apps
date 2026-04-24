@@ -14,6 +14,7 @@ import cn from 'classnames'
 import { Box } from '../layout/Box'
 import { Flex } from '../layout/Flex'
 import { Popup } from '../popup'
+import { isKeyboardActivationKey } from '../../utils/keyboard'
 
 import { PopupMenuItem, PopupMenuProps } from './types'
 
@@ -83,7 +84,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
     const handleMenuItemKeyDown = useCallback(
       (item: PopupMenuItem, index: number) =>
         (e: KeyboardEvent<HTMLElement>) => {
-          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          if (isKeyboardActivationKey(e)) {
             e.preventDefault()
             e.stopPropagation()
             item.onClick(e as unknown as MouseEvent<HTMLElement>)

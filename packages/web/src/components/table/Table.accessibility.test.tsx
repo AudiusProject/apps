@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { fireEvent, render, screen } from 'test/test-utils'
+import { fireEvent, render, screen, waitFor } from 'test/test-utils'
 
 import { Table } from './Table'
 
@@ -57,6 +57,20 @@ describe('Table accessibility', () => {
     const showMoreButton = screen.getByRole('button', { name: /show more/i })
     showMoreButton.focus()
     expect(showMoreButton).toHaveFocus()
+  })
+
+  it('activates sortable headers with Enter and Space', async () => {
+    const handleSort = vi.fn()
+    render(
+      <Table columns={columns} data={data} onSort={handleSort} useLocalSort />
+    )
+
+    const sortButton = screen.getByRole('button', { name: 'Sort by Title' })
+    fireEvent.keyDown(sortButton, { key: 'Enter' })
+    await waitFor(() => expect(handleSort).toHaveBeenCalledTimes(1))
+
+    fireEvent.keyDown(sortButton, { key: ' ' })
+    await waitFor(() => expect(handleSort).toHaveBeenCalledTimes(2))
   })
 
   it('keeps pagination controls in the tab order', () => {

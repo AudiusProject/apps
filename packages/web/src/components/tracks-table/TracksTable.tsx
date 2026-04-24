@@ -336,7 +336,6 @@ export const TracksTable = ({
             variant={active ? 'visible' : 'default'}
             badgeSize='xs'
             aria-label={`View artist: ${user.name}`}
-            tabIndex={0}
             popover
           />
         ) : (
@@ -408,7 +407,6 @@ export const TracksTable = ({
                   textVariant='title'
                   size='s'
                   strength='weak'
-                  tabIndex={0}
                   aria-label={`View track: ${track.name ?? track.title}`}
                   css={{
                     display: 'block',
@@ -450,7 +448,6 @@ export const TracksTable = ({
           variant={index === activeIndexRef.current ? 'visible' : 'default'}
           badgeSize='xs'
           aria-label={`View artist: ${user.name}`}
-          tabIndex={0}
           popover
         />
       </div>
