@@ -89,89 +89,95 @@ function* watchEditPlaylist() {
 function* editPlaylistAsync(
   action: ReturnType<typeof collectionActions.editPlaylist>
 ) {
-  const { playlistId, formFields } = action
-  const userId = yield* call(ensureLoggedIn)
-  yield* waitForWrite()
+  const { playlistId, formFields, onComplete } = action
+  try {
+    const userId = yield* call(ensureLoggedIn)
+    yield* waitForWrite()
 
-  const isNative = yield* getContext('isNativeMobile')
-  const { generatePlaylistArtwork } = yield* getContext('imageUtils')
+    const isNative = yield* getContext('isNativeMobile')
+    const { generatePlaylistArtwork } = yield* getContext('imageUtils')
 
-  formFields.description = squashNewLines(formFields.description) ?? null
+    formFields.description = squashNewLines(formFields.description) ?? null
 
-  // Updated the stored account playlist shortcut
-  yield* put(
-    accountActions.renameAccountPlaylist({
-      collectionId: playlistId,
-      name: formFields.playlist_name
+    // Updated the stored account playlist shortcut
+    yield* put(
+      accountActions.renameAccountPlaylist({
+        collectionId: playlistId,
+        name: formFields.playlist_name
+      })
+    )
+
+    const pending = yield* hasPendingPlaylistUpdates(playlistId)
+    const queryOpts = pending ? {} : { staleTime: 0 }
+    let playlist: Collection = { ...formFields }
+    const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
+      ...queryOpts
     })
-  )
+    const updatedTracks = (yield* all(
+      formFields.playlist_contents.track_ids.map(({ track }) =>
+        call(queryTrack, track)
+      )
+    )).filter(removeNullable)
 
-  const pending = yield* hasPendingPlaylistUpdates(playlistId)
-  const queryOpts = pending ? {} : { staleTime: 0 }
-  let playlist: Collection = { ...formFields }
-  const playlistTracks = yield* call(queryCollectionTracks, playlistId, {
-    ...queryOpts
-  })
-  const updatedTracks = (yield* all(
-    formFields.playlist_contents.track_ids.map(({ track }) =>
-      call(queryTrack, track)
+    // If the collection is a newly premium album, this will populate the premium metadata (price/splits/etc)
+    if (
+      playlist.is_album &&
+      isContentUSDCPurchaseGated(playlist.stream_conditions)
+    ) {
+      playlist.stream_conditions = yield* call(
+        getUSDCMetadata,
+        playlist.stream_conditions
+      )
+    }
+
+    // Optimistic update #1 to quickly update metadata and track lineup
+    if (isNative) {
+      yield* call(optimisticUpdateCollection, playlist)
+    }
+
+    playlist = yield* call(
+      updatePlaylistArtwork,
+      playlist,
+      playlistTracks!,
+      { updated: updatedTracks },
+      { generateImage: generatePlaylistArtwork }
     )
-  )).filter(removeNullable)
 
-  // If the collection is a newly premium album, this will populate the premium metadata (price/splits/etc)
-  if (
-    playlist.is_album &&
-    isContentUSDCPurchaseGated(playlist.stream_conditions)
-  ) {
-    playlist.stream_conditions = yield* call(
-      getUSDCMetadata,
-      playlist.stream_conditions
-    )
-  }
-
-  // Optimistic update #1 to quickly update metadata and track lineup
-  if (isNative) {
+    // Optimistic update #2 to update the artwork
+    const playlistBeforeEdit = yield* queryCollection(playlistId)
     yield* call(optimisticUpdateCollection, playlist)
-  }
 
-  playlist = yield* call(
-    updatePlaylistArtwork,
-    playlist,
-    playlistTracks!,
-    { updated: updatedTracks },
-    { generateImage: generatePlaylistArtwork }
-  )
+    yield* call(confirmEditPlaylist, playlistId, userId, playlist)
+    yield* put(collectionActions.editPlaylistSucceeded())
+    yield* put(toast({ content: messages.editToast }))
+    if (onComplete) yield* call(onComplete, true)
 
-  // Optimistic update #2 to update the artwork
-  const playlistBeforeEdit = yield* queryCollection(playlistId)
-  yield* call(optimisticUpdateCollection, playlist)
+    if (playlistBeforeEdit?.is_private && !playlist.is_private) {
+      const playlistTracksForPublish = yield* call(
+        queryCollectionTracks,
+        playlistId
+      )
 
-  yield* call(confirmEditPlaylist, playlistId, userId, playlist)
-  yield* put(collectionActions.editPlaylistSucceeded())
-  yield* put(toast({ content: messages.editToast }))
-
-  if (playlistBeforeEdit?.is_private && !playlist.is_private) {
-    const playlistTracksForPublish = yield* call(
-      queryCollectionTracks,
-      playlistId
-    )
-
-    // Publish all hidden tracks
-    // If the playlist is a scheduled release
-    //    AND all tracks are scheduled releases, publish them all
-    const isEachTrackScheduled = playlistTracksForPublish?.every(
-      (track) => track.is_unlisted && track.is_scheduled_release
-    )
-    const isEarlyRelease =
-      playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
-    for (const track of playlistTracksForPublish ?? []) {
-      if (
-        track.is_unlisted &&
-        (!track.is_scheduled_release || isEarlyRelease)
-      ) {
-        yield* put(trackPageActions.makeTrackPublic(track.track_id))
+      // Publish all hidden tracks
+      // If the playlist is a scheduled release
+      //    AND all tracks are scheduled releases, publish them all
+      const isEachTrackScheduled = playlistTracksForPublish?.every(
+        (track) => track.is_unlisted && track.is_scheduled_release
+      )
+      const isEarlyRelease =
+        playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
+      for (const track of playlistTracksForPublish ?? []) {
+        if (
+          track.is_unlisted &&
+          (!track.is_scheduled_release || isEarlyRelease)
+        ) {
+          yield* put(trackPageActions.makeTrackPublic(track.track_id))
+        }
       }
     }
+  } catch (error) {
+    if (onComplete) yield* call(onComplete, false, error as Error)
+    throw error
   }
 }
 
