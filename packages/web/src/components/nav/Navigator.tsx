@@ -46,8 +46,7 @@ const Navigator = ({ className }: OwnProps) => {
   // Mobile-web pages that render their own full-bleed hero + back
   // control (contest page) opt out of the global top nav so the hero
   // can own the top of the viewport. Desktop is unaffected.
-  const hideMobileNav =
-    isMobile && /\/contest(\/|$)/.test(location.pathname)
+  const hideMobileNav = isMobile && /\/contest(\/|$)/.test(location.pathname)
 
   const [isCollapsed, setIsCollapsedState] = useState<boolean>(() => {
     try {

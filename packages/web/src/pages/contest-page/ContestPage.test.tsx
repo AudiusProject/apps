@@ -195,10 +195,11 @@ describe('ContestPage', () => {
   })
 
   it('renders the details / prizes / submissions / feed sections when a contest exists', () => {
-    // Provide a non-empty lineup so the Submissions pill renders (the
-    // tab toggle is hidden while no submissions exist).
+    // Provide original + one submission so submissionsCount = 1 and the
+    // Submissions pill renders (the tab toggle is hidden while there are
+    // no actual submissions).
     mocks.useRemixesLineup.mockReturnValue({
-      data: [{ id: 1 }],
+      data: [{ id: 1 }, { id: 2 }],
       isFetching: false,
       isPending: false,
       isError: false,

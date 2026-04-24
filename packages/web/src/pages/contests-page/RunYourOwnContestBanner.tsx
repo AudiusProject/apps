@@ -67,12 +67,7 @@ export const RunYourOwnContestBanner = () => {
         </Text>
       </Flex>
 
-      <Button
-        variant='primary'
-        size='default'
-        asChild
-        css={{ flexShrink: 0 }}
-      >
+      <Button variant='primary' size='default' asChild css={{ flexShrink: 0 }}>
         <a
           href={CONTEST_HOSTING_HELP_URL}
           target='_blank'
