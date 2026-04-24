@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   useCreateEvent,
@@ -71,11 +71,11 @@ const messages = {
   deadlineHelper:
     'Remixes submitted after this date will not be accepted. Local timezone applies.',
   coverPhotoLabel: 'Cover Photo',
-  coverPhotoHelper: 'This image will represent your remix contest.',
+  coverPhotoHelper:
+    "Optional — defaults to the track's artwork if you don't upload one.",
   coverPhotoPlaceholder: 'Drag-and-drop an image here, or browse to upload',
-  coverPhotoComingSoon:
-    'Upload coming soon — temporarily paste an image URL below to override the track artwork default.',
-  coverPhotoUrlLabel: 'Cover image URL (optional)',
+  coverPhotoUploadFailed:
+    'Upload failed. Try again or leave blank to use the track artwork.',
   prizesLabel: 'Prizes',
   prizesHelper: 'Describe all prizes, rewards, or other incentives.',
   prizesPlaceholder: '1st place gets $500. 2nd place gets $250…',
@@ -84,9 +84,7 @@ const messages = {
     'Choose one or more tracks to be linked to this contest. Any stems included in that track will also be part of this contest.',
   sourceTracksSectionLabel: 'SOURCE TRACKS',
   addTrack: '+ Add Track',
-  uploadNow: 'Upload Now',
   cancel: 'Cancel',
-  saveDraft: 'Save Draft',
   launch: 'Launch',
   save: 'Save',
   turnOff: 'Turn off contest',
@@ -164,34 +162,73 @@ export const HostRemixContestPage = () => {
   const primaryPermalink = primaryTrack?.permalink ?? ''
 
   // ---------------------------------------------------------------------------
+  // Draft persistence — keyed by handle/slug (or 'new' for the trackless
+  // route) so a user can navigate to edit a source track and return without
+  // losing in-flight form state. Cleared on launch / cancel / delete.
+  // ---------------------------------------------------------------------------
+  const draftStorageKey = useMemo(
+    () =>
+      handle && slug
+        ? `host-remix-contest-draft:${handle}/${slug}`
+        : 'host-remix-contest-draft:new',
+    [handle, slug]
+  )
+  const draft = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const raw = window.sessionStorage.getItem(draftStorageKey)
+      return raw ? JSON.parse(raw) : null
+    } catch {
+      return null
+    }
+    // Read once on mount; ignore deps churn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftStorageKey])
+
+  // ---------------------------------------------------------------------------
   // Form state
   // ---------------------------------------------------------------------------
-  const [title, setTitle] = useState(existingEventData.title ?? '')
+  const [title, setTitle] = useState(
+    draft?.title ?? existingEventData.title ?? ''
+  )
   const [description, setDescription] = useState(
-    existingEventData.description ?? ''
+    draft?.description ?? existingEventData.description ?? ''
   )
   const [descriptionError, setDescriptionError] = useState(false)
-  const [videoUrl, setVideoUrl] = useState(existingEventData.videoUrl ?? '')
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState(
-    existingEventData.coverPhotoUrl ?? ''
+  const [videoUrl, setVideoUrl] = useState(
+    draft?.videoUrl ?? existingEventData.videoUrl ?? ''
   )
-  const [prizeInfo, setPrizeInfo] = useState(existingEventData.prizeInfo ?? '')
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState(
+    draft?.coverPhotoUrl ?? existingEventData.coverPhotoUrl ?? ''
+  )
+  const [prizeInfo, setPrizeInfo] = useState(
+    draft?.prizeInfo ?? existingEventData.prizeInfo ?? ''
+  )
 
+  const initialEndDate = draft?.contestEndDate
+    ? dayjs(draft.contestEndDate)
+    : remixContest
+      ? dayjs(remixContest.endDate)
+      : null
   const [contestEndDate, setContestEndDate] = useState<dayjs.Dayjs | null>(
-    remixContest ? dayjs(remixContest.endDate) : null
+    initialEndDate
   )
   const [endDateTouched, setEndDateTouched] = useState(false)
   const [endDateError, setEndDateError] = useState(false)
   const [timeValue, setTimeValue] = useState(
-    contestEndDate ? dayjs(contestEndDate).format('hh:mm') : ''
+    draft?.timeValue ??
+      (initialEndDate ? dayjs(initialEndDate).format('hh:mm') : '')
   )
   const [timeError, setTimeError] = useState(false)
   const [meridianValue, setMeridianValue] = useState(
-    contestEndDate ? dayjs(contestEndDate).format('A') : ''
+    draft?.meridianValue ??
+      (initialEndDate ? dayjs(initialEndDate).format('A') : '')
   )
 
   const [sourceTrackIds, setSourceTrackIds] = useState<number[]>(
-    existingEventData.sourceTrackIds ?? (primaryTrackId ? [primaryTrackId] : [])
+    draft?.sourceTrackIds ??
+      existingEventData.sourceTrackIds ??
+      (primaryTrackId ? [primaryTrackId] : [])
   )
 
   // The event's backing track: prefer the URL-scoped primary track, and
@@ -211,6 +248,50 @@ export const HostRemixContestPage = () => {
     null
   )
 
+  // Persist form state on every change so the user can leave (e.g. to
+  // edit a source track) and return without losing what they typed.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.sessionStorage.setItem(
+        draftStorageKey,
+        JSON.stringify({
+          title,
+          description,
+          videoUrl,
+          coverPhotoUrl,
+          prizeInfo,
+          contestEndDate: contestEndDate?.toISOString() ?? null,
+          timeValue,
+          meridianValue,
+          sourceTrackIds
+        })
+      )
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [
+    draftStorageKey,
+    title,
+    description,
+    videoUrl,
+    coverPhotoUrl,
+    prizeInfo,
+    contestEndDate,
+    timeValue,
+    meridianValue,
+    sourceTrackIds
+  ])
+
+  const clearDraft = useCallback(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.sessionStorage.removeItem(draftStorageKey)
+    } catch {
+      /* ignore */
+    }
+  }, [draftStorageKey])
+
   // ---------------------------------------------------------------------------
   // Cover-photo upload + fallback to track artwork
   // ---------------------------------------------------------------------------
@@ -222,12 +303,18 @@ export const HostRemixContestPage = () => {
   const { upload: uploadCover, isUploading: isCoverUploading } =
     useUploadContestCover()
   const coverFileInputRef = useRef<HTMLInputElement>(null)
+  const [coverUploadError, setCoverUploadError] = useState(false)
 
   const handleCoverFileSelected = useCallback(
     async (file: File | null) => {
       if (!file) return
+      setCoverUploadError(false)
       const url = await uploadCover(file)
-      if (url) setCoverPhotoUrl(url)
+      if (url) {
+        setCoverPhotoUrl(url)
+      } else {
+        setCoverUploadError(true)
+      }
     },
     [uploadCover]
   )
@@ -278,6 +365,7 @@ export const HostRemixContestPage = () => {
   }, [])
 
   const handleCancel = useCallback(() => {
+    clearDraft()
     // Track-less flow: fall back to the contests discovery page.
     if (!primaryPermalink) {
       navigate(CONTESTS_PAGE)
@@ -288,7 +376,7 @@ export const HostRemixContestPage = () => {
         ? fullContestPage(primaryPermalink)
         : fullTrackPage(primaryPermalink)
     )
-  }, [isEdit, navigate, primaryPermalink])
+  }, [clearDraft, isEdit, navigate, primaryPermalink])
 
   const handleSubmit = useCallback(() => {
     const parsedTime = parseTime(timeValue)
@@ -358,12 +446,14 @@ export const HostRemixContestPage = () => {
       )
     }
 
+    clearDraft()
     if (effectivePermalink) {
       navigate(fullContestPage(effectivePermalink))
     } else {
       navigate(CONTESTS_PAGE)
     }
   }, [
+    clearDraft,
     timeValue,
     contestEndDate,
     meridianValue,
@@ -398,10 +488,12 @@ export const HostRemixContestPage = () => {
         })
       )
     }
+    clearDraft()
     if (primaryPermalink) {
       navigate(fullTrackPage(primaryPermalink))
     }
   }, [
+    clearDraft,
     remixContest,
     currentUserId,
     deleteEvent,
@@ -584,9 +676,6 @@ export const HostRemixContestPage = () => {
             <Flex direction='column' gap='xs'>
               <Text variant='title' size='l' tag='label'>
                 {messages.coverPhotoLabel}
-                <Text color='accent' tag='span'>
-                  {messages.required}
-                </Text>
               </Text>
               <Text variant='body' size='s' color='subdued'>
                 {messages.coverPhotoHelper}
@@ -647,6 +736,11 @@ export const HostRemixContestPage = () => {
                 e.target.value = ''
               }}
             />
+            {coverUploadError ? (
+              <Text variant='body' size='s' color='danger'>
+                {messages.coverPhotoUploadFailed}
+              </Text>
+            ) : null}
           </Paper>
 
           {/* Section: Prizes */}
@@ -693,21 +787,17 @@ export const HostRemixContestPage = () => {
               </Text>
             </Flex>
             {/* For now only one Source Track is supported. Once one has
-                been picked, both Add Track and Upload Now are locked out
-                — users can Remove the existing row to swap. */}
+                been picked, Add Track is locked out — users can Remove the
+                existing row to swap. (Upload-track-from-here is dropped for
+                v1; will follow up alongside Save Draft in v2.) */}
             {sourceTrackIds.length === 0 ? (
-              <Flex gap='s'>
-                <Button
-                  variant='primary'
-                  fullWidth
-                  onClick={handleAddSourceTrack}
-                >
-                  {messages.addTrack}
-                </Button>
-                <Button variant='secondary' iconLeft={IconCloudUpload}>
-                  {messages.uploadNow}
-                </Button>
-              </Flex>
+              <Button
+                variant='primary'
+                fullWidth
+                onClick={handleAddSourceTrack}
+              >
+                {messages.addTrack}
+              </Button>
             ) : null}
             {sourceTrackIds.length > 0 ? (
               <Flex direction='column' gap='xs'>
@@ -721,6 +811,11 @@ export const HostRemixContestPage = () => {
                       sourceTrackId={id}
                       onRemove={() => handleRemoveSourceTrack(id)}
                       onManageStems={() => setManageStemsTargetId(id)}
+                      editReturnTo={
+                        handle && slug
+                          ? `/${handle}/${slug}/host-contest`
+                          : '/host-contest'
+                      }
                     />
                   ))}
                 </Flex>
@@ -739,11 +834,6 @@ export const HostRemixContestPage = () => {
                   {messages.turnOff}
                 </Button>
               ) : null}
-              {/* Save Draft is scoped out for now (Chunk 2) — no draft
-                  model exists on the backend yet. */}
-              <Button variant='secondary' disabled>
-                {messages.saveDraft}
-              </Button>
               <Button
                 variant='primary'
                 onClick={handleSubmit}
@@ -782,12 +872,19 @@ type SourceTrackRowProps = {
   sourceTrackId: number
   onRemove: () => void
   onManageStems: () => void
+  /**
+   * Path the track-edit page should return to when the user clicks
+   * Save / Back. Encoded into a `returnTo` query param so the in-flight
+   * contest-creation form is restored from sessionStorage on landing.
+   */
+  editReturnTo: string
 }
 
 const SourceTrackRow = ({
   sourceTrackId,
   onRemove,
-  onManageStems
+  onManageStems,
+  editReturnTo
 }: SourceTrackRowProps) => {
   const navigate = useNavigate()
   const { data: trackData } = useTrack(sourceTrackId, {
@@ -870,7 +967,8 @@ const SourceTrackRow = ({
               text: messages.editTrack,
               onClick: () => {
                 if (trackData?.permalink) {
-                  navigate(`${trackData.permalink}/edit`)
+                  const target = `${trackData.permalink}/edit?returnTo=${encodeURIComponent(editReturnTo)}`
+                  navigate(target)
                 }
               }
             },

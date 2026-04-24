@@ -192,6 +192,11 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const hasStems = stemTracks.length > 0 || isUploadingStems
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
 
+  // No caret / no expandable list when there's a single downloadable track
+  // (download original ON, no stems). Tapping the row's download button
+  // should be the entire interaction — there's nothing to expand.
+  const isSingleTrackDownload = !!is_downloadable && !hasStems
+
   const handleDownloadButtonClick = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
@@ -244,13 +249,13 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
           justifyContent='space-between'
           alignItems='center'
           p='l'
-          onClick={onToggleExpand}
+          onClick={isSingleTrackDownload ? undefined : onToggleExpand}
           css={{
-            cursor: 'pointer'
+            cursor: isSingleTrackDownload ? 'default' : 'pointer'
           }}
-          role='button'
-          aria-expanded={expanded}
-          aria-controls='download-section'
+          role={isSingleTrackDownload ? undefined : 'button'}
+          aria-expanded={isSingleTrackDownload ? undefined : expanded}
+          aria-controls={isSingleTrackDownload ? undefined : 'download-section'}
         >
           <Flex
             justifyContent='space-between'
@@ -316,14 +321,16 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             ) : null}
           </Flex>
 
-          <IconCaretDown
-            css={{
-              transition: 'transform var(--harmony-expressive)',
-              transform: expanded ? 'rotate(-180deg)' : undefined
-            }}
-            size='m'
-            color='default'
-          />
+          {isSingleTrackDownload ? null : (
+            <IconCaretDown
+              css={{
+                transition: 'transform var(--harmony-expressive)',
+                transform: expanded ? 'rotate(-180deg)' : undefined
+              }}
+              size='m'
+              color='default'
+            />
+          )}
         </Flex>
         {shouldDisplayOwnerPremiumDownloads && formattedPrice ? (
           <Flex pl='l' pr='l' pb='l'>
