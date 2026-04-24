@@ -770,6 +770,8 @@ const WebPlayer = (props: WebPlayerProps) => {
           role='main'
           className={cn(styles.mainContentWrapper, {
             [styles.mainContentWrapperMobile]: isMobile,
+            [styles.noMobileNav]:
+              isMobile && /\/contest(\/|$)/.test(currentRoute),
             [styles.noScroll]: noScroll
           })}
         >

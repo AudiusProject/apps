@@ -69,3 +69,13 @@
   transform: none;
   transition: none;
 }
+
+/* Applied alongside .mainContentWrapperMobile on routes that hide the
+   global mobile top nav (e.g. the contest page, whose hero owns the
+   top of the viewport). Removes the reserved 40px nav gutter so the
+   hero sits flush under the safe-area inset instead of leaving a
+   blank strip where the nav used to be. */
+.mainContentWrapperMobile.noMobileNav {
+  min-height: calc(100vh - env(safe-area-inset-top, 0px));
+  margin-top: env(safe-area-inset-top, 0px);
+}

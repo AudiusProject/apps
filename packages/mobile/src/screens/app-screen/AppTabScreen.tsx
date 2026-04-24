@@ -19,10 +19,10 @@ import type {
 import type { EventArg, NavigationState } from '@react-navigation/native'
 import { useIsFocused } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { Dimensions } from 'react-native'
 
 import { FilterButtonScreen } from '@audius/harmony-native'
 import type { FilterButtonScreenParams } from '@audius/harmony-native'
-import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AudioScreen } from 'app/screens/audio-screen'
@@ -65,12 +65,14 @@ import {
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
 
-import { ContestScreen } from '../contest-screen'
+import { ContestFollowersScreen, ContestScreen } from '../contest-screen'
 import { ContestsScreen } from '../contests-screen'
 import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
 import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
+
+const SCREEN_WIDTH = Dimensions.get('window').width
 
 export type AppTabScreenParamList = {
   Track: {
@@ -81,6 +83,7 @@ export type AppTabScreenParamList = {
   } & ({ handle: string; slug: string } | { trackId: ID })
   TrackRemixes: { trackId: ID } | { handle: string; slug: string }
   Contest: { trackId: ID } | { handle: string; slug: string }
+  ContestFollowers: { eventId: ID }
   Profile: { handle: string; id?: ID } | { handle?: string; id: ID }
   Collection: {
     id?: ID
@@ -180,20 +183,22 @@ type AppTabScreenProps = {
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
   const { drawerNavigation, setIsAtStackRoot } = useContext(AppDrawerContext)
-  const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const isFocused = useIsFocused()
   const isAtStackRootRef = useRef(true)
 
-  // NowPlayingDrawer calls setOptions({swipeEnabled: false}) imperatively, and
-  // imperative options beat screenOptions, so we must also re-apply imperatively.
+  // NowPlayingDrawer calls setOptions imperatively, and imperative options beat
+  // screenOptions, so we must also re-apply imperatively. We gate on
+  // swipeEdgeWidth rather than swipeEnabled to keep the drawer's
+  // PanGestureHandler registered — fully disabling it narrows the native
+  // stack's fullScreenGesture back-swipe to the left edge.
   const applyDrawerSwipe = useCallback(
     (isAtRoot: boolean) => {
       setIsAtStackRoot?.(isAtRoot)
       drawerNavigation?.setOptions({
-        swipeEnabled: isAtRoot && !isNowPlayingDrawerOpen
+        swipeEdgeWidth: isAtRoot ? SCREEN_WIDTH : 0
       })
     },
-    [drawerNavigation, isNowPlayingDrawerOpen, setIsAtStackRoot]
+    [drawerNavigation, setIsAtStackRoot]
   )
 
   const handleChangeState = useCallback(
@@ -257,6 +262,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
       <Stack.Screen name='Contests' component={ContestsScreen} />
       <Stack.Screen name='Contest' component={ContestScreen} />
+      <Stack.Screen
+        name='ContestFollowers'
+        component={ContestFollowersScreen}
+      />
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />

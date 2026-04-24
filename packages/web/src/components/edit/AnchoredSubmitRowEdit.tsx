@@ -25,10 +25,18 @@ type AnchoredSubmitRowEditProps = {
 
 export const AnchoredSubmitRowEdit = ({
   errorText,
-  isSubmitting = false
+  isSubmitting: isSubmittingProp
 }: AnchoredSubmitRowEditProps = {}) => {
   const scrollToTop = useContext(EditFormScrollContext)
-  const { isValid, submitForm } = useFormikContext()
+  const {
+    isValid,
+    submitForm,
+    isSubmitting: isFormikSubmitting
+  } = useFormikContext()
+  // Fall back to Formik's submission state so flows that don't pass an
+  // explicit isSubmitting prop still get a loading indicator while the
+  // submit handler's promise is in flight.
+  const isSubmitting = isSubmittingProp ?? isFormikSubmitting
 
   const navigate = useNavigate()
 

@@ -315,6 +315,7 @@ export const remoteConfig = <
   return {
     getFeatureEnabled,
     getRemoteVar,
+    getPlatform: () => platform,
     init,
     setUserId,
     waitForRemoteConfig,

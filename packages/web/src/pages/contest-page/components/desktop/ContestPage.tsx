@@ -28,10 +28,9 @@ import {
   Button,
   Divider,
   FilterButton,
+  FollowButton,
   Flex,
   IconButton,
-  IconNotificationOff,
-  IconNotificationOn,
   IconShare,
   Paper,
   SelectablePill,
@@ -63,8 +62,6 @@ import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
   title: 'Remix Contest',
-  follow: 'Follow',
-  following: 'Following',
   enterContest: 'Enter Contest',
   share: 'Share contest',
   submissionsDue: 'Submissions Due:',
@@ -265,10 +262,13 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
 
-  // Lineup for the submissions tab — full TrackTile treatment.
+  // Lineup for the submissions tab — full TrackTile treatment. Includes
+  // the original (parent) track at the top of the lineup so viewers can
+  // compare the source the remixes are built on without jumping back out
+  // to the track page, matching the track-page `RemixesPage`.
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
-    includeOriginal: false,
+    includeOriginal: true,
     includeWinners: true,
     isContestEntry: true,
     sortMethod,
@@ -305,7 +305,17 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
   }, [contest?.endDate])
 
-  const submissionsCount = lineup.data?.length
+  // Total lineup length includes the original + winners + remixes.
+  // The Submissions tab pill should show the number of *actual*
+  // submissions (remixes), not the whole lineup. Subtract one for
+  // the original (always included when `includeOriginal: true`) and
+  // the number of winners from the contest event data.
+  const lineupLength = lineup.data?.length
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
+  const submissionsCount =
+    lineupLength === undefined
+      ? undefined
+      : Math.max(0, lineupLength - 1 - winnerCount)
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {
@@ -360,9 +370,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         </Flex>
       )
     }
-    // Public view: Share icon + Follow pill (notification-style bell) +
-    // Enter Contest primary CTA, per the Figma. Enter Contest is hidden
-    // once the contest has ended — "entering" isn't meaningful anymore.
+    // Public view: Share icon + profile-style Follow button
+    // (Follow → Following → hover Unfollow) + Enter Contest primary
+    // CTA, per the Figma. Enter Contest is hidden once the contest
+    // has ended — "entering" isn't meaningful anymore.
     return (
       <Flex gap='s' alignItems='center' wrap='wrap'>
         <IconButton
@@ -371,17 +382,14 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           aria-label={messages.share}
           onClick={handleShareContest}
         />
-        <Button
+        <FollowButton
           size='small'
-          variant={followState?.isFollowed ? 'secondary' : 'secondary'}
-          iconLeft={
-            followState?.isFollowed ? IconNotificationOn : IconNotificationOff
-          }
+          fullWidth={false}
+          isFollowing={!!followState?.isFollowed}
           disabled={isFollowing || isUnfollowing}
-          onClick={handleToggleFollow}
-        >
-          {followState?.isFollowed ? messages.following : messages.follow}
-        </Button>
+          onFollow={handleToggleFollow}
+          onUnfollow={handleToggleFollow}
+        />
         {!isEnded ? (
           <Button size='small' onClick={handleEnterContest}>
             {messages.enterContest}
@@ -703,11 +711,13 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               >
                 {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
 
-                <EventFollowersCard
-                  eventId={eventId}
-                  followerCount={followState?.followerCount ?? 0}
-                  onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
-                />
+                {(followState?.followerCount ?? 0) > 0 ? (
+                  <EventFollowersCard
+                    eventId={eventId}
+                    followerCount={followState?.followerCount ?? 0}
+                    onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
+                  />
+                ) : null}
 
                 {/* Comments tile — in-column Figma card. */}
                 <ContestCommentsTile
@@ -726,69 +736,96 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           />
 
           {activeTab === 'submissions' ? (
-            <Paper
-              direction='column'
-              p='xl'
-              gap='l'
-              borderRadius='l'
-              border='default'
-              shadow='flat'
-              backgroundColor='white'
-            >
-              {/* Filter bar — same controls the track-page `RemixesPage`
-                exposes above its remixes lineup: a Co-Signed toggle
-                plus a Most Recent / Most Plays / Most Favorites sort
-                dropdown. Co-signed surfaces entries the host has
-                endorsed; the sort drives the underlying
-                `useRemixesLineup` query. */}
-              <Flex
-                justifyContent='space-between'
-                alignItems='center'
-                gap='s'
-                css={{
-                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
-                    {
-                      flexDirection: 'column',
-                      alignItems: 'stretch'
-                    }
-                }}
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.submissionsTab(submissionsCount)}
-                </Text>
-                <Flex gap='s' wrap='wrap'>
-                  <FilterButton
-                    label={messages.coSigned}
-                    value={isCosign ? 'true' : null}
-                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+            <Flex direction='column' gap='l'>
+              {(() => {
+                // Lineup shape is [original, ...winners, ...remixes].
+                // Mirror the legacy `RemixesPage` delineator pattern:
+                // a WINNERS label after the original, and a
+                // `SUBMISSIONS (N) + filter bar` delineator after
+                // the last winner (or after the original when there
+                // are no winners). Keeps the filter controls docked
+                // to the boundary between winners and submissions
+                // where they're most contextual, and matches the
+                // native mobile + track-page reference.
+                const winnersDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Box pt='l'>
+                      <Text variant='label' size='m' color='subdued'>
+                        WINNERS
+                      </Text>
+                    </Box>
+                  </Box>
+                )
+                const submissionsDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Flex
+                      justifyContent='space-between'
+                      alignItems='center'
+                      gap='s'
+                      pt='l'
+                      css={{
+                        [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                          {
+                            flexDirection: 'column',
+                            alignItems: 'stretch'
+                          }
+                      }}
+                    >
+                      <Text variant='label' size='m' color='subdued'>
+                        {messages.submissionsTab(submissionsCount)}
+                      </Text>
+                      <Flex gap='s' wrap='wrap'>
+                        <FilterButton
+                          label={messages.coSigned}
+                          value={isCosign ? 'true' : null}
+                          onClick={() =>
+                            updateIsCosignParam(isCosign ? '' : 'true')
+                          }
+                        />
+                        <FilterButton
+                          value={sortMethod ?? 'recent'}
+                          variant='replaceLabel'
+                          onChange={updateSortParam}
+                          options={[
+                            { label: messages.sortRecent, value: 'recent' },
+                            { label: messages.sortPlays, value: 'plays' },
+                            { label: messages.sortFavorites, value: 'likes' }
+                          ]}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Box>
+                )
+                const delineatorMap: Record<number, JSX.Element> =
+                  winnerCount > 0
+                    ? {
+                        0: winnersDelineator,
+                        [winnerCount]: submissionsDelineator
+                      }
+                    : {
+                        0: submissionsDelineator
+                      }
+                return (
+                  <TanQueryLineup
+                    data={lineup.data}
+                    isFetching={lineup.isFetching}
+                    isPending={lineup.isPending}
+                    isError={lineup.isError}
+                    hasNextPage={lineup.hasNextPage}
+                    play={lineup.play}
+                    pause={lineup.pause}
+                    loadNextPage={lineup.loadNextPage}
+                    isPlaying={lineup.isPlaying}
+                    lineup={lineup.lineup}
+                    pageSize={CONTEST_PAGE_SIZE}
+                    actions={remixesPageLineupActions}
+                    delineatorMap={delineatorMap}
                   />
-                  <FilterButton
-                    value={sortMethod ?? 'recent'}
-                    variant='replaceLabel'
-                    onChange={updateSortParam}
-                    options={[
-                      { label: messages.sortRecent, value: 'recent' },
-                      { label: messages.sortPlays, value: 'plays' },
-                      { label: messages.sortFavorites, value: 'likes' }
-                    ]}
-                  />
-                </Flex>
-              </Flex>
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
-            </Paper>
+                )
+              })()}
+            </Flex>
           ) : null}
         </Box>
       </Box>

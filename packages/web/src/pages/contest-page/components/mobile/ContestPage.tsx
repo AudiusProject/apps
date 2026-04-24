@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  getCommentQueryKey,
   useCurrentUserId,
+  useEventComments,
   useEventFollowState,
+  useFollowEvent,
   useRemixContest,
   useRemixesLineup,
   useStems,
   useTrack,
   useTrackByPermalink,
+  useUnfollowEvent,
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { SquareSizes } from '@audius/common/models'
+import { ShareSource, SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
   remixesPageLineupActions,
-  remixesPageSelectors
+  remixesPageSelectors,
+  shareModalUIActions
 } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import {
@@ -28,9 +33,15 @@ import {
   IconArrowLeft,
   IconButton,
   IconKebabHorizontal,
+  IconShare,
+  IconUserFollow,
+  IconUserFollowing,
   Paper,
-  Text
+  PopupMenu,
+  Text,
+  useTheme
 } from '@audius/harmony'
+import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
@@ -71,7 +82,10 @@ const messages = {
   sortPlays: 'Most Plays',
   sortFavorites: 'Most Favorites',
   loading: 'Loading…',
-  noRemixes: 'No submissions yet.'
+  noRemixes: 'No submissions yet.',
+  follow: 'Follow Contest',
+  unfollow: 'Unfollow Contest',
+  share: 'Share Contest'
 }
 
 const HERO_HEIGHT = 220
@@ -141,22 +155,40 @@ const MobileCountdown = ({ endDate }: { endDate: string }) => {
 // underline on the active tab, subdued on inactive. Uses `title` variant
 // so the text renders mixed case (the `label` variant would force
 // uppercase).
+//
+// Wrapped in a Paper so the tab strip reads as a distinct surface from
+// the hero content above it (the hero sits on the page background).
+// A continuous thin bottom border acts as the inactive underline for
+// every tab, with a thicker accent underline overlaying the active
+// one — this keeps tab widths uniform (equal flex columns) and the
+// row visually anchored.
 // -----------------------------------------------------------------------------
 const TabBar = ({
   active,
-  onChange
+  onChange,
+  showUpdates
 }: {
   active: MobileContestTab
   onChange: (t: MobileContestTab) => void
+  showUpdates: boolean
 }) => {
+  const { color } = useTheme()
   const tabs: { key: MobileContestTab; label: string }[] = [
     { key: 'details', label: messages.detailsTab },
-    { key: 'updates', label: messages.updatesTab },
+    ...(showUpdates
+      ? [{ key: 'updates' as MobileContestTab, label: messages.updatesTab }]
+      : []),
     { key: 'submissions', label: messages.submissionsTab },
     { key: 'comments', label: messages.commentsTab }
   ]
   return (
-    <Flex alignItems='center' justifyContent='space-around' w='100%'>
+    <Flex
+      alignItems='stretch'
+      w='100%'
+      css={{
+        borderBottom: `1px solid ${color.border.default}`
+      }}
+    >
       {tabs.map((t) => {
         const isActive = active === t.key
         return (
@@ -166,11 +198,24 @@ const TabBar = ({
             css={{
               flex: 1,
               textAlign: 'center',
-              paddingBottom: 8,
-              borderBottom: isActive
-                ? '2px solid var(--harmony-primary)'
-                : '2px solid transparent',
-              cursor: 'pointer'
+              paddingTop: 10,
+              paddingBottom: 10,
+              position: 'relative',
+              cursor: 'pointer',
+              // Overlay a 2px accent rule on the active tab — sits on
+              // top of the container's 1px default border so active
+              // state reads clearly without disturbing tab widths.
+              '&::after': isActive
+                ? {
+                    content: '""',
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: -1,
+                    height: 2,
+                    backgroundColor: color.primary.primary
+                  }
+                : undefined
             }}
           >
             <Text
@@ -229,13 +274,63 @@ const ContestPage = ({
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
+  const { mutate: followEvent, isPending: isFollowing } = useFollowEvent()
+  const { mutate: unfollowEvent, isPending: isUnfollowing } = useUnfollowEvent()
 
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
+
+  const handleToggleFollow = useRequiresAccountCallback(() => {
+    if (!eventId || !currentUserId) return
+    if (followState?.isFollowed) {
+      unfollowEvent({ userId: currentUserId, eventId })
+    } else {
+      followEvent({ userId: currentUserId, eventId })
+    }
+  }, [
+    eventId,
+    currentUserId,
+    followState?.isFollowed,
+    followEvent,
+    unfollowEvent
+  ])
+
+  const handleShareContest = useCallback(() => {
+    if (!trackId) return
+    dispatch(
+      shareModalUIActions.requestOpen({
+        type: 'contest',
+        trackId,
+        source: ShareSource.PAGE
+      })
+    )
+  }, [dispatch, trackId])
 
   const { imageUrl: coverArtUrl } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
+
+  // Updates tab visibility — for non-hosts, hide the tab until there's
+  // at least one host-authored top-level post (a "post update"). The
+  // host always sees the tab so they have somewhere to compose from.
+  // We mirror the filter ContestCommentsTile uses internally.
+  const queryClient = useQueryClient()
+  const { data: commentFeedItems } = useEventComments({
+    eventId: eventId ?? 0,
+    sortMethod: 'newest',
+    enabled: !!eventId
+  })
+  const hasPostUpdates = (commentFeedItems ?? []).some(({ commentId }) => {
+    const comment = queryClient.getQueryData(getCommentQueryKey(commentId))
+    if (!comment) return false
+    const parentCommentId = (comment as any).parentCommentId
+    return (
+      contest?.userId !== undefined &&
+      (comment as any).userId === contest.userId &&
+      !parentCommentId
+    )
+  })
+  const showUpdatesTab = isOwner || hasPostUpdates
 
   // Stems & Downloads panel: only mount when the track has downloadable
   // content. Matches the desktop behaviour — DownloadSection assumes a
@@ -256,15 +351,27 @@ const ContestPage = ({
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
 
   // Submissions lineup — driven on demand by the Submissions tab.
+  // Includes the original (parent) track at the top of the lineup so
+  // listeners can compare against the source remixes are built on
+  // without jumping back out, matching the track-page `RemixesPage`
+  // and the desktop contest page.
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
-    includeOriginal: false,
+    includeOriginal: true,
     includeWinners: true,
     isContestEntry: true,
     sortMethod,
     isCosign
   })
-  const submissionsCount = lineup.data?.length
+  // Total lineup length includes the original + winners + remixes.
+  // The "N Submissions" label should show the number of *actual*
+  // submissions (remixes), not the whole lineup.
+  const lineupLength = lineup.data?.length
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
+  const submissionsCount =
+    lineupLength === undefined
+      ? undefined
+      : Math.max(0, lineupLength - 1 - winnerCount)
 
   useEffect(() => {
     if (trackId) {
@@ -340,21 +447,34 @@ const ContestPage = ({
     </Button>
   )
 
+  // Overflow menu items. Host gets Share only (follow doesn't apply to
+  // your own contest); public gets Follow/Unfollow + Share. Wired
+  // through Harmony `PopupMenu` — the kebab IconButton is the anchor.
+  const isFollowed = !!followState?.isFollowed
+  const followMenuItem = {
+    icon: isFollowed ? <IconUserFollowing /> : <IconUserFollow />,
+    text: isFollowed ? messages.unfollow : messages.follow,
+    onClick: () => handleToggleFollow()
+  }
+  const shareMenuItem = {
+    icon: <IconShare />,
+    text: messages.share,
+    onClick: () => handleShareContest()
+  }
+  const overflowMenuItems = isOwner
+    ? [shareMenuItem]
+    : [followMenuItem, shareMenuItem]
+
   return (
     <Page
       title={messages.title}
       canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
-      {/* Mobile header block now inherits the same `white` surface
-          token the Paper cards use, so the hero + title + deadline
-          + countdown + hosted-by stack reads as the same background
-          color as the sections below it. Matches Figma 2925-18102
-          where the whole contest header sits on a single dark
-          (dark-mode) / white (light-mode) surface. */}
+      {/* Top section: hero banner + meta (title, CTA, deadline,
+          countdown, hosted-by) sits on a white surface. */}
       <Box
         w='100%'
-        pb='xl'
         css={(theme) => ({ backgroundColor: theme.color.background.white })}
       >
         {/* Hero banner */}
@@ -368,19 +488,22 @@ const ContestPage = ({
             position: 'relative'
           }}
         >
+          {/* Back button — white disc with an elevation shadow for
+              emphasis instead of the previous translucent dark circle.
+              Reads cleanly against both light and dark cover art. */}
           <Box
-            css={{
+            css={(theme) => ({
               position: 'absolute',
               top: 12,
               left: 12,
               borderRadius: '50%',
-              backgroundColor: 'rgba(0,0,0,0.35)',
-              backdropFilter: 'blur(8px)'
-            }}
+              backgroundColor: theme.color.background.white,
+              boxShadow: theme.shadows.mid
+            })}
           >
             <IconButton
               icon={IconArrowLeft}
-              color='staticWhite'
+              color='default'
               aria-label='Back'
               onClick={() => navigate(-1)}
             />
@@ -394,14 +517,18 @@ const ContestPage = ({
           </Text>
           <Flex gap='s' alignItems='center'>
             <Box css={{ flex: 1 }}>{primaryAction}</Box>
-            <IconButton
-              icon={IconKebabHorizontal}
-              color='default'
-              aria-label='Contest actions'
-              onClick={() => {
-                /* TODO: hook overflow drawer. For now this is a visual
-                   placeholder — artist gets Edit/Share, public gets Share. */
-              }}
+            <PopupMenu
+              items={overflowMenuItems}
+              renderTrigger={(anchorRef, triggerPopup, triggerProps) => (
+                <IconButton
+                  ref={anchorRef}
+                  icon={IconKebabHorizontal}
+                  color='default'
+                  aria-label='Contest actions'
+                  onClick={() => triggerPopup()}
+                  {...triggerProps}
+                />
+              )}
             />
           </Flex>
 
@@ -446,8 +573,30 @@ const ContestPage = ({
             </Flex>
           </Flex>
 
-          {/* Tabs */}
-          <TabBar active={activeTab} onChange={setActiveTab} />
+          {/* Separator between the hosted-by row and the tab strip
+              below so the tab bar reads as a distinct section
+              instead of running directly into the host's name. */}
+          <Divider />
+        </Box>
+      </Box>
+
+      {/* Tab row + tab content sit on the page (surface1) background
+          so the separation from the hero's white surface reads as a
+          distinct section. The tab row itself is sticky to the top of
+          this section and uses a white strip to keep it legible when
+          cards scroll under it. */}
+      <Box
+        w='100%'
+        css={(theme) => ({ backgroundColor: theme.color.background.surface1 })}
+      >
+        <Box
+          css={(theme) => ({ backgroundColor: theme.color.background.white })}
+        >
+          <TabBar
+            active={activeTab}
+            onChange={setActiveTab}
+            showUpdates={showUpdatesTab}
+          />
         </Box>
 
         {/* Tab content */}
@@ -477,47 +626,82 @@ const ContestPage = ({
             </Box>
           ) : activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pt='l'>
-              {/* Filter bar — same controls track-page RemixesPage exposes
-                  above its remixes lineup: a Co-Signed toggle + a sort
-                  dropdown (Recent / Plays / Favorites). */}
-              <Flex justifyContent='space-between' alignItems='center'>
-                <SectionLabel>
-                  {submissionsCount != null
-                    ? `${submissionsCount} ${messages.submissions}`
-                    : messages.submissions}
-                </SectionLabel>
-                <Flex gap='xs'>
-                  <FilterButton
-                    label={messages.coSigned}
-                    value={isCosign ? 'true' : null}
-                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+              {(() => {
+                // Mirror the legacy `RemixesPage` delineator pattern:
+                // WINNERS label after the original, and a
+                // `N SUBMISSIONS + filter bar` delineator after the
+                // last winner (or after the original when there are
+                // no winners).
+                const winnersDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Box pt='l'>
+                      <SectionLabel>WINNERS</SectionLabel>
+                    </Box>
+                  </Box>
+                )
+                const submissionsDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Flex
+                      justifyContent='space-between'
+                      alignItems='center'
+                      pt='l'
+                    >
+                      <SectionLabel>
+                        {submissionsCount != null
+                          ? `${submissionsCount} ${messages.submissions}`
+                          : messages.submissions}
+                      </SectionLabel>
+                      <Flex gap='xs'>
+                        <FilterButton
+                          label={messages.coSigned}
+                          value={isCosign ? 'true' : null}
+                          onClick={() =>
+                            updateIsCosignParam(isCosign ? '' : 'true')
+                          }
+                        />
+                        <FilterButton
+                          value={sortMethod ?? 'recent'}
+                          variant='replaceLabel'
+                          onChange={updateSortParam}
+                          options={[
+                            { label: messages.sortRecent, value: 'recent' },
+                            { label: messages.sortPlays, value: 'plays' },
+                            { label: messages.sortFavorites, value: 'likes' }
+                          ]}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Box>
+                )
+                const delineatorMap: Record<number, JSX.Element> =
+                  winnerCount > 0
+                    ? {
+                        0: winnersDelineator,
+                        [winnerCount]: submissionsDelineator
+                      }
+                    : {
+                        0: submissionsDelineator
+                      }
+                return (
+                  <TanQueryLineup
+                    data={lineup.data}
+                    isFetching={lineup.isFetching}
+                    isPending={lineup.isPending}
+                    isError={lineup.isError}
+                    hasNextPage={lineup.hasNextPage}
+                    play={lineup.play}
+                    pause={lineup.pause}
+                    loadNextPage={lineup.loadNextPage}
+                    isPlaying={lineup.isPlaying}
+                    lineup={lineup.lineup}
+                    pageSize={CONTEST_PAGE_SIZE}
+                    actions={remixesPageLineupActions}
+                    delineatorMap={delineatorMap}
                   />
-                  <FilterButton
-                    value={sortMethod ?? 'recent'}
-                    variant='replaceLabel'
-                    onChange={updateSortParam}
-                    options={[
-                      { label: messages.sortRecent, value: 'recent' },
-                      { label: messages.sortPlays, value: 'plays' },
-                      { label: messages.sortFavorites, value: 'likes' }
-                    ]}
-                  />
-                </Flex>
-              </Flex>
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
+                )
+              })()}
             </Flex>
           ) : (
             <Box pt='l'>
@@ -606,14 +790,24 @@ const DetailsTab = ({
         ) : null}
       </Paper>
 
-      {/* Followers — card renders its own FOLLOWERS (N) label inside
-          the Paper, so no wrapper label here. */}
-      <EventFollowersCard eventId={eventId} followerCount={followerCount} />
+      {/* Followers — only show once the contest has at least one
+          follower; an empty face-pile was adding a visual dead zone
+          between Prizes and Stems. */}
+      {followerCount > 0 ? (
+        <EventFollowersCard eventId={eventId} followerCount={followerCount} />
+      ) : null}
 
       {/* Stems & Downloads — enriched card (artwork + Public Free +
           artist + N Stems chip + Download All + expandable file
-          list). Renders its own title inside the Paper. */}
-      {hasDownloads ? <ContestStemsCard trackId={trackId} /> : null}
+          list). Renders its own title inside the Paper. Trailing
+          spacer gives the last section breathing room from the
+          bottom tab bar that sits over page content. */}
+      {hasDownloads ? (
+        <>
+          <ContestStemsCard trackId={trackId} />
+          <Box pb='2xl' />
+        </>
+      ) : null}
     </Flex>
   )
 }

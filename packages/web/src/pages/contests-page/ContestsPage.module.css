@@ -1,0 +1,38 @@
+/* Responsive grid mirroring the Fan Clubs leaderboard card layout —
+   3-col at desktop, 2-col on tablet, 1-col on mobile. min-width +
+   gap values are aligned with `FanClubsTable.module.css`.
+   Uses viewport media queries rather than container queries because
+   the latter don't apply uniformly through the flex-grandchildren
+   (`.cardsContainer > *`) in this bundle. The app's left nav is a
+   fixed 240px / collapsed 64px, so viewport breakpoints are a close
+   proxy for the real content-column width. */
+.bodyWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--harmony-unit-6) var(--harmony-unit-4);
+  min-width: 328px;
+}
+
+.cardsContainer > * {
+  flex: 0 0 calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+  max-width: calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+}
+
+@media (max-width: 1140px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - var(--harmony-unit-4)) / 2);
+    max-width: calc((100% - var(--harmony-unit-4)) / 2);
+  }
+}
+
+@media (max-width: 880px) {
+  .cardsContainer > * {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

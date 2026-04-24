@@ -52,7 +52,7 @@ const formId = 'edit-collection-form'
 
 type EditCollectionFormProps = {
   initialValues: CollectionValues
-  onSubmit: (values: CollectionValues) => void
+  onSubmit: (values: CollectionValues) => void | Promise<void>
   isAlbum: boolean
   isUpload: boolean
   focus?: Nullable<string>
@@ -96,7 +96,9 @@ export const EditCollectionForm = (props: EditCollectionFormProps) => {
           confirmCallback
         })
       } else {
-        onSubmit(values)
+        // Forward the promise so Formik keeps `isSubmitting` true (and the
+        // submit button in its loading state) while the save is in flight.
+        return onSubmit(values)
       }
     },
     [

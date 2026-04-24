@@ -9,6 +9,7 @@ import {
 import { Client } from '@audius/common/models'
 import { createKeyboardActivationHandler } from '@audius/harmony'
 import cn from 'classnames'
+import { useLocation } from 'react-router'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 import { getClient } from 'utils/clientUtil'
@@ -41,6 +42,12 @@ const Navigator = ({ className }: OwnProps) => {
   const client = getClient()
   const isMobile = useIsMobile()
   const isElectron = client === Client.ELECTRON
+  const location = useLocation()
+  // Mobile-web pages that render their own full-bleed hero + back
+  // control (contest page) opt out of the global top nav so the hero
+  // can own the top of the viewport. Desktop is unaffected.
+  const hideMobileNav =
+    isMobile && /\/contest(\/|$)/.test(location.pathname)
 
   const [isCollapsed, setIsCollapsedState] = useState<boolean>(() => {
     try {
@@ -139,7 +146,7 @@ const Navigator = ({ className }: OwnProps) => {
 
   const isInWebView =
     typeof window !== 'undefined' && window.ReactNativeWebView !== undefined
-  if (isInWebView) return null
+  if (isInWebView || hideMobileNav) return null
 
   return (
     <NavSidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>
