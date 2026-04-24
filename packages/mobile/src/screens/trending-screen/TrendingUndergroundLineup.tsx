@@ -22,7 +22,9 @@ export const TrendingUndergroundLineup = ({
 
   const querySource = useMemo(
     () => ({
-      queryKey: [...getTrendingUndergroundQueryKey({ pageSize: PAGE_SIZE })] as unknown[]
+      queryKey: [
+        ...getTrendingUndergroundQueryKey({ pageSize: PAGE_SIZE })
+      ] as unknown[]
     }),
     []
   )
