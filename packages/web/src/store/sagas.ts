@@ -52,7 +52,6 @@ import socialSagas from 'common/store/social/sagas'
 import firstUploadModalSagas from 'components/first-upload-modal/store/sagas'
 import passwordResetSagas from 'components/password-reset/store/sagas'
 import dashboardSagas from 'pages/dashboard-page/store/sagas'
-import deletedSagas from 'pages/deleted-page/store/sagas'
 import settingsSagas from 'pages/settings-page/store/sagas'
 import accountSagas from 'store/account/sagas'
 import webAnalyticsSagas from 'store/analytics/sagas'
@@ -127,7 +126,6 @@ export default function* rootSaga() {
     changePasswordSagas(),
     chatWebSagas(),
     deactivateAccountSagas(),
-    deletedSagas(),
     deletePlaylistConfirmationModalSagas(),
     duplicateAddConfirmationModalSagas(),
     firstUploadModalSagas(),
