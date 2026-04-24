@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-stage",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "web:stage"],
+      "port": 3003
+    },
+    {
+      "name": "web-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "web:prod"],
+      "port": 3002
+    }
+  ]
+}

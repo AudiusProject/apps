@@ -41,7 +41,6 @@ import remixesSagas from 'common/store/pages/remixes-page/sagas'
 import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import trendingWinnersSagas from 'common/store/pages/trending-winners/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import playlistUpdatesSagas from 'common/store/playlist-updates/sagas'
@@ -103,7 +102,6 @@ export default function* rootSaga() {
     signOnSaga(),
     socialSagas(),
     trackPageSagas(),
-    trendingWinnersSagas(),
     premiumTracksSagas(),
     exclusiveTracksSagas(),
     searchTracksLineupSagas(),

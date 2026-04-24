@@ -1,7 +1,3 @@
-export * as trendingWinnersPageLineupSelectors from './trending-winners/lineup/selectors'
-export { trendingWinnersPageLineupActions } from './trending-winners/lineup/actions'
-export { default as trendingWinnersPageReducer } from './trending-winners/slice'
-
 export { default as trendingPageReducer } from './trending/reducer'
 export * as trendingPageActions from './trending/actions'
 export * as trendingPageSelectors from './trending/selectors'

@@ -39,7 +39,6 @@ import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/trac
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import trendingWinnersSagas from 'common/store/pages/trending-winners/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import profileSagas from 'common/store/profile/sagas'
@@ -111,7 +110,6 @@ export default function* rootSaga() {
     ...mobileChatSagas(),
     ...collectionPageSagas(),
     ...feedPageSagas(),
-    ...trendingWinnersSagas(),
     ...librarySagas(),
     ...profileSagas(),
     ...socialSagas(),
