@@ -17,7 +17,10 @@ type ContestHeroImageProps = {
  * sits on a skeleton until at least the small image is ready — avoids
  * the long "totally blank" window users saw before.
  */
-export const ContestHeroImage = ({ trackId, height }: ContestHeroImageProps) => {
+export const ContestHeroImage = ({
+  trackId,
+  height
+}: ContestHeroImageProps) => {
   const { motion } = useTheme()
 
   const { imageUrl: smallUrl, hasNoArtwork } = useTrackCoverArt({
@@ -55,9 +58,7 @@ export const ContestHeroImage = ({ trackId, height }: ContestHeroImageProps) => 
       })}
     >
       {showSkeleton ? (
-        <Skeleton
-          css={{ position: 'absolute', inset: 0, zIndex: 0 }}
-        />
+        <Skeleton css={{ position: 'absolute', inset: 0, zIndex: 0 }} />
       ) : null}
       {smallUrl ? (
         <img
