@@ -26,7 +26,6 @@ import {
 import { FeatureFlags } from '@audius/common/services'
 import {
   trackPageActions,
-  trackPageSelectors,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
   shareModalUIActions,
@@ -180,13 +179,7 @@ const TrackPage = () => {
         )
       }
     },
-    [
-      track,
-      accountUserId,
-      currentPlaybackTrackId,
-      previewing,
-      dispatch
-    ]
+    [track, accountUserId, currentPlaybackTrackId, previewing, dispatch]
   )
 
   const onHeroRepost = useCallback(

@@ -63,10 +63,6 @@ const { getIsReachable } = reachabilitySelectors
 
 const QUEUE_SUBSCRIBER_NAME = 'QUEUE'
 
-// Legacy lineup prefixes that the tan-query lineups dispatched through.
-// Retained as literal strings so existing source-based branches keep their
-// semantics without importing deleted PREFIX constants.
-const TAN_QUERY_LINEUP_PREFIXES = ['SEARCH_TRACKS', 'REMIXES', 'TRACK_TRACKS']
 export function* getToQueue(
   prefix: string,
   entry: LineupEntry<Track | Collection>
@@ -297,7 +293,6 @@ function* watchPlay() {
     }
   })
 }
-
 
 function* watchPause() {
   yield* takeEvery(pause.type, function* (action: ReturnType<typeof pause>) {
