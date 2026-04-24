@@ -38,6 +38,7 @@ import {
   IconUserFollowing,
   Paper,
   PopupMenu,
+  Skeleton,
   Text,
   useTheme
 } from '@audius/harmony'
@@ -424,13 +425,41 @@ const ContestPage = ({
     return null
   }
 
+  // Contest hasn't resolved yet (or no contest exists for this track).
+  // Render a skeleton matching the mobile page layout instead of the old
+  // "No contest is currently running" copy.
   if (!contest || !eventId) {
     return (
       <Page title={messages.title} variant='flush'>
-        <Box p='xl'>
-          <Text variant='body'>
-            No contest is currently running for this track.
-          </Text>
+        <Box p='l'>
+          <Paper
+            direction='column'
+            borderRadius='l'
+            border='default'
+            shadow='flat'
+            backgroundColor='white'
+            css={{ overflow: 'hidden' }}
+          >
+            <Skeleton h={180} w='100%' />
+            <Flex direction='column' gap='m' p='l'>
+              <Skeleton h={20} w={140} />
+              <Skeleton h={28} w='80%' />
+              <Divider orientation='horizontal' />
+              <Flex gap='m' alignItems='center'>
+                <Skeleton h={32} w={32} css={{ borderRadius: '50%' }} />
+                <Flex direction='column' gap='2xs' flex='1 1 auto'>
+                  <Skeleton h={10} w={80} />
+                  <Skeleton h={16} w={140} />
+                </Flex>
+              </Flex>
+              <Flex gap='s'>
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+              </Flex>
+            </Flex>
+          </Paper>
         </Box>
       </Page>
     )

@@ -5,6 +5,8 @@ import { useQueryContext } from '~/api/tan-query/utils'
 import { Event, Feature, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
+import { QUERY_KEYS } from '../queryKeys'
+
 import { getEventQueryKey } from './utils'
 
 export type UpdateEventArgs = {
@@ -25,6 +27,11 @@ export const useUpdateEvent = () => {
     mutationFn: async (args: UpdateEventArgs) => {
       const sdk = await audiusSdk()
       return await sdk.events.updateEvent({ ...args })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.remixContestsList]
+      })
     },
     onMutate: async (args: UpdateEventArgs) => {
       const { eventId, ...updates } = args

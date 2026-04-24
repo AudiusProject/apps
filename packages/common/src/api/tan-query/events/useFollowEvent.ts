@@ -107,6 +107,11 @@ export const useFollowEvent = () => {
       queryClient.invalidateQueries({
         queryKey: getEventFollowStateQueryKey(eventId, userId)
       })
+      // Also refresh the followers avatar list so the user's avatar
+      // appears in the leaderboard card / modal without a refresh.
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.eventFollowers, eventId]
+      })
     }
   })
 }
@@ -147,6 +152,9 @@ export const useUnfollowEvent = () => {
     onSettled: (_data, _err, { userId, eventId }) => {
       queryClient.invalidateQueries({
         queryKey: getEventFollowStateQueryKey(eventId, userId)
+      })
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.eventFollowers, eventId]
       })
     }
   })

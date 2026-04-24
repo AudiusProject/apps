@@ -5,7 +5,8 @@ import { useQueryContext } from '~/api/tan-query/utils'
 import { Comment, Feature, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
-import { getEventCommentsQueryKey } from './useEventComments'
+import { QUERY_KEYS } from '../queryKeys'
+
 import { getCommentQueryKey } from './utils'
 
 export type PostEventCommentArgs = {
@@ -76,29 +77,28 @@ export const usePostEventComment = () => {
 
       // Only optimistically push top-level comments to the feed; replies are
       // nested inside their parent comment and come back on invalidation.
+      // Patch every cached sort variant ('top' / 'newest' / 'timestamp') so
+      // the comment shows up regardless of which tab the user is viewing.
       if (!args.parentCommentId) {
-        const feedQueryKey = getEventCommentsQueryKey({
-          eventId,
-          sortMethod: 'newest'
-        })
-        queryClient.setQueryData(feedQueryKey, (prevData: any) => {
-          if (!prevData) return prevData
-          const next = structuredClone(prevData)
-          if (next.pages?.[0]) {
-            next.pages[0].unshift({ commentId: newId })
+        queryClient.setQueriesData<any>(
+          { queryKey: [QUERY_KEYS.eventComments, eventId] },
+          (prevData: any) => {
+            if (!prevData) return prevData
+            const next = structuredClone(prevData)
+            if (next.pages?.[0]) {
+              next.pages[0].unshift({ commentId: newId })
+            }
+            return next
           }
-          return next
-        })
+        )
       }
 
       return { newId }
     },
     onSuccess: (_data, args) => {
+      // Invalidate every sort variant — the user might be on Top or Newest.
       queryClient.invalidateQueries({
-        queryKey: getEventCommentsQueryKey({
-          eventId: args.eventId,
-          sortMethod: 'newest'
-        })
+        queryKey: [QUERY_KEYS.eventComments, args.eventId]
       })
     },
     onError: (error: Error, args) => {
@@ -112,10 +112,7 @@ export const usePostEventComment = () => {
         content: 'There was an error posting your comment. Please try again.'
       })
       queryClient.invalidateQueries({
-        queryKey: getEventCommentsQueryKey({
-          eventId: args.eventId,
-          sortMethod: 'newest'
-        })
+        queryKey: [QUERY_KEYS.eventComments, args.eventId]
       })
     }
   })

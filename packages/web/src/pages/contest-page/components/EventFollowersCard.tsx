@@ -76,28 +76,30 @@ export const EventFollowersCard = ({
         </Text>
       </Flex>
 
-      {hasAny ? (
+      {followerCount > 0 ? (
         <Flex alignItems='center' justifyContent='space-between' gap='s'>
           <Flex>
-            {visibleIds.map((userId, idx) => (
-              <Box
-                key={userId}
-                css={{
-                  // Overlap each subsequent avatar over the previous
-                  // to produce the stacked "face pile" look.
-                  marginLeft: idx === 0 ? 0 : -OVERLAP_PX,
-                  // Later avatars sit on top so the overlap reads
-                  // left → right.
-                  zIndex: idx
-                }}
-              >
-                <Avatar
-                  userId={userId}
-                  imageSize={SquareSizes.SIZE_150_BY_150}
-                  size='medium'
-                />
-              </Box>
-            ))}
+            {hasAny
+              ? visibleIds.map((userId, idx) => (
+                  <Box
+                    key={userId}
+                    css={{
+                      // Overlap each subsequent avatar over the previous
+                      // to produce the stacked "face pile" look.
+                      marginLeft: idx === 0 ? 0 : -OVERLAP_PX,
+                      // Later avatars sit on top so the overlap reads
+                      // left → right.
+                      zIndex: idx
+                    }}
+                  >
+                    <Avatar
+                      userId={userId}
+                      imageSize={SquareSizes.SIZE_150_BY_150}
+                      size='medium'
+                    />
+                  </Box>
+                ))
+              : null}
           </Flex>
           <IconButton
             icon={IconCaretRight}
