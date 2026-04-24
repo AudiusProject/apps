@@ -8,7 +8,6 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
 import { COINS_CREATE_PAGE, clubPage } from '@audius/common/src/utils/route'
-import { convertHexToRGBA } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -17,7 +16,6 @@ import {
   IconButton,
   IconClose,
   IconVerified,
-  Paper,
   SelectablePill,
   Text,
   TextInput,
@@ -30,6 +28,7 @@ import { useNavigate } from 'react-router'
 
 import imageCoinsBackgroundImage from 'assets/img/imageCoinsBackgroundImage2x.webp'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
+import { Frosted } from 'components/frosted/Frosted'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { usePortal } from 'hooks/usePortal'
@@ -73,7 +72,7 @@ const messages = {
 // Desktop version
 const DesktopFanClubsExplorePage = () => {
   const navigate = useNavigate()
-  const { motion, spacing, color } = useTheme()
+  const { motion, spacing } = useTheme()
   const pageContentRef = useRef<HTMLDivElement>(null)
   const controlsRowRef = useRef<HTMLDivElement>(null)
   const isNarrowLayout = useIsContainerNarrow(pageContentRef, 760)
@@ -146,12 +145,6 @@ const DesktopFanClubsExplorePage = () => {
     shouldShowLaunchCta && !isLaunchBannerDismissed
       ? spacing.xl + spacing['5xl'] + spacing['3xl']
       : 0
-
-  const bannerSurface =
-    typeof color.background.surface1 === 'string' &&
-    color.background.surface1.startsWith('#')
-      ? convertHexToRGBA(color.background.surface1, 0.78)
-      : 'rgba(255, 255, 255, 0.78)'
 
   const viewModeOptions = [
     {
@@ -337,17 +330,15 @@ const DesktopFanClubsExplorePage = () => {
               zIndex: zIndex.NAVIGATOR_POPUP
             }}
           >
-            <Paper
-              border='strong'
+            <Frosted
+              contentPaddingInline='0px'
+              border='default'
               borderRadius='m'
-              shadow='mid'
               w='100%'
               css={{
                 position: 'relative',
                 overflow: 'hidden',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                backgroundColor: bannerSurface,
+                boxShadow: 'var(--harmony-shadow-mid)',
                 transition: `opacity ${motion.expressive}`
               }}
             >
@@ -383,16 +374,15 @@ const DesktopFanClubsExplorePage = () => {
                     {messages.launchYourOwn}
                   </Text>
                   <Tooltip text={messages.getStartedTooltip} placement='top'>
-                    <Flex
+                    <Frosted
+                      contentPaddingInline='0px'
+                      direction='row'
                       alignItems='center'
                       border='strong'
                       borderRadius='m'
                       css={{
                         alignSelf: 'flex-start',
-                        overflow: 'hidden',
-                        backgroundColor: bannerSurface,
-                        backdropFilter: 'blur(12px)',
-                        WebkitBackdropFilter: 'blur(12px)'
+                        overflow: 'hidden'
                       }}
                     >
                       <Flex ph='s' pv='xs'>
@@ -407,7 +397,7 @@ const DesktopFanClubsExplorePage = () => {
                       >
                         <IconVerified size='s' />
                       </Flex>
-                    </Flex>
+                    </Frosted>
                   </Tooltip>
                 </Flex>
                 <Box
@@ -428,7 +418,7 @@ const DesktopFanClubsExplorePage = () => {
                   </Button>
                 </Box>
               </Flex>
-            </Paper>
+            </Frosted>
           </Box>
         ) : null}
       </Portal>

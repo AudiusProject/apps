@@ -3,7 +3,17 @@
   min-width: 320px;
   text-align: center;
   height: var(--play-bar-height);
-  background: var(--harmony-n-25);
+  backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  background: var(
+    --frosted-surface-background,
+    color-mix(
+      in srgb,
+      var(--frosted-surface-background-color, var(--harmony-n-25))
+        var(--frosted-surface-opacity, 65%),
+      transparent
+    )
+  );
   user-select: none;
 }
 

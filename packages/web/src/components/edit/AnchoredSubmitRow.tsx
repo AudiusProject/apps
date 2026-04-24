@@ -39,7 +39,7 @@ export const AnchoredSubmitRow = () => {
     <>
       <Portal>
         <div className={styles.buttonRow}>
-          <Frosted alignItems='center' gap='m'>
+          <Frosted className={styles.frosted} alignItems='center' gap='m'>
             <Button
               variant='primary'
               size='default'

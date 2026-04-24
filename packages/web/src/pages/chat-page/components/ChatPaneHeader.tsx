@@ -33,7 +33,7 @@ export const ChatPaneHeader = (props: ChatPaneHeaderProps) => {
       w='100%'
       h={
         isNarrowLayout
-          ? 'var(--chat-pane-header-height, 80px)'
+          ? 'var(--chat-pane-header-height, var(--chat-row-height, 80px))'
           : CHAT_PANE_HEADER_HEIGHT_PX
       }
       contentPaddingInline='0px'

@@ -47,6 +47,18 @@
   flex: 1 1 100%;
 }
 
+.matrixDisabledControl {
+  opacity: 0.2;
+}
+
+.matrixDisabledControl > div {
+  opacity: 1;
+}
+
+.matrixDisabledSegmentedControl {
+  opacity: 1 !important;
+}
+
 .showPrivateKey {
   line-height: var(--harmony-unit-5);
 }

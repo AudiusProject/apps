@@ -81,7 +81,7 @@ export const NavHeader = () => {
     return (
       <Flex
         direction='column'
-        backgroundColor='surface1'
+        borderBottom='default'
         flex={0}
         css={{ minHeight: 58, width: COLLAPSED_HEADER_WIDTH, flexShrink: 0 }}
       >
@@ -115,7 +115,7 @@ export const NavHeader = () => {
   return (
     <Flex
       alignItems='center'
-      backgroundColor='surface1'
+      borderBottom='default'
       justifyContent='space-between'
       pv='l'
       ph='m'

@@ -13,8 +13,8 @@
   /* Extend scroll container behind the frosted ChatHeader so
    * backdrop-filter has real content to blur (same pattern as ChatMessageList). */
   margin-top: calc(-1 * var(--chat-header-height, 112px));
-  padding-top: calc(var(--chat-header-height, 112px) + 8px);
-  scroll-padding-top: calc(var(--chat-header-height, 112px) + 8px);
+  padding-top: var(--chat-header-height, 112px);
+  scroll-padding-top: var(--chat-header-height, 112px);
 }
 
 .compact {

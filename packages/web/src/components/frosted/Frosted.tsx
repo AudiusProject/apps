@@ -18,12 +18,14 @@ export const Frosted = ({
       column
       css={[
         {
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'var(--frosted-surface-backdrop-filter, blur(10px))',
+          WebkitBackdropFilter:
+            'var(--frosted-surface-backdrop-filter, blur(10px))',
           zIndex: 10,
           position: 'relative',
           paddingInline: contentPaddingInline,
           background:
-            'color-mix(in srgb, var(--harmony-n-25) 60%, transparent)'
+            'var(--frosted-surface-background, color-mix(in srgb, var(--frosted-surface-background-color, var(--harmony-n-25)) var(--frosted-surface-opacity, 65%), transparent))'
         },
         css
       ]}

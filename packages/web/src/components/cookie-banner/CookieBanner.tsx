@@ -7,6 +7,7 @@ import cn from 'classnames'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
+import { Frosted } from 'components/frosted/Frosted'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { dismissCookieBanner } from 'store/application/ui/cookieBanner/actions'
 import { AppState } from 'store/types'
@@ -33,13 +34,8 @@ export const CookieBanner = ({ isPlaying, dismiss }: CookieBannerProps) => {
     if (win) win.focus()
   }
 
-  return (
-    <div
-      className={cn(styles.container, {
-        [styles.isMobile]: isMobile,
-        [styles.isPlaying]: isPlaying
-      })}
-    >
+  const content = (
+    <>
       <div className={styles.description}>
         {messages.description}
         <span className={styles.link} onClick={goToCookiePolicy}>
@@ -49,7 +45,26 @@ export const CookieBanner = ({ isPlaying, dismiss }: CookieBannerProps) => {
       <div className={styles.iconContainer} onClick={dismiss}>
         <IconRemove className={styles.iconRemove} />
       </div>
+    </>
+  )
+
+  return isMobile ? (
+    <div
+      className={cn(styles.container, {
+        [styles.isMobile]: isMobile,
+        [styles.isPlaying]: isPlaying
+      })}
+    >
+      {content}
     </div>
+  ) : (
+    <Frosted
+      contentPaddingInline='0px'
+      direction='row'
+      className={styles.container}
+    >
+      {content}
+    </Frosted>
   )
 }
 

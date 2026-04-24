@@ -14,8 +14,9 @@ import {
   useCurrentAccountUser,
   useHasAccount
 } from '@audius/common/api'
-import { Client, Status } from '@audius/common/models'
+import { Client, FrostedSurfaceIntensity, Status } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
+import { themeSelectors } from '@audius/common/store'
 import {
   COIN_DETAIL_BUY_PAGE,
   CLUB_DETAIL_PAGE,
@@ -77,6 +78,7 @@ import 'utils/redirect'
 import { getPathname } from 'utils/route'
 
 import styles from './WebPlayer.module.css'
+const { getFrostedSurfaceIntensity } = themeSelectors
 const TrendingGenreSelectionPage = lazy(
   () => import('components/trending-genre-selection/TrendingGenreSelectionPage')
 )
@@ -495,6 +497,8 @@ const WebPlayer = (props: WebPlayerProps) => {
   const { userHandle, isGuestAccount = false } = accountUserData ?? {}
   const { data: accountStatus } = useAccountStatus()
   const showCookieBanner = useSelector(getShowCookieBanner)
+  const frostedSurfaceIntensity =
+    useSelector(getFrostedSurfaceIntensity) ?? FrostedSurfaceIntensity.DEFAULT
 
   // Convert mapDispatchToProps to useCallback with useDispatch
   const updateRouteOnSignUpCompletion = useCallback(
@@ -758,6 +762,9 @@ const WebPlayer = (props: WebPlayerProps) => {
       <div
         id='webPlayer'
         className={cn(styles.app, { [styles.mobileApp]: isMobile })}
+        data-frosted-surface-intensity={
+          isMobile ? undefined : frostedSurfaceIntensity
+        }
       >
         {showCookieBanner ? <CookieBanner /> : null}
         <Notice shouldPadTop={false} />
