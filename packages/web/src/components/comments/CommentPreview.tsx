@@ -7,7 +7,6 @@ import {
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { ID } from '@audius/common/models'
-import { trackPageSelectors } from '@audius/common/store'
 import {
   Flex,
   IconCaretRight,
@@ -17,15 +16,13 @@ import {
   Skeleton,
   Text
 } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { Link, useSearchParams, useNavigate } from 'react-router'
-import { tracksActions } from '~/store/pages/track/lineup/actions'
 
 import { push as pushRoute } from 'utils/navigation'
 
 import { CommentBlock } from './CommentBlock'
 import { CommentForm } from './CommentForm'
-const { getLineup } = trackPageSelectors
 
 const CommentPreviewHeader = () => {
   const {
@@ -138,8 +135,6 @@ export const CommentPreview = (props: CommentPreviewProps) => {
   const showComments = searchParams.get('showComments')
   const commentId = searchParams.get('commentId')
   const navigate = useNavigate()
-  const lineup = useSelector(getLineup)
-  const uid = lineup?.entries?.[0]?.uid
 
   // Show the comment screen if the showComments or commentId query param is present
   useEffect(() => {
@@ -161,11 +156,7 @@ export const CommentPreview = (props: CommentPreviewProps) => {
   ])
 
   return (
-    <CommentSectionProvider
-      entityId={entityId}
-      lineupActions={tracksActions}
-      uid={uid}
-    >
+    <CommentSectionProvider entityId={entityId}>
       <Flex gap='s' direction='column' w='100%' alignItems='flex-start'>
         <CommentPreviewHeader />
         <CommentPreviewContent />

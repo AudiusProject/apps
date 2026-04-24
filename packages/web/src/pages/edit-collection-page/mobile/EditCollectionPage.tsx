@@ -13,8 +13,7 @@ import { newCollectionMetadata } from '@audius/common/schemas'
 import { RandomImage } from '@audius/common/services'
 import {
   EditCollectionValues,
-  cacheCollectionsActions,
-  collectionPageLineupActions as tracksActions
+  cacheCollectionsActions
 } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { IconCamera } from '@audius/harmony'
@@ -72,7 +71,7 @@ const g = withNullGuard((props: EditCollectionPageProps) => {
 })
 
 const EditCollectionPage = g(
-  ({ removeTrack, editPlaylist, orderPlaylist, refreshLineup }) => {
+  ({ removeTrack, editPlaylist, orderPlaylist }) => {
     const { handle, slug } = useParams<EditCollectionPageParams>()
     const isAlbum = Boolean(useMatch('/:handle/album/:slug/edit'))
     const permalink = `/${handle ?? ''}/${isAlbum ? 'album' : 'playlist'}/${slug ?? ''}`
@@ -236,7 +235,6 @@ const EditCollectionPage = g(
             (idx) => playlistTrackIds[idx]
           )
         }
-        refreshLineup()
 
         editPlaylist(collection.playlist_id, formFields as EditCollectionValues)
 
@@ -256,7 +254,6 @@ const EditCollectionPage = g(
       hasReordered,
       reorderedTracks,
       orderPlaylist,
-      refreshLineup,
       removeTrack,
       removedTracks,
       dispatch,
@@ -464,8 +461,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
     orderPlaylist: (playlistId: ID, idsAndTimes: any) =>
       dispatch(orderPlaylist(playlistId, idsAndTimes)),
     removeTrack: (trackId: ID, playlistId: ID, timestamp: number) =>
-      dispatch(removeTrackFromPlaylist(trackId, playlistId, timestamp)),
-    refreshLineup: () => dispatch(tracksActions.fetchLineupMetadatas())
+      dispatch(removeTrackFromPlaylist(trackId, playlistId, timestamp))
   }
 }
 

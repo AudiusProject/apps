@@ -1,5 +1,6 @@
 import { uniq } from 'lodash'
 
+import { Status } from '~/models/Status'
 import { CommonState } from '~/store/commonStore'
 
 import { ID } from '../../../models/Identifiers'
@@ -170,17 +171,11 @@ export const getIsFetchingMore = (state: CommonState) =>
 export const hasReachedEnd = (state: CommonState) =>
   state.pages.libraryPage.hasReachedEnd
 
-export const getLibraryTracksStatus = (state: CommonState) =>
-  state.pages.libraryPage.tracks.status
-export const getLibraryTracksLineup = (state: CommonState) =>
-  state.pages.libraryPage.tracks
-export const getLibraryTracksLineupUid = (
-  state: CommonState,
-  props: { id: ID }
-) => {
-  const track = state.pages.libraryPage.tracks.entries.find(
-    // @ts-ignore
-    (t) => t.id === props.id
-  )
-  return track ? track.uid : null
+// Status is now derived from the async fetchSaves flow. Treat fetching-more
+// or initial-fetch as LOADING; otherwise SUCCESS. Kept as a selector so
+// existing consumers don't need to special-case the library page.
+export const getLibraryTracksStatus = (state: CommonState): Status => {
+  const s = state.pages.libraryPage
+  if (s.initialFetch || s.fetchingMore) return Status.LOADING
+  return Status.SUCCESS
 }

@@ -1,13 +1,11 @@
 import { FollowSource, ID } from '@audius/common/models'
 import {
-  feedPageLineupActions as feedActions,
   feedPageActions as discoverActions,
   usersSocialActions as socialActions
 } from '@audius/common/store'
 import { getErrorMessage } from '@audius/common/utils'
 import { call, put, take, fork, takeEvery } from 'redux-saga/effects'
 
-import feedSagas from 'common/store/pages/feed/lineup/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 function* waitForFollow(userIds: ID[]) {
@@ -24,16 +22,15 @@ function* waitForFollow(userIds: ID[]) {
   }
 }
 
-function* confirmFollowsAndRefresh(userIds: ID[]) {
+function* confirmFollows(userIds: ID[]) {
+  // Wait for follows to confirm; tanquery-driven feed refetches naturally.
   yield call(waitForFollow, userIds)
-  yield put(feedActions.refreshInView(true))
 }
 
 function* followUsers(action: ReturnType<typeof discoverActions.followUsers>) {
   yield call(waitForWrite)
   try {
-    yield put(feedActions.setLoading())
-    yield fork(confirmFollowsAndRefresh, action.userIds)
+    yield fork(confirmFollows, action.userIds)
     for (const userId of action.userIds) {
       yield put(socialActions.followUser(userId, FollowSource.EMPTY_FEED))
     }
@@ -47,5 +44,5 @@ function* watchFollowUsers() {
 }
 
 export default function sagas() {
-  return [...feedSagas(), watchFollowUsers]
+  return [watchFollowUsers]
 }

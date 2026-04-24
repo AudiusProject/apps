@@ -1,4 +1,4 @@
-import { ID, UID, LineupState, Status, LineupTrack } from '~/models'
+import { ID, UID, Status, LineupTrack } from '~/models'
 import type { Dayjs } from '~/utils/dayjs'
 
 export type CollectionTrack = LineupTrack & { dateAdded: Dayjs }
@@ -7,7 +7,6 @@ export type CollectionsPageState = {
   collectionPermalink: string
   collectionId: ID | null
   status: Status | null
-  tracks: LineupState<CollectionTrack>
   userUid: UID | null
 }
 

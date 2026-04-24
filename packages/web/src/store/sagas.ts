@@ -33,10 +33,7 @@ import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
-import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
-import remixesSagas from 'common/store/pages/remixes-page/sagas'
-import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import playerSagas from 'common/store/player/sagas'
@@ -90,7 +87,6 @@ export default function* rootSaga() {
     chatSagas(),
     dashboardSagas(),
     feedPageSagas(),
-    historySagas(),
     passwordResetSagas(),
     profileSagas(),
     rewardsPageSagas(),
@@ -99,8 +95,6 @@ export default function* rootSaga() {
     signOnSaga(),
     socialSagas(),
     trackPageSagas(),
-    searchTracksLineupSagas(),
-    remixesSagas(),
 
     modalsSagas(),
 
@@ -127,7 +121,6 @@ export default function* rootSaga() {
     deletePlaylistConfirmationModalSagas(),
     duplicateAddConfirmationModalSagas(),
     firstUploadModalSagas(),
-    remixesSagas(),
     scrollLockSagas(),
     shareModalSagas(),
     stripeModalSagas(),

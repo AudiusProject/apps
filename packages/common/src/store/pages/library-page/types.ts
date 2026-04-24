@@ -8,7 +8,6 @@ import {
   ID,
   Collection,
   Favorite,
-  LineupState,
   LineupTrack
 } from '../../../models'
 
@@ -57,7 +56,6 @@ export interface LibraryPageState {
       }
     }
   }
-  tracks: LineupState<LineupTrack & { id: ID; dateSaved: string }>
   trackSaves: Favorite[]
   hasReachedEnd: boolean
   initialFetch: boolean

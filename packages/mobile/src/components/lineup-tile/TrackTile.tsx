@@ -320,8 +320,6 @@ const TrackTileComponent = (props: TrackTileProps) => {
           trackId={track.track_id}
           rankIndex={lineupTileProps.index}
           isTrending={lineupTileProps.isTrending}
-          uid={lineupTileProps.uid}
-          actions={lineupTileProps.actions}
         />
         {isReadonly ? null : (
           <LineupTileActionButtons

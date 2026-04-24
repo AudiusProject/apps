@@ -1,17 +1,20 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useTracks, useUsers } from '@audius/common/api'
-import { PlaybackSource, Status } from '@audius/common/models'
+import { Kind, Status } from '@audius/common/models'
 import type { ID, UID, Track, User } from '@audius/common/models'
 import {
-  libraryPageTracksLineupActions as tracksActions,
   libraryPageActions,
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
+  playbackActions,
+  playbackSelectors,
+  playerSelectors,
   reachabilitySelectors
 } from '@audius/common/store'
-import { Uid, type Nullable } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import { makeStableUid, Uid, type Nullable } from '@audius/common/utils'
 import { debounce } from 'lodash'
 import Animated, { Layout } from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,7 +29,6 @@ import { makeStyles } from 'app/styles'
 
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
-import { useFavoritesLineup } from './useFavoritesLineup'
 
 const { fetchSaves: fetchSavesAction, fetchMoreSaves } = libraryPageActions
 const {
@@ -123,8 +125,23 @@ export const TracksTab = () => {
     )
   }, [dispatch, filterValue, selectedCategory])
 
-  const { entries, status: lineupStatus } = useFavoritesLineup(fetchSaves)
-  const trackUids = useMemo(() => entries.map(({ uid }) => uid), [entries])
+  // Fetch saves on mount / when category or filter changes (previously
+  // handled by useFavoritesLineup via reachability effect).
+  useEffect(() => {
+    fetchSaves()
+  }, [fetchSaves])
+
+  const lineupStatus = savedTracksStatus
+
+  // Build UIDs from the save list directly (no more legacy lineup state).
+  const trackUids = useMemo(() => {
+    const ids = new Set<ID>()
+    saves.forEach((s: any) => ids.add(s.save_item_id))
+    Object.keys(localAdditions).forEach((id) => ids.add(Number(id)))
+    return Array.from(ids).map((id) =>
+      makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS')
+    )
+  }, [saves, localAdditions])
 
   const filterTrack = useCallback(
     (track: Nullable<Track>, user: Nullable<User>) => {
@@ -192,11 +209,47 @@ export const TracksTab = () => {
     isReachable
   ])
 
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
+  const isPlaying = useSelector(playerSelectors.getPlaying)
+
+  // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
+  // source-based offline-download check keeps working.
+  const playbackSource = 'SAVED_TRACKS'
+  const playbackQueue: PlaybackTrack[] = useMemo(
+    () =>
+      filteredTrackUids
+        .map((uid) => Uid.fromString(uid).id as ID)
+        .map((id) => ({
+          trackId: id,
+          source: playbackSource,
+          legacyUid: makeStableUid(Kind.TRACKS, id, playbackSource)
+        })),
+    [filteredTrackUids]
+  )
+
   const togglePlay = useCallback(
-    (uid: UID, id: ID) => {
-      dispatch(tracksActions.togglePlay(uid, id, PlaybackSource.LIBRARY_PAGE))
+    (_uid: UID, id: ID) => {
+      if (currentPlaybackTrackId === id && isPlaying) {
+        dispatch(playbackActions.togglePlay())
+        return
+      }
+      if (currentPlaybackTrackId === id && !isPlaying) {
+        dispatch(playbackActions.play())
+        return
+      }
+      const startIndex = playbackQueue.findIndex((t) => t.trackId === id)
+      if (startIndex < 0) return
+      dispatch(
+        playbackActions.playFrom({
+          tracks: playbackQueue,
+          startIndex,
+          querySource: null
+        })
+      )
     },
-    [dispatch]
+    [dispatch, currentPlaybackTrackId, isPlaying, playbackQueue]
   )
 
   const handleChangeFilterValue = useMemo(() => {

@@ -166,7 +166,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updateCoverPhoto,
     didChangeTabsFrom,
     onCloseArtistRecommendations
-  } = useProfilePage(containerRef)
+  } = useProfilePage()
 
   // Map twitterHandle to xHandle for mobile
   const xHandle = twitterHandle

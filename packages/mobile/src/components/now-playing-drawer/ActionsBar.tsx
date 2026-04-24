@@ -19,7 +19,6 @@ import {
   usePremiumContentPurchaseModal,
   playbackPositionSelectors,
   PurchaseableContentType,
-  playerActions,
   playerSelectors
 } from '@audius/common/store'
 import { Genre, removeNullable } from '@audius/common/utils'
@@ -165,14 +164,15 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
 
   const handleComments = useCallback(() => {
     if (track) {
+      // From Now Playing — play-from-comment goes through the playback slice
+      // with a generic 'comments' source (not a lineup prefix).
       open({
         entityId: track.track_id,
         navigation,
-        actions: playerActions,
-        uid: uid as string
+        playbackSource: 'comments'
       })
     }
-  }, [uid, navigation, open, track])
+  }, [navigation, open, track])
 
   const playbackPositionInfo = useSelector((state) =>
     getTrackPosition(state, {

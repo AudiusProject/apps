@@ -13,7 +13,6 @@ import {
   useCurrentCommentSection
 } from '@audius/common/context'
 import type { Comment, ID, UserMetadata } from '@audius/common/models'
-import type { LineupBaseActions, playerActions } from '@audius/common/store'
 import type {
   BottomSheetFlatListMethods,
   BottomSheetFooterProps
@@ -214,14 +213,9 @@ export type CommentDrawerData = {
   entityId: number
   navigation: NativeStackNavigationProp<ParamListBase>
   autoFocusInput?: boolean
-  uid?: string
-  /** Object containing lineup/player actions such as play, togglePlay, setPage
-   *  Typically these are lineup actions -
-   *  but playerActions are used when the comments were opened from NowPlaying.
-   *  In that scenario the comments are always for the currently playing track,
-   *  so it doesnt need to worry about changing lineups
-   */
-  actions?: LineupBaseActions | typeof playerActions
+  // Source tag for the new playback queue when the user plays the track from
+  // the comment drawer. Kept optional; defaults to 'comments' downstream.
+  playbackSource?: string
   highlightedComment?: Comment | null
 }
 
@@ -237,8 +231,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     bottomSheetModalRef,
     handleClose,
     autoFocusInput,
-    uid,
-    actions,
+    playbackSource,
     highlightedComment
   } = props
   const { color } = useTheme()
@@ -276,8 +269,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
             entityId={entityId}
             replyingAndEditingState={replyingAndEditingState}
             setReplyingAndEditingState={setReplyingAndEditingState}
-            uid={uid}
-            lineupActions={actions}
+            playbackSource={playbackSource}
           >
             <CommentDrawerForm
               commentListRef={commentListRef}
@@ -350,8 +342,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
           setReplyingAndEditingState={setReplyingAndEditingState}
           navigation={navigation}
           closeDrawer={handleCloseDrawer}
-          uid={uid}
-          lineupActions={actions}
+          playbackSource={playbackSource}
         >
           <CommentDrawerHeader minimal={autoCompleteActive} />
           <Divider orientation='horizontal' />

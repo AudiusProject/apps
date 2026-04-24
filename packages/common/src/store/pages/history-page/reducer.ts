@@ -1,26 +1,8 @@
-import { Track } from '~/models/Track'
-import { LineupActions, asLineup } from '~/store/lineup/reducer'
+// History page has no persisted state after the tanquery migration.
+// Kept as a stub reducer so the combined pages reducer doesn't need to
+// branch for history.
+const initialState = {}
 
-import { PREFIX as tracksPrefix } from './lineups/tracks/actions'
-import tracksReducer, {
-  initialState as initialLineupState
-} from './lineups/tracks/reducer'
-
-const initialState = {
-  tracks: initialLineupState
-}
-
-const actionsMap = {}
-
-const tracksLineupReducer = asLineup(tracksPrefix, tracksReducer)
-
-const reducer = (state = initialState, action: LineupActions<Track>) => {
-  const tracks = tracksLineupReducer(state.tracks, action)
-  if (tracks !== state.tracks) return { ...state, tracks }
-
-  const matchingReduceFunction = actionsMap[action.type]
-  if (!matchingReduceFunction) return state
-  return matchingReduceFunction(state, action)
-}
+const reducer = (state = initialState, _action: unknown) => state
 
 export default reducer

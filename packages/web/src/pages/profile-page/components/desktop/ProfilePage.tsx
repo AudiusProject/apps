@@ -150,7 +150,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     onCloseBlockUserConfirmationModal,
     onCloseUnblockUserConfirmationModal,
     onCloseMuteUserConfirmationModal
-  } = useProfilePage(containerRef)
+  } = useProfilePage()
   const renderProfileCompletionCard = () => {
     return isOwner ? <ProfileCompletionHeroCard /> : null
   }

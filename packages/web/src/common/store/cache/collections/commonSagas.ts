@@ -54,7 +54,6 @@ import {
   isPlaylistConfirmerDone
 } from './utils/hasPendingPlaylistUpdates'
 import { optimisticUpdateCollection } from './utils/optimisticUpdateCollection'
-import { updateCollectionLineupOrderIfViewing } from './utils/updateCollectionPageLineup'
 
 const { manualClearToast, toast } = toastActions
 
@@ -451,7 +450,6 @@ function* orderPlaylistAsync(
   )
 
   yield* call(optimisticUpdateCollection, updatedPlaylist)
-  yield* call(updateCollectionLineupOrderIfViewing, action.playlistId, trackIds)
   yield* call(
     confirmOrderPlaylist,
     userId,

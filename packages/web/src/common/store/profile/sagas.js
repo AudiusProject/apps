@@ -24,8 +24,6 @@ import {
 import { Id } from '@audius/sdk'
 import { call, getContext, put, select, takeEvery } from 'redux-saga/effects'
 
-import feedSagas from 'common/store/pages/profile/lineups/feed/sagas.js'
-import tracksSagas from 'common/store/pages/profile/lineups/tracks/sagas.js'
 import { push as pushRoute } from 'utils/navigation'
 import { waitForWrite } from 'utils/sagaHelpers'
 
@@ -172,10 +170,5 @@ function* confirmUpdateProfile(userId, metadata) {
 }
 
 export default function sagas() {
-  return [
-    ...feedSagas(),
-    ...tracksSagas(),
-    watchFetchProfile,
-    watchUpdateProfile
-  ]
+  return [watchFetchProfile, watchUpdateProfile]
 }

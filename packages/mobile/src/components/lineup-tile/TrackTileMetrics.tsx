@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { useTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { FavoriteType, Name } from '@audius/common/models'
-import type { LineupBaseActions } from '@audius/common/store'
 import {
   repostsUserListActions,
   favoritesUserListActions,
@@ -90,13 +89,16 @@ export const SavesMetric = (props: SavesMetricProps) => {
 
 type CommentMetricProps = {
   trackId: ID
-  actions?: LineupBaseActions
-  uid?: string
+  // Source tag for the new playback queue when the user plays the track
+  // from the opened comment drawer. Defaults to a generic 'lineup-comments'
+  // tag so AudioPlayer source comparisons never confuse it with a real
+  // page-owned queue.
+  playbackSource?: string
   showLeaveCommentText?: boolean
 }
 
 export const CommentMetric = (props: CommentMetricProps) => {
-  const { trackId, actions, uid, showLeaveCommentText } = props
+  const { trackId, playbackSource, showLeaveCommentText } = props
   const { open } = useCommentDrawer()
   const navigation = useNavigation()
   const { data: partialTrack } = useTrack(trackId, {
@@ -114,8 +116,7 @@ export const CommentMetric = (props: CommentMetricProps) => {
       entityId: trackId,
       navigation,
       autoFocusInput: false,
-      uid,
-      actions
+      playbackSource
     })
 
     trackEvent(
@@ -125,7 +126,7 @@ export const CommentMetric = (props: CommentMetricProps) => {
         source: 'lineup'
       })
     )
-  }, [open, trackId, navigation, uid, actions])
+  }, [open, trackId, navigation, playbackSource])
 
   if (commentCount === undefined || commentsDisabled) return null
 

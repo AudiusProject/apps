@@ -12,7 +12,7 @@ import {
   useGatedContentAccessMap,
   useDebouncedCallback
 } from '@audius/common/hooks'
-import { statusIsNotFinalized, ID, UID, Lineup } from '@audius/common/models'
+import { statusIsNotFinalized, ID, Status, UID } from '@audius/common/models'
 import {
   libraryPageSelectors,
   LibraryCategory,
@@ -204,7 +204,7 @@ const TracksLineup = ({
   queuedAndPlaying,
   onTogglePlay
 }: {
-  tracks: Lineup<LibraryPageTrack>
+  tracks: { entries: LibraryPageTrack[]; status: Status }
   goToTrending: () => void
   onFilterChange: (e: any) => void
   filterText: string

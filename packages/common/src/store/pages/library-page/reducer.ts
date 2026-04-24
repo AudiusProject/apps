@@ -1,7 +1,6 @@
 import { Storage, persistReducer } from 'redux-persist'
 
 import { ID } from '~/models/Identifiers'
-import { asLineup } from '~/store/lineup/reducer'
 import {
   ADD_LOCAL_COLLECTION,
   ADD_LOCAL_TRACK,
@@ -17,13 +16,9 @@ import {
   REMOVE_LOCAL_TRACK,
   SET_SELECTED_CATEGORY
 } from '~/store/pages/library-page/actions'
-import tracksReducer, {
-  initialState as initialLineupState
-} from '~/store/pages/library-page/lineups/tracks/reducer'
 import { signOut } from '~/store/sign-out/slice'
 import { ActionsMap } from '~/utils/reducer'
 
-import { PREFIX as tracksPrefix } from './lineups/tracks/actions'
 import { LibraryCategory, LibraryCategoryType, LibraryPageState } from './types'
 import { calculateNewLibraryCategories } from './utils'
 
@@ -32,7 +27,6 @@ const initialState = {
   initialFetch: false,
   hasReachedEnd: false,
   fetchingMore: false,
-  tracks: initialLineupState,
   tracksCategory: LibraryCategory.All,
   collectionsCategory: LibraryCategory.All,
   local: {
@@ -206,12 +200,7 @@ const actionsMap: ActionsMap<LibraryPageState> = {
   }
 }
 
-const tracksLineupReducer = asLineup(tracksPrefix, tracksReducer)
-
 export const libraryPageReducer = (state = initialState, action: any) => {
-  const tracks = tracksLineupReducer(state.tracks as any, action)
-  if (tracks !== state.tracks) return { ...state, tracks }
-
   const matchingReduceFunction = actionsMap[action.type]
   if (!matchingReduceFunction) return state
   return matchingReduceFunction(state, action)

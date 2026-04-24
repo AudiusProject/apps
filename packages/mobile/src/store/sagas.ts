@@ -30,10 +30,7 @@ import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
-import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
-import remixesSagas from 'common/store/pages/remixes-page/sagas'
-import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
@@ -111,14 +108,11 @@ export default function* rootSaga() {
     ...librarySagas(),
     ...profileSagas(),
     ...socialSagas(),
-    ...historySagas(),
     ...rewardsPageSagas(),
     ...settingsSagas(),
-    ...searchTracksLineupSagas(),
 
     // Cast
     ...castSagas(),
-    ...remixesSagas(),
 
     // Application
     ...addToCollectionSagas(),

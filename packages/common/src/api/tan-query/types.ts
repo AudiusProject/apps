@@ -9,7 +9,6 @@ import {
 
 import { ID } from '~/models'
 
-import { UseLineupQueryData } from './lineups/useLineupQuery'
 import { makeLoadNextPage } from './utils/infiniteQueryLoadNextPage'
 
 /**
@@ -39,19 +38,18 @@ export type SelectableQueryOptions<TData, TResult = TData> = Omit<
 
 export type LineupData = { id: ID; type: EntityType }
 
-export type LineupQueryData = UseLineupQueryData &
-  Pick<
-    UseInfiniteQueryResult,
-    | 'data'
-    | 'hasNextPage'
-    | 'isInitialLoading'
-    | 'isLoading'
-    | 'isPending'
-    | 'isError'
-  > & {
-    loadNextPage: ReturnType<typeof makeLoadNextPage>
-    pageSize?: number
-  }
+export type LineupQueryData = Pick<
+  UseInfiniteQueryResult,
+  | 'data'
+  | 'hasNextPage'
+  | 'isInitialLoading'
+  | 'isLoading'
+  | 'isPending'
+  | 'isError'
+> & {
+  loadNextPage: ReturnType<typeof makeLoadNextPage>
+  pageSize?: number
+}
 
 export type FlatUseInfiniteQueryResult<T> = Omit<
   UseInfiniteQueryResult,
