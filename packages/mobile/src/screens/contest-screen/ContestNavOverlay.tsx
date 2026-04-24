@@ -159,7 +159,6 @@ export const ContestNavOverlay = ({
           <Text
             variant='title'
             size='m'
-            strength='strong'
             numberOfLines={1}
             ellipsizeMode='tail'
           >

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useRemixesLineup } from '@audius/common/api'
+import { useRemixContest, useRemixesLineup } from '@audius/common/api'
 import { remixesPageLineupActions } from '@audius/common/store'
 
-import { FilterButton, Flex, Text } from '@audius/harmony-native'
+import { Divider, FilterButton, Flex, Text } from '@audius/harmony-native'
 import { TanQueryLineup } from 'app/components/lineup/TanQueryLineup'
 
 import { useContestPage } from '../ContestPageContext'
@@ -12,6 +12,7 @@ const CONTEST_PAGE_SIZE = 10
 
 const messages = {
   submissions: 'SUBMISSIONS',
+  winners: 'WINNERS',
   coSigned: 'Co-Signed',
   sort: 'Sort'
 }
@@ -32,9 +33,12 @@ const SORT_OPTIONS = [
  * The lineup now includes the original (parent) track at the top
  * (`includeOriginal: true`) so listeners can compare against the
  * source without jumping back out — same behaviour as the track-page
- * `RemixesPage` and the web contest page. A filter bar above the
- * lineup exposes Co-Signed + sort controls (recent/plays/favorites),
- * matching the web `RemixesPage` QA round.
+ * `RemixesPage` and the web contest page. A filter bar lives inside
+ * the submissions delineator (rendered between winners and remixes)
+ * with Co-Signed + sort controls (recent/plays/favorites). This
+ * mirrors the legacy `TrackRemixesScreen` delineator pattern so the
+ * lineup reads as: original → WINNERS label → winner tracks →
+ * SUBMISSIONS (N) label + filter bar → remix entries.
  *
  * We manually call `loadCachedDataIntoLineup()` once the tan-query
  * page has data. `useRemixesLineup` opts out of automatic cache
@@ -48,6 +52,8 @@ const SORT_OPTIONS = [
  */
 export const ContestSubmissionsTab = () => {
   const { trackId } = useContestPage()
+  const { data: contest } = useRemixContest(trackId)
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
 
   const [sortMethod, setSortMethod] = useState<'recent' | 'plays' | 'likes'>(
     'recent'
@@ -76,41 +82,75 @@ export const ContestSubmissionsTab = () => {
     }
   }, [hasData, loadCachedDataIntoLineup])
 
-  const submissionsCount = data?.length ?? 0
+  // Total lineup length includes original + winners + remixes. The
+  // number of actual submissions (remixes) is the remainder once we
+  // pull off the original (1 entry) and the winners.
+  const submissionsCount = Math.max(
+    0,
+    (data?.length ?? 0) - 1 - winnerCount
+  )
 
-  // Header above the lineup — SUBMISSIONS label + filter row. Rendered
-  // via `header` so it scrolls with the list (the collapsible tab
-  // header already handles its own sticky behaviour; keeping this one
-  // in-flow matches the web treatment).
-  const renderHeader = () => (
-    <Flex ph='l' pt='l' gap='m'>
-      <Flex row justifyContent='space-between' alignItems='center' gap='s'>
+  const winnersDelineator = useMemo(
+    () => (
+      <Flex ph='l' pt='l' gap='xs'>
+        <Divider />
         <Text variant='label' size='m' color='subdued'>
-          {submissionsCount > 0
-            ? `${submissionsCount} ${messages.submissions}`
-            : messages.submissions}
+          {messages.winners}
         </Text>
       </Flex>
-      <Flex row gap='s' wrap='wrap'>
-        <FilterButton
-          label={messages.coSigned}
-          value={isCosign ? 'true' : undefined}
-          onPress={() => setIsCosign((prev) => !prev)}
-          onChange={(v) => setIsCosign(v === 'true')}
-          size='small'
-        />
-        <FilterButton
-          label={messages.sort}
-          value={sortMethod}
-          variant='replaceLabel'
-          onChange={handleSortChange}
-          options={SORT_OPTIONS}
-          disableSearch
-          size='small'
-        />
-      </Flex>
-    </Flex>
+    ),
+    []
   )
+
+  const submissionsDelineator = useMemo(
+    () => (
+      <Flex ph='l' pt='l' gap='m'>
+        <Divider />
+        <Flex row justifyContent='space-between' alignItems='center' gap='s'>
+          <Text variant='label' size='m' color='subdued'>
+            {submissionsCount > 0
+              ? `${submissionsCount} ${messages.submissions}`
+              : messages.submissions}
+          </Text>
+        </Flex>
+        <Flex row gap='s' wrap='wrap'>
+          <FilterButton
+            label={messages.coSigned}
+            value={isCosign ? 'true' : undefined}
+            onPress={() => setIsCosign((prev) => !prev)}
+            onChange={(v) => setIsCosign(v === 'true')}
+            size='small'
+          />
+          <FilterButton
+            label={messages.sort}
+            value={sortMethod}
+            variant='replaceLabel'
+            onChange={handleSortChange}
+            options={SORT_OPTIONS}
+            disableSearch
+            size='small'
+          />
+        </Flex>
+      </Flex>
+    ),
+    [submissionsCount, isCosign, sortMethod, handleSortChange]
+  )
+
+  // Lineup shape is [original, ...winners, ...remixes]. Delineator
+  // keys map to the index the label renders AFTER, so:
+  // - With winners: WINNERS after original (index 0), SUBMISSIONS
+  //   after the last winner (index `winnerCount`).
+  // - Without winners: SUBMISSIONS after original (index 0).
+  // Same pattern the legacy `TrackRemixesScreen` uses.
+  const delineatorMap =
+    winnerCount > 0
+      ? {
+          0: winnersDelineator,
+          [winnerCount]: submissionsDelineator
+        }
+      : {
+          0: submissionsDelineator
+        }
 
   return (
     <TanQueryLineup
@@ -122,7 +162,7 @@ export const ContestSubmissionsTab = () => {
       pageSize={CONTEST_PAGE_SIZE}
       hasMore={!!lineup.hasNextPage}
       actions={remixesPageLineupActions}
-      header={renderHeader}
+      delineatorMap={delineatorMap}
     />
   )
 }

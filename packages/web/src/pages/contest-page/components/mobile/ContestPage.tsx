@@ -363,7 +363,15 @@ const ContestPage = ({
     sortMethod,
     isCosign
   })
-  const submissionsCount = lineup.data?.length
+  // Total lineup length includes the original + winners + remixes.
+  // The "N Submissions" label should show the number of *actual*
+  // submissions (remixes), not the whole lineup.
+  const lineupLength = lineup.data?.length
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
+  const submissionsCount =
+    lineupLength === undefined
+      ? undefined
+      : Math.max(0, lineupLength - 1 - winnerCount)
 
   useEffect(() => {
     if (trackId) {
@@ -564,6 +572,11 @@ const ContestPage = ({
               </Flex>
             </Flex>
           </Flex>
+
+          {/* Separator between the hosted-by row and the tab strip
+              below so the tab bar reads as a distinct section
+              instead of running directly into the host's name. */}
+          <Divider />
         </Box>
       </Box>
 
@@ -613,47 +626,82 @@ const ContestPage = ({
             </Box>
           ) : activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pt='l'>
-              {/* Filter bar — same controls track-page RemixesPage exposes
-                  above its remixes lineup: a Co-Signed toggle + a sort
-                  dropdown (Recent / Plays / Favorites). */}
-              <Flex justifyContent='space-between' alignItems='center'>
-                <SectionLabel>
-                  {submissionsCount != null
-                    ? `${submissionsCount} ${messages.submissions}`
-                    : messages.submissions}
-                </SectionLabel>
-                <Flex gap='xs'>
-                  <FilterButton
-                    label={messages.coSigned}
-                    value={isCosign ? 'true' : null}
-                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+              {(() => {
+                // Mirror the legacy `RemixesPage` delineator pattern:
+                // WINNERS label after the original, and a
+                // `N SUBMISSIONS + filter bar` delineator after the
+                // last winner (or after the original when there are
+                // no winners).
+                const winnersDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Box pt='l'>
+                      <SectionLabel>WINNERS</SectionLabel>
+                    </Box>
+                  </Box>
+                )
+                const submissionsDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Flex
+                      justifyContent='space-between'
+                      alignItems='center'
+                      pt='l'
+                    >
+                      <SectionLabel>
+                        {submissionsCount != null
+                          ? `${submissionsCount} ${messages.submissions}`
+                          : messages.submissions}
+                      </SectionLabel>
+                      <Flex gap='xs'>
+                        <FilterButton
+                          label={messages.coSigned}
+                          value={isCosign ? 'true' : null}
+                          onClick={() =>
+                            updateIsCosignParam(isCosign ? '' : 'true')
+                          }
+                        />
+                        <FilterButton
+                          value={sortMethod ?? 'recent'}
+                          variant='replaceLabel'
+                          onChange={updateSortParam}
+                          options={[
+                            { label: messages.sortRecent, value: 'recent' },
+                            { label: messages.sortPlays, value: 'plays' },
+                            { label: messages.sortFavorites, value: 'likes' }
+                          ]}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Box>
+                )
+                const delineatorMap: Record<number, JSX.Element> =
+                  winnerCount > 0
+                    ? {
+                        0: winnersDelineator,
+                        [winnerCount]: submissionsDelineator
+                      }
+                    : {
+                        0: submissionsDelineator
+                      }
+                return (
+                  <TanQueryLineup
+                    data={lineup.data}
+                    isFetching={lineup.isFetching}
+                    isPending={lineup.isPending}
+                    isError={lineup.isError}
+                    hasNextPage={lineup.hasNextPage}
+                    play={lineup.play}
+                    pause={lineup.pause}
+                    loadNextPage={lineup.loadNextPage}
+                    isPlaying={lineup.isPlaying}
+                    lineup={lineup.lineup}
+                    pageSize={CONTEST_PAGE_SIZE}
+                    actions={remixesPageLineupActions}
+                    delineatorMap={delineatorMap}
                   />
-                  <FilterButton
-                    value={sortMethod ?? 'recent'}
-                    variant='replaceLabel'
-                    onChange={updateSortParam}
-                    options={[
-                      { label: messages.sortRecent, value: 'recent' },
-                      { label: messages.sortPlays, value: 'plays' },
-                      { label: messages.sortFavorites, value: 'likes' }
-                    ]}
-                  />
-                </Flex>
-              </Flex>
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
+                )
+              })()}
             </Flex>
           ) : (
             <Box pt='l'>

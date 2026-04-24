@@ -305,7 +305,17 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
   }, [contest?.endDate])
 
-  const submissionsCount = lineup.data?.length
+  // Total lineup length includes the original + winners + remixes.
+  // The Submissions tab pill should show the number of *actual*
+  // submissions (remixes), not the whole lineup. Subtract one for
+  // the original (always included when `includeOriginal: true`) and
+  // the number of winners from the contest event data.
+  const lineupLength = lineup.data?.length
+  const winnerCount = contest?.eventData?.winners?.length ?? 0
+  const submissionsCount =
+    lineupLength === undefined
+      ? undefined
+      : Math.max(0, lineupLength - 1 - winnerCount)
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {
@@ -727,62 +737,94 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
           {activeTab === 'submissions' ? (
             <Flex direction='column' gap='l'>
-              {/* Filter bar — same controls the track-page `RemixesPage`
-                exposes above its remixes lineup: a Co-Signed toggle
-                plus a Most Recent / Most Plays / Most Favorites sort
-                dropdown. Co-signed surfaces entries the host has
-                endorsed; the sort drives the underlying
-                `useRemixesLineup` query. Sits directly on the page
-                background (the TrackTiles below provide their own
-                paper treatment — the extra outer Paper was
-                double-framing the row). */}
-              <Flex
-                justifyContent='space-between'
-                alignItems='center'
-                gap='s'
-                css={{
-                  [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
-                    {
-                      flexDirection: 'column',
-                      alignItems: 'stretch'
-                    }
-                }}
-              >
-                <Text variant='label' size='m' color='subdued'>
-                  {messages.submissionsTab(submissionsCount)}
-                </Text>
-                <Flex gap='s' wrap='wrap'>
-                  <FilterButton
-                    label={messages.coSigned}
-                    value={isCosign ? 'true' : null}
-                    onClick={() => updateIsCosignParam(isCosign ? '' : 'true')}
+              {(() => {
+                // Lineup shape is [original, ...winners, ...remixes].
+                // Mirror the legacy `RemixesPage` delineator pattern:
+                // a WINNERS label after the original, and a
+                // `SUBMISSIONS (N) + filter bar` delineator after
+                // the last winner (or after the original when there
+                // are no winners). Keeps the filter controls docked
+                // to the boundary between winners and submissions
+                // where they're most contextual, and matches the
+                // native mobile + track-page reference.
+                const winnersDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Box pt='l'>
+                      <Text variant='label' size='m' color='subdued'>
+                        WINNERS
+                      </Text>
+                    </Box>
+                  </Box>
+                )
+                const submissionsDelineator = (
+                  <Box pt='l' pb='s'>
+                    <Divider />
+                    <Flex
+                      justifyContent='space-between'
+                      alignItems='center'
+                      gap='s'
+                      pt='l'
+                      css={{
+                        [`@container contest (max-width: ${HEADER_STACK_BREAKPOINT_PX}px)`]:
+                          {
+                            flexDirection: 'column',
+                            alignItems: 'stretch'
+                          }
+                      }}
+                    >
+                      <Text variant='label' size='m' color='subdued'>
+                        {messages.submissionsTab(submissionsCount)}
+                      </Text>
+                      <Flex gap='s' wrap='wrap'>
+                        <FilterButton
+                          label={messages.coSigned}
+                          value={isCosign ? 'true' : null}
+                          onClick={() =>
+                            updateIsCosignParam(isCosign ? '' : 'true')
+                          }
+                        />
+                        <FilterButton
+                          value={sortMethod ?? 'recent'}
+                          variant='replaceLabel'
+                          onChange={updateSortParam}
+                          options={[
+                            { label: messages.sortRecent, value: 'recent' },
+                            { label: messages.sortPlays, value: 'plays' },
+                            { label: messages.sortFavorites, value: 'likes' }
+                          ]}
+                        />
+                      </Flex>
+                    </Flex>
+                  </Box>
+                )
+                const delineatorMap: Record<number, JSX.Element> =
+                  winnerCount > 0
+                    ? {
+                        0: winnersDelineator,
+                        [winnerCount]: submissionsDelineator
+                      }
+                    : {
+                        0: submissionsDelineator
+                      }
+                return (
+                  <TanQueryLineup
+                    data={lineup.data}
+                    isFetching={lineup.isFetching}
+                    isPending={lineup.isPending}
+                    isError={lineup.isError}
+                    hasNextPage={lineup.hasNextPage}
+                    play={lineup.play}
+                    pause={lineup.pause}
+                    loadNextPage={lineup.loadNextPage}
+                    isPlaying={lineup.isPlaying}
+                    lineup={lineup.lineup}
+                    pageSize={CONTEST_PAGE_SIZE}
+                    actions={remixesPageLineupActions}
+                    delineatorMap={delineatorMap}
                   />
-                  <FilterButton
-                    value={sortMethod ?? 'recent'}
-                    variant='replaceLabel'
-                    onChange={updateSortParam}
-                    options={[
-                      { label: messages.sortRecent, value: 'recent' },
-                      { label: messages.sortPlays, value: 'plays' },
-                      { label: messages.sortFavorites, value: 'likes' }
-                    ]}
-                  />
-                </Flex>
-              </Flex>
-              <TanQueryLineup
-                data={lineup.data}
-                isFetching={lineup.isFetching}
-                isPending={lineup.isPending}
-                isError={lineup.isError}
-                hasNextPage={lineup.hasNextPage}
-                play={lineup.play}
-                pause={lineup.pause}
-                loadNextPage={lineup.loadNextPage}
-                isPlaying={lineup.isPlaying}
-                lineup={lineup.lineup}
-                pageSize={CONTEST_PAGE_SIZE}
-                actions={remixesPageLineupActions}
-              />
+                )
+              })()}
             </Flex>
           ) : null}
         </Box>

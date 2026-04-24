@@ -54,6 +54,7 @@ import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/co
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
+import { ContestActionsDrawer } from 'app/screens/contest-screen/ContestActionsDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
   TrendingCombinedFilterDrawer,
@@ -173,6 +174,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,
+  ContestActions: ContestActionsDrawer,
   CoinInsightsOverflowMenu,
   WalletRowOverflowMenu
 }
