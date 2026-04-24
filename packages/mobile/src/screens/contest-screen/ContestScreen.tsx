@@ -52,6 +52,7 @@ import { ContestCommentsTab } from './tabs/ContestCommentsTab'
 import { ContestDetailsTab } from './tabs/ContestDetailsTab'
 import { ContestSubmissionsTab } from './tabs/ContestSubmissionsTab'
 import { ContestUpdatesTab } from './tabs/ContestUpdatesTab'
+import { useContestScrollStatusBar } from './useContestScrollStatusBar'
 
 const messages = {
   title: 'Remix Contest',
@@ -171,6 +172,7 @@ export const ContestScreen = () => {
   // floating nav bar's blur background + icon colors fade in as the
   // hero scrolls out of view — same pattern `ProfileScreen` uses.
   const scrollY = useSharedValue(0)
+  useContestScrollStatusBar(scrollY)
 
   // Updates tab visibility — for non-hosts, hide the tab until
   // there's at least one host-authored top-level post (a "post

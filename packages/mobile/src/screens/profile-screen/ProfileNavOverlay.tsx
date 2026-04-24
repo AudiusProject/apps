@@ -22,6 +22,7 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { useProfileScrollY } from './ProfileScrollContext'
 
@@ -81,6 +82,7 @@ export const ProfileNavOverlay = () => {
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const scrollY = useProfileScrollY()
+  const isDarkMode = isDarkTheme(useThemeVariant())
 
   const { data: accountId } = useCurrentUserId()
   const { user_id } =
@@ -166,7 +168,7 @@ export const ProfileNavOverlay = () => {
       style={[styles.root, { height: overlayHeight }]}
     >
       <AnimatedBlurView
-        blurType='light'
+        blurType={isDarkMode ? 'dark' : 'light'}
         blurAmount={20}
         style={[styles.blurBackground, blurBackgroundStyle]}
       />

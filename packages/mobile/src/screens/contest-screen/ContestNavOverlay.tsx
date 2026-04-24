@@ -17,6 +17,7 @@ import {
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { useContestScrollY } from './ContestScrollContext'
 
@@ -95,6 +96,7 @@ export const ContestNavOverlay = ({
   const insets = useSafeAreaInsets()
   const navigation = useNavigation()
   const scrollY = useContestScrollY()
+  const isDarkMode = isDarkTheme(useThemeVariant())
 
   const overlayHeight = insets.top + CONTEST_NAV_CONTROLS_HEIGHT
 
@@ -144,7 +146,7 @@ export const ContestNavOverlay = ({
       style={[styles.root, { height: overlayHeight }]}
     >
       <AnimatedBlurView
-        blurType='light'
+        blurType={isDarkMode ? 'dark' : 'light'}
         blurAmount={20}
         style={[styles.blurBackground, blurBackgroundStyle]}
       />
