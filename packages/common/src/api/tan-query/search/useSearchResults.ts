@@ -5,7 +5,6 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 import { isEmpty } from 'lodash'
-import { useDispatch } from 'react-redux'
 
 import { searchResultsFromSDK } from '~/adapters'
 import { useCurrentUserId } from '~/api'
@@ -20,7 +19,6 @@ import {
 } from '~/models'
 import { FeatureFlags } from '~/services'
 import { SearchKind, SearchSortMethod } from '~/store'
-import { tracksActions as searchResultsPageTracksLineupActions } from '~/store/pages/search-results/lineup/tracks/actions'
 import { Genre, formatMusicalKey } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -132,7 +130,6 @@ const useSearchQueryProps = <T>(
   }
   const { audiusSdk, getFeatureEnabled, analytics } = useQueryContext()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
   return {
     initialPageParam: 0,
@@ -282,15 +279,6 @@ const useSearchQueryProps = <T>(
         }
       }))
 
-      // Update lineup when new data arrives
-      dispatch(
-        searchResultsPageTracksLineupActions.fetchLineupMetadatas(
-          pageParam,
-          pageSize,
-          false,
-          { items: formattedTracks }
-        )
-      )
       return {
         tracks: formattedTracks,
         users,

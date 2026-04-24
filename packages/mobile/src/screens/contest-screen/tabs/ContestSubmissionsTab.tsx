@@ -96,10 +96,7 @@ export const ContestSubmissionsTab = () => {
   // Total lineup length includes original + winners + remixes. The
   // number of actual submissions (remixes) is the remainder once we
   // pull off the original (1 entry) and the winners.
-  const submissionsCount = Math.max(
-    0,
-    lineupTrackIds.length - 1 - winnerCount
-  )
+  const submissionsCount = Math.max(0, lineupTrackIds.length - 1 - winnerCount)
 
   const winnersDelineator = useMemo(
     () => (

@@ -168,7 +168,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     enabled: !!handleLower
   })
   const tracksQuerySource = useMemo(
-    () => ({ queryKey: [...getProfileTracksQueryKey(tracksArgs)] as unknown[] }),
+    () => ({
+      queryKey: [...getProfileTracksQueryKey(tracksArgs)] as unknown[]
+    }),
     [tracksArgs]
   )
 
@@ -180,8 +182,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     enabled: !!handleLower
   })
   const repostsQuerySource = useMemo(
-    () =>
-      ({ queryKey: [...getProfileRepostsQueryKey(repostsArgs)] as unknown[] }),
+    () => ({
+      queryKey: [...getProfileRepostsQueryKey(repostsArgs)] as unknown[]
+    }),
     [repostsArgs]
   )
 

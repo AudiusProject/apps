@@ -2,7 +2,6 @@ import { Name } from '@audius/common/models'
 import {
   accountActions,
   tokenDashboardPageActions,
-  feedPageLineupActions,
   signOutActions,
   searchActions,
   getContext
@@ -40,7 +39,6 @@ function* signOut() {
   yield* call(waitForValue, getIsSettingUp, {}, (isSettingUp) => !isSettingUp)
 
   yield* put(resetAccount())
-  yield* put(feedPageLineupActions.reset())
 
   yield* put(clearHistory())
   yield* put(clearOfflineDownloads())

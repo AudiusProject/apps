@@ -16,7 +16,7 @@ import {
   LineupState,
   CollectionMetadata
 } from '@audius/common/models'
-import { StringKeys, FeatureFlags } from '@audius/common/services'
+import { FeatureFlags } from '@audius/common/services'
 import {
   cacheActions,
   lineupActions as baseLineupActions,
@@ -70,9 +70,6 @@ function* filterDeletes<T extends Track | Collection>(
     getFeatureEnabled,
     FeatureFlags.USDC_PURCHASES
   )
-  const deniedHandles = remoteConfig
-    .getRemoteVar(StringKeys.EXPLORE_PREMIUM_DENIED_USERS)
-    ?.split(',')
 
   // TODO: are we properly filtering out deleted collections?
   return tracksMetadata

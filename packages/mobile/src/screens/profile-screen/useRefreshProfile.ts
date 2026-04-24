@@ -9,14 +9,9 @@ import {
   getUserQueryKey
 } from '@audius/common/api'
 import { Status } from '@audius/common/models'
-import {
-  profilePageFeedLineupActions,
-  profilePageTracksLineupActions,
-  profilePageSelectors,
-  ProfilePageTabs
-} from '@audius/common/store'
+import { profilePageSelectors, ProfilePageTabs } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 const { getProfileStatus } = profilePageSelectors
 
@@ -26,7 +21,6 @@ export const useRefreshProfile = (
   currentTab: ProfilePageTabs
 ) => {
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const status = useSelector((state) => getProfileStatus(state, handleLower))
 
@@ -64,14 +58,6 @@ export const useRefreshProfile = (
               handle: handleLower
             })
           })
-          dispatch(
-            profilePageTracksLineupActions.refreshInView(
-              true,
-              { userId: profile.user_id },
-              null,
-              { handle: handleLower }
-            )
-          )
           break
         case ProfilePageTabs.ALBUMS:
           // Albums are already invalidated above, but also reset for immediate refresh
@@ -91,18 +77,10 @@ export const useRefreshProfile = (
               handle: handleLower
             })
           })
-          dispatch(
-            profilePageFeedLineupActions.refreshInView(
-              true,
-              { userId: profile.user_id },
-              null,
-              { handle: handleLower }
-            )
-          )
           break
       }
     }
-  }, [profile, handleLower, currentTab, queryClient, dispatch])
+  }, [profile, handleLower, currentTab, queryClient])
 
   return {
     handleRefresh,

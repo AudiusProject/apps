@@ -11,14 +11,15 @@ import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
 export const TracksTab = () => {
-  const { handle, track_count = 0 } = useProfileUser({
-    select: (user) => ({
-      handle: user.handle,
-      user_id: user.user_id,
-      track_count: user.track_count,
-      artist_pick_track_id: user.artist_pick_track_id
-    })
-  }).user ?? {}
+  const { handle, track_count = 0 } =
+    useProfileUser({
+      select: (user) => ({
+        handle: user.handle,
+        user_id: user.user_id,
+        track_count: user.track_count,
+        artist_pick_track_id: user.artist_pick_track_id
+      })
+    }).user ?? {}
 
   const handleLower = handle?.toLowerCase() ?? ''
 

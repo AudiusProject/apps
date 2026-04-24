@@ -15,13 +15,14 @@ import { EmptyProfileTile } from '../EmptyProfileTile'
 // `trackIds` on the hook side. This is a known limitation introduced by the
 // tanquery migration.
 export const RepostsTab = () => {
-  const { handle, repost_count = 0 } = useProfileUser({
-    select: (user) => ({
-      handle: user.handle,
-      user_id: user.user_id,
-      repost_count: user.repost_count
-    })
-  }).user ?? {}
+  const { handle, repost_count = 0 } =
+    useProfileUser({
+      select: (user) => ({
+        handle: user.handle,
+        user_id: user.user_id,
+        repost_count: user.repost_count
+      })
+    }).user ?? {}
 
   const handleLower = handle?.toLowerCase() ?? ''
 
@@ -37,8 +38,9 @@ export const RepostsTab = () => {
   } = useProfileReposts(queryArgs, { enabled: !!handleLower })
 
   const querySource = useMemo(
-    () =>
-      ({ queryKey: [...getProfileRepostsQueryKey(queryArgs)] as unknown[] }),
+    () => ({
+      queryKey: [...getProfileRepostsQueryKey(queryArgs)] as unknown[]
+    }),
     [queryArgs]
   )
 

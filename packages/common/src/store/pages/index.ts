@@ -41,11 +41,6 @@ export * from './library-page/utils'
 export { persistedLibraryPageReducer } from './library-page/reducer'
 
 export {
-  default as pickWinnersPageLineupReducer,
-  initialState as pickWinnersPageLineupInitialState
-} from './pick-winners/lineup/reducer'
-export { tracksActions as pickWinnersPageLineupActions } from './pick-winners/lineup/actions'
-export {
   default as pickWinnersPageReducer,
   actions as pickWinnersPageActions
 } from './pick-winners/slice'
@@ -100,11 +95,6 @@ export * from './deactivate-account'
 
 export * from './chat'
 
-export {
-  default as exclusiveTracksPageLineupReducer,
-  initialState as exclusiveTracksPageLineupInitialState
-} from './exclusive-tracks/lineup/reducer'
-export { tracksActions as exclusiveTracksPageLineupActions } from './exclusive-tracks/lineup/actions'
 export {
   default as exclusiveTracksPageReducer,
   actions as exclusiveTracksPageActions
