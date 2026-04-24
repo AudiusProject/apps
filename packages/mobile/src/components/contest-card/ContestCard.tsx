@@ -40,8 +40,7 @@ const messages = {
   endsToday: 'ENDS TODAY',
   ended: 'ENDED',
   daysLeft: (n: number) => `${n} ${n === 1 ? 'DAY' : 'DAYS'} LEFT`,
-  entries: (n: number) => `${n} ${n === 1 ? 'ENTRY' : 'ENTRIES'}`,
-  prizesAvailable: 'PRIZES AVAILABLE'
+  entries: (n: number) => `${n} ${n === 1 ? 'ENTRY' : 'ENTRIES'}`
 }
 
 const formatStatus = (endDate?: string | null): string => {
@@ -276,7 +275,6 @@ export const ContestCard = (props: ContestCardProps) => {
     return null
   }
 
-  const prizeInfo = remixContest.eventData?.prizeInfo
   const status = formatStatus(remixContest.endDate)
 
   return (
@@ -325,7 +323,6 @@ export const ContestCard = (props: ContestCardProps) => {
             contentContainerStyle={{ gap: 8, flexDirection: 'row' }}
           >
             <Pill label={messages.entries(entriesCount)} />
-            {prizeInfo ? <Pill label={messages.prizesAvailable} /> : null}
           </ScrollView>
         </Flex>
       </Flex>
