@@ -492,10 +492,17 @@ export const SettingsPage = () => {
             description={settingsMessages.appearanceDescription}
             isFull={true}
           >
-            <Flex column gap='l'>
-              <Flex gap='l' alignItems='flex-end' css={{ flexWrap: 'wrap' }}>
-                <Flex column gap='s' css={{ flex: '0 0 180px' }}>
-                  <Text variant='label' size='s'>
+            <Flex column gap='l' className={styles.appearanceControls}>
+              <div className={styles.appearanceControlRow}>
+                <Flex
+                  column
+                  gap='s'
+                  className={cn(
+                    styles.appearanceControl,
+                    styles.appearanceThemeControl
+                  )}
+                >
+                  <Text variant='label' size='s' textAlign='left'>
                     {settingsMessages.themeLabel}
                   </Text>
                   <FilterButton<ThemePalette>
@@ -510,13 +517,12 @@ export const SettingsPage = () => {
                 <Flex
                   column
                   gap='s'
-                  className={cn({
+                  className={cn(styles.appearanceControl, {
                     [styles.matrixDisabledControl]:
                       effectivePalette === ThemePalette.MATRIX
                   })}
-                  css={{ flex: '1 1 320px' }}
                 >
-                  <Text variant='label' size='s'>
+                  <Text variant='label' size='s' textAlign='left'>
                     {settingsMessages.colorModeLabel}
                   </Text>
                   <SegmentedControl
@@ -533,9 +539,9 @@ export const SettingsPage = () => {
                     key={`tab-slider-${effectivePalette}`}
                   />
                 </Flex>
-              </Flex>
-              <Flex column gap='s'>
-                <Text variant='label' size='s'>
+              </div>
+              <Flex column gap='s' className={styles.appearanceControl}>
+                <Text variant='label' size='s' textAlign='left'>
                   {settingsMessages.surfaceStyleLabel}
                 </Text>
                 <SegmentedControl

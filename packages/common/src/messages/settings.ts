@@ -16,9 +16,9 @@ export const settingsMessages = {
   matrixMode: 'Matrix',
   defaultPalette: 'Default',
   classicPalette: 'Classic',
-  themeLabel: 'Theme',
-  colorModeLabel: 'Color Mode',
-  surfaceStyleLabel: 'Surface Style',
+  themeLabel: 'Color Theme',
+  colorModeLabel: 'Light / Dark',
+  surfaceStyleLabel: 'Glass Effect',
   surfaceStyleSolid: 'Solid',
   surfaceStyleSubtle: 'Subtle',
   surfaceStyleDefault: 'Default',
@@ -38,7 +38,7 @@ export const settingsMessages = {
   desktopAppCardTitle: 'Download the Desktop App',
 
   appearanceDescription:
-    'Choose a theme palette, color mode, and surface style.',
+    'Customize colors, light/dark mode, and glass effects.',
   inboxSettingsCardDescription:
     'Configure who is able to send messages to your inbox.',
   commentSettingsCardDescription:
