@@ -117,6 +117,26 @@ export const SelectablePill = (props: SelectablePillProps) => {
     disableUnselectAnimation
   ])
 
+  // Force animated styles to repaint with the new theme colors when the
+  // theme changes. Updating the dependency arrays below refreshes the
+  // worklet closures, but Reanimated only re-renders the view when a
+  // shared value it reads actually changes. Nudging `selected` here
+  // triggers that re-render so the interpolated colors pick up the new
+  // theme values instead of staying cached on the previous palette.
+  useEffect(() => {
+    const target = isSelected ? 1 : 0
+    selected.value = 1 - target
+    selected.value = target
+  }, [
+    color.background.white,
+    color.secondary.s400,
+    color.border.strong,
+    color.text.default,
+    color.static.white,
+    selected,
+    isSelected
+  ])
+
   const animatedRootStyles = useAnimatedStyle(
     () => ({
       opacity: withTiming(disabled ? 0.45 : 1, motion.press),
