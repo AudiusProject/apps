@@ -19,6 +19,27 @@
   overflow: hidden;
 }
 
+.tokenIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tokenIconButton:focus {
+  outline: none;
+}
+
+.tokenIconButton:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
+}
+
 .cardsContainer {
   display: flex;
   flex-wrap: wrap;

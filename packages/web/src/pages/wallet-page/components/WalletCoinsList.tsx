@@ -74,12 +74,13 @@ const USDCCoinCard = () => {
       symbol={TOKEN_LISTING_MAP.USDC.symbol}
       heldValue={usdcBalanceFormatted}
       dollarValue={usdcBalanceFormatted}
+      actionLabel='View Cash asset details'
     />
   )
 }
 
 const DiscoverFanClubsCard = ({ onClick }: { onClick: () => void }) => {
-  const { color } = useTheme()
+  const { color, spacing } = useTheme()
 
   return (
     <Flex
@@ -91,14 +92,44 @@ const DiscoverFanClubsCard = ({ onClick }: { onClick: () => void }) => {
       onClick={onClick}
       css={{
         cursor: 'pointer',
-        '&:hover': { backgroundColor: color.background.surface2 }
+        '&:hover,&:focus-within': { backgroundColor: color.background.surface2 }
       }}
     >
       <Text variant='heading' size='s'>
         {walletMessages.fanClubs.title}
       </Text>
       <Flex alignItems='center' gap='m'>
-        <IconCaretRight size='l' color='subdued' />
+        <button
+          type='button'
+          aria-label='Discover fan clubs'
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick()
+          }}
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: spacing.unit8,
+            height: spacing.unit8,
+            padding: 0,
+            border: 0,
+            borderRadius: '50%',
+            background: 'transparent',
+            color: 'inherit',
+            cursor: 'pointer',
+            '&:focus': {
+              outline: 'none'
+            },
+            '&:focus-visible': {
+              outline:
+                '2px solid var(--harmony-focus, var(--harmony-secondary))',
+              outlineOffset: 2
+            }
+          }}
+        >
+          <IconCaretRight size='l' color='subdued' />
+        </button>
       </Flex>
     </Flex>
   )
@@ -309,6 +340,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
       loading={isLoading}
       name={coinData?.name ?? ''}
       onClick={() => handleCoinClick(coin.ticker)}
+      actionLabel={`View ${coinData?.name || tokenSymbol} asset details`}
     />
   )
 }

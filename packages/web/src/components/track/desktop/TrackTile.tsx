@@ -49,6 +49,7 @@ import { getTrackWithFallback, getUserWithFallback } from '../helpers'
 import { messages } from '../trackTileMessages'
 import { TrackTileSize } from '../types'
 
+import styles from './TrackTile.module.css'
 import { TrackTileDuration } from './TrackTileDuration'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -393,6 +394,7 @@ export const TrackTile = ({
                       applyHoverStylesToInnerSvg
                       onClick={onClickTitle}
                       disabled={disableActions}
+                      className={styles.trackTitleLink}
                       tabIndex={0}
                       aria-label={`View track: ${title}`}
                       ellipses

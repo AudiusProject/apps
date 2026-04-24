@@ -33,12 +33,14 @@ export const ChatListItem = (props: ChatListItemProps) => {
     return null
   }
   return (
-    <div
+    <button
+      type='button'
       className={cn(styles.root, {
         [styles.active]: isCurrentChat,
         [styles.compact]: isCompact
       })}
       onClick={handleClick}
+      aria-current={isCurrentChat ? 'page' : undefined}
     >
       <ChatUser
         user={users[0]}
@@ -58,6 +60,6 @@ export const ChatListItem = (props: ChatListItemProps) => {
         ) : null}
       </ChatUser>
       <div className={styles.messagePreview}>{chat.last_message}</div>
-    </div>
+    </button>
   )
 }

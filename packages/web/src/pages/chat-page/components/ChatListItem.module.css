@@ -1,14 +1,30 @@
 .root {
+  appearance: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--harmony-unit-2);
+  width: 100%;
   padding: var(--harmony-unit-4) var(--harmony-unit-6);
   background-color: var(--harmony-white);
+  border: 0;
   border-bottom: 1px solid var(--harmony-n-100);
+  color: inherit;
+  font: inherit;
+  text-align: left;
 
   cursor: pointer;
   position: relative;
+}
+
+.root:focus {
+  outline: none;
+}
+
+.root:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
 }
 
 .root:hover {

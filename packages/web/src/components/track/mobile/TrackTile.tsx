@@ -426,15 +426,17 @@ export const TrackTile = ({
             justifyContent='center'
             gap='xs'
             pv='xs'
-            mr='m'
-            flex='0 1 65%'
-            css={{ overflow: 'hidden' }}
+            flex='1 1 0'
+            css={{ minWidth: 0, overflow: 'hidden' }}
           >
             <TextLink
               to={permalink}
               textVariant='title'
               isActive={uid === playingUid || isActive}
               applyHoverStylesToInnerSvg
+              className={styles.trackTitleLink}
+              tabIndex={0}
+              aria-label={`View track: ${title || messages.loading}`}
             >
               <Text ellipses>{title || messages.loading}</Text>
               {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}

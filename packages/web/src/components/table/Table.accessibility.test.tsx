@@ -74,4 +74,15 @@ describe('Table accessibility', () => {
     nextPageButton.focus()
     expect(nextPageButton).toHaveFocus()
   })
+
+  it('keeps the virtualized list container out of the tab order', () => {
+    const { container } = render(
+      <Table columns={columns} data={data} isVirtualized />
+    )
+
+    expect(container.querySelector('.ReactVirtualized__Grid')).toHaveAttribute(
+      'tabindex',
+      '-1'
+    )
+  })
 })

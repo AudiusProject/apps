@@ -899,6 +899,7 @@ export const Table = ({
                         {({ width }) => (
                           <List
                             role='Tabpanel'
+                            tabIndex={-1}
                             autoHeight
                             height={height}
                             width={width}

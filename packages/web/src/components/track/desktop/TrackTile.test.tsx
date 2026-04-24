@@ -132,6 +132,26 @@ describe('TrackTile', () => {
     expect(artistLink).toHaveFocus()
   })
 
+  it('keeps the track title in the natural tab order before the artist link', async () => {
+    const { container } = renderTrackTile()
+
+    const trackLink = await screen.findByRole('link', {
+      name: /View track: Test Track/
+    })
+    const artistLink = await screen.findByRole('link', { name: 'Test User' })
+    const tabbableElements = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])'
+      )
+    )
+
+    expect(tabbableElements.indexOf(trackLink)).toBeGreaterThanOrEqual(0)
+    expect(tabbableElements.indexOf(artistLink)).toBeGreaterThanOrEqual(0)
+    expect(tabbableElements.indexOf(trackLink)).toBeLessThan(
+      tabbableElements.indexOf(artistLink)
+    )
+  })
+
   it('activates track and artist links with Space without scrolling the page', async () => {
     const { unmount } = renderTrackTile()
 

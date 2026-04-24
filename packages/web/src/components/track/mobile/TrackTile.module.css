@@ -220,3 +220,20 @@
 .isHidden {
   visibility: hidden;
 }
+
+.trackTitleLink {
+  display: flex !important;
+  width: 100%;
+  min-width: 0;
+}
+
+.trackTitleLink > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.trackTitleLink:focus-visible {
+  border-radius: 4px;
+  outline: none !important;
+  box-shadow: inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary));
+}
