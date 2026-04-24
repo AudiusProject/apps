@@ -22,13 +22,21 @@ import {
   useCurrentUserId
 } from '~/api'
 import { useGatedContentAccess } from '~/hooks'
-import { Kind, ModalSource, ID, Comment, ReplyComment, Name, Track } from '~/models'
+import {
+  Kind,
+  ModalSource,
+  ID,
+  Comment,
+  ReplyComment,
+  Name,
+  Track
+} from '~/models'
 import { playbackActions } from '~/store'
 import { seek } from '~/store/player/slice'
-import { makeStableUid } from '~/utils/uid'
 import { PurchaseableContentType } from '~/store/purchase-content/types'
 import { usePremiumContentPurchaseModal } from '~/store/ui/modals/premium-content-purchase-modal'
 import { Nullable } from '~/utils'
+import { makeStableUid } from '~/utils/uid'
 
 import { useAppContext } from '../appContext'
 
@@ -77,10 +85,7 @@ type CommentSectionContextType<NavigationProp> = {
   loadMorePages: () => void
   hasNewComments: boolean
   isCommentCountLoading: boolean
-} & Omit<
-  CommentSectionProviderProps<NavigationProp>,
-  'playbackSource' | 'uid'
->
+} & Omit<CommentSectionProviderProps<NavigationProp>, 'playbackSource' | 'uid'>
 
 export const CommentSectionContext = createContext<
   CommentSectionContextType<any> | undefined

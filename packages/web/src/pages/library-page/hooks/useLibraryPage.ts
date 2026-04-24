@@ -15,7 +15,8 @@ import {
   ID,
   Kind,
   UID,
-  LineupTrack
+  LineupTrack,
+  Status
 } from '@audius/common/models'
 import {
   LibraryPageTabs as ProfileTabs,
@@ -35,7 +36,6 @@ import {
   TrackRecord
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { Status } from '@audius/common/models'
 import { dayjs, makeStableUid, route } from '@audius/common/utils'
 import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
 import { debounce } from 'lodash'

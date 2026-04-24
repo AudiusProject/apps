@@ -180,9 +180,7 @@ export const useProfilePage = () => {
   // Set default tab
   useEffect(() => {
     if (!activeTab && profile && accountUserId !== profile.user_id) {
-      setActiveTab(
-        isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
-      )
+      setActiveTab(isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS)
     }
   }, [activeTab, profile, isArtist, accountUserId])
 

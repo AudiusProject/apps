@@ -70,385 +70,379 @@ const g = withNullGuard((props: EditCollectionPageProps) => {
   if (hasAccount) return { ...props }
 })
 
-const EditCollectionPage = g(
-  ({ removeTrack, editPlaylist, orderPlaylist }) => {
-    const { handle, slug } = useParams<EditCollectionPageParams>()
-    const isAlbum = Boolean(useMatch('/:handle/album/:slug/edit'))
-    const permalink = `/${handle ?? ''}/${isAlbum ? 'album' : 'playlist'}/${slug ?? ''}`
-    const dispatch = useDispatch()
-    const navigate = useNavigate()
-    useRequiresAccount()
-    useIsUnauthorizedForHandleRedirect(handle ?? '')
+const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
+  const { handle, slug } = useParams<EditCollectionPageParams>()
+  const isAlbum = Boolean(useMatch('/:handle/album/:slug/edit'))
+  const permalink = `/${handle ?? ''}/${isAlbum ? 'album' : 'playlist'}/${slug ?? ''}`
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  useRequiresAccount()
+  useIsUnauthorizedForHandleRedirect(handle ?? '')
 
-    const { data: collection } = useCollectionByPermalink(permalink)
-    const { data: tracks } = useTracks(collection?.trackIds ?? [])
-    const { byId: trackUsers } = useUsers(tracks?.map((t) => t.owner_id) ?? [])
+  const { data: collection } = useCollectionByPermalink(permalink)
+  const { data: tracks } = useTracks(collection?.trackIds ?? [])
+  const { byId: trackUsers } = useUsers(tracks?.map((t) => t.owner_id) ?? [])
 
-    const { playlist_id, is_album } = collection ?? {}
+  const { playlist_id, is_album } = collection ?? {}
 
-    const messages = getMessages(is_album ? 'album' : 'playlist')
+  const messages = getMessages(is_album ? 'album' : 'playlist')
 
-    const initialMetadata = {
-      ...(collection as unknown as Collection),
-      artwork: { url: '' }
+  const initialMetadata = {
+    ...(collection as unknown as Collection),
+    artwork: { url: '' }
+  }
+
+  const [formFields, setFormFields] = useState(
+    initialMetadata || initialFormFields
+  )
+
+  const [showRemoveTrackDrawer, setShowRemoveTrackDrawer] = useState(false)
+  const onDrawerClose = useCallback(() => setShowRemoveTrackDrawer(false), [])
+
+  // Holds all tracks to be removed on save
+  const [removedTracks, setRemovedTracks] = useState<
+    { timestamp: number; trackId: ID }[]
+  >([])
+
+  // Holds track to be removed if confirmed
+  const [confirmRemoveTrack, setConfirmRemoveTrack] =
+    useState<Nullable<{ title: string; trackId: ID; timestamp: number }>>(null)
+
+  // State to keep track of reordering
+  const [reorderedTracks, setReorderedTracks] = useState<number[]>([])
+  const [hasReordered, setHasReordered] = useState(false)
+  useEffect(() => {
+    if (reorderedTracks.length === 0 && tracks && tracks.length !== 0) {
+      setReorderedTracks(tracks.map((_: any, i: number) => i))
     }
+  }, [setReorderedTracks, reorderedTracks, tracks])
 
-    const [formFields, setFormFields] = useState(
-      initialMetadata || initialFormFields
-    )
+  const { imageUrl: artworkUrl } = useCollectionCoverArt({
+    collectionId: playlist_id,
+    size: SquareSizes.SIZE_1000_BY_1000
+  })
 
-    const [showRemoveTrackDrawer, setShowRemoveTrackDrawer] = useState(false)
-    const onDrawerClose = useCallback(() => setShowRemoveTrackDrawer(false), [])
+  const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [didChangeArtwork, setDidChangeArtwork] = useState(false)
 
-    // Holds all tracks to be removed on save
-    const [removedTracks, setRemovedTracks] = useState<
-      { timestamp: number; trackId: ID }[]
-    >([])
-
-    // Holds track to be removed if confirmed
-    const [confirmRemoveTrack, setConfirmRemoveTrack] =
-      useState<Nullable<{ title: string; trackId: ID; timestamp: number }>>(
-        null
-      )
-
-    // State to keep track of reordering
-    const [reorderedTracks, setReorderedTracks] = useState<number[]>([])
-    const [hasReordered, setHasReordered] = useState(false)
-    useEffect(() => {
-      if (reorderedTracks.length === 0 && tracks && tracks.length !== 0) {
-        setReorderedTracks(tracks.map((_: any, i: number) => i))
-      }
-    }, [setReorderedTracks, reorderedTracks, tracks])
-
-    const { imageUrl: artworkUrl } = useCollectionCoverArt({
-      collectionId: playlist_id,
-      size: SquareSizes.SIZE_1000_BY_1000
-    })
-
-    const [isProcessingImage, setIsProcessingImage] = useState(false)
-    const [didChangeArtwork, setDidChangeArtwork] = useState(false)
-
-    const onDropArtwork = useCallback(
-      async (selectedFiles: any) => {
-        try {
-          let file = selectedFiles[0]
-          file = await resizeImage(file)
-          const url = URL.createObjectURL(file)
-          setFormFields((formFields: any) => ({
-            ...formFields,
-            artwork: { file, url }
-          }))
-          setDidChangeArtwork(true)
-        } catch (err) {
-          setFormFields((formFields: any) => ({
-            ...formFields,
-            artwork: {
-              ...(formFields.artwork || {}),
-              error: err instanceof Error ? err.message : 'Unknown error'
-            }
-          }))
-        }
-      },
-      [setFormFields]
-    )
-
-    const getRandomArtwork = useCallback(async () => {
-      setIsProcessingImage(true)
-      const value = await RandomImage.get()
-      if (value) {
-        await onDropArtwork([value])
-      }
-      setIsProcessingImage(false)
-    }, [onDropArtwork, setIsProcessingImage])
-
-    const onUpdateName = useCallback(
-      (name: string) => {
+  const onDropArtwork = useCallback(
+    async (selectedFiles: any) => {
+      try {
+        let file = selectedFiles[0]
+        file = await resizeImage(file)
+        const url = URL.createObjectURL(file)
         setFormFields((formFields: any) => ({
           ...formFields,
-          playlist_name: name
+          artwork: { file, url }
         }))
-      },
-      [setFormFields]
-    )
-
-    const onUpdateDescription = useCallback(
-      (description: string) => {
-        setFormFields((formFields: any) => ({ ...formFields, description }))
-      },
-      [setFormFields]
-    )
-
-    const onReorderPlaylist = useCallback(
-      (source: number, destination: number) => {
-        const reorder = [...reorderedTracks]
-        const tmp = reorder[source]
-        reorder.splice(source, 1)
-        reorder.splice(destination, 0, tmp)
-
-        setHasReordered(true)
-        setReorderedTracks(reorder)
-      },
-      [setHasReordered, reorderedTracks, setReorderedTracks]
-    )
-
-    const formatReorder = (
-      trackIds: { track: ID; time: number }[],
-      reorder: number[]
-    ) => {
-      return reorder.map((i) => {
-        const { track, time } = trackIds[i]
-        return {
-          id: track,
-          time
-        }
-      })
-    }
-
-    const onSave = useCallback(() => {
-      // Sanitize description field. Description is required to be present, but can be null
-      if (formFields.description === undefined) {
-        formFields.description = null
-      }
-      // Copy the metadata playlist contents so that a reference is not changed between
-      // removing tracks, updating track order, and edit playlist
-      const playlistTrackIds = [
-        ...(collection?.playlist_contents?.track_ids ?? [])
-      ]
-
-      for (const removedTrack of removedTracks) {
-        const { playlist_id } = collection!
-        removeTrack(removedTrack.trackId, playlist_id, removedTrack.timestamp)
-      }
-
-      if (collection && formFields.playlist_id) {
-        // Edit playlist
-        if (hasReordered) {
-          // Reorder the playlist and refresh the lineup just in case it's
-          // in the view behind the edit playlist page.
-          orderPlaylist(
-            collection.playlist_id,
-            formatReorder(playlistTrackIds, reorderedTracks)
-          )
-          // Update the playlist content track_ids so that the editPlaylist
-          // optimistically update the cached collection trackIds
-          formFields.playlist_contents.track_ids = reorderedTracks.map(
-            (idx) => playlistTrackIds[idx]
-          )
-        }
-
-        editPlaylist(collection.playlist_id, formFields as EditCollectionValues)
-
-        track({
-          eventName: Name.COLLECTION_EDIT,
-          properties: {
-            id: collection.playlist_id
+        setDidChangeArtwork(true)
+      } catch (err) {
+        setFormFields((formFields: any) => ({
+          ...formFields,
+          artwork: {
+            ...(formFields.artwork || {}),
+            error: err instanceof Error ? err.message : 'Unknown error'
           }
-        })
-
-        dispatch(replace(permalink))
+        }))
       }
-    }, [
-      formFields,
-      collection,
-      editPlaylist,
-      hasReordered,
-      reorderedTracks,
-      orderPlaylist,
-      removeTrack,
-      removedTracks,
-      dispatch,
-      permalink
-    ])
+    },
+    [setFormFields]
+  )
 
-    /**
-     * Stores the track to be removed if confirmed
-     * Opens the drawer to confirm removal of the track
-     */
-    const onRemoveTrack = useCallback(
-      (index: number) => {
-        if ((collection?.playlist_contents?.track_ids.length ?? 0) <= index)
-          return
-        const reorderedIndex = reorderedTracks[index]
-        const { playlist_contents } = collection!
-        const { track: trackId, time } =
-          playlist_contents.track_ids[reorderedIndex]
-        const trackMetadata = tracks?.find(
-          (track) => track.track_id === trackId
-        )
-        if (!trackMetadata) return
-        setConfirmRemoveTrack({
-          title: trackMetadata.title,
-          trackId,
-          timestamp: time
-        })
-        setShowRemoveTrackDrawer(true)
-      },
-      [
-        reorderedTracks,
-        setShowRemoveTrackDrawer,
-        collection,
-        tracks,
-        setConfirmRemoveTrack
-      ]
-    )
+  const getRandomArtwork = useCallback(async () => {
+    setIsProcessingImage(true)
+    const value = await RandomImage.get()
+    if (value) {
+      await onDropArtwork([value])
+    }
+    setIsProcessingImage(false)
+  }, [onDropArtwork, setIsProcessingImage])
 
-    /**
-     * Moves the track to be removed to the removedTracks array
-     * Closes the drawer to confirm removal of the track
-     */
-    const onConfirmRemove = useCallback(() => {
-      if (!confirmRemoveTrack) return
-      const removeIdx = collection?.playlist_contents.track_ids.findIndex(
-        (t) =>
-          t.track === confirmRemoveTrack.trackId &&
-          t.time === confirmRemoveTrack.timestamp
-      )
-      if (removeIdx === -1) return
-      setRemovedTracks((removed) =>
-        removed.concat({
-          trackId: confirmRemoveTrack.trackId,
-          timestamp: confirmRemoveTrack.timestamp
-        })
-      )
-      setReorderedTracks((tracks) =>
-        tracks.filter((trackIndex) => trackIndex !== removeIdx)
-      )
-      onDrawerClose()
-    }, [
-      confirmRemoveTrack,
-      collection?.playlist_contents.track_ids,
-      onDrawerClose
-    ])
+  const onUpdateName = useCallback(
+    (name: string) => {
+      setFormFields((formFields: any) => ({
+        ...formFields,
+        playlist_name: name
+      }))
+    },
+    [setFormFields]
+  )
 
-    const setters = useCallback(
-      () => ({
-        left: (
-          <TextElement
-            text='Cancel'
-            type={Type.SECONDARY}
-            onClick={() => navigate(-1)}
-          />
-        ),
-        center: messages.editPlaylist,
-        right: (
-          <TextElement
-            text='Save'
-            type={Type.PRIMARY}
-            isEnabled={!!formFields.playlist_name}
-            onClick={onSave}
-          />
-        )
-      }),
-      [formFields.playlist_name, messages.editPlaylist, navigate, onSave]
-    )
+  const onUpdateDescription = useCallback(
+    (description: string) => {
+      setFormFields((formFields: any) => ({ ...formFields, description }))
+    },
+    [setFormFields]
+  )
 
-    useTemporaryNavContext(setters)
+  const onReorderPlaylist = useCallback(
+    (source: number, destination: number) => {
+      const reorder = [...reorderedTracks]
+      const tmp = reorder[source]
+      reorder.splice(source, 1)
+      reorder.splice(destination, 0, tmp)
 
-    const trackAccessMap = useGatedContentAccessMap(tracks ?? [])
+      setHasReordered(true)
+      setReorderedTracks(reorder)
+    },
+    [setHasReordered, reorderedTracks, setReorderedTracks]
+  )
 
-    // Put together track list if necessary
-    let trackList = null
-    if (tracks && reorderedTracks.length > 0) {
-      trackList = reorderedTracks.map((i) => {
-        const t = tracks[i]
-        const playlistTrack = collection?.playlist_contents.track_ids[i]
-        const isRemoveActive =
-          showRemoveTrackDrawer &&
-          t.track_id === confirmRemoveTrack?.trackId &&
-          playlistTrack?.time === confirmRemoveTrack?.timestamp
-        const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
-          t.track_id
-        ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
-        const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-        const trackOwner = trackUsers[t.owner_id]
+  const formatReorder = (
+    trackIds: { track: ID; time: number }[],
+    reorder: number[]
+  ) => {
+    return reorder.map((i) => {
+      const { track, time } = trackIds[i]
+      return {
+        id: track,
+        time
+      }
+    })
+  }
 
-        return {
-          isLoading: false,
-          artistName: trackOwner?.name,
-          artistHandle: trackOwner?.handle,
-          trackTitle: t.title,
-          permalink: t.permalink,
-          trackId: t.track_id,
-          time: playlistTrack?.time,
-          isStreamGated: t.is_stream_gated,
-          isDeleted: t.is_delete || !!trackOwner?.is_deactivated,
-          isUnlisted: t.is_unlisted,
-          isLocked,
-          isRemoveActive
-        }
-      })
+  const onSave = useCallback(() => {
+    // Sanitize description field. Description is required to be present, but can be null
+    if (formFields.description === undefined) {
+      formFields.description = null
+    }
+    // Copy the metadata playlist contents so that a reference is not changed between
+    // removing tracks, updating track order, and edit playlist
+    const playlistTrackIds = [
+      ...(collection?.playlist_contents?.track_ids ?? [])
+    ]
+
+    for (const removedTrack of removedTracks) {
+      const { playlist_id } = collection!
+      removeTrack(removedTrack.trackId, playlist_id, removedTrack.timestamp)
     }
 
-    return (
-      <div className={styles.editPlaylistPage}>
-        <div className={styles.artwork}>
-          <DynamicImage
-            image={
-              didChangeArtwork
-                ? formFields.artwork.url
-                : artworkUrl || formFields.artwork.url || placeholderCoverArt
-            }
-            className={styles.image}
-            wrapperClassName={styles.imageWrapper}
-          >
-            {
-              <UploadStub
-                onChange={onDropArtwork}
-                isProcessing={isProcessingImage}
-              />
-            }
-          </DynamicImage>
-          <div className={styles.random} onClick={getRandomArtwork}>
-            <IconCamera className={styles.iconCamera} />
-            <div className={styles.text}>{messages.randomPhoto}</div>
-          </div>
-        </div>
+    if (collection && formFields.playlist_id) {
+      // Edit playlist
+      if (hasReordered) {
+        // Reorder the playlist and refresh the lineup just in case it's
+        // in the view behind the edit playlist page.
+        orderPlaylist(
+          collection.playlist_id,
+          formatReorder(playlistTrackIds, reorderedTracks)
+        )
+        // Update the playlist content track_ids so that the editPlaylist
+        // optimistically update the cached collection trackIds
+        formFields.playlist_contents.track_ids = reorderedTracks.map(
+          (idx) => playlistTrackIds[idx]
+        )
+      }
 
-        <div className={styles.info}>
-          <GroupableList>
+      editPlaylist(collection.playlist_id, formFields as EditCollectionValues)
+
+      track({
+        eventName: Name.COLLECTION_EDIT,
+        properties: {
+          id: collection.playlist_id
+        }
+      })
+
+      dispatch(replace(permalink))
+    }
+  }, [
+    formFields,
+    collection,
+    editPlaylist,
+    hasReordered,
+    reorderedTracks,
+    orderPlaylist,
+    removeTrack,
+    removedTracks,
+    dispatch,
+    permalink
+  ])
+
+  /**
+   * Stores the track to be removed if confirmed
+   * Opens the drawer to confirm removal of the track
+   */
+  const onRemoveTrack = useCallback(
+    (index: number) => {
+      if ((collection?.playlist_contents?.track_ids.length ?? 0) <= index)
+        return
+      const reorderedIndex = reorderedTracks[index]
+      const { playlist_contents } = collection!
+      const { track: trackId, time } =
+        playlist_contents.track_ids[reorderedIndex]
+      const trackMetadata = tracks?.find((track) => track.track_id === trackId)
+      if (!trackMetadata) return
+      setConfirmRemoveTrack({
+        title: trackMetadata.title,
+        trackId,
+        timestamp: time
+      })
+      setShowRemoveTrackDrawer(true)
+    },
+    [
+      reorderedTracks,
+      setShowRemoveTrackDrawer,
+      collection,
+      tracks,
+      setConfirmRemoveTrack
+    ]
+  )
+
+  /**
+   * Moves the track to be removed to the removedTracks array
+   * Closes the drawer to confirm removal of the track
+   */
+  const onConfirmRemove = useCallback(() => {
+    if (!confirmRemoveTrack) return
+    const removeIdx = collection?.playlist_contents.track_ids.findIndex(
+      (t) =>
+        t.track === confirmRemoveTrack.trackId &&
+        t.time === confirmRemoveTrack.timestamp
+    )
+    if (removeIdx === -1) return
+    setRemovedTracks((removed) =>
+      removed.concat({
+        trackId: confirmRemoveTrack.trackId,
+        timestamp: confirmRemoveTrack.timestamp
+      })
+    )
+    setReorderedTracks((tracks) =>
+      tracks.filter((trackIndex) => trackIndex !== removeIdx)
+    )
+    onDrawerClose()
+  }, [
+    confirmRemoveTrack,
+    collection?.playlist_contents.track_ids,
+    onDrawerClose
+  ])
+
+  const setters = useCallback(
+    () => ({
+      left: (
+        <TextElement
+          text='Cancel'
+          type={Type.SECONDARY}
+          onClick={() => navigate(-1)}
+        />
+      ),
+      center: messages.editPlaylist,
+      right: (
+        <TextElement
+          text='Save'
+          type={Type.PRIMARY}
+          isEnabled={!!formFields.playlist_name}
+          onClick={onSave}
+        />
+      )
+    }),
+    [formFields.playlist_name, messages.editPlaylist, navigate, onSave]
+  )
+
+  useTemporaryNavContext(setters)
+
+  const trackAccessMap = useGatedContentAccessMap(tracks ?? [])
+
+  // Put together track list if necessary
+  let trackList = null
+  if (tracks && reorderedTracks.length > 0) {
+    trackList = reorderedTracks.map((i) => {
+      const t = tracks[i]
+      const playlistTrack = collection?.playlist_contents.track_ids[i]
+      const isRemoveActive =
+        showRemoveTrackDrawer &&
+        t.track_id === confirmRemoveTrack?.trackId &&
+        playlistTrack?.time === confirmRemoveTrack?.timestamp
+      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMap[
+        t.track_id
+      ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
+      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+      const trackOwner = trackUsers[t.owner_id]
+
+      return {
+        isLoading: false,
+        artistName: trackOwner?.name,
+        artistHandle: trackOwner?.handle,
+        trackTitle: t.title,
+        permalink: t.permalink,
+        trackId: t.track_id,
+        time: playlistTrack?.time,
+        isStreamGated: t.is_stream_gated,
+        isDeleted: t.is_delete || !!trackOwner?.is_deactivated,
+        isUnlisted: t.is_unlisted,
+        isLocked,
+        isRemoveActive
+      }
+    })
+  }
+
+  return (
+    <div className={styles.editPlaylistPage}>
+      <div className={styles.artwork}>
+        <DynamicImage
+          image={
+            didChangeArtwork
+              ? formFields.artwork.url
+              : artworkUrl || formFields.artwork.url || placeholderCoverArt
+          }
+          className={styles.image}
+          wrapperClassName={styles.imageWrapper}
+        >
+          {
+            <UploadStub
+              onChange={onDropArtwork}
+              isProcessing={isProcessingImage}
+            />
+          }
+        </DynamicImage>
+        <div className={styles.random} onClick={getRandomArtwork}>
+          <IconCamera className={styles.iconCamera} />
+          <div className={styles.text}>{messages.randomPhoto}</div>
+        </div>
+      </div>
+
+      <div className={styles.info}>
+        <GroupableList>
+          <Grouping>
+            <EditableRow
+              label='Name'
+              format={Format.INPUT}
+              initialValue={formFields.playlist_name}
+              placeholderValue={messages.placeholderName}
+              onChange={onUpdateName}
+              maxLength={64}
+            />
+            <EditableRow
+              label='Description'
+              format={Format.TEXT_AREA}
+              initialValue={formFields?.description ?? undefined}
+              placeholderValue={messages.placeholderDescription}
+              onChange={onUpdateDescription}
+              centerLeftElement={false}
+              maxLength={1000}
+            />
+          </Grouping>
+          {trackList && trackList.length > 0 && (
             <Grouping>
-              <EditableRow
-                label='Name'
-                format={Format.INPUT}
-                initialValue={formFields.playlist_name}
-                placeholderValue={messages.placeholderName}
-                onChange={onUpdateName}
-                maxLength={64}
-              />
-              <EditableRow
-                label='Description'
-                format={Format.TEXT_AREA}
-                initialValue={formFields?.description ?? undefined}
-                placeholderValue={messages.placeholderDescription}
-                onChange={onUpdateDescription}
-                centerLeftElement={false}
-                maxLength={1000}
+              <TrackList
+                tracks={trackList}
+                showDivider
+                noDividerMargin
+                isReorderable
+                onRemove={onRemoveTrack}
+                onReorder={onReorderPlaylist}
               />
             </Grouping>
-            {trackList && trackList.length > 0 && (
-              <Grouping>
-                <TrackList
-                  tracks={trackList}
-                  showDivider
-                  noDividerMargin
-                  isReorderable
-                  onRemove={onRemoveTrack}
-                  onReorder={onReorderPlaylist}
-                />
-              </Grouping>
-            )}
-          </GroupableList>
-        </div>
-        <RemovePlaylistTrackDrawer
-          isOpen={showRemoveTrackDrawer}
-          trackTitle={confirmRemoveTrack?.title}
-          onClose={onDrawerClose}
-          onConfirm={onConfirmRemove}
-        />
+          )}
+        </GroupableList>
       </div>
-    )
-  }
-)
+      <RemovePlaylistTrackDrawer
+        isOpen={showRemoveTrackDrawer}
+        trackTitle={confirmRemoveTrack?.title}
+        onClose={onDrawerClose}
+        onConfirm={onConfirmRemove}
+      />
+    </div>
+  )
+})
 
 function mapStateToProps(state: AppState) {
   return {}

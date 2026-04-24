@@ -8,6 +8,7 @@ import {
   playerSelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
+import { makeStableUid } from '@audius/common/utils'
 import {
   Button,
   IconListeningHistory,
@@ -19,7 +20,6 @@ import {
   GetUsersTrackHistorySortMethodEnum,
   GetUsersTrackHistorySortDirectionEnum
 } from '@audius/sdk'
-import { makeStableUid } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
 

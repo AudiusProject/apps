@@ -3,13 +3,7 @@ import { GetUserLibraryTracksTypeEnum } from '@audius/sdk'
 import type { Dayjs } from '~/utils/dayjs'
 import { ValueOf } from '~/utils/typeUtils'
 
-import {
-  UID,
-  ID,
-  Collection,
-  Favorite,
-  LineupTrack
-} from '../../../models'
+import { UID, ID, Collection, Favorite, LineupTrack } from '../../../models'
 
 export const LibraryCategory = GetUserLibraryTracksTypeEnum
 export type LibraryCategoryType = ValueOf<typeof LibraryCategory>
