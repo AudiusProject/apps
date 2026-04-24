@@ -116,4 +116,16 @@ describe('TrackTile', () => {
     renderTrackTile(overrides)
     await assert()
   })
+
+  it('keeps the track and artist links focusable', async () => {
+    renderTrackTile()
+
+    const trackLink = await screen.findByRole('link', { name: 'Test Track' })
+    trackLink.focus()
+    expect(trackLink).toHaveFocus()
+
+    const artistLink = await screen.findByRole('link', { name: 'Test User' })
+    artistLink.focus()
+    expect(artistLink).toHaveFocus()
+  })
 })

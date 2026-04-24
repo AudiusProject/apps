@@ -74,6 +74,11 @@ export const TextLink = forwardRef((props: TextLinkProps, ref: Ref<'a'>) => {
           path: { transition: `fill ${motion.hover}` }
         }),
         ':hover': hoverStyles,
+        ':focus-visible': {
+          borderRadius: spacing.xs,
+          outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
+          outlineOffset: 3
+        },
         ...(isActive && { ...hoverStyles, textDecoration: 'none' }),
         ...(showUnderline && hoverStyles),
         ...(ellipses && { minWidth: 0 })

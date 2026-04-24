@@ -1,4 +1,12 @@
-import { forwardRef, useCallback, useRef, useState, MouseEvent } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  KeyboardEvent,
+  MouseEvent
+} from 'react'
 
 import { useTheme } from '@emotion/react'
 import cn from 'classnames'
@@ -36,6 +44,7 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
     const { spacing, typography, color } = useTheme()
     const clickInsideRef = useRef<any>(null)
     const anchorRef = useRef<HTMLElement>(null)
+    const menuItemRefs = useRef<Array<HTMLElement | null>>([])
 
     const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false)
 
@@ -52,6 +61,16 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
       if (onClose) onClose()
     }, [setIsPopupVisible, onClose])
 
+    useEffect(() => {
+      if (!isPopupVisible) return
+
+      const timeout = setTimeout(() => {
+        menuItemRefs.current[0]?.focus({ preventScroll: true })
+      }, 0)
+
+      return () => clearTimeout(timeout)
+    }, [isPopupVisible])
+
     const handleMenuItemClick = useCallback(
       (item: PopupMenuItem) => (e: MouseEvent<HTMLElement>) => {
         e.stopPropagation()
@@ -59,6 +78,27 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
         handlePopupClose()
       },
       [handlePopupClose]
+    )
+
+    const handleMenuItemKeyDown = useCallback(
+      (item: PopupMenuItem, index: number) =>
+        (e: KeyboardEvent<HTMLElement>) => {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault()
+            e.stopPropagation()
+            item.onClick(e as unknown as MouseEvent<HTMLElement>)
+            handlePopupClose()
+            return
+          }
+
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault()
+            const direction = e.key === 'ArrowDown' ? 1 : -1
+            const nextIndex = (index + direction + items.length) % items.length
+            menuItemRefs.current[nextIndex]?.focus()
+          }
+        },
+      [handlePopupClose, items.length]
     )
 
     const triggerId = id ? `${id}-trigger` : undefined
@@ -87,6 +127,10 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
         path: {
           fill: color.icon.white
         }
+      },
+      '&:focus-visible': {
+        outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
+        outlineOffset: '2px'
       },
       '&.destructive': {
         color: color.status.error,
@@ -148,8 +192,12 @@ export const PopupMenu = forwardRef<HTMLDivElement, PopupMenuProps>(
                   className={cn(item.className, {
                     destructive: item.destructive
                   })}
+                  ref={(element: HTMLDivElement | null) => {
+                    menuItemRefs.current[i] = element
+                  }}
                   onClick={handleMenuItemClick(item)}
-                  tabIndex={i === 0 ? 0 : -1}
+                  onKeyDown={handleMenuItemKeyDown(item, i)}
+                  tabIndex={0}
                   css={menuItemCss}
                   alignItems='center'
                   gap='s'

@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { KeyboardEvent, memo } from 'react'
 
 import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
@@ -21,6 +21,17 @@ const { getPreviewing } = playerSelectors
 
 const messages = {
   preview: 'Preview'
+}
+
+const handleKeyboardActivation = (
+  event: KeyboardEvent<HTMLDivElement>,
+  callback: () => void
+) => {
+  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+    event.stopPropagation()
+    event.preventDefault()
+    callback()
+  }
 }
 
 interface PlayingTrackInfoProps {
@@ -97,6 +108,12 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickTrackTitle}
+            onKeyDown={(event) =>
+              handleKeyboardActivation(event, onClickTrackTitle)
+            }
+            role='button'
+            tabIndex={0}
+            aria-label={`View track: ${trackTitle}`}
           >
             {trackTitle}
           </div>
@@ -155,6 +172,12 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickArtistName}
+            onKeyDown={(event) =>
+              handleKeyboardActivation(event, onClickArtistName)
+            }
+            role='button'
+            tabIndex={0}
+            aria-label={`View artist: ${artistName}`}
           >
             {artistName}
           </div>

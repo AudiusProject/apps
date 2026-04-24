@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { KeyboardEvent, useEffect, useState } from 'react'
 
 import { useToggleFavoriteTrack, useUser } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
@@ -114,6 +114,19 @@ const PlayBar = ({
   } = track
 
   const { name } = user
+  const infoLabel = `View current track: ${title} by ${name}`
+
+  const handleInfoKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.stopPropagation()
+      event.preventDefault()
+      onClickInfo()
+    }
+  }
 
   let playButtonStatus
   if (isBuffering) {
@@ -159,7 +172,14 @@ const PlayBar = ({
               className={styles.favorite}
             />
           )}
-          <div className={styles.info} onClick={onClickInfo}>
+          <div
+            className={styles.info}
+            onClick={onClickInfo}
+            onKeyDown={handleInfoKeyDown}
+            role='button'
+            tabIndex={0}
+            aria-label={infoLabel}
+          >
             {track?.track_id ? (
               <TrackFlair
                 className={styles.artwork}

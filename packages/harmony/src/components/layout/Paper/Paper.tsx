@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { KeyboardEvent, forwardRef } from 'react'
 
 import { useTheme } from '@emotion/react'
 
@@ -18,7 +18,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
     ...other
   } = props
 
-  const { onClick } = other
+  const { onClick, onKeyDown } = other
 
   const { shadows, motion } = useTheme()
 
@@ -33,10 +33,30 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
       transform: 'scale(1.01)',
       boxShadow: shadows.far
     },
+    '&:focus-visible': {
+      outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
+      outlineOffset: '3px'
+    },
     '&:active': {
       transform: 'scale(0.995)',
       boxShadow: shadows.near,
       transition: motion.press
+    }
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event)
+
+    if (event.defaultPrevented || !onClick) return
+
+    if (
+      event.key === 'Enter' ||
+      event.key === ' ' ||
+      event.key === 'Spacebar'
+    ) {
+      event.stopPropagation()
+      event.preventDefault()
+      event.currentTarget.click()
     }
   }
 
@@ -50,6 +70,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
       tabIndex={onClick ? 0 : undefined}
       ref={ref}
       {...other}
+      onKeyDown={onClick ? handleKeyDown : onKeyDown}
     />
   )
 })

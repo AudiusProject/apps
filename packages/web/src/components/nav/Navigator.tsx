@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  KeyboardEvent,
   useLayoutEffect,
   useRef,
   useState
@@ -100,6 +101,17 @@ const Navigator = ({ className }: OwnProps) => {
     [isCollapsed]
   )
 
+  const handleResizeHandleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.stopPropagation()
+        e.preventDefault()
+        setIsCollapsed(!isCollapsed)
+      }
+    },
+    [isCollapsed, setIsCollapsed]
+  )
+
   useEffect(() => {
     if (!isDragging) return
 
@@ -150,6 +162,16 @@ const Navigator = ({ className }: OwnProps) => {
               className={styles.resizeHandle}
               style={{ cursor: isCollapsed ? 'e-resize' : 'w-resize' }}
               onMouseDown={handleDragStart}
+              onKeyDown={handleResizeHandleKeyDown}
+              role='button'
+              tabIndex={0}
+              aria-label={
+                isCollapsed
+                  ? 'Expand navigation sidebar'
+                  : 'Collapse navigation sidebar'
+              }
+              aria-controls='leftNav'
+              aria-expanded={!isCollapsed}
             />
           </>
         )}

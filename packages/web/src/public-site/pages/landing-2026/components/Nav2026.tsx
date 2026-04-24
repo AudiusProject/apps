@@ -95,7 +95,21 @@ export const Nav2026 = (props: Nav2026Props) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isDropdownClosing, setIsDropdownClosing] = useState(false)
   const [isMobileOverlayOpen, setIsMobileOverlayOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const isScrolledRef = useRef(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const scrolled = window.scrollY > 0
+      if (scrolled !== isScrolledRef.current) {
+        isScrolledRef.current = scrolled
+        setIsScrolled(scrolled)
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const startCloseDropdown = useCallback(() => {
     if (!isDropdownOpen) return
@@ -152,7 +166,7 @@ export const Nav2026 = (props: Nav2026Props) => {
 
   return (
     <>
-      <div className={styles.container}>
+      <div className={`${styles.container}${isScrolled ? ` ${styles.scrolled}` : ''}`}>
         <nav className={styles.nav}>
           <div className={styles.inner}>
             <a

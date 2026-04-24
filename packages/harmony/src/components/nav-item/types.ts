@@ -16,6 +16,8 @@ export type NavItemProps = WithCSS<{
   rightIcon?: ReactNode
   /** Whether the navigation item is currently selected. */
   isSelected?: boolean
+  /** Whether the wrapping link currently has keyboard focus. */
+  isFocusVisible?: boolean
   /** The callback function to be called when the navigation item is clicked. */
   onClick?: (event?: MouseEvent<Element>) => void
   /** The size of the text to display. */

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { KeyboardEvent, ReactNode, useCallback, useMemo, useState } from 'react'
 
 import { Name } from '@audius/common/models'
 import { NavItem, NavItemProps } from '@audius/harmony'
@@ -13,6 +13,7 @@ import {
 import { removeNullable } from 'utils/typeUtils'
 
 import { CollapsedNavItem } from './CollapsedNavItem'
+import styles from './LeftNavLink.module.css'
 import { useNavSidebar } from './NavSidebarContext'
 
 /**
@@ -42,6 +43,12 @@ const isPathMatch = ({
   })
 }
 
+const getAccessibleLabel = (children: ReactNode) => {
+  if (typeof children === 'string') return children
+  if (typeof children === 'number') return `${children}`
+  return undefined
+}
+
 export type LeftNavLinkProps = Omit<NavItemProps, 'isSelected'> & {
   to?: string
   disabled?: boolean
@@ -67,6 +74,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
   const location = useLocation()
   const dispatch = useDispatch()
   const { isCollapsed } = useNavSidebar()
+  const [isFocusVisible, setIsFocusVisible] = useState(false)
   const isSelected = useMemo(() => {
     const pathsToMatch = [to, ...additionalPathMatches].filter(removeNullable)
     return isPathMatch({
@@ -75,6 +83,7 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
       exact
     })
   }, [to, additionalPathMatches, location.pathname, exact])
+  const accessibleLabel = getAccessibleLabel(children)
 
   const requiresAccountOnClick = useRequiresAccountOnClick(
     (e) => {
@@ -95,27 +104,66 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     restriction
   )
 
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLAnchorElement>) => {
+    if (e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault()
+      e.stopPropagation()
+      e.currentTarget.click()
+    }
+  }, [])
+
+  const handleFocus = useCallback(() => {
+    setIsFocusVisible(true)
+  }, [])
+
+  const handleBlur = useCallback(() => {
+    setIsFocusVisible(false)
+  }, [])
+
   if (isCollapsed && leftIcon) {
     return (
-      <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
+      <NavLink
+        to={to ?? ''}
+        onClick={requiresAccountOnClick}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        className={styles.navLink}
+        draggable={false}
+        tabIndex={0}
+        aria-label={accessibleLabel}
+        aria-current={isSelected ? 'page' : undefined}
+      >
         <CollapsedNavItem
           icon={leftIcon}
           isSelected={isSelected}
           disabled={disabled}
           hasNotification={hasNotification}
+          isFocusVisible={isFocusVisible}
         />
       </NavLink>
     )
   }
 
   return (
-    <NavLink to={to ?? ''} onClick={requiresAccountOnClick} draggable={false}>
+    <NavLink
+      to={to ?? ''}
+      onClick={requiresAccountOnClick}
+      onKeyDown={handleKeyDown}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      className={styles.navLink}
+      draggable={false}
+      tabIndex={0}
+      aria-current={isSelected ? 'page' : undefined}
+    >
       <NavItem
         {...other}
         leftIcon={leftIcon}
         rightIcon={rightIcon}
         hasNotification={hasNotification}
         isSelected={isSelected}
+        isFocusVisible={isFocusVisible}
         css={{
           opacity: disabled ? 0.5 : 1,
           cursor: 'pointer'

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { KeyboardEvent, useCallback, useMemo, useState } from 'react'
 
 import { useTheme, CSSObject } from '@emotion/react'
 import { ResizeObserver } from '@juggle/resize-observer'
@@ -91,11 +91,31 @@ export const ExpandableNavItem = ({
     onClick?.(!isOpen)
   }, [canUnfurl, isOpen, onClick])
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (
+        event.key === 'Enter' ||
+        event.key === ' ' ||
+        event.key === 'Spacebar'
+      ) {
+        event.stopPropagation()
+        event.preventDefault()
+        handleClick()
+      }
+    },
+    [handleClick]
+  )
+
   const styles = useMemo(
     () => ({
       ...getStyles(theme, disabled),
       opacity: isMainActive ? 0.8 : disabled ? 0.5 : 1,
-      transition: `opacity ${theme.motion.quick}, background-color ${theme.motion.hover}`
+      transition: `opacity ${theme.motion.quick}, background-color ${theme.motion.hover}`,
+      '&:focus-visible': {
+        borderRadius: theme.cornerRadius.m,
+        outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
+        outlineOffset: 3
+      }
     }),
     [theme, disabled, isMainActive]
   )
@@ -183,7 +203,7 @@ export const ExpandableNavItem = ({
   const shouldShowRightIcon = isOpen || shouldPersistRightIcon
 
   return (
-    <Flex direction='column' role='navigation' w='100%' {...props}>
+    <Flex direction='column' w='100%' {...props}>
       <Flex
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -198,7 +218,9 @@ export const ExpandableNavItem = ({
             onMouseDown={handleMainContainerMouseDown}
             onMouseUp={handleMainContainerMouseUp}
             onClick={handleClick}
+            onKeyDown={handleKeyDown}
             role='button'
+            tabIndex={0}
             aria-expanded={isOpen}
             aria-controls={`${label}-content`}
             aria-label={`${label} navigation section`}

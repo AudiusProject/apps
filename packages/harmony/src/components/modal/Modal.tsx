@@ -5,7 +5,8 @@ import {
   useMemo,
   forwardRef,
   MouseEventHandler,
-  useRef
+  useRef,
+  KeyboardEvent as ReactKeyboardEvent
 } from 'react'
 
 import { useTheme } from '@emotion/react'
@@ -33,6 +34,36 @@ const rootContainer = 'modalRootContainer'
 const rootId = 'modalRoot'
 const bgId = 'bgModal'
 const wrapperClass = 'modalWrapper'
+
+const focusableSelector = [
+  'a[href]:not([tabindex="-1"])',
+  'button:not([disabled]):not([tabindex="-1"])',
+  'input:not([disabled]):not([type="hidden"]):not([tabindex="-1"])',
+  'select:not([disabled]):not([tabindex="-1"])',
+  'textarea:not([disabled]):not([tabindex="-1"])',
+  '[contenteditable="true"]:not([tabindex="-1"])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',')
+
+const isFocusableElementVisible = (element: HTMLElement) => {
+  if (element.closest('[hidden], [aria-hidden="true"]')) return false
+  const style = window.getComputedStyle(element)
+  return style.display !== 'none' && style.visibility !== 'hidden'
+}
+
+const getFocusableElements = (container: HTMLElement) => {
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(focusableSelector)
+  ).filter(isFocusableElementVisible)
+}
+
+const getInitialFocusElement = (container: HTMLElement) => {
+  return (
+    container.querySelector<HTMLElement>('[autofocus], [data-autofocus]') ??
+    getFocusableElements(container)[0] ??
+    container
+  )
+}
 
 const anchorStyleMap = {
   [Anchor.TOP]: styles.top,
@@ -278,6 +309,90 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
 
   useHotkeys({ 27 /* escape */: handleEscape })
 
+  const modalBodyRef = useRef<HTMLDivElement | null>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
+  const shouldRestoreFocusRef = useRef(false)
+
+  const setModalBodyRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      modalBodyRef.current = node
+      outsideClickRef.current = node
+    },
+    [outsideClickRef]
+  )
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+    shouldRestoreFocusRef.current = true
+
+    const timeout = window.setTimeout(() => {
+      const modalBody = modalBodyRef.current
+      if (!modalBody || modalBody.contains(document.activeElement)) return
+
+      getInitialFocusElement(modalBody).focus({ preventScroll: true })
+    }, 0)
+
+    return () => window.clearTimeout(timeout)
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen || !shouldRestoreFocusRef.current) return
+
+    shouldRestoreFocusRef.current = false
+    const previousFocus = previousFocusRef.current
+    if (previousFocus?.isConnected) {
+      previousFocus.focus({ preventScroll: true })
+    }
+  }, [isOpen])
+
+  const handleModalKeyDown = useCallback(
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onClose()
+        return
+      }
+
+      if (e.key !== 'Tab') return
+
+      const modalBody = modalBodyRef.current
+      if (!modalBody) return
+
+      const focusableElements = getFocusableElements(modalBody)
+      if (focusableElements.length === 0) {
+        e.preventDefault()
+        modalBody.focus({ preventScroll: true })
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const activeElement = document.activeElement
+
+      if (e.shiftKey) {
+        if (
+          activeElement === firstElement ||
+          !modalBody.contains(activeElement)
+        ) {
+          e.preventDefault()
+          lastElement.focus({ preventScroll: true })
+        }
+        return
+      }
+
+      if (activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus({ preventScroll: true })
+      }
+    },
+    [onClose]
+  )
+
   const wrapperClassNames = cn(
     styles.wrapper,
     anchorStyleMap[anchor],
@@ -353,12 +468,15 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
                     ref={ref}
                   >
                     <AnimatedDiv
-                      ref={dismissOnClickOutside ? outsideClickRef : null}
+                      ref={setModalBodyRef}
                       className={bodyClassNames}
                       style={{ ...props, ...bodyOffset, ...bodyStyle }}
                       role='dialog'
+                      aria-modal='true'
                       aria-labelledby={titleId}
                       aria-describedby={subtitleId}
+                      tabIndex={-1}
+                      onKeyDown={handleModalKeyDown}
                       onMouseDown={handleModalContentClicked}
                     >
                       <>
