@@ -11,26 +11,23 @@ import {
 import { useCurrentUserId } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import {
-  Paper,
-  Text,
   Flex,
   IconNote,
   IconAlbum,
   IconPlaylists,
+  Paper,
   TextInput,
   TextInputSize,
   IconSearch,
   IconUser,
-  Divider,
-  FilterButton,
-  useTheme
+  FilterButton
 } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
-import exploreHeaderLanding from 'assets/img/explore-header-landing.png'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
+import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import useTabs from 'hooks/useTabs/useTabs'
@@ -106,7 +103,6 @@ const tabHeaders = [
 ]
 
 const DEBOUNCE_MS = 200
-const NORMAL_WIDTH = 1200
 
 const SearchExplorePage = ({
   title,
@@ -125,9 +121,7 @@ const SearchExplorePage = ({
   const tabContainerRef = useRef<HTMLDivElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
-  const { motion } = useTheme()
   const isNarrowLayout = useIsContainerNarrow(pageContentRef, 760)
-  const isExtraNarrowLayout = useIsContainerNarrow(pageContentRef, 520)
   const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 552)
   const handleSearchTab = useCallback(
     (newTab: string) => {
@@ -209,14 +203,6 @@ const SearchExplorePage = ({
     onTabClick: handleSearchTab,
     selectedTabLabel: capitalize(categoryKey)
   })
-  const [bannerIsVisible, setBannerIsVisible] = useState(false)
-
-  useEffect(() => {
-    const img = new window.Image()
-    img.src = exploreHeaderLanding
-    img.onload = () => setBannerIsVisible(true)
-  }, [])
-
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent =
     categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
@@ -310,123 +296,78 @@ const SearchExplorePage = ({
     }
   ]
 
-  const headerHeroPaddingX = isExtraNarrowLayout
-    ? 'l'
-    : isNarrowLayout
-      ? 'xl'
-      : 'unit14'
+  const header = (
+    <Header
+      primary={messages.explore}
+      bottomBar={
+        <Flex ref={tabContainerRef} alignSelf='stretch' css={{ minWidth: 0 }}>
+          <Flex alignSelf='flex-start'>{tabs}</Flex>
+        </Flex>
+      }
+    />
+  )
 
   return (
     <Page
       title={pageTitle}
       description={description}
       size='large'
-      variant='flush'
+      header={header}
     >
-      <Flex justifyContent='center' w='100%'>
-        <Flex
-          ref={pageContentRef}
-          direction='column'
-          pv='3xl'
-          ph='unit8'
-          gap='3xl'
-          alignItems='stretch'
-          css={{
-            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
-            width: '100%',
-            maxWidth: NORMAL_WIDTH
-          }}
-        >
-          {/* Header Section */}
-          <Paper
-            alignItems='center'
-            direction='column'
-            pv='xl'
-            ph={headerHeroPaddingX}
-            css={{
-              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
-              backgroundImage: `url(${exploreHeaderLanding})`,
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              opacity: bannerIsVisible ? 1 : 0,
-              transition: `opacity ${motion.quick}`
-            }}
-            borderRadius='l'
-            alignSelf='stretch'
-          >
-            <Flex direction='column' gap='m' alignItems='center'>
-              <Text
-                variant='display'
-                size='s'
-                color='staticWhite'
-                textAlign='center'
-                css={{
-                  fontSize: 'clamp(1.75rem, 5vw, 2.25rem)',
-                  lineHeight: 'clamp(2rem, 5.4vw, 2.5rem)'
-                }}
-              >
-                {messages.explore}
-              </Text>
-              <Text
-                variant='heading'
-                size='s'
-                color='staticWhite'
-                textAlign='center'
-                css={{
-                  fontSize: 'clamp(1rem, 2.8vw, 1.5rem)',
-                  lineHeight: 'clamp(1.25rem, 3.4vw, 1.75rem)',
-                  fontWeight: 'var(--harmony-font-demi-bold)'
-                }}
-              >
-                {messages.description}
-              </Text>
-            </Flex>
-            <Flex mt='xl' w='100%' css={{ maxWidth: 400 }}>
-              <TextInput
-                ref={searchBarRef}
-                label={messages.searchPlaceholder}
-                value={inputValue}
-                startIcon={IconSearch}
-                size={TextInputSize.SMALL}
-                onChange={handleSearch}
-                onClear={handleClearSearch}
-              />
-            </Flex>
-          </Paper>
-
-          {/* Tabs and Filters */}
-          <Flex
-            direction='column'
-            gap='l'
-            css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}
-          >
-            <Flex direction='column'>
-              <Flex
-                ref={tabContainerRef}
-                alignSelf='stretch'
-                css={{
-                  minWidth: 0
-                }}
-              >
-                <Flex alignSelf='flex-start'>{tabs}</Flex>
+      <Flex
+        ref={pageContentRef}
+        direction='column'
+        gap='3xl'
+        alignItems='stretch'
+        css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX, width: '100%' }}
+      >
+        {/* Search + Filters Banner */}
+        <Paper direction='column' gap='m' pv='l' ph='xl' alignSelf='stretch'>
+          <Flex w='100%'>
+            <TextInput
+              ref={searchBarRef}
+              label={messages.searchPlaceholder}
+              value={inputValue}
+              startIcon={IconSearch}
+              size={TextInputSize.SMALL}
+              onChange={handleSearch}
+              onClear={handleClearSearch}
+            />
+          </Flex>
+          {filterKeys.length ? (
+            isNarrowLayout ? (
+              <Flex direction='row' alignItems='center' gap='s' wrap='wrap'>
+                {filterKeys.map((filterKey) => {
+                  const FilterComponent =
+                    filters[filterKey as keyof typeof filters]
+                  return <FilterComponent key={filterKey} />
+                })}
+                <SortMethodFilterButton />
+                {categoryKey === CategoryView.TRACKS ? (
+                  <FilterButton
+                    value={tracksLayout}
+                    variant='replaceLabel'
+                    optionsLabel={messages.layoutOptionsLabel}
+                    onChange={setTracksLayout}
+                    options={viewLayoutOptions}
+                  />
+                ) : null}
               </Flex>
-              <Divider orientation='horizontal' />
-            </Flex>
-            {filterKeys.length ? (
-              isNarrowLayout ? (
-                <Flex
-                  direction='row'
-                  alignItems='center'
-                  gap='s'
-                  wrap='wrap'
-                  mv='m'
-                >
+            ) : (
+              <Flex
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                wrap='wrap'
+              >
+                <Flex direction='row' gap='s' wrap='wrap'>
                   {filterKeys.map((filterKey) => {
                     const FilterComponent =
                       filters[filterKey as keyof typeof filters]
                     return <FilterComponent key={filterKey} />
                   })}
+                </Flex>
+                <Flex gap='s'>
                   <SortMethodFilterButton />
                   {categoryKey === CategoryView.TRACKS ? (
                     <FilterButton
@@ -438,58 +379,31 @@ const SearchExplorePage = ({
                     />
                   ) : null}
                 </Flex>
-              ) : (
-                <Flex
-                  direction='row'
-                  justifyContent='space-between'
-                  alignItems='center'
-                  wrap='wrap'
-                >
-                  <Flex direction='row' gap='s' mv='m' wrap='wrap'>
-                    {filterKeys.map((filterKey) => {
-                      const FilterComponent =
-                        filters[filterKey as keyof typeof filters]
-                      return <FilterComponent key={filterKey} />
-                    })}
-                  </Flex>
-                  <Flex gap='s'>
-                    <SortMethodFilterButton />
-                    {categoryKey === CategoryView.TRACKS ? (
-                      <FilterButton
-                        value={tracksLayout}
-                        variant='replaceLabel'
-                        optionsLabel={messages.layoutOptionsLabel}
-                        onChange={setTracksLayout}
-                        options={viewLayoutOptions}
-                      />
-                    ) : null}
-                  </Flex>
-                </Flex>
-              )
-            ) : null}
-          </Flex>
-
-          {/* Content Section */}
-          {inputValue || showSearchResults ? (
-            <SearchResults
-              tracksLayout={tracksLayout}
-              handleSearchTab={handleSearchTab}
-            />
+              </Flex>
+            )
           ) : null}
-          <Flex
-            direction='column'
-            gap='3xl'
-            css={{
-              minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
-              overflowX: 'clip',
-              overflowY: 'visible',
-              display: showSearchResults ? 'none' : undefined
-            }}
-          >
-            {sectionConfigs.map(({ key, shouldRender, element }) =>
-              shouldRender ? <Fragment key={key}>{element}</Fragment> : null
-            )}
-          </Flex>
+        </Paper>
+
+        {/* Content Section */}
+        {inputValue || showSearchResults ? (
+          <SearchResults
+            tracksLayout={tracksLayout}
+            handleSearchTab={handleSearchTab}
+          />
+        ) : null}
+        <Flex
+          direction='column'
+          gap='3xl'
+          css={{
+            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
+            overflowX: 'clip',
+            overflowY: 'visible',
+            display: showSearchResults ? 'none' : undefined
+          }}
+        >
+          {sectionConfigs.map(({ key, shouldRender, element }) =>
+            shouldRender ? <Fragment key={key}>{element}</Fragment> : null
+          )}
         </Flex>
       </Flex>
     </Page>
