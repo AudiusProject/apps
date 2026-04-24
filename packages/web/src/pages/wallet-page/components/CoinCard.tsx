@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { MouseEvent, ReactNode } from 'react'
 
 import {
   Box,
@@ -43,6 +43,7 @@ export type CoinCardProps = {
   loading?: boolean
   noDollarSignPrefix?: boolean
   onClick?: () => void
+  actionLabel?: string
 }
 
 export const CoinRow = ({
@@ -54,9 +55,16 @@ export const CoinRow = ({
   dollarValue,
   loading = false,
   noDollarSignPrefix = false,
-  onClick
+  onClick,
+  actionLabel
 }: CoinCardProps) => {
   const { color, spacing } = useTheme()
+  const resolvedActionLabel = actionLabel ?? `View ${name} asset details`
+
+  const handleActionClick = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    onClick?.()
+  }
 
   const renderIcon = () => {
     if (typeof icon === 'string') {
@@ -83,7 +91,9 @@ export const CoinRow = ({
       css={{
         cursor: onClick ? 'pointer' : 'default',
         minWidth: 0,
-        '&:hover': onClick ? { backgroundColor: color.background.surface2 } : {}
+        '&:hover,&:focus-within': onClick
+          ? { backgroundColor: color.background.surface2 }
+          : {}
       }}
     >
       <Flex alignItems='center' gap='l' css={{ minWidth: 0, flex: 1 }}>
@@ -162,7 +172,36 @@ export const CoinRow = ({
             </Text>
           )}
         </Box>
-        {onClick ? <IconCaretRight size='l' color='subdued' /> : null}
+        {onClick ? (
+          <button
+            type='button'
+            aria-label={resolvedActionLabel}
+            onClick={handleActionClick}
+            css={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: spacing.unit8,
+              height: spacing.unit8,
+              padding: 0,
+              border: 0,
+              borderRadius: '50%',
+              background: 'transparent',
+              color: 'inherit',
+              cursor: 'pointer',
+              '&:focus': {
+                outline: 'none'
+              },
+              '&:focus-visible': {
+                outline:
+                  '2px solid var(--harmony-focus, var(--harmony-secondary))',
+                outlineOffset: 2
+              }
+            }}
+          >
+            <IconCaretRight size='l' color='subdued' />
+          </button>
+        ) : null}
       </Flex>
     </Flex>
   )

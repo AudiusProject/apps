@@ -52,3 +52,9 @@
 .isDragging .resizeHandle {
   background-color: var(--harmony-n-100);
 }
+
+.resizeHandle:focus-visible {
+  background-color: var(--harmony-n-100);
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
+}

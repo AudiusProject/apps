@@ -58,6 +58,14 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
   }, [])
 
   useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = '#111'
+    return () => {
+      document.body.style.background = prev
+    }
+  }, [])
+
+  useEffect(() => {
     const linkFonts = document.createElement('link')
     linkFonts.rel = 'stylesheet'
     linkFonts.href = LANDING_FONTS_CSS_HREF
@@ -168,14 +176,12 @@ export const LandingPage2026 = (props: LandingPage2026Props) => {
         {showCookieBanner ? (
           <CookieBanner isPlaying={false} dismiss={onDismissCookie} />
         ) : null}
-        <header>
-          <Nav2026
-            isMobile={isMobileOrNarrow}
-            isAuthenticated={props.isAuthenticated}
-            openNavScreen={props.openNavScreen}
-            setRenderPublicSite={props.setRenderPublicSite}
-          />
-        </header>
+        <Nav2026
+          isMobile={isMobileOrNarrow}
+          isAuthenticated={props.isAuthenticated}
+          openNavScreen={props.openNavScreen}
+          setRenderPublicSite={props.setRenderPublicSite}
+        />
         <main className={styles.main}>
           <Hero2026
             isMobile={isMobileOrNarrow}

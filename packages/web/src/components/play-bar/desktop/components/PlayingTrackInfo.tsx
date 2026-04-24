@@ -4,7 +4,7 @@ import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
 import { playerSelectors } from '@audius/common/store'
-import { Tooltip } from '@audius/harmony'
+import { createKeyboardActivationHandler, Tooltip } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
@@ -97,6 +97,12 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickTrackTitle}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickTrackTitle
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={`View track: ${trackTitle}`}
           >
             {trackTitle}
           </div>
@@ -155,6 +161,12 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickArtistName}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickArtistName
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={`View artist: ${artistName}`}
           >
             {artistName}
           </div>

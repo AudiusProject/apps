@@ -59,7 +59,10 @@ export const readInitialFanClubsViewMode = (): FanClubsViewMode => {
 
 type CoinCell = Cell<Coin>
 
-const renderTokenNameCell = (cellInfo: CoinCell) => {
+const renderTokenNameCell = (
+  cellInfo: CoinCell,
+  onViewCoin: (ticker: string) => void
+) => {
   const coin = cellInfo.row.original
 
   if (!coin || !coin.ticker) {
@@ -67,6 +70,7 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
   }
 
   const assetDetailUrl = route.coinPage(coin.ticker)
+  const coinName = coin.name || coin.ticker
 
   return (
     <Flex
@@ -95,12 +99,22 @@ const renderTokenNameCell = (cellInfo: CoinCell) => {
           minWidth: 0
         }}
       >
-        <TokenIcon
-          logoURI={coin.logoUri}
-          size='xl'
-          hex
-          css={{ minWidth: spacing.unit10, minHeight: spacing.unit10 }}
-        />
+        <button
+          type='button'
+          className={styles.tokenIconButton}
+          aria-label={`View ${coinName} fan club`}
+          onClick={(e) => {
+            e.stopPropagation()
+            onViewCoin(coin.ticker ?? '')
+          }}
+        >
+          <TokenIcon
+            logoURI={coin.logoUri}
+            size='xl'
+            hex
+            css={{ minWidth: spacing.unit10, minHeight: spacing.unit10 }}
+          />
+        </button>
         <Flex column css={{ overflow: 'hidden' }}>
           <TextLink
             to={assetDetailUrl}
@@ -434,8 +448,22 @@ export const FanClubsTable = ({
     [navigate]
   )
 
+  const handleViewCoin = useCallback(
+    (ticker: string) => {
+      if (ticker) {
+        navigate(route.coinPage(ticker))
+      }
+    },
+    [navigate]
+  )
+
   const columns = useMemo(() => {
     const baseColumns = { ...tableColumnMap }
+    baseColumns.tokenName = {
+      ...baseColumns.tokenName,
+      Cell: (cellInfo: CoinCell) =>
+        renderTokenNameCell(cellInfo, handleViewCoin)
+    }
     baseColumns.buy = {
       ...baseColumns.buy,
       Cell: (cellInfo: CoinCell) => renderBuyCell(cellInfo, handleBuy)
@@ -450,7 +478,7 @@ export const FanClubsTable = ({
       baseColumns.holders,
       baseColumns.buy
     ]
-  }, [handleBuy])
+  }, [handleBuy, handleViewCoin])
   const cards = useMemo(
     () =>
       coins?.map((coin) => <FanClubCoinCard key={coin.mint} coin={coin} />) ??

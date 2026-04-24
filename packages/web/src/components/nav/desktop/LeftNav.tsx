@@ -73,6 +73,7 @@ export const LeftNav = (props: OwnProps) => {
       backgroundColor='surface1'
       borderRight='default'
       as='nav'
+      aria-label='Primary navigation'
       id='leftNav'
       direction='column'
       h='100%'

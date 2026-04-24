@@ -81,6 +81,11 @@ export const BaseButton = forwardRef<HTMLButtonElement, BaseButtonProps>(
       ':focus': {
         outline: 'none !important'
       },
+      ':focus-visible': {
+        outline:
+          '2px solid var(--harmony-focus, var(--harmony-secondary)) !important',
+        outlineOffset: '3px'
+      },
       ':hover': {
         transform: fullWidth ? 'scale(1.00)' : 'scale(1.04)'
       },

@@ -128,10 +128,8 @@ export default class Confetti {
     const { clientWidth: width, clientHeight: height } = canvas
     this.width = width
     this.height = height
-    window.addEventListener('resize', () => {
-      this.width = window.innerWidth
-      this.height = window.innerHeight
-    })
+    this.animationFrameId = null
+    this.isResizeListenerAttached = false
     this.particleRate = particleRate
     this.paths = paths
     this.colors = colors
@@ -152,6 +150,23 @@ export default class Confetti {
     this.particleColumns = range(0, width, COLUMN_SPACING).map(
       (c) => c + Math.random() * COLUMN_SPACING - COLUMN_SPACING * 0.4
     )
+  }
+
+  handleResize = () => {
+    this.width = window.innerWidth
+    this.height = window.innerHeight
+  }
+
+  attachResizeListener = () => {
+    if (this.isResizeListenerAttached) return
+    window.addEventListener('resize', this.handleResize)
+    this.isResizeListenerAttached = true
+  }
+
+  detachResizeListener = () => {
+    if (!this.isResizeListenerAttached) return
+    window.removeEventListener('resize', this.handleResize)
+    this.isResizeListenerAttached = false
   }
 
   generateParticle = (source, number) => {
@@ -243,17 +258,30 @@ export default class Confetti {
   }
 
   update = () => {
-    if (this.animate() && this.run) {
-      window.requestAnimationFrame(this.update)
+    this.animationFrameId = null
+    if (!this.runAnimation) return
+    if (this.animate()) {
+      this.animationFrameId = window.requestAnimationFrame(this.update)
+    } else {
+      this.stop()
     }
   }
 
   stop = () => {
     this.runAnimation = false
+    if (this.animationFrameId !== null) {
+      window.cancelAnimationFrame(this.animationFrameId)
+      this.animationFrameId = null
+    }
+    this.detachResizeListener()
   }
 
   run = () => {
+    if (this.runAnimation) return
     this.runAnimation = true
-    window.requestAnimationFrame(this.update)
+    this.attachResizeListener()
+    if (this.animationFrameId === null) {
+      this.animationFrameId = window.requestAnimationFrame(this.update)
+    }
   }
 }

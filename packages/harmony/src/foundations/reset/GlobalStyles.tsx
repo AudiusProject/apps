@@ -21,12 +21,12 @@ export const GlobalStyles = () => {
         }
 
         a:hover,
-        a:focus {
+        a:focus:not(:focus-visible) {
           text-decoration: none;
           outline: none;
         }
 
-        a:active {
+        a:active:not(:focus-visible) {
           outline: none;
         }
 

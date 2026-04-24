@@ -1,5 +1,6 @@
 import {
   CSSProperties,
+  KeyboardEvent as ReactKeyboardEvent,
   MouseEvent,
   useCallback,
   useEffect,
@@ -17,6 +18,7 @@ import {
   IconCaretLeft,
   IconCaretRight,
   IconCaretUp,
+  isKeyboardActivationKey,
   Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -54,6 +56,13 @@ const FETCH_BATCH_SIZE = 80
 // Table cells/headers add 12px left + 12px right padding in CSS.
 // Include this chrome in collapse budgeting to avoid clipping before drop.
 const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
+
+const getColumnSortLabel = (column: any, headerContent: unknown) => {
+  if (typeof column.sortTitle === 'string') return column.sortTitle
+  if (typeof headerContent === 'string') return headerContent
+  if (typeof column.Header === 'string') return column.Header
+  return column.id ?? column.accessor ?? 'column'
+}
 
 // Column Sort Functions
 export const numericSorter = (accessor: string) => (rowA: any, rowB: any) => {
@@ -118,6 +127,10 @@ export type TableProps = {
   useLocalSort?: boolean
   wrapperClassName?: string
   responsiveColumns?: ResponsiveColumns
+}
+
+type TableRowPropsWithKeyDown = TableRowProps & {
+  onKeyDown?: (e: ReactKeyboardEvent<HTMLElement>) => void
 }
 
 export const Table = ({
@@ -333,6 +346,21 @@ export const Table = ({
     const hasExplicitNullHeader =
       column?.Header === null || column?.Header === false
     const headerContent = hasExplicitNullHeader ? null : column.render('Header')
+    const isSortable = column.disableSortBy !== true
+    const {
+      onClick: onSortClick,
+      onKeyDown: onSortKeyDown,
+      ...sortByToggleProps
+    } = column.getSortByToggleProps()
+
+    const handleSortKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      onSortKeyDown?.(e)
+      if (e.defaultPrevented || !isKeyboardActivationKey(e)) return
+
+      e.preventDefault()
+      e.stopPropagation()
+      onSortClick?.(e)
+    }
 
     return (
       <th
@@ -347,12 +375,28 @@ export const Table = ({
         role={role}
         style={style}
         key={key}
+        aria-sort={
+          column.isSorted
+            ? column.isSortedDesc
+              ? 'descending'
+              : 'ascending'
+            : undefined
+        }
       >
         {/* Sorting Container */}
         <div
-          {...column.getSortByToggleProps()}
+          {...sortByToggleProps}
           title=''
           className={styles.headerContent}
+          role={isSortable ? 'button' : undefined}
+          tabIndex={isSortable ? 0 : undefined}
+          aria-label={
+            isSortable
+              ? `Sort by ${getColumnSortLabel(column, headerContent)}`
+              : undefined
+          }
+          onClick={onSortClick}
+          onKeyDown={isSortable ? handleSortKeyDown : onSortKeyDown}
         >
           <div className={styles.textCell}>
             {column.sortTitle && headerContent ? (
@@ -441,6 +485,8 @@ export const Table = ({
 
   const renderTableRow = useCallback(
     (row: Row, key: string, props: TableRowProps, className = '') => {
+      const { onKeyDown: onRowPropsKeyDown, ...rowProps } =
+        props as TableRowPropsWithKeyDown
       const cells = row.cells.filter(
         (cell: Cell) =>
           isColumnVisible(cell.column.id) && !isEndColumn(cell.column.id)
@@ -457,7 +503,6 @@ export const Table = ({
         (row.original as any).track_id
       ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-
       return (
         <Row
           className={cn(
@@ -469,11 +514,12 @@ export const Table = ({
               [styles.disabled]: isLocked
             }
           )}
-          {...props}
+          {...rowProps}
           key={key}
           onClick={(e: MouseEvent<HTMLTableRowElement>) =>
             onClickRow?.(e, row, row.index)
           }
+          onKeyDown={onRowPropsKeyDown}
         >
           {cells.map((cell) => renderCell(cell))}
           {endCells.length
@@ -690,29 +736,37 @@ export const Table = ({
 
     return (
       <div className={styles.pageButtonContainer}>
-        <IconCaretLeft
-          className={cn(styles.pageCaret, {
-            [styles.disabled]: currentPage <= 0
-          })}
+        <button
+          type='button'
+          className={styles.pageCaretButton}
+          disabled={currentPage <= 0}
+          aria-label='Previous page'
           onClick={prevPage}
-        />
+        >
+          <IconCaretLeft className={styles.pageCaret} />
+        </button>
         {range(maxPage + 1).map((idx) => (
-          <div
+          <button
+            type='button'
             key={`pageButton_${idx}`}
             className={cn(styles.pageButton, {
               [styles.active]: currentPage === idx
             })}
+            aria-current={currentPage === idx ? 'page' : undefined}
             onClick={() => goToPage(idx)}
           >
             {idx + 1}
-          </div>
+          </button>
         ))}
-        <IconCaretRight
-          className={cn(styles.pageCaret, {
-            [styles.disabled]: currentPage >= maxPage
-          })}
+        <button
+          type='button'
+          className={styles.pageCaretButton}
+          disabled={currentPage >= maxPage}
+          aria-label='Next page'
           onClick={nextPage}
-        />
+        >
+          <IconCaretRight className={styles.pageCaret} />
+        </button>
       </div>
     )
   }, [
@@ -734,7 +788,12 @@ export const Table = ({
     }
 
     return (
-      <div className={styles.showMoreContainer} onClick={handleShowMoreToggle}>
+      <button
+        type='button'
+        className={styles.showMoreContainer}
+        aria-expanded={showMore}
+        onClick={handleShowMoreToggle}
+      >
         <p className={styles.showMoreText}>
           {showMore ? 'Show Less' : 'Show More'}
         </p>
@@ -743,7 +802,7 @@ export const Table = ({
         ) : (
           <IconCaretDown className={styles.showMoreCaret} />
         )}
-      </div>
+      </button>
     )
   }, [onShowMoreToggle, rows.length, showMore, showMoreLimit])
 
@@ -838,6 +897,7 @@ export const Table = ({
                         {({ width }) => (
                           <List
                             role='Tabpanel'
+                            tabIndex={-1}
                             autoHeight
                             height={height}
                             width={width}

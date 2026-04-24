@@ -192,7 +192,8 @@ export const SegmentedControl = <T extends string>(
               className={cn(styles.tab, {
                 [styles.tabFullWidth]: !!fullWidth,
                 [styles.disabled]: !disabled && option.disabled,
-                [styles.isMobile]: isMobile
+                [styles.isMobile]: isMobile,
+                [styles.selected]: isSelected
               })}
               style={
                 equalWidth && maxOptionWidth

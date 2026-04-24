@@ -154,6 +154,11 @@ const ShuffleButton = ({
 
   return (
     <button
+      aria-label={
+        state.shuffleState === ShuffleStates.ON
+          ? 'Turn shuffle off'
+          : 'Turn shuffle on'
+      }
       className={cn(styles.button, {
         [styles.buttonFixedSize]: isMobile,
         [styles.shuffle]: isMobile

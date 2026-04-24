@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { render, screen } from 'test/test-utils'
+import { fireEvent, render, screen } from 'test/test-utils'
 
 import { TracksTable } from './TracksTable'
 
@@ -43,7 +43,9 @@ vi.mock('components/link', () => ({
     <a href={to}>{children}</a>
   ),
   UserLink: ({ userId }: { userId?: number }) => (
-    <span>{`user-${userId ?? 'unknown'}`}</span>
+    <a
+      href={`/users/${userId ?? 'unknown'}`}
+    >{`user-${userId ?? 'unknown'}`}</a>
   )
 }))
 
@@ -132,5 +134,24 @@ describe('TracksTable', () => {
 
     expect(screen.getByText('Track One')).toBeInTheDocument()
     expect(screen.queryByText('user-1')).not.toBeInTheDocument()
+  })
+
+  it('uses the inline artwork as the keyboard-visible play target', () => {
+    const onClickRow = vi.fn()
+    render(
+      <TracksTable
+        data={[track] as any}
+        columns={['trackName']}
+        showArtistInTrackNameColumn
+        onClickRow={onClickRow}
+      />
+    )
+
+    const playButton = screen.getByRole('button', { name: 'Play Track One' })
+    playButton.focus()
+    expect(playButton).toHaveFocus()
+
+    fireEvent.click(playButton)
+    expect(onClickRow).toHaveBeenCalledWith(track, 0)
   })
 })

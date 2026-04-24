@@ -226,7 +226,14 @@ export const ChallengeRewardsTile = ({
   const verifiedOnlyTiles = !isVerified
     ? verifiedOnlyRewards.map((id) => {
         const props = getChallengeConfig(id)
-        return <RewardPanel {...props} openModal={openModal} key={props.id} />
+        return (
+          <RewardPanel
+            {...props}
+            openModal={openModal}
+            key={props.id}
+            isLocked={hasLockedRewards}
+          />
+        )
       })
     : []
 
@@ -297,7 +304,11 @@ export const ChallengeRewardsTile = ({
                   overflow: 'hidden'
                 }}
               >
-                <div className={styles.rewardsContainer}>
+                <div
+                  className={styles.rewardsContainer}
+                  aria-hidden
+                  style={{ pointerEvents: 'none' }}
+                >
                   {verifiedOnlyTiles}
                 </div>
                 <Flex

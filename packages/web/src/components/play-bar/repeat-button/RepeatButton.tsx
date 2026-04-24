@@ -178,6 +178,7 @@ const RepeatButton = ({
 
   return (
     <button
+      aria-label='Change repeat mode'
       className={cn(styles.button, {
         [styles.buttonFixedSize]: isMobile,
         [styles.repeat]: isMobile

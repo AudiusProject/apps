@@ -82,12 +82,22 @@ type TrackRow = Row<RowInfo>
 
 type MiniTrackArtworkProps = {
   trackId: number
+  trackTitle?: string
   isPlaying: boolean
   isLocked: boolean
+  isDisabled?: boolean
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
 const MiniTrackArtwork = memo(
-  ({ trackId, isPlaying, isLocked }: MiniTrackArtworkProps) => {
+  ({
+    trackId,
+    trackTitle,
+    isPlaying,
+    isLocked,
+    isDisabled,
+    onClick
+  }: MiniTrackArtworkProps) => {
     const { imageUrl, hasNoArtwork } = useTrackCoverArt({
       trackId,
       size: SquareSizes.SIZE_150_BY_150
@@ -101,8 +111,25 @@ const MiniTrackArtwork = memo(
           ? IconPause
           : IconPlay
 
+    const actionLabel = isDisabled
+      ? `Locked ${trackTitle || 'track'}`
+      : isLocked
+        ? `Unlock ${trackTitle || 'track'}`
+        : `${isPlaying ? 'Pause' : 'Play'} ${trackTitle || 'track'}`
+
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      onClick?.(e)
+    }
+
     return (
-      <div className={styles.inlineArtworkContainer}>
+      <button
+        type='button'
+        className={styles.inlineArtworkContainer}
+        aria-label={actionLabel}
+        disabled={isDisabled || !onClick}
+        onClick={handleClick}
+      >
         <Artwork src={imageUrl} css={{ width: '100%', height: '100%' }} />
         <div
           className={cn(styles.inlineArtworkIcon, {
@@ -111,7 +138,7 @@ const MiniTrackArtwork = memo(
         >
           <IconComponent size='m' color='staticWhite' />
         </div>
-      </div>
+      </button>
     )
   }
 )
@@ -218,6 +245,29 @@ export const TracksTable = ({
     ? ALBUM_TRACK_NAME_COLUMN_WIDTH
     : COLUMN_WIDTHS.artistName
 
+  const shouldSkipTrackActivation = useCallback((track: RowInfo) => {
+    const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
+      track.track_id
+    ] ?? {
+      isFetchingNFTAccess: false,
+      hasStreamAccess: true
+    }
+    const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+    const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+    const deleted =
+      track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
+
+    return (isLocked && !isPremium) || deleted
+  }, [])
+
+  const activateTrack = useCallback(
+    (track: RowInfo, index: number) => {
+      if (shouldSkipTrackActivation(track)) return
+      onClickRowRef.current?.(track, index)
+    },
+    [shouldSkipTrackActivation]
+  )
+
   // Cell Render Functions
   const renderPlayButtonCell = useCallback((cellInfo: TrackCell) => {
     const index = cellInfo.row.index
@@ -256,6 +306,9 @@ export const TracksTable = ({
         hasStreamAccess: true
       }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
+      const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
+      const isArtworkDisabled =
+        !onClickRowRef.current || (isLocked && !isPremium) || deleted
 
       const artistRow = showArtistInTrackNameColumn ? (
         user?.is_deactivated ? (
@@ -282,6 +335,7 @@ export const TracksTable = ({
             strength='default'
             variant={active ? 'visible' : 'default'}
             badgeSize='xs'
+            aria-label={`View artist: ${user.name}`}
             popover
           />
         ) : (
@@ -308,8 +362,11 @@ export const TracksTable = ({
           {showArtistInTrackNameColumn && track.track_id ? (
             <MiniTrackArtwork
               trackId={track.track_id}
+              trackTitle={track.name ?? track.title}
               isPlaying={isTrackPlaying}
               isLocked={isLocked}
+              isDisabled={isArtworkDisabled}
+              onClick={() => activateTrack(track, index)}
             />
           ) : null}
           <Flex
@@ -344,11 +401,13 @@ export const TracksTable = ({
                 mouseEnterDelay={1}
               >
                 <TextLink
+                  className={styles.trackTitleLink}
                   to={deleted ? '' : track.permalink}
                   isActive={active}
                   textVariant='title'
                   size='s'
                   strength='weak'
+                  aria-label={`View track: ${track.name ?? track.title}`}
                   css={{
                     display: 'block',
                     lineHeight: '125%',
@@ -366,7 +425,7 @@ export const TracksTable = ({
         </Flex>
       )
     },
-    [showArtistInTrackNameColumn]
+    [activateTrack, showArtistInTrackNameColumn]
   )
 
   const renderArtistNameCell = useCallback((cellInfo: TrackCell) => {
@@ -388,6 +447,7 @@ export const TracksTable = ({
           strength='strong'
           variant={index === activeIndexRef.current ? 'visible' : 'default'}
           badgeSize='xs'
+          aria-label={`View artist: ${user.name}`}
           popover
         />
       </div>
@@ -974,25 +1034,16 @@ export const TracksTable = ({
   const handleClickRow = useCallback(
     (e: MouseEvent<HTMLTableRowElement>, rowInfo: TrackRow, index: number) => {
       const track = rowInfo.original
-      const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef
-        .current[track.track_id] ?? {
-        isFetchingNFTAccess: false,
-        hasStreamAccess: true
-      }
-      const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-      const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-      const deleted =
-        track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
       const clickedActionButton = [
         favoriteButtonRef,
         repostButtonRef,
         overflowMenuRef
       ].some((ref) => isDescendantElementOf(e?.target, ref.current))
 
-      if ((isLocked && !isPremium) || deleted || clickedActionButton) return
-      onClickRowRef.current?.(track, index)
+      if (clickedActionButton) return
+      activateTrack(track, index)
     },
-    []
+    [activateTrack]
   )
 
   const getRowClassName = useCallback((rowIndex: number) => {

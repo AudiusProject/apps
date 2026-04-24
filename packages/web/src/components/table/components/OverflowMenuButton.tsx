@@ -1,4 +1,7 @@
-import { IconKebabHorizontal as IconOptions } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  IconKebabHorizontal as IconOptions
+} from '@audius/harmony'
 import cn from 'classnames'
 
 import tabStyles from 'components/actions-tab/ActionsTab.module.css'
@@ -66,10 +69,16 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
         {(ref, triggerPopup) => (
           <div
             className={tabStyles.iconKebabHorizontalWrapper}
+            role='button'
+            tabIndex={0}
+            aria-label='Open track actions'
             onClick={(e) => {
               e.stopPropagation()
               triggerPopup()
             }}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: () => triggerPopup()
+            })}
           >
             <div ref={ref}>
               <IconOptions

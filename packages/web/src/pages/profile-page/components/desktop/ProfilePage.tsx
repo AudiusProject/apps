@@ -1,4 +1,4 @@
-import { memo, ReactNode, useEffect, useState, RefObject } from 'react'
+import { memo, ReactNode, useEffect, useRef, useState, RefObject } from 'react'
 
 import { useMutedUsers } from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
@@ -42,6 +42,7 @@ import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
 import useTabs, { TabHeader, useTabRecalculator } from 'hooks/useTabs/useTabs'
 import { BlockUserConfirmationModal } from 'pages/chat-page/components/BlockUserConfirmationModal'
 import { UnblockUserConfirmationModal } from 'pages/chat-page/components/UnblockUserConfirmationModal'
+import { usePreventOffscreenFocus } from 'pages/profile-page/usePreventOffscreenFocus'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
 import { getUserPageContext } from 'ssr/metaTags'
 import { zIndex } from 'utils/zIndex'
@@ -75,6 +76,9 @@ const LeftColumnSpacer = () => (
 )
 
 const ProfilePage = ({ containerRef }: ProfilePageProps) => {
+  const profileFocusRootRef = useRef<HTMLDivElement>(null)
+  usePreventOffscreenFocus(profileFocusRootRef)
+
   const {
     // Profile data
     profile,
@@ -388,7 +392,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       scrollableSearch
       fromOpacity={1}
     >
-      <Box w='100%' pb='2xl'>
+      <Box ref={profileFocusRootRef} w='100%' pb='2xl'>
         <CoverPhoto
           userId={userId}
           updatedCoverPhoto={updatedCoverPhoto ? updatedCoverPhoto.url : ''}
