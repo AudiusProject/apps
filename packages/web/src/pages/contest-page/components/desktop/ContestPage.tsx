@@ -28,10 +28,9 @@ import {
   Button,
   Divider,
   FilterButton,
+  FollowButton,
   Flex,
   IconButton,
-  IconNotificationOff,
-  IconNotificationOn,
   IconShare,
   Paper,
   SelectablePill,
@@ -63,8 +62,6 @@ import { EventFollowersCard } from '../EventFollowersCard'
 
 const messages = {
   title: 'Remix Contest',
-  follow: 'Follow',
-  following: 'Following',
   enterContest: 'Enter Contest',
   share: 'Share contest',
   submissionsDue: 'Submissions Due:',
@@ -265,10 +262,13 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const updateSortParam = useUpdateSearchParams('sortMethod')
   const updateIsCosignParam = useUpdateSearchParams('isCosign')
 
-  // Lineup for the submissions tab — full TrackTile treatment.
+  // Lineup for the submissions tab — full TrackTile treatment. Includes
+  // the original (parent) track at the top of the lineup so viewers can
+  // compare the source the remixes are built on without jumping back out
+  // to the track page, matching the track-page `RemixesPage`.
   const lineup = useRemixesLineup({
     trackId: trackId ?? undefined,
-    includeOriginal: false,
+    includeOriginal: true,
     includeWinners: true,
     isContestEntry: true,
     sortMethod,
@@ -360,9 +360,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         </Flex>
       )
     }
-    // Public view: Share icon + Follow pill (notification-style bell) +
-    // Enter Contest primary CTA, per the Figma. Enter Contest is hidden
-    // once the contest has ended — "entering" isn't meaningful anymore.
+    // Public view: Share icon + profile-style Follow button
+    // (Follow → Following → hover Unfollow) + Enter Contest primary
+    // CTA, per the Figma. Enter Contest is hidden once the contest
+    // has ended — "entering" isn't meaningful anymore.
     return (
       <Flex gap='s' alignItems='center' wrap='wrap'>
         <IconButton
@@ -371,17 +372,14 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           aria-label={messages.share}
           onClick={handleShareContest}
         />
-        <Button
+        <FollowButton
           size='small'
-          variant={followState?.isFollowed ? 'secondary' : 'secondary'}
-          iconLeft={
-            followState?.isFollowed ? IconNotificationOn : IconNotificationOff
-          }
+          fullWidth={false}
+          isFollowing={!!followState?.isFollowed}
           disabled={isFollowing || isUnfollowing}
-          onClick={handleToggleFollow}
-        >
-          {followState?.isFollowed ? messages.following : messages.follow}
-        </Button>
+          onFollow={handleToggleFollow}
+          onUnfollow={handleToggleFollow}
+        />
         {!isEnded ? (
           <Button size='small' onClick={handleEnterContest}>
             {messages.enterContest}
@@ -703,11 +701,13 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
               >
                 {hasDownloads ? <ContestStemsCard trackId={trackId!} /> : null}
 
-                <EventFollowersCard
-                  eventId={eventId}
-                  followerCount={followState?.followerCount ?? 0}
-                  onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
-                />
+                {(followState?.followerCount ?? 0) > 0 ? (
+                  <EventFollowersCard
+                    eventId={eventId}
+                    followerCount={followState?.followerCount ?? 0}
+                    onOpenLeaderboard={() => setIsFollowersModalOpen(true)}
+                  />
+                ) : null}
 
                 {/* Comments tile — in-column Figma card. */}
                 <ContestCommentsTile
@@ -726,21 +726,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           />
 
           {activeTab === 'submissions' ? (
-            <Paper
-              direction='column'
-              p='xl'
-              gap='l'
-              borderRadius='l'
-              border='default'
-              shadow='flat'
-              backgroundColor='white'
-            >
+            <Flex direction='column' gap='l'>
               {/* Filter bar — same controls the track-page `RemixesPage`
                 exposes above its remixes lineup: a Co-Signed toggle
                 plus a Most Recent / Most Plays / Most Favorites sort
                 dropdown. Co-signed surfaces entries the host has
                 endorsed; the sort drives the underlying
-                `useRemixesLineup` query. */}
+                `useRemixesLineup` query. Sits directly on the page
+                background (the TrackTiles below provide their own
+                paper treatment — the extra outer Paper was
+                double-framing the row). */}
               <Flex
                 justifyContent='space-between'
                 alignItems='center'
@@ -788,7 +783,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 pageSize={CONTEST_PAGE_SIZE}
                 actions={remixesPageLineupActions}
               />
-            </Paper>
+            </Flex>
           ) : null}
         </Box>
       </Box>

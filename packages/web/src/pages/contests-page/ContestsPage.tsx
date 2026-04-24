@@ -9,6 +9,7 @@ import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 
+import styles from './ContestsPage.module.css'
 import { RunYourOwnContestBanner } from './RunYourOwnContestBanner'
 
 const CONTEST_HOSTING_HELP_URL =
@@ -89,46 +90,30 @@ export const ContestsPage = () => {
             </Text>
           </Box>
         ) : showSkeletons ? (
-          <Flex direction='column' gap='l'>
+          <Flex direction='column' gap='l' className={styles.bodyWrapper}>
             {Array.from({ length: HERO_SKELETON_COUNT }).map((_, i) => (
               <ContestCardSkeleton key={`hero-skeleton-${i}`} variant='hero' />
             ))}
-            <Box
-              css={{
-                display: 'grid',
-                gap: 16,
-                gridTemplateColumns: isMobile
-                  ? '1fr'
-                  : 'repeat(3, minmax(0, 1fr))'
-              }}
-            >
+            <div className={styles.cardsContainer}>
               {Array.from({ length: GRID_SKELETON_COUNT }).map((_, i) => (
                 <ContestCardSkeleton
                   key={`grid-skeleton-${i}`}
                   variant='grid'
                 />
               ))}
-            </Box>
+            </div>
           </Flex>
         ) : (
-          <Flex direction='column' gap='l'>
+          <Flex direction='column' gap='l' className={styles.bodyWrapper}>
             {heroTrackId != null ? (
               <ContestCard trackId={heroTrackId} variant='hero' />
             ) : null}
             {gridTrackIds.length > 0 ? (
-              <Box
-                css={{
-                  display: 'grid',
-                  gap: 16,
-                  gridTemplateColumns: isMobile
-                    ? '1fr'
-                    : 'repeat(3, minmax(0, 1fr))'
-                }}
-              >
+              <div className={styles.cardsContainer}>
                 {gridTrackIds.map((id) => (
                   <ContestCard key={id} trackId={id} variant='grid' />
                 ))}
-              </Box>
+              </div>
             ) : null}
           </Flex>
         )}

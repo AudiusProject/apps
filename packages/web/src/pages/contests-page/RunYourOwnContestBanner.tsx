@@ -24,11 +24,13 @@ const messages = {
 
 /**
  * Desktop-only CTA encouraging viewers to host their own remix
- * contest. Hidden on mobile-width viewports. Pinned to the bottom of
- * the viewport (position: fixed) so it hovers over scrolled content
- * rather than getting buried at the end of the page. Dismissable for
- * the rest of the session (state is not persisted across reloads —
- * flip to localStorage if we want it to stick).
+ * contest. Hidden on mobile-width viewports. Renders in the normal
+ * page flow underneath the contest grid — matches the placement on
+ * other launchpad/explore pages (fan clubs, etc.) so the banner
+ * tracks the content column's width + padding instead of
+ * float-overlapping rows with a fixed viewport offset.
+ * Dismissable for the rest of the session (state is not persisted
+ * across reloads — flip to localStorage if we want it to stick).
  */
 export const RunYourOwnContestBanner = () => {
   const isMobile = useIsMobile()
@@ -42,25 +44,21 @@ export const RunYourOwnContestBanner = () => {
       alignItems='center'
       justifyContent='space-between'
       gap='l'
-      p='l'
+      p='xl'
       border='default'
       shadow='mid'
+      backgroundColor='white'
+      w='100%'
       css={{
-        // Hovering bottom dock — sits above the global playbar's
-        // 60-80px chin (safe offset: 96px). Left + right are pinned
-        // to the main content column; the sidebar anchors the left
-        // edge via its fixed width of 240px in the app shell.
-        position: 'fixed',
-        bottom: 96,
-        left: 264,
-        right: 24,
-        borderRadius: 16,
-        // Float above track tiles + other page content but below
-        // modals (which use higher z-index tiers).
-        zIndex: 10
+        position: 'relative',
+        borderRadius: 16
       }}
     >
-      <Flex direction='column' gap='xs' css={{ flex: '1 1 auto', minWidth: 0 }}>
+      <Flex
+        direction='column'
+        gap='xs'
+        css={{ flex: '1 1 auto', minWidth: 0, paddingRight: 24 }}
+      >
         <Text variant='heading' size='s'>
           {messages.title}
         </Text>
@@ -73,7 +71,7 @@ export const RunYourOwnContestBanner = () => {
         variant='primary'
         size='default'
         asChild
-        css={{ flexShrink: 0, alignSelf: 'center' }}
+        css={{ flexShrink: 0 }}
       >
         <a
           href={CONTEST_HOSTING_HELP_URL}
