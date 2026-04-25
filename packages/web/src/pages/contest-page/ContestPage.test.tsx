@@ -180,12 +180,15 @@ describe('ContestPage', () => {
     expect(container.querySelector('[data-testid="prizes-tab"]')).toBeNull()
   })
 
-  it('renders the "no contest" fallback when the track has no remix contest', () => {
+  it('renders the skeleton fallback when the track has no remix contest', () => {
     mocks.useRemixContest.mockReturnValue({ data: null })
-    renderContestPage()
+    const { container } = renderContestPage()
+    // The fallback replaces the old "No contest is currently running"
+    // copy with a layout-matching skeleton (Harmony `Skeleton` boxes
+    // expose `aria-busy`), so assert at least one skeleton is rendered.
     expect(
-      screen.getByText(/no contest is currently running for this track/i)
-    ).toBeInTheDocument()
+      container.querySelectorAll('[aria-busy="true"]').length
+    ).toBeGreaterThan(0)
     // The main layout sections should NOT render in the fallback branch.
     expect(screen.queryByTestId('details-tab')).not.toBeInTheDocument()
     expect(screen.queryByTestId('prizes-tab')).not.toBeInTheDocument()
