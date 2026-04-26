@@ -180,15 +180,16 @@ describe('ContestPage', () => {
     expect(container.querySelector('[data-testid="prizes-tab"]')).toBeNull()
   })
 
-  it('renders the "no contest" fallback when the track has no remix contest', () => {
+  it('renders the skeleton fallback when the track has no remix contest', () => {
     mocks.useRemixContest.mockReturnValue({ data: null })
-    renderContestPage()
-    expect(
-      screen.getByText(/no contest is currently running for this track/i)
-    ).toBeInTheDocument()
+    const { container } = renderContestPage()
+    // The page now renders a layout-shaped Skeleton instead of the old
+    // "no contest is currently running" copy. Skeleton renders an
+    // element with `aria-busy`, which is unique to that fallback branch.
+    expect(container.querySelector('[aria-busy]')).not.toBeNull()
     // The main layout sections should NOT render in the fallback branch.
-    expect(screen.queryByTestId('details-tab')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('prizes-tab')).not.toBeInTheDocument()
+    expect(screen.queryByText(/^about this contest$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^prizes$/i)).not.toBeInTheDocument()
     expect(
       screen.queryByTestId('contest-comments-section')
     ).not.toBeInTheDocument()
