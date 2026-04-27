@@ -41,7 +41,6 @@ discovery=(
   discovery-provider-openresty
   es-indexer
   solana-relay
-  trending-challenge-rewards
   staking
   anti-abuse
   archiver

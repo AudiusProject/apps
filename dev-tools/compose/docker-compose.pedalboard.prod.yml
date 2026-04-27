@@ -33,19 +33,6 @@ services:
     profiles:
       - pedalboard
 
-  trending-challenge-rewards:
-    container_name: trending-challenge-rewards
-    build:
-      context: ${PROJECT_ROOT}
-      dockerfile: ${PROJECT_ROOT}/packages/discovery-provider/plugins/pedalboard/docker/Dockerfile.prod
-      args:
-        app_name: trending-challenge-rewards
-        TURBO_TEAM: '${TURBO_TEAM}'
-        TURBO_TOKEN: '${TURBO_TOKEN}'
-    restart: always
-    profiles:
-      - pedalboard
-
   staking:
     build:
       context: ${PROJECT_ROOT}
