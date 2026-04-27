@@ -14,7 +14,6 @@ import firstUploadModal from 'components/first-upload-modal/store/slice'
 import passwordReset from 'components/password-reset/store/reducer'
 import unfollowConfirmation from 'components/unfollow-confirmation-modal/store/reducers'
 import dashboard from 'pages/dashboard-page/store/slice'
-import deleted from 'pages/deleted-page/store/slice'
 import visualizer from 'pages/visualizer/store/slice'
 import appCTAModal from 'store/application/ui/app-cta-modal/slice'
 import cookieBanner from 'store/application/ui/cookieBanner/reducer'
@@ -66,7 +65,6 @@ const createRootReducer = () => {
         visualizer
       }),
       pages: combineReducers({
-        deleted,
         unfollowConfirmation
       })
     })

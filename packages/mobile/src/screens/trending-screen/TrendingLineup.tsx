@@ -1,89 +1,90 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
+import {
+  getTrendingQueryKey,
+  TRENDING_INITIAL_PAGE_SIZE,
+  TRENDING_LOAD_MORE_PAGE_SIZE,
+  useTrending
+} from '@audius/common/api'
 import { TimeRange } from '@audius/common/models'
 import {
-  lineupSelectors,
-  trendingPageLineupActions,
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch } from 'react-redux'
+import type { SectionListProps } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { Lineup } from 'app/components/lineup'
-import type { LineupProps } from 'app/components/lineup/types'
-const {
-  getDiscoverTrendingAllTimeLineup,
-  getDiscoverTrendingMonthLineup,
-  getDiscoverTrendingWeekLineup
-} = trendingPageSelectors
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
+
 const { setTrendingTimeRange } = trendingPageActions
-const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
-  trendingPageLineupActions
-const { makeGetLineupMetadatas } = lineupSelectors
+const { getTrendingGenre } = trendingPageSelectors
 
-const getTrendingWeekLineup = makeGetLineupMetadatas(
-  getDiscoverTrendingWeekLineup
-)
-
-const getTrendingMonthLineup = makeGetLineupMetadatas(
-  getDiscoverTrendingMonthLineup
-)
-
-const getTrendingAllTimeLineup = makeGetLineupMetadatas(
-  getDiscoverTrendingAllTimeLineup
-)
-
-const selectorsMap = {
-  [TimeRange.WEEK]: getTrendingWeekLineup,
-  [TimeRange.MONTH]: getTrendingMonthLineup,
-  [TimeRange.ALL_TIME]: getTrendingAllTimeLineup
+const sourceFor = (timeRange: TimeRange) => {
+  if (timeRange === TimeRange.WEEK) return 'DISCOVER_TRENDING_WEEK'
+  if (timeRange === TimeRange.MONTH) return 'DISCOVER_TRENDING_MONTH'
+  return 'DISCOVER_TRENDING_ALL_TIME'
 }
 
-const actionsMap = {
-  [TimeRange.WEEK]: trendingWeekActions,
-  [TimeRange.MONTH]: trendingMonthActions,
-  [TimeRange.ALL_TIME]: trendingAllTimeActions
-}
-
-type BaseLineupProps = Pick<LineupProps, 'header' | 'rankIconCount'>
-
-type TrendingLineupProps = BaseLineupProps & {
+type TrendingLineupProps = {
   timeRange: TimeRange
+  header?: SectionListProps<unknown>['ListHeaderComponent']
+  rankIconCount?: number
 }
 
-export const TrendingLineup = (props: TrendingLineupProps) => {
-  const { timeRange, ...other } = props
+export const TrendingLineup = ({
+  timeRange,
+  header,
+  rankIconCount
+}: TrendingLineupProps) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const trendingActions = actionsMap[timeRange]
+  const genre = useSelector(getTrendingGenre)
 
+  // Keep the redux "active time range" in sync with the selected tab — the
+  // filter UI components read from it.
   useEffect(() => {
-    // @ts-ignore tabPress is not a valid event, and wasn't able to figure out a fix
-    const tabPressListener = navigation.addListener('tabPress', () => {
+    // @ts-ignore tabPress is a tab navigator event
+    const tabPressListener = navigation.addListener?.('tabPress', () => {
       dispatch(setTrendingTimeRange(timeRange))
     })
-
     return tabPressListener
   }, [navigation, dispatch, timeRange])
 
-  const handleLoadMore = useCallback(
-    (offset: number, limit: number, overwrite: boolean) => {
-      dispatch(trendingActions.fetchLineupMetadatas(offset, limit, overwrite))
-    },
-    [dispatch, trendingActions]
+  const queryArgs = useMemo(
+    () => ({
+      timeRange,
+      genre,
+      initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
+      loadMorePageSize: TRENDING_LOAD_MORE_PAGE_SIZE
+    }),
+    [timeRange, genre]
+  )
+
+  const { trackIds, isPending, isFetching, hasNextPage, loadNextPage } =
+    useTrending(queryArgs)
+
+  const querySource = useMemo(
+    () => ({ queryKey: [...getTrendingQueryKey(queryArgs)] as unknown[] }),
+    [queryArgs]
   )
 
   return (
-    <Lineup
+    <TrackLineup
+      trackIds={trackIds}
+      source={sourceFor(timeRange)}
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={isFetching}
+      hasNextPage={hasNextPage}
+      loadNextPage={loadNextPage}
+      pageSize={TRENDING_LOAD_MORE_PAGE_SIZE}
+      initialPageSize={TRENDING_INITIAL_PAGE_SIZE}
       isTrending
-      selfLoad
-      pullToRefresh
-      lineupSelector={selectorsMap[timeRange]}
-      actions={trendingActions}
-      loadMore={handleLoadMore}
+      rankIconCount={rankIconCount}
+      header={header}
       itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
-      {...other}
+      pullToRefresh
     />
   )
 }

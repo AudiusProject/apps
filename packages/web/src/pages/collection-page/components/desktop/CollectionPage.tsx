@@ -191,9 +191,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   const collectionLoading = statusValue === Status.LOADING
   const queuedAndPlaying = playing && isQueued()
   const queuedAndPreviewing = previewing && isQueued()
-  const tracksLoading =
-    trackCount > 0 &&
-    (tracks.status === Status.LOADING || tracks.status === Status.IDLE)
+  const tracksLoading = trackCount > 0 && tracks.status === Status.LOADING
   const pageLoading = collectionLoading || tracksLoading
 
   const duration =

@@ -1,9 +1,7 @@
 import { useCallback } from 'react'
 
-import { Kind } from '@audius/common/models'
 import {
   useAlbumTrackRemoveConfirmationModal,
-  collectionPageLineupActions,
   cacheCollectionsActions
 } from '@audius/common/store'
 import {
@@ -30,13 +28,13 @@ export const AlbumTrackRemoveConfirmationModal = () => {
   const {
     isOpen,
     onClose,
-    data: { trackId, playlistId, uid, timestamp }
+    data: { trackId, playlistId, timestamp }
   } = useAlbumTrackRemoveConfirmationModal()
 
   const dispatch = useDispatch()
 
   const handleConfirm = useCallback(() => {
-    if (trackId && playlistId && uid && timestamp) {
+    if (trackId && playlistId && timestamp) {
       dispatch(
         cacheCollectionsActions.removeTrackFromPlaylist(
           trackId,
@@ -44,10 +42,9 @@ export const AlbumTrackRemoveConfirmationModal = () => {
           timestamp
         )
       )
-      dispatch(collectionPageLineupActions.remove(Kind.TRACKS, uid))
     }
     onClose()
-  }, [dispatch, onClose, playlistId, timestamp, trackId, uid])
+  }, [dispatch, onClose, playlistId, timestamp, trackId])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size='medium'>

@@ -1,13 +1,18 @@
-import { useRemixContest, useTrackPageLineup } from '@audius/common/api'
+import { useMemo } from 'react'
+
+import {
+  getTrackPageLineupQueryKey,
+  useRemixContest,
+  useTrackPageLineup
+} from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { User } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { tracksActions } from '@audius/common/src/store/pages/track/lineup/actions'
 import { Flex, Text, IconRemix } from '@audius/harmony'
 import type { IconComponent } from '@audius/harmony'
 
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 
 import { ViewOtherRemixesButton } from './ViewOtherRemixesButton'
@@ -51,7 +56,8 @@ export const TrackPageLineup = ({
   trackId,
   commentsDisabled
 }: TrackPageLineupProps) => {
-  const { indices, ...lineupData } = useTrackPageLineup({ trackId })
+  const { trackIds, indices, isPending, isFetching, isError } =
+    useTrackPageLineup({ trackId })
   const { data: remixContest } = useRemixContest(trackId)
   const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
   const suppressRemixLineupForContest = !!remixContest && isContestsEnabled
@@ -63,6 +69,13 @@ export const TrackPageLineup = ({
     (isCommentingEnabled && isDesktop) || isMobile
       ? LineupVariant.SECTION
       : LineupVariant.CONDENSED
+
+  const querySource = useMemo(
+    () => ({
+      queryKey: [...getTrackPageLineupQueryKey(trackId)] as unknown[]
+    }),
+    [trackId]
+  )
 
   const hasRemixSection =
     !suppressRemixLineupForContest &&
@@ -79,17 +92,22 @@ export const TrackPageLineup = ({
   const renderRemixParentSection = () => {
     if (indices.remixParentSection.index === undefined || !trackId) return null
 
-    const parentTrackId =
-      lineupData.data?.[indices.remixParentSection.index]?.id
+    const start = indices.remixParentSection.index
+    const end = start + (indices.remixParentSection.pageSize ?? 0)
+    const sectionTrackIds = trackIds.slice(start, end)
+    const parentTrackId = sectionTrackIds[0]
 
     return (
       <Section title={messages.originalTrack}>
-        <TanQueryLineup
-          {...lineupData}
-          maxEntries={indices.remixParentSection.pageSize}
+        <TrackLineup
+          trackIds={sectionTrackIds}
+          source='TRACK_PAGE_MORE_BY'
+          querySource={querySource}
           variant={lineupVariant}
-          offset={indices.remixParentSection.index}
-          actions={tracksActions}
+          isPending={isPending}
+          isFetching={isFetching}
+          isError={isError}
+          hasNextPage={false}
         />
         {parentTrackId ? (
           <ViewOtherRemixesButton parentTrackId={parentTrackId} size='xs' />
@@ -101,14 +119,21 @@ export const TrackPageLineup = ({
   const renderRemixesSection = () => {
     if (indices.remixesSection.index === undefined || !trackId) return null
 
+    const start = indices.remixesSection.index
+    const end = start + (indices.remixesSection.pageSize ?? 0)
+    const sectionTrackIds = trackIds.slice(start, end)
+
     return (
       <Section title={messages.remixes} icon={IconRemix}>
-        <TanQueryLineup
-          {...lineupData}
-          maxEntries={indices.remixesSection.pageSize}
+        <TrackLineup
+          trackIds={sectionTrackIds}
+          source='TRACK_PAGE_REMIXES'
+          querySource={querySource}
           variant={lineupVariant}
-          offset={indices.remixesSection.index}
-          actions={tracksActions}
+          isPending={isPending}
+          isFetching={isFetching}
+          isError={isError}
+          hasNextPage={false}
         />
         <ViewOtherRemixesButton parentTrackId={trackId} size='xs' />
       </Section>
@@ -118,14 +143,21 @@ export const TrackPageLineup = ({
   const renderMoreBySection = () => {
     if (indices.moreBySection.index === undefined) return null
 
+    const start = indices.moreBySection.index
+    const end = start + (indices.moreBySection.pageSize ?? 0)
+    const sectionTrackIds = trackIds.slice(start, end)
+
     return (
       <Section title={messages.moreBy(user?.name ?? '')}>
-        <TanQueryLineup
-          {...lineupData}
-          maxEntries={indices.moreBySection.pageSize}
+        <TrackLineup
+          trackIds={sectionTrackIds}
+          source='TRACK_PAGE_MORE_BY'
+          querySource={querySource}
           variant={lineupVariant}
-          offset={indices.moreBySection.index}
-          actions={tracksActions}
+          isPending={isPending}
+          isFetching={isFetching}
+          isError={isError}
+          hasNextPage={false}
         />
       </Section>
     )
@@ -134,14 +166,21 @@ export const TrackPageLineup = ({
   const renderRecommendedSection = () => {
     if (indices.recommendedSection.index === undefined) return null
 
+    const start = indices.recommendedSection.index
+    const end = start + (indices.recommendedSection.pageSize ?? 0)
+    const sectionTrackIds = trackIds.slice(start, end)
+
     return (
       <Section title={messages.youMightAlsoLike}>
-        <TanQueryLineup
-          {...lineupData}
-          maxEntries={indices.recommendedSection.pageSize}
+        <TrackLineup
+          trackIds={sectionTrackIds}
+          source='TRACK_PAGE_MORE_BY'
+          querySource={querySource}
           variant={lineupVariant}
-          offset={indices.recommendedSection.index}
-          actions={tracksActions}
+          isPending={isPending}
+          isFetching={isFetching}
+          isError={isError}
+          hasNextPage={false}
         />
       </Section>
     )

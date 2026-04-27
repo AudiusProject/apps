@@ -18,9 +18,7 @@ import {
   OverflowSource,
   usePremiumContentPurchaseModal,
   playbackPositionSelectors,
-  PurchaseableContentType,
-  playerActions,
-  playerSelectors
+  PurchaseableContentType
 } from '@audius/common/store'
 import { Genre, removeNullable } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
@@ -48,7 +46,6 @@ import { useCommentDrawer } from '../comments/CommentDrawerContext'
 import { FavoriteButton } from './FavoriteButton'
 import { RepostButton } from './RepostButton'
 
-const { getUid } = playerSelectors
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { updateMethod } = castActions
@@ -120,7 +117,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   const isUnlisted = track?.is_unlisted
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const uid = useSelector(getUid)
 
   const handlePurchasePress = useCallback(() => {
     if (track?.track_id) {
@@ -165,14 +161,15 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
 
   const handleComments = useCallback(() => {
     if (track) {
+      // From Now Playing — play-from-comment goes through the playback slice
+      // with a generic 'comments' source (not a lineup prefix).
       open({
         entityId: track.track_id,
         navigation,
-        actions: playerActions,
-        uid: uid as string
+        playbackSource: 'comments'
       })
     }
-  }, [uid, navigation, open, track])
+  }, [navigation, open, track])
 
   const playbackPositionInfo = useSelector((state) =>
     getTrackPosition(state, {

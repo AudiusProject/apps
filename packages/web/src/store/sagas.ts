@@ -13,6 +13,7 @@ import {
   searchUsersModalSagas,
   modalsSagas,
   playerSagas as commonPlayerSagas,
+  playbackSagas,
   playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
@@ -31,18 +32,10 @@ import changePasswordSagas from 'common/store/change-password/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
-import exclusiveTracksSagas from 'common/store/pages/exclusive-tracks/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
-import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
-import premiumTracksSagas from 'common/store/pages/premium-tracks/sagas'
-import remixesSagas from 'common/store/pages/remixes-page/sagas'
-import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import trendingPageSagas from 'common/store/pages/trending/sagas'
-import trendingUndergroundSagas from 'common/store/pages/trending-underground/sagas'
-import trendingWinnersSagas from 'common/store/pages/trending-winners/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import playlistUpdatesSagas from 'common/store/playlist-updates/sagas'
@@ -55,7 +48,6 @@ import socialSagas from 'common/store/social/sagas'
 import firstUploadModalSagas from 'components/first-upload-modal/store/sagas'
 import passwordResetSagas from 'components/password-reset/store/sagas'
 import dashboardSagas from 'pages/dashboard-page/store/sagas'
-import deletedSagas from 'pages/deleted-page/store/sagas'
 import settingsSagas from 'pages/settings-page/store/sagas'
 import accountSagas from 'store/account/sagas'
 import webAnalyticsSagas from 'store/analytics/sagas'
@@ -95,7 +87,6 @@ export default function* rootSaga() {
     chatSagas(),
     dashboardSagas(),
     feedPageSagas(),
-    historySagas(),
     passwordResetSagas(),
     profileSagas(),
     rewardsPageSagas(),
@@ -104,13 +95,6 @@ export default function* rootSaga() {
     signOnSaga(),
     socialSagas(),
     trackPageSagas(),
-    trendingPageSagas(),
-    trendingUndergroundSagas(),
-    trendingWinnersSagas(),
-    premiumTracksSagas(),
-    exclusiveTracksSagas(),
-    searchTracksLineupSagas(),
-    remixesSagas(),
 
     modalsSagas(),
 
@@ -122,6 +106,7 @@ export default function* rootSaga() {
     // Playback
     playerSagas(),
     commonPlayerSagas(),
+    ...playbackSagas(),
     playbackPositionSagas(),
     queueSagas(),
 
@@ -133,11 +118,9 @@ export default function* rootSaga() {
     changePasswordSagas(),
     chatWebSagas(),
     deactivateAccountSagas(),
-    deletedSagas(),
     deletePlaylistConfirmationModalSagas(),
     duplicateAddConfirmationModalSagas(),
     firstUploadModalSagas(),
-    remixesSagas(),
     scrollLockSagas(),
     shareModalSagas(),
     stripeModalSagas(),

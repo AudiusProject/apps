@@ -5,12 +5,9 @@ import {
   useCurrentCommentSection
 } from '@audius/common/context'
 import { ID } from '@audius/common/models'
-import { trackPageSelectors } from '@audius/common/store'
 import { Divider, Flex, LoadingSpinner, Paper } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
-import { useSelector } from 'react-redux'
 import { useSearchParams, useLocation, useNavigate } from 'react-router'
-import { tracksActions } from '~/store/pages/track/lineup/actions'
 
 import { useMainContentRef } from 'pages/MainContentContext'
 
@@ -25,8 +22,6 @@ import { CommentSortBar } from './CommentSortBar'
 import { CommentThread } from './CommentThread'
 import { NoComments } from './NoComments'
 import { useHighlightedComment } from './useHighlightedComment'
-
-const { getLineup } = trackPageSelectors
 
 type CommentSectionInnerProps = {
   commentSectionRef: React.RefObject<HTMLDivElement | null>
@@ -188,15 +183,9 @@ type CommentSectionProps = {
 
 export const CommentSection = (props: CommentSectionProps) => {
   const { entityId, commentSectionRef } = props
-  const lineup = useSelector(getLineup)
-  const uid = lineup?.entries?.[0]?.uid
 
   return (
-    <CommentSectionProvider
-      entityId={entityId}
-      lineupActions={tracksActions}
-      uid={uid}
-    >
+    <CommentSectionProvider entityId={entityId}>
       <CommentSectionInner
         commentSectionRef={commentSectionRef}
         entityId={entityId}

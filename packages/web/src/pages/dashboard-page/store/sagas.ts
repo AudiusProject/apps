@@ -1,25 +1,57 @@
 import {
   transformAndCleanList,
-  userCollectionMetadataFromSDK
+  userCollectionMetadataFromSDK,
+  userTrackMetadataFromSDK
 } from '@audius/common/adapters'
 import {
   primeCollectionDataSaga,
+  primeTrackDataSaga,
   queryAccountUser,
   queryCurrentUserId
 } from '@audius/common/api'
 import { Track } from '@audius/common/models'
 import { getContext, getSDK } from '@audius/common/store'
-import { dayjs, Dayjs, route } from '@audius/common/utils'
+import { removeNullable, dayjs, Dayjs, route } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { each } from 'lodash'
 import { all, call, put, takeEvery } from 'typed-redux-saga'
 
-import { retrieveUserTracks } from 'common/store/pages/profile/lineups/tracks/retrieveUserTracks'
 import { requiresAccount } from 'common/utils/requiresAccount'
 import { waitForRead } from 'utils/sagaHelpers'
 
 import { actions as dashboardActions } from './slice'
 import ArtistDashboardState from './types'
+
+// Fetch this user's tracks (including unlisted). Was previously implemented
+// in profile/lineups/tracks/retrieveUserTracks.ts, inlined here as the only
+// remaining caller after the legacy lineup sagas were removed.
+function* retrieveUserTracks({
+  handle,
+  currentUserId,
+  offset,
+  limit,
+  getUnlisted = false
+}: {
+  handle: string
+  currentUserId: number
+  offset?: number
+  limit?: number
+  getUnlisted?: boolean
+}) {
+  const sdk = yield* getSDK()
+  const { data } = yield* call([sdk.users, sdk.users.getTracksByUserHandle], {
+    handle,
+    userId: OptionalId.parse(currentUserId),
+    offset,
+    limit,
+    filterTracks: getUnlisted ? 'all' : undefined
+  } as any)
+  const tracks = transformAndCleanList(data, userTrackMetadataFromSDK).filter(
+    removeNullable
+  ) as Track[]
+  yield* call(primeTrackDataSaga, tracks)
+  return tracks
+}
 
 const { DASHBOARD_PAGE } = route
 

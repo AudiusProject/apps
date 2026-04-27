@@ -30,7 +30,6 @@ import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
 import { persistedLibraryPageReducer } from './pages/library-page/reducer'
 import pickWinners from './pages/pick-winners/slice'
-import premiumTracks from './pages/premium-tracks/slice'
 import profileReducer from './pages/profile/reducer'
 import { ProfilePageState } from './pages/profile/types'
 import remixes from './pages/remixes/slice'
@@ -43,8 +42,8 @@ import track from './pages/track/reducer'
 import { TrackPageState } from './pages/track/types'
 import trending from './pages/trending/reducer'
 import { TrendingPageState } from './pages/trending/types'
-import trendingUnderground from './pages/trending-underground/slice'
-import trendingWinners from './pages/trending-winners/slice'
+import playback from './playback/slice'
+import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
 import player, { PlayerState } from './player/slice'
@@ -123,6 +122,7 @@ export const reducers = (storage: Storage, history?: History) => ({
   // Playback
   queue,
   player,
+  playback,
   playbackPosition,
 
   // Wallet
@@ -185,12 +185,9 @@ export const reducers = (storage: Storage, history?: History) => ({
     tokenDashboard: tokenDashboardSlice.reducer,
     track,
     trending: trending(history),
-    trendingUnderground,
-    trendingWinners,
     settings,
     remixes,
-    exclusiveTracks,
-    premiumTracks
+    exclusiveTracks
   }),
   search: searchReducer(storage),
   stemsUpload,
@@ -227,6 +224,7 @@ export type CommonState = {
   // Playback
   queue: ReturnType<typeof queue>
   player: PlayerState
+  playback: PlaybackState
   playbackPosition: PlaybackPositionState
 
   // Wallet
@@ -287,11 +285,8 @@ export type CommonState = {
     searchResults: SearchPageState
     settings: SettingsPageState
     trending: TrendingPageState
-    trendingUnderground: ReturnType<typeof trendingUnderground>
-    trendingWinners: ReturnType<typeof trendingWinners>
     remixes: ReturnType<typeof remixes>
     exclusiveTracks: ReturnType<typeof exclusiveTracks>
-    premiumTracks: ReturnType<typeof premiumTracks>
   }
   search: SearchState
 

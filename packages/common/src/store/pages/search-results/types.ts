@@ -1,8 +1,4 @@
-import { LineupState, Track } from '../../../models'
-
-export type SearchPageState = {
-  tracks: LineupState<Track>
-}
+export type SearchPageState = Record<string, never>
 
 export enum SearchKind {
   TRACKS = 'tracks',

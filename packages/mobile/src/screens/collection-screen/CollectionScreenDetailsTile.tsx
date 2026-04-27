@@ -7,29 +7,27 @@ import {
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccessMap } from '@audius/common/hooks'
 import {
+  Kind,
   Name,
   PlaybackSource,
-  Status,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import type { ID, UID, AccessConditions } from '@audius/common/models'
 import {
-  collectionPageLineupActions as tracksActions,
-  collectionPageSelectors,
   reachabilitySelectors,
   playerSelectors,
+  playbackActions,
+  playbackSelectors,
   PurchaseableContentType,
-  queueActions,
   collectionPageActions
 } from '@audius/common/store'
-import { formatReleaseDate, Uid } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import { formatReleaseDate, Uid, makeStableUid } from '@audius/common/utils'
 import type { Maybe, Nullable } from '@audius/common/utils'
 import dayjs from 'dayjs'
 import { pick, uniq } from 'lodash'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { usePrevious } from 'react-use'
-import { createSelector } from 'reselect'
 
 import {
   Box,
@@ -60,56 +58,28 @@ import { UserBadges } from 'app/components/user-badges'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useRoute } from 'app/hooks/useRoute'
 import { make, track } from 'app/services/analytics'
-import type { AppState } from 'app/store'
 import { makeStyles } from 'app/styles'
 
 import { CollectionScreenSkeleton } from './CollectionScreenSkeleton'
-import { useFetchCollectionLineup } from './useFetchCollectionLineup'
 
-const { getPlaying, getPreviewing, getUid } = playerSelectors
+const { getPlaying, getPreviewing } = playerSelectors
 const { getIsReachable } = reachabilitySelectors
-const { getCollectionTracksLineup } = collectionPageSelectors
 const { resetCollection, fetchCollection } = collectionPageActions
 
-const selectTrackUids = createSelector(
-  (state: AppState) => getCollectionTracksLineup(state).entries,
-  (entries) => entries.map(({ uid }) => uid)
-)
-
-const selectFirstTrack = (state: AppState) =>
-  getCollectionTracksLineup(state).entries[0]
-
-const selectTrackCount = (state: AppState) => {
-  return getCollectionTracksLineup(state).entries.length
-}
-
-const selectIsLineupLoading = (state: AppState) => {
-  return getCollectionTracksLineup(state).status !== Status.SUCCESS
-}
-
-const selectIsQueued = createSelector(
-  selectTrackUids,
-  getUid,
-  (trackUids, playingUid) => {
-    return trackUids.some((trackUid) => playingUid === trackUid)
-  }
-)
-
-const useRefetchLineupOnTrackAdd = (collectionId: ID) => {
-  const { data: collectionTrackCount } = useCollection(collectionId, {
-    select: (collection) => collection.playlist_contents.track_ids.length
+// Derive the collection's track UIDs from the tanquery-cached collection
+// contents. UIDs are stable so they can be compared against the playing
+// queue uid for highlight purposes.
+const useCollectionTrackUids = (collectionId: ID | null | undefined) => {
+  const { data: trackIds } = useCollection(collectionId ?? undefined, {
+    select: (c) => c.playlist_contents.track_ids.map(({ track }) => track)
   })
-
-  const trackCount = collectionId ? collectionTrackCount : 0
-
-  const previousTrackCount = usePrevious(trackCount)
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    if (previousTrackCount && previousTrackCount !== trackCount) {
-      dispatch(tracksActions.fetchLineupMetadatas(0, 200, false))
-    }
-  }, [previousTrackCount, trackCount, dispatch])
+  return useMemo(
+    () =>
+      (trackIds ?? []).map((id) =>
+        makeStableUid(Kind.TRACKS, id as ID, 'COLLECTION_TRACKS')
+      ),
+    [trackIds]
+  )
 }
 
 const getMessages = (
@@ -272,18 +242,21 @@ export const CollectionScreenDetailsTile = ({
   const doesUserHaveAccessToAnyTrack = Object.values(trackAccessMap).some(
     ({ hasStreamAccess }) => hasStreamAccess
   )
-  const trackUids = useSelector(selectTrackUids)
-  const collectionTrackCount = useSelector(selectTrackCount)
+  const trackUids = useCollectionTrackUids(collectionId)
+  const collectionTrackCount = trackUids.length
   const trackCount = trackCountProp ?? collectionTrackCount
-  const isLineupLoading = useSelector(selectIsLineupLoading)
-  const isQueued = useSelector(selectIsQueued)
+  const isLineupLoading = !collectionTracks
+  const playingTrack = useCurrentTrack()
+  const playingTrackId = playingTrack?.track_id
+  const isQueued = useMemo(() => {
+    if (!playingTrackId || !collectionTracks) return false
+    return collectionTracks.some((t) => t.track_id === playingTrackId)
+  }, [playingTrackId, collectionTracks])
   const isPlaybackActive = useSelector(getPlaying)
   const isPlaying = isPlaybackActive && isQueued
   const isPreviewing = useSelector(getPreviewing)
   const isPlayingPreview = isPreviewing && isPlaying
-  const playingTrack = useCurrentTrack()
-  const playingTrackId = playingTrack?.track_id
-  const firstTrack = useSelector(selectFirstTrack)
+  const firstTrack = collectionTracks?.[0]
   const messages = getMessages(isAlbum ? 'album' : 'playlist', isStreamGated)
   const isPublished = !isPrivate || isPublishing
   const shouldShowScheduledRelease =
@@ -321,8 +294,6 @@ export const CollectionScreenDetailsTile = ({
     dispatch(resetCollection())
   }, [dispatch])
 
-  useRefetchLineupOnTrackAdd(collectionId)
-
   const badges = [
     shouldShowScheduledRelease ? (
       <MusicBadge variant='accent' icon={IconCalendarMonth}>
@@ -337,13 +308,28 @@ export const CollectionScreenDetailsTile = ({
     style: styles.coverArt
   })
 
+  // Matches legacy collection lineup prefix so existing consumers (e.g.
+  // playlist library highlight) that key off queue source keep working.
+  const collectionPlaybackSource = 'COLLECTION_TRACKS'
+  const collectionPlaybackQueue: PlaybackTrack[] = useMemo(
+    () =>
+      trackUids
+        .map((uid) => Uid.fromString(uid).id as ID)
+        .map((id) => ({
+          trackId: id,
+          source: collectionPlaybackSource,
+          legacyUid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
+        })),
+    [trackUids, collectionPlaybackSource]
+  )
+
   const play = useCallback(
     ({ isPreview = false }: { isPreview?: boolean } = {}) => {
       if (isPlaying && isQueued && isPreviewing === isPreview) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         recordPlay(playingTrackId, false)
       } else if (!isPlaying && isQueued) {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         recordPlay(playingTrackId, true, numericCollectionId)
         recordPlaylistPlay({
           collectionId: numericCollectionId,
@@ -351,10 +337,19 @@ export const CollectionScreenDetailsTile = ({
           trackCount,
           isPreview
         })
-      } else if (trackCount > 0 && firstTrack) {
-        dispatch(queueActions.clear({}))
-        dispatch(tracksActions.play(firstTrack.uid, { isPreview }))
-        recordPlay(firstTrack.id, true, numericCollectionId)
+      } else if (trackCount > 0 && collectionPlaybackQueue.length > 0) {
+        dispatch(
+          playbackActions.playFrom({
+            tracks: collectionPlaybackQueue,
+            startIndex: 0,
+            querySource: null
+          })
+        )
+        recordPlay(
+          collectionPlaybackQueue[0].trackId,
+          true,
+          numericCollectionId
+        )
         recordPlaylistPlay({
           collectionId: numericCollectionId,
           isAlbum: !!isAlbum,
@@ -368,7 +363,7 @@ export const CollectionScreenDetailsTile = ({
       isQueued,
       isPreviewing,
       trackCount,
-      firstTrack,
+      collectionPlaybackQueue,
       dispatch,
       playingTrackId,
       numericCollectionId,
@@ -563,7 +558,6 @@ const CollectionTrackList = ({
 }: CollectionTrackListProps) => {
   const styles = useStyles()
   const dispatch = useDispatch()
-  const playingUid = useSelector(getUid)
   const messages = getMessages(isAlbum ? 'album' : 'playlist')
 
   const numericCollectionId =
@@ -573,29 +567,62 @@ const CollectionTrackList = ({
   const { slug, collectionType, handle } = params ?? {}
   const permalink = slug ? `/${handle}/${collectionType}/${slug}` : undefined
 
-  const handleFetchCollection = useCallback(() => {
+  useEffect(() => {
     dispatch(resetCollection())
     if (numericCollectionId) {
-      dispatch(fetchCollection(collectionId as number, permalink, true))
+      dispatch(fetchCollection(collectionId as number, permalink, false))
     }
   }, [dispatch, collectionId, permalink, numericCollectionId])
 
-  useFetchCollectionLineup(collectionId, handleFetchCollection)
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
+
+  const trackListPlaybackSource = 'COLLECTION_TRACKS'
+  const trackListPlaybackQueue: PlaybackTrack[] = useMemo(
+    () =>
+      uids
+        .map((uid) => Uid.fromString(uid).id as ID)
+        .map((id) => ({
+          trackId: id,
+          source: trackListPlaybackSource,
+          legacyUid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
+        })),
+    [uids, trackListPlaybackSource]
+  )
 
   const handlePressTrackListItemPlay = useCallback(
-    (uid: UID, id: ID) => {
-      if (isPlaying && playingUid === uid) {
-        dispatch(tracksActions.pause())
+    (_uid: UID, id: ID) => {
+      if (isPlaying && currentPlaybackTrackId === id) {
+        dispatch(playbackActions.togglePlay())
         recordPlay(id, false)
-      } else if (playingUid !== uid) {
-        dispatch(tracksActions.play(uid))
-        recordPlay(id, true, numericCollectionId)
-      } else {
-        dispatch(tracksActions.play())
-        recordPlay(id, true, numericCollectionId)
+        return
       }
+      if (!isPlaying && currentPlaybackTrackId === id) {
+        dispatch(playbackActions.play())
+        recordPlay(id, true, numericCollectionId)
+        return
+      }
+      const startIndex = trackListPlaybackQueue.findIndex(
+        (t) => t.trackId === id
+      )
+      if (startIndex < 0) return
+      dispatch(
+        playbackActions.playFrom({
+          tracks: trackListPlaybackQueue,
+          startIndex,
+          querySource: null
+        })
+      )
+      recordPlay(id, true, numericCollectionId)
     },
-    [dispatch, isPlaying, playingUid, numericCollectionId]
+    [
+      dispatch,
+      isPlaying,
+      currentPlaybackTrackId,
+      numericCollectionId,
+      trackListPlaybackQueue
+    ]
   )
   return (
     <TrackList

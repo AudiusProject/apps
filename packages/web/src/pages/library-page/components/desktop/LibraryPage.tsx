@@ -157,8 +157,7 @@ const LibraryPage = () => {
   const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
     Boolean(entry.track_id)
   )
-  const tracksLoading =
-    (status === Status.IDLE || status === Status.LOADING) && isEmpty
+  const tracksLoading = status === Status.LOADING && isEmpty
   const showTrackTableSkeletons =
     (tracksLoading || initFetch) && !hasResolvedTrackRows
   const tracksTableShowsSpinner =

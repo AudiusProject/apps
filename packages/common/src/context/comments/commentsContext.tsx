@@ -22,12 +22,21 @@ import {
   useCurrentUserId
 } from '~/api'
 import { useGatedContentAccess } from '~/hooks'
-import { ModalSource, ID, Comment, ReplyComment, Name, Track } from '~/models'
-import { LineupBaseActions, playerActions } from '~/store'
+import {
+  Kind,
+  ModalSource,
+  ID,
+  Comment,
+  ReplyComment,
+  Name,
+  Track
+} from '~/models'
+import { playbackActions } from '~/store'
 import { seek } from '~/store/player/slice'
 import { PurchaseableContentType } from '~/store/purchase-content/types'
 import { usePremiumContentPurchaseModal } from '~/store/ui/modals/premium-content-purchase-modal'
 import { Nullable } from '~/utils'
+import { makeStableUid } from '~/utils/uid'
 
 import { useAppContext } from '../appContext'
 
@@ -45,13 +54,11 @@ type CommentSectionProviderProps<NavigationProp> = {
   navigation?: NavigationProp
   closeDrawer?: () => void
   uid?: string
-  /** Object containing lineup/player actions such as play, togglePlay, setPage
-   *  Typically these are lineup actions -
-   *  but playerActions are used when the comments were opened from NowPlaying.
-   *  In that scenario the comments are always for the currently playing track,
-   *  so it doesnt need to worry about changing lineups
+  /**
+   * Opaque source tag for the playback queue when the user plays the track
+   * from a comment. Defaults to 'comments' when omitted.
    */
-  lineupActions?: LineupBaseActions | typeof playerActions
+  playbackSource?: string
 }
 
 export type ReplyingAndEditingState = {
@@ -78,7 +85,7 @@ type CommentSectionContextType<NavigationProp> = {
   loadMorePages: () => void
   hasNewComments: boolean
   isCommentCountLoading: boolean
-} & Omit<CommentSectionProviderProps<NavigationProp>, 'lineupActions' | 'uid'>
+} & Omit<CommentSectionProviderProps<NavigationProp>, 'playbackSource' | 'uid'>
 
 export const CommentSectionContext = createContext<
   CommentSectionContextType<any> | undefined
@@ -95,8 +102,7 @@ export function CommentSectionProvider<NavigationProp>(
     setReplyingAndEditingState,
     navigation,
     closeDrawer,
-    uid: lineupUid,
-    lineupActions
+    playbackSource = 'comments'
   } = props
   const { data: track } = useTrack(entityId)
 
@@ -184,15 +190,33 @@ export function CommentSectionProvider<NavigationProp>(
 
   const playTrack = useCallback(
     (timestampSeconds?: number) => {
-      if (lineupUid === undefined || lineupActions === undefined) {
-        return
+      if (!track) return
+
+      const dispatchPlay = () => {
+        dispatch(
+          playbackActions.playFrom({
+            tracks: [
+              {
+                trackId: track.track_id,
+                source: playbackSource,
+                legacyUid: makeStableUid(
+                  Kind.TRACKS,
+                  track.track_id,
+                  playbackSource
+                )
+              }
+            ],
+            startIndex: 0,
+            querySource: null
+          })
+        )
       }
 
       // If a timestamp is provided, we should seek to that timestamp
       if (timestampSeconds !== undefined) {
         // But only if the user has access to the stream
         if (!hasStreamAccess) {
-          const { track_id: trackId } = track!
+          const { track_id: trackId } = track
           openPremiumContentPurchaseModal(
             { contentId: trackId, contentType: PurchaseableContentType.TRACK },
             {
@@ -200,18 +224,17 @@ export function CommentSectionProvider<NavigationProp>(
             }
           )
         } else {
-          dispatch(lineupActions.play(lineupUid))
+          dispatchPlay()
           setTimeout(() => dispatch(seek({ seconds: timestampSeconds })), 100)
         }
       } else {
-        dispatch(lineupActions.play(lineupUid))
+        dispatchPlay()
       }
     },
     [
       dispatch,
       hasStreamAccess,
-      lineupActions,
-      lineupUid,
+      playbackSource,
       openPremiumContentPurchaseModal,
       track
     ]

@@ -13,6 +13,7 @@ import {
   searchUsersModalSagas,
   modalsSagas,
   playerSagas as commonPlayerSagas,
+  playbackSagas,
   playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
@@ -28,19 +29,11 @@ import changePasswordSagas from 'common/store/change-password/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
-import exclusiveTracksSagas from 'common/store/pages/exclusive-tracks/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
-import historySagas from 'common/store/pages/history/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
-import premiumTracksSagas from 'common/store/pages/premium-tracks/sagas'
-import remixesSagas from 'common/store/pages/remixes-page/sagas'
-import searchTracksLineupSagas from 'common/store/pages/search-page/lineups/tracks/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import trendingPageSagas from 'common/store/pages/trending/sagas'
-import trendingUndergroundSagas from 'common/store/pages/trending-underground/sagas'
-import trendingWinnersSagas from 'common/store/pages/trending-winners/sagas'
 import playerSagas from 'common/store/player/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import profileSagas from 'common/store/profile/sagas'
@@ -83,6 +76,7 @@ export default function* rootSaga() {
     // Playback
     ...commonPlayerSagas(),
     ...playerSagas(),
+    ...playbackSagas(),
     ...queueSagas(),
     ...playbackPositionSagas(),
 
@@ -111,22 +105,14 @@ export default function* rootSaga() {
     ...mobileChatSagas(),
     ...collectionPageSagas(),
     ...feedPageSagas(),
-    ...trendingPageSagas(),
-    ...trendingUndergroundSagas(),
-    ...trendingWinnersSagas(),
     ...librarySagas(),
     ...profileSagas(),
     ...socialSagas(),
-    ...historySagas(),
     ...rewardsPageSagas(),
     ...settingsSagas(),
-    ...premiumTracksSagas(),
-    ...exclusiveTracksSagas(),
-    ...searchTracksLineupSagas(),
 
     // Cast
     ...castSagas(),
-    ...remixesSagas(),
 
     // Application
     ...addToCollectionSagas(),

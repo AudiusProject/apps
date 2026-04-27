@@ -5,7 +5,6 @@ import { useCurrentTrack } from '@audius/common/hooks'
 import { ErrorLevel, Feature, Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
-  libraryPageTracksLineupActions,
   queueActions,
   queueSelectors,
   RepeatMode,
@@ -219,7 +218,7 @@ export const AudioPlayer = () => {
 
   const isCollectionMarkedForDownload = useSelector(
     getIsCollectionMarkedForDownload(
-      queueSource === libraryPageTracksLineupActions.prefix
+      queueSource === 'SAVED_TRACKS'
         ? DOWNLOAD_REASON_FAVORITES
         : queueCollectionId?.toString()
     )

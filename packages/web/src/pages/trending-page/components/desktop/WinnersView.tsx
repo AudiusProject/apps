@@ -1,10 +1,9 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { useTrendingWinners } from '@audius/common/api'
 import {
-  trendingWinnersPageLineupActions,
-  trendingWinnersPageLineupSelectors
-} from '@audius/common/store'
+  getTrendingWinnersQueryKey,
+  useTrendingWinners
+} from '@audius/common/api'
 import { dayjs } from '@audius/common/utils'
 import {
   Flex,
@@ -16,18 +15,14 @@ import {
   SelectablePill,
   Text
 } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
 
 import EndOfLineup from 'components/lineup/EndOfLineup'
-import Lineup from 'components/lineup/Lineup'
-import { useLineupProps } from 'components/lineup/hooks'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
 import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
 import { TrackTileSize } from 'components/track/types'
 import { useIsMobile } from 'hooks/useIsMobile'
-
-const { getLineup } = trendingWinnersPageLineupSelectors
 
 const messages = {
   header: 'Winners',
@@ -61,17 +56,6 @@ const formatWeekLabel = (week: string | null): string => {
   return d.format('MMM D')
 }
 
-const useTrendingWinnersLineup = (scrollParent: HTMLElement | undefined) => {
-  return useLineupProps({
-    actions: trendingWinnersPageLineupActions,
-    getLineupSelector: getLineup,
-    variant: LineupVariant.MAIN,
-    scrollParent: scrollParent ?? undefined,
-    isTrending: true,
-    isOrdered: true
-  })
-}
-
 export type WinnersViewProps = {
   week: string | null
   subFilter: WinnersSubFilter
@@ -87,7 +71,6 @@ export const WinnersView = ({
   onSubFilterChange,
   containerRef
 }: WinnersViewProps) => {
-  const dispatch = useDispatch()
   const { data: tracks, isPending } = useTrendingWinners(
     {
       week,
@@ -95,28 +78,20 @@ export const WinnersView = ({
     },
     { enabled: true }
   )
-
-  const lineupProps = useTrendingWinnersLineup(
-    containerRef?.current ?? undefined
+  const trackIds = useMemo(
+    () => (tracks ?? []).map((t) => t.track_id),
+    [tracks]
+  )
+  const querySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingWinnersQueryKey({ week, type: subFilter })
+      ] as unknown[]
+    }),
+    [week, subFilter]
   )
   const isMobile = useIsMobile()
   const TrackTileComponent = isMobile ? MobileTrackTile : DesktopTrackTile
-
-  useEffect(() => {
-    if (tracks && tracks.length > 0) {
-      dispatch(
-        trendingWinnersPageLineupActions.fetchLineupMetadatas(
-          0,
-          tracks.length,
-          true,
-          { tracks }
-        )
-      )
-    }
-    return () => {
-      dispatch(trendingWinnersPageLineupActions.reset())
-    }
-  }, [dispatch, tracks, subFilter])
 
   const handlePrevWeek = useCallback(() => {
     const base = week ? dayjs(week + 'T12:00:00Z') : getLastCompletedFriday()
@@ -232,11 +207,21 @@ export const WinnersView = ({
         </Flex>
       ) : (
         <div>
-          <Lineup
+          <TrackLineup
             aria-label='trending winners tracks'
-            {...lineupProps}
-            endOfLineup={<EndOfLineup description={messages.endOfLineup} />}
+            trackIds={trackIds}
+            source={`DISCOVER_TRENDING_WINNERS_${subFilter}`}
+            querySource={querySource}
+            isPending={isPending}
+            isFetching={false}
+            hasNextPage={false}
+            ordered
+            isTrending
             variant={LineupVariant.MAIN}
+            scrollParent={containerRef?.current ?? null}
+            endOfLineupElement={
+              <EndOfLineup description={messages.endOfLineup} />
+            }
           />
         </div>
       )}

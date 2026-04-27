@@ -1,4 +1,4 @@
-import { useEffect, useContext, useCallback } from 'react'
+import { useEffect, useContext, useCallback, useMemo } from 'react'
 
 import {
   useUser,
@@ -6,14 +6,11 @@ import {
   useTrackByPermalink,
   useRemixContest,
   useRemixersCount,
-  useRemixesLineup
+  useRemixesLineup,
+  getRemixesQueryKey
 } from '@audius/common/api'
 import { remixMessages as messages } from '@audius/common/messages'
-import {
-  remixesPageActions,
-  remixesPageLineupActions,
-  remixesPageSelectors
-} from '@audius/common/store'
+import { remixesPageActions, remixesPageSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Flex,
@@ -27,7 +24,8 @@ import { useParams } from 'react-router'
 
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
+import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useSubPageHeader } from 'components/nav/mobile/NavContext'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
@@ -41,11 +39,13 @@ const { profilePage } = route
 const { getTrackId } = remixesPageSelectors
 const { fetchTrackSucceeded, reset } = remixesPageActions
 
+const REMIXES_PAGE_SIZE = 10
+
 type RemixesPageProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-const RemixesPage = ({ containerRef }: RemixesPageProps) => {
+const RemixesPage = (_props: RemixesPageProps) => {
   const dispatch = useDispatch()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
   const originalTrackId = useSelector(getTrackId)
@@ -69,7 +69,6 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   useEffect(() => {
     return function cleanup() {
       dispatch(reset())
-      dispatch(remixesPageLineupActions.reset())
     }
   }, [dispatch])
 
@@ -93,17 +92,13 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
   const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
 
   const {
-    data,
+    trackIds,
     count: lineupCount,
     isFetching,
     isPending,
     isError,
     hasNextPage,
-    play,
-    pause,
     loadNextPage,
-    isPlaying,
-    lineup,
     pageSize
   } = useRemixesLineup({
     trackId: track?.track_id,
@@ -113,6 +108,23 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     isCosign,
     isContestEntry
   })
+
+  const querySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getRemixesQueryKey({
+          trackId: track?.track_id,
+          includeOriginal: true,
+          includeWinners: true,
+          pageSize: REMIXES_PAGE_SIZE,
+          sortMethod,
+          isCosign,
+          isContestEntry
+        })
+      ] as unknown[]
+    }),
+    [track?.track_id, sortMethod, isCosign, isContestEntry]
+  )
 
   const { data: contest } = useRemixContest(track?.track_id)
   const { setHeader } = useContext(HeaderContext)
@@ -221,19 +233,17 @@ const RemixesPage = ({ containerRef }: RemixesPageProps) => {
     >
       <Flex direction='column' mt='3xl' gap='l' w='100%'>
         <Text variant='title'>{messages.originalTrack}</Text>
-        <TanQueryLineup
-          data={data}
+        <TrackLineup
+          trackIds={trackIds}
+          source='REMIXES_PAGE_TRACKS'
+          querySource={querySource}
           isFetching={isFetching}
           isPending={isPending}
           isError={isError}
           hasNextPage={hasNextPage}
-          play={play}
-          pause={pause}
           loadNextPage={loadNextPage}
-          isPlaying={isPlaying}
-          lineup={lineup}
-          actions={remixesPageLineupActions}
           pageSize={pageSize}
+          variant={LineupVariant.MAIN}
           delineatorMap={delineatorMap}
           maxEntries={maxEntries}
         />

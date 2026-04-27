@@ -5,7 +5,6 @@ import {
 import { primeTrackDataSaga, queryCurrentAccount } from '@audius/common/api'
 import { FavoriteType, Favorite } from '@audius/common/models'
 import {
-  libraryPageTracksLineupActions as tracksActions,
   libraryPageActions as actions,
   libraryPageSelectors,
   getContext,
@@ -19,25 +18,11 @@ import {
   GetUserLibraryTracksSortMethodEnum,
   GetUserLibraryTracksSortDirectionEnum
 } from '@audius/sdk'
-import { call, fork, put, select, takeLatest } from 'typed-redux-saga'
+import { call, put, select, takeLatest } from 'typed-redux-saga'
 
 import { waitForRead } from 'utils/sagaHelpers'
 
-import tracksSagas from './lineups/sagas'
-
 const { getTrackSaves } = libraryPageSelectors
-
-function* fetchLineupMetadatas(offset: number, limit: number) {
-  const isNativeMobile = yield* getContext('isNativeMobile')
-
-  // Mobile currently uses infinite scroll instead of a virtualized list
-  // so we need to apply the offset & limit
-  if (isNativeMobile) {
-    yield* put(tracksActions.fetchLineupMetadatas(offset, limit))
-  } else {
-    yield* put(tracksActions.fetchLineupMetadatas())
-  }
-}
 
 type LibraryParams = {
   userId: number
@@ -146,31 +131,33 @@ function* watchFetchSaves() {
 
       // Don't refetch saves in the same session
       if (saves && saves.length && isSameParams) {
-        yield* fork(fetchLineupMetadatas, offset, limit)
-      } else {
-        try {
-          currentQuery = query
-          currentSortDirection = sortDirection
-          currentSortMethod = sortMethod
-          currentCategory = category
-          yield* put(actions.fetchSavesRequested())
-          const { saves, tracks } = yield* call(sendLibraryRequest, params)
+        return
+      }
 
-          yield* call(primeTrackDataSaga, tracks)
+      try {
+        currentQuery = query
+        currentSortDirection = sortDirection
+        currentSortMethod = sortMethod
+        currentCategory = category
+        yield* put(actions.fetchSavesRequested())
+        const { saves: newSaves, tracks } = yield* call(
+          sendLibraryRequest,
+          params
+        )
 
-          const fullSaves = Array(trackSaveCount)
-            .fill(0)
-            .map((_) => ({})) as Favorite[]
+        yield* call(primeTrackDataSaga, tracks)
 
-          fullSaves.splice(offset, saves.length, ...saves)
-          yield* put(actions.fetchSavesSucceeded(fullSaves))
-          if (limit > 0 && saves.length < limit) {
-            yield* put(actions.endFetching(offset + saves.length))
-          }
-          yield* fork(fetchLineupMetadatas, offset, limit)
-        } catch (e) {
-          yield* put(actions.fetchSavesFailed())
+        const fullSaves = Array(trackSaveCount)
+          .fill(0)
+          .map((_) => ({})) as Favorite[]
+
+        fullSaves.splice(offset, newSaves.length, ...newSaves)
+        yield* put(actions.fetchSavesSucceeded(fullSaves))
+        if (limit > 0 && newSaves.length < limit) {
+          yield* put(actions.endFetching(offset + newSaves.length))
         }
+      } catch (e) {
+        yield* put(actions.fetchSavesFailed())
       }
     }
   )
@@ -201,7 +188,6 @@ function* watchFetchMoreSaves() {
         if (limit > 0 && saves.length < limit) {
           yield* put(actions.endFetching(offset + saves.length))
         }
-        yield* fork(fetchLineupMetadatas, offset, limit)
       } catch (e) {
         yield* put(actions.fetchMoreSavesFailed())
       }
@@ -210,5 +196,5 @@ function* watchFetchMoreSaves() {
 }
 
 export default function sagas() {
-  return [...tracksSagas(), watchFetchSaves, watchFetchMoreSaves]
+  return [watchFetchSaves, watchFetchMoreSaves]
 }

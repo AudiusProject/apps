@@ -11,10 +11,10 @@ import {
 import { useTheme } from '@emotion/react'
 import cn from 'classnames'
 
+import { isKeyboardActivationKey } from '../../utils/keyboard'
 import { Box } from '../layout/Box'
 import { Flex } from '../layout/Flex'
 import { Popup } from '../popup'
-import { isKeyboardActivationKey } from '../../utils/keyboard'
 
 import { PopupMenuItem, PopupMenuProps } from './types'
 

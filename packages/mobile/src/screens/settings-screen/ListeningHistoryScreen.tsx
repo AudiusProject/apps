@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import { useTrackHistory } from '@audius/common/api'
+import {
+  getTrackHistoryQueryKey,
+  useCurrentUserId,
+  useTrackHistory
+} from '@audius/common/api'
 import { useDebouncedCallback } from '@audius/common/hooks'
 
 import { IconListeningHistory, Paper } from '@audius/harmony-native'
 import { EmptyTile, Screen, ScreenContent } from 'app/components/core'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
-import { TrackList } from 'app/components/track-list'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 const messages = {
   title: 'Listening History',
@@ -18,17 +22,32 @@ const messages = {
 
 export const ListeningHistoryScreen = () => {
   const [filterValue, setFilterValue] = useState('')
+  const { data: currentUserId } = useCurrentUserId()
+
+  const queryArgs = useMemo(
+    () => ({
+      query: filterValue
+    }),
+    [filterValue]
+  )
 
   const {
+    trackIds,
     loadNextPage,
-    togglePlay,
     isPending,
+    isFetching,
     hasNextPage,
-    pageSize,
-    lineup: { entries }
-  } = useTrackHistory({
-    query: filterValue
-  })
+    pageSize
+  } = useTrackHistory(queryArgs)
+
+  const querySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrackHistoryQueryKey(currentUserId, queryArgs)
+      ] as unknown[]
+    }),
+    [currentUserId, queryArgs]
+  )
 
   const handleChangeFilterValue = useDebouncedCallback(
     (value: string) => {
@@ -38,7 +57,7 @@ export const ListeningHistoryScreen = () => {
     100
   )
 
-  const showEmptyMessage = !isPending && entries.length === 0
+  const showEmptyMessage = !isPending && !isFetching && trackIds.length === 0
   const showNoResults = showEmptyMessage && filterValue.length > 0
   const showNoHistory = showEmptyMessage && !filterValue
 
@@ -61,14 +80,14 @@ export const ListeningHistoryScreen = () => {
               mb={0}
               mh='s'
             />
-            <TrackList
-              uids={entries.map(({ uid }) => uid)}
-              togglePlay={togglePlay}
-              trackItemAction='overflow'
-              onEndReached={loadNextPage}
-              onEndReachedThreshold={0.5}
-              showSkeleton={isPending}
+            <TrackLineup
+              trackIds={trackIds}
+              source='HISTORY_TRACKS'
+              querySource={querySource}
+              isPending={isPending}
+              isFetching={isFetching}
               hasNextPage={hasNextPage}
+              loadNextPage={loadNextPage}
               pageSize={pageSize}
             />
           </Paper>

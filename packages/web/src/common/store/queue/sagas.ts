@@ -18,7 +18,6 @@ import {
 } from '@audius/common/models'
 import {
   cacheActions,
-  lineupRegistry,
   queueActions,
   queueSelectors,
   reachabilitySelectors,
@@ -28,14 +27,10 @@ import {
   playerActions,
   playerSelectors,
   PlayerBehavior,
-  profilePageSelectors,
   trackPageSelectors
 } from '@audius/common/store'
 import { Uid, makeUid, waitForAccount, Nullable } from '@audius/common/utils'
 import { all, call, put, select, takeEvery, takeLatest } from 'typed-redux-saga'
-import { PREFIX as REMIXES_PREFIX } from '~/store/pages/remixes/lineup/actions'
-import { PREFIX as SEARCH_PREFIX } from '~/store/pages/search-results/lineup/tracks/actions'
-import { PREFIX as TRACK_PAGE_LINEUP_PREFIX } from '~/store/pages/track/lineup/actions'
 
 import { make } from 'common/store/analytics/actions'
 import { getRecommendedTracks } from 'common/store/recommendation/sagas'
@@ -55,7 +50,6 @@ const {
   getCollectionId
 } = queueSelectors
 
-const { getProfileUserHandle } = profilePageSelectors
 const { getTrackId: getTrackPageTrackId } = trackPageSelectors
 
 const {
@@ -69,11 +63,6 @@ const { getIsReachable } = reachabilitySelectors
 
 const QUEUE_SUBSCRIBER_NAME = 'QUEUE'
 
-const TAN_QUERY_LINEUP_PREFIXES = [
-  SEARCH_PREFIX,
-  REMIXES_PREFIX,
-  TRACK_PAGE_LINEUP_PREFIX
-]
 export function* getToQueue(
   prefix: string,
   entry: LineupEntry<Track | Collection>
@@ -206,14 +195,6 @@ function* watchPlay() {
       const isNearEndOfQueue = index + 3 >= length
 
       if (isNearEndOfQueue) {
-        /* Fetch more lineup tracks if available. Ideally, this would run async after we've started
-        playing the next track. But since we may skip the next track, we need the lineup and/or autoplay
-        logic to be run ahead of time.
-        Important note: Using the track we're being asked to play, as the lineup
-        source may be changing with that track, and we don't want to look up a lineup
-        using the "currentTrack" in the player.
-        */
-        yield* call(fetchLineupTracks, playActionTrack)
       }
 
       yield* call(handleQueueAutoplay, {
@@ -311,45 +292,6 @@ function* watchPlay() {
       }
     }
   })
-}
-
-// Fetches more lineup tracks if available. This is needed for cases
-// where the user hasn't scrolled through the lineup.
-function* fetchLineupTracks(currentTrack: Track) {
-  const source = yield* select(getSource)
-  if (!source) return
-
-  const lineupEntry = lineupRegistry[source]
-  if (!lineupEntry) return
-
-  // NOTE: For tan-query lineups we want to avoid this behavior
-  if (TAN_QUERY_LINEUP_PREFIXES.includes(lineupEntry.actions.prefix)) return
-
-  const currentProfileUserHandle = yield* select(getProfileUserHandle)
-
-  const currentTrackOwner = yield* queryUser(currentTrack.owner_id)
-
-  // NOTE: This is a bandaid fix. On the profile page when on the reposts lineup,
-  // we need to select the lineup using the handle of the profile page user, not the handle of the track owner
-  const handleToUse =
-    source === QueueSource.PROFILE_FEED
-      ? (currentProfileUserHandle ?? undefined)
-      : currentTrackOwner?.handle
-
-  const lineup = yield* select(lineupEntry.selector, handleToUse)
-
-  if (lineup.hasMore) {
-    const offset = lineup.entries.length + lineup.deleted + lineup.nullCount
-    yield* put(
-      lineupEntry.actions.fetchLineupMetadatas(
-        offset,
-        5,
-        false,
-        lineup.payload,
-        { handle: lineup.handle }
-      )
-    )
-  }
 }
 
 function* watchPause() {

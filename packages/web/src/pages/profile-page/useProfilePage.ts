@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, RefObject } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -6,24 +6,20 @@ import {
   useQueryContext,
   QUERY_KEYS
 } from '@audius/common/api'
-import { useCurrentTrack, useIsArtist } from '@audius/common/hooks'
+import { useIsArtist } from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
   FollowSource,
   CreatePlaylistSource,
   Status,
-  ID,
-  UID
+  ID
 } from '@audius/common/models'
 import { newUserMetadata } from '@audius/common/schemas'
 import {
   accountActions,
   cacheCollectionsActions,
-  profilePageFeedLineupActions as feedActions,
-  profilePageTracksLineupActions as tracksActions,
   profilePageActions as profileActions,
-  profilePageSelectors,
   CollectionSortMode,
   TracksSortMode,
   ProfilePageTabs,
@@ -31,7 +27,6 @@ import {
   chatActions,
   chatSelectors,
   ChatPermissionAction,
-  queueSelectors,
   usersSocialActions as socialActions,
   mobileOverflowMenuUIActions,
   shareModalUIActions,
@@ -39,8 +34,7 @@ import {
   OverflowSource,
   inboxUnavailableModalActions,
   followingUserListActions,
-  followersUserListActions,
-  playerSelectors
+  followersUserListActions
 } from '@audius/common/store'
 import { dayjs, getErrorMessage, Nullable, route } from '@audius/common/utils'
 import { useQueryClient } from '@tanstack/react-query'
@@ -52,7 +46,6 @@ import {
   openSignOn,
   showRequiresAccountToast
 } from 'common/store/pages/signon/actions'
-import { LineupVariant } from 'components/lineup/types'
 import { ProfileMode } from 'components/stat-banner/StatBanner'
 import { StatProps } from 'components/stats/Stats'
 import * as unfollowConfirmationActions from 'components/unfollow-confirmation-modal/store/actions'
@@ -63,8 +56,6 @@ import { getPathname } from 'utils/route'
 import { parseUserRoute } from 'utils/route/userRouteParser'
 
 const { NOT_FOUND_PAGE, profilePage: profilePageRoute } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
 const { setFollowers } = followersUserListActions
 const { setFollowing } = followingUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -72,14 +63,11 @@ const { open } = mobileOverflowMenuUIActions
 const { fetchHasTracks } = accountActions
 const { createPlaylist } = cacheCollectionsActions
 
-const { getProfileFeedLineup, getProfileTracksLineup } = profilePageSelectors
 const { createChat } = chatActions
 const { getBlockees, useCanCreateChat } = chatSelectors
 const { setCurrentUser } = profileActions
 
-export const useProfilePage = (
-  containerRef?: RefObject<HTMLDivElement> | null
-) => {
+export const useProfilePage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -105,19 +93,7 @@ export const useProfilePage = (
   const isArtist = useIsArtist({ id: profile?.user_id })
   const chatPermissions = useCanCreateChat(profile?.user_id)
 
-  // Redux selectors
-  const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
-  const currentQueueItem = useSelector(getCurrentQueueItem)
-  const playing = useSelector(getPlaying)
-  const buffering = useSelector(getBuffering)
-  const artistTracks = useSelector((state: any) =>
-    getProfileTracksLineup(state, handleLower)
-  )
-  const userFeed = useSelector((state: any) =>
-    getProfileFeedLineup(state, handleLower)
-  )
   const blockeeList = useSelector(getBlockees)
-  const currentTrack = useCurrentTrack()
 
   // Local state
   const [activeTab, setActiveTab] = useState<ProfilePageTabs | null>(() => {
@@ -203,26 +179,10 @@ export const useProfilePage = (
 
   // Set default tab
   useEffect(() => {
-    if (
-      !activeTab &&
-      profile &&
-      artistTracks?.status === Status.SUCCESS &&
-      accountUserId !== profile.user_id
-    ) {
-      if (isArtist) {
-        setActiveTab(ProfilePageTabs.TRACKS)
-      } else {
-        setActiveTab(ProfilePageTabs.REPOSTS)
-      }
-    } else if (
-      !activeTab &&
-      profile &&
-      !isArtist &&
-      accountUserId !== profile.user_id
-    ) {
-      setActiveTab(ProfilePageTabs.REPOSTS)
+    if (!activeTab && profile && accountUserId !== profile.user_id) {
+      setActiveTab(isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS)
     }
-  }, [activeTab, profile, artistTracks?.status, isArtist, accountUserId])
+  }, [activeTab, profile, isArtist, accountUserId])
 
   // Set current user in Redux state for profile selectors
   useEffect(() => {
@@ -438,78 +398,6 @@ export const useProfilePage = (
     [isArtist]
   )
 
-  const getLineupProps = useCallback(
-    (lineup: any) => {
-      const { uid: playingUid, source } = currentQueueItem
-      return {
-        lineup,
-        variant: LineupVariant.CONDENSED,
-        playingSource: source,
-        playingTrackId: currentTrack?.track_id ?? null,
-        playingUid,
-        playing,
-        buffering,
-        scrollParent: containerRef?.current || null
-      }
-    },
-    [currentQueueItem, currentTrack, playing, buffering, containerRef]
-  )
-
-  const loadMoreArtistTracks = useCallback(
-    (offset: number, limit: number) => {
-      if (!profile) return
-      dispatch(
-        tracksActions.fetchLineupMetadatas(
-          offset,
-          limit,
-          false,
-          {
-            userId: profile.user_id,
-            sort: tracksLineupOrder
-          },
-          { handle: handleLower }
-        )
-      )
-    },
-    [profile, tracksLineupOrder, handleLower, dispatch]
-  )
-
-  const playArtistTrack = useCallback(
-    (uid: string) => dispatch(tracksActions.play(uid)),
-    [dispatch]
-  )
-
-  const pauseArtistTrack = useCallback(
-    () => dispatch(tracksActions.pause()),
-    [dispatch]
-  )
-
-  const loadMoreUserFeed = useCallback(
-    (offset: number, limit: number) => {
-      if (!profile) return
-      dispatch(
-        feedActions.fetchLineupMetadatas(
-          offset,
-          limit,
-          false,
-          { userId: profile.user_id },
-          { handle: handleLower }
-        )
-      )
-    },
-    [profile, handleLower, dispatch]
-  )
-
-  const playUserFeedTrack = useCallback(
-    (uid: UID) => dispatch(feedActions.play(uid)),
-    [dispatch]
-  )
-
-  const pauseUserFeedTrack = useCallback(
-    () => dispatch(feedActions.pause()),
-    [dispatch]
-  )
-
   const onSortByRecent = useCallback(() => {
     if (!profile) return
     setTracksLineupOrder(TracksSortMode.RECENT)
@@ -523,14 +411,7 @@ export const useProfilePage = (
       sort: 'recent'
     })
     dispatch(trackEvent)
-    loadMoreArtistTracks(0, artistTracks?.entries.length ?? 0)
-  }, [
-    profile,
-    handleLower,
-    dispatch,
-    loadMoreArtistTracks,
-    artistTracks?.entries.length
-  ])
+  }, [profile, handleLower, dispatch])
 
   const onSortByPopular = useCallback(() => {
     if (!profile) return
@@ -545,14 +426,7 @@ export const useProfilePage = (
       sort: 'popular'
     })
     dispatch(trackEvent)
-    loadMoreArtistTracks(0, artistTracks?.entries.length ?? 0)
-  }, [
-    profile,
-    handleLower,
-    dispatch,
-    loadMoreArtistTracks,
-    artistTracks?.entries.length
-  ])
+  }, [profile, handleLower, dispatch])
 
   const didChangeTabsFrom = useCallback(
     (prevLabel: string, currLabel: string) => {
@@ -1002,17 +876,8 @@ export const useProfilePage = (
         }
       : { error: false, url: '' },
 
-    // Lineups
-    artistTracks: artistTracks ?? {
-      entries: [],
-      status: Status.LOADING,
-      hasMore: false
-    },
-    userFeed: userFeed ?? {
-      entries: [],
-      status: Status.LOADING,
-      hasMore: false
-    },
+    tracksLineupOrder,
+    handleLower,
 
     // State
     editMode,
@@ -1029,15 +894,8 @@ export const useProfilePage = (
     // Handlers
     goToRoute,
     changeTab,
-    getLineupProps,
     onSortByRecent,
     onSortByPopular,
-    loadMoreArtistTracks,
-    loadMoreUserFeed,
-    playArtistTrack,
-    pauseArtistTrack,
-    playUserFeedTrack,
-    pauseUserFeedTrack,
     refreshProfile,
     setFollowingUserId,
     setFollowersUserId,
@@ -1070,8 +928,6 @@ export const useProfilePage = (
     onCloseMuteUserConfirmationModal,
     onCloseUnmuteUserConfirmationModal,
     clickOverflow,
-    createPlaylist: createPlaylistCallback,
-    currentQueueItem,
-    trackIsActive: !!currentQueueItem
+    createPlaylist: createPlaylistCallback
   }
 }

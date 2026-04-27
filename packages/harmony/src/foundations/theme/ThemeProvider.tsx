@@ -50,6 +50,10 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
       )
       syncDocumentTheme()
     }
+    // `theme` is intentionally excluded — the effect below handles theme
+    // updates for an existing provider. Re-running this effect on theme
+    // change would unmount/remount the provider's stack entry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId])
 
   useEffect(() => {

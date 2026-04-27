@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
-  trendingPageLineupActions,
   trendingPageSelectors
 } from '@audius/common/store'
 import { ALL_GENRES } from '@audius/common/utils'
@@ -16,8 +15,6 @@ import { makeStyles } from 'app/styles'
 const { getTrendingTimeRange, getTrendingGenre, getTrendingCategory } =
   trendingPageSelectors
 const { setTrendingTimeRange, setTrendingGenre } = trendingPageActions
-const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
-  trendingPageLineupActions
 
 const timeRangeLabels: Record<TimeRange, string> = {
   [TimeRange.WEEK]: 'This Week',
@@ -41,30 +38,25 @@ export const TrendingFilterChips = () => {
   const timeRange = useSelector(getTrendingTimeRange) ?? TimeRange.WEEK
   const genre = useSelector(getTrendingGenre) ?? ALL_GENRES
 
-  const resetLineups = useCallback(() => {
-    dispatch(trendingWeekActions.reset())
-    dispatch(trendingMonthActions.reset())
-    dispatch(trendingAllTimeActions.reset())
-  }, [dispatch])
-
+  // Clearing filters naturally changes the tanquery key (which includes
+  // timeRange + genre), so a new query fires automatically — no manual
+  // lineup reset needed.
   const handleClearTimeRange = useCallback(
     (_value: string, isSelected: boolean) => {
       if (!isSelected) {
         dispatch(setTrendingTimeRange(TimeRange.WEEK))
-        resetLineups()
       }
     },
-    [dispatch, resetLineups]
+    [dispatch]
   )
 
   const handleClearGenre = useCallback(
     (_value: string, isSelected: boolean) => {
       if (!isSelected) {
         dispatch(setTrendingGenre(null))
-        resetLineups()
       }
     },
-    [dispatch, resetLineups]
+    [dispatch]
   )
 
   const showTimeRangeChip = timeRange !== TimeRange.WEEK
