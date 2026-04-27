@@ -21,7 +21,9 @@ export const initialState: PlaybackState = {
   shuffleOrder: [],
   shuffleIndex: -1,
   querySource: null,
-  retries: 0
+  retries: 0,
+  overshot: false,
+  undershot: false
 }
 
 const generateShuffleOrder = (queueLength: number, currentIndex: number) => {
@@ -87,6 +89,8 @@ const slice = createSlice({
       state.counter += 1
       state.retries = 0
       state.seek = null
+      state.overshot = false
+      state.undershot = false
       if (state.shuffle) {
         state.shuffleOrder = generateShuffleOrder(
           state.queue.length,
@@ -103,6 +107,8 @@ const slice = createSlice({
       state.counter += 1
       state.retries = 0
       state.seek = null
+      state.overshot = false
+      state.undershot = false
       if (state.shuffle) {
         state.shuffleOrder = generateShuffleOrder(state.queue.length, index)
         state.shuffleIndex = 0
@@ -126,14 +132,28 @@ const slice = createSlice({
       state.playing = !state.playing
     },
 
-    next: (state, _action: PayloadAction<NextPayload>) => {
+    next: (state, action: PayloadAction<NextPayload>) => {
+      const skip = action.payload?.skip
       if (state.queue.length === 0) return
+      // Repeat-single on a natural track end (skip falsy): keep the same
+      // index, and let the saga re-issue playerActions.play to restart the
+      // current track. The next button passes skip=true, which bypasses
+      // this and advances normally — matches the legacy queue behavior.
+      if (state.repeat === RepeatMode.SINGLE && !skip) {
+        state.counter += 1
+        state.retries = 0
+        state.seek = null
+        state.overshot = false
+        state.undershot = false
+        return
+      }
       if (state.shuffle) {
         const nextShuffle = state.shuffleIndex + 1
         if (nextShuffle >= state.shuffleOrder.length) {
           if (state.repeat === RepeatMode.ALL) {
             state.shuffleIndex = 0
           } else {
+            state.overshot = true
             return
           }
         } else {
@@ -145,6 +165,7 @@ const slice = createSlice({
           if (state.repeat === RepeatMode.ALL) {
             state.index = 0
           } else {
+            state.overshot = true
             return
           }
         } else {
@@ -154,6 +175,8 @@ const slice = createSlice({
       state.counter += 1
       state.retries = 0
       state.seek = null
+      state.overshot = false
+      state.undershot = false
     },
 
     previous: (state) => {
@@ -164,6 +187,7 @@ const slice = createSlice({
           if (state.repeat === RepeatMode.ALL) {
             state.shuffleIndex = state.shuffleOrder.length - 1
           } else {
+            state.undershot = true
             return
           }
         } else {
@@ -171,12 +195,17 @@ const slice = createSlice({
         }
         state.index = state.shuffleOrder[state.shuffleIndex]
       } else {
-        if (state.index - 1 < 0) return
+        if (state.index - 1 < 0) {
+          state.undershot = true
+          return
+        }
         state.index = state.index - 1
       }
       state.counter += 1
       state.retries = 0
       state.seek = null
+      state.overshot = false
+      state.undershot = false
     },
 
     addToQueue: (state, action: PayloadAction<AddToQueuePayload>) => {

@@ -53,4 +53,12 @@ export type PlaybackState = {
   querySource: PlaybackQuerySource | null
 
   retries: number
+
+  // True when next() was a no-op because we're at end of queue with
+  // repeat=OFF. Saga reads this to reset the player instead of looping
+  // back to the same track. Cleared on play/playFrom/playTrackAt and on
+  // any successful advance.
+  overshot: boolean
+  // Same idea for previous() at start of queue.
+  undershot: boolean
 }

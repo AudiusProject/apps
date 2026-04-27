@@ -18,7 +18,9 @@ const {
   getPlaybackIndex,
   getCurrentPlaybackTrack,
   getQuerySource,
-  getIsPlaying: getPlaybackIsPlaying
+  getIsPlaying: getPlaybackIsPlaying,
+  getOvershot,
+  getUndershot
 } = playbackSelectors
 
 // Map PlaybackTrack[] -> shadow queue entries for the legacy queue slice so
@@ -100,6 +102,13 @@ function* watchPlayTrackAt() {
 
 function* watchNext() {
   yield* takeEvery(playbackActions.next.type, function* () {
+    const overshot = yield* select(getOvershot)
+    if (overshot) {
+      // End of queue, no repeat — stop playback rather than re-load
+      // the same last track.
+      yield* put(playerActions.reset({ shouldAutoplay: false }))
+      return
+    }
     const index = yield* select(getPlaybackIndex)
     if (index < 0) return
     yield* call(playCurrent)
@@ -108,6 +117,11 @@ function* watchNext() {
 
 function* watchPrevious() {
   yield* takeEvery(playbackActions.previous.type, function* () {
+    const undershot = yield* select(getUndershot)
+    if (undershot) {
+      yield* put(playerActions.reset({ shouldAutoplay: false }))
+      return
+    }
     const index = yield* select(getPlaybackIndex)
     if (index < 0) return
     yield* call(playCurrent)

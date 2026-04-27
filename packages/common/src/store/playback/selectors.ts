@@ -28,3 +28,5 @@ export const getRepeat = (state: CommonState) => state.playback.repeat
 export const getShuffle = (state: CommonState) => state.playback.shuffle
 export const getQuerySource = (state: CommonState) => state.playback.querySource
 export const getRetries = (state: CommonState) => state.playback.retries
+export const getOvershot = (state: CommonState) => state.playback.overshot
+export const getUndershot = (state: CommonState) => state.playback.undershot
