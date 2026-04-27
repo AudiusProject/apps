@@ -173,6 +173,31 @@ function* watchPlayerPause() {
   })
 }
 
+// Mirror legacy queue shuffle/repeat into the playback slice so that natural
+// track-end (which fires playbackActions.next as the audio element's onEnd
+// from the initial playFrom) honors the user's shuffle/repeat selection.
+// Without this, only the next/previous buttons (which dispatch queueActions
+// and go through the legacy queue saga) honor shuffle — natural track-end
+// silently advances linearly. The PlayBar UI dispatches queueActions.shuffle
+// / queueActions.repeat, so this mirror keeps the playback slice in sync.
+function* watchQueueShuffle() {
+  yield* takeEvery(
+    queueActions.shuffle.type,
+    function* (action: ReturnType<typeof queueActions.shuffle>) {
+      yield* put(playbackActions.setShuffle({ enable: action.payload.enable }))
+    }
+  )
+}
+
+function* watchQueueRepeat() {
+  yield* takeEvery(
+    queueActions.repeat.type,
+    function* (action: ReturnType<typeof queueActions.repeat>) {
+      yield* put(playbackActions.setRepeat({ mode: action.payload.mode }))
+    }
+  )
+}
+
 const PAGINATE_THRESHOLD = 3
 
 function* maybePaginate(queueLen: number, index: number) {
@@ -201,5 +226,7 @@ export const sagas = () => [
   watchSeekTo,
   watchSetPlaybackRate,
   watchPlayerPlaySucceeded,
-  watchPlayerPause
+  watchPlayerPause,
+  watchQueueShuffle,
+  watchQueueRepeat
 ]
