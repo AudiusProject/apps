@@ -4,7 +4,7 @@ import { Kind } from '~/models'
 import { cacheActions } from '~/store/cache'
 import { getContext } from '~/store/effects'
 import { playerActions } from '~/store/player'
-import { queueActions, QueueSource } from '~/store/queue'
+import { queueActions, queueSelectors, QueueSource } from '~/store/queue'
 import { makeUid } from '~/utils/uid'
 
 import * as playbackSelectors from './selectors'
@@ -42,6 +42,17 @@ function* shadowToLegacyQueue(tracks: PlaybackTrack[], index: number) {
   yield* put(queueActions.clear({}))
   yield* put(queueActions.add({ entries, index: 0 }))
   yield* put(queueActions.updateIndex({ index }))
+  // If shuffle was enabled before any tracks were loaded (e.g. the
+  // ShuffleButton restored shuffleState=ON from localStorage on mount,
+  // dispatching queue/shuffle against an empty queue), the legacy queue's
+  // shuffleOrder is empty. queue.add does not regenerate shuffleOrder by
+  // design, so re-toggle shuffle here against the now-populated queue so
+  // the legacy queue's shuffleIndex/shuffleOrder are valid. Without this
+  // the next button overshoots immediately and the player resets+pauses.
+  const queueShuffle = yield* select(queueSelectors.getShuffle)
+  if (queueShuffle) {
+    yield* put(queueActions.shuffle({ enable: true }))
+  }
   yield* put(
     cacheActions.subscribe(
       Kind.TRACKS,
