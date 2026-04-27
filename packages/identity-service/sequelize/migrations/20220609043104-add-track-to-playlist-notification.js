@@ -4,12 +4,18 @@ const models = require('../../src/models')
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
-      await queryInterface.sequelize.query(`ALTER TYPE "enum_Notifications_type" ADD VALUE 'AddTrackToPlaylist'`)
-      await queryInterface.addColumn('Notifications', 'metadata', {
-        type: Sequelize.JSONB,
-        allowNull: true
-      },
-      { transaction })
+      await queryInterface.sequelize.query(
+        `ALTER TYPE "enum_Notifications_type" ADD VALUE 'AddTrackToPlaylist'`
+      )
+      await queryInterface.addColumn(
+        'Notifications',
+        'metadata',
+        {
+          type: Sequelize.JSONB,
+          allowNull: true
+        },
+        { transaction }
+      )
     })
   },
 
@@ -18,9 +24,26 @@ module.exports = {
     const columnName = 'type'
     const enumName = 'enum_Notifications_type'
     const newEnumName = `enum_Notifications_type_new`
-    const prevValues = ['Follow', 'RepostTrack', 'RepostPlaylist', 'RepostAlbum', 'FavoriteTrack',
-      'FavoritePlaylist', 'FavoriteAlbum', 'CreateTrack', 'CreatePlaylist', 'CreateAlbum',
-      'Announcement', 'MilestoneListen', 'MilestoneRepost', 'MilestoneFavorite', 'MilestoneFollow', 'RemixCreate', 'RemixCosign', 'TrendingTrack']
+    const prevValues = [
+      'Follow',
+      'RepostTrack',
+      'RepostPlaylist',
+      'RepostAlbum',
+      'FavoriteTrack',
+      'FavoritePlaylist',
+      'FavoriteAlbum',
+      'CreateTrack',
+      'CreatePlaylist',
+      'CreateAlbum',
+      'Announcement',
+      'MilestoneListen',
+      'MilestoneRepost',
+      'MilestoneFavorite',
+      'MilestoneFollow',
+      'RemixCreate',
+      'RemixCosign',
+      'TrendingTrack'
+    ]
 
     return queryInterface.sequelize.transaction(async (transaction) => {
       // Delete notifs with this type
@@ -31,26 +54,38 @@ module.exports = {
       await queryInterface.removeColumn('Notifications', 'metadata')
 
       // Revert enum change
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
       CREATE TYPE "${newEnumName}"
-        AS ENUM ('${prevValues.join('\', \'')}')
-    `, { transaction })
+        AS ENUM ('${prevValues.join("', '")}')
+    `,
+        { transaction }
+      )
 
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         ALTER TABLE "${tableName}"
           ALTER COLUMN ${columnName}
             TYPE "${newEnumName}"
             USING ("${columnName}"::text::"${newEnumName}")
-      `, { transaction })
+      `,
+        { transaction }
+      )
 
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         DROP TYPE "${enumName}"
-      `, { transaction })
+      `,
+        { transaction }
+      )
 
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         ALTER TYPE "${newEnumName}"
           RENAME TO "${enumName}"
-      `, { transaction })
+      `,
+        { transaction }
+      )
     })
   }
 }

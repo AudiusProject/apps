@@ -3,10 +3,15 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
-      await queryInterface.addColumn('UserEvents', 'playlistUpdates', {
-        type: Sequelize.JSONB,
-        allowNull: true
-      }, { transaction })
+      await queryInterface.addColumn(
+        'UserEvents',
+        'playlistUpdates',
+        {
+          type: Sequelize.JSONB,
+          allowNull: true
+        },
+        { transaction }
+      )
     })
   },
 

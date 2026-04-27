@@ -8,11 +8,9 @@ import { solanaRouter } from './typed-routes/solana/solanaRelay'
 // This first import is slow but makes it easier to debug timing issues since no other code will be slowed down by importing it.
 const path = require('path')
 const { libs } = require('@audius/sdk-legacy/dist/libs')
-const { loadAudiusSdk } = require(path.join(
-  __dirname,
-  '..',
-  'loadAudiusSdk.cjs'
-))
+const { loadAudiusSdk } = require(
+  path.join(__dirname, '..', 'loadAudiusSdk.cjs')
+)
 
 const { setupTracing } = require('./tracer')
 setupTracing()

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -6,11 +6,8 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'SocialHandles',
-      'pinnedTrackId', {
-        type: Sequelize.INTEGER
-      }
-    )
+    return queryInterface.addColumn('SocialHandles', 'pinnedTrackId', {
+      type: Sequelize.INTEGER
+    })
   }
-};
+}
