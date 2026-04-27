@@ -173,31 +173,36 @@ describe('TrackTile', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('plays from the artwork without stealing track tile action clicks', async () => {
+  it('plays from the tile background and artwork without stealing action clicks', async () => {
     const { togglePlay } = renderTrackTile()
 
     const playButton = await screen.findByRole('button', {
       name: 'Play Test Track'
     })
-    fireEvent.click(playButton)
+    const tileClickTarget = await screen.findByTestId('track-tile-click-target')
+
+    fireEvent.click(tileClickTarget)
     expect(togglePlay).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(playButton)
+    expect(togglePlay).toHaveBeenCalledTimes(2)
 
     const favoriteButton = await screen.findByRole('button', {
       name: /^Favorite$/i
     })
     fireEvent.click(favoriteButton)
-    expect(togglePlay).toHaveBeenCalledTimes(1)
+    expect(togglePlay).toHaveBeenCalledTimes(2)
 
     const repostButton = await screen.findByRole('button', {
       name: /^Repost$/i
     })
     fireEvent.click(repostButton)
-    expect(togglePlay).toHaveBeenCalledTimes(1)
+    expect(togglePlay).toHaveBeenCalledTimes(2)
 
     const shareButton = await screen.findByRole('button', {
       name: /^Share$/i
     })
     fireEvent.click(shareButton)
-    expect(togglePlay).toHaveBeenCalledTimes(1)
+    expect(togglePlay).toHaveBeenCalledTimes(2)
   })
 })

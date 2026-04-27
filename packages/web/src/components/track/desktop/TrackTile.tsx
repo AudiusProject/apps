@@ -242,6 +242,14 @@ export const TrackTile = ({
     openLockedContentModal
   ])
 
+  const onClickArtwork = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      onTogglePlay()
+    },
+    [onTogglePlay]
+  )
+
   const renderOverflowMenu = () => {
     const menu: Omit<import('components/menu/TrackMenu').OwnProps, 'children'> =
       {
@@ -293,17 +301,19 @@ export const TrackTile = ({
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
   const disableActions = false
   const showSkeleton = loading
+  const canClickTile = !loading && !disableActions
   const artworkActionLabel =
     trackId && !hasStreamAccess && !isPreviewable
       ? `Unlock ${title || 'track'}`
       : `${isTrackPlaying ? 'Pause' : 'Play'} ${title || 'track'}`
 
-  const tileContent = (
+  const tileBody = (
     <Paper
       css={[
         isLoading && { opacity: 0.6 },
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         {
+          cursor: canClickTile ? 'pointer' : 'default',
           height: size === TrackTileSize.LARGE ? 144 : 128,
           containerType: 'inline-size',
           '&:hover .artworkIcon': { opacity: 0.75 },
@@ -338,7 +348,7 @@ export const TrackTile = ({
             type='button'
             aria-label={artworkActionLabel}
             disabled={isLoading || disableActions}
-            onClick={onTogglePlay}
+            onClick={onClickArtwork}
             css={{
               display: 'block',
               width: '100%',
@@ -470,6 +480,15 @@ export const TrackTile = ({
         )}
       </Flex>
     </Paper>
+  )
+
+  const tileContent = (
+    <div
+      data-testid='track-tile-click-target'
+      onClick={canClickTile ? onTogglePlay : undefined}
+    >
+      {tileBody}
+    </div>
   )
 
   if (isStreamGated) {
