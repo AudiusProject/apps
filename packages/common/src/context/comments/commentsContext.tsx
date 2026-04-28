@@ -199,11 +199,7 @@ export function CommentSectionProvider<NavigationProp>(
               {
                 trackId: track.track_id,
                 source: playbackSource,
-                uid: makeStableUid(
-                  Kind.TRACKS,
-                  track.track_id,
-                  playbackSource
-                )
+                uid: makeStableUid(Kind.TRACKS, track.track_id, playbackSource)
               }
             ],
             startIndex: 0,

@@ -1,9 +1,5 @@
-import {
-  useCurrentUserId
-} from '@audius/common/api'
-import {
-  ID
-} from '@audius/common/models'
+import { useCurrentUserId } from '@audius/common/api'
+import { ID } from '@audius/common/models'
 import {
   playbackSelectors,
   playbackPositionSelectors,
@@ -15,9 +11,7 @@ import {
   IconPause,
   IconPlay
 } from '@audius/harmony'
-import {
-  useSelector
-} from 'react-redux'
+import { useSelector } from 'react-redux'
 
 const { getTrackId } = playbackSelectors
 const { getTrackPosition } = playbackPositionSelectors

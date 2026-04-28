@@ -1,8 +1,4 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useMemo
-} from 'react'
+import { MutableRefObject, useCallback, useMemo } from 'react'
 
 import {
   playbackActions,
@@ -23,10 +19,7 @@ import {
   IconPlaybackRate3x
 } from '@audius/harmony'
 import cn from 'classnames'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import zIndex from 'utils/zIndex'
 

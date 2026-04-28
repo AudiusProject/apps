@@ -1,9 +1,4 @@
-import {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo
-} from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 
 import {
   getRemixesQueryKey,
@@ -13,17 +8,9 @@ import {
   useTrackByPermalink,
   useUpdateEvent
 } from '@audius/common/api'
-import {
-  remixMessages as messages
-} from '@audius/common/messages'
-import {
-  ID,
-  Kind,
-  Name
-} from '@audius/common/models'
-import {
-  toast
-} from '@audius/common/src/store/ui/toast/slice'
+import { remixMessages as messages } from '@audius/common/messages'
+import { ID, Kind, Name } from '@audius/common/models'
+import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   playbackSelectors,
   playbackActions,
@@ -44,63 +31,28 @@ import {
   LoadingSpinner,
   Box
 } from '@audius/harmony'
-import {
-  ClassNames
-} from '@emotion/react'
-import {
-  isEqual
-} from 'lodash'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
-import {
-  useParams,
-  useNavigate
-} from 'react-router'
+import { ClassNames } from '@emotion/react'
+import { isEqual } from 'lodash'
+import { useDispatch, useSelector } from 'react-redux'
+import { useParams, useNavigate } from 'react-router'
 
-import {
-  Droppable
-} from 'components/dragndrop'
-import {
-  Header
-} from 'components/header/desktop/Header'
-import {
-  TrackLineup
-} from 'components/lineup/TrackLineup'
-import {
-  Page
-} from 'components/page/Page'
-import {
-  TrackTile
-} from 'components/track/desktop/TrackTile'
-import {
-  TrackTileSize
-} from 'components/track/types'
-import {
-  useUpdateSearchParams
-} from 'pages/search-page/hooks'
-import {
-  track,
-  make
-} from 'services/analytics'
-import {
-  selectDragnDropState
-} from 'store/dragndrop/slice'
-import {
-  trackRemixesPage
-} from 'utils/route'
+import { Droppable } from 'components/dragndrop'
+import { Header } from 'components/header/desktop/Header'
+import { TrackLineup } from 'components/lineup/TrackLineup'
+import { Page } from 'components/page/Page'
+import { TrackTile } from 'components/track/desktop/TrackTile'
+import { TrackTileSize } from 'components/track/types'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
+import { track, make } from 'services/analytics'
+import { selectDragnDropState } from 'store/dragndrop/slice'
+import { trackRemixesPage } from 'utils/route'
 
-import {
-  usePickWinnersPageParams
-} from './hooks'
+import { usePickWinnersPageParams } from './hooks'
 
 const {
-  clearQueue: clear,
   addToQueue: add,
   removeByUid: remove,
   reorder,
-  play: playAction,
   pause: pauseAction
 } = playbackActions
 const { getUid, getPlaying } = playbackSelectors
@@ -398,7 +350,9 @@ export const PickWinnersPage = () => {
           })
         )
       } else {
-        dispatch(playbackActions.playTrackAt({ index: Math.max(0, startIndex) }))
+        dispatch(
+          playbackActions.playTrackAt({ index: Math.max(0, startIndex) })
+        )
       }
     },
     [dispatch, playingUid, winnerTileUid, winners]

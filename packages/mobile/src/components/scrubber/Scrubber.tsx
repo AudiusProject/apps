@@ -1,35 +1,16 @@
-import {
-  useCallback,
-  useState
-} from 'react'
+import { useCallback, useState } from 'react'
 
-import {
-  playbackActions
-} from '@audius/common/store'
-import {
-  formatSeconds
-} from '@audius/common/utils'
-import {
-  View
-} from 'react-native'
-import {
-  useDispatch
-} from 'react-redux'
+import { playbackActions } from '@audius/common/store'
+import { formatSeconds } from '@audius/common/utils'
+import { View } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 import Text from 'app/components/text'
-import {
-  makeStyles
-} from 'app/styles'
+import { makeStyles } from 'app/styles'
 
-import {
-  PositionTimestamp
-} from './PositionTimestamp'
-import {
-  Slider
-} from './Slider'
-import {
-  usePosition
-} from './usePosition'
+import { PositionTimestamp } from './PositionTimestamp'
+import { Slider } from './Slider'
+import { usePosition } from './usePosition'
 
 const { seekTo: seek } = playbackActions
 

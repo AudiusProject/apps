@@ -1,43 +1,17 @@
-import {
-  useCallback,
-  useState
-} from 'react'
+import { useCallback, useState } from 'react'
 
-import {
-  walletMessages
-} from '@audius/common/messages'
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  GetCoinsSortMethodEnum,
-  GetCoinsSortDirectionEnum
-} from '@audius/sdk'
-import {
-  useSelector
-} from 'react-redux'
+import { walletMessages } from '@audius/common/messages'
+import { playbackSelectors } from '@audius/common/store'
+import { GetCoinsSortMethodEnum, GetCoinsSortDirectionEnum } from '@audius/sdk'
+import { useSelector } from 'react-redux'
 
 import type { IconComponent } from '@audius/harmony-native'
-import {
-  Button,
-  Flex,
-  IconSortDown,
-  IconSortUp
-} from '@audius/harmony-native'
-import {
-  Screen,
-  SegmentedControl
-} from 'app/components/core'
-import {
-  useNavigation
-} from 'app/hooks/useNavigation'
-import {
-  useRoute
-} from 'app/hooks/useRoute'
+import { Button, Flex, IconSortDown, IconSortUp } from '@audius/harmony-native'
+import { Screen, SegmentedControl } from 'app/components/core'
+import { useNavigation } from 'app/hooks/useNavigation'
+import { useRoute } from 'app/hooks/useRoute'
 
-import {
-  SelectionItemList
-} from '../list-selection-screen/SelectionItemList'
+import { SelectionItemList } from '../list-selection-screen/SelectionItemList'
 
 const { getHasTrack } = playbackSelectors
 

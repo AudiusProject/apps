@@ -1,19 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import {
-  useCurrentUserId
-} from '@audius/common/api'
-import {
-  useCanSendMessage
-} from '@audius/common/hooks'
-import {
-  Status
-} from '@audius/common/models'
+import { useCurrentUserId } from '@audius/common/api'
+import { useCanSendMessage } from '@audius/common/hooks'
+import { Status } from '@audius/common/models'
 import type { ChatMessageWithExtras } from '@audius/common/models'
 import {
   chatActions,
@@ -25,17 +14,9 @@ import {
   isEarliestUnread,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
-import {
-  OptionalHashId,
-  OptionalId,
-  type ChatBlast
-} from '@audius/sdk'
-import {
-  Portal
-} from '@gorhom/portal'
-import {
-  useFocusEffect
-} from '@react-navigation/native'
+import { OptionalHashId, OptionalId, type ChatBlast } from '@audius/sdk'
+import { Portal } from '@gorhom/portal'
+import { useFocusEffect } from '@react-navigation/native'
 import type { FlatListProps, LayoutChangeEvent } from 'react-native'
 import {
   AppState,
@@ -46,21 +27,11 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import {
-  useSafeAreaInsets
-} from 'react-native-safe-area-context'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  IconKebabHorizontal,
-  IconMessage
-} from '@audius/harmony-native'
-import {
-  BOTTOM_BAR_HEIGHT
-} from 'app/components/bottom-tab-bar'
+import { IconKebabHorizontal, IconMessage } from '@audius/harmony-native'
+import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
 import {
   HeaderShadow,
   KeyboardAvoidingView,
@@ -68,69 +39,31 @@ import {
   ScreenContent
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
-import {
-  PLAY_BAR_HEIGHT
-} from 'app/components/now-playing-drawer'
-import {
-  light
-} from 'app/haptics'
-import {
-  useRoute
-} from 'app/hooks/useRoute'
-import {
-  useToast
-} from 'app/hooks/useToast'
-import {
-  setVisibility
-} from 'app/store/drawers/slice'
-import {
-  makeStyles
-} from 'app/styles'
-import {
-  spacing
-} from 'app/styles/spacing'
-import {
-  useThemePalette
-} from 'app/utils/theme'
+import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
+import { light } from 'app/haptics'
+import { useRoute } from 'app/hooks/useRoute'
+import { useToast } from 'app/hooks/useToast'
+import { setVisibility } from 'app/store/drawers/slice'
+import { makeStyles } from 'app/styles'
+import { spacing } from 'app/styles/spacing'
+import { useThemePalette } from 'app/utils/theme'
 
-import {
-  ChatBlastAudienceDisplay
-} from './ChatBlastAudienceDisplay'
-import {
-  ChatBlastHeader
-} from './ChatBlastHeader'
-import {
-  ChatBlastSubHeader
-} from './ChatBlastSubHeader'
-import {
-  ChatMessageListItem
-} from './ChatMessageListItem'
-import {
-  ChatMessageSeparator
-} from './ChatMessageSeparator'
-import {
-  ChatTextInput
-} from './ChatTextInput'
-import {
-  ChatUnavailable
-} from './ChatUnavailable'
-import {
-  EmptyChatMessages
-} from './EmptyChatMessages'
-import {
-  ReactionPopup
-} from './ReactionPopup'
-import {
-  UserChatHeader
-} from './UserChatHeader'
+import { ChatBlastAudienceDisplay } from './ChatBlastAudienceDisplay'
+import { ChatBlastHeader } from './ChatBlastHeader'
+import { ChatBlastSubHeader } from './ChatBlastSubHeader'
+import { ChatMessageListItem } from './ChatMessageListItem'
+import { ChatMessageSeparator } from './ChatMessageSeparator'
+import { ChatTextInput } from './ChatTextInput'
+import { ChatUnavailable } from './ChatUnavailable'
+import { EmptyChatMessages } from './EmptyChatMessages'
+import { ReactionPopup } from './ReactionPopup'
+import { UserChatHeader } from './UserChatHeader'
 import {
   END_REACHED_MIN_MESSAGES,
   NEW_MESSAGE_TOAST_SCROLL_THRESHOLD,
   SCROLL_TO_BOTTOM_THRESHOLD
 } from './constants'
-import {
-  useKeyboardAvoidingPlaybarStyle
-} from './hooks/useKeyboardAvoidingPlaybarStyle'
+import { useKeyboardAvoidingPlaybarStyle } from './hooks/useKeyboardAvoidingPlaybarStyle'
 
 type ChatFlatListProps = FlatListProps<ChatMessageWithExtras>
 type ChatListEventHandler<K extends keyof ChatFlatListProps> = NonNullable<

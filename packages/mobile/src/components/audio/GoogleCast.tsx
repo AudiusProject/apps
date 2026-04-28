@@ -1,19 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import {
-  useUser
-} from '@audius/common/api'
-import {
-  useCurrentTrack,
-  useImageSize
-} from '@audius/common/hooks'
-import {
-  SquareSizes
-} from '@audius/common/models'
+import { useUser } from '@audius/common/api'
+import { useCurrentTrack, useImageSize } from '@audius/common/hooks'
+import { SquareSizes } from '@audius/common/models'
 import {
   castActions,
   playbackSelectors,
@@ -27,14 +16,8 @@ import {
   useRemoteMediaClient
 } from 'react-native-google-cast'
 import TrackPlayer, { Event } from 'react-native-track-player'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
-import {
-  useAsync,
-  usePrevious
-} from 'react-use'
+import { useDispatch, useSelector } from 'react-redux'
+import { useAsync, usePrevious } from 'react-use'
 
 const { setIsCasting } = castActions
 const { getPlaying, getSeek, getCounter } = playbackSelectors

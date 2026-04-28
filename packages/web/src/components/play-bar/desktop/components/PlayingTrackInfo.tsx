@@ -1,48 +1,20 @@
-import {
-  memo
-} from 'react'
+import { memo } from 'react'
 
-import {
-  useTrack
-} from '@audius/common/api'
-import {
-  useGatedContentAccess
-} from '@audius/common/hooks'
-import {
-  SquareSizes,
-  Color,
-  ID
-} from '@audius/common/models'
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  createKeyboardActivationHandler,
-  Tooltip
-} from '@audius/harmony'
-import {
-  animated,
-  useSpring
-} from '@react-spring/web'
+import { useTrack } from '@audius/common/api'
+import { useGatedContentAccess } from '@audius/common/hooks'
+import { SquareSizes, Color, ID } from '@audius/common/models'
+import { playbackSelectors } from '@audius/common/store'
+import { createKeyboardActivationHandler, Tooltip } from '@audius/harmony'
+import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
-import {
-  useSelector
-} from 'react-redux'
+import { useSelector } from 'react-redux'
 
-import {
-  Draggable
-} from 'components/dragndrop'
+import { Draggable } from 'components/dragndrop'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
-import {
-  LockedStatusBadge
-} from 'components/locked-status-badge'
+import { LockedStatusBadge } from 'components/locked-status-badge'
 import UserBadges from 'components/user-badges/UserBadges'
-import {
-  useProfilePicture
-} from 'hooks/useProfilePicture'
-import {
-  fullTrackPage
-} from 'utils/route'
+import { useProfilePicture } from 'hooks/useProfilePicture'
+import { fullTrackPage } from 'utils/route'
 
 import styles from './PlayingTrackInfo.module.css'
 const { getPreviewing } = playbackSelectors

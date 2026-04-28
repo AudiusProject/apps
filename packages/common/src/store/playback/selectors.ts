@@ -19,7 +19,8 @@ const isIndexValid = (state: CommonState) => {
 
 export const getCurrentPlaybackTrack = (
   state: CommonState
-): PlaybackTrack | null => (isIndexValid(state) ? state.playback.queue[state.playback.index] : null)
+): PlaybackTrack | null =>
+  isIndexValid(state) ? state.playback.queue[state.playback.index] : null
 
 export const getCurrentTrackId = (state: CommonState) =>
   getCurrentPlaybackTrack(state)?.trackId ?? null
@@ -31,7 +32,8 @@ export const getCurrentEntryUid = (state: CommonState): UID | null =>
   getCurrentPlaybackTrack(state)?.uid ?? null
 
 export const getCurrentPlayerBehavior = (state: CommonState) =>
-  getCurrentPlaybackTrack(state)?.playerBehavior ?? PlayerBehavior.FULL_OR_PREVIEW
+  getCurrentPlaybackTrack(state)?.playerBehavior ??
+  PlayerBehavior.FULL_OR_PREVIEW
 
 export const getCollectionId = (state: CommonState) => {
   const uid = getCurrentEntryUid(state)
@@ -108,7 +110,4 @@ export const getOrder = createSelector(
 // the legacy `queueSelectors.makeGetCurrent`. The uid here is the "currently
 // loaded" uid (lags during load), matching legacy semantics.
 export const makeGetCurrent = () =>
-  createSelector(
-    [getUid, getCurrentSource],
-    (uid, source) => ({ uid, source })
-  )
+  createSelector([getUid, getCurrentSource], (uid, source) => ({ uid, source }))

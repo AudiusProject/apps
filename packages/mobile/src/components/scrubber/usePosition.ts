@@ -1,31 +1,13 @@
-import {
-  useCallback,
-  useEffect,
-  useRef
-} from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  playbackSelectors,
-  playbackRateValueMap
-} from '@audius/common/store'
-import {
-  formatSeconds,
-  Genre
-} from '@audius/common/utils'
-import {
-  useAppState
-} from '@react-native-community/hooks'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
+import { formatSeconds, Genre } from '@audius/common/utils'
+import { useAppState } from '@react-native-community/hooks'
 import type { TextInput } from 'react-native'
 import TrackPlayer from 'react-native-track-player'
-import {
-  useSelector
-} from 'react-redux'
-import {
-  useAsync
-} from 'react-use'
+import { useSelector } from 'react-redux'
+import { useAsync } from 'react-use'
 
 const { getPlaybackRate, getSeek, getSeekCounter, getCounter, getBuffering } =
   playbackSelectors

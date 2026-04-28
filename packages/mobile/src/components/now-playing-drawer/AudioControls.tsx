@@ -1,6 +1,4 @@
-import {
-  useCallback
-} from 'react'
+import { useCallback } from 'react'
 
 import {
   playbackActions,
@@ -8,14 +6,8 @@ import {
   RepeatMode,
   modalsActions
 } from '@audius/common/store'
-import {
-  Animated,
-  View
-} from 'react-native'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { Animated, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   IconSkipNext,
@@ -24,25 +16,13 @@ import {
   IconSkipPrevious,
   IconButton
 } from '@audius/harmony-native'
-import {
-  usePressScaleAnimation
-} from 'app/hooks/usePressScaleAnimation'
-import {
-  makeStyles
-} from 'app/styles'
+import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
+import { makeStyles } from 'app/styles'
 
-import {
-  PlayButton
-} from './PlayButton'
-import {
-  PlaybackRateButton
-} from './PlaybackRateButton'
-import {
-  RepeatButton
-} from './RepeatButton'
-import {
-  ShuffleButton
-} from './ShuffleButton'
+import { PlayButton } from './PlayButton'
+import { PlaybackRateButton } from './PlaybackRateButton'
+import { RepeatButton } from './RepeatButton'
+import { ShuffleButton } from './ShuffleButton'
 
 const { setVisibility } = modalsActions
 const { getRepeat, getShuffle } = playbackSelectors

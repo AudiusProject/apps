@@ -1,55 +1,27 @@
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-  type ReactElement
-} from 'react'
+import { memo, useCallback, useMemo, useRef, type ReactElement } from 'react'
 
-import {
-  useDebouncedCallback
-} from '@audius/common/hooks'
+import { useDebouncedCallback } from '@audius/common/hooks'
 import {
   Kind,
   type ID,
   type PlaybackSource,
   type UID
 } from '@audius/common/models'
-import {
-  playbackActions,
-  playbackSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
-import {
-  makeStableUid
-} from '@audius/common/utils'
-import {
-  range
-} from 'lodash'
+import { makeStableUid } from '@audius/common/utils'
+import { range } from 'lodash'
 import type {
   SectionList as RNSectionList,
   SectionListProps,
   ViewStyle
 } from 'react-native'
-import {
-  StyleSheet,
-  View
-} from 'react-native'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { StyleSheet, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  SectionList
-} from 'app/components/core'
-import {
-  TrackTile,
-  LineupTileSkeleton
-} from 'app/components/lineup-tile'
-import {
-  useScrollToTop
-} from 'app/hooks/useScrollToTop'
+import { SectionList } from 'app/components/core'
+import { TrackTile, LineupTileSkeleton } from 'app/components/lineup-tile'
+import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
 const { makeGetCurrent } = playbackSelectors
 const { getPlaying } = playbackSelectors

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   useCurrentAccount,
@@ -12,9 +6,7 @@ import {
   useUsers,
   selectNameSortedPlaylistsAndAlbums
 } from '@audius/common/api'
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
+import { useCurrentTrack } from '@audius/common/hooks'
 import {
   Name,
   RepostSource,
@@ -42,34 +34,14 @@ import {
   TrackRecord
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import {
-  dayjs,
-  makeStableUid,
-  route
-} from '@audius/common/utils'
-import {
-  GetUserLibraryTracksSortMethodEnum
-} from '@audius/sdk'
-import {
-  debounce
-} from 'lodash'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
-import {
-  useLocation,
-  useNavigate,
-  useSearchParams
-} from 'react-router'
+import { dayjs, makeStableUid, route } from '@audius/common/utils'
+import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
+import { debounce } from 'lodash'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 
-import {
-  TrackEvent,
-  make
-} from 'common/store/analytics/actions'
-import {
-  push
-} from 'utils/navigation'
+import { TrackEvent, make } from 'common/store/analytics/actions'
+import { push } from 'utils/navigation'
 
 import {
   getTabFromPathname,

@@ -1,20 +1,9 @@
 import type { ReactNode } from 'react'
-import {
-  createContext,
-  useCallback,
-  useMemo,
-  useState
-} from 'react'
+import { createContext, useCallback, useMemo, useState } from 'react'
 
-import {
-  playbackActions,
-  playbackSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import Video from 'react-native-video'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 type PreviewContextProps = {
   isPlaying: boolean

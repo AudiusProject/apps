@@ -1,37 +1,17 @@
-import {
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import {
-  playbackActions,
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  MIN_BUFFERING_DELAY_MS
-} from '@audius/common/utils'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
+import { MIN_BUFFERING_DELAY_MS } from '@audius/common/utils'
+import { useDispatch, useSelector } from 'react-redux'
 
 import IconPause from 'app/assets/animations/iconPause.json'
 import IconPlay from 'app/assets/animations/iconPlay.json'
 import IconLoadingSpinner from 'app/assets/animations/iconPlayLoadingSpinner.json'
 import type { AnimatedButtonProps } from 'app/components/core'
-import {
-  AnimatedButton
-} from 'app/components/core'
-import {
-  makeAnimations
-} from 'app/styles'
-import {
-  colorize
-} from 'app/utils/colorizeLottie'
-import {
-  Theme
-} from 'app/utils/theme'
+import { AnimatedButton } from 'app/components/core'
+import { makeAnimations } from 'app/styles'
+import { colorize } from 'app/utils/colorizeLottie'
+import { Theme } from 'app/utils/theme'
 
 const { pause, play } = playbackActions
 const { getPlaying, getBuffering } = playbackSelectors

@@ -1,8 +1,4 @@
-import {
-  MouseEvent,
-  useCallback,
-  useEffect
-} from 'react'
+import { MouseEvent, useCallback, useEffect } from 'react'
 
 import {
   useToggleFavoriteTrack,
@@ -10,9 +6,7 @@ import {
   useTrack,
   useUser
 } from '@audius/common/api'
-import {
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   ModalSource,
   isContentUSDCPurchaseGated,
@@ -33,10 +27,7 @@ import {
   OverflowSource,
   playbackSelectors
 } from '@audius/common/store'
-import {
-  Genre,
-  formatLineupTileDuration
-} from '@audius/common/utils'
+import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
   IconVolumeLevel2 as IconVolume,
   Text,
@@ -45,57 +36,24 @@ import {
   IconKebabHorizontal
 } from '@audius/harmony'
 import cn from 'classnames'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  useModalState
-} from 'common/hooks/useModalState'
-import {
-  Draggable
-} from 'components/dragndrop'
-import {
-  TextLink,
-  UserLink
-} from 'components/link'
+import { useModalState } from 'common/hooks/useModalState'
+import { Draggable } from 'components/dragndrop'
+import { TextLink, UserLink } from 'components/link'
 import Menu from 'components/menu/Menu'
-import {
-  OwnProps as TrackMenuProps
-} from 'components/menu/TrackMenu'
+import { OwnProps as TrackMenuProps } from 'components/menu/TrackMenu'
 import Skeleton from 'components/skeleton/Skeleton'
-import {
-  TrackTileProps,
-  TrackTileSize
-} from 'components/track/types'
-import {
-  useIsMobile
-} from 'hooks/useIsMobile'
-import {
-  DragDropKind
-} from 'store/dragndrop/slice'
-import {
-  fullTrackPage
-} from 'utils/route'
-import {
-  useIsDarkMode,
-  useIsMatrix
-} from 'utils/theme/theme'
+import { TrackTileProps, TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { DragDropKind } from 'store/dragndrop/slice'
+import { fullTrackPage } from 'utils/route'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
-import {
-  TrackDogEar
-} from '../TrackDogEar'
-import {
-  TrackTileStats
-} from '../TrackTileStats'
-import {
-  getTrackWithFallback,
-  getUserWithFallback
-} from '../helpers'
-import {
-  messages
-} from '../trackTileMessages'
+import { TrackDogEar } from '../TrackDogEar'
+import { TrackTileStats } from '../TrackTileStats'
+import { getTrackWithFallback, getUserWithFallback } from '../helpers'
+import { messages } from '../trackTileMessages'
 
 import BottomButtons from './BottomButtons'
 import styles from './TrackTile.module.css'

@@ -1,62 +1,26 @@
-import {
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   useCurrentCommentSection,
   useEditComment,
   usePostComment
 } from '@audius/common/context'
-import {
-  commentsMessages as messages
-} from '@audius/common/messages'
-import {
-  ID,
-  Name,
-  SquareSizes
-} from '@audius/common/models'
-import {
-  playbackSelectors
-} from '@audius/common/src/store'
-import {
-  Avatar,
-  Flex
-} from '@audius/harmony'
-import {
-  CommentMention
-} from '@audius/sdk'
-import {
-  useSelector
-} from 'react-redux'
-import {
-  useLocation
-} from 'react-router'
-import {
-  usePrevious
-} from 'react-use'
+import { commentsMessages as messages } from '@audius/common/messages'
+import { ID, Name, SquareSizes } from '@audius/common/models'
+import { playbackSelectors } from '@audius/common/src/store'
+import { Avatar, Flex } from '@audius/harmony'
+import { CommentMention } from '@audius/sdk'
+import { useSelector } from 'react-redux'
+import { useLocation } from 'react-router'
+import { usePrevious } from 'react-use'
 
-import {
-  ComposerInput
-} from 'components/composer-input/ComposerInput'
-import {
-  useIsMobile
-} from 'hooks/useIsMobile'
-import {
-  useProfilePicture
-} from 'hooks/useProfilePicture'
-import {
-  make,
-  track
-} from 'services/analytics'
-import {
-  audioPlayer
-} from 'services/audio-player'
+import { ComposerInput } from 'components/composer-input/ComposerInput'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { useProfilePicture } from 'hooks/useProfilePicture'
+import { make, track } from 'services/analytics'
+import { audioPlayer } from 'services/audio-player'
 
-import {
-  useCommentActionCallback
-} from './useCommentActionCallback'
+import { useCommentActionCallback } from './useCommentActionCallback'
 
 type CommentFormValues = {
   commentMessage: string

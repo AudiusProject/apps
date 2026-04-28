@@ -1,35 +1,13 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import { createContext, useCallback, useEffect, useState } from 'react'
 
-import {
-  useUserTracksByHandle,
-  useUser
-} from '@audius/common/api'
-import {
-  ID,
-  Track
-} from '@audius/common/models'
-import {
-  PlayerBehavior,
-  playbackActions
-} from '@audius/common/store'
-import {
-  pick
-} from 'lodash'
-import {
-  useDispatch
-} from 'react-redux'
-import {
-  useUnmount
-} from 'react-use'
+import { useUserTracksByHandle, useUser } from '@audius/common/api'
+import { ID, Track } from '@audius/common/models'
+import { PlayerBehavior, playbackActions } from '@audius/common/store'
+import { pick } from 'lodash'
+import { useDispatch } from 'react-redux'
+import { useUnmount } from 'react-use'
 
-import {
-  audioPlayer
-} from 'services/audio-player'
+import { audioPlayer } from 'services/audio-player'
 
 type PreviewContextProps = {
   isPlaying: boolean

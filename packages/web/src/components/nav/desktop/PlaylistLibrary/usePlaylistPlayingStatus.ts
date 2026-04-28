@@ -1,23 +1,10 @@
-import {
-  useMemo
-} from 'react'
+import { useMemo } from 'react'
 
-import {
-  useCollection
-} from '@audius/common/api'
-import {
-  PlaylistLibraryID
-} from '@audius/common/models'
-import {
-  playbackSelectors,
-  QueueSource
-} from '@audius/common/store'
-import {
-  Uid
-} from '@audius/common/utils'
-import {
-  useSelector
-} from 'react-redux'
+import { useCollection } from '@audius/common/api'
+import { PlaylistLibraryID } from '@audius/common/models'
+import { playbackSelectors, QueueSource } from '@audius/common/store'
+import { Uid } from '@audius/common/utils'
+import { useSelector } from 'react-redux'
 
 const {
   getTrackId,

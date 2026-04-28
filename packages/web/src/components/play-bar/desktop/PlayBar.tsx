@@ -1,70 +1,35 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import {
-  useCurrentUserId,
-  useUser
-} from '@audius/common/api'
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  Name,
-  PlaybackSource
-} from '@audius/common/models'
+import { useCurrentUserId, useUser } from '@audius/common/api'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { Name, PlaybackSource } from '@audius/common/models'
 import {
   playbackActions,
   RepeatMode,
   playbackSelectors,
   playbackRateValueMap
 } from '@audius/common/store'
-import {
-  Genre,
-  route
-} from '@audius/common/utils'
-import {
-  removeHotkeys,
-  setupHotkeys,
-  Scrubber
-} from '@audius/harmony'
+import { Genre, route } from '@audius/common/utils'
+import { removeHotkeys, setupHotkeys, Scrubber } from '@audius/harmony'
 import cn from 'classnames'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  make
-} from 'common/store/analytics/actions'
+import { make } from 'common/store/analytics/actions'
 import PlayButton from 'components/play-bar/PlayButton'
 import VolumeBar from 'components/play-bar/VolumeBar'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
 import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
 import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
-import {
-  useIsContainerNarrow
-} from 'hooks/useIsContainerNarrow'
-import {
-  audioPlayer
-} from 'services/audio-player'
-import {
-  push
-} from 'utils/navigation'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
+import { audioPlayer } from 'services/audio-player'
+import { push } from 'utils/navigation'
 
-import {
-  PlaybackRateButton
-} from '../playback-rate-button/PlaybackRateButton'
+import { PlaybackRateButton } from '../playback-rate-button/PlaybackRateButton'
 
 import styles from './PlayBar.module.css'
 import PlayingTrackInfo from './components/PlayingTrackInfo'
-import {
-  SocialActions
-} from './components/SocialActions'
+import { SocialActions } from './components/SocialActions'
 
 const { profilePage } = route
 const { getPlaying, getCounter, getUid, getBuffering, getPlaybackRate } =

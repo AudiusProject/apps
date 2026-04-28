@@ -1,45 +1,19 @@
 import type { ID } from '@audius/common/models'
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  TouchableOpacity,
-  View
-} from 'react-native'
-import {
-  useSelector
-} from 'react-redux'
+import { playbackSelectors } from '@audius/common/store'
+import { TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-import {
-  IconVolumeLevel2
-} from '@audius/harmony-native'
-import {
-  Text,
-  FadeInView
-} from 'app/components/core'
-import {
-  UserLink
-} from 'app/components/user-link'
-import {
-  useNavigation
-} from 'app/hooks/useNavigation'
-import {
-  makeStyles
-} from 'app/styles'
+import { IconVolumeLevel2 } from '@audius/harmony-native'
+import { Text, FadeInView } from 'app/components/core'
+import { UserLink } from 'app/components/user-link'
+import { useNavigation } from 'app/hooks/useNavigation'
+import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
-import {
-  useThemeColors
-} from 'app/utils/theme'
+import { useThemeColors } from 'app/utils/theme'
 
-import {
-  LineupTileArt
-} from './LineupTileArt'
-import {
-  LineupTileTopRight
-} from './LineupTileTopRight'
-import {
-  useStyles as useTileStyles
-} from './styles'
+import { LineupTileArt } from './LineupTileArt'
+import { LineupTileTopRight } from './LineupTileTopRight'
+import { useStyles as useTileStyles } from './styles'
 import type { RenderImage } from './types'
 
 const { getPlaying } = playbackSelectors

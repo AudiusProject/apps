@@ -1,89 +1,44 @@
-import {
-  useCallback,
-  useEffect,
-  useState
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   useCurrentAccountUser,
   selectIsAccountComplete,
   useAccountStatus
 } from '@audius/common/api'
-import {
-  MobileOS,
-  Status
-} from '@audius/common/models'
+import { MobileOS, Status } from '@audius/common/models'
 import {
   buyUSDCActions,
   chatActions,
   playbackActions
 } from '@audius/common/store'
-import {
-  route
-} from '@audius/common/utils'
-import {
-  PortalHost
-} from '@gorhom/portal'
-import {
-  useLinkTo
-} from '@react-navigation/native'
-import {
-  createNativeStackNavigator
-} from '@react-navigation/native-stack'
+import { route } from '@audius/common/utils'
+import { PortalHost } from '@gorhom/portal'
+import { useLinkTo } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import {
   getRouteOnCompletion,
   getStartedAndFinishedSignup,
   getStartedSignUpProcess,
   getWelcomeModalShown
 } from 'common/store/pages/signon/selectors'
-import {
-  Platform
-} from 'react-native'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { Platform } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 import useAppState from 'app/hooks/useAppState'
-import {
-  useDrawer
-} from 'app/hooks/useDrawer'
-import {
-  useNavigation
-} from 'app/hooks/useNavigation'
-import {
-  useUpdateRequired
-} from 'app/hooks/useUpdateRequired'
-import {
-  SplashScreen
-} from 'app/screens/splash-screen'
-import {
-  UpdateRequiredScreen
-} from 'app/screens/update-required-screen'
-import {
-  enterBackground,
-  enterForeground
-} from 'app/store/lifecycle/actions'
+import { useDrawer } from 'app/hooks/useDrawer'
+import { useNavigation } from 'app/hooks/useNavigation'
+import { useUpdateRequired } from 'app/hooks/useUpdateRequired'
+import { SplashScreen } from 'app/screens/splash-screen'
+import { UpdateRequiredScreen } from 'app/screens/update-required-screen'
+import { enterBackground, enterForeground } from 'app/store/lifecycle/actions'
 
-import {
-  AppDrawerScreen
-} from '../app-drawer-screen'
-import {
-  OAuthScreen
-} from '../oauth-screen/OAuthScreen'
-import {
-  ResetPasswordModalScreen
-} from '../reset-password-screen'
-import {
-  SignOnStack
-} from '../sign-on-screen'
+import { AppDrawerScreen } from '../app-drawer-screen'
+import { OAuthScreen } from '../oauth-screen/OAuthScreen'
+import { ResetPasswordModalScreen } from '../reset-password-screen'
+import { SignOnStack } from '../sign-on-screen'
 
-import {
-  StatusBar
-} from './StatusBar'
-import {
-  useResetNotificationBadgeCount
-} from './useResetNotificationBadgeCount'
+import { StatusBar } from './StatusBar'
+import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount'
 
 const { fetchMoreChats, fetchUnreadMessagesCount, connect, disconnect } =
   chatActions

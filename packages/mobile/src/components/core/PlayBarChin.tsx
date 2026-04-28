@@ -1,16 +1,8 @@
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  View
-} from 'react-native'
-import {
-  useSelector
-} from 'react-redux'
+import { playbackSelectors } from '@audius/common/store'
+import { View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-import {
-  PLAY_BAR_HEIGHT
-} from '../now-playing-drawer'
+import { PLAY_BAR_HEIGHT } from '../now-playing-drawer'
 
 const { getHasTrack } = playbackSelectors
 

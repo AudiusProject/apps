@@ -3,8 +3,12 @@ import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ID, Name } from '~/models'
-import { playbackActions, playbackSelectors } from '~/store/playback'
-import { QueueSource, Queueable } from '~/store/playback'
+import {
+  playbackActions,
+  playbackSelectors,
+  QueueSource,
+  Queueable
+} from '~/store/playback'
 import { Nullable } from '~/utils'
 
 import { useCurrentTrack } from '../useCurrentTrack'

@@ -1,62 +1,25 @@
-import {
-  useCurrentUserId,
-  useToggleFavoriteTrack
-} from '@audius/common/api'
-import {
-  useGatedContentAccess
-} from '@audius/common/hooks'
-import {
-  FavoriteSource,
-  SquareSizes
-} from '@audius/common/models'
+import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
+import { useGatedContentAccess } from '@audius/common/hooks'
+import { FavoriteSource, SquareSizes } from '@audius/common/models'
 import type { Track, User } from '@audius/common/models'
-import {
-  playbackSelectors
-} from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
-import {
-  TouchableOpacity,
-  Animated,
-  View
-} from 'react-native'
-import {
-  useSelector
-} from 'react-redux'
+import { TouchableOpacity, Animated, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-import {
-  IconLock
-} from '@audius/harmony-native'
-import {
-  FavoriteButton
-} from 'app/components/favorite-button'
+import { IconLock } from '@audius/harmony-native'
+import { FavoriteButton } from 'app/components/favorite-button'
 import Text from 'app/components/text'
-import {
-  makeStyles
-} from 'app/styles'
-import {
-  useColor
-} from 'app/utils/theme'
-import {
-  zIndex
-} from 'app/utils/zIndex'
+import { makeStyles } from 'app/styles'
+import { useColor } from 'app/utils/theme'
+import { zIndex } from 'app/utils/zIndex'
 
-import {
-  LockedStatusBadge
-} from '../core'
-import {
-  TrackImage
-} from '../image/TrackImage'
+import { LockedStatusBadge } from '../core'
+import { TrackImage } from '../image/TrackImage'
 
-import {
-  PlayButton
-} from './PlayButton'
-import {
-  TrackingBar
-} from './TrackingBar'
-import {
-  NOW_PLAYING_HEIGHT,
-  PLAY_BAR_HEIGHT
-} from './constants'
+import { PlayButton } from './PlayButton'
+import { TrackingBar } from './TrackingBar'
+import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
 const { getPreviewing } = playbackSelectors
 
 const messages = {

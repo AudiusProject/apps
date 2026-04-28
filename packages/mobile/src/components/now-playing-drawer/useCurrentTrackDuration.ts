@@ -1,15 +1,7 @@
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  getTrackPreviewDuration
-} from '@audius/common/utils'
-import {
-  useSelector
-} from 'react-redux'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { playbackSelectors } from '@audius/common/store'
+import { getTrackPreviewDuration } from '@audius/common/utils'
+import { useSelector } from 'react-redux'
 
 const { getPreviewing } = playbackSelectors
 

@@ -1,23 +1,9 @@
-import {
-  playbackSelectors,
-  uploadSelectors
-} from '@audius/common/store'
-import {
-  createAction
-} from '@reduxjs/toolkit'
-import {
-  call,
-  fork,
-  select,
-  takeEvery
-} from 'typed-redux-saga'
+import { playbackSelectors, uploadSelectors } from '@audius/common/store'
+import { createAction } from '@reduxjs/toolkit'
+import { call, fork, select, takeEvery } from 'typed-redux-saga'
 
-import {
-  env
-} from 'services/env'
-import {
-  reportToSentry
-} from 'store/errors/reportToSentry'
+import { env } from 'services/env'
+import { reportToSentry } from 'store/errors/reportToSentry'
 import {
   foregroundPollingDaemon,
   visibilityPollingDaemon

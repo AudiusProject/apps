@@ -1,25 +1,8 @@
-import {
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  useMemo
-} from 'react'
+import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 
-import {
-  useCurrentUserId,
-  useTracks,
-  useUsers
-} from '@audius/common/api'
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  ErrorLevel,
-  Feature,
-  Name,
-  SquareSizes
-} from '@audius/common/models'
+import { useCurrentUserId, useTracks, useUsers } from '@audius/common/api'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { ErrorLevel, Feature, Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
   playbackActions,
@@ -43,14 +26,8 @@ import {
   resolveStreamUrl
 } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
-import {
-  Id,
-  OptionalId
-} from '@audius/sdk'
-import {
-  isEqual,
-  uniq
-} from 'lodash'
+import { Id, OptionalId } from '@audius/sdk'
+import { isEqual, uniq } from 'lodash'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -61,32 +38,17 @@ import TrackPlayer, {
   TrackType,
   useIsPlaying
 } from 'react-native-track-player'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
-import {
-  useAsync,
-  usePrevious
-} from 'react-use'
+import { useDispatch, useSelector } from 'react-redux'
+import { useAsync, usePrevious } from 'react-use'
 
-import {
-  make,
-  track as analyticsTrack
-} from 'app/services/analytics'
-import {
-  audiusBackendInstance
-} from 'app/services/audius-backend-instance'
+import { make, track as analyticsTrack } from 'app/services/analytics'
+import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import {
   getLocalAudioPath,
   getLocalTrackCoverArtPath
 } from 'app/services/offline-downloader'
-import {
-  audiusSdk
-} from 'app/services/sdk/audius-sdk'
-import {
-  DOWNLOAD_REASON_FAVORITES
-} from 'app/store/offline-downloads/constants'
+import { audiusSdk } from 'app/services/sdk/audius-sdk'
+import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
 import {
   getOfflineTrackStatus,
   getIsCollectionMarkedForDownload
@@ -95,16 +57,10 @@ import {
   addOfflineEntries,
   OfflineDownloadStatus
 } from 'app/store/offline-downloads/slice'
-import {
-  reportToSentry
-} from 'app/utils/reportToSentry'
+import { reportToSentry } from 'app/utils/reportToSentry'
 
-import {
-  useChromecast
-} from './GoogleCast'
-import {
-  useSavePodcastProgress
-} from './useSavePodcastProgress'
+import { useChromecast } from './GoogleCast'
+import { useSavePodcastProgress } from './useSavePodcastProgress'
 
 export const DEFAULT_IMAGE_URL =
   'https://download.audius.co/static-resources/preview-image.jpg'
@@ -547,7 +503,9 @@ export const AudioPlayer = () => {
             const trackPosition = trackPositions?.[track.track_id]
             if (trackPosition?.status === 'IN_PROGRESS') {
               dispatch(
-                playbackActions.seekTo({ seconds: trackPosition.playbackPosition })
+                playbackActions.seekTo({
+                  seconds: trackPosition.playbackPosition
+                })
               )
             } else if (isLongFormContent) {
               dispatch(

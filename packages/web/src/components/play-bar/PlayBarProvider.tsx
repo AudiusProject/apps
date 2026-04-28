@@ -1,19 +1,10 @@
-import {
-  modalsSelectors,
-  playbackSelectors
-} from '@audius/common/store'
+import { modalsSelectors, playbackSelectors } from '@audius/common/store'
 import cn from 'classnames'
-import {
-  connect
-} from 'react-redux'
+import { connect } from 'react-redux'
 
 import NowPlayingDrawer from 'components/now-playing/NowPlayingDrawer'
-import {
-  useIsMobile
-} from 'hooks/useIsMobile'
-import {
-  AppState
-} from 'store/types'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { AppState } from 'store/types'
 
 import styles from './PlayBarProvider.module.css'
 import DesktopPlayBar from './desktop/PlayBar'

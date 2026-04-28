@@ -1,54 +1,20 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
-import {
-  playbackSelectors,
-  playbackRateValueMap
-} from '@audius/common/store'
-import {
-  Genre
-} from '@audius/common/utils'
-import {
-  useAppState
-} from '@react-native-community/hooks'
+import { useCurrentTrack } from '@audius/common/hooks'
+import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
+import { Genre } from '@audius/common/utils'
+import { useAppState } from '@react-native-community/hooks'
 import type { GestureResponderEvent } from 'react-native'
-import {
-  Easing,
-  View,
-  Animated,
-  PanResponder
-} from 'react-native'
+import { Easing, View, Animated, PanResponder } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import TrackPlayer from 'react-native-track-player'
-import {
-  useSelector
-} from 'react-redux'
-import {
-  useAsync,
-  usePrevious
-} from 'react-use'
+import { useSelector } from 'react-redux'
+import { useAsync, usePrevious } from 'react-use'
 
-import {
-  usePressScaleAnimation
-} from 'app/hooks/usePressScaleAnimation'
-import {
-  makeStyles
-} from 'app/styles'
-import {
-  attachToDx
-} from 'app/utils/animation'
-import {
-  useThemeColors
-} from 'app/utils/theme'
+import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
+import { makeStyles } from 'app/styles'
+import { attachToDx } from 'app/utils/animation'
+import { useThemeColors } from 'app/utils/theme'
 
 const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
 

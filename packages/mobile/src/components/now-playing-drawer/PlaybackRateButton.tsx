@@ -1,10 +1,6 @@
 import type { PlaybackRate } from '@audius/common/store'
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  useSelector
-} from 'react-redux'
+import { playbackSelectors } from '@audius/common/store'
+import { useSelector } from 'react-redux'
 
 import type { IconButtonProps } from '@audius/harmony-native'
 import {

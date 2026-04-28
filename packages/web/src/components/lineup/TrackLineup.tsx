@@ -1,58 +1,23 @@
-import {
-  useCallback,
-  useMemo,
-  useRef
-} from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
-import {
-  Kind,
-  ID,
-  PlaybackSource,
-  Name
-} from '@audius/common/models'
-import {
-  playbackActions,
-  playbackSelectors
-} from '@audius/common/store'
+import { Kind, ID, PlaybackSource, Name } from '@audius/common/models'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack, PlaybackQuerySource } from '@audius/common/store'
-import {
-  makeStableUid
-} from '@audius/common/utils'
-import {
-  Divider,
-  Flex
-} from '@audius/harmony'
+import { makeStableUid } from '@audius/common/utils'
+import { Divider, Flex } from '@audius/harmony'
 import cn from 'classnames'
 import InfiniteScroll from 'react-infinite-scroller'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  make
-} from 'common/store/analytics/actions'
-import {
-  TrackTile as TrackTileDesktop
-} from 'components/track/desktop/TrackTile'
-import {
-  TrackTile as MobileTrackTile
-} from 'components/track/mobile/TrackTile'
-import {
-  TrackTileSize,
-  TileProps
-} from 'components/track/types'
-import {
-  useIsContainerNarrow
-} from 'hooks/useIsContainerNarrow'
-import {
-  useIsMobile
-} from 'hooks/useIsMobile'
+import { make } from 'common/store/analytics/actions'
+import { TrackTile as TrackTileDesktop } from 'components/track/desktop/TrackTile'
+import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
+import { TrackTileSize, TileProps } from 'components/track/types'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
+import { useIsMobile } from 'hooks/useIsMobile'
 
 import styles from './Lineup.module.css'
-import {
-  LineupVariant
-} from './types'
+import { LineupVariant } from './types'
 
 const NARROW_CONTAINER_THRESHOLD_PX = 600
 const DEFAULT_LOAD_MORE_THRESHOLD = 500

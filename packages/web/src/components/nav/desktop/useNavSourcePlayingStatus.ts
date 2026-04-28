@@ -1,6 +1,4 @@
-import {
-  useMemo
-} from 'react'
+import { useMemo } from 'react'
 
 import {
   FEED_PAGE,
@@ -8,16 +6,14 @@ import {
   LIBRARY_PAGE,
   EXPLORE_PAGE
 } from '@audius/common/src/utils/route'
-import {
-  playbackSelectors,
-  QueueSource
-} from '@audius/common/store'
-import {
-  useSelector
-} from 'react-redux'
+import { playbackSelectors, QueueSource } from '@audius/common/store'
+import { useSelector } from 'react-redux'
 
-const { getTrackId, getPlaying, getCurrentSource: getSource } =
-  playbackSelectors
+const {
+  getTrackId,
+  getPlaying,
+  getCurrentSource: getSource
+} = playbackSelectors
 
 /**
  * Hook to determine if the currently playing track is from a specific navigation source

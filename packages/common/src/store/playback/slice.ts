@@ -340,7 +340,10 @@ const slice = createSlice({
         state.index >= 0 ? state.queue[state.index]?.uid : undefined
       state.queue = newOrder
       state.index = currentUid
-        ? Math.max(0, newOrder.findIndex((t) => t.uid === currentUid))
+        ? Math.max(
+            0,
+            newOrder.findIndex((t) => t.uid === currentUid)
+          )
         : -1
     },
 

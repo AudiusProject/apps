@@ -1,15 +1,8 @@
-import {
-  useCallback,
-  useMemo
-} from 'react'
+import { useCallback, useMemo } from 'react'
 
 import type { PlaybackRate } from '@audius/common/store'
-import {
-  playbackActions
-} from '@audius/common/store'
-import {
-  useDispatch
-} from 'react-redux'
+import { playbackActions } from '@audius/common/store'
+import { useDispatch } from 'react-redux'
 
 import ActionDrawer from '../action-drawer'
 import type { ActionDrawerRow } from '../action-drawer/ActionDrawer'

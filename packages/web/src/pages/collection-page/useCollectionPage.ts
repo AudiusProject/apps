@@ -14,9 +14,7 @@ import {
   useUsers,
   useCurrentUserId
 } from '@audius/common/api'
-import {
-  useCurrentTrack
-} from '@audius/common/hooks'
+import { useCurrentTrack } from '@audius/common/hooks'
 import {
   Status,
   ID,
@@ -66,24 +64,12 @@ import {
   makeUid,
   makeStableUid
 } from '@audius/common/utils'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
-import {
-  useLocation,
-  useNavigate
-} from 'react-router'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router'
 
-import {
-  useHistoryContext
-} from 'app/HistoryProvider'
-import {
-  make
-} from 'common/store/analytics/actions'
-import {
-  getCollectionPageContext
-} from 'ssr/metaTags'
+import { useHistoryContext } from 'app/HistoryProvider'
+import { make } from 'common/store/analytics/actions'
+import { getCollectionPageContext } from 'ssr/metaTags'
 import {
   setUsers,
   setVisibility
@@ -92,17 +78,9 @@ import {
   UserListType,
   UserListEntityType
 } from 'store/application/ui/userListModal/types'
-import {
-  replace
-} from 'utils/navigation'
-import {
-  getPathname,
-  collectionPage,
-  profilePage
-} from 'utils/route'
-import {
-  parseCollectionRoute
-} from 'utils/route/collectionRouteParser'
+import { replace } from 'utils/navigation'
+import { getPathname, collectionPage, profilePage } from 'utils/route'
+import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions

@@ -1,39 +1,17 @@
-import {
-  memo
-} from 'react'
+import { memo } from 'react'
 
-import {
-  playbackSelectors
-} from '@audius/common/store'
-import {
-  route
-} from '@audius/common/utils'
-import {
-  IconClose as IconRemove
-} from '@audius/harmony'
+import { playbackSelectors } from '@audius/common/store'
+import { route } from '@audius/common/utils'
+import { IconClose as IconRemove } from '@audius/harmony'
 import cn from 'classnames'
-import {
-  connect
-} from 'react-redux'
-import {
-  Dispatch
-} from 'redux'
+import { connect } from 'react-redux'
+import { Dispatch } from 'redux'
 
-import {
-  Frosted
-} from 'components/frosted/Frosted'
-import {
-  useIsMobile
-} from 'hooks/useIsMobile'
-import {
-  dismissCookieBanner
-} from 'store/application/ui/cookieBanner/actions'
-import {
-  AppState
-} from 'store/types'
-import {
-  BASE_URL
-} from 'utils/route'
+import { Frosted } from 'components/frosted/Frosted'
+import { useIsMobile } from 'hooks/useIsMobile'
+import { dismissCookieBanner } from 'store/application/ui/cookieBanner/actions'
+import { AppState } from 'store/types'
+import { BASE_URL } from 'utils/route'
 
 import styles from './CookieBanner.module.css'
 

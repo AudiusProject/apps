@@ -1,25 +1,13 @@
-import {
-  useEffect
-} from 'react'
+import { useEffect } from 'react'
 
-import {
-  useCurrentUserId,
-  useTrack
-} from '@audius/common/api'
+import { useCurrentUserId, useTrack } from '@audius/common/api'
 import {
   playbackSelectors,
   playbackPositionActions
 } from '@audius/common/store'
-import {
-  isLongFormContent
-} from '@audius/common/utils'
-import {
-  useProgress
-} from 'react-native-track-player'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { isLongFormContent } from '@audius/common/utils'
+import { useProgress } from 'react-native-track-player'
+import { useDispatch, useSelector } from 'react-redux'
 
 const { getPlaying, getTrackId } = playbackSelectors
 const { setTrackPosition } = playbackPositionActions

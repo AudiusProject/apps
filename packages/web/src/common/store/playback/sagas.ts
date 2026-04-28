@@ -1,13 +1,6 @@
-import {
-  queryCollection,
-  queryCurrentUserId,
-  queryTrack,
-  queryTrackByUid,
-  queryUser
-} from '@audius/common/api'
+import { queryCurrentUserId, queryTrack, queryUser } from '@audius/common/api'
 import {
   Feature,
-  ID,
   Kind,
   Name,
   PlaybackSource as AnalyticsPlaybackSource,
@@ -19,7 +12,6 @@ import {
   calculatePlayerBehavior,
   gatedContentSelectors,
   getContext,
-  PlayerBehavior,
   playbackActions,
   playbackSelectors,
   QueueSource,
@@ -66,7 +58,6 @@ const {
   getCounter,
   getCurrentPlaybackTrack,
   getCurrentSource,
-  getCurrentEntryUid,
   getCurrentPlayerBehavior,
   getCurrentTrackId,
   getCollectionId,
@@ -195,10 +186,7 @@ function* watchPlay() {
         const isLongFormContent =
           track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
 
-        const createEndChannel = async (
-          url: string,
-          timeoutMs?: number
-        ) => {
+        const createEndChannel = async (url: string, timeoutMs?: number) => {
           const endChannel = eventChannel((emitter) => {
             audioPlayer.load(
               trackDuration ||
@@ -273,7 +261,8 @@ function* watchPlay() {
           audioPlayer.setPlaybackRate(playbackRate)
           const trackPlaybackInfo = yield* select((state: any) => {
             const positions =
-              state.playbackPosition?.userId?.[String(currentUserId)]?.trackPositions
+              state.playbackPosition?.userId?.[String(currentUserId)]
+                ?.trackPositions
             return positions?.[trackId]
           })
           if (trackPlaybackInfo?.status !== 'IN_PROGRESS') {
@@ -650,8 +639,7 @@ function* handleQueueAutoplay({
   const shuffle = yield* select(getShuffle)
   const repeatMode = yield* select(getRepeat)
   const source = yield* select(getCurrentSource)
-  const trackPageException =
-    source === QueueSource.TRACK_TRACKS && length === 1
+  const trackPageException = source === QueueSource.TRACK_TRACKS && length === 1
   const isCloseToEndOfQueue = index + 2 >= length
   const isNotRepeating =
     repeatMode === RepeatMode.OFF ||
@@ -701,7 +689,8 @@ function* watchQueueAutoplay() {
       const excludedTrackIds = new Set(exclusionList)
       const queue = yield* select(getPlaybackQueue)
       queue.forEach((entry) => {
-        if (typeof entry.trackId === 'number') excludedTrackIds.add(entry.trackId)
+        if (typeof entry.trackId === 'number')
+          excludedTrackIds.add(entry.trackId)
       })
       const recommendedTracks = tracks
         .filter(({ track_id }) => !excludedTrackIds.has(track_id))

@@ -1,10 +1,5 @@
 import type { ComponentType } from 'react'
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useState
-} from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 
 import {
   useCollection,
@@ -12,9 +7,7 @@ import {
   useTrack,
   useCurrentUserId
 } from '@audius/common/api'
-import {
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   type ID,
   type UID,
@@ -39,15 +32,8 @@ import type {
   NativeTouchEvent,
   TouchableOpacityProps
 } from 'react-native'
-import {
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native'
-import {
-  useDispatch,
-  useSelector
-} from 'react-redux'
+import { Text, TouchableOpacity, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   IconButton,
@@ -60,22 +46,12 @@ import {
   IconRemove,
   IconVisibilityHidden
 } from '@audius/harmony-native'
-import {
-  flexRowCentered,
-  font,
-  makeStyles
-} from 'app/styles'
+import { flexRowCentered, font, makeStyles } from 'app/styles'
 
-import {
-  TrackDownloadStatusIndicator
-} from '../offline-downloads/TrackDownloadStatusIndicator'
-import {
-  UserLink
-} from '../user-link'
+import { TrackDownloadStatusIndicator } from '../offline-downloads/TrackDownloadStatusIndicator'
+import { UserLink } from '../user-link'
 
-import {
-  TrackArtwork
-} from './TrackArtwork'
+import { TrackArtwork } from './TrackArtwork'
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 
 const { getPlaying, getUid } = playbackSelectors
