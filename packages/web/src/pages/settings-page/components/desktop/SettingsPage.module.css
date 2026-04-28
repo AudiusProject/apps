@@ -54,7 +54,7 @@
 .appearanceControlRow {
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
-  align-items: end;
+  align-items: start;
   gap: var(--harmony-unit-4);
   width: 100%;
 }
