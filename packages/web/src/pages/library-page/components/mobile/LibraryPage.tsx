@@ -39,10 +39,10 @@ import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useMainPageHeader } from 'components/nav/mobile/NavContext'
+import { Tab, TabList } from 'components/tabs'
 import TrackList from 'components/track/mobile/TrackList'
 import { TrackItemAction } from 'components/track/mobile/TrackListItem'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
-import useTabs from 'hooks/useTabs/useTabs'
 import { useLibraryCollections } from 'pages/library-page/hooks/useLibraryCollections'
 import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
@@ -586,27 +586,6 @@ const filterMessages = {
   filterPlaylists: 'Filter...'
 }
 
-const tabHeaders = [
-  {
-    icon: <IconNote />,
-    text: LibraryPageTabs.TRACKS,
-    label: LibraryPageTabs.TRACKS,
-    to: 'tracks'
-  },
-  {
-    icon: <IconAlbum />,
-    text: LibraryPageTabs.ALBUMS,
-    label: LibraryPageTabs.ALBUMS,
-    to: 'albums'
-  },
-  {
-    icon: <IconPlaylists />,
-    text: LibraryPageTabs.PLAYLISTS,
-    label: LibraryPageTabs.PLAYLISTS,
-    to: 'playlists'
-  }
-]
-
 const messages = {
   title: 'Library',
   description: "View tracks that you've favorited"
@@ -625,50 +604,52 @@ const LibraryPage = () => {
     filterText,
     playlistUpdates,
     updatePlaylistLastViewedAt,
-    currentTab,
-    onChangeTab
+    currentTab
   } = useLibraryPage()
   useMainPageHeader()
   const queuedAndPlaying = playing && isQueued
 
   const goToTrending = () => goToRoute(TRENDING_PAGE)
-  const elements = [
-    <TracksLineup
-      key='tracksLineup'
-      tracks={tracks}
-      goToTrending={goToTrending}
-      onFilterChange={onFilterChange}
-      filterText={filterText}
-      getFilteredData={getFilteredData}
-      playingUid={playingUid}
-      queuedAndPlaying={queuedAndPlaying}
-      onTogglePlay={onTogglePlay}
-    />,
-    <AlbumCardLineup key='albumLineup' />,
-    <PlaylistCardLineup
-      key='playlistLineup'
-      goToTrending={goToTrending}
-      onFilterChange={onFilterChange}
-      playlistUpdates={playlistUpdates}
-      updatePlaylistLastViewedAt={updatePlaylistLastViewedAt}
-    />
-  ]
 
-  const handleTabClick = useCallback(
-    (newTab: string) => {
-      onChangeTab(newTab as LibraryPageTabs)
-    },
-    [onChangeTab]
+  const body =
+    currentTab === LibraryPageTabs.ALBUMS ? (
+      <AlbumCardLineup />
+    ) : currentTab === LibraryPageTabs.PLAYLISTS ? (
+      <PlaylistCardLineup
+        goToTrending={goToTrending}
+        onFilterChange={onFilterChange}
+        playlistUpdates={playlistUpdates}
+        updatePlaylistLastViewedAt={updatePlaylistLastViewedAt}
+      />
+    ) : (
+      <TracksLineup
+        tracks={tracks}
+        goToTrending={goToTrending}
+        onFilterChange={onFilterChange}
+        filterText={filterText}
+        getFilteredData={getFilteredData}
+        playingUid={playingUid}
+        queuedAndPlaying={queuedAndPlaying}
+        onTogglePlay={onTogglePlay}
+      />
+    )
+
+  const tabs = useMemo(
+    () => (
+      <TabList variant='mobile'>
+        <Tab to='/library/tracks' icon={<IconNote />}>
+          {LibraryPageTabs.TRACKS}
+        </Tab>
+        <Tab to='/library/albums' icon={<IconAlbum />}>
+          {LibraryPageTabs.ALBUMS}
+        </Tab>
+        <Tab to='/library/playlists' icon={<IconPlaylists />}>
+          {LibraryPageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
+    ),
+    []
   )
-  const { tabs, body } = useTabs({
-    tabs: tabHeaders,
-    elements,
-    selectedTabLabel: currentTab,
-    initialScrollOffset: SCROLL_HEIGHT,
-    onTabClick: handleTabClick,
-    pathname: '/library',
-    routed: true
-  })
 
   const { setHeader } = useContext(HeaderContext)
   useEffect(() => {

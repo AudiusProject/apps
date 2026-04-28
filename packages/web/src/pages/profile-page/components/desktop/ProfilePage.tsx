@@ -47,9 +47,9 @@ import Page from 'components/page/Page'
 import ProfilePicture from 'components/profile-picture/ProfilePicture'
 import { ProfileCompletionHeroCard } from 'components/profile-progress/components/ProfileCompletionHeroCard'
 import { EmptyStatBanner, StatBanner } from 'components/stat-banner/StatBanner'
+import { Tab, TabList } from 'components/tabs'
 import UploadChip from 'components/upload/UploadChip'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
-import useTabs, { TabHeader, useTabRecalculator } from 'hooks/useTabs/useTabs'
 import { BlockUserConfirmationModal } from 'pages/chat-page/components/BlockUserConfirmationModal'
 import { UnblockUserConfirmationModal } from 'pages/chat-page/components/UnblockUserConfirmationModal'
 import { usePreventOffscreenFocus } from 'pages/profile-page/usePreventOffscreenFocus'
@@ -200,64 +200,102 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     [repostsArgs]
   )
 
-  const getArtistProfileContent = () => {
-    if (!profile) return { headers: [], elements: [] }
+  const profileBasePath = profilePage(handle)
 
-    const trackUploadChip = isOwner ? (
-      <UploadChip
-        key='upload-chip'
-        type='track'
-        variant='tile'
-        source='profile'
-      />
-    ) : null
+  // Determine which tab is active. The URL is the source of truth; activeTab
+  // (from useProfilePage, derived from route params) drives the body render.
+  const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
+  const currentTab = activeTab ?? defaultTab
 
-    const headers: TabHeader[] = [
-      {
-        icon: <IconNote />,
-        text: ProfilePageTabs.TRACKS,
-        label: ProfilePageTabs.TRACKS,
-        to: 'tracks'
-      },
-      {
-        icon: <IconAlbum />,
-        text: ProfilePageTabs.ALBUMS,
-        label: ProfilePageTabs.ALBUMS,
-        to: 'albums'
-      },
-      {
-        icon: <IconPlaylists />,
-        text: ProfilePageTabs.PLAYLISTS,
-        label: ProfilePageTabs.PLAYLISTS,
-        to: 'playlists'
-      },
-      {
-        icon: <IconReposts />,
-        text: ProfilePageTabs.REPOSTS,
-        label: ProfilePageTabs.REPOSTS,
-        to: 'reposts'
-      }
-    ]
+  const tabs = profile ? (
+    isArtist ? (
+      <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>
+        <Tab to={`${profileBasePath}/tracks`} icon={<IconNote />}>
+          {ProfilePageTabs.TRACKS}
+        </Tab>
+        <Tab to={`${profileBasePath}/albums`} icon={<IconAlbum />}>
+          {ProfilePageTabs.ALBUMS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+        <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+      </TabList>
+    ) : (
+      <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>
+        <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
+    )
+  ) : null
+
+  const renderArtistTab = () => {
+    if (!profile) return null
     const tracksEmpty =
       artistTracksQuery.isSuccess && artistTracksQuery.trackIds.length === 0
     const repostsEmpty =
       (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
       profile.repost_count === 0
+    const trackUploadChip = isOwner ? (
+      <UploadChip type='track' variant='tile' source='profile' />
+    ) : null
 
-    const elements = [
-      <Box w='100%' key={ProfilePageTabs.TRACKS}>
+    if (currentTab === ProfilePageTabs.ALBUMS) {
+      return (
+        <Box w='100%'>
+          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.PLAYLISTS) {
+      return (
+        <Box w='100%'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.REPOSTS) {
+      return (
+        <Box w='100%'>
+          {status === Status.SUCCESS ? (
+            repostsEmpty ? (
+              <EmptyTab
+                isOwner={isOwner}
+                name={profile.name}
+                text={'reposted anything'}
+              />
+            ) : (
+              <TrackLineup
+                trackIds={userRepostsQuery.trackIds}
+                source='PROFILE_FEED'
+                querySource={repostsQuerySource}
+                isPending={userRepostsQuery.isPending}
+                isFetching={userRepostsQuery.isFetching}
+                isError={userRepostsQuery.isError}
+                hasNextPage={userRepostsQuery.hasNextPage}
+                loadNextPage={userRepostsQuery.loadNextPage}
+                variant={LineupVariant.CONDENSED}
+                scrollParent={containerRef?.current ?? null}
+              />
+            )
+          ) : null}
+        </Box>
+      )
+    }
+    // Default: Tracks
+    return (
+      <Box w='100%'>
         {renderProfileCompletionCard()}
         {status === Status.SUCCESS ? (
           tracksEmpty ? (
             <>
-              {isOwner ? (
-                <UploadChip
-                  key='upload-chip'
-                  type='track'
-                  variant='tile'
-                  source='profile'
-                />
-              ) : null}
+              {trackUploadChip}
               <EmptyTab
                 isOwner={isOwner}
                 name={profile.name}
@@ -284,65 +322,26 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
             </>
           )
         ) : null}
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.ALBUMS}>
-        <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.PLAYLISTS}>
-        <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.REPOSTS}>
-        {status === Status.SUCCESS ? (
-          repostsEmpty ? (
-            <EmptyTab
-              isOwner={isOwner}
-              name={profile.name}
-              text={'reposted anything'}
-            />
-          ) : (
-            <TrackLineup
-              trackIds={userRepostsQuery.trackIds}
-              source='PROFILE_FEED'
-              querySource={repostsQuerySource}
-              isPending={userRepostsQuery.isPending}
-              isFetching={userRepostsQuery.isFetching}
-              isError={userRepostsQuery.isError}
-              hasNextPage={userRepostsQuery.hasNextPage}
-              loadNextPage={userRepostsQuery.loadNextPage}
-              variant={LineupVariant.CONDENSED}
-              scrollParent={containerRef?.current ?? null}
-            />
-          )
-        ) : null}
       </Box>
-    ]
-
-    return { headers, elements }
+    )
   }
 
-  const getUserProfileContent = () => {
-    if (!profile) return { headers: [], elements: [] }
-
-    const headers: TabHeader[] = [
-      {
-        icon: <IconReposts />,
-        text: ProfilePageTabs.REPOSTS,
-        label: ProfilePageTabs.REPOSTS,
-        to: 'reposts'
-      },
-      {
-        icon: <IconPlaylists />,
-        text: ProfilePageTabs.PLAYLISTS,
-        label: ProfilePageTabs.PLAYLISTS,
-        to: 'playlists'
-      }
-    ]
+  const renderUserTab = () => {
+    if (!profile) return null
     const userRepostsEmpty =
       (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
       profile.repost_count === 0
 
-    const elements = [
-      <Box w='100%' key={ProfilePageTabs.REPOSTS}>
+    if (currentTab === ProfilePageTabs.PLAYLISTS) {
+      return (
+        <Box w='100%'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    // Default: Reposts
+    return (
+      <Box w='100%'>
         {renderProfileCompletionCard()}
         {userRepostsEmpty ? (
           <EmptyTab
@@ -365,33 +364,11 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
             scrollParent={containerRef?.current ?? null}
           />
         )}
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.PLAYLISTS}>
-        <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
       </Box>
-    ]
-
-    return { headers, elements }
+    )
   }
 
-  const { headers, elements } = profile
-    ? isArtist
-      ? getArtistProfileContent()
-      : getUserProfileContent()
-    : { headers: [], elements: [] }
-
-  const tabRecalculator = useTabRecalculator()
-
-  const { tabs, body } = useTabs({
-    didChangeTabsFrom,
-    isMobile: false,
-    tabs: headers,
-    tabRecalculator,
-    initialTab: activeTab || undefined,
-    elements,
-    pathname: profilePage(handle),
-    routed: true
-  })
+  const body = profile ? (isArtist ? renderArtistTab() : renderUserTab()) : null
 
   const {
     title = '',
