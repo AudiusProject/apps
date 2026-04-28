@@ -20,21 +20,13 @@ type TooltipContentProps = {
 const TooltipContent = ({ completionStages }: TooltipContentProps) => {
   const completionPercentage = getPercentageComplete(completionStages).toFixed()
   const strings = makeStrings(Number(completionPercentage))
-  const stepsComplete = completionStages.filter((stage) => stage.isCompleted)
-    .length
+  const stepsComplete = completionStages.filter(
+    (stage) => stage.isCompleted
+  ).length
 
   return (
-    <Flex
-      column
-      gap='m'
-      w={320}
-      css={{ whiteSpace: 'normal' }}
-    >
-      <Flex
-        column
-        gap='xs'
-        alignItems='flex-start'
-      >
+    <Flex column gap='m' w={320} css={{ whiteSpace: 'normal' }}>
+      <Flex column gap='xs' alignItems='flex-start'>
         <Text variant='title' size='l' color='default' textAlign='left'>
           {strings.title}
         </Text>
@@ -55,7 +47,10 @@ const TooltipContent = ({ completionStages }: TooltipContentProps) => {
           css={{ width: `${completionPercentage}%` }}
         />
       </Flex>
-      <TaskCompletionList completionStages={completionStages} variant='surface' />
+      <TaskCompletionList
+        completionStages={completionStages}
+        variant='surface'
+      />
     </Flex>
   )
 }
