@@ -32,11 +32,7 @@ type TabsContextValue = {
   onTabClick?: (key: string) => void
   // Tabs register themselves on mount and report active state. TabList
   // computes which tab gets the accent — matched tab if any, else first.
-  registerTab: (
-    key: string,
-    el: HTMLElement | null,
-    isActive: boolean
-  ) => void
+  registerTab: (key: string, el: HTMLElement | null, isActive: boolean) => void
   // Key of the tab TabList has chosen as active (may differ from the tab's
   // own match status when no tab matches and TabList falls back to first).
   activeKey: string | null
