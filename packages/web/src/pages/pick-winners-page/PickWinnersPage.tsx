@@ -12,9 +12,8 @@ import { remixMessages as messages } from '@audius/common/messages'
 import { ID, Kind, Name } from '@audius/common/models'
 import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
-  playerSelectors,
-  queueActions,
-  queueSelectors,
+  playbackSelectors,
+  playbackActions,
   QueueSource,
   useFinalizeWinnersConfirmationModal
 } from '@audius/common/store'
@@ -51,15 +50,12 @@ import { trackRemixesPage } from 'utils/route'
 import { usePickWinnersPageParams } from './hooks'
 
 const {
-  clear,
-  add,
-  remove,
+  addToQueue: add,
+  removeByUid: remove,
   reorder,
-  play: playAction,
   pause: pauseAction
-} = queueActions
-const { getUid } = queueSelectors
-const { getPlaying } = playerSelectors
+} = playbackActions
+const { getUid, getPlaying } = playbackSelectors
 
 const TRACK_TILE_HEIGHT = 144
 const PICK_WINNERS_PAGE_SIZE = 10
@@ -237,7 +233,13 @@ export const PickWinnersPage = () => {
       if (isPlayingWinnersQueue) {
         dispatch(
           add({
-            entries: [{ id, uid, source: QueueSource.PICK_WINNERS_TRACKS }],
+            tracks: [
+              {
+                trackId: id,
+                uid,
+                source: QueueSource.PICK_WINNERS_TRACKS
+              }
+            ],
             index: winners.length
           })
         )
@@ -329,8 +331,8 @@ export const PickWinnersPage = () => {
 
   const handlePlay = useCallback(
     (winnerId: ID) => {
-      const newEntries = winners.map((id) => ({
-        id,
+      const newTracks = winners.map((id) => ({
+        trackId: id,
         uid: winnerTileUid(id),
         source: QueueSource.PICK_WINNERS_TRACKS
       }))
@@ -339,11 +341,19 @@ export const PickWinnersPage = () => {
         QueueSource.PICK_WINNERS_TRACKS
       )
 
+      const startIndex = winners.indexOf(winnerId)
       if (!isPlayingWinnersQueue) {
-        dispatch(clear({}))
-        dispatch(add({ entries: newEntries, index: 0 }))
+        dispatch(
+          playbackActions.playFrom({
+            tracks: newTracks,
+            startIndex: Math.max(0, startIndex)
+          })
+        )
+      } else {
+        dispatch(
+          playbackActions.playTrackAt({ index: Math.max(0, startIndex) })
+        )
       }
-      dispatch(playAction({ uid: winnerTileUid(winnerId) }))
     },
     [dispatch, playingUid, winnerTileUid, winners]
   )

@@ -7,12 +7,7 @@ import {
   type PlaybackSource,
   type UID
 } from '@audius/common/models'
-import {
-  playbackActions,
-  playbackSelectors,
-  playerSelectors,
-  queueSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import { range } from 'lodash'
@@ -28,8 +23,8 @@ import { SectionList } from 'app/components/core'
 import { TrackTile, LineupTileSkeleton } from 'app/components/lineup-tile'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
-const { makeGetCurrent } = queueSelectors
-const { getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying } = playbackSelectors
 const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 // Threshold (as a fraction of visible list height) for how close to the end
@@ -164,7 +159,7 @@ export const TrackLineup = ({
       visibleTrackIds.map((id) => ({
         trackId: id,
         source,
-        legacyUid: uidFor(id)
+        uid: uidFor(id)
       })),
     [visibleTrackIds, source, uidFor]
   )

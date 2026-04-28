@@ -52,8 +52,8 @@ import {
   pollForTokenAccountInfo
 } from '~/store/buy-usdc/utils'
 import { getContext } from '~/store/effects'
-import { getPreviewing, getTrackId } from '~/store/player/selectors'
-import { stop } from '~/store/player/slice'
+import { getPreviewing, getTrackId } from '~/store/playback/selectors'
+import { stop } from '~/store/playback/slice'
 import { saveTrack } from '~/store/social/tracks/actions'
 import {
   transactionCanceled,

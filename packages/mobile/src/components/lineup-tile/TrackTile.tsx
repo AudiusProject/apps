@@ -22,7 +22,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors,
   trackPageActions,
   PurchaseableContentType,
@@ -49,7 +49,7 @@ import { LineupTileMetadata } from './LineupTileMetadata'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { TrackTileStats } from './TrackTileStats'
 
-const { getUid } = playerSelectors
+const { getUid } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions

@@ -10,7 +10,6 @@ import {
   LibraryPageTabs,
   playbackActions,
   playbackSelectors,
-  playerSelectors,
   reachabilitySelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
@@ -212,7 +211,7 @@ export const TracksTab = () => {
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
   )
-  const isPlaying = useSelector(playerSelectors.getPlaying)
+  const isPlaying = useSelector(playbackSelectors.getPlaying)
 
   // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
   // source-based offline-download check keeps working.
@@ -224,7 +223,7 @@ export const TracksTab = () => {
         .map((id) => ({
           trackId: id,
           source: playbackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, playbackSource)
+          uid: makeStableUid(Kind.TRACKS, id, playbackSource)
         })),
     [filteredTrackUids]
   )

@@ -1,7 +1,6 @@
 import {
   averageColorReducer,
   remixesPageReducer as RemixesPageReducer,
-  queueReducer as QueueReducer,
   remoteConfigReducer as RemoteConfigReducer,
   stemsUploadReducer as StemsUploadReducer,
   ChangePasswordState,
@@ -84,9 +83,6 @@ export type AppState = CommonState & {
   dashboard: ArtistDashboardState
   history: HistoryPageState
   collection: CollectionsPageState
-
-  // Playback
-  queue: ReturnType<typeof QueueReducer>
 
   // Remote Config + Flags
   remoteConfig: ReturnType<typeof RemoteConfigReducer>

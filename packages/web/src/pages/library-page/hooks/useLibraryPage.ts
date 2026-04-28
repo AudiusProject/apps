@@ -24,11 +24,9 @@ import {
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
-  queueSelectors,
-  tracksSocialActions as socialActions,
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  tracksSocialActions as socialActions,
+  playbackActions,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
   LibraryCategoryType,
@@ -55,8 +53,8 @@ import {
 } from '../lib/libraryUrl'
 
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying, getBuffering } = playbackSelectors
 const {
   getLibraryTracksStatus,
   hasReachedEnd,
@@ -362,7 +360,7 @@ export const useLibraryPage = () => {
       tracks.entries.map((entry: any) => ({
         trackId: entry.track_id ?? entry.id,
         source: playbackSource,
-        legacyUid: makeStableUid(
+        uid: makeStableUid(
           Kind.TRACKS,
           entry.track_id ?? entry.id,
           playbackSource

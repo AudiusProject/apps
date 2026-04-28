@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useGatedContentAccess } from '@audius/common/hooks'
 import type { Track, User } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -15,7 +15,7 @@ import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { UserLink } from '../user-link'
 
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 
 const messages = {
   preview: 'PREVIEW'

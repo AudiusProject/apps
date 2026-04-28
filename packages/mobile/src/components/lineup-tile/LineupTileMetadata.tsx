@@ -1,5 +1,5 @@
 import type { ID } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import { TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -16,7 +16,7 @@ import { LineupTileTopRight } from './LineupTileTopRight'
 import { useStyles as useTileStyles } from './styles'
 import type { RenderImage } from './types'
 
-const { getPlaying } = playerSelectors
+const { getPlaying } = playbackSelectors
 
 const useStyles = makeStyles(({ palette }) => ({
   metadata: {

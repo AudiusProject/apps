@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useContext } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { connect } from 'react-redux'
 import { useLocation } from 'react-router'
@@ -14,7 +14,7 @@ import { getSafeArea, SafeAreaDirection } from 'utils/safeArea'
 
 import styles from './MobilePageContainer.module.css'
 
-const { getHasTrack } = playerSelectors
+const { getHasTrack } = playbackSelectors
 
 type OwnProps = {
   children: ReactNode

@@ -11,11 +11,7 @@ import {
   ModalSource
 } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import {
-  playbackActions,
-  playerSelectors,
-  queueSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
@@ -29,8 +25,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 
 import { TextPostCard } from './TextPostCard'
 
-const { getPlaying } = playerSelectors
-const { makeGetCurrent } = queueSelectors
+const { getPlaying } = playbackSelectors
+const { makeGetCurrent } = playbackSelectors
 
 const messages = {
   title: 'Fan Club Feed',
@@ -80,7 +76,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
       .map((item) => ({
         trackId: item.trackId,
         source: FAN_CLUB_SOURCE,
-        legacyUid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
+        uid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
       }))
   }, [feedItems])
 

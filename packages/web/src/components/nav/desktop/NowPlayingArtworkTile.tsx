@@ -2,7 +2,7 @@ import { MouseEvent, useCallback, useRef } from 'react'
 
 import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import {
   IconImage,
   IconWaveForm as IconVisualizer,
@@ -28,7 +28,7 @@ import { fullTrackPage } from 'utils/route'
 
 import styles from './NowPlayingArtworkTile.module.css'
 
-const { getTrackId } = playerSelectors
+const { getTrackId } = playbackSelectors
 
 const messages = {
   viewTrack: 'View currently playing track',

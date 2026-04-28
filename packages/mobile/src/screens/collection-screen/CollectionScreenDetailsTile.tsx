@@ -15,9 +15,8 @@ import {
 import type { ID, UID, AccessConditions } from '@audius/common/models'
 import {
   reachabilitySelectors,
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  playbackActions,
   PurchaseableContentType,
   collectionPageActions
 } from '@audius/common/store'
@@ -62,7 +61,7 @@ import { makeStyles } from 'app/styles'
 
 import { CollectionScreenSkeleton } from './CollectionScreenSkeleton'
 
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
 const { resetCollection, fetchCollection } = collectionPageActions
 
@@ -318,7 +317,7 @@ export const CollectionScreenDetailsTile = ({
         .map((id) => ({
           trackId: id,
           source: collectionPlaybackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
+          uid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
         })),
     [trackUids, collectionPlaybackSource]
   )
@@ -586,7 +585,7 @@ const CollectionTrackList = ({
         .map((id) => ({
           trackId: id,
           source: trackListPlaybackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
+          uid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
         })),
     [uids, trackListPlaybackSource]
   )

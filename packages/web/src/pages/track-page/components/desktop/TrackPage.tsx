@@ -29,10 +29,8 @@ import {
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
   shareModalUIActions,
-  playerSelectors,
-  playerActions,
-  playbackActions,
-  playbackSelectors
+  playbackSelectors,
+  playbackActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { formatDate, route, makeStableUid } from '@audius/common/utils'
@@ -63,7 +61,7 @@ import { RemixContestSection } from './RemixContestSection'
 import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
 const TrackPage = () => {
@@ -134,16 +132,12 @@ const TrackPage = () => {
       const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const tracks: PlaybackTrack[] = [
           {
             trackId: track.track_id,
             source: playbackSource,
-            legacyUid: makeStableUid(
-              Kind.TRACKS,
-              track.track_id,
-              playbackSource
-            )
+            uid: makeStableUid(Kind.TRACKS, track.track_id, playbackSource)
           }
         ]
         dispatch(

@@ -3,16 +3,20 @@ import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ID, Name } from '~/models'
-import { getPlaying, getUid } from '~/store/player/selectors'
-import { QueueSource, Queueable, queueActions } from '~/store/queue'
-import { makeGetCurrent } from '~/store/queue/selectors'
+import {
+  playbackActions,
+  playbackSelectors,
+  QueueSource,
+  Queueable
+} from '~/store/playback'
 import { Nullable } from '~/utils'
 
 import { useCurrentTrack } from '../useCurrentTrack'
 
 import { TrackPlayback } from './types'
 
-const { clear, add, play, pause } = queueActions
+const { playFrom, pause } = playbackActions
+const { getPlaying, getUid, makeGetCurrent } = playbackSelectors
 
 type RecordAnalytics = ({ name, id }: { name: TrackPlayback; id: ID }) => void
 
@@ -25,13 +29,19 @@ type UseToggleTrack = {
   entries?: Queueable[]
 }
 
+const queueablesToPlaybackTracks = (entries: Queueable[]) =>
+  entries
+    .filter((e) => typeof e.id === 'number')
+    .map((e) => ({
+      trackId: e.id as ID,
+      source: e.source as unknown as string,
+      uid: e.uid,
+      playerBehavior: e.playerBehavior
+    }))
+
 /**
- * Hook that exposes a function to play a track.
- * Optionally records a track play analytics event.
- *
- * @param {Function} recordAnalytics Function that tracks play event
- *
- * @returns {Function} the function that plays the track
+ * Returns a function that plays a track. Used by chat track / playlist tiles
+ * which build their own queue from the message contents.
  */
 export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
@@ -41,8 +51,7 @@ export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
     ({
       id,
       uid,
-      entries,
-      passUid
+      entries
     }: {
       id?: ID
       uid: string
@@ -50,11 +59,14 @@ export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
       passUid?: boolean
     }) => {
       if (playingUid !== uid) {
-        dispatch(clear({}))
-        dispatch(add({ entries }))
-        dispatch(play({ uid }))
+        const tracks = queueablesToPlaybackTracks(entries)
+        const startIndex = Math.max(
+          0,
+          tracks.findIndex((t) => t.uid === uid)
+        )
+        dispatch(playFrom({ tracks, startIndex, querySource: null }))
       } else {
-        dispatch(play(passUid ? { uid } : {}))
+        dispatch(playbackActions.play({}))
       }
       if (recordAnalytics && id) {
         recordAnalytics({ name: Name.PLAYBACK_PLAY, id })
@@ -66,18 +78,10 @@ export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   return playTrack
 }
 
-/**
- * Hook that exposes a function to pause a track.
- * Optionally records a track pause analytics event.
- *
- * @param {Function} recordAnalytics Function that tracks pause event
- *
- * @returns {Function} the function that pauses the track
- */
+/** Returns a function that pauses playback and optionally records analytics. */
 export const usePauseTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
-
-  const pauseTrack = useCallback(
+  return useCallback(
     (id?: ID) => {
       dispatch(pause({}))
       if (recordAnalytics && id) {
@@ -86,38 +90,12 @@ export const usePauseTrack = (recordAnalytics?: RecordAnalytics) => {
     },
     [dispatch, recordAnalytics]
   )
-
-  return pauseTrack
 }
 
 /**
- * Represents that props passed into the useToggleTrack hook.
- *
- * @typedef {Object} UseToggleTrackProps
- * @property {string} uid the uid of the track (nullable)
- * @property {string} source the queue source
- * @property {boolean} isPreview whether the track is a preview
- * @property {Function} recordAnalytics the function that tracks the event
- * @property {number} id the id of the track (nullable and optional)
- */
-
-/**
- * Represents that props passed into the useToggleTrack hook.
- *
- * @typedef {Object} UseToggleTrackResult
- * @property {Function} togglePlay the function that toggles the track i.e. play/pause
- * @property {boolean} isTrackPlaying whether the track is playing or paused
- */
-
-/**
- * Hook that exposes a togglePlay function and isTrackPlaying boolean
- * to facilitate the playing / pausing of a track.
- * Also records the play / pause action as an analytics event.
- * Leverages the useTrackPlay and useTrackPause hooks.
- *
- * @param {UseToggleTrackProps} param Object passed into function
- *
- * @returns {UseToggleTrackResult} the object that contains togglePlay and isTrackPlaying
+ * Hook that exposes a togglePlay function and an isTrackPlaying flag for
+ * a single track. Leverages usePlayTrack / usePauseTrack and records
+ * play/pause analytics events.
  */
 export const useToggleTrack = ({
   uid,

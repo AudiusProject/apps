@@ -18,7 +18,7 @@ import {
   mobileOverflowMenuUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors
 } from '@audius/common/store'
 import {
@@ -54,7 +54,7 @@ import { UserLink } from '../user-link'
 import { TrackArtwork } from './TrackArtwork'
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 
-const { getPlaying, getUid } = playerSelectors
+const { getPlaying, getUid } = playbackSelectors
 const { getTrackPosition } = playbackPositionSelectors
 
 export type TrackItemAction = 'overflow' | 'remove'

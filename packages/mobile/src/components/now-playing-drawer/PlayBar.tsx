@@ -2,7 +2,7 @@ import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { FavoriteSource, SquareSizes } from '@audius/common/models'
 import type { Track, User } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { TouchableOpacity, Animated, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -20,7 +20,7 @@ import { TrackImage } from '../image/TrackImage'
 import { PlayButton } from './PlayButton'
 import { TrackingBar } from './TrackingBar'
 import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 
 const messages = {
   preview: 'PREVIEW'

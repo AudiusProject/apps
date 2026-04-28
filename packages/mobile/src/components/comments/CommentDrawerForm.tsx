@@ -7,7 +7,7 @@ import {
   usePostComment
 } from '@audius/common/context'
 import type { UserMetadata } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { CommentMention } from '@audius/sdk'
 import {
   BottomSheetTextInput,
@@ -40,7 +40,7 @@ export const CommentDrawerForm = (props: CommentDrawerFormProps) => {
     replyingAndEditingState ?? {}
   const [postComment] = usePostComment()
   const [editComment] = useEditComment()
-  const playerTrackId = useSelector(playerSelectors.getTrackId)
+  const playerTrackId = useSelector(playbackSelectors.getTrackId)
 
   const handlePostComment = async (
     message: string,

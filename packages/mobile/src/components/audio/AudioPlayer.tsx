@@ -5,13 +5,11 @@ import { useCurrentTrack } from '@audius/common/hooks'
 import { ErrorLevel, Feature, Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   reachabilitySelectors,
   tracksSocialActions,
-  playerActions,
-  playerSelectors,
   playbackRateValueMap,
   playbackPositionActions,
   playbackPositionSelectors,
@@ -78,19 +76,19 @@ const getArtworkTargetSize = (artwork?: Track['artwork']) =>
   SquareSizes.SIZE_1000_BY_1000
 
 const { getPlaying, getSeek, getCounter, getPlaybackRate, getUid } =
-  playerSelectors
+  playbackSelectors
 const { setTrackPosition } = playbackPositionActions
 const { getUserTrackPositions } = playbackPositionSelectors
 const { recordListen } = tracksSocialActions
-const { getPlayerBehavior } = queueSelectors
+const { getCurrentPlayerBehavior: getPlayerBehavior } = playbackSelectors
 const {
-  getIndex,
+  getPlaybackIndex: getIndex,
   getOrder,
-  getSource,
+  getCurrentSource: getSource,
   getCollectionId,
   getRepeat,
   getShuffle
-} = queueSelectors
+} = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
 
 const { getNftAccessSignatureMap } = gatedContentSelectors
@@ -250,20 +248,20 @@ export const AudioPlayer = () => {
   const isLongFormContentRef = useRef<boolean>(false)
   const [isAudioSetup, setIsAudioSetup] = useState(false)
 
-  const play = useCallback(() => dispatch(playerActions.play()), [dispatch])
-  const pause = useCallback(() => dispatch(playerActions.pause()), [dispatch])
-  const next = useCallback(() => dispatch(queueActions.next()), [dispatch])
+  const play = useCallback(() => dispatch(playbackActions.play()), [dispatch])
+  const pause = useCallback(() => dispatch(playbackActions.pause()), [dispatch])
+  const next = useCallback(() => dispatch(playbackActions.next()), [dispatch])
   const previous = useCallback(
-    () => dispatch(queueActions.previous()),
+    () => dispatch(playbackActions.previous()),
     [dispatch]
   )
 
   const reset = useCallback(
-    () => dispatch(playerActions.reset({ shouldAutoplay: false })),
+    () => dispatch(playbackActions.reset({ shouldAutoplay: false })),
     [dispatch]
   )
   const updateQueueIndex = useCallback(
-    (index: number) => dispatch(queueActions.updateIndex({ index })),
+    (index: number) => dispatch(playbackActions.setIndex({ index })),
     [dispatch]
   )
   const updatePlayerInfo = useCallback(
@@ -276,7 +274,7 @@ export const AudioPlayer = () => {
       trackId: number
       uid: string
     }) => {
-      dispatch(playerActions.set({ previewing, trackId, uid }))
+      dispatch(playbackActions.set({ previewing, trackId, uid }))
     },
     [dispatch]
   )
@@ -294,7 +292,7 @@ export const AudioPlayer = () => {
       bufferingDuringPlay !== undefined &&
       bufferingDuringPlay !== previousBufferingState
     ) {
-      dispatch(playerActions.setBuffering({ buffering: bufferingDuringPlay }))
+      dispatch(playbackActions.setBuffering({ buffering: bufferingDuringPlay }))
       if (!bufferingDuringPlay && bufferStartTime) {
         const bufferDuration = Math.ceil(performance.now() - bufferStartTime)
         analyticsTrack(
@@ -505,7 +503,9 @@ export const AudioPlayer = () => {
             const trackPosition = trackPositions?.[track.track_id]
             if (trackPosition?.status === 'IN_PROGRESS') {
               dispatch(
-                playerActions.seek({ seconds: trackPosition.playbackPosition })
+                playbackActions.seekTo({
+                  seconds: trackPosition.playbackPosition
+                })
               )
             } else if (isLongFormContent) {
               dispatch(

@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux'
 import { SelectableQueryOptions, useTrack } from '~/api'
 import { TQTrack } from '~/api/tan-query/models'
 
-import { playerSelectors } from '../store/player'
+import { playbackSelectors } from '../store/playback'
 
-const { getTrackId } = playerSelectors
+const { getTrackId } = playbackSelectors
 
 /**
  * Hook to get the current track from the player state

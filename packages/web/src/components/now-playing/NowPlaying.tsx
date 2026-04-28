@@ -17,8 +17,8 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -26,8 +26,6 @@ import {
   OverflowAction,
   OverflowSource,
   usePremiumContentPurchaseModal,
-  playerActions,
-  playerSelectors,
   playbackRateValueMap,
   gatedContentSelectors,
   OverflowActionCallbacks,
@@ -71,15 +69,22 @@ import { withNullGuard } from 'utils/withNullGuard'
 import styles from './NowPlaying.module.css'
 import ActionsBar from './components/ActionsBar'
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const { getBuffering, getCounter, getPlaying, getPlaybackRate, getSeek } =
-  playerSelectors
+  playbackSelectors
 
-const { seek, reset } = playerActions
+const { seekTo: seek, reset } = playbackActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { next, pause, play, previous, repeat, shuffle } = queueActions
+const {
+  next,
+  pause,
+  play,
+  previous,
+  setRepeat: repeat,
+  setShuffle: shuffle
+} = playbackActions
 const { getGatedContentStatusMap } = gatedContentSelectors
 
 type OwnProps = {

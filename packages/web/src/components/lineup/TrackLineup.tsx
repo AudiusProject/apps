@@ -1,12 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react'
 
 import { Kind, ID, PlaybackSource, Name } from '@audius/common/models'
-import {
-  playbackActions,
-  playbackSelectors,
-  playerSelectors,
-  queueSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack, PlaybackQuerySource } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import { Divider, Flex } from '@audius/harmony'
@@ -27,8 +22,8 @@ import { LineupVariant } from './types'
 const NARROW_CONTAINER_THRESHOLD_PX = 600
 const DEFAULT_LOAD_MORE_THRESHOLD = 500
 
-const { getPlaying: getPlayerPlaying } = playerSelectors
-const { makeGetCurrent } = queueSelectors
+const { getPlaying: getPlayerPlaying } = playbackSelectors
+const { makeGetCurrent } = playbackSelectors
 const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 export type TrackLineupProps = {
@@ -154,7 +149,7 @@ export const TrackLineup = ({
       trackIds.map((id) => ({
         trackId: id,
         source,
-        legacyUid: uidFor(id)
+        uid: uidFor(id)
       })),
     [trackIds, source, uidFor]
   )

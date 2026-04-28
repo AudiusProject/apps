@@ -4,10 +4,9 @@ import { useCurrentUserId, useUser } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
 import { Name, PlaybackSource } from '@audius/common/models'
 import {
-  queueActions,
+  playbackActions,
   RepeatMode,
-  playerActions,
-  playerSelectors,
+  playbackSelectors,
   playbackRateValueMap
 } from '@audius/common/store'
 import { Genre, route } from '@audius/common/utils'
@@ -34,10 +33,18 @@ import { SocialActions } from './components/SocialActions'
 
 const { profilePage } = route
 const { getPlaying, getCounter, getUid, getBuffering, getPlaybackRate } =
-  playerSelectors
+  playbackSelectors
 
-const { seek, reset } = playerActions
-const { play, pause, next, previous, repeat, shuffle } = queueActions
+const {
+  seekTo: seek,
+  reset,
+  play,
+  pause,
+  next,
+  previous,
+  setRepeat: repeat,
+  setShuffle: shuffle
+} = playbackActions
 
 const SKIP_DURATION_SEC = 15
 const RESTART_THRESHOLD_SEC = 3

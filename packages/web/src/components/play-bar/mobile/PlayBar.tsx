@@ -10,10 +10,9 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
-  tracksSocialActions,
-  playerSelectors
+  playbackActions,
+  playbackSelectors,
+  tracksSocialActions
 } from '@audius/common/store'
 import {
   createKeyboardActivationHandler,
@@ -37,10 +36,11 @@ import { AppState } from 'store/types'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import styles from './PlayBar.module.css'
-const { makeGetCurrent } = queueSelectors
-const { getPreviewing, getBuffering, getCounter, getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPreviewing, getBuffering, getCounter, getPlaying } =
+  playbackSelectors
 const { recordListen } = tracksSocialActions
-const { pause, play } = queueActions
+const { pause, play } = playbackActions
 
 const SEEK_INTERVAL = 200
 

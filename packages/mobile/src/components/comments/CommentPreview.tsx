@@ -8,7 +8,7 @@ import {
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { CommentMention } from '@audius/sdk'
 import { OptionalHashId } from '@audius/sdk'
 import { TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
@@ -92,7 +92,7 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
     entityId
   } = useCurrentCommentSection()
   const [postComment] = usePostComment()
-  const playerTrackId = useSelector(playerSelectors.getTrackId)
+  const playerTrackId = useSelector(playbackSelectors.getTrackId)
 
   const handlePress = useCallback(() => {
     openCommentDrawer()

@@ -1,13 +1,13 @@
 import { Feature } from '@audius/common/models'
-import { playerActions } from '@audius/common/store'
+import { playbackActions } from '@audius/common/store'
 
 import { createErrorSagas } from 'utils/errorSagas'
 
-const { error } = playerActions
+const { error } = playbackActions
 
-type PlayerErrors = ReturnType<typeof error>
+type PlaybackErrors = ReturnType<typeof error>
 
-const errorSagas = createErrorSagas<PlayerErrors>({
+const errorSagas = createErrorSagas<PlaybackErrors>({
   errorTypes: [error.type],
   getShouldRedirect: () => false,
   getShouldReport: () => true,

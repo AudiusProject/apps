@@ -21,7 +21,7 @@ import {
 import {
   collectionsSocialActions,
   shareModalUIActions,
-  playerSelectors,
+  playbackSelectors,
   usePremiumContentPurchaseModal,
   PurchaseableContentType
 } from '@audius/common/store'
@@ -63,7 +63,7 @@ import { getCollectionWithFallback } from '../helpers'
 
 import TrackListItem from './TrackListItem'
 
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const {
   saveCollection,

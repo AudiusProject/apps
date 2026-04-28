@@ -28,7 +28,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import { formatLineupTileDuration, route } from '@audius/common/utils'
 import {
@@ -67,7 +67,7 @@ import styles from './PlaylistTile.module.css'
 import TrackTileArt from './TrackTileArt'
 
 const { collectionPage } = route
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const {

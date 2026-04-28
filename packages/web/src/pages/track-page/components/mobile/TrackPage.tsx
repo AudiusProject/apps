@@ -31,10 +31,8 @@ import {
   favoritesUserListActions,
   repostsUserListActions,
   mobileOverflowMenuUIActions,
-  playerSelectors,
-  playerActions,
-  playbackActions,
   playbackSelectors,
+  playbackActions,
   RepostType
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
@@ -66,7 +64,7 @@ import TrackPageHeader from './TrackHeader'
 import { RemixContestSection } from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { setFavorite } = favoritesUserListActions
@@ -147,16 +145,12 @@ const TrackPage = () => {
       const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const tracks: PlaybackTrack[] = [
           {
             trackId: track.track_id,
             source: playbackSource,
-            legacyUid: makeStableUid(
-              Kind.TRACKS,
-              track.track_id,
-              playbackSource
-            )
+            uid: makeStableUid(Kind.TRACKS, track.track_id, playbackSource)
           }
         ]
         dispatch(

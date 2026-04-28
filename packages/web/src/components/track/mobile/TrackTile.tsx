@@ -25,7 +25,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
@@ -61,7 +61,7 @@ import TrackTileArt from './TrackTileArt'
 
 const { setLockedContentId } = gatedContentActions
 const { getGatedContentStatusMap } = gatedContentSelectors
-const { getUid, getPlaying, getBuffering } = playerSelectors
+const { getUid, getPlaying, getBuffering } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions

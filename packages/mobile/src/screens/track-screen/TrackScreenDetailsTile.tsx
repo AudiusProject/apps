@@ -33,7 +33,7 @@ import type {
 } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import {
-  queueSelectors,
+  playbackSelectors,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -44,7 +44,6 @@ import {
   favoritesUserListActions,
   trackPageActions,
   RepostType,
-  playerSelectors,
   playbackActions,
   playbackPositionSelectors,
   PurchaseableContentType,
@@ -99,7 +98,7 @@ import { makeStyles } from 'app/styles'
 import { DownloadSection } from './DownloadSection'
 import { TrackDescription } from './TrackDescription'
 
-const { getPlaying, getTrackId, getPreviewing } = playerSelectors
+const { getPlaying, getTrackId, getPreviewing } = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -107,7 +106,7 @@ const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { getIsReachable } = reachabilitySelectors
 const { getTrackPosition } = playbackPositionSelectors
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
@@ -351,7 +350,7 @@ export const TrackScreenDetailsTile = ({
               {
                 trackId,
                 source: playbackSource,
-                legacyUid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
+                uid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
               }
             ],
             startIndex: 0,

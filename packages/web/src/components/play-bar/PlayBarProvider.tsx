@@ -1,4 +1,4 @@
-import { modalsSelectors, playerSelectors } from '@audius/common/store'
+import { modalsSelectors, playbackSelectors } from '@audius/common/store'
 import cn from 'classnames'
 import { connect } from 'react-redux'
 
@@ -8,7 +8,7 @@ import { AppState } from 'store/types'
 
 import styles from './PlayBarProvider.module.css'
 import DesktopPlayBar from './desktop/PlayBar'
-const { getUid: getPlayingUid } = playerSelectors
+const { getUid: getPlayingUid } = playbackSelectors
 const { getModalVisibility } = modalsSelectors
 
 type OwnProps = {
