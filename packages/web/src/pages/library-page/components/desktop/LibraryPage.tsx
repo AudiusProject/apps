@@ -224,24 +224,29 @@ const LibraryPage = () => {
     },
     bodyClassName: styles.tabBody,
     elementClassName: styles.tabElement,
+    pathname: '/library',
+    routed: true,
     tabs: [
       {
         icon: <IconNote />,
         text: LibraryPageTabs.TRACKS,
         label: LibraryPageTabs.TRACKS,
-        hideText: shouldHideTabText
+        hideText: shouldHideTabText,
+        to: 'tracks'
       },
       {
         icon: <IconAlbum />,
         text: LibraryPageTabs.ALBUMS,
         label: LibraryPageTabs.ALBUMS,
-        hideText: shouldHideTabText
+        hideText: shouldHideTabText,
+        to: 'albums'
       },
       {
         icon: <IconPlaylists />,
         text: LibraryPageTabs.PLAYLISTS,
         label: LibraryPageTabs.PLAYLISTS,
-        hideText: shouldHideTabText
+        hideText: shouldHideTabText,
+        to: 'playlists'
       }
     ],
     elements: [

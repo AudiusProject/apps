@@ -590,17 +590,20 @@ const tabHeaders = [
   {
     icon: <IconNote />,
     text: LibraryPageTabs.TRACKS,
-    label: LibraryPageTabs.TRACKS
+    label: LibraryPageTabs.TRACKS,
+    to: 'tracks'
   },
   {
     icon: <IconAlbum />,
     text: LibraryPageTabs.ALBUMS,
-    label: LibraryPageTabs.ALBUMS
+    label: LibraryPageTabs.ALBUMS,
+    to: 'albums'
   },
   {
     icon: <IconPlaylists />,
     text: LibraryPageTabs.PLAYLISTS,
-    label: LibraryPageTabs.PLAYLISTS
+    label: LibraryPageTabs.PLAYLISTS,
+    to: 'playlists'
   }
 ]
 
@@ -662,7 +665,9 @@ const LibraryPage = () => {
     elements,
     selectedTabLabel: currentTab,
     initialScrollOffset: SCROLL_HEIGHT,
-    onTabClick: handleTabClick
+    onTabClick: handleTabClick,
+    pathname: '/library',
+    routed: true
   })
 
   const { setHeader } = useContext(HeaderContext)

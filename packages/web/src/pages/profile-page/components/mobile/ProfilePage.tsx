@@ -390,7 +390,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     tabs: profileTabs,
     elements: profileElements,
     initialTab: activeTab || undefined,
-    pathname: profilePage(handle)
+    pathname: profilePage(handle),
+    routed: true
   })
 
   if (!profile) {

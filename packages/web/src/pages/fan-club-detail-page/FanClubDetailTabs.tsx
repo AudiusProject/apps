@@ -1,12 +1,13 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 import { coinDetailsMessages } from '@audius/common/messages'
 import { EDIT_COIN_DETAILS_PAGE } from '@audius/common/src/utils/route'
 import { Button } from '@audius/harmony'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 
 import useTabs from 'hooks/useTabs/useTabs'
 import { AudioWalletTransactions } from 'pages/audio-page/AudioWalletTransactions'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { env } from 'services/env'
 
 import { FanClubDetailContent } from './FanClubDetailContent'
@@ -15,6 +16,8 @@ export enum FanClubDetailTabType {
   HOME = 'home',
   TRANSACTIONS = 'transactions'
 }
+
+const TAB_PARAM = 'tab'
 
 const messages = {
   home: 'Home',
@@ -33,12 +36,13 @@ export const useFanClubDetailTabs = ({
   ticker,
   isOwner = false
 }: UseFanClubDetailTabsProps) => {
-  const [selectedTab, setSelectedTab] = useState(FanClubDetailTabType.HOME)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const updateTabSearchParam = useUpdateSearchParams(TAB_PARAM)
 
-  const handleTabChange = useCallback((_from: string, to: string) => {
-    setSelectedTab(to as FanClubDetailTabType)
-  }, [])
+  const selectedTab =
+    (searchParams.get(TAB_PARAM) as FanClubDetailTabType) ??
+    FanClubDetailTabType.HOME
 
   const handleEditClick = useCallback(() => {
     if (ticker) {
@@ -70,7 +74,7 @@ export const useFanClubDetailTabs = ({
     tabs,
     selectedTabLabel: selectedTab,
     elements: tabElements,
-    didChangeTabsFrom: handleTabChange
+    onTabClick: updateTabSearchParam
   })
 
   const rightDecorator = isOwner ? (

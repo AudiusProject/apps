@@ -20,6 +20,7 @@ import { isKeyboardActivationKey, Text, Tooltip } from '@audius/harmony'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 import cn from 'classnames'
 import { throttle } from 'lodash'
+import { useLocation, useNavigate } from 'react-router'
 // eslint-disable-next-line no-restricted-imports
 import { animated, useTransition, useSpring } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
@@ -1099,6 +1100,12 @@ type UseTabsArguments = {
   initialScrollOffset?: number
   // The base pathname url of the page to determine tab navigation
   pathname?: string
+
+  // When true, integrate with react-router. Requires `pathname`.
+  // The active tab is derived from the current location matched against
+  // `${pathname}/${tab.to}`, and clicking a tab pushes that URL via navigate().
+  // This makes browser back/forward and deep links work for tabs.
+  routed?: boolean
 }
 
 type UseTabsResult = {
@@ -1136,12 +1143,38 @@ const useTabs = ({
   disabledTabTooltipText,
   tabRecalculator,
   initialScrollOffset = 0,
-  pathname
+  pathname,
+  routed = false
 }: UseTabsArguments): UseTabsResult => {
   if (tabs.length !== elements.length)
     throw new Error('Non-matching number of tabs and elements')
 
-  const isControlled = !!selectedTabLabel
+  // Always call these hooks (rules of hooks); only use the values when `routed`.
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // Derive the active tab from the URL when in routed mode.
+  // Falls back to `initialTab` when no subpath matches a tab.to (e.g. the
+  // canonical "default tab" URL like /handle for an artist's tracks).
+  const routedSelectedLabel = useMemo(() => {
+    if (!routed || !pathname) return undefined
+    const subpath = location.pathname.startsWith(pathname)
+      ? location.pathname
+          .slice(pathname.length)
+          .replace(/^\/+/, '')
+          .split('/')[0]
+      : ''
+    const matched = tabs.find((t) => t.to === subpath)
+    if (matched) return matched.label
+    if (initialTab && tabs.some((t) => t.label === initialTab))
+      return initialTab
+    return tabs[0]?.label
+  }, [routed, pathname, location.pathname, tabs, initialTab])
+
+  const effectiveSelectedTabLabel = routed
+    ? routedSelectedLabel
+    : selectedTabLabel
+  const isControlled = !!effectiveSelectedTabLabel
 
   // Set up full width transitions
   const fullWidthContainerRef = useRef<HTMLDivElement>(null)
@@ -1182,7 +1215,7 @@ const useTabs = ({
 
   // Find the starting index
   const controlledIndex = isControlled
-    ? tabs.findIndex((t) => t.label === selectedTabLabel)
+    ? tabs.findIndex((t) => t.label === effectiveSelectedTabLabel)
     : initialTab
       ? tabs.findIndex((t) => t.label === initialTab)
       : 0
@@ -1263,6 +1296,17 @@ const useTabs = ({
 
   const onTabClick = useCallback(
     (newIndex: number) => {
+      // In routed mode, push the URL and let useLocation drive the active
+      // index. didChangeTabsFrom will fire from the URL-change effect below.
+      if (routed && pathname) {
+        const tab = tabs[newIndex]
+        const target = tab.to !== undefined ? `${pathname}/${tab.to}` : pathname
+        // Preserve query string so filters/search persist across tab clicks.
+        navigate({ pathname: target, search: location.search })
+        onTabClickCb && onTabClickCb(tab.label)
+        return
+      }
+
       if (isControlled) {
         onChangeComplete(activeIndex, newIndex)
         onTabClickCb && onTabClickCb(tabs[newIndex].label)
@@ -1277,6 +1321,10 @@ const useTabs = ({
       onTabClickCb && onTabClickCb(tabs[newIndex].label)
     },
     [
+      routed,
+      pathname,
+      navigate,
+      location.search,
       isControlled,
       isMobile,
       isMobileV2,
@@ -1286,6 +1334,20 @@ const useTabs = ({
       tabs
     ]
   )
+
+  // In routed mode, fire didChangeTabsFrom when the URL change moves the
+  // active tab (controlled mode otherwise routes this through onChangeComplete
+  // synchronously on click).
+  const prevRoutedLabelRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!routed) return
+    const newLabel = tabs[activeIndex]?.label
+    const prev = prevRoutedLabelRef.current
+    if (prev !== undefined && newLabel && prev !== newLabel) {
+      didChangeTabsFrom?.(prev, newLabel)
+    }
+    prevRoutedLabelRef.current = newLabel
+  }, [routed, activeIndex, tabs, didChangeTabsFrom])
 
   const tabBarKey = tabs.map((t) => t.label).join('-')
 

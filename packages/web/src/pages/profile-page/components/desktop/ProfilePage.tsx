@@ -389,7 +389,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     tabRecalculator,
     initialTab: activeTab || undefined,
     elements,
-    pathname: profilePage(handle)
+    pathname: profilePage(handle),
+    routed: true
   })
 
   const {
