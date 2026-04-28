@@ -1,6 +1,14 @@
-import { memo, useCallback, useMemo, useRef, type ReactElement } from 'react'
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  type ReactElement
+} from 'react'
 
-import { useDebouncedCallback } from '@audius/common/hooks'
+import {
+  useDebouncedCallback
+} from '@audius/common/hooks'
 import {
   Kind,
   type ID,
@@ -9,27 +17,42 @@ import {
 } from '@audius/common/models'
 import {
   playbackActions,
-  playbackSelectors,
-  playerSelectors,
-  queueSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
-import { range } from 'lodash'
+import {
+  makeStableUid
+} from '@audius/common/utils'
+import {
+  range
+} from 'lodash'
 import type {
   SectionList as RNSectionList,
   SectionListProps,
   ViewStyle
 } from 'react-native'
-import { StyleSheet, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  StyleSheet,
+  View
+} from 'react-native'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { SectionList } from 'app/components/core'
-import { TrackTile, LineupTileSkeleton } from 'app/components/lineup-tile'
-import { useScrollToTop } from 'app/hooks/useScrollToTop'
+import {
+  SectionList
+} from 'app/components/core'
+import {
+  TrackTile,
+  LineupTileSkeleton
+} from 'app/components/lineup-tile'
+import {
+  useScrollToTop
+} from 'app/hooks/useScrollToTop'
 
-const { makeGetCurrent } = queueSelectors
-const { getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying } = playbackSelectors
 const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 // Threshold (as a fraction of visible list height) for how close to the end
@@ -164,7 +187,7 @@ export const TrackLineup = ({
       visibleTrackIds.map((id) => ({
         trackId: id,
         source,
-        legacyUid: uidFor(id)
+        uid: uidFor(id)
       })),
     [visibleTrackIds, source, uidFor]
   )

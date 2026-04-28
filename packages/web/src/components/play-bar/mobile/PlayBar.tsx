@@ -1,7 +1,16 @@
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useState
+} from 'react'
 
-import { useToggleFavoriteTrack, useUser } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useToggleFavoriteTrack,
+  useUser
+} from '@audius/common/api'
+import {
+  useCurrentTrack,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   Name,
   FavoriteSource,
@@ -10,10 +19,9 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
-  tracksSocialActions,
-  playerSelectors
+  playbackActions,
+  playbackSelectors,
+  tracksSocialActions
 } from '@audius/common/store'
 import {
   createKeyboardActivationHandler,
@@ -21,26 +29,47 @@ import {
   IconLock
 } from '@audius/harmony'
 import cn from 'classnames'
-import { connect, useSelector } from 'react-redux'
-import { Dispatch } from 'redux'
+import {
+  connect,
+  useSelector
+} from 'react-redux'
+import {
+  Dispatch
+} from 'redux'
 
-import { make, useRecord } from 'common/store/analytics/actions'
+import {
+  make,
+  useRecord
+} from 'common/store/analytics/actions'
 import FavoriteButton from 'components/alt-button/FavoriteButton'
-import { LockedStatusBadge } from 'components/locked-status-badge'
+import {
+  LockedStatusBadge
+} from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import TrackingBar from 'components/play-bar/TrackingBar'
-import { PlayButtonStatus } from 'components/play-bar/types'
+import {
+  PlayButtonStatus
+} from 'components/play-bar/types'
 import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
-import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
-import { audioPlayer } from 'services/audio-player'
-import { AppState } from 'store/types'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import {
+  useTrackCoverArt
+} from 'hooks/useTrackCoverArt'
+import {
+  audioPlayer
+} from 'services/audio-player'
+import {
+  AppState
+} from 'store/types'
+import {
+  useIsDarkMode,
+  useIsMatrix
+} from 'utils/theme/theme'
 
 import styles from './PlayBar.module.css'
-const { makeGetCurrent } = queueSelectors
-const { getPreviewing, getBuffering, getCounter, getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPreviewing, getBuffering, getCounter, getPlaying } = playbackSelectors
 const { recordListen } = tracksSocialActions
-const { pause, play } = queueActions
+const { pause, play } = playbackActions
 
 const SEEK_INTERVAL = 200
 

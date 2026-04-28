@@ -1,7 +1,15 @@
-import { useCallback, useMemo } from 'react'
+import {
+  useCallback,
+  useMemo
+} from 'react'
 
-import { useFanClubFeed, type FanClubFeedItem } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
+import {
+  useFanClubFeed,
+  type FanClubFeedItem
+} from '@audius/common/api'
+import {
+  useFeatureFlag
+} from '@audius/common/hooks'
 import {
   Kind,
   Name,
@@ -10,27 +18,50 @@ import {
   ID,
   ModalSource
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
+import {
+  FeatureFlags
+} from '@audius/common/services'
 import {
   playbackActions,
-  playerSelectors,
-  queueSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
-import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  makeStableUid
+} from '@audius/common/utils'
+import {
+  Button,
+  Flex,
+  LoadingSpinner,
+  Text
+} from '@audius/harmony'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
-import { TrackTile as TrackTileDesktop } from 'components/track/desktop/TrackTile'
-import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
-import { TrackTileSize } from 'components/track/types'
-import { useIsMobile } from 'hooks/useIsMobile'
+import {
+  make
+} from 'common/store/analytics/actions'
+import {
+  TrackTile as TrackTileDesktop
+} from 'components/track/desktop/TrackTile'
+import {
+  TrackTile as MobileTrackTile
+} from 'components/track/mobile/TrackTile'
+import {
+  TrackTileSize
+} from 'components/track/types'
+import {
+  useIsMobile
+} from 'hooks/useIsMobile'
 
-import { TextPostCard } from './TextPostCard'
+import {
+  TextPostCard
+} from './TextPostCard'
 
-const { getPlaying } = playerSelectors
-const { makeGetCurrent } = queueSelectors
+const { getPlaying } = playbackSelectors
+const { makeGetCurrent } = playbackSelectors
 
 const messages = {
   title: 'Fan Club Feed',
@@ -80,7 +111,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
       .map((item) => ({
         trackId: item.trackId,
         source: FAN_CLUB_SOURCE,
-        legacyUid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
+        uid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
       }))
   }, [feedItems])
 

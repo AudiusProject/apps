@@ -1,13 +1,27 @@
-import { createContext, useCallback, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useState
+} from 'react'
 
-import { queueActions, playerSelectors } from '@audius/common/store'
-import { Nullable } from '@audius/common/utils'
-import { useSelector, useDispatch } from 'react-redux'
+import {
+  playbackActions,
+  playbackSelectors
+} from '@audius/common/store'
+import {
+  Nullable
+} from '@audius/common/utils'
+import {
+  useSelector,
+  useDispatch
+} from 'react-redux'
 
-import { audioPlayer } from 'services/audio-player'
+import {
+  audioPlayer
+} from 'services/audio-player'
 
-const { getPlaying } = playerSelectors
-const { pause: pauseQueue } = queueActions
+const { getPlaying } = playbackSelectors
+const { pause: pauseQueue } = playbackActions
 
 type PreviewContextProps = {
   playPreview: (preview: HTMLAudioElement, idx: number) => void

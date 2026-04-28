@@ -1,4 +1,10 @@
-import { useMemo, useCallback, useEffect, useRef, MouseEvent } from 'react'
+import {
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+  MouseEvent
+} from 'react'
 
 import {
   useCollection,
@@ -21,11 +27,14 @@ import {
 import {
   collectionsSocialActions,
   shareModalUIActions,
-  playerSelectors,
+  playbackSelectors,
   usePremiumContentPurchaseModal,
   PurchaseableContentType
 } from '@audius/common/store'
-import { formatLineupTileDuration, route } from '@audius/common/utils'
+import {
+  formatLineupTileDuration,
+  route
+} from '@audius/common/utils'
 import {
   Scrollbar,
   IconArrowRight as IconArrow,
@@ -38,32 +47,72 @@ import {
   IconButton,
   IconVolumeLevel2 as IconVolume
 } from '@audius/harmony'
-import { LocationState } from 'history'
-import { range } from 'lodash'
-import { useSelector, useDispatch } from 'react-redux'
+import {
+  LocationState
+} from 'history'
+import {
+  range
+} from 'lodash'
+import {
+  useSelector,
+  useDispatch
+} from 'react-redux'
 
-import { TrackEvent, make } from 'common/store/analytics/actions'
-import { CollectionTileStats } from 'components/collection/CollectionTileStats'
-import { Draggable } from 'components/dragndrop'
-import { TextLink, UserLink } from 'components/link'
-import { OwnProps as CollectionMenuProps } from 'components/menu/CollectionMenu'
+import {
+  TrackEvent,
+  make
+} from 'common/store/analytics/actions'
+import {
+  CollectionTileStats
+} from 'components/collection/CollectionTileStats'
+import {
+  Draggable
+} from 'components/dragndrop'
+import {
+  TextLink,
+  UserLink
+} from 'components/link'
+import {
+  OwnProps as CollectionMenuProps
+} from 'components/menu/CollectionMenu'
 import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
-import { CollectionArtwork } from 'components/track/Artwork'
-import { TrackTileSize } from 'components/track/types'
-import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { isDescendantElementOf } from 'utils/domUtils'
-import { push as pushRoute } from 'utils/navigation'
-import { fullTrackPage } from 'utils/route'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import {
+  CollectionArtwork
+} from 'components/track/Artwork'
+import {
+  TrackTileSize
+} from 'components/track/types'
+import {
+  useRequiresAccountOnClick
+} from 'hooks/useRequiresAccount'
+import {
+  isDescendantElementOf
+} from 'utils/domUtils'
+import {
+  push as pushRoute
+} from 'utils/navigation'
+import {
+  fullTrackPage
+} from 'utils/route'
+import {
+  useIsDarkMode,
+  useIsMatrix
+} from 'utils/theme/theme'
 
-import { OwnerActionButtons } from '../OwnerActionButtons'
-import { ViewerActionButtons } from '../ViewerActionButtons'
-import { getCollectionWithFallback } from '../helpers'
+import {
+  OwnerActionButtons
+} from '../OwnerActionButtons'
+import {
+  ViewerActionButtons
+} from '../ViewerActionButtons'
+import {
+  getCollectionWithFallback
+} from '../helpers'
 
 import TrackListItem from './TrackListItem'
 
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const {
   saveCollection,

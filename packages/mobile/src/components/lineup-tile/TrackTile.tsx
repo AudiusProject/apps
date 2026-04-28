@@ -1,4 +1,9 @@
-import { memo, useCallback, useContext, useRef } from 'react'
+import {
+  memo,
+  useCallback,
+  useContext,
+  useRef
+} from 'react'
 
 import {
   useCurrentUserId,
@@ -6,7 +11,9 @@ import {
   useTrack,
   useUser
 } from '@audius/common/api'
-import { useGatedTrackAccess } from '@audius/common/hooks'
+import {
+  useGatedTrackAccess
+} from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
@@ -22,7 +29,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors,
   trackPageActions,
   PurchaseableContentType,
@@ -31,25 +38,54 @@ import {
   usePublishConfirmationModal
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
-import { Genre, removeNullable } from '@audius/common/utils'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  Genre,
+  removeNullable
+} from '@audius/common/utils'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { Paper, type ImageProps } from '@audius/harmony-native'
-import { LineupContext } from 'app/components/lineup/LineupContext'
+import {
+  Paper,
+  type ImageProps
+} from '@audius/harmony-native'
+import {
+  LineupContext
+} from 'app/components/lineup/LineupContext'
 import type { TrackTileProps } from 'app/components/lineup-tile/types'
-import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { setVisibility } from 'app/store/drawers/slice'
+import {
+  useIsUSDCEnabled
+} from 'app/hooks/useIsUSDCEnabled'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  setVisibility
+} from 'app/store/drawers/slice'
 
-import { TrackImage } from '../image/TrackImage'
-import { TrackDogEar } from '../track/TrackDogEar'
+import {
+  TrackImage
+} from '../image/TrackImage'
+import {
+  TrackDogEar
+} from '../track/TrackDogEar'
 
-import { LineupTileActionButtons } from './LineupTileActionButtons'
-import { LineupTileMetadata } from './LineupTileMetadata'
-import { TilePressBlockContext } from './TilePressBlockContext'
-import { TrackTileStats } from './TrackTileStats'
+import {
+  LineupTileActionButtons
+} from './LineupTileActionButtons'
+import {
+  LineupTileMetadata
+} from './LineupTileMetadata'
+import {
+  TilePressBlockContext
+} from './TilePressBlockContext'
+import {
+  TrackTileStats
+} from './TrackTileStats'
 
-const { getUid } = playerSelectors
+const { getUid } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions

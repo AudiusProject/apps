@@ -1,7 +1,14 @@
-import { playerActions } from '@audius/common/store'
+import {
+  playbackActions
+} from '@audius/common/store'
 import TrackPlayer, { RepeatMode, useProgress } from 'react-native-track-player'
-import { useDispatch } from 'react-redux'
-import { useAsync, usePrevious } from 'react-use'
+import {
+  useDispatch
+} from 'react-redux'
+import {
+  useAsync,
+  usePrevious
+} from 'react-use'
 
 export const RepeatListener = () => {
   const dispatch = useDispatch()
@@ -15,7 +22,7 @@ export const RepeatListener = () => {
     ) {
       // Manually increment player count if we are repeating
       if ((await TrackPlayer.getRepeatMode()) === RepeatMode.Track) {
-        dispatch(playerActions.incrementCount())
+        dispatch(playbackActions.incrementCounter())
       }
     }
   }, [position, previousPosition, dispatch])

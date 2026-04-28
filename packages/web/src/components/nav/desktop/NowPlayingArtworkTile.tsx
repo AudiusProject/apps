@@ -1,8 +1,19 @@
-import { MouseEvent, useCallback, useRef } from 'react'
+import {
+  MouseEvent,
+  useCallback,
+  useRef
+} from 'react'
 
-import { useCurrentUserId, useTrack } from '@audius/common/api'
-import { SquareSizes } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import {
+  useCurrentUserId,
+  useTrack
+} from '@audius/common/api'
+import {
+  SquareSizes
+} from '@audius/common/models'
+import {
+  playbackSelectors
+} from '@audius/common/store'
 import {
   IconImage,
   IconWaveForm as IconVisualizer,
@@ -11,24 +22,43 @@ import {
   Paper,
   Text
 } from '@audius/harmony'
-import { animated, useSpring } from '@react-spring/web'
-import { useDispatch, useSelector } from 'react-redux'
-import { Link, useLocation } from 'react-router'
+import {
+  animated,
+  useSpring
+} from '@react-spring/web'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  Link,
+  useLocation
+} from 'react-router'
 
-import { Draggable } from 'components/dragndrop'
+import {
+  Draggable
+} from 'components/dragndrop'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
-import { TrackDogEar } from 'components/track/TrackDogEar'
+import {
+  TrackDogEar
+} from 'components/track/TrackDogEar'
 import {
   useTrackCoverArt,
   useTrackCoverArtDominantColor
 } from 'hooks/useTrackCoverArt'
-import { NO_VISUALIZER_ROUTES } from 'pages/visualizer/constants'
-import { openVisualizer } from 'pages/visualizer/store/slice'
-import { fullTrackPage } from 'utils/route'
+import {
+  NO_VISUALIZER_ROUTES
+} from 'pages/visualizer/constants'
+import {
+  openVisualizer
+} from 'pages/visualizer/store/slice'
+import {
+  fullTrackPage
+} from 'utils/route'
 
 import styles from './NowPlayingArtworkTile.module.css'
 
-const { getTrackId } = playerSelectors
+const { getTrackId } = playbackSelectors
 
 const messages = {
   viewTrack: 'View currently playing track',

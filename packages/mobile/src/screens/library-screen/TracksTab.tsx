@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useTracks, useUsers } from '@audius/common/api'
-import { Kind, Status } from '@audius/common/models'
+import {
+  useTracks,
+  useUsers
+} from '@audius/common/api'
+import {
+  Kind,
+  Status
+} from '@audius/common/models'
 import type { ID, UID, Track, User } from '@audius/common/models'
 import {
   libraryPageActions,
@@ -10,25 +16,52 @@ import {
   LibraryPageTabs,
   playbackActions,
   playbackSelectors,
-  playerSelectors,
   reachabilitySelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid, Uid, type Nullable } from '@audius/common/utils'
-import { debounce } from 'lodash'
+import {
+  makeStableUid,
+  Uid,
+  type Nullable
+} from '@audius/common/utils'
+import {
+  debounce
+} from 'lodash'
 import Animated, { Layout } from 'react-native-reanimated'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { Tile, VirtualizedScrollView } from 'app/components/core'
-import { EmptyTileCTA } from 'app/components/empty-tile-cta'
-import { FilterInput } from 'app/components/filter-input'
-import { TrackList } from 'app/components/track-list'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
-import { getIsDoneLoadingFromDisk } from 'app/store/offline-downloads/selectors'
-import { makeStyles } from 'app/styles'
+import {
+  Tile,
+  VirtualizedScrollView
+} from 'app/components/core'
+import {
+  EmptyTileCTA
+} from 'app/components/empty-tile-cta'
+import {
+  FilterInput
+} from 'app/components/filter-input'
+import {
+  TrackList
+} from 'app/components/track-list'
+import {
+  WithLoader
+} from 'app/components/with-loader/WithLoader'
+import {
+  getIsDoneLoadingFromDisk
+} from 'app/store/offline-downloads/selectors'
+import {
+  makeStyles
+} from 'app/styles'
 
-import { NoTracksPlaceholder } from './NoTracksPlaceholder'
-import { OfflineContentBanner } from './OfflineContentBanner'
+import {
+  NoTracksPlaceholder
+} from './NoTracksPlaceholder'
+import {
+  OfflineContentBanner
+} from './OfflineContentBanner'
 
 const { fetchSaves: fetchSavesAction, fetchMoreSaves } = libraryPageActions
 const {
@@ -212,7 +245,7 @@ export const TracksTab = () => {
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
   )
-  const isPlaying = useSelector(playerSelectors.getPlaying)
+  const isPlaying = useSelector(playbackSelectors.getPlaying)
 
   // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
   // source-based offline-download check keeps working.
@@ -224,7 +257,7 @@ export const TracksTab = () => {
         .map((id) => ({
           trackId: id,
           source: playbackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, playbackSource)
+          uid: makeStableUid(Kind.TRACKS, id, playbackSource)
         })),
     [filteredTrackUids]
   )

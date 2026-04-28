@@ -1,7 +1,17 @@
-import { useCallback, useEffect, MouseEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  MouseEvent
+} from 'react'
 
-import { useCurrentUserId, useTrack, useUser } from '@audius/common/api'
-import { useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentUserId,
+  useTrack,
+  useUser
+} from '@audius/common/api'
+import {
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
@@ -13,9 +23,11 @@ import {
   tracksSocialActions,
   shareModalUIActions,
   gatedContentActions,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
-import { Genre } from '@audius/common/utils'
+import {
+  Genre
+} from '@audius/common/utils'
 import {
   IconCrown,
   Text,
@@ -29,34 +41,70 @@ import {
   IconPin,
   IconText
 } from '@audius/harmony'
-import { useSelector, useDispatch } from 'react-redux'
+import {
+  useSelector,
+  useDispatch
+} from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
-import { Draggable } from 'components/dragndrop'
-import { TextLink, UserLink } from 'components/link'
+import {
+  useModalState
+} from 'common/hooks/useModalState'
+import {
+  Draggable
+} from 'components/dragndrop'
+import {
+  TextLink,
+  UserLink
+} from 'components/link'
 import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
-import { TrackArtwork } from 'components/track/Artwork'
-import { DragDropKind } from 'store/dragndrop/slice'
-import { fullTrackPage } from 'utils/route'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import {
+  TrackArtwork
+} from 'components/track/Artwork'
+import {
+  DragDropKind
+} from 'store/dragndrop/slice'
+import {
+  fullTrackPage
+} from 'utils/route'
+import {
+  useIsDarkMode,
+  useIsMatrix
+} from 'utils/theme/theme'
 
-import { OwnerActionButtons } from '../OwnerActionButtons'
-import { TrackDogEar } from '../TrackDogEar'
-import { TrackTileStats } from '../TrackTileStats'
-import { ViewerActionButtons } from '../ViewerActionButtons'
-import { getTrackWithFallback, getUserWithFallback } from '../helpers'
-import { messages } from '../trackTileMessages'
-import { TrackTileSize } from '../types'
+import {
+  OwnerActionButtons
+} from '../OwnerActionButtons'
+import {
+  TrackDogEar
+} from '../TrackDogEar'
+import {
+  TrackTileStats
+} from '../TrackTileStats'
+import {
+  ViewerActionButtons
+} from '../ViewerActionButtons'
+import {
+  getTrackWithFallback,
+  getUserWithFallback
+} from '../helpers'
+import {
+  messages
+} from '../trackTileMessages'
+import {
+  TrackTileSize
+} from '../types'
 
 import styles from './TrackTile.module.css'
-import { TrackTileDuration } from './TrackTileDuration'
+import {
+  TrackTileDuration
+} from './TrackTileDuration'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { repostTrack, undoRepostTrack, saveTrack, unsaveTrack } =
   tracksSocialActions
 const { setLockedContentId } = gatedContentActions
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 
 // Props from ConnectedTrackTile
 export type TrackTileProps = {

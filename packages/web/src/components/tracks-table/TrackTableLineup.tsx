@@ -1,6 +1,12 @@
-import { useCallback, useMemo } from 'react'
+import {
+  useCallback,
+  useMemo
+} from 'react'
 
-import { useTracks, useUsers } from '@audius/common/api'
+import {
+  useTracks,
+  useUsers
+} from '@audius/common/api'
 import {
   Name,
   PlaybackSource,
@@ -10,21 +16,29 @@ import {
   Kind
 } from '@audius/common/models'
 import {
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  playbackActions,
   tracksSocialActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  makeStableUid
+} from '@audius/common/utils'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
+import {
+  make
+} from 'common/store/analytics/actions'
 
-import { TracksTable } from './TracksTable'
+import {
+  TracksTable
+} from './TracksTable'
 import type { TracksTableProps, TrackWithUID } from './types'
 
-const { getBuffering, getPlaying } = playerSelectors
+const { getBuffering, getPlaying } = playbackSelectors
 
 type TrackTableLineupProps = Omit<
   TracksTableProps,
@@ -76,7 +90,7 @@ export const TrackTableLineup = ({
       trackIds.map((id) => ({
         trackId: id,
         source,
-        legacyUid: makeStableUid(Kind.TRACKS, id, source)
+        uid: makeStableUid(Kind.TRACKS, id, source)
       })),
     [trackIds, source]
   )

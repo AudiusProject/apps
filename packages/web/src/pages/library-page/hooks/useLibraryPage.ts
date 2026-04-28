@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import {
   useCurrentAccount,
@@ -6,7 +12,9 @@ import {
   useUsers,
   selectNameSortedPlaylistsAndAlbums
 } from '@audius/common/api'
-import { useCurrentTrack } from '@audius/common/hooks'
+import {
+  useCurrentTrack
+} from '@audius/common/hooks'
 import {
   Name,
   RepostSource,
@@ -24,11 +32,9 @@ import {
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
-  queueSelectors,
-  tracksSocialActions as socialActions,
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  tracksSocialActions as socialActions,
+  playbackActions,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
   LibraryCategoryType,
@@ -36,14 +42,34 @@ import {
   TrackRecord
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { dayjs, makeStableUid, route } from '@audius/common/utils'
-import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
-import { debounce } from 'lodash'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate, useSearchParams } from 'react-router'
+import {
+  dayjs,
+  makeStableUid,
+  route
+} from '@audius/common/utils'
+import {
+  GetUserLibraryTracksSortMethodEnum
+} from '@audius/sdk'
+import {
+  debounce
+} from 'lodash'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams
+} from 'react-router'
 
-import { TrackEvent, make } from 'common/store/analytics/actions'
-import { push } from 'utils/navigation'
+import {
+  TrackEvent,
+  make
+} from 'common/store/analytics/actions'
+import {
+  push
+} from 'utils/navigation'
 
 import {
   getTabFromPathname,
@@ -55,8 +81,8 @@ import {
 } from '../lib/libraryUrl'
 
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying, getBuffering } = playbackSelectors
 const {
   getLibraryTracksStatus,
   hasReachedEnd,
@@ -362,7 +388,7 @@ export const useLibraryPage = () => {
       tracks.entries.map((entry: any) => ({
         trackId: entry.track_id ?? entry.id,
         source: playbackSource,
-        legacyUid: makeStableUid(
+        uid: makeStableUid(
           Kind.TRACKS,
           entry.track_id ?? entry.id,
           playbackSource

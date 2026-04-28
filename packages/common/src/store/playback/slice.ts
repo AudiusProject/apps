@@ -1,14 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { Feature, ID } from '../../models'
-import { PlaybackRate } from '../player/types'
-import { RepeatMode } from '../queue/types'
+import { Feature, ID, UID } from '../../models'
+import { Maybe, Nullable } from '../../utils'
 
-import { PlaybackQuerySource, PlaybackState, PlaybackTrack } from './types'
+import {
+  PlaybackQuerySource,
+  PlaybackRate,
+  PlaybackState,
+  PlaybackTrack,
+  PlayerBehavior,
+  RepeatMode
+} from './types'
 
 export const initialState: PlaybackState = {
   queue: [],
   index: -1,
+  playingUid: null,
+  playingTrackId: null,
   playing: false,
   buffering: false,
   previewing: false,
@@ -45,8 +53,29 @@ type PlayTrackAtPayload = {
   index: number
 }
 
+type PlayPayload = Maybe<{
+  // Resume / load by uid (used by chat playback and natural-track-end paths
+  // that don't know the queue index — the saga finds the index from the uid).
+  uid?: Nullable<UID>
+  trackId?: ID
+  startTime?: number
+  playerBehavior?: PlayerBehavior
+  retries?: number
+  onEnd?: (...args: any) => any
+}>
+
+type PausePayload = Maybe<{
+  // When true, only set the playing flag — don't actually pause the audio
+  // engine. Mobile audio uses this to keep redux in sync with engine events.
+  onlySetState?: boolean
+}>
+
+type StopPayload = Maybe<{}>
+
 type AddToQueuePayload = {
   tracks: PlaybackTrack[]
+  // Optional insertion index; defaults to end.
+  index?: number
 }
 
 type PlayNextPayload = {
@@ -57,8 +86,21 @@ type RemoveFromQueuePayload = {
   index: number
 }
 
+type RemoveByUidPayload = {
+  uid: UID
+}
+
 type AppendPagePayload = {
   tracks: PlaybackTrack[]
+}
+
+type ReorderPayload = {
+  orderedUids: UID[]
+}
+
+type SetIndexPayload = {
+  index?: number
+  shuffleIndex?: number
 }
 
 type NextPayload = { skip?: boolean } | undefined
@@ -68,14 +110,38 @@ type SetPlaybackRatePayload = { rate: PlaybackRate }
 type SetRepeatPayload = { mode: RepeatMode }
 type SetShufflePayload = { enable: boolean }
 type SetBufferingPayload = { buffering: boolean }
-type PlaySucceededPayload = { previewing?: boolean } | undefined
+type PlaySucceededPayload =
+  | { uid?: Nullable<UID>; trackId?: ID; isPreview?: boolean }
+  | undefined
+
+type SetPayload = {
+  uid: UID
+  trackId: ID
+  previewing?: boolean
+}
+
+type ResetPayload = {
+  shouldAutoplay: boolean
+}
+
+type ResetSucceededPayload = {
+  shouldAutoplay: boolean
+}
+
 type ErrorPayload = {
   error: string
   trackId: ID
   info: string
   feature?: Feature
 }
+
 type SetRetriesPayload = { retries: number }
+
+type QueueAutoplayPayload = {
+  genre: string
+  exclusionList: number[]
+  currentUserId: Nullable<ID> | undefined
+}
 
 const slice = createSlice({
   name: 'playback',
@@ -115,30 +181,36 @@ const slice = createSlice({
       }
     },
 
-    // Resume playing the current track (no index change).
-    play: (state) => {
-      state.playing = true
+    // Resume / load. The saga handles the load+play cycle and sets retries.
+    play: (state, action: PayloadAction<PlayPayload>) => {
+      state.retries = action.payload?.retries ?? 0
     },
 
-    pause: (state) => {
-      state.playing = false
+    pause: (_state, _action: PayloadAction<PausePayload>) => {
+      // The audio engine actually pauses; setPlayingState reconciles state.
     },
 
-    stop: (state) => {
+    stop: (state, _action: PayloadAction<StopPayload>) => {
       state.playing = false
+      state.playingUid = null
+      state.playingTrackId = null
+      state.counter += 1
     },
 
     togglePlay: (state) => {
       state.playing = !state.playing
     },
 
+    setPlayingState: (state, action: PayloadAction<{ playing: boolean }>) => {
+      state.playing = action.payload.playing
+    },
+
     next: (state, action: PayloadAction<NextPayload>) => {
       const skip = action.payload?.skip
       if (state.queue.length === 0) return
       // Repeat-single on a natural track end (skip falsy): keep the same
-      // index, and let the saga re-issue playerActions.play to restart the
-      // current track. The next button passes skip=true, which bypasses
-      // this and advances normally — matches the legacy queue behavior.
+      // index, and let the saga re-issue play to restart the current track.
+      // The next button passes skip=true, which bypasses this and advances.
       if (state.repeat === RepeatMode.SINGLE && !skip) {
         state.counter += 1
         state.retries = 0
@@ -209,7 +281,18 @@ const slice = createSlice({
     },
 
     addToQueue: (state, action: PayloadAction<AddToQueuePayload>) => {
-      state.queue = [...state.queue, ...action.payload.tracks]
+      const { tracks, index } = action.payload
+      if (index === undefined) {
+        state.queue = [...state.queue, ...tracks]
+        return
+      }
+      const insertAt = Math.max(0, Math.min(index, state.queue.length))
+      const next = [...state.queue]
+      next.splice(insertAt, 0, ...tracks)
+      state.queue = next
+      if (state.index >= insertAt) {
+        state.index += tracks.length
+      }
     },
 
     playNext: (state, action: PayloadAction<PlayNextPayload>) => {
@@ -227,9 +310,38 @@ const slice = createSlice({
       state.queue = next
       if (index < state.index) state.index -= 1
       else if (index === state.index) {
-        // If the currently-playing track is removed, clamp the index.
         state.index = Math.min(state.index, state.queue.length - 1)
       }
+    },
+
+    removeByUid: (state, action: PayloadAction<RemoveByUidPayload>) => {
+      const { uid } = action.payload
+      const idx = state.queue.findIndex((t) => t.uid === uid)
+      if (idx < 0) return
+      const next = [...state.queue]
+      next.splice(idx, 1)
+      state.queue = next
+      if (idx < state.index) state.index -= 1
+      else if (idx === state.index) {
+        state.index = Math.min(state.index, state.queue.length - 1)
+      }
+    },
+
+    reorder: (state, action: PayloadAction<ReorderPayload>) => {
+      const { orderedUids } = action.payload
+      const byUid = new Map<UID, PlaybackTrack>()
+      state.queue.forEach((t) => {
+        if (t.uid) byUid.set(t.uid, t)
+      })
+      const newOrder = orderedUids
+        .map((uid) => byUid.get(uid))
+        .filter((t): t is PlaybackTrack => !!t)
+      const currentUid =
+        state.index >= 0 ? state.queue[state.index]?.uid : undefined
+      state.queue = newOrder
+      state.index = currentUid
+        ? Math.max(0, newOrder.findIndex((t) => t.uid === currentUid))
+        : -1
     },
 
     appendPage: (state, action: PayloadAction<AppendPagePayload>) => {
@@ -279,7 +391,34 @@ const slice = createSlice({
 
     playSucceeded: (state, action: PayloadAction<PlaySucceededPayload>) => {
       state.playing = true
-      state.previewing = !!action.payload?.previewing
+      const payload = action.payload ?? {}
+      if (payload.uid) state.playingUid = payload.uid
+      if (payload.trackId) state.playingTrackId = payload.trackId
+      state.previewing = !!payload.isPreview
+    },
+
+    set: (state, action: PayloadAction<SetPayload>) => {
+      const { uid, trackId, previewing } = action.payload
+      state.playingUid = uid
+      state.playingTrackId = trackId
+      state.previewing = !!previewing
+    },
+
+    setIndex: (state, action: PayloadAction<SetIndexPayload>) => {
+      const { index, shuffleIndex } = action.payload
+      if (typeof index === 'number') state.index = index
+      if (typeof shuffleIndex === 'number') state.shuffleIndex = shuffleIndex
+    },
+
+    reset: (_state, _action: PayloadAction<ResetPayload>) => {
+      // Saga calls audioPlayer.seek(0) and either pauses or replays.
+    },
+
+    resetSucceeded: (state, action: PayloadAction<ResetSucceededPayload>) => {
+      const { shouldAutoplay } = action.payload
+      state.playing = shouldAutoplay
+      state.counter += 1
+      state.previewing = false
     },
 
     setRetries: (state, action: PayloadAction<SetRetriesPayload>) => {
@@ -290,7 +429,9 @@ const slice = createSlice({
       state.counter += 1
     },
 
-    error: (_state, _action: PayloadAction<ErrorPayload>) => {}
+    error: (_state, _action: PayloadAction<ErrorPayload>) => {},
+
+    queueAutoplay: (_state, _action: PayloadAction<QueueAutoplayPayload>) => {}
   }
 })
 
@@ -301,11 +442,14 @@ export const {
   pause,
   stop,
   togglePlay,
+  setPlayingState,
   next,
   previous,
   addToQueue,
   playNext,
   removeFromQueue,
+  removeByUid,
+  reorder,
   appendPage,
   clearQueue,
   seekTo,
@@ -314,9 +458,14 @@ export const {
   setShuffle,
   setBuffering,
   playSucceeded,
+  set,
+  setIndex,
+  reset,
+  resetSucceeded,
   setRetries,
   incrementCounter,
-  error
+  error,
+  queueAutoplay
 } = slice.actions
 
 export default slice.reducer

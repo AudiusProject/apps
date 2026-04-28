@@ -1,14 +1,28 @@
-import { ChangeEvent, useCallback, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  useCallback,
+  useMemo,
+  useState
+} from 'react'
 
-import { useCurrentUserId, useTrackHistory } from '@audius/common/api'
-import { Name, PlaybackSource, Kind, ID } from '@audius/common/models'
+import {
+  useCurrentUserId,
+  useTrackHistory
+} from '@audius/common/api'
+import {
+  Name,
+  PlaybackSource,
+  Kind,
+  ID
+} from '@audius/common/models'
 import {
   playbackActions,
-  playbackSelectors,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
+import {
+  makeStableUid
+} from '@audius/common/utils'
 import {
   Button,
   IconListeningHistory,
@@ -20,18 +34,36 @@ import {
   GetUsersTrackHistorySortMethodEnum,
   GetUsersTrackHistorySortDirectionEnum
 } from '@audius/sdk'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  useNavigate
+} from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
+import {
+  make
+} from 'common/store/analytics/actions'
 import FilterInput from 'components/filter-input/FilterInput'
-import { Header } from 'components/header/desktop/Header'
+import {
+  Header
+} from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
-import { dateSorter } from 'components/table'
-import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
-import { TrackTableLineup, TracksTableColumn } from 'components/tracks-table'
+import {
+  dateSorter
+} from 'components/table'
+import {
+  RESPONSIVE_TABLE_POLICIES
+} from 'components/table/responsivePolicies'
+import {
+  TrackTableLineup,
+  TracksTableColumn
+} from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
-import { useMainContentRef } from 'pages/MainContentContext'
+import {
+  useMainContentRef
+} from 'pages/MainContentContext'
 
 import styles from './HistoryPage.module.css'
 
@@ -95,7 +127,7 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
     sortDirection
   })
 
-  const isPlaying = useSelector(playerSelectors.getPlaying)
+  const isPlaying = useSelector(playbackSelectors.getPlaying)
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
   )
@@ -106,7 +138,7 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
       trackIds.map((id) => ({
         trackId: id,
         source: HISTORY_SOURCE,
-        legacyUid: makeStableUid(Kind.TRACKS, id, HISTORY_SOURCE)
+        uid: makeStableUid(Kind.TRACKS, id, HISTORY_SOURCE)
       })),
     [trackIds]
   )

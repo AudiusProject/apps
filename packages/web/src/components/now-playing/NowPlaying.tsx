@@ -1,11 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 
 import {
   useCurrentUserId,
   useToggleFavoriteTrack,
   useUser
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
@@ -17,8 +25,8 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -26,60 +34,101 @@ import {
   OverflowAction,
   OverflowSource,
   usePremiumContentPurchaseModal,
-  playerActions,
-  playerSelectors,
   playbackRateValueMap,
   gatedContentSelectors,
   OverflowActionCallbacks,
   PurchaseableContentType
 } from '@audius/common/store'
-import { Genre, route } from '@audius/common/utils'
+import {
+  Genre,
+  route
+} from '@audius/common/utils'
 import {
   IconCaretRight as IconCaret,
   IconImage,
   Scrubber
 } from '@audius/harmony'
-import { Location } from 'history'
-import { connect, useSelector } from 'react-redux'
-import { Dispatch } from 'redux'
+import {
+  Location
+} from 'history'
+import {
+  connect,
+  useSelector
+} from 'react-redux'
+import {
+  Dispatch
+} from 'redux'
 
-import { useHistoryContext } from 'app/HistoryProvider'
-import { useRecord, make } from 'common/store/analytics/actions'
+import {
+  useHistoryContext
+} from 'app/HistoryProvider'
+import {
+  useRecord,
+  make
+} from 'common/store/analytics/actions'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
-import { LockedStatusBadge } from 'components/locked-status-badge'
+import {
+  LockedStatusBadge
+} from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
 import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
 import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
-import { PlayButtonStatus } from 'components/play-bar/types'
-import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
-import { TrackDogEar } from 'components/track/TrackDogEar'
+import {
+  PlayButtonStatus
+} from 'components/play-bar/types'
+import {
+  GatedConditionsPill
+} from 'components/track/GatedConditionsPill'
+import {
+  TrackDogEar
+} from 'components/track/TrackDogEar'
 import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
 import UserBadges from 'components/user-badges/UserBadges'
-import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
+import {
+  useRequiresAccountOnClick
+} from 'hooks/useRequiresAccount'
 import {
   useTrackCoverArt,
   useTrackCoverArtDominantColor
 } from 'hooks/useTrackCoverArt'
-import { audioPlayer } from 'services/audio-player'
-import { AppState } from 'store/types'
-import { pushUniqueRoute as pushRoute } from 'utils/route'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
-import { withNullGuard } from 'utils/withNullGuard'
+import {
+  audioPlayer
+} from 'services/audio-player'
+import {
+  AppState
+} from 'store/types'
+import {
+  pushUniqueRoute as pushRoute
+} from 'utils/route'
+import {
+  useIsDarkMode,
+  useIsMatrix
+} from 'utils/theme/theme'
+import {
+  withNullGuard
+} from 'utils/withNullGuard'
 
 import styles from './NowPlaying.module.css'
 import ActionsBar from './components/ActionsBar'
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const { getBuffering, getCounter, getPlaying, getPlaybackRate, getSeek } =
-  playerSelectors
+  playbackSelectors
 
-const { seek, reset } = playerActions
+const { seekTo: seek, reset } = playbackActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { next, pause, play, previous, repeat, shuffle } = queueActions
+const {
+  next,
+  pause,
+  play,
+  previous,
+  setRepeat: repeat,
+  setShuffle: shuffle
+} = playbackActions
 const { getGatedContentStatusMap } = gatedContentSelectors
 
 type OwnProps = {

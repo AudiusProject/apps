@@ -1,20 +1,44 @@
-import { ReactNode, useEffect, useContext } from 'react'
+import {
+  ReactNode,
+  useEffect,
+  useContext
+} from 'react'
 
-import { useInstanceVar } from '@audius/common/hooks'
-import { playerSelectors } from '@audius/common/store'
+import {
+  useInstanceVar
+} from '@audius/common/hooks'
+import {
+  playbackSelectors
+} from '@audius/common/store'
 import cn from 'classnames'
-import { connect } from 'react-redux'
-import { useLocation } from 'react-router'
+import {
+  connect
+} from 'react-redux'
+import {
+  useLocation
+} from 'react-router'
 
-import { MetaTags, MetaTagsProps } from 'components/meta-tags/MetaTags'
-import { ScrollContext } from 'components/scroll-provider/ScrollProvider'
-import { AppState } from 'store/types'
-import { getPathname } from 'utils/route'
-import { getSafeArea, SafeAreaDirection } from 'utils/safeArea'
+import {
+  MetaTags,
+  MetaTagsProps
+} from 'components/meta-tags/MetaTags'
+import {
+  ScrollContext
+} from 'components/scroll-provider/ScrollProvider'
+import {
+  AppState
+} from 'store/types'
+import {
+  getPathname
+} from 'utils/route'
+import {
+  getSafeArea,
+  SafeAreaDirection
+} from 'utils/safeArea'
 
 import styles from './MobilePageContainer.module.css'
 
-const { getHasTrack } = playerSelectors
+const { getHasTrack } = playbackSelectors
 
 type OwnProps = {
   children: ReactNode

@@ -1,4 +1,8 @@
-import { useEffect, useContext, useCallback } from 'react'
+import {
+  useEffect,
+  useContext,
+  useCallback
+} from 'react'
 
 import {
   useCurrentUserId,
@@ -23,7 +27,9 @@ import {
   PlaybackSource,
   FavoriteType
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
+import {
+  FeatureFlags
+} from '@audius/common/services'
 import {
   OverflowAction,
   tracksSocialActions as socialTracksActions,
@@ -31,42 +37,74 @@ import {
   favoritesUserListActions,
   repostsUserListActions,
   mobileOverflowMenuUIActions,
-  playerSelectors,
-  playerActions,
-  playbackActions,
   playbackSelectors,
+  playbackActions,
   RepostType
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { formatDate, route, makeStableUid } from '@audius/common/utils'
-import { Flex } from '@audius/harmony'
-import { Id } from '@audius/sdk'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router'
+import {
+  formatDate,
+  route,
+  makeStableUid
+} from '@audius/common/utils'
+import {
+  Flex
+} from '@audius/harmony'
+import {
+  Id
+} from '@audius/sdk'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  useLocation,
+  useNavigate
+} from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
-import { CommentPreview } from 'components/comments/CommentPreview'
-import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
+import {
+  make
+} from 'common/store/analytics/actions'
+import {
+  CommentPreview
+} from 'components/comments/CommentPreview'
+import {
+  HeaderContext
+} from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
   LeftPreset,
   CenterPreset,
   RightPreset
 } from 'components/nav/mobile/NavContext'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
+import {
+  RemixContestCountdown
+} from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
-import { getTrackDefaults } from 'pages/track-page/utils'
-import { getTrackPageContext } from 'ssr/metaTags'
-import { parseTrackRoute } from 'utils/route/trackRouteParser'
+import {
+  getTrackDefaults
+} from 'pages/track-page/utils'
+import {
+  getTrackPageContext
+} from 'ssr/metaTags'
+import {
+  parseTrackRoute
+} from 'utils/route/trackRouteParser'
 
-import { TrackPageLineup } from '../TrackPageLineup'
-import { RemixContestTeaser } from '../shared/RemixContestTeaser'
+import {
+  TrackPageLineup
+} from '../TrackPageLineup'
+import {
+  RemixContestTeaser
+} from '../shared/RemixContestTeaser'
 
 import TrackPageHeader from './TrackHeader'
-import { RemixContestSection } from './remix-contests/RemixContestSection'
+import {
+  RemixContestSection
+} from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { setFavorite } = favoritesUserListActions
@@ -147,12 +185,12 @@ const TrackPage = () => {
       const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const tracks: PlaybackTrack[] = [
           {
             trackId: track.track_id,
             source: playbackSource,
-            legacyUid: makeStableUid(
+            uid: makeStableUid(
               Kind.TRACKS,
               track.track_id,
               playbackSource

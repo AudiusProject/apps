@@ -1,16 +1,33 @@
 import type { UID, LineupTrack } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
-import { playerSelectors } from '@audius/common/store'
-import { pluralize } from '@audius/common/utils'
-import { range } from 'lodash'
-import { Pressable, Text, View } from 'react-native'
-import { useSelector } from 'react-redux'
+import {
+  playbackSelectors
+} from '@audius/common/store'
+import {
+  pluralize
+} from '@audius/common/utils'
+import {
+  range
+} from 'lodash'
+import {
+  Pressable,
+  Text,
+  View
+} from 'react-native'
+import {
+  useSelector
+} from 'react-redux'
 
-import { Box } from '@audius/harmony-native'
+import {
+  Box
+} from '@audius/harmony-native'
 import Skeleton from 'app/components/skeleton'
-import { flexRowCentered, makeStyles } from 'app/styles'
+import {
+  flexRowCentered,
+  makeStyles
+} from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
-const { getUid } = playerSelectors
+const { getUid } = playbackSelectors
 
 // Max number of tracks to display
 const DISPLAY_TRACK_COUNT = 5

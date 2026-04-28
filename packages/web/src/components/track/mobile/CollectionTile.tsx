@@ -1,4 +1,9 @@
-import { useEffect, MouseEvent, useCallback, useMemo } from 'react'
+import {
+  useEffect,
+  MouseEvent,
+  useCallback,
+  useMemo
+} from 'react'
 
 import {
   CollectionTrackWithUid,
@@ -28,9 +33,12 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
-import { formatLineupTileDuration, route } from '@audius/common/utils'
+import {
+  formatLineupTileDuration,
+  route
+} from '@audius/common/utils'
 import {
   Box,
   Flex,
@@ -40,34 +48,72 @@ import {
   Text
 } from '@audius/harmony'
 import cn from 'classnames'
-import { range } from 'lodash'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  range
+} from 'lodash'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
-import { useRecord, make } from 'common/store/analytics/actions'
-import { CollectionDogEar } from 'components/collection'
-import { CollectionTileStats } from 'components/collection/CollectionTileStats'
-import { Draggable } from 'components/dragndrop'
-import { TextLink, UserLink } from 'components/link'
-import { OwnProps as CollectionMenuProps } from 'components/menu/CollectionMenu'
+import {
+  useModalState
+} from 'common/hooks/useModalState'
+import {
+  useRecord,
+  make
+} from 'common/store/analytics/actions'
+import {
+  CollectionDogEar
+} from 'components/collection'
+import {
+  CollectionTileStats
+} from 'components/collection/CollectionTileStats'
+import {
+  Draggable
+} from 'components/dragndrop'
+import {
+  TextLink,
+  UserLink
+} from 'components/link'
+import {
+  OwnProps as CollectionMenuProps
+} from 'components/menu/CollectionMenu'
 import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
-import { TrackTileSize } from 'components/track/types'
-import { useIsMobile } from 'hooks/useIsMobile'
-import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { push } from 'utils/navigation'
-import { fullTrackPage } from 'utils/route'
-import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
+import {
+  TrackTileSize
+} from 'components/track/types'
+import {
+  useIsMobile
+} from 'hooks/useIsMobile'
+import {
+  useRequiresAccountOnClick
+} from 'hooks/useRequiresAccount'
+import {
+  push
+} from 'utils/navigation'
+import {
+  fullTrackPage
+} from 'utils/route'
+import {
+  useIsDarkMode,
+  useIsMatrix
+} from 'utils/theme/theme'
 
-import { DesktopCollectionTileProps } from '../desktop/CollectionTile'
-import { getCollectionWithFallback } from '../helpers'
+import {
+  DesktopCollectionTileProps
+} from '../desktop/CollectionTile'
+import {
+  getCollectionWithFallback
+} from '../helpers'
 
 import BottomButtons from './BottomButtons'
 import styles from './PlaylistTile.module.css'
 import TrackTileArt from './TrackTileArt'
 
 const { collectionPage } = route
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const {

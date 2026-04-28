@@ -1,19 +1,36 @@
-import { useCallback, useEffect } from 'react'
+import {
+  useCallback,
+  useEffect
+} from 'react'
 
-import { useComment } from '@audius/common/api'
+import {
+  useComment
+} from '@audius/common/api'
 import {
   CommentSectionProvider,
   useCurrentCommentSection,
   usePostComment
 } from '@audius/common/context'
-import { commentsMessages as messages } from '@audius/common/messages'
+import {
+  commentsMessages as messages
+} from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import {
+  playbackSelectors
+} from '@audius/common/store'
 import type { CommentMention } from '@audius/sdk'
-import { OptionalHashId } from '@audius/sdk'
-import { TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import {
+  OptionalHashId
+} from '@audius/sdk'
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native'
 import TrackPlayer from 'react-native-track-player'
-import { useSelector } from 'react-redux'
+import {
+  useSelector
+} from 'react-redux'
 
 import {
   Flex,
@@ -23,14 +40,24 @@ import {
   PlainButton,
   Text
 } from '@audius/harmony-native'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { useRoute } from 'app/hooks/useRoute'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  useRoute
+} from 'app/hooks/useRoute'
 
 import Skeleton from '../skeleton'
 
-import { CommentBlock } from './CommentBlock'
-import { useCommentDrawer } from './CommentDrawerContext'
-import { CommentForm } from './CommentForm'
+import {
+  CommentBlock
+} from './CommentBlock'
+import {
+  useCommentDrawer
+} from './CommentDrawerContext'
+import {
+  CommentForm
+} from './CommentForm'
 
 type CommentPreviewHeaderProps = {
   openCommentDrawer: () => void
@@ -92,7 +119,7 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
     entityId
   } = useCurrentCommentSection()
   const [postComment] = usePostComment()
-  const playerTrackId = useSelector(playerSelectors.getTrackId)
+  const playerTrackId = useSelector(playbackSelectors.getTrackId)
 
   const handlePress = useCallback(() => {
     openCommentDrawer()

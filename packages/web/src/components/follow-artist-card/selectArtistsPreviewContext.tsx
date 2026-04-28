@@ -1,13 +1,35 @@
-import { createContext, useCallback, useEffect, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useState
+} from 'react'
 
-import { useUserTracksByHandle, useUser } from '@audius/common/api'
-import { ID, Track } from '@audius/common/models'
-import { PlayerBehavior, playerActions } from '@audius/common/store'
-import { pick } from 'lodash'
-import { useDispatch } from 'react-redux'
-import { useUnmount } from 'react-use'
+import {
+  useUserTracksByHandle,
+  useUser
+} from '@audius/common/api'
+import {
+  ID,
+  Track
+} from '@audius/common/models'
+import {
+  PlayerBehavior,
+  playbackActions
+} from '@audius/common/store'
+import {
+  pick
+} from 'lodash'
+import {
+  useDispatch
+} from 'react-redux'
+import {
+  useUnmount
+} from 'react-use'
 
-import { audioPlayer } from 'services/audio-player'
+import {
+  audioPlayer
+} from 'services/audio-player'
 
 type PreviewContextProps = {
   isPlaying: boolean
@@ -55,10 +77,10 @@ export const SelectArtistsPreviewContextProvider = (props: {
       return
     }
     if (audioPlayer.isPlaying()) {
-      dispatch(playerActions.pause())
+      dispatch(playbackActions.pause())
       setIsPlaying(false)
     } else {
-      dispatch(playerActions.play())
+      dispatch(playbackActions.play())
       setIsPlaying(true)
     }
   }, [dispatch])
@@ -79,7 +101,7 @@ export const SelectArtistsPreviewContextProvider = (props: {
         return
       }
       if (audioPlayer.isPlaying()) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
       }
       setNowPlayingArtistId(artistId)
       setIsPlaying(true)
@@ -95,7 +117,7 @@ export const SelectArtistsPreviewContextProvider = (props: {
       if (artistId === nowPlayingArtistId) {
         togglePlayback()
       } else {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         setIsPlaying(false)
         setNowPlayingArtistId(artistId)
       }
@@ -118,14 +140,14 @@ export const SelectArtistsPreviewContextProvider = (props: {
       : Math.min(30, Math.max(0, duration - 30))
 
     dispatch(
-      playerActions.play({
+      playbackActions.play({
         trackId: track_id,
         startTime,
         playerBehavior: PlayerBehavior.PREVIEW_OR_FULL
       })
     )
     dispatch(
-      playerActions.play({
+      playbackActions.play({
         trackId: track_id,
         startTime,
         playerBehavior: PlayerBehavior.PREVIEW_OR_FULL,

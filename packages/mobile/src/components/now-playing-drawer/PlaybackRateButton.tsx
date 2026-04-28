@@ -1,6 +1,10 @@
 import type { PlaybackRate } from '@audius/common/store'
-import { playerSelectors } from '@audius/common/store'
-import { useSelector } from 'react-redux'
+import {
+  playbackSelectors
+} from '@audius/common/store'
+import {
+  useSelector
+} from 'react-redux'
 
 import type { IconButtonProps } from '@audius/harmony-native'
 import {
@@ -16,7 +20,7 @@ import {
   IconButton
 } from '@audius/harmony-native'
 
-const { getPlaybackRate } = playerSelectors
+const { getPlaybackRate } = playbackSelectors
 
 const messages = {
   playbackLabel: 'Change Playback Rate'

@@ -1,4 +1,8 @@
-import { useCallback, useRef, useEffect } from 'react'
+import {
+  useCallback,
+  useRef,
+  useEffect
+} from 'react'
 
 import {
   useCurrentUserId,
@@ -23,47 +27,91 @@ import {
   FollowSource,
   PlaybackSource
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
+import {
+  FeatureFlags
+} from '@audius/common/services'
 import {
   trackPageActions,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
   shareModalUIActions,
-  playerSelectors,
-  playerActions,
-  playbackActions,
-  playbackSelectors
+  playbackSelectors,
+  playbackActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { formatDate, route, makeStableUid } from '@audius/common/utils'
-import { Box, Flex } from '@audius/harmony'
-import { Id } from '@audius/sdk'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router'
+import {
+  formatDate,
+  route,
+  makeStableUid
+} from '@audius/common/utils'
+import {
+  Box,
+  Flex
+} from '@audius/harmony'
+import {
+  Id
+} from '@audius/sdk'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  useLocation,
+  useNavigate
+} from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
-import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
-import { CommentSection } from 'components/comments/CommentSection'
+import {
+  make
+} from 'common/store/analytics/actions'
+import {
+  MIN_DESKTOP_CONTENT_WIDTH_PX
+} from 'common/utils/layout'
+import {
+  CommentSection
+} from 'components/comments/CommentSection'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
-import { FlushPageContainer } from 'components/page/FlushPageContainer'
+import {
+  EmptyNavBanner
+} from 'components/nav-banner/NavBanner'
+import {
+  FlushPageContainer
+} from 'components/page/FlushPageContainer'
 import Page from 'components/page/Page'
-import { EmptyStatBanner } from 'components/stat-banner/StatBanner'
-import { GiantTrackTile } from 'components/track/GiantTrackTile'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
+import {
+  EmptyStatBanner
+} from 'components/stat-banner/StatBanner'
+import {
+  GiantTrackTile
+} from 'components/track/GiantTrackTile'
+import {
+  RemixContestCountdown
+} from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
-import { getTrackDefaults, emptyStringGuard } from 'pages/track-page/utils'
-import { getTrackPageContext } from 'ssr/metaTags'
-import { parseTrackRoute } from 'utils/route/trackRouteParser'
+import {
+  getTrackDefaults,
+  emptyStringGuard
+} from 'pages/track-page/utils'
+import {
+  getTrackPageContext
+} from 'ssr/metaTags'
+import {
+  parseTrackRoute
+} from 'utils/route/trackRouteParser'
 
-import { TrackPageLineup } from '../TrackPageLineup'
-import { RemixContestTeaser } from '../shared/RemixContestTeaser'
+import {
+  TrackPageLineup
+} from '../TrackPageLineup'
+import {
+  RemixContestTeaser
+} from '../shared/RemixContestTeaser'
 
-import { RemixContestSection } from './RemixContestSection'
+import {
+  RemixContestSection
+} from './RemixContestSection'
 import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
 const TrackPage = () => {
@@ -134,12 +182,12 @@ const TrackPage = () => {
       const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const tracks: PlaybackTrack[] = [
           {
             trackId: track.track_id,
             source: playbackSource,
-            legacyUid: makeStableUid(
+            uid: makeStableUid(
               Kind.TRACKS,
               track.track_id,
               playbackSource

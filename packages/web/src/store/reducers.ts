@@ -1,5 +1,4 @@
 import {
-  queueReducer as queue,
   remoteConfigReducer as remoteConfig,
   reducers as clientStoreReducers
 } from '@audius/common/store'
@@ -44,9 +43,6 @@ const createRootReducer = () => {
 
     // Pages
     dashboard,
-
-    // Playback
-    queue,
 
     // Error Page
     error,

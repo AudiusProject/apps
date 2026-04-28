@@ -7,51 +7,107 @@ import {
   useState
 } from 'react'
 
-import { useUser } from '@audius/common/api'
-import { useCurrentTrack } from '@audius/common/hooks'
 import {
-  queueActions,
-  playerActions,
-  playerSelectors
+  useUser
+} from '@audius/common/api'
+import {
+  useCurrentTrack
+} from '@audius/common/hooks'
+import {
+  playbackActions,
+  playbackSelectors
 } from '@audius/common/store'
-import { Genre } from '@audius/common/utils'
-import { useNavigationState } from '@react-navigation/native'
+import {
+  Genre
+} from '@audius/common/utils'
+import {
+  useNavigationState
+} from '@react-navigation/native'
 import type {
   Animated,
   GestureResponderEvent,
   PanResponderGestureState
 } from 'react-native'
-import { Keyboard, Platform, View, StatusBar, Pressable } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {
+  Keyboard,
+  Platform,
+  View,
+  StatusBar,
+  Pressable
+} from 'react-native'
+import {
+  useSafeAreaInsets
+} from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import {
+  BOTTOM_BAR_HEIGHT
+} from 'app/components/bottom-tab-bar'
 import Drawer, {
   DrawerAnimationStyle,
   FULL_DRAWER_HEIGHT
 } from 'app/components/drawer'
-import { Scrubber } from 'app/components/scrubber'
-import { useDrawer } from 'app/hooks/useDrawer'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { AppDrawerContext } from 'app/screens/app-drawer-screen'
-import { AppTabNavigationContext } from 'app/screens/app-screen'
-import { makeStyles } from 'app/styles'
-import { zIndex } from 'app/utils/zIndex'
+import {
+  Scrubber
+} from 'app/components/scrubber'
+import {
+  useDrawer
+} from 'app/hooks/useDrawer'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  AppDrawerContext
+} from 'app/screens/app-drawer-screen'
+import {
+  AppTabNavigationContext
+} from 'app/screens/app-screen'
+import {
+  makeStyles
+} from 'app/styles'
+import {
+  zIndex
+} from 'app/utils/zIndex'
 
-import { ActionsBar } from './ActionsBar'
-import { Artwork } from './Artwork'
-import { AudioControls } from './AudioControls'
-import { Logo } from './Logo'
-import { PlayBar } from './PlayBar'
-import { TitleBar } from './TitleBar'
-import { TrackInfo } from './TrackInfo'
-import { PLAY_BAR_HEIGHT } from './constants'
-import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-const { seek, reset } = playerActions
+import {
+  ActionsBar
+} from './ActionsBar'
+import {
+  Artwork
+} from './Artwork'
+import {
+  AudioControls
+} from './AudioControls'
+import {
+  Logo
+} from './Logo'
+import {
+  PlayBar
+} from './PlayBar'
+import {
+  TitleBar
+} from './TitleBar'
+import {
+  TrackInfo
+} from './TrackInfo'
+import {
+  PLAY_BAR_HEIGHT
+} from './constants'
+import {
+  useCurrentTrackDuration
+} from './useCurrentTrackDuration'
+const {
+  seekTo: seek,
+  reset,
+  next,
+  previous
+} = playbackActions
 
-const { getPlaying, getUid, getCounter, getBuffering } = playerSelectors
-const { next, previous } = queueActions
+const { getPlaying, getUid, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 const SKIP_DURATION_SEC = 15

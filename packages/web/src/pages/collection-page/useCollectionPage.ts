@@ -14,7 +14,9 @@ import {
   useUsers,
   useCurrentUserId
 } from '@audius/common/api'
-import { useCurrentTrack } from '@audius/common/hooks'
+import {
+  useCurrentTrack
+} from '@audius/common/hooks'
 import {
   Status,
   ID,
@@ -31,7 +33,7 @@ import {
 } from '@audius/common/models'
 import {
   collectionPageActions as collectionActions,
-  queueSelectors,
+  playbackSelectors,
   collectionsSocialActions as socialCollectionsActions,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
@@ -43,9 +45,7 @@ import {
   repostsUserListActions,
   favoritesUserListActions,
   RepostType,
-  playerSelectors,
   playbackActions,
-  playbackSelectors,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
   CollectionTrack,
@@ -55,7 +55,6 @@ import {
   usePremiumContentPurchaseModalActions,
   albumTrackRemoveConfirmationModalActions,
   PlayerBehavior,
-  playerActions,
   cacheCollectionsActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
@@ -67,12 +66,24 @@ import {
   makeUid,
   makeStableUid
 } from '@audius/common/utils'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useNavigate } from 'react-router'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
+import {
+  useLocation,
+  useNavigate
+} from 'react-router'
 
-import { useHistoryContext } from 'app/HistoryProvider'
-import { make } from 'common/store/analytics/actions'
-import { getCollectionPageContext } from 'ssr/metaTags'
+import {
+  useHistoryContext
+} from 'app/HistoryProvider'
+import {
+  make
+} from 'common/store/analytics/actions'
+import {
+  getCollectionPageContext
+} from 'ssr/metaTags'
 import {
   setUsers,
   setVisibility
@@ -81,15 +92,26 @@ import {
   UserListType,
   UserListEntityType
 } from 'store/application/ui/userListModal/types'
-import { replace } from 'utils/navigation'
-import { getPathname, collectionPage, profilePage } from 'utils/route'
-import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
+import {
+  replace
+} from 'utils/navigation'
+import {
+  getPathname,
+  collectionPage,
+  profilePage
+} from 'utils/route'
+import {
+  parseCollectionRoute
+} from 'utils/route/collectionRouteParser'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
-const { makeGetCurrent, getPlayerBehavior } = queueSelectors
-const { getPlaying } = playerSelectors
+const {
+  makeGetCurrent,
+  getCurrentPlayerBehavior: getPlayerBehavior,
+  getPlaying
+} = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -506,7 +528,7 @@ export const useCollectionPage = (
       tracks.entries.map((entry) => ({
         trackId: entry.track_id,
         source: collectionPlaybackSource,
-        legacyUid: makeStableUid(
+        uid: makeStableUid(
           Kind.TRACKS,
           entry.track_id,
           collectionPlaybackSource
@@ -666,7 +688,7 @@ export const useCollectionPage = (
           )
         }
       } else if (tracks.entries.length > 0) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const firstEntry = tracks.entries[0]
         const startIndex = collectionPlaybackQueue.findIndex(
           (t) => t.trackId === firstEntry.track_id

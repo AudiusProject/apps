@@ -7,18 +7,26 @@ import {
   usePostComment
 } from '@audius/common/context'
 import type { UserMetadata } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import {
+  playbackSelectors
+} from '@audius/common/store'
 import type { CommentMention } from '@audius/sdk'
 import {
   BottomSheetTextInput,
   type BottomSheetFlatListMethods
 } from '@gorhom/bottom-sheet'
 import TrackPlayer from 'react-native-track-player'
-import { useSelector } from 'react-redux'
+import {
+  useSelector
+} from 'react-redux'
 
-import { Box } from '@audius/harmony-native'
+import {
+  Box
+} from '@audius/harmony-native'
 
-import { CommentForm } from './CommentForm'
+import {
+  CommentForm
+} from './CommentForm'
 
 type CommentDrawerFormProps = {
   commentListRef: RefObject<BottomSheetFlatListMethods | null>
@@ -40,7 +48,7 @@ export const CommentDrawerForm = (props: CommentDrawerFormProps) => {
     replyingAndEditingState ?? {}
   const [postComment] = usePostComment()
   const [editComment] = useEditComment()
-  const playerTrackId = useSelector(playerSelectors.getTrackId)
+  const playerTrackId = useSelector(playbackSelectors.getTrackId)
 
   const handlePostComment = async (
     message: string,

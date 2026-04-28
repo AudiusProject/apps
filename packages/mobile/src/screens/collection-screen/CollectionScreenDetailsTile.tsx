@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo
+} from 'react'
 
 import {
   useCollection,
   useCollectionTracks,
   useTracks
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccessMap } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useGatedContentAccessMap
+} from '@audius/common/hooks'
 import {
   Kind,
   Name,
@@ -15,19 +22,30 @@ import {
 import type { ID, UID, AccessConditions } from '@audius/common/models'
 import {
   reachabilitySelectors,
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  playbackActions,
   PurchaseableContentType,
   collectionPageActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { formatReleaseDate, Uid, makeStableUid } from '@audius/common/utils'
+import {
+  formatReleaseDate,
+  Uid,
+  makeStableUid
+} from '@audius/common/utils'
 import type { Maybe, Nullable } from '@audius/common/utils'
 import dayjs from 'dayjs'
-import { pick, uniq } from 'lodash'
-import { TouchableOpacity } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  pick,
+  uniq
+} from 'lodash'
+import {
+  TouchableOpacity
+} from 'react-native'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
 import {
   Box,
@@ -42,27 +60,62 @@ import {
   Paper,
   Text
 } from '@audius/harmony-native'
-import { CollectionDogEar } from 'app/components/collection/CollectionDogEar'
-import { UserGeneratedText } from 'app/components/core'
-import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
-import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
-import { CollectionMetadataList } from 'app/components/details-tile/CollectionMetadataList'
-import { DetailsTileActionButtons } from 'app/components/details-tile/DetailsTileActionButtons'
-import { DetailsTileHasAccess } from 'app/components/details-tile/DetailsTileHasAccess'
-import { DetailsTileNoAccess } from 'app/components/details-tile/DetailsTileNoAccess'
-import { DetailsTileStats } from 'app/components/details-tile/DetailsTileStats'
+import {
+  CollectionDogEar
+} from 'app/components/collection/CollectionDogEar'
+import {
+  UserGeneratedText
+} from 'app/components/core'
+import {
+  ScreenPrimaryContent
+} from 'app/components/core/Screen/ScreenPrimaryContent'
+import {
+  ScreenSecondaryContent
+} from 'app/components/core/Screen/ScreenSecondaryContent'
+import {
+  CollectionMetadataList
+} from 'app/components/details-tile/CollectionMetadataList'
+import {
+  DetailsTileActionButtons
+} from 'app/components/details-tile/DetailsTileActionButtons'
+import {
+  DetailsTileHasAccess
+} from 'app/components/details-tile/DetailsTileHasAccess'
+import {
+  DetailsTileNoAccess
+} from 'app/components/details-tile/DetailsTileNoAccess'
+import {
+  DetailsTileStats
+} from 'app/components/details-tile/DetailsTileStats'
 import type { DetailsTileProps } from 'app/components/details-tile/types'
-import { OfflineStatusRow } from 'app/components/offline-downloads'
-import { TrackList } from 'app/components/track-list'
-import { UserBadges } from 'app/components/user-badges'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { useRoute } from 'app/hooks/useRoute'
-import { make, track } from 'app/services/analytics'
-import { makeStyles } from 'app/styles'
+import {
+  OfflineStatusRow
+} from 'app/components/offline-downloads'
+import {
+  TrackList
+} from 'app/components/track-list'
+import {
+  UserBadges
+} from 'app/components/user-badges'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  useRoute
+} from 'app/hooks/useRoute'
+import {
+  make,
+  track
+} from 'app/services/analytics'
+import {
+  makeStyles
+} from 'app/styles'
 
-import { CollectionScreenSkeleton } from './CollectionScreenSkeleton'
+import {
+  CollectionScreenSkeleton
+} from './CollectionScreenSkeleton'
 
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
 const { resetCollection, fetchCollection } = collectionPageActions
 
@@ -318,7 +371,7 @@ export const CollectionScreenDetailsTile = ({
         .map((id) => ({
           trackId: id,
           source: collectionPlaybackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
+          uid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
         })),
     [trackUids, collectionPlaybackSource]
   )
@@ -586,7 +639,7 @@ const CollectionTrackList = ({
         .map((id) => ({
           trackId: id,
           source: trackListPlaybackSource,
-          legacyUid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
+          uid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
         })),
     [uids, trackListPlaybackSource]
   )

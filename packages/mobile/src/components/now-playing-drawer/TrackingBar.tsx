@@ -1,22 +1,47 @@
-import { useCallback, useEffect, useRef } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef
+} from 'react'
 
-import { useCurrentTrack } from '@audius/common/hooks'
-import { playerSelectors, playbackRateValueMap } from '@audius/common/store'
-import { Genre } from '@audius/common/utils'
-import { Animated, Dimensions, Easing } from 'react-native'
+import {
+  useCurrentTrack
+} from '@audius/common/hooks'
+import {
+  playbackSelectors,
+  playbackRateValueMap
+} from '@audius/common/store'
+import {
+  Genre
+} from '@audius/common/utils'
+import {
+  Animated,
+  Dimensions,
+  Easing
+} from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import TrackPlayer, { useIsPlaying } from 'react-native-track-player'
-import { useSelector } from 'react-redux'
-import { useAsync } from 'react-use'
+import {
+  useSelector
+} from 'react-redux'
+import {
+  useAsync
+} from 'react-use'
 
-import { makeStyles } from 'app/styles'
-import { useThemeColors } from 'app/utils/theme'
+import {
+  makeStyles
+} from 'app/styles'
+import {
+  useThemeColors
+} from 'app/utils/theme'
 
-import { NOW_PLAYING_HEIGHT } from './constants'
+import {
+  NOW_PLAYING_HEIGHT
+} from './constants'
 
 const width = Dimensions.get('window').width
 
-const { getSeek, getPaused, getBuffering } = playerSelectors
+const { getSeek, getPaused, getBuffering } = playbackSelectors
 
 const useStyles = makeStyles(({ palette }) => ({
   rail: {
@@ -64,7 +89,7 @@ export const TrackingBar = (props: TrackingBarProps) => {
   const trackGenre = useCurrentTrack({
     select: (track) => track?.genre
   })
-  const playbackRate = useSelector(playerSelectors.getPlaybackRate)
+  const playbackRate = useSelector(playbackSelectors.getPlaybackRate)
 
   // Calculate the actual playback rate based on track type
   const isLongFormContent =

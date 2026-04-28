@@ -10,7 +10,10 @@ import {
   useFanClub,
   useTrackDownloadCount
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   Kind,
   Name,
@@ -33,7 +36,7 @@ import type {
 } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import {
-  queueSelectors,
+  playbackSelectors,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -44,7 +47,6 @@ import {
   favoritesUserListActions,
   trackPageActions,
   RepostType,
-  playerSelectors,
   playbackActions,
   playbackPositionSelectors,
   PurchaseableContentType,
@@ -58,10 +60,17 @@ import {
   removeNullable,
   dayjs
 } from '@audius/common/utils'
-import { encodeHashId } from '@audius/sdk'
+import {
+  encodeHashId
+} from '@audius/sdk'
 import type { FlatList } from 'react-native'
-import { TouchableOpacity } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  TouchableOpacity
+} from 'react-native'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
 import {
   Button,
@@ -78,28 +87,68 @@ import {
   Text,
   IconFanClub
 } from '@audius/harmony-native'
-import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
-import { Tag } from 'app/components/core'
-import { DeletedTile } from 'app/components/details-tile/DeletedTile'
-import { DetailsProgressInfo } from 'app/components/details-tile/DetailsProgressInfo'
-import { DetailsTileActionButtons } from 'app/components/details-tile/DetailsTileActionButtons'
-import { DetailsTileHasAccess } from 'app/components/details-tile/DetailsTileHasAccess'
-import { DetailsTileNoAccess } from 'app/components/details-tile/DetailsTileNoAccess'
-import { DetailsTileStats } from 'app/components/details-tile/DetailsTileStats'
-import { TrackMetadataList } from 'app/components/details-tile/TrackMetadataList'
-import { TrackImage } from 'app/components/image/TrackImage'
-import { OfflineStatusRow } from 'app/components/offline-downloads'
-import { TrackDogEar } from 'app/components/track/TrackDogEar'
-import { TrackFlair, Size } from 'app/components/track-flair'
-import { UserBadges } from 'app/components/user-badges'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { make, track as trackEvent } from 'app/services/analytics'
-import { makeStyles } from 'app/styles'
+import {
+  useCommentDrawer
+} from 'app/components/comments/CommentDrawerContext'
+import {
+  Tag
+} from 'app/components/core'
+import {
+  DeletedTile
+} from 'app/components/details-tile/DeletedTile'
+import {
+  DetailsProgressInfo
+} from 'app/components/details-tile/DetailsProgressInfo'
+import {
+  DetailsTileActionButtons
+} from 'app/components/details-tile/DetailsTileActionButtons'
+import {
+  DetailsTileHasAccess
+} from 'app/components/details-tile/DetailsTileHasAccess'
+import {
+  DetailsTileNoAccess
+} from 'app/components/details-tile/DetailsTileNoAccess'
+import {
+  DetailsTileStats
+} from 'app/components/details-tile/DetailsTileStats'
+import {
+  TrackMetadataList
+} from 'app/components/details-tile/TrackMetadataList'
+import {
+  TrackImage
+} from 'app/components/image/TrackImage'
+import {
+  OfflineStatusRow
+} from 'app/components/offline-downloads'
+import {
+  TrackDogEar
+} from 'app/components/track/TrackDogEar'
+import {
+  TrackFlair,
+  Size
+} from 'app/components/track-flair'
+import {
+  UserBadges
+} from 'app/components/user-badges'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  make,
+  track as trackEvent
+} from 'app/services/analytics'
+import {
+  makeStyles
+} from 'app/styles'
 
-import { DownloadSection } from './DownloadSection'
-import { TrackDescription } from './TrackDescription'
+import {
+  DownloadSection
+} from './DownloadSection'
+import {
+  TrackDescription
+} from './TrackDescription'
 
-const { getPlaying, getTrackId, getPreviewing } = playerSelectors
+const { getPlaying, getTrackId, getPreviewing } = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -107,7 +156,7 @@ const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { getIsReachable } = reachabilitySelectors
 const { getTrackPosition } = playbackPositionSelectors
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
@@ -351,7 +400,7 @@ export const TrackScreenDetailsTile = ({
               {
                 trackId,
                 source: playbackSource,
-                legacyUid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
+                uid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
               }
             ],
             startIndex: 0,

@@ -1,7 +1,17 @@
-import { useCallback, useMemo, useRef } from 'react'
+import {
+  useCallback,
+  useMemo,
+  useRef
+} from 'react'
 
-import { useCollection, useCurrentUserId, useUser } from '@audius/common/api'
-import { useGatedCollectionAccess } from '@audius/common/hooks'
+import {
+  useCollection,
+  useCurrentUserId,
+  useUser
+} from '@audius/common/api'
+import {
+  useGatedCollectionAccess
+} from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
@@ -16,30 +26,63 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   PurchaseableContentType
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
-import { removeNullable } from '@audius/common/utils'
-import { useDispatch, useSelector } from 'react-redux'
+import {
+  removeNullable
+} from '@audius/common/utils'
+import {
+  useDispatch,
+  useSelector
+} from 'react-redux'
 
-import { Paper, type ImageProps } from '@audius/harmony-native'
-import { useNavigation } from 'app/hooks/useNavigation'
-import { setVisibility } from 'app/store/drawers/slice'
-import { getIsCollectionMarkedForDownload } from 'app/store/offline-downloads/selectors'
+import {
+  Paper,
+  type ImageProps
+} from '@audius/harmony-native'
+import {
+  useNavigation
+} from 'app/hooks/useNavigation'
+import {
+  setVisibility
+} from 'app/store/drawers/slice'
+import {
+  getIsCollectionMarkedForDownload
+} from 'app/store/offline-downloads/selectors'
 
-import { CollectionDogEar } from '../collection/CollectionDogEar'
-import { CollectionImage } from '../image/CollectionImage'
+import {
+  CollectionDogEar
+} from '../collection/CollectionDogEar'
+import {
+  CollectionImage
+} from '../image/CollectionImage'
 
-import { CollectionTileStats } from './CollectionTileStats'
-import { CollectionTileTrackList } from './CollectionTileTrackList'
-import { LineupTileActionButtons } from './LineupTileActionButtons'
-import { LineupTileMetadata } from './LineupTileMetadata'
-import { TilePressBlockContext } from './TilePressBlockContext'
-import { LineupTileSource, type CollectionTileProps } from './types'
-import { useEnhancedCollectionTracks } from './useEnhancedCollectionTracks'
+import {
+  CollectionTileStats
+} from './CollectionTileStats'
+import {
+  CollectionTileTrackList
+} from './CollectionTileTrackList'
+import {
+  LineupTileActionButtons
+} from './LineupTileActionButtons'
+import {
+  LineupTileMetadata
+} from './LineupTileMetadata'
+import {
+  TilePressBlockContext
+} from './TilePressBlockContext'
+import {
+  LineupTileSource,
+  type CollectionTileProps
+} from './types'
+import {
+  useEnhancedCollectionTracks
+} from './useEnhancedCollectionTracks'
 
-const { getUid } = playerSelectors
+const { getUid } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const {
