@@ -39,7 +39,22 @@ def get_latest_blocknumber_via_redis(session: Session, redis: Redis) -> Optional
 
 
 # The number of users to recieve the trending rewards
-TRENDING_LIMIT = 5
+TRENDING_LIMIT = 10
+
+# Per-rank $AUDIO payout for trending track and trending underground challenges.
+# Ranks 1-5 receive 1000; ranks 6-10 receive 100.
+TRENDING_TRACK_AMOUNTS_BY_RANK = {
+    1: 1000,
+    2: 1000,
+    3: 1000,
+    4: 1000,
+    5: 1000,
+    6: 100,
+    7: 100,
+    8: 100,
+    9: 100,
+    10: 100,
+}
 
 
 def dispatch_trending_challenges(
@@ -53,6 +68,7 @@ def dispatch_trending_challenges(
     type: TrendingType,
 ):
     for idx, track in enumerate(tracks):
+        rank = idx + 1
         challenge_bus.dispatch(
             challenge_event,
             latest_blocknumber,
@@ -61,7 +77,8 @@ def dispatch_trending_challenges(
             {
                 "id": track["track_id"],
                 "user_id": track["owner_id"],
-                "rank": idx + 1,
+                "rank": rank,
+                "amount": TRENDING_TRACK_AMOUNTS_BY_RANK[rank],
                 "type": str(type),
                 "version": str(version),
                 "week": date_to_week(date),

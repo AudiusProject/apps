@@ -185,18 +185,18 @@ export const challengeRewardsConfig: Partial<
   },
   [ChallengeName.TrendingTrack]: {
     id: ChallengeName.TrendingTrack,
-    title: 'Global Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    title: 'Global Trending Weekly Top 10',
+    description: () => 'Top 10 winners are selected every Friday at Noon PT!',
     fullDescription: () =>
-      'Top 5 winners are selected every Friday at Noon PT!',
+      'Top 10 winners are selected every Friday at Noon PT!',
     panelButtonText: 'See More'
   },
   [ChallengeName.TrendingUndergroundTrack]: {
     id: ChallengeName.TrendingUndergroundTrack,
-    title: 'Underground Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    title: 'Underground Trending Weekly Top 10',
+    description: () => 'Top 10 winners are selected every Friday at Noon PT!',
     fullDescription: () =>
-      'Top 5 winners are selected every Friday at Noon PT!',
+      'Top 10 winners are selected every Friday at Noon PT!',
     panelButtonText: 'See More'
   },
   'top-api': {
