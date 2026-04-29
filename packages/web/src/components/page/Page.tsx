@@ -21,6 +21,7 @@ type HeaderContainerProps = Pick<
   | 'headerContentPaddingInline'
   | 'subHeader'
   | 'disableHeaderFrosted'
+  | 'frostedHeaderContainer'
 >
 
 const HeaderContainer = (props: HeaderContainerProps) => {
@@ -29,7 +30,8 @@ const HeaderContainer = (props: HeaderContainerProps) => {
     showSearch,
     headerContentPaddingInline,
     subHeader,
-    disableHeaderFrosted
+    disableHeaderFrosted,
+    frostedHeaderContainer
   } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
@@ -39,7 +41,12 @@ const HeaderContainer = (props: HeaderContainerProps) => {
   })
 
   return (
-    <div ref={headerContainerRef} className={styles.headerContainer}>
+    <div
+      ref={headerContainerRef}
+      className={cn(styles.headerContainer, {
+        [styles.headerContainerFrosted]: frostedHeaderContainer
+      })}
+    >
       {disableHeaderFrosted ? (
         headerElement
       ) : (
@@ -51,7 +58,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}
-      <div className={styles.headerBoxShadow} />
+      {!subHeader && <div className={styles.headerBoxShadow} />}
     </div>
   )
 }
@@ -70,6 +77,7 @@ type PageProps = {
   subHeader?: ReactNode
   headerContentPaddingInline?: string
   disableHeaderFrosted?: boolean
+  frostedHeaderContainer?: boolean
 
   // There are some pages which don't have a fixed header but still display
   // a search bar that scrolls with the page.
@@ -99,6 +107,7 @@ export const Page = (props: PageProps) => {
     subHeader,
     headerContentPaddingInline = 'var(--harmony-unit-8)',
     disableHeaderFrosted = false,
+    frostedHeaderContainer = false,
     image,
     noIndex = false,
     ogDescription,
@@ -148,6 +157,7 @@ export const Page = (props: PageProps) => {
             showSearch={showSearch}
             headerContentPaddingInline={headerContentPaddingInline}
             disableHeaderFrosted={disableHeaderFrosted}
+            frostedHeaderContainer={frostedHeaderContainer}
           />
         )}
         <div

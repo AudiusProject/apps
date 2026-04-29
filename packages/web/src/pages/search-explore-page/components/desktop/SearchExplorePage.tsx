@@ -18,15 +18,13 @@ import {
   TextInput,
   TextInputSize,
   IconSearch,
-  IconUser,
-  FilterButton
+  IconUser
 } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
-import { Frosted } from 'components/frosted/Frosted'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
@@ -39,11 +37,7 @@ import {
   useSearchCategory,
   useShowSearchResults
 } from 'pages/search-page/hooks'
-import {
-  CategoryView,
-  ViewLayout,
-  viewLayoutOptions
-} from 'pages/search-page/types'
+import { CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
@@ -115,7 +109,6 @@ const SearchExplorePage = ({
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   const previousDebouncedValue = usePrevious(debouncedValue)
   const showSearchResults = useShowSearchResults()
-  const [tracksLayout, setTracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
   const pageContentRef = useRef<HTMLDivElement>(null)
   const tabContainerRef = useRef<HTMLDivElement>(null)
@@ -309,13 +302,23 @@ const SearchExplorePage = ({
   )
 
   const subHeader = (
-    <Frosted
-      contentPaddingInline='var(--harmony-unit-8)'
-      css={{ borderTop: '1px solid var(--harmony-n-100)', zIndex: 9 }}
+    <Flex
+      column
+      w='100%'
+      ph='2xl'
       pv='m'
-      gap='m'
+      css={{
+        borderTop: '1px solid var(--harmony-n-100)',
+        background:
+          'color-mix(in srgb, var(--harmony-n-950) 3%, transparent)',
+        alignSelf: 'stretch'
+      }}
     >
-      <Flex css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}>
+      <Flex
+        column
+        gap='m'
+        css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}
+      >
         <TextInput
           ref={searchBarRef}
           label={messages.searchPlaceholder}
@@ -325,38 +328,28 @@ const SearchExplorePage = ({
           onChange={handleSearch}
           onClear={handleClearSearch}
         />
+        {filterKeys.length ? (
+          <Flex
+            direction='row'
+            justifyContent={isNarrowLayout ? undefined : 'space-between'}
+            alignItems='center'
+            gap='s'
+            wrap='wrap'
+          >
+            <Flex direction='row' gap='s' wrap='wrap'>
+              {filterKeys.map((filterKey) => {
+                const FilterComponent =
+                  filters[filterKey as keyof typeof filters]
+                return <FilterComponent key={filterKey} />
+              })}
+            </Flex>
+            <Flex gap='s'>
+              <SortMethodFilterButton />
+            </Flex>
+          </Flex>
+        ) : null}
       </Flex>
-      {filterKeys.length ? (
-        <Flex
-          css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}
-          direction='row'
-          justifyContent={isNarrowLayout ? undefined : 'space-between'}
-          alignItems='center'
-          gap='s'
-          wrap='wrap'
-        >
-          <Flex direction='row' gap='s' wrap='wrap'>
-            {filterKeys.map((filterKey) => {
-              const FilterComponent =
-                filters[filterKey as keyof typeof filters]
-              return <FilterComponent key={filterKey} />
-            })}
-          </Flex>
-          <Flex gap='s'>
-            <SortMethodFilterButton />
-            {categoryKey === CategoryView.TRACKS ? (
-              <FilterButton
-                value={tracksLayout}
-                variant='replaceLabel'
-                optionsLabel={messages.layoutOptionsLabel}
-                onChange={setTracksLayout}
-                options={viewLayoutOptions}
-              />
-            ) : null}
-          </Flex>
-        </Flex>
-      ) : null}
-    </Frosted>
+    </Flex>
   )
 
   return (
@@ -367,6 +360,8 @@ const SearchExplorePage = ({
       header={header}
       subHeader={subHeader}
       showSearch={false}
+      disableHeaderFrosted
+      frostedHeaderContainer
     >
       <Flex
         ref={pageContentRef}
@@ -377,10 +372,7 @@ const SearchExplorePage = ({
       >
         {/* Content Section */}
         {inputValue || showSearchResults ? (
-          <SearchResults
-            tracksLayout={tracksLayout}
-            handleSearchTab={handleSearchTab}
-          />
+          <SearchResults handleSearchTab={handleSearchTab} />
         ) : null}
         <Flex
           direction='column'

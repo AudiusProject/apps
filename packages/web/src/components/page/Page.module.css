@@ -31,6 +31,23 @@
   right: 0;
   z-index: 13;
   border-bottom: 1px solid var(--harmony-n-100);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.headerContainerFrosted {
+  backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  background: var(
+    --frosted-surface-background,
+    color-mix(
+      in srgb,
+      var(--frosted-surface-background-color, var(--harmony-n-25))
+        var(--frosted-surface-opacity, 65%),
+      transparent
+    )
+  );
 }
 
 /* Pull up overlaps scrollbar; negative margin cancels the 5px flow box so the header border sits flush. */

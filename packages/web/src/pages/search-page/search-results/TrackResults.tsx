@@ -15,7 +15,6 @@ import { useMainContentRef } from 'pages/MainContentContext'
 
 import { NoResultsTile } from '../NoResultsTile'
 import { useSearchParams } from '../hooks'
-import { ViewLayout } from '../types'
 
 const { addItem: addRecentSearch } = searchActions
 
@@ -23,7 +22,6 @@ type TrackResultsProps = {
   isPending: boolean
   isFetching: boolean
   isError: boolean
-  viewLayout?: ViewLayout
   category?: SearchKind
   count?: number
   waitForAllResults?: boolean
@@ -32,7 +30,6 @@ type TrackResultsProps = {
 export const TrackResults = (props: TrackResultsProps) => {
   const {
     category = SearchKind.TRACKS,
-    viewLayout = 'list',
     count,
     isPending,
     isFetching,
@@ -44,8 +41,6 @@ export const TrackResults = (props: TrackResultsProps) => {
   const isMobile = useIsMobile()
 
   const dispatch = useDispatch()
-
-  const isTrackGridLayout = viewLayout === 'grid'
 
   const searchParams = useSearchParams()
 
@@ -98,7 +93,7 @@ export const TrackResults = (props: TrackResultsProps) => {
       isError={isError}
       hasNextPage={shouldLoadMore ? hasNextPage : false}
       loadNextPage={shouldLoadMore ? loadNextPage : undefined}
-      variant={viewLayout === 'grid' ? LineupVariant.GRID : LineupVariant.MAIN}
+      variant={LineupVariant.MAIN}
       scrollParent={mainContentRef.current}
       emptyElement={<NoResultsTile />}
       onClickTile={handleClickTrackTile}
@@ -107,11 +102,8 @@ export const TrackResults = (props: TrackResultsProps) => {
         ? {
             lineupContainerStyles: css({ width: '100%' }),
             tileContainerStyles: css({
-              display: isTrackGridLayout ? 'grid' : 'flex',
-              flexDirection: isTrackGridLayout ? undefined : 'column',
-              gridTemplateColumns: isTrackGridLayout
-                ? 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))'
-                : undefined,
+              display: 'flex',
+              flexDirection: 'column',
               gap: '4px 16px',
               justifyContent: 'space-between'
             })
@@ -121,11 +113,7 @@ export const TrackResults = (props: TrackResultsProps) => {
   )
 }
 
-type TrackResultsPageProps = {
-  layout?: ViewLayout
-}
-
-export const TrackResultsPage = ({ layout }: TrackResultsPageProps) => {
+export const TrackResultsPage = () => {
   const isMobile = useIsMobile()
   const searchParams = useSearchParams()
   const { isPending, isFetching, isError } = useSearchTrackResults(searchParams)
@@ -133,7 +121,6 @@ export const TrackResultsPage = ({ layout }: TrackResultsPageProps) => {
   return (
     <Flex p={isMobile ? 'l' : undefined} css={{ backgroundColor: 'default' }}>
       <TrackResults
-        viewLayout={layout}
         isPending={isPending}
         isFetching={isFetching}
         isError={isError}

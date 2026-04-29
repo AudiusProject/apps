@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, ChangeEvent } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -15,13 +15,9 @@ import {
   IconButton,
   IconClose,
   IconFanClub,
-  IconSearch,
   IconVerified,
-  Paper,
   SelectablePill,
   Text,
-  TextInput,
-  TextInputSize,
   Tooltip,
   useTheme
 } from '@audius/harmony'
@@ -56,7 +52,6 @@ const readLaunchBannerDismissed = () => {
 }
 
 const messages = {
-  searchPlaceholder: 'Search',
   getStarted: 'Get Started',
   launchYourOwn: 'Launch Your Own Fan Club!',
   required: 'Verification Required',
@@ -75,7 +70,6 @@ const DesktopFanClubsExplorePage = () => {
   const Portal = usePortal({
     container: mainContentRef.current?.parentElement ?? undefined
   })
-  const [searchValue, setSearchValue] = useState('')
   const [isLaunchBannerDismissed, setIsLaunchBannerDismissed] = useState(
     readLaunchBannerDismissed
   )
@@ -107,14 +101,6 @@ const DesktopFanClubsExplorePage = () => {
     }
     navigate(COINS_CREATE_PAGE)
   }, [canViewExistingClub, existingClubTicker, navigate])
-
-  const handleSearchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value)
-  }, [])
-
-  const handleClearSearch = useCallback(() => {
-    setSearchValue('')
-  }, [])
 
   const handleDismissLaunchBanner = useCallback(() => {
     setIsLaunchBannerDismissed(true)
@@ -200,17 +186,7 @@ const DesktopFanClubsExplorePage = () => {
           paddingBottom: launchCtaReserveY
         }}
       >
-        <Paper pv='l' ph='xl' alignSelf='stretch'>
-          <TextInput
-            label={messages.searchPlaceholder}
-            value={searchValue}
-            startIcon={IconSearch}
-            size={TextInputSize.SMALL}
-            onChange={handleSearchChange}
-            onClear={handleClearSearch}
-          />
-        </Paper>
-        <FanClubsTable searchQuery={searchValue} viewMode={fanClubsViewMode} />
+        <FanClubsTable viewMode={fanClubsViewMode} />
       </Flex>
 
       <Portal>

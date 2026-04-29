@@ -147,7 +147,7 @@ export const walletMessages = {
     view: 'View',
     tableView: 'Table',
     leaderboardView: 'Leaderboard',
-    cardView: 'Cards',
+    cardView: 'Fan Clubs',
     launchYourClub: 'Launch your club',
     viewYourClub: 'View your club',
     fanClubLabel: 'Fan Club',

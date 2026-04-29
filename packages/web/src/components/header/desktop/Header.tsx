@@ -73,6 +73,7 @@ export const Header = (props: HeaderProps) => {
             justifyContent='space-between'
             w='100%'
             gap='m'
+            className={styles.contentGlow}
           >
             {showBackButton ? (
               <BackButton onClick={onClickBack ?? (() => navigate(-1))} />
@@ -111,7 +112,9 @@ export const Header = (props: HeaderProps) => {
       {children}
       {bottomBar && (
         <div className={styles.bottomBarContainer}>
-          <div className={styles.bottomBar}>{bottomBar}</div>
+          <div className={cn(styles.bottomBar, styles.contentGlow)}>
+            {bottomBar}
+          </div>
         </div>
       )}
     </>

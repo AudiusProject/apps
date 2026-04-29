@@ -35,8 +35,7 @@ import {
 import {
   Category,
   CategoryKey,
-  CategoryView,
-  ViewLayout
+  CategoryView
 } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
@@ -81,7 +80,6 @@ const SearchExplorePage = ({
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   const previousDebouncedValue = usePrevious(debouncedValue)
   const showSearchResults = useShowSearchResults()
-  const [tracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
@@ -237,10 +235,7 @@ const SearchExplorePage = ({
           </RadioGroup>
         </Flex>
         {inputValue || showSearchResults ? (
-          <SearchResults
-            tracksLayout={tracksLayout}
-            handleSearchTab={handleSearchTab}
-          />
+          <SearchResults handleSearchTab={handleSearchTab} />
         ) : null}
         <Flex
           direction='column'
