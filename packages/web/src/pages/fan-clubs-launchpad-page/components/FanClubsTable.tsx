@@ -407,13 +407,10 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
   const FilterHeader = useMemo(() => {
     const Component = () => {
       const [value, setValue] = useState('')
-      const onChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-          setValue(e.target.value)
-          handleSearchChangeRef.current(e)
-        },
-        []
-      )
+      const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(e.target.value)
+        handleSearchChangeRef.current(e)
+      }, [])
       return (
         <div className={styles.filterHeader}>
           <FilterInput placeholder='Filter' onChange={onChange} value={value} />
@@ -427,7 +424,7 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
   const queryResult = useFanClubs({
     sortMethod,
     sortDirection,
-    query: viewMode === 'table' ? (searchValue || undefined) : undefined,
+    query: viewMode === 'table' ? searchValue || undefined : undefined,
     pageSize: FAN_CLUBS_BATCH_SIZE
   })
 
@@ -500,7 +497,8 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
     baseColumns.tokenName = {
       ...baseColumns.tokenName,
       Header: FilterHeader,
-      Cell: (cellInfo: CoinCell) => renderTokenNameCell(cellInfo, handleViewCoin)
+      Cell: (cellInfo: CoinCell) =>
+        renderTokenNameCell(cellInfo, handleViewCoin)
     }
     baseColumns.buy = {
       ...baseColumns.buy,

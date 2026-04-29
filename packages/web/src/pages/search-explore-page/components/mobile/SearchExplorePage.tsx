@@ -32,11 +32,7 @@ import {
   useSearchCategory,
   useShowSearchResults
 } from 'pages/search-page/hooks'
-import {
-  Category,
-  CategoryKey,
-  CategoryView
-} from 'pages/search-page/types'
+import { Category, CategoryKey, CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'

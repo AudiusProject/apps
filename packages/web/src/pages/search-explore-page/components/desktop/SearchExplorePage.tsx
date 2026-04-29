@@ -309,8 +309,7 @@ const SearchExplorePage = ({
       pv='m'
       css={{
         borderTop: '1px solid var(--harmony-n-100)',
-        background:
-          'color-mix(in srgb, var(--harmony-n-950) 3%, transparent)',
+        background: 'color-mix(in srgb, var(--harmony-n-950) 3%, transparent)',
         alignSelf: 'stretch'
       }}
     >

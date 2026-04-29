@@ -16,7 +16,6 @@ import {
   IconClose,
   IconFanClub,
   IconVerified,
-  SelectablePill,
   Text,
   Tooltip,
   useTheme
@@ -132,17 +131,6 @@ const DesktopFanClubsExplorePage = () => {
     ],
     []
   )
-
-  const viewModeOptions = [
-    {
-      label: walletMessages.fanClubs.cardView,
-      value: 'cards'
-    },
-    {
-      label: walletMessages.fanClubs.leaderboardView,
-      value: 'table'
-    }
-  ]
 
   const { tabs: viewModeTabs } = useTabs({
     isMobile: false,

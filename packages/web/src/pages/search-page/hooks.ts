@@ -18,7 +18,6 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { CategoryKey, CategoryView } from './types'
 import { urlSearchParamsToObject } from './utils'
 
-
 const { SEARCH_BASE_ROUTE, SEARCH_PAGE } = route
 
 export const useShowSearchResults = () => {
