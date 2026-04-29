@@ -1,12 +1,13 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 import { coinDetailsMessages } from '@audius/common/messages'
 import { EDIT_COIN_DETAILS_PAGE } from '@audius/common/src/utils/route'
 import { Button } from '@audius/harmony'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 
-import useTabs from 'hooks/useTabs/useTabs'
+import { Tab, TabList } from 'components/tabs'
 import { AudioWalletTransactions } from 'pages/audio-page/AudioWalletTransactions'
+import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { env } from 'services/env'
 
 import { FanClubDetailContent } from './FanClubDetailContent'
@@ -15,6 +16,8 @@ export enum FanClubDetailTabType {
   HOME = 'home',
   TRANSACTIONS = 'transactions'
 }
+
+const TAB_PARAM = 'tab'
 
 const messages = {
   home: 'Home',
@@ -33,12 +36,13 @@ export const useFanClubDetailTabs = ({
   ticker,
   isOwner = false
 }: UseFanClubDetailTabsProps) => {
-  const [selectedTab, setSelectedTab] = useState(FanClubDetailTabType.HOME)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const updateTabSearchParam = useUpdateSearchParams(TAB_PARAM)
 
-  const handleTabChange = useCallback((_from: string, to: string) => {
-    setSelectedTab(to as FanClubDetailTabType)
-  }, [])
+  const selectedTab =
+    (searchParams.get(TAB_PARAM) as FanClubDetailTabType) ??
+    FanClubDetailTabType.HOME
 
   const handleEditClick = useCallback(() => {
     if (ticker) {
@@ -47,31 +51,6 @@ export const useFanClubDetailTabs = ({
   }, [ticker, navigate])
 
   const isWAudio = mint === env.WAUDIO_MINT_ADDRESS
-
-  // For wAUDIO, show both tabs
-  const tabs = [
-    {
-      text: messages.home,
-      label: FanClubDetailTabType.HOME
-    },
-    {
-      text: messages.transactions,
-      label: FanClubDetailTabType.TRANSACTIONS
-    }
-  ]
-
-  const tabElements = [
-    <FanClubDetailContent key='home' mint={mint} />,
-    <AudioWalletTransactions key='transactions' />
-  ]
-
-  const tabsResult = useTabs({
-    isMobile: false,
-    tabs,
-    selectedTabLabel: selectedTab,
-    elements: tabElements,
-    didChangeTabsFrom: handleTabChange
-  })
 
   const rightDecorator = isOwner ? (
     <Button variant='secondary' size='small' onClick={handleEditClick}>
@@ -90,6 +69,20 @@ export const useFanClubDetailTabs = ({
 
   // For wAUDIO, return the full tabs system
   return {
-    ...tabsResult
+    tabs: (
+      <TabList value={selectedTab} onChange={updateTabSearchParam}>
+        <Tab value={FanClubDetailTabType.HOME}>{messages.home}</Tab>
+        <Tab value={FanClubDetailTabType.TRANSACTIONS}>
+          {messages.transactions}
+        </Tab>
+      </TabList>
+    ),
+    body:
+      selectedTab === FanClubDetailTabType.TRANSACTIONS ? (
+        <AudioWalletTransactions />
+      ) : (
+        <FanClubDetailContent mint={mint} />
+      ),
+    rightDecorator
   }
 }
