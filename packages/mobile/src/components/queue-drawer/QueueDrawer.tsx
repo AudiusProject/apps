@@ -1,16 +1,13 @@
-import { Fragment, useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { useTrackHistory } from '@audius/common/api'
-import {
-  playbackActions,
-  playbackSelectors,
-  QueueSource
-} from '@audius/common/store'
-import type { PlaybackTrack } from '@audius/common/store'
-import { FlatList, Pressable, View } from 'react-native'
-import DraggableFlatList, {
-  OpacityDecorator
-} from 'react-native-draggable-flatlist'
+import { useTrack, useUser } from '@audius/common/api'
+import type { ID } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
+import type { PlaybackTrack, QueueSource } from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
+import { useQueryClient } from '@tanstack/react-query'
+import { Pressable, View } from 'react-native'
+import DraggableFlatList from 'react-native-draggable-flatlist'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
@@ -18,120 +15,298 @@ import {
   Flex,
   IconButton,
   IconClose,
-  LoadingSpinner,
+  IconDrag,
+  IconPause,
+  IconPlay,
   PlainButton,
   Text,
   useTheme
 } from '@audius/harmony-native'
 import { NativeDrawer } from 'app/components/drawer'
-import { TrackListItem } from 'app/components/track-list/TrackListItem'
+import { TrackImage } from 'app/components/image/TrackImage'
+import UserBadges from 'app/components/user-badges'
 import * as haptics from 'app/haptics'
 import { useDrawer } from 'app/hooks/useDrawer'
 
-const { getPlaybackQueue, getPlaybackIndex } = playbackSelectors
+const { getPlaybackQueue, getPlaybackIndex, getIsPlaying, getQuerySource } =
+  playbackSelectors
 const {
   playTrackAt,
   removeFromQueue,
   reorder,
   clearUpcoming,
   togglePlay,
-  playFrom
+  addToQueue
 } = playbackActions
 
 const DRAWER_NAME = 'Queue'
 
 const messages = {
   queue: 'Queue',
-  history: 'History',
-  nowPlaying: 'Now playing',
   upNext: 'Up Next',
   clear: 'Clear',
   emptyQueue: 'Your queue is empty.',
-  emptyHistory: "You haven't played any tracks yet."
+  playingFrom: 'Playing from '
 }
 
-type Tab = 'queue' | 'history'
+const SOURCE_LABELS: Record<string, string> = {
+  feed: 'Feed',
+  trending: 'Trending',
+  trendingUnderground: 'Underground',
+  exploreContent: 'Explore',
+  premiumTracks: 'Premium Tracks',
+  newReleaseAlbums: 'New Releases',
+  bestSellingAlbums: 'Best Selling',
+  feelingLuckyTracks: 'Feeling Lucky',
+  recentlyPlayedTracks: 'Recently Played',
+  trackHistory: 'Listening History',
+  libraryTracks: 'Your Library',
+  favoritedTracks: 'Favorites',
+  reposts: 'Reposts',
+  profileTracks: 'Profile',
+  tracksByPlaylist: 'Playlist',
+  tracksByAlbum: 'Album',
+  trackPageLineup: 'More tracks',
+  search: 'Search'
+}
 
-const TabButton = ({
-  label,
-  active,
-  onPress
-}: {
-  label: string
-  active: boolean
-  onPress: () => void
-}) => {
+type RowProps = {
+  trackId: ID
+  variant: 'now-playing' | 'queued' | 'up-next'
+  isPlaying?: boolean
+  onPlayPause?: () => void
+  onPlay?: () => void
+  onRemove?: () => void
+  drag?: () => void
+}
+
+const MiniTrackRow = ({
+  trackId,
+  variant,
+  isPlaying,
+  onPlayPause,
+  onPlay,
+  onRemove,
+  drag
+}: RowProps) => {
   const { color, spacing } = useTheme()
+  const { data: track } = useTrack(trackId, {
+    select: (t) => ({
+      title: t?.title,
+      ownerId: t?.owner_id
+    })
+  })
+  const { data: user } = useUser(track?.ownerId, {
+    select: (u) => ({ name: u?.name })
+  })
+
+  const isNowPlaying = variant === 'now-playing'
+
   return (
     <Pressable
-      onPress={onPress}
-      accessibilityRole='button'
-      accessibilityState={{ selected: active }}
+      onPress={onPlay}
       style={{
-        position: 'relative',
-        paddingVertical: spacing.m,
-        paddingHorizontal: spacing.s
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.s,
+        paddingVertical: spacing.s,
+        gap: spacing.m
       }}
     >
-      <Text
-        variant='title'
-        size='m'
-        strength='strong'
-        color={active ? 'default' : 'subdued'}
+      <View
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 4,
+          overflow: 'hidden',
+          flexShrink: 0
+        }}
       >
-        {label}
-      </Text>
-      {active ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: -1,
-            height: 3,
-            backgroundColor: color.secondary.s400,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20
-          }}
+        <TrackImage
+          trackId={trackId}
+          size={SquareSizes.SIZE_150_BY_150}
+          style={{ width: 48, height: 48 }}
+          borderRadius='xs'
         />
-      ) : null}
+      </View>
+
+      <View style={{ flex: 1, minWidth: 0, justifyContent: 'center' }}>
+        <Text
+          variant='body'
+          size='m'
+          strength='strong'
+          color={isNowPlaying ? 'accent' : 'default'}
+          numberOfLines={1}
+        >
+          {track?.title ?? ''}
+        </Text>
+        {track?.ownerId ? (
+          <Flex direction='row' alignItems='center' gap='xs'>
+            <Text
+              variant='body'
+              size='s'
+              color='subdued'
+              numberOfLines={1}
+              style={{ flexShrink: 1 }}
+            >
+              {user?.name ?? ''}
+            </Text>
+            <UserBadges userId={track.ownerId} badgeSize='xs' />
+          </Flex>
+        ) : null}
+      </View>
+
+      <Flex direction='row' alignItems='center' gap='l'>
+        {isNowPlaying ? (
+          <Pressable
+            onPress={onPlayPause}
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: color.secondary.s400,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {isPlaying ? (
+              <IconPause size='2xs' color='staticWhite' />
+            ) : (
+              <IconPlay size='2xs' color='staticWhite' />
+            )}
+          </Pressable>
+        ) : (
+          <>
+            {onRemove ? (
+              <IconButton
+                icon={IconClose}
+                size='s'
+                color='subdued'
+                aria-label='Remove from queue'
+                onPress={onRemove}
+              />
+            ) : null}
+            {drag ? (
+              <Pressable
+                onLongPress={() => {
+                  haptics.medium()
+                  drag()
+                }}
+                delayLongPress={150}
+                style={{ padding: 4 }}
+              >
+                <IconDrag size='s' color='subdued' />
+              </Pressable>
+            ) : null}
+          </>
+        )}
+      </Flex>
     </Pressable>
   )
 }
 
-const QueueTabContent = () => {
+type UpNextItem = {
+  kind: 'up-next'
+  trackId: ID
+}
+type QueuedItem = {
+  kind: 'queued'
+  trackId: ID
+  uid?: string
+  queueIndex: number
+}
+type NowPlayingItem = {
+  kind: 'now-playing'
+  trackId: ID
+}
+type ListItem = NowPlayingItem | QueuedItem | UpNextItem
+
+const useNextFromSourceMobile = () => {
+  const querySource = useSelector(getQuerySource)
+  const queue = useSelector(getPlaybackQueue)
+  const queryClient = useQueryClient()
+
+  return useMemo<{ trackIds: ID[]; sourceKey: string | null }>(() => {
+    if (!querySource) return { trackIds: [], sourceKey: null }
+    const data = queryClient.getQueryData<{
+      pages: Array<Array<{ id: number | string; type?: string }>>
+    }>(querySource.queryKey as any)
+    const sourceKey =
+      Array.isArray(querySource.queryKey) && querySource.queryKey[0]
+        ? String(querySource.queryKey[0])
+        : null
+    if (!data?.pages) return { trackIds: [], sourceKey }
+
+    const inQueue = new Set(queue.map((t) => t.trackId))
+    const upcoming: ID[] = []
+    for (const page of data.pages) {
+      for (const item of page) {
+        if (!item) continue
+        if (item.type && item.type !== 'track') continue
+        const id = typeof item.id === 'number' ? item.id : Number(item.id)
+        if (!Number.isFinite(id)) continue
+        if (inQueue.has(id)) continue
+        upcoming.push(id)
+        if (upcoming.length >= 10) break
+      }
+      if (upcoming.length >= 10) break
+    }
+    return { trackIds: upcoming, sourceKey }
+  }, [querySource, queue, queryClient])
+}
+
+const sourceLabel = (key: string | null) =>
+  SOURCE_LABELS[key ?? ''] ?? 'Up Next'
+
+export const QueueDrawer = () => {
+  const { onClose } = useDrawer(DRAWER_NAME)
   const dispatch = useDispatch()
   const queue = useSelector(getPlaybackQueue)
   const index = useSelector(getPlaybackIndex)
+  const isPlaying = useSelector(getIsPlaying)
+  const { spacing } = useTheme()
+  const { trackIds: nextFromIds, sourceKey } = useNextFromSourceMobile()
 
-  const nowPlaying = index >= 0 && index < queue.length ? queue[index] : null
-  const upNext = useMemo<PlaybackTrack[]>(
+  const nowPlaying: PlaybackTrack | null =
+    index >= 0 && index < queue.length ? queue[index] : null
+  const upNextStart = index >= 0 ? index + 1 : 0
+  const queuedTracks = useMemo<PlaybackTrack[]>(
     () => (index >= 0 ? queue.slice(index + 1) : []),
     [queue, index]
   )
-  const upNextStart = index >= 0 ? index + 1 : 0
+
+  const queuedListData = useMemo<QueuedItem[]>(
+    () =>
+      queuedTracks.map((t, i) => ({
+        kind: 'queued' as const,
+        trackId: t.trackId,
+        uid: t.uid,
+        queueIndex: upNextStart + i
+      })),
+    [queuedTracks, upNextStart]
+  )
 
   const handleTogglePlay = useCallback(() => {
     dispatch(togglePlay())
   }, [dispatch])
 
-  const handlePlayUpNext = useCallback(
-    (_uid: string, trackId: number) => {
-      const queueIndex = queue.findIndex(
-        (t, i) => i >= upNextStart && t.trackId === trackId
-      )
-      if (queueIndex < 0) return
+  const handlePlayQueueItem = useCallback(
+    (queueIndex: number) => {
       dispatch(playTrackAt({ index: queueIndex }))
     },
-    [dispatch, queue, upNextStart]
+    [dispatch]
   )
 
   const handleRemove = useCallback(
-    (relativeIndex: number) => {
-      dispatch(removeFromQueue({ index: upNextStart + relativeIndex }))
+    (queueIndex: number) => {
+      dispatch(removeFromQueue({ index: queueIndex }))
     },
-    [dispatch, upNextStart]
+    [dispatch]
   )
+
+  const handleClear = useCallback(() => {
+    dispatch(clearUpcoming())
+  }, [dispatch])
 
   const handleReorder = useCallback(
     ({ from, to }: { from: number; to: number }) => {
@@ -140,9 +315,8 @@ const QueueTabContent = () => {
         .map((t) => t.uid)
         .filter((uid): uid is string => !!uid)
       if (orderedUids.length !== queue.length) return
-      const headLen = upNextStart
-      const head = orderedUids.slice(0, headLen)
-      const tail = orderedUids.slice(headLen)
+      const head = orderedUids.slice(0, upNextStart)
+      const tail = orderedUids.slice(upNextStart)
       const [moved] = tail.splice(from, 1)
       tail.splice(to, 0, moved)
       dispatch(reorder({ orderedUids: [...head, ...tail] }))
@@ -150,144 +324,67 @@ const QueueTabContent = () => {
     [dispatch, queue, upNextStart]
   )
 
-  const handleClear = useCallback(() => {
-    dispatch(clearUpcoming())
-  }, [dispatch])
-
-  if (queue.length === 0) {
-    return (
-      <Flex pv='2xl' alignItems='center'>
-        <Text variant='body' size='m' color='subdued'>
-          {messages.emptyQueue}
-        </Text>
-      </Flex>
-    )
-  }
-
-  return (
-    <View style={{ flex: 1 }}>
-      {nowPlaying ? (
-        <Fragment>
-          <Flex ph='m' pb='s'>
-            <Text variant='title' size='m' color='default'>
-              {messages.nowPlaying}
-            </Text>
-          </Flex>
-          <TrackListItem
-            id={nowPlaying.trackId}
-            index={index}
-            togglePlay={handleTogglePlay}
-          />
-        </Fragment>
-      ) : null}
-
-      {upNext.length > 0 ? (
-        <View style={{ flex: 1, marginTop: 8 }}>
-          <Flex
-            direction='row'
-            alignItems='center'
-            justifyContent='space-between'
-            ph='m'
-            pb='s'
-          >
-            <Text variant='title' size='m' color='default'>
-              {messages.upNext}
-            </Text>
-            <PlainButton onPress={handleClear}>{messages.clear}</PlainButton>
-          </Flex>
-          <DraggableFlatList
-            data={upNext.map((t) => t.trackId)}
-            keyExtractor={(item, i) => `${item}-${i}`}
-            onDragBegin={() => haptics.medium()}
-            onDragEnd={({ from, to }) => handleReorder({ from, to })}
-            activationDistance={20}
-            renderItem={({ item, getIndex, drag }) => {
-              const i = getIndex() ?? 0
-              return (
-                <OpacityDecorator>
-                  <TrackListItem
-                    id={item as number}
-                    index={i}
-                    isReorderable
-                    onDrag={drag}
-                    togglePlay={handlePlayUpNext}
-                    onRemove={handleRemove}
-                    trackItemAction='remove'
-                  />
-                </OpacityDecorator>
-              )
-            }}
-          />
-        </View>
-      ) : null}
-    </View>
-  )
-}
-
-const HistoryTabContent = () => {
-  const dispatch = useDispatch()
-  const { trackIds, isPending, isFetching } = useTrackHistory({ pageSize: 50 })
-  const isLoading = isPending && isFetching
-
-  const handlePlayHistory = useCallback(
-    (_uid: string, trackId: number) => {
-      const startIndex = trackIds.findIndex((id) => id === trackId)
-      if (startIndex < 0) return
-      const tracks = trackIds.map((id) => ({
-        trackId: id,
-        source: QueueSource.HISTORY_TRACKS
-      }))
-      dispatch(playFrom({ tracks, startIndex, querySource: null }))
+  const handleAddNextFromToQueue = useCallback(
+    (trackId: ID) => {
+      const sourceTag = String(sourceKey ?? 'next-from')
+      dispatch(
+        addToQueue({
+          tracks: [{ trackId, source: sourceTag as unknown as QueueSource }]
+        })
+      )
     },
-    [dispatch, trackIds]
+    [dispatch, sourceKey]
   )
 
-  if (isLoading) {
-    return (
-      <Flex pv='2xl' alignItems='center'>
-        <LoadingSpinner />
-      </Flex>
-    )
-  }
-
-  if (trackIds.length === 0) {
-    return (
-      <Flex pv='2xl' alignItems='center'>
-        <Text variant='body' size='m' color='subdued'>
-          {messages.emptyHistory}
-        </Text>
-      </Flex>
-    )
-  }
-
-  return (
-    <FlatList
-      data={trackIds}
-      keyExtractor={(item, i) => `${item}-${i}`}
-      renderItem={({ item, index: i }) => (
-        <TrackListItem
-          id={item}
-          index={i}
-          togglePlay={handlePlayHistory}
-          trackItemAction='overflow'
+  const renderQueuedItem = useCallback(
+    ({
+      item,
+      drag
+    }: {
+      item: QueuedItem | { kind: 'now-playing'; trackId: ID }
+      drag: () => void
+    }) => {
+      if (item.kind === 'now-playing') {
+        return (
+          <MiniTrackRow
+            trackId={item.trackId}
+            variant='now-playing'
+            isPlaying={isPlaying}
+            onPlayPause={handleTogglePlay}
+          />
+        )
+      }
+      return (
+        <MiniTrackRow
+          trackId={item.trackId}
+          variant='queued'
+          onPlay={() => handlePlayQueueItem(item.queueIndex)}
+          onRemove={() => handleRemove(item.queueIndex)}
+          drag={drag}
         />
-      )}
-    />
+      )
+    },
+    [isPlaying, handleTogglePlay, handlePlayQueueItem, handleRemove]
   )
-}
 
-export const QueueDrawer = () => {
-  const { onClose } = useDrawer(DRAWER_NAME)
-  const [tab, setTab] = useState<Tab>('queue')
+  const draggableData = useMemo<ListItem[]>(() => {
+    const items: ListItem[] = []
+    if (nowPlaying) {
+      items.push({ kind: 'now-playing', trackId: nowPlaying.trackId })
+    }
+    items.push(...queuedListData)
+    return items
+  }, [nowPlaying, queuedListData])
+
+  const isEmpty = queue.length === 0
 
   return (
     <NativeDrawer
       drawerName={DRAWER_NAME}
       onClose={onClose}
-      isFullscreen
       drawerStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
     >
-      <View style={{ flex: 1, width: '100%' }}>
+      <View style={{ width: '100%', paddingBottom: spacing.l }}>
         <Flex
           direction='row'
           alignItems='center'
@@ -295,30 +392,79 @@ export const QueueDrawer = () => {
           ph='l'
           pv='m'
         >
-          <Flex direction='row' gap='m'>
-            <TabButton
-              label={messages.queue}
-              active={tab === 'queue'}
-              onPress={() => setTab('queue')}
-            />
-            <TabButton
-              label={messages.history}
-              active={tab === 'history'}
-              onPress={() => setTab('history')}
-            />
-          </Flex>
-          <IconButton
-            icon={IconClose}
-            color='subdued'
-            size='m'
-            aria-label='Close queue'
-            onPress={onClose}
-          />
+          <Text variant='title' size='l' strength='strong' color='default'>
+            {messages.queue}
+          </Text>
+          {!isEmpty ? (
+            <PlainButton onPress={handleClear}>{messages.clear}</PlainButton>
+          ) : null}
         </Flex>
         <Divider orientation='horizontal' />
-        <View style={{ flex: 1, paddingTop: 8 }}>
-          {tab === 'queue' ? <QueueTabContent /> : <HistoryTabContent />}
-        </View>
+
+        {isEmpty ? (
+          <Flex pv='2xl' alignItems='center'>
+            <Text variant='body' size='m' color='subdued'>
+              {messages.emptyQueue}
+            </Text>
+          </Flex>
+        ) : (
+          <View style={{ paddingHorizontal: spacing.s }}>
+            <DraggableFlatList<ListItem>
+              data={draggableData}
+              keyExtractor={(item, i) =>
+                item.kind === 'now-playing'
+                  ? `np-${item.trackId}`
+                  : item.kind === 'queued'
+                    ? `q-${item.uid ?? item.trackId}-${item.queueIndex}`
+                    : `un-${item.trackId}-${i}`
+              }
+              renderItem={renderQueuedItem as any}
+              onDragBegin={() => haptics.medium()}
+              onDragEnd={({ from, to }) => {
+                // The first item is always the now-playing track (not draggable).
+                // Adjust indices to match the queuedListData (which excludes
+                // now-playing).
+                const adjFrom = nowPlaying ? from - 1 : from
+                const adjTo = nowPlaying ? to - 1 : to
+                if (adjFrom < 0 || adjTo < 0) return
+                handleReorder({ from: adjFrom, to: adjTo })
+              }}
+              activationDistance={20}
+              scrollEnabled
+            />
+          </View>
+        )}
+
+        {nextFromIds.length > 0 ? (
+          <View
+            style={{
+              paddingHorizontal: spacing.s,
+              paddingTop: spacing.m
+            }}
+          >
+            <View
+              style={{ paddingHorizontal: spacing.s, marginBottom: spacing.s }}
+            >
+              <Text variant='title' size='m' color='default'>
+                {messages.upNext}
+              </Text>
+              <Text variant='body' size='s' color='subdued'>
+                {messages.playingFrom}
+                <Text variant='body' size='s' color='accent'>
+                  {sourceLabel(sourceKey)}
+                </Text>
+              </Text>
+            </View>
+            {nextFromIds.map((trackId) => (
+              <MiniTrackRow
+                key={`nf-${trackId}`}
+                trackId={trackId}
+                variant='up-next'
+                onPlay={() => handleAddNextFromToQueue(trackId)}
+              />
+            ))}
+          </View>
+        ) : null}
       </View>
     </NativeDrawer>
   )
