@@ -12,6 +12,16 @@
   height: 100%;
 }
 
+.tabWrapper:focus {
+  outline: none;
+}
+
+.tabWrapper:focus-visible .tab {
+  border-radius: 6px;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
+}
+
 .tabWrapperMobile {
   flex: 1;
   margin: 0px 8px;

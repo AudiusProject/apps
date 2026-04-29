@@ -1,11 +1,13 @@
 import { useEffect, useContext, RefObject, useMemo } from 'react'
 
-import { Status, User } from '@audius/common/models'
 import {
-  profilePageFeedLineupActions as feedActions,
-  profilePageTracksLineupActions as tracksActions,
-  ProfilePageTabs
-} from '@audius/common/store'
+  useProfileTracks,
+  useProfileReposts,
+  getProfileTracksQueryKey,
+  getProfileRepostsQueryKey
+} from '@audius/common/api'
+import { Status, User } from '@audius/common/models'
+import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   IconAlbum,
@@ -17,7 +19,8 @@ import { Id } from '@audius/sdk'
 import cn from 'classnames'
 
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
-import Lineup from 'components/lineup/Lineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
+import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
   LeftPreset,
@@ -135,9 +138,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updatedCoverPhoto,
     updatedProfilePicture,
 
-    // Lineups
-    artistTracks,
-    userFeed,
+    // Lineups (legacy redux lineups — no longer read here; tanquery below)
+    handleLower,
+    tracksLineupOrder,
 
     // State
     hasMadeEdit,
@@ -145,13 +148,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
     // Handlers
     goToRoute,
-    getLineupProps,
-    loadMoreArtistTracks,
-    loadMoreUserFeed,
-    playArtistTrack,
-    pauseArtistTrack,
-    playUserFeedTrack,
-    pauseUserFeedTrack,
     setFollowingUserId,
     setFollowersUserId,
     onFollow,
@@ -170,7 +166,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updateCoverPhoto,
     didChangeTabsFrom,
     onCloseArtistRecommendations
-  } = useProfilePage(containerRef)
+  } = useProfilePage()
 
   // Map twitterHandle to xHandle for mobile
   const xHandle = twitterHandle
@@ -184,6 +180,37 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
   const isLoading = status === Status.LOADING
   const isEditing = mode === 'editing'
+
+  // --- Tanquery lineups replace legacy redux lineups --------------------------
+  // Reposts may include collections (playlist reposts); TrackLineup only renders
+  // tracks today, so collections are dropped on the hook side (trackIds filter).
+  const tracksArgs = useMemo(
+    () => ({ handle: handleLower ?? '', sort: tracksLineupOrder }),
+    [handleLower, tracksLineupOrder]
+  )
+  const artistTracksQuery = useProfileTracks(tracksArgs, {
+    enabled: !!handleLower
+  })
+  const tracksQuerySource = useMemo(
+    () => ({
+      queryKey: [...getProfileTracksQueryKey(tracksArgs)] as unknown[]
+    }),
+    [tracksArgs]
+  )
+
+  const repostsArgs = useMemo(
+    () => ({ handle: handleLower ?? '' }),
+    [handleLower]
+  )
+  const userRepostsQuery = useProfileReposts(repostsArgs, {
+    enabled: !!handleLower
+  })
+  const repostsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getProfileRepostsQueryKey(repostsArgs)] as unknown[]
+    }),
+    [repostsArgs]
+  )
 
   // Compute tabs and elements before calling useTabs
   const { profileTabs, profileElements } = useMemo(() => {
@@ -209,15 +236,19 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               }
             />
           ) : (
-            <Lineup
-              {...getLineupProps(artistTracks)}
+            <TrackLineup
+              trackIds={artistTracksQuery.trackIds}
+              source='PROFILE_TRACKS'
+              querySource={tracksQuerySource}
+              isPending={artistTracksQuery.isPending}
+              isFetching={artistTracksQuery.isFetching}
+              isError={artistTracksQuery.isError}
+              hasNextPage={artistTracksQuery.hasNextPage}
+              loadNextPage={artistTracksQuery.loadNextPage}
+              variant={LineupVariant.MAIN}
               leadingElementId={profile.artist_pick_track_id ?? undefined}
-              showArtistPick={true}
-              limit={profile.track_count}
-              loadMore={loadMoreArtistTracks}
-              playTrack={playArtistTrack}
-              pauseTrack={pauseArtistTrack}
-              actions={tracksActions}
+              showArtistPick
+              maxEntries={profile.track_count}
             />
           )}
         </div>,
@@ -240,13 +271,17 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               }
             />
           ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              count={profile.repost_count}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
+            <TrackLineup
+              trackIds={userRepostsQuery.trackIds}
+              source='PROFILE_FEED'
+              querySource={repostsQuerySource}
+              isPending={userRepostsQuery.isPending}
+              isFetching={userRepostsQuery.isFetching}
+              isError={userRepostsQuery.isError}
+              hasNextPage={userRepostsQuery.hasNextPage}
+              loadNextPage={userRepostsQuery.loadNextPage}
+              variant={LineupVariant.MAIN}
+              maxEntries={profile.repost_count}
             />
           )}
         </div>
@@ -268,13 +303,17 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               }
             />
           ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              count={profile.repost_count}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
+            <TrackLineup
+              trackIds={userRepostsQuery.trackIds}
+              source='PROFILE_FEED'
+              querySource={repostsQuerySource}
+              isPending={userRepostsQuery.isPending}
+              isFetching={userRepostsQuery.isFetching}
+              isError={userRepostsQuery.isError}
+              hasNextPage={userRepostsQuery.hasNextPage}
+              loadNextPage={userRepostsQuery.loadNextPage}
+              variant={LineupVariant.MAIN}
+              maxEntries={profile.repost_count}
             />
           )}
         </div>,
@@ -292,15 +331,20 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     isOwner,
     userId,
     name,
-    artistTracks,
-    userFeed,
-    getLineupProps,
-    loadMoreArtistTracks,
-    loadMoreUserFeed,
-    playArtistTrack,
-    pauseArtistTrack,
-    playUserFeedTrack,
-    pauseUserFeedTrack
+    artistTracksQuery.trackIds,
+    artistTracksQuery.isPending,
+    artistTracksQuery.isFetching,
+    artistTracksQuery.isError,
+    artistTracksQuery.hasNextPage,
+    artistTracksQuery.loadNextPage,
+    tracksQuerySource,
+    userRepostsQuery.trackIds,
+    userRepostsQuery.isPending,
+    userRepostsQuery.isFetching,
+    userRepostsQuery.isError,
+    userRepostsQuery.hasNextPage,
+    userRepostsQuery.loadNextPage,
+    repostsQuerySource
   ])
 
   // Set Nav-Bar Menu

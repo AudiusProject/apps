@@ -6,7 +6,7 @@
   flex: 1;
 
   min-width: 220px;
-  max-width: 700px;
+  max-width: 550px;
   padding: var(--harmony-unit-6);
 
   border: 1px solid var(--harmony-border-default);

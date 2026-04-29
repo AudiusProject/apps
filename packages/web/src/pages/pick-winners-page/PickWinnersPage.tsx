@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 
 import {
+  getRemixesQueryKey,
   useCurrentUserId,
   useRemixContest,
-  useRemixesLineup,
+  useRemixes,
   useTrackByPermalink,
   useUpdateEvent
 } from '@audius/common/api'
@@ -11,10 +12,8 @@ import { remixMessages as messages } from '@audius/common/messages'
 import { ID, Kind, Name } from '@audius/common/models'
 import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
-  pickWinnersPageLineupActions,
-  playerSelectors,
-  queueActions,
-  queueSelectors,
+  playbackSelectors,
+  playbackActions,
   QueueSource,
   useFinalizeWinnersConfirmationModal
 } from '@audius/common/store'
@@ -39,7 +38,7 @@ import { useParams, useNavigate } from 'react-router'
 
 import { Droppable } from 'components/dragndrop'
 import { Header } from 'components/header/desktop/Header'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { Page } from 'components/page/Page'
 import { TrackTile } from 'components/track/desktop/TrackTile'
 import { TrackTileSize } from 'components/track/types'
@@ -51,15 +50,12 @@ import { trackRemixesPage } from 'utils/route'
 import { usePickWinnersPageParams } from './hooks'
 
 const {
-  clear,
-  add,
-  remove,
+  addToQueue: add,
+  removeByUid: remove,
   reorder,
-  play: playAction,
   pause: pauseAction
-} = queueActions
-const { getUid } = queueSelectors
-const { getPlaying } = playerSelectors
+} = playbackActions
+const { getUid, getPlaying } = playbackSelectors
 
 const TRACK_TILE_HEIGHT = 144
 const PICK_WINNERS_PAGE_SIZE = 10
@@ -87,24 +83,46 @@ export const PickWinnersPage = () => {
     useFinalizeWinnersConfirmationModal()
 
   const { sortMethod, isCosign } = usePickWinnersPageParams()
-  const {
-    data,
-    count,
-    isFetching,
-    isPending,
-    isError,
-    hasNextPage,
-    play,
-    pause,
-    loadNextPage,
-    isPlaying,
-    lineup
-  } = useRemixesLineup({
-    trackId: originalTrack?.track_id,
-    sortMethod,
-    isCosign,
-    isContestEntry: true
-  })
+
+  // Submissions list — raw remixes for the contest entry. Uses
+  // `useRemixes` directly rather than `useRemixesLineup` so the list
+  // does not prepend the original track or the winners (those live in
+  // the winner-selection strip above).
+  const remixesArgs = useMemo(
+    () => ({
+      trackId: originalTrack?.track_id,
+      pageSize: PICK_WINNERS_PAGE_SIZE,
+      sortMethod,
+      isCosign,
+      isContestEntry: true
+    }),
+    [originalTrack?.track_id, sortMethod, isCosign]
+  )
+  const remixesQuery = useRemixes(remixesArgs)
+  const trackIds = useMemo(
+    () =>
+      remixesQuery.data?.pages.flatMap((page) =>
+        page.tracks.map((t) => t.id)
+      ) ?? [],
+    [remixesQuery.data]
+  )
+  const count = remixesQuery.data?.pages[0]?.count
+  const isFetching = remixesQuery.isFetching
+  const isPending = remixesQuery.isPending
+  const isError = remixesQuery.isError
+  const hasNextPage = remixesQuery.hasNextPage
+  const isFetchingNextPage = remixesQuery.isFetchingNextPage
+  const { fetchNextPage } = remixesQuery
+  const loadNextPage = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return
+    fetchNextPage()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesArgs)] as unknown[]
+    }),
+    [remixesArgs]
+  )
 
   const [winners, setWinners] = useState<ID[]>([])
   const [initialWinners, setInitialWinners] = useState<ID[]>([])
@@ -215,7 +233,13 @@ export const PickWinnersPage = () => {
       if (isPlayingWinnersQueue) {
         dispatch(
           add({
-            entries: [{ id, uid, source: QueueSource.PICK_WINNERS_TRACKS }],
+            tracks: [
+              {
+                trackId: id,
+                uid,
+                source: QueueSource.PICK_WINNERS_TRACKS
+              }
+            ],
             index: winners.length
           })
         )
@@ -307,8 +331,8 @@ export const PickWinnersPage = () => {
 
   const handlePlay = useCallback(
     (winnerId: ID) => {
-      const newEntries = winners.map((id) => ({
-        id,
+      const newTracks = winners.map((id) => ({
+        trackId: id,
         uid: winnerTileUid(id),
         source: QueueSource.PICK_WINNERS_TRACKS
       }))
@@ -317,11 +341,19 @@ export const PickWinnersPage = () => {
         QueueSource.PICK_WINNERS_TRACKS
       )
 
+      const startIndex = winners.indexOf(winnerId)
       if (!isPlayingWinnersQueue) {
-        dispatch(clear({}))
-        dispatch(add({ entries: newEntries, index: 0 }))
+        dispatch(
+          playbackActions.playFrom({
+            tracks: newTracks,
+            startIndex: Math.max(0, startIndex)
+          })
+        )
+      } else {
+        dispatch(
+          playbackActions.playTrackAt({ index: Math.max(0, startIndex) })
+        )
       }
-      dispatch(playAction({ uid: winnerTileUid(winnerId) }))
     },
     [dispatch, playingUid, winnerTileUid, winners]
   )
@@ -496,19 +528,16 @@ export const PickWinnersPage = () => {
                   />
                 </Flex>
               </Flex>
-              <TanQueryLineup
-                data={data}
-                isFetching={isFetching}
+              <TrackLineup
+                trackIds={trackIds}
+                source={QueueSource.PICK_WINNERS_TRACKS}
+                querySource={submissionsQuerySource}
                 isPending={isPending}
+                isFetching={isFetching}
                 isError={isError}
                 hasNextPage={hasNextPage}
-                play={play}
-                pause={pause}
                 loadNextPage={loadNextPage}
-                isPlaying={isPlaying}
-                lineup={lineup}
                 pageSize={PICK_WINNERS_PAGE_SIZE}
-                actions={pickWinnersPageLineupActions}
                 elementAdornment={tileAdornment}
               />
             </Flex>

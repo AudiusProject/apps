@@ -16,7 +16,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   PurchaseableContentType
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
@@ -39,7 +39,7 @@ import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
 import { useEnhancedCollectionTracks } from './useEnhancedCollectionTracks'
 
-const { getUid } = playerSelectors
+const { getUid } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const {

@@ -5,15 +5,30 @@ import { CompletionStage } from './types'
 
 type CompletionIconProps = {
   isCompleted: boolean
+  variant: 'inverted' | 'surface'
 }
 
-const CompletionIcon = ({ isCompleted }: CompletionIconProps) => {
+const CompletionIcon = ({ isCompleted, variant }: CompletionIconProps) => {
+  const isSurface = variant === 'surface'
+
   return (
     <div className={styles.iconWrapper}>
       {isCompleted ? (
-        <IconValidationCheck className={styles.checkMark} />
+        <IconValidationCheck
+          className={
+            isSurface
+              ? `${styles.checkMark} ${styles.surfaceCheckMark}`
+              : styles.checkMark
+          }
+          color={isSurface ? 'success' : undefined}
+          size={isSurface ? 's' : undefined}
+        />
       ) : (
-        <div className={styles.incompleteCircle} />
+        <div
+          className={
+            isSurface ? styles.surfaceIncompleteCircle : styles.incompleteCircle
+          }
+        />
       )}
     </div>
   )
@@ -22,16 +37,28 @@ const CompletionIcon = ({ isCompleted }: CompletionIconProps) => {
 /**
  * `TaskCompletionItem` represents a single item in a `TaskCompletionList`
  */
-export const TaskCompletionItem = ({ title, isCompleted }: CompletionStage) => (
-  <Flex alignItems='center' gap='xs'>
-    <CompletionIcon isCompleted={isCompleted} />
+export const TaskCompletionItem = ({
+  title,
+  isCompleted,
+  variant = 'inverted'
+}: CompletionStage & { variant?: 'inverted' | 'surface' }) => (
+  <Flex
+    alignItems='center'
+    gap='s'
+    backgroundColor={variant === 'surface' ? 'surface2' : undefined}
+    borderRadius={variant === 'surface' ? 's' : undefined}
+    pv={variant === 'surface' ? 's' : undefined}
+    ph={variant === 'surface' ? 'm' : undefined}
+  >
+    <CompletionIcon isCompleted={isCompleted} variant={variant} />
     <Text
       variant='body'
-      size='m'
-      color='staticWhite'
+      size={variant === 'surface' ? 's' : 'm'}
+      color={variant === 'surface' ? 'default' : 'staticWhite'}
       css={{
         textDecoration: isCompleted ? 'line-through' : 'none',
-        opacity: isCompleted ? 0.5 : 1
+        opacity: isCompleted ? 0.6 : 1,
+        textAlign: 'left'
       }}
     >
       {title}

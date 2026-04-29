@@ -4,23 +4,17 @@ import {
   useInfiniteQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
 import { transformAndCleanList } from '~/adapters/utils'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { PlaybackSource } from '~/models'
-import {
-  premiumTracksPageLineupActions,
-  premiumTracksPageLineupSelectors
-} from '~/store/pages'
+import { ID } from '~/models/Identifiers'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, LineupData, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -41,10 +35,11 @@ export const usePremiumTracks = (
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
-  const queryData = useInfiniteQuery({
-    queryKey: getPremiumTracksQueryKey(pageSize),
+  const queryKey = getPremiumTracksQueryKey(pageSize)
+
+  const query = useInfiniteQuery({
+    queryKey,
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
@@ -58,24 +53,11 @@ export const usePremiumTracks = (
           limit: pageSize,
           offset: pageParam
         })
-
       const processedTracks = transformAndCleanList(
         tracks,
         userTrackMetadataFromSDK
       )
-
       primeTrackData({ tracks: processedTracks, queryClient })
-
-      // Update lineup when new data arrives
-      dispatch(
-        premiumTracksPageLineupActions.fetchLineupMetadatas(
-          pageParam,
-          pageSize,
-          false,
-          { tracks: processedTracks }
-        )
-      )
-
       return processedTracks.map((t) => ({
         id: t.track_id,
         type: EntityType.TRACK
@@ -86,13 +68,23 @@ export const usePremiumTracks = (
     enabled: options?.enabled !== false
   })
 
-  return useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getPremiumTracksQueryKey(pageSize),
-    lineupActions: premiumTracksPageLineupActions,
-    lineupSelector: premiumTracksPageLineupSelectors.getLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize
-  })
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+    queryKey
+  }
 }

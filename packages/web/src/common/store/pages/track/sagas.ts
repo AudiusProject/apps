@@ -1,33 +1,10 @@
-import { queryTrack, queryUser } from '@audius/common/api'
+import { queryTrack } from '@audius/common/api'
 import {
   cacheTracksActions as trackCacheActions,
-  trackPageLineupActions,
-  trackPageActions,
-  trackPageSelectors
+  trackPageActions
 } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
-import { call, put, select, takeEvery } from 'typed-redux-saga'
-
-import trackLineupSagas from './lineups/sagas'
-
-const { tracksActions } = trackPageLineupActions
-const { getTrackId } = trackPageSelectors
-
-function* watchRefetchLineup() {
-  yield* takeEvery(trackPageActions.REFETCH_LINEUP, function* (action) {
-    const trackId = yield* select(getTrackId)
-    const track = yield* queryTrack(trackId)
-    const user = yield* call(queryUser, track?.owner_id)
-
-    yield* put(tracksActions.reset())
-    yield* put(
-      tracksActions.fetchLineupMetadatas(0, 6, false, {
-        ownerHandle: user?.handle,
-        heroTrackPermalink: track?.permalink
-      })
-    )
-  })
-}
+import { put, takeEvery } from 'typed-redux-saga'
 
 function* watchTrackPageMakePublic() {
   yield* takeEvery(
@@ -58,5 +35,5 @@ function* watchTrackPageMakePublic() {
 }
 
 export default function sagas() {
-  return [...trackLineupSagas(), watchRefetchLineup, watchTrackPageMakePublic]
+  return [watchTrackPageMakePublic]
 }

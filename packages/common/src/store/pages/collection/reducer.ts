@@ -1,10 +1,4 @@
-import { Collection } from '~/models/Collection'
-import tracksReducer, {
-  initialState as initialLineupState
-} from '~/store/pages/collection/lineup/reducer'
-
 import { Status } from '../../../models/Status'
-import { LineupActions, asLineup } from '../../../store/lineup/reducer'
 
 import {
   FETCH_COLLECTION,
@@ -17,15 +11,13 @@ import {
   FetchCollectionAction,
   ResetCollectionAction
 } from './actions'
-import { PREFIX as tracksPrefix } from './lineup/actions'
 import { CollectionsPageState } from './types'
 
-export const initialState = {
+export const initialState: CollectionsPageState = {
   collectionId: null,
   userUid: null,
   status: null,
-  tracks: initialLineupState,
-  collectionPermalink: null
+  collectionPermalink: ''
 }
 
 const actionsMap = {
@@ -71,26 +63,13 @@ const actionsMap = {
   }
 }
 
-const tracksLineupReducer = asLineup(tracksPrefix, tracksReducer)
-
-const reducer = (
-  state: CollectionsPageState,
-  action: CollectionPageAction | LineupActions<Collection>
-) => {
+const reducer = (state: CollectionsPageState, action: CollectionPageAction) => {
   if (!state) {
-    // @ts-ignore
     state = initialState
   }
-
-  const updatedTracks = tracksLineupReducer(
-    // @ts-ignore
-    state.tracks,
-    action as LineupActions<Collection>
-  )
-  if (updatedTracks !== state.tracks) return { ...state, tracks: updatedTracks }
-  const matchingReduceFunction = actionsMap[action.type]
+  const matchingReduceFunction = (actionsMap as any)[action.type]
   if (!matchingReduceFunction) return state
-  return matchingReduceFunction(state, action as CollectionPageAction)
+  return matchingReduceFunction(state, action)
 }
 
 export default reducer

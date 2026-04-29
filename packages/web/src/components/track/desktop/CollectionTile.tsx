@@ -21,7 +21,7 @@ import {
 import {
   collectionsSocialActions,
   shareModalUIActions,
-  playerSelectors,
+  playbackSelectors,
   usePremiumContentPurchaseModal,
   PurchaseableContentType
 } from '@audius/common/store'
@@ -63,7 +63,7 @@ import { getCollectionWithFallback } from '../helpers'
 
 import TrackListItem from './TrackListItem'
 
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const {
   saveCollection,
@@ -513,6 +513,7 @@ export const CollectionTile = ({
   }
 
   const hasOrdering = order !== undefined
+  const canClickTile = !isLoading && !disableActions
 
   return (
     <Paper
@@ -522,7 +523,10 @@ export const CollectionTile = ({
       css={[
         isLoading && { opacity: 0.6 },
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
-        { minHeight: size === TrackTileSize.LARGE ? 180 : 120 },
+        {
+          minHeight: size === TrackTileSize.LARGE ? 180 : 120,
+          cursor: canClickTile ? 'pointer' : 'default'
+        },
         {
           '&:hover .artworkIcon': { opacity: 0.75 },
           '&:hover': { transform: 'scale(1.004)' },

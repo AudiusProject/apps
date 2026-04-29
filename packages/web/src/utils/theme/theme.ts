@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import {
+  FrostedSurfaceIntensity,
   SystemAppearance,
   Theme,
   ThemeMode,
@@ -18,6 +19,7 @@ export { getLottieThemeColors }
 export const THEME_KEY = 'theme'
 export const THEME_PALETTE_KEY = 'themePalette'
 export const THEME_MODE_KEY = 'themeMode'
+export const FROSTED_SURFACE_INTENSITY_KEY = 'frostedSurfaceIntensity'
 export const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)'
 
 const doesPreferDarkMode = () => {
@@ -76,6 +78,21 @@ export const getThemeModeFromStorage = (): ThemeMode | null => {
   if (theme === Theme.DARK) return ThemeMode.DARK
   return ThemeMode.AUTO
 }
+
+export const getFrostedSurfaceIntensityFromStorage =
+  (): FrostedSurfaceIntensity | null => {
+    if (typeof window === 'undefined') return null
+    const stored = window.localStorage.getItem(FROSTED_SURFACE_INTENSITY_KEY)
+    if (
+      stored &&
+      Object.values(FrostedSurfaceIntensity).includes(
+        stored as FrostedSurfaceIntensity
+      )
+    ) {
+      return stored as FrostedSurfaceIntensity
+    }
+    return null
+  }
 
 export const getSystemAppearance = () =>
   doesPreferDarkMode() ? SystemAppearance.DARK : SystemAppearance.LIGHT

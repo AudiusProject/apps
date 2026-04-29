@@ -5,8 +5,6 @@
   opacity: 1;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
-  background-color: #1a1a1a;
-  color: rgba(255, 255, 255, 0.88);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(0, 0, 0, 0.2);
@@ -32,14 +30,12 @@
 .link {
   cursor: pointer;
   margin-left: 3px;
-  color: #fff;
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-color: rgba(255, 255, 255, 0.45);
 }
 
 .link:hover {
-  color: #fff;
   text-decoration-color: rgba(255, 255, 255, 0.75);
 }
 
@@ -57,7 +53,11 @@
   transition: all ease-in-out 0.07s;
 }
 
-.iconRemove path {
+.container:not(.isMobile) .iconRemove path {
+  fill: var(--harmony-neutral);
+}
+
+.isMobile .iconRemove path {
   fill: rgba(255, 255, 255, 0.75);
 }
 
@@ -65,7 +65,11 @@
   transform: scale(1.1);
 }
 
-.iconRemove:hover path {
+.container:not(.isMobile) .iconRemove:hover path {
+  fill: var(--harmony-neutral);
+}
+
+.isMobile .iconRemove:hover path {
   fill: #fff;
 }
 
@@ -76,11 +80,21 @@
 /* Mobile Styles */
 .isMobile {
   transition: all 0.07s ease-in-out;
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.88);
   bottom: 18px;
   left: 0px;
   right: 0px;
   margin: 0px 12px;
   max-width: none;
+}
+
+.isMobile .link {
+  color: #fff;
+}
+
+.isMobile .link:hover {
+  color: #fff;
 }
 
 .isMobile.isPlaying {

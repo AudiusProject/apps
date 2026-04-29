@@ -9,11 +9,7 @@ import {
 
 import { useUser } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import {
-  queueActions,
-  playerActions,
-  playerSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useNavigationState } from '@react-navigation/native'
 import type {
@@ -48,10 +44,9 @@ import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-const { seek, reset } = playerActions
+const { seekTo: seek, reset, next, previous } = playbackActions
 
-const { getPlaying, getUid, getCounter, getBuffering } = playerSelectors
-const { next, previous } = queueActions
+const { getPlaying, getUid, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 const SKIP_DURATION_SEC = 15

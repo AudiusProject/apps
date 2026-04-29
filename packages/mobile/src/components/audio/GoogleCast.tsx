@@ -5,8 +5,8 @@ import { useCurrentTrack, useImageSize } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import {
   castActions,
-  playerSelectors,
-  playerActions
+  playbackSelectors,
+  playbackActions
 } from '@audius/common/store'
 import {
   CastState,
@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAsync, usePrevious } from 'react-use'
 
 const { setIsCasting } = castActions
-const { getPlaying, getSeek, getCounter } = playerSelectors
+const { getPlaying, getSeek, getCounter } = playbackSelectors
 
 export { CastState, MediaPlayerState } from 'react-native-google-cast'
 
@@ -145,9 +145,9 @@ export const useChromecast = () => {
         mediaStatus?.playerState === MediaPlayerState.BUFFERING) &&
         castState !== CastState.NOT_CONNECTED)
     ) {
-      dispatch(playerActions.setBuffering({ buffering: true }))
+      dispatch(playbackActions.setBuffering({ buffering: true }))
     } else {
-      dispatch(playerActions.setBuffering({ buffering: false }))
+      dispatch(playbackActions.setBuffering({ buffering: false }))
     }
   }, [mediaStatus, castState, dispatch])
 
@@ -175,7 +175,7 @@ export const useChromecast = () => {
       previousCastState === CastState.CONNECTED
     ) {
       TrackPlayer.setVolume(1)
-      dispatch(playerActions.pause())
+      dispatch(playbackActions.pause())
     }
   }, [castState, previousCastState, dispatch])
 

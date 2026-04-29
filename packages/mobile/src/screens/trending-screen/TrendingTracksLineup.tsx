@@ -1,15 +1,14 @@
 import { TimeRange } from '@audius/common/models'
 import { trendingPageSelectors } from '@audius/common/store'
+import type { SectionListProps } from 'react-native'
 import { useSelector } from 'react-redux'
-
-import type { LineupProps } from 'app/components/lineup/types'
 
 import { TrendingLineup } from './TrendingLineup'
 
 const { getTrendingTimeRange } = trendingPageSelectors
 
 type TrendingTracksLineupProps = {
-  header?: LineupProps['header']
+  header?: SectionListProps<unknown>['ListHeaderComponent']
 }
 
 export const TrendingTracksLineup = ({ header }: TrendingTracksLineupProps) => {

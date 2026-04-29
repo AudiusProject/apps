@@ -1,11 +1,4 @@
-import type {
-  ID,
-  UID,
-  LineupState,
-  Status,
-  Track,
-  Collection
-} from '../../../models'
+import type { ID, UID, Status } from '../../../models'
 import type { Nullable } from '../../../utils/typeUtils'
 
 export enum CollectionSortMode {
@@ -34,8 +27,6 @@ export type ProfileState = {
   collectionStatus: Status
   collectionSortMode: CollectionSortMode
   profileMeterDismissed: boolean
-  feed: LineupState<Track | Collection>
-  tracks: LineupState<Track>
   error?: string
 }
 

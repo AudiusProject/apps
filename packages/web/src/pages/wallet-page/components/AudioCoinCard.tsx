@@ -39,6 +39,7 @@ export const AudioCoinCard = () => {
       name={COIN_NAME}
       noDollarSignPrefix
       onClick={handleCoinClick}
+      actionLabel={`View ${AUDIO_TICKER} asset details`}
     />
   )
 }

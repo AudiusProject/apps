@@ -8,6 +8,3 @@ export const getCollectionStatus = (state: CommonState) =>
 
 export const getCollectionPermalink = (state: CommonState) =>
   state.pages.collection.collectionPermalink
-
-export const getCollectionTracksLineup = (state: CommonState) =>
-  state.pages.collection.tracks

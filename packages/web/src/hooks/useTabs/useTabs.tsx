@@ -10,11 +10,13 @@ import {
   CSSProperties,
   RefObject,
   Ref,
-  createRef
+  createRef,
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent
 } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
-import { Text, Tooltip } from '@audius/harmony'
+import { isKeyboardActivationKey, Text, Tooltip } from '@audius/harmony'
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 import cn from 'classnames'
 import { throttle } from 'lodash'
@@ -38,7 +40,6 @@ export type TabHeader = {
 }
 
 type TabProps = {
-  onClick: () => void
   isActive: boolean
   isMobile: boolean
   isMobileV2: boolean
@@ -52,7 +53,6 @@ type TabProps = {
 const Tab = forwardRef(
   (
     {
-      onClick,
       icon,
       text,
       label,
@@ -74,7 +74,6 @@ const Tab = forwardRef(
         { [styles.tabActive]: isActive },
         { [styles.tabDisabled]: disabled }
       )}
-      onClick={() => !disabled && onClick?.()}
       aria-label={label}
       ref={ref}
     >
@@ -148,6 +147,11 @@ const TabBar = memo(
         return refsArr.current[index] ?? createRef()
       })
     }
+    const tabDisplayModeSignature = useMemo(
+      () =>
+        tabs.map((tab) => `${tab.label}:${tab.hideText ? '1' : '0'}`).join('|'),
+      [tabs]
+    )
 
     useEffect(() => {
       accentPositionRef.current = accentPosition
@@ -225,7 +229,7 @@ const TabBar = memo(
       isMobileV2,
       setAccentProps,
       setDidPositionTab,
-      tabs
+      tabs.length
     ])
 
     // If we resize the window we'd better resposition
@@ -268,11 +272,17 @@ const TabBar = memo(
         if (frameId !== null) cancelAnimationFrame(frameId)
         observer.disconnect()
       }
-    }, [isMobile, isMobileV2, resizeTabs, tabs])
+    }, [isMobile, isMobileV2, resizeTabs, tabDisplayModeSignature])
 
     useEffect(() => {
+      // Tab content can switch between icon+text and icon-only at responsive
+      // breakpoints. Re-measure on the next frame to catch post-layout sizing.
       resizeTabs()
-    }, [activeIndex, tabs, resizeTabs, fractionalOffset])
+      const frameId = requestAnimationFrame(() => {
+        resizeTabs()
+      })
+      return () => cancelAnimationFrame(frameId)
+    }, [activeIndex, resizeTabs, fractionalOffset, tabDisplayModeSignature])
 
     // Stretchy effect while translating.
     // Ask Michael to explain this if necessary.
@@ -329,9 +339,55 @@ const TabBar = memo(
               : undefined) || (showIconOnlyTooltip ? tab.text : undefined)
           const tooltipActive = !!tooltipText
 
+          const selectTab = (
+            event?:
+              | ReactMouseEvent<HTMLElement>
+              | ReactKeyboardEvent<HTMLElement>
+          ) => {
+            if (tab.disabled) {
+              event?.preventDefault()
+              return
+            }
+            onClick(i)
+          }
+
+          const focusTabAtIndex = (index: number) => {
+            refsArr.current[index]?.current?.closest('[role="tab"]')?.focus()
+          }
+
+          const handleTabKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+            if (isKeyboardActivationKey(event)) {
+              event.preventDefault()
+              selectTab(event)
+              return
+            }
+
+            if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+              event.preventDefault()
+              const direction = event.key === 'ArrowRight' ? 1 : -1
+              const nextIndex = (i + direction + tabs.length) % tabs.length
+              focusTabAtIndex(nextIndex)
+              if (!tabs[nextIndex]?.disabled) onClick(nextIndex)
+              return
+            }
+
+            if (event.key === 'Home') {
+              event.preventDefault()
+              focusTabAtIndex(0)
+              if (!tabs[0]?.disabled) onClick(0)
+              return
+            }
+
+            if (event.key === 'End') {
+              event.preventDefault()
+              const lastIndex = tabs.length - 1
+              focusTabAtIndex(lastIndex)
+              if (!tabs[lastIndex]?.disabled) onClick(lastIndex)
+            }
+          }
+
           const tabElement = (
             <Tab
-              onClick={() => onClick(i)}
               ref={refsArr.current[i]}
               isActive={isActive}
               key={tab.label}
@@ -349,10 +405,15 @@ const TabBar = memo(
 
           const rootProps = {
             role: 'tab',
+            tabIndex: tab.disabled ? -1 : 0,
+            'aria-selected': isActive,
+            'aria-disabled': tab.disabled || undefined,
             className: cn(styles.tabWrapper, {
               [styles.tabWrapperMobile]: isMobile,
               [styles.tabWrapperDesktopIconOnly]: isDesktopIconOnly
-            })
+            }),
+            onClick: selectTab,
+            onKeyDown: handleTabKeyDown
           }
 
           return (
@@ -436,7 +497,7 @@ const useContainerDimensions = (
   useEffect(() => {
     window.addEventListener('resize', updateSize)
     updateSize()
-    return window.removeEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
   }, [updateSize, activeIndex, dimensionsAreDirty])
 
   return {

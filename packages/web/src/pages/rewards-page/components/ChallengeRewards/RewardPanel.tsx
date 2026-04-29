@@ -46,6 +46,7 @@ type RewardPanelProps = {
   remainingLabel?: string
   openModal: (modalType: ChallengeRewardsModalType) => void
   id: ChallengeRewardID
+  isLocked?: boolean
 }
 
 export const RewardPanel = ({
@@ -54,7 +55,8 @@ export const RewardPanel = ({
   description,
   openModal,
   progressLabel,
-  remainingLabel
+  remainingLabel,
+  isLocked = false
 }: RewardPanelProps) => {
   const { color } = useTheme()
   const { data: currentAccount } = useCurrentAccount()
@@ -122,7 +124,7 @@ export const RewardPanel = ({
 
   return (
     <Paper
-      onClick={openRewardModal}
+      onClick={isLocked ? undefined : openRewardModal}
       flex={`1 1 ${PANEL_WIDTH}px`}
       column
       shadow='flat'
@@ -132,7 +134,7 @@ export const RewardPanel = ({
         minHeight: PANEL_HEIGHT,
         backgroundColor: hasDisbursed ? color.neutral.n25 : undefined,
         position: 'relative',
-        cursor: 'pointer'
+        cursor: isLocked ? 'default' : 'pointer'
       }}
     >
       <Flex column h='100%'>

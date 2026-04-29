@@ -1,59 +1,49 @@
-import { useCallback, useEffect } from 'react'
+import { useMemo } from 'react'
 
 import {
-  lineupSelectors,
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
-} from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+  getTrendingUndergroundQueryKey,
+  useTrendingUnderground
+} from '@audius/common/api'
+import type { SectionListProps } from 'react-native'
 
-import { Lineup } from 'app/components/lineup'
-import type { LineupProps } from 'app/components/lineup/types'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
-const { getLineup } = trendingUndergroundPageLineupSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
-
-const getTrendingUndergroundLineup = makeGetLineupMetadatas(getLineup)
+const PAGE_SIZE = 10
 
 type TrendingUndergroundLineupProps = {
-  header?: LineupProps['header']
+  header?: SectionListProps<unknown>['ListHeaderComponent']
 }
 
 export const TrendingUndergroundLineup = ({
   header
 }: TrendingUndergroundLineupProps) => {
-  const dispatch = useDispatch()
+  const { trackIds, isPending, isFetching, hasNextPage, loadNextPage } =
+    useTrendingUnderground({ pageSize: PAGE_SIZE })
 
-  useEffect(() => {
-    return () => {
-      dispatch(trendingUndergroundPageLineupActions.reset())
-    }
-  }, [dispatch])
-
-  const handleLoadMore = useCallback(
-    (offset: number, limit: number, overwrite: boolean) => {
-      dispatch(
-        trendingUndergroundPageLineupActions.fetchLineupMetadatas(
-          offset,
-          limit,
-          overwrite
-        )
-      )
-    },
-    [dispatch]
+  const querySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingUndergroundQueryKey({ pageSize: PAGE_SIZE })
+      ] as unknown[]
+    }),
+    []
   )
 
   return (
-    <Lineup
+    <TrackLineup
+      trackIds={trackIds}
+      source='DISCOVER_TRENDING_UNDERGROUND'
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={isFetching}
+      hasNextPage={hasNextPage}
+      loadNextPage={loadNextPage}
+      pageSize={PAGE_SIZE}
       isTrending
-      selfLoad
-      pullToRefresh
       rankIconCount={5}
       header={header}
-      lineupSelector={getTrendingUndergroundLineup}
-      actions={trendingUndergroundPageLineupActions}
-      loadMore={handleLoadMore}
       itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
+      pullToRefresh
     />
   )
 }

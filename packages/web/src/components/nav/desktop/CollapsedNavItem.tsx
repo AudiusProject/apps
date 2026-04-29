@@ -7,6 +7,7 @@ type CollapsedNavItemProps = {
   disabled?: boolean
   hasNotification?: boolean
   onClick?: () => void
+  isFocusVisible?: boolean
 }
 
 export const CollapsedNavItem = ({
@@ -14,7 +15,8 @@ export const CollapsedNavItem = ({
   isSelected = false,
   disabled = false,
   hasNotification = false,
-  onClick
+  onClick,
+  isFocusVisible = false
 }: CollapsedNavItemProps) => {
   const { color, motion } = useTheme()
 
@@ -43,6 +45,10 @@ export const CollapsedNavItem = ({
           width: 40,
           height: 40,
           backgroundColor,
+          ...(isFocusVisible && {
+            boxShadow:
+              'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
+          }),
           transition: `background-color ${motion.hover}`,
           '&:hover': {
             backgroundColor: isSelected ? undefined : color.background.surface2,

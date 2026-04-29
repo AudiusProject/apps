@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
+  getRemixesQueryKey,
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
@@ -15,11 +16,11 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import type { ID } from '@audius/common/models'
 import { ShareSource, SquareSizes } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
-  remixesPageLineupActions,
   remixesPageSelectors,
   shareModalUIActions
 } from '@audius/common/store'
@@ -38,6 +39,7 @@ import {
   IconUserFollowing,
   Paper,
   PopupMenu,
+  Skeleton,
   Text,
   useTheme
 } from '@audius/harmony'
@@ -46,7 +48,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
@@ -355,23 +357,37 @@ const ContestPage = ({
   // listeners can compare against the source remixes are built on
   // without jumping back out, matching the track-page `RemixesPage`
   // and the desktop contest page.
-  const lineup = useRemixesLineup({
-    trackId: trackId ?? undefined,
-    includeOriginal: true,
-    includeWinners: true,
-    isContestEntry: true,
-    sortMethod,
-    isCosign
-  })
+  const remixesLineupArgs = useMemo(
+    () => ({
+      trackId: trackId ?? undefined,
+      includeOriginal: true,
+      includeWinners: true,
+      isContestEntry: true,
+      pageSize: CONTEST_PAGE_SIZE,
+      sortMethod,
+      isCosign
+    }),
+    [trackId, sortMethod, isCosign]
+  )
+  const lineup = useRemixesLineup(remixesLineupArgs)
+  const lineupTrackIds = useMemo(
+    () => (lineup.data ?? []).map((d) => d.id as ID),
+    [lineup.data]
+  )
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesLineupArgs)] as unknown[]
+    }),
+    [remixesLineupArgs]
+  )
   // Total lineup length includes the original + winners + remixes.
   // The "N Submissions" label should show the number of *actual*
   // submissions (remixes), not the whole lineup.
-  const lineupLength = lineup.data?.length
+  const lineupLength = lineupTrackIds.length
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const submissionsCount =
-    lineupLength === undefined
-      ? undefined
-      : Math.max(0, lineupLength - 1 - winnerCount)
+  const submissionsCount = lineup.isPending
+    ? undefined
+    : Math.max(0, lineupLength - 1 - winnerCount)
 
   useEffect(() => {
     if (trackId) {
@@ -382,7 +398,6 @@ const ContestPage = ({
   useEffect(() => {
     return function cleanup() {
       dispatch(remixesPageActions.reset())
-      dispatch(remixesPageLineupActions.reset())
     }
   }, [dispatch])
 
@@ -424,13 +439,41 @@ const ContestPage = ({
     return null
   }
 
+  // Contest hasn't resolved yet (or no contest exists for this track).
+  // Render a skeleton matching the mobile page layout instead of the old
+  // "No contest is currently running" copy.
   if (!contest || !eventId) {
     return (
       <Page title={messages.title} variant='flush'>
-        <Box p='xl'>
-          <Text variant='body'>
-            No contest is currently running for this track.
-          </Text>
+        <Box p='l'>
+          <Paper
+            direction='column'
+            borderRadius='l'
+            border='default'
+            shadow='flat'
+            backgroundColor='white'
+            css={{ overflow: 'hidden' }}
+          >
+            <Skeleton h={180} w='100%' />
+            <Flex direction='column' gap='m' p='l'>
+              <Skeleton h={20} w={140} />
+              <Skeleton h={28} w='80%' />
+              <Divider orientation='horizontal' />
+              <Flex gap='m' alignItems='center'>
+                <Skeleton h={32} w={32} css={{ borderRadius: '50%' }} />
+                <Flex direction='column' gap='2xs' flex='1 1 auto'>
+                  <Skeleton h={10} w={80} />
+                  <Skeleton h={16} w={140} />
+                </Flex>
+              </Flex>
+              <Flex gap='s'>
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+                <Skeleton h={48} w={56} />
+              </Flex>
+            </Flex>
+          </Paper>
         </Box>
       </Page>
     )
@@ -685,19 +728,16 @@ const ContestPage = ({
                         0: submissionsDelineator
                       }
                 return (
-                  <TanQueryLineup
-                    data={lineup.data}
-                    isFetching={lineup.isFetching}
+                  <TrackLineup
+                    trackIds={lineupTrackIds}
+                    source='CONTEST_SUBMISSIONS'
+                    querySource={submissionsQuerySource}
                     isPending={lineup.isPending}
+                    isFetching={lineup.isFetching}
                     isError={lineup.isError}
                     hasNextPage={lineup.hasNextPage}
-                    play={lineup.play}
-                    pause={lineup.pause}
                     loadNextPage={lineup.loadNextPage}
-                    isPlaying={lineup.isPlaying}
-                    lineup={lineup.lineup}
                     pageSize={CONTEST_PAGE_SIZE}
-                    actions={remixesPageLineupActions}
                     delineatorMap={delineatorMap}
                   />
                 )

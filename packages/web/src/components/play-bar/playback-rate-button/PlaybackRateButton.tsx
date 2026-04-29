@@ -1,8 +1,8 @@
 import { MutableRefObject, useCallback, useMemo } from 'react'
 
 import {
-  playerActions,
-  playerSelectors,
+  playbackActions,
+  playbackSelectors,
   PlaybackRate
 } from '@audius/common/store'
 import {
@@ -25,8 +25,8 @@ import zIndex from 'utils/zIndex'
 
 import styles from '../PlayBarButton.module.css'
 
-const { setPlaybackRate } = playerActions
-const { getPlaybackRate } = playerSelectors
+const { setPlaybackRate } = playbackActions
+const { getPlaybackRate } = playbackSelectors
 
 type PlaybackRateButtonProps = {
   isMobile: boolean
@@ -82,6 +82,7 @@ export const PlaybackRateButton = ({ isMobile }: PlaybackRateButtonProps) => {
   const renderButton = useCallback(
     (ref: MutableRefObject<any>, triggerPopup: () => void) => (
       <button
+        aria-label='Playback speed'
         className={cn(styles.button, styles.playbackRateButton, {
           [styles.buttonFixedSize]: isMobile
         })}

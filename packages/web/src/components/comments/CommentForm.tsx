@@ -7,7 +7,7 @@ import {
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { ID, Name, SquareSizes } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/src/store'
+import { playbackSelectors } from '@audius/common/src/store'
 import { Avatar, Flex } from '@audius/harmony'
 import { CommentMention } from '@audius/sdk'
 import { useSelector } from 'react-redux'
@@ -54,7 +54,7 @@ export const CommentForm = ({
   const isMobile = useIsMobile()
 
   const [messageId, setMessageId] = useState(0) // Message id is used to reset the composer input
-  const currentlyPlayingTrackId = useSelector(playerSelectors.getTrackId)
+  const currentlyPlayingTrackId = useSelector(playbackSelectors.getTrackId)
   const [postComment] = usePostComment()
   const [editComment] = useEditComment()
 

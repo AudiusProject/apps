@@ -1,7 +1,6 @@
 import {
   averageColorReducer,
   remixesPageReducer as RemixesPageReducer,
-  queueReducer as QueueReducer,
   remoteConfigReducer as RemoteConfigReducer,
   stemsUploadReducer as StemsUploadReducer,
   ChangePasswordState,
@@ -23,7 +22,6 @@ import { FirstUploadModalState } from 'components/first-upload-modal/store/slice
 import { PasswordResetState } from 'components/password-reset/store/types'
 import { UnfollowConfirmationModalState } from 'components/unfollow-confirmation-modal/store/types'
 import ArtistDashboardState from 'pages/dashboard-page/store/types'
-import DeletedPageReducer from 'pages/deleted-page/store/slice'
 import VisualizerReducer from 'pages/visualizer/store/slice'
 import AppCTAModalReducer from 'store/application/ui/app-cta-modal/slice'
 import { ErrorState } from 'store/errors/reducers'
@@ -75,7 +73,6 @@ export type AppState = CommonState & {
       notificationUsers: NotificationUsersPageState
       unfollowConfirmation: UnfollowConfirmationModalState
       remixes: ReturnType<typeof RemixesPageReducer>
-      deleted: ReturnType<typeof DeletedPageReducer>
     }
     account: {
       guestEmail: string | null
@@ -86,9 +83,6 @@ export type AppState = CommonState & {
   dashboard: ArtistDashboardState
   history: HistoryPageState
   collection: CollectionsPageState
-
-  // Playback
-  queue: ReturnType<typeof QueueReducer>
 
   // Remote Config + Flags
   remoteConfig: ReturnType<typeof RemoteConfigReducer>

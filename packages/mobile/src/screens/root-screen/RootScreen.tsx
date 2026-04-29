@@ -9,7 +9,7 @@ import { MobileOS, Status } from '@audius/common/models'
 import {
   buyUSDCActions,
   chatActions,
-  playerActions
+  playbackActions
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
@@ -42,7 +42,7 @@ import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount
 
 const { fetchMoreChats, fetchUnreadMessagesCount, connect, disconnect } =
   chatActions
-const { reset } = playerActions
+const { reset } = playbackActions
 const { startRecoveryIfNecessary } = buyUSDCActions
 const { FEED_PAGE } = route
 

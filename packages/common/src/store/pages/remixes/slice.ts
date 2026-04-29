@@ -1,25 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { combineReducers } from 'redux'
-
-import { asLineup } from '~/store/lineup/reducer'
 
 import { ID } from '../../../models/Identifiers'
-
-import { PREFIX as remixesTracksPrefix } from './lineup/actions'
-import remixesTracksReducer, {
-  initialState as initialLineupState
-} from './lineup/reducer'
 
 type State = {
   trackId: ID | null
   count: number | null
-  tracks: typeof initialLineupState
 }
 
 const initialState: State = {
   trackId: null,
-  count: null,
-  tracks: initialLineupState
+  count: null
 }
 
 const slice = createSlice({
@@ -41,13 +31,6 @@ const slice = createSlice({
   }
 })
 
-const remixesLineupReducer = asLineup(remixesTracksPrefix, remixesTracksReducer)
-
 export const { reset, setCount, fetchTrackSucceeded } = slice.actions
-
-export default combineReducers({
-  page: slice.reducer,
-  tracks: remixesLineupReducer
-})
-
+export default slice.reducer
 export const actions = slice.actions

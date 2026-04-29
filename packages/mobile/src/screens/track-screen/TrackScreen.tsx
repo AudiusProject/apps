@@ -1,7 +1,9 @@
 import { useRef } from 'react'
 
 import { useTrackByParams, useUser } from '@audius/common/api'
-import { trackPageSelectors, reachabilitySelectors } from '@audius/common/store'
+import { Kind } from '@audius/common/models'
+import { reachabilitySelectors } from '@audius/common/store'
+import { makeStableUid } from '@audius/common/utils'
 import type { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -22,7 +24,6 @@ import { TrackScreenDetailsTile } from './TrackScreenDetailsTile'
 import { TrackScreenLineup } from './TrackScreenLineup'
 import { TrackScreenSkeleton } from './TrackScreenSkeleton'
 
-const { getLineup } = trackPageSelectors
 const { getIsReachable } = reachabilitySelectors
 
 export const TrackScreen = () => {
@@ -35,8 +36,6 @@ export const TrackScreen = () => {
   const track = fetchedTrack ?? searchTrack
 
   const { data: user } = useUser(track?.owner_id)
-
-  const lineup = useSelector(getLineup)
 
   if (!track || !user) {
     return (
@@ -60,8 +59,8 @@ export const TrackScreen = () => {
                 <TrackScreenDetailsTile
                   track={track}
                   user={user}
-                  uid={lineup?.entries?.[0]?.uid}
-                  isLineupLoading={!lineup?.entries?.[0]}
+                  uid={makeStableUid(Kind.TRACKS, track_id, 'TRACK_TRACKS')}
+                  isLineupLoading={false}
                   scrollViewRef={scrollViewRef}
                 />
               </Flex>

@@ -17,6 +17,10 @@ export const getThemeMode = (state: CommonState) => {
   return getBaseState(state).themeMode
 }
 
+export const getFrostedSurfaceIntensity = (state: CommonState) => {
+  return getBaseState(state).frostedSurfaceIntensity
+}
+
 export const getSystemAppearance = (state: CommonState) => {
   return getBaseState(state).systemAppearance
 }

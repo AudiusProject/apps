@@ -1,64 +1,64 @@
 import { useMemo } from 'react'
 
-import { useProfileUser } from '@audius/common/api'
-import { useProxySelector } from '@audius/common/hooks'
-import { Status } from '@audius/common/models'
 import {
-  profilePageTracksLineupActions as tracksActions,
-  profilePageSelectors
-} from '@audius/common/store'
+  useProfileUser,
+  useProfileTracks,
+  getProfileTracksQueryKey
+} from '@audius/common/api'
 
-import { Lineup } from 'app/components/lineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
-const { getProfileTracksLineup } = profilePageSelectors
-
 export const TracksTab = () => {
+  const { handle, track_count = 0 } =
+    useProfileUser({
+      select: (user) => ({
+        handle: user.handle,
+        user_id: user.user_id,
+        track_count: user.track_count,
+        artist_pick_track_id: user.artist_pick_track_id
+      })
+    }).user ?? {}
+
+  const handleLower = handle?.toLowerCase() ?? ''
+
+  const queryArgs = useMemo(() => ({ handle: handleLower }), [handleLower])
+
   const {
-    handle,
-    user_id,
-    track_count = 0,
-    artist_pick_track_id
-  } = useProfileUser({
-    select: (user) => ({
-      handle: user.handle,
-      user_id: user.user_id,
-      track_count: user.track_count,
-      artist_pick_track_id: user.artist_pick_track_id
-    })
-  }).user ?? {}
+    trackIds,
+    isPending,
+    isFetching,
+    hasNextPage,
+    loadNextPage,
+    refetch
+  } = useProfileTracks(queryArgs, { enabled: !!handleLower })
 
-  const handleLower = handle?.toLowerCase()
-
-  const lineup = useProxySelector(
-    (state) => getProfileTracksLineup(state, handleLower),
-    [handleLower]
+  const querySource = useMemo(
+    () => ({ queryKey: [...getProfileTracksQueryKey(queryArgs)] as unknown[] }),
+    [queryArgs]
   )
 
-  const fetchPayload = useMemo(() => ({ userId: user_id }), [user_id])
-  const extraFetchOptions = useMemo(() => ({ handle }), [handle])
-
-  // `selfLoad` fired with an undefined handle makes the saga return [],
-  // which poisons `hasMore` and leaves the tab stuck on the empty state.
-  const canSelfLoad = !!handleLower
-  const canShowEmptyTile = track_count === 0 || lineup.status !== Status.IDLE
+  const canShowEmptyTile = track_count === 0 || (!isPending && !isFetching)
 
   return (
-    <Lineup
-      selfLoad={canSelfLoad}
+    <TrackLineup
+      trackIds={trackIds}
+      source='PROFILE_TRACKS'
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={isFetching}
+      hasNextPage={hasNextPage}
+      loadNextPage={loadNextPage}
       pullToRefresh
-      leadingElementId={artist_pick_track_id}
-      showArtistPick={true}
-      actions={tracksActions}
-      lineup={lineup}
-      fetchPayload={fetchPayload}
-      extraFetchOptions={extraFetchOptions}
+      refresh={() => {
+        refetch()
+      }}
+      showArtistPick
       disableTopTabScroll
       LineupEmptyComponent={
         canShowEmptyTile ? <EmptyProfileTile tab='tracks' /> : undefined
       }
-      showsVerticalScrollIndicator={false}
     />
   )
 }

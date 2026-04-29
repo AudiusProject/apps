@@ -3,10 +3,6 @@ import { createDeepEqualSelector } from '~/utils/selectorHelpers'
 
 import { Status } from '../../../models'
 
-import { initialState as initialFeedState } from './lineups/feed/reducer'
-import { PREFIX as TRACKS_PREFIX } from './lineups/tracks/actions'
-import { initialState as initialTracksState } from './lineups/tracks/reducer'
-
 const getProfile = (state: CommonState, handle?: string) => {
   const profileHandle = handle?.toLowerCase() ?? state.pages.profile.currentUser
   if (!profileHandle) return null
@@ -37,11 +33,6 @@ export const getProfileCollectionSortMode = (
   handle: string
 ) => getProfile(state, handle)?.collectionSortMode
 
-export const getProfileFeedLineup = (state: CommonState, handle?: string) =>
-  getProfile(state, handle)?.feed ?? initialFeedState
-export const getProfileTracksLineup = (state: CommonState, handle?: string) =>
-  getProfile(state, handle)?.tracks ?? initialTracksState
-
 export const makeGetProfile = () => {
   return createDeepEqualSelector(
     [getProfileStatus, getProfileError, getProfileUserId],
@@ -60,6 +51,3 @@ export const makeGetProfile = () => {
     }
   )
 }
-
-export const getTrackSource = (state: CommonState, handle: string) =>
-  `${TRACKS_PREFIX}:${getProfileUserId(state, handle)}`

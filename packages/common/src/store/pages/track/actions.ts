@@ -8,8 +8,6 @@ export const MAKE_TRACK_PUBLIC = 'TRACK_PAGE/MAKE_TRACK_PUBLIC'
 export const GO_TO_REMIXES_OF_PARENT_PAGE =
   'TRACK_PAGE/GO_TO_REMIXES_OF_PARENT_PAGE'
 
-export const REFETCH_LINEUP = 'TRACK_PAGE/REFETCH_LINEUP'
-
 export type ResetAction = {
   type: typeof RESET
 }
@@ -29,16 +27,11 @@ export type MakeTrackPublicAction = {
   trackId: ID
 }
 
-export type RefetchLineupAction = {
-  type: typeof REFETCH_LINEUP
-}
-
 export type TrackPageAction =
   | ResetAction
   | SetTrackIdAction
   | SetTrackPermalinkAction
   | MakeTrackPublicAction
-  | RefetchLineupAction
 
 export const resetTrackPage = (): ResetAction => ({ type: RESET })
 export const setTrackId = (trackId: ID): SetTrackIdAction => ({
@@ -54,13 +47,4 @@ export const setTrackPermalink = (
 export const makeTrackPublic = (trackId: ID): MakeTrackPublicAction => ({
   type: MAKE_TRACK_PUBLIC,
   trackId
-})
-
-/**
- * Refreshes the lineup based on the track that's currently set.
- * Useful when the lineup's content depends on changes that may
- * happen to the track in view on the track page.
- */
-export const refetchLineup = (): RefetchLineupAction => ({
-  type: REFETCH_LINEUP
 })

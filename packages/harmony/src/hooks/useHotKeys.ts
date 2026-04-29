@@ -20,21 +20,45 @@ export type Mapping = {
   [key: number]: Handler | ModifierHandler
 }
 
+const interactiveSelector = [
+  'a[href]',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="menuitem"]',
+  '[role="option"]',
+  '[role="tab"]',
+  '[role="checkbox"]',
+  '[role="radio"]',
+  '[role="switch"]',
+  '[role="slider"]',
+  '[role="spinbutton"]',
+  '[role="combobox"]',
+  '[role="listbox"]',
+  '[role="textbox"]'
+].join(',')
+
+function isInteractiveHotkeyTarget(element: Element | EventTarget | null) {
+  if (!(element instanceof HTMLElement)) return false
+
+  return element.closest(interactiveSelector) !== null
+}
+
 /**
  * Checks whether the DOM is in a state where a global hotkey press is allowed.
- * For example, even if an anchor tag has focus, it should not prevent global hotkeys
- * from working.
+ * Focused controls should own Space/Enter/arrow keys so keyboard activation and
+ * native widgets are not intercepted by app-level playback shortcuts.
  * @returns whether or not a global hotkey press is allowed.
  */
-function allowGlobalHotkeyPress() {
+function allowGlobalHotkeyPress(e: KeyboardEvent) {
   return (
-    document.activeElement &&
-    (document.activeElement === document.body ||
-      document.activeElement.nodeName === 'A' /* <a> */ ||
-      document.activeElement.nodeName === 'BUTTON' /* <button> */ ||
-      document.activeElement.getAttribute('role') === 'button' ||
-      document.activeElement.getAttribute('role') === 'main')
-  ) /* Lottie button */
+    !isInteractiveHotkeyTarget(document.activeElement) &&
+    !isInteractiveHotkeyTarget(e.target)
+  )
 }
 
 function isModifierPressed(modifier: ModifierKeys, e: KeyboardEvent) {
@@ -54,7 +78,7 @@ function fireHotkey(
   mapping: Mapping,
   preventDefault: boolean
 ) {
-  if (allowGlobalHotkeyPress() && e.keyCode in mapping) {
+  if (allowGlobalHotkeyPress(e) && e.keyCode in mapping) {
     if (size(mapping[e.keyCode]) > 1) {
       const cb = (mapping[e.keyCode] as ModifierHandler).cb
       const or = (mapping[e.keyCode] as ModifierHandler).or

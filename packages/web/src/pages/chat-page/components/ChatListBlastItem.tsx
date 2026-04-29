@@ -33,13 +33,10 @@ export const ChatListBlastItem = (props: ChatListBlastItemProps) => {
   }, [chatId, onChatClicked])
 
   return (
-    <Flex
-      ph='xl'
-      pv='l'
-      direction='column'
-      gap='s'
-      borderBottom='default'
+    <button
+      type='button'
       onClick={handleClick}
+      aria-current={isCurrentChat ? 'page' : undefined}
       className={cn(styles.root, {
         [styles.active]: isCurrentChat,
         [styles.compact]: isCompact
@@ -81,6 +78,6 @@ export const ChatListBlastItem = (props: ChatListBlastItemProps) => {
           </Flex>
         ) : null}
       </Flex>
-    </Flex>
+    </button>
   )
 }

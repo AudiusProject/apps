@@ -2,7 +2,7 @@ import { MouseEvent, useCallback, useRef } from 'react'
 
 import { useCurrentUserId, useTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import {
   IconImage,
   IconWaveForm as IconVisualizer,
@@ -28,7 +28,7 @@ import { fullTrackPage } from 'utils/route'
 
 import styles from './NowPlayingArtworkTile.module.css'
 
-const { getTrackId } = playerSelectors
+const { getTrackId } = playbackSelectors
 
 const messages = {
   viewTrack: 'View currently playing track',
@@ -110,6 +110,10 @@ export const NowPlayingArtworkTile = ({
 
   if (!permalink || !trackId) return null
 
+  const viewTrackLabel = title
+    ? `View currently playing track: ${title}`
+    : messages.viewTrack
+
   const renderCoverArt = () => {
     return (
       <AnimatedPaper
@@ -129,7 +133,7 @@ export const NowPlayingArtworkTile = ({
         <Link
           className={styles.coverArtLink}
           to={permalink}
-          aria-label={messages.viewTrack}
+          aria-label={viewTrackLabel}
         >
           <DynamicImage
             key={trackId}

@@ -1,13 +1,16 @@
 import { ReactNode } from 'react'
 
-import { Flex, Text, useTheme, Tooltip } from '@audius/harmony'
+import { Flex, Text, Tooltip } from '@audius/harmony'
 
 import { getPercentageComplete } from './ProfileCompletionHeroCard'
+import styles from './ProfileCompletionTooltip.module.css'
 import { TaskCompletionList } from './TaskCompletionList'
 import { CompletionStages } from './types'
 
 const makeStrings = (completionPercentage: number) => ({
-  completionPercentage: `Profile ${completionPercentage}% Complete`
+  title: `Profile ${completionPercentage}% Complete`,
+  completeCount: (stepsComplete: number, numSteps: number) =>
+    `${stepsComplete} of ${numSteps} tasks complete`
 })
 
 type TooltipContentProps = {
@@ -17,25 +20,37 @@ type TooltipContentProps = {
 const TooltipContent = ({ completionStages }: TooltipContentProps) => {
   const completionPercentage = getPercentageComplete(completionStages).toFixed()
   const strings = makeStrings(Number(completionPercentage))
-  const { color } = useTheme()
+  const stepsComplete = completionStages.filter(
+    (stage) => stage.isCompleted
+  ).length
 
   return (
-    <Flex direction='column'>
-      <Flex
-        p='l'
-        alignItems='center'
-        justifyContent='center'
-        css={{
-          backgroundColor: color.secondary.s500
-        }}
-      >
-        <Text variant='title' size='l' color='white'>
-          {strings.completionPercentage}
+    <Flex column gap='m' w={320} css={{ whiteSpace: 'normal' }}>
+      <Flex column gap='xs' alignItems='flex-start'>
+        <Text variant='title' size='l' color='default' textAlign='left'>
+          {strings.title}
+        </Text>
+        <Text variant='body' size='s' color='subdued' textAlign='left'>
+          {strings.completeCount(stepsComplete, completionStages.length)}
         </Text>
       </Flex>
-      <Flex p='l'>
-        <TaskCompletionList completionStages={completionStages} />
+      <Flex
+        h={4}
+        w='100%'
+        backgroundColor='surface2'
+        borderRadius='s'
+        css={{ overflow: 'hidden' }}
+      >
+        <Flex
+          h='100%'
+          backgroundColor='primary'
+          css={{ width: `${completionPercentage}%` }}
+        />
       </Flex>
+      <TaskCompletionList
+        completionStages={completionStages}
+        variant='surface'
+      />
     </Flex>
   )
 }
@@ -59,13 +74,15 @@ export const ProfileCompletionTooltip = ({
 }: ProfileCompletionTooltipProps) => {
   return (
     <Tooltip
-      color='secondary'
+      className={styles.surfaceTooltip}
+      color='white'
+      mount='body'
       shouldWrapContent={false}
       disabled={isDisabled}
       mouseEnterDelay={0.1}
       shouldDismissOnClick={shouldDismissOnClick}
       text={<TooltipContent completionStages={completionStages} />}
-      placement='right'
+      placement='rightBottom'
     >
       {children}
     </Tooltip>

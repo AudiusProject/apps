@@ -10,7 +10,7 @@ import {
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
 import type { Genre, Mood } from '@audius/sdk'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'
 import { TrackEditFormValues } from 'components/edit-track/types'
@@ -36,6 +36,11 @@ export const EditTrackPage = (props: EditPageProps) => {
   const params = useParams<{ handle?: string; slug?: string }>()
   const { handle } = params
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // When the user lands here from the host-contest page, we honour the
+  // `returnTo` param so Save / Back lead them back to the in-flight contest
+  // form (which restores from sessionStorage).
+  const returnTo = searchParams.get('returnTo')
   useRequiresAccount()
   useIsUnauthorizedForHandleRedirect(handle ?? '')
   const { onOpen: openReplaceTrackConfirmation } =
@@ -78,7 +83,7 @@ export const EditTrackPage = (props: EditPageProps) => {
             audioFile,
             imageFile
           })
-          navigate(metadata.permalink)
+          navigate(returnTo ?? metadata.permalink)
           closeReplaceTrackProgress()
         }
       })
@@ -89,7 +94,7 @@ export const EditTrackPage = (props: EditPageProps) => {
         audioFile,
         imageFile
       })
-      navigate(metadata.permalink)
+      navigate(returnTo ?? metadata.permalink)
     }
   }
 
@@ -132,7 +137,13 @@ export const EditTrackPage = (props: EditPageProps) => {
   return (
     <Page
       title={messages.title}
-      header={<Header primary={messages.title} showBackButton />}
+      header={
+        <Header
+          primary={messages.title}
+          showBackButton
+          onClickBack={returnTo ? () => navigate(returnTo) : undefined}
+        />
+      }
     >
       {trackStatus !== 'success' || !coverArtUrl ? (
         <LoadingSpinnerFullPage />

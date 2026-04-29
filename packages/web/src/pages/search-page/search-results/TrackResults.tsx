@@ -1,18 +1,14 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { SEARCH_PAGE_SIZE, useSearchTrackResults } from '@audius/common/api'
 import { Kind, Name } from '@audius/common/models'
-import {
-  searchResultsPageTracksLineupActions,
-  searchActions,
-  SearchKind
-} from '@audius/common/store'
+import { searchActions, SearchKind } from '@audius/common/store'
 import { Flex } from '@audius/harmony'
 import { css } from '@emotion/css'
 import { useDispatch } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
@@ -78,32 +74,35 @@ export const TrackResults = (props: TrackResultsProps) => {
   )
 
   // Wait for useSearchAllResults to finish loading before fetching tracks
-  const { data, hasNextPage, loadNextPage, isPlaying, play, pause, lineup } =
+  const { trackIds, hasNextPage, loadNextPage, queryKey } =
     useSearchTrackResults(searchParams, {
       enabled: !waitForAllResults // Only fetch if not waiting for all results
     })
 
+  const querySource = useMemo(
+    () => ({ queryKey: [...queryKey] as unknown[] }),
+    [queryKey]
+  )
+
+  // Whenever this component is shown on the AllResults page - we don't want to infinite scroll
+  const shouldLoadMore = category === 'tracks'
+
   return (
-    <TanQueryLineup
-      data={data}
-      lineup={lineup}
+    <TrackLineup
+      trackIds={trackIds}
+      source='SEARCH_TRACKS'
+      querySource={querySource}
       pageSize={SEARCH_PAGE_SIZE}
       isFetching={isFetching}
       isPending={isPending}
       isError={isError}
-      hasNextPage={hasNextPage}
-      loadNextPage={loadNextPage}
-      isPlaying={isPlaying}
-      play={play}
-      pause={pause}
+      hasNextPage={shouldLoadMore ? hasNextPage : false}
+      loadNextPage={shouldLoadMore ? loadNextPage : undefined}
       variant={viewLayout === 'grid' ? LineupVariant.GRID : LineupVariant.MAIN}
       scrollParent={mainContentRef.current}
-      actions={searchResultsPageTracksLineupActions}
       emptyElement={<NoResultsTile />}
       onClickTile={handleClickTrackTile}
       maxEntries={count}
-      // Whenever this component is shown on the AllResults page - we don't want to infinite scroll
-      shouldLoadMore={category === 'tracks'}
       {...(!isMobile
         ? {
             lineupContainerStyles: css({ width: '100%' }),

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { playerActions, playerSelectors } from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { MIN_BUFFERING_DELAY_MS } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -13,8 +13,8 @@ import { makeAnimations } from 'app/styles'
 import { colorize } from 'app/utils/colorizeLottie'
 import { Theme } from 'app/utils/theme'
 
-const { pause, play } = playerActions
-const { getPlaying, getBuffering } = playerSelectors
+const { pause, play } = playbackActions
+const { getPlaying, getBuffering } = playbackSelectors
 
 const useAnimatedIcons = makeAnimations(({ palette, type }) => {
   const iconColor =

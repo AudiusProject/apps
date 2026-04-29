@@ -1,4 +1,4 @@
-import { useCallback, useEffect, MouseEvent, useRef } from 'react'
+import { useCallback, useEffect, MouseEvent } from 'react'
 
 import { useCurrentUserId, useTrack, useUser } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
@@ -13,7 +13,7 @@ import {
   tracksSocialActions,
   shareModalUIActions,
   gatedContentActions,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import {
@@ -38,7 +38,6 @@ import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackArtwork } from 'components/track/Artwork'
 import { DragDropKind } from 'store/dragndrop/slice'
-import { isDescendantElementOf } from 'utils/domUtils'
 import { fullTrackPage } from 'utils/route'
 import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
@@ -50,13 +49,14 @@ import { getTrackWithFallback, getUserWithFallback } from '../helpers'
 import { messages } from '../trackTileMessages'
 import { TrackTileSize } from '../types'
 
+import styles from './TrackTile.module.css'
 import { TrackTileDuration } from './TrackTileDuration'
 
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { repostTrack, undoRepostTrack, saveTrack, unsaveTrack } =
   tracksSocialActions
 const { setLockedContentId } = gatedContentActions
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getUid, getBuffering, getPlaying } = playbackSelectors
 
 // Props from ConnectedTrackTile
 export type TrackTileProps = {
@@ -143,7 +143,6 @@ export const TrackTile = ({
   const loading = isLoading || isFetchingNFTAccess || isPending
 
   const [, setLockedContentVisibility] = useModalState('LockedContent')
-  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!loading && hasLoaded) {
@@ -228,27 +227,27 @@ export const TrackTile = ({
     setLockedContentVisibility(true)
   }, [dispatch, trackId, setLockedContentVisibility])
 
-  const onTogglePlay = useCallback(
-    (e?: MouseEvent /* click event within TrackTile */) => {
-      const shouldSkipTogglePlay = isDescendantElementOf(
-        e?.target,
-        menuRef.current
-      )
-      if (shouldSkipTogglePlay) return
-      if (trackId && !hasStreamAccess && !isPreviewable) {
-        openLockedContentModal()
-        return
-      }
-      togglePlay(uid, trackId)
+  const onTogglePlay = useCallback(() => {
+    if (trackId && !hasStreamAccess && !isPreviewable) {
+      openLockedContentModal()
+      return
+    }
+    togglePlay(uid, trackId)
+  }, [
+    togglePlay,
+    isPreviewable,
+    uid,
+    trackId,
+    hasStreamAccess,
+    openLockedContentModal
+  ])
+
+  const onClickArtwork = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      onTogglePlay()
     },
-    [
-      togglePlay,
-      isPreviewable,
-      uid,
-      trackId,
-      hasStreamAccess,
-      openLockedContentModal
-    ]
+    [onTogglePlay]
   )
 
   const renderOverflowMenu = () => {
@@ -302,13 +301,19 @@ export const TrackTile = ({
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
   const disableActions = false
   const showSkeleton = loading
+  const canClickTile = !loading && !disableActions
+  const artworkActionLabel =
+    trackId && !hasStreamAccess && !isPreviewable
+      ? `Unlock ${title || 'track'}`
+      : `${isTrackPlaying ? 'Pause' : 'Play'} ${title || 'track'}`
 
-  const tileContent = (
+  const tileBody = (
     <Paper
       css={[
         isLoading && { opacity: 0.6 },
         disableActions && { opacity: 0.5, pointerEvents: 'none' },
         {
+          cursor: canClickTile ? 'pointer' : 'default',
           height: size === TrackTileSize.LARGE ? 144 : 128,
           containerType: 'inline-size',
           '&:hover .artworkIcon': { opacity: 0.75 },
@@ -321,7 +326,6 @@ export const TrackTile = ({
       mb={size === TrackTileSize.LARGE ? 'l' : 's'}
       p='s'
       gap='l'
-      onClick={!isLoading && !disableActions ? onTogglePlay : undefined}
     >
       <Flex gap='s'>
         {/* prefix ordering */}
@@ -340,18 +344,43 @@ export const TrackTile = ({
           h={size === TrackTileSize.LARGE ? 128 : 108}
           w={size === TrackTileSize.LARGE ? 128 : 108}
         >
-          <TrackArtwork
-            id={trackId}
-            coSign={coSign || undefined}
-            size='large'
-            isBuffering={isTrackBuffering}
-            isPlaying={isTrackPlaying}
-            artworkIconClassName='artworkIcon'
-            showArtworkIcon={!loading}
-            showSkeleton={loading}
-            noShimmer={noShimmer}
-            hasStreamAccess={hasStreamAccess || isPreviewable}
-          />
+          <button
+            type='button'
+            aria-label={artworkActionLabel}
+            disabled={isLoading || disableActions}
+            onClick={onClickArtwork}
+            css={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              padding: 0,
+              border: 0,
+              background: 'transparent',
+              cursor: isLoading || disableActions ? 'default' : 'pointer',
+              '&:focus': {
+                outline: 'none'
+              },
+              '&:focus-visible': {
+                borderRadius: 6,
+                outline:
+                  '2px solid var(--harmony-focus, var(--harmony-secondary))',
+                outlineOffset: 3
+              }
+            }}
+          >
+            <TrackArtwork
+              id={trackId}
+              coSign={coSign || undefined}
+              size='large'
+              isBuffering={isTrackBuffering}
+              isPlaying={isTrackPlaying}
+              artworkIconClassName='artworkIcon'
+              showArtworkIcon={!loading}
+              showSkeleton={loading}
+              noShimmer={noShimmer}
+              hasStreamAccess={hasStreamAccess || isPreviewable}
+            />
+          </button>
         </Box>
       </Flex>
       <TrackDogEar trackId={trackId} hideUnlocked />
@@ -375,6 +404,8 @@ export const TrackTile = ({
                       applyHoverStylesToInnerSvg
                       onClick={onClickTitle}
                       disabled={disableActions}
+                      className={styles.trackTitleLink}
+                      aria-label={`View track: ${title}`}
                       ellipses
                     >
                       <Text ellipses>{title}</Text>
@@ -388,6 +419,7 @@ export const TrackTile = ({
                       userId={user_id}
                       badgeSize='xs'
                       isActive={isActive}
+                      aria-label={partialUser?.name}
                       popover
                       css={{ marginTop: '-4px' }}
                     />
@@ -448,6 +480,15 @@ export const TrackTile = ({
         )}
       </Flex>
     </Paper>
+  )
+
+  const tileContent = (
+    <div
+      data-testid='track-tile-click-target'
+      onClick={canClickTile ? onTogglePlay : undefined}
+    >
+      {tileBody}
+    </div>
   )
 
   if (isStreamGated) {

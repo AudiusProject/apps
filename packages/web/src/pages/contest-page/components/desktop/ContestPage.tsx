@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
+  getRemixesQueryKey,
   useCurrentUserId,
   useEventFollowState,
   useFollowEvent,
@@ -13,11 +14,11 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import type { ID } from '@audius/common/models'
 import { SquareSizes, ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
-  remixesPageLineupActions,
   remixesPageSelectors,
   shareModalUIActions,
   useHostRemixContestModal
@@ -28,12 +29,15 @@ import {
   Button,
   Divider,
   FilterButton,
-  FollowButton,
   Flex,
   IconButton,
   IconShare,
+  IconUserFollow,
+  IconUserFollowing,
+  IconUserUnfollow,
   Paper,
   SelectablePill,
+  Skeleton,
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
@@ -41,7 +45,7 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar/Avatar'
-import { TanQueryLineup } from 'components/lineup/TanQueryLineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import UserBadges from 'components/user-badges/UserBadges'
 import { UserGeneratedText } from 'components/user-generated-text'
@@ -63,6 +67,9 @@ import { EventFollowersCard } from '../EventFollowersCard'
 const messages = {
   title: 'Remix Contest',
   enterContest: 'Enter Contest',
+  follow: 'Follow',
+  following: 'Following',
+  unfollow: 'Unfollow',
   share: 'Share contest',
   submissionsDue: 'Submissions Due:',
   contestEnded: 'Contest Ended',
@@ -216,6 +223,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const { data: followState } = useEventFollowState(eventId)
   const { mutate: followEvent, isPending: isFollowing } = useFollowEvent()
   const { mutate: unfollowEvent, isPending: isUnfollowing } = useUnfollowEvent()
+  // Drives the Following → Unfollow label swap on hover for the contest
+  // follow button. Local state keeps the parity with FollowButton's old
+  // behavior without bringing back the size mismatch.
+  const [isFollowHovering, setIsFollowHovering] = useState(false)
 
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
 
@@ -266,14 +277,29 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // the original (parent) track at the top of the lineup so viewers can
   // compare the source the remixes are built on without jumping back out
   // to the track page, matching the track-page `RemixesPage`.
-  const lineup = useRemixesLineup({
-    trackId: trackId ?? undefined,
-    includeOriginal: true,
-    includeWinners: true,
-    isContestEntry: true,
-    sortMethod,
-    isCosign
-  })
+  const remixesLineupArgs = useMemo(
+    () => ({
+      trackId: trackId ?? undefined,
+      includeOriginal: true,
+      includeWinners: true,
+      isContestEntry: true,
+      pageSize: CONTEST_PAGE_SIZE,
+      sortMethod,
+      isCosign
+    }),
+    [trackId, sortMethod, isCosign]
+  )
+  const lineup = useRemixesLineup(remixesLineupArgs)
+  const lineupTrackIds = useMemo(
+    () => (lineup.data ?? []).map((d) => d.id as ID),
+    [lineup.data]
+  )
+  const submissionsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getRemixesQueryKey(remixesLineupArgs)] as unknown[]
+    }),
+    [remixesLineupArgs]
+  )
 
   useEffect(() => {
     if (trackId) {
@@ -284,7 +310,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   useEffect(() => {
     return function cleanup() {
       dispatch(reset())
-      dispatch(remixesPageLineupActions.reset())
     }
   }, [dispatch])
 
@@ -310,12 +335,11 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // submissions (remixes), not the whole lineup. Subtract one for
   // the original (always included when `includeOriginal: true`) and
   // the number of winners from the contest event data.
-  const lineupLength = lineup.data?.length
+  const lineupLength = lineupTrackIds.length
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const submissionsCount =
-    lineupLength === undefined
-      ? undefined
-      : Math.max(0, lineupLength - 1 - winnerCount)
+  const submissionsCount = lineup.isPending
+    ? undefined
+    : Math.max(0, lineupLength - 1 - winnerCount)
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {
@@ -370,10 +394,21 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         </Flex>
       )
     }
-    // Public view: Share icon + profile-style Follow button
-    // (Follow → Following → hover Unfollow) + Enter Contest primary
-    // CTA, per the Figma. Enter Contest is hidden once the contest
-    // has ended — "entering" isn't meaningful anymore.
+    // Public view: Share icon + Follow / Following + Enter Contest, all
+    // size='small' (h=32) to match Figma 2857:94748. Renders the
+    // Follow / Following / Unfollow swap on the regular Button so its
+    // height aligns with the Enter Contest CTA next to it (FollowButton
+    // is 28px tall at small, which produced a visual mismatch).
+    const isFollowed = !!followState?.isFollowed
+    let followIcon = IconUserFollow
+    let followLabel = messages.follow
+    if (isFollowed && !isFollowHovering) {
+      followIcon = IconUserFollowing
+      followLabel = messages.following
+    } else if (isFollowed && isFollowHovering) {
+      followIcon = IconUserUnfollow
+      followLabel = messages.unfollow
+    }
     return (
       <Flex gap='s' alignItems='center' wrap='wrap'>
         <IconButton
@@ -382,14 +417,17 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           aria-label={messages.share}
           onClick={handleShareContest}
         />
-        <FollowButton
+        <Button
           size='small'
-          fullWidth={false}
-          isFollowing={!!followState?.isFollowed}
+          variant={isFollowed ? 'primary' : 'secondary'}
+          iconLeft={followIcon}
           disabled={isFollowing || isUnfollowing}
-          onFollow={handleToggleFollow}
-          onUnfollow={handleToggleFollow}
-        />
+          onClick={handleToggleFollow}
+          onMouseEnter={() => setIsFollowHovering(true)}
+          onMouseLeave={() => setIsFollowHovering(false)}
+        >
+          {followLabel}
+        </Button>
         {!isEnded ? (
           <Button size='small' onClick={handleEnterContest}>
             {messages.enterContest}
@@ -402,6 +440,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     isOwner,
     isEnded,
     followState?.isFollowed,
+    isFollowHovering,
     isFollowing,
     isUnfollowing,
     handleToggleFollow,
@@ -420,18 +459,71 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return null
   }
 
-  // No contest row on this track — keep the minimal placeholder behaviour.
+  // Contest hasn't resolved yet (or no contest exists for this track).
+  // Render a skeleton matching the page layout instead of the old
+  // "No contest is currently running" copy — covers the initial-load
+  // flash and avoids a confusing empty state.
   if (!contest || !eventId) {
     return (
       <Page
         title={messages.title}
         canonicalUrl={fullContestPage(track.permalink)}
+        variant='flush'
       >
-        <Flex column gap='l' p='xl'>
-          <Text variant='body'>
-            No contest is currently running for this track.
-          </Text>
-        </Flex>
+        <Box
+          css={{
+            maxWidth: MAX_CONTENT_WIDTH,
+            margin: '0 auto',
+            width: '100%'
+          }}
+        >
+          <Box
+            css={{
+              paddingInline: 'var(--harmony-unit-8)',
+              paddingBlock: 'var(--harmony-unit-6)'
+            }}
+          >
+            <Paper
+              direction='column'
+              borderRadius='l'
+              border='default'
+              shadow='flat'
+              backgroundColor='white'
+              css={{ overflow: 'hidden' }}
+            >
+              <Skeleton h={HERO_MIN_HEIGHT} w='100%' />
+              <Flex direction='column' gap='l' p='2xl'>
+                <Flex
+                  justifyContent='space-between'
+                  alignItems='center'
+                  gap='m'
+                >
+                  <Skeleton h={20} w={140} />
+                  <Flex gap='s'>
+                    <Skeleton h={32} w={32} css={{ borderRadius: '50%' }} />
+                    <Skeleton h={32} w={120} />
+                    <Skeleton h={32} w={120} />
+                  </Flex>
+                </Flex>
+                <Skeleton h={36} w='60%' />
+                <Divider orientation='horizontal' />
+                <Flex gap='m' alignItems='center'>
+                  <Skeleton h={40} w={40} css={{ borderRadius: '50%' }} />
+                  <Flex direction='column' gap='2xs' flex='1 1 auto'>
+                    <Skeleton h={12} w={100} />
+                    <Skeleton h={18} w={180} />
+                  </Flex>
+                </Flex>
+                <Flex gap='m'>
+                  <Skeleton h={56} w={72} />
+                  <Skeleton h={56} w={72} />
+                  <Skeleton h={56} w={72} />
+                  <Skeleton h={56} w={72} />
+                </Flex>
+              </Flex>
+            </Paper>
+          </Box>
+        </Box>
       </Page>
     )
   }
@@ -808,19 +900,16 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                         0: submissionsDelineator
                       }
                 return (
-                  <TanQueryLineup
-                    data={lineup.data}
-                    isFetching={lineup.isFetching}
+                  <TrackLineup
+                    trackIds={lineupTrackIds}
+                    source='CONTEST_SUBMISSIONS'
+                    querySource={submissionsQuerySource}
                     isPending={lineup.isPending}
+                    isFetching={lineup.isFetching}
                     isError={lineup.isError}
                     hasNextPage={lineup.hasNextPage}
-                    play={lineup.play}
-                    pause={lineup.pause}
                     loadNextPage={lineup.loadNextPage}
-                    isPlaying={lineup.isPlaying}
-                    lineup={lineup.lineup}
                     pageSize={CONTEST_PAGE_SIZE}
-                    actions={remixesPageLineupActions}
                     delineatorMap={delineatorMap}
                   />
                 )

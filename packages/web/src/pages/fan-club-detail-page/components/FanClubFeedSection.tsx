@@ -1,12 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import {
-  useFanClubFeed,
-  type FanClubFeedItem,
-  mapLineupDataToFullLineupItems
-} from '@audius/common/api'
+import { useFanClubFeed, type FanClubFeedItem } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import {
+  Kind,
   Name,
   PlaybackSource,
   UID,
@@ -14,15 +11,10 @@ import {
   ModalSource
 } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import {
-  exclusiveTracksPageLineupActions,
-  exclusiveTracksPageSelectors,
-  playerSelectors,
-  queueSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
+import type { PlaybackTrack } from '@audius/common/store'
+import { makeStableUid } from '@audius/common/utils'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
-import { EntityType } from '@audius/sdk'
-import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
@@ -33,8 +25,8 @@ import { useIsMobile } from 'hooks/useIsMobile'
 
 import { TextPostCard } from './TextPostCard'
 
-const { getBuffering } = playerSelectors
-const { makeGetCurrent } = queueSelectors
+const { getPlaying } = playbackSelectors
+const { makeGetCurrent } = playbackSelectors
 
 const messages = {
   title: 'Fan Club Feed',
@@ -42,6 +34,7 @@ const messages = {
 }
 
 const FEED_PAGE_SIZE = 10
+const FAN_CLUB_SOURCE = 'EXCLUSIVE_TRACKS_PAGE'
 
 type FanClubFeedSectionProps = {
   mint: string
@@ -49,7 +42,6 @@ type FanClubFeedSectionProps = {
 
 export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const dispatch = useDispatch()
-  const queryClient = useQueryClient()
   const isMobile = useIsMobile()
   const { isEnabled: isTextPostsEnabled } = useFeatureFlag(
     FeatureFlags.FAN_CLUB_TEXT_POST_POSTING
@@ -69,79 +61,25 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     enabled: !!mint
   })
 
-  // Extract track items for lineup (playback ordering)
-  const trackLineupData = useMemo(
-    () =>
-      feedItems
-        ?.filter(
-          (item): item is Extract<FanClubFeedItem, { itemType: 'track' }> =>
-            item.itemType === 'track'
-        )
-        .map((item) => ({ id: item.trackId, type: EntityType.TRACK })) ?? [],
-    [feedItems]
-  )
-
-  // Lineup state for sequential track playback
-  const lineup = useSelector(exclusiveTracksPageSelectors.getLineup)
-  const isPlaying = useSelector(playerSelectors.getPlaying)
+  const isPlaying = useSelector(getPlaying)
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
   const currentQueueItem = useSelector(getCurrentQueueItem)
-  const isBuffering = useSelector(getBuffering)
   const playingUid = currentQueueItem?.uid
-  const playingSource = currentQueueItem?.source
 
-  // Sync lineup with track data from the feed
-  const prevTrackCount = useRef(0)
-  useEffect(() => {
-    if (trackLineupData.length !== prevTrackCount.current) {
-      dispatch(exclusiveTracksPageLineupActions.reset())
-      if (trackLineupData.length > 0) {
-        const fullTracks = mapLineupDataToFullLineupItems(
-          trackLineupData,
-          queryClient,
-          () => {},
-          lineup.prefix
-        )
-        dispatch(
-          exclusiveTracksPageLineupActions.fetchLineupMetadatas(
-            0,
-            fullTracks.length,
-            false,
-            { items: fullTracks }
-          )
-        )
-      }
-      prevTrackCount.current = trackLineupData.length
-    }
-  }, [trackLineupData, dispatch, queryClient, lineup.prefix])
+  // Build the play queue from track items (text posts aren't playable).
+  const tracksForPlayback: PlaybackTrack[] = useMemo(() => {
+    return (feedItems ?? [])
+      .filter(
+        (item): item is Extract<FanClubFeedItem, { itemType: 'track' }> =>
+          item.itemType === 'track'
+      )
+      .map((item) => ({
+        trackId: item.trackId,
+        source: FAN_CLUB_SOURCE,
+        uid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
+      }))
+  }, [feedItems])
 
-  // Playback controls
-  const togglePlay = useCallback(
-    (uid: UID, id: ID) => {
-      if (uid !== playingUid || (uid === playingUid && !isPlaying)) {
-        dispatch(exclusiveTracksPageLineupActions.play(uid))
-        dispatch(
-          make(Name.PLAYBACK_PLAY, {
-            id,
-            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
-          })
-        )
-      } else {
-        dispatch(exclusiveTracksPageLineupActions.pause())
-        dispatch(
-          make(Name.PLAYBACK_PAUSE, {
-            id,
-            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
-          })
-        )
-      }
-    },
-    [playingUid, isPlaying, dispatch]
-  )
-
-  const TrackTile = isMobile ? MobileTrackTile : TrackTileDesktop
-
-  // Precompute mapping from feed index to lineup entry index for tracks
   const feedItemsWithLineupIndex = useMemo(() => {
     let trackIdx = 0
     return (
@@ -152,6 +90,47 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
     )
   }, [feedItems])
 
+  const togglePlay = useCallback(
+    (uid: UID, id: ID) => {
+      if (uid === playingUid && isPlaying) {
+        dispatch(playbackActions.togglePlay())
+        dispatch(
+          make(Name.PLAYBACK_PAUSE, {
+            id,
+            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
+          })
+        )
+        return
+      }
+      if (uid === playingUid && !isPlaying) {
+        dispatch(playbackActions.play())
+        dispatch(
+          make(Name.PLAYBACK_PLAY, {
+            id,
+            source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
+          })
+        )
+        return
+      }
+      const startIndex = tracksForPlayback.findIndex((t) => t.trackId === id)
+      if (startIndex < 0) return
+      dispatch(
+        playbackActions.playFrom({
+          tracks: tracksForPlayback,
+          startIndex
+        })
+      )
+      dispatch(
+        make(Name.PLAYBACK_PLAY, {
+          id,
+          source: PlaybackSource.EXCLUSIVE_TRACKS_PAGE
+        })
+      )
+    },
+    [playingUid, isPlaying, dispatch, tracksForPlayback]
+  )
+
+  const TrackTile = isMobile ? MobileTrackTile : TrackTileDesktop
   const hasContent = feedItemsWithLineupIndex.length > 0
 
   if (!hasContent && !isFeedPending) return null
@@ -182,16 +161,17 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
               )
             }
 
-            // Track item — render using lineup entry for playback state
-            const lineupEntry: any = lineup.entries[item.lineupIndex]
-            if (!lineupEntry) return null
+            const uid = makeStableUid(
+              Kind.TRACKS,
+              item.trackId,
+              FAN_CLUB_SOURCE
+            )
 
             return (
               <TrackTile
                 key={`track-${item.trackId}`}
-                {...lineupEntry}
-                uid={lineupEntry.uid}
-                id={lineupEntry.id ?? item.trackId}
+                uid={uid}
+                id={item.trackId}
                 index={item.lineupIndex}
                 ordered={false}
                 togglePlay={togglePlay}
@@ -199,9 +179,10 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
                 statSize='large'
                 isLoading={false}
                 isTrending={false}
+                isFeed={false}
+                isActive={uid === playingUid}
+                hasLoaded={() => {}}
                 source={ModalSource.LineUpTrackTile}
-                isBuffering={isBuffering}
-                playingSource={playingSource}
               />
             )
           })}

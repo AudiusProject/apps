@@ -1,14 +1,11 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { useTrendingWinners } from '@audius/common/api'
 import {
-  lineupSelectors,
-  trendingWinnersPageLineupActions,
-  trendingWinnersPageLineupSelectors
-} from '@audius/common/store'
+  getTrendingWinnersQueryKey,
+  useTrendingWinners
+} from '@audius/common/api'
 import { dayjs } from '@audius/common/utils'
 import { ScrollView, View } from 'react-native'
-import { useDispatch } from 'react-redux'
 
 import {
   Flex,
@@ -20,14 +17,9 @@ import {
   SelectablePill,
   Text
 } from '@audius/harmony-native'
-import { Lineup } from 'app/components/lineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { LineupTileSkeleton } from 'app/components/lineup-tile'
 import { makeStyles } from 'app/styles'
-
-const { getLineup } = trendingWinnersPageLineupSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
-
-const getTrendingWinnersLineup = makeGetLineupMetadatas(getLineup)
 
 const messages = {
   header: 'Winners',
@@ -69,7 +61,6 @@ export const TrendingWinnersView = ({
   onWeekChange,
   onSubFilterChange
 }: TrendingWinnersViewProps) => {
-  const dispatch = useDispatch()
   const { data: tracks, isPending } = useTrendingWinners(
     {
       week,
@@ -77,22 +68,18 @@ export const TrendingWinnersView = ({
     },
     { enabled: true }
   )
-
-  useEffect(() => {
-    if (tracks && tracks.length > 0) {
-      dispatch(
-        trendingWinnersPageLineupActions.fetchLineupMetadatas(
-          0,
-          tracks.length,
-          true,
-          { tracks }
-        )
-      )
-    }
-    return () => {
-      dispatch(trendingWinnersPageLineupActions.reset())
-    }
-  }, [dispatch, tracks, subFilter])
+  const trackIds = useMemo(
+    () => (tracks ?? []).map((t) => t.track_id),
+    [tracks]
+  )
+  const querySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingWinnersQueryKey({ week, type: subFilter })
+      ] as unknown[]
+    }),
+    [week, subFilter]
+  )
 
   const handlePrevWeek = useCallback(() => {
     const base = week ? dayjs(week + 'T12:00:00Z') : getLastCompletedFriday()
@@ -196,14 +183,15 @@ export const TrendingWinnersView = ({
   }
 
   return (
-    <Lineup
+    <TrackLineup
       isTrending
-      selfLoad={false}
-      pullToRefresh={false}
       rankIconCount={5}
-      lineupSelector={getTrendingWinnersLineup}
-      actions={trendingWinnersPageLineupActions}
-      loadMore={() => {}}
+      trackIds={trackIds}
+      source={`DISCOVER_TRENDING_WINNERS_${subFilter}`}
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={false}
+      hasNextPage={false}
       header={
         <View style={styles.headerWrapper}>
           <Paper

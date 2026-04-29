@@ -1,7 +1,6 @@
 import { useTrack } from '@audius/common/api'
 import { useIsTrackUnlockable } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import { type LineupBaseActions } from '@audius/common/store'
 
 import { Flex } from '@audius/harmony-native'
 
@@ -21,12 +20,13 @@ type TrackTileStatsProps = {
   trackId: ID
   isTrending?: boolean
   rankIndex?: number
-  uid?: string
-  actions?: LineupBaseActions
+  // Source tag for playback when the user plays the track from within the
+  // comment drawer opened via the CommentMetric.
+  playbackSource?: string
 }
 
 export const TrackTileStats = (props: TrackTileStatsProps) => {
-  const { trackId, isTrending, rankIndex, uid, actions } = props
+  const { trackId, isTrending, rankIndex, playbackSource } = props
 
   const isUnlockable = useIsTrackUnlockable(trackId)
 
@@ -54,8 +54,7 @@ export const TrackTileStats = (props: TrackTileStatsProps) => {
             <SavesMetric trackId={trackId} />
             <CommentMetric
               trackId={trackId}
-              uid={uid}
-              actions={actions}
+              playbackSource={playbackSource}
               showLeaveCommentText={noMetrics}
             />
             <TrackDownloadStatusIndicator size='s' trackId={trackId} />

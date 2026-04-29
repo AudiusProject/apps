@@ -16,6 +16,7 @@ import {
 import { useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
+import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
 import { UserChatHeader } from './UserChatHeader'
@@ -75,32 +76,38 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     )
 
     return (
-      <Flex
-        ref={ref}
+      <Frosted
         w='100%'
-        h={112}
-        ph={CHAT_HEADER_PADDING_PX}
-        css={{ minWidth: 0, borderRadius: 0 }}
+        h='var(--chat-header-height, 112px)'
+        contentPaddingInline='0px'
         borderBottom='default'
       >
         <Flex
-          w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
-          css={{ flexShrink: 0 }}
+          ref={ref}
+          w='100%'
+          h='var(--chat-header-height, 112px)'
+          ph={CHAT_HEADER_PADDING_PX}
+          css={{ minWidth: 0, borderRadius: 0 }}
         >
-          {headerContent}
-        </Flex>
-        {isNarrowLayout ? null : (
-          <Flex p='l' flex={1} alignItems='center' css={{ minWidth: 0 }}>
-            {chat ? (
-              isBlast ? (
-                <ChatBlastHeader chat={chat} />
-              ) : (
-                <UserChatHeader chatId={chat.chat_id} />
-              )
-            ) : null}
+          <Flex
+            w={isNarrowLayout ? '100%' : CHAT_LIST_WIDTH_PX}
+            css={{ flexShrink: 0 }}
+          >
+            {headerContent}
           </Flex>
-        )}
-      </Flex>
+          {isNarrowLayout ? null : (
+            <Flex p='l' flex={1} alignItems='center' css={{ minWidth: 0 }}>
+              {chat ? (
+                isBlast ? (
+                  <ChatBlastHeader chat={chat} />
+                ) : (
+                  <UserChatHeader chatId={chat.chat_id} />
+                )
+              ) : null}
+            </Flex>
+          )}
+        </Flex>
+      </Frosted>
     )
   }
 )

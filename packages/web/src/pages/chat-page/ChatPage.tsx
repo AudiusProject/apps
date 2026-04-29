@@ -127,6 +127,7 @@ export const ChatPage = () => {
       showSearch={false}
       headerPadding={0}
       headerContentPaddingInline='0px'
+      disableHeaderFrosted
       header={
         <ChatHeader
           currentChatId={currentChatId}
@@ -174,9 +175,9 @@ export const ChatPage = () => {
               ) : null}
             </>
           ) : (
-            <Flex ph='2xl' pt='2xl' justifyContent='center'>
+            <div className={styles.emptyState}>
               <CreateChatPrompt hasChats={!hideChatList} />
-            </Flex>
+            </div>
           )}
         </div>
       </div>

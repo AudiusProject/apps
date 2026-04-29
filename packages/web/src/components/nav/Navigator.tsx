@@ -7,6 +7,7 @@ import {
 } from 'react'
 
 import { Client } from '@audius/common/models'
+import { createKeyboardActivationHandler } from '@audius/harmony'
 import cn from 'classnames'
 import { useLocation } from 'react-router'
 
@@ -106,6 +107,15 @@ const Navigator = ({ className }: OwnProps) => {
     [isCollapsed]
   )
 
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed(!isCollapsed)
+  }, [isCollapsed, setIsCollapsed])
+
+  const handleResizeHandleKeyDown =
+    createKeyboardActivationHandler<HTMLDivElement>({
+      onActivate: toggleCollapsed
+    })
+
   useEffect(() => {
     if (!isDragging) return
 
@@ -156,6 +166,16 @@ const Navigator = ({ className }: OwnProps) => {
               className={styles.resizeHandle}
               style={{ cursor: isCollapsed ? 'e-resize' : 'w-resize' }}
               onMouseDown={handleDragStart}
+              onKeyDown={handleResizeHandleKeyDown}
+              role='button'
+              tabIndex={0}
+              aria-label={
+                isCollapsed
+                  ? 'Expand navigation sidebar'
+                  : 'Collapse navigation sidebar'
+              }
+              aria-controls='leftNav'
+              aria-expanded={!isCollapsed}
             />
           </>
         )}

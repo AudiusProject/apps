@@ -1,41 +1,64 @@
-import { useCallback } from 'react'
+import { useMemo } from 'react'
 
 import {
-  lineupSelectors,
-  feedPageLineupActions as feedActions,
-  feedPageSelectors
-} from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+  getFeedQueryKey,
+  FEED_INITIAL_PAGE_SIZE,
+  FEED_LOAD_MORE_PAGE_SIZE,
+  useCurrentUserId,
+  useFeed
+} from '@audius/common/api'
+import { feedPageSelectors } from '@audius/common/store'
+import { useSelector } from 'react-redux'
 
 import { Screen, ScreenContent } from 'app/components/core'
-import { Lineup } from 'app/components/lineup'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { SuggestedFollows } from 'app/components/suggested-follows'
 import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { FeedFilterButton } from './FeedFilterButton'
-const { getDiscoverFeedLineup } = feedPageSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
 
-const getFeedLineup = makeGetLineupMetadatas(getDiscoverFeedLineup)
+const { getFeedFilter } = feedPageSelectors
 
 const messages = {
   header: 'Your Feed',
   endOfFeed: "Looks like you've reached the end of your feed..."
 }
 
+// Note: the feed API returns both tracks and collections (playlist reposts).
+// The new TrackLineup renders tracks only, so collections are filtered out by
+// `trackIds` on the hook side. This is a known limitation introduced by the
+// tanquery migration — collection feed rendering will be restored if/when
+// TrackLineup learns to render mixed feeds.
 export const FeedScreen = () => {
   useAppTabScreen()
+  const feedFilter = useSelector(getFeedFilter)
+  const { data: currentUserId } = useCurrentUserId()
 
-  const dispatch = useDispatch()
+  const feedArgs = useMemo(
+    () => ({
+      userId: currentUserId,
+      filter: feedFilter,
+      initialPageSize: FEED_INITIAL_PAGE_SIZE,
+      loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
+    }),
+    [feedFilter, currentUserId]
+  )
 
-  const loadMore = useCallback(
-    (offset: number, limit: number, overwrite: boolean) => {
-      dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
-    },
-    [dispatch]
+  const {
+    trackIds,
+    isPending,
+    isFetching,
+    hasNextPage,
+    loadNextPage,
+    refetch
+  } = useFeed(feedArgs)
+
+  const querySource = useMemo(
+    () => ({ queryKey: [...getFeedQueryKey(feedArgs)] as unknown[] }),
+    [feedArgs]
   )
 
   return (
@@ -50,19 +73,25 @@ export const FeedScreen = () => {
       )}
     >
       <ScreenContent>
-        <Lineup
+        <TrackLineup
+          trackIds={trackIds}
+          source='DISCOVER_FEED'
+          querySource={querySource}
+          isPending={isPending}
+          isFetching={isFetching}
+          hasNextPage={hasNextPage}
+          loadNextPage={loadNextPage}
+          pageSize={FEED_LOAD_MORE_PAGE_SIZE}
+          initialPageSize={FEED_INITIAL_PAGE_SIZE}
           pullToRefresh
-          delineate
-          selfLoad
+          refresh={() => {
+            refetch()
+          }}
           hideHeaderOnEmpty
+          LineupEmptyComponent={<SuggestedFollows />}
           ListFooterComponent={
             <EndOfLineupNotice description={messages.endOfFeed} />
           }
-          LineupEmptyComponent={<SuggestedFollows />}
-          actions={feedActions}
-          lineupSelector={getFeedLineup}
-          loadMore={loadMore}
-          showsVerticalScrollIndicator={false}
         />
       </ScreenContent>
     </Screen>

@@ -12,6 +12,7 @@ import {
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
+  Kind,
   Name,
   ShareSource,
   RepostSource,
@@ -32,8 +33,7 @@ import type {
 } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import {
-  trackPageLineupActions,
-  queueSelectors,
+  playbackSelectors,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -44,7 +44,7 @@ import {
   favoritesUserListActions,
   trackPageActions,
   RepostType,
-  playerSelectors,
+  playbackActions,
   playbackPositionSelectors,
   PurchaseableContentType,
   usePublishConfirmationModal,
@@ -53,6 +53,7 @@ import {
 import {
   formatReleaseDate,
   Genre,
+  makeStableUid,
   removeNullable,
   dayjs
 } from '@audius/common/utils'
@@ -97,16 +98,15 @@ import { makeStyles } from 'app/styles'
 import { DownloadSection } from './DownloadSection'
 import { TrackDescription } from './TrackDescription'
 
-const { getPlaying, getTrackId, getPreviewing } = playerSelectors
+const { getPlaying, getTrackId, getPreviewing } = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { tracksActions } = trackPageLineupActions
 const { getIsReachable } = reachabilitySelectors
 const { getTrackPosition } = playbackPositionSelectors
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
@@ -332,17 +332,31 @@ export const TrackScreenDetailsTile = ({
       if (isLineupLoading) return
 
       if (isPlaying && isPlayingId && isPreviewing === isPreview) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         recordPlay(trackId, false, true)
       } else if (
         currentQueueItem.uid !== uid &&
         currentTrack &&
         currentTrack.track_id === trackId
       ) {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         recordPlay(trackId)
       } else {
-        dispatch(tracksActions.play(uid, { isPreview }))
+        // Matches legacy track page lineup prefix.
+        const playbackSource = 'TRACK_TRACKS'
+        dispatch(
+          playbackActions.playFrom({
+            tracks: [
+              {
+                trackId,
+                source: playbackSource,
+                uid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
+              }
+            ],
+            startIndex: 0,
+            querySource: null
+          })
+        )
         recordPlay(trackId, true, true)
       }
     },
@@ -382,8 +396,7 @@ export const TrackScreenDetailsTile = ({
     openCommentDrawer({
       entityId: trackId,
       navigation,
-      actions: tracksActions,
-      uid
+      playbackSource: 'TRACK_TRACKS'
     })
     trackEvent(
       make({
@@ -392,7 +405,7 @@ export const TrackScreenDetailsTile = ({
         source: 'track_page'
       })
     )
-  }, [openCommentDrawer, trackId, navigation, uid])
+  }, [openCommentDrawer, trackId, navigation])
 
   const handlePressSave = useToggleFavoriteTrack({
     trackId,

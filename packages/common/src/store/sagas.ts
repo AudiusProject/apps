@@ -11,8 +11,8 @@ import { buyUSDCSagas } from '~/store/buy-usdc'
 import { sagas as castSagas } from '~/store/cast/sagas'
 import { gatedContentSagas } from '~/store/gated-content'
 import { chatSagas } from '~/store/pages/chat'
+import { playbackSagas } from '~/store/playback'
 import { playbackPositionSagas } from '~/store/playback-position'
-import { playerSagas } from '~/store/player'
 import { purchaseContentSagas } from '~/store/purchase-content'
 import remoteConfigSagas from '~/store/remote-config/sagas'
 import {
@@ -53,7 +53,7 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   modals: modalsSagas,
   deletePlaylistConfirmationModalUI: deletePlaylistConfirmationModalUISagas,
   duplidateAddConfirmationModalUI: duplicateAddConfirmationModalUISagas,
-  player: playerSagas,
+  playback: playbackSagas,
   playbackPosition: playbackPositionSagas,
   playlistUpdates: playlistUpdatesSagas,
   withdrawUSDC: withdrawUSDCSagas

@@ -18,7 +18,6 @@ import {
 import type { ID } from '@audius/common/models'
 import {
   cacheCollectionsActions,
-  collectionPageLineupActions as tracksActions,
   tracksSocialActions,
   usersSocialActions,
   addToCollectionUIActions,
@@ -31,8 +30,6 @@ import {
   usePublishConfirmationModal,
   trackPageActions,
   artistPickModalActions,
-  playerActions,
-  playerSelectors,
   useHostRemixContestModal
 } from '@audius/common/store'
 import type { OverflowActionCallbacks } from '@audius/common/store'
@@ -46,7 +43,6 @@ import { setVisibility } from 'app/store/drawers/slice'
 
 import { useCommentDrawer } from '../comments/CommentDrawerContext'
 
-const { getUid } = playerSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { getMobileOverflowModal } = mobileOverflowMenuUISelectors
 const { requestOpen: openAddToCollectionModal } = addToCollectionUIActions
@@ -75,7 +71,6 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
   const id = modalId as ID
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const uid = useSelector(getUid)
 
   const { open } = useCommentDrawer()
 
@@ -124,11 +119,10 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
       open({
         entityId: track.track_id,
         navigation,
-        actions: playerActions,
-        uid: uid as string
+        playbackSource: 'comments'
       })
     }
-  }, [uid, navigation, open, track?.track_id])
+  }, [navigation, open, track?.track_id])
 
   const handleOpenRemixContestDrawer = useCallback(() => {
     if (track?.track_id) {
@@ -175,7 +169,6 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
             metadata_time ?? time
           )
         )
-        dispatch(tracksActions.fetchLineupMetadatas())
       }
     },
     [OverflowAction.VIEW_TRACK_PAGE]: () => {

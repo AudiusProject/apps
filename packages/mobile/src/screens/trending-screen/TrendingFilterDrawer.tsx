@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react'
 
 import {
   modalsActions,
-  trendingPageLineupActions,
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
@@ -38,8 +37,6 @@ const TRENDING_FILTER_MODAL = 'TrendingFilter' as const
 const { setVisibility } = modalsActions
 const { setTrendingGenre } = trendingPageActions
 const { getTrendingGenre } = trendingPageSelectors
-const { trendingWeekActions, trendingMonthActions, trendingAllTimeActions } =
-  trendingPageLineupActions
 
 export const MODAL_NAME = 'TrendingGenreSelection'
 
@@ -139,9 +136,6 @@ export const TrendingFilterDrawer = () => {
           : (genre.replace(ELECTRONIC_PREFIX, '') as Genre)
 
       dispatch(setTrendingGenre(trimmedGenre))
-      dispatch(trendingWeekActions.reset())
-      dispatch(trendingMonthActions.reset())
-      dispatch(trendingAllTimeActions.reset())
       Keyboard.dismiss()
       onClose()
     },

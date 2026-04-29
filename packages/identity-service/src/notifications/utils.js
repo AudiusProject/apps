@@ -1,4 +1,3 @@
-const axios = require('axios')
 const moment = require('moment-timezone')
 const Hashids = require('hashids/cjs')
 
@@ -26,15 +25,12 @@ async function updateBlockchainIds() {
     try {
       const walletAddress = updateUser.walletAddress
       logger.info(`Updating user with wallet ${walletAddress}`)
-      const response = await axios({
-        method: 'get',
-        url: `${discoveryProvider.discoveryProviderEndpoint}/users`,
-        params: {
-          wallet: walletAddress
-        }
+      const respUsers = await discoveryProvider._makeRequest({
+        endpoint: 'users',
+        queryParams: { wallet: walletAddress }
       })
-      if (response.data.data.length === 1) {
-        const respUser = response.data.data[0]
+      if (respUsers.length === 1) {
+        const respUser = respUsers[0]
         const missingUserId = respUser.user_id
         const missingHandle = respUser.handle
         const updateObject = { blockchainUserId: missingUserId }
@@ -48,7 +44,7 @@ async function updateBlockchainIds() {
         )
         continue
       }
-      for (const respUser of response.data.data) {
+      for (const respUser of respUsers) {
         // Only update if handles match
         if (respUser.handle === updateUser.handle) {
           const missingUserId = respUser.user_id

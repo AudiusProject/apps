@@ -1,5 +1,1 @@
-import { LineupState, LineupTrack } from '../../../models'
-
-export interface HistoryPageState {
-  tracks: LineupState<LineupTrack>
-}
+export type HistoryPageState = Record<string, never>

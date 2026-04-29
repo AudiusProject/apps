@@ -40,6 +40,7 @@ export const PreviewArtistHint = () => {
       </Text>
       <IconButton
         role='button'
+        accessibilityLabel='Dismiss preview hint'
         icon={IconCloseAlt}
         hitSlop={spacing.l}
         color='white'

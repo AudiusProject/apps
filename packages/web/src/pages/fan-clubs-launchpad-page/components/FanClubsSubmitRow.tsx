@@ -43,7 +43,7 @@ export const FanClubsSubmitRow = ({
   isValid: isValidProp,
   errorText
 }: FanClubsSubmitRowProps) => {
-  const { color, spacing } = useTheme()
+  const { spacing } = useTheme()
   const { isValid: isEntireFormValid } = useFormikContext()
   const isFormValid = isValidProp ?? isEntireFormValid
   const [showError, setShowError] = useState(false)
@@ -71,7 +71,7 @@ export const FanClubsSubmitRow = ({
           left: 'var(--nav-width)',
           width: 'calc(100% - var(--nav-width))',
           padding: spacing.unit3,
-          borderTop: `1px solid ${color.border.strong}`,
+          borderTop: '1px solid var(--harmony-border-default)',
           zIndex: zIndex.NAVIGATOR_POPUP
         }}
         direction='column'

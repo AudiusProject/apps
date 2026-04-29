@@ -61,45 +61,50 @@ export const getCurrentAccountQueryFn = async (
   currentUserWallet: string | null,
   queryClient: QueryClient
 ): Promise<AccountState | null | undefined> => {
-  const localAccount = getLocalAccount(localStorage, queryClient)
-  if (localAccount) {
-    return localAccount
-  }
-
   if (!currentUserWallet) {
-    return null
+    // No wallet yet (bootstrap); fall back to cached account if present
+    return getLocalAccount(localStorage, queryClient)
   }
 
-  const { data } = await sdk.users.getUserAccount({
-    wallet: currentUserWallet!
-  })
+  try {
+    const { data } = await sdk.users.getUserAccount({
+      wallet: currentUserWallet
+    })
 
-  if (!data) {
-    console.warn('Missing user from account response')
-    return null
+    if (!data) {
+      console.warn('Missing user from account response')
+      return getLocalAccount(localStorage, queryClient)
+    }
+
+    const account = accountFromSDK(data)
+    if (account) {
+      queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
+      primeUserData({ users: [account.user], queryClient })
+    } else {
+      queryClient.setQueryData(getAccountStatusQueryKey(), Status.ERROR)
+    }
+
+    return {
+      collections: account?.playlists,
+      userId: account?.user?.user_id,
+      hasTracks: (account?.user?.track_count ?? 0) > 0,
+      status: account ? Status.SUCCESS : Status.ERROR,
+      reason: null,
+      connectivityFailure: false,
+      needsAccountRecovery: false,
+      walletAddresses: { currentUser: null, web3User: null },
+      playlistLibrary: account?.playlist_library ?? null,
+      trackSaveCount: account?.track_save_count ?? null,
+      guestEmail: null
+    } as AccountState
+  } catch (e) {
+    // On server error (e.g. offline), fall back to the cached account
+    console.warn(
+      'Failed to fetch current account, falling back to local cache',
+      e
+    )
+    return getLocalAccount(localStorage, queryClient)
   }
-
-  const account = accountFromSDK(data)
-  if (account) {
-    queryClient.setQueryData(getAccountStatusQueryKey(), Status.SUCCESS)
-    primeUserData({ users: [account.user], queryClient })
-  } else {
-    queryClient.setQueryData(getAccountStatusQueryKey(), Status.ERROR)
-  }
-
-  return {
-    collections: account?.playlists,
-    userId: account?.user?.user_id,
-    hasTracks: (account?.user?.track_count ?? 0) > 0,
-    status: account ? Status.SUCCESS : Status.ERROR,
-    reason: null,
-    connectivityFailure: false,
-    needsAccountRecovery: false,
-    walletAddresses: { currentUser: null, web3User: null },
-    playlistLibrary: account?.playlist_library ?? null,
-    trackSaveCount: account?.track_save_count ?? null,
-    guestEmail: null
-  } as AccountState
 }
 
 /**
@@ -123,6 +128,10 @@ export const useCurrentAccount = <TResult = AccountState | null | undefined>(
         currentUserWallet!,
         queryClient
       ),
+    // Render cached account immediately while fresh data loads, so the UI
+    // doesn't flash empty but server data still wins once it arrives.
+    placeholderData: () =>
+      getLocalAccount(localStorage, queryClient) ?? undefined,
     staleTime: Infinity,
     gcTime: Infinity,
     enabled: options?.enabled !== false && !!currentUserWallet,

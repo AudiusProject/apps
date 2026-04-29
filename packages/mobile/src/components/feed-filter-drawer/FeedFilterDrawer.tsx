@@ -1,10 +1,9 @@
 import { useCallback, useMemo } from 'react'
 
+import { QUERY_KEYS } from '@audius/common/api'
 import { Name, FeedFilter } from '@audius/common/models'
-import {
-  feedPageLineupActions as feedActions,
-  feedPageActions
-} from '@audius/common/store'
+import { feedPageActions } from '@audius/common/store'
+import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import ActionDrawer from 'app/components/action-drawer'
@@ -24,19 +23,18 @@ export const messages = {
 
 export const FeedFilterDrawer = () => {
   const dispatch = useDispatch()
+  const queryClient = useQueryClient()
 
   const handleSelectFilter = useCallback(
     (filter: FeedFilter) => {
       dispatch(setFeedFilter(filter))
-      // Clear the lineup
-      dispatch(feedActions.reset())
-      // Tell the store that the feed is still in view so it can be refetched
-      dispatch(feedActions.setInView(true))
-      // Force a refresh for at least 10 tiles
-      dispatch(feedActions.refreshInView(true, null, 10))
+      // Invalidate the feed tan-query so it refetches with the new filter
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.feed]
+      })
       track(make({ eventName: Name.FEED_CHANGE_VIEW, view: filter }))
     },
-    [dispatch]
+    [dispatch, queryClient]
   )
 
   const rows = useMemo(

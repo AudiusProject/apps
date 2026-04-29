@@ -25,7 +25,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
@@ -61,7 +61,7 @@ import TrackTileArt from './TrackTileArt'
 
 const { setLockedContentId } = gatedContentActions
 const { getGatedContentStatusMap } = gatedContentSelectors
-const { getUid, getPlaying, getBuffering } = playerSelectors
+const { getUid, getPlaying, getBuffering } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
@@ -375,9 +375,22 @@ export const TrackTile = ({
     openLockedContentModal
   ])
 
+  const handleArtworkClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      handleClick()
+    },
+    [handleClick]
+  )
+
   const isReadonly = variant === 'readonly'
   const tileOrder =
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
+  const isTrackPlaying = uid === playingUid && isPlaying
+  const artworkActionLabel =
+    gatedTrackId && !hasStreamAccess && !preview_cid
+      ? `Unlock ${title || 'track'}`
+      : `${isTrackPlaying ? 'Pause' : 'Play'} ${title || 'track'}`
 
   if (is_delete || is_deactivated) return null
 
@@ -409,32 +422,40 @@ export const TrackTile = ({
           </Flex>
         </div>
         <div className={styles.metadata}>
-          <TrackTileArt
-            id={track_id}
-            isTrack
-            isPlaying={uid === playingUid && isPlaying}
-            isBuffering={isBuffering}
-            showSkeleton={loading}
-            noShimmer={noShimmer}
-            coSign={_co_sign}
-            className={styles.albumArtContainer}
-            label={`${title} by ${name}`}
-            artworkIconClassName={styles.artworkIcon}
-          />
+          <button
+            type='button'
+            className={styles.albumArtButton}
+            aria-label={artworkActionLabel}
+            disabled={loading}
+            onClick={handleArtworkClick}
+          >
+            <TrackTileArt
+              id={track_id}
+              isTrack
+              isPlaying={isTrackPlaying}
+              isBuffering={isBuffering}
+              showSkeleton={loading}
+              noShimmer={noShimmer}
+              coSign={_co_sign}
+              label={`${title} by ${name}`}
+              artworkIconClassName={styles.artworkIcon}
+            />
+          </button>
           <Flex
             direction='column'
             justifyContent='center'
             gap='xs'
             pv='xs'
-            mr='m'
-            flex='0 1 65%'
-            css={{ overflow: 'hidden' }}
+            flex='1 1 0'
+            css={{ minWidth: 0, overflow: 'hidden' }}
           >
             <TextLink
               to={permalink}
               textVariant='title'
               isActive={uid === playingUid || isActive}
               applyHoverStylesToInnerSvg
+              className={styles.trackTitleLink}
+              aria-label={`View track: ${title || messages.loading}`}
             >
               <Text ellipses>{title || messages.loading}</Text>
               {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}

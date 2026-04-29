@@ -2,16 +2,13 @@ import { queryCollection, queryCollectionByPermalink } from '@audius/common/api'
 import { Kind } from '@audius/common/models'
 import {
   cacheActions,
-  collectionPageLineupActions as tracksActions,
   collectionPageActions as collectionActions,
   reachabilitySelectors
 } from '@audius/common/store'
 import { makeUid, route } from '@audius/common/utils'
-import { call, put, select, takeLatest, takeEvery } from 'redux-saga/effects'
+import { call, put, select, takeLatest } from 'redux-saga/effects'
 
 import { push as pushRoute } from 'utils/navigation'
-
-import tracksSagas from './lineups/sagas'
 
 const { NOT_FOUND_PAGE } = route
 const { fetchCollectionSucceeded, fetchCollectionFailed } = collectionActions
@@ -19,7 +16,7 @@ const { getIsReachable } = reachabilitySelectors
 
 function* watchFetchCollection() {
   yield takeLatest(collectionActions.FETCH_COLLECTION, function* (action) {
-    const { id: collectionId, permalink, fetchLineup, forceFetch } = action
+    const { id: collectionId, permalink, forceFetch } = action
     const queryOptions = forceFetch ? { force: true, staleTime: 0 } : undefined
 
     let collection
@@ -53,21 +50,12 @@ function* watchFetchCollection() {
           collection.playlist_contents.track_ids.length
         )
       )
-      if (fetchLineup) {
-        yield put(tracksActions.fetchLineupMetadatas(0, 200, false, undefined))
-      }
     } else {
       yield put(fetchCollectionFailed(userUid))
     }
   })
 }
 
-function* watchResetCollection() {
-  yield takeEvery(collectionActions.RESET_COLLECTION, function* () {
-    yield put(tracksActions.reset())
-  })
-}
-
 export default function sagas() {
-  return [...tracksSagas(), watchFetchCollection, watchResetCollection]
+  return [watchFetchCollection]
 }
