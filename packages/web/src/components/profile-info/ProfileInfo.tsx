@@ -1,5 +1,6 @@
 import { SquareSizes, User } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 
 import UserBadges from 'components/user-badges/UserBadges'
@@ -35,7 +36,13 @@ export const ProfileInfo = ({
           [styles.accountWrapperLeftAlign]: !centered
         })}
       >
-        <img className={cn(styles.dynamicPhoto, imgClassName)} src={image} />
+        <Image
+          h='78px'
+          w='78px'
+          className={cn(styles.dynamicPhoto, imgClassName)}
+          src={image}
+          alt={user.name}
+        />
         <div className={styles.userInfoWrapper}>
           <div className={cn(styles.name, displayNameClassName)}>
             {user.name}

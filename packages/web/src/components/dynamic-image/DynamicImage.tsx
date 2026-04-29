@@ -1,16 +1,8 @@
-import {
-  memo,
-  useEffect,
-  useRef,
-  RefObject,
-  ComponentPropsWithoutRef
-} from 'react'
+import { ComponentPropsWithoutRef, memo, useMemo } from 'react'
 
-import { useInstanceVar } from '@audius/common/hooks'
-import { Box } from '@audius/harmony'
+import { Box, Image as HarmonyImage } from '@audius/harmony'
 import cn from 'classnames'
 
-import transparentPlaceholderImg from 'assets/img/1x1-transparent.png'
 import Skeleton from 'components/skeleton/Skeleton'
 
 import styles from './DynamicImage.module.css'
@@ -20,87 +12,51 @@ const placeholder =
 
 export type DynamicImageProps = {
   alt?: string
-  // Image URL (or style.backgroundImage)
+  /** Image URL (or, when isUrl=false, raw value for style.backgroundImage). */
   image?: string
-  // Whether or not the image is a full URL. This can be set to false
-  // and the image prop is treated as the entire style.backgroundImage
+  /**
+   * When false, `image` is treated as a style.backgroundImage value (e.g. a
+   * gradient or a `url(...)` literal).
+   */
   isUrl?: boolean
-  // Classes to apply to the wrapper
+  /** Optional low-resolution placeholder URL for progressive loading. */
+  priorityLowResImage?: string
+  /** Classes to apply to the wrapper. */
   wrapperClassName?: string
-  // Classes to apply to the skeleton
+  /** Classes to apply to the skeleton. */
   skeletonClassName?: string
-  // Styles to apply to the image itself
+  /** Styles to apply to the image itself. */
   imageStyle?: object
-  // Whether or not to immediately animate
+  /** Whether to immediately show the image (skip fade animation). */
   immediate?: boolean
-  // Immediately removes animating-out images
+  /** Immediately removes animating-out images. */
   immediatelyLeave?: boolean
-  // Whether or not to use a skeleton while loading
+  /** Whether to use a skeleton while loading. */
   useSkeleton?: boolean
-  // Don't use shimmer for the skeleton
+  /** Don't use shimmer for the skeleton. */
   noShimmer?: boolean
-  // Whether or not to use the default placeholder
+  /** Whether to use the default placeholder gradient when no image is set. */
   usePlaceholder?: boolean
-  // Whether or not to blur the background image
+  /** Whether to blur the background image (frosted-glass overlay). */
   useBlur?: boolean
 } & ComponentPropsWithoutRef<'div'>
 
-const moveBehind = (ref: RefObject<HTMLDivElement | null>) => {
-  if (ref.current) {
-    ref.current.style.animation = 'none'
-    ref.current.style.zIndex = '1'
-    ref.current.style.backgroundColor = 'unset'
-    ref.current.style.backgroundImage = 'none'
-  }
-}
-
-const fadeIn = (
-  ref: RefObject<HTMLDivElement | null>,
-  isUrl: boolean,
-  image: string,
-  immediate: boolean
-) => {
-  if (ref.current) {
-    ref.current.style.zIndex = '2'
-    ref.current.style.removeProperty('background-color')
-
-    if (image === placeholder) {
-      ref.current.style.backgroundColor = 'unset'
-      ref.current.style.backgroundImage = `${image}`
-      ref.current.style.transition = 'unset'
-      ref.current.style.opacity = '1'
-      return
-    }
-
-    // Set default background color for static images (transparent background defaults)
-    if (image.includes('/static')) {
-      ref.current.style.backgroundColor = 'var(--harmony-n-300)'
-    } else if (
-      !image.startsWith('data:image/png') &&
-      !image.startsWith('/@fs')
-    ) {
-      ref.current.style.backgroundColor = 'unset'
-    }
-
-    // Allow gradient values for 'image' in addition to URIs
-    ref.current.style.backgroundImage = image.includes('linear-gradient(')
-      ? `${image}`
-      : isUrl
-        ? `url(${image})`
-        : image
-    ref.current.style.transition = `opacity ${
-      immediate ? '0.1s' : '0.3s'
-    } ease-in-out`
-    ref.current.style.opacity = '1'
-  }
-}
-
 /**
- * A dynamic image that transitions between changes to the `image` prop.
+ * DynamicImage — a backwards-compatible wrapper around Harmony's Image
+ * primitive that supports the legacy "background image" pattern.
+ *
+ * Most callers should prefer `<Image>` from `@audius/harmony` directly. This
+ * wrapper exists to keep the existing call sites working while delegating to
+ * the new progressive-loading-capable primitive.
+ *
+ * When `isUrl=false` (legacy behavior), `image` is interpreted as a CSS
+ * `background-image` value (e.g. a gradient or a `url(...)` literal) and we
+ * fall back to a plain background-image-on-a-div approach.
  */
 const DynamicImage = ({
   image,
   isUrl = true,
+  priorityLowResImage,
   wrapperClassName,
   className,
   skeletonClassName,
@@ -115,56 +71,19 @@ const DynamicImage = ({
   noShimmer,
   ...other
 }: DynamicImageProps) => {
-  const first = useRef<HTMLDivElement>(null)
-  const second = useRef<HTMLDivElement>(null)
-  const [getIsFirstActive, setIsFirstActive] = useInstanceVar(true)
+  const displayImage = useMemo(() => {
+    if (image) return image
+    if (usePlaceholder) return placeholder
+    return undefined
+  }, [image, usePlaceholder])
 
-  const [getPrevImage, setPrevImage] = useInstanceVar('') // no previous image
+  // Detect "non-URL" usages: gradients, raw url(...) strings, etc. These can't
+  // go through <img>, so we render a div with backgroundImage (legacy path).
+  const isBackgroundImage =
+    !isUrl || (displayImage?.includes('linear-gradient(') ?? false)
 
-  // The actual image to display (maybe placeholder)
-  let displayImage: string
-  if (usePlaceholder) {
-    displayImage = image || placeholder
-  } else {
-    displayImage = image || (transparentPlaceholderImg as string)
-  }
-
-  useEffect(() => {
-    if (first.current && second.current) {
-      // Not the first time the image is loading and the image hasn't changed
-      if (getPrevImage() !== '' && getPrevImage() === displayImage) {
-        return
-      }
-      setPrevImage(displayImage)
-
-      if (getIsFirstActive()) {
-        moveBehind(second)
-        fadeIn(
-          first,
-          !!isUrl,
-          displayImage,
-          !!immediate || displayImage === placeholder
-        )
-
-        setIsFirstActive(false)
-      } else {
-        moveBehind(first)
-        fadeIn(second, !!isUrl, displayImage, !!immediate)
-
-        setIsFirstActive(true)
-      }
-    }
-  }, [
-    isUrl,
-    displayImage,
-    first,
-    second,
-    getPrevImage,
-    setPrevImage,
-    getIsFirstActive,
-    setIsFirstActive,
-    immediate
-  ])
+  const showPlaceholderSkeleton =
+    useSkeleton && (!displayImage || displayImage === placeholder)
 
   const accessibilityProps =
     alt === undefined
@@ -173,6 +92,63 @@ const DynamicImage = ({
         ? { 'aria-hidden': true as const }
         : { role: 'img' as const, 'aria-label': alt }
 
+  if (isBackgroundImage || !displayImage) {
+    // Legacy fallback: render a div with backgroundImage. This handles
+    // gradients and the placeholder gradient.
+    const bgImage =
+      displayImage && displayImage.includes('linear-gradient(')
+        ? displayImage
+        : displayImage
+          ? isUrl
+            ? `url(${displayImage})`
+            : displayImage
+          : undefined
+
+    return (
+      <Box
+        className={cn(styles.wrapper, wrapperClassName)}
+        {...other}
+        {...accessibilityProps}
+        css={{
+          '&:before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '100%',
+            ...(useBlur
+              ? {
+                  backdropFilter: 'blur(25px)',
+                  zIndex: 3
+                }
+              : undefined)
+          }
+        }}
+      >
+        {showPlaceholderSkeleton ? (
+          <Skeleton
+            className={cn(styles.skeleton, skeletonClassName)}
+            noShimmer={noShimmer}
+          />
+        ) : null}
+        <div
+          className={cn(styles.image, className)}
+          style={{
+            ...imageStyle,
+            backgroundImage: bgImage,
+            opacity: bgImage ? 1 : 0,
+            transition: `opacity ${immediate ? '0.1s' : '0.3s'} ease-in-out`
+          }}
+          onClick={onClick}
+          data-testid='dynamic-image-bg'
+        />
+        {children ? <div className={styles.children}>{children}</div> : null}
+      </Box>
+    )
+  }
+
+  // Modern path: delegate to Harmony Image for true progressive loading.
   return (
     <Box
       className={cn(styles.wrapper, wrapperClassName)}
@@ -195,27 +171,24 @@ const DynamicImage = ({
         }
       }}
     >
-      {useSkeleton && displayImage === placeholder ? (
-        <Skeleton
-          className={cn(styles.skeleton, skeletonClassName)}
-          noShimmer={noShimmer}
-        />
-      ) : null}
-      <div
-        ref={first}
-        className={cn(styles.image, className)}
-        style={imageStyle}
+      <HarmonyImage
+        src={displayImage}
+        priorityLowResSrc={priorityLowResImage}
+        alt={alt ?? ''}
+        useSkeleton={useSkeleton}
+        immediate={immediate}
         onClick={onClick}
-        data-testid='dynamic-image-first'
+        className={className}
+        css={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          ...imageStyle
+        }}
       />
-      <div
-        ref={second}
-        className={cn(styles.image, className)}
-        style={imageStyle}
-        onClick={onClick}
-        data-testid='dynamic-image-second'
-      />
-      {children && <div className={styles.children}>{children}</div>}
+      {children ? <div className={styles.children}>{children}</div> : null}
     </Box>
   )
 }
