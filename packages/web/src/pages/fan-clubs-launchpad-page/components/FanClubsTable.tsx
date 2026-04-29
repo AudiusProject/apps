@@ -378,12 +378,18 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
     externalUsdcBalance,
     externalAudioBalance
   })
-  const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
-    GetCoinsSortMethodEnum.MarketCap
-  )
-  const [sortDirection, setSortDirection] = useState<GetCoinsSortDirectionEnum>(
-    GetCoinsSortDirectionEnum.Desc
-  )
+  const [sortSettings, setSortSettings] = useState({
+    cards: {
+      method: GetCoinsSortMethodEnum.Holder,
+      direction: GetCoinsSortDirectionEnum.Desc
+    },
+    table: {
+      method: GetCoinsSortMethodEnum.MarketCap,
+      direction: GetCoinsSortDirectionEnum.Desc
+    }
+  })
+  const sortMethod = sortSettings[viewMode].method
+  const sortDirection = sortSettings[viewMode].direction
   const [searchValue, setSearchValue] = useState('')
 
   const handleSearchChange = useCallback(
@@ -448,13 +454,15 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
 
   const onSort = useCallback(
     (method: string, direction: string) => {
-      const newSortMethod = sortMethodMap[method] ?? sortMethod
-      const newSortDirection = sortDirectionMap[direction] ?? sortDirection
-
-      setSortMethod(newSortMethod)
-      setSortDirection(newSortDirection)
+      setSortSettings((prev) => ({
+        ...prev,
+        [viewMode]: {
+          method: sortMethodMap[method] ?? prev[viewMode].method,
+          direction: sortDirectionMap[direction] ?? prev[viewMode].direction
+        }
+      }))
     },
-    [sortMethod, sortDirection]
+    [viewMode]
   )
 
   const handleBuy = useCallback(
