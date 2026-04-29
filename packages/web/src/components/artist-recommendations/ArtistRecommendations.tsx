@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -51,18 +51,18 @@ const ArtistProfilePictureWrapper = ({
   const isMobile = useIsMobile()
   if (isMobile) {
     return (
-      <DynamicImage
-        wrapperClassName={styles.profilePicture}
-        image={profilePicture}
+      <Image
+        className={styles.profilePicture}
+        src={profilePicture}
       />
     )
   }
   return (
     <ArtistPopover handle={handle}>
       <div>
-        <DynamicImage
-          wrapperClassName={styles.profilePicture}
-          image={profilePicture}
+        <Image
+          className={styles.profilePicture}
+          src={profilePicture}
         />
       </div>
     </ArtistPopover>

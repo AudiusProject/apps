@@ -40,7 +40,7 @@ import {
   make,
   TrackEvent
 } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import PlayingTrackInfo from 'components/play-bar/desktop/components/PlayingTrackInfo'
 import {
   webgl2Supported
@@ -105,7 +105,7 @@ const Artwork = ({ track }: { track?: Track | null }) => {
     trackId: track_id,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.artwork} image={image} />
+  return <Image className={styles.artwork} src={image} />
 }
 
 const VisualizerAutoCycleSync = connect((state: AppState) => ({

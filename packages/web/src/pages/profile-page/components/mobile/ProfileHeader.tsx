@@ -25,13 +25,13 @@ import {
   Button,
   IconPencil,
   FollowButton,
-  Text
+  Text,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistRecommendationsDropdown } from 'components/artist-recommendations/ArtistRecommendationsDropdown'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Skeleton from 'components/skeleton/Skeleton'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
@@ -282,9 +282,9 @@ const ProfileHeader = ({
   return (
     <div className={styles.headerContainer}>
       <GrowingCoverPhoto
-        image={updatedCoverPhoto || coverPhoto}
-        imageStyle={coverPhotoStyle}
-        wrapperClassName={cn(styles.coverPhoto, {
+        src={updatedCoverPhoto || coverPhoto}
+        style={coverPhotoStyle}
+        className={cn(styles.coverPhoto, {
           [styles.isEditing]: isEditing
         })}
         useBlur={Boolean(
@@ -298,16 +298,15 @@ const ProfileHeader = ({
         ) : null}
         {isEditing && <UploadStub onChange={onUpdateCoverPhoto} />}
       </GrowingCoverPhoto>
-      <DynamicImage
-        image={updatedProfilePicture || profilePicture}
+      <Image
+        src={updatedProfilePicture || profilePicture}
         alt={messages.profilePicAltText}
-        className={styles.profilePicture}
-        wrapperClassName={cn(styles.profilePictureWrapper, {
+        className={cn(styles.profilePictureWrapper, styles.profilePicture, {
           [styles.isEditing]: isEditing
         })}
       >
         {isEditing && <UploadStub onChange={onUpdateProfilePicture} />}
-      </DynamicImage>
+      </Image>
       {!isEditing && !isDeactivated && (
         <div className={styles.artistInfo}>
           <div className={styles.titleContainer}>

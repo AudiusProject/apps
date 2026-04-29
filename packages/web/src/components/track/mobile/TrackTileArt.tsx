@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { SquareSizes, ID, Remix } from '@audius/common/models'
 import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
@@ -62,7 +62,7 @@ const TrackTileArt = ({
   }
 
   const renderImage = () => (
-    <DynamicImage {...imageProps}>
+    <Image {...imageProps}>
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
@@ -72,7 +72,7 @@ const TrackTileArt = ({
         )}
         hasNoArtwork={hasNoArtwork}
       />
-    </DynamicImage>
+    </Image>
   )
 
   return (
@@ -120,7 +120,7 @@ const CollectionTileArt = ({
   }
 
   const renderImage = () => (
-    <DynamicImage {...imageProps}>
+    <Image {...imageProps}>
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
@@ -130,7 +130,7 @@ const CollectionTileArt = ({
         )}
         hasNoArtwork={hasNoArtwork}
       />
-    </DynamicImage>
+    </Image>
   )
 
   return renderImage()

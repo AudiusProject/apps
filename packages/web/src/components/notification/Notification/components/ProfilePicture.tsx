@@ -5,8 +5,9 @@ import { useNotificationModal } from '@audius/common/store'
 import cn from 'classnames'
 import { useNavigate } from 'react-router'
 
+import { Image } from '@audius/harmony'
+
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
 import styles from './ProfilePicture.module.css'
@@ -50,12 +51,15 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
   )
 
   const profilePictureElement = (
-    <DynamicImage
+    <Image
       onClick={handleClick}
-      wrapperClassName={cn(styles.profilePictureWrapper, className)}
-      skeletonClassName={styles.profilePictureSkeleton}
-      className={cn(styles.profilePicture, innerClassName)}
-      image={profilePicture}
+      className={cn(
+        styles.profilePictureWrapper,
+        styles.profilePicture,
+        className,
+        innerClassName
+      )}
+      src={profilePicture}
     />
   )
 

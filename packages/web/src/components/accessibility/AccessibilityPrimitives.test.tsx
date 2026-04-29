@@ -7,6 +7,7 @@ import {
   IconArrowRight,
   IconTokenAUDIO,
   IconTrending,
+  Image,
   isKeyboardActivationKey,
   Modal,
   ModalHeader,
@@ -19,7 +20,6 @@ import {
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, vi } from 'vitest'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { TextLink as WebTextLink } from 'components/link/TextLink'
 import { LeftNavLink } from 'components/nav/desktop/LeftNavLink'
 import { fireEvent, render, screen, it, waitFor } from 'test/test-utils'
@@ -142,9 +142,9 @@ describe('accessibility primitives', () => {
     })
   })
 
-  describe('DynamicImage', () => {
+  describe('Image', () => {
     it('renders a named image when alt text is provided', () => {
-      render(<DynamicImage alt='Track artwork' image='track.jpg' />)
+      render(<Image alt='Track artwork' src='track.jpg' />)
 
       expect(
         screen.getByRole('img', { name: 'Track artwork' })
@@ -153,7 +153,7 @@ describe('accessibility primitives', () => {
 
     it('hides decorative images from assistive technology', () => {
       render(
-        <DynamicImage data-testid='dynamic-image' alt='' image='track.jpg' />
+        <Image data-testid='dynamic-image' alt='' src='track.jpg' />
       )
       const image = screen.getByTestId('dynamic-image')
 
@@ -163,7 +163,7 @@ describe('accessibility primitives', () => {
     })
 
     it('does not expose unnamed images as images', () => {
-      render(<DynamicImage data-testid='dynamic-image' image='track.jpg' />)
+      render(<Image data-testid='dynamic-image' src='track.jpg' />)
       const image = screen.getByTestId('dynamic-image')
 
       expect(image).not.toHaveAttribute('role')

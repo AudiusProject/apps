@@ -23,7 +23,7 @@ import cn from 'classnames'
 import { pick } from 'lodash'
 import { useNavigate } from 'react-router'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { UserLink } from 'components/link'
 import Skeleton from 'components/skeleton/Skeleton'
 import { GatedContentSection } from 'components/track/GatedContentSection'
@@ -211,10 +211,10 @@ const CollectionHeader = ({
             </MusicBadge>
           )
         ) : null}
-        <DynamicImage
+        <Image
           alt={messages.coverArtAltText}
-          wrapperClassName={styles.coverArt}
-          image={image}
+          className={styles.coverArt}
+          src={image}
         />
         <Flex gap='xs' direction='column' alignItems='center'>
           <Text variant='heading' size='s' tag='h1'>
@@ -283,7 +283,7 @@ const CollectionHeader = ({
               streamConditions={streamConditions}
               hasStreamAccess={!!access?.stream}
               isOwner={isOwner}
-              wrapperClassName={styles.gatedContentSectionWrapper}
+              className={styles.gatedContentSectionWrapper}
               buttonClassName={styles.gatedContentSectionButton}
               ownerId={userId}
               source={ModalSource.CollectionDetails}

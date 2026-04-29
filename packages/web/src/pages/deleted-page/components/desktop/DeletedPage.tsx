@@ -17,7 +17,7 @@ import { useDispatch } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -50,7 +50,7 @@ const TrackArt = ({ trackId }: { trackId: ID }) => {
     trackId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
@@ -58,7 +58,7 @@ const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
     collectionId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 export type DeletedPageProps = {

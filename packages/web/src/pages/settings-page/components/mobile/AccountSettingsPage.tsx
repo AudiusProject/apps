@@ -20,7 +20,7 @@ import { debounce } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -193,9 +193,9 @@ const AccountSettingsPage = () => {
     >
       <div className={settingsPageStyles.bodyContainer}>
         <div className={styles.account}>
-          <DynamicImage
-            image={profilePicture}
-            wrapperClassName={styles.profilePicture}
+          <Image
+            src={profilePicture}
+            className={styles.profilePicture}
           />
           <div className={styles.info}>
             <div className={styles.name}>{name}</div>

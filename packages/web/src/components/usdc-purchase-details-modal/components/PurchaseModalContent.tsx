@@ -14,7 +14,7 @@ import {
   IconExternalLink
 } from '@audius/harmony'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { ExternalLink, UserLink } from 'components/link'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
@@ -64,9 +64,9 @@ export const PurchaseModalContent = ({
           <DetailSection
             label={contentLabel}
             actionButton={
-              <DynamicImage
-                image={artwork}
-                wrapperClassName={styles.artworkContainer}
+              <Image
+                src={artwork}
+                className={styles.artworkContainer}
               />
             }
           >

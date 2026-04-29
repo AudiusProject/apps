@@ -3,12 +3,12 @@ import { useCallback, useEffect } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import { Name, SquareSizes } from '@audius/common/models'
 import { musicConfettiActions } from '@audius/common/store'
-import { Modal, SocialButton } from '@audius/harmony'
+import { Modal, SocialButton, Image } from '@audius/harmony'
+import cn from 'classnames'
 import { connect, useDispatch } from 'react-redux'
 import { Dispatch } from 'redux'
 
 import { useRecord, make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import ConnectedMusicConfetti from 'components/music-confetti/ConnectedMusicConfetti'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -91,10 +91,9 @@ const FirstUploadModal = ({ isOpen, close }: FirstUploadModalProps) => {
       >
         <div className={styles.content}>
           <div className={styles.artist}>
-            <DynamicImage
-              image={image}
-              wrapperClassName={styles.imageWrapper}
-              className={styles.image}
+            <Image
+              src={image}
+              className={cn(styles.imageWrapper, styles.image)}
             />
             <div className={styles.name}>
               <span>{name}</span>

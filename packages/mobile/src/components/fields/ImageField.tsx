@@ -6,8 +6,7 @@ import type { ImageStyle, ViewStyle } from 'react-native'
 import { Animated, Pressable, View } from 'react-native'
 import type { Options } from 'react-native-image-crop-picker'
 
-import { IconCloudUpload } from '@audius/harmony-native'
-import { DynamicImage } from 'app/components/core'
+import { IconCloudUpload, Image as HarmonyImage } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import type { StylesProps } from 'app/styles'
@@ -108,16 +107,13 @@ export const ImageField = (props: ImageFieldProps) => {
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <DynamicImage
-        source={source}
-        styles={{
-          root: [styles.imageContainer, stylesProp?.imageContainer],
-          image: [styles.image, stylesProp?.image]
-        }}
-        onLoad={() => setIsLoading(false)}
-        resizeMode={isDefaultImage ? 'repeat' : undefined}
-        noSkeleton
-      >
+      <View style={[styles.imageContainer, stylesProp?.imageContainer]}>
+        <HarmonyImage
+          source={source}
+          onLoad={() => setIsLoading(false)}
+          resizeMode={isDefaultImage ? 'repeat' : undefined}
+          style={[styles.image, stylesProp?.image]}
+        />
         <View style={styles.backdrop} />
         <Animated.View style={[styles.centerIcon, { transform: [{ scale }] }]}>
           {isLoading || isProcessing ? (
@@ -130,7 +126,7 @@ export const ImageField = (props: ImageFieldProps) => {
             />
           )}
         </Animated.View>
-      </DynamicImage>
+      </View>
     </Pressable>
   )
 }

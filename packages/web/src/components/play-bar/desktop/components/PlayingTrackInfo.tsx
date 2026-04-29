@@ -10,7 +10,7 @@ import cn from 'classnames'
 import { useSelector } from 'react-redux'
 
 import { Draggable } from 'components/dragndrop'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -129,14 +129,13 @@ const PlayingTrackInfo = ({
     >
       {!hideArt && (
         <div className={styles.profilePictureWrapper}>
-          <DynamicImage
-            image={profileImage}
+          <Image
+            src={profileImage}
             onClick={onClickArtistName}
             className={cn(styles.profilePicture, {
               [styles.isDefault]: !!trackId
             })}
-            imageStyle={boxShadowStyle}
-            usePlaceholder={false}
+            style={boxShadowStyle}
           />
         </div>
       )}

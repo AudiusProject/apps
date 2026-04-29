@@ -1,8 +1,8 @@
 import { SquareSizes, WidthSizes, ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { Text } from '@audius/harmony'
+import { Text, Image } from '@audius/harmony'
+import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
@@ -31,17 +31,29 @@ export const ArtistCard = ({ userId, handle, name }: ArtistCardProps) => {
 
   return (
     <div className={styles.root} onClick={() => navigate(profilePage(handle))}>
-      <DynamicImage
-        className={styles.coverPhoto}
-        wrapperClassName={styles.coverPhotoWrapper}
-        image={coverPhoto}
-        useBlur={shouldBlur}
-      />
+      <div
+        className={cn(styles.coverPhotoWrapper, styles.coverPhoto)}
+        css={{ position: 'relative', overflow: 'hidden' }}
+      >
+        <Image
+          src={coverPhoto}
+          css={{ position: 'absolute', inset: 0 }}
+        />
+        {shouldBlur ? (
+          <div
+            css={{
+              position: 'absolute',
+              inset: 0,
+              backdropFilter: 'blur(25px)',
+              zIndex: 3
+            }}
+          />
+        ) : null}
+      </div>
       <div className={styles.details}>
-        <DynamicImage
-          className={styles.profilePicture}
-          wrapperClassName={styles.profilePictureWrapper}
-          image={profilePicture}
+        <Image
+          className={cn(styles.profilePictureWrapper, styles.profilePicture)}
+          src={profilePicture}
         />
         <div className={styles.info}>
           <div className={styles.name}>

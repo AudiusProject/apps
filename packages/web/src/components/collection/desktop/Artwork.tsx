@@ -1,11 +1,11 @@
 import { useCollection } from '@audius/common/api'
 import { imageBlank } from '@audius/common/assets'
 import { SquareSizes } from '@audius/common/models'
-import { Button, IconPencil } from '@audius/harmony'
+import { Button, IconPencil, Image } from '@audius/harmony'
+import cn from 'classnames'
 import { pick } from 'lodash'
 import { Link } from 'react-router'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
 import styles from './CollectionHeader.module.css'
@@ -39,11 +39,10 @@ export const Artwork = (props: ArtworkProps) => {
   const hasImage = image && image !== imageBlank
 
   return (
-    <DynamicImage
-      wrapperClassName={styles.coverArtWrapper}
+    <Image
+      className={cn(styles.coverArtWrapper, styles.coverArt)}
       alt={messages.coverArtAltText}
-      className={styles.coverArt}
-      image={image}
+      src={image}
     >
       {isOwner ? (
         <span className={styles.imageEditButtonWrapper}>
@@ -66,6 +65,6 @@ export const Artwork = (props: ArtworkProps) => {
           </Button>
         </span>
       ) : null}
-    </DynamicImage>
+    </Image>
   )
 }

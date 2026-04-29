@@ -43,7 +43,7 @@ import { Dispatch } from 'redux'
 
 import { useHistoryContext } from 'app/HistoryProvider'
 import { useRecord, make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
@@ -412,13 +412,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id} borderOffset={2} />
-              <DynamicImage image={image} useSkeleton={!hasNoArtwork}>
+              <Image src={image} useSkeleton={!hasNoArtwork}>
                 {hasNoArtwork ? (
                   <div className={styles.emptyArtworkIcon}>
                     <IconImage width={80} height={80} />
                   </div>
                 ) : null}
-              </DynamicImage>
+              </Image>
             </div>
           </TrackFlair>
         ) : (
@@ -430,13 +430,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id as ID} borderOffset={2} />
-              <DynamicImage image={image} useSkeleton={!hasNoArtwork}>
+              <Image src={image} useSkeleton={!hasNoArtwork}>
                 {hasNoArtwork ? (
                   <div className={styles.emptyArtworkIcon}>
                     <IconImage width={80} height={80} />
                   </div>
                 ) : null}
-              </DynamicImage>
+              </Image>
             </div>
           </div>
         )}

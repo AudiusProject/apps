@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router'
 
 import { Draggable } from 'components/dragndrop'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import { TrackDogEar } from 'components/track/TrackDogEar'
 import {
   useTrackCoverArt,
@@ -135,10 +135,10 @@ export const NowPlayingArtworkTile = ({
           to={permalink}
           aria-label={viewTrackLabel}
         >
-          <DynamicImage
+          <Image
             key={trackId}
             useSkeleton={!hasNoArtwork}
-            image={trackCoverArtImage}
+            src={trackCoverArtImage}
           >
             <div className={styles.artworkOverlay}>
               {hasNoArtwork ? (
@@ -176,7 +176,7 @@ export const NowPlayingArtworkTile = ({
                 </button>
               ) : null}
             </div>
-          </DynamicImage>
+          </Image>
         </Link>
       </AnimatedPaper>
     )

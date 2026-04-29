@@ -5,8 +5,9 @@ import { SquareSizes, ID } from '@audius/common/models'
 import cn from 'classnames'
 import { pick } from 'lodash'
 
+import { Image } from '@audius/harmony'
+
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Skeleton from 'components/skeleton/Skeleton'
 import { MountPlacement } from 'components/types'
 import UserBadges from 'components/user-badges/UserBadges'
@@ -133,23 +134,19 @@ const ArtistChip = ({
           mouseEnterDelay={0.3}
           onNavigateAway={onNavigateAway}
         >
-          <DynamicImage
-            wrapperClassName={styles.profilePictureWrapper}
-            skeletonClassName={styles.profilePictureSkeleton}
-            className={cn(styles.profilePicture, {
+          <Image
+            className={cn(styles.profilePictureWrapper, styles.profilePicture, {
               [styles.clickable]: onClickArtistName != null
             })}
-            image={profilePicture}
+            src={profilePicture}
           />
         </ArtistPopover>
       ) : (
-        <DynamicImage
-          wrapperClassName={styles.profilePictureWrapper}
-          skeletonClassName={styles.profilePictureSkeleton}
-          className={cn(styles.profilePicture, {
+        <Image
+          className={cn(styles.profilePictureWrapper, styles.profilePicture, {
             [styles.clickable]: onClickArtistName != null
           })}
-          image={profilePicture}
+          src={profilePicture}
         />
       )}
       <div className={styles.text}>

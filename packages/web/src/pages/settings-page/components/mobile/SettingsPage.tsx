@@ -36,7 +36,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import GroupableList from 'components/groupable-list/GroupableList'
 import Grouping from 'components/groupable-list/Grouping'
 import Row from 'components/groupable-list/Row'
@@ -296,9 +296,9 @@ export const SettingsPage = (props: SettingsPageProps) => {
           <Grouping>
             <Row to={ACCOUNT_SETTINGS_PAGE}>
               <div className={styles.account}>
-                <DynamicImage
-                  image={profilePicture}
-                  wrapperClassName={styles.profilePicture}
+                <Image
+                  src={profilePicture}
+                  className={styles.profilePicture}
                 />
                 <div className={styles.info}>
                   <div className={styles.name}>{name}</div>

@@ -14,7 +14,7 @@ import cn from 'classnames'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -109,9 +109,9 @@ const UserArtCard = g(
           onClick={goToProfile}
           className={styles.perspectiveCard}
         >
-          <DynamicImage
-            wrapperClassName={styles.profilePicture}
-            image={isLoading ? '' : image}
+          <Image
+            className={styles.profilePicture}
+            src={isLoading ? '' : image}
           />
         </PerspectiveCard>
         <div className={styles.userName} onClick={goToProfile}>

@@ -1,5 +1,6 @@
 import {
   ComponentPropsWithoutRef,
+  CSSProperties,
   ImgHTMLAttributes,
   forwardRef,
   useEffect,
@@ -31,6 +32,8 @@ export type ImageProps = {
   loading?: 'lazy' | 'eager'
   /** CSS object-fit applied to the image. Defaults to 'cover'. */
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down'
+  /** Inline style applied to the underlying `<img>` element. */
+  style?: CSSProperties
   /** Called when the high-res image successfully loads. */
   onLoad?: NativeImgProps['onLoad']
   /** Called when the high-res image fails to load. */
@@ -39,9 +42,7 @@ export type ImageProps = {
   immediate?: boolean
   /** Additional native <img> attributes (srcSet, sizes, crossOrigin, etc.). */
   imgProps?: Omit<NativeImgProps, 'src' | 'alt' | 'onLoad' | 'onError'>
-  /**
-   * Optional data-testid forwarded to the underlying <img> tag for testing.
-   */
+  /** Optional data-testid forwarded to the underlying <img>. */
   'data-testid'?: string
 } & Omit<BoxProps, 'children' | 'as'> &
   Pick<ComponentPropsWithoutRef<'div'>, 'children'>
@@ -56,7 +57,9 @@ export type ImageProps = {
  *  - Native `loading="lazy"` and `decoding="async"` for off-screen images.
  *  - Crossfades smoothly when `src` changes.
  *
- * Use this anywhere you would have used a raw `<img>` tag.
+ * Use this anywhere you would have used a raw `<img>` tag. The outer wrapper
+ * fills its parent by default — pass `h`/`w` BoxProps (or a className with
+ * dimensions) for cases where the parent doesn't constrain the size.
  */
 export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
   props,
@@ -69,12 +72,14 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
     useSkeleton = true,
     loading = 'lazy',
     objectFit = 'cover',
+    style,
     onLoad,
     onError,
     immediate = false,
     imgProps,
     children,
     borderRadius,
+    className,
     'data-testid': testId,
     ...other
   } = props
@@ -111,12 +116,18 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
     objectFit
   }
 
+  // The outer Box defaults to filling its parent so the absolutely-positioned
+  // inner <img> has a height to fill. Callers that explicitly set h/w via
+  // BoxProps or a sized className will override these.
+  const fillSize = { height: '100%', width: '100%' }
+
   return (
     <Box
       ref={ref}
       borderRadius={borderRadius}
+      className={className}
       {...other}
-      css={{ position: 'relative', overflow: 'hidden' }}
+      css={{ position: 'relative', overflow: 'hidden', ...fillSize }}
     >
       {showSkeleton ? (
         <Skeleton
@@ -162,6 +173,7 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
             setIsLoaded(true)
             onError?.(e)
           }}
+          style={style}
           css={{
             ...baseImgStyle,
             opacity: isLoaded && !hasError ? 1 : 0,
@@ -179,7 +191,7 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
             position: 'absolute',
             top: 0,
             left: 0,
-            zIndex: 3,
+            zIndex: 4,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'

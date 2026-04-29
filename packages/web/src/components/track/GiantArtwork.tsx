@@ -2,9 +2,8 @@ import { memo, useEffect } from 'react'
 
 import { SquareSizes, Remix } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
-import { IconArrowLeft, IconImage } from '@audius/harmony'
+import { IconArrowLeft, IconImage, Image } from '@audius/harmony'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -33,9 +32,9 @@ const GiantArtwork = (props: GiantArtworkProps) => {
   }, [image, hasNoArtwork, callback])
 
   const imageElement = (
-    <DynamicImage
-      wrapperClassName={styles.imageWrapper}
-      image={image}
+    <Image
+      className={styles.imageWrapper}
+      src={image}
       alt={messages.artworkAltText}
       useSkeleton={!hasNoArtwork}
     >
@@ -49,7 +48,7 @@ const GiantArtwork = (props: GiantArtworkProps) => {
           <IconArrowLeft width={24} height={24} />
         </div>
       ) : null}
-    </DynamicImage>
+    </Image>
   )
 
   return (

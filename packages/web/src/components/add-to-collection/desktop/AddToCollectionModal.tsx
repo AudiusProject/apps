@@ -32,7 +32,7 @@ import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
+import { Image } from '@audius/harmony'
 import SearchBar from 'components/search-bar/SearchBar'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
@@ -230,10 +230,9 @@ const CollectionItem = ({
       className={cn(styles.listItem, [{ [styles.disabled]: disabled }])}
       onClick={() => handleClick(collection)}
     >
-      <DynamicImage
-        className={styles.image}
-        wrapperClassName={styles.imageWrapper}
-        image={image}
+      <Image
+        className={cn(styles.imageWrapper, styles.image)}
+        src={image}
       />
       {disabled ? (
         <Tooltip text={messages.hiddenAdd} placement='right'>
