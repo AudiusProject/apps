@@ -9,8 +9,7 @@ import {
   Id,
   type UpdateUserRequestBody
 } from '@audius/sdk'
-import camelcaseKeys from 'camelcase-keys'
-import { omit, pick } from 'lodash'
+import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
 import type { PlaylistLibraryItem } from '~/models'
@@ -201,16 +200,17 @@ function mapLibraryContentsToSdkFormat(
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
 ): UpdateUserRequestBody => ({
-  ...camelcaseKeys(
-    pick(input, [
-      'name',
-      'handle',
-      'is_deactivated',
-      'profile_type',
-      'spl_usdc_payout_wallet',
-      'coin_flair_mint'
-    ])
-  ),
+  // Fields that the SDK's strict schema does NOT accept as null:
+  // coerce nullish values to undefined so legacy records (where these can
+  // be null in the DB despite TS types) still save successfully.
+  name: input.name ?? undefined,
+  handle: input.handle ?? undefined,
+  isDeactivated: input.is_deactivated ?? undefined,
+  // Fields where the SDK schema explicitly allows null and null is meaningful
+  // (e.g. coinFlairMint: null = use default badge).
+  profileType: input.profile_type,
+  splUsdcPayoutWallet: input.spl_usdc_payout_wallet,
+  coinFlairMint: input.coin_flair_mint,
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,
   artistPickTrackId: input.artist_pick_track_id
