@@ -26,7 +26,6 @@ import {
   Nullable,
   actionChannelDispatcher,
   getTrackPreviewDuration,
-  makeUid,
   waitForAccount
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
@@ -67,11 +66,11 @@ const {
   getPlaybackRate,
   getPlaybackRetryCount,
   getPlaying,
+  getPlayingIndex,
   getQuerySource,
   getRepeat,
   getShuffle,
   getTrackId,
-  getUid,
   getUndershot,
   getLength
 } = playbackSelectors
@@ -136,11 +135,13 @@ function* watchPlay() {
   yield* takeLatest(
     playbackActions.play.type,
     function* (action: ReturnType<typeof playbackActions.play>) {
-      const { uid, trackId, playerBehavior, startTime, onEnd, retries } =
+      const { trackId, playerBehavior, startTime, onEnd, retries } =
         action.payload ?? {}
       const audioPlayer = yield* getContext('audioPlayer')
       const isNativeMobile = yield getContext('isNativeMobile')
       const audiusBackendInstance = yield* getContext('audiusBackendInstance')
+
+      const queueIndex = yield* select(getPlaybackIndex)
 
       if (trackId) {
         const track = yield* queryTrack(trackId)
@@ -150,7 +151,9 @@ function* watchPlay() {
         if (!isReachable && isNativeMobile) {
           // Offline playback on mobile — engine handles via cache.
           audioPlayer.play()
-          yield* put(playbackActions.playSucceeded({ uid, trackId }))
+          yield* put(
+            playbackActions.playSucceeded({ trackId, index: queueIndex })
+          )
           return
         }
 
@@ -278,8 +281,8 @@ function* watchPlay() {
             audioPlayer.play()
             yield* put(
               playbackActions.playSucceeded({
-                uid,
                 trackId,
+                index: queueIndex,
                 isPreview: shouldPreview
               })
             )
@@ -308,8 +311,8 @@ function* watchPlay() {
         audioPlayer.play()
         yield* put(
           playbackActions.playSucceeded({
-            uid,
             trackId,
+            index: queueIndex,
             isPreview: shouldPreview
           })
         )
@@ -348,13 +351,11 @@ function* watchReset() {
       if (!shouldAutoplay) {
         audioPlayer.pause()
       } else {
-        const playerUid = yield* select(getUid)
         const playerTrackId = yield* select(getTrackId)
         const playerBehavior = yield* select(getCurrentPlayerBehavior)
-        if (playerUid && playerTrackId) {
+        if (playerTrackId) {
           yield* put(
             playbackActions.play({
-              uid: playerUid,
               trackId: playerTrackId,
               onEnd: playbackActions.next,
               playerBehavior
@@ -540,11 +541,8 @@ function* playCurrent() {
   if (!current) return
   const queue = yield* select(getPlaybackQueue)
   const index = yield* select(getPlaybackIndex)
-  const uid =
-    current.uid ?? makeUid(Kind.TRACKS, current.trackId, current.source)
   yield* put(
     playbackActions.play({
-      uid,
       trackId: current.trackId,
       onEnd: playbackActions.next,
       playerBehavior: current.playerBehavior
@@ -696,7 +694,6 @@ function* watchQueueAutoplay() {
         .filter(({ track_id }) => !excludedTrackIds.has(track_id))
         .map(({ track_id }) => ({
           trackId: track_id,
-          uid: makeUid(Kind.TRACKS, track_id, QueueSource.RECOMMENDED_TRACKS),
           source: QueueSource.RECOMMENDED_TRACKS
         }))
       if (recommendedTracks.length === 0) return

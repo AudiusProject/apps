@@ -1,7 +1,7 @@
 import { memo, MouseEvent, useRef } from 'react'
 
 import {
-  CollectionTrackWithUid,
+  CollectionTrack,
   useCurrentUserId,
   useUser
 } from '@audius/common/api'
@@ -9,8 +9,7 @@ import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   ID,
   isContentUSDCPurchaseGated,
-  Track,
-  UID
+  Track
 } from '@audius/common/models'
 import { Genre, formatSeconds, route } from '@audius/common/utils'
 import { IconKebabHorizontal } from '@audius/harmony'
@@ -41,13 +40,13 @@ type TrackListItemProps = {
   size: TrackTileSize
   disableActions: boolean
   playing: boolean
-  togglePlay: (uid: UID, id: ID) => void
+  togglePlay: (id: ID, index: number) => void
   goToRoute: (route: string) => void
   artistHandle: string
   forceSkeleton?: boolean
   isLastTrack?: boolean
   noShimmer?: boolean
-} & ({ track?: CollectionTrackWithUid } | { isLoading: true }) // either a track must be passed or loading must be true
+} & ({ track?: CollectionTrack } | { isLoading: true }) // either a track must be passed or loading must be true
 
 const TrackListItem = (props: TrackListItemProps) => {
   const {
@@ -138,7 +137,7 @@ const TrackListItem = (props: TrackListItemProps) => {
       menuRef.current
     )
     if (!deleted && togglePlay && !shouldSkipTogglePlay)
-      togglePlay(track.uid, track.track_id)
+      togglePlay(track.track_id, index)
   }
 
   const hideShow = cn({

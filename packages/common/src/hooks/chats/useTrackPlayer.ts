@@ -16,16 +16,15 @@ import { useCurrentTrack } from '../useCurrentTrack'
 import { TrackPlayback } from './types'
 
 const { playFrom, pause } = playbackActions
-const { getPlaying, getUid, makeGetCurrent } = playbackSelectors
+const { getPlaying, getTrackId, makeGetCurrent } = playbackSelectors
 
 type RecordAnalytics = ({ name, id }: { name: TrackPlayback; id: ID }) => void
 
 type UseToggleTrack = {
-  uid: Nullable<string>
+  id: Nullable<ID>
   source: QueueSource
   isPreview?: boolean
   recordAnalytics?: RecordAnalytics
-  id?: Nullable<ID>
   entries?: Queueable[]
 }
 
@@ -35,7 +34,6 @@ const queueablesToPlaybackTracks = (entries: Queueable[]) =>
     .map((e) => ({
       trackId: e.id as ID,
       source: e.source as unknown as string,
-      uid: e.uid,
       playerBehavior: e.playerBehavior
     }))
 
@@ -45,34 +43,25 @@ const queueablesToPlaybackTracks = (entries: Queueable[]) =>
  */
 export const usePlayTrack = (recordAnalytics?: RecordAnalytics) => {
   const dispatch = useDispatch()
-  const playingUid = useSelector(getUid)
+  const playingTrackId = useSelector(getTrackId)
 
   const playTrack = useCallback(
-    ({
-      id,
-      uid,
-      entries
-    }: {
-      id?: ID
-      uid: string
-      entries: Queueable[]
-      passUid?: boolean
-    }) => {
-      if (playingUid !== uid) {
+    ({ id, entries }: { id: ID; entries: Queueable[] }) => {
+      if (playingTrackId !== id) {
         const tracks = queueablesToPlaybackTracks(entries)
         const startIndex = Math.max(
           0,
-          tracks.findIndex((t) => t.uid === uid)
+          tracks.findIndex((t) => t.trackId === id)
         )
         dispatch(playFrom({ tracks, startIndex, querySource: null }))
       } else {
         dispatch(playbackActions.play({}))
       }
-      if (recordAnalytics && id) {
+      if (recordAnalytics) {
         recordAnalytics({ name: Name.PLAYBACK_PLAY, id })
       }
     },
-    [dispatch, recordAnalytics, playingUid]
+    [dispatch, recordAnalytics, playingTrackId]
   )
 
   return playTrack
@@ -98,10 +87,9 @@ export const usePauseTrack = (recordAnalytics?: RecordAnalytics) => {
  * play/pause analytics events.
  */
 export const useToggleTrack = ({
-  uid,
+  id,
   source,
   recordAnalytics,
-  id,
   entries: entriesProp
 }: UseToggleTrack) => {
   const currentQueueItem = useSelector(makeGetCurrent())
@@ -110,24 +98,24 @@ export const useToggleTrack = ({
   const isTrackPlaying = !!(
     playing &&
     currentTrack &&
-    currentQueueItem.uid === uid
+    currentQueueItem.trackId === id &&
+    currentQueueItem.source === source
   )
 
   const playTrack = usePlayTrack(recordAnalytics)
   const pauseTrack = usePauseTrack(recordAnalytics)
 
   const togglePlay = useCallback(() => {
-    if (!id || !uid) return
+    if (!id) return
     if (isTrackPlaying) {
       pauseTrack(id)
     } else {
       playTrack({
         id,
-        uid,
-        entries: entriesProp ?? [{ id, uid, source }]
+        entries: entriesProp ?? [{ id, source }]
       })
     }
-  }, [playTrack, pauseTrack, isTrackPlaying, id, uid, source, entriesProp])
+  }, [playTrack, pauseTrack, isTrackPlaying, id, source, entriesProp])
 
   return { togglePlay, isTrackPlaying }
 }

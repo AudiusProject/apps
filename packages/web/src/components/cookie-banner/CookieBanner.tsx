@@ -16,7 +16,7 @@ import { BASE_URL } from 'utils/route'
 import styles from './CookieBanner.module.css'
 
 const { PRIVACY_POLICY } = route
-const { getUid } = playbackSelectors
+const { getHasTrack } = playbackSelectors
 
 const messages = {
   description:
@@ -70,7 +70,7 @@ export const CookieBanner = ({ isPlaying, dismiss }: CookieBannerProps) => {
 
 function mapStateToProps(state: AppState) {
   return {
-    isPlaying: !!getUid(state)
+    isPlaying: getHasTrack(state)
   }
 }
 
