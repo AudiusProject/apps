@@ -160,6 +160,8 @@ export const CollectionTile = (props: CollectionTileProps) => {
     const isOwner = collection.playlist_owner_id === currentUserId
 
     const overflowActions = [
+      OverflowAction.PLAY_COLLECTION_NEXT,
+      OverflowAction.ADD_COLLECTION_TO_QUEUE,
       collection.is_album
         ? OverflowAction.VIEW_ALBUM_PAGE
         : OverflowAction.VIEW_PLAYLIST_PAGE,

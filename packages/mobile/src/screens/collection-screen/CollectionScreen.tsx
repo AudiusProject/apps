@@ -181,6 +181,8 @@ const CollectionScreenComponent = (props: CollectionScreenComponentProps) => {
 
   const handlePressOverflow = useCallback(() => {
     const overflowActions = [
+      !is_private || isOwner ? OverflowAction.PLAY_COLLECTION_NEXT : null,
+      !is_private || isOwner ? OverflowAction.ADD_COLLECTION_TO_QUEUE : null,
       isOwner && !ddex_app
         ? is_album
           ? OverflowAction.EDIT_ALBUM

@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import AnimatedIconButton, {
   AnimatedIconType
 } from 'components/animated-button/AnimatedIconButton'
+import { QueueButton } from 'components/play-bar/queue-button/QueueButton'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
 import { useIsMatrix } from 'utils/theme/theme'
@@ -96,6 +97,7 @@ export const SocialActions = ({
 
   return (
     <Flex className={cn(styles.root, { [styles.compact]: compact })}>
+      <QueueButton />
       {track?.stream_conditions &&
       'usdc_purchase' in track.stream_conditions &&
       !hasStreamAccess ? (

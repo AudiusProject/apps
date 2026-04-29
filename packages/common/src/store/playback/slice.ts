@@ -360,6 +360,22 @@ const slice = createSlice({
       state.querySource = null
     },
 
+    // Clear everything except the currently playing track. The track keeps
+    // playing and stays in the queue at index 0; upcoming tracks and
+    // pagination source are dropped.
+    clearUpcoming: (state) => {
+      if (state.index < 0 || state.index >= state.queue.length) {
+        state.queue = []
+        state.index = -1
+      } else {
+        state.queue = [state.queue[state.index]]
+        state.index = 0
+      }
+      state.shuffleOrder = state.shuffle && state.queue.length > 0 ? [0] : []
+      state.shuffleIndex = state.shuffle && state.queue.length > 0 ? 0 : -1
+      state.querySource = null
+    },
+
     seekTo: (state, action: PayloadAction<SeekPayload>) => {
       state.seek = action.payload.seconds
       state.seekCounter += 1
@@ -455,6 +471,7 @@ export const {
   reorder,
   appendPage,
   clearQueue,
+  clearUpcoming,
   seekTo,
   setPlaybackRate,
   setRepeat,
