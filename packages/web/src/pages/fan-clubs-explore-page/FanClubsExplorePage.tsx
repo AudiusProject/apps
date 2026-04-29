@@ -15,6 +15,7 @@ import {
   Flex,
   IconButton,
   IconClose,
+  IconFanClub,
   IconSearch,
   IconVerified,
   Paper,
@@ -163,6 +164,7 @@ const DesktopFanClubsExplorePage = () => {
   const header = (
     <Header
       primary={walletMessages.fanClubs.title}
+      icon={IconFanClub}
       rightDecorator={
         <Button variant='secondary' size='small' onClick={handleHeaderClubCta}>
           {canViewExistingClub

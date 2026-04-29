@@ -213,3 +213,4 @@ packages/identity-service/emailCache
 
 # Playwright
 test-results
+/.claude

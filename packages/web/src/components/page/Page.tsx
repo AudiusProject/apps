@@ -16,11 +16,11 @@ const HEADER_MARGIN_PX = 32
 // Responsible for positioning the header
 type HeaderContainerProps = Pick<
   PageProps,
-  'header' | 'showSearch' | 'headerContentPaddingInline'
+  'header' | 'showSearch' | 'headerContentPaddingInline' | 'subHeader'
 >
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { header, showSearch, headerContentPaddingInline } = props
+  const { header, showSearch, headerContentPaddingInline, subHeader } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
 
@@ -32,6 +32,7 @@ const HeaderContainer = (props: HeaderContainerProps) => {
           topLeftElement: showSearch ? <DesktopSearchBar /> : null
         })}
       </Frosted>
+      {subHeader}
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}
@@ -51,6 +52,7 @@ type PageProps = {
   fromOpacity?: number
   fadeDuration?: number
   header?: ReactNode
+  subHeader?: ReactNode
   headerContentPaddingInline?: string
 
   // There are some pages which don't have a fixed header but still display
@@ -78,6 +80,7 @@ export const Page = (props: PageProps) => {
     fadeDuration = 200,
     fromOpacity = 0.2,
     header,
+    subHeader,
     headerContentPaddingInline = 'var(--harmony-unit-8)',
     image,
     noIndex = false,
@@ -124,6 +127,7 @@ export const Page = (props: PageProps) => {
         {header && (
           <HeaderContainer
             header={header}
+            subHeader={subHeader}
             showSearch={showSearch}
             headerContentPaddingInline={headerContentPaddingInline}
           />

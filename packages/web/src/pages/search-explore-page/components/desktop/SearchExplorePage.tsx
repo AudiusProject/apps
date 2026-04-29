@@ -15,7 +15,6 @@ import {
   IconNote,
   IconAlbum,
   IconPlaylists,
-  Paper,
   TextInput,
   TextInputSize,
   IconSearch,
@@ -27,6 +26,7 @@ import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
+import { Frosted } from 'components/frosted/Frosted'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
@@ -299,6 +299,7 @@ const SearchExplorePage = ({
   const header = (
     <Header
       primary={messages.explore}
+      icon={IconSearch}
       bottomBar={
         <Flex ref={tabContainerRef} alignSelf='stretch' css={{ minWidth: 0 }}>
           <Flex alignSelf='flex-start'>{tabs}</Flex>
@@ -307,12 +308,65 @@ const SearchExplorePage = ({
     />
   )
 
+  const subHeader = (
+    <Frosted
+      contentPaddingInline='var(--harmony-unit-8)'
+      css={{ borderTop: '1px solid var(--harmony-n-100)', zIndex: 9 }}
+      pv='m'
+      gap='m'
+    >
+      <Flex css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}>
+        <TextInput
+          ref={searchBarRef}
+          label={messages.searchPlaceholder}
+          value={inputValue}
+          startIcon={IconSearch}
+          size={TextInputSize.SMALL}
+          onChange={handleSearch}
+          onClear={handleClearSearch}
+        />
+      </Flex>
+      {filterKeys.length ? (
+        <Flex
+          css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}
+          direction='row'
+          justifyContent={isNarrowLayout ? undefined : 'space-between'}
+          alignItems='center'
+          gap='s'
+          wrap='wrap'
+        >
+          <Flex direction='row' gap='s' wrap='wrap'>
+            {filterKeys.map((filterKey) => {
+              const FilterComponent =
+                filters[filterKey as keyof typeof filters]
+              return <FilterComponent key={filterKey} />
+            })}
+          </Flex>
+          <Flex gap='s'>
+            <SortMethodFilterButton />
+            {categoryKey === CategoryView.TRACKS ? (
+              <FilterButton
+                value={tracksLayout}
+                variant='replaceLabel'
+                optionsLabel={messages.layoutOptionsLabel}
+                onChange={setTracksLayout}
+                options={viewLayoutOptions}
+              />
+            ) : null}
+          </Flex>
+        </Flex>
+      ) : null}
+    </Frosted>
+  )
+
   return (
     <Page
       title={pageTitle}
       description={description}
       size='large'
       header={header}
+      subHeader={subHeader}
+      showSearch={false}
     >
       <Flex
         ref={pageContentRef}
@@ -321,69 +375,6 @@ const SearchExplorePage = ({
         alignItems='stretch'
         css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX, width: '100%' }}
       >
-        {/* Search + Filters Banner */}
-        <Paper direction='column' gap='m' pv='l' ph='xl' alignSelf='stretch'>
-          <Flex w='100%'>
-            <TextInput
-              ref={searchBarRef}
-              label={messages.searchPlaceholder}
-              value={inputValue}
-              startIcon={IconSearch}
-              size={TextInputSize.SMALL}
-              onChange={handleSearch}
-              onClear={handleClearSearch}
-            />
-          </Flex>
-          {filterKeys.length ? (
-            isNarrowLayout ? (
-              <Flex direction='row' alignItems='center' gap='s' wrap='wrap'>
-                {filterKeys.map((filterKey) => {
-                  const FilterComponent =
-                    filters[filterKey as keyof typeof filters]
-                  return <FilterComponent key={filterKey} />
-                })}
-                <SortMethodFilterButton />
-                {categoryKey === CategoryView.TRACKS ? (
-                  <FilterButton
-                    value={tracksLayout}
-                    variant='replaceLabel'
-                    optionsLabel={messages.layoutOptionsLabel}
-                    onChange={setTracksLayout}
-                    options={viewLayoutOptions}
-                  />
-                ) : null}
-              </Flex>
-            ) : (
-              <Flex
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                wrap='wrap'
-              >
-                <Flex direction='row' gap='s' wrap='wrap'>
-                  {filterKeys.map((filterKey) => {
-                    const FilterComponent =
-                      filters[filterKey as keyof typeof filters]
-                    return <FilterComponent key={filterKey} />
-                  })}
-                </Flex>
-                <Flex gap='s'>
-                  <SortMethodFilterButton />
-                  {categoryKey === CategoryView.TRACKS ? (
-                    <FilterButton
-                      value={tracksLayout}
-                      variant='replaceLabel'
-                      optionsLabel={messages.layoutOptionsLabel}
-                      onChange={setTracksLayout}
-                      options={viewLayoutOptions}
-                    />
-                  ) : null}
-                </Flex>
-              </Flex>
-            )
-          ) : null}
-        </Paper>
-
         {/* Content Section */}
         {inputValue || showSearchResults ? (
           <SearchResults

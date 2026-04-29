@@ -18,6 +18,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { CategoryKey, CategoryView } from './types'
 import { urlSearchParamsToObject } from './utils'
 
+
 const { SEARCH_BASE_ROUTE, SEARCH_PAGE } = route
 
 export const useShowSearchResults = () => {
@@ -57,11 +58,13 @@ export const useSearchCategory = () => {
         })
       }
 
-      const commonFilterParams = Object.fromEntries(
-        Object.entries(params || searchParams)
-          .filter(([key, value]) => value !== undefined && value !== null)
-          .map(([key, value]) => [key, String(value)])
-      )
+      const commonFilterParams = params
+        ? Object.fromEntries(
+            Object.entries(params)
+              .filter(([key, value]) => value !== undefined && value !== null)
+              .map(([key, value]) => [key, String(value)])
+          )
+        : urlSearchParamsToObject(searchParams)
       const pathname =
         newCategory === 'all'
           ? generatePath(SEARCH_BASE_ROUTE)

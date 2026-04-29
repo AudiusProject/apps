@@ -140,7 +140,7 @@ export const walletMessages = {
 
   // Fan clubs (fan club tokens)
   fanClubs: {
-    title: 'Discover Fan Clubs',
+    title: 'Fan Clubs',
     searchPlaceholder: 'Search fan clubs',
     noCoins: 'No results found',
     noCoinsDescription: 'No fan clubs matched your search.',

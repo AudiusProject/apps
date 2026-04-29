@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useCanSendMessage } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
+import { Flex } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router'
@@ -173,7 +174,9 @@ export const ChatPage = () => {
               ) : null}
             </>
           ) : (
-            <CreateChatPrompt hasChats={!hideChatList} />
+            <Flex ph='2xl' pt='2xl' justifyContent='center'>
+              <CreateChatPrompt hasChats={!hideChatList} />
+            </Flex>
           )}
         </div>
       </div>

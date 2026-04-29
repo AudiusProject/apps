@@ -51,6 +51,7 @@ export const SearchPage = () => {
       )}
       header={header}
       fullHeight
+      {...(!isMobile && { showSearch: false })}
     >
       <Flex
         direction='column'
