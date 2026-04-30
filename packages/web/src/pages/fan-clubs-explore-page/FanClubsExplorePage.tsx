@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -26,8 +26,8 @@ import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Frosted } from 'components/frosted/Frosted'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
+import { Tab, TabList } from 'components/tabs'
 import { usePortal } from 'hooks/usePortal'
-import useTabs from 'hooks/useTabs/useTabs'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { isMobile } from 'utils/clientUtil'
 import zIndex from 'utils/zIndex'
@@ -124,22 +124,15 @@ const DesktopFanClubsExplorePage = () => {
       ? spacing.xl + spacing['5xl'] + spacing['3xl']
       : 0
 
-  const viewModeTabHeaders = useMemo(
-    () => [
-      { text: walletMessages.fanClubs.cardView, label: 'cards' },
-      { text: walletMessages.fanClubs.leaderboardView, label: 'table' }
-    ],
-    []
+  const viewModeTabs = (
+    <TabList
+      value={fanClubsViewMode}
+      onChange={(v) => handleFanClubsViewModeChange(v as FanClubsViewMode)}
+    >
+      <Tab value='cards'>{walletMessages.fanClubs.cardView}</Tab>
+      <Tab value='table'>{walletMessages.fanClubs.leaderboardView}</Tab>
+    </TabList>
   )
-
-  const { tabs: viewModeTabs } = useTabs({
-    isMobile: false,
-    tabs: viewModeTabHeaders,
-    elements: viewModeTabHeaders.map((t) => <div key={t.label} />),
-    onTabClick: (label) =>
-      handleFanClubsViewModeChange(label as FanClubsViewMode),
-    selectedTabLabel: fanClubsViewMode
-  })
 
   const header = (
     <Header
