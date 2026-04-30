@@ -1,6 +1,6 @@
 const { runMigrations, clearDatabase } = require('../../src/migrationManager')
 
-async function getApp () {
+async function getApp() {
   delete require.cache[require.resolve('../../src/app')] // force reload between each test
   const App = require('../../src/app')
   const config = require('../../src/config')
@@ -29,13 +29,15 @@ async function getApp () {
     getVisitorHistory: async (visitorId) => {
       return {
         visitorId,
-        visits: [{
-          confidence: { score: 0.8 }, // arbitrary non-perfect score
-          timestamp: Date.now(),
-          tag: {
-            origin: 'web'
+        visits: [
+          {
+            confidence: { score: 0.8 }, // arbitrary non-perfect score
+            timestamp: Date.now(),
+            tag: {
+              origin: 'web'
+            }
           }
-        }]
+        ]
       }
     }
   }

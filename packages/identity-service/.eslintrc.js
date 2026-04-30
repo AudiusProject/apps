@@ -1,10 +1,7 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    tsconfigRootDir: __dirname,
-    ecmaVersion: 2020,
-    project: ['./tsconfig.json'],
-    tsconfigRootDir: __dirname
+    ecmaVersion: 2020
   },
   extends: [
     'standard',

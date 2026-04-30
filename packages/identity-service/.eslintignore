@@ -1,3 +1,7 @@
 .eslintrc.js
 build/**
-src/notifications/renderEmail/**
+build_test/**
+coverage/**
+dist/**
+local-storage/**
+patches/**

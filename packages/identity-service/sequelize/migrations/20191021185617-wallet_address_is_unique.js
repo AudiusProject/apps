@@ -9,6 +9,10 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.removeConstraint('Users', 'wallet_address_is_unique', {})
+    return queryInterface.removeConstraint(
+      'Users',
+      'wallet_address_is_unique',
+      {}
+    )
   }
 }

@@ -16,9 +16,7 @@ describe('test /health_check and /balance_check', function () {
   // skipping because need to mock libs for this check to succed, but since we have
   // health checks this should be okay
   it.skip('responds 200 for health check', function (done) {
-    request(app)
-      .get('/health_check')
-      .expect(200, done)
+    request(app).get('/health_check').expect(200, done)
   })
 
   it('responds to balance check', function (done) {
@@ -38,8 +36,6 @@ describe('test /health_check and /balance_check', function () {
   })
 
   it('responds 404 for invalid route', function (done) {
-    request(app)
-      .get('/invalid_route')
-      .expect(404, done)
+    request(app).get('/invalid_route').expect(404, done)
   })
 })

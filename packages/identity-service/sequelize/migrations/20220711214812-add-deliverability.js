@@ -2,13 +2,10 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn(
-      'Users',
-      'isEmailDeliverable', {
-        type: Sequelize.BOOLEAN,
-        defaultValue: true
-      }
-    )
+    return queryInterface.addColumn('Users', 'isEmailDeliverable', {
+      type: Sequelize.BOOLEAN,
+      defaultValue: true
+    })
   },
 
   down: (queryInterface, Sequelize) => {

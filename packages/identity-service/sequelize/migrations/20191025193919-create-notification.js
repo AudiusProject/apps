@@ -23,7 +23,8 @@ module.exports = {
           'MilestoneListen',
           'MilestoneRepost',
           'MilestoneFavorite',
-          'MilestoneFollow')
+          'MilestoneFollow'
+        )
       },
       isRead: {
         type: Sequelize.BOOLEAN

@@ -8,8 +8,6 @@ const authMiddleware = require('../authMiddleware')
 const models = require('../models')
 const config = require('../config')
 const { createPlatformEndpoint, deleteEndpoint } = require('../awsSNS')
-const path = require('path')
-const fs = require('fs')
 
 const iOSSNSParams = {
   PlatformApplicationArn: config.get('awsSNSiOSARN')
@@ -21,21 +19,7 @@ const androidSNSParams = {
 
 const IOS = 'ios'
 const ANDROID = 'android'
-const SAFARI = 'safari'
-const DEVICE_TYPES = new Set([IOS, ANDROID, SAFARI])
-
-// A signed Push Pacakge zip is required for safari browser push notifications
-let pushPackageName = ''
-const environment = config.get('environment')
-if (environment === 'development') {
-  pushPackageName = 'devPushPackage.zip'
-} else {
-  pushPackageName = 'productionPushPackage.zip'
-}
-const pushPackagePath = path.join(
-  __dirname,
-  `../notifications/browserPush/${pushPackageName}`
-)
+const DEVICE_TYPES = new Set([IOS, ANDROID])
 
 /**
  * Checks if a browser Push API subscription is valid for notifications
@@ -152,22 +136,13 @@ module.exports = function (app) {
         else if (deviceType === ANDROID)
           params = { ...androidSNSParams, ...params }
 
-        // If native moblie (ios/android), register the device with aws sns
-        if (deviceType !== SAFARI) {
-          const awsARN = (await createPlatformEndpoint(params)).EndpointArn
-          await models.NotificationDeviceToken.upsert({
-            deviceToken,
-            deviceType,
-            userId,
-            awsARN
-          })
-        } else {
-          await models.NotificationDeviceToken.upsert({
-            deviceToken,
-            deviceType,
-            userId
-          })
-        }
+        const awsARN = (await createPlatformEndpoint(params)).EndpointArn
+        await models.NotificationDeviceToken.upsert({
+          deviceToken,
+          deviceType,
+          userId,
+          awsARN
+        })
 
         return successResponse()
       } catch (e) {
@@ -426,98 +401,6 @@ module.exports = function (app) {
       } catch (e) {
         return errorResponseServerError(
           `Unable to deregister push browser subscription`,
-          e.message
-        )
-      }
-    })
-  )
-
-  /*
-   * Downloads the signed safari web push package for authentication.
-   */
-  app.post(
-    '/push_notifications/safari/:version/pushPackages/:websitePushID',
-    (req, res) => {
-      try {
-        res.writeHead(200, {
-          'Content-Type': 'application/zip'
-        })
-
-        const readStream = fs.createReadStream(pushPackagePath)
-        readStream.pipe(res)
-      } catch (e) {
-        return errorResponseServerError(
-          `Unable to send safari push package`,
-          e.message
-        )
-      }
-    }
-  )
-
-  /*
-   * Registering or Updating Device Permission Policy
-   * When users first grant permission, or later change their permission levels for your website, a POST request is sent to the following URL:
-   * NOTE: the deviceToken is also accessible in the client, and sent as part of the device_token/register endpoint w/ additional data
-   */
-  app.post(
-    '/push_notifications/safari/:version/devices/:deviceToken/registrations/:websitePushID',
-    handleResponse(async (req, res, next) => {
-      try {
-        return successResponse({})
-      } catch (e) {
-        return errorResponseServerError(
-          `Unable to save safari browser push notificaiton subscription`,
-          e.message
-        )
-      }
-    })
-  )
-
-  /*
-   * Forgetting Device Permission Policy
-   * If a user removes permission of a website in Safari preferences, a DELETE request is sent to the following URL:
-   * This is done by the safari browser, but the client redundently send a request to device_token/deregister
-   */
-  app.delete(
-    '/push_notifications/safari/:version/devices/:deviceToken/registrations/:websitePushID',
-    handleResponse(async (req, res, next) => {
-      const { deviceToken } = req.body
-
-      if (!deviceToken) {
-        return errorResponseBadRequest(
-          'Did not pass in a valid deviceToken or userId for device token registration'
-        )
-      }
-
-      try {
-        // delete device token
-        await models.NotificationDeviceToken.destroy({
-          where: { deviceToken }
-        })
-        return successResponse()
-      } catch (e) {
-        return errorResponseServerError(
-          `Unable to delete browser push notificaiton devicetoken`,
-          e.message
-        )
-      }
-    })
-  )
-
-  /*
-   * Logging Errors
-   * If an error occurs, a POST request is sent to the following URL:
-   */
-  app.post(
-    '/push_notifications/safari/:version/log',
-    handleResponse(async (req, res, next) => {
-      // TODO: Download website package
-      req.logger.info(JSON.stringify(req.body, null, ''))
-      try {
-        return successResponse()
-      } catch (e) {
-        return errorResponseServerError(
-          `Unable to log safari push notification`,
           e.message
         )
       }
