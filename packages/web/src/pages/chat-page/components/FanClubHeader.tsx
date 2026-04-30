@@ -12,10 +12,12 @@ const messages = {
 
 export const FanClubHeader = ({
   userId,
-  audience
+  audience,
+  className
 }: {
   userId: ID
   audience?: ChatBlastAudience
+  className?: string
 }) => {
   const fanClubSymbol = useFanClubMessageHeader({
     userId,
@@ -28,6 +30,7 @@ export const FanClubHeader = ({
 
   return (
     <Flex
+      className={className}
       ph='l'
       pv='xs'
       gap='m'

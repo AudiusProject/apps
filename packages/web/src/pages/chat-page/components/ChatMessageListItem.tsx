@@ -211,11 +211,17 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
       >
         <Flex className={styles.bubbleCorners}>
           <Flex column className={styles.bubbleContent}>
-            <FanClubHeader userId={senderUserId} audience={message.audience} />
+            <FanClubHeader
+              userId={senderUserId}
+              audience={message.audience}
+              className={styles.fanClubHeader}
+            />
             {isCollectionUrl(linkValue) ? (
               <ChatMessagePlaylist
                 className={cn(styles.unfurl, styles.playlistUnfurl)}
                 link={link.value}
+                chatId={chatId}
+                messageId={message.message_id}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
               />
@@ -223,6 +229,8 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
               <ChatMessageTrack
                 className={cn(styles.unfurl, styles.trackUnfurl)}
                 link={link.value}
+                chatId={chatId}
+                messageId={message.message_id}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
               />

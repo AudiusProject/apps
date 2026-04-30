@@ -1,23 +1,29 @@
 import { useCallback, useMemo, useEffect } from 'react'
 
 import {
+  getCollectionByPermalinkQueryKey,
   useCollection,
   useCollectionByPermalink,
-  useTracks,
-  useUsers
+  useTracks
 } from '@audius/common/api'
 import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
-import { Name, Kind, Status, ID, ModalSource } from '@audius/common/models'
+import { Name, Kind, ID, ModalSource } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
 import { getPathFromPlaylistUrl, makeUid } from '@audius/common/utils'
+import { useQuery } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
 import { CollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTileSize } from 'components/track/types'
 
+import { ChatUnfurlSkeleton } from './ChatUnfurlSkeleton'
+import { LinkPreview } from './LinkPreview'
+
 export const ChatMessagePlaylist = ({
   link,
+  chatId,
+  messageId,
   onEmpty,
   onSuccess,
   className
@@ -30,6 +36,21 @@ export const ChatMessagePlaylist = ({
   const collectionId = playlist?.playlist_id
   const { data: collection } = useCollection(collectionId)
 
+  // Subscribe to the permalink-lookup query directly. `useCollectionByPermalink`
+  // chains permalink → collection and returns the inner `useCollection`'s
+  // pending state, which stays `true` forever when the permalink resolves
+  // to no collection (the inner query is just disabled). Reading the
+  // permalink query state directly lets us distinguish "still resolving"
+  // from "resolved with no collection" so the skeleton terminates correctly.
+  const { data: collectionIdFromPermalink, isPending: isPermalinkPending } =
+    useQuery<number | null | undefined>({
+      queryKey: getCollectionByPermalinkQueryKey(permalink),
+      enabled: false
+    })
+  const hasCollectionId =
+    !isPermalinkPending && collectionIdFromPermalink != null
+  const isPending = isPermalinkPending || (hasCollectionId && !collection)
+
   const uid = useMemo(() => {
     return collectionId ? makeUid(Kind.COLLECTIONS, collectionId) : null
   }, [collectionId])
@@ -37,7 +58,6 @@ export const ChatMessagePlaylist = ({
   const trackIds =
     playlist?.playlist_contents?.track_ids?.map((t) => t.track) ?? []
   const { data: tracks } = useTracks(trackIds)
-  const { byId: usersById } = useUsers(tracks?.map((t) => t.owner_id))
 
   const uidMap = useMemo(() => {
     return trackIds.reduce((result: { [id: ID]: string }, id) => {
@@ -46,20 +66,6 @@ export const ChatMessagePlaylist = ({
     }, {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId])
-
-  /**
-   * Include uids for the tracks as those are used to play the tracks,
-   * and also to determine which track is currently playing.
-   * Also include the other properties to conform with the component.
-   */
-  const tracksWithUids = useMemo(() => {
-    return (tracks || []).map((track) => ({
-      ...track,
-      user: usersById[track.owner_id],
-      id: track.track_id,
-      uid: uidMap[track.track_id]
-    }))
-  }, [tracks, uidMap, usersById])
 
   const entries = useMemo(() => {
     return (tracks || []).map((track) => ({
@@ -81,34 +87,61 @@ export const ChatMessagePlaylist = ({
   const pauseTrack = usePauseTrack()
 
   const collectionExists = !!collection && !collection.is_delete
+  const hasResolvedCollection = !isPending && collectionExists && !!uid
+
   useEffect(() => {
-    if (collectionExists && uid) {
+    // While the underlying collection query is still pending we don't yet
+    // know whether the unfurl will resolve to a player or be empty — defer
+    // firing the parent callbacks so the URL text doesn't flash before the
+    // player.
+    if (isPending) return
+    if (hasResolvedCollection) {
       dispatch(make(Name.MESSAGE_UNFURL_PLAYLIST, {}))
       onSuccess?.()
-    } else {
-      onEmpty?.()
     }
-  }, [collectionExists, uid, onSuccess, onEmpty, dispatch])
+    // If the URL pattern-matches a playlist/album but no collection exists
+    // (or it's deleted), fall through to LinkPreview below — LinkPreview
+    // will fire its own onEmpty/onSuccess once OG metadata resolves.
+  }, [isPending, hasResolvedCollection, onSuccess, dispatch])
 
-  return collectionId && uid ? (
+  if (isPending) {
+    return <ChatUnfurlSkeleton className={className} />
+  }
+
+  if (hasResolvedCollection && collectionId) {
     // You may wonder why we use the mobile web playlist tile here.
     // It's simply because the chat playlist tile uses the same design as mobile web.
-    <CollectionTile
-      containerClassName={className}
-      index={0}
-      uid={uid}
-      id={collectionId}
-      size={TrackTileSize.SMALL}
-      ordered={false}
-      togglePlay={() => {}}
-      playTrack={playTrack}
-      pauseTrack={pauseTrack}
-      hasLoaded={() => {}}
-      isLoading={status === Status.LOADING || status === Status.IDLE}
-      isTrending={false}
-      numLoadingSkeletonRows={tracksWithUids.length}
-      variant='readonly'
-      source={ModalSource.DirectMessageCollectionTile}
+    return (
+      <CollectionTile
+        containerClassName={className}
+        index={0}
+        uid={uid}
+        id={collectionId}
+        size={TrackTileSize.SMALL}
+        ordered={false}
+        togglePlay={() => {}}
+        playTrack={playTrack}
+        pauseTrack={pauseTrack}
+        hasLoaded={() => {}}
+        isLoading={false}
+        isTrending={false}
+        variant='readonly'
+        source={ModalSource.DirectMessageCollectionTile}
+      />
+    )
+  }
+
+  // URL looked like a playlist/album but resolved to nothing real — fall
+  // back to a generic OG link preview so the bubble doesn't snap from
+  // skeleton to bare URL text.
+  return (
+    <LinkPreview
+      className={className}
+      href={link}
+      chatId={chatId}
+      messageId={messageId}
+      onEmpty={onEmpty}
+      onSuccess={onSuccess}
     />
-  ) : null
+  )
 }

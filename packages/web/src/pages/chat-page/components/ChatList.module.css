@@ -40,9 +40,3 @@
 .subheader {
   line-height: 150%;
 }
-
-.spinner {
-  margin: auto;
-  width: var(--harmony-unit-8);
-  height: 100px;
-}

@@ -71,6 +71,14 @@
 }
 
 .spinner {
-  margin: auto;
+  margin: var(--harmony-unit-6) auto 0;
   width: var(--harmony-unit-8);
+}
+
+/* Recolor the Lottie spinner's stroke. The component renders an inline
+ * `<g><path>` whose default stroke is `--harmony-n-500`; in the chat
+ * message-list context we want the subdued text token so it visually
+ * matches the "Beginning of Conversation" affordance below. */
+.spinner :global(g) path {
+  stroke: var(--harmony-text-subdued);
 }

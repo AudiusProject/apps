@@ -18,6 +18,8 @@ export enum ChatPermissionAction {
 
 export type ChatMessageTileProps = {
   link: string
+  chatId: string
+  messageId: string
   styles?: any
   onEmpty?: () => void
   onSuccess?: () => void

@@ -31,6 +31,15 @@ vi.mock('@audius/common/hooks', async () => {
   }
 })
 
+vi.mock('components/user-badges/UserBadges', () => ({
+  default: ({ disableInteraction }: { disableInteraction?: boolean }) => (
+    <span
+      data-disable-interaction={disableInteraction ? 'true' : 'false'}
+      data-testid='user-badges'
+    />
+  )
+}))
+
 describe('Chat list accessibility', () => {
   it('uses a single native button for user chat rows', () => {
     const handleClick = vi.fn()
@@ -50,6 +59,10 @@ describe('Chat list accessibility', () => {
 
     const row = screen.getByRole('button', { name: /test user/i })
     expect(row).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByTestId('user-badges')).toHaveAttribute(
+      'data-disable-interaction',
+      'true'
+    )
 
     fireEvent.click(row)
     expect(handleClick).toHaveBeenCalledWith('chat-1')

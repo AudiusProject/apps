@@ -20,6 +20,7 @@ import {
   isEarliestUnread,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
+import { Flex, Text } from '@audius/harmony'
 import { OptionalId } from '@audius/sdk'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
@@ -87,8 +88,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     const [messageListRef, { height: messageListHeight }] = useMeasure({
       polyfill: ResizeObserver
     })
-
-    const isScrollable = messageListHeight > (ref.current?.clientHeight ?? 0)
 
     // On first load, mark chat as read
     useEffect(() => {
@@ -165,6 +164,17 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       },
       [throttledScrollHandler]
     )
+
+    // Snap to the bottom whenever the inner message-list content resizes and
+    // the user was near the bottom — covers avatar loads, unfurls, image
+    // expansions, etc. that don't change the message-array reference and so
+    // wouldn't otherwise trip StickyScrollList's stickToBottom logic.
+    useLayoutEffect(() => {
+      if (!ref.current) return
+      if (wasNearBottomRef.current) {
+        ref.current.scrollTo({ top: ref.current.scrollHeight })
+      }
+    }, [messageListHeight])
 
     // Respond to async unfurl expansions explicitly signaled by list items
     useEffect(() => {
@@ -324,11 +334,13 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
             ))}
           {!chat?.messagesSummary || chat.messagesSummary.prev_count > 0 ? (
             <LoadingSpinner className={styles.spinner} />
-          ) : isScrollable ? (
-            <div className={styles.separator}>
-              <span className={styles.tag}>{messages.endOfMessages}</span>
-            </div>
-          ) : null}
+          ) : (
+            <Flex justifyContent='center' p='l'>
+              <Text variant='body' size='m' color='subdued'>
+                {messages.endOfMessages}
+              </Text>
+            </Flex>
+          )}
           {chat?.is_blast ? <ChatBlastAudienceDisplay chat={chat} /> : null}
         </div>
       </StickyScrollList>

@@ -12,7 +12,6 @@ import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
 
 import { useSelector } from 'common/hooks/useSelector'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from './ChatList.module.css'
 import { ChatListBlastItem } from './ChatListBlastItem'
@@ -65,10 +64,16 @@ export const ChatList = (props: ChatListProps) => {
         useWindow={false}
         loader={
           hasLoadedOnce ? (
-            <LoadingSpinner
-              key={'loading-spinner'}
-              className={styles.spinner}
-            />
+            <div key='loading-skeletons'>
+              <SkeletonChatListItem
+                style={{ opacity: 0.5 }}
+                isCompact={isCompact}
+              />
+              <SkeletonChatListItem
+                style={{ opacity: 0.25 }}
+                isCompact={isCompact}
+              />
+            </div>
           ) : undefined
         }
       >
@@ -99,9 +104,15 @@ export const ChatList = (props: ChatListProps) => {
           </div>
         ) : (
           <>
-            <SkeletonChatListItem />
-            <SkeletonChatListItem style={{ opacity: 0.5 }} />
-            <SkeletonChatListItem style={{ opacity: 0.25 }} />
+            <SkeletonChatListItem isCompact={isCompact} />
+            <SkeletonChatListItem
+              style={{ opacity: 0.5 }}
+              isCompact={isCompact}
+            />
+            <SkeletonChatListItem
+              style={{ opacity: 0.25 }}
+              isCompact={isCompact}
+            />
           </>
         )}
       </InfiniteScroll>

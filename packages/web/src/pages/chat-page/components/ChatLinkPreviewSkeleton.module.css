@@ -1,0 +1,49 @@
+/* Mirrors LinkPreview.module.css's column layout: thumbnail + domain bar
+ * + text section. Sized close to a typical OG card so the bubble doesn't
+ * snap when the real preview replaces the skeleton.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: min(448px, 100%);
+  background: var(--harmony-white);
+  box-sizing: border-box;
+}
+
+.thumbnail {
+  width: 100%;
+  height: 160px;
+  border-radius: 0;
+}
+
+.domain {
+  width: 40%;
+  min-width: 80px;
+  max-width: 200px;
+  height: 14px;
+  margin: var(--harmony-unit-1) var(--harmony-unit-4);
+  border-radius: 48px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--harmony-unit-2);
+  padding: var(--harmony-unit-4);
+  border-top: 1px solid var(--harmony-n-150);
+}
+
+.title {
+  width: 75%;
+  min-width: 100px;
+  height: 18px;
+  border-radius: 48px;
+}
+
+.description {
+  width: 90%;
+  min-width: 120px;
+  height: 14px;
+  border-radius: 48px;
+}
