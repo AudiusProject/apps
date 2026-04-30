@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import { useToggleTrack } from '@audius/common/hooks'
-import { ID, Kind, UID } from '@audius/common/models'
+import { ID } from '@audius/common/models'
 import type { Queueable } from '@audius/common/store'
 import { QueueSource } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
@@ -17,13 +16,11 @@ import { DESKTOP_RESPONSIVE_TILE_WIDTH, MOBILE_TILE_WIDTH } from './constants'
 // Wrapper component to make tiles playable
 export const PlayableTile = ({
   id,
-  uid,
   index,
   source = QueueSource.EXPLORE,
   entries
 }: {
   id: ID
-  uid: UID
   index: number
   source?: QueueSource
   entries?: Queueable[]
@@ -33,24 +30,23 @@ export const PlayableTile = ({
 
   const { togglePlay, isTrackPlaying } = useToggleTrack({
     id,
-    uid,
     source,
     entries
   })
 
   // Create lineup-style togglePlay function that TrackTile expects
   const handleTogglePlay = useCallback(
-    (tileUid: UID, trackId: ID) => {
-      if (tileUid === uid && trackId === id) {
+    (trackId: ID) => {
+      if (trackId === id) {
         togglePlay()
       }
     },
-    [uid, id, togglePlay]
+    [id, togglePlay]
   )
 
   return (
+    // @ts-ignore - track tile accepts extra props
     <Tile
-      uid={uid}
       id={id}
       index={index}
       togglePlay={handleTogglePlay}
@@ -84,7 +80,6 @@ export const TilePairs = ({
     () =>
       data.map((id) => ({
         id,
-        uid: makeStableUid(Kind.TRACKS, id, source),
         source
       })),
     [data, source]
@@ -105,7 +100,6 @@ export const TilePairs = ({
               <PlayableTile
                 key={id}
                 id={id}
-                uid={entries[entryIndex].uid}
                 index={entryIndex}
                 source={source}
                 entries={entries}
@@ -125,7 +119,6 @@ export const TileSkeletons = ({ noShimmer }: { noShimmer?: boolean }) => {
 
   const tileProps = {
     togglePlay: () => {},
-    uid: '',
     isActive: false,
     size: TrackTileSize.SMALL,
     noShimmer,
@@ -144,6 +137,7 @@ export const TileSkeletons = ({ noShimmer }: { noShimmer?: boolean }) => {
           gap='m'
           css={{ minWidth: tileWidth, width: tileWidth }}
         >
+          {/* @ts-ignore - track tile accepts extra props */}
           <Tile
             {...tileProps}
             key={`${i}-0`}
@@ -151,6 +145,7 @@ export const TileSkeletons = ({ noShimmer }: { noShimmer?: boolean }) => {
             index={0}
             statSize={isMobile ? 'large' : 'small'}
           />
+          {/* @ts-ignore - track tile accepts extra props */}
           <Tile
             {...tileProps}
             key={`${i}-1`}

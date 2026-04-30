@@ -432,14 +432,30 @@ export const useCollectionPage = (
     }
   }, [collection, params, user, pathname, dispatch, updatingRoute])
 
+  // The currently-playing entry's uid (as constructed locally for this
+  // collection), or null if a different source is playing.
+  const playingUid = useMemo(() => {
+    if (
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== COLLECTION_TRACKS_SOURCE
+    ) {
+      return null
+    }
+    return makeStableUid(
+      Kind.TRACKS,
+      currentQueueItem.trackId,
+      COLLECTION_TRACKS_SOURCE
+    )
+  }, [currentQueueItem.trackId, currentQueueItem.source])
+
   // Helper functions
   const isQueued = useCallback(() => {
-    return tracks.entries.some((entry) => currentQueueItem.uid === entry.uid)
-  }, [tracks.entries, currentQueueItem.uid])
+    return tracks.entries.some((entry) => playingUid === entry.uid)
+  }, [tracks.entries, playingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return playingUid
+  }, [playingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null

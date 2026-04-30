@@ -1,11 +1,9 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { useFeelingLuckyTracks } from '@audius/common/api'
 import { useToggleTrack } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { Kind } from '@audius/common/models'
 import { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
 
 import { Button, Flex, Text } from '@audius/harmony-native'
 import { LineupTileSkeleton, TrackTile } from 'app/components/lineup-tile'
@@ -22,13 +20,8 @@ export const FeelingLucky = () => {
   } = useFeelingLuckyTracks({ limit: 1 }, { enabled: inView })
   const track = feelingLuckyTracks[0]
 
-  const uid = useMemo(() => {
-    return track?.track_id ? makeUid(Kind.TRACKS, track.track_id) : null
-  }, [track?.track_id])
-
   const { togglePlay } = useToggleTrack({
-    id: track?.track_id,
-    uid,
+    id: track?.track_id ?? null,
     source: QueueSource.EXPLORE
   })
 
@@ -50,11 +43,10 @@ export const FeelingLucky = () => {
         </Flex>
         {!inView || isPending || isFetching ? (
           <LineupTileSkeleton noShimmer />
-        ) : track && uid ? (
+        ) : track ? (
           <TrackTile
             key={track.track_id}
             id={track.track_id}
-            uid={uid}
             togglePlay={togglePlay}
             index={0}
           />

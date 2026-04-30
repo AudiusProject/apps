@@ -188,7 +188,6 @@ export const WinnersView = ({
                 css={{ '& > *': { width: '100%', minWidth: 0 } }}
               >
                 <TrackTileComponent
-                  uid={`skeleton-winners-${i}`}
                   id={-1}
                   index={i}
                   size={TrackTileSize.LARGE}

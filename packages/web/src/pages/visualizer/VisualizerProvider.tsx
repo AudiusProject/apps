@@ -308,7 +308,7 @@ const Visualizer = ({
   const [, setHistoryTick] = useState(0)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const trackFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevQueueUidRef = useRef<string | null>(null)
+  const prevQueueTrackIdRef = useRef<number | null>(null)
 
   const optionsAnchorRef = useRef<HTMLButtonElement>(null)
 
@@ -357,7 +357,7 @@ const Visualizer = ({
 
   useEffect(() => {
     if (!isVisible) {
-      prevQueueUidRef.current = null
+      prevQueueTrackIdRef.current = null
       setNowPlayingPeek(false)
       if (trackFlashTimerRef.current) {
         clearTimeout(trackFlashTimerRef.current)
@@ -370,10 +370,10 @@ const Visualizer = ({
 
   useEffect(() => {
     if (!isVisible || !showVisualizer || !autoHideTrackDetails) return
-    const uid = currentQueueItem?.uid
-    if (!uid) return
-    if (prevQueueUidRef.current === uid) return
-    prevQueueUidRef.current = uid
+    const trackId = currentQueueItem?.trackId
+    if (!trackId) return
+    if (prevQueueTrackIdRef.current === trackId) return
+    prevQueueTrackIdRef.current = trackId
 
     setNowPlayingPeek(true)
     if (trackFlashTimerRef.current) clearTimeout(trackFlashTimerRef.current)
@@ -385,7 +385,7 @@ const Visualizer = ({
     isVisible,
     showVisualizer,
     autoHideTrackDetails,
-    currentQueueItem?.uid
+    currentQueueItem?.trackId
   ])
 
   useEffect(() => {
@@ -485,8 +485,8 @@ const Visualizer = ({
   }, [user])
 
   const renderTrackInfo = () => {
-    const { uid } = currentQueueItem
-    return currentTrack && user && uid ? (
+    const { trackId } = currentQueueItem
+    return currentTrack && user && trackId ? (
       <div className={styles.trackInfoWrapper}>
         <PlayingTrackInfo
           trackId={currentTrack.track_id}

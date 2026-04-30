@@ -12,7 +12,6 @@ import {
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
-  Kind,
   Name,
   ShareSource,
   RepostSource,
@@ -53,7 +52,6 @@ import {
 import {
   formatReleaseDate,
   Genre,
-  makeStableUid,
   removeNullable,
   dayjs
 } from '@audius/common/utils'
@@ -335,7 +333,7 @@ export const TrackScreenDetailsTile = ({
         dispatch(playbackActions.togglePlay())
         recordPlay(trackId, false, true)
       } else if (
-        currentQueueItem.uid !== uid &&
+        currentQueueItem.trackId !== trackId &&
         currentTrack &&
         currentTrack.track_id === trackId
       ) {
@@ -349,8 +347,7 @@ export const TrackScreenDetailsTile = ({
             tracks: [
               {
                 trackId,
-                source: playbackSource,
-                uid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
+                source: playbackSource
               }
             ],
             startIndex: 0,
@@ -365,8 +362,7 @@ export const TrackScreenDetailsTile = ({
       isPlaying,
       isPlayingId,
       isPreviewing,
-      currentQueueItem.uid,
-      uid,
+      currentQueueItem.trackId,
       currentTrack,
       trackId,
       dispatch

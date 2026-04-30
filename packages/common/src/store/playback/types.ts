@@ -1,4 +1,4 @@
-import { ID, Track, UID, User } from '../../models'
+import { ID, Track, User } from '../../models'
 
 export const PLAYBACK_RATE_LS_KEY = 'playbackRate'
 
@@ -61,38 +61,38 @@ export enum QueueSource {
   EXPLORE = 'EXPLORE'
 }
 
-// Legacy queue-entry shape. Chat playback and a few page helpers still build
-// add-to-queue lists in this form; the saga adapts them to PlaybackTrack at
-// the boundary. Worth keeping as a public shape so callers don't leak the
-// trackId-vs-id rename into their own data flow.
+// Lightweight queue-entry descriptor used by chat playback and a few page
+// helpers that build add-to-queue lists. The saga adapts to PlaybackTrack at
+// the boundary.
 export type Queueable = {
   id: ID | string
-  uid: UID
   artistId?: ID
   source: QueueSource
   playerBehavior?: PlayerBehavior
 }
 
-// Minimal "currently playing" descriptor.
+// Minimal "currently playing" descriptor. Identity is (trackId, source) — for
+// tile-highlight comparisons callers also have the queue index available.
 export type QueueItem = {
-  uid: UID | null
+  trackId: ID | null
   source: QueueSource | null
   track: Track | null
   user: User | null
 }
 
-// A single entry in the playback queue. Identity is (queue[index], trackId).
-// The queue may contain duplicates; index disambiguates them.
+// A single entry in the playback queue. Identity is the queue index — the
+// queue may contain duplicates, and (queue.length, index) disambiguates them.
 export type PlaybackTrack = {
   trackId: ID
   // Free-form-ish source tag (e.g. 'trending-week', 'profile:handle:tracks').
   // Used for analytics, mobile offline-download checks, and PlaylistLibrary
   // current-track highlighting.
   source: string
+  // The collection (playlist/album) id this entry was queued from, if any.
+  // Set by collection-page when building its queue; consumed by analytics
+  // (PLAYBACK_PLAY events).
+  collectionId?: ID
   playerBehavior?: PlayerBehavior
-  // UID matching what the rendered tile uses, so tile-highlight comparisons
-  // (playingUid === entry.uid) match. The saga generates one if absent.
-  uid?: UID
 }
 
 // Points the saga at the tanquery that produced this queue so it can paginate
@@ -110,7 +110,7 @@ export type PlaybackState = {
   // playSucceeded; lags behind queue[index] during the brief load gap so
   // tile-highlight comparisons keep the previously-playing tile active until
   // the new track actually starts.
-  playingUid: UID | null
+  playingIndex: number
   playingTrackId: ID | null
 
   playing: boolean

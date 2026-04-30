@@ -54,7 +54,7 @@ import { UserLink } from '../user-link'
 import { TrackArtwork } from './TrackArtwork'
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 
-const { getPlaying, getUid } = playbackSelectors
+const { getPlaying, getTrackId } = playbackSelectors
 const { getTrackPosition } = playbackPositionSelectors
 
 export type TrackItemAction = 'overflow' | 'remove'
@@ -222,8 +222,8 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
   const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
   const isActive = useSelector((state) => {
-    const playingUid = getUid(state)
-    return uid !== undefined && uid === playingUid
+    const playingTrackId = getTrackId(state)
+    return track_id !== undefined && track_id === playingTrackId
   })
 
   const isPlaying = useSelector((state) => {

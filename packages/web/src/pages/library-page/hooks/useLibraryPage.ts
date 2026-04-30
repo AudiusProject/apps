@@ -601,15 +601,29 @@ export const useLibraryPage = () => {
       )
   }, [formattedEntries, state.filterText])
 
-  const isQueued = useCallback(() => {
-    return tracks.entries.some(
-      (entry: any) => currentQueueItem.uid === entry.uid
+  // The currently-playing entry's uid (as constructed locally for the
+  // SAVED_TRACKS lineup), or null if a different source is playing.
+  const currentPlayingUid = useMemo(() => {
+    if (
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== playbackSource
+    ) {
+      return null
+    }
+    return makeStableUid(
+      'tracks' as any,
+      currentQueueItem.trackId,
+      playbackSource
     )
-  }, [tracks.entries, currentQueueItem.uid])
+  }, [currentQueueItem.trackId, currentQueueItem.source])
+
+  const isQueued = useCallback(() => {
+    return tracks.entries.some((entry: any) => currentPlayingUid === entry.uid)
+  }, [tracks.entries, currentPlayingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return currentPlayingUid
+  }, [currentPlayingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null
