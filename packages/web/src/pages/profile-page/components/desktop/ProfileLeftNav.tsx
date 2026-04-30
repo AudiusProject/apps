@@ -141,7 +141,7 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               size={TextAreaSize.SMALL}
               grows
               placeholder={messages.description}
-              defaultValue={bio || ''}
+              value={bio || ''}
               maxLength={MAX_BIO_LENGTH}
               showMaxLength
               onChange={(e) => onUpdateBio(e.target.value)}
