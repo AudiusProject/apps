@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
 import { useCallback, useContext } from 'react'
 
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
 import { GradientText } from 'app/components/core'
 import { OtaUpdateBanner } from 'app/components/ota-update-banner/OtaUpdateBanner'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -23,14 +22,6 @@ type MobileRootHeaderProps = {
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   container: {
     backgroundColor: palette.white
-  },
-  logoContainer: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: 14,
-    width: 120,
-    height: 25,
-    opacity: 0.45
   },
   row: {
     flexDirection: 'row',
@@ -59,9 +50,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
  *
  * Layout (single row): [Avatar] [GradientText title] [right content]
  *
- * Audius logo is positioned in the status bar area (under dynamic island)
- * at low opacity so it appears in screenshots but is hidden behind the
- * system chrome during normal use.
+ * The screenshot-only Audius logo that previously lived here behind the
+ * Dynamic Island has moved up to AppDrawerScreen as a top-level overlay so
+ * it doesn't animate with the screen during stack transitions.
  */
 export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const { title, children, showDivider = true } = props
@@ -77,11 +68,6 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
 
   return (
     <View style={styles.container}>
-      {Platform.OS === 'ios' ? (
-        <View style={styles.logoContainer}>
-          <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
-        </View>
-      ) : null}
       <View style={{ marginTop: insets.top }}>
         <OtaUpdateBanner />
         <View style={styles.row}>

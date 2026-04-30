@@ -3,8 +3,9 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { useNavigation } from '@react-navigation/native'
-import { Dimensions } from 'react-native'
+import { Dimensions, Platform, View, StyleSheet } from 'react-native'
 
+import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
 import { AudioPlayer } from 'app/components/audio/AudioPlayer'
 import { RepeatListener } from 'app/components/audio/RepeatListener'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -59,22 +60,23 @@ export const AppDrawerScreen = memo(() => {
     DrawerContentComponentProps['navigation'] | null
   >(null)
 
-  // Drawer swipe only when at stack root; otherwise the stack's swipe-back wins.
   const setIsAtStackRoot = useCallback((next: boolean) => {
     setIsAtStackRootState((prev) => (prev === next ? prev : next))
   }, [])
 
-  // Shrink the drawer's swipe area to zero (instead of disabling the gesture
-  // handler) so the native stack's fullScreenGestureEnabled back gesture keeps
-  // responding across the whole screen; fully disabling the drawer's
-  // PanGestureHandler narrows swipe-back to the left edge.
+  // Drawer swipe-to-open is enabled only when at the tab stack's root, so
+  // the right-swipe gesture inside a nested stack falls through to the native
+  // stack's fullScreenSwipe back behavior. swipeEdgeWidth stays at the full
+  // screen width so opening the drawer from the root doesn't require a swipe
+  // from the screen edge.
   const drawerScreenOptions = useMemo(
     () => ({
       headerShown: false,
-      swipeEdgeWidth: isAtStackRoot ? SCREEN_WIDTH : 0,
+      swipeEdgeWidth: SCREEN_WIDTH,
       drawerType: 'slide' as const,
       drawerStyle: { width: '75%' as const },
-      swipeEnabled: !gesturesDisabled && !isNowPlayingDrawerOpen
+      swipeEnabled:
+        isAtStackRoot && !gesturesDisabled && !isNowPlayingDrawerOpen
     }),
     [isAtStackRoot, gesturesDisabled, isNowPlayingDrawerOpen]
   )
@@ -109,6 +111,30 @@ export const AppDrawerScreen = memo(() => {
           {(props) => <AppStack {...props} {...gestureProps} />}
         </Drawer.Screen>
       </Drawer.Navigator>
+      {/*
+        iOS-only screenshot logo, positioned behind the Dynamic Island so it
+        is invisible during normal use but appears in App Store screenshots
+        (and on devices without a Dynamic Island). Rendered at the top of the
+        component tree above the navigator so it stays put during stack
+        push/pop transitions instead of fading with the leaving screen.
+        pointerEvents=none lets touches pass through to the navigator below.
+      */}
+      {Platform.OS === 'ios' ? (
+        <View pointerEvents='none' style={styles.dynamicIslandLogo}>
+          <IconAudiusLogoHorizontal height={25} width={120} color='subdued' />
+        </View>
+      ) : null}
     </>
   )
+})
+
+const styles = StyleSheet.create({
+  dynamicIslandLogo: {
+    position: 'absolute',
+    top: 14,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    opacity: 0.45
+  }
 })
