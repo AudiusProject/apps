@@ -5,11 +5,7 @@ import { PlaylistLibraryID } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
 
-const {
-  getTrackId,
-  getPlaying,
-  getCollectionId
-} = playbackSelectors
+const { getTrackId, getPlaying, getCollectionId } = playbackSelectors
 
 /**
  * Used to determine if a track from a specific playlist is currently playing.
@@ -35,11 +31,5 @@ export const usePlaylistPlayingStatus = (id: PlaylistLibraryID) => {
     const isSource = playingCollectionId === id
 
     return hasTrack && isSource
-  }, [
-    collectionTrackIds,
-    currentTrackId,
-    isPlaying,
-    playingCollectionId,
-    id
-  ])
+  }, [collectionTrackIds, currentTrackId, isPlaying, playingCollectionId, id])
 }

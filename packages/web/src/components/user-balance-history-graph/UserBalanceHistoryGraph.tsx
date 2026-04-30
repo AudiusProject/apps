@@ -316,7 +316,11 @@ export const UserBalanceHistoryGraph = () => {
     >
       <Line
         data={getChartData(timestamps, balances, secondary)}
-        options={getChartOptions(chartId, neutralColor, spacing, borderColor)}
+        // chart.js v2-style options shape; cast as any to bypass v3+ type
+        // mismatches (xAxes/yAxes vs scales.x/scales.y, hover.mode literal).
+        options={
+          getChartOptions(chartId, neutralColor, spacing, borderColor) as any
+        }
         height={200}
       />
     </Flex>

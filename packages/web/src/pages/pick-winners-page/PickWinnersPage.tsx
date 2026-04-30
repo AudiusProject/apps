@@ -9,7 +9,7 @@ import {
   useUpdateEvent
 } from '@audius/common/api'
 import { remixMessages as messages } from '@audius/common/messages'
-import { ID, Kind, Name } from '@audius/common/models'
+import { ID, Name } from '@audius/common/models'
 import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   playbackSelectors,
@@ -51,11 +51,11 @@ import { usePickWinnersPageParams } from './hooks'
 
 const {
   addToQueue: add,
-  removeByUid: remove,
+  removeFromQueue: remove,
   reorder,
   pause: pauseAction
 } = playbackActions
-const { getUid, getPlaying } = playbackSelectors
+const { getTrackId, getCurrentSource, getPlaying } = playbackSelectors
 
 const TRACK_TILE_HEIGHT = 144
 const PICK_WINNERS_PAGE_SIZE = 10
@@ -72,8 +72,11 @@ export const PickWinnersPage = () => {
   )
   const { data: remixContest } = useRemixContest(originalTrack?.track_id)
   const { mutate: updateEvent } = useUpdateEvent()
-  const playingUid = useSelector(getUid)
+  const playingTrackId = useSelector(getTrackId)
+  const playingSource = useSelector(getCurrentSource)
   const isPlayerPlaying = useSelector(getPlaying)
+  const isPlayingWinnersQueue =
+    playingSource === QueueSource.PICK_WINNERS_TRACKS
   const { dragging: isDragging, id: draggingId } =
     useSelector(selectDragnDropState)
 
@@ -211,12 +214,6 @@ export const PickWinnersPage = () => {
     />
   )
 
-  const winnerTileUid = useCallback(
-    (tileId: ID) =>
-      `kind:${Kind.TRACKS}-id:${tileId}-source:${QueueSource.PICK_WINNERS_TRACKS}:${originalTrack?.track_id ?? 0}`,
-    [originalTrack?.track_id]
-  )
-
   const addIdToWinners = useCallback(
     (id: ID) => {
       if (winners.includes(id)) return
@@ -225,18 +222,12 @@ export const PickWinnersPage = () => {
         return
       }
 
-      const uid = winnerTileUid(id)
-      const isPlayingWinnersQueue = playingUid?.includes(
-        QueueSource.PICK_WINNERS_TRACKS
-      )
-
       if (isPlayingWinnersQueue) {
         dispatch(
           add({
             tracks: [
               {
                 trackId: id,
-                uid,
                 source: QueueSource.PICK_WINNERS_TRACKS
               }
             ],
@@ -247,22 +238,18 @@ export const PickWinnersPage = () => {
 
       setWinners([...winners, id])
     },
-    [winners, winnerTileUid, playingUid, dispatch]
+    [winners, isPlayingWinnersQueue, dispatch]
   )
 
   const removeIdFromWinners = useCallback(
     (id: ID) => {
-      if (!winners.includes(id)) return
+      const removeIdx = winners.indexOf(id)
+      if (removeIdx < 0) return
       setWinners(winners.filter((winnerId) => winnerId !== id))
 
-      const uid = winnerTileUid(id)
-      const isPlayingWinnersQueue = playingUid?.includes(
-        QueueSource.PICK_WINNERS_TRACKS
-      )
-
-      if (isPlayingWinnersQueue) dispatch(remove({ uid }))
+      if (isPlayingWinnersQueue) dispatch(remove({ index: removeIdx }))
     },
-    [winners, winnerTileUid, playingUid, dispatch]
+    [winners, isPlayingWinnersQueue, dispatch]
   )
 
   const submissionHeading = useCallback((count: number | undefined) => {
@@ -333,13 +320,8 @@ export const PickWinnersPage = () => {
     (winnerId: ID) => {
       const newTracks = winners.map((id) => ({
         trackId: id,
-        uid: winnerTileUid(id),
         source: QueueSource.PICK_WINNERS_TRACKS
       }))
-
-      const isPlayingWinnersQueue = playingUid?.includes(
-        QueueSource.PICK_WINNERS_TRACKS
-      )
 
       const startIndex = winners.indexOf(winnerId)
       if (!isPlayingWinnersQueue) {
@@ -355,7 +337,7 @@ export const PickWinnersPage = () => {
         )
       }
     },
-    [dispatch, playingUid, winnerTileUid, winners]
+    [dispatch, isPlayingWinnersQueue, winners]
   )
 
   const handlePause = useCallback(() => {
@@ -364,8 +346,8 @@ export const PickWinnersPage = () => {
 
   const renderWinnerTile = useCallback(
     (winnerId: ID, index: number) => {
-      const uid = winnerTileUid(winnerId)
-      const isTilePlaying = playingUid === uid && isPlayerPlaying
+      const isTilePlaying =
+        isPlayingWinnersQueue && playingTrackId === winnerId && isPlayerPlaying
 
       const togglePlay = () => {
         if (isTilePlaying) {
@@ -386,9 +368,9 @@ export const PickWinnersPage = () => {
         const item = winnersCopy.splice(originIdx, 1)[0]
         winnersCopy.splice(placeIdx + offset, 0, item)
         setWinners(winnersCopy)
-        dispatch(
-          reorder({ orderedUids: winnersCopy.map((id) => winnerTileUid(id)) })
-        )
+        // Map new positions back to original indices in the playback queue.
+        const newOrderedIndices = winnersCopy.map((id) => winners.indexOf(id))
+        dispatch(reorder({ orderedIndices: newOrderedIndices }))
       }
 
       return (
@@ -431,7 +413,6 @@ export const PickWinnersPage = () => {
                   <TrackTile
                     key={winnerId}
                     dragKind='winner-tile'
-                    uid={uid}
                     id={winnerId}
                     index={index}
                     order={index + 1}
@@ -454,8 +435,8 @@ export const PickWinnersPage = () => {
       )
     },
     [
-      winnerTileUid,
-      playingUid,
+      isPlayingWinnersQueue,
+      playingTrackId,
       isPlayerPlaying,
       handlePause,
       handlePlay,

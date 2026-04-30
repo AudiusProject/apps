@@ -32,13 +32,7 @@ import PlayingTrackInfo from './components/PlayingTrackInfo'
 import { SocialActions } from './components/SocialActions'
 
 const { profilePage } = route
-const {
-  getPlaying,
-  getCounter,
-  getTrackId,
-  getBuffering,
-  getPlaybackRate
-} =
+const { getPlaying, getCounter, getTrackId, getBuffering, getPlaybackRate } =
   playbackSelectors
 
 const {

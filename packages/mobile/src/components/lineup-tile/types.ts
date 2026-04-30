@@ -26,8 +26,8 @@ export type RenderImage = (props: ImageProps) => ReactNode
 
 export type TrackTileProps = {
   id: ID
-  uid: UID
-  togglePlay: (args: { uid: UID; id: ID; source: PlaybackSource }) => void
+  uid?: UID
+  togglePlay: (args?: { uid?: UID; id: ID; source?: PlaybackSource }) => void
   onPress?: (id: ID) => void
   variant?: LineupItemVariant
   index: number
@@ -40,8 +40,8 @@ export type TrackTileProps = {
 
 export type CollectionTileProps = {
   id: ID
-  uid: UID
-  togglePlay: (args: { uid: UID; id: ID; source: PlaybackSource }) => void
+  uid?: UID
+  togglePlay: (args?: { uid?: UID; id: ID; source?: PlaybackSource }) => void
   variant?: LineupItemVariant
   index: number
   isTrending?: boolean

@@ -17,10 +17,7 @@ import {
   calculatePlayerBehavior,
   PlayerBehavior
 } from '@audius/common/store'
-import type {
-  PlaybackTrack,
-  CommonState
-} from '@audius/common/store'
+import type { PlaybackTrack, CommonState } from '@audius/common/store'
 import {
   Genre,
   removeNullable,

@@ -105,12 +105,12 @@ const messages = {
 }
 
 const g = withNullGuard((wide: NowPlayingProps) => {
-  const { uid, source } = wide.currentQueueItem
+  const { trackId, source } = wide.currentQueueItem
   const currentTrack = useCurrentTrack()
   const { data: user } = useUser(currentTrack?.owner_id)
-  if (uid !== null && currentTrack !== null && source !== null && !!user) {
+  if (trackId !== null && currentTrack !== null && source !== null && !!user) {
     const currentQueueItem = {
-      uid,
+      trackId,
       source,
       user,
       track: currentTrack
@@ -143,7 +143,7 @@ const NowPlaying = g(
     clickOverflow,
     goToRoute
   }) => {
-    const { uid, track, user } = currentQueueItem
+    const { trackId: queueTrackId, track, user } = currentQueueItem
     const { history } = useHistoryContext()
     const isDarkMode = useIsDarkMode()
     const isMatrixMode = useIsMatrix()
@@ -468,9 +468,9 @@ const NowPlaying = g(
           <Scrubber
             // Include the duration in the media key because the play counter can
             // potentially update before the duration coming from the native layer if present
-            mediaKey={`${uid}${mediaKey}${timing.duration}`}
+            mediaKey={`${queueTrackId}${mediaKey}${timing.duration}`}
             isPlaying={isPlaying && !isBuffering}
-            isDisabled={!uid}
+            isDisabled={!queueTrackId}
             isMobile
             getAudioPosition={
               audioPlayer ? audioPlayer.getPosition : () => timing.position

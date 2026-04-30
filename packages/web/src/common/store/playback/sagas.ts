@@ -66,7 +66,6 @@ const {
   getPlaybackRate,
   getPlaybackRetryCount,
   getPlaying,
-  getPlayingIndex,
   getQuerySource,
   getRepeat,
   getShuffle,

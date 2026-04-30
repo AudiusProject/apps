@@ -6,8 +6,7 @@ import {
   ShareSource,
   RepostSource,
   FavoriteSource,
-  ID,
-  UID
+  ID
 } from '@audius/common/models'
 import {
   tracksSocialActions,
@@ -56,8 +55,11 @@ const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { repostTrack, undoRepostTrack, saveTrack, unsaveTrack } =
   tracksSocialActions
 const { setLockedContentId } = gatedContentActions
-const { getTrackId: getPlayingTrackId, getBuffering, getPlaying } =
-  playbackSelectors
+const {
+  getTrackId: getPlayingTrackId,
+  getBuffering,
+  getPlaying
+} = playbackSelectors
 
 // Props from ConnectedTrackTile
 export type TrackTileProps = {

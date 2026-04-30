@@ -15,7 +15,6 @@ import {
   ID,
   Track,
   FavoriteSource,
-  Kind,
   PlayableType,
   Name,
   ShareSource,
@@ -33,7 +32,7 @@ import {
   playbackActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { formatDate, route, makeStableUid } from '@audius/common/utils'
+import { formatDate, route } from '@audius/common/utils'
 import { Box, Flex } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
@@ -136,8 +135,7 @@ const TrackPage = () => {
         const tracks: PlaybackTrack[] = [
           {
             trackId: track.track_id,
-            source: playbackSource,
-            uid: makeStableUid(Kind.TRACKS, track.track_id, playbackSource)
+            source: playbackSource
           }
         ]
         dispatch(

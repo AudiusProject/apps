@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useRef } from 'react'
 
-import { Kind, ID, PlaybackSource, Name } from '@audius/common/models'
+import { ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack, PlaybackQuerySource } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
 import { Divider, Flex } from '@audius/harmony'
 import cn from 'classnames'
 import InfiniteScroll from 'react-infinite-scroller'
@@ -136,38 +135,31 @@ export const TrackLineup = ({
   useSelector(getPlaybackCurrentTrackId)
   const isPlaying = useSelector(getPlayerPlaying)
 
-  // Build stable UIDs so the PlayBar (reading legacy queue) and tile
-  // highlight logic line up with what the playback saga writes to the
-  // legacy shadow queue.
-  const uidFor = useCallback(
-    (id: ID) => makeStableUid(Kind.TRACKS, id, source),
-    [source]
-  )
-
   const tracksForPlayback: PlaybackTrack[] = useMemo(
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source,
-        uid: uidFor(id)
+        source
       })),
-    [trackIds, source, uidFor]
+    [trackIds, source]
   )
 
   const togglePlay = useCallback(
-    (uid: string, trackId: ID, clickSource?: PlaybackSource) => {
+    (trackId: ID, clickSource?: PlaybackSource) => {
       const analytics = clickSource || playbackSource
-      const currentUid = currentLegacy?.uid ?? null
+      const currentTrackId = currentLegacy?.trackId ?? null
+      const currentSource = currentLegacy?.source ?? null
+      const isSameTile = currentTrackId === trackId && currentSource === source
       // LineupProvider-style semantics: if we're already the playing track
       // and playing, pause; otherwise start / resume this tile.
-      if (uid === currentUid && isPlaying) {
+      if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, { id: `${trackId}`, source: analytics })
         )
         return
       }
-      if (uid === currentUid && !isPlaying) {
+      if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
         dispatch(
           make(Name.PLAYBACK_PLAY, { id: `${trackId}`, source: analytics })
@@ -192,7 +184,9 @@ export const TrackLineup = ({
       tracksForPlayback,
       trackIds,
       querySource,
-      currentLegacy?.uid,
+      currentLegacy?.trackId,
+      currentLegacy?.source,
+      source,
       isPlaying,
       playbackSource
     ]
@@ -264,7 +258,6 @@ export const TrackLineup = ({
   const tiles = useMemo(() => {
     if (isError) return []
     return visibleTrackIds.map((trackId, index) => {
-      const uid = uidFor(trackId)
       const trackProps = {
         index,
         ordered,
@@ -272,7 +265,6 @@ export const TrackLineup = ({
         size: tileSize,
         statSize,
         containerClassName,
-        uid,
         id: trackId,
         isLoading: false,
         isTrending,
@@ -281,12 +273,11 @@ export const TrackLineup = ({
         showArtistPick
       }
       // @ts-ignore - track tile accepts extra props
-      return <TrackTile {...trackProps} key={`${uid}-${index}`} />
+      return <TrackTile {...trackProps} key={`${trackId}-${index}`} />
     })
   }, [
     isError,
     visibleTrackIds,
-    uidFor,
     ordered,
     togglePlay,
     tileSize,
