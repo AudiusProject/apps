@@ -9,13 +9,14 @@ import {
   LibraryPageTabs,
   reachabilitySelectors
 } from '@audius/common/store'
-import Animated, { Layout } from 'react-native-reanimated'
+import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { CollectionList } from 'app/components/collection-list'
-import { VirtualizedScrollView } from 'app/components/core'
+import { PlayBarChin } from 'app/components/core/PlayBarChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
+import { makeStyles } from 'app/styles'
 
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
@@ -32,7 +33,17 @@ const messages = {
   inputPlaceholder: 'Filter Playlists'
 }
 
+const useStyles = makeStyles(() => ({
+  root: {
+    flex: 1
+  },
+  list: {
+    flex: 1
+  }
+}))
+
 export const PlaylistsTab = () => {
+  const styles = useStyles()
   const [filterValue, setFilterValue] = useState('')
   const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
 
@@ -79,7 +90,7 @@ export const PlaylistsTab = () => {
   })
 
   return (
-    <VirtualizedScrollView>
+    <View style={styles.root}>
       {noItemsLoaded ? (
         !isReachable ? (
           <NoTracksPlaceholder />
@@ -97,22 +108,22 @@ export const PlaylistsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <Animated.View layout={Layout}>
+          <View style={styles.list}>
             <CollectionList
               collectionType='playlist'
               onEndReached={handleEndReached}
               onEndReachedThreshold={0.5}
-              scrollEnabled={false}
               collectionIds={collectionIds ?? []}
               isLoadingMore={isFetchingNextPage && hasNextPage}
               showCreateCollectionTile={!!isReachable}
               createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
               isLoading={isPending && (collectionIds?.length ?? 0) === 0}
               totalCount={12}
+              ListFooterComponent={<PlayBarChin />}
             />
-          </Animated.View>
+          </View>
         </>
       )}
-    </VirtualizedScrollView>
+    </View>
   )
 }
