@@ -243,7 +243,9 @@ const slice = createSlice({
         if (
           summary.prev_count === 0 ||
           (summary.prev_cursor &&
-            dayjs(summary.prev_cursor).isBefore(state.chats.summary.prev_cursor))
+            dayjs(summary.prev_cursor).isBefore(
+              state.chats.summary.prev_cursor
+            ))
         ) {
           state.chats.summary.prev_count = summary.prev_count
           if (summary.prev_cursor) {
@@ -308,7 +310,8 @@ const slice = createSlice({
       if (
         !existingSummary ||
         summary.next_count === 0 ||
-        dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor)
+        (summary.next_cursor &&
+          dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor))
       ) {
         summaryToUse.next_count = summary.next_count
         if (summary.next_cursor || !existingSummary) {
@@ -318,7 +321,8 @@ const slice = createSlice({
       if (
         !existingSummary ||
         summary.prev_count === 0 ||
-        dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor)
+        (summary.prev_cursor &&
+          dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor))
       ) {
         summaryToUse.prev_count = summary.prev_count
         if (summary.prev_cursor || !existingSummary) {

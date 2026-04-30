@@ -135,7 +135,7 @@ function* doFetchUnreadMessagesCount() {
 /**
  * Gets all chats fresher than what we currently have
  */
-function* doFetchLatestChats() {
+export function* doFetchLatestChats() {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -144,6 +144,7 @@ function* doFetchLatestChats() {
     let hasMoreChats = true
     let data: UserChat[] = []
     let firstResponse: TypedCommsResponse<UserChat[]> | undefined
+    let lastResponse: TypedCommsResponse<UserChat[]> | undefined
     const currentUserId = yield* call(queryCurrentUserId)
     if (!currentUserId) {
       throw new Error('User not found')
@@ -155,20 +156,38 @@ function* doFetchLatestChats() {
         after: summary?.next_cursor,
         limit: CHAT_PAGE_SIZE
       })
-      hasMoreChats = response.data.length > 0
-      // Advance using the response cursor so subsequent pages walk newer chats.
-      // Mirrors the pagination pattern used in doFetchLatestMessages below.
-      before = response.summary?.prev_cursor
       data = data.concat(response.data)
       if (!firstResponse) {
         firstResponse = response
       }
+      lastResponse = response
+      // Advance using the response cursor so subsequent pages walk newer chats.
+      // Mirrors the pagination pattern used in doFetchLatestMessages below.
+      const nextBefore = response.summary?.prev_cursor
+      const prevCount = response.summary?.prev_count ?? 0
+      hasMoreChats =
+        response.data.length > 0 &&
+        prevCount > 0 &&
+        !!nextBefore &&
+        nextBefore !== before
+      before = nextBefore
+    }
+    if (!firstResponse || !lastResponse) {
+      throw new Error('No responses gathered')
     }
     yield* fetchUsersForChats(data)
+    const summaryToUse =
+      firstResponse.summary && lastResponse.summary
+        ? {
+            ...firstResponse.summary,
+            prev_cursor: lastResponse.summary.prev_cursor,
+            prev_count: lastResponse.summary.prev_count
+          }
+        : firstResponse.summary
     yield* put(
       fetchMoreChatsSucceeded({
-        ...firstResponse,
-        data
+        data,
+        summary: summaryToUse
       })
     )
   } catch (e) {

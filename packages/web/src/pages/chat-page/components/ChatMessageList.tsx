@@ -236,24 +236,31 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
     const autoFetchMoreGuardRef = useRef<{
       chatId: string
       prevCount: number
+      messagesStatus?: Status | 'PENDING'
     } | null>(null)
+    const prevCount = chat?.messagesSummary?.prev_count
+    const messagesStatus = chat?.messagesStatus
     useEffect(() => {
       if (
         chatId &&
         ref.current &&
         ref.current.scrollHeight - SPINNER_HEIGHT <= ref.current.clientHeight &&
-        chat?.messagesSummary &&
-        chat?.messagesSummary.prev_count > 0
+        prevCount &&
+        prevCount > 0
       ) {
-        const prevCount = chat.messagesSummary.prev_count
         const last = autoFetchMoreGuardRef.current
-        if (last && last.chatId === chatId && last.prevCount === prevCount) {
+        if (
+          last &&
+          last.chatId === chatId &&
+          last.prevCount === prevCount &&
+          last.messagesStatus === messagesStatus
+        ) {
           return
         }
-        autoFetchMoreGuardRef.current = { chatId, prevCount }
+        autoFetchMoreGuardRef.current = { chatId, prevCount, messagesStatus }
         dispatch(fetchMoreMessages({ chatId }))
       }
-    }, [dispatch, chatId, chat, chatMessages])
+    }, [dispatch, chatId, prevCount, messagesStatus, chatMessages])
 
     const unreadMessageCount = chatFrozenRef.current?.unread_message_count ?? 0
     const showSendMessagePrompt =
