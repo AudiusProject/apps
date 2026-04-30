@@ -1,5 +1,6 @@
 ---
 "@audius/mobile": patch
+"@audius/common": patch
 ---
 
-Fix mobile performance regression during long-form audio playback by throttling podcast position persistence to once every 5 seconds instead of every progress tick.
+Replace polling-based podcast playback position persistence with an event-driven approach (saving on pause, track change, queue end, and app background) and cap stored positions per user to bound storage growth.
