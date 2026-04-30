@@ -156,7 +156,9 @@ function* doFetchLatestChats() {
         limit: CHAT_PAGE_SIZE
       })
       hasMoreChats = response.data.length > 0
-      before = summary?.prev_cursor
+      // Advance using the response cursor so subsequent pages walk newer chats.
+      // Mirrors the pagination pattern used in doFetchLatestMessages below.
+      before = response.summary?.prev_cursor
       data = data.concat(response.data)
       if (!firstResponse) {
         firstResponse = response

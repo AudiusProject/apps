@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 
 import { useCurrentUserId, useUsers } from '@audius/common/api'
 import { useCanSendMessage } from '@audius/common/hooks'
@@ -43,7 +43,9 @@ const messages = {
   membersOnly: 'Members Only'
 }
 
-export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
+export const ChatMessageListItem = memo(function ChatMessageListItem(
+  props: ChatMessageListItemProps
+) {
   const { chatId, message, hasTail } = props
 
   // Refs
@@ -277,4 +279,4 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       ) : null}
     </Flex>
   )
-}
+})

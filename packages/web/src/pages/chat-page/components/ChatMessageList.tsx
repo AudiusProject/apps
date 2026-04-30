@@ -156,10 +156,15 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       [scrollHandler]
     )
 
-    // Cancel any throttled scrolls when component dismounts
-    useEffect(() => () => {
-      throttledScrollHandler.cancel()
-    })
+    // Cancel any throttled scrolls when the handler changes or on unmount.
+    // (Without the dep array, the cleanup ran on every render and cancelled
+    // in-flight throttled invocations spuriously.)
+    useEffect(
+      () => () => {
+        throttledScrollHandler.cancel()
+      },
+      [throttledScrollHandler]
+    )
 
     // Respond to async unfurl expansions explicitly signaled by list items
     useEffect(() => {
@@ -224,7 +229,14 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       }
     }, [dispatch, chatId, chat?.messagesStatus])
 
-    // Fix for if the initial load doesn't have enough messages to cause scrolling
+    // Fix for if the initial load doesn't have enough messages to cause scrolling.
+    // Guarded so that re-renders triggered by the messages array don't dispatch
+    // duplicate fetchMoreMessages for the same (chatId, prev_count) pair while
+    // the saga is still in flight.
+    const autoFetchMoreGuardRef = useRef<{
+      chatId: string
+      prevCount: number
+    } | null>(null)
     useEffect(() => {
       if (
         chatId &&
@@ -233,6 +245,12 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
         chat?.messagesSummary &&
         chat?.messagesSummary.prev_count > 0
       ) {
+        const prevCount = chat.messagesSummary.prev_count
+        const last = autoFetchMoreGuardRef.current
+        if (last && last.chatId === chatId && last.prevCount === prevCount) {
+          return
+        }
+        autoFetchMoreGuardRef.current = { chatId, prevCount }
         dispatch(fetchMoreMessages({ chatId }))
       }
     }, [dispatch, chatId, chat, chatMessages])

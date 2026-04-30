@@ -123,6 +123,9 @@ export const chatMiddleware =
           if (messageListener) {
             sdk.chats.removeEventListener('message', messageListener)
           }
+          if (blastListener) {
+            sdk.chats.removeEventListener('blast', blastListener)
+          }
           if (reactionListener) {
             sdk.chats.removeEventListener('reaction', reactionListener)
           }
