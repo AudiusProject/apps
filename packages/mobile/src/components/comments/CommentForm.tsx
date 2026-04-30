@@ -6,7 +6,7 @@ import { commentsMessages as messages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
 import type { ID, UserMetadata } from '@audius/common/models'
 import type { CommentMention } from '@audius/sdk'
-import type { TextInput as RNTextInput } from 'react-native'
+import type { TextInput as RNTextInput, TextInputProps } from 'react-native'
 
 import {
   Box,
@@ -78,6 +78,8 @@ type CommentFormProps = {
   onAutocompleteChange?: (isActive: boolean, value: string) => void
   setAutocompleteHandler?: (handler: (user: UserMetadata) => void) => void
   TextInputComponent?: typeof RNTextInput
+  onPressIn?: TextInputProps['onPressIn']
+  readOnly?: boolean
   autoFocus?: boolean
   isPreview?: boolean
 }
@@ -90,6 +92,8 @@ export const CommentForm = (props: CommentFormProps) => {
     onSubmit = () => {},
     initialValue,
     TextInputComponent,
+    onPressIn,
+    readOnly,
     autoFocus,
     isPreview
   } = props
@@ -242,6 +246,8 @@ export const CommentForm = (props: CommentFormProps) => {
             placeholder={messages.addComment}
             onSubmit={handleSubmit}
             TextInputComponent={TextInputComponent}
+            onPressIn={onPressIn}
+            readOnly={readOnly}
             onLayout={handleLayout}
             maxLength={400}
             maxMentions={10}
