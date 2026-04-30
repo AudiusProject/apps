@@ -7,7 +7,7 @@ import type {
   NativeStackNavigationProp
 } from '@react-navigation/native-stack'
 import { CardStyleInterpolators } from '@react-navigation/stack'
-import { Text, View } from 'react-native'
+import { Platform, Text, View } from 'react-native'
 
 import {
   IconAudiusLogoHorizontal,
@@ -85,7 +85,15 @@ export const useAppScreenOptions = <
         params && (params as ContextualParams).fromAppDrawer
 
       return {
-        animation: isFromAppLeftDrawer ? 'none' : 'default',
+        // On iOS 26, the default `animation` ('default') makes
+        // `@react-navigation/native-stack` use Apple's
+        // `interactiveContentPopGestureRecognizer`, which is edge-only in our
+        // setup. Picking a non-default animation ('simple_push') combined with
+        // `customAnimationOnGesture: true` flips RNScreens onto its own
+        // `RNSPanGestureRecognizer`, which is full-screen and gives us
+        // swipe-to-pop from anywhere on the screen on both iOS 26 and earlier.
+        animation: isFromAppLeftDrawer ? 'none' : 'simple_push',
+        customAnimationOnGesture: true,
         fullScreenGestureEnabled: true,
         freezeOnBlur: true,
         cardOverlayEnabled: true,
@@ -124,15 +132,26 @@ export const useAppScreenOptions = <
               </Text>
             )
           }
-          return (
-            <View>
-              <IconAudiusLogoHorizontal
-                height={24}
-                width={100}
-                color='subdued'
-              />
-            </View>
-          )
+          // Android: render the Audius logo as the centered header title on
+          // root screens. Android's stack transition doesn't snapshot/cross-
+          // fade the header the way UIKit does, so a per-screen logo here
+          // doesn't fade awkwardly on push/pop.
+          //
+          // iOS: rendered as a top-level overlay in AppDrawerScreen instead
+          // (positioned behind the Dynamic Island, only visible in App Store
+          // screenshots) so it stays put during stack transitions.
+          if (Platform.OS === 'android') {
+            return (
+              <View>
+                <IconAudiusLogoHorizontal
+                  height={24}
+                  width={100}
+                  color='subdued'
+                />
+              </View>
+            )
+          }
+          return null
         },
         headerRightContainerStyle: styles.headerRight,
         headerRight: () => {

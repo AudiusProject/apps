@@ -19,10 +19,10 @@ import type {
 import type { EventArg, NavigationState } from '@react-navigation/native'
 import { useIsFocused } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { Dimensions } from 'react-native'
 
 import { FilterButtonScreen } from '@audius/harmony-native'
 import type { FilterButtonScreenParams } from '@audius/harmony-native'
+import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { SetAppTabNavigationContext } from 'app/screens/app-screen/AppTabNavigationProvider'
@@ -73,8 +73,6 @@ import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
 import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
-
-const SCREEN_WIDTH = Dimensions.get('window').width
 
 export type AppTabScreenParamList = {
   Track: {
@@ -185,23 +183,22 @@ type AppTabScreenProps = {
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
   const { drawerNavigation, setIsAtStackRoot } = useContext(AppDrawerContext)
+  const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const { setNavigation } = useContext(SetAppTabNavigationContext)
   const isFocused = useIsFocused()
   const isAtStackRootRef = useRef(true)
 
-  // NowPlayingDrawer calls setOptions imperatively, and imperative options beat
-  // screenOptions, so we must also re-apply imperatively. We gate on
-  // swipeEdgeWidth rather than swipeEnabled to keep the drawer's
-  // PanGestureHandler registered — fully disabling it narrows the native
-  // stack's fullScreenGesture back-swipe to the left edge.
   const applyDrawerSwipe = useCallback(
     (isAtRoot: boolean) => {
       setIsAtStackRoot?.(isAtRoot)
+      // NowPlayingDrawer calls setOptions({ swipeEnabled: false }) imperatively
+      // on pan release, and that override outlives a re-render of
+      // screenOptions, so we re-assert it imperatively here too.
       drawerNavigation?.setOptions({
-        swipeEdgeWidth: isAtRoot ? SCREEN_WIDTH : 0
+        swipeEnabled: isAtRoot && !isNowPlayingDrawerOpen
       })
     },
-    [drawerNavigation, setIsAtStackRoot]
+    [drawerNavigation, isNowPlayingDrawerOpen, setIsAtStackRoot]
   )
 
   const handleChangeState = useCallback(
