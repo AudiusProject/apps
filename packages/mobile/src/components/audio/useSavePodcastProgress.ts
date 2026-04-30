@@ -23,20 +23,32 @@ const events = [
   Event.PlaybackQueueEnded
 ] as const
 
+// Matches AudioPlayer.tsx's threshold for considering a track "ended".
+const TRACK_END_BUFFER = 2
+
 export const useSavePodcastProgress = () => {
   const dispatch = useDispatch()
 
   const { data: userId } = useCurrentUserId()
   const trackId = useSelector(getTrackId)
-  const { data: isTrackLongFormContent } = useTrack(trackId, {
-    select: (data) => isLongFormContent(data)
+  const { data: trackInfo } = useTrack(trackId, {
+    select: (data) => ({
+      isLongForm: isLongFormContent(data),
+      duration: data?.duration
+    })
   })
+  const isTrackLongFormContent = trackInfo?.isLongForm
+  const trackDuration = trackInfo?.duration
 
   const savePosition = useCallback(
     async (overridePosition?: number) => {
       if (!isTrackLongFormContent || !userId || !trackId) return
       const position =
         overridePosition ?? (await TrackPlayer.getProgress()).position
+      // Don't dispatch IN_PROGRESS for a track that's effectively over —
+      // AudioPlayer marks those COMPLETED in the same event tick and we'd
+      // race that dispatch.
+      if (trackDuration && position >= trackDuration - TRACK_END_BUFFER) return
       dispatch(
         setTrackPosition({
           userId,
@@ -45,7 +57,7 @@ export const useSavePodcastProgress = () => {
         })
       )
     },
-    [dispatch, userId, trackId, isTrackLongFormContent]
+    [dispatch, userId, trackId, isTrackLongFormContent, trackDuration]
   )
 
   useTrackPlayerEvents(events, async (event) => {
