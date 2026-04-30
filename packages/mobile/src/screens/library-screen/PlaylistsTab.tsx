@@ -108,19 +108,20 @@ export const PlaylistsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <CollectionList
-            style={styles.list}
-            collectionType='playlist'
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.5}
-            collectionIds={collectionIds ?? []}
-            isLoadingMore={isFetchingNextPage && hasNextPage}
-            showCreateCollectionTile={!!isReachable}
-            createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
-            isLoading={isPending && (collectionIds?.length ?? 0) === 0}
-            totalCount={12}
-            ListFooterComponent={<PlayBarChin />}
-          />
+          <View style={styles.list}>
+            <CollectionList
+              collectionType='playlist'
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.5}
+              collectionIds={collectionIds ?? []}
+              isLoadingMore={isFetchingNextPage && hasNextPage}
+              showCreateCollectionTile={!!isReachable}
+              createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
+              isLoading={isPending && (collectionIds?.length ?? 0) === 0}
+              totalCount={12}
+              ListFooterComponent={<PlayBarChin />}
+            />
+          </View>
         </>
       )}
     </View>

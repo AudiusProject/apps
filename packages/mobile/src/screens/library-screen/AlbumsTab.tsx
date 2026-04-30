@@ -110,18 +110,19 @@ export const AlbumsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <CollectionList
-            style={styles.list}
-            collectionType='album'
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.5}
-            collectionIds={collectionIds ?? []}
-            showCreateCollectionTile={!!isReachable}
-            isLoading={isPending && (collectionIds?.length ?? 0) === 0}
-            isLoadingMore={isFetchingNextPage && hasNextPage}
-            totalCount={12}
-            ListFooterComponent={<PlayBarChin />}
-          />
+          <View style={styles.list}>
+            <CollectionList
+              collectionType='album'
+              onEndReached={handleEndReached}
+              onEndReachedThreshold={0.5}
+              collectionIds={collectionIds ?? []}
+              showCreateCollectionTile={!!isReachable}
+              isLoading={isPending && (collectionIds?.length ?? 0) === 0}
+              isLoadingMore={isFetchingNextPage && hasNextPage}
+              totalCount={12}
+              ListFooterComponent={<PlayBarChin />}
+            />
+          </View>
         </>
       )}
     </View>
