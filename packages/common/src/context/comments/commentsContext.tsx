@@ -22,21 +22,12 @@ import {
   useCurrentUserId
 } from '~/api'
 import { useGatedContentAccess } from '~/hooks'
-import {
-  Kind,
-  ModalSource,
-  ID,
-  Comment,
-  ReplyComment,
-  Name,
-  Track
-} from '~/models'
+import { ModalSource, ID, Comment, ReplyComment, Name, Track } from '~/models'
 import { playbackActions } from '~/store'
-import { seek } from '~/store/player/slice'
+import { seekTo } from '~/store/playback/slice'
 import { PurchaseableContentType } from '~/store/purchase-content/types'
 import { usePremiumContentPurchaseModal } from '~/store/ui/modals/premium-content-purchase-modal'
 import { Nullable } from '~/utils'
-import { makeStableUid } from '~/utils/uid'
 
 import { useAppContext } from '../appContext'
 
@@ -198,12 +189,7 @@ export function CommentSectionProvider<NavigationProp>(
             tracks: [
               {
                 trackId: track.track_id,
-                source: playbackSource,
-                legacyUid: makeStableUid(
-                  Kind.TRACKS,
-                  track.track_id,
-                  playbackSource
-                )
+                source: playbackSource
               }
             ],
             startIndex: 0,
@@ -225,7 +211,7 @@ export function CommentSectionProvider<NavigationProp>(
           )
         } else {
           dispatchPlay()
-          setTimeout(() => dispatch(seek({ seconds: timestampSeconds })), 100)
+          setTimeout(() => dispatch(seekTo({ seconds: timestampSeconds })), 100)
         }
       } else {
         dispatchPlay()

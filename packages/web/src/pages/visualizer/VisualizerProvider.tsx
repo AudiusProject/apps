@@ -1,9 +1,15 @@
 import {
-  queueSelectors,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
-import { Nullable, route } from '@audius/common/utils'
-import { Name, SquareSizes, Track } from '@audius/common/models'
+import {
+  Nullable,
+  route
+} from '@audius/common/utils'
+import {
+  Name,
+  SquareSizes,
+  Track
+} from '@audius/common/models'
 import {
   useEffect,
   useState,
@@ -11,10 +17,18 @@ import {
   useRef,
   type ReactNode
 } from 'react'
-import { push } from 'utils/navigation'
-import { AppState } from 'store/types'
-import { Dispatch } from 'redux'
-import { connect } from 'react-redux'
+import {
+  push
+} from 'utils/navigation'
+import {
+  AppState
+} from 'store/types'
+import {
+  Dispatch
+} from 'redux'
+import {
+  connect
+} from 'react-redux'
 import cn from 'classnames'
 
 import ButterchurnVisualizer from 'utils/visualizer/butterchurnVisualizer'
@@ -22,10 +36,15 @@ import Toast from 'components/toast/Toast'
 
 import styles from './VisualizerProvider.module.css'
 
-import { make, TrackEvent } from 'common/store/analytics/actions'
+import {
+  make,
+  TrackEvent
+} from 'common/store/analytics/actions'
 import DynamicImage from 'components/dynamic-image/DynamicImage'
 import PlayingTrackInfo from 'components/play-bar/desktop/components/PlayingTrackInfo'
-import { webgl2Supported } from './utils'
+import {
+  webgl2Supported
+} from './utils'
 import {
   IconAudiusLogoHorizontalNew,
   IconClose as IconRemove,
@@ -37,11 +56,22 @@ import {
   Text,
   Popup
 } from '@audius/harmony'
-import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
-import { audioPlayer } from 'services/audio-player'
-import { useCurrentTrack } from '@audius/common/hooks'
-import { useUser } from '@audius/common/api'
-import { toggleAutoCycle, toggleAutoHideTrackDetails } from './store/slice'
+import {
+  useTrackCoverArt
+} from 'hooks/useTrackCoverArt'
+import {
+  audioPlayer
+} from 'services/audio-player'
+import {
+  useCurrentTrack
+} from '@audius/common/hooks'
+import {
+  useUser
+} from '@audius/common/api'
+import {
+  toggleAutoCycle,
+  toggleAutoHideTrackDetails
+} from './store/slice'
 import {
   getIsVisible,
   getIsAutoCycling,
@@ -49,8 +79,8 @@ import {
 } from './store/selectors'
 
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying } = playbackSelectors
 
 const messages = {
   browserUnsupported: (browser: string) =>
@@ -278,7 +308,7 @@ const Visualizer = ({
   const [, setHistoryTick] = useState(0)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const trackFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevQueueUidRef = useRef<string | null>(null)
+  const prevQueueTrackIdRef = useRef<number | null>(null)
 
   const optionsAnchorRef = useRef<HTMLButtonElement>(null)
 
@@ -327,7 +357,7 @@ const Visualizer = ({
 
   useEffect(() => {
     if (!isVisible) {
-      prevQueueUidRef.current = null
+      prevQueueTrackIdRef.current = null
       setNowPlayingPeek(false)
       if (trackFlashTimerRef.current) {
         clearTimeout(trackFlashTimerRef.current)
@@ -340,10 +370,10 @@ const Visualizer = ({
 
   useEffect(() => {
     if (!isVisible || !showVisualizer || !autoHideTrackDetails) return
-    const uid = currentQueueItem?.uid
-    if (!uid) return
-    if (prevQueueUidRef.current === uid) return
-    prevQueueUidRef.current = uid
+    const trackId = currentQueueItem?.trackId
+    if (!trackId) return
+    if (prevQueueTrackIdRef.current === trackId) return
+    prevQueueTrackIdRef.current = trackId
 
     setNowPlayingPeek(true)
     if (trackFlashTimerRef.current) clearTimeout(trackFlashTimerRef.current)
@@ -355,7 +385,7 @@ const Visualizer = ({
     isVisible,
     showVisualizer,
     autoHideTrackDetails,
-    currentQueueItem?.uid
+    currentQueueItem?.trackId
   ])
 
   useEffect(() => {
@@ -455,8 +485,8 @@ const Visualizer = ({
   }, [user])
 
   const renderTrackInfo = () => {
-    const { uid } = currentQueueItem
-    return currentTrack && user && uid ? (
+    const { trackId } = currentQueueItem
+    return currentTrack && user && trackId ? (
       <div className={styles.trackInfoWrapper}>
         <PlayingTrackInfo
           trackId={currentTrack.track_id}

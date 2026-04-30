@@ -201,15 +201,19 @@ function mapLibraryContentsToSdkFormat(
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
 ): UpdateUserRequestBody => ({
+  // The SDK's strict schema rejects null for name/handle/is_deactivated, so
+  // coerce nullish to undefined — legacy records where these are null in the
+  // DB (despite TS types) were silently failing profile save.
+  name: input.name ?? undefined,
+  handle: input.handle ?? undefined,
+  isDeactivated: input.is_deactivated ?? undefined,
+  // The SDK schema *does* allow null for profile_type, spl_usdc_payout_wallet,
+  // and coin_flair_mint (null is meaningful — e.g. coinFlairMint:null = use
+  // default badge). The OpenAPI-generated `UpdateUserRequestBody` type is
+  // incorrectly non-nullable for these, so spread via pick to bypass TS while
+  // preserving null at runtime.
   ...camelcaseKeys(
-    pick(input, [
-      'name',
-      'handle',
-      'is_deactivated',
-      'profile_type',
-      'spl_usdc_payout_wallet',
-      'coin_flair_mint'
-    ])
+    pick(input, ['profile_type', 'spl_usdc_payout_wallet', 'coin_flair_mint'])
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,

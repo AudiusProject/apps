@@ -3,7 +3,7 @@ import { call, delay, put, select, takeEvery } from 'typed-redux-saga'
 import { queryCurrentUserId, queryTrack } from '~/api'
 import { AudioPlayer } from '~/services/audio-player'
 import { getContext } from '~/store/effects'
-import { getPlaying, getTrackId } from '~/store/player/selectors'
+import { getPlaying, getTrackId } from '~/store/playback/selectors'
 import { isLongFormContent } from '~/utils/isLongFormContent'
 
 import { getPlaybackPositions } from './selectors'

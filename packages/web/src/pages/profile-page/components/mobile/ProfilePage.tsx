@@ -27,8 +27,8 @@ import NavContext, {
   CenterPreset
 } from 'components/nav/mobile/NavContext'
 import TextElement, { Type } from 'components/nav/mobile/TextElement'
+import { Tab, TabList } from 'components/tabs'
 import TierExplainerDrawer from 'components/user-badges/TierExplainerDrawer'
-import useTabs, { TabHeader } from 'hooks/useTabs/useTabs'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
 import { getUserPageContext } from 'ssr/metaTags'
 
@@ -46,48 +46,6 @@ const { profilePage } = route
 type ProfilePageProps = {
   containerRef: RefObject<HTMLDivElement>
 }
-
-const artistTabs: TabHeader[] = [
-  {
-    icon: <IconNote />,
-    text: ProfilePageTabs.TRACKS,
-    label: ProfilePageTabs.TRACKS,
-    to: 'tracks'
-  },
-  {
-    icon: <IconAlbum />,
-    text: ProfilePageTabs.ALBUMS,
-    label: ProfilePageTabs.ALBUMS,
-    to: 'albums'
-  },
-  {
-    icon: <IconPlaylists />,
-    text: ProfilePageTabs.PLAYLISTS,
-    label: ProfilePageTabs.PLAYLISTS,
-    to: 'playlists'
-  },
-  {
-    icon: <IconReposts className={styles.iconReposts} />,
-    text: ProfilePageTabs.REPOSTS,
-    label: ProfilePageTabs.REPOSTS,
-    to: 'reposts'
-  }
-]
-
-const userTabs: TabHeader[] = [
-  {
-    icon: <IconReposts className={styles.iconReposts} />,
-    text: ProfilePageTabs.REPOSTS,
-    label: ProfilePageTabs.REPOSTS,
-    to: 'reposts'
-  },
-  {
-    icon: <IconPlaylists />,
-    text: ProfilePageTabs.PLAYLISTS,
-    label: ProfilePageTabs.PLAYLISTS,
-    to: 'playlists'
-  }
-]
 
 const getMessages = ({
   name,
@@ -212,18 +170,102 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     [repostsArgs]
   )
 
-  // Compute tabs and elements before calling useTabs
-  const { profileTabs, profileElements } = useMemo(() => {
-    if (!profile || isLoading || isEditing) {
-      return { profileTabs: [], profileElements: [] }
-    }
+  const profileBasePath = profilePage(handle)
+  const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
+  const currentTab = activeTab ?? defaultTab
 
+  const profileTabs =
+    !profile || isLoading || isEditing ? null : isArtist ? (
+      <TabList
+        variant='mobile'
+        onTabClick={(key) => didChangeTabsFrom('', key)}
+      >
+        <Tab to={`${profileBasePath}/tracks`} icon={<IconNote />}>
+          {ProfilePageTabs.TRACKS}
+        </Tab>
+        <Tab to={`${profileBasePath}/albums`} icon={<IconAlbum />}>
+          {ProfilePageTabs.ALBUMS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+        <Tab
+          to={`${profileBasePath}/reposts`}
+          icon={<IconReposts className={styles.iconReposts} />}
+        >
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+      </TabList>
+    ) : (
+      <TabList
+        variant='mobile'
+        onTabClick={(key) => didChangeTabsFrom('', key)}
+      >
+        <Tab
+          to={`${profileBasePath}/reposts`}
+          icon={<IconReposts className={styles.iconReposts} />}
+        >
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
+    )
+
+  const profileBody = (() => {
+    if (!profile || isLoading || isEditing) return null
     const tabMessages = getMessages({ name, isOwner })
 
     if (isArtist) {
-      const tabs = artistTabs
-      const elements = [
-        <div className={styles.tracksLineupContainer} key='artistTracks'>
+      if (currentTab === ProfilePageTabs.ALBUMS) {
+        return (
+          <div className={styles.cardLineupContainer}>
+            <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
+          </div>
+        )
+      }
+      if (currentTab === ProfilePageTabs.PLAYLISTS) {
+        return (
+          <div className={styles.cardLineupContainer}>
+            <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+          </div>
+        )
+      }
+      if (currentTab === ProfilePageTabs.REPOSTS) {
+        return (
+          <div className={styles.tracksLineupContainer}>
+            {profile.repost_count === 0 ? (
+              <EmptyTab
+                message={
+                  <>
+                    {tabMessages.emptyReposts}
+                    <i
+                      className={cn('emoji', 'face-with-monocle', styles.emoji)}
+                    />
+                  </>
+                }
+              />
+            ) : (
+              <TrackLineup
+                trackIds={userRepostsQuery.trackIds}
+                source='PROFILE_FEED'
+                querySource={repostsQuerySource}
+                isPending={userRepostsQuery.isPending}
+                isFetching={userRepostsQuery.isFetching}
+                isError={userRepostsQuery.isError}
+                hasNextPage={userRepostsQuery.hasNextPage}
+                loadNextPage={userRepostsQuery.loadNextPage}
+                variant={LineupVariant.MAIN}
+                maxEntries={profile.repost_count}
+              />
+            )}
+          </div>
+        )
+      }
+      // Default: Tracks
+      return (
+        <div className={styles.tracksLineupContainer}>
           {profile.track_count === 0 ? (
             <EmptyTab
               message={
@@ -251,101 +293,47 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               maxEntries={profile.track_count}
             />
           )}
-        </div>,
-        <div className={styles.cardLineupContainer} key='artistAlbums'>
-          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>,
-        <div className={styles.cardLineupContainer} key='artistPlaylists'>
-          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>,
-        <div className={styles.tracksLineupContainer} key='artistUsers'>
-          {profile.repost_count === 0 ? (
-            <EmptyTab
-              message={
-                <>
-                  {tabMessages.emptyReposts}
-                  <i
-                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                  />
-                </>
-              }
-            />
-          ) : (
-            <TrackLineup
-              trackIds={userRepostsQuery.trackIds}
-              source='PROFILE_FEED'
-              querySource={repostsQuerySource}
-              isPending={userRepostsQuery.isPending}
-              isFetching={userRepostsQuery.isFetching}
-              isError={userRepostsQuery.isError}
-              hasNextPage={userRepostsQuery.hasNextPage}
-              loadNextPage={userRepostsQuery.loadNextPage}
-              variant={LineupVariant.MAIN}
-              maxEntries={profile.repost_count}
-            />
-          )}
         </div>
-      ]
-      return { profileTabs: tabs, profileElements: elements }
-    } else {
-      const tabs = userTabs
-      const elements = [
-        <div className={styles.tracksLineupContainer} key='tracks'>
-          {profile.repost_count === 0 ? (
-            <EmptyTab
-              message={
-                <>
-                  {tabMessages.emptyReposts}
-                  <i
-                    className={cn('emoji', 'face-with-monocle', styles.emoji)}
-                  />
-                </>
-              }
-            />
-          ) : (
-            <TrackLineup
-              trackIds={userRepostsQuery.trackIds}
-              source='PROFILE_FEED'
-              querySource={repostsQuerySource}
-              isPending={userRepostsQuery.isPending}
-              isFetching={userRepostsQuery.isFetching}
-              isError={userRepostsQuery.isError}
-              hasNextPage={userRepostsQuery.hasNextPage}
-              loadNextPage={userRepostsQuery.loadNextPage}
-              variant={LineupVariant.MAIN}
-              maxEntries={profile.repost_count}
-            />
-          )}
-        </div>,
-        <div className={styles.cardLineupContainer} key='playlists'>
-          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-        </div>
-      ]
-      return { profileTabs: tabs, profileElements: elements }
+      )
     }
-  }, [
-    profile,
-    isLoading,
-    isEditing,
-    isArtist,
-    isOwner,
-    userId,
-    name,
-    artistTracksQuery.trackIds,
-    artistTracksQuery.isPending,
-    artistTracksQuery.isFetching,
-    artistTracksQuery.isError,
-    artistTracksQuery.hasNextPage,
-    artistTracksQuery.loadNextPage,
-    tracksQuerySource,
-    userRepostsQuery.trackIds,
-    userRepostsQuery.isPending,
-    userRepostsQuery.isFetching,
-    userRepostsQuery.isError,
-    userRepostsQuery.hasNextPage,
-    userRepostsQuery.loadNextPage,
-    repostsQuerySource
-  ])
+
+    // Non-artist user
+    if (currentTab === ProfilePageTabs.PLAYLISTS) {
+      return (
+        <div className={styles.cardLineupContainer}>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </div>
+      )
+    }
+    // Default: Reposts
+    return (
+      <div className={styles.tracksLineupContainer}>
+        {profile.repost_count === 0 ? (
+          <EmptyTab
+            message={
+              <>
+                {tabMessages.emptyReposts}
+                <i className={cn('emoji', 'face-with-monocle', styles.emoji)} />
+              </>
+            }
+          />
+        ) : (
+          <TrackLineup
+            trackIds={userRepostsQuery.trackIds}
+            source='PROFILE_FEED'
+            querySource={repostsQuerySource}
+            isPending={userRepostsQuery.isPending}
+            isFetching={userRepostsQuery.isFetching}
+            isError={userRepostsQuery.isError}
+            hasNextPage={userRepostsQuery.hasNextPage}
+            loadNextPage={userRepostsQuery.loadNextPage}
+            variant={LineupVariant.MAIN}
+            maxEntries={profile.repost_count}
+          />
+        )}
+      </div>
+    )
+  })()
 
   // Set Nav-Bar Menu
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
@@ -384,14 +372,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     onSave,
     hasMadeEdit
   ])
-
-  const { tabs, body } = useTabs({
-    didChangeTabsFrom,
-    tabs: profileTabs,
-    elements: profileElements,
-    initialTab: activeTab || undefined,
-    pathname: profilePage(handle)
-  })
 
   if (!profile) {
     return null
@@ -435,8 +415,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   } else if (!isLoading && !isEditing) {
     content = (
       <div className={styles.contentContainer}>
-        <div className={styles.tabs}>{tabs}</div>
-        {body}
+        <div className={styles.tabs}>{profileTabs}</div>
+        {profileBody}
       </div>
     )
   }

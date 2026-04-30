@@ -11,6 +11,7 @@ const sortIncompleteFirst = (list: CompletionStages) => {
 
 type TaskCompletionListProps = {
   completionStages: CompletionStages
+  variant?: 'inverted' | 'surface'
 }
 
 /**
@@ -19,23 +20,27 @@ type TaskCompletionListProps = {
  * and `ProfileCompletionHeroCard`.
  */
 export const TaskCompletionList = ({
-  completionStages
+  completionStages,
+  variant = 'inverted'
 }: TaskCompletionListProps) => {
   const { color } = useTheme()
 
   return (
     <Flex
-      direction='column'
+      column
       gap='s'
       wrap='wrap'
       css={{
-        backgroundColor: color.secondary.s300
+        backgroundColor:
+          variant === 'surface' ? 'transparent' : color.secondary.s300,
+        width: '100%'
       }}
     >
       {sortIncompleteFirst(completionStages).map((e) => (
         <TaskCompletionItem
           title={e.title}
           isCompleted={e.isCompleted}
+          variant={variant}
           key={e.title}
         />
       ))}

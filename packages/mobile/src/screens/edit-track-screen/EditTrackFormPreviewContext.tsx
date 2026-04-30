@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useMemo, useState } from 'react'
 
-import { playerActions, playerSelectors } from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import Video from 'react-native-video'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -23,12 +23,12 @@ export const EditTrackFormPreviewContextProvider = (props: {
   const dispatch = useDispatch()
   const [sourceUri, setSourceUri] = useState('')
   const [isPlaying, setIsPlaying] = useState(false)
-  const isPlayerPlaying = useSelector(playerSelectors.getPlaying)
+  const isPlayerPlaying = useSelector(playbackSelectors.getPlaying)
 
   // Request preview playback
   const playPreview = useCallback(
     async (url: string) => {
-      if (isPlayerPlaying) dispatch(playerActions.pause())
+      if (isPlayerPlaying) dispatch(playbackActions.pause())
 
       setSourceUri(url)
       setIsPlaying(true)

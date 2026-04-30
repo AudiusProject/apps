@@ -7,12 +7,7 @@ import {
   type PlaybackSource,
   type UID
 } from '@audius/common/models'
-import {
-  playbackActions,
-  playbackSelectors,
-  playerSelectors,
-  queueSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import { range } from 'lodash'
@@ -28,8 +23,8 @@ import { SectionList } from 'app/components/core'
 import { TrackTile, LineupTileSkeleton } from 'app/components/lineup-tile'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
-const { makeGetCurrent } = queueSelectors
-const { getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying } = playbackSelectors
 const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
 // Threshold (as a fraction of visible list height) for how close to the end
@@ -164,19 +159,21 @@ export const TrackLineup = ({
       visibleTrackIds.map((id) => ({
         trackId: id,
         source,
-        legacyUid: uidFor(id)
+        uid: uidFor(id)
       })),
     [visibleTrackIds, source, uidFor]
   )
 
   const togglePlay = useCallback(
-    ({ uid, id }: { uid: UID; id: ID; source: PlaybackSource }) => {
-      const currentUid = currentLegacy?.uid ?? null
-      if (uid === currentUid && isPlaying) {
+    ({ id }: { uid: UID; id: ID; source: PlaybackSource }) => {
+      const currentTrackId = currentLegacy?.trackId ?? null
+      const currentSource = currentLegacy?.source ?? null
+      const isSameTile = currentTrackId === id && currentSource === source
+      if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
         return
       }
-      if (uid === currentUid && !isPlaying) {
+      if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
         return
       }
@@ -195,7 +192,9 @@ export const TrackLineup = ({
       tracksForPlayback,
       visibleTrackIds,
       querySource,
-      currentLegacy?.uid,
+      currentLegacy?.trackId,
+      currentLegacy?.source,
+      source,
       isPlaying
     ]
   )

@@ -148,6 +148,14 @@ export default defineConfig(async ({ mode }) => {
       conditions: [...defaultClientConditions],
       dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
       alias: {
+        // Force chart.js v4 from this package's node_modules. The root
+        // workspace also resolves chart.js v2 (protocol-dashboard), and
+        // chartjs-adapter-dayjs-4 hoists to root, so its `chart.js` import
+        // would otherwise pick up v2 and silently break the date adapter.
+        'chart.js': path.resolve(
+          __dirname,
+          'node_modules/chart.js'
+        ),
         // Ensure single React instance to prevent ReactCurrentDispatcher errors
         ...(!ssr
           ? {

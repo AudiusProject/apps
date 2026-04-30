@@ -12,7 +12,6 @@ import {
   toastSagas,
   searchUsersModalSagas,
   modalsSagas,
-  playerSagas as commonPlayerSagas,
   playbackSagas,
   playbackPositionSagas,
   gatedContentSagas,
@@ -34,10 +33,9 @@ import librarySagas from 'common/store/pages/library/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import playerSagas from 'common/store/player/sagas'
+import playbackEngineSagas from 'common/store/playback/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import profileSagas from 'common/store/profile/sagas'
-import queueSagas from 'common/store/queue/sagas'
 import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import socialSagas from 'common/store/social/sagas'
@@ -74,10 +72,8 @@ export default function* rootSaga() {
     ...savedCollectionsSagas(),
 
     // Playback
-    ...commonPlayerSagas(),
-    ...playerSagas(),
+    ...playbackEngineSagas(),
     ...playbackSagas(),
-    ...queueSagas(),
     ...playbackPositionSagas(),
 
     // Sign in / Sign out

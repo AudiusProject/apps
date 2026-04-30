@@ -1,4 +1,4 @@
-import { TimeRange, ID, UID, Lineup, Track, User } from '@audius/common/models'
+import { TimeRange, ID, Lineup, Track, User } from '@audius/common/models'
 import { Genre } from '@audius/sdk'
 
 type ExtraTrendingLineupProps = {}
@@ -15,7 +15,7 @@ export interface TrendingPageContentProps {
   fetchSuggestedFollowUsers: () => void
   followUsers: (userIDs: ID[]) => void
   suggestedFollows: User[]
-  playTrendingTrack: (uid: UID) => void
+  playTrendingTrack: (trackId: ID) => void
   pauseTrendingTrack: () => void
   refreshTrendingInView: (overwrite: boolean) => void
   hasAccount: boolean
@@ -26,7 +26,6 @@ export interface TrendingPageContentProps {
   switchView: () => void
   getLineupProps: (lineup: Lineup<any>) => {
     lineup: Lineup<any>
-    playingUid: UID
     playingSource: string
     playingTrackId: ID | null
     playing: boolean
@@ -45,7 +44,7 @@ export interface TrendingPageContentProps {
   makeLoadMore: (
     timeRange: TimeRange
   ) => (offset: number, limit: number, overwrite: boolean) => void
-  makePlayTrack: (timeRange: TimeRange) => (uid: string) => void
+  makePlayTrack: (timeRange: TimeRange) => (trackId: ID) => void
   makePauseTrack: (timeRange: TimeRange) => () => void
   makeSetInView: (timeRange: TimeRange) => (inView: boolean) => void
   makeRefreshTrendingInView: (
@@ -54,7 +53,6 @@ export interface TrendingPageContentProps {
   makeResetTrending: (timeRange: TimeRange) => () => void
 
   getLineupForRange: (timeRange: TimeRange) => {
-    playingUid: UID
     lineup: Lineup<Track>
     playingSource: any
     playingTrackId: ID | null

@@ -31,15 +31,15 @@ const TRENDING_REWARDS_DRAWER_NAME = 'TrendingRewardsExplainer'
 const TOS_URL = 'https://blog.audius.co/article/audio-rewards'
 
 const messages = {
-  tracksTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  undergroundTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  winners: 'Top 5 winners are selected every Friday at Noon PT!',
+  tracksTitle: 'Top 10 Tracks Each Week Earn $AUDIO',
+  undergroundTitle: 'Top 10 Tracks Each Week Earn $AUDIO',
+  winners: 'Top 10 winners are selected every Friday at Noon PT!',
   lastWeek: "LAST WEEK'S WINNERS",
   tracks: 'Tracks',
   underground: 'Underground',
   terms: 'Terms and Conditions Apply',
-  tracksModalTitle: 'Top 5 Trending Tracks',
-  undergroundModalTitle: 'Top 5 Underground Trending Tracks',
+  tracksModalTitle: 'Top 10 Trending Tracks',
+  undergroundModalTitle: 'Top 10 Underground Trending Tracks',
   buttonTextTracks: 'Trending Tracks',
   buttonTextUnderground: 'Underground Trending Tracks'
 }

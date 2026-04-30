@@ -31,7 +31,7 @@ import {
 } from '@audius/common/models'
 import {
   collectionPageActions as collectionActions,
-  queueSelectors,
+  playbackSelectors,
   collectionsSocialActions as socialCollectionsActions,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
@@ -43,9 +43,7 @@ import {
   repostsUserListActions,
   favoritesUserListActions,
   RepostType,
-  playerSelectors,
   playbackActions,
-  playbackSelectors,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
   CollectionTrack,
@@ -55,7 +53,6 @@ import {
   usePremiumContentPurchaseModalActions,
   albumTrackRemoveConfirmationModalActions,
   PlayerBehavior,
-  playerActions,
   cacheCollectionsActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
@@ -88,8 +85,11 @@ import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
-const { makeGetCurrent, getPlayerBehavior } = queueSelectors
-const { getPlaying } = playerSelectors
+const {
+  makeGetCurrent,
+  getCurrentPlayerBehavior: getPlayerBehavior,
+  getPlaying
+} = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -432,14 +432,30 @@ export const useCollectionPage = (
     }
   }, [collection, params, user, pathname, dispatch, updatingRoute])
 
+  // The currently-playing entry's uid (as constructed locally for this
+  // collection), or null if a different source is playing.
+  const playingUid = useMemo(() => {
+    if (
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== COLLECTION_TRACKS_SOURCE
+    ) {
+      return null
+    }
+    return makeStableUid(
+      Kind.TRACKS,
+      currentQueueItem.trackId,
+      COLLECTION_TRACKS_SOURCE
+    )
+  }, [currentQueueItem.trackId, currentQueueItem.source])
+
   // Helper functions
   const isQueued = useCallback(() => {
-    return tracks.entries.some((entry) => currentQueueItem.uid === entry.uid)
-  }, [tracks.entries, currentQueueItem.uid])
+    return tracks.entries.some((entry) => playingUid === entry.uid)
+  }, [tracks.entries, playingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return playingUid
+  }, [playingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null
@@ -506,7 +522,7 @@ export const useCollectionPage = (
       tracks.entries.map((entry) => ({
         trackId: entry.track_id,
         source: collectionPlaybackSource,
-        legacyUid: makeStableUid(
+        uid: makeStableUid(
           Kind.TRACKS,
           entry.track_id,
           collectionPlaybackSource
@@ -666,7 +682,7 @@ export const useCollectionPage = (
           )
         }
       } else if (tracks.entries.length > 0) {
-        dispatch(playerActions.stop({}))
+        dispatch(playbackActions.stop({}))
         const firstEntry = tracks.entries[0]
         const startIndex = collectionPlaybackQueue.findIndex(
           (t) => t.trackId === firstEntry.track_id

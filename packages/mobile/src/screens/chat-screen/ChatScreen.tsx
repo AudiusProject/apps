@@ -7,7 +7,7 @@ import type { ChatMessageWithExtras } from '@audius/common/models'
 import {
   chatActions,
   chatSelectors,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import {
   encodeUrlName,
@@ -86,7 +86,7 @@ const {
   fetchBlockees,
   fetchPermissions
 } = chatActions
-const { getHasTrack } = playerSelectors
+const { getHasTrack } = playbackSelectors
 
 const messages = {
   title: 'Messages',

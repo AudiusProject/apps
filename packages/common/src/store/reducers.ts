@@ -46,14 +46,12 @@ import playback from './playback/slice'
 import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
-import player, { PlayerState } from './player/slice'
 import {
   playlistLibraryReducer,
   PlaylistLibraryState
 } from './playlist-library'
 import { playlistUpdatesReducer, PlaylistUpdateState } from './playlist-updates'
 import { purchaseContentReducer } from './purchase-content'
-import queue from './queue/slice'
 import reachability from './reachability/reducer'
 import { ReachabilityState } from './reachability/types'
 import { recoveryEmailReducer, RecoveryEmailState } from './recovery-email'
@@ -120,8 +118,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   savedCollections: savedCollectionsReducer,
 
   // Playback
-  queue,
-  player,
   playback,
   playbackPosition,
 
@@ -222,8 +218,6 @@ export type CommonState = {
   savedCollections: ReturnType<typeof savedCollectionsReducer>
 
   // Playback
-  queue: ReturnType<typeof queue>
-  player: PlayerState
   playback: PlaybackState
   playbackPosition: PlaybackPositionState
 

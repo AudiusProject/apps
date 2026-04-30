@@ -12,7 +12,6 @@ import {
   toastSagas,
   searchUsersModalSagas,
   modalsSagas,
-  playerSagas as commonPlayerSagas,
   playbackSagas,
   playbackPositionSagas,
   gatedContentSagas,
@@ -36,11 +35,10 @@ import feedPageSagas from 'common/store/pages/feed/sagas'
 import librarySagas from 'common/store/pages/library/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
-import playerSagas from 'common/store/player/sagas'
+import playbackEngineSagas from 'common/store/playback/sagas'
 import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import playlistUpdatesSagas from 'common/store/playlist-updates/sagas'
 import profileSagas from 'common/store/profile/sagas'
-import queueSagas from 'common/store/queue/sagas'
 import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import searchAiBarSagas from 'common/store/search-ai-bar/sagas'
@@ -104,11 +102,9 @@ export default function* rootSaga() {
     savedCollectionsSagas(),
 
     // Playback
-    playerSagas(),
-    commonPlayerSagas(),
+    playbackEngineSagas(),
     ...playbackSagas(),
     playbackPositionSagas(),
-    queueSagas(),
 
     // Cast
     castSagas(),

@@ -22,7 +22,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors,
   trackPageActions,
   PurchaseableContentType,
@@ -49,7 +49,7 @@ import { LineupTileMetadata } from './LineupTileMetadata'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { TrackTileStats } from './TrackTileStats'
 
-const { getUid } = playerSelectors
+const { getTrackId } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
@@ -115,7 +115,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
   }, [track?.track_id, dispatch])
 
   const isPlayingUid = useSelector(
-    (state: CommonState) => getUid(state) === lineupTileProps.uid
+    (state: CommonState) => getTrackId(state) === id
   )
 
   const renderImage = useCallback(

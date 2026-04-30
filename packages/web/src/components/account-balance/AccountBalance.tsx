@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 
 import {
   useCurrentUserId,
@@ -17,8 +17,12 @@ import {
 import { css, useTheme } from '@emotion/react'
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
-import { UserBalanceHistoryGraph } from 'components/user-balance-history-graph'
 import { useIsMobile } from 'hooks/useIsMobile'
+import lazyWithPreload from 'utils/lazyWithPreload'
+
+const UserBalanceHistoryGraph = lazyWithPreload(
+  () => import('components/user-balance-history-graph/UserBalanceHistoryGraph')
+)
 
 const formatCurrency = (value: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('en-US', {
@@ -282,7 +286,21 @@ const AccountBalanceContent = () => {
         </Flex>
       )}
 
-      <UserBalanceHistoryGraph />
+      <Suspense
+        fallback={
+          <Flex
+            w='100%'
+            direction='column'
+            alignItems='center'
+            justifyContent='center'
+            css={{ minHeight: '200px' }}
+          >
+            <LoadingSpinner size='xl' color='subdued' />
+          </Flex>
+        }
+      >
+        <UserBalanceHistoryGraph />
+      </Suspense>
     </Paper>
   )
 }

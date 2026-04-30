@@ -32,7 +32,9 @@ export const useManagedAccounts = <TResult = ManagedUserMetadata[] | undefined>(
       const { data = [] } = managedUsers
       return managedUserListFromSDK(data) as TResult
     },
-    enabled: isValidId(userId),
-    ...options
+    ...options,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    enabled: isValidId(userId) && options?.enabled !== false
   })
 }

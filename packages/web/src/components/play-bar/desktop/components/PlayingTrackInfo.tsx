@@ -3,7 +3,7 @@ import { memo } from 'react'
 import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import { createKeyboardActivationHandler, Tooltip } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
@@ -17,7 +17,7 @@ import { useProfilePicture } from 'hooks/useProfilePicture'
 import { fullTrackPage } from 'utils/route'
 
 import styles from './PlayingTrackInfo.module.css'
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 
 const messages = {
   preview: 'Preview'

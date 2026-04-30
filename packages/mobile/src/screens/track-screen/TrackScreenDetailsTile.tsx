@@ -12,7 +12,6 @@ import {
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
-  Kind,
   Name,
   ShareSource,
   RepostSource,
@@ -33,7 +32,7 @@ import type {
 } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import {
-  queueSelectors,
+  playbackSelectors,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -44,7 +43,6 @@ import {
   favoritesUserListActions,
   trackPageActions,
   RepostType,
-  playerSelectors,
   playbackActions,
   playbackPositionSelectors,
   PurchaseableContentType,
@@ -54,7 +52,6 @@ import {
 import {
   formatReleaseDate,
   Genre,
-  makeStableUid,
   removeNullable,
   dayjs
 } from '@audius/common/utils'
@@ -99,7 +96,7 @@ import { makeStyles } from 'app/styles'
 import { DownloadSection } from './DownloadSection'
 import { TrackDescription } from './TrackDescription'
 
-const { getPlaying, getTrackId, getPreviewing } = playerSelectors
+const { getPlaying, getTrackId, getPreviewing } = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -107,7 +104,7 @@ const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
 const { getIsReachable } = reachabilitySelectors
 const { getTrackPosition } = playbackPositionSelectors
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
@@ -336,7 +333,7 @@ export const TrackScreenDetailsTile = ({
         dispatch(playbackActions.togglePlay())
         recordPlay(trackId, false, true)
       } else if (
-        currentQueueItem.uid !== uid &&
+        currentQueueItem.trackId !== trackId &&
         currentTrack &&
         currentTrack.track_id === trackId
       ) {
@@ -350,8 +347,7 @@ export const TrackScreenDetailsTile = ({
             tracks: [
               {
                 trackId,
-                source: playbackSource,
-                legacyUid: makeStableUid(Kind.TRACKS, trackId, playbackSource)
+                source: playbackSource
               }
             ],
             startIndex: 0,
@@ -366,8 +362,7 @@ export const TrackScreenDetailsTile = ({
       isPlaying,
       isPlayingId,
       isPreviewing,
-      currentQueueItem.uid,
-      uid,
+      currentQueueItem.trackId,
       currentTrack,
       trackId,
       dispatch

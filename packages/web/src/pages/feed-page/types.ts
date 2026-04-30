@@ -1,4 +1,4 @@
-import { FeedFilter, ID, UID, Lineup } from '@audius/common/models'
+import { FeedFilter, ID, Lineup } from '@audius/common/models'
 
 export interface FeedPageContentProps {
   feedTitle: string
@@ -9,12 +9,11 @@ export interface FeedPageContentProps {
   refreshFeedInView: (overwrite: boolean, limit?: number) => void
   setFeedInView: (inView: boolean) => void
   loadMoreFeed: (offset: number, limit: number, overwrite: boolean) => void
-  playFeedTrack: (uid: UID) => void
+  playFeedTrack: (trackId: ID) => void
   pauseFeedTrack: () => void
   switchView: () => void
   getLineupProps: (lineup: Lineup<any>) => {
     lineup: Lineup<any>
-    playingUid: UID
     playingSource: string
     playingTrackId: ID | null
     playing: boolean

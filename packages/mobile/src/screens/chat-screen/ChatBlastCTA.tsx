@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 
 import { useCanSendChatBlast } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import { TouchableHighlight } from 'react-native-gesture-handler'
 import { useSelector } from 'react-redux'
 
@@ -21,7 +21,7 @@ import { useAppTabNavigation } from '../app-screen'
 
 import { useKeyboardAvoidingPlaybarStyle } from './hooks/useKeyboardAvoidingPlaybarStyle'
 
-const { getHasTrack } = playerSelectors
+const { getHasTrack } = playbackSelectors
 
 const CTA_HEIGHT = 80
 

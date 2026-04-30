@@ -24,11 +24,9 @@ import {
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
-  queueSelectors,
-  tracksSocialActions as socialActions,
-  playerSelectors,
-  playbackActions,
   playbackSelectors,
+  tracksSocialActions as socialActions,
+  playbackActions,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
   LibraryCategoryType,
@@ -55,8 +53,8 @@ import {
 } from '../lib/libraryUrl'
 
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPlaying, getBuffering } = playbackSelectors
 const {
   getLibraryTracksStatus,
   hasReachedEnd,
@@ -362,7 +360,7 @@ export const useLibraryPage = () => {
       tracks.entries.map((entry: any) => ({
         trackId: entry.track_id ?? entry.id,
         source: playbackSource,
-        legacyUid: makeStableUid(
+        uid: makeStableUid(
           Kind.TRACKS,
           entry.track_id ?? entry.id,
           playbackSource
@@ -603,15 +601,29 @@ export const useLibraryPage = () => {
       )
   }, [formattedEntries, state.filterText])
 
-  const isQueued = useCallback(() => {
-    return tracks.entries.some(
-      (entry: any) => currentQueueItem.uid === entry.uid
+  // The currently-playing entry's uid (as constructed locally for the
+  // SAVED_TRACKS lineup), or null if a different source is playing.
+  const currentPlayingUid = useMemo(() => {
+    if (
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== playbackSource
+    ) {
+      return null
+    }
+    return makeStableUid(
+      'tracks' as any,
+      currentQueueItem.trackId,
+      playbackSource
     )
-  }, [tracks.entries, currentQueueItem.uid])
+  }, [currentQueueItem.trackId, currentQueueItem.source])
+
+  const isQueued = useCallback(() => {
+    return tracks.entries.some((entry: any) => currentPlayingUid === entry.uid)
+  }, [tracks.entries, currentPlayingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return currentPlayingUid
+  }, [currentPlayingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null

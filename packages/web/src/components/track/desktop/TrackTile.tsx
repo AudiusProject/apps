@@ -6,14 +6,14 @@ import {
   ShareSource,
   RepostSource,
   FavoriteSource,
-  ID,
-  UID
+  ID
 } from '@audius/common/models'
 import {
   tracksSocialActions,
   shareModalUIActions,
   gatedContentActions,
-  playerSelectors
+  playbackSelectors,
+  CommonState
 } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import {
@@ -56,11 +56,14 @@ const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { repostTrack, undoRepostTrack, saveTrack, unsaveTrack } =
   tracksSocialActions
 const { setLockedContentId } = gatedContentActions
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const {
+  getTrackId: getPlayingTrackId,
+  getBuffering,
+  getPlaying
+} = playbackSelectors
 
 // Props from ConnectedTrackTile
 export type TrackTileProps = {
-  uid: UID
   id: ID
   index: number
   order?: number
@@ -68,7 +71,7 @@ export type TrackTileProps = {
   size: TrackTileSize
   statSize: 'small' | 'large'
   ordered: boolean
-  togglePlay: (uid: UID, id: ID) => void
+  togglePlay: (id: ID) => void
   isLoading: boolean
   hasLoaded: (index: number) => void
   isTrending: boolean
@@ -80,7 +83,6 @@ export type TrackTileProps = {
 }
 
 export const TrackTile = ({
-  uid,
   id,
   index,
   order,
@@ -115,12 +117,16 @@ export const TrackTile = ({
   })
   const { user_id, is_deactivated: isOwnerDeactivated } =
     getUserWithFallback(partialUser)
-  const playingUid = useSelector(getUid)
-  const isPlaying = useSelector(getPlaying)
-  const isBuffering = useSelector(getBuffering)
-  const isActive = uid === playingUid
-  const isTrackBuffering = isActive && isBuffering
-  const isTrackPlaying = isActive && isPlaying
+  const isActive = useSelector(
+    (state: CommonState) => getPlayingTrackId(state) === id
+  )
+  const isTrackPlaying = useSelector(
+    (state: CommonState) => getPlayingTrackId(state) === id && getPlaying(state)
+  )
+  const isTrackBuffering = useSelector(
+    (state: CommonState) =>
+      getPlayingTrackId(state) === id && getBuffering(state)
+  )
   const isOwner = currentUserId === user_id
 
   const trackWithFallback = getTrackWithFallback(track)
@@ -232,11 +238,10 @@ export const TrackTile = ({
       openLockedContentModal()
       return
     }
-    togglePlay(uid, trackId)
+    togglePlay(trackId)
   }, [
     togglePlay,
     isPreviewable,
-    uid,
     trackId,
     hasStreamAccess,
     openLockedContentModal

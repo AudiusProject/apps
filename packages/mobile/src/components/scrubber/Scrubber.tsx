@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { playerActions } from '@audius/common/store'
+import { playbackActions } from '@audius/common/store'
 import { formatSeconds } from '@audius/common/utils'
 import { View } from 'react-native'
 import { useDispatch } from 'react-redux'
@@ -12,7 +12,7 @@ import { PositionTimestamp } from './PositionTimestamp'
 import { Slider } from './Slider'
 import { usePosition } from './usePosition'
 
-const { seek } = playerActions
+const { seekTo: seek } = playbackActions
 
 const useStyles = makeStyles(({ palette }) => ({
   root: {

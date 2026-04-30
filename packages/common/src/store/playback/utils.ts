@@ -2,6 +2,8 @@ import { Track, isContentUSDCPurchaseGated } from '~/models/Track'
 
 import { PlayerBehavior } from './types'
 
+// Decide whether the engine should play the full track, the preview, or skip
+// based on the user's access and the requested playback behavior.
 export function calculatePlayerBehavior(
   track?: Track | null,
   playerBehavior?: PlayerBehavior

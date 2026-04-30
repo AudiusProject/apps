@@ -1,11 +1,10 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 
 import { useFeelingLuckyTracks } from '@audius/common/api'
 import { useToggleTrack } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { UID, ID, Kind } from '@audius/common/models'
+import { ID } from '@audius/common/models'
 import { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
 import { Text, Flex, Button, IconArrowRotate } from '@audius/harmony'
 
 import { TrackTile as DesktopTrackTile } from 'components/track/desktop/TrackTile'
@@ -24,29 +23,20 @@ export const FeelingLuckySection = () => {
     refetch: refetchFeelingLucky
   } = useFeelingLuckyTracks({ limit: 1 }, { enabled: inView })
 
-  // Create UID and togglePlay for feeling lucky track
   const feelingLuckyTrackId = feelingLuckyTrack?.[0]?.track_id ?? 0
-  const feelingLuckyUid = useMemo(
-    () =>
-      feelingLuckyTrackId
-        ? makeUid(Kind.TRACKS, feelingLuckyTrackId, QueueSource.EXPLORE)
-        : '',
-    [feelingLuckyTrackId]
-  )
 
   const { togglePlay: toggleFeelingLucky, isTrackPlaying } = useToggleTrack({
     id: feelingLuckyTrackId,
-    uid: feelingLuckyUid,
     source: QueueSource.EXPLORE
   })
 
   const handleTogglePlay = useCallback(
-    (tileUid: UID, trackId: ID) => {
-      if (tileUid === feelingLuckyUid && trackId === feelingLuckyTrackId) {
+    (trackId: ID) => {
+      if (trackId === feelingLuckyTrackId) {
         toggleFeelingLucky()
       }
     },
-    [feelingLuckyUid, feelingLuckyTrackId, toggleFeelingLucky]
+    [feelingLuckyTrackId, toggleFeelingLucky]
   )
 
   const Tile = isMobile ? MobileTrackTile : DesktopTrackTile
@@ -72,9 +62,9 @@ export const FeelingLuckySection = () => {
               {messages.imFeelingLucky}
             </Button>
           </Flex>
+          {/* @ts-ignore - track tile accepts extra props */}
           <Tile
             key={feelingLuckyTrackId}
-            uid={feelingLuckyUid}
             id={feelingLuckyTrackId}
             isActive={isTrackPlaying}
             index={0}

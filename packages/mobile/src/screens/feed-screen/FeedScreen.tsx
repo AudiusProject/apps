@@ -15,7 +15,6 @@ import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
 import { SuggestedFollows } from 'app/components/suggested-follows'
-import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { FeedFilterButton } from './FeedFilterButton'
@@ -33,7 +32,6 @@ const messages = {
 // tanquery migration — collection feed rendering will be restored if/when
 // TrackLineup learns to render mixed feeds.
 export const FeedScreen = () => {
-  useAppTabScreen()
   const feedFilter = useSelector(getFeedFilter)
   const { data: currentUserId } = useCurrentUserId()
 

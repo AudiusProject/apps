@@ -9,11 +9,7 @@ import {
 
 import { useUser } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import {
-  queueActions,
-  playerActions,
-  playerSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useNavigationState } from '@react-navigation/native'
 import type {
@@ -48,10 +44,9 @@ import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-const { seek, reset } = playerActions
+const { seekTo: seek, reset, next, previous } = playbackActions
 
-const { getPlaying, getUid, getCounter, getBuffering } = playerSelectors
-const { next, previous } = queueActions
+const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 const SKIP_DURATION_SEC = 15
@@ -115,7 +110,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
   const playCounter = useSelector(getCounter)
-  const currentUid = useSelector(getUid)
+  const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
   const [isPlayBarShowing, setIsPlayBarShowing] = useState(false)
@@ -137,10 +132,10 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   }, [isPlaying, isPlayBarShowing])
 
   useEffect(() => {
-    if (!currentUid) {
+    if (!currentTrackId) {
       setIsPlayBarShowing(false)
     }
-  }, [currentUid])
+  }, [currentTrackId])
 
   const onDrawerOpen = useCallback(() => {
     Keyboard.dismiss()
@@ -232,7 +227,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   useEffect(() => {
     setMediaKey((mediaKey) => mediaKey + 1)
-  }, [playCounter, currentUid])
+  }, [playCounter, currentTrackId])
 
   const onNext = useCallback(async () => {
     const isLongFormContent =

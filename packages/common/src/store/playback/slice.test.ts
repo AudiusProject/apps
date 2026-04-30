@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest'
 
-import { RepeatMode } from '../queue/types'
-
 import playbackReducer, { actions, initialState } from './slice'
 import type { PlaybackTrack } from './types'
+import { RepeatMode } from './types'
 
 const track = (id: number): PlaybackTrack => ({
   trackId: id,

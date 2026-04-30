@@ -3,7 +3,7 @@ import { useMemo, useCallback, useEffect, useRef, MouseEvent } from 'react'
 import {
   useCollection,
   useUser,
-  useCollectionTracksWithUid,
+  useOrderedCollectionTracks,
   useCurrentUserId
 } from '@audius/common/api'
 import {
@@ -11,7 +11,6 @@ import {
   RepostSource,
   FavoriteSource,
   ID,
-  UID,
   Track,
   isContentUSDCPurchaseGated,
   ModalSource,
@@ -21,7 +20,7 @@ import {
 import {
   collectionsSocialActions,
   shareModalUIActions,
-  playerSelectors,
+  playbackSelectors,
   usePremiumContentPurchaseModal,
   PurchaseableContentType
 } from '@audius/common/store'
@@ -63,7 +62,7 @@ import { getCollectionWithFallback } from '../helpers'
 
 import TrackListItem from './TrackListItem'
 
-const { getUid, getBuffering, getPlaying } = playerSelectors
+const { getTrackId, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const {
   saveCollection,
@@ -74,14 +73,13 @@ const {
 const { collectionPage } = route
 
 export type DesktopCollectionTileProps = {
-  uid: UID
   id: ID
   ordered: boolean
   index: number
   size: TrackTileSize
   containerClassName?: string
-  togglePlay: (uid: UID, id: ID) => void
-  playTrack: (uid: string) => void
+  togglePlay: (id: ID, index: number) => void
+  playTrack: (trackId: ID) => void
   playingTrackId?: ID
   pauseTrack: () => void
   isUploading?: boolean
@@ -95,7 +93,6 @@ export type DesktopCollectionTileProps = {
 }
 
 export const CollectionTile = ({
-  uid,
   id: collectionId,
   ordered,
   index,
@@ -151,7 +148,7 @@ export const CollectionTile = ({
     playlist_owner_id
   } = getCollectionWithFallback(partialCollection)
 
-  const tracks = useCollectionTracksWithUid(partialCollection, uid)
+  const tracks = useOrderedCollectionTracks(partialCollection)
   const { data: currentUserId } = useCurrentUserId()
   const { data: partialUser } = useUser(playlist_owner_id, {
     select: (user) => ({
@@ -166,7 +163,7 @@ export const CollectionTile = ({
     user_id
   } = partialUser ?? {}
 
-  const playingUid = useSelector(getUid)
+  const playingTrackIdState = useSelector(getTrackId)
   const isBuffering = useSelector(getBuffering)
   const isPlaying = useSelector(getPlaying)
 
@@ -216,8 +213,8 @@ export const CollectionTile = ({
   const menuRef = useRef<HTMLDivElement>(null)
 
   const isActive = useMemo(() => {
-    return tracks.some((track: any) => track.uid === playingUid)
-  }, [tracks, playingUid])
+    return tracks.some((track) => track.track_id === playingTrackIdState)
+  }, [tracks, playingTrackIdState])
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
 
@@ -238,8 +235,8 @@ export const CollectionTile = ({
       if (shouldSkipTogglePlay) return
       if (isUploading) return
       if (!isActive || !isPlaying) {
-        if (isActive) {
-          playTrack(playingUid!)
+        if (isActive && playingTrackIdState != null) {
+          playTrack(playingTrackIdState)
           if (record) {
             record(
               make(Name.PLAYBACK_PLAY, {
@@ -258,10 +255,9 @@ export const CollectionTile = ({
             )
           }
         } else {
-          const trackUid = tracks[0] ? tracks[0].uid : null
           const trackId = tracks[0] ? tracks[0].track_id : null
-          if (!trackUid || !trackId) return
-          playTrack(trackUid)
+          if (!trackId) return
+          playTrack(trackId)
           if (record) {
             record(
               make(Name.PLAYBACK_PLAY, {
@@ -298,7 +294,7 @@ export const CollectionTile = ({
       playTrack,
       pauseTrack,
       isActive,
-      playingUid,
+      playingTrackIdState,
       playingTrackId,
       isUploading,
       id,
@@ -419,7 +415,7 @@ export const CollectionTile = ({
         />
       ))
     }
-    return tracks?.map((track, i) => (
+    return tracks?.map((track: Track, i: number) => (
       <Draggable
         key={`${track.title}+${i}`}
         text={track.title}
@@ -432,7 +428,7 @@ export const CollectionTile = ({
           key={`${track.title}+${i}`}
           isLoading={isLoading}
           isAlbum={isAlbum}
-          active={playingUid === track.uid}
+          active={playingTrackIdState === track.track_id}
           size={size}
           disableActions={disableActions}
           playing={isPlaying}
@@ -448,7 +444,7 @@ export const CollectionTile = ({
     tracks,
     isLoading,
     isAlbum,
-    playingUid,
+    playingTrackIdState,
     size,
     disableActions,
     isPlaying,
