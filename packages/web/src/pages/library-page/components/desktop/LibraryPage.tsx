@@ -159,8 +159,6 @@ const LibraryPage = () => {
   const tracksLoading = status === Status.LOADING && isEmpty
   const showTrackTableSkeletons =
     (tracksLoading || initFetch) && !hasResolvedTrackRows
-  const tracksTableShowsSpinner =
-    (tracksLoading || initFetch) && !showTrackTableSkeletons
   const trackSkeletonRowCount =
     expectedTrackCount > 0
       ? Math.min(expectedTrackCount, INITIAL_TRACK_SKELETON_ROWS)
@@ -233,7 +231,6 @@ const LibraryPage = () => {
         fetchMore={fetchMoreTracks}
         isVirtualized
         key='favorites'
-        loading={tracksTableShowsSpinner}
         onClickFavorite={toggleSaveTrack}
         onClickRepost={onClickRepost}
         onClickRow={onClickRow}

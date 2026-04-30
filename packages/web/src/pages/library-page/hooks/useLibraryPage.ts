@@ -103,6 +103,8 @@ export const useLibraryPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const lastCategoryUrlRef = useRef<string | null>(null)
+  const [hasRequestedInitialFetch, setHasRequestedInitialFetch] =
+    useState(false)
 
   const currentTrack = useCurrentTrack()
 
@@ -116,7 +118,9 @@ export const useLibraryPage = () => {
   const tracksFetchStatus = useSelector(getLibraryTracksStatus)
 
   const libraryTrackIds = useMemo(() => {
-    const saveIds = trackSaves.map((s: any) => s.save_item_id as ID)
+    const saveIds = trackSaves
+      .map((s: any) => s.save_item_id as ID | undefined)
+      .filter((id): id is ID => Boolean(id))
     const localIds = Array.from(
       new Set([
         ...Object.keys(localFavorites).map(Number),
@@ -143,7 +147,8 @@ export const useLibraryPage = () => {
     () => (libraryFetchedTracks ?? []).map((t) => t.owner_id),
     [libraryFetchedTracks]
   )
-  const { byId: libraryUsersById } = useUsers(libraryOwnerIds)
+  const { byId: libraryUsersById, isPending: isLibraryUsersPending } =
+    useUsers(libraryOwnerIds)
 
   const defaultEntries = useMemo(() => {
     return libraryTrackIds
@@ -314,8 +319,16 @@ export const useLibraryPage = () => {
   }, [])
 
   const tracks = useMemo(() => {
-    const status: Status =
-      tracksFetchStatus === Status.SUCCESS && !isLibraryTracksPending
+    const hasExpectedTrackRows =
+      trackSaves.length > 0 || libraryTrackIds.length > 0
+    const hasPendingTrackRows =
+      hasExpectedTrackRows && defaultEntries.length === 0
+    const status: Status = !hasRequestedInitialFetch
+      ? Status.LOADING
+      : tracksFetchStatus === Status.SUCCESS &&
+          !isLibraryTracksPending &&
+          !isLibraryUsersPending &&
+          !hasPendingTrackRows
         ? Status.SUCCESS
         : tracksFetchStatus === Status.ERROR
           ? Status.ERROR
@@ -331,7 +344,16 @@ export const useLibraryPage = () => {
         ordered.length === defaultEntries.length ? ordered : defaultEntries,
       status
     }
-  }, [defaultEntries, sortedOrder, tracksFetchStatus, isLibraryTracksPending])
+  }, [
+    defaultEntries,
+    sortedOrder,
+    tracksFetchStatus,
+    isLibraryTracksPending,
+    isLibraryUsersPending,
+    hasRequestedInitialFetch,
+    trackSaves.length,
+    libraryTrackIds.length
+  ])
 
   const updatePlaylistLastViewedAt = useCallback(
     (playlistId: number) => {
@@ -484,6 +506,7 @@ export const useLibraryPage = () => {
   )
 
   useEffect(() => {
+    setHasRequestedInitialFetch(true)
     fetchLibraryTracks(
       state.filterText,
       tracksCategory,
