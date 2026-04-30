@@ -12,7 +12,8 @@ import {
   tracksSocialActions,
   shareModalUIActions,
   gatedContentActions,
-  playbackSelectors
+  playbackSelectors,
+  CommonState
 } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import {
@@ -116,12 +117,16 @@ export const TrackTile = ({
   })
   const { user_id, is_deactivated: isOwnerDeactivated } =
     getUserWithFallback(partialUser)
-  const playingTrackId = useSelector(getPlayingTrackId)
-  const isPlaying = useSelector(getPlaying)
-  const isBuffering = useSelector(getBuffering)
-  const isActive = id === playingTrackId
-  const isTrackBuffering = isActive && isBuffering
-  const isTrackPlaying = isActive && isPlaying
+  const isActive = useSelector(
+    (state: CommonState) => getPlayingTrackId(state) === id
+  )
+  const isTrackPlaying = useSelector(
+    (state: CommonState) => getPlayingTrackId(state) === id && getPlaying(state)
+  )
+  const isTrackBuffering = useSelector(
+    (state: CommonState) =>
+      getPlayingTrackId(state) === id && getBuffering(state)
+  )
   const isOwner = currentUserId === user_id
 
   const trackWithFallback = getTrackWithFallback(track)

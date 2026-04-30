@@ -25,7 +25,8 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playbackSelectors
+  playbackSelectors,
+  CommonState
 } from '@audius/common/store'
 import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
@@ -120,9 +121,15 @@ export const TrackTile = ({
   })
   const { user_id, handle, name, is_deactivated } =
     getUserWithFallback(partialUser) ?? {}
-  const playingTrackId = useSelector(getTrackId)
-  const isBuffering = useSelector(getBuffering)
-  const isPlaying = useSelector(getPlaying)
+  const isTrackActive = useSelector(
+    (state: CommonState) => getTrackId(state) === id
+  )
+  const isTrackPlaying = useSelector(
+    (state: CommonState) => getTrackId(state) === id && getPlaying(state)
+  )
+  const isTrackBuffering = useSelector(
+    (state: CommonState) => getTrackId(state) === id && getBuffering(state)
+  )
   const { data: currentUserId } = useCurrentUserId()
   const darkMode = useIsDarkMode()
   const isMatrixMode = useIsMatrix()
@@ -384,7 +391,6 @@ export const TrackTile = ({
   const isReadonly = variant === 'readonly'
   const tileOrder =
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
-  const isTrackPlaying = id === playingTrackId && isPlaying
   const artworkActionLabel =
     gatedTrackId && !hasStreamAccess && !preview_cid
       ? `Unlock ${title || 'track'}`
@@ -431,7 +437,7 @@ export const TrackTile = ({
               id={track_id}
               isTrack
               isPlaying={isTrackPlaying}
-              isBuffering={isBuffering}
+              isBuffering={isTrackBuffering}
               showSkeleton={loading}
               noShimmer={noShimmer}
               coSign={_co_sign}
@@ -450,15 +456,13 @@ export const TrackTile = ({
             <TextLink
               to={permalink}
               textVariant='title'
-              isActive={id === playingTrackId || isActive}
+              isActive={isTrackActive || isActive}
               applyHoverStylesToInnerSvg
               className={styles.trackTitleLink}
               aria-label={`View track: ${title || messages.loading}`}
             >
               <Text ellipses>{title || messages.loading}</Text>
-              {id === playingTrackId && isPlaying ? (
-                <IconVolume size='m' />
-              ) : null}
+              {isTrackPlaying ? <IconVolume size='m' /> : null}
               {loading ? (
                 <Skeleton
                   className={styles.skeleton}
