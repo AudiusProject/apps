@@ -57,6 +57,7 @@ const { makeGetCurrent } = playbackSelectors
 const { getPlaying, getBuffering } = playbackSelectors
 const {
   getLibraryTracksStatus,
+  getInitialFetchStatus,
   hasReachedEnd,
   getTrackSaves,
   getLocalTrackFavorites,
@@ -116,6 +117,7 @@ export const useLibraryPage = () => {
   const localReposts = useSelector(getLocalTrackReposts)
   const localPurchases = useSelector(getLocalTrackPurchases)
   const tracksFetchStatus = useSelector(getLibraryTracksStatus)
+  const initialFetch = useSelector(getInitialFetchStatus)
 
   const libraryTrackIds = useMemo(() => {
     const saveIds = trackSaves
@@ -321,18 +323,27 @@ export const useLibraryPage = () => {
   const tracks = useMemo(() => {
     const hasExpectedTrackRows =
       trackSaves.length > 0 || libraryTrackIds.length > 0
+    // Treat any "we expect rows but `defaultEntries` hasn't materialized"
+    // gap as LOADING. This holds skeletons in place across the saga's
+    // `fetchSavesSucceeded` → tan-query observer re-key → `defaultEntries`
+    // memo recompute chain, eliminating the empty-table flash.
     const hasPendingTrackRows =
       hasExpectedTrackRows && defaultEntries.length === 0
-    const status: Status = !hasRequestedInitialFetch
-      ? Status.LOADING
-      : tracksFetchStatus === Status.SUCCESS &&
-          !isLibraryTracksPending &&
-          !isLibraryUsersPending &&
-          !hasPendingTrackRows
-        ? Status.SUCCESS
-        : tracksFetchStatus === Status.ERROR
-          ? Status.ERROR
-          : Status.LOADING
+    // On a cold mount the saga hasn't yet put `fetchSavesRequested`, so
+    // `tracksFetchStatus` reads SUCCESS while `entries` is still empty —
+    // hold LOADING until either we observe the saga or the cache already
+    // has saves to render.
+    const status: Status =
+      !hasRequestedInitialFetch && trackSaves.length === 0
+        ? Status.LOADING
+        : tracksFetchStatus === Status.SUCCESS &&
+            !isLibraryTracksPending &&
+            !isLibraryUsersPending &&
+            !hasPendingTrackRows
+          ? Status.SUCCESS
+          : tracksFetchStatus === Status.ERROR
+            ? Status.ERROR
+            : Status.LOADING
     if (!sortedOrder) return { entries: defaultEntries, status }
     const byUid = new Map(defaultEntries.map((e) => [e.uid, e]))
     const ordered = sortedOrder
@@ -506,7 +517,6 @@ export const useLibraryPage = () => {
   )
 
   useEffect(() => {
-    setHasRequestedInitialFetch(true)
     fetchLibraryTracks(
       state.filterText,
       tracksCategory,
@@ -515,6 +525,16 @@ export const useLibraryPage = () => {
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run on mount
+
+  // Latch on the first time the saga reports the initial fetch is in flight.
+  // We can't set this synchronously next to `dispatch(fetchSaves)` because the
+  // saga puts `fetchSavesRequested` asynchronously (after `waitForRead` /
+  // `queryCurrentAccount`) — flipping it eagerly would let one render slip
+  // through with `tracksFetchStatus === SUCCESS` and an empty `entries`,
+  // briefly rendering the empty state.
+  useEffect(() => {
+    if (initialFetch) setHasRequestedInitialFetch(true)
+  }, [initialFetch])
 
   useEffect(() => {
     return () => {
