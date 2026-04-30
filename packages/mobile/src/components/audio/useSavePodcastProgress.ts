@@ -21,7 +21,7 @@ const events = [
   Event.PlaybackState,
   Event.PlaybackActiveTrackChanged,
   Event.PlaybackQueueEnded
-] as const
+]
 
 // Matches AudioPlayer.tsx's threshold for considering a track "ended".
 const TRACK_END_BUFFER = 2
