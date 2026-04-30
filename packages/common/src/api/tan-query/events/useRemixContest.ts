@@ -13,6 +13,10 @@ export type RemixContestData = {
   description: string
   prizeInfo: string
   winners: ID[]
+  title?: string
+  videoUrl?: string
+  coverPhotoUrl?: string
+  sourceTrackIds?: number[]
 }
 
 type RemixContestEvent = OverrideProperties<

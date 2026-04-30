@@ -45,7 +45,7 @@ import { TrackTileSize } from 'components/track/types'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { track, make } from 'services/analytics'
 import { selectDragnDropState } from 'store/dragndrop/slice'
-import { trackRemixesPage } from 'utils/route'
+import { contestPage } from 'utils/route'
 
 import { usePickWinnersPageParams } from './hooks'
 
@@ -160,10 +160,7 @@ export const PickWinnersPage = () => {
         }
       }
 
-      // Navigate back to the track remixes page for the original track
-      const pathname = trackRemixesPage(originalTrack?.permalink ?? '')
-      const search = new URLSearchParams({ isContestEntry: 'true' }).toString()
-      navigate(`${pathname}?${search}`)
+      navigate(contestPage(originalTrack?.permalink ?? ''))
     }
   }, [
     canFinalize,
@@ -189,9 +186,7 @@ export const PickWinnersPage = () => {
   ])
 
   const handleBack = useCallback(() => {
-    const pathname = trackRemixesPage(originalTrack?.permalink ?? '')
-    const search = new URLSearchParams({ isContestEntry: 'true' }).toString()
-    navigate(`${pathname}?${search}`)
+    navigate(contestPage(originalTrack?.permalink ?? ''))
   }, [navigate, originalTrack?.permalink])
 
   const pageHeader = (

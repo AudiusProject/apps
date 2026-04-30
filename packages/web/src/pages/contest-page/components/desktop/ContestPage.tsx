@@ -245,10 +245,11 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     unfollowEvent
   ])
 
-  const { imageUrl: coverArtUrl } = useTrackCoverArt({
+  const { imageUrl: trackCoverArtUrl } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
+  const coverArtUrl = contest?.eventData?.coverPhotoUrl || trackCoverArtUrl
 
   // Only render the Stems & Downloads panel when the track actually has
   // downloadable content. The DownloadSection component assumes a

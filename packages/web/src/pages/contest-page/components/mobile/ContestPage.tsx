@@ -307,10 +307,11 @@ const ContestPage = ({
     )
   }, [dispatch, trackId])
 
-  const { imageUrl: coverArtUrl } = useTrackCoverArt({
+  const { imageUrl: trackCoverArtUrl } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
+  const coverArtUrl = contest?.eventData?.coverPhotoUrl || trackCoverArtUrl
 
   // Updates tab visibility — for non-hosts, hide the tab until there's
   // at least one host-authored top-level post (a "post update"). The
