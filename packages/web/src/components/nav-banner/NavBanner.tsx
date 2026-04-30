@@ -19,7 +19,7 @@ const messages = {
 }
 
 type NavBannerProps = {
-  tabs?: ReactElement
+  tabs?: ReactElement | null
   dropdownDisabled?: boolean
   onChange?: (tab?: any) => void
   onSortByRecent?: () => void

@@ -22,9 +22,9 @@ import {
 } from '@audius/harmony'
 import { Link, useSearchParams } from 'react-router'
 
+import { Tab, TabList } from 'components/tabs'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import useTabs from 'hooks/useTabs/useTabs'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { track, make } from 'services/analytics'
 import { pickWinnersPage } from 'utils/route'
@@ -83,78 +83,48 @@ export const RemixContestSection = ({
     setContentHeight(height)
   }, [])
 
-  const tabs = [
-    {
-      text: messages.details,
-      label: 'details'
-    },
-    ...(hasPrizeInfo
-      ? [
-          {
-            text: messages.prizes,
-            label: 'prizes'
-          }
-        ]
-      : []),
-    ...(hasWinners
-      ? [
-          {
-            text: messages.winners,
-            label: 'winners'
-          }
-        ]
-      : [
-          {
-            text: remixCount
-              ? `${messages.submissions} (${remixCount})`
-              : messages.submissions,
-            label: 'submissions'
-          }
-        ])
-  ]
-
   const [urlSearchParams] = useSearchParams()
   const updateTabSearchParam = useUpdateSearchParams(TAB_PARAM)
-  const tab =
-    urlSearchParams.get(TAB_PARAM) ?? (hasWinners ? 'winners' : undefined)
+  const activeTab =
+    urlSearchParams.get(TAB_PARAM) ?? (hasWinners ? 'winners' : 'details')
 
-  const { tabs: TabBar, body: ContentBody } = useTabs({
-    onTabClick: updateTabSearchParam,
-    tabs,
-    initialTab: tab,
-    elements: [
-      <TabBody key='details' onHeightChange={handleHeightChange}>
+  const TabBar = (
+    <TabList value={activeTab} onChange={updateTabSearchParam}>
+      <Tab value='details'>{messages.details}</Tab>
+      {hasPrizeInfo ? <Tab value='prizes'>{messages.prizes}</Tab> : null}
+      {hasWinners ? (
+        <Tab value='winners'>{messages.winners}</Tab>
+      ) : (
+        <Tab value='submissions'>
+          {remixCount
+            ? `${messages.submissions} (${remixCount})`
+            : messages.submissions}
+        </Tab>
+      )}
+    </TabList>
+  )
+
+  const ContentBody = (
+    <TabBody onHeightChange={handleHeightChange}>
+      {activeTab === 'details' ? (
         <RemixContestDetailsTab trackId={trackId} />
-      </TabBody>,
-      ...(hasPrizeInfo
-        ? [
-            <TabBody key='prizes' onHeightChange={handleHeightChange}>
-              <RemixContestPrizesTab trackId={trackId} />
-            </TabBody>
-          ]
-        : []),
-      ...(hasWinners
-        ? [
-            <TabBody key='winners' onHeightChange={handleHeightChange}>
-              <RemixContestWinnersTab
-                trackId={trackId}
-                winnerIds={remixContest?.eventData?.winners ?? []}
-                count={remixCount}
-              />
-            </TabBody>
-          ]
-        : [
-            <TabBody key='submissions' onHeightChange={handleHeightChange}>
-              <RemixContestSubmissionsTab
-                trackId={trackId}
-                submissions={remixesList.slice(0, 10)}
-                count={remixCount}
-              />
-            </TabBody>
-          ])
-    ],
-    isMobile: false
-  })
+      ) : activeTab === 'prizes' && hasPrizeInfo ? (
+        <RemixContestPrizesTab trackId={trackId} />
+      ) : activeTab === 'winners' && hasWinners ? (
+        <RemixContestWinnersTab
+          trackId={trackId}
+          winnerIds={remixContest?.eventData?.winners ?? []}
+          count={remixCount}
+        />
+      ) : (
+        <RemixContestSubmissionsTab
+          trackId={trackId}
+          submissions={remixesList.slice(0, 10)}
+          count={remixCount}
+        />
+      )}
+    </TabBody>
+  )
 
   const pickWinnersRoute = pickWinnersPage(originalTrack?.permalink ?? '')
 

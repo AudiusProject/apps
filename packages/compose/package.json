@@ -10,7 +10,6 @@
     "@audius/sdk": "*",
     "@audius/spl": "*",
     "@pedalboard/solana-relay": "*",
-    "@pedalboard/trending-challenge-rewards": "*",
     "@pedalboard/staking": "*",
     "@pedalboard/archiver": "*"
   },

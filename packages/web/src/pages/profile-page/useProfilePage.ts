@@ -440,22 +440,9 @@ export const useProfilePage = () => {
         })
         dispatch(trackEvent)
       }
-      if (profile) {
-        let tab = `/${currLabel.toLowerCase()}`
-        if (isArtist) {
-          if (currLabel === ProfilePageTabs.TRACKS) {
-            tab = ''
-          }
-        } else {
-          if (currLabel === ProfilePageTabs.REPOSTS) {
-            tab = ''
-          }
-        }
-        window.history.replaceState({}, '', `/${profile.handle}${tab}`)
-      }
       setActiveTab(currLabel as ProfilePageTabs)
     },
-    [profile, isArtist, dispatch]
+    [dispatch]
   )
 
   const onEdit = useCallback(() => {

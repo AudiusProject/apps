@@ -166,12 +166,6 @@ services:
     <<: *common
 
   # Pedalboard (plugins)
-  trending-challenge-rewards:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: trending-challenge-rewards
-    <<: *common
-
   staking:
     extends:
       file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml

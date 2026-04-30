@@ -3,7 +3,6 @@ import {
   ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState
 } from 'react'
@@ -27,8 +26,8 @@ import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
+import { Tab, TabList } from 'components/tabs'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
-import useTabs from 'hooks/useTabs/useTabs'
 import { filters } from 'pages/search-page/SearchFilters'
 import { SearchResults } from 'pages/search-page/SearchResults'
 import { SortMethodFilterButton } from 'pages/search-page/SortMethodFilterButton'
@@ -69,30 +68,14 @@ export enum SearchTabs {
 }
 
 const tabHeaders = [
+  { value: SearchTabs.ALL, icon: <IconSearch />, text: SearchTabs.ALL },
+  { value: SearchTabs.PROFILES, icon: <IconUser />, text: SearchTabs.PROFILES },
+  { value: SearchTabs.TRACKS, icon: <IconNote />, text: SearchTabs.TRACKS },
+  { value: SearchTabs.ALBUMS, icon: <IconAlbum />, text: SearchTabs.ALBUMS },
   {
-    icon: <IconSearch />,
-    text: SearchTabs.ALL,
-    label: SearchTabs.ALL
-  },
-  {
-    icon: <IconUser />,
-    text: SearchTabs.PROFILES,
-    label: SearchTabs.PROFILES
-  },
-  {
-    icon: <IconNote />,
-    text: SearchTabs.TRACKS,
-    label: SearchTabs.TRACKS
-  },
-  {
-    icon: <IconAlbum />,
-    text: SearchTabs.ALBUMS,
-    label: SearchTabs.ALBUMS
-  },
-  {
+    value: SearchTabs.PLAYLISTS,
     icon: <IconPlaylists />,
-    text: SearchTabs.PLAYLISTS,
-    label: SearchTabs.PLAYLISTS
+    text: SearchTabs.PLAYLISTS
   }
 ]
 
@@ -175,27 +158,21 @@ const SearchExplorePage = ({
 
   const filterKeys: string[] = categories[categoryKey].filters
 
-  const tabsWithDisplayMode = useMemo(
-    () =>
-      tabHeaders.map((tab) => ({
-        ...tab,
-        hideText: shouldHideTabText
-      })),
-    [shouldHideTabText]
+  const tabs = (
+    <TabList value={capitalize(categoryKey)} onChange={handleSearchTab}>
+      {tabHeaders.map((tab) => (
+        <Tab
+          key={tab.value}
+          value={tab.value}
+          icon={tab.icon}
+          hideText={shouldHideTabText}
+        >
+          {tab.text}
+        </Tab>
+      ))}
+    </TabList>
   )
 
-  const tabElements = useMemo(
-    () => tabHeaders.map((tab) => <Flex key={tab.label}>{tab.text}</Flex>),
-    []
-  )
-
-  const { tabs } = useTabs({
-    isMobile: false,
-    tabs: tabsWithDisplayMode,
-    elements: tabElements,
-    onTabClick: handleSearchTab,
-    selectedTabLabel: capitalize(categoryKey)
-  })
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent =
     categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL

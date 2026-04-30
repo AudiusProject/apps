@@ -213,11 +213,7 @@ export const userMetadataToSdk = (
   // incorrectly non-nullable for these, so spread via pick to bypass TS while
   // preserving null at runtime.
   ...camelcaseKeys(
-    pick(input, [
-      'profile_type',
-      'spl_usdc_payout_wallet',
-      'coin_flair_mint'
-    ])
+    pick(input, ['profile_type', 'spl_usdc_payout_wallet', 'coin_flair_mint'])
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,

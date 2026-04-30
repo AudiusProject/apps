@@ -82,7 +82,6 @@ docker compose -f dev-tools/compose/docker-compose.pedalboard.dev.yml up app-tem
 docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
 
 NAMES                        IMAGE                                    STATUS
-trending-challenge-rewards   pedalboard-trending-challenge-rewards    Up 21 minutes
 app-template                 pedalboard-app-template                  Up 21 minutes
 ```
 

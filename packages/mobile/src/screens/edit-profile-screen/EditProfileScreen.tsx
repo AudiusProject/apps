@@ -3,6 +3,7 @@ import { useCallback } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import type { UserMetadata } from '@audius/common/models'
 import { SquareSizes, WidthSizes } from '@audius/common/models'
+import { MAX_BIO_LENGTH } from '@audius/common/services'
 import { profilePageActions } from '@audius/common/store'
 import type { FormikProps } from 'formik'
 import { Formik } from 'formik'
@@ -82,7 +83,7 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 label='Bio'
                 placeholder='Tell us about yourself'
                 multiline
-                maxLength={256}
+                maxLength={MAX_BIO_LENGTH}
                 noGutter
               />
               <TextField
