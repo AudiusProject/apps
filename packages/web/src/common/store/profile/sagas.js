@@ -11,7 +11,8 @@ import {
   chatActions,
   reachabilitySelectors,
   confirmerActions,
-  getSDK
+  getSDK,
+  toastActions
 } from '@audius/common/store'
 import {
   squashNewLines,
@@ -161,6 +162,11 @@ function* confirmUpdateProfile(userId, metadata) {
       },
       function* () {
         yield put(profileActions.updateProfileFailed())
+        yield put(
+          toastActions.toast({
+            content: "Couldn't save your profile. Please try again."
+          })
+        )
       },
       undefined,
       undefined,

@@ -1,3 +1,4 @@
+import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { View } from 'react-native'
 
 import { useTheme } from '@audius/harmony-native'
@@ -106,6 +107,7 @@ export const ProfileHeader = () => {
             name='name'
             label='Display Name'
             placeholder='Name'
+            maxLength={MAX_DISPLAY_NAME_LENGTH}
             noGutter
           />
         </View>
