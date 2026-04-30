@@ -25,6 +25,8 @@ import { FilterButtonScreen } from '@audius/harmony-native'
 import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
+import { SetAppTabNavigationContext } from 'app/screens/app-screen/AppTabNavigationProvider'
+import type { AppTabNavigation } from 'app/screens/app-screen/AppTabNavigationProvider'
 import { AudioScreen } from 'app/screens/audio-screen'
 import { CashScreen } from 'app/screens/cash-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
@@ -183,6 +185,7 @@ type AppTabScreenProps = {
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
   const { drawerNavigation, setIsAtStackRoot } = useContext(AppDrawerContext)
+  const { setNavigation } = useContext(SetAppTabNavigationContext)
   const isFocused = useIsFocused()
   const isAtStackRootRef = useRef(true)
 
@@ -227,13 +230,22 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     if (isFocused) applyDrawerSwipe(isAtStackRootRef.current)
   }, [isFocused, applyDrawerSwipe])
 
+  // Keep AppTabNavigationContext pointed at the active tab's stack so external
+  // surfaces like NowPlayingDrawer push onto whichever tab is currently in
+  // focus, regardless of stack depth.
+  const screenListeners = useCallback(
+    ({ navigation }: { navigation: any }) => ({
+      state: handleChangeState,
+      transitionEnd: handleTransitionEnd,
+      focus: () => setNavigation(navigation as AppTabNavigation)
+    }),
+    [handleChangeState, handleTransitionEnd, setNavigation]
+  )
+
   return (
     <Stack.Navigator
       screenOptions={screenOptions}
-      screenListeners={{
-        state: handleChangeState,
-        transitionEnd: handleTransitionEnd
-      }}
+      screenListeners={screenListeners}
     >
       {baseScreen(Stack)}
       <Stack.Screen name='Track' component={TrackScreen} />
