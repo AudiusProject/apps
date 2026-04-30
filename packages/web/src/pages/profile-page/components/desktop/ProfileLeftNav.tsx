@@ -1,5 +1,6 @@
 import { useArtistCreatedFanClub } from '@audius/common/api'
 import { ID } from '@audius/common/models'
+import { MAX_BIO_LENGTH } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import {
   Box,
@@ -141,6 +142,8 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               grows
               placeholder={messages.description}
               defaultValue={bio || ''}
+              maxLength={MAX_BIO_LENGTH}
+              showMaxLength
               onChange={(e) => onUpdateBio(e.target.value)}
             />
 
