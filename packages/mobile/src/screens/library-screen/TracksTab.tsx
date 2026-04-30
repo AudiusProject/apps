@@ -74,15 +74,26 @@ const useStyles = makeStyles(({ spacing }) => ({
 const FETCH_LIMIT = 50
 
 function useTracksWithUsers(trackUids: string[]) {
-  const trackIds = trackUids.map((uid) => Uid.fromString(uid).id as ID)
+  const trackIds = useMemo(
+    () => trackUids.map((uid) => Uid.fromString(uid).id as ID),
+    [trackUids]
+  )
   const { data: tracks = [], byId: tracksById } = useTracks(trackIds)
-  const { byId: usersById } = useUsers(tracks.map((track) => track.owner_id))
+  const ownerIds = useMemo(
+    () => tracks.map((track) => track.owner_id),
+    [tracks]
+  )
+  const { byId: usersById } = useUsers(ownerIds)
 
-  return trackUids.map((uid) => {
-    const track = tracksById[Uid.fromString(uid).id]
-    const user = usersById[track?.owner_id]
-    return { uid, track, user }
-  })
+  return useMemo(
+    () =>
+      trackUids.map((uid) => {
+        const track = tracksById[Uid.fromString(uid).id]
+        const user = usersById[track?.owner_id]
+        return { uid, track, user }
+      }),
+    [trackUids, tracksById, usersById]
+  )
 }
 
 export const TracksTab = () => {
