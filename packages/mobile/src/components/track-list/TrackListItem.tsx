@@ -221,14 +221,16 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
   const { isFetchingNFTAccess, hasStreamAccess } = useGatedContentAccess(track)
   const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
-  const isActive = useSelector((state) => {
-    const playingTrackId = getTrackId(state)
-    return track_id !== undefined && track_id === playingTrackId
-  })
+  const isActive = useSelector(
+    (state) => track_id !== undefined && getTrackId(state) === track_id
+  )
 
-  const isPlaying = useSelector((state) => {
-    return isActive && getPlaying(state)
-  })
+  const isPlaying = useSelector(
+    (state) =>
+      track_id !== undefined &&
+      getTrackId(state) === track_id &&
+      getPlaying(state)
+  )
   const isPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   // Unlike other gated tracks, USDC purchase gated tracks are playable because they have previews
   const isPlayable = !isDeleted && (!isLocked || isPurchaseGated)
@@ -262,8 +264,10 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
 
   const isLongFormContent =
     track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
-  const playbackPositionInfo = useSelector((state) =>
-    getTrackPosition(state, { trackId: track_id, userId: currentUserId })
+  const playbackPositionStatus = useSelector(
+    (state) =>
+      getTrackPosition(state, { trackId: track_id, userId: currentUserId })
+        ?.status
   )
 
   const handleOpenOverflowMenu = useCallback(() => {
@@ -289,7 +293,7 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
         : OverflowAction.VIEW_TRACK_PAGE,
       !showViewAlbum && album_backlink ? OverflowAction.VIEW_ALBUM_PAGE : null,
       isLongFormContent
-        ? playbackPositionInfo?.status === 'COMPLETED'
+        ? playbackPositionStatus === 'COMPLETED'
           ? OverflowAction.MARK_AS_UNPLAYED
           : OverflowAction.MARK_AS_PLAYED
         : null,
@@ -321,7 +325,7 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
     isLongFormContent,
     showViewAlbum,
     album_backlink,
-    playbackPositionInfo?.status,
+    playbackPositionStatus,
     isContextPlaylistOwner,
     dispatch,
     track_id,
