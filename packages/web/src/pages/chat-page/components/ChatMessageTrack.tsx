@@ -26,12 +26,9 @@ import { TrackTile } from 'components/track/mobile/TrackTile'
 import { TrackTileSize } from 'components/track/types'
 
 import { ChatUnfurlSkeleton } from './ChatUnfurlSkeleton'
-import { LinkPreview } from './LinkPreview'
 
 export const ChatMessageTrack = ({
   link,
-  chatId,
-  messageId,
   onEmpty,
   onSuccess,
   className
@@ -96,18 +93,19 @@ export const ChatMessageTrack = ({
   const hasResolvedTrack = !isPending && trackExists && !is_delete
 
   useEffect(() => {
-    // While the underlying track query is still pending we don't yet know
-    // whether the unfurl will resolve to a player or be empty — defer firing
-    // the parent callbacks so the URL text doesn't flash before the player.
+    // Defer firing parent callbacks while the permalink query is still
+    // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedTrack) {
       dispatch(make(Name.MESSAGE_UNFURL_TRACK, {}))
       onSuccess?.()
+    } else {
+      // Track URL resolved to nothing playable (deleted or missing) —
+      // signal empty so the bubble falls back to bare URL text rather than
+      // showing a misleading or generic preview.
+      onEmpty?.()
     }
-    // If the URL pattern-matches a track but no track exists (or it's
-    // deleted), fall through to LinkPreview below — LinkPreview will fire
-    // its own onEmpty/onSuccess once OG metadata resolves.
-  }, [isPending, hasResolvedTrack, onSuccess, dispatch])
+  }, [isPending, hasResolvedTrack, onSuccess, onEmpty, dispatch])
 
   if (isPending) {
     return <ChatUnfurlSkeleton className={className} />
@@ -135,17 +133,5 @@ export const ChatMessageTrack = ({
     )
   }
 
-  // URL looked like a track but resolved to nothing real — fall back to a
-  // generic OG link preview so the bubble doesn't snap from skeleton to
-  // bare URL text.
-  return (
-    <LinkPreview
-      className={className}
-      href={link}
-      chatId={chatId}
-      messageId={messageId}
-      onEmpty={onEmpty}
-      onSuccess={onSuccess}
-    />
-  )
+  return null
 }

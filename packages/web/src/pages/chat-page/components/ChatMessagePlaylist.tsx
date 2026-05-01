@@ -18,12 +18,9 @@ import { CollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTileSize } from 'components/track/types'
 
 import { ChatUnfurlSkeleton } from './ChatUnfurlSkeleton'
-import { LinkPreview } from './LinkPreview'
 
 export const ChatMessagePlaylist = ({
   link,
-  chatId,
-  messageId,
   onEmpty,
   onSuccess,
   className
@@ -76,19 +73,19 @@ export const ChatMessagePlaylist = ({
   const hasResolvedCollection = !isPending && collectionExists
 
   useEffect(() => {
-    // While the underlying collection query is still pending we don't yet
-    // know whether the unfurl will resolve to a player or be empty — defer
-    // firing the parent callbacks so the URL text doesn't flash before the
-    // player.
+    // Defer firing parent callbacks while the permalink query is still
+    // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedCollection) {
       dispatch(make(Name.MESSAGE_UNFURL_PLAYLIST, {}))
       onSuccess?.()
+    } else {
+      // Collection URL resolved to nothing playable (deleted or missing) —
+      // signal empty so the bubble falls back to bare URL text rather than
+      // showing a misleading or generic preview.
+      onEmpty?.()
     }
-    // If the URL pattern-matches a playlist/album but no collection exists
-    // (or it's deleted), fall through to LinkPreview below — LinkPreview
-    // will fire its own onEmpty/onSuccess once OG metadata resolves.
-  }, [isPending, hasResolvedCollection, onSuccess, dispatch])
+  }, [isPending, hasResolvedCollection, onSuccess, onEmpty, dispatch])
 
   if (isPending) {
     return <ChatUnfurlSkeleton className={className} />
@@ -116,17 +113,5 @@ export const ChatMessagePlaylist = ({
     )
   }
 
-  // URL looked like a playlist/album but resolved to nothing real — fall
-  // back to a generic OG link preview so the bubble doesn't snap from
-  // skeleton to bare URL text.
-  return (
-    <LinkPreview
-      className={className}
-      href={link}
-      chatId={chatId}
-      messageId={messageId}
-      onEmpty={onEmpty}
-      onSuccess={onSuccess}
-    />
-  )
+  return null
 }
