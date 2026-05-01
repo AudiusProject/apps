@@ -313,7 +313,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     <>
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        snapPoints={['50%', '85%', '100%']}
+        snapPoints={['50%', '85%', '95%']}
         topInset={insets.top}
         style={{
           borderTopRightRadius: COMMENT_DRAWER_BORDER_RADIUS,
@@ -334,6 +334,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
         footerComponent={renderFooterComponent}
         onDismiss={handleCloseDrawer}
         onChange={handleSheetChanges}
+        keyboardBlurBehavior='restore'
         android_keyboardInputMode='adjustResize'
       >
         <CommentSectionProvider

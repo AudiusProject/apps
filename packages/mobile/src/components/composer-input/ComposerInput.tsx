@@ -108,6 +108,8 @@ export const ComposerInput = forwardRef(function ComposerInput(
     styles: propStyles,
     TextInputComponent,
     onLayout,
+    onPressIn,
+    readOnly,
     maxLength = 10000,
     maxMentions = Infinity
   } = props
@@ -544,6 +546,8 @@ export const ComposerInput = forwardRef(function ComposerInput(
         multiline
         inputAccessoryViewID='none'
         maxLength={maxLength}
+        onPressIn={onPressIn}
+        readOnly={readOnly}
         autoCorrect
         TextInputComponent={TextInputComponent}
         onFocus={onFocus}
