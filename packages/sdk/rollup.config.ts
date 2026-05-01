@@ -40,8 +40,11 @@ const browserInternal = [
 
 export const outputConfigs = {
   /**
-   * SDK Node Package (ES Module)
-   * Used by third parties using ES Modules
+   * SDK Node Package (ES Module + CommonJS)
+   * Used by third parties consuming the SDK from Node. The `.cjs` output is
+   * resolved via the `require` condition in package.json#exports so legacy
+   * Node consumers (and CJS-heavy stacks) can `require('@audius/sdk')`
+   * without hitting ESM/CJS interop edges on transitive deps.
    */
   sdkConfigEs: {
     input: 'src/index.ts',
@@ -51,6 +54,13 @@ export const outputConfigs = {
         format: 'es',
         sourcemap: true,
         entryFileNames: '[name].esm.js'
+      },
+      {
+        dir: 'dist',
+        format: 'cjs',
+        sourcemap: true,
+        entryFileNames: '[name].cjs',
+        exports: 'named'
       }
     ],
     plugins: [
@@ -92,10 +102,13 @@ export const outputConfigs = {
   },
 
   /**
-   * SDK Browser Package (ES Module)
+   * SDK Browser Package (ES Module + CommonJS)
    * Used by the Audius Web Client and by extension the Desktop Client
    * - Includes polyfills for node libraries
    * - Includes deps that are ignored or polyfilled for browser
+   * The `.browser.cjs` output is resolved via the `browser`/`require`
+   * condition in package.json#exports so bundlers operating in CJS mode get
+   * the polyfilled build instead of the Node one.
    */
   sdkBrowserConfigEs: {
     input: 'src/index.ts',
@@ -105,6 +118,13 @@ export const outputConfigs = {
         format: 'es',
         sourcemap: true,
         entryFileNames: '[name].browser.esm.js'
+      },
+      {
+        dir: 'dist',
+        format: 'cjs',
+        sourcemap: true,
+        entryFileNames: '[name].browser.cjs',
+        exports: 'named'
       }
     ],
     plugins: [
