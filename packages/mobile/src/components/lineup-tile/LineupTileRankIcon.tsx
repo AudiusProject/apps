@@ -26,7 +26,7 @@ export const LineupTileRankIcon = (props: LineupTileRankIconProps) => {
   const styles = useStyles()
   const trackTileStyles = useTrackTileStyles()
   const { secondary } = useThemeColors()
-  const Icon = index < 5 ? IconCrown : IconTrending
+  const Icon = index < 10 ? IconCrown : IconTrending
   return (
     <View style={trackTileStyles.statItem}>
       <Icon fill={secondary} style={styles.icon} height={14} width={14} />
