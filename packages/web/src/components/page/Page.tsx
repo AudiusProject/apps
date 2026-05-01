@@ -48,7 +48,9 @@ const HeaderContainer = (props: HeaderContainerProps) => {
       })}
     >
       {disableHeaderFrosted ? (
-        headerElement
+        <div style={{ paddingInline: headerContentPaddingInline }}>
+          {headerElement}
+        </div>
       ) : (
         <Frosted contentPaddingInline={headerContentPaddingInline}>
           {headerElement}
