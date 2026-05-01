@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router'
 import { Cell } from 'react-table'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
+import FilterInput from 'components/filter-input/FilterInput'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
 import { TextLink, UserLink } from 'components/link'
 import { dateSorter, numericSorter, Table } from 'components/table'
@@ -350,7 +351,6 @@ const sortDirectionMap: Record<string, GetCoinsSortDirectionEnum> = {
 }
 
 type FanClubsTableProps = {
-  searchQuery?: string
   viewMode: FanClubsViewMode
 }
 
@@ -360,10 +360,7 @@ const isEmptyRow = (row: any) => {
   return Boolean(!row?.original || Object.keys(row.original).length === 0)
 }
 
-export const FanClubsTable = ({
-  searchQuery,
-  viewMode
-}: FanClubsTableProps) => {
+export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
   const mainContentRef = useMainContentRef()
   const navigate = useNavigate()
   const { onOpen: openBuySellModal } = useBuySellModal()
@@ -381,17 +378,53 @@ export const FanClubsTable = ({
     externalUsdcBalance,
     externalAudioBalance
   })
-  const [sortMethod, setSortMethod] = useState<GetCoinsSortMethodEnum>(
-    GetCoinsSortMethodEnum.MarketCap
+  const [sortSettings, setSortSettings] = useState({
+    cards: {
+      method: GetCoinsSortMethodEnum.Holder,
+      direction: GetCoinsSortDirectionEnum.Desc
+    },
+    table: {
+      method: GetCoinsSortMethodEnum.MarketCap,
+      direction: GetCoinsSortDirectionEnum.Desc
+    }
+  })
+  const sortMethod = sortSettings[viewMode].method
+  const sortDirection = sortSettings[viewMode].direction
+  const [searchValue, setSearchValue] = useState('')
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value),
+    []
   )
-  const [sortDirection, setSortDirection] = useState<GetCoinsSortDirectionEnum>(
-    GetCoinsSortDirectionEnum.Desc
-  )
+
+  // Ref so the stable FilterHeader component can always call the latest handler
+  const handleSearchChangeRef = useRef(handleSearchChange)
+  useEffect(() => {
+    handleSearchChangeRef.current = handleSearchChange
+  }, [handleSearchChange])
+
+  // Stable component reference — created once, never remounted on keystroke
+  const FilterHeader = useMemo(() => {
+    const Component = () => {
+      const [value, setValue] = useState('')
+      const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(e.target.value)
+        handleSearchChangeRef.current(e)
+      }, [])
+      return (
+        <div className={styles.filterHeader}>
+          <FilterInput placeholder='Filter' onChange={onChange} value={value} />
+        </div>
+      )
+    }
+    Component.displayName = 'FilterHeader'
+    return Component
+  }, [])
 
   const queryResult = useFanClubs({
     sortMethod,
     sortDirection,
-    query: searchQuery,
+    query: viewMode === 'table' ? searchValue || undefined : undefined,
     pageSize: FAN_CLUBS_BATCH_SIZE
   })
 
@@ -418,13 +451,15 @@ export const FanClubsTable = ({
 
   const onSort = useCallback(
     (method: string, direction: string) => {
-      const newSortMethod = sortMethodMap[method] ?? sortMethod
-      const newSortDirection = sortDirectionMap[direction] ?? sortDirection
-
-      setSortMethod(newSortMethod)
-      setSortDirection(newSortDirection)
+      setSortSettings((prev) => ({
+        ...prev,
+        [viewMode]: {
+          method: sortMethodMap[method] ?? prev[viewMode].method,
+          direction: sortDirectionMap[direction] ?? prev[viewMode].direction
+        }
+      }))
     },
-    [sortMethod, sortDirection]
+    [viewMode]
   )
 
   const handleBuy = useCallback(
@@ -461,6 +496,7 @@ export const FanClubsTable = ({
     const baseColumns = { ...tableColumnMap }
     baseColumns.tokenName = {
       ...baseColumns.tokenName,
+      Header: FilterHeader,
       Cell: (cellInfo: CoinCell) =>
         renderTokenNameCell(cellInfo, handleViewCoin)
     }
@@ -478,7 +514,7 @@ export const FanClubsTable = ({
       baseColumns.holders,
       baseColumns.buy
     ]
-  }, [handleBuy, handleViewCoin])
+  }, [handleBuy, handleViewCoin, FilterHeader])
   const cards = useMemo(
     () =>
       coins?.map((coin) => <FanClubCoinCard key={coin.mint} coin={coin} />) ??

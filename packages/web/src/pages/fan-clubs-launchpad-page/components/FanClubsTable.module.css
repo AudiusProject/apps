@@ -19,6 +19,20 @@
   overflow: hidden;
 }
 
+.filterHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-transform: none;
+  padding-left: 24px;
+  margin-bottom: 8px;
+}
+
+.filterHeader > div {
+  width: 100%;
+}
+
 .tokenIconButton {
   display: inline-flex;
   align-items: center;

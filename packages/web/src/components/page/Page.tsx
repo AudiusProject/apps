@@ -19,7 +19,9 @@ type HeaderContainerProps = Pick<
   | 'header'
   | 'showSearch'
   | 'headerContentPaddingInline'
+  | 'subHeader'
   | 'disableHeaderFrosted'
+  | 'frostedHeaderContainer'
 >
 
 const HeaderContainer = (props: HeaderContainerProps) => {
@@ -27,7 +29,9 @@ const HeaderContainer = (props: HeaderContainerProps) => {
     header,
     showSearch,
     headerContentPaddingInline,
-    disableHeaderFrosted
+    subHeader,
+    disableHeaderFrosted,
+    frostedHeaderContainer
   } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
@@ -37,7 +41,12 @@ const HeaderContainer = (props: HeaderContainerProps) => {
   })
 
   return (
-    <div ref={headerContainerRef} className={styles.headerContainer}>
+    <div
+      ref={headerContainerRef}
+      className={cn(styles.headerContainer, {
+        [styles.headerContainerFrosted]: frostedHeaderContainer
+      })}
+    >
       {disableHeaderFrosted ? (
         headerElement
       ) : (
@@ -45,10 +54,11 @@ const HeaderContainer = (props: HeaderContainerProps) => {
           {headerElement}
         </Frosted>
       )}
+      {subHeader}
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}
-      <div className={styles.headerBoxShadow} />
+      {!subHeader && <div className={styles.headerBoxShadow} />}
     </div>
   )
 }
@@ -64,8 +74,10 @@ type PageProps = {
   fromOpacity?: number
   fadeDuration?: number
   header?: ReactNode
+  subHeader?: ReactNode
   headerContentPaddingInline?: string
   disableHeaderFrosted?: boolean
+  frostedHeaderContainer?: boolean
 
   // There are some pages which don't have a fixed header but still display
   // a search bar that scrolls with the page.
@@ -92,8 +104,10 @@ export const Page = (props: PageProps) => {
     fadeDuration = 200,
     fromOpacity = 0.2,
     header,
+    subHeader,
     headerContentPaddingInline = 'var(--harmony-unit-8)',
     disableHeaderFrosted = false,
+    frostedHeaderContainer = false,
     image,
     noIndex = false,
     ogDescription,
@@ -139,9 +153,11 @@ export const Page = (props: PageProps) => {
         {header && (
           <HeaderContainer
             header={header}
+            subHeader={subHeader}
             showSearch={showSearch}
             headerContentPaddingInline={headerContentPaddingInline}
             disableHeaderFrosted={disableHeaderFrosted}
+            frostedHeaderContainer={frostedHeaderContainer}
           />
         )}
         <div

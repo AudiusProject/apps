@@ -32,12 +32,7 @@ import {
   useSearchCategory,
   useShowSearchResults
 } from 'pages/search-page/hooks'
-import {
-  Category,
-  CategoryKey,
-  CategoryView,
-  ViewLayout
-} from 'pages/search-page/types'
+import { Category, CategoryKey, CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
@@ -81,7 +76,6 @@ const SearchExplorePage = ({
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   const previousDebouncedValue = usePrevious(debouncedValue)
   const showSearchResults = useShowSearchResults()
-  const [tracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
@@ -237,10 +231,7 @@ const SearchExplorePage = ({
           </RadioGroup>
         </Flex>
         {inputValue || showSearchResults ? (
-          <SearchResults
-            tracksLayout={tracksLayout}
-            handleSearchTab={handleSearchTab}
-          />
+          <SearchResults handleSearchTab={handleSearchTab} />
         ) : null}
         <Flex
           direction='column'
