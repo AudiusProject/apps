@@ -272,6 +272,8 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
             {isCollection ? (
               <ChatMessagePlaylist
                 key={`${link.value}-${link.start}-${link.end}`}
+                chatId={chatId}
+                messageId={messageId}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
@@ -280,6 +282,8 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
             ) : isTrack ? (
               <ChatMessageTrack
                 key={`${link.value}-${link.start}-${link.end}`}
+                chatId={chatId}
+                messageId={messageId}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
