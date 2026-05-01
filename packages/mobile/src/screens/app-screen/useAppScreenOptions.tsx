@@ -7,7 +7,7 @@ import type {
   NativeStackNavigationProp
 } from '@react-navigation/native-stack'
 import { CardStyleInterpolators } from '@react-navigation/stack'
-import { Platform, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 import {
   IconAudiusLogoHorizontal,
@@ -132,26 +132,15 @@ export const useAppScreenOptions = <
               </Text>
             )
           }
-          // Android: render the Audius logo as the centered header title on
-          // root screens. Android's stack transition doesn't snapshot/cross-
-          // fade the header the way UIKit does, so a per-screen logo here
-          // doesn't fade awkwardly on push/pop.
-          //
-          // iOS: rendered as a top-level overlay in AppDrawerScreen instead
-          // (positioned behind the Dynamic Island, only visible in App Store
-          // screenshots) so it stays put during stack transitions.
-          if (Platform.OS === 'android') {
-            return (
-              <View>
-                <IconAudiusLogoHorizontal
-                  height={24}
-                  width={100}
-                  color='subdued'
-                />
-              </View>
-            )
-          }
-          return null
+          return (
+            <View>
+              <IconAudiusLogoHorizontal
+                height={24}
+                width={100}
+                color='subdued'
+              />
+            </View>
+          )
         },
         headerRightContainerStyle: styles.headerRight,
         headerRight: () => {
