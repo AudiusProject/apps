@@ -54,10 +54,7 @@ type TrackListProps = BaseTrackListProps &
   )
 
 const noOp = () => {}
-const keyExtractor = (
-  item: string | number | LoadingItem,
-  index: number
-) => {
+const keyExtractor = (item: string | number | LoadingItem, index: number) => {
   if (typeof item === 'object' && '_loading' in item) return `loading-${index}`
   return String(item)
 }

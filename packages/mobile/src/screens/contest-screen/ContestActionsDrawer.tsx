@@ -55,7 +55,10 @@ export const ContestActionsDrawer = () => {
   // labels to match their icons in the neutral/default text color,
   // so pass an explicit override style on each row — `style` is
   // spread onto the row's Text inside `ActionDrawer`.
-  const rowStyle = { color: color.text.default }
+  const rowStyle = useMemo(
+    () => ({ color: color.text.default }),
+    [color.text.default]
+  )
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: track } = useTrack(trackId ?? null)
