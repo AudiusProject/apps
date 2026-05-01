@@ -25,7 +25,7 @@ export const ExploreContent = () => {
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
   const showTrackContent = category === 'tracks' || category === 'all'
   const showPlaylistContent = category === 'playlists' || category === 'all'
-  const showAlbumContent = category === 'albums' || category === 'all'
+  const showAlbumContent = category === 'albums'
   const showUserContent = category === 'users' || category === 'all'
 
   return (
