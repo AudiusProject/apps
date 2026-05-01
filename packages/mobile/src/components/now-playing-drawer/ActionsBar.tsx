@@ -31,11 +31,13 @@ import {
   IconButton,
   IconCastAirplay,
   IconCastChromecast,
+  IconIndent,
   IconKebabHorizontal,
   Button,
   IconMessage
 } from '@audius/harmony-native'
 import { useAirplay } from 'app/components/audio/Airplay'
+import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
@@ -60,6 +62,7 @@ const messages = {
   castLabel: 'Cast to Device',
   shareLabel: 'Share Content',
   optionsLabel: 'More Options',
+  queueLabel: 'Queue',
   price: (price: number) => `$${USDC(price / 100).toLocaleString()}`
 }
 
@@ -112,6 +115,7 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   const navigation = useNavigation()
 
   const { open } = useCommentDrawer()
+  const { onOpen: openQueue } = useDrawer('Queue')
   const isOwner = track?.owner_id === accountUserId
 
   const isUnlisted = track?.is_unlisted
@@ -307,14 +311,27 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
     )
   }
 
+  const renderQueueButton = () => {
+    return (
+      <IconButton
+        icon={IconIndent}
+        onPress={openQueue}
+        size='l'
+        aria-label={messages.queueLabel}
+        style={styles.button}
+      />
+    )
+  }
+
   return (
     <View style={styles.container}>
       {shouldShowPurchasePill ? renderPurchaseButton() : null}
       <View style={styles.actions}>
-        {renderCastButton()}
-        {shouldShowActions ? renderRepostButton() : null}
         {shouldShowActions ? renderFavoriteButton() : null}
+        {shouldShowActions ? renderRepostButton() : null}
         {shouldShowActions ? renderCommentsButton() : null}
+        {renderQueueButton()}
+        {renderCastButton()}
         {renderOptionsButton()}
       </View>
     </View>

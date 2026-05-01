@@ -37,6 +37,7 @@ import { PlaybackRateDrawer } from 'app/components/playback-rate-drawer'
 import { PremiumContentPurchaseDrawer } from 'app/components/premium-content-purchase-drawer'
 import { ProfileActionsDrawer } from 'app/components/profile-actions-drawer'
 import { PurchaseVendorDrawer } from 'app/components/purchase-vendor-drawer/PurchaseVendorDrawer'
+import { QueueDrawer } from 'app/components/queue-drawer'
 import { RateCtaDrawer } from 'app/components/rate-cta-drawer'
 import { ReceiveTokensDrawer } from 'app/components/receive-tokens-drawer'
 import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
@@ -174,6 +175,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,
+  Queue: QueueDrawer,
   ContestActions: ContestActionsDrawer,
   CoinInsightsOverflowMenu,
   WalletRowOverflowMenu

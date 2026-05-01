@@ -24,8 +24,10 @@ import {
   mobileOverflowMenuUISelectors,
   shareModalUIActions,
   OverflowAction,
+  playbackActions,
   playbackPositionActions,
   PurchaseableContentType,
+  QueueSource,
   usePremiumContentPurchaseModal,
   usePublishConfirmationModal,
   trackPageActions,
@@ -57,7 +59,9 @@ type Props = {
 
 const messages = {
   markedAsPlayed: 'Marked as Played',
-  markedAsUnplayed: 'Marked as Unplayed'
+  markedAsUnplayed: 'Marked as Unplayed',
+  willPlayNext: 'Will play next',
+  addedToQueue: 'Added to queue'
 }
 
 const TrackOverflowMenuDrawer = ({ render }: Props) => {
@@ -226,7 +230,23 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
     [OverflowAction.SET_ARTIST_PICK]: handleSetAsArtistPick,
     [OverflowAction.UNSET_ARTIST_PICK]: handleUnsetAsArtistPick,
     [OverflowAction.VIEW_COMMENTS]: handleOpenCommentsDrawer,
-    [OverflowAction.HOST_REMIX_CONTEST]: handleOpenRemixContestDrawer
+    [OverflowAction.HOST_REMIX_CONTEST]: handleOpenRemixContestDrawer,
+    [OverflowAction.PLAY_NEXT]: () => {
+      dispatch(
+        playbackActions.playNext({
+          track: { trackId: id, source: QueueSource.RECOMMENDED_TRACKS }
+        })
+      )
+      toast({ content: messages.willPlayNext })
+    },
+    [OverflowAction.ADD_TO_QUEUE]: () => {
+      dispatch(
+        playbackActions.addToQueue({
+          tracks: [{ trackId: id, source: QueueSource.RECOMMENDED_TRACKS }]
+        })
+      )
+      toast({ content: messages.addedToQueue })
+    }
   }
 
   return render(callbacks)

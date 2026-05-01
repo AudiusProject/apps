@@ -272,6 +272,12 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
 
   const handleOpenOverflowMenu = useCallback(() => {
     const overflowActions = [
+      !isLocked && (!isUnlisted || isTrackOwner)
+        ? OverflowAction.PLAY_NEXT
+        : null,
+      !isLocked && (!isUnlisted || isTrackOwner)
+        ? OverflowAction.ADD_TO_QUEUE
+        : null,
       !isUnlisted || isTrackOwner ? OverflowAction.SHARE : null,
       !isTrackOwner && !isLocked && !isUnlisted
         ? has_current_user_saved

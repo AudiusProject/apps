@@ -207,6 +207,8 @@ const TrackTileComponent = (props: TrackTileProps) => {
       isOwner && user?.artist_pick_track_id === track.track_id
 
     const overflowActions = [
+      !track.is_unlisted || isOwner ? OverflowAction.PLAY_NEXT : null,
+      !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_QUEUE : null,
       isOwner && !track.ddex_app ? OverflowAction.ADD_TO_ALBUM : null,
       !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_PLAYLIST : null,
       isLongFormContent
