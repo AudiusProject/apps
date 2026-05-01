@@ -1,6 +1,6 @@
 {
   "name": "@audius/mobile",
-  "version": "1.5.179",
+  "version": "1.5.180",
   "private": true,
   "scripts": {
     "android:dev": "ENVFILE=.env.dev turbo run android -- --mode=prodDebug",
@@ -217,7 +217,9 @@
   },
   "jest": {
     "preset": "react-native",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "moduleNameMapper": {
       "^react-native$": "<rootDir>/node_modules/react-native",
       "^@testing-library/react-native$": "<rootDir>/node_modules/@testing-library/react-native"
