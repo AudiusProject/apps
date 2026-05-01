@@ -9,12 +9,7 @@ import {
   useGatedContentAccess,
   useToggleTrack
 } from '@audius/common/hooks'
-import {
-  Name,
-  PlaybackSource,
-  ID,
-  ModalSource
-} from '@audius/common/models'
+import { Name, PlaybackSource, ID, ModalSource } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
 import { getPathFromTrackUrl } from '@audius/common/utils'
 import { useQuery } from '@tanstack/react-query'
