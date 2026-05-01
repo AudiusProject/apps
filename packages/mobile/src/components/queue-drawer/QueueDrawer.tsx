@@ -212,7 +212,6 @@ type UpNextItem = {
 type QueuedItem = {
   kind: 'queued'
   trackId: ID
-  uid?: string
   queueIndex: number
 }
 type NowPlayingItem = {
@@ -280,7 +279,6 @@ export const QueueDrawer = () => {
       queuedTracks.map((t, i) => ({
         kind: 'queued' as const,
         trackId: t.trackId,
-        uid: t.uid,
         queueIndex: upNextStart + i
       })),
     [queuedTracks, upNextStart]
@@ -311,17 +309,17 @@ export const QueueDrawer = () => {
   const handleReorder = useCallback(
     ({ from, to }: { from: number; to: number }) => {
       if (from === to) return
-      const orderedUids = queue
-        .map((t) => t.uid)
-        .filter((uid): uid is string => !!uid)
-      if (orderedUids.length !== queue.length) return
-      const head = orderedUids.slice(0, upNextStart)
-      const tail = orderedUids.slice(upNextStart)
-      const [moved] = tail.splice(from, 1)
-      tail.splice(to, 0, moved)
-      dispatch(reorder({ orderedUids: [...head, ...tail] }))
+      const orderedIndices = Array.from({ length: queue.length }, (_, i) => i)
+      const movable = orderedIndices.slice(upNextStart)
+      const [moved] = movable.splice(from, 1)
+      movable.splice(to, 0, moved)
+      dispatch(
+        reorder({
+          orderedIndices: [...orderedIndices.slice(0, upNextStart), ...movable]
+        })
+      )
     },
-    [dispatch, queue, upNextStart]
+    [dispatch, queue.length, upNextStart]
   )
 
   const handleAddNextFromToQueue = useCallback(
@@ -415,7 +413,7 @@ export const QueueDrawer = () => {
                 item.kind === 'now-playing'
                   ? `np-${item.trackId}`
                   : item.kind === 'queued'
-                    ? `q-${item.uid ?? item.trackId}-${item.queueIndex}`
+                    ? `q-${item.queueIndex}`
                     : `un-${item.trackId}-${i}`
               }
               renderItem={renderQueuedItem as any}

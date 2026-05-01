@@ -84,8 +84,7 @@ type DraggableStateSnapshot = {
   isDropAnimating?: boolean
 }
 
-const trackKey = (t: PlaybackTrack, index: number) =>
-  t.uid ? `${t.uid}` : `${t.trackId}-${index}`
+const trackKey = (t: PlaybackTrack, index: number) => `${t.trackId}-${index}`
 
 type QueueRowProps = {
   trackId: ID
@@ -259,31 +258,23 @@ export const QueueTab = ({ onClose }: QueueTabProps) => {
   const handleDragEnd = useCallback(
     (result: DropResult) => {
       if (!result.destination) return
-      const sourceIndex = nextInQueueStart + result.source.index
-      const destIndex = nextInQueueStart + result.destination.index
-      if (sourceIndex === destIndex) return
-      const orderedUids = queue
-        .map((t, i) => ({ uid: t.uid, i }))
-        .filter((e): e is { uid: string; i: number } => !!e.uid)
-        .map((e) => e.uid)
-      // Build new order: identify uid order excluding the moved item, then
-      // insert it at the destination relative position.
-      const tailUids = nextInQueue
-        .map((t) => t.uid)
-        .filter((uid): uid is string => !!uid)
-      if (tailUids.length !== nextInQueue.length) {
-        // Some items lack a uid — fall back to no-op (shouldn't happen in practice).
-        return
-      }
-      const moved = tailUids.splice(result.source.index, 1)[0]
-      tailUids.splice(result.destination.index, 0, moved)
-      const headUids = orderedUids.slice(
-        0,
-        Math.max(0, orderedUids.length - nextInQueue.length)
+      const tailLen = nextInQueue.length
+      if (tailLen <= 1) return
+      if (result.source.index === result.destination.index) return
+      const orderedIndices = Array.from({ length: queue.length }, (_, i) => i)
+      const movable = orderedIndices.slice(nextInQueueStart)
+      const [moved] = movable.splice(result.source.index, 1)
+      movable.splice(result.destination.index, 0, moved)
+      dispatch(
+        reorder({
+          orderedIndices: [
+            ...orderedIndices.slice(0, nextInQueueStart),
+            ...movable
+          ]
+        })
       )
-      dispatch(reorder({ orderedUids: [...headUids, ...tailUids] }))
     },
-    [dispatch, nextInQueueStart, queue, nextInQueue]
+    [dispatch, nextInQueueStart, nextInQueue.length, queue.length]
   )
 
   if (queue.length === 0) {
