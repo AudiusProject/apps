@@ -8,7 +8,6 @@ const { createFpClient } = require('./fpClient')
 const optimizelySDK = require('@optimizely/optimizely-sdk')
 const Sentry = require('@sentry/node')
 const cluster = require('cluster')
-const NotificationProcessor = require('./notifications/index.js')
 const config = require('./config.js')
 const txRelay = require('./relay/txRelay')
 const ethTxRelay = require('./relay/ethTxRelay')
@@ -20,7 +19,6 @@ const { generateETHWalletLockKey } = require('./relay/ethTxRelay.js')
 
 const { SlackReporter } = require('./utils/slackReporter')
 const { sendResponse, errorResponseServerError } = require('./apiHelpers')
-const { fetchAnnouncements } = require('./announcements')
 const { logger, loggingMiddleware } = require('./logging')
 const {
   getRateLimiter,
@@ -45,16 +43,6 @@ class App {
     this.optimizelyPromise = null
     this.optimizelyClientInstance = this.configureOptimizely()
 
-    // Async job configuration
-    this.notificationProcessor = new NotificationProcessor({
-      errorHandler: (error) => {
-        try {
-          return Sentry.captureException(error)
-        } catch (sentryError) {
-          logger.error(`Received error from Sentry ${sentryError}`)
-        }
-      }
-    })
     // Note: The order of the following functions is IMPORTANT, as it sets the functions
     // that process a request in the order applied
     this.expressSettings()
@@ -89,9 +77,7 @@ class App {
       await Lock.clearAllLocks(generateWalletLockKey('*'))
       await Lock.clearAllLocks(generateETHWalletLockKey('*'))
 
-      // if it's a non test run
-      // 1. start notifications processing
-      // 2. fork web server worker processes
+      // if it's a non test run, fork web server worker processes
       if (!config.get('isTestRun')) {
         // Fork extra web server workers
         // note - we can't have more than 1 worker at the moment because POA and ETH relays
@@ -108,7 +94,6 @@ class App {
         })
 
         const audiusInstance = await this.configureAudiusInstance()
-        cluster.fork({ WORKER_TYPE: 'notifications' })
 
         await this.configureDiscoveryNodeRegistration(audiusInstance)
         await this.configureReporter()
@@ -142,31 +127,23 @@ class App {
       return { app: this.express, server }
     } else {
       // if it's not the master worker in the cluster
-      const audiusInstance = await this.configureAudiusInstance()
+      await this.configureAudiusInstance()
 
       await this.configureReporter()
 
-      if (process.env.WORKER_TYPE === 'notifications') {
-        await this.notificationProcessor.init(
-          audiusInstance,
-          this.express,
-          this.redisClient
-        )
-      } else {
-        await new Promise((resolve) => {
-          server = this.express.listen(this.port, resolve)
-        })
-        server.setTimeout(config.get('setTimeout'))
-        server.timeout = config.get('timeout')
-        server.keepAliveTimeout = config.get('keepAliveTimeout')
-        server.headersTimeout = config.get('headersTimeout')
+      await new Promise((resolve) => {
+        server = this.express.listen(this.port, resolve)
+      })
+      server.setTimeout(config.get('setTimeout'))
+      server.timeout = config.get('timeout')
+      server.keepAliveTimeout = config.get('keepAliveTimeout')
+      server.headersTimeout = config.get('headersTimeout')
 
-        this.express.set('redis', this.redisClient)
-        this.express.set('fpClient', this.fpClient)
+      this.express.set('redis', this.redisClient)
+      this.express.set('fpClient', this.fpClient)
 
-        logger.info(`Listening on port ${this.port}...`)
-        return { app: this.express, server }
-      }
+      logger.info(`Listening on port ${this.port}...`)
+      return { app: this.express, server }
     }
   }
 

@@ -6,7 +6,6 @@ import { useFocusEffect } from '@react-navigation/native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
-import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { NotificationList } from './NotificationList'
@@ -16,7 +15,6 @@ const messages = {
 }
 
 export const NotificationsScreen = () => {
-  useAppTabScreen()
   const { mutate: markAsViewed } = useMarkNotificationsAsViewed()
 
   const handleMarkAsViewed = useCallback(() => {

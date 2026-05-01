@@ -57,6 +57,7 @@ const { makeGetCurrent } = playbackSelectors
 const { getPlaying, getBuffering } = playbackSelectors
 const {
   getLibraryTracksStatus,
+  getInitialFetchStatus,
   hasReachedEnd,
   getTrackSaves,
   getLocalTrackFavorites,
@@ -103,6 +104,8 @@ export const useLibraryPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const lastCategoryUrlRef = useRef<string | null>(null)
+  const [hasRequestedInitialFetch, setHasRequestedInitialFetch] =
+    useState(false)
 
   const currentTrack = useCurrentTrack()
 
@@ -114,9 +117,12 @@ export const useLibraryPage = () => {
   const localReposts = useSelector(getLocalTrackReposts)
   const localPurchases = useSelector(getLocalTrackPurchases)
   const tracksFetchStatus = useSelector(getLibraryTracksStatus)
+  const initialFetch = useSelector(getInitialFetchStatus)
 
   const libraryTrackIds = useMemo(() => {
-    const saveIds = trackSaves.map((s: any) => s.save_item_id as ID)
+    const saveIds = trackSaves
+      .map((s: any) => s.save_item_id as ID | undefined)
+      .filter((id): id is ID => Boolean(id))
     const localIds = Array.from(
       new Set([
         ...Object.keys(localFavorites).map(Number),
@@ -143,7 +149,8 @@ export const useLibraryPage = () => {
     () => (libraryFetchedTracks ?? []).map((t) => t.owner_id),
     [libraryFetchedTracks]
   )
-  const { byId: libraryUsersById } = useUsers(libraryOwnerIds)
+  const { byId: libraryUsersById, isPending: isLibraryUsersPending } =
+    useUsers(libraryOwnerIds)
 
   const defaultEntries = useMemo(() => {
     return libraryTrackIds
@@ -314,12 +321,29 @@ export const useLibraryPage = () => {
   }, [])
 
   const tracks = useMemo(() => {
+    const hasExpectedTrackRows =
+      trackSaves.length > 0 || libraryTrackIds.length > 0
+    // Treat any "we expect rows but `defaultEntries` hasn't materialized"
+    // gap as LOADING. This holds skeletons in place across the saga's
+    // `fetchSavesSucceeded` → tan-query observer re-key → `defaultEntries`
+    // memo recompute chain, eliminating the empty-table flash.
+    const hasPendingTrackRows =
+      hasExpectedTrackRows && defaultEntries.length === 0
+    // On a cold mount the saga hasn't yet put `fetchSavesRequested`, so
+    // `tracksFetchStatus` reads SUCCESS while `entries` is still empty —
+    // hold LOADING until either we observe the saga or the cache already
+    // has saves to render.
     const status: Status =
-      tracksFetchStatus === Status.SUCCESS && !isLibraryTracksPending
-        ? Status.SUCCESS
-        : tracksFetchStatus === Status.ERROR
-          ? Status.ERROR
-          : Status.LOADING
+      !hasRequestedInitialFetch && trackSaves.length === 0
+        ? Status.LOADING
+        : tracksFetchStatus === Status.SUCCESS &&
+            !isLibraryTracksPending &&
+            !isLibraryUsersPending &&
+            !hasPendingTrackRows
+          ? Status.SUCCESS
+          : tracksFetchStatus === Status.ERROR
+            ? Status.ERROR
+            : Status.LOADING
     if (!sortedOrder) return { entries: defaultEntries, status }
     const byUid = new Map(defaultEntries.map((e) => [e.uid, e]))
     const ordered = sortedOrder
@@ -331,7 +355,16 @@ export const useLibraryPage = () => {
         ordered.length === defaultEntries.length ? ordered : defaultEntries,
       status
     }
-  }, [defaultEntries, sortedOrder, tracksFetchStatus, isLibraryTracksPending])
+  }, [
+    defaultEntries,
+    sortedOrder,
+    tracksFetchStatus,
+    isLibraryTracksPending,
+    isLibraryUsersPending,
+    hasRequestedInitialFetch,
+    trackSaves.length,
+    libraryTrackIds.length
+  ])
 
   const updatePlaylistLastViewedAt = useCallback(
     (playlistId: number) => {
@@ -493,6 +526,16 @@ export const useLibraryPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // Only run on mount
 
+  // Latch on the first time the saga reports the initial fetch is in flight.
+  // We can't set this synchronously next to `dispatch(fetchSaves)` because the
+  // saga puts `fetchSavesRequested` asynchronously (after `waitForRead` /
+  // `queryCurrentAccount`) — flipping it eagerly would let one render slip
+  // through with `tracksFetchStatus === SUCCESS` and an empty `entries`,
+  // briefly rendering the empty state.
+  useEffect(() => {
+    if (initialFetch) setHasRequestedInitialFetch(true)
+  }, [initialFetch])
+
   useEffect(() => {
     return () => {
       resetSavedTracks()
@@ -601,15 +644,29 @@ export const useLibraryPage = () => {
       )
   }, [formattedEntries, state.filterText])
 
-  const isQueued = useCallback(() => {
-    return tracks.entries.some(
-      (entry: any) => currentQueueItem.uid === entry.uid
+  // The currently-playing entry's uid (as constructed locally for the
+  // SAVED_TRACKS lineup), or null if a different source is playing.
+  const currentPlayingUid = useMemo(() => {
+    if (
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== playbackSource
+    ) {
+      return null
+    }
+    return makeStableUid(
+      'tracks' as any,
+      currentQueueItem.trackId,
+      playbackSource
     )
-  }, [tracks.entries, currentQueueItem.uid])
+  }, [currentQueueItem.trackId, currentQueueItem.source])
+
+  const isQueued = useCallback(() => {
+    return tracks.entries.some((entry: any) => currentPlayingUid === entry.uid)
+  }, [tracks.entries, currentPlayingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return currentPlayingUid
+  }, [currentPlayingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null

@@ -1,0 +1,35 @@
+name: PR Preview Cleanup
+
+# Deletes the per-PR Cloudflare Workers that web.yml deploys on PR open/sync.
+# Triggers ONLY on pull_request: closed so the rest of web.yml's build/test/deploy
+# jobs are not re-run on close.
+#
+# The matching deploy step is in .github/workflows/web.yml :: web-deploy-preview
+# Worker names: audius-web-preview-pr-<N>  and  audius-web-ssr-preview-pr-<N>
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-web-preview-workers:
+    name: Delete PR preview workers
+    runs-on: ubuntu-latest
+    # No paths: filter on purpose — wrangler delete is idempotent and we'd
+    # rather run a no-op than miss a cleanup.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Delete PR preview workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          cd packages/web
+          MAIN_NAME="audius-web-preview-pr-${PR_NUM}"
+          SSR_NAME="audius-web-ssr-preview-pr-${PR_NUM}"
+          echo "Attempting to delete $MAIN_NAME and $SSR_NAME"
+          npx wrangler@4.54.0 delete --name "$MAIN_NAME" --config ./wrangler.toml         --force 2>&1 || true
+          npx wrangler@4.54.0 delete --name "$SSR_NAME"  --config ./src/ssr/wrangler.toml --force 2>&1 || true
+        continue-on-error: true

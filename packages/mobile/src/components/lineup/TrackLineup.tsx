@@ -165,13 +165,15 @@ export const TrackLineup = ({
   )
 
   const togglePlay = useCallback(
-    ({ uid, id }: { uid: UID; id: ID; source: PlaybackSource }) => {
-      const currentUid = currentLegacy?.uid ?? null
-      if (uid === currentUid && isPlaying) {
+    ({ id }: { uid: UID; id: ID; source: PlaybackSource }) => {
+      const currentTrackId = currentLegacy?.trackId ?? null
+      const currentSource = currentLegacy?.source ?? null
+      const isSameTile = currentTrackId === id && currentSource === source
+      if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
         return
       }
-      if (uid === currentUid && !isPlaying) {
+      if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
         return
       }
@@ -190,7 +192,9 @@ export const TrackLineup = ({
       tracksForPlayback,
       visibleTrackIds,
       querySource,
-      currentLegacy?.uid,
+      currentLegacy?.trackId,
+      currentLegacy?.source,
+      source,
       isPlaying
     ]
   )

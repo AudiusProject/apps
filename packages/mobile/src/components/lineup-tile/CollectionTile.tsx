@@ -39,7 +39,7 @@ import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
 import { useEnhancedCollectionTracks } from './useEnhancedCollectionTracks'
 
-const { getUid } = playbackSelectors
+const { getTrackId } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const {
@@ -81,7 +81,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
     })
   })
   const collection = collectionOverride ?? cachedCollection
-  const collectionTracks = useEnhancedCollectionTracks(uid)
+  const collectionTracks = useEnhancedCollectionTracks(uid ?? '')
   const tracks = tracksOverride ?? collectionTracks
 
   const { data: user } = useUser(collection?.playlist_owner_id, {
@@ -94,12 +94,12 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const { hasStreamAccess } = useGatedCollectionAccess(id)
 
   const currentTrack = useSelector((state: CommonState) => {
-    const uid = getUid(state)
-    return tracks.find((track) => track.uid === uid) ?? null
+    const trackId = getTrackId(state)
+    return tracks.find((track) => track.track_id === trackId) ?? null
   })
   const isPlayingUid = useSelector((state: CommonState) => {
-    const uid = getUid(state)
-    return tracks.some((track) => track.uid === uid)
+    const trackId = getTrackId(state)
+    return tracks.some((track) => track.track_id === trackId)
   })
 
   const isCollectionMarkedForDownload = useSelector((state) =>

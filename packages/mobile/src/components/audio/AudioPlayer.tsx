@@ -17,7 +17,7 @@ import {
   calculatePlayerBehavior,
   PlayerBehavior
 } from '@audius/common/store'
-import type { Queueable, CommonState } from '@audius/common/store'
+import type { PlaybackTrack, CommonState } from '@audius/common/store'
 import {
   Genre,
   removeNullable,
@@ -75,7 +75,7 @@ const getArtworkTargetSize = (artwork?: Track['artwork']) =>
   TRACK_ARTWORK_PREFERRED_SIZES.find((size) => artwork?.[size]) ??
   SquareSizes.SIZE_1000_BY_1000
 
-const { getPlaying, getSeek, getCounter, getPlaybackRate, getUid } =
+const { getPlaying, getSeek, getCounter, getPlaybackRate, getTrackId } =
   playbackSelectors
 const { setTrackPosition } = playbackPositionActions
 const { getUserTrackPositions } = playbackPositionSelectors
@@ -83,7 +83,7 @@ const { recordListen } = tracksSocialActions
 const { getCurrentPlayerBehavior: getPlayerBehavior } = playbackSelectors
 const {
   getPlaybackIndex: getIndex,
-  getOrder,
+  getPlaybackQueue,
   getCurrentSource: getSource,
   getCollectionId,
   getRepeat,
@@ -156,7 +156,7 @@ const unlistedTrackFallbackTrackData = {
 
 type QueueableTrack = {
   track: Nullable<Track>
-} & Pick<Queueable, 'playerBehavior'>
+} & Pick<PlaybackTrack, 'playerBehavior'>
 
 export const AudioPlayer = () => {
   const track = useCurrentTrack()
@@ -166,9 +166,9 @@ export const AudioPlayer = () => {
   const repeatMode = useSelector(getRepeat)
   const playbackRate = useSelector(getPlaybackRate)
   const { data: currentUserId } = useCurrentUserId()
-  const uid = useSelector(getUid)
+  const playingTrackId = useSelector(getTrackId)
   const playerBehavior = useSelector(getPlayerBehavior)
-  const previousUid = usePrevious(uid)
+  const previousPlayingTrackId = usePrevious(playingTrackId)
   const previousPlayerBehavior =
     usePrevious(playerBehavior) || PlayerBehavior.FULL_OR_PREVIEW
   const trackPositions = useSelector((state: CommonState) =>
@@ -185,23 +185,19 @@ export const AudioPlayer = () => {
   // Queue Things
   const queueIndex = useSelector(getIndex)
   const queueShuffle = useSelector(getShuffle)
-  const queueOrder = useSelector(getOrder)
+  const queueOrder = useSelector(getPlaybackQueue)
   const queueSource = useSelector(getSource)
   const queueCollectionId = useSelector(getCollectionId)
-  const queueTrackUids = useMemo(
-    () => queueOrder.map((trackData) => trackData.uid),
-    [queueOrder]
-  )
   const queueTrackIds = useMemo(
-    () => queueOrder.map((trackData) => trackData.id as ID),
+    () => queueOrder.map((trackData) => trackData.trackId as ID),
     [queueOrder]
   )
 
   const { byId: tracksById } = useTracks(uniq(queueTrackIds))
   const queueTracks = useMemo(
     () =>
-      queueOrder.map(({ id, playerBehavior }) => ({
-        track: tracksById[id],
+      queueOrder.map(({ trackId, playerBehavior }) => ({
+        track: tracksById[trackId],
         playerBehavior
       })),
     [queueOrder, tracksById]
@@ -268,13 +264,13 @@ export const AudioPlayer = () => {
     ({
       previewing,
       trackId,
-      uid
+      index
     }: {
       previewing: boolean
       trackId: number
-      uid: string
+      index: number
     }) => {
-      dispatch(playbackActions.set({ previewing, trackId, uid }))
+      dispatch(playbackActions.set({ previewing, trackId, index }))
     },
     [dispatch]
   )
@@ -494,7 +490,7 @@ export const AudioPlayer = () => {
             updatePlayerInfo({
               previewing: shouldPreview,
               trackId: track.track_id,
-              uid: queueTrackUids[playerIndex]
+              index: playerIndex
             })
 
             const isLongFormContent =
@@ -650,8 +646,10 @@ export const AudioPlayer = () => {
     }
   }, [counter, resetPositionForSameTrack])
 
-  // Ref to keep track of the queue in the track player vs the queue in state
-  const queueListRef = useRef<string[]>([])
+  // Ref to keep track of the queue in the track player vs the queue in state.
+  // Identity is the trackId-array — duplicates are fine because we still
+  // diff position-by-position with isEqual.
+  const queueListRef = useRef<ID[]>([])
 
   // A ref to the enqueue task to await before either requeing or appending to queue
   const enqueueTracksJobRef = useRef<Promise<void> | undefined>(undefined)
@@ -659,7 +657,7 @@ export const AudioPlayer = () => {
   const abortEnqueueControllerRef = useRef(new AbortController())
 
   const handleQueueChange = useCallback(async () => {
-    const refUids = queueListRef.current
+    const refTrackIds = queueListRef.current
 
     // Due to a dependency waterfall (queue from redux -> useTracks -> useUsers),
     // we need to wait for all 3 things to be loaded before loading anything into RNTP - queue + tracks + users
@@ -676,20 +674,20 @@ export const AudioPlayer = () => {
       return
     }
     if (
-      isEqual(refUids, queueTrackUids) &&
+      isEqual(refTrackIds, queueTrackIds) &&
       !didOfflineToggleChange &&
       !didPlayerBehaviorChange
     ) {
       return
     }
 
-    queueListRef.current = queueTrackUids
+    queueListRef.current = queueTrackIds
 
     // Checks to allow for continuous playback while making queue updates
     // Check if we are appending to the end of the queue
     const isQueueAppend =
-      refUids.length > 0 &&
-      isEqual(queueTrackUids.slice(0, refUids.length), refUids) &&
+      refTrackIds.length > 0 &&
+      isEqual(queueTrackIds.slice(0, refTrackIds.length), refTrackIds) &&
       !didPlayerBehaviorChange
 
     // If not an append, cancel the enqueue task first
@@ -707,14 +705,14 @@ export const AudioPlayer = () => {
     // TODO: Queue removal logic was firing too often previously and causing playback issues when at the end of queues. Need to fix
     // Check if we are removing from the end of the queue
     // const isQueueRemoval =
-    //   refUids.length > 0 &&
-    //   isEqual(refUids.slice(0, queueTrackUids.length), queueTrackUids)
+    //   refTrackIds.length > 0 &&
+    //   isEqual(refTrackIds.slice(0, queueTrackIds.length), queueTrackIds)
 
     // if (isQueueRemoval) {
     //   // NOTE: There might be a case where we are trying to remove the currently playing track.
     //   // Shouldn't be possible, but need to keep an eye out for that
-    //   const startingRemovalIndex = queueTrackUids.length
-    //   const removalLength = refUids.length - queueTrackUids.length
+    //   const startingRemovalIndex = queueTrackIds.length
+    //   const removalLength = refTrackIds.length - queueTrackIds.length
     //   const removalIndexArray = range(removalLength).map(
     //     (i) => i + startingRemovalIndex
     //   )
@@ -724,7 +722,7 @@ export const AudioPlayer = () => {
     // }
 
     const newQueueTracks = isQueueAppend
-      ? queueTracks.slice(refUids.length)
+      ? queueTracks.slice(refTrackIds.length)
       : queueTracks
     // Enqueue tracks using 'middle-out' to ensure user can ready skip forward or backwards
     const enqueueTracks = async (
@@ -775,7 +773,7 @@ export const AudioPlayer = () => {
   }, [
     queueTracks,
     queueIndex,
-    queueTrackUids,
+    queueTrackIds,
     didOfflineToggleChange,
     didPlayerBehaviorChange,
     queueTrackOwnersMap,
@@ -867,7 +865,7 @@ export const AudioPlayer = () => {
     if (isAudioSetup) {
       handleQueueChange()
     }
-  }, [handleQueueChange, queueTrackUids, isAudioSetup])
+  }, [handleQueueChange, queueTrackIds, isAudioSetup])
 
   useAsync(async () => {
     if (isAudioSetup && didPlayerBehaviorChange) {
@@ -879,7 +877,7 @@ export const AudioPlayer = () => {
           queueTracks[queueIndex].playerBehavior
         ).shouldPreview,
         trackId: queueTracks[queueIndex].track?.track_id ?? 0,
-        uid: queueTrackUids[queueIndex]
+        index: queueIndex
       })
     }
   }, [didPlayerBehaviorChange])
@@ -903,11 +901,11 @@ export const AudioPlayer = () => {
   }, [handlePlaybackRateChange, playbackRate])
 
   useEffect(() => {
-    // Stop playback if we have unloaded a uid from the player
-    if (previousUid && !uid && !playing) {
+    // Stop playback if we have unloaded a track from the player.
+    if (previousPlayingTrackId && !playingTrackId && !playing) {
       handleStop()
     }
-  }, [handleStop, playing, uid, previousUid])
+  }, [handleStop, playing, playingTrackId, previousPlayingTrackId])
 
   useSavePodcastProgress()
 

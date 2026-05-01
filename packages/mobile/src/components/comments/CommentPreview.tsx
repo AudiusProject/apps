@@ -141,7 +141,12 @@ const CommentPreviewContent = (props: CommentPreviewContentProps) => {
         <TouchableWithoutFeedback onPress={handleFormPress}>
           <View>
             <View>
-              <CommentForm isPreview onSubmit={handleSubmitPreview} />
+              <CommentForm
+                isPreview
+                onSubmit={handleSubmitPreview}
+                onPressIn={handleFormPress}
+                readOnly
+              />
             </View>
           </View>
         </TouchableWithoutFeedback>

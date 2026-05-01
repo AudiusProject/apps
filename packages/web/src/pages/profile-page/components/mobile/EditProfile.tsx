@@ -1,3 +1,7 @@
+import {
+  MAX_BIO_LENGTH,
+  MAX_DISPLAY_NAME_LENGTH
+} from '@audius/common/services'
 import { IconLink, IconTikTok, IconX, IconInstagram } from '@audius/harmony'
 
 import EditableRow, { Format } from 'components/groupable-list/EditableRow'
@@ -55,14 +59,14 @@ const EditProfile = ({
             format={Format.INPUT}
             initialValue={name}
             onChange={onUpdateName}
-            maxLength={32}
+            maxLength={MAX_DISPLAY_NAME_LENGTH}
           />
           <EditableRow
             label='Bio'
             format={Format.TEXT_AREA}
             initialValue={bio}
             onChange={onUpdateBio}
-            maxLength={256}
+            maxLength={MAX_BIO_LENGTH}
           />
           <EditableRow
             label='Location'

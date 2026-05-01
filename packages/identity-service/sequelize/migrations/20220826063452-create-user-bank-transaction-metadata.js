@@ -26,14 +26,14 @@ module.exports = {
             allowNull: false,
             type: Sequelize.DATE
           }
-        }, { transaction })
-      await queryInterface.addIndex(
-        'UserBankTransactionMetadata',
-        ['userId'],
-        { transaction, name: 'idx_user_bank_transaction_metadata_user_id' }
+        },
+        { transaction }
       )
-    }
-    )
+      await queryInterface.addIndex('UserBankTransactionMetadata', ['userId'], {
+        transaction,
+        name: 'idx_user_bank_transaction_metadata_user_id'
+      })
+    })
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
@@ -42,7 +42,9 @@ module.exports = {
         'idx_user_bank_transaction_metadata_user_id',
         { transaction }
       )
-      await queryInterface.dropTable('UserBankTransactionMetadata', { transaction })
+      await queryInterface.dropTable('UserBankTransactionMetadata', {
+        transaction
+      })
     })
   }
 }

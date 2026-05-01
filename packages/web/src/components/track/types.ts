@@ -1,12 +1,11 @@
 import { MouseEvent, ReactNode } from 'react'
 
-import { CollectionTrackWithUid } from '@audius/common/api'
+import { CollectionTrack } from '@audius/common/api'
 import {
   PlaybackSource,
   Collection,
   Favorite,
   ID,
-  UID,
   Repost,
   Remix,
   AccessConditions,
@@ -31,9 +30,8 @@ export type TileProps = {
   hasCurrentUserSaved: boolean
   duration: number
   activityTimestamp?: string
-  togglePlay: (uid: UID, trackId: ID, source?: PlaybackSource) => void
+  togglePlay: (trackId: ID, source?: PlaybackSource) => void
   trackTileStyles?: {}
-  uid: UID
   id: ID
   userId: ID
   isActive: boolean
@@ -81,8 +79,8 @@ export type TrackTileProps = TileProps & {
 }
 
 export type CollectionTileProps = TileProps & {
-  playingUid?: UID | null
   playingTrackId?: ID | null
+  playingIndex?: number | null
   isAlbum: boolean
   isPublic: boolean
   contentTitle: string
@@ -91,16 +89,15 @@ export type CollectionTileProps = TileProps & {
   artistName: string
   artistHandle: string
   artistIsVerified: boolean
-  activeTrackUid: UID | null
   saveCount: number
-  tracks: CollectionTrackWithUid[]
+  tracks: CollectionTrack[]
   trackCount: number
   collection?: Nullable<Collection>
   showArtworkIcon?: boolean
   showSkeleton?: boolean
   noShimmer?: boolean
   pauseTrack: () => void
-  playTrack: (uid: UID) => void
+  playTrack: (trackId: ID, index: number) => void
   disableActions?: boolean
   ordered?: boolean
   isFeed?: boolean

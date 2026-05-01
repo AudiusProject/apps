@@ -1,4 +1,4 @@
-import type { UID, LineupTrack } from '@audius/common/models'
+import type { ID, LineupTrack } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import { playbackSelectors } from '@audius/common/store'
 import { pluralize } from '@audius/common/utils'
@@ -10,7 +10,7 @@ import { Box } from '@audius/harmony-native'
 import Skeleton from 'app/components/skeleton'
 import { flexRowCentered, makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
-const { getUid } = playbackSelectors
+const { getTrackId } = playbackSelectors
 
 // Max number of tracks to display
 const DISPLAY_TRACK_COUNT = 5
@@ -78,16 +78,16 @@ type TrackItemProps = {
   showSkeleton?: boolean
   index: number
   track?: LineupTrack
-  uid?: UID
+  trackId?: ID
   isAlbum?: boolean
   deleted?: boolean
 }
 
 const TrackItem = (props: TrackItemProps) => {
-  const { showSkeleton, index, track, uid, isAlbum, deleted } = props
+  const { showSkeleton, index, track, trackId, isAlbum, deleted } = props
   const styles = useStyles()
   const isPlayingUid = useSelector(
-    (state: CommonState) => getUid(state) === uid
+    (state: CommonState) => getTrackId(state) === trackId
   )
   return (
     <>
@@ -170,8 +170,8 @@ export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
     <Pressable onPressIn={onPressWithPropagationBlock} onPress={onPress}>
       {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
         <TrackItem
-          key={track.uid}
-          uid={track.uid}
+          key={`${track.track_id}-${index}`}
+          trackId={track.track_id}
           index={index}
           track={track}
           isAlbum={isAlbum}

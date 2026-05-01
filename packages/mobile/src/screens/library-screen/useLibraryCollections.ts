@@ -60,16 +60,20 @@ export const useLibraryCollections = ({
     return ids
   })
 
-  const localCollectionIds = difference(
-    locallyAddedCollectionIds,
-    locallyRemovedCollectionIds
+  const localCollectionIds = useMemo(
+    () => difference(locallyAddedCollectionIds, locallyRemovedCollectionIds),
+    [locallyAddedCollectionIds, locallyRemovedCollectionIds]
   )
 
   const { data: localCollections = [] } = useCollections(localCollectionIds)
 
-  const filteredLocalCollectionIds = filterCollections(localCollections, {
-    filterText: filterValue
-  }).map((collection) => collection.playlist_id)
+  const filteredLocalCollectionIds = useMemo(
+    () =>
+      filterCollections(localCollections, { filterText: filterValue }).map(
+        (collection) => collection.playlist_id
+      ),
+    [localCollections, filterValue]
+  )
 
   const {
     data: fetchedCollectionIds,
@@ -89,9 +93,9 @@ export const useLibraryCollections = ({
     sortDirection: 'desc'
   })
 
-  const filteredFetchedCollectionIds = difference(
-    fetchedCollectionIds,
-    localCollectionIds
+  const filteredFetchedCollectionIds = useMemo(
+    () => difference(fetchedCollectionIds, localCollectionIds),
+    [fetchedCollectionIds, localCollectionIds]
   )
 
   const offlineCollectionIds = useSelector((state: AppState) => {
@@ -101,9 +105,18 @@ export const useLibraryCollections = ({
     )
   })
 
-  const collectionIds = isReachable
-    ? [...filteredLocalCollectionIds, ...filteredFetchedCollectionIds]
-    : offlineCollectionIds
+  const collectionIds = useMemo(
+    () =>
+      isReachable
+        ? [...filteredLocalCollectionIds, ...filteredFetchedCollectionIds]
+        : offlineCollectionIds,
+    [
+      isReachable,
+      filteredLocalCollectionIds,
+      filteredFetchedCollectionIds,
+      offlineCollectionIds
+    ]
+  )
 
   const loadNextPage = useMemo(
     () =>

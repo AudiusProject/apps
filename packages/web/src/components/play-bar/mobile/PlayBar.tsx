@@ -64,7 +64,7 @@ const PlayBar = ({
   pause,
   onClickInfo
 }: PlayBarProps) => {
-  const { uid } = currentQueueItem
+  const { trackId: queueTrackId } = currentQueueItem
   const track = useCurrentTrack()
   const isDarkMode = useIsDarkMode()
   const isMatrixMode = useIsMatrix()
@@ -108,7 +108,7 @@ const PlayBar = ({
     source: FavoriteSource.PLAYBAR
   })
 
-  if (!uid || !track || !user) return null
+  if (!queueTrackId || !track || !user) return null
 
   const {
     title,

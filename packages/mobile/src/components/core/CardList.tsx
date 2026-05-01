@@ -123,6 +123,17 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
     ]
   )
 
+  const keyExtractor = useCallback(
+    (item: ItemT | LoadingCard, index: number) => {
+      if ('_loading' in item) return `loading-${index}`
+      const id =
+        (item as { id?: string | number; playlist_id?: string | number }).id ??
+        (item as { playlist_id?: string | number }).playlist_id
+      return id != null ? String(id) : String(index)
+    },
+    []
+  )
+
   if (isHorizontal) {
     return (
       <Flex mh={carouselSpacing * -1}>
@@ -136,6 +147,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
           ref={ref}
           data={data}
           renderItem={handleRenderItem}
+          keyExtractor={keyExtractor}
           horizontal
           {...(other as Partial<CardListProps<ItemT | LoadingCard>>)}
         />
@@ -150,6 +162,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
       ref={ref}
       data={data}
       renderItem={handleRenderItem}
+      keyExtractor={keyExtractor}
       numColumns={2}
       {...(other as Partial<CardListProps<ItemT | LoadingCard>>)}
     />

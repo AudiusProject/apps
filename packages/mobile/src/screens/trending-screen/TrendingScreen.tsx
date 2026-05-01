@@ -7,7 +7,6 @@ import { Flex, IconTrending } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
-import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
@@ -27,7 +26,6 @@ const titleByCategory = {
 } as const
 
 export const TrendingScreen = () => {
-  useAppTabScreen()
   const category = useSelector(getTrendingCategory) ?? 'tracks'
 
   const [winnersWeek, setWinnersWeek] = useState<string | null>(null)

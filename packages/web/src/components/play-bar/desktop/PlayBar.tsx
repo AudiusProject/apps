@@ -32,7 +32,7 @@ import PlayingTrackInfo from './components/PlayingTrackInfo'
 import { SocialActions } from './components/SocialActions'
 
 const { profilePage } = route
-const { getPlaying, getCounter, getUid, getBuffering, getPlaybackRate } =
+const { getPlaying, getCounter, getTrackId, getBuffering, getPlaybackRate } =
   playbackSelectors
 
 const {
@@ -79,7 +79,7 @@ const PlayBar = () => {
   const playCounter = useSelector(getCounter)
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
-  const uid = useSelector(getUid)
+  const playingTrackId = useSelector(getTrackId)
   const playbackRate = useSelector(getPlaybackRate)
 
   // Local state - broken into individual useState hooks
@@ -109,7 +109,7 @@ const PlayBar = () => {
     currentTrack?.genre === Genre.Podcasts ||
     currentTrack?.genre === Genre.Audiobooks
 
-  const playable = !!uid
+  const playable = !!playingTrackId
 
   // Update timing state
   const startSeeking = useCallback(() => {
@@ -297,9 +297,9 @@ const PlayBar = () => {
           <div className={styles.timeControls}>
             {audioPlayer ? (
               <Scrubber
-                mediaKey={`${uid}${mediaKey}${timing.duration}`}
+                mediaKey={`${playingTrackId}${mediaKey}${timing.duration}`}
                 isPlaying={isPlaying && !isBuffering}
-                isDisabled={!uid}
+                isDisabled={!playingTrackId}
                 includeTimestamps
                 getAudioPosition={audioPlayer?.getPosition}
                 getTotalTime={audioPlayer?.getDuration}
@@ -365,12 +365,11 @@ const PlayBar = () => {
           />
           <div
             className={styles.socialActionsWrapper}
-            style={trackId && uid ? undefined : { visibility: 'hidden' }}
+            style={trackId ? undefined : { visibility: 'hidden' }}
           >
-            {trackId && uid ? (
+            {trackId ? (
               <SocialActions
                 trackId={trackId}
-                uid={uid}
                 isOwner={isOwner}
                 compact={isNarrow}
               />

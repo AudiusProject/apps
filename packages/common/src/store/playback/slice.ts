@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { Feature, ID, UID } from '../../models'
+import { Feature, ID } from '../../models'
 import { Maybe, Nullable } from '../../utils'
 
 import {
@@ -15,7 +15,7 @@ import {
 export const initialState: PlaybackState = {
   queue: [],
   index: -1,
-  playingUid: null,
+  playingIndex: -1,
   playingTrackId: null,
   playing: false,
   buffering: false,
@@ -54,9 +54,9 @@ type PlayTrackAtPayload = {
 }
 
 type PlayPayload = Maybe<{
-  // Resume / load by uid (used by chat playback and natural-track-end paths
-  // that don't know the queue index — the saga finds the index from the uid).
-  uid?: Nullable<UID>
+  // Resume / load by trackId (used by chat playback and natural-track-end
+  // paths that don't know the queue index — the saga finds the index from
+  // the trackId).
   trackId?: ID
   startTime?: number
   playerBehavior?: PlayerBehavior
@@ -86,16 +86,14 @@ type RemoveFromQueuePayload = {
   index: number
 }
 
-type RemoveByUidPayload = {
-  uid: UID
-}
-
 type AppendPagePayload = {
   tracks: PlaybackTrack[]
 }
 
 type ReorderPayload = {
-  orderedUids: UID[]
+  // The new ordering expressed as the old indices in their new positions.
+  // E.g. [2, 0, 1] takes queue=[A,B,C] -> [C,A,B].
+  orderedIndices: number[]
 }
 
 type SetIndexPayload = {
@@ -111,12 +109,12 @@ type SetRepeatPayload = { mode: RepeatMode }
 type SetShufflePayload = { enable: boolean }
 type SetBufferingPayload = { buffering: boolean }
 type PlaySucceededPayload =
-  | { uid?: Nullable<UID>; trackId?: ID; isPreview?: boolean }
+  | { trackId?: ID; index?: number; isPreview?: boolean }
   | undefined
 
 type SetPayload = {
-  uid: UID
   trackId: ID
+  index: number
   previewing?: boolean
 }
 
@@ -192,7 +190,7 @@ const slice = createSlice({
 
     stop: (state, _action: PayloadAction<StopPayload>) => {
       state.playing = false
-      state.playingUid = null
+      state.playingIndex = -1
       state.playingTrackId = null
       state.counter += 1
     },
@@ -314,37 +312,17 @@ const slice = createSlice({
       }
     },
 
-    removeByUid: (state, action: PayloadAction<RemoveByUidPayload>) => {
-      const { uid } = action.payload
-      const idx = state.queue.findIndex((t) => t.uid === uid)
-      if (idx < 0) return
-      const next = [...state.queue]
-      next.splice(idx, 1)
-      state.queue = next
-      if (idx < state.index) state.index -= 1
-      else if (idx === state.index) {
-        state.index = Math.min(state.index, state.queue.length - 1)
-      }
-    },
-
     reorder: (state, action: PayloadAction<ReorderPayload>) => {
-      const { orderedUids } = action.payload
-      const byUid = new Map<UID, PlaybackTrack>()
-      state.queue.forEach((t) => {
-        if (t.uid) byUid.set(t.uid, t)
-      })
-      const newOrder = orderedUids
-        .map((uid) => byUid.get(uid))
+      const { orderedIndices } = action.payload
+      const newOrder = orderedIndices
+        .map((i) => state.queue[i])
         .filter((t): t is PlaybackTrack => !!t)
-      const currentUid =
-        state.index >= 0 ? state.queue[state.index]?.uid : undefined
+      const currentIndex = state.index
       state.queue = newOrder
-      state.index = currentUid
-        ? Math.max(
-            0,
-            newOrder.findIndex((t) => t.uid === currentUid)
-          )
-        : -1
+      state.index =
+        currentIndex >= 0
+          ? Math.max(0, orderedIndices.indexOf(currentIndex))
+          : -1
     },
 
     appendPage: (state, action: PayloadAction<AppendPagePayload>) => {
@@ -395,14 +373,14 @@ const slice = createSlice({
     playSucceeded: (state, action: PayloadAction<PlaySucceededPayload>) => {
       state.playing = true
       const payload = action.payload ?? {}
-      if (payload.uid) state.playingUid = payload.uid
+      if (typeof payload.index === 'number') state.playingIndex = payload.index
       if (payload.trackId) state.playingTrackId = payload.trackId
       state.previewing = !!payload.isPreview
     },
 
     set: (state, action: PayloadAction<SetPayload>) => {
-      const { uid, trackId, previewing } = action.payload
-      state.playingUid = uid
+      const { trackId, index, previewing } = action.payload
+      state.playingIndex = index
       state.playingTrackId = trackId
       state.previewing = !!previewing
     },
@@ -451,7 +429,6 @@ export const {
   addToQueue,
   playNext,
   removeFromQueue,
-  removeByUid,
   reorder,
   appendPage,
   clearQueue,

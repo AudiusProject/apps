@@ -13,8 +13,11 @@ describe('convict configuration test', function () {
   it('Env key and object key names are equal', function () {
     const schema = config.getSchema().properties
 
-    for (var key in schema) {
-      assert(key === schema[key]['env'], `The key ${key} and the env key ${schema[key]['env']} do not match.`)
+    for (const key in schema) {
+      assert(
+        key === schema[key].env,
+        `The key ${key} and the env key ${schema[key].env} do not match.`
+      )
     }
   })
 
@@ -27,8 +30,8 @@ describe('convict configuration test', function () {
       }
     })
 
-    process.env['randomKey'] = 123
-    assert(process.env['randomKey'] === '123')
+    process.env.randomKey = 123
+    assert(process.env.randomKey === '123')
 
     c.load({})
 
@@ -51,7 +54,7 @@ describe('convict configuration test', function () {
       }
     })
 
-    process.env['randomKey'] = '123'
+    process.env.randomKey = '123'
 
     c.load({})
 
@@ -68,16 +71,20 @@ describe('convict configuration test', function () {
   it('setting a value through env key, and ensuring the new value is set in config', function () {
     const schema = config.getSchema().properties
 
-    for (var key in schema) {
+    for (const key in schema) {
       // special case this property since config.load will override the test value in the env var because of custom type coercion
-      if (key === 'relayerWallets' || key === 'ethRelayerWallets' || key === 'solanaFeePayerWallets') {
+      if (
+        key === 'relayerWallets' ||
+        key === 'ethRelayerWallets' ||
+        key === 'solanaFeePayerWallets'
+      ) {
         assert.deepStrictEqual(Array.isArray(config.get(key)), true)
         continue
       }
 
-      let oldValue = config.get(key)
+      const oldValue = config.get(key)
 
-      let format = schema[key].format.toString()
+      const format = schema[key].format.toString()
 
       // setting invalid values
       const invalidValue = getInvalidConfigValue(format)
@@ -103,13 +110,14 @@ describe('convict configuration test', function () {
       // convict js converts env vars to its proper type
       assert(
         config.get(key) === validValue,
-        `The config key '${key}' with format type '${schema[key].format}' is still retaining its old value of '${oldValue}' instead of '${validValue}'`)
+        `The config key '${key}' with format type '${schema[key].format}' is still retaining its old value of '${oldValue}' instead of '${validValue}'`
+      )
     }
   })
 })
 
 // Retrieves proper values for validation tests
-function getValidConfigValue (format) {
+function getValidConfigValue(format) {
   let validValue
 
   switch (format) {
@@ -133,7 +141,7 @@ function getValidConfigValue (format) {
 }
 
 // Retrieves bad values for validation tests
-function getInvalidConfigValue (format) {
+function getInvalidConfigValue(format) {
   let invalidValue
 
   switch (format) {
@@ -159,9 +167,12 @@ function getInvalidConfigValue (format) {
 }
 
 // Sets and validates env var
-function setAndValidateEnvVar (key, newValue) {
+function setAndValidateEnvVar(key, newValue) {
   process.env[key] = newValue
 
   // everything in process.env is typeof string
-  assert(process.env[key] === newValue.toString(), 'Env var was not set properly.')
+  assert(
+    process.env[key] === newValue.toString(),
+    'Env var was not set properly.'
+  )
 }

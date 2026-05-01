@@ -7,9 +7,9 @@ import {
   useTracks
 } from '@audius/common/api'
 import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
-import { Name, Kind, ID, ModalSource } from '@audius/common/models'
+import { Name, ModalSource } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
-import { getPathFromPlaylistUrl, makeUid } from '@audius/common/utils'
+import { getPathFromPlaylistUrl } from '@audius/common/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
@@ -51,35 +51,21 @@ export const ChatMessagePlaylist = ({
     !isPermalinkPending && collectionIdFromPermalink != null
   const isPending = isPermalinkPending || (hasCollectionId && !collection)
 
-  const uid = useMemo(() => {
-    return collectionId ? makeUid(Kind.COLLECTIONS, collectionId) : null
-  }, [collectionId])
-
   const trackIds =
     playlist?.playlist_contents?.track_ids?.map((t) => t.track) ?? []
   const { data: tracks } = useTracks(trackIds)
 
-  const uidMap = useMemo(() => {
-    return trackIds.reduce((result: { [id: ID]: string }, id) => {
-      result[id] = makeUid(Kind.TRACKS, id)
-      return result
-    }, {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionId])
-
   const entries = useMemo(() => {
     return (tracks || []).map((track) => ({
       id: track.track_id,
-      uid: uidMap[track.track_id],
       source: QueueSource.CHAT_PLAYLIST_TRACKS
     }))
-  }, [tracks, uidMap])
+  }, [tracks])
 
   const play = usePlayTrack()
   const playTrack = useCallback(
-    (uid: string) => {
-      // Have to pass the uid bc the sagas cant get the lineup from the route in the ChatPage
-      play({ uid, entries, passUid: true })
+    (id: number) => {
+      play({ id, entries })
     },
     [play, entries]
   )
@@ -87,7 +73,7 @@ export const ChatMessagePlaylist = ({
   const pauseTrack = usePauseTrack()
 
   const collectionExists = !!collection && !collection.is_delete
-  const hasResolvedCollection = !isPending && collectionExists && !!uid
+  const hasResolvedCollection = !isPending && collectionExists
 
   useEffect(() => {
     // While the underlying collection query is still pending we don't yet
@@ -115,7 +101,6 @@ export const ChatMessagePlaylist = ({
       <CollectionTile
         containerClassName={className}
         index={0}
-        uid={uid}
         id={collectionId}
         size={TrackTileSize.SMALL}
         ordered={false}

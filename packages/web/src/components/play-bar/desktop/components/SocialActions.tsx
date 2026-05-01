@@ -5,7 +5,6 @@ import { useGatedContentAccess } from '@audius/common/hooks'
 import {
   ModalSource,
   ID,
-  UID,
   RepostSource,
   FavoriteSource
 } from '@audius/common/models'
@@ -34,7 +33,6 @@ const { repostTrack, undoRepostTrack } = tracksSocialActions
 
 type SocialActionsProps = {
   trackId: ID
-  uid: UID
   isOwner: boolean
   compact?: boolean
 }
@@ -48,13 +46,12 @@ const messages = {
 
 export const SocialActions = ({
   trackId,
-  uid,
   isOwner,
   compact = false
 }: SocialActionsProps) => {
   const { data: track } = useTrack(trackId)
   const dispatch = useDispatch()
-  const isFavoriteAndRepostDisabled = !uid || isOwner
+  const isFavoriteAndRepostDisabled = !trackId || isOwner
   const favorited = track?.has_current_user_saved ?? false
   const reposted = track?.has_current_user_reposted ?? false
   const isUnlisted = track?.is_unlisted

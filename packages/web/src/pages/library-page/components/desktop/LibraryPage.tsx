@@ -30,10 +30,10 @@ import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { dateSorter } from 'components/table'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
+import { Tab, TabList } from 'components/tabs'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
-import useTabs from 'hooks/useTabs/useTabs'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
@@ -94,7 +94,6 @@ const LibraryPage = () => {
     allTracksFetched,
     hasReachedEnd,
     filterText,
-    onChangeTab,
     onClickRow,
     onClickRepost,
     onSortTracks
@@ -157,11 +156,20 @@ const LibraryPage = () => {
   const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
     Boolean(entry.track_id)
   )
-  const tracksLoading = status === Status.LOADING && isEmpty
+  // Skeletons cover two cases:
+  //  1. `initFetch` (a fetchSaves refetch from cold load OR a
+  //     category/filter/sort change) — we always want skeletons here, even
+  //     over stale rows from the previous query, so users don't click rows
+  //     that no longer match the new filter.
+  //  2. `status === LOADING && !hasResolvedTrackRows` — bridges the gap
+  //     between `fetchSavesSucceeded` and `defaultEntries` materializing on
+  //     cold load. The `!hasResolvedTrackRows` guard is critical: without
+  //     it, the virtualized table's `fetchMore` (which sets `fetchingMore`
+  //     and thus flips `tracksFetchStatus` to LOADING) would wipe the whole
+  //     table to skeletons during pagination.
   const showTrackTableSkeletons =
-    (tracksLoading || initFetch) && !hasResolvedTrackRows
-  const tracksTableShowsSpinner =
-    (tracksLoading || initFetch) && !showTrackTableSkeletons
+    initFetch || (status === Status.LOADING && !hasResolvedTrackRows)
+  const tracksLoading = showTrackTableSkeletons && isEmpty
   const trackSkeletonRowCount =
     expectedTrackCount > 0
       ? Math.min(expectedTrackCount, INITIAL_TRACK_SKELETON_ROWS)
@@ -177,7 +185,7 @@ const LibraryPage = () => {
           ) as unknown as LibraryPageTrack[],
           -1
         ]
-      : status === Status.SUCCESS || entries.length
+      : entries.length
         ? getTracksTableData()
         : [[], -1]
 
@@ -216,75 +224,73 @@ const LibraryPage = () => {
     </div>
   )
 
-  const { tabs, body } = useTabs({
-    isMobile: false,
-    selectedTabLabel: currentTab,
-    didChangeTabsFrom: (_, to) => {
-      onChangeTab(to as LibraryPageTabs)
-    },
-    bodyClassName: styles.tabBody,
-    elementClassName: styles.tabElement,
-    tabs: [
-      {
-        icon: <IconNote />,
-        text: LibraryPageTabs.TRACKS,
-        label: LibraryPageTabs.TRACKS,
-        hideText: shouldHideTabText
-      },
-      {
-        icon: <IconAlbum />,
-        text: LibraryPageTabs.ALBUMS,
-        label: LibraryPageTabs.ALBUMS,
-        hideText: shouldHideTabText
-      },
-      {
-        icon: <IconPlaylists />,
-        text: LibraryPageTabs.PLAYLISTS,
-        label: LibraryPageTabs.PLAYLISTS,
-        hideText: shouldHideTabText
-      }
-    ],
-    elements: [
-      isEmpty && !tracksLoading ? (
-        <EmptyTable
-          primaryText={emptyTracksHeader}
-          secondaryText={messages.emptyTracksBody}
-          buttonLabel={messages.goToTrending}
-          onClick={() => goToRoute('/trending')}
-        />
-      ) : (
-        <TracksTable
-          columns={tableColumns}
-          data={dataSource}
-          wrapperClassName={styles.libraryTrackTableWrapper}
-          trackActionsHeader={trackTableHeaderFilter}
-          defaultSorter={dateSorter('dateSaved')}
-          fetchMore={fetchMoreTracks}
-          isVirtualized
-          key='favorites'
-          loading={tracksTableShowsSpinner}
-          onClickFavorite={toggleSaveTrack}
-          onClickRepost={onClickRepost}
-          onClickRow={onClickRow}
-          onSort={allTracksFetched ? onSortTracks : onSortChange}
-          playing={queuedAndPlaying}
-          activeIndex={activeIndex}
-          showArtistInTrackNameColumn
-          responsiveColumns={RESPONSIVE_TABLE_POLICIES.libraryTracks}
-          scrollRef={mainContentRef}
-          useLocalSort={allTracksFetched}
-          fetchBatchSize={50}
-          userId={currentUserId}
-        />
-      ),
-      <AlbumsTabPage key='albums' />,
-      <PlaylistsTabPage key='playlists' />
-    ]
-  })
+  const tracksContent =
+    isEmpty && !showTrackTableSkeletons ? (
+      <EmptyTable
+        primaryText={emptyTracksHeader}
+        secondaryText={messages.emptyTracksBody}
+        buttonLabel={messages.goToTrending}
+        onClick={() => goToRoute('/trending')}
+      />
+    ) : (
+      <TracksTable
+        columns={tableColumns}
+        data={dataSource}
+        wrapperClassName={styles.libraryTrackTableWrapper}
+        trackActionsHeader={trackTableHeaderFilter}
+        defaultSorter={dateSorter('dateSaved')}
+        fetchMore={fetchMoreTracks}
+        isVirtualized
+        key='favorites'
+        onClickFavorite={toggleSaveTrack}
+        onClickRepost={onClickRepost}
+        onClickRow={onClickRow}
+        onSort={allTracksFetched ? onSortTracks : onSortChange}
+        playing={queuedAndPlaying}
+        activeIndex={activeIndex}
+        showArtistInTrackNameColumn
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.libraryTracks}
+        scrollRef={mainContentRef}
+        useLocalSort={allTracksFetched}
+        fetchBatchSize={50}
+        userId={currentUserId}
+      />
+    )
+
+  const body =
+    currentTab === LibraryPageTabs.ALBUMS ? (
+      <AlbumsTabPage />
+    ) : currentTab === LibraryPageTabs.PLAYLISTS ? (
+      <PlaylistsTabPage />
+    ) : (
+      tracksContent
+    )
 
   const headerBottomBar = (
     <div ref={tabContainerRef} className={styles.headerBottomBarContainer}>
-      {tabs}
+      <TabList>
+        <Tab
+          to='/library/tracks'
+          icon={<IconNote />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.TRACKS}
+        </Tab>
+        <Tab
+          to='/library/albums'
+          icon={<IconAlbum />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.ALBUMS}
+        </Tab>
+        <Tab
+          to='/library/playlists'
+          icon={<IconPlaylists />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
     </div>
   )
 

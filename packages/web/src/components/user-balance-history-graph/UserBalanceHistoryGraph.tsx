@@ -9,11 +9,35 @@ import {
 import { walletMessages } from '@audius/common/messages'
 import { convertHexToRGBA } from '@audius/common/utils'
 import { Flex, Text, useTheme } from '@audius/harmony'
+import {
+  Chart,
+  Filler,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+  TimeScale,
+  Tooltip,
+  type Chart as ChartType,
+  type ChartOptions,
+  type TooltipModel
+} from 'chart.js'
+import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm.js'
 import { Line } from 'react-chartjs-2'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from './UserBalanceHistoryGraph.module.css'
+
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  TimeScale,
+  Filler,
+  Tooltip
+)
 
 const messages = walletMessages.balanceHistory
 
@@ -33,12 +57,10 @@ const formatDate = (timestamp: number): string => {
   const targetDate = new Date(timestamp)
   targetDate.setHours(0, 0, 0, 0)
 
-  // Check if it's today
   if (targetDate.getTime() === today.getTime()) {
     return 'TODAY'
   }
 
-  // Otherwise return the day of the week
   return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
 }
 
@@ -56,11 +78,10 @@ const getChartData = (
   balances: number[],
   secondary: string
 ) => ({
-  labels: timestamps,
   datasets: [
     {
       fill: true,
-      lineTension: 0.4,
+      tension: 0.4,
       backgroundColor: convertHexToRGBA(secondary, 0.15),
       borderColor: secondary,
       borderWidth: 2,
@@ -77,7 +98,7 @@ const getChartData = (
       pointHoverBorderWidth: 2,
       pointRadius: 0,
       pointHitRadius: 10,
-      data: balances
+      data: timestamps.map((t, i) => ({ x: t, y: balances[i] }))
     }
   ]
 })
@@ -87,7 +108,7 @@ const getChartOptions = (
   neutralColor: string,
   spacing: Record<string, number>,
   borderColor: string
-) => ({
+): ChartOptions<'line'> => ({
   maintainAspectRatio: false,
   responsive: true,
   layout: {
@@ -98,127 +119,136 @@ const getChartOptions = (
       right: spacing.s
     }
   },
-  scales: {
-    xAxes: [
-      {
-        type: 'time',
-        time: {
-          unit: 'day',
-          displayFormats: {
-            day: 'MMM D'
-          }
-        },
-        gridLines: {
-          display: false,
-          drawBorder: false
-        },
-        ticks: {
-          maxTicksLimit: 7,
-          padding: spacing.m,
-          fontColor: neutralColor,
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 11,
-          fontStyle: '500',
-          maxRotation: 0,
-          minRotation: 0,
-          callback: function (value: any) {
-            return formatDate(value)
-          }
-        }
-      }
-    ],
-    yAxes: [
-      {
-        gridLines: {
-          display: true,
-          drawBorder: false,
-          color: borderColor,
-          zeroLineColor: borderColor,
-          borderDash: [4, 4],
-          lineWidth: 1
-        },
-        ticks: {
-          maxTicksLimit: 3,
-          padding: spacing.m,
-          beginAtZero: false,
-          fontColor: neutralColor,
-          fontFamily: 'Inter, sans-serif',
-          fontSize: 11,
-          fontStyle: '500',
-          callback: function (value: any) {
-            return formatCurrency(value)
-          }
-        }
-      }
-    ]
-  },
-  legend: {
-    display: false
-  },
-  hover: {
+  interaction: {
     mode: 'index',
     intersect: false,
     axis: 'x'
   },
-  tooltips: {
-    enabled: false,
-    mode: 'index',
-    intersect: false,
-    axis: 'x',
-    custom: function (tooltipModel: any) {
-      let tooltipEl = document.getElementById(
-        `balance-chart-tooltip-${chartId}`
-      )
-
-      if (!tooltipEl) {
-        tooltipEl = document.createElement('div')
-        tooltipEl.id = `balance-chart-tooltip-${chartId}`
-        tooltipEl.className = styles.tooltip
-        document.body.appendChild(tooltipEl)
+  scales: {
+    x: {
+      type: 'time',
+      time: {
+        unit: 'day',
+        displayFormats: {
+          day: 'MMM D'
+        }
+      },
+      grid: {
+        display: false
+      },
+      border: {
+        display: false
+      },
+      ticks: {
+        maxTicksLimit: 7,
+        padding: spacing.m,
+        color: neutralColor,
+        font: {
+          family: 'Inter, sans-serif',
+          size: 11,
+          weight: 500
+        },
+        maxRotation: 0,
+        minRotation: 0,
+        callback: function (value) {
+          return formatDate(Number(value))
+        }
       }
-
-      if (tooltipModel.opacity === 0) {
-        tooltipEl.style.opacity = '0'
-        return
+    },
+    y: {
+      beginAtZero: false,
+      grid: {
+        display: true,
+        color: borderColor,
+        lineWidth: 1
+      },
+      border: {
+        display: false,
+        dash: [4, 4]
+      },
+      ticks: {
+        maxTicksLimit: 3,
+        padding: spacing.m,
+        color: neutralColor,
+        font: {
+          family: 'Inter, sans-serif',
+          size: 11,
+          weight: 500
+        },
+        callback: function (value) {
+          return formatCurrency(Number(value))
+        }
       }
+    }
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      enabled: false,
+      mode: 'index',
+      intersect: false,
+      axis: 'x',
+      external: function (context: {
+        chart: ChartType
+        tooltip: TooltipModel<'line'>
+      }) {
+        const tooltipModel = context.tooltip
+        let tooltipEl = document.getElementById(
+          `balance-chart-tooltip-${chartId}`
+        )
 
-      if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
-        const dataPoint = tooltipModel.dataPoints[0]
-        const timestamp = dataPoint.xLabel
-        const balance = dataPoint.yLabel
+        if (!tooltipEl) {
+          tooltipEl = document.createElement('div')
+          tooltipEl.id = `balance-chart-tooltip-${chartId}`
+          tooltipEl.className = styles.tooltip
+          document.body.appendChild(tooltipEl)
+        }
 
-        tooltipEl.innerHTML = `
-          <div class="${styles.tooltipContent}">
-            <div class="${styles.tooltipDate}">${formatTooltipDate(timestamp)}</div>
-            <div class="${styles.tooltipValue}">${formatCurrency(balance)}</div>
-          </div>
-        `
+        if (tooltipModel.opacity === 0) {
+          tooltipEl.style.opacity = '0'
+          return
+        }
+
+        if (tooltipModel.dataPoints && tooltipModel.dataPoints.length > 0) {
+          const dataPoint = tooltipModel.dataPoints[0]
+          const timestamp = Number(dataPoint.parsed.x)
+          const balance = Number(dataPoint.parsed.y)
+
+          tooltipEl.innerHTML = `
+            <div class="${styles.tooltipContent}">
+              <div class="${styles.tooltipDate}">${formatTooltipDate(timestamp)}</div>
+              <div class="${styles.tooltipValue}">${formatCurrency(balance)}</div>
+            </div>
+          `
+        }
+
+        const position = context.chart.canvas.getBoundingClientRect()
+
+        tooltipEl.style.opacity = '1'
+        tooltipEl.style.position = 'absolute'
+        tooltipEl.style.left =
+          position.x +
+          window.pageXOffset +
+          tooltipModel.caretX -
+          tooltipEl.offsetWidth / 2 +
+          'px'
+        tooltipEl.style.top =
+          position.y +
+          window.pageYOffset +
+          tooltipModel.caretY -
+          tooltipEl.offsetHeight -
+          12 +
+          'px'
+        tooltipEl.style.pointerEvents = 'none'
+        tooltipEl.style.transition = 'opacity 0.15s ease-in-out'
       }
-
-      const position = (this as any)._chart.canvas.getBoundingClientRect()
-
-      tooltipEl.style.opacity = '1'
-      tooltipEl.style.position = 'absolute'
-      tooltipEl.style.left =
-        position.x +
-        window.pageXOffset +
-        tooltipModel.caretX -
-        tooltipEl.offsetWidth / 2 +
-        'px'
-      tooltipEl.style.top =
-        position.y +
-        window.pageYOffset +
-        tooltipModel.caretY -
-        tooltipEl.offsetHeight -
-        12 +
-        'px'
-      tooltipEl.style.pointerEvents = 'none'
-      tooltipEl.style.transition = 'opacity 0.15s ease-in-out'
     }
   }
 })
 
-export const UserBalanceHistoryGraph = () => {
+const UserBalanceHistoryGraphImpl = () => {
   const chartId = useRef(Math.random().toString(36).substring(7)).current
   const { color, spacing } = useTheme()
   const secondary = color.secondary.secondary
@@ -316,9 +346,16 @@ export const UserBalanceHistoryGraph = () => {
     >
       <Line
         data={getChartData(timestamps, balances, secondary)}
-        options={getChartOptions(chartId, neutralColor, spacing, borderColor)}
+        // chart.js v2-style options shape; cast as any to bypass v3+ type
+        // mismatches (xAxes/yAxes vs scales.x/scales.y, hover.mode literal).
+        options={
+          getChartOptions(chartId, neutralColor, spacing, borderColor) as any
+        }
         height={200}
       />
     </Flex>
   )
 }
+
+export const UserBalanceHistoryGraph = UserBalanceHistoryGraphImpl
+export default UserBalanceHistoryGraphImpl

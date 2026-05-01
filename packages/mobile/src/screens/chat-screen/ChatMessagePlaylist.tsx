@@ -18,7 +18,7 @@ import { CollectionTile } from 'app/components/lineup-tile'
 import { LineupTileSource } from 'app/components/lineup-tile/types'
 import { make, track as trackEvent } from 'app/services/analytics'
 
-const { getUid, getPlaying, getTrackId } = playbackSelectors
+const { getPlaying, getTrackId } = playbackSelectors
 
 export const ChatMessagePlaylist = ({
   link,
@@ -28,7 +28,6 @@ export const ChatMessagePlaylist = ({
 }: ChatMessageTileProps) => {
   const isPlaying = useSelector(getPlaying)
   const playingTrackId = useSelector(getTrackId)
-  const playingUid = useSelector(getUid)
 
   const permalink = getPathFromPlaylistUrl(link) ?? ''
   const { data: collection } = useCollectionByPermalink(permalink)
@@ -72,12 +71,13 @@ export const ChatMessagePlaylist = ({
   const entries = useMemo(() => {
     return (tracks || []).map((track) => ({
       id: track.track_id,
-      uid: uidMap[track.track_id],
       source: QueueSource.CHAT_PLAYLIST_TRACKS
     }))
-  }, [tracks, uidMap])
+  }, [tracks])
 
-  const isActive = tracksWithUids.find((track) => track.uid === playingUid)
+  const isActive = tracksWithUids.find(
+    (track) => track.track_id === playingTrackId
+  )
 
   const recordAnalytics = useCallback(
     ({ name, id }: { name: TrackPlayback; id: ID }) => {
@@ -97,21 +97,19 @@ export const ChatMessagePlaylist = ({
 
   const togglePlay = useCallback(() => {
     if (!isPlaying || !isActive) {
-      if (isActive) {
-        playTrack({ id: playingTrackId!, uid: playingUid!, entries })
+      if (isActive && playingTrackId != null) {
+        playTrack({ id: playingTrackId, entries })
       } else {
-        const trackUid = tracksWithUids[0] ? tracksWithUids[0].uid : null
         const trackId = tracksWithUids[0] ? tracksWithUids[0].track_id : null
-        if (!trackUid || !trackId) return
-        playTrack({ id: trackId, uid: trackUid, entries })
+        if (!trackId) return
+        playTrack({ id: trackId, entries })
       }
-    } else {
-      pauseTrack(playingTrackId!)
+    } else if (playingTrackId != null) {
+      pauseTrack(playingTrackId)
     }
   }, [
     isPlaying,
     isActive,
-    playingUid,
     playingTrackId,
     entries,
     tracksWithUids,

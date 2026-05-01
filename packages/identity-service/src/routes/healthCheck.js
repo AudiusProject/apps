@@ -10,15 +10,6 @@ const { getRelayerFunds, fundRelayerIfEmpty } = require('../relay/txRelay')
 const { getEthRelayerFunds } = require('../relay/ethTxRelay')
 const solanaWeb3 = require('@solana/web3.js')
 const Web3 = require('web3')
-const audiusLibsWrapper = require('../audiusLibsInstance')
-const {
-  NOTIFICATION_JOB_LAST_SUCCESS_KEY,
-  NOTIFICATION_EMAILS_JOB_LAST_SUCCESS_KEY,
-  NOTIFICATION_ANNOUNCEMENTS_JOB_LAST_SUCCESS_KEY
-} = require('../notifications/index.js')
-
-const axios = require('axios')
-const moment = require('moment')
 
 // Defaults used in relay health check endpoint
 const RELAY_HEALTH_ACCOUNTS = new Set(
@@ -320,87 +311,6 @@ module.exports = function (app) {
         belowMinimumBalances,
         balances: solanaFeePayerBalancesArr
       })
-    })
-  )
-
-  app.get(
-    '/notification_check',
-    handleResponse(async (req, res) => {
-      let { maxBlockDifference, maxDrift } = req.query
-      maxBlockDifference = maxBlockDifference || 100
-
-      let highestBlockNumber =
-        await models.NotificationAction.max('blocknumber')
-      if (!highestBlockNumber) {
-        highestBlockNumber = config.get('notificationStartBlock')
-      }
-      req.logger.info(
-        `notifications_check | Running notifications_check, comparing blockNumber ${highestBlockNumber}`
-      )
-      const redis = req.app.get('redis')
-      const maxFromRedis = await redis.get('maxBlockNumber')
-      if (maxFromRedis) {
-        highestBlockNumber = parseInt(maxFromRedis)
-      }
-
-      // Get job success timestamps
-      const notificationJobLastSuccess = await redis.get(
-        NOTIFICATION_JOB_LAST_SUCCESS_KEY
-      )
-      const notificationEmailsJobLastSuccess = await redis.get(
-        NOTIFICATION_EMAILS_JOB_LAST_SUCCESS_KEY
-      )
-      const notificationAnnouncementsJobLastSuccess = await redis.get(
-        NOTIFICATION_ANNOUNCEMENTS_JOB_LAST_SUCCESS_KEY
-      )
-
-      const { discoveryProvider } = audiusLibsWrapper.getAudiusLibs()
-      req.logger.info(
-        `notifications_check | Making notification_check request on ${discoveryProvider} at ${discoveryProvider.discoveryProviderEndpoint}`
-      )
-
-      const body = (
-        await axios({
-          method: 'get',
-          url: `${discoveryProvider.discoveryProviderEndpoint}/health_check`
-        })
-      ).data
-      req.logger.info(
-        `notifications_check | Received notification_check response ${body} on ${discoveryProvider.discoveryProviderEndpoint}`
-      )
-      const discProvDbHighestBlock = body.data.db.number
-      const notifBlockDiff = discProvDbHighestBlock - highestBlockNumber
-      const resp = {
-        discProv: body.data,
-        identity: highestBlockNumber,
-        notifBlockDiff,
-        notificationJobLastSuccess,
-        notificationEmailsJobLastSuccess,
-        notificationAnnouncementsJobLastSuccess
-      }
-
-      // Test if last runs were recent enough
-      let withinBounds = true
-      if (maxDrift) {
-        const cutoff = moment().subtract(maxDrift, 'seconds')
-        const isWithinBounds = (key) =>
-          key ? moment(key).isAfter(cutoff) : true
-        withinBounds =
-          isWithinBounds(notificationJobLastSuccess) &&
-          isWithinBounds(notificationEmailsJobLastSuccess) &&
-          isWithinBounds(notificationAnnouncementsJobLastSuccess)
-        req.logger.info(
-          `notifications_check | isWithinBounds is ${withinBounds} and notifBlockDiff is ${notifBlockDiff}`
-        )
-      }
-      if (!withinBounds || notifBlockDiff > maxBlockDifference) {
-        req.logger.info(
-          `notifications_check | Returning a 500 because we are out of bounds or notifBlockDiff is too large`
-        )
-        return errorResponseServerError(resp)
-      }
-
-      return successResponse(resp)
     })
   )
 

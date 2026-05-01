@@ -25,7 +25,8 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playbackSelectors
+  playbackSelectors,
+  CommonState
 } from '@audius/common/store'
 import { Genre, formatLineupTileDuration } from '@audius/common/utils'
 import {
@@ -61,7 +62,7 @@ import TrackTileArt from './TrackTileArt'
 
 const { setLockedContentId } = gatedContentActions
 const { getGatedContentStatusMap } = gatedContentSelectors
-const { getUid, getPlaying, getBuffering } = playbackSelectors
+const { getTrackId, getPlaying, getBuffering } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
@@ -86,7 +87,6 @@ type ConnectedTrackTileProps = Omit<
 > & { dragKind?: DragDropKind }
 
 export const TrackTile = ({
-  uid,
   id,
   index,
   order,
@@ -121,9 +121,15 @@ export const TrackTile = ({
   })
   const { user_id, handle, name, is_deactivated } =
     getUserWithFallback(partialUser) ?? {}
-  const playingUid = useSelector(getUid)
-  const isBuffering = useSelector(getBuffering)
-  const isPlaying = useSelector(getPlaying)
+  const isTrackActive = useSelector(
+    (state: CommonState) => getTrackId(state) === id
+  )
+  const isTrackPlaying = useSelector(
+    (state: CommonState) => getTrackId(state) === id && getPlaying(state)
+  )
+  const isTrackBuffering = useSelector(
+    (state: CommonState) => getTrackId(state) === id && getBuffering(state)
+  )
   const { data: currentUserId } = useCurrentUserId()
   const darkMode = useIsDarkMode()
   const isMatrixMode = useIsMatrix()
@@ -363,11 +369,10 @@ export const TrackTile = ({
       return
     }
 
-    togglePlay(uid, id)
+    togglePlay(id)
   }, [
     loading,
     togglePlay,
-    uid,
     id,
     gatedTrackId,
     hasStreamAccess,
@@ -386,7 +391,6 @@ export const TrackTile = ({
   const isReadonly = variant === 'readonly'
   const tileOrder =
     order ?? (ordered && index !== undefined ? index + 1 : undefined)
-  const isTrackPlaying = uid === playingUid && isPlaying
   const artworkActionLabel =
     gatedTrackId && !hasStreamAccess && !preview_cid
       ? `Unlock ${title || 'track'}`
@@ -433,7 +437,7 @@ export const TrackTile = ({
               id={track_id}
               isTrack
               isPlaying={isTrackPlaying}
-              isBuffering={isBuffering}
+              isBuffering={isTrackBuffering}
               showSkeleton={loading}
               noShimmer={noShimmer}
               coSign={_co_sign}
@@ -452,13 +456,13 @@ export const TrackTile = ({
             <TextLink
               to={permalink}
               textVariant='title'
-              isActive={uid === playingUid || isActive}
+              isActive={isTrackActive || isActive}
               applyHoverStylesToInnerSvg
               className={styles.trackTitleLink}
               aria-label={`View track: ${title || messages.loading}`}
             >
               <Text ellipses>{title || messages.loading}</Text>
-              {uid === playingUid && isPlaying ? <IconVolume size='m' /> : null}
+              {isTrackPlaying ? <IconVolume size='m' /> : null}
               {loading ? (
                 <Skeleton
                   className={styles.skeleton}

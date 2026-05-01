@@ -2,18 +2,10 @@ import { useCallback, useMemo } from 'react'
 
 import { useFanClubFeed, type FanClubFeedItem } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import {
-  Kind,
-  Name,
-  PlaybackSource,
-  UID,
-  ID,
-  ModalSource
-} from '@audius/common/models'
+import { Name, PlaybackSource, ID, ModalSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
 import { Button, Flex, LoadingSpinner, Text } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -64,7 +56,8 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   const isPlaying = useSelector(getPlaying)
   const getCurrentQueueItem = useMemo(() => makeGetCurrent(), [])
   const currentQueueItem = useSelector(getCurrentQueueItem)
-  const playingUid = currentQueueItem?.uid
+  const playingTrackId = currentQueueItem?.trackId ?? null
+  const playingSource = currentQueueItem?.source ?? null
 
   // Build the play queue from track items (text posts aren't playable).
   const tracksForPlayback: PlaybackTrack[] = useMemo(() => {
@@ -75,8 +68,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
       )
       .map((item) => ({
         trackId: item.trackId,
-        source: FAN_CLUB_SOURCE,
-        uid: makeStableUid(Kind.TRACKS, item.trackId, FAN_CLUB_SOURCE)
+        source: FAN_CLUB_SOURCE
       }))
   }, [feedItems])
 
@@ -91,8 +83,10 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
   }, [feedItems])
 
   const togglePlay = useCallback(
-    (uid: UID, id: ID) => {
-      if (uid === playingUid && isPlaying) {
+    (id: ID) => {
+      const isSameTile =
+        playingTrackId === id && playingSource === FAN_CLUB_SOURCE
+      if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, {
@@ -102,7 +96,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         )
         return
       }
-      if (uid === playingUid && !isPlaying) {
+      if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
         dispatch(
           make(Name.PLAYBACK_PLAY, {
@@ -127,7 +121,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
         })
       )
     },
-    [playingUid, isPlaying, dispatch, tracksForPlayback]
+    [playingTrackId, playingSource, isPlaying, dispatch, tracksForPlayback]
   )
 
   const TrackTile = isMobile ? MobileTrackTile : TrackTileDesktop
@@ -161,16 +155,14 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
               )
             }
 
-            const uid = makeStableUid(
-              Kind.TRACKS,
-              item.trackId,
-              FAN_CLUB_SOURCE
-            )
+            const isActive =
+              playingTrackId === item.trackId &&
+              playingSource === FAN_CLUB_SOURCE
 
             return (
+              // @ts-ignore - track tile accepts extra props
               <TrackTile
                 key={`track-${item.trackId}`}
-                uid={uid}
                 id={item.trackId}
                 index={item.lineupIndex}
                 ordered={false}
@@ -180,7 +172,7 @@ export const FanClubFeedSection = ({ mint }: FanClubFeedSectionProps) => {
                 isLoading={false}
                 isTrending={false}
                 isFeed={false}
-                isActive={uid === playingUid}
+                isActive={isActive}
                 hasLoaded={() => {}}
                 source={ModalSource.LineUpTrackTile}
               />

@@ -1,7 +1,5 @@
 import { createSelector } from 'reselect'
 
-import { ID, UID } from '../../models'
-import { Uid } from '../../utils/uid'
 import { CommonState } from '../commonStore'
 
 import { PlaybackTrack, PlayerBehavior } from './types'
@@ -28,29 +26,18 @@ export const getCurrentTrackId = (state: CommonState) =>
 export const getCurrentSource = (state: CommonState) =>
   getCurrentPlaybackTrack(state)?.source ?? null
 
-export const getCurrentEntryUid = (state: CommonState): UID | null =>
-  getCurrentPlaybackTrack(state)?.uid ?? null
+export const getCollectionId = (state: CommonState) =>
+  getCurrentPlaybackTrack(state)?.collectionId ?? null
 
 export const getCurrentPlayerBehavior = (state: CommonState) =>
   getCurrentPlaybackTrack(state)?.playerBehavior ??
   PlayerBehavior.FULL_OR_PREVIEW
 
-export const getCollectionId = (state: CommonState) => {
-  const uid = getCurrentEntryUid(state)
-  if (!uid) return null
-  return Uid.getCollectionId(uid)
-}
-
-export const getUpNext = (state: CommonState) => {
-  const { queue, index } = state.playback
-  if (index < 0) return []
-  return queue.slice(index + 1)
-}
-
 // Audio engine state — these mirror what the legacy `player` slice used to
-// expose. `playingUid` / `playingTrackId` lag behind queue[index] until
+// expose. `playingIndex` / `playingTrackId` lag behind queue[index] until
 // playSucceeded fires, which is what tile-highlight comparisons want.
-export const getUid = (state: CommonState) => state.playback.playingUid
+export const getPlayingIndex = (state: CommonState) =>
+  state.playback.playingIndex
 export const getTrackId = (state: CommonState) => state.playback.playingTrackId
 export const getHasTrack = (state: CommonState) =>
   !!state.playback.playingTrackId
@@ -80,34 +67,20 @@ export const getShuffleOrder = (state: CommonState) =>
 export const getOvershot = (state: CommonState) => state.playback.overshot
 export const getUndershot = (state: CommonState) => state.playback.undershot
 
-// Membership check by uid (was queueSelectors.getUidInQueue)
-export const getUidInQueue = (state: CommonState, props: { uid: UID }) =>
-  state.playback.queue.some((t) => t.uid === props.uid)
-
-// Adapter for code that wants the legacy `Queueable[]` shape (id/uid/source/
-// playerBehavior). Used by the mobile AudioPlayer to drive react-native-track-
-// player and by anything else that iterated the old queue.
-type LegacyQueueable = {
-  id: ID
-  uid: UID
-  source: string
-  playerBehavior?: PlayerBehavior
-}
-export const getOrder = createSelector(
-  [getPlaybackQueue],
-  (queue): LegacyQueueable[] =>
-    queue
-      .filter((t): t is PlaybackTrack & { uid: UID } => !!t.uid)
-      .map((t) => ({
-        id: t.trackId,
-        uid: t.uid,
-        source: t.source,
-        playerBehavior: t.playerBehavior
-      }))
+export const getUpNext = createSelector(
+  [getPlaybackQueue, getPlaybackIndex],
+  (queue, index) => (index < 0 ? [] : queue.slice(index + 1))
 )
 
-// Returns { uid, source } describing the currently playing entry. Mirrors
-// the legacy `queueSelectors.makeGetCurrent`. The uid here is the "currently
-// loaded" uid (lags during load), matching legacy semantics.
+// Returns { trackId, source } describing the currently playing entry. Mirrors
+// the legacy `queueSelectors.makeGetCurrent`. The values here are the
+// "currently loaded" entry (lags during load), matching legacy semantics.
 export const makeGetCurrent = () =>
-  createSelector([getUid, getCurrentSource], (uid, source) => ({ uid, source }))
+  createSelector(
+    [getTrackId, getPlayingIndex, getPlaybackQueue],
+    (trackId, index, queue) => ({
+      trackId,
+      index,
+      source: index >= 0 && index < queue.length ? queue[index].source : null
+    })
+  )

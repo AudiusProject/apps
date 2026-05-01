@@ -27,7 +27,6 @@ function renderTrackTile(overrides = {}, propOverrides = {}) {
           path='/'
           element={
             <TrackTile
-              uid='test-uid'
               id={1}
               index={0}
               size={TrackTileSize.SMALL}

@@ -3,6 +3,17 @@ import { useRef, useState, useEffect } from 'react'
 import { Theme } from '@audius/common/models'
 import { dayjs, formatCount } from '@audius/common/utils'
 import { Select } from '@audius/harmony'
+import {
+  Chart,
+  CategoryScale,
+  Filler,
+  Legend,
+  LineController,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Tooltip
+} from 'chart.js'
 import numeral from 'numeral'
 import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
@@ -10,6 +21,17 @@ import { Line } from 'react-chartjs-2'
 import { messages } from '../DashboardPage'
 
 import styles from './TotalPlaysChart.module.css'
+
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Legend,
+  Tooltip
+)
 
 const MONTHS = {
   JAN: 'January',
@@ -49,7 +71,7 @@ const getDataProps = ({ labels, values }, theme) => {
     datasets: [
       {
         fill: true,
-        lineTension: 0.2,
+        tension: 0.2,
         backgroundColor: colorBackground,
         borderColor: colorPrimary,
         borderCapStyle: 'butt',
@@ -79,113 +101,95 @@ const getLineGraphOptions = (transformXValue) => ({
     }
   },
   scales: {
-    xAxes: [
-      {
-        gridLines: {
-          display: false
-        },
-        ticks: {
-          padding: 13,
-          fontColor: 'rgba(133,129,153, 0.5)',
-          fontSize: 10,
-          fontStyle: 'bold'
-        }
-      }
-    ],
-    yAxes: [
-      {
-        gridLines: {
-          display: false
-        },
-        ticks: {
-          beginAtZero: true,
-          width: 1000,
-          fontColor: 'rgba(133,129,153, 0.5)',
-          fontSize: 10,
-          fontStyle: 'bold',
-          callback: (value, index, values) => {
-            if (value === 0) return ''
-            // Do not show floats.
-            if (parseInt(value) !== value) return ''
-            return ` ${numeral(value).format('0a').toUpperCase()}`
-          }
-        },
-        afterFit: function (scaleInstance) {
-          scaleInstance.width = 22 // sets the width to 100px
-        }
-      }
-    ]
-  },
-  legend: {
-    display: false
-  },
-  tooltips: {
-    enabled: false,
-    titleFontSize: 10,
-    titleFontStyle: 500,
-    titleFontColor: '#FFFFFF',
-    titleSpacing: 0,
-    titleMarginBottom: 7,
-    bodyFontSize: 16,
-    bodyFontStyle: 'bold',
-    bodyFontColor: '#FFFFFF',
-    bodySpacing: 0,
-    bodyMarginBottom: 2,
-    xPadding: 16,
-    yPadding: 11,
-    xAlign: 'left',
-    yAlign: 'bottom',
-    position: 'nearest',
-    custom: function (tooltipModel) {
-      // Tooltip Element
-      let tooltipEl = document.getElementById('chartjs-tooltip')
-
-      // Create element on first render
-      if (!tooltipEl) {
-        tooltipEl = document.createElement('div')
-        tooltipEl.id = 'chartjs-tooltip'
-        tooltipEl.innerHTML = '<div></div>'
-        document.body.appendChild(tooltipEl)
-      }
-
-      // Hide if no tooltip
-      if (tooltipModel.opacity === 0) {
-        tooltipEl.style.opacity = 0
-        return
-      }
-
-      const title = tooltipModel.title[0] || []
-      const playCount = tooltipModel.body[0].lines[0] || 0
-      const innerHtml = `
-        <div class='totalPlaysTooltipContainer'>
-          <div class='totalPlaysTooltipTitle'>${title}</div>
-          <div class='totalPlaysTooltipLabelContainer'>
-            <div class='totalPlaysTooltipLabelText'>${
-              playCount + ' Plays'
-            }</div>
-          </div>
-          <div class='totalPlaysTooptipCarrot'/>
-        </div>`
-
-      tooltipEl.innerHTML = innerHtml
-
-      // Display, position, and set styles for font
-      tooltipEl.style.opacity = 1
-      tooltipEl.style.position = 'absolute'
-      tooltipEl.style.left =
-        tooltipModel.caretX - tooltipEl.offsetWidth / 2 + 'px'
-      tooltipEl.style.top =
-        tooltipModel.caretY - tooltipEl.offsetHeight - 20 + 'px'
-      tooltipEl.style.transition = 'opacity 0.18s ease-in-out'
-      tooltipEl.style.pointerEvents = 'none'
-    },
-    callbacks: {
-      label: (tooltipItem, data) => {
-        const value = tooltipItem.yLabel
-        return formatCount(value)
+    x: {
+      grid: {
+        display: false
       },
-      title: (tooltipItem, data) => {
-        return transformXValue(tooltipItem[0].xLabel)
+      ticks: {
+        padding: 13,
+        color: 'rgba(133,129,153, 0.5)',
+        font: {
+          size: 10,
+          weight: 'bold'
+        }
+      }
+    },
+    y: {
+      beginAtZero: true,
+      grid: {
+        display: false
+      },
+      ticks: {
+        color: 'rgba(133,129,153, 0.5)',
+        font: {
+          size: 10,
+          weight: 'bold'
+        },
+        callback: (value) => {
+          if (value === 0) return ''
+          if (parseInt(value) !== value) return ''
+          return ` ${numeral(value).format('0a').toUpperCase()}`
+        }
+      },
+      afterFit: function (scaleInstance) {
+        scaleInstance.width = 22
+      }
+    }
+  },
+  plugins: {
+    legend: {
+      display: false
+    },
+    tooltip: {
+      enabled: false,
+      position: 'nearest',
+      external: function (context) {
+        const tooltipModel = context.tooltip
+        let tooltipEl = document.getElementById('chartjs-tooltip')
+
+        if (!tooltipEl) {
+          tooltipEl = document.createElement('div')
+          tooltipEl.id = 'chartjs-tooltip'
+          tooltipEl.innerHTML = '<div></div>'
+          document.body.appendChild(tooltipEl)
+        }
+
+        if (tooltipModel.opacity === 0) {
+          tooltipEl.style.opacity = 0
+          return
+        }
+
+        const title = tooltipModel.title[0] || []
+        const playCount = tooltipModel.body[0].lines[0] || 0
+        const innerHtml = `
+          <div class='totalPlaysTooltipContainer'>
+            <div class='totalPlaysTooltipTitle'>${title}</div>
+            <div class='totalPlaysTooltipLabelContainer'>
+              <div class='totalPlaysTooltipLabelText'>${
+                playCount + ' Plays'
+              }</div>
+            </div>
+            <div class='totalPlaysTooptipCarrot'/>
+          </div>`
+
+        tooltipEl.innerHTML = innerHtml
+
+        tooltipEl.style.opacity = 1
+        tooltipEl.style.position = 'absolute'
+        tooltipEl.style.left =
+          tooltipModel.caretX - tooltipEl.offsetWidth / 2 + 'px'
+        tooltipEl.style.top =
+          tooltipModel.caretY - tooltipEl.offsetHeight - 20 + 'px'
+        tooltipEl.style.transition = 'opacity 0.18s ease-in-out'
+        tooltipEl.style.pointerEvents = 'none'
+      },
+      callbacks: {
+        label: (tooltipItem) => {
+          return formatCount(tooltipItem.parsed.y)
+        },
+        title: (tooltipItems) => {
+          return transformXValue(tooltipItems[0].label)
+        }
       }
     }
   }
@@ -236,15 +240,12 @@ const TotalPlaysChart = ({
   useEffect(() => {
     setChartWidthHeight()
     window.addEventListener('resize', setChartWidthHeight)
-    // NOTE: Hacky fix b/c chart.js uses canvas to calculte posistion,
-    // so we need to have the font loaded to correctly measure text size to position the chart axes text
+    // chart.js measures text via canvas, so we wait for fonts to be ready
+    // before triggering an update so axis labels size correctly.
     document.fonts.ready.then(() => {
-      if (chart.current?.chartInstance) {
-        chart.current.chartInstance.update()
-      }
+      chart.current?.update()
     })
 
-    // Calculate how many years to show in the dropdown
     const createdAt = dayjs(accountCreatedAt)
     const today = dayjs()
 

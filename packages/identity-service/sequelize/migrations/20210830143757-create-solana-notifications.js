@@ -9,9 +9,7 @@ module.exports = {
         type: Sequelize.UUID
       },
       type: {
-        type: Sequelize.ENUM(
-          'ChallengeReward'
-        )
+        type: Sequelize.ENUM('ChallengeReward')
       },
       isRead: {
         type: Sequelize.BOOLEAN

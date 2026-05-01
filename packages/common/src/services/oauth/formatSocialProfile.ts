@@ -2,6 +2,10 @@ import { TikTokProfile, TwitterProfile } from '~/store/account/types'
 
 export const MAX_HANDLE_LENGTH = 30
 export const MAX_DISPLAY_NAME_LENGTH = 32
+// Must match CHARACTER_LIMIT_USER_BIO in
+// packages/discovery-provider/src/tasks/entity_manager/utils.py — the
+// indexer rejects bios longer than this with IndexingValidationError.
+export const MAX_BIO_LENGTH = 256
 
 export const formatTwitterProfile = async (
   twitterProfile: TwitterProfile,

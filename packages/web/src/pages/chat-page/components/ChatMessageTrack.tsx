@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import {
   getTrackByPermalinkQueryKey,
@@ -12,12 +12,11 @@ import {
 import {
   Name,
   PlaybackSource,
-  Kind,
   ID,
   ModalSource
 } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
-import { getPathFromTrackUrl, makeUid } from '@audius/common/utils'
+import { getPathFromTrackUrl } from '@audius/common/utils'
 import { useQuery } from '@tanstack/react-query'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
@@ -74,10 +73,6 @@ export const ChatMessageTrack = ({
     partialTrack ?? {}
   const isPreview = !!is_stream_gated && !!preview_cid && !hasStreamAccess
 
-  const uid = useMemo(() => {
-    return track_id ? makeUid(Kind.TRACKS, track_id) : null
-  }, [track_id])
-
   const recordAnalytics = useCallback(
     ({ name, id }: { name: TrackPlayback; id: ID }) => {
       if (!trackExists) return
@@ -92,14 +87,13 @@ export const ChatMessageTrack = ({
   )
 
   const { togglePlay, isTrackPlaying } = useToggleTrack({
-    id: track_id,
-    uid,
+    id: track_id ?? null,
     isPreview,
     source: QueueSource.CHAT_TRACKS,
     recordAnalytics
   })
 
-  const hasResolvedTrack = !isPending && trackExists && uid && !is_delete
+  const hasResolvedTrack = !isPending && trackExists && !is_delete
 
   useEffect(() => {
     // While the underlying track query is still pending we don't yet know
@@ -126,7 +120,6 @@ export const ChatMessageTrack = ({
       <TrackTile
         containerClassName={className}
         index={0}
-        uid={uid}
         id={track_id}
         size={TrackTileSize.SMALL}
         ordered={false}

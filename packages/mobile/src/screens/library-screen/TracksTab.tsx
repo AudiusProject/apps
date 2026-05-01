@@ -15,14 +15,13 @@ import {
 import type { PlaybackTrack } from '@audius/common/store'
 import { makeStableUid, Uid, type Nullable } from '@audius/common/utils'
 import { debounce } from 'lodash'
-import Animated, { Layout } from 'react-native-reanimated'
+import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Tile, VirtualizedScrollView } from 'app/components/core'
+import { PlayBarChin } from 'app/components/core/PlayBarChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
 import { TrackList } from 'app/components/track-list'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
 import { getIsDoneLoadingFromDisk } from 'app/store/offline-downloads/selectors'
 import { makeStyles } from 'app/styles'
 
@@ -33,7 +32,6 @@ const { fetchSaves: fetchSavesAction, fetchMoreSaves } = libraryPageActions
 const {
   getTrackSaves,
   getLibraryTracksStatus,
-  getInitialFetchStatus,
   getSelectedCategoryLocalTrackAdds,
   getIsFetchingMore,
   getCategory
@@ -50,39 +48,50 @@ const messages = {
   inputPlaceholder: 'Filter Tracks'
 }
 
-const useStyles = makeStyles(({ spacing }) => ({
-  container: {
-    marginBottom: spacing(4),
-    marginHorizontal: spacing(3)
+const useStyles = makeStyles(({ palette, spacing }) => ({
+  root: {
+    flex: 1
   },
-  containerWithTopSpacing: {
+  rowsContainer: {
+    flex: 1,
     marginTop: spacing(3),
     marginBottom: spacing(4),
-    marginHorizontal: spacing(3)
-  },
-  trackList: {
+    marginHorizontal: spacing(3),
+    borderWidth: 1,
+    borderColor: palette.neutralLight8,
+    backgroundColor: palette.white,
     borderRadius: 8,
     overflow: 'hidden'
   },
-  spinnerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: spacing(12)
+  emptyState: {
+    marginTop: spacing(3),
+    marginHorizontal: spacing(3)
   }
 }))
 
 const FETCH_LIMIT = 50
 
 function useTracksWithUsers(trackUids: string[]) {
-  const trackIds = trackUids.map((uid) => Uid.fromString(uid).id as ID)
+  const trackIds = useMemo(
+    () => trackUids.map((uid) => Uid.fromString(uid).id as ID),
+    [trackUids]
+  )
   const { data: tracks = [], byId: tracksById } = useTracks(trackIds)
-  const { byId: usersById } = useUsers(tracks.map((track) => track.owner_id))
+  const ownerIds = useMemo(
+    () => tracks.map((track) => track.owner_id),
+    [tracks]
+  )
+  const { byId: usersById } = useUsers(ownerIds)
 
-  return trackUids.map((uid) => {
-    const track = tracksById[Uid.fromString(uid).id]
-    const user = usersById[track?.owner_id]
-    return { uid, track, user }
-  })
+  return useMemo(
+    () =>
+      trackUids.map((uid) => {
+        const track = tracksById[Uid.fromString(uid).id]
+        const user = usersById[track?.owner_id]
+        return { uid, track, user }
+      }),
+    [trackUids, tracksById, usersById]
+  )
 }
 
 export const TracksTab = () => {
@@ -104,7 +113,6 @@ export const TracksTab = () => {
     return isReachable ? onlineSavedTracksStatus : offlineSavedTracksStatus
   })
 
-  const initialFetch = useSelector(getInitialFetchStatus)
   const isFetchingMore = useSelector(getIsFetchingMore)
   const saves = useSelector(getTrackSaves)
   const localAdditions = useSelector(getSelectedCategoryLocalTrackAdds)
@@ -264,64 +272,58 @@ export const TracksTab = () => {
   const shouldShowFilterInput =
     trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
-  const renderContent = () => {
+  const renderBody = () => {
     if (filteredTrackUids.length === 0 && !isPending) {
       if (!isReachable) {
-        return <NoTracksPlaceholder />
+        return (
+          <View style={styles.emptyState}>
+            <NoTracksPlaceholder />
+          </View>
+        )
       }
-      if (filterValue) {
-        return <EmptyTileCTA message={messages.noResultsText} />
-      }
-      return <EmptyTileCTA message={emptyTabText} />
+      return (
+        <View style={styles.emptyState}>
+          <EmptyTileCTA
+            message={filterValue ? messages.noResultsText : emptyTabText}
+          />
+        </View>
+      )
+    }
+
+    if (!showTrackSkeletonList && filteredTrackUids.length === 0) {
+      return null
     }
 
     return (
-      <WithLoader
-        loading={initialFetch && saveCount === 0 && !showTrackSkeletonList}
-      >
-        <Animated.View layout={Layout}>
-          {showTrackSkeletonList || filteredTrackUids.length > 0 ? (
-            <Tile
-              styles={{
-                tile:
-                  showTrackSkeletonList && !shouldShowFilterInput
-                    ? styles.containerWithTopSpacing
-                    : styles.container
-              }}
-            >
-              <TrackList
-                style={styles.trackList}
-                hideArt
-                showSkeleton={showTrackSkeletonList}
-                skeletonRowCount={trackSkeletonRowCount}
-                hasNextPage={
-                  isFetchingMore && !allTracksFetched && isReachable === true
-                }
-                onEndReached={handleMoreFetchSaves}
-                onEndReachedThreshold={1.5}
-                togglePlay={togglePlay}
-                trackItemAction='overflow'
-                uids={showTrackSkeletonList ? undefined : filteredTrackUids}
-              />
-            </Tile>
-          ) : null}
-        </Animated.View>
-      </WithLoader>
+      <View style={styles.rowsContainer}>
+        <TrackList
+          hideArt
+          showSkeleton={showTrackSkeletonList}
+          skeletonRowCount={trackSkeletonRowCount}
+          hasNextPage={
+            isFetchingMore && !allTracksFetched && isReachable === true
+          }
+          onEndReached={handleMoreFetchSaves}
+          onEndReachedThreshold={1.5}
+          ListFooterComponent={<PlayBarChin />}
+          togglePlay={togglePlay}
+          trackItemAction='overflow'
+          uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+        />
+      </View>
     )
   }
 
   return (
-    <VirtualizedScrollView>
-      <>
-        <OfflineContentBanner />
-        {shouldShowFilterInput && (
-          <FilterInput
-            placeholder={messages.inputPlaceholder}
-            onChangeText={handleChangeFilterValue}
-          />
-        )}
-        {renderContent()}
-      </>
-    </VirtualizedScrollView>
+    <View style={styles.root}>
+      <OfflineContentBanner />
+      {shouldShowFilterInput ? (
+        <FilterInput
+          placeholder={messages.inputPlaceholder}
+          onChangeText={handleChangeFilterValue}
+        />
+      ) : null}
+      {renderBody()}
+    </View>
   )
 }
