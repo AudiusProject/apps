@@ -49,6 +49,7 @@ import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import UserBadges from 'components/user-badges/UserBadges'
 import { UserGeneratedText } from 'components/user-generated-text'
+import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
@@ -63,6 +64,7 @@ import { ContestCommentsTile } from '../ContestCommentsTile'
 import { ContestFollowersModal } from '../ContestFollowersModal'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
+import { PostUpdateComposer } from '../PostUpdateComposer'
 
 const messages = {
   title: 'Remix Contest',
@@ -736,14 +738,20 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                   }
               }}
             >
-              {/* Left column: About + Prizes (and Updates if we add
-                host-feed parity later). Cards sit on the page
-                background. */}
+              {/* Left column: POST UPDATE composer (host-only) + About +
+                Prizes + Updates feed. Composer + feed are split per
+                Figma 2806-63008 — the composer sits above About, the
+                historical feed sits below Prizes. */}
               <Flex
                 direction='column'
                 gap='l'
                 css={{ flex: '1 1 auto', minWidth: 0 }}
               >
+                <PostUpdateComposer
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                />
+
                 {/* About — render description inline (same pattern as
                   mobile-web). Using the shared `RemixContestDetailsTab`
                   here previously double-padded the card AND prepended a
@@ -765,6 +773,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                     {(contest.eventData as any)?.description ??
                       'Enter my remix contest before the deadline for your chance to win!'}
                   </UserGeneratedText>
+                  {/* Optional embedded video (YouTube / Vimeo) configured on the
+                    Edit Contest "Video Link" field. Renders nothing when no
+                    URL is set or the URL isn't a YouTube / Vimeo link. */}
+                  <VideoEmbed url={(contest.eventData as any)?.videoUrl} />
                 </Paper>
 
                 <Paper
@@ -786,6 +798,19 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                     {(contest.eventData as any)?.prizeInfo ?? ''}
                   </UserGeneratedText>
                 </Paper>
+
+                {/* Updates feed — host-authored top-level posts. Compose
+                  affordance lives above the About card via
+                  `PostUpdateComposer`; this tile is feed-only. Empty
+                  state ("Nothing here yet …") still renders so the
+                  section reads as a deliberate part of the page rather
+                  than disappearing for new contests. */}
+                <ContestCommentsTile
+                  eventId={eventId}
+                  eventOwnerUserId={contest?.userId}
+                  mode='updates'
+                  hideComposer
+                />
               </Flex>
 
               {/* Right column: Stems & Downloads + Followers + Comments. */}

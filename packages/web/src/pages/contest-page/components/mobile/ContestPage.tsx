@@ -51,6 +51,7 @@ import { Avatar } from 'components/avatar/Avatar'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import Page from 'components/page/Page'
 import { UserGeneratedText } from 'components/user-generated-text'
+import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
@@ -60,6 +61,7 @@ import { fullContestPage, pickWinnersPage } from 'utils/route'
 import { ContestCommentsTile } from '../ContestCommentsTile'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
+import { PostUpdateComposer } from '../PostUpdateComposer'
 
 const messages = {
   title: 'Remix Contest',
@@ -658,16 +660,28 @@ const ContestPage = ({
               prizeInfo={
                 (contest.eventData as any)?.prizeInfo as string | undefined
               }
+              videoUrl={
+                (contest.eventData as any)?.videoUrl as string | undefined
+              }
             />
           ) : activeTab === 'updates' ? (
-            <Box pt='l'>
+            <Flex direction='column' gap='l' pt='l'>
+              {/* POST UPDATE composer — matches Figma 2888-130746. Mirrors
+                  the Details tab so the host can compose from either tab. */}
+              <PostUpdateComposer
+                eventId={eventId}
+                eventOwnerUserId={contest.userId}
+              />
+              {/* Updates feed — historical host posts only, no composer
+                  (the dedicated card above owns that). */}
               <ContestCommentsTile
                 eventId={eventId}
                 eventOwnerUserId={contest.userId}
                 mode='updates'
                 hideHeading
+                hideComposer
               />
-            </Box>
+            </Flex>
           ) : activeTab === 'submissions' ? (
             <Flex direction='column' gap='l' pt='l'>
               {(() => {
@@ -781,18 +795,26 @@ type DetailsTabProps = {
   followerCount: number
   description: string | undefined
   prizeInfo: string | undefined
+  videoUrl: string | undefined
 }
 
 const DetailsTab = ({
   trackId,
   eventId,
+  contestOwnerId,
   hasDownloads,
   followerCount,
   description,
-  prizeInfo
+  prizeInfo,
+  videoUrl
 }: DetailsTabProps) => {
   return (
     <Flex direction='column' gap='l' pt='l'>
+      {/* POST UPDATE composer — host-only. Renders nothing for non-owners.
+          The Updates tab owns the historical feed; this card lets the
+          host post from the Details tab too (matches Figma 2888-23430). */}
+      <PostUpdateComposer eventId={eventId} eventOwnerUserId={contestOwnerId} />
+
       {/* About — wrapped in a Paper card so the section reads as a
           unit matching Figma 2925-18101 (every other Details block
           is a card; bare text sitting on the page background broke
@@ -810,6 +832,10 @@ const DetailsTab = ({
         <UserGeneratedText variant='body'>
           {description ?? fallbackDescription}
         </UserGeneratedText>
+        {/* Optional embedded video (YouTube / Vimeo) configured on the
+            Edit Contest "Video Link" field. Renders nothing when no URL
+            is set or the URL isn't a YouTube / Vimeo link. */}
+        <VideoEmbed url={videoUrl} />
       </Paper>
 
       {/* Prizes — inline prize info inside its own Paper card.

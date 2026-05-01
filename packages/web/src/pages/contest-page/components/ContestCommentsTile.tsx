@@ -73,6 +73,14 @@ type ContestCommentsTileProps = {
    * inner card label would double up. Defaults to false (label shown).
    */
   hideHeading?: boolean
+  /**
+   * Render only the feed (no composer / sign-in stub). Used on surfaces
+   * where a separate `PostUpdateComposer` already owns the compose
+   * affordance — e.g. desktop contest details, where the composer sits
+   * above About and the historical feed sits below Prizes. Defaults to
+   * false (composer rendered when the user is allowed to post).
+   */
+  hideComposer?: boolean
 }
 
 /**
@@ -97,7 +105,8 @@ export const ContestCommentsTile = ({
   eventId,
   eventOwnerUserId,
   mode,
-  hideHeading = false
+  hideHeading = false,
+  hideComposer = false
 }: ContestCommentsTileProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const isEventOwner =
@@ -125,7 +134,14 @@ export const ContestCommentsTile = ({
   const heading =
     mode === 'updates' ? messages.updatesHeading : messages.commentsHeading
   const showComposer =
-    currentUserId !== null && (mode === 'comments' || isEventOwner)
+    !hideComposer &&
+    currentUserId !== null &&
+    (mode === 'comments' || isEventOwner)
+  // When `hideComposer` is set, the caller is rendering a feed-only
+  // tile alongside a separate composer (e.g. desktop details), so the
+  // "sign in to comment" stub would be a redundant CTA. Track separately
+  // from `showComposer` so the empty-feed treatment stays clean.
+  const showSignInStub = !hideComposer
   const composerPlaceholder =
     mode === 'updates'
       ? messages.composePostUpdatePlaceholder
@@ -268,13 +284,13 @@ export const ContestCommentsTile = ({
             </Flex>
           ) : null}
         </Flex>
-      ) : currentUserId ? null : (
+      ) : showSignInStub && !currentUserId ? (
         <Box p='m'>
           <Text variant='body' size='s' color='subdued'>
             {messages.signInToComment}
           </Text>
         </Box>
-      )}
+      ) : null}
 
       {/* Divider between composer and feed — matches the thin
           separator in Figma node 2857-99394. Only shown when there's
