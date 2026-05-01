@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 15.3.1
+
+### Patch Changes
+
+- Add a `files` field to `package.json` so the published tarball actually ships the built `dist/` directory. 15.3.0 was published with no `dist/` because the package's `.gitignore` excludes `dist`, and without an explicit `files` whitelist npm fell back to that ignore file and skipped every built artifact. Republish-only fix; no SDK code changes vs. 15.3.0.
+
 ## 15.3.0
 
 ### Minor Changes
