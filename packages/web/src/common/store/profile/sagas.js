@@ -100,7 +100,7 @@ export function* updateProfileAsync(action) {
       ? undefined
       : {
           ...prevUser,
-          name: metadata.name
+          ...metadata
         }
   )
 

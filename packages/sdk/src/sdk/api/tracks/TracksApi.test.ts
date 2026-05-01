@@ -202,6 +202,24 @@ describe('TracksApi', () => {
       })
     })
 
+    it('preserves allowed API keys in track metadata updates', async () => {
+      const allowedApiKeys = ['test-api-key']
+      await tracks.updateTrack({
+        userId: '7eP5n',
+        trackId: 'ogRRByg',
+        metadata: {
+          allowedApiKeys
+        }
+      })
+
+      expect(EntityManagerClient.prototype.manageEntity).toHaveBeenCalled()
+      const request = vitest.mocked(EntityManagerClient.prototype.manageEntity)
+        .mock.calls.at(-1)?.[0]
+      const metadata = JSON.parse(request?.metadata ?? '{}')
+
+      expect(metadata.data.allowed_api_keys).toEqual(allowedApiKeys)
+    })
+
     it('throws an error if invalid metadata is provided', async () => {
       await expect(async () => {
         await tracks.updateTrack({

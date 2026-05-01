@@ -269,6 +269,7 @@ export const trackMetadataForUploadToSdk = (
   return {
     ...camelcaseKeys(
       pick(input, [
+        'allowed_api_keys',
         'license',
         'isrc',
         'iswc',
