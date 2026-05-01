@@ -44,7 +44,7 @@
   "dependencies": {
     "@audius/fixed-decimal": "0.2.1",
     "@audius/hedgehog": "3.0.0-alpha.1",
-    "@audius/sdk": "15.3.0",
+    "@audius/sdk": "15.3.1",
     "@audius/spl": "2.1.0",
     "@babel/core": "^7.23.7",
     "@babel/plugin-proposal-class-static-block": "7.21.0",
