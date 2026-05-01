@@ -68,6 +68,10 @@ type UserBadgesProps = {
 
   // Optional flag to hide the fan club badge
   hideFanClubBadge?: boolean
+
+  // Disable hover/click handling when badges are rendered inside a larger
+  // interactive surface.
+  disableInteraction?: boolean
 }
 
 /**
@@ -83,7 +87,8 @@ const UserBadges = ({
   isVerifiedOverride,
   overrideTier,
   mint,
-  hideFanClubBadge = false
+  hideFanClubBadge = false,
+  disableInteraction = false
 }: UserBadgesProps) => {
   const { tier: currentTier, isVerified } = useTierAndVerifiedForUser(userId)
   const { data: user } = useUser(userId, {
@@ -216,12 +221,12 @@ const UserBadges = ({
 
   return (
     <Box
-      onClick={handleStopPropagation}
+      onClick={disableInteraction ? undefined : handleStopPropagation}
       css={{
         display: 'inline-flex',
         alignSelf: 'center',
         position: 'relative',
-        pointerEvents: 'auto'
+        pointerEvents: disableInteraction ? 'none' : 'auto'
       }}
     >
       <span

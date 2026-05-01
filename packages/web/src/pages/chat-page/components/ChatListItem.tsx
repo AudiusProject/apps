@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 
 import { useOtherChatUsersFromChat } from '@audius/common/api'
 import type { UserChat } from '@audius/sdk'
@@ -19,7 +19,9 @@ type ChatListItemProps = {
   isCompact?: boolean
 }
 
-export const ChatListItem = (props: ChatListItemProps) => {
+export const ChatListItem = memo(function ChatListItem(
+  props: ChatListItemProps
+) {
   const { chat, currentChatId, onChatClicked, isCompact } = props
   const isCurrentChat = currentChatId && currentChatId === chat.chat_id
 
@@ -62,4 +64,4 @@ export const ChatListItem = (props: ChatListItemProps) => {
       <div className={styles.messagePreview}>{chat.last_message}</div>
     </button>
   )
-}
+})

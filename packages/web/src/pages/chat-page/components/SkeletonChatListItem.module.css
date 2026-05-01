@@ -1,3 +1,6 @@
+/* Skeleton mirrors ChatListItem.module.css.
+ * Keep the .compact rules below in sync with .root.compact in
+ * ChatListItem.module.css so the loading state matches the real row. */
 .root {
   display: flex;
   flex-direction: column;
@@ -16,28 +19,54 @@
   border-radius: 50%;
   width: var(--harmony-unit-12);
   height: var(--harmony-unit-12);
+  flex-shrink: 0;
 }
 
 .profile {
   display: flex;
   flex-direction: column;
   gap: var(--harmony-unit-3);
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .name {
-  width: 100px;
+  width: 40%;
+  min-width: 60px;
+  max-width: 140px;
   height: 16px;
   border-radius: 48px;
 }
 
 .handle {
-  width: 87px;
+  width: 30%;
+  min-width: 50px;
+  max-width: 110px;
   height: 12px;
   border-radius: 48px;
 }
 
 .message {
-  width: 226px;
+  width: 75%;
+  min-width: 80px;
+  max-width: 260px;
   height: 14px;
   border-radius: 48px;
+}
+
+/* Mirror ChatListItem.module.css `.root.compact`:
+ * fixed row height, hide message + handle + name, center the avatar. */
+.root.compact {
+  height: var(--chat-row-height, 80px);
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.root.compact .profile,
+.root.compact .message {
+  display: none;
+}
+
+.root.compact .user {
+  justify-content: center;
 }

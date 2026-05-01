@@ -1,0 +1,66 @@
+/* Sized to match the resolved chat track / playlist tile so the bubble
+ * doesn't jump when the skeleton is replaced by the real content.
+ *
+ * Reference dimensions (TrackTile.module.css `.container.readonly`):
+ *   - padding: var(--harmony-unit-2) on all sides
+ *   - albumArtButton row + stats row underneath
+ *
+ * No border-bottom here — the parent ChatMessageListItem rule
+ * `.bubble:not(.hideMessage) .unfurl` decides when the divider applies
+ * (it's intentionally suppressed for URL-only bubbles). Adding a border
+ * here caused a 1px jump for URL-only messages when the skeleton resolved.
+ */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--harmony-unit-2);
+  padding: var(--harmony-unit-2);
+  background: var(--harmony-white);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.metadata {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--harmony-unit-3);
+  min-width: 0;
+}
+
+.artwork {
+  width: 74px;
+  height: 74px;
+  border-radius: var(--harmony-unit-1);
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--harmony-unit-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.title {
+  width: 70%;
+  min-width: 80px;
+  height: 16px;
+  border-radius: 48px;
+}
+
+.subtitle {
+  width: 50%;
+  min-width: 60px;
+  height: 14px;
+  border-radius: 48px;
+}
+
+.stats {
+  width: 35%;
+  min-width: 60px;
+  height: 12px;
+  border-radius: 48px;
+}

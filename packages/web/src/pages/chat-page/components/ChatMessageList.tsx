@@ -20,6 +20,7 @@ import {
   isEarliestUnread,
   chatCanFetchMoreMessages
 } from '@audius/common/utils'
+import { Flex, Text } from '@audius/harmony'
 import { OptionalId } from '@audius/sdk'
 import { ResizeObserver } from '@juggle/resize-observer'
 import cn from 'classnames'
@@ -88,8 +89,6 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       polyfill: ResizeObserver
     })
 
-    const isScrollable = messageListHeight > (ref.current?.clientHeight ?? 0)
-
     // On first load, mark chat as read
     useEffect(() => {
       if (chatId) {
@@ -156,10 +155,26 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       [scrollHandler]
     )
 
-    // Cancel any throttled scrolls when component dismounts
-    useEffect(() => () => {
-      throttledScrollHandler.cancel()
-    })
+    // Cancel any throttled scrolls when the handler changes or on unmount.
+    // (Without the dep array, the cleanup ran on every render and cancelled
+    // in-flight throttled invocations spuriously.)
+    useEffect(
+      () => () => {
+        throttledScrollHandler.cancel()
+      },
+      [throttledScrollHandler]
+    )
+
+    // Snap to the bottom whenever the inner message-list content resizes and
+    // the user was near the bottom — covers avatar loads, unfurls, image
+    // expansions, etc. that don't change the message-array reference and so
+    // wouldn't otherwise trip StickyScrollList's stickToBottom logic.
+    useLayoutEffect(() => {
+      if (!ref.current) return
+      if (wasNearBottomRef.current) {
+        ref.current.scrollTo({ top: ref.current.scrollHeight })
+      }
+    }, [messageListHeight])
 
     // Respond to async unfurl expansions explicitly signaled by list items
     useEffect(() => {
@@ -224,18 +239,38 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
       }
     }, [dispatch, chatId, chat?.messagesStatus])
 
-    // Fix for if the initial load doesn't have enough messages to cause scrolling
+    // Fix for if the initial load doesn't have enough messages to cause scrolling.
+    // Guarded so that re-renders triggered by the messages array don't dispatch
+    // duplicate fetchMoreMessages for the same (chatId, prev_count) pair while
+    // the saga is still in flight.
+    const autoFetchMoreGuardRef = useRef<{
+      chatId: string
+      prevCount: number
+      messagesStatus?: Status | 'PENDING'
+    } | null>(null)
+    const prevCount = chat?.messagesSummary?.prev_count
+    const messagesStatus = chat?.messagesStatus
     useEffect(() => {
       if (
         chatId &&
         ref.current &&
         ref.current.scrollHeight - SPINNER_HEIGHT <= ref.current.clientHeight &&
-        chat?.messagesSummary &&
-        chat?.messagesSummary.prev_count > 0
+        prevCount &&
+        prevCount > 0
       ) {
+        const last = autoFetchMoreGuardRef.current
+        if (
+          last &&
+          last.chatId === chatId &&
+          last.prevCount === prevCount &&
+          last.messagesStatus === messagesStatus
+        ) {
+          return
+        }
+        autoFetchMoreGuardRef.current = { chatId, prevCount, messagesStatus }
         dispatch(fetchMoreMessages({ chatId }))
       }
-    }, [dispatch, chatId, chat, chatMessages])
+    }, [dispatch, chatId, prevCount, messagesStatus, chatMessages])
 
     const unreadMessageCount = chatFrozenRef.current?.unread_message_count ?? 0
     const showSendMessagePrompt =
@@ -299,11 +334,13 @@ export const ChatMessageList = forwardRef<HTMLDivElement, ChatMessageListProps>(
             ))}
           {!chat?.messagesSummary || chat.messagesSummary.prev_count > 0 ? (
             <LoadingSpinner className={styles.spinner} />
-          ) : isScrollable ? (
-            <div className={styles.separator}>
-              <span className={styles.tag}>{messages.endOfMessages}</span>
-            </div>
-          ) : null}
+          ) : (
+            <Flex justifyContent='center' p='l'>
+              <Text variant='body' size='m' color='subdued'>
+                {messages.endOfMessages}
+              </Text>
+            </Flex>
+          )}
           {chat?.is_blast ? <ChatBlastAudienceDisplay chat={chat} /> : null}
         </div>
       </StickyScrollList>

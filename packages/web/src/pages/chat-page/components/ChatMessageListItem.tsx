@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 
 import { useCurrentUserId, useUsers } from '@audius/common/api'
 import { useCanSendMessage } from '@audius/common/hooks'
@@ -43,7 +43,9 @@ const messages = {
   membersOnly: 'Members Only'
 }
 
-export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
+export const ChatMessageListItem = memo(function ChatMessageListItem(
+  props: ChatMessageListItemProps
+) {
   const { chatId, message, hasTail } = props
 
   // Refs
@@ -209,11 +211,17 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       >
         <Flex className={styles.bubbleCorners}>
           <Flex column className={styles.bubbleContent}>
-            <FanClubHeader userId={senderUserId} audience={message.audience} />
+            <FanClubHeader
+              userId={senderUserId}
+              audience={message.audience}
+              className={styles.fanClubHeader}
+            />
             {isCollectionUrl(linkValue) ? (
               <ChatMessagePlaylist
                 className={cn(styles.unfurl, styles.playlistUnfurl)}
                 link={link.value}
+                chatId={chatId}
+                messageId={message.message_id}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
               />
@@ -221,6 +229,8 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
               <ChatMessageTrack
                 className={cn(styles.unfurl, styles.trackUnfurl)}
                 link={link.value}
+                chatId={chatId}
+                messageId={message.message_id}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
               />
@@ -277,4 +287,4 @@ export const ChatMessageListItem = (props: ChatMessageListItemProps) => {
       ) : null}
     </Flex>
   )
-}
+})

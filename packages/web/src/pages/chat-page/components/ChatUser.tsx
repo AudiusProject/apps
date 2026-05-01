@@ -51,6 +51,7 @@ export const ChatUser = ({
               <UserBadges
                 userId={user.user_id}
                 size='s'
+                disableInteraction
                 css={{ display: 'inline-flex', verticalAlign: 'middle' }}
               />
             </>

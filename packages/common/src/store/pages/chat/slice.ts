@@ -222,20 +222,35 @@ const slice = createSlice({
       state.chats.status = Status.SUCCESS
       if (!state.chats.summary) {
         state.chats.summary = summary
-      } else {
+      } else if (summary) {
+        // Next direction: update if the response signals "no more newer chats"
+        // (count === 0) OR if its cursor strictly advances forward. The
+        // count===0 branch is what lets us trust the end-of-pagination signal
+        // even when the backend returns a null/empty cursor on an exhausted
+        // page; without it, prev_count/next_count get stuck above zero
+        // forever and the loader never resolves.
         if (
-          summary?.next_cursor &&
-          dayjs(summary?.next_cursor).isAfter(state.chats.summary.next_cursor)
+          summary.next_count === 0 ||
+          (summary.next_cursor &&
+            dayjs(summary.next_cursor).isAfter(state.chats.summary.next_cursor))
         ) {
-          state.chats.summary.next_cursor = summary?.next_cursor
-          state.chats.summary.next_count = summary?.next_count
+          state.chats.summary.next_count = summary.next_count
+          if (summary.next_cursor) {
+            state.chats.summary.next_cursor = summary.next_cursor
+          }
         }
+        // Prev direction: same pattern.
         if (
-          summary?.prev_cursor &&
-          dayjs(summary?.prev_cursor).isBefore(state.chats.summary.prev_cursor)
+          summary.prev_count === 0 ||
+          (summary.prev_cursor &&
+            dayjs(summary.prev_cursor).isBefore(
+              state.chats.summary.prev_cursor
+            ))
         ) {
-          state.chats.summary.prev_cursor = summary?.prev_cursor
-          state.chats.summary.prev_count = summary?.prev_count
+          state.chats.summary.prev_count = summary.prev_count
+          if (summary.prev_cursor) {
+            state.chats.summary.prev_cursor = summary.prev_cursor
+          }
         }
       }
       for (const chat of data) {
@@ -287,22 +302,32 @@ const slice = createSlice({
       }
 
       // Update the summary to include the max of next_cursor and
-      // min of prev_cursor.
+      // min of prev_cursor. Also honor count === 0 as an authoritative
+      // end-of-pagination signal so the count fields can converge to 0 even
+      // when the backend returns a null/empty cursor on an exhausted page.
       const existingSummary = state.chats.entities[chatId]?.messagesSummary
       const summaryToUse = { ...summary, ...existingSummary }
       if (
         !existingSummary ||
-        dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor)
+        summary.next_count === 0 ||
+        (summary.next_cursor &&
+          dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor))
       ) {
         summaryToUse.next_count = summary.next_count
-        summaryToUse.next_cursor = summary.next_cursor
+        if (summary.next_cursor || !existingSummary) {
+          summaryToUse.next_cursor = summary.next_cursor
+        }
       }
       if (
         !existingSummary ||
-        dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor)
+        summary.prev_count === 0 ||
+        (summary.prev_cursor &&
+          dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor))
       ) {
         summaryToUse.prev_count = summary.prev_count
-        summaryToUse.prev_cursor = summary.prev_cursor
+        if (summary.prev_cursor || !existingSummary) {
+          summaryToUse.prev_cursor = summary.prev_cursor
+        }
       }
 
       chatsAdapter.updateOne(state.chats, {

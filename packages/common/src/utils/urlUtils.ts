@@ -26,6 +26,20 @@ export const getPathFromAudiusUrl = (url: string) =>
     ? url
     : (new RegExp(audiusUrlRegex).exec(url)?.[2] ?? null)
 
+/**
+ * Pasted URLs commonly contain percent-encoded unicode (e.g. `%E2%80%93` for
+ * an en-dash). The SDK URL-encodes its query params before hitting the API,
+ * so passing an already-encoded path through results in double-encoding and
+ * the lookup fails. Decode here so callers always get the canonical form.
+ */
+const safeDecodePath = (path: string) => {
+  try {
+    return decodeURIComponent(path)
+  } catch {
+    return path
+  }
+}
+
 const collectionUrlRegex =
   // eslint-disable-next-line no-useless-escape
   /^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?(audius\.co)(\/[\S]+\/(?:playlist|album)\/[\S]+)$/gim
@@ -35,7 +49,7 @@ export const isCollectionUrl = (url: string) =>
 export const getPathFromPlaylistUrl = (url: string) => {
   const results = new RegExp(collectionUrlRegex).exec(url)
   if (!results) return null
-  return results[2]
+  return safeDecodePath(results[2])
 }
 
 const trackUrlRegex =
@@ -46,5 +60,5 @@ export const isTrackUrl = (url: string) => new RegExp(trackUrlRegex).test(url)
 export const getPathFromTrackUrl = (url: string) => {
   const results = new RegExp(trackUrlRegex).exec(url)
   if (!results) return null
-  return results[2]
+  return safeDecodePath(results[2])
 }
