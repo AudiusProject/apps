@@ -287,14 +287,18 @@
 
 .tableRow:hover:not(.skeletonRow),
 .tableRow:focus-within:not(.skeletonRow),
-.tableRow:hover > .tableCell,
-.tableRow:focus-within > .tableCell {
+.tableRow:hover:not(.skeletonRow) > .tableCell,
+.tableRow:focus-within:not(.skeletonRow) > .tableCell {
   z-index: 3;
   box-shadow:
     0 1px 0 0 var(--harmony-n-100),
     0 -1px 0 0 var(--harmony-n-100);
   transition: all 0.07s ease-in-out;
   background-color: var(--harmony-n-50);
+}
+
+.tableRow.skeletonRow {
+  cursor: default;
 }
 
 .tableRow.disabled {

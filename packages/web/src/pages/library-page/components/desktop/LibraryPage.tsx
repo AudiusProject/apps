@@ -156,11 +156,20 @@ const LibraryPage = () => {
   const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
     Boolean(entry.track_id)
   )
-  const tracksLoading = status === Status.LOADING && isEmpty
+  // Skeletons cover two cases:
+  //  1. `initFetch` (a fetchSaves refetch from cold load OR a
+  //     category/filter/sort change) — we always want skeletons here, even
+  //     over stale rows from the previous query, so users don't click rows
+  //     that no longer match the new filter.
+  //  2. `status === LOADING && !hasResolvedTrackRows` — bridges the gap
+  //     between `fetchSavesSucceeded` and `defaultEntries` materializing on
+  //     cold load. The `!hasResolvedTrackRows` guard is critical: without
+  //     it, the virtualized table's `fetchMore` (which sets `fetchingMore`
+  //     and thus flips `tracksFetchStatus` to LOADING) would wipe the whole
+  //     table to skeletons during pagination.
   const showTrackTableSkeletons =
-    (tracksLoading || initFetch) && !hasResolvedTrackRows
-  const tracksTableShowsSpinner =
-    (tracksLoading || initFetch) && !showTrackTableSkeletons
+    initFetch || (status === Status.LOADING && !hasResolvedTrackRows)
+  const tracksLoading = showTrackTableSkeletons && isEmpty
   const trackSkeletonRowCount =
     expectedTrackCount > 0
       ? Math.min(expectedTrackCount, INITIAL_TRACK_SKELETON_ROWS)
@@ -176,7 +185,7 @@ const LibraryPage = () => {
           ) as unknown as LibraryPageTrack[],
           -1
         ]
-      : status === Status.SUCCESS || entries.length
+      : entries.length
         ? getTracksTableData()
         : [[], -1]
 
@@ -216,7 +225,7 @@ const LibraryPage = () => {
   )
 
   const tracksContent =
-    isEmpty && !tracksLoading ? (
+    isEmpty && !showTrackTableSkeletons ? (
       <EmptyTable
         primaryText={emptyTracksHeader}
         secondaryText={messages.emptyTracksBody}
@@ -233,7 +242,6 @@ const LibraryPage = () => {
         fetchMore={fetchMoreTracks}
         isVirtualized
         key='favorites'
-        loading={tracksTableShowsSpinner}
         onClickFavorite={toggleSaveTrack}
         onClickRepost={onClickRepost}
         onClickRow={onClickRow}
