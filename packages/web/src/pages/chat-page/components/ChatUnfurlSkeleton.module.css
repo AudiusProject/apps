@@ -4,7 +4,11 @@
  * Reference dimensions (TrackTile.module.css `.container.readonly`):
  *   - padding: var(--harmony-unit-2) on all sides
  *   - albumArtButton row + stats row underneath
- *   - 1px border-bottom in chat context
+ *
+ * No border-bottom here — the parent ChatMessageListItem rule
+ * `.bubble:not(.hideMessage) .unfurl` decides when the divider applies
+ * (it's intentionally suppressed for URL-only bubbles). Adding a border
+ * here caused a 1px jump for URL-only messages when the skeleton resolved.
  */
 .root {
   display: flex;
@@ -14,7 +18,6 @@
   background: var(--harmony-white);
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid var(--harmony-n-150);
 }
 
 .metadata {
