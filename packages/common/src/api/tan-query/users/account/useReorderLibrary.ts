@@ -24,6 +24,7 @@ type ReorderLibraryVariables = {
 }
 
 type ReorderLibraryResult = {
+  previousLibrary: PlaylistLibrary
   updatedLibrary: PlaylistLibrary
   collectionId: PlaylistLibraryID
   destinationId: PlaylistLibraryID
@@ -53,8 +54,12 @@ export const useReorderLibrary = () => {
         throw new Error('Missing required data')
       }
 
+      // Snapshot the pre-update library before mutating — `updatePlaylistLibrary`
+      // overwrites it via setQueryData, and onSuccess needs to reason about the
+      // prior state (was the playlist already in the library? in a folder?).
+      const previousLibrary = playlistLibrary
       const updatedLibrary = playlistLibraryHelpers.reorderPlaylistLibrary(
-        playlistLibrary,
+        previousLibrary,
         collectionId,
         destinationId,
         collectionType
@@ -63,6 +68,7 @@ export const useReorderLibrary = () => {
       await updatePlaylistLibrary(updatedLibrary)
 
       return {
+        previousLibrary,
         updatedLibrary,
         collectionId,
         destinationId,
@@ -70,18 +76,17 @@ export const useReorderLibrary = () => {
       }
     },
     onSuccess: ({
+      previousLibrary,
       updatedLibrary,
       collectionId,
       destinationId,
       collectionType
     }) => {
-      // Invalidate the playlist library query
       queryClient.setQueryData(getCurrentAccountQueryKey(), (old) => {
         if (!old) return old
         return { ...old, playlist_library: updatedLibrary }
       })
 
-      // Analytics
       track(
         make({
           eventName: Name.PLAYLIST_LIBRARY_REORDER,
@@ -90,9 +95,8 @@ export const useReorderLibrary = () => {
         })
       )
 
-      // If dragging in a new playlist, save to user collections
       if (collectionType === 'playlist' && typeof collectionId === 'number') {
-        const isNewAddition = !playlistLibrary?.contents.some(
+        const isNewAddition = !previousLibrary.contents.some(
           (item: PlaylistLibraryItem) =>
             'playlist_id' in item && item.playlist_id === collectionId
         )
@@ -101,13 +105,12 @@ export const useReorderLibrary = () => {
         }
       }
 
-      // Track folder analytics
       const isIdInFolderBeforeReorder = playlistLibraryHelpers.isInsideFolder(
-        playlistLibrary!,
+        previousLibrary,
         collectionId
       )
       const isDroppingIntoFolder = playlistLibraryHelpers.isInsideFolder(
-        playlistLibrary!,
+        previousLibrary,
         destinationId
       )
 

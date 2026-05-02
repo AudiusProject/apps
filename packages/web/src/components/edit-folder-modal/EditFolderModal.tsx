@@ -1,11 +1,8 @@
 import { useCallback, useState } from 'react'
 
-import { useCurrentAccount } from '@audius/common/api'
+import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
 import { Name, PlaylistLibraryFolder } from '@audius/common/models'
-import {
-  playlistLibraryActions,
-  playlistLibraryHelpers
-} from '@audius/common/store'
+import { playlistLibraryHelpers } from '@audius/common/store'
 import {
   Modal,
   ModalContent,
@@ -25,7 +22,6 @@ import { useSelector } from 'utils/reducer'
 import { zIndex } from 'utils/zIndex'
 
 import styles from './EditFolderModal.module.css'
-const { update: updatePlaylistLibrary } = playlistLibraryActions
 const { renamePlaylistFolderInLibrary } = playlistLibraryHelpers
 
 const messages = {
@@ -50,6 +46,7 @@ const EditFolderModal = () => {
   const onCloseDeleteConfirmation = () => setShowDeleteConfirmation(false)
 
   const dispatch = useDispatch()
+  const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
 
   const handleClose = useCallback(() => {
     dispatch(setFolderId(null))
@@ -72,12 +69,19 @@ const EditFolderModal = () => {
           folderId,
           newName
         )
-        dispatch(updatePlaylistLibrary({ playlistLibrary: newLibrary }))
+        updatePlaylistLibrary(newLibrary)
       }
       record(make(Name.FOLDER_SUBMIT_EDIT, {}))
       handleClose()
     },
-    [dispatch, folder, folderId, handleClose, playlistLibrary, record]
+    [
+      folder,
+      folderId,
+      handleClose,
+      playlistLibrary,
+      record,
+      updatePlaylistLibrary
+    ]
   )
 
   const handleConfirmDelete = useCallback(() => {

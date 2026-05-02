@@ -1,6 +1,5 @@
 import { uniq } from 'lodash'
 
-import { Status } from '~/models/Status'
 import { CommonState } from '~/store/commonStore'
 
 import { ID } from '../../../models/Identifiers'
@@ -8,8 +7,6 @@ import { ID } from '../../../models/Identifiers'
 import { LibraryCategory, LibraryPageTabs } from './types'
 
 export const getLibrary = (state: CommonState) => state.pages.libraryPage
-export const getTrackSaves = (state: CommonState) =>
-  state.pages.libraryPage.trackSaves
 
 export const getCollectionsCategory = (state: CommonState) => {
   return state.pages.libraryPage.collectionsCategory
@@ -162,20 +159,4 @@ export const getSelectedCategoryLocalPlaylistAdds = (state: CommonState) => {
     collectionType: 'playlist',
     updateType: 'add'
   })
-}
-
-export const getInitialFetchStatus = (state: CommonState) =>
-  state.pages.libraryPage.initialFetch
-export const getIsFetchingMore = (state: CommonState) =>
-  state.pages.libraryPage.fetchingMore
-export const hasReachedEnd = (state: CommonState) =>
-  state.pages.libraryPage.hasReachedEnd
-
-// Status is now derived from the async fetchSaves flow. Treat fetching-more
-// or initial-fetch as LOADING; otherwise SUCCESS. Kept as a selector so
-// existing consumers don't need to special-case the library page.
-export const getLibraryTracksStatus = (state: CommonState): Status => {
-  const s = state.pages.libraryPage
-  if (s.initialFetch || s.fetchingMore) return Status.LOADING
-  return Status.SUCCESS
 }

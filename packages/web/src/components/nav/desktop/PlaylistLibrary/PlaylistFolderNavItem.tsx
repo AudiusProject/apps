@@ -1,16 +1,12 @@
 import { useCallback, useState, MouseEvent, useMemo } from 'react'
 
+import { useAddToPlaylistFolder } from '@audius/common/api'
 import {
   Name,
   PlaylistLibraryID,
-  PlaylistLibraryKind,
   PlaylistLibraryFolder
 } from '@audius/common/models'
-import {
-  playlistLibraryActions,
-  modalsActions,
-  playlistUpdatesSelectors
-} from '@audius/common/store'
+import { modalsActions, playlistUpdatesSelectors } from '@audius/common/store'
 import {
   IconFolder,
   PopupMenuItem,
@@ -36,7 +32,6 @@ import { NavItemKebabButton } from './NavItemKebabButton'
 import { PlaylistLibraryNavItem, keyExtractor } from './PlaylistLibraryNavItem'
 
 const { setVisibility } = modalsActions
-const { addToFolder } = playlistLibraryActions
 const { selectPlaylistUpdateById } = playlistUpdatesSelectors
 
 type PlaylistFolderNavItemProps = {
@@ -77,22 +72,17 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
 
   const dispatch = useDispatch()
   const record = useRecord()
+  const { mutate: addToPlaylistFolder } = useAddToPlaylistFolder()
   const [isDeleteConfirmationOpen, toggleDeleteConfirmationOpen] =
     useToggle(false)
 
   const isDisabled = draggingKind && !acceptedKinds.includes(draggingKind)
 
   const handleDrop = useCallback(
-    (id: PlaylistLibraryID, kind: DragDropKind) => {
-      dispatch(
-        addToFolder({
-          folder,
-          draggingId: id,
-          draggingKind: kind as PlaylistLibraryKind
-        })
-      )
+    (entityId: PlaylistLibraryID, _kind: DragDropKind) => {
+      addToPlaylistFolder({ folder, entityId })
     },
-    [dispatch, folder]
+    [addToPlaylistFolder, folder]
   )
 
   const handleDragEnter = useCallback(() => {

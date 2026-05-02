@@ -46,10 +46,6 @@ import playback from './playback/slice'
 import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
-import {
-  playlistLibraryReducer,
-  PlaylistLibraryState
-} from './playlist-library'
 import { playlistUpdatesReducer, PlaylistUpdateState } from './playlist-updates'
 import { purchaseContentReducer } from './purchase-content'
 import reachability from './reachability/reducer'
@@ -128,7 +124,6 @@ export const reducers = (storage: Storage, history?: History) => ({
   cast,
 
   // Playlist Library
-  playlistLibrary: playlistLibraryReducer,
   playlistUpdates: playlistUpdatesReducer,
 
   // UI
@@ -228,7 +223,6 @@ export type CommonState = {
   cast: ReturnType<typeof cast>
 
   // Playlist library
-  playlistLibrary: PlaylistLibraryState
   playlistUpdates: PlaylistUpdateState
 
   ui: {

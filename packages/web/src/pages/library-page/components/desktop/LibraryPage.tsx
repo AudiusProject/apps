@@ -44,12 +44,7 @@ import { LibraryCategorySelectionMenu } from './LibraryCategorySelectionMenu'
 import styles from './LibraryPage.module.css'
 import { PlaylistsTabPage } from './PlaylistsTabPage'
 
-const {
-  getInitialFetchStatus,
-  getCategory,
-  getTrackSaves,
-  getSelectedCategoryLocalTrackAdds
-} = libraryPageSelectors
+const { getCategory, getSelectedCategoryLocalTrackAdds } = libraryPageSelectors
 
 const INITIAL_TRACK_SKELETON_ROWS = 10
 
@@ -99,12 +94,10 @@ const LibraryPage = () => {
     onSortTracks
   } = useLibraryPage()
   const mainContentRef = useMainContentRef()
-  const initFetch = useSelector(getInitialFetchStatus)
-  const trackSaveIds = useSelector(getTrackSaves)
   const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
   const expectedTrackCount = useMemo(
-    () => trackSaveIds.length + Object.keys(localTrackAdds).length,
-    [trackSaveIds, localTrackAdds]
+    () => entries.length + Object.keys(localTrackAdds).length,
+    [entries.length, localTrackAdds]
   )
   const { data: currentUserId } = useCurrentUserId()
 
@@ -156,19 +149,10 @@ const LibraryPage = () => {
   const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
     Boolean(entry.track_id)
   )
-  // Skeletons cover two cases:
-  //  1. `initFetch` (a fetchSaves refetch from cold load OR a
-  //     category/filter/sort change) — we always want skeletons here, even
-  //     over stale rows from the previous query, so users don't click rows
-  //     that no longer match the new filter.
-  //  2. `status === LOADING && !hasResolvedTrackRows` — bridges the gap
-  //     between `fetchSavesSucceeded` and `defaultEntries` materializing on
-  //     cold load. The `!hasResolvedTrackRows` guard is critical: without
-  //     it, the virtualized table's `fetchMore` (which sets `fetchingMore`
-  //     and thus flips `tracksFetchStatus` to LOADING) would wipe the whole
-  //     table to skeletons during pagination.
+  // Show skeletons while the initial library-tracks query is loading and we
+  // don't yet have any resolved rows to show.
   const showTrackTableSkeletons =
-    initFetch || (status === Status.LOADING && !hasResolvedTrackRows)
+    status === Status.LOADING && !hasResolvedTrackRows
   const tracksLoading = showTrackTableSkeletons && isEmpty
   const trackSkeletonRowCount =
     expectedTrackCount > 0
@@ -193,7 +177,7 @@ const LibraryPage = () => {
 
   // Setup play button
   const playButtonActive =
-    currentTab === LibraryPageTabs.TRACKS && !tracksLoading && !initFetch
+    currentTab === LibraryPageTabs.TRACKS && !tracksLoading
   const playAllButton = (
     <div
       className={styles.playButtonContainer}

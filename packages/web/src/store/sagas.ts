@@ -32,11 +32,9 @@ import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
 import feedPageSagas from 'common/store/pages/feed/sagas'
-import librarySagas from 'common/store/pages/library/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import playbackEngineSagas from 'common/store/playback/sagas'
-import playlistLibrarySagas from 'common/store/playlist-library/sagas'
 import playlistUpdatesSagas from 'common/store/playlist-updates/sagas'
 import profileSagas from 'common/store/profile/sagas'
 import recoveryEmailSagas from 'common/store/recovery-email/sagas'
@@ -75,7 +73,6 @@ export default function* rootSaga() {
 
     // Account
     accountSagas(),
-    playlistLibrarySagas(),
     playlistUpdatesSagas(),
     recoveryEmailSagas(),
     signOutSagas(),
@@ -88,7 +85,6 @@ export default function* rootSaga() {
     passwordResetSagas(),
     profileSagas(),
     rewardsPageSagas(),
-    librarySagas(),
     settingsSagas(),
     signOnSaga(),
     socialSagas(),
@@ -155,7 +151,6 @@ export function* testRootSaga() {
 
     // Account
     // accountSagas(),
-    // playlistLibrarySagas(),
     // playlistUpdatesSagas(),
     // recoveryEmailSagas(),
     // signOutSagas(),

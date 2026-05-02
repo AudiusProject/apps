@@ -3,6 +3,7 @@ import {
   userCollectionMetadataFromSDK
 } from '@audius/common/adapters'
 import {
+  persistAccountPlaylistLibrarySaga,
   primeCollectionDataSaga,
   queryAccountUser,
   queryCollection,
@@ -157,6 +158,7 @@ function* optimisticallySavePlaylist(
       permalink: playlist?.permalink
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 
   yield* put(
     addLocalCollection({
