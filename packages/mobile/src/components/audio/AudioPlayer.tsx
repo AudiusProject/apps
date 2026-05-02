@@ -462,7 +462,7 @@ export const AudioPlayer = () => {
 
     if (event.type === Event.PlaybackActiveTrackChanged) {
       setBufferStartTime(performance.now())
-      await enqueueTracksJobRef.current
+      await queueSetupJobRef.current
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 
@@ -651,139 +651,97 @@ export const AudioPlayer = () => {
   // diff position-by-position with isEqual.
   const queueListRef = useRef<ID[]>([])
 
-  // A ref to the enqueue task to await before either requeing or appending to queue
-  const enqueueTracksJobRef = useRef<Promise<void> | undefined>(undefined)
-  // A way to abort the enqeue tracks job if a new lineup is played
+  // A way to abort the in-flight queue build if a new lineup supersedes it.
   const abortEnqueueControllerRef = useRef(new AbortController())
-  // A ref to the in-flight handleQueueChange invocation. handleQueueIdxChange
-  // awaits this so it doesn't read the active track index mid-enqueue, when
-  // the middle-out queue build has the target index occupied by a track that
-  // will subsequently be shifted by an insert-at-0.
+  // Tracks the in-flight handleQueueChange invocation. Set synchronously
+  // by the useEffect below so handleQueueIdxChange can await it before
+  // reading the active index, and so a new build can serialize after the
+  // prior one's pending TrackPlayer ops have settled.
   const queueSetupJobRef = useRef<Promise<void> | undefined>(undefined)
 
-  const handleQueueChange = useCallback(async () => {
-    const refTrackIds = queueListRef.current
+  const handleQueueChange = useCallback(
+    async (priorJob: Promise<void> | undefined) => {
+      const refTrackIds = queueListRef.current
 
-    // Due to a dependency waterfall (queue from redux -> useTracks -> useUsers),
-    // we need to wait for all 3 things to be loaded before loading anything into RNTP - queue + tracks + users
-    // Original bug: https://linear.app/audius/issue/QA-2255/keeps-playing-the-same-track-when-clicking-new-tracks-in-the-same
-    if (
-      !queueTracks.every(
-        ({ track }) =>
-          !!track?.track_id && !!queueTrackOwnersMap[track.owner_id]
-      )
-    ) {
-      return
-    }
-    if (queueIndex === -1) {
-      return
-    }
-    if (
-      isEqual(refTrackIds, queueTrackIds) &&
-      !didOfflineToggleChange &&
-      !didPlayerBehaviorChange
-    ) {
-      return
-    }
-
-    queueListRef.current = queueTrackIds
-
-    // Checks to allow for continuous playback while making queue updates
-    // Check if we are appending to the end of the queue
-    const isQueueAppend =
-      refTrackIds.length > 0 &&
-      isEqual(queueTrackIds.slice(0, refTrackIds.length), refTrackIds) &&
-      !didPlayerBehaviorChange
-
-    // If not an append, cancel the enqueue task first
-    if (!isQueueAppend) {
-      abortEnqueueControllerRef.current.abort()
-    }
-    // wait for enqueue task to either shut down or finish
-    if (enqueueTracksJobRef.current) {
-      await enqueueTracksJobRef.current
-    }
-
-    // Re-init the abort controller now that the enqueue job is done
-    abortEnqueueControllerRef.current = new AbortController()
-
-    // TODO: Queue removal logic was firing too often previously and causing playback issues when at the end of queues. Need to fix
-    // Check if we are removing from the end of the queue
-    // const isQueueRemoval =
-    //   refTrackIds.length > 0 &&
-    //   isEqual(refTrackIds.slice(0, queueTrackIds.length), queueTrackIds)
-
-    // if (isQueueRemoval) {
-    //   // NOTE: There might be a case where we are trying to remove the currently playing track.
-    //   // Shouldn't be possible, but need to keep an eye out for that
-    //   const startingRemovalIndex = queueTrackIds.length
-    //   const removalLength = refTrackIds.length - queueTrackIds.length
-    //   const removalIndexArray = range(removalLength).map(
-    //     (i) => i + startingRemovalIndex
-    //   )
-    //   await TrackPlayer.remove(removalIndexArray)
-    //   await TrackPlayer.skip(queueIndex)
-    //   return
-    // }
-
-    const newQueueTracks = isQueueAppend
-      ? queueTracks.slice(refTrackIds.length)
-      : queueTracks
-    // Enqueue tracks using 'middle-out' to ensure user can ready skip forward or backwards
-    const enqueueTracks = async (
-      queuableTracks: QueueableTrack[],
-      queueIndex = -1
-    ) => {
-      let currentPivot = 1
-      while (
-        queueIndex - currentPivot >= 0 ||
-        queueIndex + currentPivot < queueTracks.length
+      // Due to a dependency waterfall (queue from redux -> useTracks -> useUsers),
+      // we need queue + tracks + users all loaded before mutating RNTP.
+      // Original bug: https://linear.app/audius/issue/QA-2255/keeps-playing-the-same-track-when-clicking-new-tracks-in-the-same
+      if (
+        !queueTracks.every(
+          ({ track }) =>
+            !!track?.track_id && !!queueTrackOwnersMap[track.owner_id]
+        )
       ) {
-        if (abortEnqueueControllerRef.current.signal.aborted) {
-          return
-        }
-
-        const nextTrack = queuableTracks[queueIndex + currentPivot]
-        if (nextTrack) {
-          const trackData = await makeTrackData(nextTrack)
-          await TrackPlayer.add(trackData)
-        }
-
-        const previousTrack = queuableTracks[queueIndex - currentPivot]
-        if (previousTrack) {
-          await TrackPlayer.add(await makeTrackData(previousTrack), 0)
-        }
-        currentPivot++
+        return
       }
-    }
+      if (queueIndex === -1) return
+      if (
+        isEqual(refTrackIds, queueTrackIds) &&
+        !didOfflineToggleChange &&
+        !didPlayerBehaviorChange
+      ) {
+        return
+      }
 
-    if (isQueueAppend) {
-      enqueueTracksJobRef.current = enqueueTracks(newQueueTracks)
-      await enqueueTracksJobRef.current
-      enqueueTracksJobRef.current = undefined
-    } else {
+      queueListRef.current = queueTrackIds
+
+      // Append-detection: the new queue is the previous queue plus more
+      // tracks tacked on. Keep RNTP playback going and just append.
+      const isQueueAppend =
+        refTrackIds.length > 0 &&
+        isEqual(queueTrackIds.slice(0, refTrackIds.length), refTrackIds) &&
+        !didPlayerBehaviorChange
+
+      // Replace cancels the in-flight build immediately; append serializes
+      // after it instead of cancelling.
+      if (!isQueueAppend) {
+        abortEnqueueControllerRef.current.abort()
+      }
+      if (priorJob) await priorJob
+
+      abortEnqueueControllerRef.current = new AbortController()
+      const { signal } = abortEnqueueControllerRef.current
+
+      if (isQueueAppend) {
+        const newTracks = queueTracks.slice(refTrackIds.length)
+        const trackData = await Promise.all(
+          newTracks.map((qt) => makeTrackData(qt))
+        )
+        if (signal.aborted) return
+        await TrackPlayer.add(trackData)
+        return
+      }
+
+      // Resolve all stream URLs in parallel, then mutate RNTP atomically:
+      // reset, add the entire queue in order, skip to the active index,
+      // play. One transactional build means the active index can't drift
+      // mid-build, and parallel URL resolution is roughly as fast as the
+      // old "fetch firstTrack first, then sequentially fetch the rest"
+      // path while removing all the surrounding race-condition surface.
+      const trackData = await Promise.all(
+        queueTracks.map((qt) => makeTrackData(qt))
+      )
+      if (signal.aborted) return
       await TrackPlayer.reset()
-
+      if (signal.aborted) return
+      await TrackPlayer.add(trackData)
+      if (signal.aborted) return
+      if (queueIndex > 0) {
+        await TrackPlayer.skip(queueIndex)
+        if (signal.aborted) return
+      }
       await TrackPlayer.play()
-
-      const firstTrack = newQueueTracks[queueIndex]
-      if (!firstTrack) return
-
-      await TrackPlayer.add(await makeTrackData(firstTrack))
-
-      enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
-      await enqueueTracksJobRef.current
-      enqueueTracksJobRef.current = undefined
-    }
-  }, [
-    queueTracks,
-    queueIndex,
-    queueTrackIds,
-    didOfflineToggleChange,
-    didPlayerBehaviorChange,
-    queueTrackOwnersMap,
-    makeTrackData
-  ])
+    },
+    [
+      queueTracks,
+      queueIndex,
+      queueTrackIds,
+      didOfflineToggleChange,
+      didPlayerBehaviorChange,
+      queueTrackOwnersMap,
+      makeTrackData
+    ]
+  )
 
   // Tracks the most-recently-requested queueIndex so older in-flight
   // handleQueueIdxChange invocations (from rapid "next" taps) can bail out
@@ -794,41 +752,20 @@ export const AudioPlayer = () => {
     if (queueIndex === -1) return
     latestQueueIdxRef.current = queueIndex
 
-    // Wait for any in-flight queue setup to finish before reading the
-    // active index. handleQueueChange grows the RNTP queue
-    // non-monotonically — `add(firstTrack)` then a middle-out loop that
-    // both appends and `add(prev, 0)`-inserts. Polling for queue length
-    // alone exits as soon as `queue.length > queueIndex`, which can
-    // happen mid-build when the target slot is still occupied by a
-    // later track that has not yet been shifted by a pending
-    // insert-at-0. Skipping at that moment lands on the wrong track —
-    // e.g. tapping the second trending track skips to position 1 of
-    // [firstTrack, nextTrack], which becomes the third track once the
-    // prefix insert lands.
+    // Wait for any in-flight queue build so we read the active index
+    // against the final queue layout. handleQueueChange already calls
+    // skip(queueIndex) at the end of a fresh build, so this branch is
+    // primarily for index-only changes (e.g. "next" in the now-playing
+    // drawer) where the queue itself didn't change.
     await queueSetupJobRef.current
 
     if (latestQueueIdxRef.current !== queueIndex) return
 
-    // Defensive poll for the rare case where setup bailed out before
-    // populating the queue (e.g. dependency data not loaded yet) — the
-    // earlier await is then a no-op against a resolved/undefined ref.
-    const POLL_INTERVAL_MS = 100
-    const MAX_WAIT_MS = 30000
-    const startTime = Date.now()
-    let queue = await TrackPlayer.getQueue()
-    while (
-      queueIndex >= queue.length &&
-      Date.now() - startTime < MAX_WAIT_MS &&
-      latestQueueIdxRef.current === queueIndex
-    ) {
-      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS))
-      queue = await TrackPlayer.getQueue()
-    }
-
-    if (latestQueueIdxRef.current !== queueIndex) return
+    const queue = await TrackPlayer.getQueue()
+    if (queueIndex >= queue.length) return
 
     const playerIdx = await TrackPlayer.getActiveTrackIndex()
-    if (queueIndex !== playerIdx && queueIndex < queue.length) {
+    if (queueIndex !== playerIdx) {
       await TrackPlayer.skip(queueIndex)
     }
   }, [queueIndex])
@@ -878,7 +815,8 @@ export const AudioPlayer = () => {
 
   useEffect(() => {
     if (isAudioSetup) {
-      queueSetupJobRef.current = handleQueueChange()
+      const priorJob = queueSetupJobRef.current
+      queueSetupJobRef.current = handleQueueChange(priorJob)
     }
   }, [handleQueueChange, queueTrackIds, isAudioSetup])
 
