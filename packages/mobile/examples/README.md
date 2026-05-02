@@ -8,15 +8,17 @@ From the **repository root** (`apps/`):
 
 ```bash
 npm install
-npm run ios:dev      # iOS simulator
+npm run ios      # iOS simulator (against production)
 # or
-npm run android:dev  # Android emulator
+npm run android  # Android emulator (against production)
 ```
+
+Use `npm run ios:local` / `npm run android:local` instead if you want to run against a locally-running protocol stack.
 
 Note: each example includes its own `.npmrc` with `legacy-peer-deps=true`,
 so `npm install` works without manually passing that flag.
 
-Environment: copy `packages/mobile/.env.dev` if needed; the app runs against staging by default.
+Environment: copy `packages/mobile/.env.dev` if needed; the app runs against production by default.
 
 ## Available examples
 

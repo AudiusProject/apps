@@ -49,11 +49,11 @@ Authentication, sign-in, login, sign-on, OAuth, authenticated gets, Hedgehog, id
 
 ## How to run (main app)
 
-1. From repo root: `npm install` then `npm run ios:dev` or `npm run android:dev`.
+1. From repo root: `npm install` then `npm run ios` or `npm run android` (use `:local` variants to run against a local protocol stack).
 2. Open the app; the first screen is the **sign-on** flow (sign in or create account).
 3. To test sign-out: sign in, then use **Settings** (or profile) → Sign out.
 
-No extra setup; the app uses staging identity by default (see `packages/mobile/.env.dev`).
+No extra setup; the app uses production identity by default.
 
 ## Source of truth (implementation)
 

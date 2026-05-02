@@ -16,7 +16,7 @@ export const FeatureFlagsNavItem = () => {
     FeatureFlags.FEATURE_FLAG_ACCESS
   )
 
-  // Debug builds (e.g. `npm run ios:prod` on simulator) use production env/Optimizely
+  // Debug builds (e.g. `npm run ios` on simulator) use production env/Optimizely
   // defaults where `feature_flag_access` is off — still expose overrides for local dev.
   const showFeatureFlags = isFeatureFlagAccessEnabled || __DEV__
 

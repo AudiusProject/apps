@@ -27,12 +27,10 @@ npm run bundle:ios
 # Start the react-native server
 npm run mobile
 
-# Run a simulator using a prod configuration
+# Run a simulator against production (typical default)
 npm run ios
-# Run a simulator using a stage configuration
-npm run ios:stage
-# Run a simulator using a dev configuration
-npm run ios:dev
+# Run a simulator against a locally-running protocol stack (special option)
+npm run ios:local
 
 # Run the app on a device
 npm run ios:device "Raymond's iPhone"
@@ -46,12 +44,10 @@ xcrun xctrace list devices
 # Start the react-native server
 npm run mobile
 
-# Run a simulator using a prod configuration
+# Run a simulator against production (typical default)
 npm run android
-# Run a simulator using a stage configuration
-npm run android:stage
-# Run a simulator using a dev configuration
-npm run android:dev
+# Run a simulator against a locally-running protocol stack (special option)
+npm run android:local
 
 # Look at android devices
 adb devices
@@ -115,5 +111,5 @@ npm start -- --reset-cache
 # first manually close all running instances of metro
 watchman watch-del-all
 npm start -- --reset-cache
-npm run ios:dev
+npm run ios
 ```
