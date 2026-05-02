@@ -5,6 +5,7 @@ type ProfileTabParamList = {
   Albums: {}
   Playlists: {}
   Tracks: {}
+  Contests: { lazy?: boolean }
 }
 
 export type ProfileTabRoutes<RouteName extends keyof ProfileTabParamList> =

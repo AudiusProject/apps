@@ -246,13 +246,21 @@ export const ContestCard = (props: ContestCardProps) => {
 
   // Hero is full-width of the device, so always request the largest size the
   // SDK exposes (1000×1000). Grid cards are narrower so 480×480 is enough.
-  const { source: coverSource } = useTrackImage({
+  const { source: trackImageSource } = useTrackImage({
     trackId,
     size:
       variant === 'hero'
         ? SquareSizes.SIZE_1000_BY_1000
         : SquareSizes.SIZE_480_BY_480
   })
+  // Prefer the contest's own cover photo (set on the host contest form's
+  // "Cover Photo" field) over the parent track's artwork — same fallback
+  // ordering the contest screen header uses.
+  const contestCoverPhotoUrl = (remixContest?.eventData as any)
+    ?.coverPhotoUrl as string | undefined
+  const coverSource = contestCoverPhotoUrl
+    ? { uri: contestCoverPhotoUrl }
+    : trackImageSource
 
   // Count-only: API returns full total in `count` even when limit=0 (no track rows).
   const { data: remixesData } = useRemixes(

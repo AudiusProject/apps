@@ -29,6 +29,7 @@ import {
   IconNote,
   IconPlaylists,
   IconRepost as IconReposts,
+  IconTrophy,
   Text,
   Hint,
   IconQuestionCircle
@@ -61,6 +62,7 @@ import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 import { EditableName } from '../EditableName'
 
 import { AlbumsTab } from './AlbumsTab'
+import { ContestsTab } from './ContestsTab'
 import { EmptyTab } from './EmptyTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { ProfileLeftNav } from './ProfileLeftNav'
@@ -222,6 +224,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
           {ProfilePageTabs.REPOSTS}
         </Tab>
+        <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
+          {ProfilePageTabs.CONTESTS}
+        </Tab>
       </TabList>
     ) : (
       <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>
@@ -257,6 +262,13 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       return (
         <Box w='100%'>
           <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.CONTESTS) {
+      return (
+        <Box w='100%'>
+          <ContestsTab isOwner={isOwner} profile={profile} />
         </Box>
       )
     }

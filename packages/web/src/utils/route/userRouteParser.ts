@@ -79,7 +79,8 @@ export const parseUserRoute = (
       (tab === 'tracks' ||
         tab === 'albums' ||
         tab === 'playlists' ||
-        tab === 'reposts')
+        tab === 'reposts' ||
+        tab === 'contests')
     ) {
       // Decode handle to prevent double-encoding when used in API calls
       const decodedHandle = safeDecode(handle)

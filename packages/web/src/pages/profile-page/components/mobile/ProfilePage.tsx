@@ -13,7 +13,8 @@ import {
   IconAlbum,
   IconNote,
   IconPlaylists,
-  IconRepost as IconReposts
+  IconRepost as IconReposts,
+  IconTrophy
 } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import cn from 'classnames'
@@ -35,6 +36,7 @@ import { getUserPageContext } from 'ssr/metaTags'
 import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 
 import { AlbumsTab } from './AlbumsTab'
+import { ContestsTab } from './ContestsTab'
 import EditProfile from './EditProfile'
 import { EmptyTab } from './EmptyTab'
 import { PlaylistsTab } from './PlaylistsTab'
@@ -195,6 +197,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         >
           {ProfilePageTabs.REPOSTS}
         </Tab>
+        <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
+          {ProfilePageTabs.CONTESTS}
+        </Tab>
       </TabList>
     ) : (
       <TabList
@@ -229,6 +234,13 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         return (
           <div className={styles.cardLineupContainer}>
             <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+          </div>
+        )
+      }
+      if (currentTab === ProfilePageTabs.CONTESTS) {
+        return (
+          <div className={styles.cardLineupContainer}>
+            <ContestsTab isOwner={isOwner} profile={profile} />
           </div>
         )
       }

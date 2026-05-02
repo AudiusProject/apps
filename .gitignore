@@ -216,3 +216,4 @@ test-results
 
 # Local agent state
 .claude/
+.aider*

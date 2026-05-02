@@ -225,13 +225,19 @@ export const ContestCard = forwardRef(
     // Hero is full-width (~960px+ at 2x DPI ≈ 1920px), so always request the
     // largest size the SDK exposes (1000×1000). Grid cards are ~309px wide so
     // 480×480 is a much better size/fidelity tradeoff.
-    const { imageUrl } = useTrackCoverArt({
+    const { imageUrl: trackImageUrl } = useTrackCoverArt({
       trackId,
       size:
         variant === 'hero'
           ? SquareSizes.SIZE_1000_BY_1000
           : SquareSizes.SIZE_480_BY_480
     })
+    // Prefer the contest's own cover photo (set on the host contest form's
+    // "Cover Photo" field) over the parent track's artwork — same fallback
+    // ordering the contest page itself uses.
+    const contestCoverPhotoUrl = (remixContest?.eventData as any)
+      ?.coverPhotoUrl as string | undefined
+    const imageUrl = contestCoverPhotoUrl || trackImageUrl
 
     // Count-only: API returns full total in `count` even when limit=0 (no track rows).
     // staleTime lets the discovery endpoint's primed cache (see

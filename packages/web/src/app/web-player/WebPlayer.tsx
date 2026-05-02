@@ -281,6 +281,7 @@ const {
   PROFILE_PAGE_ALBUMS,
   PROFILE_PAGE_PLAYLISTS,
   PROFILE_PAGE_REPOSTS,
+  PROFILE_PAGE_CONTESTS,
   TRENDING_UNDERGROUND_PAGE,
   COIN_EXCLUSIVE_TRACKS_PAGE,
   COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE,
@@ -1161,6 +1162,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<ProfilePageRoute mainContentRef={mainContentRef} />}
                 />
                 <Route
+                  path={PROFILE_PAGE_CONTESTS}
+                  element={<ProfilePageRoute mainContentRef={mainContentRef} />}
+                />
+                <Route
                   path={PROFILE_PAGE_COMMENTS}
                   element={<CommentHistoryPage />}
                 />
@@ -1555,6 +1560,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route
                   path={PROFILE_PAGE_REPOSTS}
+                  element={<ProfilePageRoute mainContentRef={mainContentRef} />}
+                />
+                <Route
+                  path={PROFILE_PAGE_CONTESTS}
                   element={<ProfilePageRoute mainContentRef={mainContentRef} />}
                 />
                 <Route

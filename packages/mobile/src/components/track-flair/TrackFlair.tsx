@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 
 import { useRemixContest, useTrack } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { View } from 'react-native'
 
@@ -80,12 +82,16 @@ export const TrackFlair = ({ size, children, style, trackId }: CoSignProps) => {
     }
   })
   const { data: remixContest } = useRemixContest(trackId)
+  // When CONTESTS is on, the contest experience moved to its own screen
+  // and the trophy flair on the artwork is an orphaned indicator on what
+  // should be a clean tile (Figma 2888-16639).
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const { size: iconSize, position } = layoutBySize[size]
 
   const FlairIcon = isCosign
     ? IconCosign
-    : remixContest?.endDate
+    : remixContest?.endDate && !isContestsEnabled
       ? IconContestSign
       : null
 

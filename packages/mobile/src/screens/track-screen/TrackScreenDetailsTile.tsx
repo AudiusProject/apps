@@ -10,7 +10,11 @@ import {
   useFanClub,
   useTrackDownloadCount
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useFeatureFlag,
+  useGatedContentAccess
+} from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
@@ -30,6 +34,7 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { CommonState } from '@audius/common/store'
 import {
   playbackSelectors,
@@ -230,7 +235,12 @@ export const TrackScreenDetailsTile = ({
     track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = !!remixContest
+  // When CONTESTS is on, the contest experience moved to a dedicated
+  // screen and the track screen reads as a normal track screen. The
+  // tile keeps its standard "TRACK"/"REMIX" header label rather than
+  // swapping in "REMIX CONTEST" — Figma 2888-16639.
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const isRemixContest = !!remixContest && !isContestsEnabled
 
   const isPlayingPreview = isPreviewing && isPlaying
   const isPlayingFullAccess = isPlaying && !isPreviewing

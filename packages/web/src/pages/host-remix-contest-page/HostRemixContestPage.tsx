@@ -14,7 +14,7 @@ import {
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
 import { Name, SquareSizes } from '@audius/common/models'
-import { dayjs, route } from '@audius/common/utils'
+import { dayjs, parseVideoUrl, route } from '@audius/common/utils'
 import {
   Box,
   Button,
@@ -36,6 +36,7 @@ import { useNavigate, useParams } from 'react-router'
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
 import Page from 'components/page/Page'
+import { VideoPlatformBadge } from 'components/video-platform-badge/VideoPlatformBadge'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { track, make } from 'services/analytics'
@@ -598,13 +599,25 @@ export const HostRemixContestPage = () => {
                 {messages.videoHelper}
               </Text>
             </Flex>
-            <TextInput
-              label={messages.videoLabel}
-              hideLabel
-              placeholder={messages.videoPlaceholder}
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-            />
+            <Flex gap='m' alignItems='center'>
+              <Flex flex={1}>
+                <TextInput
+                  label={messages.videoLabel}
+                  hideLabel
+                  placeholder={messages.videoPlaceholder}
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                />
+              </Flex>
+              {(() => {
+                const parsed = videoUrl.trim()
+                  ? parseVideoUrl(videoUrl.trim())
+                  : null
+                return parsed ? (
+                  <VideoPlatformBadge platform={parsed.platform} />
+                ) : null
+              })()}
+            </Flex>
           </Paper>
 
           {/* Section: Submission Deadline */}

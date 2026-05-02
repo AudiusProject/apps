@@ -1,6 +1,7 @@
 import { Suspense, useCallback } from 'react'
 
 import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import {
   SquareSizes,
   isContentUSDCPurchaseGated,
@@ -10,6 +11,7 @@ import {
   AccessConditions,
   isContentTokenGated
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { OverflowAction, PurchaseableContentType } from '@audius/common/store'
 import { Nullable, formatReleaseDate, dayjs } from '@audius/common/utils'
 import {
@@ -214,7 +216,13 @@ const TrackHeader = ({
   const shouldShowScheduledRelease =
     release_date && dayjs(release_date).isAfter(dayjs())
   const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = !!remixContest
+  // When CONTESTS is on, the track page is just a normal track page and the
+  // contest experience moved to `/{handle}/{slug}/contest`. Header keeps its
+  // standard "TRACK" / "REMIX" label rather than swapping in "REMIX CONTEST"
+  // — Figma 2844-51756 shows this layout. Legacy "REMIX CONTEST" pill is
+  // kept for the flag-off branch.
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const isRemixContest = !!remixContest && !isContestsEnabled
 
   const imageElement = (
     <TrackArtwork

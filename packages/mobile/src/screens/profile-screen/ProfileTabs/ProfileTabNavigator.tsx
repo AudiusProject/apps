@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react'
 
 import { useProfileUser } from '@audius/common/api'
-import { useIsArtist } from '@audius/common/hooks'
+import { useFeatureFlag, useIsArtist } from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import { ProfilePageTabs } from '@audius/common/store'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -9,7 +10,8 @@ import {
   IconAlbum,
   IconNote,
   IconPlaylists,
-  IconRepost
+  IconRepost,
+  IconTrophy
 } from '@audius/harmony-native'
 import {
   collapsibleTabScreen,
@@ -20,6 +22,7 @@ import { useRoute } from 'app/hooks/useRoute'
 import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileNavOverlay'
 
 import { AlbumsTab } from './AlbumsTab'
+import { ContestsTab } from './ContestsTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { RepostsTab } from './RepostsTab'
 import { TracksTab } from './TracksTab'
@@ -53,6 +56,7 @@ export const ProfileTabNavigator = ({
     handle: params.handle
   }
   const isArtist = useIsArtist(params)
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const trackScreen = collapsibleTabScreen({
     name: ProfilePageTabs.TRACKS,
@@ -90,6 +94,15 @@ export const ProfileTabNavigator = ({
     onRefresh
   })
 
+  const contestsScreen = collapsibleTabScreen({
+    name: ProfilePageTabs.CONTESTS,
+    Icon: IconTrophy,
+    component: ContestsTab,
+    initialParams: { ...initialParams, lazy: true },
+    refreshing,
+    onRefresh
+  })
+
   if (isArtist) {
     return (
       <CollapsibleTabNavigator
@@ -101,6 +114,10 @@ export const ProfileTabNavigator = ({
         {albumsScreen}
         {playlistsScreen}
         {repostsScreen}
+        {/* Contests tab — gated by the same flag as the contests page +
+            dedicated contest screen. Hidden when CONTESTS is off so the
+            tab doesn't lead to an unreachable destination. */}
+        {isContestsEnabled ? contestsScreen : null}
       </CollapsibleTabNavigator>
     )
   }

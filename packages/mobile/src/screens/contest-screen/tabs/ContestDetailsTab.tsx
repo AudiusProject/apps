@@ -4,6 +4,7 @@ import { useRemixContest } from '@audius/common/api'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
 import { FlatList, UserGeneratedText } from 'app/components/core'
+import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
 
 import { useContestPage } from '../ContestPageContext'
 import { ContestStemsCard } from '../ContestStemsCard'
@@ -41,6 +42,7 @@ export const ContestDetailsTab = () => {
     useContestPage()
   const { data: contest } = useRemixContest(trackId)
   const prizeInfo = (contest?.eventData as any)?.prizeInfo as string | undefined
+  const videoUrl = (contest?.eventData as any)?.videoUrl as string | undefined
 
   const renderHeader = useCallback(
     () => (
@@ -53,6 +55,10 @@ export const ContestDetailsTab = () => {
           <UserGeneratedText variant='body'>
             {description ?? fallbackDescription}
           </UserGeneratedText>
+          {/* Optional embedded video (YouTube / Vimeo) configured on
+              the Edit Contest "Video Link" field. Renders nothing when
+              no URL is set or the URL isn't a YouTube / Vimeo link. */}
+          <VideoEmbed url={videoUrl} />
         </Paper>
 
         {/* Prizes — prize info text inside its own Paper card. */}
@@ -70,7 +76,15 @@ export const ContestDetailsTab = () => {
         {hasDownloads ? <ContestStemsCard trackId={trackId} /> : null}
       </Flex>
     ),
-    [description, trackId, eventId, followerCount, hasDownloads, prizeInfo]
+    [
+      description,
+      trackId,
+      eventId,
+      followerCount,
+      hasDownloads,
+      prizeInfo,
+      videoUrl
+    ]
   )
 
   return (

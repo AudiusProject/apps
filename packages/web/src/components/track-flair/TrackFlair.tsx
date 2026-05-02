@@ -1,7 +1,9 @@
 import { ReactNode, RefObject } from 'react'
 
 import { useRemixContest, useTrack } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import cn from 'classnames'
 
 import CoSignFlair from './CosignFlair'
@@ -23,6 +25,12 @@ const TrackFlair = (props: TrackFlairProps) => {
 
   const { data: track } = useTrack(id)
   const { data: remixContest } = useRemixContest(id)
+  // When CONTESTS is on, the contest experience moved to a dedicated page
+  // and the track page is just a normal track page. The trophy flair on
+  // the artwork was the visual handoff into the in-line contest UI; with
+  // that gone it's an orphaned indicator on what should be a clean tile
+  // (Figma 2844-51756 — track art has no trophy).
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   if (!track) return <>{children}</>
 
@@ -41,7 +49,7 @@ const TrackFlair = (props: TrackFlairProps) => {
       userId={remixTrack?.user.user_id}
       hideToolTip={hideToolTip}
     />
-  ) : remixContest?.endDate ? (
+  ) : remixContest?.endDate && !isContestsEnabled ? (
     <RemixContestFlair
       endDate={remixContest.endDate}
       size={size}

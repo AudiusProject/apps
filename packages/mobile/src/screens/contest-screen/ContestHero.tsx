@@ -1,3 +1,4 @@
+import { useRemixContest } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { Image, View } from 'react-native'
@@ -28,10 +29,17 @@ export const ContestHero = ({ trackId }: ContestHeroProps) => {
     trackId,
     size: SquareSizes.SIZE_1000_BY_1000
   })
-  const src =
+  const trackImageUri =
     source && typeof source === 'object' && 'uri' in source
       ? (source as { uri?: string }).uri
       : undefined
+  // Prefer the contest's own cover photo (Edit Contest "Cover Photo"
+  // field) over the parent track's artwork — same fallback ordering
+  // used by the contest header on web and the contest cards.
+  const { data: remixContest } = useRemixContest(trackId)
+  const contestCoverPhotoUrl = (remixContest?.eventData as any)
+    ?.coverPhotoUrl as string | undefined
+  const src = contestCoverPhotoUrl || trackImageUri
 
   // `pointerEvents='none'` on the outer View — the hero is purely
   // decorative now that the back button lives in the overlay, so

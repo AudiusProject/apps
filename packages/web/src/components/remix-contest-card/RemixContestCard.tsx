@@ -3,12 +3,15 @@ import { MouseEvent, Ref, forwardRef, useCallback } from 'react'
 import { useRemixContest, useTrack, useUser } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { formatContestDeadlineWithStatus } from '@audius/common/utils'
-import { Flex, Skeleton, Text } from '@audius/harmony'
+import { Artwork, Flex, Skeleton, Text } from '@audius/harmony'
 import { useLinkClickHandler } from 'react-router'
 
 import { Card, CardProps, CardFooter, CardContent } from 'components/card'
 import { TextLink, UserLink } from 'components/link'
 import { TrackArtwork } from 'components/track/TrackArtwork'
+import TrackFlair, {
+  Size as FlairSize
+} from 'components/track-flair/TrackFlair'
 
 const messages = {
   deadline: (releaseDate?: string) =>
@@ -87,15 +90,33 @@ export const RemixContestCard = forwardRef(
       return <RemixContestCardSkeleton size={size} {...other} />
     }
 
+    // Prefer the contest's own cover photo (set on the host contest form's
+    // "Cover Photo" field) over the parent track's artwork — same fallback
+    // ordering the contest page itself uses. When present, render a plain
+    // Artwork wrapped in TrackFlair so the badge treatment matches the
+    // default TrackArtwork render path.
+    const contestCoverPhotoUrl = (remixContest?.eventData as any)
+      ?.coverPhotoUrl as string | undefined
+
     return (
       <Card ref={ref} onClick={handleClick} size={size} {...other}>
         <Flex direction='column' p='s' gap='s'>
-          <TrackArtwork
-            trackId={track.track_id}
-            size={SquareSizes.SIZE_480_BY_480}
-            mr='xs'
-            css={{ minHeight: 24, minWidth: 24 }}
-          />
+          {contestCoverPhotoUrl ? (
+            <TrackFlair size={FlairSize.LARGE} id={track.track_id}>
+              <Artwork
+                src={contestCoverPhotoUrl}
+                mr='xs'
+                css={{ minHeight: 24, minWidth: 24 }}
+              />
+            </TrackFlair>
+          ) : (
+            <TrackArtwork
+              trackId={track.track_id}
+              size={SquareSizes.SIZE_480_BY_480}
+              mr='xs'
+              css={{ minHeight: 24, minWidth: 24 }}
+            />
+          )}
           <CardContent gap='xs'>
             <TextLink
               to={permalink}

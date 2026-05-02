@@ -94,6 +94,11 @@ export const HostRemixContestDrawer = () => {
   const [prizeInfo, setPrizeInfo] = useState(
     remixContestData ? remixContestData.prizeInfo : ''
   )
+  // Pre-populate from existing eventData when editing — same field the web
+  // Edit Contest form writes to (Figma 2811:109911 / Video Link section).
+  const [videoUrl, setVideoUrl] = useState<string>(
+    (remixContestData as any)?.videoUrl ?? ''
+  )
   const [endDate, setEndDate] = useState(
     remixContest ? dayjs(remixContest.endDate) : null
   )
@@ -145,6 +150,7 @@ export const HostRemixContestDrawer = () => {
         eventData: {
           description,
           prizeInfo,
+          videoUrl: videoUrl.trim() || undefined,
           winners: remixContest.eventData.winners ?? []
         },
         userId
@@ -167,6 +173,7 @@ export const HostRemixContestDrawer = () => {
         eventData: {
           description,
           prizeInfo,
+          videoUrl: videoUrl.trim() || undefined,
           winners: []
         }
       })
@@ -193,6 +200,7 @@ export const HostRemixContestDrawer = () => {
     remixContest?.eventId,
     remixContest?.eventData.winners,
     prizeInfo,
+    videoUrl,
     createEvent
   ])
 
@@ -262,6 +270,28 @@ export const HostRemixContestDrawer = () => {
                   labelText: styles.labelText
                 }}
                 maxLength={maxPrizeInfoLength}
+              />
+            </Flex>
+            {/* Video Link — matches the web Edit Contest "Video Link"
+                section (Figma 2811:109911). Saves to eventData.videoUrl
+                so the contest screen's About card can embed it inline. */}
+            <Flex column gap='xs'>
+              <Text variant='title' size='l'>
+                Video Link
+              </Text>
+              <Text variant='body' size='s' color='subdued'>
+                Add a YouTube or Vimeo link to embed it on your page.
+              </Text>
+              <TextInput
+                value={videoUrl}
+                onChangeText={setVideoUrl}
+                placeholder='https://www.youtube.com/watch?v=...'
+                autoCapitalize='none'
+                autoCorrect={false}
+                keyboardType='url'
+                styles={{
+                  labelText: styles.labelText
+                }}
               />
             </Flex>
             <Flex column gap='l'>
