@@ -655,6 +655,11 @@ export const AudioPlayer = () => {
   const enqueueTracksJobRef = useRef<Promise<void> | undefined>(undefined)
   // A way to abort the enqeue tracks job if a new lineup is played
   const abortEnqueueControllerRef = useRef(new AbortController())
+  // A ref to the in-flight handleQueueChange invocation. handleQueueIdxChange
+  // awaits this so it doesn't read the active track index mid-enqueue, when
+  // the middle-out queue build has the target index occupied by a track that
+  // will subsequently be shifted by an insert-at-0.
+  const queueSetupJobRef = useRef<Promise<void> | undefined>(undefined)
 
   const handleQueueChange = useCallback(async () => {
     const refTrackIds = queueListRef.current
@@ -789,13 +794,24 @@ export const AudioPlayer = () => {
     if (queueIndex === -1) return
     latestQueueIdxRef.current = queueIndex
 
-    // TrackPlayer's native queue is populated asynchronously by the middle-out
-    // enqueueTracks loop in handleQueueChange. If the user presses "next"
-    // before our target index has been added, TrackPlayer.skip(queueIndex) is
-    // silently dropped (the old code's `queueIndex < queue.length` check
-    // fails). Poll until the target is reachable, then skip. Without this,
-    // pressing next within ~5s of play leaves audio stuck on the first track
-    // even though the redux-driven artwork updates.
+    // Wait for any in-flight queue setup to finish before reading the
+    // active index. handleQueueChange grows the RNTP queue
+    // non-monotonically — `add(firstTrack)` then a middle-out loop that
+    // both appends and `add(prev, 0)`-inserts. Polling for queue length
+    // alone exits as soon as `queue.length > queueIndex`, which can
+    // happen mid-build when the target slot is still occupied by a
+    // later track that has not yet been shifted by a pending
+    // insert-at-0. Skipping at that moment lands on the wrong track —
+    // e.g. tapping the second trending track skips to position 1 of
+    // [firstTrack, nextTrack], which becomes the third track once the
+    // prefix insert lands.
+    await queueSetupJobRef.current
+
+    if (latestQueueIdxRef.current !== queueIndex) return
+
+    // Defensive poll for the rare case where setup bailed out before
+    // populating the queue (e.g. dependency data not loaded yet) — the
+    // earlier await is then a no-op against a resolved/undefined ref.
     const POLL_INTERVAL_MS = 100
     const MAX_WAIT_MS = 30000
     const startTime = Date.now()
@@ -809,7 +825,6 @@ export const AudioPlayer = () => {
       queue = await TrackPlayer.getQueue()
     }
 
-    // Bail if a newer next/prev press superseded this one while polling.
     if (latestQueueIdxRef.current !== queueIndex) return
 
     const playerIdx = await TrackPlayer.getActiveTrackIndex()
@@ -863,7 +878,7 @@ export const AudioPlayer = () => {
 
   useEffect(() => {
     if (isAudioSetup) {
-      handleQueueChange()
+      queueSetupJobRef.current = handleQueueChange()
     }
   }, [handleQueueChange, queueTrackIds, isAudioSetup])
 
