@@ -9,6 +9,7 @@ import {
   PlaylistLibraryID,
   PlaylistLibraryFolder
 } from '@audius/common/models'
+import { modalsActions } from '@audius/common/store'
 import {
   IconFolder,
   PopupMenuItem,
@@ -25,13 +26,15 @@ import { useToggle } from 'react-use'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Draggable, Droppable } from 'components/dragndrop'
-import { EditFolderModal } from 'components/edit-folder-modal/EditFolderModal'
+import { setFolderId as setEditFolderModalFolderId } from 'store/application/ui/editFolderModal/slice'
 import { DragDropKind, selectDraggingKind } from 'store/dragndrop/slice'
 import { useSelector } from 'utils/reducer'
 
 import { DeleteFolderConfirmationModal } from './DeleteFolderConfirmationModal'
 import { NavItemKebabButton } from './NavItemKebabButton'
 import { PlaylistLibraryNavItem, keyExtractor } from './PlaylistLibraryNavItem'
+
+const { setVisibility } = modalsActions
 
 type PlaylistFolderNavItemProps = {
   folder: PlaylistLibraryFolder
@@ -73,7 +76,6 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
   const { mutate: addToPlaylistFolder } = useAddToPlaylistFolder()
   const [isDeleteConfirmationOpen, toggleDeleteConfirmationOpen] =
     useToggle(false)
-  const [isEditFolderOpen, setIsEditFolderOpen] = useState(false)
 
   const isDisabled = draggingKind && !acceptedKinds.includes(draggingKind)
 
@@ -114,15 +116,12 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
     (event: MouseEvent<HTMLElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      setIsEditFolderOpen(true)
+      dispatch(setEditFolderModalFolderId(id))
+      dispatch(setVisibility({ modal: 'EditFolder', visible: true }))
       record(make(Name.FOLDER_OPEN_EDIT, {}))
     },
-    [record]
+    [dispatch, id, record]
   )
-
-  const handleCloseEdit = useCallback(() => {
-    setIsEditFolderOpen(false)
-  }, [])
 
   const kebabItems: PopupMenuItem[] = useMemo(
     () => [
@@ -238,11 +237,6 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
                 folderId={id}
                 visible={isDeleteConfirmationOpen}
                 onCancel={toggleDeleteConfirmationOpen}
-              />
-              <EditFolderModal
-                isOpen={isEditFolderOpen}
-                onClose={handleCloseEdit}
-                folder={folder}
               />
             </Box>
           </Draggable>
