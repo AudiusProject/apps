@@ -16,7 +16,6 @@ import { playbackPositionSagas } from '~/store/playback-position'
 import { purchaseContentSagas } from '~/store/purchase-content'
 import remoteConfigSagas from '~/store/remote-config/sagas'
 import {
-  searchUsersModalSagas,
   toastSagas,
   deletePlaylistConfirmationModalUISagas,
   duplicateAddConfirmationModalUISagas,
@@ -27,7 +26,6 @@ import {
   modalsSagas
 } from '~/store/ui'
 
-import { playlistUpdatesSagas } from './playlist-updates'
 import { CommonStoreContext } from './storeContext'
 
 /**
@@ -45,7 +43,6 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   gatedContent: gatedContentSagas,
   purchaseContent: purchaseContentSagas,
   chat: chatSagas,
-  searchUsers: searchUsersModalSagas,
   toast: toastSagas,
   shareModalUI: shareModalUISagas,
   stripeModalUI: stripeModalUISagas,
@@ -55,7 +52,6 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   duplidateAddConfirmationModalUI: duplicateAddConfirmationModalUISagas,
   playback: playbackSagas,
   playbackPosition: playbackPositionSagas,
-  playlistUpdates: playlistUpdatesSagas,
   withdrawUSDC: withdrawUSDCSagas
 
   // signOut: signOutSagas

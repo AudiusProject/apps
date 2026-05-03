@@ -10,7 +10,6 @@ import {
   shareModalUISagas as shareModalSagas,
   stripeModalUISagas as stripeModalSagas,
   toastSagas,
-  searchUsersModalSagas,
   modalsSagas,
   playbackSagas,
   playbackPositionSagas,
@@ -26,8 +25,6 @@ import addToCollectionSagas from 'common/store/add-to-collection/sagas'
 import analyticsSagas from 'common/store/analytics/sagas'
 import backendSagas from 'common/store/backend/sagas'
 import collectionsSagas from 'common/store/cache/collections/webSagas'
-import tracksSagas from 'common/store/cache/tracks/sagas'
-import changePasswordSagas from 'common/store/change-password/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
@@ -35,15 +32,11 @@ import feedPageSagas from 'common/store/pages/feed/sagas'
 import signOnSaga from 'common/store/pages/signon/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import playbackEngineSagas from 'common/store/playback/sagas'
-import playlistUpdatesSagas from 'common/store/playlist-updates/sagas'
 import profileSagas from 'common/store/profile/sagas'
-import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
-import searchAiBarSagas from 'common/store/search-ai-bar/sagas'
 import socialSagas from 'common/store/social/sagas'
 import firstUploadModalSagas from 'components/first-upload-modal/store/sagas'
 import passwordResetSagas from 'components/password-reset/store/sagas'
-import dashboardSagas from 'pages/dashboard-page/store/sagas'
 import settingsSagas from 'pages/settings-page/store/sagas'
 import accountSagas from 'store/account/sagas'
 import webAnalyticsSagas from 'store/analytics/sagas'
@@ -65,7 +58,6 @@ export default function* rootSaga() {
     webAnalyticsSagas(),
     backendSagas(),
     confirmerSagas(),
-    searchAiBarSagas(),
 
     cookieBannerSagas(),
     reachabilitySagas(),
@@ -73,14 +65,11 @@ export default function* rootSaga() {
 
     // Account
     accountSagas(),
-    playlistUpdatesSagas(),
-    recoveryEmailSagas(),
     signOutSagas(),
 
     // Pages
     collectionSagas(),
     chatSagas(),
-    dashboardSagas(),
     feedPageSagas(),
     passwordResetSagas(),
     profileSagas(),
@@ -94,7 +83,6 @@ export default function* rootSaga() {
 
     // Cache
     collectionsSagas(),
-    tracksSagas(),
     savedCollectionsSagas(),
 
     // Playback
@@ -107,7 +95,6 @@ export default function* rootSaga() {
 
     // Application
     addToCollectionSagas(),
-    changePasswordSagas(),
     chatWebSagas(),
     deactivateAccountSagas(),
     deletePlaylistConfirmationModalSagas(),
@@ -119,7 +106,6 @@ export default function* rootSaga() {
     overflowMenuSagas(),
     toastSagas(),
 
-    searchUsersModalSagas(),
     stemUploadSagas(),
     userListModalSagas(),
     commonReachabilitySagas(),
@@ -158,7 +144,6 @@ export function* testRootSaga() {
     // Pages
     // collectionSagas(),
     // chatSagas(),
-    // dashboardSagas(),
     // feedPageSagas(),
     // historySagas(),
     // passwordResetSagas(),
@@ -180,13 +165,11 @@ export function* testRootSaga() {
 
     // Cache
     collectionsSagas(),
-    tracksSagas(),
     savedCollectionsSagas(),
 
     // Application
     // addToCollectionSagas(),
     // buyAudioSagas(),
-    // changePasswordSagas(),
     // chatWebSagas(),
     // deactivateAccountSagas(),
     // deletedSagas(),
@@ -200,7 +183,6 @@ export function* testRootSaga() {
     // overflowMenuSagas(),
     // toastSagas(),
 
-    // searchUsersModalSagas(),
     // stemUploadSagas(),
     // userListModalSagas(),
     // commonReachabilitySagas(),

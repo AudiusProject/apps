@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useCurrentUserId, useFollowers, useUsers } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useFollowers,
+  useSearchUsersModal,
+  useUsers
+} from '@audius/common/api'
 import { Status, statusIsNotFinalized } from '@audius/common/models'
 import type { User } from '@audius/common/models'
-import {
-  chatActions,
-  chatSelectors,
-  searchUsersModalActions,
-  searchUsersModalSelectors
-} from '@audius/common/store'
+import { chatActions, chatSelectors } from '@audius/common/store'
 import type { CreateChatModalState } from '@audius/common/store'
 import { View, Image } from 'react-native'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
@@ -31,8 +31,6 @@ import { makeStyles } from 'app/styles'
 import { ChatBlastCTA } from './ChatBlastCTA'
 import { ChatUserListItem } from './ChatUserListItem'
 
-const { searchUsers } = searchUsersModalActions
-const { getUserList } = searchUsersModalSelectors
 const { fetchBlockees, fetchBlockers, fetchPermissions } = chatActions
 const { getUserList: getChatsUserList } = chatSelectors
 
@@ -190,18 +188,18 @@ const useDefaultUserList = (
 }
 
 const useQueryUserList = (query: string) => {
-  const dispatch = useDispatch()
-  const { userIds, status, hasMore } = useSelector(getUserList)
+  const { userIds, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useSearchUsersModal({ query })
 
   const loadMore = useCallback(() => {
-    dispatch(searchUsers({ query }))
-  }, [query, dispatch])
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  useEffect(() => {
-    loadMore()
-  }, [loadMore])
+  // Map tan-query state onto the Status enum the UI expects below.
+  const status =
+    isPending || isFetchingNextPage ? Status.LOADING : Status.SUCCESS
 
-  return { hasMore, loadMore, status, userIds }
+  return { hasMore: !!hasNextPage, loadMore, status, userIds: userIds ?? [] }
 }
 
 export const ChatUserListScreen = () => {

@@ -8,7 +8,9 @@ import {
 } from 'react'
 
 import {
+  useAllPlaylistUpdateIds,
   useCollectionByParams,
+  useMarkPlaylistAsViewed,
   useTracks,
   useUser,
   useUsers,
@@ -44,8 +46,6 @@ import {
   favoritesUserListActions,
   RepostType,
   playbackActions,
-  playlistUpdatesActions,
-  playlistUpdatesSelectors,
   CollectionTrack,
   CollectionsPageType,
   CollectionPageTrackRecord,
@@ -84,7 +84,6 @@ import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
-const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
 const {
   makeGetCurrent,
   getCurrentPlayerBehavior: getPlayerBehavior,
@@ -94,7 +93,6 @@ const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
-const { updatedPlaylistViewed } = playlistUpdatesActions
 const { removeTrackFromPlaylist, orderPlaylist, publishPlaylist } =
   cacheCollectionsActions
 
@@ -207,7 +205,8 @@ export const useCollectionPage = (
     })
     return map
   }, [sortedEntries])
-  const playlistUpdates = useSelector(selectAllPlaylistUpdateIds)
+  const { data: playlistUpdates = [] } = useAllPlaylistUpdateIds()
+  const { mutate: markPlaylistAsViewed } = useMarkPlaylistAsViewed()
   // Note: These selectors are available but not currently used in the hook
   // const reduxCollectionId = useSelector((state: any) => getCollectionId(state))
   // const reduxCollectionPermalink = useSelector((state: any) => getCollectionPermalink(state))
@@ -304,9 +303,9 @@ export const useCollectionPage = (
       playlistId &&
       playlistUpdates.includes(playlistId)
     ) {
-      dispatch(updatedPlaylistViewed({ playlistId }))
+      markPlaylistAsViewed({ playlistId })
     }
-  }, [collection, playlistId, type, playlistUpdates, dispatch])
+  }, [collection, playlistId, type, playlistUpdates, markPlaylistAsViewed])
 
   // Initialize order from tracks
   useEffect(() => {

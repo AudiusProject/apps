@@ -1,12 +1,14 @@
 import { useCallback, useState, MouseEvent, useMemo } from 'react'
 
-import { useAddToPlaylistFolder } from '@audius/common/api'
+import {
+  useAddToPlaylistFolder,
+  useAllPlaylistUpdateIds
+} from '@audius/common/api'
 import {
   Name,
   PlaylistLibraryID,
   PlaylistLibraryFolder
 } from '@audius/common/models'
-import { modalsActions, playlistUpdatesSelectors } from '@audius/common/store'
 import {
   IconFolder,
   PopupMenuItem,
@@ -23,16 +25,13 @@ import { useToggle } from 'react-use'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { Draggable, Droppable } from 'components/dragndrop'
-import { setFolderId as setEditFolderModalFolderId } from 'store/application/ui/editFolderModal/slice'
+import { EditFolderModal } from 'components/edit-folder-modal/EditFolderModal'
 import { DragDropKind, selectDraggingKind } from 'store/dragndrop/slice'
 import { useSelector } from 'utils/reducer'
 
 import { DeleteFolderConfirmationModal } from './DeleteFolderConfirmationModal'
 import { NavItemKebabButton } from './NavItemKebabButton'
 import { PlaylistLibraryNavItem, keyExtractor } from './PlaylistLibraryNavItem'
-
-const { setVisibility } = modalsActions
-const { selectPlaylistUpdateById } = playlistUpdatesSelectors
 
 type PlaylistFolderNavItemProps = {
   folder: PlaylistLibraryFolder
@@ -51,13 +50,12 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
   const { spacing } = useTheme()
   const { folder, level } = props
   const { name, contents, id } = folder
-  const folderHasUpdate = useSelector((state) => {
-    return folder.contents.some(
-      (content) =>
-        content.type === 'playlist' &&
-        selectPlaylistUpdateById(state, content.playlist_id)
-    )
-  })
+  const { data: playlistUpdateIds = [] } = useAllPlaylistUpdateIds()
+  const folderHasUpdate = folder.contents.some(
+    (content) =>
+      content.type === 'playlist' &&
+      playlistUpdateIds.includes(content.playlist_id)
+  )
   const draggingKind = useSelector(selectDraggingKind)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
@@ -75,6 +73,7 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
   const { mutate: addToPlaylistFolder } = useAddToPlaylistFolder()
   const [isDeleteConfirmationOpen, toggleDeleteConfirmationOpen] =
     useToggle(false)
+  const [isEditFolderOpen, setIsEditFolderOpen] = useState(false)
 
   const isDisabled = draggingKind && !acceptedKinds.includes(draggingKind)
 
@@ -115,12 +114,15 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
     (event: MouseEvent<HTMLElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      dispatch(setEditFolderModalFolderId(id))
-      dispatch(setVisibility({ modal: 'EditFolder', visible: true }))
+      setIsEditFolderOpen(true)
       record(make(Name.FOLDER_OPEN_EDIT, {}))
     },
-    [dispatch, id, record]
+    [record]
   )
+
+  const handleCloseEdit = useCallback(() => {
+    setIsEditFolderOpen(false)
+  }, [])
 
   const kebabItems: PopupMenuItem[] = useMemo(
     () => [
@@ -236,6 +238,11 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
                 folderId={id}
                 visible={isDeleteConfirmationOpen}
                 onCancel={toggleDeleteConfirmationOpen}
+              />
+              <EditFolderModal
+                isOpen={isEditFolderOpen}
+                onClose={handleCloseEdit}
+                folder={folder}
               />
             </Box>
           </Draggable>

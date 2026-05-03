@@ -135,6 +135,17 @@ export * from './tan-query/users/useOtherChatUsers'
 
 // Account
 export * from './tan-query/users/account/useResetPassword'
+export * from './tan-query/users/account/useResendRecoveryEmail'
+
+// Playlist updates
+export * from './tan-query/playlist-updates/usePlaylistUpdates'
+export * from './tan-query/playlist-updates/useMarkPlaylistAsViewed'
+
+// Search users modal
+export * from './tan-query/search-users-modal/useSearchUsersModal'
+
+// Artist Dashboard
+export * from './tan-query/dashboard/useArtistDashboardListenData'
 export * from './tan-query/users/account/useManagedAccounts'
 export * from './tan-query/users/account/useManagers'
 export * from './tan-query/users/account/useRequestAddManager'

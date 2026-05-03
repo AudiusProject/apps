@@ -1,6 +1,5 @@
 import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
@@ -9,7 +8,6 @@ import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Track } from '~/models/Track'
 import { UserMetadata } from '~/models/User'
-import { deleteTrackRequested } from '~/store/cache/tracks/actions'
 
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUser } from '../users/useUser'
@@ -31,7 +29,6 @@ type MutationContext = {
 export const useDeleteTrack = () => {
   const { audiusSdk, reportToSentry } = useQueryContext()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
   const { data: currentUser } = useUser(currentUserId)
   const {
@@ -58,9 +55,6 @@ export const useDeleteTrack = () => {
       // Snapshot the previous values
       const previousTrack = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!previousTrack) throw new Error('Track not found')
-
-      // Triggers removal from profile lineup
-      dispatch(deleteTrackRequested(trackId))
 
       // Before deleting, check if the track is set as the artist pick & update if so
       if (currentUser.artist_pick_track_id === trackId) {
