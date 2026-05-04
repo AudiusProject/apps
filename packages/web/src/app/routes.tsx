@@ -3,6 +3,7 @@ import React, { lazy, Suspense, useEffect } from 'react'
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { CoinflowPurchaseProtection } from '@coinflowlabs/react'
+import NiceModal from '@ebay/nice-modal-react'
 import type { RouteObject } from 'react-router'
 import { Navigate, Outlet, useNavigate } from 'react-router'
 
@@ -80,14 +81,19 @@ const RootLayout = () => {
                         <SyncLocalStorageUserProvider
                           localStorage={localStorage}
                         >
-                          <SomethingWrong />
-                          <Suspense fallback={null}>
-                            <CoinflowPurchaseProtection
-                              merchantId={MERCHANT_ID || ''}
-                              coinflowEnv={IS_PRODUCTION ? 'prod' : 'sandbox'}
-                            />
-                            <Outlet />
-                          </Suspense>
+                          {/* NiceModal-managed modals (e.g. ShareModal)
+                              read AudiusQueryProvider + ToastContext, so the
+                              Provider must mount inside them. */}
+                          <NiceModal.Provider>
+                            <SomethingWrong />
+                            <Suspense fallback={null}>
+                              <CoinflowPurchaseProtection
+                                merchantId={MERCHANT_ID || ''}
+                                coinflowEnv={IS_PRODUCTION ? 'prod' : 'sandbox'}
+                              />
+                              <Outlet />
+                            </Suspense>
+                          </NiceModal.Provider>
                         </SyncLocalStorageUserProvider>
                       </MainContentContextProvider>
                     </ToastContextProvider>

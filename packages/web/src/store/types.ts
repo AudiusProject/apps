@@ -26,7 +26,6 @@ import { ErrorState } from 'store/errors/reducers'
 import { BackendState } from '../common/store/backend/types'
 
 import { CookieBannerState } from './application/ui/cookieBanner/types'
-import { EditFolderModalState } from './application/ui/editFolderModal/slice'
 import { ScrollLockState } from './application/ui/scrollLock/types'
 import { UserListModalState } from './application/ui/userListModal/types'
 import { DragnDropState } from './dragndrop/slice'
@@ -52,7 +51,6 @@ export type AppState = CommonState & {
       appCTAModal: ReturnType<typeof AppCTAModalReducer>
       averageColor: ReturnType<typeof averageColor>
       cookieBanner: CookieBannerState
-      editFolderModal: EditFolderModalState
       embedModal: EmbedModalState
       firstUploadModal: FirstUploadModalState
       scrollLock: ScrollLockState

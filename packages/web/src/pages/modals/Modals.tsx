@@ -18,7 +18,6 @@ import { DownloadTrackArchiveModal } from 'components/download-track-archive-mod
 import { DuplicateAddConfirmationModal } from 'components/duplicate-add-confirmation-modal'
 import { EarlyReleaseConfirmationModal } from 'components/early-release-confirmation-modal'
 import { EditAccessConfirmationModal } from 'components/edit-access-confirmation-modal'
-import EditFolderModal from 'components/edit-folder-modal/EditFolderModal'
 import EmbedModal from 'components/embed-modal/EmbedModal'
 import { FeatureFlagOverrideModal } from 'components/feature-flag-override-modal'
 import { FinalizeWinnersConfirmationModal } from 'components/finalize-winners-confirmation-modal/FinalizeWinnersConfirmationModal'
@@ -61,7 +60,6 @@ import { ClaimVestedCoinsModal } from 'pages/fan-club-detail-page/components/Cla
 import { ChallengeRewardsModal } from 'pages/rewards-page/components/modals/ChallengeRewardsModal'
 
 import AppModal from './AppModal'
-const ShareModal = lazy(() => import('components/share-modal'))
 
 const StripeOnRampModal = lazy(() => import('components/stripe-on-ramp-modal'))
 
@@ -78,8 +76,6 @@ const CommentSettingsModal = lazy(
 )
 
 const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
-  Share: ShareModal,
-  EditFolder: EditFolderModal,
   AddToCollection: AddToCollectionModal,
   TiersExplainer: TierExplainerModal,
   DeletePlaylistConfirmation: DeletePlaylistConfirmationModal,

@@ -63,7 +63,6 @@ export type Modals =
   | 'TrendingFilter'
   | 'TrendingRewardsExplainer'
   | 'SocialProof'
-  | 'EditFolder'
   | 'EditTrack'
   | 'SignOutConfirmation'
   | 'Overflow'

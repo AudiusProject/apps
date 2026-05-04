@@ -11,13 +11,13 @@ import {
   modalsActions,
   useCreateChatModal
 } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import * as embedModalActions from 'components/embed-modal/store/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useModalState } from 'pages/modals/useModalState'
 import { SHARE_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 import { useSelector } from 'utils/reducer'
 import { openXLink } from 'utils/xShare'
@@ -33,8 +33,15 @@ const { shareTrack, shareContest } = tracksSocialActions
 const { shareCollection } = collectionsSocialActions
 const { setVisibility } = modalsActions
 
-export const ShareModal = () => {
-  const { isOpen, onClose, onClosed } = useModalState('Share')
+export const ShareModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+  // NiceModal handles unmount via `remove()` after the close animation;
+  // there's no separate "fully closed" callback, so reuse onClose here.
+  const onClosed = onClose
   const sendShareAction = useShareAction()
 
   const { toast } = useContext(ToastContext)
@@ -154,4 +161,8 @@ export const ShareModal = () => {
 
   if (isMobile) return <ShareDrawer {...shareProps} />
   return <ShareDialog {...shareProps} />
-}
+})
+
+// Register the modal so saga code (and anything else outside React) can
+// open it via `showNiceModal('Share')`.
+NiceModal.register('Share', ShareModal)

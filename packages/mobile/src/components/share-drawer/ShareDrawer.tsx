@@ -9,6 +9,7 @@ import {
   usersSocialActions,
   shareModalUISelectors
 } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Linking } from 'react-native'
 import ViewShot from 'react-native-view-shot'
@@ -31,9 +32,8 @@ import { make, track } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
-import ActionDrawer from '../action-drawer'
+import { ActionDrawerWithoutRedux } from '../action-drawer/ActionDrawerWithoutRedux'
 import { Text } from '../core'
-import { useDrawerState } from '../drawer/AppDrawer'
 
 import { ShareToStorySticker } from './ShareToStorySticker'
 import { messages } from './messages'
@@ -71,13 +71,17 @@ const useStyles = makeStyles(({ spacing }) => ({
   }
 }))
 
-export const ShareDrawer = () => {
+export const ShareDrawer = NiceModal.create(() => {
   const styles = useStyles()
   const viewShotRef = useRef<ViewShot | null>(null) as React.RefObject<ViewShot>
   const navigation = useNavigation<AppTabScreenParamList>()
   const sendShareAction = useShareAction()
 
-  const { onClose } = useDrawerState('Share')
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
   const { onClose: onCloseNowPlaying } = useDrawer('NowPlaying')
 
   const { secondary } = useThemeColors()
@@ -277,9 +281,10 @@ export const ShareDrawer = () => {
           />
         </ViewShot>
       ) : null}
-      <ActionDrawer
+      <ActionDrawerWithoutRedux
+        isOpen={isOpen}
+        onClose={onClose}
         disableAutoClose={true}
-        modalName='Share'
         rows={getRows()}
         title={messages.modalTitle(shareType)}
         titleIcon={IconShare}
@@ -292,7 +297,11 @@ export const ShareDrawer = () => {
             {messages.hiddenPlaylistShareHelperText}
           </Text>
         ) : null}
-      </ActionDrawer>
+      </ActionDrawerWithoutRedux>
     </>
   )
-}
+})
+
+// Register so saga code (and anything else outside React) can open it via
+// `showNiceModal('Share')`.
+NiceModal.register('Share', ShareDrawer)

@@ -28,7 +28,6 @@ export const initialState: BasicModalsState = {
   TrendingFilter: { isOpen: false },
   TrendingRewardsExplainer: { isOpen: false },
   SocialProof: { isOpen: false },
-  EditFolder: { isOpen: false },
   EditTrack: { isOpen: false },
   SignOutConfirmation: { isOpen: false },
   Overflow: { isOpen: false },
