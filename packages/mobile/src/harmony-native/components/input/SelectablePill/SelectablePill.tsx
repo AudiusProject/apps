@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useControlled } from '@audius/harmony/src/hooks/useControlled'
-import { DEFAULT_HIT_SLOP } from '@audius/harmony-native'
 import { css } from '@emotion/native'
 import { Pressable } from 'react-native'
 import type { GestureResponderEvent } from 'react-native'
@@ -12,6 +11,8 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
+
+import { DEFAULT_HIT_SLOP } from '@audius/harmony-native'
 
 import { useTheme } from '../../../foundations/theme'
 import { Text } from '../../Text/Text'
