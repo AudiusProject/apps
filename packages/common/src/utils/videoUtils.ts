@@ -44,7 +44,7 @@ export const getVideoThumbnailUrl = (parsed: ParsedVideo): string | null => {
  */
 export const getVideoEmbedUrl = (parsed: ParsedVideo): string => {
   if (parsed.platform === 'youtube') {
-    return `https://www.youtube.com/embed/${parsed.videoId}`
+    return `https://www.youtube.com/embed/${parsed.videoId}?origin=https://audius.co&enablejsapi=1`
   }
   return `https://player.vimeo.com/video/${parsed.videoId}`
 }

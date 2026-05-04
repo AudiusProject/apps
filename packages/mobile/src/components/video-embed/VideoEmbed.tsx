@@ -34,17 +34,18 @@ export const VideoEmbed = ({ url }: VideoEmbedProps) => {
       }}
     >
       <WebView
-        source={{ uri: embedUrl }}
+        source={{
+          html: `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{margin:0;padding:0}iframe{width:100%;height:100%;border:none}</style></head><body><iframe src="${embedUrl}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></body></html>`,
+          baseUrl: 'https://audius.co'
+        }}
         style={{ flex: 1, backgroundColor: 'transparent' }}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
-        // Block opening external links inside the WebView so taps that
-        // trigger a navigation (e.g. "Watch on YouTube" overlays) are
-        // ignored — the embed stays focused on the video itself.
         onShouldStartLoadWithRequest={(req) =>
           req.url.startsWith('https://www.youtube.com/embed/') ||
-          req.url.startsWith('https://player.vimeo.com/')
+          req.url.startsWith('https://player.vimeo.com/') ||
+          req.url === 'about:blank'
         }
       />
     </View>
