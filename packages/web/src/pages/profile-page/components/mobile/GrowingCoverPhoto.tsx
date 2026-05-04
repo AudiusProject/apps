@@ -1,10 +1,10 @@
 import { useEffect, useCallback } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
+import { Image, type ImageProps } from '@audius/harmony'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
-import { Image, type ImageProps } from '@audius/harmony'
 const animatedAny = animated as any
 
 type GrowingCoverPhotoProps = ImageProps & {

@@ -2,10 +2,9 @@ import { ComponentPropsWithoutRef } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { SquareSizes, ID } from '@audius/common/models'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 import { pick } from 'lodash'
-
-import { Image } from '@audius/harmony'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import Skeleton from 'components/skeleton/Skeleton'

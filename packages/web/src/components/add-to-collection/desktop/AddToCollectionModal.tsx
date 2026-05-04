@@ -24,7 +24,8 @@ import {
   Scrollbar,
   IconMultiselectAdd,
   LoadingSpinner,
-  Tooltip
+  Tooltip,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 import { capitalize } from 'lodash'
@@ -32,7 +33,6 @@ import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { Image } from '@audius/harmony'
 import SearchBar from 'components/search-bar/SearchBar'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
@@ -230,10 +230,7 @@ const CollectionItem = ({
       className={cn(styles.listItem, [{ [styles.disabled]: disabled }])}
       onClick={() => handleClick(collection)}
     >
-      <Image
-        className={cn(styles.imageWrapper, styles.image)}
-        src={image}
-      />
+      <Image className={cn(styles.imageWrapper, styles.image)} src={image} />
       {disabled ? (
         <Tooltip text={messages.hiddenAdd} placement='right'>
           <span className={styles.playlistName}>

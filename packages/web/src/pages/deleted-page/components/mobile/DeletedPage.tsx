@@ -12,11 +12,10 @@ import {
   User
 } from '@audius/common/models'
 import { route, NestedNonNullable } from '@audius/common/utils'
-import { Button, IconUser } from '@audius/harmony'
+import { Button, IconUser, Image } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import { Image } from '@audius/harmony'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'

@@ -20,11 +20,11 @@ import {
   IconMessage,
   IconExternalLink,
   Hint,
-  IconCart
+  IconCart,
+  Image
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
-import { Image } from '@audius/harmony'
 import { ExternalLink, UserLink } from 'components/link'
 
 import { ContentLink } from './ContentLink'
@@ -100,10 +100,7 @@ export const SaleModalContent = ({
           <DetailSection
             label={contentLabel}
             actionButton={
-              <Image
-                src={artwork}
-                className={styles.artworkContainer}
-              />
+              <Image src={artwork} className={styles.artworkContainer} />
             }
           >
             <ContentLink

@@ -35,7 +35,8 @@ import { Genre, route } from '@audius/common/utils'
 import {
   IconCaretRight as IconCaret,
   IconImage,
-  Scrubber
+  Scrubber,
+  Image
 } from '@audius/harmony'
 import { Location } from 'history'
 import { connect, useSelector } from 'react-redux'
@@ -43,7 +44,6 @@ import { Dispatch } from 'redux'
 
 import { useHistoryContext } from 'app/HistoryProvider'
 import { useRecord, make } from 'common/store/analytics/actions'
-import { Image } from '@audius/harmony'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'

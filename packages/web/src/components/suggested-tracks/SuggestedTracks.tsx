@@ -13,12 +13,12 @@ import {
   IconCaretDown,
   IconRefresh,
   Paper,
-  useTheme
+  useTheme,
+  Image
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { useToggle } from 'react-use'
 
-import { Image } from '@audius/harmony'
 import { UserLink } from 'components/link/UserLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'

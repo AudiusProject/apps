@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { Flex, FilterButton, Image } from '@audius/harmony'
+import { FilterButton, Image } from '@audius/harmony'
 import { useAsync } from 'react-use'
 
 const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'

@@ -4,13 +4,16 @@ import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
-import { createKeyboardActivationHandler, Tooltip } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  Tooltip,
+  Image
+} from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
 
 import { Draggable } from 'components/dragndrop'
-import { Image } from '@audius/harmony'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'

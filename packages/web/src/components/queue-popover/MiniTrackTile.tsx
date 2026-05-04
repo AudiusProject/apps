@@ -10,11 +10,11 @@ import {
   IconKebabHorizontal,
   IconPause,
   IconPlay,
+  Image,
   Text,
   useTheme
 } from '@audius/harmony'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link/UserLink'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -145,7 +145,7 @@ export const MiniTrackTile = ({
         }}
         onClick={handleArtworkClick}
       >
-        <DynamicImage image={imageUrl} useBlur={false} />
+        <Image src={imageUrl} />
         {showOverlay && (
           <Flex
             css={{

@@ -9,14 +9,14 @@ import {
   useTheme,
   Box,
   Paper,
-  Text
+  Text,
+  Image
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router'
 
 import { Draggable } from 'components/dragndrop'
-import { Image } from '@audius/harmony'
 import { TrackDogEar } from 'components/track/TrackDogEar'
 import {
   useTrackCoverArt,

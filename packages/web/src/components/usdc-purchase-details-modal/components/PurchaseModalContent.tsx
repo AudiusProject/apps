@@ -11,10 +11,10 @@ import {
   Text,
   Flex,
   IconArrowRight,
-  IconExternalLink
+  IconExternalLink,
+  Image
 } from '@audius/harmony'
 
-import { Image } from '@audius/harmony'
 import { ExternalLink, UserLink } from 'components/link'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
@@ -64,10 +64,7 @@ export const PurchaseModalContent = ({
           <DetailSection
             label={contentLabel}
             actionButton={
-              <Image
-                src={artwork}
-                className={styles.artworkContainer}
-              />
+              <Image src={artwork} className={styles.artworkContainer} />
             }
           >
             <ContentLink

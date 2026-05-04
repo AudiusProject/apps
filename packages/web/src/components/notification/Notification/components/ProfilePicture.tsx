@@ -2,10 +2,9 @@ import { MouseEventHandler, useCallback } from 'react'
 
 import { SquareSizes, User } from '@audius/common/models'
 import { useNotificationModal } from '@audius/common/store'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 import { useNavigate } from 'react-router'
-
-import { Image } from '@audius/harmony'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { useProfilePicture } from 'hooks/useProfilePicture'

@@ -61,145 +61,146 @@ export type ImageProps = {
  * fills its parent by default — pass `h`/`w` BoxProps (or a className with
  * dimensions) for cases where the parent doesn't constrain the size.
  */
-export const Image = forwardRef<HTMLDivElement, ImageProps>(function Image(
-  props,
-  ref
-) {
-  const {
-    src,
-    priorityLowResSrc,
-    alt = '',
-    useSkeleton = true,
-    loading = 'lazy',
-    objectFit = 'cover',
-    style,
-    onLoad,
-    onError,
-    immediate = false,
-    imgProps,
-    children,
-    borderRadius,
-    className,
-    'data-testid': testId,
-    ...other
-  } = props
+export const Image = forwardRef<HTMLDivElement, ImageProps>(
+  function Image(props, ref) {
+    const {
+      src,
+      priorityLowResSrc,
+      alt,
+      useSkeleton = true,
+      loading = 'lazy',
+      objectFit = 'cover',
+      style,
+      onLoad,
+      onError,
+      immediate = false,
+      imgProps,
+      children,
+      borderRadius,
+      className,
+      'data-testid': testId,
+      ...other
+    } = props
 
-  const imgRef = useRef<HTMLImageElement | null>(null)
-  const { motion } = useTheme()
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [hasError, setHasError] = useState(false)
+    const imgRef = useRef<HTMLImageElement | null>(null)
+    const { motion } = useTheme()
+    const [isLoaded, setIsLoaded] = useState(false)
+    const [hasError, setHasError] = useState(false)
 
-  // When src changes, reset error state so a retry can re-fade-in. We don't
-  // reset isLoaded preemptively here because doing so causes a brief skeleton
-  // flash even when the next image is already cached.
-  useEffect(() => {
-    setHasError(false)
-  }, [src])
+    // When src changes, reset error state so a retry can re-fade-in. We don't
+    // reset isLoaded preemptively here because doing so causes a brief skeleton
+    // flash even when the next image is already cached.
+    useEffect(() => {
+      setHasError(false)
+    }, [src])
 
-  const transition = immediate
-    ? 'opacity 0.1s ease-in-out'
-    : `opacity ${motion.calm}`
+    const transition = immediate
+      ? 'opacity 0.1s ease-in-out'
+      : `opacity ${motion.calm}`
 
-  const showSkeleton = useSkeleton && !isLoaded && !priorityLowResSrc && !!src
-  const showLowRes = !!priorityLowResSrc && !isLoaded
-  const accessibilityProps =
-    alt === ''
-      ? { 'aria-hidden': true as const, alt: '' }
-      : { alt, role: 'img' as const }
+    const showSkeleton = useSkeleton && !isLoaded && !priorityLowResSrc && !!src
+    const showLowRes = !!priorityLowResSrc && !isLoaded
+    const accessibilityProps =
+      alt === ''
+        ? { 'aria-hidden': true as const, alt: '' }
+        : alt !== undefined
+          ? { alt, role: 'img' as const }
+          : {}
 
-  const baseImgStyle = {
-    position: 'absolute' as const,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit
+    const baseImgStyle = {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      objectFit
+    }
+
+    // The outer Box defaults to filling its parent so the absolutely-positioned
+    // inner <img> has a height to fill. Callers that explicitly set h/w via
+    // BoxProps or a sized className will override these.
+    const fillSize = { height: '100%', width: '100%' }
+
+    return (
+      <Box
+        ref={ref}
+        borderRadius={borderRadius}
+        className={className}
+        {...other}
+        css={{ position: 'relative', overflow: 'hidden', ...fillSize }}
+      >
+        {showSkeleton ? (
+          <Skeleton
+            h='100%'
+            w='100%'
+            borderRadius={borderRadius}
+            css={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+          />
+        ) : null}
+
+        {showLowRes ? (
+          <img
+            src={priorityLowResSrc}
+            alt=''
+            aria-hidden
+            draggable={false}
+            css={{
+              ...baseImgStyle,
+              zIndex: 1,
+              // Slight blur smooths the visual jump from low-res to high-res.
+              filter: 'blur(8px)',
+              transform: 'scale(1.05)'
+            }}
+          />
+        ) : null}
+
+        {src ? (
+          <img
+            ref={imgRef}
+            src={src}
+            loading={loading}
+            decoding='async'
+            draggable={false}
+            data-testid={testId}
+            {...accessibilityProps}
+            {...imgProps}
+            onLoad={(e) => {
+              setIsLoaded(true)
+              onLoad?.(e)
+            }}
+            onError={(e) => {
+              setHasError(true)
+              setIsLoaded(true)
+              onError?.(e)
+            }}
+            style={style}
+            css={{
+              ...baseImgStyle,
+              opacity: isLoaded && !hasError ? 1 : 0,
+              transition,
+              zIndex: 2
+            }}
+          />
+        ) : null}
+
+        {children ? (
+          <Box
+            h='100%'
+            w='100%'
+            css={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              zIndex: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {children}
+          </Box>
+        ) : null}
+      </Box>
+    )
   }
-
-  // The outer Box defaults to filling its parent so the absolutely-positioned
-  // inner <img> has a height to fill. Callers that explicitly set h/w via
-  // BoxProps or a sized className will override these.
-  const fillSize = { height: '100%', width: '100%' }
-
-  return (
-    <Box
-      ref={ref}
-      borderRadius={borderRadius}
-      className={className}
-      {...other}
-      css={{ position: 'relative', overflow: 'hidden', ...fillSize }}
-    >
-      {showSkeleton ? (
-        <Skeleton
-          h='100%'
-          w='100%'
-          borderRadius={borderRadius}
-          css={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-        />
-      ) : null}
-
-      {showLowRes ? (
-        <img
-          src={priorityLowResSrc}
-          alt=''
-          aria-hidden
-          draggable={false}
-          css={{
-            ...baseImgStyle,
-            zIndex: 1,
-            // Slight blur smooths the visual jump from low-res to high-res.
-            filter: 'blur(8px)',
-            transform: 'scale(1.05)'
-          }}
-        />
-      ) : null}
-
-      {src ? (
-        <img
-          ref={imgRef}
-          src={src}
-          loading={loading}
-          decoding='async'
-          draggable={false}
-          data-testid={testId}
-          {...accessibilityProps}
-          {...imgProps}
-          onLoad={(e) => {
-            setIsLoaded(true)
-            onLoad?.(e)
-          }}
-          onError={(e) => {
-            setHasError(true)
-            setIsLoaded(true)
-            onError?.(e)
-          }}
-          style={style}
-          css={{
-            ...baseImgStyle,
-            opacity: isLoaded && !hasError ? 1 : 0,
-            transition,
-            zIndex: 2
-          }}
-        />
-      ) : null}
-
-      {children ? (
-        <Box
-          h='100%'
-          w='100%'
-          css={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            zIndex: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          {children}
-        </Box>
-      ) : null}
-    </Box>
-  )
-})
+)

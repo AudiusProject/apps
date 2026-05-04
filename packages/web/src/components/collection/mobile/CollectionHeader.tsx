@@ -17,13 +17,13 @@ import {
   IconPlay,
   IconVisibilityHidden,
   MusicBadge,
-  Text
+  Text,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 import { pick } from 'lodash'
 import { useNavigate } from 'react-router'
 
-import { Image } from '@audius/harmony'
 import { UserLink } from 'components/link'
 import Skeleton from 'components/skeleton/Skeleton'
 import { GatedContentSection } from 'components/track/GatedContentSection'

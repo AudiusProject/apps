@@ -12,12 +12,11 @@ import {
   User
 } from '@audius/common/models'
 import { route, NestedNonNullable } from '@audius/common/utils'
-import { Button, IconUser, Flex } from '@audius/harmony'
+import { Button, IconUser, Flex, Image } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import { Image } from '@audius/harmony'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'

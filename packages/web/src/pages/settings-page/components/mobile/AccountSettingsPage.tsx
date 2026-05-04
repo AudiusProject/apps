@@ -14,13 +14,13 @@ import {
   Flex,
   Text,
   IconComponent,
-  useTheme
+  useTheme,
+  Image
 } from '@audius/harmony'
 import { debounce } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
-import { Image } from '@audius/harmony'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -193,10 +193,7 @@ const AccountSettingsPage = () => {
     >
       <div className={settingsPageStyles.bodyContainer}>
         <div className={styles.account}>
-          <Image
-            src={profilePicture}
-            className={styles.profilePicture}
-          />
+          <Image src={profilePicture} className={styles.profilePicture} />
           <div className={styles.info}>
             <div className={styles.name}>{name}</div>
             <div className={styles.handle}>{`@${handle}`}</div>

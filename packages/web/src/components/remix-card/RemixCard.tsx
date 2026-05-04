@@ -1,7 +1,7 @@
 import { ID, Remix } from '@audius/common/models'
+import { Image } from '@audius/harmony'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import { Image } from '@audius/harmony'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import UserBadges from 'components/user-badges/UserBadges'

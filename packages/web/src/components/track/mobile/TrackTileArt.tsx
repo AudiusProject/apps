@@ -1,9 +1,9 @@
 import { memo } from 'react'
 
 import { SquareSizes, ID, Remix } from '@audius/common/models'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 
-import { Image } from '@audius/harmony'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'

@@ -2,9 +2,8 @@ import { ReactNode } from 'react'
 
 import { useCollection, useTrack } from '@audius/common/api'
 import { SquareSizes, USDCContentPurchaseType } from '@audius/common/models'
-import { Skeleton, Text } from '@audius/harmony'
+import { Skeleton, Text, Image } from '@audius/harmony'
 
-import { Image } from '@audius/harmony'
 import { UserLink } from 'components/link'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'

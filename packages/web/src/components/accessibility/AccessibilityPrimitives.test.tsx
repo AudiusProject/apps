@@ -152,9 +152,7 @@ describe('accessibility primitives', () => {
     })
 
     it('hides decorative images from assistive technology', () => {
-      render(
-        <Image data-testid='dynamic-image' alt='' src='track.jpg' />
-      )
+      render(<Image data-testid='dynamic-image' alt='' src='track.jpg' />)
       const image = screen.getByTestId('dynamic-image')
 
       expect(image).toHaveAttribute('aria-hidden', 'true')

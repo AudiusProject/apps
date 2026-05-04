@@ -1,9 +1,8 @@
 import { useCollection, useTrack } from '@audius/common/api'
 import { SquareSizes, ID } from '@audius/common/models'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, Text, Image } from '@audius/harmony'
 import { pick } from 'lodash'
 
-import { Image } from '@audius/harmony'
 import { UserLink } from 'components/link/UserLink'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'

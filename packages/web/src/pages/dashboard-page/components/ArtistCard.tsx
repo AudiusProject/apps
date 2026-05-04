@@ -35,10 +35,7 @@ export const ArtistCard = ({ userId, handle, name }: ArtistCardProps) => {
         className={cn(styles.coverPhotoWrapper, styles.coverPhoto)}
         css={{ position: 'relative', overflow: 'hidden' }}
       >
-        <Image
-          src={coverPhoto}
-          css={{ position: 'absolute', inset: 0 }}
-        />
+        <Image src={coverPhoto} css={{ position: 'absolute', inset: 0 }} />
         {shouldBlur ? (
           <div
             css={{

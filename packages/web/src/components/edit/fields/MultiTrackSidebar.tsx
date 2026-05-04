@@ -8,13 +8,13 @@ import {
   IconCloudUpload,
   Text,
   useTheme,
-  IconButton
+  IconButton,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useField, useFormikContext } from 'formik'
 import { isEmpty } from 'lodash'
 
-import { Image } from '@audius/harmony'
 import { useIndexedField } from 'components/edit-track/hooks'
 import {
   SingleTrackEditValues,

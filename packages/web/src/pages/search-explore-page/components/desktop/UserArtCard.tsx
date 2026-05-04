@@ -10,11 +10,11 @@ import {
   Name
 } from '@audius/common/models'
 import { formatCount, route } from '@audius/common/utils'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
-import { Image } from '@audius/harmony'
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'

@@ -1,7 +1,7 @@
 import { SquareSizes } from '@audius/common/models'
 import { TrackEntity } from '@audius/common/store'
-
 import { Image } from '@audius/harmony'
+
 import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -28,10 +28,7 @@ export const TrackContent = (props: TrackContentProps) => {
         size={Size.SMALL}
         className={styles.cosign}
       >
-        <Image
-          className={styles.trackContentArtwork}
-          src={image}
-        />
+        <Image className={styles.trackContentArtwork} src={image} />
       </TrackFlair>
       {hideTitle ? null : (
         <span className={styles.trackContentText}>{track.title}</span>

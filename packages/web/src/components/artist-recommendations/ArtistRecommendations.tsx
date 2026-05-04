@@ -4,13 +4,12 @@ import { useRelatedArtistsUsers } from '@audius/common/api'
 import { Name, FollowSource, SquareSizes, ID } from '@audius/common/models'
 import { usersSocialActions as socialActions } from '@audius/common/store'
 import { route } from '@audius/common/utils'
-import { FollowButton, IconButton, IconClose } from '@audius/harmony'
+import { FollowButton, IconButton, IconClose, Image } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import { Image } from '@audius/harmony'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -50,20 +49,12 @@ const ArtistProfilePictureWrapper = ({
 
   const isMobile = useIsMobile()
   if (isMobile) {
-    return (
-      <Image
-        className={styles.profilePicture}
-        src={profilePicture}
-      />
-    )
+    return <Image className={styles.profilePicture} src={profilePicture} />
   }
   return (
     <ArtistPopover handle={handle}>
       <div>
-        <Image
-          className={styles.profilePicture}
-          src={profilePicture}
-        />
+        <Image className={styles.profilePicture} src={profilePicture} />
       </div>
     </ArtistPopover>
   )

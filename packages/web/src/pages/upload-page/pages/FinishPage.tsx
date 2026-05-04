@@ -23,13 +23,13 @@ import {
   PlainButton,
   ProgressBar,
   Box,
-  Flex
+  Flex,
+  Image
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
-import { Image } from '@audius/harmony'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { Tile } from 'components/tile'
 
