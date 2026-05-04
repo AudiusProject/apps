@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   useFollowEvent: vi.fn(),
   useUnfollowEvent: vi.fn(),
   useRemixesLineup: vi.fn(),
+  useRemixes: vi.fn(),
   useRemixersCount: vi.fn(),
   useComment: vi.fn(),
   useEventComments: vi.fn(),
@@ -43,6 +44,7 @@ vi.mock('@audius/common/api', async (importOriginal) => {
     useFollowEvent: mocks.useFollowEvent,
     useUnfollowEvent: mocks.useUnfollowEvent,
     useRemixesLineup: mocks.useRemixesLineup,
+    useRemixes: mocks.useRemixes,
     useRemixersCount: mocks.useRemixersCount,
     useComment: mocks.useComment,
     useEventComments: mocks.useEventComments,
@@ -91,7 +93,7 @@ const contest = {
   endDate: '2099-12-31T23:59:00Z',
   eventData: {
     description: 'Remix my track',
-    prizeInfo: '',
+    prizeInfo: 'Cash prizes for the top three!',
     winners: []
   }
 }
@@ -101,10 +103,10 @@ const renderContestPage = (opts?: {
 }) => {
   const containerRef = createRef<HTMLDivElement>()
   return render(
-    <MemoryRouter initialEntries={['/Protohype/ready-to-love/contest']}>
+    <MemoryRouter initialEntries={['/Protohype/contest/ready-to-love']}>
       <Routes>
         <Route
-          path='/:handle/:slug/contest'
+          path='/:handle/contest/:slug'
           element={
             <ContestPage
               containerRef={containerRef as RefObject<HTMLDivElement>}
@@ -157,6 +159,9 @@ describe('ContestPage', () => {
       lineup: { entries: [], order: {} }
     })
     mocks.useRemixersCount.mockReturnValue({ data: 0 })
+    mocks.useRemixes.mockReturnValue({
+      data: { pages: [{ count: 0 }] }
+    })
     mocks.useEventComments.mockReturnValue({
       data: [],
       isPending: false,
@@ -211,6 +216,12 @@ describe('ContestPage', () => {
       loadNextPage: vi.fn(),
       isPlaying: false,
       lineup: { entries: [], order: {} }
+    })
+    // Submissions pill reads from the count-only API query, not the
+    // lineup length — so the test needs a non-zero count for the pill
+    // to render.
+    mocks.useRemixes.mockReturnValue({
+      data: { pages: [{ count: 1 }] }
     })
     renderContestPage()
 

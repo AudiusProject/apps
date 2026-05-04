@@ -19,7 +19,6 @@ import {
 } from '@audius/common/store'
 import type { PlaybackTrack, CommonState } from '@audius/common/store'
 import {
-  Genre,
   removeNullable,
   getTrackPreviewDuration,
   isLongFormContent,
@@ -376,9 +375,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
   // --- appendToQueue: add new tracks to end ---
   const appendToQueue = useCallback(
     async (newTracks: QueueableTrack[]) => {
-      const resolved = await Promise.all(
-        newTracks.map((t) => makeTrackData(t))
-      )
+      const resolved = await Promise.all(newTracks.map((t) => makeTrackData(t)))
       await TrackPlayer.add(resolved)
     },
     [makeTrackData]
@@ -738,7 +735,6 @@ const usePlaybackControls = (
   queueIdxChangeJobRef: React.MutableRefObject<Promise<void> | undefined>,
   setSeekPosition: (seekPos?: number) => Promise<void>
 ) => {
-  const dispatch = useDispatch()
   const playing = useSelector(getPlaying)
   const seek = useSelector(getSeek)
   const counter = useSelector(getCounter)

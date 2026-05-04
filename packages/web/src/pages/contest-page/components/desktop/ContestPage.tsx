@@ -6,6 +6,7 @@ import {
   useEventFollowState,
   useFollowEvent,
   useRemixContest,
+  useRemixes,
   useRemixesLineup,
   useStems,
   useTrack,
@@ -223,8 +224,8 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
-  const { mutate: followEvent, isPending: isFollowing } = useFollowEvent()
-  const { mutate: unfollowEvent, isPending: isUnfollowing } = useUnfollowEvent()
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
   // Drives the Following → Unfollow label swap on hover for the contest
   // follow button. Local state keeps the parity with FollowButton's old
   // behavior without bringing back the size mismatch.
@@ -333,16 +334,18 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
   }, [contest?.endDate])
 
-  // Total lineup length includes the original + winners + remixes.
-  // The Submissions tab pill should show the number of *actual*
-  // submissions (remixes), not the whole lineup. Subtract one for
-  // the original (always included when `includeOriginal: true`) and
-  // the number of winners from the contest event data.
-  const lineupLength = lineupTrackIds.length
+  // Submissions count comes from the API total (count-only query) so
+  // the SelectablePill matches the contest card on the explore grid.
+  // Previously this was derived from `lineupTrackIds.length`, which
+  // only reflects what infinite-scroll has loaded — the count crept
+  // up as the user scrolled rather than reading as a stable total.
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const submissionsCount = lineup.isPending
-    ? undefined
-    : Math.max(0, lineupLength - 1 - winnerCount)
+  const { data: remixesCountData } = useRemixes(
+    { trackId: trackId ?? 0, pageSize: 0, isContestEntry: true },
+    { enabled: !!trackId, staleTime: 60_000 }
+  )
+  const submissionsCount: number | undefined =
+    remixesCountData?.pages?.[0]?.count
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {
@@ -424,10 +427,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           size='small'
           variant={isFollowed ? 'primary' : 'secondary'}
           iconLeft={followIcon}
-          disabled={isFollowing || isUnfollowing}
           onClick={handleToggleFollow}
           onMouseEnter={() => setIsFollowHovering(true)}
           onMouseLeave={() => setIsFollowHovering(false)}
+          css={{ width: 112, justifyContent: 'center' }}
         >
           {followLabel}
         </Button>
@@ -444,8 +447,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     isEnded,
     followState?.isFollowed,
     isFollowHovering,
-    isFollowing,
-    isUnfollowing,
     handleToggleFollow,
     handleEditContest,
     handlePickWinners,
@@ -779,37 +780,39 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                   <VideoEmbed url={(contest.eventData as any)?.videoUrl} />
                 </Paper>
 
-                <Paper
-                  direction='column'
-                  p='xl'
-                  gap='l'
-                  borderRadius='l'
-                  border='default'
-                  backgroundColor='white'
-                  shadow='flat'
-                >
-                  <Text variant='label' size='m' color='subdued'>
-                    {messages.prizes}
-                  </Text>
-                  {/* Inline prize info — avoids the `p='xl'` the
-                    track-page `RemixContestPrizesTab` adds, which
-                    double-padded this card. */}
-                  <UserGeneratedText variant='body'>
-                    {(contest.eventData as any)?.prizeInfo ?? ''}
-                  </UserGeneratedText>
-                </Paper>
+                {(contest.eventData as any)?.prizeInfo?.trim() ? (
+                  <Paper
+                    direction='column'
+                    p='xl'
+                    gap='l'
+                    borderRadius='l'
+                    border='default'
+                    backgroundColor='white'
+                    shadow='flat'
+                  >
+                    <Text variant='label' size='m' color='subdued'>
+                      {messages.prizes}
+                    </Text>
+                    {/* Inline prize info — avoids the `p='xl'` the
+                      track-page `RemixContestPrizesTab` adds, which
+                      double-padded this card. */}
+                    <UserGeneratedText variant='body'>
+                      {(contest.eventData as any).prizeInfo}
+                    </UserGeneratedText>
+                  </Paper>
+                ) : null}
 
                 {/* Updates feed — host-authored top-level posts. Compose
                   affordance lives above the About card via
-                  `PostUpdateComposer`; this tile is feed-only. Empty
-                  state ("Nothing here yet …") still renders so the
-                  section reads as a deliberate part of the page rather
-                  than disappearing for new contests. */}
+                  `PostUpdateComposer`; this tile is feed-only. The
+                  empty card hides for non-hosts so a brand-new contest
+                  doesn't render an empty section under Prizes. */}
                 <ContestCommentsTile
                   eventId={eventId}
                   eventOwnerUserId={contest?.userId}
                   mode='updates'
                   hideComposer
+                  hideWhenEmpty
                 />
               </Flex>
 

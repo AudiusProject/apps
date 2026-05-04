@@ -48,6 +48,7 @@ import { UserLink } from 'app/components/user-link'
 const messages = {
   heading: 'STEMS & DOWNLOADS',
   publicFree: 'Public Free',
+  download: 'Download',
   downloadAll: 'Download All',
   stemsCount: (n: number) => (n === 1 ? '1 Stem' : `${n} Stems`),
   fullTrack: 'Full Track',
@@ -172,7 +173,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           </View>
           <Flex direction='column' gap='2xs' flex={1}>
             <Text variant='title' size='s'>
-              {messages.publicFree}
+              {track.title}
             </Text>
             <UserLink userId={artist.user_id} size='s' />
           </Flex>
@@ -227,7 +228,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           <Pressable onPress={handleDownloadAll}>
             <Flex direction='row' gap='xs' alignItems='center'>
               <Text variant='label' size='s' strength='strong'>
-                {messages.downloadAll}
+                {stemsCount > 0 ? messages.downloadAll : messages.download}
               </Text>
               <IconReceive size='s' color='default' />
             </Flex>

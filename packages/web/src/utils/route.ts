@@ -62,10 +62,13 @@ export const fullPickWinnersPage = (permalink: string) => {
 }
 
 export const contestPage = (permalink: string) => {
-  return `${permalink}/contest`
+  // Permalink shape: `/{handle}/{slug}`. Contest URL injects the literal
+  // "contest" segment between handle and slug → `/{handle}/contest/{slug}`.
+  const [, handle, ...rest] = permalink.split('/')
+  return `/${handle}/contest/${rest.join('/')}`
 }
 export const fullContestPage = (permalink: string) => {
-  return `${fullTrackPage(permalink)}/contest`
+  return `${BASE_URL}${contestPage(permalink)}`
 }
 
 export const hostRemixContestPage = (permalink: string) => {

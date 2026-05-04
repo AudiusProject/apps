@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux'
 
 import { TextLink } from 'components/link/TextLink'
 import { push } from 'utils/navigation'
+import { contestPage } from 'utils/route'
 
 import { NotificationBody } from './components/NotificationBody'
 import { NotificationFooter } from './components/NotificationFooter'
@@ -59,7 +60,7 @@ export const FanRemixContestSubmissionNotification = (
             css={{ display: 'inline' }}
             variant='secondary'
             size='l'
-            to={`${contestTrack.permalink}/contest`}
+            to={contestPage(contestTrack.permalink)}
           >
             {contestTrack.title}
           </TextLink>
