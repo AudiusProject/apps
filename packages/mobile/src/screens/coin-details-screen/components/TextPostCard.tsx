@@ -172,7 +172,7 @@ export const TextPostCard = ({ commentId, mint }: TextPostCardProps) => {
             >
               <WebView
                 source={{
-                  html: `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{margin:0;padding:0}iframe{width:100%;height:100%;border:none}</style></head><body><iframe src="${videoEmbedUrl}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></body></html>`,
+                  html: `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;background:transparent}iframe{width:100%;height:100%;border:0;display:block}</style></head><body><iframe src="${videoEmbedUrl}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></body></html>`,
                   baseUrl: 'https://audius.co'
                 }}
                 style={{ flex: 1 }}
