@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 import { useTrack, useUser } from '@audius/common/api'
 import { DownloadQuality } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   useWaitForDownloadModal,
   tracksSocialActions,
@@ -18,6 +19,7 @@ import {
   TextLink,
   ModalTitle
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -36,12 +38,10 @@ const messages = {
   tryAgain: 'Try again.'
 }
 
-export const WaitForDownloadModal = () => {
+export const WaitForDownloadModal = NiceModal.create(() => {
   const isMobile = useIsMobile()
+  const modal = useModal()
   const {
-    isOpen,
-    onClose,
-    onClosed,
     data: { parentTrackId, trackIds, quality }
   } = useWaitForDownloadModal()
   const dispatch = useDispatch()
@@ -50,10 +50,13 @@ export const WaitForDownloadModal = () => {
 
   const downloadError = useSelector(getDownloadError)
 
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+
   const handleClosed = useCallback(() => {
     dispatch(tracksSocialActions.cancelDownloads())
-    onClosed()
-  }, [onClosed, dispatch])
+  }, [dispatch])
 
   const performDownload = useCallback(() => {
     dispatch(
@@ -83,8 +86,8 @@ export const WaitForDownloadModal = () => {
 
   return (
     <ModalDrawer
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={modal.visible}
+      onClose={handleClose}
       onClosed={handleClosed}
       bodyClassName={styles.modal}
       isFullscreen
@@ -92,7 +95,7 @@ export const WaitForDownloadModal = () => {
       wrapperClassName={isMobile ? styles.mobileWrapper : undefined}
     >
       <ModalHeader
-        onClose={onClose}
+        onClose={handleClose}
         showDismissButton={!isMobile}
         className={cn(styles.modalHeader, { [styles.mobile]: isMobile })}
       >
@@ -119,4 +122,7 @@ export const WaitForDownloadModal = () => {
       </Flex>
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('WaitForDownloadModal', WaitForDownloadModal)
+registerNiceModalId('WaitForDownloadModal')

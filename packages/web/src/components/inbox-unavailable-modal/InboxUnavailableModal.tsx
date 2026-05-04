@@ -2,6 +2,7 @@ import { ReactNode, useCallback } from 'react'
 
 import { useCurrentUserId, useUser } from '@audius/common/api'
 import { FollowSource, User } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   chatActions,
   chatSelectors,
@@ -22,6 +23,7 @@ import {
   ModalContentText
 } from '@audius/harmony'
 import { Action } from '@reduxjs/toolkit'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
 import { UserLink } from 'components/link/UserLink'
@@ -86,8 +88,9 @@ const actionToContent = ({
   }
 }
 
-export const InboxUnavailableModal = () => {
-  const { isOpen, onClose, onClosed, data } = useInboxUnavailableModal()
+export const InboxUnavailableModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useInboxUnavailableModal()
   const { userId, presetMessage, onSuccessAction, onCancelAction } = data
   const { data: user } = useUser(userId)
   const dispatch = useDispatch()
@@ -96,6 +99,10 @@ export const InboxUnavailableModal = () => {
   const hasAction =
     callToAction === ChatPermissionAction.FOLLOW ||
     callToAction === ChatPermissionAction.UNBLOCK
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
 
   const handleClick = useCallback(() => {
     if (!userId) {
@@ -130,12 +137,12 @@ export const InboxUnavailableModal = () => {
     } else {
       window.open(CHAT_BLOG_POST_URL, '_blank')
     }
-    onClose()
+    handleClose()
   }, [
     userId,
     callToAction,
     currentUserId,
-    onClose,
+    handleClose,
     presetMessage,
     onSuccessAction,
     dispatch
@@ -145,17 +152,17 @@ export const InboxUnavailableModal = () => {
     if (onCancelAction) {
       dispatch(onCancelAction)
     }
-    onClose()
-  }, [dispatch, onCancelAction, onClose])
+    handleClose()
+  }, [dispatch, onCancelAction, handleClose])
 
   const { content, buttonText, buttonIcon } = actionToContent({
     action: callToAction,
     user,
-    onClose
+    onClose: handleClose
   })
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onClosed={onClosed} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader onClose={handleCancel}>
         <ModalTitle icon={<IconMessageLocked />} title={messages.title} />
       </ModalHeader>
@@ -174,4 +181,7 @@ export const InboxUnavailableModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('InboxUnavailableModal', InboxUnavailableModal)
+registerNiceModalId('InboxUnavailableModal')

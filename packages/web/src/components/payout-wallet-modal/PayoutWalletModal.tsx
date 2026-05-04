@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
 import { SolanaWalletAddress } from '@audius/common/models'
-import { MEMO_PROGRAM_ID } from '@audius/common/services'
+import { MEMO_PROGRAM_ID, registerNiceModalId } from '@audius/common/services'
 import { isValidSolAddress, profilePageActions } from '@audius/common/store'
 import {
   Button,
@@ -19,6 +19,7 @@ import {
   RadioGroup,
   Text
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import {
   TOKEN_PROGRAM_ID,
   TokenAccountNotFoundError,
@@ -38,7 +39,6 @@ import { useAsync } from 'react-use'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { useModalState } from 'common/hooks/useModalState'
 import { TextField } from 'components/form-fields'
 import { ModalForm } from 'components/modal-form/ModalForm'
 import { audiusSdk } from 'services/audius-sdk'
@@ -174,15 +174,15 @@ const PayoutWalletModalForm = ({
 
 const SET_PAYOUT_WALLET_MEMO_STRING = 'Payout Wallet'
 
-export const PayoutWalletModal = () => {
-  const [isOpen, setIsOpen] = useModalState('PayoutWallet')
+export const PayoutWalletModal = NiceModal.create(() => {
+  const modal = useModal()
   const { data: user } = useCurrentAccountUser()
   const dispatch = useDispatch()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleClose = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+    modal.hide()
+  }, [modal])
 
   const handleSubmit = useCallback(
     async (
@@ -307,7 +307,7 @@ export const PayoutWalletModal = () => {
         }
         dispatch(profilePageActions.updateProfile(updatedUser))
 
-        setIsOpen(false)
+        modal.hide()
       } catch (e) {
         setErrors({ address: 'Please try again later' })
         await reportToSentry({
@@ -317,7 +317,7 @@ export const PayoutWalletModal = () => {
       }
       setIsSubmitting(false)
     },
-    [dispatch, user, setIsOpen]
+    [dispatch, user, modal]
   )
 
   const { value: payoutWallet } = useAsync(async () => {
@@ -338,7 +338,7 @@ export const PayoutWalletModal = () => {
     : { option: 'default' }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader onClose={handleClose}>
         <ModalTitle title={messages.title} icon={<IconMoneyBracket />} />
       </ModalHeader>
@@ -355,4 +355,7 @@ export const PayoutWalletModal = () => {
       </Formik>
     </Modal>
   )
-}
+})
+
+NiceModal.register('PayoutWallet', PayoutWalletModal)
+registerNiceModalId('PayoutWallet')

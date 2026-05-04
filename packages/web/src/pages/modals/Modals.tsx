@@ -6,33 +6,26 @@ import { CoinSuccessModal } from 'components/CoinSuccessModal'
 import { AddCashModal } from 'components/add-cash-modal/AddCashModal'
 import AddToCollectionModal from 'components/add-to-collection/desktop/AddToCollectionModal'
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
-import { ArtistPickModal } from 'components/artist-pick-modal/ArtistPickModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
 import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
-import { DownloadTrackArchiveModal } from 'components/download-track-archive-modal/DownloadTrackArchiveModal'
 import EmbedModal from 'components/embed-modal/EmbedModal'
 import { FeatureFlagOverrideModal } from 'components/feature-flag-override-modal'
 import FirstUploadModal from 'components/first-upload-modal/FirstUploadModal'
 import { HostRemixContestModal } from 'components/host-remix-contest-modal/HostRemixContestModal'
-import { InboxUnavailableModal } from 'components/inbox-unavailable-modal/InboxUnavailableModal'
-import { LockedContentModal } from 'components/locked-content-modal/LockedContentModal'
 import { PasswordResetModal } from 'components/password-reset/PasswordResetModal'
-import { PayoutWalletModal } from 'components/payout-wallet-modal/PayoutWalletModal'
 import { PremiumContentPurchaseModal } from 'components/premium-content-purchase-modal/PremiumContentPurchaseModal'
 import { ReceiveTokensModal } from 'components/receive-tokens-modal'
 import { ClaimAllRewardsModal } from 'components/rewards/modals/ClaimAllRewardsModal'
 import TopAPIModal from 'components/rewards/modals/TopAPI'
 import { SendTokensModal } from 'components/send-tokens-modal'
 import ConnectedMobileOverflowModal from 'components/track-overflow-modal/ConnectedMobileOverflowModal'
-import { TransactionDetailsModal } from 'components/transaction-details-modal'
 import UnfollowConfirmationModal from 'components/unfollow-confirmation-modal/UnfollowConfirmationModal'
 import { UnsavedChangesDialog } from 'components/unsaved-changes-dialog/UnsavedChangesDialog'
 import { USDCPurchaseDetailsModal } from 'components/usdc-purchase-details-modal/USDCPurchaseDetailsModal'
 import { USDCTransactionDetailsModal } from 'components/usdc-transaction-details-modal/USDCTransactionDetailsModal'
 import { UserListModal } from 'components/user-list-modal/UserListModal'
-import { WaitForDownloadModal } from 'components/wait-for-download-modal/WaitForDownloadModal'
 import { WithdrawUSDCModal } from 'components/withdraw-usdc-modal/WithdrawUSDCModal'
 import { CoinflowWithdrawModal } from 'components/withdraw-usdc-modal/components/CoinflowWithdrawModal'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -63,10 +56,8 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   AddToCollection: AddToCollectionModal,
   HostRemixContest: HostRemixContestModal,
   AudioBreakdown: AudioBreakdownModal,
-  TransactionDetails: TransactionDetailsModal,
   InboxSettings: InboxSettingsModal,
   CommentSettings: CommentSettingsModal,
-  LockedContent: LockedContentModal,
   APIRewardsExplainer: TopAPIModal,
   ChallengeRewards: ChallengeRewardsModal,
   ClaimAllRewards: ClaimAllRewardsModal,
@@ -76,7 +67,6 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   PremiumContentPurchaseModal,
   CreateChatModal,
   ChatBlastModal,
-  InboxUnavailableModal,
   WithdrawUSDCModal,
   CoinflowOnramp: CoinflowOnrampModal,
   StripeOnRamp: StripeOnRampModal,
@@ -84,11 +74,7 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   USDCTransactionDetailsModal,
   AddCashModal,
   CoinflowWithdraw: CoinflowWithdrawModal,
-  WaitForDownloadModal,
-  ArtistPick: ArtistPickModal,
-  PayoutWallet: PayoutWalletModal,
   ConnectedWallets: ConnectedWalletsModal,
-  DownloadTrackArchive: DownloadTrackArchiveModal,
   BuySellModal,
   ReceiveTokensModal,
   SendTokensModal
