@@ -18,6 +18,7 @@ import {
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '~/models/Track'
+import { createUserBankIfNeeded } from '~/services/audius-backend'
 import { CommonState } from '~/store/commonStore'
 import { stemsUploadSelectors } from '~/store/stems-upload'
 import { replaceTrackProgressModalActions } from '~/store/ui/modals/replace-track-progress-modal'
@@ -29,6 +30,7 @@ import { formatMusicalKey } from '~/utils/musicalKeys'
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
 import { addPremiumMetadata } from '../upload/usePublishTracks'
+import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { getUserQueryKey } from '../users/useUser'
 import { handleStemUpdates } from '../utils/handleStemUpdates'
@@ -107,6 +109,7 @@ export const useUpdateTrack = () => {
   const store = useStore()
   const { mutate: deleteTrack } = useDeleteTrack()
   const { data: userId } = useCurrentUserId()
+  const { data: accountUser } = useCurrentAccountUser()
 
   return useMutation({
     mutationFn: async ({
@@ -133,6 +136,26 @@ export const useUpdateTrack = () => {
         metadata as TrackMetadataForUpload
       )
       const sdkMetadata = trackMetadataForUploadToSdk(metadataWithSplits)
+
+      const ethAddress = accountUser?.wallet
+      if (
+        ethAddress &&
+        (isContentUSDCPurchaseGated(metadataWithSplits.stream_conditions) ||
+          isContentUSDCPurchaseGated(metadataWithSplits.download_conditions))
+      ) {
+        createUserBankIfNeeded(sdk, {
+          mint: 'USDC',
+          ethAddress,
+          recordAnalytics: analytics.track
+        }).catch((error) => {
+          reportToSentry({
+            error,
+            additionalInfo: { trackId, userId, ethAddress },
+            feature: Feature.Edit,
+            name: 'Ensure USDC userbank on track edit'
+          })
+        })
+      }
 
       const response = await sdk.tracks.updateTrack({
         audioFile,
