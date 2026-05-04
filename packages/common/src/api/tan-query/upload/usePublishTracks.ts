@@ -8,6 +8,7 @@ import {
   Name,
   Feature
 } from '~/models'
+import { createUserBankIfNeeded } from '~/services/audius-backend'
 import { ProgressStatus, uploadActions } from '~/store'
 import type { TrackMetadataForUpload } from '~/store'
 
@@ -28,6 +29,7 @@ type PublishTracksContext = Pick<
   'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
 > & {
   userId: number
+  ethAddress?: string | null
   kind?: 'tracks' | 'album' | 'playlist'
 }
 
@@ -45,6 +47,7 @@ export const publishTracks = async (
 ) => {
   const {
     userId,
+    ethAddress,
     kind,
     audiusSdk,
     dispatch,
@@ -57,6 +60,23 @@ export const publishTracks = async (
   }
 
   const sdk = await audiusSdk()
+
+  if (
+    ethAddress &&
+    params.some(
+      (p) =>
+        isContentUSDCPurchaseGated(p.metadata.stream_conditions) ||
+        isContentUSDCPurchaseGated(p.metadata.download_conditions)
+    )
+  ) {
+    createUserBankIfNeeded(sdk, {
+      mint: 'USDC',
+      ethAddress,
+      recordAnalytics: track
+    }).catch((err) => {
+      console.warn('Failed to ensure USDC userbank during track upload', err)
+    })
+  }
 
   return await Promise.all(
     params.map(async (param) => {
@@ -189,6 +209,7 @@ export const usePublishTracks = (
     ...getPublishTracksOptions({
       ...queryContext,
       userId: userId!,
+      ethAddress: accountUser?.wallet,
       kind
     }),
     onSuccess: async (data) => {
