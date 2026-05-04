@@ -14,8 +14,6 @@ import FirstUploadModal from 'components/first-upload-modal/FirstUploadModal'
 import { HostRemixContestModal } from 'components/host-remix-contest-modal/HostRemixContestModal'
 import { PasswordResetModal } from 'components/password-reset/PasswordResetModal'
 import { PremiumContentPurchaseModal } from 'components/premium-content-purchase-modal/PremiumContentPurchaseModal'
-import { ClaimAllRewardsModal } from 'components/rewards/modals/ClaimAllRewardsModal'
-import TopAPIModal from 'components/rewards/modals/TopAPI'
 import { SendTokensModal } from 'components/send-tokens-modal'
 import ConnectedMobileOverflowModal from 'components/track-overflow-modal/ConnectedMobileOverflowModal'
 import UnfollowConfirmationModal from 'components/unfollow-confirmation-modal/UnfollowConfirmationModal'
@@ -48,9 +46,7 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   HostRemixContest: HostRemixContestModal,
   InboxSettings: InboxSettingsModal,
   CommentSettings: CommentSettingsModal,
-  APIRewardsExplainer: TopAPIModal,
   ChallengeRewards: ChallengeRewardsModal,
-  ClaimAllRewards: ClaimAllRewardsModal,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
   BrowserPushPermissionConfirmation: BrowserPushConfirmationModal,
   PremiumContentPurchaseModal,
