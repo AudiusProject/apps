@@ -67,7 +67,10 @@ const DeletePlaylistConfirmationModal = NiceModal.create(() => {
   )
 })
 
-NiceModal.register('DeletePlaylistConfirmation', DeletePlaylistConfirmationModal)
+NiceModal.register(
+  'DeletePlaylistConfirmation',
+  DeletePlaylistConfirmationModal
+)
 registerNiceModalId('DeletePlaylistConfirmation')
 
 export default DeletePlaylistConfirmationModal

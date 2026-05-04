@@ -1,3 +1,5 @@
+import { useCallback } from 'react'
+
 import {
   useArtistCreatedFanClub,
   useCurrentAccountUser,
@@ -9,14 +11,8 @@ import {
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import { useCallback } from 'react'
-
 import { registerNiceModalId } from '@audius/common/services'
-import {
-  useChatBlastModal,
-  chatActions,
-  useCreateChatModal
-} from '@audius/common/src/store'
+import { chatActions, useCreateChatModal } from '@audius/common/src/store'
 import { formatNumberCommas } from '@audius/common/utils'
 import {
   Flex,

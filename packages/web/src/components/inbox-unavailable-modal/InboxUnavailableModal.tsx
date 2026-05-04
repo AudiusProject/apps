@@ -22,8 +22,8 @@ import {
   Button,
   ModalContentText
 } from '@audius/harmony'
-import { Action } from '@reduxjs/toolkit'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
+import { Action } from '@reduxjs/toolkit'
 import { useDispatch } from 'react-redux'
 
 import { UserLink } from 'components/link/UserLink'
