@@ -4,7 +4,9 @@ import {
   queryUser,
   updateCollectionData,
   selectIsGuestAccount,
-  getUserQueryKey
+  getUserQueryKey,
+  removePlaylistFromLibrarySaga,
+  persistAccountPlaylistLibrarySaga
 } from '@audius/common/api'
 import { Name, Kind, ID, User } from '@audius/common/models'
 import {
@@ -29,7 +31,6 @@ import { call, takeEvery, put } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
 import * as signOnActions from 'common/store/pages/signon/actions'
-import { removePlaylistFromLibrary } from 'common/store/playlist-library/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import watchCollectionErrors from './errorSagas'
@@ -359,6 +360,7 @@ export function* saveCollectionAsync(
       permalink: collection.permalink || ''
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 
   yield* put(
     addLocalCollection({
@@ -461,7 +463,7 @@ export function* unsaveCollectionAsync(
     accountActions.removeAccountPlaylist({ collectionId: action.collectionId })
   )
 
-  yield* call(removePlaylistFromLibrary, action.collectionId)
+  yield* call(removePlaylistFromLibrarySaga, action.collectionId)
   yield* call(updateCollectionData, [
     {
       playlist_id: action.collectionId,

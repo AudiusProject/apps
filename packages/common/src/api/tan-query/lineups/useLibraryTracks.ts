@@ -78,7 +78,7 @@ export const useLibraryTracks = (
   const queryData = useInfiniteQuery({
     queryKey,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!currentUserId) return []
+      if (!currentUserId) return [] as LineupData[]
       const sdk = await audiusSdk()
       const response = await sdk.users.getUserLibraryTracks({
         id: Id.parse(currentUserId),
@@ -91,16 +91,24 @@ export const useLibraryTracks = (
       })
 
       const data = response.data ?? []
-      const tracks = data
-        .map((activity) => userTrackMetadataFromSDK(activity.item))
+      const entries = data
+        .map((activity) => {
+          const track = userTrackMetadataFromSDK(activity.item)
+          if (!track) return null
+          return { track, timestamp: activity.timestamp }
+        })
         .filter(removeNullable)
 
-      primeTrackData({ tracks, queryClient })
+      primeTrackData({
+        tracks: entries.map((e) => e.track),
+        queryClient
+      })
 
-      return tracks.map((t) => ({
-        id: t.track_id,
-        type: EntityType.TRACK
-      }))
+      return entries.map((e) => ({
+        id: e.track.track_id,
+        type: EntityType.TRACK,
+        timestamp: e.timestamp
+      })) as LineupData[]
     },
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
@@ -124,6 +132,7 @@ export const useLibraryTracks = (
     isPending: queryData.isPending,
     isLoading: queryData.isLoading,
     isFetching: queryData.isFetching,
+    isFetchingNextPage: queryData.isFetchingNextPage,
     isSuccess: queryData.isSuccess,
     isError: queryData.isError,
     isInitialLoading: queryData.isInitialLoading,

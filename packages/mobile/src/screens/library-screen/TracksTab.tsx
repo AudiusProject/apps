@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
-import { useTracks, useUsers } from '@audius/common/api'
+import { useLibraryTracks, useTracks, useUsers } from '@audius/common/api'
 import { Kind, Status } from '@audius/common/models'
 import type { ID, UID, Track, User } from '@audius/common/models'
 import {
-  libraryPageActions,
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
@@ -13,7 +12,7 @@ import {
   reachabilitySelectors
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid, Uid, type Nullable } from '@audius/common/utils'
+import { makeStableUid, type Nullable } from '@audius/common/utils'
 import { debounce } from 'lodash'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -28,14 +27,7 @@ import { makeStyles } from 'app/styles'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 
-const { fetchSaves: fetchSavesAction, fetchMoreSaves } = libraryPageActions
-const {
-  getTrackSaves,
-  getLibraryTracksStatus,
-  getSelectedCategoryLocalTrackAdds,
-  getIsFetchingMore,
-  getCategory
-} = libraryPageSelectors
+const { getSelectedCategoryLocalTrackAdds, getCategory } = libraryPageSelectors
 const { getIsReachable } = reachabilitySelectors
 
 const messages = {
@@ -70,12 +62,9 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 }))
 
 const FETCH_LIMIT = 50
+const FILTER_DEBOUNCE_MS = 250
 
-function useTracksWithUsers(trackUids: string[]) {
-  const trackIds = useMemo(
-    () => trackUids.map((uid) => Uid.fromString(uid).id as ID),
-    [trackUids]
-  )
+function useTracksWithUsers(trackIds: ID[]) {
   const { data: tracks = [], byId: tracksById } = useTracks(trackIds)
   const ownerIds = useMemo(
     () => tracks.map((track) => track.owner_id),
@@ -85,12 +74,16 @@ function useTracksWithUsers(trackUids: string[]) {
 
   return useMemo(
     () =>
-      trackUids.map((uid) => {
-        const track = tracksById[Uid.fromString(uid).id]
+      trackIds.map((id) => {
+        const track = tracksById[id]
         const user = usersById[track?.owner_id]
-        return { uid, track, user }
+        return {
+          uid: makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS'),
+          track,
+          user
+        }
       }),
-    [trackUids, tracksById, usersById]
+    [trackIds, tracksById, usersById]
   )
 }
 
@@ -100,55 +93,62 @@ export const TracksTab = () => {
   const isReachable = useSelector(getIsReachable)
 
   const [filterValue, setFilterValue] = useState('')
-  const [fetchPage, setFetchPage] = useState(0)
+  const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
   const selectedCategory = useSelector((state) =>
     getCategory(state, { currentTab: LibraryPageTabs.TRACKS })
   )
-  const savedTracksStatus = useSelector((state) => {
-    const onlineSavedTracksStatus = getLibraryTracksStatus(state)
-    const isDoneLoadingFromDisk = getIsDoneLoadingFromDisk(state)
-    const offlineSavedTracksStatus = isDoneLoadingFromDisk
-      ? Status.SUCCESS
-      : Status.LOADING
-    return isReachable ? onlineSavedTracksStatus : offlineSavedTracksStatus
+
+  const {
+    trackIds: fetchedTrackIds,
+    isPending: isLibraryQueryPending,
+    isFetchingNextPage,
+    isError: isLibraryQueryError,
+    hasNextPage,
+    fetchNextPage
+  } = useLibraryTracks({
+    category: selectedCategory,
+    query: debouncedFilterValue,
+    pageSize: FETCH_LIMIT
   })
 
-  const isFetchingMore = useSelector(getIsFetchingMore)
-  const saves = useSelector(getTrackSaves)
+  const isDoneLoadingFromDisk = useSelector(getIsDoneLoadingFromDisk)
+  const savedTracksStatus = isReachable
+    ? isLibraryQueryError
+      ? Status.ERROR
+      : isLibraryQueryPending
+        ? Status.LOADING
+        : Status.SUCCESS
+    : isDoneLoadingFromDisk
+      ? Status.SUCCESS
+      : Status.LOADING
+
+  const isFetchingMore = isFetchingNextPage
   const localAdditions = useSelector(getSelectedCategoryLocalTrackAdds)
 
   const saveCount = useMemo(
-    () => saves.length + Object.keys(localAdditions).length,
-    [saves, localAdditions]
+    () => fetchedTrackIds.length + Object.keys(localAdditions).length,
+    [fetchedTrackIds, localAdditions]
   )
   const trackSkeletonRowCount = useMemo(
     () => (saveCount > 0 ? Math.min(saveCount, 10) : 10),
     [saveCount]
   )
 
-  const fetchSaves = useCallback(() => {
-    dispatch(
-      fetchSavesAction(filterValue, selectedCategory, '', '', 0, FETCH_LIMIT)
-    )
-  }, [dispatch, filterValue, selectedCategory])
-
-  // Fetch saves on mount / when category or filter changes (previously
-  // handled by useFavoritesLineup via reachability effect).
-  useEffect(() => {
-    fetchSaves()
-  }, [fetchSaves])
-
   const lineupStatus = savedTracksStatus
 
-  // Build UIDs from the save list directly (no more legacy lineup state).
-  const trackUids = useMemo(() => {
+  // Combine server-fetched ids with locally-added ones (optimistic favorites
+  // / reposts / purchases that haven't yet been included in the server page).
+  const trackIds = useMemo(() => {
     const ids = new Set<ID>()
-    saves.forEach((s: any) => ids.add(s.save_item_id))
+    fetchedTrackIds.forEach((id) => ids.add(id))
     Object.keys(localAdditions).forEach((id) => ids.add(Number(id)))
-    return Array.from(ids).map((id) =>
-      makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS')
-    )
-  }, [saves, localAdditions])
+    return Array.from(ids)
+  }, [fetchedTrackIds, localAdditions])
+
+  const trackUids = useMemo(
+    () => trackIds.map((id) => makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS')),
+    [trackIds]
+  )
 
   const filterTrack = useCallback(
     (track: Nullable<Track>, user: Nullable<User>) => {
@@ -165,7 +165,7 @@ export const TracksTab = () => {
     [filterValue]
   )
 
-  const trackData = useTracksWithUsers(trackUids)
+  const trackData = useTracksWithUsers(trackIds)
   const isLoadingTracks = trackData.some(({ track, user }) => !track || !user)
 
   let emptyTabText: string
@@ -179,41 +179,36 @@ export const TracksTab = () => {
     emptyTabText = messages.emptyTracksPurchasedText
   }
 
-  const filteredTrackUids = useMemo(() => {
-    return trackData
-      .filter(({ track, user }) => filterTrack(track, user))
-      .map(({ uid }) => uid)
+  const filteredTrackEntries = useMemo(() => {
+    return trackData.filter(({ track, user }) => filterTrack(track, user))
   }, [trackData, filterTrack])
+  const filteredTrackUids = useMemo(
+    () => filteredTrackEntries.map(({ uid }) => uid),
+    [filteredTrackEntries]
+  )
+  const filteredTrackIds = useMemo(
+    () =>
+      filteredTrackEntries
+        .map(({ track }) => track?.track_id)
+        .filter((id): id is ID => Boolean(id)),
+    [filteredTrackEntries]
+  )
 
   const allTracksFetched = useMemo(() => {
-    return trackUids.length === saveCount && !filterValue
-  }, [trackUids, saveCount, filterValue])
+    return !hasNextPage && !filterValue
+  }, [hasNextPage, filterValue])
 
   const handleMoreFetchSaves = useCallback(() => {
-    if (allTracksFetched || isFetchingMore || !isReachable) {
+    if (allTracksFetched || isFetchingMore || !isReachable || !hasNextPage) {
       return
     }
-
-    const nextPage = fetchPage + 1
-    dispatch(
-      fetchMoreSaves(
-        filterValue,
-        selectedCategory,
-        '',
-        '',
-        nextPage * FETCH_LIMIT,
-        FETCH_LIMIT
-      )
-    )
-    setFetchPage(nextPage)
+    fetchNextPage().catch(() => undefined)
   }, [
     allTracksFetched,
-    selectedCategory,
-    dispatch,
-    fetchPage,
-    filterValue,
     isFetchingMore,
-    isReachable
+    isReachable,
+    hasNextPage,
+    fetchNextPage
   ])
 
   const currentPlaybackTrackId = useSelector(
@@ -226,14 +221,12 @@ export const TracksTab = () => {
   const playbackSource = 'SAVED_TRACKS'
   const playbackQueue: PlaybackTrack[] = useMemo(
     () =>
-      filteredTrackUids
-        .map((uid) => Uid.fromString(uid).id as ID)
-        .map((id) => ({
-          trackId: id,
-          source: playbackSource,
-          uid: makeStableUid(Kind.TRACKS, id, playbackSource)
-        })),
-    [filteredTrackUids]
+      filteredTrackIds.map((id) => ({
+        trackId: id,
+        source: playbackSource,
+        uid: makeStableUid(Kind.TRACKS, id, playbackSource)
+      })),
+    [filteredTrackIds]
   )
 
   const togglePlay = useCallback(
@@ -259,9 +252,17 @@ export const TracksTab = () => {
     [dispatch, currentPlaybackTrackId, isPlaying, playbackQueue]
   )
 
-  const handleChangeFilterValue = useMemo(() => {
-    return debounce(setFilterValue, 250)
-  }, [])
+  const commitFilterValue = useMemo(
+    () => debounce(setDebouncedFilterValue, FILTER_DEBOUNCE_MS),
+    []
+  )
+  const handleChangeFilterValue = useCallback(
+    (value: string) => {
+      setFilterValue(value)
+      commitFilterValue(value)
+    },
+    [commitFilterValue]
+  )
 
   const isPending =
     lineupStatus !== Status.SUCCESS ||

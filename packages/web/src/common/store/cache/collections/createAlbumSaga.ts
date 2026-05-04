@@ -9,7 +9,8 @@ import {
   queryUser,
   queryCurrentUserId,
   updateCollectionData,
-  primeCollectionDataSaga
+  primeCollectionDataSaga,
+  persistAccountPlaylistLibrarySaga
 } from '@audius/common/api'
 import {
   Name,
@@ -143,6 +144,7 @@ function* optimisticallySaveAlbum(
       permalink: album?.permalink
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 }
 
 function* createAndConfirmAlbum(

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   useCurrentAccount,
+  useLibraryTracks,
   useTracks,
   useUsers,
   selectNameSortedPlaylistsAndAlbums
@@ -29,13 +30,16 @@ import {
   playbackActions,
   playlistUpdatesActions,
   playlistUpdatesSelectors,
-  LibraryCategoryType,
   LibraryPageTrack,
   TrackRecord
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { dayjs, makeStableUid, route } from '@audius/common/utils'
-import { GetUserLibraryTracksSortMethodEnum } from '@audius/sdk'
+import {
+  EntityType,
+  GetUserLibraryTracksSortDirectionEnum,
+  GetUserLibraryTracksSortMethodEnum
+} from '@audius/sdk'
 import { debounce } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
@@ -56,10 +60,6 @@ const { profilePage } = route
 const { makeGetCurrent } = playbackSelectors
 const { getPlaying, getBuffering } = playbackSelectors
 const {
-  getLibraryTracksStatus,
-  getInitialFetchStatus,
-  hasReachedEnd,
-  getTrackSaves,
   getLocalTrackFavorites,
   getLocalTrackReposts,
   getLocalTrackPurchases,
@@ -69,6 +69,9 @@ const {
 const { updatedPlaylistViewed } = playlistUpdatesActions
 
 const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
+
+const LIBRARY_TRACKS_PAGE_SIZE = 50
+const FILTER_DEBOUNCE_MS = 300
 
 const messages = {
   title: 'Library',
@@ -85,6 +88,12 @@ const sortMethodMap: Record<string, string> = {
   plays: GetUserLibraryTracksSortMethodEnum.Plays,
   repost_count: GetUserLibraryTracksSortMethodEnum.Reposts
 }
+
+const sortDirectionMap: Record<string, GetUserLibraryTracksSortDirectionEnum> =
+  {
+    ascend: GetUserLibraryTracksSortDirectionEnum.Asc,
+    descend: GetUserLibraryTracksSortDirectionEnum.Desc
+  }
 
 type LibraryPageState = {
   currentTab: ProfileTabs
@@ -104,85 +113,18 @@ export const useLibraryPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const lastCategoryUrlRef = useRef<string | null>(null)
-  const [hasRequestedInitialFetch, setHasRequestedInitialFetch] =
-    useState(false)
 
   const currentTrack = useCurrentTrack()
 
-  // Tanquery-derived tracks for the library table. The legacy `fetchSaves`
-  // saga still populates saves/local-adds + track cache entries; we read
-  // those pieces and build the lineup-shaped entries here.
-  const trackSaves = useSelector(getTrackSaves)
   const localFavorites = useSelector(getLocalTrackFavorites)
   const localReposts = useSelector(getLocalTrackReposts)
   const localPurchases = useSelector(getLocalTrackPurchases)
-  const tracksFetchStatus = useSelector(getLibraryTracksStatus)
-  const initialFetch = useSelector(getInitialFetchStatus)
-
-  const libraryTrackIds = useMemo(() => {
-    const saveIds = trackSaves
-      .map((s: any) => s.save_item_id as ID | undefined)
-      .filter((id): id is ID => Boolean(id))
-    const localIds = Array.from(
-      new Set([
-        ...Object.keys(localFavorites).map(Number),
-        ...Object.keys(localReposts).map(Number),
-        ...Object.keys(localPurchases).map(Number)
-      ])
-    ) as ID[]
-    const allIds = new Set<ID>()
-    localIds.forEach((id) => allIds.add(id))
-    saveIds.forEach((id) => allIds.add(id))
-    return Array.from(allIds)
-  }, [trackSaves, localFavorites, localReposts, localPurchases])
-
-  const {
-    byId: libraryTracksById,
-    data: libraryFetchedTracks,
-    isPending: isLibraryTracksPending
-  } = useTracks(libraryTrackIds, { enabled: libraryTrackIds.length > 0 })
-
-  // `TQTrack = Omit<Track, 'user'>` so we also fetch owners and attach
-  // `user` on each entry — the legacy library table (and others) read
-  // `metadata.user.name`.
-  const libraryOwnerIds = useMemo(
-    () => (libraryFetchedTracks ?? []).map((t) => t.owner_id),
-    [libraryFetchedTracks]
-  )
-  const { byId: libraryUsersById, isPending: isLibraryUsersPending } =
-    useUsers(libraryOwnerIds)
-
-  const defaultEntries = useMemo(() => {
-    return libraryTrackIds
-      .map((id) => {
-        const track = libraryTracksById[id]
-        if (!track) return null
-        const user = libraryUsersById[track.owner_id]
-        if (!user) return null
-        const save = trackSaves.find((s: any) => s.save_item_id === id)
-        const dateSaved = save?.created_at
-          ? dayjs(save.created_at).toISOString()
-          : ''
-        return {
-          ...(track as any),
-          user,
-          kind: 'tracks',
-          id,
-          uid: makeStableUid('tracks' as any, id, 'SAVED_TRACKS'),
-          dateSaved
-        } as LibraryPageTrack & { uid: string }
-      })
-      .filter(
-        (e): e is LibraryPageTrack & { uid: string; id: ID } => e !== null
-      )
-  }, [libraryTrackIds, libraryTracksById, libraryUsersById, trackSaves])
 
   const getCurrentQueueItem = makeGetCurrent()
   const currentQueueItem = useSelector(getCurrentQueueItem)
   const playing = useSelector(getPlaying)
   const buffering = useSelector(getBuffering)
   const playlistUpdates = useSelector(selectAllPlaylistUpdateIds)
-  const hasReachedEndValue = useSelector(hasReachedEnd)
   const tracksCategory = useSelector(getTracksCategory)
 
   const { data: account } = useCurrentAccount({
@@ -212,6 +154,14 @@ export const useLibraryPage = () => {
     shouldReturnToTrackPurchases: false
   })
 
+  // Debounced query input — drives the tan-query queryKey, so each keystroke
+  // doesn't fire a new SDK request.
+  const [debouncedFilterText, setDebouncedFilterText] = useState(urlSearch)
+  const commitFilterText = useMemo(
+    () => debounce(setDebouncedFilterText, FILTER_DEBOUNCE_MS),
+    []
+  )
+
   const selectedCategoryForUrlTab = useSelector(
     (state: Parameters<typeof getCategory>[0]) =>
       getCategory(state, { currentTab: urlTab })
@@ -235,6 +185,7 @@ export const useLibraryPage = () => {
       currentTab: tab,
       filterText: search
     }))
+    setDebouncedFilterText(search)
     dispatch(
       saveActions.setSelectedCategory({
         currentTab: tab,
@@ -262,51 +213,93 @@ export const useLibraryPage = () => {
     )
   }, [selectedCategoryForUrlTab, setSearchParams])
 
-  const fetchLibraryTracks = useCallback(
-    (
-      query?: string,
-      category?: LibraryCategoryType,
-      sortMethod?: string,
-      sortDirection?: string,
-      offset?: number,
-      limit?: number
-    ) => {
-      dispatch(
-        saveActions.fetchSaves(
-          query,
-          category,
-          sortMethod,
-          sortDirection,
-          offset,
-          limit
-        )
-      )
-    },
-    [dispatch]
-  )
+  // tan-query for the saved-tracks lineup. Replaces the legacy fetchSaves saga.
+  const {
+    trackIds: fetchedTrackIds,
+    data: fetchedLineupData,
+    isPending: isLibraryQueryPending,
+    isError: isLibraryQueryError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useLibraryTracks({
+    category: tracksCategory,
+    query: debouncedFilterText,
+    sortMethod: (state.sortMethod || undefined) as
+      | GetUserLibraryTracksSortMethodEnum
+      | undefined,
+    sortDirection: sortDirectionMap[state.sortDirection],
+    pageSize: LIBRARY_TRACKS_PAGE_SIZE
+  })
 
-  const fetchMoreSavedTracks = useCallback(
-    (
-      query?: string,
-      category?: LibraryCategoryType,
-      sortMethod?: string,
-      sortDirection?: string,
-      offset?: number,
-      limit?: number
-    ) => {
-      dispatch(
-        saveActions.fetchMoreSaves(
-          query,
-          category,
-          sortMethod,
-          sortDirection,
-          offset,
-          limit
-        )
-      )
-    },
-    [dispatch]
+  const fetchedTimestampById = useMemo(() => {
+    const map = new Map<ID, string | undefined>()
+    fetchedLineupData.forEach((d) => {
+      if (d.type === EntityType.TRACK) {
+        map.set(d.id as ID, d.timestamp)
+      }
+    })
+    return map
+  }, [fetchedLineupData])
+
+  const libraryTrackIds = useMemo(() => {
+    const localIds = Array.from(
+      new Set([
+        ...Object.keys(localFavorites).map(Number),
+        ...Object.keys(localReposts).map(Number),
+        ...Object.keys(localPurchases).map(Number)
+      ])
+    ) as ID[]
+    const allIds = new Set<ID>()
+    localIds.forEach((id) => allIds.add(id))
+    fetchedTrackIds.forEach((id) => allIds.add(id))
+    return Array.from(allIds)
+  }, [fetchedTrackIds, localFavorites, localReposts, localPurchases])
+
+  const {
+    byId: libraryTracksById,
+    data: libraryFetchedTracks,
+    isPending: isLibraryTracksPending
+  } = useTracks(libraryTrackIds, { enabled: libraryTrackIds.length > 0 })
+
+  // `TQTrack = Omit<Track, 'user'>` so we also fetch owners and attach
+  // `user` on each entry — the legacy library table reads `metadata.user.name`.
+  const libraryOwnerIds = useMemo(
+    () => (libraryFetchedTracks ?? []).map((t) => t.owner_id),
+    [libraryFetchedTracks]
   )
+  const { byId: libraryUsersById, isPending: isLibraryUsersPending } =
+    useUsers(libraryOwnerIds)
+
+  const defaultEntries = useMemo(() => {
+    return libraryTrackIds
+      .map((id) => {
+        const track = libraryTracksById[id]
+        if (!track) return null
+        const user = libraryUsersById[track.owner_id]
+        if (!user) return null
+        const ts = fetchedTimestampById.get(id)
+        const dateSaved = ts ? dayjs(ts).toISOString() : ''
+        return {
+          ...(track as any),
+          user,
+          kind: 'tracks',
+          id,
+          uid: makeStableUid('tracks' as any, id, 'SAVED_TRACKS'),
+          dateSaved
+        } as LibraryPageTrack & { uid: string }
+      })
+      .filter(
+        (e): e is LibraryPageTrack & { uid: string; id: ID } => e !== null
+      )
+  }, [
+    libraryTrackIds,
+    libraryTracksById,
+    libraryUsersById,
+    fetchedTimestampById
+  ])
+
+  const hasReachedEndValue = !hasNextPage
 
   // State-owned sort order (UID list) for the library track table. `null`
   // means "render in the default order from saves".
@@ -321,35 +314,16 @@ export const useLibraryPage = () => {
   }, [])
 
   const tracks = useMemo(() => {
-    const hasExpectedTrackRows =
-      trackSaves.length > 0 || libraryTrackIds.length > 0
-    // Treat any "we expect rows but `defaultEntries` hasn't materialized"
-    // gap as LOADING. This holds skeletons in place across the saga's
-    // `fetchSavesSucceeded` → tan-query observer re-key → `defaultEntries`
-    // memo recompute chain, eliminating the empty-table flash.
-    const hasPendingTrackRows =
-      hasExpectedTrackRows && defaultEntries.length === 0
-    // On a cold mount the saga hasn't yet put `fetchSavesRequested`, so
-    // `tracksFetchStatus` reads SUCCESS while `entries` is still empty —
-    // hold LOADING until either we observe the saga or the cache already
-    // has saves to render.
-    const status: Status =
-      !hasRequestedInitialFetch && trackSaves.length === 0
+    const status: Status = isLibraryQueryError
+      ? Status.ERROR
+      : isLibraryQueryPending || isLibraryTracksPending || isLibraryUsersPending
         ? Status.LOADING
-        : tracksFetchStatus === Status.SUCCESS &&
-            !isLibraryTracksPending &&
-            !isLibraryUsersPending &&
-            !hasPendingTrackRows
-          ? Status.SUCCESS
-          : tracksFetchStatus === Status.ERROR
-            ? Status.ERROR
-            : Status.LOADING
+        : Status.SUCCESS
     if (!sortedOrder) return { entries: defaultEntries, status }
     const byUid = new Map(defaultEntries.map((e) => [e.uid, e]))
     const ordered = sortedOrder
       .map((uid) => byUid.get(uid))
       .filter((e): e is (typeof defaultEntries)[number] => !!e)
-    // Fall back to default if the sort is stale.
     return {
       entries:
         ordered.length === defaultEntries.length ? ordered : defaultEntries,
@@ -358,12 +332,10 @@ export const useLibraryPage = () => {
   }, [
     defaultEntries,
     sortedOrder,
-    tracksFetchStatus,
+    isLibraryQueryError,
+    isLibraryQueryPending,
     isLibraryTracksPending,
-    isLibraryUsersPending,
-    hasRequestedInitialFetch,
-    trackSaves.length,
-    libraryTrackIds.length
+    isLibraryUsersPending
   ])
 
   const updatePlaylistLastViewedAt = useCallback(
@@ -475,66 +447,10 @@ export const useLibraryPage = () => {
     [dispatch]
   )
 
-  const handleFetchSavedTracks = useMemo(
-    () =>
-      debounce(() => {
-        fetchLibraryTracks(
-          state.filterText,
-          tracksCategory,
-          state.sortMethod,
-          state.sortDirection
-        )
-      }, 300),
-    [
-      state.filterText,
-      state.sortMethod,
-      state.sortDirection,
-      tracksCategory,
-      fetchLibraryTracks
-    ]
-  )
-
-  const handleFetchMoreSavedTracks = useCallback(
-    (offset: number, limit: number) => {
-      if (hasReachedEndValue) return
-      fetchMoreSavedTracks(
-        state.filterText,
-        tracksCategory,
-        state.sortMethod,
-        state.sortDirection,
-        offset,
-        limit
-      )
-    },
-    [
-      hasReachedEndValue,
-      state.filterText,
-      state.sortMethod,
-      state.sortDirection,
-      tracksCategory,
-      fetchMoreSavedTracks
-    ]
-  )
-
-  useEffect(() => {
-    fetchLibraryTracks(
-      state.filterText,
-      tracksCategory,
-      state.sortMethod,
-      state.sortDirection
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run on mount
-
-  // Latch on the first time the saga reports the initial fetch is in flight.
-  // We can't set this synchronously next to `dispatch(fetchSaves)` because the
-  // saga puts `fetchSavesRequested` asynchronously (after `waitForRead` /
-  // `queryCurrentAccount`) — flipping it eagerly would let one render slip
-  // through with `tracksFetchStatus === SUCCESS` and an empty `entries`,
-  // briefly rendering the empty state.
-  useEffect(() => {
-    if (initialFetch) setHasRequestedInitialFetch(true)
-  }, [initialFetch])
+  const fetchMoreTracks = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return
+    fetchNextPage().catch(() => undefined)
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   useEffect(() => {
     return () => {
@@ -560,10 +476,6 @@ export const useLibraryPage = () => {
       }))
     }
   }, [state.initialOrder, tracks.entries])
-
-  useEffect(() => {
-    handleFetchSavedTracks()
-  }, [tracksCategory, handleFetchSavedTracks])
 
   const updateSearchParam = useCallback(
     (search: string) => {
@@ -591,29 +503,25 @@ export const useLibraryPage = () => {
   const onFilterChange = useCallback(
     (e: any) => {
       const value = e.target.value
-      const callBack = !state.allTracksFetched
-        ? handleFetchSavedTracks
-        : undefined
       setState((prev) => ({ ...prev, filterText: value }))
       debouncedUpdateSearchParam(value)
-      if (callBack) {
-        callBack()
+      // Only push the filter to the server query when we don't already have
+      // every row locally — mirror the saga-era behavior where complete
+      // result sets get filtered client-side.
+      if (!state.allTracksFetched) {
+        commitFilterText(value)
       }
     },
-    [state.allTracksFetched, handleFetchSavedTracks, debouncedUpdateSearchParam]
+    [state.allTracksFetched, debouncedUpdateSearchParam, commitFilterText]
   )
 
-  const onSortChange = useCallback(
-    (method: string, direction: string) => {
-      setState((prev) => ({
-        ...prev,
-        sortMethod: sortMethodMap[method] ?? '',
-        sortDirection: direction
-      }))
-      handleFetchSavedTracks()
-    },
-    [handleFetchSavedTracks]
-  )
+  const onSortChange = useCallback((method: string, direction: string) => {
+    setState((prev) => ({
+      ...prev,
+      sortMethod: sortMethodMap[method] ?? '',
+      sortDirection: direction
+    }))
+  }, [])
 
   const formatMetadata = useCallback((trackMetadatas: LibraryPageTrack[]) => {
     return trackMetadatas.map((entry, i) => ({
@@ -897,13 +805,7 @@ export const useLibraryPage = () => {
     buffering,
 
     // Props from dispatch
-    fetchLibraryTracks: () =>
-      fetchLibraryTracks(
-        state.filterText,
-        tracksCategory,
-        state.sortMethod,
-        state.sortDirection
-      ),
+    fetchLibraryTracks: () => {},
     resetSavedTracks,
     updateLineupOrder,
     goToRoute,
@@ -933,7 +835,7 @@ export const useLibraryPage = () => {
     onClickArtistName,
     onClickRepost,
     onTogglePlay,
-    fetchMoreTracks: handleFetchMoreSavedTracks,
+    fetchMoreTracks,
 
     // Additional props
     hasReachedEnd: hasReachedEndValue,

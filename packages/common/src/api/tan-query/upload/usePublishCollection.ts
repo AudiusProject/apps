@@ -21,6 +21,7 @@ import { getCollectionsBatcher } from '../batchers/getCollectionsBatcher'
 import { QUERY_KEYS } from '../queryKeys'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useCurrentAccount } from '../users/account/useCurrentAccount'
+import { updatePlaylistLibrary } from '../users/account/useUpdatePlaylistLibrary'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
 
@@ -182,6 +183,22 @@ export const usePublishCollection = (
             handle: accountUser!.handle
           }
         })
+      )
+
+      // Persist the now-updated library to the user's profile + tan-query cache.
+      const previousLibrary = account?.playlistLibrary ?? { contents: [] }
+      await updatePlaylistLibrary(
+        sdk,
+        userId,
+        {
+          ...previousLibrary,
+          contents: [
+            ...previousLibrary.contents,
+            { playlist_id: collection.playlist_id, type: 'playlist' as const }
+          ]
+        },
+        queryClient,
+        dispatch
       )
 
       // Add to library as favorite locally

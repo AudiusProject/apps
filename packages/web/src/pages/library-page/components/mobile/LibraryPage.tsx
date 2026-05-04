@@ -53,8 +53,7 @@ import styles from './LibraryPage.module.css'
 import NewCollectionButton from './NewCollectionButton'
 
 const { TRENDING_PAGE } = route
-const { getCategory, getTrackSaves, getSelectedCategoryLocalTrackAdds } =
-  libraryPageSelectors
+const { getCategory, getSelectedCategoryLocalTrackAdds } = libraryPageSelectors
 
 const INITIAL_MOBILE_TRACK_SKELETON_ROWS = 10
 
@@ -213,11 +212,10 @@ const TracksLineup = ({
   queuedAndPlaying: boolean
   onTogglePlay: (uid: UID, trackId: ID) => void
 }) => {
-  const trackSaveIds = useSelector(getTrackSaves)
   const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
   const expectedTrackCount = useMemo(
-    () => trackSaveIds.length + Object.keys(localTrackAdds).length,
-    [trackSaveIds, localTrackAdds]
+    () => tracks.entries.length + Object.keys(localTrackAdds).length,
+    [tracks.entries.length, localTrackAdds]
   )
   const [trackEntries] = getFilteredData(tracks.entries)
   const trackAccessMap = useGatedContentAccessMap(trackEntries)
