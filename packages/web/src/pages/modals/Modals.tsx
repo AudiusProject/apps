@@ -20,14 +20,11 @@ import { SendTokensModal } from 'components/send-tokens-modal'
 import ConnectedMobileOverflowModal from 'components/track-overflow-modal/ConnectedMobileOverflowModal'
 import UnfollowConfirmationModal from 'components/unfollow-confirmation-modal/UnfollowConfirmationModal'
 import { UnsavedChangesDialog } from 'components/unsaved-changes-dialog/UnsavedChangesDialog'
-import { USDCPurchaseDetailsModal } from 'components/usdc-purchase-details-modal/USDCPurchaseDetailsModal'
-import { USDCTransactionDetailsModal } from 'components/usdc-transaction-details-modal/USDCTransactionDetailsModal'
 import { UserListModal } from 'components/user-list-modal/UserListModal'
 import { WithdrawUSDCModal } from 'components/withdraw-usdc-modal/WithdrawUSDCModal'
 import { CoinflowWithdrawModal } from 'components/withdraw-usdc-modal/components/CoinflowWithdrawModal'
 import { useIsMobile } from 'hooks/useIsMobile'
 import TransferAudioMobileDrawer from 'pages/audio-page/components/modals/TransferAudioMobileDrawer'
-import { ClaimVestedCoinsModal } from 'pages/fan-club-detail-page/components/ClaimVestedCoinsModal'
 import { ChallengeRewardsModal } from 'pages/rewards-page/components/modals/ChallengeRewardsModal'
 
 import AppModal from './AppModal'
@@ -54,7 +51,6 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   APIRewardsExplainer: TopAPIModal,
   ChallengeRewards: ChallengeRewardsModal,
   ClaimAllRewards: ClaimAllRewardsModal,
-  ClaimVestedCoinsModal,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
   BrowserPushPermissionConfirmation: BrowserPushConfirmationModal,
   PremiumContentPurchaseModal,
@@ -62,8 +58,6 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   WithdrawUSDCModal,
   CoinflowOnramp: CoinflowOnrampModal,
   StripeOnRamp: StripeOnRampModal,
-  USDCPurchaseDetailsModal,
-  USDCTransactionDetailsModal,
   CoinflowWithdraw: CoinflowWithdrawModal,
   SendTokensModal
 }
