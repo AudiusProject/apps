@@ -245,6 +245,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const [acText, setAcText] = useState('')
   const [replyingAndEditingState, setReplyingAndEditingState] =
     useState<ReplyingAndEditingState>()
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false)
 
   const setAutocompleteHandler = useCallback(
     (autocompleteHandler: (user: UserMetadata) => void) => {
@@ -298,6 +299,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
 
   const handleSheetChanges = useCallback(
     (index: number) => {
+      setIsDrawerVisible(index >= 0)
       // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
       if (index === 0 && bottomSheetModalRef.current) {
         // Use a small delay to ensure the modal is fully presented
@@ -360,16 +362,18 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
           )}
         </CommentSectionProvider>
       </BottomSheetModal>
-      <Box
-        style={{
-          backgroundColor: color.background.white,
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          zIndex: 5,
-          height: insets.bottom
-        }}
-      />
+      {isDrawerVisible ? (
+        <Box
+          style={{
+            backgroundColor: color.background.white,
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            zIndex: 5,
+            height: insets.bottom
+          }}
+        />
+      ) : null}
     </>
   )
 }
