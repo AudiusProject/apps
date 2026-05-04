@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import {
   useAlbumTrackRemoveConfirmationModal,
   cacheCollectionsActions
@@ -13,6 +14,7 @@ import {
   ModalTitle,
   ModalFooter
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
 const messages = {
@@ -24,14 +26,17 @@ const messages = {
   release: 'Remove Track From Album'
 }
 
-export const AlbumTrackRemoveConfirmationModal = () => {
+export const AlbumTrackRemoveConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
   const {
-    isOpen,
-    onClose,
     data: { trackId, playlistId, timestamp }
   } = useAlbumTrackRemoveConfirmationModal()
 
   const dispatch = useDispatch()
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
 
   const handleConfirm = useCallback(() => {
     if (trackId && playlistId && timestamp) {
@@ -43,11 +48,11 @@ export const AlbumTrackRemoveConfirmationModal = () => {
         )
       )
     }
-    onClose()
-  }, [dispatch, onClose, playlistId, timestamp, trackId])
+    handleClose()
+  }, [dispatch, handleClose, playlistId, timestamp, trackId])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='medium'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='medium'>
       <ModalHeader>
         <ModalTitle title={messages.title} />
       </ModalHeader>
@@ -56,7 +61,7 @@ export const AlbumTrackRemoveConfirmationModal = () => {
         <ModalContentText>{messages.description2}</ModalContentText>
       </ModalContent>
       <ModalFooter>
-        <Button fullWidth variant='secondary' onClick={onClose}>
+        <Button fullWidth variant='secondary' onClick={handleClose}>
           {messages.cancel}
         </Button>
         <Button variant='destructive' fullWidth onClick={handleConfirm}>
@@ -65,4 +70,10 @@ export const AlbumTrackRemoveConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register(
+  'AlbumTrackRemoveConfirmation',
+  AlbumTrackRemoveConfirmationModal
+)
+registerNiceModalId('AlbumTrackRemoveConfirmation')
