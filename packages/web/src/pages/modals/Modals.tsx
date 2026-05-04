@@ -3,7 +3,6 @@ import { ComponentType, lazy } from 'react'
 import { Modals as ModalTypes } from '@audius/common/store'
 
 import { CoinSuccessModal } from 'components/CoinSuccessModal'
-import AddToCollectionModal from 'components/add-to-collection/desktop/AddToCollectionModal'
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
@@ -11,7 +10,6 @@ import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
 import EmbedModal from 'components/embed-modal/EmbedModal'
 import { FeatureFlagOverrideModal } from 'components/feature-flag-override-modal'
 import FirstUploadModal from 'components/first-upload-modal/FirstUploadModal'
-import { HostRemixContestModal } from 'components/host-remix-contest-modal/HostRemixContestModal'
 import { PasswordResetModal } from 'components/password-reset/PasswordResetModal'
 import { PremiumContentPurchaseModal } from 'components/premium-content-purchase-modal/PremiumContentPurchaseModal'
 import { SendTokensModal } from 'components/send-tokens-modal'
@@ -23,7 +21,6 @@ import { WithdrawUSDCModal } from 'components/withdraw-usdc-modal/WithdrawUSDCMo
 import { CoinflowWithdrawModal } from 'components/withdraw-usdc-modal/components/CoinflowWithdrawModal'
 import { useIsMobile } from 'hooks/useIsMobile'
 import TransferAudioMobileDrawer from 'pages/audio-page/components/modals/TransferAudioMobileDrawer'
-import { ChallengeRewardsModal } from 'pages/rewards-page/components/modals/ChallengeRewardsModal'
 
 import AppModal from './AppModal'
 
@@ -42,11 +39,8 @@ const CommentSettingsModal = lazy(
 )
 
 const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
-  AddToCollection: AddToCollectionModal,
-  HostRemixContest: HostRemixContestModal,
   InboxSettings: InboxSettingsModal,
   CommentSettings: CommentSettingsModal,
-  ChallengeRewards: ChallengeRewardsModal,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
   BrowserPushPermissionConfirmation: BrowserPushConfirmationModal,
   PremiumContentPurchaseModal,

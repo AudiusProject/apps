@@ -9,6 +9,7 @@
  * Add new NiceModal-managed modals here as they migrate.
  */
 import 'components/add-cash-modal/AddCashModal'
+import 'components/add-to-collection/desktop/AddToCollectionModal'
 import 'components/album-track-remove-confirmation-modal/AlbumTrackRemoveConfirmationModal'
 import 'components/artist-pick-modal/ArtistPickModal'
 import 'components/buy-sell-modal/BuySellModal'
@@ -20,6 +21,7 @@ import 'components/early-release-confirmation-modal/EarlyReleaseConfirmationModa
 import 'components/edit-access-confirmation-modal/EditAccessConfirmationModal'
 import 'components/finalize-winners-confirmation-modal/FinalizeWinnersConfirmationModal'
 import 'components/hide-confirmation-modal/HideContentConfirmationModal'
+import 'components/host-remix-contest-modal/HostRemixContestModal'
 import 'components/inbox-unavailable-modal/InboxUnavailableModal'
 import 'components/leaving-audius-modal/LeavingAudiusModal'
 import 'components/locked-content-modal/LockedContentModal'
@@ -42,3 +44,4 @@ import 'pages/audio-page/components/modals/AudioBreakdownModal'
 import 'pages/audio-page/components/modals/ConnectedWalletsModal'
 import 'pages/chat-page/components/ChatBlastModal'
 import 'pages/fan-club-detail-page/components/ClaimVestedCoinsModal'
+import 'pages/rewards-page/components/modals/ChallengeRewardsModal/ChallengeRewardsModal'
