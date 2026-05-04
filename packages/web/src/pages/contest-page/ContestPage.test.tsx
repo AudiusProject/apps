@@ -225,9 +225,10 @@ describe('ContestPage', () => {
     ).toBeInTheDocument()
 
     // Contest details internals differ across desktop/mobile layouts.
-    // Assert on the layout-agnostic behavior: exactly one comments tile
-    // appears in the details view.
-    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(1)
+    // The redesigned layout renders TWO ContestCommentsTile instances:
+    // one in mode='updates' (left column, Updates feed) and one for the
+    // regular comments feed (right column).
+    expect(screen.getAllByTestId('contest-comments-section')).toHaveLength(2)
     // The submissions lineup lives under the Submissions tab, not the
     // Details tab; it renders after flipping the pill.
     expect(screen.queryByTestId('tan-query-lineup')).not.toBeInTheDocument()
