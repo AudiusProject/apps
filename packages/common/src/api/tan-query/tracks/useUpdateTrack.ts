@@ -147,8 +147,13 @@ export const useUpdateTrack = () => {
           mint: 'USDC',
           ethAddress,
           recordAnalytics: analytics.track
-        }).catch((err) => {
-          console.warn('Failed to ensure USDC userbank during track edit', err)
+        }).catch((error) => {
+          reportToSentry({
+            error,
+            additionalInfo: { trackId, userId, ethAddress },
+            feature: Feature.Edit,
+            name: 'Ensure USDC userbank on track edit'
+          })
         })
       }
 

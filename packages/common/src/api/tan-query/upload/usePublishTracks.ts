@@ -73,8 +73,13 @@ export const publishTracks = async (
       mint: 'USDC',
       ethAddress,
       recordAnalytics: track
-    }).catch((err) => {
-      console.warn('Failed to ensure USDC userbank during track upload', err)
+    }).catch((error) => {
+      reportToSentry({
+        error,
+        additionalInfo: { userId, ethAddress },
+        feature: Feature.Upload,
+        name: 'Ensure USDC userbank on track upload'
+      })
     })
   }
 
