@@ -4,12 +4,14 @@ import {
   getCommentQueryKey,
   useComment,
   useCurrentUserId,
+  useDeleteComment,
   useEventComments,
   usePostEventComment,
   useUser
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
+import { Portal } from '@gorhom/portal'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
 
@@ -17,13 +19,17 @@ import {
   Button,
   Divider,
   Flex,
+  IconButton,
   IconHeart,
+  IconKebabHorizontal,
   LoadingSpinner,
   Paper,
+  PlainButton,
   SelectablePill,
   Text
 } from '@audius/harmony-native'
 
+import { ActionDrawerWithoutRedux } from '../../components/action-drawer'
 import { Timestamp } from '../../components/comments/Timestamp'
 import { ComposerInput } from '../../components/composer-input'
 import { ProfilePicture } from '../../components/core/ProfilePicture'
@@ -39,10 +45,14 @@ const messages = {
   emptyUpdatesSub: 'The contest host will post announcements here.',
   composePlaceholder: 'Add a comment',
   composePostUpdatePlaceholder: 'Post an update to your contest followers…',
+  composeReplyPlaceholder: 'Reply…',
   postUpdateBadge: 'Post Update',
   artistBadge: 'Artist',
   loadMore: 'Load more',
-  signInToComment: 'Sign in to comment.'
+  signInToComment: 'Sign in to comment.',
+  reply: 'Reply',
+  delete: 'Delete',
+  moreActions: 'More actions'
 }
 
 export type ContestCommentsMode = 'updates' | 'comments'
@@ -113,8 +123,13 @@ export const ContestCommentsList = ({
 
   const heading =
     mode === 'updates' ? messages.updatesHeading : messages.commentsHeading
+  // In `comments` mode the host should NOT see the top-level composer —
+  // they participate via replies (and via the Updates tab for
+  // announcements). Viewers see the top-level composer.
+  // In `updates` mode only the host can compose.
   const showComposer =
-    currentUserId !== null && (mode === 'comments' || isEventOwner)
+    currentUserId !== null &&
+    (mode === 'comments' ? !isEventOwner : isEventOwner)
   const composerPlaceholder =
     mode === 'updates'
       ? messages.composePostUpdatePlaceholder
@@ -255,6 +270,7 @@ export const ContestCommentsList = ({
             <ContestCommentRow
               key={commentId}
               commentId={commentId}
+              eventId={eventId}
               eventOwnerUserId={eventOwnerUserId}
               mode={mode}
             />
@@ -279,17 +295,27 @@ export const ContestCommentsList = ({
 
 type ContestCommentRowProps = {
   commentId: ID
+  eventId: ID
   eventOwnerUserId: ID | undefined
   mode: ContestCommentsMode
 }
 
 const ContestCommentRow = ({
   commentId,
+  eventId,
   eventOwnerUserId,
   mode
 }: ContestCommentRowProps) => {
   const { data: comment } = useComment(commentId)
   const { data: author } = useUser(comment?.userId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { mutate: postComment } = usePostEventComment()
+  const { mutate: deleteComment } = useDeleteComment()
+
+  const [isReplying, setIsReplying] = useState(false)
+  const [replyMessageId, setReplyMessageId] = useState(0)
+  const [isOverflowOpen, setIsOverflowOpen] = useState(false)
+  const [isOverflowVisible, setIsOverflowVisible] = useState(false)
 
   if (!comment || !author) return null
 
@@ -309,11 +335,46 @@ const ContestCommentRow = ({
 
   const isAuthorEventOwner =
     eventOwnerUserId !== undefined && comment.userId === eventOwnerUserId
+  const isCurrentUserHost =
+    currentUserId !== null &&
+    eventOwnerUserId !== undefined &&
+    currentUserId === eventOwnerUserId
+  const isCurrentUserAuthor =
+    currentUserId !== null && comment.userId === currentUserId
+  const canDelete = isCurrentUserHost || isCurrentUserAuthor
+  const canReply = currentUserId !== null
 
   const createdAt: Date | undefined =
     'createdAt' in comment && (comment as any).createdAt
       ? dayjs((comment as any).createdAt).toDate()
       : undefined
+
+  const handleReplySubmit = (value: string) => {
+    if (!currentUserId) return
+    const body = value.trim()
+    if (!body) return
+    postComment({
+      userId: currentUserId,
+      eventId,
+      body,
+      parentCommentId: commentId
+    })
+    setReplyMessageId((prev) => prev + 1)
+    setIsReplying(false)
+  }
+
+  const handleDelete = () => {
+    if (!currentUserId) return
+    deleteComment({
+      commentId,
+      userId: currentUserId,
+      // useDeleteComment is track-typed but the SDK only consumes
+      // commentId/userId — pass eventId to keep cache helpers happy.
+      trackId: eventId,
+      currentSort: undefined,
+      parentCommentId
+    })
+  }
 
   return (
     <Flex direction='row' gap='m' alignItems='flex-start'>
@@ -322,26 +383,93 @@ const ContestCommentRow = ({
         style={{ width: 40, height: 40, flexShrink: 0 }}
       />
       <Flex direction='column' gap='xs' flex={1}>
-        <Flex direction='row' gap='s' alignItems='center' wrap='wrap'>
-          <UserLink userId={author.user_id} />
-          {isAuthorEventOwner ? (
-            <Text variant='label' size='xs' color='accent' strength='strong'>
-              {isPostUpdate ? messages.postUpdateBadge : messages.artistBadge}
-            </Text>
+        <Flex
+          direction='row'
+          gap='s'
+          alignItems='center'
+          wrap='wrap'
+          justifyContent='space-between'
+        >
+          <Flex direction='row' gap='s' alignItems='center' wrap='wrap'>
+            <UserLink userId={author.user_id} />
+            {/* Show Artist badge only when the host is commenting in
+                the Comments feed; suppress the Post Update badge in
+                the Updates feed (every row there is already a host
+                update — the badge was redundant). */}
+            {isAuthorEventOwner && !isPostUpdate ? (
+              <Text variant='label' size='xs' color='accent' strength='strong'>
+                {messages.artistBadge}
+              </Text>
+            ) : null}
+            {createdAt ? <Timestamp time={createdAt} /> : null}
+          </Flex>
+          {canDelete ? (
+            <IconButton
+              aria-label={messages.moreActions}
+              icon={IconKebabHorizontal}
+              size='s'
+              color='subdued'
+              onPress={() => {
+                setIsOverflowOpen(true)
+                setIsOverflowVisible(true)
+              }}
+            />
           ) : null}
-          {createdAt ? <Timestamp time={createdAt} /> : null}
         </Flex>
         <Text variant='body' size='s'>
           {comment.message}
         </Text>
-        {/* Reaction placeholder. Track-page `CommentActionBar` hard-
-            depends on track context (pinned_comment_id, track.permalink,
-            etc.), so we render a visual-only heart stub here. Wiring
-            event comment reactions is a separate server feature. */}
         <Flex direction='row' gap='m' alignItems='center' pt='xs'>
           <IconHeart color='subdued' size='s' />
+          {canReply ? (
+            <PlainButton
+              variant='subdued'
+              onPress={() => setIsReplying((v) => !v)}
+            >
+              {messages.reply}
+            </PlainButton>
+          ) : null}
         </Flex>
+        {isReplying && currentUserId ? (
+          <Flex
+            direction='row'
+            gap='s'
+            alignItems='center'
+            pt='xs'
+            style={{ width: '100%' }}
+          >
+            <ProfilePicture
+              userId={currentUserId}
+              style={{ width: 28, height: 28, flexShrink: 0 }}
+            />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <ComposerInput
+                messageId={replyMessageId}
+                placeholder={messages.composeReplyPlaceholder}
+                maxLength={400}
+                maxMentions={10}
+                onSubmit={(value) => handleReplySubmit(value)}
+              />
+            </View>
+          </Flex>
+        ) : null}
       </Flex>
+      {isOverflowVisible ? (
+        <Portal hostName='DrawerPortal'>
+          <ActionDrawerWithoutRedux
+            rows={[
+              {
+                text: messages.delete,
+                callback: handleDelete,
+                isDestructive: true
+              }
+            ]}
+            isOpen={isOverflowOpen}
+            onClose={() => setIsOverflowOpen(false)}
+            onClosed={() => setIsOverflowVisible(false)}
+          />
+        </Portal>
+      ) : null}
     </Flex>
   )
 }
