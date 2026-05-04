@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useControlled } from '@audius/harmony/src/hooks/useControlled'
+import { DEFAULT_HIT_SLOP } from '@audius/harmony-native'
 import { css } from '@emotion/native'
 import { Pressable } from 'react-native'
 import type { GestureResponderEvent } from 'react-native'
@@ -11,8 +12,6 @@ import Animated, {
   useSharedValue,
   withTiming
 } from 'react-native-reanimated'
-
-import { DEFAULT_HIT_SLOP } from '@audius/harmony-native'
 
 import { useTheme } from '../../../foundations/theme'
 import { Text } from '../../Text/Text'
@@ -134,47 +133,43 @@ export const SelectablePill = (props: SelectablePillProps) => {
     color.static.white
   ])
 
-  const animatedRootStyles = useAnimatedStyle(
-    () => {
-      // Subscribe to themeNudge so this worklet re-runs whenever the
-      // theme palette changes and picks up the latest closure colors.
-      themeNudge.value
-      return {
-        opacity: withTiming(disabled ? 0.45 : 1, motion.press),
-        backgroundColor: interpolateColor(
-          selected.value,
-          [0, 1],
-          [color.background.white, color.secondary.s400]
-        ),
-        borderColor: interpolateColor(
-          selected.value,
-          [0, 1],
-          [color.border.strong, color.secondary.s400]
-        ),
-        transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
-      }
-    },
-    [
-      disabled,
-      color.background.white,
-      color.secondary.s400,
-      color.border.strong
-    ]
-  )
+  const animatedRootStyles = useAnimatedStyle(() => {
+    // Subscribe to themeNudge so this worklet re-runs whenever the
+    // theme palette changes and picks up the latest closure colors.
+    // eslint-disable-next-line no-unused-expressions
+    themeNudge.value
+    return {
+      opacity: withTiming(disabled ? 0.45 : 1, motion.press),
+      backgroundColor: interpolateColor(
+        selected.value,
+        [0, 1],
+        [color.background.white, color.secondary.s400]
+      ),
+      borderColor: interpolateColor(
+        selected.value,
+        [0, 1],
+        [color.border.strong, color.secondary.s400]
+      ),
+      transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
+    }
+  }, [
+    disabled,
+    color.background.white,
+    color.secondary.s400,
+    color.border.strong
+  ])
 
-  const animatedTextStyles = useAnimatedStyle(
-    () => {
-      themeNudge.value
-      return {
-        color: interpolateColor(
-          selected.value,
-          [0, 1],
-          [color.text.default, color.static.white]
-        )
-      }
-    },
-    [color.text.default, color.static.white]
-  )
+  const animatedTextStyles = useAnimatedStyle(() => {
+    // eslint-disable-next-line no-unused-expressions
+    themeNudge.value
+    return {
+      color: interpolateColor(
+        selected.value,
+        [0, 1],
+        [color.text.default, color.static.white]
+      )
+    }
+  }, [color.text.default, color.static.white])
 
   return (
     <Pressable
