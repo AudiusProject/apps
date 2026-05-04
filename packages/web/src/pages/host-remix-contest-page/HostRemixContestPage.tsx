@@ -14,21 +14,29 @@ import {
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
 import { Name, SquareSizes } from '@audius/common/models'
-import { dayjs, parseVideoUrl, route } from '@audius/common/utils'
+import {
+  dayjs,
+  getVideoThumbnailUrl,
+  parseVideoUrl,
+  route
+} from '@audius/common/utils'
 import {
   Box,
   Button,
   Flex,
+  IconClose,
   IconCloudUpload,
   IconKebabHorizontal,
+  IconPlay,
   IconTrophy,
   LoadingSpinner,
+  PlainButton,
   PopupMenu,
   Paper,
   Select,
   Text,
-  TextInput,
-  TextArea
+  TextArea,
+  TextInput
 } from '@audius/harmony'
 import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
 import { useNavigate, useParams } from 'react-router'
@@ -36,7 +44,6 @@ import { useNavigate, useParams } from 'react-router'
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
 import Page from 'components/page/Page'
-import { VideoPlatformBadge } from 'components/video-platform-badge/VideoPlatformBadge'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { track, make } from 'services/analytics'
@@ -46,6 +53,7 @@ import {
   TimeInput,
   parseTime
 } from '../../components/host-remix-contest-modal/TimeInput'
+import { AttachVideoModal } from '../fan-club-detail-page/components/AttachVideoModal'
 
 import { AddSourceTrackModal } from './AddSourceTrackModal'
 import { ManageStemsModal } from './ManageStemsModal'
@@ -199,6 +207,7 @@ export const HostRemixContestPage = () => {
   const [videoUrl, setVideoUrl] = useState(
     draft?.videoUrl ?? existingEventData.videoUrl ?? ''
   )
+  const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
   const [coverPhotoUrl, setCoverPhotoUrl] = useState(
     draft?.coverPhotoUrl ?? existingEventData.coverPhotoUrl ?? ''
   )
@@ -583,7 +592,8 @@ export const HostRemixContestPage = () => {
             />
           </Paper>
 
-          {/* Section: Video Link */}
+          {/* Section: Video Link — uses the same AttachVideoModal as the
+              fan-club composer so the validation + preview UX matches. */}
           <Paper
             direction='column'
             p='xl'
@@ -599,23 +609,75 @@ export const HostRemixContestPage = () => {
                 {messages.videoHelper}
               </Text>
             </Flex>
-            <Flex gap='m' alignItems='center'>
-              <Flex flex={1}>
-                <TextInput
-                  label={messages.videoLabel}
-                  hideLabel
-                  placeholder={messages.videoPlaceholder}
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                />
-              </Flex>
+            <Flex direction='row' alignItems='center' gap='m'>
               {(() => {
                 const parsed = videoUrl.trim()
                   ? parseVideoUrl(videoUrl.trim())
                   : null
-                return parsed ? (
-                  <VideoPlatformBadge platform={parsed.platform} />
-                ) : null
+                const thumbnail = parsed ? getVideoThumbnailUrl(parsed) : null
+                return videoUrl && parsed ? (
+                  <Flex
+                    css={(theme) => ({
+                      position: 'relative',
+                      width: 102,
+                      height: 56,
+                      borderRadius: theme.cornerRadius.s,
+                      overflow: 'hidden',
+                      backgroundColor: theme.color.neutral.n800
+                    })}
+                  >
+                    {thumbnail ? (
+                      <img
+                        src={thumbnail}
+                        alt=''
+                        css={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    ) : null}
+                    <Flex
+                      alignItems='center'
+                      justifyContent='center'
+                      css={{
+                        position: 'absolute',
+                        inset: 0,
+                        backgroundColor: 'rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      <IconPlay size='l' color='staticWhite' />
+                    </Flex>
+                    <Flex
+                      alignItems='center'
+                      justifyContent='center'
+                      onClick={() => setVideoUrl('')}
+                      css={(theme) => ({
+                        position: 'absolute',
+                        top: 4,
+                        left: 4,
+                        width: 24,
+                        height: 24,
+                        borderRadius: theme.cornerRadius.circle,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.7)'
+                        }
+                      })}
+                    >
+                      <IconClose size='xs' color='staticWhite' />
+                    </Flex>
+                  </Flex>
+                ) : (
+                  <PlainButton
+                    type='button'
+                    variant='default'
+                    onClick={() => setShowAttachVideoModal(true)}
+                  >
+                    {messages.videoLabel}
+                  </PlainButton>
+                )
               })()}
             </Flex>
           </Paper>
@@ -874,6 +936,11 @@ export const HostRemixContestPage = () => {
         isOpen={manageStemsTargetId !== null}
         onClose={() => setManageStemsTargetId(null)}
         trackId={manageStemsTargetId}
+      />
+      <AttachVideoModal
+        isOpen={showAttachVideoModal}
+        onClose={() => setShowAttachVideoModal(false)}
+        onAttach={(url) => setVideoUrl(url)}
       />
     </Page>
   )

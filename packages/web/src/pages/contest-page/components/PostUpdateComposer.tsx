@@ -3,26 +3,26 @@ import { useCallback, useState } from 'react'
 import { useCurrentUserId, usePostEventComment } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
+import { getVideoThumbnailUrl, parseVideoUrl } from '@audius/common/utils'
 import {
   Avatar as HarmonyAvatar,
   Box,
   Flex,
-  IconCamera,
+  IconClose,
+  IconPlay,
   Paper,
-  PlainButton,
-  Text,
-  TextInput
+  PlainButton
 } from '@audius/harmony'
 import { EntityType } from '@audius/sdk'
 
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
+import { AttachVideoModal } from '../../fan-club-detail-page/components/AttachVideoModal'
+
 const messages = {
-  postUpdate: 'POST UPDATE',
   placeholder: 'Update your fans',
-  attachVideo: 'Attach Video',
-  videoUrlPlaceholder: 'Paste a YouTube or Vimeo URL'
+  attachVideo: '+ Attach Video'
 }
 
 type PostUpdateComposerProps = {
@@ -52,26 +52,24 @@ export const PostUpdateComposer = ({
 
   const { mutate: postComment, isPending: isPosting } = usePostEventComment()
 
-  const [videoUrlOpen, setVideoUrlOpen] = useState(false)
-  const [videoUrlDraft, setVideoUrlDraft] = useState('')
+  const [videoUrl, setVideoUrl] = useState<string | undefined>()
+  const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
   const [messageId, setMessageId] = useState(0)
 
   const handleSubmit = useCallback(
     (value: string) => {
       const body = value.trim()
       if (!body || !currentUserId) return
-      const trimmedVideoUrl = videoUrlDraft.trim()
       postComment({
         userId: currentUserId,
         eventId,
         body,
-        videoUrl: trimmedVideoUrl.length > 0 ? trimmedVideoUrl : undefined
+        videoUrl: videoUrl && videoUrl.trim().length > 0 ? videoUrl : undefined
       })
-      setVideoUrlDraft('')
-      setVideoUrlOpen(false)
+      setVideoUrl(undefined)
       setMessageId((prev) => prev + 1)
     },
-    [currentUserId, eventId, postComment, videoUrlDraft]
+    [currentUserId, eventId, postComment, videoUrl]
   )
 
   const profileImage = useProfilePicture({
@@ -80,6 +78,9 @@ export const PostUpdateComposer = ({
   })
 
   if (!isEventOwner) return null
+
+  const parsedVideo = videoUrl ? parseVideoUrl(videoUrl) : null
+  const thumbnailUrl = parsedVideo ? getVideoThumbnailUrl(parsedVideo) : null
 
   return (
     <Paper
@@ -92,10 +93,6 @@ export const PostUpdateComposer = ({
       backgroundColor='white'
       shadow='flat'
     >
-      <Text variant='label' size='m' color='subdued'>
-        {messages.postUpdate}
-      </Text>
-
       <Flex w='100%' gap='s' alignItems='center'>
         <HarmonyAvatar
           size='auto'
@@ -118,25 +115,78 @@ export const PostUpdateComposer = ({
         </Box>
       </Flex>
 
-      <Flex direction='column' gap='s' w='100%'>
-        <PlainButton
-          type='button'
-          variant='subdued'
-          iconLeft={IconCamera}
-          onClick={() => setVideoUrlOpen((v) => !v)}
-          css={{ alignSelf: 'flex-start' }}
-        >
-          {messages.attachVideo}
-        </PlainButton>
-        {videoUrlOpen ? (
-          <TextInput
-            label=''
-            value={videoUrlDraft}
-            onChange={(e) => setVideoUrlDraft(e.target.value)}
-            placeholder={messages.videoUrlPlaceholder}
-          />
-        ) : null}
+      <Flex direction='row' alignItems='center' gap='m'>
+        {videoUrl && parsedVideo ? (
+          <Flex
+            css={(theme) => ({
+              position: 'relative',
+              width: 102,
+              height: 56,
+              borderRadius: theme.cornerRadius.s,
+              overflow: 'hidden',
+              backgroundColor: theme.color.neutral.n800,
+              cursor: 'pointer'
+            })}
+          >
+            {thumbnailUrl ? (
+              <img
+                src={thumbnailUrl}
+                alt=''
+                css={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            ) : null}
+            <Flex
+              alignItems='center'
+              justifyContent='center'
+              css={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)'
+              }}
+            >
+              <IconPlay size='l' color='staticWhite' />
+            </Flex>
+            <Flex
+              alignItems='center'
+              justifyContent='center'
+              onClick={() => setVideoUrl(undefined)}
+              css={(theme) => ({
+                position: 'absolute',
+                top: 4,
+                left: 4,
+                width: 24,
+                height: 24,
+                borderRadius: theme.cornerRadius.circle,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.7)'
+                }
+              })}
+            >
+              <IconClose size='xs' color='staticWhite' />
+            </Flex>
+          </Flex>
+        ) : (
+          <PlainButton
+            type='button'
+            variant='subdued'
+            onClick={() => setShowAttachVideoModal(true)}
+          >
+            {messages.attachVideo}
+          </PlainButton>
+        )}
       </Flex>
+
+      <AttachVideoModal
+        isOpen={showAttachVideoModal}
+        onClose={() => setShowAttachVideoModal(false)}
+        onAttach={(url) => setVideoUrl(url)}
+      />
     </Paper>
   )
 }

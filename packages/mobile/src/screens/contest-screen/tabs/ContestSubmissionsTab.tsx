@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   getRemixesQueryKey,
   useRemixContest,
+  useRemixes,
   useRemixesLineup
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
@@ -93,10 +94,13 @@ export const ContestSubmissionsTab = () => {
     [remixesLineupArgs]
   )
 
-  // Total lineup length includes original + winners + remixes. The
-  // number of actual submissions (remixes) is the remainder once we
-  // pull off the original (1 entry) and the winners.
-  const submissionsCount = Math.max(0, lineupTrackIds.length - 1 - winnerCount)
+  // Submissions total comes from a count-only API query so it matches
+  // the contest card total instead of growing as the user scrolls.
+  const { data: remixesCountData } = useRemixes(
+    { trackId, pageSize: 0, isContestEntry: true },
+    { enabled: !!trackId, staleTime: 60_000 }
+  )
+  const submissionsCount = remixesCountData?.pages?.[0]?.count ?? 0
 
   const winnersDelineator = useMemo(
     () => (

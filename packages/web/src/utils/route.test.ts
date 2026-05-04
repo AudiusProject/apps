@@ -7,46 +7,33 @@ import { describe, expect, it } from 'vitest'
 import { contestPage, fullContestPage, BASE_URL } from './route'
 
 describe('contestPage route helper', () => {
-  // The contest page is a new route added in the remix-contest redesign.
-  // These tests lock in the URL shape the rest of the app (teaser link on
-  // the track page, Follow button, canonical SSR meta) relies on.
-  it('appends /contest to a permalink', () => {
+  // The contest page URL injects the literal `contest` segment between
+  // handle and slug — `/{handle}/contest/{slug}` — so it sits as a
+  // sibling to `/{handle}/album/{slug}` rather than as a child of the
+  // track URL. These tests lock in that shape.
+  it('rewrites the permalink into /{handle}/contest/{slug}', () => {
     expect(contestPage('/Protohype/ready-to-love')).toBe(
-      '/Protohype/ready-to-love/contest'
+      '/Protohype/contest/ready-to-love'
     )
   })
 
-  it('appends /contest to permalinks containing uppercase and punctuation', () => {
+  it('preserves uppercase and punctuation in the slug', () => {
     expect(contestPage('/Dj_Mix/My-Track--01')).toBe(
-      '/Dj_Mix/My-Track--01/contest'
+      '/Dj_Mix/contest/My-Track--01'
     )
-  })
-
-  it('does not normalise or rewrite the input permalink', () => {
-    // Empty permalink is a programming error upstream; the helper is a pure
-    // string concatenation, so we just verify it doesn't silently correct
-    // the caller.
-    expect(contestPage('')).toBe('/contest')
   })
 })
 
 describe('fullContestPage route helper', () => {
   it('prefixes the base url to a contest permalink', () => {
-    const expected = `${BASE_URL}/Protohype/ready-to-love/contest`
+    const expected = `${BASE_URL}/Protohype/contest/ready-to-love`
     expect(fullContestPage('/Protohype/ready-to-love')).toBe(expected)
   })
 })
 
 describe('CONTEST_PAGE route pattern', () => {
-  it('matches the /@handle/@slug/contest nesting of the existing /remixes pattern', () => {
-    expect(CONTEST_PAGE).toBe('/:handle/:slug/contest')
-  })
-
-  it('is a sibling of TRACK_REMIXES_PAGE with the same handle/slug prefix', () => {
-    // Both routes nest under a track page, so they must share the
-    // /:handle/:slug prefix for react-router to match them.
-    expect(CONTEST_PAGE.startsWith('/:handle/:slug/')).toBe(true)
-    expect(TRACK_REMIXES_PAGE.startsWith('/:handle/:slug/')).toBe(true)
+  it('matches the /:handle/contest/:slug nesting', () => {
+    expect(CONTEST_PAGE).toBe('/:handle/contest/:slug')
   })
 
   it('does not collide with the sibling /remixes route', () => {

@@ -1,30 +1,31 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
   useComment,
   useCurrentUserId,
+  useDeleteComment,
   useEventComments,
   usePostEventComment,
   useReactToComment,
   useUser
 } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
-import { dayjs } from '@audius/common/utils'
+import { dayjs, parseVideoUrl } from '@audius/common/utils'
 import {
   Avatar as HarmonyAvatar,
   Box,
   Button,
   Divider,
   Flex,
-  IconCamera,
   IconHeart,
+  IconKebabHorizontal,
   LoadingSpinner,
   Paper,
   PlainButton,
+  PopupMenu,
   SelectablePill,
-  Text,
-  TextInput
+  Text
 } from '@audius/harmony'
 import { EntityType } from '@audius/sdk'
 import { useQueryClient } from '@tanstack/react-query'
@@ -34,6 +35,7 @@ import { UserLink } from 'components/link/UserLink'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
 import { Timestamp } from '../../../components/comments/Timestamp'
+import { AttachVideoModal } from '../../fan-club-detail-page/components/AttachVideoModal'
 
 const messages = {
   commentsHeading: 'Comments',
@@ -45,13 +47,16 @@ const messages = {
   emptyUpdatesSub: 'The contest host will post announcements here.',
   composePlaceholder: 'Add a comment',
   composePostUpdatePlaceholder: 'Post an update to your contest followers…',
+  composeReplyPlaceholder: 'Reply…',
   postUpdate: 'Post Update',
-  attachVideo: 'Attach Video',
-  videoUrlPlaceholder: 'Paste a video URL (MP4 or HLS)',
+  attachVideo: '+ Attach Video',
   postUpdateBadge: 'Post Update',
   artistBadge: 'Artist',
   loadMore: 'Load more',
-  signInToComment: 'Sign in to comment.'
+  signInToComment: 'Sign in to comment.',
+  reply: 'Reply',
+  delete: 'Delete',
+  cancel: 'Cancel'
 }
 
 /**
@@ -81,6 +86,13 @@ type ContestCommentsTileProps = {
    * false (composer rendered when the user is allowed to post).
    */
   hideComposer?: boolean
+  /**
+   * When true, render nothing if there are no items to show AND the
+   * composer is hidden. Used by the desktop Updates section so an empty
+   * "Nothing here yet" card doesn't take up space below Prizes for
+   * non-hosts. Defaults to false (empty-state card always rendered).
+   */
+  hideWhenEmpty?: boolean
 }
 
 /**
@@ -106,7 +118,8 @@ export const ContestCommentsTile = ({
   eventOwnerUserId,
   mode,
   hideHeading = false,
-  hideComposer = false
+  hideComposer = false,
+  hideWhenEmpty = false
 }: ContestCommentsTileProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const isEventOwner =
@@ -133,10 +146,14 @@ export const ContestCommentsTile = ({
 
   const heading =
     mode === 'updates' ? messages.updatesHeading : messages.commentsHeading
+  // In `comments` mode the host should NOT see the top-level composer —
+  // they participate via replies (and via the dedicated POST UPDATE
+  // composer for announcements). Viewers see the top-level composer.
+  // In `updates` mode only the host can compose top-level posts.
   const showComposer =
     !hideComposer &&
     currentUserId !== null &&
-    (mode === 'comments' || isEventOwner)
+    (mode === 'comments' ? !isEventOwner : isEventOwner)
   // When `hideComposer` is set, the caller is rendering a feed-only
   // tile alongside a separate composer (e.g. desktop details), so the
   // "sign in to comment" stub would be a redundant CTA. Track separately
@@ -149,8 +166,8 @@ export const ContestCommentsTile = ({
   const showAttachVideo = mode === 'updates'
 
   // Composer local state. videoUrl is owner-only (Updates mode).
-  const [videoUrlOpen, setVideoUrlOpen] = useState(false)
-  const [videoUrlDraft, setVideoUrlDraft] = useState('')
+  const [videoUrl, setVideoUrl] = useState<string | undefined>()
+  const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
 
   // Incrementing messageId "clears" the ComposerInput after submit — the
   // track page uses the same pattern.
@@ -160,18 +177,16 @@ export const ContestCommentsTile = ({
     (value: string) => {
       const body = value.trim()
       if (!body || !currentUserId) return
-      const trimmedVideoUrl = videoUrlDraft.trim()
       postComment({
         userId: currentUserId,
         eventId,
         body,
-        videoUrl: trimmedVideoUrl.length > 0 ? trimmedVideoUrl : undefined
+        videoUrl: videoUrl && videoUrl.trim().length > 0 ? videoUrl : undefined
       })
-      setVideoUrlDraft('')
-      setVideoUrlOpen(false)
+      setVideoUrl(undefined)
       setMessageId((prev) => prev + 1)
     },
-    [currentUserId, eventId, postComment, videoUrlDraft]
+    [currentUserId, eventId, postComment, videoUrl]
   )
 
   const profileImage = useProfilePicture({
@@ -204,6 +219,18 @@ export const ContestCommentsTile = ({
       !parentCommentId
     return mode === 'updates' ? isPostUpdate : !isPostUpdate
   })
+
+  // hideWhenEmpty hides the entire card when there's nothing to show and
+  // the composer is also suppressed — keeps the desktop Updates rail
+  // from rendering an empty "Nothing here yet" tile for non-host viewers.
+  if (
+    hideWhenEmpty &&
+    !isPending &&
+    filteredItems.length === 0 &&
+    (hideComposer || !showComposer)
+  ) {
+    return null
+  }
 
   return (
     <Paper
@@ -263,25 +290,11 @@ export const ContestCommentsTile = ({
           </Flex>
 
           {showAttachVideo ? (
-            <Flex direction='column' gap='s' w='100%'>
-              <PlainButton
-                type='button'
-                variant='subdued'
-                iconLeft={IconCamera}
-                onClick={() => setVideoUrlOpen((v) => !v)}
-                css={{ alignSelf: 'flex-start' }}
-              >
-                {messages.attachVideo}
-              </PlainButton>
-              {videoUrlOpen ? (
-                <TextInput
-                  label=''
-                  value={videoUrlDraft}
-                  onChange={(e) => setVideoUrlDraft(e.target.value)}
-                  placeholder={messages.videoUrlPlaceholder}
-                />
-              ) : null}
-            </Flex>
+            <AttachVideoComposerRow
+              videoUrl={videoUrl}
+              onClear={() => setVideoUrl(undefined)}
+              onOpen={() => setShowAttachVideoModal(true)}
+            />
           ) : null}
         </Flex>
       ) : showSignInStub && !currentUserId ? (
@@ -360,7 +373,65 @@ export const ContestCommentsTile = ({
           ) : null}
         </Flex>
       )}
+
+      {showAttachVideo ? (
+        <AttachVideoModal
+          isOpen={showAttachVideoModal}
+          onClose={() => setShowAttachVideoModal(false)}
+          onAttach={(url) => setVideoUrl(url)}
+        />
+      ) : null}
     </Paper>
+  )
+}
+
+type AttachVideoComposerRowProps = {
+  videoUrl: string | undefined
+  onClear: () => void
+  onOpen: () => void
+}
+
+const AttachVideoComposerRow = ({
+  videoUrl,
+  onClear,
+  onOpen
+}: AttachVideoComposerRowProps) => {
+  const parsed = useMemo(
+    () => (videoUrl ? parseVideoUrl(videoUrl) : null),
+    [videoUrl]
+  )
+  return (
+    <Flex direction='row' alignItems='center' gap='m' w='100%'>
+      {videoUrl && parsed ? (
+        <Flex
+          alignItems='center'
+          gap='s'
+          css={(theme) => ({
+            position: 'relative',
+            border: `1px solid ${theme.color.border.default}`,
+            borderRadius: theme.cornerRadius.s,
+            paddingInline: theme.spacing.s,
+            paddingBlock: theme.spacing.xs
+          })}
+        >
+          <Text variant='body' size='s' color='subdued'>
+            {parsed.platform === 'youtube' ? 'YouTube' : 'Vimeo'} video attached
+          </Text>
+          <Button size='xs' variant='secondary' onClick={onClear}>
+            {messages.cancel}
+          </Button>
+        </Flex>
+      ) : (
+        <PlainButton
+          type='button'
+          variant='subdued'
+          onClick={onOpen}
+          css={{ alignSelf: 'flex-start' }}
+        >
+          {messages.attachVideo}
+        </PlainButton>
+      )}
+    </Flex>
   )
 }
 
@@ -391,6 +462,15 @@ const ContestCommentRow = ({
   const { data: author } = useUser(comment?.userId)
   const { data: currentUserId } = useCurrentUserId()
   const { mutate: reactToComment } = useReactToComment()
+  const { mutate: deleteComment } = useDeleteComment()
+  const { mutate: postComment } = usePostEventComment()
+  const profileImage = useProfilePicture({
+    userId: currentUserId ?? undefined,
+    size: SquareSizes.SIZE_150_BY_150
+  })
+
+  const [isReplying, setIsReplying] = useState(false)
+  const [replyMessageId, setReplyMessageId] = useState(0)
 
   if (!comment || !author) return null
 
@@ -410,6 +490,16 @@ const ContestCommentRow = ({
 
   const isAuthorEventOwner =
     eventOwnerUserId !== undefined && comment.userId === eventOwnerUserId
+  const isCurrentUserHost =
+    currentUserId !== null &&
+    eventOwnerUserId !== undefined &&
+    currentUserId === eventOwnerUserId
+  const isCurrentUserAuthor =
+    currentUserId !== null && comment.userId === currentUserId
+  // Host moderates the contest; authors can delete their own comments.
+  const canDelete = isCurrentUserHost || isCurrentUserAuthor
+  // Reply is shown to any signed-in user, top-level rows only.
+  const canReply = currentUserId !== null
 
   const videoUrl: string | undefined =
     'videoUrl' in comment ? ((comment as any).videoUrl ?? undefined) : undefined
@@ -419,18 +509,74 @@ const ContestCommentRow = ({
       ? dayjs((comment as any).createdAt).toDate()
       : undefined
 
+  const handleDelete = () => {
+    if (!currentUserId) return
+    deleteComment({
+      commentId,
+      userId: currentUserId,
+      // `useDeleteComment` is track-typed; the mutation passes the
+      // entityId through to the SDK regardless. Pass `eventId` so cache
+      // helpers don't choke on undefined.
+      trackId: eventId,
+      currentSort: undefined,
+      parentCommentId
+    })
+  }
+
+  const handleReplySubmit = (value: string) => {
+    if (!currentUserId) return
+    const body = value.trim()
+    if (!body) return
+    postComment({
+      userId: currentUserId,
+      eventId,
+      body,
+      parentCommentId: commentId
+    })
+    setReplyMessageId((prev) => prev + 1)
+    setIsReplying(false)
+  }
+
   return (
     <Flex direction='row' gap='m' alignItems='flex-start' w='100%'>
       <UserAvatar userId={author.user_id} />
       <Flex direction='column' gap='xs' css={{ flex: 1, minWidth: 0 }}>
-        <Flex gap='s' alignItems='center' wrap='wrap'>
-          <UserLink userId={author.user_id} />
-          {isAuthorEventOwner ? (
-            <Text variant='label' size='xs' color='accent' strength='strong'>
-              {isPostUpdate ? messages.postUpdateBadge : messages.artistBadge}
-            </Text>
+        <Flex
+          gap='s'
+          alignItems='center'
+          wrap='wrap'
+          justifyContent='space-between'
+        >
+          <Flex gap='s' alignItems='center' wrap='wrap'>
+            <UserLink userId={author.user_id} />
+            {/* Show Artist badge when the host comments in the Comments
+                feed; suppress the "Post Update" badge in the Updates
+                feed because every row there is already a host update —
+                the label was redundant. */}
+            {isAuthorEventOwner && !isPostUpdate ? (
+              <Text variant='label' size='xs' color='accent' strength='strong'>
+                {messages.artistBadge}
+              </Text>
+            ) : null}
+            {createdAt ? <Timestamp time={createdAt} /> : null}
+          </Flex>
+          {canDelete ? (
+            <PopupMenu
+              items={[{ text: messages.delete, onClick: handleDelete }]}
+              renderTrigger={(anchorRef, triggerPopup) => (
+                <Box
+                  ref={anchorRef as any}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    triggerPopup()
+                  }}
+                  css={{ cursor: 'pointer', lineHeight: 0 }}
+                >
+                  <IconKebabHorizontal size='s' color='subdued' />
+                </Box>
+              )}
+            />
           ) : null}
-          {createdAt ? <Timestamp time={createdAt} /> : null}
         </Flex>
         <Text variant='body' size='s'>
           {comment.message}
@@ -449,13 +595,6 @@ const ContestCommentRow = ({
             />
           </Box>
         ) : null}
-        {/* Like button. `useReactToComment` already drives the
-            react/unreact flow on track comments — we reuse it here
-            with `entityType: 'Event'` so contest comments get the
-            same optimistic cache update + toast-on-failure behavior
-            without reinventing any of it. Current user's reaction
-            state (`isCurrentUserReacted`) controls the filled/outline
-            icon and the like count comes straight off the comment. */}
         <Flex gap='m' alignItems='center' pt='xs'>
           <Flex
             gap='xs'
@@ -467,8 +606,6 @@ const ContestCommentRow = ({
                 commentId,
                 userId: currentUserId,
                 isLiked: nextIsLiked,
-                // `trackId` is what the mutation calls the entity ID
-                // — for events it carries the eventId instead.
                 trackId: eventId,
                 entityType: 'Event',
                 isEntityOwner:
@@ -491,7 +628,38 @@ const ContestCommentRow = ({
               </Text>
             ) : null}
           </Flex>
+          {canReply ? (
+            <PlainButton
+              type='button'
+              variant='subdued'
+              onClick={() => setIsReplying((v) => !v)}
+            >
+              {messages.reply}
+            </PlainButton>
+          ) : null}
         </Flex>
+        {isReplying && currentUserId ? (
+          <Flex direction='row' gap='s' alignItems='center' pt='xs' w='100%'>
+            <HarmonyAvatar
+              size='auto'
+              isLoading={false}
+              src={profileImage}
+              css={{ width: 28, height: 28, flexShrink: 0 }}
+            />
+            <Box css={{ flex: 1, minWidth: 0 }}>
+              <ComposerInput
+                messageId={replyMessageId}
+                entityId={eventId}
+                entityType={EntityType.EVENT}
+                placeholder={messages.composeReplyPlaceholder}
+                maxLength={400}
+                maxMentions={10}
+                onSubmit={(value) => handleReplySubmit(value)}
+                blurOnSubmit
+              />
+            </Box>
+          </Flex>
+        ) : null}
       </Flex>
     </Flex>
   )

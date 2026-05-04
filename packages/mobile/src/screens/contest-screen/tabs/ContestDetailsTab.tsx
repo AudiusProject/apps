@@ -61,15 +61,22 @@ export const ContestDetailsTab = () => {
           <VideoEmbed url={videoUrl} />
         </Paper>
 
-        {/* Prizes — prize info text inside its own Paper card. */}
-        <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
-          <Text variant='label' size='m' color='subdued'>
-            {messages.prizes}
-          </Text>
-          {prizeInfo ? (
+        {/* Prizes — only render the card when there's content. Empty
+            cards looked like an unfinished section. */}
+        {prizeInfo?.trim() ? (
+          <Paper
+            direction='column'
+            p='l'
+            gap='m'
+            borderRadius='m'
+            shadow='flat'
+          >
+            <Text variant='label' size='m' color='subdued'>
+              {messages.prizes}
+            </Text>
             <UserGeneratedText variant='body'>{prizeInfo}</UserGeneratedText>
-          ) : null}
-        </Paper>
+          </Paper>
+        ) : null}
 
         <EventFollowersCard eventId={eventId} followerCount={followerCount} />
 

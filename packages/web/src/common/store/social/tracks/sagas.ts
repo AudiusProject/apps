@@ -36,6 +36,7 @@ import {
 import { make } from 'common/store/analytics/actions'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { updateProfileAsync } from 'common/store/profile/sagas'
+import { fullContestPage } from 'utils/route'
 import { waitForRead, waitForWrite } from 'utils/sagaHelpers'
 
 import watchTrackErrors from './errorSagas'
@@ -814,7 +815,7 @@ function* watchShareContest() {
       const user = yield* queryUser(track.owner_id)
       if (!user) return
 
-      const link = `${track.permalink}/contest`
+      const link = fullContestPage(track.permalink)
       const share = yield* getContext('share')
       share(link, formatShareText(track.title, user.name))
 

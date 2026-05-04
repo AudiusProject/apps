@@ -123,7 +123,7 @@ export const shareTrack = createCustomAction(
 
 /**
  * Share a remix-contest event — takes the parent track's ID and
- * resolves the contest URL (`{permalink}/contest`) in the saga.
+ * resolves the contest URL (`/{handle}/contest/{slug}`) in the saga.
  * Separated from `shareTrack` so analytics + clipboard target the
  * contest page rather than the underlying track.
  */

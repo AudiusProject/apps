@@ -46,6 +46,7 @@ const messages = {
   heading: 'STEMS & DOWNLOADS',
   publicFree: 'Public Free',
   unlockAll: (price: string) => `Unlock All ${price}`,
+  download: 'Download',
   downloadAll: 'Download All',
   stemsCount: (n: number) => (n === 1 ? '1 Stem' : `${n} Stems`),
   fullTrack: 'Full Track',
@@ -162,11 +163,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   if (!track || !artist) return null
 
-  const accessLabel =
-    shouldDisplayPremiumDownloadLocked && formattedPrice
-      ? messages.unlockAll(formattedPrice)
-      : messages.publicFree
-
   // Numbered rows. First row is the parent "Full Track" when the
   // track is downloadable, followed by each stem. Index numbers the
   // user sees start at 1 — matches the Figma leading-column numerals.
@@ -224,7 +220,12 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           role='button'
           tabIndex={0}
           onClick={handleRowClick}
-          css={{ cursor: 'pointer' }}
+          css={{
+            cursor: 'pointer',
+            '&:hover .contest-stems-card-title': {
+              color: color.primary.primary
+            }
+          }}
         >
           <Box
             w={64}
@@ -239,8 +240,16 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             }}
           />
           <Flex direction='column' gap='2xs' css={{ flex: 1, minWidth: 0 }}>
-            <Text variant='title' size='m' color='default'>
-              {accessLabel}
+            <Text
+              variant='title'
+              size='m'
+              color='default'
+              className='contest-stems-card-title'
+              css={{
+                transition: 'color var(--harmony-quick)'
+              }}
+            >
+              {track.title}
             </Text>
             <Flex onClick={(e) => e.stopPropagation()}>
               <UserLink userId={artist.user_id} popover size='s' />
@@ -290,7 +299,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               iconRight={IconReceive}
               onClick={handleDownloadAll}
             >
-              {messages.downloadAll}
+              {stemsCount > 0 ? messages.downloadAll : messages.download}
             </PlainButton>
           )}
         </Flex>

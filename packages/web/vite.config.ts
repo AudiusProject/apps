@@ -241,7 +241,17 @@ export default defineConfig(async ({ mode }) => {
           }
         }
       },
-      exclude: ['e2e', 'node_modules', 'dist'],
+      // Patterns must be globs — bare strings like `'node_modules'`
+      // were matching only top-level paths, so nested
+      // `examples/trending/node_modules/**/*.test.*` files were
+      // getting picked up and run against happy-dom (where they
+      // network out and fail). Match the vitest defaults shape.
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/e2e/**',
+        '**/examples/**'
+      ],
       threads: false,
       minWorkers: 1,
       maxWorkers: 1, // Segfaults if multithreaded

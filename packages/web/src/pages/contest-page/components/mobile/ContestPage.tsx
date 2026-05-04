@@ -680,6 +680,7 @@ const ContestPage = ({
                 mode='updates'
                 hideHeading
                 hideComposer
+                hideWhenEmpty
               />
             </Flex>
           ) : activeTab === 'submissions' ? (

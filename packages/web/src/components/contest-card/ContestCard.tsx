@@ -29,6 +29,7 @@ import { useLinkClickHandler } from 'react-router'
 import { Avatar } from 'components/avatar/Avatar'
 import { UserLink } from 'components/link'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
+import { contestPage } from 'utils/route'
 
 const messages = {
   hostedBy: 'HOSTED BY',
@@ -262,7 +263,7 @@ export const ContestCard = forwardRef(
     // — the contest page is the actual destination readers are trying to
     // reach from the Explore grid.
     const contestDestination = track?.permalink
-      ? `${track.permalink}/contest`
+      ? contestPage(track.permalink)
       : ''
     const handleNavigate =
       useLinkClickHandler<HTMLDivElement>(contestDestination)

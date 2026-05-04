@@ -1,3 +1,3 @@
 import { makePageRoute } from 'ssr/util'
 
-export default makePageRoute(['/@handle/@slug/contest'], 'Contest Page')
+export default makePageRoute(['/@handle/contest/@slug'], 'Contest Page')
