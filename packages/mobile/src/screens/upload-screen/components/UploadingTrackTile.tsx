@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import type { TrackForUpload } from '@audius/common/store'
 import { View } from 'react-native'
 
-import { IconImage } from '@audius/harmony-native'
-import { DynamicImage, LinearProgress, Text, Tile } from 'app/components/core'
+import { IconImage, Image as HarmonyImage } from '@audius/harmony-native'
+import { LinearProgress, Text, Tile } from 'app/components/core'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
@@ -57,19 +57,32 @@ export const UploadingTrackTile = (props: UploadingTrackTileProps) => {
   return (
     <Tile styles={{ root: styles.tile, content: styles.tileContent }}>
       <View style={styles.content}>
-        <DynamicImage
-          source={source}
-          styles={{ root: styles.artwork, imageContainer: styles.image }}
-          noSkeleton
-        >
-          {artwork && 'url' in artwork && artwork?.url ? null : (
-            <IconImage
-              fill={neutralLight8}
-              height={spacing(8)}
-              width={spacing(8)}
+        <View style={[styles.artwork, styles.image]}>
+          {source.uri ? (
+            <HarmonyImage
+              source={source}
+              style={{ width: '100%', height: '100%' }}
             />
+          ) : (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              <IconImage
+                fill={neutralLight8}
+                height={spacing(8)}
+                width={spacing(8)}
+              />
+            </View>
           )}
-        </DynamicImage>
+        </View>
         <Text weight='demiBold' style={styles.title}>
           {title}
         </Text>

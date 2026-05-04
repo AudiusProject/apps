@@ -2,9 +2,8 @@ import { ReactNode } from 'react'
 
 import { useCollection, useTrack } from '@audius/common/api'
 import { SquareSizes, USDCContentPurchaseType } from '@audius/common/models'
-import { Skeleton, Text } from '@audius/harmony'
+import { Skeleton, Text, Image } from '@audius/harmony'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -47,7 +46,7 @@ export const TrackNameWithArtwork = ({
         <Skeleton />
       ) : (
         <>
-          <DynamicImage wrapperClassName={styles.artwork} image={image} />
+          <Image className={styles.artwork} src={image} />
           <div className={styles.textContainer}>
             <Text
               className={styles.titleText}

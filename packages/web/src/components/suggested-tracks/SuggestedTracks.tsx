@@ -13,12 +13,12 @@ import {
   IconCaretDown,
   IconRefresh,
   Paper,
-  useTheme
+  useTheme,
+  Image
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import { useToggle } from 'react-use'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link/UserLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -67,7 +67,7 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
   return (
     <div className={styles.suggestedTrack}>
       <div className={styles.trackDetails}>
-        <DynamicImage wrapperClassName={styles.trackArtwork} image={image} />
+        <Image className={styles.trackArtwork} src={image} />
         <div className={styles.trackInfo}>
           <p className={styles.trackName}>{title}</p>
           {user ? <UserLink userId={user.user_id} size='s' /> : null}

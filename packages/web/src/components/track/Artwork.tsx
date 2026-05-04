@@ -5,11 +5,11 @@ import {
   IconImage,
   IconLock,
   IconPlaybackPlay as IconPlay,
-  IconPlaybackPause as IconPause
+  IconPlaybackPause as IconPause,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
@@ -98,17 +98,15 @@ const Artwork = memo(
     hasNoArtwork
   }: ArtworkProps) => {
     const imageElement = (
-      <DynamicImage
-        wrapperClassName={cn(styles.artworkWrapper, {
+      <Image
+        className={cn(styles.artworkWrapper, styles.artwork, {
           [styles.artworkInset]: !coSign,
           [styles.small]: size === 'small',
           [styles.large]: size === 'large',
           [styles.artworkEmpty]: hasNoArtwork ?? false
         })}
-        className={styles.artwork}
-        image={showSkeleton ? '' : image}
+        src={showSkeleton ? '' : image}
         aria-label={label}
-        noShimmer={noShimmer}
         useSkeleton={!hasNoArtwork}
       >
         {showArtworkIcon && (
@@ -121,7 +119,7 @@ const Artwork = memo(
             hasNoArtwork={hasNoArtwork}
           />
         )}
-      </DynamicImage>
+      </Image>
     )
     return isTrack ? (
       <TrackFlair

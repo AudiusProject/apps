@@ -12,11 +12,12 @@ import {
   Text,
   IconCart,
   IconComponent,
-  IconUserFollowing
+  IconUserFollowing,
+  Image
 } from '@audius/harmony'
+import cn from 'classnames'
 
 import { CollectionDogEar } from 'components/collection'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -92,10 +93,9 @@ export const LockedContentDetailsTile = ({
         position: 'relative'
       }}
     >
-      <DynamicImage
-        wrapperClassName={styles.imageWrapper}
-        className={styles.image}
-        image={image}
+      <Image
+        className={cn(styles.imageWrapper, styles.image)}
+        src={image}
         aria-label={label}
       />
       {isAlbum ? (

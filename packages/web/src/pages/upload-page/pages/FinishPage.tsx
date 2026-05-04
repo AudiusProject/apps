@@ -23,13 +23,13 @@ import {
   PlainButton,
   ProgressBar,
   Box,
-  Flex
+  Flex,
+  Image
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { Tile } from 'components/tile'
 
@@ -96,9 +96,9 @@ const UploadTrackItem = (props: UploadTrackItemProps) => {
         <ProgressIndicator status={trackProgress?.audio?.status} />
         {displayIndex ? <Text size='s'>{index + 1}</Text> : null}
         {displayArtwork ? (
-          <DynamicImage
-            wrapperClassName={styles.trackItemArtwork}
-            image={artworkUrl || placeholderArt}
+          <Image
+            className={styles.trackItemArtwork}
+            src={artworkUrl || placeholderArt}
           />
         ) : null}
         <Text size='s'>{track.metadata.title}</Text>

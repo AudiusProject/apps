@@ -1,9 +1,8 @@
 import { useCollection, useTrack } from '@audius/common/api'
 import { SquareSizes, ID } from '@audius/common/models'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, Text, Image } from '@audius/harmony'
 import { pick } from 'lodash'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link/UserLink'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -11,11 +10,11 @@ import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 type ComposePreviewInfoProps = {
   title: string
   userId: ID
-  image?: string
+  src?: string
 }
 
 const ComposePreviewInfo = (props: ComposePreviewInfoProps) => {
-  const { title, userId, image } = props
+  const { title, userId, src } = props
   return (
     <Flex ph='l' pv='s' gap='m' borderBottom='default'>
       <Flex
@@ -24,7 +23,7 @@ const ComposePreviewInfo = (props: ComposePreviewInfoProps) => {
         w='unit12'
         style={{ overflow: 'hidden' }}
       >
-        <DynamicImage style={{ height: '100%', width: '100%' }} image={image} />
+        <Image style={{ height: '100%', width: '100%' }} src={src} />
       </Flex>
       <Flex direction='column' alignItems='flex-start' justifyContent='center'>
         <Text variant='body' strength='strong'>
@@ -62,7 +61,7 @@ export const ComposerTrackInfo = (props: ComposerTrackInfoProps) => {
     <ComposePreviewInfo
       title={track.title}
       userId={track.owner_id}
-      image={image}
+      src={image}
     />
   )
 }
@@ -91,7 +90,7 @@ export const ComposerCollectionInfo = (props: ComposerCollectionInfoProps) => {
     <ComposePreviewInfo
       title={playlist_name}
       userId={playlist_owner_id}
-      image={image}
+      src={image}
     />
   )
 }

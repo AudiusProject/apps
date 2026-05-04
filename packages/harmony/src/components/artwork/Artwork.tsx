@@ -17,6 +17,13 @@ export type ArtworkProps = {
   onError?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void
   hex?: boolean
   borderColor?: string
+  /**
+   * Optional low-resolution image URL. When provided, it is shown immediately
+   * (with a slight blur) as a placeholder while the high-res `src` loads, then
+   * crossfades out once the high-res image is ready. Enables true progressive
+   * image loading.
+   */
+  priorityLowResSrc?: string
 } & Pick<ComponentProps<'img'>, 'src' | 'onError'> &
   BoxProps
 
@@ -31,6 +38,7 @@ export const Artwork = (props: ArtworkProps) => {
   const {
     isLoading: isLoadingProp,
     src,
+    priorityLowResSrc,
     borderRadius = 's',
     borderWidth,
     shadow,
@@ -83,6 +91,29 @@ export const Artwork = (props: ArtworkProps) => {
           clipPath: useHexClip ? `url(#${roundedHexClipPath})` : undefined
         }}
       />
+      {priorityLowResSrc && isLoading ? (
+        <Box
+          as='img'
+          // @ts-ignore - Box doesn't type all img props
+          src={priorityLowResSrc}
+          alt=''
+          aria-hidden
+          borderRadius={useHexClip ? borderRadius : borderRadius}
+          h='100%'
+          w='100%'
+          draggable={false}
+          css={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            objectFit: 'cover',
+            zIndex: 1,
+            filter: 'blur(8px)',
+            transform: 'scale(1.05)',
+            clipPath: useHexClip ? `url(#${roundedHexClipPath})` : undefined
+          }}
+        />
+      ) : null}
       {src ? (
         <Box
           as='img'
@@ -97,8 +128,10 @@ export const Artwork = (props: ArtworkProps) => {
             setIsLoadingState(false)
             onError?.(event)
           }}
-          // @ts-ignore
+          // @ts-ignore - Box does not type <img> src/loading/decoding
           src={src}
+          loading='lazy'
+          decoding='async'
           data-testid={testId}
           draggable={false}
           css={{
@@ -108,6 +141,7 @@ export const Artwork = (props: ArtworkProps) => {
             objectFit: 'cover',
             opacity: isLoading ? 0 : 1,
             transition: `opacity ${motion.calm}`,
+            zIndex: 2,
             clipPath: useHexClip ? `url(#${roundedHexClipPath})` : undefined
           }}
         />

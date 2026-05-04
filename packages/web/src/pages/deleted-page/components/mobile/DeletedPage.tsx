@@ -12,11 +12,10 @@ import {
   User
 } from '@audius/common/models'
 import { route, NestedNonNullable } from '@audius/common/utils'
-import { Button, IconUser } from '@audius/harmony'
+import { Button, IconUser, Image } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -46,7 +45,7 @@ const TrackArt = ({ trackId }: { trackId: ID }) => {
     trackId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
@@ -54,7 +53,7 @@ const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
     collectionId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 export type DeletedPageProps = {

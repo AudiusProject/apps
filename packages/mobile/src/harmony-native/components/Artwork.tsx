@@ -21,6 +21,12 @@ export type ArtworkProps = {
   borderWidth?: number
   'data-testid'?: string
   noLoading?: boolean
+  /**
+   * Optional low-resolution image source. When provided, it is shown
+   * immediately while the high-res `source` loads, then crossfades out.
+   * Enables true progressive image loading.
+   */
+  priorityLowResSource?: ImageProps['source']
 } & Partial<Pick<ImageProps, 'source' | 'onError' | 'onLoad'>> &
   BoxProps
 
@@ -35,6 +41,7 @@ export const Artwork = (props: ArtworkProps) => {
   const {
     isLoading: isLoadingProp,
     source,
+    priorityLowResSource,
     onError,
     onLoad,
     borderRadius = 's',
@@ -107,6 +114,21 @@ export const Artwork = (props: ArtworkProps) => {
                 : color.background.surface2
           }}
         />
+        {hasImageSource && priorityLowResSource && isLoading ? (
+          <Image
+            blurRadius={8}
+            source={priorityLowResSource}
+            style={{
+              height: '100%',
+              width: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              borderRadius: cornerRadius[borderRadius],
+              zIndex: 1
+            }}
+          />
+        ) : null}
         {hasImageSource ? (
           <AnimatedImage
             testID={testId}
@@ -117,7 +139,8 @@ export const Artwork = (props: ArtworkProps) => {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                borderRadius: cornerRadius[borderRadius]
+                borderRadius: cornerRadius[borderRadius],
+                zIndex: 2
               },
               animatedStyle
             ]}

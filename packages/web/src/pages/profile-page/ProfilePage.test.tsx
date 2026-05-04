@@ -125,11 +125,9 @@ describe('ProfilePage', () => {
     })
     expect(profilePhoto).toBeInTheDocument()
 
-    const dynamicImage = await within(profilePhoto).findByTestId(
-      'dynamic-image-second'
-    )
-    expect(dynamicImage.style.backgroundImage).toEqual(
-      `url("${nonArtistUser.profile_picture[SquareSizes.SIZE_480_BY_480]}")`
+    expect(profilePhoto).toHaveAttribute(
+      'src',
+      nonArtistUser.profile_picture[SquareSizes.SIZE_480_BY_480]
     )
 
     // TODO: cover photo not rendering in test env for some reason

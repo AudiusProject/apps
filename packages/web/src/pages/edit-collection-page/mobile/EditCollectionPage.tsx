@@ -16,13 +16,13 @@ import {
   cacheCollectionsActions
 } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
-import { IconCamera } from '@audius/harmony'
+import { IconCamera, Image } from '@audius/harmony'
+import cn from 'classnames'
 import { capitalize } from 'lodash'
 import { connect, useDispatch } from 'react-redux'
 import { useParams, useMatch, useNavigate } from 'react-router'
 import { Dispatch } from 'redux'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import EditableRow, { Format } from 'components/groupable-list/EditableRow'
 import GroupableList from 'components/groupable-list/GroupableList'
 import Grouping from 'components/groupable-list/Grouping'
@@ -377,14 +377,13 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
   return (
     <div className={styles.editPlaylistPage}>
       <div className={styles.artwork}>
-        <DynamicImage
-          image={
+        <Image
+          src={
             didChangeArtwork
               ? formFields.artwork.url
               : artworkUrl || formFields.artwork.url || placeholderCoverArt
           }
-          className={styles.image}
-          wrapperClassName={styles.imageWrapper}
+          className={cn(styles.imageWrapper, styles.image)}
         >
           {
             <UploadStub
@@ -392,7 +391,7 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
               isProcessing={isProcessingImage}
             />
           }
-        </DynamicImage>
+        </Image>
         <div className={styles.random} onClick={getRandomArtwork}>
           <IconCamera className={styles.iconCamera} />
           <div className={styles.text}>{messages.randomPhoto}</div>

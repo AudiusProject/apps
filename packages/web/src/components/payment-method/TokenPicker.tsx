@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { Flex, FilterButton } from '@audius/harmony'
+import { FilterButton, Image } from '@audius/harmony'
 import { useAsync } from 'react-use'
 
 const TOKEN_LIST_URL = 'https://cache.jup.ag/tokens'
@@ -48,14 +48,23 @@ export const TokenPicker = ({
     helperText:
       asset.name.length > 15 ? asset.name.slice(0, 12) + '...' : asset.name,
     leadingElement: (
-      <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-        <img height={20} width={20} src={asset.logoURI} loading='lazy' />
-      </Flex>
+      <Image
+        h={20}
+        w={20}
+        borderRadius='s'
+        src={asset.logoURI}
+        alt={asset.symbol}
+      />
     ),
     labelLeadingElement: (
-      <Flex borderRadius='s' style={{ overflow: 'hidden' }}>
-        <img height={20} width={20} src={asset.logoURI} />
-      </Flex>
+      <Image
+        h={20}
+        w={20}
+        borderRadius='s'
+        src={asset.logoURI}
+        alt={asset.symbol}
+        loading='eager'
+      />
     )
   }))
 

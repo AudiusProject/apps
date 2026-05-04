@@ -3,7 +3,7 @@ import { memo, useState, useEffect, useMemo } from 'react'
 import { useArtistCreatedFanClub } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useTheme } from '@audius/harmony'
+import { useTheme, Image } from '@audius/harmony'
 import cn from 'classnames'
 import Lottie from 'lottie-react'
 import PropTypes from 'prop-types'
@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import ImageSelectionButton from 'components/image-selection/ImageSelectionButton'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import { env } from 'services/env'
@@ -100,12 +99,10 @@ const ProfilePicture = ({
       })}
     >
       <div className={styles.profilePictureBackground}>
-        <DynamicImage
+        <Image
           alt={messages.profilePicAltText}
-          usePlaceholder={false}
-          image={updatedProfilePicture || image}
-          skeletonClassName={styles.profilePictureSkeleton}
-          wrapperClassName={styles.profilePicture}
+          src={updatedProfilePicture || image}
+          className={styles.profilePicture}
         >
           {editMode && (
             <div
@@ -116,10 +113,10 @@ const ProfilePicture = ({
               <Lottie loop autoplay animationData={loadingSpinner} />
             </div>
           )}
-        </DynamicImage>
+        </Image>
         {editMode || showEdit ? (
           <ImageSelectionButton
-            wrapperClassName={styles.imageSelectionButtonWrapper}
+            className={styles.imageSelectionButtonWrapper}
             buttonClassName={styles.imageSelectionButton}
             onSelect={onSelect}
             onClick={onClick}

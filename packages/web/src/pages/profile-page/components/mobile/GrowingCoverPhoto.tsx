@@ -1,13 +1,16 @@
 import { useEffect, useCallback } from 'react'
 
 import { useInstanceVar } from '@audius/common/hooks'
+import { Image, type ImageProps } from '@audius/harmony'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
-import DynamicImage, {
-  DynamicImageProps
-} from 'components/dynamic-image/DynamicImage'
 const animatedAny = animated as any
+
+type GrowingCoverPhotoProps = ImageProps & {
+  /** When true, renders a frosted-glass overlay on top of the image. */
+  useBlur?: boolean
+}
 
 // Scale the image by making it larger relative to y-pos and translate it up slightly (capping at -15px) so it
 // covers the gap made by overscroll.
@@ -34,10 +37,15 @@ const messages = {
 }
 
 /**
- * A cover photo for mobile that grows as the user overflow scrolls in the Y direction (up).
- * Same props as DynamicImage.
+ * A cover photo for mobile that grows as the user overflow-scrolls upward.
+ * Wraps Harmony Image in a parallax-style animated container, with an
+ * optional blur overlay for fallback (placeholder) cover photos.
  */
-const GrowingCoverPhoto = ({ children, ...rest }: DynamicImageProps) => {
+const GrowingCoverPhoto = ({
+  children,
+  useBlur,
+  ...rest
+}: GrowingCoverPhotoProps) => {
   const [getShouldTrackScroll, setShouldTrackScroll] = useInstanceVar(false)
   const [springProps, setSpringProps] = useSpring(() => ({
     to: {
@@ -116,9 +124,19 @@ const GrowingCoverPhoto = ({ children, ...rest }: DynamicImageProps) => {
         transform: springProps.y.interpolate(interpTransform)
       }}
     >
-      <DynamicImage alt={messages.coverArtAltText} {...rest}>
+      <Image alt={messages.coverArtAltText} {...rest}>
+        {useBlur ? (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backdropFilter: 'blur(25px)',
+              zIndex: 3
+            }}
+          />
+        ) : null}
         {children}
-      </DynamicImage>
+      </Image>
     </animatedAny.div>
   )
 }
