@@ -135,7 +135,11 @@ export const Tooltip = ({
   className = '',
   color = 'secondary',
   disabled = false,
-  mount = 'parent',
+  // `position: fixed` coordinates are skewed inside any transformed ancestor
+  // (e.g. the sidebar-shift `transform: translateX` on the main app wrapper),
+  // so default to portaling outside the React tree rather than into the
+  // trigger's parent.
+  mount = 'body',
   getPopupContainer,
   mouseEnterDelay = 0.5,
   mouseLeaveDelay = 0,
