@@ -1,12 +1,15 @@
 import { useCallback, useState, MouseEvent, useMemo } from 'react'
 
-import { useAddToPlaylistFolder } from '@audius/common/api'
+import {
+  useAddToPlaylistFolder,
+  useAllPlaylistUpdateIds
+} from '@audius/common/api'
 import {
   Name,
   PlaylistLibraryID,
   PlaylistLibraryFolder
 } from '@audius/common/models'
-import { modalsActions, playlistUpdatesSelectors } from '@audius/common/store'
+import { modalsActions } from '@audius/common/store'
 import {
   IconFolder,
   PopupMenuItem,
@@ -32,7 +35,6 @@ import { NavItemKebabButton } from './NavItemKebabButton'
 import { PlaylistLibraryNavItem, keyExtractor } from './PlaylistLibraryNavItem'
 
 const { setVisibility } = modalsActions
-const { selectPlaylistUpdateById } = playlistUpdatesSelectors
 
 type PlaylistFolderNavItemProps = {
   folder: PlaylistLibraryFolder
@@ -51,13 +53,12 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
   const { spacing } = useTheme()
   const { folder, level } = props
   const { name, contents, id } = folder
-  const folderHasUpdate = useSelector((state) => {
-    return folder.contents.some(
-      (content) =>
-        content.type === 'playlist' &&
-        selectPlaylistUpdateById(state, content.playlist_id)
-    )
-  })
+  const { data: playlistUpdateIds = [] } = useAllPlaylistUpdateIds()
+  const folderHasUpdate = folder.contents.some(
+    (content) =>
+      content.type === 'playlist' &&
+      playlistUpdateIds.includes(content.playlist_id)
+  )
   const draggingKind = useSelector(selectDraggingKind)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [isHovering, setIsHovering] = useState(false)

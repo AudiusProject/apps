@@ -40,8 +40,7 @@ import {
   confirmerActions,
   getSDK,
   fetchAccountAsync,
-  getOrCreateUSDCUserBank,
-  changePasswordActions
+  getOrCreateUSDCUserBank
 } from '@audius/common/store'
 import {
   parseHandleReservedStatusFromSocial,
@@ -72,7 +71,6 @@ import {
 } from 'typed-redux-saga'
 
 import { identify, make } from 'common/store/analytics/actions'
-import { sendRecoveryEmail } from 'common/store/recovery-email/sagas'
 import { UiErrorCode } from 'store/errors/actions'
 import { reportToSentry } from 'store/errors/reportToSentry'
 import { setHasRequestedBrowserPermission } from 'utils/browserNotifications'
@@ -94,6 +92,28 @@ const { FEED_PAGE, SIGN_IN_PAGE, SIGN_UP_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 const { requestPushNotificationPermissions } = settingsPageActions
 const { saveCollection } = collectionsSocialActions
 const { toast } = toastActions
+
+/**
+ * Sends a recovery info email to the currently logged-in user.
+ * Inlined here from the legacy `recovery-email/sagas.ts` after the user-
+ * facing flow moved to the `useResendRecoveryEmail` mutation hook. Sign-up
+ * still calls this generator inline as part of account creation.
+ */
+function* sendRecoveryEmail() {
+  const authService = yield* getContext('authService')
+  const identityService = yield* getContext('identityService')
+  const getHostUrl = yield* getContext('getHostUrl')
+  const host = getHostUrl()
+  const recoveryInfo = yield* call([
+    authService.hedgehogInstance,
+    authService.hedgehogInstance.generateRecoveryInfo
+  ])
+
+  yield* call([identityService, identityService.sendRecoveryInfo], {
+    login: recoveryInfo.login,
+    host: host ?? recoveryInfo.host
+  })
+}
 
 const SIGN_UP_TIMEOUT_MILLIS = 20 /* min */ * 60 * 1000
 const DEFAULT_HANDLE_VERIFICATION_TIMEOUT_MILLIS = 5_000
@@ -514,13 +534,32 @@ function* signUp() {
                 completeProfileMetadataRequest
               )
 
-              yield* put(
-                changePasswordActions.changePassword({
-                  email,
-                  password,
-                  oldPassword: TEMPORARY_PASSWORD
-                })
-              )
+              {
+                // Previously dispatched changePasswordActions.changePassword
+                // which ran a watcher saga in change-password/sagas.ts. Inlined
+                // here as a direct authService call now that the user-facing
+                // change-password flow lives in useChangePasswordFormConfiguration.
+                const authService = yield* getContext('authService')
+                try {
+                  yield* call([authService, authService.changeCredentials], {
+                    newUsername: email,
+                    newPassword: password,
+                    oldUsername: email,
+                    oldPassword: TEMPORARY_PASSWORD
+                  })
+                  yield* put(
+                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
+                      status: 'success'
+                    })
+                  )
+                } catch {
+                  yield* put(
+                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
+                      status: 'failure'
+                    })
+                  )
+                }
+              }
 
               yield* fork(sendPostSignInRecoveryEmail, { handle, email })
 

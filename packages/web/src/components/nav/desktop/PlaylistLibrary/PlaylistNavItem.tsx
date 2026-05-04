@@ -1,18 +1,13 @@
 import { useCallback } from 'react'
 
-import { useCurrentAccount, useCurrentUserId } from '@audius/common/api'
 import {
-  playlistUpdatesActions,
-  playlistUpdatesSelectors
-} from '@audius/common/store'
-import { useDispatch } from 'react-redux'
-
-import { useSelector } from 'utils/reducer'
+  useCurrentAccount,
+  useCurrentUserId,
+  useMarkPlaylistAsViewed,
+  usePlaylistHasUpdate
+} from '@audius/common/api'
 
 import { CollectionNavItem } from './CollectionNavItem'
-
-const { selectPlaylistUpdateById } = playlistUpdatesSelectors
-const { updatedPlaylistViewed } = playlistUpdatesActions
 
 type PlaylistNavItemProps = {
   playlistId: number
@@ -22,7 +17,6 @@ type PlaylistNavItemProps = {
 
 export const PlaylistNavItem = (props: PlaylistNavItemProps) => {
   const { playlistId, level, isChild } = props
-  const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
 
   const { data: accountCollection } = useCurrentAccount({
@@ -32,15 +26,14 @@ export const PlaylistNavItem = (props: PlaylistNavItemProps) => {
 
   const isOwnedByCurrentUser = user?.id === currentUserId
 
-  const hasPlaylistUpdate = useSelector(
-    (state) => !!selectPlaylistUpdateById(state, playlistId)
-  )
+  const { data: hasPlaylistUpdate = false } = usePlaylistHasUpdate(playlistId)
+  const { mutate: markPlaylistAsViewed } = useMarkPlaylistAsViewed()
 
   const handleClick = useCallback(() => {
     if (hasPlaylistUpdate) {
-      dispatch(updatedPlaylistViewed({ playlistId }))
+      markPlaylistAsViewed({ playlistId })
     }
-  }, [hasPlaylistUpdate, dispatch, playlistId])
+  }, [hasPlaylistUpdate, markPlaylistAsViewed, playlistId])
 
   if (!name || !permalink || !user) return null
   return (

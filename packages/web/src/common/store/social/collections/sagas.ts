@@ -1,6 +1,8 @@
 import {
+  getPlaylistUpdatesQueryKey,
   queryAccountUser,
   queryCollection,
+  queryCurrentUserId,
   queryUser,
   updateCollectionData,
   selectIsGuestAccount,
@@ -16,7 +18,6 @@ import {
   LibraryCategory,
   collectionsSocialActions as socialActions,
   getContext,
-  playlistUpdatesActions,
   confirmerActions,
   getSDK
 } from '@audius/common/store'
@@ -34,7 +35,6 @@ import * as signOnActions from 'common/store/pages/signon/actions'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import watchCollectionErrors from './errorSagas'
-const { updatedPlaylistViewed } = playlistUpdatesActions
 const { addLocalCollection, removeLocalCollection } = libraryPageActions
 const { collectionPage } = route
 
@@ -337,7 +337,16 @@ export function* saveCollectionAsync(
   )
 
   if (!collection.is_album) {
-    yield* put(updatedPlaylistViewed({ playlistId: action.collectionId }))
+    // Optimistically clear the "has updates" badge for this playlist —
+    // saving a playlist counts as viewing it. Replaces the legacy
+    // `updatedPlaylistViewed` action; the mutation hook still drives the
+    // SDK call from the user-facing nav/page click handlers.
+    const queryClient = yield* getContext('queryClient')
+    const userId = yield* call(queryCurrentUserId)
+    queryClient.setQueryData(
+      getPlaylistUpdatesQueryKey(userId),
+      (old) => old?.filter((u) => u.playlist_id !== action.collectionId) ?? []
+    )
   }
 
   const subscribedUid = makeUid(

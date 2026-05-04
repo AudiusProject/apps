@@ -10,7 +10,6 @@ import {
   shareModalUISagas as shareModalSagas,
   stripeModalUISagas,
   toastSagas,
-  searchUsersModalSagas,
   modalsSagas,
   playbackSagas,
   playbackPositionSagas,
@@ -23,8 +22,6 @@ import { sagaWithErrorHandler } from '@audius/common/utils'
 import addToCollectionSagas from 'common/store/add-to-collection/sagas'
 import analyticsSagas from 'common/store/analytics/sagas'
 import backendSagas from 'common/store/backend/sagas'
-import tracksSagas from 'common/store/cache/tracks/sagas'
-import changePasswordSagas from 'common/store/change-password/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
@@ -34,7 +31,6 @@ import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
 import playbackEngineSagas from 'common/store/playback/sagas'
 import profileSagas from 'common/store/profile/sagas'
-import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 import savedCollectionsSagas from 'common/store/saved-collections/sagas'
 import socialSagas from 'common/store/social/sagas'
 import { all, spawn } from 'typed-redux-saga'
@@ -61,11 +57,9 @@ export default function* rootSaga() {
 
     // Account
     ...accountSagas(),
-    ...recoveryEmailSagas(),
 
     // Cache
     ...collectionsSagas(),
-    ...tracksSagas(),
     ...savedCollectionsSagas(),
 
     // Playback
@@ -87,9 +81,6 @@ export default function* rootSaga() {
     ...withdrawUSDCSagas(),
     ...stripeModalUISagas(),
 
-    // Search Users
-    ...searchUsersModalSagas(),
-
     ...modalsSagas(),
 
     // Pages
@@ -108,7 +99,6 @@ export default function* rootSaga() {
 
     // Application
     ...addToCollectionSagas(),
-    ...changePasswordSagas(),
 
     ...overflowMenuSagas(),
     ...rateCtaSagas(),

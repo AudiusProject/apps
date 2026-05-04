@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import { Nullable } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
-import { useSelector } from 'react-redux'
 
 import {
   CollectionsTable,
@@ -13,7 +12,6 @@ import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import styles from '../DashboardPage.module.css'
-import { makeGetDashboard } from '../store/selectors'
 
 import { EmptySearchResults } from './EmptySearchResults'
 import { EmptyTabState } from './EmptyTabState'
@@ -41,7 +39,7 @@ export const ArtistDashboardAlbumsTab = ({
 }: ArtistDashboardAlbumsTabProps) => {
   const navigate = useNavigateToPage()
   const { data: accountUser } = useCurrentAccountUser()
-  const { account } = useSelector(makeGetDashboard(accountUser))
+  const account = accountUser
   const filteredData = useFilteredAlbumData({
     selectedFilter,
     filterText

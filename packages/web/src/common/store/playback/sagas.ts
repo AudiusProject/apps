@@ -1,4 +1,13 @@
-import { queryCurrentUserId, queryTrack, queryUser } from '@audius/common/api'
+import {
+  transformAndCleanList,
+  userTrackMetadataFromSDK
+} from '@audius/common/adapters'
+import {
+  primeTrackDataSaga,
+  queryCurrentUserId,
+  queryTrack,
+  queryUser
+} from '@audius/common/api'
 import {
   Feature,
   Kind,
@@ -7,11 +16,13 @@ import {
   Track,
   UserTrackMetadata
 } from '@audius/common/models'
+import { IntKeys } from '@audius/common/services'
 import {
   cacheActions,
   calculatePlayerBehavior,
   gatedContentSelectors,
   getContext,
+  getSDK,
   playbackActions,
   playbackSelectors,
   QueueSource,
@@ -42,7 +53,6 @@ import {
 } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
-import { getRecommendedTracks } from 'common/store/recommendation/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import errorSagas from './errorSagas'
@@ -670,6 +680,26 @@ function* handleQueueAutoplay({
   }
 }
 
+// Inlined from the legacy `recommendation/sagas.ts` — autoplay was the only
+// caller of `getRecommendedTracks`, so the helper saga has been folded in here.
+function* fetchRecommendedAutoplayTracks(
+  genre: string,
+  exclusionList: number[],
+  currentUserId: Nullable<number> | undefined
+) {
+  const remoteConfigInstance = yield* getContext('remoteConfigInstance')
+  const sdk = yield* getSDK()
+  const { data } = yield* call([sdk.tracks, sdk.tracks.getRecommendedTracks], {
+    genre,
+    exclusionList,
+    limit: remoteConfigInstance.getRemoteVar(IntKeys.AUTOPLAY_LIMIT) || 10,
+    userId: OptionalId.parse(currentUserId)
+  })
+  const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
+  yield* call(primeTrackDataSaga, tracks)
+  return tracks
+}
+
 function* watchQueueAutoplay() {
   yield* takeEvery(
     playbackActions.queueAutoplay.type,
@@ -678,7 +708,7 @@ function* watchQueueAutoplay() {
       const isReachable = yield* select(getIsReachable)
       if (!isReachable) return
       const tracks: UserTrackMetadata[] = yield* call(
-        getRecommendedTracks,
+        fetchRecommendedAutoplayTracks,
         genre,
         exclusionList,
         currentUserId

@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
+  useAllPlaylistUpdateIds,
   useCurrentAccount,
   useLibraryTracks,
+  useMarkPlaylistAsViewed,
   useTracks,
   useUsers,
   selectNameSortedPlaylistsAndAlbums
@@ -28,8 +30,6 @@ import {
   playbackSelectors,
   tracksSocialActions as socialActions,
   playbackActions,
-  playlistUpdatesActions,
-  playlistUpdatesSelectors,
   LibraryPageTrack,
   TrackRecord
 } from '@audius/common/store'
@@ -66,9 +66,6 @@ const {
   getTracksCategory,
   getCategory
 } = libraryPageSelectors
-const { updatedPlaylistViewed } = playlistUpdatesActions
-
-const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
 
 const LIBRARY_TRACKS_PAGE_SIZE = 50
 const FILTER_DEBOUNCE_MS = 300
@@ -124,7 +121,8 @@ export const useLibraryPage = () => {
   const currentQueueItem = useSelector(getCurrentQueueItem)
   const playing = useSelector(getPlaying)
   const buffering = useSelector(getBuffering)
-  const playlistUpdates = useSelector(selectAllPlaylistUpdateIds)
+  const { data: playlistUpdates = [] } = useAllPlaylistUpdateIds()
+  const { mutate: markPlaylistAsViewed } = useMarkPlaylistAsViewed()
   const tracksCategory = useSelector(getTracksCategory)
 
   const { data: account } = useCurrentAccount({
@@ -340,9 +338,9 @@ export const useLibraryPage = () => {
 
   const updatePlaylistLastViewedAt = useCallback(
     (playlistId: number) => {
-      dispatch(updatedPlaylistViewed({ playlistId }))
+      markPlaylistAsViewed({ playlistId })
     },
-    [dispatch]
+    [markPlaylistAsViewed]
   )
 
   const goToRoute = useCallback(

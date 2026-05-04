@@ -3,7 +3,8 @@ import { useMemo } from 'react'
 import {
   useCurrentUserId,
   useUserAlbums,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useUserTracksByHandle
 } from '@audius/common/api'
 import {
   Collection,
@@ -17,10 +18,7 @@ import {
   IconVisibilityHidden,
   IconVisibilityPublic
 } from '@audius/harmony'
-import { useSelector } from 'react-redux'
 import { Nullable } from 'vitest'
-
-import { makeGetDashboard } from '../store/selectors'
 
 import {
   AlbumFilters,
@@ -28,6 +26,8 @@ import {
   DataSourceTrack,
   TrackFilters
 } from './types'
+
+const DASHBOARD_TRACKS_PAGE_SIZE = 50
 
 const messages = {
   public: 'Public',
@@ -53,12 +53,27 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   }
 }
 
-/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table. Download counts are not shown per-row; total downloads are in the stats tile only. */
+/** Returns the logged-in user's tracks (including hidden), formatted for the
+ * Artist Dashboard tracks table. Download counts are not shown per-row; total
+ * downloads are in the stats tile only.
+ *
+ * Backed by `useUserTracksByHandle` with `filterTracks: 'all'` — replaces the
+ * legacy `dashboardActions.fetch/fetchTracks` saga + slice state.
+ */
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
-  const { tracks } = useSelector(makeGetDashboard(accountUser))
+  const handle = accountUser?.handle
+  const { data: tracks } = useUserTracksByHandle(
+    {
+      handle,
+      filterTracks: 'all',
+      limit: DASHBOARD_TRACKS_PAGE_SIZE,
+      offset: 0
+    },
+    { enabled: !!handle }
+  )
   const tracksFormatted = useMemo(() => {
-    return tracks
+    return (tracks ?? [])
       .map((track: Track, i: number) => formatTrackMetadata(track, i))
       .filter((meta) => !meta.is_invalid)
   }, [tracks])

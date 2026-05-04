@@ -87,14 +87,6 @@ export {
 export * as transactionDetailsSelectors from './transaction-details/selectors'
 export * from './transaction-details/types'
 
-export {
-  default as searchUsersModalReducer,
-  actions as searchUsersModalActions
-} from './search-users-modal/slice'
-export type { SearchUsersModalState } from './search-users-modal/slice'
-export * as searchUsersModalSelectors from './search-users-modal/selectors'
-export { default as searchUsersModalSagas } from './search-users-modal/sagas'
-
 export * from './buy-sell'
 export {
   TOKEN_LISTING_MAP,

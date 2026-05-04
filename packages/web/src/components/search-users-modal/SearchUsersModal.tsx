@@ -8,12 +8,8 @@ import {
   useState
 } from 'react'
 
-import { useUsers } from '@audius/common/api'
-import { ID, Status, User } from '@audius/common/models'
-import {
-  searchUsersModalActions,
-  searchUsersModalSelectors
-} from '@audius/common/store'
+import { useSearchUsersModal, useUsers } from '@audius/common/api'
+import { ID, User } from '@audius/common/models'
 import {
   Box,
   Flex,
@@ -30,7 +26,6 @@ import {
   useTheme
 } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
-import { useDispatch, useSelector } from 'react-redux'
 import { useDebounce } from 'react-use'
 
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -41,9 +36,6 @@ const messages = {
 }
 
 const DEBOUNCE_MS = 100
-
-const { searchUsers } = searchUsersModalActions
-const { getUserList, getLastSearchQuery } = searchUsersModalSelectors
 
 type UsersSearchProps = {
   debounceMs?: number
@@ -89,18 +81,25 @@ export const UsersSearch = (props: UsersSearchProps) => {
     onChange,
     onFetchResults
   } = props
-  const dispatch = useDispatch()
-  const [hasQuery, setHasQuery] = useState(false)
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const scrollParentRef = useRef<HTMLElement | null>(null)
 
-  const { userIds, hasMore, status } = useSelector(getUserList)
-  const lastSearchQuery = useSelector(getLastSearchQuery)
+  const hasQuery = debouncedQuery.length > 0
+
+  const {
+    userIds: searchUserIds,
+    isPending,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  } = useSearchUsersModal({ query: debouncedQuery })
 
   const ids = useMemo(() => {
-    const unfilteredIds = hasQuery ? userIds : defaultUserList.userIds
+    const unfilteredIds = hasQuery ? searchUserIds : defaultUserList.userIds
     const excludedUserIdsSet = new Set(excludedUserIds ?? [])
     return unfilteredIds.filter((id) => !excludedUserIdsSet.has(id))
-  }, [hasQuery, userIds, defaultUserList.userIds, excludedUserIds])
+  }, [hasQuery, searchUserIds, defaultUserList.userIds, excludedUserIds])
+
   const { data: users } = useUsers(ids)
 
   useEffect(() => {
@@ -109,11 +108,10 @@ export const UsersSearch = (props: UsersSearchProps) => {
 
   useDebounce(
     () => {
-      dispatch(searchUsers({ query }))
-      setHasQuery(!!query)
+      setDebouncedQuery(query)
     },
     debounceMs,
-    [query, setHasQuery, dispatch]
+    [query]
   )
 
   const handleClose = useCallback(() => {
@@ -128,26 +126,26 @@ export const UsersSearch = (props: UsersSearchProps) => {
   )
 
   const handleLoadMore = useCallback(() => {
-    if (status === Status.LOADING || defaultUserList.loading) {
+    if (isPending || isFetchingNextPage || defaultUserList.loading) {
       return
     }
     if (hasQuery) {
-      dispatch(searchUsers({ query }))
+      if (hasNextPage) fetchNextPage()
     } else {
       defaultUserList.loadMore()
     }
-  }, [hasQuery, query, status, defaultUserList, dispatch])
+  }, [
+    hasQuery,
+    isPending,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    defaultUserList
+  ])
 
   const getScrollParent = useCallback(() => {
     return scrollParentRef.current
   }, [])
-
-  // Clear the query if something else resets our search state
-  useEffect(() => {
-    if (!lastSearchQuery) {
-      onChange('')
-    }
-  }, [lastSearchQuery, onChange])
   return (
     <Flex direction='column' h={690}>
       <Box p='xl'>
@@ -180,7 +178,7 @@ export const UsersSearch = (props: UsersSearchProps) => {
           loadMore={handleLoadMore}
           useWindow={false}
           initialLoad
-          hasMore={hasQuery ? hasMore : defaultUserList.hasMore}
+          hasMore={hasQuery ? !!hasNextPage : defaultUserList.hasMore}
           getScrollParent={getScrollParent}
           loader={
             <LoadingSpinner

@@ -7,12 +7,8 @@ import {
   useState
 } from 'react'
 
-import { useUsers } from '@audius/common/api'
-import { User, Status } from '@audius/common/models'
-import {
-  searchUsersModalActions,
-  searchUsersModalSelectors
-} from '@audius/common/store'
+import { useSearchUsersModal } from '@audius/common/api'
+import { User } from '@audius/common/models'
 import {
   Flex,
   IconButton,
@@ -26,7 +22,6 @@ import {
   OptionKeyHandler,
   LoadingSpinner
 } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
 import { useDebounce } from 'react-use'
 
 import { Avatar } from 'components/avatar'
@@ -40,9 +35,6 @@ const messages = {
 }
 
 const DEBOUNCE_MS = 300
-
-const { searchUsers } = searchUsersModalActions
-const { getUserList, getLastSearchQuery } = searchUsersModalSelectors
 
 type UserSearchAutocompleteProps = {
   value?: User | null
@@ -61,10 +53,9 @@ export const UserSearchAutocomplete = ({
   error,
   helperText
 }: UserSearchAutocompleteProps) => {
-  const dispatch = useDispatch()
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const [hasQuery, setHasQuery] = useState(false)
   const [menuWidth, setMenuWidth] = useState<number | undefined>(undefined)
   const [shouldPositionAbove, setShouldPositionAbove] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -73,32 +64,26 @@ export const UserSearchAutocomplete = ({
   const optionRefs = useRef<HTMLButtonElement[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const { userIds, status } = useSelector(getUserList)
-  const lastSearchQuery = useSelector(getLastSearchQuery)
+  const trimmedQuery = debouncedQuery.trim()
+  const hasQuery = trimmedQuery.length > 0
 
-  const ids = useMemo(() => {
-    const excludedUserIdsSet = new Set(excludedUserIds ?? [])
-    return userIds.filter((id) => !excludedUserIdsSet.has(id))
-  }, [userIds, excludedUserIds])
+  const { users, isPending } = useSearchUsersModal({
+    query: trimmedQuery,
+    limit: 3
+  })
 
-  const { data: users } = useUsers(ids.length > 0 ? ids : null)
-
-  // The search API already filters users by name and handle, so we just use the results directly
   const filteredUsers = useMemo(() => {
-    return users ?? []
-  }, [users])
+    if (!users) return []
+    const excludedUserIdsSet = new Set(excludedUserIds ?? [])
+    return users.filter((u) => !excludedUserIdsSet.has(u.user_id))
+  }, [users, excludedUserIds])
 
   useDebounce(
     () => {
-      if (query.trim()) {
-        dispatch(searchUsers({ query: query.trim(), limit: 3 }))
-        setHasQuery(true)
-      } else {
-        setHasQuery(false)
-      }
+      setDebouncedQuery(query)
     },
     DEBOUNCE_MS,
-    [query, dispatch]
+    [query]
   )
 
   // Calculate menu width to match input and check if we should position above
@@ -138,14 +123,6 @@ export const UserSearchAutocomplete = ({
       }
     }
   }, [isOpen, query])
-
-  // Clear query if search state resets
-  useEffect(() => {
-    if (!lastSearchQuery && hasQuery) {
-      setQuery('')
-      setHasQuery(false)
-    }
-  }, [lastSearchQuery, hasQuery])
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -192,7 +169,7 @@ export const UserSearchAutocomplete = ({
     return query
   }, [value, query])
 
-  const isLoading = status === Status.LOADING && hasQuery
+  const isLoading = isPending && hasQuery
 
   const options = useMemo(
     () =>

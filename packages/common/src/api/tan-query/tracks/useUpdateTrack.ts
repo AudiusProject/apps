@@ -8,19 +8,29 @@ import { useDispatch, useStore } from 'react-redux'
 
 import { trackMetadataForUploadToSdk } from '~/adapters/track'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { UserTrackMetadata } from '~/models'
+import { Track, UserTrackMetadata } from '~/models'
+import { Name } from '~/models/Analytics'
 import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
+import {
+  TrackAccessType,
+  isContentFollowGated,
+  isContentTokenGated,
+  isContentUSDCPurchaseGated
+} from '~/models/Track'
 import { CommonState } from '~/store/commonStore'
 import { stemsUploadSelectors } from '~/store/stems-upload'
 import { replaceTrackProgressModalActions } from '~/store/ui/modals/replace-track-progress-modal'
 import { toast } from '~/store/ui/toast/slice'
 import { TrackMetadataForUpload } from '~/store/upload'
+import { squashNewLines } from '~/utils/formatUtil'
+import { formatMusicalKey } from '~/utils/musicalKeys'
 
 import { TQTrack } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
 import { addPremiumMetadata } from '../upload/usePublishTracks'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { getUserQueryKey } from '../users/useUser'
 import { handleStemUpdates } from '../utils/handleStemUpdates'
 import { primeTrackData } from '../utils/primeTrackData'
 
@@ -40,8 +50,58 @@ export type UpdateTrackParams = {
   imageFile?: CrossPlatformFile
 }
 
+const getTrackAccess = ({
+  is_stream_gated,
+  stream_conditions
+}: Partial<Track>): TrackAccessType => {
+  if (is_stream_gated && stream_conditions) {
+    if (isContentFollowGated(stream_conditions)) {
+      return TrackAccessType.FOLLOW_GATED
+    } else if (isContentTokenGated(stream_conditions)) {
+      return TrackAccessType.TOKEN_GATED
+    } else if (isContentUSDCPurchaseGated(stream_conditions)) {
+      return TrackAccessType.USDC_GATED
+    }
+  }
+  return TrackAccessType.PUBLIC
+}
+
+/**
+ * Edit-track formatting that lived in the legacy `editTrackAsync` saga:
+ * normalize description, format musical key, coerce bpm, and recompute the
+ * "is custom" flags. Mutates the metadata in place.
+ */
+const applyEditTrackFormatting = (
+  metadata: Partial<TrackMetadataForUpload>,
+  previousTrack: Partial<Track> | undefined
+) => {
+  if (metadata.description !== undefined) {
+    metadata.description = squashNewLines(metadata.description) ?? null
+  }
+  if (metadata.musical_key !== undefined) {
+    metadata.musical_key =
+      formatMusicalKey(metadata.musical_key || undefined) ?? null
+  }
+  if (metadata.bpm !== undefined) {
+    metadata.bpm = metadata.bpm ? Number(metadata.bpm) : null
+  }
+  if (previousTrack) {
+    if ('bpm' in metadata) {
+      metadata.is_custom_bpm =
+        previousTrack.is_custom_bpm ||
+        (!!metadata.bpm && metadata.bpm !== previousTrack.bpm)
+    }
+    if ('musical_key' in metadata) {
+      metadata.is_custom_musical_key =
+        previousTrack.is_custom_musical_key ||
+        (!!metadata.musical_key &&
+          metadata.musical_key !== previousTrack.musical_key)
+    }
+  }
+}
+
 export const useUpdateTrack = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk, reportToSentry, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const store = useStore()
@@ -63,6 +123,11 @@ export const useUpdateTrack = () => {
       if (!userId) {
         throw new Error('useUpdateTrack: missing current userId')
       }
+      // Apply legacy edit-track formatting (squash newlines, format musical
+      // key, coerce bpm, recompute is_custom flags). Replaces
+      // `editTrackAsync` saga preprocessing.
+      applyEditTrackFormatting(metadata, previousMetadata)
+
       const metadataWithSplits = addPremiumMetadata(
         userId,
         metadata as TrackMetadataForUpload
@@ -102,7 +167,34 @@ export const useUpdateTrack = () => {
         )
       }
 
-      // TODO: remixOf event tracking, see trackNewRemixEvent saga
+      // New-remix analytics — replaces the legacy `trackNewRemixEvent` saga
+      // helper. Fires when the parent_track_id changes.
+      const prevParentId =
+        previousMetadata?.remix_of?.tracks?.[0]?.parent_track_id ?? null
+      const nextParentId =
+        metadata.remix_of?.tracks?.[0]?.parent_track_id ?? null
+      if (nextParentId && prevParentId !== nextParentId) {
+        const accountUser = userId
+          ? queryClient.getQueryData(getUserQueryKey(userId))
+          : undefined
+        const parentTrack = queryClient.getQueryData(
+          getTrackQueryKey(nextParentId)
+        )
+        const parentUser = parentTrack
+          ? queryClient.getQueryData(getUserQueryKey(parentTrack.owner_id))
+          : undefined
+        analytics.track(
+          analytics.make({
+            eventName: Name.REMIX_NEW_REMIX,
+            id: trackId,
+            handle: accountUser?.handle ?? '',
+            title: metadata.title ?? previousMetadata?.title ?? '',
+            parent_track_id: nextParentId,
+            parent_track_title: parentTrack?.title ?? '',
+            parent_track_user_handle: parentUser?.handle ?? ''
+          })
+        )
+      }
 
       return response
     },
@@ -143,11 +235,81 @@ export const useUpdateTrack = () => {
       // Return context with the previous track and metadata
       return { previousTrack }
     },
-    onSuccess: (_, params) => {
+    onSuccess: (_, params, context?: MutationContext) => {
       queryClient.invalidateQueries({
         queryKey: getTrackQueryKey(params.trackId)
       })
       dispatch(toast({ content: 'Changes saved!' }))
+
+      // Edit-track analytics — replaces the `recordEditTrackAnalytics`
+      // generator the legacy `editTrackAsync` saga ran on confirmer success.
+      const prev = context?.previousTrack
+      if (!prev) return
+      const next = { ...prev, ...params.metadata } as Track
+
+      // Hide-remixes
+      if (
+        (prev?.field_visibility?.remixes ?? true) &&
+        next?.field_visibility?.remixes === false
+      ) {
+        const accountUser = userId
+          ? queryClient.getQueryData(getUserQueryKey(userId))
+          : undefined
+        analytics.track(
+          analytics.make({
+            eventName: Name.REMIX_HIDE,
+            id: next.track_id,
+            handle: accountUser?.handle ?? ''
+          })
+        )
+      }
+      // Access changed
+      const prevAccess = getTrackAccess(prev)
+      const nextAccess = getTrackAccess(next)
+      if (prevAccess !== nextAccess) {
+        analytics.track(
+          analytics.make({
+            eventName: Name.TRACK_EDIT_ACCESS_CHANGED,
+            id: next.track_id,
+            from: prevAccess,
+            to: nextAccess
+          })
+        )
+      }
+      // BPM changed
+      if (prev.bpm !== next.bpm && next.bpm) {
+        analytics.track(
+          analytics.make({
+            eventName: Name.TRACK_EDIT_BPM_CHANGED,
+            id: next.track_id,
+            from: prev.bpm ?? 0,
+            to: next.bpm
+          })
+        )
+      }
+      // Musical key changed
+      if (prev.musical_key !== next.musical_key && next.musical_key) {
+        analytics.track(
+          analytics.make({
+            eventName: Name.TRACK_EDIT_MUSICAL_KEY_CHANGED,
+            id: next.track_id,
+            from: prev.musical_key ?? '',
+            to: next.musical_key
+          })
+        )
+      }
+      // Comments disabled
+      if (
+        prev.comments_disabled !== next.comments_disabled &&
+        next.comments_disabled
+      ) {
+        analytics.track(
+          analytics.make({
+            eventName: Name.COMMENTS_DISABLE_TRACK_COMMENTS,
+            trackId: next.track_id
+          })
+        )
+      }
     },
     onError: (error, { trackId, metadata }, context?: MutationContext) => {
       // If the mutation fails, roll back track data

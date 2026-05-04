@@ -6,8 +6,6 @@ import account from './account/slice'
 import averageColorReducer from './average-color/slice'
 import { buyUSDCReducer } from './buy-usdc'
 import cast from './cast/slice'
-import changePasswordReducer from './change-password/slice'
-import { ChangePasswordState } from './change-password/types'
 import confirmer from './confirmer/reducer'
 import { ConfirmerState } from './confirmer/types'
 import downloads, { DownloadState } from './downloads/slice'
@@ -46,22 +44,14 @@ import playback from './playback/slice'
 import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
-import { playlistUpdatesReducer, PlaylistUpdateState } from './playlist-updates'
 import { purchaseContentReducer } from './purchase-content'
 import reachability from './reachability/reducer'
 import { ReachabilityState } from './reachability/types'
-import { recoveryEmailReducer, RecoveryEmailState } from './recovery-email'
 import savedCollectionsReducer from './saved-collections/slice'
 import searchReducer from './search/slice'
 import { SearchState } from './search/types'
 import stemsUpload from './stems-upload/slice'
-import {
-  searchUsersModalReducer,
-  SearchUsersModalState,
-  ToastState,
-  TransactionDetailsState,
-  withdrawUSDCReducer
-} from './ui'
+import { ToastState, TransactionDetailsState, withdrawUSDCReducer } from './ui'
 import addToCollectionReducer, {
   AddToCollectionState
 } from './ui/add-to-collection/reducer'
@@ -123,15 +113,11 @@ export const reducers = (storage: Storage, history?: History) => ({
   // Cast
   cast,
 
-  // Playlist Library
-  playlistUpdates: playlistUpdatesReducer,
-
   // UI
   ui: combineReducers({
     averageColor: averageColorReducer,
     addToCollection: addToCollectionReducer,
 
-    changePassword: changePasswordReducer,
     deletePlaylistConfirmationModal: deletePlaylistConfirmationReducer,
     duplicateAddConfirmationModal: duplicateAddConfirmationReducer,
     mobileOverflowModal: mobileOverflowModalReducer,
@@ -141,7 +127,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     shareModal: shareModalReducer,
     stripeModal: stripeModalReducer,
     coinflowModal: coinflowModalReducer,
-    searchUsersModal: searchUsersModalReducer,
     toast: toastReducer,
     transactionDetails: transactionDetailsReducer,
     userList: combineReducers({
@@ -156,8 +141,7 @@ export const reducers = (storage: Storage, history?: History) => ({
       purchasers: purchasersUserListReducer,
       remixers: remixersUserListReducer
     }),
-    theme,
-    recoveryEmail: recoveryEmailReducer
+    theme
   }),
 
   // Pages
@@ -222,20 +206,15 @@ export type CommonState = {
   // Cast
   cast: ReturnType<typeof cast>
 
-  // Playlist library
-  playlistUpdates: PlaylistUpdateState
-
   ui: {
     averageColor: ReturnType<typeof averageColorReducer>
     addToCollection: AddToCollectionState
-    changePassword: ChangePasswordState
     deletePlaylistConfirmationModal: DeletePlaylistConfirmationModalState
     duplicateAddConfirmationModal: DuplicateAddConfirmationModalState
     mobileOverflowModal: MobileOverflowModalState
     modals: ModalsState
     musicConfetti: MusicConfettiState
     nowPlaying: NowPlayingState
-    searchUsersModal: SearchUsersModalState
     shareModal: ShareModalState
     stripeModal: StripeModalState
     toast: ToastState
@@ -254,7 +233,6 @@ export type CommonState = {
       remixers: ReturnType<typeof remixersUserListReducer>
     }
     theme: ThemeState
-    recoveryEmail: RecoveryEmailState
   }
 
   pages: {
