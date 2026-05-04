@@ -3,11 +3,9 @@ import { ComponentType, lazy } from 'react'
 import { Modals as ModalTypes } from '@audius/common/store'
 
 import { CoinSuccessModal } from 'components/CoinSuccessModal'
-import { AddCashModal } from 'components/add-cash-modal/AddCashModal'
 import AddToCollectionModal from 'components/add-to-collection/desktop/AddToCollectionModal'
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
-import { BuySellModal } from 'components/buy-sell-modal/BuySellModal'
 import CoinflowOnrampModal from 'components/coinflow-onramp-modal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
 import EmbedModal from 'components/embed-modal/EmbedModal'
@@ -16,7 +14,6 @@ import FirstUploadModal from 'components/first-upload-modal/FirstUploadModal'
 import { HostRemixContestModal } from 'components/host-remix-contest-modal/HostRemixContestModal'
 import { PasswordResetModal } from 'components/password-reset/PasswordResetModal'
 import { PremiumContentPurchaseModal } from 'components/premium-content-purchase-modal/PremiumContentPurchaseModal'
-import { ReceiveTokensModal } from 'components/receive-tokens-modal'
 import { ClaimAllRewardsModal } from 'components/rewards/modals/ClaimAllRewardsModal'
 import TopAPIModal from 'components/rewards/modals/TopAPI'
 import { SendTokensModal } from 'components/send-tokens-modal'
@@ -29,10 +26,7 @@ import { UserListModal } from 'components/user-list-modal/UserListModal'
 import { WithdrawUSDCModal } from 'components/withdraw-usdc-modal/WithdrawUSDCModal'
 import { CoinflowWithdrawModal } from 'components/withdraw-usdc-modal/components/CoinflowWithdrawModal'
 import { useIsMobile } from 'hooks/useIsMobile'
-import AudioBreakdownModal from 'pages/audio-page/components/modals/AudioBreakdownModal'
-import { ConnectedWalletsModal } from 'pages/audio-page/components/modals/ConnectedWalletsModal'
 import TransferAudioMobileDrawer from 'pages/audio-page/components/modals/TransferAudioMobileDrawer'
-import { ChatBlastModal } from 'pages/chat-page/components/ChatBlastModal'
 import { ClaimVestedCoinsModal } from 'pages/fan-club-detail-page/components/ClaimVestedCoinsModal'
 import { ChallengeRewardsModal } from 'pages/rewards-page/components/modals/ChallengeRewardsModal'
 
@@ -55,7 +49,6 @@ const CommentSettingsModal = lazy(
 const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   AddToCollection: AddToCollectionModal,
   HostRemixContest: HostRemixContestModal,
-  AudioBreakdown: AudioBreakdownModal,
   InboxSettings: InboxSettingsModal,
   CommentSettings: CommentSettingsModal,
   APIRewardsExplainer: TopAPIModal,
@@ -66,17 +59,12 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   BrowserPushPermissionConfirmation: BrowserPushConfirmationModal,
   PremiumContentPurchaseModal,
   CreateChatModal,
-  ChatBlastModal,
   WithdrawUSDCModal,
   CoinflowOnramp: CoinflowOnrampModal,
   StripeOnRamp: StripeOnRampModal,
   USDCPurchaseDetailsModal,
   USDCTransactionDetailsModal,
-  AddCashModal,
   CoinflowWithdraw: CoinflowWithdrawModal,
-  ConnectedWallets: ConnectedWalletsModal,
-  BuySellModal,
-  ReceiveTokensModal,
   SendTokensModal
 }
 

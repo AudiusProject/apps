@@ -9,6 +9,9 @@ import {
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
+import { useCallback } from 'react'
+
+import { registerNiceModalId } from '@audius/common/services'
 import {
   useChatBlastModal,
   chatActions,
@@ -31,6 +34,7 @@ import {
   Select
 } from '@audius/harmony'
 import { ChatBlastAudience } from '@audius/sdk'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { Formik, useField } from 'formik'
 import { useDispatch } from 'react-redux'
 
@@ -77,9 +81,11 @@ type ChatBlastFormValues = {
   remixed_track_id?: number
 }
 
-export const ChatBlastModal = () => {
+export const ChatBlastModal = NiceModal.create(() => {
   const dispatch = useDispatch()
-  const { isOpen, onClose } = useChatBlastModal()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
   const { onOpen: openCreateChatModal, data: createChatModalData } =
     useCreateChatModal()
 
@@ -159,7 +165,10 @@ export const ChatBlastModal = () => {
       </Formik>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ChatBlastModal', ChatBlastModal)
+registerNiceModalId('ChatBlastModal')
 
 const ChatBlastsFields = () => {
   const [field] = useField(TARGET_AUDIENCE_FIELD)

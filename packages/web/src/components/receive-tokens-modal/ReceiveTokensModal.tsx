@@ -7,6 +7,7 @@ import {
   useRootWalletAddress
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
+import { registerNiceModalId } from '@audius/common/services'
 import { useReceiveTokensModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -19,6 +20,7 @@ import {
   Text,
   useMedia
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { AddressTile } from 'components/address-tile'
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
@@ -32,10 +34,13 @@ import { copyToClipboard } from 'utils/clipboardUtil'
 const DIMENSIONS = 160
 const LOADING_HEIGHT = 400
 
-export const ReceiveTokensModal = () => {
+export const ReceiveTokensModal = NiceModal.create(() => {
   const { toast } = useContext(ToastContext)
   const { isMobile } = useMedia()
-  const { isOpen, onClose, data } = useReceiveTokensModal()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const { data } = useReceiveTokensModal()
   const { mint } = data ?? {}
   const { data: coin } = useFanClub(mint)
   const { coinBalanceFormatted: balance } = useFormattedCoinBalance(
@@ -167,4 +172,7 @@ export const ReceiveTokensModal = () => {
       </Flex>
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('ReceiveTokensModal', ReceiveTokensModal)
+registerNiceModalId('ReceiveTokensModal')
