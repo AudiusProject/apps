@@ -787,6 +787,13 @@ export const AudioPlayer = () => {
 
   const handleQueueIdxChange = useCallback(async () => {
     if (queueIndex === -1) return
+
+    // If the RNTP queue hasn't been rebuilt to match the current redux queue
+    // yet, bail out. handleQueueChange will load the correct track when it
+    // fires. Without this guard, skip() targets an index in the OLD lineup
+    // (e.g. skipping to Feed track #2 when the user tapped Trending track #2).
+    if (!isEqual(queueListRef.current, queueTrackIds)) return
+
     latestQueueIdxRef.current = queueIndex
 
     // TrackPlayer's native queue is populated asynchronously by the middle-out
@@ -816,7 +823,7 @@ export const AudioPlayer = () => {
     if (queueIndex !== playerIdx && queueIndex < queue.length) {
       await TrackPlayer.skip(queueIndex)
     }
-  }, [queueIndex])
+  }, [queueIndex, queueTrackIds])
 
   // Tracks the latest handleQueueIdxChange invocation so handleTogglePlay can
   // wait for a pending skip before calling TrackPlayer.play(). Without this,
