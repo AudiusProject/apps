@@ -3,6 +3,7 @@ import { useCallback, useContext, useEffect } from 'react'
 import { useCurrentUserId } from '@audius/common/api'
 import { useIsManagedAccount, useShareAction } from '@audius/common/hooks'
 import { Name, PlayableType } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   collectionsSocialActions,
   tracksSocialActions,
@@ -164,5 +165,8 @@ export const ShareModal = NiceModal.create(() => {
 })
 
 // Register the modal so saga code (and anything else outside React) can
-// open it via `showNiceModal('Share')`.
+// open it via `showNiceModal('Share')`. The id is also added to the
+// nice-modal bridge allowlist so legacy `setVisibility('Share', true)`
+// dispatches translate to `showNiceModal('Share')`.
 NiceModal.register('Share', ShareModal)
+registerNiceModalId('Share')

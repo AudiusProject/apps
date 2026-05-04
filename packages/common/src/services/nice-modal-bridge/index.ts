@@ -9,6 +9,13 @@
  * If a caller fires `showNiceModal` before the adapter is registered
  * (e.g. during early app boot or in a test), the call is logged and
  * resolves with `undefined` rather than throwing.
+ *
+ * `registerNiceModalId(id)` adds a modal id to the bridge allowlist. The
+ * `share-modal` saga's bridge saga (`watchOpenViaSetVisibility`) reads
+ * this allowlist and translates legacy `setVisibility(id, true)` actions
+ * into `showNiceModal(id)` calls. Wave-D registry-pattern modals call
+ * `registerNiceModalId('Foo')` next to their `NiceModal.register('Foo', ...)`
+ * so existing redux trigger sites keep working unchanged.
  */
 
 export type NiceModalShowFn = (
@@ -48,3 +55,18 @@ export const hideNiceModal: NiceModalHideFn = (id) => {
   }
   return adapter.hide(id)
 }
+
+/**
+ * Allowlist of modal ids that should bridge from `setVisibility(id, true)`
+ * to `showNiceModal(id)`. Modals call `registerNiceModalId('Foo')` at
+ * module scope, alongside their `NiceModal.register('Foo', Component)`.
+ *
+ * Backed by a Set so re-imports are idempotent.
+ */
+const niceModalIds = new Set<string>()
+
+export const registerNiceModalId = (id: string) => {
+  niceModalIds.add(id)
+}
+
+export const isNiceModalId = (id: string): boolean => niceModalIds.has(id)

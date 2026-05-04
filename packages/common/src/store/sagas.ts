@@ -6,6 +6,7 @@
 // import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 // import signOutSagas from 'common/store/sign-out/sagas'
 
+import niceModalBridgeSagas from '~/services/nice-modal-bridge/sagas'
 import { accountSagas } from '~/store/account'
 import { buyUSDCSagas } from '~/store/buy-usdc'
 import { sagas as castSagas } from '~/store/cast/sagas'
@@ -52,7 +53,8 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   duplidateAddConfirmationModalUI: duplicateAddConfirmationModalUISagas,
   playback: playbackSagas,
   playbackPosition: playbackPositionSagas,
-  withdrawUSDC: withdrawUSDCSagas
+  withdrawUSDC: withdrawUSDCSagas,
+  niceModalBridge: niceModalBridgeSagas
 
   // signOut: signOutSagas
   // recoveryEmail: recoveryEmailSagas

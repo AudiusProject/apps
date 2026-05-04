@@ -8,7 +8,6 @@ import {
 } from '~/adapters'
 import { queryCollection, queryTrack, queryUser } from '~/api'
 import { TQCollection } from '~/api/tan-query/models'
-import { showNiceModal } from '~/services/nice-modal-bridge'
 import { getSDK } from '~/store/sdkUtils'
 
 import { setVisibility } from '../modals/parentSlice'
@@ -99,25 +98,10 @@ function* watchHandleRequestOpen() {
   yield takeEvery(requestOpen, handleRequestOpen)
 }
 
-/**
- * Bridge: any caller dispatching `setVisibility({ modal: 'Share', visible: true })`
- * (legacy callers like `onCancelAction` from CreateChatModal, plus the
- * `handleRequestOpen` saga above) gets translated into a `NiceModal.show('Share')`
- * call. This lets the rest of the codebase migrate at its own pace — once all
- * callers go through `showNiceModal` directly, this bridge can be removed.
- */
-function* watchOpenShareViaSetVisibility() {
-  yield takeEvery(
-    setVisibility,
-    function* (action: ReturnType<typeof setVisibility>) {
-      const { modal, visible } = action.payload
-      if (modal === 'Share' && visible === true) {
-        yield call(showNiceModal, 'Share')
-      }
-    }
-  )
-}
+// The `setVisibility('Share', true)` → `showNiceModal('Share')` bridge now
+// lives in the generalized `services/nice-modal-bridge/sagas.ts`, driven by
+// the `registerNiceModalId` allowlist that ShareModal opts into.
 
 export default function sagas() {
-  return [watchHandleRequestOpen, watchOpenShareViaSetVisibility]
+  return [watchHandleRequestOpen]
 }
