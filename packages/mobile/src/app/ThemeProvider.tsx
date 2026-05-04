@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import {
   Theme,
@@ -12,7 +12,7 @@ import { themeActions, themeSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAppState } from '@react-native-community/hooks'
-import { useDarkMode } from 'react-native-dynamic'
+import { Appearance, useColorScheme } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
@@ -66,6 +66,14 @@ const resolveToHarmonyTheme = (
   return resolvedMode === 'light' ? 'classic-light' : 'classic-dark'
 }
 
+// Fallback to the live system value when redux hasn't been seeded yet
+// (e.g. on the very first render before ThemeProvider's effect has fired).
+// Without this the first paint would force light even when the OS is dark.
+const getCurrentSystemAppearance = (): SystemAppearance =>
+  Appearance.getColorScheme() === 'dark'
+    ? SystemAppearance.DARK
+    : SystemAppearance.LIGHT
+
 const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
   const theme = getTheme(state)
   const themePalette = getThemePalette(state)
@@ -80,9 +88,7 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
         : theme === Theme.DARK
           ? ThemeMode.DARK
           : ThemeMode.AUTO)
-    const sysAppearance =
-      systemAppearance ??
-      (theme === Theme.DARK ? SystemAppearance.DARK : SystemAppearance.LIGHT)
+    const sysAppearance = systemAppearance ?? getCurrentSystemAppearance()
     return resolveToHarmonyTheme(themePalette, mode, sysAppearance)
   }
 
@@ -96,7 +102,7 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
       return 'matrix'
     case Theme.AUTO:
     default:
-      switch (systemAppearance) {
+      switch (systemAppearance ?? getCurrentSystemAppearance()) {
         case SystemAppearance.DARK:
           return 'default-dark'
         case SystemAppearance.LIGHT:
@@ -108,10 +114,15 @@ const selectHarmonyTheme = (state: AppState): HarmonyThemeName => {
 
 export const ThemeProvider = (props: ThemeProviderProps) => {
   const { children } = props
-  const isDarkMode = useDarkMode()
+  // useColorScheme from react-native synchronously returns the current
+  // system value on first render (unlike react-native-dynamic's
+  // useDarkMode, which can report stale `light` until its listener fires).
+  const colorScheme = useColorScheme()
+  const isDarkMode = colorScheme === 'dark'
   const dispatch = useDispatch()
   const appState = useAppState()
   const theme = useSelector(selectHarmonyTheme)
+  const hasInitializedSystemAppearanceRef = useRef(false)
 
   useAsync(async () => {
     const [savedTheme, savedPalette, savedMode] = await Promise.all([
@@ -160,16 +171,24 @@ export const ThemeProvider = (props: ThemeProviderProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    // react-native-dynamic incorrectly sets dark-mode when in background
-    if (appState === 'active') {
-      dispatch(
-        setSystemAppearance({
-          systemAppearance: isDarkMode
+    // iOS briefly reports dark-mode while generating the app-switcher
+    // snapshot, so ignore changes when backgrounded. The very first
+    // dispatch must always run so the initial render picks up the
+    // system value even if appState hasn't settled to 'active' yet.
+    if (appState !== 'active' && hasInitializedSystemAppearanceRef.current) {
+      return
+    }
+    hasInitializedSystemAppearanceRef.current = true
+    const currentScheme =
+      Appearance.getColorScheme() ?? (isDarkMode ? 'dark' : 'light')
+    dispatch(
+      setSystemAppearance({
+        systemAppearance:
+          currentScheme === 'dark'
             ? SystemAppearance.DARK
             : SystemAppearance.LIGHT
-        })
-      )
-    }
+      })
+    )
   }, [isDarkMode, dispatch, appState])
 
   return (

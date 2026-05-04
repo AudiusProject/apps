@@ -56,6 +56,12 @@ export const SelectablePill = (props: SelectablePillProps) => {
 
   const pressed = useSharedValue(0)
   const selected = useSharedValue(isSelected ? 1 : 0)
+  // Bumped whenever the theme palette changes so the animated style
+  // worklets below re-execute on the UI thread and pick up the new
+  // color values. Reanimated only re-runs a worklet when a shared
+  // value it reads changes; updating useAnimatedStyle's dependency
+  // array alone is not enough to force a repaint.
+  const themeNudge = useSharedValue(0)
 
   const handlePressIn = useCallback(() => {
     pressed.value = withTiming(1, motion.press)
@@ -117,41 +123,37 @@ export const SelectablePill = (props: SelectablePillProps) => {
     disableUnselectAnimation
   ])
 
-  // Force animated styles to repaint with the new theme colors when the
-  // theme changes. Updating the dependency arrays below refreshes the
-  // worklet closures, but Reanimated only re-renders the view when a
-  // shared value it reads actually changes. Nudging `selected` here
-  // triggers that re-render so the interpolated colors pick up the new
-  // theme values instead of staying cached on the previous palette.
   useEffect(() => {
-    const target = isSelected ? 1 : 0
-    selected.value = 1 - target
-    selected.value = target
+    themeNudge.value = themeNudge.value + 1
   }, [
+    themeNudge,
     color.background.white,
     color.secondary.s400,
     color.border.strong,
     color.text.default,
-    color.static.white,
-    selected,
-    isSelected
+    color.static.white
   ])
 
   const animatedRootStyles = useAnimatedStyle(
-    () => ({
-      opacity: withTiming(disabled ? 0.45 : 1, motion.press),
-      backgroundColor: interpolateColor(
-        selected.value,
-        [0, 1],
-        [color.background.white, color.secondary.s400]
-      ),
-      borderColor: interpolateColor(
-        selected.value,
-        [0, 1],
-        [color.border.strong, color.secondary.s400]
-      ),
-      transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
-    }),
+    () => {
+      // Subscribe to themeNudge so this worklet re-runs whenever the
+      // theme palette changes and picks up the latest closure colors.
+      themeNudge.value
+      return {
+        opacity: withTiming(disabled ? 0.45 : 1, motion.press),
+        backgroundColor: interpolateColor(
+          selected.value,
+          [0, 1],
+          [color.background.white, color.secondary.s400]
+        ),
+        borderColor: interpolateColor(
+          selected.value,
+          [0, 1],
+          [color.border.strong, color.secondary.s400]
+        ),
+        transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
+      }
+    },
     [
       disabled,
       color.background.white,
@@ -161,13 +163,16 @@ export const SelectablePill = (props: SelectablePillProps) => {
   )
 
   const animatedTextStyles = useAnimatedStyle(
-    () => ({
-      color: interpolateColor(
-        selected.value,
-        [0, 1],
-        [color.text.default, color.static.white]
-      )
-    }),
+    () => {
+      themeNudge.value
+      return {
+        color: interpolateColor(
+          selected.value,
+          [0, 1],
+          [color.text.default, color.static.white]
+        )
+      }
+    },
     [color.text.default, color.static.white]
   )
 
