@@ -426,11 +426,19 @@ const ContestPage = ({
   }, [track?.permalink, navigate])
 
   // "Enter Contest" — defer to the existing upload flow with the contest
-  // track pre-linked as the remix parent. If the app ever gets a dedicated
-  // /enter-contest route we'll swap to that.
+  // track pre-linked as the remix parent. UploadPage reads
+  // `initialMetadata` off `location.state`, not URL search params, so
+  // we hand off via state. The previous `?remix_of=ID` query string was
+  // ignored — submissions weren't getting linked back to the contest.
   const handleEnterContest = useRequiresAccountCallback(() => {
     if (!trackId) return
-    navigate(`/upload?remix_of=${trackId}`)
+    navigate('/upload', {
+      state: {
+        initialMetadata: {
+          remix_of: { tracks: [{ parent_track_id: trackId }] }
+        }
+      }
+    })
   }, [trackId, navigate])
 
   // Flag gate
