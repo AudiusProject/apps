@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import {
   Id,
@@ -8,7 +8,7 @@ import {
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { purchaseFromSDK } from '~/adapters/purchase'
-import { useQueryContext, makeLoadNextPage } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
 import {
   USDCContentPurchaseType,
@@ -97,10 +97,16 @@ export const useSales = (args: GetSalesListArgs, options?: QueryOptions) => {
   const tracksQueryResult = useTracks(trackIdsToFetch)
   const collectionsQueryResult = useCollections(collectionIdsToFetch)
 
-  const loadNextPageCallback = useMemo(
-    () => makeLoadNextPage(queryResult),
-    [queryResult]
-  )
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. We read the latest queryResult from a ref
+  // at call time instead of capturing it in the closure deps.
+  const queryResultRef = useRef(queryResult)
+  queryResultRef.current = queryResult
+  const loadNextPageCallback = useCallback(() => {
+    const q = queryResultRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
 
   return {
     ...combineQueryStatuses([

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useRef } from 'react'
 
 import {
   Id,
@@ -15,7 +15,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 
-import { useQueryContext, makeLoadNextPage } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models/Identifiers'
 import { USDCTransactionDetails } from '~/models/USDCTransactions'
 
@@ -130,10 +130,16 @@ export const useUSDCTransactions = (
 
   // @ts-ignore
   queryData.reset = reset
-  const loadNextPageCallback = useMemo(
-    () => makeLoadNextPage(queryData),
-    [queryData]
-  )
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. We read the latest queryData from a ref
+  // at call time instead of capturing it in the closure deps.
+  const queryDataRef = useRef(queryData)
+  queryDataRef.current = queryData
+  const loadNextPageCallback = useCallback(() => {
+    const q = queryDataRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
   // @ts-ignore
   queryData.loadNextPage = loadNextPageCallback
   return queryData as UseInfiniteQueryResult<USDCTransactionDetails[]> & {
