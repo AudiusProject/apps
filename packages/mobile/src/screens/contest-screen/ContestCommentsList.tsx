@@ -2,11 +2,13 @@ import { useCallback, useState } from 'react'
 
 import {
   getCommentQueryKey,
+  QUERY_KEYS,
   useComment,
   useCurrentUserId,
   useDeleteComment,
   useEventComments,
   usePostEventComment,
+  useReactToComment,
   useUser
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
@@ -14,6 +16,8 @@ import { dayjs } from '@audius/common/utils'
 import { Portal } from '@gorhom/portal'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
+
+import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
 
 import {
   Button,
@@ -306,11 +310,13 @@ const ContestCommentRow = ({
   eventOwnerUserId,
   mode
 }: ContestCommentRowProps) => {
+  const queryClient = useQueryClient()
   const { data: comment } = useComment(commentId)
   const { data: author } = useUser(comment?.userId)
   const { data: currentUserId } = useCurrentUserId()
   const { mutate: postComment } = usePostEventComment()
   const { mutate: deleteComment } = useDeleteComment()
+  const { mutate: reactToComment } = useReactToComment()
 
   const [isReplying, setIsReplying] = useState(false)
   const [replyMessageId, setReplyMessageId] = useState(0)
@@ -342,7 +348,12 @@ const ContestCommentRow = ({
   const isCurrentUserAuthor =
     currentUserId !== null && comment.userId === currentUserId
   const canDelete = isCurrentUserHost || isCurrentUserAuthor
-  const canReply = currentUserId !== null
+  // Replies allowed on regular comments only — nobody can reply to an
+  // artist's contest update (those are announcements, not threads).
+  const canReply = currentUserId !== null && !isPostUpdate
+
+  const videoUrl: string | undefined =
+    'videoUrl' in comment ? ((comment as any).videoUrl ?? undefined) : undefined
 
   const createdAt: Date | undefined =
     'createdAt' in comment && (comment as any).createdAt
@@ -365,6 +376,38 @@ const ContestCommentRow = ({
 
   const handleDelete = () => {
     if (!currentUserId) return
+    // Optimistic cleanup against the *event* comment caches —
+    // useDeleteComment's onMutate runs against track caches, so without
+    // this the deleted row reappears until the next refetch (the bug
+    // the contest QA pass flagged: "deleting a comment makes it
+    // reappear immediately").
+    if (parentCommentId) {
+      queryClient.setQueryData(getCommentQueryKey(parentCommentId), (prev) => {
+        if (!prev) return prev
+        const parent = prev as any
+        return {
+          ...parent,
+          replies: (parent.replies ?? []).filter((r: any) => r.id !== commentId),
+          replyCount: Math.max(0, (parent.replyCount ?? 0) - 1)
+        }
+      })
+    } else {
+      queryClient.setQueriesData<any>(
+        { queryKey: [QUERY_KEYS.eventComments, eventId] },
+        (prevData: any) => {
+          if (!prevData) return prevData
+          const next = structuredClone(prevData)
+          next.pages = (next.pages ?? []).map((page: any[]) =>
+            (page ?? []).filter((item) => item?.commentId !== commentId)
+          )
+          return next
+        }
+      )
+      queryClient.removeQueries({
+        queryKey: getCommentQueryKey(commentId),
+        exact: true
+      })
+    }
     deleteComment({
       commentId,
       userId: currentUserId,
@@ -373,6 +416,21 @@ const ContestCommentRow = ({
       trackId: eventId,
       currentSort: undefined,
       parentCommentId
+    })
+  }
+
+  const handleToggleLike = () => {
+    if (!currentUserId) return
+    const nextIsLiked = !(comment as any).isCurrentUserReacted
+    reactToComment({
+      commentId,
+      userId: currentUserId,
+      isLiked: nextIsLiked,
+      trackId: eventId,
+      entityType: 'Event',
+      isEntityOwner:
+        eventOwnerUserId !== undefined && currentUserId === eventOwnerUserId,
+      currentSort: undefined
     })
   }
 
@@ -419,8 +477,39 @@ const ContestCommentRow = ({
         <Text variant='body' size='s'>
           {comment.message}
         </Text>
+        {videoUrl ? (
+          <View style={{ marginTop: 4 }}>
+            {/* Updates store YouTube / Vimeo URLs (set via the
+                AttachVideoModal). VideoEmbed renders these as a
+                proper iframe inside a WebView — the previous version
+                of this row didn't render videos at all on mobile. */}
+            <VideoEmbed url={videoUrl} />
+          </View>
+        ) : null}
         <Flex direction='row' gap='m' alignItems='center' pt='xs'>
-          <IconHeart color='subdued' size='s' />
+          {/* Wire the heart up to useReactToComment + show the live
+              count. Previously this row rendered a static IconHeart
+              with no onPress and no count, which is why "favorite
+              count on comments isn't working" was reported. */}
+          <PlainButton
+            variant='subdued'
+            onPress={handleToggleLike}
+            disabled={!currentUserId}
+          >
+            <Flex direction='row' alignItems='center' gap='xs'>
+              <IconHeart
+                color={
+                  (comment as any).isCurrentUserReacted ? 'active' : 'subdued'
+                }
+                size='s'
+              />
+              {(comment as any).reactCount > 0 ? (
+                <Text variant='body' size='s' color='subdued'>
+                  {(comment as any).reactCount}
+                </Text>
+              ) : null}
+            </Flex>
+          </PlainButton>
           {canReply ? (
             <PlainButton
               variant='subdued'

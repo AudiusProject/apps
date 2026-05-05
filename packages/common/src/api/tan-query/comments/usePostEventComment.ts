@@ -50,11 +50,15 @@ export const usePostEventComment = () => {
       })
     },
     onMutate: async (args: PostEventCommentArgs & { newId?: ID }) => {
-      const { userId, eventId, body } = args
+      const { userId, eventId, body, parentCommentId, videoUrl } = args
       const sdk = await audiusSdk()
       const newId = await sdk.comments.generateCommentId()
       args.newId = newId
 
+      // Carry parentCommentId + videoUrl on the optimistic shape — without
+      // them the row classifier in the Contest comments tile mis-routes
+      // replies (no parentCommentId → looks like a host post-update) and
+      // the attached video doesn't render until the refetch lands.
       const newComment: Comment = {
         id: newId,
         entityId: eventId,
@@ -69,17 +73,18 @@ export const usePostEventComment = () => {
         replies: undefined,
         createdAt: new Date().toISOString(),
         updatedAt: undefined,
-        isMembersOnly: false
+        isMembersOnly: false,
+        parentCommentId,
+        videoUrl
       } as unknown as Comment
 
       // Prime the individual comment cache
       queryClient.setQueryData(getCommentQueryKey(newId), newComment)
 
-      // Only optimistically push top-level comments to the feed; replies are
-      // nested inside their parent comment and come back on invalidation.
-      // Patch every cached sort variant ('top' / 'newest' / 'timestamp') so
-      // the comment shows up regardless of which tab the user is viewing.
-      if (!args.parentCommentId) {
+      if (!parentCommentId) {
+        // Top-level comment: prepend to every cached sort variant ('top' /
+        // 'newest' / 'timestamp') so the comment shows up regardless of
+        // which tab the user is viewing.
         queryClient.setQueriesData<any>(
           { queryKey: [QUERY_KEYS.eventComments, eventId] },
           (prevData: any) => {
@@ -89,6 +94,34 @@ export const usePostEventComment = () => {
               next.pages[0].unshift({ commentId: newId })
             }
             return next
+          }
+        )
+      } else {
+        // Reply: push into the parent's nested `replies` array so the
+        // reply appears under the parent without waiting for the refetch.
+        // Mirrors `usePostComment`'s optimistic behavior for tracks.
+        queryClient.setQueryData(
+          getCommentQueryKey(parentCommentId),
+          (prev: Comment | undefined) => {
+            if (!prev) return prev
+            const replyShape = {
+              id: newId,
+              entityId: eventId,
+              userId,
+              message: body,
+              mentions: [],
+              isEdited: false,
+              trackTimestampS: undefined,
+              reactCount: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: undefined,
+              isMembersOnly: false
+            } as any
+            return {
+              ...prev,
+              replies: [...((prev as any).replies ?? []), replyShape],
+              replyCount: ((prev as any).replyCount ?? 0) + 1
+            }
           }
         )
       }
