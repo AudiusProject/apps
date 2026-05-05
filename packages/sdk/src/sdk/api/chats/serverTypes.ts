@@ -75,6 +75,11 @@ export type ChatReadRPC = {
   }
 }
 
+export type ChatReadAllRPC = {
+  method: 'chat.read_all'
+  params: Record<string, never>
+}
+
 export type ChatBlockRPC = {
   method: 'chat.block'
   params: {
@@ -106,6 +111,7 @@ export type RPCPayloadRequest =
   | ChatMessageRPC
   | ChatReactRPC
   | ChatReadRPC
+  | ChatReadAllRPC
   | ChatBlockRPC
   | ChatUnblockRPC
   | ChatPermitRPC

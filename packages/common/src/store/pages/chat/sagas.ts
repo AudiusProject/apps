@@ -10,7 +10,6 @@ import {
   type ValidatedChatPermissions
 } from '@audius/sdk'
 import {
-  all,
   call,
   delay,
   put,
@@ -95,8 +94,13 @@ const {
   deleteChat,
   deleteChatSucceeded
 } = chatActions
-const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
-  chatSelectors
+const {
+  getChatsSummary,
+  getChat,
+  getOptimisticReads,
+  getUnfurlMetadata,
+  getNonOptimisticChat
+} = chatSelectors
 const { toast } = toastActions
 const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
@@ -610,38 +614,19 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
 }
 
 function* doMarkAllChatsAsRead() {
-  const audiusSdk = yield* getContext('audiusSdk')
-  const sdk = yield* call(audiusSdk)
-  const currentUserId = yield* call(queryCurrentUserId)
-  if (!currentUserId) return
-
-  // Page through every chat on the server (not just the ones already in
-  // local state) so this works even if the user hasn't scrolled their
-  // full inbox.
-  const unreadChatIds: string[] = []
-  let before: string | undefined
-  let hasMore = true
   try {
-    while (hasMore) {
-      const response = yield* call([sdk.chats, sdk.chats.getAll], {
-        userId: Id.parse(currentUserId),
-        before,
-        limit: CHAT_PAGE_SIZE
-      })
-      for (const chat of response.data) {
-        if (!chat.is_blast && (chat.unread_message_count ?? 0) > 0) {
-          unreadChatIds.push(chat.chat_id)
-        }
-      }
-      const nextBefore = response.summary?.prev_cursor
-      const prevCount = response.summary?.prev_count ?? 0
-      hasMore =
-        response.data.length > 0 &&
-        prevCount > 0 &&
-        !!nextBefore &&
-        nextBefore !== before
-      before = nextBefore
-    }
+    const audiusSdk = yield* getContext('audiusSdk')
+    const sdk = yield* call(audiusSdk)
+    // Single server-side UPDATE clears every chat_member.unread_count for
+    // this user. The locally-known chat IDs we feed into the success
+    // reducer are just for committing the optimistic per-chat state we
+    // already wrote — chats outside local state get cleared on the
+    // server and converge via the trailing fetchUnreadMessagesCount.
+    yield* call([sdk.chats, sdk.chats.readAll])
+    const optimisticReads = yield* select(getOptimisticReads)
+    const chatIds = Object.keys(optimisticReads)
+    yield* put(markAllChatsAsReadSucceeded({ chatIds }))
+    yield* put(fetchUnreadMessagesCount())
   } catch (e) {
     yield* put(markAllChatsAsReadFailed({ chatIds: [] }))
     yield* put(
@@ -654,64 +639,9 @@ function* doMarkAllChatsAsRead() {
     reportToSentry({
       name: 'Chats',
       error: e as Error,
-      additionalInfo: { phase: 'pagination' },
       feature: Feature.Chats
     })
-    return
   }
-
-  if (unreadChatIds.length === 0) {
-    yield* put(markAllChatsAsReadSucceeded({ chatIds: [] }))
-    yield* put(fetchUnreadMessagesCount())
-    return
-  }
-
-  // Fire all read calls in parallel and split into successes/failures so we
-  // commit each one's optimistic state independently.
-  const results = yield* all(
-    unreadChatIds.map((chatId) =>
-      call(function* () {
-        try {
-          yield* call([sdk.chats, sdk.chats.read], { chatId })
-          return { chatId, ok: true as const }
-        } catch (e) {
-          return { chatId, ok: false as const, error: e as Error }
-        }
-      })
-    )
-  )
-
-  const succeeded = results.filter((r) => r.ok).map((r) => r.chatId)
-  const failed = results.filter((r) => !r.ok)
-
-  if (succeeded.length > 0) {
-    yield* put(markAllChatsAsReadSucceeded({ chatIds: succeeded }))
-  }
-  if (failed.length > 0) {
-    yield* put(
-      markAllChatsAsReadFailed({ chatIds: failed.map((f) => f.chatId) })
-    )
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: failed[0].error!,
-      additionalInfo: { failedChatCount: failed.length },
-      feature: Feature.Chats
-    })
-    yield* put(
-      toast({
-        type: 'error',
-        content:
-          failed.length === unreadChatIds.length
-            ? 'Failed to mark messages as read.'
-            : `Failed to mark ${failed.length} ${
-                failed.length === 1 ? 'conversation' : 'conversations'
-              } as read.`
-      })
-    )
-  }
-  // Re-sync the global unread badge so chats outside local state converge.
-  yield* put(fetchUnreadMessagesCount())
 }
 
 function* doSendMessage(action: ReturnType<typeof sendMessage>) {
