@@ -1,0 +1,7 @@
+/* Default fill-parent sizing. Applied at a lower CSS source-order than any
+   consumer CSS module so caller classes can override height/width without
+   fighting Emotion's runtime css-prop priority. */
+.root {
+  height: 100%;
+  width: 100%;
+}
