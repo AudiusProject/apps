@@ -34,8 +34,9 @@ npm run web:stage    # Against staging
 npm run web:prod     # Against production
 
 # Run mobile applications
-npm run ios:dev      # iOS local development
-npm run android:dev  # Android local development
+npm run mobile       # Metro only — preferred for JS-only changes; user opens the simulator manually with the existing build
+npm run ios:dev      # iOS full build + boot simulator (slow; only when native modules changed)
+npm run android:dev  # Android full build + boot emulator (slow; only when native modules changed)
 
 # Testing
 npm run test         # Run all tests via Turbo
