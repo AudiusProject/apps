@@ -448,6 +448,16 @@ jobs:
           cd packages/web
           cp -r ./public/.well-known build 2>/dev/null || true
 
+      # Source maps are uploaded to S3 in release/production deploys (see the
+      # `Move sourcemaps` step in the release/prod jobs). For preview we don't
+      # ship them anywhere, but they still need to be removed from the bundle —
+      # individual chunk maps can exceed the Cloudflare 25 MiB per-asset limit
+      # and break the deploy. Strip them from both bundles before wrangler.
+      - name: Strip sourcemaps for preview
+        run: |
+          cd packages/web
+          find build build-ssr -type f -name '*.map' -delete || true
+
       - name: Deploy to Cloudflare (Preview)
         id: deploy
         env:
