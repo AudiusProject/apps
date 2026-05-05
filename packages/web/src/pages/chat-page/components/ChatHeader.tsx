@@ -13,7 +13,8 @@ import {
   Text,
   IconMessages,
   IconCheck,
-  Tooltip
+  IconKebabHorizontal,
+  PopupMenu
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
@@ -26,9 +27,10 @@ import { UserChatHeader } from './UserChatHeader'
 
 const messages = {
   header: 'Messages',
-  settings: 'Settings',
+  inboxOptions: 'Inbox Options',
+  inboxSettings: 'Inbox Settings',
   compose: 'Compose',
-  markAllAsRead: 'Mark all as read'
+  markAllAsRead: 'Mark All as Read'
 }
 
 const CHAT_HEADER_PADDING_PX = 20
@@ -68,6 +70,23 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       setIsMarkAllAsReadModalVisible(true)
     }, [])
 
+    const inboxMenuItems = [
+      {
+        text: messages.inboxSettings,
+        icon: <IconSettings />,
+        onClick: handleSettingsClicked
+      },
+      ...(hasUnread
+        ? [
+            {
+              text: messages.markAllAsRead,
+              icon: <IconCheck />,
+              onClick: handleMarkAllAsReadClicked
+            }
+          ]
+        : [])
+    ]
+
     const headerContent = (
       <Flex p='l' alignItems='center' gap='m'>
         <IconMessages size='2xl' color='heading' />
@@ -75,19 +94,18 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
           {messages.header}
         </Text>
         <Flex gap='m' css={{ marginLeft: 'auto' }}>
-          {hasUnread ? (
-            <Tooltip text={messages.markAllAsRead} placement='bottom'>
+          <PopupMenu
+            items={inboxMenuItems}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            renderTrigger={(ref, trigger) => (
               <IconButton
-                aria-label={messages.markAllAsRead}
-                icon={IconCheck}
-                onClick={handleMarkAllAsReadClicked}
+                ref={ref}
+                aria-label={messages.inboxOptions}
+                icon={IconKebabHorizontal}
+                onClick={() => trigger()}
               />
-            </Tooltip>
-          ) : null}
-          <IconButton
-            aria-label={messages.settings}
-            icon={IconSettings}
-            onClick={handleSettingsClicked}
+            )}
           />
           <IconButton
             aria-label={messages.compose}
