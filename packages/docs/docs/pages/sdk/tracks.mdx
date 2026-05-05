@@ -649,6 +649,7 @@ Metadata object for creating a new track. Fields marked **Required** must be pro
 | `isStreamGated`                | `boolean`                                               | Whether streaming is behind an access gate        | _Optional_   |
 | `streamConditions`             | [`AccessGate`](#accessgate)                             | Conditions for stream access gating               | _Optional_   |
 | `downloadConditions`           | [`AccessGate`](#accessgate)                             | Conditions for download access gating             | _Optional_   |
+| `allowedApiKeys`               | `string[]`                                              | API keys allowed to stream this track             | _Optional_   |
 | `fieldVisibility`              | [`FieldVisibility`](#fieldvisibility)                   | Controls visibility of individual track fields    | _Optional_   |
 | `placementHosts`               | `string`                                                | Preferred storage node placement hosts            | _Optional_   |
 | `stemOf`                       | [`StemParent`](#stemparent)                             | Parent track if this track is a stem              | _Optional_   |
@@ -698,6 +699,7 @@ you want to change. Omitted fields retain their current values.
 | `isStreamGated`       | `boolean`                               | Whether streaming is behind an access gate        |
 | `streamConditions`    | [`AccessGate`](#accessgate)             | Conditions for stream access gating               |
 | `downloadConditions`  | [`AccessGate`](#accessgate)             | Conditions for download access gating             |
+| `allowedApiKeys`      | `string[]`                              | API keys allowed to stream this track             |
 | `fieldVisibility`     | [`FieldVisibility`](#fieldvisibility)   | Controls visibility of individual track fields    |
 | `placementHosts`      | `string`                                | Preferred storage node placement hosts            |
 | `stemOf`              | [`StemParent`](#stemparent)             | Parent track if this track is a stem              |

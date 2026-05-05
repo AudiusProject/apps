@@ -287,7 +287,8 @@ export const trackMetadataForUploadToSdk = (
         'is_custom_musical_key',
         'comments_disabled',
         'ddex_release_ids',
-        'parental_warning_type'
+        'parental_warning_type',
+        'allowed_api_keys'
       ])
     ),
     trackId: OptionalId.parse(input.track_id),
