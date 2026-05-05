@@ -1,6 +1,7 @@
 import { ErrorLevel } from '@audius/common/models'
 import type { Environment } from '@audius/common/services'
 import { remoteConfig } from '@audius/common/services'
+import CodePush from '@bravemobile/react-native-code-push'
 import * as optimizely from '@optimizely/optimizely-sdk'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
@@ -19,13 +20,31 @@ const { version: appVersion } = packageInfo
 const OPTIMIZELY_KEY = env.OPTIMIZELY_KEY
 const DATA_FILE_URL = 'https://experiments.audius.co/datafiles/%s.json'
 
+/**
+ * Sentinel returned when no OTA bundle is applied (the app is running its
+ * embedded binary bundle). Lets Optimizely audiences target "native vs OTA"
+ * without distinguishing missing data from a real value.
+ */
+const OTA_VERSION_NATIVE = 'native'
+
+const getOtaVersion = async (): Promise<string> => {
+  try {
+    const pkg = await CodePush.getUpdateMetadata(CodePush.UpdateState.RUNNING)
+    return pkg?.label ?? OTA_VERSION_NATIVE
+  } catch {
+    return OTA_VERSION_NATIVE
+  }
+}
+
 const getMobileClientInfo = async () => {
   const mobilePlatform = Platform.OS
   const mobileAppVersion = VersionNumber.appVersion
+  const otaVersion = await getOtaVersion()
 
   return {
     mobilePlatform,
-    mobileAppVersion
+    mobileAppVersion,
+    otaVersion
   }
 }
 

@@ -41,6 +41,11 @@ type MobileClientInfo = {
   /** This is the type of Platform.OS, but we only expect ios or android here */
   mobilePlatform: 'ios' | 'android' | 'web' | 'windows' | 'macos'
   mobileAppVersion: string
+  /**
+   * Running CodePush bundle label (e.g. "v17"), or "native" when the app is
+   * running the binary's embedded bundle with no OTA applied.
+   */
+  otaVersion?: string
 }
 
 export type RemoteConfigOptions<Client> = {
@@ -245,7 +250,8 @@ export const remoteConfig = <
         appVersion,
         platform,
         mobilePlatform: mobileClientInfo?.mobilePlatform ?? null,
-        mobileAppVersion: mobileClientInfo?.mobileAppVersion ?? null
+        mobileAppVersion: mobileClientInfo?.mobileAppVersion ?? null,
+        otaVersion: mobileClientInfo?.otaVersion ?? null
         // Note: this actually returns `undefined` if optimizely data has not been requested
       }) as boolean | undefined
     }
