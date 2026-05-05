@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import {
   Id,
@@ -97,9 +97,10 @@ export const useSales = (args: GetSalesListArgs, options?: QueryOptions) => {
   const tracksQueryResult = useTracks(trackIdsToFetch)
   const collectionsQueryResult = useCollections(collectionIdsToFetch)
 
-  const loadNextPageCallback = useCallback(() => {
-    makeLoadNextPage(queryResult)
-  }, [queryResult])
+  const loadNextPageCallback = useMemo(
+    () => makeLoadNextPage(queryResult),
+    [queryResult]
+  )
 
   return {
     ...combineQueryStatuses([

@@ -2148,6 +2148,13 @@ export type WithdrawUSDCSuccess = WithdrawUSDCTransferEventFields & {
 
 export type WithdrawUSDCFailure = WithdrawUSDCTransferEventFields & {
   eventName: Name.WITHDRAW_USDC_FAILURE
+  error?: unknown
+  errorName?: string
+  /** HTTP status code, when the failure was a non-2xx SDK response. */
+  httpStatus?: number
+  httpStatusText?: string
+  /** Truncated response body, when the failure was a non-2xx SDK response. */
+  responseBody?: string
 }
 export type WithdrawUSDCCancelled = WithdrawUSDCTransferEventFields & {
   eventName: Name.WITHDRAW_USDC_CANCELLED
@@ -2166,6 +2173,13 @@ export type WithdrawUSDCCreateDestAccountSuccess =
 export type WithdrawUSDCCreateDestAccountFailure =
   WithdrawUSDCTransferEventFields & {
     eventName: Name.WITHDRAW_USDC_CREATE_DEST_TOKEN_ACCOUNT_FAILED
+    error?: unknown
+    errorName?: string
+    /** HTTP status code, when the failure was a non-2xx SDK response. */
+    httpStatus?: number
+    httpStatusText?: string
+    /** Truncated response body, when the failure was a non-2xx SDK response. */
+    responseBody?: string
   }
 
 export type WithdrawUSDCTransferToRootWallet =

@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
   Id,
@@ -130,7 +130,7 @@ export const useUSDCTransactions = (
 
   // @ts-ignore
   queryData.reset = reset
-  const loadNextPageCallback = useCallback(
+  const loadNextPageCallback = useMemo(
     () => makeLoadNextPage(queryData),
     [queryData]
   )
