@@ -1,4 +1,4 @@
-import { forwardRef, useCallback } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 
 import {
   chatSelectors,
@@ -11,7 +11,9 @@ import {
   IconButton,
   Flex,
   Text,
-  IconMessages
+  IconMessages,
+  IconCheck,
+  Tooltip
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
@@ -19,12 +21,14 @@ import { useModalState } from 'common/hooks/useModalState'
 import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
+import { MarkAllAsReadConfirmationModal } from './MarkAllAsReadConfirmationModal'
 import { UserChatHeader } from './UserChatHeader'
 
 const messages = {
   header: 'Messages',
   settings: 'Settings',
-  compose: 'Compose'
+  compose: 'Compose',
+  markAllAsRead: 'Mark all as read'
 }
 
 const CHAT_HEADER_PADDING_PX = 20
@@ -41,9 +45,15 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
   ({ currentChatId, isNarrowLayout }, ref) => {
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
+    const [isMarkAllAsReadModalVisible, setIsMarkAllAsReadModalVisible] =
+      useState(false)
     const chat = useSelector((state: CommonState) =>
       chatSelectors.getChat(state, currentChatId ?? '')
     )
+    const unreadMessagesCount = useSelector(
+      chatSelectors.getUnreadMessagesCount
+    )
+    const hasUnread = unreadMessagesCount > 0
     const isBlast = chat?.is_blast
 
     const handleComposeClicked = useCallback(() => {
@@ -54,6 +64,10 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       setInboxSettingsVisible(true)
     }, [setInboxSettingsVisible])
 
+    const handleMarkAllAsReadClicked = useCallback(() => {
+      setIsMarkAllAsReadModalVisible(true)
+    }, [])
+
     const headerContent = (
       <Flex p='l' alignItems='center' gap='m'>
         <IconMessages size='2xl' color='heading' />
@@ -61,6 +75,15 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
           {messages.header}
         </Text>
         <Flex gap='m' css={{ marginLeft: 'auto' }}>
+          {hasUnread ? (
+            <Tooltip text={messages.markAllAsRead} placement='bottom'>
+              <IconButton
+                aria-label={messages.markAllAsRead}
+                icon={IconCheck}
+                onClick={handleMarkAllAsReadClicked}
+              />
+            </Tooltip>
+          ) : null}
           <IconButton
             aria-label={messages.settings}
             icon={IconSettings}
@@ -76,6 +99,7 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     )
 
     return (
+      <>
       <Frosted
         w='100%'
         h='var(--chat-header-height, 112px)'
@@ -108,6 +132,11 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
           )}
         </Flex>
       </Frosted>
+        <MarkAllAsReadConfirmationModal
+          isVisible={isMarkAllAsReadModalVisible}
+          onClose={() => setIsMarkAllAsReadModalVisible(false)}
+        />
+      </>
     )
   }
 )

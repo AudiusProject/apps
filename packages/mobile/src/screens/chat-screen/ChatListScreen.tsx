@@ -6,11 +6,18 @@ import { FlashList } from '@shopify/flash-list'
 import { View, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Button, IconCompose, IconMessage } from '@audius/harmony-native'
+import {
+  Button,
+  Flex,
+  IconCheck,
+  IconCompose,
+  IconMessage
+} from '@audius/harmony-native'
 import { Text, Screen, ScreenContent, HeaderShadow } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
+import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemePalette } from 'app/utils/theme'
@@ -19,7 +26,12 @@ import { ChatListBlastItem } from './ChatListBlastItem'
 import { ChatListItem } from './ChatListItem'
 import { ChatListItemSkeleton } from './ChatListItemSkeleton'
 
-const { getChats, getChatsStatus, getHasMoreChats } = chatSelectors
+const {
+  getChats,
+  getChatsStatus,
+  getHasMoreChats,
+  getUnreadMessagesCount
+} = chatSelectors
 const { fetchMoreMessages, fetchLatestChats, fetchMoreChats } = chatActions
 
 const CHATS_MESSAGES_PREFETCH_LIMIT = 10
@@ -107,16 +119,32 @@ export const ChatListScreen = () => {
   const nonEmptyChats = chats.filter((chat) => !!chat.last_message_at)
   const chatsStatus = useSelector(getChatsStatus)
   const hasMore = useSelector(getHasMoreChats)
+  const unreadCount = useSelector(getUnreadMessagesCount)
+  const hasUnread = unreadCount > 0
 
   // If this is the first fetch, we want to show the fade-out loading skeleton
   // On subsequent loads, we want to show a skeleton in each incoming chat row.
   const isLoadingFirstTime =
     chats.length === 0 && (chatsStatus ?? Status.LOADING) === Status.LOADING
   const navigateToChatUserList = () => navigation.navigate('ChatUserList')
-  const iconCompose = (
-    <TouchableOpacity onPress={navigateToChatUserList} hitSlop={spacing(2)}>
-      <IconCompose fill={palette.neutralLight4} />
-    </TouchableOpacity>
+  const openMarkAllAsReadDrawer = useCallback(() => {
+    dispatch(setVisibility({ drawer: 'MarkAllAsRead', visible: true }))
+  }, [dispatch])
+  const topbarRight = (
+    <Flex direction='row' alignItems='center' gap='l'>
+      {hasUnread ? (
+        <TouchableOpacity
+          onPress={openMarkAllAsReadDrawer}
+          hitSlop={spacing(2)}
+          accessibilityLabel='Mark all as read'
+        >
+          <IconCheck fill={palette.neutralLight4} />
+        </TouchableOpacity>
+      ) : null}
+      <TouchableOpacity onPress={navigateToChatUserList} hitSlop={spacing(2)}>
+        <IconCompose fill={palette.neutralLight4} />
+      </TouchableOpacity>
+    </Flex>
   )
 
   const handleLoadMore = useCallback(() => {
@@ -161,7 +189,7 @@ export const ChatListScreen = () => {
       title={messages.title}
       variant='secondary'
       icon={IconMessage}
-      topbarRight={iconCompose}
+      topbarRight={topbarRight}
     >
       <ScreenContent>
         <HeaderShadow />

@@ -17,6 +17,7 @@ import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/
 import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-drawer'
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
 import { DeleteChatDrawer } from 'app/components/delete-chat-drawer'
+import { MarkAllAsReadDrawer } from 'app/components/mark-all-as-read-drawer'
 import { DeletePlaylistConfirmationDrawer } from 'app/components/delete-playlist-confirmation-drawer'
 import { DownloadTrackArchiveDrawer } from 'app/components/download-track-archive-drawer/DownloadTrackArchiveDrawer'
 import { ArtistPickConfirmationDrawer } from 'app/components/drawers/ArtistPickConfirmationDrawer'
@@ -172,6 +173,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   BlockMessages: BlockMessagesDrawer,
   MuteComments: MuteCommentsConfirmationDrawer,
   DeleteChat: DeleteChatDrawer,
+  MarkAllAsRead: MarkAllAsReadDrawer,
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,

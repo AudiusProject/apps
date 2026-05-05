@@ -485,6 +485,66 @@ const slice = createSlice({
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
     },
+    markAllChatsAsRead: (state) => {
+      // triggers saga
+      // Optimistically mark every non-blast chat with unread messages as read
+      const allChats = chatsAdapter
+        .getSelectors()
+        .selectAll(state.chats)
+      for (const chat of allChats) {
+        if (chat.is_blast) continue
+        if (!chat.unread_message_count) continue
+        state.optimisticChatRead[chat.chat_id] = {
+          last_read_at: chat.last_message_at,
+          unread_message_count: 0
+        }
+      }
+      state.optimisticUnreadMessagesCount = 0
+    },
+    markAllChatsAsReadSucceeded: (
+      state,
+      action: PayloadAction<{ chatIds: string[] }>
+    ) => {
+      // Apply the read state for the chats that succeeded
+      const { chatIds } = action.payload
+      let totalCleared = 0
+      for (const chatId of chatIds) {
+        delete state.optimisticChatRead[chatId]
+        const existingChat = chatsAdapter
+          .getSelectors()
+          .selectById(state.chats, chatId)
+        if (!existingChat || existingChat.is_blast) continue
+        totalCleared += existingChat.unread_message_count ?? 0
+        chatsAdapter.updateOne(state.chats, {
+          id: chatId,
+          changes: {
+            last_read_at: existingChat.last_message_at,
+            unread_message_count: 0
+          }
+        })
+      }
+      state.unreadMessagesCount = Math.max(
+        0,
+        state.unreadMessagesCount - totalCleared
+      )
+      // If there are no remaining optimistic reads, drop the optimistic count
+      if (Object.keys(state.optimisticChatRead).length === 0) {
+        delete state.optimisticUnreadMessagesCount
+      }
+    },
+    markAllChatsAsReadFailed: (
+      state,
+      action: PayloadAction<{ chatIds: string[] }>
+    ) => {
+      // Roll back the optimistic reads for chats that failed
+      const { chatIds } = action.payload
+      for (const chatId of chatIds) {
+        delete state.optimisticChatRead[chatId]
+      }
+      if (Object.keys(state.optimisticChatRead).length === 0) {
+        delete state.optimisticUnreadMessagesCount
+      }
+    },
     sendMessage: (
       state,
       action: PayloadAction<{

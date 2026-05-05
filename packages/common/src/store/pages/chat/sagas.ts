@@ -10,6 +10,7 @@ import {
   type ValidatedChatPermissions
 } from '@audius/sdk'
 import {
+  all,
   call,
   delay,
   put,
@@ -75,6 +76,9 @@ const {
   markChatAsRead,
   markChatAsReadSucceeded,
   markChatAsReadFailed,
+  markAllChatsAsRead,
+  markAllChatsAsReadSucceeded,
+  markAllChatsAsReadFailed,
   sendMessage,
   sendMessageFailed,
   addMessage,
@@ -91,8 +95,13 @@ const {
   deleteChat,
   deleteChatSucceeded
 } = chatActions
-const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
-  chatSelectors
+const {
+  getChatsSummary,
+  getChat,
+  getNonOptimisticChats,
+  getUnfurlMetadata,
+  getNonOptimisticChat
+} = chatSelectors
 const { toast } = toastActions
 const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
@@ -605,6 +614,65 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
   }
 }
 
+function* doMarkAllChatsAsRead() {
+  const audiusSdk = yield* getContext('audiusSdk')
+  const sdk = yield* call(audiusSdk)
+  // Use non-optimistic chats: the optimistic reducer for markAllChatsAsRead has
+  // already cleared unread counts in the merged view by the time this saga runs.
+  const chats = yield* select(getNonOptimisticChats)
+  const unreadChatIds = chats
+    .filter((c) => !c.is_blast && (c.unread_message_count ?? 0) > 0)
+    .map((c) => c.chat_id)
+  if (unreadChatIds.length === 0) return
+
+  // Fire all read calls in parallel and split into successes/failures so we
+  // commit each one's optimistic state independently.
+  const results = yield* all(
+    unreadChatIds.map((chatId) =>
+      call(function* () {
+        try {
+          yield* call([sdk.chats, sdk.chats.read], { chatId })
+          return { chatId, ok: true as const }
+        } catch (e) {
+          return { chatId, ok: false as const, error: e as Error }
+        }
+      })
+    )
+  )
+
+  const succeeded = results.filter((r) => r.ok).map((r) => r.chatId)
+  const failed = results.filter((r) => !r.ok)
+
+  if (succeeded.length > 0) {
+    yield* put(markAllChatsAsReadSucceeded({ chatIds: succeeded }))
+  }
+  if (failed.length > 0) {
+    yield* put(
+      markAllChatsAsReadFailed({ chatIds: failed.map((f) => f.chatId) })
+    )
+    const reportToSentry = yield* getContext('reportToSentry')
+    reportToSentry({
+      name: 'Chats',
+      error: failed[0].error!,
+      additionalInfo: { failedChatCount: failed.length },
+      feature: Feature.Chats
+    })
+    yield* put(
+      toast({
+        type: 'error',
+        content:
+          failed.length === unreadChatIds.length
+            ? 'Failed to mark messages as read.'
+            : `Failed to mark ${failed.length} ${
+                failed.length === 1 ? 'conversation' : 'conversations'
+              } as read.`
+      })
+    )
+  } else {
+    yield* put(toast({ content: 'Marked all messages as read.' }))
+  }
+}
+
 function* doSendMessage(action: ReturnType<typeof sendMessage>) {
   const { chatId, message, resendMessageId } = action.payload
   const { track, make } = yield* getContext('analytics')
@@ -977,6 +1045,10 @@ function* watchMarkChatAsRead() {
   yield takeEvery(markChatAsRead, doMarkChatAsRead)
 }
 
+function* watchMarkAllChatsAsRead() {
+  yield takeLatest(markAllChatsAsRead, doMarkAllChatsAsRead)
+}
+
 function* watchFetchBlockees() {
   yield takeLatest(fetchBlockees, doFetchBlockees)
 }
@@ -1021,6 +1093,7 @@ export const sagas = () => {
     watchCreateChat,
     watchCreateChatBlast,
     watchMarkChatAsRead,
+    watchMarkAllChatsAsRead,
     watchSendMessage,
     watchAddMessage,
     watchSetMessageReactionSucceeded,
