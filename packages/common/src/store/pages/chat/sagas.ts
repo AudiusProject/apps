@@ -95,13 +95,8 @@ const {
   deleteChat,
   deleteChatSucceeded
 } = chatActions
-const {
-  getChatsSummary,
-  getChat,
-  getNonOptimisticChats,
-  getUnfurlMetadata,
-  getNonOptimisticChat
-} = chatSelectors
+const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
+  chatSelectors
 const { toast } = toastActions
 const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
@@ -617,13 +612,59 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
 function* doMarkAllChatsAsRead() {
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
-  // Use non-optimistic chats: the optimistic reducer for markAllChatsAsRead has
-  // already cleared unread counts in the merged view by the time this saga runs.
-  const chats = yield* select(getNonOptimisticChats)
-  const unreadChatIds = chats
-    .filter((c) => !c.is_blast && (c.unread_message_count ?? 0) > 0)
-    .map((c) => c.chat_id)
-  if (unreadChatIds.length === 0) return
+  const currentUserId = yield* call(queryCurrentUserId)
+  if (!currentUserId) return
+
+  // Page through every chat on the server (not just the ones already in
+  // local state) so this works even if the user hasn't scrolled their
+  // full inbox.
+  const unreadChatIds: string[] = []
+  let before: string | undefined
+  let hasMore = true
+  try {
+    while (hasMore) {
+      const response = yield* call([sdk.chats, sdk.chats.getAll], {
+        userId: Id.parse(currentUserId),
+        before,
+        limit: CHAT_PAGE_SIZE
+      })
+      for (const chat of response.data) {
+        if (!chat.is_blast && (chat.unread_message_count ?? 0) > 0) {
+          unreadChatIds.push(chat.chat_id)
+        }
+      }
+      const nextBefore = response.summary?.prev_cursor
+      const prevCount = response.summary?.prev_count ?? 0
+      hasMore =
+        response.data.length > 0 &&
+        prevCount > 0 &&
+        !!nextBefore &&
+        nextBefore !== before
+      before = nextBefore
+    }
+  } catch (e) {
+    yield* put(markAllChatsAsReadFailed({ chatIds: [] }))
+    yield* put(
+      toast({
+        type: 'error',
+        content: 'Failed to mark messages as read.'
+      })
+    )
+    const reportToSentry = yield* getContext('reportToSentry')
+    reportToSentry({
+      name: 'Chats',
+      error: e as Error,
+      additionalInfo: { phase: 'pagination' },
+      feature: Feature.Chats
+    })
+    return
+  }
+
+  if (unreadChatIds.length === 0) {
+    yield* put(markAllChatsAsReadSucceeded({ chatIds: [] }))
+    yield* put(fetchUnreadMessagesCount())
+    return
+  }
 
   // Fire all read calls in parallel and split into successes/failures so we
   // commit each one's optimistic state independently.
@@ -668,9 +709,9 @@ function* doMarkAllChatsAsRead() {
               } as read.`
       })
     )
-  } else {
-    yield* put(toast({ content: 'Marked all messages as read.' }))
   }
+  // Re-sync the global unread badge so chats outside local state converge.
+  yield* put(fetchUnreadMessagesCount())
 }
 
 function* doSendMessage(action: ReturnType<typeof sendMessage>) {

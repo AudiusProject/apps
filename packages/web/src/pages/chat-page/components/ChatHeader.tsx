@@ -1,6 +1,7 @@
-import { forwardRef, useCallback, useState } from 'react'
+import { forwardRef, useCallback } from 'react'
 
 import {
+  chatActions,
   chatSelectors,
   CommonState,
   useCreateChatModal
@@ -16,13 +17,12 @@ import {
   IconKebabHorizontal,
   PopupMenu
 } from '@audius/harmony'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
-import { MarkAllAsReadConfirmationModal } from './MarkAllAsReadConfirmationModal'
 import { UserChatHeader } from './UserChatHeader'
 
 const messages = {
@@ -45,10 +45,9 @@ type ChatHeaderProps = {
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
   ({ currentChatId, isNarrowLayout }, ref) => {
+    const dispatch = useDispatch()
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
-    const [isMarkAllAsReadModalVisible, setIsMarkAllAsReadModalVisible] =
-      useState(false)
     const chat = useSelector((state: CommonState) =>
       chatSelectors.getChat(state, currentChatId ?? '')
     )
@@ -67,8 +66,8 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     }, [setInboxSettingsVisible])
 
     const handleMarkAllAsReadClicked = useCallback(() => {
-      setIsMarkAllAsReadModalVisible(true)
-    }, [])
+      dispatch(chatActions.markAllChatsAsRead())
+    }, [dispatch])
 
     const inboxMenuItems = [
       {
@@ -117,7 +116,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
     )
 
     return (
-      <>
       <Frosted
         w='100%'
         h='var(--chat-header-height, 112px)'
@@ -150,11 +148,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
           )}
         </Flex>
       </Frosted>
-        <MarkAllAsReadConfirmationModal
-          isVisible={isMarkAllAsReadModalVisible}
-          onClose={() => setIsMarkAllAsReadModalVisible(false)}
-        />
-      </>
     )
   }
 )

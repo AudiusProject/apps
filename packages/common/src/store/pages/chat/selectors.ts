@@ -67,8 +67,6 @@ export const getChat = createSelector(
 
 export const getNonOptimisticChat = selectChatById
 
-export const getNonOptimisticChats = selectAllChats
-
 /**
  * Gets all chats and their optimistic read status
  */
