@@ -238,15 +238,25 @@ export const ContestScreen = () => {
 
   const handlePickWinners = useCallback(() => {
     if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Pick winners — native screen not yet wired')
-  }, [trackId])
+    // Reuse the existing track-screen "Pick Winners" drawer — it
+    // informs the artist that picking winners has to happen in a web
+    // browser. The native picking flow doesn't exist yet, so deferring
+    // the user there is the same pattern the track screen already
+    // uses.
+    dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
+  }, [trackId, dispatch])
 
   const handleEnterContest = useCallback(() => {
     if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Enter contest — native upload flow not yet wired')
-  }, [trackId])
+    // Same wire-up as web: jump into the upload flow with `remix_of`
+    // pre-filled so the resulting track is linked to this contest's
+    // parent track. The Upload modal stack reads `initialMetadata` off
+    // its initial route params and merges it into the track metadata
+    // when the user picks a file (see SelectTrackScreen).
+    ;(navigation as any).navigate('Upload', {
+      initialMetadata: { remix_of: { tracks: [{ parent_track_id: trackId }] } }
+    })
+  }, [trackId, navigation])
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the
