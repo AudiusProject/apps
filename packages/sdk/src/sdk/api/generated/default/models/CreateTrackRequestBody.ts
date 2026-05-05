@@ -219,6 +219,12 @@ export interface CreateTrackRequestBody {
      */
     accessAuthorities?: Array<string> | null;
     /**
+     * API keys allowed to stream this track
+     * @type {Array<string>}
+     * @memberof CreateTrackRequestBody
+     */
+    allowedApiKeys?: Array<string> | null;
+    /**
      * 
      * @type {AccessGate}
      * @memberof CreateTrackRequestBody
@@ -385,6 +391,7 @@ export function CreateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
         'isUnlisted': !exists(json, 'is_unlisted') ? undefined : json['is_unlisted'],
         'isStreamGated': !exists(json, 'is_stream_gated') ? undefined : json['is_stream_gated'],
         'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
+        'allowedApiKeys': !exists(json, 'allowed_api_keys') ? undefined : json['allowed_api_keys'],
         'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
         'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
         'fieldVisibility': !exists(json, 'field_visibility') ? undefined : FieldVisibilityFromJSON(json['field_visibility']),
@@ -440,6 +447,7 @@ export function CreateTrackRequestBodyToJSON(value?: CreateTrackRequestBody | nu
         'is_unlisted': value.isUnlisted,
         'is_stream_gated': value.isStreamGated,
         'access_authorities': value.accessAuthorities,
+        'allowed_api_keys': value.allowedApiKeys,
         'stream_conditions': AccessGateToJSON(value.streamConditions),
         'download_conditions': AccessGateToJSON(value.downloadConditions),
         'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
