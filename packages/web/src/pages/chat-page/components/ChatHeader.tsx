@@ -94,6 +94,11 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
           {messages.header}
         </Text>
         <Flex gap='m' css={{ marginLeft: 'auto' }}>
+          <IconButton
+            aria-label={messages.compose}
+            icon={IconCompose}
+            onClick={handleComposeClicked}
+          />
           <PopupMenu
             items={inboxMenuItems}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -106,11 +111,6 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
                 onClick={() => trigger()}
               />
             )}
-          />
-          <IconButton
-            aria-label={messages.compose}
-            icon={IconCompose}
-            onClick={handleComposeClicked}
           />
         </Flex>
       </Flex>
