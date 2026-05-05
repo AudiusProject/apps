@@ -114,6 +114,12 @@ export const ChatReadRequestSchema = z.object({
 
 export type ChatReadRequest = z.infer<typeof ChatReadRequestSchema>
 
+export const ChatReadAllRequestSchema = z.object({
+  currentUserId: z.optional(z.string())
+})
+
+export type ChatReadAllRequest = z.infer<typeof ChatReadAllRequestSchema>
+
 export const ChatBlockRequestSchema = z.object({
   currentUserId: z.optional(z.string()),
   userId: z.string()

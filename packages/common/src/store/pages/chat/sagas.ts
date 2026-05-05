@@ -75,6 +75,9 @@ const {
   markChatAsRead,
   markChatAsReadSucceeded,
   markChatAsReadFailed,
+  markAllChatsAsRead,
+  markAllChatsAsReadSucceeded,
+  markAllChatsAsReadFailed,
   sendMessage,
   sendMessageFailed,
   addMessage,
@@ -605,6 +608,33 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
   }
 }
 
+function* doMarkAllChatsAsRead() {
+  try {
+    const audiusSdk = yield* getContext('audiusSdk')
+    const sdk = yield* call(audiusSdk)
+    // One server-side UPDATE clears every chat_member.unread_count for this
+    // user. The trailing fetchUnreadMessagesCount converges the global badge
+    // for chats not yet in local state.
+    yield* call([sdk.chats, sdk.chats.readAll])
+    yield* put(markAllChatsAsReadSucceeded())
+    yield* put(fetchUnreadMessagesCount())
+  } catch (e) {
+    yield* put(markAllChatsAsReadFailed())
+    yield* put(
+      toast({
+        type: 'error',
+        content: 'Failed to mark messages as read.'
+      })
+    )
+    const reportToSentry = yield* getContext('reportToSentry')
+    reportToSentry({
+      name: 'Chats',
+      error: e as Error,
+      feature: Feature.Chats
+    })
+  }
+}
+
 function* doSendMessage(action: ReturnType<typeof sendMessage>) {
   const { chatId, message, resendMessageId } = action.payload
   const { track, make } = yield* getContext('analytics')
@@ -977,6 +1007,10 @@ function* watchMarkChatAsRead() {
   yield takeEvery(markChatAsRead, doMarkChatAsRead)
 }
 
+function* watchMarkAllChatsAsRead() {
+  yield takeLatest(markAllChatsAsRead, doMarkAllChatsAsRead)
+}
+
 function* watchFetchBlockees() {
   yield takeLatest(fetchBlockees, doFetchBlockees)
 }
@@ -1021,6 +1055,7 @@ export const sagas = () => {
     watchCreateChat,
     watchCreateChatBlast,
     watchMarkChatAsRead,
+    watchMarkAllChatsAsRead,
     watchSendMessage,
     watchAddMessage,
     watchSetMessageReactionSucceeded,
