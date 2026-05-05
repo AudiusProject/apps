@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
@@ -8,7 +8,9 @@ import {
   SolanaWalletAddress,
   User
 } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { useSendTokensModal } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import ResponsiveModal from 'components/modal/ResponsiveModal'
 import { reportToSentry } from 'store/errors/reportToSentry'
@@ -32,8 +34,11 @@ type SendTokensState = {
   signature: string
 }
 
-const SendTokensModal = () => {
-  const { isOpen, onClose: closeModal, data } = useSendTokensModal()
+const SendTokensModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const closeModal = useCallback(() => modal.hide(), [modal])
+  const { data } = useSendTokensModal()
   const { mint, user: prePopulatedUser } = data ?? {}
   const isAppKitModalOpenRef = useRef(false)
 
@@ -288,6 +293,9 @@ const SendTokensModal = () => {
       ) : null}
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('SendTokensModal', SendTokensModal)
+registerNiceModalId('SendTokensModal')
 
 export default SendTokensModal

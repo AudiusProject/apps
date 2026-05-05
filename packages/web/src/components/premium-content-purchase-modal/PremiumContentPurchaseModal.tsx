@@ -24,7 +24,7 @@ import {
   PurchaseVendor,
   USDCPurchaseConditions
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
+import { FeatureFlags, registerNiceModalId } from '@audius/common/services'
 import {
   buyUSDCActions,
   usePremiumContentPurchaseModal,
@@ -43,6 +43,7 @@ import {
   IconCart,
   ModalTitle
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { Formik, useField, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
@@ -203,13 +204,13 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   )
 }
 
-export const PremiumContentPurchaseModal = () => {
+export const PremiumContentPurchaseModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
   const {
-    isOpen,
-    onClose,
-    onClosed,
     data: { contentId, contentType }
   } = usePremiumContentPurchaseModal()
   const { isEnabled: isCoinflowEnabled, isLoaded: isCoinflowEnabledLoaded } =
@@ -305,10 +306,9 @@ export const PremiumContentPurchaseModal = () => {
   }, [isUnlocking, stage, onClose])
 
   const handleClosed = useCallback(() => {
-    onClosed()
     dispatch(cleanup())
     dispatch(cleanupUSDCRecovery())
-  }, [onClosed, dispatch])
+  }, [dispatch])
 
   useManagedAccountNotAllowedCallback({
     trigger: isOpen,
@@ -354,4 +354,7 @@ export const PremiumContentPurchaseModal = () => {
       ) : null}
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('PremiumContentPurchaseModal', PremiumContentPurchaseModal)
+registerNiceModalId('PremiumContentPurchaseModal')

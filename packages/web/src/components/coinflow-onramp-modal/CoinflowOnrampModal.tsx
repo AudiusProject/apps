@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { useCoinflowAdapter } from '@audius/common/hooks'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   coinflowModalUIActions,
   useCoinflowOnrampModal
 } from '@audius/common/store'
 import { CoinflowPurchase, Currency } from '@coinflowlabs/react'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { VersionedTransaction } from '@solana/web3.js'
 import { useDispatch } from 'react-redux'
 
@@ -21,12 +23,13 @@ const { transactionSucceeded, transactionCanceled } = coinflowModalUIActions
 const MERCHANT_ID = env.COINFLOW_MERCHANT_ID
 const IS_PRODUCTION = env.ENVIRONMENT === 'production'
 
-export const CoinflowOnrampModal = () => {
+export const CoinflowOnrampModal = NiceModal.create(() => {
+  const modal = useModal()
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = onClose
+  const isOpen = modal.visible
   const {
-    data: { amount, serializedTransaction, purchaseMetadata, guestEmail },
-    isOpen,
-    onClose,
-    onClosed
+    data: { amount, serializedTransaction, purchaseMetadata, guestEmail }
   } = useCoinflowOnrampModal()
   const dispatch = useDispatch()
   const [transaction, setTransaction] = useState<
@@ -92,4 +95,7 @@ export const CoinflowOnrampModal = () => {
       ) : null}
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('CoinflowOnramp', CoinflowOnrampModal)
+registerNiceModalId('CoinflowOnramp')

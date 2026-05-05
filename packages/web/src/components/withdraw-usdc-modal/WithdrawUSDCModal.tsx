@@ -4,7 +4,11 @@ import { useUSDCBalance } from '@audius/common/api'
 import { useFeatureFlag, useRemoteVar } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { Name, Status } from '@audius/common/models'
-import { IntKeys, FeatureFlags } from '@audius/common/services'
+import {
+  IntKeys,
+  FeatureFlags,
+  registerNiceModalId
+} from '@audius/common/services'
 import {
   withdrawUSDCActions,
   withdrawUSDCSelectors,
@@ -21,6 +25,7 @@ import {
   IconTransaction,
   ModalTitle
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { Formik, FormikProps, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
@@ -77,9 +82,12 @@ const TrackFormErrors = ({ currentBalance }: { currentBalance: number }) => {
   return null
 }
 
-export const WithdrawUSDCModal = () => {
+export const WithdrawUSDCModal = NiceModal.create(() => {
   const dispatch = useDispatch()
-  const { isOpen, onClose, onClosed, data, setData } = useWithdrawUSDCModal()
+  const modal = useModal()
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = onClose
+  const { data, setData } = useWithdrawUSDCModal()
   const { isEnabled: isCoinflowEnabled } = useFeatureFlag(
     FeatureFlags.COINFLOW_OFFRAMP_ENABLED
   )
@@ -163,7 +171,7 @@ export const WithdrawUSDCModal = () => {
   return (
     <Modal
       size='medium'
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={onClose}
       onClosed={handleOnClosed}
       dismissOnClickOutside={!DISABLE_MODAL_CLOSE_PAGES.has(page)}
@@ -208,4 +216,7 @@ export const WithdrawUSDCModal = () => {
       </ModalContent>
     </Modal>
   )
-}
+})
+
+NiceModal.register('WithdrawUSDCModal', WithdrawUSDCModal)
+registerNiceModalId('WithdrawUSDCModal')
