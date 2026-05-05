@@ -487,10 +487,11 @@ const slice = createSlice({
     },
     markAllChatsAsRead: (state) => {
       // triggers saga
-      // Optimistically mark every non-blast chat with unread messages as read
-      const allChats = chatsAdapter
-        .getSelectors()
-        .selectAll(state.chats)
+      // Optimistically mark every locally-known non-blast chat with unread
+      // messages as read. Chats that aren't loaded into state yet get cleared
+      // server-side by the saga's chat.read_all RPC and reconcile via the
+      // trailing fetchUnreadMessagesCount.
+      const allChats = chatsAdapter.getSelectors().selectAll(state.chats)
       for (const chat of allChats) {
         if (chat.is_blast) continue
         if (!chat.unread_message_count) continue
@@ -501,20 +502,15 @@ const slice = createSlice({
       }
       state.optimisticUnreadMessagesCount = 0
     },
-    markAllChatsAsReadSucceeded: (
-      state,
-      action: PayloadAction<{ chatIds: string[] }>
-    ) => {
-      // Apply the read state for the chats that succeeded
-      const { chatIds } = action.payload
-      let totalCleared = 0
-      for (const chatId of chatIds) {
-        delete state.optimisticChatRead[chatId]
+    markAllChatsAsReadSucceeded: (state) => {
+      // Server confirmed every chat_member.unread_count is now 0; promote the
+      // optimistic per-chat reads to the entity. unreadMessagesCount itself is
+      // overwritten by the trailing fetchUnreadMessagesCount the saga fires.
+      for (const chatId of Object.keys(state.optimisticChatRead)) {
         const existingChat = chatsAdapter
           .getSelectors()
           .selectById(state.chats, chatId)
         if (!existingChat || existingChat.is_blast) continue
-        totalCleared += existingChat.unread_message_count ?? 0
         chatsAdapter.updateOne(state.chats, {
           id: chatId,
           changes: {
@@ -523,27 +519,14 @@ const slice = createSlice({
           }
         })
       }
-      state.unreadMessagesCount = Math.max(
-        0,
-        state.unreadMessagesCount - totalCleared
-      )
-      // If there are no remaining optimistic reads, drop the optimistic count
-      if (Object.keys(state.optimisticChatRead).length === 0) {
-        delete state.optimisticUnreadMessagesCount
-      }
+      state.optimisticChatRead = {}
+      delete state.optimisticUnreadMessagesCount
     },
-    markAllChatsAsReadFailed: (
-      state,
-      action: PayloadAction<{ chatIds: string[] }>
-    ) => {
-      // Roll back the optimistic reads for chats that failed
-      const { chatIds } = action.payload
-      for (const chatId of chatIds) {
-        delete state.optimisticChatRead[chatId]
-      }
-      if (Object.keys(state.optimisticChatRead).length === 0) {
-        delete state.optimisticUnreadMessagesCount
-      }
+    markAllChatsAsReadFailed: (state) => {
+      // chat.read_all is all-or-nothing; on failure undo every optimistic
+      // read this run installed.
+      state.optimisticChatRead = {}
+      delete state.optimisticUnreadMessagesCount
     },
     sendMessage: (
       state,

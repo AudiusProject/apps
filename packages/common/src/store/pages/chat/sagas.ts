@@ -94,13 +94,8 @@ const {
   deleteChat,
   deleteChatSucceeded
 } = chatActions
-const {
-  getChatsSummary,
-  getChat,
-  getOptimisticReads,
-  getUnfurlMetadata,
-  getNonOptimisticChat
-} = chatSelectors
+const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
+  chatSelectors
 const { toast } = toastActions
 const { open: openInboxUnavailableModal } = inboxUnavailableModalActions
 
@@ -617,18 +612,14 @@ function* doMarkAllChatsAsRead() {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
-    // Single server-side UPDATE clears every chat_member.unread_count for
-    // this user. The locally-known chat IDs we feed into the success
-    // reducer are just for committing the optimistic per-chat state we
-    // already wrote — chats outside local state get cleared on the
-    // server and converge via the trailing fetchUnreadMessagesCount.
+    // One server-side UPDATE clears every chat_member.unread_count for this
+    // user. The trailing fetchUnreadMessagesCount converges the global badge
+    // for chats not yet in local state.
     yield* call([sdk.chats, sdk.chats.readAll])
-    const optimisticReads = yield* select(getOptimisticReads)
-    const chatIds = Object.keys(optimisticReads)
-    yield* put(markAllChatsAsReadSucceeded({ chatIds }))
+    yield* put(markAllChatsAsReadSucceeded())
     yield* put(fetchUnreadMessagesCount())
   } catch (e) {
-    yield* put(markAllChatsAsReadFailed({ chatIds: [] }))
+    yield* put(markAllChatsAsReadFailed())
     yield* put(
       toast({
         type: 'error',
