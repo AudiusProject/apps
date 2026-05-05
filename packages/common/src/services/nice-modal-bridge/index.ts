@@ -70,3 +70,5 @@ export const registerNiceModalId = (id: string) => {
 }
 
 export const isNiceModalId = (id: string): boolean => niceModalIds.has(id)
+
+export { default as niceModalBridgeSagas } from './sagas'

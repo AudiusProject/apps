@@ -1,3 +1,4 @@
+import { niceModalBridgeSagas } from '@audius/common/services'
 import {
   buyUSDCSagas,
   castSagas,
@@ -80,6 +81,7 @@ export default function* rootSaga() {
     trackPageSagas(),
 
     modalsSagas(),
+    niceModalBridgeSagas(),
 
     // Cache
     collectionsSagas(),
