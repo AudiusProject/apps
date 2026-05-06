@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
+import { getEventQueryKey } from '@audius/common/api'
 import type {
   AnnouncementNotification,
   UserSubscriptionNotification,
@@ -48,6 +49,7 @@ import {
 } from '@audius/common/store'
 import { OptionalId } from '@audius/sdk'
 import { useLinkTo } from '@react-navigation/native'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { useNavigation } from './useNavigation'
 
@@ -59,6 +61,7 @@ import { useNavigation } from './useNavigation'
 export const useNotificationNavigation = () => {
   const navigation = useNavigation()
   const linkTo = useLinkTo()
+  const queryClient = useQueryClient()
 
   const socialActionHandler = useCallback(
     (
@@ -135,9 +138,23 @@ export const useNotificationNavigation = () => {
         entityType === Entity.Playlist
       ) {
         navigation.navigate('Collection', { id: entityId })
+      } else if (entityType === Entity.Event) {
+        // Event-typed comment notifications carry entityId = event_id.
+        // The Contest screen takes a track id (or handle/slug), so chase
+        // the cached event to find its underlying parent track. The row
+        // that triggered this navigation already mounted
+        // `useNotificationEntity`, which primes the event cache via
+        // `useEvent`, so this read is synchronous in the common case.
+        const cachedEvent = queryClient.getQueryData(
+          getEventQueryKey(entityId)
+        ) as { entityId?: number | null } | undefined
+        const trackId = cachedEvent?.entityId ?? null
+        if (trackId != null) {
+          navigation.navigate('Contest', { trackId })
+        }
       }
     },
-    [navigation]
+    [navigation, queryClient]
   )
 
   const milestoneHandler = useCallback(

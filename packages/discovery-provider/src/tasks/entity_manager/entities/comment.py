@@ -827,8 +827,6 @@ def react_comment(params: ManageEntityParameters):
     validate_comment_reaction_tx(params)
     comment_id = params.entity_id
     user_id = params.user_id
-    metadata = params.metadata
-    entity_type = metadata.get("entity_type", EntityType.TRACK.value)
 
     existing_reaction = params.existing_records[EntityType.COMMENT_REACTION.value].get(
         (user_id, comment_id)
@@ -864,6 +862,11 @@ def react_comment(params: ManageEntityParameters):
     )
 
     comment_row = params.existing_records[EntityType.COMMENT.value][comment_id]
+    # Use the comment's stored entity_type for the notification rather than what
+    # the client sent in this reaction's metadata — clients have shipped wrong
+    # values here in the past and the resulting "liked your comment on …
+    # undefined" notification is hard to repair after the fact.
+    entity_type = comment_row.entity_type
     if comment_row.entity_type == FAN_CLUB_ENTITY_TYPE:
         entity_user_id = comment_row.entity_id
         data_entity_ref = comment_row.entity_id

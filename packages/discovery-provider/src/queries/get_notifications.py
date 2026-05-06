@@ -181,30 +181,72 @@ class NotificationType(str, Enum):
     ARTIST_REMIX_CONTEST_ENDED = "artist_remix_contest_ended"
     ARTIST_REMIX_CONTEST_ENDING_SOON = "artist_remix_contest_ending_soon"
     ARTIST_REMIX_CONTEST_SUBMISSIONS = "artist_remix_contest_submissions"
+    # Indexer/pedalboard emit these types but they were missing from the
+    # enum, so the parser's `oneof` validation rejected them as
+    # `valid_types` args and the default list below couldn't include
+    # them. Add the missing members so the frontend can opt in/out and
+    # the default-all path returns them.
+    FAN_REMIX_CONTEST_SUBMISSION = "fan_remix_contest_submission"
+    FAN_CLUB_TEXT_POST = "fan_club_text_post"
+    REMIX_CONTEST_UPDATE = "remix_contest_update"
 
     def __str__(self) -> str:
         return str.__str__(self)
 
 
+# Default-on notification types when the client doesn't enumerate them
+# explicitly (or sends an empty list). The set mirrors the Go API's
+# `oneof=...` whitelist on /v1/notifications (api.audius.co repo,
+# api/v1_notifications.go) which is the canonical source of truth for
+# "types the frontend knows how to render". Adding a new user-facing
+# notification type means appending it here AND to the Go API
+# whitelist; deprecated/broken types are owned by the Go API's
+# `unsupportedNotificationTypes` deny-list and intentionally omitted
+# here too.
 default_valid_notification_types = [
+    NotificationType.ANNOUNCEMENT,
+    NotificationType.FOLLOW,
     NotificationType.REPOST,
     NotificationType.SAVE,
-    NotificationType.FOLLOW,
-    NotificationType.TIP_SEND,
+    NotificationType.COSIGN,
+    NotificationType.CREATE,
     NotificationType.TIP_RECEIVE,
-    NotificationType.MILESTONE,
+    NotificationType.TIP_SEND,
+    NotificationType.CHALLENGE_REWARD,
+    NotificationType.REPOST_OF_REPOST,
+    NotificationType.SAVE_OF_REPOST,
+    NotificationType.TASTEMAKER,
+    NotificationType.REACTION,
+    NotificationType.SUPPORTER_DETRONED,
     NotificationType.SUPPORTER_RANK_UP,
     NotificationType.SUPPORTING_RANK_UP,
-    NotificationType.CHALLENGE_REWARD,
-    NotificationType.TIER_CHANGE,
-    NotificationType.CREATE,
-    NotificationType.REMIX,
-    NotificationType.COSIGN,
-    NotificationType.TRENDING,
-    NotificationType.SUPPORTER_DETRONED,
-    NotificationType.ANNOUNCEMENT,
-    NotificationType.REACTION,
+    NotificationType.MILESTONE,
     NotificationType.TRACK_ADDED_TO_PLAYLIST,
+    NotificationType.TIER_CHANGE,
+    NotificationType.TRENDING,
+    NotificationType.TRENDING_PLAYLIST,
+    NotificationType.TRENDING_UNDERGROUND,
+    NotificationType.USDC_PURCHASE_BUYER,
+    NotificationType.USDC_PURCHASE_SELLER,
+    NotificationType.TRACK_ADDED_TO_PURCHASED_ALBUM,
+    NotificationType.REQUEST_MANAGER,
+    NotificationType.APPROVE_MANAGER_REQUEST,
+    NotificationType.CLAIMABLE_REWARD,
+    NotificationType.COMMENT,
+    NotificationType.COMMENT_THREAD,
+    NotificationType.COMMENT_MENTION,
+    NotificationType.COMMENT_REACTION,
+    NotificationType.LISTEN_STREAK_REMINDER,
+    NotificationType.FAN_REMIX_CONTEST_STARTED,
+    NotificationType.FAN_REMIX_CONTEST_ENDED,
+    NotificationType.FAN_REMIX_CONTEST_ENDING_SOON,
+    NotificationType.FAN_REMIX_CONTEST_WINNERS_SELECTED,
+    NotificationType.FAN_REMIX_CONTEST_SUBMISSION,
+    NotificationType.ARTIST_REMIX_CONTEST_ENDED,
+    NotificationType.ARTIST_REMIX_CONTEST_ENDING_SOON,
+    NotificationType.ARTIST_REMIX_CONTEST_SUBMISSIONS,
+    NotificationType.FAN_CLUB_TEXT_POST,
+    NotificationType.REMIX_CONTEST_UPDATE,
 ]
 
 

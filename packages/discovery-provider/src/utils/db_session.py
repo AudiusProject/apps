@@ -1,17 +1,16 @@
-from flask import current_app
+_db_session_manager = None
+_db_read_replica_session_manager = None
+
+
+def set_session_managers(db, db_read_replica):
+    global _db_session_manager, _db_read_replica_session_manager
+    _db_session_manager = db
+    _db_read_replica_session_manager = db_read_replica
 
 
 def get_db():
-    """Connect to the configured database. The connection
-    is unique for each request and will be reused if this is called
-    again.
-    """
-    return current_app.db_session_manager
+    return _db_session_manager
 
 
 def get_db_read_replica():
-    """Connect to the configured database. The connection
-    is unique for each request and will be reused if this is called
-    again.
-    """
-    return current_app.db_read_replica_session_manager
+    return _db_read_replica_session_manager

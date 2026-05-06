@@ -283,14 +283,28 @@ export const ContestCard = (props: ContestCardProps) => {
     return null
   }
 
+  // Skip contests hosted by deactivated users — same filter as the web
+  // ContestCard. The discovery endpoint can still surface tombstoned
+  // hosts (the fake "Audius" / life-audius-airdrop accounts) and
+  // rendering them on explore was the QA bug we needed to suppress.
+  if (user.is_deactivated) {
+    return null
+  }
+
   const status = formatStatus(remixContest.endDate)
+  const contestTitle =
+    (remixContest.eventData as any)?.title?.trim() || track.title
 
   return (
     <Paper
       onPress={handlePress}
       border='default'
       shadow='mid'
-      style={{ overflow: 'hidden', borderRadius: 14 }}
+      // Floor the card at ~250px so the artist name + badges row in the
+      // header doesn't clip on the narrowest carousels (the mobile
+      // explore "Contests" rail was sized to whatever CardList default
+      // — the QA pass flagged the cards as too skinny).
+      style={{ overflow: 'hidden', borderRadius: 14, minWidth: 250 }}
       {...other}
     >
       {/* Cover banner */}
@@ -323,7 +337,7 @@ export const ContestCard = (props: ContestCardProps) => {
             size={variant === 'hero' ? 'l' : 'm'}
             numberOfLines={2}
           >
-            {track.title}
+            {contestTitle}
           </Text>
           <ScrollView
             horizontal

@@ -6,7 +6,10 @@ import {
   useUsers
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { CommentThreadNotification as CommentThreadNotificationType } from '@audius/common/store'
+import {
+  CommentThreadNotification as CommentThreadNotificationType,
+  Entity
+} from '@audius/common/store'
 import { IconMessage } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -32,7 +35,8 @@ import { entityToUserListEntity, USER_LENGTH_LIMIT } from './utils'
 const messages = {
   replied: ' replied to your comment on',
   your: 'your',
-  their: 'their'
+  their: 'their',
+  remixContestLabel: 'remix contest'
 }
 
 type CommentThreadNotificationProps = {
@@ -123,7 +127,9 @@ export const CommentThreadNotification = (
             isOwner
           />
         )}{' '}
-        {entityType.toLowerCase()}{' '}
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

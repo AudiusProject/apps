@@ -43,8 +43,11 @@ def create_artist_remix_contest_ended_notifications(session, now=None):
             )
             .first()
         )
-        # Don't create notifications for private tracks
-        if parent_track.is_unlisted:
+        # Skip when the parent track has been deleted or hidden — without
+        # this guard, a single dangling event would raise AttributeError
+        # ("None has no .is_unlisted") and abort the entire batch, dropping
+        # notifications for every other contest in the same window.
+        if parent_track is None or parent_track.is_unlisted:
             continue
 
         exists = (

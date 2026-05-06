@@ -2,6 +2,7 @@ import { useExploreContent } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
+import { route } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
@@ -42,6 +43,11 @@ export const FeaturedRemixContestsSection = () => {
           ? messages.contests
           : messages.featuredRemixContests
       }
+      // Surface a "View All" affordance back to the dedicated Contests
+      // hub when that page is feature-flagged on. Without it, users can
+      // only see the carousel-of-N cards from explore — the QA pass
+      // flagged the missing CTA.
+      viewAllLink={isContestsPageEnabled ? route.CONTESTS_PAGE : undefined}
     >
       {isContestsPageEnabled
         ? showLoading

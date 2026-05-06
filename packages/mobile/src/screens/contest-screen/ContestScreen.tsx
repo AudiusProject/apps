@@ -8,18 +8,24 @@ import {
 
 import {
   getCommentQueryKey,
+  getEventQueryKey,
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
+  useFollowEvent,
   useRemixContest,
   useStems,
   useTrack,
   useTrackByParams,
+  useUnfollowEvent,
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
+import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
+import { PortalHost } from '@gorhom/portal'
 import { useNavigation } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
@@ -61,6 +67,8 @@ const messages = {
   hostedBy: 'HOSTED BY',
   pickWinners: 'Pick Winners',
   enterContest: 'Enter Contest',
+  follow: 'Follow',
+  following: 'Following',
   details: 'Details',
   updates: 'Updates',
   submissions: 'Submissions',
@@ -164,6 +172,8 @@ export const ContestScreen = () => {
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
   const dispatch = useDispatch()
 
@@ -198,16 +208,54 @@ export const ContestScreen = () => {
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  const handleOpenOverflow = useCallback(() => {
-    if (!eventId || trackId == null) return
+  // Per the contest QA pass the kebab affordance was replaced with a
+  // dedicated share icon at the top-right of the nav overlay (and
+  // Follow moved next to Enter Contest). Keep this callback as the
+  // share entry point so ContestNavOverlay can invoke it directly.
+  const handleShareContest = useCallback(() => {
+    if (trackId == null) return
     dispatch(
-      setVisibility({
-        drawer: 'ContestActions',
-        visible: true,
-        data: { eventId, trackId }
+      shareModalUIActions.requestOpen({
+        type: 'contest',
+        trackId,
+        source: ShareSource.PAGE
       })
     )
-  }, [dispatch, eventId, trackId])
+  }, [dispatch, trackId])
+
+  // Pull-to-refresh: invalidate the contest's event + comment queries so all
+  // tabs (details, updates, submissions, comments) refetch the next time
+  // they're focused. Mirrors the profile pull-to-refresh pattern; cover
+  // photo expansion is handled by the `PullToRefreshPortalHost` below.
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const handleRefresh = useCallback(() => {
+    if (!eventId) return
+    setIsRefreshing(true)
+    queryClient.invalidateQueries({ queryKey: getEventQueryKey(eventId) })
+    queryClient.invalidateQueries({
+      // Matches QUERY_KEYS.eventComments — written this way to avoid pulling
+      // the whole queryKeys map into the contest screen for one constant.
+      queryKey: ['eventComments', eventId]
+    })
+    // Drop the spinner shortly after — the underlying queries are async but
+    // we don't have a single status flag to watch like profile does.
+    setTimeout(() => setIsRefreshing(false), 600)
+  }, [eventId, queryClient])
+
+  const handleToggleFollow = useCallback(() => {
+    if (!eventId || !currentUserId) return
+    if (followState?.isFollowed) {
+      unfollowEvent({ userId: currentUserId, eventId })
+    } else {
+      followEvent({ userId: currentUserId, eventId })
+    }
+  }, [
+    eventId,
+    currentUserId,
+    followState?.isFollowed,
+    followEvent,
+    unfollowEvent
+  ])
 
   // Only render the Stems & Downloads section when the track actually
   // has downloadable content — DownloadSection assumes a downloadable
@@ -238,15 +286,25 @@ export const ContestScreen = () => {
 
   const handlePickWinners = useCallback(() => {
     if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Pick winners — native screen not yet wired')
-  }, [trackId])
+    // Reuse the existing track-screen "Pick Winners" drawer — it
+    // informs the artist that picking winners has to happen in a web
+    // browser. The native picking flow doesn't exist yet, so deferring
+    // the user there is the same pattern the track screen already
+    // uses.
+    dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
+  }, [trackId, dispatch])
 
   const handleEnterContest = useCallback(() => {
-    if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Enter contest — native upload flow not yet wired')
-  }, [trackId])
+    if (!trackId)
+      return // Same wire-up as web: jump into the upload flow with `remix_of`
+      // pre-filled so the resulting track is linked to this contest's
+      // parent track. The Upload modal stack reads `initialMetadata` off
+      // its initial route params and merges it into the track metadata
+      // when the user picks a file (see SelectTrackScreen).
+    ;(navigation as any).navigate('Upload', {
+      initialMetadata: { remix_of: { tracks: [{ parent_track_id: trackId }] } }
+    })
+  }, [trackId, navigation])
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the
@@ -313,7 +371,20 @@ export const ContestScreen = () => {
       <ContestScrollBridge />
       <ContestHero trackId={track.track_id} />
 
-      <Flex p='l' gap='l' pointerEvents='box-none'>
+      {/* `backgroundColor='white'` here is what makes the hero's
+          pull-to-refresh stretch read cleanly: the scaled cover image
+          intentionally bleeds past `ContestHero`'s layout box (no
+          overflow:hidden anymore) so it can fill the over-scroll gap
+          above, and this section's solid bg hides the downward bleed
+          into the title/CTA/countdown stack. Same pattern
+          `ProfileHeader` uses for the bio section below the cover
+          photo. */}
+      <Flex
+        p='l'
+        gap='l'
+        pointerEvents='box-none'
+        backgroundColor='white'
+      >
         {/* Title — pure display; `pointerEvents='none'` wrapper so
             scroll gestures that land on the title pass through. */}
         <Flex pointerEvents='none'>
@@ -322,12 +393,18 @@ export const ContestScreen = () => {
           </Text>
         </Flex>
 
-        {/* Primary CTA — sits in the scrolling header. Overflow lives
-            in the floating `ContestNavOverlay` kebab, matching the
-            profile screen pattern (one kebab, always reachable at
-            the top of the screen). "Enter Contest" is hidden once
-            the contest ends — entering isn't meaningful anymore. */}
-        {isOwner || !isEnded ? (
+        {/* Primary CTA row.
+            - Host: full-width Pick Winners.
+            - Non-host (active): Follow + Enter Contest as a 50/50 pair.
+              The Follow button replaces the kebab/drawer affordance; the
+              share icon now lives in the floating `ContestNavOverlay` at
+              the top-right of the screen (see `onPressShare`).
+            - Non-host (ended): just the Follow toggle, since "Enter
+              Contest" isn't actionable after the deadline.
+            All buttons sit inside the scrolling header so they remain
+            reachable while the floating nav bar is the only thing
+            persistent at the top. */}
+        {isOwner ? (
           <Flex
             direction='row'
             alignItems='center'
@@ -338,14 +415,45 @@ export const ContestScreen = () => {
               <Button
                 variant='primary'
                 size='small'
-                onPress={isOwner ? handlePickWinners : handleEnterContest}
+                onPress={handlePickWinners}
                 fullWidth
               >
-                {isOwner ? messages.pickWinners : messages.enterContest}
+                {messages.pickWinners}
               </Button>
             </Flex>
           </Flex>
-        ) : null}
+        ) : (
+          <Flex
+            direction='row'
+            alignItems='center'
+            gap='s'
+            pointerEvents='box-none'
+          >
+            <Flex flex={1} pointerEvents='box-none'>
+              <Button
+                variant={followState?.isFollowed ? 'secondary' : 'primary'}
+                size='small'
+                onPress={handleToggleFollow}
+                disabled={!currentUserId || !eventId}
+                fullWidth
+              >
+                {followState?.isFollowed ? messages.following : messages.follow}
+              </Button>
+            </Flex>
+            {!isEnded ? (
+              <Flex flex={1} pointerEvents='box-none'>
+                <Button
+                  variant='primary'
+                  size='small'
+                  onPress={handleEnterContest}
+                  fullWidth
+                >
+                  {messages.enterContest}
+                </Button>
+              </Flex>
+            ) : null}
+          </Flex>
+        )}
 
         {/* Submissions Due block — pure display; wrap the entire
             label + date + time group in `pointerEvents='none'`. */}
@@ -441,22 +549,30 @@ export const ContestScreen = () => {
   const detailsScreen = collapsibleTabScreen({
     name: 'Details',
     Icon: EmptyTabIcon,
-    component: ContestDetailsTab
+    component: ContestDetailsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const updatesScreen = collapsibleTabScreen({
     name: 'Updates',
     Icon: EmptyTabIcon,
-    component: ContestUpdatesTab
+    component: ContestUpdatesTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const submissionsScreen = collapsibleTabScreen({
     name: 'Submissions',
     Icon: EmptyTabIcon,
-    component: ContestSubmissionsTab
+    component: ContestSubmissionsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const commentsScreen = collapsibleTabScreen({
     name: 'Comments',
     Icon: EmptyTabIcon,
-    component: ContestCommentsTab
+    component: ContestCommentsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
 
   return (
@@ -472,6 +588,12 @@ export const ContestScreen = () => {
                 on the contest page. With the wrapper the navigator
                 fills the remaining space below any chrome and the
                 header slides normally. */}
+            {/* PullToRefresh portal target — the core FlatList /
+                SectionList wrappers portal their pull-to-refresh control
+                here so it lands on top of the cover photo and the gesture
+                expands the cover image instead of opening a blank gap
+                above the list. Mirrors the ProfileScreen pattern. */}
+            <PortalHost name='PullToRefreshPortalHost' />
             <View style={{ height: '100%' }}>
               <CollapsibleTabNavigator
                 renderHeader={renderHeader}
@@ -493,7 +615,7 @@ export const ContestScreen = () => {
               </CollapsibleTabNavigator>
               <ContestNavOverlay
                 title={contestTitle}
-                onPressOverflow={handleOpenOverflow}
+                onPressShare={handleShareContest}
               />
             </View>
           </ContestScrollContext.Provider>

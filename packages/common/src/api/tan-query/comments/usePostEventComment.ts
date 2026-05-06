@@ -7,6 +7,7 @@ import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
 
+import { CommentOrReply } from './types'
 import { getCommentQueryKey } from './utils'
 
 export type PostEventCommentArgs = {
@@ -36,6 +37,13 @@ export const usePostEventComment = () => {
   return useMutation({
     mutationFn: async (args: PostEventCommentArgs & { newId?: ID }) => {
       const sdk = await audiusSdk()
+      // Note: SDK's CreateCommentRequestBody calls the parent field `parentId`
+      // (not parentCommentId). The SDK's createComment override reads
+      // `metadata.parentId` to build the on-chain payload. Sending it under
+      // the wrong key drops the link silently — the indexer never gets a
+      // parent_comment_id, no comment_threads row is created, and the
+      // refetched reply comes back un-threaded which mis-routes artist
+      // replies to the Updates feed.
       return await sdk.comments.createComment({
         userId: Id.parse(args.userId)!,
         metadata: {
@@ -43,18 +51,22 @@ export const usePostEventComment = () => {
           entityId: args.eventId,
           entityType: 'Event',
           body: args.body,
-          parentCommentId: args.parentCommentId,
+          parentId: args.parentCommentId,
           mentions: args.mentions ?? [],
           videoUrl: args.videoUrl
         } as any
       })
     },
     onMutate: async (args: PostEventCommentArgs & { newId?: ID }) => {
-      const { userId, eventId, body } = args
+      const { userId, eventId, body, parentCommentId, videoUrl } = args
       const sdk = await audiusSdk()
       const newId = await sdk.comments.generateCommentId()
       args.newId = newId
 
+      // Carry parentCommentId + videoUrl on the optimistic shape — without
+      // them the row classifier in the Contest comments tile mis-routes
+      // replies (no parentCommentId → looks like a host post-update) and
+      // the attached video doesn't render until the refetch lands.
       const newComment: Comment = {
         id: newId,
         entityId: eventId,
@@ -69,17 +81,18 @@ export const usePostEventComment = () => {
         replies: undefined,
         createdAt: new Date().toISOString(),
         updatedAt: undefined,
-        isMembersOnly: false
+        isMembersOnly: false,
+        parentCommentId,
+        videoUrl
       } as unknown as Comment
 
       // Prime the individual comment cache
       queryClient.setQueryData(getCommentQueryKey(newId), newComment)
 
-      // Only optimistically push top-level comments to the feed; replies are
-      // nested inside their parent comment and come back on invalidation.
-      // Patch every cached sort variant ('top' / 'newest' / 'timestamp') so
-      // the comment shows up regardless of which tab the user is viewing.
-      if (!args.parentCommentId) {
+      if (!parentCommentId) {
+        // Top-level comment: prepend to every cached sort variant ('top' /
+        // 'newest' / 'timestamp') so the comment shows up regardless of
+        // which tab the user is viewing.
         queryClient.setQueriesData<any>(
           { queryKey: [QUERY_KEYS.eventComments, eventId] },
           (prevData: any) => {
@@ -89,6 +102,42 @@ export const usePostEventComment = () => {
               next.pages[0].unshift({ commentId: newId })
             }
             return next
+          }
+        )
+      } else {
+        // Reply: push into the parent's nested `replies` array so the
+        // reply appears under the parent without waiting for the refetch.
+        // Mirrors `usePostComment`'s optimistic behavior for tracks.
+        // The cache slot is typed `CommentOrReply | undefined`. The
+        // optimistic shape we splice in is a `Comment`-shaped object that
+        // structurally satisfies `CommentOrReply` but TS can't prove it
+        // (entityType narrows differently on the ReplyComment branch),
+        // so we shape the updater as `(prev) => CommentOrReply` and
+        // cast the result. The `as any` on `replyShape` is the same
+        // escape hatch usePostComment uses for its optimistic reply.
+        queryClient.setQueryData<CommentOrReply | undefined>(
+          getCommentQueryKey(parentCommentId),
+          (prev: CommentOrReply | undefined) => {
+            if (!prev) return prev
+            const parent = prev as Comment
+            const replyShape = {
+              id: newId,
+              entityId: eventId,
+              userId,
+              message: body,
+              mentions: [],
+              isEdited: false,
+              trackTimestampS: undefined,
+              reactCount: 0,
+              createdAt: new Date().toISOString(),
+              updatedAt: undefined,
+              isMembersOnly: false
+            } as any
+            return {
+              ...parent,
+              replies: [...(parent.replies ?? []), replyShape],
+              replyCount: (parent.replyCount ?? 0) + 1
+            } as CommentOrReply
           }
         )
       }

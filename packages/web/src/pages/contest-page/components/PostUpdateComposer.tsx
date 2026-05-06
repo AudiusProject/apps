@@ -96,6 +96,7 @@ export const PostUpdateComposer = ({
       <Flex w='100%' gap='s' alignItems='center'>
         <HarmonyAvatar
           size='auto'
+          borderWidth='thin'
           isLoading={false}
           src={profileImage}
           css={{ width: 32, height: 32, flexShrink: 0 }}

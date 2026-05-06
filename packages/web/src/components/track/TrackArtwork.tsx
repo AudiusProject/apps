@@ -19,7 +19,7 @@ export const TrackArtwork = (props: TrackArtworkProps) => {
     size,
     flairSize = Size.LARGE,
     hideToolTip = false,
-    isLoading = false,
+    isLoading,
     ...other
   } = props
 

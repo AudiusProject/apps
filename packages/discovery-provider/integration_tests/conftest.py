@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import ast
 import os
 import subprocess
 from contextlib import contextmanager
@@ -10,11 +11,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
+from flask import Flask
+
 import src
-from src.app import create_app, create_celery
+from src.app import create_celery
+from src.challenges.create_new_challenges import create_new_challenges
 from src.models.base import Base
 from src.utils import helpers
+from src.utils.db_session import set_session_managers
 from src.utils.redis_connection import get_redis
+from src.utils.session_manager import SessionManager
 
 DB_URL = os.getenv(
     "audius_db_url",
@@ -79,6 +85,28 @@ def pg_migrate_sh():
     create_database(DB_URL, template=tempalte_name)
 
 
+class _TestApp:
+    """A minimal stand-in for the Flask app fixture.
+
+    Provides a no-op `app_context()` so existing tests can keep using
+    `with app.app_context():` while the underlying db session managers are
+    populated via the global `set_session_managers` mechanism. Wraps a real
+    Flask app so tests that need `test_request_context()` (for code paths
+    that read `flask.request.args`, e.g. `paginate_query`) keep working.
+    """
+
+    def __init__(self):
+        self._flask_app = Flask(__name__)
+
+    @contextmanager
+    def app_context(self):
+        with self._flask_app.app_context():
+            yield self
+
+    def test_request_context(self, *args, **kwargs):
+        return self._flask_app.test_request_context(*args, **kwargs)
+
+
 @contextmanager
 def app_impl():
     pg_migrate_sh()
@@ -90,10 +118,18 @@ def app_impl():
     redis = get_redis()
     redis.flushall()
 
-    # Create application for testing
-    discovery_provider_app = create_app(TEST_CONFIG_OVERRIDE)
+    engine_args = ast.literal_eval(ENGINE_ARGS_LITERAL)
+    db = SessionManager(DB_URL, engine_args)
+    db_read_replica = SessionManager(DB_URL, engine_args)
+    set_session_managers(db, db_read_replica)
 
-    yield discovery_provider_app
+    # Seed the challenges table from challenges.json. In production this is
+    # done by `configure_celery` at celery startup; in tests we must do it
+    # explicitly so challenge/notification tests have the rows they expect.
+    with db.scoped_session() as session:
+        create_new_challenges(session)
+
+    yield _TestApp()
 
 
 @pytest.fixture
@@ -159,11 +195,6 @@ def celery_app():
     if database_exists(DB_URL):
         drop_database(DB_URL)
     redis.flushall()
-
-
-@pytest.fixture
-def client(app):  # pylint: disable=redefined-outer-name
-    return app.test_client()
 
 
 postgresql_my = factories.postgresql("postgresql_nooproc")

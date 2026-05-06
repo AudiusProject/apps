@@ -185,6 +185,15 @@ const StatusPill = ({ children }: { children: ReactNode }) => {
 export const ContestCardSkeleton = (
   props: { variant?: ContestCardVariant } & Omit<PaperProps, 'variant'>
 ) => {
+  // Mirror the dimensions the real `ContestCard` uses so the skeleton
+  // doesn't pop in shorter than the resolved card. Hero rows render
+  // heading/l (line-height 40) and grid rows render heading/m
+  // (line-height 32); both clamp to two lines, giving an 80 / 64 px
+  // title block respectively. Earlier iterations rendered a single 28px
+  // line, which was the source of the "skeleton loader is the wrong
+  // size on the explore page" QA pass.
+  const variant = props.variant ?? 'grid'
+  const titleBlockHeight = variant === 'hero' ? 80 : 64
   return (
     <Paper
       direction='column'
@@ -205,10 +214,9 @@ export const ContestCardSkeleton = (
         </Flex>
         <Divider orientation='horizontal' />
         <Flex direction='column' gap='s'>
-          <Skeleton h={28} w='80%' />
+          <Skeleton h={titleBlockHeight} w='80%' />
           <Flex gap='s'>
             <Skeleton h={22} w={72} />
-            <Skeleton h={22} w={120} />
           </Flex>
         </Flex>
       </Flex>
@@ -279,6 +287,17 @@ export const ContestCard = forwardRef(
       return <ContestCardSkeleton variant={variant} {...other} />
     }
 
+    // Skip contests whose host has been deactivated. The discovery
+    // endpoint can still return these (e.g. the fake "Audius" /
+    // life-audius-airdrop accounts that were deleted) but a contest
+    // with a tombstoned host has no valid action surface — and showing
+    // them on the explore grid was the root of the "deleted accounts
+    // surface contests" bug. Returning null lets the grid auto-collapse
+    // around the missing card without leaving a placeholder hole.
+    if (user.is_deactivated) {
+      return null
+    }
+
     const status = formatStatus(remixContest.endDate)
 
     return (
@@ -347,7 +366,7 @@ export const ContestCard = forwardRef(
                   wordBreak: 'break-word'
                 }}
               >
-                {track.title}
+                {(remixContest.eventData as any)?.title?.trim() || track.title}
               </Text>
             </Flex>
             <Flex

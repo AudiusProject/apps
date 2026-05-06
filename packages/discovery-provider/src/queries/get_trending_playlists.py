@@ -7,7 +7,6 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.sql.functions import GenericFunction, func
 from sqlalchemy.sql.type_api import TypeEngine
 
-from src.api.v1.helpers import extend_track, format_limit, format_offset
 from src.models.playlists.playlist import Playlist
 from src.models.playlists.playlist_track import PlaylistTrack
 from src.models.playlists.playlist_trending_score import PlaylistTrendingScore
@@ -23,8 +22,6 @@ from src.queries.query_helpers import (
     populate_playlist_metadata,
     populate_track_metadata,
 )
-from src.utils.db_session import get_db_read_replica
-from src.utils.helpers import decode_string_id
 
 
 class jsonb_array_length(GenericFunction):  # pylint: disable=too-many-ancestors
@@ -199,11 +196,7 @@ def _get_trending_playlists_with_session(
         add_users_to_tracks(session, populated_tracks, current_user_id)
 
         # Re-associate tracks with playlists
-        # track_id -> populated_track
-        populated_track_map = {
-            track["track_id"]: extend_track(track, session)
-            for track in populated_tracks
-        }
+        populated_track_map = {track["track_id"]: track for track in populated_tracks}
         for playlist in playlists_map.values():
             for i in range(len(playlist["tracks"])):
                 track_id = playlist["tracks"][i]["track_id"]
@@ -222,24 +215,3 @@ def _get_trending_playlists_with_session(
         if user:
             playlist["user"] = user
     return sorted_playlists
-
-
-def get_trending_playlists(args: GetTrendingPlaylistsArgs, strategy):
-    """Returns Trending Playlists."""
-    db = get_db_read_replica()
-    with db.scoped_session() as session:
-        return _get_trending_playlists_with_session(session, args, strategy)
-
-
-def get_full_trending_playlists(request, args, strategy):
-    offset, limit = format_offset(args), format_limit(args, TRENDING_LIMIT)
-    current_user_id, time = args.get("user_id"), args.get("time", "week")
-    time = "week" if time not in ["week", "month", "year"] else time
-
-    args = {"time": time, "with_tracks": True, "limit": limit, "offset": offset}
-    if current_user_id:
-        decoded = decode_string_id(current_user_id)
-        args["current_user_id"] = decoded
-    playlists = get_trending_playlists(args, strategy)
-
-    return playlists

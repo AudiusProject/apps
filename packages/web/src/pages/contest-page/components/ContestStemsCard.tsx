@@ -95,7 +95,10 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     useDownloadTrackArchiveModal()
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
-  const [expanded, setExpanded] = useState(false)
+  // Default to expanded so the stems list is visible without an extra
+  // click. Once we support multiple source tracks per contest we'll flip
+  // back to collapsed-by-default to keep the surface compact.
+  const [expanded, setExpanded] = useState(true)
   const stemsCount = stems.length
 
   // Same file-size query the track page runs. `stemTracks.map(...)` is
@@ -220,12 +223,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           role='button'
           tabIndex={0}
           onClick={handleRowClick}
-          css={{
-            cursor: 'pointer',
-            '&:hover .contest-stems-card-title': {
-              color: color.primary.primary
-            }
-          }}
+          css={{ cursor: 'pointer' }}
         >
           <Box
             w={64}
@@ -240,13 +238,21 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             }}
           />
           <Flex direction='column' gap='2xs' css={{ flex: 1, minWidth: 0 }}>
+            {/* Title underlines + turns accent on its own hover, the way
+                the UserLink below it does. Previously the whole row
+                hover scope highlighted the title — that scope was too
+                broad (just hovering the cover art lit up the title). */}
             <Text
               variant='title'
               size='m'
               color='default'
-              className='contest-stems-card-title'
               css={{
-                transition: 'color var(--harmony-quick)'
+                cursor: 'pointer',
+                transition: 'color var(--harmony-quick)',
+                '&:hover': {
+                  color: color.primary.primary,
+                  textDecoration: 'underline'
+                }
               }}
             >
               {track.title}

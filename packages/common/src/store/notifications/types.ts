@@ -98,6 +98,12 @@ export enum Entity {
   Playlist = 'Playlist',
   Album = 'Album',
   User = 'User',
+  // Remix-contest comment notifications carry `data.type === "Event"`
+  // because the indexer's comment_*/comment_reaction notifications stamp
+  // the contest's event_id (not its underlying track) as `entity_id`.
+  // Surfaces that render comment notifications use this case to pick a
+  // "remix contest" label and resolve navigation through the underlying
+  // track instead of trying to look up an Event in useNotificationEntity.
   Event = 'Event'
 }
 

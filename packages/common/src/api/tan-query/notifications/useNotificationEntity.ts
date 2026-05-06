@@ -20,30 +20,40 @@ export const useNotificationEntity = <T extends Notification>(
   const entityType =
     'entityType' in notification ? notification.entityType : null
 
-  // Always call hooks unconditionally
+  // For comment notifications on a remix-contest event the indexer sends
+  // `entity_id = event_id` (not the underlying track). Resolve the event
+  // first so we can chase its `entityId` (the parent track) below — that
+  // way EntityLink can render the track title and `useGoToEntity` lands
+  // on a navigable URL we can rewrite into the contest page.
+  const { data: event } = useEvent(
+    entityType === Entity.Event ? entityId : null
+  )
+  const trackIdFromEvent = event?.entityId ?? null
+
+  // Always call hooks unconditionally. Track is resolved either directly
+  // (Track entityType) or via the event hop (Event entityType).
   const { data: track } = useTrack(
-    entityType === Entity.Track ? entityId : null
+    entityType === Entity.Track
+      ? entityId
+      : entityType === Entity.Event
+        ? trackIdFromEvent
+        : null
   )
   const { data: collection } = useCollection(
     entityType === Entity.Playlist || entityType === Entity.Album
       ? entityId
       : null
   )
-  // Events (contests) wrap an underlying track. Two-hop: event -> track.
-  const { data: event } = useEvent(
-    entityType === Entity.Event ? entityId : null
-  )
-  const eventTrackId = event?.entityId ?? null
-  const { data: eventTrack } = useTrack(eventTrackId)
 
-  // Get user data for the entity
+  // Get user data for the entity. For Event-typed notifications the
+  // "owner" is the contest host, not the underlying track's owner.
   const userId = useMemo(() => {
     if (!entityId || !entityType || entityType === Entity.User) return null
+    if (entityType === Entity.Event) return event?.userId ?? null
     if (track) return track.owner_id
     if (collection) return collection.playlist_owner_id
-    if (eventTrack) return eventTrack.owner_id
     return null
-  }, [entityId, entityType, track, collection, eventTrack])
+  }, [entityId, entityType, event, track, collection])
 
   const { data: user } = useUser(userId)
 
@@ -56,9 +66,6 @@ export const useNotificationEntity = <T extends Notification>(
     if (collection) {
       return { ...collection, user: user ?? null }
     }
-    if (eventTrack) {
-      return { ...eventTrack, user: user ?? null }
-    }
     return null
-  }, [entityId, entityType, track, collection, eventTrack, user])
+  }, [entityId, entityType, track, collection, user])
 }

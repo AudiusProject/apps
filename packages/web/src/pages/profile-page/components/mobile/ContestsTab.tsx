@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { useAllRemixContests, useRemixContest } from '@audius/common/api'
 import { ID, User } from '@audius/common/models'
@@ -7,6 +7,8 @@ import { Box, Flex, LoadingSpinner } from '@audius/harmony'
 import { ContestCard } from 'components/contest-card/ContestCard'
 
 import { EmptyTab } from './EmptyTab'
+
+const MAX_PAGES_TO_LOAD = 5
 
 type ContestsTabProps = {
   profile: User
@@ -43,10 +45,25 @@ export const ContestsTab = ({ profile, isOwner }: ContestsTabProps) => {
   const {
     data: trackIds,
     isPending,
-    isFetching
+    isFetching,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage
   } = useAllRemixContests({ pageSize: 50 })
 
   const contestTrackIds = useMemo(() => trackIds ?? [], [trackIds])
+
+  // Auto-paginate the global contest list (the discovery endpoint
+  // doesn't filter by host yet) up to a safety cap. Without this, an
+  // artist whose hosted contests sit beyond the first page reads as
+  // "no contests" until the user scrolls — and ended-only artists
+  // never showed up.
+  const loadedPages = trackIds ? Math.ceil(trackIds.length / 50) : 0
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && loadedPages < MAX_PAGES_TO_LOAD) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])
 
   if (isPending && contestTrackIds.length === 0) {
     return (

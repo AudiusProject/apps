@@ -52,6 +52,8 @@ import {
   ChatReactRequestSchema,
   ChatReadRequest,
   ChatReadRequestSchema,
+  ChatReadAllRequest,
+  ChatReadAllRequestSchema,
   ChatUnfurlRequest,
   ChatUnfurlRequestSchema,
   TypedCommsResponse,
@@ -573,6 +575,25 @@ export class ChatsApi
       params: {
         chat_id: chatId
       }
+    })
+  }
+
+  /**
+   * Marks every chat the current user belongs to as read in a single
+   * server-side UPDATE. The corresponding RPC (`chat.read_all`) accepts no
+   * params besides the standard sender identity and timestamp.
+   * @param params.currentUserId the user to act on behalf of
+   * @returns the rpc object
+   */
+  public async readAll(params: ChatReadAllRequest = {}) {
+    const { currentUserId } = await parseParams(
+      'readAll',
+      ChatReadAllRequestSchema
+    )(params)
+    return await this.sendRpc({
+      current_user_id: currentUserId,
+      method: 'chat.read_all',
+      params: {}
     })
   }
 

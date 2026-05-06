@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
+  QUERY_KEYS,
   useComment,
   useCurrentUserId,
   useDeleteComment,
@@ -32,6 +33,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { UserLink } from 'components/link/UserLink'
+import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
 import { Timestamp } from '../../../components/comments/Timestamp'
@@ -267,6 +269,7 @@ export const ContestCommentsTile = ({
           <Flex w='100%' gap='s' alignItems='center'>
             <HarmonyAvatar
               size='auto'
+              borderWidth='thin'
               isLoading={false}
               src={profileImage}
               css={{ width: 32, height: 32, flexShrink: 0 }}
@@ -458,6 +461,7 @@ const ContestCommentRow = ({
   eventOwnerUserId,
   mode
 }: ContestCommentRowProps) => {
+  const queryClient = useQueryClient()
   const { data: comment } = useComment(commentId)
   const { data: author } = useUser(comment?.userId)
   const { data: currentUserId } = useCurrentUserId()
@@ -498,8 +502,9 @@ const ContestCommentRow = ({
     currentUserId !== null && comment.userId === currentUserId
   // Host moderates the contest; authors can delete their own comments.
   const canDelete = isCurrentUserHost || isCurrentUserAuthor
-  // Reply is shown to any signed-in user, top-level rows only.
-  const canReply = currentUserId !== null
+  // Replies are allowed on regular comments only; nobody can reply to
+  // an artist's contest update (those are announcements, not threads).
+  const canReply = currentUserId !== null && !isPostUpdate
 
   const videoUrl: string | undefined =
     'videoUrl' in comment ? ((comment as any).videoUrl ?? undefined) : undefined
@@ -511,6 +516,47 @@ const ContestCommentRow = ({
 
   const handleDelete = () => {
     if (!currentUserId) return
+    // useDeleteComment's optimistic update is hard-coded against the
+    // *track* comment list cache. For event comments we have to scrub
+    // the comment from the eventComments cache ourselves so the row
+    // disappears immediately instead of reappearing until the next
+    // refetch (the bug the contest QA pass flagged: "deleting a
+    // comment makes it reappear immediately").
+    if (parentCommentId) {
+      // Reply: drop from the parent comment's nested replies array.
+      queryClient.setQueryData(getCommentQueryKey(parentCommentId), (prev) => {
+        if (!prev) return prev
+        const parent = prev as any
+        return {
+          ...parent,
+          replies: (parent.replies ?? []).filter(
+            (r: any) => r.id !== commentId
+          ),
+          replyCount: Math.max(0, (parent.replyCount ?? 0) - 1)
+        }
+      })
+    } else {
+      // Top-level: remove the row from every cached sort variant of the
+      // event comments feed.
+      queryClient.setQueriesData<any>(
+        { queryKey: [QUERY_KEYS.eventComments, eventId] },
+        (prevData: any) => {
+          if (!prevData) return prevData
+          const next = structuredClone(prevData)
+          next.pages = (next.pages ?? []).map((page: any[]) =>
+            (page ?? []).filter((item) => item?.commentId !== commentId)
+          )
+          return next
+        }
+      )
+      // Drop the per-comment cache entry too so any stragglers re-fetch
+      // fresh data on next render.
+      queryClient.removeQueries({
+        queryKey: getCommentQueryKey(commentId),
+        exact: true
+      })
+    }
+
     deleteComment({
       commentId,
       userId: currentUserId,
@@ -583,16 +629,14 @@ const ContestCommentRow = ({
         </Text>
         {videoUrl ? (
           <Box mt='xs'>
-            <video
-              controls
-              src={videoUrl}
-              style={{
-                width: '100%',
-                maxHeight: 340,
-                borderRadius: 8,
-                backgroundColor: '#000'
-              }}
-            />
+            {/* Updates only accept YouTube / Vimeo URLs (set via the
+                AttachVideoModal), so the right primitive is the same
+                iframe-based `VideoEmbed` we use elsewhere. The previous
+                `<video src>` tag tried to play these as raw HTML5
+                media, which fails on YouTube — the platform serves a
+                webpage, not a media stream — and rendered as a black
+                player with a zero-second duration. */}
+            <VideoEmbed url={videoUrl} />
           </Box>
         ) : null}
         <Flex gap='m' alignItems='center' pt='xs'>
@@ -642,6 +686,7 @@ const ContestCommentRow = ({
           <Flex direction='row' gap='s' alignItems='center' pt='xs' w='100%'>
             <HarmonyAvatar
               size='auto'
+              borderWidth='thin'
               isLoading={false}
               src={profileImage}
               css={{ width: 28, height: 28, flexShrink: 0 }}
@@ -660,6 +705,166 @@ const ContestCommentRow = ({
             </Box>
           </Flex>
         ) : null}
+        {/* Nested replies. The API returns top-level comments with each
+            reply nested in `comment.replies`; render those inline below
+            the parent so users can see the conversation. Skipped in
+            Updates mode because Updates can't be replied to. */}
+        {!isPostUpdate &&
+        (comment as any).replies &&
+        (comment as any).replies.length > 0 ? (
+          <Flex direction='column' gap='m' pt='xs' w='100%'>
+            {((comment as any).replies as any[]).map((reply) => (
+              <ContestCommentReplyRow
+                key={reply.id}
+                reply={reply}
+                eventId={eventId}
+                eventOwnerUserId={eventOwnerUserId}
+                parentCommentId={commentId}
+              />
+            ))}
+          </Flex>
+        ) : null}
+      </Flex>
+    </Flex>
+  )
+}
+
+type ContestCommentReplyRowProps = {
+  reply: any
+  eventId: ID
+  eventOwnerUserId: ID | undefined
+  parentCommentId: ID
+}
+
+/**
+ * Nested reply row. Lighter than ContestCommentRow — replies don't get
+ * their own reply affordance (single-level threading), don't show the
+ * Updates / Comments mode filter (already constrained by the parent),
+ * and only carry like + delete affordances. Rendered inside
+ * `ContestCommentRow`'s replies list.
+ */
+const ContestCommentReplyRow = ({
+  reply,
+  eventId,
+  eventOwnerUserId,
+  parentCommentId
+}: ContestCommentReplyRowProps) => {
+  const queryClient = useQueryClient()
+  const { data: author } = useUser(reply.userId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { mutate: reactToComment } = useReactToComment()
+  const { mutate: deleteComment } = useDeleteComment()
+
+  if (!author) return null
+
+  const isAuthorEventOwner =
+    eventOwnerUserId !== undefined && reply.userId === eventOwnerUserId
+  const isCurrentUserHost =
+    currentUserId !== null &&
+    eventOwnerUserId !== undefined &&
+    currentUserId === eventOwnerUserId
+  const isCurrentUserAuthor =
+    currentUserId !== null && reply.userId === currentUserId
+  const canDelete = isCurrentUserHost || isCurrentUserAuthor
+  const createdAt: Date | undefined = reply.createdAt
+    ? dayjs(reply.createdAt).toDate()
+    : undefined
+
+  const handleDelete = () => {
+    if (!currentUserId) return
+    // Optimistic: drop this reply from the parent's replies array. The
+    // mutation's own onMutate handler is track-typed so we own the cache
+    // cleanup here for events.
+    queryClient.setQueryData(getCommentQueryKey(parentCommentId), (prev) => {
+      if (!prev) return prev
+      const parent = prev as any
+      return {
+        ...parent,
+        replies: (parent.replies ?? []).filter((r: any) => r.id !== reply.id),
+        replyCount: Math.max(0, (parent.replyCount ?? 0) - 1)
+      }
+    })
+    deleteComment({
+      commentId: reply.id,
+      userId: currentUserId,
+      trackId: eventId,
+      currentSort: undefined,
+      parentCommentId
+    })
+  }
+
+  return (
+    <Flex direction='row' gap='m' alignItems='flex-start' w='100%'>
+      <UserAvatar userId={author.user_id} />
+      <Flex direction='column' gap='xs' css={{ flex: 1, minWidth: 0 }}>
+        <Flex
+          gap='s'
+          alignItems='center'
+          wrap='wrap'
+          justifyContent='space-between'
+        >
+          <Flex gap='s' alignItems='center' wrap='wrap'>
+            <UserLink userId={author.user_id} />
+            {isAuthorEventOwner ? (
+              <Text variant='label' size='xs' color='accent' strength='strong'>
+                {messages.artistBadge}
+              </Text>
+            ) : null}
+            {createdAt ? <Timestamp time={createdAt} /> : null}
+          </Flex>
+          {canDelete ? (
+            <PopupMenu
+              items={[{ text: messages.delete, onClick: handleDelete }]}
+              renderTrigger={(anchorRef, triggerPopup) => (
+                <Box
+                  ref={anchorRef as any}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    triggerPopup()
+                  }}
+                  css={{ cursor: 'pointer', lineHeight: 0 }}
+                >
+                  <IconKebabHorizontal size='s' color='subdued' />
+                </Box>
+              )}
+            />
+          ) : null}
+        </Flex>
+        <Text variant='body' size='s'>
+          {reply.message}
+        </Text>
+        <Flex gap='m' alignItems='center' pt='xs'>
+          <Flex
+            gap='xs'
+            alignItems='center'
+            onClick={() => {
+              if (!currentUserId) return
+              const nextIsLiked = !reply.isCurrentUserReacted
+              reactToComment({
+                commentId: reply.id,
+                userId: currentUserId,
+                isLiked: nextIsLiked,
+                trackId: eventId,
+                entityType: 'Event',
+                isEntityOwner:
+                  eventOwnerUserId !== undefined &&
+                  currentUserId === eventOwnerUserId,
+                currentSort: undefined
+              })
+            }}
+            css={{ cursor: currentUserId ? 'pointer' : 'default' }}
+          >
+            <IconHeart
+              color={reply.isCurrentUserReacted ? 'active' : 'subdued'}
+              size='s'
+            />
+            {reply.reactCount > 0 ? (
+              <Text variant='body' size='s' color='subdued'>
+                {reply.reactCount}
+              </Text>
+            ) : null}
+          </Flex>
+        </Flex>
       </Flex>
     </Flex>
   )
@@ -679,6 +884,10 @@ const UserAvatar = ({ userId }: UserAvatarProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
   return (
-    <HarmonyAvatar src={src} css={{ width: 40, height: 40, flexShrink: 0 }} />
+    <HarmonyAvatar
+      src={src}
+      borderWidth='thin'
+      css={{ width: 40, height: 40, flexShrink: 0 }}
+    />
   )
 }
