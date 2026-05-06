@@ -7,7 +7,6 @@ import {
 } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
-import { userMetadataFromSDK } from '~/adapters'
 import { eventMetadataFromSDK } from '~/adapters/event'
 import { getRemixesQueryKey } from '~/api/tan-query/remixes/useRemixes'
 import { useQueryContext } from '~/api/tan-query/utils'
@@ -84,17 +83,6 @@ export const useAllRemixContests = (
       // network round-trip instead of N+1.
       primeRelatedData({ related, queryClient })
 
-      // Build a userId → is_deactivated lookup from the related users so
-      // we can drop contests whose host has been tombstoned. The discovery
-      // endpoint can still return these (e.g. the fake "Audius" /
-      // life-audius-airdrop accounts) and rendering them on the explore
-      // grid was the root of the "deleted accounts surface contests" bug.
-      const deactivatedUserIds = new Set<ID>()
-      for (const sdkUser of related?.users ?? []) {
-        const u = userMetadataFromSDK(sdkUser)
-        if (u?.is_deactivated) deactivatedUserIds.add(u.user_id)
-      }
-
       // Prime useRemixes({ trackId, pageSize: 0, isContestEntry: true }) so
       // ContestCard's entry-count badge doesn't fire a count-only request
       // per card. The card reads `data.pages[0].count`, so we seed the
@@ -126,8 +114,6 @@ export const useAllRemixContests = (
         .map((sdkEvent: SDKEvent) => {
           const event = eventMetadataFromSDK(sdkEvent)
           if (!event) return null
-          // Drop contests hosted by deactivated users (see comment above).
-          if (event.userId && deactivatedUserIds.has(event.userId)) return null
           // Prime the per-event cache so useEvent hits immediately downstream.
           queryClient.setQueryData(getEventQueryKey(event.eventId), event)
           // useRemixContest resolves via useEventIdsByEntityId keyed by
