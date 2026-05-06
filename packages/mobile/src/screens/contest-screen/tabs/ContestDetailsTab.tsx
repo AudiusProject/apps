@@ -78,7 +78,11 @@ export const ContestDetailsTab = () => {
           </Paper>
         ) : null}
 
-        <EventFollowersCard eventId={eventId} followerCount={followerCount} />
+        {/* Followers — hide entirely when the contest has no followers yet,
+            mirroring how the Prizes tile hides on empty content. */}
+        {followerCount > 0 ? (
+          <EventFollowersCard eventId={eventId} followerCount={followerCount} />
+        ) : null}
 
         {hasDownloads ? <ContestStemsCard trackId={trackId} /> : null}
       </Flex>

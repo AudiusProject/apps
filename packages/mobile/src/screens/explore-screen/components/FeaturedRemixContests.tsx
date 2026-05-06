@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { useExploreContent, useTracks } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
@@ -25,12 +25,26 @@ export const FeaturedRemixContests = () => {
   const { data: exploreContent, isPending: isExplorePending } =
     useExploreContent({ enabled: inView })
 
-  // Old-card path needs the hydrated track list; new-card path resolves per
-  // card internally so we skip this fetch when the flag is enabled.
-  const { data: remixContests } = useTracks(
+  // The curated featured-contests list is a static JSON file (see
+  // useExploreContent). Some entries can refer to tracks the artist has
+  // since deleted or made private — when ContestCard hits one of those it
+  // renders `null`, but CardList's row wrapper (a fixed-width View) keeps
+  // the card-sized slot, leaving a visible gap in the carousel. Hydrating
+  // the tracks here lets us filter the list down to ones a card will
+  // actually render for.
+  const { data: remixContests, isPending: isTracksPending } = useTracks(
     exploreContent?.featuredRemixContests,
-    { enabled: inView && !isContestsPageEnabled }
+    { enabled: inView }
   )
+
+  const validTrackIds = useMemo(() => {
+    if (!remixContests) return undefined
+    return remixContests
+      .filter((t) => !t.is_delete && !t.is_unlisted)
+      .map((t) => t.track_id)
+  }, [remixContests])
+
+  const isLoading = isExplorePending || isTracksPending
 
   return (
     <InViewWrapper>
@@ -43,18 +57,16 @@ export const FeaturedRemixContests = () => {
       >
         {isContestsPageEnabled ? (
           <CardList
-            data={exploreContent?.featuredRemixContests?.map((trackId) => ({
-              trackId
-            }))}
+            data={validTrackIds?.map((trackId) => ({ trackId }))}
             renderItem={({ item }) => <ContestCard trackId={item.trackId} />}
             horizontal
             carouselSpacing={spacing.l}
-            isLoading={isExplorePending}
+            isLoading={isLoading}
             LoadingCardComponent={TrackCardSkeleton}
           />
         ) : (
           <CardList
-            data={remixContests?.map((track) => ({ trackId: track.track_id }))}
+            data={validTrackIds?.map((trackId) => ({ trackId }))}
             renderItem={({ item }) => (
               <RemixContestCard trackId={item.trackId} />
             )}
