@@ -22,6 +22,7 @@ import {
 } from '@solana/web3.js'
 
 import { CommonStoreContext } from '~/store/storeContext'
+import { getResponseErrorAnalyticsFields } from '~/utils/error'
 
 import { AnalyticsEvent, Name } from '../../models'
 import {
@@ -848,11 +849,13 @@ export const transferFromUserBank = async ({
     return signature
   } catch (e) {
     if (isCreatingTokenAccount) {
+      const responseErrorFields = await getResponseErrorAnalyticsFields(e)
       await track(
         make({
           eventName: Name.WITHDRAW_USDC_CREATE_DEST_TOKEN_ACCOUNT_FAILED,
           ...analyticsFields,
-          error: e instanceof Error ? e.message : e
+          error: e instanceof Error ? e.message : e,
+          ...responseErrorFields
         })
       )
     }

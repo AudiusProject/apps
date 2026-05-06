@@ -100,7 +100,10 @@ export type TableProps = {
   data: any[]
   defaultSorter?: (a: any, b: any) => number
   fetchBatchSize?: number
-  fetchMore?: (offset: number, limit: number) => void
+  fetchMore?: (
+    offset: number,
+    limit: number
+  ) => Promise<unknown> | undefined | void
   fetchPage?: (page: number) => void
   fetchThreshold?: number
   getRowClassName?: (rowIndex: number) => string
@@ -698,10 +701,15 @@ export const Table = ({
   ])
 
   const loadMoreRows = useCallback(
+    // Await the fetch so InfiniteLoader's in-flight tracking actually
+    // works — without the await the returned promise resolves immediately
+    // and InfiniteLoader will keep firing loadMoreRows in a tight loop
+    // (forceUpdate → still-unloaded-rows → loadMoreRows → repeat) which
+    // cascades through every page of a cursor-based query.
     async ({ startIndex }: { startIndex: number }) => {
       const offset = startIndex
       const limit = fetchBatchSize
-      fetchMore?.(offset, limit)
+      await fetchMore?.(offset, limit)
     },
     [fetchMore, fetchBatchSize]
   )

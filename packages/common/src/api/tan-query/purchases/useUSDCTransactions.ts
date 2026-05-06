@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 
 import {
   Id,
@@ -15,7 +15,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 
-import { useQueryContext, makeLoadNextPage } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models/Identifiers'
 import { USDCTransactionDetails } from '~/models/USDCTransactions'
 
@@ -31,6 +31,16 @@ type UseUSDCTransactionsArgs = {
   sortDirection?: GetUSDCTransactionsSortDirectionEnum
   type?: GetUSDCTransactionsTypeEnum[]
   method?: GetUSDCTransactionsMethodEnum
+  /**
+   * When true, refetch every loaded page periodically. Off by default —
+   * baseline polling refetches every loaded page on each tick, which is
+   * expensive and visually disruptive. Callers waiting on a specific
+   * just-completed withdrawal should manage their own short-term polling
+   * (see `useWithdrawalTransactionPoller` in WithdrawalsTab).
+   */
+  isPolling?: boolean
+  /** Poll interval in ms when `isPolling` is true. */
+  pollingInterval?: number
 }
 
 export const getUSDCTransactionsQueryKey = (
@@ -81,7 +91,9 @@ export const useUSDCTransactions = (
     sortMethod = GetUSDCTransactionsSortMethodEnum.Date,
     sortDirection = GetUSDCTransactionsSortDirectionEnum.Desc,
     type,
-    method
+    method,
+    isPolling = false,
+    pollingInterval = 5000
   }: UseUSDCTransactionsArgs = {},
   options?: QueryOptions
 ) => {
@@ -118,7 +130,7 @@ export const useUSDCTransactions = (
       return data.map((transaction) => parseTransaction({ transaction }))
     },
     select: (data) => data.pages.flat(),
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval: isPolling ? pollingInterval : false,
     ...options,
     enabled: options?.enabled !== false && !!currentUserId
   })
@@ -130,10 +142,16 @@ export const useUSDCTransactions = (
 
   // @ts-ignore
   queryData.reset = reset
-  const loadNextPageCallback = useCallback(
-    () => makeLoadNextPage(queryData),
-    [queryData]
-  )
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. We read the latest queryData from a ref
+  // at call time instead of capturing it in the closure deps.
+  const queryDataRef = useRef(queryData)
+  queryDataRef.current = queryData
+  const loadNextPageCallback = useCallback(() => {
+    const q = queryDataRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
   // @ts-ignore
   queryData.loadNextPage = loadNextPageCallback
   return queryData as UseInfiniteQueryResult<USDCTransactionDetails[]> & {

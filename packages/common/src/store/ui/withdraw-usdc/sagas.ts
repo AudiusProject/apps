@@ -7,6 +7,7 @@ import { queryAccountUser } from '~/api'
 import { getUSDCBalanceQueryKey } from '~/api/tan-query/wallets/useUSDCBalance'
 import { Name, Status, WithdrawUSDCTransferEventFields } from '~/models'
 import { transferFromUserBank } from '~/services/audius-backend/solana'
+import { getResponseErrorAnalyticsFields } from '~/utils/error'
 
 import { buyUSDCActions } from '../../buy-usdc'
 import { getContext } from '../../effects'
@@ -183,12 +184,14 @@ function* doWithdrawUSDCCoinflow({
     const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
+    const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
     yield* call(
       track,
       make({
         eventName: Name.WITHDRAW_USDC_FAILURE,
         ...analyticsFields,
-        error: e instanceof Error ? e.message : e
+        error: e instanceof Error ? e.message : e,
+        ...responseErrorFields
       })
     )
 
@@ -274,12 +277,14 @@ function* doWithdrawUSDCManualTransfer({
     const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
+    const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
     yield* call(
       track,
       make({
         eventName: Name.WITHDRAW_USDC_FAILURE,
         ...analyticsFields,
-        error: e instanceof Error ? e.message : e
+        error: e instanceof Error ? e.message : e,
+        ...responseErrorFields
       })
     )
 

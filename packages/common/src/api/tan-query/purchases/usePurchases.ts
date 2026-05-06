@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import {
   Id,
@@ -8,7 +8,7 @@ import {
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { purchaseFromSDK } from '~/adapters/purchase'
-import { useQueryContext, makeLoadNextPage } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
 import {
   USDCContentPurchaseType,
@@ -22,7 +22,11 @@ import { QueryKey, QueryOptions } from '../types'
 import { useUsers } from '../users/useUsers'
 import { combineQueryStatuses } from '../utils/combineQueryResults'
 
-const PAGE_SIZE = 10
+// Matches the consumer Table's `fetchBatchSize` so InfiniteLoader's
+// `minimumBatchSize` is satisfied in a single round-trip. When this was 10,
+// the Table asked for 50-row batches and InfiniteLoader cascaded 5 fetches
+// to fill each batch.
+const PAGE_SIZE = 50
 
 export type GetPurchaseListArgs = {
   userId: ID | null | undefined
@@ -102,9 +106,16 @@ export const usePurchases = (
   const tracksQueryResult = useTracks(trackIdsToFetch)
   const collectionsQueryResult = useCollections(collectionIdsToFetch)
 
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. We read the latest queryResult from a ref
+  // at call time instead of capturing it in the closure deps.
+  const queryResultRef = useRef(queryResult)
+  queryResultRef.current = queryResult
   const loadNextPageCallback = useCallback(() => {
-    makeLoadNextPage(queryResult)
-  }, [queryResult])
+    const q = queryResultRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
 
   return {
     ...combineQueryStatuses([
