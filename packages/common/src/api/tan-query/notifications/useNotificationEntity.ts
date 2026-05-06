@@ -22,15 +22,16 @@ export const useNotificationEntity = <T extends Notification>(
 
   // For comment notifications on a remix-contest event the indexer sends
   // `entity_id = event_id` (not the underlying track). Resolve the event
-  // first and then chase its `entityId` (the parent track) below — that
-  // way EntityLink can render the track title and `useGoToEntity` lands on
-  // a navigable URL we can rewrite into the contest page.
+  // first so we can chase its `entityId` (the parent track) below — that
+  // way EntityLink can render the track title and `useGoToEntity` lands
+  // on a navigable URL we can rewrite into the contest page.
   const { data: event } = useEvent(
     entityType === Entity.Event ? entityId : null
   )
   const trackIdFromEvent = event?.entityId ?? null
 
-  // Always call hooks unconditionally
+  // Always call hooks unconditionally. Track is resolved either directly
+  // (Track entityType) or via the event hop (Event entityType).
   const { data: track } = useTrack(
     entityType === Entity.Track
       ? entityId
@@ -44,13 +45,15 @@ export const useNotificationEntity = <T extends Notification>(
       : null
   )
 
-  // Get user data for the entity
+  // Get user data for the entity. For Event-typed notifications the
+  // "owner" is the contest host, not the underlying track's owner.
   const userId = useMemo(() => {
     if (!entityId || !entityType || entityType === Entity.User) return null
+    if (entityType === Entity.Event) return event?.userId ?? null
     if (track) return track.owner_id
     if (collection) return collection.playlist_owner_id
     return null
-  }, [entityId, entityType, track, collection])
+  }, [entityId, entityType, event, track, collection])
 
   const { data: user } = useUser(userId)
 

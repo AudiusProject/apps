@@ -46,10 +46,9 @@ const TrackTileArt = ({
   })
 
   const imageProps = {
-    image: showSkeleton ? '' : image,
-    noShimmer,
+    src: showSkeleton ? undefined : image,
     useSkeleton: !hasNoArtwork,
-    wrapperClassName: coSign
+    className: coSign
       ? styles.imageWrapper
       : cn(
           styles.container,
@@ -104,10 +103,9 @@ const CollectionTileArt = ({
   })
 
   const imageProps = {
-    image: showSkeleton ? '' : image,
-    noShimmer,
+    src: showSkeleton ? undefined : image,
     useSkeleton: !hasNoArtwork,
-    wrapperClassName: coSign
+    className: coSign
       ? styles.imageWrapper
       : cn(
           styles.container,

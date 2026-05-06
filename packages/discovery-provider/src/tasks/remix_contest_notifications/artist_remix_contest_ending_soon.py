@@ -47,10 +47,13 @@ def create_artist_remix_contest_ending_soon_notifications(session, now=None):
             .first()
         )
 
-        # Don't create notifications for private tracks
-        if parent_track.is_unlisted:
+        # Guard against the parent track having been deleted/hidden between
+        # the event being created and this batch running — otherwise the
+        # AttributeError on `parent_track.is_unlisted` would abort the whole
+        # batch and drop notifications for every other ending-soon contest.
+        if parent_track is None or parent_track.is_unlisted:
             continue
-        parent_track_owner_id = parent_track.owner_id if parent_track else None
+        parent_track_owner_id = parent_track.owner_id
         exists = (
             session.query(Notification)
             .filter(

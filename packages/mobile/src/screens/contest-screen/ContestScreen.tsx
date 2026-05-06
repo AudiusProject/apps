@@ -8,6 +8,7 @@ import {
 
 import {
   getCommentQueryKey,
+  getEventQueryKey,
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
@@ -24,6 +25,7 @@ import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
+import { PortalHost } from '@gorhom/portal'
 import { useNavigation } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
@@ -220,6 +222,25 @@ export const ContestScreen = () => {
       })
     )
   }, [dispatch, trackId])
+
+  // Pull-to-refresh: invalidate the contest's event + comment queries so all
+  // tabs (details, updates, submissions, comments) refetch the next time
+  // they're focused. Mirrors the profile pull-to-refresh pattern; cover
+  // photo expansion is handled by the `PullToRefreshPortalHost` below.
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const handleRefresh = useCallback(() => {
+    if (!eventId) return
+    setIsRefreshing(true)
+    queryClient.invalidateQueries({ queryKey: getEventQueryKey(eventId) })
+    queryClient.invalidateQueries({
+      // Matches QUERY_KEYS.eventComments — written this way to avoid pulling
+      // the whole queryKeys map into the contest screen for one constant.
+      queryKey: ['eventComments', eventId]
+    })
+    // Drop the spinner shortly after — the underlying queries are async but
+    // we don't have a single status flag to watch like profile does.
+    setTimeout(() => setIsRefreshing(false), 600)
+  }, [eventId, queryClient])
 
   const handleToggleFollow = useCallback(() => {
     if (!eventId || !currentUserId) return
@@ -515,22 +536,30 @@ export const ContestScreen = () => {
   const detailsScreen = collapsibleTabScreen({
     name: 'Details',
     Icon: EmptyTabIcon,
-    component: ContestDetailsTab
+    component: ContestDetailsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const updatesScreen = collapsibleTabScreen({
     name: 'Updates',
     Icon: EmptyTabIcon,
-    component: ContestUpdatesTab
+    component: ContestUpdatesTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const submissionsScreen = collapsibleTabScreen({
     name: 'Submissions',
     Icon: EmptyTabIcon,
-    component: ContestSubmissionsTab
+    component: ContestSubmissionsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const commentsScreen = collapsibleTabScreen({
     name: 'Comments',
     Icon: EmptyTabIcon,
-    component: ContestCommentsTab
+    component: ContestCommentsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
 
   return (
@@ -546,6 +575,12 @@ export const ContestScreen = () => {
                 on the contest page. With the wrapper the navigator
                 fills the remaining space below any chrome and the
                 header slides normally. */}
+            {/* PullToRefresh portal target — the core FlatList /
+                SectionList wrappers portal their pull-to-refresh control
+                here so it lands on top of the cover photo and the gesture
+                expands the cover image instead of opening a blank gap
+                above the list. Mirrors the ProfileScreen pattern. */}
+            <PortalHost name='PullToRefreshPortalHost' />
             <View style={{ height: '100%' }}>
               <CollapsibleTabNavigator
                 renderHeader={renderHeader}

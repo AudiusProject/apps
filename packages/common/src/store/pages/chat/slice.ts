@@ -485,6 +485,49 @@ const slice = createSlice({
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
     },
+    markAllChatsAsRead: (state) => {
+      // triggers saga
+      // Optimistically mark every locally-known non-blast chat with unread
+      // messages as read. Chats that aren't loaded into state yet get cleared
+      // server-side by the saga's chat.read_all RPC and reconcile via the
+      // trailing fetchUnreadMessagesCount.
+      const allChats = chatsAdapter.getSelectors().selectAll(state.chats)
+      for (const chat of allChats) {
+        if (chat.is_blast) continue
+        if (!chat.unread_message_count) continue
+        state.optimisticChatRead[chat.chat_id] = {
+          last_read_at: chat.last_message_at,
+          unread_message_count: 0
+        }
+      }
+      state.optimisticUnreadMessagesCount = 0
+    },
+    markAllChatsAsReadSucceeded: (state) => {
+      // Server confirmed every chat_member.unread_count is now 0; promote the
+      // optimistic per-chat reads to the entity. unreadMessagesCount itself is
+      // overwritten by the trailing fetchUnreadMessagesCount the saga fires.
+      for (const chatId of Object.keys(state.optimisticChatRead)) {
+        const existingChat = chatsAdapter
+          .getSelectors()
+          .selectById(state.chats, chatId)
+        if (!existingChat || existingChat.is_blast) continue
+        chatsAdapter.updateOne(state.chats, {
+          id: chatId,
+          changes: {
+            last_read_at: existingChat.last_message_at,
+            unread_message_count: 0
+          }
+        })
+      }
+      state.optimisticChatRead = {}
+      delete state.optimisticUnreadMessagesCount
+    },
+    markAllChatsAsReadFailed: (state) => {
+      // chat.read_all is all-or-nothing; on failure undo every optimistic
+      // read this run installed.
+      state.optimisticChatRead = {}
+      delete state.optimisticUnreadMessagesCount
+    },
     sendMessage: (
       state,
       action: PayloadAction<{

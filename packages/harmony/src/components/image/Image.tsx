@@ -13,6 +13,8 @@ import { useTheme } from '@emotion/react'
 import { Box, BoxProps } from '../layout/Box'
 import { Skeleton } from '../skeleton'
 
+import styles from './Image.module.css'
+
 type NativeImgProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'placeholder'>
 
 export type ImageProps = {
@@ -98,7 +100,7 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(
       ? 'opacity 0.1s ease-in-out'
       : `opacity ${motion.calm}`
 
-    const showSkeleton = useSkeleton && !isLoaded && !priorityLowResSrc && !!src
+    const showSkeleton = useSkeleton && !isLoaded && !priorityLowResSrc
     const showLowRes = !!priorityLowResSrc && !isLoaded
     const accessibilityProps =
       alt === ''
@@ -116,18 +118,21 @@ export const Image = forwardRef<HTMLDivElement, ImageProps>(
       objectFit
     }
 
-    // The outer Box defaults to filling its parent so the absolutely-positioned
-    // inner <img> has a height to fill. Callers that explicitly set h/w via
-    // BoxProps or a sized className will override these.
-    const fillSize = { height: '100%', width: '100%' }
+    // The outer Box defaults to filling its parent via Image.module.css .root
+    // (height/width 100%). Because the CSS module is injected before any
+    // consumer CSS module (import order), consumer classes win for conflicts,
+    // letting callers override sizing via className without fighting Emotion.
+    const rootClassName = className
+      ? `${styles.root} ${className}`
+      : styles.root
 
     return (
       <Box
         ref={ref}
         borderRadius={borderRadius}
-        className={className}
+        className={rootClassName}
         {...other}
-        css={{ position: 'relative', overflow: 'hidden', ...fillSize }}
+        css={{ position: 'relative', overflow: 'hidden' }}
       >
         {showSkeleton ? (
           <Skeleton

@@ -1,6 +1,7 @@
 import { forwardRef, useCallback } from 'react'
 
 import {
+  chatActions,
   chatSelectors,
   CommonState,
   useCreateChatModal
@@ -11,9 +12,12 @@ import {
   IconButton,
   Flex,
   Text,
-  IconMessages
+  IconMessages,
+  IconCheck,
+  IconKebabHorizontal,
+  PopupMenu
 } from '@audius/harmony'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Frosted } from 'components/frosted/Frosted'
@@ -23,8 +27,10 @@ import { UserChatHeader } from './UserChatHeader'
 
 const messages = {
   header: 'Messages',
-  settings: 'Settings',
-  compose: 'Compose'
+  inboxOptions: 'Inbox Options',
+  inboxSettings: 'Inbox Settings',
+  compose: 'Compose',
+  markAllAsRead: 'Mark All as Read'
 }
 
 const CHAT_HEADER_PADDING_PX = 20
@@ -39,11 +45,16 @@ type ChatHeaderProps = {
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
   ({ currentChatId, isNarrowLayout }, ref) => {
+    const dispatch = useDispatch()
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
     const chat = useSelector((state: CommonState) =>
       chatSelectors.getChat(state, currentChatId ?? '')
     )
+    const unreadMessagesCount = useSelector(
+      chatSelectors.getUnreadMessagesCount
+    )
+    const hasUnread = unreadMessagesCount > 0
     const isBlast = chat?.is_blast
 
     const handleComposeClicked = useCallback(() => {
@@ -54,6 +65,27 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
       setInboxSettingsVisible(true)
     }, [setInboxSettingsVisible])
 
+    const handleMarkAllAsReadClicked = useCallback(() => {
+      dispatch(chatActions.markAllChatsAsRead())
+    }, [dispatch])
+
+    const inboxMenuItems = [
+      {
+        text: messages.inboxSettings,
+        icon: <IconSettings />,
+        onClick: handleSettingsClicked
+      },
+      ...(hasUnread
+        ? [
+            {
+              text: messages.markAllAsRead,
+              icon: <IconCheck />,
+              onClick: handleMarkAllAsReadClicked
+            }
+          ]
+        : [])
+    ]
+
     const headerContent = (
       <Flex p='l' alignItems='center' gap='m'>
         <IconMessages size='2xl' color='heading' />
@@ -62,14 +94,22 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
         </Text>
         <Flex gap='m' css={{ marginLeft: 'auto' }}>
           <IconButton
-            aria-label={messages.settings}
-            icon={IconSettings}
-            onClick={handleSettingsClicked}
-          />
-          <IconButton
             aria-label={messages.compose}
             icon={IconCompose}
             onClick={handleComposeClicked}
+          />
+          <PopupMenu
+            items={inboxMenuItems}
+            transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+            renderTrigger={(ref, trigger) => (
+              <IconButton
+                ref={ref}
+                aria-label={messages.inboxOptions}
+                icon={IconKebabHorizontal}
+                onClick={() => trigger()}
+              />
+            )}
           />
         </Flex>
       </Flex>

@@ -105,7 +105,7 @@ const Artwork = memo(
           [styles.large]: size === 'large',
           [styles.artworkEmpty]: hasNoArtwork ?? false
         })}
-        src={showSkeleton ? '' : image}
+        src={showSkeleton ? undefined : image}
         aria-label={label}
         useSkeleton={!hasNoArtwork}
       >
