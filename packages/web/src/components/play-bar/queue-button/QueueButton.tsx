@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
+import { Name } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/store'
 import {
   Box,
@@ -11,6 +12,7 @@ import {
 } from '@audius/harmony'
 import { useSelector } from 'react-redux'
 
+import { make, useRecord } from 'common/store/analytics/actions'
 import { QueuePopover } from 'components/queue-popover'
 
 const { getPlaybackQueue } = playbackSelectors
@@ -25,14 +27,33 @@ export const QueueButton = () => {
   const queue = useSelector(getPlaybackQueue)
   const hasItems = queue.length > 0
   const { color } = useTheme()
+  const record = useRecord()
 
   const handleToggle = useCallback(() => {
-    setIsOpen((open) => !open)
-  }, [])
+    setIsOpen((open) => {
+      const next = !open
+      if (next) {
+        record(
+          make(Name.PLAY_QUEUE_OPEN, {
+            source: 'queue',
+            queueLength: queue.length
+          })
+        )
+      } else {
+        record(make(Name.PLAY_QUEUE_CLOSE, { source: 'queue' }))
+      }
+      return next
+    })
+  }, [record, queue.length])
 
   const handleClose = useCallback(() => {
-    setIsOpen(false)
-  }, [])
+    setIsOpen((open) => {
+      if (open) {
+        record(make(Name.PLAY_QUEUE_CLOSE, { source: 'queue' }))
+      }
+      return false
+    })
+  }, [record])
 
   return (
     <>

@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTrack, useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { SquareSizes } from '@audius/common/models'
+import { Name, SquareSizes } from '@audius/common/models'
 import type { PlaybackTrack, QueueSource } from '@audius/common/store'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { Pressable, View } from 'react-native'
 import DraggableFlatList from 'react-native-draggable-flatlist'
 import { useDispatch, useSelector } from 'react-redux'
@@ -261,13 +262,33 @@ const sourceLabel = (key: string | null) =>
   SOURCE_LABELS[key ?? ''] ?? 'Up Next'
 
 export const QueueDrawer = () => {
-  const { onClose } = useDrawer(DRAWER_NAME)
+  const { isOpen, onClose } = useDrawer(DRAWER_NAME)
   const dispatch = useDispatch()
   const queue = useSelector(getPlaybackQueue)
   const index = useSelector(getPlaybackIndex)
   const isPlaying = useSelector(getIsPlaying)
   const { spacing, color } = useTheme()
   const { trackIds: nextFromIds, sourceKey } = useNextFromSourceMobile()
+  const record = useRecord()
+
+  const queueLengthRef = useRef(queue.length)
+  useEffect(() => {
+    queueLengthRef.current = queue.length
+  }, [queue.length])
+  const wasOpenRef = useRef(false)
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      record(
+        make(Name.PLAY_QUEUE_OPEN, {
+          source: 'queue',
+          queueLength: queueLengthRef.current
+        })
+      )
+    } else if (!isOpen && wasOpenRef.current) {
+      record(make(Name.PLAY_QUEUE_CLOSE, { source: 'queue' }))
+    }
+    wasOpenRef.current = isOpen
+  }, [isOpen, record])
 
   // Suspend the parent drawer's swipe-to-dismiss gesture while the user is
   // reordering items. Without this, the drawer's PanResponder claims the
@@ -321,20 +342,47 @@ export const QueueDrawer = () => {
   const handlePlayQueueItem = useCallback(
     (queueIndex: number) => {
       dispatch(playTrackAt({ index: queueIndex }))
+      const trackId = queue[queueIndex]?.trackId
+      if (trackId !== undefined) {
+        record(
+          make(Name.PLAY_QUEUE_PLAY_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            position: queueIndex
+          })
+        )
+      }
     },
-    [dispatch]
+    [dispatch, queue, record]
   )
 
   const handleRemove = useCallback(
     (queueIndex: number) => {
+      const trackId = queue[queueIndex]?.trackId
       dispatch(removeFromQueue({ index: queueIndex }))
+      if (trackId !== undefined) {
+        record(
+          make(Name.PLAY_QUEUE_REMOVE_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            position: queueIndex
+          })
+        )
+      }
     },
-    [dispatch]
+    [dispatch, queue, record]
   )
 
   const handleClear = useCallback(() => {
+    const upcomingLength = Math.max(queue.length - upNextStart, 0)
     dispatch(clearUpcoming())
-  }, [dispatch])
+    record(
+      make(Name.PLAY_QUEUE_CLEAR, {
+        source: 'queue',
+        queueLength: upcomingLength
+      })
+    )
+  }, [dispatch, queue.length, upNextStart, record])
 
   const handleReorder = useCallback(
     ({ from, to }: { from: number; to: number }) => {
@@ -348,8 +396,21 @@ export const QueueDrawer = () => {
           orderedIndices: [...orderedIndices.slice(0, upNextStart), ...movable]
         })
       )
+      const fromAbsolute = upNextStart + from
+      const toAbsolute = upNextStart + to
+      const movedTrackId = queue[fromAbsolute]?.trackId
+      if (movedTrackId !== undefined) {
+        record(
+          make(Name.PLAY_QUEUE_REORDER_TRACK, {
+            source: 'queue',
+            trackId: String(movedTrackId),
+            fromPosition: fromAbsolute,
+            toPosition: toAbsolute
+          })
+        )
+      }
     },
-    [dispatch, queue.length, upNextStart]
+    [dispatch, queue, upNextStart, record]
   )
 
   const handleAddNextFromToQueue = useCallback(
@@ -360,8 +421,15 @@ export const QueueDrawer = () => {
           tracks: [{ trackId, source: sourceTag as unknown as QueueSource }]
         })
       )
+      record(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(trackId),
+          from: 'queue'
+        })
+      )
     },
-    [dispatch, sourceKey]
+    [dispatch, sourceKey, record]
   )
 
   const renderQueuedItem = useCallback(

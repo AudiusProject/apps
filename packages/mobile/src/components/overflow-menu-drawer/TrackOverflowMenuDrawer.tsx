@@ -13,7 +13,8 @@ import {
   RepostSource,
   FavoriteSource,
   FollowSource,
-  ModalSource
+  ModalSource,
+  Name
 } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
 import {
@@ -35,6 +36,7 @@ import {
   useHostRemixContestModal
 } from '@audius/common/store'
 import type { OverflowActionCallbacks } from '@audius/common/store'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -71,6 +73,7 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
   const navigation = useNavigation({ customNavigation: contextNavigation })
   const dispatch = useDispatch()
   const { toast } = useToast()
+  const record = useRecord()
   const { id: modalId, contextPlaylistId } = useSelector(getMobileOverflowModal)
   const id = modalId as ID
   const { onOpen: openPremiumContentPurchaseModal } =
@@ -237,12 +240,26 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
           track: { trackId: id, source: QueueSource.RECOMMENDED_TRACKS }
         })
       )
+      record(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(id),
+          from: 'overflow menu'
+        })
+      )
       toast({ content: messages.willPlayNext })
     },
     [OverflowAction.ADD_TO_QUEUE]: () => {
       dispatch(
         playbackActions.addToQueue({
           tracks: [{ trackId: id, source: QueueSource.RECOMMENDED_TRACKS }]
+        })
+      )
+      record(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(id),
+          from: 'overflow menu'
         })
       )
       toast({ content: messages.addedToQueue })
