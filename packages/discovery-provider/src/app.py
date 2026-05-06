@@ -1,46 +1,24 @@
 from __future__ import absolute_import
 
 import ast
-import datetime
 import logging
-import time
 from collections import defaultdict
 from typing import Any, Dict
 
 from celery.schedules import timedelta
-from flask import Flask
-from flask.json import JSONEncoder
-from flask_cors import CORS
-from opentelemetry.instrumentation.flask import FlaskInstrumentor  # type: ignore
-from sqlalchemy import exc
-from sqlalchemy_utils import create_database, database_exists
 from web3 import Web3
-from werkzeug.middleware.proxy_fix import ProxyFix
 
-from src import api_helpers, exceptions, tracer
-from src.api.v1 import api as api_v1
-from src.api.v1.playlists import playlist_stream_bp
 from src.challenges.challenge_event_bus import setup_challenge_bus
-from src.challenges.create_new_challenges import create_new_challenges
 from src.database_task import DatabaseTask
 from src.eth_indexing.event_scanner import eth_indexing_last_scanned_block_key
-from src.queries import (
-    block_confirmation,
-    get_redirect_weights,
-    health_check,
-    notifications,
-    queries,
-    search,
-    search_queries,
-    user_signals,
-)
 from src.solana.solana_client_manager import SolanaClientManager
 from src.tasks import celery_app
 from src.tasks.index_core import index_core_lock_key
 from src.tasks.repair_audio_analyses import REPAIR_AUDIO_ANALYSES_LOCK
 from src.tasks.update_delist_statuses import UPDATE_DELIST_STATUSES_LOCK
 from src.utils import helpers, web3_provider
-from src.utils.config import ConfigIni, config_files, shared_config
+from src.utils.config import shared_config
+from src.utils.db_session import set_session_managers
 from src.utils.constants import CONTRACT_NAMES_ON_CHAIN, CONTRACT_TYPES
 from src.utils.eth_contracts_helpers import fetch_trusted_notifier_info
 from src.utils.eth_manager import EthManager
@@ -101,10 +79,6 @@ def init_contracts():
     )
 
 
-def create_app(test_config=None):
-    return create(test_config)
-
-
 def create_celery(test_config=None):
     # pylint: disable=W0603
     global web3endpoint, abi_values, eth_abi_values, eth_web3
@@ -126,142 +100,9 @@ def create_celery(test_config=None):
     # Initialize Solana web3 provider
     solana_client_manager = SolanaClientManager(shared_config["solana"]["endpoint"])
 
-    return create(test_config, mode="celery")
-
-
-def create(test_config=None, mode="app"):
-    arg_type = type(mode)
-    assert isinstance(mode, str), f"Expected string, provided {arg_type}"
-    assert mode in ("app", "celery"), f"Expected app/celery, provided {mode}"
-
-    tracer.configure_tracer()
-    app = Flask(__name__)
-    FlaskInstrumentor().instrument_app(app)
-
-    # Tell Flask that it should respect the X-Forwarded-For and X-Forwarded-Proto
-    # headers coming from a proxy (if any).
-    # On its own Flask's `url_for` is not very smart and if you're serving
-    # traffic through an HTTPS proxy, `url_for` will create URLs with the HTTP
-    # protocol. This is the cannonical solution.
-    # https://werkzeug.palletsprojects.com/en/1.0.x/middleware/proxy_fix/
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-
-    if shared_config["cors"]["allow_all"]:
-        CORS(app, max_age=86400, resources={r"/*": {"origins": "*"}})
-    else:
-        CORS(app, max_age=86400)
-    app.iniconfig = ConfigIni()
-    configure_flask(test_config, app, mode)
-
-    if mode == "app":
-        helpers.configure_flask_app_logging(
-            app, shared_config["discprov"]["loglevel_flask"]
-        )
-        # Create challenges. Run the create_new_challenges only in flask
-        # Running this in celery + flask init can cause a race condition
-        session_manager = app.db_session_manager
-        with session_manager.scoped_session() as session:
-            create_new_challenges(session)
-        return app
-
-    if mode == "celery":
-        # log level is defined via command line in docker yml files
-        helpers.configure_logging()
-        configure_celery(celery_app.celery, test_config)
-        return celery_app
-
-    raise ValueError("Invalid mode")
-
-
-def register_exception_handlers(flask_app):
-    # catch exceptions thrown by us and propagate error message through
-    @flask_app.errorhandler(exceptions.Base)
-    def handle_audius_error(error):  # pylint: disable=W0612
-        logger.exception("Audius-derived exception")
-        return api_helpers.error_response(str(error), 400)
-
-    # show a common error message for exceptions not thrown by us
-    @flask_app.errorhandler(Exception)
-    def handle_exception(_error):  # pylint: disable=W0612
-        logger.exception("Non Audius-derived exception")
-        return api_helpers.error_response(["Something caused the server to crash."])
-
-    @flask_app.errorhandler(404)
-    def handle_404(_error):  # pylint: disable=W0612
-        return api_helpers.error_response(["Route does not exist"], 404)
-
-
-def configure_flask(test_config, app, mode="app"):
-    with app.app_context():
-        app.iniconfig.read(config_files)
-
-    # custom JSON serializer for timestamps
-    class TimestampJSONEncoder(JSONEncoder):
-        # pylint: disable=E0202
-        def default(self, o):
-            if isinstance(o, datetime.datetime):
-                # ISO-8601 timestamp format
-                return o.strftime("%Y-%m-%dT%H:%M:%SZ")
-            return JSONEncoder.default(self, o)
-
-    app.json_encoder = TimestampJSONEncoder
-
-    database_url = app.config["db"]["url"]
-    if test_config is not None:
-        if "db" in test_config:
-            if "url" in test_config["db"]:
-                database_url = test_config["db"]["url"]
-
-    # Sometimes ECS latency causes the create_database function to fail because db connection is not ready
-    # Give it some more time to get set up, up to 5 times
-    i = 0
-    while i < 5:
-        try:
-            # Create database if necessary
-            if not database_exists(database_url):
-                create_database(database_url)
-            else:
-                break
-        except exc.OperationalError as e:
-            if "could not connect to server" in str(e):
-                logger.warning(
-                    "DB connection isn't up yet...setting a temporary timeout and trying again"
-                )
-                time.sleep(10)
-            else:
-                raise e
-
-        i += 1
-
-    if test_config is not None:
-        # load the test config if passed in
-        app.config.update(test_config)
-
-    app.db_session_manager = SessionManager(
-        app.config["db"]["url"],
-        ast.literal_eval(app.config["db"]["engine_args_literal"]),
-    )
-
-    app.db_read_replica_session_manager = SessionManager(
-        app.config["db"]["url_read_replica"],
-        ast.literal_eval(app.config["db"]["engine_args_literal"]),
-    )
-
-    # Register route blueprints
-    register_exception_handlers(app)
-    app.register_blueprint(queries.bp)
-    app.register_blueprint(search.bp)
-    app.register_blueprint(search_queries.bp)
-    app.register_blueprint(notifications.bp)
-    app.register_blueprint(health_check.bp)
-    app.register_blueprint(get_redirect_weights.bp)
-    app.register_blueprint(block_confirmation.bp)
-    app.register_blueprint(user_signals.bp)
-    app.register_blueprint(api_v1.bp)
-    app.register_blueprint(api_v1.bp_full)
-    app.register_blueprint(playlist_stream_bp)
-
-    return app
+    helpers.configure_logging()
+    configure_celery(celery_app.celery, test_config)
+    return celery_app
 
 
 def configure_celery(celery, test_config=None):
@@ -417,6 +258,7 @@ def configure_celery(celery, test_config=None):
         database_url_read_replica,
         ast.literal_eval(shared_config["db"]["engine_args_literal"]),
     )
+    set_session_managers(db, db_read_replica)
     logger.info("Database instance initialized!")
 
     registry_address = Web3.to_checksum_address(

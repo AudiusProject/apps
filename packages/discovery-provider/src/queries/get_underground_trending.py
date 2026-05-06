@@ -3,20 +3,16 @@ from typing import Any, Optional, TypedDict
 
 from sqlalchemy.orm.session import Session
 
-from src.api.v1.helpers import extend_track, format_limit, format_offset
 from src.gated_content.constants import SHOULD_TRENDING_EXCLUDE_GATED_TRACKS
 from src.models.tracks.track import Track
 from src.models.tracks.track_trending_score import TrackTrendingScore
 from src.models.users.aggregate_user import AggregateUser
-from src.queries.generate_unpopulated_trending_tracks import TRENDING_TRACKS_LIMIT
 from src.queries.get_unpopulated_tracks import get_unpopulated_tracks
 from src.queries.query_helpers import (
     get_users_by_id,
     get_users_ids,
     populate_track_metadata,
 )
-from src.utils.db_session import get_db_read_replica
-from src.utils.helpers import decode_string_id
 
 logger = logging.getLogger(__name__)
 
@@ -124,26 +120,5 @@ def _get_underground_trending_with_session(
         user = users[track["owner_id"]]
         if user:
             track["user"] = user
-    sorted_tracks = [extend_track(track, session) for track in sorted_tracks]
 
     return sorted_tracks
-
-
-def _get_underground_trending(args: GetUndergroundTrendingTrackArgs, strategy):
-    db = get_db_read_replica()
-    with db.scoped_session() as session:
-        return _get_underground_trending_with_session(session, args, strategy)
-
-
-def get_underground_trending(request, args, strategy):
-    offset, limit = format_offset(args), format_limit(args, TRENDING_TRACKS_LIMIT)
-    current_user_id = args.get("user_id")
-    args = {"limit": limit, "offset": offset}
-
-    # If user ID, let _get_underground_trending
-    # handle caching + limit + offset
-    if current_user_id:
-        decoded = decode_string_id(current_user_id)
-        args["current_user_id"] = decoded
-    trending = _get_underground_trending(args, strategy)
-    return trending

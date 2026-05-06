@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import ast
 import os
 import subprocess
 from contextlib import contextmanager
@@ -11,10 +12,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
 import src
-from src.app import create_app, create_celery
+from src.app import create_celery
 from src.models.base import Base
 from src.utils import helpers
+from src.utils.db_session import set_session_managers
 from src.utils.redis_connection import get_redis
+from src.utils.session_manager import SessionManager
 
 DB_URL = os.getenv(
     "audius_db_url",
@@ -79,6 +82,19 @@ def pg_migrate_sh():
     create_database(DB_URL, template=tempalte_name)
 
 
+class _TestApp:
+    """A minimal stand-in for the Flask app fixture.
+
+    Provides a no-op `app_context()` so existing tests can keep using
+    `with app.app_context():` while the underlying db session managers are
+    populated via the global `set_session_managers` mechanism.
+    """
+
+    @contextmanager
+    def app_context(self):
+        yield self
+
+
 @contextmanager
 def app_impl():
     pg_migrate_sh()
@@ -90,10 +106,12 @@ def app_impl():
     redis = get_redis()
     redis.flushall()
 
-    # Create application for testing
-    discovery_provider_app = create_app(TEST_CONFIG_OVERRIDE)
+    engine_args = ast.literal_eval(ENGINE_ARGS_LITERAL)
+    db = SessionManager(DB_URL, engine_args)
+    db_read_replica = SessionManager(DB_URL, engine_args)
+    set_session_managers(db, db_read_replica)
 
-    yield discovery_provider_app
+    yield _TestApp()
 
 
 @pytest.fixture
@@ -159,11 +177,6 @@ def celery_app():
     if database_exists(DB_URL):
         drop_database(DB_URL)
     redis.flushall()
-
-
-@pytest.fixture
-def client(app):  # pylint: disable=redefined-outer-name
-    return app.test_client()
 
 
 postgresql_my = factories.postgresql("postgresql_nooproc")
