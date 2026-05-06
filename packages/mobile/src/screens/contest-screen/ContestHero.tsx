@@ -81,17 +81,20 @@ export const ContestHero = ({ trackId }: ContestHeroProps) => {
     ]
   }))
 
-  // `overflow: 'hidden'` on the container clips the scaled image so
-  // it doesn't bleed past the hero edges into the body of the page
-  // when the over-scroll snaps back. `pointerEvents='none'` keeps
-  // touches falling through to the underlying scroll view.
+  // No `overflow: 'hidden'` here — on pull-to-refresh the scaled
+  // image needs to bleed *upward* past the hero's layout box to fill
+  // the gap above, exactly the way `ProfileCoverPhoto` does. Downward
+  // bleed into the body is hidden by the next sibling's own
+  // `backgroundColor='white'`, mirroring the profile header's pattern
+  // where the bio section's solid bg covers the cover-photo bleed.
+  // `pointerEvents='none'` keeps touches falling through to the
+  // underlying scroll view.
   return (
     <View
       pointerEvents='none'
       style={{
         width: '100%',
-        height: CONTEST_HERO_HEIGHT,
-        overflow: 'hidden'
+        height: CONTEST_HERO_HEIGHT
       }}
     >
       {src ? (
