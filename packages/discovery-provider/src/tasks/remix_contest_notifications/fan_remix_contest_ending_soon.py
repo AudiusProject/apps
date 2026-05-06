@@ -50,8 +50,10 @@ def create_fan_remix_contest_ending_soon_notifications(session, now=None):
             )
             .first()
         )
-        # Don't create notifications for private tracks
-        if parent_track.is_unlisted:
+        # Guard against a deleted/hidden parent track — without this the
+        # AttributeError on `.is_unlisted` would propagate and abort the
+        # whole batch, silently dropping every other contest's notifications.
+        if parent_track is None or parent_track.is_unlisted:
             continue
 
         follower_user_ids = set(
