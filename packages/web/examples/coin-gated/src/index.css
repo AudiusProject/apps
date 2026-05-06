@@ -325,3 +325,83 @@ body {
   border-width: 2px;
   border-top-color: #fff;
 }
+
+/* Fan-club text posts */
+.postsHint {
+  font-size: 12px;
+  color: #777;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.postList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.postItem {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.postItem:last-child {
+  border-bottom: none;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.postAuthor {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.postBadges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+
+.memberBadge {
+  padding: 2px 8px;
+  background: #f0e6ff;
+  color: #6a1b9a;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.publicBadge {
+  padding: 2px 8px;
+  background: #e0f0e0;
+  color: #2e7d32;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.postBody {
+  font-size: 14px;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.postLocked {
+  color: #888;
+  font-style: italic;
+}
+
+.postMeta {
+  font-size: 11px;
+  color: #999;
+  margin: 0;
+}
