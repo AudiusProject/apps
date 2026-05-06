@@ -17,6 +17,32 @@ const analyticsBlacklist = [
 
 const MAX_BREADCRUMBS = 300
 
+// Noisy, non-actionable error patterns we don't want clogging Sentry.
+// Each entry is matched against the event's error message and exception value.
+const NOISY_ERROR_PATTERNS: RegExp[] = [
+  // Code-splitting / dynamic import failures. Almost always a stale deploy or
+  // flaky network — not a real bug we can fix in code.
+  /ChunkLoadError/i,
+  /Loading chunk [\w-]+ failed/i,
+  /Failed to fetch dynamically imported module/i,
+  /Importing a module script failed/i,
+  // ResizeObserver loop warnings. Browsers fire these spuriously and they
+  // don't represent real errors — ignored by all major frameworks.
+  /ResizeObserver loop limit exceeded/i,
+  /ResizeObserver loop completed with undelivered notifications/i,
+  // Aborted fetches. Caused by user navigation or component unmount, not bugs.
+  /AbortError/i,
+  /The user aborted a request/i,
+  // Generic network failures — user offline, captive portal, ad blocker, etc.
+  /Failed to fetch/i,
+  /NetworkError/i,
+  /Load failed/i,
+  /The network connection was lost/i,
+  // Browser permission denials (mic, camera, clipboard, notifications) —
+  // expected user choices, not bugs.
+  /NotAllowedError/i
+]
+
 let sentryInitialized = false
 let sentryInitPromise: Promise<void> | null = null
 
@@ -61,6 +87,48 @@ export const initializeSentry = async () => {
 
         normalizeDepth: 5,
         maxBreadcrumbs: MAX_BREADCRUMBS,
+        beforeSend: (event, hint) => {
+          const exception = event.exception?.values?.[0]
+          const message =
+            (typeof hint?.originalException === 'object' &&
+            hint?.originalException !== null &&
+            'message' in hint.originalException
+              ? String(
+                  (hint.originalException as { message?: unknown }).message ??
+                    ''
+                )
+              : '') ||
+            exception?.value ||
+            event.message ||
+            ''
+          const stack = exception?.stacktrace?.frames?.length ?? 0
+
+          // Drop known-noisy error patterns (chunk load, ResizeObserver,
+          // network/abort, permission denials). See NOISY_ERROR_PATTERNS above
+          // for the full rationale.
+          if (NOISY_ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
+            if (env.ENVIRONMENT !== 'production') {
+              console.warn('[sentry] dropped noisy error:', message)
+            }
+            return null
+          }
+
+          // Drop unhandled rejections / exceptions that have no stack and
+          // either an empty message or a message too short to be actionable
+          // (e.g. "true", "null", "Error"). These are almost always thrown
+          // non-Error values from third-party scripts.
+          if (stack === 0 && message.trim().length < 10) {
+            if (env.ENVIRONMENT !== 'production') {
+              console.warn(
+                '[sentry] dropped low-signal error (no stack, short message):',
+                JSON.stringify(message)
+              )
+            }
+            return null
+          }
+
+          return event
+        },
         beforeBreadcrumb: (breadCrumb, hint) => {
           // filter out info and debug logs
           if (
