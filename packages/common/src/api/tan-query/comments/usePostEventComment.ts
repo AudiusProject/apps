@@ -36,6 +36,13 @@ export const usePostEventComment = () => {
   return useMutation({
     mutationFn: async (args: PostEventCommentArgs & { newId?: ID }) => {
       const sdk = await audiusSdk()
+      // Note: SDK's CreateCommentRequestBody calls the parent field `parentId`
+      // (not parentCommentId). The SDK's createComment override reads
+      // `metadata.parentId` to build the on-chain payload. Sending it under
+      // the wrong key drops the link silently — the indexer never gets a
+      // parent_comment_id, no comment_threads row is created, and the
+      // refetched reply comes back un-threaded which mis-routes artist
+      // replies to the Updates feed.
       return await sdk.comments.createComment({
         userId: Id.parse(args.userId)!,
         metadata: {
@@ -43,7 +50,7 @@ export const usePostEventComment = () => {
           entityId: args.eventId,
           entityType: 'Event',
           body: args.body,
-          parentCommentId: args.parentCommentId,
+          parentId: args.parentCommentId,
           mentions: args.mentions ?? [],
           videoUrl: args.videoUrl
         } as any
