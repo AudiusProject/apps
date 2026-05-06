@@ -108,7 +108,6 @@ const CoverPhoto = ({
         aria-label={messages.altText}
         className={styles.photo}
         style={{
-          position: 'relative',
           backgroundImage: imageSettings.backgroundImage,
           ...imageSettings.backgroundStyle
         }}
