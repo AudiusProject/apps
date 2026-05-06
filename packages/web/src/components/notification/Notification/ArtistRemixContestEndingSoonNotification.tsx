@@ -21,7 +21,8 @@ import { getEntityLink } from './utils'
 const messages = {
   title: 'Remix Contest',
   description1: `Your remix contest for `,
-  description2: ` is ending in 48 hours!`
+  description2: ` is ending in 48 hours!`,
+  fallbackDescription: 'Your remix contest is ending in 48 hours!'
 }
 
 type ArtistRemixContestEndingSoonNotificationProps = {
@@ -43,24 +44,31 @@ export const ArtistRemixContestEndingSoonNotification = (
     }
   }, [entity, dispatch])
 
-  if (!entity) return null
-
   return (
-    <NotificationTile notification={notification} onClick={handleClick}>
+    <NotificationTile
+      notification={notification}
+      onClick={entity ? handleClick : undefined}
+    >
       <NotificationHeader icon={<IconTrophy color='accent' />}>
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <Flex>
         <NotificationBody>
           <Text variant='body' size='l'>
-            {messages.description1}
-            <TrackLink
-              css={{ display: 'inline' }}
-              variant='secondary'
-              size='l'
-              trackId={entity.track_id}
-            />
-            {messages.description2}
+            {entity ? (
+              <>
+                {messages.description1}
+                <TrackLink
+                  css={{ display: 'inline' }}
+                  variant='secondary'
+                  size='l'
+                  trackId={entity.track_id}
+                />
+                {messages.description2}
+              </>
+            ) : (
+              messages.fallbackDescription
+            )}
           </Text>
         </NotificationBody>
       </Flex>

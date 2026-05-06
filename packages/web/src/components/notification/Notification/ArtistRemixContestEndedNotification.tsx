@@ -54,16 +54,19 @@ export const ArtistRemixContestEndedNotification = (
     }
   }, [entity, dispatch])
 
-  if (!entity) return null
-
   return (
-    <NotificationTile notification={notification} onClick={handleClick}>
+    <NotificationTile
+      notification={notification}
+      onClick={entity ? handleClick : undefined}
+    >
       <NotificationHeader icon={<IconTrophy color='accent' />}>
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <Flex column gap='l'>
-        <NotificationBody>{messages.pickWinnersDescription}</NotificationBody>
-        {remixCount > 0 && (
+        <NotificationBody>
+          {entity ? messages.pickWinnersDescription : messages.description}
+        </NotificationBody>
+        {entity && remixCount > 0 && (
           <Button css={{ width: 'fit-content' }} size='small' asChild>
             <Link to={pickWinnersRoute} onClick={(e) => e.stopPropagation()}>
               Pick Winners

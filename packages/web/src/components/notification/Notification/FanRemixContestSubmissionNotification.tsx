@@ -18,7 +18,10 @@ import { UserNameLink } from './components/UserNameLink'
 
 const messages = {
   title: 'New submission',
-  forContest: ' for '
+  forContest: ' for ',
+  submittedTrack: ' submitted a track',
+  fallbackWithSubmitter: ' submitted a track to a remix contest.',
+  fallbackGeneric: 'A new submission was posted to a remix contest.'
 }
 
 type FanRemixContestSubmissionNotificationProps = {
@@ -44,26 +47,40 @@ export const FanRemixContestSubmissionNotification = (
     }
   }, [submissionTrack, dispatch])
 
-  if (!contestTrack || !submissionTrack || !submitter) return null
+  const canFullyRender = contestTrack && submissionTrack && submitter
 
   return (
-    <NotificationTile notification={notification} onClick={handleClick}>
+    <NotificationTile
+      notification={notification}
+      onClick={submissionTrack ? handleClick : undefined}
+    >
       <NotificationHeader icon={<IconTrophy color='accent' />}>
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <Flex alignItems='flex-start'>
         <NotificationBody>
-          <UserNameLink user={submitter} notification={notification} />
-          {' submitted a track'}
-          {messages.forContest}
-          <TextLink
-            css={{ display: 'inline' }}
-            variant='secondary'
-            size='l'
-            to={contestPage(contestTrack.permalink)}
-          >
-            {contestTrack.title}
-          </TextLink>
+          {canFullyRender ? (
+            <>
+              <UserNameLink user={submitter} notification={notification} />
+              {messages.submittedTrack}
+              {messages.forContest}
+              <TextLink
+                css={{ display: 'inline' }}
+                variant='secondary'
+                size='l'
+                to={contestPage(contestTrack.permalink)}
+              >
+                {contestTrack.title}
+              </TextLink>
+            </>
+          ) : submitter ? (
+            <>
+              <UserNameLink user={submitter} notification={notification} />
+              {messages.fallbackWithSubmitter}
+            </>
+          ) : (
+            messages.fallbackGeneric
+          )}
         </NotificationBody>
       </Flex>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

@@ -4,6 +4,7 @@ import type { Collection, Track, User } from '~/models'
 import { Entity, Notification } from '~/store/notifications/types'
 
 import { useCollection } from '../collection/useCollection'
+import { useEvent } from '../events/useEvent'
 import { useTrack } from '../tracks/useTrack'
 import { useUser } from '../users/useUser'
 
@@ -28,14 +29,21 @@ export const useNotificationEntity = <T extends Notification>(
       ? entityId
       : null
   )
+  // Events (contests) wrap an underlying track. Two-hop: event -> track.
+  const { data: event } = useEvent(
+    entityType === Entity.Event ? entityId : null
+  )
+  const eventTrackId = event?.entityId ?? null
+  const { data: eventTrack } = useTrack(eventTrackId)
 
   // Get user data for the entity
   const userId = useMemo(() => {
     if (!entityId || !entityType || entityType === Entity.User) return null
     if (track) return track.owner_id
     if (collection) return collection.playlist_owner_id
+    if (eventTrack) return eventTrack.owner_id
     return null
-  }, [entityId, entityType, track, collection])
+  }, [entityId, entityType, track, collection, eventTrack])
 
   const { data: user } = useUser(userId)
 
@@ -48,6 +56,9 @@ export const useNotificationEntity = <T extends Notification>(
     if (collection) {
       return { ...collection, user: user ?? null }
     }
+    if (eventTrack) {
+      return { ...eventTrack, user: user ?? null }
+    }
     return null
-  }, [entityId, entityType, track, collection, user])
+  }, [entityId, entityType, track, collection, eventTrack, user])
 }

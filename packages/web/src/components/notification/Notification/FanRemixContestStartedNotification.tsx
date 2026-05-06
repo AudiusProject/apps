@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useNotificationEntity } from '@audius/common/api'
+import { useNotificationEntity, useUser } from '@audius/common/api'
 import {
   FanRemixContestStartedNotification as FanRemixContestStartedNotificationType,
   TrackEntity
@@ -22,7 +22,9 @@ import { getEntityLink } from './utils'
 
 const messages = {
   title: 'New Remix Contest',
-  description: 'started a new remix contest for '
+  description: 'started a new remix contest for ',
+  fallbackWithUser: ' started a new remix contest.',
+  fallbackGeneric: 'A new remix contest has started.'
 }
 
 type FanRemixContestStartedNotificationProps = {
@@ -33,10 +35,14 @@ export const FanRemixContestStartedNotification = (
   props: FanRemixContestStartedNotificationProps
 ) => {
   const { notification } = props
-  const { timeLabel, isViewed } = notification
+  const { timeLabel, isViewed, entityUserId } = notification
   const dispatch = useDispatch()
 
   const entity = useNotificationEntity(notification) as TrackEntity | null
+  // Fallback host lookup so the row still renders if the contest's track
+  // has been deleted; the entity hook returns null in that case.
+  const { data: hostUser } = useUser(entity ? null : entityUserId)
+  const host = entity?.user ?? hostUser ?? null
 
   const handleClick = useCallback(() => {
     if (entity) {
@@ -44,26 +50,40 @@ export const FanRemixContestStartedNotification = (
     }
   }, [entity, dispatch])
 
-  if (!entity || !entity.user) return null
-
   return (
-    <NotificationTile notification={notification} onClick={handleClick}>
+    <NotificationTile
+      notification={notification}
+      onClick={entity ? handleClick : undefined}
+    >
       <NotificationHeader icon={<IconTrophy color='accent' />}>
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
-      <Flex alignItems='flex-start'>
-        <TrackContent track={entity} hideTitle />
+      {entity && entity.user ? (
+        <Flex alignItems='flex-start'>
+          <TrackContent track={entity} hideTitle />
+          <NotificationBody>
+            <UserNameLink user={entity.user} notification={notification} />{' '}
+            {messages.description}
+            <TrackLink
+              css={{ display: 'inline' }}
+              variant='secondary'
+              size='l'
+              trackId={entity.track_id}
+            />
+          </NotificationBody>
+        </Flex>
+      ) : (
         <NotificationBody>
-          <UserNameLink user={entity.user} notification={notification} />{' '}
-          {messages.description}
-          <TrackLink
-            css={{ display: 'inline' }}
-            variant='secondary'
-            size='l'
-            trackId={entity.track_id}
-          />
+          {host ? (
+            <>
+              <UserNameLink user={host} notification={notification} />
+              {messages.fallbackWithUser}
+            </>
+          ) : (
+            messages.fallbackGeneric
+          )}
         </NotificationBody>
-      </Flex>
+      )}
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />
     </NotificationTile>
   )
