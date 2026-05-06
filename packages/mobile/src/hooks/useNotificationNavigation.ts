@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 
+import { getEventQueryKey } from '@audius/common/api'
 import type {
   AnnouncementNotification,
   UserSubscriptionNotification,
@@ -46,7 +47,6 @@ import {
   Entity,
   Achievement
 } from '@audius/common/store'
-import { getEventQueryKey } from '@audius/common/api'
 import { OptionalId } from '@audius/sdk'
 import { useLinkTo } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'

@@ -17,8 +17,6 @@ import { Portal } from '@gorhom/portal'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
 
-import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
-
 import {
   Button,
   Divider,
@@ -32,6 +30,7 @@ import {
   SelectablePill,
   Text
 } from '@audius/harmony-native'
+import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
 
 import { ActionDrawerWithoutRedux } from '../../components/action-drawer'
 import { Timestamp } from '../../components/comments/Timestamp'
@@ -387,7 +386,9 @@ const ContestCommentRow = ({
         const parent = prev as any
         return {
           ...parent,
-          replies: (parent.replies ?? []).filter((r: any) => r.id !== commentId),
+          replies: (parent.replies ?? []).filter(
+            (r: any) => r.id !== commentId
+          ),
           replyCount: Math.max(0, (parent.replyCount ?? 0) - 1)
         }
       })
