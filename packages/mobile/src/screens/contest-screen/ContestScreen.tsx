@@ -371,7 +371,20 @@ export const ContestScreen = () => {
       <ContestScrollBridge />
       <ContestHero trackId={track.track_id} />
 
-      <Flex p='l' gap='l' pointerEvents='box-none'>
+      {/* `backgroundColor='white'` here is what makes the hero's
+          pull-to-refresh stretch read cleanly: the scaled cover image
+          intentionally bleeds past `ContestHero`'s layout box (no
+          overflow:hidden anymore) so it can fill the over-scroll gap
+          above, and this section's solid bg hides the downward bleed
+          into the title/CTA/countdown stack. Same pattern
+          `ProfileHeader` uses for the bio section below the cover
+          photo. */}
+      <Flex
+        p='l'
+        gap='l'
+        pointerEvents='box-none'
+        backgroundColor='white'
+      >
         {/* Title — pure display; `pointerEvents='none'` wrapper so
             scroll gestures that land on the title pass through. */}
         <Flex pointerEvents='none'>
