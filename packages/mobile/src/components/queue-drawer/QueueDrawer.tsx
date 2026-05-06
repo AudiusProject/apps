@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useTrack, useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
@@ -78,6 +78,7 @@ type RowProps = {
   onPlay?: () => void
   onRemove?: () => void
   drag?: () => void
+  onDragHandleLongPress?: () => void
 }
 
 const MiniTrackRow = ({
@@ -87,7 +88,8 @@ const MiniTrackRow = ({
   onPlayPause,
   onPlay,
   onRemove,
-  drag
+  drag,
+  onDragHandleLongPress
 }: RowProps) => {
   const { color, spacing } = useTheme()
   const { data: track } = useTrack(trackId, {
@@ -189,6 +191,7 @@ const MiniTrackRow = ({
             {drag ? (
               <Pressable
                 onLongPress={() => {
+                  onDragHandleLongPress?.()
                   haptics.medium()
                   drag()
                 }}
@@ -263,8 +266,35 @@ export const QueueDrawer = () => {
   const queue = useSelector(getPlaybackQueue)
   const index = useSelector(getPlaybackIndex)
   const isPlaying = useSelector(getIsPlaying)
-  const { spacing } = useTheme()
+  const { spacing, color } = useTheme()
   const { trackIds: nextFromIds, sourceKey } = useNextFromSourceMobile()
+
+  // Suspend the parent drawer's swipe-to-dismiss gesture while the user is
+  // reordering items. Without this, the drawer's PanResponder claims the
+  // vertical drag and the drawer slides instead of the row.
+  const [isItemDragging, setIsItemDragging] = useState(false)
+  const dragResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handleDragHandleLongPress = useCallback(() => {
+    if (dragResetTimeout.current) {
+      clearTimeout(dragResetTimeout.current)
+      dragResetTimeout.current = null
+    }
+    setIsItemDragging(true)
+  }, [])
+  const handleDragRelease = useCallback(() => {
+    // Defer slightly so the drawer's PanResponder can't grab the tail end of
+    // the gesture as the finger lifts.
+    if (dragResetTimeout.current) clearTimeout(dragResetTimeout.current)
+    dragResetTimeout.current = setTimeout(() => {
+      setIsItemDragging(false)
+      dragResetTimeout.current = null
+    }, 150)
+  }, [])
+  useEffect(() => {
+    return () => {
+      if (dragResetTimeout.current) clearTimeout(dragResetTimeout.current)
+    }
+  }, [])
 
   const nowPlaying: PlaybackTrack | null =
     index >= 0 && index < queue.length ? queue[index] : null
@@ -359,10 +389,17 @@ export const QueueDrawer = () => {
           onPlay={() => handlePlayQueueItem(item.queueIndex)}
           onRemove={() => handleRemove(item.queueIndex)}
           drag={drag}
+          onDragHandleLongPress={handleDragHandleLongPress}
         />
       )
     },
-    [isPlaying, handleTogglePlay, handlePlayQueueItem, handleRemove]
+    [
+      isPlaying,
+      handleTogglePlay,
+      handlePlayQueueItem,
+      handleRemove,
+      handleDragHandleLongPress
+    ]
   )
 
   const draggableData = useMemo<ListItem[]>(() => {
@@ -381,14 +418,25 @@ export const QueueDrawer = () => {
       drawerName={DRAWER_NAME}
       onClose={onClose}
       drawerStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
+      gesturesDisabled={isItemDragging}
     >
       <View style={{ width: '100%', paddingBottom: spacing.l }}>
+        <Flex alignItems='center' pt='s' pb='xs'>
+          <View
+            style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: color.neutral.n200
+            }}
+          />
+        </Flex>
         <Flex
           direction='row'
           alignItems='center'
           justifyContent='space-between'
           ph='l'
-          pv='m'
+          pv='l'
         >
           <Text variant='title' size='l' strength='strong' color='default'>
             {messages.queue}
@@ -417,8 +465,12 @@ export const QueueDrawer = () => {
                     : `un-${item.trackId}-${i}`
               }
               renderItem={renderQueuedItem as any}
-              onDragBegin={() => haptics.medium()}
+              onDragBegin={() => {
+                setIsItemDragging(true)
+                haptics.medium()
+              }}
               onDragEnd={({ from, to }) => {
+                handleDragRelease()
                 // The first item is always the now-playing track (not draggable).
                 // Adjust indices to match the queuedListData (which excludes
                 // now-playing).
