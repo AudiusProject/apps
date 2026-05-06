@@ -6,6 +6,7 @@ import {
   useUsers
 } from '@audius/common/api'
 import type { CommentReactionNotification as CommentReactionNotificationType } from '@audius/common/store'
+import { Entity } from '@audius/common/store'
 
 import { IconMessage } from '@audius/harmony-native'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
@@ -24,7 +25,8 @@ const USER_LENGTH_LIMIT = 3
 const messages = {
   liked: ' liked your comment on ',
   your: 'your',
-  their: 'their'
+  their: 'their',
+  remixContestLabel: 'remix contest'
 }
 
 type CommentReactionNotificationProps = {
@@ -75,7 +77,12 @@ export const CommentReactionNotification = (
         ) : (
           <UserNameLink user={entity.user} isOwner />
         )}{' '}
-        {entityType.toLowerCase()} <EntityLink entity={entity} />
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType
+            ? entityType.toLowerCase()
+            : messages.remixContestLabel}{' '}
+        <EntityLink entity={entity} />
       </NotificationText>
     </NotificationTile>
   )

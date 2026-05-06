@@ -7,6 +7,7 @@ import {
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
 import type { CommentThreadNotification as CommentThreadNotificationType } from '@audius/common/store'
+import { Entity } from '@audius/common/store'
 import { formatCount } from '@audius/common/utils'
 
 import { IconMessage } from '@audius/harmony-native'
@@ -28,7 +29,8 @@ const messages = {
     ` and ${formatCount(userCount)} other${userCount > 1 ? 's' : ''}`,
   replied: 'replied to your comment on',
   your: 'your',
-  their: 'their'
+  their: 'their',
+  remixContestLabel: 'remix contest'
 }
 
 type CommentThreadNotificationProps = {
@@ -84,7 +86,10 @@ export const CommentThreadNotification = (
         ) : (
           <UserNameLink user={entity.user} isOwner />
         )}{' '}
-        {entityType.toLowerCase()} <EntityLink entity={entity} />
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType.toLowerCase()}{' '}
+        <EntityLink entity={entity} />
       </NotificationText>
     </NotificationTile>
   )

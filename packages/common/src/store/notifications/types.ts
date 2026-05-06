@@ -97,7 +97,14 @@ export enum Entity {
   Track = 'Track',
   Playlist = 'Playlist',
   Album = 'Album',
-  User = 'User'
+  User = 'User',
+  // Remix-contest comment notifications carry `data.type === "Event"`
+  // because the indexer's comment_*/comment_reaction notifications stamp
+  // the contest's event_id (not its underlying track) as `entity_id`.
+  // Surfaces that render comment notifications use this case to pick a
+  // "remix contest" label and resolve navigation through the underlying
+  // track instead of trying to look up an Event in useNotificationEntity.
+  Event = 'Event'
 }
 
 export type TrackEntity = Track & { user: Nullable<User> }
@@ -545,7 +552,7 @@ export type CommentNotification = BaseNotification & {
   type: NotificationType.Comment
   entityId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -554,7 +561,7 @@ export type CommentThreadNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -563,7 +570,7 @@ export type CommentMentionNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -572,7 +579,7 @@ export type CommentReactionNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 

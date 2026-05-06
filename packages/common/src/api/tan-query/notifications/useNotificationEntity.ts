@@ -4,6 +4,7 @@ import type { Collection, Track, User } from '~/models'
 import { Entity, Notification } from '~/store/notifications/types'
 
 import { useCollection } from '../collection/useCollection'
+import { useEvent } from '../events/useEvent'
 import { useTrack } from '../tracks/useTrack'
 import { useUser } from '../users/useUser'
 
@@ -19,9 +20,23 @@ export const useNotificationEntity = <T extends Notification>(
   const entityType =
     'entityType' in notification ? notification.entityType : null
 
+  // For comment notifications on a remix-contest event the indexer sends
+  // `entity_id = event_id` (not the underlying track). Resolve the event
+  // first and then chase its `entityId` (the parent track) below — that
+  // way EntityLink can render the track title and `useGoToEntity` lands on
+  // a navigable URL we can rewrite into the contest page.
+  const { data: event } = useEvent(
+    entityType === Entity.Event ? entityId : null
+  )
+  const trackIdFromEvent = event?.entityId ?? null
+
   // Always call hooks unconditionally
   const { data: track } = useTrack(
-    entityType === Entity.Track ? entityId : null
+    entityType === Entity.Track
+      ? entityId
+      : entityType === Entity.Event
+        ? trackIdFromEvent
+        : null
   )
   const { data: collection } = useCollection(
     entityType === Entity.Playlist || entityType === Entity.Album

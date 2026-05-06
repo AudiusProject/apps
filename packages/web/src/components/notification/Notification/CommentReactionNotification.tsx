@@ -6,7 +6,10 @@ import {
   useUsers
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { CommentReactionNotification as CommentReactionNotificationType } from '@audius/common/store'
+import {
+  CommentReactionNotification as CommentReactionNotificationType,
+  Entity
+} from '@audius/common/store'
 import { IconMessage } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -132,11 +135,14 @@ export const CommentReactionNotification = (
         )}{' '}
         {/* `entityType` is optional in payloads from the indexer for
             comment reactions on remix contests — guard the rendering
-            so we don't ship a literal "undefined" to users. The
-            fallback label keeps the sentence grammatical for the case
-            the type is genuinely missing. */}
-        {entityType ? entityType.toLowerCase() : messages.fallbackEntityLabel}
-        {' '}
+            so we don't ship a literal "undefined" to users. Event-typed
+            payloads render the human-readable "remix contest" label
+            instead of the raw enum string. */}
+        {entityType === Entity.Event
+          ? messages.fallbackEntityLabel
+          : entityType
+            ? entityType.toLowerCase()
+            : messages.fallbackEntityLabel}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />
