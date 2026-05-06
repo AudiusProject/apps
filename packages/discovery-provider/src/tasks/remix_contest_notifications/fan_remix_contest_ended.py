@@ -101,23 +101,26 @@ def create_fan_remix_contest_ended_notifications(session, now=None):
         )
         # Exclude the contest host — they have artist_remix_contest_ended.
         notified_user_ids.discard(event.user_id)
-        for user_id in notified_user_ids:
-            group_id = get_fan_remix_contest_ended_group_id(event.event_id)
-            parent_track = (
-                session.query(Track)
-                .filter(
-                    Track.track_id == event.entity_id,
-                    Track.is_current == True,
-                    Track.is_delete == False,
-                )
-                .first()
+
+        # Resolve the parent track once per event rather than per recipient —
+        # the inner loop ran the same query N times and crashed the whole
+        # batch with AttributeError when the track had been deleted/hidden
+        # (parent_track was None but `.is_unlisted` was still accessed).
+        group_id = get_fan_remix_contest_ended_group_id(event.event_id)
+        parent_track = (
+            session.query(Track)
+            .filter(
+                Track.track_id == event.entity_id,
+                Track.is_current == True,
+                Track.is_delete == False,
             )
-            parent_track_owner_id = parent_track.owner_id if parent_track else None
+            .first()
+        )
+        if parent_track is None or parent_track.is_unlisted:
+            continue
+        parent_track_owner_id = parent_track.owner_id
 
-            # Don't create notifications for private tracks
-            if parent_track.is_unlisted and parent_track_owner_id is not None:
-                continue
-
+        for user_id in notified_user_ids:
             exists = (
                 session.query(Notification)
                 .filter(

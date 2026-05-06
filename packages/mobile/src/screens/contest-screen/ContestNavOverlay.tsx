@@ -12,7 +12,7 @@ import {
   Flex,
   IconButton,
   IconCaretLeft,
-  IconKebabHorizontal,
+  IconShare,
   Text
 } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -73,7 +73,7 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 type ContestNavOverlayProps = {
   title: string
-  onPressOverflow?: () => void
+  onPressShare?: () => void
 }
 
 /**
@@ -90,7 +90,7 @@ type ContestNavOverlayProps = {
  */
 export const ContestNavOverlay = ({
   title,
-  onPressOverflow
+  onPressShare
 }: ContestNavOverlayProps) => {
   const styles = useStyles()
   const insets = useSafeAreaInsets()
@@ -187,11 +187,11 @@ export const ContestNavOverlay = ({
         <View style={styles.iconStack}>
           <Animated.View style={whiteIconsStyle}>
             <IconButton
-              icon={IconKebabHorizontal}
+              icon={IconShare}
               color='staticWhite'
               shadow='emphasis'
-              onPress={onPressOverflow ?? (() => {})}
-              aria-label='Contest actions'
+              onPress={onPressShare ?? (() => {})}
+              aria-label='Share contest'
             />
           </Animated.View>
           <Animated.View
@@ -199,10 +199,10 @@ export const ContestNavOverlay = ({
             style={[styles.iconLayer, neutralIconsStyle]}
           >
             <IconButton
-              icon={IconKebabHorizontal}
+              icon={IconShare}
               color='default'
-              onPress={onPressOverflow ?? (() => {})}
-              aria-label='Contest actions'
+              onPress={onPressShare ?? (() => {})}
+              aria-label='Share contest'
             />
           </Animated.View>
         </View>

@@ -124,7 +124,7 @@ export const CommentReactionNotification = (
             isOwner
           />
         )}{' '}
-        {entityType.toLowerCase()}{' '}
+        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

@@ -8,18 +8,24 @@ import {
 
 import {
   getCommentQueryKey,
+  getEventQueryKey,
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
+  useFollowEvent,
   useRemixContest,
   useStems,
   useTrack,
   useTrackByParams,
+  useUnfollowEvent,
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
+import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
+import { PortalHost } from '@gorhom/portal'
 import { useNavigation } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
 import { View } from 'react-native'
@@ -27,7 +33,14 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
 
-import { Button, Divider, Flex, Text } from '@audius/harmony-native'
+import {
+  Button,
+  Divider,
+  Flex,
+  IconUserFollow,
+  IconUserFollowing,
+  Text
+} from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
 import {
@@ -36,7 +49,6 @@ import {
 } from 'app/components/top-tab-bar'
 import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
-import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
 import {
@@ -61,6 +73,8 @@ const messages = {
   hostedBy: 'HOSTED BY',
   pickWinners: 'Pick Winners',
   enterContest: 'Enter Contest',
+  follow: 'Follow',
+  following: 'Following',
   details: 'Details',
   updates: 'Updates',
   submissions: 'Submissions',
@@ -198,16 +212,55 @@ export const ContestScreen = () => {
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  const handleOpenOverflow = useCallback(() => {
-    if (!eventId || trackId == null) return
+  // Share lives on the top-right nav (replacing the kebab) per Figma; no
+  // overflow drawer. Dispatch the share modal directly with the contest's
+  // track id, mirroring what `ContestActionsDrawer` did internally.
+  const handleShareContest = useCallback(() => {
+    if (trackId == null) return
     dispatch(
-      setVisibility({
-        drawer: 'ContestActions',
-        visible: true,
-        data: { eventId, trackId }
+      shareModalUIActions.requestOpen({
+        type: 'contest',
+        trackId,
+        source: ShareSource.PAGE
       })
     )
-  }, [dispatch, eventId, trackId])
+  }, [dispatch, trackId])
+
+  // Pull-to-refresh: invalidate the contest's event + comment queries so all
+  // tabs (details, updates, submissions, comments) refetch the next time
+  // they're focused. Mirrors the profile pull-to-refresh pattern; cover
+  // photo expansion is handled by the `PullToRefreshPortalHost` below.
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const handleRefresh = useCallback(() => {
+    if (!eventId) return
+    setIsRefreshing(true)
+    queryClient.invalidateQueries({ queryKey: getEventQueryKey(eventId) })
+    queryClient.invalidateQueries({
+      // Matches QUERY_KEYS.eventComments — written this way to avoid pulling
+      // the whole queryKeys map into the contest screen for one constant.
+      queryKey: ['eventComments', eventId]
+    })
+    // Drop the spinner shortly after — the underlying queries are async but
+    // we don't have a single status flag to watch like profile does.
+    setTimeout(() => setIsRefreshing(false), 600)
+  }, [eventId, queryClient])
+
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
+  const handleToggleFollow = useCallback(() => {
+    if (!eventId || !currentUserId) return
+    if (followState?.isFollowed) {
+      unfollowEvent({ userId: currentUserId, eventId })
+    } else {
+      followEvent({ userId: currentUserId, eventId })
+    }
+  }, [
+    eventId,
+    currentUserId,
+    followState?.isFollowed,
+    followEvent,
+    unfollowEvent
+  ])
 
   // Only render the Stems & Downloads section when the track actually
   // has downloadable content — DownloadSection assumes a downloadable
@@ -322,11 +375,13 @@ export const ContestScreen = () => {
           </Text>
         </Flex>
 
-        {/* Primary CTA — sits in the scrolling header. Overflow lives
-            in the floating `ContestNavOverlay` kebab, matching the
-            profile screen pattern (one kebab, always reachable at
-            the top of the screen). "Enter Contest" is hidden once
-            the contest ends — entering isn't meaningful anymore. */}
+        {/* Primary CTA — sits in the scrolling header. The Share action
+            lives in the top-right of the floating `ContestNavOverlay`
+            (replaces the old kebab per Figma). For non-host viewers a
+            Follow / Following button sits to the right of Enter Contest;
+            the host sees only Pick Winners (following your own contest
+            isn't meaningful). "Enter Contest" is hidden once the contest
+            ends — entering isn't meaningful anymore. */}
         {isOwner || !isEnded ? (
           <Flex
             direction='row'
@@ -344,6 +399,18 @@ export const ContestScreen = () => {
                 {isOwner ? messages.pickWinners : messages.enterContest}
               </Button>
             </Flex>
+            {!isOwner ? (
+              <Button
+                variant='secondary'
+                size='small'
+                iconLeft={
+                  followState?.isFollowed ? IconUserFollowing : IconUserFollow
+                }
+                onPress={handleToggleFollow}
+              >
+                {followState?.isFollowed ? messages.following : messages.follow}
+              </Button>
+            ) : null}
           </Flex>
         ) : null}
 
@@ -441,22 +508,30 @@ export const ContestScreen = () => {
   const detailsScreen = collapsibleTabScreen({
     name: 'Details',
     Icon: EmptyTabIcon,
-    component: ContestDetailsTab
+    component: ContestDetailsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const updatesScreen = collapsibleTabScreen({
     name: 'Updates',
     Icon: EmptyTabIcon,
-    component: ContestUpdatesTab
+    component: ContestUpdatesTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const submissionsScreen = collapsibleTabScreen({
     name: 'Submissions',
     Icon: EmptyTabIcon,
-    component: ContestSubmissionsTab
+    component: ContestSubmissionsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
   const commentsScreen = collapsibleTabScreen({
     name: 'Comments',
     Icon: EmptyTabIcon,
-    component: ContestCommentsTab
+    component: ContestCommentsTab,
+    refreshing: isRefreshing,
+    onRefresh: handleRefresh
   })
 
   return (
@@ -472,6 +547,12 @@ export const ContestScreen = () => {
                 on the contest page. With the wrapper the navigator
                 fills the remaining space below any chrome and the
                 header slides normally. */}
+            {/* PullToRefresh portal target — the core FlatList /
+                SectionList wrappers portal their pull-to-refresh control
+                here so it lands on top of the cover photo and the gesture
+                expands the cover image instead of opening a blank gap
+                above the list. Mirrors the ProfileScreen pattern. */}
+            <PortalHost name='PullToRefreshPortalHost' />
             <View style={{ height: '100%' }}>
               <CollapsibleTabNavigator
                 renderHeader={renderHeader}
@@ -493,7 +574,7 @@ export const ContestScreen = () => {
               </CollapsibleTabNavigator>
               <ContestNavOverlay
                 title={contestTitle}
-                onPressOverflow={handleOpenOverflow}
+                onPressShare={handleShareContest}
               />
             </View>
           </ContestScrollContext.Provider>

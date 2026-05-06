@@ -1,6 +1,7 @@
 import type { MutableRefObject, Ref } from 'react'
 import { forwardRef, useContext, useRef } from 'react'
 
+import { Portal } from '@gorhom/portal'
 import type {
   FlatListProps as RNFlatListProps,
   FlatList as RNFlatList
@@ -21,14 +22,41 @@ export type AnimatedFlatListT<ItemT> = Animated.FlatList<ItemT>
 type CollapsibleFlatListProps<ItemT> = RNFlatListProps<ItemT>
 
 function CollapsibleFlatList<ItemT>(props: CollapsibleFlatListProps<ItemT>) {
-  const { refreshing, onRefresh } = props
-  const { neutral } = useThemeColors()
+  const { neutral, staticWhite } = useThemeColors()
+
+  // Pull refresh state from CollapsibleTabNavigatorContext when the host
+  // screen provides one (profile, contest). Falling back to the props lets
+  // direct callers (anything outside the navigator) keep the legacy inline
+  // RefreshControl behavior.
+  const collapsibleContext = useContext(CollapsibleTabNavigatorContext)
+  const refreshing =
+    collapsibleContext.refreshing !== undefined
+      ? collapsibleContext.refreshing
+      : props.refreshing
+  const onRefresh = collapsibleContext.onRefresh ?? props.onRefresh
+  const isFromContext = collapsibleContext.onRefresh !== undefined
 
   const scrollY = useCurrentTabScrollY()
 
   return (
     <View>
-      {onRefresh ? <PullToRefresh scrollY={scrollY} /> : null}
+      {/* When the host screen exposes a `PullToRefreshPortalHost` (profile,
+          contest), portal the iOS pull-to-refresh into it so the gesture
+          expands the cover photo instead of leaving a blank gap above the
+          list. Mirrors `CollapsibleSectionList`'s portal usage. */}
+      {Platform.OS === 'ios' && onRefresh && isFromContext ? (
+        <Portal hostName='PullToRefreshPortalHost'>
+          <PullToRefresh
+            isRefreshing={refreshing ?? undefined}
+            onRefresh={onRefresh}
+            scrollY={scrollY}
+            topOffset={40}
+            color={staticWhite}
+          />
+        </Portal>
+      ) : Platform.OS === 'ios' && onRefresh ? (
+        <PullToRefresh scrollY={scrollY} />
+      ) : null}
       <Tabs.FlatList
         {...props}
         refreshControl={
