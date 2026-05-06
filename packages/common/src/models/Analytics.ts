@@ -292,6 +292,15 @@ export enum Name {
   // Playback performance metrics
   BUFFERING_TIME = 'Buffering Time',
 
+  // Play Queue
+  PLAY_QUEUE_OPEN = 'Play Queue: Open',
+  PLAY_QUEUE_CLOSE = 'Play Queue: Close',
+  PLAY_QUEUE_ADD_TRACK = 'Play Queue: Add Track',
+  PLAY_QUEUE_REMOVE_TRACK = 'Play Queue: Remove Track',
+  PLAY_QUEUE_REORDER_TRACK = 'Play Queue: Reorder Track',
+  PLAY_QUEUE_PLAY_TRACK = 'Play Queue: Play Track',
+  PLAY_QUEUE_CLEAR = 'Play Queue: Clear',
+
   // Navigation
   PAGE_VIEW = 'Page View',
   ON_FIRST_PAGE = 'nav-on-first-page',
@@ -1496,6 +1505,47 @@ type PlaylistPlay = {
 type BufferingTime = {
   eventName: Name.BUFFERING_TIME
   duration: number
+}
+
+// Play Queue
+type PlayQueueOpen = {
+  eventName: Name.PLAY_QUEUE_OPEN
+  source: 'queue'
+  queueLength?: number
+}
+type PlayQueueClose = {
+  eventName: Name.PLAY_QUEUE_CLOSE
+  source: 'queue'
+}
+type PlayQueueAddTrack = {
+  eventName: Name.PLAY_QUEUE_ADD_TRACK
+  source: 'queue'
+  trackId: string
+  from?: 'overflow menu' | 'queue'
+}
+type PlayQueueRemoveTrack = {
+  eventName: Name.PLAY_QUEUE_REMOVE_TRACK
+  source: 'queue'
+  trackId: string
+  position: number
+}
+type PlayQueueReorderTrack = {
+  eventName: Name.PLAY_QUEUE_REORDER_TRACK
+  source: 'queue'
+  trackId: string
+  fromPosition: number
+  toPosition: number
+}
+type PlayQueuePlayTrack = {
+  eventName: Name.PLAY_QUEUE_PLAY_TRACK
+  source: 'queue'
+  trackId: string
+  position: number
+}
+type PlayQueueClear = {
+  eventName: Name.PLAY_QUEUE_CLEAR
+  source: 'queue'
+  queueLength: number
 }
 
 // Linking
@@ -3202,6 +3252,13 @@ export type AllTrackingEvents =
   | PlaybackPause
   | PlaylistPlay
   | BufferingTime
+  | PlayQueueOpen
+  | PlayQueueClose
+  | PlayQueueAddTrack
+  | PlayQueueRemoveTrack
+  | PlayQueueReorderTrack
+  | PlayQueuePlayTrack
+  | PlayQueueClear
   | Follow
   | Unfollow
   | LinkClicking

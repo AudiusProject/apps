@@ -145,11 +145,25 @@ const QueueRow = ({
 
   const handlePlayNext = useCallback(() => {
     dispatch(playNext({ track: { trackId, source: 'queue-popover' } }))
+    dispatch(
+      make(Name.PLAY_QUEUE_ADD_TRACK, {
+        source: 'queue',
+        trackId: String(trackId),
+        from: 'queue'
+      })
+    )
     toast('Will play next')
   }, [dispatch, trackId, toast])
 
   const handleAddToQueue = useCallback(() => {
     dispatch(addToQueue({ tracks: [{ trackId, source: 'queue-popover' }] }))
+    dispatch(
+      make(Name.PLAY_QUEUE_ADD_TRACK, {
+        source: 'queue',
+        trackId: String(trackId),
+        from: 'queue'
+      })
+    )
     toast('Added to queue')
   }, [dispatch, trackId, toast])
 
@@ -221,26 +235,53 @@ export const QueueTab = ({ onClose }: QueueTabProps) => {
   const handlePlayAt = useCallback(
     (queueIndex: number) => {
       dispatch(playTrackAt({ index: queueIndex }))
+      const trackId = queue[queueIndex]?.trackId
       dispatch(
         make(Name.PLAYBACK_PLAY, {
-          id: queue[queueIndex]?.trackId ?? null,
+          id: trackId ?? null,
           source: PlaybackSource.PLAYBAR
         })
       )
+      if (trackId !== undefined) {
+        dispatch(
+          make(Name.PLAY_QUEUE_PLAY_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            position: queueIndex
+          })
+        )
+      }
     },
     [dispatch, queue]
   )
 
   const handleRemove = useCallback(
     (queueIndex: number) => {
+      const trackId = queue[queueIndex]?.trackId
       dispatch(removeFromQueue({ index: queueIndex }))
+      if (trackId !== undefined) {
+        dispatch(
+          make(Name.PLAY_QUEUE_REMOVE_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            position: queueIndex
+          })
+        )
+      }
     },
-    [dispatch]
+    [dispatch, queue]
   )
 
   const handleClear = useCallback(() => {
+    const upcomingLength = nextInQueue.length
     dispatch(clearUpcoming())
-  }, [dispatch])
+    dispatch(
+      make(Name.PLAY_QUEUE_CLEAR, {
+        source: 'queue',
+        queueLength: upcomingLength
+      })
+    )
+  }, [dispatch, nextInQueue.length])
 
   const handlePlayNext = useCallback(
     (trackId: ID) => {
@@ -249,6 +290,13 @@ export const QueueTab = ({ onClose }: QueueTabProps) => {
         addToQueue({
           tracks: [{ trackId, source: sourceTag }],
           index: nextInQueueStart
+        })
+      )
+      dispatch(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(trackId),
+          from: 'queue'
         })
       )
     },
@@ -273,8 +321,21 @@ export const QueueTab = ({ onClose }: QueueTabProps) => {
           ]
         })
       )
+      const fromAbsolute = nextInQueueStart + result.source.index
+      const toAbsolute = nextInQueueStart + result.destination.index
+      const movedTrackId = queue[fromAbsolute]?.trackId
+      if (movedTrackId !== undefined) {
+        dispatch(
+          make(Name.PLAY_QUEUE_REORDER_TRACK, {
+            source: 'queue',
+            trackId: String(movedTrackId),
+            fromPosition: fromAbsolute,
+            toPosition: toAbsolute
+          })
+        )
+      }
     },
-    [dispatch, nextInQueueStart, nextInQueue.length, queue.length]
+    [dispatch, nextInQueueStart, nextInQueue.length, queue]
   )
 
   if (queue.length === 0) {

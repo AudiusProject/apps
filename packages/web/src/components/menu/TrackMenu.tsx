@@ -11,7 +11,8 @@ import {
   RepostSource,
   FavoriteSource,
   PlayableType,
-  ID
+  ID,
+  Name
 } from '@audius/common/models'
 import {
   cacheCollectionsActions,
@@ -33,6 +34,7 @@ import { pick } from 'lodash'
 import { connect, useDispatch, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
 
+import { make } from 'common/store/analytics/actions'
 import * as embedModalActions from 'components/embed-modal/store/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { push } from 'utils/navigation'
@@ -338,6 +340,13 @@ const TrackMenu = ({
             track: { trackId, source: QueueSource.RECOMMENDED_TRACKS }
           })
         )
+        dispatch(
+          make(Name.PLAY_QUEUE_ADD_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            from: 'overflow menu'
+          })
+        )
         toast(messages.willPlayNext)
       }
     }
@@ -348,6 +357,13 @@ const TrackMenu = ({
         dispatch(
           playbackActions.addToQueue({
             tracks: [{ trackId, source: QueueSource.RECOMMENDED_TRACKS }]
+          })
+        )
+        dispatch(
+          make(Name.PLAY_QUEUE_ADD_TRACK, {
+            source: 'queue',
+            trackId: String(trackId),
+            from: 'overflow menu'
           })
         )
         toast(messages.addedToQueue)
