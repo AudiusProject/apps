@@ -3,7 +3,17 @@ import { IconAlbum, IconNote, IconPlaylists, IconUser } from '@audius/harmony'
 import { Category } from './types'
 
 export const categories = {
-  all: { filters: [] },
+  all: {
+    filters: [
+      'genre',
+      'mood',
+      'key',
+      'bpm',
+      'isPremium',
+      'hasDownloads',
+      'isVerified'
+    ]
+  },
   profiles: { icon: IconUser, filters: ['genre', 'isVerified'] },
   tracks: {
     icon: IconNote,

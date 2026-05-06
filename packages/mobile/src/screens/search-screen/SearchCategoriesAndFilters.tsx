@@ -63,7 +63,15 @@ const SearchCategory = (props: SearchCategoryProps) => {
 }
 
 const filtersByCategory: Record<SearchCategoryType, SearchFilter[]> = {
-  all: [],
+  all: [
+    'genre',
+    'mood',
+    'key',
+    'bpm',
+    'isPremium',
+    'hasDownloads',
+    'isVerified'
+  ],
   users: ['genre', 'isVerified'],
   tracks: [
     'genre',
