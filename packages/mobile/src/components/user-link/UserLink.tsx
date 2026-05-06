@@ -11,7 +11,6 @@ import Animated, {
 
 import type { IconSize, TextLinkProps } from '@audius/harmony-native'
 import { Flex, TextLink, useTheme } from '@audius/harmony-native'
-import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
 
 import { UserBadges } from '../user-badges'
@@ -40,7 +39,6 @@ export const UserLink = (props: UserLinkProps) => {
     mint,
     ...other
   } = props
-  const navigation = useNavigation()
   const { data: userName } = useUser(userId, {
     select: (user) => user?.name
   })
@@ -54,6 +52,12 @@ export const UserLink = (props: UserLinkProps) => {
     }
   })
 
+  // The wrapper Pressable used to also call `navigation.push('Profile', ...)`
+  // on press, but the inner TextLink already dispatches StackActions.push via
+  // its `to` prop. Both onPress handlers fire on a single tap, which pushed
+  // Profile twice — visible on the contest screen as the destination profile
+  // briefly appearing and then the contest covering it again. Keep the
+  // Pressable for its press animation only; navigation lives in the TextLink.
   return (
     <Pressable
       disabled={disabled}
@@ -66,10 +70,6 @@ export const UserLink = (props: UserLinkProps) => {
         if (!disabled) {
           animatedPressed.value = withTiming(0, motion.press)
         }
-      }}
-      onPress={() => {
-        if (disabled) return
-        navigation.push('Profile', { id: userId })
       }}
     >
       <AnimatedFlex
