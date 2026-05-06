@@ -97,7 +97,8 @@ export enum Entity {
   Track = 'Track',
   Playlist = 'Playlist',
   Album = 'Album',
-  User = 'User'
+  User = 'User',
+  Event = 'Event'
 }
 
 export type TrackEntity = Track & { user: Nullable<User> }
@@ -545,7 +546,7 @@ export type CommentNotification = BaseNotification & {
   type: NotificationType.Comment
   entityId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -554,7 +555,7 @@ export type CommentThreadNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -563,7 +564,7 @@ export type CommentMentionNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 
@@ -572,7 +573,7 @@ export type CommentReactionNotification = BaseNotification & {
   entityId: ID
   entityUserId: ID
   userIds: ID[]
-  entityType: Entity.Playlist | Entity.Album | Entity.Track
+  entityType: Entity.Playlist | Entity.Album | Entity.Track | Entity.Event
   commentId?: ID
 }
 

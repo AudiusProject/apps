@@ -55,7 +55,8 @@ export const CommentNotification = (props: CommentNotificationProps) => {
       <NotificationText>
         <UserNameLink user={firstUser} />
         {otherUsersCount > 0 ? messages.others(otherUsersCount) : null}{' '}
-        {messages.commented} {entityType.toLowerCase()}{' '}
+        {messages.commented}{' '}
+        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} commentId={notification.commentId} />
       </NotificationText>
     </NotificationTile>

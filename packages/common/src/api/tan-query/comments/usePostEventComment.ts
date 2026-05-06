@@ -43,7 +43,11 @@ export const usePostEventComment = () => {
           entityId: args.eventId,
           entityType: 'Event',
           body: args.body,
-          parentCommentId: args.parentCommentId,
+          // SDK's CreateCommentRequestBody uses `parentId`, not `parentCommentId`.
+          // Sending the wrong key drops the parent on the floor and the reply
+          // ends up as a top-level comment (which, if the author is the artist,
+          // gets surfaced as a "post update").
+          parentId: args.parentCommentId,
           mentions: args.mentions ?? [],
           videoUrl: args.videoUrl
         } as any

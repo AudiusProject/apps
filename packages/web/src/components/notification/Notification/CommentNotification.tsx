@@ -100,7 +100,7 @@ export const CommentNotification = (props: CommentNotificationProps) => {
           <OthersLink othersCount={otherUsersCount} onClick={handleClick} />
         ) : null}
         {messages.commented}
-        {entityType.toLowerCase()}{' '}
+        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

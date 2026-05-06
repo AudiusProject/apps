@@ -75,7 +75,8 @@ export const CommentReactionNotification = (
         ) : (
           <UserNameLink user={entity.user} isOwner />
         )}{' '}
-        {entityType.toLowerCase()} <EntityLink entity={entity} />
+        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
+        <EntityLink entity={entity} />
       </NotificationText>
     </NotificationTile>
   )
