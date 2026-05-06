@@ -60,11 +60,7 @@ export const ContestsTab = ({ profile, isOwner }: ContestsTabProps) => {
   // never showed up.
   const loadedPages = trackIds ? Math.ceil(trackIds.length / 50) : 0
   useEffect(() => {
-    if (
-      hasNextPage &&
-      !isFetchingNextPage &&
-      loadedPages < MAX_PAGES_TO_LOAD
-    ) {
+    if (hasNextPage && !isFetchingNextPage && loadedPages < MAX_PAGES_TO_LOAD) {
       fetchNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])

@@ -47,9 +47,7 @@ export const FeaturedRemixContestsSection = () => {
       // hub when that page is feature-flagged on. Without it, users can
       // only see the carousel-of-N cards from explore — the QA pass
       // flagged the missing CTA.
-      viewAllLink={
-        isContestsPageEnabled ? route.CONTESTS_PAGE : undefined
-      }
+      viewAllLink={isContestsPageEnabled ? route.CONTESTS_PAGE : undefined}
     >
       {isContestsPageEnabled
         ? showLoading

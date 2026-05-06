@@ -529,7 +529,9 @@ const ContestCommentRow = ({
         const parent = prev as any
         return {
           ...parent,
-          replies: (parent.replies ?? []).filter((r: any) => r.id !== commentId),
+          replies: (parent.replies ?? []).filter(
+            (r: any) => r.id !== commentId
+          ),
           replyCount: Math.max(0, (parent.replyCount ?? 0) - 1)
         }
       })

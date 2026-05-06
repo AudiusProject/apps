@@ -7,6 +7,7 @@ import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
 
+import { CommentOrReply } from './types'
 import { getCommentQueryKey } from './utils'
 
 export type PostEventCommentArgs = {
@@ -107,10 +108,18 @@ export const usePostEventComment = () => {
         // Reply: push into the parent's nested `replies` array so the
         // reply appears under the parent without waiting for the refetch.
         // Mirrors `usePostComment`'s optimistic behavior for tracks.
-        queryClient.setQueryData(
+        // The cache slot is typed `CommentOrReply | undefined`. The
+        // optimistic shape we splice in is a `Comment`-shaped object that
+        // structurally satisfies `CommentOrReply` but TS can't prove it
+        // (entityType narrows differently on the ReplyComment branch),
+        // so we shape the updater as `(prev) => CommentOrReply` and
+        // cast the result. The `as any` on `replyShape` is the same
+        // escape hatch usePostComment uses for its optimistic reply.
+        queryClient.setQueryData<CommentOrReply | undefined>(
           getCommentQueryKey(parentCommentId),
-          (prev: Comment | undefined) => {
+          (prev: CommentOrReply | undefined) => {
             if (!prev) return prev
+            const parent = prev as Comment
             const replyShape = {
               id: newId,
               entityId: eventId,
@@ -125,10 +134,10 @@ export const usePostEventComment = () => {
               isMembersOnly: false
             } as any
             return {
-              ...prev,
-              replies: [...((prev as any).replies ?? []), replyShape],
-              replyCount: ((prev as any).replyCount ?? 0) + 1
-            }
+              ...parent,
+              replies: [...(parent.replies ?? []), replyShape],
+              replyCount: (parent.replyCount ?? 0) + 1
+            } as CommentOrReply
           }
         )
       }

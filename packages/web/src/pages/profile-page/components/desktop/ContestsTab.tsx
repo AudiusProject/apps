@@ -73,11 +73,7 @@ export const ContestsTab = ({ profile }: ContestsTabProps) => {
   // up to a safety cap so a typical profile resolves correctly.
   const loadedPages = trackIds ? Math.ceil(trackIds.length / 50) : 0
   useEffect(() => {
-    if (
-      hasNextPage &&
-      !isFetchingNextPage &&
-      loadedPages < MAX_PAGES_TO_LOAD
-    ) {
+    if (hasNextPage && !isFetchingNextPage && loadedPages < MAX_PAGES_TO_LOAD) {
       fetchNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])
