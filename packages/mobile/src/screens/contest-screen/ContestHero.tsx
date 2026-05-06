@@ -2,8 +2,15 @@ import { useRemixContest } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { Image, View } from 'react-native'
+import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
+import Animated, {
+  interpolate,
+  useAnimatedStyle
+} from 'react-native-reanimated'
 
 import { useTrackImage } from 'app/components/image/TrackImage'
+
+const AnimatedImage = Animated.createAnimatedComponent(Image)
 
 /**
  * Contest hero banner. Renders a raw `<Image>` rather than the
@@ -17,6 +24,12 @@ import { useTrackImage } from 'app/components/image/TrackImage'
  * disc. That moved into `ContestNavOverlay`, which floats above the
  * hero with a profile-style white/neutral icon that fades on scroll
  * — so the hero now only renders the cover image.
+ *
+ * On pull-to-refresh / over-scroll the cover photo stretches to fill
+ * the revealed gap (mirrors `ProfileCoverPhoto`'s scale + translate
+ * interpolation). Without this the collapsible header showed a flat
+ * white gap above the hero when the user dragged the contest scroll
+ * view downward — visually the image needs to follow the gesture.
  */
 export const CONTEST_HERO_HEIGHT = 220
 
@@ -41,19 +54,50 @@ export const ContestHero = ({ trackId }: ContestHeroProps) => {
     ?.coverPhotoUrl as string | undefined
   const src = contestCoverPhotoUrl || trackImageUri
 
-  // `pointerEvents='none'` on the outer View — the hero is purely
-  // decorative now that the back button lives in the overlay, so
-  // any touches should pass through to the underlying collapsible
-  // scroll view instead of being swallowed.
+  // Active-tab scroll position. Negative when the user over-scrolls /
+  // pulls down. We don't read from `ContestScrollContext` here because
+  // this component lives inside `Tabs.Container`, where the per-tab
+  // hook is the source of truth — the bridge writes to the outer
+  // context for siblings (like the floating nav overlay) that need
+  // it but can't call the hook themselves.
+  const scrollY = useCurrentTabScrollY()
+
+  const animatedImageStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        // Same scale + translate ratios `ProfileCoverPhoto` uses so
+        // both screens feel identical on overdrag.
+        scale: interpolate(scrollY.value, [-200, 0], [4, 1], {
+          extrapolateLeft: 'extend',
+          extrapolateRight: 'clamp'
+        })
+      },
+      {
+        translateY: interpolate(scrollY.value, [-200, 0], [-40, 0], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp'
+        })
+      }
+    ]
+  }))
+
+  // `overflow: 'hidden'` on the container clips the scaled image so
+  // it doesn't bleed past the hero edges into the body of the page
+  // when the over-scroll snaps back. `pointerEvents='none'` keeps
+  // touches falling through to the underlying scroll view.
   return (
     <View
       pointerEvents='none'
-      style={{ width: '100%', height: CONTEST_HERO_HEIGHT }}
+      style={{
+        width: '100%',
+        height: CONTEST_HERO_HEIGHT,
+        overflow: 'hidden'
+      }}
     >
       {src ? (
-        <Image
+        <AnimatedImage
           source={{ uri: src }}
-          style={{ width: '100%', height: '100%' }}
+          style={[{ width: '100%', height: '100%' }, animatedImageStyle]}
           resizeMode='cover'
         />
       ) : null}

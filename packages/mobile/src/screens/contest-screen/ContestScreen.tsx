@@ -11,14 +11,18 @@ import {
   useCurrentUserId,
   useEventComments,
   useEventFollowState,
+  useFollowEvent,
   useRemixContest,
   useStems,
   useTrack,
   useTrackByParams,
+  useUnfollowEvent,
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
+import { ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
+import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import { useNavigation } from '@react-navigation/native'
 import { useQueryClient } from '@tanstack/react-query'
@@ -61,6 +65,8 @@ const messages = {
   hostedBy: 'HOSTED BY',
   pickWinners: 'Pick Winners',
   enterContest: 'Enter Contest',
+  follow: 'Follow',
+  following: 'Following',
   details: 'Details',
   updates: 'Updates',
   submissions: 'Submissions',
@@ -164,6 +170,8 @@ export const ContestScreen = () => {
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
   const dispatch = useDispatch()
 
@@ -198,16 +206,35 @@ export const ContestScreen = () => {
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  const handleOpenOverflow = useCallback(() => {
-    if (!eventId || trackId == null) return
+  // Per the contest QA pass the kebab affordance was replaced with a
+  // dedicated share icon at the top-right of the nav overlay (and
+  // Follow moved next to Enter Contest). Keep this callback as the
+  // share entry point so ContestNavOverlay can invoke it directly.
+  const handleShareContest = useCallback(() => {
+    if (trackId == null) return
     dispatch(
-      setVisibility({
-        drawer: 'ContestActions',
-        visible: true,
-        data: { eventId, trackId }
+      shareModalUIActions.requestOpen({
+        type: 'contest',
+        trackId,
+        source: ShareSource.PAGE
       })
     )
-  }, [dispatch, eventId, trackId])
+  }, [dispatch, trackId])
+
+  const handleToggleFollow = useCallback(() => {
+    if (!eventId || !currentUserId) return
+    if (followState?.isFollowed) {
+      unfollowEvent({ userId: currentUserId, eventId })
+    } else {
+      followEvent({ userId: currentUserId, eventId })
+    }
+  }, [
+    eventId,
+    currentUserId,
+    followState?.isFollowed,
+    followEvent,
+    unfollowEvent
+  ])
 
   // Only render the Stems & Downloads section when the track actually
   // has downloadable content — DownloadSection assumes a downloadable
@@ -247,12 +274,12 @@ export const ContestScreen = () => {
   }, [trackId, dispatch])
 
   const handleEnterContest = useCallback(() => {
-    if (!trackId) return
-    // Same wire-up as web: jump into the upload flow with `remix_of`
-    // pre-filled so the resulting track is linked to this contest's
-    // parent track. The Upload modal stack reads `initialMetadata` off
-    // its initial route params and merges it into the track metadata
-    // when the user picks a file (see SelectTrackScreen).
+    if (!trackId)
+      return // Same wire-up as web: jump into the upload flow with `remix_of`
+      // pre-filled so the resulting track is linked to this contest's
+      // parent track. The Upload modal stack reads `initialMetadata` off
+      // its initial route params and merges it into the track metadata
+      // when the user picks a file (see SelectTrackScreen).
     ;(navigation as any).navigate('Upload', {
       initialMetadata: { remix_of: { tracks: [{ parent_track_id: trackId }] } }
     })
@@ -332,12 +359,18 @@ export const ContestScreen = () => {
           </Text>
         </Flex>
 
-        {/* Primary CTA — sits in the scrolling header. Overflow lives
-            in the floating `ContestNavOverlay` kebab, matching the
-            profile screen pattern (one kebab, always reachable at
-            the top of the screen). "Enter Contest" is hidden once
-            the contest ends — entering isn't meaningful anymore. */}
-        {isOwner || !isEnded ? (
+        {/* Primary CTA row.
+            - Host: full-width Pick Winners.
+            - Non-host (active): Follow + Enter Contest as a 50/50 pair.
+              The Follow button replaces the kebab/drawer affordance; the
+              share icon now lives in the floating `ContestNavOverlay` at
+              the top-right of the screen (see `onPressShare`).
+            - Non-host (ended): just the Follow toggle, since "Enter
+              Contest" isn't actionable after the deadline.
+            All buttons sit inside the scrolling header so they remain
+            reachable while the floating nav bar is the only thing
+            persistent at the top. */}
+        {isOwner ? (
           <Flex
             direction='row'
             alignItems='center'
@@ -348,14 +381,45 @@ export const ContestScreen = () => {
               <Button
                 variant='primary'
                 size='small'
-                onPress={isOwner ? handlePickWinners : handleEnterContest}
+                onPress={handlePickWinners}
                 fullWidth
               >
-                {isOwner ? messages.pickWinners : messages.enterContest}
+                {messages.pickWinners}
               </Button>
             </Flex>
           </Flex>
-        ) : null}
+        ) : (
+          <Flex
+            direction='row'
+            alignItems='center'
+            gap='s'
+            pointerEvents='box-none'
+          >
+            <Flex flex={1} pointerEvents='box-none'>
+              <Button
+                variant={followState?.isFollowed ? 'secondary' : 'primary'}
+                size='small'
+                onPress={handleToggleFollow}
+                disabled={!currentUserId || !eventId}
+                fullWidth
+              >
+                {followState?.isFollowed ? messages.following : messages.follow}
+              </Button>
+            </Flex>
+            {!isEnded ? (
+              <Flex flex={1} pointerEvents='box-none'>
+                <Button
+                  variant='primary'
+                  size='small'
+                  onPress={handleEnterContest}
+                  fullWidth
+                >
+                  {messages.enterContest}
+                </Button>
+              </Flex>
+            ) : null}
+          </Flex>
+        )}
 
         {/* Submissions Due block — pure display; wrap the entire
             label + date + time group in `pointerEvents='none'`. */}
@@ -503,7 +567,7 @@ export const ContestScreen = () => {
               </CollapsibleTabNavigator>
               <ContestNavOverlay
                 title={contestTitle}
-                onPressOverflow={handleOpenOverflow}
+                onPressShare={handleShareContest}
               />
             </View>
           </ContestScrollContext.Provider>

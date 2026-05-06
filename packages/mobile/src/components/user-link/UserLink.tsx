@@ -11,7 +11,6 @@ import Animated, {
 
 import type { IconSize, TextLinkProps } from '@audius/harmony-native'
 import { Flex, TextLink, useTheme } from '@audius/harmony-native'
-import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
 
 import { UserBadges } from '../user-badges'
@@ -40,7 +39,6 @@ export const UserLink = (props: UserLinkProps) => {
     mint,
     ...other
   } = props
-  const navigation = useNavigation()
   const { data: userName } = useUser(userId, {
     select: (user) => user?.name
   })
@@ -54,10 +52,16 @@ export const UserLink = (props: UserLinkProps) => {
     }
   })
 
+  // The outer Pressable used to also dispatch `navigation.push('Profile')`,
+  // which fired in addition to the inner TextLink's own push. On iOS the
+  // tap reached both responders, so a single tap in the contest "Hosted by"
+  // row would push two Profile screens — the second one landing back over
+  // the contest as the user backed out. Drop the duplicate navigation here
+  // and let TextLink (which has proper Link semantics + a11y) own the push.
   return (
     <Pressable
       disabled={disabled}
-      onPressIn={(e) => {
+      onPressIn={() => {
         if (!disabled) {
           animatedPressed.value = withTiming(1, motion.press)
         }
@@ -66,10 +70,6 @@ export const UserLink = (props: UserLinkProps) => {
         if (!disabled) {
           animatedPressed.value = withTiming(0, motion.press)
         }
-      }}
-      onPress={() => {
-        if (disabled) return
-        navigation.push('Profile', { id: userId })
       }}
     >
       <AnimatedFlex
