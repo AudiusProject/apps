@@ -31,6 +31,16 @@ type UseUSDCTransactionsArgs = {
   sortDirection?: GetUSDCTransactionsSortDirectionEnum
   type?: GetUSDCTransactionsTypeEnum[]
   method?: GetUSDCTransactionsMethodEnum
+  /**
+   * When true, refetch every loaded page periodically. Off by default —
+   * baseline polling refetches every loaded page on each tick, which is
+   * expensive and visually disruptive. Callers waiting on a specific
+   * just-completed withdrawal should manage their own short-term polling
+   * (see `useWithdrawalTransactionPoller` in WithdrawalsTab).
+   */
+  isPolling?: boolean
+  /** Poll interval in ms when `isPolling` is true. */
+  pollingInterval?: number
 }
 
 export const getUSDCTransactionsQueryKey = (
@@ -81,7 +91,9 @@ export const useUSDCTransactions = (
     sortMethod = GetUSDCTransactionsSortMethodEnum.Date,
     sortDirection = GetUSDCTransactionsSortDirectionEnum.Desc,
     type,
-    method
+    method,
+    isPolling = false,
+    pollingInterval = 5000
   }: UseUSDCTransactionsArgs = {},
   options?: QueryOptions
 ) => {
@@ -118,7 +130,7 @@ export const useUSDCTransactions = (
       return data.map((transaction) => parseTransaction({ transaction }))
     },
     select: (data) => data.pages.flat(),
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval: isPolling ? pollingInterval : false,
     ...options,
     enabled: options?.enabled !== false && !!currentUserId
   })

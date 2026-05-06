@@ -22,7 +22,11 @@ import { QueryKey, QueryOptions } from '../types'
 import { useUsers } from '../users/useUsers'
 import { combineQueryStatuses } from '../utils/combineQueryResults'
 
-const PAGE_SIZE = 10
+// Matches the consumer Table's `fetchBatchSize` so InfiniteLoader's
+// `minimumBatchSize` is satisfied in a single round-trip. When this was 10,
+// the Table asked for 50-row batches and InfiniteLoader cascaded 5 fetches
+// to fill each batch.
+const PAGE_SIZE = 50
 
 export type GetPurchaseListArgs = {
   userId: ID | null | undefined
