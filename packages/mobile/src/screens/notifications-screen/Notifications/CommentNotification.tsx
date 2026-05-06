@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 
 import { useNotificationEntity, useUsers } from '@audius/common/api'
 import type { CommentNotification as CommentNotificationType } from '@audius/common/store'
+import { Entity } from '@audius/common/store'
 
 import { IconMessage } from '@audius/harmony-native'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
@@ -19,7 +20,8 @@ const USER_LENGTH_LIMIT = 3
 
 const messages = {
   others: (count: number) => ` and ${count} other${count > 1 ? 's' : ''}`,
-  commented: 'commented on your'
+  commented: 'commented on your',
+  remixContestLabel: 'remix contest'
 }
 
 type CommentNotificationProps = {
@@ -56,7 +58,9 @@ export const CommentNotification = (props: CommentNotificationProps) => {
         <UserNameLink user={firstUser} />
         {otherUsersCount > 0 ? messages.others(otherUsersCount) : null}{' '}
         {messages.commented}{' '}
-        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} commentId={notification.commentId} />
       </NotificationText>
     </NotificationTile>

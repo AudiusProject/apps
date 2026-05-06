@@ -41,6 +41,7 @@ import {
 import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
 import { useNavigate, useParams } from 'react-router'
 
+import { ConfirmationModal } from 'components/confirmation-modal/ConfirmationModal'
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
 import Page from 'components/page/Page'
@@ -88,15 +89,20 @@ const messages = {
   prizesLabel: 'Prizes',
   prizesHelper: 'Describe all prizes, rewards, or other incentives.',
   prizesPlaceholder: '1st place gets $500. 2nd place gets $250…',
-  sourceTracksLabel: 'Source Tracks',
+  sourceTracksLabel: 'Source Track',
   sourceTracksHelper:
-    'Choose one or more tracks to be linked to this contest. Any stems included in that track will also be part of this contest.',
-  sourceTracksSectionLabel: 'SOURCE TRACKS',
+    'Choose a track to be linked to this contest. Any stems included in that track will also be part of this contest.',
+  sourceTracksSectionLabel: 'SOURCE TRACK',
   addTrack: '+ Add Track',
   cancel: 'Cancel',
   launch: 'Launch',
   save: 'Save',
-  turnOff: 'Turn off contest',
+  turnOff: 'Delete Contest',
+  deleteConfirmTitle: 'Delete Contest?',
+  deleteConfirmDescription:
+    'Are you sure you want to delete this contest? This cannot be undone.',
+  deleteConfirm: 'Delete',
+  deleteCancel: 'Cancel',
   visitTrack: 'Visit Track',
   editTrack: 'Edit Track',
   manageStems: 'Manage Stems',
@@ -241,6 +247,40 @@ export const HostRemixContestPage = () => {
       (primaryTrackId ? [primaryTrackId] : [])
   )
 
+  // Hydrate form state once `remixContest` resolves.
+  //
+  // Why: `useState` initializers only run on first mount. On the edit route
+  // the form mounts before the React Query fetch finishes, so the initial
+  // state captures empty values and never picks up the resolved contest
+  // data — Title, Description, Prizes, Video Link, etc. all rendered blank
+  // even though the backend had them. Skip if a draft exists (the user
+  // already started typing) so we don't overwrite in-flight edits.
+  const hasHydratedRef = useRef(false)
+  useEffect(() => {
+    if (hasHydratedRef.current) return
+    if (draft) {
+      hasHydratedRef.current = true
+      return
+    }
+    if (!remixContest) return
+    const data = remixContest.eventData as ContestEventData
+    if (data.title) setTitle(data.title)
+    if (data.description) setDescription(data.description)
+    if (data.videoUrl) setVideoUrl(data.videoUrl)
+    if (data.coverPhotoUrl) setCoverPhotoUrl(data.coverPhotoUrl)
+    if (data.prizeInfo) setPrizeInfo(data.prizeInfo)
+    if (remixContest.endDate) {
+      const d = dayjs(remixContest.endDate)
+      setContestEndDate(d)
+      setTimeValue(d.format('hh:mm'))
+      setMeridianValue(d.format('A'))
+    }
+    if (data.sourceTrackIds && data.sourceTrackIds.length > 0) {
+      setSourceTrackIds(data.sourceTrackIds)
+    }
+    hasHydratedRef.current = true
+  }, [remixContest, draft])
+
   // The event's backing track: prefer the URL-scoped primary track, and
   // fall back to the (required) first Source Track when entering from the
   // track-less /host-contest route. This is the `entity_id` on create /
@@ -257,6 +297,7 @@ export const HostRemixContestPage = () => {
   const [manageStemsTargetId, setManageStemsTargetId] = useState<number | null>(
     null
   )
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
   // Persist form state on every change so the user can leave (e.g. to
   // edit a source track) and return without losing what they typed.
@@ -905,7 +946,10 @@ export const HostRemixContestPage = () => {
             </Button>
             <Flex gap='s'>
               {displayTurnOffButton ? (
-                <Button variant='destructive' onClick={handleDeleteEvent}>
+                <Button
+                  variant='destructive'
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                >
                   {messages.turnOff}
                 </Button>
               ) : null}
@@ -941,6 +985,18 @@ export const HostRemixContestPage = () => {
         isOpen={showAttachVideoModal}
         onClose={() => setShowAttachVideoModal(false)}
         onAttach={(url) => setVideoUrl(url)}
+      />
+      <ConfirmationModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteEvent}
+        destructive
+        messages={{
+          header: messages.deleteConfirmTitle,
+          description: messages.deleteConfirmDescription,
+          confirm: messages.deleteConfirm,
+          cancel: messages.deleteCancel
+        }}
       />
     </Page>
   )

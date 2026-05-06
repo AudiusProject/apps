@@ -333,7 +333,10 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         commentId: params.commentId,
         isLiked: true,
-        entityType: md.entityType === 'FanClub' ? 'FanClub' : 'Track',
+        entityType:
+          md.entityType === 'FanClub' || md.entityType === 'Event'
+            ? md.entityType
+            : 'Track',
         trackId: encodeHashId(md.entityId) ?? ''
       }
       return await this.reactToCommentWithEntityManager(metadata)
@@ -351,7 +354,10 @@ export class CommentsApi extends GeneratedCommentsApi {
         userId: params.userId,
         commentId: params.commentId,
         isLiked: false,
-        entityType: md.entityType === 'FanClub' ? 'FanClub' : 'Track',
+        entityType:
+          md.entityType === 'FanClub' || md.entityType === 'Event'
+            ? md.entityType
+            : 'Track',
         trackId: encodeHashId(md.entityId) ?? ''
       }
       return await this.reactToCommentWithEntityManager(metadata)

@@ -88,7 +88,11 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  const [expanded, setExpanded] = useState(false)
+  // Default to expanded so the stems list is visible without an extra
+  // tap. Once we support multiple source tracks per contest we'll flip
+  // back to collapsed-by-default to keep the surface compact. Matches
+  // the web ContestStemsCard.
+  const [expanded, setExpanded] = useState(true)
 
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
@@ -142,15 +146,19 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   if (!track || !artist) return null
 
   return (
-    <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
-      <Text variant='label' size='m' color='subdued'>
-        {messages.heading}
-      </Text>
+    <Paper direction='column' borderRadius='m' shadow='flat'>
+      {/* Heading sits in the top padding slot — matches the web
+          ContestStemsCard. The inner padding+border wrapper that used
+          to live here was dropped per the contest QA pass: web has no
+          inner container, so the mobile card now reads as one surface
+          with the same vertical rhythm. */}
+      <View style={{ paddingTop: 16, paddingHorizontal: 16 }}>
+        <Text variant='label' size='m' color='subdued'>
+          {messages.heading}
+        </Text>
+      </View>
 
-      {/* Inner bordered container — separates the source-track +
-          stems block from the card heading and any future siblings,
-          matching Figma 2925-18101. */}
-      <Paper direction='column' borderRadius='m' shadow='flat' border='default'>
+      <Flex direction='column'>
         {/* Collapsed summary row: artwork + access label + artist +
             caret. */}
         <Flex direction='row' p='l' gap='m' alignItems='center'>
@@ -252,7 +260,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             ))}
           </View>
         ) : null}
-      </Paper>
+      </Flex>
     </Paper>
   )
 }

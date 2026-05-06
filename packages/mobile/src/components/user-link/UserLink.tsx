@@ -52,16 +52,16 @@ export const UserLink = (props: UserLinkProps) => {
     }
   })
 
-  // The wrapper Pressable used to also call `navigation.push('Profile', ...)`
-  // on press, but the inner TextLink already dispatches StackActions.push via
-  // its `to` prop. Both onPress handlers fire on a single tap, which pushed
-  // Profile twice — visible on the contest screen as the destination profile
-  // briefly appearing and then the contest covering it again. Keep the
-  // Pressable for its press animation only; navigation lives in the TextLink.
+  // The outer Pressable used to also dispatch `navigation.push('Profile')`,
+  // which fired in addition to the inner TextLink's own push. On iOS the
+  // tap reached both responders, so a single tap in the contest "Hosted by"
+  // row would push two Profile screens — the second one landing back over
+  // the contest as the user backed out. Drop the duplicate navigation here
+  // and let TextLink (which has proper Link semantics + a11y) own the push.
   return (
     <Pressable
       disabled={disabled}
-      onPressIn={(e) => {
+      onPressIn={() => {
         if (!disabled) {
           animatedPressed.value = withTiming(1, motion.press)
         }

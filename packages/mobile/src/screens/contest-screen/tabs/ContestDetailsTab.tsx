@@ -79,7 +79,8 @@ export const ContestDetailsTab = () => {
         ) : null}
 
         {/* Followers — hide entirely when the contest has no followers yet,
-            mirroring how the Prizes tile hides on empty content. */}
+            mirroring how the Prizes tile hides on empty content. Rendering
+            "0 followers" was QA-flagged as visually busy and unhelpful. */}
         {followerCount > 0 ? (
           <EventFollowersCard eventId={eventId} followerCount={followerCount} />
         ) : null}

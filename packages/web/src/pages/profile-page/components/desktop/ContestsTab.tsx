@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { useAllRemixContests, useRemixContest } from '@audius/common/api'
 import { ID, User } from '@audius/common/models'
@@ -8,6 +8,8 @@ import { ContestCard } from 'components/contest-card/ContestCard'
 
 import { EmptyTab } from './EmptyTab'
 import styles from './ProfilePage.module.css'
+
+const MAX_PAGES_TO_LOAD = 5
 
 const messages = {
   emptyContests: 'hosted any contests'
@@ -55,10 +57,26 @@ export const ContestsTab = ({ profile }: ContestsTabProps) => {
   const {
     data: trackIds,
     isPending,
-    isFetching
+    isFetching,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage
   } = useAllRemixContests({ pageSize: 50 })
 
   const contestTrackIds = useMemo(() => trackIds ?? [], [trackIds])
+
+  // The discovery endpoint can't filter by host userId yet, so the
+  // client filters globally fetched pages. Without auto-pagination an
+  // artist whose contests aren't on the first 50 rows of the global
+  // list (active first, then ended) reads as "no contests" — including
+  // ended-contest-only artists. Pull additional pages opportunistically
+  // up to a safety cap so a typical profile resolves correctly.
+  const loadedPages = trackIds ? Math.ceil(trackIds.length / 50) : 0
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage && loadedPages < MAX_PAGES_TO_LOAD) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])
 
   if (isPending && contestTrackIds.length === 0) {
     return (
@@ -90,10 +108,12 @@ export const ContestsTab = ({ profile }: ContestsTabProps) => {
         // Tile grid sized like the Contests page hero/grid: each card
         // claims at least 280px and grows up to 480px. Stacks naturally
         // on narrower profile main columns without a JS breakpoint.
+        // When the artist hosts a single contest the tile expands edge
+        // to edge — capping it at 480px left an awkward gap.
         '> *': {
           flex: '1 1 280px',
           minWidth: 0,
-          maxWidth: 480
+          maxWidth: contestTrackIds.length === 1 ? '100%' : 480
         }
       }}
     >

@@ -366,10 +366,19 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
 
   const handleEnterContest = useRequiresAccountCallback(() => {
     if (!trackId) return
-    // Deep-link into the upload flow with remix_of pre-filled so the
-    // resulting track is linked back to the contest track. No dedicated
-    // "enter-contest" route today.
-    navigate(`/upload?remix_of=${trackId}`)
+    // Deep-link into the upload flow with `remix_of` pre-filled so the
+    // resulting track is linked back to the contest track. UploadPage
+    // reads `initialMetadata` off `location.state`, NOT off URL search
+    // params — the previous `?remix_of=ID` query string was being
+    // ignored, which is why submissions weren't getting linked to
+    // contests.
+    navigate('/upload', {
+      state: {
+        initialMetadata: {
+          remix_of: { tracks: [{ parent_track_id: trackId }] }
+        }
+      }
+    })
   }, [trackId, navigate])
 
   const handleShareContest = useCallback(() => {
@@ -631,10 +640,14 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 {renderActions()}
               </Flex>
 
-              {/* Title */}
+              {/* Title — prefer the host-authored custom title set on the
+                  Edit Contest page; fall back to "<track title> Remix
+                  Contest" so contests created before the title field
+                  existed (or saved without a title) still read sensibly. */}
               <Box mt='l'>
                 <Text variant='display' size='s'>
-                  {track.title} {messages.title}
+                  {(contest.eventData as any)?.title?.trim() ||
+                    `${track.title} ${messages.title}`}
                 </Text>
               </Box>
 

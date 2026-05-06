@@ -6,7 +6,10 @@ import {
   useUsers
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { CommentReactionNotification as CommentReactionNotificationType } from '@audius/common/store'
+import {
+  CommentReactionNotification as CommentReactionNotificationType,
+  Entity
+} from '@audius/common/store'
 import { IconMessage } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -32,7 +35,13 @@ import { entityToUserListEntity, USER_LENGTH_LIMIT } from './utils'
 const messages = {
   liked: ' liked your comment on ',
   your: 'your',
-  their: 'their'
+  their: 'their',
+  // Generic fallback when the notification entityType isn't a value we
+  // know how to render (e.g. backend hasn't indexed a remix-contest
+  // comment with a typed entity yet — the QA pass found these
+  // notifications were rendering "their undefined" because
+  // `entityType` was missing on the payload).
+  fallbackEntityLabel: 'remix contest'
 }
 
 type CommentReactionNotificationProps = {
@@ -124,7 +133,16 @@ export const CommentReactionNotification = (
             isOwner
           />
         )}{' '}
-        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
+        {/* `entityType` is optional in payloads from the indexer for
+            comment reactions on remix contests — guard the rendering
+            so we don't ship a literal "undefined" to users. Event-typed
+            payloads render the human-readable "remix contest" label
+            instead of the raw enum string. */}
+        {entityType === Entity.Event
+          ? messages.fallbackEntityLabel
+          : entityType
+            ? entityType.toLowerCase()
+            : messages.fallbackEntityLabel}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

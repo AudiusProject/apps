@@ -2,7 +2,10 @@ import { MouseEventHandler, useCallback } from 'react'
 
 import { useNotificationEntity, useUsers } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { CommentNotification as CommentNotificationType } from '@audius/common/store'
+import {
+  CommentNotification as CommentNotificationType,
+  Entity
+} from '@audius/common/store'
 import { IconMessage } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -26,7 +29,11 @@ import { UserNameLink } from './components/UserNameLink'
 import { entityToUserListEntity, USER_LENGTH_LIMIT } from './utils'
 
 const messages = {
-  commented: ' commented on your '
+  commented: ' commented on your ',
+  // Remix-contest comments resolve their entity through the underlying
+  // track; render the noun as "remix contest" so the sentence reads
+  // correctly instead of "commented on your event <track>".
+  remixContestLabel: 'remix contest'
 }
 
 type CommentNotificationProps = {
@@ -100,7 +107,9 @@ export const CommentNotification = (props: CommentNotificationProps) => {
           <OthersLink othersCount={otherUsersCount} onClick={handleClick} />
         ) : null}
         {messages.commented}
-        {entityType === 'Event' ? 'contest' : entityType.toLowerCase()}{' '}
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

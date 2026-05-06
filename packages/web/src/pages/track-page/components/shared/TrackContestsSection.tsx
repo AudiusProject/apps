@@ -1,6 +1,6 @@
 import { useEventIdsByEntityId } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, IconTrophy, Text } from '@audius/harmony'
 import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
 
 import { ContestCard } from 'components/contest-card/ContestCard'
@@ -41,22 +41,33 @@ export const TrackContestsSection = ({
 
   if (!contestEventIds || contestEventIds.length === 0) return null
 
+  const isSingle = contestEventIds.length === 1
+
   return (
     <Flex direction='column' gap='l' w='100%'>
-      <Text variant='title' size='l'>
-        {messages.contests}
-      </Text>
+      {/* Header sized + iconified to match the track-page Comments
+          header (`<IconMessage /> Comments` at `title/l`). The previous
+          version used a smaller, unadorned label which read as a
+          minor section. */}
+      <Flex gap='s' alignItems='center'>
+        <IconTrophy color='default' />
+        <Text variant='title' size='l'>
+          {messages.contests}
+        </Text>
+      </Flex>
       <Flex
         gap='l'
         wrap='wrap'
         css={{
           // Tile grid: each card claims at least 280px and grows. On a
           // wide track-page main column we'll get 2-3 across; narrow
-          // shells stack to one column without a JS breakpoint.
+          // shells stack to one column without a JS breakpoint. With a
+          // single contest the tile should expand edge-to-edge instead
+          // of being capped at the multi-tile maxWidth.
           '> *': {
             flex: '1 1 280px',
             minWidth: 0,
-            maxWidth: 480
+            maxWidth: isSingle ? '100%' : 480
           }
         }}
       >

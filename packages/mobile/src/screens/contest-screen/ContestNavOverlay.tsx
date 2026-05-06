@@ -73,12 +73,18 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 type ContestNavOverlayProps = {
   title: string
+  /**
+   * Tap handler for the top-right share icon. Replaces the previous
+   * kebab/overflow drawer entry — Follow now lives next to "Enter
+   * Contest" in the scrolling header so the only persistent overlay
+   * action is Share.
+   */
   onPressShare?: () => void
 }
 
 /**
  * Floating nav bar that sits on top of the contest hero. Starts
- * transparent with `staticWhite` back / kebab icons so they read on
+ * transparent with `staticWhite` back / share icons so they read on
  * top of the cover image; as the user scrolls the hero out of view
  * a blurred background fades in along with the contest title in the
  * center and neutral-colored icons replace the white ones. Mirrors

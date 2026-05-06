@@ -33,14 +33,7 @@ import { useSharedValue } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch } from 'react-redux'
 
-import {
-  Button,
-  Divider,
-  Flex,
-  IconUserFollow,
-  IconUserFollowing,
-  Text
-} from '@audius/harmony-native'
+import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
 import {
@@ -49,6 +42,7 @@ import {
 } from 'app/components/top-tab-bar'
 import { UserLink } from 'app/components/user-link'
 import { useRoute } from 'app/hooks/useRoute'
+import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
 import {
@@ -178,6 +172,8 @@ export const ContestScreen = () => {
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: followState } = useEventFollowState(eventId)
+  const { mutate: followEvent } = useFollowEvent()
+  const { mutate: unfollowEvent } = useUnfollowEvent()
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
   const dispatch = useDispatch()
 
@@ -212,9 +208,10 @@ export const ContestScreen = () => {
   })
   const showUpdatesTab = isOwner || hasPostUpdates
 
-  // Share lives on the top-right nav (replacing the kebab) per Figma; no
-  // overflow drawer. Dispatch the share modal directly with the contest's
-  // track id, mirroring what `ContestActionsDrawer` did internally.
+  // Per the contest QA pass the kebab affordance was replaced with a
+  // dedicated share icon at the top-right of the nav overlay (and
+  // Follow moved next to Enter Contest). Keep this callback as the
+  // share entry point so ContestNavOverlay can invoke it directly.
   const handleShareContest = useCallback(() => {
     if (trackId == null) return
     dispatch(
@@ -245,8 +242,6 @@ export const ContestScreen = () => {
     setTimeout(() => setIsRefreshing(false), 600)
   }, [eventId, queryClient])
 
-  const { mutate: followEvent } = useFollowEvent()
-  const { mutate: unfollowEvent } = useUnfollowEvent()
   const handleToggleFollow = useCallback(() => {
     if (!eventId || !currentUserId) return
     if (followState?.isFollowed) {
@@ -291,15 +286,25 @@ export const ContestScreen = () => {
 
   const handlePickWinners = useCallback(() => {
     if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Pick winners — native screen not yet wired')
-  }, [trackId])
+    // Reuse the existing track-screen "Pick Winners" drawer — it
+    // informs the artist that picking winners has to happen in a web
+    // browser. The native picking flow doesn't exist yet, so deferring
+    // the user there is the same pattern the track screen already
+    // uses.
+    dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
+  }, [trackId, dispatch])
 
   const handleEnterContest = useCallback(() => {
-    if (!trackId) return
-    // eslint-disable-next-line no-console
-    console.info('Enter contest — native upload flow not yet wired')
-  }, [trackId])
+    if (!trackId)
+      return // Same wire-up as web: jump into the upload flow with `remix_of`
+      // pre-filled so the resulting track is linked to this contest's
+      // parent track. The Upload modal stack reads `initialMetadata` off
+      // its initial route params and merges it into the track metadata
+      // when the user picks a file (see SelectTrackScreen).
+    ;(navigation as any).navigate('Upload', {
+      initialMetadata: { remix_of: { tracks: [{ parent_track_id: trackId }] } }
+    })
+  }, [trackId, navigation])
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the
@@ -375,14 +380,18 @@ export const ContestScreen = () => {
           </Text>
         </Flex>
 
-        {/* Primary CTA — sits in the scrolling header. The Share action
-            lives in the top-right of the floating `ContestNavOverlay`
-            (replaces the old kebab per Figma). For non-host viewers a
-            Follow / Following button sits to the right of Enter Contest;
-            the host sees only Pick Winners (following your own contest
-            isn't meaningful). "Enter Contest" is hidden once the contest
-            ends — entering isn't meaningful anymore. */}
-        {isOwner || !isEnded ? (
+        {/* Primary CTA row.
+            - Host: full-width Pick Winners.
+            - Non-host (active): Follow + Enter Contest as a 50/50 pair.
+              The Follow button replaces the kebab/drawer affordance; the
+              share icon now lives in the floating `ContestNavOverlay` at
+              the top-right of the screen (see `onPressShare`).
+            - Non-host (ended): just the Follow toggle, since "Enter
+              Contest" isn't actionable after the deadline.
+            All buttons sit inside the scrolling header so they remain
+            reachable while the floating nav bar is the only thing
+            persistent at the top. */}
+        {isOwner ? (
           <Flex
             direction='row'
             alignItems='center'
@@ -393,26 +402,45 @@ export const ContestScreen = () => {
               <Button
                 variant='primary'
                 size='small'
-                onPress={isOwner ? handlePickWinners : handleEnterContest}
+                onPress={handlePickWinners}
                 fullWidth
               >
-                {isOwner ? messages.pickWinners : messages.enterContest}
+                {messages.pickWinners}
               </Button>
             </Flex>
-            {!isOwner ? (
+          </Flex>
+        ) : (
+          <Flex
+            direction='row'
+            alignItems='center'
+            gap='s'
+            pointerEvents='box-none'
+          >
+            <Flex flex={1} pointerEvents='box-none'>
               <Button
-                variant='secondary'
+                variant={followState?.isFollowed ? 'secondary' : 'primary'}
                 size='small'
-                iconLeft={
-                  followState?.isFollowed ? IconUserFollowing : IconUserFollow
-                }
                 onPress={handleToggleFollow}
+                disabled={!currentUserId || !eventId}
+                fullWidth
               >
                 {followState?.isFollowed ? messages.following : messages.follow}
               </Button>
+            </Flex>
+            {!isEnded ? (
+              <Flex flex={1} pointerEvents='box-none'>
+                <Button
+                  variant='primary'
+                  size='small'
+                  onPress={handleEnterContest}
+                  fullWidth
+                >
+                  {messages.enterContest}
+                </Button>
+              </Flex>
             ) : null}
           </Flex>
-        ) : null}
+        )}
 
         {/* Submissions Due block — pure display; wrap the entire
             label + date + time group in `pointerEvents='none'`. */}
