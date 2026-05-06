@@ -47,9 +47,7 @@ COPY nginx_conf /usr/local/openresty/conf/
 ARG git_sha
 ENV GIT_SHA=$git_sha
 
-EXPOSE 5000
-
 HEALTHCHECK --interval=5s --timeout=10s --retries=12 \
-  CMD pgrep pg_migrate || curl -f http://localhost:5000/health_check || exit 1
+  CMD pgrep pg_migrate || pgrep -f "celery -A src.worker.celery" || exit 1
 
 CMD ["bash", "scripts/start.sh"]

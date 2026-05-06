@@ -73,6 +73,4 @@ COPY nginx_conf /usr/local/openresty/conf/
 ARG git_sha
 ENV GIT_SHA=$git_sha
 
-EXPOSE 5000
-
 CMD ["bash", "scripts/start.sh"]
