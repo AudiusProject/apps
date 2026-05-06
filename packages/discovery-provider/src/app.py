@@ -9,6 +9,7 @@ from celery.schedules import timedelta
 from web3 import Web3
 
 from src.challenges.challenge_event_bus import setup_challenge_bus
+from src.challenges.create_new_challenges import create_new_challenges
 from src.database_task import DatabaseTask
 from src.eth_indexing.event_scanner import eth_indexing_last_scanned_block_key
 from src.solana.solana_client_manager import SolanaClientManager
@@ -260,6 +261,12 @@ def configure_celery(celery, test_config=None):
     )
     set_session_managers(db, db_read_replica)
     logger.info("Database instance initialized!")
+
+    # Seed the challenges table from challenges.json. Previously done by the
+    # Flask init path; now that we're celery-only, this is the sole seeding
+    # point so a fresh deploy gets the expected challenge rows.
+    with db.scoped_session() as session:
+        create_new_challenges(session)
 
     registry_address = Web3.to_checksum_address(
         shared_config["eth_contracts"]["registry"]
