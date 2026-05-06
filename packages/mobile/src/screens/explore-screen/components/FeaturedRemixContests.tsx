@@ -1,6 +1,10 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
-import { useExploreContent, useTracks } from '@audius/common/api'
+import {
+  useAllRemixContests,
+  useExploreContent,
+  useTracks
+} from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
@@ -22,29 +26,24 @@ export const FeaturedRemixContests = () => {
     FeatureFlags.CONTESTS
   )
 
+  // When the contests feature is on the section title is just
+  // "Contests" — switch the data source from the curated featured
+  // list to the full live list so the carousel actually matches the
+  // label (Julian: "the full list of contests isn't showing on the
+  // mobile discovery page"). Backed by `useAllRemixContests`, the same
+  // source the dedicated /contests screen uses.
+  const { data: allContestTrackIds, isPending: isAllContestsPending } =
+    useAllRemixContests(undefined, { enabled: inView && isContestsPageEnabled })
+
   const { data: exploreContent, isPending: isExplorePending } =
-    useExploreContent({ enabled: inView })
+    useExploreContent({ enabled: inView && !isContestsPageEnabled })
 
-  // The curated featured-contests list is a static JSON file (see
-  // useExploreContent). Some entries can refer to tracks the artist has
-  // since deleted or made private — when ContestCard hits one of those it
-  // renders `null`, but CardList's row wrapper (a fixed-width View) keeps
-  // the card-sized slot, leaving a visible gap in the carousel. Hydrating
-  // the tracks here lets us filter the list down to ones a card will
-  // actually render for.
-  const { data: remixContests, isPending: isTracksPending } = useTracks(
+  // Old-card path needs the hydrated track list; new-card path resolves per
+  // card internally so we skip this fetch when the flag is enabled.
+  const { data: remixContests } = useTracks(
     exploreContent?.featuredRemixContests,
-    { enabled: inView }
+    { enabled: inView && !isContestsPageEnabled }
   )
-
-  const validTrackIds = useMemo(() => {
-    if (!remixContests) return undefined
-    return remixContests
-      .filter((t) => !t.is_delete && !t.is_unlisted)
-      .map((t) => t.track_id)
-  }, [remixContests])
-
-  const isLoading = isExplorePending || isTracksPending
 
   return (
     <InViewWrapper>
@@ -57,21 +56,22 @@ export const FeaturedRemixContests = () => {
       >
         {isContestsPageEnabled ? (
           <CardList
-            data={validTrackIds?.map((trackId) => ({ trackId }))}
+            data={(allContestTrackIds ?? []).map((trackId) => ({ trackId }))}
             renderItem={({ item }) => <ContestCard trackId={item.trackId} />}
             horizontal
             carouselSpacing={spacing.l}
-            isLoading={isLoading}
+            isLoading={isAllContestsPending}
             LoadingCardComponent={TrackCardSkeleton}
           />
         ) : (
           <CardList
-            data={validTrackIds?.map((trackId) => ({ trackId }))}
+            data={remixContests?.map((track) => ({ trackId: track.track_id }))}
             renderItem={({ item }) => (
               <RemixContestCard trackId={item.trackId} />
             )}
             horizontal
             carouselSpacing={spacing.l}
+            isLoading={isExplorePending}
             LoadingCardComponent={TrackCardSkeleton}
           />
         )}

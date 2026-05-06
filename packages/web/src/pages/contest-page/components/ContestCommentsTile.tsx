@@ -21,6 +21,7 @@ import {
   Flex,
   IconHeart,
   IconKebabHorizontal,
+  IconStar,
   LoadingSpinner,
   Paper,
   PlainButton,
@@ -53,7 +54,7 @@ const messages = {
   postUpdate: 'Post Update',
   attachVideo: '+ Attach Video',
   postUpdateBadge: 'Post Update',
-  artistBadge: 'Artist',
+  hostBadge: 'Host',
   loadMore: 'Load more',
   signInToComment: 'Sign in to comment.',
   reply: 'Reply',
@@ -587,42 +588,27 @@ const ContestCommentRow = ({
     <Flex direction='row' gap='m' alignItems='flex-start' w='100%'>
       <UserAvatar userId={author.user_id} />
       <Flex direction='column' gap='xs' css={{ flex: 1, minWidth: 0 }}>
-        <Flex
-          gap='s'
-          alignItems='center'
-          wrap='wrap'
-          justifyContent='space-between'
-        >
-          <Flex gap='s' alignItems='center' wrap='wrap'>
-            <UserLink userId={author.user_id} />
-            {/* Show Artist badge when the host comments in the Comments
-                feed; suppress the "Post Update" badge in the Updates
-                feed because every row there is already a host update —
-                the label was redundant. */}
-            {isAuthorEventOwner && !isPostUpdate ? (
-              <Text variant='label' size='xs' color='accent' strength='strong'>
-                {messages.artistBadge}
+        {/* Header row mirrors the track-page CommentBlock layout —
+            user link + timestamp on the left, Host badge on the
+            right. Overflow kebab moved out of this row and into the
+            action bar below so it sits next to Reply (matches the
+            track-page CommentActionBar). */}
+        <Flex gap='s' alignItems='center' wrap='wrap'>
+          <UserLink userId={author.user_id} />
+          {/* Host badge: shown when the contest owner comments in the
+              Comments feed. Suppressed in the Updates feed because
+              every row there is already a host update — the label
+              would be redundant. Visual treatment matches the
+              track-page CommentBadge (IconStar + accent text). */}
+          {isAuthorEventOwner && !isPostUpdate ? (
+            <Flex gap='xs' alignItems='center'>
+              <IconStar color='accent' size='2xs' />
+              <Text color='accent' variant='body' size='s'>
+                {messages.hostBadge}
               </Text>
-            ) : null}
-            {createdAt ? <Timestamp time={createdAt} /> : null}
-          </Flex>
-          {canDelete ? (
-            <PopupMenu
-              items={[{ text: messages.delete, onClick: handleDelete }]}
-              renderTrigger={(anchorRef, triggerPopup) => (
-                <Box
-                  ref={anchorRef as any}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    triggerPopup()
-                  }}
-                  css={{ cursor: 'pointer', lineHeight: 0 }}
-                >
-                  <IconKebabHorizontal size='s' color='subdued' />
-                </Box>
-              )}
-            />
+            </Flex>
           ) : null}
+          {createdAt ? <Timestamp time={createdAt} /> : null}
         </Flex>
         <Text variant='body' size='s'>
           {comment.message}
@@ -639,6 +625,11 @@ const ContestCommentRow = ({
             <VideoEmbed url={videoUrl} />
           </Box>
         ) : null}
+        {/* Action bar: heart, Reply, overflow kebab. Same shape as the
+            track-page CommentActionBar so contest comments read like
+            normal comments. The overflow kebab used to sit in the
+            header; moving it here stops the row from wrapping when the
+            user link + timestamp + badge are wide. */}
         <Flex gap='m' alignItems='center' pt='xs'>
           <Flex
             gap='xs'
@@ -680,6 +671,23 @@ const ContestCommentRow = ({
             >
               {messages.reply}
             </PlainButton>
+          ) : null}
+          {canDelete ? (
+            <PopupMenu
+              items={[{ text: messages.delete, onClick: handleDelete }]}
+              renderTrigger={(anchorRef, triggerPopup) => (
+                <Box
+                  ref={anchorRef as any}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    triggerPopup()
+                  }}
+                  css={{ cursor: 'pointer', lineHeight: 0 }}
+                >
+                  <IconKebabHorizontal size='s' color='subdued' />
+                </Box>
+              )}
+            />
           ) : null}
         </Flex>
         {isReplying && currentUserId ? (

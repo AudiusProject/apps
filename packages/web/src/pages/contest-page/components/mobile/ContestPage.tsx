@@ -58,6 +58,7 @@ import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
 import { fullContestPage, pickWinnersPage } from 'utils/route'
 
+import { useEnterContest } from '../../hooks/useEnterContest'
 import { ContestCommentsTile } from '../ContestCommentsTile'
 import { ContestStemsCard } from '../ContestStemsCard'
 import { EventFollowersCard } from '../EventFollowersCard'
@@ -425,21 +426,13 @@ const ContestPage = ({
     if (track?.permalink) navigate(pickWinnersPage(track.permalink))
   }, [track?.permalink, navigate])
 
-  // "Enter Contest" — defer to the existing upload flow with the contest
-  // track pre-linked as the remix parent. UploadPage reads
-  // `initialMetadata` off `location.state`, not URL search params, so
-  // we hand off via state. The previous `?remix_of=ID` query string was
-  // ignored — submissions weren't getting linked back to the contest.
-  const handleEnterContest = useRequiresAccountCallback(() => {
-    if (!trackId) return
-    navigate('/upload', {
-      state: {
-        initialMetadata: {
-          remix_of: { tracks: [{ parent_track_id: trackId }] }
-        }
-      }
-    })
-  }, [trackId, navigate])
+  // "Enter Contest" — deep-link into the upload flow with the source
+  // track's artwork + genre + remix_of pre-filled. See
+  // `useEnterContest` for the full shape; reused across the desktop +
+  // mobile contest pages and the mobile track-page contest details
+  // tab so submitters get the same pre-filled form regardless of
+  // entry point.
+  const handleEnterContest = useEnterContest(trackId)
 
   // Flag gate
   if (isFlagLoaded && !isContestsEnabled) {

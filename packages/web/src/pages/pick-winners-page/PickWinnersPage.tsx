@@ -248,7 +248,7 @@ export const PickWinnersPage = () => {
   )
 
   const submissionHeading = useCallback((count: number | undefined) => {
-    return `${messages.remixesTitle}${count !== undefined ? ` (${count})` : ''}`
+    return `${messages.pickWinnersSubmissionsTitle}${count !== undefined ? ` (${count})` : ''}`
   }, [])
 
   const TileButton = useCallback(

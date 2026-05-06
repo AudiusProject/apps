@@ -1,12 +1,10 @@
 import { useRemixContest } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { UPLOAD_PAGE } from '@audius/common/src/utils/route'
 import { dayjs, formatContestDeadline } from '@audius/common/utils'
 import { Button, Divider, Flex, IconCloudUpload, Text } from '@audius/harmony'
 
 import { UserGeneratedText } from 'components/user-generated-text'
-import { useNavigateToPage } from 'hooks/useNavigateToPage'
-import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { useEnterContest } from 'pages/contest-page/hooks/useEnterContest'
 
 const messages = {
   due: 'Submission Due:',
@@ -29,23 +27,12 @@ export const RemixContestDetailsTab = ({
   trackId,
   isOwner
 }: RemixContestDetailsTabProps) => {
-  const navigate = useNavigateToPage()
   const { data: remixContest } = useRemixContest(trackId)
   const isContestEnded = dayjs(remixContest?.endDate).isBefore(dayjs())
 
-  const goToUploadWithRemix = useRequiresAccountCallback(() => {
-    if (!trackId) return
-
-    const state = {
-      initialMetadata: {
-        is_remix: true,
-        remix_of: {
-          tracks: [{ parent_track_id: trackId }]
-        }
-      }
-    }
-    navigate(UPLOAD_PAGE, state)
-  }, [trackId, navigate])
+  // Shared entry-point hook: pre-fills artwork + genre + remix_of from
+  // the source track so the submitter doesn't have to re-supply them.
+  const goToUploadWithRemix = useEnterContest(trackId)
 
   return (
     <Flex column w='100%'>

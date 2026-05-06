@@ -51,6 +51,14 @@ export const ContestsTab = () => {
   const isFocused = useIsFocused()
   const queryClient = useQueryClient()
 
+  // Larger page size + auto-pagination below: the discovery endpoint
+  // doesn't support `host=…`, so we paginate the global list and
+  // filter client-side. Bumped from 50 → 100 because hosts whose
+  // contests sit deep in the global list (ended contests, smaller
+  // accounts) were missing from the tab — Julian's @dimensionx
+  // report. Together with the `useEffect` below that drains pages
+  // until exhausted, this guarantees the host's contests appear once
+  // they're anywhere in the result set.
   const {
     data: trackIds,
     isPending,
@@ -58,7 +66,7 @@ export const ContestsTab = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
-  } = useAllRemixContests({ pageSize: 50 }, { enabled: isFocused })
+  } = useAllRemixContests({ pageSize: 100 }, { enabled: isFocused })
 
   const allTrackIds = useMemo(() => trackIds ?? [], [trackIds])
 
