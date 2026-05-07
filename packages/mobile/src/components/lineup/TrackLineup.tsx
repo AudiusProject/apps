@@ -1,6 +1,13 @@
-import { memo, useCallback, useMemo, useRef, type ReactElement } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement
+} from 'react'
 
-import { useDebouncedCallback } from '@audius/common/hooks'
 import {
   Kind,
   type ID,
@@ -27,9 +34,11 @@ const { makeGetCurrent } = playbackSelectors
 const { getPlaying } = playbackSelectors
 const { getCurrentTrackId: getPlaybackCurrentTrackId } = playbackSelectors
 
-// Threshold (as a fraction of visible list height) for how close to the end
-// of the list the user must scroll before we fetch the next page.
-const LOAD_MORE_THRESHOLD = 0.5
+// Threshold for `onEndReachedThreshold` (fraction of viewport length).
+// 1.0 means "fetch when one full viewport of content remains below" so the
+// next page request is in flight well before the user actually hits the
+// bottom of the list.
+const LOAD_MORE_THRESHOLD = 1
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -204,12 +213,30 @@ export const TrackLineup = ({
     [visibleTrackIds, uidFor]
   )
 
+  // Synchronous "load more was triggered" flag — set the moment the scroll
+  // handler fires so skeletons render on the next frame, without waiting for
+  // the parent's tanquery `isFetching` to propagate. Cleared once the parent
+  // either delivers more entries or finishes fetching.
+  const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
+  const prevEntriesLengthRef = useRef(entries.length)
+  useEffect(() => {
+    if (entries.length !== prevEntriesLengthRef.current) {
+      prevEntriesLengthRef.current = entries.length
+      setIsLoadMoreTriggered(false)
+    }
+  }, [entries.length])
+  useEffect(() => {
+    if (!isFetching) setIsLoadMoreTriggered(false)
+  }, [isFetching])
+
   const sections: Section[] = useMemo(() => {
     const getSkeletonCount = () => {
       if (entries.length === 0 && isPending) {
         return Math.min(maxEntries, initialPageSize ?? pageSize)
       }
-      if (isFetching) return Math.min(maxEntries, pageSize)
+      if (isFetching || isLoadMoreTriggered) {
+        return Math.min(maxEntries, pageSize)
+      }
       return 0
     }
     const skeletons = range(getSkeletonCount()).map(
@@ -218,7 +245,15 @@ export const TrackLineup = ({
     const data: RenderItem[] = [...entries, ...skeletons]
     if (data.length === 0) return []
     return [{ data }]
-  }, [entries, isPending, isFetching, initialPageSize, pageSize, maxEntries])
+  }, [
+    entries,
+    isPending,
+    isFetching,
+    isLoadMoreTriggered,
+    initialPageSize,
+    pageSize,
+    maxEntries
+  ])
 
   const renderItem = useCallback(
     ({ item, index }: { item: RenderItem; index: number }) => {
@@ -254,26 +289,16 @@ export const TrackLineup = ({
     ]
   )
 
-  const debouncedLoadNextPage = useDebouncedCallback(
-    () => {
-      loadNextPage?.()
-    },
-    [loadNextPage],
-    100
-  )
-
-  const handleScroll = useCallback(
-    ({ nativeEvent }: any) => {
-      const { layoutMeasurement, contentOffset, contentSize } = nativeEvent
-      if (
-        layoutMeasurement.height + contentOffset.y >=
-        contentSize.height - LOAD_MORE_THRESHOLD * layoutMeasurement.height
-      ) {
-        if (!isFetching && hasNextPage) debouncedLoadNextPage()
-      }
-    },
-    [debouncedLoadNextPage, isFetching, hasNextPage]
-  )
+  // Single, synchronous load-more entry point. Flipping the local flag in the
+  // same tick as dispatching the parent's `loadNextPage` makes the skeletons
+  // render on the very next frame, instead of after a debounce window plus
+  // the round-trip through tanquery's `isFetching`.
+  const handleLoadMore = useCallback(() => {
+    if (!hasNextPage || isFetching || isLoadMoreTriggered) return
+    if (!loadNextPage) return
+    setIsLoadMoreTriggered(true)
+    loadNextPage()
+  }, [hasNextPage, isFetching, isLoadMoreTriggered, loadNextPage])
 
   const scrollToTop = useCallback(() => {
     if (entries.length === 0) return
@@ -296,12 +321,11 @@ export const TrackLineup = ({
       <SectionList
         {...pullToRefreshProps}
         ref={ref}
-        onScroll={handleScroll}
         ListHeaderComponent={hideHeaderOnEmpty && isEmpty ? undefined : header}
         ListFooterComponent={hasNextPage ? null : ListFooterComponent}
         hidePlayBarChin={true}
         ListEmptyComponent={LineupEmptyComponent}
-        onEndReached={debouncedLoadNextPage}
+        onEndReached={handleLoadMore}
         onEndReachedThreshold={LOAD_MORE_THRESHOLD}
         sections={isEmpty ? [] : sections}
         stickySectionHeadersEnabled={false}
