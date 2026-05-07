@@ -6,7 +6,7 @@ import {
   useEventFollowState,
   useFollowEvent,
   useRemixContest,
-  useRemixes,
+  useRemixesCount,
   useRemixesLineup,
   useStems,
   useTrack,
@@ -341,12 +341,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // only reflects what infinite-scroll has loaded — the count crept
   // up as the user scrolled rather than reading as a stable total.
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const { data: remixesCountData } = useRemixes(
-    { trackId: trackId ?? 0, pageSize: 0, isContestEntry: true },
+  const { data: submissionsCount } = useRemixesCount(
+    { trackId, isContestEntry: true },
     { enabled: !!trackId, staleTime: 60_000 }
   )
-  const submissionsCount: number | undefined =
-    remixesCountData?.pages?.[0]?.count
 
   const handleEditContest = useCallback(() => {
     if (track?.permalink) {

@@ -8,7 +8,7 @@ import {
   useRemixersCount,
   useRemixesLineup,
   useCurrentUserId,
-  useRemixes,
+  useRemixesCount,
   getRemixesQueryKey
 } from '@audius/common/api'
 import { remixMessages as messages } from '@audius/common/messages'
@@ -67,11 +67,10 @@ const RemixesPage = (_props: RemixesPageProps) => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: contest } = useRemixContest(trackId)
   const winnerCount = contest?.eventData?.winners?.length ?? 0
-  const { data: remixes } = useRemixes({
+  const { data: remixCount = 0 } = useRemixesCount({
     trackId: trackId ?? undefined,
     isContestEntry: true
   })
-  const remixCount = remixes?.pages[0]?.count ?? 0
 
   const { sortMethod, isCosign, isContestEntry } = useRemixPageParams()
   const {

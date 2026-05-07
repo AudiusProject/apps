@@ -4,7 +4,7 @@ import {
   getRemixesQueryKey,
   useCurrentUserId,
   useRemixContest,
-  useRemixes,
+  useRemixesCount,
   useRemixesLineup,
   useTrackByParams
 } from '@audius/common/api'
@@ -88,11 +88,10 @@ export const TrackRemixesScreen = () => {
   const isRemixContestEnded =
     isRemixContest && dayjs(contest.endDate).isBefore(dayjs())
   const isTrackOwner = currentUserId === track?.owner_id
-  const { data: remixes } = useRemixes({
+  const { data: remixCount = 0 } = useRemixesCount({
     trackId: track?.track_id,
     isContestEntry: true
   })
-  const remixCount = remixes?.pages[0]?.count ?? 0
   const showPickWinnersButton =
     isTrackOwner && isRemixContestEnded && remixCount > 0
   const winnerCount = contest?.eventData?.winners?.length ?? 0

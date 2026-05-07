@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import {
   useRemixContest,
-  useRemixes,
+  useRemixesCount,
   useTrack,
   useUser
 } from '@audius/common/api'
@@ -262,12 +262,10 @@ export const ContestCard = (props: ContestCardProps) => {
     ? { uri: contestCoverPhotoUrl }
     : trackImageSource
 
-  // Count-only: API returns full total in `count` even when limit=0 (no track rows).
-  const { data: remixesData } = useRemixes(
-    { trackId, pageSize: 0, isContestEntry: true },
+  const { data: entriesCount = 0 } = useRemixesCount(
+    { trackId, isContestEntry: true },
     { enabled: !!trackId }
   )
-  const entriesCount = remixesData?.pages?.[0]?.count ?? 0
 
   const navigation = useNavigation<NavigationProp>()
   const handlePress = useCallback(() => {

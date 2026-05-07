@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   getRemixesQueryKey,
   useRemixContest,
-  useRemixes,
+  useRemixesCount,
   useRemixesLineup
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
@@ -96,11 +96,10 @@ export const ContestSubmissionsTab = () => {
 
   // Submissions total comes from a count-only API query so it matches
   // the contest card total instead of growing as the user scrolls.
-  const { data: remixesCountData } = useRemixes(
-    { trackId, pageSize: 0, isContestEntry: true },
+  const { data: submissionsCount = 0 } = useRemixesCount(
+    { trackId, isContestEntry: true },
     { enabled: !!trackId, staleTime: 60_000 }
   )
-  const submissionsCount = remixesCountData?.pages?.[0]?.count ?? 0
 
   const winnersDelineator = useMemo(
     () => (

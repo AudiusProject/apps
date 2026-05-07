@@ -7,17 +7,17 @@ import {
 } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
-import { eventMetadataFromSDK } from '~/adapters/event'
-import { getRemixesQueryKey } from '~/api/tan-query/remixes/useRemixes'
-import { useQueryContext } from '~/api/tan-query/utils'
-import { primeRelatedData } from '~/api/tan-query/utils/primeRelatedData'
-import { ID } from '~/models'
-import { removeNullable } from '~/utils'
-
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 
 import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
+
+import { eventMetadataFromSDK } from '~/adapters/event'
+import { getRemixesCountQueryKey } from '~/api/tan-query/remixes/useRemixes'
+import { useQueryContext } from '~/api/tan-query/utils'
+import { primeRelatedData } from '~/api/tan-query/utils/primeRelatedData'
+import { ID } from '~/models'
+import { removeNullable } from '~/utils'
 
 const DEFAULT_PAGE_SIZE = 25
 
@@ -83,28 +83,15 @@ export const useAllRemixContests = (
       // network round-trip instead of N+1.
       primeRelatedData({ related, queryClient })
 
-      // Prime useRemixes({ trackId, pageSize: 0, isContestEntry: true }) so
-      // ContestCard's entry-count badge doesn't fire a count-only request
-      // per card. The card reads `data.pages[0].count`, so we seed the
-      // InfiniteData shape directly.
+      // Prime the dedicated `useRemixesCount` cache so ContestCard's
+      // entry-count badge doesn't fire a count-only request per card.
       const entryCounts = related?.entryCounts ?? {}
       for (const [hashedTrackId, count] of Object.entries(entryCounts)) {
         const trackId = OptionalHashId.parse(hashedTrackId)
         if (!trackId) continue
-        // The useRemixes query key is typed as `InfiniteData<RemixesQueryData[]>`
-        // (pages-of-arrays) but the runtime cache shape is `InfiniteData<RemixesQueryData>`
-        // — see ContestCard's `remixesData?.pages?.[0]?.count` access. We
-        // seed the real runtime shape and cast to bypass the existing key type.
         queryClient.setQueryData(
-          getRemixesQueryKey({
-            trackId,
-            pageSize: 0,
-            isContestEntry: true
-          }),
-          {
-            pages: [{ count, tracks: [] }],
-            pageParams: [0]
-          } as unknown as never
+          getRemixesCountQueryKey({ trackId, isContestEntry: true }),
+          count
         )
       }
 
