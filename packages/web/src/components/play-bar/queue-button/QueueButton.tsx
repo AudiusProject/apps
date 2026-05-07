@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { useQueueNewFeatureBadge } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
@@ -16,12 +16,15 @@ import { useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { QueuePopover } from 'components/queue-popover'
+import { ToastContext } from 'components/toast/ToastContext'
 
-const { getPlaybackQueue } = playbackSelectors
+const { getPlaybackQueue, getShuffle } = playbackSelectors
 
 const messages = {
   queue: 'Queue',
-  newFeature: 'New'
+  newFeature: 'New',
+  queueDisabledDuringShuffle: 'Turn shuffle off to view queue',
+  disableShuffleToast: 'Disable shuffle to use the queue'
 }
 
 const pulse = keyframes`
@@ -39,13 +42,19 @@ export const QueueButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const queue = useSelector(getPlaybackQueue)
+  const isShuffleEnabled = useSelector(getShuffle)
   const hasItems = queue.length > 0
   const { color } = useTheme()
   const record = useRecord()
+  const { toast } = useContext(ToastContext)
   const { showBadge: showNewFeatureBadge, dismiss: dismissNewFeatureBadge } =
     useQueueNewFeatureBadge()
 
   const handleToggle = useCallback(() => {
+    if (isShuffleEnabled) {
+      toast(messages.disableShuffleToast)
+      return
+    }
     if (showNewFeatureBadge) {
       dismissNewFeatureBadge()
     }
@@ -63,7 +72,14 @@ export const QueueButton = () => {
       }
       return next
     })
-  }, [record, queue.length, showNewFeatureBadge, dismissNewFeatureBadge])
+  }, [
+    isShuffleEnabled,
+    record,
+    queue.length,
+    showNewFeatureBadge,
+    dismissNewFeatureBadge,
+    toast
+  ])
 
   const handleClose = useCallback(() => {
     setIsOpen((open) => {
@@ -74,6 +90,18 @@ export const QueueButton = () => {
     })
   }, [record])
 
+  useEffect(() => {
+    if (isShuffleEnabled) {
+      handleClose()
+    }
+  }, [handleClose, isShuffleEnabled])
+
+  const tooltipText = isShuffleEnabled
+    ? messages.queueDisabledDuringShuffle
+    : showNewFeatureBadge
+      ? messages.newFeature
+      : messages.queue
+
   return (
     <>
       <Flex
@@ -82,23 +110,22 @@ export const QueueButton = () => {
         alignItems='center'
         justifyContent='center'
       >
-        <Tooltip
-          text={showNewFeatureBadge ? messages.newFeature : messages.queue}
-          placement='top'
-          mount='body'
-        >
+        <Tooltip text={tooltipText} placement='top' mount='body'>
           <Flex>
             <IconButton
               icon={IconIndent}
               size='m'
-              color={isOpen ? 'accent' : 'subdued'}
+              color={
+                isShuffleEnabled ? 'disabled' : isOpen ? 'accent' : 'subdued'
+              }
               aria-label={messages.queue}
               aria-expanded={isOpen}
+              aria-disabled={isShuffleEnabled}
               onClick={handleToggle}
             />
           </Flex>
         </Tooltip>
-        {hasItems ? (
+        {hasItems && !isShuffleEnabled ? (
           <Box
             css={{
               position: 'absolute',
@@ -113,7 +140,7 @@ export const QueueButton = () => {
             }}
           />
         ) : null}
-        {showNewFeatureBadge ? (
+        {showNewFeatureBadge && !isShuffleEnabled ? (
           <Box
             aria-hidden
             css={{
@@ -132,7 +159,7 @@ export const QueueButton = () => {
         ) : null}
       </Flex>
       <QueuePopover
-        isVisible={isOpen}
+        isVisible={isOpen && !isShuffleEnabled}
         anchorRef={anchorRef}
         onClose={handleClose}
       />
