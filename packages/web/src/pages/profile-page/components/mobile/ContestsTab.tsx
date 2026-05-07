@@ -1,14 +1,12 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
-import { useAllRemixContests, useRemixContest } from '@audius/common/api'
-import { ID, User } from '@audius/common/models'
+import { useUserRemixContests } from '@audius/common/api'
+import { User } from '@audius/common/models'
 import { Box, Flex, LoadingSpinner } from '@audius/harmony'
 
 import { ContestCard } from 'components/contest-card/ContestCard'
 
 import { EmptyTab } from './EmptyTab'
-
-const MAX_PAGES_TO_LOAD = 5
 
 type ContestsTabProps = {
   profile: User
@@ -16,28 +14,14 @@ type ContestsTabProps = {
 }
 
 /**
- * Per-row guard: render a `<ContestCard>` only when the resolved remix
- * contest event for `trackId` is hosted by `hostUserId`. See the desktop
- * ContestsTab for the full rationale; the mobile component is a thin
- * wrapper around the same cards with a stacked single-column layout.
- */
-const HostedContestCard = ({
-  trackId,
-  hostUserId
-}: {
-  trackId: ID
-  hostUserId: ID
-}) => {
-  const { data: contest } = useRemixContest(trackId)
-  if (!contest || contest.userId !== hostUserId) return null
-  return <ContestCard trackId={trackId} variant='grid' />
-}
-
-/**
  * Profile "Contests" tab on mobile. Lists contests hosted by this
  * profile as a stacked grid of `ContestCard`s. Matches Figma 2864-13286
  * (the desktop layout collapses to a single column on narrow shells —
  * mobile reuses the same card so the visual treatment stays consistent).
+ *
+ * Calls `GET /v1/users/{id}/contests` (via `useUserRemixContests`), which
+ * returns only this artist's contests with active first (by soonest-ending
+ * end_date) followed by ended.
  */
 export const ContestsTab = ({ profile, isOwner }: ContestsTabProps) => {
   const { user_id: hostUserId, name } = profile
@@ -45,25 +29,13 @@ export const ContestsTab = ({ profile, isOwner }: ContestsTabProps) => {
   const {
     data: trackIds,
     isPending,
-    isFetching,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage
-  } = useAllRemixContests({ pageSize: 50 })
+    isFetching
+  } = useUserRemixContests({
+    userId: hostUserId,
+    pageSize: 50
+  })
 
   const contestTrackIds = useMemo(() => trackIds ?? [], [trackIds])
-
-  // Auto-paginate the global contest list (the discovery endpoint
-  // doesn't filter by host yet) up to a safety cap. Without this, an
-  // artist whose hosted contests sit beyond the first page reads as
-  // "no contests" until the user scrolls — and ended-only artists
-  // never showed up.
-  const loadedPages = trackIds ? Math.ceil(trackIds.length / 50) : 0
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage && loadedPages < MAX_PAGES_TO_LOAD) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])
 
   if (isPending && contestTrackIds.length === 0) {
     return (
@@ -88,11 +60,7 @@ export const ContestsTab = ({ profile, isOwner }: ContestsTabProps) => {
   return (
     <Flex direction='column' gap='l' p='l'>
       {contestTrackIds.map((trackId) => (
-        <HostedContestCard
-          key={trackId}
-          trackId={trackId}
-          hostUserId={hostUserId}
-        />
+        <ContestCard key={trackId} trackId={trackId} variant='grid' />
       ))}
     </Flex>
   )

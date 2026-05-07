@@ -115,21 +115,8 @@ const SearchExplorePage = ({
         newParams.delete('query')
       }
       setSearchParams(newParams, { replace: true })
-    } else if (categoryKey === SearchTabs.ALL.toLowerCase()) {
-      // clear filters when searching all
-      const newParams = new URLSearchParams()
-      if (debouncedValue) {
-        newParams.set('query', debouncedValue)
-      }
-      setSearchParams(newParams, { replace: true })
     }
-  }, [
-    debouncedValue,
-    setSearchParams,
-    searchParams,
-    previousDebouncedValue,
-    categoryKey
-  ])
+  }, [debouncedValue, setSearchParams, searchParams, previousDebouncedValue])
 
   const { setCenter, setRight } = useContext(NavContext)!
   const { setHeader } = useContext(HeaderContext)
