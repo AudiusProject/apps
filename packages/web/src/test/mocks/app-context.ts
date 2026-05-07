@@ -1,4 +1,4 @@
-import { FeatureFlags } from '@audius/common/services'
+import { FeatureFlags, LocalStorage } from '@audius/common/services'
 
 import { createMockLocalStorage } from './local-storage'
 import { createMockRemoteConfig } from './remote-config'
@@ -18,5 +18,5 @@ export const createMockAppContext = (
   trackDownload: {} as any,
   audiusSdk: undefined,
   remoteConfig: createMockRemoteConfig(featureFlags),
-  localStorage: createMockLocalStorage()
+  localStorage: createMockLocalStorage() as unknown as LocalStorage
 })

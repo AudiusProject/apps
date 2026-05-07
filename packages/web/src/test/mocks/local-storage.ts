@@ -12,6 +12,8 @@ export const createMockLocalStorage = () => {
 
   return {
     localStorage: mockLocalStorage,
+    preloadSyncKeys: async () => {},
+    preloadAccountSyncCache: async () => {},
     getItem: async (key: string) => storage.get(key) ?? null,
     getItemSync: (key: string) => storage.get(key) ?? null,
     setItem: async (key: string, value: string) => {
