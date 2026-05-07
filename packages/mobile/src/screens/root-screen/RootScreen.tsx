@@ -29,6 +29,7 @@ import { useEffectOnce } from 'react-use'
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { usePrefetchTrendingImages } from 'app/hooks/usePrefetchTrendingImages'
 import { useUpdateRequired } from 'app/hooks/useUpdateRequired'
 import { SplashScreen } from 'app/screens/splash-screen'
 import { UpdateRequiredScreen } from 'app/screens/update-required-screen'
@@ -72,6 +73,7 @@ export const RootScreen = () => {
   // so the user never sees the brief layout settling that caused a visible
   // "slide down/up" glitch on content load.
   const isRestoring = useIsRestoring()
+  usePrefetchTrendingImages()
   const { data: accountStatus } = useAccountStatus()
   const { data: hasCompleteAccount } = useCurrentAccountUser({
     select: selectIsAccountComplete
