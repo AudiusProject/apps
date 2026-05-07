@@ -141,12 +141,7 @@ const SearchExplorePage = ({
       }
       setSearchParams(newParams, { replace: true })
     }
-  }, [
-    debouncedValue,
-    setSearchParams,
-    searchParams,
-    previousDebouncedValue
-  ])
+  }, [debouncedValue, setSearchParams, searchParams, previousDebouncedValue])
 
   const filterKeys: string[] = categories[categoryKey].filters
 

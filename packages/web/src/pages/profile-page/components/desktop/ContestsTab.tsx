@@ -30,7 +30,11 @@ type ContestsTabProps = {
 export const ContestsTab = ({ profile }: ContestsTabProps) => {
   const { user_id: hostUserId, name } = profile
 
-  const { data: trackIds, isPending, isFetching } = useUserRemixContests({
+  const {
+    data: trackIds,
+    isPending,
+    isFetching
+  } = useUserRemixContests({
     userId: hostUserId,
     pageSize: 50
   })

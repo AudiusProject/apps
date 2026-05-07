@@ -116,12 +116,7 @@ const SearchExplorePage = ({
       }
       setSearchParams(newParams, { replace: true })
     }
-  }, [
-    debouncedValue,
-    setSearchParams,
-    searchParams,
-    previousDebouncedValue
-  ])
+  }, [debouncedValue, setSearchParams, searchParams, previousDebouncedValue])
 
   const { setCenter, setRight } = useContext(NavContext)!
   const { setHeader } = useContext(HeaderContext)
