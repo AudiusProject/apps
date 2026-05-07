@@ -7,10 +7,7 @@ import { ID } from '~/models'
 import { Event } from '~/models/Event'
 
 import { useAllRemixContests } from './useAllRemixContests'
-import {
-  getEventIdsByEntityIdQueryKey,
-  getEventQueryKey
-} from './utils'
+import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
 
 const PAGE_SIZE = 50
 const MAX_PAGES_TO_LOAD = 5
@@ -26,9 +23,7 @@ const MAX_PAGES_TO_LOAD = 5
  * `useAllRemixContests`, so the per-track lookup here is a synchronous cache
  * read in practice.
  */
-export const useUserHasRemixContest = (
-  hostUserId: ID | null | undefined
-) => {
+export const useUserHasRemixContest = (hostUserId: ID | null | undefined) => {
   const queryClient = useQueryClient()
 
   const enabled = hostUserId != null
@@ -52,13 +47,7 @@ export const useUserHasRemixContest = (
     ) {
       fetchNextPage()
     }
-  }, [
-    hostUserId,
-    hasNextPage,
-    isFetchingNextPage,
-    loadedPages,
-    fetchNextPage
-  ])
+  }, [hostUserId, hasNextPage, isFetchingNextPage, loadedPages, fetchNextPage])
 
   const hasContest = useMemo(() => {
     if (!hostUserId || !trackIds) return false
@@ -83,8 +72,7 @@ export const useUserHasRemixContest = (
   const isResolving =
     isPending ||
     (!hasContest &&
-      (isFetching ||
-        (hasNextPage && loadedPages < MAX_PAGES_TO_LOAD)))
+      (isFetching || (hasNextPage && loadedPages < MAX_PAGES_TO_LOAD)))
 
   return { hasContest, isPending: isResolving }
 }
