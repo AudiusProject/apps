@@ -1,4 +1,4 @@
-import { Children, useEffect, useState } from 'react'
+import { Children, useEffect, useMemo, useState } from 'react'
 
 import { useTheme } from '@emotion/react'
 import Animated, {
@@ -55,13 +55,22 @@ export const Artwork = (props: ArtworkProps) => {
   const isLoading = isLoadingProp ?? isLoadingState
   const { color, cornerRadius, motion } = useTheme()
 
-  const imageSource = !source
-    ? source
-    : typeof source === 'number'
-      ? source
+  // Pull primitives off the source so we can memoize on stable identity.
+  // Without this, every render produces a fresh source object, which
+  // AnimatedImage treats as a new image and reloads — visible as a flash.
+  const sourceNumber = typeof source === 'number' ? source : undefined
+  const sourceUri =
+    !source || typeof source === 'number'
+      ? undefined
       : Array.isArray(source)
-        ? { uri: source[0].uri }
-        : { uri: source.uri }
+        ? source[0]?.uri
+        : source.uri
+
+  const imageSource = useMemo(() => {
+    if (sourceNumber !== undefined) return sourceNumber
+    if (sourceUri) return { uri: sourceUri }
+    return undefined
+  }, [sourceNumber, sourceUri])
 
   const hasImageSource = typeof imageSource === 'number' || imageSource?.uri
   const hasChildren = Children.toArray(children).length > 0

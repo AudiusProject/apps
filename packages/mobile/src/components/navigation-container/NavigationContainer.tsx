@@ -1,15 +1,12 @@
 import { useRef, type ReactNode } from 'react'
-import { useEffect } from 'react'
 
 import { useCurrentAccountUser, useHasAccount } from '@audius/common/api'
-import { Status } from '@audius/common/models'
 import type { LinkingOptions } from '@react-navigation/native'
 import {
   NavigationContainer as RNNavigationContainer,
   createNavigationContainerRef,
   getStateFromPath
 } from '@react-navigation/native'
-import { useAccountStatus } from '~/api/tan-query/users/account/useAccountStatus'
 
 import { AppTabNavigationProvider } from 'app/screens/app-screen'
 import { screen } from 'app/services/analytics'
@@ -38,30 +35,13 @@ const NavigationContainer = (props: NavigationContainerProps) => {
     select: (user) => user?.handle
   })
   const hasAccount = useHasAccount()
-  const { data: accountStatus } = useAccountStatus()
-  const hasCompletedInitialLoad = useRef(false)
 
   const routeNameRef = useRef<string | undefined>(undefined)
 
-  // Ensure that the user's account data is fully loaded before rendering the app.
-  // This prevents the NavigationContainer from rendering prematurely, which relies
-  // on the hasAccount state to determine how to handle deep links.
-  useEffect(() => {
-    if (
-      !hasCompletedInitialLoad.current &&
-      (accountStatus === Status.SUCCESS || accountStatus === Status.ERROR)
-    ) {
-      hasCompletedInitialLoad.current = true
-    }
-  }, [accountStatus])
-
-  if (
-    !hasCompletedInitialLoad.current &&
-    (accountStatus === Status.IDLE ||
-      (accountStatus === Status.LOADING && !hasAccount))
-  ) {
-    return null
-  }
+  // hasAccount/accountHandle come from useCurrentAccount's synchronous
+  // placeholderData (sourced from local storage), so getStateFromPath has
+  // the values it needs from the first render — no need to gate the
+  // navigator on the server's account-status round trip.
 
   const linking: LinkingOptions<{}> = {
     prefixes: [
