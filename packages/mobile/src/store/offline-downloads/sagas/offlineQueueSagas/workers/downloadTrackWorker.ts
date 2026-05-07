@@ -139,41 +139,70 @@ function* downloadTrackAsync(
       call(writeTrackMetadata, track)
     ])
   } catch (e) {
+    console.warn(
+      `[offline] track ${trackId} download failed:`,
+      e instanceof Error ? e.message : e
+    )
     return OfflineDownloadStatus.ERROR
   }
 
   return OfflineDownloadStatus.SUCCESS
 }
 
+function buildMirrorUris(primary: string, mirrors: string[] | undefined) {
+  const uris = [primary]
+  for (const mirror of mirrors ?? []) {
+    try {
+      const url = new URL(primary)
+      url.hostname = new URL(mirror).hostname
+      uris.push(url.toString())
+    } catch {
+      // skip malformed mirror
+    }
+  }
+  return uris
+}
+
 function* downloadTrackAudio(track: UserTrackMetadata, userId: ID) {
-  const { track_id } = track
+  const { track_id, stream } = track
 
   const trackFilePath = getLocalAudioPath(track_id)
 
-  const audiusSdk = yield* getContext('audiusSdk')
-  const sdk = yield* call(audiusSdk)
-  const audiusBackendInstance = yield* getContext('audiusBackendInstance')
-  const nftAccessSignatureMap = yield* select(getNftAccessSignatureMap)
-  const nftAccessSignature = nftAccessSignatureMap[track_id]?.mp3 ?? null
-  const { data, signature } = yield* call(
-    audiusBackendInstance.signGatedContentRequest,
-    { sdk }
-  )
-  const trackAudioUri = yield* call(
-    [sdk.tracks, sdk.tracks.getTrackStreamUrl],
-    {
-      trackId: Id.parse(track_id),
-      userId: OptionalId.parse(userId),
-      userSignature: signature,
-      userData: data,
-      nftAccessSignature: nftAccessSignature
-        ? JSON.stringify(nftAccessSignature)
-        : undefined
-    }
-  )
-  const response = yield* call(downloadFile, trackAudioUri, trackFilePath)
-  const { status } = response.info()
-  if (status === 200) return
+  // Prefer the v1 pre-signed stream URL (with mirrors), matching the
+  // AudioPlayer's online-streaming logic. Only fall back to building a
+  // URL manually when the v1 response omits stream.url.
+  let candidateUris: string[]
+  if (stream?.url) {
+    candidateUris = buildMirrorUris(stream.url, stream.mirrors)
+  } else {
+    const sdk = yield* getSDK()
+    const audiusBackendInstance = yield* getContext('audiusBackendInstance')
+    const nftAccessSignatureMap = yield* select(getNftAccessSignatureMap)
+    const nftAccessSignature = nftAccessSignatureMap[track_id]?.mp3 ?? null
+    const { data, signature } = yield* call(
+      audiusBackendInstance.signGatedContentRequest,
+      { sdk }
+    )
+    const fallbackUri = yield* call(
+      [sdk.tracks, sdk.tracks.getTrackStreamUrl],
+      {
+        trackId: Id.parse(track_id),
+        userId: OptionalId.parse(userId),
+        userSignature: signature,
+        userData: data,
+        nftAccessSignature: nftAccessSignature
+          ? JSON.stringify(nftAccessSignature)
+          : undefined
+      }
+    )
+    candidateUris = [fallbackUri]
+  }
+
+  for (const uri of candidateUris) {
+    const response = yield* call(downloadFile, uri, trackFilePath)
+    const { status } = response.info()
+    if (status === 200) return
+  }
 
   throw new Error('Unable to download track audio')
 }
@@ -184,15 +213,7 @@ function* downloadTrackCoverArt(track: TrackMetadata) {
   const primaryImage = artwork[SquareSizes.SIZE_1000_BY_1000]
   if (!primaryImage) return
 
-  const coverArtUris = [
-    primaryImage,
-    ...(artwork.mirrors ?? []).map((mirror) => {
-      const url = new URL(primaryImage)
-      url.hostname = new URL(mirror).hostname
-      return url.toString()
-    })
-  ]
-
+  const coverArtUris = buildMirrorUris(primaryImage, artwork.mirrors)
   const covertArtFilePath = getLocalTrackCoverArtDestination(track_id)
 
   for (const coverArtUri of coverArtUris) {
@@ -201,7 +222,9 @@ function* downloadTrackCoverArt(track: TrackMetadata) {
     if (status === 200) return
   }
 
-  throw new Error('Unable to download track cover art')
+  // Best-effort: don't fail the whole track download if cover art is
+  // unavailable — the audio file is the essential payload, and the
+  // collection cover art download follows the same non-fatal pattern.
 }
 
 async function writeTrackMetadata(track: UserTrackMetadata) {
