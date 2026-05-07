@@ -97,6 +97,7 @@ export const QUERY_KEYS = {
   events: 'events',
   eventsByEntityId: 'eventsByEntityId',
   remixContestsList: 'remixContestsList',
+  userContests: 'userContests',
   walletOwner: 'walletOwner',
   tokenPrice: 'tokenPrice',
   usdcBalance: 'usdcBalance',
