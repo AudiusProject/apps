@@ -8,6 +8,7 @@ import {
   Flex,
   IconButton,
   IconIndent,
+  NotificationCount,
   Tooltip,
   useTheme
 } from '@audius/harmony'
@@ -17,7 +18,7 @@ import { useSelector } from 'react-redux'
 import { make, useRecord } from 'common/store/analytics/actions'
 import { QueuePopover } from 'components/queue-popover'
 
-const { getPlaybackQueue } = playbackSelectors
+const { getPlaybackQueue, getUpNext } = playbackSelectors
 
 const messages = {
   queue: 'Queue',
@@ -39,11 +40,17 @@ export const QueueButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const queue = useSelector(getPlaybackQueue)
-  const hasItems = queue.length > 0
+  const upNext = useSelector(getUpNext)
+  // Show the indicator only when there are queued items beyond the currently
+  // playing track — a single playing track shouldn't trigger it.
+  const hasItems = upNext.length > 0
   const { color } = useTheme()
   const record = useRecord()
-  const { showBadge: showNewFeatureBadge, dismiss: dismissNewFeatureBadge } =
-    useQueueNewFeatureBadge()
+  const { dismiss: dismissNewFeatureBadge } = useQueueNewFeatureBadge()
+  // Forced on for local visual testing. Restore the hook's showBadge value
+  // before shipping.
+  const showNewFeatureBadge = true
+  const showQueueDot = hasItems && !showNewFeatureBadge
 
   const handleToggle = useCallback(() => {
     if (showNewFeatureBadge) {
@@ -88,31 +95,29 @@ export const QueueButton = () => {
           mount='body'
         >
           <Flex>
-            <IconButton
-              icon={IconIndent}
-              size='m'
-              color={isOpen ? 'accent' : 'subdued'}
-              aria-label={messages.queue}
-              aria-expanded={isOpen}
-              onClick={handleToggle}
-            />
+            {showQueueDot ? (
+              <NotificationCount size='s'>
+                <IconButton
+                  icon={IconIndent}
+                  size='m'
+                  color={isOpen ? 'accent' : 'subdued'}
+                  aria-label={messages.queue}
+                  aria-expanded={isOpen}
+                  onClick={handleToggle}
+                />
+              </NotificationCount>
+            ) : (
+              <IconButton
+                icon={IconIndent}
+                size='m'
+                color={isOpen ? 'accent' : 'subdued'}
+                aria-label={messages.queue}
+                aria-expanded={isOpen}
+                onClick={handleToggle}
+              />
+            )}
           </Flex>
         </Tooltip>
-        {hasItems ? (
-          <Box
-            css={{
-              position: 'absolute',
-              bottom: -2,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 4,
-              height: 4,
-              borderRadius: 4,
-              background: isOpen ? color.secondary.s400 : color.icon.subdued,
-              pointerEvents: 'none'
-            }}
-          />
-        ) : null}
         {showNewFeatureBadge ? (
           <Box
             aria-hidden
