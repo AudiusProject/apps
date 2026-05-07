@@ -41,6 +41,7 @@ import {
   collapsibleTabScreen
 } from 'app/components/top-tab-bar'
 import { UserLink } from 'app/components/user-link'
+import { useEnterContest } from 'app/hooks/useEnterContest'
 import { useRoute } from 'app/hooks/useRoute'
 import { setVisibility } from 'app/store/drawers/slice'
 
@@ -294,17 +295,7 @@ export const ContestScreen = () => {
     dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
   }, [trackId, dispatch])
 
-  const handleEnterContest = useCallback(() => {
-    if (!trackId)
-      return // Same wire-up as web: jump into the upload flow with `remix_of`
-      // pre-filled so the resulting track is linked to this contest's
-      // parent track. The Upload modal stack reads `initialMetadata` off
-      // its initial route params and merges it into the track metadata
-      // when the user picks a file (see SelectTrackScreen).
-    ;(navigation as any).navigate('Upload', {
-      initialMetadata: { remix_of: { tracks: [{ parent_track_id: trackId }] } }
-    })
-  }, [trackId, navigation])
+  const handleEnterContest = useEnterContest(trackId)
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the
