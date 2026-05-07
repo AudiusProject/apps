@@ -12,7 +12,11 @@ const PAGE_SIZE = 1
  */
 export const useUserHasRemixContest = (hostUserId: ID | null | undefined) => {
   const enabled = hostUserId != null
-  const { data: trackIds, isPending, isFetching } = useUserRemixContests(
+  const {
+    data: trackIds,
+    isPending,
+    isFetching
+  } = useUserRemixContests(
     { userId: hostUserId, pageSize: PAGE_SIZE },
     { enabled }
   )
