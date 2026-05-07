@@ -5,7 +5,7 @@ export const localStorage = new LocalStorage({
   localStorage: AsyncStorage
 })
 
-// Pre-load the keys that useCurrentAccount.placeholderData reads on first
-// render. AsyncStorage is async, so without this preload the sync read returns
-// null and we briefly render the sign-on screen before the network resolves.
+// Pre-load the sync cache for the keys useCurrentAccount.placeholderData
+// reads (AsyncStorage's getItem returns a Promise on RN, so the sync path
+// used to silently return null and we'd flash the sign-on screen).
 export const localStoragePreloadPromise = localStorage.preloadAccountSyncCache()
