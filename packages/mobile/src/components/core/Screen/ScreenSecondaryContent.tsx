@@ -21,11 +21,17 @@ export const ScreenSecondaryContent = (props: ScreenSecondaryContentProps) => {
   const { children, skeleton } = props
   const { isPrimaryContentReady } = useScreenContext()
 
-  // Note: not animating on Android because shadows are rendered natively behind the
-  // animated view and thus don't follow the animation.
+  // Skip the iOS FadeIn entrance when a skeleton is provided — the skeleton
+  // is the visual placeholder, so fading the swap-in causes a brief flash
+  // through opacity 0. Keep the FadeIn for the no-skeleton case where the
+  // children are appearing from nothing.
+  // Android: not animated because shadows render natively behind the
+  // animated view and don't follow the animation.
+  const shouldFadeIn = Platform.OS === 'ios' && !skeleton
+
   return isPrimaryContentReady ? (
     <Animated.View
-      entering={Platform.OS === 'ios' ? FadeIn : undefined}
+      entering={shouldFadeIn ? FadeIn : undefined}
       style={{ flex: 1, minHeight: 0 }}
     >
       {children}

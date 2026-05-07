@@ -23,6 +23,7 @@ import {
 } from 'common/store/pages/signon/selectors'
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
+import { useEffectOnce } from 'react-use'
 
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -76,7 +77,6 @@ export const RootScreen = () => {
   const welcomeModalShown = useSelector(getWelcomeModalShown)
   const isAndroid = Platform.OS === MobileOS.ANDROID
 
-  const [isLoaded, setIsLoaded] = useState(false)
   const [isSplashScreenDismissed, setIsSplashScreenDismissed] = useState(false)
   const { navigate } = useNavigation()
   const { onOpen: openWelcomeDrawer } = useDrawer('Welcome')
@@ -90,21 +90,15 @@ export const RootScreen = () => {
 
   useResetNotificationBadgeCount()
 
-  useEffect(() => {
-    if (
-      !isLoaded &&
-      (accountStatus === Status.SUCCESS || accountStatus === Status.ERROR)
-    ) {
-      // Reset the player when the app is loaded for the first time. Fixes an issue
-      // where after a crash, the player would persist the previous state. PAY-1412.
-      dispatch(reset({ shouldAutoplay: false }))
-      setIsLoaded(true)
-    }
-  }, [accountStatus, setIsLoaded, isLoaded, dispatch])
+  // Reset the player on first mount so a crash doesn't leak previous playback
+  // state into the next session. PAY-1412.
+  useEffectOnce(() => {
+    dispatch(reset({ shouldAutoplay: false }))
+  })
 
-  // Connect to chats websockets and prefetch chats
+  // Connect to chats once the server confirms the account.
   useEffect(() => {
-    if (isLoaded && accountStatus === Status.SUCCESS) {
+    if (accountStatus === Status.SUCCESS) {
       dispatch(connect())
       dispatch(fetchMoreChats())
       dispatch(fetchUnreadMessagesCount())
@@ -113,7 +107,7 @@ export const RootScreen = () => {
     return () => {
       dispatch(disconnect())
     }
-  }, [dispatch, isLoaded, accountStatus])
+  }, [dispatch, accountStatus])
 
   const handleSplashScreenDismissed = useCallback(() => {
     setIsSplashScreenDismissed(true)
@@ -144,50 +138,43 @@ export const RootScreen = () => {
 
   return (
     <>
-      <SplashScreen
-        canDismiss={isLoaded}
-        onDismiss={handleSplashScreenDismissed}
-      />
-      <StatusBar isAppLoaded={isLoaded} />
-      {isLoaded ? (
-        <Stack.Navigator
-          screenOptions={{ gestureEnabled: false, headerShown: false }}
-        >
-          {updateRequired ? (
-            <Stack.Screen name='UpdateStack' component={UpdateRequiredScreen} />
-          ) : null}
+      <SplashScreen canDismiss onDismiss={handleSplashScreenDismissed} />
+      <StatusBar isAppLoaded />
+      <Stack.Navigator
+        screenOptions={{ gestureEnabled: false, headerShown: false }}
+      >
+        {updateRequired ? (
+          <Stack.Screen name='UpdateStack' component={UpdateRequiredScreen} />
+        ) : null}
 
-          {showHomeStack ? (
-            <Stack.Screen
-              name='HomeStack'
-              component={AppDrawerScreen}
-              // animation: none here is a workaround to prevent "white screen of death" on Android
-              options={isAndroid ? { animation: 'none' } : undefined}
-            />
-          ) : (
-            <Stack.Screen name='SignOnStack'>
-              {() => (
-                <SignOnStack
-                  isSplashScreenDismissed={isSplashScreenDismissed}
-                />
-              )}
-            </Stack.Screen>
-          )}
+        {showHomeStack ? (
           <Stack.Screen
-            name='ResetPassword'
-            component={ResetPasswordModalScreen}
-            options={{ presentation: 'modal' }}
+            name='HomeStack'
+            component={AppDrawerScreen}
+            // animation: none here is a workaround to prevent "white screen of death" on Android
+            options={isAndroid ? { animation: 'none' } : undefined}
           />
-          <Stack.Screen
-            name='OAuthScreen'
-            component={OAuthScreen}
-            options={{ presentation: 'modal' }}
-          />
-          <Stack.Screen name='TokenPicker' options={{ presentation: 'modal' }}>
-            {() => <PortalHost name='TokenPickerPortal' />}
+        ) : (
+          <Stack.Screen name='SignOnStack'>
+            {() => (
+              <SignOnStack isSplashScreenDismissed={isSplashScreenDismissed} />
+            )}
           </Stack.Screen>
-        </Stack.Navigator>
-      ) : null}
+        )}
+        <Stack.Screen
+          name='ResetPassword'
+          component={ResetPasswordModalScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name='OAuthScreen'
+          component={OAuthScreen}
+          options={{ presentation: 'modal' }}
+        />
+        <Stack.Screen name='TokenPicker' options={{ presentation: 'modal' }}>
+          {() => <PortalHost name='TokenPickerPortal' />}
+        </Stack.Screen>
+      </Stack.Navigator>
     </>
   )
 }

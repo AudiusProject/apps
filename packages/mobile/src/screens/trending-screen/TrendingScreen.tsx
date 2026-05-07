@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { trendingPageSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
@@ -13,6 +13,7 @@ import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
 import { TrendingFilterButton } from './TrendingFilterButton'
 import { TrendingFilterChips } from './TrendingFilterChips'
 import { TrendingHeader } from './TrendingHeader'
+import { TrendingLineupSkeletons } from './TrendingLineupSkeletons'
 import { TrendingTracksLineup } from './TrendingTracksLineup'
 import { TrendingUndergroundLineup } from './TrendingUndergroundLineup'
 import { TrendingWinnersView } from './TrendingWinnersView'
@@ -33,35 +34,49 @@ export const TrendingScreen = () => {
     'tracks' | 'underground'
   >('tracks')
 
+  // Memoized so the header isn't a new function reference on every render —
+  // otherwise Screen's setOptions runs each parent re-render and React
+  // Navigation rebuilds the header, remounting AccountPictureHeader and
+  // re-firing the profile-picture image-fetch path.
+  const renderHeader = useCallback(
+    () => (
+      <MobileRootHeader title={titleByCategory[category]} showDivider={false}>
+        {category === 'tracks' ? <TrendingFilterButton /> : null}
+      </MobileRootHeader>
+    ),
+    [category]
+  )
+
+  // Render the category pills both as the deferred-render skeleton and as
+  // the children. Same JSX in the same position → React reconciles to the
+  // same TrendingHeader instance across the swap, so the pills appear
+  // immediately and don't pop in / shift content when isScreenReady flips.
+  const trendingPills = (
+    <TrendingHeader
+      title={titleByCategory[category]}
+      icon={IconTrending}
+      filterModal={TRENDING_FILTER_MODAL}
+      showTitleRow={false}
+    />
+  )
+
   return (
-    <Screen
-      url='Trending'
-      header={() => (
-        <MobileRootHeader title={titleByCategory[category]} showDivider={false}>
-          {category === 'tracks' ? <TrendingFilterButton /> : null}
-        </MobileRootHeader>
-      )}
-    >
+    <Screen url='Trending' header={renderHeader}>
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
-        <ScreenPrimaryContent>
-          <TrendingHeader
-            title={titleByCategory[category]}
-            icon={IconTrending}
-            filterModal={TRENDING_FILTER_MODAL}
-            showTitleRow={false}
-          />
+        <ScreenPrimaryContent skeleton={trendingPills}>
+          {trendingPills}
         </ScreenPrimaryContent>
         <ScreenContent>
           {category === 'tracks' ? (
-            <ScreenSecondaryContent>
+            <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
               <TrendingTracksLineup header={<TrendingFilterChips />} />
             </ScreenSecondaryContent>
           ) : category === 'underground' ? (
-            <ScreenSecondaryContent>
+            <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
               <TrendingUndergroundLineup />
             </ScreenSecondaryContent>
           ) : (
-            <ScreenSecondaryContent>
+            <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
               <TrendingWinnersView
                 week={winnersWeek}
                 subFilter={winnersSubFilter}
