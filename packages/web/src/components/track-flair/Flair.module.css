@@ -6,6 +6,8 @@
   position: absolute;
   background-color: var(--harmony-white);
   border-radius: 4px;
+  /* Harmony Image uses positive z-index layers for artwork and overlays. */
+  z-index: 5;
 }
 
 .flair.tiny {
