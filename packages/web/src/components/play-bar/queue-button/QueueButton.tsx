@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux'
 import { make, useRecord } from 'common/store/analytics/actions'
 import { QueuePopover } from 'components/queue-popover'
 
-const { getPlaybackQueue } = playbackSelectors
+const { getPlaybackQueue, getUpNext } = playbackSelectors
 
 const messages = {
   queue: 'Queue',
@@ -40,13 +40,17 @@ export const QueueButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const queue = useSelector(getPlaybackQueue)
+  const upNext = useSelector(getUpNext)
   // Show the indicator only when there are queued items beyond the currently
   // playing track — a single playing track shouldn't trigger it.
-  const hasItems = queue.length > 1
+  const hasItems = upNext.length > 0
   const { color } = useTheme()
   const record = useRecord()
-  const { showBadge: showNewFeatureBadge, dismiss: dismissNewFeatureBadge } =
-    useQueueNewFeatureBadge()
+  const { dismiss: dismissNewFeatureBadge } = useQueueNewFeatureBadge()
+  // Forced on for local visual testing. Restore the hook's showBadge value
+  // before shipping.
+  const showNewFeatureBadge = true
+  const showQueueDot = hasItems && !showNewFeatureBadge
 
   const handleToggle = useCallback(() => {
     if (showNewFeatureBadge) {
@@ -91,7 +95,7 @@ export const QueueButton = () => {
           mount='body'
         >
           <Flex>
-            {hasItems ? (
+            {showQueueDot ? (
               <NotificationCount size='s'>
                 <IconButton
                   icon={IconIndent}

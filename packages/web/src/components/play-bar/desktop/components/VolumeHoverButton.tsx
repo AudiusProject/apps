@@ -9,6 +9,7 @@ import {
   IconVolumeLevel2,
   IconVolumeLevel3,
   ModifierKeys,
+  removeHotkeys,
   setupHotkeys,
   type IconComponent
 } from '@audius/harmony'
@@ -19,6 +20,8 @@ const messages = {
   mute: 'Mute',
   unmute: 'Unmute'
 }
+
+const VOLUME_STEP = 10
 
 const getVolumeIcon = (volumeLevel: number): IconComponent => {
   if (volumeLevel === 0) return IconVolumeLevel0
@@ -49,11 +52,15 @@ export const VolumeHoverButton = ({
   granularity,
   onChange
 }: VolumeHoverButtonProps) => {
-  const [volumeLevel, setVolumeLevel] = useState(getLibraryVolume(defaultValue))
-  const preMuteVolumeRef = useRef(getLibraryVolume(defaultValue))
+  const [volumeLevel, setVolumeLevel] = useState(() =>
+    getLibraryVolume(defaultValue)
+  )
+  const volumeLevelRef = useRef(volumeLevel)
+  const preMuteVolumeRef = useRef(volumeLevel)
 
   const volumeChange = useCallback(
     (value: number, persist = true) => {
+      volumeLevelRef.current = value
       if (persist) {
         window.localStorage.setItem('volume', String(value))
       }
@@ -65,12 +72,12 @@ export const VolumeHoverButton = ({
 
   useEffect(() => {
     const volumeUp = () => {
-      volumeChange(Math.min(volumeLevel + 10, 100))
+      volumeChange(Math.min(volumeLevelRef.current + VOLUME_STEP, granularity))
     }
     const volumeDown = () => {
-      volumeChange(Math.max(volumeLevel - 10, 0))
+      volumeChange(Math.max(volumeLevelRef.current - VOLUME_STEP, 0))
     }
-    setupHotkeys({
+    const hotkeysHook = setupHotkeys({
       38 /* up */: { cb: volumeUp, or: [ModifierKeys.CTRL, ModifierKeys.CMD] },
       40 /* down */: {
         cb: volumeDown,
@@ -78,9 +85,11 @@ export const VolumeHoverButton = ({
       }
     })
     // Ensure rounded edges at the default volume.
-    volumeChange(volumeLevel)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volumeChange])
+    volumeChange(volumeLevelRef.current)
+    return () => {
+      removeHotkeys(hotkeysHook)
+    }
+  }, [granularity, volumeChange])
 
   const handleToggleMute = useCallback(() => {
     if (volumeLevel > 0) {
