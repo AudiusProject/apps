@@ -221,7 +221,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   // default so the body matches the (now hidden) tab list.
   const rawTab = activeTab ?? defaultTab
   const currentTab =
-    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab ? defaultTab : rawTab
+    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
+      ? defaultTab
+      : rawTab
 
   const tabs = profile ? (
     isArtist ? (

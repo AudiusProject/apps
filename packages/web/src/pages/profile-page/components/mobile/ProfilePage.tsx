@@ -188,7 +188,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   // the body in sync with the (now conditional) tab list.
   const rawTab = activeTab ?? defaultTab
   const currentTab =
-    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab ? defaultTab : rawTab
+    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
+      ? defaultTab
+      : rawTab
 
   const profileTabs =
     !profile || isLoading || isEditing ? null : isArtist ? (
