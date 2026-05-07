@@ -379,12 +379,7 @@ export const ContestScreen = () => {
           into the title/CTA/countdown stack. Same pattern
           `ProfileHeader` uses for the bio section below the cover
           photo. */}
-      <Flex
-        p='l'
-        gap='l'
-        pointerEvents='box-none'
-        backgroundColor='white'
-      >
+      <Flex p='l' gap='l' pointerEvents='box-none' backgroundColor='white'>
         {/* Title — pure display; `pointerEvents='none'` wrapper so
             scroll gestures that land on the title pass through. */}
         <Flex pointerEvents='none'>

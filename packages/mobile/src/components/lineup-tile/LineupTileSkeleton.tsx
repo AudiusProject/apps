@@ -16,8 +16,8 @@ export const LineupTileSkeleton = ({ noShimmer }: LineupTileSkeletonProps) => {
   return (
     <Paper>
       <Flex flex={1} justifyContent='space-between'>
-        <Flex direction='row' alignItems='center' p='s' gap='m'>
-          <Skeleton height={80} width={80} noShimmer={noShimmer} />
+        <Flex direction='row' alignItems='center' p='s' gap='s'>
+          <Skeleton height={72} width={72} noShimmer={noShimmer} />
           <Flex gap='s' flex={1}>
             <Skeleton width='80%' height={20} noShimmer={noShimmer} />
             <Skeleton width='60%' height={20} noShimmer={noShimmer} />
