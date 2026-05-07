@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useDispatch } from 'react-redux'
 
 import { useAppContext } from '~/context/appContext'
 import { FeatureFlags } from '~/services/remote-config/feature-flags'
@@ -6,6 +8,10 @@ import { FeatureFlags } from '~/services/remote-config/feature-flags'
 import { useFeatureFlag } from './useFeatureFlag'
 
 const QUEUE_NEW_BADGE_DISMISSED_KEY = '@queue-new-feature-badge-dismissed'
+// Mirrors the IDENTIFY action type in common/store/analytics/actions.
+// Dispatching this triggers the analytics saga to forward traits to Amplitude
+// as user properties, so the A/B variation can be sliced in Amplitude charts.
+const ANALYTICS_IDENTIFY = 'ANALYTICS/IDENTIFY'
 
 /**
  * Drives the "New" indicator on the play queue button.
@@ -22,6 +28,17 @@ export const useQueueNewFeatureBadge = () => {
     FeatureFlags.QUEUE_NEW_FEATURE_BADGE
   )
   const [hasDismissed, setHasDismissed] = useState<boolean | null>(null)
+  const dispatch = useDispatch()
+  const hasIdentifiedRef = useRef(false)
+
+  useEffect(() => {
+    if (!isLoaded || hasIdentifiedRef.current) return
+    hasIdentifiedRef.current = true
+    dispatch({
+      type: ANALYTICS_IDENTIFY,
+      traits: { queue_new_feature_badge: isEnabled ? 'on' : 'off' }
+    })
+  }, [isLoaded, isEnabled, dispatch])
 
   useEffect(() => {
     let cancelled = false
