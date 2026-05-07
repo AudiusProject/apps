@@ -15,6 +15,7 @@ import { route } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
 import { useLinkTo } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { useIsRestoring } from '@tanstack/react-query'
 import {
   getRouteOnCompletion,
   getStartedAndFinishedSignup,
@@ -28,6 +29,7 @@ import { useEffectOnce } from 'react-use'
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { usePrefetchTrendingImages } from 'app/hooks/usePrefetchTrendingImages'
 import { useUpdateRequired } from 'app/hooks/useUpdateRequired'
 import { SplashScreen } from 'app/screens/splash-screen'
 import { UpdateRequiredScreen } from 'app/screens/update-required-screen'
@@ -66,6 +68,12 @@ export type RootScreenParamList = {
 export const RootScreen = () => {
   const { updateRequired } = useUpdateRequired()
   const dispatch = useDispatch()
+  // Keep the native splash up until the query-client cache is fully restored
+  // from AsyncStorage. The skeleton→real content swap happens under the splash,
+  // so the user never sees the brief layout settling that caused a visible
+  // "slide down/up" glitch on content load.
+  const isRestoring = useIsRestoring()
+  usePrefetchTrendingImages()
   const { data: accountStatus } = useAccountStatus()
   const { data: hasCompleteAccount } = useCurrentAccountUser({
     select: selectIsAccountComplete
@@ -138,7 +146,10 @@ export const RootScreen = () => {
 
   return (
     <>
-      <SplashScreen canDismiss onDismiss={handleSplashScreenDismissed} />
+      <SplashScreen
+        canDismiss={!isRestoring}
+        onDismiss={handleSplashScreenDismissed}
+      />
       <StatusBar isAppLoaded />
       <Stack.Navigator
         screenOptions={{ gestureEnabled: false, headerShown: false }}

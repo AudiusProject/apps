@@ -157,11 +157,16 @@ export const useImageSize = <
       return
     }
 
+    // Set the URL optimistically so the image starts rendering from the
+    // native image cache immediately instead of showing a gray placeholder
+    // while the async prefetch is pending. If fetchWithFallback ends up
+    // resolving a different mirror URL, we update then.
+    setImageUrl(targetUrl)
     // Fetch image with fallback mirrors
     try {
       const finalUrl = await fetchWithFallback(targetUrl)
       IMAGE_CACHE.add(finalUrl)
-      setImageUrl(finalUrl)
+      if (finalUrl !== targetUrl) setImageUrl(finalUrl)
     } catch (e) {
       console.error(`Unable to load image ${targetUrl} after retries: ${e}`)
     }

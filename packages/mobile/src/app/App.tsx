@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
+import { playbackActions } from '@audius/common/store'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider, PortalHost } from '@gorhom/portal'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { Platform, UIManager } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -28,7 +29,8 @@ import {
   localStoragePreloadPromise
 } from 'app/services/local-storage'
 import { queryClient } from 'app/services/query-client'
-import { persistor, store } from 'app/store'
+import { queryClientPersistOptions } from 'app/services/query-persister'
+import { getOrCreatePersistor, store, dispatch } from 'app/store'
 import { subscribeToNetworkStatusUpdates } from 'app/utils/reachability'
 
 import { AppContextProvider } from './AppContextProvider'
@@ -98,9 +100,24 @@ const App = () => {
         >
           <Provider store={store}>
             <AudiusQueryProvider>
-              <QueryClientProvider client={queryClient}>
+              <PersistQueryClientProvider
+                client={queryClient}
+                persistOptions={queryClientPersistOptions}
+              >
                 <SyncLocalStorageUserProvider localStorage={localStorage}>
-                  <PersistGate loading={null} persistor={persistor}>
+                  <PersistGate
+                    loading={null}
+                    persistor={getOrCreatePersistor()}
+                    onBeforeLift={() => {
+                      // Reset the player before any children render so that
+                      // NowPlayingDrawer never sees isPlaying=true from a
+                      // previous session. Without this, the PlayBar slide-up
+                      // animation fires (child effects run before parent
+                      // useEffectOnce) and is visible through the fading
+                      // splash screen.
+                      dispatch(playbackActions.reset({ shouldAutoplay: false }))
+                    }}
+                  >
                     <ThemeProvider>
                       <GestureHandlerRootView style={{ flex: 1 }}>
                         <PortalProvider>
@@ -128,7 +145,7 @@ const App = () => {
                     </ThemeProvider>
                   </PersistGate>
                 </SyncLocalStorageUserProvider>
-              </QueryClientProvider>
+              </PersistQueryClientProvider>
             </AudiusQueryProvider>
           </Provider>
         </KeyboardProvider>
