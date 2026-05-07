@@ -1,13 +1,12 @@
 .root {
-  margin-left: var(--harmony-unit-9);
   display: flex;
-  gap: var(--harmony-unit-4);
+  gap: var(--harmony-unit-3);
   justify-content: center;
   align-items: center;
 }
 
 .compact {
-  margin-left: var(--harmony-unit-2);
+  gap: var(--harmony-unit-2);
 }
 
 .toggleRepostContainer,
@@ -20,8 +19,8 @@
 
 .iconButton {
   display: flex;
-  height: var(--harmony-unit-6);
-  width: var(--harmony-unit-6);
+  height: var(--harmony-unit-5);
+  width: var(--harmony-unit-5);
   align-items: center;
   transform: scale3d(1, 1, 1);
   transition: all 0.12s ease-in-out !important;
@@ -47,3 +46,4 @@
   transform: scale(1.15);
   transform-origin: center;
 }
+

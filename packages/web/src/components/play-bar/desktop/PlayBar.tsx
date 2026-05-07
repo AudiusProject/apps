@@ -16,9 +16,9 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
 import PlayButton from 'components/play-bar/PlayButton'
-import VolumeBar from 'components/play-bar/VolumeBar'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
+import { QueueButton } from 'components/play-bar/queue-button/QueueButton'
 import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
 import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
@@ -30,6 +30,7 @@ import { PlaybackRateButton } from '../playback-rate-button/PlaybackRateButton'
 import styles from './PlayBar.module.css'
 import PlayingTrackInfo from './components/PlayingTrackInfo'
 import { SocialActions } from './components/SocialActions'
+import { VolumeHoverButton } from './components/VolumeHoverButton'
 
 const { profilePage } = route
 const { getPlaying, getCounter, getTrackId, getBuffering, getPlaybackRate } =
@@ -265,104 +266,59 @@ const PlayBar = () => {
   }, [initialVolume])
 
   return (
-    <div className={styles.playBar}>
-      <div
-        className={cn(styles.playBarContentWrapper, {
-          [styles.narrow]: isNarrow
-        })}
-        ref={wrapperRef}
-      >
-        <div className={styles.playBarPlayingInfo}>
-          {trackId && artistUserId ? (
-            <PlayingTrackInfo
-              trackId={trackId}
-              isOwner={isOwner}
-              trackTitle={trackTitle}
-              trackPermalink={trackPermalink}
-              artistName={artistName}
-              artistHandle={artistHandle}
-              artistUserId={artistUserId}
-              isVerified={isVerified}
-              isTrackUnlisted={isTrackUnlisted}
-              isStreamGated={isStreamGated}
-              onClickTrackTitle={goToTrackPage}
-              onClickArtistName={goToArtistPage}
-              hasShadow={false}
-              hideArt={isNarrow}
-            />
-          ) : null}
-        </div>
-
-        <div className={styles.playBarControls}>
-          <div className={styles.timeControls}>
-            {audioPlayer ? (
-              <Scrubber
-                mediaKey={`${playingTrackId}${mediaKey}${timing.duration}`}
-                isPlaying={isPlaying && !isBuffering}
-                isDisabled={!playingTrackId}
-                includeTimestamps
-                getAudioPosition={audioPlayer?.getPosition}
-                getTotalTime={audioPlayer?.getDuration}
-                playbackRate={
-                  isLongFormContent ? playbackRateValueMap[playbackRate] : 1
-                }
-                elapsedSeconds={timing.position}
-                totalSeconds={duration ?? 0}
-                style={{
-                  railListenedColor: 'var(--track-slider-rail)',
-                  handleColor: 'var(--track-slider-handle)',
-                  handleBorderColor: 'var(--track-slider-handle-border)'
-                }}
-                onScrubRelease={(position: number) =>
-                  dispatch(seek({ seconds: position }))
-                }
-              />
-            ) : null}
-          </div>
-
-          <div className={styles.buttonControls}>
-            <div className={styles.shuffleButton}>
-              {isLongFormContent ? null : (
-                <ShuffleButton
-                  onShuffleOn={shuffleOn}
-                  onShuffleOff={shuffleOff}
-                />
-              )}
-            </div>
-            <div className={styles.previousButton}>
-              <PreviousButtonProvider onClick={onPrevious} isMobile={false} />
-            </div>
-            <div className={styles.playButton}>
-              <PlayButton
-                playable={playable}
-                status={playButtonStatus}
-                onClick={togglePlay}
-              />
-            </div>
-            <div className={styles.nextButton}>
-              <NextButtonProvider onClick={onNext} isMobile={false} />
-            </div>
-            <div className={styles.repeatButton}>
-              {isLongFormContent ? (
-                <PlaybackRateButton isMobile={false} />
-              ) : (
-                <RepeatButton
-                  onRepeatOff={repeatOff}
-                  onRepeatAll={repeatAll}
-                  onRepeatSingle={repeatSingle}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.optionsRight}>
-          <VolumeBar
-            defaultValue={100}
-            granularity={VOLUME_GRANULARITY}
-            onChange={updateVolume}
-            compact={isNarrow}
+    <div
+      className={cn(styles.playBar, { [styles.narrow]: isNarrow })}
+      ref={wrapperRef}
+    >
+      <div className={styles.artistInfo}>
+        {trackId && artistUserId ? (
+          <PlayingTrackInfo
+            trackId={trackId}
+            isOwner={isOwner}
+            trackTitle={trackTitle}
+            trackPermalink={trackPermalink}
+            artistName={artistName}
+            artistHandle={artistHandle}
+            artistUserId={artistUserId}
+            isVerified={isVerified}
+            isTrackUnlisted={isTrackUnlisted}
+            isStreamGated={isStreamGated}
+            onClickTrackTitle={goToTrackPage}
+            onClickArtistName={goToArtistPage}
+            hasShadow={false}
+            hideArt={isNarrow}
           />
+        ) : null}
+      </div>
+
+      <div className={styles.scrubber}>
+        {audioPlayer ? (
+          <Scrubber
+            mediaKey={`${playingTrackId}${mediaKey}${timing.duration}`}
+            isPlaying={isPlaying && !isBuffering}
+            isDisabled={!playingTrackId}
+            includeTimestamps
+            getAudioPosition={audioPlayer?.getPosition}
+            getTotalTime={audioPlayer?.getDuration}
+            playbackRate={
+              isLongFormContent ? playbackRateValueMap[playbackRate] : 1
+            }
+            elapsedSeconds={timing.position}
+            totalSeconds={duration ?? 0}
+            style={{
+              railListenedColor: 'var(--track-slider-rail)',
+              handleColor: 'var(--track-slider-handle)',
+              handleBorderColor: 'var(--track-slider-handle-border)'
+            }}
+            onScrubRelease={(position: number) =>
+              dispatch(seek({ seconds: position }))
+            }
+          />
+        ) : null}
+      </div>
+
+      <div className={styles.bottomRow}>
+        <div className={styles.bottomLeft}>
           <div
             className={styles.socialActionsWrapper}
             style={trackId ? undefined : { visibility: 'hidden' }}
@@ -373,10 +329,52 @@ const PlayBar = () => {
                 isOwner={isOwner}
                 compact={isNarrow}
               />
-            ) : (
-              <div className={styles.socialActionsPlaceholder} />
+            ) : null}
+          </div>
+        </div>
+
+        <div className={styles.playbackControls}>
+          <div className={styles.shuffleButton}>
+            {isLongFormContent ? null : (
+              <ShuffleButton
+                onShuffleOn={shuffleOn}
+                onShuffleOff={shuffleOff}
+              />
             )}
           </div>
+          <div className={styles.previousButton}>
+            <PreviousButtonProvider onClick={onPrevious} isMobile={false} />
+          </div>
+          <div className={styles.playButton}>
+            <PlayButton
+              playable={playable}
+              status={playButtonStatus}
+              onClick={togglePlay}
+            />
+          </div>
+          <div className={styles.nextButton}>
+            <NextButtonProvider onClick={onNext} isMobile={false} />
+          </div>
+          <div className={styles.repeatButton}>
+            {isLongFormContent ? (
+              <PlaybackRateButton isMobile={false} />
+            ) : (
+              <RepeatButton
+                onRepeatOff={repeatOff}
+                onRepeatAll={repeatAll}
+                onRepeatSingle={repeatSingle}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className={styles.bottomRight}>
+          <VolumeHoverButton
+            defaultValue={100}
+            granularity={VOLUME_GRANULARITY}
+            onChange={updateVolume}
+          />
+          <QueueButton />
         </div>
       </div>
     </div>

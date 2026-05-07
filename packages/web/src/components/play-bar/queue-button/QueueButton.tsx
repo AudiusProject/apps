@@ -8,6 +8,7 @@ import {
   Flex,
   IconButton,
   IconIndent,
+  NotificationCount,
   Tooltip,
   useTheme
 } from '@audius/harmony'
@@ -39,7 +40,9 @@ export const QueueButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const queue = useSelector(getPlaybackQueue)
-  const hasItems = queue.length > 0
+  // Show the indicator only when there are queued items beyond the currently
+  // playing track — a single playing track shouldn't trigger it.
+  const hasItems = queue.length > 1
   const { color } = useTheme()
   const record = useRecord()
   const { showBadge: showNewFeatureBadge, dismiss: dismissNewFeatureBadge } =
@@ -88,31 +91,29 @@ export const QueueButton = () => {
           mount='body'
         >
           <Flex>
-            <IconButton
-              icon={IconIndent}
-              size='m'
-              color={isOpen ? 'accent' : 'subdued'}
-              aria-label={messages.queue}
-              aria-expanded={isOpen}
-              onClick={handleToggle}
-            />
+            {hasItems ? (
+              <NotificationCount size='s'>
+                <IconButton
+                  icon={IconIndent}
+                  size='m'
+                  color={isOpen ? 'accent' : 'subdued'}
+                  aria-label={messages.queue}
+                  aria-expanded={isOpen}
+                  onClick={handleToggle}
+                />
+              </NotificationCount>
+            ) : (
+              <IconButton
+                icon={IconIndent}
+                size='m'
+                color={isOpen ? 'accent' : 'subdued'}
+                aria-label={messages.queue}
+                aria-expanded={isOpen}
+                onClick={handleToggle}
+              />
+            )}
           </Flex>
         </Tooltip>
-        {hasItems ? (
-          <Box
-            css={{
-              position: 'absolute',
-              bottom: -2,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 4,
-              height: 4,
-              borderRadius: 4,
-              background: isOpen ? color.secondary.s400 : color.icon.subdued,
-              pointerEvents: 'none'
-            }}
-          />
-        ) : null}
         {showNewFeatureBadge ? (
           <Box
             aria-hidden

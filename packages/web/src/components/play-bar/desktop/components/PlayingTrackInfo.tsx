@@ -69,7 +69,17 @@ const PlayingTrackInfo = ({
   fullTrackText,
   hideArt = false
 }: PlayingTrackInfoProps) => {
-  const { data: track } = useTrack(trackId)
+  const { data: track } = useTrack(trackId, {
+    select: (track) => ({
+      track_id: track?.track_id,
+      stream_conditions: track?.stream_conditions,
+      download_conditions: track?.download_conditions,
+      access: track?.access,
+      is_stream_gated: track?.is_stream_gated,
+      is_download_gated: track?.is_download_gated,
+      preview_cid: track?.preview_cid
+    })
+  })
   const { hasStreamAccess } = useGatedContentAccess(track)
   const isPreviewing = useSelector(getPreviewing)
   const shouldShowPreviewLock =
