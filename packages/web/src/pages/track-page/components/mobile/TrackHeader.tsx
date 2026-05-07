@@ -184,6 +184,8 @@ const TrackHeader = ({
     select: (track) => {
       return {
         is_downloadable: track?.is_downloadable,
+        is_download_gated: track?.is_download_gated,
+        is_stream_gated: track?.is_stream_gated,
         album_backlink: track?.album_backlink,
         release_date: track?.release_date,
         ddex_app: track?.ddex_app,
@@ -194,6 +196,8 @@ const TrackHeader = ({
   })
   const {
     is_downloadable,
+    is_download_gated,
+    is_stream_gated,
     album_backlink,
     release_date,
     ddex_app,
@@ -202,7 +206,9 @@ const TrackHeader = ({
   } = partialTrack ?? {}
 
   const dispatch = useDispatch()
-  const hasDownloadableAssets = is_downloadable || (_stems?.length ?? 0) > 0
+  const hasGatedDownloadExtras = !!is_download_gated && !is_stream_gated
+  const hasDownloadableAssets =
+    is_downloadable || hasGatedDownloadExtras || (_stems?.length ?? 0) > 0
 
   const showSocials = !isUnlisted && hasStreamAccess
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)

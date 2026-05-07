@@ -192,10 +192,10 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const hasStems = stemTracks.length > 0 || isUploadingStems
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
 
-  // No caret / no expandable list when there's a single downloadable track
-  // (download original ON, no stems). Tapping the row's download button
-  // should be the entire interaction — there's nothing to expand.
-  const isSingleTrackDownload = !!is_downloadable && !hasStems
+  // No caret / no expandable list when there's a single downloadable track.
+  // Tapping the row's download button should be the entire interaction.
+  const hasOriginalDownload = !!is_downloadable
+  const isSingleTrackDownload = hasOriginalDownload && !hasStems
 
   const handleDownloadButtonClick = useRequiresAccountCallback(
     (e: MouseEvent) => {
@@ -341,7 +341,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
         ) : null}
         <Expandable expanded={expanded} id='downloads-section'>
           <Box>
-            {is_downloadable ? (
+            {hasOriginalDownload ? (
               <DownloadRow
                 trackId={trackId}
                 parentTrackId={trackId}
@@ -363,7 +363,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
                 size={fileSizes?.[stemTrack.track_id]?.[downloadQuality]}
                 index={
                   i +
-                  (is_downloadable
+                  (hasOriginalDownload
                     ? STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK
                     : STEM_INDEX_OFFSET_WITHOUT_ORIGINAL_TRACK)
                 }
@@ -378,7 +378,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
                 index={
                   i +
                   stemTracks.length +
-                  (is_downloadable
+                  (hasOriginalDownload
                     ? STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK
                     : STEM_INDEX_OFFSET_WITHOUT_ORIGINAL_TRACK)
                 }

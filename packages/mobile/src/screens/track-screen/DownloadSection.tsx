@@ -153,6 +153,7 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
 
   const hasStems = stemTracks.length > 0
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
+  const hasOriginalDownload = !!track?.is_downloadable
 
   const handleDownloadButtonPress = useCallback(() => {
     if (hasStems) {
@@ -236,7 +237,7 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
       onToggleExpand={onToggleExpand}
     >
       <Flex gap='m'>
-        {track?.is_downloadable ? (
+        {hasOriginalDownload ? (
           <>
             <Divider />
             <DownloadRow
@@ -254,7 +255,7 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
               trackId={stemTrack.track_id}
               index={
                 i +
-                (track?.is_downloadable
+                (hasOriginalDownload
                   ? STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK
                   : STEM_INDEX_OFFSET_WITHOUT_ORIGINAL_TRACK)
               }

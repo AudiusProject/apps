@@ -3,12 +3,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { stemTrackMetadataFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { ID } from '~/models/Identifiers'
-import { StemTrack } from '~/models/Track'
+import type { ID } from '~/models/Identifiers'
+import type { Stem, StemTrack, Track } from '~/models/Track'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 import { primeTrackData } from '../utils/primeTrackData'
+
+import { getTrackQueryKey } from './useTrack'
 
 export const getStemsQueryKey = (trackId: ID | null | undefined) =>
   [QUERY_KEYS.stems, trackId] as unknown as QueryKey<StemTrack[]>
@@ -40,6 +42,24 @@ export const useStems = (
       if (stems.length) {
         primeTrackData({ tracks: stems, queryClient })
       }
+
+      queryClient.setQueryData<Track | undefined>(
+        getTrackQueryKey(trackId!),
+        (track) => {
+          if (!track) {
+            return track
+          }
+
+          return {
+            ...track,
+            _stems: stems.map<Stem>((stem) => ({
+              track_id: stem.track_id,
+              category: stem.stem_of.category,
+              orig_filename: stem.orig_filename ?? ''
+            }))
+          }
+        }
+      )
 
       return stems
     },
