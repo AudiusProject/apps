@@ -12,12 +12,15 @@ import {
   useMutedUsers,
   useProfileTracks,
   useProfileReposts,
+  useUserHasRemixContest,
   getProfileTracksQueryKey,
   getProfileRepostsQueryKey
 } from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { commentsMessages } from '@audius/common/messages'
 import { Status } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -204,10 +207,23 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
   const profileBasePath = profilePage(handle)
 
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const { hasContest: profileHasContest } = useUserHasRemixContest(
+    isArtist && isContestsEnabled ? userId : null
+  )
+  const showContestsTab = isContestsEnabled && profileHasContest
+
   // Determine which tab is active. The URL is the source of truth; activeTab
   // (from useProfilePage, derived from route params) drives the body render.
   const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
-  const currentTab = activeTab ?? defaultTab
+  // If a viewer hits /:handle/contests on a profile that doesn't qualify for
+  // the tab (flag off or host doesn't run any contest), fall back to the
+  // default so the body matches the (now hidden) tab list.
+  const rawTab = activeTab ?? defaultTab
+  const currentTab =
+    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
+      ? defaultTab
+      : rawTab
 
   const tabs = profile ? (
     isArtist ? (
@@ -224,9 +240,11 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
           {ProfilePageTabs.REPOSTS}
         </Tab>
-        <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
-          {ProfilePageTabs.CONTESTS}
-        </Tab>
+        {showContestsTab ? (
+          <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
+            {ProfilePageTabs.CONTESTS}
+          </Tab>
+        ) : null}
       </TabList>
     ) : (
       <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>

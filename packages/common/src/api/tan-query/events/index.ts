@@ -8,6 +8,7 @@ export * from './useEventsByEntityId'
 export * from './useFollowEvent'
 export * from './useRemixContest'
 export * from './useRemixContestWinners'
+export * from './useUserHasRemixContest'
 
 // Mutations
 export * from './useCreateEvent'
