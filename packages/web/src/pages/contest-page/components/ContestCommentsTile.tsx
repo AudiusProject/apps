@@ -815,7 +815,7 @@ const ContestCommentReplyRow = ({
             <UserLink userId={author.user_id} />
             {isAuthorEventOwner ? (
               <Text variant='label' size='xs' color='accent' strength='strong'>
-                {messages.artistBadge}
+                {messages.hostBadge}
               </Text>
             ) : null}
             {createdAt ? <Timestamp time={createdAt} /> : null}
