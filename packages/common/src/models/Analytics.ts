@@ -1512,6 +1512,7 @@ type PlayQueueOpen = {
   eventName: Name.PLAY_QUEUE_OPEN
   source: 'queue'
   queueLength?: number
+  newFeatureBadge?: boolean
 }
 type PlayQueueClose = {
   eventName: Name.PLAY_QUEUE_CLOSE

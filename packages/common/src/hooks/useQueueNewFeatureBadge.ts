@@ -8,13 +8,15 @@ import { useFeatureFlag } from './useFeatureFlag'
 const QUEUE_NEW_BADGE_DISMISSED_KEY = '@queue-new-feature-badge-dismissed'
 
 /**
- * Drives the "New" indicator on the play queue button.
+ * Drives the "New" indicator on the play queue button and tracks first-open
+ * cohort attribution for A/B analysis.
  *
- * `showBadge` is true only when:
- *   1. Remote config feature flag is loaded AND enabled (treatment cohort), and
- *   2. The user has not dismissed the badge before (per local storage).
- *
- * `dismiss` permanently hides the badge for this user/device.
+ * `showBadge` — true only for treatment cohort before their first open.
+ * `isFirstOpen` — true until the user opens the queue for the first time ever.
+ *   null while the localStorage read is in-flight.
+ * `isEnabled` — whether the user is in the treatment cohort (flag on).
+ * `dismiss` — permanently marks "first open done"; safe to call for both
+ *   treatment and control so the analytics property is only sent once.
  */
 export const useQueueNewFeatureBadge = () => {
   const { localStorage } = useAppContext()
@@ -44,6 +46,8 @@ export const useQueueNewFeatureBadge = () => {
   }, [hasDismissed, localStorage])
 
   const showBadge = Boolean(isLoaded && isEnabled && hasDismissed === false)
+  // hasDismissed === false means "read from storage and not yet dismissed"
+  const isFirstOpen = hasDismissed === false
 
-  return { showBadge, dismiss }
+  return { showBadge, dismiss, isFirstOpen, isEnabled, isLoaded }
 }

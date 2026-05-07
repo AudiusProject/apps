@@ -42,20 +42,29 @@ export const QueueButton = () => {
   const hasItems = queue.length > 0
   const { color } = useTheme()
   const record = useRecord()
-  const { showBadge: showNewFeatureBadge, dismiss: dismissNewFeatureBadge } =
-    useQueueNewFeatureBadge()
+  const {
+    showBadge: showNewFeatureBadge,
+    dismiss,
+    isFirstOpen,
+    isEnabled,
+    isLoaded
+  } = useQueueNewFeatureBadge()
 
   const handleToggle = useCallback(() => {
-    if (showNewFeatureBadge) {
-      dismissNewFeatureBadge()
-    }
+    // Capture before dismiss() flips the flag — both treatment and control
+    // users call dismiss() so newFeatureBadge is only sent on the first open.
+    const wasFirstOpen = isFirstOpen && isLoaded
+    dismiss()
+
     setIsOpen((open) => {
       const next = !open
       if (next) {
         record(
           make(Name.PLAY_QUEUE_OPEN, {
             source: 'queue',
-            queueLength: queue.length
+            queueLength: queue.length,
+            // Present only on first-ever open: true = treatment, false = control
+            ...(wasFirstOpen && { newFeatureBadge: isEnabled })
           })
         )
       } else {
@@ -63,7 +72,7 @@ export const QueueButton = () => {
       }
       return next
     })
-  }, [record, queue.length, showNewFeatureBadge, dismissNewFeatureBadge])
+  }, [record, queue.length, isFirstOpen, isEnabled, isLoaded, dismiss])
 
   const handleClose = useCallback(() => {
     setIsOpen((open) => {
