@@ -3,14 +3,19 @@ import { useEffect, useMemo } from 'react'
 import { EntityType } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
-import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
-import { ID } from '~/models'
-import { remixesPageActions } from '~/store/pages'
-
 import { LineupData, QueryOptions } from '../types'
 import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 
-import { UseRemixesArgs, useRemixes, getRemixesQueryKey } from './useRemixes'
+import {
+  UseRemixesArgs,
+  useRemixes,
+  useRemixesCount,
+  getRemixesQueryKey
+} from './useRemixes'
+
+import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
+import { ID } from '~/models'
+import { remixesPageActions } from '~/store/pages'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -60,10 +65,19 @@ export const useRemixesLineup = (
     }
   )
 
+  // Total submissions/remixes count comes from the dedicated count query.
+  // The lineup query's queryFn primes this cache entry, so once the lineup
+  // is loaded this hits the cache instead of making another round-trip.
+  const { data: count } = useRemixesCount(
+    { trackId, isCosign, isContestEntry },
+    {
+      enabled: options?.enabled !== false && !!trackId
+    }
+  )
+
   // Process and order the lineup data
   const processedLineupData: LineupData[] = useMemo(() => {
-    const remixTracks =
-      queryData.data?.pages.flatMap((page) => page.tracks) ?? []
+    const remixTracks = queryData.data?.pages.flat() ?? []
 
     const orderedTracks: LineupData[] = []
 
@@ -114,7 +128,7 @@ export const useRemixesLineup = (
 
   return {
     data: processedLineupData,
-    count: queryData.data?.pages[0]?.count,
+    count,
     trackIds,
     queryKey,
     pageSize,

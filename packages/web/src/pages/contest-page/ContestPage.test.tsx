@@ -25,7 +25,7 @@ const mocks = vi.hoisted(() => ({
   useFollowEvent: vi.fn(),
   useUnfollowEvent: vi.fn(),
   useRemixesLineup: vi.fn(),
-  useRemixes: vi.fn(),
+  useRemixesCount: vi.fn(),
   useRemixersCount: vi.fn(),
   useComment: vi.fn(),
   useEventComments: vi.fn(),
@@ -44,7 +44,7 @@ vi.mock('@audius/common/api', async (importOriginal) => {
     useFollowEvent: mocks.useFollowEvent,
     useUnfollowEvent: mocks.useUnfollowEvent,
     useRemixesLineup: mocks.useRemixesLineup,
-    useRemixes: mocks.useRemixes,
+    useRemixesCount: mocks.useRemixesCount,
     useRemixersCount: mocks.useRemixersCount,
     useComment: mocks.useComment,
     useEventComments: mocks.useEventComments,
@@ -159,9 +159,7 @@ describe('ContestPage', () => {
       lineup: { entries: [], order: {} }
     })
     mocks.useRemixersCount.mockReturnValue({ data: 0 })
-    mocks.useRemixes.mockReturnValue({
-      data: { pages: [{ count: 0 }] }
-    })
+    mocks.useRemixesCount.mockReturnValue({ data: 0 })
     mocks.useEventComments.mockReturnValue({
       data: [],
       isPending: false,
@@ -220,9 +218,7 @@ describe('ContestPage', () => {
     // Submissions pill reads from the count-only API query, not the
     // lineup length — so the test needs a non-zero count for the pill
     // to render.
-    mocks.useRemixes.mockReturnValue({
-      data: { pages: [{ count: 1 }] }
-    })
+    mocks.useRemixesCount.mockReturnValue({ data: 1 })
     renderContestPage()
 
     // About + Prizes are now rendered as uppercase label-style section

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useNotificationEntity, useRemixes } from '@audius/common/api'
+import { useNotificationEntity, useRemixesCount } from '@audius/common/api'
 import {
   ArtistRemixContestEndedNotification as ArtistRemixContestEndedNotificationType,
   TrackEntity
@@ -39,12 +39,10 @@ export const ArtistRemixContestEndedNotification = (
   const dispatch = useDispatch()
 
   const entity = useNotificationEntity(notification) as TrackEntity | null
-  const { data: remixes } = useRemixes({
+  const { data: remixCount = 0 } = useRemixesCount({
     trackId: entity?.track_id,
     isContestEntry: true
   })
-
-  const remixCount = remixes?.pages[0]?.count ?? 0
 
   const pickWinnersRoute = entity ? pickWinnersPage(entity?.permalink) : ''
 

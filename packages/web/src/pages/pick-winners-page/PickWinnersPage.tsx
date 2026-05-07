@@ -5,6 +5,7 @@ import {
   useCurrentUserId,
   useRemixContest,
   useRemixes,
+  useRemixesCount,
   useTrackByPermalink,
   useUpdateEvent
 } from '@audius/common/api'
@@ -104,12 +105,14 @@ export const PickWinnersPage = () => {
   const remixesQuery = useRemixes(remixesArgs)
   const trackIds = useMemo(
     () =>
-      remixesQuery.data?.pages.flatMap((page) =>
-        page.tracks.map((t) => t.id)
-      ) ?? [],
+      remixesQuery.data?.pages.flatMap((page) => page.map((t) => t.id)) ?? [],
     [remixesQuery.data]
   )
-  const count = remixesQuery.data?.pages[0]?.count
+  const { data: count } = useRemixesCount({
+    trackId: originalTrack?.track_id,
+    isCosign,
+    isContestEntry: true
+  })
   const isFetching = remixesQuery.isFetching
   const isPending = remixesQuery.isPending
   const isError = remixesQuery.isError
