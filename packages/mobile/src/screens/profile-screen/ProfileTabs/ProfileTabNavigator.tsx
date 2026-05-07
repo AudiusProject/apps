@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 
-import { useProfileUser } from '@audius/common/api'
+import { useProfileUser, useUserHasRemixContest } from '@audius/common/api'
 import { useFeatureFlag, useIsArtist } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 import { ProfilePageTabs } from '@audius/common/store'
@@ -57,6 +57,10 @@ export const ProfileTabNavigator = ({
   }
   const isArtist = useIsArtist(params)
   const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const { hasContest: profileHasContest } = useUserHasRemixContest(
+    isArtist && isContestsEnabled ? user_id : null
+  )
+  const showContestsTab = isContestsEnabled && profileHasContest
 
   const trackScreen = collapsibleTabScreen({
     name: ProfilePageTabs.TRACKS,
@@ -114,10 +118,10 @@ export const ProfileTabNavigator = ({
         {albumsScreen}
         {playlistsScreen}
         {repostsScreen}
-        {/* Contests tab — gated by the same flag as the contests page +
-            dedicated contest screen. Hidden when CONTESTS is off so the
-            tab doesn't lead to an unreachable destination. */}
-        {isContestsEnabled ? contestsScreen : null}
+        {/* Contests tab — gated by the CONTESTS flag AND on whether this
+            host actually runs any remix contest. Hidden otherwise so the
+            tab doesn't lead to an empty/unreachable destination. */}
+        {showContestsTab ? contestsScreen : null}
       </CollapsibleTabNavigator>
     )
   }

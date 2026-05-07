@@ -3,10 +3,13 @@ import { useEffect, useContext, RefObject, useMemo } from 'react'
 import {
   useProfileTracks,
   useProfileReposts,
+  useUserHasRemixContest,
   getProfileTracksQueryKey,
   getProfileRepostsQueryKey
 } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { Status, User } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -173,8 +176,19 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   )
 
   const profileBasePath = profilePage(handle)
+  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
+  const { hasContest: profileHasContest } = useUserHasRemixContest(
+    isArtist && isContestsEnabled ? userId : null
+  )
+  const showContestsTab = isContestsEnabled && profileHasContest
+
   const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
-  const currentTab = activeTab ?? defaultTab
+  // Fall back to the default tab when the URL points at /contests but the
+  // tab itself is hidden (flag off or this host runs no contests). Keeps
+  // the body in sync with the (now conditional) tab list.
+  const rawTab = activeTab ?? defaultTab
+  const currentTab =
+    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab ? defaultTab : rawTab
 
   const profileTabs =
     !profile || isLoading || isEditing ? null : isArtist ? (
@@ -197,9 +211,11 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         >
           {ProfilePageTabs.REPOSTS}
         </Tab>
-        <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
-          {ProfilePageTabs.CONTESTS}
-        </Tab>
+        {showContestsTab ? (
+          <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
+            {ProfilePageTabs.CONTESTS}
+          </Tab>
+        ) : null}
       </TabList>
     ) : (
       <TabList
