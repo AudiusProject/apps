@@ -88,11 +88,20 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  // Default to expanded so the stems list is visible without an extra
-  // tap. Once we support multiple source tracks per contest we'll flip
-  // back to collapsed-by-default to keep the surface compact. Matches
-  // the web ContestStemsCard.
-  const [expanded, setExpanded] = useState(true)
+  // Default to expanded for short lists so the user sees the stems
+  // without an extra tap; auto-collapse when there are more than
+  // STEMS_COLLAPSE_THRESHOLD entries so a long list doesn't push the
+  // comments tab way down the screen. Explicit user toggle wins.
+  const STEMS_COLLAPSE_THRESHOLD = 5
+  const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
+  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
+  const expanded = expandedOverride ?? stemsBelowThreshold
+  const setExpanded = (next: boolean | ((prev: boolean) => boolean)) => {
+    setExpandedOverride((prev) => {
+      const current = prev ?? stemsBelowThreshold
+      return typeof next === 'function' ? next(current) : next
+    })
+  }
 
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
@@ -146,19 +155,15 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   if (!track || !artist) return null
 
   return (
-    <Paper direction='column' borderRadius='m' shadow='flat'>
-      {/* Heading sits in the top padding slot — matches the web
-          ContestStemsCard. The inner padding+border wrapper that used
-          to live here was dropped per the contest QA pass: web has no
-          inner container, so the mobile card now reads as one surface
-          with the same vertical rhythm. */}
-      <View style={{ paddingTop: 16, paddingHorizontal: 16 }}>
-        <Text variant='label' size='m' color='subdued'>
-          {messages.heading}
-        </Text>
-      </View>
+    <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
+      <Text variant='label' size='m' color='subdued'>
+        {messages.heading}
+      </Text>
 
-      <Flex direction='column'>
+      {/* Inner bordered container — separates the source-track +
+          stems block from the card heading and any future siblings,
+          matching Figma 2925-18101. */}
+      <Paper direction='column' borderRadius='m' shadow='flat' border='default'>
         {/* Collapsed summary row: artwork + access label + artist +
             caret. */}
         <Flex direction='row' p='l' gap='m' alignItems='center'>
@@ -260,7 +265,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             ))}
           </View>
         ) : null}
-      </Flex>
+      </Paper>
     </Paper>
   )
 }

@@ -95,11 +95,22 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     useDownloadTrackArchiveModal()
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
-  // Default to expanded so the stems list is visible without an extra
-  // click. Once we support multiple source tracks per contest we'll flip
-  // back to collapsed-by-default to keep the surface compact.
-  const [expanded, setExpanded] = useState(true)
   const stemsCount = stems.length
+  // Default to expanded for short lists so users can see the stems
+  // without an extra click; collapse when there are more than
+  // STEMS_COLLAPSE_THRESHOLD entries so a long list doesn't push the
+  // followers + comments tiles way down the page. The user's explicit
+  // toggle (override) wins over the heuristic.
+  const STEMS_COLLAPSE_THRESHOLD = 5
+  const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
+  const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
+  const expanded = expandedOverride ?? stemsBelowThreshold
+  const setExpanded = (next: boolean | ((prev: boolean) => boolean)) => {
+    setExpandedOverride((prev) => {
+      const current = prev ?? stemsBelowThreshold
+      return typeof next === 'function' ? next(current) : next
+    })
+  }
 
   // Same file-size query the track page runs. `stemTracks.map(...)` is
   // what feeds per-stem row sizes; adding the parent trackId means
@@ -223,7 +234,12 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           role='button'
           tabIndex={0}
           onClick={handleRowClick}
-          css={{ cursor: 'pointer' }}
+          css={{
+            cursor: 'pointer',
+            '&:hover .contest-stems-card-title': {
+              color: color.primary.primary
+            }
+          }}
         >
           <Box
             w={64}
@@ -238,21 +254,13 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             }}
           />
           <Flex direction='column' gap='2xs' css={{ flex: 1, minWidth: 0 }}>
-            {/* Title underlines + turns accent on its own hover, the way
-                the UserLink below it does. Previously the whole row
-                hover scope highlighted the title — that scope was too
-                broad (just hovering the cover art lit up the title). */}
             <Text
               variant='title'
               size='m'
               color='default'
+              className='contest-stems-card-title'
               css={{
-                cursor: 'pointer',
-                transition: 'color var(--harmony-quick)',
-                '&:hover': {
-                  color: color.primary.primary,
-                  textDecoration: 'underline'
-                }
+                transition: 'color var(--harmony-quick)'
               }}
             >
               {track.title}

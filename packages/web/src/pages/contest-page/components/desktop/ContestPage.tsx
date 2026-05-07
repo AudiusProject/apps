@@ -61,6 +61,7 @@ import {
   pickWinnersPage
 } from 'utils/route'
 
+import { useEnterContest } from '../../hooks/useEnterContest'
 import { ContestCommentsTile } from '../ContestCommentsTile'
 import { ContestFollowersModal } from '../ContestFollowersModal'
 import { ContestStemsCard } from '../ContestStemsCard'
@@ -364,22 +365,12 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     navigate(pickWinnersPage(track.permalink))
   }, [track?.permalink, navigate])
 
-  const handleEnterContest = useRequiresAccountCallback(() => {
-    if (!trackId) return
-    // Deep-link into the upload flow with `remix_of` pre-filled so the
-    // resulting track is linked back to the contest track. UploadPage
-    // reads `initialMetadata` off `location.state`, NOT off URL search
-    // params — the previous `?remix_of=ID` query string was being
-    // ignored, which is why submissions weren't getting linked to
-    // contests.
-    navigate('/upload', {
-      state: {
-        initialMetadata: {
-          remix_of: { tracks: [{ parent_track_id: trackId }] }
-        }
-      }
-    })
-  }, [trackId, navigate])
+  // Deep-link into the upload flow with the source track's artwork +
+  // genre + remix_of pre-filled. See `useEnterContest` for the full
+  // shape; reused across the desktop + mobile contest pages and the
+  // mobile track-page contest details tab so submitters get the same
+  // pre-filled form regardless of entry point.
+  const handleEnterContest = useEnterContest(trackId)
 
   const handleShareContest = useCallback(() => {
     if (!trackId) return
@@ -640,14 +631,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 {renderActions()}
               </Flex>
 
-              {/* Title — prefer the host-authored custom title set on the
-                  Edit Contest page; fall back to "<track title> Remix
-                  Contest" so contests created before the title field
-                  existed (or saved without a title) still read sensibly. */}
+              {/* Title */}
               <Box mt='l'>
                 <Text variant='display' size='s'>
-                  {(contest.eventData as any)?.title?.trim() ||
-                    `${track.title} ${messages.title}`}
+                  {track.title} {messages.title}
                 </Text>
               </Box>
 
