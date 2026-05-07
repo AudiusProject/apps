@@ -21,6 +21,7 @@ export type IdentifyTraits = {
   name?: string
   email?: string
   userId?: ID
+  queue_new_feature_badge?: 'on' | 'off'
 }
 
 export type AnalyticsEvent = {
