@@ -578,6 +578,9 @@ export enum Name {
   REMIX_CONTEST_DELETE = 'Remix Contest: Delete',
   REMIX_CONTEST_PICK_WINNERS_OPEN = 'Remix Contest: Pick Winners Open',
   REMIX_CONTEST_PICK_WINNERS_FINALIZE = 'Remix Contest: Finalize Winners',
+  REMIX_CONTEST_VIEW = 'Remix Contest: View',
+  REMIX_CONTEST_ENTER = 'Remix Contest: Enter',
+  REMIX_CONTEST_VIEW_SUBMISSIONS = 'Remix Contest: View Submissions',
 
   // Android App Lifecycle
   ANDROID_APP_RESTART_HEARTBEAT = 'Android App: Restart Due to Heartbeat',
@@ -2868,6 +2871,24 @@ export type RemixContestPickWinnersFinalize = {
   trackId: ID
 }
 
+export type RemixContestView = {
+  eventName: Name.REMIX_CONTEST_VIEW
+  remixContestId: ID
+  trackId: ID
+}
+
+export type RemixContestEnter = {
+  eventName: Name.REMIX_CONTEST_ENTER
+  remixContestId: ID
+  trackId: ID
+}
+
+export type RemixContestViewSubmissions = {
+  eventName: Name.REMIX_CONTEST_VIEW_SUBMISSIONS
+  remixContestId: ID
+  trackId: ID
+}
+
 export type AndroidAppRestartHeartbeat = {
   eventName: Name.ANDROID_APP_RESTART_HEARTBEAT
   timeSinceLastHeartbeat: number
@@ -3504,6 +3525,9 @@ export type AllTrackingEvents =
   | RemixContestDelete
   | RemixContestPickWinnersOpen
   | RemixContestPickWinnersFinalize
+  | RemixContestView
+  | RemixContestEnter
+  | RemixContestViewSubmissions
   | AndroidAppRestartHeartbeat
   | AndroidAppRestartStale
   | AndroidAppRestartForceQuit
