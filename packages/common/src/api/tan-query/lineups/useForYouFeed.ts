@@ -1,16 +1,15 @@
-import { EntityType, Id } from '@audius/sdk'
+import { Id } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
-import { transformAndCleanList, userFeedItemFromSDK } from '~/adapters'
-import { useQueryContext } from '~/api/tan-query/utils'
-import { ID, UserCollectionMetadata, UserTrackMetadata } from '~/models'
+import { userTrackMetadataFromSDK } from '~/adapters/track'
+import { transformAndCleanList } from '~/adapters/utils'
+import { primeTrackData, useQueryContext } from '~/api/tan-query/utils'
+import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
-import { LineupData, QueryKey, QueryOptions } from '../types'
+import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
-import { primeCollectionData } from '../utils/primeCollectionData'
-import { primeTrackData } from '../utils/primeTrackData'
 
 export const FOR_YOU_INITIAL_PAGE_SIZE = 10
 export const FOR_YOU_LOAD_MORE_PAGE_SIZE = 10
@@ -21,17 +20,13 @@ type ForYouFeedArgs = {
 }
 
 export const getForYouFeedQueryKey = (userId: ID | null | undefined) => {
-  return [QUERY_KEYS.forYouFeed, userId] as unknown as QueryKey<
-    (UserTrackMetadata | UserCollectionMetadata)[]
-  >
+  return [QUERY_KEYS.forYouFeed, userId] as unknown as QueryKey<ID[]>
 }
 
 /**
  * "For You" personalized feed. Calls the server-ranked
  * `GET /v1/users/{id}/feed/for-you` endpoint and exposes the result as
- * a paginated lineup. Pagination via offset; the underlying response
- * shape is shared with `getUserFeed`, so items are mixed tracks +
- * collections and we filter to track ids for the lineup consumer.
+ * a paginated lineup of track ids.
  */
 export const useForYouFeed = (
   {
@@ -48,7 +43,7 @@ export const useForYouFeed = (
 
   const query = useInfiniteQuery({
     initialPageParam: 0,
-    getNextPageParam: (lastPage: LineupData[], allPages) => {
+    getNextPageParam: (lastPage: ID[], allPages) => {
       const isFirstPage = allPages.length === 1
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       if (lastPage.length < currentPageSize) return undefined
@@ -56,6 +51,7 @@ export const useForYouFeed = (
     },
     queryKey,
     queryFn: async ({ pageParam }) => {
+      if (!currentUserId) return [] as ID[]
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
@@ -63,50 +59,24 @@ export const useForYouFeed = (
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         limit: currentPageSize,
-        offset: pageParam,
-        withUsers: true
+        offset: pageParam
       })
 
-      const feed = transformAndCleanList(data, userFeedItemFromSDK).map(
-        ({ item }) => item
-      )
+      const tracks = primeTrackData({
+        tracks: transformAndCleanList(data, userTrackMetadataFromSDK),
+        queryClient
+      })
 
-      const { tracks, collections } = feed.reduce(
-        (acc, item) => {
-          if ('track_id' in item) {
-            acc.tracks.push(item)
-          } else {
-            acc.collections.push(item)
-          }
-          return acc
-        },
-        {
-          tracks: [] as UserTrackMetadata[],
-          collections: [] as UserCollectionMetadata[]
-        }
-      )
-
-      primeTrackData({ tracks, queryClient })
-      primeCollectionData({ collections, queryClient })
-
-      return feed.map((item) =>
-        'track_id' in item
-          ? { id: item.track_id, type: EntityType.TRACK }
-          : { id: item.playlist_id, type: EntityType.PLAYLIST }
-      )
+      return tracks.map(({ track_id }) => track_id)
     },
     select: (data) => data?.pages.flat(),
     ...options,
     enabled: options?.enabled !== false && currentUserId !== null
   })
 
-  const data = query.data ?? []
-  const trackIds = data
-    .filter((d) => d.type === EntityType.TRACK)
-    .map((d) => d.id as ID)
+  const trackIds = query.data ?? []
 
   return {
-    data,
     trackIds,
     isPending: query.isPending,
     isLoading: query.isLoading,

@@ -46,6 +46,7 @@ import type {
   PurchasesCountResponse,
   PurchasesResponse,
   RelatedArtistResponse,
+  RemixContestsResponse,
   RemixersCountResponse,
   RemixersResponse,
   Reposts,
@@ -139,6 +140,8 @@ import {
     PurchasesResponseToJSON,
     RelatedArtistResponseFromJSON,
     RelatedArtistResponseToJSON,
+    RemixContestsResponseFromJSON,
+    RemixContestsResponseToJSON,
     RemixersCountResponseFromJSON,
     RemixersCountResponseToJSON,
     RemixersResponseFromJSON,
@@ -312,6 +315,13 @@ export interface GetBulkUsersRequest {
 
 export interface GetConnectedWalletsRequest {
     id: string;
+}
+
+export interface GetContestsByUserRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    status?: GetContestsByUserStatusEnum;
 }
 
 export interface GetFollowersRequest {
@@ -674,6 +684,14 @@ export interface GetUserFeedRequest {
     followeeUserId?: Array<number>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
+}
+
+export interface GetUserForYouFeedRequest {
+    id: string;
+    limit?: number;
+    offset?: number;
+    maxPerArtist?: number;
+    userId?: string;
 }
 
 export interface GetUserIDsByAddressesRequest {
@@ -1702,6 +1720,58 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getConnectedWallets(params: GetConnectedWalletsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ConnectedWalletsResponse> {
         const response = await this.getConnectedWalletsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get the remix contests hosted by a single user, ordered with currently-active contests first (by soonest-ending end_date) followed by ended contests (most-recently-ended first). Mirrors the response shape of `GET /events/remix-contests` (data + related users / tracks / entry_counts).
+     * Get contests hosted by user
+     */
+    async getContestsByUserRaw(params: GetContestsByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<RemixContestsResponse>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getContestsByUser.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.status !== undefined) {
+            queryParameters['status'] = params.status;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/contests`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => RemixContestsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the remix contests hosted by a single user, ordered with currently-active contests first (by soonest-ending end_date) followed by ended contests (most-recently-ended first). Mirrors the response shape of `GET /events/remix-contests` (data + related users / tracks / entry_counts).
+     * Get contests hosted by user
+     */
+    async getContestsByUser(params: GetContestsByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<RemixContestsResponse> {
+        const response = await this.getContestsByUserRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -4107,6 +4177,62 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
+     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground, similar-artist) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Get For You feed for user
+     */
+    async getUserForYouFeedRaw(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserForYouFeed.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.maxPerArtist !== undefined) {
+            queryParameters['max_per_artist'] = params.maxPerArtist;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/feed/for-you`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground, similar-artist) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Get For You feed for user
+     */
+    async getUserForYouFeed(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
+        const response = await this.getUserForYouFeedRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
      * Gets User IDs from any Ethereum wallet address or Solana account address associated with their Audius account.
      */
     async getUserIDsByAddressesRaw(params: GetUserIDsByAddressesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserIdsAddressesResponse>> {
@@ -5233,6 +5359,15 @@ export const GetAudioTransactionsSortDirectionEnum = {
     Desc: 'desc'
 } as const;
 export type GetAudioTransactionsSortDirectionEnum = typeof GetAudioTransactionsSortDirectionEnum[keyof typeof GetAudioTransactionsSortDirectionEnum];
+/**
+ * @export
+ */
+export const GetContestsByUserStatusEnum = {
+    Active: 'active',
+    Ended: 'ended',
+    All: 'all'
+} as const;
+export type GetContestsByUserStatusEnum = typeof GetContestsByUserStatusEnum[keyof typeof GetContestsByUserStatusEnum];
 /**
  * @export
  */

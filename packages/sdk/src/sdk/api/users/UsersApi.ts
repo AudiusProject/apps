@@ -21,8 +21,6 @@ import {
   DownloadPurchasesAsCSVRequest,
   DownloadSalesAsCSVRequest,
   DownloadUSDCWithdrawalsAsCSVRequest,
-  UserFeedResponse,
-  UserFeedResponseFromJSON,
   UsersApi as GeneratedUsersApi,
   type UserPlaylistLibrary
 } from '../generated/default'
@@ -59,14 +57,6 @@ import {
   type EntityManagerPlaylistLibraryContents,
   type UsersApiServicesConfig
 } from './types'
-
-export interface GetUserForYouFeedRequest {
-  id: string
-  offset?: number
-  limit?: number
-  userId?: string
-  withUsers?: boolean
-}
 
 export class UsersApi extends GeneratedUsersApi {
   private readonly storage: StorageService
@@ -854,59 +844,6 @@ export class UsersApi extends GeneratedUsersApi {
   /** @hidden
    * Update user collectibles preferences
    */
-  /**
-   * Hand-written binding for `GET /v1/users/{id}/feed/for-you` — the
-   * server-ranked For You feed. Move into the generated client when the
-   * SDK is regenerated against the updated discovery spec.
-   */
-  async getUserForYouFeed(
-    params: GetUserForYouFeedRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<UserFeedResponse> {
-    if (params.id === null || params.id === undefined) {
-      throw new runtime.RequiredError(
-        'id',
-        'Required parameter params.id was null or undefined when calling getUserForYouFeed.'
-      )
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const queryParameters: any = {}
-    if (params.offset !== undefined) queryParameters.offset = params.offset
-    if (params.limit !== undefined) queryParameters.limit = params.limit
-    if (params.userId !== undefined) queryParameters.user_id = params.userId
-    if (params.withUsers !== undefined) {
-      queryParameters.with_users = params.withUsers
-    }
-
-    const headerParameters: runtime.HTTPHeaders = {}
-    if (
-      !headerParameters.Authorization &&
-      this.configuration &&
-      this.configuration.accessToken
-    ) {
-      const token = await this.configuration.accessToken('OAuth2', ['read'])
-      if (token) headerParameters.Authorization = token
-    }
-
-    const response = await this.request(
-      {
-        path: `/users/{id}/feed/for-you`.replace(
-          '{id}',
-          encodeURIComponent(String(params.id))
-        ),
-        method: 'GET',
-        headers: headerParameters,
-        query: queryParameters
-      },
-      initOverrides
-    )
-
-    return await new runtime.JSONApiResponse(response, (jsonValue) =>
-      UserFeedResponseFromJSON(jsonValue)
-    ).value()
-  }
-
   async updateCollectibles(params: UpdateCollectiblesRequest) {
     const { userId, collectibles } = await parseParams(
       'updateCollectibles',
