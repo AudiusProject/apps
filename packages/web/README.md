@@ -21,16 +21,16 @@
 
 ## Development
 
-There are 3 environments you can develop against
+There are 2 environments you can develop against
 
+- prod (main net) — the default
 - dev (local net, see the [Audius Protocol](https://github.com/AudiusProject/apps))
-- stage (test net)
-- prod (main net)
 
 ### Running
 
 ```bash
-npm run start:<environment>
+npm run start        # Against production (default)
+npm run start:local  # Against local services
 ```
 
 When running against a dev environment on a remote machine, enable a network proxy:
@@ -42,8 +42,9 @@ networksetup -setautoproxyurl "Wi-Fi" "http://$AUDIUS_REMOTE_DEV_HOST:8080/proxy
 ### Building
 
 ```bash
-# Bundles static assets into ./build-<environment>
-npm run build:<environment>
+# Bundles static assets into ./build-<environment>, where <environment> is dev or prod
+npm run build:dev
+npm run build:prod
 ```
 
 ### Electron (Desktop App)
@@ -51,8 +52,8 @@ npm run build:<environment>
 To run electron using a static build:
 
 ```bash
-npm run build:<environment>
-npm run electron:<environment>
+npm run build:prod
+npm run electron:prod
 # Or to point at a local service with an optional port specifier
 npm run electron:localhost # -- <port>
 ```
@@ -60,7 +61,7 @@ npm run electron:localhost # -- <port>
 To build a desktop binary using a static build (outputs to `./dist`):
 
 ```bash
-npm run build:<environment>
+npm run build:prod
 
 # Build all the binaries!!
 npm run dist
