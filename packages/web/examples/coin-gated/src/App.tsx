@@ -26,6 +26,29 @@ type TrackItem = {
   isStreamGated?: boolean
 }
 
+type FanClubComment = {
+  id: string
+  userId?: string
+  message: string
+  createdAt: string
+  isMembersOnly?: boolean
+  isTombstone?: boolean
+}
+
+type FanClubUser = {
+  id?: string
+  handle?: string
+  name?: string
+}
+
+type FanClubFeedResponse = {
+  data: Array<
+    | { item_type: 'text_post'; comment: FanClubComment }
+    | { item_type: 'track'; track: TrackItem }
+  >
+  related: { users: FanClubUser[]; tracks: TrackItem[] }
+}
+
 // ---------------------------------------------------------------------------
 // Phantom wallet detection
 // ---------------------------------------------------------------------------
@@ -112,6 +135,64 @@ function useGatedTracks(artistId: string | undefined, userId: string | undefined
 }
 
 // ---------------------------------------------------------------------------
+// Hooks: useFanClubPosts
+// ---------------------------------------------------------------------------
+//
+// Fetches the fan-club feed for a coin mint. The API enforces the holder gate
+// using whichever credentials the SDK has set:
+//   - OAuth user (sdk.oauth.login) -> gate via the user's linked wallets
+//   - Solana wallet (sdk.solanaWallet.auth) -> gate via X-Solana-* headers
+//
+// Members-only text posts are returned with their `message` populated when the
+// caller holds the coin, and tombstoned (`isTombstone: true`, empty message)
+// otherwise. Public posts (`isMembersOnly: false`) are always visible.
+
+function useFanClubPosts(
+  coinMint: string | undefined,
+  userId: string | undefined,
+  walletConnected: boolean,
+  walletPubkey: string | null
+) {
+  const sdk = getSDK()
+  return useQuery({
+    queryKey: [
+      'fan-club-posts',
+      coinMint,
+      userId,
+      walletConnected,
+      walletPubkey
+    ],
+    queryFn: async () => {
+      const res = (await sdk.comments.getFanClubFeed({
+        mint: coinMint!,
+        userId,
+        sortMethod: 'newest'
+      })) as FanClubFeedResponse
+
+      const userById = new Map<string, FanClubUser>()
+      for (const u of res.related?.users ?? []) {
+        if (u.id) userById.set(u.id, u)
+      }
+
+      const posts = res.data
+        .filter(
+          (item): item is { item_type: 'text_post'; comment: FanClubComment } =>
+            item.item_type === 'text_post'
+        )
+        .map((item) => ({
+          ...item.comment,
+          author: item.comment.userId
+            ? userById.get(item.comment.userId)
+            : undefined
+        }))
+
+      return posts
+    },
+    enabled: !!coinMint
+  })
+}
+
+// ---------------------------------------------------------------------------
 // App
 // ---------------------------------------------------------------------------
 
@@ -144,6 +225,11 @@ export default function App() {
 
   const coinMint = coin?.mint
   const { data: coinBalance } = useCoinBalance(userId, walletPubkey ?? undefined, coinMint)
+  const {
+    data: posts,
+    isPending: postsPending,
+    error: postsError
+  } = useFanClubPosts(coinMint, userId, walletConnected, walletPubkey)
 
   // -------------------------------------------------------------------------
   // OAuth session restore
@@ -291,7 +377,7 @@ export default function App() {
     return (
       <div className='center'>
         <div className='card'>
-          <h1 className='title'>Coin-Gated Tracks</h1>
+          <h1 className='title'>Coin-Gated Content</h1>
           <p className='required'>Requires an Audius developer app API key.</p>
           <p className='required'>
             Create a <code>.env</code> file with:
@@ -315,10 +401,10 @@ export default function App() {
   return (
     <div className='container'>
       {/* Header */}
-      <h1 className='title'>Coin-Gated Tracks</h1>
+      <h1 className='title'>Coin-Gated Content</h1>
       <p className='subtitle'>
-        Browse and stream coin-gated tracks using an artist coin.
-        Sign in with Audius or connect a Solana wallet.
+        Browse coin-gated tracks and members-only fan-club text posts using an
+        artist coin. Sign in with Audius or connect a Solana wallet.
       </p>
 
       {/* Ticker input */}
@@ -484,6 +570,77 @@ export default function App() {
                     >
                       {isPlaying ? '\u23F9' : '\u25B6'}
                     </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Coin-gated text posts */}
+      {coin && (
+        <div className='card'>
+          <p className='sectionTitle'>Coin-Gated Text Posts</p>
+          <p className='postsHint'>
+            Members-only posts are returned with their message body when the
+            caller holds the coin (via OAuth-linked wallet or connected Solana
+            wallet). Otherwise the API returns them tombstoned.
+          </p>
+
+          {postsPending ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+              <div className='spinner' />
+            </div>
+          ) : postsError ? (
+            <p className='error'>
+              {postsError instanceof Error ? postsError.message : 'Failed to load posts'}
+            </p>
+          ) : !posts || posts.length === 0 ? (
+            <p className='emptyState'>
+              No fan-club text posts found for ${coinTicker}.
+            </p>
+          ) : (
+            <ul className='postList'>
+              {posts.map((post) => {
+                const membersOnly = !!post.isMembersOnly
+                const tombstoned = !!post.isTombstone
+                const decrypted = !tombstoned && post.message.length > 0
+                const accessGranted = !membersOnly || decrypted
+
+                return (
+                  <li key={post.id} className='postItem'>
+                    <div className='postHeader'>
+                      <span className='postAuthor'>
+                        @{post.author?.handle ?? 'unknown'}
+                      </span>
+                      <span className='postBadges'>
+                        {membersOnly ? (
+                          <span className='memberBadge'>Members-only</span>
+                        ) : (
+                          <span className='publicBadge'>Public</span>
+                        )}
+                        <span
+                          className={
+                            accessGranted ? 'accessGranted' : 'accessDenied'
+                          }
+                        >
+                          {accessGranted ? 'Access granted' : 'Locked'}
+                        </span>
+                      </span>
+                    </div>
+                    <p className='postBody'>
+                      {decrypted ? (
+                        post.message
+                      ) : (
+                        <em className='postLocked'>
+                          Locked – hold ${coinTicker} to view this post.
+                        </em>
+                      )}
+                    </p>
+                    <p className='postMeta'>
+                      {new Date(post.createdAt).toLocaleString()}
+                    </p>
                   </li>
                 )
               })}
