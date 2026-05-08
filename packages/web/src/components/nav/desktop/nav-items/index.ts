@@ -1,3 +1,4 @@
+export { HomeNavItem } from './HomeNavItem'
 export { FeedNavItem } from './FeedNavItem'
 export { TrendingNavItem } from './TrendingNavItem'
 export { ExploreNavItem } from './ExploreNavItem'

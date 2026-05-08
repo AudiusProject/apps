@@ -49,7 +49,6 @@ import NavBanner, { EmptyNavBanner } from 'components/nav-banner/NavBanner'
 import { FlushPageContainer } from 'components/page/FlushPageContainer'
 import Page from 'components/page/Page'
 import ProfilePicture from 'components/profile-picture/ProfilePicture'
-import { ProfileCompletionHeroCard } from 'components/profile-progress/components/ProfileCompletionHeroCard'
 import { EmptyStatBanner, StatBanner } from 'components/stat-banner/StatBanner'
 import { Tab, TabList } from 'components/tabs'
 import UploadChip from 'components/upload/UploadChip'
@@ -168,9 +167,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     onCloseUnblockUserConfirmationModal,
     onCloseMuteUserConfirmationModal
   } = useProfilePage()
-  const renderProfileCompletionCard = () => {
-    return isOwner ? <ProfileCompletionHeroCard /> : null
-  }
 
   const isDeactivated = !!profile?.is_deactivated
 
@@ -321,7 +317,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     // Default: Tracks
     return (
       <Box w='100%'>
-        {renderProfileCompletionCard()}
         {status === Status.SUCCESS ? (
           tracksEmpty ? (
             <>
@@ -372,7 +367,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     // Default: Reposts
     return (
       <Box w='100%'>
-        {renderProfileCompletionCard()}
         {userRepostsEmpty ? (
           <EmptyTab
             isOwner={isOwner}

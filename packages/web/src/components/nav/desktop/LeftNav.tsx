@@ -16,6 +16,7 @@ import { useNavSidebar } from './NavSidebarContext'
 import { NowPlayingArtworkTile } from './NowPlayingArtworkTile'
 import { RouteNav } from './RouteNav'
 import {
+  HomeNavItem,
   FeedNavItem,
   TrendingNavItem,
   ExploreNavItem,
@@ -128,6 +129,7 @@ export const LeftNav = (props: OwnProps) => {
               flex='1 1 auto'
               css={{ overflow: 'hidden' }}
             >
+              <HomeNavItem />
               <TrendingNavItem />
               <FeedNavItem />
               <ExploreNavItem />

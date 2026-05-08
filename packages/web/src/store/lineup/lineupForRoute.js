@@ -27,7 +27,8 @@ const {
   SETTINGS_PAGE,
   NOT_FOUND_PAGE,
   LIBRARY_PAGE,
-  TRACK_EDIT_PAGE
+  TRACK_EDIT_PAGE,
+  HOMEPAGE_PAGE
 } = route
 const { getCollectionTracksLineup } = collectionPageSelectors
 const { getDiscoverFeedLineup } = feedPageSelectors
@@ -50,7 +51,8 @@ export const getLineupSelectorForRoute = (location) => {
     matchPage(UPLOAD_PAGE) ||
     matchPage(DASHBOARD_PAGE) ||
     matchPage(SETTINGS_PAGE) ||
-    matchPage(NOT_FOUND_PAGE)
+    matchPage(NOT_FOUND_PAGE) ||
+    matchPage(HOMEPAGE_PAGE)
   ) {
     return () => null
   }

@@ -50,9 +50,8 @@ target 'AudiusReactNative' do
 
     def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
       framework_path = File.join(Dir.pwd, framework_relative_path)
-      command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
-      puts "Stripping bitcode: #{command}"
-      system(command)
+      puts "Stripping bitcode: #{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+      system(bitcode_strip_path, framework_path, "-r", "-o", framework_path)
     end
 
     framework_paths = [
@@ -65,6 +64,53 @@ target 'AudiusReactNative' do
     framework_paths.each do |framework_relative_path|
       strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
     end
+
+    def patch_react_native_scripts_for_paths_with_spaces(react_native_path)
+      hermes_script_path = File.join(react_native_path, "sdks/hermes-engine/utils/replace_hermes_version.js")
+      hermes_contents = File.read(hermes_script_path)
+      patched_hermes_contents = hermes_contents
+        .gsub(
+          "const {execSync} = require('child_process');",
+          "const {execFileSync} = require('child_process');"
+        )
+        .gsub(
+          '  execSync(`tar -xf ${tarballURLPath} -C ${finalLocation}`);',
+          "  execFileSync('tar', ['-xf', tarballURLPath, '-C', finalLocation]);"
+        )
+
+      if patched_hermes_contents != hermes_contents
+        puts "Patching Hermes replacement script for paths with spaces"
+        File.write(hermes_script_path, patched_hermes_contents)
+      end
+
+      environment_script_path = File.join(react_native_path, "scripts/xcode/with-environment.sh")
+      environment_contents = File.read(environment_script_path)
+      patched_environment_contents = environment_contents.gsub(
+        "if [ -n \"$1\" ]; then\n  $1\nfi",
+        "if [ \"$#\" -gt 0 ]; then\n  \"$@\"\nfi"
+      )
+
+      if patched_environment_contents != environment_contents
+        puts "Patching React Native Xcode environment script for paths with spaces"
+        File.write(environment_script_path, patched_environment_contents)
+      end
+    end
+
+    def patch_script_phase_for_paths_with_spaces(script_phase)
+      return if script_phase.shell_script.nil?
+
+      patched_script = script_phase.shell_script.gsub(
+        '/bin/sh -c "$WITH_ENVIRONMENT $SCRIPT_PHASES_SCRIPT"',
+        '"$WITH_ENVIRONMENT" "$SCRIPT_PHASES_SCRIPT"'
+      )
+
+      if patched_script != script_phase.shell_script
+        puts "Patching #{script_phase.display_name} script phase for paths with spaces"
+        script_phase.shell_script = patched_script
+      end
+    end
+
+    patch_react_native_scripts_for_paths_with_spaces(config[:reactNativePath])
 
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
    react_native_post_install(
@@ -81,6 +127,25 @@ target 'AudiusReactNative' do
 
     # https://github.com/CocoaPods/CocoaPods/issues/11402#issuecomment-1201464693
     installer.pods_project.targets.each do |target|
+      target.shell_script_build_phases.each do |script_phase|
+        patch_script_phase_for_paths_with_spaces(script_phase)
+      end
+
+      target.build_configurations.each do |config|
+        deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        next if deployment_target.nil?
+
+        if Gem::Version.new(deployment_target) < Gem::Version.new('15.5')
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
+        end
+      end
+
+      if target.name == "fmt"
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'gnu++17'
+        end
+      end
+
       if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
         target.build_configurations.each do |config|
             config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
@@ -101,4 +166,3 @@ target 'AudiusReactNative' do
 
   end
 end
-

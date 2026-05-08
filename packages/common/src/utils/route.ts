@@ -52,6 +52,7 @@ export const UPLOAD_ALBUM_PAGE = '/upload/album'
 export const UPLOAD_PLAYLIST_PAGE = '/upload/playlist'
 export const SETTINGS_PAGE = '/settings'
 export const HOME_PAGE = '/'
+export const HOMEPAGE_PAGE = '/home'
 export const NOT_FOUND_PAGE = '/404'
 export const SIGN_IN_PAGE = '/signin'
 export const SIGN_IN_CONFIRM_EMAIL_PAGE = '/signin/confirm-email'
@@ -337,6 +338,7 @@ export const orderedRoutes = [
   SALES_PAGE,
   WITHDRAWALS_PAGE,
   NOT_FOUND_PAGE,
+  HOMEPAGE_PAGE,
   HOME_PAGE,
   PLAYLIST_PAGE,
   ALBUM_PAGE,
@@ -350,6 +352,7 @@ export const orderedRoutes = [
 ]
 
 export const staticRoutes = new Set([
+  HOMEPAGE_PAGE,
   FEED_PAGE,
   TRENDING_PAGE,
   EXPLORE_PAGE,
