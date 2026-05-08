@@ -56,6 +56,7 @@ export type Modals =
   | 'BrowserPushPermissionConfirmation'
   | 'AudioBreakdown'
   | 'DeactivateAccountConfirmation'
+  | 'FeedFilter'
   | 'PurchaseVendor'
   | 'TrendingGenreSelection'
   | 'TrendingCategory'

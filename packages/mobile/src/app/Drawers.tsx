@@ -24,6 +24,7 @@ import { MuteCommentsConfirmationDrawer } from 'app/components/drawers/MuteComme
 import { DuplicateAddConfirmationDrawer } from 'app/components/duplicate-add-confirmation-drawer'
 import { EnablePushNotificationsDrawer } from 'app/components/enable-push-notifications-drawer'
 import { FanClubDetailsDrawer } from 'app/components/fan-club-details-drawer/FanClubDetailsDrawer'
+import { FeedFilterDrawer } from 'app/components/feed-filter-drawer'
 import { ForgotPasswordDrawer } from 'app/components/forgot-password-drawer'
 import { HostRemixContestDrawer } from 'app/components/host-remix-contest-drawer/HostRemixContestDrawer'
 import { InboxUnavailableDrawer } from 'app/components/inbox-unavailable-drawer/InboxUnavailableDrawer'
@@ -115,6 +116,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
   Share: ShareDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
+  FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
   TrendingFilter: TrendingCombinedFilterDrawer,
   Overflow: OverflowMenuDrawer,

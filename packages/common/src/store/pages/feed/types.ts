@@ -1,6 +1,5 @@
-import { FeedFilter, FeedTab } from '../../../models'
+import { FeedFilter } from '../../../models'
 
 export type FeedPageState = {
   feedFilter: FeedFilter
-  feedTab: FeedTab
 }

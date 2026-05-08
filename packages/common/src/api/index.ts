@@ -38,7 +38,6 @@ export * from './tan-query/collection/useBestSellingAlbums'
 
 // Lineups
 export * from './tan-query/lineups/useFeed'
-export * from './tan-query/lineups/useForYouFeed'
 export * from './tan-query/lineups/useExclusiveTracks'
 export * from './tan-query/lineups/useLibraryTracks'
 export * from './tan-query/lineups/useProfileReposts'
