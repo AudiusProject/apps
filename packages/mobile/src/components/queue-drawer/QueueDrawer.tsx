@@ -3,11 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTrack, useUser } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { Name, SquareSizes } from '@audius/common/models'
-import type { PlaybackTrack, QueueSource } from '@audius/common/store'
+import type { QueueSource } from '@audius/common/store'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
 import { make, useRecord } from 'common/store/analytics/actions'
-import { Pressable, View } from 'react-native'
+import { Dimensions, Pressable, View } from 'react-native'
 import DraggableFlatList from 'react-native-draggable-flatlist'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -15,6 +15,8 @@ import {
   Divider,
   Flex,
   IconButton,
+  IconCaretDown,
+  IconCaretUp,
   IconClose,
   IconDrag,
   IconPause,
@@ -42,12 +44,24 @@ const {
 
 const DRAWER_NAME = 'Queue'
 
+const SCREEN_HEIGHT = Dimensions.get('window').height
+// Default (non-fullscreen) drawer takes ~85% of the screen so the user can
+// still see/dismiss the drawer by tapping the dimmed background, and so the
+// drag handle and header are guaranteed to be on-screen regardless of how
+// long the queue is.
+const COLLAPSED_HEIGHT = Math.round(SCREEN_HEIGHT * 0.85)
+// Fixed row height — required so getItemLayout works and initialScrollIndex
+// doesn't break scroll bounds.
+const ROW_HEIGHT = 64
+
 const messages = {
   queue: 'Queue',
   upNext: 'Up Next',
   clear: 'Clear',
   emptyQueue: 'Your queue is empty.',
-  playingFrom: 'Playing from '
+  playingFrom: 'Playing from ',
+  expand: 'Expand queue',
+  collapse: 'Collapse queue'
 }
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -73,7 +87,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 type RowProps = {
   trackId: ID
-  variant: 'now-playing' | 'queued' | 'up-next'
+  variant: 'now-playing' | 'past' | 'upcoming' | 'next-from'
   isPlaying?: boolean
   onPlayPause?: () => void
   onPlay?: () => void
@@ -104,6 +118,7 @@ const MiniTrackRow = ({
   })
 
   const isNowPlaying = variant === 'now-playing'
+  const isPast = variant === 'past'
 
   return (
     <Pressable
@@ -112,8 +127,9 @@ const MiniTrackRow = ({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: spacing.s,
-        paddingVertical: spacing.s,
-        gap: spacing.m
+        gap: spacing.m,
+        height: ROW_HEIGHT,
+        opacity: isPast ? 0.6 : 1
       }}
     >
       <View
@@ -209,20 +225,11 @@ const MiniTrackRow = ({
   )
 }
 
-type UpNextItem = {
-  kind: 'up-next'
-  trackId: ID
-}
-type QueuedItem = {
-  kind: 'queued'
+type ListItem = {
+  kind: 'past' | 'now-playing' | 'upcoming'
   trackId: ID
   queueIndex: number
 }
-type NowPlayingItem = {
-  kind: 'now-playing'
-  trackId: ID
-}
-type ListItem = NowPlayingItem | QueuedItem | UpNextItem
 
 const useNextFromSourceMobile = () => {
   const querySource = useSelector(getQuerySource)
@@ -271,6 +278,15 @@ export const QueueDrawer = () => {
   const { trackIds: nextFromIds, sourceKey } = useNextFromSourceMobile()
   const record = useRecord()
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const listRef = useRef<any>(null)
+
+  // Reset fullscreen state when the drawer fully closes so the next open
+  // starts in the collapsed state.
+  useEffect(() => {
+    if (!isOpen) setIsFullscreen(false)
+  }, [isOpen])
+
   const queueLengthRef = useRef(queue.length)
   useEffect(() => {
     queueLengthRef.current = queue.length
@@ -303,8 +319,6 @@ export const QueueDrawer = () => {
     setIsItemDragging(true)
   }, [])
   const handleDragRelease = useCallback(() => {
-    // Defer slightly so the drawer's PanResponder can't grab the tail end of
-    // the gesture as the finger lifts.
     if (dragResetTimeout.current) clearTimeout(dragResetTimeout.current)
     dragResetTimeout.current = setTimeout(() => {
       setIsItemDragging(false)
@@ -317,22 +331,21 @@ export const QueueDrawer = () => {
     }
   }, [])
 
-  const nowPlaying: PlaybackTrack | null =
-    index >= 0 && index < queue.length ? queue[index] : null
-  const upNextStart = index >= 0 ? index + 1 : 0
-  const queuedTracks = useMemo<PlaybackTrack[]>(
-    () => (index >= 0 ? queue.slice(index + 1) : []),
-    [queue, index]
-  )
-
-  const queuedListData = useMemo<QueuedItem[]>(
+  // Build full queue list — past, now-playing, and upcoming all rendered so
+  // the user can scroll above the now-playing track to see history.
+  const listData = useMemo<ListItem[]>(
     () =>
-      queuedTracks.map((t, i) => ({
-        kind: 'queued' as const,
+      queue.map((t, i) => ({
+        kind:
+          i < index
+            ? ('past' as const)
+            : i === index
+              ? ('now-playing' as const)
+              : ('upcoming' as const),
         trackId: t.trackId,
-        queueIndex: upNextStart + i
+        queueIndex: i
       })),
-    [queuedTracks, upNextStart]
+    [queue, index]
   )
 
   const handleTogglePlay = useCallback(() => {
@@ -373,6 +386,7 @@ export const QueueDrawer = () => {
     [dispatch, queue, record]
   )
 
+  const upNextStart = index >= 0 ? index + 1 : 0
   const handleClear = useCallback(() => {
     const upcomingLength = Math.max(queue.length - upNextStart, 0)
     dispatch(clearUpcoming())
@@ -384,33 +398,31 @@ export const QueueDrawer = () => {
     )
   }, [dispatch, queue.length, upNextStart, record])
 
-  const handleReorder = useCallback(
+  // Reorder is only valid for upcoming tracks (anything after the now-playing
+  // index). The from/to indices come from the rendered list and align with
+  // the underlying queue index because we render the entire queue.
+  const handleListReorder = useCallback(
     ({ from, to }: { from: number; to: number }) => {
       if (from === to) return
+      if (index < 0) return
+      if (from <= index || to <= index) return
       const orderedIndices = Array.from({ length: queue.length }, (_, i) => i)
-      const movable = orderedIndices.slice(upNextStart)
-      const [moved] = movable.splice(from, 1)
-      movable.splice(to, 0, moved)
-      dispatch(
-        reorder({
-          orderedIndices: [...orderedIndices.slice(0, upNextStart), ...movable]
-        })
-      )
-      const fromAbsolute = upNextStart + from
-      const toAbsolute = upNextStart + to
-      const movedTrackId = queue[fromAbsolute]?.trackId
+      const [moved] = orderedIndices.splice(from, 1)
+      orderedIndices.splice(to, 0, moved)
+      dispatch(reorder({ orderedIndices }))
+      const movedTrackId = queue[from]?.trackId
       if (movedTrackId !== undefined) {
         record(
           make(Name.PLAY_QUEUE_REORDER_TRACK, {
             source: 'queue',
             trackId: String(movedTrackId),
-            fromPosition: fromAbsolute,
-            toPosition: toAbsolute
+            fromPosition: from,
+            toPosition: to
           })
         )
       }
     },
-    [dispatch, queue, upNextStart, record]
+    [dispatch, queue, index, record]
   )
 
   const handleAddNextFromToQueue = useCallback(
@@ -432,14 +444,8 @@ export const QueueDrawer = () => {
     [dispatch, sourceKey, record]
   )
 
-  const renderQueuedItem = useCallback(
-    ({
-      item,
-      drag
-    }: {
-      item: QueuedItem | { kind: 'now-playing'; trackId: ID }
-      drag: () => void
-    }) => {
+  const renderItem = useCallback(
+    ({ item, drag }: { item: ListItem; drag: () => void }) => {
       if (item.kind === 'now-playing') {
         return (
           <MiniTrackRow
@@ -450,10 +456,19 @@ export const QueueDrawer = () => {
           />
         )
       }
+      if (item.kind === 'past') {
+        return (
+          <MiniTrackRow
+            trackId={item.trackId}
+            variant='past'
+            onPlay={() => handlePlayQueueItem(item.queueIndex)}
+          />
+        )
+      }
       return (
         <MiniTrackRow
           trackId={item.trackId}
-          variant='queued'
+          variant='upcoming'
           onPlay={() => handlePlayQueueItem(item.queueIndex)}
           onRemove={() => handleRemove(item.queueIndex)}
           drag={drag}
@@ -470,16 +485,52 @@ export const QueueDrawer = () => {
     ]
   )
 
-  const draggableData = useMemo<ListItem[]>(() => {
-    const items: ListItem[] = []
-    if (nowPlaying) {
-      items.push({ kind: 'now-playing', trackId: nowPlaying.trackId })
-    }
-    items.push(...queuedListData)
-    return items
-  }, [nowPlaying, queuedListData])
-
   const isEmpty = queue.length === 0
+
+  const initialScrollIndex =
+    index >= 0 && index < listData.length ? index : undefined
+
+  // FlatList row layout — required for initialScrollIndex to behave correctly
+  // and avoid clipped scroll bounds.
+  const getItemLayout = useCallback(
+    (_data: ArrayLike<ListItem> | null | undefined, i: number) => ({
+      length: ROW_HEIGHT,
+      offset: ROW_HEIGHT * i,
+      index: i
+    }),
+    []
+  )
+
+  const renderListFooter = useCallback(() => {
+    if (nextFromIds.length === 0) return null
+    return (
+      <View
+        style={{
+          paddingTop: spacing.l
+        }}
+      >
+        <View style={{ paddingHorizontal: spacing.s, marginBottom: spacing.s }}>
+          <Text variant='title' size='m' color='default'>
+            {messages.upNext}
+          </Text>
+          <Text variant='body' size='s' color='subdued'>
+            {messages.playingFrom}
+            <Text variant='body' size='s' color='accent'>
+              {sourceLabel(sourceKey)}
+            </Text>
+          </Text>
+        </View>
+        {nextFromIds.map((trackId) => (
+          <MiniTrackRow
+            key={`nf-${trackId}`}
+            trackId={trackId}
+            variant='next-from'
+            onPlay={() => handleAddNextFromToQueue(trackId)}
+          />
+        ))}
+      </View>
+    )
+  }, [nextFromIds, sourceKey, spacing.l, spacing.s, handleAddNextFromToQueue])
 
   return (
     <NativeDrawer
@@ -488,7 +539,12 @@ export const QueueDrawer = () => {
       drawerStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
       gesturesDisabled={isItemDragging}
     >
-      <View style={{ width: '100%', paddingBottom: spacing.l }}>
+      <View
+        style={{
+          width: '100%',
+          height: isFullscreen ? SCREEN_HEIGHT : COLLAPSED_HEIGHT
+        }}
+      >
         <Flex alignItems='center' pt='s' pb='xs'>
           <View
             style={{
@@ -504,14 +560,23 @@ export const QueueDrawer = () => {
           alignItems='center'
           justifyContent='space-between'
           ph='l'
-          pv='l'
+          pv='m'
         >
           <Text variant='title' size='l' strength='strong' color='default'>
             {messages.queue}
           </Text>
-          {!isEmpty ? (
-            <PlainButton onPress={handleClear}>{messages.clear}</PlainButton>
-          ) : null}
+          <Flex direction='row' alignItems='center' gap='m'>
+            {!isEmpty ? (
+              <PlainButton onPress={handleClear}>{messages.clear}</PlainButton>
+            ) : null}
+            <IconButton
+              icon={isFullscreen ? IconCaretDown : IconCaretUp}
+              size='m'
+              color='subdued'
+              aria-label={isFullscreen ? messages.collapse : messages.expand}
+              onPress={() => setIsFullscreen((s) => !s)}
+            />
+          </Flex>
         </Flex>
         <Divider orientation='horizontal' />
 
@@ -522,67 +587,47 @@ export const QueueDrawer = () => {
             </Text>
           </Flex>
         ) : (
-          <View style={{ paddingHorizontal: spacing.s }}>
+          <View
+            style={{
+              flex: 1,
+              paddingHorizontal: spacing.s,
+              paddingTop: spacing.xs
+            }}
+          >
             <DraggableFlatList<ListItem>
-              data={draggableData}
-              keyExtractor={(item, i) =>
-                item.kind === 'now-playing'
-                  ? `np-${item.trackId}`
-                  : item.kind === 'queued'
-                    ? `q-${item.queueIndex}`
-                    : `un-${item.trackId}-${i}`
-              }
-              renderItem={renderQueuedItem as any}
+              ref={listRef as any}
+              data={listData}
+              keyExtractor={(item) => `q-${item.queueIndex}-${item.trackId}`}
+              renderItem={renderItem as any}
+              getItemLayout={getItemLayout}
+              initialScrollIndex={initialScrollIndex}
+              onScrollToIndexFailed={(info) => {
+                const wait = setTimeout(() => {
+                  listRef.current?.scrollToIndex({
+                    index: Math.min(
+                      info.index,
+                      Math.max(info.highestMeasuredFrameIndex, 0)
+                    ),
+                    animated: false
+                  })
+                }, 100)
+                return () => clearTimeout(wait)
+              }}
+              showsVerticalScrollIndicator
               onDragBegin={() => {
                 setIsItemDragging(true)
                 haptics.medium()
               }}
               onDragEnd={({ from, to }) => {
                 handleDragRelease()
-                // The first item is always the now-playing track (not draggable).
-                // Adjust indices to match the queuedListData (which excludes
-                // now-playing).
-                const adjFrom = nowPlaying ? from - 1 : from
-                const adjTo = nowPlaying ? to - 1 : to
-                if (adjFrom < 0 || adjTo < 0) return
-                handleReorder({ from: adjFrom, to: adjTo })
+                handleListReorder({ from, to })
               }}
               activationDistance={20}
-              scrollEnabled
+              ListFooterComponent={renderListFooter}
+              contentContainerStyle={{ paddingBottom: spacing.l }}
             />
           </View>
         )}
-
-        {nextFromIds.length > 0 ? (
-          <View
-            style={{
-              paddingHorizontal: spacing.s,
-              paddingTop: spacing.m
-            }}
-          >
-            <View
-              style={{ paddingHorizontal: spacing.s, marginBottom: spacing.s }}
-            >
-              <Text variant='title' size='m' color='default'>
-                {messages.upNext}
-              </Text>
-              <Text variant='body' size='s' color='subdued'>
-                {messages.playingFrom}
-                <Text variant='body' size='s' color='accent'>
-                  {sourceLabel(sourceKey)}
-                </Text>
-              </Text>
-            </View>
-            {nextFromIds.map((trackId) => (
-              <MiniTrackRow
-                key={`nf-${trackId}`}
-                trackId={trackId}
-                variant='up-next'
-                onPlay={() => handleAddNextFromToQueue(trackId)}
-              />
-            ))}
-          </View>
-        ) : null}
       </View>
     </NativeDrawer>
   )

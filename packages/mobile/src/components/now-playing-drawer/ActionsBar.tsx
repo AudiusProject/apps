@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect } from 'react'
+import { useCallback, useLayoutEffect } from 'react'
 
 import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
 import {
@@ -28,13 +28,6 @@ import type { Nullable } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 import { View, Platform } from 'react-native'
 import { CastButton, useDevices } from 'react-native-google-cast'
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
-} from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
@@ -96,21 +89,6 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     flexGrow: 1,
     alignItems: 'center'
   },
-  queueButtonContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative'
-  },
-  newFeatureBadge: {
-    position: 'absolute',
-    top: spacing(2),
-    right: '38%',
-    width: spacing(2),
-    height: spacing(2),
-    borderRadius: spacing(1),
-    backgroundColor: palette.secondary
-  },
   buyButton: {
     backgroundColor: palette.specialLightGreen
   },
@@ -151,23 +129,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
     }
     openQueue()
   }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
-
-  const newBadgePulse = useSharedValue(1)
-  useEffect(() => {
-    if (!showQueueNewFeatureBadge) {
-      newBadgePulse.value = 1
-      return
-    }
-    newBadgePulse.value = withRepeat(
-      withTiming(0.55, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
-    )
-  }, [showQueueNewFeatureBadge, newBadgePulse])
-  const newBadgeAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: newBadgePulse.value,
-    transform: [{ scale: 0.4 + newBadgePulse.value * 0.8 }]
-  }))
 
   const isOwner = track?.owner_id === accountUserId
 
@@ -366,22 +327,14 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
 
   const renderQueueButton = () => {
     return (
-      <View style={styles.queueButtonContainer}>
-        <IconButton
-          icon={IconIndent}
-          onPress={handleOpenQueue}
-          size='l'
-          aria-label={messages.queueLabel}
-        />
-        {showQueueNewFeatureBadge ? (
-          <Animated.View
-            pointerEvents='none'
-            accessibilityElementsHidden
-            importantForAccessibility='no-hide-descendants'
-            style={[styles.newFeatureBadge, newBadgeAnimatedStyle]}
-          />
-        ) : null}
-      </View>
+      <IconButton
+        icon={IconIndent}
+        onPress={handleOpenQueue}
+        size='l'
+        color={showQueueNewFeatureBadge ? 'active' : 'default'}
+        aria-label={messages.queueLabel}
+        style={styles.button}
+      />
     )
   }
 
