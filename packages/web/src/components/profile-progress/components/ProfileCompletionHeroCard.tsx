@@ -28,6 +28,11 @@ const BADGE_COLUMN_WIDTH = 280
 const CARD_CONTAINER_NAME = 'profile-completion-hero-card'
 const STACK_BREAKPOINT_PX = 600
 const STACK_QUERY = `@container ${CARD_CONTAINER_NAME} (max-width: ${STACK_BREAKPOINT_PX}px)`
+// At and above this card width, the task grid switches to two columns. Below
+// this (but still in the side-by-side badge layout), the task grid is a
+// single column so the longest task titles never need to truncate.
+const TWO_COL_BREAKPOINT_PX = 800
+const TWO_COL_QUERY = `@container ${CARD_CONTAINER_NAME} (min-width: ${TWO_COL_BREAKPOINT_PX}px)`
 
 interface CompletionStage {
   isCompleted: boolean
@@ -199,11 +204,17 @@ export const ProfileCompletionHeroCard = (
             css={{
               width: '100%',
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              // Single column by default — fits any task title without any
+              // truncation, and looks consistent with the sidebar tooltip
+              // pattern. At wide card widths we promote to two columns so
+              // the meter doesn't waste vertical space.
+              gridTemplateColumns: 'minmax(0, 1fr)',
               gap: theme.spacing.s,
               alignContent: 'start',
+              [TWO_COL_QUERY]: {
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'
+              },
               [STACK_QUERY]: {
-                gridTemplateColumns: 'minmax(0, 1fr)',
                 gap: theme.spacing.xs
               }
             }}

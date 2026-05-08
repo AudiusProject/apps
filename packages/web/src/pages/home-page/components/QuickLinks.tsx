@@ -7,7 +7,7 @@ import {
   useTrack,
   useUserRemixContests
 } from '@audius/common/api'
-import { useChallengeCooldownSchedule } from '@audius/common/hooks'
+import { useChallengeCooldownSchedule, useIsArtist } from '@audius/common/hooks'
 import { formatNumberCommas, route } from '@audius/common/utils'
 import {
   Flex,
@@ -36,7 +36,8 @@ const {
   REWARDS_PAGE,
   SIGN_UP_PAGE,
   UPLOAD_PAGE,
-  clubPage
+  clubPage,
+  profilePage
 } = route
 
 const messages = {
@@ -46,6 +47,7 @@ const messages = {
   launchFanClub: 'Launch a Fan Club',
   manageFanClub: 'Manage Fan Club',
   uploadTrack: 'Upload',
+  yourProfile: 'Your Profile',
   getVerified: 'Get Verified',
   joinDiscord: 'Discord',
   support: 'Support',
@@ -133,7 +135,9 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
     enabled: isAuthed
   })
 
+  const isArtist = useIsArtist({ id: currentUserId ?? undefined })
   const isVerified = !!currentUser?.is_verified
+  const currentUserHandle = currentUser?.handle
 
   const pills = useMemo<Pill[]>(() => {
     if (!isAuthed) {
@@ -173,14 +177,33 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
       })
     }
 
+    items.push({
+      key: 'upload',
+      label: messages.uploadTrack,
+      icon: IconCloudUpload,
+      to: UPLOAD_PAGE
+    })
+
+    if (currentUserHandle) {
+      items.push({
+        key: 'your-profile',
+        label: messages.yourProfile,
+        icon: IconUser,
+        to: profilePage(currentUserHandle)
+      })
+    }
+
     const hostedCount = hostedContestTrackIds?.length ?? 0
     if (hostedCount === 0) {
-      items.push({
-        key: 'host-contest',
-        label: messages.hostContest,
-        icon: IconTrophy,
-        to: HOST_REMIX_CONTEST_ROOT_PAGE
-      })
+      // Only artists can host a contest — non-artists never see the empty CTA.
+      if (isArtist) {
+        items.push({
+          key: 'host-contest',
+          label: messages.hostContest,
+          icon: IconTrophy,
+          to: HOST_REMIX_CONTEST_ROOT_PAGE
+        })
+      }
     } else if (hostedCount === 1 && hostedTrack?.permalink) {
       items.push({
         key: 'manage-contest',
@@ -212,13 +235,6 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
         to: CLUBS_CREATE_PAGE
       })
     }
-
-    items.push({
-      key: 'upload',
-      label: messages.uploadTrack,
-      icon: IconCloudUpload,
-      to: UPLOAD_PAGE
-    })
 
     if (!isVerified) {
       items.push({
@@ -255,7 +271,9 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
     hostedContestTrackIds,
     hostedTrack,
     createdFanClub,
-    isVerified
+    isArtist,
+    isVerified,
+    currentUserHandle
   ])
 
   return (

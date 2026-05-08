@@ -64,7 +64,6 @@ export const StatusZone = ({ variant }: StatusZoneProps) => {
       <ProfileCompletionHeroCard
         isDismissed={isDismissed}
         onDismiss={onDismiss}
-        forceVisible
       />
       <QuickLinks />
     </Flex>

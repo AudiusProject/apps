@@ -7,7 +7,7 @@ import {
   useMemo
 } from 'react'
 
-import { useCurrentUserId } from '@audius/common/api'
+import { useCurrentUserId, useIsAccountLoaded } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import type { Mood } from '@audius/sdk'
@@ -40,9 +40,12 @@ export type MobileHomePageProps = {
 
 export const MobileHomePage = (_props: MobileHomePageProps) => {
   const navigate = useNavigate()
-  const { data: currentUserId, isPending: isCurrentUserIdLoading } =
-    useCurrentUserId()
-  const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
+  const { data: currentUserId } = useCurrentUserId()
+  const isAccountLoaded = useIsAccountLoaded()
+  // While the account is still resolving (e.g. during a manager-mode account
+  // switch), keep the personalized layout in place rather than flashing the
+  // unauthenticated view.
+  const showUserContextualContent = !isAccountLoaded || !!currentUserId
 
   const { setCenter, setRight } = useContext(NavContext)!
 
