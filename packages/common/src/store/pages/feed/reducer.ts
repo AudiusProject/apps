@@ -34,7 +34,8 @@ const actionsMap = {
 }
 
 const feedPageReducer = (state = initialState, action: FeedPageAction) => {
-  const matchingReduceFunction = actionsMap[action.type as keyof typeof actionsMap]
+  const matchingReduceFunction =
+    actionsMap[action.type as keyof typeof actionsMap]
   if (!matchingReduceFunction) return state
   return matchingReduceFunction(state, action as any)
 }

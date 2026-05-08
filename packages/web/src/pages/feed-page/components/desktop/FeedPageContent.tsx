@@ -40,10 +40,7 @@ type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-const tabToFilter: Record<
-  Exclude<FeedTab, FeedTab.FOR_YOU>,
-  FeedFilter
-> = {
+const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
   [FeedTab.FOLLOWING]: FeedFilter.ALL,
   [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }

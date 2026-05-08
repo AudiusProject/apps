@@ -46,10 +46,7 @@ type FeedPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-const tabToFilter: Record<
-  Exclude<FeedTab, FeedTab.FOR_YOU>,
-  FeedFilter
-> = {
+const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
   [FeedTab.FOLLOWING]: FeedFilter.ALL,
   [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }
@@ -109,7 +106,7 @@ const FeedPageMobileContent = ({
         <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
       </Header>
     )
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setHeader, feedTab])
 
   // Set Nav-Bar Menu
