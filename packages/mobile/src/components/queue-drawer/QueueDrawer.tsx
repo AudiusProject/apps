@@ -238,9 +238,15 @@ const useNextFromSourceMobile = () => {
 
   return useMemo<{ trackIds: ID[]; sourceKey: string | null }>(() => {
     if (!querySource) return { trackIds: [], sourceKey: null }
-    const data = queryClient.getQueryData<{
-      pages: Array<Array<{ id: number | string; type?: string }>>
-    }>(querySource.queryKey as any)
+    type LineupItem = { id: number | string; type?: string }
+    // Most lineup pages are `LineupItem[]`. The remixes/contest lineup wraps
+    // its items in `{ count, tracks: LineupItem[] }` — without this branch,
+    // `for (const item of page)` would throw on the object and crash the
+    // drawer when a contest track is playing.
+    type LineupPage = LineupItem[] | { tracks: LineupItem[] }
+    const data = queryClient.getQueryData<{ pages: LineupPage[] }>(
+      querySource.queryKey as any
+    )
     const sourceKey =
       Array.isArray(querySource.queryKey) && querySource.queryKey[0]
         ? String(querySource.queryKey[0])
@@ -250,7 +256,12 @@ const useNextFromSourceMobile = () => {
     const inQueue = new Set(queue.map((t) => t.trackId))
     const upcoming: ID[] = []
     for (const page of data.pages) {
-      for (const item of page) {
+      const items: LineupItem[] = Array.isArray(page)
+        ? page
+        : Array.isArray(page?.tracks)
+          ? page.tracks
+          : []
+      for (const item of items) {
         if (!item) continue
         if (item.type && item.type !== 'track') continue
         const id = typeof item.id === 'number' ? item.id : Number(item.id)
