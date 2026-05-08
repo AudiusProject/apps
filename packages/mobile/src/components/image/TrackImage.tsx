@@ -66,7 +66,11 @@ export const useTrackImage = ({
   })
   const artwork = artworkData?.artwork
   const hasNoArtwork = artworkData?.hasNoArtwork ?? false
-  const { imageUrl, onError: onImageError } = useImageSize({
+  const {
+    imageUrl,
+    priorityLowResUrl,
+    onError: onImageError
+  } = useImageSize({
     artwork,
     targetSize: size,
     defaultImage: '',
@@ -97,6 +101,7 @@ export const useTrackImage = ({
 
   return {
     source: primitiveToImageSource(imageUrl),
+    priorityLowResSource: primitiveToImageSource(priorityLowResUrl),
     hasNoArtwork: false,
     onError: onImageError
   }
@@ -129,6 +134,7 @@ export const TrackImage = (props: TrackImageProps) => {
   const trackImageSource = useTrackImage({ trackId, size })
   const {
     source: loadedSource,
+    priorityLowResSource,
     onError: onImageError,
     hasNoArtwork
   } = trackImageSource
@@ -176,6 +182,7 @@ export const TrackImage = (props: TrackImageProps) => {
   return (
     <Artwork
       source={source}
+      priorityLowResSource={priorityLowResSource}
       onLoad={onLoad}
       onError={handleError}
       borderRadius={borderRadius}
