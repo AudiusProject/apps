@@ -593,22 +593,35 @@ const ContestCommentRow = ({
             right. Overflow kebab moved out of this row and into the
             action bar below so it sits next to Reply (matches the
             track-page CommentActionBar). */}
-        <Flex gap='s' alignItems='center' wrap='wrap'>
-          <UserLink userId={author.user_id} />
+        <Flex
+          justifyContent='space-between'
+          alignItems='center'
+          gap='s'
+          w='100%'
+        >
+          <Flex
+            gap='s'
+            alignItems='center'
+            css={{ minWidth: 0, flexWrap: 'wrap' }}
+          >
+            <UserLink userId={author.user_id} />
+            {createdAt ? <Timestamp time={createdAt} /> : null}
+          </Flex>
           {/* Host badge: shown when the contest owner comments in the
               Comments feed. Suppressed in the Updates feed because
               every row there is already a host update — the label
               would be redundant. Visual treatment matches the
               track-page CommentBadge (IconStar + accent text). */}
           {isAuthorEventOwner && !isPostUpdate ? (
-            <Flex gap='xs' alignItems='center'>
-              <IconStar color='accent' size='2xs' />
-              <Text color='accent' variant='body' size='s'>
-                {messages.hostBadge}
-              </Text>
-            </Flex>
+            <Box css={{ flexShrink: 0 }}>
+              <Flex gap='xs' alignItems='center'>
+                <IconStar color='accent' size='2xs' />
+                <Text color='accent' variant='body' size='s'>
+                  {messages.hostBadge}
+                </Text>
+              </Flex>
+            </Box>
           ) : null}
-          {createdAt ? <Timestamp time={createdAt} /> : null}
         </Flex>
         <Text variant='body' size='s'>
           {comment.message}
@@ -813,30 +826,32 @@ const ContestCommentReplyRow = ({
         >
           <Flex gap='s' alignItems='center' wrap='wrap'>
             <UserLink userId={author.user_id} />
+            {createdAt ? <Timestamp time={createdAt} /> : null}
+          </Flex>
+          <Flex gap='s' alignItems='center' css={{ flexShrink: 0 }}>
             {isAuthorEventOwner ? (
               <Text variant='label' size='xs' color='accent' strength='strong'>
                 {messages.hostBadge}
               </Text>
             ) : null}
-            {createdAt ? <Timestamp time={createdAt} /> : null}
+            {canDelete ? (
+              <PopupMenu
+                items={[{ text: messages.delete, onClick: handleDelete }]}
+                renderTrigger={(anchorRef, triggerPopup) => (
+                  <Box
+                    ref={anchorRef as any}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      triggerPopup()
+                    }}
+                    css={{ cursor: 'pointer', lineHeight: 0 }}
+                  >
+                    <IconKebabHorizontal size='s' color='subdued' />
+                  </Box>
+                )}
+              />
+            ) : null}
           </Flex>
-          {canDelete ? (
-            <PopupMenu
-              items={[{ text: messages.delete, onClick: handleDelete }]}
-              renderTrigger={(anchorRef, triggerPopup) => (
-                <Box
-                  ref={anchorRef as any}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    triggerPopup()
-                  }}
-                  css={{ cursor: 'pointer', lineHeight: 0 }}
-                >
-                  <IconKebabHorizontal size='s' color='subdued' />
-                </Box>
-              )}
-            />
-          ) : null}
         </Flex>
         <Text variant='body' size='s'>
           {reply.message}
