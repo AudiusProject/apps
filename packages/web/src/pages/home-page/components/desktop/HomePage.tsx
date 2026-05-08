@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
+import { localStorage } from 'services/local-storage'
 
 import { ArtistSpotlightSection } from '../../../search-explore-page/components/desktop/ArtistSpotlightSection'
 import { FeaturedPlaylistsSection } from '../../../search-explore-page/components/desktop/FeaturedPlaylistsSection'
@@ -40,10 +41,14 @@ export const DesktopHomePage = ({
   const navigate = useNavigate()
   const { data: currentUserId } = useCurrentUserId()
   const isAccountLoaded = useIsAccountLoaded()
-  // While the account is still resolving (e.g. during a manager-mode account
-  // switch), keep the personalized layout in place rather than flashing the
-  // unauthenticated view.
-  const showUserContextualContent = !isAccountLoaded || !!currentUserId
+  // While the account is still resolving, fall back to the synchronous
+  // localStorage hint to decide what to render. Without this, unauth visitors
+  // flash the personalized layout before the unauth filler swaps in (and
+  // authed users flashed the unauth filler before personalized loaded).
+  const cachedHasAccount = localStorage.getAudiusAccountSync()?.userId != null
+  const showUserContextualContent = isAccountLoaded
+    ? !!currentUserId
+    : cachedHasAccount
 
   const onMoodClick = useCallback(
     (mood: Mood) => {

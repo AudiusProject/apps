@@ -17,6 +17,7 @@ import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { CenterPreset } from 'components/nav/mobile/NavContext'
+import { localStorage } from 'services/local-storage'
 
 import { ArtistSpotlightSection } from '../../../search-explore-page/components/desktop/ArtistSpotlightSection'
 import { FeaturedPlaylistsSection } from '../../../search-explore-page/components/desktop/FeaturedPlaylistsSection'
@@ -44,10 +45,14 @@ export const MobileHomePage = (_props: MobileHomePageProps) => {
   const navigate = useNavigate()
   const { data: currentUserId } = useCurrentUserId()
   const isAccountLoaded = useIsAccountLoaded()
-  // While the account is still resolving (e.g. during a manager-mode account
-  // switch), keep the personalized layout in place rather than flashing the
-  // unauthenticated view.
-  const showUserContextualContent = !isAccountLoaded || !!currentUserId
+  // While the account is still resolving, fall back to the synchronous
+  // localStorage hint to decide what to render. Without this, unauth visitors
+  // flash the personalized layout before the unauth filler swaps in (and
+  // authed users flashed the unauth filler before personalized loaded).
+  const cachedHasAccount = localStorage.getAudiusAccountSync()?.userId != null
+  const showUserContextualContent = isAccountLoaded
+    ? !!currentUserId
+    : cachedHasAccount
 
   const { setCenter, setRight } = useContext(NavContext)!
   const { setHeader } = useContext(HeaderContext)
