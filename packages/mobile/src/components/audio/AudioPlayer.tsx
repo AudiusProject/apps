@@ -86,8 +86,7 @@ const {
   getPlaybackQueue,
   getCurrentSource: getSource,
   getCollectionId,
-  getRepeat,
-  getShuffle
+  getRepeat
 } = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
 const { getNftAccessSignatureMap } = gatedContentSelectors
@@ -175,7 +174,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
   const dispatch = useDispatch()
 
   const queueIndex = useSelector(getIndex)
-  const queueShuffle = useSelector(getShuffle)
   const queueOrder = useSelector(getPlaybackQueue)
   const queueSource = useSelector(getSource)
   const queueCollectionId = useSelector(getCollectionId)
@@ -482,7 +480,6 @@ const useQueueSync = (isAudioSetup: boolean) => {
 
   return {
     queueIndex,
-    queueShuffle,
     queueTracks,
     queueIdxChangeJobRef,
     makeTrackData,
@@ -497,14 +494,12 @@ const useQueueSync = (isAudioSetup: boolean) => {
 /** Handles all RNTP events: errors, remote controls, track changes. */
 const usePlaybackEvents = ({
   queueIndex,
-  queueShuffle,
   queueTracks,
   makeTrackData,
   retries,
   currentUserId
 }: {
   queueIndex: number
-  queueShuffle: boolean
   queueTracks: QueueableTrack[]
   makeTrackData: (t: QueueableTrack, retries?: number) => Promise<any>
   retries: number
@@ -645,49 +640,46 @@ const usePlaybackEvents = ({
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 
-      // RNTP auto-advanced to next track
+      // RNTP auto-advanced to next track. The redux queue is always in
+      // playable order (shuffled or not), so RNTP and redux indices align.
       if (playerIndex > queueIndex) {
-        if (queueShuffle) {
+        const { track: nextTrack, playerBehavior: nextBehavior } =
+          queueTracks[playerIndex] ?? {}
+        const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
+          nextTrack,
+          nextBehavior
+        )
+
+        if (!nextTrack || shouldSkip) {
           dispatch(playbackActions.next())
         } else {
-          const { track: nextTrack, playerBehavior: nextBehavior } =
-            queueTracks[playerIndex] ?? {}
-          const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
-            nextTrack,
-            nextBehavior
+          dispatch(playbackActions.setIndex({ index: playerIndex }))
+          dispatch(
+            playbackActions.set({
+              previewing: shouldPreview,
+              trackId: nextTrack.track_id,
+              index: playerIndex
+            })
           )
 
-          if (!nextTrack || shouldSkip) {
-            dispatch(playbackActions.next())
-          } else {
-            dispatch(playbackActions.setIndex({ index: playerIndex }))
+          const trackPosition = trackPositions?.[nextTrack.track_id]
+          if (trackPosition?.status === 'IN_PROGRESS') {
             dispatch(
-              playbackActions.set({
-                previewing: shouldPreview,
-                trackId: nextTrack.track_id,
-                index: playerIndex
+              playbackActions.seekTo({
+                seconds: trackPosition.playbackPosition
               })
             )
-
-            const trackPosition = trackPositions?.[nextTrack.track_id]
-            if (trackPosition?.status === 'IN_PROGRESS') {
-              dispatch(
-                playbackActions.seekTo({
-                  seconds: trackPosition.playbackPosition
-                })
-              )
-            } else if (isLongFormContent(nextTrack)) {
-              dispatch(
-                setTrackPosition({
-                  userId: currentUserId,
-                  trackId: nextTrack.track_id,
-                  positionInfo: {
-                    status: 'IN_PROGRESS',
-                    playbackPosition: 0
-                  }
-                })
-              )
-            }
+          } else if (isLongFormContent(nextTrack)) {
+            dispatch(
+              setTrackPosition({
+                userId: currentUserId,
+                trackId: nextTrack.track_id,
+                positionInfo: {
+                  status: 'IN_PROGRESS',
+                  playbackPosition: 0
+                }
+              })
+            )
           }
         }
       }
@@ -850,7 +842,6 @@ export const AudioPlayer = () => {
 
   const {
     queueIndex,
-    queueShuffle,
     queueTracks,
     queueIdxChangeJobRef,
     makeTrackData,
@@ -860,7 +851,6 @@ export const AudioPlayer = () => {
 
   const { setSeekPosition } = usePlaybackEvents({
     queueIndex,
-    queueShuffle,
     queueTracks,
     makeTrackData,
     retries,

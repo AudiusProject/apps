@@ -60,10 +60,6 @@ export const getRetries = getPlaybackRetryCount
 // Shuffle / repeat / overshoot
 export const getRepeat = (state: CommonState) => state.playback.repeat
 export const getShuffle = (state: CommonState) => state.playback.shuffle
-export const getShuffleIndex = (state: CommonState) =>
-  state.playback.shuffleIndex
-export const getShuffleOrder = (state: CommonState) =>
-  state.playback.shuffleOrder
 export const getOvershot = (state: CommonState) => state.playback.overshot
 export const getUndershot = (state: CommonState) => state.playback.undershot
 

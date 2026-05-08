@@ -26,21 +26,48 @@ export const initialState: PlaybackState = {
   playbackRate: '1x',
   repeat: RepeatMode.OFF,
   shuffle: false,
-  shuffleOrder: [],
-  shuffleIndex: -1,
+  shuffleOriginalQueue: [],
+  shuffleOriginalIndices: [],
   querySource: null,
   retries: 0,
   overshot: false,
   undershot: false
 }
 
-const generateShuffleOrder = (queueLength: number, currentIndex: number) => {
-  const availableIndices = Array.from(
-    { length: queueLength },
-    (_, i) => i
-  ).filter((i) => i !== currentIndex)
-  const shuffled = availableIndices.sort(() => Math.random() - 0.5)
-  return currentIndex >= 0 ? [currentIndex, ...shuffled] : shuffled
+// Build a permutation of [0..length-1] with `currentIndex` (when valid)
+// pinned at position 0 — so the currently-playing track stays "current"
+// when shuffle toggles on.
+const buildShufflePermutation = (length: number, currentIndex: number) => {
+  const indices = Array.from({ length }, (_, i) => i).filter(
+    (i) => i !== currentIndex
+  )
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[indices[i], indices[j]] = [indices[j], indices[i]]
+  }
+  return currentIndex >= 0 && currentIndex < length
+    ? [currentIndex, ...indices]
+    : indices
+}
+
+// Apply a permutation (an array of original indices) to a source array,
+// returning a new array in the permuted order.
+const applyPermutation = <T>(source: T[], permutation: number[]): T[] =>
+  permutation.map((i) => source[i])
+
+// Drop the entry at `position` from `originalIndices` and decrement any
+// remaining entries that pointed past it, since shuffleOriginalQueue just
+// shrunk by one.
+const removeFromOriginalIndices = (
+  originalIndices: number[],
+  visibleIndex: number
+) => {
+  const removedOriginalIndex = originalIndices[visibleIndex]
+  const next = originalIndices.filter((_, i) => i !== visibleIndex)
+  for (let i = 0; i < next.length; i++) {
+    if (next[i] > removedOriginalIndex) next[i] -= 1
+  }
+  return next
 }
 
 type PlayFromPayload = {
@@ -97,8 +124,7 @@ type ReorderPayload = {
 }
 
 type SetIndexPayload = {
-  index?: number
-  shuffleIndex?: number
+  index: number
 }
 
 type NextPayload = { skip?: boolean } | undefined
@@ -147,36 +173,38 @@ const slice = createSlice({
   reducers: {
     playFrom: (state, action: PayloadAction<PlayFromPayload>) => {
       const { tracks, startIndex, querySource } = action.payload
-      state.queue = tracks
-      state.index = Math.max(0, Math.min(startIndex, tracks.length - 1))
+      const clampedStart = Math.max(0, Math.min(startIndex, tracks.length - 1))
+      if (state.shuffle && tracks.length > 0) {
+        const permutation = buildShufflePermutation(tracks.length, clampedStart)
+        state.shuffleOriginalQueue = tracks
+        state.shuffleOriginalIndices = permutation
+        state.queue = applyPermutation(tracks, permutation)
+        state.index = 0
+      } else {
+        state.queue = tracks
+        state.index = clampedStart
+        state.shuffleOriginalQueue = []
+        state.shuffleOriginalIndices = []
+      }
       state.querySource = querySource ?? null
       state.counter += 1
       state.retries = 0
       state.seek = null
       state.overshot = false
       state.undershot = false
-      if (state.shuffle) {
-        state.shuffleOrder = generateShuffleOrder(
-          state.queue.length,
-          state.index
-        )
-        state.shuffleIndex = 0
-      }
     },
 
     playTrackAt: (state, action: PayloadAction<PlayTrackAtPayload>) => {
       const { index } = action.payload
       if (index < 0 || index >= state.queue.length) return
+      // Queue is already in playable order (shuffled or not), so we just
+      // jump to the chosen position.
       state.index = index
       state.counter += 1
       state.retries = 0
       state.seek = null
       state.overshot = false
       state.undershot = false
-      if (state.shuffle) {
-        state.shuffleOrder = generateShuffleOrder(state.queue.length, index)
-        state.shuffleIndex = 0
-      }
     },
 
     // Resume / load. The saga handles the load+play cycle and sets retries.
@@ -217,30 +245,15 @@ const slice = createSlice({
         state.undershot = false
         return
       }
-      if (state.shuffle) {
-        const nextShuffle = state.shuffleIndex + 1
-        if (nextShuffle >= state.shuffleOrder.length) {
-          if (state.repeat === RepeatMode.ALL) {
-            state.shuffleIndex = 0
-          } else {
-            state.overshot = true
-            return
-          }
+      if (state.index + 1 >= state.queue.length) {
+        if (state.repeat === RepeatMode.ALL) {
+          state.index = 0
         } else {
-          state.shuffleIndex = nextShuffle
+          state.overshot = true
+          return
         }
-        state.index = state.shuffleOrder[state.shuffleIndex]
       } else {
-        if (state.index + 1 >= state.queue.length) {
-          if (state.repeat === RepeatMode.ALL) {
-            state.index = 0
-          } else {
-            state.overshot = true
-            return
-          }
-        } else {
-          state.index = state.index + 1
-        }
+        state.index = state.index + 1
       }
       state.counter += 1
       state.retries = 0
@@ -251,26 +264,11 @@ const slice = createSlice({
 
     previous: (state) => {
       if (state.queue.length === 0) return
-      if (state.shuffle) {
-        const prevShuffle = state.shuffleIndex - 1
-        if (prevShuffle < 0) {
-          if (state.repeat === RepeatMode.ALL) {
-            state.shuffleIndex = state.shuffleOrder.length - 1
-          } else {
-            state.undershot = true
-            return
-          }
-        } else {
-          state.shuffleIndex = prevShuffle
-        }
-        state.index = state.shuffleOrder[state.shuffleIndex]
-      } else {
-        if (state.index - 1 < 0) {
-          state.undershot = true
-          return
-        }
-        state.index = state.index - 1
+      if (state.index - 1 < 0) {
+        state.undershot = true
+        return
       }
+      state.index = state.index - 1
       state.counter += 1
       state.retries = 0
       state.seek = null
@@ -280,16 +278,29 @@ const slice = createSlice({
 
     addToQueue: (state, action: PayloadAction<AddToQueuePayload>) => {
       const { tracks, index } = action.payload
-      if (index === undefined) {
-        state.queue = [...state.queue, ...tracks]
-        return
-      }
-      const insertAt = Math.max(0, Math.min(index, state.queue.length))
+      if (tracks.length === 0) return
+      const insertAt =
+        index === undefined
+          ? state.queue.length
+          : Math.max(0, Math.min(index, state.queue.length))
+
       const next = [...state.queue]
       next.splice(insertAt, 0, ...tracks)
       state.queue = next
-      if (state.index >= insertAt) {
+      if (insertAt <= state.index) {
         state.index += tracks.length
+      }
+
+      if (state.shuffle) {
+        // New tracks are appended to originalQueue (they have no "natural"
+        // position pre-shuffle). Their original indices then point at the
+        // newly-appended slots.
+        const baseOriginalIndex = state.shuffleOriginalQueue.length
+        state.shuffleOriginalQueue = [...state.shuffleOriginalQueue, ...tracks]
+        const newOriginalIndices = tracks.map((_, i) => baseOriginalIndex + i)
+        const nextOriginal = [...state.shuffleOriginalIndices]
+        nextOriginal.splice(insertAt, 0, ...newOriginalIndices)
+        state.shuffleOriginalIndices = nextOriginal
       }
     },
 
@@ -298,11 +309,34 @@ const slice = createSlice({
       const next = [...state.queue]
       next.splice(insertAt, 0, action.payload.track)
       state.queue = next
+
+      if (state.shuffle) {
+        const baseOriginalIndex = state.shuffleOriginalQueue.length
+        state.shuffleOriginalQueue = [
+          ...state.shuffleOriginalQueue,
+          action.payload.track
+        ]
+        const nextOriginal = [...state.shuffleOriginalIndices]
+        nextOriginal.splice(insertAt, 0, baseOriginalIndex)
+        state.shuffleOriginalIndices = nextOriginal
+      }
     },
 
     removeFromQueue: (state, action: PayloadAction<RemoveFromQueuePayload>) => {
       const { index } = action.payload
       if (index < 0 || index >= state.queue.length) return
+
+      if (state.shuffle && state.shuffleOriginalIndices.length > 0) {
+        const removedOriginalIdx = state.shuffleOriginalIndices[index]
+        state.shuffleOriginalIndices = removeFromOriginalIndices(
+          state.shuffleOriginalIndices,
+          index
+        )
+        state.shuffleOriginalQueue = state.shuffleOriginalQueue.filter(
+          (_, i) => i !== removedOriginalIdx
+        )
+      }
+
       const next = [...state.queue]
       next.splice(index, 1)
       state.queue = next
@@ -323,18 +357,38 @@ const slice = createSlice({
         currentIndex >= 0
           ? Math.max(0, orderedIndices.indexOf(currentIndex))
           : -1
+
+      if (state.shuffle && state.shuffleOriginalIndices.length > 0) {
+        // The reorder rearranges visible positions; original-position
+        // mappings move with their tracks. shuffleOriginalQueue itself is
+        // untouched — its purpose is to remember the pre-shuffle order.
+        state.shuffleOriginalIndices = orderedIndices
+          .map((i) => state.shuffleOriginalIndices[i])
+          .filter((v): v is number => v !== undefined)
+      }
     },
 
     appendPage: (state, action: PayloadAction<AppendPagePayload>) => {
+      const { tracks } = action.payload
+      if (tracks.length === 0) return
       // Used by the saga when the backing tanquery fetches a next page.
-      state.queue = [...state.queue, ...action.payload.tracks]
+      state.queue = [...state.queue, ...tracks]
+
+      if (state.shuffle) {
+        const baseOriginalIndex = state.shuffleOriginalQueue.length
+        state.shuffleOriginalQueue = [...state.shuffleOriginalQueue, ...tracks]
+        state.shuffleOriginalIndices = [
+          ...state.shuffleOriginalIndices,
+          ...tracks.map((_, i) => baseOriginalIndex + i)
+        ]
+      }
     },
 
     clearQueue: (state) => {
       state.queue = []
       state.index = -1
-      state.shuffleOrder = []
-      state.shuffleIndex = -1
+      state.shuffleOriginalQueue = []
+      state.shuffleOriginalIndices = []
       state.querySource = null
     },
 
@@ -345,12 +399,20 @@ const slice = createSlice({
       if (state.index < 0 || state.index >= state.queue.length) {
         state.queue = []
         state.index = -1
+        state.shuffleOriginalQueue = []
+        state.shuffleOriginalIndices = []
       } else {
-        state.queue = [state.queue[state.index]]
+        const current = state.queue[state.index]
+        state.queue = [current]
         state.index = 0
+        if (state.shuffle) {
+          state.shuffleOriginalQueue = [current]
+          state.shuffleOriginalIndices = [0]
+        } else {
+          state.shuffleOriginalQueue = []
+          state.shuffleOriginalIndices = []
+        }
       }
-      state.shuffleOrder = state.shuffle && state.queue.length > 0 ? [0] : []
-      state.shuffleIndex = state.shuffle && state.queue.length > 0 ? 0 : -1
       state.querySource = null
     },
 
@@ -369,16 +431,40 @@ const slice = createSlice({
 
     setShuffle: (state, action: PayloadAction<SetShufflePayload>) => {
       const { enable } = action.payload
+      if (enable === state.shuffle) return
       state.shuffle = enable
-      if (enable && state.queue.length > 0) {
-        state.shuffleOrder = generateShuffleOrder(
+
+      if (enable) {
+        if (state.queue.length === 0) {
+          state.shuffleOriginalQueue = []
+          state.shuffleOriginalIndices = []
+          return
+        }
+        const permutation = buildShufflePermutation(
           state.queue.length,
           state.index
         )
-        state.shuffleIndex = 0
-      } else if (!enable) {
-        state.shuffleOrder = []
-        state.shuffleIndex = -1
+        state.shuffleOriginalQueue = [...state.queue]
+        state.shuffleOriginalIndices = permutation
+        state.queue = applyPermutation(state.shuffleOriginalQueue, permutation)
+        // currentIndex was pinned to position 0 when valid.
+        state.index =
+          state.index >= 0 && state.index < state.shuffleOriginalQueue.length
+            ? 0
+            : state.index
+      } else {
+        if (state.shuffleOriginalQueue.length === 0) {
+          state.shuffleOriginalIndices = []
+          return
+        }
+        const currentOriginalIndex =
+          state.index >= 0 && state.index < state.shuffleOriginalIndices.length
+            ? state.shuffleOriginalIndices[state.index]
+            : -1
+        state.queue = state.shuffleOriginalQueue
+        state.index = currentOriginalIndex
+        state.shuffleOriginalQueue = []
+        state.shuffleOriginalIndices = []
       }
     },
 
@@ -402,9 +488,8 @@ const slice = createSlice({
     },
 
     setIndex: (state, action: PayloadAction<SetIndexPayload>) => {
-      const { index, shuffleIndex } = action.payload
+      const { index } = action.payload
       if (typeof index === 'number') state.index = index
-      if (typeof shuffleIndex === 'number') state.shuffleIndex = shuffleIndex
     },
 
     reset: (_state, _action: PayloadAction<ResetPayload>) => {

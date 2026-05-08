@@ -128,8 +128,14 @@ export type PlaybackState = {
 
   repeat: RepeatMode
   shuffle: boolean
-  shuffleOrder: number[]
-  shuffleIndex: number
+  // The pre-shuffle queue, captured when shuffle is enabled. Empty when
+  // shuffle is off. Mutations (add/remove/reorder) keep this in sync so
+  // disabling shuffle restores a coherent original order.
+  shuffleOriginalQueue: PlaybackTrack[]
+  // Parallel array to `queue` while shuffle is on:
+  // shuffleOriginalIndices[i] is the position of queue[i] in
+  // shuffleOriginalQueue. Empty when shuffle is off.
+  shuffleOriginalIndices: number[]
 
   querySource: PlaybackQuerySource | null
 
