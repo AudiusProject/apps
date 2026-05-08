@@ -28,7 +28,7 @@ import IconHelpSupport from '../assets/icon-help-support.svg'
 
 import styles from './Nav2026.module.css'
 
-const { SIGN_UP_PAGE, TRENDING_PAGE, DOWNLOAD_LINK } = route
+const { SIGN_UP_PAGE, HOMEPAGE_PAGE, DOWNLOAD_LINK } = route
 
 const messages = {
   signUp: 'Sign Up',
@@ -154,7 +154,7 @@ export const Nav2026 = (props: Nav2026Props) => {
 
   const onCtaClick = (e: MouseEvent) => {
     setIsMobileOverlayOpen(false)
-    const routeToUse = isAuthenticated ? TRENDING_PAGE : SIGN_UP_PAGE
+    const routeToUse = isAuthenticated ? HOMEPAGE_PAGE : SIGN_UP_PAGE
     handleClickRoute(routeToUse, setRenderPublicSite, navigate)(e)
   }
 

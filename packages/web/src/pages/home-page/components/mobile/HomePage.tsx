@@ -13,6 +13,8 @@ import { Flex } from '@audius/harmony'
 import type { Mood } from '@audius/sdk'
 import { useNavigate } from 'react-router'
 
+import Header from 'components/header/mobile/Header'
+import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { CenterPreset } from 'components/nav/mobile/NavContext'
 
@@ -48,11 +50,16 @@ export const MobileHomePage = (_props: MobileHomePageProps) => {
   const showUserContextualContent = !isAccountLoaded || !!currentUserId
 
   const { setCenter, setRight } = useContext(NavContext)!
+  const { setHeader } = useContext(HeaderContext)
 
   useEffect(() => {
     setRight(null)
     setCenter(CenterPreset.LOGO)
   }, [setCenter, setRight])
+
+  useEffect(() => {
+    setHeader(<Header title={messages.title} />)
+  }, [setHeader])
 
   const onMoodClick = useCallback(
     (mood: Mood) => {
@@ -111,14 +118,14 @@ export const MobileHomePage = (_props: MobileHomePageProps) => {
         element: <UndergroundTrendingTracksSection />
       },
       {
+        key: 'artist-spotlight',
+        shouldRender: true,
+        element: <ArtistSpotlightSection />
+      },
+      {
         key: 'mood-grid',
         shouldRender: true,
         element: <MoodGrid onMoodClick={onMoodClick} />
-      },
-      {
-        key: 'artist-spotlight',
-        shouldRender: !showUserContextualContent,
-        element: <ArtistSpotlightSection />
       }
     ],
     [showUserContextualContent, onMoodClick]
@@ -130,10 +137,12 @@ export const MobileHomePage = (_props: MobileHomePageProps) => {
       containerClassName='home-page'
       hasDefaultHeader
     >
-      <Flex direction='column' w='100%' gap='l' pb='l'>
-        {sectionConfigs.map(({ key, shouldRender, element }) =>
-          shouldRender ? <Fragment key={key}>{element}</Fragment> : null
-        )}
+      <Flex direction='column' w='100%' style={{ overflow: 'hidden' }}>
+        <Flex direction='column' mt='l' gap='2xl' pb='l'>
+          {sectionConfigs.map(({ key, shouldRender, element }) =>
+            shouldRender ? <Fragment key={key}>{element}</Fragment> : null
+          )}
+        </Flex>
       </Flex>
     </MobilePageContainer>
   )

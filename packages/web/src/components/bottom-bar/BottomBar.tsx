@@ -6,7 +6,7 @@ import { useLocation } from 'react-router'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import ExploreButton from 'components/bottom-bar/buttons/ExploreButton'
 import FeedButton from 'components/bottom-bar/buttons/FeedButton'
-import LibraryButton from 'components/bottom-bar/buttons/LibraryButton'
+import HomeButton from 'components/bottom-bar/buttons/HomeButton'
 import NotificationsButton from 'components/bottom-bar/buttons/NotificationsButton'
 import TrendingButton from 'components/bottom-bar/buttons/TrendingButton'
 
@@ -24,17 +24,16 @@ const {
   FEED_PAGE,
   TRENDING_PAGE,
   EXPLORE_PAGE,
-  FAVORITES_PAGE,
-  LIBRARY_PAGE,
+  HOMEPAGE_PAGE,
   NOTIFICATION_PAGE
 } = route
 
 type Props = {
   currentPage: string
+  onClickHome: () => void
   onClickFeed: () => void
   onClickTrending: () => void
   onClickExplore: () => void
-  onClickLibrary: () => void
   onClickNotifications: () => void
   isDarkMode: boolean
   isMatrixMode: boolean
@@ -42,10 +41,10 @@ type Props = {
 
 const BottomBar = ({
   currentPage,
+  onClickHome,
   onClickFeed,
   onClickTrending,
   onClickExplore,
-  onClickLibrary,
   onClickNotifications,
   isDarkMode,
   isMatrixMode
@@ -68,6 +67,14 @@ const BottomBar = ({
 
   return window.ReactNativeWebView?.postMessage ? null : (
     <div className={styles.bottomBar}>
+      <HomeButton
+        isActive={currentPage === HOMEPAGE_PAGE}
+        darkMode={isDarkMode}
+        onClick={onClick(onClickHome, HOMEPAGE_PAGE)}
+        href={HOMEPAGE_PAGE}
+        isMatrixMode={isMatrixMode}
+        aria-label='Home Page'
+      />
       <TrendingButton
         isActive={currentPage === TRENDING_PAGE}
         darkMode={isDarkMode}
@@ -91,16 +98,6 @@ const BottomBar = ({
         href={EXPLORE_PAGE}
         isMatrixMode={isMatrixMode}
         aria-label='Explore Page'
-      />
-      <LibraryButton
-        isActive={
-          currentPage === FAVORITES_PAGE || currentPage === LIBRARY_PAGE
-        }
-        darkMode={isDarkMode}
-        onClick={onClick(onClickLibrary, LIBRARY_PAGE)}
-        href={LIBRARY_PAGE}
-        isMatrixMode={isMatrixMode}
-        aria-label='Library Page'
       />
       <NotificationsButton
         isActive={currentPage === NOTIFICATION_PAGE}

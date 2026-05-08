@@ -278,19 +278,22 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
 
   return (
     <Flex
-      gap='s'
+      w='100%'
       pv='s'
       css={{
         overflowX: 'auto',
         overflowY: 'hidden',
+        minWidth: 0,
         msOverflowStyle: 'none',
         scrollbarWidth: 'none',
         '&::-webkit-scrollbar': { display: 'none' }
       }}
     >
-      {pills.map((pill) => (
-        <PillItem key={pill.key} pill={pill} />
-      ))}
+      <Flex gap='s' ph='l' css={{ minWidth: 'max-content' }}>
+        {pills.map((pill) => (
+          <PillItem key={pill.key} pill={pill} />
+        ))}
+      </Flex>
     </Flex>
   )
 }

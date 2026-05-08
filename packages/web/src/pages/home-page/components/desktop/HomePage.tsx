@@ -102,14 +102,14 @@ export const DesktopHomePage = ({
         element: <UndergroundTrendingTracksSection />
       },
       {
+        key: 'artist-spotlight',
+        shouldRender: true,
+        element: <ArtistSpotlightSection />
+      },
+      {
         key: 'mood-grid',
         shouldRender: true,
         element: <MoodGrid onMoodClick={onMoodClick} />
-      },
-      {
-        key: 'artist-spotlight',
-        shouldRender: !showUserContextualContent,
-        element: <ArtistSpotlightSection />
       }
     ],
     [showUserContextualContent, onMoodClick]

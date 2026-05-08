@@ -11,7 +11,7 @@ import { LANDING_2026_TEXT_CLASS } from '../landing2026TextClass'
 
 import styles from './Hero2026.module.css'
 
-const { TRENDING_PAGE } = route
+const { HOMEPAGE_PAGE } = route
 
 const messages = {
   line1: 'Find your people.',
@@ -28,7 +28,7 @@ export const Hero2026 = (props: Hero2026Props) => {
   const navigate = useNavigate()
 
   const onGetStarted = (e: MouseEvent) => {
-    handleClickRoute(TRENDING_PAGE, props.setRenderPublicSite, navigate)(e)
+    handleClickRoute(HOMEPAGE_PAGE, props.setRenderPublicSite, navigate)(e)
   }
 
   return (
