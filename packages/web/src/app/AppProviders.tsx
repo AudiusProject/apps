@@ -1,4 +1,4 @@
-import { ReactNode, useState, useMemo } from 'react'
+import { ReactNode, useState, useMemo, lazy, Suspense } from 'react'
 
 import { FrostedSurfaceIntensity, ThemePalette } from '@audius/common/models'
 import { MediaProvider } from '@audius/harmony/src/contexts'
@@ -11,7 +11,6 @@ import {
   RouterProvider
 } from 'react-router'
 import { PersistGate } from 'redux-persist/integration/react'
-import { WagmiProvider } from 'wagmi'
 
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
@@ -25,8 +24,10 @@ import {
   getThemePaletteFromStorage
 } from 'utils/theme/theme'
 
-import { wagmiAdapter } from './ReownAppKitModal'
 import { createRoutes } from './routes'
+
+// Lazy load ReownProvider to avoid loading @reown packages until needed
+const ReownProvider = lazy(() => import('./ReownProvider').then(module => ({ default: module.ReownProvider })))
 
 type AppProvidersProps = {
   children?: ReactNode
@@ -76,17 +77,19 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   }, [basename])
 
   return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <MediaProvider>
-          <ReduxProvider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <RouterProvider router={router} />
-            </PersistGate>
-          </ReduxProvider>
-        </MediaProvider>
-        <ReactQueryDevtools />
-      </QueryClientProvider>
-    </WagmiProvider>
+    <Suspense fallback={null}>
+      <ReownProvider>
+        <QueryClientProvider client={queryClient}>
+          <MediaProvider>
+            <ReduxProvider store={store}>
+              <PersistGate loading={null} persistor={persistor}>
+                <RouterProvider router={router} />
+              </PersistGate>
+            </ReduxProvider>
+          </MediaProvider>
+          <ReactQueryDevtools />
+        </QueryClientProvider>
+      </ReownProvider>
+    </Suspense>
   )
 }

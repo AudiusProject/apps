@@ -15,7 +15,8 @@ import { push } from 'utils/navigation'
 const { resetAccount, unsubscribeBrowserPushNotifications } = accountActions
 const { signOut: signOutAction } = signOutActions
 
-const wagmiConfig = wagmiAdapter.wagmiConfig
+// Use synchronous accessor - by the time saga runs, ReownProvider should be initialized
+const getWagmiConfig = () => wagmiAdapter.wagmiConfig
 
 function* watchSignOut() {
   const localStorage = yield* getContext('localStorage')
@@ -24,6 +25,7 @@ function* watchSignOut() {
   yield takeLatest(
     signOutAction.type,
     function* (action: ReturnType<typeof signOutAction>) {
+      const wagmiConfig = getWagmiConfig()
       if (wagmiConfig.state.status === 'connected') {
         yield call(disconnect, wagmiConfig)
       }
