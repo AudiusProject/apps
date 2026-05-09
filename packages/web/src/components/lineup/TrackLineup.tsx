@@ -232,7 +232,8 @@ export const TrackLineup = ({
     null
   )
   useEffect(() => {
-    const parent = externalScrollParent ?? document.getElementById('mainContent')
+    const parent =
+      externalScrollParent ?? document.getElementById('mainContent')
     if (!parent) return
     const update = () => setMeasuredThreshold(parent.clientHeight || null)
     update()
@@ -338,10 +339,7 @@ export const TrackLineup = ({
 
   const isInitialLoad = isPending && tiles.length === 0
   const isEmpty =
-    tiles.length === 0 &&
-    !isFetching &&
-    !isInitialLoad &&
-    !isLoadMoreTriggered
+    tiles.length === 0 && !isFetching && !isInitialLoad && !isLoadMoreTriggered
 
   return (
     <div
