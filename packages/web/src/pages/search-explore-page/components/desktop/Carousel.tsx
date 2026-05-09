@@ -305,7 +305,11 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
                   background: `linear-gradient(to right, ${pageBg}, transparent)`,
                   pointerEvents: 'none',
                   opacity: canScrollLeft ? 1 : 0,
-                  transition: 'opacity 150ms ease-out'
+                  transition: 'opacity 150ms ease-out',
+                  // Card hover/shadow styling can promote individual cards to
+                  // their own stacking context; explicit z-index keeps the
+                  // fade overlay reliably on top of any card paint.
+                  zIndex: 2
                 }}
               />
               <Box
@@ -319,7 +323,8 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
                   background: `linear-gradient(to left, ${pageBg}, transparent)`,
                   pointerEvents: 'none',
                   opacity: canScrollRight ? 1 : 0,
-                  transition: 'opacity 150ms ease-out'
+                  transition: 'opacity 150ms ease-out',
+                  zIndex: 2
                 }}
               />
             </>
