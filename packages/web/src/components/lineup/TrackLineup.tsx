@@ -282,7 +282,7 @@ export const TrackLineup = ({
   }, [hasNextPage, isFetching, isLoadMoreTriggered, loadNextPage])
 
   const renderSkeletons = useCallback(
-    (skeletonCount: number | undefined) => {
+    (skeletonCount: number | undefined, indexOffset = 0) => {
       if (!skeletonCount) return null
       return (
         <>
@@ -301,7 +301,7 @@ export const TrackLineup = ({
                 <Flex direction={isSmallTrackTile ? 'row' : 'column'} w='100%'>
                   {/* @ts-ignore - TrackTile types don't fully cover loading state */}
                   <TrackTile
-                    index={index}
+                    index={indexOffset + index}
                     size={tileSize}
                     ordered={ordered}
                     isLoading
@@ -435,8 +435,8 @@ export const TrackLineup = ({
                 </Flex>
               ))}
 
-          {(isFetching || isLoadMoreTriggered) && tiles.length > 0
-            ? renderSkeletons(loadingSkeletonCount)
+          {hasNextPage && tiles.length > 0
+            ? renderSkeletons(loadingSkeletonCount, tiles.length)
             : null}
         </InfiniteScroll>
       </div>
