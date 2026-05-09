@@ -287,38 +287,42 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
               {children}
             </Flex>
           </Flex>
-          {/* Edge-fade overlays (desktop only). Rendered as absolute siblings
-              of the scroll container so they don't interfere with scroll
-              compositing — applying `mask-image` on the scrollable element
-              itself forces a non-composited paint mode that breaks the
-              smooth-scroll animation. */}
-          {!isMobile && canScrollLeft ? (
-            <Box
-              aria-hidden
-              css={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: 0,
-                width: FADE_LENGTH_PX,
-                background: `linear-gradient(to right, ${pageBg}, transparent)`,
-                pointerEvents: 'none'
-              }}
-            />
-          ) : null}
-          {!isMobile && canScrollRight ? (
-            <Box
-              aria-hidden
-              css={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                right: 0,
-                width: FADE_LENGTH_PX,
-                background: `linear-gradient(to left, ${pageBg}, transparent)`,
-                pointerEvents: 'none'
-              }}
-            />
+          {/* Edge-fade overlays (desktop only). Always mounted; visibility is
+              driven by opacity transitions instead of conditional rendering so
+              we don't remount the gradient div every time canScrollLeft /
+              canScrollRight flip (which can happen rapidly during snap
+              settling and was causing the overlay flicker). */}
+          {!isMobile ? (
+            <>
+              <Box
+                aria-hidden
+                css={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  width: FADE_LENGTH_PX,
+                  background: `linear-gradient(to right, ${pageBg}, transparent)`,
+                  pointerEvents: 'none',
+                  opacity: canScrollLeft ? 1 : 0,
+                  transition: 'opacity 150ms ease-out'
+                }}
+              />
+              <Box
+                aria-hidden
+                css={{
+                  position: 'absolute',
+                  top: 0,
+                  bottom: 0,
+                  right: 0,
+                  width: FADE_LENGTH_PX,
+                  background: `linear-gradient(to left, ${pageBg}, transparent)`,
+                  pointerEvents: 'none',
+                  opacity: canScrollRight ? 1 : 0,
+                  transition: 'opacity 150ms ease-out'
+                }}
+              />
+            </>
           ) : null}
         </Box>
       </Flex>
