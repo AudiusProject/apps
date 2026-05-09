@@ -18,6 +18,18 @@ export type CarouselProps = {
   viewAllLink?: string
 }
 
+const FADE_LENGTH_PX = 64
+
+const getFadeMask = (canScrollLeft: boolean, canScrollRight: boolean) => {
+  const leftStop = canScrollLeft
+    ? `transparent 0, black ${FADE_LENGTH_PX}px`
+    : 'black 0'
+  const rightStop = canScrollRight
+    ? `black calc(100% - ${FADE_LENGTH_PX}px), transparent 100%`
+    : 'black 100%'
+  return `linear-gradient(to right, ${leftStop}, ${rightStop})`
+}
+
 export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
   ({ title, children, viewAllLink }, ref) => {
     const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -165,7 +177,18 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
             paddingLeft: railInset,
             paddingRight: railInset,
             paddingTop: railShadowPaddingTop,
-            paddingBottom: railShadowPaddingBottom
+            paddingBottom: railShadowPaddingBottom,
+
+            // Desktop only: fade content into the page at edges when there's
+            // more to scroll in that direction. Avoids the abrupt edge of a
+            // finite carousel without repeating content. Fade region needs to
+            // be deep enough to land on actual card content (cards start
+            // ~railInset + contentInset from the scroll-container edge), so
+            // we use a fixed length larger than that.
+            ...(!isMobile && {
+              WebkitMaskImage: getFadeMask(canScrollLeft, canScrollRight),
+              maskImage: getFadeMask(canScrollLeft, canScrollRight)
+            })
           }}
         >
           <Flex
