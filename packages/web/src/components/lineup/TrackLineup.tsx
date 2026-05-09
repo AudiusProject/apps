@@ -19,11 +19,23 @@ import styles from './Lineup.module.css'
 import { LineupVariant } from './types'
 
 const NARROW_CONTAINER_THRESHOLD_PX = 600
-// Fallback used until the scroll parent has been measured. Matches roughly one
-// viewport on a typical laptop — sized so the next page request fires while a
-// full screen of content is still below, and skeletons appear before the user
-// reaches the literal bottom of the list.
-const DEFAULT_LOAD_MORE_THRESHOLD = 800
+// Fallback used until the scroll parent has been measured. Sized so the next
+// page request fires well before the user reaches the literal bottom of the
+// list. Effective threshold is `LOAD_MORE_VIEWPORTS * scrollParent.clientHeight`
+// once measured.
+const DEFAULT_LOAD_MORE_THRESHOLD = 1600
+// Number of viewports of "remaining content" that should trigger loading the
+// next page. Larger values give a bigger buffer for fast desktop scrolling so
+// skeletons paint comfortably before the user reaches the bottom. Matches the
+// effect of mobile's `onEndReachedThreshold` but on the larger desktop viewport
+// we need more headroom to keep up with fling scrolls.
+const LOAD_MORE_VIEWPORTS = 2
+// Approximate rendered heights of a TrackTile in different variants — used to
+// compute how many skeletons to render so the bottom-of-list "loading window"
+// fills the threshold area instead of leaving the user staring at a frozen
+// last entry while the next page is in flight.
+const APPROX_TILE_HEIGHT_LARGE = 124
+const APPROX_TILE_HEIGHT_SMALL = 80
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
@@ -225,17 +237,16 @@ export const TrackLineup = ({
     return trackIds.slice(0, end)
   }, [trackIds, maxEntries])
 
-  // Track the scroll parent's viewport height so the load-more threshold is
-  // ~one full viewport (matches mobile's `onEndReachedThreshold = 1`). Falls
-  // back to the constant until measured.
-  const [measuredThreshold, setMeasuredThreshold] = useState<number | null>(
+  // Track the scroll parent's viewport height so the load-more threshold is a
+  // multiple of one full viewport. Falls back to the constant until measured.
+  const [scrollParentHeight, setScrollParentHeight] = useState<number | null>(
     null
   )
   useEffect(() => {
     const parent =
       externalScrollParent ?? document.getElementById('mainContent')
     if (!parent) return
-    const update = () => setMeasuredThreshold(parent.clientHeight || null)
+    const update = () => setScrollParentHeight(parent.clientHeight || null)
     update()
     if (typeof ResizeObserver === 'undefined') return
     const observer = new ResizeObserver(update)
@@ -243,7 +254,9 @@ export const TrackLineup = ({
     return () => observer.disconnect()
   }, [externalScrollParent])
 
-  const effectiveLoadMoreThreshold = measuredThreshold ?? loadMoreThreshold
+  const effectiveLoadMoreThreshold = scrollParentHeight
+    ? scrollParentHeight * LOAD_MORE_VIEWPORTS
+    : loadMoreThreshold
 
   // Synchronous "load more was triggered" flag — set the moment the scroll
   // handler fires so skeletons render on the next frame, without waiting for
@@ -341,6 +354,20 @@ export const TrackLineup = ({
   const isEmpty =
     tiles.length === 0 && !isFetching && !isInitialLoad && !isLoadMoreTriggered
 
+  // While a page is in flight we render skeletons below the loaded tiles. They
+  // need to fill ~one threshold's worth of vertical space so the bottom of the
+  // list feels populated even when the user scrolls into the trigger area
+  // faster than the network can return. `pageSize` is too small on its own
+  // (e.g. trending uses 4) so we floor by a viewport-derived count.
+  const approxTileHeight = isSmallTrackTile
+    ? APPROX_TILE_HEIGHT_SMALL
+    : APPROX_TILE_HEIGHT_LARGE
+  const fillCount = Math.ceil(effectiveLoadMoreThreshold / approxTileHeight)
+  const loadingSkeletonCount = Math.min(
+    Math.max(0, maxEntries - tiles.length),
+    Math.max(pageSize, fillCount)
+  )
+
   return (
     <div
       className={cn(lineupStyle, {
@@ -409,7 +436,7 @@ export const TrackLineup = ({
               ))}
 
           {(isFetching || isLoadMoreTriggered) && tiles.length > 0
-            ? renderSkeletons(Math.min(maxEntries - tiles.length, pageSize))
+            ? renderSkeletons(loadingSkeletonCount)
             : null}
         </InfiniteScroll>
       </div>
