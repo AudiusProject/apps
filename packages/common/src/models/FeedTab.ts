@@ -1,0 +1,5 @@
+export enum FeedTab {
+  FOR_YOU = 'FOR_YOU',
+  FOLLOWING = 'FOLLOWING',
+  UPLOADS_ONLY = 'UPLOADS_ONLY'
+}

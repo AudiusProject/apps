@@ -434,7 +434,10 @@ type HomePageRedirectProps = {
 
 const HomePageRedirect = ({
   isGuestAccount,
-  target = TRENDING_PAGE
+  // Default to FEED_PAGE to align with main's "feed is the default" choice
+  // for any caller that doesn't pass an explicit target. Active mounts in
+  // this file pass `target={HOMEPAGE_PAGE}` to land on the new home page.
+  target = FEED_PAGE
 }: HomePageRedirectProps) => {
   const location = useLocation()
   const currentPath = getPathname(location)

@@ -29,9 +29,8 @@ npm run protocol
 audius-compose connect
 
 # Run web application
-npm run web:dev      # Against local services
-npm run web:stage    # Against staging
-npm run web:prod     # Against production
+npm run web          # Against production
+npm run web:local    # Against local services
 
 # Run mobile applications
 npm run mobile       # Metro only — preferred for JS-only changes; user opens the simulator manually with the existing build

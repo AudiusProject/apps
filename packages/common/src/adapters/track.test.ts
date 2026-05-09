@@ -10,7 +10,7 @@ const makeMetadata = (
 ): TrackMetadataForUpload =>
   ({
     title: 'Test Track',
-    genre: Genre.ELECTRONIC,
+    genre: Genre.Electronic,
     ...overrides
   }) as TrackMetadataForUpload
 

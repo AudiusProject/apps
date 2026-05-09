@@ -21,7 +21,6 @@ export const initialState: BasicModalsState = {
   BrowserPushPermissionConfirmation: { isOpen: false },
   AudioBreakdown: { isOpen: false },
   DeactivateAccountConfirmation: { isOpen: false },
-  FeedFilter: { isOpen: false },
   PurchaseVendor: { isOpen: false },
   TrendingGenreSelection: { isOpen: false },
   TrendingCategory: { isOpen: false },

@@ -56,7 +56,7 @@ Environments:
 For example:
 
 ```bash
-npm run web:prod
+npm run web
 ```
 
 For all available commands please see the [package.json scripts](https://github.com/AudiusProject/apps/blob/f850434ddca7d697f78a58d971f9bba1aba7f24d/package.json#L10) and the relevant package READMEs.

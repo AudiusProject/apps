@@ -1,6 +1,7 @@
 import { ChatPermission, Genre } from '@audius/sdk'
 
 import { FeedFilter } from '~/models/FeedFilter'
+import { FeedTab } from '~/models/FeedTab'
 import { ID, PlayableType } from '~/models/Identifiers'
 import { TimeRange } from '~/models/TimeRange'
 import { WalletAddress } from '~/models/Wallet'
@@ -1351,7 +1352,7 @@ type TrendingChangeView = {
 // Feed
 type FeedChangeView = {
   eventName: Name.FEED_CHANGE_VIEW
-  view: FeedFilter
+  view: FeedFilter | FeedTab
 }
 
 // Notifications
