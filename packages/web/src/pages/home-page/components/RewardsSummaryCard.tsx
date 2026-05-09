@@ -23,7 +23,16 @@ const messages = {
   viewAll: 'View All Rewards'
 }
 
-export const RewardsSummaryCard = () => {
+type RewardsSummaryCardProps = {
+  /**
+   * When true, bypasses the empty-state hide. Intended for testing/QA only.
+   */
+  forceVisible?: boolean
+}
+
+export const RewardsSummaryCard = ({
+  forceVisible = false
+}: RewardsSummaryCardProps = {}) => {
   const { claimableAmount, isEmpty } = useChallengeCooldownSchedule({
     multiple: true
   })
@@ -38,7 +47,7 @@ export const RewardsSummaryCard = () => {
     navigate(REWARDS_PAGE)
   }, [navigate])
 
-  if (isEmpty) return null
+  if (isEmpty && !forceVisible) return null
 
   return (
     <Paper border='strong' p='l' direction='column' gap='m'>

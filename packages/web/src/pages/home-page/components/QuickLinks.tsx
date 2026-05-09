@@ -13,9 +13,9 @@ import {
   Flex,
   IconCloudUpload,
   IconDiscord,
+  IconFanClub,
+  IconGift,
   IconQuestionCircle,
-  IconStar,
-  IconTokenAUDIO,
   IconTrophy,
   IconUser,
   IconVerified,
@@ -25,6 +25,8 @@ import {
 } from '@audius/harmony'
 import { GetContestsByUserStatusEnum } from '@audius/sdk'
 import { useNavigate } from 'react-router'
+
+import { useIsMobile } from 'hooks/useIsMobile'
 
 const {
   AUDIUS_DISCORD_LINK,
@@ -52,7 +54,8 @@ const messages = {
   joinDiscord: 'Discord',
   support: 'Support',
   signUp: 'Sign Up',
-  rewardsLabel: '$AUDIO'
+  rewards: 'Rewards',
+  audioUnit: '$AUDIO'
 }
 
 type Pill = {
@@ -104,15 +107,8 @@ const PillItem = ({ pill }: { pill: Pill }) => {
   )
 }
 
-type QuickLinksProps = {
-  /**
-   * When true, surfaces a "Rewards" pill in the row showing claimable $AUDIO.
-   * Desktop omits this because RewardsSummaryCard already covers it.
-   */
-  showRewardsPill?: boolean
-}
-
-export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
+export const QuickLinks = () => {
+  const isMobile = useIsMobile()
   const { data: currentUserId } = useCurrentUserId()
   const { data: currentUser } = useCurrentAccountUser()
   const isAuthed = !!currentUserId
@@ -167,15 +163,16 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
 
     const items: Pill[] = []
 
-    if (showRewardsPill && !isRewardsEmpty) {
-      items.push({
-        key: 'rewards',
-        label: `${formatNumberCommas(claimableAmount)} ${messages.rewardsLabel}`,
-        icon: IconTokenAUDIO,
-        to: REWARDS_PAGE,
-        highlight: true
-      })
-    }
+    const hasClaimable = !isRewardsEmpty && claimableAmount > 0
+    items.push({
+      key: 'rewards',
+      label: hasClaimable
+        ? `${formatNumberCommas(claimableAmount)} ${messages.audioUnit}`
+        : messages.rewards,
+      icon: IconGift,
+      to: REWARDS_PAGE,
+      highlight: hasClaimable
+    })
 
     items.push({
       key: 'upload',
@@ -224,14 +221,14 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
       items.push({
         key: 'manage-fan-club',
         label: messages.manageFanClub,
-        icon: IconStar,
+        icon: IconFanClub,
         to: clubPage(createdFanClub.ticker)
       })
     } else if (isVerified) {
       items.push({
         key: 'launch-fan-club',
         label: messages.launchFanClub,
-        icon: IconStar,
+        icon: IconFanClub,
         to: CLUBS_CREATE_PAGE
       })
     }
@@ -265,7 +262,6 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
     return items
   }, [
     isAuthed,
-    showRewardsPill,
     isRewardsEmpty,
     claimableAmount,
     hostedContestTrackIds,
@@ -289,7 +285,11 @@ export const QuickLinks = ({ showRewardsPill = false }: QuickLinksProps) => {
         '&::-webkit-scrollbar': { display: 'none' }
       }}
     >
-      <Flex gap='s' ph='l' css={{ minWidth: 'max-content' }}>
+      <Flex
+        gap='s'
+        ph={isMobile ? 'l' : undefined}
+        css={{ minWidth: 'max-content' }}
+      >
         {pills.map((pill) => (
           <PillItem key={pill.key} pill={pill} />
         ))}

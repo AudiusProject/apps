@@ -53,18 +53,18 @@ export const StatusZone = ({ variant }: StatusZoneProps) => {
     // surfaces as a pill in QuickLinks instead.
     return (
       <Flex column gap='l' w='100%'>
-        <QuickLinks showRewardsPill />
+        <QuickLinks />
       </Flex>
     )
   }
 
   return (
     <Flex column gap='l' w='100%'>
-      <RewardsSummaryCard />
       <ProfileCompletionHeroCard
         isDismissed={isDismissed}
         onDismiss={onDismiss}
       />
+      <RewardsSummaryCard />
       <QuickLinks />
     </Flex>
   )
