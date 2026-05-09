@@ -31,10 +31,7 @@ const messages = {
   endOfFeed: "Looks like you've reached the end of your feed..."
 }
 
-const tabToFilter: Record<
-  Exclude<FeedTab, FeedTab.FOR_YOU>,
-  FeedFilter
-> = {
+const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
   [FeedTab.FOLLOWING]: FeedFilter.ALL,
   [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }
@@ -95,9 +92,7 @@ export const FeedScreen = () => {
         pageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE,
         initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
         refetch: undefined as undefined | (() => void),
-        querySource: undefined as
-          | { queryKey: unknown[] }
-          | undefined
+        querySource: undefined as { queryKey: unknown[] } | undefined
       }
     : {
         trackIds: followFeed.trackIds,
