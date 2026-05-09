@@ -90,10 +90,22 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const bottomBarRef = useRef<HTMLDivElement>(null)
   const isCondensedBar = useIsContainerNarrow(bottomBarRef, 640)
 
-  const [category, setCategory] = useState<TrendingCategory>(() => {
+  const [category, setCategoryState] = useState<TrendingCategory>(() => {
     const { week } = parseUrlParams()
     return isValidWinnersWeek(week) ? 'winners' : 'tracks'
   })
+  const setCategory = useCallback(
+    (next: TrendingCategory) => {
+      // Switching category swaps the lineup underneath the user, but the
+      // outer scroll parent (mainContent) keeps its position. Reset to top
+      // so the new category starts from the top instead of mid-scroll.
+      if (containerRef?.current?.scrollTo) {
+        containerRef.current.scrollTo(0, 0)
+      }
+      setCategoryState(next)
+    },
+    [containerRef]
+  )
   const [winnersWeek, setWinnersWeek] = useState<string | null>(() => {
     const { week } = parseUrlParams()
     return isValidWinnersWeek(week) ? week : null

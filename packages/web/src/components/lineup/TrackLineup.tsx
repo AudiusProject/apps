@@ -292,7 +292,12 @@ export const TrackLineup = ({
               <Flex
                 direction='column'
                 gap='m'
-                key={`skeleton-${index}`}
+                // Position-based key so a skeleton's React identity matches
+                // its absolute position in the lineup. Without this, the same
+                // DOM node would change its rendered order number every time
+                // a page resolves (skeleton-0 reused but now showing tileOrder
+                // for a higher index), which reads as the numbers jumping.
+                key={`skeleton-${indexOffset + index}`}
                 w='100%'
                 as='li'
                 className={cn({ [tileStyles!]: !!tileStyles })}
