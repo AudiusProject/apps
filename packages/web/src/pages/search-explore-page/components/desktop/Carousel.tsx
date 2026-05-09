@@ -1,12 +1,14 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 
 import {
+  Box,
   Flex,
   IconButton,
   IconCaretLeft,
   IconCaretRight,
   Text,
-  PlainButton
+  PlainButton,
+  useTheme
 } from '@audius/harmony'
 import { Link } from 'react-router'
 
@@ -18,17 +20,13 @@ export type CarouselProps = {
   viewAllLink?: string
 }
 
-const FADE_LENGTH_PX = 64
-
-const getFadeMask = (canScrollLeft: boolean, canScrollRight: boolean) => {
-  const leftStop = canScrollLeft
-    ? `transparent 0, black ${FADE_LENGTH_PX}px`
-    : 'black 0'
-  const rightStop = canScrollRight
-    ? `black calc(100% - ${FADE_LENGTH_PX}px), transparent 100%`
-    : 'black 100%'
-  return `linear-gradient(to right, ${leftStop}, ${rightStop})`
-}
+const FADE_LENGTH_PX = 24
+const SCROLL_DURATION_MS = 320
+// scroll-margin-left applied to every non-first card so the prior card peeks
+// at the left edge during snap. Mirrored in CSS below; duplicated as a JS
+// constant so the caret-press animation can compute the exact snap-aligned
+// scrollLeft target and avoid the snap-back "jump" at the end of animation.
+const NON_FIRST_SNAP_MARGIN_PX = 40
 
 export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
   ({ title, children, viewAllLink }, ref) => {
@@ -36,7 +34,10 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     const [canScrollRight, setCanScrollRight] = useState(true)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const rafRef = useRef<number | null>(null)
+    const animRef = useRef<number | null>(null)
     const isMobile = useIsMobile()
+    const theme = useTheme()
+    const pageBg = theme.color.background.default
 
     const updateScrollButtons = useCallback(() => {
       if (rafRef.current !== null) return
@@ -73,23 +74,99 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     // so card shadows (including hover states) are not cut between carousels.
     const railShadowPaddingTop = isMobile ? 12 : 10
     const railShadowPaddingBottom = isMobile ? 12 : 20
+
+    // JS-driven smooth scroll for caret presses. Native smooth scroll +
+    // scroll-snap fight each other in this layout, so we rAF-drive scrollLeft
+    // directly with ease-out. We disable snap for the duration of the
+    // animation, but pre-compute the exact snap-aligned scrollLeft target so
+    // that when snap re-engages at the end, the browser sees we're already
+    // aligned and doesn't pull anywhere — no end-of-animation jump.
     const handleScrollBy = useCallback(
       (direction: -1 | 1) => {
         const container = scrollContainerRef.current
         if (!container) return
+        const innerRail = container.firstElementChild as HTMLElement | null
+        if (!innerRail) return
+        if (animRef.current !== null) {
+          cancelAnimationFrame(animRef.current)
+          animRef.current = null
+        }
 
-        // Scroll by nearly one viewport of rail content so nav remains aligned
-        // across responsive widths without hardcoded pixel jumps.
-        const scrollAmount = Math.max(
-          240,
-          container.clientWidth - (railInset + contentInset) * 2 - 24
-        )
-        container.scrollBy({
-          left: direction * scrollAmount,
-          behavior: 'smooth'
+        const scrollPaddingLeft = railInset + contentInset
+        const start = container.scrollLeft
+        const maxScroll = container.scrollWidth - container.clientWidth
+        const containerLeft = container.getBoundingClientRect().left
+
+        // Build the list of snap-aligned scrollLeft positions, one per card.
+        // Mirrors the CSS snap rules: padding on the container, plus
+        // scroll-margin-left on every non-first card.
+        const cards = Array.from(innerRail.children) as HTMLElement[]
+        const snapPositions = cards.map((card, i) => {
+          const cardLeftInContainer =
+            card.getBoundingClientRect().left - containerLeft + start
+          const cardMargin = i === 0 ? 0 : NON_FIRST_SNAP_MARGIN_PX
+          return Math.max(
+            0,
+            Math.min(
+              cardLeftInContainer - cardMargin - scrollPaddingLeft,
+              maxScroll
+            )
+          )
         })
+
+        // Pick the snap position closest to where a viewport-sized scroll in
+        // the requested direction would have landed.
+        const desiredDistance = Math.max(
+          240,
+          container.clientWidth - scrollPaddingLeft * 2 - 24
+        )
+        const desiredTarget = Math.max(
+          0,
+          Math.min(start + direction * desiredDistance, maxScroll)
+        )
+        let target = desiredTarget
+        let bestDist = Infinity
+        for (const pos of snapPositions) {
+          // Skip snap targets in the wrong direction (with a small epsilon so
+          // we don't get stuck at the current position).
+          if (direction === 1 && pos <= start + 1) continue
+          if (direction === -1 && pos >= start - 1) continue
+          const dist = Math.abs(pos - desiredTarget)
+          if (dist < bestDist) {
+            bestDist = dist
+            target = pos
+          }
+        }
+
+        const startTime = performance.now()
+        const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+        const previousSnapType = container.style.scrollSnapType
+        container.style.scrollSnapType = 'none'
+        const tick = (now: number) => {
+          const elapsed = now - startTime
+          const progress = Math.min(elapsed / SCROLL_DURATION_MS, 1)
+          container.scrollLeft = start + (target - start) * easeOut(progress)
+          if (progress < 1) {
+            animRef.current = requestAnimationFrame(tick)
+          } else {
+            animRef.current = null
+            // We landed exactly on a snap-aligned scrollLeft; restoring snap
+            // here is a no-op for the browser.
+            container.style.scrollSnapType = previousSnapType
+          }
+        }
+        animRef.current = requestAnimationFrame(tick)
       },
       [railInset]
+    )
+
+    useEffect(
+      () => () => {
+        if (animRef.current !== null) {
+          cancelAnimationFrame(animRef.current)
+        }
+      },
+      []
     )
 
     return (
@@ -159,50 +236,91 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
             </Flex>
           ) : null}
         </Flex>
-        <Flex
-          ref={scrollContainerRef}
-          css={{
-            overflowX: 'auto',
-
-            scrollbarWidth: 'none', // Firefox
-            msOverflowStyle: 'none', // IE/Edge
-            '&::-webkit-scrollbar': {
-              display: 'none' // Chrome/Safari
-            },
-            overscrollBehaviorX: 'contain', // prevents back gesture on chrome
-
-            // Keep edge clipping behavior while preserving room for card shadows.
-            marginLeft: -railInset,
-            marginRight: -railInset,
-            paddingLeft: railInset,
-            paddingRight: railInset,
-            paddingTop: railShadowPaddingTop,
-            paddingBottom: railShadowPaddingBottom,
-
-            // Desktop only: fade content into the page at edges when there's
-            // more to scroll in that direction. Avoids the abrupt edge of a
-            // finite carousel without repeating content. Fade region needs to
-            // be deep enough to land on actual card content (cards start
-            // ~railInset + contentInset from the scroll-container edge), so
-            // we use a fixed length larger than that.
-            ...(!isMobile && {
-              WebkitMaskImage: getFadeMask(canScrollLeft, canScrollRight),
-              maskImage: getFadeMask(canScrollLeft, canScrollRight)
-            })
-          }}
-        >
+        <Box css={{ position: 'relative' }}>
           <Flex
-            gap='m'
+            ref={scrollContainerRef}
             css={{
-              minWidth: 'max-content',
-              overflow: 'visible',
-              paddingLeft: contentInset,
-              paddingRight: contentInset
+              overflowX: 'auto',
+
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none', // IE/Edge
+              '&::-webkit-scrollbar': {
+                display: 'none' // Chrome/Safari
+              },
+              overscrollBehaviorX: 'contain', // prevents back gesture on chrome
+
+              // Keep edge clipping behavior while preserving room for card shadows.
+              marginLeft: -railInset,
+              marginRight: -railInset,
+              paddingLeft: railInset,
+              paddingRight: railInset,
+              paddingTop: railShadowPaddingTop,
+              paddingBottom: railShadowPaddingBottom,
+
+              // Magnetic settle for user-driven scrolling. The caret-press
+              // animation disables this for its duration so it doesn't fight
+              // the rAF-driven scrollLeft updates.
+              scrollSnapType: 'x proximity',
+              // The first card sits `railInset + contentInset` inside the
+              // scroll container's padding box; matching scroll-padding keeps
+              // the snapped first card from getting pulled past the visible
+              // edge.
+              scrollPaddingLeft: railInset + contentInset
             }}
           >
-            {children}
+            <Flex
+              gap='m'
+              css={{
+                minWidth: 'max-content',
+                overflow: 'visible',
+                paddingLeft: contentInset,
+                paddingRight: contentInset,
+                '& > *': { scrollSnapAlign: 'start' },
+                // For non-first cards, push the snap point inward so the prior
+                // card peeks at the left edge (and catches the fade overlay)
+                // rather than being scrolled fully off-screen.
+                '& > * + *': {
+                  scrollMarginLeft: `${NON_FIRST_SNAP_MARGIN_PX}px`
+                }
+              }}
+            >
+              {children}
+            </Flex>
           </Flex>
-        </Flex>
+          {/* Edge-fade overlays (desktop only). Rendered as absolute siblings
+              of the scroll container so they don't interfere with scroll
+              compositing — applying `mask-image` on the scrollable element
+              itself forces a non-composited paint mode that breaks the
+              smooth-scroll animation. */}
+          {!isMobile && canScrollLeft ? (
+            <Box
+              aria-hidden
+              css={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                width: FADE_LENGTH_PX,
+                background: `linear-gradient(to right, ${pageBg}, transparent)`,
+                pointerEvents: 'none'
+              }}
+            />
+          ) : null}
+          {!isMobile && canScrollRight ? (
+            <Box
+              aria-hidden
+              css={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                width: FADE_LENGTH_PX,
+                background: `linear-gradient(to left, ${pageBg}, transparent)`,
+                pointerEvents: 'none'
+              }}
+            />
+          ) : null}
+        </Box>
       </Flex>
     )
   }
