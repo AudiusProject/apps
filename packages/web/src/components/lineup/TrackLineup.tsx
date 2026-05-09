@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
@@ -19,7 +19,11 @@ import styles from './Lineup.module.css'
 import { LineupVariant } from './types'
 
 const NARROW_CONTAINER_THRESHOLD_PX = 600
-const DEFAULT_LOAD_MORE_THRESHOLD = 500
+// Fallback used until the scroll parent has been measured. Matches roughly one
+// viewport on a typical laptop — sized so the next page request fires while a
+// full screen of content is still below, and skeletons appear before the user
+// reaches the literal bottom of the list.
+const DEFAULT_LOAD_MORE_THRESHOLD = 800
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
@@ -221,6 +225,48 @@ export const TrackLineup = ({
     return trackIds.slice(0, end)
   }, [trackIds, maxEntries])
 
+  // Track the scroll parent's viewport height so the load-more threshold is
+  // ~one full viewport (matches mobile's `onEndReachedThreshold = 1`). Falls
+  // back to the constant until measured.
+  const [measuredThreshold, setMeasuredThreshold] = useState<number | null>(
+    null
+  )
+  useEffect(() => {
+    const parent = externalScrollParent ?? document.getElementById('mainContent')
+    if (!parent) return
+    const update = () => setMeasuredThreshold(parent.clientHeight || null)
+    update()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(update)
+    observer.observe(parent)
+    return () => observer.disconnect()
+  }, [externalScrollParent])
+
+  const effectiveLoadMoreThreshold = measuredThreshold ?? loadMoreThreshold
+
+  // Synchronous "load more was triggered" flag — set the moment the scroll
+  // handler fires so skeletons render on the next frame, without waiting for
+  // tanquery's `isFetching` to round-trip back through the parent. Cleared
+  // once the parent either delivers more entries or finishes fetching.
+  const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
+  const prevEntriesLengthRef = useRef(visibleTrackIds.length)
+  useEffect(() => {
+    if (visibleTrackIds.length !== prevEntriesLengthRef.current) {
+      prevEntriesLengthRef.current = visibleTrackIds.length
+      setIsLoadMoreTriggered(false)
+    }
+  }, [visibleTrackIds.length])
+  useEffect(() => {
+    if (!isFetching) setIsLoadMoreTriggered(false)
+  }, [isFetching])
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasNextPage || isFetching || isLoadMoreTriggered) return
+    if (!loadNextPage) return
+    setIsLoadMoreTriggered(true)
+    loadNextPage()
+  }, [hasNextPage, isFetching, isLoadMoreTriggered, loadNextPage])
+
   const renderSkeletons = useCallback(
     (skeletonCount: number | undefined) => {
       if (!skeletonCount) return null
@@ -291,7 +337,11 @@ export const TrackLineup = ({
   ])
 
   const isInitialLoad = isPending && tiles.length === 0
-  const isEmpty = tiles.length === 0 && !isFetching && !isInitialLoad
+  const isEmpty =
+    tiles.length === 0 &&
+    !isFetching &&
+    !isInitialLoad &&
+    !isLoadMoreTriggered
 
   return (
     <div
@@ -309,19 +359,19 @@ export const TrackLineup = ({
         <InfiniteScroll
           aria-label={ariaLabel}
           pageStart={0}
-          loadMore={loadNextPage ?? (() => {})}
+          loadMore={handleLoadMore}
           hasMore={!!hasNextPage && tiles.length < maxEntries}
           useWindow={isMobile}
           initialLoad={false}
           getScrollParent={getScrollParent}
           element='ol'
-          threshold={loadMoreThreshold}
+          threshold={effectiveLoadMoreThreshold}
           className={cn({
             [tileContainerStyles!]: !!tileContainerStyles && !isEmpty
           })}
         >
           {tiles.length === 0
-            ? isFetching || isInitialLoad
+            ? isFetching || isInitialLoad || isLoadMoreTriggered
               ? renderSkeletons(
                   Math.min(maxEntries, initialPageSize ?? pageSize)
                 )
@@ -360,7 +410,7 @@ export const TrackLineup = ({
                 </Flex>
               ))}
 
-          {isFetching && tiles.length > 0
+          {(isFetching || isLoadMoreTriggered) && tiles.length > 0
             ? renderSkeletons(Math.min(maxEntries - tiles.length, pageSize))
             : null}
         </InfiniteScroll>
