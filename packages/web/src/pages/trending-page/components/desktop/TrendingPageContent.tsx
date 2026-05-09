@@ -4,7 +4,6 @@ import {
   getTrendingQueryKey,
   getTrendingUndergroundQueryKey,
   TRENDING_INITIAL_PAGE_SIZE,
-  TRENDING_LOAD_MORE_PAGE_SIZE,
   useTrending,
   useTrendingUnderground
 } from '@audius/common/api'
@@ -106,11 +105,16 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const trendingGenre = useSelector(getTrendingGenre)
   const trendingTimeRange = useSelector(getTrendingTimeRange)
 
+  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
+  // the shared default (mobile-tuned) so successive load-mores keep up with a
+  // user scrolling deep into the lineup.
+  const desktopLoadMorePageSize = 10
+
   // ----- Three tanquery streams, one per time range -----
   const trendingArgs = useMemo(
     () => ({
       initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
-      loadMorePageSize: TRENDING_LOAD_MORE_PAGE_SIZE,
+      loadMorePageSize: desktopLoadMorePageSize,
       genre: trendingGenre
     }),
     [trendingGenre]
@@ -401,7 +405,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         isError={q.isError}
         hasNextPage={q.hasNextPage}
         loadNextPage={q.loadNextPage}
-        pageSize={TRENDING_LOAD_MORE_PAGE_SIZE}
+        pageSize={desktopLoadMorePageSize}
         initialPageSize={TRENDING_INITIAL_PAGE_SIZE}
         scrollParent={containerRef?.current ?? null}
         endOfLineupElement={
