@@ -437,7 +437,7 @@ const HomePageRedirect = ({ isGuestAccount }: HomePageRedirectProps) => {
       currentPath === HOME_PAGE
         ? isGuestAccount
           ? LIBRARY_PAGE
-          : TRENDING_PAGE
+          : FEED_PAGE
         : currentPath,
     search: includeSearch(location.search) ? location.search : ''
   }

@@ -48,7 +48,7 @@ const ConnectedBottomBar = () => {
   // Use ref to track last nav route synchronously (avoids render loops)
   // This is critical for React Router v7 compatibility where location updates
   // can happen before component re-renders
-  const lastNavRouteRef = useRef(TRENDING_PAGE)
+  const lastNavRouteRef = useRef(FEED_PAGE)
   const currentRoute = getPathname(location)
 
   // Compute current page synchronously: use current route if it's a nav route,
