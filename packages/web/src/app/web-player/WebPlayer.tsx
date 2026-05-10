@@ -154,6 +154,7 @@ const FbSharePage = lazy(() =>
   }))
 )
 const FeedPage = lazy(() => import('pages/feed-page/FeedPage'))
+const HomePage = lazy(() => import('pages/home-page/HomePage'))
 const FollowersPage = lazy(() => import('pages/followers-page/FollowersPage'))
 const FollowingPage = lazy(() => import('pages/following-page/FollowingPage'))
 const HistoryPage = lazy(() => import('pages/history-page/HistoryPage'))
@@ -245,6 +246,7 @@ const {
   UPLOAD_PLAYLIST_PAGE,
   SETTINGS_PAGE,
   HOME_PAGE,
+  HOMEPAGE_PAGE,
   NOT_FOUND_PAGE,
   SEARCH_PAGE,
   PLAYLIST_PAGE,
@@ -427,9 +429,16 @@ const CoinExclusiveTracksLegacyRedirect = () => {
 
 type HomePageRedirectProps = {
   isGuestAccount: boolean
+  target?: string
 }
 
-const HomePageRedirect = ({ isGuestAccount }: HomePageRedirectProps) => {
+const HomePageRedirect = ({
+  isGuestAccount,
+  // Default to FEED_PAGE to align with main's "feed is the default" choice
+  // for any caller that doesn't pass an explicit target. Active mounts in
+  // this file pass `target={HOMEPAGE_PAGE}` to land on the new home page.
+  target = FEED_PAGE
+}: HomePageRedirectProps) => {
   const location = useLocation()
   const currentPath = getPathname(location)
   const to = {
@@ -437,7 +446,7 @@ const HomePageRedirect = ({ isGuestAccount }: HomePageRedirectProps) => {
       currentPath === HOME_PAGE
         ? isGuestAccount
           ? LIBRARY_PAGE
-          : FEED_PAGE
+          : target
         : currentPath,
     search: includeSearch(location.search) ? location.search : ''
   }
@@ -1282,9 +1291,15 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={PROFILE_PAGE}
                   element={<ProfilePageRoute mainContentRef={mainContentRef} />}
                 />
+                <Route path={HOMEPAGE_PAGE} element={<HomePage />} />
                 <Route
                   path={HOME_PAGE}
-                  element={<HomePageRedirect isGuestAccount={isGuestAccount} />}
+                  element={
+                    <HomePageRedirect
+                      isGuestAccount={isGuestAccount}
+                      target={HOMEPAGE_PAGE}
+                    />
+                  }
                 />
               </AnimatedSwitch>
             ) : (
@@ -1632,9 +1647,15 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={PROFILE_PAGE}
                   element={<ProfilePageRoute mainContentRef={mainContentRef} />}
                 />
+                <Route path={HOMEPAGE_PAGE} element={<HomePage />} />
                 <Route
                   path={HOME_PAGE}
-                  element={<HomePageRedirect isGuestAccount={isGuestAccount} />}
+                  element={
+                    <HomePageRedirect
+                      isGuestAccount={isGuestAccount}
+                      target={HOMEPAGE_PAGE}
+                    />
+                  }
                 />
               </Routes>
             )}

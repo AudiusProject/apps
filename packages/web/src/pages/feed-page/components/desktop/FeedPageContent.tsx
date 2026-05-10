@@ -27,7 +27,7 @@ import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
 import { FeedTabs } from 'pages/feed-page/components/FeedTabs'
 
 const messages = {
-  feedHeaderTitle: 'Your Feed',
+  feedHeaderTitle: 'Feed',
   feedTitle: 'Feed',
   feedDescription: 'Listen to what people you follow are sharing'
 }

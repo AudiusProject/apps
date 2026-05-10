@@ -11,6 +11,7 @@ import {
   IconComponent,
   IconFanClub,
   IconGift,
+  IconLibrary,
   IconSettings,
   IconTrophy,
   IconUser,
@@ -33,6 +34,7 @@ const {
   CONTESTS_PAGE,
   FOLLOWERS_USERS_ROUTE,
   FOLLOWING_USERS_ROUTE,
+  LIBRARY_PAGE,
   REWARDS_PAGE,
   SETTINGS_PAGE,
   WALLET_PAGE,
@@ -41,6 +43,7 @@ const {
 
 const messages = {
   profile: 'My Profile',
+  library: 'Library',
   audio: '$AUDIO',
   artistCoins: 'Artist Coins',
   contests: 'Contests',
@@ -222,6 +225,14 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
                 icon={IconUser}
                 label={messages.profile}
                 href={profilePage(handle)}
+                onNavigate={handleNavigate}
+              />
+            ) : null}
+            {currentUserId ? (
+              <NavItem
+                icon={IconLibrary}
+                label={messages.library}
+                href={LIBRARY_PAGE}
                 onNavigate={handleNavigate}
               />
             ) : null}

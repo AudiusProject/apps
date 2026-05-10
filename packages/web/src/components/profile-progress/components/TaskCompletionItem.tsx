@@ -49,6 +49,7 @@ export const TaskCompletionItem = ({
     borderRadius={variant === 'surface' ? 's' : undefined}
     pv={variant === 'surface' ? 's' : undefined}
     ph={variant === 'surface' ? 'm' : undefined}
+    css={{ flexShrink: 0, flexWrap: 'nowrap' }}
   >
     <CompletionIcon isCompleted={isCompleted} variant={variant} />
     <Text
@@ -58,7 +59,8 @@ export const TaskCompletionItem = ({
       css={{
         textDecoration: isCompleted ? 'line-through' : 'none',
         opacity: isCompleted ? 0.6 : 1,
-        textAlign: 'left'
+        textAlign: 'left',
+        whiteSpace: 'nowrap'
       }}
     >
       {title}

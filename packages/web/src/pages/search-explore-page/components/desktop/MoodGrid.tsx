@@ -9,7 +9,11 @@ import { useSearchCategory } from 'pages/search-page/hooks'
 import { labelByCategoryView } from 'pages/search-page/types'
 import { MOODS } from 'utils/Moods'
 
-export const MoodGrid = () => {
+type MoodGridProps = {
+  onMoodClick?: (mood: Mood) => void
+}
+
+export const MoodGrid = ({ onMoodClick }: MoodGridProps = {}) => {
   const [category, setCategory] = useSearchCategory()
   const { color } = useTheme()
 
@@ -17,13 +21,17 @@ export const MoodGrid = () => {
 
   const handleMoodPress = useCallback(
     (mood: Mood) => {
+      if (onMoodClick) {
+        onMoodClick(mood)
+        return
+      }
       if (category === 'all') {
         setCategory('tracks', { mood })
       } else {
         setCategory(category, { mood })
       }
     },
-    [category, setCategory]
+    [category, setCategory, onMoodClick]
   )
 
   return (

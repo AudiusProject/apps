@@ -22,7 +22,7 @@ const {
   TERMS_OF_SERVICE,
   API_TERMS,
   OPEN_MUSIC_LICENSE_LINK,
-  TRENDING_PAGE,
+  HOMEPAGE_PAGE,
   AUDIUS_BLOG_LINK,
   DOWNLOAD_LINK,
   AUDIUS_HELP_LINK,
@@ -128,7 +128,7 @@ const Footer = (props: FooterProps) => {
               <p className={styles.siteLinksColumnTitle}>{messages.product}</p>
               <a
                 onClick={handleClickRoute(
-                  TRENDING_PAGE,
+                  HOMEPAGE_PAGE,
                   props.setRenderPublicSite,
                   navigate
                 )}

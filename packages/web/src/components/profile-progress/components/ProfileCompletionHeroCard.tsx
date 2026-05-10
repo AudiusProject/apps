@@ -1,27 +1,38 @@
 import { useIsAccountLoaded } from '@audius/common/api'
 import { useOrderedCompletionStages } from '@audius/common/src/store/challenges'
 import { challengesSelectors, profilePageActions } from '@audius/common/store'
-import { Box, Flex, Text, useTheme } from '@audius/harmony'
+import { Box, Flex, Text, TextLink, useTheme } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 // eslint-disable-next-line no-restricted-imports -- TODO: migrate to @react-spring/web
 import { useSpring, animated } from 'react-spring'
 
 import { SegmentedProgressBar } from 'components/segmented-progress-bar/SegmentedProgressBar'
 
-import { useProfileCompletionDismissal, useVerticalCollapse } from '../hooks'
+import { useProfileCompletionDismissal } from '../hooks'
 
-import { TaskCompletionList } from './TaskCompletionList'
+import { TaskCompletionItem } from './TaskCompletionItem'
 const animatedAny = animated as any
 
 const { profileMeterDismissed } = profilePageActions
 const { getProfilePageMeterDismissed } = challengesSelectors
 
 const messages = {
-  complete: 'Profile Complete'
+  complete: 'Profile Complete',
+  dismiss: 'Dismiss'
 }
 
-const ORIGINAL_HEIGHT_PIXELS = 206
-const CARD_HEIGHT_PIXELS = 182
+const BADGE_COLUMN_WIDTH = 280
+
+// Container-query stacking: when the card is below this width, the layout
+// collapses to a single stacked column.
+const CARD_CONTAINER_NAME = 'profile-completion-hero-card'
+const STACK_BREAKPOINT_PX = 600
+const STACK_QUERY = `@container ${CARD_CONTAINER_NAME} (max-width: ${STACK_BREAKPOINT_PX}px)`
+// At and above this card width, the task grid switches to two columns. Below
+// this (but still in the side-by-side badge layout), the task grid is a
+// single column so the longest task titles never need to truncate.
+const TWO_COL_BREAKPOINT_PX = 800
+const TWO_COL_QUERY = `@container ${CARD_CONTAINER_NAME} (min-width: ${TWO_COL_BREAKPOINT_PX}px)`
 
 interface CompletionStage {
   isCompleted: boolean
@@ -38,21 +49,53 @@ export const getPercentageComplete = (
   return (stepsCompleted / completionStages.length) * 100
 }
 
+const sortIncompleteFirst = (list: CompletionStage[]) => {
+  const incomplete = list.filter((e) => !e.isCompleted)
+  const complete = list.filter((e) => e.isCompleted)
+  return [...incomplete, ...complete]
+}
+
+type ProfileCompletionHeroCardProps = {
+  isDismissed?: boolean
+  onDismiss?: () => void
+  /**
+   * When true, bypasses the dismissal/auto-hide gates and forces the meter
+   * visible. Intended for testing/QA.
+   */
+  forceVisible?: boolean
+}
+
 /**
- * ProfileCompletionHeroCard is the hero card that shows the profile completion percentage,
- * the progress meter, and the list of completed stages. It handles its own state management
- * and animations.
+ * ProfileCompletionHeroCard is the larger profile completion meter shown on
+ * surfaces with more horizontal space (e.g. /home and the profile page).
+ *
+ * Layout: badge (percentage + bar) on the left and task grid on the right at
+ * wide card widths; stacks vertically below `STACK_BREAKPOINT_PX`. Stacking
+ * is driven by container queries on the card itself, not viewport, so the
+ * card behaves correctly inside any-width container.
+ *
+ * The task grid uses CSS `repeat(auto-fit, minmax(...))` so columns reflow
+ * continuously as the card narrows — at every intermediate width tasks fit
+ * cleanly into however many columns work.
+ *
+ * Dismiss lives in a footer row (no absolute positioning) so the layout has
+ * no hidden overflow risk.
+ *
+ * Pass `isDismissed`/`onDismiss` to override the default profile-page-scoped
+ * dismissal state (e.g. for use on /home).
  */
-export const ProfileCompletionHeroCard = () => {
+export const ProfileCompletionHeroCard = (
+  props: ProfileCompletionHeroCardProps = {}
+) => {
   const dispatch = useDispatch()
+  const theme = useTheme()
 
   const isAccountLoaded = useIsAccountLoaded()
   const completionStages = useOrderedCompletionStages()
-  const isDismissed = useSelector(getProfilePageMeterDismissed)
-  const theme = useTheme()
-  const { color } = theme
+  const reduxIsDismissed = useSelector(getProfilePageMeterDismissed)
 
-  const onDismiss = () => dispatch(profileMeterDismissed())
+  const isDismissed = props.isDismissed ?? reduxIsDismissed
+  const onDismiss = props.onDismiss ?? (() => dispatch(profileMeterDismissed()))
 
   const { isHidden, shouldNeverShow } = useProfileCompletionDismissal({
     onDismiss,
@@ -61,7 +104,8 @@ export const ProfileCompletionHeroCard = () => {
     isDismissed
   })
 
-  const transitions = useVerticalCollapse(!isHidden, ORIGINAL_HEIGHT_PIXELS)
+  const effectiveIsHidden = props.forceVisible ? false : isHidden
+  const effectiveShouldNeverShow = props.forceVisible ? false : shouldNeverShow
 
   const stepsCompleted = getStepsCompleted(completionStages)
   const percentageCompleted = getPercentageComplete(completionStages)
@@ -70,95 +114,127 @@ export const ProfileCompletionHeroCard = () => {
     from: { animatedPercentage: 0 }
   })
 
-  if (shouldNeverShow) return null
+  if (effectiveShouldNeverShow || effectiveIsHidden) return null
+
+  const sortedStages = sortIncompleteFirst(completionStages)
 
   return (
-    <>
-      {transitions.map(({ item, key, props }) =>
-        item ? (
-          <animatedAny.div style={props} key={key}>
-            <Flex
-              shadow='emphasis'
-              w='100%'
-              borderRadius='m'
-              css={{ userSelect: 'none', overflow: 'hidden' }}
-            >
-              <Flex
-                column
-                justifyContent='flex-start'
-                alignItems='center'
-                backgroundColor='white'
-                ph='l'
-                w={289}
-                css={{
-                  flexShrink: 0,
-                  fontSize: 26,
-                  fontWeight: 'bold',
-                  lineHeight: 32,
-                  letterSpacing: 0.93
-                }}
-              >
-                <Box
-                  mt={34}
-                  css={{
-                    color: theme.color.text.accent,
-                    fontSize: '52px',
-                    fontWeight: theme.typography.weight.heavy,
-                    lineHeight: theme.typography.lineHeight.xl,
-                    letterSpacing: 1.86
-                  }}
-                >
-                  <animatedAny.span>
-                    {animatedPercentage.interpolate((v: unknown) =>
-                      (v as number).toFixed()
-                    )}
-                  </animatedAny.span>
-                  %
-                </Box>
-                <Flex p='m'>
-                  <Text variant='title' size='m'>
-                    {messages.complete}
-                  </Text>
-                </Flex>
-                <SegmentedProgressBar
-                  numSteps={completionStages.length}
-                  stepsComplete={stepsCompleted}
-                />
-              </Flex>
-              <Flex
-                p='l'
-                flex={1}
-                h={CARD_HEIGHT_PIXELS}
-                css={{ backgroundColor: color.secondary.s300 }}
-              >
-                <TaskCompletionList completionStages={completionStages} />
-              </Flex>
-              <button
-                css={{
-                  position: 'absolute',
-                  bottom: theme.spacing.m,
-                  right: theme.spacing.m,
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: theme.color.text.white,
-                  fontSize: theme.typography.size.xs,
-                  opacity: 0.5,
-                  textAlign: 'center',
-                  fontWeight: theme.typography.weight.medium,
-                  letterSpacing: 0.43,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    textDecoration: 'underline'
-                  }
-                }}
-                onClick={onDismiss}
-              >
-                Dismiss
-              </button>
-            </Flex>
-          </animatedAny.div>
-        ) : null
-      )}
-    </>
+    <Flex
+      direction='column'
+      border='strong'
+      borderRadius='l'
+      w='100%'
+      css={{
+        userSelect: 'none',
+        overflow: 'hidden',
+        containerType: 'inline-size',
+        containerName: CARD_CONTAINER_NAME
+      }}
+    >
+      <Flex
+        css={{
+          flexDirection: 'row',
+          alignItems: 'stretch',
+          [STACK_QUERY]: {
+            flexDirection: 'column'
+          }
+        }}
+      >
+        <Flex
+          direction='column'
+          justifyContent='center'
+          alignItems='center'
+          backgroundColor='white'
+          css={{
+            width: BADGE_COLUMN_WIDTH,
+            flexShrink: 0,
+            padding: theme.spacing.xl,
+            gap: theme.spacing.m,
+            [STACK_QUERY]: {
+              width: '100%',
+              padding: theme.spacing.m,
+              gap: theme.spacing.xs
+            }
+          }}
+        >
+          <Text
+            color='accent'
+            css={{
+              fontSize: 56,
+              fontWeight: theme.typography.weight.heavy,
+              lineHeight: theme.typography.lineHeight.xl,
+              letterSpacing: 1.86,
+              [STACK_QUERY]: {
+                fontSize: 40,
+                lineHeight: theme.typography.lineHeight.l,
+                letterSpacing: 1.4
+              }
+            }}
+          >
+            <animatedAny.span>
+              {animatedPercentage.interpolate((v: unknown) =>
+                (v as number).toFixed()
+              )}
+            </animatedAny.span>
+            %
+          </Text>
+          <Text variant='title' size='m'>
+            {messages.complete}
+          </Text>
+          <SegmentedProgressBar
+            numSteps={completionStages.length}
+            stepsComplete={stepsCompleted}
+          />
+        </Flex>
+        <Flex
+          direction='column'
+          backgroundColor='surface2'
+          css={{
+            flex: '1 1 auto',
+            minWidth: 0,
+            padding: theme.spacing.xl,
+            gap: theme.spacing.m,
+            [STACK_QUERY]: {
+              padding: theme.spacing.m,
+              gap: theme.spacing.xs
+            }
+          }}
+        >
+          <Box
+            css={{
+              width: '100%',
+              display: 'grid',
+              // Single column by default — fits any task title without any
+              // truncation, and looks consistent with the sidebar tooltip
+              // pattern. At wide card widths we promote to two columns so
+              // the meter doesn't waste vertical space.
+              gridTemplateColumns: 'minmax(0, 1fr)',
+              gap: theme.spacing.s,
+              alignContent: 'start',
+              [TWO_COL_QUERY]: {
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'
+              },
+              [STACK_QUERY]: {
+                gap: theme.spacing.xs
+              }
+            }}
+          >
+            {sortedStages.map((stage) => (
+              <TaskCompletionItem
+                key={stage.title}
+                title={stage.title}
+                isCompleted={stage.isCompleted}
+                variant='surface'
+              />
+            ))}
+          </Box>
+          <Flex justifyContent='flex-end' css={{ marginTop: 'auto' }}>
+            <TextLink onClick={onDismiss} variant='subdued' size='s'>
+              {messages.dismiss}
+            </TextLink>
+          </Flex>
+        </Flex>
+      </Flex>
+    </Flex>
   )
 }

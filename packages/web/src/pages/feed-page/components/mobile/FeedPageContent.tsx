@@ -35,7 +35,7 @@ import styles from './FeedPageContent.module.css'
 const { FEED_PAGE } = route
 
 const messages = {
-  title: 'Your Feed',
+  title: 'Feed',
   feedTitle: 'Feed',
   feedDescription: 'Listen to what people you follow are sharing'
 }
