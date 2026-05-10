@@ -4,7 +4,6 @@ import {
   getTrendingQueryKey,
   getTrendingUndergroundQueryKey,
   TRENDING_INITIAL_PAGE_SIZE,
-  TRENDING_LOAD_MORE_PAGE_SIZE,
   useTrending,
   useTrendingUnderground
 } from '@audius/common/api'
@@ -91,10 +90,22 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const bottomBarRef = useRef<HTMLDivElement>(null)
   const isCondensedBar = useIsContainerNarrow(bottomBarRef, 640)
 
-  const [category, setCategory] = useState<TrendingCategory>(() => {
+  const [category, setCategoryState] = useState<TrendingCategory>(() => {
     const { week } = parseUrlParams()
     return isValidWinnersWeek(week) ? 'winners' : 'tracks'
   })
+  const setCategory = useCallback(
+    (next: TrendingCategory) => {
+      // Switching category swaps the lineup underneath the user, but the
+      // outer scroll parent (mainContent) keeps its position. Reset to top
+      // so the new category starts from the top instead of mid-scroll.
+      if (containerRef?.current?.scrollTo) {
+        containerRef.current.scrollTo(0, 0)
+      }
+      setCategoryState(next)
+    },
+    [containerRef]
+  )
   const [winnersWeek, setWinnersWeek] = useState<string | null>(() => {
     const { week } = parseUrlParams()
     return isValidWinnersWeek(week) ? week : null
@@ -106,11 +117,16 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   const trendingGenre = useSelector(getTrendingGenre)
   const trendingTimeRange = useSelector(getTrendingTimeRange)
 
+  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
+  // the shared default (mobile-tuned) so successive load-mores keep up with a
+  // user scrolling deep into the lineup.
+  const desktopLoadMorePageSize = 10
+
   // ----- Three tanquery streams, one per time range -----
   const trendingArgs = useMemo(
     () => ({
       initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
-      loadMorePageSize: TRENDING_LOAD_MORE_PAGE_SIZE,
+      loadMorePageSize: desktopLoadMorePageSize,
       genre: trendingGenre
     }),
     [trendingGenre]
@@ -401,7 +417,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
         isError={q.isError}
         hasNextPage={q.hasNextPage}
         loadNextPage={q.loadNextPage}
-        pageSize={TRENDING_LOAD_MORE_PAGE_SIZE}
+        pageSize={desktopLoadMorePageSize}
         initialPageSize={TRENDING_INITIAL_PAGE_SIZE}
         scrollParent={containerRef?.current ?? null}
         endOfLineupElement={

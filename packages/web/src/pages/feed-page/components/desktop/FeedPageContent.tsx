@@ -3,12 +3,10 @@ import { useMemo, useRef } from 'react'
 import {
   getFeedQueryKey,
   FEED_INITIAL_PAGE_SIZE,
-  FEED_LOAD_MORE_PAGE_SIZE,
   useCurrentUserId,
   useFeed,
   useForYouFeed,
-  FOR_YOU_INITIAL_PAGE_SIZE,
-  FOR_YOU_LOAD_MORE_PAGE_SIZE
+  FOR_YOU_INITIAL_PAGE_SIZE
 } from '@audius/common/api'
 import { Name, FeedFilter, FeedTab } from '@audius/common/models'
 import {
@@ -56,6 +54,11 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const feedTab = useSelector(getFeedTab)
   const { data: currentUserId } = useCurrentUserId()
 
+  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
+  // the shared default (mobile-tuned) so successive load-mores keep up with a
+  // user scrolling deep into the lineup.
+  const desktopLoadMorePageSize = 10
+
   const isForYou = feedTab === FeedTab.FOR_YOU
   const followingFilter = isForYou
     ? FeedFilter.ALL
@@ -67,7 +70,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       userId: currentUserId,
       filter: followingFilter,
       initialPageSize: FEED_INITIAL_PAGE_SIZE,
-      loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
+      loadMorePageSize: desktopLoadMorePageSize
     }),
     [followingFilter, currentUserId]
   )
@@ -77,7 +80,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const forYouFeed = useForYouFeed(
     {
       initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
-      loadMorePageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE
+      loadMorePageSize: desktopLoadMorePageSize
     },
     { enabled: isForYou }
   )
@@ -115,7 +118,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         isError: forYouFeed.isError,
         hasNextPage: forYouFeed.hasNextPage,
         loadNextPage: forYouFeed.loadNextPage,
-        pageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE,
+        pageSize: desktopLoadMorePageSize,
         initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
         querySource: undefined
       }
@@ -126,7 +129,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         isError: followFeed.isError,
         hasNextPage: followFeed.hasNextPage,
         loadNextPage: followFeed.loadNextPage,
-        pageSize: FEED_LOAD_MORE_PAGE_SIZE,
+        pageSize: desktopLoadMorePageSize,
         initialPageSize: FEED_INITIAL_PAGE_SIZE,
         querySource: followQuerySource
       }
