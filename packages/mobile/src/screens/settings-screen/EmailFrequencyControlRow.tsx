@@ -17,14 +17,12 @@ const { updateEmailFrequency } = settingsPageActions
 
 const messages = {
   emailFrequency: "'What You Missed' Email Frequency",
-  live: 'Live',
   daily: 'Daily',
   weekly: 'Weekly',
   off: 'Off'
 }
 
 const emailFrequencyOptions = [
-  { key: EmailFrequency.Live, text: messages.live },
   { key: EmailFrequency.Daily, text: messages.daily },
   { key: EmailFrequency.Weekly, text: messages.weekly },
   { key: EmailFrequency.Off, text: messages.off }

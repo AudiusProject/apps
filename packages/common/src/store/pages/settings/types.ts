@@ -28,7 +28,6 @@ export enum PushNotificationSetting {
 }
 
 export enum EmailFrequency {
-  Live = 'live',
   Daily = 'daily',
   Weekly = 'weekly',
   Off = 'off'

@@ -144,7 +144,6 @@ const NotificationSettingsModal = (props: NotificationSettingsModalProps) => {
   ]
 
   const emailOptions = [
-    { key: EmailFrequency.Live, text: 'Live' },
     { key: EmailFrequency.Daily, text: 'Daily' },
     { key: EmailFrequency.Weekly, text: 'Weekly' },
     { key: EmailFrequency.Off, text: 'Off' }
