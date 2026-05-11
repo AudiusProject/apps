@@ -3,6 +3,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState
 } from 'react'
 
@@ -21,7 +22,7 @@ import {
   useUser
 } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
-import { ShareSource } from '@audius/common/models'
+import { Name, ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
@@ -36,6 +37,7 @@ import { useDispatch } from 'react-redux'
 import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
+import { make, track as trackEvent } from 'app/services/analytics'
 import {
   CollapsibleTabNavigator,
   collapsibleTabScreen
@@ -295,7 +297,38 @@ export const ContestScreen = () => {
     dispatch(setVisibility({ drawer: 'PickWinners', visible: true }))
   }, [trackId, dispatch])
 
-  const handleEnterContest = useEnterContest(trackId)
+  const enterContest = useEnterContest(trackId)
+  const handleEnterContest = useCallback(async () => {
+    if (trackId != null && eventId != null) {
+      trackEvent(
+        make({
+          eventName: Name.REMIX_CONTEST_ENTER,
+          remixContestId: eventId,
+          trackId
+        })
+      )
+    }
+    await enterContest()
+  }, [enterContest, trackId, eventId])
+
+  // Fire a Remix Contest: View event the first time the screen resolves
+  // both a trackId and an eventId. The screen is mounted once per
+  // navigation push, so a ref guard makes the event idempotent across
+  // unrelated re-renders (followers count update, scroll-y reaction,
+  // etc.) while still firing on each fresh push.
+  const hasFiredViewRef = useRef(false)
+  useEffect(() => {
+    if (hasFiredViewRef.current) return
+    if (trackId == null || eventId == null) return
+    hasFiredViewRef.current = true
+    trackEvent(
+      make({
+        eventName: Name.REMIX_CONTEST_VIEW,
+        remixContestId: eventId,
+        trackId
+      })
+    )
+  }, [trackId, eventId])
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the

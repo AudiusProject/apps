@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   getRemixesQueryKey,
@@ -6,10 +6,13 @@ import {
   useRemixesCount,
   useRemixesLineup
 } from '@audius/common/api'
+import { Name } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
+import { useFocusedTab } from 'react-native-collapsible-tab-view'
 
 import { Divider, FilterButton, Flex, Text } from '@audius/harmony-native'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
+import { make, track as trackEvent } from 'app/services/analytics'
 
 import { useContestPage } from '../ContestPageContext'
 
@@ -56,9 +59,32 @@ const SORT_OPTIONS = [
  * gap by hydrating Redux from the tan-query cache immediately.
  */
 export const ContestSubmissionsTab = () => {
-  const { trackId } = useContestPage()
+  const { trackId, eventId } = useContestPage()
   const { data: contest } = useRemixContest(trackId)
   const winnerCount = contest?.eventData?.winners?.length ?? 0
+
+  // Fire a Remix Contest: View Submissions event the first time the
+  // user actually focuses this tab. Tabs are mounted eagerly
+  // (`lazy: false` in `CollapsibleTabNavigator`), so a plain mount
+  // effect would fire even for users who only ever look at the Details
+  // tab. `useFocusedTab` from react-native-collapsible-tab-view is the
+  // primitive the tab navigator already uses — it returns the
+  // currently-focused tab name and re-runs effects when that changes.
+  const focusedTab = useFocusedTab()
+  const hasFiredSubmissionsViewRef = useRef(false)
+  useEffect(() => {
+    if (hasFiredSubmissionsViewRef.current) return
+    if (focusedTab !== 'Submissions') return
+    if (trackId == null || eventId == null) return
+    hasFiredSubmissionsViewRef.current = true
+    trackEvent(
+      make({
+        eventName: Name.REMIX_CONTEST_VIEW_SUBMISSIONS,
+        remixContestId: eventId,
+        trackId
+      })
+    )
+  }, [focusedTab, trackId, eventId])
 
   const [sortMethod, setSortMethod] = useState<'recent' | 'plays' | 'likes'>(
     'recent'
