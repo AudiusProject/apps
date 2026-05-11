@@ -30,7 +30,7 @@ const SCROLL_THRESHOLD = 300
 export const NotificationPage = () => {
   const {
     notifications,
-    isAllPending: isPending,
+    isPending,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage

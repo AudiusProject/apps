@@ -10,21 +10,15 @@ type FeedTabsProps = {
 
 const messages = {
   forYou: 'For You',
-  following: 'Following',
-  uploadsOnly: 'Uploads Only'
+  chronological: 'Chronological'
 }
 
 const tabToLabel: Record<FeedTab, string> = {
   [FeedTab.FOR_YOU]: messages.forYou,
-  [FeedTab.FOLLOWING]: messages.following,
-  [FeedTab.UPLOADS_ONLY]: messages.uploadsOnly
+  [FeedTab.CHRONOLOGICAL]: messages.chronological
 }
 
-const tabs: FeedTab[] = [
-  FeedTab.FOR_YOU,
-  FeedTab.FOLLOWING,
-  FeedTab.UPLOADS_ONLY
-]
+const tabs: FeedTab[] = [FeedTab.FOR_YOU, FeedTab.CHRONOLOGICAL]
 
 export const FeedTabs = ({ currentTab, onSelectTab }: FeedTabsProps) => {
   const handleChange = useCallback(

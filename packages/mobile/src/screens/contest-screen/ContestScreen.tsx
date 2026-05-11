@@ -45,6 +45,7 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useEnterContest } from 'app/hooks/useEnterContest'
 import { useRoute } from 'app/hooks/useRoute'
+import { make, track as trackEvent } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'

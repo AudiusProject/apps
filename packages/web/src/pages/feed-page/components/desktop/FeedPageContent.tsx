@@ -1,16 +1,14 @@
-import { useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import {
   getFeedQueryKey,
   FEED_INITIAL_PAGE_SIZE,
-  FEED_LOAD_MORE_PAGE_SIZE,
   useCurrentUserId,
   useFeed,
   useForYouFeed,
-  FOR_YOU_INITIAL_PAGE_SIZE,
-  FOR_YOU_LOAD_MORE_PAGE_SIZE
+  FOR_YOU_INITIAL_PAGE_SIZE
 } from '@audius/common/api'
-import { Name, FeedFilter, FeedTab } from '@audius/common/models'
+import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
 import {
   feedPageSelectors,
   feedPageActions as discoverPageAction
@@ -26,6 +24,7 @@ import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
+import { FeedFilters } from 'pages/feed-page/components/FeedFilters'
 import { FeedTabs } from 'pages/feed-page/components/FeedTabs'
 
 const messages = {
@@ -34,15 +33,10 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getFeedTab } = feedPageSelectors
+const { getFeedTab, getFeedFilter } = feedPageSelectors
 
 type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
-}
-
-const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
-  [FeedTab.FOLLOWING]: FeedFilter.ALL,
-  [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }
 
 // Note: the feed API returns both tracks and collections (playlist reposts).
@@ -53,23 +47,30 @@ const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const dispatch = useDispatch()
   const titleRowRef = useRef<HTMLDivElement>(null)
-  const feedTab = useSelector(getFeedTab)
+  const persistedTab = useSelector(getFeedTab)
+  const feedFilter = useSelector(getFeedFilter)
   const { data: currentUserId } = useCurrentUserId()
 
-  const isForYou = feedTab === FeedTab.FOR_YOU
-  const followingFilter = isForYou
-    ? FeedFilter.ALL
-    : tabToFilter[feedTab as Exclude<FeedTab, FeedTab.FOR_YOU>]
+  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
+  // the shared default (mobile-tuned) so successive load-mores keep up with a
+  // user scrolling deep into the lineup.
+  const desktopLoadMorePageSize = 10
 
-  // Following / Uploads-Only lineup. Disabled while For You is active.
+  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
+  // CHRONOLOGICAL after the For You / Chronological refactor.
+  const feedTab =
+    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
+  const isForYou = feedTab === FeedTab.FOR_YOU
+
+  // Chronological lineup. Disabled while For You is active.
   const feedArgs = useMemo(
     () => ({
       userId: currentUserId,
-      filter: followingFilter,
+      filter: feedFilter,
       initialPageSize: FEED_INITIAL_PAGE_SIZE,
-      loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
+      loadMorePageSize: desktopLoadMorePageSize
     }),
-    [followingFilter, currentUserId]
+    [feedFilter, currentUserId]
   )
   const followFeed = useFeed(feedArgs, { enabled: !isForYou })
 
@@ -77,7 +78,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const forYouFeed = useForYouFeed(
     {
       initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
-      loadMorePageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE
+      loadMorePageSize: desktopLoadMorePageSize
     },
     { enabled: isForYou }
   )
@@ -88,13 +89,24 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   )
 
   const record = useRecord()
-  const onSelectTab = (tab: FeedTab) => {
-    if (containerRef?.current?.scrollTo) {
-      containerRef.current.scrollTo(0, 0)
-    }
-    dispatch(discoverPageAction.setFeedTab(tab))
-    record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
-  }
+  const onSelectTab = useCallback(
+    (tab: FeedTab) => {
+      if (containerRef?.current?.scrollTo) {
+        containerRef.current.scrollTo(0, 0)
+      }
+      dispatch(discoverPageAction.setFeedTab(tab))
+      record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
+    },
+    [containerRef, dispatch, record]
+  )
+
+  const onSelectFilter = useCallback(
+    (filter: FeedFilter) => {
+      dispatch(discoverPageAction.setFeedFilter(filter))
+      record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
+    },
+    [dispatch, record]
+  )
 
   const header = (
     <Header
@@ -103,6 +115,14 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       primary={messages.feedHeaderTitle}
       rightDecorator={
         <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
+      }
+      bottomBar={
+        isForYou ? null : (
+          <FeedFilters
+            currentFilter={feedFilter}
+            onSelectFilter={onSelectFilter}
+          />
+        )
       }
     />
   )
@@ -115,7 +135,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         isError: forYouFeed.isError,
         hasNextPage: forYouFeed.hasNextPage,
         loadNextPage: forYouFeed.loadNextPage,
-        pageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE,
+        pageSize: desktopLoadMorePageSize,
         initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
         querySource: undefined
       }
@@ -126,7 +146,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         isError: followFeed.isError,
         hasNextPage: followFeed.hasNextPage,
         loadNextPage: followFeed.loadNextPage,
-        pageSize: FEED_LOAD_MORE_PAGE_SIZE,
+        pageSize: desktopLoadMorePageSize,
         initialPageSize: FEED_INITIAL_PAGE_SIZE,
         querySource: followQuerySource
       }

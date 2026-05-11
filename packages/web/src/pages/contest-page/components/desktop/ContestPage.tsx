@@ -56,6 +56,7 @@ import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { make, track as trackEvent } from 'services/analytics'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
+import { make, track as trackEvent } from 'services/analytics'
 import {
   fullContestPage,
   hostRemixContestPage,

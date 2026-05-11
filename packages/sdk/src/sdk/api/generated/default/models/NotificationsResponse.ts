@@ -19,6 +19,12 @@ import {
     NotificationsFromJSONTyped,
     NotificationsToJSON,
 } from './Notifications';
+import type { Related } from './Related';
+import {
+    RelatedFromJSON,
+    RelatedFromJSONTyped,
+    RelatedToJSON,
+} from './Related';
 import type { VersionMetadata } from './VersionMetadata';
 import {
     VersionMetadataFromJSON,
@@ -80,6 +86,12 @@ export interface NotificationsResponse {
      * @memberof NotificationsResponse
      */
     data?: Notifications;
+    /**
+     * 
+     * @type {Related}
+     * @memberof NotificationsResponse
+     */
+    related?: Related;
 }
 
 /**
@@ -116,6 +128,7 @@ export function NotificationsResponseFromJSONTyped(json: any, ignoreDiscriminato
         'timestamp': json['timestamp'],
         'version': VersionMetadataFromJSON(json['version']),
         'data': !exists(json, 'data') ? undefined : NotificationsFromJSON(json['data']),
+        'related': !exists(json, 'related') ? undefined : RelatedFromJSON(json['related']),
     };
 }
 
@@ -136,6 +149,7 @@ export function NotificationsResponseToJSON(value?: NotificationsResponse | null
         'timestamp': value.timestamp,
         'version': VersionMetadataToJSON(value.version),
         'data': NotificationsToJSON(value.data),
+        'related': RelatedToJSON(value.related),
     };
 }
 

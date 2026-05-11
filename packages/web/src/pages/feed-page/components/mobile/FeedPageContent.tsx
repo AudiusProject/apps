@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 
 import {
   getFeedQueryKey,
@@ -10,12 +10,13 @@ import {
   FOR_YOU_INITIAL_PAGE_SIZE,
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
-import { Name, FeedFilter, FeedTab } from '@audius/common/models'
+import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
 import {
   feedPageSelectors,
   feedPageActions as discoverPageAction
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
+import { Flex } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -27,6 +28,7 @@ import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useMainPageHeader } from 'components/nav/mobile/NavContext'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
+import { FeedFilters } from 'pages/feed-page/components/FeedFilters'
 import { FeedTabs } from 'pages/feed-page/components/FeedTabs'
 import { BASE_URL } from 'utils/route'
 
@@ -40,15 +42,10 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getFeedTab } = feedPageSelectors
+const { getFeedTab, getFeedFilter } = feedPageSelectors
 
 type FeedPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
-}
-
-const tabToFilter: Record<Exclude<FeedTab, FeedTab.FOR_YOU>, FeedFilter> = {
-  [FeedTab.FOLLOWING]: FeedFilter.ALL,
-  [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }
 
 // Note: the feed API returns both tracks and collections (playlist reposts).
@@ -60,22 +57,24 @@ const FeedPageMobileContent = ({
   containerRef
 }: FeedPageMobileContentProps) => {
   const dispatch = useDispatch()
-  const feedTab = useSelector(getFeedTab)
+  const persistedTab = useSelector(getFeedTab)
+  const feedFilter = useSelector(getFeedFilter)
   const { data: currentUserId } = useCurrentUserId()
 
+  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
+  // CHRONOLOGICAL after the For You / Chronological refactor.
+  const feedTab =
+    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
   const isForYou = feedTab === FeedTab.FOR_YOU
-  const followingFilter = isForYou
-    ? FeedFilter.ALL
-    : tabToFilter[feedTab as Exclude<FeedTab, FeedTab.FOR_YOU>]
 
   const feedArgs = useMemo(
     () => ({
       userId: currentUserId,
-      filter: followingFilter,
+      filter: feedFilter,
       initialPageSize: FEED_INITIAL_PAGE_SIZE,
       loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
     }),
-    [followingFilter, currentUserId]
+    [feedFilter, currentUserId]
   )
   const followFeed = useFeed(feedArgs, { enabled: !isForYou })
 
@@ -95,19 +94,38 @@ const FeedPageMobileContent = ({
   const { setHeader } = useContext(HeaderContext)
 
   const record = useRecord()
-  const handleSelectTab = (tab: FeedTab) => {
-    dispatch(discoverPageAction.setFeedTab(tab))
-    record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
-  }
+  const handleSelectTab = useCallback(
+    (tab: FeedTab) => {
+      dispatch(discoverPageAction.setFeedTab(tab))
+      record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
+    },
+    [dispatch, record]
+  )
+
+  const handleSelectFilter = useCallback(
+    (filter: FeedFilter) => {
+      dispatch(discoverPageAction.setFeedFilter(filter))
+      record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
+    },
+    [dispatch, record]
+  )
 
   useEffect(() => {
     setHeader(
       <Header title={messages.title} className={styles.header}>
-        <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
+        <Flex direction='column' gap='s' alignItems='center'>
+          <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
+          {isForYou ? null : (
+            <FeedFilters
+              currentFilter={feedFilter}
+              onSelectFilter={handleSelectFilter}
+            />
+          )}
+        </Flex>
       </Header>
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setHeader, feedTab])
+  }, [setHeader, feedTab, feedFilter, isForYou])
 
   // Set Nav-Bar Menu
   useMainPageHeader()

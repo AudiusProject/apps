@@ -71,7 +71,11 @@ export const useCollectionImage = ({
   })
   const artwork = artworkData?.artwork
   const hasNoArtwork = artworkData?.hasNoArtwork ?? false
-  const { imageUrl, onError: onImageError } = useImageSize({
+  const {
+    imageUrl,
+    priorityLowResUrl,
+    onError: onImageError
+  } = useImageSize({
     artwork,
     targetSize: size,
     defaultImage: '',
@@ -98,6 +102,7 @@ export const useCollectionImage = ({
 
   return {
     source: primitiveToImageSource(imageUrl),
+    priorityLowResSource: primitiveToImageSource(priorityLowResUrl),
     hasNoArtwork: false,
     onError: onImageError
   }
@@ -121,6 +126,7 @@ export const CollectionImage = (props: CollectionImageProps) => {
   const collectionImageSource = useCollectionImage({ collectionId, size })
   const {
     source: loadedSource,
+    priorityLowResSource,
     onError: onImageError,
     hasNoArtwork
   } = collectionImageSource
@@ -160,6 +166,7 @@ export const CollectionImage = (props: CollectionImageProps) => {
     <Artwork
       {...other}
       source={source}
+      priorityLowResSource={priorityLowResSource}
       onLoad={onLoad}
       onError={handleError}
       style={style}
