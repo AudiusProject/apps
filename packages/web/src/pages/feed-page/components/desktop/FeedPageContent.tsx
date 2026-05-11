@@ -8,7 +8,7 @@ import {
   useForYouFeed,
   FOR_YOU_INITIAL_PAGE_SIZE
 } from '@audius/common/api'
-import { Name, FeedFilter, FeedTab } from '@audius/common/models'
+import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
 import {
   feedPageSelectors,
   feedPageActions as discoverPageAction
