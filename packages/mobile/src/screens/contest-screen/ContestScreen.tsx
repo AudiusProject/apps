@@ -37,7 +37,6 @@ import { useDispatch } from 'react-redux'
 import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
-import { make, track as trackEvent } from 'app/services/analytics'
 import {
   CollapsibleTabNavigator,
   collapsibleTabScreen
@@ -45,6 +44,7 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useEnterContest } from 'app/hooks/useEnterContest'
 import { useRoute } from 'app/hooks/useRoute'
+import { make, track as trackEvent } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
