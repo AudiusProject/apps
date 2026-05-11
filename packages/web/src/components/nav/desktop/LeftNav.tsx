@@ -128,8 +128,8 @@ export const LeftNav = (props: OwnProps) => {
               flex='1 1 auto'
               css={{ overflow: 'hidden' }}
             >
-              <TrendingNavItem />
               <FeedNavItem />
+              <TrendingNavItem />
               <ExploreNavItem />
               <ContestsNavItem />
               <LibraryNavItem />

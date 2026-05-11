@@ -37,8 +37,8 @@ const ConnectedBottomBar = () => {
   // Memoize navRoutes to avoid recreating Set on every render
   const navRoutes = useMemo(() => {
     return new Set([
-      TRENDING_PAGE,
       FEED_PAGE,
+      TRENDING_PAGE,
       EXPLORE_PAGE,
       LIBRARY_PAGE,
       NOTIFICATION_PAGE
