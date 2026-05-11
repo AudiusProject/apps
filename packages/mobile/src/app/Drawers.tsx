@@ -40,7 +40,6 @@ import { QueueDrawer } from 'app/components/queue-drawer'
 import { RateCtaDrawer } from 'app/components/rate-cta-drawer'
 import { ReceiveTokensDrawer } from 'app/components/receive-tokens-drawer'
 import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
-import { ShareDrawer } from 'app/components/share-drawer'
 import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-drawer'
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
@@ -113,7 +112,6 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ClaimAllRewards: ClaimAllRewardsDrawer,
   APIRewardsExplainer: ApiRewardsDrawer,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
-  Share: ShareDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
   TrendingFilter: TrendingCombinedFilterDrawer,

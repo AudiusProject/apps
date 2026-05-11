@@ -1,4 +1,7 @@
+import { useCallback } from 'react'
+
 import { USDCTransactionType } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { useUSDCTransactionDetailsModal } from '@audius/common/store'
 import { makeSolanaTransactionLink, dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
@@ -12,6 +15,7 @@ import {
   IconExternalLink,
   Text
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { ExternalTextLink } from 'components/link'
 
@@ -44,8 +48,12 @@ const DetailSection = ({
   </div>
 )
 
-export const USDCTransactionDetailsModal = () => {
-  const { isOpen, data, onClose, onClosed } = useUSDCTransactionDetailsModal()
+export const USDCTransactionDetailsModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = useCallback(() => modal.remove(), [modal])
+  const { data } = useUSDCTransactionDetailsModal()
   const { transactionDetails } = data
 
   if (!transactionDetails) {
@@ -99,4 +107,7 @@ export const USDCTransactionDetailsModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('USDCTransactionDetailsModal', USDCTransactionDetailsModal)
+registerNiceModalId('USDCTransactionDetailsModal')

@@ -5,7 +5,7 @@ import {
   useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import { useConnectedWalletsModal } from '@audius/common/store'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   Button,
   Flex,
@@ -18,6 +18,7 @@ import {
   ModalTitle,
   Text
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import Drawer from 'components/drawer/Drawer'
 import { ToastContext } from 'components/toast/ToastContext'
@@ -57,8 +58,11 @@ enum Pages {
   CONFIRM_REMOVE_WALLET = 1
 }
 
-export const ConnectedWalletsModal = () => {
-  const { isOpen, onClose, onClosed } = useConnectedWalletsModal()
+export const ConnectedWalletsModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = useCallback(() => modal.remove(), [modal])
   const { toast } = useContext(ToastContext)
 
   const [currentPage, setCurrentPage] = useState(Pages.TABLE)
@@ -260,4 +264,7 @@ export const ConnectedWalletsModal = () => {
       )}
     </Modal>
   )
-}
+})
+
+NiceModal.register('ConnectedWallets', ConnectedWalletsModal)
+registerNiceModalId('ConnectedWallets')

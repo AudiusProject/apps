@@ -1,3 +1,4 @@
+import { niceModalBridgeSagas } from '@audius/common/services'
 import {
   buyUSDCSagas,
   castSagas,
@@ -82,6 +83,7 @@ export default function* rootSaga() {
     ...stripeModalUISagas(),
 
     ...modalsSagas(),
+    ...niceModalBridgeSagas(),
 
     // Pages
     ...trackPageSagas(),

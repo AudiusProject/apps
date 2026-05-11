@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
 import { useGatedContentAccess, useLockedContent } from '@audius/common/hooks'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   PurchaseableContentType,
   gatedContentActions
@@ -11,10 +12,10 @@ import {
   ModalTitle,
   IconLock
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { GatedContentSection } from 'components/track/GatedContentSection'
 import { LockedContentDetailsTile } from 'components/track/LockedContentDetailsTile'
@@ -28,22 +29,22 @@ const messages = {
   howToUnlock: 'HOW TO UNLOCK'
 }
 
-export const LockedContentModal = () => {
-  const [isOpen, setIsOpen] = useModalState('LockedContent')
+export const LockedContentModal = NiceModal.create(() => {
+  const modal = useModal()
   const dispatch = useDispatch()
   const { track, owner } = useLockedContent()
   const { hasStreamAccess } = useGatedContentAccess(track)
 
   const handleClose = useCallback(() => {
-    setIsOpen(false)
+    modal.hide()
     dispatch(resetLockedContentId())
-  }, [setIsOpen, dispatch])
+  }, [modal, dispatch])
 
   const isMobile = useIsMobile()
 
   return (
     <ModalDrawer
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={handleClose}
       bodyClassName={styles.modalBody}
       dismissOnClickOutside
@@ -82,4 +83,7 @@ export const LockedContentModal = () => {
       </ModalContent>
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('LockedContent', LockedContentModal)
+registerNiceModalId('LockedContent')

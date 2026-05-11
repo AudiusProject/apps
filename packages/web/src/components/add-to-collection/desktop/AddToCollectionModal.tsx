@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   useCurrentUserId,
@@ -12,6 +12,7 @@ import {
   SquareSizes,
   Collection
 } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   cacheCollectionsActions,
   addToCollectionUISelectors,
@@ -27,12 +28,12 @@ import {
   Tooltip,
   Image
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { capitalize } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import SearchBar from 'components/search-bar/SearchBar'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
@@ -56,10 +57,11 @@ const getMessages = (collectionType: 'album' | 'playlist') => ({
   hiddenAdd: `You cannot add hidden tracks to a public ${collectionType}.`
 })
 
-const AddToCollectionModal = () => {
+const AddToCollectionModal = NiceModal.create(() => {
   const dispatch = useDispatch()
 
-  const [isOpen, setIsOpen] = useModalState('AddToCollection')
+  const modal = useModal()
+  const handleClose = useCallback(() => modal.hide(), [modal])
   const collectionType = useSelector(getCollectionType)
   const trackId = useSelector(getTrackId)
   const trackTitle = useSelector(getTrackTitle)
@@ -135,7 +137,7 @@ const AddToCollectionModal = () => {
       }
     }
 
-    setIsOpen(false)
+    handleClose()
   }
 
   const handleCreateCollection = () => {
@@ -149,16 +151,16 @@ const AddToCollectionModal = () => {
         'toast'
       )
     )
-    setIsOpen(false)
+    handleClose()
   }
 
   return (
     <Modal
-      isOpen={isOpen === true}
+      isOpen={modal.visible}
       showTitleHeader
       showDismissButton
       title={messages.title}
-      onClose={() => setIsOpen(false)}
+      onClose={handleClose}
       allowScroll={false}
       bodyClassName={styles.modalBody}
       headerContainerClassName={styles.modalHeader}
@@ -204,7 +206,7 @@ const AddToCollectionModal = () => {
       </Scrollbar>
     </Modal>
   )
-}
+})
 
 type CollectionItemProps = {
   collectionType: 'album' | 'playlist'
@@ -243,5 +245,8 @@ const CollectionItem = ({
     </div>
   )
 }
+
+NiceModal.register('AddToCollection', AddToCollectionModal)
+registerNiceModalId('AddToCollection')
 
 export default AddToCollectionModal

@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
 import { Status } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   transactionDetailsActions,
   transactionDetailsSelectors
@@ -14,9 +15,9 @@ import {
   IconTransaction,
   Button
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import { useSelector } from 'common/hooks/useSelector'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
@@ -32,9 +33,9 @@ const messages = {
   error: 'Something went wrong.'
 }
 
-export const TransactionDetailsModal = () => {
+export const TransactionDetailsModal = NiceModal.create(() => {
   const dispatch = useDispatch()
-  const [isOpen, setIsOpen] = useModalState('TransactionDetails')
+  const modal = useModal()
   const transactionDetails = useSelector(getTransactionDetails)
 
   const handleClose = useCallback(() => {
@@ -42,11 +43,15 @@ export const TransactionDetailsModal = () => {
       dispatch(transactionDetails.onModalCloseAction)
       dispatch(setModalClosedAction())
     }
-    setIsOpen(false)
-  }, [dispatch, setIsOpen, transactionDetails])
+    modal.hide()
+  }, [dispatch, modal, transactionDetails])
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} bodyClassName={styles.root}>
+    <Modal
+      isOpen={modal.visible}
+      onClose={handleClose}
+      bodyClassName={styles.root}
+    >
       <ModalHeader onClose={handleClose}>
         <ModalTitle
           title={messages.transactionDetails}
@@ -71,4 +76,7 @@ export const TransactionDetailsModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('TransactionDetails', TransactionDetailsModal)
+registerNiceModalId('TransactionDetails')

@@ -1,6 +1,7 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 
 import { buySellMessages } from '@audius/common/messages'
+import { registerNiceModalId } from '@audius/common/services'
 import { useBuySellModal, useAddCashModal } from '@audius/common/store'
 import {
   IconJupiterLogo,
@@ -14,6 +15,7 @@ import {
   Text,
   useTheme
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useAppKitState } from '@reown/appkit/react'
 
 import { zIndex } from '../../utils/zIndex'
@@ -23,9 +25,12 @@ import { Screen } from './types'
 
 export const WALLET_GUIDE_URL = 'https://help.audius.co/product/wallet-guide'
 
-export const BuySellModal = () => {
+export const BuySellModal = NiceModal.create(() => {
   const theme = useTheme()
-  const { isOpen, onClose, data } = useBuySellModal()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const { data } = useBuySellModal()
   const { ticker, initialTab } = data
   const { onOpen: openAddCashModal } = useAddCashModal()
   const [resetState, setResetState] = useState<(() => void) | null>(null)
@@ -111,4 +116,7 @@ export const BuySellModal = () => {
       )}
     </Modal>
   )
-}
+})
+
+NiceModal.register('BuySellModal', BuySellModal)
+registerNiceModalId('BuySellModal')

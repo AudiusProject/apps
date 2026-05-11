@@ -98,6 +98,10 @@ function* watchHandleRequestOpen() {
   yield takeEvery(requestOpen, handleRequestOpen)
 }
 
+// The `setVisibility('Share', true)` → `showNiceModal('Share')` bridge now
+// lives in the generalized `services/nice-modal-bridge/sagas.ts`, driven by
+// the `registerNiceModalId` allowlist that ShareModal opts into.
+
 export default function sagas() {
   return [watchHandleRequestOpen]
 }

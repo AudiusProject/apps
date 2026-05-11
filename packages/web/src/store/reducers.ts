@@ -14,7 +14,6 @@ import unfollowConfirmation from 'components/unfollow-confirmation-modal/store/r
 import visualizer from 'pages/visualizer/store/slice'
 import appCTAModal from 'store/application/ui/app-cta-modal/slice'
 import cookieBanner from 'store/application/ui/cookieBanner/reducer'
-import editFolderModal from 'store/application/ui/editFolderModal/slice'
 import scrollLock from 'store/application/ui/scrollLock/reducer'
 import userListModal from 'store/application/ui/userListModal/slice'
 import dragndrop from 'store/dragndrop/slice'
@@ -47,7 +46,6 @@ const createRootReducer = () => {
       ui: combineReducers({
         appCTAModal,
         cookieBanner,
-        editFolderModal,
         embedModal,
         firstUploadModal,
         scrollLock,

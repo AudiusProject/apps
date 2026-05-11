@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { useEditAccessConfirmationModal } from '@audius/common/store'
 import {
   Modal,
@@ -10,6 +11,7 @@ import {
   Text,
   Flex
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const messages = {
   title: 'Confirm Update',
@@ -19,22 +21,27 @@ const messages = {
   confirm: 'Update Audience'
 }
 
-export const EditAccessConfirmationModal = () => {
-  const { data, isOpen, onClose } = useEditAccessConfirmationModal()
+export const EditAccessConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useEditAccessConfirmationModal()
   const { confirmCallback, cancelCallback } = data
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
 
   const handleConfirm = useCallback(() => {
     confirmCallback()
-    onClose()
-  }, [confirmCallback, onClose])
+    handleClose()
+  }, [confirmCallback, handleClose])
 
   const handleCancel = useCallback(() => {
     cancelCallback?.()
-    onClose()
-  }, [cancelCallback, onClose])
+    handleClose()
+  }, [cancelCallback, handleClose])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader>
         <Flex alignSelf='center' gap='s'>
           <Text variant='label' size='xl' strength='strong'>
@@ -59,4 +66,7 @@ export const EditAccessConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('EditAccessConfirmation', EditAccessConfirmationModal)
+registerNiceModalId('EditAccessConfirmation')
