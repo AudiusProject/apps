@@ -5,15 +5,10 @@ import { Flex, SelectablePill, useTheme } from '@audius/harmony-native'
 
 const tabLabels: Record<FeedTab, string> = {
   [FeedTab.FOR_YOU]: 'For You',
-  [FeedTab.FOLLOWING]: 'Following',
-  [FeedTab.UPLOADS_ONLY]: 'Uploads Only'
+  [FeedTab.CHRONOLOGICAL]: 'Chronological'
 }
 
-const tabs: FeedTab[] = [
-  FeedTab.FOR_YOU,
-  FeedTab.FOLLOWING,
-  FeedTab.UPLOADS_ONLY
-]
+const tabs: FeedTab[] = [FeedTab.FOR_YOU, FeedTab.CHRONOLOGICAL]
 
 type FeedTabsProps = {
   currentTab: FeedTab
