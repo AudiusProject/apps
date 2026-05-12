@@ -76,10 +76,15 @@ export const useForYouFeed = (
 
   const trackIds = query.data ?? []
 
+  // When the query is disabled, react-query keeps isPending/isLoading true
+  // (data is undefined). Surface them as false so consumers can render an
+  // empty state instead of an indefinite loading state.
+  const isDisabled = currentUserId === null || options?.enabled === false
+
   return {
     trackIds,
-    isPending: query.isPending,
-    isLoading: query.isLoading,
+    isPending: isDisabled ? false : query.isPending,
+    isLoading: isDisabled ? false : query.isLoading,
     isFetching: query.isFetching,
     isSuccess: query.isSuccess,
     isError: query.isError,
