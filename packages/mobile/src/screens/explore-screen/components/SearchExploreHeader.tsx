@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 
 import { exploreMessages as messages } from '@audius/common/messages'
-import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import type { ScrollView } from 'react-native'
 import { Keyboard } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -53,27 +53,19 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query])
 
-  useFocusEffect(
-    useCallback(() => {
-      if (params?.autoFocus === true && textInputRef.current) {
-        textInputRef.current?.focus()
-      }
-    }, [params?.autoFocus])
-  )
-
+  // Focus the search input when navigated here with autoFocus: true (e.g.,
+  // user taps the search icon). Use a plain useEffect — NOT useFocusEffect —
+  // so this fires only when the param transitions, not on every screen focus.
+  // Without this, the keyboard re-appears whenever the app returns from
+  // background while explore is the active tab. Consume the param by setting
+  // it back to false so a subsequent search-icon tap can re-trigger focus.
   useEffect(() => {
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        if (params?.autoFocus === true) {
-          // @ts-expect-error: setParams is not typed on the generic NavigationProp, but is available on StackNavigationProp
-          navigation.setParams?.({ autoFocus: false })
-        }
-      }
-    )
-
-    return () => keyboardDidHideListener?.remove()
-  }, [navigation, params?.autoFocus])
+    if (params?.autoFocus === true) {
+      textInputRef.current?.focus()
+      // @ts-expect-error: setParams is not typed on the generic NavigationProp, but is available on StackNavigationProp
+      navigation.setParams?.({ autoFocus: false })
+    }
+  }, [params?.autoFocus, navigation])
 
   const handleOpenLeftNavDrawer = useCallback(() => {
     if (isNowPlayingDrawerOpen) return
@@ -117,7 +109,6 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
           <TextInput
             ref={textInputRef}
             label='Search'
-            autoFocus={params?.autoFocus}
             autoCorrect={false}
             placeholder={messages.searchPlaceholder}
             size={TextInputSize.SMALL}
