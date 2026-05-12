@@ -1,9 +1,11 @@
 import logging
 from typing import List, Optional, TypedDict
 
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, func, or_
 
+from src.models.comments.comment_report import COMMENT_KARMA_THRESHOLD
 from src.models.events.event import Event, EventEntityType, EventType
+from src.models.moderation.muted_user import MutedUser
 from src.models.users.aggregate_user import AggregateUser
 from src.queries.query_helpers import add_query_pagination, get_pagination_vars
 from src.utils import helpers
@@ -91,15 +93,33 @@ def _get_events(session, args):
     if args.get("filter_deleted", True):
         base_query = base_query.filter(Event.is_deleted == False)
 
-    # Hide events whose host has been shadow-banned. Mirrors the
-    # `score < 0` check used in the SQL feed handlers (handle_save,
-    # handle_follow, handle_repost). Uses an OUTER JOIN so users
-    # without an aggregate_user row (e.g. brand-new accounts that
-    # haven't been rolled up yet) aren't excluded — only users with a
-    # confirmed negative score get filtered out.
+    # Hide events whose host is shadow-banned. The discovery-provider
+    # has two parallel shadow-ban signals; we apply both so the filter
+    # catches the full population:
+    #
+    # 1. `aggregate_user.score < 0` — composite account-quality signal
+    #    (impersonators, low engagement, chat-blocks). Same check used
+    #    by the SQL feed handlers handle_save, handle_follow,
+    #    handle_repost. OUTER JOIN with a NULL-pass so brand-new users
+    #    without an aggregate_user row aren't excluded.
+    # 2. `muted_by_karma` — host has been comment-muted by users whose
+    #    combined follower counts cross COMMENT_KARMA_THRESHOLD. Same
+    #    subquery shape used in `get_track_comment_count.py` for
+    #    per-user comment hiding.
+    muted_by_karma = (
+        session.query(MutedUser.muted_user_id)
+        .join(AggregateUser, MutedUser.user_id == AggregateUser.user_id)
+        .filter(MutedUser.is_delete == False)
+        .group_by(MutedUser.muted_user_id)
+        .having(func.sum(AggregateUser.follower_count) >= COMMENT_KARMA_THRESHOLD)
+        .subquery()
+    )
     base_query = base_query.outerjoin(
         AggregateUser, AggregateUser.user_id == Event.user_id
-    ).filter(or_(AggregateUser.score >= 0, AggregateUser.score.is_(None)))
+    ).filter(
+        or_(AggregateUser.score >= 0, AggregateUser.score.is_(None)),
+        ~Event.user_id.in_(muted_by_karma),
+    )
 
     # Order by created_at desc by default
     base_query = base_query.order_by(desc(Event.created_at))
