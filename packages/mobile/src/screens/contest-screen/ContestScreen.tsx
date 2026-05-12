@@ -37,7 +37,6 @@ import { useDispatch } from 'react-redux'
 import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
-import { make, track as trackEvent } from 'app/services/analytics'
 import {
   CollapsibleTabNavigator,
   collapsibleTabScreen
