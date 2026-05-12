@@ -7,6 +7,7 @@ import { FeatureFlags } from '@audius/common/services'
 import { Flex, IconTrophy, Text } from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import { makeStyles } from 'app/styles'
 
 const messages = {
   title: 'Contests',
@@ -16,7 +17,17 @@ const messages = {
 const HERO_SKELETON_COUNT = 1
 const GRID_SKELETON_COUNT = 4
 
+// Clears the bottom tab bar + iOS home-indicator safe area below the last
+// card. The shared `<ScrollView>` already appends a `<PlayBarChin />` that
+// handles the now-playing bar; this padding handles the rest.
+const useStyles = makeStyles(({ spacing }) => ({
+  scrollContent: {
+    paddingBottom: spacing(30)
+  }
+}))
+
 export const ContestsScreen = () => {
+  const styles = useStyles()
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
     FeatureFlags.CONTESTS
   )
@@ -39,7 +50,7 @@ export const ContestsScreen = () => {
       title={messages.title}
     >
       <ScreenContent>
-        <ScrollView>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <Flex direction='column' gap='l' mv='l' mh='m'>
             {showSkeletons ? (
               <Flex direction='column' gap='l'>
