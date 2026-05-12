@@ -1,9 +1,10 @@
 import logging
 from typing import List, Optional, TypedDict
 
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 
 from src.models.events.event import Event, EventEntityType, EventType
+from src.models.users.aggregate_user import AggregateUser
 from src.queries.query_helpers import add_query_pagination, get_pagination_vars
 from src.utils import helpers
 from src.utils.db_session import get_db_read_replica
@@ -89,6 +90,16 @@ def _get_events(session, args):
     # Allow filtering of deletes
     if args.get("filter_deleted", True):
         base_query = base_query.filter(Event.is_deleted == False)
+
+    # Hide events whose host has been shadow-banned. Mirrors the
+    # `score < 0` check used in the SQL feed handlers (handle_save,
+    # handle_follow, handle_repost). Uses an OUTER JOIN so users
+    # without an aggregate_user row (e.g. brand-new accounts that
+    # haven't been rolled up yet) aren't excluded — only users with a
+    # confirmed negative score get filtered out.
+    base_query = base_query.outerjoin(
+        AggregateUser, AggregateUser.user_id == Event.user_id
+    ).filter(or_(AggregateUser.score >= 0, AggregateUser.score.is_(None)))
 
     # Order by created_at desc by default
     base_query = base_query.order_by(desc(Event.created_at))
