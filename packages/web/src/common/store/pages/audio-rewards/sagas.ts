@@ -9,7 +9,8 @@ import {
   SpecifierWithAmount,
   Name,
   Feature,
-  ChallengeName
+  ChallengeName,
+  FailureReason
 } from '@audius/common/models'
 import {
   IntKeys,
@@ -221,6 +222,14 @@ type ErrorResult = SpecifierWithAmount & {
   error: unknown
 }
 
+const isAlreadyClaimedErrorMessage = (errorMessage: string) => {
+  const normalizedError = errorMessage.toUpperCase()
+  return (
+    normalizedError.includes(FailureReason.ALREADY_DISBURSED) ||
+    normalizedError.includes(FailureReason.ALREADY_SENT)
+  )
+}
+
 async function claimRewardsForChallenge({
   sdk,
   userId,
@@ -256,8 +265,14 @@ async function claimRewardsForChallenge({
           })
         )
         .then((res) => {
-          if (res?.data?.[0]?.error) {
-            throw new Error(res.data[0].error)
+          const claimError = res?.data?.[0]?.error
+          if (claimError && !isAlreadyClaimedErrorMessage(claimError)) {
+            throw new Error(claimError)
+          }
+          // ALREADY_DISBURSED/ALREADY_SENT means the reward was already
+          // processed; treat it as a successful outcome for client state.
+          if (claimError) {
+            return res
           }
           track(
             make({
