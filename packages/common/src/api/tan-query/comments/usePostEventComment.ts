@@ -144,12 +144,14 @@ export const usePostEventComment = () => {
 
       return { newId }
     },
-    onSuccess: (_data, args) => {
-      // Invalidate every sort variant — the user might be on Top or Newest.
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.eventComments, args.eventId]
-      })
-    },
+    // No onSuccess invalidate: the optimistic comment was just primed with
+    // the same id the SDK reserved, so the next natural refetch (focus /
+    // remount / staleTime expiry) will replace it seamlessly once the
+    // indexer has caught up. Invalidating immediately races the indexer —
+    // the refetch returns the pre-comment list before the new row lands,
+    // wiping the optimistic comment from the cache and giving the user the
+    // "I pressed send and it disappeared" experience. Mirrors how the
+    // track-comment hook (usePostComment) handles success.
     onError: (error: Error, args) => {
       reportToSentry({
         error,
