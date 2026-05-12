@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '22.21.1'
+  NODE_VERSION: '24.10.0'
 
 jobs:
   sdk-ci:

@@ -14,7 +14,7 @@ permissions:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  NODE_VERSION: "22.21.1"
+  NODE_VERSION: "24.10.0"
 
 jobs:
   changes:
@@ -56,7 +56,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.21.1
+          node-version: 24.10.0
           # registry-url for correct registry targeting, but do NOT use always-auth
           # (that's for token auth, not OIDC)
           registry-url: "https://registry.npmjs.org"
