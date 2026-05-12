@@ -23,6 +23,7 @@ import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import Drawer, {
   DrawerAnimationStyle,
   FULL_DRAWER_HEIGHT
@@ -109,6 +110,9 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const styles = useStyles()
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
+  // Defer to the comments bottom-sheet while it's presented: its swipe-to-dismiss
+  // gesture would otherwise leak through and also close this drawer underneath.
+  const { isOpen: isCommentDrawerOpen } = useCommentDrawer()
   const playCounter = useSelector(getCounter)
   const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)
@@ -294,6 +298,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       onPanResponderMove={onPanResponderMove}
       onPanResponderRelease={onPanResponderRelease}
       isGestureSupported={isGestureEnabled}
+      gesturesDisabled={isCommentDrawerOpen}
       translationAnim={translationAnim}
       // Disable safe area view edges because they are handled manually
       disableSafeAreaView
