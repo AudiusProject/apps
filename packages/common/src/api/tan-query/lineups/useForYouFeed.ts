@@ -88,7 +88,7 @@ export const useForYouFeed = (
     isFetching: query.isFetching,
     isSuccess: query.isSuccess,
     isError: query.isError,
-    isInitialLoading: query.isInitialLoading,
+    isInitialLoading: isDisabled ? false : query.isInitialLoading,
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
     loadNextPage: makeLoadNextPage(query),
