@@ -1,12 +1,18 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { FeatureFlags } from '@audius/common/services'
 
-import { Flex, IconTrophy, Text } from '@audius/harmony-native'
+import {
+  Box,
+  Flex,
+  IconTrophy,
+  LoadingSpinner,
+  Text
+} from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
-import { Screen, ScreenContent, ScrollView } from 'app/components/core'
+import { FlatList, Screen, ScreenContent } from 'app/components/core'
 
 const messages = {
   title: 'Contests',
@@ -20,16 +26,38 @@ export const ContestsScreen = () => {
   const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
     FeatureFlags.CONTESTS
   )
-  const { data, isPending, isError, isSuccess } = useAllRemixContests(
-    undefined,
-    { enabled: isContestsPageEnabled }
-  )
+  const {
+    data,
+    isPending,
+    isError,
+    isSuccess,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useAllRemixContests(undefined, { enabled: isContestsPageEnabled })
 
   const contests = isContestsPageEnabled ? (data ?? []) : []
   const [heroTrackId, ...gridTrackIds] = contests
   const showSkeletons =
     isContestsPageEnabled && (isPending || (!isSuccess && !isError))
   const showEmpty = isSuccess && contests.length === 0
+
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  const renderItem = useCallback(
+    ({ item }: { item: number }) => (
+      <ContestCard trackId={item} variant='grid' />
+    ),
+    []
+  )
+
+  const keyExtractor = useCallback((id: number) => String(id), [])
+
+  const ItemSeparator = useCallback(() => <Box h='l' />, [])
 
   return (
     <Screen
@@ -39,39 +67,52 @@ export const ContestsScreen = () => {
       title={messages.title}
     >
       <ScreenContent>
-        <ScrollView>
+        {showSkeletons ? (
           <Flex direction='column' gap='l' mv='l' mh='m'>
-            {showSkeletons ? (
-              <Flex direction='column' gap='l'>
-                {Array.from({ length: HERO_SKELETON_COUNT }).map((_, i) => (
-                  <ContestCardSkeleton
-                    key={`hero-skeleton-${i}`}
-                    variant='hero'
-                  />
-                ))}
-                {Array.from({ length: GRID_SKELETON_COUNT }).map((_, i) => (
-                  <ContestCardSkeleton
-                    key={`grid-skeleton-${i}`}
-                    variant='grid'
-                  />
-                ))}
-              </Flex>
-            ) : showEmpty ? (
-              <Text variant='body' size='l' color='subdued'>
-                {messages.empty}
-              </Text>
-            ) : (
-              <Flex direction='column' gap='l'>
-                {heroTrackId != null ? (
-                  <ContestCard trackId={heroTrackId} variant='hero' />
-                ) : null}
-                {gridTrackIds.map((id) => (
-                  <ContestCard key={id} trackId={id} variant='grid' />
-                ))}
-              </Flex>
-            )}
+            {Array.from({ length: HERO_SKELETON_COUNT }).map((_, i) => (
+              <ContestCardSkeleton key={`hero-skeleton-${i}`} variant='hero' />
+            ))}
+            {Array.from({ length: GRID_SKELETON_COUNT }).map((_, i) => (
+              <ContestCardSkeleton key={`grid-skeleton-${i}`} variant='grid' />
+            ))}
           </Flex>
-        </ScrollView>
+        ) : showEmpty ? (
+          <Flex direction='column' mv='l' mh='m'>
+            <Text variant='body' size='l' color='subdued'>
+              {messages.empty}
+            </Text>
+          </Flex>
+        ) : (
+          <FlatList
+            data={gridTrackIds}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            ItemSeparatorComponent={ItemSeparator}
+            ListHeaderComponent={
+              heroTrackId != null ? (
+                <Box mb='l'>
+                  <ContestCard trackId={heroTrackId} variant='hero' />
+                </Box>
+              ) : null
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <Flex justifyContent='center' pv='l'>
+                  <Box w={24}>
+                    <LoadingSpinner />
+                  </Box>
+                </Flex>
+              ) : null
+            }
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.5}
+            contentContainerStyle={{
+              paddingVertical: 16,
+              paddingHorizontal: 12
+            }}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </ScreenContent>
     </Screen>
   )
