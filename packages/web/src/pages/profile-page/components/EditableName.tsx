@@ -51,7 +51,7 @@ export const EditableName = (props: EditableNameProps) => {
           <div className={styles.editNameContainer}>
             <span className={styles.editingName}>{name}</span>
             <IconButton
-              css={{ marginBottom: spacing.s }}
+              css={{ marginBottom: spacing.s, marginLeft: spacing.s }}
               aria-label={messages.editLabel}
               icon={IconPencil}
               color='staticWhite'
