@@ -1,12 +1,9 @@
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import { Table, Users } from '@pedalboard/storage'
 import { recoverPersonalSignature } from 'eth-sig-util'
 import { NextFunction, Request, Response } from 'express'
 
-import { config } from '../config'
+import { db as discoveryDb } from '../db'
 import { getCachedDiscoveryNodes } from '../redis'
-
-const discoveryDb = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 export const userSignerRecoveryMiddleware = async (
   req: Request,

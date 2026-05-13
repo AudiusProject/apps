@@ -1,6 +1,5 @@
 import { CpAmm, getUnClaimReward } from '@meteora-ag/cp-amm-sdk'
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   TOKEN_PROGRAM_ID,
   createTransferInstruction,
@@ -9,13 +8,11 @@ import {
 import { Connection, PublicKey } from '@solana/web3.js'
 import { Request, Response } from 'express'
 
-import { config } from '../../config'
+import { db } from '../../db'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 
 import { AUDIO_MINT } from './constants'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 interface ClaimFeesRequestBody {
   tokenMint: string
