@@ -1,9 +1,7 @@
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import type { ArtistCoins } from '@pedalboard/storage'
 
 import { config } from '../../config'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
+import { db } from '../../db'
 
 export const getAllowedMints = async (): Promise<string[]> => {
   const rows = await db<ArtistCoins>('artist_coins').select('mint')
