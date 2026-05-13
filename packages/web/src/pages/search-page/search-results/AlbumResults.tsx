@@ -152,7 +152,7 @@ export const AlbumResultsPage = () => {
   const { data, isFetching, hasNextPage, loadNextPage, isPending } = queryData
 
   const isResultsEmpty = data?.length === 0
-  const showNoResultsTile = !isFetching && isResultsEmpty
+  const showNoResultsTile = !isFetching && !isPending && isResultsEmpty
 
   return (
     <InfiniteScroll

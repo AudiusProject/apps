@@ -21,7 +21,7 @@ import { useExploreRoute } from './hooks'
 const SearchExploreContent = () => {
   const { params } = useExploreRoute<'SearchExplore'>()
   const scrollRef = useRef<any>(null)
-  const [, setCategory] = useSearchCategory()
+  const [category, setCategory] = useSearchCategory()
   const [filters, setFilters] = useSearchFilters()
   const [query, setQuery] = useSearchQuery()
   const [, setAutoFocus] = useSearchAutoFocus()
@@ -50,7 +50,7 @@ const SearchExploreContent = () => {
     }
   })
 
-  const showSearch = Boolean(query || hasAnyFilter)
+  const showSearch = Boolean(query || hasAnyFilter || category !== 'all')
 
   return (
     <ScreenContent>

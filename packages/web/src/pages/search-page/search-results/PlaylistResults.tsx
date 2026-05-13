@@ -159,7 +159,7 @@ export const PlaylistResultsPage = () => {
   } = queryData
 
   const isResultsEmpty = playlists?.length === 0
-  const showNoResultsTile = !isFetching && isResultsEmpty
+  const showNoResultsTile = !isFetching && !isPending && isResultsEmpty
 
   return (
     <InfiniteScroll

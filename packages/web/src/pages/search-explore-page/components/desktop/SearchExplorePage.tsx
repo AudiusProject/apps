@@ -344,7 +344,7 @@ const SearchExplorePage = ({
             minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
             overflowX: 'clip',
             overflowY: 'visible',
-            display: showSearchResults ? 'none' : undefined
+            display: inputValue || showSearchResults ? 'none' : undefined
           }}
         >
           {sectionConfigs.map(({ key, shouldRender, element }) =>
