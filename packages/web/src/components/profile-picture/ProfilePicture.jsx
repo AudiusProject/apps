@@ -116,7 +116,7 @@ const ProfilePicture = ({
         </Image>
         {editMode || showEdit ? (
           <ImageSelectionButton
-            className={styles.imageSelectionButtonWrapper}
+            wrapperClassName={styles.imageSelectionButtonWrapper}
             buttonClassName={styles.imageSelectionButton}
             onSelect={onSelect}
             onClick={onClick}
