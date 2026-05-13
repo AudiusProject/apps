@@ -108,7 +108,7 @@ const signature = await walletClient.signTypedData({
 | `EthRewardsManager`      | Transfers AUDIO rewards from Ethereum to Solana via Wormhole.                       |
 | `Governance`             | On-chain governance: proposals, stake-weighted voting, execution.                   |
 | `Registry`               | Central directory mapping contract names to addresses.                              |
-| `ServiceProviderFactory` | Registration and staking for discovery nodes and content nodes.                     |
+| `ServiceProviderFactory` | Registration and staking for Open Audio Validator Nodes (the unified node type that replaces the legacy *discovery node* / *content node* split — contract and service-type names are retained from the earlier architecture). |
 | `ServiceTypeManager`     | Registry of valid service types and their versions.                                 |
 | `Staking`                | Core staking contract holding all staked AUDIO with checkpointing.                  |
 | `TrustedNotifierManager` | Registry of trusted notifier entities.                                              |
