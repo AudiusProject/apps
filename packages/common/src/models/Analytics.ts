@@ -42,30 +42,6 @@ export enum Name {
   CREATE_ACCOUNT_COMPLETE_EMAIL = 'Create Account: Complete Email',
   // When the user continues past the password page
   CREATE_ACCOUNT_COMPLETE_PASSWORD = 'Create Account: Complete Password',
-  // When the user starts integrating with twitter
-  CREATE_ACCOUNT_START_TWITTER = 'Create Account: Start Twitter',
-  // When the user successfully continues past the "twitter connection page"
-  CREATE_ACCOUNT_COMPLETE_TWITTER = 'Create Account: Complete Twitter',
-  // When the user closed the twitter oauth modal
-  CREATE_ACCOUNT_CLOSED_TWITTER = 'Create Account: Closed Twitter',
-  // When the user encounters an error during twitter oauth
-  CREATE_ACCOUNT_TWITTER_ERROR = 'Create Account: Twitter Error',
-  // When the user starts integrating with instagram
-  CREATE_ACCOUNT_START_INSTAGRAM = 'Create Account: Start Instagram',
-  // When the user continues past the "instagram connection page"
-  CREATE_ACCOUNT_COMPLETE_INSTAGRAM = 'Create Account: Complete Instagram',
-  // When the user closed the instagram oauth modal
-  CREATE_ACCOUNT_CLOSED_INSTAGRAM = 'Create Account: Closed Instagram',
-  // When the user encounters an error during instagram oauth
-  CREATE_ACCOUNT_INSTAGRAM_ERROR = 'Create Account: Error Instagram',
-  // When the user starts integrating with tiktok
-  CREATE_ACCOUNT_START_TIKTOK = 'Create Account: Start TikTok',
-  // When the user continues past the "tiktok connection page"
-  CREATE_ACCOUNT_COMPLETE_TIKTOK = 'Create Account: Complete TikTok',
-  // When the user closes the tiktok oauth modal
-  CREATE_ACCOUNT_CLOSED_TIKTOK = 'Create Account: Closed TikTok',
-  // Errors encountered during tiktok oauth
-  CREATE_ACCOUNT_TIKTOK_ERROR = 'Create Account: TikTok Error',
   // When the user continues past the "profile info page"
   CREATE_ACCOUNT_COMPLETE_PROFILE = 'Create Account: Complete Profile',
   // When the user uploads a profile photo in signup
@@ -238,9 +214,6 @@ export enum Name {
   COLLECTION_EDIT_ACCESS_CHANGED = 'Collection Edit: Access Changed',
   COLLECTION_EDIT = 'Collection Edit: General Edits',
 
-  // Gated Track Listen
-  LISTEN_GATED = 'Listen: Gated',
-
   // Unlocked Gated Tracks
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
   USDC_PURCHASE_GATED_COLLECTION_UNLOCKED = 'USDC Gated: Collection Unlocked',
@@ -319,7 +292,6 @@ export enum Name {
   SEARCH_TAG_SEARCH = 'Search: Tag Search',
   SEARCH_MORE_RESULTS = 'Search: More Results',
   SEARCH_RESULT_SELECT = 'Search: Result Select',
-  SEARCH_TAB_CLICK = 'Search: Tab Click',
 
   // Explore
   EXPLORE_SECTION_VIEW = 'Explore: Section View',
@@ -332,7 +304,6 @@ export enum Name {
   // System
   WEB_VITALS = 'Web Vitals',
   PERFORMANCE = 'Performance',
-  CREATOR_NODE_SELECTION = 'Creator Node Selection',
 
   // Remixes
   STEM_COMPLETE_UPLOAD = 'Stem: Complete Upload',
@@ -351,10 +322,6 @@ export enum Name {
   TRANSFER_AUDIO_TO_WAUDIO_REQUEST = 'TRANSFER_AUDIO_TO_WAUDIO_REQUEST',
   TRANSFER_AUDIO_TO_WAUDIO_SUCCESS = 'TRANSFER_AUDIO_TO_WAUDIO_SUCCESS',
   TRANSFER_AUDIO_TO_WAUDIO_FAILURE = 'TRANSFER_AUDIO_TO_WAUDIO_FAILURE',
-
-  // Service monitoring
-  SERVICE_MONITOR_REQUEST = 'Service Monitor: Request',
-  SERVICE_MONITOR_HEALTH_CHECK = 'Service Monitor: Status',
 
   // Playlist library
   PLAYLIST_LIBRARY_REORDER = 'Playlist Library: Reorder',
@@ -391,18 +358,6 @@ export enum Name {
   SOCIAL_PROOF_OPEN = 'Social Proof: Open',
   SOCIAL_PROOF_SUCCESS = 'Social Proof: Success',
   SOCIAL_PROOF_ERROR = 'Social Proof: Error',
-
-  // Buy Audio
-  BUY_AUDIO_ON_RAMP_OPENED = 'Buy Audio: On Ramp Opened',
-  BUY_AUDIO_ON_RAMP_CANCELED = 'Buy Audio: On Ramp Canceled',
-  BUY_AUDIO_ON_RAMP_SUCCESS = 'Buy Audio: On Ramp Success',
-  BUY_AUDIO_SUCCESS = 'Buy Audio: Success',
-  BUY_AUDIO_FAILURE = 'Buy Audio: Failure',
-
-  // Buy Audio Recovery
-  BUY_AUDIO_RECOVERY_OPENED = 'Buy Audio Recovery: Opened',
-  BUY_AUDIO_RECOVERY_SUCCESS = 'Buy Audio Recovery: Success',
-  BUY_AUDIO_RECOVERY_FAILURE = 'Buy Audio Recovery: Failure',
 
   // Buy USDC
   BUY_USDC_ON_RAMP_OPENED = 'Buy USDC: On Ramp Opened',
@@ -502,11 +457,6 @@ export enum Name {
   JUPITER_QUOTE_REQUEST = 'Jupiter: Quote Request',
   JUPITER_QUOTE_RESPONSE = 'Jupiter: Quote Response',
 
-  // Repair Signups
-  SIGN_UP_REPAIR_START = 'Sign Up Repair: Start',
-  SIGN_UP_REPAIR_SUCCESS = 'Sign Up Repair: Success',
-  SIGN_UP_REPAIR_FAILURE = 'Sign Up Repair: Failure',
-
   // Export Private Key
   EXPORT_PRIVATE_KEY_LINK_CLICKED = 'Export Private Key: Settings Link Clicked',
   EXPORT_PRIVATE_KEY_PAGE_VIEWED = 'Export Private Key: Page Viewed',
@@ -526,7 +476,6 @@ export enum Name {
   COMMENTS_CREATE_COMMENT = 'Comments: Create Comment',
   COMMENTS_UPDATE_COMMENT = 'Comments: Update Comment',
   COMMENTS_DELETE_COMMENT = 'Comments: Delete Comment',
-  COMMENTS_REPLY_TO_COMMENT = 'Comments: Reply to Comment',
   COMMENTS_FOCUS_COMMENT_INPUT = 'Comments: Focus Comment Input',
   COMMENTS_CLICK_REPLY_BUTTON = 'Comments: Click Reply Button',
   COMMENTS_LIKE_COMMENT = 'Comments: Like Comment',
@@ -666,84 +615,6 @@ type CreateAccountCompletePassword = {
   eventName: Name.CREATE_ACCOUNT_COMPLETE_PASSWORD
   emailAddress: string
 }
-// Twitter Account Creation
-type CreateAccountStartTwitter = {
-  eventName: Name.CREATE_ACCOUNT_START_TWITTER
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountCompleteTwitter = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_TWITTER
-  isVerified: boolean
-  emailAddress?: string
-  handle: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountClosedTwitter = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_TWITTER
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountTwitterError = {
-  eventName: Name.CREATE_ACCOUNT_TWITTER_ERROR
-  emailAddress?: string
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
-// Instagram Account Creation
-type CreateAccountStartInstagram = {
-  eventName: Name.CREATE_ACCOUNT_START_INSTAGRAM
-  emailAddress?: string
-  page?: string
-}
-type CreateAccountCompleteInstagram = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_INSTAGRAM
-  isVerified: boolean
-  emailAddress?: string
-  handle: string
-  page?: string
-}
-type CreateAccountClosedInstagram = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_INSTAGRAM
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountInstagramError = {
-  eventName: Name.CREATE_ACCOUNT_INSTAGRAM_ERROR
-  emailAddress?: string
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
-// TikTok account creation
-type CreateAccountStartTikTok = {
-  eventName: Name.CREATE_ACCOUNT_START_TIKTOK
-  emailAddress?: string
-  page?: string
-}
-type CreateAccountClosedTikTok = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_TIKTOK
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountCompleteTikTok =
-  | {
-      eventName: Name.CREATE_ACCOUNT_COMPLETE_TIKTOK
-      emailAddress: string
-      page?: string
-    }
-  | {
-      eventName: Name.CREATE_ACCOUNT_COMPLETE_TIKTOK
-      isVerified: boolean
-      handle: string
-      page?: string
-    }
-type CreateAccountTikTokError = {
-  eventName: Name.CREATE_ACCOUNT_TIKTOK_ERROR
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
 type CreateAccountUploadProfilePhoto = {
   eventName: Name.CREATE_ACCOUNT_UPLOAD_PROFILE_PHOTO
   emailAddress?: string
@@ -979,12 +850,10 @@ export enum FollowSource {
   HOVER_TILE = 'hover tile',
   OVERFLOW = 'overflow',
   USER_LIST = 'user list',
-  ARTIST_RECOMMENDATIONS_POPUP = 'artist recommendations popup',
   EMPTY_FEED = 'empty feed',
   HOW_TO_UNLOCK_TRACK_PAGE = 'how to unlock track page',
   HOW_TO_UNLOCK_MODAL = 'how to unlock modal',
-  SIGN_UP = 'sign up',
-  ARTIST_COIN_PURCHASE = 'artist coin purchase'
+  SIGN_UP = 'sign up'
 }
 
 type Share = {
@@ -1667,11 +1536,6 @@ type ExploreSectionClick = {
   link?: string
 }
 
-type ListenGated = {
-  eventName: Name.LISTEN_GATED
-  trackId: string
-}
-
 type OnFirstPage = {
   eventName: Name.ON_FIRST_PAGE
 }
@@ -2024,57 +1888,6 @@ type AuthorizedAppRemoveError = {
   name?: string
   apiKey?: string
   error?: string
-}
-
-type BuyAudioOnRampOpened = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_OPENED
-  provider: string
-}
-
-type BuyAudioOnRampCanceled = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_CANCELED
-  provider: string
-}
-
-type BuyAudioOnRampSuccess = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_SUCCESS
-  provider: string
-}
-
-type BuyAudioSuccess = {
-  eventName: Name.BUY_AUDIO_SUCCESS
-  provider: string
-  requestedAudio: number
-  actualAudio: number
-  surplusAudio: number
-}
-
-type BuyAudioFailure = {
-  eventName: Name.BUY_AUDIO_FAILURE
-  provider: string
-  requestedAudio: number
-  stage: string
-  error: string
-}
-
-type BuyAudioRecoveryOpened = {
-  eventName: Name.BUY_AUDIO_RECOVERY_OPENED
-  provider: string
-  trigger: string
-  balance: string
-}
-
-type BuyAudioRecoverySuccess = {
-  eventName: Name.BUY_AUDIO_RECOVERY_SUCCESS
-  provider: string
-  audioRecovered: number
-}
-
-type BuyAudioRecoveryFailure = {
-  eventName: Name.BUY_AUDIO_RECOVERY_FAILURE
-  provider: string
-  stage: string
-  error: string
 }
 
 // Buy USDC
@@ -3161,22 +2974,10 @@ export type AllTrackingEvents =
   | CreateAccountOpen
   | CreateAccountCompleteEmail
   | CreateAccountCompletePassword
-  | CreateAccountStartTwitter
-  | CreateAccountCompleteTwitter
-  | CreateAccountStartInstagram
-  | CreateAccountCompleteInstagram
-  | CreateAccountStartTikTok
-  | CreateAccountClosedTikTok
-  | CreateAccountCompleteTikTok
   | CreateAccountCompleteProfile
   | CreateAccountCompleteFollow
   | CreateAccountCompleteCreating
   | CreateAccountOpenFinish
-  | CreateAccountClosedTwitter
-  | CreateAccountTikTokError
-  | CreateAccountTwitterError
-  | CreateAccountClosedInstagram
-  | CreateAccountInstagramError
   | CreateAccountUploadProfilePhoto
   | CreateAccountUploadProfilePhotoError
   | CreateAccountUploadProfileCover
@@ -3308,7 +3109,6 @@ export type AllTrackingEvents =
   | SearchResultSelect
   | ExploreSectionView
   | ExploreSectionClick
-  | ListenGated
   | ErrorPage
   | NotFoundPage
   | PageView
@@ -3366,14 +3166,6 @@ export type AllTrackingEvents =
   | AudiusOauthComplete
   | AudiusOauthSubmit
   | AudiusOauthError
-  | BuyAudioOnRampOpened
-  | BuyAudioOnRampSuccess
-  | BuyAudioOnRampCanceled
-  | BuyAudioSuccess
-  | BuyAudioFailure
-  | BuyAudioRecoveryOpened
-  | BuyAudioRecoverySuccess
-  | BuyAudioRecoveryFailure
   | BuyUSDCOnRampOpened
   | BuyUSDCOnRampSuccess
   | BuyUSDCOnRampCanceled
