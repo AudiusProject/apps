@@ -55,12 +55,33 @@ export const useForYouFeed = (
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.users.getUserForYouFeed({
-        id: Id.parse(currentUserId),
-        userId: Id.parse(currentUserId),
-        limit: currentPageSize,
-        offset: pageParam
+      // The OpenAPI spec for /v1/users/{id}/feed/for-you omits the
+      // Encoded-Data-Message / Encoded-Data-Signature header parameters
+      // that the analogous /v1/users/{id}/feed endpoint declares, so the
+      // generated SDK method has no auth-header handling. Without those
+      // headers the discovery node rejects the request with 403
+      // (`authedWallet=` empty). Sign here and pass the headers via
+      // initOverrides — the request-signature middleware sees them
+      // already present and skips its own injection.
+      const message = `signature:${Date.now()}`
+      const signature = await sdk.services.audiusWalletClient.signMessage({
+        message
       })
+      const { data = [] } = await sdk.users.getUserForYouFeed(
+        {
+          id: Id.parse(currentUserId),
+          userId: Id.parse(currentUserId),
+          limit: currentPageSize,
+          offset: pageParam
+        },
+        async ({ init }) => ({
+          headers: {
+            ...(init.headers as Record<string, string>),
+            'Encoded-Data-Message': message,
+            'Encoded-Data-Signature': signature
+          }
+        })
+      )
 
       const tracks = primeTrackData({
         tracks: transformAndCleanList(data, userTrackMetadataFromSDK),
