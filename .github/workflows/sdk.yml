@@ -40,6 +40,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |

@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "Current npm version: $(npm --version)"
           # OIDC trusted publishing requires npm 11.5.1+
-          npm install -g npm@latest
+          npm install -g npm@11.10.0
           echo "Updated npm version: $(npm --version)"
 
       - name: Create concatenated patch file

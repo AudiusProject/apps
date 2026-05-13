@@ -43,6 +43,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -98,6 +101,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -159,6 +165,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -215,6 +224,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -287,6 +299,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -378,6 +393,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -537,6 +555,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -611,6 +632,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -728,6 +752,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -843,6 +870,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file

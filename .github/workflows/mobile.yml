@@ -43,6 +43,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -148,6 +151,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Install dependencies
         env:
           CI: true
@@ -224,6 +230,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Install dependencies
         env:
           CI: true
@@ -284,6 +293,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -458,6 +470,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -678,6 +693,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -838,6 +856,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
