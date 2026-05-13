@@ -1,11 +1,8 @@
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import type { SolKeypairs } from '@pedalboard/storage'
 import { Keypair } from '@solana/web3.js'
 import { Logger } from 'pino'
 
-import { config } from '../../config'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
+import { db } from '../../db'
 
 export const getKeypair = async (logger: Logger): Promise<Keypair> => {
   const [deleted] = await db<SolKeypairs>('sol_keypairs')

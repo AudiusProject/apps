@@ -3,7 +3,6 @@ import {
   DynamicBondingCurveClient,
   SwapMode
 } from '@meteora-ag/dynamic-bonding-curve-sdk'
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   SolMeteoraDammV2Pools,
   SolMeteoraDbcPools,
@@ -14,14 +13,12 @@ import { Connection, PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { NextFunction, Request, Response } from 'express'
 
-import { config } from '../../config'
+import { db } from '../../db'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
 import { AUDIO_MINT } from '../launchpad/constants'
 
 import { SWAP_SLIPPAGE_BPS } from './constants'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 const getDBCPoolQuote = async (
   dbcPool: SolMeteoraDbcPools,

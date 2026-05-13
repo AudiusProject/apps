@@ -1,11 +1,8 @@
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import { AssociatedWallets, Table, WalletChain } from '@pedalboard/storage'
 import { VersionedTransaction } from '@solana/web3.js'
 
-import { config } from '../../config'
+import { db } from '../../db'
 import { logger } from '../../logger'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 export const associateExternalWallet = async (
   transaction: VersionedTransaction,
