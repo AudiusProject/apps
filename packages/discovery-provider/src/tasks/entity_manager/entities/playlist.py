@@ -677,7 +677,10 @@ def populate_playlist_record_metadata(
         # Update the playlist_record when the corresponding field exists
         # in playlist_metadata
         if key == "playlist_contents":
-            if not playlist_metadata.get(key):
+            # Use `is None` rather than a truthiness check so that an explicit
+            # empty list (the user removing the last track) is applied instead
+            # of being silently treated as "field omitted".
+            if playlist_metadata.get(key) is None:
                 continue
             playlist_record.playlist_contents = process_playlist_contents(
                 playlist_record,
