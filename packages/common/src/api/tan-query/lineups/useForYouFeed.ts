@@ -69,7 +69,9 @@ export const useForYouFeed = (
 
       return tracks.map(({ track_id }) => track_id)
     },
-    select: (data) => data?.pages.flat(),
+    // Server-ranked recs can repeat across pages — keep first occurrence to
+    // preserve ranking order while preventing duplicate tiles.
+    select: (data) => [...new Set(data?.pages.flat() ?? [])],
     ...options,
     enabled: options?.enabled !== false && currentUserId !== null
   })
