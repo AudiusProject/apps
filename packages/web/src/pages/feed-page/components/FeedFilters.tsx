@@ -38,7 +38,7 @@ export const FeedFilters = ({
   )
 
   return (
-    <Flex gap='s' role='radiogroup' onChange={handleChange}>
+    <Flex gap='s' role='radiogroup' onChange={handleChange} pb='l'>
       {filters.map((filter) => (
         <SelectablePill
           name='feed-filter'
