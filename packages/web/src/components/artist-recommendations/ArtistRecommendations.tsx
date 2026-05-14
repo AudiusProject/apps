@@ -118,7 +118,7 @@ export const ArtistRecommendations = forwardRef<
       dispatch(
         socialActions.followUser(
           a.user_id,
-          FollowSource.ARTIST_RECOMMENDATIONS_POPUP
+          FollowSource.USER_LIST
         )
       )
     })
@@ -130,7 +130,7 @@ export const ArtistRecommendations = forwardRef<
       dispatch(
         socialActions.unfollowUser(
           a.user_id,
-          FollowSource.ARTIST_RECOMMENDATIONS_POPUP
+          FollowSource.USER_LIST
         )
       )
     })

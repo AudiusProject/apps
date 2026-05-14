@@ -272,7 +272,7 @@ const autoFollowArtistOnCoinPurchase = async ({
 
     followUser({
       followeeUserId: coin.ownerId,
-      source: FollowSource.ARTIST_COIN_PURCHASE
+      source: FollowSource.OVERFLOW
     })
   } catch (error) {
     reportToSentry({
