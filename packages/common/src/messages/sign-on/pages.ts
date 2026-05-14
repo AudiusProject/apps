@@ -68,7 +68,7 @@ export const finishProfilePageMessages = {
   description:
     'Your photos & Display Name is how others see you. Customize with special characters, spaces, emojis, whatever!',
   displayName: 'Display Name',
-  inputPlaceholder: 'Display Name',
+  inputPlaceholder: 'Enter your display name',
   goBack: 'Go back',
   profileImageUploadError: 'There was an issue uploading your profile image.',
   coverPhotoUploadError: 'There was an issue uploading your cover photo image.',
