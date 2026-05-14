@@ -113,7 +113,7 @@ const FeedPageMobileContent = ({
   useEffect(() => {
     setHeader(
       <Header title={messages.title} className={styles.header}>
-        <Flex direction='column' gap='s' alignItems='center'>
+        <Flex gap='s' alignItems='center' justifyContent='center'>
           <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
           {isForYou ? null : (
             <FeedFilters

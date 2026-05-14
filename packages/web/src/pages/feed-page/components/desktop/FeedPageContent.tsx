@@ -114,15 +114,15 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       icon={IconFeed}
       primary={messages.feedHeaderTitle}
       rightDecorator={
-        <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
-      }
-      bottomBar={
-        isForYou ? null : (
-          <FeedFilters
-            currentFilter={feedFilter}
-            onSelectFilter={onSelectFilter}
-          />
-        )
+        <Flex gap='s' alignItems='center'>
+          <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
+          {isForYou ? null : (
+            <FeedFilters
+              currentFilter={feedFilter}
+              onSelectFilter={onSelectFilter}
+            />
+          )}
+        </Flex>
       }
     />
   )
