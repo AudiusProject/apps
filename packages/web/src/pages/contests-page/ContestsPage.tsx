@@ -53,7 +53,7 @@ export const ContestsPage = () => {
     isFetchingNextPage
   } = useAllRemixContests(
     { pageSize: PAGE_SIZE },
-    { enabled: isContestsPageEnabled }
+    { enabled: !isFlagLoaded || isContestsPageEnabled }
   )
 
   const getScrollParent = useCallback(
