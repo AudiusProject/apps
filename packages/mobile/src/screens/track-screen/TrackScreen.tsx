@@ -1,9 +1,7 @@
 import { useRef } from 'react'
 
 import { useTrackByParams, useUser } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Kind } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { reachabilitySelectors } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
 import type { FlatList } from 'react-native'
@@ -20,8 +18,6 @@ import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryCo
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { useRoute } from 'app/hooks/useRoute'
 
-import { RemixContestCountdown } from './RemixContestCountdown'
-import { RemixContestSection } from './RemixContestSection'
 import { TrackContestsSection } from './TrackContestsSection'
 import { TrackScreenDetailsTile } from './TrackScreenDetailsTile'
 import { TrackScreenLineup } from './TrackScreenLineup'
@@ -33,7 +29,6 @@ export const TrackScreen = () => {
   const { params } = useRoute<'Track'>()
   const isReachable = useSelector(getIsReachable)
   const scrollViewRef = useRef<FlatList>(null)
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const { searchTrack, ...restParams } = params ?? {}
   const { data: fetchedTrack } = useTrackByParams(restParams)
@@ -59,14 +54,6 @@ export const TrackScreen = () => {
             {/* Track Details */}
             <ScreenPrimaryContent skeleton={<TrackScreenSkeleton />}>
               <Flex gap='l'>
-                {/* Legacy in-line countdown chip — when CONTESTS is on
-                    the contest experience moved to its own screen with
-                    its own countdown, so this top-of-page chip would
-                    be a redundant artifact (Figma 2888-16639 shows a
-                    clean header). */}
-                {!isContestsEnabled ? (
-                  <RemixContestCountdown trackId={track_id} />
-                ) : null}
                 <TrackScreenDetailsTile
                   track={track}
                   user={user}
@@ -80,15 +67,9 @@ export const TrackScreen = () => {
             {isReachable ? (
               <ScreenSecondaryContent>
                 <Flex gap='2xl'>
-                  {/* Contests — when CONTESTS is on, render a "Contests"
-                      tile rail that links to the dedicated contest
-                      screen (Figma 2888-16639). Otherwise fall back to
-                      the legacy in-line tabbed RemixContestSection. */}
-                  {isContestsEnabled ? (
-                    <TrackContestsSection trackId={track_id} />
-                  ) : (
-                    <RemixContestSection trackId={track_id} />
-                  )}
+                  {/* "Contests" tile rail links to the dedicated contest
+                      screen (Figma 2888-16639). */}
+                  <TrackContestsSection trackId={track_id} />
                   {/* Comments */}
                   {!comments_disabled ? (
                     <Flex flex={3}>

@@ -16,7 +16,6 @@ export enum FeatureFlags {
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
   FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
-  CONTESTS = 'contests',
   QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge'
 }
 
@@ -50,6 +49,5 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
-  [FeatureFlags.CONTESTS]: false,
   [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false
 }

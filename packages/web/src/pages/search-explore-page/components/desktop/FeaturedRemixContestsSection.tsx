@@ -1,16 +1,9 @@
 import { useExploreContent } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import { Box } from '@audius/harmony'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
-import {
-  RemixContestCard,
-  RemixContestCardSkeleton
-} from 'components/remix-contest-card'
-import { useIsMobile } from 'hooks/useIsMobile'
 
 import { Carousel } from './Carousel'
 import { CONTEST_CARD_WIDTH } from './constants'
@@ -24,10 +17,6 @@ export const FeaturedRemixContestsSection = () => {
   const { data, isPending, isError, isSuccess } = useExploreContent({
     enabled: inView
   })
-  const isMobile = useIsMobile()
-  const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS
-  )
 
   if (isError || (isSuccess && !data?.featuredRemixContests?.length)) {
     return null
@@ -38,40 +27,21 @@ export const FeaturedRemixContestsSection = () => {
   return (
     <Carousel
       ref={ref}
-      title={
-        isContestsPageEnabled
-          ? messages.contests
-          : messages.featuredRemixContests
-      }
-      // Surface a "View All" affordance back to the dedicated Contests
-      // hub when that page is feature-flagged on. Without it, users can
-      // only see the carousel-of-N cards from explore — the QA pass
-      // flagged the missing CTA.
-      viewAllLink={isContestsPageEnabled ? route.CONTESTS_PAGE : undefined}
+      title={messages.contests}
+      // Surface a "View All" affordance back to the dedicated Contests hub.
+      viewAllLink={route.CONTESTS_PAGE}
     >
-      {isContestsPageEnabled
-        ? showLoading
-          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <Box key={i} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
-                <ContestCardSkeleton variant='grid' />
-              </Box>
-            ))
-          : data.featuredRemixContests.map((trackId) => (
-              <Box key={trackId} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
-                <ContestCard trackId={trackId} variant='grid' />
-              </Box>
-            ))
-        : showLoading
-          ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <RemixContestCardSkeleton
-                key={i}
-                size={isMobile ? 'xs' : 's'}
-                noShimmer
-              />
-            ))
-          : data.featuredRemixContests.map((id) => (
-              <RemixContestCard key={id} id={id} size='s' />
-            ))}
+      {showLoading
+        ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <Box key={i} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
+              <ContestCardSkeleton variant='grid' />
+            </Box>
+          ))
+        : data.featuredRemixContests.map((trackId) => (
+            <Box key={trackId} w={CONTEST_CARD_WIDTH} css={{ flexShrink: 0 }}>
+              <ContestCard trackId={trackId} variant='grid' />
+            </Box>
+          ))}
     </Carousel>
   )
 }

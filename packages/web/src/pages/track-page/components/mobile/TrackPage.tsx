@@ -6,11 +6,7 @@ import {
   useToggleFavoriteTrack,
   useUser
 } from '@audius/common/api'
-import {
-  useCurrentTrack,
-  useFeatureFlag,
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
   FavoriteSource,
   ID,
@@ -22,7 +18,6 @@ import {
   PlaybackSource,
   FavoriteType
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   OverflowAction,
   tracksSocialActions as socialTracksActions,
@@ -50,7 +45,6 @@ import NavContext, {
   CenterPreset,
   RightPreset
 } from 'components/nav/mobile/NavContext'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
 import { getTrackPageContext } from 'ssr/metaTags'
@@ -60,7 +54,6 @@ import { TrackPageLineup } from '../TrackPageLineup'
 import { TrackContestsSection } from '../shared/TrackContestsSection'
 
 import TrackPageHeader from './TrackHeader'
-import { RemixContestSection } from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
 const { getPlaying, getPreviewing } = playbackSelectors
@@ -120,7 +113,6 @@ const TrackPage = () => {
   const isCommentingEnabled = !track?.comments_disabled
 
   const loading = !track || isFetchingNFTAccess
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const toggleSaveTrack = useToggleFavoriteTrack({
     trackId: track?.track_id,
@@ -297,14 +289,6 @@ const TrackPage = () => {
     >
       <Flex column p='l' gap='2xl' w='100%'>
         <Flex column gap='l'>
-          {/* The countdown chip is part of the legacy in-line contest UI.
-              When CONTESTS is on the contest experience lives on its own
-              page (with its own countdown), so this would be a redundant
-              artifact on what should look like a normal track page
-              (Figma 2844-51756). */}
-          {!isContestsEnabled ? (
-            <RemixContestCountdown trackId={defaults.trackId} />
-          ) : null}
           <TrackPageHeader
             isLoading={loading}
             isPlaying={heroPlaying}
@@ -346,15 +330,7 @@ const TrackPage = () => {
             goToRepostsPage={goToRepostsPage}
           />
         </Flex>
-        {isContestsEnabled ? (
-          // The full Details / Prizes / Submissions / Winners experience
-          // moved to the dedicated contest page; the track page surfaces
-          // a "Contests" tile rail that links out. Replaces the previous
-          // one-line `RemixContestTeaser` so this matches Figma 2844-51756.
-          <TrackContestsSection trackId={defaults.trackId} />
-        ) : (
-          <RemixContestSection trackId={defaults.trackId} isOwner={isOwner} />
-        )}
+        <TrackContestsSection trackId={defaults.trackId} />
         {isCommentingEnabled ? (
           <CommentPreview entityId={defaults.trackId} />
         ) : null}
