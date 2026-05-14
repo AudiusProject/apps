@@ -1,4 +1,3 @@
-import { initializeDiscoveryDb } from '@pedalboard/basekit'
 import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync
@@ -8,11 +7,9 @@ import BN from 'bn.js'
 import { Request, Response } from 'express'
 
 import { LockClient } from '@meteora-ag/met-lock-sdk'
-import { config } from '../../config'
+import { db } from '../../db'
 import { logger } from '../../logger'
 import { getConnection } from '../../utils/connections'
-
-const db = initializeDiscoveryDb(config.discoveryDbConnectionString)
 
 interface ClaimVestedCoinsRequestBody {
   tokenMint: string
