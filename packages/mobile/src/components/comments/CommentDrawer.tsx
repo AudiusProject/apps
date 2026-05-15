@@ -172,21 +172,21 @@ const CommentDrawerContent = (props: {
     )
   }
 
-  // Empty state
-  if (!commentIds || !commentIds.length) {
-    return (
-      <Flex p='l'>
-        <NoComments />
-      </Flex>
-    )
-  }
-
+  // Always render BottomSheetFlatList (with ListEmptyComponent for the empty
+  // state) so the bottom sheet can handle keyboard avoidance and touch
+  // propagation correctly. Swapping in a plain <Flex> when there are zero
+  // comments breaks the footer composer's send button on a 0-comment track.
   return (
     <BottomSheetFlatList
       ref={commentListRef}
       data={commentIds}
       keyExtractor={(id) => id.toString()}
       ListHeaderComponent={<Box h='l' />}
+      ListEmptyComponent={
+        <Flex p='l'>
+          <NoComments />
+        </Flex>
+      }
       ListFooterComponent={
         <>
           {isLoadingMorePages ? (
