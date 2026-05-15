@@ -197,6 +197,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [mobile-install, mobile-version-check]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.mobile-version-check.outputs.version_unchanged == 'true') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.ota_channel == 'rc' || github.event.inputs.ota_channel == ''))
+    # Serialize per-platform publishes so two concurrent runs can't read-modify-write
+    # the same s3://.../mobile-ota/histories/<platform>/rc/<binary>.json and clobber each
+    # other's release entry.
+    concurrency:
+      group: mobile-ota-release-rc-${{ matrix.platform }}
+      cancel-in-progress: false
     strategy:
       fail-fast: false
       matrix:
@@ -288,8 +294,6 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
-          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ${{ matrix.platform }} --identifier "$OTA_CHANNEL" || true
-
           npx code-push release \
             --binary-version "$BINARY_VERSION" \
             --app-version "$OTA_APP_VERSION" \
@@ -307,6 +311,9 @@ jobs:
     environment:
       name: mobile-production-ota
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    concurrency:
+      group: mobile-ota-release-production-${{ matrix.platform }}
+      cancel-in-progress: false
     strategy:
       fail-fast: false
       matrix:
@@ -388,8 +395,6 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
-          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ${{ matrix.platform }} --identifier "$OTA_CHANNEL" || true
-
           npx code-push release \
             --binary-version "$BINARY_VERSION" \
             --app-version "$OTA_APP_VERSION" \
