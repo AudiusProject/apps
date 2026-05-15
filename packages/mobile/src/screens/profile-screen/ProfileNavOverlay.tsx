@@ -4,7 +4,7 @@ import { useCurrentUserId, useProfileUser } from '@audius/common/api'
 import { ShareSource } from '@audius/common/models'
 import { modalsActions, shareModalUIActions } from '@audius/common/store'
 import { BlurView } from '@react-native-community/blur'
-import { StyleSheet, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import Animated, {
   interpolate,
   useAnimatedStyle
@@ -22,7 +22,7 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
-import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
+import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 
 import { useProfileScrollY } from './ProfileScrollContext'
 
@@ -83,6 +83,7 @@ export const ProfileNavOverlay = () => {
   const navigation = useNavigation()
   const scrollY = useProfileScrollY()
   const isDarkMode = isDarkTheme(useThemeVariant())
+  const { backgroundSurface } = useThemeColors()
 
   const { data: accountId } = useCurrentUserId()
   const { user_id } =
@@ -167,11 +168,21 @@ export const ProfileNavOverlay = () => {
       pointerEvents='box-none'
       style={[styles.root, { height: overlayHeight }]}
     >
-      <AnimatedBlurView
-        blurType={isDarkMode ? 'dark' : 'light'}
-        blurAmount={20}
-        style={[styles.blurBackground, blurBackgroundStyle]}
-      />
+      {Platform.OS === 'android' ? (
+        <Animated.View
+          style={[
+            styles.blurBackground,
+            { backgroundColor: backgroundSurface },
+            blurBackgroundStyle
+          ]}
+        />
+      ) : (
+        <AnimatedBlurView
+          blurType={isDarkMode ? 'dark' : 'light'}
+          blurAmount={20}
+          style={[styles.blurBackground, blurBackgroundStyle]}
+        />
+      )}
       <Flex
         direction='row'
         justifyContent='space-between'
