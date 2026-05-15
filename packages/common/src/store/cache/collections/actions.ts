@@ -24,6 +24,8 @@ export const ORDER_PLAYLIST_FAILED = 'ORDER_PLAYLIST_FAILED'
 export const PUBLISH_PLAYLIST = 'PUBLISH_PLAYLIST'
 export const PUBLISH_PLAYLIST_FAILED = 'PUBLISH_PLAYLIST_FAILED'
 
+export const DUPLICATE_PLAYLIST = 'DUPLICATE_PLAYLIST'
+
 /**
  * @param initTrackId optional track id to pull artwork from.
  */
@@ -174,4 +176,27 @@ export function publishPlaylistFailed(
   metadata: Record<string, unknown>
 ) {
   return { type: PUBLISH_PLAYLIST_FAILED, error, params, metadata }
+}
+
+export function duplicatePlaylist({
+  sourcePlaylistId,
+  formFields,
+  trackIds,
+  source,
+  isAlbum
+}: {
+  sourcePlaylistId: ID
+  formFields: Partial<Collection>
+  trackIds: ID[]
+  source: string
+  isAlbum?: boolean
+}) {
+  return {
+    type: DUPLICATE_PLAYLIST,
+    sourcePlaylistId,
+    formFields,
+    trackIds,
+    source,
+    isAlbum: !!isAlbum
+  }
 }
