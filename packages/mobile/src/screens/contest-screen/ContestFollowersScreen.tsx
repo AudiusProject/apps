@@ -18,15 +18,17 @@ const messages = {
  * We reuse the shared `UserList` + `UserListScreen` scaffolding that
  * powers Followers/Following/Mutuals, wired up to `useEventFollowers`
  * instead of the per-user follow hooks. The event-followers hook
- * isn't paginated today, so we request a healthy upper bound (200)
- * and render what comes back — pagination can be wired in later
- * without touching this screen if the hook grows it.
+ * isn't paginated today, so we request the same upper bound the web
+ * modal uses (100) — values above that come back empty from the
+ * indexer's response, which is what was producing a blank list.
+ * Pagination can be wired in later without touching this screen if
+ * the hook grows it.
  */
 export const ContestFollowersScreen = () => {
   const { params } = useRoute<'ContestFollowers'>()
   const { eventId } = params
 
-  const { userIds, isPending } = useEventFollowers({ eventId, limit: 200 })
+  const { userIds, isPending } = useEventFollowers({ eventId, limit: 100 })
 
   return (
     <UserListScreen title={messages.title} titleIcon={IconUserFollowers}>
