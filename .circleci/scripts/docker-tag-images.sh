@@ -40,7 +40,6 @@ discovery=(
   discovery-provider-notifications
   discovery-provider-openresty
   es-indexer
-  solana-relay
   staking
   anti-abuse
   archiver
