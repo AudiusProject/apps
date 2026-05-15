@@ -40,7 +40,6 @@ export const useEventFollowers = (
 
   const queryRes = useQuery({
     queryKey: getEventFollowersQueryKey({ eventId, limit }),
-    enabled: options?.enabled !== false && !!eventId,
     queryFn: async (): Promise<ID[]> => {
       if (!eventId) return []
       try {
@@ -63,7 +62,8 @@ export const useEventFollowers = (
         return []
       }
     },
-    ...options
+    ...options,
+    enabled: !!eventId && (options?.enabled ?? true)
   })
 
   const { data: users } = useUsers(queryRes.data)
