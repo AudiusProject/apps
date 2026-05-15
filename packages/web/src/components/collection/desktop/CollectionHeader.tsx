@@ -10,7 +10,10 @@ import {
   IconCart,
   useTheme,
   MusicBadge,
-  IconCalendarMonth
+  IconCalendarMonth,
+  Switch,
+  TextArea,
+  TextInput
 } from '@audius/harmony'
 import cn from 'classnames'
 import { pick } from 'lodash'
@@ -28,13 +31,21 @@ import { CollectionHeaderProps } from '../types'
 import { Artwork } from './Artwork'
 import { CollectionActionButtons } from './CollectionActionButtons'
 import styles from './CollectionHeader.module.css'
+import { usePlaylistEditMode } from './edit-mode/PlaylistEditModeContext'
 
 const messages = {
   premiumLabel: 'premium',
   by: 'By ',
   hidden: 'Hidden',
   releases: (releaseDate: string) =>
-    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`
+    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`,
+  titleLabel: 'Playlist title',
+  titleAlbumLabel: 'Album title',
+  descriptionLabel: 'Description',
+  descriptionPlaceholder: 'Add a description',
+  visibility: 'Visibility',
+  publicLabel: 'Public',
+  privateLabel: 'Hidden'
 }
 
 export const CollectionHeader = (props: CollectionHeaderProps) => {
@@ -71,15 +82,34 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
         'is_scheduled_release',
         'release_date',
         'permalink',
-        'is_private'
+        'is_private',
+        'is_album'
       ])
   })
   const {
     is_scheduled_release: isScheduledRelease,
     release_date: releaseDate,
     permalink,
-    is_private: isPrivate
+    is_private: isPrivate,
+    is_album: isAlbumFromCollection
   } = partialCollection ?? {}
+
+  const editMode = usePlaylistEditMode()
+  const isEditingThis =
+    editMode.isEditMode && editMode.collectionId === collectionId
+
+  const stagedTitle =
+    editMode.draft.playlist_name !== undefined
+      ? editMode.draft.playlist_name
+      : title
+  const stagedDescription =
+    editMode.draft.description !== undefined
+      ? editMode.draft.description
+      : description
+  const stagedIsPrivate =
+    editMode.draft.is_private !== undefined
+      ? editMode.draft.is_private
+      : (isPrivate ?? false)
 
   const hasStreamAccess = access?.stream
   const shouldShowStats = !isPrivate || isOwner
@@ -134,44 +164,62 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             gap='s'
             className={styles.titleArtistSection}
           >
-            <Flex
-              as={isOwner ? Link : 'span'}
-              css={{ background: 0, border: 0, padding: 0, margin: 0 }}
-              gap='s'
-              alignItems='center'
-              className={cn({
-                [styles.editableTitle]: isOwner
-              })}
-              // @ts-ignore -- Flex Link doesn't type `to` correctly
-              to={
-                isOwner
-                  ? { pathname: `${permalink}/edit`, search: '?focus=name' }
-                  : undefined
-              }
-            >
-              {isLoading ? (
-                <Skeleton height='48px' width='300px' />
-              ) : (
-                <>
-                  <Text
-                    variant='heading'
-                    size='xl'
-                    className={cn(styles.titleHeader)}
-                    textAlign='left'
-                    css={{
-                      fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
-                      lineHeight: 1.33
-                    }}
-                  >
-                    {title}
-                  </Text>
+            {isEditingThis ? (
+              <Flex direction='column' gap='s'>
+                <TextInput
+                  label={
+                    isAlbumFromCollection
+                      ? messages.titleAlbumLabel
+                      : messages.titleLabel
+                  }
+                  value={stagedTitle}
+                  onChange={(e) =>
+                    editMode.setField('playlist_name', e.target.value)
+                  }
+                  maxLength={64}
+                  autoFocus
+                />
+              </Flex>
+            ) : (
+              <Flex
+                as={isOwner ? Link : 'span'}
+                css={{ background: 0, border: 0, padding: 0, margin: 0 }}
+                gap='s'
+                alignItems='center'
+                className={cn({
+                  [styles.editableTitle]: isOwner
+                })}
+                // @ts-ignore -- Flex Link doesn't type `to` correctly
+                to={
+                  isOwner
+                    ? { pathname: `${permalink}/edit`, search: '?focus=name' }
+                    : undefined
+                }
+              >
+                {isLoading ? (
+                  <Skeleton height='48px' width='300px' />
+                ) : (
+                  <>
+                    <Text
+                      variant='heading'
+                      size='xl'
+                      className={cn(styles.titleHeader)}
+                      textAlign='left'
+                      css={{
+                        fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
+                        lineHeight: 1.33
+                      }}
+                    >
+                      {title}
+                    </Text>
 
-                  {!isLoading && isOwner ? (
-                    <IconPencil className={styles.editIcon} color='subdued' />
-                  ) : null}
-                </>
-              )}
-            </Flex>
+                    {!isLoading && isOwner ? (
+                      <IconPencil className={styles.editIcon} color='subdued' />
+                    ) : null}
+                  </>
+                )}
+              </Flex>
+            )}
             {isLoading ? (
               <Skeleton height='24px' width='150px' />
             ) : userId !== null ? (
@@ -190,6 +238,25 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
                 <Text color='subdued'>{messages.by}</Text>
                 <UserLink userId={userId} popover variant='visible' />
               </Text>
+            ) : null}
+            {isEditingThis ? (
+              <Flex alignItems='center' gap='m' mt='s'>
+                <Text variant='label' size='m' color='subdued'>
+                  {messages.visibility}
+                </Text>
+                <Switch
+                  checked={!stagedIsPrivate}
+                  onChange={(e) =>
+                    editMode.setField('is_private', !e.target.checked)
+                  }
+                  aria-label={messages.visibility}
+                />
+                <Text variant='body' size='s' color='subdued'>
+                  {stagedIsPrivate
+                    ? messages.privateLabel
+                    : messages.publicLabel}
+                </Text>
+              </Flex>
             ) : null}
           </Flex>
           <div className={styles.statsDesktop}>{renderStatsRow(isLoading)}</div>
@@ -263,7 +330,17 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
         <Skeleton height='40px' width='100%' />
       ) : (
         <Flex gap='l' direction='column'>
-          {description ? (
+          {isEditingThis ? (
+            <TextArea
+              aria-label={messages.descriptionLabel}
+              placeholder={messages.descriptionPlaceholder}
+              value={stagedDescription ?? ''}
+              onChange={(e) => editMode.setField('description', e.target.value)}
+              maxLength={1000}
+              showMaxLength
+              grows
+            />
+          ) : description ? (
             <UserGeneratedText
               size='s'
               linkSource='collection page'
