@@ -7,17 +7,17 @@ import {
 } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
-import { QUERY_KEYS } from '../queryKeys'
-import { QueryKey, QueryOptions } from '../types'
-
-import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
-
 import { eventMetadataFromSDK } from '~/adapters/event'
 import { getRemixesCountQueryKey } from '~/api/tan-query/remixes/useRemixes'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { primeRelatedData } from '~/api/tan-query/utils/primeRelatedData'
 import { ID } from '~/models'
 import { removeNullable } from '~/utils'
+
+import { QUERY_KEYS } from '../queryKeys'
+import { QueryKey, QueryOptions } from '../types'
+
+import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
 
 const DEFAULT_PAGE_SIZE = 25
 
