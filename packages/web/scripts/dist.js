@@ -109,8 +109,6 @@ const makeBuildParams = (isProduction) => {
       // Inject data into package.json
       // https://www.electron.build/configuration/configuration
       extraMetadata: {
-        // We set prod & stage to separate values to ensure that
-        // the app's app-data does not collide (in addition to a different `scheme`).
         // `productName` controls the app-data location on most platforms.
         // https://github.com/electron-userland/electron-builder/issues/3429#issuecomment-434024379
         productName,
