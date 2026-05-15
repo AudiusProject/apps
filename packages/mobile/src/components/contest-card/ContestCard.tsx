@@ -298,11 +298,7 @@ export const ContestCard = (props: ContestCardProps) => {
       onPress={handlePress}
       border='default'
       shadow='mid'
-      // Floor the card at ~250px so the artist name + badges row in the
-      // header doesn't clip on the narrowest carousels (the mobile
-      // explore "Contests" rail was sized to whatever CardList default
-      // — the QA pass flagged the cards as too skinny).
-      style={{ overflow: 'hidden', borderRadius: 14, minWidth: 250 }}
+      style={{ overflow: 'hidden', borderRadius: 14 }}
       {...other}
     >
       {/* Cover banner */}
