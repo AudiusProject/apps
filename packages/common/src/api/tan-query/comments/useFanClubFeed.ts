@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import { commentFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -46,7 +46,7 @@ export const useFanClubFeed = ({
   pageSize = FAN_CLUB_FEED_PAGE_SIZE,
   enabled = true
 }: UseFanClubFeedArgs) => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -99,18 +99,14 @@ export const useFanClubFeed = ({
 
   useEffect(() => {
     if (error) {
-      reportToSentry({
-        error,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(
         toast({
           content: 'There was an error loading the feed. Please try again.'
         })
       )
     }
-  }, [error, dispatch, reportToSentry])
+  }, [error, dispatch])
 
   return queryRes
 }

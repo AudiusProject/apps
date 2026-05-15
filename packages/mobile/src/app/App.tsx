@@ -42,9 +42,6 @@ import { Drawers } from './Drawers'
 import ErrorBoundary from './ErrorBoundary'
 import { ThemeProvider } from './ThemeProvider'
 import './registerNiceModals'
-import { initSentry, navigationIntegration } from './sentry'
-
-initSentry()
 
 // Wire the platform-agnostic bridge so common (sagas/services) can drive
 // nice-modal-react without depending on the package directly.
@@ -130,9 +127,7 @@ const App = () => {
                         <PortalProvider>
                           <ErrorBoundary>
                             <ConnectivityManager />
-                            <NavigationContainer
-                              navigationIntegration={navigationIntegration}
-                            >
+                            <NavigationContainer>
                               <BottomSheetModalProvider>
                                 <CommentDrawerProvider>
                                   {/* NiceModal-managed modals (e.g.

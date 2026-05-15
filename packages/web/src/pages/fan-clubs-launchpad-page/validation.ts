@@ -7,7 +7,7 @@ import {
   useQueryContext,
   useWalletAudioBalance
 } from '@audius/common/api'
-import { Chain, ErrorLevel, Feature } from '@audius/common/models'
+import { Chain } from '@audius/common/models'
 import { MAX_HANDLE_LENGTH } from '@audius/common/services'
 import { AUDIO } from '@audius/fixed-decimal'
 import { useAppKitAccount as useExternalWalletAccount } from '@reown/appkit/react'
@@ -16,8 +16,6 @@ import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
 import { useLaunchpadConfig } from 'hooks/useLaunchpadConfig'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 export const FIELDS = {
   coinName: 'coinName',
   coinSymbol: 'coinSymbol',
@@ -119,16 +117,10 @@ export const setupFormSchema = ({
               }
             } catch (error: any) {
               // This should rarely happen, and likely not a fatal error
-              reportToSentry({
-                error:
-                  error instanceof Error ? error : new Error(error as string),
-                name: 'Launchpad Ticker Validation Error',
-                feature: Feature.FanClubs,
-                level: ErrorLevel.Warning,
-                additionalInfo: {
-                  ticker
-                }
-              })
+              console.error(
+                'Launchpad Ticker Validation Error',
+                error instanceof Error ? error : new Error(error as string)
+              )
               // For other errors, show unknown error
               context.addIssue({
                 code: z.ZodIssueCode.custom,

@@ -28,7 +28,6 @@ import dayjs from '~/utils/dayjs'
 
 import { ID, ComputedUserProperties, WriteableUserMetadata } from '../../models'
 import { AnalyticsEvent } from '../../models/Analytics'
-import { ReportToSentryArgs } from '../../models/ErrorReporting'
 import * as schemas from '../../schemas'
 import {
   FeatureFlags,
@@ -124,12 +123,7 @@ type AudiusBackendParams = {
   nativeMobile: Maybe<boolean>
   recaptchaSiteKey: Maybe<string>
   recordAnalytics: (event: AnalyticsEvent, callback?: () => void) => void
-  reportError: ({
-    level,
-    additionalInfo,
-    error,
-    name
-  }: ReportToSentryArgs) => void | Promise<void>
+  reportError: (args: { error: Error }) => void | Promise<void>
   registryAddress: Maybe<string>
   entityManagerAddress: Maybe<string>
   remoteConfigInstance: RemoteConfigInstance

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux'
 
 import { commentFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QueryOptions } from '../types'
@@ -31,7 +31,7 @@ export const useUserComments = (
   },
   options?: QueryOptions
 ) => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const isMutating = useIsMutating()
   const queryClient = useQueryClient()
@@ -75,14 +75,10 @@ export const useUserComments = (
 
   useEffect(() => {
     if (error) {
-      reportToSentry({
-        error,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(toast({ content: messages.loadError('comments') }))
     }
-  }, [error, dispatch, reportToSentry])
+  }, [error, dispatch])
 
   const { data: comments } = useComments(commentIds)
 

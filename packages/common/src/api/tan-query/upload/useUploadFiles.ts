@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 
 import type { UploadTrackFilesTask } from '@audius/sdk'
 
-import { Feature } from '~/models'
 import { uploadActions, ProgressStatus } from '~/store'
 
 import { useQueryContext } from '../utils'
@@ -13,7 +12,7 @@ type UploadTrackFilesTaskWithClientId = UploadTrackFilesTask & {
 }
 
 export const useUploadFiles = () => {
-  const { dispatch, reportToSentry } = useQueryContext()
+  const { dispatch } = useQueryContext()
   const uploadFiles = useCallback(
     async (tasks: UploadTrackFilesTaskWithClientId[]) => {
       return await Promise.all(
@@ -30,11 +29,7 @@ export const useUploadFiles = () => {
                 progress: { status: ProgressStatus.ERROR }
               })
             )
-            reportToSentry({
-              error: e as Error,
-              name: 'Upload: Upload Track File',
-              feature: Feature.Upload
-            })
+            console.error('Upload: Upload Track File', e as Error)
             return {
               clientId: u.clientId,
               audioUploadResponse: null,
@@ -45,7 +40,7 @@ export const useUploadFiles = () => {
         })
       )
     },
-    [dispatch, reportToSentry]
+    [dispatch]
   )
   return uploadFiles
 }

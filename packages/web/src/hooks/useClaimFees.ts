@@ -4,7 +4,6 @@ import {
   useQueryContext,
   pollUntilAudioBalanceChanges
 } from '@audius/common/api'
-import { Feature } from '@audius/common/models'
 import { createUserBankIfNeeded } from '@audius/common/services'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { VersionedTransaction } from '@solana/web3.js'
@@ -16,8 +15,6 @@ import {
 
 import { appkitModal } from 'app/ReownAppKitModal'
 import { track } from 'services/analytics'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 export type UseClaimFeesParams = {
   tokenMint: string
   externalWalletAddress: string
@@ -95,14 +92,7 @@ export const useClaimFees = (
     ...options,
     onError: (error, params) => {
       // Call the original onError if provided
-      reportToSentry({
-        error,
-        feature: Feature.FanClubs,
-        name: 'Fan club fees claim error',
-        additionalInfo: {
-          ...params
-        }
-      })
+      console.error(error)
     },
     onSuccess: async (data, variables, context) => {
       // Invalidate the fan club query to refetch the updated fees

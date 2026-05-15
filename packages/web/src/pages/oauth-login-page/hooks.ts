@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useAccountStatus, useCurrentUserId } from '@audius/common/api'
-import {
-  Name,
-  ErrorLevel,
-  statusIsNotFinalized,
-  UserMetadata
-} from '@audius/common/models'
+import { Name, statusIsNotFinalized, UserMetadata } from '@audius/common/models'
 import { Id } from '@audius/sdk'
 import * as queryString from 'query-string'
 import { useDispatch } from 'react-redux'
@@ -16,7 +11,6 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import { audiusSdk } from 'services/audius-sdk'
 import { identityService } from 'services/audius-sdk/identity'
 import * as errorActions from 'store/errors/actions'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { messages } from './messages'
 import { Display } from './types'
@@ -456,7 +450,7 @@ export const useOAuthSetup = ({
         })
       } catch (e) {
         if (e instanceof Error) {
-          reportToSentry({ level: ErrorLevel.Error, error: e })
+          console.error(e)
         }
         dispatch(
           errorActions.handleError({

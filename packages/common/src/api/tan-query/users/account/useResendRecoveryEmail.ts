@@ -11,8 +11,7 @@ import { useQueryContext } from '../../utils'
  * packages/web/src/common/store/recovery-email/sagas.ts.
  */
 export const useResendRecoveryEmail = () => {
-  const { authService, identityService, analytics, reportToSentry } =
-    useQueryContext()
+  const { authService, identityService, analytics } = useQueryContext()
   const { getHostUrl } = useAppContext()
 
   return useMutation({
@@ -33,10 +32,10 @@ export const useResendRecoveryEmail = () => {
       )
     },
     onError: (error) => {
-      reportToSentry({
-        error: error instanceof Error ? error : new Error(String(error)),
-        name: 'Resend Recovery: Failed to send recovery email'
-      })
+      console.error(
+        'Resend Recovery: Failed to send recovery email',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   })
 }

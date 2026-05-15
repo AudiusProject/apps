@@ -2,18 +2,12 @@ import { useCallback, useState, useEffect, useRef } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import {
-  ErrorLevel,
-  Feature,
-  SolanaWalletAddress,
-  User
-} from '@audius/common/models'
+import { SolanaWalletAddress, User } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
 import { useSendTokensModal } from '@audius/common/store'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import ResponsiveModal from 'components/modal/ResponsiveModal'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import SendTokensConfirmation from './SendTokensConfirmation'
 import SendTokensFailure from './SendTokensFailure'
@@ -186,17 +180,7 @@ const SendTokensModal = NiceModal.create(() => {
       }
 
       setError(errorMessage)
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error: error as Error,
-        additionalInfo: {
-          amount: state.amount.toString(),
-          destinationAddress: state.destinationAddress,
-          mint: state.selectedMint,
-          errorString
-        },
-        feature: Feature.SendTokens
-      })
+      console.error(error as Error)
       setState((prev) => ({ ...prev, step: 'failure' }))
     }
   }

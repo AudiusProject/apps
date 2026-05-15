@@ -1,10 +1,8 @@
-import { ErrorLevel } from '@audius/common/models'
 import { remoteConfig } from '@audius/common/services'
 import optimizely, { Config } from '@optimizely/optimizely-sdk'
 import { isEmpty } from 'lodash'
 
 import { env } from 'services/env'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import { isElectron } from 'utils/clientUtil'
 
 import packageInfo from '../../../package.json'
@@ -35,20 +33,14 @@ export const remoteConfigInstance = remoteConfig({
 
     const datafile = window.optimizelyDatafile
     if (isEmpty(datafile)) {
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error: new Error('Optimizely failed to load')
-      })
+      console.error(new Error('Optimizely failed to load'))
     }
 
     return optimizely.createInstance({
       datafile,
       errorHandler: {
         handleError: (error) => {
-          reportToSentry({
-            level: ErrorLevel.Error,
-            error
-          })
+          console.error(error)
         }
       }
     })

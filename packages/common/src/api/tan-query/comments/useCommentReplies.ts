@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import { replyCommentFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QueryOptions } from '../types'
@@ -27,7 +27,7 @@ export const useCommentReplies = (
   { commentId, pageSize = COMMENT_REPLIES_PAGE_SIZE }: GetRepliesArgs,
   options?: QueryOptions
 ) => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const startingLimit = 3 // comments will load in with 3 already so we don't start pagination at 0
@@ -80,14 +80,10 @@ export const useCommentReplies = (
 
   useEffect(() => {
     if (error) {
-      reportToSentry({
-        error,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(toast({ content: messages.loadError('replies') }))
     }
-  }, [error, dispatch, reportToSentry])
+  }, [error, dispatch])
 
   const { data: replies } = useComments(replyIds)
 

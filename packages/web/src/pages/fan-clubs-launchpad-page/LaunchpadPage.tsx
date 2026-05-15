@@ -11,8 +11,6 @@ import { useFeatureFlag } from '@audius/common/hooks'
 import { launchpadMessages } from '@audius/common/messages'
 import {
   Chain,
-  ErrorLevel,
-  Feature,
   Name,
   LaunchpadFormValues,
   WidthSizes
@@ -43,7 +41,6 @@ import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useExternalWalletSwap } from 'hooks/useExternalWalletSwap'
 import { LAUNCHPAD_COIN_DECIMALS, useLaunchCoin } from 'hooks/useLaunchCoin'
 import { make, track } from 'services/analytics'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { ConnectedWalletHeader } from './components'
 import {
@@ -67,13 +64,6 @@ const messages = {
     failedToCheckWalletBalance:
       'Failed to check wallet balance. Please try again.'
   }
-}
-
-const sanitizeFormValuesForLogging = (
-  values: LaunchpadFormValues
-): Omit<LaunchpadFormValues, 'coinImage'> => {
-  const { coinImage: _coinImageIgnored, ...rest } = values
-  return rest
 }
 
 /**
@@ -176,15 +166,10 @@ const LaunchpadPageContent = ({
       const { solana: connectedWallet } = newWallets
       if (!connectedWallet) {
         alert(messages.errors.noSolanaWalletFound)
-        reportToSentry({
-          error: new Error(messages.errors.noSolanaWalletFound),
-          name: 'Launchpad Page',
-          feature: Feature.FanClubs,
-          additionalInfo: {
-            newWallets,
-            externalWalletAccount
-          }
-        })
+        console.error(
+          'Launchpad Page',
+          new Error(messages.errors.noSolanaWalletFound)
+        )
         return
       }
 
@@ -213,21 +198,15 @@ const LaunchpadPageContent = ({
         }
       } catch (error) {
         alert(messages.errors.failedToCheckWalletBalance)
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(error as string),
-          name: 'Launchpad Page',
-          feature: Feature.FanClubs,
-          additionalInfo: {
-            newWallets,
-            externalWalletAccount
-          }
-        })
+        console.error(
+          'Launchpad Page',
+          error instanceof Error ? error : new Error(error as string)
+        )
       }
     },
     [
       queryClient,
       queryContext,
-      externalWalletAccount,
       trackWalletConnectSuccess,
       trackWalletInsufficientBalance,
       handleWalletAddSuccess
@@ -560,18 +539,12 @@ export const LaunchpadPage = () => {
         toast(messages.errors.unknownError, Infinity, {
           rightIcon: IconClose
         })
-        reportToSentry({
-          error: new Error(
+        console.error(
+          'Launchpad Submit Error',
+          new Error(
             'Unable to submit launchpad form. No user or connected wallet found'
-          ),
-          name: 'Launchpad Submit Error',
-          feature: Feature.FanClubs,
-          additionalInfo: {
-            currentUser,
-            connectedWalletAddress,
-            formValues: sanitizeFormValuesForLogging(formValues)
-          }
-        })
+          )
+        )
         throw new Error('No user or connected wallet found')
       }
 
@@ -606,17 +579,12 @@ export const LaunchpadPage = () => {
           toast(messages.errors.unknownError, Infinity, {
             rightIcon: IconClose
           })
-          reportToSentry({
-            error: new Error(
+          console.error(
+            'First Buy Retry Failure',
+            new Error(
               'First buy retry failed. No mint address or pay amount found.'
-            ),
-            name: 'First Buy Retry Failure',
-            feature: Feature.FanClubs,
-            additionalInfo: {
-              errorMetadata,
-              formValues: sanitizeFormValuesForLogging(formValues)
-            }
-          })
+            )
+          )
         }
       } else {
         trackCoinCreationStarted(connectedWalletAddress, formValues)
@@ -632,29 +600,17 @@ export const LaunchpadPage = () => {
               console.warn(
                 'Failed to copy banner image, coin will be created without banner'
               )
-              reportToSentry({
-                error: new Error(
-                  'Failed to copy banner image from cover photo'
-                ),
-                name: 'Failed to Copy Banner Image',
-                feature: Feature.FanClubs,
-                level: ErrorLevel.Warning,
-                additionalInfo: {
-                  bannerImageUrl: defaultBannerImageUrl
-                }
-              })
+              console.error(
+                'Failed to Copy Banner Image',
+                new Error('Failed to copy banner image from cover photo')
+              )
             }
           } catch (error) {
             console.warn('Error copying banner image:', error)
-            reportToSentry({
-              error: error instanceof Error ? error : new Error(String(error)),
-              name: 'Error Copying Banner Image',
-              feature: Feature.FanClubs,
-              level: ErrorLevel.Warning,
-              additionalInfo: {
-                bannerImageUrl: defaultBannerImageUrl
-              }
-            })
+            console.error(
+              'Error Copying Banner Image',
+              error instanceof Error ? error : new Error(String(error))
+            )
           }
         }
 

@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { FanClubFeedItem, getFanClubFeedQueryKey } from './useFanClubFeed'
@@ -18,7 +18,7 @@ export type DeleteTextPostArgs = {
 }
 
 export const useDeleteTextPost = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -60,12 +60,7 @@ export const useDeleteTextPost = () => {
       })
     },
     onError: (error: Error, args) => {
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(toast({ content: 'There was an error deleting the post.' }))
       // Reset to server state
       queryClient.invalidateQueries({

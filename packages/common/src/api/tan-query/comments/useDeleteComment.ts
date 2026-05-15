@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID, ReplyComment } from '~/models'
+import { Comment, ID, ReplyComment } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { messages } from './types'
@@ -23,7 +23,7 @@ export type DeleteCommentArgs = {
 }
 
 export const useDeleteComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -100,12 +100,7 @@ export const useDeleteComment = () => {
 
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Toast standard error message
       dispatch(toast({ content: messages.mutationError('deleting') }))
       // Since this mutation handles sort data, its difficult to undo the optimistic update so we just re-load everything

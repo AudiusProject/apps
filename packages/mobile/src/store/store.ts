@@ -1,4 +1,3 @@
-import { ErrorLevel } from '@audius/common/models'
 import type { CommonState, RemoteConfigState } from '@audius/common/store'
 import {
   chatMiddleware,
@@ -24,7 +23,6 @@ import thunk from 'redux-thunk'
 
 import { queryClient } from 'app/services/query-client'
 import { audiusSdk } from 'app/services/sdk/audius-sdk'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import type { DrawersState } from './drawers/slice'
 import drawers from './drawers/slice'
@@ -82,12 +80,6 @@ const onSagaError = (
       timeout: errorRestartTimeout
     })
   )
-
-  reportToSentry({
-    level: ErrorLevel.Fatal,
-    error,
-    additionalInfo: errorInfo
-  })
 
   // Automatically restart the app if the session is longer
   // than 30 seconds. Don't want to restart for shorter sessions

@@ -44,8 +44,6 @@ import { ModalForm } from 'components/modal-form/ModalForm'
 import { audiusSdk } from 'services/audius-sdk'
 import { env } from 'services/env'
 import { getAssociatedTokenAccountOwner } from 'services/solana/solana'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 const messages = {
   title: 'Payout Wallet',
   body: 'Automatically send USDC earned on Audius to an external Solana wallet.',
@@ -310,10 +308,7 @@ export const PayoutWalletModal = NiceModal.create(() => {
         modal.hide()
       } catch (e) {
         setErrors({ address: 'Please try again later' })
-        await reportToSentry({
-          error: e as Error,
-          name: 'Payout Wallet: Error setting wallet'
-        })
+        await console.error('Payout Wallet: Error setting wallet', e as Error)
       }
       setIsSubmitting(false)
     },

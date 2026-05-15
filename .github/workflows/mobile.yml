@@ -501,11 +501,6 @@ jobs:
           cd packages/mobile/ios
           RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
 
-      - name: Install Sentry CLI
-        run: |
-          curl -sL https://sentry.io/get-cli/ | bash
-          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
-
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
@@ -559,9 +554,6 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
           cd packages/mobile/ios
           bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic.releasecandidate
@@ -888,11 +880,6 @@ jobs:
           cd packages/mobile/ios
           RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
 
-      - name: Install Sentry CLI
-        run: |
-          curl -sL https://sentry.io/get-cli/ | bash
-          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
-
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
@@ -946,9 +933,6 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
           cd packages/mobile/ios
           bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic

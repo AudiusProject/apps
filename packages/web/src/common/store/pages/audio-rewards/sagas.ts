@@ -8,7 +8,6 @@ import {
   ChallengeRewardID,
   SpecifierWithAmount,
   Name,
-  Feature,
   ChallengeName
 } from '@audius/common/models'
 import {
@@ -54,7 +53,6 @@ import {
   all
 } from 'typed-redux-saga'
 
-import { reportToSentry } from 'store/errors/reportToSentry'
 import { waitForRead } from 'utils/sagaHelpers'
 import {
   foregroundPollingDaemon,
@@ -358,17 +356,6 @@ function* claimSingleChallengeRewardAsync(
       )
       if (res.error instanceof Errors.AntiAbuseOracleAttestationError) {
         aaoError = res.error
-      } else {
-        yield* call(reportToSentry, {
-          error,
-          name: 'ClaimRewards',
-          additionalInfo: {
-            challengeId,
-            specifier: res.specifier,
-            amount: res.amount
-          },
-          feature: Feature.Rewards
-        })
       }
     }
     const errorMessage = 'Some specifiers failed to claim'

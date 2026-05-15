@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { track } from 'app/services/analytics'
 import { env } from 'app/services/env'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import { getFeatureEnabled } from './remote-config'
 import { remoteConfigInstance } from './remote-config/remote-config-instance'
@@ -29,7 +28,7 @@ export const audiusBackendInstance = audiusBackend({
   nativeMobile: true,
   recaptchaSiteKey: env.RECAPTCHA_SITE_KEY,
   recordAnalytics: track,
-  reportError: reportToSentry,
+  reportError: ({ error }) => console.error(error),
   registryAddress: env.REGISTRY_ADDRESS,
   entityManagerAddress: env.ENTITY_MANAGER_ADDRESS,
   remoteConfigInstance,
