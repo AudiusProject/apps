@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react'
 
 import { useUser } from '@audius/common/api'
 import {
-  CommentSectionProvider,
   useCurrentCommentSection,
   useDeleteComment,
   useUpdateCommentNotificationSetting,
@@ -238,8 +237,12 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
   }, [deleteComment, id, parentCommentId, toast])
 
   const handlePress = useCallback(() => {
-    setIsOpen(!isOpen)
-    setIsVisible(!isVisible)
+    // Always open on press; closing is driven by the drawer's onClose/onClosed
+    // callbacks. Toggling these from captured values let isOpen and isVisible
+    // drift out of sync when the drawer was swipe-closed mid-animation, after
+    // which subsequent taps rendered the drawer with isOpen=false (no slide-in).
+    setIsOpen(true)
+    setIsVisible(true)
 
     trackEvent(
       make({
@@ -247,7 +250,7 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
         commentId: id
       })
     )
-  }, [isOpen, isVisible, id])
+  }, [id])
 
   return (
     <>
@@ -262,14 +265,12 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
 
       <Portal hostName='DrawerPortal'>
         {isVisible ? (
-          <CommentSectionProvider entityId={entityId}>
-            <ActionDrawerWithoutRedux
-              rows={rows}
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
-              onClosed={() => setIsVisible(false)}
-            />
-          </CommentSectionProvider>
+          <ActionDrawerWithoutRedux
+            rows={rows}
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            onClosed={() => setIsVisible(false)}
+          />
         ) : null}
 
         {isFlagAndHideConfirmationVisible ? (
