@@ -1,8 +1,6 @@
 import React, { useCallback } from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 
 import {
   Box,
@@ -23,9 +21,6 @@ const HERO_SKELETON_COUNT = 1
 const GRID_SKELETON_COUNT = 4
 
 export const ContestsScreen = () => {
-  const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS
-  )
   const {
     data,
     isPending,
@@ -34,12 +29,11 @@ export const ContestsScreen = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
-  } = useAllRemixContests(undefined, { enabled: isContestsPageEnabled })
+  } = useAllRemixContests()
 
-  const contests = isContestsPageEnabled ? (data ?? []) : []
+  const contests = data ?? []
   const [heroTrackId, ...gridTrackIds] = contests
-  const showSkeletons =
-    isContestsPageEnabled && (isPending || (!isSuccess && !isError))
+  const showSkeletons = isPending || (!isSuccess && !isError)
   const showEmpty = isSuccess && contests.length === 0
 
   const handleEndReached = useCallback(() => {

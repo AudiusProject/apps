@@ -15,10 +15,8 @@ import {
   useUnfollowEvent,
   useUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 import { ShareSource, SquareSizes } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
   remixesPageSelectors,
@@ -45,7 +43,7 @@ import {
 } from '@audius/harmony'
 import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
-import { Navigate, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { TrackLineup } from 'components/lineup/TrackLineup'
@@ -263,9 +261,6 @@ const ContestPage = ({
   const navigate = useNavigate()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
 
-  const { isEnabled: isContestsEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.CONTESTS)
-
   const { data: originalTrackByPermalink } = useTrackByPermalink(
     handle && slug ? `/${handle}/${slug}` : null
   )
@@ -433,11 +428,6 @@ const ContestPage = ({
   // tab so submitters get the same pre-filled form regardless of
   // entry point.
   const handleEnterContest = useEnterContest(trackId)
-
-  // Flag gate
-  if (isFlagLoaded && !isContestsEnabled) {
-    return <Navigate to='/' replace />
-  }
 
   if (!track || !user) {
     return null

@@ -17,10 +17,8 @@ import {
   getProfileRepostsQueryKey
 } from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { commentsMessages } from '@audius/common/messages'
 import { Status } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -207,18 +205,17 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
   const profileBasePath = profilePage(handle)
 
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
   const { hasContest: profileHasContest } = useUserHasRemixContest(
-    isArtist && isContestsEnabled ? userId : null
+    isArtist ? userId : null
   )
-  const showContestsTab = isContestsEnabled && profileHasContest
+  const showContestsTab = profileHasContest
 
   // Determine which tab is active. The URL is the source of truth; activeTab
   // (from useProfilePage, derived from route params) drives the body render.
   const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
   // If a viewer hits /:handle/contests on a profile that doesn't qualify for
-  // the tab (flag off or host doesn't run any contest), fall back to the
-  // default so the body matches the (now hidden) tab list.
+  // the tab (host doesn't run any contest), fall back to the default so the
+  // body matches the (now hidden) tab list.
   const rawTab = activeTab ?? defaultTab
   const currentTab =
     rawTab === ProfilePageTabs.CONTESTS && !showContestsTab

@@ -95,7 +95,6 @@ export { default as IconCloudDownloadPaused } from '@audius/harmony/src/assets/i
 export { default as IconNotificationOn } from '@audius/harmony/src/assets/icons/NotificationOn.svg'
 export { default as IconTrophy } from '@audius/harmony/src/assets/icons/Trophy.svg'
 export { default as IconCosign } from '@audius/harmony/src/assets/icons/Cosign.svg'
-export { default as IconContestSign } from '@audius/harmony/src/assets/icons/ContestSign.svg'
 export { default as IconCloudDownloadQueued } from '@audius/harmony/src/assets/icons/CloudDownloadQueued.svg'
 export { default as IconPause } from '@audius/harmony/src/assets/icons/Pause.svg'
 export { default as IconTurntable } from '@audius/harmony/src/assets/icons/Turntable.svg'
