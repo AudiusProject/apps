@@ -52,6 +52,7 @@ import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/compon
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
+import { FeedFilterDrawer } from 'app/screens/feed-screen'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
@@ -115,6 +116,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
   TrendingFilter: TrendingCombinedFilterDrawer,
+  FeedFilter: FeedFilterDrawer,
   Overflow: OverflowMenuDrawer,
   SignOutConfirmation: SignOutConfirmationDrawer,
   AddToCollection: AddToCollectionDrawer,
