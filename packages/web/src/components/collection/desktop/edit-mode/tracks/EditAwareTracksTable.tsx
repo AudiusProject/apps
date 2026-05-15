@@ -6,6 +6,7 @@ import { TracksTable } from 'components/tracks-table'
 
 import { usePlaylistEditMode } from '../PlaylistEditModeContext'
 
+import styles from './EditAwareTracksTable.module.css'
 import { useTrackSelection } from './TrackSelectionContext'
 
 type TrackLike = { track_id?: number | null } & Record<string, unknown>
@@ -62,5 +63,21 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
     [isEditingThis, onClickRow, selection]
   )
 
-  return <TracksTable {...rest} onClickRow={handleClickRow} />
+  const rowClassNameAddition = useCallback(
+    (track: TrackLike) => {
+      if (!isEditingThis) return undefined
+      const id = track.track_id
+      if (typeof id !== 'number') return undefined
+      return selection.isSelected(id) ? styles.selected : undefined
+    },
+    [isEditingThis, selection]
+  )
+
+  return (
+    <TracksTable
+      {...rest}
+      onClickRow={handleClickRow}
+      rowClassNameAddition={rowClassNameAddition}
+    />
+  )
 }
