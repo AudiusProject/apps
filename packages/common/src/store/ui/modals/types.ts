@@ -121,6 +121,7 @@ export type Modals =
   | 'VerificationSuccess'
   | 'VerificationError'
   | 'CreatePlaylistModal'
+  | 'DuplicatePlaylistModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState

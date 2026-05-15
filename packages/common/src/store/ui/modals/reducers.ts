@@ -15,6 +15,7 @@ import { createChatModalReducer } from './create-chat-modal'
 import { createPlaylistModalReducer } from './create-playlist-modal'
 import { deleteTrackConfirmationModalReducer } from './delete-track-confirmation-modal'
 import { downloadTrackArchiveModalReducer } from './download-track-archive-modal'
+import { duplicatePlaylistModalReducer } from './duplicate-playlist-modal'
 import { earlyReleaseConfirmationModalReducer } from './early-release-confirmation-modal'
 import { editAccessConfirmationModalReducer } from './edit-access-confirmation-modal'
 import { externalWalletSignUpModalReducer } from './external-wallet-sign-up-modal'
@@ -94,7 +95,8 @@ const combinedReducers = combineReducers({
   SendTokensModal: sendTokensModalReducer,
   CoinSuccessModal: coinSuccessModalReducer,
   FanClubDetailsModal: fanClubDetailsModalReducer,
-  CreatePlaylistModal: createPlaylistModalReducer
+  CreatePlaylistModal: createPlaylistModalReducer,
+  DuplicatePlaylistModal: duplicatePlaylistModalReducer
 })
 
 /**
