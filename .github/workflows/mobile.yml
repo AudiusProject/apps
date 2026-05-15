@@ -191,16 +191,13 @@ jobs:
           fi
 
   # OTA Release: publish JS bundle updates when native app version is unchanged.
-  # Matrixed over platforms so iOS and Android publish in parallel.
+  # iOS and Android code-push run in parallel as background processes within
+  # one runner so the node_modules setup only happens once.
   mobile-ota-release:
-    name: Mobile OTA Release (CodePush, ${{ matrix.platform }})
+    name: Mobile OTA Release (CodePush)
     runs-on: ubuntu-latest
     needs: [mobile-install, mobile-version-check]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.mobile-version-check.outputs.version_unchanged == 'true') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.ota_channel == 'rc' || github.event.inputs.ota_channel == ''))
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ios, android]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -273,13 +270,13 @@ jobs:
             echo "channel=rc" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish OTA update (${{ matrix.platform }})
+      - name: Publish OTA update (iOS + Android in parallel)
         env:
           OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
           OTA_S3_PREFIX: mobile-ota
           OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
         run: |
-          set -euo pipefail
+          set -uo pipefail
           BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
           OTA_CHANNEL="${{ steps.ota-channel.outputs.channel }}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
@@ -288,29 +285,49 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
-          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ${{ matrix.platform }} --identifier "$OTA_CHANNEL" || true
 
-          npx code-push release \
-            --binary-version "$BINARY_VERSION" \
-            --app-version "$OTA_APP_VERSION" \
-            --platform ${{ matrix.platform }} \
-            --identifier "$OTA_CHANNEL" \
-            --entry-file index.js
+          publish_platform() {
+            local platform="$1"
+            npx code-push create-history --binary-version "$BINARY_VERSION" --platform "$platform" --identifier "$OTA_CHANNEL" || true
+            npx code-push release \
+              --binary-version "$BINARY_VERSION" \
+              --app-version "$OTA_APP_VERSION" \
+              --platform "$platform" \
+              --identifier "$OTA_CHANNEL" \
+              --entry-file index.js
+          }
+
+          publish_platform ios > ios.log 2>&1 &
+          IOS_PID=$!
+          publish_platform android > android.log 2>&1 &
+          ANDROID_PID=$!
+
+          wait "$IOS_PID"; IOS_STATUS=$?
+          wait "$ANDROID_PID"; ANDROID_STATUS=$?
+
+          echo "::group::iOS code-push output"
+          cat ios.log
+          echo "::endgroup::"
+          echo "::group::Android code-push output"
+          cat android.log
+          echo "::endgroup::"
+
+          if [[ $IOS_STATUS -ne 0 || $ANDROID_STATUS -ne 0 ]]; then
+            echo "iOS exit: $IOS_STATUS, Android exit: $ANDROID_STATUS"
+            exit 1
+          fi
 
   # OTA Release (Production): manual + environment approval gate.
-  # Matrixed over platforms so iOS and Android publish in parallel.
+  # iOS and Android code-push run in parallel as background processes within
+  # one runner so the node_modules setup only happens once.
   mobile-ota-release-production:
-    name: Mobile OTA Release (Production, ${{ matrix.platform }})
+    name: Mobile OTA Release (Production)
     runs-on: ubuntu-latest
     needs: [mobile-install, mobile-version-check]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.ota_channel == 'production'
     environment:
       name: mobile-production-ota
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [ios, android]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -374,13 +391,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Publish OTA update to production (${{ matrix.platform }})
+      - name: Publish OTA update to production (iOS + Android in parallel)
         env:
           OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
           OTA_S3_PREFIX: mobile-ota
           OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
         run: |
-          set -euo pipefail
+          set -uo pipefail
           BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
           OTA_CHANNEL="production"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
@@ -388,14 +405,37 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
-          npx code-push create-history --binary-version "$BINARY_VERSION" --platform ${{ matrix.platform }} --identifier "$OTA_CHANNEL" || true
 
-          npx code-push release \
-            --binary-version "$BINARY_VERSION" \
-            --app-version "$OTA_APP_VERSION" \
-            --platform ${{ matrix.platform }} \
-            --identifier "$OTA_CHANNEL" \
-            --entry-file index.js
+          publish_platform() {
+            local platform="$1"
+            npx code-push create-history --binary-version "$BINARY_VERSION" --platform "$platform" --identifier "$OTA_CHANNEL" || true
+            npx code-push release \
+              --binary-version "$BINARY_VERSION" \
+              --app-version "$OTA_APP_VERSION" \
+              --platform "$platform" \
+              --identifier "$OTA_CHANNEL" \
+              --entry-file index.js
+          }
+
+          publish_platform ios > ios.log 2>&1 &
+          IOS_PID=$!
+          publish_platform android > android.log 2>&1 &
+          ANDROID_PID=$!
+
+          wait "$IOS_PID"; IOS_STATUS=$?
+          wait "$ANDROID_PID"; ANDROID_STATUS=$?
+
+          echo "::group::iOS code-push output"
+          cat ios.log
+          echo "::endgroup::"
+          echo "::group::Android code-push output"
+          cat android.log
+          echo "::endgroup::"
+
+          if [[ $IOS_STATUS -ne 0 || $ANDROID_STATUS -ne 0 ]]; then
+            echo "iOS exit: $IOS_STATUS, Android exit: $ANDROID_STATUS"
+            exit 1
+          fi
 
   # iOS Release Candidate: Build and upload
   mobile-build-upload-releasecandidate-ios:
