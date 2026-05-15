@@ -102,8 +102,17 @@ export function editPlaylistFailed(
   return { type: EDIT_PLAYLIST_FAILED, error, params, metadata }
 }
 
-export function addTrackToPlaylist(trackId: ID, playlistId: ID) {
-  return { type: ADD_TRACK_TO_PLAYLIST, trackId, playlistId }
+export function addTrackToPlaylist(
+  trackId: ID,
+  playlistId: ID,
+  options?: { silent?: boolean }
+) {
+  return {
+    type: ADD_TRACK_TO_PLAYLIST,
+    trackId,
+    playlistId,
+    silent: options?.silent ?? false
+  }
 }
 
 export function addTrackToPlaylistFailed(
