@@ -12,16 +12,16 @@ import {
 } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
+import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
+import { useQueryContext } from '~/api/tan-query/utils'
+import { remixesPageActions } from '~/store/pages'
+
 import { QUERY_KEYS } from '../queryKeys'
 import { getTrackQueryKey } from '../tracks/useTrack'
 import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { getUserQueryKey } from '../users/useUser'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
-import { useQueryContext } from '~/api/tan-query/utils'
-import { remixesPageActions } from '~/store/pages'
 
 const DEFAULT_PAGE_SIZE = 10
 

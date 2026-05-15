@@ -182,8 +182,9 @@ describe('playback slice', () => {
         actions.removeFromQueue({ index: 1 })
       )
       expect(afterRemove.queue).toHaveLength(3)
-      expect(afterRemove.queue.find((t) => t.trackId === removedTrack.trackId))
-        .toBeUndefined()
+      expect(
+        afterRemove.queue.find((t) => t.trackId === removedTrack.trackId)
+      ).toBeUndefined()
       expect(afterRemove.shuffleOriginalQueue).toHaveLength(3)
       expect(
         afterRemove.shuffleOriginalQueue.find(

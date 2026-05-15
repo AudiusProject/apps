@@ -10,7 +10,6 @@ export * from './useFollowEvent'
 export * from './useRemixContest'
 export * from './useRemixContestWinners'
 export * from './useUserHasRemixContest'
-export * from './useUserRemixContests'
 
 // Mutations
 export * from './useCreateEvent'

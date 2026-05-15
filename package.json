@@ -56,7 +56,6 @@
     "mobile:example:upload": "cd packages/mobile/examples/upload && npx expo start",
     "EMBED======================================": "",
     "embed:prod": "npm run start:prod -w embed",
-    "embed:stage": "npm run start:stage -w embed",
     "embed:dev": "npm run start:dev -w embed",
     "HARMONY====================================": "",
     "harmony": "turbo run start --filter=@audius/harmony",
