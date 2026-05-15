@@ -10,7 +10,7 @@ import {
   FOR_YOU_INITIAL_PAGE_SIZE,
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
-import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
+import { Name, FeedTab } from '@audius/common/models'
 import { feedPageActions, feedPageSelectors } from '@audius/common/store'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -21,11 +21,11 @@ import { SuggestedFollows } from 'app/components/suggested-follows'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { make, track } from 'app/services/analytics'
 
-import { FeedFilters } from './FeedFilters'
+import { FeedFilterButton } from './FeedFilterButton'
 import { FeedTabs } from './FeedTabs'
 
 const { getFeedTab, getFeedFilter } = feedPageSelectors
-const { setFeedTab, setFeedFilter } = feedPageActions
+const { setFeedTab } = feedPageActions
 
 const messages = {
   header: 'Your Feed',
@@ -80,12 +80,17 @@ export const FeedScreen = () => {
     [dispatch]
   )
 
-  const handleSelectFilter = useCallback(
-    (filter: FeedFilter) => {
-      dispatch(setFeedFilter(filter))
-      track(make({ eventName: Name.FEED_CHANGE_VIEW, view: filter }))
-    },
-    [dispatch]
+  // Memoized so the header isn't a new function reference on every render —
+  // otherwise Screen's setOptions runs each parent re-render and React
+  // Navigation rebuilds the header, remounting AccountPictureHeader and
+  // re-firing the profile-picture image-fetch path.
+  const renderHeader = useCallback(
+    () => (
+      <MobileRootHeader title={messages.header} showDivider={false}>
+        {isForYou ? null : <FeedFilterButton />}
+      </MobileRootHeader>
+    ),
+    [isForYou]
   )
 
   const lineupProps = isForYou
@@ -115,20 +120,9 @@ export const FeedScreen = () => {
       }
 
   return (
-    <Screen
-      url='Feed'
-      header={() => (
-        <MobileRootHeader title={messages.header} showDivider={false} />
-      )}
-    >
+    <Screen url='Feed' header={renderHeader}>
       <ScreenContent>
         <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
-        {isForYou ? null : (
-          <FeedFilters
-            currentFilter={feedFilter}
-            onSelectFilter={handleSelectFilter}
-          />
-        )}
         <TrackLineup
           key={`feed-${feedTab}`}
           source='DISCOVER_FEED'
