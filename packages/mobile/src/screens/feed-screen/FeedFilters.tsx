@@ -1,18 +1,19 @@
+import { useCallback } from 'react'
+
 import { FeedFilter } from '@audius/common/models'
-import { ScrollView, View } from 'react-native'
+import { FilterButton, useTheme } from '@audius/harmony-native'
+import { View } from 'react-native'
 
-import { Flex, SelectablePill, useTheme } from '@audius/harmony-native'
-
-const filterLabels: Record<FeedFilter, string> = {
-  [FeedFilter.ALL]: 'All Posts',
-  [FeedFilter.ORIGINAL]: 'Original Posts',
-  [FeedFilter.REPOST]: 'Reposts'
+const messages = {
+  allPosts: 'All Posts',
+  originalPosts: 'Original Posts',
+  reposts: 'Reposts'
 }
 
-const filters: FeedFilter[] = [
-  FeedFilter.ALL,
-  FeedFilter.ORIGINAL,
-  FeedFilter.REPOST
+const filterOptions = [
+  { label: messages.allPosts, value: FeedFilter.ALL },
+  { label: messages.originalPosts, value: FeedFilter.ORIGINAL },
+  { label: messages.reposts, value: FeedFilter.REPOST }
 ]
 
 type FeedFiltersProps = {
@@ -25,36 +26,33 @@ export const FeedFilters = ({
   onSelectFilter
 }: FeedFiltersProps) => {
   const { spacing, color } = useTheme()
+
+  const handleChange = useCallback(
+    (value: string | undefined) => {
+      if (!value) return
+      onSelectFilter(value as FeedFilter)
+    },
+    [onSelectFilter]
+  )
+
   return (
     <View
       style={{
         backgroundColor: color.background.white,
-        paddingBottom: spacing.s
+        paddingHorizontal: spacing.l,
+        paddingBottom: spacing.s,
+        alignItems: 'flex-start'
       }}
     >
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: spacing.l }}
-      >
-        <Flex direction='row' alignItems='center' gap='s'>
-          {filters.map((filter) => (
-            <SelectablePill
-              key={filter}
-              type='radio'
-              size='small'
-              value={filter}
-              label={filterLabels[filter]}
-              isSelected={currentFilter === filter}
-              onChange={(value, isSelected) => {
-                if (!isSelected) return
-                onSelectFilter(value as FeedFilter)
-              }}
-              disableUnselectAnimation
-            />
-          ))}
-        </Flex>
-      </ScrollView>
+      <FilterButton
+        label={messages.allPosts}
+        value={currentFilter}
+        variant='replaceLabel'
+        onChange={handleChange}
+        options={filterOptions}
+        size='small'
+        disableSearch
+      />
     </View>
   )
 }
