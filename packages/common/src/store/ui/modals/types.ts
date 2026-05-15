@@ -119,6 +119,7 @@ export type Modals =
   | 'CoinSuccessModal'
   | 'VerificationSuccess'
   | 'VerificationError'
+  | 'CreatePlaylistModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState

@@ -12,6 +12,7 @@ import { coinflowWithdrawModalReducer } from './coinflow-withdraw-modal'
 import { connectedWalletsModalReducer } from './connected-wallets-modal'
 import { chatBlastModalReducer } from './create-chat-blast-modal'
 import { createChatModalReducer } from './create-chat-modal'
+import { createPlaylistModalReducer } from './create-playlist-modal'
 import { deleteTrackConfirmationModalReducer } from './delete-track-confirmation-modal'
 import { downloadTrackArchiveModalReducer } from './download-track-archive-modal'
 import { earlyReleaseConfirmationModalReducer } from './early-release-confirmation-modal'
@@ -92,7 +93,8 @@ const combinedReducers = combineReducers({
   ReceiveTokensModal: receiveTokensModalReducer,
   SendTokensModal: sendTokensModalReducer,
   CoinSuccessModal: coinSuccessModalReducer,
-  FanClubDetailsModal: fanClubDetailsModalReducer
+  FanClubDetailsModal: fanClubDetailsModalReducer,
+  CreatePlaylistModal: createPlaylistModalReducer
 })
 
 /**

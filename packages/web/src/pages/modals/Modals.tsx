@@ -6,6 +6,7 @@ import { CoinSuccessModal } from 'components/CoinSuccessModal'
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
+import { CreatePlaylistModal } from 'components/create-playlist-modal/CreatePlaylistModal'
 import EmbedModal from 'components/embed-modal/EmbedModal'
 import { FeatureFlagOverrideModal } from 'components/feature-flag-override-modal'
 import FirstUploadModal from 'components/first-upload-modal/FirstUploadModal'
@@ -37,7 +38,8 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   CommentSettings: CommentSettingsModal,
   BrowserPushPermissionConfirmation: BrowserPushConfirmationModal,
   CreateChatModal,
-  StripeOnRamp: StripeOnRampModal
+  StripeOnRamp: StripeOnRampModal,
+  CreatePlaylistModal
 }
 
 const commonModals = Object.entries(commonModalsMap) as [
