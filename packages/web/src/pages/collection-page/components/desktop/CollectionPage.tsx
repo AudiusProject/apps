@@ -24,6 +24,7 @@ import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
 import { PlaylistEditModeBar } from 'components/collection/desktop/edit-mode/PlaylistEditModeBar'
 import { PlaylistEditModeProvider } from 'components/collection/desktop/edit-mode/PlaylistEditModeContext'
+import { EditAwareTracksTable } from 'components/collection/desktop/edit-mode/tracks/EditAwareTracksTable'
 import { TrackBulkActionsBar } from 'components/collection/desktop/edit-mode/tracks/TrackBulkActionsBar'
 import { TrackHistoryProvider } from 'components/collection/desktop/edit-mode/tracks/TrackHistoryContext'
 import { TrackSelectionProvider } from 'components/collection/desktop/edit-mode/tracks/TrackSelectionContext'
@@ -31,7 +32,6 @@ import FilterInput from 'components/filter-input/FilterInput'
 import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
-import { TracksTable } from 'components/tracks-table'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { computeCollectionMetadataProps } from 'pages/collection-page/store/utils'
@@ -349,7 +349,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
                 <NoSearchResultsContent />
               ) : (
                 <div className={styles.tableWrapper}>
-                  <TracksTable
+                  <EditAwareTracksTable
+                    collectionId={playlistId!}
                     // @ts-ignore
                     columns={tracksTableColumns}
                     wrapperClassName={styles.tracksTableWrapper}
