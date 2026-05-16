@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { messages } from './types'
@@ -22,7 +22,7 @@ export type MuteUserArgs = {
 }
 
 export const useMuteUser = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
 
@@ -94,12 +94,7 @@ export const useMuteUser = () => {
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Generic toast error
       dispatch(toast({ content: messages.muteUserError }))
 

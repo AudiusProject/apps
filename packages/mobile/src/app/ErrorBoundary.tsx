@@ -1,13 +1,11 @@
 import type { ReactNode } from 'react'
 import { PureComponent, useEffect } from 'react'
 
-import { ErrorLevel } from '@audius/common/models'
 import type { Nullable } from '@audius/common/utils'
 
 import { useToast } from 'app/hooks/useToast'
 import { make, track } from 'app/services/analytics'
 import { EventNames } from 'app/types/analytics'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 type ErrorToastProps = {
   error: Nullable<string>
@@ -39,11 +37,7 @@ class ErrorBoundary extends PureComponent<ErrorBoundaryProps> {
   componentDidCatch(error: Error | null, errorInfo: any) {
     // On catch set the error state so it triggers a toast
     this.setState({ error: error?.message })
-    reportToSentry({
-      level: ErrorLevel.Fatal,
-      error: error ?? new Error('Unknown error caught by'),
-      additionalInfo: errorInfo
-    })
+    console.error(error ?? new Error('Unknown error caught by'), errorInfo)
     track(
       make({
         eventName: EventNames.APP_ERROR,

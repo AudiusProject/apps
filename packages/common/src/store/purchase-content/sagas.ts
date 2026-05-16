@@ -29,7 +29,6 @@ import {
 import { isPurchaseableAlbum, PurchaseableContentMetadata } from '~/hooks'
 import { Collection } from '~/models'
 import { FavoriteSource, Name } from '~/models/Analytics'
-import { ErrorLevel, Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import {
   PurchaseAccess,
@@ -632,7 +631,6 @@ function* doStartPurchaseContentFlow({
   }
 }: ReturnType<typeof startPurchaseContentFlow>) {
   const usdcConfig = yield* call(getBuyUSDCRemoteConfig)
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
@@ -886,12 +884,7 @@ function* doStartPurchaseContentFlow({
       return
     }
 
-    yield* call(reportToSentry, {
-      level: ErrorLevel.Error,
-      error,
-      additionalInfo: { contentId, contentType },
-      feature: Feature.Purchase
-    })
+    console.error('Purchase failed', error, { contentId, contentType })
     yield* put(purchaseContentFlowFailed({ error }))
     yield* put(updateGatedContentStatus({ contentId, status: 'LOCKED' }))
     yield* call(

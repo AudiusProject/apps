@@ -47,7 +47,6 @@ import { TextAreaField, TextField } from 'components/form-fields'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import {
   ALLOWED_IMAGE_FILE_TYPES,
   resizeImage
@@ -346,10 +345,10 @@ export const EditCoinDetailsPage = () => {
       const previewUrl = URL.createObjectURL(processedFile)
       setBannerPreviewUrl(previewUrl)
     } catch (error) {
-      reportToSentry({
-        error: error instanceof Error ? error : new Error(error as string),
-        name: 'Coin Banner Upload Processing Error'
-      })
+      console.error(
+        'Coin Banner Upload Processing Error',
+        error instanceof Error ? error : new Error(error as string)
+      )
       setBannerError(bannerMessages.errors.processingError)
     } finally {
       setIsProcessingBanner(false)
@@ -389,20 +388,7 @@ export const EditCoinDetailsPage = () => {
           ? e.message
           : 'Failed to update coin details. Please try again.'
       setSubmitError(errorMessage)
-      await reportToSentry({
-        name: 'EditCoinDetails',
-        error:
-          e instanceof Error
-            ? e
-            : new Error(
-                e instanceof Object && 'message' in e
-                  ? (e.message as string)
-                  : 'Unknown Error'
-              ),
-        additionalInfo: {
-          raw: e
-        }
-      })
+      await console.error('EditCoinDetails', e instanceof Error)
       throw e // Re-throw to let Formik handle the error
     }
   }

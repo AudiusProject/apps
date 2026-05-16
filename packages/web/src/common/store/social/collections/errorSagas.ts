@@ -1,4 +1,3 @@
-import { Feature } from '@audius/common/models'
 import { collectionsSocialActions as socialCollectionActions } from '@audius/common/store'
 
 import { createErrorSagas } from 'utils/errorSagas'
@@ -18,8 +17,7 @@ const errorSagas = createErrorSagas<CollectionErrors>({
   getAdditionalInfo: (action: CollectionErrors) => ({
     error: action.error,
     collectionId: action.collectionId
-  }),
-  feature: Feature.Social
+  })
 })
 
 export default errorSagas

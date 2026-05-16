@@ -5,19 +5,12 @@ import { takeEvery, put } from 'redux-saga/effects'
 import { make } from 'common/store/analytics/actions'
 
 import * as errorActions from './actions'
-import { reportToSentry } from './reportToSentry'
 const { toast } = toastActions
 
 function* handleError(action: errorActions.HandleErrorAction) {
   console.debug(`Handling error: ${action.message}`)
   if (action.shouldReport) {
-    reportToSentry({
-      level: action.level,
-      additionalInfo: action.additionalInfo,
-      error: new Error(action.message),
-      name: action.name,
-      feature: action.feature
-    })
+    console.error(action.name ?? 'Error', action.message, action.additionalInfo)
     yield put(
       make(Name.APP_ERROR, {
         errorMessage: action?.message ?? 'Unknown Error'

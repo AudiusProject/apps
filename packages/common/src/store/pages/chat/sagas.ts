@@ -26,7 +26,6 @@ import {
   queryUsers
 } from '~/api'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Status } from '~/models/Status'
 import { inboxUnavailableModalActions } from '~/store/ui/modals'
@@ -126,12 +125,7 @@ function* doFetchUnreadMessagesCount() {
     )
   } catch (e) {
     yield* put(fetchUnreadMessagesCountFailed())
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -195,12 +189,7 @@ export function* doFetchLatestChats() {
     )
   } catch (e) {
     yield* put(fetchMoreChatsFailed())
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -223,12 +212,7 @@ function* doFetchMoreChats() {
     yield* put(fetchMoreChatsSucceeded(response))
   } catch (e) {
     yield* put(fetchMoreChatsFailed())
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -288,15 +272,7 @@ function* doFetchLatestMessages(
     )
   } catch (e) {
     yield* put(fetchMoreMessagesFailed({ chatId }))
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -350,15 +326,7 @@ function* doFetchMoreMessages(action: ReturnType<typeof fetchMoreMessages>) {
     )
   } catch (e) {
     yield* put(fetchMoreMessagesFailed({ chatId }))
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -398,18 +366,7 @@ function* doSetMessageReaction(action: ReturnType<typeof setMessageReaction>) {
     )
   } catch (e) {
     yield* put(setMessageReactionFailed(action.payload))
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId,
-        messageId,
-        reaction,
-        userId
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
     yield* call(
       track,
       make({
@@ -480,16 +437,8 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
         })
       )
     }
-    const reportToSentry = yield* getContext('reportToSentry')
     if (!isForbiddenError) {
-      reportToSentry({
-        name: 'Chats',
-        error: e as Error,
-        additionalInfo: {
-          userIds
-        },
-        feature: Feature.Chats
-      })
+      console.error('Chats', e as Error)
     }
     yield* call(track, make({ eventName: Name.CREATE_CHAT_FAILURE }))
   }
@@ -557,17 +506,7 @@ function* doCreateChatBlast(action: ReturnType<typeof createChatBlast>) {
         content: 'Something went wrong. Failed to create chat blast.'
       })
     )
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        audience,
-        audienceContentId,
-        audienceContentType
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
 
     yield* call(
       track,
@@ -596,15 +535,7 @@ function* doMarkChatAsRead(action: ReturnType<typeof markChatAsRead>) {
     yield* put(markChatAsReadSucceeded({ chatId }))
   } catch (e) {
     yield* put(markChatAsReadFailed({ chatId }))
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -626,12 +557,7 @@ function* doMarkAllChatsAsRead() {
         content: 'Failed to mark messages as read.'
       })
     )
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -717,16 +643,7 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
         }
       }
     }
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId,
-        messageId: messageIdToUse
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
     yield* call(track, make({ eventName: Name.SEND_MESSAGE_FAILURE }))
   }
 }
@@ -762,12 +679,7 @@ function* doFetchBlockees() {
       })
     )
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -784,12 +696,7 @@ function* doFetchBlockers() {
       })
     )
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -808,12 +715,7 @@ function* doBlockUser(action: ReturnType<typeof blockUser>) {
       make({ eventName: Name.BLOCK_USER_SUCCESS, blockedUserId: userId })
     )
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
     yield* call(
       track,
       make({ eventName: Name.BLOCK_USER_FAILURE, blockedUserId: userId })
@@ -830,12 +732,7 @@ function* doUnblockUser(action: ReturnType<typeof unblockUser>) {
     })
     yield* put(fetchBlockees())
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -862,12 +759,7 @@ function* doFetchPermissions(action: ReturnType<typeof fetchPermissions>) {
       })
     )
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -891,17 +783,7 @@ function* doFetchLinkUnfurlMetadata(
       fetchLinkUnfurlSucceeded({ chatId, messageId, unfurlMetadata: data[0] })
     )
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId,
-        messageId,
-        href
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
   }
 }
 
@@ -922,32 +804,15 @@ function* doDeleteChat(action: ReturnType<typeof deleteChat>) {
     yield* put(deleteChatSucceeded({ chatId }))
     yield* call(track, make({ eventName: Name.DELETE_CHAT_SUCCESS }))
   } catch (e) {
-    const reportToSentry = yield* getContext('reportToSentry')
-    reportToSentry({
-      name: 'Chats',
-      error: e as Error,
-      additionalInfo: {
-        chatId
-      },
-      feature: Feature.Chats
-    })
+    console.error('Chats', e as Error)
     yield* call(track, make({ eventName: Name.DELETE_CHAT_FAILURE }))
   }
 }
 
 function* doLogError({ payload: { error } }: ReturnType<typeof logError>) {
   const { track, make } = yield* getContext('analytics')
-  const reportToSentry = yield* getContext('reportToSentry')
-  const { code, url } = error
-  reportToSentry({
-    name: 'Chats',
-    error,
-    additionalInfo: {
-      code,
-      url
-    },
-    feature: Feature.Chats
-  })
+  const { code } = error
+  console.error(error)
   yield* call(track, make({ eventName: Name.CHAT_WEBSOCKET_ERROR, code }))
 }
 

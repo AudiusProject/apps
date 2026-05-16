@@ -16,7 +16,6 @@ import {
   type QueryContextType
 } from '~/api/tan-query/utils/QueryContext'
 import { Chain, ID } from '~/models'
-import { Feature } from '~/models/ErrorReporting'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -43,7 +42,7 @@ export const getWalletAudioBalanceQueryKey = ({
 
 type FetchAudioBalanceContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'audiusBackend' | 'reportToSentry'
+  'audiusSdk' | 'audiusBackend'
 >
 
 const getWalletAudioBalanceQueryFn =
@@ -54,7 +53,7 @@ const getWalletAudioBalanceQueryFn =
     ReturnType<typeof getWalletAudioBalanceQueryKey>
   >) => {
     const [_ignored, chain, address, { includeStaked }] = queryKey
-    const { audiusSdk, audiusBackend, reportToSentry } = context
+    const { audiusSdk, audiusBackend } = context
     try {
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
@@ -81,12 +80,7 @@ const getWalletAudioBalanceQueryFn =
         return AUDIO(wAUDIO(BigInt(wAudioSolBalance.toString()))).value
       }
     } catch (error) {
-      reportToSentry({
-        error: toErrorWithMessage(error),
-        name: 'AudioBalanceFetchError',
-        feature: Feature.TanQuery,
-        additionalInfo: { address, chain }
-      })
+      console.error('AudioBalanceFetchError', toErrorWithMessage(error))
       throw error
     }
   }

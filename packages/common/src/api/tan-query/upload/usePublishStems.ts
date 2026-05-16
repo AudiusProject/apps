@@ -15,7 +15,7 @@ const { updateProgress } = uploadActions
 
 type PublishStemsContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
+  'audiusSdk' | 'analytics' | 'dispatch'
 > & {
   userId: number
 }

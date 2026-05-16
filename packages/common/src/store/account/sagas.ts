@@ -19,7 +19,7 @@ import {
   getWalletAccountSaga
 } from '~/api'
 import { getAccountStatusQueryKey } from '~/api/tan-query/users/account/useAccountStatus'
-import { AccountUserMetadata, ErrorLevel, Status, UserMetadata } from '~/models'
+import { AccountUserMetadata, Status, UserMetadata } from '~/models'
 import { getContext } from '~/store/effects'
 import { chatActions } from '~/store/pages/chat'
 import { UPLOAD_TRACKS_SUCCEEDED } from '~/store/upload/actions'
@@ -84,28 +84,6 @@ function* handleUploadTrack() {
   yield* put(setHasTracks(true))
 }
 
-/**
- * Sets the sentry user so that alerts are tied to a user
- */
-function* setSentryUser(
-  user: Pick<UserMetadata, 'user_id' | 'handle'>,
-  traits: Record<string, unknown>
-) {
-  const sentry = yield* getContext('sentry')
-  if (traits.isVerified) {
-    sentry.setTag('isVerified', `${traits.isVerified}`)
-  }
-  if (traits.managerUserId) {
-    sentry.setTag('isManagerMode', 'true')
-  }
-  const scope = sentry.getCurrentScope()
-  scope.setUser({
-    id: `${user.user_id}`,
-    username: user.handle,
-    ...traits
-  })
-}
-
 function* initializeMetricsForUser({
   accountUser,
   web3WalletAddress
@@ -165,7 +143,6 @@ function* initializeMetricsForUser({
     }
 
     yield* call([analytics, analytics.identify], traits)
-    yield* call(setSentryUser, accountUser, traits)
   }
 }
 
@@ -177,7 +154,6 @@ export function* fetchAccountAsync({
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const remoteConfigInstance = yield* getContext('remoteConfigInstance')
   const localStorage = yield* getContext('localStorage')
-  const reportToSentry = yield* getContext('reportToSentry')
   const sdk = yield* getSDK()
   const queryClient = yield* getContext('queryClient')
 
@@ -202,10 +178,7 @@ export function* fetchAccountAsync({
     wallet = accountWalletAddressOverride ?? web3WalletAddress
   } catch (e) {
     if (!(e instanceof HedgehogWalletNotFoundError)) {
-      yield* call(reportToSentry, {
-        name: 'FetchAccountAsync',
-        error: e as Error
-      })
+      console.error('FetchAccountAsync', e)
     }
   }
   if (!wallet || !web3WalletAddress) {
@@ -261,10 +234,7 @@ export function* fetchAccountAsync({
     try {
       yield* call(recordIPIfNotRecent, user.handle)
     } catch (e) {
-      yield* call(reportToSentry, {
-        name: 'FetchAccountAsync',
-        error: e as Error
-      })
+      console.error('FetchAccountAsync', e)
     }
   }
 
@@ -315,7 +285,6 @@ export function* fetchAccountAsync({
 
 function* fetchLocalAccountAsync() {
   const localStorage = yield* getContext('localStorage')
-  const reportToSentry = yield* getContext('reportToSentry')
   const sdk = yield* getSDK()
   const queryClient = yield* getContext('queryClient')
 
@@ -345,10 +314,7 @@ function* fetchLocalAccountAsync() {
     wallet = accountWalletAddressOverride ?? web3WalletAddress
   } catch (e) {
     if (!(e instanceof HedgehogWalletNotFoundError)) {
-      yield* call(reportToSentry, {
-        name: 'FetchLocalAccountAsync',
-        error: e as Error
-      })
+      console.error('FetchLocalAccountAsync', e)
     }
   }
 
@@ -428,21 +394,15 @@ function* recordIPIfNotRecent(handle: string): SagaIterator {
 function* associateTwitterAccount(action: ReturnType<typeof twitterLogin>) {
   const { uuid: twitterId, profile } = action.payload
   const identityService = yield* getContext('identityService')
-  const reportToSentry = yield* getContext('reportToSentry')
   const queryClient = yield* getContext('queryClient')
   const userId = yield* call(queryCurrentUserId)
   const accountUser = yield* call(queryAccountUser)
   const handle = accountUser?.handle
   if (!userId || !handle) {
-    reportToSentry({
-      error: new Error('Missing userId or handle'),
-      name: 'Failed to associate Twitter Account',
-      additionalInfo: {
-        handle,
-        userId,
-        twitterId
-      }
-    })
+    console.error(
+      'Failed to associate Twitter Account',
+      new Error('Missing userId or handle')
+    )
     return
   }
 
@@ -464,36 +424,22 @@ function* associateTwitterAccount(action: ReturnType<typeof twitterLogin>) {
     }
   } catch (err) {
     const error = err instanceof Error ? err : new Error(err as string)
-    reportToSentry({
-      error,
-      name: 'Failed to associate Twitter Account',
-      additionalInfo: {
-        handle,
-        userId,
-        twitterId
-      }
-    })
+    console.error(error)
   }
 }
 
 function* associateInstagramAccount(action: ReturnType<typeof instagramLogin>) {
   const { uuid: instagramId, profile } = action.payload
   const identityService = yield* getContext('identityService')
-  const reportToSentry = yield* getContext('reportToSentry')
   const queryClient = yield* getContext('queryClient')
   const userId = yield* call(queryCurrentUserId)
   const accountUser = yield* call(queryAccountUser)
   const handle = accountUser?.handle
   if (!userId || !handle) {
-    reportToSentry({
-      error: new Error('Missing userId or handle'),
-      name: 'Failed to associate Instagram Account',
-      additionalInfo: {
-        handle,
-        userId,
-        instagramId
-      }
-    })
+    console.error(
+      'Failed to associate Instagram Account',
+      new Error('Missing userId or handle')
+    )
     return
   }
 
@@ -515,36 +461,22 @@ function* associateInstagramAccount(action: ReturnType<typeof instagramLogin>) {
     }
   } catch (err) {
     const error = err instanceof Error ? err : new Error(err as string)
-    reportToSentry({
-      error,
-      name: 'Failed to associate Instagram Account',
-      additionalInfo: {
-        handle,
-        userId,
-        instagramId
-      }
-    })
+    console.error(error)
   }
 }
 
 function* associateTikTokAccount(action: ReturnType<typeof tikTokLogin>) {
   const { uuid: tikTokId, profile } = action.payload
   const identityService = yield* getContext('identityService')
-  const reportToSentry = yield* getContext('reportToSentry')
   const queryClient = yield* getContext('queryClient')
   const userId = yield* call(queryCurrentUserId)
   const accountUser = yield* call(queryAccountUser)
   const handle = accountUser?.handle
   if (!userId || !handle) {
-    reportToSentry({
-      error: new Error('Missing userId or handle'),
-      name: 'Failed to associate TikTok Account',
-      additionalInfo: {
-        handle,
-        userId,
-        tikTokId
-      }
-    })
+    console.error(
+      'Failed to associate TikTok Account',
+      new Error('Missing userId or handle')
+    )
     return
   }
 
@@ -566,15 +498,7 @@ function* associateTikTokAccount(action: ReturnType<typeof tikTokLogin>) {
     }
   } catch (err) {
     const error = err instanceof Error ? err : new Error(err as string)
-    reportToSentry({
-      error,
-      name: 'Failed to associate TikTok Account',
-      additionalInfo: {
-        handle,
-        userId,
-        tikTokId
-      }
-    })
+    console.error(error)
   }
 }
 
@@ -596,12 +520,9 @@ function* watchFetchAccountFailed() {
     fetchAccountFailed.type,
     function* (action: ReturnType<typeof fetchAccountFailed>) {
       const userId = yield* call(queryCurrentUserId)
-      const reportToSentry = yield* getContext('reportToSentry')
       if (userId) {
-        yield* call(reportToSentry, {
-          level: ErrorLevel.Error,
-          error: new Error(`Fetch account failed: ${action.payload.reason}`),
-          additionalInfo: { userId }
+        console.error(`Fetch account failed: ${action.payload.reason}`, {
+          userId
         })
       }
     }

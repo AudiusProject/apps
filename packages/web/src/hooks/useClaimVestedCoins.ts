@@ -6,7 +6,6 @@ import {
   useQueryContext,
   QUERY_KEYS
 } from '@audius/common/api'
-import { Feature } from '@audius/common/models'
 import type { UserCoinWithAccounts } from '@audius/sdk'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
@@ -17,8 +16,6 @@ import {
 } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 export type UseClaimVestedCoinsParams = {
   tokenMint: string
   externalWalletAddress: string
@@ -124,14 +121,7 @@ export const useClaimVestedCoins = (
     },
     ...options,
     onError: (error, params) => {
-      reportToSentry({
-        error,
-        feature: Feature.FanClubs,
-        name: 'Fan club vested coins claim error',
-        additionalInfo: {
-          ...params
-        }
-      })
+      console.error(error)
       options?.onError?.(error, params, undefined)
     },
     onSuccess: (data: ClaimVestedCoinsResult, variables, context) => {

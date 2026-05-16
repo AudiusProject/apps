@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataListFromSDK } from '~/adapters/user'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
@@ -34,7 +34,7 @@ export const useEventFollowers = (
   { eventId, limit = DEFAULT_LIMIT }: UseEventFollowersArgs,
   options?: QueryOptions
 ) => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
 
@@ -54,11 +54,7 @@ export const useEventFollowers = (
         if (users.length) primeUserData({ users, queryClient })
         return users.map((u) => u.user_id)
       } catch (error) {
-        reportToSentry({
-          error: error as Error,
-          name: 'Events',
-          feature: Feature.Events
-        })
+        console.error('Events', error as Error)
         return []
       }
     },

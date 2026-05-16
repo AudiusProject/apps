@@ -23,7 +23,6 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import Drawer from 'components/drawer/Drawer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import { NEW_WALLET_CONNECTED_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 
 import {
@@ -113,20 +112,7 @@ export const ConnectedWalletsModal = NiceModal.create(() => {
         toast(messages.walletAlreadyAdded)
       } else {
         toast(messages.error)
-        await reportToSentry({
-          name: 'ConnectWallet',
-          error:
-            e instanceof Error
-              ? e
-              : new Error(
-                  e instanceof Object && 'message' in e
-                    ? (e.message as string)
-                    : 'Unknown Error'
-                ),
-          additionalInfo: {
-            raw: e
-          }
-        })
+        await console.error('ConnectWallet', e instanceof Error)
       }
     },
     [toast]

@@ -1,12 +1,11 @@
 import { useRef, useState } from 'react'
 
 import { launchpadMessages } from '@audius/common/messages'
-import { ErrorLevel, Feature, LaunchpadFormValues } from '@audius/common/models'
+import { LaunchpadFormValues } from '@audius/common/models'
 import { Flex, Paper, Text } from '@audius/harmony'
 import { useFormikContext } from 'formik'
 
 import { useFormImageUrl } from 'hooks/useFormImageUrl'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import {
   resizeImage,
   ALLOWED_IMAGE_FILE_TYPES
@@ -110,12 +109,10 @@ export const SetupPage = ({ onContinue, onBack }: SetupPageProps) => {
       setFieldValue('coinImage', processedFile)
       // Hook will automatically create blob URL from processed file
     } catch (error) {
-      reportToSentry({
-        error: error instanceof Error ? error : new Error(error as string),
-        name: 'Launchpad Image Upload Processing Error',
-        feature: Feature.FanClubs,
-        level: ErrorLevel.Warning // not worth alerting on here
-      })
+      console.error(
+        'Launchpad Image Upload Processing Error',
+        error instanceof Error ? error : new Error(error as string)
+      )
       setImageError(messages.errors.processingError)
     } finally {
       setIsProcessingImage(false)

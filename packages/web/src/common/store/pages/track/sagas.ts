@@ -7,8 +7,7 @@ import {
   queryTrack,
   updateTrackData
 } from '@audius/common/api'
-import { Feature } from '@audius/common/models'
-import { getContext, getSDK, trackPageActions } from '@audius/common/store'
+import { getSDK, trackPageActions } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { call, takeEvery } from 'typed-redux-saga'
@@ -70,13 +69,10 @@ function* watchTrackPageMakePublic() {
       } catch (error) {
         // Roll back the optimistic update.
         yield* call(updateTrackData, [track])
-        const reportToSentry = yield* getContext('reportToSentry')
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(String(error)),
-          name: 'Make Track Public',
-          additionalInfo: { trackId },
-          feature: Feature.Edit
-        })
+        console.error(
+          'Make Track Public',
+          error instanceof Error ? error : new Error(String(error))
+        )
       }
     }
   )

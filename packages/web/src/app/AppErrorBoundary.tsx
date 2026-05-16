@@ -1,6 +1,5 @@
 import { ReactNode, useCallback } from 'react'
 
-import { ErrorLevel } from '@audius/common/models'
 import { ErrorBoundary, ErrorBoundaryProps } from 'react-error-boundary'
 import { useDispatch } from 'react-redux'
 
@@ -22,8 +21,7 @@ export const AppErrorBoundary = ({ children }: AppErrorBoundaryProps) => {
           name: 'ReactErrorBoundary',
           message: error.message,
           shouldRedirect: true,
-          additionalInfo: errorInfo,
-          level: ErrorLevel.Fatal
+          additionalInfo: errorInfo
         })
       )
     },

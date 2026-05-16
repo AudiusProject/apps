@@ -20,7 +20,7 @@ import { useFanClub, getFanClubQueryKey } from './useFanClub'
 /**
  * Function to check if a coin ticker is available for use.
  * Returns true if available, false if taken.
- * Handles 404 errors gracefully without reporting them to Sentry.
+ * Swallows 404 errors so they are treated as "available".
  */
 export const fetchCoinTickerAvailability = async (
   ticker: string,

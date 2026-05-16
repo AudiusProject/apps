@@ -10,7 +10,6 @@ import {
   SwapTokensResult,
   getConnectedWalletsQueryOptions
 } from '@audius/common/api'
-import { ErrorLevel, Feature } from '@audius/common/models'
 import {
   getJupiterQuoteByMintWithRetry,
   jupiterInstance
@@ -28,8 +27,6 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 type BaseSwapParams = {
   walletAddress: string
 }
@@ -631,10 +628,8 @@ export const useExternalWalletSwap = () => {
         // Determine error type based on progress
         let errorType = SwapErrorType.UNKNOWN
         let errorStage = 'UNKNOWN'
-        let userCancelled = false
 
         if (errorMessage.includes('User rejected')) {
-          userCancelled = true
           hookProgress.userCancelled = true
           errorType = SwapErrorType.WALLET_ERROR
           errorStage = 'USER_REJECTED'
@@ -652,18 +647,10 @@ export const useExternalWalletSwap = () => {
           errorStage = 'SENDING_TRANSACTION'
         }
 
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(errorMessage),
-          level: ErrorLevel.Error,
-          feature: Feature.FanClubs,
-          name: 'External Wallet Swap Error',
-          additionalInfo: {
-            ...params,
-            progress: hookProgress,
-            errorStage,
-            userCancelled
-          }
-        })
+        console.error(
+          'External Wallet Swap Error',
+          error instanceof Error ? error : new Error(errorMessage)
+        )
 
         return {
           status: SwapStatus.ERROR,

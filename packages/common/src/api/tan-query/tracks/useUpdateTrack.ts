@@ -10,7 +10,6 @@ import { trackMetadataForUploadToSdk } from '~/adapters/track'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { Track, UserTrackMetadata } from '~/models'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import {
   TrackAccessType,
@@ -103,7 +102,7 @@ const applyEditTrackFormatting = (
 }
 
 export const useUpdateTrack = () => {
-  const { audiusSdk, reportToSentry, analytics } = useQueryContext()
+  const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const store = useStore()
@@ -148,12 +147,7 @@ export const useUpdateTrack = () => {
           ethAddress,
           recordAnalytics: analytics.track
         }).catch((error) => {
-          reportToSentry({
-            error,
-            additionalInfo: { trackId, userId, ethAddress },
-            feature: Feature.Edit,
-            name: 'Ensure USDC userbank on track edit'
-          })
+          console.error(error)
         })
       }
 
@@ -334,7 +328,7 @@ export const useUpdateTrack = () => {
         )
       }
     },
-    onError: (error, { trackId, metadata }, context?: MutationContext) => {
+    onError: (error, { trackId }, context?: MutationContext) => {
       // If the mutation fails, roll back track data
       if (context?.previousTrack) {
         primeTrackData({
@@ -370,16 +364,7 @@ export const useUpdateTrack = () => {
         })
       )
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          trackId,
-          userId,
-          metadata
-        },
-        feature: Feature.Edit,
-        name: 'Edit Track'
-      })
+      console.error(error)
     }
   })
 }

@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 import { useAppContext } from '~/context/appContext'
 import { Name, FollowSource } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { UserMetadata } from '~/models/User'
 import { removeFolloweeId } from '~/store/gated-content/slice'
@@ -25,7 +24,7 @@ type MutationContext = {
 }
 
 export const useUnfollowUser = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const {
@@ -104,11 +103,7 @@ export const useUnfollowUser = () => {
 
       return { previousUser }
     },
-    onError: (
-      error,
-      { followeeUserId },
-      context: MutationContext | undefined
-    ) => {
+    onError: (error, _args, context: MutationContext | undefined) => {
       const { previousUser } = context ?? {}
 
       if (previousUser) {
@@ -119,14 +114,7 @@ export const useUnfollowUser = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          followeeUserId
-        },
-        feature: Feature.Social,
-        name: 'Unfollow User'
-      })
+      console.error(error)
     }
   })
 }

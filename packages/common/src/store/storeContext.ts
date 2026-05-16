@@ -13,7 +13,6 @@ import {
   AnalyticsEvent,
   IdentifyTraits,
   LineupState,
-  ReportToSentryArgs,
   Track
 } from '../models'
 import { AudioPlayer } from '../services/audio-player'
@@ -68,11 +67,6 @@ export type CommonStoreContext = {
   ) => (state: CommonState) => LineupState<Track>
   audioPlayer: AudioPlayer
   nftClient: null
-  sentry: {
-    setTag: (key: string, value: string) => void
-    getCurrentScope: () => { setUser: (user: any) => void }
-  }
-  reportToSentry: (args: ReportToSentryArgs) => void
   trackDownload: TrackDownload
   instagramAppId?: string
   instagramRedirectUrl?: string

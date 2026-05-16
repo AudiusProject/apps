@@ -38,8 +38,7 @@ export type SendCoinsResult = {
  */
 export const useSendCoins = ({ mint }: { mint: string }) => {
   const queryClient = useQueryClient()
-  const { audiusBackend, audiusSdk, reportToSentry, analytics, env } =
-    useQueryContext()
+  const { audiusBackend, audiusSdk, analytics, env } = useQueryContext()
   const { data: walletAddresses } = useWalletAddresses()
   const { data: currentUser } = useCurrentAccountUser()
 
@@ -203,16 +202,10 @@ export const useSendCoins = ({ mint }: { mint: string }) => {
         }
       }
 
-      if (reportToSentry) {
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(error as string),
-          name: 'Send Coins',
-          additionalInfo: {
-            amount: amount.toString(),
-            mint
-          }
-        })
-      }
+      console.error(
+        'Send Coins',
+        error instanceof Error ? error : new Error(error as string)
+      )
     }
   })
 }

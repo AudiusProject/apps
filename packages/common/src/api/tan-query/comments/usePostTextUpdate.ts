@@ -2,7 +2,7 @@ import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { getFanClubFeedQueryKey } from './useFanClubFeed'
@@ -18,7 +18,7 @@ export type PostTextUpdateArgs = {
 }
 
 export const usePostTextUpdate = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -93,12 +93,7 @@ export const usePostTextUpdate = () => {
       })
     },
     onError: (error: Error, args) => {
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       toast({
         content: 'There was an error posting your update. Please try again.'
       })

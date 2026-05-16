@@ -9,7 +9,6 @@
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler'
 // eslint-disable-next-line import/no-unresolved
 import manifestJSON from '__STATIC_CONTENT_MANIFEST'
-import { Toucan } from 'toucan-js'
 import { renderPage } from 'vike/server'
 try {
   // eslint-disable-next-line import/no-unresolved
@@ -25,20 +24,10 @@ const BROWSER_CACHE_TTL_SECONDS = 60 * 60 * 24
 
 export default {
   async fetch(request, env, ctx) {
-    const sentry = env.SENTRY_DSN
-      ? new Toucan({
-          dsn: env.SENTRY_DSN,
-          context: ctx,
-          request
-        })
-      : null
-
     try {
       return await handleRequest(request, env, ctx)
     } catch (e) {
-      if (sentry) {
-        sentry.captureException(e)
-      }
+      console.error('SSR worker error:', e)
       if (DEBUG) {
         return new Response(e.message || e.toString(), { status: 500 })
       }

@@ -34,7 +34,7 @@ import {
 
 type PublishCollectionContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
+  'audiusSdk' | 'analytics' | 'dispatch'
 > & {
   userId: number
 }
@@ -139,7 +139,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
 export const usePublishCollection = (
   options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
 ) => {
-  const { audiusSdk, analytics, reportToSentry } = useQueryContext()
+  const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: account = null } = useCurrentAccount()
@@ -152,8 +152,7 @@ export const usePublishCollection = (
       audiusSdk,
       userId: userId!,
       dispatch,
-      analytics,
-      reportToSentry
+      analytics
     }),
 
     onSuccess: async (playlist) => {

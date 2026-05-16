@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { CommentOrReply, messages } from './types'
@@ -20,7 +20,7 @@ export type EditCommentArgs = {
 }
 
 export const useEditComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -62,12 +62,7 @@ export const useEditComment = () => {
     },
     onError: (error: Error, args, context) => {
       const { commentId } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Toast standard error message
       dispatch(toast({ content: messages.mutationError('editing') }))
 

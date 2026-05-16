@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 
 import { commentFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -54,7 +54,7 @@ export const useEventComments = ({
   pageSize = EVENT_COMMENTS_PAGE_SIZE,
   enabled = true
 }: UseEventCommentsArgs) => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -100,11 +100,7 @@ export const useEventComments = ({
 
   useEffect(() => {
     if (error) {
-      reportToSentry({
-        error,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(
         toast({
           content:
@@ -112,7 +108,7 @@ export const useEventComments = ({
         })
       )
     }
-  }, [error, dispatch, reportToSentry])
+  }, [error, dispatch])
 
   return queryRes
 }

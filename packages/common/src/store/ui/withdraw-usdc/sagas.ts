@@ -166,22 +166,19 @@ function* doWithdrawUSDCCoinflow({
       })
       yield* put(cleanupWithdrawUSDC())
       yield* put(closeWithdrawUSDCModal())
-      // Buy USDC recovery already logs to sentry and makes an analytics event
-      // so add some logs to help discern which flow the recovery was triggered
-      // from and help aid in debugging should this ever hit.
+      // Buy USDC recovery already logs and makes an analytics event, so add
+      // some logs to help discern which flow the recovery was triggered from
+      // and help aid in debugging should this ever hit.
       if (action.payload.status === Status.ERROR) {
-        // Breadcrumb hint:
         console.warn(
           'Failed to transfer funds back from root wallet:',
           rootSolanaAccount.publicKey.toBase58()
         )
-        // Console error for sentry issue
         console.error('Failed to recover funds from Coinflow Withdraw')
       }
     }
   } catch (e: unknown) {
     console.error('Withdraw USDC failed', e)
-    const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
     const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
@@ -195,9 +192,7 @@ function* doWithdrawUSDCCoinflow({
       })
     )
 
-    reportToSentry({
-      error: e as Error
-    })
+    console.error(e as Error)
   }
 }
 
@@ -274,7 +269,6 @@ function* doWithdrawUSDCManualTransfer({
     })
   } catch (e: unknown) {
     console.error('Withdraw USDC failed', e)
-    const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
     const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
@@ -288,9 +282,7 @@ function* doWithdrawUSDCManualTransfer({
       })
     )
 
-    reportToSentry({
-      error: e as Error
-    })
+    console.error(e as Error)
   }
 }
 

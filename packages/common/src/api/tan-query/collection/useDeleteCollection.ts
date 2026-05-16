@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { accountActions } from '~/store'
 
@@ -25,7 +24,7 @@ type MutationContext = {
 }
 
 export const useDeleteCollection = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -88,7 +87,7 @@ export const useDeleteCollection = () => {
 
       return { previousCollection }
     },
-    onError: (error, { collectionId }, context?: MutationContext) => {
+    onError: (error, _args, context?: MutationContext) => {
       // Roll back optimistic updates if the mutation fails
       if (context?.previousCollection) {
         const collection = context.previousCollection
@@ -101,14 +100,7 @@ export const useDeleteCollection = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          collectionId
-        },
-        feature: Feature.Edit,
-        name: 'Delete Collection'
-      })
+      console.error(error)
     },
     onSuccess: async (_, { collectionId }) => {
       // Invalidate and refetch collection queries to ensure cache consistency

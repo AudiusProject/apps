@@ -10,7 +10,6 @@ import {
 } from 'typed-redux-saga'
 
 import { Name } from '~/models/Analytics'
-import { ErrorLevel } from '~/models/ErrorReporting'
 import { IdentityRequestError } from '~/services/auth/identity'
 import { getContext } from '~/store/effects'
 
@@ -41,7 +40,6 @@ function* handleInitializeStripeModal({
   payload: { amount, destinationCurrency, destinationWallet }
 }: ReturnType<typeof initializeStripeModal>) {
   const identityService = yield* getContext('identityService')
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
   const { onrampFailed } = yield* select(getStripeModalState)
   try {
@@ -79,16 +77,12 @@ function* handleInitializeStripeModal({
       })
     }
     yield* put(setVisibility({ modal: 'StripeOnRamp', visible: 'closing' }))
-    yield* call(reportToSentry, {
-      level: ErrorLevel.Error,
-      error,
-      additionalInfo: {
-        code,
-        stripeErrorMessage,
-        type,
-        amount,
-        destinationCurrency
-      }
+    console.error('Stripe session creation error', error, {
+      code,
+      stripeErrorMessage,
+      type,
+      amount,
+      destinationCurrency
     })
     yield* call(
       track,

@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react'
 
 import { accountFromSDK } from '@audius/common/adapters'
-import { Name, ErrorLevel } from '@audius/common/models'
+import { Name } from '@audius/common/models'
 import { Flex, Text } from '@audius/harmony'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { audiusSdk, authService } from 'services/audius-sdk'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { ContentWrapper } from './components/ContentWrapper'
 import { useOAuthSetup } from './hooks'
@@ -94,7 +93,7 @@ export const OAuthSignUpPage = () => {
         })
       )
       if (error && !isUserError) {
-        reportToSentry({ level: ErrorLevel.Error, error })
+        console.error(error)
       }
     },
     onPendingTransactionApproval: () => {},
@@ -193,7 +192,7 @@ export const OAuthSignUpPage = () => {
         })
       )
       if (err instanceof Error) {
-        reportToSentry({ level: ErrorLevel.Error, error: err })
+        console.error(err)
       }
     }
   }

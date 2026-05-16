@@ -13,7 +13,6 @@ import {
 } from '~/api'
 import { QUERY_KEYS } from '~/api/tan-query/queryKeys'
 import type { QueryContextType } from '~/api/tan-query/utils/QueryContext'
-import { Feature } from '~/models'
 import { FollowSource } from '~/models/Analytics'
 import type { User } from '~/models/User'
 import { JupiterQuoteResult } from '~/services/Jupiter'
@@ -230,15 +229,13 @@ const autoFollowArtistOnCoinPurchase = async ({
   queryClient,
   audiusSdk,
   dispatch,
-  followUser,
-  reportToSentry
+  followUser
 }: {
   outputMint: string
   queryClient: ReturnType<typeof useQueryClient>
   audiusSdk: QueryContextType['audiusSdk']
   dispatch: ReturnType<typeof useDispatch>
   followUser: ReturnType<typeof useFollowUser>['mutate']
-  reportToSentry: QueryContextType['reportToSentry']
 }) => {
   if (!outputMint || NON_FAN_CLUB_MINTS.includes(outputMint)) {
     return
@@ -275,12 +272,7 @@ const autoFollowArtistOnCoinPurchase = async ({
       source: FollowSource.OVERFLOW
     })
   } catch (error) {
-    reportToSentry({
-      name: 'AutoFollowArtistOnCoinPurchaseError',
-      error: error as Error,
-      feature: Feature.TanQuery,
-      additionalInfo: { outputMint }
-    })
+    console.error('AutoFollowArtistOnCoinPurchaseError', error as Error)
   }
 }
 
@@ -290,8 +282,7 @@ const autoFollowArtistOnCoinPurchase = async ({
  */
 export const useSwapCoins = () => {
   const queryClient = useQueryClient()
-  const { solanaWalletService, reportToSentry, audiusSdk, env } =
-    useQueryContext()
+  const { solanaWalletService, audiusSdk, env } = useQueryContext()
   const { data: user } = useCurrentAccountUser()
   const { coins } = useTradeableCoins()
   const dispatch = useDispatch()
@@ -334,18 +325,17 @@ export const useSwapCoins = () => {
             errorStage = result.errorStage
           }
 
-          reportToSentry({
-            name: `JupiterSwap${result.errorStage || errorStage}Error`,
-            error: new Error(result.error?.message || 'Unknown swap error'),
-            feature: Feature.TanQuery,
-            additionalInfo: {
+          console.error(
+            `JupiterSwap${result.errorStage || errorStage}Error`,
+            new Error(result.error?.message || 'Unknown swap error'),
+            {
               params,
               signature,
               errorStage: result.errorStage || errorStage,
               firstQuoteResponse: firstQuoteResult?.quote,
               secondQuoteResponse: secondQuoteResult?.quote
             }
-          })
+          )
 
           // Throw error so React Query calls onError instead of onSuccess
           throw new Error(result.error?.message || 'Swap failed')
@@ -353,17 +343,12 @@ export const useSwapCoins = () => {
 
         return result
       } catch (error: unknown) {
-        reportToSentry({
-          name: `JupiterSwap${errorStage}Error`,
-          error: error as Error,
-          feature: Feature.TanQuery,
-          additionalInfo: {
-            params,
-            signature,
-            errorStage,
-            firstQuoteResponse: firstQuoteResult?.quote,
-            secondQuoteResponse: secondQuoteResult?.quote
-          }
+        console.error(`JupiterSwap${errorStage}Error`, error, {
+          params,
+          signature,
+          errorStage,
+          firstQuoteResponse: firstQuoteResult?.quote,
+          secondQuoteResponse: secondQuoteResult?.quote
         })
 
         return getSwapErrorResponse({
@@ -383,8 +368,7 @@ export const useSwapCoins = () => {
         queryClient,
         audiusSdk,
         dispatch,
-        followUser,
-        reportToSentry
+        followUser
       })
     },
     onMutate: () => {

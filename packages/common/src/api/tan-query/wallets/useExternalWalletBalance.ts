@@ -9,7 +9,6 @@ import {
   useQueryContext,
   type QueryContextType
 } from '~/api/tan-query/utils/QueryContext'
-import { Feature } from '~/models/ErrorReporting'
 import { TOKEN_LISTING_MAP } from '~/store'
 import { toErrorWithMessage } from '~/utils/error'
 
@@ -47,11 +46,11 @@ export const getExternalWalletBalanceQueryKey = ({
 
 type FetchExternalWalletBalanceContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'env' | 'reportToSentry'
+  'audiusSdk' | 'env'
 >
 
 const getExternalWalletBalanceQueryFn =
-  (context: FetchExternalWalletBalanceContext) =>
+  (_context: FetchExternalWalletBalanceContext) =>
   async ({
     queryKey
   }: QueryFunctionContext<
@@ -61,7 +60,6 @@ const getExternalWalletBalanceQueryFn =
     if (!walletAddress || !mint) {
       throw new Error('Wallet address and mint are required')
     }
-    const { reportToSentry } = context
     try {
       // Call Jupiter API to get balances
       const response = await fetch(
@@ -93,12 +91,10 @@ const getExternalWalletBalanceQueryFn =
       // Convert raw balance to FixedDecimal with proper decimals
       return new FixedDecimal(tokenBalance.uiAmount, tokenBalance.decimals)
     } catch (error) {
-      reportToSentry({
-        error: toErrorWithMessage(error),
-        name: 'ExternalWalletBalanceFetchError',
-        feature: Feature.TanQuery,
-        additionalInfo: { walletAddress, mint }
-      })
+      console.error(
+        'ExternalWalletBalanceFetchError',
+        toErrorWithMessage(error)
+      )
       throw error
     }
   }

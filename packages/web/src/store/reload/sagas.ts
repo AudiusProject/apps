@@ -3,7 +3,6 @@ import { createAction } from '@reduxjs/toolkit'
 import { call, fork, select, takeEvery } from 'typed-redux-saga'
 
 import { env } from 'services/env'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import {
   foregroundPollingDaemon,
   visibilityPollingDaemon
@@ -51,11 +50,9 @@ function* reloadIfNecessary() {
       })
     }
   } catch (e) {
-    console.error('[reload] Failed to check git SHA.', e)
-    yield* call(reportToSentry, {
-      name: 'Failed to check git SHA',
-      error: e as Error,
-      additionalInfo: { fetchedSha, localSha }
+    console.error('[reload] Failed to check git SHA.', e, {
+      fetchedSha,
+      localSha
     })
   }
 }
