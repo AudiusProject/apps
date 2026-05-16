@@ -188,11 +188,14 @@ export const ContestCardSkeleton = (
   // doesn't pop in shorter than the resolved card. Hero rows render
   // heading/l (line-height 40) and grid rows render heading/m
   // (line-height 32); both clamp to two lines, giving an 80 / 64 px
-  // title block respectively. Earlier iterations rendered a single 28px
-  // line, which was the source of the "skeleton loader is the wrong
-  // size on the explore page" QA pass.
+  // title block respectively. The title placeholder is rendered as two
+  // stacked bars sized to the real heading text rather than a single
+  // solid block — same reserved height, but visually reads as text
+  // instead of looming as a single dense rectangle the way the earlier
+  // 64px slab did on the explore grid.
   const variant = props.variant ?? 'grid'
   const titleBlockHeight = variant === 'hero' ? 80 : 64
+  const titleLineHeight = variant === 'hero' ? 28 : 22
   return (
     <Paper
       direction='column'
@@ -213,7 +216,15 @@ export const ContestCardSkeleton = (
         </Flex>
         <Divider orientation='horizontal' />
         <Flex direction='column' gap='s'>
-          <Skeleton h={titleBlockHeight} w='80%' />
+          <Flex
+            direction='column'
+            gap='s'
+            justifyContent='center'
+            css={{ height: titleBlockHeight }}
+          >
+            <Skeleton h={titleLineHeight} w='80%' />
+            <Skeleton h={titleLineHeight} w='55%' />
+          </Flex>
           <Flex gap='s'>
             <Skeleton h={22} w={72} />
           </Flex>
