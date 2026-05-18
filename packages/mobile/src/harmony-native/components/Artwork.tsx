@@ -27,7 +27,7 @@ export type ArtworkProps = {
    * Enables true progressive image loading.
    */
   priorityLowResSource?: ImageProps['source']
-} & Partial<Pick<ImageProps, 'source' | 'onError' | 'onLoad'>> &
+} & Partial<Pick<ImageProps, 'source' | 'onError' | 'onLoad' | 'timeoutMs'>> &
   BoxProps
 
 /**
@@ -44,6 +44,7 @@ export const Artwork = (props: ArtworkProps) => {
     priorityLowResSource,
     onError,
     onLoad,
+    timeoutMs,
     borderRadius = 's',
     borderWidth,
     shadow,
@@ -158,6 +159,7 @@ export const Artwork = (props: ArtworkProps) => {
               onLoad?.(event)
             }}
             onError={onError}
+            timeoutMs={timeoutMs}
             source={imageSource}
           />
         ) : null}
