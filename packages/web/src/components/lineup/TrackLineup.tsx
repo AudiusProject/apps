@@ -33,9 +33,11 @@ const LOAD_MORE_VIEWPORTS = 2
 // Approximate rendered heights of a TrackTile in different variants — used to
 // compute how many skeletons to render so the bottom-of-list "loading window"
 // fills the threshold area instead of leaving the user staring at a frozen
-// last entry while the next page is in flight.
-const APPROX_TILE_HEIGHT_LARGE = 124
-const APPROX_TILE_HEIGHT_SMALL = 80
+// last entry while the next page is in flight. Large tile = 144px body +
+// 24px mb='l' + 16px parent gap='m' ≈ 184. Small tile is rendered in a row
+// layout, so a smaller estimate is fine.
+const APPROX_TILE_HEIGHT_LARGE = 184
+const APPROX_TILE_HEIGHT_SMALL = 96
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
@@ -440,7 +442,9 @@ export const TrackLineup = ({
                 </Flex>
               ))}
 
-          {hasNextPage && tiles.length > 0
+          {hasNextPage &&
+          tiles.length > 0 &&
+          (isFetching || isLoadMoreTriggered)
             ? renderSkeletons(loadingSkeletonCount, tiles.length)
             : null}
         </InfiniteScroll>
