@@ -10,7 +10,7 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { FeatureFlags } from '@audius/common/services'
 
 import { useTheme } from '@audius/harmony-native'
-import { ContestCard } from 'app/components/contest-card'
+import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { CardList } from 'app/components/core'
 import { RemixContestCard } from 'app/components/remix-carousel/RemixContestCard'
 import { TrackCardSkeleton } from 'app/components/track/TrackCardSkeleton'
@@ -61,7 +61,9 @@ export const FeaturedRemixContests = () => {
             horizontal
             carouselSpacing={spacing.l}
             isLoading={isAllContestsPending}
-            LoadingCardComponent={TrackCardSkeleton}
+            LoadingCardComponent={() => (
+              <ContestCardSkeleton style={{ minWidth: 250 }} />
+            )}
           />
         ) : (
           <CardList
