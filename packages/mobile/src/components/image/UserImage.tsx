@@ -9,6 +9,11 @@ import profilePicEmpty from 'app/assets/images/imageProfilePicEmpty2X.png'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
 
+// Per-URL render timeout (ms) so a stalled Open Audio Validator Node
+// advances to the next mirror without waiting on the OS TCP timeout
+// (60–90s). Matches the web MirrorImage pattern.
+const USER_IMAGE_TIMEOUT_MS = 3000
+
 type UseUserImageOptions = {
   userId: ID | null | undefined
   size: SquareSizes
@@ -87,6 +92,7 @@ export const UserImage = (props: UserImageProps) => {
       source={source}
       priorityLowResSource={priorityLowResSource}
       onError={handleError}
+      timeoutMs={USER_IMAGE_TIMEOUT_MS}
     />
   )
 }
