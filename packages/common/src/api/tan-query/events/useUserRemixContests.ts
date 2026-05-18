@@ -9,7 +9,7 @@ import {
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
 import { eventMetadataFromSDK } from '~/adapters/event'
-import { getRemixesQueryKey } from '~/api/tan-query/remixes/useRemixes'
+import { getRemixesCountQueryKey } from '~/api/tan-query/remixes/useRemixes'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { primeRelatedData } from '~/api/tan-query/utils/primeRelatedData'
 import { ID } from '~/models'
@@ -97,23 +97,15 @@ export const useUserRemixContests = (
       // N+1.
       primeRelatedData({ related, queryClient })
 
-      // Prime useRemixes({ trackId, pageSize: 0, isContestEntry: true }) so
-      // ContestCard's entry-count badge doesn't fire a count-only request
-      // per card. Mirrors the priming in useAllRemixContests.
+      // Prime the dedicated `useRemixesCount` cache so ContestCard's
+      // entry-count badge doesn't fire a count-only request per card.
       const entryCounts = related?.entryCounts ?? {}
       for (const [hashedTrackId, count] of Object.entries(entryCounts)) {
         const trackId = OptionalHashId.parse(hashedTrackId)
         if (!trackId) continue
         queryClient.setQueryData(
-          getRemixesQueryKey({
-            trackId,
-            pageSize: 0,
-            isContestEntry: true
-          }),
-          {
-            pages: [{ count, tracks: [] }],
-            pageParams: [0]
-          } as unknown as never
+          getRemixesCountQueryKey({ trackId, isContestEntry: true }),
+          count
         )
       }
 
