@@ -88,7 +88,7 @@ const messages = {
     'Upload failed. Try again or leave blank to use the track artwork.',
   prizesLabel: 'Prizes',
   prizesHelper: 'Describe all prizes, rewards, or other incentives.',
-  prizesPlaceholder: '1st place gets $500. 2nd place gets $250…',
+  prizesPlaceholder: '1st Place: Official Release, Social Support, VIP Tickets, etc…',
   sourceTracksLabel: 'Source Track',
   sourceTracksHelper:
     'Choose a track to be linked to this contest. Any stems included in that track will also be part of this contest.',
