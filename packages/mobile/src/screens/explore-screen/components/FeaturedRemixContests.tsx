@@ -5,10 +5,8 @@ import { exploreMessages as messages } from '@audius/common/messages'
 import { useWindowDimensions } from 'react-native'
 
 import { useTheme } from '@audius/harmony-native'
-import { ContestCard } from 'app/components/contest-card'
+import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { CardList } from 'app/components/core'
-import { TrackCardSkeleton } from 'app/components/track/TrackCardSkeleton'
-
 import { useDeferredElement } from '../../../hooks/useDeferredElement'
 
 import { ExploreSection } from './ExploreSection'
@@ -24,7 +22,6 @@ export const FeaturedRemixContests = () => {
   const { width: windowWidth } = useWindowDimensions()
   const contestCardWidth = windowWidth - CONTEST_CARD_PEEK
   const { InViewWrapper, inView } = useDeferredElement()
-
   const { data: allContestTrackIds, isPending: isAllContestsPending } =
     useAllRemixContests(undefined, { enabled: inView })
 
@@ -38,7 +35,9 @@ export const FeaturedRemixContests = () => {
           carouselSpacing={spacing.l}
           horizontalCardWidth={contestCardWidth}
           isLoading={isAllContestsPending}
-          LoadingCardComponent={TrackCardSkeleton}
+          LoadingCardComponent={() => (
+            <ContestCardSkeleton style={{ width: contestCardWidth }} />
+          )}
         />
       </ExploreSection>
     </InViewWrapper>
