@@ -22,6 +22,7 @@ class EventType(str, enum.Enum):
     remix_contest = "remix_contest"
     live_event = "live_event"
     new_release = "new_release"
+    open_contest = "open_contest"
 
 
 class EventEntityType(str, enum.Enum):

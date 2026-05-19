@@ -66,6 +66,7 @@ from src.tasks.entity_manager.entities.email import (
 from src.tasks.entity_manager.entities.event import (
     create_event,
     delete_event,
+    submit_to_contest,
     update_event,
 )
 from src.tasks.entity_manager.entities.grant import (
@@ -480,6 +481,11 @@ def entity_manager_update(
                             and params.entity_type == EntityType.EVENT
                         ):
                             delete_event(params)
+                        elif (
+                            params.action == Action.SUBMIT_TO_CONTEST
+                            and params.entity_type == EntityType.EVENT
+                        ):
+                            submit_to_contest(params)
 
                         logger.debug("process transaction")  # log event context
                     except IndexingValidationError as e:
@@ -679,6 +685,19 @@ def collect_entities_to_fetch(update_task, entity_manager_txs):
                     if event_entity_type == EventEntityType.track:
                         event_entity_id = json_metadata.get("data", {}).get("entity_id")
                         entities_to_fetch[EntityType.TRACK].add(event_entity_id)
+                elif action == Action.SUBMIT_TO_CONTEST:
+                    # SubmitToContest metadata is bare JSON {"track_id": <id>},
+                    # not a CID-wrapped envelope, so the data field doesn't apply.
+                    try:
+                        json_metadata = json.loads(metadata)
+                    except Exception as e:
+                        logger.error(
+                            f"tasks | entity_manager.py | Exception deserializing SubmitToContest metadata: {e}"
+                        )
+                        continue
+                    track_id = json_metadata.get("track_id")
+                    if isinstance(track_id, int):
+                        entities_to_fetch[EntityType.TRACK].add(track_id)
 
             if entity_type == EntityType.COMMENT:
                 if (

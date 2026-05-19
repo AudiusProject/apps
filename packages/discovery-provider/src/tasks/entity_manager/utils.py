@@ -98,6 +98,7 @@ class Action(str, Enum):
     ADD_EMAIL = "AddEmail"
     REPORT = "Report"
     SHARE = "Share"
+    SUBMIT_TO_CONTEST = "SubmitToContest"
 
     def __str__(self) -> str:
         return str.__str__(self)
@@ -359,6 +360,7 @@ def expect_cid_metadata_json(metadata, action, entity_type):
         Action.UNSUBSCRIBE,
         Action.APPROVE,
         Action.REJECT,
+        Action.SUBMIT_TO_CONTEST,
     ]:
         return False
     if not metadata:

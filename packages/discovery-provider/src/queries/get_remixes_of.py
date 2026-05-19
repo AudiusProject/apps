@@ -2,6 +2,7 @@ from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.orm import aliased
 
 from src import exceptions
+from src.models.events.contest_submission import ContestSubmission
 from src.models.events.event import Event, EventType
 from src.models.social.aggregate_plays import AggregatePlay
 from src.models.social.repost import Repost, RepostType
@@ -29,6 +30,10 @@ def get_remixes_of(args):
     sort_method = args.get("sort_method", "recent")
     only_cosigns = args.get("only_cosigns", False)
     only_contest_entries = args.get("only_contest_entries", False)
+    # When provided, return tracks submitted to this open_contest event
+    # (rows in contest_submissions). Open contests have no parent track,
+    # so the classic remixes-table join doesn't apply.
+    contest_id = args.get("contest_id")
 
     db = get_db_read_replica()
 
@@ -151,7 +156,54 @@ def get_remixes_of(args):
             track_ids = list(map(lambda track: track["track_id"], tracks))
             return (tracks, track_ids, count)
 
-        (tracks, track_ids, count) = get_unpopulated_remixes()
+        def get_unpopulated_open_contest_submissions():
+            submission_query = (
+                session.query(Track)
+                .join(
+                    ContestSubmission,
+                    ContestSubmission.track_id == Track.track_id,
+                )
+                .outerjoin(
+                    AggregateTrack, AggregateTrack.track_id == Track.track_id
+                )
+                .outerjoin(
+                    AggregatePlay, AggregatePlay.play_item_id == Track.track_id
+                )
+                .filter(
+                    ContestSubmission.contest_id == contest_id,
+                    Track.is_current == True,
+                    Track.is_delete == False,
+                    Track.is_unlisted == False,
+                )
+            )
+
+            if sort_method == RemixesSortMethod.likes:
+                submission_query = submission_query.order_by(
+                    desc(func.coalesce(AggregateTrack.save_count, 0)),
+                    desc(Track.track_id),
+                )
+            elif sort_method == RemixesSortMethod.plays:
+                submission_query = submission_query.order_by(
+                    desc(func.coalesce(AggregatePlay.count, 0)),
+                    desc(Track.track_id),
+                )
+            else:
+                submission_query = submission_query.order_by(
+                    desc(ContestSubmission.created_at), desc(Track.track_id)
+                )
+
+            (tracks, count) = add_query_pagination(
+                submission_query, limit, offset, True, True
+            )
+            tracks = tracks.all()
+            tracks = helpers.query_result_to_list(tracks)
+            track_ids = list(map(lambda track: track["track_id"], tracks))
+            return (tracks, track_ids, count)
+
+        if contest_id is not None and not track_id:
+            (tracks, track_ids, count) = get_unpopulated_open_contest_submissions()
+        else:
+            (tracks, track_ids, count) = get_unpopulated_remixes()
         tracks = populate_track_metadata(session, track_ids, tracks, current_user_id)
         if args.get("with_users", False):
             add_users_to_tracks(session, tracks, current_user_id)
