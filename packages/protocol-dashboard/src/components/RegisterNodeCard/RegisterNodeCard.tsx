@@ -84,7 +84,7 @@ export const RegisterNodeCard = ({ wallet }: { wallet: string }) => {
         <Flex alignItems='center' gap='xl'>
           <Card p='xl' direction='column'>
             <Box>
-              {storageCommitment == null ? (
+              {currentVersion == null ? (
                 <Box mb='xs'>
                   <Loading />
                 </Box>
