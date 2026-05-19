@@ -11,6 +11,7 @@ import {
 import {
   CastState,
   MediaPlayerState,
+  useCastSession,
   useCastState,
   useMediaStatus,
   useRemoteMediaClient
@@ -40,6 +41,7 @@ export const useChromecast = () => {
   const client = useRemoteMediaClient()
   const castState = useCastState()
   const mediaStatus = useMediaStatus()
+  const castSession = useCastSession()
   const previousCastState = usePrevious(castState)
 
   const [internalCounter, setInternalCounter] = useState(0)
@@ -82,15 +84,26 @@ export const useChromecast = () => {
 
   // Update our cast UI when the cast device connects
   useEffect(() => {
-    switch (castState) {
-      case CastState.CONNECTED:
-        dispatch(setIsCasting({ isCasting: true }))
-        break
-      default:
-        dispatch(setIsCasting({ isCasting: false }))
-        break
+    if (castState !== CastState.CONNECTED) {
+      dispatch(setIsCasting({ isCasting: false }))
+      return
     }
-  }, [castState, dispatch])
+    let cancelled = false
+    const resolve = async () => {
+      const device = await castSession?.getCastDevice()
+      if (cancelled) return
+      dispatch(
+        setIsCasting({
+          isCasting: true,
+          deviceName: device?.friendlyName ?? null
+        })
+      )
+    }
+    resolve()
+    return () => {
+      cancelled = true
+    }
+  }, [castState, castSession, dispatch])
 
   // Ensure that the progress gets reset to 0
   // when a new track is played

@@ -1,39 +1,29 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { CastMethod } from './types'
-
-type CastState = {
-  method: CastMethod
-  isCasting: boolean
-}
+import { CastState } from './types'
 
 const initialState: CastState = {
-  method: 'airplay',
-  isCasting: false
+  isCasting: false,
+  deviceName: null
 }
 
 const slice = createSlice({
   name: 'cast',
   initialState,
   reducers: {
-    updateMethod: (
-      state,
-      {
-        payload: { method }
-      }: PayloadAction<{ method: CastMethod; persist?: boolean }>
-    ) => {
-      state.method = method
-    },
     setIsCasting: (
       state,
-      { payload: { isCasting } }: PayloadAction<{ isCasting: boolean }>
+      {
+        payload: { isCasting, deviceName }
+      }: PayloadAction<{ isCasting: boolean; deviceName?: string | null }>
     ) => {
       state.isCasting = isCasting
+      state.deviceName = isCasting ? (deviceName ?? state.deviceName) : null
     }
   }
 })
 
-export const { updateMethod, setIsCasting } = slice.actions
+export const { setIsCasting } = slice.actions
 
 export default slice.reducer
 

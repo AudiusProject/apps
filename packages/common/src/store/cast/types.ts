@@ -1,3 +1,4 @@
-export const CAST_METHOD = 'cast'
-
-export type CastMethod = 'airplay' | 'chromecast'
+export type CastState = {
+  isCasting: boolean
+  deviceName: string | null
+}

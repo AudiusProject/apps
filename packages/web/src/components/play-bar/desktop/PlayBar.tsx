@@ -15,6 +15,7 @@ import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
+import { CastButton } from 'components/cast-button'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
@@ -374,6 +375,7 @@ const PlayBar = () => {
             granularity={VOLUME_GRANULARITY}
             onChange={updateVolume}
           />
+          <CastButton />
           <QueueButton />
         </div>
       </div>

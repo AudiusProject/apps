@@ -37,6 +37,7 @@ export type Drawer =
   | 'WalletRowOverflowMenu'
   | 'LockedTextPost'
   | 'Queue'
+  | 'Connect'
 
 export type DrawerData = {
   EnablePushNotifications: undefined
@@ -81,6 +82,7 @@ export type DrawerData = {
   PickWinners: undefined
   LockedTextPost: { mint: string }
   Queue: undefined
+  Connect: undefined
   CoinInsightsOverflowMenu: { mint: string }
   WalletRowOverflowMenu: {
     address: string
@@ -123,6 +125,7 @@ const initialState: DrawersState = {
   PickWinners: false,
   LockedTextPost: false,
   Queue: false,
+  Connect: false,
   CoinInsightsOverflowMenu: false,
   WalletRowOverflowMenu: false,
   data: {}

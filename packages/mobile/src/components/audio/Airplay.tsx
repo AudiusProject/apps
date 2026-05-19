@@ -47,14 +47,14 @@ const Airplay = () => {
       'deviceConnected',
       (device) => {
         console.info(`Connected to device ${JSON.stringify(device)}`)
-        if (
-          device &&
-          device.devices &&
-          device.devices[0] &&
-          device.devices[0].portType &&
-          device.devices[0].portType === AIRPLAY_PORT_TYPE
-        ) {
-          dispatch(setIsCasting({ isCasting: true }))
+        const route = device?.devices?.[0]
+        if (route?.portType === AIRPLAY_PORT_TYPE) {
+          dispatch(
+            setIsCasting({
+              isCasting: true,
+              deviceName: route.portName ?? route.name ?? null
+            })
+          )
         } else {
           dispatch(setIsCasting({ isCasting: false }))
         }

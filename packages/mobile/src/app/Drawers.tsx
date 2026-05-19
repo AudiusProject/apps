@@ -13,6 +13,7 @@ import { ChallengeRewardsDrawer } from 'app/components/challenge-rewards-drawer'
 import { ClaimAllRewardsDrawer } from 'app/components/challenge-rewards-drawer/ClaimAllRewardsDrawer'
 import { ChatActionsDrawer } from 'app/components/chat-actions-drawer'
 import { CoinflowOnrampDrawer } from 'app/components/coinflow-onramp-drawer/CoinflowOnrampDrawer'
+import { ConnectDrawer } from 'app/components/connect-drawer'
 import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/CoinflowWithdrawDrawer'
 import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-drawer'
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
@@ -173,6 +174,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,
   Queue: QueueDrawer,
+  Connect: ConnectDrawer,
   CoinInsightsOverflowMenu,
   WalletRowOverflowMenu
 }
