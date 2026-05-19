@@ -9,7 +9,6 @@ import {
   Divider,
   Flex,
   IconButton,
-  IconCastSpeaker,
   IconCheck,
   IconClose,
   IconSpeaker,
@@ -140,7 +139,7 @@ export const ConnectDrawer = () => {
         />
         <Row
           label={IS_IOS ? messages.airplayBluetooth : messages.bluetooth}
-          icon={IconCastSpeaker}
+          icon={IconSpeaker}
           onPress={handleSelectAirplayOrBluetooth}
         />
 
@@ -154,7 +153,7 @@ export const ConnectDrawer = () => {
             <Row
               key={device.deviceId}
               label={device.friendlyName}
-              icon={IconCastSpeaker}
+              icon={IconSpeaker}
               active={isActive}
               onPress={() => handleSelectCastDevice(device.deviceId)}
             />

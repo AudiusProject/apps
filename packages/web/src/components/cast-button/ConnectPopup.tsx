@@ -13,10 +13,10 @@ import {
   Flex,
   IconButton,
   IconCast,
-  IconCastSpeaker,
   IconCheck,
   IconClose,
   IconDesktop,
+  IconSpeaker,
   Text,
   useTheme
 } from '@audius/harmony'
@@ -212,7 +212,7 @@ export const ConnectPopup = ({
         />
         <Row
           label={messages.googleCastDevices}
-          icon={IconCastSpeaker}
+          icon={IconSpeaker}
           active={isCasting}
           onClick={onSelectCastDevices}
         />
