@@ -12,8 +12,14 @@ const messages = {
 export const CastButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+  // The audio element is routed through an AudioContext on this app, so
+  // `audio.remote.state` doesn't reliably flip to 'connected' when the user
+  // tab-casts via the system picker. Track an optimistic local flag set when
+  // the user successfully picks a device.
+  const [pickedCast, setPickedCast] = useState(false)
   const { supported, state, prompt } = useRemotePlayback()
-  const isCasting = state === 'connected' || state === 'connecting'
+  const isCasting =
+    pickedCast || state === 'connected' || state === 'connecting'
 
   const handleToggle = useCallback(() => {
     setIsOpen((o) => !o)
@@ -23,10 +29,20 @@ export const CastButton = () => {
     setIsOpen(false)
   }, [])
 
-  const handleSelectCastDevices = useCallback(() => {
-    prompt()
+  const handleSelectCastDevices = useCallback(async () => {
     setIsOpen(false)
+    try {
+      await prompt()
+      setPickedCast(true)
+    } catch {
+      // User cancelled the picker — leave the existing state.
+    }
   }, [prompt])
+
+  const handleSelectThisBrowser = useCallback(() => {
+    setPickedCast(false)
+    setIsOpen(false)
+  }, [])
 
   if (!supported) return null
 
@@ -51,6 +67,7 @@ export const CastButton = () => {
         anchorRef={anchorRef}
         isCasting={isCasting}
         onClose={handleClose}
+        onSelectThisBrowser={handleSelectThisBrowser}
         onSelectCastDevices={handleSelectCastDevices}
       />
     </>

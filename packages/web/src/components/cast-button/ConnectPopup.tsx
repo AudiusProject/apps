@@ -40,6 +40,7 @@ type ConnectPopupProps = {
   anchorRef: MutableRefObject<HTMLElement | null>
   isCasting: boolean
   onClose: () => void
+  onSelectThisBrowser: () => void
   onSelectCastDevices: () => void
 }
 
@@ -92,6 +93,7 @@ export const ConnectPopup = ({
   anchorRef,
   isCasting,
   onClose,
+  onSelectThisBrowser,
   onSelectCastDevices
 }: ConnectPopupProps) => {
   const popoverRef = useRef<HTMLDivElement | null>(null)
@@ -204,6 +206,7 @@ export const ConnectPopup = ({
             label={messages.thisBrowser}
             icon={IconDesktop}
             active={!isCasting}
+            onClick={onSelectThisBrowser}
           />
           <Row
             label={messages.googleCastDevices}
