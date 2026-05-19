@@ -39,10 +39,21 @@ export const CastButton = () => {
     }
   }, [prompt])
 
-  const handleSelectThisBrowser = useCallback(() => {
-    setPickedCast(false)
+  const handleSelectThisBrowser = useCallback(async () => {
     setIsOpen(false)
-  }, [])
+    if (isCasting) {
+      // RemotePlayback has no programmatic disconnect. Re-opening the
+      // browser's native picker shows a "Stop casting" option for the
+      // currently-active device — the user clicks that to return audio
+      // to the local browser. This is the same flow Spotify uses.
+      try {
+        await prompt()
+      } catch {
+        // User cancelled the picker — leave the existing state.
+      }
+    }
+    setPickedCast(false)
+  }, [isCasting, prompt])
 
   if (!supported) return null
 
