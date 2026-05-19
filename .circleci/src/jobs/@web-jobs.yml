@@ -143,30 +143,6 @@ web-deploy-production-cloudflare:
         copy-robots: true
     # - web-deploy-sourcemaps-s3
 
-web-deploy-sentry-sourcemaps:
-  working_directory: ~/apps
-  docker:
-    - image: cimg/node:20.19
-  steps:
-    - checkout
-    - attach_workspace:
-        at: ./
-    - run:
-        name: cut-sentry-release
-        command: |
-          cd packages/web
-          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client new ${CIRCLE_SHA1}
-    - run:
-        name: upload-sourcemaps
-        command: |
-          cd packages/web
-          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client files ${CIRCLE_SHA1} upload-sourcemaps --no-rewrite build-production/static/js
-    - run:
-        name: finalize-release
-        command: |
-          cd packages/web
-          ../../node_modules/.bin/sentry-cli --auth-token ${SENTRY_AUTH_TOKEN} releases --org audius --project audius-client finalize ${CIRCLE_SHA1}
-
 web-dist-mac-production:
   working_directory: ~/apps
   # run on macos so dmg can be created and signed.

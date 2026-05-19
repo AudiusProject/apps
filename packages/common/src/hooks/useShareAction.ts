@@ -5,9 +5,9 @@ import { Id } from '@audius/sdk'
 import { useCurrentUserId } from '~/api/tan-query/users/account/useCurrentUserId'
 import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 
-/** Sends an EntityManager share action. Fire and forget. Will report to sentry if it fails. */
+/** Sends an EntityManager share action. Fire and forget. Logs to console if it fails. */
 export const useShareAction = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const { data: userId } = useCurrentUserId()
 
   return useCallback(
@@ -34,17 +34,12 @@ export const useShareAction = () => {
           })
         }
       } catch (error) {
-        reportToSentry({
-          error: error as Error,
-          name: 'Failed to send EntityManager share action',
-          additionalInfo: {
-            userId,
-            entityId,
-            entityType
-          }
-        })
+        console.error(
+          'Failed to send EntityManager share action',
+          error as Error
+        )
       }
     },
-    [audiusSdk, userId, reportToSentry]
+    [audiusSdk, userId]
   )
 }

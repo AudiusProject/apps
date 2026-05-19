@@ -7,5 +7,4 @@ export const logError = (...args) => {
   ) {
     console.error(args)
   }
-  // TODO: Add Sentry logging
 }

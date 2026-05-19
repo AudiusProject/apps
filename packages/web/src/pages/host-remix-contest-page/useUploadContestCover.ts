@@ -9,7 +9,7 @@ import { useQueryContext } from '@audius/common/api'
  * content-node URL the form can persist in `eventData.coverPhotoUrl`.
  */
 export const useUploadContestCover = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const [isUploading, setIsUploading] = useState(false)
 
   const upload = useCallback(
@@ -45,17 +45,13 @@ export const useUploadContestCover = () => {
 
         return `${contentNodeEndpoint}/content/${cid}`
       } catch (error) {
-        reportToSentry({
-          error: error as Error,
-          name: 'HostRemixContest',
-          additionalInfo: { where: 'useUploadContestCover' }
-        })
+        console.error('HostRemixContest', error as Error)
         return null
       } finally {
         setIsUploading(false)
       }
     },
-    [audiusSdk, reportToSentry]
+    [audiusSdk]
   )
 
   return { upload, isUploading }

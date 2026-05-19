@@ -7,6 +7,7 @@ import {
 } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
 import { ID, Name } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { useDownloadTrackArchiveModal } from '@audius/common/store'
 import {
   Modal,
@@ -22,6 +23,7 @@ import {
   IconError,
   TextLink
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { env } from 'services/env'
 
@@ -161,12 +163,10 @@ const DownloadTrackArchiveModalContent = ({
   )
 }
 
-export const DownloadTrackArchiveModal = () => {
+export const DownloadTrackArchiveModal = NiceModal.create(() => {
+  const modal = useModal()
   const {
-    data: { trackId, fileCount },
-    isOpen,
-    onClose,
-    onClosed
+    data: { trackId, fileCount }
   } = useDownloadTrackArchiveModal()
 
   if (!trackId) {
@@ -180,9 +180,12 @@ export const DownloadTrackArchiveModal = () => {
     <DownloadTrackArchiveModalContent
       trackId={trackId}
       fileCount={fileCount}
-      isOpen={isOpen}
-      onClose={onClose}
-      onClosed={onClosed}
+      isOpen={modal.visible}
+      onClose={() => modal.hide()}
+      onClosed={() => modal.remove()}
     />
   )
-}
+})
+
+NiceModal.register('DownloadTrackArchive', DownloadTrackArchiveModal)
+registerNiceModalId('DownloadTrackArchive')

@@ -1,8 +1,6 @@
 import { useCallback } from 'react'
 
 import { useAllRemixContests } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import {
   Box,
@@ -13,7 +11,7 @@ import {
   LoadingSpinner
 } from '@audius/harmony'
 import InfiniteScroll from 'react-infinite-scroller'
-import { Link, Navigate } from 'react-router'
+import { Link } from 'react-router'
 
 import { ContestCard, ContestCardSkeleton } from 'components/contest-card'
 import { Header } from 'components/header/desktop/Header'
@@ -41,8 +39,6 @@ const PAGE_SIZE = 12
 export const ContestsPage = () => {
   const isMobile = useIsMobile()
   const mainContentRef = useMainContentRef()
-  const { isEnabled: isContestsPageEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.CONTESTS)
   const {
     data,
     isPending,
@@ -51,10 +47,7 @@ export const ContestsPage = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage
-  } = useAllRemixContests(
-    { pageSize: PAGE_SIZE },
-    { enabled: isContestsPageEnabled }
-  )
+  } = useAllRemixContests({ pageSize: PAGE_SIZE })
 
   const getScrollParent = useCallback(
     () => mainContentRef.current ?? null,
@@ -66,10 +59,6 @@ export const ContestsPage = () => {
       fetchNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  if (isFlagLoaded && !isContestsPageEnabled) {
-    return <Navigate to='/' replace />
-  }
 
   const contests = data ?? []
   const showSkeletons = isPending || (!isSuccess && !isError)

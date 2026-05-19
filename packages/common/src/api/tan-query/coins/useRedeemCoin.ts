@@ -1,7 +1,6 @@
 import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { Feature } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -15,7 +14,7 @@ type RedeemCoinParams = {
 }
 
 export const useRedeemCoin = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
@@ -47,13 +46,8 @@ export const useRedeemCoin = () => {
         queryKey: getFanClubQueryKey(mint)
       })
     },
-    onError: (error: Error, args, _context) => {
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'RedeemCoin',
-        feature: Feature.FanClubs
-      })
+    onError: (error: Error, _args, _context) => {
+      console.error(error)
 
       // Toast generic error message
       toast({

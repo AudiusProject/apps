@@ -1,8 +1,6 @@
 import { MouseEvent, ReactNode, useCallback, useContext } from 'react'
 
 import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { formatCount, route } from '@audius/common/utils'
 import {
   Divider,
@@ -97,7 +95,6 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
   const { setStackReset } = useContext(RouterContext)
 
   const { data: currentUserId } = useCurrentUserId()
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
   const { data: accountUser } = useCurrentAccountUser({
     select: (user) => ({
       handle: user?.handle,
@@ -237,14 +234,12 @@ export const LeftNavDrawer = ({ isOpen, onClose }: LeftNavDrawerProps) => {
               href={CLUBS_EXPLORE_PAGE}
               onNavigate={handleNavigate}
             />
-            {isContestsEnabled ? (
-              <NavItem
-                icon={IconTrophy}
-                label={messages.contests}
-                href={CONTESTS_PAGE}
-                onNavigate={handleNavigate}
-              />
-            ) : null}
+            <NavItem
+              icon={IconTrophy}
+              label={messages.contests}
+              href={CONTESTS_PAGE}
+              onNavigate={handleNavigate}
+            />
             <NavItem
               icon={IconGift}
               label={messages.rewards}

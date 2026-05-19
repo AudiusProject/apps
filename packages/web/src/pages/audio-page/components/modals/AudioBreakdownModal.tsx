@@ -3,10 +3,11 @@ import {
   useAssociatedWallets,
   useWalletAudioBalances
 } from '@audius/common/api'
+import { registerNiceModalId } from '@audius/common/services'
 import { AUDIO } from '@audius/fixed-decimal'
 import { IconInfo, Tooltip } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
-import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
@@ -103,12 +104,12 @@ const AudioBreakdownBody = () => {
   )
 }
 
-const AudioBreakdownModal = () => {
-  const [isOpen, setOpen] = useModalState('AudioBreakdown')
+const AudioBreakdownModal = NiceModal.create(() => {
+  const modal = useModal()
   return (
     <ModalDrawer
-      isOpen={isOpen}
-      onClose={() => setOpen(false)}
+      isOpen={modal.visible}
+      onClose={() => modal.hide()}
       title={messages.modalTitle}
       isFullscreen={true}
       showTitleHeader
@@ -117,6 +118,9 @@ const AudioBreakdownModal = () => {
       <AudioBreakdownBody />
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('AudioBreakdown', AudioBreakdownModal)
+registerNiceModalId('AudioBreakdown')
 
 export default AudioBreakdownModal

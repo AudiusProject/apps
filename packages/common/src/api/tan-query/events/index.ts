@@ -1,6 +1,7 @@
 // Queries
 export * from './useAllEvents'
 export * from './useAllRemixContests'
+export * from './useUserRemixContests'
 export * from './useEvent'
 export * from './useEventFollowers'
 export * from './useEvents'
@@ -9,7 +10,6 @@ export * from './useFollowEvent'
 export * from './useRemixContest'
 export * from './useRemixContestWinners'
 export * from './useUserHasRemixContest'
-export * from './useUserRemixContests'
 
 // Mutations
 export * from './useCreateEvent'

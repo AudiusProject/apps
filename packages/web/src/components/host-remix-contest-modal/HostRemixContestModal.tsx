@@ -10,6 +10,7 @@ import {
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { useHostRemixContestModal } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
 import {
@@ -27,6 +28,7 @@ import {
   TextArea
 } from '@audius/harmony'
 import { EventEntityTypeEnum, EventEventTypeEnum } from '@audius/sdk'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
@@ -37,8 +39,15 @@ import { TimeInput, parseTime } from './TimeInput'
 const contestHostingLink =
   'https://help.audius.co/artists/hosting-a-remix-contest'
 
-export const HostRemixContestModal = () => {
-  const { data, isOpen, onClose, onClosed } = useHostRemixContestModal()
+export const HostRemixContestModal = NiceModal.create(() => {
+  // Visibility owned by NiceModal; payload (`trackId`) still flows through
+  // the legacy createModal hook.
+  const modal = useModal()
+  const onClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+  const onClosed = onClose
+  const { data } = useHostRemixContestModal()
   const { trackId } = data
   const { mutate: createEvent } = useCreateEvent()
   const { mutate: updateEvent } = useUpdateEvent()
@@ -203,7 +212,12 @@ export const HostRemixContestModal = () => {
   }, [remixContest, userId, deleteEvent, onClose, trackId])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} onClosed={onClosed} size='medium'>
+    <Modal
+      isOpen={modal.visible}
+      onClose={onClose}
+      onClosed={onClosed}
+      size='medium'
+    >
       <ModalHeader onClose={onClose}>
         <ModalTitle Icon={IconTrophy} title={remixMessages.modalTitle} />
       </ModalHeader>
@@ -322,4 +336,7 @@ export const HostRemixContestModal = () => {
       </ModalContent>
     </Modal>
   )
-}
+})
+
+NiceModal.register('HostRemixContest', HostRemixContestModal)
+registerNiceModalId('HostRemixContest')

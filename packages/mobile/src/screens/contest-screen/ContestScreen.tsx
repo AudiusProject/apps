@@ -21,9 +21,7 @@ import {
   useUnfollowEvent,
   useUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { Name, ShareSource } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
@@ -37,7 +35,6 @@ import { useDispatch } from 'react-redux'
 import { Button, Divider, Flex, Text } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ProfilePicture } from 'app/components/core/ProfilePicture'
-import { make, track as trackEvent } from 'app/services/analytics'
 import {
   CollapsibleTabNavigator,
   collapsibleTabScreen
@@ -45,6 +42,7 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useEnterContest } from 'app/hooks/useEnterContest'
 import { useRoute } from 'app/hooks/useRoute'
+import { make, track as trackEvent } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
@@ -163,9 +161,6 @@ export const ContestScreen = () => {
   const { params } = useRoute<'Contest'>()
   const navigation = useNavigation()
   const insets = useSafeAreaInsets()
-
-  const { isEnabled: isContestsEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.CONTESTS)
 
   const { data: track } = useTrackByParams(params ?? {})
   const trackId = track?.track_id
@@ -337,11 +332,6 @@ export const ContestScreen = () => {
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false })
   }, [navigation])
-
-  if (isFlagLoaded && !isContestsEnabled) {
-    navigation.goBack()
-    return null
-  }
 
   if (!track || !user || !contest || !eventId || trackId == null) {
     return (

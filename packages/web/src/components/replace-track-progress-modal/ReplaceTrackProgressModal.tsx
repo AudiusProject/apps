@@ -1,3 +1,4 @@
+import { registerNiceModalId } from '@audius/common/services'
 import { useReplaceTrackProgressModal } from '@audius/common/store'
 import {
   Modal,
@@ -10,6 +11,7 @@ import {
   LoadingSpinner,
   Button
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const messages = {
   description:
@@ -20,17 +22,20 @@ const messages = {
   close: 'Close'
 }
 
-export const ReplaceTrackProgressModal = () => {
-  const { data, isOpen, onClose } = useReplaceTrackProgressModal()
+export const ReplaceTrackProgressModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useReplaceTrackProgressModal()
   const { loaded, total, transcode, error } = data
 
   const uploadProgress =
     Math.min((loaded && total ? loaded / total : 0) + (transcode ?? 0), 2) / 2
   const isUploadComplete = uploadProgress >= 1
 
+  const onClose = () => modal.hide()
+
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={onClose}
       size='small'
       dismissOnClickOutside={false}
@@ -78,4 +83,7 @@ export const ReplaceTrackProgressModal = () => {
       </ModalContent>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ReplaceTrackProgress', ReplaceTrackProgressModal)
+registerNiceModalId('ReplaceTrackProgress')

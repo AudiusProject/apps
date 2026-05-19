@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 
 import { useCurrentUserId, useTracks, useUsers } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import { ErrorLevel, Feature, Name, SquareSizes } from '@audius/common/models'
+import { Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
   playbackActions,
@@ -57,7 +57,6 @@ import {
   addOfflineEntries,
   OfflineDownloadStatus
 } from 'app/store/offline-downloads/slice'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import { useChromecast } from './GoogleCast'
 import { useSavePodcastProgress } from './useSavePodcastProgress'
@@ -296,17 +295,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
             : track.duration
         }
       } catch (e) {
-        reportToSentry({
-          level: ErrorLevel.Error,
-          name: 'AudioPlayer: makeTrackData failed',
-          additionalInfo: {
-            track,
-            playerBehavior,
-            trackOwner: queueTrackOwnersMap[track?.owner_id ?? '']
-          },
-          feature: Feature.Playback,
-          error: e
-        })
+        console.error('AudioPlayer: makeTrackData failed', e)
         return unlistedTrackFallbackTrackData
       }
     },

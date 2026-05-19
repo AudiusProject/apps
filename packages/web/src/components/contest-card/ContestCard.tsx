@@ -3,7 +3,6 @@ import {
   ReactNode,
   Ref,
   forwardRef,
-  useCallback,
   useEffect,
   useState
 } from 'react'
@@ -24,7 +23,7 @@ import {
   Text,
   useTheme
 } from '@audius/harmony'
-import { useLinkClickHandler } from 'react-router'
+import { Link } from 'react-router'
 
 import { Avatar } from 'components/avatar/Avatar'
 import { UserLink } from 'components/link'
@@ -59,7 +58,7 @@ export type ContestCardProps = Omit<PaperProps, 'onClick'> & {
    */
   trackId: ID
   variant?: ContestCardVariant
-  onClick?: (e: MouseEvent<HTMLDivElement>) => void
+  onClick?: (e: MouseEvent<HTMLAnchorElement>) => void
 }
 
 const COVER_HEIGHT = 96
@@ -271,15 +270,6 @@ export const ContestCard = forwardRef(
     const contestDestination = track?.permalink
       ? contestPage(track.permalink)
       : ''
-    const handleNavigate =
-      useLinkClickHandler<HTMLDivElement>(contestDestination)
-    const handleClick = useCallback(
-      (e: MouseEvent<HTMLDivElement>) => {
-        onClick?.(e)
-        if (contestDestination) handleNavigate(e)
-      },
-      [handleNavigate, onClick, contestDestination]
-    )
 
     if (!track || !user || !remixContest) {
       return <ContestCardSkeleton variant={variant} {...other} />
@@ -297,18 +287,26 @@ export const ContestCard = forwardRef(
     }
 
     const status = formatStatus(remixContest.endDate)
+    const contestTitle =
+      (remixContest.eventData as any)?.title?.trim() || track.title
 
     return (
       <Paper
         ref={ref}
-        role='button'
-        tabIndex={0}
-        onClick={handleClick}
         direction='column'
         border='default'
         shadow='mid'
         w='100%'
-        css={{ overflow: 'hidden', borderRadius: 14, cursor: 'pointer' }}
+        css={{
+          overflow: 'hidden',
+          borderRadius: 14,
+          cursor: 'pointer',
+          // Establish a positioning context for the stretched <Link> overlay
+          // below, which is what lets cmd+click / middle-click open the
+          // contest page in a new tab the way the browser does for any
+          // ordinary anchor.
+          position: 'relative'
+        }}
         {...other}
       >
         {/* Cover banner */}
@@ -337,7 +335,16 @@ export const ContestCard = forwardRef(
               >
                 {messages.hostedBy}
               </Text>
-              <UserLink userId={user.user_id} size='l' ellipses />
+              {/* UserLink is its own <a>; lift it above the stretched link
+                  so the artist's profile remains independently clickable
+                  (and nesting two anchors stays invalid HTML — they're
+                  siblings in the stacking context, not parent/child). */}
+              <UserLink
+                userId={user.user_id}
+                size='l'
+                ellipses
+                css={{ position: 'relative', zIndex: 2 }}
+              />
             </Flex>
           </Flex>
 
@@ -364,26 +371,48 @@ export const ContestCard = forwardRef(
                   wordBreak: 'break-word'
                 }}
               >
-                {(remixContest.eventData as any)?.title?.trim() || track.title}
+                {contestTitle}
               </Text>
             </Flex>
             <Flex
               gap='s'
               wrap='nowrap'
-              onClick={(e) => e.stopPropagation()}
               css={{
                 overflowX: 'auto',
                 overflowY: 'hidden',
                 minWidth: 0,
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                '&::-webkit-scrollbar': { display: 'none' }
+                '&::-webkit-scrollbar': { display: 'none' },
+                // Elevate the horizontally-scrolling entries row above the
+                // stretched link so horizontal scroll / pill clicks don't
+                // accidentally navigate to the contest page.
+                position: 'relative',
+                zIndex: 2
               }}
             >
               <CardPill>{messages.entries(entriesCount)}</CardPill>
             </Flex>
           </Flex>
         </Flex>
+
+        {/* Stretched-link overlay: a real <a> that fills the card so the
+            browser handles cmd+click and middle-click natively (opening
+            the contest in a new tab). Interactive descendants
+            (UserLink, the entries row) opt out via a higher z-index. */}
+        {contestDestination ? (
+          <Link
+            to={contestDestination}
+            aria-label={contestTitle}
+            onClick={onClick}
+            css={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 1,
+              textDecoration: 'none'
+            }}
+          />
+        ) : null}
       </Paper>
     )
   }

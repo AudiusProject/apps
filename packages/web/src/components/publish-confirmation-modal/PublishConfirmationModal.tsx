@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { usePublishConfirmationModal } from '@audius/common/store'
 import {
   Button,
@@ -11,6 +12,7 @@ import {
   ModalFooter,
   IconRocket
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const getMessages = (contentType: 'track' | 'album' | 'playlist') => ({
   title: 'Confirm Release',
@@ -19,19 +21,24 @@ const getMessages = (contentType: 'track' | 'album' | 'playlist') => ({
   release: 'Release Now'
 })
 
-export const PublishConfirmationModal = () => {
-  const { data, isOpen, onClose } = usePublishConfirmationModal()
+export const PublishConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = usePublishConfirmationModal()
   const { contentType, confirmCallback } = data
 
   const messages = getMessages(contentType)
 
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+
   const handleConfirm = useCallback(() => {
     confirmCallback()
-    onClose()
-  }, [confirmCallback, onClose])
+    handleClose()
+  }, [confirmCallback, handleClose])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader>
         <ModalTitle icon={<IconRocket />} title={messages.title} />
       </ModalHeader>
@@ -41,7 +48,7 @@ export const PublishConfirmationModal = () => {
         </ModalContentText>
       </ModalContent>
       <ModalFooter>
-        <Button fullWidth variant='secondary' onClick={onClose}>
+        <Button fullWidth variant='secondary' onClick={handleClose}>
           {messages.cancel}
         </Button>
         <Button variant='primary' fullWidth onClick={handleConfirm}>
@@ -50,4 +57,7 @@ export const PublishConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('PublishConfirmation', PublishConfirmationModal)
+registerNiceModalId('PublishConfirmation')

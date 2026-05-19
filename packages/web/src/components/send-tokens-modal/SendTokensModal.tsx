@@ -1,17 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
-import {
-  ErrorLevel,
-  Feature,
-  SolanaWalletAddress,
-  User
-} from '@audius/common/models'
+import { SolanaWalletAddress, User } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { useSendTokensModal } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import ResponsiveModal from 'components/modal/ResponsiveModal'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import SendTokensConfirmation from './SendTokensConfirmation'
 import SendTokensFailure from './SendTokensFailure'
@@ -32,8 +28,11 @@ type SendTokensState = {
   signature: string
 }
 
-const SendTokensModal = () => {
-  const { isOpen, onClose: closeModal, data } = useSendTokensModal()
+const SendTokensModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const closeModal = useCallback(() => modal.hide(), [modal])
+  const { data } = useSendTokensModal()
   const { mint, user: prePopulatedUser } = data ?? {}
   const isAppKitModalOpenRef = useRef(false)
 
@@ -181,17 +180,7 @@ const SendTokensModal = () => {
       }
 
       setError(errorMessage)
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error: error as Error,
-        additionalInfo: {
-          amount: state.amount.toString(),
-          destinationAddress: state.destinationAddress,
-          mint: state.selectedMint,
-          errorString
-        },
-        feature: Feature.SendTokens
-      })
+      console.error(error as Error)
       setState((prev) => ({ ...prev, step: 'failure' }))
     }
   }
@@ -288,6 +277,9 @@ const SendTokensModal = () => {
       ) : null}
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('SendTokensModal', SendTokensModal)
+registerNiceModalId('SendTokensModal')
 
 export default SendTokensModal

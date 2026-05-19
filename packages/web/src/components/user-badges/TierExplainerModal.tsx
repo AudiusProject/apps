@@ -1,6 +1,7 @@
 import { useCallback, ReactElement } from 'react'
 
 import { BadgeTier } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { route, Nullable } from '@audius/common/utils'
 import {
   Button,
@@ -16,10 +17,10 @@ import {
   IconTokenPlatinum,
   IconTokenSilver
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import { BadgeTierText } from 'components/user-badges/ProfilePageBadge'
 import { useProfileTier } from 'hooks/wallet'
 import { TierLevel, TierNumber } from 'pages/rewards-page/Tiers'
@@ -101,15 +102,14 @@ const Tier = ({ tier, isActive = false, isCompact = false }: TierProps) => {
   )
 }
 
-const TierExplainerModal = () => {
+const TierExplainerModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const tier = useProfileTier()
-
-  const [isOpen, setIsOpen] = useModalState('TiersExplainer')
+  const modal = useModal()
 
   const handleDismiss = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+    modal.hide()
+  }, [modal])
 
   const onClickLearnMore = useCallback(() => {
     handleDismiss()
@@ -119,7 +119,7 @@ const TierExplainerModal = () => {
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={handleDismiss}
       dismissOnClickOutside
       size='medium'
@@ -147,6 +147,9 @@ const TierExplainerModal = () => {
       </ModalContent>
     </Modal>
   )
-}
+})
+
+NiceModal.register('TiersExplainer', TierExplainerModal)
+registerNiceModalId('TiersExplainer')
 
 export default TierExplainerModal

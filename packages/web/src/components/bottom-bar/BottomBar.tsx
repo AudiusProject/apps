@@ -68,14 +68,6 @@ const BottomBar = ({
 
   return window.ReactNativeWebView?.postMessage ? null : (
     <div className={styles.bottomBar}>
-      <TrendingButton
-        isActive={currentPage === TRENDING_PAGE}
-        darkMode={isDarkMode}
-        onClick={onClick(onClickTrending, TRENDING_PAGE)}
-        href={TRENDING_PAGE}
-        isMatrixMode={isMatrixMode}
-        aria-label='Trending Page'
-      />
       <FeedButton
         isActive={currentPage === FEED_PAGE}
         darkMode={isDarkMode}
@@ -83,6 +75,14 @@ const BottomBar = ({
         href={FEED_PAGE}
         isMatrixMode={isMatrixMode}
         aria-label='Feed Page'
+      />
+      <TrendingButton
+        isActive={currentPage === TRENDING_PAGE}
+        darkMode={isDarkMode}
+        onClick={onClick(onClickTrending, TRENDING_PAGE)}
+        href={TRENDING_PAGE}
+        isMatrixMode={isMatrixMode}
+        aria-label='Trending Page'
       />
       <ExploreButton
         isActive={currentPage === EXPLORE_PAGE}

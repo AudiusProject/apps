@@ -14,10 +14,7 @@ import { useRemoteVar } from '~/hooks'
 import { ChallengeRewardID } from '~/models'
 import { ID } from '~/models/Identifiers'
 import { StringKeys } from '~/services'
-import {
-  NotificationType,
-  Notification
-} from '~/store/notifications/types'
+import { NotificationType, Notification } from '~/store/notifications/types'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'

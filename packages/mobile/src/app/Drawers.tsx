@@ -40,7 +40,6 @@ import { QueueDrawer } from 'app/components/queue-drawer'
 import { RateCtaDrawer } from 'app/components/rate-cta-drawer'
 import { ReceiveTokensDrawer } from 'app/components/receive-tokens-drawer'
 import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
-import { ShareDrawer } from 'app/components/share-drawer'
 import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-drawer'
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
@@ -53,6 +52,7 @@ import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/compon
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
+import { FeedFilterDrawer } from 'app/screens/feed-screen'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
@@ -113,10 +113,10 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ClaimAllRewards: ClaimAllRewardsDrawer,
   APIRewardsExplainer: ApiRewardsDrawer,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
-  Share: ShareDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
   TrendingFilter: TrendingCombinedFilterDrawer,
+  FeedFilter: FeedFilterDrawer,
   Overflow: OverflowMenuDrawer,
   SignOutConfirmation: SignOutConfirmationDrawer,
   AddToCollection: AddToCollectionDrawer,

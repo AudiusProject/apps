@@ -1,6 +1,5 @@
 import { createRef, type RefObject } from 'react'
 
-import { FeatureFlags } from '@audius/common/services'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, vi, beforeEach } from 'vitest'
 
@@ -98,9 +97,7 @@ const contest = {
   }
 }
 
-const renderContestPage = (opts?: {
-  featureFlags?: Partial<Record<FeatureFlags, boolean>>
-}) => {
+const renderContestPage = () => {
   const containerRef = createRef<HTMLDivElement>()
   return render(
     <MemoryRouter initialEntries={['/Protohype/contest/ready-to-love']}>
@@ -118,12 +115,7 @@ const renderContestPage = (opts?: {
       </Routes>
     </MemoryRouter>,
     {
-      skipRouter: true,
-      featureFlags: { [FeatureFlags.CONTESTS]: true, ...opts?.featureFlags },
-      // The page guards the flag check on `isLoaded` to avoid flicker during
-      // remote-config hydration in prod. In tests we've already set the
-      // flag value, so mark the config as loaded so the guard fires.
-      reduxState: { remoteConfig: { remoteConfigLoaded: true } }
+      skipRouter: true
     }
   )
 }

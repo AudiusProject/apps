@@ -56,7 +56,6 @@
     "mobile:example:upload": "cd packages/mobile/examples/upload && npx expo start",
     "EMBED======================================": "",
     "embed:prod": "npm run start:prod -w embed",
-    "embed:stage": "npm run start:stage -w embed",
     "embed:dev": "npm run start:dev -w embed",
     "HARMONY====================================": "",
     "harmony": "turbo run start --filter=@audius/harmony",
@@ -82,7 +81,6 @@
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "11.12.0",
-    "@sentry/cli": "3.1.0",
     "@tsconfig/strictest": "2.0.2",
     "@types/keyv": "4.2.0",
     "@types/react": "19.0.0",

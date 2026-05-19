@@ -1,7 +1,9 @@
 import { ReactNode, useState, useMemo } from 'react'
 
 import { FrostedSurfaceIntensity, ThemePalette } from '@audius/common/models'
+import { setNiceModalAdapter } from '@audius/common/services'
 import { MediaProvider } from '@audius/harmony/src/contexts'
+import NiceModal from '@ebay/nice-modal-react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Provider as ReduxProvider } from 'react-redux'
@@ -26,7 +28,12 @@ import {
 } from 'utils/theme/theme'
 
 import { wagmiAdapter } from './ReownAppKitModal'
+import './registerNiceModals'
 import { createRoutes } from './routes'
+
+// Wire the platform-agnostic bridge so common (sagas/services) can drive
+// nice-modal-react without depending on the package directly.
+setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 
 type AppProvidersProps = {
   children?: ReactNode
@@ -81,6 +88,9 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         <MediaProvider>
           <ReduxProvider store={store}>
             <PersistGate loading={null} persistor={persistor}>
+              {/* <NiceModal.Provider> is mounted inside routes.tsx, deeper
+                  in the tree, so NiceModal-managed modals can read app
+                  contexts (AudiusQueryProvider, ToastContext, etc). */}
               <RouterProvider router={router} />
             </PersistGate>
           </ReduxProvider>

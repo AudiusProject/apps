@@ -5,8 +5,7 @@ import { trackMetadataForUploadToSdk } from '~/adapters'
 import {
   isContentUSDCPurchaseGated,
   type USDCPurchaseConditions,
-  Name,
-  Feature
+  Name
 } from '~/models'
 import { createUserBankIfNeeded } from '~/services/audius-backend'
 import { ProgressStatus, uploadActions } from '~/store'
@@ -26,7 +25,7 @@ const { updateProgress } = uploadActions
 
 type PublishTracksContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
+  'audiusSdk' | 'analytics' | 'dispatch'
 > & {
   userId: number
   ethAddress?: string | null
@@ -51,7 +50,6 @@ export const publishTracks = async (
     kind,
     audiusSdk,
     dispatch,
-    reportToSentry,
     analytics: { make, track }
   } = context
 
@@ -74,12 +72,7 @@ export const publishTracks = async (
       ethAddress,
       recordAnalytics: track
     }).catch((error) => {
-      reportToSentry({
-        error,
-        additionalInfo: { userId, ethAddress },
-        feature: Feature.Upload,
-        name: 'Ensure USDC userbank on track upload'
-      })
+      console.error(error)
     })
   }
 
@@ -147,11 +140,7 @@ export const publishTracks = async (
               progress: { status: ProgressStatus.ERROR }
             })
           )
-          reportToSentry({
-            error: e as Error,
-            name: 'Upload: Track Publish',
-            feature: Feature.Upload
-          })
+          console.error('Upload: Track Publish', e as Error)
           console.error('Error publishing track:', e)
           return { result: null, error: e as Error }
         }

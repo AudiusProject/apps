@@ -1,29 +1,33 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { settingsMessages } from '@audius/common/messages'
 import { route } from '@audius/common/utils'
 import { Button, IconUserList } from '@audius/harmony'
 import { useMatch } from 'react-router'
 
-import { useModalState } from 'common/hooks/useModalState'
+import { LabelAccountModal } from 'components/label-account-modal/LabelAccountModal'
 
 import SettingsCard from '../SettingsCard'
 
 const { LABEL_ACCOUNT_SETTINGS_PAGE } = route
 
 export const LabelAccountSettingsCard = () => {
-  const [, setIsModalOpen] = useModalState('LabelAccount')
+  const [isOpen, setIsOpen] = useState(false)
   const match = useMatch(LABEL_ACCOUNT_SETTINGS_PAGE)
 
   useEffect(() => {
     if (match) {
-      setIsModalOpen(true)
+      setIsOpen(true)
     }
-  }, [match, setIsModalOpen])
+  }, [match])
 
   const handleOpen = useCallback(() => {
-    setIsModalOpen(true)
-  }, [setIsModalOpen])
+    setIsOpen(true)
+  }, [])
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
 
   return (
     <>
@@ -36,6 +40,7 @@ export const LabelAccountSettingsCard = () => {
           {settingsMessages.labelAccountButtonText}
         </Button>
       </SettingsCard>
+      <LabelAccountModal isOpen={isOpen} onClose={handleClose} />
     </>
   )
 }

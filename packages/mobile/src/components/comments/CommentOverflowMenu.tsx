@@ -238,8 +238,8 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
   }, [deleteComment, id, parentCommentId, toast])
 
   const handlePress = useCallback(() => {
-    setIsOpen(!isOpen)
-    setIsVisible(!isVisible)
+    setIsOpen(true)
+    setIsVisible(true)
 
     trackEvent(
       make({
@@ -247,7 +247,7 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
         commentId: id
       })
     )
-  }, [isOpen, isVisible, id])
+  }, [id])
 
   return (
     <>

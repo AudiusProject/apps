@@ -16,6 +16,7 @@ import { difference } from 'lodash'
 import { useSelector } from 'react-redux'
 
 import type { AppState } from 'app/store'
+import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
 import {
   getIsDoneLoadingFromDisk,
   getOfflineCollectionsStatus
@@ -100,21 +101,39 @@ export const useLibraryCollections = ({
 
   const offlineCollectionIds = useSelector((state: AppState) => {
     const offlineCollectionsStatus = getOfflineCollectionsStatus(state)
-    return Object.keys(offlineCollectionsStatus).filter(
-      (k) => offlineCollectionsStatus[k] === OfflineDownloadStatus.SUCCESS
-    )
+    const ids: number[] = []
+    for (const key of Object.keys(offlineCollectionsStatus)) {
+      if (key === DOWNLOAD_REASON_FAVORITES) continue
+      if (offlineCollectionsStatus[key] !== OfflineDownloadStatus.SUCCESS)
+        continue
+      const numericId = Number(key)
+      if (Number.isFinite(numericId) && numericId > 0) ids.push(numericId)
+    }
+    return ids
   })
+
+  const { data: offlineCollections = [] } = useCollections(offlineCollectionIds)
+
+  const filteredOfflineCollectionIds = useMemo(() => {
+    const wantAlbums = collectionType === 'albums'
+    return filterCollections(
+      offlineCollections.filter(
+        (collection) => Boolean(collection.is_album) === wantAlbums
+      ),
+      { filterText: filterValue }
+    ).map((collection) => collection.playlist_id)
+  }, [offlineCollections, collectionType, filterValue])
 
   const collectionIds = useMemo(
     () =>
       isReachable
         ? [...filteredLocalCollectionIds, ...filteredFetchedCollectionIds]
-        : offlineCollectionIds,
+        : filteredOfflineCollectionIds,
     [
       isReachable,
       filteredLocalCollectionIds,
       filteredFetchedCollectionIds,
-      offlineCollectionIds
+      filteredOfflineCollectionIds
     ]
   )
 
@@ -141,12 +160,12 @@ export const useLibraryCollections = ({
 
   return {
     collectionIds,
-    hasNextPage,
+    hasNextPage: isReachable ? hasNextPage : false,
     loadNextPage,
     status,
-    isPending,
-    isLoading,
-    isFetchingNextPage,
+    isPending: isReachable ? isPending : !isDoneLoadingFromDisk,
+    isLoading: isReachable ? isLoading : !isDoneLoadingFromDisk,
+    isFetchingNextPage: isReachable ? isFetchingNextPage : false,
     localCollectionCount: localCollectionIds.length
   }
 }

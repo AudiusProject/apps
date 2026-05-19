@@ -3,6 +3,10 @@ import { useEffect, useMemo } from 'react'
 import { EntityType } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
+import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
+import { ID } from '~/models'
+import { remixesPageActions } from '~/store/pages'
+
 import { LineupData, QueryOptions } from '../types'
 import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 
@@ -12,10 +16,6 @@ import {
   useRemixesCount,
   getRemixesQueryKey
 } from './useRemixes'
-
-import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
-import { ID } from '~/models'
-import { remixesPageActions } from '~/store/pages'
 
 const DEFAULT_PAGE_SIZE = 10
 

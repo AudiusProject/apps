@@ -50,6 +50,7 @@
     "@audius/sdk": "*",
     "@bravemobile/react-native-code-push": "^12.3.2",
     "@coinflowlabs/react-native": "4.5.2",
+    "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "11.14.0",
     "@fingerprintjs/fingerprintjs-pro-react-native": "3.9.0",

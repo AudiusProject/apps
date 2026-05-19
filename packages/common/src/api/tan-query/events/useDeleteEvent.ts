@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Event, Feature, ID } from '~/models'
+import { Event, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { getEventQueryKey, getEventIdsByEntityIdQueryKey } from './utils'
@@ -13,7 +13,7 @@ export type DeleteEventArgs = {
 }
 
 export const useDeleteEvent = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -111,12 +111,7 @@ export const useDeleteEvent = () => {
         )
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Events',
-        feature: Feature.Events
-      })
+      console.error(error)
 
       toast({
         content: 'There was an error deleting the event. Please try again'

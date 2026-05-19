@@ -12,7 +12,6 @@ import { call, put, race, take, takeLeading } from 'typed-redux-saga'
 
 import { queryHasAccount, queryAccountUser, queryWalletAddresses } from '~/api'
 import { Name } from '~/models/Analytics'
-import { ErrorLevel } from '~/models/ErrorReporting'
 import { PurchaseVendor } from '~/models/PurchaseContent'
 import { Status } from '~/models/Status'
 import { StringUSDC } from '~/models/Wallet'
@@ -217,7 +216,6 @@ function* doBuyUSDC({
     portalHostName
   }
 }: ReturnType<typeof onrampOpened>) {
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
   const solanaWalletService = yield* getContext('solanaWalletService')
   const config = yield* call(getBuyUSDCRemoteConfig)
@@ -336,11 +334,7 @@ function* doBuyUSDC({
       e instanceof BuyUSDCError
         ? e
         : new BuyUSDCError(BuyUSDCErrorCode.OnrampError, `${e}`)
-    yield* call(reportToSentry, {
-      level: ErrorLevel.Error,
-      error,
-      additionalInfo: { userBank }
-    })
+    console.error('BuyUSDC onramp failed', error, { userBank })
     yield* put(buyUSDCFlowFailed({ error }))
     yield* call(
       track,
@@ -359,7 +353,6 @@ function* recoverPurchaseIfNecessary() {
   const hasAccount = yield* call(queryHasAccount)
   if (!hasAccount) return
 
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const solanaWalletService = yield* getContext('solanaWalletService')
@@ -465,10 +458,7 @@ function* recoverPurchaseIfNecessary() {
     )
   } catch (e) {
     yield* put(recoveryStatusChanged({ status: Status.ERROR }))
-    yield* call(reportToSentry, {
-      level: ErrorLevel.Error,
-      error: e as Error
-    })
+    console.error('BuyUSDC recovery failed', e)
     yield* call(
       track,
       make({

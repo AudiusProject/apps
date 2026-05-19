@@ -14,10 +14,8 @@ import {
   useUnfollowEvent,
   useUser
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
 import { Name, SquareSizes, ShareSource } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   remixesPageActions,
   remixesPageSelectors,
@@ -42,7 +40,7 @@ import {
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { Navigate, useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar/Avatar'
@@ -209,9 +207,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const navigate = useNavigate()
   const { onOpen: openHostRemixContest } = useHostRemixContestModal()
   const { handle, slug } = useParams<{ handle: string; slug: string }>()
-
-  const { isEnabled: isContestsEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.CONTESTS)
 
   const originalTrackId = useSelector(getTrackId)
   const { data: originalTrackByPermalink } = useTrackByPermalink(
@@ -482,11 +477,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     handleShareContest,
     handleEnterContest
   ])
-
-  // Flag gate
-  if (isFlagLoaded && !isContestsEnabled) {
-    return <Navigate to='/' replace />
-  }
 
   if (!track || !user) {
     return null

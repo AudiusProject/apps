@@ -1,6 +1,5 @@
 import { useCallback, useLayoutEffect, useState } from 'react'
 
-import { ErrorLevel, Feature } from '@audius/common/models'
 import { newCollectionMetadata } from '@audius/common/schemas'
 import {
   TrackMetadataForUpload,
@@ -13,7 +12,6 @@ import cn from 'classnames'
 import { AudioQuality } from 'components/upload/AudioQuality'
 import { Dropzone } from 'components/upload/Dropzone'
 import { InvalidFileType } from 'components/upload/InvalidFileType'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { TracksPreview } from '../components/TracksPreview'
 import { processFiles } from '../store/utils/processFiles'
@@ -68,15 +66,10 @@ const SelectPage = (props: SelectPageProps) => {
       })
 
       const processedFiles = processFiles(selectedFiles, (name, reason) => {
-        reportToSentry({
-          name: 'UploadProcessFiles',
-          error: new Error(`${reason} error for file ${name}`),
-          feature: Feature.Upload,
-          level: ErrorLevel.Warning,
-          additionalInfo: {
-            selectedFiles
-          }
-        })
+        console.error(
+          'UploadProcessFiles',
+          new Error(`${reason} error for file ${name}`)
+        )
         return setUploadTrackError({ reason })
       })
       const processedTracks = (await Promise.all(processedFiles)).filter(

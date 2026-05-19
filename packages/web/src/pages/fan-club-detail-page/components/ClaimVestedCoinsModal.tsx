@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useFanClubByTicker } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
+import { registerNiceModalId } from '@audius/common/services'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
 import { FixedDecimal } from '@audius/fixed-decimal'
 import {
@@ -14,6 +15,7 @@ import {
   TextInput,
   Tooltip
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import ResponsiveModal from '../../../components/modal/ResponsiveModal'
 
@@ -21,8 +23,11 @@ const messages = coinDetailsMessages.claimVestedCoinsModal
 
 const DEFAULT_REWARDS_POOL_PERCENT = 50
 
-export const ClaimVestedCoinsModal = () => {
-  const { isOpen, onClose, data } = useClaimVestedCoinsModal()
+export const ClaimVestedCoinsModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const { data } = useClaimVestedCoinsModal()
   const { ticker, claimable, onClaim, isClaimPending } = data ?? {}
   const { data: coin } = useFanClubByTicker({ ticker: data?.ticker })
   const [rewardsPoolPercentage, setRewardsPoolPercentage] = useState(
@@ -188,4 +193,7 @@ export const ClaimVestedCoinsModal = () => {
       </Flex>
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('ClaimVestedCoinsModal', ClaimVestedCoinsModal)
+registerNiceModalId('ClaimVestedCoinsModal')

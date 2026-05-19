@@ -2,13 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Terminology
+
+Audius runs on the **Open Audio Protocol**, which uses a single canonical node type: the **Open Audio Validator Node**. The earlier split between *Discovery Nodes* and *Content Nodes* is deprecated — both roles are now served by validator nodes. When writing docs, comments, commit messages, or user-facing strings, use "Open Audio Validator Node" (or just "validator node"). Do not introduce new references to "Discovery Node", "Content Node", "Creator Node", or "Discovery Provider". Directory names like `packages/discovery-provider` and `mediorum` are retained for compatibility but no longer reflect the architecture.
+
 ## Project Overview
 
 Audius is a decentralized, community-owned music-sharing protocol. This is a monorepo containing:
 
 - Web and desktop applications (React + Vite)
 - Mobile applications (React Native)
-- Backend services (Discovery Provider, Content Node)
+- Backend services that together make up the Open Audio Validator Node software (indexer + media storage; see `packages/discovery-provider` and `mediorum` directories — names retained from earlier architecture)
 - Blockchain smart contracts (Ethereum and Solana)
 - SDK and common libraries
 
@@ -76,7 +80,7 @@ audius-cmd stream
 - **packages/sdk**: JavaScript SDK for interacting with Audius protocol
 - **packages/harmony**: Design system components and tokens
 - **packages/discovery-provider**: Python backend that indexes blockchain data
-- **mediorum**: Content node for storing/serving audio files
+- **mediorum**: Media storage component of the Open Audio Validator Node — stores and serves audio files (directory name retained from earlier "content node" architecture)
 
 ### State Management
 
@@ -130,7 +134,7 @@ audius-cmd stream
 - Protocol must be running for local development
 - Mobile requires proper native environment setup
 - Some features require blockchain interaction
-- Audio processing happens on content nodes
+- Audio processing happens on Open Audio Validator Nodes (the role formerly called "content node" — deprecated terminology)
 
 ## Code Style and Best Practices
 

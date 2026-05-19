@@ -23,7 +23,6 @@ import {
   signAndSendTransaction
 } from 'app/store/utils/phantomWalletConnect'
 import { generatePlaylistArtwork } from 'app/utils/generatePlaylistArtwork'
-import { reportToSentry } from 'app/utils/reportToSentry'
 import share from 'app/utils/share'
 
 export const storeContext: CommonStoreContext = {
@@ -45,11 +44,6 @@ export const storeContext: CommonStoreContext = {
   env,
   explore,
   nftClient: null,
-  sentry: {
-    setTag: () => {}, // Sentry removed - no-op
-    getCurrentScope: () => ({ setUser: () => {} }) // Sentry removed - no-op
-  },
-  reportToSentry,
   // Shim in main, but defined in native-reloaded branch
   audioPlayer,
   trackDownload,

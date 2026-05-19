@@ -113,16 +113,22 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       titleRowRef={titleRowRef}
       icon={IconFeed}
       primary={messages.feedHeaderTitle}
-      rightDecorator={
-        <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
-      }
       bottomBar={
-        isForYou ? null : (
-          <FeedFilters
-            currentFilter={feedFilter}
-            onSelectFilter={onSelectFilter}
-          />
-        )
+        <Flex
+          w='100%'
+          alignItems='center'
+          justifyContent='space-between'
+          gap='m'
+          pb='l'
+        >
+          <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
+          {isForYou ? null : (
+            <FeedFilters
+              currentFilter={feedFilter}
+              onSelectFilter={onSelectFilter}
+            />
+          )}
+        </Flex>
       }
     />
   )

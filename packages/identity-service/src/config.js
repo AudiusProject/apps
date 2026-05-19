@@ -695,12 +695,6 @@ const config = convict({
     default: '',
     env: 'aaoAddress'
   },
-  sentryDSN: {
-    doc: 'Sentry DSN key',
-    format: String,
-    env: 'sentryDSN',
-    default: ''
-  },
   ethGasMultiplier: {
     doc: 'Constant value to multiply the configured FAST gas price by - in order to optimize tx success',
     format: Number,

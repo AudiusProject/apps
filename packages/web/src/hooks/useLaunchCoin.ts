@@ -7,7 +7,6 @@ import {
   useQueryContext
 } from '@audius/common/api'
 import {
-  Feature,
   LaunchCoinErrorMetadata,
   LaunchCoinResponse
 } from '@audius/common/models'
@@ -41,7 +40,7 @@ export const LAUNCHPAD_COIN_DECIMALS = 9 // All our launched coins will have 9 d
  * This creates a new token and optionally makes an initial purchase.
  */
 export const useLaunchCoin = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation<LaunchCoinResponse, Error, LaunchCoinParams>({
@@ -154,14 +153,10 @@ export const useLaunchCoin = () => {
             ? 'firstBuyConfirmed'
             : 'poolCreateConfirmed'
         } catch (e) {
-          if (reportToSentry) {
-            reportToSentry({
-              error: e instanceof Error ? e : new Error(e as string),
-              name: 'Confirm Launch Failure',
-              feature: Feature.FanClubs,
-              additionalInfo: errorMetadata
-            })
-          }
+          console.error(
+            'Confirm Launch Failure',
+            e instanceof Error ? e : new Error(e as string)
+          )
           throw e
         }
 
@@ -236,14 +231,10 @@ export const useLaunchCoin = () => {
           errorMetadata.sdkCoinAdded = true
           errorMetadata.lastStep = 'sdkCoinAdded'
         } catch (e) {
-          if (reportToSentry) {
-            reportToSentry({
-              error: e instanceof Error ? e : new Error(e as string),
-              name: 'SDK Create Coin Failure',
-              feature: Feature.FanClubs,
-              additionalInfo: errorMetadata
-            })
-          }
+          console.error(
+            'SDK Create Coin Failure',
+            e instanceof Error ? e : new Error(e as string)
+          )
         }
 
         return {
@@ -253,14 +244,10 @@ export const useLaunchCoin = () => {
           errorMetadata
         }
       } catch (error) {
-        if (reportToSentry) {
-          reportToSentry({
-            error: error instanceof Error ? error : new Error(error as string),
-            name: 'Launch Coin Failure',
-            feature: Feature.FanClubs,
-            additionalInfo: errorMetadata
-          })
-        }
+        console.error(
+          'Launch Coin Failure',
+          error instanceof Error ? error : new Error(error as string)
+        )
         return { isError: true, errorMetadata, newMint: '', logoUri: '' }
       }
     },
@@ -288,18 +275,10 @@ export const useLaunchCoin = () => {
       })
     },
     onError: (error, params, _context) => {
-      if (reportToSentry) {
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(error as string),
-          name: 'Launch Coin',
-          feature: Feature.TanQuery,
-          additionalInfo: {
-            coinName: params.name,
-            coinSymbol: params.symbol,
-            initialBuyAmount: params.initialBuyAmountAudio ?? 0
-          }
-        })
-      }
+      console.error(
+        'Launch Coin',
+        error instanceof Error ? error : new Error(error as string)
+      )
     }
   })
 }

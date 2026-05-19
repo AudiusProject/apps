@@ -2,7 +2,6 @@ import type { RefObject } from 'react'
 import React, { useCallback } from 'react'
 
 import {
-  useRemixContest,
   useToggleFavoriteTrack,
   useTrackRank,
   useStems,
@@ -10,11 +9,7 @@ import {
   useFanClub,
   useTrackDownloadCount
 } from '@audius/common/api'
-import {
-  useCurrentTrack,
-  useFeatureFlag,
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
@@ -34,7 +29,6 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { CommonState } from '@audius/common/store'
 import {
   playbackSelectors,
@@ -128,8 +122,7 @@ const messages = {
   preview: 'Preview',
   hidden: 'Hidden',
   releases: (releaseDate: string) =>
-    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`,
-  remixContest: 'Remix Contest'
+    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -234,13 +227,6 @@ export const TrackScreenDetailsTile = ({
   const isLongFormContent =
     track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
-  const { data: remixContest } = useRemixContest(trackId)
-  // When CONTESTS is on, the contest experience moved to a dedicated
-  // screen and the track screen reads as a normal track screen. The
-  // tile keeps its standard "TRACK"/"REMIX" header label rather than
-  // swapping in "REMIX CONTEST" — Figma 2888-16639.
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
-  const isRemixContest = !!remixContest && !isContestsEnabled
 
   const isPlayingPreview = isPreviewing && isPlaying
   const isPlayingFullAccess = isPlaying && !isPreviewing
@@ -273,9 +259,7 @@ export const TrackScreenDetailsTile = ({
   )
 
   let headerText
-  if (isRemixContest) {
-    headerText = messages.remixContest
-  } else if (isRemix) {
+  if (isRemix) {
     headerText = messages.remix
   } else if (isStreamGated) {
     if (isContentUSDCPurchaseGated(streamConditions)) {

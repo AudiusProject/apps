@@ -1,7 +1,9 @@
 import { useState } from 'react'
 
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
+import { setNiceModalAdapter } from '@audius/common/services'
 import { playbackActions } from '@audius/common/store'
+import NiceModal from '@ebay/nice-modal-react'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider, PortalHost } from '@gorhom/portal'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
@@ -39,9 +41,11 @@ import { ConnectivityManager } from './ConnectivityManager'
 import { Drawers } from './Drawers'
 import ErrorBoundary from './ErrorBoundary'
 import { ThemeProvider } from './ThemeProvider'
-import { initSentry, navigationIntegration } from './sentry'
+import './registerNiceModals'
 
-initSentry()
+// Wire the platform-agnostic bridge so common (sagas/services) can drive
+// nice-modal-react without depending on the package directly.
+setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 
 const Airplay = Platform.select({
   ios: () => require('../components/audio/Airplay').default,
@@ -123,18 +127,22 @@ const App = () => {
                         <PortalProvider>
                           <ErrorBoundary>
                             <ConnectivityManager />
-                            <NavigationContainer
-                              navigationIntegration={navigationIntegration}
-                            >
+                            <NavigationContainer>
                               <BottomSheetModalProvider>
                                 <CommentDrawerProvider>
-                                  <Toasts />
-                                  <Airplay />
-                                  <RootScreen />
-                                  <Drawers />
-                                  <NotificationReminder />
-                                  <RateCtaReminder />
-                                  <PortalHost name='ChatReactionsPortal' />
+                                  {/* NiceModal-managed modals (e.g.
+                                      ShareDrawer) call useNavigation(), so
+                                      the Provider must mount inside
+                                      NavigationContainer. */}
+                                  <NiceModal.Provider>
+                                    <Toasts />
+                                    <Airplay />
+                                    <RootScreen />
+                                    <Drawers />
+                                    <NotificationReminder />
+                                    <RateCtaReminder />
+                                    <PortalHost name='ChatReactionsPortal' />
+                                  </NiceModal.Provider>
                                 </CommentDrawerProvider>
                               </BottomSheetModalProvider>
                               <PortalHost name='DrawerPortal' />

@@ -84,7 +84,12 @@ export function fetchCurrentVersion(
   serviceType: ServiceType
 ): ThunkAction<void, AppState, Audius, Action<string>> {
   return async (dispatch, getState, aud) => {
-    const currentVersion = await aud.NodeType.getCurrentVersion(serviceType)
+    const numberOfVersions =
+      await aud.NodeType.getNumberOfVersions(serviceType)
+    const currentVersion = await aud.NodeType.getVersion(
+      serviceType,
+      numberOfVersions - 1
+    )
     dispatch(setCurrentVersion({ serviceType, currentVersion }))
   }
 }

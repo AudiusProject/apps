@@ -70,14 +70,6 @@ jobs:
       filters:
         branches:
           only: /^main$/
-  - web-deploy-sentry-sourcemaps:
-      context: Audius Client
-      requires:
-        - web-hold-production
-      filters:
-        branches:
-          only: /^main$/
-
   # Distribute production desktop binaries on main.
   - web-hold-dist-mac-production:
       type: approval

@@ -244,10 +244,7 @@ export enum DoubleKeys {
   /**
    * How often we should show suggested follows after a user follows another user
    */
-  SHOW_ARTIST_RECOMMENDATIONS_PERCENT = 'SHOW_ARTIST_RECOMMENDATIONS_PERCENT',
-
-  /** How many Sentry error recordings we sample. Value ranges from 0.0-1.0 */
-  SENTRY_REPLAY_ERROR_SAMPLE_RATE = 'SENTRY_REPLAY_ERROR_SAMPLE_RATE'
+  SHOW_ARTIST_RECOMMENDATIONS_PERCENT = 'SHOW_ARTIST_RECOMMENDATIONS_PERCENT'
 }
 
 export enum StringKeys {

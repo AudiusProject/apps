@@ -62,13 +62,12 @@ export const env: Env = {
   REWARDS_MANAGER_TOKEN_PDA: '3V9opXNpHmPPymKeq7CYD8wWMH8wzFXmqEkNdzfsZhYq',
   SAFARI_WEB_PUSH_ID: 'web.co.audius',
   SCHEME: 'audius',
-  SENTRY_DSN: 'https://e26d2b01488f4b538ea235de6466c40a@s.audius.co/1457231',
   SOL_BRIDGE_ADDRESS: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
   SOL_TOKEN_BRIDGE_ADDRESS: 'wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb',
   SOLANA_CLUSTER_ENDPOINT:
     'https://carolina-8qh733-fast-mainnet.helius-rpc.com',
   SOLANA_FEE_PAYER_ADDRESS: 'pqx3fvvh6b2eZBfLhTtQ5KxzU3CginmgGTmDCjk8TPP',
-  SOLANA_RELAY_ENDPOINT: 'https://discoveryprovider.audius.co',
+  SOLANA_RELAY_ENDPOINT: 'https://solana-relay.audius.engineering',
   SOLANA_TOKEN_PROGRAM_ADDRESS: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   SOLANA_WEB3_CLUSTER: 'mainnet-beta',
   STRIPE_CLIENT_PUBLISHABLE_KEY:

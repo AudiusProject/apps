@@ -25,7 +25,6 @@ function* watchUploadStems() {
 
       const audiusSdk = yield* getContext('audiusSdk')
       const dispatch = yield* getContext('dispatch')
-      const reportToSentry = yield* getContext('reportToSentry')
       const analytics = yield* getContext('analytics')
       const userId = yield* call(queryCurrentUserId)
       if (!userId) {
@@ -47,7 +46,6 @@ function* watchUploadStems() {
             audiusSdk,
             dispatch,
             userId,
-            reportToSentry,
             analytics
           },
           {

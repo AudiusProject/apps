@@ -337,18 +337,6 @@ const validSearchCategories = [
   'playlists'
 ]
 
-// Lazy load Sentry - initialize on first user interaction or after app loads
-if (typeof window !== 'undefined') {
-  // Initialize Sentry after a short delay to not block initial render
-  setTimeout(() => {
-    import('services/sentry').then(({ initializeSentry }) => {
-      initializeSentry().catch((err) => {
-        console.error('Failed to initialize Sentry:', err)
-      })
-    })
-  }, 100)
-}
-
 // Wrapper components for routes that need params or location
 const SearchCategoryLegacyRedirect = () => {
   const params = useParams<{ category?: string; query?: string }>()

@@ -19,7 +19,6 @@ import { navigationThemes } from './navigationThemes'
 
 type NavigationContainerProps = {
   children: ReactNode
-  navigationIntegration: any // Sentry removed - kept for compatibility
 }
 
 export const navigationRef = createNavigationContainerRef()
@@ -29,7 +28,7 @@ export const navigationRef = createNavigationContainerRef()
  * and configures linking
  */
 const NavigationContainer = (props: NavigationContainerProps) => {
-  const { children, navigationIntegration } = props
+  const { children } = props
   const theme = useThemeVariant()
   const { data: accountHandle } = useCurrentAccountUser({
     select: (user) => user?.handle
@@ -187,10 +186,6 @@ const NavigationContainer = (props: NavigationContainerProps) => {
 
   const onReady = () => {
     routeNameRef.current = getPrimaryRoute(navigationRef.getRootState())
-    // Sentry removed - navigationIntegration is null
-    if (navigationIntegration?.registerNavigationContainer) {
-      navigationIntegration.registerNavigationContainer(navigationRef)
-    }
   }
 
   return (

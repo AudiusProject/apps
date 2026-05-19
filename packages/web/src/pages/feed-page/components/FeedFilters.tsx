@@ -1,7 +1,7 @@
-import { ChangeEvent, useCallback } from 'react'
+import { useCallback } from 'react'
 
 import { FeedFilter } from '@audius/common/models'
-import { Flex, SelectablePill } from '@audius/harmony'
+import { FilterButton } from '@audius/harmony'
 
 type FeedFiltersProps = {
   currentFilter: FeedFilter
@@ -14,16 +14,10 @@ const messages = {
   reposts: 'Reposts'
 }
 
-const filterToLabel: Record<FeedFilter, string> = {
-  [FeedFilter.ALL]: messages.allPosts,
-  [FeedFilter.ORIGINAL]: messages.originalPosts,
-  [FeedFilter.REPOST]: messages.reposts
-}
-
-const filters: FeedFilter[] = [
-  FeedFilter.ALL,
-  FeedFilter.ORIGINAL,
-  FeedFilter.REPOST
+const filterOptions = [
+  { label: messages.allPosts, value: FeedFilter.ALL },
+  { label: messages.originalPosts, value: FeedFilter.ORIGINAL },
+  { label: messages.reposts, value: FeedFilter.REPOST }
 ]
 
 export const FeedFilters = ({
@@ -31,25 +25,19 @@ export const FeedFilters = ({
   onSelectFilter
 }: FeedFiltersProps) => {
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      onSelectFilter(e.target.value as FeedFilter)
+    (value: string) => {
+      onSelectFilter(value as FeedFilter)
     },
     [onSelectFilter]
   )
 
   return (
-    <Flex gap='s' role='radiogroup' onChange={handleChange}>
-      {filters.map((filter) => (
-        <SelectablePill
-          name='feed-filter'
-          key={filter}
-          type='radio'
-          value={filter}
-          label={filterToLabel[filter]}
-          isSelected={currentFilter === filter}
-          size='small'
-        />
-      ))}
-    </Flex>
+    <FilterButton
+      label={messages.allPosts}
+      value={currentFilter}
+      variant='replaceLabel'
+      onChange={handleChange}
+      options={filterOptions}
+    />
   )
 }
