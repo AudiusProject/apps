@@ -256,7 +256,11 @@ export const TrackLineup = ({
     return () => observer.disconnect()
   }, [externalScrollParent])
 
-  const effectiveLoadMoreThreshold = scrollParentHeight
+  // Base threshold = the "remaining content" buffer we want before the bottom
+  // of *loaded tiles*. We add the persistent skeleton area to this below so
+  // react-infinite-scroller's bottom-of-content check stays anchored to the
+  // loaded tiles rather than the skeleton padding.
+  const baseLoadMoreThreshold = scrollParentHeight
     ? scrollParentHeight * LOAD_MORE_VIEWPORTS
     : loadMoreThreshold
 
@@ -361,19 +365,28 @@ export const TrackLineup = ({
   const isEmpty =
     tiles.length === 0 && !isFetching && !isInitialLoad && !isLoadMoreTriggered
 
-  // While a page is in flight we render skeletons below the loaded tiles. They
-  // need to fill ~one threshold's worth of vertical space so the bottom of the
-  // list feels populated even when the user scrolls into the trigger area
-  // faster than the network can return. `pageSize` is too small on its own
-  // (e.g. trending uses 4) so we floor by a viewport-derived count.
+  // Persistent skeletons render below the loaded tiles whenever more pages are
+  // available. They fill ~one threshold's worth of vertical space so the bottom
+  // of the list feels populated even when the user scrolls into the trigger
+  // area faster than the network can return. `pageSize` is too small on its own
+  // (e.g. trending uses 4) so we floor by a viewport-derived count. Keeping
+  // them mounted across fetch cycles (rather than gating on isFetching) means
+  // scrollHeight only ever grows monotonically, which keeps the scroll thumb
+  // stable instead of snapping wider/narrower each page.
   const approxTileHeight = isSmallTrackTile
     ? APPROX_TILE_HEIGHT_SMALL
     : APPROX_TILE_HEIGHT_LARGE
-  const fillCount = Math.ceil(effectiveLoadMoreThreshold / approxTileHeight)
+  const fillCount = Math.ceil(baseLoadMoreThreshold / approxTileHeight)
   const loadingSkeletonCount = Math.min(
     Math.max(0, maxEntries - tiles.length),
     Math.max(pageSize, fillCount)
   )
+  // The skeleton block adds to scrollHeight; compensate the threshold so the
+  // trigger fires when the user is within `LOAD_MORE_VIEWPORTS` of the bottom
+  // of *loaded tiles*, not the bottom of the skeleton padding.
+  const skeletonAreaHeight =
+    hasNextPage && tiles.length > 0 ? loadingSkeletonCount * approxTileHeight : 0
+  const effectiveLoadMoreThreshold = baseLoadMoreThreshold + skeletonAreaHeight
 
   return (
     <div
@@ -442,9 +455,7 @@ export const TrackLineup = ({
                 </Flex>
               ))}
 
-          {hasNextPage &&
-          tiles.length > 0 &&
-          (isFetching || isLoadMoreTriggered)
+          {hasNextPage && tiles.length > 0
             ? renderSkeletons(loadingSkeletonCount, tiles.length)
             : null}
         </InfiniteScroll>
