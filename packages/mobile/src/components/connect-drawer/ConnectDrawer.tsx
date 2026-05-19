@@ -6,11 +6,9 @@ import GoogleCast, { useDevices } from 'react-native-google-cast'
 import { useSelector } from 'react-redux'
 
 import {
-  Divider,
   Flex,
-  IconButton,
+  IconCast,
   IconCheck,
-  IconClose,
   IconSpeaker,
   Text,
   useTheme
@@ -26,7 +24,6 @@ const IS_IOS = Platform.OS === 'ios'
 
 const messages = {
   title: 'Connect',
-  close: 'Close',
   thisDevice: 'This Device',
   airplayBluetooth: 'AirPlay & Bluetooth',
   bluetooth: 'Bluetooth',
@@ -109,28 +106,12 @@ export const ConnectDrawer = () => {
   )
 
   return (
-    <NativeDrawer drawerName={DRAWER_NAME}>
+    <NativeDrawer
+      drawerName={DRAWER_NAME}
+      title={messages.title}
+      titleIcon={IconCast}
+    >
       <Flex direction='column' pb='l'>
-        <Flex
-          direction='row'
-          alignItems='center'
-          justifyContent='space-between'
-          ph='l'
-          pv='m'
-        >
-          <Text variant='title' size='l' strength='strong' color='default'>
-            {messages.title}
-          </Text>
-          <IconButton
-            icon={IconClose}
-            size='m'
-            color='subdued'
-            aria-label={messages.close}
-            onPress={onClose}
-          />
-        </Flex>
-        <Divider orientation='horizontal' />
-
         <Row
           label={messages.thisDevice}
           icon={IconSpeaker}
@@ -142,8 +123,6 @@ export const ConnectDrawer = () => {
           icon={IconSpeaker}
           onPress={handleSelectAirplayOrBluetooth}
         />
-
-        {devices.length > 0 ? <Divider orientation='horizontal' /> : null}
 
         {devices.map((device) => {
           const isActive = Boolean(
