@@ -38,7 +38,7 @@ export const getCurrentVersion = (
     case ServiceType.ContentNode:
       return state.cache.protocol.services.contentNode.currentVersion
     case ServiceType.Validator:
-      return state.cache.protocol.services.validator?.currentVersion ?? '1.0.0'
+      return state.cache.protocol.services.validator?.currentVersion
   }
 }
 

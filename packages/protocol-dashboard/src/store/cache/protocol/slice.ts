@@ -82,8 +82,14 @@ const slice = createSlice({
             action.payload.currentVersion
           break
         case ServiceType.Validator:
-          state.services.validator.currentVersion =
-            action.payload.currentVersion
+          state.services.validator = {
+            ...(state.services.validator ?? {
+              isValid: false,
+              minStake: new BN(0),
+              maxStake: new BN(0)
+            }),
+            currentVersion: action.payload.currentVersion
+          }
           break
       }
     }
