@@ -55,9 +55,18 @@ const slice = createSlice({
       state.delegator.maxDelegators = action.payload.maxDelegators
     },
     setServiceTypeInfo: (state, action: PayloadAction<SetServiceTypeInfo>) => {
-      state.services.discoveryProvider = action.payload.discoveryProvider
-      state.services.contentNode = action.payload.contentNode
-      state.services.validator = action.payload.validator
+      state.services.discoveryProvider = {
+        ...action.payload.discoveryProvider,
+        currentVersion: state.services.discoveryProvider?.currentVersion
+      }
+      state.services.contentNode = {
+        ...action.payload.contentNode,
+        currentVersion: state.services.contentNode?.currentVersion
+      }
+      state.services.validator = {
+        ...action.payload.validator,
+        currentVersion: state.services.validator?.currentVersion
+      }
     },
     setEthBlockNumber: (state, action: PayloadAction<number>) => {
       state.ethBlockNumber = action.payload
