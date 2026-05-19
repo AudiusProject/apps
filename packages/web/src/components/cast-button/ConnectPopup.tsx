@@ -30,8 +30,10 @@ const messages = {
 }
 
 const POPOVER_WIDTH = 320
-const POPOVER_HEIGHT = 240
 const POPOVER_GAP = 12
+// Approximate intrinsic content height used only for initial vertical
+// positioning above the anchor. The popup itself is content-sized.
+const POPOVER_HEIGHT_HINT = 180
 
 type ConnectPopupProps = {
   isVisible: boolean
@@ -108,11 +110,11 @@ export const ConnectPopup = ({
     const el = anchorRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    const desiredHeight = Math.min(
-      POPOVER_HEIGHT,
-      Math.floor(window.innerHeight * 0.7)
-    )
-    let top = rect.top - desiredHeight - POPOVER_GAP
+    // Use the rendered height if we have one (re-positioning), otherwise an
+    // intrinsic-height hint for the first paint.
+    const heightHint =
+      popoverRef.current?.getBoundingClientRect().height ?? POPOVER_HEIGHT_HINT
+    let top = rect.top - heightHint - POPOVER_GAP
     let left = rect.right - POPOVER_WIDTH
     if (top < 8) top = 8
     if (left < 8) left = 8
@@ -149,11 +151,6 @@ export const ConnectPopup = ({
 
   if (!shouldRender || !position) return null
 
-  const desiredHeight = Math.min(
-    POPOVER_HEIGHT,
-    Math.floor(window.innerHeight * 0.7)
-  )
-
   return createPortal(
     <div
       ref={popoverRef}
@@ -165,7 +162,6 @@ export const ConnectPopup = ({
         top: position.top,
         left: position.left,
         width: POPOVER_WIDTH,
-        height: desiredHeight,
         zIndex: 20000,
         opacity: isVisible ? 1 : 0,
         transition: 'opacity 140ms ease-out'
@@ -173,14 +169,12 @@ export const ConnectPopup = ({
     >
       <Flex
         direction='column'
-        gap='s'
         css={(theme) => ({
           backgroundColor: theme.color.background.white,
           border: `1px solid ${theme.color.border.strong}`,
           borderRadius: theme.cornerRadius.m,
           boxShadow:
             '0px 0px 4px 0px rgba(0,0,0,0.04), 0px 8px 16px 0px rgba(0,0,0,0.08)',
-          height: '100%',
           width: '100%',
           padding: 8
         })}
@@ -191,7 +185,7 @@ export const ConnectPopup = ({
           justifyContent='space-between'
           pl='m'
           pr='s'
-          pt='xs'
+          pv='xs'
         >
           <Text variant='title' size='m' strength='strong' color='default'>
             {messages.connect}
@@ -205,17 +199,19 @@ export const ConnectPopup = ({
           />
         </Flex>
         <Divider orientation='horizontal' />
-        <Row
-          label={messages.thisBrowser}
-          icon={IconDesktop}
-          active={!isCasting}
-        />
-        <Row
-          label={messages.googleCastDevices}
-          icon={IconSpeaker}
-          active={isCasting}
-          onClick={onSelectCastDevices}
-        />
+        <Flex direction='column' pt='xs'>
+          <Row
+            label={messages.thisBrowser}
+            icon={IconDesktop}
+            active={!isCasting}
+          />
+          <Row
+            label={messages.googleCastDevices}
+            icon={IconSpeaker}
+            active={isCasting}
+            onClick={onSelectCastDevices}
+          />
+        </Flex>
       </Flex>
     </div>,
     document.body

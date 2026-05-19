@@ -1,13 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 
-import { castSelectors } from '@audius/common/store'
 import { Flex, IconButton, IconCast, Tooltip } from '@audius/harmony'
-import { useSelector } from 'react-redux'
 
 import { ConnectPopup } from './ConnectPopup'
 import { useRemotePlayback } from './useRemotePlayback'
-
-const { getIsCasting } = castSelectors
 
 const messages = {
   cast: 'Cast'
@@ -16,8 +12,8 @@ const messages = {
 export const CastButton = () => {
   const anchorRef = useRef<HTMLDivElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const isCasting = useSelector(getIsCasting)
-  const { supported, prompt } = useRemotePlayback()
+  const { supported, state, prompt } = useRemotePlayback()
+  const isCasting = state === 'connected' || state === 'connecting'
 
   const handleToggle = useCallback(() => {
     setIsOpen((o) => !o)
