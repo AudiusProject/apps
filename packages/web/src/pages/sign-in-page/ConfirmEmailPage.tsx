@@ -52,7 +52,7 @@ export const ConfirmEmailPage = () => {
       dispatch(setValueField('otp', sanitizedOtp))
       dispatch(setValueField('email', email))
       dispatch(startSignUp())
-      dispatch(signIn(email, password, undefined, sanitizedOtp))
+      dispatch(signIn(email, password, sanitizedOtp))
     },
     [dispatch, email, password]
   )

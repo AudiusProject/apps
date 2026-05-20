@@ -726,11 +726,13 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const sdk = yield* getSDK()
   const authService = yield* getContext('authService')
+  const isNativeMobile = yield* getContext('isNativeMobile')
   const queryClient = yield* getContext('queryClient')
 
   yield* call(waitForRead)
   try {
     const signOn = yield* select(getSignOn)
+    const isGuest = yield* select(getIsGuest)
 
     let signInResponse: SignInResponse
     try {
