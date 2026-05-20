@@ -72,10 +72,7 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  // React Native 0.77 - explicitly set Metro URL
-  NSURL *url = [NSURL URLWithString:@"http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false"];
-  NSLog(@"[AppDelegate] DEBUG mode - Using Metro URL: %@", url);
-  return url;
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
   return [CodePush bundleURL];
 #endif
