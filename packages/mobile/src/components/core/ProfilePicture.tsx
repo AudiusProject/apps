@@ -32,8 +32,7 @@ export const ProfilePicture = (props: ProfilePictureProps) => {
   // `useProfilePicture` instead of being clobbered by the props spread.
   const { onError: callerOnError, ...restProps } = props as BaseAvatarProps &
     ProfilePictureUserProps
-  const userId =
-    'user' in restProps ? restProps.user.user_id : restProps.userId
+  const userId = 'user' in restProps ? restProps.user.user_id : restProps.userId
 
   const { data: userQuery } = useUser(userId, {
     enabled: !('user' in restProps)

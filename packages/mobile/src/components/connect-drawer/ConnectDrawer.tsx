@@ -15,8 +15,8 @@ import {
   Text,
   useTheme
 } from '@audius/harmony-native'
-import { NativeDrawer } from 'app/components/drawer'
 import { useAirplay } from 'app/components/audio/Airplay'
+import { NativeDrawer } from 'app/components/drawer'
 import { useDrawer } from 'app/hooks/useDrawer'
 
 const { getIsCasting, getMethod, getDeviceName } = castSelectors

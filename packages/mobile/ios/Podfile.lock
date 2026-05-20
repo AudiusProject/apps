@@ -17,7 +17,6 @@ PODS:
   - ffmpeg-kit-react-native/full-gpl (6.0.2):
     - ffmpeg-kit-ios-full-gpl (= 6.0)
     - React-Core
-  - FingerprintPro (2.11.0)
   - fmt (11.0.2)
   - glog (0.3.5)
   - google-cast-sdk-dynamic-xcframework-no-bluetooth (4.7.1)
@@ -1826,9 +1825,6 @@ PODS:
     - Yoga
   - RNDateTimePicker (8.3.0):
     - React-Core
-  - RNFingerprintjsPro (1.0.4):
-    - FingerprintPro (~> 2.11.0)
-    - React-Core
   - RNFlashList (1.8.3):
     - DoubleConversion
     - glog
@@ -2226,7 +2222,6 @@ DEPENDENCIES:
   - "RNCClipboard (from `../../../node_modules/@react-native-clipboard/clipboard`)"
   - "RNCMaskedView (from `../node_modules/@react-native-masked-view/masked-view`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
-  - "RNFingerprintjsPro (from `../../../node_modules/@fingerprintjs/fingerprintjs-pro-react-native`)"
   - "RNFlashList (from `../../../node_modules/@shopify/flash-list`)"
   - RNFS (from `../../../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -2246,7 +2241,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Base64
-    - FingerprintPro
     - google-cast-sdk-dynamic-xcframework-no-bluetooth
     - JWT
     - lottie-ios
@@ -2458,8 +2452,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-masked-view/masked-view"
   RNDateTimePicker:
     :path: "../node_modules/@react-native-community/datetimepicker"
-  RNFingerprintjsPro:
-    :path: "../../../node_modules/@fingerprintjs/fingerprintjs-pro-react-native"
   RNFlashList:
     :path: "../../../node_modules/@shopify/flash-list"
   RNFS:
@@ -2502,7 +2494,6 @@ SPEC CHECKSUMS:
   FBLazyVector: e053802577a711add20e45bbbf5dd1180b6ca62e
   ffmpeg-kit-ios-full-gpl: 7d416729f7b3604b64cee2a752c42608a8d228e0
   ffmpeg-kit-react-native: 3cea88c9c5cfad62e1465279ea7d800dfbba3b00
-  FingerprintPro: 2fbd0cda75fbab32055f7cb38bc5fc9d17168979
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   google-cast-sdk-dynamic-xcframework-no-bluetooth: 1fa9e267df3fd6f8a1c6e3345142ca5286297968
@@ -2597,7 +2588,6 @@ SPEC CHECKSUMS:
   RNCClipboard: dfeb43751adff21e588657b5b6c888c72f3aa68e
   RNCMaskedView: 6d4bf14f158d1a93484edf30850cbbd7ccbb8668
   RNDateTimePicker: a793ed8822283f576dd0a205a0916c5098c2611f
-  RNFingerprintjsPro: eeda8165fe366f1039cd8823277295a525cb81b5
   RNFlashList: 9f51bc9dfd6f8de406735fa4ac886d1ca365cf67
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 83e18e53d3388ac5cb165a1404bc3be1e4cbdad0
@@ -2621,6 +2611,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: eca8dd841b7cd47d82d66be58af8e3aeb819012f
 
-PODFILE CHECKSUM: b77c7dc423273b965d32a03d73fe6277c67877b7
+PODFILE CHECKSUM: ff32c6e71db703085465729079ba9f2c256d255a
 
 COCOAPODS: 1.15.2

@@ -7,6 +7,7 @@ import { useWindowDimensions } from 'react-native'
 import { useTheme } from '@audius/harmony-native'
 import { ContestCard, ContestCardSkeleton } from 'app/components/contest-card'
 import { CardList } from 'app/components/core'
+
 import { useDeferredElement } from '../../../hooks/useDeferredElement'
 
 import { ExploreSection } from './ExploreSection'
