@@ -1,6 +1,4 @@
 const { getOtpEmail } = require('../notifications/emails/otp')
-const { Op } = require('sequelize')
-const models = require('../models')
 
 const OTP_CHARS = '0123456789'
 const OTP_REDIS_PREFIX = 'otp'
@@ -13,31 +11,8 @@ const OTP_BYPASS_EMAILS = new Set([
   'fb@audius.co'
 ])
 
-const requiresOtp = async ({ email, visitorId }) => {
-  if (OTP_BYPASS_EMAILS.has(email)) {
-    return false
-  } else if (!visitorId) {
-    return true
-  } else {
-    const userRecord = await models.User.findOne({
-      where: { email }
-    })
-    if (!userRecord || userRecord.blockchainUserId === null) {
-      return true
-    }
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setDate(-180)
-    const verifiedFp = await models.Fingerprints.findOne({
-      where: {
-        userId: userRecord.blockchainUserId,
-        visitorId,
-        updatedAt: {
-          [Op.gt]: sixMonthsAgo
-        }
-      }
-    })
-    return !verifiedFp
-  }
+const requiresOtp = async ({ email }) => {
+  return !OTP_BYPASS_EMAILS.has(email)
 }
 
 const generateOtp = () => {

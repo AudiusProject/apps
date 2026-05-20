@@ -61,7 +61,7 @@ No extra setup; the app uses staging identity by default (see `packages/mobile/.
 |--------|----------|
 | Auth service (mobile) | `packages/mobile/src/services/sdk/auth.ts` – creates `authService` via `createAuthService`, wires `localStorage`, identity endpoint, key creation; exports `authService`, `getAudiusWalletClient`, `solanaWalletService`. |
 | Sign-on UI (screens, stack) | `packages/mobile/src/screens/sign-on-screen/` – `SignOnStack.tsx`, `SignOnScreen`, `CreatePasswordScreen`, `PickHandleScreen`, `FinishProfileScreen`, `ConfirmEmailScreen`, etc. |
-| Auth service (shared API) | `packages/common/src/services/auth/authService.ts` – `createAuthService`, `signIn(email, password, visitorId?, otp?)`, `signOut`, `resetPassword`, `getWallet`, `confirmCredentials`, `changeCredentials`. |
+| Auth service (shared API) | `packages/common/src/services/auth/authService.ts` – `createAuthService`, `signIn(email, password, otp?)`, `signOut`, `resetPassword`, `getWallet`, `confirmCredentials`, `changeCredentials`. |
 | Hedgehog / identity | `packages/common/src/services/auth/hedgehog.ts`, `identity.ts` – low-level Hedgehog instance and identity service integration. |
 | Sign-in validation | `packages/common/src/schemas/sign-on/signInSchema.ts` – Zod schema for sign-in form. |
 

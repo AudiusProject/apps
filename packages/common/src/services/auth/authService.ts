@@ -31,7 +31,6 @@ export type AuthService = {
   signIn: (
     email: string,
     password: string,
-    visitorId?: string,
     otp?: string
   ) => Promise<SignInResponse>
   signOut: () => Promise<void>
@@ -65,14 +64,12 @@ export const createAuthService = ({
   const signIn = async (
     email: string,
     password: string,
-    visitorId?: string,
     otp?: string
   ) => {
     const wallet = await hedgehogInstance.login({
       email,
       username: email,
       password,
-      visitorId,
       otp
     })
 

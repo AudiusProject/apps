@@ -4,7 +4,6 @@ const cookieParser = require('cookie-parser')
 const sgMail = require('@sendgrid/mail')
 const sgClient = require('@sendgrid/client')
 const { redisClient, Lock } = require('./redis')
-const { createFpClient } = require('./fpClient')
 const optimizelySDK = require('@optimizely/optimizely-sdk')
 const cluster = require('cluster')
 const config = require('./config.js')
@@ -35,7 +34,6 @@ class App {
     this.port = port
     this.express = express()
     this.redisClient = redisClient
-    this.fpClient = createFpClient(config.get('fpServerApiKey'))
     this.configureSendGrid()
 
     this.optimizelyPromise = null
@@ -138,7 +136,6 @@ class App {
       server.headersTimeout = config.get('headersTimeout')
 
       this.express.set('redis', this.redisClient)
-      this.express.set('fpClient', this.fpClient)
 
       logger.info(`Listening on port ${this.port}...`)
       return { app: this.express, server }

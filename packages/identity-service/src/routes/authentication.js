@@ -17,7 +17,6 @@ const {
   getWalletAssociatedEmail,
   associateWalletAddressWithUser
 } = require('../utils/walletAssociation')
-const { validateFingerprint } = require('../utils/fpHelpers')
 const authMiddleware = require('../authMiddleware')
 
 const EncodedDataMessageHeader = 'encoded-data-message'
@@ -227,13 +226,7 @@ module.exports = function (app) {
   app.get(
     '/authentication',
     handleResponse(async (req, res, next) => {
-      const {
-        lookupKey,
-        email: emailParam,
-        username,
-        visitorId,
-        otp
-      } = req.query
+      const { lookupKey, email: emailParam, username, otp } = req.query
       let email = emailParam ?? username
       if (!lookupKey) {
         return errorResponseBadRequest('Missing lookupKey')
@@ -258,7 +251,7 @@ module.exports = function (app) {
         req.logger.error('Missing sendgrid api key')
       }
 
-      const otpRequired = await requiresOtp({ email, visitorId })
+      const otpRequired = await requiresOtp({ email })
       if (!otpRequired) {
         return successResponse(existingUser)
       } else if (!otp) {
@@ -291,9 +284,6 @@ module.exports = function (app) {
         if (!isOtpValid) {
           return errorResponseBadRequest('Invalid credentials')
         }
-
-        // async
-        validateFingerprint({ req, email, visitorId })
 
         if (existingUser.walletAddress === null) {
           await associateWalletAddressWithUser({
