@@ -43,7 +43,7 @@ export const Scrollbar = forwardRef(
     // useMeasure ref is required for infinite scrolling to work
     const [ref] = useMeasure({ polyfill: ResizeObserver })
     const containerRef = useRef<HTMLElement | null>(null)
-    const timerRef = useRef<NodeJS.Timeout | null>(null)
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const reactId = useId()
     const elementId = id || reactId
 

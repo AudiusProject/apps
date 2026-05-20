@@ -156,8 +156,8 @@ export const Tooltip = ({
 
   const triggerRef = useRef<HTMLElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const enterDelayTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const leaveDelayTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const enterDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const leaveDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mousedOverRef = useRef(false)
 
   // Handle mouse enter with delay

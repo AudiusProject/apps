@@ -15,7 +15,7 @@ export const useHoverDelay = (
 ) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Clean up the timer when component unmounts
   useEffect(() => {
