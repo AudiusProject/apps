@@ -3,10 +3,12 @@ import { useCallback, useMemo, useState } from 'react'
 import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
 import {
   playlistLibraryHelpers,
-  useCreatePlaylistModal
+  useCreatePlaylistModal,
+  useDuplicatePlaylistModal
 } from '@audius/common/store'
 import {
   IconButton,
+  IconCopy,
   IconFolder,
   IconPlaylists,
   IconPlus,
@@ -22,6 +24,7 @@ const messages = {
   new: 'New',
   newPlaylistOrFolderTooltip: 'New Playlist or Folder',
   createPlaylist: 'Create Playlist',
+  duplicatePlaylist: 'Duplicate Playlist',
   createFolder: 'Create Folder',
   newFolderName: 'New Folder'
 }
@@ -33,12 +36,17 @@ export const CreatePlaylistLibraryItemButton = () => {
   })
   const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
   const { onOpen: openCreatePlaylistModal } = useCreatePlaylistModal()
+  const { onOpen: openDuplicatePlaylistModal } = useDuplicatePlaylistModal()
   const [isActive, setIsActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const handleSubmitPlaylist = useCallback(() => {
     openCreatePlaylistModal({ isAlbum: false })
   }, [openCreatePlaylistModal])
+
+  const handleDuplicatePlaylist = useCallback(() => {
+    openDuplicatePlaylistModal({ isAlbum: false })
+  }, [openDuplicatePlaylistModal])
 
   const handleSubmitFolder = useCallback(() => {
     if (!library) return null
@@ -65,12 +73,17 @@ export const CreatePlaylistLibraryItemButton = () => {
         onClick: handleSubmitPlaylist
       },
       {
+        text: messages.duplicatePlaylist,
+        icon: <IconCopy />,
+        onClick: handleDuplicatePlaylist
+      },
+      {
         text: messages.createFolder,
         icon: <IconFolder />,
         onClick: handleSubmitFolder
       }
     ],
-    [handleSubmitPlaylist, handleSubmitFolder]
+    [handleSubmitPlaylist, handleDuplicatePlaylist, handleSubmitFolder]
   )
 
   return (

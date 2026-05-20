@@ -85,7 +85,8 @@ export const initialState: BasicModalsState = {
   FanClubDetailsModal: { isOpen: false },
   VerificationSuccess: { isOpen: false },
   VerificationError: { isOpen: false },
-  CreatePlaylistModal: { isOpen: false }
+  CreatePlaylistModal: { isOpen: false },
+  DuplicatePlaylistModal: { isOpen: false }
 }
 
 const slice = createSlice({
