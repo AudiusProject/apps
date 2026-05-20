@@ -26,7 +26,8 @@ import {
 } from '../models';
 
 export interface GetNotificationsRequest {
-    userId: string;
+    id: string;
+    userId?: string;
     timestamp?: number;
     groupId?: string;
     limit?: number;
@@ -34,7 +35,8 @@ export interface GetNotificationsRequest {
 }
 
 export interface GetPlaylistUpdatesRequest {
-    userId: string;
+    id: string;
+    userId?: string;
 }
 
 /**
@@ -47,11 +49,15 @@ export class NotificationsApi extends runtime.BaseAPI {
      * Get notifications for user ID
      */
     async getNotificationsRaw(params: GetNotificationsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<NotificationsResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling getNotifications.');
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getNotifications.');
         }
 
         const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
 
         if (params.timestamp !== undefined) {
             queryParameters['timestamp'] = params.timestamp;
@@ -72,7 +78,7 @@ export class NotificationsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/notifications/{user_id}`.replace(`{${"user_id"}}`, encodeURIComponent(String(params.userId))),
+            path: `/notifications/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -94,16 +100,20 @@ export class NotificationsApi extends runtime.BaseAPI {
      * Get playlists the user has saved that have been updated for user ID
      */
     async getPlaylistUpdatesRaw(params: GetPlaylistUpdatesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PlaylistUpdatesResponse>> {
-        if (params.userId === null || params.userId === undefined) {
-            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling getPlaylistUpdates.');
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getPlaylistUpdates.');
         }
 
         const queryParameters: any = {};
 
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/notifications/{user_id}/playlist_updates`.replace(`{${"user_id"}}`, encodeURIComponent(String(params.userId))),
+            path: `/notifications/{id}/playlist_updates`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
