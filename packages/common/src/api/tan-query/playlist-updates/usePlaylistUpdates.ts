@@ -38,18 +38,18 @@ export const usePlaylistUpdates = <TResult = PlaylistUpdate[]>(
       const sdk = await audiusSdk()
       // sdk.notifications.getPlaylistUpdates is not currently typed in the
       // public SDK surface; cast to the expected shape used in the legacy saga.
-      // userId2 carries the requester id as `?user_id=` so the backend can
+      // userId carries the requester id as `?user_id=` so the backend can
       // personalize related.users in the response.
       const response = (await (
         sdk.notifications as {
           getPlaylistUpdates: (params: {
-            userId: string
-            userId2?: string
+            id: string
+            userId?: string
           }) => Promise<PlaylistUpdatesResponse>
         }
       ).getPlaylistUpdates({
-        userId: Id.parse(currentUserId),
-        userId2: Id.parse(currentUserId)
+        id: Id.parse(currentUserId),
+        userId: Id.parse(currentUserId)
       })) as PlaylistUpdatesResponse | undefined
 
       return transformAndCleanList(
