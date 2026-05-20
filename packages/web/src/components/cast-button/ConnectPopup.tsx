@@ -13,6 +13,7 @@ import {
   Flex,
   IconButton,
   IconCast,
+  IconCastAirplay,
   IconCheck,
   IconClose,
   IconDesktop,
@@ -26,7 +27,8 @@ const messages = {
   connect: 'Connect',
   close: 'Close',
   thisBrowser: 'This web browser',
-  googleCastDevices: 'Google Cast devices'
+  googleCastDevices: 'Google Cast devices',
+  airplayDevices: 'AirPlay devices'
 }
 
 const POPOVER_WIDTH = 320
@@ -39,6 +41,7 @@ type ConnectPopupProps = {
   isVisible: boolean
   anchorRef: MutableRefObject<HTMLElement | null>
   isCasting: boolean
+  mode: 'cast' | 'airplay'
   onClose: () => void
   onSelectThisBrowser: () => void
   onSelectCastDevices: () => void
@@ -92,6 +95,7 @@ export const ConnectPopup = ({
   isVisible,
   anchorRef,
   isCasting,
+  mode,
   onClose,
   onSelectThisBrowser,
   onSelectCastDevices
@@ -209,8 +213,12 @@ export const ConnectPopup = ({
             onClick={onSelectThisBrowser}
           />
           <Row
-            label={messages.googleCastDevices}
-            icon={IconSpeaker}
+            label={
+              mode === 'airplay'
+                ? messages.airplayDevices
+                : messages.googleCastDevices
+            }
+            icon={mode === 'airplay' ? IconCastAirplay : IconSpeaker}
             active={isCasting}
             onClick={onSelectCastDevices}
           />

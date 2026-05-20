@@ -20,6 +20,16 @@ const getRemote = (): RemotePlayback | null => {
 }
 
 /**
+ * Safari's `audio.remote.prompt()` opens the AirPlay picker; Chrome's
+ * opens the Cast picker. We surface different labels based on this so the
+ * UI matches the picker the user will see.
+ */
+export const isSafari = (): boolean => {
+  if (typeof navigator === 'undefined') return false
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+}
+
+/**
  * Bridges the browser's RemotePlayback API to Redux + exposes a `prompt`
  * action that opens Chrome's native cast picker.
  */

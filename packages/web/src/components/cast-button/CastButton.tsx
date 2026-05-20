@@ -1,12 +1,13 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { Flex, IconButton, IconCast, Tooltip } from '@audius/harmony'
 
 import { ConnectPopup } from './ConnectPopup'
-import { useRemotePlayback } from './useRemotePlayback'
+import { isSafari, useRemotePlayback } from './useRemotePlayback'
 
 const messages = {
-  cast: 'Cast'
+  cast: 'Cast',
+  airplay: 'AirPlay'
 }
 
 export const CastButton = () => {
@@ -20,6 +21,13 @@ export const CastButton = () => {
   const { supported, state, prompt } = useRemotePlayback()
   const isCasting =
     pickedCast || state === 'connected' || state === 'connecting'
+  // Safari's `audio.remote.prompt()` opens the AirPlay picker; on Chromium
+  // it opens Chrome's cast picker. Label the popup row + tooltip accordingly.
+  const mode = useMemo<'airplay' | 'cast'>(
+    () => (isSafari() ? 'airplay' : 'cast'),
+    []
+  )
+  const tooltipLabel = mode === 'airplay' ? messages.airplay : messages.cast
 
   const handleToggle = useCallback(() => {
     setIsOpen((o) => !o)
@@ -60,13 +68,13 @@ export const CastButton = () => {
   return (
     <>
       <Flex ref={anchorRef as any} alignItems='center' justifyContent='center'>
-        <Tooltip text={messages.cast} placement='top' mount='body'>
+        <Tooltip text={tooltipLabel} placement='top' mount='body'>
           <Flex>
             <IconButton
               icon={IconCast}
               size='m'
               color={isCasting ? 'accent' : 'subdued'}
-              aria-label={messages.cast}
+              aria-label={tooltipLabel}
               aria-expanded={isOpen}
               onClick={handleToggle}
             />
@@ -77,6 +85,7 @@ export const CastButton = () => {
         isVisible={isOpen}
         anchorRef={anchorRef}
         isCasting={isCasting}
+        mode={mode}
         onClose={handleClose}
         onSelectThisBrowser={handleSelectThisBrowser}
         onSelectCastDevices={handleSelectCastDevices}
