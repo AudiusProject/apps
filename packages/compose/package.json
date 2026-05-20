@@ -9,7 +9,6 @@
     "@audius/commands": "*",
     "@audius/sdk": "*",
     "@audius/spl": "*",
-    "@pedalboard/solana-relay": "*",
     "@pedalboard/staking": "*",
     "@pedalboard/archiver": "*"
   },

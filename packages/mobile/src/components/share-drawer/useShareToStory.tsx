@@ -4,7 +4,7 @@ import EventEmitter from 'events'
 import path from 'path'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { ErrorLevel, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import type { Color } from '@audius/common/models'
 import { modalsActions } from '@audius/common/store'
 import type { ShareContent } from '@audius/common/store'
@@ -51,7 +51,6 @@ import {
   pickTwoMostDominantAndVibrant
 } from 'app/utils/dominantColors'
 import { isImageUriSource } from 'app/utils/image'
-import { reportToSentry } from 'app/utils/reportToSentry'
 import { getTrackRoute } from 'app/utils/routes'
 
 import { DrawerHeader } from '../core/DrawerHeader'
@@ -209,11 +208,7 @@ export const useShareToStory = ({
 
   const handleError = useCallback(
     (platform: ShareToStoryPlatform, error: Error, name?: string) => {
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error,
-        name
-      })
+      console.error(error)
       toast({ content: messages.shareToStoryError, type: 'error' })
       track(
         make({

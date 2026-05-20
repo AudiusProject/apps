@@ -3,12 +3,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { DEFAULT_PURCHASE_AMOUNT_CENTS } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   buyUSDCActions,
   buyUSDCSelectors,
-  BuyUSDCStage,
-  useAddCashModal
+  BuyUSDCStage
 } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { AddCash } from 'components/add-cash/AddCash'
@@ -21,8 +22,10 @@ const { getBuyUSDCFlowStage } = buyUSDCSelectors
 
 type Page = 'add-cash' | 'crypto-transfer'
 
-export const AddCashModal = () => {
-  const { isOpen, onClose } = useAddCashModal()
+export const AddCashModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
   const dispatch = useDispatch()
   const buyUSDCStage = useSelector(getBuyUSDCFlowStage)
   const inProgress = [
@@ -91,4 +94,7 @@ export const AddCashModal = () => {
       )}
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('AddCashModal', AddCashModal)
+registerNiceModalId('AddCashModal')

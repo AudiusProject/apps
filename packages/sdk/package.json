@@ -190,7 +190,7 @@
     "directory": "packages/sdk"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "author": "Audius",
   "license": "Apache-2.0",

@@ -1,6 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
-import { useFileSizes, useStems, useTrack, useUser } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useEventFollowState,
+  useFileSizes,
+  useFollowEvent,
+  useRemixContest,
+  useStems,
+  useTrack,
+  useUser
+} from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import {
   DownloadQuality,
@@ -105,7 +114,26 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
+  // Auto-follow the contest when a signed-in user kicks off a stem
+  // download — downloading a stem is a strong engagement signal that
+  // the user wants to participate. Fires on tap (rather than on
+  // download completion) because the download saga doesn't expose a
+  // success hook to the caller; the follow mutation is optimistic so
+  // the UI updates instantly, and the user can unfollow at any time.
+  const { data: contest } = useRemixContest(trackId)
+  const contestEventId = contest?.eventId
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: followState } = useEventFollowState(contestEventId)
+  const { mutate: followEvent } = useFollowEvent()
+
+  const followContestIfNeeded = useCallback(() => {
+    if (!contestEventId || !currentUserId) return
+    if (followState?.isFollowed) return
+    followEvent({ userId: currentUserId, eventId: contestEventId })
+  }, [contestEventId, currentUserId, followState?.isFollowed, followEvent])
+
   const handleDownloadOne = (downloadTrackId: ID) => {
+    followContestIfNeeded()
     openWaitForDownloadModal({
       parentTrackId: trackId,
       trackIds: [downloadTrackId],
@@ -115,6 +143,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const handleDownloadAll = () => {
     if (!track) return
+    followContestIfNeeded()
     // All stems + (optionally) the parent track.
     const ids = [
       ...(track.is_downloadable ? [trackId] : []),

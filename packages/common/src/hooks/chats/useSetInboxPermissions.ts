@@ -18,7 +18,7 @@ const { fetchPermissions } = chatActions
 const { getChatPermissionsStatus, getUserChatPermissions } = chatSelectors
 
 export const useSetInboxPermissions = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const dispatch = useDispatch()
   const { data: userId } = useCurrentUserId()
   const permissions = useSelector((state: CommonState) =>
@@ -50,10 +50,7 @@ export const useSetInboxPermissions = () => {
           })
         )
       } catch (e) {
-        reportToSentry({
-          name: 'Chats',
-          error: e as Error
-        })
+        console.error('Chats', e as Error)
         track(
           make({
             eventName: Name.CHANGE_INBOX_SETTINGS_FAILURE,
@@ -62,7 +59,7 @@ export const useSetInboxPermissions = () => {
         )
       }
     },
-    [audiusSdk, doFetchPermissions, track, make, reportToSentry]
+    [audiusSdk, doFetchPermissions, track, make]
   )
 
   return {

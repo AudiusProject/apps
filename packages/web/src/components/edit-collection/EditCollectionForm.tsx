@@ -195,7 +195,7 @@ export const EditCollectionForm = (props: EditCollectionFormProps) => {
             </Flex>
           ) : null}
         </Tile>
-        <CollectionTrackFieldArray />
+        <CollectionTrackFieldArray isUpload={isUpload} />
         {isUpload ? <AnchoredSubmitRow /> : <AnchoredSubmitRowEdit />}
         {playlist_id ? (
           <>

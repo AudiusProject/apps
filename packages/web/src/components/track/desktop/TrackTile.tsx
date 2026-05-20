@@ -336,11 +336,9 @@ export const TrackTile = ({
         {/* prefix ordering */}
         {tileOrder && (
           <Flex column gap='2xs' alignItems='center' justifyContent='center'>
-            {!isLoading && tileOrder <= 10 && (
-              <IconCrown color='default' size='s' />
-            )}
+            {tileOrder <= 10 && <IconCrown color='default' size='s' />}
             <Text variant='label' color='default'>
-              {!isLoading && tileOrder}
+              {tileOrder}
             </Text>
           </Flex>
         )}

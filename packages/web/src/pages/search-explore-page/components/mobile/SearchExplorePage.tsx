@@ -224,7 +224,9 @@ const SearchExplorePage = ({
           direction='column'
           mt='l'
           gap='2xl'
-          css={{ display: inputValue || showSearchResults ? 'none' : undefined }}
+          css={{
+            display: inputValue || showSearchResults ? 'none' : undefined
+          }}
         >
           {showTrackContent && showUserContextualContent ? (
             <RecommendedTracksSection />

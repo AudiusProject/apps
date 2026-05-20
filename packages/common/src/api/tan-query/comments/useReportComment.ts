@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID, ReplyComment } from '~/models'
+import { Comment, ID, ReplyComment } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { messages } from './types'
@@ -23,7 +23,7 @@ export type ReportCommentArgs = {
 }
 
 export const useReportComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -76,12 +76,7 @@ export const useReportComment = () => {
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Generic toast error
       dispatch(toast({ content: messages.mutationError('reporting') }))
 

@@ -1,3 +1,4 @@
+import { Id } from '@audius/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userCollectionMetadataFromSDK } from '~/adapters/collection'
@@ -7,6 +8,7 @@ import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { entityCacheOptions } from '../utils/entityCacheOptions'
 import { primeCollectionData } from '../utils/primeCollectionData'
 
@@ -28,6 +30,7 @@ export const useNewAlbumReleases = (
   const { limit = 10 } = args
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
+  const { data: currentUserId } = useCurrentUserId()
 
   const idQuery = useQuery({
     queryKey: getNewAlbumReleasesQueryKey({ limit }),
@@ -35,7 +38,11 @@ export const useNewAlbumReleases = (
       const sdk = await audiusSdk()
       const { data = [] } = await sdk.playlists.getPlaylistsNewReleases({
         limit,
-        type: 'album'
+        type: 'album',
+        // Requester id so the backend personalizes embedded album-owner users
+        // (e.g. does_current_user_follow). primeCollectionData fans these out
+        // into the shared user cache, so without this they'd poison it.
+        userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
       const collections = transformAndCleanList(
         data,

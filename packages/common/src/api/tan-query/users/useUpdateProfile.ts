@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataToSdk } from '~/adapters/user'
 import { primeUserData, useQueryContext } from '~/api/tan-query/utils'
-import { Feature } from '~/models/ErrorReporting'
 import { UserMetadata, WriteableUserMetadata } from '~/models/User'
 import { dataURLtoFile } from '~/utils'
 import { squashNewLines } from '~/utils/formatUtil'
@@ -16,7 +15,7 @@ export type MutationContext = {
 }
 
 export const useUpdateProfile = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
@@ -92,14 +91,7 @@ export const useUpdateProfile = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          metadata
-        },
-        feature: Feature.Edit,
-        name: 'Edit Profile'
-      })
+      console.error(error)
     },
     onSettled: (_, __) => {
       // Always refetch after error or success to ensure cache is in sync with server

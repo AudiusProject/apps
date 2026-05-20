@@ -43,8 +43,6 @@ export const getPublicUrl = (): string => {
   switch (env) {
     case 'production':
       return 'https://audius.co'
-    case 'staging':
-      return 'https://staging.audius.co'
     default:
       return 'http://localhost:3000'
   }

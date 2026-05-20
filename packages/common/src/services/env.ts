@@ -59,7 +59,6 @@ export type Env = {
   REOWN_PROJECT_ID: string
   SAFARI_WEB_PUSH_ID: string
   SCHEME: string
-  SENTRY_DSN: string
   SOL_BRIDGE_ADDRESS: Nullable<string>
   SOL_TOKEN_BRIDGE_ADDRESS: Nullable<string>
   SOLANA_CLUSTER_ENDPOINT: string

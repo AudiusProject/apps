@@ -18,7 +18,6 @@ import { Action } from 'typesafe-actions'
 
 // this import needs to be very specific for SSR bundlesize
 import { getAccountStatusQueryKey } from '~/api/tan-query/users/account/useAccountStatus'
-import { ErrorLevel, ReportToSentryArgs } from '~/models'
 import { waitForReachability } from '~/store/reachability/sagas'
 import { toast } from '~/store/ui/toast/slice'
 
@@ -187,18 +186,7 @@ export function* sagaWithErrorHandler(saga: () => Generator<any, void, any>) {
       break
     } catch (e) {
       yield* put(toast({ content: messages.somethingWrong }))
-      console.warn(`Saga ${saga.name} failed, restarting...`, e)
-
-      // Force typing of reportToSentry. We're not able to pull it in
-      // from getContext in ~common as that would require the store.
-      const reportToSentry: (args: ReportToSentryArgs) => void =
-        yield* getContext('reportToSentry') as any
-
-      yield* call(reportToSentry, {
-        name: 'Uncaught Saga Error',
-        level: ErrorLevel.Error,
-        error: e as Error
-      })
+      console.error(`Uncaught Saga Error in ${saga.name}`, e)
     }
   }
 }

@@ -1,7 +1,11 @@
 import { MouseEvent, useCallback, useState } from 'react'
 
 import {
+  useCurrentUserId,
+  useEventFollowState,
   useFileSizes,
+  useFollowEvent,
+  useRemixContest,
   useStems,
   useTrack,
   useTrackByPermalink,
@@ -95,6 +99,24 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     useDownloadTrackArchiveModal()
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
+  // Auto-follow the contest when a signed-in user kicks off a stem
+  // download — downloading a stem is a strong engagement signal that
+  // the user wants to participate. Fires on tap (rather than on
+  // download completion) because the download saga doesn't expose a
+  // success hook to the caller; the follow mutation is optimistic so
+  // the UI updates instantly, and the user can unfollow at any time.
+  const { data: contest } = useRemixContest(trackId)
+  const contestEventId = contest?.eventId
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: followState } = useEventFollowState(contestEventId)
+  const { mutate: followEvent } = useFollowEvent()
+
+  const followContestIfNeeded = useCallback(() => {
+    if (!contestEventId || !currentUserId) return
+    if (followState?.isFollowed) return
+    followEvent({ userId: currentUserId, eventId: contestEventId })
+  }, [contestEventId, currentUserId, followState?.isFollowed, followEvent])
+
   const stemsCount = stems.length
   // Default to expanded for short lists so users can see the stems
   // without an extra click; collapse when there are more than
@@ -129,12 +151,19 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     (e: MouseEvent) => {
       e.stopPropagation()
       if (!track) return
+      followContestIfNeeded()
       openDownloadTrackArchiveModal({
         trackId,
         fileCount: stemsCount + (track.is_downloadable ? 1 : 0)
       })
     },
-    [openDownloadTrackArchiveModal, trackId, stemsCount, track]
+    [
+      followContestIfNeeded,
+      openDownloadTrackArchiveModal,
+      trackId,
+      stemsCount,
+      track
+    ]
   )
 
   const handleUnlockAll = useRequiresAccountCallback(
@@ -153,13 +182,14 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   // specific trackId the user clicked.
   const handleDownloadOne = useRequiresAccountCallback(
     (downloadTrackId: ID, parentTrackId?: ID) => {
+      followContestIfNeeded()
       openWaitForDownloadModal({
         parentTrackId,
         trackIds: [downloadTrackId],
         quality: DownloadQuality.ORIGINAL
       })
     },
-    [openWaitForDownloadModal]
+    [followContestIfNeeded, openWaitForDownloadModal]
   )
 
   // Click-through to the track page. Guarded: action buttons inside

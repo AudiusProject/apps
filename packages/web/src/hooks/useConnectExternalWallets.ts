@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
-import { Name, Chain, Feature } from '@audius/common/models'
+import { Name, Chain } from '@audius/common/models'
 import { isLightTheme } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
 import type { NamespaceTypeMap } from '@reown/appkit'
@@ -15,8 +15,6 @@ import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
 import { useRecord, make } from 'common/store/analytics/actions'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 /**
  * Error when trying to associate a wallet that was already associated
  */
@@ -160,11 +158,10 @@ export const useConnectExternalWallets = (
           )
         }
         if (!solAddress && !ethAddress) {
-          reportToSentry({
-            error: new Error('No wallets found to connect'),
-            name: 'Connect Wallet Error',
-            feature: Feature.FanClubs
-          })
+          console.error(
+            'Connect Wallet Error',
+            new Error('No wallets found to connect')
+          )
         }
 
         setCurrentWallets({
@@ -184,14 +181,7 @@ export const useConnectExternalWallets = (
             error: String(event.data)
           })
         )
-        reportToSentry({
-          error: new Error('Connect Wallet Error'),
-          name: 'Connect Wallet Error',
-          feature: Feature.FanClubs,
-          additionalInfo: {
-            error: String(event.data)
-          }
-        })
+        console.error('Connect Wallet Error', new Error('Connect Wallet Error'))
         onError?.(event)
       }
     })

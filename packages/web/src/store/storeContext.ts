@@ -22,7 +22,6 @@ import { isElectron } from 'utils/clientUtil'
 import { generatePlaylistArtwork } from 'utils/imageProcessingUtil'
 import { getShare } from 'utils/share'
 
-import { reportToSentry } from './errors/reportToSentry'
 import { getLineupSelectorForRoute } from './lineup/lineupForRoute'
 
 export const buildStoreContext = ({
@@ -58,21 +57,6 @@ export const buildStoreContext = ({
     getLineupSelectorForRoute,
     audioPlayer: audioPlayer!,
     nftClient: null,
-    sentry: {
-      setTag: async (...args) => {
-        const Sentry = await import('@sentry/browser')
-        return Sentry.setTag(...args)
-      },
-      getCurrentScope: () => ({
-        setUser: (user: any) => {
-          // Lazy load Sentry and set user asynchronously
-          import('@sentry/browser').then((Sentry) => {
-            Sentry.getCurrentScope().setUser(user)
-          })
-        }
-      })
-    },
-    reportToSentry,
     trackDownload,
     instagramAppId: env.INSTAGRAM_APP_ID,
     instagramRedirectUrl: env.INSTAGRAM_REDIRECT_URL,

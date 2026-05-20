@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 import { Nullable } from '~/utils'
 
@@ -23,7 +23,7 @@ export type PinCommentArgs = {
 }
 
 export const usePinComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -88,12 +88,7 @@ export const usePinComment = () => {
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort, previousPinnedCommentId } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Toast standard error message
       dispatch(toast({ content: messages.mutationError('pinning') }))
       queryClient.setQueryData(

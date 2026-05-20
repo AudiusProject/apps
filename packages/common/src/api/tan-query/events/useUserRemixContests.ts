@@ -17,6 +17,7 @@ import { removeNullable } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
 
@@ -28,9 +29,9 @@ type UseUserRemixContestsArgs = {
   userId: ID | null | undefined
   pageSize?: number
   /**
-   * Filter by contest status. Defaults to `'all'` (the backend's default),
-   * which returns active contests first (ordered by soonest-ending end_date)
-   * followed by ended contests (most-recently-ended first).
+   * Filter by contest status. Defaults to `'all'`, which returns active
+   * contests first (ordered by soonest-ending end_date) followed by ended
+   * contests (most-recently-ended first).
    */
   status?: UserRemixContestStatus
 }
@@ -41,20 +42,21 @@ export const getUserRemixContestsQueryKey = ({
   status = GetContestsByUserStatusEnum.All
 }: UseUserRemixContestsArgs) =>
   [
-    QUERY_KEYS.userRemixContests,
-    { userId, pageSize, status }
+    QUERY_KEYS.userRemixContestsList,
+    userId,
+    { pageSize, status }
   ] as unknown as QueryKey<ID[]>
 
 /**
- * Hook to fetch remix contest events hosted by a specific user with infinite
- * query support. Calls the dedicated endpoint
- * `GET /v1/users/{id}/contests` (SDK: `users.getContestsByUser`), which returns
- * events ordered with currently-active contests first (by soonest-ending
- * end_date) followed by ended contests.
+ * Hook to fetch the remix contests hosted by a specific user with infinite
+ * query support. Calls `GET /v1/users/{id}/contests` (SDK:
+ * `users.getContestsByUser`), which returns events ordered with
+ * currently-active contests first (by soonest-ending end_date) followed by
+ * ended contests.
  *
- * Each page is mapped to the remix contest's parent track ID
- * (`event.entityId`) so consumers like `ContestCard` can receive a
- * `trackId` prop and resolve the event internally via `useRemixContest`.
+ * Each page is mapped to the contest's parent track ID (`event.entityId`)
+ * so consumers like `ContestCard` can take a `trackId` prop and resolve the
+ * event internally via `useRemixContest`.
  */
 export const useUserRemixContests = (
   {
@@ -66,6 +68,7 @@ export const useUserRemixContests = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
+  const { data: currentUserId } = useCurrentUserId()
 
   return useInfiniteQuery({
     queryKey: getUserRemixContestsQueryKey({ userId, pageSize, status }),
@@ -75,22 +78,28 @@ export const useUserRemixContests = (
       return allPages.length * pageSize
     },
     queryFn: async ({ pageParam }) => {
+      if (!userId) return []
       const sdk = await audiusSdk()
       const { data, related } = await sdk.users.getContestsByUser({
         id: Id.parse(userId),
         limit: pageSize,
-        offset: pageParam as number,
-        status
+        offset: pageParam,
+        status,
+        // Requester id so the backend personalizes embedded related.users
+        // (e.g. does_current_user_follow). Path `id` is the contest host;
+        // query `userId` is the current user viewing the page.
+        userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
 
       // Prime related tracks + users (full objects, delivered alongside the
-      // event list on the per-user endpoint, same shape as the discovery
-      // endpoint).
+      // event list). This turns ContestCard's useTrack / useUser into cache
+      // hits so the grid can paint with one network round-trip instead of
+      // N+1.
       primeRelatedData({ related, queryClient })
 
       // Prime useRemixes({ trackId, pageSize: 0, isContestEntry: true }) so
       // ContestCard's entry-count badge doesn't fire a count-only request
-      // per card.
+      // per card. Mirrors the priming in useAllRemixContests.
       const entryCounts = related?.entryCounts ?? {}
       for (const [hashedTrackId, count] of Object.entries(entryCounts)) {
         const trackId = OptionalHashId.parse(hashedTrackId)
@@ -114,7 +123,7 @@ export const useUserRemixContests = (
         .map((sdkEvent: SDKEvent) => {
           const event = eventMetadataFromSDK(sdkEvent)
           if (!event) return null
-          // Prime the per-event cache so useEvent hits immediately downstream.
+          // Prime per-event cache so useEvent hits immediately downstream.
           queryClient.setQueryData(getEventQueryKey(event.eventId), event)
           // useRemixContest resolves via useEventIdsByEntityId keyed by
           // (entityId, entityType=Track, eventType=RemixContest). Prime that
@@ -136,8 +145,8 @@ export const useUserRemixContests = (
         })
         .filter(removeNullable)
     },
-    enabled: !!userId && options?.enabled !== false,
     select: (data) => data.pages.flat(),
+    enabled: options?.enabled !== false && !!userId,
     ...options
   })
 }

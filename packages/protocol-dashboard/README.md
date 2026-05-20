@@ -1,8 +1,8 @@
 # Audius Service Provider Dashboard
 
 ## Summary
-Audius Service Provider Dashboard allows users to register content nodes and discovery providers, 
-view their registered services & which ones are out date, and explore all audius services.
+Audius Service Provider Dashboard allows operators to register Open Audio Validator Nodes (the unified node type that replaces the deprecated *content node* / *discovery provider* split),
+view their registered services and which ones are out of date, and explore all Audius services.
 
 ## Running the Application
 The application requires ethereum contracts.

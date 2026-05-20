@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { messages } from './types'
@@ -15,7 +15,7 @@ export type UpdateTrackCommentNotificationSettingArgs = {
 }
 
 export const useUpdateTrackCommentNotificationSetting = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
 
@@ -38,12 +38,7 @@ export const useUpdateTrackCommentNotificationSetting = () => {
     },
     onError: (error: Error, args) => {
       const { trackId } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       dispatch(toast({ content: messages.muteUserError }))
 
       queryClient.resetQueries({

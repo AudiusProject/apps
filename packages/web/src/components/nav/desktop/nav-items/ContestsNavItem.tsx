@@ -1,7 +1,5 @@
 import React from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import { IconTrophy } from '@audius/harmony'
 
@@ -12,12 +10,7 @@ import { useNavSourcePlayingStatus } from '../useNavSourcePlayingStatus'
 const { CONTESTS_PAGE } = route
 
 export const ContestsNavItem = () => {
-  const { isEnabled: isContestsPageEnabled } = useFeatureFlag(
-    FeatureFlags.CONTESTS
-  )
   const playingFromRoute = useNavSourcePlayingStatus()
-
-  if (!isContestsPageEnabled) return null
 
   return (
     <LeftNavLink

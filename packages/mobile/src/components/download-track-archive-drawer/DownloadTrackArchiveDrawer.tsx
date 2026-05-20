@@ -8,7 +8,7 @@ import {
 } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
 import type { ID } from '@audius/common/models'
-import { Feature, Name } from '@audius/common/models'
+import { Name } from '@audius/common/models'
 import type { DownloadFile } from '@audius/common/services'
 import { useDownloadTrackArchiveModal } from '@audius/common/store'
 
@@ -23,7 +23,6 @@ import {
 } from '@audius/harmony-native'
 import Drawer from 'app/components/drawer'
 import { env } from 'app/services/env'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import { DrawerHeader } from '../core/DrawerHeader'
 import LoadingSpinner from '../loading-spinner'
@@ -58,14 +57,7 @@ const useDownloadFile = () => {
         setSuccess(true)
       } catch (e) {
         setError(e as Error)
-        reportToSentry({
-          additionalInfo: {
-            file
-          },
-          name: 'Failed to download track archive',
-          error: e as Error,
-          feature: Feature.Remixes
-        })
+        console.error('Failed to download track archive', e as Error)
       } finally {
         setFetching(false)
         setAbortController(null)

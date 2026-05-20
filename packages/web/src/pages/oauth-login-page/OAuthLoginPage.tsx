@@ -8,7 +8,7 @@ import {
   useCurrentAccountUser
 } from '@audius/common/api'
 import { useAccountSwitcher } from '@audius/common/hooks'
-import { Name, ErrorLevel, UserMetadata } from '@audius/common/models'
+import { Name, UserMetadata } from '@audius/common/models'
 import { SignInResponse } from '@audius/common/services'
 import { signOutActions } from '@audius/common/store'
 import {
@@ -33,7 +33,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { AccountListContent } from 'components/nav/desktop/AccountSwitcher/AccountListContent'
 import { ProfileInfo } from 'components/profile-info/ProfileInfo'
 import { audiusSdk, authService } from 'services/audius-sdk'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import styles from './OAuthLoginPage.module.css'
 import { ApproveTransactionScreen } from './components/ApproveTransactionScreen'
@@ -114,7 +113,7 @@ export const OAuthLoginPage = () => {
       })
     )
     if (error && !isUserError) {
-      reportToSentry({ level: ErrorLevel.Error, error })
+      console.error(error)
     }
   }
 

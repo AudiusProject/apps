@@ -12,7 +12,7 @@ import {
   useIsManagedAccount
 } from '@audius/common/hooks'
 import { coinDetailsMessages, walletMessages } from '@audius/common/messages'
-import { Feature, Name, WidthSizes } from '@audius/common/models'
+import { Name, WidthSizes } from '@audius/common/models'
 import { useClaimVestedCoinsModal } from '@audius/common/store'
 import {
   formatCurrencyWithSubscript,
@@ -63,7 +63,6 @@ import { useConnectExternalWallets } from 'hooks/useConnectExternalWallets'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import { push } from 'utils/navigation'
 
 const { REWARDS_PAGE, UPLOAD_PAGE } = route
@@ -589,17 +588,7 @@ export const FanClubInfoSection = ({
       )
     },
     onError: (error) => {
-      reportToSentry({
-        error,
-        feature: Feature.FanClubs,
-        name: 'Failed to claim fan club fees',
-        additionalInfo: {
-          coin,
-          tokenMint: mint,
-          unclaimedFees,
-          totalArtistEarnings
-        }
-      })
+      console.error(error)
       console.error(error)
       toast(toastMessages.feesClaimFailed)
       record(
@@ -630,15 +619,7 @@ export const FanClubInfoSection = ({
         )
       },
       onError: (error) => {
-        reportToSentry({
-          error,
-          feature: Feature.FanClubs,
-          name: 'Failed to claim vested fan clubs',
-          additionalInfo: {
-            coin,
-            tokenMint: mint
-          }
-        })
+        console.error(error)
         console.error(error)
         toast(toastMessages.vestedCoinsClaimFailed)
         record(

@@ -1,13 +1,10 @@
 import { MouseEvent, ReactNode, useCallback } from 'react'
 
-import { Feature } from '@audius/common/models'
 import cn from 'classnames'
 
 import 'url-search-params-polyfill'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { env } from 'services/env'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 const HOSTNAME = env.PUBLIC_HOSTNAME
 const INSTAGRAM_APP_ID = env.INSTAGRAM_APP_ID
 const INSTAGRAM_REDIRECT_URL = env.INSTAGRAM_REDIRECT_URL || ''
@@ -92,12 +89,7 @@ const InstagramAuth = ({
 
         return onSuccess(profileRespJson.username, igUserProfile)
       } catch (err: any) {
-        reportToSentry({
-          error: err,
-          name: 'Sign Up: InstagramAuth getProfile failed',
-          tags: { socialMedia: 'instagram' },
-          feature: Feature.SignUp
-        })
+        console.error('Sign Up: InstagramAuth getProfile failed', err)
         onFailure(err)
       }
     },
@@ -137,12 +129,7 @@ const InstagramAuth = ({
                   'They were either not set during the redirect, or were removed—typically by a ' +
                   'routing library—before Instagram react component could read it.'
               )
-              reportToSentry({
-                error,
-                name: 'Sign Up: InstagramAuth oauth redirect failed',
-                feature: Feature.SignUp,
-                tags: { socialMedia: 'instagram' }
-              })
+              console.error(error)
               return onFailure(error)
             }
           }
@@ -159,12 +146,7 @@ const InstagramAuth = ({
     const popup = openPopup()
     await new Promise((resolve) => setTimeout(resolve, 500)) // wait 500ms
     if (!popup) {
-      reportToSentry({
-        error: new Error('Unable to open InstagramAuth popup'),
-        name: 'Sign Up',
-        feature: Feature.SignUp,
-        tags: { socialMedia: 'instagram' }
-      })
+      console.error('Sign Up', new Error('Unable to open InstagramAuth popup'))
     }
     try {
       if (popup) {
@@ -174,12 +156,10 @@ const InstagramAuth = ({
         polling(popup)
       }
     } catch (error) {
-      reportToSentry({
-        error: error as Error,
-        name: 'Sign Up: InstagramAuth popup polling failed',
-        feature: Feature.SignUp,
-        tags: { socialMedia: 'instagram' }
-      })
+      console.error(
+        'Sign Up: InstagramAuth popup polling failed',
+        error as Error
+      )
       if (popup) popup.close()
       return onFailure(error)
     }

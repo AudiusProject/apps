@@ -71,7 +71,6 @@ export const useChangeEmailFormConfiguration = (onComplete: () => void) => {
     () => toFormikValidationSchema(emailSchema(queryContext, queryClient)),
     [queryContext, queryClient]
   )
-  const reportToSentry = queryContext.reportToSentry
 
   const validationSchema =
     page === ChangeEmailPage.ConfirmPassword
@@ -136,11 +135,11 @@ export const useChangeEmailFormConfiguration = (onComplete: () => void) => {
         } else {
           helpers.setFieldError('otp', messages.somethingWrong)
           helpers.setFieldError('email', messages.somethingWrong)
-          reportToSentry({ error: e as Error, name: 'ChangeEmail' })
+          console.error('ChangeEmail', e as Error)
         }
       }
     },
-    [setPage, onComplete, authService, reportToSentry]
+    [setPage, onComplete, authService]
   )
 
   const onSubmit = useCallback(

@@ -1,5 +1,8 @@
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+
 import alias from '@rollup/plugin-alias'
-import babel from '@rollup/plugin-babel'
+import { babel } from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
@@ -9,7 +12,9 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-import pkg from './package.json'
+const pkg = JSON.parse(
+  readFileSync(fileURLToPath(new URL('./package.json', import.meta.url)), 'utf-8')
+)
 
 const extensions = ['.js', '.ts']
 

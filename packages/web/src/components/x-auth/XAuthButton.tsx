@@ -3,13 +3,10 @@ import { MouseEventHandler } from 'react'
 import 'whatwg-fetch'
 import 'url-search-params-polyfill'
 
-import { Feature } from '@audius/common/models'
 import { TwitterProfile } from '@audius/common/store'
 import { SocialButton } from '@audius/harmony'
 
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 const REQUEST_TOKEN_URL =
   `${audiusBackendInstance.identityServiceUrl}/twitter` as const
 const LOGIN_URL =
@@ -81,13 +78,10 @@ export const XAuthButton = (props: XAuthButtonProps) => {
       })
       .catch((error) => {
         popup?.close()
-        reportToSentry({
-          error: error as Error,
-          additionalInfo: { authenticationUrl, screenName },
-          tags: { socialMedia: 'twitter' },
-          name: 'Sign Up: Twitter getRequestToken popup failed',
-          feature: Feature.SignUp
-        })
+        console.error(
+          'Sign Up: Twitter getRequestToken popup failed',
+          error as Error
+        )
         return onFailure(error)
       })
   }
@@ -135,13 +129,7 @@ export const XAuthButton = (props: XAuthButtonProps) => {
                 'They were either not set during the redirect, or were removed—typically by a ' +
                 'routing library—before Twitter react component could read it.'
             )
-            reportToSentry({
-              error,
-              additionalInfo: { popupLocation: popup.location },
-              tags: { socialMedia: 'twitter' },
-              name: 'Sign Up: Twitter oauth redirect failed',
-              feature: Feature.SignUp
-            })
+            console.error(error)
             return onFailure(error)
           }
         }
@@ -169,12 +157,7 @@ export const XAuthButton = (props: XAuthButtonProps) => {
         response.json().then(({ uuid, profile }) => onSuccess(uuid, profile))
       })
       .catch((error) => {
-        reportToSentry({
-          error: error as Error,
-          tags: { socialMedia: 'twitter' },
-          name: 'Sign Up: Twitter getOauthToken failed',
-          feature: Feature.SignUp
-        })
+        console.error('Sign Up: Twitter getOauthToken failed', error as Error)
         return onFailure(error)
       })
   }

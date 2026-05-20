@@ -1,14 +1,16 @@
 import { useCallback, useContext, useMemo } from 'react'
 
 import { useDeleteCollection } from '@audius/common/api'
+import { registerNiceModalId } from '@audius/common/services'
 import { deletePlaylistConfirmationModalUISelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import ActionSheetModal from 'components/action-drawer/ActionDrawer'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { push } from 'utils/navigation'
+
 const { TRENDING_PAGE } = route
 const { getPlaylistId } = deletePlaylistConfirmationModalUISelectors
 
@@ -22,16 +24,16 @@ const actions = [
   { text: messages.cancel }
 ]
 
-const DeletePlaylistConfirmationModal = () => {
-  const [isOpen, setIsOpen] = useModalState('DeletePlaylistConfirmation')
+const DeletePlaylistConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
   const playlistId = useSelector(getPlaylistId) ?? -1
   const { mutateAsync: deleteCollection } = useDeleteCollection()
   const dispatch = useDispatch()
   const { setStackReset } = useContext(RouterContext)
 
   const handleClose = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+    modal.hide()
+  }, [modal])
 
   const handleDelete = useCallback(async () => {
     try {
@@ -57,12 +59,18 @@ const DeletePlaylistConfirmationModal = () => {
 
   return (
     <ActionSheetModal
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={handleClose}
       actions={actions}
       didSelectRow={didSelectRow}
     />
   )
-}
+})
+
+NiceModal.register(
+  'DeletePlaylistConfirmation',
+  DeletePlaylistConfirmationModal
+)
+registerNiceModalId('DeletePlaylistConfirmation')
 
 export default DeletePlaylistConfirmationModal

@@ -61,9 +61,9 @@ export type Modals =
   | 'TrendingCategory'
   | 'TrendingTimeRange'
   | 'TrendingFilter'
+  | 'FeedFilter'
   | 'TrendingRewardsExplainer'
   | 'SocialProof'
-  | 'EditFolder'
   | 'EditTrack'
   | 'SignOutConfirmation'
   | 'Overflow'
@@ -83,7 +83,6 @@ export type Modals =
   | 'PlaybackRate'
   | 'ProfileActions'
   | 'PublishContentModal'
-  | 'LabelAccount'
   | 'DuplicateAddConfirmation'
   | 'PremiumContentPurchaseModal'
   | 'CreateChatModal'
@@ -121,6 +120,8 @@ export type Modals =
   | 'CoinSuccessModal'
   | 'VerificationSuccess'
   | 'VerificationError'
+  | 'CreatePlaylistModal'
+  | 'DuplicatePlaylistModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState

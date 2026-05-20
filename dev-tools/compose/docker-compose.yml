@@ -172,12 +172,6 @@ services:
       service: staking
     <<: *common
 
-  solana-relay:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: solana-relay
-    <<: *common
-
   anti-abuse:
     extends:
       file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml

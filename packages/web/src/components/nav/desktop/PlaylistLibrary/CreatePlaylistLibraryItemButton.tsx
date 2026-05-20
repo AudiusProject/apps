@@ -1,53 +1,52 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
-import { CreatePlaylistSource } from '@audius/common/models'
 import {
-  cacheCollectionsActions,
-  playlistLibraryHelpers
+  playlistLibraryHelpers,
+  useCreatePlaylistModal,
+  useDuplicatePlaylistModal
 } from '@audius/common/store'
 import {
   IconButton,
+  IconCopy,
   IconFolder,
   IconPlaylists,
   IconPlus,
   PopupMenu,
   PopupMenuItem
 } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
 
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 
-const { createPlaylist } = cacheCollectionsActions
 const { addFolderToLibrary, constructPlaylistFolder } = playlistLibraryHelpers
 
 const messages = {
   new: 'New',
   newPlaylistOrFolderTooltip: 'New Playlist or Folder',
   createPlaylist: 'Create Playlist',
+  duplicatePlaylist: 'Duplicate Playlist',
   createFolder: 'Create Folder',
-  newPlaylistName: 'New Playlist',
   newFolderName: 'New Folder'
 }
 
 // Allows user to create a playlist or playlist-folder
 export const CreatePlaylistLibraryItemButton = () => {
-  const dispatch = useDispatch()
   const { data: library } = useCurrentAccount({
     select: (account) => account?.playlistLibrary
   })
   const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
+  const { onOpen: openCreatePlaylistModal } = useCreatePlaylistModal()
+  const { onOpen: openDuplicatePlaylistModal } = useDuplicatePlaylistModal()
   const [isActive, setIsActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const handleSubmitPlaylist = useCallback(() => {
-    dispatch(
-      createPlaylist(
-        { playlist_name: messages.newPlaylistName },
-        CreatePlaylistSource.NAV
-      )
-    )
-  }, [dispatch])
+    openCreatePlaylistModal({ isAlbum: false })
+  }, [openCreatePlaylistModal])
+
+  const handleDuplicatePlaylist = useCallback(() => {
+    openDuplicatePlaylistModal({ isAlbum: false })
+  }, [openDuplicatePlaylistModal])
 
   const handleSubmitFolder = useCallback(() => {
     if (!library) return null
@@ -74,12 +73,17 @@ export const CreatePlaylistLibraryItemButton = () => {
         onClick: handleSubmitPlaylist
       },
       {
+        text: messages.duplicatePlaylist,
+        icon: <IconCopy />,
+        onClick: handleDuplicatePlaylist
+      },
+      {
         text: messages.createFolder,
         icon: <IconFolder />,
         onClick: handleSubmitFolder
       }
     ],
-    [handleSubmitPlaylist, handleSubmitFolder]
+    [handleSubmitPlaylist, handleDuplicatePlaylist, handleSubmitFolder]
   )
 
   return (

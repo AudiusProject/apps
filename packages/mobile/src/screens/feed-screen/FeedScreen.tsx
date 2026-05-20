@@ -10,7 +10,7 @@ import {
   FOR_YOU_INITIAL_PAGE_SIZE,
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
-import { Name, FeedFilter, FeedTab } from '@audius/common/models'
+import { Name, FeedTab } from '@audius/common/models'
 import { feedPageActions, feedPageSelectors } from '@audius/common/store'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -21,22 +21,15 @@ import { SuggestedFollows } from 'app/components/suggested-follows'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { make, track } from 'app/services/analytics'
 
+import { FeedFilterButton } from './FeedFilterButton'
 import { FeedTabs } from './FeedTabs'
 
-const { getFeedTab } = feedPageSelectors
+const { getFeedTab, getFeedFilter } = feedPageSelectors
 const { setFeedTab } = feedPageActions
 
 const messages = {
   header: 'Your Feed',
   endOfFeed: "Looks like you've reached the end of your feed..."
-}
-
-const tabToFilter: Record<
-  Exclude<FeedTab, FeedTab.FOR_YOU>,
-  FeedFilter
-> = {
-  [FeedTab.FOLLOWING]: FeedFilter.ALL,
-  [FeedTab.UPLOADS_ONLY]: FeedFilter.ORIGINAL
 }
 
 // Note: the feed API returns both tracks and collections (playlist reposts).
@@ -46,22 +39,24 @@ const tabToFilter: Record<
 // TrackLineup learns to render mixed feeds.
 export const FeedScreen = () => {
   const dispatch = useDispatch()
-  const feedTab = useSelector(getFeedTab)
+  const persistedTab = useSelector(getFeedTab)
+  const feedFilter = useSelector(getFeedFilter)
   const { data: currentUserId } = useCurrentUserId()
 
+  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
+  // CHRONOLOGICAL after the For You / Chronological refactor.
+  const feedTab =
+    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
   const isForYou = feedTab === FeedTab.FOR_YOU
-  const followingFilter = isForYou
-    ? FeedFilter.ALL
-    : tabToFilter[feedTab as Exclude<FeedTab, FeedTab.FOR_YOU>]
 
   const feedArgs = useMemo(
     () => ({
       userId: currentUserId,
-      filter: followingFilter,
+      filter: feedFilter,
       initialPageSize: FEED_INITIAL_PAGE_SIZE,
       loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
     }),
-    [followingFilter, currentUserId]
+    [feedFilter, currentUserId]
   )
   const followFeed = useFeed(feedArgs, { enabled: !isForYou })
   const forYouFeed = useForYouFeed(
@@ -85,6 +80,19 @@ export const FeedScreen = () => {
     [dispatch]
   )
 
+  // Memoized so the header isn't a new function reference on every render —
+  // otherwise Screen's setOptions runs each parent re-render and React
+  // Navigation rebuilds the header, remounting AccountPictureHeader and
+  // re-firing the profile-picture image-fetch path.
+  const renderHeader = useCallback(
+    () => (
+      <MobileRootHeader title={messages.header} showDivider={false}>
+        {isForYou ? null : <FeedFilterButton />}
+      </MobileRootHeader>
+    ),
+    [isForYou]
+  )
+
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,
@@ -95,9 +103,7 @@ export const FeedScreen = () => {
         pageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE,
         initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
         refetch: undefined as undefined | (() => void),
-        querySource: undefined as
-          | { queryKey: unknown[] }
-          | undefined
+        querySource: undefined as { queryKey: unknown[] } | undefined
       }
     : {
         trackIds: followFeed.trackIds,
@@ -114,12 +120,7 @@ export const FeedScreen = () => {
       }
 
   return (
-    <Screen
-      url='Feed'
-      header={() => (
-        <MobileRootHeader title={messages.header} showDivider={false} />
-      )}
-    >
+    <Screen url='Feed' header={renderHeader}>
       <ScreenContent>
         <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         <TrackLineup

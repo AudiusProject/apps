@@ -90,7 +90,7 @@ type AddConnectedWalletParams = {
 
 export const useAddAssociatedWallet = () => {
   const queryClient = useQueryClient()
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const { data: currentUserId = null } = useCurrentUserId()
 
   // for priming cache
@@ -150,10 +150,7 @@ export const useAddAssociatedWallet = () => {
         getConnectedWalletsQueryKey({ userId: currentUserId }),
         context?.previousAssociatedWallets
       )
-      reportToSentry({
-        error,
-        name: 'Add Connected Wallet'
-      })
+      console.error(error)
     }
   })
 }
@@ -164,7 +161,7 @@ export type RemoveConnectedWalletParams = {
 
 export const useRemoveAssociatedWallet = () => {
   const queryClient = useQueryClient()
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
 
   // for priming cache
@@ -217,10 +214,7 @@ export const useRemoveAssociatedWallet = () => {
           type: 'error'
         })
       )
-      reportToSentry({
-        error,
-        name: 'Remove Connected Wallet'
-      })
+      console.error(error)
     }
   })
 }

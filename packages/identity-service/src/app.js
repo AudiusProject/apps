@@ -5,7 +5,6 @@ const sgMail = require('@sendgrid/mail')
 const sgClient = require('@sendgrid/client')
 const { redisClient, Lock } = require('./redis')
 const optimizelySDK = require('@optimizely/optimizely-sdk')
-const Sentry = require('@sentry/node')
 const cluster = require('cluster')
 const config = require('./config.js')
 const txRelay = require('./relay/txRelay')
@@ -35,7 +34,6 @@ class App {
     this.port = port
     this.express = express()
     this.redisClient = redisClient
-    this.configureSentry()
     this.configureSendGrid()
 
     this.optimizelyPromise = null
@@ -155,15 +153,6 @@ class App {
       'sendgridClient',
       config.get('sendgridApiKey') ? sgClient : null
     )
-  }
-
-  configureSentry() {
-    const dsn = config.get('sentryDSN')
-    if (dsn) {
-      Sentry.init({
-        dsn
-      })
-    }
   }
 
   configureOptimizely() {
@@ -397,7 +386,6 @@ class App {
     function errorHandler(err, req, res, next) {
       req.logger.error('Internal server error')
       req.logger.error(err.stack)
-      Sentry.captureException(err)
       sendResponse(req, res, errorResponseServerError('Internal server error'))
     }
     this.express.use(errorHandler)

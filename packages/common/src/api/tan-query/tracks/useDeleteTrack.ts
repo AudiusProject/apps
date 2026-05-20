@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Track } from '~/models/Track'
 import { UserMetadata } from '~/models/User'
@@ -27,7 +26,7 @@ type MutationContext = {
 }
 
 export const useDeleteTrack = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
   const { data: currentUser } = useUser(currentUserId)
@@ -134,12 +133,7 @@ export const useDeleteTrack = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: { trackId },
-        name: 'Delete Track',
-        feature: Feature.Edit
-      })
+      console.error(error)
     }
   })
 }

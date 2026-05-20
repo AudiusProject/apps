@@ -4,6 +4,7 @@ import { useCurrentAccountUser } from '@audius/common/api'
 import { imageProfilePicEmpty } from '@audius/common/assets'
 import { welcomeModalMessages } from '@audius/common/messages'
 import { Name, SquareSizes } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import { fillString, route } from '@audius/common/utils'
 import {
   Modal,
@@ -15,10 +16,10 @@ import {
   Avatar,
   Box
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
 
-import { useModalState } from 'common/hooks/useModalState'
 import { make } from 'common/store/analytics/actions'
 import {
   getNameField,
@@ -32,7 +33,7 @@ import { useSelector } from 'utils/reducer'
 
 const { UPLOAD_PAGE } = route
 
-export const WelcomeModal = () => {
+export const WelcomeModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const { isMobile } = useMedia()
   const { value: nameField } = useSelector(getNameField)
@@ -47,25 +48,25 @@ export const WelcomeModal = () => {
   })
 
   const userName = nameField ?? accountName
-  const [isOpen, setIsOpen] = useModalState('Welcome')
+  const modal = useModal()
 
   const profileImage =
     profileImageField?.url ?? (presavedProfilePic || imageProfilePicEmpty)
 
   const Root = isMobile ? Drawer : Modal
   const onClose = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+    modal.hide()
+  }, [modal])
 
   useEffect(() => {
-    if (isOpen) {
+    if (modal.visible) {
       dispatch(make(Name.CREATE_ACCOUNT_WELCOME_MODAL, {}))
     }
-  }, [dispatch, isOpen])
+  }, [dispatch, modal.visible])
 
   return (
     <Root
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={onClose}
       size='small'
       aria-labelledby='welcome-title'
@@ -135,4 +136,7 @@ export const WelcomeModal = () => {
       </Flex>
     </Root>
   )
-}
+})
+
+NiceModal.register('Welcome', WelcomeModal)
+registerNiceModalId('Welcome')

@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack, PlaybackQuerySource } from '@audius/common/store'
 import { Divider, Flex } from '@audius/harmony'
 import cn from 'classnames'
-import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
@@ -19,7 +18,17 @@ import styles from './Lineup.module.css'
 import { LineupVariant } from './types'
 
 const NARROW_CONTAINER_THRESHOLD_PX = 600
-const DEFAULT_LOAD_MORE_THRESHOLD = 500
+// Fallback used until the scroll parent has been measured. Sized so the next
+// page request fires well before the user reaches the literal bottom of the
+// list. Effective threshold is `LOAD_MORE_VIEWPORTS * scrollParent.clientHeight`
+// once measured.
+const DEFAULT_LOAD_MORE_THRESHOLD = 1600
+// Number of viewports of "remaining content" that should trigger loading the
+// next page. Larger values give a bigger buffer for fast desktop scrolling so
+// skeletons paint comfortably before the user reaches the bottom. Matches the
+// effect of mobile's `onEndReachedThreshold` but on the larger desktop viewport
+// we need more headroom to keep up with fling scrolls.
+const LOAD_MORE_VIEWPORTS = 2
 
 const { getPlaying: getPlayerPlaying } = playbackSelectors
 const { makeGetCurrent } = playbackSelectors
@@ -192,11 +201,6 @@ export const TrackLineup = ({
     ]
   )
 
-  const getScrollParent = useCallback(() => {
-    if (externalScrollParent) return externalScrollParent
-    return document.getElementById('mainContent')
-  }, [externalScrollParent])
-
   // Tile sizing mirrors the legacy component.
   let tileSize: TrackTileSize = TrackTileSize.LARGE
   let statSize: 'small' | 'large' = 'large'
@@ -221,8 +225,75 @@ export const TrackLineup = ({
     return trackIds.slice(0, end)
   }, [trackIds, maxEntries])
 
+  // Track the scroll parent's viewport height so the load-more threshold is a
+  // multiple of one full viewport. Falls back to the constant until measured.
+  const [scrollParentHeight, setScrollParentHeight] = useState<number | null>(
+    null
+  )
+  useEffect(() => {
+    const parent =
+      externalScrollParent ?? document.getElementById('mainContent')
+    if (!parent) return
+    const update = () => setScrollParentHeight(parent.clientHeight || null)
+    update()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(update)
+    observer.observe(parent)
+    return () => observer.disconnect()
+  }, [externalScrollParent])
+
+  // How many viewports below the user's current bottom edge we want loadMore
+  // to fire. Passed to the IntersectionObserver as a bottom rootMargin.
+  const loadMoreRootMargin = scrollParentHeight
+    ? scrollParentHeight * LOAD_MORE_VIEWPORTS
+    : loadMoreThreshold
+
+  // Synchronous "load more was triggered" flag — set the moment the trigger
+  // fires so skeletons render on the next frame, without waiting for
+  // tanquery's `isFetching` to round-trip back through the parent. Cleared
+  // once the parent either delivers more entries or finishes fetching.
+  const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
+  const prevEntriesLengthRef = useRef(visibleTrackIds.length)
+  useEffect(() => {
+    if (visibleTrackIds.length !== prevEntriesLengthRef.current) {
+      prevEntriesLengthRef.current = visibleTrackIds.length
+      setIsLoadMoreTriggered(false)
+    }
+  }, [visibleTrackIds.length])
+  useEffect(() => {
+    if (!isFetching) setIsLoadMoreTriggered(false)
+  }, [isFetching])
+
+  const handleLoadMore = useCallback(() => {
+    if (!hasNextPage || isFetching || isLoadMoreTriggered) return
+    if (!loadNextPage) return
+    setIsLoadMoreTriggered(true)
+    loadNextPage()
+  }, [hasNextPage, isFetching, isLoadMoreTriggered, loadNextPage])
+
+  // IntersectionObserver-based trigger. A 1px sentinel <li> is rendered just
+  // below the last loaded tile (above the persistent skeleton block); when it
+  // enters the viewport — extended downward by `loadMoreRootMargin` — we fire
+  // loadMore. Using IO instead of react-infinite-scroller's scroll-listener
+  // means the trigger geometry is anchored to a specific DOM element and is
+  // immune to scrollHeight fluctuations from the skeleton block or anywhere
+  // else in the layout.
+  const sentinelRef = useRef<HTMLLIElement>(null)
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el || !hasNextPage) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) handleLoadMore()
+      },
+      { rootMargin: `0px 0px ${loadMoreRootMargin}px 0px`, threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, loadMoreRootMargin, handleLoadMore])
+
   const renderSkeletons = useCallback(
-    (skeletonCount: number | undefined) => {
+    (skeletonCount: number | undefined, indexOffset = 0) => {
       if (!skeletonCount) return null
       return (
         <>
@@ -232,7 +303,12 @@ export const TrackLineup = ({
               <Flex
                 direction='column'
                 gap='m'
-                key={`skeleton-${index}`}
+                // Position-based key so a skeleton's React identity matches
+                // its absolute position in the lineup. Without this, the same
+                // DOM node would change its rendered order number every time
+                // a page resolves (skeleton-0 reused but now showing tileOrder
+                // for a higher index), which reads as the numbers jumping.
+                key={`skeleton-${indexOffset + index}`}
                 w='100%'
                 as='li'
                 className={cn({ [tileStyles!]: !!tileStyles })}
@@ -241,7 +317,7 @@ export const TrackLineup = ({
                 <Flex direction={isSmallTrackTile ? 'row' : 'column'} w='100%'>
                   {/* @ts-ignore - TrackTile types don't fully cover loading state */}
                   <TrackTile
-                    index={index}
+                    index={indexOffset + index}
                     size={tileSize}
                     ordered={ordered}
                     isLoading
@@ -291,7 +367,19 @@ export const TrackLineup = ({
   ])
 
   const isInitialLoad = isPending && tiles.length === 0
-  const isEmpty = tiles.length === 0 && !isFetching && !isInitialLoad
+  const isEmpty =
+    tiles.length === 0 && !isFetching && !isInitialLoad && !isLoadMoreTriggered
+
+  // Persistent skeletons render below the loaded tiles whenever more pages are
+  // available, so scrollHeight grows monotonically across fetches (no
+  // mount/unmount churn on the bottom block). A stable count keeps the block
+  // height invariant across renders — important because the scrollbar thumb is
+  // sized relative to scrollHeight. `pageSize` is too small on its own (e.g.
+  // trending uses 4) so we floor by a small constant.
+  const loadingSkeletonCount = Math.min(
+    Math.max(0, maxEntries - tiles.length),
+    Math.max(pageSize, 10)
+  )
 
   return (
     <div
@@ -306,22 +394,14 @@ export const TrackLineup = ({
           [lineupContainerStyles!]: !!lineupContainerStyles
         })}
       >
-        <InfiniteScroll
+        <ol
           aria-label={ariaLabel}
-          pageStart={0}
-          loadMore={loadNextPage ?? (() => {})}
-          hasMore={!!hasNextPage && tiles.length < maxEntries}
-          useWindow={isMobile}
-          initialLoad={false}
-          getScrollParent={getScrollParent}
-          element='ol'
-          threshold={loadMoreThreshold}
           className={cn({
             [tileContainerStyles!]: !!tileContainerStyles && !isEmpty
           })}
         >
           {tiles.length === 0
-            ? isFetching || isInitialLoad
+            ? isFetching || isInitialLoad || isLoadMoreTriggered
               ? renderSkeletons(
                   Math.min(maxEntries, initialPageSize ?? pageSize)
                 )
@@ -360,10 +440,24 @@ export const TrackLineup = ({
                 </Flex>
               ))}
 
-          {isFetching && tiles.length > 0
-            ? renderSkeletons(Math.min(maxEntries - tiles.length, pageSize))
-            : null}
-        </InfiniteScroll>
+          {hasNextPage && tiles.length > 0 ? (
+            <>
+              {/* 1px sentinel watched by IntersectionObserver to fire
+                  loadMore. Placed between the loaded tiles and the persistent
+                  skeleton block so the trigger geometry stays anchored to the
+                  bottom of loaded content. The IO rootMargin extends the
+                  viewport downward by `loadMoreRootMargin` so the trigger
+                  fires that many pixels before the sentinel actually enters
+                  the visible area. */}
+              <li
+                ref={sentinelRef}
+                aria-hidden
+                css={{ height: 1, listStyle: 'none', margin: 0, padding: 0 }}
+              />
+              {renderSkeletons(loadingSkeletonCount, tiles.length)}
+            </>
+          ) : null}
+        </ol>
       </div>
       {!hasNextPage && tiles.length > 0 && endOfLineupElement
         ? endOfLineupElement

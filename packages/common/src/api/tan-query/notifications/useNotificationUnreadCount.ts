@@ -35,14 +35,14 @@ export const useNotificationUnreadCount = () => {
       const response = await (
         sdk.notifications as {
           getNotifications: (params: {
-            userId: string
+            id: string
             limit?: number
           }) => Promise<{
             data?: { unreadCount?: number }
           }>
         }
       ).getNotifications({
-        userId: Id.parse(currentUserId),
+        id: Id.parse(currentUserId),
         limit: 0
       })
       return response?.data?.unreadCount ?? 0

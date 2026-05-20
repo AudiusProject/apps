@@ -253,7 +253,6 @@
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* Bundle React Native code and images */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				838AABE123CE404D004B2DA3 /* ShellScript */,
-				18A5B1D0CA1543ABB2DC5C65 /* Upload Debug Symbols to Sentry */,
 				CBD3B687421F14165031EAF0 /* [CP] Embed Pods Frameworks */,
 				B73C21C532E1201FEFBAECDA /* [CP] Copy Pods Resources */,
 				23A43AB82E37E73000CDCDF2 /* Embed Foundation Extensions */,
@@ -355,20 +354,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		18A5B1D0CA1543ABB2DC5C65 /* Upload Debug Symbols to Sentry */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Upload Debug Symbols to Sentry";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/scripts/uploadSentryDebugSymbols.sh\n";
-		};
 		4F8185A02FC4BDA0C345B32B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;

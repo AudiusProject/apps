@@ -1,6 +1,7 @@
 import { useCallback, useContext } from 'react'
 
 import { useCurrentAccountUser, useCollection } from '@audius/common/api'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   cacheCollectionsActions,
   duplicateAddConfirmationModalUISelectors
@@ -15,10 +16,10 @@ import {
   ModalTitle,
   ModalFooter
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { capitalize, pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import { useSelector } from 'common/hooks/useSelector'
 import { ToastContext } from 'components/toast/ToastContext'
 import ToastLinkContent from 'components/toast/mobile/ToastLinkContent'
@@ -38,7 +39,7 @@ const messages = {
   view: 'View'
 }
 
-export const DuplicateAddConfirmationModal = () => {
+export const DuplicateAddConfirmationModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const playlistId = useSelector(getPlaylistId)
@@ -51,12 +52,12 @@ export const DuplicateAddConfirmationModal = () => {
   const { data: accountHandle } = useCurrentAccountUser({
     select: (data) => data?.handle
   })
-  const [isOpen, setIsOpen] = useModalState('DuplicateAddConfirmation')
+  const modal = useModal()
   const collectionType = is_album ? 'album' : 'playlist'
 
   const onClose = useCallback(() => {
-    setIsOpen(false)
-  }, [setIsOpen])
+    modal.hide()
+  }, [modal])
 
   const handleAdd = useCallback(() => {
     if (trackId && playlistId) {
@@ -94,7 +95,7 @@ export const DuplicateAddConfirmationModal = () => {
   ])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={onClose} size='small'>
       <ModalHeader>
         <ModalTitle title={messages.title} />
       </ModalHeader>
@@ -116,4 +117,7 @@ export const DuplicateAddConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('DuplicateAddConfirmation', DuplicateAddConfirmationModal)
+registerNiceModalId('DuplicateAddConfirmation')

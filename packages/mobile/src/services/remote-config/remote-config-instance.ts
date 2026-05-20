@@ -1,4 +1,3 @@
-import { ErrorLevel } from '@audius/common/models'
 import type { Environment } from '@audius/common/services'
 import { remoteConfig } from '@audius/common/services'
 import CodePush from '@bravemobile/react-native-code-push'
@@ -9,7 +8,6 @@ import Config from 'react-native-config'
 import VersionNumber from 'react-native-version-number'
 
 import { env } from 'app/services/env'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import packageInfo from '../../../package.json'
 
@@ -60,11 +58,7 @@ export const remoteConfigInstance = remoteConfig({
       },
       errorHandler: {
         handleError: (error) => {
-          reportToSentry({
-            level: ErrorLevel.Error,
-            error,
-            name: 'Optimizely failed to load'
-          })
+          console.error(error)
         }
       }
     })

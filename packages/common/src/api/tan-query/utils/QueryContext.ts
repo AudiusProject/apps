@@ -16,8 +16,7 @@ import {
 import {
   AllTrackingEvents,
   AnalyticsEvent,
-  IdentifyTraits,
-  ReportToSentryArgs
+  IdentifyTraits
 } from '../../../models'
 
 export type QueryContextType = {
@@ -27,7 +26,6 @@ export type QueryContextType = {
   solanaWalletService: SolanaWalletService
   identityService: IdentityService
   dispatch: Dispatch
-  reportToSentry: (args: ReportToSentryArgs) => void
   env: Env
   fetch: typeof fetch
   remoteConfigInstance: RemoteConfigInstance
@@ -96,8 +94,6 @@ export function* getQueryContext(): Generator<any, QueryContextType, any> {
     remoteConfigInstance: yield* getContext<
       QueryContextType['remoteConfigInstance']
     >('remoteConfigInstance'),
-    reportToSentry:
-      yield* getContext<QueryContextType['reportToSentry']>('reportToSentry'),
     analytics: yield* getContext<QueryContextType['analytics']>('analytics'),
     nftClient: null,
     imageUtils: yield* getContext<QueryContextType['imageUtils']>('imageUtils')

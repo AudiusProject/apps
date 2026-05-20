@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import {
@@ -26,7 +26,7 @@ export type PostCommentArgs = {
 }
 
 export const usePostComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -113,12 +113,7 @@ export const usePostComment = () => {
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Undo comment count change
       subtractCommentCount(queryClient, trackId)
       // Toast generic error message

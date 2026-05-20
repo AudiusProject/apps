@@ -2,7 +2,7 @@ import { encodeHashId } from '@audius/sdk'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -65,7 +65,7 @@ export const useEventFollowState = (eventId: ID | null | undefined) => {
 }
 
 export const useFollowEvent = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -96,11 +96,7 @@ export const useFollowEvent = () => {
         getEventFollowStateQueryKey(eventId, userId),
         ctx?.prev ?? { isFollowed: false, followerCount: 0 }
       )
-      reportToSentry({
-        error,
-        name: 'Events',
-        feature: Feature.Events
-      })
+      console.error(error)
       toast({ content: 'Could not follow contest. Please try again.' })
     },
     onSettled: (_data, _err, { userId, eventId }) => {
@@ -117,7 +113,7 @@ export const useFollowEvent = () => {
 }
 
 export const useUnfollowEvent = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -142,11 +138,7 @@ export const useUnfollowEvent = () => {
         getEventFollowStateQueryKey(eventId, userId),
         ctx?.prev ?? { isFollowed: true, followerCount: 0 }
       )
-      reportToSentry({
-        error,
-        name: 'Events',
-        feature: Feature.Events
-      })
+      console.error(error)
       toast({ content: 'Could not unfollow contest. Please try again.' })
     },
     onSettled: (_data, _err, { userId, eventId }) => {

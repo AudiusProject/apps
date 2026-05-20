@@ -62,7 +62,6 @@ export const env: Env = {
   REWARDS_MANAGER_TOKEN_PDA: 'FRk4j95RG2kSk3BHXBPVgKszFc2rLQ8K6RS83k3dmzvQ',
   SAFARI_WEB_PUSH_ID: 'web.co.audius',
   SCHEME: 'audius',
-  SENTRY_DSN: 'https://4b15a7a2f2e2459997408b39a0c4942c@s.audius.co/1851611',
   SOL_BRIDGE_ADDRESS: null,
   SOL_TOKEN_BRIDGE_ADDRESS: null,
   SOLANA_CLUSTER_ENDPOINT: 'http://audius-solana-test-validator-1',

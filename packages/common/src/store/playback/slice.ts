@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { Feature, ID } from '../../models'
+import { ID } from '../../models'
 import { Maybe, Nullable } from '../../utils'
 
 import {
@@ -156,7 +156,6 @@ type ErrorPayload = {
   error: string
   trackId: ID
   info: string
-  feature?: Feature
 }
 
 type SetRetriesPayload = { retries: number }

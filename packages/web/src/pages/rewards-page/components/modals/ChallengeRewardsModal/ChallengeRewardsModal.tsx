@@ -2,6 +2,7 @@ import { useCallback, useEffect, useContext } from 'react'
 
 import { useCurrentAccountUser, useCurrentAccount } from '@audius/common/api'
 import { ChallengeName } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   challengesSelectors,
   audioRewardsPageSelectors,
@@ -12,9 +13,9 @@ import {
 } from '@audius/common/store'
 import { getAAOErrorEmojis } from '@audius/common/utils'
 import { ModalContent, Text } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
@@ -133,15 +134,15 @@ const ChallengeRewardsBody = ({ dismissModal }: BodyProps) => {
   )
 }
 
-export const ChallengeRewardsModal = () => {
+export const ChallengeRewardsModal = NiceModal.create(() => {
   const modalType = useSelector(getChallengeRewardsModalType) as ChallengeName
-  const [isOpen, setOpen] = useModalState('ChallengeRewards')
+  const modal = useModal()
   const dispatch = useDispatch()
   const wm = useWithMobileStyle(styles.mobile)
   const onClose = useCallback(() => {
-    setOpen(false)
+    modal.hide()
     dispatch(resetAndCancelClaimReward())
-  }, [dispatch, setOpen])
+  }, [dispatch, modal])
 
   const { title } = getChallengeConfig(modalType)
 
@@ -149,7 +150,7 @@ export const ChallengeRewardsModal = () => {
     <ModalDrawer
       title={<>{title}</>}
       showTitleHeader
-      isOpen={isOpen}
+      isOpen={modal.visible}
       onClose={onClose}
       isFullscreen={true}
       titleClassName={wm(styles.title)}
@@ -162,4 +163,7 @@ export const ChallengeRewardsModal = () => {
       </ModalContent>
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('ChallengeRewards', ChallengeRewardsModal)
+registerNiceModalId('ChallengeRewards')

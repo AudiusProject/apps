@@ -25,6 +25,11 @@ export type CardListProps<ItemT> = Omit<FlatListProps<ItemT>, 'data'> & {
   // Use carousel spacing to override the parent's margins
   // e.g. make carousel start and end at edge of the screen
   carouselSpacing?: number
+
+  // Override the per-item slot width in horizontal mode. Defaults to
+  // `spacing(43)` (172px), which is right for small thumbnail-style cards
+  // (tracks, playlists) but too narrow for the redesigned contest card.
+  horizontalCardWidth?: number | `${number}%`
 }
 
 export type LoadingCard = { _loading: true }
@@ -60,11 +65,12 @@ const useStyles = makeStyles(({ spacing }) => ({
     flexGrow: 0
   },
   cardHorizontal: {
-    width: spacing(43),
     paddingRight: spacing(3),
     paddingBottom: spacing(3)
   }
 }))
+
+const DEFAULT_HORIZONTAL_CARD_WIDTH = 172
 
 export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
   const {
@@ -78,6 +84,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
     totalCount,
     horizontal: isHorizontal = false,
     carouselSpacing = 0,
+    horizontalCardWidth = DEFAULT_HORIZONTAL_CARD_WIDTH,
     ...other
   } = props
 
@@ -109,7 +116,13 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
         )
 
       return (
-        <View style={isHorizontal ? styles.cardHorizontal : styles.card}>
+        <View
+          style={
+            isHorizontal
+              ? [styles.cardHorizontal, { width: horizontalCardWidth }]
+              : styles.card
+          }
+        >
           {itemElement}
         </View>
       )
@@ -119,7 +132,8 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
       renderItem,
       styles.card,
       styles.cardHorizontal,
-      isHorizontal
+      isHorizontal,
+      horizontalCardWidth
     ]
   )
 

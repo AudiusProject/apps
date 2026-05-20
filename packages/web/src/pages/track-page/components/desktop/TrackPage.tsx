@@ -6,11 +6,7 @@ import {
   useToggleFavoriteTrack,
   useUser
 } from '@audius/common/api'
-import {
-  useCurrentTrack,
-  useFeatureFlag,
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
   ID,
   Track,
@@ -22,7 +18,6 @@ import {
   FollowSource,
   PlaybackSource
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   trackPageActions,
   tracksSocialActions as socialTracksActions,
@@ -47,7 +42,6 @@ import { FlushPageContainer } from 'components/page/FlushPageContainer'
 import Page from 'components/page/Page'
 import { EmptyStatBanner } from 'components/stat-banner/StatBanner'
 import { GiantTrackTile } from 'components/track/GiantTrackTile'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults, emptyStringGuard } from 'pages/track-page/utils'
 import { getTrackPageContext } from 'ssr/metaTags'
@@ -56,7 +50,6 @@ import { parseTrackRoute } from 'utils/route/trackRouteParser'
 import { TrackPageLineup } from '../TrackPageLineup'
 import { TrackContestsSection } from '../shared/TrackContestsSection'
 
-import { RemixContestSection } from './RemixContestSection'
 import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
@@ -107,7 +100,6 @@ const TrackPage = () => {
 
   const isCommentingEnabled = !track?.comments_disabled
   const loading = !track || isFetchingNFTAccess
-  const { isEnabled: isContestsEnabled } = useFeatureFlag(FeatureFlags.CONTESTS)
 
   const toggleSaveTrack = useToggleFavoriteTrack({
     trackId: track?.track_id,
@@ -336,16 +328,6 @@ const TrackPage = () => {
       fromOpacity={1}
       noIndex={defaults.isUnlisted}
     >
-      {/* The cover-photo countdown overlay is part of the legacy in-line
-          contest UI. When CONTESTS is on the contest experience lives on
-          its own page (with its own countdown), so this top-of-page chip
-          would be a redundant artifact on what should look like a normal
-          track page (Figma 2844-51756). */}
-      {!isContestsEnabled ? (
-        <FlushPageContainer contentMinWidthPx={MIN_DESKTOP_CONTENT_WIDTH_PX}>
-          <RemixContestCountdown trackId={track?.track_id ?? 0} />
-        </FlushPageContainer>
-      ) : null}
       <Box w='100%' css={{ position: 'absolute', height: '376px' }}>
         <CoverPhoto loading={loading} userId={user ? user.user_id : null} />
         <EmptyStatBanner />
@@ -362,16 +344,7 @@ const TrackPage = () => {
         >
           {renderGiantTrackTile()}
           {track?.track_id ? (
-            isContestsEnabled ? (
-              // The full Details / Prizes / Submissions / Winners
-              // experience moved to the dedicated contest page; the
-              // track page now surfaces a compact "Contests" tile rail
-              // that links out. Replaces the previous one-line
-              // `RemixContestTeaser` so this matches Figma 2844-51756.
-              <TrackContestsSection trackId={track.track_id} />
-            ) : (
-              <RemixContestSection trackId={track.track_id} isOwner={isOwner} />
-            )
+            <TrackContestsSection trackId={track.track_id} />
           ) : null}
           <Box w='100%' className={styles.commentsAndLineupContainer}>
             <Flex

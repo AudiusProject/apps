@@ -322,6 +322,7 @@ export interface GetContestsByUserRequest {
     offset?: number;
     limit?: number;
     status?: GetContestsByUserStatusEnum;
+    userId?: string;
 }
 
 export interface GetFollowersRequest {
@@ -684,14 +685,6 @@ export interface GetUserFeedRequest {
     followeeUserId?: Array<number>;
     encodedDataMessage?: string;
     encodedDataSignature?: string;
-}
-
-export interface GetUserForYouFeedRequest {
-    id: string;
-    limit?: number;
-    offset?: number;
-    maxPerArtist?: number;
-    userId?: string;
 }
 
 export interface GetUserIDsByAddressesRequest {
@@ -1745,6 +1738,10 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.status !== undefined) {
             queryParameters['status'] = params.status;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -4172,62 +4169,6 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getUserFeed(params: GetUserFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserFeedResponse> {
         const response = await this.getUserFeedRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground, similar-artist) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
-     * Get For You feed for user
-     */
-    async getUserForYouFeedRaw(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
-        if (params.id === null || params.id === undefined) {
-            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserForYouFeed.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.limit !== undefined) {
-            queryParameters['limit'] = params.limit;
-        }
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
-
-        if (params.maxPerArtist !== undefined) {
-            queryParameters['max_per_artist'] = params.maxPerArtist;
-        }
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
-            const token = await this.configuration.accessToken("OAuth2", ["read"]);
-            if (token) {
-                headerParameters["Authorization"] = token;
-            }
-        }
-
-        const response = await this.request({
-            path: `/users/{id}/feed/for-you`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
-    }
-
-    /**
-     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground, similar-artist) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
-     * Get For You feed for user
-     */
-    async getUserForYouFeed(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
-        const response = await this.getUserForYouFeedRaw(params, initOverrides);
         return await response.value();
     }
 

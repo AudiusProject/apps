@@ -1,12 +1,13 @@
 import { useCallback } from 'react'
 
 import { useCoinflowWithdrawalAdapter } from '@audius/common/hooks'
+import { registerNiceModalId } from '@audius/common/services'
 import {
-  useCoinflowWithdrawModal,
   withdrawUSDCActions,
   withdrawUSDCSelectors
 } from '@audius/common/store'
 import { CoinflowWithdraw, OnSuccessMethod } from '@coinflowlabs/react'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
@@ -34,8 +35,11 @@ const parseTransactionFromSuccessParams = (params: string) => {
 const MERCHANT_ID = env.COINFLOW_MERCHANT_ID
 const IS_PRODUCTION = env.ENVIRONMENT === 'production'
 
-export const CoinflowWithdrawModal = () => {
-  const { isOpen, onClose, onClosed } = useCoinflowWithdrawModal()
+export const CoinflowWithdrawModal = NiceModal.create(() => {
+  const modal = useModal()
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = onClose
+  const isOpen = modal.visible
   const amount = useSelector(getWithdrawAmount)
 
   const adapter = useCoinflowWithdrawalAdapter()
@@ -85,4 +89,7 @@ export const CoinflowWithdrawModal = () => {
       ) : null}
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('CoinflowWithdraw', CoinflowWithdrawModal)
+registerNiceModalId('CoinflowWithdraw')

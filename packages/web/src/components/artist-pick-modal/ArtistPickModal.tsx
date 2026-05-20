@@ -1,4 +1,7 @@
+import { useCallback } from 'react'
+
 import { useCurrentAccountUser } from '@audius/common/api'
+import { registerNiceModalId } from '@audius/common/services'
 import { tracksSocialActions, useArtistPickModal } from '@audius/common/store'
 import {
   Button,
@@ -9,6 +12,7 @@ import {
   ModalHeader,
   ModalTitle
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
 const { setArtistPick, unsetArtistPick } = tracksSocialActions
@@ -34,10 +38,9 @@ const messagesMap = {
   }
 }
 
-export const ArtistPickModal = () => {
+export const ArtistPickModal = NiceModal.create(() => {
+  const modal = useModal()
   const {
-    isOpen,
-    onClose,
     data: { trackId }
   } = useArtistPickModal()
   const dispatch = useDispatch()
@@ -50,17 +53,21 @@ export const ArtistPickModal = () => {
 
   const messages = messagesMap[action]
 
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+
   const handleSubmit = () => {
     if (trackId) {
       dispatch(setArtistPick(trackId))
     } else {
       dispatch(unsetArtistPick())
     }
-    onClose()
+    handleClose()
   }
 
   return (
-    <Modal size='small' isOpen={isOpen} onClose={onClose}>
+    <Modal size='small' isOpen={modal.visible} onClose={handleClose}>
       <ModalHeader>
         <ModalTitle title={messages.title} />
       </ModalHeader>
@@ -70,7 +77,7 @@ export const ArtistPickModal = () => {
         </ModalContentText>
       </ModalContent>
       <ModalFooter>
-        <Button variant='secondary' onClick={onClose} fullWidth>
+        <Button variant='secondary' onClick={handleClose} fullWidth>
           Cancel
         </Button>
         <Button variant='primary' onClick={handleSubmit} fullWidth>
@@ -79,4 +86,7 @@ export const ArtistPickModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ArtistPick', ArtistPickModal)
+registerNiceModalId('ArtistPick')

@@ -115,24 +115,14 @@ export const ArtistRecommendations = forwardRef<
   // Follow/Unfollow listeners
   const handleFollowAll = useCallback(() => {
     suggestedArtists.forEach((a) => {
-      dispatch(
-        socialActions.followUser(
-          a.user_id,
-          FollowSource.ARTIST_RECOMMENDATIONS_POPUP
-        )
-      )
+      dispatch(socialActions.followUser(a.user_id, FollowSource.USER_LIST))
     })
     setHasFollowedAll(true)
   }, [dispatch, suggestedArtists])
 
   const handleUnfollowAll = useCallback(() => {
     suggestedArtists.forEach((a) => {
-      dispatch(
-        socialActions.unfollowUser(
-          a.user_id,
-          FollowSource.ARTIST_RECOMMENDATIONS_POPUP
-        )
-      )
+      dispatch(socialActions.unfollowUser(a.user_id, FollowSource.USER_LIST))
     })
     setHasFollowedAll(false)
   }, [dispatch, suggestedArtists])

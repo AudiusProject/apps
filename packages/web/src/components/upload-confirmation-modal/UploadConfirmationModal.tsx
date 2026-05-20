@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { useUploadConfirmationModal } from '@audius/common/store'
 import {
   Modal,
@@ -12,6 +13,7 @@ import {
   Text,
   Flex
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const messages = {
   title: 'Confirm Upload',
@@ -22,17 +24,22 @@ const messages = {
   upload: 'Upload'
 }
 
-export const UploadConfirmationModal = () => {
-  const { data, isOpen, onClose } = useUploadConfirmationModal()
+export const UploadConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useUploadConfirmationModal()
   const { confirmCallback, hasPublicTracks } = data
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
 
   const handleConfirm = useCallback(() => {
     confirmCallback()
-    onClose()
-  }, [confirmCallback, onClose])
+    handleClose()
+  }, [confirmCallback, handleClose])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader>
         <ModalTitle icon={<IconUpload />} title={messages.title} />
       </ModalHeader>
@@ -46,7 +53,7 @@ export const UploadConfirmationModal = () => {
         </Flex>
       </ModalContent>
       <ModalFooter>
-        <Button variant='secondary' fullWidth onClick={onClose}>
+        <Button variant='secondary' fullWidth onClick={handleClose}>
           {messages.cancel}
         </Button>
         <Button variant='primary' fullWidth onClick={handleConfirm}>
@@ -55,4 +62,7 @@ export const UploadConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('UploadConfirmation', UploadConfirmationModal)
+registerNiceModalId('UploadConfirmation')

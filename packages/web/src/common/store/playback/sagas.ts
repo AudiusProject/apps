@@ -9,7 +9,6 @@ import {
   queryUser
 } from '@audius/common/api'
 import {
-  Feature,
   Kind,
   Name,
   PlaybackSource as AnalyticsPlaybackSource,
@@ -498,8 +497,7 @@ function* handleAudioErrors() {
           playbackActions.error({
             error,
             trackId,
-            info: data,
-            feature: Feature.Playback
+            info: data
           })
         )
       }

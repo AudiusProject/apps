@@ -12,8 +12,6 @@ import {
   Button
 } from '@audius/harmony'
 
-import { useModalState } from 'common/hooks/useModalState'
-
 const messages = {
   title: 'Label Account',
   error: 'Something went wrong. Please try again.',
@@ -22,9 +20,13 @@ const messages = {
   done: 'Done'
 }
 
-export const LabelAccountModal = () => {
-  const [isVisible, setIsVisible] = useModalState('LabelAccount')
-  const handleClose = useCallback(() => setIsVisible(false), [setIsVisible])
+type LabelAccountModalProps = {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export const LabelAccountModal = (props: LabelAccountModalProps) => {
+  const { isOpen, onClose } = props
   const { data: currentUserId } = useCurrentUserId()
   const { data: user } = useUser(currentUserId)
   const [isLabel, setIsLabel] = useState(user?.profile_type === 'label')
@@ -41,8 +43,8 @@ export const LabelAccountModal = () => {
   }, [updateProfile, isLabel, user])
 
   return (
-    <Modal onClose={handleClose} isOpen={isVisible} size='small'>
-      <ModalHeader onClose={handleClose}>
+    <Modal onClose={onClose} isOpen={isOpen} size='small'>
+      <ModalHeader onClose={onClose}>
         <ModalTitle title={messages.title} icon={<IconUserList />} />
       </ModalHeader>
       <Flex direction='column' p='xl' gap='xl'>
@@ -54,7 +56,7 @@ export const LabelAccountModal = () => {
           <Switch checked={isLabel} onChange={handleToggle} />
           <Text>{messages.identifyAsLabel}</Text>
         </Flex>
-        <Button variant='secondary' fullWidth onClick={handleClose}>
+        <Button variant='secondary' fullWidth onClick={onClose}>
           {messages.done}
         </Button>
       </Flex>

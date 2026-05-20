@@ -2,7 +2,7 @@ import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -31,7 +31,7 @@ export type PostEventCommentArgs = {
  * the event's owner, so there's no client-side branching here.
  */
 export const usePostEventComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -144,19 +144,16 @@ export const usePostEventComment = () => {
 
       return { newId }
     },
-    onSuccess: (_data, args) => {
-      // Invalidate every sort variant — the user might be on Top or Newest.
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.eventComments, args.eventId]
-      })
-    },
+    // No onSuccess invalidate: the optimistic comment was just primed with
+    // the same id the SDK reserved, so the next natural refetch (focus /
+    // remount / staleTime expiry) will replace it seamlessly once the
+    // indexer has caught up. Invalidating immediately races the indexer —
+    // the refetch returns the pre-comment list before the new row lands,
+    // wiping the optimistic comment from the cache and giving the user the
+    // "I pressed send and it disappeared" experience. Mirrors how the
+    // track-comment hook (usePostComment) handles success.
     onError: (error: Error, args) => {
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       toast({
         content: 'There was an error posting your comment. Please try again.'
       })
