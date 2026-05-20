@@ -85,7 +85,10 @@ export const useChromecast = () => {
   // Update our cast UI when the cast device connects
   useEffect(() => {
     if (castState !== CastState.CONNECTED) {
-      dispatch(setIsCasting({ isCasting: false }))
+      // Tag the disconnect with method:'chromecast' so the reducer only
+      // clears state if chromecast was the active method — symmetric with
+      // Airplay.tsx so the two listeners don't clobber each other.
+      dispatch(setIsCasting({ isCasting: false, method: 'chromecast' }))
       return
     }
     let cancelled = false
@@ -95,6 +98,7 @@ export const useChromecast = () => {
       dispatch(
         setIsCasting({
           isCasting: true,
+          method: 'chromecast',
           deviceName: device?.friendlyName ?? null
         })
       )

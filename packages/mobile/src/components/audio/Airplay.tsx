@@ -52,11 +52,17 @@ const Airplay = () => {
           dispatch(
             setIsCasting({
               isCasting: true,
+              method: 'airplay',
               deviceName: route.portName ?? route.name ?? null
             })
           )
         } else {
-          dispatch(setIsCasting({ isCasting: false }))
+          // Tag the disconnect with method:'airplay' so the reducer only
+          // clears state if AirPlay was the active method. This prevents the
+          // listener (which fires on any audio route change, including the
+          // one Chromecast triggers when it takes over) from clobbering
+          // chromecast state.
+          dispatch(setIsCasting({ isCasting: false, method: 'airplay' }))
         }
       }
     )
