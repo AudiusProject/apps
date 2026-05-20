@@ -33,12 +33,32 @@ export const primeRelatedData = ({
   const { users, tracks, playlists } = related
 
   if (users && users.length > 0) {
-    primeUserData({
-      users: transformAndCleanList(users, userMetadataFromSDK),
-      queryClient,
-      forceReplace,
-      skipQueryData
-    })
+    // `related` users are hydrated server-side. When the server omits the
+    // requester's perspective (`does_current_user_follow` and other
+    // current-user fields), priming would shadow any later authoritative
+    // fetch — `useUser` / `useUserByHandle` use `staleTime: Infinity` and
+    // `primeUserData` skips overwriting an existing cache entry, so the
+    // partial prime would persist and the profile page would render stale
+    // follow state. Skip the prime in that case and let `useUser`'s
+    // batcher fetch fresh data with `currentUserId`.
+    // (The TS type claims `does_current_user_follow: boolean`, but the
+    // SDK leaves it `undefined` when the server omits the key.)
+    const primedUsers = transformAndCleanList(
+      users,
+      userMetadataFromSDK
+    ).filter(
+      (user) =>
+        (user as { does_current_user_follow?: boolean })
+          .does_current_user_follow !== undefined
+    )
+    if (primedUsers.length > 0) {
+      primeUserData({
+        users: primedUsers,
+        queryClient,
+        forceReplace,
+        skipQueryData
+      })
+    }
   }
 
   if (tracks && tracks.length > 0) {
