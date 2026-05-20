@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '22.21.1'
+  NODE_VERSION: '24.10.0'
 
 jobs:
   sdk-ci:
@@ -39,6 +39,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file

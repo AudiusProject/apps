@@ -25,7 +25,7 @@ on:
           - production
 
 env:
-  NODE_VERSION: '22.21.1'
+  NODE_VERSION: '24.10.0'
 
 jobs:
   # Install dependencies and warm the node_modules cache shared by every downstream job.
@@ -43,6 +43,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -220,6 +223,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -331,6 +337,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -418,6 +427,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -584,6 +596,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -804,6 +819,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -956,6 +974,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
