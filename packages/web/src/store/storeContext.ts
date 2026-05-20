@@ -12,7 +12,6 @@ import {
 import { identityService } from 'services/audius-sdk/identity'
 import { env } from 'services/env'
 import { explore } from 'services/explore'
-import { fingerprintClient } from 'services/fingerprint'
 import { localStorage } from 'services/local-storage'
 import { queryClient } from 'services/query-client'
 import { getFeatureEnabled } from 'services/remote-config/featureFlagHelpers'
@@ -49,7 +48,6 @@ export const buildStoreContext = ({
     analytics,
     remoteConfigInstance,
     audiusBackendInstance,
-    fingerprintClient,
     walletClient,
     localStorage,
     isNativeMobile: false,

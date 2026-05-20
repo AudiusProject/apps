@@ -36,8 +36,6 @@ export const env: Env = {
   EXPLORE_CONTENT_URL:
     'https://download.audius.co/static-resources/explore-content.json',
   FCM_PUSH_PUBLIC_KEY: null,
-  FINGERPRINT_ENDPOINT: 'https://fp.audius.co',
-  FINGERPRINT_PUBLIC_API_KEY: 'MNtDQ4NCsNSP7YOkOiQT',
   GA_HOSTNAME: 'audius.co',
   GA_MEASUREMENT_ID: 'UA-120325397-2',
   HCAPTCHA_BASE_URL: 'https://audius.co',

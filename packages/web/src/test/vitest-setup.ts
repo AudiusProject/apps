@@ -16,9 +16,6 @@ console.error = (...args) => {
     ) {
       return
     }
-    if (args[0].includes('Error initializing fingerprint client')) {
-      return
-    }
   }
   originalError.call(console, ...args)
 }

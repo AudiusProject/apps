@@ -833,12 +833,6 @@ const config = convict({
     env: 'solanaUSDCMintAddress',
     default: ''
   },
-  fpServerApiKey: {
-    doc: 'API key for requesting visitorId information',
-    format: String,
-    env: 'fpServerApiKey',
-    default: ''
-  },
   useDiscoveryListens: {
     doc: 'Forward listen requests to discovery',
     format: Boolean,

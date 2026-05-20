@@ -20,7 +20,6 @@ import { AudioPlayer } from '../services/audio-player'
 import { AudiusBackend } from '../services/audius-backend'
 import { Env } from '../services/env'
 import { Explore } from '../services/explore'
-import { FingerprintClient } from '../services/fingerprint'
 import { LocalStorage } from '../services/local-storage'
 import { FeatureFlags, RemoteConfigInstance } from '../services/remote-config'
 import { TrackDownload } from '../services/track-download'
@@ -54,7 +53,6 @@ export type CommonStoreContext = {
   getHostUrl: () => string
   remoteConfigInstance: RemoteConfigInstance
   audiusBackendInstance: AudiusBackend
-  fingerprintClient: FingerprintClient<any>
   walletClient: WalletClient
   localStorage: LocalStorage
   isNativeMobile: boolean
