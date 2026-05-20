@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { Image, Platform } from 'react-native'
+import { Image } from 'react-native'
 
 import {
   IconCloudDownload,
@@ -22,13 +22,10 @@ import type { ProfileTabScreenParamList } from '../app-screen/ProfileTabScreen'
 
 import { AccountSettingsRow } from './AccountSettingsRow'
 import { AppearanceSettingsRow } from './AppearanceSettingsRow'
-import { CastSettingsRow } from './CastSettingsRow'
 import { SettingsRowLabel } from './SettingRowLabel'
 import { SettingsDivider } from './SettingsDivider'
 import { SettingsRow } from './SettingsRow'
 import { SettingsRowDescription } from './SettingsRowDescription'
-
-const IS_IOS = Platform.OS === 'ios'
 
 const messages = {
   title: 'Settings',
@@ -125,7 +122,6 @@ export const SettingsScreen = () => {
               {messages.commentDescription}
             </SettingsRowDescription>
           </SettingsRow>
-          {IS_IOS ? <CastSettingsRow /> : null}
           <SettingsRow onPress={handlePressDownloads}>
             <SettingsRowLabel
               label={messages.downloads}

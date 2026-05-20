@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect } from 'react'
+import { useCallback } from 'react'
 
 import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
 import {
@@ -13,7 +13,6 @@ import {
 import type { Track } from '@audius/common/models'
 import {
   castSelectors,
-  castActions,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -26,25 +25,22 @@ import {
 import { Genre, removeNullable } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
-import { View, Platform } from 'react-native'
-import { CastButton, useDevices } from 'react-native-google-cast'
+import { View } from 'react-native'
+import { useDevices } from 'react-native-google-cast'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
   IconButton,
-  IconCastAirplay,
-  IconCastChromecast,
+  IconCast,
   IconIndent,
   IconKebabHorizontal,
   Button,
   IconMessage
 } from '@audius/harmony-native'
-import { useAirplay } from 'app/components/audio/Airplay'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
-import { useThemeColors } from 'app/utils/theme'
 
 import { useCommentDrawer } from '../comments/CommentDrawerContext'
 
@@ -53,8 +49,7 @@ import { RepostButton } from './RepostButton'
 
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { updateMethod } = castActions
-const { getMethod: getCastMethod, getIsCasting } = castSelectors
+const { getIsCasting } = castSelectors
 const { getTrackPosition } = playbackPositionSelectors
 
 const { getIsReachable } = reachabilitySelectors
@@ -109,16 +104,16 @@ type ActionsBarProps = {
 export const ActionsBar = ({ track }: ActionsBarProps) => {
   const styles = useStyles()
   const { toast } = useToast()
-  const castMethod = useSelector(getCastMethod)
   const isCasting = useSelector(getIsCasting)
   const { data: accountUserId } = useCurrentUserId()
-  const { neutral, neutralLight6, primary } = useThemeColors()
   const dispatch = useDispatch()
   const isReachable = useSelector(getIsReachable)
   const navigation = useNavigation()
 
   const { open } = useCommentDrawer()
   const { onOpen: openQueue } = useDrawer('Queue')
+  const { onOpen: openConnect } = useDrawer('Connect')
+  const castDevices = useDevices()
   const {
     showBadge: showQueueNewFeatureBadge,
     dismiss: dismissQueueNewFeatureBadge
@@ -153,12 +148,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
     'usdc_purchase' in track.stream_conditions &&
     !hasStreamAccess
   const shouldShowActions = hasStreamAccess && !isUnlisted
-
-  useLayoutEffect(() => {
-    if (Platform.OS === 'android' && castMethod === 'airplay') {
-      dispatch(updateMethod({ method: 'chromecast' }))
-    }
-  }, [castMethod, dispatch])
 
   const handleFavorite = useToggleFavoriteTrack({
     trackId: track?.track_id,
@@ -226,9 +215,6 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
     }
   }, [track, isOwner, isUnlisted, playbackPositionInfo?.status, dispatch])
 
-  const { openAirplayDialog } = useAirplay()
-  const castDevices = useDevices()
-
   const renderPurchaseButton = () => {
     if (
       track?.stream_conditions &&
@@ -248,30 +234,21 @@ export const ActionsBar = ({ track }: ActionsBarProps) => {
   }
 
   const renderCastButton = () => {
-    if (castMethod === 'airplay') {
-      return (
-        <IconButton
-          onPress={openAirplayDialog}
-          icon={IconCastAirplay}
-          color={isCasting ? 'active' : 'default'}
-          size='l'
-          aria-label={messages.castLabel}
-          style={styles.button}
-        />
-      )
-    }
-    return isReachable && castDevices.length > 0 ? (
-      <CastButton
-        style={{
-          ...styles.button,
-          ...styles.icon,
-          tintColor: isCasting ? primary : neutral
-        }}
+    // The button is always tappable when reachable; the drawer itself can
+    // show "This Device" + the system AirPlay/Bluetooth picker even when no
+    // chromecast devices are discoverable. When offline, fall back to a
+    // disabled state since neither chromecast nor AirPlay/Bluetooth will help.
+    const disabled = !isReachable && castDevices.length === 0
+    return (
+      <IconButton
+        onPress={openConnect}
+        icon={IconCast}
+        color={isCasting ? 'active' : 'default'}
+        size='l'
+        disabled={disabled}
+        aria-label={messages.castLabel}
+        style={styles.button}
       />
-    ) : (
-      <View style={{ ...styles.button, width: 24 }}>
-        <IconCastChromecast fill={neutralLight6} height={24} width={24} />
-      </View>
     )
   }
 
