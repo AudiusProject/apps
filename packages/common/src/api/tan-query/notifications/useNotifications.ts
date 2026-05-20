@@ -77,6 +77,10 @@ export const useNotifications = (options?: QueryOptions) => {
       const sdk = await audiusSdk()
       const response = await sdk.notifications.getNotifications({
         userId: Id.parse(currentUserId),
+        // Requester id sent as `?user_id=`. Needed so the backend personalizes
+        // embedded related.users (e.g. does_current_user_follow) — the path
+        // userId alone identifies the notifications owner, not the requester.
+        userId2: Id.parse(currentUserId),
         limit: DEFAULT_LIMIT,
         timestamp: pageParam?.timestamp,
         groupId: pageParam?.groupId

@@ -27,6 +27,7 @@ import {
 
 export interface GetNotificationsRequest {
     userId: string;
+    userId2?: string;
     timestamp?: number;
     groupId?: string;
     limit?: number;
@@ -35,6 +36,7 @@ export interface GetNotificationsRequest {
 
 export interface GetPlaylistUpdatesRequest {
     userId: string;
+    userId2?: string;
 }
 
 /**
@@ -52,6 +54,10 @@ export class NotificationsApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
+
+        if (params.userId2 !== undefined) {
+            queryParameters['user_id'] = params.userId2;
+        }
 
         if (params.timestamp !== undefined) {
             queryParameters['timestamp'] = params.timestamp;
@@ -99,6 +105,10 @@ export class NotificationsApi extends runtime.BaseAPI {
         }
 
         const queryParameters: any = {};
+
+        if (params.userId2 !== undefined) {
+            queryParameters['user_id'] = params.userId2;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
