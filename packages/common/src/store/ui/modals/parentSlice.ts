@@ -84,7 +84,8 @@ export const initialState: BasicModalsState = {
   CoinSuccessModal: { isOpen: false },
   FanClubDetailsModal: { isOpen: false },
   VerificationSuccess: { isOpen: false },
-  VerificationError: { isOpen: false }
+  VerificationError: { isOpen: false },
+  CreatePlaylistModal: { isOpen: false }
 }
 
 const slice = createSlice({
