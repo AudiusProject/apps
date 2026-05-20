@@ -322,6 +322,7 @@ export interface GetContestsByUserRequest {
     offset?: number;
     limit?: number;
     status?: GetContestsByUserStatusEnum;
+    userId?: string;
 }
 
 export interface GetFollowersRequest {
@@ -1737,6 +1738,10 @@ export class UsersApi extends runtime.BaseAPI {
 
         if (params.status !== undefined) {
             queryParameters['status'] = params.status;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

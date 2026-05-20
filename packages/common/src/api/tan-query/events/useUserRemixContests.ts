@@ -17,6 +17,7 @@ import { removeNullable } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
 
@@ -67,6 +68,7 @@ export const useUserRemixContests = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
+  const { data: currentUserId } = useCurrentUserId()
 
   return useInfiniteQuery({
     queryKey: getUserRemixContestsQueryKey({ userId, pageSize, status }),
@@ -82,7 +84,11 @@ export const useUserRemixContests = (
         id: Id.parse(userId),
         limit: pageSize,
         offset: pageParam,
-        status
+        status,
+        // Requester id so the backend personalizes embedded related.users
+        // (e.g. does_current_user_follow). Path `id` is the contest host;
+        // query `userId` is the current user viewing the page.
+        userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
 
       // Prime related tracks + users (full objects, delivered alongside the

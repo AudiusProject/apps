@@ -97,6 +97,7 @@ export interface GetRemixContestsRequest {
     offset?: number;
     limit?: number;
     status?: GetRemixContestsStatusEnum;
+    userId?: string;
 }
 
 export interface UnfollowEventRequest {
@@ -548,6 +549,10 @@ export class EventsApi extends runtime.BaseAPI {
 
         if (params.status !== undefined) {
             queryParameters['status'] = params.status;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
