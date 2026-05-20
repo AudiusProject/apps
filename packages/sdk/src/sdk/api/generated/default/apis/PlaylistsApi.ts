@@ -96,6 +96,7 @@ export interface GetPlaylistsNewReleasesRequest {
     offset?: number;
     limit?: number;
     type?: GetPlaylistsNewReleasesTypeEnum;
+    userId?: string;
 }
 
 export interface GetTrendingPlaylistsRequest {
@@ -531,6 +532,10 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         if (params.type !== undefined) {
             queryParameters['type'] = params.type;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

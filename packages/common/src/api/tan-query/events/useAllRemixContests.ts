@@ -2,6 +2,7 @@ import {
   EventEntityTypeEnum,
   EventEventTypeEnum,
   GetRemixContestsStatusEnum,
+  Id,
   OptionalHashId,
   Event as SDKEvent
 } from '@audius/sdk'
@@ -16,6 +17,7 @@ import { removeNullable } from '~/utils'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
 
@@ -61,6 +63,7 @@ export const useAllRemixContests = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
+  const { data: currentUserId } = useCurrentUserId()
 
   return useInfiniteQuery({
     queryKey: getAllRemixContestsQueryKey({ pageSize, status }),
@@ -74,7 +77,11 @@ export const useAllRemixContests = (
       const { data, related } = await sdk.events.getRemixContests({
         limit: pageSize,
         offset: pageParam,
-        status
+        status,
+        // Requester id so the backend personalizes embedded related.users
+        // (e.g. does_current_user_follow). Without it the cache primes those
+        // users un-personalized and other surfaces read the bad state.
+        userId: currentUserId ? Id.parse(currentUserId) : undefined
       })
 
       // Prime related tracks + users (full objects, delivered alongside the
