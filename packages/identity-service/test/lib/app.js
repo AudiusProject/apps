@@ -25,25 +25,7 @@ async function getApp() {
   }
   const audiusLibs = { captcha, solanaWeb3Manager }
 
-  const fpClient = {
-    getVisitorHistory: async (visitorId) => {
-      return {
-        visitorId,
-        visits: [
-          {
-            confidence: { score: 0.8 }, // arbitrary non-perfect score
-            timestamp: Date.now(),
-            tag: {
-              origin: 'web'
-            }
-          }
-        ]
-      }
-    }
-  }
-
   server.app.set('audiusLibs', audiusLibs)
-  server.app.set('fpClient', fpClient)
 
   // run all migrations before each test
   await clearDatabase()

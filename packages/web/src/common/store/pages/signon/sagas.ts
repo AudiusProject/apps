@@ -720,34 +720,19 @@ function* signUp() {
 }
 
 function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
-  const { email, password, visitorId, otp } = action
+  const { email, password, otp } = action
   yield* put(make(Name.SIGN_IN_START, {}))
 
-  const fingerprintClient = yield* getContext('fingerprintClient')
   const audiusBackendInstance = yield* getContext('audiusBackendInstance')
   const sdk = yield* getSDK()
   const authService = yield* getContext('authService')
   const isNativeMobile = yield* getContext('isNativeMobile')
-  const isElectron = yield* getContext('isElectron')
   const queryClient = yield* getContext('queryClient')
-  const clientOrigin = isNativeMobile
-    ? 'mobile'
-    : isElectron
-      ? 'desktop'
-      : 'web'
 
   yield* call(waitForRead)
   try {
     const signOn = yield* select(getSignOn)
-    const isGuest = select(getIsGuest)
-
-    const fpResponse = isGuest
-      ? undefined // guest account should not use fingerprint
-      : yield* call(
-          [fingerprintClient, fingerprintClient.identify],
-          email ?? signOn.email.value,
-          clientOrigin
-        )
+    const isGuest = yield* select(getIsGuest)
 
     let signInResponse: SignInResponse
     try {
@@ -755,7 +740,6 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
         authService.signIn,
         email ?? signOn.email.value,
         password ?? signOn.password.value,
-        visitorId ?? fpResponse?.visitorId,
         otp ?? signOn.otp.value
       )
     } catch (err) {

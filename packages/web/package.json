@@ -80,7 +80,6 @@
     "@emotion/react": "11.14.0",
     "@emotion/server": "11.11.0",
     "@emotion/styled": "11.14.0",
-    "@fingerprintjs/fingerprintjs-pro": "3.5.6",
     "@google/model-viewer": "3.3.0",
     "@hcaptcha/react-hcaptcha": "0.3.6",
     "@juggle/resize-observer": "^3.3.1",

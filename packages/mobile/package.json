@@ -53,7 +53,6 @@
     "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "11.14.0",
-    "@fingerprintjs/fingerprintjs-pro-react-native": "3.9.0",
     "@gorhom/bottom-sheet": "5.2.8",
     "@gorhom/portal": "1.0.14",
     "@hcaptcha/react-native-hcaptcha": "1.6.0",

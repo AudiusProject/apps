@@ -11,15 +11,14 @@ import {
   sql,
   type ActionRow,
   type TrackDetails,
-  type UserDetails,
-  queryUsers
+  type UserDetails
 } from './actionLog'
 import { logger } from 'hono/logger'
 import { config } from './config'
 import { HashId } from '@audius/sdk'
 import { SolanaUtils, Utils } from '@audius/sdk-legacy'
 import bn from 'bn.js'
-import { useEmail, userFingerprints } from './identity'
+import { useEmail } from './identity'
 import { cors } from 'hono/cors'
 import { getAudiusSdk } from './sdk'
 
@@ -359,11 +358,6 @@ app.get('/attestation/ui/user', async (c) => {
 
   if (!signals) return c.text(`user id not found: ${idOrHandle}`, 404)
 
-  const fingerprints = await userFingerprints(user.id)
-  const fingerprintUsers = await queryUsers({
-    ids: fingerprints.flatMap((f) => f.userIds)
-  })
-
   let lastDate = ''
   function dateHeader(timestamp: Date) {
     const d = timestamp?.toDateString()
@@ -489,16 +483,12 @@ app.get('/attestation/ui/user', async (c) => {
         <table>
           <thead>
             <tr>
-              <th class='text-left'>Fingerprint Count</th>
               <th class='text-left'>Deliverable Email</th>
               <th class='text-left'>Override</th>
               <th class='text-left'>Overall Score</th>
             </tr>
           </thead>
           <tbody>
-            <td class={userScore.fingerprintCount > 0 ? 'text-red-500' : ''}>
-              {userScore.fingerprintCount}
-            </td>
             <td class={!userScore.isEmailDeliverable ? 'text-red-500' : ''}>
               {userScore.isEmailDeliverable.toString()}
             </td>
@@ -557,36 +547,6 @@ app.get('/attestation/ui/user', async (c) => {
                 </form>
               )}
             </td>
-          </tbody>
-        </table>
-
-        <h2 class='text-xl font-bold mt-4'>Fingerprints</h2>
-        <table>
-          <thead>
-            <tr>
-              <th class='text-left'>Fingerprint</th>
-              <th class='text-left'>User Count</th>
-              <th class='text-left'>Users</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fingerprints.map((f) => (
-              <tr>
-                <td>{f.fingerprint}</td>
-                <td>{f.userCount}</td>
-                <td class='flex gap-2'>
-                  {f.userIds
-                    .slice(0, 20)
-                    .map((id) => fingerprintUsers.find((u) => u.id == id))
-                    .filter(Boolean)
-                    .map((u) => (
-                      <a href={`/attestation/ui/user?q=${u!.handle}`}>
-                        {u!.handle}
-                      </a>
-                    ))}
-                </td>
-              </tr>
-            ))}
           </tbody>
         </table>
 

@@ -33,7 +33,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { AccountListContent } from 'components/nav/desktop/AccountSwitcher/AccountListContent'
 import { ProfileInfo } from 'components/profile-info/ProfileInfo'
 import { audiusSdk, authService } from 'services/audius-sdk'
-import { fingerprintClient } from 'services/fingerprint'
 
 import styles from './OAuthLoginPage.module.css'
 import { ApproveTransactionScreen } from './components/ApproveTransactionScreen'
@@ -188,12 +187,10 @@ export const OAuthLoginPage = () => {
     setIsSubmitting(true)
     let signInResponse: SignInResponse
     try {
-      const fpResponse = await fingerprintClient.identify(emailInput, 'web')
       const sanitizedOtp = otpInput ? otpInput.replace(/\s/g, '') : undefined
       signInResponse = await authService.signIn(
         emailInput,
         passwordInput,
-        fpResponse?.visitorId,
         sanitizedOtp
       )
 

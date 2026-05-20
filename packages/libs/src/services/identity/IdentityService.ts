@@ -117,7 +117,6 @@ export class IdentityService {
   async getFn(params: {
     lookupKey: string
     username: string
-    visitorId?: string
     otp?: string
   }): Promise<{ iv: string; cipherText: string }> {
     return await this._makeRequest({

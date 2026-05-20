@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 import postgres from 'postgres'
 import fetch from 'cross-fetch'
-import { useEmailDeliverable, useFingerprintDeviceCount } from './identity'
+import { useEmailDeliverable } from './identity'
 
 export const sql = postgres(process.env.audius_db_url || '')
 
@@ -157,8 +157,7 @@ export async function getUserNormalizedScore(userId: number, wallet: string) {
   // Convert values to numbers
   const shadowbanScore = Number(shadowban_score)
 
-  const numberOfUserWithFingerprint = (await useFingerprintDeviceCount(userId))!
-  let overallScore = shadowbanScore - numberOfUserWithFingerprint
+  let overallScore = shadowbanScore
 
   const isEmailDeliverable = await useEmailDeliverable(wallet)
   if (!isEmailDeliverable) {
@@ -184,7 +183,6 @@ export async function getUserNormalizedScore(userId: number, wallet: string) {
     challengeCount: challenge_count,
     followingCount: following_count,
     chatBlockCount: chat_block_count,
-    fingerprintCount: numberOfUserWithFingerprint,
     isAudiusImpersonator: is_audius_impersonator,
     hasProfilePicture: has_profile_picture,
     isEmailDeliverable,
