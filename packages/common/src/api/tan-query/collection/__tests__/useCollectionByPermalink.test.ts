@@ -23,6 +23,30 @@ vi.mock('@audius/sdk', () => ({
   }
 }))
 
+vi.mock('../useCollection', () => ({
+  useCollection: vi.fn(),
+  getCollectionQueryKey: vi.fn((collectionId) => [
+    'collection',
+    collectionId
+  ])
+}))
+
+vi.mock('../../utils/primeCollectionData', () => ({
+  primeCollectionData: vi.fn(({ collections, queryClient }) => {
+    collections.forEach((collection: any) => {
+      queryClient.setQueryData(['collection', collection.playlist_id], {
+        ...collection,
+        trackIds: []
+      })
+      queryClient.setQueryData(
+        ['collectionByPermalink', collection.permalink],
+        collection.playlist_id
+      )
+    })
+    return collections
+  })
+}))
+
 describe('getCollectionByPermalinkQueryFn', () => {
   const currentUserId = null
   let queryClient: QueryClient
