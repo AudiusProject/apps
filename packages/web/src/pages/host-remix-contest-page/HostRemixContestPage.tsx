@@ -161,7 +161,7 @@ export const HostRemixContestPage = () => {
     isContestEntry: true
   })
 
-  const { mutate: createEvent } = useCreateEvent()
+  const { mutateAsync: createEvent } = useCreateEvent()
   const { mutate: updateEvent } = useUpdateEvent()
   const { mutate: deleteEvent } = useDeleteEvent()
 
@@ -445,7 +445,7 @@ export const HostRemixContestPage = () => {
     navigate(isEdit ? contestPage(primaryPermalink) : primaryPermalink)
   }, [clearDraft, isEdit, navigate, primaryPermalink])
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const parsedTime = parseTime(timeValue)
     if (!parsedTime) return
 
@@ -496,14 +496,21 @@ export const HostRemixContestPage = () => {
         })
       )
     } else {
-      createEvent({
-        eventType: EventEventTypeEnum.RemixContest,
-        entityType: EventEntityTypeEnum.Track,
-        entityId: entityTrackId,
-        eventData,
-        endDate,
-        userId: currentUserId
-      })
+      try {
+        await createEvent({
+          eventType: EventEventTypeEnum.RemixContest,
+          entityType: EventEntityTypeEnum.Track,
+          entityId: entityTrackId,
+          eventData,
+          endDate,
+          userId: currentUserId
+        })
+      } catch {
+        // Mutation's onError already surfaces a toast; stay on the form so
+        // the user can retry instead of navigating to a half-created
+        // contest page.
+        return
+      }
 
       track(
         make({
