@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
@@ -36,6 +36,7 @@ import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { UserLink } from 'components/link/UserLink'
 import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 import { useProfilePicture } from 'hooks/useProfilePicture'
+import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 
 import { Timestamp } from '../../../components/comments/Timestamp'
 import { AttachVideoModal } from '../../fan-club-detail-page/components/AttachVideoModal'
@@ -66,8 +67,8 @@ const messages = {
  * - `updates` renders only host-authored top-level posts. Composer shown
  *   only to the host; composer exposes an Attach Video affordance.
  * - `comments` renders everything that *isn't* a host post-update
- *   (community comments + replies). Composer shown to every signed-in
- *   user. No video attach — that's host-only.
+ *   (community comments + replies). Composer shown to public viewers and
+ *   login-gated for signed-out users. No video attach — that's host-only.
  */
 export type ContestCommentsMode = 'updates' | 'comments'
 
@@ -127,8 +128,10 @@ export const ContestCommentsTile = ({
   const { data: currentUserId } = useCurrentUserId()
   const isEventOwner =
     currentUserId !== null &&
+    currentUserId !== undefined &&
     eventOwnerUserId !== undefined &&
     currentUserId === eventOwnerUserId
+  const isLoggedIn = currentUserId !== null && currentUserId !== undefined
 
   // Sort toggle lives on the Comments panel only. Updates is host-curated
   // and always pinned to newest-first.
@@ -151,12 +154,11 @@ export const ContestCommentsTile = ({
     mode === 'updates' ? messages.updatesHeading : messages.commentsHeading
   // In `comments` mode the host should NOT see the top-level composer —
   // they participate via replies (and via the dedicated POST UPDATE
-  // composer for announcements). Viewers see the top-level composer.
+  // composer for announcements). Public viewers see the top-level composer;
+  // signed-out viewers get the same account gate as Enter Contest.
   // In `updates` mode only the host can compose top-level posts.
   const showComposer =
-    !hideComposer &&
-    currentUserId !== null &&
-    (mode === 'comments' ? !isEventOwner : isEventOwner)
+    !hideComposer && (mode === 'comments' ? !isEventOwner : isEventOwner)
   // When `hideComposer` is set, the caller is rendering a feed-only
   // tile alongside a separate composer (e.g. desktop details), so the
   // "sign in to comment" stub would be a redundant CTA. Track separately
@@ -176,7 +178,15 @@ export const ContestCommentsTile = ({
   // track page uses the same pattern.
   const [messageId, setMessageId] = useState(0)
 
-  const handleComposerSubmit = useCallback(
+  const handleComposerClick = useRequiresAccountCallback(
+    () => {},
+    [],
+    undefined,
+    undefined,
+    'account'
+  )
+
+  const handleComposerSubmit = useRequiresAccountCallback(
     (value: string) => {
       const body = value.trim()
       if (!body || !currentUserId) return
@@ -268,13 +278,15 @@ export const ContestCommentsTile = ({
       {showComposer ? (
         <Flex direction='column' gap='m' w='100%'>
           <Flex w='100%' gap='s' alignItems='center'>
-            <HarmonyAvatar
-              size='auto'
-              borderWidth='thin'
-              isLoading={false}
-              src={profileImage}
-              css={{ width: 32, height: 32, flexShrink: 0 }}
-            />
+            {isLoggedIn ? (
+              <HarmonyAvatar
+                size='auto'
+                borderWidth='thin'
+                isLoading={false}
+                src={profileImage}
+                css={{ width: 32, height: 32, flexShrink: 0 }}
+              />
+            ) : null}
             <Box css={{ flex: 1, minWidth: 0 }}>
               {/* ComposerInput renders its own send affordance + Enter
                   submit, so no external send button is needed. Matches
@@ -286,8 +298,10 @@ export const ContestCommentsTile = ({
                 placeholder={composerPlaceholder}
                 maxLength={400}
                 maxMentions={10}
+                onClick={handleComposerClick}
                 onSubmit={(value) => handleComposerSubmit(value)}
                 disabled={isPosting}
+                readOnly={!isLoggedIn}
                 blurOnSubmit
               />
             </Box>
