@@ -281,6 +281,26 @@ export const HostRemixContestPage = () => {
     hasHydratedRef.current = true
   }, [remixContest, draft])
 
+  // On the track-scoped route (/:handle/:slug/host-contest) the URL
+  // identifies the source track, but `useTrackByPermalink` is async — by
+  // the time it resolves, the `useState` initializer above has already
+  // captured `primaryTrackId === undefined` and seeded `sourceTrackIds`
+  // to `[]`. Without this sync, the Source Track section shows "+ Add
+  // Track" instead of the URL's track and the Launch button stays
+  // disabled forever (`sourceTrackIds.length === 0`), so clicking Launch
+  // appears to do nothing. Run once when `primaryTrackId` first
+  // resolves; skip if state was already populated from a draft or
+  // existing contest, and never re-populate after a user removes the
+  // row.
+  const hasSeededPrimaryTrackRef = useRef(false)
+  useEffect(() => {
+    if (hasSeededPrimaryTrackRef.current) return
+    if (!primaryTrackId) return
+    hasSeededPrimaryTrackRef.current = true
+    if (sourceTrackIds.length > 0) return
+    setSourceTrackIds([primaryTrackId])
+  }, [primaryTrackId, sourceTrackIds.length])
+
   // The event's backing track: prefer the URL-scoped primary track, and
   // fall back to the (required) first Source Track when entering from the
   // track-less /host-contest route. This is the `entity_id` on create /
