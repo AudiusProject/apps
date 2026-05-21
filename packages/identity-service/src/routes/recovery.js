@@ -69,7 +69,13 @@ module.exports = function (app) {
           'Invalid signature provided, no user found'
         )
       }
-      if (!existingUser.isEmailDeliverable) {
+      // Suppress recovery email if the address has not been verified.
+      // Fall back to the legacy isEmailDeliverable flag for accounts created
+      // before email verification was introduced (those start verified=false
+      // but may have a valid deliverable flag).
+      const canReceiveEmail =
+        existingUser.isEmailVerified || existingUser.isEmailDeliverable
+      if (!canReceiveEmail) {
         req.logger.info(
           `Unable to deliver recovery email to ${existingUser.email}`
         )

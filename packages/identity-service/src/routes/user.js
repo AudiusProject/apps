@@ -11,6 +11,12 @@ const authMiddleware = require('../authMiddleware')
 const captchaMiddleware = require('../captchaMiddleware')
 const config = require('../config')
 const { validateOtp, sendOtp } = require('../utils/otp')
+const { isDisposableEmail } = require('../utils/disposableEmail')
+const {
+  generateVerificationToken,
+  hashToken,
+  sendVerificationEmail
+} = require('../utils/emailVerification')
 
 const BOUNCER_BASE_URL = 'https://api.usebouncer.com/v1.1/email/verify'
 
@@ -49,6 +55,13 @@ module.exports = function (app) {
       const body = req.body
       if (body.username && body.walletAddress) {
         const email = body.username.toLowerCase()
+
+        if (isDisposableEmail(email)) {
+          return errorResponseBadRequest(
+            'Please use a non-disposable email address'
+          )
+        }
+
         const existingUser = await models.User.findOne({
           where: {
             email
@@ -65,6 +78,10 @@ module.exports = function (app) {
 
         try {
           const isDeliverable = await isEmailDeliverable(email, req.logger)
+          const verificationToken = generateVerificationToken()
+          const hashedToken = hashToken(verificationToken)
+          const isGuest = !!body.isGuest
+
           await models.User.create({
             email,
             // Store non checksummed wallet address
@@ -72,8 +89,27 @@ module.exports = function (app) {
             lastSeenDate: Date.now(),
             IP,
             isEmailDeliverable: isDeliverable,
-            isGuest: body.isGuest
+            isEmailVerified: false,
+            emailVerificationToken: hashedToken,
+            emailVerificationTokenCreatedAt: new Date(),
+            isGuest
           })
+
+          if (!isGuest) {
+            try {
+              await sendVerificationEmail({
+                email,
+                token: verificationToken,
+                sendgrid: req.app.get('sendgrid'),
+                logger: req.logger
+              })
+            } catch (emailErr) {
+              req.logger.error(
+                `Error sending verification email to ${email}`,
+                emailErr
+              )
+            }
+          }
 
           return successResponse()
         } catch (err) {

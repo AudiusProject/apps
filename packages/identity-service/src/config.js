@@ -773,6 +773,12 @@ const config = convict({
     env: 'websiteHost',
     default: 'https://audius.co'
   },
+  identityServiceHost: {
+    doc: 'Publicly reachable base URL of this identity service instance',
+    format: String,
+    env: 'identityServiceHost',
+    default: 'https://identityservice.audius.co'
+  },
   amplitudeAPIKey: {
     doc: 'Amplitude API key',
     format: String,

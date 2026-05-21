@@ -63,6 +63,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: true
       },
+      isEmailVerified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      emailVerificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      emailVerificationTokenCreatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
       // this is the last time we have an activity for this user
       // could be updated whenever we relay a tx on behalf of them
       lastSeenDate: {

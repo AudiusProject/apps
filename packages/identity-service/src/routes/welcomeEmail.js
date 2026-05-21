@@ -46,7 +46,11 @@ module.exports = function (app) {
           'Invalid signature provided, no user found'
         )
       }
-      if (!existingUser.isEmailDeliverable) {
+      // Suppress welcome email if the address has not been verified. Fall back
+      // to the legacy isEmailDeliverable flag for pre-verification accounts.
+      const canReceiveEmail =
+        existingUser.isEmailVerified || existingUser.isEmailDeliverable
+      if (!canReceiveEmail) {
         req.logger.info(
           `Unable to deliver welcome email to ${existingUser.handle} ${existingUser.email}`
         )
