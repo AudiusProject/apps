@@ -71,15 +71,6 @@ export async function getUser(handle: string) {
   return rows[0].user as UserDetails
 }
 
-export async function queryUsers({ ids }: { ids: number[] }) {
-  const rows = await sql`
-  ${sql.unsafe(buildUserDetails)}
-  where
-    user_id in ${sql(ids)}
-  `
-  return rows.map((r) => r.user) as UserDetails[]
-}
-
 export async function getRecentUsers(page: number) {
   const rows = await sql`
   ${sql.unsafe(buildUserDetails)}
