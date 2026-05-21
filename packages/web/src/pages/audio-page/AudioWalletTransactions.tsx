@@ -36,12 +36,6 @@ const messages = {
 
 const AUDIO_TRANSACTIONS_SHOW_MORE_LIMIT = 5
 
-// /v1/users/{id}/transactions/audio caps `limit` at 100 server-side. The page
-// fetches in a single batch (no pagination UI), so this is also the most we'll
-// ever render at once. Power users with more than 100 transactions see only the
-// most recent 100 until a "load more" affordance is added.
-const AUDIO_TRANSACTIONS_SERVER_MAX_LIMIT = 100
-
 const Disclaimer = () => {
   const setVisibility = useSetVisibility()
   return (
@@ -82,23 +76,17 @@ export const AudioWalletTransactions = () => {
   const { data: audioTransactionsCount = 0, isPending: isCountLoading } =
     useAudioTransactionsCount()
 
-  const requestedPageSize = Math.min(
-    audioTransactionsCount > 0
-      ? audioTransactionsCount
-      : DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE,
-    AUDIO_TRANSACTIONS_SERVER_MAX_LIMIT
+  const {
+    data: audioTransactions = [],
+    isPending: isTransactionsLoading,
+    loadNextPage
+  } = useAudioTransactions(
+    {
+      sortMethod,
+      sortDirection
+    },
+    { refetchOnMount: 'always' }
   )
-
-  const { data: audioTransactions = [], isPending: isTransactionsLoading } =
-    useAudioTransactions(
-      {
-        page: 0,
-        pageSize: requestedPageSize,
-        sortMethod,
-        sortDirection
-      },
-      { refetchOnMount: 'always' }
-    )
 
   // Defaults: sort method = date, sort direction = desc
   const onSort = useCallback(
@@ -149,6 +137,10 @@ export const AudioWalletTransactions = () => {
           onClickRow={onClickRow}
           showMoreLimit={AUDIO_TRANSACTIONS_SHOW_MORE_LIMIT}
           scrollRef={mainContentRef}
+          fetchMore={loadNextPage}
+          totalRowCount={audioTransactionsCount}
+          fetchBatchSize={DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE}
+          isVirtualized={true}
         />
       )}
     </Flex>
