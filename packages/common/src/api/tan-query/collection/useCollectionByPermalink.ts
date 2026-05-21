@@ -45,7 +45,6 @@ export const getCollectionByPermalinkQueryFn = async (
       collections: [collection],
       queryClient
     })
-  }
 
     return collection.playlist_id
   }
