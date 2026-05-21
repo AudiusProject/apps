@@ -5,7 +5,7 @@ import { pick } from 'lodash'
 import { userCollectionMetadataFromSDK } from '~/adapters/collection'
 import { useQueryContext } from '~/api/tan-query/utils'
 import type { ID } from '~/models/Identifiers'
-import { parsePlaylistIdFromPermalink } from '~/utils'
+import { parsePlaylistIdFromPermalink } from '~/utils/stringUtils'
 
 import type { TQCollection } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
