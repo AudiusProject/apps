@@ -47,6 +47,14 @@ vi.mock('../../utils/primeCollectionData', () => ({
   })
 }))
 
+vi.mock('~/api/tan-query/utils/QueryContext', () => ({
+  useQueryContext: vi.fn()
+}))
+
+vi.mock('../../users/account/useCurrentUserId', () => ({
+  useCurrentUserId: vi.fn()
+}))
+
 describe('getCollectionByPermalinkQueryFn', () => {
   const currentUserId = null
   let queryClient: QueryClient
