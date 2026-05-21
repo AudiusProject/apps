@@ -23,7 +23,7 @@ const productionConfig: SdkServicesConfig = {
     storageNodes: [],
     antiAbuseOracleNodes: {
       endpoints: [
-        'https://discoveryprovider.audius.co',
+        'https://anti-abuse-oracle.audius.engineering',
         'https://audius-oracle.creatorseed.com',
         'https://oracle.audius.endl.net'
       ],

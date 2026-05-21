@@ -4,7 +4,7 @@ const { logger } = require('../logging')
 const models = require('../models')
 
 const aaoEndpoint =
-  config.get('aaoEndpoint') || 'https://antiabuseoracle.audius.co'
+  config.get('aaoEndpoint') || 'https://anti-abuse-oracle.audius.engineering'
 
 const allowRules = new Set([-17, -18])
 const blockRelayAbuseErrorCodes = new Set([0, 8, 10, 13, 15, 18])

@@ -185,7 +185,7 @@ export async function getUserNormalizedScore(userId: number, wallet: string) {
 }
 
 export async function getAAOAttestation(handle: string) {
-  const url = `https://antiabuseoracle.audius.co/abuse/${handle}`
+  const url = `https://anti-abuse-oracle.audius.engineering/abuse/${handle}`
   try {
     const response = await fetch(url)
     if (!response.ok) {
