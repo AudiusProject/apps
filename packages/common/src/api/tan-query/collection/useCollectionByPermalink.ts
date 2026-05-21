@@ -1,10 +1,11 @@
-import { OptionalId } from '@audius/sdk'
+import { Id, OptionalId } from '@audius/sdk'
 import { useQuery, useQueryClient, QueryClient } from '@tanstack/react-query'
 import { pick } from 'lodash'
 
 import { userCollectionMetadataFromSDK } from '~/adapters/collection'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models/Identifiers'
+import { parsePlaylistIdFromPermalink } from '~/utils'
 
 import { TQCollection } from '../models'
 import { QUERY_KEYS } from '../queryKeys'
@@ -30,22 +31,41 @@ export const getCollectionByPermalinkQueryFn = async (
   queryClient: QueryClient,
   sdk: any
 ) => {
+  const userId = OptionalId.parse(currentUserId)
+
   const { data = [] } = await sdk.playlists.getBulkPlaylists({
     permalink: [permalink],
-    userId: OptionalId.parse(currentUserId)
+    userId
   })
 
   const collection = userCollectionMetadataFromSDK(data[0])
 
   if (collection) {
-    // Prime related entities
-    primeCollectionData({
-      collections: [collection],
-      queryClient
-    })
+    primeCollectionData({ collections: [collection], queryClient })
+    return collection.playlist_id
   }
 
-  return collection?.playlist_id
+  // Hidden (is_private) playlists are filtered out of permalink lookups
+  // for logged-out users, but ID-based lookups honor direct-link access.
+  // Retry with the id encoded in the permalink slug so anyone with the
+  // link can view the playlist.
+  const idFromSlug = parsePlaylistIdFromPermalink(permalink)
+  if (Number.isNaN(idFromSlug)) return undefined
+
+  const { data: byId = [] } = await sdk.playlists.getBulkPlaylists({
+    id: [Id.parse(idFromSlug)],
+    userId
+  })
+
+  const byIdCollection = userCollectionMetadataFromSDK(byId[0])
+  // Guard against id-in-slug collisions: only accept the result if it
+  // truly maps back to the requested permalink.
+  if (!byIdCollection || byIdCollection.permalink !== permalink) {
+    return undefined
+  }
+
+  primeCollectionData({ collections: [byIdCollection], queryClient })
+  return byIdCollection.playlist_id
 }
 
 export const useCollectionByPermalink = <TResult = TQCollection>(
