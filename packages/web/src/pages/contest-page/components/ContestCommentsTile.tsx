@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
   getCommentQueryKey,
@@ -158,8 +158,7 @@ export const ContestCommentsTile = ({
   // signed-out viewers get the same account gate as Enter Contest.
   // In `updates` mode only the host can compose top-level posts.
   const showComposer =
-    !hideComposer &&
-    (mode === 'comments' ? !isEventOwner : isEventOwner)
+    !hideComposer && (mode === 'comments' ? !isEventOwner : isEventOwner)
   // When `hideComposer` is set, the caller is rendering a feed-only
   // tile alongside a separate composer (e.g. desktop details), so the
   // "sign in to comment" stub would be a redundant CTA. Track separately

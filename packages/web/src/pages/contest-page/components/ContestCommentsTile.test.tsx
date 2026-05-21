@@ -90,6 +90,7 @@ describe('ContestCommentsTile', () => {
       (callback: (...args: any[]) => any) =>
         (...args: any[]) => {
           mocks.requiresAccount()
+          // eslint-disable-next-line n/no-callback-literal
           return callback(...args)
         }
     )
