@@ -41,6 +41,10 @@ services:
         app_name: staking
         TURBO_TEAM: '${TURBO_TEAM}'
         TURBO_TOKEN: '${TURBO_TOKEN}'
+    env_file: .env
+    environment:
+      solana_rpc_endpoint: '${SOLANA_RPC_ENDPOINT}'
+      eth_rpc_endpoint: '${ETH_RPC_ENDPOINT}'
     restart: always
     profiles:
       - pedalboard
