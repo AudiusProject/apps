@@ -5,10 +5,12 @@ import { ServiceType } from 'types'
 const bytesToGb = (bytes: number) => Math.floor(bytes / 10 ** 9)
 
 const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
+  const isValidator = serviceType === ServiceType.Validator
+  const healthPath = isValidator ? '/health-check' : '/health_check'
   const { data, status, error } = useQuery({
-    queryKey: ['health', { endpoint }],
+    queryKey: ['health', { endpoint, healthPath }],
     queryFn: async () => {
-      const response = await fetch(`${endpoint}/health_check`)
+      const response = await fetch(`${endpoint}${healthPath}`)
       if (!response.ok) {
         throw new Error(
           `Failed fetching health check from ${endpoint}: ${response.status} ${response.statusText}`
@@ -35,6 +37,125 @@ const useNodeHealth = (endpoint: string, serviceType: ServiceType) => {
 
   if (status === 'pending' || status === 'error') {
     return { status, error, health: null }
+  }
+
+  if (isValidator) {
+    const core = data?.core ?? {}
+
+    const hasPrimitiveProps = (o: Record<string, unknown>) =>
+      Object.values(o).some(
+        (x) => x === null || typeof x !== 'object' || Array.isArray(x)
+      )
+    const countPeers = (val: any): number => {
+      if (val == null) return 0
+      if (Array.isArray(val)) {
+        return val.reduce(
+          (sum: number, item) =>
+            sum +
+            (item && typeof item === 'object' && !Array.isArray(item)
+              ? hasPrimitiveProps(item)
+                ? 1
+                : countPeers(item)
+              : 1),
+          0
+        )
+      }
+      if (typeof val !== 'object') return 0
+      const subObjects = Object.values(val).filter(
+        (v): v is Record<string, unknown> =>
+          v !== null && typeof v === 'object' && !Array.isArray(v)
+      )
+      const arrays = Object.values(val).filter((v): v is unknown[] =>
+        Array.isArray(v)
+      )
+      if (subObjects.length === 0 && arrays.length === 0) return 0
+      if (subObjects.some(hasPrimitiveProps)) {
+        return subObjects.length + arrays.reduce((s, a) => s + countPeers(a), 0)
+      }
+      return (
+        subObjects.reduce((s, o) => s + countPeers(o), 0) +
+        arrays.reduce((s, a) => s + countPeers(a), 0)
+      )
+    }
+    const peerCount = countPeers(core?.peers)
+
+    const syncInfo = core?.sync_info ?? {}
+    const findHeight = (obj: any): number | undefined => {
+      if (!obj || typeof obj !== 'object') return undefined
+      for (const k of [
+        'latest_block_height',
+        'block_height',
+        'height',
+        'current_height'
+      ]) {
+        const v = obj[k]
+        if (typeof v === 'number') return v
+        if (typeof v === 'string' && /^\d+$/.test(v)) return Number(v)
+      }
+      for (const v of Object.values(obj)) {
+        const found = findHeight(v)
+        if (found !== undefined) return found
+      }
+      return undefined
+    }
+    const currentHeight = findHeight(syncInfo) ?? findHeight(core)
+
+    const parseDurationMs = (s: unknown): number | undefined => {
+      if (typeof s !== 'string') return undefined
+      let total = 0
+      const re = /(\d+(?:\.\d+)?)(ns|us|µs|ms|s|m|h)/g
+      let match: RegExpExecArray | null
+      let matched = false
+      while ((match = re.exec(s)) !== null) {
+        matched = true
+        const n = parseFloat(match[1])
+        switch (match[2]) {
+          case 'ns':
+            total += n / 1e6
+            break
+          case 'us':
+          case 'µs':
+            total += n / 1e3
+            break
+          case 'ms':
+            total += n
+            break
+          case 's':
+            total += n * 1000
+            break
+          case 'm':
+            total += n * 60 * 1000
+            break
+          case 'h':
+            total += n * 60 * 60 * 1000
+            break
+        }
+      }
+      return matched ? total : undefined
+    }
+    let startedAt: Date | undefined
+    const uptimeMs = parseDurationMs(data?.uptime)
+    const ts = data?.timestamp ? Date.parse(data.timestamp) : NaN
+    if (!isNaN(ts) && uptimeMs !== undefined) {
+      startedAt = new Date(ts - uptimeMs)
+    }
+
+    return {
+      status,
+      error: null,
+      health: {
+        version: data?.data?.version ?? data?.version,
+        chainId: core?.chain_info?.chain_id,
+        nodeType: core?.node_info?.node_type,
+        ethAddress: core?.node_info?.eth_address ?? data?.signer,
+        peerCount,
+        currentHeight,
+        storageType: core?.storage_info?.storage_type,
+        startedAt,
+        gitSha: typeof data?.git === 'string' ? data.git : undefined,
+        delegateOwnerWallet: data?.signer
+      }
+    }
   }
 
   const { data: health } = data
