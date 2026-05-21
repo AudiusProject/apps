@@ -66,7 +66,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     backgroundColor: palette.white
   },
   trackContainerActive: {
-    backgroundColor: palette.neutralLight9
+    backgroundColor: 'rgba(130,86,220,0.07)'
   },
   trackContainerDisabled: {
     backgroundColor: palette.neutralLight9
@@ -101,6 +101,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     lineHeight: 16,
     paddingTop: 2,
     color: palette.neutral
+  },
+  trackTitleTextActive: {
+    color: '#8256DC'
   },
   downloadIndicator: {
     marginLeft: spacing(1)
@@ -405,11 +408,21 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
               <View style={styles.trackTitle}>
                 <Text
                   numberOfLines={1}
-                  style={[styles.trackTitleText, { maxWidth: titleMaxWidth }]}
+                  style={[
+                    styles.trackTitleText,
+                    isActive && styles.trackTitleTextActive,
+                    { maxWidth: titleMaxWidth }
+                  ]}
                 >
                   {title}
                 </Text>
-                <Text numberOfLines={1} style={[styles.trackTitleText]}>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.trackTitleText,
+                    isActive && styles.trackTitleTextActive
+                  ]}
+                >
                   {messages.deleted}
                 </Text>
               </View>
