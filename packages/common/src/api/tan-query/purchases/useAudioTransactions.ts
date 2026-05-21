@@ -1,13 +1,14 @@
+import { useCallback, useRef } from 'react'
+
 import {
   GetAudioTransactionsSortMethodEnum,
   GetAudioTransactionsSortDirectionEnum,
   Id
 } from '@audius/sdk'
-import { useQuery } from '@tanstack/react-query'
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { audioTransactionFromSdk } from '~/adapters/audioTransactions'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { ID } from '~/models'
 import { TransactionDetails } from '~/store/ui/transaction-details/types'
 import { Nullable } from '~/utils/typeUtils'
 
@@ -16,60 +17,65 @@ import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 type GetAudioTransactionsArgs = {
-  page?: number
   pageSize?: number
   sortMethod?: GetAudioTransactionsSortMethodEnum
   sortDirection?: GetAudioTransactionsSortDirectionEnum
 }
 
+// /v1/users/{id}/transactions/audio caps `limit` at 100 server-side. Keep the
+// page size at or below that.
 export const DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE = 50
 
 export const getAudioTransactionsQueryKey = ({
   userId,
-  page,
   sortMethod,
   sortDirection,
   pageSize
-}: GetAudioTransactionsArgs & { userId: Nullable<ID> | undefined }) =>
+}: GetAudioTransactionsArgs & { userId: Nullable<number> | undefined }) =>
   [
     QUERY_KEYS.audioTransactions,
     userId,
     {
-      page,
       sortMethod,
       sortDirection,
       pageSize
     }
-  ] as unknown as QueryKey<TransactionDetails[]>
+  ] as unknown as QueryKey<InfiniteData<TransactionDetails[]>>
 
 export const useAudioTransactions = (
-  args: GetAudioTransactionsArgs,
+  args: GetAudioTransactionsArgs = {},
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
   const { data: userId } = useCurrentUserId()
   const {
-    page = 0,
     pageSize = DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE,
     sortMethod,
     sortDirection
   } = args
 
-  const queryResults = useQuery({
+  const queryResult = useInfiniteQuery({
     queryKey: getAudioTransactionsQueryKey({
       userId,
-      page,
       sortMethod,
       sortDirection,
       pageSize
     }),
-    queryFn: async () => {
+    initialPageParam: 0,
+    getNextPageParam: (
+      lastPage: TransactionDetails[],
+      allPages: TransactionDetails[][]
+    ) => {
+      if (lastPage.length < pageSize) return undefined
+      return allPages.length * pageSize
+    },
+    queryFn: async ({ pageParam }) => {
       if (!userId) return []
 
       const sdk = await audiusSdk()
       const response = await sdk.users.getAudioTransactions({
         id: Id.parse(userId),
-        offset: page * pageSize,
+        offset: pageParam,
         limit: pageSize,
         sortMethod,
         sortDirection
@@ -79,9 +85,24 @@ export const useAudioTransactions = (
 
       return response.data.map(audioTransactionFromSdk)
     },
+    select: (data) => data.pages.flat(),
     ...options,
     enabled: options?.enabled !== false && !!userId
   })
 
-  return queryResults
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. Mirrors the pattern in usePurchases.
+  const queryResultRef = useRef(queryResult)
+  queryResultRef.current = queryResult
+  const loadNextPage = useCallback(() => {
+    const q = queryResultRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
+
+  return {
+    ...queryResult,
+    data: queryResult.data,
+    loadNextPage
+  }
 }

@@ -76,21 +76,17 @@ export const AudioWalletTransactions = () => {
   const { data: audioTransactionsCount = 0, isPending: isCountLoading } =
     useAudioTransactionsCount()
 
-  const requestedPageSize =
-    audioTransactionsCount > 0
-      ? audioTransactionsCount
-      : DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE
-
-  const { data: audioTransactions = [], isPending: isTransactionsLoading } =
-    useAudioTransactions(
-      {
-        page: 0,
-        pageSize: requestedPageSize,
-        sortMethod,
-        sortDirection
-      },
-      { refetchOnMount: 'always' }
-    )
+  const {
+    data: audioTransactions = [],
+    isPending: isTransactionsLoading,
+    loadNextPage
+  } = useAudioTransactions(
+    {
+      sortMethod,
+      sortDirection
+    },
+    { refetchOnMount: 'always' }
+  )
 
   // Defaults: sort method = date, sort direction = desc
   const onSort = useCallback(
@@ -141,6 +137,10 @@ export const AudioWalletTransactions = () => {
           onClickRow={onClickRow}
           showMoreLimit={AUDIO_TRANSACTIONS_SHOW_MORE_LIMIT}
           scrollRef={mainContentRef}
+          fetchMore={loadNextPage}
+          totalRowCount={audioTransactionsCount}
+          fetchBatchSize={DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE}
+          isVirtualized={true}
         />
       )}
     </Flex>
