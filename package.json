@@ -81,6 +81,7 @@
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "11.12.0",
+    "@react-native/metro-babel-transformer": "0.79.5",
     "@tsconfig/strictest": "2.0.2",
     "@types/keyv": "4.2.0",
     "@types/react": "19.0.0",

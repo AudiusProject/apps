@@ -43,7 +43,7 @@ const Toast = ({
   ...popupProps
 }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const divRef = useRef<HTMLDivElement | null>(null)
   const anchorRef = divRef as MutableRefObject<HTMLElement | null>
   const hasAccount = useHasAccount()

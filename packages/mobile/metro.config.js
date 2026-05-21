@@ -144,7 +144,7 @@ const config = {
       ),
 
       react: resolveModule('react'),
-      'react-native': path.resolve(__dirname, './node_modules', 'react-native'),
+      'react-native': resolveModule('react-native'),
 
       // Aliases for '@audius/web' to allow for absolute paths
       ...getClientAliases(),
