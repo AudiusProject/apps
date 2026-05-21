@@ -14,6 +14,15 @@ vi.mock('~/adapters/collection', () => ({
   userCollectionMetadataFromSDK: vi.fn((collection) => collection)
 }))
 
+vi.mock('@audius/sdk', () => ({
+  Id: {
+    parse: vi.fn((id) => id)
+  },
+  OptionalId: {
+    parse: vi.fn((id) => id ?? undefined)
+  }
+}))
+
 describe('getCollectionByPermalinkQueryFn', () => {
   const currentUserId = null
   let queryClient: QueryClient
