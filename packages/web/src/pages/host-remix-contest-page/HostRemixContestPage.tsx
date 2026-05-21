@@ -48,7 +48,7 @@ import Page from 'components/page/Page'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { track, make } from 'services/analytics'
-import { fullContestPage, fullTrackPage } from 'utils/route'
+import { contestPage } from 'utils/route'
 
 import {
   TimeInput,
@@ -442,11 +442,7 @@ export const HostRemixContestPage = () => {
       navigate(CONTESTS_PAGE)
       return
     }
-    navigate(
-      isEdit
-        ? fullContestPage(primaryPermalink)
-        : fullTrackPage(primaryPermalink)
-    )
+    navigate(isEdit ? contestPage(primaryPermalink) : primaryPermalink)
   }, [clearDraft, isEdit, navigate, primaryPermalink])
 
   const handleSubmit = useCallback(() => {
@@ -519,7 +515,7 @@ export const HostRemixContestPage = () => {
 
     clearDraft()
     if (effectivePermalink) {
-      navigate(fullContestPage(effectivePermalink))
+      navigate(contestPage(effectivePermalink))
     } else {
       navigate(CONTESTS_PAGE)
     }
@@ -561,7 +557,7 @@ export const HostRemixContestPage = () => {
     }
     clearDraft()
     if (primaryPermalink) {
-      navigate(fullTrackPage(primaryPermalink))
+      navigate(primaryPermalink)
     }
   }, [
     clearDraft,
