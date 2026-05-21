@@ -3,7 +3,7 @@ import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-quer
 import { pick } from 'lodash'
 
 import { userCollectionMetadataFromSDK } from '~/adapters/collection'
-import { useQueryContext } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 import type { ID } from '~/models/Identifiers'
 import { parsePlaylistIdFromPermalink } from '~/utils/stringUtils'
 
