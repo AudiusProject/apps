@@ -1,5 +1,9 @@
 import { Id, OptionalId } from '@audius/sdk'
-import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient
+} from '@tanstack/react-query'
 import { pick } from 'lodash'
 
 import { userCollectionMetadataFromSDK } from '~/adapters/collection'

@@ -25,10 +25,7 @@ vi.mock('@audius/sdk', () => ({
 
 vi.mock('../useCollection', () => ({
   useCollection: vi.fn(),
-  getCollectionQueryKey: vi.fn((collectionId) => [
-    'collection',
-    collectionId
-  ])
+  getCollectionQueryKey: vi.fn((collectionId) => ['collection', collectionId])
 }))
 
 vi.mock('../../utils/primeCollectionData', () => ({
