@@ -744,6 +744,14 @@ export interface GetUserRecommendedTracksRequest {
     timeRange?: GetUserRecommendedTracksTimeRangeEnum;
 }
 
+export interface GetUserFeedForYouRequest {
+    id: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    maxPerArtist?: number;
+}
+
 export interface GetUserTracksDownloadCountRequest {
     id: string;
 }
@@ -4169,6 +4177,61 @@ export class UsersApi extends runtime.BaseAPI {
      */
     async getUserFeed(params: GetUserFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserFeedResponse> {
         const response = await this.getUserFeedRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Gets the personalized For You feed for a user.
+     * Twitter-style multi-source pipeline — candidate retrieval (in-network,
+     * trending, underground) → linear ranking → diversity pass.
+     */
+    async getUserFeedForYouRaw(params: GetUserFeedForYouRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
+        if (params.id === null || params.id === undefined) {
+            throw new runtime.RequiredError('id', 'Required parameter params.id was null or undefined when calling getUserFeedForYou.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.maxPerArtist !== undefined) {
+            queryParameters['max_per_artist'] = params.maxPerArtist;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/users/{id}/feed/for-you`.replace(`{${"id"}}`, encodeURIComponent(String(params.id))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
+    }
+
+    /**
+     * Gets the personalized For You feed for a user.
+     */
+    async getUserFeedForYou(params: GetUserFeedForYouRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
+        const response = await this.getUserFeedForYouRaw(params, initOverrides);
         return await response.value();
     }
 

@@ -1,4 +1,4 @@
-import { Id, GetUserRecommendedTracksTimeRangeEnum } from '@audius/sdk'
+import { Id } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
@@ -24,11 +24,9 @@ export const getForYouFeedQueryKey = (userId: ID | null | undefined) => {
 }
 
 /**
- * "For You" feed for the Feed page. Backed by the same recommended-tracks
- * endpoint that powers the Explore page's For You section
- * (`GET /v1/users/{id}/recommended-tracks`). The dedicated
- * `/feed/for-you` endpoint has been retired in favor of consolidating on
- * the recommended-tracks source — see the API repo for the deletion.
+ * "For You" feed for the Feed page. Backed by the dedicated
+ * `GET /v1/users/{id}/feed/for-you` endpoint — a lean 3-source pipeline
+ * (in-network, trending, underground) with linear ranking and diversity pass.
  */
 export const useForYouFeed = (
   {
@@ -57,12 +55,11 @@ export const useForYouFeed = (
       const isFirstPage = pageParam === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.users.getUserRecommendedTracks({
+      const { data = [] } = await sdk.users.getUserFeedForYou({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         limit: currentPageSize,
-        offset: pageParam,
-        timeRange: GetUserRecommendedTracksTimeRangeEnum.Week
+        offset: pageParam
       })
 
       const tracks = primeTrackData({
