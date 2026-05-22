@@ -2,7 +2,7 @@ import type { Env } from '@audius/common/services'
 import Config from 'react-native-config'
 
 export const env: Env = {
-  AAO_ENDPOINT: 'https://discoveryprovider.audius.co',
+  AAO_ENDPOINT: 'https://anti-abuse-oracle.audius.engineering',
   AMPLITUDE_API_KEY: '86760558b8bb1b3aae61656efd4ddacb',
   AMPLITUDE_PROXY: 'https://gain2.audius.co/2/httpapi',
   API_KEY: '8acf5eb7436ea403ee536a7334faa5e9ada4b50f',
