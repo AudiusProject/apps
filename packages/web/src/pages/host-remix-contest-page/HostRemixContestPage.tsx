@@ -24,6 +24,7 @@ import {
   Box,
   Button,
   Flex,
+  Hint,
   IconClose,
   IconCloudUpload,
   IconKebabHorizontal,
@@ -58,6 +59,7 @@ import { AttachVideoModal } from '../fan-club-detail-page/components/AttachVideo
 
 import { AddSourceTrackModal } from './AddSourceTrackModal'
 import { ManageStemsModal } from './ManageStemsModal'
+import { useContestDraft } from './useContestDraft'
 import { useUploadContestCover } from './useUploadContestCover'
 
 const { CONTESTS_PAGE } = route
@@ -95,6 +97,8 @@ const messages = {
   sourceTracksSectionLabel: 'SOURCE TRACK',
   addTrack: '+ Add Track',
   cancel: 'Cancel',
+  saveDraft: 'Save Draft',
+  draftSaved: 'Draft saved',
   launch: 'Launch',
   save: 'Save',
   turnOff: 'Delete Contest',
@@ -108,7 +112,11 @@ const messages = {
   manageStems: 'Manage Stems',
   remove: 'Remove',
   noStems: 'No Stems',
-  stemsCount: (n: number) => `${n} Stem${n === 1 ? '' : 's'}`
+  stemsCount: (n: number) => `${n} Stem${n === 1 ? '' : 's'}`,
+  draftRestoreTitle: (savedAt: string) =>
+    `You have an unsaved draft from ${savedAt}.`,
+  restoreDraft: 'Restore Draft',
+  discardDraft: 'Discard'
 }
 
 const SOURCE_TRACK_ROW_HEIGHT = 56
@@ -177,74 +185,50 @@ export const HostRemixContestPage = () => {
   const primaryPermalink = primaryTrack?.permalink ?? ''
 
   // ---------------------------------------------------------------------------
-  // Draft persistence — keyed by handle/slug (or 'new' for the trackless
-  // route) so a user can navigate to edit a source track and return without
-  // losing in-flight form state. Cleared on launch / cancel / delete.
+  // Draft persistence
   // ---------------------------------------------------------------------------
-  const draftStorageKey = useMemo(
-    () =>
-      handle && slug
-        ? `host-remix-contest-draft:${handle}/${slug}`
-        : 'host-remix-contest-draft:new',
-    [handle, slug]
-  )
-  const draft = useMemo(() => {
-    if (typeof window === 'undefined') return null
-    try {
-      const raw = window.sessionStorage.getItem(draftStorageKey)
-      return raw ? JSON.parse(raw) : null
-    } catch {
-      return null
-    }
-    // Read once on mount; ignore deps churn.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftStorageKey])
+  // Drafts only apply to the create flow — edit mode is driven by the
+  // live event. Scope per user and per primary track (or "trackless" for
+  // the /host-contest entry).
+  const { existingDraft, saveDraft, clearDraft } = useContestDraft({
+    userId: currentUserId,
+    primaryTrackId,
+    enabled: !isEdit
+  })
+  const [showDraftBanner, setShowDraftBanner] = useState(!!existingDraft)
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null)
 
   // ---------------------------------------------------------------------------
   // Form state
   // ---------------------------------------------------------------------------
-  const [title, setTitle] = useState(
-    draft?.title ?? existingEventData.title ?? ''
-  )
+  const [title, setTitle] = useState(existingEventData.title ?? '')
   const [description, setDescription] = useState(
-    draft?.description ?? existingEventData.description ?? ''
+    existingEventData.description ?? ''
   )
   const [descriptionError, setDescriptionError] = useState(false)
-  const [videoUrl, setVideoUrl] = useState(
-    draft?.videoUrl ?? existingEventData.videoUrl ?? ''
-  )
+  const [videoUrl, setVideoUrl] = useState(existingEventData.videoUrl ?? '')
   const [showAttachVideoModal, setShowAttachVideoModal] = useState(false)
   const [coverPhotoUrl, setCoverPhotoUrl] = useState(
-    draft?.coverPhotoUrl ?? existingEventData.coverPhotoUrl ?? ''
+    existingEventData.coverPhotoUrl ?? ''
   )
-  const [prizeInfo, setPrizeInfo] = useState(
-    draft?.prizeInfo ?? existingEventData.prizeInfo ?? ''
-  )
+  const [prizeInfo, setPrizeInfo] = useState(existingEventData.prizeInfo ?? '')
 
-  const initialEndDate = draft?.contestEndDate
-    ? dayjs(draft.contestEndDate)
-    : remixContest
-      ? dayjs(remixContest.endDate)
-      : null
+  const initialEndDate = remixContest ? dayjs(remixContest.endDate) : null
   const [contestEndDate, setContestEndDate] = useState<dayjs.Dayjs | null>(
     initialEndDate
   )
   const [endDateTouched, setEndDateTouched] = useState(false)
   const [endDateError, setEndDateError] = useState(false)
   const [timeValue, setTimeValue] = useState(
-    draft?.timeValue ??
-      (initialEndDate ? dayjs(initialEndDate).format('hh:mm') : '')
+    initialEndDate ? dayjs(initialEndDate).format('hh:mm') : ''
   )
   const [timeError, setTimeError] = useState(false)
   const [meridianValue, setMeridianValue] = useState(
-    draft?.meridianValue ??
-      (initialEndDate ? dayjs(initialEndDate).format('A') : '')
+    initialEndDate ? dayjs(initialEndDate).format('A') : ''
   )
 
   const [sourceTrackIds, setSourceTrackIds] = useState<number[]>(
-    draft?.sourceTrackIds ??
-      existingEventData.sourceTrackIds ??
-      (primaryTrackId ? [primaryTrackId] : [])
+    existingEventData.sourceTrackIds ?? (primaryTrackId ? [primaryTrackId] : [])
   )
 
   // Hydrate form state once `remixContest` resolves.
@@ -253,15 +237,12 @@ export const HostRemixContestPage = () => {
   // the form mounts before the React Query fetch finishes, so the initial
   // state captures empty values and never picks up the resolved contest
   // data — Title, Description, Prizes, Video Link, etc. all rendered blank
-  // even though the backend had them. Skip if a draft exists (the user
-  // already started typing) so we don't overwrite in-flight edits.
+  // even though the backend had them. Drafts are disabled in edit mode
+  // (the useContestDraft hook is gated on `!isEdit`), so there's no
+  // in-flight draft to worry about clobbering here.
   const hasHydratedRef = useRef(false)
   useEffect(() => {
     if (hasHydratedRef.current) return
-    if (draft) {
-      hasHydratedRef.current = true
-      return
-    }
     if (!remixContest) return
     const data = remixContest.eventData as ContestEventData
     if (data.title) setTitle(data.title)
@@ -279,7 +260,7 @@ export const HostRemixContestPage = () => {
       setSourceTrackIds(data.sourceTrackIds)
     }
     hasHydratedRef.current = true
-  }, [remixContest, draft])
+  }, [remixContest])
 
   // On the track-scoped route (/:handle/:slug/host-contest) the URL
   // identifies the source track, but `useTrackByPermalink` is async — by
@@ -319,30 +300,42 @@ export const HostRemixContestPage = () => {
   )
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
 
-  // Persist form state on every change so the user can leave (e.g. to
-  // edit a source track) and return without losing what they typed.
+  // Debounced auto-save: while the user is editing in create mode, persist
+  // the draft a couple of seconds after they stop typing. Skipped while the
+  // restore banner is up (the user hasn't decided what to do with their
+  // existing draft yet) and when the form is entirely empty (no point
+  // overwriting an existing localStorage entry — discarding it should
+  // mean discarded).
+  const hasFormContent =
+    !!title ||
+    !!description ||
+    !!videoUrl ||
+    !!coverPhotoUrl ||
+    !!prizeInfo ||
+    !!contestEndDate ||
+    sourceTrackIds.length > 0
+
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      window.sessionStorage.setItem(
-        draftStorageKey,
-        JSON.stringify({
-          title,
-          description,
-          videoUrl,
-          coverPhotoUrl,
-          prizeInfo,
-          contestEndDate: contestEndDate?.toISOString() ?? null,
-          timeValue,
-          meridianValue,
-          sourceTrackIds
-        })
-      )
-    } catch {
-      /* ignore quota errors */
-    }
+    if (isEdit || showDraftBanner || !hasFormContent) return
+    const timer = window.setTimeout(() => {
+      saveDraft({
+        title,
+        description,
+        videoUrl,
+        coverPhotoUrl,
+        prizeInfo,
+        contestEndDate: contestEndDate?.toISOString(),
+        timeValue,
+        meridianValue,
+        sourceTrackIds
+      })
+    }, 1500)
+    return () => window.clearTimeout(timer)
   }, [
-    draftStorageKey,
+    isEdit,
+    showDraftBanner,
+    hasFormContent,
+    saveDraft,
     title,
     description,
     videoUrl,
@@ -353,15 +346,6 @@ export const HostRemixContestPage = () => {
     meridianValue,
     sourceTrackIds
   ])
-
-  const clearDraft = useCallback(() => {
-    if (typeof window === 'undefined') return
-    try {
-      window.sessionStorage.removeItem(draftStorageKey)
-    } catch {
-      /* ignore */
-    }
-  }, [draftStorageKey])
 
   // ---------------------------------------------------------------------------
   // Cover-photo upload + fallback to track artwork
@@ -434,6 +418,70 @@ export const HostRemixContestPage = () => {
       return ids.slice(0, 1)
     })
   }, [])
+
+  const handleRestoreDraft = useCallback(() => {
+    if (!existingDraft) return
+    if (existingDraft.title !== undefined) setTitle(existingDraft.title)
+    if (existingDraft.description !== undefined) {
+      setDescription(existingDraft.description)
+    }
+    if (existingDraft.videoUrl !== undefined) {
+      setVideoUrl(existingDraft.videoUrl)
+    }
+    if (existingDraft.coverPhotoUrl !== undefined) {
+      setCoverPhotoUrl(existingDraft.coverPhotoUrl)
+    }
+    if (existingDraft.prizeInfo !== undefined) {
+      setPrizeInfo(existingDraft.prizeInfo)
+    }
+    if (existingDraft.contestEndDate) {
+      setContestEndDate(dayjs(existingDraft.contestEndDate))
+    }
+    if (existingDraft.timeValue !== undefined) {
+      setTimeValue(existingDraft.timeValue)
+    }
+    if (existingDraft.meridianValue !== undefined) {
+      setMeridianValue(existingDraft.meridianValue)
+    }
+    if (existingDraft.sourceTrackIds !== undefined) {
+      setSourceTrackIds(existingDraft.sourceTrackIds)
+    }
+    setShowDraftBanner(false)
+  }, [existingDraft])
+
+  const handleDiscardDraft = useCallback(() => {
+    clearDraft()
+    setShowDraftBanner(false)
+  }, [clearDraft])
+
+  const handleSaveDraft = useCallback(() => {
+    saveDraft({
+      title,
+      description,
+      videoUrl,
+      coverPhotoUrl,
+      prizeInfo,
+      contestEndDate: contestEndDate?.toISOString(),
+      timeValue,
+      meridianValue,
+      sourceTrackIds
+    })
+    setDraftSavedAt(new Date().toISOString())
+    // After saving, the banner is no longer offering to restore — the
+    // user is already working with that state.
+    setShowDraftBanner(false)
+  }, [
+    saveDraft,
+    title,
+    description,
+    videoUrl,
+    coverPhotoUrl,
+    prizeInfo,
+    contestEndDate,
+    timeValue,
+    meridianValue,
+    sourceTrackIds
+  ])
 
   const handleCancel = useCallback(() => {
     clearDraft()
@@ -593,6 +641,33 @@ export const HostRemixContestPage = () => {
           <Text variant='heading' size='l' color='accent'>
             {isEdit ? messages.editPageTitle : messages.pageTitle}
           </Text>
+
+          {showDraftBanner && existingDraft ? (
+            <Hint
+              actions={
+                <>
+                  <Button
+                    variant='primary'
+                    size='small'
+                    onClick={handleRestoreDraft}
+                  >
+                    {messages.restoreDraft}
+                  </Button>
+                  <Button
+                    variant='secondary'
+                    size='small'
+                    onClick={handleDiscardDraft}
+                  >
+                    {messages.discardDraft}
+                  </Button>
+                </>
+              }
+            >
+              {messages.draftRestoreTitle(
+                dayjs(existingDraft.savedAt).format('MMM D, h:mm A')
+              )}
+            </Hint>
+          ) : null}
 
           {/* Section: Contest Title */}
           <Paper
@@ -976,6 +1051,15 @@ export const HostRemixContestPage = () => {
                   {messages.turnOff}
                 </Button>
               ) : null}
+              {/* Manual draft save: persists the full form to localStorage
+                  for the current user + scope until the user discards it
+                  or launches the contest. Hidden in edit mode since the
+                  live event is the source of truth. */}
+              {!isEdit ? (
+                <Button variant='secondary' onClick={handleSaveDraft}>
+                  {draftSavedAt ? messages.draftSaved : messages.saveDraft}
+                </Button>
+              ) : null}
               <Button
                 variant='primary'
                 onClick={handleSubmit}
@@ -1034,7 +1118,7 @@ type SourceTrackRowProps = {
   /**
    * Path the track-edit page should return to when the user clicks
    * Save / Back. Encoded into a `returnTo` query param so the in-flight
-   * contest-creation form is restored from sessionStorage on landing.
+   * contest-creation form can be picked back up from its draft on landing.
    */
   editReturnTo: string
 }
