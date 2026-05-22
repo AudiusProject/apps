@@ -48,7 +48,7 @@ import Page from 'components/page/Page'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { track, make } from 'services/analytics'
-import { fullContestPage, fullTrackPage } from 'utils/route'
+import { contestPage } from 'utils/route'
 
 import {
   TimeInput,
@@ -161,7 +161,7 @@ export const HostRemixContestPage = () => {
     isContestEntry: true
   })
 
-  const { mutate: createEvent } = useCreateEvent()
+  const { mutateAsync: createEvent } = useCreateEvent()
   const { mutate: updateEvent } = useUpdateEvent()
   const { mutate: deleteEvent } = useDeleteEvent()
 
@@ -442,14 +442,10 @@ export const HostRemixContestPage = () => {
       navigate(CONTESTS_PAGE)
       return
     }
-    navigate(
-      isEdit
-        ? fullContestPage(primaryPermalink)
-        : fullTrackPage(primaryPermalink)
-    )
+    navigate(isEdit ? contestPage(primaryPermalink) : primaryPermalink)
   }, [clearDraft, isEdit, navigate, primaryPermalink])
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     const parsedTime = parseTime(timeValue)
     if (!parsedTime) return
 
@@ -500,14 +496,21 @@ export const HostRemixContestPage = () => {
         })
       )
     } else {
-      createEvent({
-        eventType: EventEventTypeEnum.RemixContest,
-        entityType: EventEntityTypeEnum.Track,
-        entityId: entityTrackId,
-        eventData,
-        endDate,
-        userId: currentUserId
-      })
+      try {
+        await createEvent({
+          eventType: EventEventTypeEnum.RemixContest,
+          entityType: EventEntityTypeEnum.Track,
+          entityId: entityTrackId,
+          eventData,
+          endDate,
+          userId: currentUserId
+        })
+      } catch {
+        // Mutation's onError already surfaces a toast; stay on the form so
+        // the user can retry instead of navigating to a half-created
+        // contest page.
+        return
+      }
 
       track(
         make({
@@ -519,7 +522,7 @@ export const HostRemixContestPage = () => {
 
     clearDraft()
     if (effectivePermalink) {
-      navigate(fullContestPage(effectivePermalink))
+      navigate(contestPage(effectivePermalink))
     } else {
       navigate(CONTESTS_PAGE)
     }
@@ -561,7 +564,7 @@ export const HostRemixContestPage = () => {
     }
     clearDraft()
     if (primaryPermalink) {
-      navigate(fullTrackPage(primaryPermalink))
+      navigate(primaryPermalink)
     }
   }, [
     clearDraft,
