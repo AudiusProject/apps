@@ -39,7 +39,15 @@ import type {
   CommentReactionNotification,
   AnnouncementPushNotification,
   FanClubTextPostNotification,
-  FanRemixContestSubmissionNotification
+  FanRemixContestStartedNotification,
+  FanRemixContestEndingSoonNotification,
+  FanRemixContestEndedNotification,
+  FanRemixContestWinnersSelectedNotification,
+  RemixContestUpdateNotification,
+  FanRemixContestSubmissionNotification,
+  ArtistRemixContestEndedNotification,
+  ArtistRemixContestEndingSoonNotification,
+  ArtistRemixContestSubmissionsNotification
 } from '@audius/common/store'
 import {
   NotificationType,
@@ -221,6 +229,26 @@ export const useNotificationNavigation = () => {
     [navigation, linkTo]
   )
 
+  // All contest-related notifications carry the contest's host track in
+  // `entityId` and should land on that contest's screen. The Contest
+  // screen accepts `{ trackId }` and resolves its own event/comments.
+  const contestHandler = useCallback(
+    (
+      notification:
+        | FanRemixContestStartedNotification
+        | FanRemixContestEndingSoonNotification
+        | FanRemixContestEndedNotification
+        | FanRemixContestWinnersSelectedNotification
+        | RemixContestUpdateNotification
+        | ArtistRemixContestEndedNotification
+        | ArtistRemixContestEndingSoonNotification
+        | ArtistRemixContestSubmissionsNotification
+    ) => {
+      navigation.navigate('Contest', { trackId: notification.entityId })
+    },
+    [navigation]
+  )
+
   const notificationTypeHandlerMap = useMemo(
     () => ({
       [NotificationType.AddTrackToPlaylist]: (
@@ -333,20 +361,25 @@ export const useNotificationNavigation = () => {
       [NotificationType.CommentMention]: entityHandler,
       [NotificationType.CommentThread]: entityHandler,
       [NotificationType.CommentReaction]: entityHandler,
-      [NotificationType.FanRemixContestStarted]: entityHandler,
-      [NotificationType.FanRemixContestEnded]: entityHandler,
-      [NotificationType.FanRemixContestEndingSoon]: entityHandler,
-      [NotificationType.FanRemixContestWinnersSelected]: entityHandler,
-      [NotificationType.RemixContestUpdate]: entityHandler,
+      [NotificationType.FanRemixContestStarted]: contestHandler,
+      [NotificationType.FanRemixContestEnded]: contestHandler,
+      [NotificationType.FanRemixContestEndingSoon]: contestHandler,
+      [NotificationType.FanRemixContestWinnersSelected]: contestHandler,
+      [NotificationType.RemixContestUpdate]: contestHandler,
       [NotificationType.FanRemixContestSubmission]: (
         notification: FanRemixContestSubmissionNotification
       ) => {
+        // The submission notification fires when a fan's remix is submitted
+        // to a contest — landing on the submitted track (not the contest)
+        // matches the web destination and lets the recipient play it.
         navigation.navigate('Track', {
           trackId: notification.submissionTrackId,
           canBeUnlisted: false
         })
       },
-      [NotificationType.ArtistRemixContestEnded]: entityHandler,
+      [NotificationType.ArtistRemixContestEnded]: contestHandler,
+      [NotificationType.ArtistRemixContestEndingSoon]: contestHandler,
+      [NotificationType.ArtistRemixContestSubmissions]: contestHandler,
       [NotificationType.FanClubTextPost]: (
         notification: FanClubTextPostNotification & { ticker?: string }
       ) => {
@@ -363,6 +396,7 @@ export const useNotificationNavigation = () => {
       announcementHandler,
       socialActionHandler,
       entityHandler,
+      contestHandler,
       milestoneHandler,
       userIdHandler,
       messagesHandler,
