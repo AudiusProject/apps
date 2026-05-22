@@ -1,20 +1,23 @@
+import { useCallback } from 'react'
+
 import { useCollection, useCurrentUserId } from '@audius/common/api'
 import { ModalSource, isContentUSDCPurchaseGated } from '@audius/common/models'
-import { PurchaseableContentType } from '@audius/common/store'
+import {
+  EditCollectionValues,
+  PurchaseableContentType,
+  cacheCollectionsActions
+} from '@audius/common/store'
 import { dayjs, formatReleaseDate } from '@audius/common/utils'
 import {
   Text,
   IconVisibilityHidden,
-  IconPencil,
   Flex,
   IconCart,
   useTheme,
   MusicBadge,
   IconCalendarMonth
 } from '@audius/harmony'
-import cn from 'classnames'
-import { pick } from 'lodash'
-import { Link } from 'react-router'
+import { useDispatch } from 'react-redux'
 
 import { UserLink } from 'components/link'
 import Skeleton from 'components/skeleton/Skeleton'
@@ -28,6 +31,10 @@ import { CollectionHeaderProps } from '../types'
 import { Artwork } from './Artwork'
 import { CollectionActionButtons } from './CollectionActionButtons'
 import styles from './CollectionHeader.module.css'
+import { EditableCollectionDescription } from './EditableCollectionDescription'
+import { EditableCollectionTitle } from './EditableCollectionTitle'
+
+const { editPlaylist } = cacheCollectionsActions
 
 const messages = {
   premiumLabel: 'premium',
@@ -64,22 +71,40 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
   } = props
 
   const { spacing } = useTheme()
+  const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
-  const { data: partialCollection } = useCollection(collectionId, {
-    select: (collection) =>
-      pick(collection, [
-        'is_scheduled_release',
-        'release_date',
-        'permalink',
-        'is_private'
-      ])
-  })
+  const { data: fullCollection } = useCollection(collectionId)
   const {
     is_scheduled_release: isScheduledRelease,
     release_date: releaseDate,
-    permalink,
     is_private: isPrivate
-  } = partialCollection ?? {}
+  } = fullCollection ?? {}
+
+  const handleSaveTitle = useCallback(
+    (next: string) => {
+      if (!fullCollection || !collectionId) return
+      dispatch(
+        editPlaylist(collectionId, {
+          ...fullCollection,
+          playlist_name: next
+        } as unknown as EditCollectionValues)
+      )
+    },
+    [dispatch, fullCollection, collectionId]
+  )
+
+  const handleSaveDescription = useCallback(
+    (next: string) => {
+      if (!fullCollection || !collectionId) return
+      dispatch(
+        editPlaylist(collectionId, {
+          ...fullCollection,
+          description: next
+        } as unknown as EditCollectionValues)
+      )
+    },
+    [dispatch, fullCollection, collectionId]
+  )
 
   const hasStreamAccess = access?.stream
   const shouldShowStats = !isPrivate || isOwner
@@ -134,44 +159,24 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             gap='s'
             className={styles.titleArtistSection}
           >
-            <Flex
-              as={isOwner ? Link : 'span'}
-              css={{ background: 0, border: 0, padding: 0, margin: 0 }}
-              gap='s'
-              alignItems='center'
-              className={cn({
-                [styles.editableTitle]: isOwner
-              })}
-              // @ts-ignore -- Flex Link doesn't type `to` correctly
-              to={
-                isOwner
-                  ? { pathname: `${permalink}/edit`, search: '?focus=name' }
-                  : undefined
-              }
-            >
-              {isLoading ? (
-                <Skeleton height='48px' width='300px' />
-              ) : (
-                <>
-                  <Text
-                    variant='heading'
-                    size='xl'
-                    className={cn(styles.titleHeader)}
-                    textAlign='left'
-                    css={{
-                      fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
-                      lineHeight: 1.33
-                    }}
-                  >
-                    {title}
-                  </Text>
-
-                  {!isLoading && isOwner ? (
-                    <IconPencil className={styles.editIcon} color='subdued' />
-                  ) : null}
-                </>
-              )}
-            </Flex>
+            {isLoading ? (
+              <Skeleton height='48px' width='300px' />
+            ) : isOwner ? (
+              <EditableCollectionTitle value={title} onSave={handleSaveTitle} />
+            ) : (
+              <Text
+                variant='heading'
+                size='xl'
+                className={styles.titleHeader}
+                textAlign='left'
+                css={{
+                  fontSize: 'clamp(24px, calc(1.6cqi + 18.75px), 36px)',
+                  lineHeight: 1.33
+                }}
+              >
+                {title}
+              </Text>
+            )}
             {isLoading ? (
               <Skeleton height='24px' width='150px' />
             ) : userId !== null ? (
@@ -263,7 +268,12 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
         <Skeleton height='40px' width='100%' />
       ) : (
         <Flex gap='l' direction='column'>
-          {description ? (
+          {isOwner ? (
+            <EditableCollectionDescription
+              value={description ?? ''}
+              onSave={handleSaveDescription}
+            />
+          ) : description ? (
             <UserGeneratedText
               size='s'
               linkSource='collection page'

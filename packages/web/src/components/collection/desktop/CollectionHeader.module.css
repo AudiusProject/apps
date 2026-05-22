@@ -88,6 +88,16 @@
   cursor: pointer;
 }
 
+.editableTitleButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
 .titleHeader {
   transition:
     opacity var(--harmony-calm),
@@ -105,6 +115,59 @@
 
 .editableTitle:hover .editIcon {
   opacity: 1;
+}
+
+.titleInput {
+  width: 100%;
+  background: var(--harmony-white);
+  border: 1px solid var(--harmony-border-default);
+  border-radius: var(--harmony-unit-1);
+  padding: var(--harmony-unit-1) var(--harmony-unit-2);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: clamp(24px, calc(1.6cqi + 18.75px), 36px);
+  line-height: 1.33;
+  color: var(--harmony-text-default);
+  outline: none;
+}
+
+.titleInput:focus {
+  border-color: var(--harmony-border-accent);
+}
+
+.editableDescription {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.editableDescription:hover .editIcon {
+  opacity: 1;
+}
+
+.descriptionInput {
+  width: 100%;
+  background: var(--harmony-white);
+  border: 1px solid var(--harmony-border-default);
+  border-radius: var(--harmony-unit-1);
+  padding: var(--harmony-unit-2);
+  font-family: inherit;
+  font-size: var(--harmony-font-s);
+  line-height: var(--harmony-line-height-s);
+  color: var(--harmony-text-default);
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.descriptionInput:focus {
+  border-color: var(--harmony-border-accent);
 }
 
 .imageEditButtonWrapper {
