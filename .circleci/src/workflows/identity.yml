@@ -1,3 +1,6 @@
+# NOTE: Identity Service CI/CD has been migrated to GitHub Actions
+# (.github/workflows/identity.yml). This workflow is disabled via path
+# filtering in config.yml (run-identity-workflow is forced to false).
 when: << pipeline.parameters.run-identity-workflow >>
 jobs:
   - identity-init:
