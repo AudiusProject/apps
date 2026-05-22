@@ -285,6 +285,15 @@ jobs:
             echo "channel=rc" >> "$GITHUB_OUTPUT"
           fi
 
+      # @bravemobile/react-native-code-push@12.3.2 hardcodes
+      # `node_modules/.bin/react-native` relative to cwd. After #14365 the
+      # react-native dep hoists to root node_modules, so the bin is only at
+      # ./node_modules/.bin/react-native — not packages/mobile/node_modules/.bin/.
+      - name: Symlink react-native CLI into packages/mobile/node_modules/.bin
+        run: |
+          mkdir -p packages/mobile/node_modules/.bin
+          ln -sf "$(pwd)/node_modules/.bin/react-native" packages/mobile/node_modules/.bin/react-native
+
       - name: Publish OTA update (${{ matrix.platform }})
         env:
           OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
@@ -389,6 +398,15 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
+      # @bravemobile/react-native-code-push@12.3.2 hardcodes
+      # `node_modules/.bin/react-native` relative to cwd. After #14365 the
+      # react-native dep hoists to root node_modules, so the bin is only at
+      # ./node_modules/.bin/react-native — not packages/mobile/node_modules/.bin/.
+      - name: Symlink react-native CLI into packages/mobile/node_modules/.bin
+        run: |
+          mkdir -p packages/mobile/node_modules/.bin
+          ln -sf "$(pwd)/node_modules/.bin/react-native" packages/mobile/node_modules/.bin/react-native
 
       - name: Publish OTA update to production (${{ matrix.platform }})
         env:
