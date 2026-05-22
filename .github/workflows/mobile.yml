@@ -673,6 +673,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # The "Free disk space" step above removes $AGENT_TOOLSDIRECTORY, which
+      # also wipes the Node 24 install from the earlier setup-node step. Without
+      # this re-setup, npm ci falls back to the runner's system Node 22 and the
+      # mobile workspace's "engines" check fails with EBADENGINE.
+      - name: Setup Node.js (after disk cleanup)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0 (after disk cleanup)
+        run: npm install -g npm@11.10.0
+
       - name: Create concatenated patch file
         id: patch-file
         run: |
@@ -1050,6 +1064,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      # The "Free disk space" step above removes $AGENT_TOOLSDIRECTORY, which
+      # also wipes the Node 24 install from the earlier setup-node step. Without
+      # this re-setup, npm ci falls back to the runner's system Node 22 and the
+      # mobile workspace's "engines" check fails with EBADENGINE.
+      - name: Setup Node.js (after disk cleanup)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0 (after disk cleanup)
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
