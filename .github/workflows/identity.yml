@@ -306,10 +306,12 @@ jobs:
       - name: Build dependencies
         run: npx turbo run build --filter=identity-service^...
 
-      # The identity-service test runner (scripts/run-tests.sh) spins up its own
-      # postgres/redis docker containers when run outside CI. We supply them as
-      # GHA service containers instead, then call ts-mocha directly with the
-      # env vars the script exports.
+      # Mirror what CircleCI ran: `npx mocha` with no args (the
+      # docker-compose.test.yml `test-identity-service` entrypoint shifted "test"
+      # off and invoked `npx mocha`). Mocha's default `test/*.{js,cjs,mjs}` glob
+      # picks up only the `.js` test files; `test/index.ts` (which transitively
+      # imports the solana relay tree and requires populated solana env vars) is
+      # intentionally skipped, matching prior CI behavior.
       - name: Run tests
         timeout-minutes: 20
         working-directory: packages/identity-service
@@ -325,10 +327,7 @@ jobs:
           ethRegistryAddress: ''
           registryAddress: ''
           ethOwnerWallet: ''
-          solanaTrackListenCountAddress: ''
-          solanaAudiusEthRegistryAddress: ''
-          solanaValidSigner: ''
-        run: ../../node_modules/ts-mocha/bin/ts-mocha test/index.ts --timeout 12000 --exit
+        run: npx mocha
 
   identity-docker-push:
     name: Push identity-service Docker image
