@@ -687,6 +687,14 @@ export interface GetUserFeedRequest {
     encodedDataSignature?: string;
 }
 
+export interface GetUserForYouFeedRequest {
+    id: string;
+    limit?: number;
+    offset?: number;
+    maxPerArtist?: number;
+    userId?: string;
+}
+
 export interface GetUserIDsByAddressesRequest {
     address: Array<string>;
 }
@@ -742,14 +750,6 @@ export interface GetUserRecommendedTracksRequest {
     limit?: number;
     userId?: string;
     timeRange?: GetUserRecommendedTracksTimeRangeEnum;
-}
-
-export interface GetUserFeedForYouRequest {
-    id: string;
-    offset?: number;
-    limit?: number;
-    userId?: string;
-    maxPerArtist?: number;
 }
 
 export interface GetUserTracksDownloadCountRequest {
@@ -4181,31 +4181,31 @@ export class UsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets the personalized For You feed for a user.
-     * Twitter-style multi-source pipeline — candidate retrieval (in-network,
-     * trending, underground) → linear ranking → diversity pass.
+     * @hidden
+     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Get For You feed for user
      */
-    async getUserFeedForYouRaw(params: GetUserFeedForYouRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
+    async getUserForYouFeedRaw(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
         if (params.id === null || params.id === undefined) {
-            throw new runtime.RequiredError('id', 'Required parameter params.id was null or undefined when calling getUserFeedForYou.');
+            throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserForYouFeed.');
         }
 
         const queryParameters: any = {};
-
-        if (params.offset !== undefined) {
-            queryParameters['offset'] = params.offset;
-        }
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
         }
 
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
         }
 
         if (params.maxPerArtist !== undefined) {
             queryParameters['max_per_artist'] = params.maxPerArtist;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -4228,10 +4228,11 @@ export class UsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets the personalized For You feed for a user.
+     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Get For You feed for user
      */
-    async getUserFeedForYou(params: GetUserFeedForYouRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
-        const response = await this.getUserFeedForYouRaw(params, initOverrides);
+    async getUserForYouFeed(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
+        const response = await this.getUserForYouFeedRaw(params, initOverrides);
         return await response.value();
     }
 
