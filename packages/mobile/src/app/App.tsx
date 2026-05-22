@@ -142,10 +142,17 @@ const App = () => {
                                     <NotificationReminder />
                                     <RateCtaReminder />
                                     <PortalHost name='ChatReactionsPortal' />
+                                    {/* DrawerPortal must live INSIDE
+                                        BottomSheetModalProvider — its inner
+                                        PortalProvider isolates the registry,
+                                        so a <Portal hostName='DrawerPortal'>
+                                        from within a bottom sheet (e.g. the
+                                        comment kebab) would otherwise
+                                        silently fail to find the host. */}
+                                    <PortalHost name='DrawerPortal' />
                                   </NiceModal.Provider>
                                 </CommentDrawerProvider>
                               </BottomSheetModalProvider>
-                              <PortalHost name='DrawerPortal' />
                             </NavigationContainer>
                           </ErrorBoundary>
                         </PortalProvider>
