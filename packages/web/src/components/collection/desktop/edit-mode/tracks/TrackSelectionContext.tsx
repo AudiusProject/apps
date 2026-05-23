@@ -42,10 +42,13 @@ export const TrackSelectionProvider = ({
 
   const toggle = useCallback<SelectionContextValue['toggle']>(
     (id, index, opts) => {
+      const isShiftRange = !!opts?.shift && lastIndexRef.current !== null
       setSelectedState((prev) => {
         const next = new Set(prev)
-        if (opts?.shift && lastIndexRef.current !== null) {
-          const [a, b] = [lastIndexRef.current, index].sort((x, y) => x - y)
+        if (isShiftRange) {
+          const [a, b] = [lastIndexRef.current as number, index].sort(
+            (x, y) => x - y
+          )
           for (let i = a; i <= b; i += 1) {
             const sliceId = orderedIds[i]
             if (sliceId !== undefined) next.add(sliceId)
@@ -55,9 +58,13 @@ export const TrackSelectionProvider = ({
         } else {
           next.add(id)
         }
-        lastIndexRef.current = index
         return next
       })
+      // Keep the anchor stable across a shift-click sequence (matches
+      // Finder / Gmail / Drive). A plain click resets the anchor.
+      if (!isShiftRange) {
+        lastIndexRef.current = index
+      }
     },
     [orderedIds]
   )

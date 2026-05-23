@@ -184,6 +184,12 @@ type TracksTableProps = {
   showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
   trackActionsHeader?: ReactNode
+  /**
+   * Optional additional className applied per row. The result is appended
+   * to the table's own per-row className. Use this for things like a
+   * selected-row highlight while the page is in edit mode.
+   */
+  rowClassNameAddition?: (track: any, rowIndex: number) => string | undefined
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
 const defaultColumns: TracksTableColumn[] = [
@@ -214,6 +220,7 @@ export const TracksTable = ({
   data,
   activeIndex,
   trackActionsHeader,
+  rowClassNameAddition,
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
@@ -1046,6 +1053,9 @@ export const TracksTable = ({
     [activateTrack]
   )
 
+  const rowClassNameAdditionRef = useRef(rowClassNameAddition)
+  rowClassNameAdditionRef.current = rowClassNameAddition
+
   const getRowClassName = useCallback((rowIndex: number) => {
     const track = dataRef.current[rowIndex]
     const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
@@ -1058,10 +1068,15 @@ export const TracksTable = ({
     const deleted =
       track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
     const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-    return cn(styles.tableRow, {
-      [styles.disabled]: deleted,
-      [styles.lockedRow]: isLocked && !deleted && !isPremium
-    })
+    const extra = rowClassNameAdditionRef.current?.(track, rowIndex)
+    return cn(
+      styles.tableRow,
+      {
+        [styles.disabled]: deleted,
+        [styles.lockedRow]: isLocked && !deleted && !isPremium
+      },
+      extra
+    )
   }, [])
 
   return (

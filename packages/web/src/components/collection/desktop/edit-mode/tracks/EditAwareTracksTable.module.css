@@ -1,0 +1,5 @@
+.selected,
+.selected td {
+  background-color: var(--harmony-bg-surface-2) !important;
+  box-shadow: inset 3px 0 0 0 var(--harmony-secondary, var(--harmony-accent));
+}
