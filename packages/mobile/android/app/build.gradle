@@ -11,8 +11,9 @@ apply plugin: "com.facebook.react"
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
-    // In monorepo setup, react-native and @react-native/* are hoisted to the root node_modules
-    root = file("../../../../")
+    //   Leave at the default (../.. = packages/mobile) so index.js resolves correctly.
+    //   In monorepo setup, react-native and @react-native/* are hoisted to the root
+    //   node_modules — point the specific deps explicitly without moving `root`.
     //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
     reactNativeDir = file("../../../../node_modules/react-native")
     //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
@@ -128,7 +129,7 @@ android {
         // versionCode is automatically incremented in CI
         versionCode 1
         // Make sure this is above the currently released Android version in the play store if your changes touch native code:
-        versionName "1.1.530"
+        versionName "1.1.531"
         resValue "string", "build_config_package", "co.audius.app"
         resConfigs "en"
     }
