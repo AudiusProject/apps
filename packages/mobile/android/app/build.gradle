@@ -46,7 +46,12 @@ react {
     // extraPackagerArgs = []
     /* Hermes Commands */
     //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //   The RN Gradle plugin's hermesc lookup is anchored at `root` and only
+    //   considers `root/node_modules/react-native/sdks/hermesc/...`. Since RN
+    //   is hoisted to the monorepo node_modules, that lookup fails. Point the
+    //   plugin at the hoisted prebuilt hermesc explicitly (%OS-BIN% is
+    //   substituted by the plugin at runtime).
+    hermesCommand = "$rootDir/../../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
@@ -129,7 +134,7 @@ android {
         // versionCode is automatically incremented in CI
         versionCode 1
         // Make sure this is above the currently released Android version in the play store if your changes touch native code:
-        versionName "1.1.531"
+        versionName "1.1.532"
         resValue "string", "build_config_package", "co.audius.app"
         resConfigs "en"
     }

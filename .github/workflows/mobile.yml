@@ -432,7 +432,7 @@ jobs:
   # iOS Release Candidate: Build and upload
   mobile-build-upload-releasecandidate-ios:
     name: iOS Release Candidate Build & Upload
-    runs-on: macos-15
+    runs-on: macos-26
     needs: [mobile-install, mobile-version-check]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     steps:
@@ -834,7 +834,7 @@ jobs:
   # iOS Production: Build and upload (requires approval)
   mobile-build-upload-production-ios-main:
     name: iOS Production Build & Upload
-    runs-on: macos-15
+    runs-on: macos-26
     needs: [mobile-install, mobile-version-check]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     environment:
