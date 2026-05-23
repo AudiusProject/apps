@@ -327,7 +327,10 @@ jobs:
           ethRegistryAddress: ''
           registryAddress: ''
           ethOwnerWallet: ''
-        run: npx mocha
+        # Bumped from the .mocharc.js default of 12s — each test's beforeEach
+        # re-runs all migrations from scratch, which is slow on ubuntu-latest
+        # compared to the CircleCI xlarge machine the original timeout targeted.
+        run: npx mocha --timeout 60000
 
   identity-docker-push:
     name: Push identity-service Docker image
