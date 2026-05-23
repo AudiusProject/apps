@@ -42,11 +42,18 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
     const up = (e: KeyboardEvent) => {
       if (e.key === 'Shift') shiftRef.current = false
     }
+    // Without this, Cmd/Alt-Tabbing away while holding Shift leaves shiftRef
+    // stuck true because the keyup fires in the other window.
+    const reset = () => {
+      shiftRef.current = false
+    }
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
+    window.addEventListener('blur', reset)
     return () => {
       window.removeEventListener('keydown', down)
       window.removeEventListener('keyup', up)
+      window.removeEventListener('blur', reset)
     }
   }, [isEditingThis])
 
