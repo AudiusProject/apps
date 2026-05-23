@@ -97,6 +97,22 @@ target 'AudiusReactNative' do
       end
     end
 
+    # Xcode 26 / Apple Clang enforces stricter consteval evaluation, which
+    # breaks the fmt 11.0.2 that React Native 0.79 pins:
+    #   Pods/fmt/include/fmt/format-inl.h:59: error: call to consteval
+    #   function 'fmt::basic_format_string<...>' is not a constant expression
+    # FMT_USE_CONSTEVAL=0 forces the constexpr fallback. Fixed upstream in
+    # fmt 11.1+ / RN 0.80; this is a stopgap until we upgrade RN.
+    installer.pods_project.targets.each do |target|
+      next unless target.name == 'fmt'
+      target.build_configurations.each do |config|
+        defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+        defs = [defs] unless defs.is_a?(Array)
+        defs << 'FMT_USE_CONSTEVAL=0' unless defs.include?('FMT_USE_CONSTEVAL=0')
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+      end
+    end
+
   end
 end
 
