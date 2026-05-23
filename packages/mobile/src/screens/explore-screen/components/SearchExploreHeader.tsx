@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 
 import { exploreMessages as messages } from '@audius/common/messages'
-import { useNavigation } from '@react-navigation/native'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
 import type { ScrollView } from 'react-native'
 import { Keyboard } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -40,6 +40,7 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   const { params } = useExploreRoute<'SearchExplore'>()
   const { drawerHelpers } = useContext(AppDrawerContext)
   const navigation = useNavigation()
+  const isFocused = useIsFocused()
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const textInputRef = useRef<any>(null)
 
@@ -59,13 +60,18 @@ export const SearchExploreHeader = (props: SearchExploreHeaderProps) => {
   // Without this, the keyboard re-appears whenever the app returns from
   // background while explore is the active tab. Consume the param by setting
   // it back to false so a subsequent search-icon tap can re-trigger focus.
+  //
+  // Gate on isFocused so a stale autoFocus param can't summon the keyboard
+  // while the explore tab isn't the active tab — this is what caused the
+  // brief keyboard flash on cold launch when the explore screen mounted
+  // off-screen with autoFocus: true already on its route.
   useEffect(() => {
-    if (params?.autoFocus === true) {
+    if (params?.autoFocus === true && isFocused) {
       textInputRef.current?.focus()
       // @ts-expect-error: setParams is not typed on the generic NavigationProp, but is available on StackNavigationProp
       navigation.setParams?.({ autoFocus: false })
     }
-  }, [params?.autoFocus, navigation])
+  }, [params?.autoFocus, navigation, isFocused])
 
   const handleOpenLeftNavDrawer = useCallback(() => {
     if (isNowPlayingDrawerOpen) return
