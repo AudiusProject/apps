@@ -102,10 +102,11 @@ export const UserCard = (props: UserCardProps) => {
           handle={handle}
           css={{
             display: 'inline-grid',
-            gridTemplateColumns: 'minmax(0, auto) auto',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
             alignItems: 'center',
             justifyContent: 'center',
             columnGap: 4,
+            width: 'fit-content',
             maxWidth: '100%',
             minWidth: 0,
             overflow: 'hidden'
@@ -120,6 +121,7 @@ export const UserCard = (props: UserCardProps) => {
             css={{
               display: 'block',
               minWidth: 0,
+              width: '100%',
               maxWidth: '100%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
