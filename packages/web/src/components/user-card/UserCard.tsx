@@ -3,7 +3,12 @@ import { useCallback, MouseEvent } from 'react'
 import { useUser } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { formatCount, route } from '@audius/common/utils'
-import { Box, Skeleton, Text, TextLink as HarmonyTextLink } from '@audius/harmony'
+import {
+  Box,
+  Skeleton,
+  Text,
+  TextLink as HarmonyTextLink
+} from '@audius/harmony'
 import { pick } from 'lodash'
 import { useLinkClickHandler } from 'react-router'
 
@@ -72,7 +77,12 @@ export const UserCard = (props: UserCardProps) => {
     [onClick, handleNavigate]
   )
 
-  if (!handle || follower_count === undefined || name === undefined || loading) {
+  if (
+    !handle ||
+    follower_count === undefined ||
+    name === undefined ||
+    loading
+  ) {
     return <UserCardSkeleton size={size} {...other} />
   }
 
