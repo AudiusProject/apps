@@ -69,6 +69,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false
       },
+      // Touched on every app open via the authenticated startup ping
+      // (GET /user/email). Used for inactivity detection — finer-grained
+      // and lazier than lastSeenDate, which only moves at user creation
+      // and on relay.
+      lastActiveAt: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
       isGuest: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

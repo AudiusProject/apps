@@ -65,11 +65,13 @@ module.exports = function (app) {
 
         try {
           const isDeliverable = await isEmailDeliverable(email, req.logger)
+          const now = new Date()
           await models.User.create({
             email,
             // Store non checksummed wallet address
             walletAddress: body.walletAddress.toLowerCase(),
-            lastSeenDate: Date.now(),
+            lastSeenDate: now,
+            lastActiveAt: now,
             IP,
             isEmailDeliverable: isDeliverable,
             isGuest: body.isGuest
@@ -148,17 +150,29 @@ module.exports = function (app) {
   )
 
   /**
-   * Retrieve authenticated user's email address
+   * Retrieve authenticated user's email address.
+   *
+   * Doubles as the post-auth startup ping fired on every app open
+   * (after Hedgehog's GET /authentication restores credentials), so we
+   * use it as the write site for `lastActiveAt`. The update is
+   * fire-and-forget — never block the response on it.
    */
   app.get(
     '/user/email',
     authMiddleware,
     handleResponse(async (req, _res, _next) => {
-      const { blockchainUserId } = req.user
+      const { id: userRowId, blockchainUserId } = req.user
       const userData = await models.User.findOne({
         where: {
           blockchainUserId
         }
+      })
+
+      models.User.update(
+        { lastActiveAt: new Date() },
+        { where: { id: userRowId } }
+      ).catch((err) => {
+        req.logger.error({ err }, 'Failed to update lastActiveAt')
       })
 
       return successResponse({
