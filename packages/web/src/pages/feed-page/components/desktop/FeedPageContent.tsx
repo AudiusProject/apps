@@ -5,16 +5,13 @@ import {
   FEED_INITIAL_PAGE_SIZE,
   useCurrentUserId,
   useFeed,
+  useFeedFilter,
+  useFeedTab,
   useForYouFeed,
   FOR_YOU_INITIAL_PAGE_SIZE
 } from '@audius/common/api'
 import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
-import {
-  feedPageSelectors,
-  feedPageActions as discoverPageAction
-} from '@audius/common/store'
 import { Flex, IconFeed } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
@@ -33,8 +30,6 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getFeedTab, getFeedFilter } = feedPageSelectors
-
 type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
@@ -45,10 +40,9 @@ type FeedPageContentProps = {
 // tanquery migration — collection feed rendering will be restored if/when
 // TrackLineup learns to render mixed feeds.
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
-  const dispatch = useDispatch()
   const titleRowRef = useRef<HTMLDivElement>(null)
-  const persistedTab = useSelector(getFeedTab)
-  const feedFilter = useSelector(getFeedFilter)
+  const [feedTab, setFeedTab] = useFeedTab()
+  const [feedFilter, setFeedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
 
   // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
@@ -56,10 +50,6 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   // user scrolling deep into the lineup.
   const desktopLoadMorePageSize = 10
 
-  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
-  // CHRONOLOGICAL after the For You / Chronological refactor.
-  const feedTab =
-    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
   const isForYou = feedTab === FeedTab.FOR_YOU
 
   // Chronological lineup. Disabled while For You is active.
@@ -94,18 +84,18 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       if (containerRef?.current?.scrollTo) {
         containerRef.current.scrollTo(0, 0)
       }
-      dispatch(discoverPageAction.setFeedTab(tab))
+      setFeedTab(tab)
       record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
     },
-    [containerRef, dispatch, record]
+    [containerRef, setFeedTab, record]
   )
 
   const onSelectFilter = useCallback(
     (filter: FeedFilter) => {
-      dispatch(discoverPageAction.setFeedFilter(filter))
+      setFeedFilter(filter)
       record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
     },
-    [dispatch, record]
+    [setFeedFilter, record]
   )
 
   const header = (
