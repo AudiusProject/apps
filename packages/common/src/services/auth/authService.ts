@@ -61,11 +61,7 @@ export const createAuthService = ({
     createKey
   })
 
-  const signIn = async (
-    email: string,
-    password: string,
-    otp?: string
-  ) => {
+  const signIn = async (email: string, password: string, otp?: string) => {
     const wallet = await hedgehogInstance.login({
       email,
       username: email,
