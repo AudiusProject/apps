@@ -53,26 +53,17 @@ export type ShareContent =
   | ShareAlbumContent
   | SharePlaylistContent
 
-export type ShareModalState = {
-  source: Nullable<ShareSource>
-  content: Nullable<ShareContent>
-}
-
-type RequestOpenPayload = { source: ShareSource } & (
+export type ShareModalRequest =
   | { type: 'track'; trackId: ID }
   | { type: 'contest'; trackId: ID }
   | { type: 'profile'; profileId: ID }
   | { type: 'collection'; collectionId: ID }
-)
+
+export type ShareModalState = {
+  source: Nullable<ShareSource>
+  request: Nullable<ShareModalRequest>
+}
+
+type RequestOpenPayload = { source: ShareSource } & ShareModalRequest
 
 export type ShareModalRequestOpenAction = PayloadAction<RequestOpenPayload>
-
-type OpenPayload = { source: ShareSource } & (
-  | ShareTrackContent
-  | ShareContestContent
-  | ShareProfileContent
-  | ShareAlbumContent
-  | SharePlaylistContent
-)
-
-export type ShareModalOpenAction = PayloadAction<OpenPayload>

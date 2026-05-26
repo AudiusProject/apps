@@ -28,7 +28,7 @@ import {
   CLUBS_CREATE_PAGE,
   guestRoutes
 } from '@audius/common/src/utils/route'
-import { themeSelectors } from '@audius/common/store'
+import { remoteConfigActions, themeSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
@@ -67,13 +67,18 @@ import PlayBarProvider from 'components/play-bar/PlayBarProvider'
 import { RewardClaimedToast } from 'components/reward-claimed-toast/RewardClaimedToast'
 import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceFetcher'
 import { useEnvironment } from 'hooks/useEnvironment'
+import { usePlaybackPositionPersistence } from 'hooks/usePlaybackPositionPersistence'
+import { usePlaybackPositionPolling } from 'hooks/usePlaybackPositionPolling'
+import { usePlaybackRatePersistence } from 'hooks/usePlaybackRatePersistence'
 import { MAIN_CONTENT_ID, MainContentContext } from 'pages/MainContentContext'
 import { TableType } from 'pages/pay-and-earn-page/types'
 import { SubPage } from 'pages/settings-page/components/mobile/SettingsPage'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
 import { SsrContext } from 'ssr/SsrContext'
+import { showCookieBanner } from 'store/application/ui/cookieBanner/actions'
 import { getShowCookieBanner } from 'store/application/ui/cookieBanner/selectors'
 import { getClient } from 'utils/clientUtil'
+import { shouldShowCookieBanner } from 'utils/gdpr'
 import 'utils/redirect'
 import { getPathname } from 'utils/route'
 
@@ -486,9 +491,13 @@ const WebPlayer = (props: WebPlayerProps) => {
   const hasAccount = useHasAccount()
   const { userHandle, isGuestAccount = false } = accountUserData ?? {}
   const { data: accountStatus } = useAccountStatus()
-  const showCookieBanner = useSelector(getShowCookieBanner)
+  const showCookieBannerVisible = useSelector(getShowCookieBanner)
   const frostedSurfaceIntensity =
     useSelector(getFrostedSurfaceIntensity) ?? FrostedSurfaceIntensity.DEFAULT
+
+  usePlaybackRatePersistence()
+  usePlaybackPositionPersistence()
+  usePlaybackPositionPolling()
 
   // Convert mapDispatchToProps to useCallback with useDispatch
   const updateRouteOnSignUpCompletion = useCallback(
@@ -528,6 +537,26 @@ const WebPlayer = (props: WebPlayerProps) => {
       current.scrollTo({ top: 0 })
     }
   }, [mainContentRef])
+
+  useEffect(() => {
+    let cancelled = false
+    shouldShowCookieBanner().then((show) => {
+      if (!cancelled && show) dispatch(showCookieBanner())
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [dispatch])
+
+  useEffect(() => {
+    let cancelled = false
+    remoteConfigInstance.waitForRemoteConfig().then(() => {
+      if (!cancelled) dispatch(remoteConfigActions.setDidLoad())
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [dispatch])
 
   // Listen to location changes using useLocation hook
   useEffect(() => {
@@ -756,7 +785,7 @@ const WebPlayer = (props: WebPlayerProps) => {
           isMobile ? undefined : frostedSurfaceIntensity
         }
       >
-        {showCookieBanner ? <CookieBanner /> : null}
+        {showCookieBannerVisible ? <CookieBanner /> : null}
         <Notice shouldPadTop={false} />
         <Navigator />
         <div

@@ -1,3 +1,4 @@
+export * from './useShareContent'
 export * from './useUploadCompletionRoute'
 export * from './useUIAudio'
 export * from './useTrackMetadata'

@@ -4,7 +4,6 @@ import {
   castSagas,
   chatSagas,
   reachabilitySagas as commonReachabilitySagas,
-  remoteConfigSagas,
   deletePlaylistConfirmationModalUISagas as deletePlaylistConfirmationModalSagas,
   duplicateAddConfirmationModalUISagas as duplicateAddConfirmationModalSagas,
   mobileOverflowMenuUISagas as overflowMenuSagas,
@@ -12,8 +11,6 @@ import {
   stripeModalUISagas as stripeModalSagas,
   toastSagas,
   modalsSagas,
-  playbackSagas,
-  playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
   confirmerSagas,
@@ -42,7 +39,6 @@ import settingsSagas from 'pages/settings-page/store/sagas'
 import accountSagas from 'store/account/sagas'
 import webAnalyticsSagas from 'store/analytics/sagas'
 import chatWebSagas from 'store/application/ui/chat/sagas'
-import cookieBannerSagas from 'store/application/ui/cookieBanner/sagas'
 import scrollLockSagas from 'store/application/ui/scrollLock/sagas'
 import stemUploadSagas from 'store/application/ui/stemsUpload/sagas'
 import userListModalSagas from 'store/application/ui/userListModal/sagas'
@@ -60,7 +56,6 @@ export default function* rootSaga() {
     backendSagas(),
     confirmerSagas(),
 
-    cookieBannerSagas(),
     reachabilitySagas(),
     routingSagas(),
 
@@ -89,8 +84,6 @@ export default function* rootSaga() {
 
     // Playback
     playbackEngineSagas(),
-    ...playbackSagas(),
-    playbackPositionSagas(),
 
     // Cast
     castSagas(),
@@ -111,9 +104,6 @@ export default function* rootSaga() {
     stemUploadSagas(),
     userListModalSagas(),
     commonReachabilitySagas(),
-
-    // Remote config
-    remoteConfigSagas(),
 
     // Gated content
     gatedContentSagas(),
