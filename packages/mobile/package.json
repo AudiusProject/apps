@@ -1,6 +1,6 @@
 {
   "name": "@audius/mobile",
-  "version": "1.5.183",
+  "version": "1.5.184",
   "private": true,
   "scripts": {
     "android:dev": "ENVFILE=.env.dev turbo run android -- --mode=prodDebug",
@@ -149,7 +149,7 @@
     "react-native-svg": "^15.11.2",
     "react-native-svg-transformer": "1.5.0",
     "react-native-tab-view": "4.2.0",
-    "react-native-track-player": "4.0.1",
+    "react-native-track-player": "4.1.2",
     "react-native-url-polyfill": "2.0.0",
     "react-native-version-number": "0.3.6",
     "react-native-video": "6.18.0",
