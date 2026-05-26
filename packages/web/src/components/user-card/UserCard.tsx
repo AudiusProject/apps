@@ -3,20 +3,14 @@ import { useCallback, MouseEvent } from 'react'
 import { useUser } from '@audius/common/api'
 import { ID, SquareSizes } from '@audius/common/models'
 import { formatCount, route } from '@audius/common/utils'
-import {
-  Box,
-  Skeleton,
-  Text,
-  TextLink as HarmonyTextLink
-} from '@audius/harmony'
+import { Box, Skeleton, Text, TextLink } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useLinkClickHandler } from 'react-router'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import { Avatar } from 'components/avatar'
 import { Card, CardProps, CardFooter, CardContent } from 'components/card'
-import { TextLink } from 'components/link'
-import UserBadges from 'components/user-badges/UserBadges'
+import { UserLink } from 'components/link'
 const { profilePage } = route
 
 const messages = {
@@ -61,9 +55,9 @@ export const UserCard = (props: UserCardProps) => {
   const { id, loading, size, onClick, onUserLinkClick, ...other } = props
 
   const { data: user } = useUser(id, {
-    select: (user) => pick(user, 'handle', 'follower_count', 'name')
+    select: (user) => pick(user, 'handle', 'follower_count')
   })
-  const { handle, follower_count, name } = user ?? {}
+  const { handle, follower_count } = user ?? {}
 
   const handleNavigate = useLinkClickHandler<HTMLDivElement>(
     profilePage(user?.handle ?? '')
@@ -77,16 +71,9 @@ export const UserCard = (props: UserCardProps) => {
     [onClick, handleNavigate]
   )
 
-  if (
-    !handle ||
-    follower_count === undefined ||
-    name === undefined ||
-    loading
-  ) {
+  if (!handle || follower_count === undefined || loading) {
     return <UserCardSkeleton size={size} {...other} />
   }
-
-  const userProfilePage = profilePage(handle)
 
   return (
     <Card size={size} onClick={handleClick} {...other}>
@@ -98,49 +85,24 @@ export const UserCard = (props: UserCardProps) => {
         imageSize={SquareSizes.SIZE_480_BY_480}
       />
       <CardContent p='s' pt={0} gap='xs' alignItems='center'>
-        <ArtistPopover
-          handle={handle}
-          css={{
-            display: 'inline-grid',
-            gridTemplateColumns: 'minmax(0, 1fr) auto',
-            alignItems: 'center',
-            justifyContent: 'center',
-            columnGap: 4,
-            width: 'fit-content',
-            maxWidth: '100%',
-            minWidth: 0,
-            overflow: 'hidden'
-          }}
-        >
-          <TextLink
-            to={userProfilePage}
-            textVariant='title'
-            size='l'
-            onClick={onUserLinkClick}
-            ellipses
-            css={{
-              display: 'block',
-              minWidth: 0,
-              width: '100%',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              textAlign: 'center'
-            }}
-          >
-            {name}
-          </TextLink>
-          <UserBadges userId={id} size='s' />
-        </ArtistPopover>
+        <UserLink
+          ellipses
+          userId={id}
+          textVariant='title'
+          size='l'
+          center
+          fullWidth
+          onClick={onUserLinkClick}
+          popover
+        />
         <ArtistPopover handle={handle} css={{ width: '100%' }}>
-          <HarmonyTextLink
+          <TextLink
             onClick={onUserLinkClick}
             ellipses
             css={{ textAlign: 'center', display: 'block' }}
           >
             @{handle}
-          </HarmonyTextLink>
+          </TextLink>
         </ArtistPopover>
       </CardContent>
       <CardFooter>
