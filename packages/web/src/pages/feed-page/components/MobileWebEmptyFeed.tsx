@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 
 import { useTopArtists } from '@audius/common/api'
-import { feedPageActions } from '@audius/common/store'
+import { FollowSource } from '@audius/common/models'
+import { usersSocialActions } from '@audius/common/store'
 import {
   Box,
   Button,
@@ -38,8 +39,11 @@ const MobileWebEmptyFeed = () => {
   const handleSubmit = useCallback(
     (values: FollowUsersValues) => {
       const { selectedArtists } = values
-      const followUsers = selectedArtists.map((id) => parseInt(id))
-      dispatch(feedPageActions.followUsers(followUsers))
+      selectedArtists.forEach((id) => {
+        dispatch(
+          usersSocialActions.followUser(parseInt(id), FollowSource.EMPTY_FEED)
+        )
+      })
     },
     [dispatch]
   )

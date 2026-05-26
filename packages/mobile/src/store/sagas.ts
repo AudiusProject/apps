@@ -23,7 +23,6 @@ import backendSagas from 'common/store/backend/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
-import feedPageSagas from 'common/store/pages/feed/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
@@ -85,7 +84,6 @@ export default function* rootSaga() {
     ...chatSagas(),
     ...mobileChatSagas(),
     ...collectionPageSagas(),
-    ...feedPageSagas(),
     ...profileSagas(),
     ...socialSagas(),
     ...rewardsPageSagas(),

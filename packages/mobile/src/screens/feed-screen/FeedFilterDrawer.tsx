@@ -1,9 +1,8 @@
 import { useCallback } from 'react'
 
+import { useFeedFilter } from '@audius/common/api'
 import { FeedFilter } from '@audius/common/models'
-import { feedPageActions, feedPageSelectors } from '@audius/common/store'
 import { Pressable, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { Flex, Text } from '@audius/harmony-native'
 import { RadioButton, Text as CoreText } from 'app/components/core'
@@ -62,17 +61,15 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
 
 export const FeedFilterDrawer = () => {
   const styles = useStyles()
-  const dispatch = useDispatch()
-  const currentFilter =
-    useSelector(feedPageSelectors.getFeedFilter) ?? FeedFilter.ALL
+  const [currentFilter, setFeedFilter] = useFeedFilter()
 
   useDrawerState(FEED_FILTER_MODAL)
 
   const handleSelectFilter = useCallback(
     (filter: FeedFilter) => {
-      dispatch(feedPageActions.setFeedFilter(filter))
+      setFeedFilter(filter)
     },
-    [dispatch]
+    [setFeedFilter]
   )
 
   const drawerHeader = useCallback(

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 
+import type { PlaybackRate } from '@audius/common/store'
 import {
   PLAYBACK_RATE_LS_KEY,
-  PlaybackRate,
   playbackActions,
   playbackSelectors
 } from '@audius/common/store'

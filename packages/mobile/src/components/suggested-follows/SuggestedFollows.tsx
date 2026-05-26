@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 
 import { QUERY_KEYS } from '@audius/common/api'
-import { feedPageActions } from '@audius/common/store'
+import { FollowSource } from '@audius/common/models'
+import { usersSocialActions } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { getFollowIds } from 'common/store/pages/signon/selectors'
@@ -59,7 +60,9 @@ export const SuggestedFollows = () => {
       queryKey: [QUERY_KEYS.feed]
     })
     // Async go follow users
-    dispatch(feedPageActions.followUsers(selectedUserIds))
+    selectedUserIds.forEach((userId) => {
+      dispatch(usersSocialActions.followUser(userId, FollowSource.EMPTY_FEED))
+    })
   }, [dispatch, queryClient, selectedUserIds])
 
   const headerElement = (

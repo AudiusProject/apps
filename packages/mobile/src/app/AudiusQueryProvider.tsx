@@ -5,6 +5,7 @@ import { QueryContext } from '@audius/common/api'
 import * as analytics from 'app/services/analytics'
 import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import { env } from 'app/services/env'
+import { localStorage } from 'app/services/local-storage'
 import {
   getFeatureEnabled,
   remoteConfigInstance
@@ -28,6 +29,7 @@ export const queryContext = {
   dispatch: store.dispatch,
   env,
   fetch,
+  localStorage,
   remoteConfigInstance,
   getFeatureEnabled,
   analytics,

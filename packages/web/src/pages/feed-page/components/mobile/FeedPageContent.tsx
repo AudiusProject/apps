@@ -6,19 +6,16 @@ import {
   FEED_LOAD_MORE_PAGE_SIZE,
   useCurrentUserId,
   useFeed,
+  useFeedFilter,
+  useFeedTab,
   useForYouFeed,
   FOR_YOU_INITIAL_PAGE_SIZE,
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
 import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
-import {
-  feedPageSelectors,
-  feedPageActions as discoverPageAction
-} from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import cn from 'classnames'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import Header from 'components/header/mobile/Header'
@@ -42,8 +39,6 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getFeedTab, getFeedFilter } = feedPageSelectors
-
 type FeedPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
@@ -56,15 +51,10 @@ type FeedPageMobileContentProps = {
 const FeedPageMobileContent = ({
   containerRef
 }: FeedPageMobileContentProps) => {
-  const dispatch = useDispatch()
-  const persistedTab = useSelector(getFeedTab)
-  const feedFilter = useSelector(getFeedFilter)
+  const [feedTab, setFeedTab] = useFeedTab()
+  const [feedFilter, setFeedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
-  // CHRONOLOGICAL after the For You / Chronological refactor.
-  const feedTab =
-    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
   const isForYou = feedTab === FeedTab.FOR_YOU
 
   const feedArgs = useMemo(
@@ -96,18 +86,18 @@ const FeedPageMobileContent = ({
   const record = useRecord()
   const handleSelectTab = useCallback(
     (tab: FeedTab) => {
-      dispatch(discoverPageAction.setFeedTab(tab))
+      setFeedTab(tab)
       record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
     },
-    [dispatch, record]
+    [setFeedTab, record]
   )
 
   const handleSelectFilter = useCallback(
     (filter: FeedFilter) => {
-      dispatch(discoverPageAction.setFeedFilter(filter))
+      setFeedFilter(filter)
       record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
     },
-    [dispatch, record]
+    [setFeedFilter, record]
   )
 
   useEffect(() => {

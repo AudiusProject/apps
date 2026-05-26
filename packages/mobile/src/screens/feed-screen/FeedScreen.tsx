@@ -6,13 +6,13 @@ import {
   FEED_LOAD_MORE_PAGE_SIZE,
   useCurrentUserId,
   useFeed,
+  useFeedFilter,
+  useFeedTab,
   useForYouFeed,
   FOR_YOU_INITIAL_PAGE_SIZE,
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
 import { Name, FeedTab } from '@audius/common/models'
-import { feedPageActions, feedPageSelectors } from '@audius/common/store'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { Screen, ScreenContent } from 'app/components/core'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
@@ -23,9 +23,6 @@ import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
 import { FeedTabs } from './FeedTabs'
-
-const { getFeedTab, getFeedFilter } = feedPageSelectors
-const { setFeedTab } = feedPageActions
 
 const messages = {
   header: 'Your Feed',
@@ -38,15 +35,10 @@ const messages = {
 // tanquery migration — collection feed rendering will be restored if/when
 // TrackLineup learns to render mixed feeds.
 export const FeedScreen = () => {
-  const dispatch = useDispatch()
-  const persistedTab = useSelector(getFeedTab)
-  const feedFilter = useSelector(getFeedFilter)
+  const [feedTab, setFeedTab] = useFeedTab()
+  const [feedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Coerce legacy persisted FeedTab values (FOLLOWING / UPLOADS_ONLY) to
-  // CHRONOLOGICAL after the For You / Chronological refactor.
-  const feedTab =
-    persistedTab === FeedTab.FOR_YOU ? FeedTab.FOR_YOU : FeedTab.CHRONOLOGICAL
   const isForYou = feedTab === FeedTab.FOR_YOU
 
   const feedArgs = useMemo(
@@ -74,10 +66,10 @@ export const FeedScreen = () => {
 
   const handleSelectTab = useCallback(
     (tab: FeedTab) => {
-      dispatch(setFeedTab(tab))
+      setFeedTab(tab)
       track(make({ eventName: Name.FEED_CHANGE_VIEW, view: tab }))
     },
-    [dispatch]
+    [setFeedTab]
   )
 
   // Memoized so the header isn't a new function reference on every render —
