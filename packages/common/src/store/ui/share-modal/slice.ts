@@ -1,9 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-import {
-  ShareModalState,
-  ShareModalRequestOpenAction
-} from './types'
+import { ShareModalState, ShareModalRequestOpenAction } from './types'
 
 const initialState: ShareModalState = {
   source: null,

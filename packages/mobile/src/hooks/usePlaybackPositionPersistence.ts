@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
+import type { PlaybackPositionState } from '@audius/common/store'
 import {
   LEGACY_PLAYBACK_POSITION_LS_KEY,
   PLAYBACK_POSITION_LS_KEY,
-  PlaybackPositionState,
   playbackPositionActions,
   playbackPositionSelectors
 } from '@audius/common/store'

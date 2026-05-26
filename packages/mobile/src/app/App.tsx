@@ -24,9 +24,9 @@ import NavigationContainer from 'app/components/navigation-container'
 import { NotificationReminder } from 'app/components/notification-reminder/NotificationReminder'
 import { RateCtaReminder } from 'app/components/rate-cta-drawer/RateCtaReminder'
 import { Toasts } from 'app/components/toasts'
-import { incrementSessionCount } from 'app/hooks/useSessionCount'
 import { PlaybackPositionPersistence } from 'app/hooks/usePlaybackPositionPersistence'
 import { PlaybackRatePersistence } from 'app/hooks/usePlaybackRatePersistence'
+import { incrementSessionCount } from 'app/hooks/useSessionCount'
 import { RootScreen } from 'app/screens/root-screen'
 import {
   localStorage,
