@@ -165,11 +165,13 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
 
   yield* put(event)
 
-  yield* put(
-    toast({
-      content: messages.addedTrack(playlist.is_album ? 'album' : 'playlist')
-    })
-  )
+  if (!action.silent) {
+    yield* put(
+      toast({
+        content: messages.addedTrack(playlist.is_album ? 'album' : 'playlist')
+      })
+    )
+  }
 }
 
 function* confirmAddTrackToPlaylist(
