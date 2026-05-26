@@ -99,7 +99,10 @@ platform :android do
         sh("cd ../../../../ && echo \"yes\" | sdkmanager \"platforms;android-30\" && cd packages/mobile/android && ./gradlew #{taskName}")
 
         sh("cd ../../../../ && sudo pip install awscli")
-        sh("cd ../../../../ && aws s3 sync packages/mobile/android/app/build/outputs s3://#{remoteDirectory}/android --delete")
+        # Side-archive of build outputs to S3. The bucket may not exist or
+        # the runner's credentials may lack access; never let that block
+        # the Play Store upload below.
+        sh("cd ../../../../ && aws s3 sync packages/mobile/android/app/build/outputs s3://#{remoteDirectory}/android --delete || true")
         upload_to_play_store(
           track: options[:track],
           package_name: packageName,
