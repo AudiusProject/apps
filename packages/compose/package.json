@@ -8,9 +8,7 @@
   "dependencies": {
     "@audius/commands": "*",
     "@audius/sdk": "*",
-    "@audius/spl": "*",
-    "@pedalboard/staking": "*",
-    "@pedalboard/archiver": "*"
+    "@audius/spl": "*"
   },
   "license": "ISC"
 }

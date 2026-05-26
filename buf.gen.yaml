@@ -6,6 +6,3 @@ plugins:
     out: packages/discovery-provider/src/tasks/core/audiusd_gen
   - remote: buf.build/protocolbuffers/python:v28.3
     out: packages/discovery-provider/src/tasks/core/audiusd_gen
-  - remote: buf.build/bufbuild/es:v2.2.3
-    opt: target=ts
-    out: packages/discovery-provider/plugins/pedalboard/gen/audiusd-sdk

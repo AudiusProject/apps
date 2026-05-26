@@ -20,7 +20,6 @@ x-common: &common
     - "audius-identity-service-1:host-gateway"
     - "audius-solana-test-validator-1:host-gateway"
     - "audius-eth-ganache-1:host-gateway"
-    - "audius-pedalboard:host-gateway"
     - "audius-api:host-gateway"
     - "audius-api-elasticsearch:host-gateway"
     - "node1.oap.devnet:host-gateway"
@@ -163,25 +162,6 @@ services:
     extends:
       file: docker-compose.discovery.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
       service: healthz
-    <<: *common
-
-  # Pedalboard (plugins)
-  staking:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: staking
-    <<: *common
-
-  anti-abuse:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: anti-abuse
-    <<: *common
-
-  archiver:
-    extends:
-      file: docker-compose.pedalboard.${DOCKERCOMPOSE_ENV_TYPE:-dev}.yml
-      service: archiver
     <<: *common
 
   # Blockchain
