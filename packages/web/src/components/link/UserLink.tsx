@@ -76,9 +76,15 @@ export const UserLink = (props: UserLinkProps) => {
     />
   )
 
+  const containerStyles: CSSObject = {
+    lineHeight: 'normal',
+    minWidth: 0,
+    maxWidth: '100%'
+  }
   const linkStyles: CSSObject = {
     lineHeight: 'normal',
     display: ellipses ? 'block' : undefined,
+    flex: ellipses ? '0 1 auto' : undefined,
     minWidth: 0,
     maxWidth: '100%',
     overflow: ellipses ? 'hidden' : undefined,
@@ -95,7 +101,7 @@ export const UserLink = (props: UserLinkProps) => {
       alignItems='center'
       justifyContent={center ? 'center' : undefined}
       w={fullWidth ? '100%' : undefined}
-      css={{ overflow: 'hidden', lineHeight: 'normal' }}
+      css={containerStyles}
     >
       <TextLink
         to={url}
@@ -122,11 +128,12 @@ export const UserLink = (props: UserLinkProps) => {
         alignItems='center'
         justifyContent={center ? 'center' : undefined}
         w={fullWidth ? '100%' : undefined}
-        css={{ overflow: 'hidden', lineHeight: 'normal' }}
+        css={containerStyles}
       >
         <ArtistPopover
           css={{
             display: 'flex',
+            flex: ellipses ? '0 1 auto' : undefined,
             minWidth: 0,
             maxWidth: '100%',
             overflow: noOverflow ? 'visible' : 'hidden'
