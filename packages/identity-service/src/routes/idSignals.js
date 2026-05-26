@@ -77,7 +77,18 @@ module.exports = function (app) {
     '/record_ip',
     authMiddleware,
     handleResponse(async (req) => {
-      const { blockchainUserId, handle } = req.user
+      const { id: userRowId, blockchainUserId, handle } = req.user
+
+      // Fired by the client's recordIPIfNotRecent saga on app open
+      // (throttled to once per 24h per device), so this is also our
+      // signal that the user is active. Fire-and-forget — never block
+      // the IP-record response on this side effect.
+      models.User.update(
+        { lastActiveAt: new Date() },
+        { where: { id: userRowId } }
+      ).catch((err) => {
+        req.logger.error({ err }, 'Failed to update lastActiveAt')
+      })
 
       try {
         const userIP = getIP(req)

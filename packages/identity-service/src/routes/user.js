@@ -150,29 +150,17 @@ module.exports = function (app) {
   )
 
   /**
-   * Retrieve authenticated user's email address.
-   *
-   * Doubles as the post-auth startup ping fired on every app open
-   * (after Hedgehog's GET /authentication restores credentials), so we
-   * use it as the write site for `lastActiveAt`. The update is
-   * fire-and-forget — never block the response on it.
+   * Retrieve authenticated user's email address
    */
   app.get(
     '/user/email',
     authMiddleware,
     handleResponse(async (req, _res, _next) => {
-      const { id: userRowId, blockchainUserId } = req.user
+      const { blockchainUserId } = req.user
       const userData = await models.User.findOne({
         where: {
           blockchainUserId
         }
-      })
-
-      models.User.update(
-        { lastActiveAt: new Date() },
-        { where: { id: userRowId } }
-      ).catch((err) => {
-        req.logger.error({ err }, 'Failed to update lastActiveAt')
       })
 
       return successResponse({
