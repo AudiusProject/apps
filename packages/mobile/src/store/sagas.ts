@@ -4,7 +4,6 @@ import {
   castSagas,
   chatSagas,
   reachabilitySagas,
-  remoteConfigSagas,
   deletePlaylistConfirmationModalUISagas as deletePlaylistConfirmationModalSagas,
   duplicateAddConfirmationModalUISagas as duplicateAddConfirmationModalSagas,
   mobileOverflowMenuUISagas as overflowMenuSagas,
@@ -12,8 +11,6 @@ import {
   stripeModalUISagas,
   toastSagas,
   modalsSagas,
-  playbackSagas,
-  playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
   withdrawUSDCSagas,
@@ -65,8 +62,6 @@ export default function* rootSaga() {
 
     // Playback
     ...playbackEngineSagas(),
-    ...playbackSagas(),
-    ...playbackPositionSagas(),
 
     // Sign in / Sign out
     ...signOnSagas(),
@@ -115,7 +110,6 @@ export default function* rootSaga() {
     ...toastSagas(),
 
     initKeyboardEvents,
-    ...remoteConfigSagas(),
     ...walletsSagas()
   ]
 

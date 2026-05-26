@@ -173,12 +173,7 @@ const DownloadPage = (props: DownloadPageProps) => {
         data-fonts-ready={fontsReady ? 'true' : undefined}
       >
         {showCookieBanner ? (
-          <CookieBanner
-            isMobile={isMobileOrNarrow}
-            isPlaying={false}
-            // @ts-ignore
-            dismiss={onDismissCookiePolicy}
-          />
+          <CookieBanner isPlaying={false} dismiss={onDismissCookiePolicy} />
         ) : null}
         <Nav2026
           isMobile={isMobileOrNarrow}
