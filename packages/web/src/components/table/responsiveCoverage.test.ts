@@ -23,13 +23,14 @@ const responsiveConsumerFiles = [
 ]
 
 const allowedNonPolicyTableConsumers = [
+  'src/components/collection/desktop/edit-mode/tracks/EditAwareTracksTable.tsx',
   'src/components/tracks-table/TrackTableLineup.tsx',
   'src/components/tracks-table/TracksTable.tsx',
   'src/components/collections-table/CollectionsTable.tsx'
 ]
 
 const tableUsageRegex =
-  /<(Table|TracksTable|TrackTableLineup|CollectionsTable)(\s|>|\n)/g
+  /<(Table|TracksTable|EditAwareTracksTable|TrackTableLineup|CollectionsTable)(\s|>|\n)/g
 
 const walk = (dir: string): string[] => {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
