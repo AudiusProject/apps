@@ -76,19 +76,9 @@ export const UserLink = (props: UserLinkProps) => {
     />
   )
 
-  const containerStyles: CSSObject = {
-    columnGap: spacing.xs,
-    alignItems: 'center',
-    lineHeight: 'normal',
-    display: 'inline-flex',
-    width: fullWidth ? '100%' : undefined,
-    minWidth: 0,
-    overflow: 'hidden'
-  }
   const linkStyles: CSSObject = {
     lineHeight: 'normal',
     display: ellipses ? 'block' : undefined,
-    flex: '0 1 auto',
     minWidth: 0,
     maxWidth: '100%',
     overflow: ellipses ? 'hidden' : undefined,
@@ -99,14 +89,21 @@ export const UserLink = (props: UserLinkProps) => {
 
   // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
-    <Flex justifyContent={center ? 'center' : undefined} css={containerStyles}>
+    <Flex
+      direction='row'
+      gap='xs'
+      alignItems='center'
+      justifyContent={center ? 'center' : undefined}
+      w={fullWidth ? '100%' : undefined}
+      css={{ overflow: 'hidden', lineHeight: 'normal' }}
+    >
       <TextLink
         to={url}
         {...other}
         ellipses={ellipses}
         css={[linkStyles, cssProp]}
       >
-        <Text ellipses>{name}</Text>
+        {ellipses ? name : <Text ellipses>{name}</Text>}
       </TextLink>
       {badges}
       {children}
@@ -120,13 +117,16 @@ export const UserLink = (props: UserLinkProps) => {
   if (popover && handle && !noText) {
     return (
       <Flex
+        direction='row'
+        gap='xs'
+        alignItems='center'
         justifyContent={center ? 'center' : undefined}
-        css={containerStyles}
+        w={fullWidth ? '100%' : undefined}
+        css={{ overflow: 'hidden', lineHeight: 'normal' }}
       >
         <ArtistPopover
           css={{
-            display: 'inline-flex',
-            flex: '0 1 auto',
+            display: 'flex',
             minWidth: 0,
             maxWidth: '100%',
             overflow: noOverflow ? 'visible' : 'hidden'
@@ -139,7 +139,7 @@ export const UserLink = (props: UserLinkProps) => {
             ellipses={ellipses}
             css={[linkStyles, cssProp]}
           >
-            <Text ellipses>{name}</Text>
+            {ellipses ? name : <Text ellipses>{name}</Text>}
           </TextLink>
         </ArtistPopover>
         {badges}
