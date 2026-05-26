@@ -38,6 +38,7 @@ export const UserLink = (props: UserLinkProps) => {
     center,
     fullWidth,
     hideFanClubBadge,
+    ellipses,
     css: cssProp,
     ...other
   } = props
@@ -71,10 +72,6 @@ export const UserLink = (props: UserLinkProps) => {
     <UserBadges
       userId={userId}
       size={badgeSize}
-      css={{
-        display: 'inline-flex',
-        verticalAlign: 'middle'
-      }}
       hideFanClubBadge={hideFanClubBadge}
     />
   )
@@ -90,15 +87,25 @@ export const UserLink = (props: UserLinkProps) => {
   }
   const linkStyles: CSSObject = {
     lineHeight: 'normal',
+    display: ellipses ? 'block' : undefined,
+    flex: '0 1 auto',
     minWidth: 0,
     maxWidth: '100%',
+    overflow: ellipses ? 'hidden' : undefined,
+    textOverflow: ellipses ? 'ellipsis' : undefined,
+    whiteSpace: ellipses ? 'nowrap' : undefined,
     ...focusStyles
   }
 
   // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
     <Flex justifyContent={center ? 'center' : undefined} css={containerStyles}>
-      <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
+      <TextLink
+        to={url}
+        {...other}
+        ellipses={ellipses}
+        css={[linkStyles, cssProp]}
+      >
         <Text ellipses>{name}</Text>
       </TextLink>
       {badges}
@@ -119,12 +126,19 @@ export const UserLink = (props: UserLinkProps) => {
         <ArtistPopover
           css={{
             display: 'inline-flex',
+            flex: '0 1 auto',
             minWidth: 0,
+            maxWidth: '100%',
             overflow: noOverflow ? 'visible' : 'hidden'
           }}
           handle={handle}
         >
-          <TextLink to={url} {...other} css={[linkStyles, cssProp]}>
+          <TextLink
+            to={url}
+            {...other}
+            ellipses={ellipses}
+            css={[linkStyles, cssProp]}
+          >
             <Text ellipses>{name}</Text>
           </TextLink>
         </ArtistPopover>
