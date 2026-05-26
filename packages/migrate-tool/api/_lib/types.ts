@@ -13,6 +13,7 @@ export type TrackPreview = {
   durationSec?: number | null
   artworkUrl?: string | null
   isDownloadable: boolean
+  hasOriginal: boolean
 }
 
 export type TrackResult = {

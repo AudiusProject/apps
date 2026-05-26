@@ -26,10 +26,19 @@ database backing the request queue.
 
 ## Limitations
 
-- **Original masters**: only tracks the artist marked as **downloadable** expose
-  the original audio file via the public API. Other tracks migrate with the
-  transcoded MP3 stream, which is a lossy re-encoding rather than a bit-for-bit
-  copy. The track preview shows which of these applies per track.
+- **Audio source selection**: the worker tries sources in priority order
+  for each track and uses the first one that succeeds:
+  1. Raw `orig_file_cid` fetched from the rendezvous-primary validator node
+     (`/content/{cid}`) — bit-for-bit copy of the original master,
+     regardless of whether the artist marked the track downloadable.
+  2. Same CID, mirror node — covers the case where the primary node is
+     unhealthy.
+  3. Gated download URL — original master, only available when the track
+     is flagged downloadable.
+  4. Transcoded MP3 stream — lossy, but always reachable. Acts as the
+     last-resort fallback so every approved request gets a content copy.
+  Sources 1 and 2 are skipped when `orig_file_cid` is missing or
+  `is_original_available` is false (legacy uploads or pruned originals).
 - **No identity verification in-tool**: anyone signed in can request migration
   of any handle. The approver is responsible for verifying the requester owns
   the old account before approving. Don't approve a request without

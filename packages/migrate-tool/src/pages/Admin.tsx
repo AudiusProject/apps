@@ -177,7 +177,7 @@ export function Admin() {
                   <div className="track-sub">
                     {t.genre ?? 'Unknown'}
                     {' · '}
-                    {t.isDownloadable ? 'original audio' : 'transcoded mp3'}
+                    {t.hasOriginal ? 'original audio' : 'mp3 only'}
                   </div>
                 </div>
               </li>

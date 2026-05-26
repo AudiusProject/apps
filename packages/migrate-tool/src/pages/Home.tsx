@@ -102,7 +102,8 @@ export function Home({ navigate }: Props) {
         genre: t.genre ?? null,
         durationSec: t.duration ?? null,
         artworkUrl: t.artwork?._150x150 ?? t.artwork?._480x480 ?? null,
-        isDownloadable: Boolean(t.isDownloadable)
+        isDownloadable: Boolean(t.isDownloadable),
+        hasOriginal: Boolean(t.origFileCid) && t.isOriginalAvailable !== false
       }))
       if (previews.length === 0) {
         setError(`No tracks found for @${handle}.`)
@@ -211,10 +212,11 @@ export function Home({ navigate }: Props) {
         <div className="card">
           <h2>Step 3 — Review &amp; submit</h2>
           <div className="note">
-            <strong>Heads up:</strong> tracks marked downloadable will migrate
-            with the original audio file. Tracks not flagged as downloadable
-            will migrate with the transcoded MP3 stream only — the original
-            master isn't accessible to the developer app.
+            <strong>Heads up:</strong> the worker migrates the original
+            uploaded master whenever it's still on the network, regardless
+            of whether the track is marked downloadable. The few tracks
+            tagged below as <em>mp3 only</em> have no original on file and
+            will migrate with the transcoded MP3 stream.
           </div>
           <p className="muted" style={{ marginTop: 0 }}>
             {tracks.length} track{tracks.length === 1 ? '' : 's'} will be
@@ -234,7 +236,7 @@ export function Home({ navigate }: Props) {
                   <div className="track-sub">
                     {t.genre ?? 'Unknown genre'}
                     {' · '}
-                    {t.isDownloadable ? 'original audio' : 'transcoded mp3'}
+                    {t.hasOriginal ? 'original audio' : 'mp3 only'}
                   </div>
                 </div>
               </li>
