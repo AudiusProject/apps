@@ -1,7 +1,9 @@
+import json
 from datetime import datetime
 
 from src.challenges.challenge_event_bus import ChallengeEvent
 from src.exceptions import IndexingValidationError
+from src.models.events.contest_submission import ContestSubmission
 from src.models.events.event import Event, EventEntityType, EventType
 from src.models.tracks.track import Track
 from src.tasks.entity_manager.utils import (
@@ -33,6 +35,8 @@ def validate_create_event_tx(params: ManageEntityParameters):
         if field not in metadata:
             raise IndexingValidationError(f"Missing required field: {field}")
 
+    is_open_contest = metadata["event_type"] == EventType.open_contest
+
     if params.metadata.get("end_date"):
         # Validate end_date is a valid iso format
         try:
@@ -57,27 +61,30 @@ def validate_create_event_tx(params: ManageEntityParameters):
             f"Invalid entity_type: {params.metadata['entity_type']}"
         )
 
-    # Validate entity type is correct and entity exists
-    # TODO: Update this to validate that the entity_type is correct
-    if (
-        params.metadata["entity_id"]
-        and params.metadata["entity_type"] == EventEntityType.track.value
-        and params.metadata["entity_id"]
-        not in params.existing_records[EntityType.TRACK.value]
-    ):
-        raise IndexingValidationError(
-            f"Track {params.metadata['entity_id']} does not exist"
-        )
-
-    # Validate user is the owner of the entity
-    if params.metadata["entity_type"] == EventEntityType.track.value:
-        track_owner = params.existing_records[EntityType.TRACK.value][
+    # Open contests intentionally have no parent track, so skip the
+    # entity_id / entity_type / track-owner checks below.
+    if not is_open_contest:
+        # Validate entity type is correct and entity exists
+        # TODO: Update this to validate that the entity_type is correct
+        if (
             params.metadata["entity_id"]
-        ].owner_id
-        if track_owner != params.user_id:
+            and params.metadata["entity_type"] == EventEntityType.track.value
+            and params.metadata["entity_id"]
+            not in params.existing_records[EntityType.TRACK.value]
+        ):
             raise IndexingValidationError(
-                f"User {params.user_id} is not the owner of the track {params.metadata['entity_id']}"
+                f"Track {params.metadata['entity_id']} does not exist"
             )
+
+        # Validate user is the owner of the entity
+        if params.metadata["entity_type"] == EventEntityType.track.value:
+            track_owner = params.existing_records[EntityType.TRACK.value][
+                params.metadata["entity_id"]
+            ].owner_id
+            if track_owner != params.user_id:
+                raise IndexingValidationError(
+                    f"User {params.user_id} is not the owner of the track {params.metadata['entity_id']}"
+                )
 
     # Validate user exists
     if params.user_id not in params.existing_records[EntityType.USER.value]:
@@ -262,3 +269,68 @@ def delete_event(params: ManageEntityParameters):
     existing_event.blocknumber = params.block_number
     existing_event.updated_at = params.block_datetime
     existing_event.is_deleted = True
+
+
+def submit_to_contest(params: ManageEntityParameters):
+    """Index a SubmitToContest ManageEntity tx into contest_submissions.
+
+    Shape: entity_type=Event, entity_id=contest event_id, metadata is a
+    raw JSON string {"track_id": <id>} (no CID wrapper). The
+    contest_submissions table lives in api-land (api repo migration
+    0203); discovery is the writer.
+    """
+    validate_signer(params)
+
+    contest_id = params.entity_id
+    existing_event = params.existing_records[EntityType.EVENT.value].get(contest_id)
+    if not existing_event:
+        raise IndexingValidationError(
+            f"Cannot submit to contest {contest_id} — event does not exist"
+        )
+    if existing_event.is_deleted:
+        raise IndexingValidationError(
+            f"Cannot submit to deleted contest {contest_id}"
+        )
+    if existing_event.event_type != EventType.open_contest:
+        raise IndexingValidationError(
+            f"Event {contest_id} is not an open_contest"
+        )
+    if existing_event.end_date and existing_event.end_date < params.block_datetime:
+        raise IndexingValidationError(f"Contest {contest_id} has ended")
+
+    try:
+        metadata = json.loads(params.metadata)
+    except Exception:
+        raise IndexingValidationError("SubmitToContest metadata is not valid JSON")
+
+    track_id = metadata.get("track_id")
+    if not isinstance(track_id, int):
+        raise IndexingValidationError("SubmitToContest metadata.track_id is required")
+
+    track = params.existing_records[EntityType.TRACK.value].get(track_id)
+    if not track:
+        raise IndexingValidationError(f"Track {track_id} does not exist")
+    if track.owner_id != params.user_id:
+        raise IndexingValidationError(
+            f"User {params.user_id} is not the owner of track {track_id}"
+        )
+
+    existing_submission = (
+        params.session.query(ContestSubmission)
+        .filter(
+            ContestSubmission.contest_id == contest_id,
+            ContestSubmission.track_id == track_id,
+        )
+        .first()
+    )
+    if existing_submission:
+        return
+
+    params.session.add(
+        ContestSubmission(
+            contest_id=contest_id,
+            track_id=track_id,
+            user_id=params.user_id,
+            created_at=params.block_datetime,
+        )
+    )
