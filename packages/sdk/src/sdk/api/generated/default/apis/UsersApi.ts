@@ -4182,10 +4182,10 @@ export class UsersApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Returns a personalized For You feed for the user identified in the path. The response is a heterogenous list of tracks and playlists/albums (`{type, timestamp, item}` envelope), mirroring the chronological /v1/users/{id}/feed shape so clients can render both in a single ranked list. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (shared per-artist cap across tracks + collections + consecutive-same-artist lookahead).
      * Get For You feed for user
      */
-    async getUserForYouFeedRaw(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Tracks>> {
+    async getUserForYouFeedRaw(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserFeedResponse>> {
         if (params.id === null || params.id === undefined) {
             throw new runtime.RequiredError('id','Required parameter params.id was null or undefined when calling getUserForYouFeed.');
         }
@@ -4224,14 +4224,14 @@ export class UsersApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => TracksFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserFeedResponseFromJSON(jsonValue));
     }
 
     /**
-     * Returns a personalized For You feed for the user identified in the path. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (per-artist cap + consecutive-same-artist lookahead).
+     * Returns a personalized For You feed for the user identified in the path. The response is a heterogenous list of tracks and playlists/albums (`{type, timestamp, item}` envelope), mirroring the chronological /v1/users/{id}/feed shape so clients can render both in a single ranked list. Twitter-style multi-source pipeline — candidate retrieval (in-network, trending, underground) → linear ranking (recency decay × engagement × social affinity, weighted by source) → diversity (shared per-artist cap across tracks + collections + consecutive-same-artist lookahead).
      * Get For You feed for user
      */
-    async getUserForYouFeed(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Tracks> {
+    async getUserForYouFeed(params: GetUserForYouFeedRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserFeedResponse> {
         const response = await this.getUserForYouFeedRaw(params, initOverrides);
         return await response.value();
     }
