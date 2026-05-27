@@ -52,7 +52,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
 
   const isForYou = feedTab === FeedTab.FOR_YOU
 
-  // Chronological lineup. Disabled while For You is active.
+  // Latest lineup. Disabled while For You is active.
   const feedArgs = useMemo(
     () => ({
       userId: currentUserId,
