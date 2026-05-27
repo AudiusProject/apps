@@ -99,6 +99,14 @@ export class WalletClient {
         { permitTxHash }
       )
 
+      const permitReceipt =
+        await ethereum.publicClient.waitForTransactionReceipt({
+          hash: permitTxHash
+        })
+      if (permitReceipt.status !== 'success') {
+        throw new Error('AUDIO permit transaction failed.')
+      }
+
       const transferTxHash = await ethereum.wormholeTransferTokens({
         amount: balance,
         recipient: `0x${account.address.toBuffer().toString('hex')}`

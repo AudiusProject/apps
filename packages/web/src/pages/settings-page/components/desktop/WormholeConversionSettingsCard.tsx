@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import {
   useCurrentUserId,
@@ -33,13 +33,15 @@ const messages = {
   ethBalance: 'ERC-20 $AUDIO Balance',
   noBalance: 'No ERC-20 $AUDIO to migrate',
   loading: 'Loading...',
+  migrationInProgress: 'Migration in progress',
   success: 'Migration transaction sent!',
   error: 'Migration failed, please try again',
   tooltip:
     'The migration process usually takes 60 minutes to complete. You can navigate away, and your balance will automatically return to your built-in wallet upon completion.'
 }
 
-const WORMHOLE_MIGRATION_COMPLETED_KEY = 'wormholeMigrationCompleted'
+const WORMHOLE_MIGRATION_STARTED_KEY = 'wormholeMigrationCompleted'
+const WORMHOLE_MIGRATION_STARTED_TTL_MS = 24 * 60 * 60 * 1000
 
 export const WormholeConversionSettingsCard = () => {
   const dispatch = useDispatch()
@@ -58,12 +60,34 @@ export const WormholeConversionSettingsCard = () => {
   const { mutate: transferEthToSol, isPending: isConverting } =
     useTransferEthToSol()
 
-  const [isMigrationCompleted, setIsMigrationCompleted] = useLocalStorage(
-    WORMHOLE_MIGRATION_COMPLETED_KEY,
-    false
-  )
+  const [migrationStartedAt, setMigrationStartedAt, removeMigrationStartedAt] =
+    useLocalStorage<number | boolean | null>(
+      WORMHOLE_MIGRATION_STARTED_KEY,
+      null
+    )
 
   const hasBalance = ethBalance && ethBalance > BigInt(0)
+  const isLegacyMigrationStarted = migrationStartedAt === true
+  const migrationStartedAtMs =
+    typeof migrationStartedAt === 'number' ? migrationStartedAt : null
+  const isMigrationInProgress =
+    isLegacyMigrationStarted ||
+    (migrationStartedAtMs !== null &&
+      Date.now() - migrationStartedAtMs <= WORMHOLE_MIGRATION_STARTED_TTL_MS)
+
+  useEffect(() => {
+    if (isLegacyMigrationStarted) {
+      setMigrationStartedAt(Date.now())
+    } else if (migrationStartedAtMs !== null && !isMigrationInProgress) {
+      removeMigrationStartedAt()
+    }
+  }, [
+    isLegacyMigrationStarted,
+    isMigrationInProgress,
+    migrationStartedAtMs,
+    removeMigrationStartedAt,
+    setMigrationStartedAt
+  ])
 
   const handleConvert = useCallback(() => {
     if (!hasBalance || isConverting || !user?.erc_wallet) return
@@ -78,7 +102,7 @@ export const WormholeConversionSettingsCard = () => {
               type: 'info'
             })
           )
-          setIsMigrationCompleted(true)
+          setMigrationStartedAt(Date.now())
         },
         onError: (error) => {
           dispatch(
@@ -97,7 +121,7 @@ export const WormholeConversionSettingsCard = () => {
     user?.erc_wallet,
     transferEthToSol,
     dispatch,
-    setIsMigrationCompleted
+    setMigrationStartedAt
   ])
 
   const formattedBalance = ethBalance
@@ -105,9 +129,9 @@ export const WormholeConversionSettingsCard = () => {
     : '0'
 
   const isButtonDisabled =
-    !hasBalance || isConverting || isBalanceLoading || isMigrationCompleted
+    !hasBalance || isConverting || isBalanceLoading || isMigrationInProgress
 
-  if (!hasBalance && !isMigrationCompleted) {
+  if (!hasBalance && !isMigrationInProgress) {
     return null
   }
 
@@ -136,13 +160,13 @@ export const WormholeConversionSettingsCard = () => {
             fullWidth
             disabled={isButtonDisabled}
             iconRight={
-              isConverting || isMigrationCompleted ? undefined : IconArrowRight
+              isConverting || isMigrationInProgress ? undefined : IconArrowRight
             }
           >
             {isConverting
               ? messages.buttonTextConverting
-              : isMigrationCompleted
-                ? messages.success
+              : isMigrationInProgress
+                ? messages.migrationInProgress
                 : messages.buttonText}
           </Button>
         </Box>
