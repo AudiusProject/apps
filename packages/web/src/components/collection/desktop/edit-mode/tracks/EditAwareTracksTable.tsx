@@ -1,6 +1,14 @@
-import { ComponentProps, useCallback, useEffect, useRef } from 'react'
+import {
+  ComponentProps,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef
+} from 'react'
 
 import { ID } from '@audius/common/models'
+import { Checkbox, Flex } from '@audius/harmony'
 
 import { TracksTable } from 'components/tracks-table'
 
@@ -22,11 +30,82 @@ type EditAwareTracksTableProps = ComponentProps<typeof TracksTable> & {
  * behavior is identical to the underlying TracksTable.
  */
 export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
-  const { collectionId, onClickRow, ...rest } = props
+  const { collectionId, onClickRow, data, ...rest } = props
   const editMode = usePlaylistEditMode()
   const selection = useTrackSelection()
   const isEditingThis =
     editMode.isEditMode && editMode.collectionId === collectionId
+
+  const selectableTrackIds = useMemo(() => {
+    if (!isEditingThis) return [] as ID[]
+    const ids: ID[] = []
+    for (const t of data) {
+      if (typeof t.track_id === 'number') ids.push(t.track_id)
+    }
+    return ids
+  }, [data, isEditingThis])
+
+  const selectableCount = selectableTrackIds.length
+  const selectedCount = selection.count
+  const allSelected = selectableCount > 0 && selectedCount >= selectableCount
+  const someSelected = selectedCount > 0 && !allSelected
+
+  const handleHeaderCheckboxClick = useCallback(
+    (e: MouseEvent<HTMLInputElement>) => {
+      // Stop the click from bubbling to the column header's sort handler.
+      e.stopPropagation()
+      if (allSelected) {
+        selection.clear()
+      } else {
+        selection.selectAll(selectableTrackIds)
+      }
+    },
+    [allSelected, selectableTrackIds, selection]
+  )
+
+  const trackNameHeader = useMemo(() => {
+    if (!isEditingThis) return undefined
+    return (
+      <Flex alignItems='center' gap='m'>
+        <Checkbox
+          aria-label={allSelected ? 'Deselect all tracks' : 'Select all tracks'}
+          checked={selectedCount > 0}
+          indeterminate={someSelected}
+          onClick={handleHeaderCheckboxClick}
+          onChange={() => {}}
+        />
+        Track
+      </Flex>
+    )
+  }, [
+    allSelected,
+    handleHeaderCheckboxClick,
+    isEditingThis,
+    selectedCount,
+    someSelected
+  ])
+
+  const renderTrackPrefix = useCallback(
+    (track: TrackLike, index: number) => {
+      const id = track.track_id
+      if (typeof id !== 'number') return null
+      const checked = selection.isSelected(id)
+      return (
+        <Checkbox
+          aria-label={checked ? 'Deselect track' : 'Select track'}
+          checked={checked}
+          onClick={(e) => {
+            // Avoid double-toggling: the row's onClick handler would also
+            // call selection.toggle if the click bubbled up.
+            e.stopPropagation()
+            selection.toggle(id, index)
+          }}
+          onChange={() => {}}
+        />
+      )
+    },
+    [selection]
+  )
 
   // Capture shift modifier state from keyboard so we can extend the selection
   // even though TracksTable's onClickRow does not pass the MouseEvent.
@@ -83,8 +162,11 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
   return (
     <TracksTable
       {...rest}
+      data={data}
       onClickRow={handleClickRow}
       rowClassNameAddition={rowClassNameAddition}
+      trackNameHeader={trackNameHeader}
+      renderTrackPrefix={isEditingThis ? renderTrackPrefix : undefined}
     />
   )
 }
