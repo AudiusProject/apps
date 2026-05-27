@@ -60,14 +60,11 @@ export const WormholeConversionSettingsCard = () => {
   const { mutate: transferEthToSol, isPending: isConverting } =
     useTransferEthToSol()
 
-  const [
-    migrationStartedAt,
-    setMigrationStartedAt,
-    removeMigrationStartedAt
-  ] = useLocalStorage<number | boolean | null>(
-    WORMHOLE_MIGRATION_STARTED_KEY,
-    null
-  )
+  const [migrationStartedAt, setMigrationStartedAt, removeMigrationStartedAt] =
+    useLocalStorage<number | boolean | null>(
+      WORMHOLE_MIGRATION_STARTED_KEY,
+      null
+    )
 
   const hasBalance = ethBalance && ethBalance > BigInt(0)
   const isLegacyMigrationStarted = migrationStartedAt === true
