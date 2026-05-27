@@ -70,19 +70,15 @@ platform :android do
       if packageName === PROD_PACKAGE
         taskName = 'bundleProdRelease'
         aab = './app/build/outputs/bundle/prodRelease/app-prod-release.aab'
-        remoteDirectory = 'audius-mobile'
       elsif packageName === RC_PROD_PACKAGE
         taskName = 'bundleReleaseCandidateRelease'
         aab = './app/build/outputs/bundle/releaseCandidateRelease/app-releaseCandidate-release.aab'
-        remoteDirectory = 'audius-mobile-releasecandidate'
       elsif packageName === RC_STAGING_PACKAGE
         taskName = 'bundleStagingReleaseCandidateRelease'
         aab = './app/build/outputs/bundle/stagingReleaseCandidateRelease/app-stagingReleaseCandidate-release.aab'
-        remoteDirectory = 'audius-mobile-staging-releasecandidate'
       elsif packageName === STAGING_PACKAGE
         taskName = 'bundleStagingRelease'
         aab = './app/build/outputs/bundle/stagingRelease/app-staging-release.aab'
-        remoteDirectory = 'audius-mobile-staging'
       end
       releasedVersion = getCurrentlyReleasedVersionName()
       buildFileVersion = getVersionNameFromBuildFile()
@@ -98,11 +94,6 @@ platform :android do
         # generating the release apk & bundle
         sh("cd ../../../../ && echo \"yes\" | sdkmanager \"platforms;android-30\" && cd packages/mobile/android && ./gradlew #{taskName}")
 
-        sh("cd ../../../../ && sudo pip install awscli")
-        # Side-archive of build outputs to S3. The bucket may not exist or
-        # the runner's credentials may lack access; never let that block
-        # the Play Store upload below.
-        sh("cd ../../../../ && aws s3 sync packages/mobile/android/app/build/outputs s3://#{remoteDirectory}/android --delete || true")
         upload_to_play_store(
           track: options[:track],
           package_name: packageName,
