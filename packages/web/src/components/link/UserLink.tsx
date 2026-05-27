@@ -1,7 +1,7 @@
 import { useUser } from '@audius/common/api'
 import { ID } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { IconSize, Text, useTheme, Flex } from '@audius/harmony'
+import { IconSize, Text, useTheme } from '@audius/harmony'
 import { CSSObject } from '@emotion/react'
 import { Link } from 'react-router'
 
@@ -77,14 +77,30 @@ export const UserLink = (props: UserLinkProps) => {
   )
 
   const containerStyles: CSSObject = {
+    alignItems: 'center',
+    display: fullWidth ? 'flex' : 'inline-flex',
+    justifyContent: center ? 'center' : undefined,
     lineHeight: 'normal',
     minWidth: 0,
-    maxWidth: '100%'
+    maxWidth: '100%',
+    overflow: 'hidden',
+    width: fullWidth ? '100%' : undefined
+  }
+  const nameRowStyles: CSSObject = {
+    alignItems: 'center',
+    columnGap: spacing.xs,
+    display: 'inline-grid',
+    gridAutoColumns: 'max-content',
+    gridAutoFlow: 'column',
+    gridTemplateColumns: 'minmax(0, auto)',
+    lineHeight: 'normal',
+    maxWidth: '100%',
+    minWidth: 0,
+    verticalAlign: 'middle'
   }
   const linkStyles: CSSObject = {
     lineHeight: 'normal',
     display: ellipses ? 'block' : undefined,
-    flex: ellipses ? '0 1 auto' : undefined,
     minWidth: 0,
     maxWidth: '100%',
     overflow: ellipses ? 'hidden' : undefined,
@@ -95,25 +111,20 @@ export const UserLink = (props: UserLinkProps) => {
 
   // Badges should be outside the TextLink to prevent hover effects on badges
   const textLink = (
-    <Flex
-      direction='row'
-      gap='xs'
-      alignItems='center'
-      justifyContent={center ? 'center' : undefined}
-      w={fullWidth ? '100%' : undefined}
-      css={containerStyles}
-    >
-      <TextLink
-        to={url}
-        {...other}
-        ellipses={ellipses}
-        css={[linkStyles, cssProp]}
-      >
-        {ellipses ? name : <Text ellipses>{name}</Text>}
-      </TextLink>
-      {badges}
-      {children}
-    </Flex>
+    <span css={containerStyles}>
+      <span css={nameRowStyles}>
+        <TextLink
+          to={url}
+          {...other}
+          ellipses={ellipses}
+          css={[linkStyles, cssProp]}
+        >
+          {ellipses ? name : <Text ellipses>{name}</Text>}
+        </TextLink>
+        {badges}
+        {children}
+      </span>
+    </span>
   )
 
   const noTextLink = <Link to={url}>{children}</Link>
@@ -122,36 +133,30 @@ export const UserLink = (props: UserLinkProps) => {
   // Wrap the text in ArtistPopover if needed
   if (popover && handle && !noText) {
     return (
-      <Flex
-        direction='row'
-        gap='xs'
-        alignItems='center'
-        justifyContent={center ? 'center' : undefined}
-        w={fullWidth ? '100%' : undefined}
-        css={containerStyles}
-      >
-        <ArtistPopover
-          css={{
-            display: 'flex',
-            flex: ellipses ? '0 1 auto' : undefined,
-            minWidth: 0,
-            maxWidth: '100%',
-            overflow: noOverflow ? 'visible' : 'hidden'
-          }}
-          handle={handle}
-        >
-          <TextLink
-            to={url}
-            {...other}
-            ellipses={ellipses}
-            css={[linkStyles, cssProp]}
+      <span css={containerStyles}>
+        <span css={nameRowStyles}>
+          <ArtistPopover
+            css={{
+              display: 'block',
+              minWidth: 0,
+              maxWidth: '100%',
+              overflow: noOverflow ? 'visible' : 'hidden'
+            }}
+            handle={handle}
           >
-            {ellipses ? name : <Text ellipses>{name}</Text>}
-          </TextLink>
-        </ArtistPopover>
-        {badges}
-        {children}
-      </Flex>
+            <TextLink
+              to={url}
+              {...other}
+              ellipses={ellipses}
+              css={[linkStyles, cssProp]}
+            >
+              {ellipses ? name : <Text ellipses>{name}</Text>}
+            </TextLink>
+          </ArtistPopover>
+          {badges}
+          {children}
+        </span>
+      </span>
     )
   }
 
