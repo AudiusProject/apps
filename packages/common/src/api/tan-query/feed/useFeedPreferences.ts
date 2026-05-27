@@ -11,7 +11,7 @@ const FEED_TAB_LS_KEY = 'feed-page:tab'
 const FEED_FILTER_LS_KEY = 'feed-page:filter'
 
 const isFeedTab = (value: string | null): value is FeedTab =>
-  value === FeedTab.FOR_YOU || value === FeedTab.CHRONOLOGICAL
+  value === FeedTab.FOR_YOU || value === FeedTab.LATEST
 
 const isFeedFilter = (value: string | null): value is FeedFilter =>
   value === FeedFilter.ALL ||
@@ -19,7 +19,7 @@ const isFeedFilter = (value: string | null): value is FeedFilter =>
   value === FeedFilter.REPOST
 
 /**
- * Persisted active tab on the Feed page (For You vs Chronological). Backed by
+ * Persisted active tab on the Feed page (For You vs Latest). Backed by
  * the tan-query cache so reads in any component see the same value, with
  * localStorage as the durable store.
  */
@@ -31,6 +31,9 @@ export const useFeedTab = (): [FeedTab, (tab: FeedTab) => void] => {
     queryKey: [QUERY_KEYS.feedTab],
     queryFn: async () => {
       const stored = await localStorage.getItem(FEED_TAB_LS_KEY)
+      // Migrate the pre-rename persisted value so existing users land on the
+      // same tab they had selected.
+      if (stored === 'CHRONOLOGICAL') return FeedTab.LATEST
       return isFeedTab(stored) ? stored : FeedTab.FOR_YOU
     },
     staleTime: Infinity,
@@ -49,7 +52,7 @@ export const useFeedTab = (): [FeedTab, (tab: FeedTab) => void] => {
 }
 
 /**
- * Persisted post-type filter for the Chronological feed. Same tan-query
+ * Persisted post-type filter for the Latest feed. Same tan-query
  * shared-store pattern as {@link useFeedTab}.
  */
 export const useFeedFilter = (): [FeedFilter, (filter: FeedFilter) => void] => {
