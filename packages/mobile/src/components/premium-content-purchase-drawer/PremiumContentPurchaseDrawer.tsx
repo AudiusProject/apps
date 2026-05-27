@@ -2,6 +2,7 @@ import React, { useCallback, type ReactNode, useEffect } from 'react'
 
 import {
   useCollection,
+  useStems,
   useTrack,
   useUser,
   useUSDCBalance
@@ -449,6 +450,9 @@ export const PremiumContentPurchaseDrawer = () => {
   } = usePremiumContentPurchaseModal()
   const isAlbum = contentType === PurchaseableContentType.ALBUM
   const { data: track, isPending: isTrackPending } = useTrack(contentId)
+  useStems(contentId, {
+    enabled: isOpen && !isAlbum && !!track?.is_download_gated
+  })
   const { data: album } = useCollection(contentId, {
     enabled: isAlbum
   })

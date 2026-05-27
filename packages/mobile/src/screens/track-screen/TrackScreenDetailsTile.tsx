@@ -201,6 +201,7 @@ export const TrackScreenDetailsTile = ({
     title,
     track_id: trackId,
     stream_conditions: streamConditions,
+    is_download_gated: isDownloadGated,
     ddex_app: ddexApp,
     is_delete: isDeleted,
     release_date: releaseDate,
@@ -219,8 +220,11 @@ export const TrackScreenDetailsTile = ({
   const remixParentTrackId = remixOf?.tracks?.[0]?.parent_track_id
   const isRemix = !!remixParentTrackId
   const { data: stems = [] } = useStems(track.track_id)
+  const hasGatedDownloadExtras = isDownloadGated && !isStreamGated
   const hasDownloadableAssets =
-    (track as Track)?.is_downloadable || stems.length > 0
+    (track as Track)?.is_downloadable ||
+    hasGatedDownloadExtras ||
+    stems.length > 0
 
   const { open: openCommentDrawer } = useCommentDrawer()
 

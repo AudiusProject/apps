@@ -189,9 +189,17 @@ export const GiantTrackTile = ({
     genre === Genre.Podcasts || genre === Genre.Audiobooks
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: track } = useTrack(trackId, {
-    select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
+    select: (track) =>
+      pick(track, [
+        'is_downloadable',
+        'is_download_gated',
+        'is_stream_gated',
+        'preview_cid'
+      ])
   })
-  const shouldShowDownloadSection = !!track?.is_downloadable
+  const shouldShowDownloadSection =
+    !!track?.is_downloadable ||
+    (!!track?.is_download_gated && !track?.is_stream_gated)
   // Preview button is shown for USDC-gated tracks if user does not have access
   // or is the owner
   const showPreview =

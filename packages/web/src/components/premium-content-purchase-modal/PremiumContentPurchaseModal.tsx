@@ -5,6 +5,7 @@ import {
   useCollection,
   useCurrentAccount,
   useCurrentAccountUser,
+  useStems,
   useTrack,
   useUser
 } from '@audius/common/api'
@@ -229,6 +230,9 @@ export const PremiumContentPurchaseModal = NiceModal.create(() => {
 
   const isAlbum = contentType === PurchaseableContentType.ALBUM
   const { data: track } = useTrack(contentId, { enabled: !isAlbum })
+  useStems(contentId, {
+    enabled: isOpen && !isAlbum && !!track?.is_download_gated
+  })
 
   const { data: album } = useCollection(contentId, {
     enabled: isAlbum
