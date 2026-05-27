@@ -40,6 +40,9 @@ type RelayerWallet = {
 
 const ethRelayerWallets = config.get('ethRelayerWallets')
 
+const ensureHex = (str: string): Hex =>
+  str.startsWith('0x') ? (str as Hex) : `0x${str}`
+
 const walletClient = createWalletClient({
   chain: mainnet,
   transport: http(config.get('ethProviderUrl'))
@@ -204,9 +207,7 @@ const createRouter = () => {
           const res = await withLock(
             generateETHWalletLockKey(relayer.publicKey),
             async () => {
-              const account = privateKeyToAccount(
-                ('0x' + relayer.privateKey) as Hex
-              )
+              const account = privateKeyToAccount(ensureHex(relayer.privateKey))
               const transactionRequest = toTransactionRequest(body.params[0])
               logger.debug(transactionRequest, 'Sending transaction...')
               const hash = await walletClient.sendTransaction({
