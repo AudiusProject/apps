@@ -184,6 +184,23 @@ type TracksTableProps = {
   showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: any, index: number) => void
   trackActionsHeader?: ReactNode
+  /**
+   * Optional content for the Track column header, replacing the default
+   * 'Track' label. Used by selection mode to render a select-all checkbox.
+   */
+  trackNameHeader?: ReactNode
+  /**
+   * Optional content rendered at the leading edge of the Track-name cell
+   * (before the inline artwork). Used by selection mode to render the
+   * per-row selection checkbox.
+   */
+  renderTrackPrefix?: (track: any, rowIndex: number) => ReactNode
+  /**
+   * Optional additional className applied per row. The result is appended
+   * to the table's own per-row className. Use this for things like a
+   * selected-row highlight while the page is in edit mode.
+   */
+  rowClassNameAddition?: (track: any, rowIndex: number) => string | undefined
 } & Omit<TableProps, 'onClickRow' | 'columns'>
 
 const defaultColumns: TracksTableColumn[] = [
@@ -214,6 +231,9 @@ export const TracksTable = ({
   data,
   activeIndex,
   trackActionsHeader,
+  trackNameHeader,
+  renderTrackPrefix,
+  rowClassNameAddition,
   ...tableProps
 }: TracksTableProps) => {
   const { isVirtualized, onClickRow } = tableProps
@@ -238,6 +258,8 @@ export const TracksTable = ({
   onClickRepostRef.current = onClickRepost
   const onClickRemoveRef = useRef(onClickRemove)
   onClickRemoveRef.current = onClickRemove
+  const renderTrackPrefixRef = useRef(renderTrackPrefix)
+  renderTrackPrefixRef.current = renderTrackPrefix
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
   const [, setGatedModalVisibility] = useModalState('LockedContent')
@@ -357,8 +379,11 @@ export const TracksTable = ({
         )
       ) : null
 
+      const prefix = renderTrackPrefixRef.current?.(track, index)
+
       return (
         <Flex className={styles.trackInfoContainer}>
+          {prefix}
           {showArtistInTrackNameColumn && track.track_id ? (
             <MiniTrackArtwork
               trackId={track.track_id}
@@ -973,7 +998,7 @@ export const TracksTable = ({
       },
       trackName: {
         id: 'trackName',
-        Header: 'Track',
+        Header: trackNameHeader ?? 'Track',
         accessor: 'title',
         Cell: renderTrackNameCell,
         minWidth: trackNameColumnWidth,
@@ -981,6 +1006,10 @@ export const TracksTable = ({
         maxWidth: Number.MAX_SAFE_INTEGER,
         sortTitle: 'Track Name',
         sorter: alphaSorter('title'),
+        // When a custom header is supplied (e.g. select-all checkbox),
+        // suppress column sorting so the header's controls receive clicks
+        // instead of toggling sort order.
+        disableSortBy: Boolean(trackNameHeader),
         align: 'left'
       },
       savedDate: {
@@ -1017,6 +1046,7 @@ export const TracksTable = ({
       renderCommentsCell,
       renderTrackActions,
       trackActionsHeader,
+      trackNameHeader,
       renderOverflowMenuCell,
       renderLengthCell,
       isVirtualized,
@@ -1046,6 +1076,9 @@ export const TracksTable = ({
     [activateTrack]
   )
 
+  const rowClassNameAdditionRef = useRef(rowClassNameAddition)
+  rowClassNameAdditionRef.current = rowClassNameAddition
+
   const getRowClassName = useCallback((rowIndex: number) => {
     const track = dataRef.current[rowIndex]
     const { isFetchingNFTAccess, hasStreamAccess } = trackAccessMapRef.current[
@@ -1058,10 +1091,15 @@ export const TracksTable = ({
     const deleted =
       track.is_delete || track._marked_deleted || !!track.user?.is_deactivated
     const isPremium = isContentUSDCPurchaseGated(track.stream_conditions)
-    return cn(styles.tableRow, {
-      [styles.disabled]: deleted,
-      [styles.lockedRow]: isLocked && !deleted && !isPremium
-    })
+    const extra = rowClassNameAdditionRef.current?.(track, rowIndex)
+    return cn(
+      styles.tableRow,
+      {
+        [styles.disabled]: deleted,
+        [styles.lockedRow]: isLocked && !deleted && !isPremium
+      },
+      extra
+    )
   }, [])
 
   return (

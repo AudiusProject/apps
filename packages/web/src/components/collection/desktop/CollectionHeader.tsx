@@ -15,7 +15,10 @@ import {
   IconCart,
   useTheme,
   MusicBadge,
-  IconCalendarMonth
+  IconCalendarMonth,
+  Switch,
+  TextArea,
+  TextInput
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -33,6 +36,7 @@ import { CollectionActionButtons } from './CollectionActionButtons'
 import styles from './CollectionHeader.module.css'
 import { EditableCollectionDescription } from './EditableCollectionDescription'
 import { EditableCollectionTitle } from './EditableCollectionTitle'
+import { usePlaylistEditMode } from './edit-mode/PlaylistEditModeContext'
 
 const { editPlaylist } = cacheCollectionsActions
 
@@ -41,7 +45,14 @@ const messages = {
   by: 'By ',
   hidden: 'Hidden',
   releases: (releaseDate: string) =>
-    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`
+    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`,
+  titleLabel: 'Playlist title',
+  titleAlbumLabel: 'Album title',
+  descriptionLabel: 'Description',
+  descriptionPlaceholder: 'Add a description',
+  visibility: 'Visibility',
+  publicLabel: 'Public',
+  privateLabel: 'Hidden'
 }
 
 export const CollectionHeader = (props: CollectionHeaderProps) => {
@@ -77,7 +88,8 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
   const {
     is_scheduled_release: isScheduledRelease,
     release_date: releaseDate,
-    is_private: isPrivate
+    is_private: isPrivate,
+    is_album: isAlbumFromCollection
   } = fullCollection ?? {}
 
   const handleSaveTitle = useCallback(
@@ -105,6 +117,23 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
     },
     [dispatch, fullCollection, collectionId]
   )
+
+  const editMode = usePlaylistEditMode()
+  const isEditingThis =
+    editMode.isEditMode && editMode.collectionId === collectionId
+
+  const stagedTitle =
+    editMode.draft.playlist_name !== undefined
+      ? editMode.draft.playlist_name
+      : title
+  const stagedDescription =
+    editMode.draft.description !== undefined
+      ? editMode.draft.description
+      : description
+  const stagedIsPrivate =
+    editMode.draft.is_private !== undefined
+      ? editMode.draft.is_private
+      : (isPrivate ?? false)
 
   const hasStreamAccess = access?.stream
   const shouldShowStats = !isPrivate || isOwner
@@ -159,7 +188,23 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
             gap='s'
             className={styles.titleArtistSection}
           >
-            {isLoading ? (
+            {isEditingThis ? (
+              <Flex direction='column' gap='s'>
+                <TextInput
+                  label={
+                    isAlbumFromCollection
+                      ? messages.titleAlbumLabel
+                      : messages.titleLabel
+                  }
+                  value={stagedTitle}
+                  onChange={(e) =>
+                    editMode.setField('playlist_name', e.target.value)
+                  }
+                  maxLength={64}
+                  autoFocus
+                />
+              </Flex>
+            ) : isLoading ? (
               <Skeleton height='48px' width='300px' />
             ) : isOwner ? (
               <EditableCollectionTitle value={title} onSave={handleSaveTitle} />
@@ -195,6 +240,25 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
                 <Text color='subdued'>{messages.by}</Text>
                 <UserLink userId={userId} popover variant='visible' />
               </Text>
+            ) : null}
+            {isEditingThis ? (
+              <Flex alignItems='center' gap='m' mt='s'>
+                <Text variant='label' size='m' color='subdued'>
+                  {messages.visibility}
+                </Text>
+                <Switch
+                  checked={!stagedIsPrivate}
+                  onChange={(e) =>
+                    editMode.setField('is_private', !e.target.checked)
+                  }
+                  aria-label={messages.visibility}
+                />
+                <Text variant='body' size='s' color='subdued'>
+                  {stagedIsPrivate
+                    ? messages.privateLabel
+                    : messages.publicLabel}
+                </Text>
+              </Flex>
             ) : null}
           </Flex>
           <div className={styles.statsDesktop}>{renderStatsRow(isLoading)}</div>
@@ -268,7 +332,17 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
         <Skeleton height='40px' width='100%' />
       ) : (
         <Flex gap='l' direction='column'>
-          {isOwner ? (
+          {isEditingThis ? (
+            <TextArea
+              aria-label={messages.descriptionLabel}
+              placeholder={messages.descriptionPlaceholder}
+              value={stagedDescription ?? ''}
+              onChange={(e) => editMode.setField('description', e.target.value)}
+              maxLength={1000}
+              showMaxLength
+              grows
+            />
+          ) : isOwner ? (
             <EditableCollectionDescription
               value={description ?? ''}
               onSave={handleSaveDescription}

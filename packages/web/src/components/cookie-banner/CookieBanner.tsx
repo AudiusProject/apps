@@ -9,8 +9,9 @@ import { Dispatch } from 'redux'
 
 import { Frosted } from 'components/frosted/Frosted'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { dismissCookieBanner } from 'store/application/ui/cookieBanner/actions'
+import { dismissCookieBanner as dismissCookieBannerAction } from 'store/application/ui/cookieBanner/actions'
 import { AppState } from 'store/types'
+import { dismissCookieBanner as persistDismissCookieBanner } from 'utils/gdpr'
 import { BASE_URL } from 'utils/route'
 
 import styles from './CookieBanner.module.css'
@@ -76,7 +77,10 @@ function mapStateToProps(state: AppState) {
 
 function mapDispatchToProps(dispatch: Dispatch) {
   return {
-    dismiss: () => dispatch(dismissCookieBanner())
+    dismiss: () => {
+      persistDismissCookieBanner()
+      dispatch(dismissCookieBannerAction())
+    }
   }
 }
 

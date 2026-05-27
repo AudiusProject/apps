@@ -1,0 +1,21 @@
+.selected,
+.selected td {
+  /* Light purple tint derived from the Harmony secondary token. Mixed with
+   * white so the row stays readable in both light and dark themes — there's
+   * no Harmony secondary-50 primitive to reach for directly. */
+  background-color: color-mix(
+    in srgb,
+    var(--harmony-secondary) 8%,
+    var(--harmony-white)
+  ) !important;
+  box-shadow: inset 3px 0 0 0 var(--harmony-secondary, var(--harmony-accent));
+}
+
+.selected:hover:not(.skeletonRow),
+.selected:hover:not(.skeletonRow) > td {
+  background-color: color-mix(
+    in srgb,
+    var(--harmony-secondary) 12%,
+    var(--harmony-white)
+  ) !important;
+}

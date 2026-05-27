@@ -9,6 +9,7 @@ import { Flex, IconTrophy } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import { push } from 'utils/navigation'
+import { contestPage } from 'utils/route'
 
 import { NotificationBody } from './components/NotificationBody'
 import { NotificationFooter } from './components/NotificationFooter'
@@ -17,7 +18,6 @@ import { NotificationTile } from './components/NotificationTile'
 import { NotificationTitle } from './components/NotificationTitle'
 import { TrackContent } from './components/TrackContent'
 import { UserNameLink } from './components/UserNameLink'
-import { getEntityLink } from './utils'
 
 const messages = {
   title: 'Remix Contest',
@@ -43,7 +43,7 @@ export const FanRemixContestWinnersSelectedNotification = (
 
   const handleClick = useCallback(() => {
     if (entity) {
-      dispatch(push(getEntityLink(entity)))
+      dispatch(push(contestPage(entity.permalink)))
     }
   }, [entity, dispatch])
 

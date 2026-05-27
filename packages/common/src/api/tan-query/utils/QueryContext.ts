@@ -9,6 +9,7 @@ import {
   AudiusBackend,
   Env,
   FeatureFlags,
+  LocalStorage,
   RemoteConfigInstance,
   SolanaWalletService
 } from '~/services/index'
@@ -28,6 +29,7 @@ export type QueryContextType = {
   dispatch: Dispatch
   env: Env
   fetch: typeof fetch
+  localStorage: LocalStorage
   remoteConfigInstance: RemoteConfigInstance
   getFeatureEnabled: (
     flag: FeatureFlags,
@@ -87,6 +89,8 @@ export function* getQueryContext(): Generator<any, QueryContextType, any> {
     dispatch: yield* getContext<QueryContextType['dispatch']>('dispatch'),
     env: yield* getContext<QueryContextType['env']>('env'),
     fetch,
+    localStorage:
+      yield* getContext<QueryContextType['localStorage']>('localStorage'),
     getFeatureEnabled:
       yield* getContext<QueryContextType['getFeatureEnabled']>(
         'getFeatureEnabled'

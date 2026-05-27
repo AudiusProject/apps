@@ -12,6 +12,7 @@ import {
   solanaWalletService
 } from 'services/audius-sdk'
 import { env } from 'services/env'
+import { localStorage } from 'services/local-storage'
 import { getFeatureEnabled } from 'services/remote-config/featureFlagHelpers'
 import { remoteConfigInstance } from 'services/remote-config/remote-config-instance'
 import { generatePlaylistArtwork } from 'utils/imageProcessingUtil'
@@ -34,6 +35,7 @@ export const AudiusQueryProvider = (props: AudiusQueryProviderProps) => {
         dispatch,
         env,
         fetch,
+        localStorage,
         remoteConfigInstance,
         getFeatureEnabled,
         analytics,

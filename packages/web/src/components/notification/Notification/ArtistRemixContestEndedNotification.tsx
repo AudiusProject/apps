@@ -10,14 +10,13 @@ import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
 
 import { push } from 'utils/navigation'
-import { pickWinnersPage } from 'utils/route'
+import { contestPage, pickWinnersPage } from 'utils/route'
 
 import { NotificationBody } from './components/NotificationBody'
 import { NotificationFooter } from './components/NotificationFooter'
 import { NotificationHeader } from './components/NotificationHeader'
 import { NotificationTile } from './components/NotificationTile'
 import { NotificationTitle } from './components/NotificationTitle'
-import { getEntityLink } from './utils'
 
 const messages = {
   title: 'Your Remix Contest Ended',
@@ -48,7 +47,7 @@ export const ArtistRemixContestEndedNotification = (
 
   const handleClick = useCallback(() => {
     if (entity) {
-      dispatch(push(getEntityLink(entity)))
+      dispatch(push(contestPage(entity.permalink)))
     }
   }, [entity, dispatch])
 

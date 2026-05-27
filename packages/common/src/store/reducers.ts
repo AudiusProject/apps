@@ -23,8 +23,6 @@ import {
   DeactivateAccountState
 } from './pages/deactivate-account'
 import exclusiveTracks from './pages/exclusive-tracks/slice'
-import feedReducer from './pages/feed/reducer'
-import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
 import { persistedLibraryPageReducer } from './pages/library-page/reducer'
 import pickWinners from './pages/pick-winners/slice'
@@ -150,7 +148,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     chat: chatReducer,
     collection,
     deactivateAccount: deactivateAccountReducer,
-    feed: feedReducer(storage),
     historyPage: historyPageReducer,
     pickWinners,
     profile: profileReducer,
@@ -240,7 +237,6 @@ export type CommonState = {
     chat: ReturnType<typeof chatReducer>
     collection: CollectionsPageState
     deactivateAccount: DeactivateAccountState
-    feed: FeedPageState
 
     tokenDashboard: ReturnType<typeof tokenDashboardSlice.reducer>
     historyPage: HistoryPageState

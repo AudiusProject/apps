@@ -1,7 +1,11 @@
 import { useCallback, useContext, useEffect } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useIsManagedAccount, useShareAction } from '@audius/common/hooks'
+import {
+  useIsManagedAccount,
+  useShareAction,
+  useShareContent
+} from '@audius/common/hooks'
 import { Name, PlayableType } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
 import {
@@ -28,7 +32,7 @@ import { ShareDrawer } from './components/ShareDrawer'
 import { messages } from './messages'
 import { getXShareText } from './utils'
 
-const { getShareState } = shareModalUISelectors
+const { getShareRequest, getShareSource } = shareModalUISelectors
 const { shareUser } = usersSocialActions
 const { shareTrack, shareContest } = tracksSocialActions
 const { shareCollection } = collectionsSocialActions
@@ -49,7 +53,9 @@ export const ShareModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
   const record = useRecord()
-  const { content, source } = useSelector(getShareState)
+  const request = useSelector(getShareRequest)
+  const source = useSelector(getShareSource)
+  const content = useShareContent(request)
   const { data: accountUserId } = useCurrentUserId()
   const { onOpen: openCreateChatModal } = useCreateChatModal()
   const isManagerMode = useIsManagedAccount()

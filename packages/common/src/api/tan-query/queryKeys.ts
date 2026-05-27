@@ -68,6 +68,8 @@ export const QUERY_KEYS = {
   trackHistory: 'trackHistory',
   topTags: 'topTags',
   feed: 'feed',
+  feedTab: 'feedTab',
+  feedFilter: 'feedFilter',
   forYouFeed: 'forYouFeed',
   authorizedApps: 'authorizedApps',
   developerApps: 'developerApps',

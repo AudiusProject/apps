@@ -12,19 +12,16 @@ import { buyUSDCSagas } from '~/store/buy-usdc'
 import { sagas as castSagas } from '~/store/cast/sagas'
 import { gatedContentSagas } from '~/store/gated-content'
 import { chatSagas } from '~/store/pages/chat'
-import { playbackSagas } from '~/store/playback'
-import { playbackPositionSagas } from '~/store/playback-position'
 import { purchaseContentSagas } from '~/store/purchase-content'
-import remoteConfigSagas from '~/store/remote-config/sagas'
 import {
   toastSagas,
   deletePlaylistConfirmationModalUISagas,
   duplicateAddConfirmationModalUISagas,
   mobileOverflowMenuUISagas,
-  shareModalUISagas,
   stripeModalUISagas,
   withdrawUSDCSagas,
-  modalsSagas
+  modalsSagas,
+  shareModalUISagas
 } from '~/store/ui'
 
 import { CommonStoreContext } from './storeContext'
@@ -39,7 +36,6 @@ import { CommonStoreContext } from './storeContext'
 export const sagas = (_ctx: CommonStoreContext) => ({
   account: accountSagas,
   buyUSDC: buyUSDCSagas,
-  remoteConfig: remoteConfigSagas,
   cast: castSagas,
   gatedContent: gatedContentSagas,
   purchaseContent: purchaseContentSagas,
@@ -51,8 +47,6 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   modals: modalsSagas,
   deletePlaylistConfirmationModalUI: deletePlaylistConfirmationModalUISagas,
   duplidateAddConfirmationModalUI: duplicateAddConfirmationModalUISagas,
-  playback: playbackSagas,
-  playbackPosition: playbackPositionSagas,
   withdrawUSDC: withdrawUSDCSagas,
   niceModalBridge: niceModalBridgeSagas
 

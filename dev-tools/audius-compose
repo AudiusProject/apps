@@ -20,7 +20,6 @@ audius-creator-node-1 audius-creator-node-2 audius-creator-node-3 \
 audius-identity-service-1 \
 audius-solana-test-validator-1 \
 audius-eth-ganache-1 \
-audius-pedalboard \
 audius-anti-abuse-oracle-1 \
 audius-discovery-provider-redis-1 \
 audius-api \
@@ -344,12 +343,6 @@ def load_env(protocol_dir, service, environment):
     is_flag=True,
     help="Bring up discovery provider notifications container",
 )
-@click.option(
-    "-p",
-    "--pedalboard",
-    is_flag=True,
-    help="Bring up the pedalboard containers",
-)
 @click.option("-a", "--args", type=str, multiple=True)
 @click.option(
     "--prod",
@@ -367,7 +360,6 @@ def up(
     block_explorer,
     anti_abuse_oracle,
     notifs,
-    pedalboard,
     args,
     prod,
     services,
@@ -384,7 +376,6 @@ def up(
         *(["--profile=block-explorer"] if block_explorer else []),
         *(["--profile=elasticsearch"] if elasticsearch_replicas else []),
         *(["--profile=notifications"] if notifs else []),
-        *(["--profile=pedalboard"] if pedalboard else []),
         "--profile=storage",
         "--profile=libs",
         "--profile=solana",

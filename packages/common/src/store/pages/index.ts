@@ -53,11 +53,6 @@ export * as historyPageSelectors from './history-page/selectors'
 export * from './history-page/types'
 export { default as historyPageReducer } from './history-page/reducer'
 
-export * as feedPageSelectors from './feed/selectors'
-export * as feedPageActions from './feed/actions'
-export * from './feed/types'
-export { default as feedPageReducer } from './feed/reducer'
-
 export * as collectionPageSelectors from './collection/selectors'
 export * as collectionPageActions from './collection/actions'
 export * from './collection/types'

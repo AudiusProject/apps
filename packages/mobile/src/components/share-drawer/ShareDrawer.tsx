@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useShareAction } from '@audius/common/hooks'
+import { useShareAction, useShareContent } from '@audius/common/hooks'
 import { Name, ShareSource } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
 import {
@@ -41,7 +41,7 @@ import { messages } from './messages'
 import { useShareToStory } from './useShareToStory'
 import { getContentUrl, getXShareUrl } from './utils'
 
-const { getShareContent, getShareSource } = shareModalUISelectors
+const { getShareRequest, getShareSource } = shareModalUISelectors
 const { shareUser } = usersSocialActions
 const { shareTrack } = tracksSocialActions
 const { shareCollection } = collectionsSocialActions
@@ -87,8 +87,9 @@ export const ShareDrawer = NiceModal.create(() => {
 
   const { secondary } = useThemeColors()
   const dispatch = useDispatch()
-  const content = useSelector(getShareContent)
+  const request = useSelector(getShareRequest)
   const source = useSelector(getShareSource)
+  const content = useShareContent(request)
   const { data: accountUserId } = useCurrentUserId()
   const { toast } = useToast()
   const isOwner =

@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { setNiceModalAdapter } from '@audius/common/services'
-import { playbackActions } from '@audius/common/store'
+import { playbackActions, remoteConfigActions } from '@audius/common/store'
 import NiceModal from '@ebay/nice-modal-react'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import { PortalProvider, PortalHost } from '@gorhom/portal'
@@ -24,6 +24,8 @@ import NavigationContainer from 'app/components/navigation-container'
 import { NotificationReminder } from 'app/components/notification-reminder/NotificationReminder'
 import { RateCtaReminder } from 'app/components/rate-cta-drawer/RateCtaReminder'
 import { Toasts } from 'app/components/toasts'
+import { PlaybackPositionPersistence } from 'app/hooks/usePlaybackPositionPersistence'
+import { PlaybackRatePersistence } from 'app/hooks/usePlaybackRatePersistence'
 import { incrementSessionCount } from 'app/hooks/useSessionCount'
 import { RootScreen } from 'app/screens/root-screen'
 import {
@@ -32,6 +34,7 @@ import {
 } from 'app/services/local-storage'
 import { queryClient } from 'app/services/query-client'
 import { queryClientPersistOptions } from 'app/services/query-persister'
+import { remoteConfigInstance } from 'app/services/remote-config/remote-config-instance'
 import { getOrCreatePersistor, store, dispatch } from 'app/store'
 import { subscribeToNetworkStatusUpdates } from 'app/utils/reachability'
 
@@ -81,6 +84,9 @@ const App = () => {
   useEffectOnce(() => {
     subscribeToNetworkStatusUpdates()
     TrackPlayer.setupPlayer({ autoHandleInterruptions: true })
+    remoteConfigInstance.waitForRemoteConfig().then(() => {
+      dispatch(remoteConfigActions.setDidLoad())
+    })
     if (!localStoragePreloaded) {
       localStoragePreloadPromise.then(
         () => setPreloaded(true),
@@ -135,6 +141,8 @@ const App = () => {
                                       the Provider must mount inside
                                       NavigationContainer. */}
                                   <NiceModal.Provider>
+                                    <PlaybackRatePersistence />
+                                    <PlaybackPositionPersistence />
                                     <Toasts />
                                     <Airplay />
                                     <RootScreen />

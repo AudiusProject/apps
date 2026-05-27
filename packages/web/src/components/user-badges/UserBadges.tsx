@@ -225,6 +225,7 @@ const UserBadges = ({
       css={{
         display: 'inline-flex',
         alignSelf: 'center',
+        flexShrink: 0,
         position: 'relative',
         pointerEvents: disableInteraction ? 'none' : 'auto'
       }}

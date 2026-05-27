@@ -36,6 +36,9 @@ export * from './tan-query/collection/useTrendingAlbums'
 export * from './tan-query/collection/useNewAlbumReleases'
 export * from './tan-query/collection/useBestSellingAlbums'
 
+// Feed preferences (UI state, persisted)
+export * from './tan-query/feed/useFeedPreferences'
+
 // Lineups
 export * from './tan-query/lineups/useFeed'
 export * from './tan-query/lineups/useForYouFeed'

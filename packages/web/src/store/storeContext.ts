@@ -22,8 +22,6 @@ import { isElectron } from 'utils/clientUtil'
 import { generatePlaylistArtwork } from 'utils/imageProcessingUtil'
 import { getShare } from 'utils/share'
 
-import { getLineupSelectorForRoute } from './lineup/lineupForRoute'
-
 export const buildStoreContext = ({
   isMobile,
   isTest
@@ -53,8 +51,6 @@ export const buildStoreContext = ({
     isElectron: isElectron(),
     env,
     explore,
-    // @ts-ignore js file
-    getLineupSelectorForRoute,
     audioPlayer: audioPlayer!,
     nftClient: null,
     trackDownload,

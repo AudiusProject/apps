@@ -4,7 +4,6 @@ import {
   castSagas,
   chatSagas,
   reachabilitySagas,
-  remoteConfigSagas,
   deletePlaylistConfirmationModalUISagas as deletePlaylistConfirmationModalSagas,
   duplicateAddConfirmationModalUISagas as duplicateAddConfirmationModalSagas,
   mobileOverflowMenuUISagas as overflowMenuSagas,
@@ -12,8 +11,6 @@ import {
   stripeModalUISagas,
   toastSagas,
   modalsSagas,
-  playbackSagas,
-  playbackPositionSagas,
   gatedContentSagas,
   purchaseContentSagas,
   withdrawUSDCSagas,
@@ -26,7 +23,6 @@ import backendSagas from 'common/store/backend/sagas'
 import rewardsPageSagas from 'common/store/pages/audio-rewards/sagas'
 import collectionPageSagas from 'common/store/pages/collection/sagas'
 import deactivateAccountSagas from 'common/store/pages/deactivate-account/sagas'
-import feedPageSagas from 'common/store/pages/feed/sagas'
 import signOnSagas from 'common/store/pages/signon/sagas'
 import tokenDashboardSagas from 'common/store/pages/token-dashboard/sagas'
 import trackPageSagas from 'common/store/pages/track/sagas'
@@ -65,8 +61,6 @@ export default function* rootSaga() {
 
     // Playback
     ...playbackEngineSagas(),
-    ...playbackSagas(),
-    ...playbackPositionSagas(),
 
     // Sign in / Sign out
     ...signOnSagas(),
@@ -90,7 +84,6 @@ export default function* rootSaga() {
     ...chatSagas(),
     ...mobileChatSagas(),
     ...collectionPageSagas(),
-    ...feedPageSagas(),
     ...profileSagas(),
     ...socialSagas(),
     ...rewardsPageSagas(),
@@ -115,7 +108,6 @@ export default function* rootSaga() {
     ...toastSagas(),
 
     initKeyboardEvents,
-    ...remoteConfigSagas(),
     ...walletsSagas()
   ]
 
