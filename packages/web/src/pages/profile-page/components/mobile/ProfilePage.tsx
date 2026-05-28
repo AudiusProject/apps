@@ -142,9 +142,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   const isLoading = status === Status.LOADING
   const isEditing = mode === 'editing'
 
-  // --- Tanquery lineups replace legacy redux lineups --------------------------
-  // Reposts may include collections (playlist reposts); TrackLineup only renders
-  // tracks today, so collections are dropped on the hook side (trackIds filter).
   const tracksArgs = useMemo(
     () => ({ handle: handleLower ?? '', sort: tracksLineupOrder }),
     [handleLower, tracksLineupOrder]
@@ -276,6 +273,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
             ) : (
               <TrackLineup
                 trackIds={userRepostsQuery.trackIds}
+                lineupItems={userRepostsQuery.data}
                 source='PROFILE_FEED'
                 querySource={repostsQuerySource}
                 isPending={userRepostsQuery.isPending}
@@ -347,6 +345,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         ) : (
           <TrackLineup
             trackIds={userRepostsQuery.trackIds}
+            lineupItems={userRepostsQuery.data}
             source='PROFILE_FEED'
             querySource={repostsQuerySource}
             isPending={userRepostsQuery.isPending}

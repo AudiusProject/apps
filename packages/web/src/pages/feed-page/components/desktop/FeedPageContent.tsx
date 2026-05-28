@@ -34,11 +34,6 @@ type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-// Note: the feed API returns both tracks and collections (playlist reposts).
-// The new TrackLineup renders tracks only, so collections are filtered out by
-// `trackIds` on the hook side. This is a known limitation introduced by the
-// tanquery migration — collection feed rendering will be restored if/when
-// TrackLineup learns to render mixed feeds.
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
   const titleRowRef = useRef<HTMLDivElement>(null)
   const [feedTab, setFeedTab] = useFeedTab()
@@ -123,9 +118,13 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
     />
   )
 
+  // Both feed hooks expose the mixed `LineupData[]` the API returns
+  // (tracks + collection reposts). TrackLineup branches per entry, so
+  // collections show up inline wherever the backend puts them.
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,
+        lineupItems: forYouFeed.data,
         isPending: forYouFeed.isPending,
         isFetching: forYouFeed.isFetching,
         isError: forYouFeed.isError,
@@ -137,6 +136,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       }
     : {
         trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
         isPending: followFeed.isPending,
         isFetching: followFeed.isFetching,
         isError: followFeed.isError,

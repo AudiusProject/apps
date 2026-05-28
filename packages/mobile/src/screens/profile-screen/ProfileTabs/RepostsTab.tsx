@@ -10,10 +10,6 @@ import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
-// Note: the reposts API returns both tracks and collections (playlist reposts).
-// The new TrackLineup renders tracks only, so collections are filtered out by
-// `trackIds` on the hook side. This is a known limitation introduced by the
-// tanquery migration.
 export const RepostsTab = () => {
   const { handle, repost_count = 0 } =
     useProfileUser({
@@ -29,6 +25,7 @@ export const RepostsTab = () => {
   const queryArgs = useMemo(() => ({ handle: handleLower }), [handleLower])
 
   const {
+    data,
     trackIds,
     isPending,
     isFetching,
@@ -49,6 +46,7 @@ export const RepostsTab = () => {
   return (
     <TrackLineup
       trackIds={trackIds}
+      lineupItems={data}
       source='PROFILE_FEED'
       querySource={querySource}
       isPending={isPending}
