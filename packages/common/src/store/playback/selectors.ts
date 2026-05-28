@@ -68,15 +68,17 @@ export const getUpNext = createSelector(
   (queue, index) => (index < 0 ? [] : queue.slice(index + 1))
 )
 
-// Returns { trackId, source } describing the currently playing entry. Mirrors
-// the legacy `queueSelectors.makeGetCurrent`. The values here are the
-// "currently loaded" entry (lags during load), matching legacy semantics.
+// Returns { trackId, source } describing the currently selected queue entry.
+// Reads from queue[index] (updated synchronously by playFrom/playTrackAt) so
+// tile-highlight comparisons stay stable during the load gap between
+// playFrom and playSucceeded — avoiding a stale `playingIndex` causing a
+// double `playFrom` dispatch on rapid retaps.
 export const makeGetCurrent = () =>
-  createSelector(
-    [getTrackId, getPlayingIndex, getPlaybackQueue],
-    (trackId, index, queue) => ({
-      trackId,
+  createSelector([getPlaybackIndex, getPlaybackQueue], (index, queue) => {
+    const entry = index >= 0 && index < queue.length ? queue[index] : null
+    return {
+      trackId: entry?.trackId ?? null,
       index,
-      source: index >= 0 && index < queue.length ? queue[index].source : null
-    })
-  )
+      source: entry?.source ?? null
+    }
+  })

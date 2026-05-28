@@ -341,13 +341,14 @@ const useQueueSync = (isAudioSetup: boolean) => {
         // Sort by original index so RNTP order matches redux order
         resolved.sort((a, b) => a.i - b.i)
 
-        // Tracks before startIndex get inserted at position 0 in reverse order
         const before = resolved.filter(({ i }) => i < startIndex)
         const after = resolved.filter(({ i }) => i > startIndex)
 
-        // Insert "before" tracks at position 0 (earliest first)
-        for (const { data } of before) {
-          await TrackPlayer.add(data, 0)
+        // Insert "before" tracks at position 0. Iterate from last to first so
+        // that earliest ends up at index 0 (each insert pushes prior entries
+        // right by one).
+        for (let j = before.length - 1; j >= 0; j--) {
+          await TrackPlayer.add(before[j].data, 0)
         }
 
         // Append "after" tracks at the end

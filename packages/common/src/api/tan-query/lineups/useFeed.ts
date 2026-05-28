@@ -60,7 +60,11 @@ export const useFeed = (
       const isFirstPage = allPages.length === 1
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       if (lastPage.length < currentPageSize) return undefined
-      return allPages.reduce((total, page) => total + page.length, 0)
+      return allPages.reduce(
+        (total, page) =>
+          total + page.filter((d) => d.type === EntityType.TRACK).length,
+        0
+      )
     },
     queryKey,
     queryFn: async ({ pageParam }) => {
