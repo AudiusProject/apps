@@ -25,7 +25,6 @@ export const ReferralChallengeContent = ({
   challenge,
   challengeName,
   claimStatus,
-  aaoErrorCode,
   onClaim,
   onClose
 }: ChallengeContentProps) => {
@@ -119,7 +118,7 @@ export const ReferralChallengeContent = ({
       additionalContent={referralContent}
       actions={actions}
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={false}
     />

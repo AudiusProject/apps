@@ -11,7 +11,6 @@ import {
   musicConfettiActions,
   CommonState
 } from '@audius/common/store'
-import { getAAOErrorEmojis } from '@audius/common/utils'
 import { ModalContent, Text } from '@audius/harmony'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -26,7 +25,7 @@ import { getChallengeContent } from './challengeContentRegistry'
 import styles from './styles.module.css'
 
 const { show: showConfetti } = musicConfettiActions
-const { getAAOErrorCode, getChallengeRewardsModalType, getClaimStatus } =
+const { getChallengeRewardsModalType, getClaimStatus } =
   audioRewardsPageSelectors
 const { resetAndCancelClaimReward } = audioRewardsPageActions
 const { getOptimisticUserChallenges } = challengesSelectors
@@ -37,8 +36,6 @@ const messages = {
   rewardAlreadyClaimed: 'Reward already claimed!',
   claimError:
     'Something went wrong while claiming your rewards. Please try again and contact support@audius.co.',
-  claimErrorAAO:
-    'Your account is unable to claim rewards at this time. Please try again later or contact support@audius.co. ',
   claimableAmountLabel: (amount: number) => `Claim $${amount} AUDIO`,
   xShare: (
     modalType:
@@ -76,18 +73,6 @@ const messages = {
   ineligible: 'Ineligible'
 }
 
-const getErrorMessage = (aaoErrorCode?: number) => {
-  if (aaoErrorCode !== undefined) {
-    return (
-      <>
-        {messages.claimErrorAAO}
-        {getAAOErrorEmojis(aaoErrorCode)}
-      </>
-    )
-  }
-  return <>{messages.claimError}</>
-}
-
 type BodyProps = {
   dismissModal: () => void
 }
@@ -96,7 +81,6 @@ const ChallengeRewardsBody = ({ dismissModal }: BodyProps) => {
   const { toast } = useContext(ToastContext)
   const dispatch = useDispatch()
   const claimStatus = useSelector(getClaimStatus)
-  const aaoErrorCode = useSelector(getAAOErrorCode)
   const modalType = useSelector(getChallengeRewardsModalType) as ChallengeName
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
@@ -108,7 +92,7 @@ const ChallengeRewardsBody = ({ dismissModal }: BodyProps) => {
   const errorContent =
     claimStatus === ClaimStatus.ERROR ? (
       <Text size='s' color='danger'>
-        {getErrorMessage(aaoErrorCode)}
+        {messages.claimError}
       </Text>
     ) : null
 

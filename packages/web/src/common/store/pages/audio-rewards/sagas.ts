@@ -28,18 +28,8 @@ import {
   CommonStoreContext,
   getSDK
 } from '@audius/common/store'
-import {
-  isResponseError,
-  waitForValue,
-  isPlayCountChallenge
-} from '@audius/common/utils'
-import {
-  Id,
-  AudiusSdk,
-  ChallengeId,
-  Errors,
-  RewardManagerError
-} from '@audius/sdk'
+import { waitForValue, isPlayCountChallenge } from '@audius/common/utils'
+import { Id, AudiusSdk, ChallengeId } from '@audius/sdk'
 import {
   call,
   fork,
@@ -272,29 +262,10 @@ async function claimRewardsForChallenge({
         })
         // Handle the individual specifier failures here to let the other
         // ones continue to claim and not reject the all() call.
-        .catch(async (error: unknown) => {
-          if (error instanceof Errors.AntiAbuseOracleAttestationError) {
-            await track(
-              make({
-                eventName: Name.REWARDS_CLAIM_BLOCKED,
-                challengeId,
-                specifier: specifierWithAmount.specifier,
-                amount: specifierWithAmount.amount,
-                code: error.code as number
-              })
-            )
-          } else if (isResponseError(error)) {
-            // Error handling - tracking removed
-          } else if (error instanceof RewardManagerError) {
-            // Error handling - tracking removed
-          } else {
-            // Error handling - tracking removed
-          }
-          return {
-            ...specifierWithAmount,
-            error
-          }
-        })
+        .catch((error: unknown) => ({
+          ...specifierWithAmount,
+          error
+        }))
     )
   )
 }
@@ -344,9 +315,7 @@ function* claimSingleChallengeRewardAsync(
   yield* put(setUserChallengesDisbursed({ challengeId, specifiers: claimed }))
 
   const errors = results.filter((r): r is ErrorResult => 'error' in r)
-  let aaoError: Errors.AntiAbuseOracleAttestationError | undefined
   if (errors.length > 0) {
-    // Log and report errors for each specifier that failed to claim
     for (const res of errors) {
       const error =
         res.error instanceof Error ? res.error : new Error(String(res.error))
@@ -354,18 +323,8 @@ function* claimSingleChallengeRewardAsync(
         `Failed to claim challenge: ${challengeId} specifier: ${res.specifier} for amount: ${res.amount} with error:`,
         error
       )
-      if (res.error instanceof Errors.AntiAbuseOracleAttestationError) {
-        aaoError = res.error
-      }
     }
-    const errorMessage = 'Some specifiers failed to claim'
-    if (aaoError) {
-      throw new Errors.AntiAbuseOracleAttestationError(
-        aaoError.code,
-        errorMessage
-      )
-    }
-    throw new Error(errorMessage)
+    throw new Error('Some specifiers failed to claim')
   }
 }
 
@@ -376,11 +335,7 @@ function* claimChallengeRewardAsync(
     yield* call(claimSingleChallengeRewardAsync, action)
     yield* put(claimChallengeRewardSucceeded())
   } catch (e) {
-    if (e instanceof Errors.AntiAbuseOracleAttestationError) {
-      yield* put(claimChallengeRewardFailed({ aaoErrorCode: e.code }))
-    } else {
-      yield* put(claimChallengeRewardFailed())
-    }
+    yield* put(claimChallengeRewardFailed())
   }
 }
 
@@ -389,7 +344,6 @@ function* claimAllChallengeRewardsAsync(
 ) {
   const { claims } = action.payload
   let hasError = false
-  let aaoErrorCode: undefined | number
   const { track, make } = yield* getContext('analytics')
   yield* call(
     track,
@@ -405,24 +359,11 @@ function* claimAllChallengeRewardsAsync(
           })
         } catch (e) {
           hasError = true
-          if (e instanceof Errors.AntiAbuseOracleAttestationError) {
-            aaoErrorCode = e.code
-          }
         }
       })
     )
   )
-  if (aaoErrorCode !== undefined) {
-    yield* put(claimChallengeRewardFailed({ aaoErrorCode }))
-    yield* call(
-      track,
-      make({
-        eventName: Name.REWARDS_CLAIM_ALL_BLOCKED,
-        count: claims.length,
-        code: aaoErrorCode
-      })
-    )
-  } else if (hasError) {
+  if (hasError) {
     yield* put(claimChallengeRewardFailed())
     yield* call(
       track,

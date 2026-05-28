@@ -35,7 +35,7 @@ const messages = {
 }
 
 export const PlayCountMilestoneContent = (props: ChallengeContentProps) => {
-  const { challengeName, onClose, onClaim, claimStatus, aaoErrorCode } = props
+  const { challengeName, onClose, onClaim, claimStatus } = props
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
   const userChallenges = useSelector((state: CommonState) =>
@@ -141,7 +141,7 @@ export const PlayCountMilestoneContent = (props: ChallengeContentProps) => {
       actions={actions}
       additionalContent={additionalContent}
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={!!optimisticChallenge?.cooldown_days}
     />

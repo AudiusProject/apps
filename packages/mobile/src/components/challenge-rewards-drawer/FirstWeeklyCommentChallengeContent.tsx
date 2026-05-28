@@ -31,7 +31,6 @@ const messages = {
 }
 
 export const FirstWeeklyCommentChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -134,7 +133,7 @@ export const FirstWeeklyCommentChallengeContent = ({
         ) : null
       }
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={false}
     />
