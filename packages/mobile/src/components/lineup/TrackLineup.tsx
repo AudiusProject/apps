@@ -8,6 +8,7 @@ import {
   type ReactElement
 } from 'react'
 
+import type { LineupData } from '@audius/common/api'
 import {
   Kind,
   type ID,
@@ -17,6 +18,7 @@ import {
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackQuerySource, PlaybackTrack } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
+import { EntityType } from '@audius/sdk'
 import { range } from 'lodash'
 import type {
   SectionList as RNSectionList,
@@ -27,7 +29,11 @@ import { StyleSheet, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { SectionList } from 'app/components/core'
-import { TrackTile, LineupTileSkeleton } from 'app/components/lineup-tile'
+import {
+  TrackTile,
+  CollectionTile,
+  LineupTileSkeleton
+} from 'app/components/lineup-tile'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
 const { makeGetCurrent } = playbackSelectors
@@ -46,7 +52,9 @@ const styles = StyleSheet.create({
 })
 
 type LoadingItem = { _loading: true }
-type Entry = { trackId: ID; uid: UID }
+type TrackEntry = { kind: 'track'; trackId: ID; uid: UID }
+type CollectionEntry = { kind: 'collection'; collectionId: ID }
+type Entry = TrackEntry | CollectionEntry
 type RenderItem = Entry | LoadingItem
 
 type Section = {
@@ -67,6 +75,12 @@ export type TrackLineupProps = {
   // Ordered list of track IDs to render. Tiles read full track data from the
   // tanquery cache (primed by whatever hook produced this list).
   trackIds: ID[]
+
+  // Optional mixed track/collection list. When provided, the lineup renders
+  // collection tiles inline for `PLAYLIST`/`ALBUM` entries and track tiles
+  // for `TRACK` entries (the For You feed uses this). When omitted the
+  // lineup behaves as a pure track lineup driven by `trackIds`.
+  lineupItems?: LineupData[]
 
   // Opaque string that tags the queue entries this lineup produces. Must
   // match the source used by the playback saga's shadow into legacy queue
@@ -119,6 +133,7 @@ export type TrackLineupProps = {
  */
 export const TrackLineup = ({
   trackIds,
+  lineupItems,
   source,
   querySource,
   isPending = false,
@@ -158,10 +173,24 @@ export const TrackLineup = ({
     [source]
   )
 
-  const visibleTrackIds = useMemo(() => {
-    const end = Math.min(trackIds.length, maxEntries)
-    return trackIds.slice(0, end)
-  }, [trackIds, maxEntries])
+  // Build a single ordered list of mixed track/collection entries. When the
+  // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
+  // wrap the legacy `trackIds` so the rest of the component is uniform.
+  const visibleItems: LineupData[] = useMemo(() => {
+    const source =
+      lineupItems ?? trackIds.map((id) => ({ id, type: EntityType.TRACK }))
+    const end = Math.min(source.length, maxEntries)
+    return source.slice(0, end)
+  }, [lineupItems, trackIds, maxEntries])
+
+  // Playback queue is track-only. Collection tiles drive their own internal
+  // playback via the playback slice (the mobile CollectionTile's togglePlay
+  // already targets the first track of its playlist).
+  const visibleTrackIds = useMemo(
+    () =>
+      visibleItems.filter((i) => i.type === EntityType.TRACK).map((i) => i.id),
+    [visibleItems]
+  )
 
   const tracksForPlayback: PlaybackTrack[] = useMemo(
     () =>
@@ -174,7 +203,7 @@ export const TrackLineup = ({
   )
 
   const togglePlay = useCallback(
-    ({ id }: { uid: UID; id: ID; source: PlaybackSource }) => {
+    ({ id }: { uid?: UID; id: ID; source?: PlaybackSource }) => {
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === id && currentSource === source
@@ -209,8 +238,17 @@ export const TrackLineup = ({
   )
 
   const entries: Entry[] = useMemo(
-    () => visibleTrackIds.map((id) => ({ trackId: id, uid: uidFor(id) })),
-    [visibleTrackIds, uidFor]
+    () =>
+      visibleItems.map((item) =>
+        item.type === EntityType.TRACK
+          ? {
+              kind: 'track' as const,
+              trackId: item.id,
+              uid: uidFor(item.id)
+            }
+          : { kind: 'collection' as const, collectionId: item.id }
+      ),
+    [visibleItems, uidFor]
   )
 
   // Synchronous "load more was triggered" flag — set the moment the scroll
@@ -265,15 +303,24 @@ export const TrackLineup = ({
       return (
         <>
           <View style={[styles.item, itemStyles]}>
-            <TrackTile
-              id={entry.trackId}
-              uid={entry.uid}
-              index={index}
-              isTrending={isTrending}
-              togglePlay={togglePlay}
-              onPress={onPressItem}
-              showArtistPick={showArtistPick}
-            />
+            {entry.kind === 'track' ? (
+              <TrackTile
+                id={entry.trackId}
+                uid={entry.uid}
+                index={index}
+                isTrending={isTrending}
+                togglePlay={togglePlay}
+                onPress={onPressItem}
+                showArtistPick={showArtistPick}
+              />
+            ) : (
+              <CollectionTile
+                id={entry.collectionId}
+                index={index}
+                isTrending={isTrending}
+                togglePlay={togglePlay}
+              />
+            )}
           </View>
           {delineator}
         </>
@@ -329,11 +376,13 @@ export const TrackLineup = ({
         onEndReachedThreshold={LOAD_MORE_THRESHOLD}
         sections={isEmpty ? [] : sections}
         stickySectionHeadersEnabled={false}
-        keyExtractor={(item: any, index: number) =>
-          (item as LoadingItem)._loading
-            ? `skeleton-${index}`
-            : `${(item as Entry).uid}-${index}`
-        }
+        keyExtractor={(item: any, index: number) => {
+          if ((item as LoadingItem)._loading) return `skeleton-${index}`
+          const entry = item as Entry
+          return entry.kind === 'track'
+            ? `track-${entry.uid}-${index}`
+            : `collection-${entry.collectionId}-${index}`
+        }}
         renderItem={renderItem}
         scrollIndicatorInsets={{ right: Number.MIN_VALUE }}
       />

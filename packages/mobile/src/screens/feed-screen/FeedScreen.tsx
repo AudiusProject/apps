@@ -29,11 +29,6 @@ const messages = {
   endOfFeed: "Looks like you've reached the end of your feed..."
 }
 
-// Note: the feed API returns both tracks and collections (playlist reposts).
-// The new TrackLineup renders tracks only, so collections are filtered out by
-// `trackIds` on the hook side. This is a known limitation introduced by the
-// tanquery migration — collection feed rendering will be restored if/when
-// TrackLineup learns to render mixed feeds.
 export const FeedScreen = () => {
   const [feedTab, setFeedTab] = useFeedTab()
   const [feedFilter] = useFeedFilter()
@@ -88,6 +83,7 @@ export const FeedScreen = () => {
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,
+        lineupItems: forYouFeed.data,
         isPending: forYouFeed.isPending,
         isFetching: forYouFeed.isFetching,
         hasNextPage: forYouFeed.hasNextPage,

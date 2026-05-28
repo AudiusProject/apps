@@ -43,11 +43,6 @@ type FeedPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
-// Note: the feed API returns both tracks and collections (playlist reposts).
-// The new TrackLineup renders tracks only, so collections are filtered out by
-// `trackIds` on the hook side. This is a known limitation introduced by the
-// tanquery migration — collection feed rendering will be restored if/when
-// TrackLineup learns to render mixed feeds.
 const FeedPageMobileContent = ({
   containerRef
 }: FeedPageMobileContentProps) => {
@@ -128,6 +123,7 @@ const FeedPageMobileContent = ({
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,
+        lineupItems: forYouFeed.data,
         isPending: forYouFeed.isPending,
         isFetching: forYouFeed.isFetching,
         isError: forYouFeed.isError,

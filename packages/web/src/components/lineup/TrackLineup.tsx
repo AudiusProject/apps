@@ -1,14 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import type { LineupData } from '@audius/common/api'
+import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
 import { ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
-import type { PlaybackTrack, PlaybackQuerySource } from '@audius/common/store'
+import type {
+  PlaybackTrack,
+  PlaybackQuerySource,
+  QueueSource
+} from '@audius/common/store'
 import { Divider, Flex } from '@audius/harmony'
+import { EntityType } from '@audius/sdk'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { make } from 'common/store/analytics/actions'
+import { CollectionTile as DesktopCollectionTile } from 'components/track/desktop/CollectionTile'
 import { TrackTile as TrackTileDesktop } from 'components/track/desktop/TrackTile'
+import { CollectionTile as MobileCollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTile as MobileTrackTile } from 'components/track/mobile/TrackTile'
 import { TrackTileSize, TileProps } from 'components/track/types'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
@@ -38,6 +47,12 @@ export type TrackLineupProps = {
   // Ordered list of track IDs to render. Tiles read full track data from the
   // tanquery cache (primed by whatever hook produced this list).
   trackIds: ID[]
+
+  // Optional mixed track/collection list. When provided, the lineup renders
+  // collection tiles inline for `PLAYLIST`/`ALBUM` entries and track tiles
+  // for `TRACK` entries (the For You feed uses this). When omitted the
+  // lineup behaves as a pure track lineup driven by `trackIds`.
+  lineupItems?: LineupData[]
 
   // Opaque string that tags the queue entries this lineup produces. Must
   // match the source used by the playback saga's shadow into legacy queue
@@ -90,6 +105,7 @@ export type TrackLineupProps = {
  */
 export const TrackLineup = ({
   trackIds,
+  lineupItems,
   source,
   querySource,
   isPending = false,
@@ -132,6 +148,9 @@ export const TrackLineup = ({
     isMobile || variant === LineupVariant.SECTION || isNarrow
 
   const TrackTile = isSmallTrackTile ? MobileTrackTile : TrackTileDesktop
+  const CollectionTile = isSmallTrackTile
+    ? MobileCollectionTile
+    : DesktopCollectionTile
 
   // For tile highlight: prefer new playback slice's current track when
   // present, else fall back to legacy current (non-trending flows). Also
@@ -144,13 +163,27 @@ export const TrackLineup = ({
   useSelector(getPlaybackCurrentTrackId)
   const isPlaying = useSelector(getPlayerPlaying)
 
+  // Build a single ordered list of mixed track/collection entries. When the
+  // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
+  // wrap the legacy `trackIds` so the rest of the component is uniform.
+  const items: LineupData[] = useMemo(
+    () => lineupItems ?? trackIds.map((id) => ({ id, type: EntityType.TRACK })),
+    [lineupItems, trackIds]
+  )
+
+  // Playback queue is track-only. Collection tiles handle their own
+  // play/pause via the playback slice (see `playTrack`/`pauseTrack` below).
+  const playbackTrackIds = useMemo(
+    () => items.filter((i) => i.type === EntityType.TRACK).map((i) => i.id),
+    [items]
+  )
   const tracksForPlayback: PlaybackTrack[] = useMemo(
     () =>
-      trackIds.map((id) => ({
+      playbackTrackIds.map((id) => ({
         trackId: id,
         source
       })),
-    [trackIds, source]
+    [playbackTrackIds, source]
   )
 
   const togglePlay = useCallback(
@@ -175,7 +208,7 @@ export const TrackLineup = ({
         )
         return
       }
-      const startIndex = trackIds.indexOf(trackId)
+      const startIndex = playbackTrackIds.indexOf(trackId)
       if (startIndex < 0) return
       dispatch(
         playbackActions.playFrom({
@@ -191,7 +224,7 @@ export const TrackLineup = ({
     [
       dispatch,
       tracksForPlayback,
-      trackIds,
+      playbackTrackIds,
       querySource,
       currentLegacy?.trackId,
       currentLegacy?.source,
@@ -200,6 +233,24 @@ export const TrackLineup = ({
       playbackSource
     ]
   )
+
+  // Collection tiles drive their own internal track playback (one of the
+  // playlist's tracks at a time) through the playback slice — same hooks
+  // the chat-unfurled CollectionTile uses.
+  const playTrack = usePlayTrack()
+  const handlePlayCollectionTrack = useCallback(
+    (trackId: ID) => {
+      playTrack({
+        id: trackId,
+        // `source` on the lineup is an opaque string that tags queue entries;
+        // it lines up with `QueueSource` values for well-known lineups
+        // (DISCOVER_FEED here). The saga treats it as a string identifier.
+        entries: [{ id: trackId, source: source as QueueSource }]
+      })
+    },
+    [playTrack, source]
+  )
+  const pauseTrack = usePauseTrack()
 
   // Tile sizing mirrors the legacy component.
   let tileSize: TrackTileSize = TrackTileSize.LARGE
@@ -220,10 +271,10 @@ export const TrackLineup = ({
       ? styles.main
       : styles.section
 
-  const visibleTrackIds = useMemo(() => {
-    const end = Math.min(trackIds.length, maxEntries)
-    return trackIds.slice(0, end)
-  }, [trackIds, maxEntries])
+  const visibleItems = useMemo(() => {
+    const end = Math.min(items.length, maxEntries)
+    return items.slice(0, end)
+  }, [items, maxEntries])
 
   // Track the scroll parent's viewport height so the load-more threshold is a
   // multiple of one full viewport. Falls back to the constant until measured.
@@ -253,13 +304,13 @@ export const TrackLineup = ({
   // tanquery's `isFetching` to round-trip back through the parent. Cleared
   // once the parent either delivers more entries or finishes fetching.
   const [isLoadMoreTriggered, setIsLoadMoreTriggered] = useState(false)
-  const prevEntriesLengthRef = useRef(visibleTrackIds.length)
+  const prevEntriesLengthRef = useRef(visibleItems.length)
   useEffect(() => {
-    if (visibleTrackIds.length !== prevEntriesLengthRef.current) {
-      prevEntriesLengthRef.current = visibleTrackIds.length
+    if (visibleItems.length !== prevEntriesLengthRef.current) {
+      prevEntriesLengthRef.current = visibleItems.length
       setIsLoadMoreTriggered(false)
     }
-  }, [visibleTrackIds.length])
+  }, [visibleItems.length])
   useEffect(() => {
     if (!isFetching) setIsLoadMoreTriggered(false)
   }, [isFetching])
@@ -333,29 +384,54 @@ export const TrackLineup = ({
 
   const tiles = useMemo(() => {
     if (isError) return []
-    return visibleTrackIds.map((trackId, index) => {
-      const trackProps = {
+    return visibleItems.map((item, index) => {
+      if (item.type === EntityType.TRACK) {
+        const trackProps = {
+          index,
+          ordered,
+          togglePlay,
+          size: tileSize,
+          statSize,
+          containerClassName,
+          id: item.id,
+          isLoading: false,
+          isTrending,
+          isFeed,
+          onClick: onClickTile,
+          showArtistPick
+        }
+        // @ts-ignore - track tile accepts extra props
+        return <TrackTile {...trackProps} key={`track-${item.id}-${index}`} />
+      }
+      const collectionProps = {
         index,
         ordered,
         togglePlay,
+        playTrack: handlePlayCollectionTrack,
+        pauseTrack,
         size: tileSize,
-        statSize,
         containerClassName,
-        id: trackId,
+        id: item.id,
         isLoading: false,
+        hasLoaded: () => {},
         isTrending,
-        isFeed,
-        onClick: onClickTile,
-        showArtistPick
+        isFeed
       }
-      // @ts-ignore - track tile accepts extra props
-      return <TrackTile {...trackProps} key={`${trackId}-${index}`} />
+      return (
+        // @ts-ignore - CollectionTile mobile variant accepts a subset of these props
+        <CollectionTile
+          {...collectionProps}
+          key={`collection-${item.id}-${index}`}
+        />
+      )
     })
   }, [
     isError,
-    visibleTrackIds,
+    visibleItems,
     ordered,
     togglePlay,
+    handlePlayCollectionTrack,
+    pauseTrack,
     tileSize,
     statSize,
     containerClassName,
@@ -363,7 +439,8 @@ export const TrackLineup = ({
     isFeed,
     onClickTile,
     showArtistPick,
-    TrackTile
+    TrackTile,
+    CollectionTile
   ])
 
   const isInitialLoad = isPending && tiles.length === 0
@@ -425,7 +502,7 @@ export const TrackLineup = ({
                   >
                     {tile}
                     {elementAdornment &&
-                      elementAdornment(visibleTrackIds[index], index)}
+                      elementAdornment(visibleItems[index].id, index)}
                   </Flex>
                   {index === 0 &&
                   tiles.length >= 1 &&
