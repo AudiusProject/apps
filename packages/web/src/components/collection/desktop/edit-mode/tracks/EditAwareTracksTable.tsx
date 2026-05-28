@@ -36,14 +36,25 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
   const isEditingThis =
     editMode.isEditMode && editMode.collectionId === collectionId
 
+  // While editing, tracks staged for removal disappear from the table
+  // immediately; they are only persisted (or restored) when Apply/Discard runs.
+  const visibleData = useMemo(() => {
+    if (!isEditingThis || editMode.removedTrackIds.size === 0) return data
+    return data.filter(
+      (t) =>
+        typeof t.track_id !== 'number' ||
+        !editMode.removedTrackIds.has(t.track_id)
+    )
+  }, [data, editMode.removedTrackIds, isEditingThis])
+
   const selectableTrackIds = useMemo(() => {
     if (!isEditingThis) return [] as ID[]
     const ids: ID[] = []
-    for (const t of data) {
+    for (const t of visibleData) {
       if (typeof t.track_id === 'number') ids.push(t.track_id)
     }
     return ids
-  }, [data, isEditingThis])
+  }, [visibleData, isEditingThis])
 
   const selectableCount = selectableTrackIds.length
   const selectedCount = selection.count
@@ -162,7 +173,7 @@ export const EditAwareTracksTable = (props: EditAwareTracksTableProps) => {
   return (
     <TracksTable
       {...rest}
-      data={data}
+      data={visibleData}
       onClickRow={handleClickRow}
       rowClassNameAddition={rowClassNameAddition}
       trackNameHeader={trackNameHeader}
