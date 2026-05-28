@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
-import { useCollection, useTracks } from '@audius/common/api'
+import { useTracks } from '@audius/common/api'
 import { ID } from '@audius/common/models'
-import { cacheCollectionsActions, toastActions } from '@audius/common/store'
+import { toastActions } from '@audius/common/store'
 import {
   Button,
   Flex,
@@ -15,10 +15,8 @@ import { useDispatch } from 'react-redux'
 
 import { usePlaylistEditMode } from '../PlaylistEditModeContext'
 
-import { useTrackHistoryContext } from './TrackHistoryContext'
 import { useTrackSelection } from './TrackSelectionContext'
 
-const { removeTrackFromPlaylist, addTrackToPlaylist } = cacheCollectionsActions
 const { toast } = toastActions
 
 const messages = {
@@ -46,12 +44,16 @@ export const TrackBulkActionsBar = (props: Props) => {
   const { color } = useTheme()
   const editMode = usePlaylistEditMode()
   const selection = useTrackSelection()
-  const history = useTrackHistoryContext()
 
-  const { data: collection } = useCollection(collectionId)
+  // Tracks already staged for removal are hidden from the table and should not
+  // be re-selected (e.g. by Select all).
+  const selectableTrackIds = useMemo(
+    () => orderedTrackIds.filter((id) => !editMode.removedTrackIds.has(id)),
+    [orderedTrackIds, editMode]
+  )
   const selectedIds = useMemo(
-    () => orderedTrackIds.filter((id) => selection.isSelected(id)),
-    [orderedTrackIds, selection]
+    () => selectableTrackIds.filter((id) => selection.isSelected(id)),
+    [selectableTrackIds, selection]
   )
   const { data: selectedTracks } = useTracks(selectedIds)
 
@@ -81,39 +83,21 @@ export const TrackBulkActionsBar = (props: Props) => {
   }, [dispatch, selectedTracks])
 
   const removeSelected = useCallback(() => {
-    if (!collection) return
     const trackIds = selectedIds
     if (trackIds.length === 0) return
-    // Record each removal in history so it can be undone.
-    trackIds.forEach((trackId) => {
-      const entry = collection.playlist_contents.track_ids.find(
-        (t) => t.track === trackId
-      )
-      if (!entry) return
-      const index = collection.playlist_contents.track_ids.findIndex(
-        (t) => t.track === trackId && t.time === entry.time
-      )
-      const timestamp = entry.metadata_time ?? entry.time
-      history.push({ type: 'remove', trackId, index, timestamp })
-      dispatch(removeTrackFromPlaylist(trackId, collectionId, timestamp))
-    })
+    // Stage the removal — it isn't persisted until Apply is pressed.
+    editMode.stageRemoval(trackIds)
     dispatch(toast({ content: messages.removed(trackIds.length) }))
     selection.clear()
-  }, [collection, collectionId, dispatch, history, selectedIds, selection])
+  }, [dispatch, editMode, selectedIds, selection])
 
   const handleUndo = useCallback(() => {
-    history.undo((inverse) => {
-      if (inverse.type === 'add') {
-        dispatch(
-          addTrackToPlaylist(inverse.trackId, collectionId, { silent: true })
-        )
-      }
-    })
-  }, [collectionId, dispatch, history])
+    editMode.undoRemoval()
+  }, [editMode])
 
   const handleRedo = useCallback(() => {
-    history.redo()
-  }, [history])
+    editMode.redoRemoval()
+  }, [editMode])
 
   // Keyboard shortcuts: only active while in edit mode
   useEffect(() => {
@@ -128,7 +112,7 @@ export const TrackBulkActionsBar = (props: Props) => {
       const mod = e.metaKey || e.ctrlKey
       if (mod && e.key.toLowerCase() === 'a') {
         e.preventDefault()
-        selection.selectAll(orderedTrackIds)
+        selection.selectAll(selectableTrackIds)
         return
       }
       if (mod && e.key.toLowerCase() === 'z' && !e.shiftKey) {
@@ -166,7 +150,7 @@ export const TrackBulkActionsBar = (props: Props) => {
     editMode.isEditMode,
     handleRedo,
     handleUndo,
-    orderedTrackIds,
+    selectableTrackIds,
     removeSelected,
     selection
   ])
@@ -174,7 +158,11 @@ export const TrackBulkActionsBar = (props: Props) => {
   if (!editMode.isEditMode || editMode.collectionId !== collectionId) {
     return null
   }
-  if (selection.count === 0 && !history.canUndo && !history.canRedo) {
+  if (
+    selection.count === 0 &&
+    !editMode.canUndoRemoval &&
+    !editMode.canRedoRemoval
+  ) {
     return null
   }
 
@@ -205,7 +193,7 @@ export const TrackBulkActionsBar = (props: Props) => {
         <Button
           variant='secondary'
           size='small'
-          onClick={() => selection.selectAll(orderedTrackIds)}
+          onClick={() => selection.selectAll(selectableTrackIds)}
         >
           {messages.selectAll}
         </Button>
@@ -232,7 +220,7 @@ export const TrackBulkActionsBar = (props: Props) => {
         <Button
           variant='secondary'
           size='small'
-          disabled={!history.canUndo}
+          disabled={!editMode.canUndoRemoval}
           onClick={handleUndo}
         >
           {messages.undo}
@@ -240,7 +228,7 @@ export const TrackBulkActionsBar = (props: Props) => {
         <Button
           variant='secondary'
           size='small'
-          disabled={!history.canRedo}
+          disabled={!editMode.canRedoRemoval}
           onClick={handleRedo}
         >
           {messages.redo}

@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState
 } from 'react'
 
@@ -40,13 +41,19 @@ type PlaylistEditModeContextValue = {
   isEditMode: boolean
   status: Status
   draft: PlaylistMetadataDraft
+  removedTrackIds: Set<ID>
   hasChanges: boolean
+  canUndoRemoval: boolean
+  canRedoRemoval: boolean
   enterEditMode: () => void
   exitEditMode: () => void
   setField: <K extends keyof PlaylistMetadataDraft>(
     field: K,
     value: PlaylistMetadataDraft[K]
   ) => void
+  stageRemoval: (ids: ID[]) => void
+  undoRemoval: () => void
+  redoRemoval: () => void
   apply: () => void
   discard: () => void
   resolveConflict: () => void
@@ -61,14 +68,21 @@ const compareValues = (a: unknown, b: unknown) =>
 const messages = {
   saved: ({
     savedDetails,
-    savedArtwork
+    savedArtwork,
+    savedTracks
   }: {
     savedDetails: boolean
     savedArtwork: boolean
+    savedTracks: boolean
   }) => {
-    if (savedDetails && savedArtwork) return 'Saved details and artwork'
-    if (savedArtwork) return 'Saved artwork'
-    return 'Saved details'
+    const parts: string[] = []
+    if (savedDetails) parts.push('details')
+    if (savedArtwork) parts.push('artwork')
+    if (savedTracks) parts.push('tracks')
+    if (parts.length === 0) return 'Saved changes'
+    if (parts.length === 1) return `Saved ${parts[0]}`
+    const last = parts.pop()
+    return `Saved ${parts.join(', ')} and ${last}`
   },
   conflict:
     'Heads up — someone else changed this playlist while you were editing. Reload and try again.',
@@ -92,22 +106,40 @@ export const PlaylistEditModeProvider = ({
 
   const [isEditMode, setIsEditMode] = useState(false)
   const [draft, setDraft] = useState<PlaylistMetadataDraft>({})
+  const [removedTrackIds, setRemovedTrackIds] = useState<Set<ID>>(new Set())
   const [status, setStatus] = useState<Status>('idle')
   const [editModeLoadedAt, setEditModeLoadedAt] = useState<number | null>(null)
+
+  // Undo/redo stacks for staged track removals. Each entry is one user action
+  // (a batch of track ids removed together). These live alongside the draft so
+  // they reset atomically with it on enter/exit/discard/apply.
+  const undoStackRef = useRef<ID[][]>([])
+  const redoStackRef = useRef<ID[][]>([])
+  const [, setHistoryTick] = useState(0)
+  const bumpHistory = useCallback(() => setHistoryTick((t) => t + 1), [])
+
+  const resetRemovals = useCallback(() => {
+    setRemovedTrackIds(new Set())
+    undoStackRef.current = []
+    redoStackRef.current = []
+    bumpHistory()
+  }, [bumpHistory])
 
   const enterEditMode = useCallback(() => {
     setIsEditMode(true)
     setDraft({})
+    resetRemovals()
     setStatus('idle')
     setEditModeLoadedAt(Date.now())
-  }, [])
+  }, [resetRemovals])
 
   const exitEditMode = useCallback(() => {
     setIsEditMode(false)
     setDraft({})
+    resetRemovals()
     setStatus('idle')
     setEditModeLoadedAt(null)
-  }, [])
+  }, [resetRemovals])
 
   const setField = useCallback<PlaylistEditModeContextValue['setField']>(
     (field, value) => {
@@ -116,19 +148,61 @@ export const PlaylistEditModeProvider = ({
     []
   )
 
+  const stageRemoval = useCallback(
+    (ids: ID[]) => {
+      if (ids.length === 0) return
+      setRemovedTrackIds((prev) => {
+        const next = new Set(prev)
+        ids.forEach((id) => next.add(id))
+        return next
+      })
+      undoStackRef.current.push(ids)
+      redoStackRef.current = []
+      bumpHistory()
+    },
+    [bumpHistory]
+  )
+
+  const undoRemoval = useCallback(() => {
+    const ids = undoStackRef.current.pop()
+    if (!ids) return
+    redoStackRef.current.push(ids)
+    setRemovedTrackIds((prev) => {
+      const next = new Set(prev)
+      ids.forEach((id) => next.delete(id))
+      return next
+    })
+    bumpHistory()
+  }, [bumpHistory])
+
+  const redoRemoval = useCallback(() => {
+    const ids = redoStackRef.current.pop()
+    if (!ids) return
+    undoStackRef.current.push(ids)
+    setRemovedTrackIds((prev) => {
+      const next = new Set(prev)
+      ids.forEach((id) => next.add(id))
+      return next
+    })
+    bumpHistory()
+  }, [bumpHistory])
+
   const discard = useCallback(() => {
     setDraft({})
-  }, [])
+    resetRemovals()
+  }, [resetRemovals])
 
   const resolveConflict = useCallback(() => {
     setStatus('idle')
     setDraft({})
+    resetRemovals()
     setIsEditMode(false)
     setEditModeLoadedAt(null)
-  }, [])
+  }, [resetRemovals])
 
   const hasChanges = useMemo(() => {
     if (!collection) return false
+    if (removedTrackIds.size > 0) return true
     const fields = ['playlist_name', 'description', 'is_private'] as const
     for (const f of fields) {
       if (
@@ -140,7 +214,7 @@ export const PlaylistEditModeProvider = ({
     }
     if (draft.artwork !== undefined && draft.artwork !== null) return true
     return false
-  }, [collection, draft])
+  }, [collection, draft, removedTrackIds])
 
   const apply = useCallback(() => {
     if (!collection || !collection.playlist_id) return
@@ -165,10 +239,19 @@ export const PlaylistEditModeProvider = ({
 
     setStatus('saving')
 
+    const playlistContents = {
+      ...collection.playlist_contents,
+      track_ids: collection.playlist_contents.track_ids.filter(
+        (t) => !removedTrackIds.has(t.track)
+      )
+    }
+
     const merged: EditCollectionValues = {
       ...(collection as unknown as EditCollectionValues),
-      playlist_contents: collection.playlist_contents,
-      tracks: tracks ?? [],
+      playlist_contents: playlistContents,
+      tracks: (tracks ?? []).filter(
+        (t) => t.track_id == null || !removedTrackIds.has(t.track_id)
+      ),
       playlist_name: draft.playlist_name ?? collection.playlist_name,
       description:
         draft.description !== undefined
@@ -186,16 +269,22 @@ export const PlaylistEditModeProvider = ({
       draft.description !== undefined ||
       draft.is_private !== undefined
     const savedArtwork = draft.artwork != null
+    const savedTracks = removedTrackIds.size > 0
 
     dispatch(
       editPlaylist(collection.playlist_id, merged, (success) => {
         if (success) {
           dispatch(
             toast({
-              content: messages.saved({ savedDetails, savedArtwork })
+              content: messages.saved({
+                savedDetails,
+                savedArtwork,
+                savedTracks
+              })
             })
           )
           setDraft({})
+          resetRemovals()
           setIsEditMode(false)
           setStatus('idle')
           setEditModeLoadedAt(null)
@@ -212,8 +301,13 @@ export const PlaylistEditModeProvider = ({
     editModeLoadedAt,
     exitEditMode,
     hasChanges,
+    removedTrackIds,
+    resetRemovals,
     tracks
   ])
+
+  const canUndoRemoval = undoStackRef.current.length > 0
+  const canRedoRemoval = redoStackRef.current.length > 0
 
   const value = useMemo<PlaylistEditModeContextValue>(
     () => ({
@@ -222,16 +316,24 @@ export const PlaylistEditModeProvider = ({
       isEditMode,
       status,
       draft,
+      removedTrackIds,
       hasChanges,
+      canUndoRemoval,
+      canRedoRemoval,
       enterEditMode,
       exitEditMode,
       setField,
+      stageRemoval,
+      undoRemoval,
+      redoRemoval,
       apply,
       discard,
       resolveConflict
     }),
     [
       apply,
+      canRedoRemoval,
+      canUndoRemoval,
       collectionId,
       discard,
       draft,
@@ -240,9 +342,13 @@ export const PlaylistEditModeProvider = ({
       hasChanges,
       isEditMode,
       isOwner,
+      redoRemoval,
+      removedTrackIds,
       resolveConflict,
       setField,
-      status
+      stageRemoval,
+      status,
+      undoRemoval
     ]
   )
 
@@ -265,10 +371,16 @@ export const usePlaylistEditMode = (): PlaylistEditModeContextValue => {
       isEditMode: false,
       status: 'idle',
       draft: {},
+      removedTrackIds: new Set(),
       hasChanges: false,
+      canUndoRemoval: false,
+      canRedoRemoval: false,
       enterEditMode: () => {},
       exitEditMode: () => {},
       setField: () => {},
+      stageRemoval: () => {},
+      undoRemoval: () => {},
+      redoRemoval: () => {},
       apply: () => {},
       discard: () => {},
       resolveConflict: () => {}
