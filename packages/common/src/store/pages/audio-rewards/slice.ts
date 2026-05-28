@@ -237,17 +237,8 @@ const slice = createSlice({
       state.claimState = { status: ClaimStatus.WAITING_FOR_RETRY }
       state.claimToRetry = action.payload
     },
-    claimChallengeRewardFailed: (
-      state,
-      action: PayloadAction<
-        | {
-            aaoErrorCode: number
-          }
-        | undefined
-      >
-    ) => {
-      const aaoErrorCode = action.payload?.aaoErrorCode
-      state.claimState = { status: ClaimStatus.ERROR, aaoErrorCode }
+    claimChallengeRewardFailed: (state) => {
+      state.claimState = { status: ClaimStatus.ERROR }
     },
     claimChallengeRewardAlreadyClaimed: (state) => {
       state.claimState = { status: ClaimStatus.ALREADY_CLAIMED }

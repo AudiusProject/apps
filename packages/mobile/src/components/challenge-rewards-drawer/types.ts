@@ -15,8 +15,6 @@ export type ChallengeContentProps = {
   challengeName: ChallengeName
   /** The current claim status */
   claimStatus: ClaimStatus
-  /** Error code from AAO */
-  aaoErrorCode?: number
   /** Callback for claiming rewards */
   onClaim?: () => void
   /** Callback for closing the drawer */

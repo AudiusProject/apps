@@ -24,7 +24,6 @@ export const DefaultChallengeContent = ({
   challenge,
   challengeName,
   claimStatus,
-  aaoErrorCode,
   onClaim,
   onClose,
   children
@@ -110,7 +109,7 @@ export const DefaultChallengeContent = ({
       statusLabel={statusLabel}
       actions={children ?? actions}
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={!!challenge?.cooldown_days}
     />

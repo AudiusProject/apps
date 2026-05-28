@@ -300,10 +300,8 @@ export enum Name {
   REWARDS_CLAIM_ALL_REQUEST = 'Rewards Claim All: Request',
   REWARDS_CLAIM_ALL_SUCCESS = 'Rewards Claim All: Success',
   REWARDS_CLAIM_ALL_FAILURE = 'Rewards Claim All: Failure',
-  REWARDS_CLAIM_ALL_BLOCKED = 'Rewards Claim All: Blocked',
   REWARDS_CLAIM_REQUEST = 'Rewards Claim: Request',
   REWARDS_CLAIM_SUCCESS = 'Rewards Claim: Success',
-  REWARDS_CLAIM_BLOCKED = 'Rewards Claim: Blocked',
 
   // Buy USDC
   BUY_USDC_ON_RAMP_OPENED = 'Buy USDC: On Ramp Opened',
@@ -1493,14 +1491,6 @@ type RewardsClaimSuccess = {
   amount: number
 }
 
-type RewardsClaimBlocked = {
-  eventName: Name.REWARDS_CLAIM_BLOCKED
-  challengeId: string
-  specifier: string
-  amount: number
-  code: number
-}
-
 type RewardsClaimAllRequest = {
   eventName: Name.REWARDS_CLAIM_ALL_REQUEST
   count: number
@@ -1512,11 +1502,6 @@ type RewardsClaimAllSuccess = {
 type RewardsClaimAllFailure = {
   eventName: Name.REWARDS_CLAIM_ALL_FAILURE
   count: number
-}
-type RewardsClaimAllBlocked = {
-  eventName: Name.REWARDS_CLAIM_ALL_BLOCKED
-  count: number
-  code: number
 }
 
 type AudiusOauthStart = {
@@ -2749,11 +2734,9 @@ export type AllTrackingEvents =
   | RewardsClaimDetailsOpened
   | RewardsClaimRequest
   | RewardsClaimSuccess
-  | RewardsClaimBlocked
   | RewardsClaimAllRequest
   | RewardsClaimAllSuccess
   | RewardsClaimAllFailure
-  | RewardsClaimAllBlocked
   | FolderOpenEdit
   | FolderSubmitEdit
   | FolderDelete

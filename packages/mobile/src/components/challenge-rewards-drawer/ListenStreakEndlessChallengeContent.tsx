@@ -29,7 +29,6 @@ const messages = {
 }
 
 export const ListenStreakEndlessChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -124,7 +123,7 @@ export const ListenStreakEndlessChallengeContent = ({
       statusLabel={statusLabel}
       actions={actions}
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={false}
     />

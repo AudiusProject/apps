@@ -69,7 +69,6 @@ export const ProfileCompletionChallengeContent = ({
   challenge,
   challengeName,
   claimStatus,
-  aaoErrorCode,
   onClaim,
   onClose
 }: ChallengeContentProps) => {
@@ -216,7 +215,7 @@ export const ProfileCompletionChallengeContent = ({
       additionalContent={completionChecks}
       actions={actions}
       errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
+        claimError ? <ClaimError /> : null
       }
       isCooldownChallenge={false}
     />
