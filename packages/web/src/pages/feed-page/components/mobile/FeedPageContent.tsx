@@ -135,6 +135,7 @@ const FeedPageMobileContent = ({
       }
     : {
         trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
         isPending: followFeed.isPending,
         isFetching: followFeed.isFetching,
         isError: followFeed.isError,

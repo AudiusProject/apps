@@ -118,9 +118,9 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
     />
   )
 
-  // For You feed returns a mixed list of tracks and collections from the
-  // backend; pass it through as `lineupItems` so TrackLineup renders the
-  // playlist tiles inline. Following feed is currently track-only.
+  // Both feed hooks expose the mixed `LineupData[]` the API returns
+  // (tracks + collection reposts). TrackLineup branches per entry, so
+  // collections show up inline wherever the backend puts them.
   const lineupProps = isForYou
     ? {
         trackIds: forYouFeed.trackIds,
@@ -136,6 +136,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       }
     : {
         trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
         isPending: followFeed.isPending,
         isFetching: followFeed.isFetching,
         isError: followFeed.isError,

@@ -95,6 +95,7 @@ export const FeedScreen = () => {
       }
     : {
         trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
         isPending: followFeed.isPending,
         isFetching: followFeed.isFetching,
         hasNextPage: followFeed.hasNextPage,
