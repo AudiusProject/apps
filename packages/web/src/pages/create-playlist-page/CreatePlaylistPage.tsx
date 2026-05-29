@@ -9,6 +9,7 @@ import { CollectionMetadata } from '@audius/common/models'
 import { newCollectionMetadata } from '@audius/common/schemas'
 import { route } from '@audius/common/utils'
 import { Flex, LoadingSpinner } from '@audius/harmony'
+import { Id } from '@audius/sdk'
 import { useQueryClient } from '@tanstack/react-query'
 import { Navigate } from 'react-router'
 
@@ -91,7 +92,10 @@ export const CreatePlaylistPage = () => {
 
   if (draftId != null && isDraftCollection(draftId)) {
     return (
-      <Navigate to={PLAYLIST_ID_PAGE.replace(':id', String(draftId))} replace />
+      <Navigate
+        to={PLAYLIST_ID_PAGE.replace(':id', Id.parse(draftId))}
+        replace
+      />
     )
   }
 
