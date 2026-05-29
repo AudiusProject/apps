@@ -22,6 +22,7 @@ import { Id } from '@audius/sdk'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
+import { EditModeNavigationGuard } from 'components/collection/desktop/edit-mode/EditModeNavigationGuard'
 import { PlaylistEditModeBar } from 'components/collection/desktop/edit-mode/PlaylistEditModeBar'
 import { PlaylistEditModeProvider } from 'components/collection/desktop/edit-mode/PlaylistEditModeContext'
 import { EditAwareTracksTable } from 'components/collection/desktop/edit-mode/tracks/EditAwareTracksTable'
@@ -398,6 +399,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
             </Flex>
           ) : null}
           <PlaylistEditModeBar />
+          <EditModeNavigationGuard />
         </Page>
       </TrackSelectionProvider>
     </PlaylistEditModeProvider>

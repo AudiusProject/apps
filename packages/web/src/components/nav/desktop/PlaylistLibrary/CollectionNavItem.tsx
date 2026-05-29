@@ -28,6 +28,7 @@ import {
   IconTrash,
   PopupMenuItem,
   Text,
+  Tooltip,
   useTheme
 } from '@audius/harmony'
 import { pick } from 'lodash'
@@ -62,7 +63,8 @@ const messages = {
   edit: 'Edit',
   share: 'Share',
   delete: 'Delete',
-  unfavorite: 'Unfavorite'
+  unfavorite: 'Unfavorite',
+  favorited: 'Favorited'
 }
 
 const acceptedKinds: DragDropKind[] = [
@@ -272,14 +274,27 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
               css={{ position: 'relative' }}
               justifyContent='space-between'
             >
-              <Text
-                variant='body'
-                size='s'
-                css={{ maxWidth: '160px' }}
-                ellipses
+              <Flex
+                alignItems='center'
+                gap='xs'
+                css={{ minWidth: 0, flex: 1 }}
               >
-                {name}
-              </Text>
+                <Text
+                  variant='body'
+                  size='s'
+                  css={{ maxWidth: '160px' }}
+                  ellipses
+                >
+                  {name}
+                </Text>
+                {!isOwned ? (
+                  <Tooltip text={messages.favorited} placement='top'>
+                    <Flex alignItems='center' css={{ flexShrink: 0 }}>
+                      <IconHeart size='2xs' color='subdued' />
+                    </Flex>
+                  </Tooltip>
+                ) : null}
+              </Flex>
               <NavItemKebabButton
                 visible={isHovering && !isDraggingOver}
                 aria-label={

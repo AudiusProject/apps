@@ -55,6 +55,33 @@
   border: 0.5px solid var(--harmony-n-100);
 }
 
+.artworkButton {
+  all: unset;
+  position: relative;
+  cursor: pointer;
+  height: var(--harmony-unit-10);
+  width: var(--harmony-unit-10);
+  flex-shrink: 0;
+}
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity var(--harmony-quick);
+}
+
+.artworkButton:hover .playOverlay,
+.artworkButton:focus-visible .playOverlay,
+.playOverlay.isPlaying {
+  opacity: 1;
+}
+
 .trackInfo {
   display: flex;
   flex-direction: column;

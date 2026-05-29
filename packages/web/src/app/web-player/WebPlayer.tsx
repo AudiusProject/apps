@@ -80,7 +80,7 @@ import { getShowCookieBanner } from 'store/application/ui/cookieBanner/selectors
 import { getClient } from 'utils/clientUtil'
 import { shouldShowCookieBanner } from 'utils/gdpr'
 import 'utils/redirect'
-import { getPathname } from 'utils/route'
+import { CREATE_PLAYLIST_PAGE, getPathname } from 'utils/route'
 
 import styles from './WebPlayer.module.css'
 const { getFrostedSurfaceIntensity } = themeSelectors
@@ -124,6 +124,9 @@ const CoinRedeemPage = lazy(() =>
 )
 const CollectionPage = lazy(
   () => import('pages/collection-page/CollectionPage')
+)
+const CreatePlaylistPage = lazy(
+  () => import('pages/create-playlist-page/CreatePlaylistPage')
 )
 const CommentHistoryPage = lazy(
   () => import('pages/comment-history/CommentHistoryPage')
@@ -1159,6 +1162,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 />
                 <Route path={TRACK_ID_PAGE} element={<TrackPage />} />
                 <Route
+                  path={CREATE_PLAYLIST_PAGE}
+                  element={<CreatePlaylistPage />}
+                />
+                <Route
                   path={PLAYLIST_ID_PAGE}
                   element={<CollectionPage type='playlist' />}
                 />
@@ -1559,6 +1566,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<ProfilePageRoute mainContentRef={mainContentRef} />}
                 />
                 <Route path={TRACK_ID_PAGE} element={<TrackPage />} />
+                <Route
+                  path={CREATE_PLAYLIST_PAGE}
+                  element={<CreatePlaylistPage />}
+                />
                 <Route
                   path={PLAYLIST_ID_PAGE}
                   element={<CollectionPage type='playlist' />}
