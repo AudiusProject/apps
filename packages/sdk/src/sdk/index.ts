@@ -6,6 +6,8 @@ export {
 } from './createSdkWithServices'
 export type { AudiusSdk } from './sdk'
 export * from './api/generated/default'
+export { Genre } from './types/Genre'
+export type { GenreString } from './types/Genre'
 export { TracksApi } from './api/tracks/TracksApi'
 export { PlaylistsApi } from './api/playlists/PlaylistsApi'
 export { AlbumsApi } from './api/albums/AlbumsApi'

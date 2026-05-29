@@ -25,12 +25,6 @@ import {
     FieldVisibilityFromJSONTyped,
     FieldVisibilityToJSON,
 } from './FieldVisibility';
-import type { Genre } from './Genre';
-import {
-    GenreFromJSON,
-    GenreFromJSONTyped,
-    GenreToJSON,
-} from './Genre';
 import type { Mood } from './Mood';
 import {
     MoodFromJSON,
@@ -63,11 +57,20 @@ export interface UpdateTrackRequestBody {
      */
     title?: string;
     /**
+     * Music genre. Any string up to 100 characters is accepted. Known/canonical
+     * values (shown as autocomplete suggestions in clients): Electronic, Rock,
+     * Metal, Alternative, Hip-Hop/Rap, Experimental, Punk, Folk, Pop, Ambient,
+     * Soundtrack, World, Jazz, Acoustic, Funk, R&B/Soul, Devotional, Classical,
+     * Reggae, Podcasts, Country, Spoken Word, Comedy, Blues, Kids, Audiobooks,
+     * Latin, Lo-Fi, Hyperpop, Dancehall, Techno, Trap, House, Tech House,
+     * Deep House, Disco, Electro, Jungle, Progressive House, Hardstyle,
+     * Glitch Hop, Trance, Future Bass, Future House, Tropical House, Downtempo,
+     * Drum & Bass, Dubstep, Jersey Club, Vaporwave, Moombahton.
      * 
-     * @type {Genre}
+     * @type {string}
      * @memberof UpdateTrackRequestBody
      */
-    genre?: Genre;
+    genre?: string;
     /**
      * Track description
      * @type {string}
@@ -264,7 +267,7 @@ export function UpdateTrackRequestBodyFromJSONTyped(json: any, ignoreDiscriminat
     return {
         
         'title': !exists(json, 'title') ? undefined : json['title'],
-        'genre': !exists(json, 'genre') ? undefined : GenreFromJSON(json['genre']),
+        'genre': !exists(json, 'genre') ? undefined : json['genre'],
         'description': !exists(json, 'description') ? undefined : json['description'],
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
         'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
@@ -307,7 +310,7 @@ export function UpdateTrackRequestBodyToJSON(value?: UpdateTrackRequestBody | nu
     return {
         
         'title': value.title,
-        'genre': GenreToJSON(value.genre),
+        'genre': value.genre,
         'description': value.description,
         'mood': MoodToJSON(value.mood),
         'bpm': value.bpm,

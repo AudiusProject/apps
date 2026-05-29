@@ -169,7 +169,6 @@ export * from './FollowNotificationAction';
 export * from './FollowNotificationActionData';
 export * from './FollowersResponse';
 export * from './FollowingResponse';
-export * from './Genre';
 export * from './GetChallenges';
 export * from './GetSupportedUsers';
 export * from './GetSupporter';
