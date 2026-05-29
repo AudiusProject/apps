@@ -71,7 +71,7 @@ export const DuplicateAddConfirmationDrawer = () => {
   const handleAdd = useCallback(() => {
     if (playlistId && trackId) {
       toast({ content: messages.addedToast })
-      dispatch(addTrackToPlaylist(trackId, playlistId))
+      dispatch(addTrackToPlaylist(trackId, playlistId, { silent: true }))
     }
     onClose()
   }, [playlistId, trackId, onClose, toast, messages.addedToast, dispatch])
