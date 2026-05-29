@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { KeyboardEvent, MouseEvent, useCallback, useMemo } from 'react'
 
 import {
   SUGGESTED_TRACK_COUNT,
@@ -79,21 +79,41 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
     onAddTrack(track_id)
   }, [onAddTrack, track_id])
 
+  const handleRowKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        togglePlay()
+      }
+    },
+    [togglePlay]
+  )
+
+  const handleAddClick = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      handleAddTrack()
+    },
+    [handleAddTrack]
+  )
+
   return (
-    <div className={styles.suggestedTrack}>
+    <div
+      className={styles.suggestedTrack}
+      role='button'
+      tabIndex={0}
+      aria-label={isTrackPlaying ? `Pause ${title}` : `Play ${title}`}
+      onClick={togglePlay}
+      onKeyDown={handleRowKeyDown}
+    >
       <div className={styles.trackDetails}>
-        <button
-          type='button'
-          className={styles.artworkButton}
-          onClick={togglePlay}
-          onMouseDown={(e) => e.preventDefault()}
-          aria-label={isTrackPlaying ? `Pause ${title}` : `Play ${title}`}
-        >
+        <div className={styles.artworkWrapper}>
           <Image className={styles.trackArtwork} src={image} />
           <span
             className={cn(styles.playOverlay, {
               [styles.isPlaying]: isTrackPlaying
             })}
+            aria-hidden='true'
           >
             {isTrackPlaying ? (
               <IconPause size='s' color='staticWhite' />
@@ -101,16 +121,23 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
               <IconPlay size='s' color='staticWhite' />
             )}
           </span>
-        </button>
+        </div>
         <div className={styles.trackInfo}>
           <p className={styles.trackName}>{title}</p>
-          {user ? <UserLink userId={user.user_id} size='s' /> : null}
+          {user ? (
+            <span
+              className={styles.userLinkWrapper}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <UserLink userId={user.user_id} size='s' />
+            </span>
+          ) : null}
         </div>
       </div>
       <Button
         variant='secondary'
         size='small'
-        onClick={handleAddTrack}
+        onClick={handleAddClick}
         onMouseDown={(e) => e.preventDefault()}
         disabled={trackIsInCollection}
       >
