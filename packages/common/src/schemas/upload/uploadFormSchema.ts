@@ -1,4 +1,4 @@
-import { Genre, Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
+import { Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
 import { z } from 'zod'
 
 import { imageBlank } from '~/assets'
@@ -54,11 +54,16 @@ const USDCPurchaseConditionsSchema = z
   })
   .strict()
 
-/** Same as SDK. */
+/**
+ * Same as SDK: arbitrary string up to 100 chars. The Genre enum is reserved
+ * for autocomplete suggestions; users may submit any value.
+ */
 const GenreSchema = z
-  .enum(Object.values(Genre) as [Genre, ...Genre[]])
+  .string()
+  .min(1, { message: messages.genreRequiredError })
+  .max(100)
   .nullable()
-  .refine((val) => val !== null, {
+  .refine((val) => val !== null && val.length > 0, {
     message: messages.genreRequiredError
   })
 
