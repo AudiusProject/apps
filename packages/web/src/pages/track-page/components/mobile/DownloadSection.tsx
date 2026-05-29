@@ -206,7 +206,9 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
           backgroundColor='white'
           role={isSingleTrackDownload ? undefined : 'button'}
           aria-expanded={isSingleTrackDownload ? undefined : isExpanded}
-          aria-controls={isSingleTrackDownload ? undefined : 'downloads-section'}
+          aria-controls={
+            isSingleTrackDownload ? undefined : 'downloads-section'
+          }
           onClick={isSingleTrackDownload ? undefined : onToggleExpand}
           borderTop='default'
         >

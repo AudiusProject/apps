@@ -258,7 +258,9 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
           }}
           role={isSingleTrackDownload ? undefined : 'button'}
           aria-expanded={isSingleTrackDownload ? undefined : isExpanded}
-          aria-controls={isSingleTrackDownload ? undefined : 'downloads-section'}
+          aria-controls={
+            isSingleTrackDownload ? undefined : 'downloads-section'
+          }
         >
           <Flex
             justifyContent='space-between'
