@@ -9,6 +9,7 @@ import { getErrorMessage } from '@audius/common/utils'
 import {
   Button,
   Flex,
+  IconImage,
   IconPlaylists,
   Modal,
   ModalContent,
@@ -149,6 +150,7 @@ export const CreatePlaylistModal = () => {
               imageProcessingError={imageProcessingError}
               size='small'
               isUpload
+              iconPlaceholder={<IconImage size='4xl' color='subdued' />}
             />
           </Flex>
           <TextInput
