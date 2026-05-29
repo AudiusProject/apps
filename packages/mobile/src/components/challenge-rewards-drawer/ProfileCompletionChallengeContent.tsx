@@ -214,9 +214,7 @@ export const ProfileCompletionChallengeContent = ({
       statusLabel={statusLabel}
       additionalContent={completionChecks}
       actions={actions}
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={false}
     />
   )

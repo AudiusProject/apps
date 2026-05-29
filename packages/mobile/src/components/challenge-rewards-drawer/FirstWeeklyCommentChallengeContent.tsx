@@ -132,9 +132,7 @@ export const FirstWeeklyCommentChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={false}
     />
   )

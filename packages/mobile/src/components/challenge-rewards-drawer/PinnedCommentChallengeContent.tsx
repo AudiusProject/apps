@@ -130,9 +130,7 @@ export const PinnedCommentChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={!!challenge?.cooldown_days}
     />
   )

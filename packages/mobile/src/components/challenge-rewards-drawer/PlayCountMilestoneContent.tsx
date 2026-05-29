@@ -140,9 +140,7 @@ export const PlayCountMilestoneContent = (props: ChallengeContentProps) => {
       statusLabel={statusLabel}
       actions={actions}
       additionalContent={additionalContent}
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={!!optimisticChallenge?.cooldown_days}
     />
   )

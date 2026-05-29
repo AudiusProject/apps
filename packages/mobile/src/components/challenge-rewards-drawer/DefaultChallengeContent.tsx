@@ -108,9 +108,7 @@ export const DefaultChallengeContent = ({
       progressMax={challenge?.max_steps}
       statusLabel={statusLabel}
       actions={children ?? actions}
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={!!challenge?.cooldown_days}
     />
   )

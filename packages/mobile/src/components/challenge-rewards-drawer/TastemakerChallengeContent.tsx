@@ -118,9 +118,7 @@ export const TastemakerChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={Boolean(challenge?.cooldown_days)}
     />
   )

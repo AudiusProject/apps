@@ -148,9 +148,7 @@ export const AudioMatchingChallengeContent = ({
       statusLabel={statusLabel}
       additionalContent={additionalContent}
       actions={actions}
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge
     />
   )

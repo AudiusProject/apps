@@ -117,9 +117,7 @@ export const ReferralChallengeContent = ({
       statusLabel={statusLabel}
       additionalContent={referralContent}
       actions={actions}
-      errorContent={
-        claimError ? <ClaimError /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={false}
     />
   )
