@@ -32,7 +32,7 @@ import {
   Nullable
 } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
-import { call, put, takeEvery } from 'typed-redux-saga'
+import { actionChannel, call, put, take } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
 import { ensureLoggedIn } from 'common/utils/ensureLoggedIn'
@@ -65,11 +65,20 @@ const getCurrentTimestamp = () => {
 
 /** ADD TRACK TO PLAYLIST */
 
+// Process ADD_TRACK_TO_PLAYLIST one at a time. takeEvery let concurrent
+// invocations race: each captured the cache snapshot before any had written
+// back its optimistic update, and the last saga to finish overwrote the
+// others — silently dropping their tracks on both the cache and the backend.
+// This was visible when adding tracks in quick succession (e.g. via the
+// add-tracks-by-URL modal): only the final track survived.
 export function* watchAddTrackToPlaylist() {
-  yield* takeEvery(
-    cacheCollectionsActions.ADD_TRACK_TO_PLAYLIST,
-    addTrackToPlaylistAsync
+  const channel = yield* actionChannel<AddTrackToPlaylistAction>(
+    cacheCollectionsActions.ADD_TRACK_TO_PLAYLIST
   )
+  while (true) {
+    const action = yield* take(channel)
+    yield* call(addTrackToPlaylistAsync, action)
+  }
 }
 
 function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
