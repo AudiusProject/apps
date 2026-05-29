@@ -37,6 +37,7 @@ const STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK = 2
 
 const messages = {
   title: 'Stems & Downloads',
+  downloadTitle: 'Download',
   // TODO: When upgrading react native to >0.74, we need to remove the $ here
   // and also update android to include jsc+intl
   // https://github.com/facebook/hermes/issues/23
@@ -152,7 +153,10 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
   ])
 
   const hasStems = stemTracks.length > 0
+  const sectionTitle = hasStems ? messages.title : messages.downloadTitle
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
+  const isSingleTrackDownload = !!track?.is_downloadable && !hasStems
+  const isDownloadsExpanded = !isSingleTrackDownload && isExpanded
 
   const handleDownloadButtonPress = useCallback(() => {
     if (hasStems) {
@@ -164,15 +168,17 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
 
   const renderHeader = () => {
     return (
-      <Flex gap='l' column pb={isExpanded ? 'l' : undefined}>
+      <Flex gap='l' column pb={isDownloadsExpanded ? 'l' : undefined}>
         <Flex row justifyContent='space-between' alignItems='center'>
           <Flex row alignItems='center' gap='s'>
             <IconReceive color='default' />
             <Text variant='label' size='l' strength='strong'>
-              {messages.title}
+              {sectionTitle}
             </Text>
           </Flex>
-          <ExpandableArrowIcon expanded={isExpanded} />
+          {isSingleTrackDownload ? null : (
+            <ExpandableArrowIcon expanded={isDownloadsExpanded} />
+          )}
         </Flex>
         {shouldDisplayPremiumDownloadLocked && formattedPrice !== undefined ? (
           <Button
@@ -232,8 +238,8 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
   return (
     <Expandable
       renderHeader={renderHeader}
-      expanded={isExpanded}
-      onToggleExpand={onToggleExpand}
+      expanded={isDownloadsExpanded}
+      onToggleExpand={isSingleTrackDownload ? undefined : onToggleExpand}
     >
       <Flex gap='m'>
         {track?.is_downloadable ? (

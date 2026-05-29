@@ -56,6 +56,7 @@ import { UserLink } from 'app/components/user-link'
 
 const messages = {
   heading: 'STEMS & DOWNLOADS',
+  downloadHeading: 'DOWNLOAD',
   publicFree: 'Public Free',
   download: 'Download',
   downloadAll: 'Download All',
@@ -88,6 +89,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
       ? (source as { uri?: string }).uri
       : undefined
   const stemsCount = stems.length
+  const hasStems = stemsCount > 0
 
   const { data: fileSizes } = useFileSizes(
     {
@@ -104,7 +106,8 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const STEMS_COLLAPSE_THRESHOLD = 5
   const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
   const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
-  const expanded = expandedOverride ?? stemsBelowThreshold
+  const expanded = hasStems && (expandedOverride ?? stemsBelowThreshold)
+  const heading = hasStems ? messages.heading : messages.downloadHeading
   const setExpanded = (next: boolean | ((prev: boolean) => boolean)) => {
     setExpandedOverride((prev) => {
       const current = prev ?? stemsBelowThreshold
@@ -186,7 +189,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   return (
     <Paper direction='column' p='l' gap='m' borderRadius='m' shadow='flat'>
       <Text variant='label' size='m' color='subdued'>
-        {messages.heading}
+        {heading}
       </Text>
 
       {/* Inner bordered container — separates the source-track +
@@ -219,27 +222,29 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
             </Text>
             <UserLink userId={artist.user_id} size='s' />
           </Flex>
-          <Pressable
-            onPress={() => setExpanded((v) => !v)}
-            accessibilityRole='button'
-            accessibilityLabel={expanded ? 'Collapse stems' : 'Expand stems'}
-            style={{
-              padding: 4,
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <View
+          {hasStems ? (
+            <Pressable
+              onPress={() => setExpanded((v) => !v)}
+              accessibilityRole='button'
+              accessibilityLabel={expanded ? 'Collapse stems' : 'Expand stems'}
               style={{
-                // Rotate the caret via transform — react-native
-                // doesn't support CSS transitions, so this is a
-                // discrete flip rather than an animated rotation.
-                transform: [{ rotate: expanded ? '180deg' : '0deg' }]
+                padding: 4,
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <IconCaretDown size='m' color='default' />
-            </View>
-          </Pressable>
+              <View
+                style={{
+                  // Rotate the caret via transform — react-native
+                  // doesn't support CSS transitions, so this is a
+                  // discrete flip rather than an animated rotation.
+                  transform: [{ rotate: expanded ? '180deg' : '0deg' }]
+                }}
+              >
+                <IconCaretDown size='m' color='default' />
+              </View>
+            </Pressable>
+          ) : null}
         </Flex>
 
         {/* Footer row: N Stems outlined pill + Download All text. */}
@@ -251,7 +256,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           justifyContent='space-between'
           gap='m'
         >
-          {stemsCount > 0 ? (
+          {hasStems ? (
             <Flex
               ph='m'
               pv='2xs'
@@ -270,7 +275,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           <Pressable onPress={handleDownloadAll}>
             <Flex direction='row' gap='xs' alignItems='center'>
               <Text variant='label' size='s' strength='strong'>
-                {stemsCount > 0 ? messages.downloadAll : messages.download}
+                {hasStems ? messages.downloadAll : messages.download}
               </Text>
               <IconReceive size='s' color='default' />
             </Flex>

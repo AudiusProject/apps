@@ -48,6 +48,7 @@ import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
 const messages = {
   heading: 'STEMS & DOWNLOADS',
+  downloadHeading: 'DOWNLOAD',
   publicFree: 'Public Free',
   unlockAll: (price: string) => `Unlock All ${price}`,
   download: 'Download',
@@ -118,6 +119,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   }, [contestEventId, currentUserId, followState?.isFollowed, followEvent])
 
   const stemsCount = stems.length
+  const hasStems = stemsCount > 0
   // Default to expanded for short lists so users can see the stems
   // without an extra click; collapse when there are more than
   // STEMS_COLLAPSE_THRESHOLD entries so a long list doesn't push the
@@ -126,7 +128,8 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const STEMS_COLLAPSE_THRESHOLD = 5
   const stemsBelowThreshold = stemsCount <= STEMS_COLLAPSE_THRESHOLD
   const [expandedOverride, setExpandedOverride] = useState<boolean | null>(null)
-  const expanded = expandedOverride ?? stemsBelowThreshold
+  const expanded = hasStems && (expandedOverride ?? stemsBelowThreshold)
+  const heading = hasStems ? messages.heading : messages.downloadHeading
   const setExpanded = (next: boolean | ((prev: boolean) => boolean)) => {
     setExpandedOverride((prev) => {
       const current = prev ?? stemsBelowThreshold
@@ -250,7 +253,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           COMMENTS tiles. */}
       <Box pt='l' ph='l'>
         <Text variant='label' size='m' color='subdued'>
-          {messages.heading}
+          {heading}
         </Text>
       </Box>
 
@@ -299,22 +302,24 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               <UserLink userId={artist.user_id} popover size='s' />
             </Flex>
           </Flex>
-          <IconCaretDown
-            size='m'
-            color='default'
-            css={{
-              transition: 'transform var(--harmony-expressive)',
-              transform: expanded ? 'rotate(-180deg)' : undefined,
-              cursor: 'pointer'
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded((v) => !v)
-            }}
-            aria-expanded={expanded}
-            aria-label={expanded ? 'Collapse stems' : 'Expand stems'}
-            role='button'
-          />
+          {hasStems ? (
+            <IconCaretDown
+              size='m'
+              color='default'
+              css={{
+                transition: 'transform var(--harmony-expressive)',
+                transform: expanded ? 'rotate(-180deg)' : undefined,
+                cursor: 'pointer'
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded((v) => !v)
+              }}
+              aria-expanded={expanded}
+              aria-label={expanded ? 'Collapse stems' : 'Expand stems'}
+              role='button'
+            />
+          ) : null}
         </Flex>
 
         {/* Secondary action row: stems pill + Download All / Unlock
@@ -327,7 +332,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
           alignItems='center'
           onClick={(e) => e.stopPropagation()}
         >
-          {stemsCount > 0 ? <StemCountPill count={stemsCount} /> : <Box />}
+          {hasStems ? <StemCountPill count={stemsCount} /> : <Box />}
           {shouldDisplayPremiumDownloadLocked && formattedPrice ? (
             <Button
               size='small'
@@ -343,7 +348,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               iconRight={IconReceive}
               onClick={handleDownloadAll}
             >
-              {stemsCount > 0 ? messages.downloadAll : messages.download}
+              {hasStems ? messages.downloadAll : messages.download}
             </PlainButton>
           )}
         </Flex>
