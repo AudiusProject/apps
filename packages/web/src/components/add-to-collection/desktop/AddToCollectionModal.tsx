@@ -121,7 +121,9 @@ const AddToCollectionModal = NiceModal.create(() => {
         })
       )
     } else {
-      dispatch(addTrackToPlaylist(trackId, playlist.playlist_id))
+      dispatch(
+        addTrackToPlaylist(trackId, playlist.playlist_id, { silent: true })
+      )
       if (trackTitle) {
         toast({
           content: messages.addedToast,

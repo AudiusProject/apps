@@ -61,7 +61,7 @@ export const DuplicateAddConfirmationModal = NiceModal.create(() => {
 
   const handleAdd = useCallback(() => {
     if (trackId && playlistId) {
-      dispatch(addTrackToPlaylist(trackId, playlistId))
+      dispatch(addTrackToPlaylist(trackId, playlistId, { silent: true }))
       if (accountHandle) {
         toast(
           <ToastLinkContent
