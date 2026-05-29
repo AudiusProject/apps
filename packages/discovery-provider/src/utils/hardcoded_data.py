@@ -96,6 +96,10 @@ def has_badwords(s: str) -> bool:
     return any(badword in f for badword in handle_badwords_lower)
 
 
+# Known/canonical genres. No longer enforced as an allowlist at write time —
+# track genres can be arbitrary strings (capped at CHARACTER_LIMIT_GENRE).
+# Still used by trending (index_trending.py) and genre metrics
+# (get_genre_metrics.py) to scope read-side aggregations to canonical values.
 genre_allowlist = {
     "Acoustic",
     "Alternative",

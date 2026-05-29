@@ -24,7 +24,6 @@ import { HashId } from '../../types/HashId'
 import { StemCategory } from '../../types/StemCategory'
 import {
   Mood,
-  Genre,
   type UpdateTrackRequest,
   type CreateTrackRequest
 } from '../generated/default'
@@ -135,7 +134,7 @@ export const UploadTrackMetadataSchema = z.object({
       remixes: z.optional(z.boolean())
     })
   ),
-  genre: z.enum(Object.values(Genre) as [Genre, ...Genre[]]),
+  genre: z.string().min(1).max(100),
   isrc: z.optional(z.string().nullable()),
   isUnlisted: z.optional(z.boolean()),
   iswc: z.optional(z.string().nullable()),

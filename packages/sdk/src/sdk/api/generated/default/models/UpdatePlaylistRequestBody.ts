@@ -37,12 +37,6 @@ import {
     DdexResourceContributorFromJSONTyped,
     DdexResourceContributorToJSON,
 } from './DdexResourceContributor';
-import type { Genre } from './Genre';
-import {
-    GenreFromJSON,
-    GenreFromJSONTyped,
-    GenreToJSON,
-} from './Genre';
 import type { Mood } from './Mood';
 import {
     MoodFromJSON,
@@ -87,11 +81,20 @@ export interface UpdatePlaylistRequestBody {
      */
     isAlbum?: boolean;
     /**
+     * Music genre. Any string up to 100 characters is accepted. Known/canonical
+     * values (shown as autocomplete suggestions in clients): Electronic, Rock,
+     * Metal, Alternative, Hip-Hop/Rap, Experimental, Punk, Folk, Pop, Ambient,
+     * Soundtrack, World, Jazz, Acoustic, Funk, R&B/Soul, Devotional, Classical,
+     * Reggae, Podcasts, Country, Spoken Word, Comedy, Blues, Kids, Audiobooks,
+     * Latin, Lo-Fi, Hyperpop, Dancehall, Techno, Trap, House, Tech House,
+     * Deep House, Disco, Electro, Jungle, Progressive House, Hardstyle,
+     * Glitch Hop, Trance, Future Bass, Future House, Tropical House, Downtempo,
+     * Drum & Bass, Dubstep, Jersey Club, Vaporwave, Moombahton.
      * 
-     * @type {Genre}
+     * @type {string}
      * @memberof UpdatePlaylistRequestBody
      */
-    genre?: Genre;
+    genre?: string;
     /**
      * 
      * @type {Mood}
@@ -219,7 +222,7 @@ export function UpdatePlaylistRequestBodyFromJSONTyped(json: any, ignoreDiscrimi
         'description': !exists(json, 'description') ? undefined : json['description'],
         'isPrivate': !exists(json, 'is_private') ? undefined : json['is_private'],
         'isAlbum': !exists(json, 'is_album') ? undefined : json['is_album'],
-        'genre': !exists(json, 'genre') ? undefined : GenreFromJSON(json['genre']),
+        'genre': !exists(json, 'genre') ? undefined : json['genre'],
         'mood': !exists(json, 'mood') ? undefined : MoodFromJSON(json['mood']),
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
         'license': !exists(json, 'license') ? undefined : json['license'],
@@ -253,7 +256,7 @@ export function UpdatePlaylistRequestBodyToJSON(value?: UpdatePlaylistRequestBod
         'description': value.description,
         'is_private': value.isPrivate,
         'is_album': value.isAlbum,
-        'genre': GenreToJSON(value.genre),
+        'genre': value.genre,
         'mood': MoodToJSON(value.mood),
         'tags': value.tags,
         'license': value.license,
