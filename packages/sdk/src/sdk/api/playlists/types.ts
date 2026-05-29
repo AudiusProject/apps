@@ -6,7 +6,6 @@ import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
 import { HashId } from '../../types/HashId'
 import {
-  Genre,
   Mood,
   type CreatePlaylistRequest,
   type UpdatePlaylistRequest
@@ -93,7 +92,7 @@ export type EntityManagerCreatePlaylistRequest = z.input<
 
 export const UploadPlaylistMetadataSchema = CreatePlaylistMetadataSchema.extend(
   {
-    genre: z.enum(Object.values(Genre) as [Genre, ...Genre[]])
+    genre: z.string().min(1).max(100)
   }
 ).strict()
 

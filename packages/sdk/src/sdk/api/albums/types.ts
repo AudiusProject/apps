@@ -14,7 +14,7 @@ import { PublicKeySchema } from '../../services/Solana'
 import { DDEXResourceContributor, DDEXCopyright } from '../../types/DDEX'
 import { AudioFile, ImageFile } from '../../types/File'
 import { HashId } from '../../types/HashId'
-import { Mood, Genre } from '../generated/default'
+import { Mood } from '../generated/default'
 import type {
   CreatePlaylistRequestBody,
   UpdatePlaylistRequestBody
@@ -159,7 +159,7 @@ export const CreateAlbumSchema = z
 export type EntityManagerCreateAlbumRequest = z.input<typeof CreateAlbumSchema>
 
 export const UploadAlbumMetadataSchema = CreateAlbumMetadataSchema.extend({
-  genre: z.enum(Object.values(Genre) as [Genre, ...Genre[]]),
+  genre: z.string().min(1).max(100),
   mood: z.optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]])),
   tags: z.optional(z.string())
 })

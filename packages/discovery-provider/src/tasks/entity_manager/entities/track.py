@@ -28,6 +28,7 @@ from src.models.social.subscription import (
 from src.models.users.user import User
 from src.tasks.entity_manager.utils import (
     CHARACTER_LIMIT_DESCRIPTION,
+    CHARACTER_LIMIT_GENRE,
     TRACK_ID_OFFSET,
     Action,
     EntityType,
@@ -45,7 +46,6 @@ from src.tasks.metadata import (
 )
 from src.tasks.task_helpers import generate_slug_and_collision_id
 from src.utils import helpers
-from src.utils.hardcoded_data import genre_allowlist
 from src.utils.structured_logger import StructuredLogger
 
 logger = StructuredLogger(__name__)
@@ -534,9 +534,9 @@ def validate_track_tx(params: ManageEntityParameters):
             )
         track_bio = params.metadata.get("description")
         track_genre = params.metadata.get("genre")
-        if track_genre is not None and track_genre not in genre_allowlist:
+        if track_genre is not None and len(track_genre) > CHARACTER_LIMIT_GENRE:
             raise IndexingValidationError(
-                f"Track {track_id} attempted to be placed in genre '{track_genre}' which is not in the allow list"
+                f"Track {track_id} genre exceeds character limit {CHARACTER_LIMIT_GENRE}"
             )
         if track_bio is not None and len(track_bio) > CHARACTER_LIMIT_DESCRIPTION:
             raise IndexingValidationError(

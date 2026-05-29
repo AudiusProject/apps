@@ -191,7 +191,6 @@ models/FollowNotificationAction.ts
 models/FollowNotificationActionData.ts
 models/FollowersResponse.ts
 models/FollowingResponse.ts
-models/Genre.ts
 models/GetChallenges.ts
 models/GetSupportedUsers.ts
 models/GetSupporter.ts

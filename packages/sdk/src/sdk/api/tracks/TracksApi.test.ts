@@ -143,7 +143,7 @@ describe('TracksApi', () => {
           trackCid:
             'bafkreihzvsc5jqhxzdygntlqqd7kqtx3lul77d22v54a47m26n5q426z7i',
           title: 'BachGavotte',
-          genre: Genre.ELECTRONIC,
+          genre: Genre.Electronic,
           mood: Mood.TENDER
         },
         audioFile: {
@@ -191,7 +191,7 @@ describe('TracksApi', () => {
         },
         metadata: {
           title: 'BachGavotte',
-          genre: Genre.ELECTRONIC,
+          genre: Genre.Electronic,
           mood: Mood.TENDER
         }
       })
