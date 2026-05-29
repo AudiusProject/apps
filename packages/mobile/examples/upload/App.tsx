@@ -22,18 +22,10 @@ import {
 import { config } from './src/config'
 import { getSDK } from './src/sdk'
 
-const GENRES = [
-  'Electronic',
-  'Rock',
-  'Hip-Hop/Rap',
-  'Pop',
-  'R&B/Soul',
-  'Alternative',
-  'Country',
-  'Jazz',
-  'Folk',
-  'Classical'
-] as const
+// Genre is a freeform string up to 100 chars at the API/SDK layer. See
+// `Genre` from @audius/sdk for the canonical autocomplete suggestions if
+// you want to show a picker; this example uses a plain text input.
+const MAX_GENRE_LENGTH = 100
 
 type Screen = 'home' | 'signed-in'
 
@@ -46,7 +38,7 @@ export default function App() {
     useState<DocumentPicker.DocumentPickerAsset | null>(null)
   const [coverUri, setCoverUri] = useState<string | null>(null)
   const [title, setTitle] = useState('')
-  const [genre, setGenre] = useState<(typeof GENRES)[number]>('Electronic')
+  const [genre, setGenre] = useState<string>('')
   const [description, setDescription] = useState('')
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<string | null>(null)
@@ -131,7 +123,7 @@ export default function App() {
     setAudioFile(null)
     setCoverUri(null)
     setTitle('')
-    setGenre('Electronic')
+    setGenre('')
     setDescription('')
     setResult(null)
     setScreen('home')
@@ -302,31 +294,16 @@ export default function App() {
           />
 
           <Text style={styles.label}>Genre</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.genreScroll}
-          >
-            {GENRES.map((g) => (
-              <TouchableOpacity
-                key={g}
-                style={[
-                  styles.genreChip,
-                  genre === g && styles.genreChipActive
-                ]}
-                onPress={() => setGenre(g)}
-              >
-                <Text
-                  style={[
-                    styles.genreChipText,
-                    genre === g && styles.genreChipTextActive
-                  ]}
-                >
-                  {g}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g. Electronic, Phonk, Lo-Fi…"
+            placeholderTextColor="#888"
+            value={genre}
+            onChangeText={setGenre}
+            maxLength={MAX_GENRE_LENGTH}
+            autoCapitalize="words"
+            autoCorrect={false}
+          />
 
           <TextInput
             style={[styles.input, styles.textArea]}
@@ -452,17 +429,6 @@ const styles = StyleSheet.create({
   },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
   label: { fontSize: 14, fontWeight: '500', marginBottom: 8, color: '#333' },
-  genreScroll: { marginBottom: 16, maxHeight: 44 },
-  genreChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8
-  },
-  genreChipActive: { backgroundColor: '#CC0FE0' },
-  genreChipText: { fontSize: 14, color: '#333' },
-  genreChipTextActive: { color: '#fff', fontWeight: '600' },
   result: { marginTop: 16, fontSize: 13, color: '#555', lineHeight: 20 },
   debugTitle: { marginTop: 16, fontSize: 13, fontWeight: '600', color: '#333' },
   debugSession: {

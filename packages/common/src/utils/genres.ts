@@ -4,6 +4,15 @@ import { Genre as SDKGenre } from '@audius/sdk'
 export { Genre } from '@audius/sdk'
 
 /**
+ * Track genre value. Any string up to 100 chars is accepted at the API/SDK
+ * layer; the {@link Genre} enum provides the canonical autocomplete values.
+ * Use this type for read-side / metadata typings so custom-genre tracks
+ * flow through without TS errors. Continue using `Genre` for write-side
+ * autocomplete sources and static lists where only known values are valid.
+ */
+export type { GenreString } from '@audius/sdk'
+
+/**
  * UI-only value for "all genres" filter (e.g. trending page).
  * Not part of SDK Genre - use for filter state only.
  */
