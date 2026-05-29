@@ -274,11 +274,7 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
               css={{ position: 'relative' }}
               justifyContent='space-between'
             >
-              <Flex
-                alignItems='center'
-                gap='xs'
-                css={{ minWidth: 0, flex: 1 }}
-              >
+              <Flex alignItems='center' gap='xs' css={{ minWidth: 0, flex: 1 }}>
                 <Text
                   variant='body'
                   size='s'
