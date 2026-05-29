@@ -52,6 +52,7 @@ const STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK = 2
 
 const messages = {
   title: 'Stems & Downloads',
+  downloadTitle: 'Download',
   unlockAll: (price: string) => `Unlock All ${price}`,
   purchased: 'purchased',
   followToDownload: 'Must follow artist to download.',
@@ -190,12 +191,14 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   )
 
   const hasStems = stemTracks.length > 0 || isUploadingStems
+  const sectionTitle = hasStems ? messages.title : messages.downloadTitle
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
 
   // No caret / no expandable list when there's a single downloadable track
   // (download original ON, no stems). Tapping the row's download button
   // should be the entire interaction — there's nothing to expand.
   const isSingleTrackDownload = !!is_downloadable && !hasStems
+  const isExpanded = !isSingleTrackDownload && expanded
 
   const handleDownloadButtonClick = useRequiresAccountCallback(
     (e: MouseEvent) => {
@@ -254,8 +257,10 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             cursor: isSingleTrackDownload ? 'default' : 'pointer'
           }}
           role={isSingleTrackDownload ? undefined : 'button'}
-          aria-expanded={isSingleTrackDownload ? undefined : expanded}
-          aria-controls={isSingleTrackDownload ? undefined : 'download-section'}
+          aria-expanded={isSingleTrackDownload ? undefined : isExpanded}
+          aria-controls={
+            isSingleTrackDownload ? undefined : 'downloads-section'
+          }
         >
           <Flex
             justifyContent='space-between'
@@ -266,7 +271,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             <Flex row alignItems='center' gap='s'>
               <IconReceive size='l' color='default' />
               <Text variant='label' size='l' strength='strong'>
-                {messages.title}
+                {sectionTitle}
               </Text>
             </Flex>
             <Flex gap='l' alignItems='center'>
@@ -325,7 +330,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             <IconCaretDown
               css={{
                 transition: 'transform var(--harmony-expressive)',
-                transform: expanded ? 'rotate(-180deg)' : undefined
+                transform: isExpanded ? 'rotate(-180deg)' : undefined
               }}
               size='m'
               color='default'
@@ -339,7 +344,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             </Text>
           </Flex>
         ) : null}
-        <Expandable expanded={expanded} id='downloads-section'>
+        <Expandable expanded={isExpanded} id='downloads-section'>
           <Box>
             {is_downloadable ? (
               <DownloadRow
