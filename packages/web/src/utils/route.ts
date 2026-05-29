@@ -10,6 +10,9 @@ import { encodeUrlName } from './urlUtils'
 // Local route functions to avoid importing from @audius/common/src/utils/route which pulls in formatUtil/dayjs
 const SIGN_UP_PAGE = '/signup'
 
+// Inline "create playlist" flow entry point.
+export const CREATE_PLAYLIST_PAGE = '/create/playlist'
+
 export const profilePage = (handle: string | null | undefined) => {
   return `/${encodeUrlName(handle ?? '')}`
 }

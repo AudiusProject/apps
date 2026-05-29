@@ -3,6 +3,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState
@@ -16,6 +17,10 @@ import {
   toastActions
 } from '@audius/common/store'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router'
+
+import { isDraftCollection, removeDraftCollection } from './draftCollections'
+import { useCreateDraftPlaylist } from './useCreateDraftPlaylist'
 
 const { editPlaylist } = cacheCollectionsActions
 const { toast } = toastActions
@@ -39,10 +44,12 @@ type PlaylistEditModeContextValue = {
   collectionId?: ID
   isOwner: boolean
   isEditMode: boolean
+  isCreate: boolean
   status: Status
   draft: PlaylistMetadataDraft
   removedTrackIds: Set<ID>
   hasChanges: boolean
+  canApply: boolean
   canUndoRemoval: boolean
   canRedoRemoval: boolean
   enterEditMode: () => void
@@ -86,7 +93,9 @@ const messages = {
   },
   conflict:
     'Heads up — someone else changed this playlist while you were editing. Reload and try again.',
-  failed: 'Could not save changes. Please try again.'
+  failed: 'Could not save changes. Please try again.',
+  created: 'Created playlist',
+  createFailed: 'Could not create playlist. Please try again.'
 }
 
 type ProviderProps = {
@@ -101,8 +110,12 @@ export const PlaylistEditModeProvider = ({
   children
 }: ProviderProps) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { data: collection } = useCollection(collectionId)
   const { data: tracks } = useCollectionTracks(collectionId)
+  const publishDraft = useCreateDraftPlaylist()
+
+  const isCreate = isDraftCollection(collectionId)
 
   const [isEditMode, setIsEditMode] = useState(false)
   const [draft, setDraft] = useState<PlaylistMetadataDraft>({})
@@ -140,6 +153,15 @@ export const PlaylistEditModeProvider = ({
     setStatus('idle')
     setEditModeLoadedAt(null)
   }, [resetRemovals])
+
+  // For the inline create flow, the page mounts already in edit mode.
+  const autoEnteredRef = useRef(false)
+  useEffect(() => {
+    if (isCreate && !autoEnteredRef.current) {
+      autoEnteredRef.current = true
+      enterEditMode()
+    }
+  }, [isCreate, enterEditMode])
 
   const setField = useCallback<PlaylistEditModeContextValue['setField']>(
     (field, value) => {
@@ -190,7 +212,15 @@ export const PlaylistEditModeProvider = ({
   const discard = useCallback(() => {
     setDraft({})
     resetRemovals()
-  }, [resetRemovals])
+    setStatus('idle')
+    setIsEditMode(false)
+    setEditModeLoadedAt(null)
+    if (isCreate && collectionId != null) {
+      // Abandon the unsaved draft and leave the create page.
+      removeDraftCollection(collectionId)
+      navigate(-1)
+    }
+  }, [resetRemovals, isCreate, collectionId, navigate])
 
   const resolveConflict = useCallback(() => {
     setStatus('idle')
@@ -200,8 +230,18 @@ export const PlaylistEditModeProvider = ({
     setEditModeLoadedAt(null)
   }, [resetRemovals])
 
+  const stagedName =
+    draft.playlist_name !== undefined
+      ? draft.playlist_name
+      : collection?.playlist_name
+
+  const draftTrackCount = collection?.playlist_contents.track_ids.length ?? 0
+
   const hasChanges = useMemo(() => {
     if (!collection) return false
+    // In create mode the page is "dirty" the moment any content exists, so we
+    // warn before navigating away from an unsaved draft.
+    if (isCreate && draftTrackCount > 0) return true
     if (removedTrackIds.size > 0) return true
     const fields = ['playlist_name', 'description', 'is_private'] as const
     for (const f of fields) {
@@ -214,10 +254,60 @@ export const PlaylistEditModeProvider = ({
     }
     if (draft.artwork !== undefined && draft.artwork !== null) return true
     return false
-  }, [collection, draft, removedTrackIds])
+  }, [collection, draft, removedTrackIds, isCreate, draftTrackCount])
+
+  // For create, the primary action is enabled as long as the playlist has a
+  // usable name. For edit, it requires actual changes.
+  const canApply = isCreate
+    ? !!stagedName && stagedName.trim().length > 0
+    : hasChanges
 
   const apply = useCallback(() => {
     if (!collection || !collection.playlist_id) return
+
+    if (isCreate) {
+      if (!canApply) return
+      setStatus('saving')
+      const trackIds = collection.playlist_contents.track_ids
+        .filter((t) => !removedTrackIds.has(t.track))
+        .map((t) => t.track)
+      const metadata = {
+        ...(collection as unknown as EditCollectionValues),
+        playlist_name: draft.playlist_name ?? collection.playlist_name,
+        description:
+          draft.description !== undefined
+            ? draft.description
+            : collection.description,
+        is_private:
+          draft.is_private !== undefined
+            ? draft.is_private
+            : collection.is_private,
+        artwork: draft.artwork ?? undefined
+      } as EditCollectionValues
+      publishDraft.mutate(
+        { playlistId: collection.playlist_id, metadata, trackIds },
+        {
+          onSuccess: (confirmed) => {
+            removeDraftCollection(collection.playlist_id)
+            setDraft({})
+            resetRemovals()
+            setIsEditMode(false)
+            setStatus('idle')
+            setEditModeLoadedAt(null)
+            dispatch(toast({ content: messages.created }))
+            if (confirmed?.permalink) {
+              navigate(confirmed.permalink, { replace: true })
+            }
+          },
+          onError: () => {
+            setStatus('idle')
+            dispatch(toast({ content: messages.createFailed }))
+          }
+        }
+      )
+      return
+    }
+
     if (!hasChanges) {
       exitEditMode()
       return
@@ -295,12 +385,16 @@ export const PlaylistEditModeProvider = ({
       })
     )
   }, [
+    canApply,
     collection,
     dispatch,
     draft,
     editModeLoadedAt,
     exitEditMode,
     hasChanges,
+    isCreate,
+    navigate,
+    publishDraft,
     removedTrackIds,
     resetRemovals,
     tracks
@@ -314,10 +408,12 @@ export const PlaylistEditModeProvider = ({
       collectionId,
       isOwner,
       isEditMode,
+      isCreate,
       status,
       draft,
       removedTrackIds,
       hasChanges,
+      canApply,
       canUndoRemoval,
       canRedoRemoval,
       enterEditMode,
@@ -332,6 +428,7 @@ export const PlaylistEditModeProvider = ({
     }),
     [
       apply,
+      canApply,
       canRedoRemoval,
       canUndoRemoval,
       collectionId,
@@ -340,6 +437,7 @@ export const PlaylistEditModeProvider = ({
       enterEditMode,
       exitEditMode,
       hasChanges,
+      isCreate,
       isEditMode,
       isOwner,
       redoRemoval,
@@ -369,10 +467,12 @@ export const usePlaylistEditMode = (): PlaylistEditModeContextValue => {
       collectionId: undefined,
       isOwner: false,
       isEditMode: false,
+      isCreate: false,
       status: 'idle',
       draft: {},
       removedTrackIds: new Set(),
       hasChanges: false,
+      canApply: false,
       canUndoRemoval: false,
       canRedoRemoval: false,
       enterEditMode: () => {},

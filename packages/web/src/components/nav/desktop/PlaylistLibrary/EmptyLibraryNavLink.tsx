@@ -1,6 +1,8 @@
 import { useCallback } from 'react'
 
-import { useCreatePlaylistModal } from '@audius/common/store'
+import { useNavigate } from 'react-router'
+
+import { CREATE_PLAYLIST_PAGE } from 'utils/route'
 
 import { LeftNavLink } from '../LeftNavLink'
 
@@ -9,11 +11,11 @@ const messages = {
 }
 
 export const EmptyLibraryNavLink = () => {
-  const { onOpen: openCreatePlaylistModal } = useCreatePlaylistModal()
+  const navigate = useNavigate()
 
   const handleCreatePlaylist = useCallback(() => {
-    openCreatePlaylistModal({ isAlbum: false })
-  }, [openCreatePlaylistModal])
+    navigate(CREATE_PLAYLIST_PAGE)
+  }, [navigate])
 
   return (
     <LeftNavLink disabled onClick={handleCreatePlaylist}>

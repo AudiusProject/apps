@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
 import {
   playlistLibraryHelpers,
-  useCreatePlaylistModal,
   useDuplicatePlaylistModal
 } from '@audius/common/store'
 import {
@@ -15,8 +14,10 @@ import {
   PopupMenu,
   PopupMenuItem
 } from '@audius/harmony'
+import { useNavigate } from 'react-router'
 
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { CREATE_PLAYLIST_PAGE } from 'utils/route'
 
 const { addFolderToLibrary, constructPlaylistFolder } = playlistLibraryHelpers
 
@@ -35,14 +36,14 @@ export const CreatePlaylistLibraryItemButton = () => {
     select: (account) => account?.playlistLibrary
   })
   const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
-  const { onOpen: openCreatePlaylistModal } = useCreatePlaylistModal()
   const { onOpen: openDuplicatePlaylistModal } = useDuplicatePlaylistModal()
+  const navigate = useNavigate()
   const [isActive, setIsActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const handleSubmitPlaylist = useCallback(() => {
-    openCreatePlaylistModal({ isAlbum: false })
-  }, [openCreatePlaylistModal])
+    navigate(CREATE_PLAYLIST_PAGE)
+  }, [navigate])
 
   const handleDuplicatePlaylist = useCallback(() => {
     openDuplicatePlaylistModal({ isAlbum: false })

@@ -307,7 +307,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
       gap='xl'
       direction='column'
       p='xl'
-      backgroundColor='surface1'
+      backgroundColor={isEditingThis ? 'default' : 'surface1'}
       borderTop='strong'
       borderBottom='strong'
     >

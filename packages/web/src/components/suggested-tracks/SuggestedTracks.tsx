@@ -6,19 +6,27 @@ import {
   useSuggestedPlaylistTracks,
   useUser
 } from '@audius/common/api'
+import { useToggleTrack } from '@audius/common/hooks'
 import { SquareSizes, ID, Track } from '@audius/common/models'
+import { QueueSource, Queueable } from '@audius/common/store'
 import {
   Button,
   Divider,
   IconCaretDown,
+  IconPause,
+  IconPlay,
   IconRefresh,
   Paper,
   useTheme,
   Image
 } from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
+import { useQueryClient } from '@tanstack/react-query'
+import cn from 'classnames'
 import { useToggle } from 'react-use'
 
+import { addTrackToDraftCollection } from 'components/collection/desktop/edit-mode/draftCollectionCache'
+import { isDraftCollection } from 'components/collection/desktop/edit-mode/draftCollections'
 import { UserLink } from 'components/link/UserLink'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -39,17 +47,24 @@ const messages = {
 type SuggestedTrackProps = {
   collectionId: ID
   track: Track
+  queueEntries: Queueable[]
   onAddTrack: (trackId: ID) => void
 }
 
 const SuggestedTrackRow = (props: SuggestedTrackProps) => {
-  const { collectionId, track, onAddTrack } = props
+  const { collectionId, track, queueEntries, onAddTrack } = props
   const { track_id, title, owner_id } = track
   const { data: user } = useUser(owner_id)
   const { data: collection } = useCollection(collectionId)
   const { imageUrl: image } = useTrackCoverArt({
     trackId: track_id,
     size: SquareSizes.SIZE_150_BY_150
+  })
+
+  const { togglePlay, isTrackPlaying } = useToggleTrack({
+    id: track_id,
+    source: QueueSource.RECOMMENDED_TRACKS,
+    entries: queueEntries
   })
 
   const trackIsInCollection = useMemo(
@@ -67,7 +82,26 @@ const SuggestedTrackRow = (props: SuggestedTrackProps) => {
   return (
     <div className={styles.suggestedTrack}>
       <div className={styles.trackDetails}>
-        <Image className={styles.trackArtwork} src={image} />
+        <button
+          type='button'
+          className={styles.artworkButton}
+          onClick={togglePlay}
+          onMouseDown={(e) => e.preventDefault()}
+          aria-label={isTrackPlaying ? `Pause ${title}` : `Play ${title}`}
+        >
+          <Image className={styles.trackArtwork} src={image} />
+          <span
+            className={cn(styles.playOverlay, {
+              [styles.isPlaying]: isTrackPlaying
+            })}
+          >
+            {isTrackPlaying ? (
+              <IconPause size='s' color='staticWhite' />
+            ) : (
+              <IconPlay size='s' color='staticWhite' />
+            )}
+          </span>
+        </button>
         <div className={styles.trackInfo}>
           <p className={styles.trackName}>{title}</p>
           {user ? <UserLink userId={user.user_id} size='s' /> : null}
@@ -107,6 +141,7 @@ type SuggestedTracksProps = {
 export const SuggestedTracks = (props: SuggestedTracksProps) => {
   const { collectionId } = props
   const mainContentRef = useMainContentRef()
+  const queryClient = useQueryClient()
   const {
     suggestedTracks,
     onRefresh,
@@ -114,13 +149,19 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
   } = useSuggestedPlaylistTracks(collectionId)
   const [isExpanded, toggleIsExpanded] = useToggle(false)
   const { motion } = useTheme()
+  const isDraft = isDraftCollection(collectionId)
 
   // Preserve scroll position when adding track - prevents scroll-to-top on
   // optimistic update (e.g. from focus loss when Add button becomes disabled)
   const onAddTrack = useCallback(
     (trackId: ID) => {
       const scrollTop = mainContentRef?.current?.scrollTop ?? 0
-      originalOnAddTrack(trackId)
+      if (isDraft) {
+        // Unsaved create flow: mutate the local draft, not the backend.
+        addTrackToDraftCollection(queryClient, collectionId, trackId)
+      } else {
+        originalOnAddTrack(trackId)
+      }
       // Restore scroll after React has committed the update
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -130,7 +171,18 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
         })
       })
     },
-    [originalOnAddTrack, mainContentRef]
+    [originalOnAddTrack, mainContentRef, isDraft, queryClient, collectionId]
+  )
+
+  const queueEntries = useMemo<Queueable[]>(
+    () =>
+      suggestedTracks
+        .filter((track): track is Track => !!track?.track_id)
+        .map((track) => ({
+          id: track.track_id,
+          source: QueueSource.RECOMMENDED_TRACKS
+        })),
+    [suggestedTracks]
   )
 
   const contentHeight = 66 + SUGGESTED_TRACK_COUNT * 74
@@ -167,6 +219,7 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
                 <SuggestedTrackRow
                   track={suggestedTracks[i]}
                   collectionId={collectionId}
+                  queueEntries={queueEntries}
                   onAddTrack={onAddTrack}
                 />
               ) : (
