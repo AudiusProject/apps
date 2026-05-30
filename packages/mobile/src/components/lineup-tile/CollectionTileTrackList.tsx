@@ -1,4 +1,6 @@
-import type { ID, LineupTrack } from '@audius/common/models'
+import type { CollectionTrack } from '@audius/common/api'
+import { useUser } from '@audius/common/api'
+import type { ID } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import { playbackSelectors } from '@audius/common/store'
 import { pluralize } from '@audius/common/utils'
@@ -25,7 +27,7 @@ type LineupTileTrackListProps = {
   onPress: GestureResponderHandler
   onPressWithPropagationBlock?: () => void
   trackCount: number
-  tracks: LineupTrack[]
+  tracks: CollectionTrack[]
   isAlbum: boolean
 }
 
@@ -77,7 +79,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 type TrackItemProps = {
   showSkeleton?: boolean
   index: number
-  track?: LineupTrack
+  track?: CollectionTrack
   trackId?: ID
   isAlbum?: boolean
   deleted?: boolean
@@ -89,6 +91,15 @@ const TrackItem = (props: TrackItemProps) => {
   const isPlayingUid = useSelector(
     (state: CommonState) => getTrackId(state) === trackId
   )
+  // Mirror the web mobile CollectionTile.TrackItem path exactly: tracks
+  // returned by `useOrderedCollectionTracks` are plain CollectionTrack /
+  // TrackMetadata (no joined `user`), so we fetch the owner's display name
+  // per row from the user cache. Hooks must run before any conditional
+  // returns; passing `undefined` to useUser when no track is present is
+  // safe (selector returns undefined).
+  const { data: trackOwnerName } = useUser(track?.owner_id, {
+    select: (user) => user?.name
+  })
   return (
     <>
       <View style={styles.divider} />
@@ -121,7 +132,7 @@ const TrackItem = (props: TrackItemProps) => {
                 ]}
                 numberOfLines={1}
               >
-                {`${messages.by} ${track.user?.name}`}
+                {`${messages.by} ${trackOwnerName ?? ''}`}
               </Text>
             ) : null}
             {deleted ? (

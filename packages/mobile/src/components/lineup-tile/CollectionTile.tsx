@@ -1,7 +1,13 @@
 import { useCallback, useMemo, useRef } from 'react'
 
-import { useCollection, useCurrentUserId, useUser } from '@audius/common/api'
+import {
+  useCollection,
+  useCurrentUserId,
+  useOrderedCollectionTracks,
+  useUser
+} from '@audius/common/api'
 import { useGatedCollectionAccess } from '@audius/common/hooks'
+import type { CollectionTrack } from '@audius/common/api'
 import {
   ShareSource,
   RepostSource,
@@ -9,7 +15,6 @@ import {
   PlaybackSource,
   SquareSizes
 } from '@audius/common/models'
-import type { Track } from '@audius/common/models'
 import {
   collectionsSocialActions,
   mobileOverflowMenuUIActions,
@@ -39,7 +44,6 @@ import { CollectionTileTrackList } from './CollectionTileTrackList'
 import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
-import { useEnhancedCollectionTracks } from './useEnhancedCollectionTracks'
 
 const { getTrackId } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
@@ -76,7 +80,6 @@ const useStyles = makeStyles(({ spacing }) => ({
 
 export const CollectionTile = (props: CollectionTileProps) => {
   const {
-    uid,
     id,
     collection: collectionOverride,
     tracks: tracksOverride,
@@ -92,22 +95,12 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const styles = useStyles()
   const { data: currentUserId } = useCurrentUserId()
 
-  const { data: cachedCollection } = useCollection(id, {
-    select: (collection) => ({
-      has_current_user_reposted: collection.has_current_user_reposted,
-      has_current_user_saved: collection.has_current_user_saved,
-      is_album: collection.is_album,
-      playlist_id: collection.playlist_id,
-      playlist_name: collection.playlist_name,
-      playlist_owner_id: collection.playlist_owner_id,
-      stream_conditions: collection.stream_conditions,
-      is_private: collection.is_private,
-      is_delete: collection.is_delete,
-      playlist_contents: collection.playlist_contents
-    })
-  })
+  // Mirror the web mobile CollectionTile path exactly: fetch the collection
+  // by ID (no select), feed it to useOrderedCollectionTracks. Returns plain
+  // CollectionTrack[] / TrackMetadata[] — no UID plumbing required.
+  const { data: cachedCollection } = useCollection(id)
   const collection = collectionOverride ?? cachedCollection
-  const collectionTracks = useEnhancedCollectionTracks(uid ?? '')
+  const collectionTracks = useOrderedCollectionTracks(cachedCollection)
   const tracks = tracksOverride ?? collectionTracks
 
   const { data: user } = useUser(collection?.playlist_owner_id, {
@@ -153,9 +146,10 @@ export const CollectionTile = (props: CollectionTileProps) => {
         childPressedRef.current = false
         return
       }
+      const startTrackId = currentTrack?.track_id ?? tracks[0]?.track_id
+      if (!startTrackId) return
       togglePlay({
-        uid: currentTrack?.uid ?? tracks[0]?.uid ?? null,
-        id: currentTrack?.track_id ?? tracks[0]?.track_id ?? null,
+        id: startTrackId,
         source: PlaybackSource.PLAYLIST_TILE_TRACK
       })
     }, 100)
@@ -172,19 +166,20 @@ export const CollectionTile = (props: CollectionTileProps) => {
 
   const duration = useMemo(() => {
     return tracks.reduce(
-      (duration: number, track: Track) => duration + track.duration,
+      (duration: number, track: CollectionTrack) =>
+        duration + (track.duration ?? 0),
       0
     )
   }, [tracks])
 
-  const expectedTrackCount =
-    collection?.playlist_contents?.track_ids?.length ?? 0
-  // Tracks are fetched lazily via useEnhancedCollectionTracks; while they're
-  // loading, `tracks` is `[]` even though the collection has track_ids. We
-  // surface that to CollectionTileTrackList so it renders skeleton rows
-  // instead of an empty block (which is what previously made the tile look
-  // "compact" along with the missing duration).
-  const tracksLoading = tracks.length === 0 && expectedTrackCount > 0
+  // Use track_count if present on the collection (canonical full count);
+  // fall back to the loaded tracks length. Drives the skeleton state on the
+  // track list while tracks are still being fetched.
+  const trackCount =
+    collection?.track_count ??
+    collection?.playlist_contents?.track_ids?.length ??
+    tracks.length
+  const tracksLoading = tracks.length === 0 && trackCount > 0
 
   const handlePressOverflow = useCallback(() => {
     if (!collection) return
@@ -324,7 +319,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
           onPress={handlePressTitle}
           onPressWithPropagationBlock={handlePressWithPropagationBlock}
           isAlbum={collection.is_album}
-          trackCount={expectedTrackCount || tracks.length}
+          trackCount={trackCount}
           isLoading={tracksLoading}
         />
         {isReadonly ? null : (

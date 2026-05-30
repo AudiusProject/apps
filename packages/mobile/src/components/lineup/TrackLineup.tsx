@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
 
 type LoadingItem = { _loading: true }
 type TrackEntry = { kind: 'track'; trackId: ID; uid: UID }
-type CollectionEntry = { kind: 'collection'; collectionId: ID; uid: UID }
+type CollectionEntry = { kind: 'collection'; collectionId: ID }
 type Entry = TrackEntry | CollectionEntry
 type RenderItem = Entry | LoadingItem
 
@@ -172,15 +172,6 @@ export const TrackLineup = ({
     (id: ID) => makeStableUid(Kind.TRACKS, id, source),
     [source]
   )
-  // CollectionTile's useEnhancedCollectionTracks expects a UID (not just an
-  // ID) so it can derive a unique track UID per row in the playlist. Build
-  // one per collection entry — without it the tile renders empty (no track
-  // list, no duration).
-  const collectionUidFor = useCallback(
-    (id: ID) => makeStableUid(Kind.COLLECTIONS, id, source),
-    [source]
-  )
-
   // Build a single ordered list of mixed track/collection entries. When the
   // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
   // wrap the legacy `trackIds` so the rest of the component is uniform.
@@ -254,13 +245,9 @@ export const TrackLineup = ({
               trackId: item.id,
               uid: uidFor(item.id)
             }
-          : {
-              kind: 'collection' as const,
-              collectionId: item.id,
-              uid: collectionUidFor(item.id)
-            }
+          : { kind: 'collection' as const, collectionId: item.id }
       ),
-    [visibleItems, uidFor, collectionUidFor]
+    [visibleItems, uidFor]
   )
 
   // Synchronous "load more was triggered" flag — set the moment the scroll
@@ -328,7 +315,6 @@ export const TrackLineup = ({
             ) : (
               <CollectionTile
                 id={entry.collectionId}
-                uid={entry.uid}
                 index={index}
                 isTrending={isTrending}
                 togglePlay={togglePlay}
