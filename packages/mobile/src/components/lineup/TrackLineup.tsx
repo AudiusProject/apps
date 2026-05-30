@@ -172,7 +172,6 @@ export const TrackLineup = ({
     (id: ID) => makeStableUid(Kind.TRACKS, id, source),
     [source]
   )
-
   // Build a single ordered list of mixed track/collection entries. When the
   // caller passes `lineupItems` (mixed feed) we use it verbatim; otherwise we
   // wrap the legacy `trackIds` so the rest of the component is uniform.
