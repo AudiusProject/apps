@@ -14,7 +14,13 @@ export const OwnerActionButtons = (props: OwnerActionButtonProps) => {
   const { collectionId } = props
   const { data: partialCollection } = useCollection(collectionId, {
     select: (collection) =>
-      pick(collection, 'is_private', 'is_album', 'playlist_contents', 'ddex_app')
+      pick(
+        collection,
+        'is_private',
+        'is_album',
+        'playlist_contents',
+        'ddex_app'
+      )
   })
   const { is_private, is_album, playlist_contents, ddex_app } =
     partialCollection ?? {}

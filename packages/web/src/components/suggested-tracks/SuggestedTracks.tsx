@@ -24,10 +24,7 @@ import {
   cacheCollectionsActions,
   toastActions
 } from '@audius/common/store'
-import {
-  getErrorMessage,
-  getPathFromTrackUrl
-} from '@audius/common/utils'
+import { getErrorMessage, getPathFromTrackUrl } from '@audius/common/utils'
 import {
   Button,
   Divider,
@@ -375,11 +372,7 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
 
         for (const track of tracksToAdd) {
           if (isDraft) {
-            addTrackToDraftCollection(
-              queryClient,
-              collectionId,
-              track.track_id
-            )
+            addTrackToDraftCollection(queryClient, collectionId, track.track_id)
           } else {
             dispatch(
               addTrackToPlaylist(track.track_id, collectionId, { silent: true })
@@ -432,7 +425,10 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
       if (permalinks.length === 0) return
       e.preventDefault()
       setUrlInput('')
-      void addTracksFromText(pasted)
+      // addTracksFromText catches its own errors and toasts; the floating
+      // promise is intentional. ESLint's no-void rule disallows the `void`
+      // operator here, so we just let it float.
+      addTracksFromText(pasted)
     },
     [addTracksFromText]
   )
@@ -443,7 +439,7 @@ export const SuggestedTracks = (props: SuggestedTracksProps) => {
       e.preventDefault()
       const value = urlInput
       setUrlInput('')
-      void addTracksFromText(value)
+      addTracksFromText(value)
     },
     [urlInput, addTracksFromText]
   )
