@@ -122,7 +122,6 @@ export type Modals =
   | 'VerificationError'
   | 'CreatePlaylistModal'
   | 'DuplicatePlaylistModal'
-  | 'AddTracksByUrlModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState

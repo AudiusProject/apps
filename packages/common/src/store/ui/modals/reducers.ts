@@ -1,7 +1,6 @@
 import { Action, combineReducers, Reducer } from '@reduxjs/toolkit'
 
 import { addCashModalReducer } from './add-cash-modal'
-import { addTracksByUrlModalReducer } from './add-tracks-by-url-modal'
 import { albumTrackRemoveConfirmationModalReducer } from './album-track-remove-confirmation-modal'
 import { announcementModalReducer } from './announcement-modal'
 import { artistPickModalReducer } from './artist-pick-modal'
@@ -97,8 +96,7 @@ const combinedReducers = combineReducers({
   CoinSuccessModal: coinSuccessModalReducer,
   FanClubDetailsModal: fanClubDetailsModalReducer,
   CreatePlaylistModal: createPlaylistModalReducer,
-  DuplicatePlaylistModal: duplicatePlaylistModalReducer,
-  AddTracksByUrlModal: addTracksByUrlModalReducer
+  DuplicatePlaylistModal: duplicatePlaylistModalReducer
 })
 
 /**
