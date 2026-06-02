@@ -56,25 +56,36 @@ const {
 } = collectionsSocialActions
 
 const useStyles = makeStyles(({ spacing }) => ({
-  artworkWrapper: {
-    width: '100%',
-    aspectRatio: 1,
-    overflow: 'hidden'
-  },
-  artwork: {
-    width: '100%',
-    height: '100%'
-  },
   metadata: {
-    paddingHorizontal: spacing(4),
-    paddingVertical: spacing(3),
+    flexDirection: 'row',
+    gap: spacing(2),
+    width: '100%'
+  },
+  imageContainer: {
+    marginTop: spacing(2),
+    marginLeft: spacing(2)
+  },
+  image: {
+    borderRadius: 4,
+    height: 72,
+    width: 72
+  },
+  titles: {
+    flex: 1,
+    alignItems: 'flex-start',
+    marginTop: spacing(2),
+    paddingRight: spacing(2),
     gap: spacing(1)
   },
   titleTouchable: {
-    flex: 1
+    width: '100%'
   },
   artistTouchable: {
     alignSelf: 'flex-start'
+  },
+  topRight: {
+    marginTop: spacing(2),
+    marginRight: spacing(2)
   }
 }))
 
@@ -268,21 +279,21 @@ export const CollectionTile = (props: CollectionTileProps) => {
       <Paper onPress={handlePress} style={style}>
         <CollectionDogEar collectionId={collection.playlist_id} hideUnlocked />
 
-        {/* Card-style header: large square artwork above title + meta */}
-        <View style={styles.artworkWrapper}>
-          {renderImage({ style: styles.artwork })}
-        </View>
-
-        <Flex column style={styles.metadata}>
-          <Text
-            variant='label'
-            size='xs'
-            textTransform='uppercase'
-            color='subdued'
-          >
-            {contentType}
-          </Text>
-          <Flex row alignItems='center' justifyContent='space-between' gap='s'>
+        {/* Compact header: small square artwork beside label + title + artist,
+            with total duration in the top-right (mirrors web mobile) */}
+        <View style={styles.metadata}>
+          <View style={styles.imageContainer}>
+            {renderImage({ style: styles.image })}
+          </View>
+          <Flex column style={styles.titles}>
+            <Text
+              variant='label'
+              size='xs'
+              textTransform='uppercase'
+              color='subdued'
+            >
+              {contentType}
+            </Text>
             <TouchableOpacity
               style={styles.titleTouchable}
               onPressIn={handlePressWithPropagationBlock}
@@ -292,22 +303,24 @@ export const CollectionTile = (props: CollectionTileProps) => {
                 {collection.playlist_name}
               </Text>
             </TouchableOpacity>
-            {durationText ? (
-              <Text variant='body' size='s' color='subdued'>
+            <TouchableOpacity
+              onPressIn={handlePressWithPropagationBlock}
+              activeOpacity={0.7}
+              style={styles.artistTouchable}
+            >
+              <View pointerEvents='none'>
+                <UserLink textVariant='body' userId={user.user_id} />
+              </View>
+            </TouchableOpacity>
+          </Flex>
+          {durationText ? (
+            <View style={styles.topRight}>
+              <Text variant='body' size='xs' color='subdued'>
                 {durationText}
               </Text>
-            ) : null}
-          </Flex>
-          <TouchableOpacity
-            onPressIn={handlePressWithPropagationBlock}
-            activeOpacity={0.7}
-            style={styles.artistTouchable}
-          >
-            <View pointerEvents='none'>
-              <UserLink textVariant='body' userId={user.user_id} />
             </View>
-          </TouchableOpacity>
-        </Flex>
+          ) : null}
+        </View>
 
         <CollectionTileStats
           collectionId={collection.playlist_id}
