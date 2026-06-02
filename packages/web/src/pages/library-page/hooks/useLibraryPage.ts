@@ -16,7 +16,6 @@ import {
   FavoriteSource,
   PlaybackSource,
   ID,
-  Kind,
   UID,
   LineupTrack,
   Status
@@ -362,12 +361,7 @@ export const useLibraryPage = () => {
     () =>
       tracks.entries.map((entry: any) => ({
         trackId: entry.track_id ?? entry.id,
-        source: playbackSource,
-        uid: makeStableUid(
-          Kind.TRACKS,
-          entry.track_id ?? entry.id,
-          playbackSource
-        )
+        source: playbackSource
       })),
     [tracks.entries]
   )

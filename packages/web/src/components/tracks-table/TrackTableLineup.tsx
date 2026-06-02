@@ -74,8 +74,7 @@ export const TrackTableLineup = ({
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source,
-        uid: makeStableUid(Kind.TRACKS, id, source)
+        source
       })),
     [trackIds, source]
   )

@@ -223,8 +223,7 @@ export const TracksTab = () => {
     () =>
       filteredTrackIds.map((id) => ({
         trackId: id,
-        source: playbackSource,
-        uid: makeStableUid(Kind.TRACKS, id, playbackSource)
+        source: playbackSource
       })),
     [filteredTrackIds]
   )
