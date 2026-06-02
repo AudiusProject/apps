@@ -13,11 +13,9 @@ fi
 export NVM_DIR=$HOME/.nvm;
 source $NVM_DIR/nvm.sh;
 
-printf "${GREEN}Confirming node, python, and ruby environments...\n${NC}"
+printf "${GREEN}Confirming node and ruby environments...\n${NC}"
 {
   nvm install
-  cp .python-version-dev .python-version
-  pyenv install -s
   rbenv install -s
 } > /dev/null
 
@@ -34,14 +32,6 @@ current_ruby_version=$(ruby --version)
 
 if [[ ! $current_ruby_version =~ $required_ruby_version ]]; then
   printf "${RED}Invalid ruby version. Expected $required_ruby_version, got $current_ruby_version\n${NC}"
-  should_error=true
-fi
-
-required_python_version=$(<'.python-version')
-current_python_version=$(python --version)
-
-if [[ ! $current_python_version =~ $required_python_version ]]; then
-  printf "${RED}Invalid python version. Expected $required_python_version, got $current_python_version\n${NC}"
   should_error=true
 fi
 
