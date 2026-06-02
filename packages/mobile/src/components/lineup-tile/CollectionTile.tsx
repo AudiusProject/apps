@@ -29,12 +29,19 @@ import { formatLineupTileDuration, removeNullable } from '@audius/common/utils'
 import { TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Flex, Paper, Text, type ImageProps } from '@audius/harmony-native'
+import {
+  Flex,
+  IconVolumeLevel2,
+  Paper,
+  Text,
+  type ImageProps
+} from '@audius/harmony-native'
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { setVisibility } from 'app/store/drawers/slice'
 import { getIsCollectionMarkedForDownload } from 'app/store/offline-downloads/selectors'
 import { makeStyles } from 'app/styles'
+import { useThemeColors } from 'app/utils/theme'
 
 import { CollectionDogEar } from '../collection/CollectionDogEar'
 import { CollectionImage } from '../image/CollectionImage'
@@ -45,7 +52,7 @@ import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
 
-const { getTrackId } = playbackSelectors
+const { getTrackId, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const {
@@ -78,7 +85,15 @@ const useStyles = makeStyles(({ spacing }) => ({
     gap: spacing(1)
   },
   titleTouchable: {
-    width: '100%'
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  titleText: {
+    flexShrink: 1
+  },
+  playingIndicator: {
+    marginLeft: 8
   },
   artistTouchable: {
     alignSelf: 'flex-start'
@@ -104,6 +119,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const dispatch = useDispatch()
   const navigation = useNavigation()
   const styles = useStyles()
+  const { primary } = useThemeColors()
   const { data: currentUserId } = useCurrentUserId()
 
   // Mirror the web mobile CollectionTile path exactly: fetch the collection
@@ -135,6 +151,10 @@ export const CollectionTile = (props: CollectionTileProps) => {
   // already runs its own `getTrackId(state) === trackId` selector and
   // applies `styles.active` / `palette.primary` to its title text).
   const isActive = currentTrack != null
+  // True only while audio is actively playing (not paused) AND one of this
+  // collection's tracks is the current track. Mirrors LineupTileMetadata's
+  // `isPlaying` derivation — drives the speaker icon next to the title.
+  const isPlaying = useSelector((state) => getPlaying(state) && isActive)
 
   const isCollectionMarkedForDownload = useSelector((state) =>
     collection
@@ -165,7 +185,14 @@ export const CollectionTile = (props: CollectionTileProps) => {
         childPressedRef.current = false
         return
       }
-      const startTrackId = currentTrack?.track_id ?? tracks[0]?.track_id
+      // Don't try to play a deleted-by-artist track. Pick the current
+      // track (if it's one of ours and not deleted), else the first
+      // non-deleted track in the collection. If everything is deleted,
+      // the tile tap is a no-op.
+      const startTrackId =
+        currentTrack && !currentTrack.is_delete
+          ? currentTrack.track_id
+          : tracks.find((t) => !t.is_delete)?.track_id
       if (!startTrackId) return
       togglePlay({
         id: startTrackId,
@@ -312,9 +339,21 @@ export const CollectionTile = (props: CollectionTileProps) => {
                 variant='title'
                 color={isActive ? 'active' : 'default'}
                 numberOfLines={1}
+                style={styles.titleText}
               >
                 {collection.playlist_name}
               </Text>
+              {/* Speaker icon next to the title while one of this
+                  collection's tracks is the currently-playing track and
+                  the audio engine is actively playing (not paused). Same
+                  icon + sizing TrackTile uses via LineupTileMetadata. */}
+              {isPlaying ? (
+                <IconVolumeLevel2
+                  fill={primary}
+                  size='m'
+                  style={styles.playingIndicator}
+                />
+              ) : null}
             </TouchableOpacity>
             <TouchableOpacity
               onPressIn={handlePressWithPropagationBlock}
