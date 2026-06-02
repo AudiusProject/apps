@@ -364,7 +364,10 @@ const App = (props) => {
             ref={playerContainerRef}
             style={{
               flex: 1,
-              width: isCard ? 'auto' : '100%',
+              width: '100%',
+              minWidth: 0,
+              minHeight: 0,
+              overflow: 'hidden',
               display: isCard ? 'flex' : 'block',
               justifyContent: isCard ? 'center' : undefined,
               alignItems: isCard ? 'center' : undefined

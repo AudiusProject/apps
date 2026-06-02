@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import { full } from '@audius/sdk'
+import { instanceOfPurchaseGate } from '@audius/sdk'
 import cn from 'classnames'
 import SimpleBar from 'simplebar-react'
 
@@ -20,8 +20,6 @@ import BedtimeScrubber from '../scrubber/BedtimeScrubber'
 import Titles from '../titles/Titles'
 
 import styles from './CollectionPlayerCard.module.css'
-
-const { instanceOfPurchaseGate } = full
 
 const CollectionListRow = ({
   playingState,

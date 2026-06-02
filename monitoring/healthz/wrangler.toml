@@ -1,6 +1,0 @@
-account_id = "3811365464a8e56b2b27a5590e328e49"
-name = "health"
-type = "webpack"
-workers_dev = true
-site = { bucket = "./dist" }
-compatibility_date = "2022-07-16"

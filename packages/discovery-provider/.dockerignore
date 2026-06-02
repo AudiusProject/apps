@@ -1,7 +1,0 @@
-venv
-logs
-*.swp
-node_modules
-*_dump
-celerybeat*
-*.rdb
