@@ -1,10 +1,9 @@
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 
 import { useCurrentUserId, useTrackHistory } from '@audius/common/api'
-import { Name, PlaybackSource, Kind, ID } from '@audius/common/models'
+import { Name, PlaybackSource, ID } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
 import {
   Button,
   IconListeningHistory,
@@ -101,8 +100,7 @@ export const HistoryPage = ({ title, description }: HistoryPageProps) => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: HISTORY_SOURCE,
-        uid: makeStableUid(Kind.TRACKS, id, HISTORY_SOURCE)
+        source: HISTORY_SOURCE
       })),
     [trackIds]
   )

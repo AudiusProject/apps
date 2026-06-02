@@ -520,12 +520,7 @@ export const useCollectionPage = (
     () =>
       tracks.entries.map((entry) => ({
         trackId: entry.track_id,
-        source: collectionPlaybackSource,
-        uid: makeStableUid(
-          Kind.TRACKS,
-          entry.track_id,
-          collectionPlaybackSource
-        )
+        source: collectionPlaybackSource
       })),
     [tracks.entries, collectionPlaybackSource]
   )

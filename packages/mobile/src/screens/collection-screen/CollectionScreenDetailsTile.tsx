@@ -316,8 +316,7 @@ export const CollectionScreenDetailsTile = ({
         .map((uid) => Uid.fromString(uid).id as ID)
         .map((id) => ({
           trackId: id,
-          source: collectionPlaybackSource,
-          uid: makeStableUid(Kind.TRACKS, id, collectionPlaybackSource)
+          source: collectionPlaybackSource
         })),
     [trackUids, collectionPlaybackSource]
   )
@@ -584,8 +583,7 @@ const CollectionTrackList = ({
         .map((uid) => Uid.fromString(uid).id as ID)
         .map((id) => ({
           trackId: id,
-          source: trackListPlaybackSource,
-          uid: makeStableUid(Kind.TRACKS, id, trackListPlaybackSource)
+          source: trackListPlaybackSource
         })),
     [uids, trackListPlaybackSource]
   )
