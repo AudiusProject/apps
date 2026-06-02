@@ -128,6 +128,14 @@ export const CollectionTile = (props: CollectionTileProps) => {
     return tracks.find((track) => track.track_id === trackId) ?? null
   })
 
+  // Title tints to the active/playing color whenever any track in this
+  // collection is the one currently playing. Mirrors TrackTile's per-tile
+  // highlight (LineupTileMetadata: `color={isActive ? 'primary' : 'neutral'}`)
+  // and the per-row highlight in CollectionTileTrackList (each TrackItem
+  // already runs its own `getTrackId(state) === trackId` selector and
+  // applies `styles.active` / `palette.primary` to its title text).
+  const isActive = currentTrack != null
+
   const isCollectionMarkedForDownload = useSelector((state) =>
     collection
       ? getIsCollectionMarkedForDownload(collection.playlist_id.toString())(
@@ -300,7 +308,11 @@ export const CollectionTile = (props: CollectionTileProps) => {
               onPressIn={handlePressWithPropagationBlock}
               onPress={handlePressTitle}
             >
-              <Text variant='title' numberOfLines={1}>
+              <Text
+                variant='title'
+                color={isActive ? 'active' : 'default'}
+                numberOfLines={1}
+              >
                 {collection.playlist_name}
               </Text>
             </TouchableOpacity>
