@@ -299,7 +299,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
               onPressIn={handlePressWithPropagationBlock}
               onPress={handlePressTitle}
             >
-              <Text variant='title' strength='strong' numberOfLines={1}>
+              <Text variant='title' numberOfLines={1}>
                 {collection.playlist_name}
               </Text>
             </TouchableOpacity>

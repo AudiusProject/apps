@@ -63,7 +63,7 @@ export const SavesMetric = (props: SavesMetricProps) => {
 
   const handlePress = useCallback(() => {
     dispatch(setFavorite(collectionId, FavoriteType.PLAYLIST))
-    navigation.push('Favorites', {
+    navigation.push('Favorited', {
       id: collectionId,
       favoriteType: FavoriteType.PLAYLIST
     })
