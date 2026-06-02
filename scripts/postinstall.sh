@@ -63,14 +63,4 @@ else
   printf "${YELLOW}WARNING: SKIP_ANDROID_INSTALL set. Skipping Android AAR installation.${NC}\n"
 fi
 
-if [[ -z "${CI}" ]]; then
-  printf "${GREEN}Setting up audius-compose...\n${NC}"
-  ./dev-tools/setup.sh > /dev/null
-fi
-
-if [[ -z "${CI}" ]]; then
-  printf "${GREEN}Installing discovery provider dependencies...\n${NC}"
-  pip install -r packages/discovery-provider/requirements.txt > /dev/null
-fi
-
 printf "\n${GREEN}Audius monorepo ready!\n${NC}"
