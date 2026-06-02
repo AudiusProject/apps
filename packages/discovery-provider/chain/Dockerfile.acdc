@@ -1,3 +1,0 @@
-FROM nethermind/nethermind:1.17.4
-
-RUN apt-get update && apt-get -y install curl jq

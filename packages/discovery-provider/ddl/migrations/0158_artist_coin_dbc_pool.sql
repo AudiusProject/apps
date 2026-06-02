@@ -1,2 +1,0 @@
-ALTER TABLE artist_coins
-    ADD COLUMN IF NOT EXISTS dbc_pool TEXT DEFAULT NULL;
