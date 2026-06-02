@@ -161,7 +161,8 @@ export const CollectionTile = (props: CollectionTileProps) => {
       if (!startTrackId) return
       togglePlay({
         id: startTrackId,
-        source: PlaybackSource.PLAYLIST_TILE_TRACK
+        source: PlaybackSource.PLAYLIST_TILE_TRACK,
+        collectionId: collection.playlist_id
       })
     }, 100)
   }, [currentTrack, togglePlay, tracks, collection])

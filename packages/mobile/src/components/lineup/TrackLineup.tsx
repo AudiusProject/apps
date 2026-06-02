@@ -9,6 +9,7 @@ import {
 } from 'react'
 
 import type { LineupData } from '@audius/common/api'
+import { useCollections } from '@audius/common/api'
 import {
   Kind,
   type ID,
@@ -182,27 +183,46 @@ export const TrackLineup = ({
     return source.slice(0, end)
   }, [lineupItems, trackIds, maxEntries])
 
-  // Playback queue is track-only. Collection tiles drive their own internal
-  // playback via the playback slice (the mobile CollectionTile's togglePlay
-  // already targets the first track of its playlist).
-  const visibleTrackIds = useMemo(
+  // Collection entries contribute their tracks to the playback queue inline,
+  // in feed order, so a playlist/album tile is playable (tap to start) and is
+  // traversed by next/previous rather than skipped. We only need the ordered
+  // track ids, which live on each collection's playlist_contents — fetched
+  // from cache (already primed by the rendered CollectionTiles).
+  const collectionIds = useMemo(
     () =>
-      visibleItems.filter((i) => i.type === EntityType.TRACK).map((i) => i.id),
+      visibleItems
+        .filter((i) => i.type !== EntityType.TRACK)
+        .map((i) => i.id),
     [visibleItems]
   )
+  const { byId: collectionsById } = useCollections(collectionIds)
 
-  const tracksForPlayback: PlaybackTrack[] = useMemo(
-    () =>
-      visibleTrackIds.map((id) => ({
-        trackId: id,
-        source,
-        uid: uidFor(id)
-      })),
-    [visibleTrackIds, source, uidFor]
-  )
+  const tracksForPlayback: PlaybackTrack[] = useMemo(() => {
+    const queue: PlaybackTrack[] = []
+    for (const item of visibleItems) {
+      if (item.type === EntityType.TRACK) {
+        queue.push({ trackId: item.id, source })
+      } else {
+        const trackIds =
+          collectionsById[item.id]?.playlist_contents?.track_ids ?? []
+        for (const { track } of trackIds) {
+          queue.push({ trackId: track, source, collectionId: item.id })
+        }
+      }
+    }
+    return queue
+  }, [visibleItems, collectionsById, source])
 
   const togglePlay = useCallback(
-    ({ id }: { uid?: UID; id: ID; source?: PlaybackSource }) => {
+    ({
+      id,
+      collectionId
+    }: {
+      uid?: UID
+      id: ID
+      source?: PlaybackSource
+      collectionId?: ID
+    }) => {
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === id && currentSource === source
@@ -214,7 +234,16 @@ export const TrackLineup = ({
         dispatch(playbackActions.play())
         return
       }
-      const startIndex = visibleTrackIds.indexOf(id)
+      // For a collection tile, locate the track within that collection's queue
+      // segment (a track id can otherwise appear more than once in the queue).
+      const startIndex =
+        collectionId != null
+          ? tracksForPlayback.findIndex(
+              (t) => t.collectionId === collectionId && t.trackId === id
+            )
+          : tracksForPlayback.findIndex(
+              (t) => t.collectionId == null && t.trackId === id
+            )
       if (startIndex < 0) return
       dispatch(
         playbackActions.playFrom({
@@ -227,7 +256,6 @@ export const TrackLineup = ({
     [
       dispatch,
       tracksForPlayback,
-      visibleTrackIds,
       querySource,
       currentLegacy?.trackId,
       currentLegacy?.source,
