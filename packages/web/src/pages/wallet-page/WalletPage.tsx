@@ -13,6 +13,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { WalletCoinsList } from 'pages/wallet-page/components/WalletCoinsList'
 
 import { LinkedWallets } from './components/LinkedWallets'
+import { SecureWalletReminderModal } from './components/SecureWalletReminderModal'
 
 const messages = {
   title: 'Wallet'
@@ -56,6 +57,7 @@ export const WalletPage = () => {
       <AccountBalance />
       <WalletCoinsList />
       <LinkedWallets />
+      <SecureWalletReminderModal />
     </Flex>
   )
 
