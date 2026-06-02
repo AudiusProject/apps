@@ -108,7 +108,18 @@ const TrackItem = (props: TrackItemProps) => {
           <Skeleton width='100%' height={10} />
         ) : !track ? null : (
           <>
-            <Text style={[styles.text, isPlayingUid && styles.active]}>
+            {/* Index also picks up the deleted style so the whole row
+                grays out consistently — without this, the number column
+                stays the default subdued color while the title/artist
+                go further-subdued, which reads as "row partially
+                deleted" rather than the intended unavailable state. */}
+            <Text
+              style={[
+                styles.text,
+                deleted && styles.deleted,
+                isPlayingUid && styles.active
+              ]}
+            >
               {index + 1}
             </Text>
             {/*
