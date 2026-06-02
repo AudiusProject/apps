@@ -1,7 +1,5 @@
 import { Text } from '@audius/harmony'
-import { full } from '@audius/sdk'
-
-const { instanceOfPurchaseGate } = full
+import { instanceOfPurchaseGate } from '@audius/sdk'
 
 const messages = {
   more: 'Looking for more like this?',

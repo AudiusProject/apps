@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { full } from '@audius/sdk'
+import { instanceOfPurchaseGate } from '@audius/sdk'
 import cn from 'classnames'
 
 import AudiusLogoGlyph from '../../assets/img/audiusLogoGlyph.svg'
@@ -10,8 +10,6 @@ import { Preview } from '../preview/Preview'
 import BedtimeScrubber from '../scrubber/BedtimeScrubber'
 
 import styles from './TrackPlayerTiny.module.css'
-
-const { instanceOfPurchaseGate } = full
 
 const MARQUEE_SPACING = 40
 const SHOULD_ANIMATE_WIDTH_THRESHOLD = 15
