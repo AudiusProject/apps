@@ -6,8 +6,8 @@ import {
   useOrderedCollectionTracks,
   useUser
 } from '@audius/common/api'
-import { useGatedCollectionAccess } from '@audius/common/hooks'
 import type { CollectionTrack } from '@audius/common/api'
+import { useGatedCollectionAccess } from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
@@ -25,16 +25,13 @@ import {
   PurchaseableContentType
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
-import { formatLineupTileDuration, removeNullable } from '@audius/common/utils'
-import { TouchableOpacity, View } from 'react-native'
+import { removeNullable } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Flex, Paper, Text, type ImageProps } from '@audius/harmony-native'
-import { UserLink } from 'app/components/user-link'
+import { Paper, type ImageProps } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { setVisibility } from 'app/store/drawers/slice'
 import { getIsCollectionMarkedForDownload } from 'app/store/offline-downloads/selectors'
-import { makeStyles } from 'app/styles'
 
 import { CollectionDogEar } from '../collection/CollectionDogEar'
 import { CollectionImage } from '../image/CollectionImage'
@@ -42,6 +39,7 @@ import { CollectionImage } from '../image/CollectionImage'
 import { CollectionTileStats } from './CollectionTileStats'
 import { CollectionTileTrackList } from './CollectionTileTrackList'
 import { LineupTileActionButtons } from './LineupTileActionButtons'
+import { LineupTileMetadata } from './LineupTileMetadata'
 import { TilePressBlockContext } from './TilePressBlockContext'
 import { LineupTileSource, type CollectionTileProps } from './types'
 
@@ -54,29 +52,6 @@ const {
   undoRepostCollection,
   unsaveCollection
 } = collectionsSocialActions
-
-const useStyles = makeStyles(({ spacing }) => ({
-  artworkWrapper: {
-    width: '100%',
-    aspectRatio: 1,
-    overflow: 'hidden'
-  },
-  artwork: {
-    width: '100%',
-    height: '100%'
-  },
-  metadata: {
-    paddingHorizontal: spacing(4),
-    paddingVertical: spacing(3),
-    gap: spacing(1)
-  },
-  titleTouchable: {
-    flex: 1
-  },
-  artistTouchable: {
-    alignSelf: 'flex-start'
-  }
-}))
 
 export const CollectionTile = (props: CollectionTileProps) => {
   const {
@@ -92,7 +67,6 @@ export const CollectionTile = (props: CollectionTileProps) => {
 
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const styles = useStyles()
   const { data: currentUserId } = useCurrentUserId()
 
   // Mirror the web mobile CollectionTile path exactly: fetch the collection
@@ -116,6 +90,10 @@ export const CollectionTile = (props: CollectionTileProps) => {
     const trackId = getTrackId(state)
     return tracks.find((track) => track.track_id === trackId) ?? null
   })
+  const isPlayingUid = useSelector((state: CommonState) => {
+    const trackId = getTrackId(state)
+    return tracks.some((track) => track.track_id === trackId)
+  })
 
   const isCollectionMarkedForDownload = useSelector((state) =>
     collection
@@ -129,7 +107,7 @@ export const CollectionTile = (props: CollectionTileProps) => {
     (props: ImageProps) => (
       <CollectionImage
         collectionId={collection?.playlist_id ?? 0}
-        size={SquareSizes.SIZE_480_BY_480}
+        size={SquareSizes.SIZE_150_BY_150}
         {...props}
       />
     ),
@@ -260,55 +238,23 @@ export const CollectionTile = (props: CollectionTileProps) => {
   const isOwner = collection.playlist_owner_id === currentUserId
   const isReadonly = variant === 'readonly'
   const contentType = collection.is_album ? 'album' : 'playlist'
-  const durationText =
-    duration > 0 ? formatLineupTileDuration(duration, false, true) : null
 
   return (
     <TilePressBlockContext.Provider value={handlePressWithPropagationBlock}>
       <Paper onPress={handlePress} style={style}>
         <CollectionDogEar collectionId={collection.playlist_id} hideUnlocked />
-
-        {/* Card-style header: large square artwork above title + meta */}
-        <View style={styles.artworkWrapper}>
-          {renderImage({ style: styles.artwork })}
-        </View>
-
-        <Flex column style={styles.metadata}>
-          <Text
-            variant='label'
-            size='xs'
-            textTransform='uppercase'
-            color='subdued'
-          >
-            {contentType}
-          </Text>
-          <Flex row alignItems='center' justifyContent='space-between' gap='s'>
-            <TouchableOpacity
-              style={styles.titleTouchable}
-              onPressIn={handlePressWithPropagationBlock}
-              onPress={handlePressTitle}
-            >
-              <Text variant='title' strength='strong' numberOfLines={1}>
-                {collection.playlist_name}
-              </Text>
-            </TouchableOpacity>
-            {durationText ? (
-              <Text variant='body' size='s' color='subdued'>
-                {durationText}
-              </Text>
-            ) : null}
-          </Flex>
-          <TouchableOpacity
-            onPressIn={handlePressWithPropagationBlock}
-            activeOpacity={0.7}
-            style={styles.artistTouchable}
-          >
-            <View pointerEvents='none'>
-              <UserLink textVariant='body' userId={user.user_id} />
-            </View>
-          </TouchableOpacity>
-        </Flex>
-
+        <LineupTileMetadata
+          renderImage={renderImage}
+          onPressTitle={handlePressTitle}
+          onPressWithPropagationBlock={handlePressWithPropagationBlock}
+          title={collection.playlist_name}
+          userId={user.user_id}
+          isPlayingUid={isPlayingUid}
+          type={contentType}
+          trackId={collection.playlist_id}
+          duration={duration}
+          isLongFormContent={false}
+        />
         <CollectionTileStats
           collectionId={collection.playlist_id}
           rankIndex={lineupTileProps.index}
