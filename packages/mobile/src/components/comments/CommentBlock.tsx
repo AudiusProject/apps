@@ -25,6 +25,7 @@ import { UserLink } from '../user-link'
 import { ArtistPick } from './ArtistPick'
 import { CommentActionBar } from './CommentActionBar'
 import { CommentBadge } from './CommentBadge'
+import { useCommentDrawer } from './CommentDrawerContext'
 import { CommentText } from './CommentText'
 import { Timestamp } from './Timestamp'
 import { TimestampLink } from './TimestampLink'
@@ -42,8 +43,16 @@ export const CommentBlockInternal = (
   }
 ) => {
   const { comment, isPreview, parentCommentId, highlightedCommentId } = props
-  const { artistId, track, navigation, closeDrawer } =
-    useCurrentCommentSection()
+  const { artistId, track, navigation } = useCurrentCommentSection()
+  // Use this for in-drawer navigation (profile pic, user link, mentions)
+  // so the destination screen is visible once we navigate. The section
+  // context's `closeDrawer` would only close the comment drawer and leave
+  // the now-playing drawer covering the destination.
+  const { closeAndExitNowPlaying } = useCommentDrawer()
+  const trackIdForCloseAll = track.track_id
+  const handleNavigateAway = useCallback(() => {
+    closeAndExitNowPlaying(trackIdForCloseAll)
+  }, [closeAndExitNowPlaying, trackIdForCloseAll])
   const {
     id: commentId,
     message,
@@ -66,9 +75,9 @@ export const CommentBlockInternal = (
   })
 
   const handlePressProfilePic = useCallback(() => {
-    closeDrawer?.()
+    handleNavigateAway()
     onPressProfilePic()
-  }, [closeDrawer, onPressProfilePic])
+  }, [handleNavigateAway, onPressProfilePic])
 
   const handlePressTimestamp = useCallback(
     (e: GestureResponderEvent, timestampSeconds: number) => {
@@ -169,7 +178,7 @@ export const CommentBlockInternal = (
                     <UserLink
                       userId={userId}
                       strength='strong'
-                      onPress={closeDrawer}
+                      onPress={handleNavigateAway}
                       lineHeight='single'
                       textLinkStyle={{ lineHeight: 20 }}
                     />
@@ -207,7 +216,7 @@ export const CommentBlockInternal = (
             mentions={mentions}
             trackDuration={track.duration}
             navigation={navigation}
-            onCloseDrawer={closeDrawer}
+            onCloseDrawer={handleNavigateAway}
           >
             {message}
           </CommentText>
