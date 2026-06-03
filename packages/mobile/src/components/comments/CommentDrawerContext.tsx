@@ -20,7 +20,19 @@ import { CommentDrawer } from './CommentDrawer'
 interface CommentDrawerContextState {
   isOpen: boolean
   open: (data: CommentDrawerData) => void
+  /**
+   * Close the comment drawer only. Use this for dismissal flows where the
+   * user is staying on the now-playing screen (swipe-down on the bottom
+   * sheet, X button, programmatic dismiss).
+   */
   close: (trackId: ID) => void
+  /**
+   * Close the comment drawer AND any open now-playing drawer behind it.
+   * Use this for in-drawer navigation actions (clicking a user link,
+   * mention, etc.) so the destination screen is actually visible once
+   * the navigation push lands.
+   */
+  closeAndExitNowPlaying: (trackId: ID) => void
 }
 
 const CommentDrawerContext = createContext<
@@ -50,10 +62,25 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
     )
   }, [])
 
-  const close = useCallback(
+  const close = useCallback((trackId: ID) => {
+    // Closes the comment drawer only. The now-playing drawer should stay
+    // open here — the BottomSheetModal's onDismiss callback (swipe-down,
+    // backdrop tap, X button) routes through this path and historically
+    // also closed the now-playing drawer underneath, which is the bug.
+    // Navigation flows that need both drawers closed call
+    // `closeAndExitNowPlaying` instead.
+    setIsOpen(false)
+    track(
+      make({
+        eventName: Name.COMMENTS_CLOSE_COMMENT_DRAWER,
+        trackId
+      })
+    )
+  }, [])
+
+  const closeAndExitNowPlaying = useCallback(
     (trackId: ID) => {
       setIsOpen(false)
-      // This happens when you click on a UserLink inside the comments drawer
       if (isNowPlayingDrawerOpen) {
         closeNowPlayingDrawer()
       }
@@ -76,7 +103,9 @@ export const CommentDrawerProvider = (props: PropsWithChildren) => {
   }, [isOpen])
 
   return (
-    <CommentDrawerContext.Provider value={{ isOpen, open, close }}>
+    <CommentDrawerContext.Provider
+      value={{ isOpen, open, close, closeAndExitNowPlaying }}
+    >
       {children}
       {drawerData ? (
         <CommentDrawer
