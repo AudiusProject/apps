@@ -1,15 +1,14 @@
-import { EntityType, Id } from '@audius/sdk'
+import { EntityType, OptionalId } from '@audius/sdk'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 
-import { transformAndCleanList, userFeedItemFromSDK } from '~/adapters'
+import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { ID, UserCollectionMetadata, UserTrackMetadata } from '~/models'
+import { ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
-import { primeCollectionData } from '../utils/primeCollectionData'
 import { primeTrackData } from '../utils/primeTrackData'
 
 export const FOR_YOU_INITIAL_PAGE_SIZE = 10
@@ -25,12 +24,21 @@ export const getForYouFeedQueryKey = (userId: ID | null | undefined) => {
 }
 
 /**
- * "For You" feed for the Feed page. Backed by the dedicated
- * `GET /v1/users/{id}/feed/for-you` endpoint — a lean 6-source pipeline
- * (in-network, trending, underground × tracks + playlists) with linear
- * ranking and a shared per-owner diversity pass. Returns a heterogenous
- * feed of tracks and playlists/albums, mirroring the chronological feed
- * shape; consumers that only render tracks can use `trackIds`.
+ * "For You" feed for the Feed page.
+ *
+ * NOTE: temporarily backed by the long-standing `GET /v1/tracks/recommended`
+ * endpoint (`sdk.tracks.getRecommendedTracks`) — the same personalized
+ * recommendation source the Explore page used before the For You feed existed.
+ * The dedicated `GET /v1/users/{id}/feed/for-you` endpoint is not yet rolled
+ * out across the validator-node fleet and 404s in production, so we fall back
+ * to the endpoint that reliably returns 200 from `api.audius.co` today. Swap
+ * back to `sdk.users.getUserForYouFeed()` once the new endpoint is deployed.
+ *
+ * `/tracks/recommended` has no `offset`, so pagination is done by passing the
+ * already-seen track ids as `exclusionList` — each page returns fresh
+ * recommendations that don't repeat earlier ones. The pageParam carries the
+ * accumulated exclusion list. Returns a tracks-only lineup; consumers that
+ * only render tracks can use `trackIds`.
  */
 export const useForYouFeed = (
   {
@@ -46,55 +54,36 @@ export const useForYouFeed = (
   const queryKey = getForYouFeedQueryKey(currentUserId)
 
   const query = useInfiniteQuery({
-    initialPageParam: 0,
+    initialPageParam: [] as ID[],
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       const isFirstPage = allPages.length === 1
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       if (lastPage.length < currentPageSize) return undefined
-      return allPages.reduce((total, page) => total + page.length, 0)
+      // Accumulate every track id seen so far; the next page excludes them.
+      return allPages.flatMap((page) => page.map((item) => item.id))
     },
     queryKey,
     queryFn: async ({ pageParam }): Promise<LineupData[]> => {
       if (!currentUserId) return []
-      const isFirstPage = pageParam === 0
+      const exclusionList = pageParam
+      const isFirstPage = exclusionList.length === 0
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.users.getUserForYouFeed({
-        id: Id.parse(currentUserId),
-        userId: Id.parse(currentUserId),
+      const { data = [] } = await sdk.tracks.getRecommendedTracks({
         limit: currentPageSize,
-        offset: pageParam
+        userId: OptionalId.parse(currentUserId),
+        exclusionList: exclusionList.length ? exclusionList : undefined
       })
 
-      const feed = transformAndCleanList(data, userFeedItemFromSDK).map(
-        ({ item }) => item
-      )
-      if (feed === null) return []
+      const tracks = primeTrackData({
+        tracks: transformAndCleanList(data, userTrackMetadataFromSDK),
+        queryClient
+      })
 
-      const { tracks, collections } = feed.reduce(
-        (acc, item) => {
-          if ('track_id' in item) {
-            acc.tracks.push(item)
-          } else {
-            acc.collections.push(item)
-          }
-          return acc
-        },
-        {
-          tracks: [] as UserTrackMetadata[],
-          collections: [] as UserCollectionMetadata[]
-        }
-      )
-
-      // Prime caches so tile renders don't have to re-fetch
-      primeTrackData({ tracks, queryClient })
-      primeCollectionData({ collections, queryClient })
-
-      return feed.map((item) =>
-        'track_id' in item
-          ? { id: item.track_id, type: EntityType.TRACK }
-          : { id: item.playlist_id, type: EntityType.PLAYLIST }
-      )
+      return tracks.map(({ track_id }) => ({
+        id: track_id,
+        type: EntityType.TRACK
+      }))
     },
     select: (data) => data?.pages.flat(),
     // Keep the loaded feed stable for the session. Without this the default
