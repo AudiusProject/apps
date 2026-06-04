@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useArtistCreatedFanClub } from '@audius/common/api'
 import { css } from '@emotion/native'
@@ -9,8 +9,11 @@ import { useNavigation } from 'app/hooks/useNavigation'
 import { env } from 'app/services/env'
 import { zIndex } from 'app/utils/zIndex'
 
+import { AvatarViewer } from '../AvatarViewer'
+
 const messages = {
-  fanClubBadge: 'Fan club badge'
+  fanClubBadge: 'Fan club badge',
+  viewAvatar: 'View profile picture'
 }
 
 export type ArtistProfilePictureProps = {
@@ -35,9 +38,20 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
     }
   }, [navigation, ownedCoin?.ticker])
 
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const handleOpenViewer = useCallback(() => setIsViewerOpen(true), [])
+  const handleCloseViewer = useCallback(() => setIsViewerOpen(false), [])
+
   return (
     <>
-      <ProfilePicture userId={userId} size='xl' />
+      <TouchableOpacity
+        onPress={handleOpenViewer}
+        activeOpacity={0.85}
+        accessibilityLabel={messages.viewAvatar}
+        accessibilityRole='imagebutton'
+      >
+        <ProfilePicture userId={userId} size='xl' />
+      </TouchableOpacity>
       {shouldShowFanClubBadge && (
         <TouchableOpacity
           onPress={handleCoinPress}
@@ -52,6 +66,11 @@ export const ArtistProfilePicture = ({ userId }: ArtistProfilePictureProps) => {
           <TokenIcon logoURI={ownedCoin?.logoUri} size='l' />
         </TouchableOpacity>
       )}
+      <AvatarViewer
+        userId={userId}
+        isOpen={isViewerOpen}
+        onClose={handleCloseViewer}
+      />
     </>
   )
 }
