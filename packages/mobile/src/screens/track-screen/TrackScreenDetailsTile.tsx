@@ -7,7 +7,9 @@ import {
   useStems,
   useCurrentUserId,
   useFanClub,
-  useTrackDownloadCount
+  useTrackDownloadCount,
+  useTrackPageLineup,
+  getTrackPageLineupQueryKey
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
@@ -29,7 +31,7 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
-import type { CommonState } from '@audius/common/store'
+import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import {
   playbackSelectors,
   reachabilitySelectors,
@@ -319,6 +321,18 @@ export const TrackScreenDetailsTile = ({
 
   const currentQueueItem = useSelector(getCurrentQueueItem)
   const currentTrack = useCurrentTrack()
+
+  // Subscribe to the same lineup that renders below the track so the hero
+  // play button can hand the related tracks (More By + You Might Also Like
+  // / Remixes) to the player as a queue. The query is shared with
+  // TrackScreenLineup via the tanquery cache, so this does not re-fetch.
+  // `enabled: isReachable` keeps the fetch off when offline — matching the
+  // visibility gate on TrackScreenLineup in TrackScreen.tsx.
+  const { trackIds: lineupTrackIds } = useTrackPageLineup(
+    { trackId },
+    { enabled: !!isReachable }
+  )
+
   const play = useCallback(
     ({ isPreview = false } = {}) => {
       if (isLineupLoading) return
@@ -334,18 +348,35 @@ export const TrackScreenDetailsTile = ({
         dispatch(playbackActions.play())
         recordPlay(trackId)
       } else {
-        // Matches legacy track page lineup prefix.
-        const playbackSource = 'TRACK_TRACKS'
+        // Hero gets the legacy 'TRACK_TRACKS' source so its uid (built in
+        // TrackScreen via makeStableUid(..., 'TRACK_TRACKS')) still matches.
+        // The related tracks below render through TrackLineup with
+        // 'TRACK_PAGE_MORE_BY' — use the same source for those queue entries
+        // so the lineup tile highlights track auto-advance.
+        const heroSource = 'TRACK_TRACKS'
+        const relatedSource = 'TRACK_PAGE_MORE_BY'
+        const hasLineup =
+          !isPreview &&
+          lineupTrackIds.length > 1 &&
+          lineupTrackIds[0] === trackId
+        const tracks: PlaybackTrack[] = hasLineup
+          ? [
+              { trackId, source: heroSource },
+              ...lineupTrackIds.slice(1).map((id) => ({
+                trackId: id,
+                source: relatedSource
+              }))
+            ]
+          : [{ trackId, source: heroSource }]
         dispatch(
           playbackActions.playFrom({
-            tracks: [
-              {
-                trackId,
-                source: playbackSource
-              }
-            ],
+            tracks,
             startIndex: 0,
-            querySource: null
+            querySource: hasLineup
+              ? {
+                  queryKey: [...getTrackPageLineupQueryKey(trackId)] as unknown[]
+                }
+              : null
           })
         )
         recordPlay(trackId, true, true)
@@ -359,6 +390,7 @@ export const TrackScreenDetailsTile = ({
       currentQueueItem.trackId,
       currentTrack,
       trackId,
+      lineupTrackIds,
       dispatch
     ]
   )
