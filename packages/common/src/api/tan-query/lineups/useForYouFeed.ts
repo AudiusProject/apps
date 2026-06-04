@@ -97,8 +97,23 @@ export const useForYouFeed = (
       )
     },
     select: (data) => data?.pages.flat(),
+    // Keep the loaded feed stable for the session. Without this the default
+    // staleTime of 0 makes the query refetch on the next mount/focus right
+    // after the first paint — and if that personalized refetch settles empty
+    // (a transient backend result, or a different node in the fleet), it
+    // replaces the just-rendered feed with `[]`, which the lineup reads as
+    // "no content" and swaps in the "follow artists" empty state. The feed
+    // renders, then blanks. Infinity (overridable via options) stops the
+    // self-inflicted refetch; pagination still works via fetchNextPage.
+    staleTime: Infinity,
     ...options,
-    enabled: options?.enabled !== false && currentUserId !== null
+    // Require a fully-resolved id (`!= null` excludes `undefined`). While the
+    // account is still loading `currentUserId` is `undefined`; enabling the
+    // query then runs the `!currentUserId` guard above and caches `[]` under
+    // the `[forYouFeed, undefined]` key. A later render that briefly reads
+    // that key would flash the empty state. Gating on a real id avoids
+    // seeding that empty cache entry entirely.
+    enabled: options?.enabled !== false && currentUserId != null
   })
 
   const data = query.data ?? []
