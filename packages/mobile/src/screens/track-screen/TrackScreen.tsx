@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import {
   useTrackByParams,
   usePrefetchTrackComments,
+  usePrefetchTrackPageLineup,
   useUser
 } from '@audius/common/api'
 import { Kind } from '@audius/common/models'
@@ -45,9 +46,14 @@ export const TrackScreen = () => {
   // route params when available so it can fire before the track resolves.
   const paramTrackId =
     'trackId' in restParams ? restParams.trackId : undefined
-  usePrefetchTrackComments(
-    track?.comments_disabled ? null : (paramTrackId ?? track?.track_id)
-  )
+  const trackId = paramTrackId ?? track?.track_id
+  usePrefetchTrackComments(track?.comments_disabled ? null : trackId)
+
+  // Warm the "more by / remixes / you might also like" lineup too. Unlike
+  // comments it can't fire from the bare trackId (it needs the hero track +
+  // owner handle), but hoisting it here lets it start as soon as those resolve
+  // instead of waiting for the ScreenSecondaryContent screen-ready gate.
+  usePrefetchTrackPageLineup(trackId)
 
   const { data: user } = useUser(track?.owner_id)
 
