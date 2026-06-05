@@ -1,0 +1,106 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  touch-action: none;
+  animation: backdropFadeIn 0.2s ease;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - 64px - env(safe-area-inset-top, 0px));
+  height: calc(100dvh - 64px - env(safe-area-inset-top, 0px));
+  display: flex;
+  flex-direction: column;
+  background: var(--harmony-bg-default, var(--harmony-n-25));
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  border: 1px solid var(--harmony-border-default, var(--harmony-n-100));
+  border-bottom: none;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.22);
+  animation: sheetSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sheetFullscreen {
+  height: 100vh;
+  height: 100dvh;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+}
+
+.dragRegion {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  touch-action: none;
+}
+
+.dragRegionWithHeader {
+  background: var(--harmony-bg-surface-1, var(--harmony-bg-default));
+  border-bottom: 1px solid var(--harmony-border-default, var(--harmony-n-100));
+}
+
+.dragRegion:active {
+  cursor: grabbing;
+}
+
+.dragHandleArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0 4px;
+}
+
+.dragHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--harmony-n-200, rgba(0, 0, 0, 0.2));
+}
+
+.scrollArea {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overscroll-behavior-y: contain;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}

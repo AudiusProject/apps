@@ -7,7 +7,7 @@ import { route } from '@audius/common/utils'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import ActionSheetModal from 'components/action-drawer/ActionDrawer'
+import BottomSheetActionDrawer from 'components/action-drawer/BottomSheetActionDrawer'
 import { RouterContext } from 'components/animated-switch/RouterContextProvider'
 import { push } from 'utils/navigation'
 
@@ -58,11 +58,12 @@ const DeletePlaylistConfirmationModal = NiceModal.create(() => {
   }
 
   return (
-    <ActionSheetModal
+    <BottomSheetActionDrawer
       isOpen={modal.visible}
       onClose={handleClose}
       actions={actions}
       didSelectRow={didSelectRow}
+      ariaLabel={messages.delete}
     />
   )
 })

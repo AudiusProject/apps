@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Box, Flex, IconCaretDown, Text } from '@audius/harmony'
 
-import ActionDrawer from 'components/action-drawer/ActionDrawer'
+import BottomSheetActionDrawer from 'components/action-drawer/BottomSheetActionDrawer'
 
 type MobileFilterButtonTypes = {
   options: { value: string; label?: string }[]
@@ -55,7 +55,7 @@ export const MobileFilterButton = ({
         </Text>
         <IconCaretDown size='s' color='default' />
       </Flex>
-      <ActionDrawer
+      <BottomSheetActionDrawer
         actions={actions}
         onClose={() => {
           setIsOpen(false)
@@ -63,6 +63,7 @@ export const MobileFilterButton = ({
         }}
         isOpen={isOpen}
         zIndex={zIndex}
+        ariaLabel='Filter options'
       />
     </Box>
   )

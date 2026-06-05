@@ -1,6 +1,4 @@
-import { Button } from '@audius/harmony'
-
-import Drawer from 'components/drawer/Drawer'
+import { BottomSheet, Button } from '@audius/harmony'
 
 import styles from './RemoveCollectionTrackDrawer.module.css'
 
@@ -26,7 +24,7 @@ const RemovePlaylistTrackDrawer = ({
   onConfirm
 }: RemovePlaylistTrackDrawerProps) => {
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} shouldClose={!isOpen}>
+    <BottomSheet isOpen={isOpen} onClose={onClose} ariaLabel={messages.title}>
       <div className={styles.drawer}>
         <h4 className={styles.title}>{messages.title}</h4>
         <div className={styles.description}>
@@ -39,7 +37,7 @@ const RemovePlaylistTrackDrawer = ({
           {messages.cancel}
         </div>
       </div>
-    </Drawer>
+    </BottomSheet>
   )
 }
 

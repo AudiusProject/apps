@@ -1,6 +1,6 @@
 import { ID } from '@audius/common/models'
 
-import ActionSheetModal from 'components/action-drawer/ActionDrawer'
+import BottomSheetActionDrawer from 'components/action-drawer/BottomSheetActionDrawer'
 
 type UnfollowConfirmationModalProps = {
   isOpen: boolean
@@ -40,11 +40,12 @@ const UnfollowConfirmationModal = ({
   }
 
   return (
-    <ActionSheetModal
+    <BottomSheetActionDrawer
       isOpen={isOpen}
       onClose={onClose}
       actions={actions}
       didSelectRow={didSelectRow}
+      ariaLabel={messages.unfollow}
     />
   )
 }

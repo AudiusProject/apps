@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { IconLink, IconShare, IconX } from '@audius/harmony'
 
-import ActionDrawer from 'components/action-drawer/ActionDrawer'
+import BottomSheetActionDrawer from 'components/action-drawer/BottomSheetActionDrawer'
 
 import { messages } from '../messages'
 import { ShareProps } from '../types'
@@ -39,7 +39,7 @@ export const ShareDrawer = ({
   }, [onShareToX, onCopyLink])
 
   return (
-    <ActionDrawer
+    <BottomSheetActionDrawer
       renderTitle={() => (
         <div className={styles.titleContainer}>
           <IconShare className={styles.titleIcon} />
@@ -50,6 +50,7 @@ export const ShareDrawer = ({
       onClose={onClose}
       isOpen={isOpen}
       classes={{ actionItem: styles.actionItem }}
+      ariaLabel={messages.modalTitle(shareType)}
     />
   )
 }

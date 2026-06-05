@@ -1,0 +1,61 @@
+.container {
+  overflow: hidden;
+}
+
+.header {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px 12px;
+}
+
+.content {
+  padding: 8px 0 64px;
+  margin: 0;
+  list-style: none;
+}
+
+.row {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid var(--harmony-n-100);
+  cursor: pointer;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.23px;
+  line-height: 26px;
+  color: var(--harmony-text-default);
+}
+
+.row:last-child {
+  border-bottom: 1px solid var(--harmony-n-100);
+}
+
+.row:active {
+  background-color: var(--harmony-n-50);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
+}
+
+.actionIcon {
+  min-width: 42px;
+  display: inline-flex;
+}
+
+.destructiveAction {
+  color: var(--harmony-red);
+}
+
+.darkAction {
+  color: var(--harmony-static-white);
+}
+
+.darkAction.destructiveAction {
+  color: var(--harmony-red);
+}
