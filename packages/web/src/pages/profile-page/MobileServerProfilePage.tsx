@@ -78,8 +78,12 @@ export const MobileServerProfilePage = ({
               position: 'absolute',
               top: 21,
               right: 13,
-              fill: 'white',
-              boxShadow: '0 1px 4px 0 rgba(0, 0, 0, 0.3)'
+              color: 'var(--harmony-static-white)',
+              fill: 'var(--harmony-static-white)',
+              filter: 'drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3))',
+              '& path': {
+                fill: 'var(--harmony-static-white)'
+              }
             }}
           />
         ) : null}
