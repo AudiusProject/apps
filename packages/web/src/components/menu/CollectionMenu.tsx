@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 
 import { useCollection, useUserByHandle } from '@audius/common/api'
 import {
@@ -125,7 +125,16 @@ const CollectionMenu = ({
 
   const navigate = useNavigate()
 
-  const getMenu = () => {
+  const collectionTracks = useMemo(
+    () =>
+      (collectionTrackIds ?? []).map((trackId) => ({
+        trackId,
+        source: QueueSource.COLLECTION_TRACKS
+      })),
+    [collectionTrackIds]
+  )
+
+  const menu = useMemo(() => {
     const routePage = collectionPage
     const shareMenuItem = {
       text: 'Share',
@@ -187,11 +196,6 @@ const CollectionMenu = ({
         )
     }
 
-    const collectionTracks = (collectionTrackIds ?? []).map((trackId) => ({
-      trackId,
-      source: QueueSource.COLLECTION_TRACKS
-    }))
-
     const playCollectionNextMenuItem = {
       text: messages.playNext,
       onClick: () => {
@@ -232,9 +236,7 @@ const CollectionMenu = ({
     ) {
       menu.items.push(addCollectionToQueueMenuItem)
     }
-    if (menu) {
-      if (includeShare) menu.items.push(shareMenuItem)
-    }
+    if (includeShare) menu.items.push(shareMenuItem)
     if (!isOwner) {
       if (includeRepost) menu.items.push(repostMenuItem)
       if (includeFavorite) menu.items.push(favoriteMenuItem)
@@ -262,9 +264,45 @@ const CollectionMenu = ({
     }
 
     return menu
-  }
-
-  const menu = getMenu()
+  }, [
+    collectionTracks,
+    ddexApp,
+    dispatch,
+    extraMenuItems,
+    goToRoute,
+    handle,
+    includeAddToQueue,
+    includeDelete,
+    includeEdit,
+    includeEmbed,
+    includeFavorite,
+    includePlayNext,
+    includeRepost,
+    includeShare,
+    includeVisitArtistPage,
+    includeVisitPage,
+    isArtist,
+    isFavorited,
+    isOwner,
+    isPublic,
+    isReposted,
+    navigate,
+    onDelete,
+    onRepost,
+    onShare,
+    openEmbedModal,
+    permalink,
+    playbackIndex,
+    playlistId,
+    playlistName,
+    repostCollection,
+    saveCollection,
+    shareCollection,
+    toast,
+    type,
+    undoRepostCollection,
+    unsaveCollection
+  ])
 
   return props.children(menu.items)
 }
