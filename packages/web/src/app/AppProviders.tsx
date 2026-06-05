@@ -15,6 +15,7 @@ import {
 import { PersistGate } from 'redux-persist/integration/react'
 import { WagmiProvider } from 'wagmi'
 
+import { REACT_QUERY_DEVTOOLS_KEY, useDevToggle } from 'hooks/useDevToggle'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { env } from 'services/env'
 import { queryClient } from 'services/query-client'
@@ -41,6 +42,10 @@ type AppProvidersProps = {
 
 export const AppProviders = ({ children }: AppProvidersProps) => {
   const isMobile = useIsMobile()
+  const [reactQueryDevtoolsEnabled] = useDevToggle(
+    REACT_QUERY_DEVTOOLS_KEY,
+    false
+  )
 
   const [{ store, persistor }] = useState(() => {
     const theme = getTheme()
@@ -95,7 +100,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
             </PersistGate>
           </ReduxProvider>
         </MediaProvider>
-        <ReactQueryDevtools />
+        {reactQueryDevtoolsEnabled ? <ReactQueryDevtools /> : null}
       </QueryClientProvider>
     </WagmiProvider>
   )

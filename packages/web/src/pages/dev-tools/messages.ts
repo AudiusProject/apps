@@ -46,5 +46,10 @@ export const messages = {
   coinSuccessModalPreviewTitle: 'Coin success modal',
   coinSuccessModalPreviewDescription:
     'Open the post-launch fan club success dialog with sample coin data (UI preview only).',
-  coinSuccessModalPreviewButton: 'Open coin success modal'
+  coinSuccessModalPreviewButton: 'Open coin success modal',
+  reactQueryDevtoolsTitle: 'React Query Devtools',
+  reactQueryDevtoolsDescription:
+    'Show the floating React Query devtools button for inspecting queries, mutations, and cache state. Off by default.',
+  reactQueryDevtoolsEnable: 'Show Devtools Button',
+  reactQueryDevtoolsDisable: 'Hide Devtools Button'
 }

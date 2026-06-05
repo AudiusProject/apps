@@ -9,6 +9,7 @@ import {
   IconShieldCheck,
   IconDashboard,
   IconFanClub,
+  IconRefresh,
   IconUser,
   Paper,
   Text,
@@ -19,6 +20,7 @@ import { useNavigate } from 'react-router'
 
 import { Header } from 'components/header/desktop/Header'
 import { Page } from 'components/page/Page'
+import { REACT_QUERY_DEVTOOLS_KEY, useDevToggle } from 'hooks/useDevToggle'
 import { env } from 'services/env'
 
 import { messages } from './messages'
@@ -102,6 +104,8 @@ export const DevTools = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { onOpen: openCoinSuccessModal } = useCoinSuccessModal()
+  const [reactQueryDevtoolsEnabled, setReactQueryDevtoolsEnabled] =
+    useDevToggle(REACT_QUERY_DEVTOOLS_KEY, false)
 
   const handleOpenFeatureFlags = () => {
     dispatch(
@@ -216,6 +220,20 @@ export const DevTools = () => {
             description={messages.coinSuccessModalPreviewDescription}
             buttonText={messages.coinSuccessModalPreviewButton}
             onButtonClick={handleOpenCoinSuccessModalPreview}
+          />
+
+          <DevToolCard
+            icon={IconRefresh}
+            title={messages.reactQueryDevtoolsTitle}
+            description={messages.reactQueryDevtoolsDescription}
+            buttonText={
+              reactQueryDevtoolsEnabled
+                ? messages.reactQueryDevtoolsDisable
+                : messages.reactQueryDevtoolsEnable
+            }
+            onButtonClick={() =>
+              setReactQueryDevtoolsEnabled(!reactQueryDevtoolsEnabled)
+            }
           />
         </Flex>
       </Box>
