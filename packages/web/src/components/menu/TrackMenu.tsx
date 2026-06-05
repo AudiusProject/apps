@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 
 import {
   useCurrentUserId,
@@ -140,62 +140,68 @@ const TrackMenu = ({
   isFavorited,
   ...props
 }: TrackMenuProps) => {
-  const { trackPermalink, goToRoute } = props
+  const {
+    genre,
+    goToRoute,
+    handle,
+    includeRepost,
+    includeShare,
+    isReposted,
+    openAddToCollectionModal,
+    openEmbedModal,
+    repostTrack: repostTrackAction,
+    setArtistPick,
+    shareTrack,
+    trackId,
+    trackPermalink,
+    trackTitle,
+    undoRepostTrack: undoRepostTrackAction,
+    unsetArtistPick
+  } = props
   const { toast } = useContext(ToastContext)
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
   const { onOpen: openDeleteTrackConfirmation } =
     useDeleteTrackConfirmationModal()
   const { onOpen: openHostRemixContest } = useHostRemixContestModal()
-  const { data: partialTrack } = useTrack(props.trackId, {
+  const { data: partialTrack } = useTrack(trackId, {
     select: (track) => pick(track, ['album_backlink', 'permalink', 'remix_of'])
   })
 
   const toggleSaveTrack = useToggleFavoriteTrack({
-    trackId: props.trackId,
+    trackId,
     source: FavoriteSource.OVERFLOW
   })
 
-  const { data: remixContest } = useRemixContest(props.trackId, {
+  const { data: remixContest } = useRemixContest(trackId, {
     enabled: includeRemixContest
   })
 
-  const onDeleteTrack = (trackId: Nullable<number>) => {
-    if (!trackId) return
+  const onDeleteTrack = useCallback(
+    (trackId: Nullable<number>) => {
+      if (!trackId) return
 
-    openDeleteTrackConfirmation({
-      trackId
-    })
-  }
+      openDeleteTrackConfirmation({
+        trackId
+      })
+    },
+    [openDeleteTrackConfirmation]
+  )
 
-  const onEditTrack = (trackId: Nullable<number>) => {
-    if (!trackId) return
-    const permalink = trackPermalink || partialTrack?.permalink
-    permalink && goToRoute(`${permalink}/edit`)
-  }
+  const onEditTrack = useCallback(
+    (trackId: Nullable<number>) => {
+      if (!trackId) return
+      const permalink = trackPermalink || partialTrack?.permalink
+      permalink && goToRoute(`${permalink}/edit`)
+    },
+    [goToRoute, partialTrack?.permalink, trackPermalink]
+  )
 
   const trackPlaybackPositions = useSelector((state: CommonState) =>
     getUserTrackPositions(state, { userId: currentUserId })
   )
 
-  const getMenu = () => {
-    const {
-      goToRoute,
-      handle,
-      includeRepost,
-      includeShare,
-      openAddToCollectionModal,
-      openEmbedModal,
-      repostTrack,
-      shareTrack,
-      trackId,
-      trackTitle,
-      trackPermalink,
-      genre,
-      undoRepostTrack,
-      unsetArtistPick
-    } = props
-
+  const menu = useMemo(() => {
     const albumInfo = partialTrack?.album_backlink
     const isLongFormContent =
       genre === Genre.Podcasts || genre === Genre.Audiobooks
@@ -206,12 +212,14 @@ const TrackMenu = ({
     }
 
     const repostMenuItem = {
-      text: props.isReposted ? messages.undoRepost : messages.repost,
+      text: isReposted ? messages.undoRepost : messages.repost,
       // Set timeout so the menu has time to close before we propagate the change.
       onClick: () =>
         setTimeout(() => {
-          props.isReposted ? undoRepostTrack(trackId) : repostTrack(trackId)
-          toast(props.isReposted ? messages.unreposted : messages.reposted)
+          isReposted
+            ? undoRepostTrackAction(trackId)
+            : repostTrackAction(trackId)
+          toast(isReposted ? messages.unreposted : messages.reposted)
         }, 0)
     }
 
@@ -297,7 +305,7 @@ const TrackMenu = ({
       text: isArtistPick ? messages.unsetArtistPick : messages.setArtistPick,
       onClick: isArtistPick
         ? () => unsetArtistPick()
-        : () => props.setArtistPick(trackId)
+        : () => setArtistPick(trackId)
     }
 
     const deleteTrackMenuItem = {
@@ -436,9 +444,56 @@ const TrackMenu = ({
     }
 
     return menu
-  }
-
-  const menu = getMenu()
+  }, [
+    currentUserId,
+    ddexApp,
+    dispatch,
+    extraMenuItems,
+    genre,
+    goToRoute,
+    handle,
+    includeAddToAlbum,
+    includeAddToPlaylist,
+    includeAddToQueue,
+    includeAlbumPage,
+    includeArtistPick,
+    includeDelete,
+    includeEdit,
+    includeEmbed,
+    includeFavorite,
+    includePlayNext,
+    includeRemixContest,
+    includeRepost,
+    includeShare,
+    includeTrackPage,
+    isArtistPick,
+    isDeleted,
+    isFavorited,
+    isOwner,
+    isOwnerDeactivated,
+    isReposted,
+    isUnlisted,
+    onDeleteTrack,
+    onEditTrack,
+    openAddToCollectionModal,
+    openEmbedModal,
+    openHostRemixContest,
+    partialTrack?.album_backlink,
+    partialTrack?.permalink,
+    partialTrack?.remix_of,
+    remixContest,
+    repostTrackAction,
+    setArtistPick,
+    shareTrack,
+    toast,
+    toggleSaveTrack,
+    trackId,
+    trackPermalink,
+    trackPlaybackPositions,
+    trackTitle,
+    undoRepostTrackAction,
+    unsetArtistPick
+  ])
 
   return props.children(menu.items)
 }
