@@ -269,7 +269,15 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
 
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
-      <Stack.Screen name='Contests' component={ContestsScreen} />
+      <Stack.Screen
+        name='Contests'
+        component={ContestsScreen}
+        // Contests is reached from the left nav drawer, which passes
+        // `fromAppDrawer: true` and drops the screen animation to 'none'.
+        // That leaves a jarring instant pop when navigating away. Force the
+        // standard horizontal push so it transitions like the Track screen.
+        options={{ animation: 'simple_push' }}
+      />
       <Stack.Screen name='Contest' component={ContestScreen} />
       <Stack.Screen
         name='ContestFollowers'
