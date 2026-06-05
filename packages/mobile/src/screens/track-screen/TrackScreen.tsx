@@ -1,6 +1,10 @@
 import { useRef } from 'react'
 
-import { useTrackByParams, useUser } from '@audius/common/api'
+import {
+  useTrackByParams,
+  usePrefetchTrackComments,
+  useUser
+} from '@audius/common/api'
 import { Kind } from '@audius/common/models'
 import { reachabilitySelectors } from '@audius/common/store'
 import { makeStableUid } from '@audius/common/utils'
@@ -33,6 +37,17 @@ export const TrackScreen = () => {
   const { searchTrack, ...restParams } = params ?? {}
   const { data: fetchedTrack } = useTrackByParams(restParams)
   const track = fetchedTrack ?? searchTrack
+
+  // Kick off the comments fetch as early as possible — on mount, in parallel
+  // with the track/user fetch — so the comment section renders from cache
+  // instead of starting its own fetch only once it mounts (gated behind the
+  // user fetch and the secondary-content gate below). Uses the trackId from
+  // route params when available so it can fire before the track resolves.
+  const paramTrackId =
+    'trackId' in restParams ? restParams.trackId : undefined
+  usePrefetchTrackComments(
+    track?.comments_disabled ? null : (paramTrackId ?? track?.track_id)
+  )
 
   const { data: user } = useUser(track?.owner_id)
 
