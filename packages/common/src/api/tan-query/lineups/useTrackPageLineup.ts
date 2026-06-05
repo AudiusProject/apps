@@ -226,3 +226,23 @@ export const useTrackPageLineup = (
     queryKey
   }
 }
+
+/**
+ * Warms the track page lineup ("more by", remixes, "you might also like") as
+ * early as possible so the lineup renders from cache instead of starting its
+ * fetch only once `TrackScreenLineup` mounts — which on mobile is gated behind
+ * the screen-ready / nav-animation delay in `ScreenSecondaryContent`.
+ *
+ * Unlike comments, this query genuinely depends on the hero track and its
+ * owner's handle (see the `enabled` guard in `useTrackPageLineup`), so it can't
+ * fire from a bare trackId before the track resolves. But hoisting it above the
+ * secondary content gate lets it fire the instant those deps are ready —
+ * overlapping the push transition instead of waiting for it to finish. Keeps a
+ * live observer so the warmed data is shared with `TrackScreenLineup`'s own
+ * query.
+ */
+export const usePrefetchTrackPageLineup = (
+  trackId: ID | null | undefined
+) => {
+  useTrackPageLineup({ trackId })
+}

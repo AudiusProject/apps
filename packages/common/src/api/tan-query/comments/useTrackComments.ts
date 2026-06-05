@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 
-import { Id } from '@audius/sdk'
+import {
+  GetTrackCommentsSortMethodEnum as CommentSortMethod,
+  Id
+} from '@audius/sdk'
 import {
   useInfiniteQuery,
   useIsMutating,
@@ -28,7 +31,13 @@ export type GetCommentsByTrackArgs = {
   pageSize?: number
 }
 
-export const useTrackComments = (
+/**
+ * Base infinite query for a track's root comment IDs. Keeps a live observer on
+ * the comment-list query (which uses `gcTime: 0`, so the data is evicted the
+ * moment no observer is mounted) and primes individual comment data into the
+ * cache. Shared by `useTrackComments` and `usePrefetchTrackComments`.
+ */
+const useTrackCommentsQuery = (
   {
     trackId,
     sortMethod,
@@ -39,10 +48,9 @@ export const useTrackComments = (
   const { audiusSdk } = useQueryContext()
   const isMutating = useIsMutating()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
 
-  const queryRes = useInfiniteQuery({
+  return useInfiniteQuery({
     initialPageParam: 0,
     getNextPageParam: (lastPage: ID[], pages) => {
       if (lastPage?.length < pageSize) return undefined
@@ -78,6 +86,31 @@ export const useTrackComments = (
     ...options,
     enabled: isMutating === 0 && options?.enabled !== false && !!trackId
   })
+}
+
+/**
+ * Warms the track comment list as early as possible (e.g. on track screen
+ * mount, in parallel with the track fetch) so the comment section renders with
+ * data already in cache instead of starting its fetch only once it mounts.
+ *
+ * Uses the default `Top` sort and page size to match what the comment section
+ * requests by default, ensuring a cache hit. Keeps a live observer mounted so
+ * the `gcTime: 0` query isn't evicted before the comment section mounts.
+ */
+export const usePrefetchTrackComments = (trackId: ID | null | undefined) => {
+  useTrackCommentsQuery(
+    { trackId: trackId as ID, sortMethod: CommentSortMethod.Top },
+    { enabled: !!trackId }
+  )
+}
+
+export const useTrackComments = (
+  args: GetCommentsByTrackArgs,
+  options?: QueryOptions
+) => {
+  const dispatch = useDispatch()
+
+  const queryRes = useTrackCommentsQuery(args, options)
 
   const { error, data: commentIds } = queryRes
 
