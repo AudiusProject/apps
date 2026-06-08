@@ -1,7 +1,6 @@
 'use strict'
 
 import { ethereumRouter } from './typed-routes/ethereum/ethRpc'
-import { solanaRouter } from './typed-routes/solana/solanaRelay'
 
 // Import libs before anything else becaues it takes a very long time to load.
 // Once it's imported once, it'll be in the cache and subsequent imports will be ~instant.
@@ -45,7 +44,6 @@ const start = async () => {
   app.express.set('audiusSdk', audiusSdk)
 
   // TODO: Move this into App once it's typed
-  app.express.use('/solana', solanaRouter)
   app.express.use('/ethereum', ethereumRouter)
   const { server } = await app.init()
 
