@@ -9,7 +9,7 @@ const {
 const models = require('./models')
 
 const audiusLibsWrapper = require('./audiusLibsInstance')
-const { encodeHashId, decodeHashId } = require('./notifications/utils')
+const { encodeHashId, decodeHashId } = require('./utils/hashIds')
 
 /**
  * Queries for whether the wallet address has privilege to act as actingUserId

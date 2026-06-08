@@ -1,4 +1,4 @@
-const { getOtpEmail } = require('../notifications/emails/otp')
+const { getOtpEmail } = require('../emails/otp')
 
 const OTP_CHARS = '0123456789'
 const OTP_REDIS_PREFIX = 'otp'

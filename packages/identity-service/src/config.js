@@ -719,12 +719,6 @@ const config = convict({
     env: 'clusterForkProcessCount',
     default: 1
   },
-  minSolanaNotificationSlot: {
-    doc: 'The slot number to start indexing if no slots defined',
-    format: Number,
-    env: 'minSolanaNotificationSlot',
-    default: 166928009
-  },
   successAudioReporterSlackUrl: {
     doc: 'The slack url to post messages for success in audio / rewards events',
     format: String,
