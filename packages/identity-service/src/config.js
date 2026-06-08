@@ -791,12 +791,6 @@ const config = convict({
     env: 'stripeSecretKey',
     default: ''
   },
-  coinflowApiKey: {
-    doc: 'API key for coinflow merchant API',
-    format: String,
-    env: 'coinflowApiKey',
-    default: ''
-  },
   skipAbuseCheck: {
     doc: 'Skip AAO abuse check on relay and notifs',
     format: Boolean,
