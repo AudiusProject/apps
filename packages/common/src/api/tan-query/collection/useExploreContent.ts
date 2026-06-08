@@ -14,7 +14,6 @@ type ExploreContentResponse = {
   featuredProfiles?: string[]
   featuredRemixContests?: string[]
   featuredLabels?: string[]
-  featuredArtistCoinTracks?: string[]
 }
 
 export type ExploreContent = {
@@ -22,7 +21,6 @@ export type ExploreContent = {
   featuredProfiles: ID[]
   featuredRemixContests: ID[]
   featuredLabels: ID[]
-  featuredArtistCoinTracks: ID[]
 }
 
 export const getExploreContentQueryKey = () => {
@@ -56,10 +54,7 @@ export const useExploreContent = <TResult = ExploreContent>(
         featuredRemixContests: parseUniqueValidIds(
           json.featuredRemixContests ?? []
         ),
-        featuredLabels: parseUniqueValidIds(json.featuredLabels ?? []),
-        featuredArtistCoinTracks: parseUniqueValidIds(
-          json.featuredArtistCoinTracks ?? []
-        )
+        featuredLabels: parseUniqueValidIds(json.featuredLabels ?? [])
       }
     },
     ...options,

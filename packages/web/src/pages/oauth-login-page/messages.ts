@@ -18,9 +18,9 @@ export const messages = {
   signOut: 'Sign Out',
   signUp: `Don't have an account? Sign up`,
   switchAccount: 'Switch Account',
-  authorizeButton: 'Authorize App',
+  authorizeButton: 'Sign In & Authorize',
   continueButton: 'Continue',
-  signInButton: 'Sign In & Authorize App',
+  signInButton: 'Sign In & Authorize',
   invalidCredentialsError: 'Invalid Credentials',
   miscError: 'An error has occurred. Please try again.',
   accountIncompleteError:
@@ -30,7 +30,7 @@ export const messages = {
   redirectURIInvalidError:
     'Whoops, this is an invalid link (redirect URI missing or invalid).',
   missingAppNameError: 'Whoops, this is an invalid link (app name missing).',
-  otpError: 'Enter the verification code sent to your email',
+  otpPrompt: 'Enter the verification code sent to your email',
   scopeError: `Whoops, this is an invalid link (scope missing or invalid).`,
   connectWalletNoPostMessageError:
     'Whoops, this is an invalid link (redirectUri must be `postMessage` if tx is `connectDashboardWallet`).',
@@ -38,9 +38,9 @@ export const messages = {
     'Whoops, this is an invalid link (the specified wallet is already connected to an Audius account).',
   disconnectWalletNotConnectedError:
     'Whoops, this is an invalid link (the specified wallet is not connected to an Audius account).',
-  writeOnceParamsError:
+  txParamsError:
     'Whoops, this is an invalid link (transaction params missing or invalid).',
-  writeOnceTxError: `Whoops, this is an invalid link ('tx' missing or invalid).`,
+  txError: `Whoops, this is an invalid link ('tx' missing or invalid).`,
   missingFieldError: 'Whoops, you must enter both your email and password.',
   originInvalidError:
     'Whoops, this is an invalid link (redirect URI is set to `postMessage` but origin is missing).',
@@ -48,9 +48,15 @@ export const messages = {
     'Whoops, something went wrong. Please close this window and try again.',
   responseModeError:
     'Whoops, this is an invalid link (response mode invalid - if set, must be "fragment" or "query").',
-  signedInAs: `You’re signed in as`,
+  signedInAs: `You’re Signed in as`,
   missingApiKeyError: 'Whoops, this is an invalid link (app API Key missing)',
   invalidApiKeyError: 'Whoops, this is an invalid link (app API Key invalid)',
+  redirectUriNotRegisteredError: (uri: string) =>
+    `Redirect URI not registered. Add "${uri}" to your app's allowed redirect URIs in Settings on audius.co.`,
+  missingCodeChallengeError:
+    'Whoops, this is an invalid link (code_challenge is required for PKCE flow).',
+  invalidCodeChallengeMethodError:
+    'Whoops, this is an invalid link (code_challenge_method must be S256).',
   approveTxToConnectProfile:
     'Approve the pending transaction in your wallet to finish connecting your Audius profile.',
   back: 'Back',

@@ -1,5 +1,103 @@
 # @audius/sdk
 
+## 6.0.28
+
+### Patch Changes
+
+- Updated dependencies [c8f9a4d]
+  - @audius/sdk@15.3.0
+
+## 6.0.27
+
+### Patch Changes
+
+- Updated dependencies [6c4c717]
+- Updated dependencies [4b53e87]
+  - @audius/sdk@15.2.0
+
+## 6.0.26
+
+### Patch Changes
+
+- Updated dependencies [500dccb]
+- Updated dependencies [d0f653d]
+  - @audius/sdk@15.1.0
+
+## 6.0.25
+
+### Patch Changes
+
+- Updated dependencies [56dea87]
+  - @audius/sdk@15.0.1
+
+## 6.0.24
+
+### Patch Changes
+
+- Updated dependencies [fc87e67]
+- Updated dependencies [4f924fe]
+- Updated dependencies [7c775fc]
+- Updated dependencies [f79f7df]
+- Updated dependencies [0866c3b]
+- Updated dependencies [383db12]
+- Updated dependencies [e0e1ecb]
+- Updated dependencies [671fa83]
+  - @audius/sdk@15.0.0
+
+## 6.0.23
+
+### Patch Changes
+
+- Updated dependencies [0cbaf44]
+- Updated dependencies [e9ffc03]
+- Updated dependencies [8fc2f10]
+- Updated dependencies [bd1ed10]
+- Updated dependencies [7dfa92a]
+  - @audius/sdk@14.1.0
+
+## 6.0.22
+
+### Patch Changes
+
+- Updated dependencies [e44d789]
+  - @audius/sdk@14.0.1
+
+## 6.0.21
+
+### Patch Changes
+
+- Updated dependencies [71bb31b]
+- Updated dependencies [71bb31b]
+- Updated dependencies [a7a9e17]
+- Updated dependencies [d864806]
+- Updated dependencies [8f12bb7]
+- Updated dependencies [6cb4b6f]
+  - @audius/sdk@14.0.0
+
+## 6.0.20
+
+### Patch Changes
+
+- Updated dependencies [fdd1e54]
+- Updated dependencies [ad2d058]
+  - @audius/sdk@13.1.0
+
+## 6.0.19
+
+### Patch Changes
+
+- Updated dependencies [7265a2e]
+  - @audius/sdk@13.0.1
+
+## 6.0.18
+
+### Patch Changes
+
+- Updated dependencies [825a39d]
+- Updated dependencies [0129871]
+- Updated dependencies [e376ade]
+  - @audius/sdk@13.0.0
+
 ## 6.0.17
 
 ### Patch Changes

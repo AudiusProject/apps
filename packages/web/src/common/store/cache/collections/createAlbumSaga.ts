@@ -9,7 +9,8 @@ import {
   queryUser,
   queryCurrentUserId,
   updateCollectionData,
-  primeCollectionDataSaga
+  primeCollectionDataSaga,
+  persistAccountPlaylistLibrarySaga
 } from '@audius/common/api'
 import {
   Name,
@@ -143,6 +144,7 @@ function* optimisticallySaveAlbum(
       permalink: album?.permalink
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 }
 
 function* createAndConfirmAlbum(
@@ -168,15 +170,25 @@ function* createAndConfirmAlbum(
       throw new Error('No userId set, cannot create album')
     }
 
+    const metadata = albumMetadataForCreateWithSDK(formFields)
+    metadata.playlistContents = initTrack
+      ? [
+          {
+            trackId: Id.parse(initTrack.track_id),
+            timestamp: Math.round(Date.now() / 1000),
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }
+        ]
+      : undefined
+
     yield* call([sdk.albums, sdk.albums.createAlbum], {
       userId: Id.parse(userId),
       albumId: Id.parse(albumId),
-      trackIds: initTrack ? [Id.parse(initTrack.track_id)] : undefined,
-      metadata: albumMetadataForCreateWithSDK(formFields)
+      metadata
     })
 
     const { data: album } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(albumId)

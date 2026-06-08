@@ -1,14 +1,25 @@
-import { memo, ReactNode, useEffect, useState, RefObject } from 'react'
+import {
+  memo,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  RefObject
+} from 'react'
 
-import { useMutedUsers } from '@audius/common/api'
+import {
+  useMutedUsers,
+  useProfileTracks,
+  useProfileReposts,
+  useUserHasRemixContest,
+  getProfileTracksQueryKey,
+  getProfileRepostsQueryKey
+} from '@audius/common/api'
 import { useMuteUser } from '@audius/common/context'
 import { commentsMessages } from '@audius/common/messages'
 import { Status } from '@audius/common/models'
-import {
-  profilePageFeedLineupActions as feedActions,
-  profilePageTracksLineupActions as tracksActions,
-  ProfilePageTabs
-} from '@audius/common/store'
+import { ProfilePageTabs } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   Box,
@@ -19,6 +30,7 @@ import {
   IconNote,
   IconPlaylists,
   IconRepost as IconReposts,
+  IconTrophy,
   Text,
   Hint,
   IconQuestionCircle
@@ -28,7 +40,7 @@ import cn from 'classnames'
 
 import { ConfirmationModal } from 'components/confirmation-modal'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import Lineup from 'components/lineup/Lineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import Mask from 'components/mask/Mask'
 import NavBanner, { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -37,11 +49,12 @@ import Page from 'components/page/Page'
 import ProfilePicture from 'components/profile-picture/ProfilePicture'
 import { ProfileCompletionHeroCard } from 'components/profile-progress/components/ProfileCompletionHeroCard'
 import { EmptyStatBanner, StatBanner } from 'components/stat-banner/StatBanner'
+import { Tab, TabList } from 'components/tabs'
 import UploadChip from 'components/upload/UploadChip'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
-import useTabs, { TabHeader, useTabRecalculator } from 'hooks/useTabs/useTabs'
 import { BlockUserConfirmationModal } from 'pages/chat-page/components/BlockUserConfirmationModal'
 import { UnblockUserConfirmationModal } from 'pages/chat-page/components/UnblockUserConfirmationModal'
+import { usePreventOffscreenFocus } from 'pages/profile-page/usePreventOffscreenFocus'
 import { useProfilePage } from 'pages/profile-page/useProfilePage'
 import { getUserPageContext } from 'ssr/metaTags'
 import { zIndex } from 'utils/zIndex'
@@ -50,6 +63,7 @@ import { DeactivatedProfileTombstone } from '../DeactivatedProfileTombstone'
 import { EditableName } from '../EditableName'
 
 import { AlbumsTab } from './AlbumsTab'
+import { ContestsTab } from './ContestsTab'
 import { EmptyTab } from './EmptyTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { ProfileLeftNav } from './ProfileLeftNav'
@@ -75,6 +89,9 @@ const LeftColumnSpacer = () => (
 )
 
 const ProfilePage = ({ containerRef }: ProfilePageProps) => {
+  const profileFocusRootRef = useRef<HTMLDivElement>(null)
+  usePreventOffscreenFocus(profileFocusRootRef)
+
   const {
     // Profile data
     profile,
@@ -96,7 +113,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     instagramVerified,
     tikTokVerified,
     website,
-    artistCoinBadge,
+    fanClubBadge,
     hasProfilePicture,
     mode,
     stats,
@@ -106,9 +123,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updatedCoverPhoto,
     updatedProfilePicture,
 
-    // Lineups
-    artistTracks,
-    userFeed,
+    // Lineups (legacy redux lineups — no longer read here; tanquery below)
+    tracksLineupOrder,
+    handleLower,
 
     // State
     editMode,
@@ -121,15 +138,8 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
 
     // Handlers
     changeTab,
-    getLineupProps,
     onSortByRecent,
     onSortByPopular,
-    loadMoreArtistTracks,
-    loadMoreUserFeed,
-    playArtistTrack,
-    pauseArtistTrack,
-    playUserFeedTrack,
-    pauseUserFeedTrack,
     onFollow,
     onUnfollow,
     onShare,
@@ -144,7 +154,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     updateInstagramHandle,
     updateTikTokHandle,
     updateWebsite,
-    updateArtistCoinBadge,
+    updateFanClubBadge,
     updateCoverPhoto,
     didChangeTabsFrom,
     onCloseArtistRecommendations,
@@ -155,66 +165,162 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     onCloseBlockUserConfirmationModal,
     onCloseUnblockUserConfirmationModal,
     onCloseMuteUserConfirmationModal
-  } = useProfilePage(containerRef)
+  } = useProfilePage()
   const renderProfileCompletionCard = () => {
     return isOwner ? <ProfileCompletionHeroCard /> : null
   }
 
   const isDeactivated = !!profile?.is_deactivated
 
-  const getArtistProfileContent = () => {
-    if (!profile) return { headers: [], elements: [] }
+  const tracksArgs = useMemo(
+    () => ({ handle: handleLower ?? '', sort: tracksLineupOrder }),
+    [handleLower, tracksLineupOrder]
+  )
+  const artistTracksQuery = useProfileTracks(tracksArgs, {
+    enabled: !!handleLower
+  })
+  const tracksQuerySource = useMemo(
+    () => ({
+      queryKey: [...getProfileTracksQueryKey(tracksArgs)] as unknown[]
+    }),
+    [tracksArgs]
+  )
 
+  const repostsArgs = useMemo(
+    () => ({ handle: handleLower ?? '' }),
+    [handleLower]
+  )
+  const userRepostsQuery = useProfileReposts(repostsArgs, {
+    enabled: !!handleLower
+  })
+  const repostsQuerySource = useMemo(
+    () => ({
+      queryKey: [...getProfileRepostsQueryKey(repostsArgs)] as unknown[]
+    }),
+    [repostsArgs]
+  )
+
+  const profileBasePath = profilePage(handle)
+
+  const { hasContest: profileHasContest } = useUserHasRemixContest(
+    isArtist ? userId : null
+  )
+  const showContestsTab = profileHasContest
+
+  // Determine which tab is active. The URL is the source of truth; activeTab
+  // (from useProfilePage, derived from route params) drives the body render.
+  const defaultTab = isArtist ? ProfilePageTabs.TRACKS : ProfilePageTabs.REPOSTS
+  // If a viewer hits /:handle/contests on a profile that doesn't qualify for
+  // the tab (host doesn't run any contest), fall back to the default so the
+  // body matches the (now hidden) tab list.
+  const rawTab = activeTab ?? defaultTab
+  const currentTab =
+    rawTab === ProfilePageTabs.CONTESTS && !showContestsTab
+      ? defaultTab
+      : rawTab
+
+  const tabs = profile ? (
+    isArtist ? (
+      <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>
+        <Tab to={`${profileBasePath}/tracks`} icon={<IconNote />}>
+          {ProfilePageTabs.TRACKS}
+        </Tab>
+        <Tab to={`${profileBasePath}/albums`} icon={<IconAlbum />}>
+          {ProfilePageTabs.ALBUMS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+        <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+        {showContestsTab ? (
+          <Tab to={`${profileBasePath}/contests`} icon={<IconTrophy />}>
+            {ProfilePageTabs.CONTESTS}
+          </Tab>
+        ) : null}
+      </TabList>
+    ) : (
+      <TabList onTabClick={(key) => didChangeTabsFrom('', key)}>
+        <Tab to={`${profileBasePath}/reposts`} icon={<IconReposts />}>
+          {ProfilePageTabs.REPOSTS}
+        </Tab>
+        <Tab to={`${profileBasePath}/playlists`} icon={<IconPlaylists />}>
+          {ProfilePageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
+    )
+  ) : null
+
+  const renderArtistTab = () => {
+    if (!profile) return null
+    const tracksEmpty =
+      artistTracksQuery.isSuccess && artistTracksQuery.trackIds.length === 0
+    const repostsEmpty =
+      (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
+      profile.repost_count === 0
     const trackUploadChip = isOwner ? (
-      <UploadChip
-        key='upload-chip'
-        type='track'
-        variant='tile'
-        source='profile'
-      />
+      <UploadChip type='track' variant='tile' source='profile' />
     ) : null
 
-    const headers: TabHeader[] = [
-      {
-        icon: <IconNote />,
-        text: ProfilePageTabs.TRACKS,
-        label: ProfilePageTabs.TRACKS,
-        to: 'tracks'
-      },
-      {
-        icon: <IconAlbum />,
-        text: ProfilePageTabs.ALBUMS,
-        label: ProfilePageTabs.ALBUMS,
-        to: 'albums'
-      },
-      {
-        icon: <IconPlaylists />,
-        text: ProfilePageTabs.PLAYLISTS,
-        label: ProfilePageTabs.PLAYLISTS,
-        to: 'playlists'
-      },
-      {
-        icon: <IconReposts />,
-        text: ProfilePageTabs.REPOSTS,
-        label: ProfilePageTabs.REPOSTS,
-        to: 'reposts'
-      }
-    ]
-    const elements = [
-      <Box w='100%' key={ProfilePageTabs.TRACKS}>
+    if (currentTab === ProfilePageTabs.ALBUMS) {
+      return (
+        <Box w='100%'>
+          <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.PLAYLISTS) {
+      return (
+        <Box w='100%'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.CONTESTS) {
+      return (
+        <Box w='100%'>
+          <ContestsTab isOwner={isOwner} profile={profile} />
+        </Box>
+      )
+    }
+    if (currentTab === ProfilePageTabs.REPOSTS) {
+      return (
+        <Box w='100%'>
+          {status === Status.SUCCESS ? (
+            repostsEmpty ? (
+              <EmptyTab
+                isOwner={isOwner}
+                name={profile.name}
+                text={'reposted anything'}
+              />
+            ) : (
+              <TrackLineup
+                trackIds={userRepostsQuery.trackIds}
+                lineupItems={userRepostsQuery.data}
+                source='PROFILE_FEED'
+                querySource={repostsQuerySource}
+                isPending={userRepostsQuery.isPending}
+                isFetching={userRepostsQuery.isFetching}
+                isError={userRepostsQuery.isError}
+                hasNextPage={userRepostsQuery.hasNextPage}
+                loadNextPage={userRepostsQuery.loadNextPage}
+                variant={LineupVariant.CONDENSED}
+                scrollParent={containerRef?.current ?? null}
+              />
+            )
+          ) : null}
+        </Box>
+      )
+    }
+    // Default: Tracks
+    return (
+      <Box w='100%'>
         {renderProfileCompletionCard()}
         {status === Status.SUCCESS ? (
-          artistTracks.status === Status.SUCCESS &&
-          artistTracks.entries.length === 0 ? (
+          tracksEmpty ? (
             <>
-              {isOwner ? (
-                <UploadChip
-                  key='upload-chip'
-                  type='track'
-                  variant='tile'
-                  source='profile'
-                />
-              ) : null}
+              {trackUploadChip}
               <EmptyTab
                 isOwner={isOwner}
                 name={profile.name}
@@ -222,117 +328,72 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               />
             </>
           ) : (
-            <Lineup
-              {...getLineupProps(artistTracks)}
-              extraPrecedingElement={trackUploadChip ?? undefined}
-              animateLeadingElement
-              leadingElementId={profile.artist_pick_track_id ?? undefined}
-              showArtistPick={true}
-              loadMore={loadMoreArtistTracks}
-              playTrack={playArtistTrack}
-              pauseTrack={pauseArtistTrack}
-              actions={tracksActions}
-              variant={LineupVariant.GRID}
-            />
-          )
-        ) : null}
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.ALBUMS}>
-        <AlbumsTab isOwner={isOwner} profile={profile} userId={userId} />
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.PLAYLISTS}>
-        <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.REPOSTS}>
-        {status === Status.SUCCESS ? (
-          (userFeed.status === Status.SUCCESS &&
-            userFeed.entries.length === 0) ||
-          profile.repost_count === 0 ? (
-            <EmptyTab
-              isOwner={isOwner}
-              name={profile.name}
-              text={'reposted anything'}
-            />
-          ) : (
-            <Lineup
-              {...getLineupProps(userFeed)}
-              loadMore={loadMoreUserFeed}
-              playTrack={playUserFeedTrack}
-              pauseTrack={pauseUserFeedTrack}
-              actions={feedActions}
-            />
+            <>
+              {trackUploadChip}
+              <TrackLineup
+                trackIds={artistTracksQuery.trackIds}
+                source='PROFILE_TRACKS'
+                querySource={tracksQuerySource}
+                isPending={artistTracksQuery.isPending}
+                isFetching={artistTracksQuery.isFetching}
+                isError={artistTracksQuery.isError}
+                hasNextPage={artistTracksQuery.hasNextPage}
+                loadNextPage={artistTracksQuery.loadNextPage}
+                variant={LineupVariant.GRID}
+                leadingElementId={profile.artist_pick_track_id ?? undefined}
+                showArtistPick
+                scrollParent={containerRef?.current ?? null}
+              />
+            </>
           )
         ) : null}
       </Box>
-    ]
-
-    return { headers, elements }
+    )
   }
 
-  const getUserProfileContent = () => {
-    if (!profile) return { headers: [], elements: [] }
+  const renderUserTab = () => {
+    if (!profile) return null
+    const userRepostsEmpty =
+      (userRepostsQuery.isSuccess && userRepostsQuery.trackIds.length === 0) ||
+      profile.repost_count === 0
 
-    const headers: TabHeader[] = [
-      {
-        icon: <IconReposts />,
-        text: ProfilePageTabs.REPOSTS,
-        label: ProfilePageTabs.REPOSTS,
-        to: 'reposts'
-      },
-      {
-        icon: <IconPlaylists />,
-        text: ProfilePageTabs.PLAYLISTS,
-        label: ProfilePageTabs.PLAYLISTS,
-        to: 'playlists'
-      }
-    ]
-    const elements = [
-      <Box w='100%' key={ProfilePageTabs.REPOSTS}>
+    if (currentTab === ProfilePageTabs.PLAYLISTS) {
+      return (
+        <Box w='100%'>
+          <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
+        </Box>
+      )
+    }
+    // Default: Reposts
+    return (
+      <Box w='100%'>
         {renderProfileCompletionCard()}
-        {(userFeed.status === Status.SUCCESS &&
-          userFeed.entries.length === 0) ||
-        profile.repost_count === 0 ? (
+        {userRepostsEmpty ? (
           <EmptyTab
             isOwner={isOwner}
             name={profile.name}
             text={'reposted anything'}
           />
         ) : (
-          <Lineup
-            {...getLineupProps(userFeed)}
-            count={profile.repost_count}
-            loadMore={loadMoreUserFeed}
-            playTrack={playUserFeedTrack}
-            pauseTrack={pauseUserFeedTrack}
-            actions={feedActions}
+          <TrackLineup
+            trackIds={userRepostsQuery.trackIds}
+            source='PROFILE_FEED'
+            querySource={repostsQuerySource}
+            isPending={userRepostsQuery.isPending}
+            isFetching={userRepostsQuery.isFetching}
+            isError={userRepostsQuery.isError}
+            hasNextPage={userRepostsQuery.hasNextPage}
+            loadNextPage={userRepostsQuery.loadNextPage}
+            variant={LineupVariant.CONDENSED}
+            maxEntries={profile.repost_count}
+            scrollParent={containerRef?.current ?? null}
           />
         )}
-      </Box>,
-      <Box w='100%' key={ProfilePageTabs.PLAYLISTS}>
-        <PlaylistsTab isOwner={isOwner} profile={profile} userId={userId} />
       </Box>
-    ]
-
-    return { headers, elements }
+    )
   }
 
-  const { headers, elements } = profile
-    ? isArtist
-      ? getArtistProfileContent()
-      : getUserProfileContent()
-    : { headers: [], elements: [] }
-
-  const tabRecalculator = useTabRecalculator()
-
-  const { tabs, body } = useTabs({
-    didChangeTabsFrom,
-    isMobile: false,
-    tabs: headers,
-    tabRecalculator,
-    initialTab: activeTab || undefined,
-    elements,
-    pathname: profilePage(handle)
-  })
+  const body = profile ? (isArtist ? renderArtistTab() : renderUserTab()) : null
 
   const {
     title = '',
@@ -388,7 +449,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       scrollableSearch
       fromOpacity={1}
     >
-      <Box w='100%' pb='2xl'>
+      <Box ref={profileFocusRootRef} w='100%' pb='2xl'>
         <CoverPhoto
           userId={userId}
           updatedCoverPhoto={updatedCoverPhoto ? updatedCoverPhoto.url : ''}
@@ -573,7 +634,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
                   instagramVerified={instagramVerified}
                   tikTokVerified={tikTokVerified}
                   website={website}
-                  artistCoinBadge={artistCoinBadge}
+                  fanClubBadge={fanClubBadge}
                   created={created}
                   onUpdateBio={updateBio}
                   onUpdateLocation={updateLocation}
@@ -581,7 +642,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
                   onUpdateInstagramHandle={updateInstagramHandle}
                   onUpdateTikTokHandle={updateTikTokHandle}
                   onUpdateWebsite={updateWebsite}
-                  onUpdateArtistCoinBadge={updateArtistCoinBadge}
+                  onUpdateFanClubBadge={updateFanClubBadge}
                 />
                 <Box flex='1 1 100%'>{body}</Box>
               </Flex>

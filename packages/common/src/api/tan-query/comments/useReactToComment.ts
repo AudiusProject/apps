@@ -1,8 +1,13 @@
+import {
+  CommentEntityType,
+  Id,
+  type ReactCommentRequestBody
+} from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { CommentOrReply, messages } from './types'
@@ -15,10 +20,11 @@ export type ReactToCommentArgs = {
   currentSort: any
   trackId: ID
   isEntityOwner?: boolean
+  entityType?: CommentEntityType
 }
 
 export const useReactToComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -26,10 +32,27 @@ export const useReactToComment = () => {
       userId,
       commentId,
       isLiked,
-      trackId
+      trackId,
+      entityType = CommentEntityType.Track
     }: ReactToCommentArgs) => {
       const sdk = await audiusSdk()
-      await sdk.comments.reactComment({ userId, commentId, isLiked, trackId })
+      const metadata: ReactCommentRequestBody = {
+        entityId: trackId,
+        entityType
+      }
+      if (isLiked) {
+        await sdk.comments.reactToComment({
+          userId: Id.parse(userId)!,
+          commentId: Id.parse(commentId)!,
+          metadata
+        })
+      } else {
+        await sdk.comments.unreactToComment({
+          userId: Id.parse(userId)!,
+          commentId: Id.parse(commentId)!,
+          metadata
+        })
+      }
     },
     mutationKey: ['reactToComment'],
     onMutate: async ({
@@ -58,12 +81,7 @@ export const useReactToComment = () => {
     },
     onError: (error: Error, args, context) => {
       const { commentId } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Toast standard error message
       dispatch(toast({ content: messages.mutationError('reacting to') }))
 

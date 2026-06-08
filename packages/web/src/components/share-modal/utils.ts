@@ -2,7 +2,12 @@ import { ShareToTwitter } from '@audius/common/models'
 import { ShareContent } from '@audius/common/store'
 import { getXShareHandle } from '@audius/common/utils'
 
-import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
+import {
+  fullCollectionPage,
+  fullContestPage,
+  fullProfilePage,
+  fullTrackPage
+} from 'utils/route'
 
 import { messages } from './messages'
 
@@ -10,7 +15,11 @@ type ShareToTwitterEvent = Omit<ShareToTwitter, 'eventName' | 'source'>
 
 type ShareMessageConfig = Pick<
   typeof messages,
-  'profileShareText' | 'trackShareText' | 'playlistShareText' | 'albumShareText'
+  | 'profileShareText'
+  | 'trackShareText'
+  | 'contestShareText'
+  | 'playlistShareText'
+  | 'albumShareText'
 >
 
 export const getXShareText = async (
@@ -29,6 +38,19 @@ export const getXShareText = async (
       } = content
       xText = messageConfig.trackShareText(title, getXShareHandle(artist))
       link = fullTrackPage(permalink)
+      analyticsEvent = { kind: 'track', id: track_id, url: link }
+      break
+    }
+    case 'contest': {
+      const {
+        track: { title, permalink, track_id },
+        artist
+      } = content
+      xText = messageConfig.contestShareText(title, getXShareHandle(artist))
+      link = fullContestPage(permalink)
+      // Contest shares route through the parent track's analytics
+      // entry — there's no dedicated 'contest' event kind yet and
+      // the parent track is what gets credited for engagement.
       analyticsEvent = { kind: 'track', id: track_id, url: link }
       break
     }

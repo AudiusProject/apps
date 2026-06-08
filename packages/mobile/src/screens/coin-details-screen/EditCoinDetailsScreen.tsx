@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCoinByTicker,
-  useUpdateArtistCoin,
+  useFanClubByTicker,
+  useUpdateFanClub,
   useCurrentUserId,
   useCurrentAccountUser
 } from '@audius/common/api'
@@ -20,7 +20,6 @@ import { useFormikContext, Formik } from 'formik'
 import { Image as RNImage, View, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import LinearGradient from 'react-native-linear-gradient'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import {
   IconInstagram,
@@ -255,7 +254,7 @@ export const EditCoinDetailsScreen = () => {
     isPending,
     isSuccess,
     isError
-  } = useArtistCoinByTicker({ ticker })
+  } = useFanClubByTicker({ ticker })
 
   const { source: defaultBannerImageSource } = useCoverPhoto({
     userId: currentUser?.user_id,
@@ -268,7 +267,7 @@ export const EditCoinDetailsScreen = () => {
       ? defaultBannerImageSource.uri
       : null
 
-  const updateCoinMutation = useUpdateArtistCoin()
+  const updateCoinMutation = useUpdateFanClub()
 
   const [bannerImageFile, setBannerImageFile] = useState<Image | null>(null)
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null)
@@ -332,20 +331,7 @@ export const EditCoinDetailsScreen = () => {
       })
       navigation.goBack()
     } catch (e) {
-      await reportToSentry({
-        name: 'EditCoinDetails',
-        error:
-          e instanceof Error
-            ? e
-            : new Error(
-                e instanceof Object && 'message' in e
-                  ? (e.message as string)
-                  : 'Unknown Error'
-              ),
-        additionalInfo: {
-          raw: e
-        }
-      })
+      await console.error('EditCoinDetails', e instanceof Error)
       throw e // Re-throw to let Formik handle the error
     }
   }

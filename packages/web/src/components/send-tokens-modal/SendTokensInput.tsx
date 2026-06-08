@@ -1,9 +1,9 @@
 import { ChangeEvent, useCallback, useMemo, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo,
+  transformFanClubToTokenInfo,
   useCurrentUserId,
   useTradeableCoins
 } from '@audius/common/api'
@@ -113,14 +113,14 @@ const SendTokensInput = ({
   )
 
   // Get the coin data and balance for selected token
-  const { data: coin } = useArtistCoin(selectedMint)
+  const { data: coin } = useFanClub(selectedMint)
   const { data: tokenBalance } = useCoinBalance({
     mint: selectedMint,
     includeExternalWallets: false, // CurrentWalletBanner handles external wallet balance
     includeStaked: false
   })
   const { data: currentUserId } = useCurrentUserId()
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Calculate USD value for display
   const usdValueInfo = useMemo(() => {

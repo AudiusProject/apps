@@ -10,6 +10,9 @@ import { encodeUrlName } from './urlUtils'
 // Local route functions to avoid importing from @audius/common/src/utils/route which pulls in formatUtil/dayjs
 const SIGN_UP_PAGE = '/signup'
 
+// Inline "create playlist" flow entry point.
+export const CREATE_PLAYLIST_PAGE = '/create/playlist'
+
 export const profilePage = (handle: string | null | undefined) => {
   return `/${encodeUrlName(handle ?? '')}`
 }
@@ -59,6 +62,23 @@ export const pickWinnersPage = (permalink: string) => {
 }
 export const fullPickWinnersPage = (permalink: string) => {
   return `${fullTrackPage(permalink)}/pick-winners`
+}
+
+export const contestPage = (permalink: string) => {
+  // Permalink shape: `/{handle}/{slug}`. Contest URL injects the literal
+  // "contest" segment between handle and slug → `/{handle}/contest/{slug}`.
+  const [, handle, ...rest] = permalink.split('/')
+  return `/${handle}/contest/${rest.join('/')}`
+}
+export const fullContestPage = (permalink: string) => {
+  return `${BASE_URL}${contestPage(permalink)}`
+}
+
+export const hostRemixContestPage = (permalink: string) => {
+  return `${permalink}/host-contest`
+}
+export const fullHostRemixContestPage = (permalink: string) => {
+  return `${fullTrackPage(permalink)}/host-contest`
 }
 
 export const fullAiPage = (handle: string) => {

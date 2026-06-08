@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { useEarlyReleaseConfirmationModal } from '@audius/common/store'
 import {
   Modal,
@@ -11,6 +12,7 @@ import {
   Flex,
   IconRocket
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const getMessages = (contentType: 'track' | 'album') => ({
   title: 'Confirm Early Release',
@@ -19,24 +21,29 @@ const getMessages = (contentType: 'track' | 'album') => ({
   confirm: 'Release Now'
 })
 
-export const EarlyReleaseConfirmationModal = () => {
-  const { data, isOpen, onClose } = useEarlyReleaseConfirmationModal()
+export const EarlyReleaseConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useEarlyReleaseConfirmationModal()
   const { contentType, confirmCallback, cancelCallback } = data
 
   const messages = getMessages(contentType)
 
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+
   const handleConfirm = useCallback(() => {
     confirmCallback()
-    onClose()
-  }, [confirmCallback, onClose])
+    handleClose()
+  }, [confirmCallback, handleClose])
 
   const handleCancel = useCallback(() => {
     cancelCallback?.()
-    onClose()
-  }, [cancelCallback, onClose])
+    handleClose()
+  }, [cancelCallback, handleClose])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader>
         <Flex alignSelf='center' gap='s'>
           <IconRocket color='default' size='l' />
@@ -62,4 +69,7 @@ export const EarlyReleaseConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('EarlyReleaseConfirmation', EarlyReleaseConfirmationModal)
+registerNiceModalId('EarlyReleaseConfirmation')

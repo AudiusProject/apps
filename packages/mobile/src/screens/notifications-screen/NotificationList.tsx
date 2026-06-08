@@ -1,37 +1,31 @@
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 
 import { useNotifications } from '@audius/common/api'
 import type { Notification } from '@audius/common/store'
 import { useIsFocused } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
 import type { ViewToken } from 'react-native'
-import { View } from 'react-native'
 
-import LoadingSpinner from 'app/components/loading-spinner'
 import { makeStyles } from 'app/styles'
 
 import { AppDrawerContext } from '../app-drawer-screen'
 
 import { EmptyNotifications } from './EmptyNotifications'
 import { NotificationListItem } from './NotificationListItem'
+import { NotificationListItemSkeleton } from './NotificationListItemSkeleton'
 
-const useStyles = makeStyles(({ spacing, palette }) => ({
+const INITIAL_SKELETON_COUNT = 5
+const PAGINATION_SKELETON_COUNT = 3
+
+type LoadingItem = { _loading: true }
+type RenderItem = Notification | LoadingItem
+
+const isLoadingItem = (item: RenderItem): item is LoadingItem =>
+  '_loading' in item
+
+const useStyles = makeStyles(({ spacing }) => ({
   container: {
     paddingBottom: spacing(30)
-  },
-  itemContainer: {
-    marginTop: spacing(2),
-    paddingHorizontal: spacing(2)
-  },
-  footer: {
-    marginTop: spacing(5),
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: spacing(12)
-  },
-  spinner: {
-    color: palette.neutralLight4
   }
 }))
 
@@ -93,7 +87,7 @@ export const NotificationList = () => {
 
   const {
     notifications,
-    isAllPending: isPending,
+    isPending,
     isError,
     fetchNextPage,
     refetch,
@@ -113,10 +107,44 @@ export const NotificationList = () => {
 
   const [isVisible, visibilityCallback] = useIsViewable()
 
+  const data = useMemo<RenderItem[]>(() => {
+    if (isError) return notifications
+    if (isPending && notifications.length === 0 && !isRefreshing) {
+      return Array.from(
+        { length: INITIAL_SKELETON_COUNT },
+        () => ({ _loading: true }) as LoadingItem
+      )
+    }
+    if (isFetchingNextPage) {
+      return [
+        ...notifications,
+        ...Array.from(
+          { length: PAGINATION_SKELETON_COUNT },
+          () => ({ _loading: true }) as LoadingItem
+        )
+      ]
+    }
+    return notifications
+  }, [notifications, isPending, isFetchingNextPage, isError, isRefreshing])
+
+  const keyExtractor = useCallback(
+    (item: RenderItem, index: number) =>
+      isLoadingItem(item) ? `skeleton-${index}` : item.id,
+    []
+  )
+
   const renderItem = useCallback(
-    ({ item, index }) => (
-      <NotificationListItem notification={item} isVisible={isVisible(index)} />
-    ),
+    ({ item, index }: { item: RenderItem; index: number }) => {
+      if (isLoadingItem(item)) {
+        return <NotificationListItemSkeleton />
+      }
+      return (
+        <NotificationListItem
+          notification={item}
+          isVisible={isVisible(index)}
+        />
+      )
+    },
     [isVisible]
   )
 
@@ -129,16 +157,9 @@ export const NotificationList = () => {
       contentContainerStyle={styles.container}
       refreshing={isRefreshing}
       onRefresh={handleRefresh}
-      data={notifications}
-      keyExtractor={(item: Notification) => item.id}
+      data={data}
+      keyExtractor={keyExtractor}
       renderItem={renderItem}
-      ListFooterComponent={
-        isPending && !isRefreshing ? (
-          <View style={styles.footer}>
-            <LoadingSpinner fill={styles.spinner.color} />
-          </View>
-        ) : undefined
-      }
       onEndReached={handleLoadMore}
       scrollEnabled={!gesturesDisabled}
       onViewableItemsChanged={visibilityCallback}

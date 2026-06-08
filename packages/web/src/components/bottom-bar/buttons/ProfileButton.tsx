@@ -15,16 +15,14 @@ const ProfileButton = ({
     <AnimatedBottomButton
       uniqueKey='profile-button'
       isActive={isActive}
-      darkMode={darkMode}
       isMatrix={isMatrixMode}
       onClick={onClick}
       href={href}
       aria-label='Profile Page'
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconProfileLight.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconProfileDark.json')
+      iconJSON={() =>
+        import('../../../assets/animations/iconProfileLight.json').then(
+          (m) => m.default
+        )
       }
       {...buttonProps}
     />

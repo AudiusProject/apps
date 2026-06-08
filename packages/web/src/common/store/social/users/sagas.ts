@@ -10,8 +10,7 @@ import { Name, Kind, ID, UserMetadata } from '@audius/common/models'
 import {
   usersSocialActions as socialActions,
   getContext,
-  confirmerActions,
-  confirmTransaction
+  confirmerActions
 } from '@audius/common/store'
 import { makeKindId, route } from '@audius/common/utils'
 import { Id } from '@audius/sdk'
@@ -113,23 +112,10 @@ function* confirmFollowUser(
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const { blockHash, blockNumber } = yield* call(
-          [sdk.users, sdk.users.followUser],
-          {
-            userId: Id.parse(accountId),
-            followeeUserId: Id.parse(userId)
-          }
-        )
-        const confirmed = yield* call(
-          confirmTransaction,
-          blockHash,
-          blockNumber
-        )
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm follow user for user id ${userId} and account id ${accountId}`
-          )
-        }
+        yield* call([sdk.users, sdk.users.followUser], {
+          userId: Id.parse(accountId),
+          followeeUserId: Id.parse(userId)
+        })
         return accountId
       },
       function* () {
@@ -261,23 +247,10 @@ function* confirmUnfollowUser(userId: ID, accountId: ID) {
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const { blockHash, blockNumber } = yield* call(
-          [sdk.users, sdk.users.unfollowUser],
-          {
-            userId: Id.parse(accountId),
-            followeeUserId: Id.parse(userId)
-          }
-        )
-        const confirmed = yield* call(
-          confirmTransaction,
-          blockHash,
-          blockNumber
-        )
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm unfollow user for user id ${userId} and account id ${accountId}`
-          )
-        }
+        yield* call([sdk.users, sdk.users.unfollowUser], {
+          userId: Id.parse(accountId),
+          followeeUserId: Id.parse(userId)
+        })
         return accountId
       },
       function* () {
@@ -366,23 +339,10 @@ function* confirmSubscribeToUser(userId: ID, accountId: ID) {
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const { blockHash, blockNumber } = yield* call(
-          [sdk.users, sdk.users.subscribeToUser],
-          {
-            subscribeeUserId: Id.parse(userId),
-            userId: Id.parse(accountId)
-          }
-        )
-        const confirmed = yield* call(
-          confirmTransaction,
-          blockHash,
-          blockNumber
-        )
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm subscribe to user for user id ${userId} and account id ${accountId}`
-          )
-        }
+        yield* call([sdk.users, sdk.users.subscribeToUser], {
+          subscribeeUserId: Id.parse(userId),
+          userId: Id.parse(accountId)
+        })
         return accountId
       },
       function* () {},
@@ -434,23 +394,11 @@ function* confirmUnsubscribeFromUser(userId: ID, accountId: ID) {
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const { blockHash, blockNumber } = yield* call(
-          [sdk.users, sdk.users.unsubscribeFromUser],
-          {
-            subscribeeUserId: Id.parse(userId),
-            userId: Id.parse(accountId)
-          }
-        )
-        const confirmed = yield* call(
-          confirmTransaction,
-          blockHash,
-          blockNumber
-        )
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm unsubscribe from user for user id ${userId} and account id ${accountId}`
-          )
-        }
+        yield* call([sdk.users, sdk.users.unsubscribeFromUser], {
+          subscribeeUserId: Id.parse(userId),
+          userId: Id.parse(accountId)
+        })
+
         return accountId
       },
       function* () {},

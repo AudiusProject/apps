@@ -1,13 +1,12 @@
 import {
   QUERY_KEYS,
-  getArtistCreatedCoinQueryKey,
+  getArtistCreatedFanClubQueryKey,
   getConnectedWalletsQueryOptions,
   getCurrentAccountQueryKey,
   getUserQueryKey,
   useQueryContext
 } from '@audius/common/api'
 import {
-  Feature,
   LaunchCoinErrorMetadata,
   LaunchCoinResponse
 } from '@audius/common/models'
@@ -41,7 +40,7 @@ export const LAUNCHPAD_COIN_DECIMALS = 9 // All our launched coins will have 9 d
  * This creates a new token and optionally makes an initial purchase.
  */
 export const useLaunchCoin = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation<LaunchCoinResponse, Error, LaunchCoinParams>({
@@ -154,14 +153,10 @@ export const useLaunchCoin = () => {
             ? 'firstBuyConfirmed'
             : 'poolCreateConfirmed'
         } catch (e) {
-          if (reportToSentry) {
-            reportToSentry({
-              error: e instanceof Error ? e : new Error(e as string),
-              name: 'Confirm Launch Failure',
-              feature: Feature.ArtistCoins,
-              additionalInfo: errorMetadata
-            })
-          }
+          console.error(
+            'Confirm Launch Failure',
+            e instanceof Error ? e : new Error(e as string)
+          )
           throw e
         }
 
@@ -230,20 +225,16 @@ export const useLaunchCoin = () => {
               link2: sanitizedLinks[1],
               link3: sanitizedLinks[2],
               link4: sanitizedLinks[3]
-              // intentionally don't send description to prevent the Artist Coin page from referencing itself
+              // intentionally don't send description to prevent the Fan Club page from referencing itself
             }
           })
           errorMetadata.sdkCoinAdded = true
           errorMetadata.lastStep = 'sdkCoinAdded'
         } catch (e) {
-          if (reportToSentry) {
-            reportToSentry({
-              error: e instanceof Error ? e : new Error(e as string),
-              name: 'SDK Create Coin Failure',
-              feature: Feature.ArtistCoins,
-              additionalInfo: errorMetadata
-            })
-          }
+          console.error(
+            'SDK Create Coin Failure',
+            e instanceof Error ? e : new Error(e as string)
+          )
         }
 
         return {
@@ -253,19 +244,15 @@ export const useLaunchCoin = () => {
           errorMetadata
         }
       } catch (error) {
-        if (reportToSentry) {
-          reportToSentry({
-            error: error instanceof Error ? error : new Error(error as string),
-            name: 'Launch Coin Failure',
-            feature: Feature.ArtistCoins,
-            additionalInfo: errorMetadata
-          })
-        }
+        console.error(
+          'Launch Coin Failure',
+          error instanceof Error ? error : new Error(error as string)
+        )
         return { isError: true, errorMetadata, newMint: '', logoUri: '' }
       }
     },
     onSuccess: (_result, params, _context) => {
-      // Invalidate the list of artist coins to add it to the list
+      // Invalidate the list of fan clubs to add it to the list
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.coins] })
       // Invalidate the user to refresh their badge info
       queryClient.invalidateQueries({
@@ -277,7 +264,7 @@ export const useLaunchCoin = () => {
       // Invalidate our user - this will refresh their badge info
       // NOTE: this will eventually move to the users metadata
       queryClient.invalidateQueries({
-        queryKey: getArtistCreatedCoinQueryKey(params.userId)
+        queryKey: getArtistCreatedFanClubQueryKey(params.userId)
       })
       // The confirmation call will associate the external wallet, so we need to invalidate the connected wallets query
       queryClient.invalidateQueries({
@@ -288,18 +275,10 @@ export const useLaunchCoin = () => {
       })
     },
     onError: (error, params, _context) => {
-      if (reportToSentry) {
-        reportToSentry({
-          error: error instanceof Error ? error : new Error(error as string),
-          name: 'Launch Coin',
-          feature: Feature.TanQuery,
-          additionalInfo: {
-            coinName: params.name,
-            coinSymbol: params.symbol,
-            initialBuyAmount: params.initialBuyAmountAudio ?? 0
-          }
-        })
-      }
+      console.error(
+        'Launch Coin',
+        error instanceof Error ? error : new Error(error as string)
+      )
     }
   })
 }

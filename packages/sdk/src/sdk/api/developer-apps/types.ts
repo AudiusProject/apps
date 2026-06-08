@@ -1,11 +1,16 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { HashId } from '../../types/HashId'
 import { isApiKeyValid } from '../../utils/apiKey'
 
 const DEVELOPER_APP_MAX_DESCRIPTION_LENGTH = 128
 const DEVELOPER_APP_MAX_IMAGE_URL_LENGTH = 2000
-const DEVELOPER_APP_IMAGE_URL_REGEX = /^(https?):\/\//i
+const URL_REGEX = /^(https?):\/\//i
+
+export type DeveloperAppsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export const CreateDeveloperAppSchema = z.object({
   name: z.string(),
@@ -14,14 +19,17 @@ export const CreateDeveloperAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_MAX_IMAGE_URL_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: 'Invalid URL'
       })
   ),
-  userId: HashId
+  userId: HashId,
+  redirectUris: z.array(z.string().max(2000)).optional()
 })
 
-export type CreateDeveloperAppRequest = z.input<typeof CreateDeveloperAppSchema>
+export type EntityManagerCreateDeveloperAppRequest = z.input<
+  typeof CreateDeveloperAppSchema
+>
 
 export const UpdateDeveloperAppSchema = z.object({
   appApiKey: z.custom<string>((data: unknown) => {
@@ -33,14 +41,17 @@ export const UpdateDeveloperAppSchema = z.object({
     z
       .string()
       .max(DEVELOPER_APP_MAX_IMAGE_URL_LENGTH)
-      .refine((value) => DEVELOPER_APP_IMAGE_URL_REGEX.test(value), {
+      .refine((value) => URL_REGEX.test(value), {
         message: 'Invalid URL'
       })
   ),
-  userId: HashId
+  userId: HashId,
+  redirectUris: z.array(z.string().max(2000)).optional()
 })
 
-export type UpdateDeveloperAppRequest = z.input<typeof UpdateDeveloperAppSchema>
+export type EntityManagerUpdateDeveloperAppRequest = z.input<
+  typeof UpdateDeveloperAppSchema
+>
 
 export const DeleteDeveloperAppSchema = z.object({
   userId: HashId,
@@ -49,4 +60,6 @@ export const DeleteDeveloperAppSchema = z.object({
   })
 })
 
-export type DeleteDeveloperAppRequest = z.input<typeof DeleteDeveloperAppSchema>
+export type EntityManagerDeleteDeveloperAppRequest = z.input<
+  typeof DeleteDeveloperAppSchema
+>

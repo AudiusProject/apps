@@ -84,9 +84,7 @@ target 'AudiusReactNative' do
       if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
         target.build_configurations.each do |config|
             config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-            if target.name != "Sentry"           
-               config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO' 
-            end
+            config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
         end
       end
     end
@@ -96,6 +94,37 @@ target 'AudiusReactNative' do
       if config.name == 'Debug'
         config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
         config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'NO'
+      end
+    end
+
+    # Xcode 26 / Apple Clang 17 enforces stricter consteval evaluation, which
+    # breaks the fmt 11.0.2 that React Native 0.79 pins:
+    #   Pods/fmt/include/fmt/format-inl.h:59: error: call to consteval
+    #   function 'fmt::basic_format_string<...>' is not a constant expression
+    #
+    # In fmt 11.0.2's include/fmt/base.h, the FMT_USE_CONSTEVAL detection
+    # block is NOT guarded by `#ifndef FMT_USE_CONSTEVAL`, so passing
+    # `-DFMT_USE_CONSTEVAL=0` is clobbered by the elif chain. The chain has
+    # an Apple-specific carve-out:
+    #   #elif defined(__apple_build_version__) && __apple_build_version__ < 14000029L
+    #     #define FMT_USE_CONSTEVAL 0  // consteval is broken in Apple clang < 14.
+    # which used to trip the disable for old Apple Clang but lets Xcode 26
+    # through.
+    #
+    # Patch the source to drop the `< 14000029L` clause so consteval is
+    # disabled for ALL Apple Clang builds, falling back to constexpr. This
+    # matches the behavior on the old runner and matches what RN's own
+    # backport does at the version-bump level (fmt 12.1.0, RN PR #56225).
+    fmt_base_h = File.join(__dir__, 'Pods/fmt/include/fmt/base.h')
+    if File.exist?(fmt_base_h)
+      text = File.read(fmt_base_h)
+      patched = text.gsub(
+        '#elif defined(__apple_build_version__) && __apple_build_version__ < 14000029L',
+        '#elif defined(__apple_build_version__)'
+      )
+      if patched != text
+        File.write(fmt_base_h, patched)
+        Pod::UI.puts "Patched Pods/fmt/include/fmt/base.h: disable consteval for all Apple Clang (Xcode 26 fmt 11.0.2 compat)".green
       end
     end
 

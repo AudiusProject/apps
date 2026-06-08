@@ -1,12 +1,19 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
+import {
+  getTrendingQueryKey,
+  getTrendingUndergroundQueryKey,
+  TRENDING_INITIAL_PAGE_SIZE,
+  TRENDING_LOAD_MORE_PAGE_SIZE,
+  useTrending,
+  useTrendingUnderground
+} from '@audius/common/api'
 import { Name, TimeRange } from '@audius/common/models'
 import {
-  trendingPageLineupActions,
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
+  trendingPageActions,
+  trendingPageSelectors
 } from '@audius/common/store'
-import { getCanonicalName, route } from '@audius/common/utils'
+import { getCanonicalName, route, toTrendingGenre } from '@audius/common/utils'
 import {
   FilterButton,
   Flex,
@@ -14,14 +21,13 @@ import {
   SelectablePill
 } from '@audius/harmony'
 import cn from 'classnames'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { EndOfLineup } from 'components/lineup/EndOfLineup'
-import Lineup from 'components/lineup/Lineup'
-import { useLineupProps } from 'components/lineup/hooks'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, {
@@ -29,24 +35,32 @@ import NavContext, {
   LeftPreset,
   RightPreset
 } from 'components/nav/mobile/NavContext'
+import { WinnersView } from 'pages/trending-page/components/desktop/WinnersView'
 import { TRENDING_MESSAGES } from 'pages/trending-page/constants'
-import { useTrendingActions } from 'pages/trending-page/hooks/useTrendingActions'
-import { useTrendingLineups } from 'pages/trending-page/hooks/useTrendingLineups'
-import { useTrendingPageCleanup } from 'pages/trending-page/hooks/useTrendingPageCleanup'
-import { useTrendingPageState } from 'pages/trending-page/hooks/useTrendingPageState'
-import { useTrendingUrlParams } from 'pages/trending-page/hooks/useTrendingUrlParams'
+import {
+  updateWinnersWeekParam,
+  isValidWinnersWeek,
+  parseUrlParams,
+  updateTimeRangeUrlParam,
+  updateGenreUrlParam,
+  isValidGenre,
+  isValidTimeRange
+} from 'pages/trending-page/utils'
+import { push as pushRoute, replace as replaceRoute } from 'utils/navigation'
 import { BASE_URL } from 'utils/route'
 import { scrollWindowToTop } from 'utils/scroll'
 
 import styles from './TrendingPageContent.module.css'
-const { TRENDING_PAGE } = route
-const { trendingAllTimeActions, trendingMonthActions, trendingWeekActions } =
-  trendingPageLineupActions
-const { getLineup } = trendingUndergroundPageLineupSelectors
+
+const { TRENDING_PAGE, TRENDING_GENRES: TRENDING_GENRES_ROUTE } = route
+const { getTrendingGenre, getTrendingTimeRange } = trendingPageSelectors
+
+const UNDERGROUND_PAGE_SIZE = 10
 
 const messages = {
   trending: 'Trending',
   underground: 'Underground',
+  winners: 'Winners',
   tracks: 'Tracks',
   thisWeek: 'This Week',
   thisMonth: 'This Month',
@@ -56,68 +70,90 @@ const messages = {
   endOfLineupDescription: "Looks like you've reached the end of this list..."
 }
 
-type TrendingCategory = 'tracks' | 'underground'
+type TrendingCategory = 'tracks' | 'underground' | 'winners'
 
 type TrendingPageMobileContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
-}
-
-const useTrendingUndergroundLineup = (
-  scrollParent: HTMLElement | undefined
-) => {
-  return useLineupProps({
-    actions: trendingUndergroundPageLineupActions,
-    getLineupSelector: getLineup,
-    variant: LineupVariant.MAIN,
-    scrollParent: scrollParent ?? undefined,
-    isTrending: true,
-    isOrdered: true
-  })
 }
 
 const TrendingPageMobileContent = ({
   containerRef
 }: TrendingPageMobileContentProps) => {
   const dispatch = useDispatch()
-  const [category, setCategory] = useState<TrendingCategory>('tracks')
-
-  const trendingPageState = useTrendingPageState()
-  const actions = useTrendingActions()
-  const lineups = useTrendingLineups({
-    trendingPageState,
-    containerRef: containerRef ?? undefined
+  const [category, setCategory] = useState<TrendingCategory>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? 'winners' : 'tracks'
   })
-  const undergroundLineupProps = useTrendingUndergroundLineup(
-    containerRef?.current ?? undefined
+  const [winnersWeek, setWinnersWeek] = useState<string | null>(() => {
+    const { week } = parseUrlParams()
+    return isValidWinnersWeek(week) ? week : null
+  })
+  const [winnersSubFilter, setWinnersSubFilter] = useState<
+    'tracks' | 'underground'
+  >('tracks')
+
+  const trendingGenre = useSelector(getTrendingGenre)
+  const trendingTimeRange = useSelector(getTrendingTimeRange)
+
+  const trendingArgs = useMemo(
+    () => ({
+      initialPageSize: TRENDING_INITIAL_PAGE_SIZE,
+      loadMorePageSize: TRENDING_LOAD_MORE_PAGE_SIZE,
+      genre: trendingGenre
+    }),
+    [trendingGenre]
+  )
+  const weekQuery = useTrending({ timeRange: TimeRange.WEEK, ...trendingArgs })
+  const monthQuery = useTrending({
+    timeRange: TimeRange.MONTH,
+    ...trendingArgs
+  })
+  const allTimeQuery = useTrending({
+    timeRange: TimeRange.ALL_TIME,
+    ...trendingArgs
+  })
+
+  const undergroundQuery = useTrendingUnderground({
+    pageSize: UNDERGROUND_PAGE_SIZE
+  })
+  const undergroundQuerySource = useMemo(
+    () => ({
+      queryKey: [
+        ...getTrendingUndergroundQueryKey({ pageSize: UNDERGROUND_PAGE_SIZE })
+      ] as unknown[]
+    }),
+    []
   )
 
-  useTrendingUrlParams({
-    trendingPageState,
-    setTrendingGenre: actions.setTrendingGenre,
-    setTrendingTimeRange: actions.setTrendingTimeRange,
-    replaceRoute: actions.replaceRoute
-  })
+  const replaceRouteCallback = useCallback(
+    (r: { search: string }) => {
+      dispatch(replaceRoute(r))
+    },
+    [dispatch]
+  )
 
-  useTrendingPageCleanup({ trendingPageState, actions })
-
-  useEffect(() => {
-    return () => {
-      dispatch(trendingUndergroundPageLineupActions.reset())
-    }
+  const goToGenreSelection = useCallback(() => {
+    dispatch(pushRoute(TRENDING_GENRES_ROUTE))
   }, [dispatch])
 
-  const { trendingWeek, trendingMonth, trendingAllTime, getLineupProps } =
-    lineups
-  const { trendingGenre, trendingTimeRange } = trendingPageState
-  const {
-    makeLoadMore,
-    makePlayTrack,
-    makePauseTrack,
-    makeSetInView,
-    setTrendingTimeRange,
-    setTrendingGenre,
-    goToGenreSelection
-  } = actions
+  useEffect(() => {
+    const { genre, timeRange } = parseUrlParams()
+    if (trendingGenre) {
+      updateGenreUrlParam(trendingGenre, replaceRouteCallback)
+    } else if (isValidGenre(genre)) {
+      dispatch(trendingPageActions.setTrendingGenre(genre as any))
+    }
+    if (isValidTimeRange(timeRange)) {
+      dispatch(trendingPageActions.setTrendingTimeRange(timeRange as TimeRange))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    updateTimeRangeUrlParam(trendingTimeRange, replaceRouteCallback)
+  }, [trendingTimeRange, replaceRouteCallback])
+  useEffect(() => {
+    updateGenreUrlParam(trendingGenre, replaceRouteCallback)
+  }, [trendingGenre, replaceRouteCallback])
 
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
@@ -126,29 +162,22 @@ const TrendingPageMobileContent = ({
     setCenter(CenterPreset.LOGO)
   }, [setLeft, setCenter, setRight])
 
-  const weekProps = useMemo(
-    () => getLineupProps(trendingWeek),
-    [getLineupProps, trendingWeek]
-  )
-  const monthProps = useMemo(
-    () => getLineupProps(trendingMonth),
-    [getLineupProps, trendingMonth]
-  )
-  const allTimeProps = useMemo(
-    () => getLineupProps(trendingAllTime),
-    [getLineupProps, trendingAllTime]
-  )
-
   const record = useRecord()
+
+  const setTrendingTimeRange = useCallback(
+    (tr: TimeRange) => dispatch(trendingPageActions.setTrendingTimeRange(tr)),
+    [dispatch]
+  )
+  const setTrendingGenre = useCallback(
+    (genre: string | null) =>
+      dispatch(trendingPageActions.setTrendingGenre(toTrendingGenre(genre))),
+    [dispatch]
+  )
 
   const handleTimeRangeChange = useCallback(
     (timeRange: TimeRange) => {
       setTrendingTimeRange(timeRange)
       scrollWindowToTop()
-      makeSetInView(timeRange)(true)
-      ;[TimeRange.WEEK, TimeRange.MONTH, TimeRange.ALL_TIME].forEach((tr) => {
-        if (tr !== timeRange) makeSetInView(tr)(false)
-      })
       record(
         make(Name.TRENDING_CHANGE_VIEW, {
           timeframe: timeRange,
@@ -156,74 +185,55 @@ const TrendingPageMobileContent = ({
         })
       )
     },
-    [setTrendingTimeRange, makeSetInView, record, trendingGenre]
+    [setTrendingTimeRange, record, trendingGenre]
   )
 
-  const getTracksLineupForRange = useCallback(
-    (timeRange: TimeRange) => {
-      const lineupMap = {
-        [TimeRange.WEEK]: (
-          <Lineup
-            key={`trendingWeek-${trendingGenre}`}
-            {...weekProps}
-            setInView={makeSetInView(TimeRange.WEEK)}
-            loadMore={makeLoadMore(TimeRange.WEEK)}
-            playTrack={makePlayTrack(TimeRange.WEEK)}
-            pauseTrack={makePauseTrack(TimeRange.WEEK)}
-            actions={trendingWeekActions}
-            variant={LineupVariant.MAIN}
-            isTrending
-            endOfLineup={
-              <EndOfLineup description={messages.endOfLineupDescription} />
-            }
-          />
-        ),
-        [TimeRange.MONTH]: (
-          <Lineup
-            key={`trendingMonth-${trendingGenre}`}
-            {...monthProps}
-            setInView={makeSetInView(TimeRange.MONTH)}
-            loadMore={makeLoadMore(TimeRange.MONTH)}
-            playTrack={makePlayTrack(TimeRange.MONTH)}
-            pauseTrack={makePauseTrack(TimeRange.MONTH)}
-            actions={trendingMonthActions}
-            variant={LineupVariant.MAIN}
-            isTrending
-            endOfLineup={
-              <EndOfLineup description={messages.endOfLineupDescription} />
-            }
-          />
-        ),
-        [TimeRange.ALL_TIME]: (
-          <Lineup
-            key={`trendingAllTime-${trendingGenre}`}
-            {...allTimeProps}
-            setInView={makeSetInView(TimeRange.ALL_TIME)}
-            loadMore={makeLoadMore(TimeRange.ALL_TIME)}
-            playTrack={makePlayTrack(TimeRange.ALL_TIME)}
-            pauseTrack={makePauseTrack(TimeRange.ALL_TIME)}
-            actions={trendingAllTimeActions}
-            variant={LineupVariant.MAIN}
-            isTrending
-            endOfLineup={
-              <EndOfLineup description={messages.endOfLineupDescription} />
-            }
-          />
-        )
-      }
-      return lineupMap[timeRange]
+  const queryForRange = useCallback(
+    (tr: TimeRange) => {
+      if (tr === TimeRange.WEEK) return weekQuery
+      if (tr === TimeRange.MONTH) return monthQuery
+      return allTimeQuery
     },
-    [
-      weekProps,
-      monthProps,
-      allTimeProps,
-      trendingGenre,
-      makeSetInView,
-      makeLoadMore,
-      makePlayTrack,
-      makePauseTrack
-    ]
+    [weekQuery, monthQuery, allTimeQuery]
   )
+
+  const querySourceFor = (timeRange: TimeRange) => ({
+    queryKey: [
+      ...getTrendingQueryKey({ timeRange, ...trendingArgs })
+    ] as unknown[]
+  })
+
+  const sourceFor = (timeRange: TimeRange) => {
+    if (timeRange === TimeRange.WEEK) return 'DISCOVER_TRENDING_WEEK'
+    if (timeRange === TimeRange.MONTH) return 'DISCOVER_TRENDING_MONTH'
+    return 'DISCOVER_TRENDING_ALL_TIME'
+  }
+
+  const getTracksLineupForRange = (timeRange: TimeRange) => {
+    const q = queryForRange(timeRange)
+    return (
+      <TrackLineup
+        key={`trending-${timeRange}-${trendingGenre ?? 'all'}`}
+        aria-label={`${timeRange} trending tracks`}
+        trackIds={q.trackIds}
+        source={sourceFor(timeRange)}
+        querySource={querySourceFor(timeRange)}
+        ordered
+        isTrending
+        variant={LineupVariant.MAIN}
+        isPending={q.isPending}
+        isFetching={q.isFetching}
+        isError={q.isError}
+        hasNextPage={q.hasNextPage}
+        loadNextPage={q.loadNextPage}
+        pageSize={TRENDING_LOAD_MORE_PAGE_SIZE}
+        initialPageSize={TRENDING_INITIAL_PAGE_SIZE}
+        endOfLineupElement={
+          <EndOfLineup description={messages.endOfLineupDescription} />
+        }
+      />
+    )
+  }
 
   const timeRangeOptions = useMemo(
     () => [
@@ -237,7 +247,8 @@ const TrendingPageMobileContent = ({
   const categoryOptions = useMemo(
     () => [
       { value: 'tracks' as const, label: messages.tracks },
-      { value: 'underground' as const, label: messages.underground }
+      { value: 'underground' as const, label: messages.underground },
+      { value: 'winners' as const, label: messages.winners }
     ],
     []
   )
@@ -284,15 +295,36 @@ const TrendingPageMobileContent = ({
       <div className={cn(styles.lineupContainer)}>
         {getTracksLineupForRange(trendingTimeRange)}
       </div>
+    ) : category === 'winners' ? (
+      <WinnersView
+        week={winnersWeek}
+        subFilter={winnersSubFilter}
+        onWeekChange={(week) => {
+          setWinnersWeek(week)
+          updateWinnersWeekParam(week, replaceRouteCallback)
+        }}
+        onSubFilterChange={setWinnersSubFilter}
+        containerRef={containerRef}
+      />
     ) : (
       <div className={cn(styles.lineupContainer)}>
-        <Lineup
+        <TrackLineup
           aria-label='underground trending tracks'
-          {...undergroundLineupProps}
-          endOfLineup={
+          trackIds={undergroundQuery.trackIds}
+          source='DISCOVER_TRENDING_UNDERGROUND'
+          querySource={undergroundQuerySource}
+          isPending={undergroundQuery.isPending}
+          isFetching={undergroundQuery.isFetching}
+          isError={undergroundQuery.isError}
+          hasNextPage={undergroundQuery.hasNextPage}
+          loadNextPage={undergroundQuery.loadNextPage}
+          pageSize={UNDERGROUND_PAGE_SIZE}
+          ordered
+          isTrending
+          variant={LineupVariant.MAIN}
+          endOfLineupElement={
             <EndOfLineup description={messages.endOfLineupDescription} />
           }
-          variant={LineupVariant.MAIN}
         />
       </div>
     )
@@ -312,7 +344,7 @@ const TrendingPageMobileContent = ({
           <SelectablePill
             type='button'
             size='large'
-            label={genreLabel}
+            label={genreLabel ?? ''}
             isSelected={isGenreSelected}
             icon={isGenreSelected ? IconCloseAlt : undefined}
             onClick={handleGenrePillClick}

@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import type { TransactionDetails as SdkTransactionDetails } from '@audius/sdk'
 
 import {
   TransactionDetails,
@@ -7,7 +7,7 @@ import {
 } from '~/store/ui/transaction-details/types'
 
 export const audioTransactionFromSdk = (
-  tx: full.TransactionDetails
+  tx: SdkTransactionDetails
 ): TransactionDetails => {
   const transactionTypeMap: Record<string, TransactionType> = {
     purchase_stripe: TransactionType.PURCHASE,
@@ -16,7 +16,8 @@ export const audioTransactionFromSdk = (
     'purchase unknown': TransactionType.PURCHASE,
     user_reward: TransactionType.CHALLENGE_REWARD,
     trending_reward: TransactionType.TRENDING_REWARD,
-    transfer: TransactionType.TRANSFER
+    transfer: TransactionType.TRANSFER,
+    tip: TransactionType.TIP
   }
 
   const txType = transactionTypeMap[tx.transactionType]
@@ -48,6 +49,7 @@ export const audioTransactionFromSdk = (
         metadata: undefined
       }
     case TransactionType.TRANSFER:
+    case TransactionType.TIP:
       return {
         signature: tx.signature,
         transactionType: txType,

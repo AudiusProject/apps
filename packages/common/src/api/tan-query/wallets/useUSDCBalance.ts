@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { UsdcWei } from '@audius/fixed-decimal'
 import { TokenAccountNotFoundError } from '@solana/spl-token'
@@ -41,7 +41,7 @@ export type UseUSDCBalanceOptions<TResult> = SelectableQueryOptions<
  */
 export const useUSDCBalance = <TResult = UsdcWei | null>({
   isPolling,
-  pollingInterval = 1000,
+  pollingInterval = 2000,
   commitment = 'processed',
   ...queryOptions
 }: {
@@ -114,8 +114,35 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
   // For compatibility with existing code
   const data = result.data ?? null
 
-  // If we're actively recovering, then we will be in loading state regardless
-  if (recoveryStatus === Status.LOADING) {
+  // When the recovery saga finishes, invalidate the balance query so the UI
+  // picks up the new balance immediately instead of waiting for the next
+  // polling tick. We keep the loading state on through the refetch so the
+  // skeleton doesn't flash off and reveal the stale balance.
+  const wasRecoveringRef = useRef(false)
+  const [isRefetchingAfterRecovery, setIsRefetchingAfterRecovery] =
+    useState(false)
+  useEffect(() => {
+    if (recoveryStatus === Status.LOADING) {
+      wasRecoveringRef.current = true
+    } else if (
+      wasRecoveringRef.current &&
+      (recoveryStatus === Status.SUCCESS || recoveryStatus === Status.ERROR)
+    ) {
+      wasRecoveringRef.current = false
+      setIsRefetchingAfterRecovery(true)
+      queryClient
+        .invalidateQueries({
+          queryKey: getUSDCBalanceQueryKey(ethAddress, commitment)
+        })
+        .finally(() => {
+          setIsRefetchingAfterRecovery(false)
+        })
+    }
+  }, [recoveryStatus, queryClient, ethAddress, commitment])
+
+  // If we're actively recovering, or finishing up the post-recovery refetch,
+  // keep showing the loading state so consumers render a skeleton/spinner.
+  if (recoveryStatus === Status.LOADING || isRefetchingAfterRecovery) {
     status = Status.LOADING
   }
 
@@ -131,6 +158,7 @@ export const useUSDCBalance = <TResult = UsdcWei | null>({
     status,
     isLoading: result.isLoading,
     isPending: result.isPending,
+    isError: result.isError,
     data,
     error: result.error,
     refresh: result.refetch,

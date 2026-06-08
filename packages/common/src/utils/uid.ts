@@ -105,6 +105,19 @@ export function makeUid(kind: string, id: ID, source?: string) {
 }
 
 /**
+ * Builds a deterministic UID for a given (kind, id, source). Unlike `makeUid`,
+ * this always returns the same string for the same inputs, so the UID is
+ * stable across component remounts. Use this when a track appears at most
+ * once in a single context (e.g., a section of unique recommended tracks),
+ * so that the tile's UID continues to match the queue entry's UID after
+ * remounting. Do not use for lineups that may contain the same track more
+ * than once — there, each instance must be uniquely identified by its UID.
+ */
+export function makeStableUid(kind: string, id: ID, source?: string) {
+  return new Uid(kind, id, source, 0).toString()
+}
+
+/**
  * A persistant identifier for a resource for re-use within a session.
  * Differs from a uid, which represents an instance.
  * @param kind

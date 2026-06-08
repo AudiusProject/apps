@@ -10,7 +10,10 @@ import {
   TransactionDetails
 } from '@audius/common/store'
 import { Flex, IconCaretRight, Paper, PlainButton, Text } from '@audius/harmony'
-import { full } from '@audius/sdk'
+import {
+  GetAudioTransactionsSortMethodEnum,
+  GetAudioTransactionsSortDirectionEnum
+} from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { useSetVisibility } from 'common/hooks/useModalState'
@@ -58,47 +61,46 @@ const Disclaimer = () => {
 }
 
 export const AudioWalletTransactions = () => {
-  const [page, setPage] = useState(0)
   const [sortMethod, setSortMethod] =
-    useState<full.GetAudioTransactionsSortMethodEnum>(
-      full.GetAudioTransactionsSortMethodEnum.Date
+    useState<GetAudioTransactionsSortMethodEnum>(
+      GetAudioTransactionsSortMethodEnum.Date
     )
   const [sortDirection, setSortDirection] =
-    useState<full.GetAudioTransactionsSortDirectionEnum>(
-      full.GetAudioTransactionsSortDirectionEnum.Desc
+    useState<GetAudioTransactionsSortDirectionEnum>(
+      GetAudioTransactionsSortDirectionEnum.Desc
     )
   const mainContentRef = useMainContentRef()
   const dispatch = useDispatch()
   const setVisibility = useSetVisibility()
 
-  const { data: audioTransactions = [], isPending: isTransactionsLoading } =
-    useAudioTransactions(
-      {
-        page,
-        sortMethod,
-        sortDirection
-      },
-      { refetchOnMount: 'always' }
-    )
-
   const { data: audioTransactionsCount = 0, isPending: isCountLoading } =
     useAudioTransactionsCount()
+
+  const {
+    data: audioTransactions = [],
+    isPending: isTransactionsLoading,
+    loadNextPage
+  } = useAudioTransactions(
+    {
+      sortMethod,
+      sortDirection
+    },
+    { refetchOnMount: 'always' }
+  )
 
   // Defaults: sort method = date, sort direction = desc
   const onSort = useCallback(
     (sortMethodInner: string, sortDirectionInner: string) => {
       const sortMethodRes =
         sortMethodInner === 'type'
-          ? full.GetAudioTransactionsSortMethodEnum.TransactionType
-          : full.GetAudioTransactionsSortMethodEnum.Date
+          ? GetAudioTransactionsSortMethodEnum.TransactionType
+          : GetAudioTransactionsSortMethodEnum.Date
       setSortMethod(sortMethodRes)
       const sortDirectionRes =
         sortDirectionInner === 'asc'
-          ? full.GetAudioTransactionsSortDirectionEnum.Asc
-          : full.GetAudioTransactionsSortDirectionEnum.Desc
+          ? GetAudioTransactionsSortDirectionEnum.Asc
+          : GetAudioTransactionsSortDirectionEnum.Desc
       setSortDirection(sortDirectionRes)
-      // Reset page when sorting changes
-      setPage(0)
     },
     [setSortMethod, setSortDirection]
   )
@@ -115,10 +117,6 @@ export const AudioWalletTransactions = () => {
     },
     [dispatch, setVisibility]
   )
-
-  const handleFetchPage = useCallback((newPage: number) => {
-    setPage(newPage)
-  }, [])
 
   const tableLoading = isTransactionsLoading || isCountLoading
   const isEmpty = audioTransactions.length === 0
@@ -137,12 +135,12 @@ export const AudioWalletTransactions = () => {
           loading={tableLoading}
           onSort={onSort}
           onClickRow={onClickRow}
-          fetchPage={handleFetchPage}
-          pageSize={DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE}
-          isPaginated
           showMoreLimit={AUDIO_TRANSACTIONS_SHOW_MORE_LIMIT}
-          totalRowCount={audioTransactionsCount}
           scrollRef={mainContentRef}
+          fetchMore={loadNextPage}
+          totalRowCount={audioTransactionsCount}
+          fetchBatchSize={DEFAULT_AUDIO_TRANSACTIONS_BATCH_SIZE}
+          isVirtualized={true}
         />
       )}
     </Flex>

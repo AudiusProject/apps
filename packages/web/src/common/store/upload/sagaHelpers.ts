@@ -6,12 +6,7 @@ import {
   isContentUSDCPurchaseGated,
   USDCPurchaseConditions
 } from '@audius/common/models'
-import {
-  getOrCreateUSDCUserBank,
-  TrackForUpload,
-  TrackMetadataForUpload
-} from '@audius/common/store'
-import { USDC } from '@audius/fixed-decimal'
+import { TrackForUpload, TrackMetadataForUpload } from '@audius/common/store'
 import { all, call, put } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
@@ -97,16 +92,19 @@ export function* recordGatedTracks(
 
 export function* getUSDCMetadata(stream_conditions: USDCPurchaseConditions) {
   const ownerAccount = yield* call(queryAccountUser)
-  const wallet = ownerAccount?.erc_wallet ?? ownerAccount?.wallet
-  const ownerUserbank = yield* call(getOrCreateUSDCUserBank, wallet)
   const priceCents = stream_conditions.usdc_purchase.price
-  const priceWei = Number(USDC(priceCents / 100).value.toString())
   const conditionsWithMetadata: USDCPurchaseConditions = {
     usdc_purchase: {
       price: priceCents,
-      splits: {
-        [ownerUserbank?.toString() ?? '']: priceWei
-      }
+      ...(stream_conditions.usdc_purchase.albumTrackPrice != null && {
+        albumTrackPrice: stream_conditions.usdc_purchase.albumTrackPrice
+      }),
+      splits: [
+        {
+          user_id: ownerAccount!.user_id!,
+          percentage: 100
+        }
+      ]
     }
   }
   return conditionsWithMetadata

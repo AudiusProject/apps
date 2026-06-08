@@ -23,7 +23,7 @@ export const AlbumPurchaseModalContent = ({
     select: (collection) => pick(collection, ['playlist_name', 'permalink'])
   })
   const { playlist_name, permalink } = partialAlbum ?? {}
-  const albumArtwork = useCollectionCoverArt({
+  const { imageUrl: albumArtwork } = useCollectionCoverArt({
     collectionId: contentId,
     size: SquareSizes.SIZE_150_BY_150
   })

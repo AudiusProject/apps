@@ -43,7 +43,7 @@ const messages = {
   save: 'Save Changes',
   message: 'Send Message',
   sendTokens: 'Send Tokens',
-  sendArtistCoins: 'Send Coins',
+  sendFanClubs: 'Send Coins',
   unblockMessages: 'Unblock Messages',
   blockMessages: 'Block Messages',
   unmuteComments: 'Unmute Comments',
@@ -269,7 +269,7 @@ export const StatBanner = (props: StatsBannerProps) => {
                 variant='secondary'
                 size='small'
                 iconLeft={IconMoneySend}
-                aria-label={messages.sendArtistCoins}
+                aria-label={messages.sendFanClubs}
                 onClick={() => {
                   openSendTokensModal({
                     mint: env.WAUDIO_MINT_ADDRESS,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useHasAccount, useIsAccountLoaded } from '@audius/common/api'
 import {
@@ -18,7 +18,7 @@ const animatedAny = animated as any
 
 const { show: showMusicConfetti } = musicConfettiActions
 
-const ORIGINAL_HEIGHT_PIXELS = 134
+const ORIGINAL_HEIGHT_PIXELS = 112
 
 const messages = {
   dismissText: 'Dismiss',
@@ -36,18 +36,29 @@ export const ProfileCompletionPanel = () => {
   const isAccountLoaded = useIsAccountLoaded()
   const isLoggedIn = useHasAccount()
 
-  const [isDismissed, setIsDismissed] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return (
+        localStorage.getItem('profile-completion-panel-dismissed') === 'true'
+      )
+    } catch {
+      return false
+    }
+  })
   const [isTooltipDisabled, setIsTooltipDisabled] = useState(false)
 
-  const onDismiss = () => {
+  const onDismiss = useCallback(() => {
     // disable the tooltip before we dismiss,
     // otherwise it gets scaled in the dismiss animation
     // and looks super jenk
     setIsTooltipDisabled(true)
     setTimeout(() => {
       setIsDismissed(true)
+      try {
+        localStorage.setItem('profile-completion-panel-dismissed', 'true')
+      } catch {}
     }, 200)
-  }
+  }, [])
 
   const { isHidden, didCompleteThisSession, shouldNeverShow } =
     useProfileCompletionDismissal({
@@ -93,10 +104,10 @@ export const ProfileCompletionPanel = () => {
                 backgroundColor='surface2'
                 border='strong'
                 borderRadius='l'
-                gap='l'
-                pv='l'
+                gap='s'
+                pv='m'
                 ph='2xl'
-                direction='column'
+                column
                 alignItems='center'
               >
                 <Text variant='title' size='s'>

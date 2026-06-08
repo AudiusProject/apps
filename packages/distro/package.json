@@ -5,16 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "start:dev": "env-cmd -f .env.dev turbo run start --filter=@audius/distro",
-    "start:stage": "env-cmd -f .env.stage turbo run start --filter=@audius/distro",
     "start:prod": "env-cmd -f .env.prod turbo run start --filter=@audius/distro",
     "build": "tsc && vite build",
-    "build:dev": "env-cmd -f .env.dev turbo run build --filter=@audius/distro",
-    "build:stage": "env-cmd -f .env.stage turbo run build --filter=@audius/distro",
     "build:prod": "env-cmd -f .env.prod turbo run build --filter=@audius/distro",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "deploy:stage": "npm run build:stage && wrangler pages deploy --branch=stage ./dist",
     "deploy:prod": "npm run build:prod && wrangler pages deploy ./dist"
   },
   "dependencies": {

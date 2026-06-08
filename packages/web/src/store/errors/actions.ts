@@ -1,10 +1,3 @@
-import {
-  ErrorLevel,
-  AdditionalErrorReportInfo,
-  ReportToSentryArgs,
-  Feature
-} from '@audius/common/models'
-
 export const HANDLE_ERROR = 'ERROR/HANDLE_ERROR'
 export const OPEN_ERROR_PAGE = 'ERROR/OPEN_ERROR_PAGE'
 export const CLOSE_ERROR_PAGE = 'ERROR/CLOSE_ERROR_PAGE'
@@ -24,9 +17,7 @@ export type HandleErrorAction = {
   // shouldRedirect is true unless a redirectRoute is passed in
   shouldToast?: boolean
 
-  additionalInfo?: AdditionalErrorReportInfo
-  level?: ErrorLevel
-  feature?: Feature
+  additionalInfo?: Record<string, unknown>
   uiErrorCode: UiErrorCode
 }
 
@@ -43,8 +34,10 @@ export type HandleErrorArgs = {
   shouldReport?: boolean
   shouldToast?: boolean
   message: string
+  name?: string
+  additionalInfo?: Record<string, unknown>
   uiErrorCode?: UiErrorCode
-} & Omit<ReportToSentryArgs, 'error'>
+}
 
 export const handleError = ({
   name,
@@ -53,7 +46,6 @@ export const handleError = ({
   shouldRedirect,
   shouldToast,
   additionalInfo = {},
-  level,
   uiErrorCode = UiErrorCode.UNKNOWN
 }: HandleErrorArgs): HandleErrorAction => ({
   type: HANDLE_ERROR,
@@ -63,7 +55,6 @@ export const handleError = ({
   shouldReport,
   shouldToast,
   additionalInfo,
-  level,
   uiErrorCode
 })
 

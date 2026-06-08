@@ -6,6 +6,7 @@ import base64url from 'base64url'
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import { audiusSdk } from 'services/audius-sdk'
 import { identityService } from 'services/audius-sdk/identity'
+import { env } from 'services/env'
 
 import { messages } from './messages'
 
@@ -24,40 +25,14 @@ export const getIsRedirectValid = ({
     if (parsedRedirectUri === 'postmessage') {
       return true
     }
-    const { hash, username, password, pathname, hostname, protocol } =
-      parsedRedirectUri
-    // Ensure that the redirect_uri protocol is http or https
-    // IMPORTANT: If this validation is not done, users can
-    // use the redirect_uri to execute arbitrary code on the host
-    // domain (e.g. audius.co).
-    if (protocol !== 'http:' && protocol !== 'https:') {
+    const { protocol } = parsedRedirectUri
+    // Only block schemes that could execute code directly in the browser.
+    // All other validation (allowed domains, path, etc.) is enforced server-side
+    // via the registered redirect URI list for the OAuth client.
+    const dangerousSchemes = ['javascript:', 'data:', 'vbscript:']
+    if (dangerousSchemes.includes(protocol)) {
       return false
     }
-    if (hash || username || password) {
-      return false
-    }
-    if (
-      pathname.includes('/..') ||
-      pathname.includes('\\..') ||
-      pathname.includes('../')
-    ) {
-      return false
-    }
-
-    // From https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address:
-    const ipRegex =
-      /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
-    const localhostIPv4Regex =
-      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-    // Disallow IP addresses as redirect URIs unless it's localhost
-    if (
-      ipRegex.test(hostname) &&
-      hostname !== '[::1]' &&
-      !localhostIPv4Regex.test(hostname)
-    ) {
-      return false
-    }
-    // TODO(nkang): Potentially check URI against malware list like https://urlhaus-api.abuse.ch/#urlinfo
     return true
   } else {
     return false
@@ -66,11 +41,12 @@ export const getIsRedirectValid = ({
 
 export const isValidApiKey = (key: string | string[]) => {
   if (Array.isArray(key)) return false
-  if (key.length !== 40) {
+  const normalized = key.toLowerCase().startsWith('0x') ? key.slice(2) : key
+  if (normalized.length !== 40) {
     return false
   }
   const hexadecimalRegex = /^[0-9a-fA-F]+$/
-  return hexadecimalRegex.test(key)
+  return hexadecimalRegex.test(normalized)
 }
 
 const getFormattedAppAddress = ({
@@ -102,11 +78,11 @@ export const formOAuthResponse = async ({
   userEmail,
   apiKey,
   onError,
-  txSignature // Only applicable to scope = write_once
+  txSignature
 }: {
   account: UserMetadata
   userEmail?: string | null
-  apiKey: string | string[] | null
+  apiKey?: string
   onError: () => void
   txSignature?: { message: string; signature: string }
 }) => {
@@ -158,6 +134,55 @@ export const formOAuthResponse = async ({
   return `${header}.${payload}.${base64url.encode(signature)}`
 }
 
+export const exchangeForAuthorizationCode = async ({
+  account,
+  userEmail,
+  apiKey,
+  redirectUri,
+  codeChallenge,
+  codeChallengeMethod,
+  scope,
+  onError
+}: {
+  account: UserMetadata
+  userEmail: string | null
+  apiKey: string
+  redirectUri: string
+  codeChallenge: string
+  codeChallengeMethod: string
+  scope: string
+  onError: () => void
+}): Promise<string | null> => {
+  // 1. Build JWT (same as implicit flow — proves user identity to API)
+  const jwt = await formOAuthResponse({ account, userEmail, apiKey, onError })
+  if (!jwt) return null
+
+  // 2. Exchange JWT + PKCE params for authorization code
+  try {
+    const res = await fetch(`${env.API_URL}/v1/oauth/authorize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: jwt,
+        client_id: apiKey,
+        redirect_uri: redirectUri,
+        code_challenge: codeChallenge,
+        code_challenge_method: codeChallengeMethod,
+        scope
+      })
+    })
+    if (!res.ok) {
+      onError()
+      return null
+    }
+    const { code } = await res.json()
+    return code
+  } catch {
+    onError()
+    return null
+  }
+}
+
 export const authWrite = async ({ userId, appApiKey }: CreateGrantRequest) => {
   const sdk = await audiusSdk()
   await sdk.grants.createGrant({
@@ -190,7 +215,7 @@ export const getIsAppAuthorized = async ({
   )
   return foundIndex !== undefined && foundIndex > -1
 }
-export type WriteOnceTx =
+export type DashboardWalletTx =
   | 'connect_dashboard_wallet'
   | 'disconnect_dashboard_wallet'
 
@@ -202,11 +227,11 @@ type DisconnectDashboardWalletParams = {
   wallet: string
 }
 
-export type WriteOnceParams =
+export type DashboardWalletParams =
   | ConnectDashboardWalletParams
   | DisconnectDashboardWalletParams
 
-export const validateWriteOnceParams = ({
+export const validateDashboardWalletParams = ({
   tx,
   params: rawParams,
   willUsePostMessage
@@ -216,13 +241,13 @@ export const validateWriteOnceParams = ({
   willUsePostMessage: boolean
 }) => {
   let error = null
-  let txParams: WriteOnceParams | null = null
+  let txParams: DashboardWalletParams | null = null
   if (tx === 'connect_dashboard_wallet') {
     if (!willUsePostMessage) {
       error = messages.connectWalletNoPostMessageError
     }
     if (!rawParams.wallet) {
-      error = messages.writeOnceParamsError
+      error = messages.txParamsError
       return { error, txParams }
     }
     txParams = {
@@ -230,7 +255,7 @@ export const validateWriteOnceParams = ({
     }
   } else if (tx === 'disconnect_dashboard_wallet') {
     if (!rawParams.wallet) {
-      error = messages.writeOnceParamsError
+      error = messages.txParamsError
       return { error, txParams }
     }
     txParams = {
@@ -238,7 +263,7 @@ export const validateWriteOnceParams = ({
     }
   } else {
     // Unknown 'tx' value
-    error = messages.writeOnceTxError
+    error = messages.txError
   }
   return { error, txParams }
 }

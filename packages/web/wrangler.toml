@@ -20,6 +20,15 @@ services = [
 ]
 vars = { ENVIRONMENT = "production", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
 
+# Preview environment for PR deployments (GitHub Actions)
+# Deployed on every PR; single preview URL overwritten per build
+[env.preview]
+name = "audius-web-preview"
+services = [
+  { binding = "SSR", service = "audius-web-ssr-preview" }
+]
+vars = { ENVIRONMENT = "production", EMBED = "https://embed.audius.workers.dev", API_URL = "https://api.audius.co", DISCOVERY_NODES = "https://api.audius.co" }
+
 # Test environment, replace `test` with subdomain
 # Invoke with npx wrangler dev --env test
 [env.test]

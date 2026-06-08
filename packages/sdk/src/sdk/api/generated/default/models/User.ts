@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -20,12 +19,24 @@ import {
     CoverPhotoFromJSONTyped,
     CoverPhotoToJSON,
 } from './CoverPhoto';
+import type { PlaylistLibrary } from './PlaylistLibrary';
+import {
+    PlaylistLibraryFromJSON,
+    PlaylistLibraryFromJSONTyped,
+    PlaylistLibraryToJSON,
+} from './PlaylistLibrary';
 import type { ProfilePicture } from './ProfilePicture';
 import {
     ProfilePictureFromJSON,
     ProfilePictureFromJSONTyped,
     ProfilePictureToJSON,
 } from './ProfilePicture';
+import type { UserArtistCoinBadge } from './UserArtistCoinBadge';
+import {
+    UserArtistCoinBadgeFromJSON,
+    UserArtistCoinBadgeFromJSONTyped,
+    UserArtistCoinBadgeToJSON,
+} from './UserArtistCoinBadge';
 
 /**
  * 
@@ -45,6 +56,18 @@ export interface User {
      * @memberof User
      */
     artistPickTrackId?: string;
+    /**
+     * 
+     * @type {UserArtistCoinBadge}
+     * @memberof User
+     */
+    artistCoinBadge: UserArtistCoinBadge;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    coinFlairMint?: string;
     /**
      * 
      * @type {string}
@@ -231,6 +254,156 @@ export interface User {
      * @memberof User
      */
     wallet: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    balance: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    associatedWalletsBalance: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    totalBalance: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    waudioBalance: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    associatedSolWalletsBalance: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof User
+     */
+    blocknumber: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    isStorageV2: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    creatorNodeEndpoint?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof User
+     */
+    currentUserFolloweeFollowCount: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    doesCurrentUserFollow: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    doesCurrentUserSubscribe: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    doesFollowCurrentUser: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    handleLc: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    updatedAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    coverPhotoSizes?: string;
+    /**
+     * 
+     * @type {CoverPhoto}
+     * @memberof User
+     */
+    coverPhotoCids?: CoverPhoto;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    coverPhotoLegacy?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    profilePictureSizes?: string;
+    /**
+     * 
+     * @type {ProfilePicture}
+     * @memberof User
+     */
+    profilePictureCids?: ProfilePicture;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    profilePictureLegacy?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    hasCollectibles: boolean;
+    /**
+     * 
+     * @type {PlaylistLibrary}
+     * @memberof User
+     */
+    playlistLibrary?: PlaylistLibrary;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof User
+     */
+    allowAiAttribution: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof User
+     */
+    profileType?: string;
 }
 
 /**
@@ -239,6 +412,7 @@ export interface User {
 export function instanceOfUser(value: object): value is User {
     let isInstance = true;
     isInstance = isInstance && "albumCount" in value && value["albumCount"] !== undefined;
+    isInstance = isInstance && "artistCoinBadge" in value && value["artistCoinBadge"] !== undefined;
     isInstance = isInstance && "followeeCount" in value && value["followeeCount"] !== undefined;
     isInstance = isInstance && "followerCount" in value && value["followerCount"] !== undefined;
     isInstance = isInstance && "handle" in value && value["handle"] !== undefined;
@@ -260,6 +434,22 @@ export function instanceOfUser(value: object): value is User {
     isInstance = isInstance && "supportingCount" in value && value["supportingCount"] !== undefined;
     isInstance = isInstance && "totalAudioBalance" in value && value["totalAudioBalance"] !== undefined;
     isInstance = isInstance && "wallet" in value && value["wallet"] !== undefined;
+    isInstance = isInstance && "balance" in value && value["balance"] !== undefined;
+    isInstance = isInstance && "associatedWalletsBalance" in value && value["associatedWalletsBalance"] !== undefined;
+    isInstance = isInstance && "totalBalance" in value && value["totalBalance"] !== undefined;
+    isInstance = isInstance && "waudioBalance" in value && value["waudioBalance"] !== undefined;
+    isInstance = isInstance && "associatedSolWalletsBalance" in value && value["associatedSolWalletsBalance"] !== undefined;
+    isInstance = isInstance && "blocknumber" in value && value["blocknumber"] !== undefined;
+    isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
+    isInstance = isInstance && "isStorageV2" in value && value["isStorageV2"] !== undefined;
+    isInstance = isInstance && "currentUserFolloweeFollowCount" in value && value["currentUserFolloweeFollowCount"] !== undefined;
+    isInstance = isInstance && "doesCurrentUserFollow" in value && value["doesCurrentUserFollow"] !== undefined;
+    isInstance = isInstance && "doesCurrentUserSubscribe" in value && value["doesCurrentUserSubscribe"] !== undefined;
+    isInstance = isInstance && "doesFollowCurrentUser" in value && value["doesFollowCurrentUser"] !== undefined;
+    isInstance = isInstance && "handleLc" in value && value["handleLc"] !== undefined;
+    isInstance = isInstance && "updatedAt" in value && value["updatedAt"] !== undefined;
+    isInstance = isInstance && "hasCollectibles" in value && value["hasCollectibles"] !== undefined;
+    isInstance = isInstance && "allowAiAttribution" in value && value["allowAiAttribution"] !== undefined;
 
     return isInstance;
 }
@@ -276,6 +466,8 @@ export function UserFromJSONTyped(json: any, ignoreDiscriminator: boolean): User
         
         'albumCount': json['album_count'],
         'artistPickTrackId': !exists(json, 'artist_pick_track_id') ? undefined : json['artist_pick_track_id'],
+        'artistCoinBadge': UserArtistCoinBadgeFromJSON(json['artist_coin_badge']),
+        'coinFlairMint': !exists(json, 'coin_flair_mint') ? undefined : json['coin_flair_mint'],
         'bio': !exists(json, 'bio') ? undefined : json['bio'],
         'coverPhoto': !exists(json, 'cover_photo') ? undefined : CoverPhotoFromJSON(json['cover_photo']),
         'followeeCount': json['followee_count'],
@@ -307,6 +499,31 @@ export function UserFromJSONTyped(json: any, ignoreDiscriminator: boolean): User
         'supportingCount': json['supporting_count'],
         'totalAudioBalance': json['total_audio_balance'],
         'wallet': json['wallet'],
+        'balance': json['balance'],
+        'associatedWalletsBalance': json['associated_wallets_balance'],
+        'totalBalance': json['total_balance'],
+        'waudioBalance': json['waudio_balance'],
+        'associatedSolWalletsBalance': json['associated_sol_wallets_balance'],
+        'blocknumber': json['blocknumber'],
+        'createdAt': json['created_at'],
+        'isStorageV2': json['is_storage_v2'],
+        'creatorNodeEndpoint': !exists(json, 'creator_node_endpoint') ? undefined : json['creator_node_endpoint'],
+        'currentUserFolloweeFollowCount': json['current_user_followee_follow_count'],
+        'doesCurrentUserFollow': json['does_current_user_follow'],
+        'doesCurrentUserSubscribe': json['does_current_user_subscribe'],
+        'doesFollowCurrentUser': json['does_follow_current_user'],
+        'handleLc': json['handle_lc'],
+        'updatedAt': json['updated_at'],
+        'coverPhotoSizes': !exists(json, 'cover_photo_sizes') ? undefined : json['cover_photo_sizes'],
+        'coverPhotoCids': !exists(json, 'cover_photo_cids') ? undefined : CoverPhotoFromJSON(json['cover_photo_cids']),
+        'coverPhotoLegacy': !exists(json, 'cover_photo_legacy') ? undefined : json['cover_photo_legacy'],
+        'profilePictureSizes': !exists(json, 'profile_picture_sizes') ? undefined : json['profile_picture_sizes'],
+        'profilePictureCids': !exists(json, 'profile_picture_cids') ? undefined : ProfilePictureFromJSON(json['profile_picture_cids']),
+        'profilePictureLegacy': !exists(json, 'profile_picture_legacy') ? undefined : json['profile_picture_legacy'],
+        'hasCollectibles': json['has_collectibles'],
+        'playlistLibrary': !exists(json, 'playlist_library') ? undefined : PlaylistLibraryFromJSON(json['playlist_library']),
+        'allowAiAttribution': json['allow_ai_attribution'],
+        'profileType': !exists(json, 'profile_type') ? undefined : json['profile_type'],
     };
 }
 
@@ -321,6 +538,8 @@ export function UserToJSON(value?: User | null): any {
         
         'album_count': value.albumCount,
         'artist_pick_track_id': value.artistPickTrackId,
+        'artist_coin_badge': UserArtistCoinBadgeToJSON(value.artistCoinBadge),
+        'coin_flair_mint': value.coinFlairMint,
         'bio': value.bio,
         'cover_photo': CoverPhotoToJSON(value.coverPhoto),
         'followee_count': value.followeeCount,
@@ -352,6 +571,31 @@ export function UserToJSON(value?: User | null): any {
         'supporting_count': value.supportingCount,
         'total_audio_balance': value.totalAudioBalance,
         'wallet': value.wallet,
+        'balance': value.balance,
+        'associated_wallets_balance': value.associatedWalletsBalance,
+        'total_balance': value.totalBalance,
+        'waudio_balance': value.waudioBalance,
+        'associated_sol_wallets_balance': value.associatedSolWalletsBalance,
+        'blocknumber': value.blocknumber,
+        'created_at': value.createdAt,
+        'is_storage_v2': value.isStorageV2,
+        'creator_node_endpoint': value.creatorNodeEndpoint,
+        'current_user_followee_follow_count': value.currentUserFolloweeFollowCount,
+        'does_current_user_follow': value.doesCurrentUserFollow,
+        'does_current_user_subscribe': value.doesCurrentUserSubscribe,
+        'does_follow_current_user': value.doesFollowCurrentUser,
+        'handle_lc': value.handleLc,
+        'updated_at': value.updatedAt,
+        'cover_photo_sizes': value.coverPhotoSizes,
+        'cover_photo_cids': CoverPhotoToJSON(value.coverPhotoCids),
+        'cover_photo_legacy': value.coverPhotoLegacy,
+        'profile_picture_sizes': value.profilePictureSizes,
+        'profile_picture_cids': ProfilePictureToJSON(value.profilePictureCids),
+        'profile_picture_legacy': value.profilePictureLegacy,
+        'has_collectibles': value.hasCollectibles,
+        'playlist_library': PlaylistLibraryToJSON(value.playlistLibrary),
+        'allow_ai_attribution': value.allowAiAttribution,
+        'profile_type': value.profileType,
     };
 }
 

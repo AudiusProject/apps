@@ -1,36 +1,43 @@
 import type { Theme } from '@react-navigation/native'
 import { DefaultTheme, DarkTheme } from '@react-navigation/native'
 
-import { darkTheme, defaultTheme, matrixTheme } from 'app/utils/theme'
+import type { ResolvedThemeName } from 'app/utils/theme'
+import {
+  darkTheme,
+  defaultTheme,
+  matrixTheme,
+  defaultLightThemeColors,
+  defaultDarkThemeColors
+} from 'app/utils/theme'
 
-const defaultNavigationtTheme: Theme = {
+const createLightNavTheme = (palette: {
+  background: string
+  white: string
+}) => ({
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: defaultTheme.background,
-    card: defaultTheme.white
+    background: palette.background,
+    card: palette.white
   }
-}
-const darkNavigationTheme = {
+})
+
+const createDarkNavTheme = (palette: {
+  background: string
+  white: string
+}) => ({
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    background: darkTheme.background,
-    card: darkTheme.white
+    background: palette.background,
+    card: palette.white
   }
-}
+})
 
-const matrixNavigationTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    background: matrixTheme.background,
-    card: matrixTheme.white
-  }
-}
-
-export const navigationThemes = {
-  default: defaultNavigationtTheme,
-  dark: darkNavigationTheme,
-  matrix: matrixNavigationTheme
+export const navigationThemes: Record<ResolvedThemeName, Theme> = {
+  'default-light': createLightNavTheme(defaultLightThemeColors),
+  'default-dark': createDarkNavTheme(defaultDarkThemeColors),
+  'classic-light': createLightNavTheme(defaultTheme),
+  'classic-dark': createDarkNavTheme(darkTheme),
+  matrix: createDarkNavTheme(matrixTheme)
 }

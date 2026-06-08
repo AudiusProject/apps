@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useCurrentTrack } from '@audius/common/hooks'
-import { playerSelectors, playbackRateValueMap } from '@audius/common/store'
+import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useAppState } from '@react-native-community/hooks'
 import type { GestureResponderEvent } from 'react-native'
@@ -16,7 +16,7 @@ import { makeStyles } from 'app/styles'
 import { attachToDx } from 'app/utils/animation'
 import { useThemeColors } from 'app/utils/theme'
 
-const { getPlaybackRate, getSeek, getSeekCounter } = playerSelectors
+const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
 
 // How much the handle "grows" when pressing
 const HANDLE_GROW_SCALE = 1.1
@@ -54,7 +54,9 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     height: spacing(4),
     width: spacing(4),
     borderRadius: spacing(2),
-    backgroundColor: palette.staticWhite,
+    backgroundColor: palette.neutralLight2,
+    borderColor: palette.borderNegative,
+    borderWidth: 1,
     // Note: React-native-shadow-2 seems to lose fidelity
     // when styling such a small shadow.
     // TODO: Revisit this, but as of writing, these values
@@ -161,7 +163,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
 
   // Calculate the actual playback rate based on track type
   const isLongFormContent =
-    trackGenre === Genre.PODCASTS || trackGenre === Genre.AUDIOBOOKS
+    trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
   const actualPlaybackRate = isLongFormContent
     ? playbackRateValueMap[playbackRate]
     : 1.0

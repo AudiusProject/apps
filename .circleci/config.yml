@@ -91,8 +91,6 @@ jobs:
             - ./packages/ddex-entrypoint/node_modules
             - ./packages/create-audius-app/node_modules
             - ./packages/dotenv-linter/bin
-            - ./packages/discovery-provider/plugins/pedalboard/apps/relay/node_modules
-            - ./packages/discovery-provider/plugins/pedalboard/apps/solana-relay/node_modules
 
   generate-release-branch:
     working_directory: ~/apps
@@ -213,10 +211,10 @@ workflows:
           config-path: ../workspace/.circleci/continue_config.yml
           mapping: |
             comms/.* run-discovery-workflow true
-            packages/identity-service/.* run-identity-workflow true
+            packages/identity-service/.* run-identity-workflow false
             eth-contracts/.* run-eth-contracts-workflow true
             .circleci/.* run-discovery-workflow true
-            .circleci/.* run-identity-workflow true
+            .circleci/.* run-identity-workflow false
             .circleci/.* run-eth-contracts-workflow true
             .circleci/.* run-protocol-dashboard-workflow true
             .circleci/.* run-sdk-workflow true
@@ -249,7 +247,7 @@ workflows:
             packages/fixed-decimal/.* run-mobile-workflow false
             packages/fixed-decimal/.* run-common-workflow true
             packages/spl/.* run-sdk-workflow true
-            packages/spl/.* run-identity-workflow true
+            packages/spl/.* run-identity-workflow false
           requires:
             - generate-config
             - init
@@ -264,10 +262,10 @@ workflows:
           config-path: ../workspace/.circleci/continue_config.yml
           mapping: |
             comms/.* run-discovery-workflow true
-            packages/identity-service/.* run-identity-workflow true
+            packages/identity-service/.* run-identity-workflow false
             eth-contracts/.* run-eth-contracts-workflow true
             .circleci/.* run-discovery-workflow true
-            .circleci/.* run-identity-workflow true
+            .circleci/.* run-identity-workflow false
             .circleci/.* run-eth-contracts-workflow true
             .circleci/.* run-protocol-dashboard-workflow true
             .circleci/.* run-sdk-workflow true
@@ -296,7 +294,7 @@ workflows:
             packages/fixed-decimal/.* run-mobile-workflow false
             packages/fixed-decimal/.* run-common-workflow true
             packages/spl/.* run-sdk-workflow true
-            packages/spl/.* run-identity-workflow true
+            packages/spl/.* run-identity-workflow false
             .* run-web-workflow false
             .* run-mobile-workflow false
           requires:

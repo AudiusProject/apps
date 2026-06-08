@@ -1,25 +1,18 @@
 import { useCallback } from 'react'
 
-import { useCurrentUserId, useUserByParams } from '@audius/common/api'
-import { ShareSource } from '@audius/common/models'
+import { useUserByParams } from '@audius/common/api'
 import {
   profilePageActions,
   reachabilitySelectors,
-  shareModalUIActions,
-  modalsActions,
   ProfilePageTabs
 } from '@audius/common/store'
 import { encodeUrlName } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
 import { useFocusEffect, useNavigationState } from '@react-navigation/native'
 import { View } from 'react-native'
+import { useSharedValue } from 'react-native-reanimated'
 import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  IconButton,
-  IconKebabHorizontal,
-  IconShare
-} from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
@@ -29,13 +22,14 @@ import { makeStyles } from 'app/styles'
 
 import { DeactivatedProfileTombstone } from './DeactivatedProfileTombstone'
 import { ProfileHeader } from './ProfileHeader'
+import { ProfileNavOverlay } from './ProfileNavOverlay'
 import { ProfileScreenSkeleton } from './ProfileScreenSkeleton'
+import { ProfileScrollContext } from './ProfileScrollContext'
 import { ProfileTabNavigator } from './ProfileTabs/ProfileTabNavigator'
+import { useProfileScrollStatusBar } from './useProfileScrollStatusBar'
 import { useRefreshProfile } from './useRefreshProfile'
-const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { setCurrentUser: setCurrentUserAction } = profilePageActions
 const { getIsReachable } = reachabilitySelectors
-const { setVisibility } = modalsActions
 
 const useStyles = makeStyles(() => ({
   navigator: {
@@ -59,8 +53,6 @@ export const ProfileScreen = () => {
   const handle =
     userHandle && userHandle !== 'accountUser' ? userHandle : profile?.handle
   const handleLower = handle?.toLowerCase() ?? ''
-  const { data: accountUserId } = useCurrentUserId()
-  const isOwner = accountUserId === profile?.user_id
   const dispatch = useDispatch()
   const isNotReachable = useSelector(getIsReachable) === false
 
@@ -105,49 +97,23 @@ export const ProfileScreen = () => {
 
   useFocusEffect(setCurrentUser)
 
-  const handlePressTopRight = useCallback(() => {
-    if (profile) {
-      if (!isOwner) {
-        dispatch(
-          setVisibility({
-            modal: 'ProfileActions',
-            visible: true
-          })
-        )
-      } else {
-        dispatch(
-          requestOpenShareModal({
-            type: 'profile',
-            profileId: profile.user_id,
-            source: ShareSource.PAGE
-          })
-        )
-      }
-    }
-  }, [profile, dispatch, isOwner])
-
-  const topbarRight = (
-    <IconButton
-      color='subdued'
-      icon={!isOwner ? IconKebabHorizontal : IconShare}
-      onPress={handlePressTopRight}
-    />
-  )
-
   const renderHeader = useCallback(() => <ProfileHeader />, [])
 
+  // Shared value that tracks the current tab's scroll position. Written to
+  // from inside the collapsible header via `ProfileScrollBridge` and read by
+  // `ProfileNavOverlay` to animate its blur background and icon colors.
+  const scrollY = useSharedValue(0)
+  useProfileScrollStatusBar(scrollY)
+
   return (
-    <Screen
-      topbarRight={topbarRight}
-      url={handle && `/${encodeUrlName(handle)}`}
-    >
+    <Screen url={handle && `/${encodeUrlName(handle)}`}>
       <ScreenContent isOfflineCapable>
         {!profile ? (
           <ProfileScreenSkeleton />
         ) : profile.is_deactivated ? (
           <DeactivatedProfileTombstone />
         ) : (
-          <>
+          <ProfileScrollContext.Provider value={scrollY}>
             <View style={styles.navigator}>
               {isNotReachable ? (
                 <>
@@ -164,11 +130,12 @@ export const ProfileScreen = () => {
                       refreshing={isRefreshing}
                       onRefresh={handleRefresh}
                     />
+                    <ProfileNavOverlay />
                   </ScreenSecondaryContent>
                 </>
               )}
             </View>
-          </>
+          </ProfileScrollContext.Provider>
         )}
       </ScreenContent>
     </Screen>

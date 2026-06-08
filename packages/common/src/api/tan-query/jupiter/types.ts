@@ -1,4 +1,4 @@
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { PublicKey } from '@solana/web3.js'
 import type { Keypair } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
@@ -74,7 +74,7 @@ export interface UserBankManagedTokenInfo {
 }
 
 export type SwapDependencies = {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   keypair: Keypair
   userPublicKey: PublicKey
   feePayer: PublicKey

@@ -9,7 +9,7 @@ type StaticTokenDisplayProps = {
 
 /**
  * A non-interactive token display component that shows the token icon and symbol
- * without any dropdown functionality. Used when artist-coins feature flag is disabled.
+ * without any dropdown functionality. Used when fan-clubs feature flag is disabled.
  */
 export const StaticTokenDisplay = ({ tokenInfo }: StaticTokenDisplayProps) => {
   const { logoURI, icon } = tokenInfo

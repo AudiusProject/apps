@@ -28,8 +28,8 @@
       "type": "image/png"
     },
     {
-      "src": "favicons/android-chrome-384x384.png",
-      "sizes": "384x384",
+      "src": "favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ],

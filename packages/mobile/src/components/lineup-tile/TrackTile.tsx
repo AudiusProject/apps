@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useContext, useRef } from 'react'
 
 import {
   useCurrentUserId,
@@ -22,7 +22,7 @@ import {
   shareModalUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors,
   trackPageActions,
   PurchaseableContentType,
@@ -32,10 +32,10 @@ import {
 } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
 import { Genre, removeNullable } from '@audius/common/utils'
-import { useNavigationState } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Paper, type ImageProps } from '@audius/harmony-native'
+import { LineupContext } from 'app/components/lineup/LineupContext'
 import type { TrackTileProps } from 'app/components/lineup-tile/types'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -46,9 +46,10 @@ import { TrackDogEar } from '../track/TrackDogEar'
 
 import { LineupTileActionButtons } from './LineupTileActionButtons'
 import { LineupTileMetadata } from './LineupTileMetadata'
+import { TilePressBlockContext } from './TilePressBlockContext'
 import { TrackTileStats } from './TrackTileStats'
 
-const { getUid } = playerSelectors
+const { getTrackId } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
@@ -68,11 +69,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
 
   const dispatch = useDispatch()
   const navigation = useNavigation()
-  const isOnArtistsTracksTab = useNavigationState((state) => {
-    // @ts-expect-error -- history returning unknown[]
-    const currentScreen = state.history?.[0].key
-    return currentScreen?.includes('Tracks')
-  })
+  const { isOnArtistsTracksTab } = useContext(LineupContext)
   const { data: currentUserId } = useCurrentUserId()
   const { onOpen: openPublishModal } = usePublishConfirmationModal()
   const { onOpen: openPremiumContentPurchaseModal } =
@@ -118,7 +115,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
   }, [track?.track_id, dispatch])
 
   const isPlayingUid = useSelector(
-    (state: CommonState) => getUid(state) === lineupTileProps.uid
+    (state: CommonState) => getTrackId(state) === id
   )
 
   const renderImage = useCallback(
@@ -135,6 +132,8 @@ const TrackTileComponent = (props: TrackTileProps) => {
     },
     [track?.track_id]
   )
+
+  const childPressedRef = useRef(false)
 
   const handlePress = useCallback(() => {
     if (!track) return
@@ -160,6 +159,10 @@ const TrackTileComponent = (props: TrackTileProps) => {
     }
 
     setTimeout(() => {
+      if (childPressedRef.current) {
+        childPressedRef.current = false
+        return
+      }
       togglePlay({
         uid: lineupTileProps.uid,
         id: track.track_id,
@@ -184,6 +187,10 @@ const TrackTileComponent = (props: TrackTileProps) => {
     onPress?.(track.track_id)
   }, [navigation, onPress, track])
 
+  const handlePressWithPropagationBlock = useCallback(() => {
+    childPressedRef.current = true
+  }, [])
+
   const playbackPositionInfo = useSelector((state) =>
     getTrackPosition(state, {
       trackId: track?.track_id ?? 0,
@@ -194,12 +201,14 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const handlePressOverflow = useCallback(() => {
     if (!track) return
     const isLongFormContent =
-      track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
+      track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
     const isOwner = currentUserId === track.owner_id
     const isArtistPick =
       isOwner && user?.artist_pick_track_id === track.track_id
 
     const overflowActions = [
+      !track.is_unlisted || isOwner ? OverflowAction.PLAY_NEXT : null,
+      !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_QUEUE : null,
       isOwner && !track.ddex_app ? OverflowAction.ADD_TO_ALBUM : null,
       !track.is_unlisted || isOwner ? OverflowAction.ADD_TO_PLAYLIST : null,
       isLongFormContent
@@ -291,51 +300,52 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const isArtistPick = user?.artist_pick_track_id === track.track_id
 
   return (
-    <Paper onPress={handlePress} style={style}>
-      <TrackDogEar trackId={track.track_id} hideUnlocked />
-      <LineupTileMetadata
-        renderImage={renderImage}
-        onPressTitle={handlePressTitle}
-        title={track.title}
-        userId={user.user_id}
-        isPlayingUid={isPlayingUid}
-        type='track'
-        trackId={track.track_id}
-        duration={track.duration}
-        isLongFormContent={
-          track.genre === Genre.PODCASTS || track.genre === Genre.AUDIOBOOKS
-        }
-        isArtistPick={showArtistPick && isArtistPick}
-      />
-      <TrackTileStats
-        trackId={track.track_id}
-        rankIndex={lineupTileProps.index}
-        isTrending={lineupTileProps.isTrending}
-        uid={lineupTileProps.uid}
-        actions={lineupTileProps.actions}
-      />
-      {isReadonly ? null : (
-        <LineupTileActionButtons
-          hasReposted={track.has_current_user_reposted}
-          hasSaved={track.has_current_user_saved}
-          isOwner={isOwner}
-          isShareHidden={hideShare}
-          isUnlisted={track.is_unlisted}
-          readonly={isReadonly}
-          contentId={track.track_id}
-          contentType={PurchaseableContentType.TRACK}
-          streamConditions={track.stream_conditions}
-          hasStreamAccess={hasStreamAccess}
-          source={lineupTileProps.source}
-          onPressOverflow={handlePressOverflow}
-          onPressRepost={handlePressRepost}
-          onPressSave={handlePressSave}
-          onPressShare={handlePressShare}
-          onPressPublish={handlePressPublish}
-          onPressEdit={onPressEdit}
+    <TilePressBlockContext.Provider value={handlePressWithPropagationBlock}>
+      <Paper onPress={handlePress} style={style}>
+        <TrackDogEar trackId={track.track_id} hideUnlocked />
+        <LineupTileMetadata
+          renderImage={renderImage}
+          onPressTitle={handlePressTitle}
+          onPressWithPropagationBlock={handlePressWithPropagationBlock}
+          title={track.title}
+          userId={user.user_id}
+          isPlayingUid={isPlayingUid}
+          type='track'
+          trackId={track.track_id}
+          duration={track.duration}
+          isLongFormContent={
+            track.genre === Genre.Podcasts || track.genre === Genre.Audiobooks
+          }
+          isArtistPick={showArtistPick && isArtistPick}
         />
-      )}
-    </Paper>
+        <TrackTileStats
+          trackId={track.track_id}
+          rankIndex={lineupTileProps.index}
+          isTrending={lineupTileProps.isTrending}
+        />
+        {isReadonly ? null : (
+          <LineupTileActionButtons
+            hasReposted={track.has_current_user_reposted}
+            hasSaved={track.has_current_user_saved}
+            isOwner={isOwner}
+            isShareHidden={hideShare}
+            isUnlisted={track.is_unlisted}
+            readonly={isReadonly}
+            contentId={track.track_id}
+            contentType={PurchaseableContentType.TRACK}
+            streamConditions={track.stream_conditions}
+            hasStreamAccess={hasStreamAccess}
+            source={lineupTileProps.source}
+            onPressOverflow={handlePressOverflow}
+            onPressRepost={handlePressRepost}
+            onPressSave={handlePressSave}
+            onPressShare={handlePressShare}
+            onPressPublish={handlePressPublish}
+            onPressEdit={onPressEdit}
+          />
+        )}
+      </Paper>
+    </TilePressBlockContext.Provider>
   )
 }
 

@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin, useCurrentUserId, useUser } from '@audius/common/api'
+import { useFanClub, useCurrentUserId, useUser } from '@audius/common/api'
 import { coinDetailsMessages } from '@audius/common/messages'
-import { useArtistCoinDetailsModal } from '@audius/common/store'
+import { useFanClubDetailsModal } from '@audius/common/store'
 import { route, makeXShareUrl } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useNavigation } from '@react-navigation/native'
@@ -20,54 +20,50 @@ export const CoinInsightsOverflowMenu = () => {
   const { data: drawerData } = useDrawer('CoinInsightsOverflowMenu')
   const mint = drawerData?.mint
   const navigation = useNavigation()
-  const { data: artistCoin } = useArtistCoin(mint)
+  const { data: fanClub } = useFanClub(mint)
   const { data: currentUserId } = useCurrentUserId()
-  const { data: artist } = useUser(artistCoin?.ownerId)
+  const { data: artist } = useUser(fanClub?.ownerId)
   const { toast } = useToast()
-  const { onOpen: openArtistCoinDetailsModal } = useArtistCoinDetailsModal()
-  const isOwner = currentUserId === artistCoin?.ownerId
+  const { onOpen: openFanClubDetailsModal } = useFanClubDetailsModal()
+  const isOwner = currentUserId === fanClub?.ownerId
 
   const handleCopyCoinAddress = useCallback(() => {
-    if (artistCoin?.mint) {
-      Clipboard.setString(artistCoin.mint)
+    if (fanClub?.mint) {
+      Clipboard.setString(fanClub.mint)
       toast({ content: messages.copiedToClipboard, type: 'info' })
     }
-  }, [artistCoin?.mint, toast])
+  }, [fanClub?.mint, toast])
 
   const handleCopyLink = useCallback(() => {
-    if (artistCoin?.ticker) {
+    if (fanClub?.ticker) {
       // TODO: Should figure out a way to make this use the correct domain
-      const coinUrl = `https://audius.co${route.coinPage(artistCoin.ticker)}`
+      const coinUrl = `https://audius.co${route.coinPage(fanClub.ticker)}`
       Clipboard.setString(coinUrl)
       toast({ content: messages.copiedLinkToClipboard, type: 'info' })
     }
-  }, [artistCoin?.ticker, toast])
+  }, [fanClub?.ticker, toast])
 
   const handleOpenBirdeye = useCallback(() => {
-    if (artistCoin?.mint) {
-      Linking.openURL(`https://birdeye.so/solana/${artistCoin.mint}`)
+    if (fanClub?.mint) {
+      Linking.openURL(`https://birdeye.so/solana/${fanClub.mint}`)
     }
-  }, [artistCoin?.mint])
+  }, [fanClub?.mint])
 
   const handleOpenDetails = useCallback(() => {
     if (mint) {
-      openArtistCoinDetailsModal({ mint, isOpen: true })
+      openFanClubDetailsModal({ mint, isOpen: true })
     }
-  }, [mint, openArtistCoinDetailsModal])
+  }, [mint, openFanClubDetailsModal])
 
   const handleShareToX = useCallback(async () => {
-    if (!artistCoin?.ticker || !artistCoin?.mint || !artist?.handle) return
+    if (!fanClub?.ticker || !fanClub?.mint || !artist?.handle) return
 
-    const isArtistOwner = currentUserId === artistCoin.ownerId
-    const coinUrl = `https://audius.co${route.coinPage(artistCoin.ticker)}`
+    const isArtistOwner = currentUserId === fanClub.ownerId
+    const coinUrl = `https://audius.co${route.coinPage(fanClub.ticker)}`
 
     const shareText = isArtistOwner
-      ? messages.shareToXArtistCopy(artistCoin.ticker, artistCoin.mint)
-      : messages.shareToXUserCopy(
-          artistCoin.ticker,
-          artist.handle,
-          artistCoin.mint
-        )
+      ? messages.shareToXArtistCopy(fanClub.ticker, fanClub.mint)
+      : messages.shareToXUserCopy(fanClub.ticker, artist.handle, fanClub.mint)
 
     const xShareUrl = makeXShareUrl(coinUrl, shareText)
 
@@ -77,14 +73,14 @@ export const CoinInsightsOverflowMenu = () => {
     } else {
       console.error(`Can't open: ${xShareUrl}`)
     }
-  }, [artistCoin, currentUserId, artist])
+  }, [fanClub, currentUserId, artist])
 
   const handleEditCoin = useCallback(() => {
-    if (artistCoin?.ticker) {
+    if (fanClub?.ticker) {
       const nav = (navigation as any).navigate
-      nav('EditCoinDetailsScreen', { ticker: artistCoin.ticker })
+      nav('EditCoinDetailsScreen', { ticker: fanClub.ticker })
     }
-  }, [artistCoin, navigation])
+  }, [fanClub, navigation])
 
   const rows: ActionDrawerRow[] = [
     ...(isOwner ? [{ text: messages.editCoin, callback: handleEditCoin }] : []),
@@ -110,8 +106,8 @@ export const CoinInsightsOverflowMenu = () => {
     }
   ]
 
-  // Don't render if no artist coin data
-  if (!artistCoin?.mint) {
+  // Don't render if no fan club data
+  if (!fanClub?.mint) {
     return null
   }
 

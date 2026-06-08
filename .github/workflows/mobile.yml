@@ -14,15 +14,91 @@ on:
       - '.github/workflows/mobile.yml'
       - '.circleci/**'
   workflow_dispatch:
+    inputs:
+      ota_channel:
+        description: 'OTA channel for manual publish'
+        required: false
+        default: 'rc'
+        type: choice
+        options:
+          - rc
+          - production
 
 env:
-  NODE_VERSION: '22.21.1'
+  NODE_VERSION: '24.10.0'
 
 jobs:
-  # Initialize: Install dependencies, lint & typecheck
-  mobile-init:
-    name: Mobile Init (Install, Lint & Typecheck)
+  # Install dependencies and warm the node_modules cache shared by every downstream job.
+  # Kept separate from lint/typecheck so OTA + build jobs don't wait on verify (~3.5 min).
+  mobile-install:
+    name: Mobile Install
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+            packages/dotenv-linter/bin
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            # Ensure dotenv-linter binary is installed (install script downloads it)
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            # Clear npm cache to avoid EEXIST conflicts
+            npm cache clean --force || true
+            # Try npm ci first, fallback to npm install if lock file is out of sync
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+  # Verify: lint & typecheck. Runs in parallel with OTA/build jobs — failure still fails the workflow,
+  # but does not block the OTA publish on the critical path.
+  mobile-verify:
+    name: Mobile Verify (Lint & Typecheck)
+    runs-on: ubuntu-latest
+    needs: mobile-install
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,28 +148,293 @@ jobs:
           if [[ -d node_modules ]]; then
             echo "Using cached node_modules, running postinstall..."
             npm run postinstall
-            # Ensure dotenv-linter binary is installed (install script downloads it)
             if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
               echo "dotenv-linter binary missing, running install script..."
               (cd packages/dotenv-linter && npm run install)
             fi
           else
             echo "No cache found, running fresh install..."
-            # Clear npm cache to avoid EEXIST conflicts
             npm cache clean --force || true
-            # Try npm ci first, fallback to npm install if lock file is out of sync
             npm ci --prefer-offline || npm install --prefer-offline
           fi
 
       - name: Lint & Typecheck
         run: npx turbo run verify --filter=@audius/mobile
 
+  mobile-version-check:
+    name: Mobile Version Change Check
+    runs-on: ubuntu-latest
+    needs: mobile-install
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    outputs:
+      current_version: ${{ steps.version-check.outputs.current_version }}
+      previous_version: ${{ steps.version-check.outputs.previous_version }}
+      version_changed: ${{ steps.version-check.outputs.version_changed }}
+      version_unchanged: ${{ steps.version-check.outputs.version_unchanged }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine version change
+        id: version-check
+        run: |
+          set -euo pipefail
+          CURRENT_VERSION=$(jq -r '.version' packages/mobile/package.json)
+          PREV_VERSION=$(git show HEAD^:packages/mobile/package.json | jq -r '.version')
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "previous_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$CURRENT_VERSION" == "$PREV_VERSION" ]]; then
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            echo "version_unchanged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            echo "version_unchanged=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # OTA Release: publish JS bundle updates when native app version is unchanged.
+  # Matrixed over platforms so iOS and Android publish in parallel.
+  mobile-ota-release:
+    name: Mobile OTA Release (CodePush, ${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    needs: [mobile-install, mobile-version-check]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.mobile-version-check.outputs.version_unchanged == 'true') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.ota_channel == 'rc' || github.event.inputs.ota_channel == ''))
+    # Serialize per-platform publishes so two concurrent runs can't read-modify-write
+    # the same s3://.../mobile-ota/histories/<platform>/rc/<binary>.json and clobber each
+    # other's release entry.
+    concurrency:
+      group: mobile-ota-release-rc-${{ matrix.platform }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, android]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+            packages/dotenv-linter/bin
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            npm cache clean --force || true
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Determine OTA channel
+        id: ota-channel
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "channel=${{ github.event.inputs.ota_channel || 'rc' }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=rc" >> "$GITHUB_OUTPUT"
+          fi
+
+      # @bravemobile/react-native-code-push@12.3.2 hardcodes
+      # `node_modules/.bin/react-native` relative to cwd. After #14365 the
+      # react-native dep hoists to root node_modules, so the bin is only at
+      # ./node_modules/.bin/react-native — not packages/mobile/node_modules/.bin/.
+      - name: Symlink react-native CLI into packages/mobile/node_modules/.bin
+        run: |
+          mkdir -p packages/mobile/node_modules/.bin
+          ln -sf "$(pwd)/node_modules/.bin/react-native" packages/mobile/node_modules/.bin/react-native
+
+      - name: Publish OTA update (${{ matrix.platform }})
+        env:
+          OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
+          OTA_S3_PREFIX: mobile-ota
+          OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
+        run: |
+          set -euo pipefail
+          BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
+          OTA_CHANNEL="${{ steps.ota-channel.outputs.channel }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
+          # Keep OTA release versions above binary version while preserving semver format.
+          OTA_PATCH=$((PATCH + 100000 + GITHUB_RUN_NUMBER))
+          OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
+
+          cd packages/mobile
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform ${{ matrix.platform }} \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
+  # OTA Release (Production): manual + environment approval gate.
+  # Matrixed over platforms so iOS and Android publish in parallel.
+  mobile-ota-release-production:
+    name: Mobile OTA Release (Production, ${{ matrix.platform }})
+    runs-on: ubuntu-latest
+    needs: [mobile-install, mobile-version-check]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.ota_channel == 'production'
+    environment:
+      name: mobile-production-ota
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    concurrency:
+      group: mobile-ota-release-production-${{ matrix.platform }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, android]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/mobile/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/libs/dist
+            packages/sdk/node_modules
+            packages/sdk/dist
+            packages/harmony/node_modules
+            packages/dotenv-linter/bin
+          key: npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-mobile-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+            npm-cache-mobile-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies
+        env:
+          CI: true
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if [[ -d node_modules ]]; then
+            echo "Using cached node_modules, running postinstall..."
+            npm run postinstall
+            if [[ ! -f packages/dotenv-linter/bin/dotenv-linter ]]; then
+              echo "dotenv-linter binary missing, running install script..."
+              (cd packages/dotenv-linter && npm run install)
+            fi
+          else
+            echo "No cache found, running fresh install..."
+            npm cache clean --force || true
+            npm ci --prefer-offline || npm install --prefer-offline
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # @bravemobile/react-native-code-push@12.3.2 hardcodes
+      # `node_modules/.bin/react-native` relative to cwd. After #14365 the
+      # react-native dep hoists to root node_modules, so the bin is only at
+      # ./node_modules/.bin/react-native — not packages/mobile/node_modules/.bin/.
+      - name: Symlink react-native CLI into packages/mobile/node_modules/.bin
+        run: |
+          mkdir -p packages/mobile/node_modules/.bin
+          ln -sf "$(pwd)/node_modules/.bin/react-native" packages/mobile/node_modules/.bin/react-native
+
+      - name: Publish OTA update to production (${{ matrix.platform }})
+        env:
+          OTA_S3_BUCKET: ${{ secrets.OTA_S3_BUCKET }}
+          OTA_S3_PREFIX: mobile-ota
+          OTA_PUBLIC_BASE_URL: https://download.audius.co/mobile-ota
+        run: |
+          set -euo pipefail
+          BINARY_VERSION="${{ needs.mobile-version-check.outputs.current_version }}"
+          OTA_CHANNEL="production"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BINARY_VERSION"
+          OTA_PATCH=$((PATCH + 100000 + GITHUB_RUN_NUMBER))
+          OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
+
+          cd packages/mobile
+          npx code-push release \
+            --binary-version "$BINARY_VERSION" \
+            --app-version "$OTA_APP_VERSION" \
+            --platform ${{ matrix.platform }} \
+            --identifier "$OTA_CHANNEL" \
+            --entry-file index.js
+
   # iOS Release Candidate: Build and upload
   mobile-build-upload-releasecandidate-ios:
     name: iOS Release Candidate Build & Upload
-    runs-on: macos-15
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: macos-26
+    needs: [mobile-install, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -104,6 +445,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -133,6 +477,12 @@ jobs:
         run: |
           cd packages/mobile
           echo -e "\nAMPLITUDE_WRITE_KEY=${{ secrets.AMPLITUDE_WRITE_KEY_PROD }}" >> .env.prod
+
+      - name: Configure release-candidate OTA channel
+        run: |
+          awk '!/^OTA_CHANNEL=/' packages/mobile/.env.prod > packages/mobile/.env.prod.tmp
+          mv packages/mobile/.env.prod.tmp packages/mobile/.env.prod
+          echo "OTA_CHANNEL=rc" >> packages/mobile/.env.prod
 
       - name: Install Python build dependencies
         run: |
@@ -180,11 +530,6 @@ jobs:
         run: |
           cd packages/mobile/ios
           RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
-
-      - name: Install Sentry CLI
-        run: |
-          curl -sL https://sentry.io/get-cli/ | bash
-          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
 
       - name: Build dependencies
         timeout-minutes: 60
@@ -239,9 +584,6 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
           cd packages/mobile/ios
           bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic.releasecandidate
@@ -260,8 +602,8 @@ jobs:
   mobile-build-upload-releasecandidate-android:
     name: Android Release Candidate Build & Upload
     runs-on: ubuntu-latest
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-install, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -272,6 +614,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -327,6 +672,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      # The "Free disk space" step above removes $AGENT_TOOLSDIRECTORY, which
+      # also wipes the Node 24 install from the earlier setup-node step. Without
+      # this re-setup, npm ci falls back to the runner's system Node 22 and the
+      # mobile workspace's "engines" check fails with EBADENGINE.
+      - name: Setup Node.js (after disk cleanup)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0 (after disk cleanup)
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -385,6 +744,12 @@ jobs:
             npm ci --prefer-offline || npm install --prefer-offline
           fi
 
+      - name: Configure release-candidate OTA channel
+        run: |
+          awk '!/^OTA_CHANNEL=/' packages/mobile/.env.prod > packages/mobile/.env.prod.tmp
+          mv packages/mobile/.env.prod.tmp packages/mobile/.env.prod
+          echo "OTA_CHANNEL=rc" >> packages/mobile/.env.prod
+
       - name: Update bundler
         run: |
           sudo gem install bundler:2.5.16
@@ -441,13 +806,6 @@ jobs:
             du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
           fi
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
       - name: Release Android (Release Candidate)
         timeout-minutes: 60
         env:
@@ -469,9 +827,9 @@ jobs:
   # iOS Production: Build and upload (requires approval)
   mobile-build-upload-production-ios-main:
     name: iOS Production Build & Upload
-    runs-on: macos-15
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: macos-26
+    needs: [mobile-install, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     environment:
       name: mobile-production-ios
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -485,6 +843,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -562,11 +923,6 @@ jobs:
           cd packages/mobile/ios
           RCT_NEW_ARCH_ENABLED=0 bundle exec pod install
 
-      - name: Install Sentry CLI
-        run: |
-          curl -sL https://sentry.io/get-cli/ | bash
-          echo "$HOME/.sentry-cli/bin" >> $GITHUB_PATH
-
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
@@ -620,9 +976,6 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: |
           cd packages/mobile/ios
           bundle exec fastlane build_and_upload bundle_id:co.audius.audiusmusic
@@ -631,8 +984,8 @@ jobs:
   mobile-build-upload-production-android-main:
     name: Android Production Build & Upload
     runs-on: ubuntu-latest
-    needs: mobile-init
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [mobile-install, mobile-version-check]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
     environment:
       name: mobile-production-android
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -646,6 +999,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -701,6 +1057,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      # The "Free disk space" step above removes $AGENT_TOOLSDIRECTORY, which
+      # also wipes the Node 24 install from the earlier setup-node step. Without
+      # this re-setup, npm ci falls back to the runner's system Node 22 and the
+      # mobile workspace's "engines" check fails with EBADENGINE.
+      - name: Setup Node.js (after disk cleanup)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0 (after disk cleanup)
+        run: npm install -g npm@11.10.0
 
       - name: Create concatenated patch file
         id: patch-file
@@ -814,13 +1184,6 @@ jobs:
           if [ -d ~/.android/sdk ]; then
             du -sh ~/.android/sdk 2>/dev/null || echo "Default SDK path not found"
           fi
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
 
       - name: Release Android (Production)
         timeout-minutes: 60

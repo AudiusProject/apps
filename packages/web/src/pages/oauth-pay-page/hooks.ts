@@ -1,15 +1,19 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo,
+  transformFanClubToTokenInfo,
   useSendCoins,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useUserByHandle,
+  useQueryContext
 } from '@audius/common/api'
 import { useUserbank } from '@audius/common/hooks'
 import { SolanaWalletAddress } from '@audius/common/models'
 import { isValidSolAddress } from '@audius/common/store'
+import { FixedDecimal } from '@audius/fixed-decimal'
+import { useQuery } from '@tanstack/react-query'
 import * as queryString from 'query-string'
 import { useLocation } from 'react-router'
 
@@ -23,6 +27,7 @@ const useParsedPayParams = () => {
 
   const {
     recipient,
+    handle,
     amount,
     mint,
     state,
@@ -61,6 +66,9 @@ const useParsedPayParams = () => {
     return null
   }, [origin])
 
+  const hasHandle = handle && typeof handle === 'string'
+  const hasRecipient = recipient && typeof recipient === 'string'
+
   const { error } = useMemo(() => {
     let error: string | null = null
 
@@ -74,9 +82,14 @@ const useParsedPayParams = () => {
       responseMode !== 'fragment'
     ) {
       error = messages.responseModeError
-    } else if (!recipient || typeof recipient !== 'string') {
+    } else if (hasHandle && hasRecipient) {
+      error = messages.handleAndRecipientError
+    } else if (!hasHandle && !hasRecipient) {
       error = messages.missingParamsError
-    } else if (!isValidSolAddress(recipient as SolanaWalletAddress)) {
+    } else if (
+      hasRecipient &&
+      !isValidSolAddress(recipient as SolanaWalletAddress)
+    ) {
       error = messages.invalidRecipientError
     } else if (!amount || typeof amount !== 'string') {
       error = messages.missingParamsError
@@ -101,6 +114,8 @@ const useParsedPayParams = () => {
     isRedirectValid,
     parsedOrigin,
     parsedRedirectUri,
+    hasHandle,
+    hasRecipient,
     recipient,
     amount,
     mint,
@@ -112,6 +127,7 @@ const useParsedPayParams = () => {
 
   return {
     recipient: recipient as string | undefined,
+    handle: handle as string | undefined,
     amount: amount as string | undefined,
     mint: mint as string | undefined,
     state,
@@ -132,7 +148,8 @@ export const useOAuthPaySetup = ({
   onError: (errorMessage: string) => void
 }) => {
   const {
-    recipient,
+    recipient: recipientParam,
+    handle,
     amount,
     mint,
     state,
@@ -147,13 +164,53 @@ export const useOAuthPaySetup = ({
   const { data: account } = useCurrentAccountUser()
   const isLoggedIn = Boolean(account?.user_id)
 
+  // Resolve handle to user if provided
+  const { data: handleUser, isPending: handleUserPending } = useUserByHandle(
+    handle ?? null,
+    { enabled: !!handle }
+  )
+  const recipientEthAddress = handle ? handleUser?.erc_wallet : undefined
+
+  // Derive the recipient's user bank address (pure math, no RPC call).
+  // Actual account creation (if needed) happens at confirm time in a single tx.
+  const { audiusSdk } = useQueryContext()
+  const {
+    data: recipientUserBank,
+    isPending: recipientUserBankPending,
+    error: recipientUserBankError
+  } = useQuery({
+    queryKey: ['deriveRecipientUserBank', recipientEthAddress, mint],
+    queryFn: async () => {
+      if (!recipientEthAddress || !mint) return null
+      const sdk = await audiusSdk()
+      const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
+        ethWallet: recipientEthAddress,
+        mint: mint as any
+      })
+      return userBank.toBase58()
+    },
+    enabled: !!recipientEthAddress && !!mint
+  })
+
+  // Determine the effective recipient address
+  const recipient = handle ? (recipientUserBank ?? undefined) : recipientParam
+  const handleLoading =
+    handle && (handleUserPending || recipientUserBankPending)
+  const handleError = handle
+    ? !handleUserPending && !handleUser
+      ? messages.handleNotFoundError
+      : recipientUserBankError
+        ? messages.handleResolvingError
+        : null
+    : null
+
   // Get the user-bank address for the specific mint (the one used to send tokens)
   const { userBankAddress } = useUserbank(mint ?? undefined)
   const currentUserWallet = userBankAddress
 
   // Get token info
-  const { data: coin } = useArtistCoin(mint ?? '')
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const { data: coin } = useFanClub(mint ?? '')
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Get user balance for the mint
   const { data: tokenBalance, isLoading: balanceLoading } = useCoinBalance({
@@ -180,11 +237,16 @@ export const useOAuthPaySetup = ({
     }
   }, [amount])
 
-  // Check if user has sufficient balance
+  // Check if user has sufficient balance.
+  // The balance FixedDecimal may use different decimals (e.g. 18 for AUDIO)
+  // than the URL amount (which uses tokenInfo.decimals, e.g. 8). Convert
+  // the amount to the balance's decimal scale before comparing.
   const hasSufficientBalance = useMemo(() => {
-    if (!tokenBalance || !amountBigInt) return false
-    return tokenBalance.balance.value >= amountBigInt
-  }, [tokenBalance, amountBigInt])
+    if (!tokenBalance || !amountBigInt || !tokenInfo) return false
+    const amountFD = new FixedDecimal(amountBigInt, tokenInfo.decimals)
+    const normalizedAmount = new FixedDecimal(amountFD, tokenBalance.decimals)
+    return tokenBalance.balance.value >= normalizedAmount.value
+  }, [tokenBalance, amountBigInt, tokenInfo])
 
   // Check if user holds the mint at all
   const userHoldsMint = useMemo(() => {
@@ -284,7 +346,10 @@ export const useOAuthPaySetup = ({
     try {
       const { signature } = await sendCoinsMutation.mutateAsync({
         recipientWallet: recipient as SolanaWalletAddress,
-        amount: amountBigInt
+        amount: amountBigInt,
+        recipientEthAddress,
+        recipientHandle: handle,
+        source: 'oauth_pay_page'
       })
 
       // Store signature to show success screen
@@ -304,7 +369,9 @@ export const useOAuthPaySetup = ({
     hasSufficientBalance,
     formResponseAndPostMessage,
     sendCoinsMutation,
-    onError
+    onError,
+    recipientEthAddress,
+    handle
   ])
 
   // Handle closing after success screen is shown
@@ -332,6 +399,10 @@ export const useOAuthPaySetup = ({
 
   return {
     recipient,
+    handle,
+    handleUser,
+    handleLoading: !!handleLoading,
+    handleError,
     amount: amountBigInt,
     mint,
     state,

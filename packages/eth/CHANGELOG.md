@@ -1,5 +1,16 @@
 # @audius/eth
 
+## 1.0.0
+
+### Major Changes
+
+- a744274: Release 1.0.0
+
+  - All contracts now simply export their ABIs and addresses.
+  - No viem dependency required.
+  - Treeshakable.
+  - Added examples and documentation.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -213,3 +213,7 @@ packages/identity-service/emailCache
 
 # Playwright
 test-results
+
+# Local agent state
+.claude/
+.aider*

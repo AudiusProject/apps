@@ -31,6 +31,8 @@ const defaultMenuProps: Partial<MenuProps> = {
   anchorOrigin: { horizontal: 'left', vertical: 'bottom' },
   transformOrigin: { horizontal: 'left', vertical: 'top' }
 }
+const SELECT_CARET_SIZE = 'm'
+const SELECT_CARET_CONTENT_GAP_PX = 2
 
 /**
  * A form input used for selecting a value: when collapsed it shows the
@@ -129,7 +131,18 @@ export const Select = forwardRef(function Select<Value extends string>(
     [value, clearable, setValue, onChange]
   )
 
-  const Icon = value !== null && clearable ? IconCloseAlt : IconCaretDown
+  const isClearIcon = value !== null && clearable
+  const Icon = isClearIcon ? IconCloseAlt : IconCaretDown
+  const endAdornment = isClearIcon ? (
+    <IconCloseAlt size='l' color='subdued' onClick={handleClickIcon} />
+  ) : (
+    <Icon
+      size={SELECT_CARET_SIZE}
+      color='subdued'
+      onClick={handleClickIcon}
+      style={{ marginLeft: SELECT_CARET_CONTENT_GAP_PX }}
+    />
+  )
 
   const optionElements = (
     <OptionKeyHandler
@@ -176,8 +189,7 @@ export const Select = forwardRef(function Select<Value extends string>(
         aria-haspopup='listbox'
         aria-expanded={isOpen}
         autoComplete='off'
-        endIcon={Icon}
-        IconProps={{ onClick: handleClickIcon }}
+        endAdornment={endAdornment}
         elevateLabel={!!selectedOption && !hideLabel}
         hidePlaceholder={!!selectedOption}
         {...other}

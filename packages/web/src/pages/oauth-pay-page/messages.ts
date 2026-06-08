@@ -8,11 +8,15 @@ export const messages = {
   confirm: 'Confirm',
   cancel: 'Cancel',
   invalidRecipient: 'Invalid recipient',
-  insufficientBalance: 'Insufficient balance',
+  insufficientBalance: 'Not enough balance, add funds on your ',
   missingParamsError:
     'Whoops, this is an invalid link (missing required parameters).',
+  handleAndRecipientError:
+    'Whoops, this is an invalid link (cannot specify both handle and recipient).',
   invalidRecipientError:
     'Whoops, this is an invalid link (recipient address is invalid).',
+  handleNotFoundError: 'Could not find a user with that handle.',
+  handleResolvingError: 'Failed to resolve user bank for the given handle.',
   invalidAmountError: 'Whoops, this is an invalid link (amount is invalid).',
   missingMintError:
     'Whoops, this is an invalid link (mint address is missing).',
@@ -28,7 +32,8 @@ export const messages = {
   transactionFailed: 'Transaction failed',
   loading: 'Loading...',
   sendingTransaction: 'Sending transaction...',
-  userDoesNotHoldMint: 'You do not hold this coin.',
+  userDoesNotHoldMint: 'Not enough balance, add funds on your ',
+  walletLink: 'wallet',
   transactionComplete: 'Your transaction is complete!',
   sent: 'Sent',
   viewOnSolana: 'View On Solana Block Explorer',

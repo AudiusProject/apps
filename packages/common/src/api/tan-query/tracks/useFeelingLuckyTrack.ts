@@ -39,7 +39,7 @@ export const useFeelingLuckyTracks = <TResult = TQTrack[]>(
     queryKey: getFeelingLuckyTracksQueryKey({ userId: currentUserId, limit }),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.tracks.getFeelingLuckyTracks({
+      const { data = [] } = await sdk.tracks.getFeelingLuckyTracks({
         limit
       })
       const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)

@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
 import { useRemoteVar } from '@audius/common/hooks'
-import { Theme } from '@audius/common/models'
 import { StringKeys } from '@audius/common/services'
 import {
   audioRewardsPageSelectors,
@@ -21,7 +20,7 @@ import TweetEmbed from 'app/components/tweet-embed'
 import { useNavigation } from 'app/hooks/useNavigation'
 import type { AppScreenParamList } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
-import { useThemeVariant } from 'app/utils/theme'
+import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
 
 import { AppDrawer, useDrawerState } from '../drawer/AppDrawer'
 const { getTrendingRewardsModalType } = audioRewardsPageSelectors
@@ -32,15 +31,15 @@ const TRENDING_REWARDS_DRAWER_NAME = 'TrendingRewardsExplainer'
 const TOS_URL = 'https://blog.audius.co/article/audio-rewards'
 
 const messages = {
-  tracksTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  undergroundTitle: 'Top 5 Tracks Each Week Receive 1000 $AUDIO',
-  winners: 'Top 5 winners are selected every Friday at Noon PT!',
+  tracksTitle: 'Top 10 Tracks Each Week Earn $AUDIO',
+  undergroundTitle: 'Top 10 Tracks Each Week Earn $AUDIO',
+  winners: 'Top 10 winners are selected every Friday at Noon PT!',
   lastWeek: "LAST WEEK'S WINNERS",
   tracks: 'Tracks',
   underground: 'Underground',
   terms: 'Terms and Conditions Apply',
-  tracksModalTitle: 'Top 5 Trending Tracks',
-  undergroundModalTitle: 'Top 5 Underground Trending Tracks',
+  tracksModalTitle: 'Top 10 Trending Tracks',
+  undergroundModalTitle: 'Top 10 Underground Trending Tracks',
   buttonTextTracks: 'Trending Tracks',
   buttonTextUnderground: 'Underground Trending Tracks'
 }
@@ -143,7 +142,7 @@ const useTweetId = (type: TrendingRewardsModalType) => {
 
 const useIsDark = () => {
   const themeVariant = useThemeVariant()
-  return themeVariant === Theme.DARK
+  return isDarkTheme(themeVariant)
 }
 
 export const TrendingRewardsDrawer = (titleIcon) => {

@@ -80,10 +80,16 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     return (
       <div className={styles.rowContainer}>
         <div className={clsx(styles.rowCol, styles.colEndpoint)}>
-          <ReactCountryFlag
-            className={styles.countryFlag}
-            countryCode={data.country}
-          />
+          {data.country && /^[A-Za-z]{2}$/.test(data.country) ? (
+            <ReactCountryFlag
+              className={styles.countryFlag}
+              countryCode={data.country}
+            />
+          ) : (
+            <span className={styles.countryFlag} aria-label='Unknown location'>
+              🏁
+            </span>
+          )}
           {data.endpoint}
         </div>
         <div className={clsx(styles.rowCol, styles.colVersion)}>

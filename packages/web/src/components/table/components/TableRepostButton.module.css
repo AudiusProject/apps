@@ -10,6 +10,15 @@
   height: 20px;
 }
 
+/* Subdued inactive – matches other action icons */
+.icon path {
+  fill: var(--harmony-n-400) !important;
+}
+
+.tableRepostButton.reposted .icon path {
+  fill: var(--harmony-primary) !important;
+}
+
 .iconContainer {
   display: flex;
   justify-content: center;

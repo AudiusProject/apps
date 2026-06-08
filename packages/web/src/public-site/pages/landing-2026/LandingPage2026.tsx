@@ -1,0 +1,222 @@
+import { useEffect, useState } from 'react'
+
+import { ThemeProvider } from '@audius/harmony'
+import { Helmet } from 'react-helmet'
+
+import { CookieBanner } from 'components/cookie-banner/CookieBanner'
+import { MetaTags } from 'components/meta-tags/MetaTags'
+import { dismissCookieBanner as dismissCookieBannerAction } from 'store/application/ui/cookieBanner/actions'
+import { shouldShowCookieBanner, dismissCookieBanner } from 'utils/gdpr'
+
+import styles from './LandingPage2026.module.css'
+import { CreateFutureCTA } from './components/CreateFutureCTA'
+import { FAQ2026, faqItems } from './components/FAQ2026'
+import { FeaturedContests2026 } from './components/FeaturedContests2026'
+import { Footer2026 } from './components/Footer2026'
+import { GrowthStartsHere } from './components/GrowthStartsHere'
+import { Hero2026 } from './components/Hero2026'
+import { MadeForUs } from './components/MadeForUs'
+import { Nav2026 } from './components/Nav2026'
+import { Partners2026 } from './components/Partners2026'
+import { WhoUsesAudius2026 } from './components/WhoUsesAudius2026'
+
+const MOBILE_MAX_WIDTH = 800
+const MOBILE_MEDIA_QUERY =
+  typeof window !== 'undefined'
+    ? window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`)
+    : null
+const BASE_PUBLIC_PATH =
+  (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '') || ''
+const LANDING_FONTS_CSS_HREF = `${BASE_PUBLIC_PATH}/fonts-landing-2026.css`
+const URBANIST_HREF =
+  'https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap'
+const DUST_BUCER_OTF_HREF = `${BASE_PUBLIC_PATH}/fonts/DustBucer.otf`
+
+type LandingPage2026Props = {
+  isMobile: boolean
+  isAuthenticated: boolean
+  openNavScreen: () => void
+  setRenderPublicSite: (shouldRender: boolean) => void
+}
+
+export const LandingPage2026 = (props: LandingPage2026Props) => {
+  const [isMobileOrNarrow, setIsMobileOrNarrow] = useState(props.isMobile)
+  const [showCookieBanner, setShowCookieBanner] = useState(false)
+  const [fontsReady, setFontsReady] = useState(false)
+
+  useEffect(() => {
+    if (MOBILE_MEDIA_QUERY) {
+      const handler = () => setIsMobileOrNarrow(MOBILE_MEDIA_QUERY.matches)
+      handler()
+      MOBILE_MEDIA_QUERY.addListener(handler)
+      return () => MOBILE_MEDIA_QUERY.removeListener(handler)
+    }
+  }, [])
+
+  useEffect(() => {
+    shouldShowCookieBanner().then((show) => setShowCookieBanner(show))
+  }, [])
+
+  useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = '#111'
+    return () => {
+      document.body.style.background = prev
+    }
+  }, [])
+
+  useEffect(() => {
+    const linkFonts = document.createElement('link')
+    linkFonts.rel = 'stylesheet'
+    linkFonts.href = LANDING_FONTS_CSS_HREF
+
+    const linkUrbanist = document.createElement('link')
+    linkUrbanist.rel = 'stylesheet'
+    linkUrbanist.href = URBANIST_HREF
+
+    const maxWaitMs = 2500
+    let revealed = false
+    let cancelled = false
+    const reveal = () => {
+      if (cancelled || revealed) return
+      revealed = true
+      window.clearTimeout(timeoutId)
+      setFontsReady(true)
+    }
+
+    const timeoutId = window.setTimeout(() => reveal(), maxWaitMs)
+
+    const loadDustBucerForHero = async () => {
+      try {
+        if (document.fonts?.load) {
+          await document.fonts.load('normal 200px "Dust Bucer"')
+        }
+      } catch {
+        /* empty */
+      } finally {
+        reveal()
+      }
+    }
+
+    linkFonts.addEventListener(
+      'load',
+      () => {
+        loadDustBucerForHero().catch(() => {})
+      },
+      { once: true }
+    )
+    linkFonts.addEventListener('error', () => reveal(), { once: true })
+    linkUrbanist.addEventListener('error', () => reveal(), { once: true })
+
+    // Register listeners before append to avoid missing cached stylesheet load events.
+    document.head.appendChild(linkFonts)
+    document.head.appendChild(linkUrbanist)
+
+    if (linkFonts.sheet) {
+      loadDustBucerForHero().catch(() => {})
+    }
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+      linkFonts.remove()
+      linkUrbanist.remove()
+    }
+  }, [])
+
+  const onDismissCookie = () => {
+    dismissCookieBanner()
+    setShowCookieBanner(false)
+    return dismissCookieBannerAction()
+  }
+
+  const homepageUrl = 'https://audius.co'
+  const faqPageStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer
+      }
+    }))
+  }
+
+  return (
+    <ThemeProvider theme='day'>
+      <MetaTags
+        title='Audius — Free Music Streaming for Artists, Labels & Fans'
+        description='Audius is a decentralized music streaming platform for artists, labels, and fans. Stream and share music, upload tracks, and grow your audience—free.'
+        canonicalUrl={`${homepageUrl}/`}
+        structuredData={faqPageStructuredData}
+      />
+      <Helmet>
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link
+          rel='preconnect'
+          href='https://fonts.gstatic.com'
+          crossOrigin=''
+        />
+        <link rel='preload' as='style' href={LANDING_FONTS_CSS_HREF} />
+        <link
+          rel='preload'
+          as='font'
+          href={DUST_BUCER_OTF_HREF}
+          type='font/otf'
+          crossOrigin=''
+        />
+      </Helmet>
+      <div
+        id='landing-page-2026'
+        className={styles.page}
+        data-fonts-ready={fontsReady ? 'true' : undefined}
+      >
+        {showCookieBanner ? (
+          <CookieBanner isPlaying={false} dismiss={onDismissCookie} />
+        ) : null}
+        <Nav2026
+          isMobile={isMobileOrNarrow}
+          isAuthenticated={props.isAuthenticated}
+          openNavScreen={props.openNavScreen}
+          setRenderPublicSite={props.setRenderPublicSite}
+        />
+        <main className={styles.main}>
+          <Hero2026
+            isMobile={isMobileOrNarrow}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+          <div className={styles.spacer} />
+          <MadeForUs isMobile={isMobileOrNarrow} />
+          <div className={styles.spacer} />
+          <WhoUsesAudius2026
+            isMobile={isMobileOrNarrow}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+          <div className={styles.spacer} />
+          <GrowthStartsHere isMobile={isMobileOrNarrow} />
+          <div className={styles.spacer} />
+          <FeaturedContests2026
+            isMobile={isMobileOrNarrow}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+          <div className={styles.spacer} />
+          <FAQ2026 isMobile={isMobileOrNarrow} />
+          <div className={styles.spacer} />
+          <CreateFutureCTA
+            isMobile={isMobileOrNarrow}
+            setRenderPublicSite={props.setRenderPublicSite}
+          />
+          <div className={styles.spacerSmall} />
+          <Partners2026 isMobile={isMobileOrNarrow} />
+          <div className={styles.spacerSmall} />
+        </main>
+        <Footer2026
+          isMobile={isMobileOrNarrow}
+          setRenderPublicSite={props.setRenderPublicSite}
+        />
+      </div>
+    </ThemeProvider>
+  )
+}

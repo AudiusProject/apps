@@ -48,12 +48,7 @@ export class Account extends Base {
   /**
    * Logs a user into Audius
    */
-  async login(
-    email: string,
-    password: string,
-    visitorId?: string,
-    otp?: string
-  ) {
+  async login(email: string, password: string, otp?: string) {
     const phases = {
       FIND_WALLET: 'FIND_WALLET',
       FIND_USER: 'FIND_USER'
@@ -69,7 +64,6 @@ export class Account extends Base {
           email,
           username: email,
           password,
-          visitorId,
           otp
         })
         this.web3Manager.setOwnerWallet(ownerWallet)

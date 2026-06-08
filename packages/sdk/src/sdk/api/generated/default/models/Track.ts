@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -14,24 +13,96 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { Access } from './Access';
+import {
+    AccessFromJSON,
+    AccessFromJSONTyped,
+    AccessToJSON,
+} from './Access';
+import type { AccessGate } from './AccessGate';
+import {
+    AccessGateFromJSON,
+    AccessGateFromJSONTyped,
+    AccessGateToJSON,
+} from './AccessGate';
 import type { AlbumBacklink } from './AlbumBacklink';
 import {
     AlbumBacklinkFromJSON,
     AlbumBacklinkFromJSONTyped,
     AlbumBacklinkToJSON,
 } from './AlbumBacklink';
+import type { CoverArt } from './CoverArt';
+import {
+    CoverArtFromJSON,
+    CoverArtFromJSONTyped,
+    CoverArtToJSON,
+} from './CoverArt';
+import type { DdexCopyright } from './DdexCopyright';
+import {
+    DdexCopyrightFromJSON,
+    DdexCopyrightFromJSONTyped,
+    DdexCopyrightToJSON,
+} from './DdexCopyright';
+import type { DdexResourceContributor } from './DdexResourceContributor';
+import {
+    DdexResourceContributorFromJSON,
+    DdexResourceContributorFromJSONTyped,
+    DdexResourceContributorToJSON,
+} from './DdexResourceContributor';
+import type { DdexRightsController } from './DdexRightsController';
+import {
+    DdexRightsControllerFromJSON,
+    DdexRightsControllerFromJSONTyped,
+    DdexRightsControllerToJSON,
+} from './DdexRightsController';
+import type { Favorite } from './Favorite';
+import {
+    FavoriteFromJSON,
+    FavoriteFromJSONTyped,
+    FavoriteToJSON,
+} from './Favorite';
+import type { FieldVisibility } from './FieldVisibility';
+import {
+    FieldVisibilityFromJSON,
+    FieldVisibilityFromJSONTyped,
+    FieldVisibilityToJSON,
+} from './FieldVisibility';
 import type { RemixParent } from './RemixParent';
 import {
     RemixParentFromJSON,
     RemixParentFromJSONTyped,
     RemixParentToJSON,
 } from './RemixParent';
+import type { Repost } from './Repost';
+import {
+    RepostFromJSON,
+    RepostFromJSONTyped,
+    RepostToJSON,
+} from './Repost';
+import type { StemParent } from './StemParent';
+import {
+    StemParentFromJSON,
+    StemParentFromJSONTyped,
+    StemParentToJSON,
+} from './StemParent';
 import type { TrackArtwork } from './TrackArtwork';
 import {
     TrackArtworkFromJSON,
     TrackArtworkFromJSONTyped,
     TrackArtworkToJSON,
 } from './TrackArtwork';
+import type { TrackSegment } from './TrackSegment';
+import {
+    TrackSegmentFromJSON,
+    TrackSegmentFromJSONTyped,
+    TrackSegmentToJSON,
+} from './TrackSegment';
+import type { UrlWithMirrors } from './UrlWithMirrors';
+import {
+    UrlWithMirrorsFromJSON,
+    UrlWithMirrorsFromJSONTyped,
+    UrlWithMirrorsToJSON,
+} from './UrlWithMirrors';
 import type { User } from './User';
 import {
     UserFromJSON,
@@ -107,22 +178,16 @@ export interface Track {
     mood?: string;
     /**
      * 
-     * @type {string}
+     * @type {Date}
      * @memberof Track
      */
-    releaseDate?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Track
-     */
-    isrc?: string;
+    releaseDate?: Date;
     /**
      * 
      * @type {RemixParent}
      * @memberof Track
      */
-    remixOf?: RemixParent;
+    remixOf: RemixParent;
     /**
      * 
      * @type {number}
@@ -213,6 +278,330 @@ export interface Track {
      * @memberof Track
      */
     albumBacklink?: AlbumBacklink;
+    /**
+     * Describes what access the given user has
+     * @type {Access}
+     * @memberof Track
+     */
+    access: Access;
+    /**
+     * The blocknumber this track was last updated
+     * @type {number}
+     * @memberof Track
+     */
+    blocknumber: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    createDate?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverArtSizes: string;
+    /**
+     * 
+     * @type {CoverArt}
+     * @memberof Track
+     */
+    coverArtCids?: CoverArt;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    createdAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    creditsSplits?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    isrc?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    license?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    iswc?: string;
+    /**
+     * 
+     * @type {FieldVisibility}
+     * @memberof Track
+     */
+    fieldVisibility: FieldVisibility;
+    /**
+     * 
+     * @type {Array<Repost>}
+     * @memberof Track
+     */
+    followeeReposts: Array<Repost>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    hasCurrentUserReposted: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isScheduledRelease: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isUnlisted: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    hasCurrentUserSaved: boolean;
+    /**
+     * 
+     * @type {Array<Favorite>}
+     * @memberof Track
+     */
+    followeeFavorites: Array<Favorite>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    routeId: string;
+    /**
+     * 
+     * @type {StemParent}
+     * @memberof Track
+     */
+    stemOf?: StemParent;
+    /**
+     * 
+     * @type {Array<TrackSegment>}
+     * @memberof Track
+     */
+    trackSegments: Array<TrackSegment>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    updatedAt: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    userId: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isDelete: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverArt?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isAvailable: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    aiAttributionUserId?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof Track
+     */
+    allowedApiKeys?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    audioUploadId?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    previewStartSeconds?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    bpm?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isCustomBpm?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    musicalKey?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    isCustomMusicalKey?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Track
+     */
+    audioAnalysisErrorCount?: number;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Track
+     */
+    commentsDisabled?: boolean;
+    /**
+     * 
+     * @type {object}
+     * @memberof Track
+     */
+    ddexReleaseIds?: object;
+    /**
+     * 
+     * @type {Array<object>}
+     * @memberof Track
+     */
+    artists?: Array<object>;
+    /**
+     * 
+     * @type {Array<DdexResourceContributor>}
+     * @memberof Track
+     */
+    resourceContributors?: Array<DdexResourceContributor> | null;
+    /**
+     * 
+     * @type {Array<DdexResourceContributor>}
+     * @memberof Track
+     */
+    indirectResourceContributors?: Array<DdexResourceContributor> | null;
+    /**
+     * 
+     * @type {DdexRightsController}
+     * @memberof Track
+     */
+    rightsController?: DdexRightsController;
+    /**
+     * 
+     * @type {DdexCopyright}
+     * @memberof Track
+     */
+    copyrightLine?: DdexCopyright | null;
+    /**
+     * 
+     * @type {DdexCopyright}
+     * @memberof Track
+     */
+    producerCopyrightLine?: DdexCopyright | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    parentalWarningType?: string | null;
+    /**
+     * Whether or not the owner has restricted streaming behind an access gate
+     * @type {boolean}
+     * @memberof Track
+     */
+    isStreamGated: boolean;
+    /**
+     * Wallet addresses that can sign to authorize stream access (programmable distribution). When empty or omitted, the track is public and validator/creator nodes can serve it.
+     * @type {Array<string>}
+     * @memberof Track
+     */
+    accessAuthorities?: Array<string> | null;
+    /**
+     * How to unlock stream access to the track
+     * @type {AccessGate}
+     * @memberof Track
+     */
+    streamConditions?: AccessGate;
+    /**
+     * Whether or not the owner has restricted downloading behind an access gate
+     * @type {boolean}
+     * @memberof Track
+     */
+    isDownloadGated: boolean;
+    /**
+     * How to unlock the track download
+     * @type {AccessGate}
+     * @memberof Track
+     */
+    downloadConditions?: AccessGate;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverOriginalSongTitle?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Track
+     */
+    coverOriginalArtist?: string;
+    /**
+     * Indicates whether the track is owned by the user for MRI sake
+     * @type {boolean}
+     * @memberof Track
+     */
+    isOwnedByUser: boolean;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    stream: UrlWithMirrors;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    download: UrlWithMirrors;
+    /**
+     * 
+     * @type {UrlWithMirrors}
+     * @memberof Track
+     */
+    preview: UrlWithMirrors;
 }
 
 /**
@@ -224,6 +613,7 @@ export function instanceOfTrack(value: object): value is Track {
     isInstance = isInstance && "genre" in value && value["genre"] !== undefined;
     isInstance = isInstance && "id" in value && value["id"] !== undefined;
     isInstance = isInstance && "isOriginalAvailable" in value && value["isOriginalAvailable"] !== undefined;
+    isInstance = isInstance && "remixOf" in value && value["remixOf"] !== undefined;
     isInstance = isInstance && "repostCount" in value && value["repostCount"] !== undefined;
     isInstance = isInstance && "favoriteCount" in value && value["favoriteCount"] !== undefined;
     isInstance = isInstance && "commentCount" in value && value["commentCount"] !== undefined;
@@ -233,6 +623,29 @@ export function instanceOfTrack(value: object): value is Track {
     isInstance = isInstance && "isDownloadable" in value && value["isDownloadable"] !== undefined;
     isInstance = isInstance && "playCount" in value && value["playCount"] !== undefined;
     isInstance = isInstance && "permalink" in value && value["permalink"] !== undefined;
+    isInstance = isInstance && "access" in value && value["access"] !== undefined;
+    isInstance = isInstance && "blocknumber" in value && value["blocknumber"] !== undefined;
+    isInstance = isInstance && "coverArtSizes" in value && value["coverArtSizes"] !== undefined;
+    isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
+    isInstance = isInstance && "fieldVisibility" in value && value["fieldVisibility"] !== undefined;
+    isInstance = isInstance && "followeeReposts" in value && value["followeeReposts"] !== undefined;
+    isInstance = isInstance && "hasCurrentUserReposted" in value && value["hasCurrentUserReposted"] !== undefined;
+    isInstance = isInstance && "isScheduledRelease" in value && value["isScheduledRelease"] !== undefined;
+    isInstance = isInstance && "isUnlisted" in value && value["isUnlisted"] !== undefined;
+    isInstance = isInstance && "hasCurrentUserSaved" in value && value["hasCurrentUserSaved"] !== undefined;
+    isInstance = isInstance && "followeeFavorites" in value && value["followeeFavorites"] !== undefined;
+    isInstance = isInstance && "routeId" in value && value["routeId"] !== undefined;
+    isInstance = isInstance && "trackSegments" in value && value["trackSegments"] !== undefined;
+    isInstance = isInstance && "updatedAt" in value && value["updatedAt"] !== undefined;
+    isInstance = isInstance && "userId" in value && value["userId"] !== undefined;
+    isInstance = isInstance && "isDelete" in value && value["isDelete"] !== undefined;
+    isInstance = isInstance && "isAvailable" in value && value["isAvailable"] !== undefined;
+    isInstance = isInstance && "isStreamGated" in value && value["isStreamGated"] !== undefined;
+    isInstance = isInstance && "isDownloadGated" in value && value["isDownloadGated"] !== undefined;
+    isInstance = isInstance && "isOwnedByUser" in value && value["isOwnedByUser"] !== undefined;
+    isInstance = isInstance && "stream" in value && value["stream"] !== undefined;
+    isInstance = isInstance && "download" in value && value["download"] !== undefined;
+    isInstance = isInstance && "preview" in value && value["preview"] !== undefined;
 
     return isInstance;
 }
@@ -257,9 +670,8 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'origFilename': !exists(json, 'orig_filename') ? undefined : json['orig_filename'],
         'isOriginalAvailable': json['is_original_available'],
         'mood': !exists(json, 'mood') ? undefined : json['mood'],
-        'releaseDate': !exists(json, 'release_date') ? undefined : json['release_date'],
-        'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
-        'remixOf': !exists(json, 'remix_of') ? undefined : RemixParentFromJSON(json['remix_of']),
+        'releaseDate': !exists(json, 'release_date') ? undefined : (new Date(json['release_date'])),
+        'remixOf': RemixParentFromJSON(json['remix_of']),
         'repostCount': json['repost_count'],
         'favoriteCount': json['favorite_count'],
         'commentCount': json['comment_count'],
@@ -275,6 +687,60 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'playlistsContainingTrack': !exists(json, 'playlists_containing_track') ? undefined : json['playlists_containing_track'],
         'pinnedCommentId': !exists(json, 'pinned_comment_id') ? undefined : json['pinned_comment_id'],
         'albumBacklink': !exists(json, 'album_backlink') ? undefined : AlbumBacklinkFromJSON(json['album_backlink']),
+        'access': AccessFromJSON(json['access']),
+        'blocknumber': json['blocknumber'],
+        'createDate': !exists(json, 'create_date') ? undefined : json['create_date'],
+        'coverArtSizes': json['cover_art_sizes'],
+        'coverArtCids': !exists(json, 'cover_art_cids') ? undefined : CoverArtFromJSON(json['cover_art_cids']),
+        'createdAt': json['created_at'],
+        'creditsSplits': !exists(json, 'credits_splits') ? undefined : json['credits_splits'],
+        'isrc': !exists(json, 'isrc') ? undefined : json['isrc'],
+        'license': !exists(json, 'license') ? undefined : json['license'],
+        'iswc': !exists(json, 'iswc') ? undefined : json['iswc'],
+        'fieldVisibility': FieldVisibilityFromJSON(json['field_visibility']),
+        'followeeReposts': ((json['followee_reposts'] as Array<any>).map(RepostFromJSON)),
+        'hasCurrentUserReposted': json['has_current_user_reposted'],
+        'isScheduledRelease': json['is_scheduled_release'],
+        'isUnlisted': json['is_unlisted'],
+        'hasCurrentUserSaved': json['has_current_user_saved'],
+        'followeeFavorites': ((json['followee_favorites'] as Array<any>).map(FavoriteFromJSON)),
+        'routeId': json['route_id'],
+        'stemOf': !exists(json, 'stem_of') ? undefined : StemParentFromJSON(json['stem_of']),
+        'trackSegments': ((json['track_segments'] as Array<any>).map(TrackSegmentFromJSON)),
+        'updatedAt': json['updated_at'],
+        'userId': json['user_id'],
+        'isDelete': json['is_delete'],
+        'coverArt': !exists(json, 'cover_art') ? undefined : json['cover_art'],
+        'isAvailable': json['is_available'],
+        'aiAttributionUserId': !exists(json, 'ai_attribution_user_id') ? undefined : json['ai_attribution_user_id'],
+        'allowedApiKeys': !exists(json, 'allowed_api_keys') ? undefined : json['allowed_api_keys'],
+        'audioUploadId': !exists(json, 'audio_upload_id') ? undefined : json['audio_upload_id'],
+        'previewStartSeconds': !exists(json, 'preview_start_seconds') ? undefined : json['preview_start_seconds'],
+        'bpm': !exists(json, 'bpm') ? undefined : json['bpm'],
+        'isCustomBpm': !exists(json, 'is_custom_bpm') ? undefined : json['is_custom_bpm'],
+        'musicalKey': !exists(json, 'musical_key') ? undefined : json['musical_key'],
+        'isCustomMusicalKey': !exists(json, 'is_custom_musical_key') ? undefined : json['is_custom_musical_key'],
+        'audioAnalysisErrorCount': !exists(json, 'audio_analysis_error_count') ? undefined : json['audio_analysis_error_count'],
+        'commentsDisabled': !exists(json, 'comments_disabled') ? undefined : json['comments_disabled'],
+        'ddexReleaseIds': !exists(json, 'ddex_release_ids') ? undefined : json['ddex_release_ids'],
+        'artists': !exists(json, 'artists') ? undefined : json['artists'],
+        'resourceContributors': !exists(json, 'resource_contributors') ? undefined : (json['resource_contributors'] === null ? null : (json['resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'indirectResourceContributors': !exists(json, 'indirect_resource_contributors') ? undefined : (json['indirect_resource_contributors'] === null ? null : (json['indirect_resource_contributors'] as Array<any>).map(DdexResourceContributorFromJSON)),
+        'rightsController': !exists(json, 'rights_controller') ? undefined : DdexRightsControllerFromJSON(json['rights_controller']),
+        'copyrightLine': !exists(json, 'copyright_line') ? undefined : DdexCopyrightFromJSON(json['copyright_line']),
+        'producerCopyrightLine': !exists(json, 'producer_copyright_line') ? undefined : DdexCopyrightFromJSON(json['producer_copyright_line']),
+        'parentalWarningType': !exists(json, 'parental_warning_type') ? undefined : json['parental_warning_type'],
+        'isStreamGated': json['is_stream_gated'],
+        'accessAuthorities': !exists(json, 'access_authorities') ? undefined : json['access_authorities'],
+        'streamConditions': !exists(json, 'stream_conditions') ? undefined : AccessGateFromJSON(json['stream_conditions']),
+        'isDownloadGated': json['is_download_gated'],
+        'downloadConditions': !exists(json, 'download_conditions') ? undefined : AccessGateFromJSON(json['download_conditions']),
+        'coverOriginalSongTitle': !exists(json, 'cover_original_song_title') ? undefined : json['cover_original_song_title'],
+        'coverOriginalArtist': !exists(json, 'cover_original_artist') ? undefined : json['cover_original_artist'],
+        'isOwnedByUser': json['is_owned_by_user'],
+        'stream': UrlWithMirrorsFromJSON(json['stream']),
+        'download': UrlWithMirrorsFromJSON(json['download']),
+        'preview': UrlWithMirrorsFromJSON(json['preview']),
     };
 }
 
@@ -297,8 +763,7 @@ export function TrackToJSON(value?: Track | null): any {
         'orig_filename': value.origFilename,
         'is_original_available': value.isOriginalAvailable,
         'mood': value.mood,
-        'release_date': value.releaseDate,
-        'isrc': value.isrc,
+        'release_date': value.releaseDate === undefined ? undefined : (value.releaseDate.toISOString().substr(0,10)),
         'remix_of': RemixParentToJSON(value.remixOf),
         'repost_count': value.repostCount,
         'favorite_count': value.favoriteCount,
@@ -315,6 +780,60 @@ export function TrackToJSON(value?: Track | null): any {
         'playlists_containing_track': value.playlistsContainingTrack,
         'pinned_comment_id': value.pinnedCommentId,
         'album_backlink': AlbumBacklinkToJSON(value.albumBacklink),
+        'access': AccessToJSON(value.access),
+        'blocknumber': value.blocknumber,
+        'create_date': value.createDate,
+        'cover_art_sizes': value.coverArtSizes,
+        'cover_art_cids': CoverArtToJSON(value.coverArtCids),
+        'created_at': value.createdAt,
+        'credits_splits': value.creditsSplits,
+        'isrc': value.isrc,
+        'license': value.license,
+        'iswc': value.iswc,
+        'field_visibility': FieldVisibilityToJSON(value.fieldVisibility),
+        'followee_reposts': ((value.followeeReposts as Array<any>).map(RepostToJSON)),
+        'has_current_user_reposted': value.hasCurrentUserReposted,
+        'is_scheduled_release': value.isScheduledRelease,
+        'is_unlisted': value.isUnlisted,
+        'has_current_user_saved': value.hasCurrentUserSaved,
+        'followee_favorites': ((value.followeeFavorites as Array<any>).map(FavoriteToJSON)),
+        'route_id': value.routeId,
+        'stem_of': StemParentToJSON(value.stemOf),
+        'track_segments': ((value.trackSegments as Array<any>).map(TrackSegmentToJSON)),
+        'updated_at': value.updatedAt,
+        'user_id': value.userId,
+        'is_delete': value.isDelete,
+        'cover_art': value.coverArt,
+        'is_available': value.isAvailable,
+        'ai_attribution_user_id': value.aiAttributionUserId,
+        'allowed_api_keys': value.allowedApiKeys,
+        'audio_upload_id': value.audioUploadId,
+        'preview_start_seconds': value.previewStartSeconds,
+        'bpm': value.bpm,
+        'is_custom_bpm': value.isCustomBpm,
+        'musical_key': value.musicalKey,
+        'is_custom_musical_key': value.isCustomMusicalKey,
+        'audio_analysis_error_count': value.audioAnalysisErrorCount,
+        'comments_disabled': value.commentsDisabled,
+        'ddex_release_ids': value.ddexReleaseIds,
+        'artists': value.artists,
+        'resource_contributors': value.resourceContributors === undefined ? undefined : (value.resourceContributors === null ? null : (value.resourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'indirect_resource_contributors': value.indirectResourceContributors === undefined ? undefined : (value.indirectResourceContributors === null ? null : (value.indirectResourceContributors as Array<any>).map(DdexResourceContributorToJSON)),
+        'rights_controller': DdexRightsControllerToJSON(value.rightsController),
+        'copyright_line': DdexCopyrightToJSON(value.copyrightLine),
+        'producer_copyright_line': DdexCopyrightToJSON(value.producerCopyrightLine),
+        'parental_warning_type': value.parentalWarningType,
+        'is_stream_gated': value.isStreamGated,
+        'access_authorities': value.accessAuthorities,
+        'stream_conditions': AccessGateToJSON(value.streamConditions),
+        'is_download_gated': value.isDownloadGated,
+        'download_conditions': AccessGateToJSON(value.downloadConditions),
+        'cover_original_song_title': value.coverOriginalSongTitle,
+        'cover_original_artist': value.coverOriginalArtist,
+        'is_owned_by_user': value.isOwnedByUser,
+        'stream': UrlWithMirrorsToJSON(value.stream),
+        'download': UrlWithMirrorsToJSON(value.download),
+        'preview': UrlWithMirrorsToJSON(value.preview),
     };
 }
 

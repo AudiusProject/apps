@@ -31,16 +31,17 @@ export type AuthService = {
   signIn: (
     email: string,
     password: string,
-    visitorId?: string,
     otp?: string
   ) => Promise<SignInResponse>
   signOut: () => Promise<void>
   resetPassword: ({
     username,
-    password
+    password,
+    oldLookupKey
   }: {
     username: string
     password: string
+    oldLookupKey?: string
   }) => Promise<void>
   getWallet: () => EthWallet | null
   generateRecoveryInfo: () => Promise<{ login: string; host: string }>
@@ -60,17 +61,11 @@ export const createAuthService = ({
     createKey
   })
 
-  const signIn = async (
-    email: string,
-    password: string,
-    visitorId?: string,
-    otp?: string
-  ) => {
+  const signIn = async (email: string, password: string, otp?: string) => {
     const wallet = await hedgehogInstance.login({
       email,
       username: email,
       password,
-      visitorId,
       otp
     })
 
@@ -84,12 +79,18 @@ export const createAuthService = ({
 
   const resetPassword = async ({
     username,
-    password
+    password,
+    oldLookupKey
   }: {
     username: string
     password: string
+    oldLookupKey?: string
   }) => {
-    return hedgehogInstance.resetPassword({ username, password })
+    return hedgehogInstance.resetPassword({
+      username,
+      password,
+      oldLookupKey
+    })
   }
 
   const generateRecoveryInfo = async () => {

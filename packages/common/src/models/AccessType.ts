@@ -3,7 +3,7 @@ export enum AccessType {
   HIDDEN = 'hidden',
   PREMIUM = 'premium',
   PREMIUM_EXTRAS = 'premium_extras',
-  SPECIAL_ACCESS = 'special_access',
+  FOLLOW_GATED = 'follow_gated',
   EXTRAS = 'extras',
   TOKEN_GATED = 'token_gated'
 }

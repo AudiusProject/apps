@@ -3,7 +3,8 @@ import { useMemo } from 'react'
 import {
   useCurrentUserId,
   useUserAlbums,
-  useCurrentAccountUser
+  useCurrentAccountUser,
+  useUserTracksByHandle
 } from '@audius/common/api'
 import {
   Collection,
@@ -13,14 +14,11 @@ import {
 } from '@audius/common/models'
 import {
   IconCart,
-  IconSparkles,
+  IconUserFollowing,
   IconVisibilityHidden,
   IconVisibilityPublic
 } from '@audius/harmony'
-import { useSelector } from 'react-redux'
 import { Nullable } from 'vitest'
-
-import { makeGetDashboard } from '../store/selectors'
 
 import {
   AlbumFilters,
@@ -29,10 +27,12 @@ import {
   TrackFilters
 } from './types'
 
+const DASHBOARD_TRACKS_PAGE_SIZE = 50
+
 const messages = {
   public: 'Public',
   premium: 'Premium',
-  specialAcess: 'SpecialAccess',
+  followersOnly: 'Followers Only',
   gated: 'Gated',
   hidden: 'Hidden'
 }
@@ -53,12 +53,27 @@ const formatTrackMetadata = (metadata: Track, i: number): DataSourceTrack => {
   }
 }
 
-/** Returns the logged-in user's tracks, formatted for Artist Dashboard tracks table */
+/** Returns the logged-in user's tracks (including hidden), formatted for the
+ * Artist Dashboard tracks table. Download counts are not shown per-row; total
+ * downloads are in the stats tile only.
+ *
+ * Backed by `useUserTracksByHandle` with `filterTracks: 'all'` — replaces the
+ * legacy `dashboardActions.fetch/fetchTracks` saga + slice state.
+ */
 export const useFormattedTrackData = () => {
   const { data: accountUser } = useCurrentAccountUser()
-  const { tracks } = useSelector(makeGetDashboard(accountUser))
+  const handle = accountUser?.handle
+  const { data: tracks } = useUserTracksByHandle(
+    {
+      handle,
+      filterTracks: 'all',
+      limit: DASHBOARD_TRACKS_PAGE_SIZE,
+      offset: 0
+    },
+    { enabled: !!handle }
+  )
   const tracksFormatted = useMemo(() => {
-    return tracks
+    return (tracks ?? [])
       .map((track: Track, i: number) => formatTrackMetadata(track, i))
       .filter((meta) => !meta.is_invalid)
   }, [tracks])
@@ -67,7 +82,7 @@ export const useFormattedTrackData = () => {
 
 /**
  * Returns a set of arrays that contain the logged-in user's tracks filtered by
- * whether the tracks are public, special access, hidden, or premium.
+ * whether the tracks are public, follow-gated, hidden, or premium.
  * Also returns a boolean indicating whether the user has only one type of track.
  */
 const useSegregatedTrackData = () => {
@@ -75,14 +90,14 @@ const useSegregatedTrackData = () => {
   const {
     hasOnlyOneSection,
     publicTracks,
-    specialAccessTracks,
+    followGatedTracks,
     hiddenTracks,
     premiumTracks
   } = useMemo(() => {
     const publicTracks = tracks.filter(
       (data) => data.is_unlisted === false && !data.is_stream_gated
     )
-    const specialAccessTracks = tracks.filter(
+    const followGatedTracks = tracks.filter(
       (data) =>
         data.is_stream_gated && isContentFollowGated(data.stream_conditions)
     )
@@ -95,7 +110,7 @@ const useSegregatedTrackData = () => {
 
     const arrays = [
       publicTracks,
-      specialAccessTracks,
+      followGatedTracks,
       hiddenTracks,
       premiumTracks
     ]
@@ -105,7 +120,7 @@ const useSegregatedTrackData = () => {
     return {
       hasOnlyOneSection,
       publicTracks,
-      specialAccessTracks,
+      followGatedTracks,
       hiddenTracks,
       premiumTracks
     }
@@ -114,7 +129,7 @@ const useSegregatedTrackData = () => {
   return {
     hasOnlyOneSection,
     publicTracks,
-    specialAccessTracks,
+    followGatedTracks,
     hiddenTracks,
     premiumTracks
   }
@@ -131,7 +146,7 @@ export const useFilteredTrackData = ({
   filterText: string
 }) => {
   const tracks = useFormattedTrackData()
-  const { publicTracks, specialAccessTracks, hiddenTracks, premiumTracks } =
+  const { publicTracks, followGatedTracks, hiddenTracks, premiumTracks } =
     useSegregatedTrackData()
 
   const filteredData = useMemo(() => {
@@ -143,8 +158,8 @@ export const useFilteredTrackData = ({
       case TrackFilters.PREMIUM:
         filteredData = premiumTracks
         break
-      case TrackFilters.SPECIAL_ACCESS:
-        filteredData = specialAccessTracks
+      case TrackFilters.FOLLOW_GATED:
+        filteredData = followGatedTracks
         break
       case TrackFilters.HIDDEN:
         filteredData = hiddenTracks
@@ -167,7 +182,7 @@ export const useFilteredTrackData = ({
     premiumTracks,
     publicTracks,
     selectedFilter,
-    specialAccessTracks,
+    followGatedTracks,
     tracks
   ])
 
@@ -179,12 +194,8 @@ export const useFilteredTrackData = ({
  * the "hidden" option will only be available if the user has hidden tracks.
  */
 export const useArtistDashboardTrackFilters = () => {
-  const {
-    specialAccessTracks,
-    hiddenTracks,
-    premiumTracks,
-    hasOnlyOneSection
-  } = useSegregatedTrackData()
+  const { followGatedTracks, hiddenTracks, premiumTracks, hasOnlyOneSection } =
+    useSegregatedTrackData()
 
   const filterButtonOptions = useMemo(() => {
     const filterButtonTrackOptions = [
@@ -203,12 +214,12 @@ export const useArtistDashboardTrackFilters = () => {
         value: TrackFilters.PREMIUM
       })
     }
-    if (specialAccessTracks.length) {
+    if (followGatedTracks.length) {
       filterButtonTrackOptions.push({
-        id: TrackFilters.SPECIAL_ACCESS,
-        label: messages.specialAcess,
-        icon: IconSparkles,
-        value: TrackFilters.SPECIAL_ACCESS
+        id: TrackFilters.FOLLOW_GATED,
+        label: messages.followersOnly,
+        icon: IconUserFollowing,
+        value: TrackFilters.FOLLOW_GATED
       })
     }
     if (hiddenTracks.length) {
@@ -220,7 +231,7 @@ export const useArtistDashboardTrackFilters = () => {
       })
     }
     return filterButtonTrackOptions
-  }, [hiddenTracks, premiumTracks, specialAccessTracks])
+  }, [hiddenTracks, premiumTracks, followGatedTracks])
 
   return { filterButtonOptions, hasOnlyOneSection }
 }

@@ -10,7 +10,7 @@ import type { TokenLimits, TokenLimitInput } from '../types/swap.types'
  * Calculates min/max token amounts based on USD limits and current token price
  * For stablecoins, assumes 1:1 parity with USD
  * For SOL, uses very small minimum (0.000001) since it's expensive
- * For artist coins, uses minimum of 1 since they're very cheap
+ * For fan clubs, uses minimum of 1 since they're very cheap
  * For other tokens, converts USD limits using current price
  */
 export const calculateTokenLimits = (
@@ -34,13 +34,13 @@ export const calculateTokenLimits = (
     if (isSOL) {
       // SOL is expensive, use very small minimum
       return {
-        min: 0.000001, // Same as artist coins launchpad
+        min: 0.000001, // Same as fan clubs launchpad
         max: 1000000
       }
     } else {
-      // Artist coins are cheap, use minimum of 1
+      // Fan clubs are cheap, use minimum of 1
       return {
-        min: 1, // Artist coins are very cheap
+        min: 1, // Fan clubs are very cheap
         max: 1000000
       }
     }

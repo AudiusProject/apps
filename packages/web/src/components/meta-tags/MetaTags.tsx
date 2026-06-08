@@ -225,14 +225,16 @@ export const MetaTags = (props: MetaTagsProps) => {
         </Helmet>
       ) : null}
 
-      <Helmet encodeSpecialCharacters={false}>
-        <link
-          rel='alternate'
-          type='application/json+oembed'
-          href={`${env.AUDIUS_URL}/oembed?url=${canonicalUrl}&format=json`}
-          title={formattedTitle}
-        />
-      </Helmet>
+      {canonicalUrl ? (
+        <Helmet encodeSpecialCharacters={false}>
+          <link
+            rel='alternate'
+            type='application/json+oembed'
+            href={`${env.AUDIUS_URL}/oembed?url=${canonicalUrl}&format=json`}
+            title={formattedTitle}
+          />
+        </Helmet>
+      ) : null}
     </>
   )
 }

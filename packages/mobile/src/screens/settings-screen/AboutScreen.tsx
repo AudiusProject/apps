@@ -1,6 +1,9 @@
+import { useEffect, useRef, useState } from 'react'
+
 import { route } from '@audius/common/utils'
 import { COPYRIGHT_TEXT } from '@audius/web/src/utils/copyright'
-import { View, Image } from 'react-native'
+import CodePush from '@bravemobile/react-native-code-push'
+import { View, Image, Pressable } from 'react-native'
 
 import {
   IconMessage,
@@ -11,6 +14,7 @@ import {
 } from '@audius/harmony-native'
 import appIcon from 'app/assets/images/appIcon.png'
 import { Screen, ScreenContent, Text } from 'app/components/core'
+import { OtaAboutDiagnostics } from 'app/components/ota-about-diagnostics/OtaAboutDiagnostics'
 import { makeStyles } from 'app/styles'
 
 import packageInfo from '../../../package.json'
@@ -25,6 +29,8 @@ const messages = {
   title: 'About',
   appName: 'Audius Music',
   version: 'Audius Version',
+  /** Shown after app version when a CodePush OTA bundle is running (e.g. " · OTA v3"). */
+  ota: 'OTA',
   copyright: COPYRIGHT_TEXT,
   discord: 'Join our community on Discord',
   x: 'Follow us on X',
@@ -50,8 +56,52 @@ const useStyles = makeStyles(({ spacing }) => ({
   }
 }))
 
+const VERSION_TAP_WINDOW_MS = 2500
+const VERSION_TAPS_TO_TOGGLE_OTA = 7
+
 export const AboutScreen = () => {
   const styles = useStyles()
+  const [otaLabel, setOtaLabel] = useState<string | null>(null)
+  const [showOtaDiagnostics, setShowOtaDiagnostics] = useState(false)
+  const versionTapRef = useRef({ count: 0, at: 0 })
+
+  const onVersionLinePress = () => {
+    const now = Date.now()
+    if (now - versionTapRef.current.at > VERSION_TAP_WINDOW_MS) {
+      versionTapRef.current.count = 0
+    }
+    versionTapRef.current.at = now
+    versionTapRef.current.count += 1
+    if (versionTapRef.current.count >= VERSION_TAPS_TO_TOGGLE_OTA) {
+      versionTapRef.current.count = 0
+      setShowOtaDiagnostics((v) => !v)
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    const loadOtaLabel = async () => {
+      try {
+        const pkg = await CodePush.getUpdateMetadata(
+          CodePush.UpdateState.RUNNING
+        )
+        if (!cancelled && pkg?.label) {
+          setOtaLabel(pkg.label)
+        }
+      } catch {
+        // CodePush may be unavailable in some environments; keep base version only.
+      }
+    }
+    loadOtaLabel().catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const versionLine =
+    otaLabel != null
+      ? `${messages.version} ${appVersion} · ${messages.ota} ${otaLabel}`
+      : `${messages.version} ${appVersion}`
 
   return (
     <Screen variant='secondary' title={messages.title} topbarRight={null}>
@@ -60,12 +110,13 @@ export const AboutScreen = () => {
           <Image source={appIcon} style={styles.appIcon} />
           <View>
             <Text variant='h2'>{messages.appName}</Text>
-            <Text variant='body2'>
-              {messages.version} {appVersion}
-            </Text>
+            <Pressable onPress={onVersionLinePress} accessibilityRole='text'>
+              <Text variant='body2'>{versionLine}</Text>
+            </Pressable>
             <Text variant='body2'>{messages.copyright}</Text>
           </View>
         </View>
+        {showOtaDiagnostics ? <OtaAboutDiagnostics /> : null}
         <SettingsRow url={route.AUDIUS_DISCORD_LINK} firstItem>
           <SettingsRowLabel label={messages.discord} icon={IconDiscord} />
         </SettingsRow>

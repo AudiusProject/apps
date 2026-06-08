@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react'
 
 import { useUser } from '@audius/common/api'
 import {
-  CommentSectionProvider,
   useCurrentCommentSection,
   useDeleteComment,
   useUpdateCommentNotificationSetting,
@@ -238,8 +237,8 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
   }, [deleteComment, id, parentCommentId, toast])
 
   const handlePress = useCallback(() => {
-    setIsOpen(!isOpen)
-    setIsVisible(!isVisible)
+    setIsOpen(true)
+    setIsVisible(true)
 
     trackEvent(
       make({
@@ -247,7 +246,7 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
         commentId: id
       })
     )
-  }, [isOpen, isVisible, id])
+  }, [id])
 
   return (
     <>
@@ -262,14 +261,12 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
 
       <Portal hostName='DrawerPortal'>
         {isVisible ? (
-          <CommentSectionProvider entityId={entityId}>
-            <ActionDrawerWithoutRedux
-              rows={rows}
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
-              onClosed={() => setIsVisible(false)}
-            />
-          </CommentSectionProvider>
+          <ActionDrawerWithoutRedux
+            rows={rows}
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            onClosed={() => setIsVisible(false)}
+          />
         ) : null}
 
         {isFlagAndHideConfirmationVisible ? (

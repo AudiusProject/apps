@@ -4,6 +4,7 @@ import {
   formatCooldownChallenges,
   useChallengeCooldownSchedule
 } from '@audius/common/hooks'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   ClaimStatus,
   audioRewardsPageActions,
@@ -23,9 +24,9 @@ import {
   ProgressBar,
   Text
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { SummaryTable } from 'components/summary-table'
 import { ToastContext } from 'components/toast/ToastContext'
@@ -47,10 +48,17 @@ const { claimAllChallengeRewards, resetAndCancelClaimReward } =
   audioRewardsPageActions
 const { getClaimStatus } = audioRewardsPageSelectors
 
-export const ClaimAllRewardsModal = () => {
+export const ClaimAllRewardsModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
-  const [isOpen, setOpen] = useModalState('ClaimAllRewards')
+  const modal = useModal()
+  const isOpen = modal.visible
+  const setOpen = useCallback(
+    (open: boolean) => {
+      if (!open) modal.hide()
+    },
+    [modal]
+  )
   const claimStatus = useSelector(getClaimStatus)
   const { claimableAmount, claimableChallenges, cooldownChallenges, summary } =
     useChallengeCooldownSchedule({
@@ -189,4 +197,7 @@ export const ClaimAllRewardsModal = () => {
       </ModalContent>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ClaimAllRewards', ClaimAllRewardsModal)
+registerNiceModalId('ClaimAllRewards')

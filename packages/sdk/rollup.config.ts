@@ -1,5 +1,8 @@
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+
 import alias from '@rollup/plugin-alias'
-import babel from '@rollup/plugin-babel'
+import { babel } from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
@@ -9,7 +12,9 @@ import nodePolyfills from 'rollup-plugin-polyfill-node'
 import { terser } from 'rollup-plugin-terser'
 import { visualizer } from 'rollup-plugin-visualizer'
 
-import pkg from './package.json'
+const pkg = JSON.parse(
+  readFileSync(fileURLToPath(new URL('./package.json', import.meta.url)), 'utf-8')
+)
 
 const extensions = ['.js', '.ts']
 
@@ -38,52 +43,13 @@ const browserInternal = [
   'xmlhttprequest'
 ]
 
-/**
- * ES-only dependencies need inlining when outputting a Common JS bundle,
- * as requiring ES modules from Common JS isn't supported.
- * Alternatively, these modules could be imported using dynamic imports,
- * but that would have other side effects and affect each bundle output
- * vs only affecting Common JS outputs, and requires Rollup 3.0.
- *
- * TODO: Make a test to ensure we don't add external ES-only modules to Common JS output
- *
- * See:
- * - https://nodejs.org/api/esm.html#interoperability-with-commonjs
- * - https://github.com/rollup/plugins/issues/481#issuecomment-661622792
- * - https://github.com/rollup/rollup/pull/4647 (3.0 supports keeping dynamic imports)
- */
-const commonJsInternal = ['micro-aes-gcm']
-
 export const outputConfigs = {
   /**
-   * SDK (and Libs) Node Package (Common JS)
-   * Used by the Audius Content Node Service and Identity Service
-   * - Includes libs
-   * - Makes external ES modules internal to prevent issues w/ using require()
-   */
-  sdkConfigCjs: {
-    input: 'src/index.ts',
-    output: [
-      {
-        dir: 'dist',
-        format: 'cjs',
-        sourcemap: true,
-        entryFileNames: '[name].cjs.js'
-      }
-    ],
-    plugins: [
-      resolve({ extensions, preferBuiltins: true }),
-      commonjs({ extensions }),
-      babel({ babelHelpers: 'bundled', extensions }),
-      json(),
-      pluginTypescript
-    ],
-    external: external.filter((id) => !commonJsInternal.includes(id))
-  },
-
-  /**
-   * SDK Node Package (ES Module)
-   * Used by third parties using ES Modules
+   * SDK Node Package (ES Module + CommonJS)
+   * Used by third parties consuming the SDK from Node. The `.cjs` output is
+   * resolved via the `require` condition in package.json#exports so legacy
+   * Node consumers (and CJS-heavy stacks) can `require('@audius/sdk')`
+   * without hitting ESM/CJS interop edges on transitive deps.
    */
   sdkConfigEs: {
     input: 'src/index.ts',
@@ -93,6 +59,13 @@ export const outputConfigs = {
         format: 'es',
         sourcemap: true,
         entryFileNames: '[name].esm.js'
+      },
+      {
+        dir: 'dist',
+        format: 'cjs',
+        sourcemap: true,
+        entryFileNames: '[name].cjs',
+        exports: 'named'
       }
     ],
     plugins: [
@@ -110,7 +83,7 @@ export const outputConfigs = {
    * Used by the Audius React Native client
    */
   sdkConfigReactNative: {
-    input: 'src/sdk/index.ts',
+    input: { index: 'src/index.native.ts' },
     output: [
       {
         dir: 'dist',
@@ -134,59 +107,29 @@ export const outputConfigs = {
   },
 
   /**
-   * SDK Browser Package (Common JS)
-   * Possibly used by third parties
-   * - Includes polyfills for node libraries
-   * - Includes deps that are ignored or polyfilled for browser
-   * - Makes external ES modules internal to prevent issues w/ using require()
-   */
-  sdkBrowserConfigCjs: {
-    input: 'src/sdk/index.ts',
-    output: [
-      {
-        dir: 'dist',
-        format: 'cjs',
-        sourcemap: true,
-        entryFileNames: '[name].browser.cjs.js'
-      }
-    ],
-    plugins: [
-      ignore(['graceful-fs', 'node-localstorage']),
-      resolve({ extensions, preferBuiltins: false }),
-      commonjs({
-        extensions,
-        transformMixedEsModules: true
-      }),
-      alias({
-        entries: [
-          { find: 'stream', replacement: 'stream-browserify' },
-          { find: 'crypto', replacement: 'crypto-browserify' }
-        ]
-      }),
-      nodePolyfills(),
-      babel({ babelHelpers: 'bundled', extensions }),
-      json(),
-      pluginTypescript
-    ],
-    external: external.filter(
-      (dep) => !browserInternal.includes(dep) && !commonJsInternal.includes(dep)
-    )
-  },
-
-  /**
-   * SDK Browser Package (ES Module)
+   * SDK Browser Package (ES Module + CommonJS)
    * Used by the Audius Web Client and by extension the Desktop Client
    * - Includes polyfills for node libraries
    * - Includes deps that are ignored or polyfilled for browser
+   * The `.browser.cjs` output is resolved via the `browser`/`require`
+   * condition in package.json#exports so bundlers operating in CJS mode get
+   * the polyfilled build instead of the Node one.
    */
   sdkBrowserConfigEs: {
-    input: 'src/sdk/index.ts',
+    input: 'src/index.ts',
     output: [
       {
         dir: 'dist',
         format: 'es',
         sourcemap: true,
         entryFileNames: '[name].browser.esm.js'
+      },
+      {
+        dir: 'dist',
+        format: 'cjs',
+        sourcemap: true,
+        entryFileNames: '[name].browser.cjs',
+        exports: 'named'
       }
     ],
     plugins: [

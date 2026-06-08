@@ -1,5 +1,15 @@
-import { full, HashId, OptionalHashId } from '@audius/sdk'
-import dayjs from 'dayjs'
+import {
+  HashId,
+  OptionalHashId,
+  type Notification as SdkNotification,
+  RepostNotificationActionDataTypeEnum,
+  RepostOfRepostNotificationActionDataTypeEnum,
+  SaveNotificationActionDataTypeEnum,
+  SaveOfRepostNotificationActionDataTypeEnum,
+  instanceOfCreatePlaylistNotificationActionData,
+  instanceOfPlaylistMilestoneNotificationActionData,
+  instanceOfTrackMilestoneNotificationActionData
+} from '@audius/sdk'
 
 import { BadgeTier, type ID } from '~/models'
 import type { ChallengeRewardID } from '~/models/AudioRewards'
@@ -10,6 +20,7 @@ import {
   NotificationType,
   type Notification
 } from '~/store/notifications/types'
+import dayjs from '~/utils/dayjs'
 import { removeNullable } from '~/utils/typeUtils'
 
 const getTimeAgo = (date: number) => {
@@ -26,7 +37,7 @@ const getTimeAgo = (date: number) => {
   return 'A few moments ago'
 }
 
-function formatBaseNotification(notification: full.Notification) {
+function formatBaseNotification(notification: SdkNotification) {
   const timestamp = notification.actions[0].timestamp
   return {
     groupId: notification.groupId,
@@ -39,11 +50,10 @@ function formatBaseNotification(notification: full.Notification) {
 
 const toEntityType = (
   type:
-    | full.SaveOfRepostNotificationActionDataTypeEnum
-    | full.SaveNotificationActionDataTypeEnum
-    | full.RepostNotificationActionDataTypeEnum
-    | full.RepostOfRepostNotificationActionDataTypeEnum
-    | full.SaveOfRepostNotificationActionDataTypeEnum
+    | SaveOfRepostNotificationActionDataTypeEnum
+    | SaveNotificationActionDataTypeEnum
+    | RepostNotificationActionDataTypeEnum
+    | RepostOfRepostNotificationActionDataTypeEnum
 ) => {
   if (type === 'track') {
     return Entity.Track
@@ -60,7 +70,7 @@ const toEntityType = (
  * and other nuanced things on a per notification basis.
  */
 export const notificationFromSDK = (
-  notification: full.Notification
+  notification: SdkNotification
 ): Notification | undefined => {
   switch (notification.type) {
     case 'follow': {
@@ -200,7 +210,7 @@ export const notificationFromSDK = (
       const entityIds = notification.actions
         .map((action) => {
           const data = action.data
-          if (full.instanceOfCreatePlaylistNotificationActionData(data)) {
+          if (instanceOfCreatePlaylistNotificationActionData(data)) {
             entityType = data.isAlbum ? Entity.Album : Entity.Playlist
             // Future proofing for when playlistId is fixed to be a string
             return HashId.parse(
@@ -295,7 +305,7 @@ export const notificationFromSDK = (
     }
     case 'milestone': {
       const data = notification.actions[0].data
-      if (full.instanceOfTrackMilestoneNotificationActionData(data)) {
+      if (instanceOfTrackMilestoneNotificationActionData(data)) {
         let achievement: Achievement
         if (data.type === 'track_repost_count') {
           achievement = Achievement.Reposts
@@ -312,7 +322,7 @@ export const notificationFromSDK = (
           achievement,
           ...formatBaseNotification(notification)
         }
-      } else if (full.instanceOfPlaylistMilestoneNotificationActionData(data)) {
+      } else if (instanceOfPlaylistMilestoneNotificationActionData(data)) {
         let achievement: Achievement
         if (data.type === 'playlist_repost_count') {
           achievement = Achievement.Reposts
@@ -347,6 +357,7 @@ export const notificationFromSDK = (
         shortDescription: data.shortDescription,
         longDescription: data.longDescription,
         route: data.route,
+        notificationCampaignId: data.notificationCampaignId ?? undefined,
         ...formatBaseNotification(notification)
       }
     }
@@ -641,5 +652,57 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    case 'fan_club_text_post': {
+      const data = notification.actions[0].data
+      return {
+        type: NotificationType.FanClubTextPost,
+        entityUserId: HashId.parse(data.entityUserId),
+        commentId: HashId.parse(data.commentId),
+        ...formatBaseNotification(notification)
+      }
+    }
+    default:
+      // Types below may arrive before the SDK is regenerated
+      {
+        const n = notification as unknown as {
+          type: string
+          actions: typeof notification.actions
+        }
+        if (n.type === 'remix_contest_update') {
+          const data = n.actions[0].data as unknown as Record<string, string>
+          return {
+            type: NotificationType.RemixContestUpdate,
+            eventId: HashId.parse(data.eventId ?? data.event_id),
+            entityId: HashId.parse(data.entityId ?? data.entity_id),
+            entityUserId: HashId.parse(
+              data.entityUserId ?? data.entity_user_id
+            ),
+            commentId: HashId.parse(data.commentId ?? data.comment_id),
+            userIds: [],
+            entityType: Entity.Track,
+            ...formatBaseNotification(notification)
+          }
+        }
+        if (n.type === 'fan_remix_contest_submission') {
+          const data = n.actions[0].data as unknown as Record<string, string>
+          return {
+            type: NotificationType.FanRemixContestSubmission,
+            eventId: HashId.parse(data.eventId ?? data.event_id),
+            entityId: HashId.parse(data.entityId ?? data.entity_id),
+            entityUserId: HashId.parse(
+              data.entityUserId ?? data.entity_user_id
+            ),
+            submissionTrackId: HashId.parse(
+              data.submissionTrackId ?? data.submission_track_id
+            ),
+            userIds: [
+              HashId.parse(data.submitterUserId ?? data.submitter_user_id)
+            ].filter(removeNullable),
+            entityType: Entity.Track,
+            ...formatBaseNotification(notification)
+          }
+        }
+      }
+      return undefined
   }
 }

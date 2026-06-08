@@ -46,6 +46,10 @@
   justify-content: center;
 }
 
+.noArt .text {
+  margin-left: 0;
+}
+
 .trackTitle,
 .artistName {
   user-select: none;
@@ -69,7 +73,8 @@
 .trackTitleContainer {
   display: flex;
   gap: var(--harmony-unit-2);
-  width: 180px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .trackTitle {
@@ -94,4 +99,29 @@
   margin-left: 4px;
   position: relative;
   top: 1px;
+}
+
+/* Overlay (e.g. visualizer): full title and artist on one line each, no ellipsis */
+.fullTrackText {
+  width: max-content;
+  max-width: none;
+}
+
+.fullTrackText .text {
+  min-width: max-content;
+}
+
+.fullTrackText .trackTitleContainer {
+  width: max-content;
+  max-width: none;
+}
+
+.fullTrackText .trackTitle,
+.fullTrackText .artistName {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.fullTrackText .artistNameWrapper {
+  max-width: none;
 }

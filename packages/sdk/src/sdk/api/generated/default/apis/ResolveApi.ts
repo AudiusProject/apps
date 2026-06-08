@@ -2,8 +2,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 

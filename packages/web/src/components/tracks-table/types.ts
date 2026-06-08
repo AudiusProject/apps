@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 import { UserTrack, UID } from '@audius/common/models'
 
 import type { TableProps } from 'components/table/Table'
@@ -42,5 +44,7 @@ export type TracksTableProps = {
   onReorder?: (source: number, destination: number) => void
   onSort?: (...props: any[]) => void
   columns?: TracksTableColumn[]
+  showArtistInTrackNameColumn?: boolean
   onClickRow?: (track: TrackWithUID, index: number) => void
+  trackActionsHeader?: ReactNode
 } & Omit<TableProps, 'onClickRow' | 'columns'>

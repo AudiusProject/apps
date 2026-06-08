@@ -131,29 +131,19 @@ const Validator: React.FC<ValidatorProps> = ({
   const isOwner = accountWallet === validator?.owner
 
   return (
-    <>
-      <div className={styles.section}>
-        <NodeOverview
-          spID={spID}
-          serviceType={ServiceType.Validator}
-          version={validator?.version}
-          endpoint={validator?.endpoint}
-          operatorWallet={validator?.owner}
-          delegateOwnerWallet={validator?.delegateOwnerWallet}
-          isOwner={isOwner}
-          isDeregistered={validator?.isDeregistered}
-          isLoading={status === Status.Loading}
-        />
-      </div>
-      {validator ? (
-        <div className={clsx(styles.section, styles.chart)}>
-          <IndividualNodeUptimeChart
-            nodeType={ServiceType.Validator}
-            node={validator.endpoint}
-          />
-        </div>
-      ) : null}
-    </>
+    <div className={styles.section}>
+      <NodeOverview
+        spID={spID}
+        serviceType={ServiceType.Validator}
+        version={validator?.version}
+        endpoint={validator?.endpoint}
+        operatorWallet={validator?.owner}
+        delegateOwnerWallet={validator?.delegateOwnerWallet}
+        isOwner={isOwner}
+        isDeregistered={validator?.isDeregistered}
+        isLoading={status === Status.Loading}
+      />
+    </div>
   )
 }
 

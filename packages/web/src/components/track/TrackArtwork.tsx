@@ -19,11 +19,11 @@ export const TrackArtwork = (props: TrackArtworkProps) => {
     size,
     flairSize = Size.LARGE,
     hideToolTip = false,
-    isLoading = false,
+    isLoading,
     ...other
   } = props
 
-  const imageSource = useTrackCoverArt({ trackId, size })
+  const { imageUrl: imageSource } = useTrackCoverArt({ trackId, size })
 
   const artworkElement = (
     <Artwork src={imageSource} isLoading={isLoading} {...other} />

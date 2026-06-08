@@ -3,20 +3,24 @@ import { memo } from 'react'
 import { useTrack } from '@audius/common/api'
 import { useGatedContentAccess } from '@audius/common/hooks'
 import { SquareSizes, Color, ID } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
+import {
+  createKeyboardActivationHandler,
+  Tooltip,
+  Image
+} from '@audius/harmony'
 import { animated, useSpring } from '@react-spring/web'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
 
 import { Draggable } from 'components/dragndrop'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import { fullTrackPage } from 'utils/route'
 
 import styles from './PlayingTrackInfo.module.css'
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 
 const messages = {
   preview: 'Preview'
@@ -35,6 +39,9 @@ interface PlayingTrackInfoProps {
   artistHandle: string
   hasShadow: boolean
   dominantColor?: Color
+  /** When true, title and artist wrap instead of single-line ellipsis (e.g. visualizer overlay). */
+  fullTrackText?: boolean
+  hideArt?: boolean
   onClickTrackTitle: () => void
   onClickArtistName: () => void
 }
@@ -58,9 +65,21 @@ const PlayingTrackInfo = ({
   isTrackUnlisted,
   isStreamGated,
   hasShadow,
-  dominantColor
+  dominantColor,
+  fullTrackText,
+  hideArt = false
 }: PlayingTrackInfoProps) => {
-  const { data: track } = useTrack(trackId)
+  const { data: track } = useTrack(trackId, {
+    select: (track) => ({
+      track_id: track?.track_id,
+      stream_conditions: track?.stream_conditions,
+      download_conditions: track?.download_conditions,
+      access: track?.access,
+      is_stream_gated: track?.is_stream_gated,
+      is_download_gated: track?.is_download_gated,
+      preview_cid: track?.preview_cid
+    })
+  })
   const { hasStreamAccess } = useGatedContentAccess(track)
   const isPreviewing = useSelector(getPreviewing)
   const shouldShowPreviewLock =
@@ -85,14 +104,22 @@ const PlayingTrackInfo = ({
   const renderTrackTitle = () => {
     return (
       <animated.div style={spring} className={styles.trackTitleContainer}>
-        <div
-          className={cn(styles.trackTitle, {
-            [styles.textShadow]: hasShadow
-          })}
-          onClick={onClickTrackTitle}
-        >
-          {trackTitle}
-        </div>
+        <Tooltip text={trackTitle} placement='top' mount='body'>
+          <div
+            className={cn(styles.trackTitle, {
+              [styles.textShadow]: hasShadow
+            })}
+            onClick={onClickTrackTitle}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickTrackTitle
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={`View track: ${trackTitle}`}
+          >
+            {trackTitle}
+          </div>
+        </Tooltip>
         {shouldShowPreviewLock ? (
           <LockedStatusBadge
             locked
@@ -107,18 +134,24 @@ const PlayingTrackInfo = ({
   }
 
   return (
-    <div className={styles.info}>
-      <div className={styles.profilePictureWrapper}>
-        <DynamicImage
-          image={profileImage}
-          onClick={onClickArtistName}
-          className={cn(styles.profilePicture, {
-            [styles.isDefault]: !!trackId
-          })}
-          imageStyle={boxShadowStyle}
-          usePlaceholder={false}
-        />
-      </div>
+    <div
+      className={cn(styles.info, {
+        [styles.fullTrackText]: fullTrackText,
+        [styles.noArt]: hideArt
+      })}
+    >
+      {!hideArt && (
+        <div className={styles.profilePictureWrapper}>
+          <Image
+            src={profileImage}
+            onClick={onClickArtistName}
+            className={cn(styles.profilePicture, {
+              [styles.isDefault]: !!trackId
+            })}
+            style={boxShadowStyle}
+          />
+        </div>
+      )}
       <div className={styles.text}>
         {isStreamGated ? (
           renderTrackTitle()
@@ -140,6 +173,12 @@ const PlayingTrackInfo = ({
               [styles.textShadow]: hasShadow
             })}
             onClick={onClickArtistName}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickArtistName
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={`View artist: ${artistName}`}
           >
             {artistName}
           </div>

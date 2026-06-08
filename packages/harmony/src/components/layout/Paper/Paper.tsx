@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 
 import { useTheme } from '@emotion/react'
 
+import { createKeyboardActivationHandler } from '../../../utils/keyboard'
 import { Flex } from '../Flex'
 
 import type { PaperProps } from './types'
@@ -18,7 +19,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
     ...other
   } = props
 
-  const { onClick } = other
+  const { onClick, onKeyDown } = other
 
   const { shadows, motion } = useTheme()
 
@@ -33,12 +34,21 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
       transform: 'scale(1.01)',
       boxShadow: shadows.far
     },
+    '&:focus-visible': {
+      outline: '2px solid var(--harmony-focus, var(--harmony-secondary))',
+      outlineOffset: '3px'
+    },
     '&:active': {
       transform: 'scale(0.995)',
       boxShadow: shadows.near,
       transition: motion.press
     }
   }
+
+  const handleKeyDown = createKeyboardActivationHandler<HTMLDivElement>({
+    onKeyDown,
+    onActivate: (event) => event.currentTarget.click()
+  })
 
   return (
     <Flex
@@ -50,6 +60,7 @@ export const Paper = forwardRef<HTMLDivElement, PaperProps>((props, ref) => {
       tabIndex={onClick ? 0 : undefined}
       ref={ref}
       {...other}
+      onKeyDown={onClick ? handleKeyDown : onKeyDown}
     />
   )
 })

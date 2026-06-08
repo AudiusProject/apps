@@ -134,7 +134,11 @@ export const AddToCollectionDrawer = () => {
               )
             } else {
               toast({ content: messages.addedToast })
-              dispatch(addTrackToPlaylist(trackId, item.playlist_id))
+              dispatch(
+                addTrackToPlaylist(trackId, item.playlist_id, {
+                  silent: true
+                })
+              )
             }
             onClose()
           }}

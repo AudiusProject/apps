@@ -71,6 +71,8 @@ export default defineConfig(async ({ mode }) => {
       include: [
         'react',
         'react-dom',
+        'butterchurn',
+        'butterchurn-presets',
         ...(env.VITE_ENV === 'production' ? ['@audius/sdk'] : [])
       ],
       dedupe: ['react', 'react-dom'],
@@ -146,6 +148,14 @@ export default defineConfig(async ({ mode }) => {
       conditions: [...defaultClientConditions],
       dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
       alias: {
+        // Force chart.js v4 from this package's node_modules. The root
+        // workspace also resolves chart.js v2 (protocol-dashboard), and
+        // chartjs-adapter-dayjs-4 hoists to root, so its `chart.js` import
+        // would otherwise pick up v2 and silently break the date adapter.
+        'chart.js': path.resolve(
+          __dirname,
+          'node_modules/chart.js'
+        ),
         // Ensure single React instance to prevent ReactCurrentDispatcher errors
         ...(!ssr
           ? {
@@ -231,7 +241,17 @@ export default defineConfig(async ({ mode }) => {
           }
         }
       },
-      exclude: ['e2e', 'node_modules', 'dist'],
+      // Patterns must be globs — bare strings like `'node_modules'`
+      // were matching only top-level paths, so nested
+      // `examples/trending/node_modules/**/*.test.*` files were
+      // getting picked up and run against happy-dom (where they
+      // network out and fail). Match the vitest defaults shape.
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/e2e/**',
+        '**/examples/**'
+      ],
       threads: false,
       minWorkers: 1,
       maxWorkers: 1, // Segfaults if multithreaded

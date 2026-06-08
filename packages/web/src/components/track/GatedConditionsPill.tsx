@@ -1,14 +1,11 @@
 import { useCallback, type MouseEvent } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
 import {
   isContentUSDCPurchaseGated,
   AccessConditions,
   Name,
-  isContentTokenGated,
-  TokenGatedConditions
+  isContentTokenGated
 } from '@audius/common/models'
-import { useBuySellModal } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import { Button, ButtonSize, IconLock } from '@audius/harmony'
 
@@ -17,7 +14,7 @@ import { make, track } from 'services/analytics'
 const messages = {
   unlocking: 'Unlocking',
   locked: 'Locked',
-  buyArtistCoin: 'Buy Artist Coin'
+  unlock: 'Unlock'
 }
 
 export const GatedConditionsPill = ({
@@ -50,23 +47,14 @@ export const GatedConditionsPill = ({
     message = isPurchase
       ? USDC(streamConditions.usdc_purchase.price / 100).toLocaleString()
       : isTokenGated
-        ? messages.buyArtistCoin
+        ? messages.unlock
         : messages.locked
   }
-
-  const { data: token } = useArtistCoin(
-    (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
-    { enabled: isTokenGated }
-  )
-
-  const { onOpen: openBuySellModal } = useBuySellModal()
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
-      if (isTokenGated) {
-        openBuySellModal({ isOpen: true, ticker: token?.ticker })
-      } else {
+      if (!isTokenGated) {
         track(
           make({
             eventName: Name.PURCHASE_CONTENT_BUY_CLICKED,
@@ -74,25 +62,34 @@ export const GatedConditionsPill = ({
             contentType
           })
         )
-        onClick?.(e)
       }
+      onClick?.(e)
     },
-    [
-      contentId,
-      contentType,
-      isTokenGated,
-      onClick,
-      openBuySellModal,
-      token?.ticker
-    ]
+    [contentId, contentType, isTokenGated, onClick]
   )
+
+  if (isTokenGated) {
+    return (
+      <Button
+        className={className}
+        variant='secondary'
+        size='small'
+        rounded
+        onClick={handleClick}
+        isLoading={unlocking}
+        css={{ height: '24px' }}
+      >
+        {message}
+      </Button>
+    )
+  }
 
   return (
     <Button
       className={className}
       size={buttonSize}
       onClick={handleClick}
-      color={isPurchase ? 'lightGreen' : isTokenGated ? 'coinGradient' : 'blue'}
+      color={isPurchase ? 'lightGreen' : 'blue'}
       isLoading={unlocking}
       iconLeft={showIcon ? IconLock : undefined}
       // TODO: Add 'xs' button size in harmony

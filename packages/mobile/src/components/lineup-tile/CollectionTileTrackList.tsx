@@ -1,6 +1,8 @@
-import type { UID, LineupTrack } from '@audius/common/models'
+import type { CollectionTrack } from '@audius/common/api'
+import { useUser } from '@audius/common/api'
+import type { ID } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import { pluralize } from '@audius/common/utils'
 import { range } from 'lodash'
 import { Pressable, Text, View } from 'react-native'
@@ -10,7 +12,7 @@ import { Box } from '@audius/harmony-native'
 import Skeleton from 'app/components/skeleton'
 import { flexRowCentered, makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
-const { getUid } = playerSelectors
+const { getTrackId } = playbackSelectors
 
 // Max number of tracks to display
 const DISPLAY_TRACK_COUNT = 5
@@ -23,8 +25,9 @@ const messages = {
 type LineupTileTrackListProps = {
   isLoading?: boolean
   onPress: GestureResponderHandler
+  onPressWithPropagationBlock?: () => void
   trackCount: number
-  tracks: LineupTrack[]
+  tracks: CollectionTrack[]
   isAlbum: boolean
 }
 
@@ -76,18 +79,27 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
 type TrackItemProps = {
   showSkeleton?: boolean
   index: number
-  track?: LineupTrack
-  uid?: UID
+  track?: CollectionTrack
+  trackId?: ID
   isAlbum?: boolean
   deleted?: boolean
 }
 
 const TrackItem = (props: TrackItemProps) => {
-  const { showSkeleton, index, track, uid, isAlbum, deleted } = props
+  const { showSkeleton, index, track, trackId, isAlbum, deleted } = props
   const styles = useStyles()
   const isPlayingUid = useSelector(
-    (state: CommonState) => getUid(state) === uid
+    (state: CommonState) => getTrackId(state) === trackId
   )
+  // Mirror the web mobile CollectionTile.TrackItem path exactly: tracks
+  // returned by `useOrderedCollectionTracks` are plain CollectionTrack /
+  // TrackMetadata (no joined `user`), so we fetch the owner's display name
+  // per row from the user cache. Hooks must run before any conditional
+  // returns; passing `undefined` to useUser when no track is present is
+  // safe (selector returns undefined).
+  const { data: trackOwnerName } = useUser(track?.owner_id, {
+    select: (user) => user?.name
+  })
   return (
     <>
       <View style={styles.divider} />
@@ -96,15 +108,39 @@ const TrackItem = (props: TrackItemProps) => {
           <Skeleton width='100%' height={10} />
         ) : !track ? null : (
           <>
-            <Text style={[styles.text, isPlayingUid && styles.active]}>
+            {/* Index also picks up the deleted style so the whole row
+                grays out consistently — without this, the number column
+                stays the default subdued color while the title/artist
+                go further-subdued, which reads as "row partially
+                deleted" rather than the intended unavailable state. */}
+            <Text
+              style={[
+                styles.text,
+                deleted && styles.deleted,
+                isPlayingUid && styles.active
+              ]}
+            >
               {index + 1}
             </Text>
+            {/*
+              Active color must be the LAST entry in the style array.
+              React Native's style array merge is left-to-right with later
+              entries winning per-property — but when a conditional active
+              style sits at index 2 and a falsy `deleted && styles.deleted`
+              sits at index 3, the result on this version of RN drops the
+              active override and `styles.title.color` (palette.neutral)
+              wins. The index Text doesn't hit this because its array is
+              only 2 entries ([text, active]). Putting `active` last
+              makes the merge unambiguous: when playing, primary wins;
+              when not playing, the conditional falsy entry is skipped
+              and styles.title/styles.deleted resolve normally.
+            */}
             <Text
               style={[
                 styles.text,
                 styles.title,
-                isPlayingUid && styles.active,
-                deleted && styles.deleted
+                deleted && styles.deleted,
+                isPlayingUid && styles.active
               ]}
               numberOfLines={1}
             >
@@ -115,12 +151,12 @@ const TrackItem = (props: TrackItemProps) => {
                 style={[
                   styles.text,
                   styles.artist,
-                  isPlayingUid && styles.active,
-                  deleted && styles.deleted
+                  deleted && styles.deleted,
+                  isPlayingUid && styles.active
                 ]}
                 numberOfLines={1}
               >
-                {`${messages.by} ${track.user?.name}`}
+                {`${messages.by} ${trackOwnerName ?? ''}`}
               </Text>
             ) : null}
             {deleted ? (
@@ -143,7 +179,14 @@ const TrackItem = (props: TrackItemProps) => {
 }
 
 export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
-  const { isLoading, onPress, trackCount, tracks, isAlbum } = props
+  const {
+    isLoading,
+    onPress,
+    onPressWithPropagationBlock,
+    trackCount,
+    tracks,
+    isAlbum
+  } = props
   const styles = useStyles()
 
   if (!tracks.length && isLoading) {
@@ -159,11 +202,11 @@ export const CollectionTileTrackList = (props: LineupTileTrackListProps) => {
   const overflowTrackCount = trackCount - DISPLAY_TRACK_COUNT
 
   return (
-    <Pressable onPress={onPress}>
+    <Pressable onPressIn={onPressWithPropagationBlock} onPress={onPress}>
       {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
         <TrackItem
-          key={track.uid}
-          uid={track.uid}
+          key={`${track.track_id}-${index}`}
+          trackId={track.track_id}
           index={index}
           track={track}
           isAlbum={isAlbum}

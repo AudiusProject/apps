@@ -9,7 +9,8 @@ import {
   useReplaceTrackProgressModal
 } from '@audius/common/store'
 import { removeNullable } from '@audius/common/utils'
-import { useNavigate, useParams } from 'react-router'
+import type { Genre, Mood } from '@audius/sdk'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 
 import { EditTrackForm } from 'components/edit-track/EditTrackForm'
 import { TrackEditFormValues } from 'components/edit-track/types'
@@ -35,6 +36,11 @@ export const EditTrackPage = (props: EditPageProps) => {
   const params = useParams<{ handle?: string; slug?: string }>()
   const { handle } = params
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // When the user lands here from the host-contest page, we honour the
+  // `returnTo` param so Save / Back lead them back to the in-flight contest
+  // form (which restores from sessionStorage).
+  const returnTo = searchParams.get('returnTo')
   useRequiresAccount()
   useIsUnauthorizedForHandleRedirect(handle ?? '')
   const { onOpen: openReplaceTrackConfirmation } =
@@ -77,7 +83,7 @@ export const EditTrackPage = (props: EditPageProps) => {
             audioFile,
             imageFile
           })
-          navigate(metadata.permalink)
+          navigate(returnTo ?? metadata.permalink)
           closeReplaceTrackProgress()
         }
       })
@@ -88,11 +94,11 @@ export const EditTrackPage = (props: EditPageProps) => {
         audioFile,
         imageFile
       })
-      navigate(metadata.permalink)
+      navigate(returnTo ?? metadata.permalink)
     }
   }
 
-  const coverArtUrl = useTrackCoverArt({
+  const { imageUrl: coverArtUrl } = useTrackCoverArt({
     trackId: track?.track_id,
     size: SquareSizes.SIZE_1000_BY_1000
   })
@@ -110,7 +116,8 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
-    mood: track?.mood || null,
+    genre: (track?.genre as Genre) ?? '',
+    mood: (track?.mood as Mood) ?? null,
     artwork: {
       url: coverArtUrl || ''
     },
@@ -130,7 +137,13 @@ export const EditTrackPage = (props: EditPageProps) => {
   return (
     <Page
       title={messages.title}
-      header={<Header primary={messages.title} showBackButton />}
+      header={
+        <Header
+          primary={messages.title}
+          showBackButton
+          onClickBack={returnTo ? () => navigate(returnTo) : undefined}
+        />
+      }
     >
       {trackStatus !== 'success' || !coverArtUrl ? (
         <LoadingSpinnerFullPage />

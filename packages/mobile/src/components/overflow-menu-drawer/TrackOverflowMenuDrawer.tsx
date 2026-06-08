@@ -13,29 +13,30 @@ import {
   RepostSource,
   FavoriteSource,
   FollowSource,
-  ModalSource
+  ModalSource,
+  Name
 } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
 import {
   cacheCollectionsActions,
-  collectionPageLineupActions as tracksActions,
   tracksSocialActions,
   usersSocialActions,
   addToCollectionUIActions,
   mobileOverflowMenuUISelectors,
   shareModalUIActions,
   OverflowAction,
+  playbackActions,
   playbackPositionActions,
   PurchaseableContentType,
+  QueueSource,
   usePremiumContentPurchaseModal,
   usePublishConfirmationModal,
   trackPageActions,
   artistPickModalActions,
-  playerActions,
-  playerSelectors,
   useHostRemixContestModal
 } from '@audius/common/store'
 import type { OverflowActionCallbacks } from '@audius/common/store'
+import { make, useRecord } from 'common/store/analytics/actions'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -46,7 +47,6 @@ import { setVisibility } from 'app/store/drawers/slice'
 
 import { useCommentDrawer } from '../comments/CommentDrawerContext'
 
-const { getUid } = playerSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { getMobileOverflowModal } = mobileOverflowMenuUISelectors
 const { requestOpen: openAddToCollectionModal } = addToCollectionUIActions
@@ -61,7 +61,9 @@ type Props = {
 
 const messages = {
   markedAsPlayed: 'Marked as Played',
-  markedAsUnplayed: 'Marked as Unplayed'
+  markedAsUnplayed: 'Marked as Unplayed',
+  willPlayNext: 'Will play next',
+  addedToQueue: 'Added to queue'
 }
 
 const TrackOverflowMenuDrawer = ({ render }: Props) => {
@@ -71,11 +73,11 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
   const navigation = useNavigation({ customNavigation: contextNavigation })
   const dispatch = useDispatch()
   const { toast } = useToast()
+  const record = useRecord()
   const { id: modalId, contextPlaylistId } = useSelector(getMobileOverflowModal)
   const id = modalId as ID
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const uid = useSelector(getUid)
 
   const { open } = useCommentDrawer()
 
@@ -124,11 +126,10 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
       open({
         entityId: track.track_id,
         navigation,
-        actions: playerActions,
-        uid: uid as string
+        playbackSource: 'comments'
       })
     }
-  }, [uid, navigation, open, track?.track_id])
+  }, [navigation, open, track?.track_id])
 
   const handleOpenRemixContestDrawer = useCallback(() => {
     if (track?.track_id) {
@@ -175,7 +176,6 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
             metadata_time ?? time
           )
         )
-        dispatch(tracksActions.fetchLineupMetadatas())
       }
     },
     [OverflowAction.VIEW_TRACK_PAGE]: () => {
@@ -233,7 +233,37 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
     [OverflowAction.SET_ARTIST_PICK]: handleSetAsArtistPick,
     [OverflowAction.UNSET_ARTIST_PICK]: handleUnsetAsArtistPick,
     [OverflowAction.VIEW_COMMENTS]: handleOpenCommentsDrawer,
-    [OverflowAction.HOST_REMIX_CONTEST]: handleOpenRemixContestDrawer
+    [OverflowAction.HOST_REMIX_CONTEST]: handleOpenRemixContestDrawer,
+    [OverflowAction.PLAY_NEXT]: () => {
+      dispatch(
+        playbackActions.playNext({
+          track: { trackId: id, source: QueueSource.RECOMMENDED_TRACKS }
+        })
+      )
+      record(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(id),
+          from: 'overflow menu'
+        })
+      )
+      toast({ content: messages.willPlayNext })
+    },
+    [OverflowAction.ADD_TO_QUEUE]: () => {
+      dispatch(
+        playbackActions.addToQueue({
+          tracks: [{ trackId: id, source: QueueSource.RECOMMENDED_TRACKS }]
+        })
+      )
+      record(
+        make(Name.PLAY_QUEUE_ADD_TRACK, {
+          source: 'queue',
+          trackId: String(id),
+          from: 'overflow menu'
+        })
+      )
+      toast({ content: messages.addedToQueue })
+    }
   }
 
   return render(callbacks)

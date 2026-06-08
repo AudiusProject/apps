@@ -26,8 +26,6 @@ e2e-init:
           - packages/libs/dist
           - packages/sdk/node_modules
           - packages/sdk/dist
-          - packages/discovery-provider/plugins/pedalboard/apps/relay/node_modules
-          - packages/discovery-provider/plugins/pedalboard/apps/solana-relay/node_modules
 
 e2e-test:
   machine: true

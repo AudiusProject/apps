@@ -13,7 +13,6 @@ import {
   useCurrentCommentSection
 } from '@audius/common/context'
 import type { Comment, ID, UserMetadata } from '@audius/common/models'
-import type { LineupBaseActions, playerActions } from '@audius/common/store'
 import type {
   BottomSheetFlatListMethods,
   BottomSheetFooterProps
@@ -173,21 +172,21 @@ const CommentDrawerContent = (props: {
     )
   }
 
-  // Empty state
-  if (!commentIds || !commentIds.length) {
-    return (
-      <Flex p='l'>
-        <NoComments />
-      </Flex>
-    )
-  }
-
+  // Always render BottomSheetFlatList (with ListEmptyComponent for the empty
+  // state) so the bottom sheet can handle keyboard avoidance and touch
+  // propagation correctly. Swapping in a plain <Flex> when there are zero
+  // comments breaks the footer composer's send button on a 0-comment track.
   return (
     <BottomSheetFlatList
       ref={commentListRef}
       data={commentIds}
       keyExtractor={(id) => id.toString()}
       ListHeaderComponent={<Box h='l' />}
+      ListEmptyComponent={
+        <Flex p='l'>
+          <NoComments />
+        </Flex>
+      }
       ListFooterComponent={
         <>
           {isLoadingMorePages ? (
@@ -214,14 +213,9 @@ export type CommentDrawerData = {
   entityId: number
   navigation: NativeStackNavigationProp<ParamListBase>
   autoFocusInput?: boolean
-  uid?: string
-  /** Object containing lineup/player actions such as play, togglePlay, setPage
-   *  Typically these are lineup actions -
-   *  but playerActions are used when the comments were opened from NowPlaying.
-   *  In that scenario the comments are always for the currently playing track,
-   *  so it doesnt need to worry about changing lineups
-   */
-  actions?: LineupBaseActions | typeof playerActions
+  // Source tag for the new playback queue when the user plays the track from
+  // the comment drawer. Kept optional; defaults to 'comments' downstream.
+  playbackSource?: string
   highlightedComment?: Comment | null
 }
 
@@ -237,8 +231,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     bottomSheetModalRef,
     handleClose,
     autoFocusInput,
-    uid,
-    actions,
+    playbackSource,
     highlightedComment
   } = props
   const { color } = useTheme()
@@ -252,6 +245,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const [acText, setAcText] = useState('')
   const [replyingAndEditingState, setReplyingAndEditingState] =
     useState<ReplyingAndEditingState>()
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false)
 
   const setAutocompleteHandler = useCallback(
     (autocompleteHandler: (user: UserMetadata) => void) => {
@@ -276,8 +270,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
             entityId={entityId}
             replyingAndEditingState={replyingAndEditingState}
             setReplyingAndEditingState={setReplyingAndEditingState}
-            uid={uid}
-            lineupActions={actions}
+            playbackSource={playbackSource}
           >
             <CommentDrawerForm
               commentListRef={commentListRef}
@@ -306,6 +299,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
 
   const handleSheetChanges = useCallback(
     (index: number) => {
+      setIsDrawerVisible(index >= 0)
       // When the sheet first opens (index >= 0), snap to index 1 (85%) if it's at index 0 (50%)
       if (index === 0 && bottomSheetModalRef.current) {
         // Use a small delay to ensure the modal is fully presented
@@ -321,7 +315,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
     <>
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        snapPoints={['50%', '85%', '100%']}
+        snapPoints={['50%', '85%', '95%']}
         topInset={insets.top}
         style={{
           borderTopRightRadius: COMMENT_DRAWER_BORDER_RADIUS,
@@ -342,6 +336,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
         footerComponent={renderFooterComponent}
         onDismiss={handleCloseDrawer}
         onChange={handleSheetChanges}
+        keyboardBlurBehavior='restore'
         android_keyboardInputMode='adjustResize'
       >
         <CommentSectionProvider
@@ -350,8 +345,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
           setReplyingAndEditingState={setReplyingAndEditingState}
           navigation={navigation}
           closeDrawer={handleCloseDrawer}
-          uid={uid}
-          lineupActions={actions}
+          playbackSource={playbackSource}
         >
           <CommentDrawerHeader minimal={autoCompleteActive} />
           <Divider orientation='horizontal' />
@@ -368,16 +362,18 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
           )}
         </CommentSectionProvider>
       </BottomSheetModal>
-      <Box
-        style={{
-          backgroundColor: color.background.white,
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          zIndex: 5,
-          height: insets.bottom
-        }}
-      />
+      {isDrawerVisible ? (
+        <Box
+          style={{
+            backgroundColor: color.background.white,
+            position: 'absolute',
+            bottom: 0,
+            width: '100%',
+            zIndex: 5,
+            height: insets.bottom
+          }}
+        />
+      ) : null}
     </>
   )
 }

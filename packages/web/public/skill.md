@@ -178,7 +178,71 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 
 [Log in with Audius Guide](https://docs.audius.co/developers/guides/log-in-with-audius)
 
-## Examples
+## Image Loading and Mirrors
+
+Images (artwork, profile pictures) often fail to load if you do not retry from mirrors. API responses include image URLs and a `mirrors` array of alternate hosts.
+
+**Artwork structure example:**
+
+```json
+{
+  "artwork": {
+    "150x150": "https://audius-content-7.example.com/content/.../150x150.jpg",
+    "480x480": "https://audius-content-7.example.com/content/.../480x480.jpg",
+    "1000x1000": "https://audius-content-7.example.com/content/.../1000x1000.jpg",
+    "mirrors": [
+      "https://audius-creator-6.theblueprint.xyz",
+      "https://cn0.mainnet.audiusindex.org",
+      "https://creatornode2.audius.co"
+    ]
+  }
+}
+```
+
+**Critical for agents:**
+
+1. **Never strip mirrors.** Do not normalize artwork to a single URL string—preserve `mirrors` so retries can swap hosts.
+2. **Use mirror retry on load failure.** When an image fails to load, replace the URL host with each mirror in order and retry until one succeeds or all fail.
+3. **Apply everywhere.** Use a shared image component with mirror retry for all Audius images (tracks, playlists, profiles). Raw `<img src={url}>` has no retry.
+4. **Size-aware selection.** Pick the variant (150x150, 480x480, 1000x1000) closest to the rendered size.
+
+[Full guide: Image Loading & Mirrors](https://docs.audius.co/developers/guides/image-mirrors)
+
+## Web Examples (Vite + React)
+
+Runnable examples live in the **apps** monorepo under `packages/web/examples/`. Use them for SDK setup, trending, artwork with mirrors, and playback.
+
+| Example   | What it shows | How to run |
+|----------|----------------|------------|
+| **trending** | SDK singleton, `getTrendingTracks`, track **artwork with mirror fallback**, **play** via `getTrackStreamUrl` + HTML5 Audio, React Query | From apps root: `npm run build -w @audius/sdk` then `cd packages/web/examples/trending && npm install && npm run dev`. Or `npm run web:example:trending`. |
+| **update-profile** | OAuth (write scope), popup flow, `verifyIDToken`, server bearer, `updateUser` for user description | Run server first (see README). Then `cd packages/web/examples/update-profile && npm run dev`. Or `npm run web:example:update-profile`. Requires .env. |
+| **upload** | OAuth popup, `uploadTrackFiles`, server `createTrack` (mirrors mobile upload) | Run server first. Then `cd packages/web/examples/upload && npm run dev` or `npm run web:example:upload`. Requires .env. |
+| **gated-upload** | Same as upload + geo-gated streaming (ip-api.com); server gates `/stream/:trackId` by IP/country | Run server first. Then `cd packages/web/examples/gated-upload && npm run dev` or `npm run web:example:gated-upload`. Requires .env. |
+
+**Key files (web trending):** `src/sdk.ts` (getSDK), `src/hooks/useTrendingTracks.ts`, `src/components/TrackArtworkImage.tsx` (mirror retry on image error), `src/utils/artwork.ts` (getArtworkUrl, getNextMirrorUrl), `src/App.tsx` (play/stop with single Audio ref).
+
+**Key files (web update-profile):** `src/sdk.ts`, `src/config.ts`, `src/oauth/buildOAuthUrl.ts`, `src/App.tsx` (OAuth redirect, form, update POST), `server/server.js` (developer app bearer, `updateUser`).
+
+**Key files (web upload):** `src/sdk.ts`, `src/config.ts`, `src/oauth/buildOAuthUrl.ts`, `src/App.tsx` (OAuth popup, file picker, uploadTrackFiles, create-track POST), `server/server.js` (`createTrack`).
+
+**Key files (web gated-upload):** Same as upload; server adds `/stream/:trackId` (geo-gate via ip-api.com) and `/my-region`.
+
+**Keywords:** SDK setup, Vite, React, trending tracks, getTrendingTracks, getTrackStreamUrl, track artwork, mirrors, React Query, OAuth, update profile, verifyIDToken, updateUser, upload track, uploadTrackFiles, createTrack, geo-gated streaming, web example.
+
+## Mobile Examples (Expo + React Native)
+
+Runnable examples in **apps** under `packages/mobile/examples/`. Use them for OAuth, server-held bearer, like/repost, and update-profile.
+
+| Example          | What it shows | How to run |
+|-----------------|----------------|------------|
+| **trending**    | SDK + Expo, getTrendingTracks, play (expo-av + getTrackStreamUrl), React Query | `cd packages/mobile/examples/trending && npx expo start` or `npm run mobile:example:trending` |
+| **auth-sign-in**| OAuth + bearer, verifyIDToken, feed | `cd packages/mobile/examples/auth-sign-in && npx expo start` or `npm run mobile:example:auth-sign-in` |
+| **like-repost** | Expo app + Node server; server holds developer app bearer; client OAuth → like/repost random track; play | Server: `cd packages/mobile/examples/like-repost/server && npm start`. Client: `cd packages/mobile/examples/like-repost && npx expo start`. Requires .env. |
+| **update-profile** | Expo app + Node server; server bearer; client calls endpoint to update user description | Server: `cd packages/mobile/examples/update-profile/server && npm start`. Client: `cd packages/mobile/examples/update-profile && npx expo start`. Requires .env. |
+
+**Keywords (mobile):** SDK setup, Expo, React Native, OAuth, bearer token, getSDK, polyfills, trending, like, repost, favoriteTrack, repostTrack, updateUser, developer app bearer, server-side writes.
+
+## Other Examples & References
 
 - [create-audius-app examples](https://github.com/AudiusProject/apps/tree/main/packages/create-audius-app/examples) — React, React + Hono templates
 - [Swagger spec](https://api.audius.co/v1/swagger.yaml) — Ingest for API discovery, codegen, or AI context
@@ -189,20 +253,23 @@ OAuth flow so your users sign in with Audius and authorize your app to act on th
 
 ## Links
 
-| Resource           | URL                                                         |
-| ------------------ | ----------------------------------------------------------- |
-| agents.md          | https://audius.co/agents.md                                 |
-| llm.txt            | https://audius.co/llm.txt                                   |
-| Docs               | https://docs.audius.co                                      |
-| API                | https://api.audius.co                                       |
-| API Reference      | https://docs.audius.co/api                                  |
-| Swagger YAML       | https://api.audius.co/v1/swagger.yaml                       |
-| Swagger Full       | https://api.audius.co/v1/full/swagger.yaml                  |
-| API Plans          | https://api.audius.co/plans                                 |
-| SDK npm            | https://www.npmjs.com/package/@audius/sdk                   |
-| GitHub apps        | https://github.com/audiusproject/apps                       |
-| Create Audius App  | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Resource                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| agents.md               | https://audius.co/agents.md                                 |
+| llms.txt                | https://audius.co/llms.txt                                  |
+| Docs                    | https://docs.audius.co                                      |
+| API                     | https://api.audius.co                                       |
+| API Reference           | https://docs.audius.co/api                                  |
+| Swagger YAML            | https://api.audius.co/v1/swagger.yaml                       |
+| Swagger Full            | https://api.audius.co/v1/full/swagger.yaml                  |
+| API Plans               | https://api.audius.co/plans                                 |
+| SDK npm                 | https://www.npmjs.com/package/@audius/sdk                   |
+| GitHub apps             | https://github.com/audiusproject/apps                       |
+| Web examples (apps)     | packages/web/examples (trending: play + artwork mirrors; update-profile: OAuth, updateUser; upload: uploadTrackFiles, createTrack; gated-upload: geo-gated streaming)    |
+| Mobile examples (apps)  | packages/mobile/examples (trending, auth, like-repost, update-profile) |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
 
 ---
 

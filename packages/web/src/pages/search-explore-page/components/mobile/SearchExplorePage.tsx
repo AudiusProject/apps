@@ -22,7 +22,8 @@ import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, usePrevious } from 'react-use'
 
-import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'
+import Header from 'components/header/mobile/Header'
+import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import NavContext, { CenterPreset } from 'components/nav/mobile/NavContext'
 import { SearchResults } from 'pages/search-page/SearchResults'
@@ -31,21 +32,23 @@ import {
   useSearchCategory,
   useShowSearchResults
 } from 'pages/search-page/hooks'
-import {
-  Category,
-  CategoryKey,
-  CategoryView,
-  ViewLayout
-} from 'pages/search-page/types'
+import { Category, CategoryKey, CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
+import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
+import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
 import { FeelingLuckySection } from '../desktop/FeelingLuckySection'
 import { LabelSpotlightSection } from '../desktop/LabelSpotlightSection'
+import { MoodGrid } from '../desktop/MoodGrid'
+import { NewAlbumReleasesSection } from '../desktop/NewAlbumReleasesSection'
+import { QuickSearchGrid } from '../desktop/QuickSearchGrid'
 import { RecentSearchesSection } from '../desktop/RecentSearchesSection'
 import { RecentlyPlayedSection } from '../desktop/RecentlyPlayedSection'
 import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
+import { TopAlbumsThisMonthSection } from '../desktop/TopAlbumsThisMonthSection'
+import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
   title: string
@@ -73,7 +76,6 @@ const SearchExplorePage = ({
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   const previousDebouncedValue = usePrevious(debouncedValue)
   const showSearchResults = useShowSearchResults()
-  const [tracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
@@ -112,32 +114,17 @@ const SearchExplorePage = ({
       } else {
         newParams.delete('query')
       }
-      setSearchParams(newParams)
-    } else if (categoryKey === SearchTabs.ALL.toLowerCase()) {
-      // clear filters when searching all
-      const newParams = new URLSearchParams()
-      if (debouncedValue) {
-        newParams.set('query', debouncedValue)
-      }
-      setSearchParams(newParams)
+      setSearchParams(newParams, { replace: true })
     }
-  }, [
-    debouncedValue,
-    setSearchParams,
-    searchParams,
-    previousDebouncedValue,
-    categoryKey
-  ])
+  }, [debouncedValue, setSearchParams, searchParams, previousDebouncedValue])
 
-  const [, setBannerIsVisible] = useState(false)
+  const { setCenter, setRight } = useContext(NavContext)!
+  const { setHeader } = useContext(HeaderContext)
 
   useEffect(() => {
-    const img = new window.Image()
-    img.src = BackgroundWaves
-    img.onload = () => setBannerIsVisible(true)
-  }, [])
+    setHeader(<Header title={messages.explore} />)
+  }, [setHeader])
 
-  const { setLeft, setCenter, setRight } = useContext(NavContext)!
   const handleCategoryChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value
@@ -163,22 +150,28 @@ const SearchExplorePage = ({
     ]
   }, [categoryKey])
 
-  // Hide search header
   useEffect(() => {
     setRight(null)
     setCenter(CenterPreset.LOGO)
-  }, [setLeft, setCenter, setRight])
+  }, [setCenter, setRight])
 
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent = categoryKey === 'tracks' || categoryKey === 'all'
+  const showTrackContent =
+    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
   const showPlaylistContent =
-    categoryKey === 'playlists' || categoryKey === 'all'
-  const showUserContent = categoryKey === 'profiles' || categoryKey === 'all'
+    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
+  const showUserContent =
+    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
+  const isTracksTab = categoryKey === CategoryView.TRACKS
+  const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
+  const isAlbumsTab = categoryKey === CategoryView.ALBUMS
+  const showAlbumContent = isAlbumsTab
 
   return (
     <MobilePageContainer
       title={messages.explore}
       containerClassName='search-explore-page'
+      hasDefaultHeader
     >
       <Flex direction='column' w='100%' style={{ overflow: 'hidden' }}>
         <Flex direction='column' ph='l' pt='l' backgroundColor='surface1'>
@@ -225,31 +218,37 @@ const SearchExplorePage = ({
           </RadioGroup>
         </Flex>
         {inputValue || showSearchResults ? (
-          <SearchResults
-            tracksLayout={tracksLayout}
-            handleSearchTab={handleSearchTab}
-          />
+          <SearchResults handleSearchTab={handleSearchTab} />
         ) : null}
         <Flex
           direction='column'
           mt='l'
           gap='2xl'
-          css={{ display: showSearchResults ? 'none' : undefined }}
+          css={{
+            display: inputValue || showSearchResults ? 'none' : undefined
+          }}
         >
-          {showTrackContent && showUserContextualContent && (
+          {showTrackContent && showUserContextualContent ? (
             <RecommendedTracksSection />
-          )}
-          {showTrackContent && showUserContextualContent && (
+          ) : null}
+          {isTracksTab ? <QuickSearchGrid /> : null}
+          {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
-          )}
-          {showPlaylistContent && <FeaturedPlaylistsSection />}
-          {showTrackContent && <FeaturedRemixContestsSection />}
-          {showUserContent && <ArtistSpotlightSection />}
-          {showUserContent && <LabelSpotlightSection />}
-          {showTrackContent && showUserContextualContent && (
+          ) : null}
+          {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
+          {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}
+          {showAlbumContent ? <NewAlbumReleasesSection /> : null}
+          {showAlbumContent ? <BestSellingAlbumsSection /> : null}
+          {showTrackContent ? <FeaturedRemixContestsSection /> : null}
+          {categoryKey === CategoryView.ALL ? <FanClubsExploreSection /> : null}
+          {isTracksTab ? <UndergroundTrendingTracksSection /> : null}
+          {showUserContent ? <ArtistSpotlightSection /> : null}
+          {showUserContent ? <LabelSpotlightSection /> : null}
+          {isTracksTab || isPlaylistsTab || isAlbumsTab ? <MoodGrid /> : null}
+          {showTrackContent && showUserContextualContent ? (
             <FeelingLuckySection />
-          )}
-          {showUserContextualContent && <RecentSearchesSection />}
+          ) : null}
+          {showUserContextualContent ? <RecentSearchesSection /> : null}
         </Flex>
       </Flex>
     </MobilePageContainer>

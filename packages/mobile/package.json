@@ -1,6 +1,6 @@
 {
   "name": "@audius/mobile",
-  "version": "1.5.164",
+  "version": "1.5.185",
   "private": true,
   "scripts": {
     "android:dev": "ENVFILE=.env.dev turbo run android -- --mode=prodDebug",
@@ -36,7 +36,10 @@
     "upload:ios": "xcrun altool --upload-app -type ios --file build/AudiusReactNative.ipa --username $APPLE_ID --password $APPLE_ID_PASSWORD",
     "verify": "concurrently \"npm:typecheck\" \"npm:lint\" \"npm:lint:env\"",
     "analyze:ios": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-ios.js' --dev=false --platform='ios' --sourcemap-output='./bundle-ios.js.map' && npx --yes source-map-explorer './bundle-ios.js' './bundle-ios.js.map' --html bundle-analysis-ios.html --no-border-checks",
-    "analyze:android": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-android.js' --dev=false --platform='android' --sourcemap-output='./bundle-android.js.map' && npx --yes source-map-explorer './bundle-android.js' './bundle-android.js.map' --html bundle-analysis-android.html --no-border-checks"
+    "analyze:android": "react-native bundle --entry-file='index.js' --bundle-output='./bundle-android.js' --dev=false --platform='android' --sourcemap-output='./bundle-android.js.map' && npx --yes source-map-explorer './bundle-android.js' './bundle-android.js.map' --html bundle-analysis-android.html --no-border-checks",
+    "ota:create-history": "code-push create-history",
+    "ota:release": "code-push release",
+    "ota:show-history": "code-push show-history"
   },
   "dependencies": {
     "@amplitude/analytics-react-native": "1.4.11",
@@ -45,10 +48,11 @@
     "@audius/fixed-decimal": "*",
     "@audius/harmony": "*",
     "@audius/sdk": "*",
+    "@bravemobile/react-native-code-push": "^12.3.2",
     "@coinflowlabs/react-native": "4.5.2",
+    "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/native": "^11.11.0",
     "@emotion/react": "11.14.0",
-    "@fingerprintjs/fingerprintjs-pro-react-native": "3.9.0",
     "@gorhom/bottom-sheet": "5.2.8",
     "@gorhom/portal": "1.0.14",
     "@hcaptcha/react-native-hcaptcha": "1.6.0",
@@ -81,12 +85,15 @@
     "@solana/web3.js": "1.98.0",
     "@stripe/crypto": "0.0.4",
     "@stripe/stripe-js": "1.54.1",
+    "@tanstack/query-async-storage-persister": "^5.62.7",
     "@tanstack/react-query": "5.62.7",
+    "@tanstack/react-query-persist-client": "^5.62.7",
     "array.prototype.flat": "1.2.5",
     "big-integer": "1.6.51",
     "bs58": "5.0.0",
     "color": "4.2.3",
     "dayjs": "1.10.7",
+    "expo": "^51.0.0",
     "expo-crypto": "9.2.0",
     "ffmpeg-kit-react-native": "6.0.2",
     "formik": "2.4.6",
@@ -101,7 +108,7 @@
     "promise": "8.3.0",
     "query-string": "7.0.1",
     "react": "19.0.0",
-    "react-native": "0.78.3",
+    "react-native": "0.79.5",
     "react-native-autolink": "4.2.0",
     "react-native-bars": "2.4.2",
     "react-native-blob-util": "0.19.4",
@@ -142,7 +149,7 @@
     "react-native-svg": "^15.11.2",
     "react-native-svg-transformer": "1.5.0",
     "react-native-tab-view": "4.2.0",
-    "react-native-track-player": "4.0.1",
+    "react-native-track-player": "4.1.2",
     "react-native-url-polyfill": "2.0.0",
     "react-native-version-number": "0.3.6",
     "react-native-video": "6.18.0",
@@ -177,14 +184,14 @@
     "@babel/plugin-transform-react-jsx": "7.21.0",
     "@babel/preset-env": "7.25.3",
     "@babel/runtime": "7.25.0",
-    "@react-native-community/cli": "^15.0.1",
-    "@react-native-community/cli-platform-android": "^15.0.1",
-    "@react-native-community/cli-platform-ios": "^15.0.1",
-    "@react-native/babel-preset": "0.78.3",
-    "@react-native/eslint-config": "0.76.9",
-    "@react-native/metro-babel-transformer": "0.78.3",
-    "@react-native/metro-config": "0.78.3",
-    "@react-native/typescript-config": "0.76.9",
+    "@react-native-community/cli": "18.0.0",
+    "@react-native-community/cli-platform-android": "18.0.0",
+    "@react-native-community/cli-platform-ios": "18.0.0",
+    "@react-native/babel-preset": "0.79.5",
+    "@react-native/eslint-config": "0.79.5",
+    "@react-native/metro-babel-transformer": "0.79.5",
+    "@react-native/metro-config": "0.79.5",
+    "@react-native/typescript-config": "0.79.5",
     "@redux-devtools/cli": "4.0.0",
     "@testing-library/jest-native": "5.4.3",
     "@testing-library/react-native": "12.4.3",
@@ -213,7 +220,14 @@
   "jest": {
     "preset": "react-native",
     "setupFilesAfterEnv": [
-      "@testing-library/jest-native/extend-expect"
+      "<rootDir>/jest.setup.js"
+    ],
+    "moduleNameMapper": {
+      "^react-native$": "<rootDir>/node_modules/react-native",
+      "^@testing-library/react-native$": "<rootDir>/node_modules/@testing-library/react-native"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-reanimated)/)"
     ],
     "moduleFileExtensions": [
       "ts",

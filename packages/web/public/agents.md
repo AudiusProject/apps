@@ -19,17 +19,19 @@ If you want to create apps that stream music from the catalog, extend the listen
 
 ## Quick Reference
 
-| Resource              | URL                                       |
-| --------------------- | ----------------------------------------- |
-| Docs                  | https://docs.audius.co                    |
-| API                   | https://api.audius.co                     |
-| API Plans (keys)      | https://api.audius.co/plans               |
-| SDK (npm)             | https://www.npmjs.com/package/@audius/sdk |
-| GitHub Org            | https://github.com/audiusproject          |
-| Open Audio Protocol   | https://openaudio.org                     |
-| skill.md (SDK/code)   | https://audius.co/skill.md                |
-| llm.txt (AI overview) | https://audius.co/llm.txt                 |
-| Protocol Dashboard    | https://dashboard.audius.org              |
+| Resource               | URL                                                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Docs                   | https://docs.audius.co                                                                                                                                   |
+| API                    | https://api.audius.co                                                                                                                                    |
+| API Plans (keys)       | https://api.audius.co/plans                                                                                                                              |
+| SDK (npm)              | https://www.npmjs.com/package/@audius/sdk                                                                                                                |
+| GitHub Org             | https://github.com/audiusproject                                                                                                                         |
+| Web examples (apps)    | packages/web/examples (trending: play + artwork mirrors; update-profile: OAuth, updateUser; upload: uploadTrackFiles; gated-upload: geo-gated streaming) |
+| Mobile examples (apps) | packages/mobile/examples (trending, auth, like-repost, update-profile)                                                                                   |
+| Open Audio Protocol    | https://openaudio.org                                                                                                                                    |
+| skill.md (SDK/code)    | https://audius.co/skill.md                                                                                                                               |
+| llms.txt (AI overview) | https://audius.co/llms.txt                                                                                                                               |
+| Protocol Dashboard     | https://dashboard.audius.org                                                                                                                             |
 
 ## Audius vs Open Audio Protocol
 
@@ -42,11 +44,24 @@ When building a music player, app, or frontend, use the Audius API and SDK at [a
 
 ## Core Concepts
 
-### REST API
+### Audius REST API
 
 HTTP API for querying and streaming the catalog. Base URL: `https://api.audius.co/v1`. Key domains: users, tracks, playlists, comments, tips, challenges, resolve (canonical URL lookup), explore, events, rewards. Read-only by default; writes require API credentials.
 
 [Full API Reference](https://docs.audius.co/api)
+
+#### Audius API Notes
+
+⚠️ discoveryprovider.audius.co is deprecated.
+
+Always use:
+https://api.audius.co
+
+Old pattern:
+https://discoveryprovider.audius.co/v1/...
+
+Correct pattern:
+https://api.audius.co/v1/...
 
 ### JavaScript SDK
 
@@ -64,11 +79,9 @@ OAuth flow so your app's users can sign in with their Audius account and authori
 
 [Log in with Audius Guide](https://docs.audius.co/developers/guides/log-in-with-audius)
 
-### create-audius-app
+### Image Loading
 
-CLI to scaffold a new Audius app. Run `npx create-audius-app` for an interactive setup or `npx create-audius-app my-app` for non-interactive. Produces a ready-to-run project with SDK, API keys, and dev server.
-
-[Create Audius App Guide](https://docs.audius.co/developers/guides/create-audius-app)
+Audius images (artwork, profile pics) include `mirrors` for fallback. When an image fails to load, retry by swapping the URL host with each mirror. Use a shared image component with mirror retry everywhere—never raw `<img>` for Audius content. Preserve `mirrors` in normalization; do not reduce to a single URL. See [skill.md — Image Loading and Mirrors](https://audius.co/skill.md#image-loading-and-mirrors) and [docs](https://docs.audius.co/developers/guides/image-mirrors).
 
 ## Quickstart
 
@@ -90,50 +103,58 @@ Get your API Key from [api.audius.co/plans](https://api.audius.co/plans) or [aud
 
 Suggested paths—adapt freely. Agents and builders use these as a jumping-off point, not a constraint.
 
-| Goal                        | Path                                                                                                                                                                                      |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Music player, app, frontend | Use [Audius API](https://api.audius.co) and [SDK](https://www.npmjs.com/package/@audius/sdk). Start with [create-audius-app](https://docs.audius.co/developers/guides/create-audius-app). |
-| User auth, OAuth            | [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius)                                                                                                         |
-| Run a node, protocol dev    | Use [Open Audio Protocol](https://openaudio.org). Read [openaudio.org/agents.md](https://openaudio.org/agents.md) and [skill.md](https://openaudio.org/skill.md).                         |
+| Goal                                                                           | Path                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Music player, app, frontend                                                    | Use [Audius API](https://api.audius.co) and [SDK](https://www.npmjs.com/package/@audius/sdk). Start with [create-audius-app](https://docs.audius.co/developers/guides/create-audius-app).                                                                                                                                                                                                                                                                                        |
+| User auth, OAuth                                                               | [Log in with Audius](https://docs.audius.co/developers/guides/log-in-with-audius)                                                                                                                                                                                                                                                                                                                                                                                                |
+| Web examples (SDK, trending, play, artwork, OAuth, writes, upload, geo-gating) | **apps** monorepo: `packages/web/examples` — **trending** (Vite + React, getTrendingTracks, play, artwork mirrors). **update-profile** (OAuth write scope, server bearer, updateUser). **upload** (OAuth popup, uploadTrackFiles, server createTrack). **gated-upload** (same + geo-gated streaming via ip-api.com). Run: `npm run build -w @audius/sdk` then `npm run web:example:trending`, `web:example:update-profile`, `web:example:upload`, or `web:example:gated-upload`. |
+| Mobile examples (OAuth, writes)                                                | **apps** monorepo: `packages/mobile/examples` — **trending** (Expo, play), **auth-sign-in** (OAuth), **like-repost** (server + bearer, like/repost), **update-profile** (server + bearer, update user). Each has a README; server examples need .env. Run e.g. `npm run mobile:example:trending`.                                                                                                                                                                                |
+| Run a node, protocol dev                                                       | Use [Open Audio Protocol](https://openaudio.org). Read [openaudio.org/agents.md](https://openaudio.org/agents.md) and [skill.md](https://openaudio.org/skill.md).                                                                                                                                                                                                                                                                                                                |
 
 ## Tutorials Index
 
-| Tutorial           | URL                                                         |
-| ------------------ | ----------------------------------------------------------- |
-| Create Audius App  | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius | https://docs.audius.co/developers/guides/log-in-with-audius |
-| SDK Tracks         | https://docs.audius.co/developers/sdk/tracks                |
-| SDK Users          | https://docs.audius.co/developers/sdk/users                 |
-| SDK Playlists      | https://docs.audius.co/developers/sdk/playlists             |
-| API Reference      | https://docs.audius.co/api                                  |
+| Tutorial                | URL                                                         |
+| ----------------------- | ----------------------------------------------------------- |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app  |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors      |
+| SDK Tracks              | https://docs.audius.co/developers/sdk/tracks                |
+| SDK Users               | https://docs.audius.co/developers/sdk/users                 |
+| SDK Playlists           | https://docs.audius.co/developers/sdk/playlists             |
+| API Reference           | https://docs.audius.co/api                                  |
 
 ## Reference
 
 - **API base**: https://api.audius.co/v1
 - **SDK**: [@audius/sdk on npm](https://www.npmjs.com/package/@audius/sdk)
 - **GitHub**: [github.com/audiusproject](https://github.com/audiusproject) (apps, sdk in monorepo)
+- **Web examples**: `packages/web/examples` — **trending** (Vite + React, SDK, getTrendingTracks, artwork mirrors, play). **update-profile** (OAuth, server bearer, updateUser). **upload** (OAuth popup, uploadTrackFiles, server createTrack). **gated-upload** (same + geo-gated streaming). Run: `npm run web:example:trending`, `web:example:update-profile`, `web:example:upload`, or `web:example:gated-upload` after building SDK.
+- **Mobile examples**: `packages/mobile/examples` — **trending** (Expo, play), **auth-sign-in** (OAuth), **like-repost** (server + bearer), **update-profile** (server + bearer). See each example’s README; server-based ones need .env.
 - **create-audius-app**: `npx create-audius-app`
 
 ## All Links
 
-| Resource            | URL                                                         |
-| ------------------- | ----------------------------------------------------------- |
-| Audius (app)        | https://audius.co                                           |
-| Docs                | https://docs.audius.co                                      |
-| API                 | https://api.audius.co                                       |
-| API Plans           | https://api.audius.co/plans                                 |
-| API Reference       | https://docs.audius.co/api                                  |
-| SDK npm             | https://www.npmjs.com/package/@audius/sdk                   |
-| Create Audius App   | https://docs.audius.co/developers/guides/create-audius-app  |
-| Log in with Audius  | https://docs.audius.co/developers/guides/log-in-with-audius |
-| GitHub Org          | https://github.com/audiusproject                            |
-| Open Audio Protocol | https://openaudio.org                                       |
-| OAP agents.md       | https://openaudio.org/agents.md                             |
-| OAP skill.md        | https://openaudio.org/skill.md                              |
-| OAP llms.txt        | https://openaudio.org/llms.txt                              |
-| Protocol Dashboard  | https://dashboard.audius.org                                |
-| skill.md            | https://audius.co/skill.md                                  |
-| llm.txt             | https://audius.co/llm.txt                                   |
+| Resource                | URL                                                                                                                                                                  |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audius (app)            | https://audius.co                                                                                                                                                    |
+| Docs                    | https://docs.audius.co                                                                                                                                               |
+| API                     | https://api.audius.co                                                                                                                                                |
+| API Plans               | https://api.audius.co/plans                                                                                                                                          |
+| API Reference           | https://docs.audius.co/api                                                                                                                                           |
+| SDK npm                 | https://www.npmjs.com/package/@audius/sdk                                                                                                                            |
+| Create Audius App       | https://docs.audius.co/developers/guides/create-audius-app                                                                                                           |
+| Log in with Audius      | https://docs.audius.co/developers/guides/log-in-with-audius                                                                                                          |
+| Image Loading & Mirrors | https://docs.audius.co/developers/guides/image-mirrors                                                                                                               |
+| GitHub Org              | https://github.com/audiusproject                                                                                                                                     |
+| Web examples            | packages/web/examples in apps repo (trending: play, artwork mirrors; update-profile: OAuth, updateUser; upload: uploadTrackFiles; gated-upload: geo-gated streaming) |
+| Mobile examples         | packages/mobile/examples in apps repo (trending, auth, like-repost, update-profile)                                                                                  |
+| Open Audio Protocol     | https://openaudio.org                                                                                                                                                |
+| OAP agents.md           | https://openaudio.org/agents.md                                                                                                                                      |
+| OAP skill.md            | https://openaudio.org/skill.md                                                                                                                                       |
+| OAP llms.txt            | https://openaudio.org/llms.txt                                                                                                                                       |
+| Protocol Dashboard      | https://dashboard.audius.org                                                                                                                                         |
+| skill.md                | https://audius.co/skill.md                                                                                                                                           |
+| llms.txt                | https://audius.co/llms.txt                                                                                                                                           |
 
 ## Skill File
 
@@ -141,4 +162,4 @@ For SDK setup, API credentials, code snippets, and create-audius-app details: [h
 
 ---
 
-*Recommendations only. Go build something unexpected.*
+_Recommendations only. Go build something unexpected._

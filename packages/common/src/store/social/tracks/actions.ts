@@ -28,6 +28,7 @@ export const CANCEL_DOWNLOAD = 'SOCIAL/CANCEL_DOWNLOAD'
 export const DOWNLOAD_FINISHED = 'SOCIAL/DOWNLOAD_FINISHED'
 
 export const SHARE_TRACK = 'SOCIAL/SHARE_TRACK'
+export const SHARE_CONTEST = 'SOCIAL/SHARE_CONTEST'
 
 export const repostTrack = createCustomAction(
   REPOST_TRACK,
@@ -117,5 +118,16 @@ export const downloadFinished = createCustomAction(DOWNLOAD_FINISHED, () => {})
 
 export const shareTrack = createCustomAction(
   SHARE_TRACK,
+  (trackId: ID, source: ShareSource) => ({ trackId, source })
+)
+
+/**
+ * Share a remix-contest event — takes the parent track's ID and
+ * resolves the contest URL (`/{handle}/contest/{slug}`) in the saga.
+ * Separated from `shareTrack` so analytics + clipboard target the
+ * contest page rather than the underlying track.
+ */
+export const shareContest = createCustomAction(
+  SHARE_CONTEST,
   (trackId: ID, source: ShareSource) => ({ trackId, source })
 )

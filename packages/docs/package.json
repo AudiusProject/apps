@@ -1,0 +1,30 @@
+{
+  "name": "docs-audius-org",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vocs dev",
+    "build": "node scripts/generate-llms-txt.cjs && vocs build",
+    "gen:llms-txt": "node scripts/generate-llms-txt.cjs",
+    "preview": "vocs preview",
+    "pages:dev": "npx wrangler pages dev --compatibility-date=2024-02-23 --proxy 5173 -- npm run dev",
+    "pages:deploy": "npm run build && npx wrangler pages deploy ./docs/dist",
+    "sync:api-spec": "node scripts/sync-openapi.cjs",
+    "gen:api-docs": "npm run sync:api-spec"
+  },
+  "dependencies": {
+    "@scalar/api-reference-react": "0.9.11",
+    "ajv": "8.5.0",
+    "zod": "4.3.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "vocs": "1.0.8"
+  },
+  "devDependencies": {
+    "wrangler": "3.30.1"
+  },
+  "engines": {
+    "node": ">=18.0"
+  }
+}

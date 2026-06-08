@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { AudiusSdk } from '@audius/sdk'
+import { AudiusSdkWithServices } from '@audius/sdk'
 
 import { useQueryContext } from '~/api'
 import { Env } from '~/services/env'
@@ -16,7 +16,7 @@ const getRandomSignableCharacter = () => {
 // The JWT will be sent thru the discord OAuth flow and then back to the discord server eventually
 // The purpose of this is so that the discord server can verify that the user is the one signing,
 // while also not exposing any details since the oauth flow requires data be passed via query params
-const requestDiscordJWT = async (sdk: AudiusSdk, env: Env) => {
+const requestDiscordJWT = async (sdk: AudiusSdkWithServices, env: Env) => {
   const data = getRandomSignableCharacter()
   const signature = await sdk.services.audiusWalletClient.signMessage({
     message: data

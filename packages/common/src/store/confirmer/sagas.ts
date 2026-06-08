@@ -2,8 +2,6 @@ import { call, delay, put, race, select, takeEvery } from 'redux-saga/effects'
 
 import { waitForValue } from '~/utils/sagaHelpers'
 
-import { getSDK } from '..'
-
 import * as confirmerActions from './actions'
 import {
   getResult,
@@ -16,18 +14,6 @@ import {
   getAreRequisiteCallsComplete
 } from './selectors'
 import type { RequestConfirmationError } from './types'
-
-export function* confirmTransaction(blockHash: string, blockNumber: number) {
-  const sdk = yield* getSDK()
-  yield call(
-    [sdk.services.entityManager, sdk.services.entityManager.confirmWrite],
-    {
-      blockHash,
-      blockNumber
-    }
-  )
-  return true
-}
 
 /* Private */
 

@@ -1,3 +1,0 @@
-[submodule "audius-backup-container"]
-	path = audius-backup-container
-	url = git@github.com:AudiusProject/audius-backup-container.git

@@ -1,0 +1,203 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #fff;
+  color: #1a1a1a;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.container {
+  padding: 60px 24px 24px;
+}
+
+.card {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #f5f5f5;
+  border-radius: 12px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.required {
+  font-size: 13px;
+  color: #333;
+  margin-top: 12px;
+}
+
+.code {
+  font-family: monospace;
+  font-size: 12px;
+  color: #555;
+  margin-top: 6px;
+}
+
+.profileRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.handle {
+  font-size: 16px;
+  color: #333;
+}
+
+.signOutBtn {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.signOutBtn:hover {
+  text-decoration: underline;
+}
+
+.pickBtn {
+  display: block;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pickBtn:hover {
+  background: #f9f9f9;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.textArea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.genreScroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.genreChip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #e8e8e8;
+  border: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.genreChip:hover {
+  background: #ddd;
+}
+
+.genreChipActive {
+  background: #cc0fe0;
+  color: #fff;
+}
+
+.button {
+  background-color: #cc0fe0;
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.button:hover:not(:disabled) {
+  background-color: #b00dc7;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.result {
+  font-size: 13px;
+  color: #333;
+  margin-top: 12px;
+}
+
+.loader {
+  margin: 16px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #eee;
+  border-top-color: #cc0fe0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  color: #d32f2f;
+  margin-top: 12px;
+  font-size: 13px;
+}

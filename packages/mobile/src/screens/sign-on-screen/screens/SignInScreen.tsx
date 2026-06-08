@@ -23,7 +23,6 @@ import { Button, Flex, IconArrowRight, TextLink } from '@audius/harmony-native'
 import { PasswordField } from 'app/components/fields'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { fingerprintClient } from 'app/services/fingerprint'
 
 import { EmailField } from '../components/EmailField'
 import { GuestEmailHint } from '../components/GuestEmailHint'
@@ -70,10 +69,9 @@ export const SignInScreen = () => {
   const handleSubmit = useCallback(
     async (values: SignInValues) => {
       const { email, password } = values
-      const visitorId = await fingerprintClient.identify(email, 'mobile')
       dispatch(setValueField('email', email))
       dispatch(setValueField('password', password))
-      dispatch(signIn(email, password, visitorId))
+      dispatch(signIn(email, password))
     },
     [dispatch]
   )

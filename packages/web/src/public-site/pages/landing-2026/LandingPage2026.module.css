@@ -1,0 +1,69 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  min-width: 100%;
+  background: #111;
+  color: #fff;
+  font-family: 'Urbanist', sans-serif;
+  font-feature-settings:
+    'liga' 0,
+    'clig' 0;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+/* Full-viewport dark background so wide screens don’t show body background */
+.page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #111;
+  z-index: -1;
+}
+
+/*
+ * Hero headline only (Dust Bucer): `.landing2026-text` on Hero2026 `h1`.
+ * Nav, hero image, and “Get Started” stay visible immediately for LCP.
+ */
+.page:not([data-fonts-ready]) :global(.landing2026-text) {
+  opacity: 0;
+}
+
+.page[data-fonts-ready='true'] :global(.landing2026-text) {
+  opacity: 1;
+  transition: opacity 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-fonts-ready='true'] :global(.landing2026-text) {
+    transition: none;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.spacer {
+  width: 100%;
+  height: 320px;
+}
+
+.spacerSmall {
+  width: 100%;
+  height: 160px;
+}
+
+@media (max-width: 800px) {
+  .spacer {
+    height: 240px;
+  }
+
+  .spacerSmall {
+    height: 120px;
+  }
+}

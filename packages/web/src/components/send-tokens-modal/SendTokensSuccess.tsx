@@ -1,7 +1,7 @@
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo
+  transformFanClubToTokenInfo
 } from '@audius/common/api'
 import { User, SquareSizes } from '@audius/common/models'
 import { makeSolanaTransactionLink } from '@audius/common/utils'
@@ -50,13 +50,13 @@ const SendTokensSuccess = ({
   signature,
   onClose
 }: SendTokensSuccessProps) => {
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { data: tokenBalance } = useCoinBalance({
     mint,
     includeExternalWallets: false,
     includeStaked: false
   })
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
   const currentBalance = tokenBalance?.balance
     ? tokenBalance.balance.value
     : BigInt(0)

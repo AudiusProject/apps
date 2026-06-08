@@ -3,15 +3,12 @@
   flex: 1 1 352px;
   border: 1px solid var(--harmony-n-100);
   background-color: var(--harmony-white);
-  box-shadow:
-    0 0 1px 0 var(--tile-shadow-1),
-    0 1px 0 0 var(--tile-shadow-2),
-    0 2px 5px -2px var(--tile-shadow-3);
+  box-shadow: var(--harmony-shadow-mid);
   display: flex;
   overflow: hidden;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2 ease-in-out;
+  transition: var(--harmony-hover);
   user-select: none;
   margin: 0px auto 12px;
 }
@@ -24,13 +21,24 @@
   box-shadow: none;
 }
 
+.container:hover,
 .container:active {
-  box-shadow:
-    0 0 1px 0 var(--tile-shadow-1),
-    0 2px 3px -2px var(--tile-shadow-3);
+  transform: scale(1.004);
+  box-shadow: var(--harmony-shadow-far);
 }
 
-.container .artworkIcon,
+.container .artworkIcon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: var(--harmony-unit-1);
+  opacity: 0;
+  transition: opacity 0.18s ease-in-out;
+}
+
 .container .artworkIcon circle {
   opacity: 0;
 }
@@ -40,7 +48,7 @@
 }
 
 .container .artworkIcon path {
-  fill: var(--harmony-white);
+  fill: var(--harmony-static-white);
 }
 
 .mainContent {

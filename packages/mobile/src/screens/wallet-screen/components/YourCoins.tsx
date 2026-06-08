@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentUserId,
   useQueryContext,
   useUserCoins
@@ -71,7 +71,7 @@ const YourCoinsHeader = () => {
   )
 }
 
-const DiscoverArtistCoinsCard = ({ onPress }: { onPress: () => void }) => {
+const DiscoverFanClubsCard = ({ onPress }: { onPress: () => void }) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <Flex
@@ -83,7 +83,7 @@ const DiscoverArtistCoinsCard = ({ onPress }: { onPress: () => void }) => {
         alignItems='center'
       >
         <Text variant='heading' size='s' numberOfLines={1}>
-          {walletMessages.artistCoins.title}
+          {walletMessages.fanClubs.title}
         </Text>
         <IconCaretRight color='subdued' />
       </Flex>
@@ -96,14 +96,14 @@ export const YourCoins = () => {
   const navigation = useNavigation()
   const { env } = useQueryContext()
 
-  const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
+  const { data: fanClubs, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
-  const audioCoin = artistCoins?.find(
+  const { data: artistOwnedCoin } = useArtistCreatedFanClub(currentUserId)
+  const audioCoin = fanClubs?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
-  const otherCoins = artistCoins?.filter(
+  const otherCoins = fanClubs?.filter(
     (coin) =>
       coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
       coin?.mint !== artistOwnedCoin?.mint &&
@@ -119,11 +119,11 @@ export const YourCoins = () => {
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
 
-  // Add cash card at the beginning, and discover artist coins card at the end
-  const cards = ['cash' as const, ...coins, 'discover-artist-coins' as const]
+  // Add cash card at the beginning, and discover fan clubs card at the end
+  const cards = ['cash' as const, ...coins, 'discover-fan-clubs' as const]
 
-  const handleDiscoverArtistCoins = useCallback(() => {
-    navigation.navigate('ArtistCoinsExplore')
+  const handleDiscoverFanClubs = useCallback(() => {
+    navigation.navigate('FanClubsExplore')
   }, [navigation])
 
   return (
@@ -137,8 +137,8 @@ export const YourCoins = () => {
             <Box key={typeof item === 'string' ? item : item.mint}>
               {item === 'cash' ? (
                 <CashCard />
-              ) : item === 'discover-artist-coins' ? (
-                <DiscoverArtistCoinsCard onPress={handleDiscoverArtistCoins} />
+              ) : item === 'discover-fan-clubs' ? (
+                <DiscoverFanClubsCard onPress={handleDiscoverFanClubs} />
               ) : item === 'audio-coin' ? (
                 <AudioCoinCard />
               ) : (

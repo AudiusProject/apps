@@ -11,8 +11,8 @@ import {
   chatActions,
   reachabilitySelectors,
   confirmerActions,
-  confirmTransaction,
-  getSDK
+  getSDK,
+  toastActions
 } from '@audius/common/store'
 import {
   squashNewLines,
@@ -25,8 +25,6 @@ import {
 import { Id } from '@audius/sdk'
 import { call, getContext, put, select, takeEvery } from 'redux-saga/effects'
 
-import feedSagas from 'common/store/pages/profile/lineups/feed/sagas.js'
-import tracksSagas from 'common/store/pages/profile/lineups/tracks/sagas.js'
 import { push as pushRoute } from 'utils/navigation'
 import { waitForWrite } from 'utils/sagaHelpers'
 
@@ -140,34 +138,23 @@ function* confirmUpdateProfile(userId, metadata) {
     confirmerActions.requestConfirmation(
       makeKindId(Kind.USERS, userId),
       function* () {
-        const response = yield call(audiusBackendInstance.updateCreator, {
+        yield call(audiusBackendInstance.updateCreator, {
           metadata,
           sdk
         })
-        const { blockHash, blockNumber } = response
-
-        const confirmed = yield call(confirmTransaction, blockHash, blockNumber)
-        if (!confirmed) {
-          throw new Error(
-            `Could not confirm update profile for user id ${userId}`
-          )
-        }
         yield waitForAccount()
         const currentUserId = yield call(queryCurrentUserId)
-        const { data = [] } = yield call(
-          [sdk.full.users, sdk.full.users.getUser],
-          {
-            id: Id.parse(userId),
-            userId: Id.parse(currentUserId)
-          }
-        )
+        const { data = [] } = yield call([sdk.users, sdk.users.getUser], {
+          id: Id.parse(userId),
+          userId: Id.parse(currentUserId)
+        })
         return userMetadataListFromSDK(data)[0]
       },
       function* (confirmedUser) {
         // Invalidate the user query to refetch fresh data from the server
         // This ensures we get the canonical data including:
         // - Processed image sizes (cover photo, profile picture)
-        // - Computed artist_coin_badge (based on coin_flair_mint and user's coins)
+        // - Computed fan_club_badge (based on coin_flair_mint and user's coins)
         queryClient.invalidateQueries({
           queryKey: getUserQueryKey(confirmedUser.user_id)
         })
@@ -175,6 +162,11 @@ function* confirmUpdateProfile(userId, metadata) {
       },
       function* () {
         yield put(profileActions.updateProfileFailed())
+        yield put(
+          toastActions.toast({
+            content: "Couldn't save your profile. Please try again."
+          })
+        )
       },
       undefined,
       undefined,
@@ -184,10 +176,5 @@ function* confirmUpdateProfile(userId, metadata) {
 }
 
 export default function sagas() {
-  return [
-    ...feedSagas(),
-    ...tracksSagas(),
-    watchFetchProfile,
-    watchUpdateProfile
-  ]
+  return [watchFetchProfile, watchUpdateProfile]
 }

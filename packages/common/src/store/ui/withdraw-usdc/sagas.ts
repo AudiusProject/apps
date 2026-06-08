@@ -7,6 +7,7 @@ import { queryAccountUser } from '~/api'
 import { getUSDCBalanceQueryKey } from '~/api/tan-query/wallets/useUSDCBalance'
 import { Name, Status, WithdrawUSDCTransferEventFields } from '~/models'
 import { transferFromUserBank } from '~/services/audius-backend/solana'
+import { getResponseErrorAnalyticsFields } from '~/utils/error'
 
 import { buyUSDCActions } from '../../buy-usdc'
 import { getContext } from '../../effects'
@@ -86,7 +87,8 @@ function* doWithdrawUSDCCoinflow({
       track,
       make,
       analyticsFields,
-      signer: rootSolanaAccount
+      signer: rootSolanaAccount,
+      keypair: rootSolanaAccount
     })
 
     console.debug(
@@ -164,36 +166,33 @@ function* doWithdrawUSDCCoinflow({
       })
       yield* put(cleanupWithdrawUSDC())
       yield* put(closeWithdrawUSDCModal())
-      // Buy USDC recovery already logs to sentry and makes an analytics event
-      // so add some logs to help discern which flow the recovery was triggered
-      // from and help aid in debugging should this ever hit.
+      // Buy USDC recovery already logs and makes an analytics event, so add
+      // some logs to help discern which flow the recovery was triggered from
+      // and help aid in debugging should this ever hit.
       if (action.payload.status === Status.ERROR) {
-        // Breadcrumb hint:
         console.warn(
           'Failed to transfer funds back from root wallet:',
           rootSolanaAccount.publicKey.toBase58()
         )
-        // Console error for sentry issue
         console.error('Failed to recover funds from Coinflow Withdraw')
       }
     }
   } catch (e: unknown) {
     console.error('Withdraw USDC failed', e)
-    const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
+    const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
     yield* call(
       track,
       make({
         eventName: Name.WITHDRAW_USDC_FAILURE,
         ...analyticsFields,
-        error: e instanceof Error ? e.message : e
+        error: e instanceof Error ? e.message : e,
+        ...responseErrorFields
       })
     )
 
-    reportToSentry({
-      error: e as Error
-    })
+    console.error(e as Error)
   }
 }
 
@@ -209,9 +208,11 @@ function* doWithdrawUSDCManualTransfer({
   const withdrawalAmountDollars = amount / 100
   const queryClient = yield* getContext('queryClient')
   const sdk = yield* getSDK()
+  const solanaWalletService = yield* getContext('solanaWalletService')
   const connection = sdk.services.solanaClient.connection
   const env = yield* getContext('env')
   const mint = new PublicKey(env.USDC_MINT_ADDRESS)
+  const rootSolanaAccount = yield* call([solanaWalletService, 'getKeypair'])
 
   const analyticsFields: WithdrawUSDCTransferEventFields = {
     destinationAddress,
@@ -244,7 +245,8 @@ function* doWithdrawUSDCManualTransfer({
       destinationWallet,
       track,
       make,
-      analyticsFields
+      analyticsFields,
+      keypair: rootSolanaAccount ?? undefined
     })
 
     console.debug('Withdraw USDC - successfully transferred USDC.', {
@@ -267,21 +269,20 @@ function* doWithdrawUSDCManualTransfer({
     })
   } catch (e: unknown) {
     console.error('Withdraw USDC failed', e)
-    const reportToSentry = yield* getContext('reportToSentry')
     yield* put(withdrawUSDCFailed({ error: e as Error }))
 
+    const responseErrorFields = yield* call(getResponseErrorAnalyticsFields, e)
     yield* call(
       track,
       make({
         eventName: Name.WITHDRAW_USDC_FAILURE,
         ...analyticsFields,
-        error: e instanceof Error ? e.message : e
+        error: e instanceof Error ? e.message : e,
+        ...responseErrorFields
       })
     )
 
-    reportToSentry({
-      error: e as Error
-    })
+    console.error(e as Error)
   }
 }
 

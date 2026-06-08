@@ -8,11 +8,11 @@ import type { IconComponent } from '@audius/harmony-native'
 import type { TextProps } from 'app/components/core'
 import type { ContextualParams } from 'app/hooks/useNavigation'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
 import { AppDrawerContext } from '../AppDrawerContext'
-import { useAppDrawerNavigation } from '../useAppDrawerNavigation'
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
   accountListItem: {
@@ -61,7 +61,7 @@ export const LeftNavLink = <Screen extends keyof AppTabScreenParamList>(
   } = props
   const styles = useStyles()
   const { neutral } = useThemeColors()
-  const navigation = useAppDrawerNavigation()
+  const navigation = useAppTabNavigation()
   const { drawerHelpers } = useContext(AppDrawerContext)
 
   const handlePress = useCallback(() => {

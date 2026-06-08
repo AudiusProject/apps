@@ -11,7 +11,13 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerProfilePage } from 'pages/profile-page/DesktopServerProfilePage'
 import { MobileServerProfilePage } from 'pages/profile-page/MobileServerProfilePage'
-import { getAppUrl, getUserPageContext, getWebUrl } from 'ssr/metaTags'
+import {
+  DEFAULT_IMAGE_URL,
+  getAppUrl,
+  getUserPageContext,
+  getWebUrl,
+  isDiscord
+} from 'ssr/metaTags'
 import { isMobileUserAgent } from 'utils/clientUtil'
 
 import { getIndexHtml } from '../getIndexHtml'
@@ -23,11 +29,12 @@ type TrackPageContext = PageContextServer & {
 }
 
 export default function render(pageContext: TrackPageContext) {
-  const { pageProps, headers, urlPathname } = pageContext
+  const { pageProps, headers, urlPathname, routeParams } = pageContext
   const { user } = pageProps
   const { id, name, bio } = user ?? {}
+  const routeHandle = routeParams?.handle?.toLowerCase() ?? ''
   // Use lower case since cache lookup by handle will lowercase it
-  const handle = user?.handle?.toLowerCase() ?? ''
+  const handle = user?.handle?.toLowerCase() ?? routeHandle
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
@@ -48,11 +55,29 @@ export default function render(pageContext: TrackPageContext) {
   const appUrl = getAppUrl(urlPathname)
   const webUrl = getWebUrl(urlPathname)
 
+  // Discord uses a weird aspect ratio for OG unfurls, so serve the profile
+  // picture directly instead of the custom OG image
+  const discordBot = isDiscord(userAgent)
+  const discordImageOverride = discordBot
+    ? (user?.profile_picture?.['1000x1000'] ?? DEFAULT_IMAGE_URL)
+    : undefined
+
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
       <ServerWebPlayer isMobile={isMobile} location={urlPathname}>
         <>
-          <MetaTags {...seoMetadata} appUrl={appUrl} webUrl={webUrl} />
+          <MetaTags
+            {...seoMetadata}
+            {...(discordImageOverride
+              ? {
+                  image: discordImageOverride,
+                  entityType: undefined,
+                  hashId: undefined
+                }
+              : {})}
+            appUrl={appUrl}
+            webUrl={webUrl}
+          />
           {user ? (
             isMobile ? (
               <MobileServerProfilePage user={user} />

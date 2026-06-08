@@ -23,7 +23,7 @@ const messages = {
   readyToClaim: 'Ready to claim!'
 }
 
-const TRENDING_CHALLENGE_IDS = new Set(['tt', 'tut', 'tp'])
+const TRENDING_CHALLENGE_IDS = new Set(['tt', 'tut'])
 
 const getCooldownChallengeInfo = (
   challenge: UndisbursedUserChallenge,

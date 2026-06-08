@@ -15,7 +15,9 @@ export type ReactionProps = {
   className?: string
   animationData: Promise<{ default: LottieOptions['animationData'] }>
   isActive?: boolean
+  isDisabled?: boolean
   isResponsive?: boolean
+  playOnHoverOnly?: boolean
   onClick?: MouseEventHandler
   width?: number
   height?: number
@@ -28,13 +30,16 @@ export const Reaction = (props: ReactionProps) => {
     className,
     animationData,
     isActive,
+    isDisabled = false,
     isResponsive,
+    playOnHoverOnly = false,
     onClick,
     width = 86,
     height = 86,
     title,
     disableClickAnimation = false
   } = props
+  const onlyPlayOnHover = playOnHoverOnly || isDisabled
   const [isInteracting, setInteracting] = useState(false)
   const [isClicked, setIsClicked] = useState(false)
   const [animation, setAnimation] = useState<LottieOptions['animationData']>()
@@ -77,20 +82,21 @@ export const Reaction = (props: ReactionProps) => {
 
   const lottieRef = useRef<LottieRefCurrentProps>(null)
   useEffect(() => {
-    if (lottieRef.current) {
-      if (isActive === false && !isInteracting) {
-        lottieRef.current.stop()
-      } else {
-        lottieRef.current.play()
-      }
+    if (!lottieRef.current) return
+    const shouldPlay = isInteracting || (!onlyPlayOnHover && isActive !== false)
+    if (shouldPlay) {
+      lottieRef.current.play()
+    } else {
+      lottieRef.current.stop()
     }
-  }, [lottieRef, isActive, isInteracting])
+  }, [lottieRef, isActive, isInteracting, onlyPlayOnHover])
 
   return (
     <div
       className={cn(styles.root, className, {
         [styles.active]: isActive === true,
         [styles.inactive]: isActive === false,
+        [styles.disabled]: isDisabled,
         [styles.responsive]: isResponsive,
         [styles.clicked]: !disableClickAnimation && isClicked
       })}
@@ -102,7 +108,7 @@ export const Reaction = (props: ReactionProps) => {
         style={{ height, width }}
         lottieRef={lottieRef}
         title={title}
-        autoplay
+        autoplay={!onlyPlayOnHover}
         loop
         animationData={animation}
       />

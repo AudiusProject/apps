@@ -12,11 +12,12 @@ import {
   Text,
   IconCart,
   IconComponent,
-  IconSparkles
+  IconUserFollowing,
+  Image
 } from '@audius/harmony'
+import cn from 'classnames'
 
 import { CollectionDogEar } from 'components/collection'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { UserLink } from 'components/link'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
@@ -26,7 +27,7 @@ import { TrackDogEar } from './TrackDogEar'
 
 const messages = {
   by: 'By',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   premiumTrack: (contentType: 'track' | 'album') =>
     `PREMIUM ${contentType.toUpperCase()}`,
   earn: (amount: string) => `Earn ${amount} $AUDIO for this purchase!`
@@ -53,11 +54,11 @@ export const LockedContentDetailsTile = ({
   const title = isAlbum ? metadata.playlist_name : metadata.title
   const isDownloadGated = !isAlbum && metadata.is_download_gated
 
-  const trackArt = useTrackCoverArt({
+  const { imageUrl: trackArt } = useTrackCoverArt({
     trackId: contentId,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const albumArt = useCollectionCoverArt({
+  const { imageUrl: albumArt } = useCollectionCoverArt({
     collectionId: contentId,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -76,8 +77,8 @@ export const LockedContentDetailsTile = ({
     IconComponent = null
     message = null
   } else {
-    IconComponent = IconSparkles
-    message = messages.specialAccess
+    IconComponent = IconUserFollowing
+    message = messages.followersOnly
   }
 
   return (
@@ -92,10 +93,9 @@ export const LockedContentDetailsTile = ({
         position: 'relative'
       }}
     >
-      <DynamicImage
-        wrapperClassName={styles.imageWrapper}
-        className={styles.image}
-        image={image}
+      <Image
+        className={cn(styles.imageWrapper, styles.image)}
+        src={image}
         aria-label={label}
       />
       {isAlbum ? (

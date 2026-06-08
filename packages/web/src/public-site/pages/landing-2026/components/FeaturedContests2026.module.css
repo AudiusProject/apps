@@ -1,0 +1,211 @@
+.section {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+/* Full-width decorative diagonal lines – SVG from Figma (75-9505) */
+.lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.lines img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.contentWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 37px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.headline {
+  font-family: 'Dust Bucer', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 140px;
+  line-height: 0.72;
+  color: #fff;
+  margin: 0;
+  width: 100%;
+  font-feature-settings: 'salt' 1;
+}
+
+.subline {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.5;
+  color: #ebebeb;
+  margin: 0;
+  width: 100%;
+}
+
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.artworkWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.artworkSkeletonInner {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.artworkWrapLoaded .artworkSkeletonInner {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.artworkWrapLoaded .artwork {
+  opacity: 1;
+}
+
+.bwOverlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  mix-blend-mode: hue;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.card:hover .bwOverlay,
+.card:focus-visible .bwOverlay {
+  opacity: 0;
+}
+
+.artworkPlaceholder {
+  position: absolute;
+  inset: 0;
+  background: #c2c0cc;
+}
+
+.title {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ebebeb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* Skeleton styles */
+.artworkSkeleton {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.titleSkeleton {
+  height: 24px;
+  width: 60%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+@media (max-width: 800px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .headline {
+    font-size: 96px;
+  }
+
+  .subline {
+    font-size: 18px;
+  }
+
+  .gridContainer {
+    padding: 0 16px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .card {
+    min-width: 0;
+  }
+}

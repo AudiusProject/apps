@@ -8,7 +8,6 @@ import Lottie from 'lottie-react'
 import { FileWithPreview } from 'react-dropzone'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import ImageSelectionButton from 'components/image-selection/ImageSelectionButton'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 
@@ -100,22 +99,33 @@ const CoverPhoto = ({
     </div>
   )
 
+  const useBlur = !updatedCoverPhoto && shouldBlur
+
   return (
     <div className={cn(styles.coverPhoto, className)}>
-      <DynamicImage
-        alt={messages.altText}
-        image={imageSettings.backgroundImage}
-        isUrl={false}
-        wrapperClassName={styles.photo}
-        imageStyle={imageSettings.backgroundStyle}
-        useBlur={shouldBlur}
-        usePlaceholder={false}
-        immediate={imageSettings.immediate}
+      <div
+        role={messages.altText ? 'img' : undefined}
+        aria-label={messages.altText}
+        className={styles.photo}
+        style={{
+          backgroundImage: imageSettings.backgroundImage,
+          ...imageSettings.backgroundStyle
+        }}
       >
+        {useBlur ? (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backdropFilter: 'blur(25px)',
+              zIndex: 3
+            }}
+          />
+        ) : null}
         <div className={styles.spinner}>
           {processing ? loadingElement : null}
         </div>
-      </DynamicImage>
+      </div>
 
       <div className={styles.button}>
         {edit ? (

@@ -1,4 +1,4 @@
-import { Id, full } from '@audius/sdk'
+import { Id, type GetUserRecommendedTracksRequest } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -19,7 +19,7 @@ const DEFAULT_PAGE_SIZE = 10
 
 // `id` is automatically added by the hook
 export type UseRecommendedTracksArgs = Omit<
-  SDKInfiniteQueryArgs<full.GetUserRecommendedTracksRequest>,
+  SDKInfiniteQueryArgs<GetUserRecommendedTracksRequest>,
   'id'
 >
 
@@ -53,7 +53,7 @@ export const useRecommendedTracks = (
     queryFn: async ({ pageParam }) => {
       if (!currentUserId) return []
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserRecommendedTracks({
+      const { data = [] } = await sdk.users.getUserRecommendedTracks({
         ...args,
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),

@@ -3,12 +3,6 @@ import { IconComponent } from '@audius/harmony'
 import { categories } from './categories'
 import { MoodInfo } from './moods'
 
-export type ViewLayout = 'grid' | 'list'
-export const viewLayoutOptions: { label: string; value: ViewLayout }[] = [
-  { label: 'Grid', value: 'grid' },
-  { label: 'List', value: 'list' }
-]
-
 // NOTE: This is different from SearchCategory because
 // it uses `profiles` instead of `users`
 export enum CategoryView {

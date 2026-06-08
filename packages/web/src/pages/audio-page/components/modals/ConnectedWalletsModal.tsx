@@ -5,7 +5,7 @@ import {
   useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import { useConnectedWalletsModal } from '@audius/common/store'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   Button,
   Flex,
@@ -18,11 +18,11 @@ import {
   ModalTitle,
   Text
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import Drawer from 'components/drawer/Drawer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { reportToSentry } from 'store/errors/reportToSentry'
 import { NEW_WALLET_CONNECTED_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 
 import {
@@ -36,7 +36,7 @@ export const WALLET_COUNT_LIMIT = 5
 const messages = {
   title: 'Connected Wallets',
   description:
-    'Connect wallets to your account to display external $AUDIO balances and showcase your artist coins',
+    'Connect wallets to your account to display external $AUDIO balances and showcase your coins',
   connect: 'Connect Wallet',
   limit: `Reached Limit of ${WALLET_COUNT_LIMIT} Connected Wallets.`,
   noConnected: 'You haven’t connected any wallets yet.',
@@ -57,8 +57,11 @@ enum Pages {
   CONFIRM_REMOVE_WALLET = 1
 }
 
-export const ConnectedWalletsModal = () => {
-  const { isOpen, onClose, onClosed } = useConnectedWalletsModal()
+export const ConnectedWalletsModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const onClosed = useCallback(() => modal.remove(), [modal])
   const { toast } = useContext(ToastContext)
 
   const [currentPage, setCurrentPage] = useState(Pages.TABLE)
@@ -109,20 +112,7 @@ export const ConnectedWalletsModal = () => {
         toast(messages.walletAlreadyAdded)
       } else {
         toast(messages.error)
-        await reportToSentry({
-          name: 'ConnectWallet',
-          error:
-            e instanceof Error
-              ? e
-              : new Error(
-                  e instanceof Object && 'message' in e
-                    ? (e.message as string)
-                    : 'Unknown Error'
-                ),
-          additionalInfo: {
-            raw: e
-          }
-        })
+        await console.error('ConnectWallet', e instanceof Error)
       }
     },
     [toast]
@@ -260,4 +250,7 @@ export const ConnectedWalletsModal = () => {
       )}
     </Modal>
   )
-}
+})
+
+NiceModal.register('ConnectedWallets', ConnectedWalletsModal)
+registerNiceModalId('ConnectedWallets')

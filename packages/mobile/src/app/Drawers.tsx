@@ -6,7 +6,6 @@ import type { Modals } from '@audius/common/store'
 import { AddCashDrawer } from 'app/components/add-funds-drawer/AddCashDrawer'
 import { AddToCollectionDrawer } from 'app/components/add-to-collection-drawer'
 import { ApiRewardsDrawer } from 'app/components/api-rewards-drawer/ApiRewardsDrawer'
-import { ArtistCoinDetailsDrawer } from 'app/components/artist-coin-details-drawer/ArtistCoinDetailsDrawer'
 import { AudioBreakdownDrawer } from 'app/components/audio-breakdown-drawer'
 import { TiersExplainerDrawer } from 'app/components/audio-rewards'
 import { BlockMessagesDrawer } from 'app/components/block-messages-drawer'
@@ -15,6 +14,7 @@ import { ClaimAllRewardsDrawer } from 'app/components/challenge-rewards-drawer/C
 import { ChatActionsDrawer } from 'app/components/chat-actions-drawer'
 import { CoinflowOnrampDrawer } from 'app/components/coinflow-onramp-drawer/CoinflowOnrampDrawer'
 import { CoinflowWithdrawDrawer } from 'app/components/coinflow-withdraw-drawer/CoinflowWithdrawDrawer'
+import { ConnectDrawer } from 'app/components/connect-drawer'
 import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-drawer'
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
 import { DeleteChatDrawer } from 'app/components/delete-chat-drawer'
@@ -24,22 +24,23 @@ import { ArtistPickConfirmationDrawer } from 'app/components/drawers/ArtistPickC
 import { MuteCommentsConfirmationDrawer } from 'app/components/drawers/MuteCommentsConfirmationDrawer'
 import { DuplicateAddConfirmationDrawer } from 'app/components/duplicate-add-confirmation-drawer'
 import { EnablePushNotificationsDrawer } from 'app/components/enable-push-notifications-drawer'
-import { FeedFilterDrawer } from 'app/components/feed-filter-drawer'
+import { FanClubDetailsDrawer } from 'app/components/fan-club-details-drawer/FanClubDetailsDrawer'
 import { ForgotPasswordDrawer } from 'app/components/forgot-password-drawer'
 import { HostRemixContestDrawer } from 'app/components/host-remix-contest-drawer/HostRemixContestDrawer'
 import { InboxUnavailableDrawer } from 'app/components/inbox-unavailable-drawer/InboxUnavailableDrawer'
 import { LeavingAudiusDrawer } from 'app/components/leaving-audius-drawer'
 import { LockedContentDrawer } from 'app/components/locked-content-drawer'
+import { LockedTextPostDrawer } from 'app/components/locked-text-post-drawer'
 import { ManagerModeDrawer } from 'app/components/manager-mode-drawer/ManagerModeDrawer'
 import { OverflowMenuDrawer } from 'app/components/overflow-menu-drawer'
 import { PlaybackRateDrawer } from 'app/components/playback-rate-drawer'
 import { PremiumContentPurchaseDrawer } from 'app/components/premium-content-purchase-drawer'
 import { ProfileActionsDrawer } from 'app/components/profile-actions-drawer'
 import { PurchaseVendorDrawer } from 'app/components/purchase-vendor-drawer/PurchaseVendorDrawer'
+import { QueueDrawer } from 'app/components/queue-drawer'
 import { RateCtaDrawer } from 'app/components/rate-cta-drawer'
 import { ReceiveTokensDrawer } from 'app/components/receive-tokens-drawer'
 import { SendTokensDrawer } from 'app/components/send-tokens-drawer'
-import { ShareDrawer } from 'app/components/share-drawer'
 import { SignOutConfirmationDrawer } from 'app/components/sign-out-confirmation-drawer'
 import { StripeOnrampDrawer } from 'app/components/stripe-onramp-drawer'
 import { TransferAudioMobileDrawer } from 'app/components/transfer-audio-mobile-drawer'
@@ -52,12 +53,12 @@ import { ReplaceTrackProgressDrawer } from 'app/screens/edit-track-screen/compon
 import { EarlyReleaseConfirmationDrawer } from 'app/screens/edit-track-screen/components/EarlyReleaseConfirmationDrawer'
 import { PublishConfirmationDrawer } from 'app/screens/edit-track-screen/components/PublishConfirmationDrawer'
 import { ConnectNewWalletDrawer } from 'app/screens/external-wallets/components/ConnectNewWalletDrawer'
+import { FeedFilterDrawer } from 'app/screens/feed-screen'
 import { WelcomeDrawer } from 'app/screens/sign-on-screen/components/WelcomeDrawer'
 import { PickWinnersDrawer } from 'app/screens/track-screen/PickWinnersDrawer'
 import {
-  TrendingCategoryDrawer,
-  TrendingFilterDrawer,
-  TrendingTimeRangeDrawer
+  TrendingCombinedFilterDrawer,
+  TrendingFilterDrawer
 } from 'app/screens/trending-screen'
 import { WalletRowOverflowMenu } from 'app/screens/wallet-screen/components/LinkedWallets'
 
@@ -113,12 +114,10 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ClaimAllRewards: ClaimAllRewardsDrawer,
   APIRewardsExplainer: ApiRewardsDrawer,
   TransferAudioMobileWarning: TransferAudioMobileDrawer,
-  Share: ShareDrawer,
   DeactivateAccountConfirmation: DeactivateAccountConfirmationDrawer,
-  FeedFilter: FeedFilterDrawer,
   TrendingGenreSelection: TrendingFilterDrawer,
-  TrendingCategory: TrendingCategoryDrawer,
-  TrendingTimeRange: TrendingTimeRangeDrawer,
+  TrendingFilter: TrendingCombinedFilterDrawer,
+  FeedFilter: FeedFilterDrawer,
   Overflow: OverflowMenuDrawer,
   SignOutConfirmation: SignOutConfirmationDrawer,
   AddToCollection: AddToCollectionDrawer,
@@ -147,7 +146,7 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   WithdrawUSDCModal: WithdrawUSDCDrawer,
   ReceiveTokensModal: ReceiveTokensDrawer,
   SendTokensModal: SendTokensDrawer,
-  ArtistCoinDetailsModal: ArtistCoinDetailsDrawer,
+  FanClubDetailsModal: FanClubDetailsDrawer,
   VerificationSuccess: VerificationSuccessDrawer,
   VerificationError: VerificationErrorDrawer
 }
@@ -165,6 +164,7 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   RemoveDownloadedFavorites: RemoveDownloadedFavoritesDrawer,
   UnfavoriteDownloadedCollection: UnfavoriteDownloadedCollectionDrawer,
   LockedContent: LockedContentDrawer,
+  LockedTextPost: LockedTextPostDrawer,
   ChatActions: ChatActionsDrawer,
   CreateChatActions: CreateChatActionsDrawer,
   BlockMessages: BlockMessagesDrawer,
@@ -173,6 +173,8 @@ const nativeDrawersMap: { [DrawerName in Drawer]?: ComponentType } = {
   Welcome: WelcomeDrawer,
   ConnectNewWallet: ConnectNewWalletDrawer,
   PickWinners: PickWinnersDrawer,
+  Queue: QueueDrawer,
+  Connect: ConnectDrawer,
   CoinInsightsOverflowMenu,
   WalletRowOverflowMenu
 }

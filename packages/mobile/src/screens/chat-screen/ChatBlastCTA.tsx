@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 
 import { useCanSendChatBlast } from '@audius/common/hooks'
 import { Name } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import { TouchableHighlight } from 'react-native-gesture-handler'
 import { useSelector } from 'react-redux'
 
@@ -17,11 +17,11 @@ import { KeyboardAvoidingView } from 'app/components/core'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer/constants'
 import { make, track } from 'app/services/analytics'
 
-import { useAppDrawerNavigation } from '../app-drawer-screen'
+import { useAppTabNavigation } from '../app-screen'
 
 import { useKeyboardAvoidingPlaybarStyle } from './hooks/useKeyboardAvoidingPlaybarStyle'
 
-const { getHasTrack } = playerSelectors
+const { getHasTrack } = playbackSelectors
 
 const CTA_HEIGHT = 80
 
@@ -33,7 +33,7 @@ const messages = {
 }
 
 export const ChatBlastCTA = () => {
-  const navigation = useAppDrawerNavigation()
+  const navigation = useAppTabNavigation()
   const keyboardAvoidingPlaybarStyle = useKeyboardAvoidingPlaybarStyle()
   const hasCurrentlyPlayingTrack = useSelector(getHasTrack)
 

@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 
 import {
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   modalsActions
 } from '@audius/common/store'
@@ -25,8 +25,8 @@ import { RepeatButton } from './RepeatButton'
 import { ShuffleButton } from './ShuffleButton'
 
 const { setVisibility } = modalsActions
-const { getRepeat, getShuffle } = queueSelectors
-const { shuffle, repeat } = queueActions
+const { getRepeat, getShuffle } = playbackSelectors
+const { setShuffle: shuffle, setRepeat: repeat } = playbackActions
 
 const messages = {
   nextLabel: 'Next Track',

@@ -1,26 +1,28 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentUserId,
-  useUserComments,
-  useProfileUser
+  useUserByParams,
+  useUserComments
 } from '@audius/common/api'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { LayoutAnimation } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useToggle } from 'react-use'
 
 import { Box, Divider, Flex, useTheme } from '@audius/harmony-native'
 import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
+import { useRoute } from 'app/hooks/useRoute'
 import { zIndex } from 'app/utils/zIndex'
 
 import { ArtistRecommendations } from '../ArtistRecommendations'
-import { BuyArtistCoinButton } from '../BuyArtistCoinButton'
+import { BuyFanClubButton } from '../BuyFanClubButton'
 import { ProfileCoverPhoto } from '../ProfileCoverPhoto'
 import { ProfileInfo } from '../ProfileInfo'
 import { ProfileMetrics } from '../ProfileMetrics'
-import { UploadTrackButton } from '../UploadTrackButton'
+import { ProfileScrollBridge } from '../ProfileScrollContext'
 
 import { ArtistProfilePicture } from './ArtistProfilePicture'
 import { Bio } from './Bio'
@@ -36,15 +38,12 @@ export const ProfileHeader = memo(() => {
   const [isExpanded, setIsExpanded] = useToggle(false)
   const [isExpandable, setIsExpandable] = useState(false)
 
-  const {
-    user_id: userId,
-    does_current_user_follow: doesCurrentUserFollow,
-    current_user_followee_follow_count: currentUserFolloweeFollowCount,
-    website,
-    twitter_handle: twitterHandle,
-    instagram_handle: instagramHandle,
-    tiktok_handle: tikTokHandle
-  } = useProfileUser({
+  // Read from the route-params cache directly so user data is available on
+  // the first render. `useProfileUser` depends on Redux state set in a
+  // focus effect, which races with the component's initial render and
+  // otherwise caused the avatar and follow-state-derived UI to pop in.
+  const { params } = useRoute<'Profile'>()
+  const { data: paramsUser } = useUserByParams(params, {
     select: (user) => ({
       user_id: user.user_id,
       does_current_user_follow: user.does_current_user_follow,
@@ -55,14 +54,24 @@ export const ProfileHeader = memo(() => {
       instagram_handle: user.instagram_handle,
       tiktok_handle: user.tiktok_handle
     })
-  }).user ?? {}
+  })
+
+  const {
+    user_id: userId,
+    does_current_user_follow: doesCurrentUserFollow,
+    current_user_followee_follow_count: currentUserFolloweeFollowCount,
+    website,
+    twitter_handle: twitterHandle,
+    instagram_handle: instagramHandle,
+    tiktok_handle: tikTokHandle
+  } = paramsUser ?? {}
 
   const { data: comments } = useUserComments({
     userId: userId || 0,
     pageSize: 1
   })
-  const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  const { data: fanClub, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
   const { tier } = useTierAndVerifiedForUser(userId)
   const hasTier = tier !== 'none'
   const isOwner = userId === accountId
@@ -102,15 +111,20 @@ export const ProfileHeader = memo(() => {
   }, [isExpanded, setIsExpanded])
 
   const { spacing } = useTheme()
+  const insets = useSafeAreaInsets()
+
+  const hasFanClubButton = !isFanClubLoading && !!userId && !!fanClub?.mint
+  const hasBottomSection = hasUserFollowed || hasFanClubButton
 
   return (
     <>
+      <ProfileScrollBridge />
       <ProfileCoverPhoto />
       <Box
         style={css({
           position: 'absolute',
-          top: spacing.unit13,
-          left: spacing.unit3,
+          top: insets.top + spacing.unit12,
+          left: spacing.unit4,
           zIndex: zIndex.PROFILE_PAGE_PROFILE_PICTURE
         })}
       >
@@ -146,17 +160,19 @@ export const ProfileHeader = memo(() => {
               onPress={handleToggleExpand}
             />
           ) : null}
-          <Divider mh={-12} />
-          {!hasUserFollowed ? null : (
-            <ArtistRecommendations onClose={handleCloseArtistRecs} />
-          )}
-          <Flex pointerEvents='box-none' mt='s'>
-            {isOwner ? (
-              <UploadTrackButton />
-            ) : !isArtistCoinLoading && userId && artistCoin?.mint ? (
-              <BuyArtistCoinButton userId={userId} />
-            ) : null}
-          </Flex>
+          {hasBottomSection ? (
+            <>
+              <Divider mh={-12} />
+              {!hasUserFollowed ? null : (
+                <ArtistRecommendations onClose={handleCloseArtistRecs} />
+              )}
+              {hasFanClubButton ? (
+                <Flex pointerEvents='box-none' mt='s' gap='s'>
+                  <BuyFanClubButton userId={userId!} />
+                </Flex>
+              ) : null}
+            </>
+          ) : null}
         </OnlineOnly>
       </Flex>
     </>

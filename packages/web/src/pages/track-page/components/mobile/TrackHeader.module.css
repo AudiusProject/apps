@@ -5,6 +5,8 @@
   font-weight: var(--harmony-font-bold);
   line-height: 25px;
   text-align: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .titleArtistSection {

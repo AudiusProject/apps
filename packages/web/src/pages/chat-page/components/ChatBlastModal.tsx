@@ -1,19 +1,18 @@
+import { useCallback } from 'react'
+
 import {
-  useArtistCreatedCoin,
+  useArtistCreatedFanClub,
   useCurrentAccountUser,
   useCurrentUserId,
-  useArtistCoinMembersCount
+  useFanClubMembersCount
 } from '@audius/common/api'
 import {
   useFirstAvailableBlastAudience,
   usePurchasersAudience,
   useRemixersAudience
 } from '@audius/common/hooks'
-import {
-  useChatBlastModal,
-  chatActions,
-  useCreateChatModal
-} from '@audius/common/src/store'
+import { registerNiceModalId } from '@audius/common/services'
+import { chatActions, useCreateChatModal } from '@audius/common/src/store'
 import { formatNumberCommas } from '@audius/common/utils'
 import {
   Flex,
@@ -31,6 +30,7 @@ import {
   Select
 } from '@audius/harmony'
 import { ChatBlastAudience } from '@audius/sdk'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { Formik, useField } from 'formik'
 import { useDispatch } from 'react-redux'
 
@@ -77,9 +77,11 @@ type ChatBlastFormValues = {
   remixed_track_id?: number
 }
 
-export const ChatBlastModal = () => {
+export const ChatBlastModal = NiceModal.create(() => {
   const dispatch = useDispatch()
-  const { isOpen, onClose } = useChatBlastModal()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
   const { onOpen: openCreateChatModal, data: createChatModalData } =
     useCreateChatModal()
 
@@ -159,7 +161,10 @@ export const ChatBlastModal = () => {
       </Formik>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ChatBlastModal', ChatBlastModal)
+registerNiceModalId('ChatBlastModal')
 
 const ChatBlastsFields = () => {
   const [field] = useField(TARGET_AUDIENCE_FIELD)
@@ -322,11 +327,11 @@ const RemixCreatorsMessageField = () => {
 const CoinHoldersMessageField = () => {
   const { data: currentUserId } = useCurrentUserId()
   const [{ value: targetAudience }] = useField(TARGET_AUDIENCE_FIELD)
-  const { data: coin } = useArtistCreatedCoin(currentUserId)
+  const { data: coin } = useArtistCreatedFanClub(currentUserId)
   const coinSymbol = coin?.ticker ?? ''
 
   const isSelected = targetAudience === ChatBlastAudience.COIN_HOLDERS
-  const { data: coinMembersCount } = useArtistCoinMembersCount({
+  const { data: coinMembersCount } = useFanClubMembersCount({
     mint: coin?.mint
   })
   const isDisabled = coinMembersCount === 0

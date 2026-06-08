@@ -1,7 +1,6 @@
 import { cloneElement, ReactElement } from 'react'
 
 import { BadgeTier } from '@audius/common/models'
-import { badgeTiers } from '@audius/common/store'
 import { Nullable } from '@audius/common/utils'
 import { User } from '@audius/sdk'
 import cn from 'classnames'
@@ -13,6 +12,16 @@ import IconSilverBadgeSVG from 'assets/img/iconSilverBadge.svg'
 import IconVerifiedSVG from 'assets/img/iconVerified.svg'
 
 import styles from './AudiusProfileBadges.module.css'
+
+// Inlined from @audius/common/store to avoid circular dependency
+// (store/wallet/utils → api barrel → upload modules → store)
+const badgeTiers: { tier: BadgeTier; humanReadableAmount: number }[] = [
+  { tier: 'platinum', humanReadableAmount: 10000 },
+  { tier: 'gold', humanReadableAmount: 1000 },
+  { tier: 'silver', humanReadableAmount: 100 },
+  { tier: 'bronze', humanReadableAmount: 10 },
+  { tier: 'none', humanReadableAmount: 0 }
+]
 
 const audioTierMapSVG: { [tier in BadgeTier]: Nullable<ReactElement> } = {
   none: null,

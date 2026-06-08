@@ -3,7 +3,7 @@ import { useTrack } from '~/api/tan-query/tracks/useTrack'
 import { DogEarType } from '~/models'
 import { ID } from '~/models/Identifiers'
 import {
-  isContentSpecialAccess,
+  isContentFollowGated,
   isContentTokenGated,
   isContentUSDCPurchaseGated
 } from '~/models/Track'
@@ -30,7 +30,7 @@ export const useTrackDogEar = (trackId: ID, hideUnlocked = false) => {
   const hideUnlockedDownload = !isOwner && hasDownloadAccess && hideUnlocked
 
   const isPurchaseable = isContentUSDCPurchaseGated(streamConditions)
-  const isSpecialAccess = isContentSpecialAccess(streamConditions)
+  const isFollowGated = isContentFollowGated(streamConditions)
   const isDownloadGated = isContentUSDCPurchaseGated(downloadConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
 
@@ -38,8 +38,8 @@ export const useTrackDogEar = (trackId: ID, hideUnlocked = false) => {
 
   if (isPurchaseable && !hideUnlockedStream) {
     dogEarType = DogEarType.USDC_PURCHASE
-  } else if (isSpecialAccess && !hideUnlockedStream) {
-    dogEarType = DogEarType.SPECIAL_ACCESS
+  } else if (isFollowGated && !hideUnlockedStream) {
+    dogEarType = DogEarType.FOLLOW_GATED
   } else if (isDownloadGated && !hideUnlockedDownload) {
     dogEarType = DogEarType.USDC_EXTRAS
   } else if (isTokenGated && !hideUnlockedStream) {

@@ -1,51 +1,64 @@
 import { useMemo } from 'react'
 
-import { useProfileUser } from '@audius/common/api'
-import { useProxySelector } from '@audius/common/hooks'
 import {
-  profilePageTracksLineupActions as tracksActions,
-  profilePageSelectors
-} from '@audius/common/store'
+  useProfileUser,
+  useProfileTracks,
+  getProfileTracksQueryKey
+} from '@audius/common/api'
 
-import { Lineup } from 'app/components/lineup'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 import { EmptyProfileTile } from '../EmptyProfileTile'
 
-const { getProfileTracksLineup } = profilePageSelectors
-
 export const TracksTab = () => {
-  const { handle, user_id, artist_pick_track_id } =
+  const { handle, track_count = 0 } =
     useProfileUser({
       select: (user) => ({
         handle: user.handle,
         user_id: user.user_id,
+        track_count: user.track_count,
         artist_pick_track_id: user.artist_pick_track_id
       })
     }).user ?? {}
 
-  const handleLower = handle?.toLowerCase()
+  const handleLower = handle?.toLowerCase() ?? ''
 
-  const lineup = useProxySelector(
-    (state) => getProfileTracksLineup(state, handleLower),
-    [handleLower]
+  const queryArgs = useMemo(() => ({ handle: handleLower }), [handleLower])
+
+  const {
+    trackIds,
+    isPending,
+    isFetching,
+    hasNextPage,
+    loadNextPage,
+    refetch
+  } = useProfileTracks(queryArgs, { enabled: !!handleLower })
+
+  const querySource = useMemo(
+    () => ({ queryKey: [...getProfileTracksQueryKey(queryArgs)] as unknown[] }),
+    [queryArgs]
   )
 
-  const fetchPayload = useMemo(() => ({ userId: user_id }), [user_id])
-  const extraFetchOptions = useMemo(() => ({ handle }), [handle])
+  const canShowEmptyTile = track_count === 0 || (!isPending && !isFetching)
 
   return (
-    <Lineup
-      selfLoad
+    <TrackLineup
+      trackIds={trackIds}
+      source='PROFILE_TRACKS'
+      querySource={querySource}
+      isPending={isPending}
+      isFetching={isFetching}
+      hasNextPage={hasNextPage}
+      loadNextPage={loadNextPage}
       pullToRefresh
-      leadingElementId={artist_pick_track_id}
-      showArtistPick={true}
-      actions={tracksActions}
-      lineup={lineup}
-      fetchPayload={fetchPayload}
-      extraFetchOptions={extraFetchOptions}
+      refresh={() => {
+        refetch()
+      }}
+      showArtistPick
       disableTopTabScroll
-      LineupEmptyComponent={<EmptyProfileTile tab='tracks' />}
-      showsVerticalScrollIndicator={false}
+      LineupEmptyComponent={
+        canShowEmptyTile ? <EmptyProfileTile tab='tracks' /> : undefined
+      }
     />
   )
 }

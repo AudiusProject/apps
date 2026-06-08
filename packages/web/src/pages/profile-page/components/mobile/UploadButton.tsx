@@ -1,18 +1,19 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
+import { route } from '@audius/common/utils'
 import { Button, Flex, IconCloudUpload } from '@audius/harmony'
+import { useDispatch } from 'react-redux'
 
-import { DownloadMobileAppDrawer } from 'components/download-mobile-app-drawer/DownloadMobileAppDrawer'
+import { push } from 'utils/navigation'
+
+const { UPLOAD_PAGE } = route
 
 const UploadButton = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const handleDrawerClose = useCallback(() => {
-    setIsDrawerOpen(false)
-  }, [setIsDrawerOpen])
+  const dispatch = useDispatch()
 
   const handleClick = useCallback(() => {
-    setIsDrawerOpen(true)
-  }, [setIsDrawerOpen])
+    dispatch(push(UPLOAD_PAGE))
+  }, [dispatch])
 
   return (
     <Flex pv='s' ph='m'>
@@ -24,10 +25,6 @@ const UploadButton = () => {
       >
         Upload Track
       </Button>
-      <DownloadMobileAppDrawer
-        isOpen={isDrawerOpen}
-        onClose={handleDrawerClose}
-      />
     </Flex>
   )
 }

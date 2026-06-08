@@ -2,17 +2,14 @@ import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 
 import { useCurrentUserId, useTracks, useUsers } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import { ErrorLevel, Feature, Name } from '@audius/common/models'
+import { Name, SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
-  libraryPageTracksLineupActions,
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   reachabilitySelectors,
   tracksSocialActions,
-  playerActions,
-  playerSelectors,
   playbackRateValueMap,
   playbackPositionActions,
   playbackPositionSelectors,
@@ -20,15 +17,16 @@ import {
   calculatePlayerBehavior,
   PlayerBehavior
 } from '@audius/common/store'
-import type { Queueable, CommonState } from '@audius/common/store'
+import type { PlaybackTrack, CommonState } from '@audius/common/store'
 import {
-  Genre,
   removeNullable,
-  getTrackPreviewDuration
+  getTrackPreviewDuration,
+  isLongFormContent,
+  resolveImageUrl,
+  resolveStreamUrl
 } from '@audius/common/utils'
 import type { Nullable } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
-import { getMirrorStreamUrl } from '@audius/web/src/common/store/player/sagas'
 import { isEqual, uniq } from 'lodash'
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
@@ -59,7 +57,6 @@ import {
   addOfflineEntries,
   OfflineDownloadStatus
 } from 'app/store/offline-downloads/slice'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import { useChromecast } from './GoogleCast'
 import { useSavePodcastProgress } from './useSavePodcastProgress'
@@ -67,29 +64,36 @@ import { useSavePodcastProgress } from './useSavePodcastProgress'
 export const DEFAULT_IMAGE_URL =
   'https://download.audius.co/static-resources/preview-image.jpg'
 
-const { getPlaying, getSeek, getCounter, getPlaybackRate, getUid } =
-  playerSelectors
+const TRACK_ARTWORK_PREFERRED_SIZES = [
+  SquareSizes.SIZE_1000_BY_1000,
+  SquareSizes.SIZE_480_BY_480,
+  SquareSizes.SIZE_150_BY_150
+] as const
+
+const getArtworkTargetSize = (artwork?: Track['artwork']) =>
+  TRACK_ARTWORK_PREFERRED_SIZES.find((size) => artwork?.[size]) ??
+  SquareSizes.SIZE_1000_BY_1000
+
+const { getPlaying, getSeek, getCounter, getPlaybackRate, getTrackId } =
+  playbackSelectors
 const { setTrackPosition } = playbackPositionActions
 const { getUserTrackPositions } = playbackPositionSelectors
 const { recordListen } = tracksSocialActions
-const { getPlayerBehavior } = queueSelectors
+const { getCurrentPlayerBehavior: getPlayerBehavior } = playbackSelectors
 const {
-  getIndex,
-  getOrder,
-  getSource,
+  getPlaybackIndex: getIndex,
+  getPlaybackQueue,
+  getCurrentSource: getSource,
   getCollectionId,
-  getRepeat,
-  getShuffle
-} = queueSelectors
+  getRepeat
+} = playbackSelectors
 const { getIsReachable } = reachabilitySelectors
-
 const { getNftAccessSignatureMap } = gatedContentSelectors
 
 // TODO: These constants are the same in now playing drawer. Move them to shared location
 const SKIP_DURATION_SEC = 15
 const RESTART_THRESHOLD_SEC = 3
 const RECORD_LISTEN_SECONDS = 1
-
 const TRACK_END_BUFFER = 2
 
 const defaultCapabilities = [
@@ -104,15 +108,12 @@ const longFormContentCapabilities = [
   Capability.JumpBackward
 ]
 
-// Set options for controlling music on the lock screen when the app is in the background
-const updatePlayerOptions = async (isLongFormContent = false) => {
-  const coreCapabilities = isLongFormContent
+const updatePlayerOptions = async (isLongForm = false) => {
+  const coreCapabilities = isLongForm
     ? longFormContentCapabilities
     : defaultCapabilities
   return await TrackPlayer.updateOptions({
-    // Media controls capabilities
     capabilities: [...coreCapabilities, Capability.Stop, Capability.SeekTo],
-    // Notification form capabilities
     notificationCapabilities: coreCapabilities,
     android: {
       appKilledPlaybackBehavior:
@@ -120,20 +121,6 @@ const updatePlayerOptions = async (isLongFormContent = false) => {
     }
   })
 }
-
-const playerEvents = [
-  Event.PlaybackError,
-  Event.PlaybackProgressUpdated,
-  Event.PlaybackQueueEnded,
-  Event.PlaybackActiveTrackChanged,
-  Event.RemotePlay,
-  Event.RemotePause,
-  Event.RemoteNext,
-  Event.RemotePrevious,
-  Event.RemoteJumpForward,
-  Event.RemoteJumpBackward,
-  Event.RemoteSeek
-]
 
 const unlistedTrackFallbackTrackData = {
   url: 'url',
@@ -148,52 +135,67 @@ const unlistedTrackFallbackTrackData = {
 
 type QueueableTrack = {
   track: Nullable<Track>
-} & Pick<Queueable, 'playerBehavior'>
+} & Pick<PlaybackTrack, 'playerBehavior'>
 
-export const AudioPlayer = () => {
-  const track = useCurrentTrack()
-  const playing = useSelector(getPlaying)
-  const seek = useSelector(getSeek)
-  const counter = useSelector(getCounter)
-  const repeatMode = useSelector(getRepeat)
-  const playbackRate = useSelector(getPlaybackRate)
-  const { data: currentUserId } = useCurrentUserId()
-  const uid = useSelector(getUid)
+// ---------------------------------------------------------------------------
+// Hook: useAudioPlayerSetup
+// ---------------------------------------------------------------------------
+/** One-time TrackPlayer initialisation and teardown. */
+const useAudioPlayerSetup = () => {
+  const [isAudioSetup, setIsAudioSetup] = useState(false)
+  const dispatch = useDispatch()
+
+  useAsync(async () => {
+    try {
+      await updatePlayerOptions()
+    } catch (e) {
+      // The player has already been set up
+    }
+    setIsAudioSetup(true)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      dispatch(playbackActions.reset({ shouldAutoplay: false }))
+      TrackPlayer.stop()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return isAudioSetup
+}
+
+// ---------------------------------------------------------------------------
+// Hook: useQueueSync
+// ---------------------------------------------------------------------------
+/** Keeps RNTP's native queue in sync with the redux queue. */
+const useQueueSync = (isAudioSetup: boolean) => {
+  const dispatch = useDispatch()
+
+  const queueIndex = useSelector(getIndex)
+  const queueOrder = useSelector(getPlaybackQueue)
+  const queueSource = useSelector(getSource)
+  const queueCollectionId = useSelector(getCollectionId)
   const playerBehavior = useSelector(getPlayerBehavior)
-  const previousUid = usePrevious(uid)
   const previousPlayerBehavior =
     usePrevious(playerBehavior) || PlayerBehavior.FULL_OR_PREVIEW
-  const trackPositions = useSelector((state: CommonState) =>
-    getUserTrackPositions(state, { userId: currentUserId })
-  )
-  const [retries, setRetries] = useState(0)
+  const didPlayerBehaviorChange = previousPlayerBehavior !== playerBehavior
 
+  const { data: currentUserId } = useCurrentUserId()
   const isReachable = useSelector(getIsReachable)
   const isNotReachable = isReachable === false
   const nftAccessSignatureMap = useSelector(getNftAccessSignatureMap)
 
-  useChromecast()
-
-  // Queue Things
-  const queueIndex = useSelector(getIndex)
-  const queueShuffle = useSelector(getShuffle)
-  const queueOrder = useSelector(getOrder)
-  const queueSource = useSelector(getSource)
-  const queueCollectionId = useSelector(getCollectionId)
-  const queueTrackUids = useMemo(
-    () => queueOrder.map((trackData) => trackData.uid),
-    [queueOrder]
-  )
   const queueTrackIds = useMemo(
-    () => queueOrder.map((trackData) => trackData.id as ID),
+    () => queueOrder.map((trackData) => trackData.trackId as ID),
     [queueOrder]
   )
 
   const { byId: tracksById } = useTracks(uniq(queueTrackIds))
   const queueTracks = useMemo(
     () =>
-      queueOrder.map(({ id, playerBehavior }) => ({
-        track: tracksById[id],
+      queueOrder.map(({ trackId, playerBehavior }) => ({
+        track: tracksById[trackId],
         playerBehavior
       })),
     [queueOrder, tracksById]
@@ -203,12 +205,11 @@ export const AudioPlayer = () => {
       queueTracks.map(({ track }) => track?.owner_id).filter(removeNullable),
     [queueTracks]
   )
-
   const { byId: queueTrackOwnersMap } = useUsers(queueTrackOwnerIds)
 
   const isCollectionMarkedForDownload = useSelector(
     getIsCollectionMarkedForDownload(
-      queueSource === libraryPageTracksLineupActions.prefix
+      queueSource === 'SAVED_TRACKS'
         ? DOWNLOAD_REASON_FAVORITES
         : queueCollectionId?.toString()
     )
@@ -219,123 +220,43 @@ export const AudioPlayer = () => {
   const didOfflineToggleChange =
     isCollectionMarkedForDownload !== wasCollectionMarkedForDownload
 
-  const didPlayerBehaviorChange = previousPlayerBehavior !== playerBehavior
-
-  // A map from trackId to offline availability
   const offlineAvailabilityByTrackId = useSelector((state) => {
     const offlineTrackStatus = getOfflineTrackStatus(state)
     return queueTrackIds.reduce((result, id) => {
       if (offlineTrackStatus[id] === OfflineDownloadStatus.SUCCESS) {
-        return {
-          ...result,
-          [id]: true
-        }
+        return { ...result, [id]: true }
       }
       return result
     }, {})
   }, isEqual)
 
-  const dispatch = useDispatch()
-
-  const isLongFormContentRef = useRef<boolean>(false)
-  const [isAudioSetup, setIsAudioSetup] = useState(false)
-
-  const play = useCallback(() => dispatch(playerActions.play()), [dispatch])
-  const pause = useCallback(() => dispatch(playerActions.pause()), [dispatch])
-  const next = useCallback(() => dispatch(queueActions.next()), [dispatch])
-  const previous = useCallback(
-    () => dispatch(queueActions.previous()),
-    [dispatch]
-  )
-
-  const reset = useCallback(
-    () => dispatch(playerActions.reset({ shouldAutoplay: false })),
-    [dispatch]
-  )
-  const updateQueueIndex = useCallback(
-    (index: number) => dispatch(queueActions.updateIndex({ index })),
-    [dispatch]
-  )
-  const updatePlayerInfo = useCallback(
-    ({
-      previewing,
-      trackId,
-      uid
-    }: {
-      previewing: boolean
-      trackId: number
-      uid: string
-    }) => {
-      dispatch(playerActions.set({ previewing, trackId, uid }))
-    },
-    [dispatch]
-  )
-
-  const [bufferStartTime, setBufferStartTime] = useState<number>()
-
-  const { bufferingDuringPlay } = useIsPlaying() // react-native-track-player hook
-
-  const previousBufferingState = usePrevious(bufferingDuringPlay)
-
-  useEffect(() => {
-    // Keep redux buffering status in sync with react-native-track-player's buffering status
-    // Only need to dispatch when the value actually changes so we check against the previous value
-    if (
-      bufferingDuringPlay !== undefined &&
-      bufferingDuringPlay !== previousBufferingState
-    ) {
-      dispatch(playerActions.setBuffering({ buffering: bufferingDuringPlay }))
-      if (!bufferingDuringPlay && bufferStartTime) {
-        const bufferDuration = Math.ceil(performance.now() - bufferStartTime)
-        analyticsTrack(
-          make({ eventName: Name.BUFFERING_TIME, duration: bufferDuration })
-        )
-        setBufferStartTime(undefined)
-      }
-    }
-  }, [
-    bufferStartTime,
-    bufferingDuringPlay,
-    dispatch,
-    previousBufferingState,
-    track
-  ])
+  const [retries, setRetries] = useState(0)
 
   const makeTrackData = useCallback(
     async ({ track, playerBehavior }: QueueableTrack, retries?: number) => {
       try {
-        if (!track) {
-          return unlistedTrackFallbackTrackData
-        }
+        if (!track) return unlistedTrackFallbackTrackData
         setRetries(retries ?? 0)
 
         const trackOwner = queueTrackOwnersMap[track.owner_id]
         const trackId = track.track_id
         const offlineTrackAvailable =
           trackId && offlineAvailabilityByTrackId[trackId]
-
         const { shouldPreview } = calculatePlayerBehavior(track, playerBehavior)
 
-        // Get Track url
         let url: string
-
-        const contentNodeStreamUrl = getMirrorStreamUrl(
-          track,
-          shouldPreview,
-          retries ?? 0
-        )
+        const streamObj = shouldPreview ? track.preview : track.stream
         if (offlineTrackAvailable && isCollectionMarkedForDownload) {
           const audioFilePath = getLocalAudioPath(trackId)
           url = `file://${audioFilePath}`
-        } else if (contentNodeStreamUrl) {
-          url = contentNodeStreamUrl
+        } else if (streamObj?.url) {
+          url =
+            (await resolveStreamUrl(streamObj, retries ?? 0)) ?? streamObj.url
         } else {
           const sdk = await audiusSdk()
           const nftAccessSignature = nftAccessSignatureMap[trackId]?.mp3 ?? null
           const { data, signature } =
-            await audiusBackendInstance.signGatedContentRequest({
-              sdk
-            })
+            await audiusBackendInstance.signGatedContentRequest({ sdk })
           url = await sdk.tracks.getTrackStreamUrl({
             trackId: Id.parse(track.track_id),
             userId: OptionalId.parse(currentUserId),
@@ -354,7 +275,11 @@ export const AudioPlayer = () => {
 
         const imageUrl =
           localTrackImageSource ??
-          track.artwork['1000x1000'] ??
+          (await resolveImageUrl({
+            artwork: track.artwork,
+            targetSize: getArtworkTargetSize(track.artwork),
+            defaultImage: DEFAULT_IMAGE_URL
+          })) ??
           DEFAULT_IMAGE_URL
 
         return {
@@ -370,17 +295,7 @@ export const AudioPlayer = () => {
             : track.duration
         }
       } catch (e) {
-        reportToSentry({
-          level: ErrorLevel.Error,
-          name: 'AudioPlayer: makeTrackData failed',
-          additionalInfo: {
-            track,
-            playerBehavior,
-            trackOwner: queueTrackOwnersMap[track?.owner_id ?? '']
-          },
-          feature: Feature.Playback,
-          error: e
-        })
+        console.error('AudioPlayer: makeTrackData failed', e)
         return unlistedTrackFallbackTrackData
       }
     },
@@ -395,157 +310,394 @@ export const AudioPlayer = () => {
     ]
   )
 
-  // Perform initial setup for the track player
-  useAsync(async () => {
-    try {
-      await updatePlayerOptions()
-    } catch (e) {
-      // The player has already been set up
+  // Ref tracking which trackIds RNTP currently has loaded.
+  const queueListRef = useRef<ID[]>([])
+
+  // --- resetQueue: full queue replacement (batch) ---
+  const resetQueue = useCallback(
+    async (tracks: QueueableTrack[], startIndex: number) => {
+      await TrackPlayer.reset()
+
+      const firstTrack = tracks[startIndex]
+      if (!firstTrack) return
+
+      // Load and play the target track immediately
+      await TrackPlayer.add(await makeTrackData(firstTrack))
+      await TrackPlayer.play()
+
+      // Batch-resolve remaining tracks concurrently, then add in order
+      if (tracks.length > 1) {
+        const remaining = tracks
+          .map((t, i) => ({ t, i }))
+          .filter(({ i }) => i !== startIndex)
+
+        const resolved = await Promise.all(
+          remaining.map(async ({ t, i }) => ({
+            data: await makeTrackData(t),
+            i
+          }))
+        )
+
+        // Sort by original index so RNTP order matches redux order
+        resolved.sort((a, b) => a.i - b.i)
+
+        const before = resolved.filter(({ i }) => i < startIndex)
+        const after = resolved.filter(({ i }) => i > startIndex)
+
+        // Insert "before" tracks at position 0. Iterate from last to first so
+        // that earliest ends up at index 0 (each insert pushes prior entries
+        // right by one).
+        for (let j = before.length - 1; j >= 0; j--) {
+          await TrackPlayer.add(before[j].data, 0)
+        }
+
+        // Append "after" tracks at the end
+        if (after.length > 0) {
+          await TrackPlayer.add(after.map(({ data }) => data))
+        }
+      }
+    },
+    [makeTrackData]
+  )
+
+  // --- appendToQueue: add new tracks to end ---
+  const appendToQueue = useCallback(
+    async (newTracks: QueueableTrack[]) => {
+      const resolved = await Promise.all(newTracks.map((t) => makeTrackData(t)))
+      await TrackPlayer.add(resolved)
+    },
+    [makeTrackData]
+  )
+
+  // --- handleQueueChange: decides reset vs append ---
+  const handleQueueChange = useCallback(async () => {
+    const refTrackIds = queueListRef.current
+
+    // Wait for all track + owner data to be loaded before touching RNTP
+    if (
+      !queueTracks.every(
+        ({ track }) =>
+          !!track?.track_id && !!queueTrackOwnersMap[track.owner_id]
+      )
+    ) {
+      return
     }
-    setIsAudioSetup(true)
+    if (queueIndex === -1) return
+    if (
+      isEqual(refTrackIds, queueTrackIds) &&
+      !didOfflineToggleChange &&
+      !didPlayerBehaviorChange
+    ) {
+      return
+    }
+
+    queueListRef.current = queueTrackIds
+
+    const isQueueAppend =
+      refTrackIds.length > 0 &&
+      isEqual(queueTrackIds.slice(0, refTrackIds.length), refTrackIds) &&
+      !didPlayerBehaviorChange
+
+    if (isQueueAppend) {
+      await appendToQueue(queueTracks.slice(refTrackIds.length))
+    } else {
+      await resetQueue(queueTracks, queueIndex)
+    }
+  }, [
+    queueTracks,
+    queueIndex,
+    queueTrackIds,
+    didOfflineToggleChange,
+    didPlayerBehaviorChange,
+    queueTrackOwnersMap,
+    appendToQueue,
+    resetQueue
+  ])
+
+  // --- handleQueueIdxChange: skip within a synced queue ---
+  const latestQueueIdxRef = useRef<number>(-1)
+
+  const handleQueueIdxChange = useCallback(async () => {
+    if (queueIndex === -1) return
+
+    // If RNTP queue hasn't been rebuilt to match the current redux queue,
+    // bail out. handleQueueChange will load the correct track when it fires.
+    if (!isEqual(queueListRef.current, queueTrackIds)) return
+
+    latestQueueIdxRef.current = queueIndex
+
+    const playerIdx = await TrackPlayer.getActiveTrackIndex()
+    if (queueIndex !== playerIdx) {
+      const queue = await TrackPlayer.getQueue()
+      if (queueIndex < queue.length) {
+        await TrackPlayer.skip(queueIndex)
+      }
+    }
+  }, [queueIndex, queueTrackIds])
+
+  // Store the skip promise so handleTogglePlay can await it
+  const queueIdxChangeJobRef = useRef<Promise<void> | undefined>(undefined)
+
+  // --- Effects ---
+  useEffect(() => {
+    if (isAudioSetup) {
+      handleQueueChange()
+    }
+  }, [handleQueueChange, queueTrackIds, isAudioSetup])
+
+  useAsync(async () => {
+    if (isAudioSetup && didPlayerBehaviorChange) {
+      const updatedTrack = await makeTrackData(queueTracks[queueIndex])
+      await TrackPlayer.load(updatedTrack)
+      dispatch(
+        playbackActions.set({
+          previewing: calculatePlayerBehavior(
+            queueTracks[queueIndex].track,
+            queueTracks[queueIndex].playerBehavior
+          ).shouldPreview,
+          trackId: queueTracks[queueIndex].track?.track_id ?? 0,
+          index: queueIndex
+        })
+      )
+    }
+  }, [didPlayerBehaviorChange])
+
+  useEffect(() => {
+    if (isAudioSetup) {
+      queueIdxChangeJobRef.current = handleQueueIdxChange()
+    }
+  }, [handleQueueIdxChange, queueIndex, isAudioSetup])
+
+  return {
+    queueIndex,
+    queueTracks,
+    queueIdxChangeJobRef,
+    makeTrackData,
+    retries,
+    currentUserId
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hook: usePlaybackEvents
+// ---------------------------------------------------------------------------
+/** Handles all RNTP events: errors, remote controls, track changes. */
+const usePlaybackEvents = ({
+  queueIndex,
+  queueTracks,
+  makeTrackData,
+  retries,
+  currentUserId
+}: {
+  queueIndex: number
+  queueTracks: QueueableTrack[]
+  makeTrackData: (t: QueueableTrack, retries?: number) => Promise<any>
+  retries: number
+  currentUserId: Nullable<ID> | undefined
+}) => {
+  const dispatch = useDispatch()
+  const track = useCurrentTrack()
+  const playing = useSelector(getPlaying)
+  const playbackRate = useSelector(getPlaybackRate)
+  const playerBehavior = useSelector(getPlayerBehavior)
+  const trackPositions = useSelector((state: CommonState) =>
+    getUserTrackPositions(state, { userId: currentUserId })
+  )
+
+  const [bufferStartTime, setBufferStartTime] = useState<number>()
+  const { bufferingDuringPlay } = useIsPlaying()
+  const previousBufferingState = usePrevious(bufferingDuringPlay)
+
+  // Sync buffering state to redux
+  useEffect(() => {
+    if (
+      bufferingDuringPlay !== undefined &&
+      bufferingDuringPlay !== previousBufferingState
+    ) {
+      dispatch(playbackActions.setBuffering({ buffering: bufferingDuringPlay }))
+      if (!bufferingDuringPlay && bufferStartTime) {
+        const bufferDuration = Math.ceil(performance.now() - bufferStartTime)
+        analyticsTrack(
+          make({ eventName: Name.BUFFERING_TIME, duration: bufferDuration })
+        )
+        setBufferStartTime(undefined)
+      }
+    }
+  }, [
+    bufferStartTime,
+    bufferingDuringPlay,
+    dispatch,
+    previousBufferingState,
+    track
+  ])
+
+  const seekToRef = useRef<number | null>(null)
+
+  const setSeekPosition = useCallback(async (seekPos = 0) => {
+    const { state } = await TrackPlayer.getPlaybackState()
+    const isSeekableState = state === State.Playing || state === State.Ready
+    if (isSeekableState) {
+      TrackPlayer.seekTo(seekPos)
+    } else {
+      seekToRef.current = seekPos
+    }
   }, [])
 
-  // When component unmounts (App is closed), reset
-  useEffect(() => {
-    return () => {
-      reset()
-      TrackPlayer.stop()
+  const handlePlayerStateChange = useCallback(async ({ state }) => {
+    const inSeekableState = state === State.Playing || state === State.Ready
+    const seekRefValue = seekToRef.current
+    if (inSeekableState && seekRefValue !== null) {
+      TrackPlayer.seekTo(seekRefValue)
+      seekToRef.current = null
     }
-  }, [reset])
+  }, [])
+
+  // Register PlaybackState listener once
+  useEffect(() => {
+    const subscription = TrackPlayer.addEventListener(
+      Event.PlaybackState,
+      handlePlayerStateChange
+    )
+    return () => subscription.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- register once
+  }, [])
+
+  const isLongFormContentRef = useRef<boolean>(false)
+
+  const playerEvents = [
+    Event.PlaybackError,
+    Event.PlaybackProgressUpdated,
+    Event.PlaybackQueueEnded,
+    Event.PlaybackActiveTrackChanged,
+    Event.RemotePlay,
+    Event.RemotePause,
+    Event.RemoteNext,
+    Event.RemotePrevious,
+    Event.RemoteJumpForward,
+    Event.RemoteJumpBackward,
+    Event.RemoteSeek
+  ]
 
   useTrackPlayerEvents(playerEvents, async (event) => {
-    const duration = (await TrackPlayer.getProgress()).duration
-    const position = (await TrackPlayer.getProgress()).position
+    const { duration, position } = await TrackPlayer.getProgress()
 
+    // --- Playback error: retry with fresh stream URL ---
     if (event.type === Event.PlaybackError) {
       console.error(`TrackPlayer Playback Error:`, event)
       const updatedTrack = await makeTrackData(
-        {
-          track,
-          playerBehavior
-        },
+        { track, playerBehavior },
         retries + 1
       )
       TrackPlayer.load(updatedTrack)
+      return
     }
 
+    // --- Remote controls ---
     if (event.type === Event.RemotePlay || event.type === Event.RemotePause) {
-      playing ? pause() : play()
+      playing
+        ? dispatch(playbackActions.pause())
+        : dispatch(playbackActions.play())
+      return
     }
-    if (event.type === Event.RemoteNext) next()
+    if (event.type === Event.RemoteNext) {
+      dispatch(playbackActions.next())
+      return
+    }
     if (event.type === Event.RemotePrevious) {
       if (position > RESTART_THRESHOLD_SEC) {
         setSeekPosition(0)
       } else {
-        previous()
+        dispatch(playbackActions.previous())
       }
+      return
     }
-
     if (event.type === Event.RemoteSeek) {
       setSeekPosition(event.position)
+      return
     }
     if (event.type === Event.RemoteJumpForward) {
       setSeekPosition(Math.min(duration, position + SKIP_DURATION_SEC))
+      return
     }
     if (event.type === Event.RemoteJumpBackward) {
       setSeekPosition(Math.max(0, position - SKIP_DURATION_SEC))
+      return
     }
 
-    if (event.type === Event.PlaybackQueueEnded) {
-      // TODO: Queue ended, what should done here?
-    }
-
+    // --- Active track changed ---
     if (event.type === Event.PlaybackActiveTrackChanged) {
       setBufferStartTime(performance.now())
-      await enqueueTracksJobRef.current
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 
-      // Update queue and player state if the track player auto plays next track
+      // RNTP auto-advanced to next track. The redux queue is always in
+      // playable order (shuffled or not), so RNTP and redux indices align.
       if (playerIndex > queueIndex) {
-        if (queueShuffle) {
-          // TODO: There will be a very short period where the next track in the queue is played instead of the next shuffle track.
-          // Figure out how to call next earlier
-          next()
-        } else {
-          const { track, playerBehavior } = queueTracks[playerIndex] ?? {}
+        const { track: nextTrack, playerBehavior: nextBehavior } =
+          queueTracks[playerIndex] ?? {}
+        const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
+          nextTrack,
+          nextBehavior
+        )
 
-          const { shouldSkip, shouldPreview } = calculatePlayerBehavior(
-            track,
-            playerBehavior
+        if (!nextTrack || shouldSkip) {
+          dispatch(playbackActions.next())
+        } else {
+          dispatch(playbackActions.setIndex({ index: playerIndex }))
+          dispatch(
+            playbackActions.set({
+              previewing: shouldPreview,
+              trackId: nextTrack.track_id,
+              index: playerIndex
+            })
           )
 
-          // Skip track if user does not have access i.e. for an unlocked gated track
-          if (!track || shouldSkip) {
-            next()
-          } else {
-            // Track Player natively went to the next track
-            // Update queue info and handle playback position updates
-            updateQueueIndex(playerIndex)
-            updatePlayerInfo({
-              previewing: shouldPreview,
-              trackId: track.track_id,
-              uid: queueTrackUids[playerIndex]
-            })
-
-            const isLongFormContent =
-              track?.genre === Genre.PODCASTS ||
-              track?.genre === Genre.AUDIOBOOKS
-            const trackPosition = trackPositions?.[track.track_id]
-            if (trackPosition?.status === 'IN_PROGRESS') {
-              dispatch(
-                playerActions.seek({ seconds: trackPosition.playbackPosition })
-              )
-            } else if (isLongFormContent) {
-              dispatch(
-                setTrackPosition({
-                  userId: currentUserId,
-                  trackId: track.track_id,
-                  positionInfo: {
-                    status: 'IN_PROGRESS',
-                    playbackPosition: 0
-                  }
-                })
-              )
-            }
+          const trackPosition = trackPositions?.[nextTrack.track_id]
+          if (trackPosition?.status === 'IN_PROGRESS') {
+            dispatch(
+              playbackActions.seekTo({
+                seconds: trackPosition.playbackPosition
+              })
+            )
+          } else if (isLongFormContent(nextTrack)) {
+            dispatch(
+              setTrackPosition({
+                userId: currentUserId,
+                trackId: nextTrack.track_id,
+                positionInfo: {
+                  status: 'IN_PROGRESS',
+                  playbackPosition: 0
+                }
+              })
+            )
           }
         }
       }
 
-      const isLongFormContent =
-        queueTracks[playerIndex]?.track?.genre === Genre.PODCASTS ||
-        queueTracks[playerIndex]?.track?.genre === Genre.AUDIOBOOKS
-
-      // Always set the correct playback rate when the active track changes
-      const newRate = isLongFormContent
-        ? playbackRateValueMap[playbackRate]
-        : 1.0
+      // Update playback rate & lock screen controls for long-form content
+      const currentTrack = queueTracks[playerIndex]?.track
+      const isLongForm = isLongFormContent(currentTrack)
+      const newRate = isLongForm ? playbackRateValueMap[playbackRate] : 1.0
       await TrackPlayer.setRate(newRate)
 
-      // Update lock screen and notification controls only when long-form content status changes
-      if (isLongFormContent !== isLongFormContentRef.current) {
-        isLongFormContentRef.current = isLongFormContent
-        await updatePlayerOptions(isLongFormContent)
+      if (isLongForm !== isLongFormContentRef.current) {
+        isLongFormContentRef.current = isLongForm
+        await updatePlayerOptions(isLongForm)
       }
 
-      // Handle track end event
+      // Handle completed long-form track
       if (event?.lastPosition !== undefined && event?.index !== undefined) {
-        const { track } = queueTracks[event.index] ?? {}
-        const isLongFormContent =
-          track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
-        const isAtEndOfTrack =
-          track?.duration &&
-          event.lastPosition >= track.duration - TRACK_END_BUFFER
-
-        if (isLongFormContent && isAtEndOfTrack) {
+        const { track: endedTrack } = queueTracks[event.index] ?? {}
+        if (
+          isLongFormContent(endedTrack) &&
+          endedTrack?.duration &&
+          event.lastPosition >= endedTrack.duration - TRACK_END_BUFFER
+        ) {
           dispatch(
             setTrackPosition({
               userId: currentUserId,
-              trackId: track.track_id,
-              positionInfo: {
-                status: 'COMPLETED',
-                playbackPosition: 0
-              }
+              trackId: endedTrack.track_id,
+              positionInfo: { status: 'COMPLETED', playbackPosition: 0 }
             })
           )
         }
@@ -553,7 +705,105 @@ export const AudioPlayer = () => {
     }
   })
 
-  // Record play effect
+  return { setSeekPosition }
+}
+
+// ---------------------------------------------------------------------------
+// Hook: usePlaybackControls
+// ---------------------------------------------------------------------------
+/** Play/pause toggle, seek, repeat, rate, stop. */
+const usePlaybackControls = (
+  isAudioSetup: boolean,
+  queueIdxChangeJobRef: React.MutableRefObject<Promise<void> | undefined>,
+  setSeekPosition: (seekPos?: number) => Promise<void>
+) => {
+  const playing = useSelector(getPlaying)
+  const seek = useSelector(getSeek)
+  const counter = useSelector(getCounter)
+  const repeatMode = useSelector(getRepeat)
+  const playbackRate = useSelector(getPlaybackRate)
+  const playingTrackId = useSelector(getTrackId)
+  const previousPlayingTrackId = usePrevious(playingTrackId)
+  const queueIndex = useSelector(getIndex)
+
+  // --- Toggle play/pause ---
+  const handleTogglePlay = useCallback(async () => {
+    if (playing) {
+      await queueIdxChangeJobRef.current
+      await TrackPlayer.play()
+    } else {
+      await TrackPlayer.pause()
+    }
+  }, [playing, queueIdxChangeJobRef])
+
+  // --- Repeat mode ---
+  const handleRepeatModeChange = useCallback(async () => {
+    if (repeatMode === RepeatMode.SINGLE) {
+      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Track)
+    } else if (repeatMode === RepeatMode.ALL) {
+      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Queue)
+    } else {
+      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Off)
+    }
+  }, [repeatMode])
+
+  // --- Playback rate ---
+  const isLongFormContentRef = useRef<boolean>(false)
+  const handlePlaybackRateChange = useCallback(async () => {
+    if (!isLongFormContentRef.current) return
+    await TrackPlayer.setRate(playbackRateValueMap[playbackRate])
+  }, [playbackRate])
+
+  // --- Seek handler ---
+  useEffect(() => {
+    if (seek !== null) {
+      setSeekPosition(seek)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seek])
+
+  // --- Counter/restart handler ---
+  const counterRef = useRef<number | null>(null)
+  const counterTrackIndex = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (counter !== counterRef.current) {
+      counterRef.current = counter
+      if (queueIndex === counterTrackIndex.current) setSeekPosition(0)
+      counterTrackIndex.current = queueIndex
+    }
+  }, [counter, queueIndex, setSeekPosition])
+
+  // --- Effects ---
+  useEffect(() => {
+    if (isAudioSetup) handleRepeatModeChange()
+  }, [handleRepeatModeChange, repeatMode, isAudioSetup])
+
+  useEffect(() => {
+    if (isAudioSetup) handleTogglePlay()
+  }, [handleTogglePlay, playing, isAudioSetup])
+
+  useEffect(() => {
+    handlePlaybackRateChange()
+  }, [handlePlaybackRateChange, playbackRate])
+
+  useEffect(() => {
+    if (previousPlayingTrackId && !playingTrackId && !playing) {
+      TrackPlayer.reset()
+    }
+  }, [playing, playingTrackId, previousPlayingTrackId])
+}
+
+// ---------------------------------------------------------------------------
+// Hook: useRecordListen
+// ---------------------------------------------------------------------------
+/** Records a listen event after a short delay. */
+const useRecordListen = () => {
+  const dispatch = useDispatch()
+  const track = useCurrentTrack()
+  const counter = useSelector(getCounter)
+  const isReachable = useSelector(getIsReachable)
+
   useEffect(() => {
     const trackId = track?.track_id
     if (!trackId) return
@@ -570,284 +820,35 @@ export const AudioPlayer = () => {
 
     return () => clearTimeout(playCounterTimeout)
   }, [counter, dispatch, isReachable, track?.track_id])
+}
 
-  const seekToRef = useRef<number | null>(null)
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+export const AudioPlayer = () => {
+  useChromecast()
 
-  const setSeekPosition = useCallback(async (seekPos = 0) => {
-    const { state } = await TrackPlayer.getPlaybackState()
-    const isSeekableState = state === State.Playing || state === State.Ready
+  const isAudioSetup = useAudioPlayerSetup()
 
-    // Delay calling seekTo if we are not currently in a seekable state
-    // Delayed seeking is handle in handlePlayerStateChange
-    if (isSeekableState) {
-      TrackPlayer.seekTo(seekPos)
-    } else {
-      seekToRef.current = seekPos
-    }
-  }, [])
-
-  const handlePlayerStateChange = useCallback(async ({ state }) => {
-    const inSeekableState = state === State.Playing || state === State.Ready
-    const seekRefValue = seekToRef.current
-
-    if (inSeekableState && seekRefValue !== null) {
-      TrackPlayer.seekTo(seekRefValue)
-      seekToRef.current = null
-    }
-  }, [])
-
-  TrackPlayer.addEventListener(Event.PlaybackState, handlePlayerStateChange)
-
-  // Seek handler
-  useEffect(() => {
-    if (seek !== null) {
-      setSeekPosition(seek)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seek])
-
-  // Keep track of the track index the last time counter was updated
-  const counterTrackIndex = useRef<number | null>(null)
-
-  const resetPositionForSameTrack = useCallback(() => {
-    // NOTE: Make sure that we only set seek position to 0 when we are restarting a track
-    if (queueIndex === counterTrackIndex.current) setSeekPosition(0)
-    counterTrackIndex.current = queueIndex
-  }, [queueIndex, setSeekPosition])
-
-  const counterRef = useRef<number | null>(null)
-
-  // Restart (counter) handler
-  useEffect(() => {
-    if (counter !== counterRef.current) {
-      counterRef.current = counter
-      resetPositionForSameTrack()
-    }
-  }, [counter, resetPositionForSameTrack])
-
-  // Ref to keep track of the queue in the track player vs the queue in state
-  const queueListRef = useRef<string[]>([])
-
-  // A ref to the enqueue task to await before either requeing or appending to queue
-  const enqueueTracksJobRef = useRef<Promise<void> | undefined>(undefined)
-  // A way to abort the enqeue tracks job if a new lineup is played
-  const abortEnqueueControllerRef = useRef(new AbortController())
-
-  const handleQueueChange = useCallback(async () => {
-    const refUids = queueListRef.current
-
-    // Due to a dependency waterfall (queue from redux -> useTracks -> useUsers),
-    // we need to wait for all 3 things to be loaded before loading anything into RNTP - queue + tracks + users
-    // Original bug: https://linear.app/audius/issue/QA-2255/keeps-playing-the-same-track-when-clicking-new-tracks-in-the-same
-    if (
-      !queueTracks.every(
-        ({ track }) =>
-          !!track?.track_id && !!queueTrackOwnersMap[track.owner_id]
-      )
-    ) {
-      return
-    }
-    if (queueIndex === -1) {
-      return
-    }
-    if (
-      isEqual(refUids, queueTrackUids) &&
-      !didOfflineToggleChange &&
-      !didPlayerBehaviorChange
-    ) {
-      return
-    }
-
-    queueListRef.current = queueTrackUids
-
-    // Checks to allow for continuous playback while making queue updates
-    // Check if we are appending to the end of the queue
-    const isQueueAppend =
-      refUids.length > 0 &&
-      isEqual(queueTrackUids.slice(0, refUids.length), refUids) &&
-      !didPlayerBehaviorChange
-
-    // If not an append, cancel the enqueue task first
-    if (!isQueueAppend) {
-      abortEnqueueControllerRef.current.abort()
-    }
-    // wait for enqueue task to either shut down or finish
-    if (enqueueTracksJobRef.current) {
-      await enqueueTracksJobRef.current
-    }
-
-    // Re-init the abort controller now that the enqueue job is done
-    abortEnqueueControllerRef.current = new AbortController()
-
-    // TODO: Queue removal logic was firing too often previously and causing playback issues when at the end of queues. Need to fix
-    // Check if we are removing from the end of the queue
-    // const isQueueRemoval =
-    //   refUids.length > 0 &&
-    //   isEqual(refUids.slice(0, queueTrackUids.length), queueTrackUids)
-
-    // if (isQueueRemoval) {
-    //   // NOTE: There might be a case where we are trying to remove the currently playing track.
-    //   // Shouldn't be possible, but need to keep an eye out for that
-    //   const startingRemovalIndex = queueTrackUids.length
-    //   const removalLength = refUids.length - queueTrackUids.length
-    //   const removalIndexArray = range(removalLength).map(
-    //     (i) => i + startingRemovalIndex
-    //   )
-    //   await TrackPlayer.remove(removalIndexArray)
-    //   await TrackPlayer.skip(queueIndex)
-    //   return
-    // }
-
-    const newQueueTracks = isQueueAppend
-      ? queueTracks.slice(refUids.length)
-      : queueTracks
-    // Enqueue tracks using 'middle-out' to ensure user can ready skip forward or backwards
-    const enqueueTracks = async (
-      queuableTracks: QueueableTrack[],
-      queueIndex = -1
-    ) => {
-      let currentPivot = 1
-      while (
-        queueIndex - currentPivot >= 0 ||
-        queueIndex + currentPivot < queueTracks.length
-      ) {
-        if (abortEnqueueControllerRef.current.signal.aborted) {
-          return
-        }
-
-        const nextTrack = queuableTracks[queueIndex + currentPivot]
-        if (nextTrack) {
-          const trackData = await makeTrackData(nextTrack)
-          await TrackPlayer.add(trackData)
-        }
-
-        const previousTrack = queuableTracks[queueIndex - currentPivot]
-        if (previousTrack) {
-          await TrackPlayer.add(await makeTrackData(previousTrack), 0)
-        }
-        currentPivot++
-      }
-    }
-
-    if (isQueueAppend) {
-      enqueueTracksJobRef.current = enqueueTracks(newQueueTracks)
-      await enqueueTracksJobRef.current
-      enqueueTracksJobRef.current = undefined
-    } else {
-      await TrackPlayer.reset()
-
-      await TrackPlayer.play()
-
-      const firstTrack = newQueueTracks[queueIndex]
-      if (!firstTrack) return
-
-      await TrackPlayer.add(await makeTrackData(firstTrack))
-
-      enqueueTracksJobRef.current = enqueueTracks(newQueueTracks, queueIndex)
-      await enqueueTracksJobRef.current
-      enqueueTracksJobRef.current = undefined
-    }
-  }, [
-    queueTracks,
+  const {
     queueIndex,
-    queueTrackUids,
-    didOfflineToggleChange,
-    didPlayerBehaviorChange,
-    queueTrackOwnersMap,
-    makeTrackData
-  ])
+    queueTracks,
+    queueIdxChangeJobRef,
+    makeTrackData,
+    retries,
+    currentUserId
+  } = useQueueSync(isAudioSetup)
 
-  const handleQueueIdxChange = useCallback(async () => {
-    await enqueueTracksJobRef.current
-    const playerIdx = await TrackPlayer.getActiveTrackIndex()
-    const queue = await TrackPlayer.getQueue()
+  const { setSeekPosition } = usePlaybackEvents({
+    queueIndex,
+    queueTracks,
+    makeTrackData,
+    retries,
+    currentUserId
+  })
 
-    if (
-      queueIndex !== -1 &&
-      queueIndex !== playerIdx &&
-      queueIndex < queue.length
-    ) {
-      await TrackPlayer.skip(queueIndex)
-    }
-  }, [queueIndex])
-
-  const handleTogglePlay = useCallback(async () => {
-    if (playing) {
-      await TrackPlayer.play()
-    } else {
-      await TrackPlayer.pause()
-    }
-  }, [playing])
-
-  const handleStop = useCallback(async () => {
-    TrackPlayer.reset()
-  }, [])
-
-  const handleRepeatModeChange = useCallback(async () => {
-    if (repeatMode === RepeatMode.SINGLE) {
-      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Track)
-    } else if (repeatMode === RepeatMode.ALL) {
-      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Queue)
-    } else {
-      await TrackPlayer.setRepeatMode(TrackPlayerRepeatMode.Off)
-    }
-  }, [repeatMode])
-
-  const handlePlaybackRateChange = useCallback(async () => {
-    if (!isLongFormContentRef.current) return
-    await TrackPlayer.setRate(playbackRateValueMap[playbackRate])
-  }, [playbackRate])
-
-  useEffect(() => {
-    if (isAudioSetup) {
-      handleRepeatModeChange()
-    }
-  }, [handleRepeatModeChange, repeatMode, isAudioSetup])
-
-  useEffect(() => {
-    if (isAudioSetup) {
-      handleQueueChange()
-    }
-  }, [handleQueueChange, queueTrackUids, isAudioSetup])
-
-  useAsync(async () => {
-    if (isAudioSetup && didPlayerBehaviorChange) {
-      const updatedTrack = await makeTrackData(queueTracks[queueIndex])
-      await TrackPlayer.load(updatedTrack)
-      updatePlayerInfo({
-        previewing: calculatePlayerBehavior(
-          queueTracks[queueIndex].track,
-          queueTracks[queueIndex].playerBehavior
-        ).shouldPreview,
-        trackId: queueTracks[queueIndex].track?.track_id ?? 0,
-        uid: queueTrackUids[queueIndex]
-      })
-    }
-  }, [didPlayerBehaviorChange])
-
-  useEffect(() => {
-    if (isAudioSetup) {
-      handleQueueIdxChange()
-    }
-  }, [handleQueueIdxChange, queueIndex, isAudioSetup])
-
-  useEffect(() => {
-    if (isAudioSetup) {
-      handleTogglePlay()
-    }
-  }, [handleTogglePlay, playing, isAudioSetup])
-
-  useEffect(() => {
-    handlePlaybackRateChange()
-  }, [handlePlaybackRateChange, playbackRate])
-
-  useEffect(() => {
-    // Stop playback if we have unloaded a uid from the player
-    if (previousUid && !uid && !playing) {
-      handleStop()
-    }
-  }, [handleStop, playing, uid, previousUid])
-
+  usePlaybackControls(isAudioSetup, queueIdxChangeJobRef, setSeekPosition)
+  useRecordListen()
   useSavePodcastProgress()
 
   return null

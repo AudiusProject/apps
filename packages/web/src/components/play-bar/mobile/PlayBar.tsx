@@ -10,12 +10,16 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
-  tracksSocialActions,
-  playerSelectors
+  playbackActions,
+  playbackSelectors,
+  tracksSocialActions
 } from '@audius/common/store'
-import { IconLock } from '@audius/harmony'
+import {
+  createKeyboardActivationHandler,
+  IconImage,
+  IconLock
+} from '@audius/harmony'
+import cn from 'classnames'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
 
@@ -29,13 +33,14 @@ import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { audioPlayer } from 'services/audio-player'
 import { AppState } from 'store/types'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import styles from './PlayBar.module.css'
-const { makeGetCurrent } = queueSelectors
-const { getPreviewing, getBuffering, getCounter, getPlaying } = playerSelectors
+const { makeGetCurrent } = playbackSelectors
+const { getPreviewing, getBuffering, getCounter, getPlaying } =
+  playbackSelectors
 const { recordListen } = tracksSocialActions
-const { pause, play } = queueActions
+const { pause, play } = playbackActions
 
 const SEEK_INTERVAL = 200
 
@@ -59,8 +64,10 @@ const PlayBar = ({
   pause,
   onClickInfo
 }: PlayBarProps) => {
-  const { uid } = currentQueueItem
+  const { trackId: queueTrackId } = currentQueueItem
   const track = useCurrentTrack()
+  const isDarkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
   const { data: user } = useUser(track?.owner_id)
 
   const [percentComplete, setPercentComplete] = useState(0)
@@ -82,7 +89,7 @@ const PlayBar = ({
     return () => clearInterval(seekInterval)
   })
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: track ? track.track_id : undefined,
     size: SquareSizes.SIZE_150_BY_150,
     defaultImage: ''
@@ -101,7 +108,7 @@ const PlayBar = ({
     source: FavoriteSource.PLAYBAR
   })
 
-  if (!uid || !track || !user) return null
+  if (!queueTrackId || !track || !user) return null
 
   const {
     title,
@@ -111,6 +118,7 @@ const PlayBar = ({
   } = track
 
   const { name } = user
+  const infoLabel = `View current track: ${title} by ${name}`
 
   let playButtonStatus
   if (isBuffering) {
@@ -150,13 +158,22 @@ const PlayBar = ({
             <FavoriteButton
               isDisabled={track?.is_unlisted}
               onClick={toggleFavorite}
-              isDarkMode={isDarkMode()}
-              isMatrixMode={isMatrix()}
+              isDarkMode={isDarkMode}
+              isMatrixMode={isMatrixMode}
               isActive={has_current_user_saved}
               className={styles.favorite}
             />
           )}
-          <div className={styles.info} onClick={onClickInfo}>
+          <div
+            className={styles.info}
+            onClick={onClickInfo}
+            onKeyDown={createKeyboardActivationHandler<HTMLDivElement>({
+              onActivate: onClickInfo
+            })}
+            role='button'
+            tabIndex={0}
+            aria-label={infoLabel}
+          >
             {track?.track_id ? (
               <TrackFlair
                 className={styles.artwork}
@@ -164,11 +181,18 @@ const PlayBar = ({
                 id={track?.track_id}
               >
                 <div
-                  className={styles.image}
-                  style={{
-                    backgroundImage: `url(${image})`
-                  }}
+                  className={cn(styles.image, {
+                    [styles.imageEmpty]: hasNoArtwork
+                  })}
+                  style={
+                    image ? { backgroundImage: `url(${image})` } : undefined
+                  }
                 >
+                  {hasNoArtwork ? (
+                    <div className={styles.emptyArtworkIcon}>
+                      <IconImage width={14} height={14} />
+                    </div>
+                  ) : null}
                   {shouldShowPreviewLock ? (
                     <div className={styles.lockOverlay}>
                       <IconLock className={styles.iconLock} />

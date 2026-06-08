@@ -1,11 +1,25 @@
+import { useMemo } from 'react'
+
 import {
+  FrostedSurfaceIntensity,
   SystemAppearance,
   Theme,
+  ThemeMode,
+  ThemePalette,
   LEGACY_THEME_DEFAULT
 } from '@audius/common/models'
+import { themeSelectors } from '@audius/common/store'
 import { useSelector } from 'react-redux'
 
+import { getLottieThemeColors } from '../lottieTheme'
+
+/** Re-export for Lottie theming - palette + mode map to design system colors */
+export { getLottieThemeColors }
+
 export const THEME_KEY = 'theme'
+export const THEME_PALETTE_KEY = 'themePalette'
+export const THEME_MODE_KEY = 'themeMode'
+export const FROSTED_SURFACE_INTENSITY_KEY = 'frostedSurfaceIntensity'
 export const PREFERS_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)'
 
 const doesPreferDarkMode = () => {
@@ -40,20 +54,91 @@ export const getTheme = (): Theme | null => {
   return Theme.AUTO
 }
 
+/** Derive themePalette from stored theme (for migration from legacy) */
+export const getThemePaletteFromStorage = (): ThemePalette | null => {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem(THEME_PALETTE_KEY)
+  if (stored && Object.values(ThemePalette).includes(stored as ThemePalette)) {
+    return stored as ThemePalette
+  }
+  const theme = getTheme()
+  if (theme === Theme.MATRIX) return ThemePalette.MATRIX
+  return null
+}
+
+/** Derive themeMode from stored theme (for migration from legacy) */
+export const getThemeModeFromStorage = (): ThemeMode | null => {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem(THEME_MODE_KEY)
+  if (stored && Object.values(ThemeMode).includes(stored as ThemeMode)) {
+    return stored as ThemeMode
+  }
+  const theme = getTheme()
+  if (theme === Theme.LIGHT) return ThemeMode.LIGHT
+  if (theme === Theme.DARK) return ThemeMode.DARK
+  return ThemeMode.AUTO
+}
+
+export const getFrostedSurfaceIntensityFromStorage =
+  (): FrostedSurfaceIntensity | null => {
+    if (typeof window === 'undefined') return null
+    const stored = window.localStorage.getItem(FROSTED_SURFACE_INTENSITY_KEY)
+    if (
+      stored &&
+      Object.values(FrostedSurfaceIntensity).includes(
+        stored as FrostedSurfaceIntensity
+      )
+    ) {
+      return stored as FrostedSurfaceIntensity
+    }
+    return null
+  }
+
 export const getSystemAppearance = () =>
   doesPreferDarkMode() ? SystemAppearance.DARK : SystemAppearance.LIGHT
 
 export const isDarkMode = () => shouldShowDark(getTheme())
-export const isMatrix = () => getTheme() === Theme.MATRIX
+const isMatrixTheme = (
+  themePalette: ThemePalette | null,
+  theme: Theme | null
+) => {
+  return themePalette != null
+    ? themePalette === ThemePalette.MATRIX
+    : theme === Theme.MATRIX
+}
+
+export const isMatrix = () => {
+  return isMatrixTheme(getThemePaletteFromStorage(), getTheme())
+}
 
 export const useIsDarkMode = () => {
-  const theme = useSelector(getTheme)
+  const theme = useSelector(themeSelectors.getTheme)
   return shouldShowDark(theme)
 }
 
 export const useIsMatrix = () => {
-  const theme = useSelector(getTheme)
-  return theme === Theme.MATRIX
+  const themePalette = useSelector(themeSelectors.getThemePalette)
+  const theme = useSelector(themeSelectors.getTheme)
+  return isMatrixTheme(themePalette, theme)
+}
+
+export const useThemePalette = (): ThemePalette | null => {
+  return useSelector(themeSelectors.getThemePalette)
+}
+
+export const useThemeMode = () => {
+  return useSelector(themeSelectors.getThemeMode)
+}
+
+/** Theme colors for Lottie - respects palette (default/classic/matrix) and light/dark mode */
+export const useLottieThemeColors = () => {
+  const palette = useSelector(themeSelectors.getThemePalette)
+  const theme = useSelector(themeSelectors.getTheme)
+  const isDark = shouldShowDark(theme)
+  return useMemo(
+    () => getLottieThemeColors(palette, isDark, theme),
+    [palette, isDark, theme]
+  )
 }
 
 export const clearTheme = () => {

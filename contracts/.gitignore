@@ -1,9 +1,0 @@
-*.swp
-*.swo
-*.swn
-.DS_Store
-.npmrc
-ganache_log.txt
-migrations/migration-output.json
-node_modules/
-build/

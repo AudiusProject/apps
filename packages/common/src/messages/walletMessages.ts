@@ -15,6 +15,8 @@ export const walletMessages = {
   transactionHistory: 'Transaction History',
   cashTransferDescription:
     'Transfer your cash balance to your bank account or debit card. $5 minimum.',
+  cashTransferSetupFee: (feeDollars: string) =>
+    `A one-time setup fee of $${feeDollars} will be deducted from your first withdrawal to cover account creation.`,
   back: 'Back',
   tryAgain: 'Try Again?',
   error: 'An error occured.',
@@ -77,6 +79,14 @@ export const walletMessages = {
     amountTooLow: 'Amount must be greater than zero.',
     invalidAddress: 'A valid Solana USDC wallet address is required',
     minCashTransfer: 'A minimum of $5 is required for cash withdrawals.',
+    coinflowSetupFeeRequired: (feeDollars: string) =>
+      `A one-time setup fee of $${feeDollars} will be deducted from your withdrawal amount.`,
+    ataCreationFeeRequired: (feeDollars: string) =>
+      `Amount must cover the one-time account creation fee of $${feeDollars}`,
+    noUsdcAccountFound: (feeDollars?: string) =>
+      feeDollars != null
+        ? `No USDC account found. A one-time fee of $${feeDollars} will be deducted.`
+        : 'No USDC account found',
     pleaseConfirm:
       'Please confirm you have reviewed this transaction and accept responsibility for errors.',
     youMustConfirm:
@@ -103,14 +113,14 @@ export const walletMessages = {
   receiveTokensLoadingSubtitle: 'Setting up your wallet',
   becomeMemberTitle: 'Become a member',
   becomeMemberBody: (coinTicker: string) =>
-    `Buy $${coinTicker} to gain access to exclusive members-only perks!`,
+    `Buy $${coinTicker} to join the fan club and unlock members-only perks.`,
 
   // Linked Wallets messages
   linkedWallets: {
     titleHasWallets: 'Linked Wallets ',
     titleNoWallets: 'Link External Wallet',
     count: (count: number) => `(${count}/5)`,
-    addWallet: 'Add Linked Wallet',
+    addWallet: 'Add',
     copied: 'Copied To Clipboard!',
     copy: 'Copy Address',
     remove: 'Remove Wallet',
@@ -128,12 +138,22 @@ export const walletMessages = {
     }
   },
 
-  // Artist Coins messages
-  artistCoins: {
-    title: 'Discover Artist Coins',
-    searchPlaceholder: 'Search Artist Coins',
+  // Fan clubs (fan club tokens)
+  fanClubs: {
+    title: 'Fan Clubs',
+    searchPlaceholder: 'Search fan clubs',
     noCoins: 'No results found',
-    noCoinsDescription: 'No Artist Coins were found matching your search.',
+    noCoinsDescription: 'No fan clubs matched your search.',
+    view: 'View',
+    tableView: 'Table',
+    leaderboardView: 'Leaderboard',
+    cardView: 'Fan Clubs',
+    launchYourClub: 'Launch your club',
+    viewYourClub: 'View your club',
+    fanClubLabel: 'Fan Club',
+    members: 'Members',
+    price: 'Price',
+    marketCap: 'Market Cap',
     sortTitle: 'SORT',
     sortAscending: 'Ascending',
     sortDescending: 'Descending',

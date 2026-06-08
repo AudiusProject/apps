@@ -36,7 +36,7 @@ const pluginTypescript = typescript({ tsconfig: './tsconfig.json' })
  * - https://github.com/rollup/plugins/issues/481#issuecomment-661622792
  * - https://github.com/rollup/rollup/pull/4647 (3.0 supports keeping dynamic imports)
  */
-const commonJsInternal = ['micro-aes-gcm']
+const commonJsInternal = ['micro-aes-gcm', '@audius/sdk']
 
 export const outputConfigs = {
   /**

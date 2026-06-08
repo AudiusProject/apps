@@ -36,6 +36,7 @@ import {
 import { make } from 'common/store/analytics/actions'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { updateProfileAsync } from 'common/store/profile/sagas'
+import { fullContestPage } from 'utils/route'
 import { waitForRead, waitForWrite } from 'utils/sagaHelpers'
 
 import watchTrackErrors from './errorSagas'
@@ -176,7 +177,10 @@ export function* confirmRepostTrack(
       function* () {
         yield* call([sdk.tracks, sdk.tracks.repostTrack], {
           trackId: Id.parse(trackId),
-          userId: Id.parse(user.user_id)
+          userId: Id.parse(user.user_id),
+          repostRequestBody: metadata
+            ? { isRepostOfRepost: metadata.is_repost_of_repost }
+            : undefined
         })
 
         return trackId
@@ -794,6 +798,38 @@ function* watchShareTrack() {
   )
 }
 
+// Contest share variant — same query + analytics kind as track, but
+// the clipboard + social link point at the contest page on the
+// parent track's permalink. Mirrors how the contest page itself
+// routes (`{permalink}/contest`) so a shared URL opens the same
+// surface the sender is on.
+function* watchShareContest() {
+  yield* takeEvery(
+    socialActions.SHARE_CONTEST,
+    function* (action: ReturnType<typeof socialActions.shareContest>) {
+      const { trackId } = action
+
+      const track = yield* queryTrack(trackId)
+      if (!track) return
+
+      const user = yield* queryUser(track.owner_id)
+      if (!user) return
+
+      const link = fullContestPage(track.permalink)
+      const share = yield* getContext('share')
+      share(link, formatShareText(track.title, user.name))
+
+      const event = make(Name.SHARE, {
+        kind: 'track',
+        source: action.source,
+        id: trackId,
+        url: link
+      })
+      yield* put(event)
+    }
+  )
+}
+
 const sagas = () => {
   return [
     watchRepostTrack,
@@ -806,6 +842,7 @@ const sagas = () => {
     watchDownloadTrack,
     watchDownloadFinished,
     watchShareTrack,
+    watchShareContest,
     watchTrackErrors
   ]
 }

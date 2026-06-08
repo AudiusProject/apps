@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { useReplaceTrackConfirmationModal } from '@audius/common/store'
 import {
   Modal,
@@ -12,6 +13,7 @@ import {
   Hint,
   IconError
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 const messages = {
   title: 'Are You Sure?',
@@ -22,22 +24,27 @@ const messages = {
   confirm: 'Confirm & Replace'
 }
 
-export const ReplaceTrackConfirmationModal = () => {
-  const { data, isOpen, onClose } = useReplaceTrackConfirmationModal()
+export const ReplaceTrackConfirmationModal = NiceModal.create(() => {
+  const modal = useModal()
+  const { data } = useReplaceTrackConfirmationModal()
   const { confirmCallback, cancelCallback } = data
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
 
   const handleConfirm = useCallback(() => {
     confirmCallback()
-    onClose()
-  }, [confirmCallback, onClose])
+    handleClose()
+  }, [confirmCallback, handleClose])
 
   const handleCancel = useCallback(() => {
     cancelCallback?.()
-    onClose()
-  }, [cancelCallback, onClose])
+    handleClose()
+  }, [cancelCallback, handleClose])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='small'>
+    <Modal isOpen={modal.visible} onClose={handleClose} size='small'>
       <ModalHeader>
         <Flex alignSelf='center' gap='s'>
           <Text variant='label' size='xl' strength='strong'>
@@ -65,4 +72,7 @@ export const ReplaceTrackConfirmationModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('ReplaceTrackConfirmation', ReplaceTrackConfirmationModal)
+registerNiceModalId('ReplaceTrackConfirmation')

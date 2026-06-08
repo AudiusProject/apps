@@ -1,0 +1,102 @@
+.section {
+  width: 100%;
+  max-width: 1440px;
+  background: #111;
+  padding: 0 48px;
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+  max-width: none;
+  padding: 96px 0;
+  box-sizing: border-box;
+}
+
+.trackWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* Vertical padding for tap area; horizontal padding so carousel doesn’t hit edges */
+  padding: 12px 24px;
+  container-type: inline-size;
+  container-name: carousel;
+}
+
+.track {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  animation: marquee 30s linear infinite;
+  width: max-content;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Size by height; width follows logo aspect ratio */
+.logo {
+  height: 34px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.logoSmall {
+  height: 19px;
+}
+
+.gradientLeft {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 76px;
+  background: linear-gradient(to right, #111, rgba(17, 17, 17, 0));
+  z-index: 1;
+}
+
+.gradientRight {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 76px;
+  background: linear-gradient(to left, #111, rgba(17, 17, 17, 0));
+  z-index: 1;
+}
+
+@media (max-width: 800px) {
+  .section {
+    padding: 0 16px;
+  }
+
+  .container {
+    padding: 48px 0;
+  }
+
+  .trackWrap {
+    padding: 12px 16px;
+  }
+
+  .logo {
+    height: 24px;
+  }
+
+  .logoSmall {
+    height: 14px;
+  }
+}

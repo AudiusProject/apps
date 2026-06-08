@@ -30,20 +30,29 @@ export const isMobile = () => {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') {
     return false
   }
-  let check = false
-  if (
+
+  // Dev-only override: setting `localStorage.__FORCE_MOBILE__ = '1'` forces
+  // the client into mobile mode regardless of the real user agent, so
+  // engineers + designers can preview the mobile-web layout from a desktop
+  // browser without toggling Chrome DevTools device mode. Unset the key (or
+  // assign any other value) to disable.
+  try {
+    if (window.localStorage?.getItem('__FORCE_MOBILE__') === '1') {
+      return true
+    }
+  } catch {
+    // localStorage may be unavailable (private mode, SSR); fall through.
+  }
+
+  // Respect the User-Agent so that "Request Desktop Site" works: when a
+  // mobile browser toggles desktop mode the UA flips to a desktop one, and
+  // we should serve the desktop app. Avoid platform/touchPoints heuristics
+  // (e.g. iPadOS sending a Mac UA) that would override that explicit choice.
+  // @ts-ignore -- TODO fix mobile imports causing type errors
+  return isMobileUserAgent(
     // @ts-ignore -- TODO fix mobile imports causing type errors
-    isMobileUserAgent(navigator.userAgent || navigator.vendor || window.opera)
-  ) {
-    check = true
-  }
-
-  // iPad iOS 13
-  if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
-    check = true
-  }
-
-  return check
+    navigator.userAgent || navigator.vendor || window.opera
+  )
 }
 
 export const isElectron = () => {

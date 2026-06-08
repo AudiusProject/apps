@@ -3,8 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Event, Feature, ID } from '~/models'
+import { Event, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
+
+import { QUERY_KEYS } from '../queryKeys'
 
 import { getEventQueryKey, getEventIdsByEntityIdQueryKey } from './utils'
 
@@ -19,13 +21,18 @@ export type CreateEventArgs = {
 }
 
 export const useCreateEvent = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (args: CreateEventArgs) => {
       const sdk = await audiusSdk()
       return await sdk.events.createEvent(args)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.remixContestsList]
+      })
     },
     onMutate: async (args: CreateEventArgs) => {
       const { userId, eventType, entityType, entityId, endDate, eventData } =
@@ -80,12 +87,7 @@ export const useCreateEvent = () => {
       return { prevEntityState, prevEventTypeState }
     },
     onError: (error: Error, args, context) => {
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Events',
-        feature: Feature.Events
-      })
+      console.error(error)
 
       // Revert the optimistic updates
       queryClient.resetQueries({

@@ -104,9 +104,12 @@ const Link = ({
           const obj = { collection: res.data[0] }
           setUnfurledContent(formatCollectionName(obj))
         } else if (instanceOfUserResponse(res)) {
-          const obj = { user: res.data }
-          setUnfurledContent(formatUserName(obj))
-          setUnfurledContentObject(obj)
+          const user = Array.isArray(res.data) ? res.data[0] : res.data
+          if (user) {
+            const obj = { user }
+            setUnfurledContent(formatUserName(obj))
+            setUnfurledContentObject(obj)
+          }
         }
       }
     }

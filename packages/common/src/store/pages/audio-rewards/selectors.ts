@@ -3,8 +3,6 @@ import { createSelector } from 'reselect'
 import { ChallengeRewardID, UserChallenge } from '../../../models/AudioRewards'
 import { CommonState } from '../../commonStore'
 
-import { ClaimStatus } from './types'
-
 export const getTrendingRewardsModalType = (state: CommonState) => {
   const type = state.pages.audioRewards.trendingRewardsModalType as string
   // 'playlists' is deprecated; treat as 'tracks'
@@ -65,10 +63,3 @@ export const getHCaptchaStatus = (state: CommonState) =>
 export const getShowRewardClaimedToast = (state: CommonState) =>
   state.pages.audioRewards.showRewardClaimedToast
 
-export const getAAOErrorCode = (state: CommonState) => {
-  const claimState = state.pages.audioRewards.claimState
-  if (claimState.status !== ClaimStatus.ERROR) {
-    return undefined
-  }
-  return claimState.aaoErrorCode
-}

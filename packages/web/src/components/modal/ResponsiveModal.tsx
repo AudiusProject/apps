@@ -85,7 +85,7 @@ const ResponsiveModal = ({
       case 'l':
         return 'large'
       case 'xl':
-        return 'large' // Map xl to large since Modal doesn't support xl
+        return 'large'
       default:
         return 'medium'
     }

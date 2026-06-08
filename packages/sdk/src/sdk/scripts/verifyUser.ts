@@ -1,6 +1,6 @@
 import { program } from 'commander'
 
-import { sdk as audiusSdk } from '../sdk'
+import { createSdkWithServices } from '../createSdkWithServices'
 import { EntityManagerAction, EntityType } from '../services'
 import { HashId } from '../types/HashId'
 
@@ -37,7 +37,7 @@ program
       process.exit(1)
     }
 
-    const sdk = audiusSdk({
+    const sdk = createSdkWithServices({
       appName: 'verify-user',
       apiSecret: args.privateKey,
       environment: args.environment
@@ -67,7 +67,7 @@ program
       console.info('With config', config)
       console.info('Sending tx...')
       const { blockHash, blockNumber } =
-        await sdk.services.entityManager.manageEntity({
+        await sdk.services.entityManager!.manageEntity({
           userId,
           entityType: EntityType.USER,
           entityId: userId,

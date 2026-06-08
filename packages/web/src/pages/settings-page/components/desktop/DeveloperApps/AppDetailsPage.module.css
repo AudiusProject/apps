@@ -38,6 +38,19 @@
   word-wrap: break-word;
 }
 
+.keyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--harmony-unit-2);
+}
+
+.keyDescription {
+  font-size: var(--harmony-font-s);
+  font-weight: var(--harmony-font-medium);
+  color: var(--harmony-n-500);
+  line-height: 1.4;
+}
+
 .keyRoot {
   display: flex;
   align-items: center;

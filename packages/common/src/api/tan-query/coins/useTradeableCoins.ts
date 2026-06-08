@@ -2,14 +2,14 @@ import { useMemo } from 'react'
 
 import type { InfiniteData } from '@tanstack/react-query'
 
-import { transformArtistCoinsToTokenInfoMap, useQueryContext } from '~/api'
+import { transformFanClubsToTokenInfoMap, useQueryContext } from '~/api'
 import { CoinInfo, TOKEN_LISTING_MAP } from '~/store'
 
 import type { Coin } from '../../../adapters/coin'
 
-import { useArtistCoins } from './useArtistCoins'
+import { useFanClubs } from './useFanClubs'
 
-export const TEMP_ARTIST_COINS_PAGE_SIZE = 100
+export const TEMP_FAN_CLUBS_PAGE_SIZE = 100
 
 export type TradeableCoinsContext = 'pay' | 'receive' | 'all'
 
@@ -41,18 +41,18 @@ export const useTradeableCoins = (
   const { env } = useQueryContext()
 
   const {
-    data: artistCoins = [],
+    data: fanClubs = [],
     isPending,
     error
-  } = useArtistCoins<CoinInfo[]>(
-    { pageSize: TEMP_ARTIST_COINS_PAGE_SIZE },
+  } = useFanClubs<CoinInfo[]>(
+    { pageSize: TEMP_FAN_CLUBS_PAGE_SIZE },
     {
       select: (data: InfiniteData<Coin[], number>) => {
         // First flatten the pages
         const coins = data.pages.flat()
 
         // Transform to CoinInfo map
-        const coinsMap = transformArtistCoinsToTokenInfoMap(coins)
+        const coinsMap = transformFanClubsToTokenInfoMap(coins)
 
         // Add USDC manually since it's frontend-only and not from API
         coinsMap.USDC = {
@@ -91,7 +91,7 @@ export const useTradeableCoins = (
         }
 
         if (context === 'pay') {
-          // For pay context, filter out USDC (users pay with artist coins)
+          // For pay context, filter out USDC (users pay with fan clubs)
           coinsArray = coinsArray.filter((coin) => coin.symbol !== 'USDC')
         }
         return coinsArray
@@ -100,19 +100,16 @@ export const useTradeableCoins = (
   )
 
   return useMemo(() => {
-    const coinsMap = artistCoins.reduce<Record<string, CoinInfo>>(
-      (acc, coin) => {
-        acc[coin.symbol] = coin
-        return acc
-      },
-      {}
-    )
+    const coinsMap = fanClubs.reduce<Record<string, CoinInfo>>((acc, coin) => {
+      acc[coin.symbol] = coin
+      return acc
+    }, {})
 
     return {
       coins: coinsMap,
-      coinsArray: artistCoins,
+      coinsArray: fanClubs,
       isLoading: isPending,
       error: error ?? null
     }
-  }, [artistCoins, isPending, error])
+  }, [fanClubs, isPending, error])
 }

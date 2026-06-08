@@ -46,7 +46,6 @@ const trendingChallengeIdMapping: {
   [key in ChallengeRewardID]?: ChallengeRewardID
 } = {
   tt: 'trending-track',
-  tp: 'trending-playlist',
   tut: 'trending-underground'
 }
 
@@ -57,6 +56,7 @@ export const ChallengeRewardNotification = (
   const { challengeId, timeLabel, isViewed, type, listenStreak } = notification
   const dispatch = useDispatch()
   const record = useRecord()
+
   const mappedChallengeRewardsConfigKey =
     trendingChallengeIdMapping[challengeId] ?? challengeId
 
@@ -89,6 +89,12 @@ export const ChallengeRewardNotification = (
         return messages.amountEarned(amount) + messages.challengeCompleteText
     }
   }, [challengeId, amount, listenStreak])
+
+  // Skip deprecated trending-playlist (tp) notifications (legacy API may still send)
+  const id = String(challengeId)
+  if (id === 'tp' || id === 'trending-playlist') {
+    return null
+  }
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>

@@ -1,20 +1,18 @@
-import type { full } from '@audius/sdk'
+import type { AccessGate } from '@audius/sdk'
 import {
   instanceOfFollowGate,
   instanceOfPurchaseGate,
-  instanceOfTokenGate,
-  instanceOfNftGate
-} from '@audius/sdk/src/sdk/api/generated/full'
+  instanceOfTokenGate
+} from '@audius/sdk'
 
 import { AccessConditions } from '~/models'
 
+/** Accepts default API AccessGate (e.g. from playlists). */
 export const accessConditionsFromSDK = (
-  input: full.AccessGate
+  input: AccessGate
 ): AccessConditions | null => {
   if (instanceOfFollowGate(input)) {
     return { follow_user_id: input.followUserId }
-  } else if (instanceOfPurchaseGate(input)) {
-    return { usdc_purchase: input.usdcPurchase }
   } else if (instanceOfTokenGate(input)) {
     return {
       token_gate: {
@@ -22,8 +20,16 @@ export const accessConditionsFromSDK = (
         token_amount: input.tokenGate.tokenAmount
       }
     }
-  } else if (instanceOfNftGate(input)) {
-    return null
+  } else if (instanceOfPurchaseGate(input)) {
+    return {
+      usdc_purchase: {
+        price: input.usdcPurchase.price,
+        splits: input.usdcPurchase.splits.map((s) => ({
+          user_id: s.userId,
+          percentage: s.percentage
+        }))
+      }
+    }
   } else {
     throw new Error(`Unsupported access gate type: ${JSON.stringify(input)}`)
   }

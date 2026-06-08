@@ -1,4 +1,4 @@
-import { AudiusSdk } from '@audius/sdk'
+import { AudiusSdkWithServices } from '@audius/sdk'
 import { useQueryClient, useMutation, QueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -34,7 +34,7 @@ export const useUpdatePlaylistLibrary = () => {
 
 // feature-tan-query TODO: migrate saga usages, then remove this
 export const updatePlaylistLibrary = async (
-  audiusSdk: AudiusSdk,
+  audiusSdk: AudiusSdkWithServices,
   userId: ID | null | undefined,
   playlistLibrary: PlaylistLibrary,
   queryClient: QueryClient,

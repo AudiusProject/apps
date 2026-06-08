@@ -36,7 +36,7 @@ export const ArtistRemixContestEndingSoonNotification = (
 
   const handlePress = useCallback(() => {
     if (track) {
-      navigation.push('Track', {
+      navigation.push('Contest', {
         trackId: track.track_id
       })
     }

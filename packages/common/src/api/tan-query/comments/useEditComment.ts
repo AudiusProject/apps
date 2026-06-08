@@ -1,9 +1,9 @@
-import { EntityType, CommentMention } from '@audius/sdk'
+import { CommentMention, Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Feature, ID } from '~/models'
+import { ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import { CommentOrReply, messages } from './types'
@@ -16,11 +16,11 @@ export type EditCommentArgs = {
   mentions?: CommentMention[]
   trackId: ID
   currentSort: any
-  entityType?: EntityType
+  entityType?: 'Track' | 'FanClub'
 }
 
 export const useEditComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
@@ -30,18 +30,19 @@ export const useEditComment = () => {
       newMessage,
       trackId,
       mentions,
-      entityType = EntityType.TRACK
+      entityType = 'Track'
     }: EditCommentArgs) => {
-      const commentData = {
-        body: newMessage,
-        userId,
-        entityId: commentId,
-        trackId,
-        entityType,
-        mentions: mentions?.map((mention) => mention.userId) ?? []
-      }
       const sdk = await audiusSdk()
-      await sdk.comments.editComment(commentData)
+      await sdk.comments.updateComment({
+        userId: Id.parse(userId)!,
+        commentId: Id.parse(commentId)!,
+        metadata: {
+          body: newMessage,
+          entityId: trackId,
+          entityType,
+          mentions: mentions?.map((mention) => mention.userId) ?? []
+        }
+      })
     },
     onMutate: ({ commentId, newMessage, mentions }) => {
       const prevComment = queryClient.getQueryData(
@@ -61,12 +62,7 @@ export const useEditComment = () => {
     },
     onError: (error: Error, args, context) => {
       const { commentId } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Toast standard error message
       dispatch(toast({ content: messages.mutationError('editing') }))
 

@@ -9,11 +9,12 @@ on:
 permissions:
   id-token: write
   contents: write
+  pull-requests: write
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  NODE_VERSION: "22.21.1"
+  NODE_VERSION: "24.10.0"
 
 jobs:
   changes:
@@ -55,7 +56,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.21.1
+          node-version: 24.10.0
           # registry-url for correct registry targeting, but do NOT use always-auth
           # (that's for token auth, not OIDC)
           registry-url: "https://registry.npmjs.org"
@@ -64,7 +65,7 @@ jobs:
         run: |
           echo "Current npm version: $(npm --version)"
           # OIDC trusted publishing requires npm 11.5.1+
-          npm install -g npm@latest
+          npm install -g npm@11.10.0
           echo "Updated npm version: $(npm --version)"
 
       - name: Create concatenated patch file
@@ -97,6 +98,7 @@ jobs:
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          export SKIP_POD_INSTALL=true SKIP_ANDROID_INSTALL=true
           mkdir -p /tmp/android-sdk-dummy
           # Clear npm cache to avoid EEXIST conflicts
           npm cache clean --force || true

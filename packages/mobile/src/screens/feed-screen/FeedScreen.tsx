@@ -1,25 +1,28 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import {
-  lineupSelectors,
-  feedPageLineupActions as feedActions,
-  feedPageSelectors
-} from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+  getFeedQueryKey,
+  FEED_INITIAL_PAGE_SIZE,
+  FEED_LOAD_MORE_PAGE_SIZE,
+  useCurrentUserId,
+  useFeed,
+  useFeedFilter,
+  useFeedTab,
+  useForYouFeed,
+  FOR_YOU_INITIAL_PAGE_SIZE,
+  FOR_YOU_LOAD_MORE_PAGE_SIZE
+} from '@audius/common/api'
+import { Name, FeedTab } from '@audius/common/models'
 
-import { IconFeed } from '@audius/harmony-native'
-import { Screen, ScreenContent, ScreenHeader } from 'app/components/core'
-import { Lineup } from 'app/components/lineup'
+import { Screen, ScreenContent } from 'app/components/core'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
-import { OnlineOnly } from 'app/components/offline-placeholder/OnlineOnly'
+import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { SuggestedFollows } from 'app/components/suggested-follows'
-import { useAppTabScreen } from 'app/hooks/useAppTabScreen'
+import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
+import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
-const { getDiscoverFeedLineup } = feedPageSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
-
-const getFeedLineup = makeGetLineupMetadatas(getDiscoverFeedLineup)
+import { FeedTabs } from './FeedTabs'
 
 const messages = {
   header: 'Your Feed',
@@ -27,38 +30,98 @@ const messages = {
 }
 
 export const FeedScreen = () => {
-  useAppTabScreen()
+  const [feedTab, setFeedTab] = useFeedTab()
+  const [feedFilter] = useFeedFilter()
+  const { data: currentUserId } = useCurrentUserId()
 
-  const dispatch = useDispatch()
+  const isForYou = feedTab === FeedTab.FOR_YOU
 
-  const loadMore = useCallback(
-    (offset: number, limit: number, overwrite: boolean) => {
-      dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
+  const feedArgs = useMemo(
+    () => ({
+      userId: currentUserId,
+      filter: feedFilter,
+      initialPageSize: FEED_INITIAL_PAGE_SIZE,
+      loadMorePageSize: FEED_LOAD_MORE_PAGE_SIZE
+    }),
+    [feedFilter, currentUserId]
+  )
+  const followFeed = useFeed(feedArgs, { enabled: !isForYou })
+  const forYouFeed = useForYouFeed(
+    {
+      initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
+      loadMorePageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE
     },
-    [dispatch]
+    { enabled: isForYou }
   )
 
+  const followQuerySource = useMemo(
+    () => ({ queryKey: [...getFeedQueryKey(feedArgs)] as unknown[] }),
+    [feedArgs]
+  )
+
+  const handleSelectTab = useCallback(
+    (tab: FeedTab) => {
+      setFeedTab(tab)
+      track(make({ eventName: Name.FEED_CHANGE_VIEW, view: tab }))
+    },
+    [setFeedTab]
+  )
+
+  // Memoized so the header isn't a new function reference on every render —
+  // otherwise Screen's setOptions runs each parent re-render and React
+  // Navigation rebuilds the header, remounting AccountPictureHeader and
+  // re-firing the profile-picture image-fetch path.
+  const renderHeader = useCallback(
+    () => (
+      <MobileRootHeader title={messages.header} showDivider={false}>
+        {isForYou ? null : <FeedFilterButton />}
+      </MobileRootHeader>
+    ),
+    [isForYou]
+  )
+
+  const lineupProps = isForYou
+    ? {
+        trackIds: forYouFeed.trackIds,
+        lineupItems: forYouFeed.data,
+        isPending: forYouFeed.isPending,
+        isFetching: forYouFeed.isFetching,
+        hasNextPage: forYouFeed.hasNextPage,
+        loadNextPage: forYouFeed.loadNextPage,
+        pageSize: FOR_YOU_LOAD_MORE_PAGE_SIZE,
+        initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
+        refetch: undefined as undefined | (() => void),
+        querySource: undefined as { queryKey: unknown[] } | undefined
+      }
+    : {
+        trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
+        isPending: followFeed.isPending,
+        isFetching: followFeed.isFetching,
+        hasNextPage: followFeed.hasNextPage,
+        loadNextPage: followFeed.loadNextPage,
+        pageSize: FEED_LOAD_MORE_PAGE_SIZE,
+        initialPageSize: FEED_INITIAL_PAGE_SIZE,
+        refetch: () => {
+          followFeed.refetch()
+        },
+        querySource: followQuerySource
+      }
+
   return (
-    <Screen url='Feed'>
-      <ScreenHeader text={messages.header} icon={IconFeed}>
-        <OnlineOnly>
-          <FeedFilterButton />
-        </OnlineOnly>
-      </ScreenHeader>
+    <Screen url='Feed' header={renderHeader}>
       <ScreenContent>
-        <Lineup
-          pullToRefresh
-          delineate
-          selfLoad
+        <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
+        <TrackLineup
+          key={`feed-${feedTab}`}
+          source='DISCOVER_FEED'
+          pullToRefresh={!isForYou}
           hideHeaderOnEmpty
+          LineupEmptyComponent={<SuggestedFollows />}
           ListFooterComponent={
             <EndOfLineupNotice description={messages.endOfFeed} />
           }
-          LineupEmptyComponent={<SuggestedFollows />}
-          actions={feedActions}
-          lineupSelector={getFeedLineup}
-          loadMore={loadMore}
-          showsVerticalScrollIndicator={false}
+          {...lineupProps}
         />
       </ScreenContent>
     </Screen>

@@ -30,13 +30,17 @@ import {
   CommentMentionNotification,
   CommentReactionNotification
 } from './Notifications'
+import { ArtistRemixContestEndedNotification } from './Notifications/ArtistRemixContestEndedNotification'
 import { ArtistRemixContestEndingSoonNotification } from './Notifications/ArtistRemixContestEndingSoonNotification'
 import { ArtistRemixContestSubmissionsNotification } from './Notifications/ArtistRemixContestSubmissionsNotification'
+import { FanClubTextPostNotification } from './Notifications/FanClubTextPostNotification'
 import { FanRemixContestEndedNotification } from './Notifications/FanRemixContestEndedNotification'
 import { FanRemixContestEndingSoonNotification } from './Notifications/FanRemixContestEndingSoonNotification'
 import { FanRemixContestStartedNotification } from './Notifications/FanRemixContestStartedNotification'
+import { FanRemixContestSubmissionNotification } from './Notifications/FanRemixContestSubmissionNotification'
 import { FanRemixContestWinnersSelectedNotification } from './Notifications/FanRemixContestWinnersSelectedNotification'
 import { ListenStreakReminderNotification } from './Notifications/ListenStreakReminderNotification'
+import { RemixContestUpdateNotification } from './Notifications/RemixContestUpdateNotification'
 
 type NotificationListItemProps = {
   notification: Notification
@@ -119,6 +123,16 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
             notification={notification}
           />
         )
+      case NotificationType.RemixContestUpdate:
+        return <RemixContestUpdateNotification notification={notification} />
+      case NotificationType.FanRemixContestSubmission:
+        return (
+          <FanRemixContestSubmissionNotification notification={notification} />
+        )
+      case NotificationType.ArtistRemixContestEnded:
+        return (
+          <ArtistRemixContestEndedNotification notification={notification} />
+        )
       case NotificationType.ArtistRemixContestEndingSoon:
         return (
           <ArtistRemixContestEndingSoonNotification
@@ -131,6 +145,8 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
             notification={notification}
           />
         )
+      case NotificationType.FanClubTextPost:
+        return <FanClubTextPostNotification notification={notification} />
       default:
         return null
     }

@@ -73,7 +73,7 @@ export const isNodeHealthy = async (endpoint: string, logger = console) => {
       baseURL: endpoint,
       url: `/health_check`,
       method: 'get',
-      timeout: 3000
+      timeout: 10_000
     })
     if (resp.status !== 200) {
       logger.warn(

@@ -1,19 +1,24 @@
-import { Id, OptionalId, EntityType, full } from '@audius/sdk'
+import {
+  GetTrackRemixesSortMethodEnum,
+  Id,
+  OptionalId,
+  EntityType
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
+  useQuery,
   useQueryClient
 } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { ID } from '~/models'
 import { remixesPageActions } from '~/store/pages'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { getTrackQueryKey } from '../tracks/useTrack'
-import { QueryKey, QueryOptions } from '../types'
+import { LineupData, QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { getUserQueryKey } from '../users/useUser'
 import { primeTrackData } from '../utils/primeTrackData'
@@ -25,14 +30,15 @@ export type UseRemixesArgs = {
   includeOriginal?: boolean
   includeWinners?: boolean
   pageSize?: number
-  sortMethod?: full.GetTrackRemixesSortMethodEnum
+  sortMethod?: GetTrackRemixesSortMethodEnum
   isCosign?: boolean
   isContestEntry?: boolean
 }
 
-export type RemixesQueryData = {
-  count: number
-  tracks: { id: ID; type: EntityType }[]
+export type UseRemixesCountArgs = {
+  trackId: number | null | undefined
+  isCosign?: boolean
+  isContestEntry?: boolean
 }
 
 export const getRemixesQueryKey = ({
@@ -55,7 +61,18 @@ export const getRemixesQueryKey = ({
       isCosign,
       isContestEntry
     }
-  ] as unknown as QueryKey<InfiniteData<RemixesQueryData[]>>
+  ] as unknown as QueryKey<InfiniteData<LineupData[]>>
+
+export const getRemixesCountQueryKey = ({
+  trackId,
+  isCosign = false,
+  isContestEntry = false
+}: UseRemixesCountArgs) =>
+  [
+    QUERY_KEYS.remixesCount,
+    trackId,
+    { isCosign, isContestEntry }
+  ] as unknown as QueryKey<number>
 
 export const useRemixes = (
   {
@@ -85,33 +102,34 @@ export const useRemixes = (
       isContestEntry
     }),
     initialPageParam: 0,
-    getNextPageParam: (lastPage: RemixesQueryData, allPages) => {
-      const isSecondPage = allPages.length === 1
-      if (
-        lastPage?.tracks?.length < pageSize ||
-        (isSecondPage && includeOriginal && lastPage?.tracks?.length - 1 === 0)
-      ) {
-        return undefined
-      }
+    getNextPageParam: (lastPage: LineupData[], allPages) => {
+      // First page may have the original prepended; subtract it before
+      // comparing to pageSize so a full page of `pageSize` actual remixes
+      // doesn't false-stop pagination.
+      const isFirstPage = allPages.length === 1
+      const remixesOnLastPage =
+        lastPage.length - (isFirstPage && includeOriginal ? 1 : 0)
+      if (remixesOnLastPage < pageSize) return undefined
       return (
-        allPages.reduce((acc, page) => acc + page.tracks.length, 0) -
+        allPages.reduce((acc, page) => acc + page.length, 0) -
         (includeOriginal ? 1 : 0)
       )
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = { count: 0, tracks: [] } } =
-        await sdk.full.tracks.getTrackRemixes({
-          trackId: Id.parse(trackId),
-          userId: OptionalId.parse(currentUserId),
-          limit: pageSize,
-          offset: pageParam,
-          sortMethod,
-          onlyCosigns: isCosign,
-          onlyContestEntries: isContestEntry
-        })
+      const remixesResponse = await sdk.tracks.getTrackRemixes({
+        trackId: Id.parse(trackId),
+        userId: OptionalId.parse(currentUserId),
+        limit: pageSize,
+        offset: pageParam,
+        sortMethod,
+        onlyCosigns: isCosign,
+        onlyContestEntries: isContestEntry
+      })
+
+      const data = remixesResponse?.data ?? { count: 0, tracks: [] }
       let processedTracks = transformAndCleanList(
-        data.tracks,
+        data.tracks ?? [],
         userTrackMetadataFromSDK
       )
 
@@ -127,20 +145,60 @@ export const useRemixes = (
 
       primeTrackData({ tracks: processedTracks, queryClient })
 
-      // Update count in store
+      // Mirror the count into the dedicated count query so single-purpose
+      // count consumers don't need to fire their own request once the
+      // lineup is loaded.
+      queryClient.setQueryData(
+        getRemixesCountQueryKey({ trackId, isCosign, isContestEntry }),
+        data.count ?? 0
+      )
+
+      // Update count in legacy redux store
       dispatch(remixesPageActions.setCount({ count: data.count }))
 
-      return {
-        tracks: processedTracks.map((t) => ({
-          id: t.track_id,
-          type: EntityType.TRACK
-        })),
-        count: data.count
-      }
+      return processedTracks.map((t) => ({
+        id: t.track_id,
+        type: EntityType.TRACK
+      }))
     },
     enabled: options?.enabled !== false && !!trackId,
     ...options
   })
 
   return queryData
+}
+
+/**
+ * Count-only companion to `useRemixes`. Hits the same SDK endpoint with
+ * `limit=0` and stores just the total under a separate query key so the
+ * lineup query can keep its standard `LineupData[]` page shape (which is
+ * what `TrackLineup` / `playFrom`'s `querySource` requires).
+ */
+export const useRemixesCount = (
+  { trackId, isCosign = false, isContestEntry = false }: UseRemixesCountArgs,
+  options?: QueryOptions
+) => {
+  const { audiusSdk } = useQueryContext()
+  const { data: currentUserId } = useCurrentUserId()
+  const dispatch = useDispatch()
+
+  return useQuery({
+    queryKey: getRemixesCountQueryKey({ trackId, isCosign, isContestEntry }),
+    queryFn: async () => {
+      const sdk = await audiusSdk()
+      const remixesResponse = await sdk.tracks.getTrackRemixes({
+        trackId: Id.parse(trackId),
+        userId: OptionalId.parse(currentUserId),
+        limit: 0,
+        offset: 0,
+        onlyCosigns: isCosign,
+        onlyContestEntries: isContestEntry
+      })
+      const count = remixesResponse?.data?.count ?? 0
+      dispatch(remixesPageActions.setCount({ count }))
+      return count
+    },
+    enabled: options?.enabled !== false && !!trackId,
+    ...options
+  })
 }

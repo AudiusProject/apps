@@ -57,12 +57,11 @@ export const RemixSubmissionCard = ({
       gap='s'
       css={{ minWidth: ARTWORK_SIZE, maxWidth: ARTWORK_SIZE + 20 }}
     >
-      <Flex borderRadius='s'>
+      <Flex borderRadius='s' css={{ position: 'relative' }}>
         {displaySkeleton ? (
           <Skeleton h={ARTWORK_SIZE} w={ARTWORK_SIZE} borderRadius='s' />
         ) : (
           <>
-            {/* Track Artwork with Flair */}
             <TrackFlair
               css={{ height: '100%', width: '100%' }}
               id={track.track_id}
@@ -80,7 +79,6 @@ export const RemixSubmissionCard = ({
                 size={SquareSizes.SIZE_480_BY_480}
               />
             </TrackFlair>
-            {/* User Avatar */}
             <Box
               h={USER_AVATAR_SIZE}
               w={USER_AVATAR_SIZE}

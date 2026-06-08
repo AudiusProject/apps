@@ -34,4 +34,9 @@ export type ButtonProps = {
    * The button size
    */
   size?: ButtonSize
+
+  /**
+   * When true, uses fully rounded (pill-shaped) corners
+   */
+  rounded?: boolean
 } & Omit<BaseButtonProps, 'styles'>

@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Name, FollowSource } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { UserMetadata } from '~/models/User'
 
@@ -26,7 +25,7 @@ type MutationContext = {
 }
 
 export const useFollowUser = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
   const {
@@ -115,11 +114,7 @@ export const useFollowUser = () => {
 
       return { previousUser }
     },
-    onError: (
-      error,
-      { followeeUserId },
-      context: MutationContext | undefined
-    ) => {
+    onError: (error, _args, context: MutationContext | undefined) => {
       const { previousUser } = context ?? {}
 
       if (previousUser) {
@@ -130,14 +125,7 @@ export const useFollowUser = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          followeeUserId
-        },
-        feature: Feature.Social,
-        name: 'Follow User'
-      })
+      console.error(error)
     }
   })
 }

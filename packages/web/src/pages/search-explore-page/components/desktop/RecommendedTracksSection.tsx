@@ -1,6 +1,6 @@
 import { useRecommendedTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { full } from '@audius/sdk'
+import { GetRecommendedTracksTimeEnum } from '@audius/sdk'
 
 import { Carousel } from './Carousel'
 import { TilePairs, TileSkeletons } from './TileHelpers'
@@ -11,7 +11,7 @@ export const RecommendedTracksSection = () => {
   const { data, isLoading, isError, isSuccess } = useRecommendedTracks(
     {
       pageSize: 10,
-      timeRange: full.GetRecommendedTracksTimeEnum.Week
+      timeRange: GetRecommendedTracksTimeEnum.Week
     },
     {
       enabled: inView

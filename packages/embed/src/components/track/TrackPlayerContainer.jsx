@@ -1,6 +1,6 @@
 import { useState, useContext, useCallback, useEffect, useMemo } from 'react'
 
-import { full } from '@audius/sdk'
+import { instanceOfPurchaseGate } from '@audius/sdk'
 
 import usePlayback from '../../hooks/usePlayback'
 import { useRecordListens } from '../../hooks/useRecordListens'
@@ -19,8 +19,6 @@ import TrackHelmet from './TrackHelmet'
 import TrackPlayerCard from './TrackPlayerCard'
 import TrackPlayerCompact from './TrackPlayerCompact'
 import TrackPlayerTiny from './TrackPlayerTiny'
-
-const { instanceOfPurchaseGate } = full
 
 const LISTEN_INTERVAL_SECONDS = 1
 

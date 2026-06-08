@@ -7,7 +7,7 @@
 .popup {
   background-color: var(--harmony-white);
   border-radius: var(--harmony-unit-2);
-  border: 1px solid var(--harmony-neutral-light-7);
+  border: 1px solid var(--harmony-border-strong);
   user-select: none;
 }
 

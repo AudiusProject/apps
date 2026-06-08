@@ -76,7 +76,11 @@ export const CreateSecpSchema = z
     /** The name of the token mint. */
     mint: MintSchema,
     /** The index of this instruction within the transaction. */
-    instructionIndex: z.number().optional()
+    instructionIndex: z.number().optional(),
+    /** Optional nonce override. When provided, skips the on-chain nonce lookup.
+     *  Useful when the caller knows the current nonce (e.g. after a prior transfer
+     *  that incremented it) and wants to avoid stale RPC reads. */
+    nonce: z.bigint().optional()
   })
   .strict()
 

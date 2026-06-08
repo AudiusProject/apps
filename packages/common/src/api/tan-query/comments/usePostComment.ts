@@ -1,9 +1,9 @@
-import { CommentMention, EntityType } from '@audius/sdk'
+import { CommentMention, EntityType, Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cloneDeep } from 'lodash'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { Comment, Feature, ID } from '~/models'
+import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
 import {
@@ -26,17 +26,23 @@ export type PostCommentArgs = {
 }
 
 export const usePostComment = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (args: PostCommentArgs) => {
       const sdk = await audiusSdk()
-      return await sdk.comments.postComment({
-        ...args,
-        mentions: args.mentions?.map((mention) => mention.userId) ?? [],
-        entityId: args.trackId,
-        commentId: args.newId
+      return await sdk.comments.createComment({
+        userId: Id.parse(args.userId)!,
+        metadata: {
+          commentId: args.newId,
+          entityId: args.trackId,
+          entityType: 'Track',
+          body: args.body,
+          trackTimestampS: args.trackTimestampS,
+          mentions: args.mentions?.map((mention) => mention.userId) ?? [],
+          parentId: args.parentCommentId
+        }
       })
     },
     onMutate: async (args: PostCommentArgs) => {
@@ -107,12 +113,7 @@ export const usePostComment = () => {
     },
     onError: (error: Error, args) => {
       const { trackId, currentSort } = args
-      reportToSentry({
-        error,
-        additionalInfo: args,
-        name: 'Comments',
-        feature: Feature.Comments
-      })
+      console.error(error)
       // Undo comment count change
       subtractCommentCount(queryClient, trackId)
       // Toast generic error message

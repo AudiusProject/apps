@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { route } from '@audius/common/utils'
-import { IconSettings } from '@audius/harmony'
+import { IconEmbed } from '@audius/harmony'
 
 import { useEnvironment } from 'hooks/useEnvironment'
 
@@ -18,7 +18,7 @@ export const DevToolsNavItem = () => {
   }
 
   return (
-    <LeftNavLink leftIcon={IconSettings} to={DEV_TOOLS_PAGE} restriction='none'>
+    <LeftNavLink leftIcon={IconEmbed} to={DEV_TOOLS_PAGE} restriction='none'>
       DevTools
     </LeftNavLink>
   )

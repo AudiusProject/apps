@@ -1,17 +1,14 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 
-import { useCurrentAccountUser } from '@audius/common/api'
-import { Status } from '@audius/common/models'
 import {
-  recoveryEmailActions,
-  recoveryEmailSelectors,
-  modalsActions,
-  useTierAndVerifiedForUser
-} from '@audius/common/store'
+  useCurrentAccountUser,
+  useResendRecoveryEmail
+} from '@audius/common/api'
+import { modalsActions, useTierAndVerifiedForUser } from '@audius/common/store'
 import { css } from '@emotion/native'
 import { pick } from 'lodash'
 import { Text, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 import {
   Flex,
@@ -36,8 +33,6 @@ import { makeStyles } from 'app/styles'
 import type { ProfileTabScreenParamList } from '../app-screen/ProfileTabScreen'
 
 import { AccountSettingsItem } from './AccountSettingsItem'
-const { resendRecoveryEmail } = recoveryEmailActions
-const { getRecoveryEmailStatus } = recoveryEmailSelectors
 const { setVisibility } = modalsActions
 
 const messages = {
@@ -92,25 +87,20 @@ export const AccountSettingsScreen = () => {
     name: accountName
   } = accountData ?? {}
 
-  const recoveryEmailStatus = useSelector(getRecoveryEmailStatus)
   const navigation = useNavigation<ProfileTabScreenParamList>()
   const { isVerified } = useTierAndVerifiedForUser(accountUserId)
 
   // Calculate badge size based on h2 font size (h2 is fontSize.medium = 16, so badge is 14)
   const badgeSize = 14
 
-  const handlePressRecoveryEmail = useCallback(() => {
-    dispatch(resendRecoveryEmail())
-  }, [dispatch])
+  const { mutate: resendRecoveryEmail } = useResendRecoveryEmail()
 
-  useEffect(() => {
-    if (recoveryEmailStatus === Status.SUCCESS) {
-      toast({ content: messages.recoveryEmailSent })
-    }
-    if (recoveryEmailStatus === Status.ERROR) {
-      toast({ content: messages.recoveryEmailSent })
-    }
-  }, [recoveryEmailStatus, toast])
+  const handlePressRecoveryEmail = useCallback(() => {
+    resendRecoveryEmail(undefined, {
+      onSuccess: () => toast({ content: messages.recoveryEmailSent }),
+      onError: () => toast({ content: messages.recoveryEmailNotSent })
+    })
+  }, [resendRecoveryEmail, toast])
 
   const handlePressChangeEmail = useCallback(() => {
     navigation.push('ChangeEmail')

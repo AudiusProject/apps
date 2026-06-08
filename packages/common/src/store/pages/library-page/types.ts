@@ -1,18 +1,11 @@
-import { full } from '@audius/sdk'
+import { GetUserLibraryTracksTypeEnum } from '@audius/sdk'
 
 import type { Dayjs } from '~/utils/dayjs'
 import { ValueOf } from '~/utils/typeUtils'
 
-import {
-  UID,
-  ID,
-  Collection,
-  Favorite,
-  LineupState,
-  LineupTrack
-} from '../../../models'
+import { UID, ID, Collection, LineupTrack } from '../../../models'
 
-export const LibraryCategory = full.GetUserLibraryTracksTypeEnum
+export const LibraryCategory = GetUserLibraryTracksTypeEnum
 export type LibraryCategoryType = ValueOf<typeof LibraryCategory>
 
 export function isLibraryCategory(value: string): value is LibraryCategoryType {
@@ -57,12 +50,6 @@ export interface LibraryPageState {
       }
     }
   }
-  tracks: LineupState<LineupTrack & { id: ID; dateSaved: string }>
-  trackSaves: Favorite[]
-  hasReachedEnd: boolean
-  initialFetch: boolean
-  fetchingMore: boolean
-
   tracksCategory: LibraryCategoryType
   collectionsCategory: LibraryCategoryType
 }

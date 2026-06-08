@@ -1,4 +1,8 @@
-import { full, Id } from '@audius/sdk'
+import {
+  Id,
+  type GetUSDCTransactionsMethodEnum,
+  type GetUSDCTransactionsTypeEnum
+} from '@audius/sdk'
 import { useQuery } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
@@ -9,8 +13,8 @@ import { QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 type UseUSDCTransactionsCountArgs = {
-  type?: full.GetUSDCTransactionsTypeEnum[]
-  method?: full.GetUSDCTransactionsMethodEnum
+  type?: GetUSDCTransactionsTypeEnum[]
+  method?: GetUSDCTransactionsMethodEnum
 }
 
 export const getUSDCTransactionsCountQueryKey = (
@@ -37,7 +41,7 @@ export const useUSDCTransactionsCount = (
     queryFn: async () => {
       if (!currentUserId) return 0
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getUSDCTransactionCount({
+      const { data } = await sdk.users.getUSDCTransactionCount({
         id: Id.parse(currentUserId),
         type: args?.type,
         method: args?.method

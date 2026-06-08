@@ -9,7 +9,7 @@ import {
 
 import {
   SwapStatus,
-  useArtistCoin,
+  useFanClub,
   useCoinPair,
   useCurrentAccountUser,
   useSwapCoins,
@@ -411,13 +411,11 @@ export const BuySellFlow = (props: BuySellFlowProps) => {
     setResetState(() => resetFunction)
   }, [setResetState, resetFunction])
 
-  const { data: outputCoin } = useArtistCoin(
-    swapTokens.outputTokenInfo?.address
-  )
+  const { data: outputCoin } = useFanClub(swapTokens.outputTokenInfo?.address)
   const pricePerBaseToken = useMemo(() => {
-    return outputCoin?.price
-      ? outputCoin?.price
-      : (outputCoin?.dynamicBondingCurve.priceUSD ?? 0)
+    return outputCoin?.price !== undefined && outputCoin.price !== 0
+      ? outputCoin.price
+      : (outputCoin?.dynamicBondingCurve?.priceUSD ?? 0)
   }, [outputCoin])
 
   const isTransactionInvalid = !transactionData?.isValid

@@ -6,7 +6,7 @@ export const settingsMessages = {
   copyright: `Copyright © ${currentYear} Audius`,
   terms: 'Terms of Service',
   privacy: 'Privacy Policy',
-  artistCoinTerms: 'Artist Coin Terms',
+  fanClubTerms: 'Fan Club Terms',
   apiTerms: 'API Terms',
   emailSent: 'Email Sent!',
   emailNotSent: 'Something broke! Please try again!',
@@ -14,6 +14,15 @@ export const settingsMessages = {
   lightMode: 'Light',
   autoMode: 'Auto',
   matrixMode: 'Matrix',
+  defaultPalette: 'Default',
+  classicPalette: 'Classic',
+  themeLabel: 'Color Theme',
+  colorModeLabel: 'Light / Dark',
+  surfaceStyleLabel: 'Glass Effect',
+  surfaceStyleSolid: 'Solid',
+  surfaceStyleSubtle: 'Subtle',
+  surfaceStyleDefault: 'Default',
+  surfaceStyleStrong: 'Strong',
   signOut: 'Sign Out',
 
   appearanceTitle: 'Appearance',
@@ -29,7 +38,7 @@ export const settingsMessages = {
   desktopAppCardTitle: 'Download the Desktop App',
 
   appearanceDescription:
-    'Enable dark mode or use the default setting to match your system preferences.',
+    'Customize colors, light/dark mode, and glass effects.',
   inboxSettingsCardDescription:
     'Configure who is able to send messages to your inbox.',
   commentSettingsCardDescription:

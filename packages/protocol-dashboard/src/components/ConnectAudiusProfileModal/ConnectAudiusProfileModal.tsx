@@ -27,6 +27,7 @@ type ConnectAudiusProfileModalProps = {
   isOpen: boolean
   onClose: () => void
   wallet: string
+  walletProvider?: any
   action: 'disconnect' | 'connect'
 }
 
@@ -34,10 +35,12 @@ export const ConnectAudiusProfileModal = ({
   isOpen,
   onClose,
   wallet,
+  walletProvider,
   action
 }: ConnectAudiusProfileModalProps) => {
   const { connect, disconnect, isWaiting } = useConnectAudiusProfile({
     wallet,
+    walletProvider,
     onSuccess: onClose
   })
   const isConnect = action === 'connect'

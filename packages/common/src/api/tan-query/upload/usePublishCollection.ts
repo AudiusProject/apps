@@ -21,6 +21,7 @@ import { getCollectionsBatcher } from '../batchers/getCollectionsBatcher'
 import { QUERY_KEYS } from '../queryKeys'
 import { useCurrentAccountUser } from '../users/account/accountSelectors'
 import { useCurrentAccount } from '../users/account/useCurrentAccount'
+import { updatePlaylistLibrary } from '../users/account/useUpdatePlaylistLibrary'
 import { getUserQueryKey } from '../users/useUser'
 import { useQueryContext, type QueryContextType } from '../utils'
 
@@ -33,10 +34,9 @@ import {
 
 type PublishCollectionContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'analytics' | 'dispatch' | 'reportToSentry'
+  'audiusSdk' | 'analytics' | 'dispatch'
 > & {
   userId: number
-  wallet: string
 }
 
 type PublishCollectionParams = {
@@ -52,15 +52,11 @@ type PublishCollectionParams = {
 const getPublishCollectionOptions = (context: PublishCollectionContext) =>
   mutationOptions({
     mutationFn: async (params: PublishCollectionParams) => {
-      const { audiusSdk, userId, wallet } = context
+      const { audiusSdk, userId } = context
       const sdk = await audiusSdk()
-      if (!userId || !wallet) {
+      if (!userId) {
         throw new Error('User ID and wallet are required to publish collection')
       }
-      const userBank = await sdk.services.claimableTokensClient.deriveUserBank({
-        ethWallet: wallet,
-        mint: 'USDC'
-      })
 
       // If the collection is a premium album, this will populate the premium metadata (price/splits/etc)
       let albumTrackPrice: number | undefined
@@ -71,9 +67,9 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         // albumTrackPrice will be parsed out of the collection metadata, so we keep a copy here
         albumTrackPrice =
           params.collectionMetadata.stream_conditions?.usdc_purchase
-            .albumTrackPrice
+            .albumTrackPrice ?? undefined
         params.collectionMetadata.stream_conditions = getUSDCMetadata(
-          userBank.toString(),
+          userId,
           params.collectionMetadata.stream_conditions
         )
       }
@@ -81,7 +77,7 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
       // Combine collection metadata into each track's metadata
       for (const track of params.tracks) {
         track.metadata = combineMetadata(
-          userBank.toString(),
+          userId,
           track.metadata,
           params.collectionMetadata,
           albumTrackPrice
@@ -105,22 +101,36 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
         ? fileToSdk(artworkBlob, 'cover_art')
         : undefined
       if (params.collectionMetadata.is_album) {
+        const metadata = albumMetadataForCreateWithSDK(
+          params.collectionMetadata
+        )
+        metadata.playlistContents = publishedTracks
+          .filter((t) => !!t.trackId)
+          .map((t) => ({
+            timestamp: Math.round(Date.now() / 1000),
+            trackId: t.trackId!,
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }))
         return await sdk.albums.createAlbum({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata: albumMetadataForCreateWithSDK(params.collectionMetadata),
-          trackIds: publishedTracks
-            .filter((t) => t.trackId && !t.error)
-            .map((t) => t.trackId!)
+          metadata
         })
       } else {
+        const metadata = playlistMetadataForCreateWithSDK(
+          params.collectionMetadata
+        )
+        metadata.playlistContents = publishedTracks
+          .filter((t) => !!t.trackId)
+          .map((t) => ({
+            timestamp: Math.round(Date.now() / 1000),
+            trackId: t.trackId!,
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }))
         return await sdk.playlists.createPlaylist({
           userId: Id.parse(userId),
           imageFile: coverArtFile,
-          metadata: playlistMetadataForCreateWithSDK(params.collectionMetadata),
-          trackIds: publishedTracks
-            .filter((t) => t.trackId && !t.error)
-            .map((t) => t.trackId!)
+          metadata
         })
       }
     }
@@ -129,23 +139,20 @@ const getPublishCollectionOptions = (context: PublishCollectionContext) =>
 export const usePublishCollection = (
   options?: Partial<ReturnType<typeof getPublishCollectionOptions>>
 ) => {
-  const { audiusSdk, analytics, reportToSentry } = useQueryContext()
+  const { audiusSdk, analytics } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: account = null } = useCurrentAccount()
   const { data: accountUser } = useCurrentAccountUser()
   const userId = account?.userId ?? undefined
-  const wallet = account?.walletAddresses.currentUser ?? undefined
 
   return useMutation({
     ...options,
     ...getPublishCollectionOptions({
       audiusSdk,
       userId: userId!,
-      wallet: wallet!,
       dispatch,
-      analytics,
-      reportToSentry
+      analytics
     }),
 
     onSuccess: async (playlist) => {
@@ -177,6 +184,22 @@ export const usePublishCollection = (
         })
       )
 
+      // Persist the now-updated library to the user's profile + tan-query cache.
+      const previousLibrary = account?.playlistLibrary ?? { contents: [] }
+      await updatePlaylistLibrary(
+        sdk,
+        userId,
+        {
+          ...previousLibrary,
+          contents: [
+            ...previousLibrary.contents,
+            { playlist_id: collection.playlist_id, type: 'playlist' as const }
+          ]
+        },
+        queryClient,
+        dispatch
+      )
+
       // Add to library as favorite locally
       dispatch(
         libraryPageActions.addLocalCollection({
@@ -204,7 +227,7 @@ export const usePublishCollection = (
  * taking the metadata from the playlist when the track is missing it.
  */
 function combineMetadata(
-  userBank: string,
+  userId: number,
   trackMetadata: TrackMetadataForUpload,
   collectionMetadata: CollectionValues,
   albumTrackPrice?: number
@@ -232,6 +255,8 @@ function combineMetadata(
   // Set download & hidden status
   metadata.is_downloadable = !!collectionMetadata.is_downloadable
 
+  // Marks child tracks so backend suppresses per-track follower create notifications.
+  metadata.is_playlist_upload = true
   metadata.is_unlisted = !!collectionMetadata.is_private
   if (collectionMetadata.is_private && collectionMetadata.field_visibility) {
     // Convert any undefined values to booleans
@@ -249,17 +274,17 @@ function combineMetadata(
     metadata.download_conditions = {
       usdc_purchase: {
         price: albumTrackPrice,
-        splits: { 0: 0 }
+        splits: []
       }
     }
     // Set up initial stream gating values
     metadata.is_stream_gated = true
     metadata.preview_start_seconds = 0
     metadata.stream_conditions = {
-      usdc_purchase: { price: albumTrackPrice, splits: { 0: 0 } }
+      usdc_purchase: { price: albumTrackPrice, splits: [] }
     }
     // Add splits to stream & download conditions
-    addPremiumMetadata(userBank, metadata)
+    addPremiumMetadata(userId, metadata)
   }
   return metadata
 }

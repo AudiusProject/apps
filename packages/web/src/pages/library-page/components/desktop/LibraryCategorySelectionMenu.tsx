@@ -9,6 +9,7 @@ import {
   CommonState
 } from '@audius/common/store'
 import {
+  FilterButton,
   SelectablePill,
   IconHeart,
   IconCart,
@@ -48,27 +49,42 @@ const CATEGORIES_WITHOUT_PURCHASED = ALL_CATEGORIES.slice(0, -1)
 type LibraryCategorySelectionMenuProps = {
   currentTab: LibraryPageTabs
   variant?: 'desktop' | 'mobile'
+  mode?: 'pills' | 'dropdown'
 }
 
 export const LibraryCategorySelectionMenu = (
   props: LibraryCategorySelectionMenuProps
 ) => {
-  const { currentTab, variant = 'desktop' } = props
+  const { currentTab, variant = 'desktop', mode = 'pills' } = props
   const dispatch = useDispatch()
   const selectedCategory = useSelector((state: CommonState) =>
     getCategory(state, { currentTab })
   )
 
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
+  const selectCategory = useCallback(
+    (category: LibraryCategoryType) => {
       dispatch(
         setSelectedCategory({
           currentTab,
-          category: e.target.value as LibraryCategoryType
+          category
         })
       )
     },
     [currentTab, dispatch]
+  )
+
+  const handlePillChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      selectCategory(e.target.value as LibraryCategoryType)
+    },
+    [selectCategory]
+  )
+
+  const handleDropdownChange = useCallback(
+    (value: LibraryCategoryType) => {
+      selectCategory(value)
+    },
+    [selectCategory]
   )
 
   const categories =
@@ -76,8 +92,24 @@ export const LibraryCategorySelectionMenu = (
       ? ALL_CATEGORIES
       : CATEGORIES_WITHOUT_PURCHASED
 
+  if (mode === 'dropdown') {
+    return (
+      <FilterButton
+        label={categories[0].label}
+        value={selectedCategory}
+        variant='replaceLabel'
+        options={categories}
+        onChange={handleDropdownChange}
+      />
+    )
+  }
+
   return (
-    <div role='radiogroup' className={styles.container} onChange={handleChange}>
+    <div
+      role='radiogroup'
+      className={styles.container}
+      onChange={handlePillChange}
+    >
       {categories.map((category) => {
         const { icon, value, label } = category
         return (

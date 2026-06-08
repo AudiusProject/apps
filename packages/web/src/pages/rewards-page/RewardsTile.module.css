@@ -1,5 +1,8 @@
 .rewardsTile {
+  container-type: inline-size;
+  container-name: rewards-tile;
   background-color: var(--harmony-white);
+  border: 1px solid var(--harmony-border-default);
   margin-bottom: 32px;
   padding: 32px 28px 32px;
 }
@@ -9,11 +12,21 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  font-size: clamp(2.25rem, 9cqi, 2.625rem);
+  line-height: 1.24;
 }
 
 .title.mobile {
-  font-size: 30px !important;
+  /* Still resolves against rewards tile width, not the viewport */
+  font-size: clamp(1.625rem, 7.2cqi, 1.875rem) !important;
+  line-height: 1.2 !important;
+}
+
+.tileSubtitle {
+  text-wrap: pretty;
+  font-size: clamp(1rem, 4.5cqi, 1.25rem);
+  line-height: 1.5;
 }
 
 .subtitle {
@@ -33,7 +46,8 @@
 .rewardsContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: var(--harmony-unit-4);
 }
 
 .disbursed {

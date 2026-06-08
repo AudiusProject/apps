@@ -129,7 +129,7 @@ const BaseOwnerActionButtons = ({
     <Flex justifyContent='space-between' w='100%' alignItems='center'>
       {bottomBar}
       {!isLoading && showIconButtons ? (
-        <Flex gap='2xl'>
+        <Flex gap='xl'>
           <Tooltip
             text={messages.share}
             disabled={isDisabled}

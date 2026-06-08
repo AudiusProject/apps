@@ -1,4 +1,4 @@
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import type {
   ID,
   AccessConditions,
@@ -6,7 +6,6 @@ import type {
 } from '@audius/common/models'
 import {
   isContentFollowGated,
-  isContentSpecialAccess,
   isContentUSDCPurchaseGated,
   isContentTokenGated
 } from '@audius/common/models'
@@ -34,14 +33,13 @@ export const DetailsTileGatedAccess = ({
   contentType
 }: DetailsTileGatedAccessProps) => {
   const isTokenGated = isContentTokenGated(streamConditions)
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
     { enabled: isTokenGated }
   )
   const shouldDisplay =
     isContentFollowGated(streamConditions) ||
     isContentTokenGated(streamConditions) ||
-    isContentSpecialAccess(streamConditions) ||
     isContentUSDCPurchaseGated(streamConditions)
 
   if (!shouldDisplay) return null
@@ -61,7 +59,7 @@ export const DetailsTileGatedAccess = ({
   return (
     <DetailsTileNoAccess
       trackId={trackId}
-      // Currently only special-access tracks are supported
+      // Currently only follow-gated tracks are supported
       contentType={PurchaseableContentType.TRACK}
       streamConditions={streamConditions}
       token={token}

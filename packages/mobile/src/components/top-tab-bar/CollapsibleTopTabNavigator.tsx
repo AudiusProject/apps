@@ -53,6 +53,7 @@ type CollapsibleTabNavigatorProps = {
   children: ReactNode
   screenOptions?: MaterialTopTabNavigationOptions
   headerHeight?: number
+  minHeaderHeight?: number
 }
 
 export const CollapsibleTabNavigator = ({
@@ -60,13 +61,15 @@ export const CollapsibleTabNavigator = ({
   initialScreenName,
   children,
   screenOptions,
-  headerHeight
+  headerHeight,
+  minHeaderHeight
 }: CollapsibleTabNavigatorProps) => {
   return (
     <Tab.Navigator
       initialRouteName={initialScreenName}
       screenOptions={{ ...screenOptions, lazy: false }}
       headerHeight={headerHeight}
+      minHeaderHeight={minHeaderHeight}
       renderHeader={renderHeader}
       renderTabBar={renderTabBar}
     >

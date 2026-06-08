@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { AudiusSdk } from '@audius/sdk'
+import { AudiusSdkWithServices } from '@audius/sdk'
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 import { AnyAction, Dispatch } from 'redux'
@@ -32,7 +32,7 @@ export const getUserQueryFn = async (
   userId: ID,
   currentUserId: ID | null | undefined,
   queryClient: QueryClient,
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   dispatch: Dispatch<AnyAction>
 ) => {
   const batchGetUsers = getUsersBatcher({

@@ -61,6 +61,7 @@ const AppOrPublicSite = () => {
       <Suspense fallback={<div style={{ width: '100vw', height: '100vh' }} />}>
         <PublicSite
           isMobile={isMobile}
+          isAuthenticated={!!foundUser}
           setRenderPublicSite={setRenderPublicSite}
         />
       </Suspense>

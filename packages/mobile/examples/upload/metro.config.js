@@ -1,0 +1,60 @@
+const path = require('path')
+
+const { getDefaultConfig } = require('expo/metro-config')
+
+/**
+ * Metro config scoped to this example so the parent app's metro.config.js
+ * (packages/mobile) is not used.
+ */
+const projectRoot = __dirname
+const monorepoRoot = path.resolve(projectRoot, '../../../../')
+const sdkPath = path.resolve(monorepoRoot, 'packages/sdk')
+const sdkSourcePath = path.resolve(sdkPath, 'src/index.native.ts')
+const packagesPath = path.resolve(monorepoRoot, 'packages')
+
+const config = getDefaultConfig(projectRoot)
+
+config.watchFolders = [
+  projectRoot,
+  sdkPath,
+  packagesPath,
+  path.resolve(monorepoRoot, 'node_modules')
+]
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+  path.resolve(monorepoRoot, 'node_modules')
+]
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  '@audius/sdk': sdkSourcePath,
+  '@audius/fixed-decimal': path.resolve(packagesPath, 'fixed-decimal'),
+  '@audius/eth': path.resolve(packagesPath, 'eth'),
+  '@audius/spl': path.resolve(packagesPath, 'spl'),
+  // Force SDK source imports to use the example's installed version of
+  // expo-web-browser rather than the SDK's devDependency copy, so the JS
+  // bundle matches the native module that is actually linked in the build.
+  'expo-web-browser': path.resolve(
+    projectRoot,
+    'node_modules',
+    'expo-web-browser'
+  ),
+  crypto: require.resolve('expo-crypto'),
+  fs: path.resolve(projectRoot, 'polyfills/fs.js'),
+  stream: require.resolve('stream-browserify'),
+  util: require.resolve('util'),
+  buffer: require.resolve('buffer'),
+  process: require.resolve('process/browser'),
+  path: require.resolve('path-browserify'),
+  os: require.resolve('os-browserify/browser'),
+  events: require.resolve('events'),
+  url: require.resolve('url'),
+  querystring: require.resolve('querystring-es3')
+}
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === '@audius/sdk') {
+    return { filePath: sdkSourcePath, type: 'sourceFile' }
+  }
+  return context.resolveRequest(context, moduleName, platform)
+}
+
+module.exports = config

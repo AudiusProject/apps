@@ -31,7 +31,6 @@ const messages = {
 }
 
 export const RemixContestWinnerChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -128,9 +127,7 @@ export const RemixContestWinnerChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge
     />
   )

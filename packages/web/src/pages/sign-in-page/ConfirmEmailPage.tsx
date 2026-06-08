@@ -24,7 +24,6 @@ import {
 } from 'common/store/pages/signon/selectors'
 import { HarmonyTextField } from 'components/form-fields/HarmonyTextField'
 import { ToastContext } from 'components/toast/ToastContext'
-import { useMedia } from 'hooks/useMedia'
 import { Heading, Page, PageFooter } from 'pages/sign-up-page/components/layout'
 import { useSelector } from 'utils/reducer'
 
@@ -40,7 +39,6 @@ const ConfirmEmailSchema = toFormikValidationSchema(confirmEmailSchema)
 
 export const ConfirmEmailPage = () => {
   const dispatch = useDispatch()
-  const { isMobile } = useMedia()
   const { value: email } = useSelector(getEmailField)
   const { value: password } = useSelector(getPasswordField)
   const { value: otp } = useSelector(getOtpField)
@@ -54,7 +52,7 @@ export const ConfirmEmailPage = () => {
       dispatch(setValueField('otp', sanitizedOtp))
       dispatch(setValueField('email', email))
       dispatch(startSignUp())
-      dispatch(signIn(email, password, undefined, sanitizedOtp))
+      dispatch(signIn(email, password, sanitizedOtp))
     },
     [dispatch, email, password]
   )
@@ -65,7 +63,7 @@ export const ConfirmEmailPage = () => {
       onSubmit={handleSubmit}
       validationSchema={ConfirmEmailSchema}
     >
-      <Page as={Form} transition={isMobile ? undefined : 'horizontal'}>
+      <Page as={Form}>
         <Heading
           heading={isGuest ? messages.finishSigningUp : messages.title}
           description={messages.description}

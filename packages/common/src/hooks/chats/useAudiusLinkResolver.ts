@@ -121,8 +121,19 @@ export const useAudiusLinkResolver = ({
 
       for (const match of matches) {
         if (!(match in linkToHuman)) {
-          const res = await sdk.resolve({ url: match })
-          if (res.data) {
+          // `sdk.resolve` throws on URLs the indexer can't map to a known
+          // entity (e.g. `/handle/contest/slug` — a contest page rather
+          // than a plain track). Catching here keeps the rest of the
+          // input intact: the unresolved URL stays as a literal link in
+          // the composed message, which is exactly what the user wants
+          // when sharing a contest into a DM.
+          let res: Awaited<ReturnType<typeof sdk.resolve>> | null = null
+          try {
+            res = await sdk.resolve({ url: match })
+          } catch {
+            res = null
+          }
+          if (res && res.data) {
             if (instanceOfTrackResponse(res)) {
               const human = formatTrackName({ track: res.data })
               linkToHuman[match] = human
@@ -140,12 +151,15 @@ export const useAudiusLinkResolver = ({
                 data: res.data[0]
               }
             } else if (instanceOfUserResponse(res)) {
-              const human = formatUserName({ user: res.data })
-              linkToHuman[match] = human
-              humanToData[human] = {
-                link: match,
-                type: 'user',
-                data: res.data
+              const user = Array.isArray(res.data) ? res.data[0] : res.data
+              if (user) {
+                const human = formatUserName({ user })
+                linkToHuman[match] = human
+                humanToData[human] = {
+                  link: match,
+                  type: 'user',
+                  data: user
+                }
               }
             }
           }

@@ -3,10 +3,10 @@ import type { ViewStyle } from 'react-native'
 import { View } from 'react-native'
 
 import {
-  IconArtistCoin,
+  IconFanClub,
   IconCart,
   IconReceive,
-  IconSparkles
+  IconUserFollowing
 } from '@audius/harmony-native'
 import DogEarRectangle from 'app/assets/images/dogEarRectangle.svg'
 import { makeStyles } from 'app/styles'
@@ -66,12 +66,12 @@ export const DogEar = (props: DogEarProps) => {
   const { staticWhite, accentBlue, specialLightGreen } = useThemeColors()
 
   const { icon: Icon, colors } = {
-    [DogEarType.SPECIAL_ACCESS]: {
-      icon: IconSparkles,
+    [DogEarType.FOLLOW_GATED]: {
+      icon: IconUserFollowing,
       colors: [accentBlue, accentBlue]
     },
     [DogEarType.TOKEN_GATED]: {
-      icon: IconArtistCoin
+      icon: IconFanClub
     },
     [DogEarType.USDC_PURCHASE]: {
       icon: IconCart,

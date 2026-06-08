@@ -2,6 +2,7 @@
   display: flex;
   gap: var(--harmony-unit-2);
   width: 100%;
+  min-width: 0;
 }
 
 .text {
@@ -36,6 +37,13 @@
 .handle,
 .profilePicture {
   cursor: pointer;
+}
+
+.handle {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .profilePicture {

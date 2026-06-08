@@ -3,6 +3,7 @@ import {
   userCollectionMetadataFromSDK
 } from '@audius/common/adapters'
 import {
+  persistAccountPlaylistLibrarySaga,
   primeCollectionDataSaga,
   queryAccountUser,
   queryCollection,
@@ -157,6 +158,7 @@ function* optimisticallySavePlaylist(
       permalink: playlist?.permalink
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 
   yield* put(
     addLocalCollection({
@@ -191,17 +193,27 @@ function* createAndConfirmPlaylist(
       throw new Error('No userId set, cannot repost collection')
     }
 
+    const metadata = playlistMetadataForCreateWithSDK(formFields)
+    metadata.playlistId = Id.parse(playlistId)
+    metadata.playlistContents = initTrack
+      ? [
+          {
+            timestamp: Math.round(Date.now() / 1000), // must use seconds
+            trackId: Id.parse(initTrack.track_id),
+            metadataTimestamp: Math.round(Date.now() / 1000)
+          }
+        ]
+      : []
+
     yield* call([sdk.playlists, sdk.playlists.createPlaylist], {
       userId: Id.parse(userId),
-      playlistId: Id.parse(playlistId),
-      trackIds: initTrack ? [Id.parse(initTrack.track_id)] : undefined,
-      metadata: playlistMetadataForCreateWithSDK(formFields)
+      metadata
     })
 
     // Merge the confirmed playlist with the optimistic playlist, preferring
     // optimistic data in case other unconfirmed edits have been made.
     const { data: playlist } = yield* call(
-      [sdk.full.playlists, sdk.full.playlists.getPlaylist],
+      [sdk.playlists, sdk.playlists.getPlaylist],
       {
         userId: OptionalId.parse(userId),
         playlistId: Id.parse(playlistId)

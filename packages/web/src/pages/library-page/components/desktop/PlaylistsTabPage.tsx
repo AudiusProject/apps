@@ -11,9 +11,8 @@ import {
 import { IconPlus } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { CollectionCard } from 'components/collection'
+import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import EmptyTable from 'components/tracks-table/EmptyTable'
 import UploadChip from 'components/upload/UploadChip'
 import { useLibraryCollections } from 'pages/library-page/hooks/useLibraryCollections'
@@ -68,22 +67,47 @@ export const PlaylistsTabPage = () => {
 
   const cards = useMemo(() => {
     const createPlaylistCard = (
-      <UploadChip
-        type='playlist'
-        variant='card'
-        source={CreatePlaylistSource.LIBRARY_PAGE}
-      />
+      <div
+        key='create-playlist-card'
+        className={styles.createPlaylistCardContainer}
+      >
+        <UploadChip
+          type='playlist'
+          variant='card'
+          cardStyle='fluid'
+          source={CreatePlaylistSource.LIBRARY_PAGE}
+        />
+      </div>
     )
-    return [
+    const loadedCards = [
       createPlaylistCard,
       ...playlistIds?.map((playlistId) => {
-        return <CollectionCard key={playlistId} id={playlistId} size='m' />
+        return (
+          <CollectionCard key={playlistId} id={playlistId} size='m' w='100%' />
+        )
       })
     ]
-  }, [playlistIds])
+    if (!isFetchingNextPage) return loadedCards
+    return loadedCards.concat(
+      Array.from({ length: 6 }, (_, i) => (
+        <CollectionCardSkeleton
+          key={`loading-${i}`}
+          size='m'
+          w='100%'
+          noShimmer
+        />
+      ))
+    )
+  }, [playlistIds, isFetchingNextPage])
 
   if (isPending) {
-    return <LoadingSpinner className={styles.spinner} />
+    return (
+      <div className={styles.cardsContainer}>
+        {Array.from({ length: 12 }, (_, i) => (
+          <CollectionCardSkeleton key={i} size='m' w='100%' noShimmer />
+        ))}
+      </div>
+    )
   }
 
   // TODO(nkang) - Add separate error state
@@ -105,7 +129,6 @@ export const PlaylistsTabPage = () => {
       loadMore={loadNextPage}
       cards={cards}
       cardsClassName={styles.cardsContainer}
-      isLoadingMore={isFetchingNextPage}
     />
   )
 }

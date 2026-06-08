@@ -4,7 +4,7 @@ import type { ID, AccessConditions } from '@audius/common/models'
 import { isContentUSDCPurchaseGated } from '@audius/common/models'
 import type { PurchaseableContentType } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
-import { View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 
 import {
   Flex,
@@ -21,6 +21,7 @@ import { flexRowCentered, makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { LineupTileAccessStatus } from './LineupTileAccessStatus'
+import { useTilePressBlock } from './TilePressBlockContext'
 import type { LineupTileSource } from './types'
 
 const messages = {
@@ -87,14 +88,27 @@ export const LineupTileActionButtons = ({
   onPressEdit
 }: Props) => {
   const styles = useStyles()
+  const blockTilePress = useTilePressBlock()
   const isUSDCEnabled = useIsUSDCEnabled()
+
+  const wrapWithBlock = (handler?: GestureResponderHandler) =>
+    handler
+      ? () => {
+          blockTilePress?.()
+          handler()
+        }
+      : undefined
   const isUSDCPurchase =
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const showPublishButton = isOwner && isUnlisted
 
+  // onPressIn fires on touch-down, so we block before Paper's tap completes.
+  // Use direct onPress (not wrapWithBlock) - repost/favorite handlers run after
+  // Lottie animation, too late for the current tap's 100ms check.
   const repostButton = (
     <RepostButton
       wrapperStyle={styles.button}
+      onPressIn={blockTilePress}
       onPress={onPressRepost}
       isActive={hasReposted}
       isDisabled={disabled}
@@ -104,38 +118,57 @@ export const LineupTileActionButtons = ({
   const favoriteButton = (
     <FavoriteButton
       wrapperStyle={styles.button}
+      onPressIn={blockTilePress}
       onPress={onPressSave}
       isActive={hasSaved}
       isDisabled={disabled}
     />
   )
 
+  // Wrap in RN TouchableOpacity so the tile doesn't stay depressed - RN touchables
+  // let the Paper's RNGH tap properly receive the release and run onFinalize.
   const shareButton = (
-    <IconButton
-      color='subdued'
-      icon={IconShare}
+    <TouchableOpacity
+      onPressIn={blockTilePress}
+      onPress={wrapWithBlock(onPressShare)}
       disabled={disabled}
-      onPress={onPressShare}
-      aria-label={messages.shareButtonLabel}
-      size='l'
-      style={{
-        padding: 0
-      }}
-    />
+      activeOpacity={0.7}
+      style={styles.button}
+      accessibilityLabel={messages.shareButtonLabel}
+      accessibilityRole='button'
+    >
+      <IconButton
+        color='subdued'
+        icon={IconShare}
+        disabled={disabled}
+        aria-label={messages.shareButtonLabel}
+        size='l'
+        style={{ padding: 0 }}
+        pointerEvents='none'
+      />
+    </TouchableOpacity>
   )
 
   const moreButton = (
-    <IconButton
-      color='subdued'
-      icon={IconKebabHorizontal}
+    <TouchableOpacity
+      onPressIn={blockTilePress}
+      onPress={wrapWithBlock(onPressOverflow)}
       disabled={disabled}
-      onPress={onPressOverflow}
-      aria-label={messages.overflowButtonLabel}
-      size='l'
-      style={{
-        padding: 0
-      }}
-    />
+      activeOpacity={0.7}
+      style={styles.button}
+      accessibilityLabel={messages.overflowButtonLabel}
+      accessibilityRole='button'
+    >
+      <IconButton
+        color='subdued'
+        icon={IconKebabHorizontal}
+        disabled={disabled}
+        aria-label={messages.overflowButtonLabel}
+        size='l'
+        style={{ padding: 0 }}
+        pointerEvents='none'
+      />
+    </TouchableOpacity>
   )
 
   const editButton = (
@@ -143,7 +176,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconPencil}
       disabled={disabled}
-      onPress={onPressEdit}
+      onPress={wrapWithBlock(onPressEdit)}
       aria-label={messages.editButtonLabel}
       size='l'
       style={{
@@ -157,7 +190,7 @@ export const LineupTileActionButtons = ({
       color='subdued'
       icon={IconRocket}
       disabled={disabled}
-      onPress={onPressPublish}
+      onPress={wrapWithBlock(onPressPublish)}
       aria-label={messages.publishButtonLabel}
       size='l'
       style={{

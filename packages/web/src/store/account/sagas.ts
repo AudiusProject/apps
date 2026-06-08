@@ -6,7 +6,7 @@ import {
   modalsActions,
   getSDK
 } from '@audius/common/store'
-import { call, getContext, put, takeEvery } from 'typed-redux-saga'
+import { call, delay, getContext, put, takeEvery } from 'typed-redux-saga'
 
 import { audiusBackendInstance } from 'services/audius-backend/audius-backend-instance'
 import {
@@ -29,16 +29,26 @@ const {
   setBrowserNotificationEnabled,
   setBrowserNotificationSettingsOn
 } = settingsPageActions
+const PASSWORD_RESET_REQUIRED_KEY = 'password-reset-required'
 
 const setBrowerPushPermissionConfirmationModal = setVisibility({
   modal: 'BrowserPushPermissionConfirmation',
   visible: true
 })
 
+const hasPendingPasswordReset = () => {
+  if (typeof window === 'undefined') return false
+  return Boolean(window.localStorage.getItem(PASSWORD_RESET_REQUIRED_KEY))
+}
+
 /**
  * Determine if the push notification modal should appear
  */
 function* showPushNotificationConfirmation() {
+  while (hasPendingPasswordReset()) {
+    yield* delay(500)
+  }
+
   const isMobile = yield* getContext('isMobile')
   const accountUser = yield* queryAccountUser()
   const hasAccount = Boolean(accountUser?.handle && accountUser?.name)

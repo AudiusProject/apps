@@ -57,6 +57,11 @@ export const useImageSize = <
   preloadImageFn?: (url: string) => Promise<void>
 }) => {
   const [imageUrl, setImageUrl] = useState<Maybe<string>>(undefined)
+  // When upgrading from a smaller cached image to the target size, holds the
+  // smaller URL so callers can show it as a blurred backdrop while the
+  // high-res crossfades in (avoids the opacity-reset flash on source change).
+  const [priorityLowResUrl, setPriorityLowResUrl] =
+    useState<Maybe<string>>(undefined)
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
   const fetchWithFallback = useCallback(
@@ -150,18 +155,34 @@ export const useImageSize = <
     }
 
     if (smallerSize) {
-      setImageUrl(artwork[smallerSize])
-      const finalUrl = await fetchWithFallback(targetUrl)
-      IMAGE_CACHE.add(finalUrl)
-      setImageUrl(finalUrl)
+      // Set the target URL optimistically so the main image slot starts
+      // loading the high-res immediately. The smaller cached URL is passed
+      // back as priorityLowResUrl so callers can show it as a blurred
+      // backdrop — this eliminates the opacity-reset flash that occurred
+      // when we previously did setImageUrl(small) then setImageUrl(large).
+      setPriorityLowResUrl(artwork[smallerSize])
+      setImageUrl(targetUrl)
+      try {
+        const finalUrl = await fetchWithFallback(targetUrl)
+        IMAGE_CACHE.add(finalUrl)
+        if (finalUrl !== targetUrl) setImageUrl(finalUrl)
+      } catch (e) {
+        // Fall back to the smaller size if high-res is unreachable.
+        setImageUrl(artwork[smallerSize])
+      }
       return
     }
 
+    // Set the URL optimistically so the image starts rendering from the
+    // native image cache immediately instead of showing a gray placeholder
+    // while the async prefetch is pending. If fetchWithFallback ends up
+    // resolving a different mirror URL, we update then.
+    setImageUrl(targetUrl)
     // Fetch image with fallback mirrors
     try {
       const finalUrl = await fetchWithFallback(targetUrl)
       IMAGE_CACHE.add(finalUrl)
-      setImageUrl(finalUrl)
+      if (finalUrl !== targetUrl) setImageUrl(finalUrl)
     } catch (e) {
       console.error(`Unable to load image ${targetUrl} after retries: ${e}`)
     }
@@ -185,5 +206,5 @@ export const useImageSize = <
     resolveImageUrl()
   }, [resolveImageUrl])
 
-  return { imageUrl, onError }
+  return { imageUrl, priorityLowResUrl, onError }
 }

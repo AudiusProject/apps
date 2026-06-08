@@ -39,7 +39,6 @@ export const RemixTab = ({
     navigate(urlString)
   }, [viewAllLink, navigate])
 
-  // If there are no tracks, show the empty state
   if (trackIds.length === 0) {
     return (
       <Flex

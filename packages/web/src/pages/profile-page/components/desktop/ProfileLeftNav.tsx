@@ -1,5 +1,6 @@
-import { useArtistCreatedCoin } from '@audius/common/api'
+import { useArtistCreatedFanClub } from '@audius/common/api'
 import { ID } from '@audius/common/models'
+import { MAX_BIO_LENGTH } from '@audius/common/services'
 import { Nullable } from '@audius/common/utils'
 import {
   Box,
@@ -16,10 +17,10 @@ import { Type } from 'pages/profile-page/components/SocialLink'
 import { ProfileTopTags } from 'pages/profile-page/components/desktop/ProfileTopTags'
 import { zIndex } from 'utils/zIndex'
 
-import { ArtistCoinFlairInput } from '../ArtistCoinFlairInput'
+import { FanClubFlairInput } from '../FanClubFlairInput'
 import SocialLinkInput from '../SocialLinkInput'
 
-import { BuyArtistCoinCard } from './BuyArtistCoinCard'
+import { BuyFanClubCard } from './BuyFanClubCard'
 import { ProfileBio } from './ProfileBio'
 import { ProfileMutuals } from './ProfileMutuals'
 import { RecentComments } from './RecentComments'
@@ -31,7 +32,7 @@ const messages = {
   description: 'Description',
   location: 'Location',
   socialHandles: 'Social Handles',
-  artistCoinFlair: 'Artist Coin Flair',
+  fanClubFlair: 'Fan Club Flair',
   website: 'Website'
 }
 
@@ -55,12 +56,12 @@ type ProfileLeftNavProps = {
   onUpdateLocation: (location: string) => void
   bio: string
   onUpdateBio: (bio: string) => void
-  artistCoinBadge?: Nullable<{
+  fanClubBadge?: Nullable<{
     mint: string
     logo_uri: string
     ticker: string
   }>
-  onUpdateArtistCoinBadge: (
+  onUpdateFanClubBadge: (
     badge: {
       mint: string
       logo_uri: string
@@ -95,18 +96,18 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
     onUpdateLocation,
     bio,
     onUpdateBio,
-    artistCoinBadge,
-    onUpdateArtistCoinBadge,
+    fanClubBadge,
+    onUpdateFanClubBadge,
     twitterVerified,
     instagramVerified,
     tikTokVerified,
     isOwner
   } = props
 
-  const { data: ownedCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  const { data: ownedCoin, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
 
-  const showArtistCoinCTA = !isArtistCoinLoading && !!ownedCoin
+  const showFanClubCTA = !isFanClubLoading && !!ownedCoin
 
   if (editMode) {
     return (
@@ -140,7 +141,9 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
               size={TextAreaSize.SMALL}
               grows
               placeholder={messages.description}
-              defaultValue={bio || ''}
+              value={bio || ''}
+              maxLength={MAX_BIO_LENGTH}
+              showMaxLength
               onChange={(e) => onUpdateBio(e.target.value)}
             />
 
@@ -185,11 +188,11 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
 
           <Flex column gap='s'>
             <Text variant='title' color='white'>
-              {messages.artistCoinFlair}
+              {messages.fanClubFlair}
             </Text>
-            <ArtistCoinFlairInput
-              selectedBadge={artistCoinBadge}
-              onChange={onUpdateArtistCoinBadge}
+            <FanClubFlairInput
+              selectedBadge={fanClubBadge}
+              onChange={onUpdateFanClubBadge}
             />
           </Flex>
 
@@ -231,8 +234,8 @@ export const ProfileLeftNav = (props: ProfileLeftNavProps) => {
           tikTokHandle={tikTokHandle}
         />
 
-        {/* For artist coin owners, replace the tip CTA with their coin */}
-        {showArtistCoinCTA ? <BuyArtistCoinCard mint={ownedCoin.mint} /> : null}
+        {/* For fan club owners, replace the tip CTA with their coin */}
+        {showFanClubCTA ? <BuyFanClubCard mint={ownedCoin.mint} /> : null}
         <RecentComments userId={userId} />
         <ProfileMutuals />
         <RelatedArtists />

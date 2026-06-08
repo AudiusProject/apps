@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { chatSelectors, useCreateChatModal } from '@audius/common/store'
-import { Button, IconCompose } from '@audius/harmony'
+import { Button } from '@audius/harmony'
 
 import { useSelector } from 'common/hooks/useSelector'
 
@@ -12,16 +12,22 @@ const { getChats } = chatSelectors
 const messages = {
   selectTitle: 'Select a Message',
   selectSubtitle: 'Open an existing conversation, or compose a new message!',
-  newTitle: 'Start a Conversation!',
-  newSubtitle:
-    'Connect with other Audius users by starting a private direct message!',
-  writeMessage: 'Write a Message'
+  newTitle: 'Nothing Here Yet',
+  newSubtitle: 'Start a Conversation!',
+  writeMessage: 'New Message'
 }
 
-export const CreateChatPrompt = () => {
+type CreateChatPromptProps = {
+  // When provided, overrides the internal `chats` selector. Used by ChatPage
+  // to keep this card in sync with the sidebar's visibility when the account
+  // has no chats.
+  hasChats?: boolean
+}
+
+export const CreateChatPrompt = ({ hasChats }: CreateChatPromptProps = {}) => {
   const { onOpen: openCreateChatModal } = useCreateChatModal()
   const chats = useSelector(getChats)
-  const hasChats = chats?.length > 0
+  const resolvedHasChats = hasChats ?? (chats?.length ?? 0) > 0
 
   const handleClick = useCallback(() => {
     openCreateChatModal()
@@ -31,13 +37,13 @@ export const CreateChatPrompt = () => {
     <div className={styles.root}>
       <div className={styles.header}>
         <div className={styles.title}>
-          {hasChats ? messages.selectTitle : messages.newTitle}
+          {resolvedHasChats ? messages.selectTitle : messages.newTitle}
         </div>
         <div className={styles.subtitle}>
-          {hasChats ? messages.selectSubtitle : messages.newSubtitle}
+          {resolvedHasChats ? messages.selectSubtitle : messages.newSubtitle}
         </div>
       </div>
-      <Button variant='primary' iconLeft={IconCompose} onClick={handleClick}>
+      <Button variant='primary' onClick={handleClick}>
         {messages.writeMessage}
       </Button>
     </div>

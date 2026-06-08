@@ -42,7 +42,13 @@ export const SegmentedControl = <T extends string>(
   const [localSelected, setLocalSelected] = useState(options[0]?.key ?? '')
   const [maxOptionWidth, setMaxOptionWidth] = useState(0)
 
-  const selectedOption = selected ?? localSelected
+  const rawSelectedOption = selected ?? localSelected
+  // If the selected value doesn't match any option, fall back to the first option
+  const selectedOption = options.some(
+    (option) => option.key === rawSelectedOption
+  )
+    ? rawSelectedOption
+    : (options[0]?.key ?? rawSelectedOption)
 
   const onSetSelected = (option: T) => {
     // Call props function if controlled
@@ -186,7 +192,8 @@ export const SegmentedControl = <T extends string>(
               className={cn(styles.tab, {
                 [styles.tabFullWidth]: !!fullWidth,
                 [styles.disabled]: !disabled && option.disabled,
-                [styles.isMobile]: isMobile
+                [styles.isMobile]: isMobile,
+                [styles.selected]: isSelected
               })}
               style={
                 equalWidth && maxOptionWidth

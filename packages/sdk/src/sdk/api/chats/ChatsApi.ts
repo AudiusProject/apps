@@ -3,7 +3,6 @@ import EventEmitter from 'events'
 import * as secp from '@noble/secp256k1'
 import { base64 } from '@scure/base'
 import WebSocket from 'isomorphic-ws'
-import { uniqBy } from 'lodash'
 import type TypedEmitter from 'typed-emitter'
 import { ulid } from 'ulid'
 
@@ -12,6 +11,7 @@ import type { LoggerService } from '../../services/Logger'
 import type { EventEmitterTarget } from '../../utils/EventEmitterTarget'
 import { CryptoUtils } from '../../utils/crypto'
 import { encodeHashId } from '../../utils/hashId'
+import { uniqBy } from '../../utils/objectUtils'
 import { parseParams } from '../../utils/parseParams'
 import {
   BaseAPI,
@@ -52,6 +52,8 @@ import {
   ChatReactRequestSchema,
   ChatReadRequest,
   ChatReadRequestSchema,
+  ChatReadAllRequest,
+  ChatReadAllRequestSchema,
   ChatUnfurlRequest,
   ChatUnfurlRequestSchema,
   TypedCommsResponse,
@@ -573,6 +575,25 @@ export class ChatsApi
       params: {
         chat_id: chatId
       }
+    })
+  }
+
+  /**
+   * Marks every chat the current user belongs to as read in a single
+   * server-side UPDATE. The corresponding RPC (`chat.read_all`) accepts no
+   * params besides the standard sender identity and timestamp.
+   * @param params.currentUserId the user to act on behalf of
+   * @returns the rpc object
+   */
+  public async readAll(params: ChatReadAllRequest = {}) {
+    const { currentUserId } = await parseParams(
+      'readAll',
+      ChatReadAllRequestSchema
+    )(params)
+    return await this.sendRpc({
+      current_user_id: currentUserId,
+      method: 'chat.read_all',
+      params: {}
     })
   }
 

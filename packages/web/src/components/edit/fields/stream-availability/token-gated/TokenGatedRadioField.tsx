@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 
-import { useArtistCreatedCoin, useCurrentUserId } from '@audius/common/api'
+import { useArtistCreatedFanClub, useCurrentUserId } from '@audius/common/api'
 import { useAccessAndRemixSettings, useHasNoTokens } from '@audius/common/hooks'
 import { priceAndAudienceMessages as messages } from '@audius/common/messages'
 import { StreamTrackAvailabilityType } from '@audius/common/models'
 import { useField } from 'formik'
-import { IconArtistCoin } from '~harmony/icons'
+import { IconFanClub } from '~harmony/icons'
 
 import { TokenIcon } from 'components/buy-sell-modal/TokenIcon'
 import { ModalRadioItem } from 'components/modal-radio/ModalRadioItem'
@@ -24,7 +24,7 @@ type TokenGatedRadioFieldProps = {
 export const TokenGatedRadioField = (props: TokenGatedRadioFieldProps) => {
   const { isRemix, isUpload, isInitiallyUnlisted, isAlbum } = props
   const { data: userId } = useCurrentUserId()
-  const { data: coin } = useArtistCreatedCoin(userId)
+  const { data: coin } = useArtistCreatedFanClub(userId)
 
   const [, , { setValue: setStreamConditionsValue }] =
     useField<AccessAndSaleFormValues[typeof STREAM_CONDITIONS]>(
@@ -58,7 +58,7 @@ export const TokenGatedRadioField = (props: TokenGatedRadioFieldProps) => {
         coin?.logoUri ? (
           <TokenIcon logoURI={coin.logoUri} hex h={24} w={24} />
         ) : (
-          <IconArtistCoin />
+          <IconFanClub />
         )
       }
       label={messages.tokenGatedRadio.title}

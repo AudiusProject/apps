@@ -21,14 +21,14 @@ export const initialState: BasicModalsState = {
   BrowserPushPermissionConfirmation: { isOpen: false },
   AudioBreakdown: { isOpen: false },
   DeactivateAccountConfirmation: { isOpen: false },
-  FeedFilter: { isOpen: false },
   PurchaseVendor: { isOpen: false },
   TrendingGenreSelection: { isOpen: false },
   TrendingCategory: { isOpen: false },
   TrendingTimeRange: { isOpen: false },
+  TrendingFilter: { isOpen: false },
+  FeedFilter: { isOpen: false },
   TrendingRewardsExplainer: { isOpen: false },
   SocialProof: { isOpen: false },
-  EditFolder: { isOpen: false },
   EditTrack: { isOpen: false },
   SignOutConfirmation: { isOpen: false },
   Overflow: { isOpen: false },
@@ -41,7 +41,6 @@ export const initialState: BasicModalsState = {
   StripeOnRamp: { isOpen: false },
   InboxSettings: { isOpen: false },
   CommentSettings: { isOpen: false },
-  LabelAccount: { isOpen: false },
   PrivateKeyExporter: { isOpen: false },
   LockedContent: { isOpen: false },
   PlaybackRate: { isOpen: false },
@@ -83,9 +82,11 @@ export const initialState: BasicModalsState = {
   ReceiveTokensModal: { isOpen: false },
   SendTokensModal: { isOpen: false },
   CoinSuccessModal: { isOpen: false },
-  ArtistCoinDetailsModal: { isOpen: false },
+  FanClubDetailsModal: { isOpen: false },
   VerificationSuccess: { isOpen: false },
-  VerificationError: { isOpen: false }
+  VerificationError: { isOpen: false },
+  CreatePlaylistModal: { isOpen: false },
+  DuplicatePlaylistModal: { isOpen: false }
 }
 
 const slice = createSlice({

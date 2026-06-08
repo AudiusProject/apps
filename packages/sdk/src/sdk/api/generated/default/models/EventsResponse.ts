@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -20,19 +19,31 @@ import {
     EventFromJSONTyped,
     EventToJSON,
 } from './Event';
+import type { RemixContestsRelated } from './RemixContestsRelated';
+import {
+    RemixContestsRelatedFromJSON,
+    RemixContestsRelatedFromJSONTyped,
+    RemixContestsRelatedToJSON,
+} from './RemixContestsRelated';
 
 /**
- * 
+ *
  * @export
  * @interface EventsResponse
  */
 export interface EventsResponse {
     /**
-     * 
+     *
      * @type {Array<Event>}
      * @memberof EventsResponse
      */
     data?: Array<Event>;
+    /**
+     *
+     * @type {RemixContestsRelated}
+     * @memberof EventsResponse
+     */
+    related?: RemixContestsRelated;
 }
 
 /**
@@ -53,8 +64,9 @@ export function EventsResponseFromJSONTyped(json: any, ignoreDiscriminator: bool
         return json;
     }
     return {
-        
+
         'data': !exists(json, 'data') ? undefined : ((json['data'] as Array<any>).map(EventFromJSON)),
+        'related': !exists(json, 'related') ? undefined : RemixContestsRelatedFromJSON(json['related']),
     };
 }
 
@@ -66,8 +78,9 @@ export function EventsResponseToJSON(value?: EventsResponse | null): any {
         return null;
     }
     return {
-        
+
         'data': value.data === undefined ? undefined : ((value.data as Array<any>).map(EventToJSON)),
+        'related': RemixContestsRelatedToJSON(value.related),
     };
 }
 

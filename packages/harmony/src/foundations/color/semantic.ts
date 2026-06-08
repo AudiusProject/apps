@@ -6,7 +6,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     default: primitives.neutral.n800,
     subdued: primitives.neutral.n400,
     disabled: primitives.neutral.n150,
-    link: primitives.primary.p500,
+    link: primitives.primary.p400,
     accent: primitives.secondary.s300,
     inverse: primitives.neutral.n950,
 
@@ -20,13 +20,13 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
-    artistCoin: primitives.special.coinGradient
+    fanClub: primitives.special.coinGradient
   },
   icon: {
     default: primitives.neutral.n800,
     subdued: primitives.neutral.n400,
     disabled: primitives.neutral.n150,
-    link: primitives.primary.p500,
+    link: primitives.primary.p400,
     accent: primitives.secondary.s300,
     inverse: primitives.static.staticWhite,
 
@@ -40,7 +40,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     success: primitives.special.green,
     premium: primitives.special.lightGreen,
     special: primitives.special.blue,
-    artistCoin: primitives.special.coinGradient
+    fanClub: primitives.special.coinGradient
   },
   link: {
     default: primitives.neutral.n800,
@@ -55,7 +55,7 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
     white: primitives.special.white,
     primary: primitives.primary.p300,
     gradient: primitives.special.gradient,
-    artistCoin: primitives.special.coinGradient,
+    fanClub: primitives.special.coinGradient,
 
     // Legacy compatibility
     accent: primitives.secondary.s300
@@ -78,9 +78,15 @@ const createSemanticTheme = (primitives: PrimitiveColors) => ({
 })
 
 export const semanticTheme = {
+  defaultLight: createSemanticTheme(primitiveTheme.defaultLight),
+  defaultDark: createSemanticTheme(primitiveTheme.defaultDark),
+  classicLight: createSemanticTheme(primitiveTheme.classicLight),
+  classicDark: createSemanticTheme(primitiveTheme.classicDark),
+  matrix: createSemanticTheme(primitiveTheme.matrix),
+  /** @deprecated Use classicLight */
   day: createSemanticTheme(primitiveTheme.day),
-  dark: createSemanticTheme(primitiveTheme.dark),
-  matrix: createSemanticTheme(primitiveTheme.matrix)
+  /** @deprecated Use classicDark */
+  dark: createSemanticTheme(primitiveTheme.dark)
 }
 
 export type SemanticColors = typeof semanticTheme.day

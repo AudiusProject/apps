@@ -3,7 +3,6 @@ import { Action, combineReducers, Reducer } from '@reduxjs/toolkit'
 import { addCashModalReducer } from './add-cash-modal'
 import { albumTrackRemoveConfirmationModalReducer } from './album-track-remove-confirmation-modal'
 import { announcementModalReducer } from './announcement-modal'
-import { artistCoinDetailsModalReducer } from './artist-coin-details-modal'
 import { artistPickModalReducer } from './artist-pick-modal'
 import { buySellModalReducer } from './buy-sell-modal'
 import { claimVestedCoinsModalReducer } from './claim-vested-coins-modal'
@@ -13,11 +12,14 @@ import { coinflowWithdrawModalReducer } from './coinflow-withdraw-modal'
 import { connectedWalletsModalReducer } from './connected-wallets-modal'
 import { chatBlastModalReducer } from './create-chat-blast-modal'
 import { createChatModalReducer } from './create-chat-modal'
+import { createPlaylistModalReducer } from './create-playlist-modal'
 import { deleteTrackConfirmationModalReducer } from './delete-track-confirmation-modal'
 import { downloadTrackArchiveModalReducer } from './download-track-archive-modal'
+import { duplicatePlaylistModalReducer } from './duplicate-playlist-modal'
 import { earlyReleaseConfirmationModalReducer } from './early-release-confirmation-modal'
 import { editAccessConfirmationModalReducer } from './edit-access-confirmation-modal'
 import { externalWalletSignUpModalReducer } from './external-wallet-sign-up-modal'
+import { fanClubDetailsModalReducer } from './fan-club-details-modal'
 import { finalizeWinnersConfirmationModalReducer } from './finalize-winners-confirmation-modal'
 import { hideContentConfirmationModalReducer } from './hide-confirmation-modal'
 import { hostRemixContestModalReducer } from './host-remix-contest-modal'
@@ -92,7 +94,9 @@ const combinedReducers = combineReducers({
   ReceiveTokensModal: receiveTokensModalReducer,
   SendTokensModal: sendTokensModalReducer,
   CoinSuccessModal: coinSuccessModalReducer,
-  ArtistCoinDetailsModal: artistCoinDetailsModalReducer
+  FanClubDetailsModal: fanClubDetailsModalReducer,
+  CreatePlaylistModal: createPlaylistModalReducer,
+  DuplicatePlaylistModal: duplicatePlaylistModalReducer
 })
 
 /**

@@ -16,10 +16,11 @@ type ChatListBlastItemProps = {
   chat: ChatBlast
   currentChatId?: string
   onChatClicked: (chatId: string) => void
+  isCompact?: boolean
 }
 
 export const ChatListBlastItem = (props: ChatListBlastItemProps) => {
-  const { chat, onChatClicked, currentChatId } = props
+  const { chat, onChatClicked, currentChatId, isCompact } = props
   const { chat_id: chatId } = chat
   const isCurrentChat = currentChatId && currentChatId === chatId
   const { chatBlastTitle, contentTitle, audienceCount } =
@@ -32,14 +33,14 @@ export const ChatListBlastItem = (props: ChatListBlastItemProps) => {
   }, [chatId, onChatClicked])
 
   return (
-    <Flex
-      ph='xl'
-      pv='l'
-      direction='column'
-      gap='s'
-      borderBottom='default'
+    <button
+      type='button'
       onClick={handleClick}
-      className={cn(styles.root, { [styles.active]: isCurrentChat })}
+      aria-current={isCurrentChat ? 'page' : undefined}
+      className={cn(styles.root, {
+        [styles.active]: isCurrentChat,
+        [styles.compact]: isCompact
+      })}
     >
       <Flex row gap='s' w='100%' className={styles.headingContainer}>
         <IconTowerBroadcast size='l' color='default' />
@@ -77,6 +78,6 @@ export const ChatListBlastItem = (props: ChatListBlastItemProps) => {
           </Flex>
         ) : null}
       </Flex>
-    </Flex>
+    </button>
   )
 }

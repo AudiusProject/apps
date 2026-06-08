@@ -4,7 +4,7 @@
 }
 
 .pageContainer .inset {
-  padding: 0px var(--harmony-unit-15) var(--harmony-unit-15);
+  padding: 0px var(--harmony-unit-8) var(--harmony-unit-15);
 }
 
 .pageContainer .flush {
@@ -18,11 +18,9 @@
 }
 
 .inset.medium > .pageContent {
-  min-width: 460px;
   max-width: 1080px;
 }
 .inset.large > .pageContent {
-  min-width: 720px;
   max-width: 1080px;
 }
 
@@ -32,18 +30,39 @@
   left: 0;
   right: 0;
   z-index: 13;
+  border-bottom: 1px solid var(--harmony-n-100);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
+.headerContainerFrosted {
+  backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  background: var(
+    --frosted-surface-background,
+    color-mix(
+      in srgb,
+      var(--frosted-surface-background-color, var(--harmony-n-25))
+        var(--frosted-surface-opacity, 65%),
+      transparent
+    )
+  );
+}
+
+/* Pull up overlaps scrollbar; negative margin cancels the 5px flow box so the header border sits flush. */
 .headerBoxShadow {
   height: 5px;
   width: 100%;
   box-shadow: var(--box-shadow-mid);
   position: relative;
   top: -5px;
+  margin-bottom: -5px;
+  pointer-events: none;
 }
 
 .searchWrapper {
   position: absolute;
   top: var(--harmony-unit-8);
-  left: var(--harmony-unit-15);
+  left: var(--harmony-unit-8);
 }

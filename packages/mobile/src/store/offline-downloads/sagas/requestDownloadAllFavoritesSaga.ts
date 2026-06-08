@@ -59,9 +59,9 @@ function* downloadAllFavorites() {
   // Add favorited tracks from api
   const sdk = yield* getSDK()
 
-  const { data } = yield* call([sdk.users, sdk.users.getFavorites], {
+  const { data } = (yield* call([sdk.users, sdk.users.getUserFavorites], {
     id: Id.parse(currentUserId)
-  })
+  })) as import('@audius/sdk').FavoritesResponse
   const allFavoritedTracks = transformAndCleanList(data, favoriteFromSDK)
 
   if (allFavoritedTracks) {

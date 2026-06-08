@@ -1,0 +1,192 @@
+.section {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.headline {
+  font-family: 'Dust Bucer', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 140px;
+  line-height: 0.72;
+  color: #fff;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.subline {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.5;
+  color: #ebebeb;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.gridContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 96px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Single grid: 5 cols → 4 → 2. Overflow items stay one cell size. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.imageSkeleton {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+}
+
+.imageWrapLoaded .imageSkeleton {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.imageWrapLoaded .image {
+  opacity: 1;
+}
+
+.bwOverlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  mix-blend-mode: hue;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.card:hover .bwOverlay,
+.card:focus-visible .bwOverlay {
+  opacity: 0;
+}
+
+.name {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #ebebeb;
+}
+
+/* Skeleton styles */
+.cardSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.cardSkeleton .imageWrap {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nameSkeleton {
+  height: 24px;
+  width: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .headline {
+    font-size: 96px;
+  }
+
+  .subline {
+    font-size: 18px;
+  }
+
+  .gridContainer {
+    padding: 0 16px;
+    width: 100%;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}

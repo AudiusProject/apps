@@ -1,9 +1,0 @@
-{
-    "extends": "@tsconfig/node16-strictest/tsconfig.json",
-    "compilerOptions": {
-        "strict": true,
-        "outDir": "dist"
-      },
-    "include": ["src"],
-    "exclude": ["node_modules"]
-  }

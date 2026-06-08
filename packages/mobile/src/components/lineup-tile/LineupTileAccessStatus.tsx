@@ -1,11 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
-import type {
-  ID,
-  AccessConditions,
-  TokenGatedConditions
-} from '@audius/common/models'
+import type { ID, AccessConditions } from '@audius/common/models'
 import {
   ModalSource,
   isContentTokenGated,
@@ -24,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import type { FlexProps } from '@audius/harmony-native'
 import {
+  Button,
   Flex,
   IconLock,
   IconLockUnlocked,
@@ -32,12 +28,12 @@ import {
 } from '@audius/harmony-native'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
-import { useNavigation } from 'app/hooks/useNavigation'
 import { make, track } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 import { EventNames } from 'app/types/analytics'
 
+import { useTilePressBlock } from './TilePressBlockContext'
 import { LineupTileSource } from './types'
 
 const { getGatedContentStatusMap } = gatedContentSelectors
@@ -46,7 +42,7 @@ const { setLockedContentId } = gatedContentActions
 const messages = {
   unlocking: 'Unlocking',
   locked: 'Locked',
-  buyArtistCoin: 'Buy Artist Coin',
+  unlock: 'Unlock',
   price: (price: string) => `$${price}`
 }
 
@@ -82,12 +78,6 @@ export const LineupTileAccessStatus = ({
     isUSDCEnabled && isContentUSDCPurchaseGated(streamConditions)
   const isTokenGated = isContentTokenGated(streamConditions)
   const isUnlocking = gatedTrackStatus === 'UNLOCKING'
-  const navigation = useNavigation()
-
-  const { data: token } = useArtistCoin(
-    (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
-    { enabled: isTokenGated }
-  )
 
   const handlePress = useCallback(() => {
     if (hasStreamAccess) {
@@ -118,13 +108,6 @@ export const LineupTileAccessStatus = ({
           source: determineModalSource()
         }
       )
-    } else if (isTokenGated) {
-      if (token?.ticker) {
-        navigation.push('BuySell', {
-          initialTab: 'buy',
-          coinTicker: token.ticker
-        })
-      }
     } else if (contentId) {
       dispatch(setLockedContentId({ id: contentId }))
       dispatch(setVisibility({ drawer: 'LockedContent', visible: true }))
@@ -132,13 +115,10 @@ export const LineupTileAccessStatus = ({
   }, [
     hasStreamAccess,
     isUSDCPurchase,
-    isTokenGated,
     contentId,
     contentType,
     openPremiumContentPurchaseModal,
     tileSource,
-    token?.ticker,
-    navigation,
     dispatch
   ])
 
@@ -147,13 +127,17 @@ export const LineupTileAccessStatus = ({
         USDC(streamConditions.usdc_purchase.price / 100).toLocaleString()
       )
     : isTokenGated
-      ? messages.buyArtistCoin
+      ? messages.unlock
       : isUnlocking
         ? messages.unlocking
         : messages.locked
 
   const showButtonText =
     !isUSDCPurchase || isTokenGated || (!hasStreamAccess && !isUnlocking)
+
+  const blockTilePress = useTilePressBlock()
+
+  const handlePressWithBlock = useCallback(() => handlePress(), [handlePress])
 
   const backgroundColor = isUSDCPurchase
     ? color.special.lightGreen
@@ -175,8 +159,22 @@ export const LineupTileAccessStatus = ({
     style: { backgroundColor }
   }
 
+  if (isTokenGated && !hasStreamAccess && !isUnlocking) {
+    return (
+      <Button
+        variant='secondary'
+        size='small'
+        rounded
+        onPress={handlePressWithBlock}
+        style={{ height: 24 }}
+      >
+        {buttonText}
+      </Button>
+    )
+  }
+
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity onPressIn={blockTilePress} onPress={handlePressWithBlock}>
       <Flex
         {...(hasStreamAccess || isUnlocking ? unlockedStyles : lockedStyles)}
         direction='row'
@@ -203,9 +201,9 @@ export const LineupTileAccessStatus = ({
             style={styles.loadingSpinner}
             fill={color.icon.staticWhite}
           />
-        ) : !isTokenGated ? (
+        ) : (
           <IconLock color='white' size='s' />
-        ) : null}
+        )}
         {showButtonText ? (
           <Text color='white' variant='label' size='m'>
             {buttonText}

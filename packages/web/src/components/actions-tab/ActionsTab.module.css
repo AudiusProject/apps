@@ -96,6 +96,16 @@
   text-align: center;
 }
 
+.iconKebabHorizontalWrapper:focus {
+  outline: none;
+}
+
+.iconKebabHorizontalWrapper:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
+}
+
 .iconKebabHorizontalRef {
   display: flex;
 }

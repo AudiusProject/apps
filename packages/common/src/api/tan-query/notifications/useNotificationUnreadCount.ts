@@ -32,11 +32,20 @@ export const useNotificationUnreadCount = () => {
     queryKey: getNotificationUnreadCountQueryKey(currentUserId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.notifications.getNotifications({
-        userId: Id.parse(currentUserId),
+      const response = await (
+        sdk.notifications as {
+          getNotifications: (params: {
+            id: string
+            limit?: number
+          }) => Promise<{
+            data?: { unreadCount?: number }
+          }>
+        }
+      ).getNotifications({
+        id: Id.parse(currentUserId),
         limit: 0
       })
-      return data?.unreadCount ?? 0
+      return response?.data?.unreadCount ?? 0
     },
     refetchInterval: pollingFreqMs,
     enabled: !!currentUserId

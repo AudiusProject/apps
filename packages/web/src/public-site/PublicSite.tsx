@@ -10,7 +10,8 @@ import { env } from 'services/env'
 
 import { AppContextProvider } from '../app/AppContextProvider'
 
-import LandingPage from './pages/landing-page/LandingPage'
+import { PublicSiteProviders } from './PublicSiteProviders'
+import { LandingPage2026 } from './pages/landing-2026/LandingPage2026'
 
 const {
   TRENDING_PAGE,
@@ -28,14 +29,11 @@ const DownloadPage = lazy(() => import('./pages/download-page/DownloadPage'))
 const TermsOfUsePage = lazy(
   () => import('./pages/terms-of-use-page/TermsOfUsePage')
 )
-const ArtistCoinTermsPage = lazy(
-  () => import('./pages/artist-coin-terms-page/ArtistCoinTermsPage')
+const FanClubTermsPage = lazy(
+  () => import('./pages/fan-club-terms-page/FanClubTermsPage')
 )
-const ArtistCoinAcceptableUsePage = lazy(
-  () =>
-    import(
-      './pages/artist-coin-acceptable-use-page/ArtistCoinAcceptableUsePage'
-    )
+const FanClubAcceptableUsePage = lazy(
+  () => import('./pages/fan-club-acceptable-use-page/FanClubAcceptableUsePage')
 )
 
 const ROOT_ID = 'root'
@@ -55,11 +53,12 @@ const ExternalRedirect = ({ to }: { to: string }) => {
 
 type PublicSiteProps = {
   isMobile: boolean
+  isAuthenticated: boolean
   setRenderPublicSite: (shouldRender: boolean) => void
 }
 
 export const PublicSite = (props: PublicSiteProps) => {
-  const { isMobile, setRenderPublicSite } = props
+  const { isMobile, isAuthenticated, setRenderPublicSite } = props
   const [isMobileOrNarrow, setIsMobileOrNarrow] = useState(isMobile)
   const handleMobileMediaQuery = useCallback(() => {
     if (MOBILE_WIDTH_MEDIA_QUERY.matches) setIsMobileOrNarrow(true)
@@ -111,107 +110,111 @@ export const PublicSite = (props: PublicSiteProps) => {
       </div>
 
       <Suspense fallback={<div style={{ width: '100vw', height: '100vh' }} />}>
-        <ThemeProvider theme='day'>
-          <AppContextProvider>
-            {(() => {
-              const RouterComponent = env.USE_HASH_ROUTING
-                ? HashRouter
-                : BrowserRouter
-              const basename = env.BASENAME || undefined
-              // In React Router v7, future flags are enabled by default for declarative routers
-              // The future prop is only available for data routers (createBrowserRouter)
-              return (
-                <RouterComponent basename={basename}>
-                  <NavScreen
-                    closeNavScreen={closeNavScreen}
-                    isOpen={isNavScreenOpen}
-                    setRenderPublicSite={setRenderPublicSite}
-                  />
-                  <Routes>
-                    <Route
-                      path='/legal/terms-of-use'
-                      element={
-                        <TermsOfUsePage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
+        <PublicSiteProviders>
+          <ThemeProvider theme='day'>
+            <AppContextProvider>
+              {(() => {
+                const RouterComponent = env.USE_HASH_ROUTING
+                  ? HashRouter
+                  : BrowserRouter
+                const basename = env.BASENAME || undefined
+                // In React Router v7, future flags are enabled by default for declarative routers
+                // The future prop is only available for data routers (createBrowserRouter)
+                return (
+                  <RouterComponent basename={basename}>
+                    <NavScreen
+                      closeNavScreen={closeNavScreen}
+                      isOpen={isNavScreenOpen}
+                      setRenderPublicSite={setRenderPublicSite}
                     />
-                    <Route
-                      path='/legal/privacy-policy'
-                      element={
-                        <PrivacyPolicyPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/artist-coin-terms'
-                      element={
-                        <ArtistCoinTermsPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/artist-coin-acceptable-use'
-                      element={
-                        <ArtistCoinAcceptableUsePage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/legal/api-terms'
-                      element={
-                        <ApiTermsPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/press'
-                      element={<ExternalRedirect to={AUDIUS_PRESS_LINK} />}
-                    />
-                    <Route
-                      path='/download'
-                      element={
-                        <DownloadPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/'
-                      element={
-                        <LandingPage
-                          isMobile={isMobileOrNarrow}
-                          openNavScreen={openNavScreen}
-                          setRenderPublicSite={setRenderPublicSite}
-                        />
-                      }
-                    />
-                    <Route
-                      path='/auth-redirect'
-                      element={<LoadingSpinnerFullPage />}
-                    />
-                  </Routes>
-                </RouterComponent>
-              )
-            })()}
-          </AppContextProvider>
-        </ThemeProvider>
+                    <Routes>
+                      <Route
+                        path='/legal/terms-of-use'
+                        element={
+                          <TermsOfUsePage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/privacy-policy'
+                        element={
+                          <PrivacyPolicyPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/fan-club-terms'
+                        element={
+                          <FanClubTermsPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/fan-club-acceptable-use'
+                        element={
+                          <FanClubAcceptableUsePage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/legal/api-terms'
+                        element={
+                          <ApiTermsPage
+                            isMobile={isMobileOrNarrow}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/press'
+                        element={<ExternalRedirect to={AUDIUS_PRESS_LINK} />}
+                      />
+                      <Route
+                        path='/download'
+                        element={
+                          <DownloadPage
+                            isMobile={isMobileOrNarrow}
+                            isAuthenticated={isAuthenticated}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/'
+                        element={
+                          <LandingPage2026
+                            isMobile={isMobileOrNarrow}
+                            isAuthenticated={isAuthenticated}
+                            openNavScreen={openNavScreen}
+                            setRenderPublicSite={setRenderPublicSite}
+                          />
+                        }
+                      />
+                      <Route
+                        path='/auth-redirect'
+                        element={<LoadingSpinnerFullPage />}
+                      />
+                    </Routes>
+                  </RouterComponent>
+                )
+              })()}
+            </AppContextProvider>
+          </ThemeProvider>
+        </PublicSiteProviders>
       </Suspense>
     </>
   )

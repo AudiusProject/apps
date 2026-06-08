@@ -11,14 +11,15 @@ apply plugin: "com.facebook.react"
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
-    // root = file("../../")
+    //   Leave at the default (../.. = packages/mobile) so index.js resolves correctly.
+    //   In monorepo setup, react-native and @react-native/* are hoisted to the root
+    //   node_modules — point the specific deps explicitly without moving `root`.
     //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
-    // reactNativeDir = file("../../node_modules/react-native")
+    reactNativeDir = file("../../../../node_modules/react-native")
     //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
-    // In monorepo setup, codegen is hoisted to root node_modules
     codegenDir = file("../../../../node_modules/@react-native/codegen")
     //   The cli.js file which is the React Native CLI entrypoint. Default is ../../node_modules/react-native/cli.js
-    // cliFile = file("../../node_modules/react-native/cli.js")
+    cliFile = file("../../../../node_modules/react-native/cli.js")
     /* Variants */
     //   The list of variants to that are debuggable. For those we're going to
     //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
@@ -45,7 +46,12 @@ react {
     // extraPackagerArgs = []
     /* Hermes Commands */
     //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //   The RN Gradle plugin's hermesc lookup is anchored at `root` and only
+    //   considers `root/node_modules/react-native/sdks/hermesc/...`. Since RN
+    //   is hoisted to the monorepo node_modules, that lookup fails. Point the
+    //   plugin at the hoisted prebuilt hermesc explicitly (%OS-BIN% is
+    //   substituted by the plugin at runtime).
+    hermesCommand = "$rootDir/../../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
@@ -128,7 +134,7 @@ android {
         // versionCode is automatically incremented in CI
         versionCode 1
         // Make sure this is above the currently released Android version in the play store if your changes touch native code:
-        versionName "1.1.519"
+        versionName "1.1.534"
         resValue "string", "build_config_package", "co.audius.app"
         resConfigs "en"
     }

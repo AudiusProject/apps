@@ -2,10 +2,10 @@ import { useCallback } from 'react'
 
 import { SquareSizes, WidthSizes, User } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { IconArtistBadge, IconLabelBadge } from '@audius/harmony'
+import { IconArtistBadge, IconLabelBadge, Image } from '@audius/harmony'
+import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
@@ -38,8 +38,6 @@ export const ArtistCardCover = (props: ArtistCoverProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  const darkenedCoverPhoto = `${gradient}, url(${coverPhoto})`
-
   const handleClickUser = useCallback(() => {
     if (onNavigateAway) {
       onNavigateAway()
@@ -48,23 +46,33 @@ export const ArtistCardCover = (props: ArtistCoverProps) => {
   }, [dispatch, handle, onNavigateAway])
 
   return (
-    <DynamicImage
-      wrapperClassName={styles.artistCoverPhoto}
-      image={darkenedCoverPhoto}
-      immediate
-      useBlur={shouldBlur}
+    <div
+      className={styles.artistCoverPhoto}
+      style={{
+        backgroundImage: `${gradient}, url(${coverPhoto})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
     >
+      {shouldBlur ? (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backdropFilter: 'blur(25px)',
+            zIndex: 1
+          }}
+        />
+      ) : null}
       <div className={styles.coverPhotoContentContainer}>
         {profileType === 'artist' ? (
           <IconArtistBadge className={styles.badge} />
         ) : profileType === 'label' ? (
           <IconLabelBadge className={styles.badge} />
         ) : null}
-        <DynamicImage
-          wrapperClassName={styles.profilePictureWrapper}
-          skeletonClassName={styles.profilePictureSkeleton}
-          className={styles.profilePicture}
-          image={profilePicture}
+        <Image
+          className={cn(styles.profilePictureWrapper, styles.profilePicture)}
+          src={profilePicture}
           immediate
         />
         <div className={styles.headerTextContainer}>
@@ -83,6 +91,6 @@ export const ArtistCardCover = (props: ArtistCoverProps) => {
           </div>
         </div>
       </div>
-    </DynamicImage>
+    </div>
   )
 }

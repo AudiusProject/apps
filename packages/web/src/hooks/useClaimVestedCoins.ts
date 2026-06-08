@@ -1,12 +1,11 @@
 import { type Coin } from '@audius/common/adapters'
 import {
-  getArtistCoinQueryKey,
+  getFanClubQueryKey,
   getUserCoinQueryKey,
   useCurrentAccountUser,
   useQueryContext,
   QUERY_KEYS
 } from '@audius/common/api'
-import { Feature } from '@audius/common/models'
 import type { UserCoinWithAccounts } from '@audius/sdk'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
 import { PublicKey, VersionedTransaction } from '@solana/web3.js'
@@ -17,8 +16,6 @@ import {
 } from '@tanstack/react-query'
 
 import { appkitModal } from 'app/ReownAppKitModal'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 export type UseClaimVestedCoinsParams = {
   tokenMint: string
   externalWalletAddress: string
@@ -33,8 +30,8 @@ export type ClaimVestedCoinsResult = {
 }
 
 /**
- * Hook for claiming vested/unlocked artist coins from the vesting schedule.
- * After an artist coin graduates, the artist's reserved coins unlock daily over a 5-year period.
+ * Hook for claiming vested/unlocked fan clubs from the vesting schedule.
+ * After a fan club graduates, the artist's reserved coins unlock daily over a 5-year period.
  * This gets the TX from solana relay, then signs and sends the claim vested coins transaction.
  * NOTE: This is a web feature only because the user must sign with the same external wallet they used to launch the coin (wallet connect wallet).
  */
@@ -124,19 +121,12 @@ export const useClaimVestedCoins = (
     },
     ...options,
     onError: (error, params) => {
-      reportToSentry({
-        error,
-        feature: Feature.ArtistCoins,
-        name: 'Artist coin vested coins claim error',
-        additionalInfo: {
-          ...params
-        }
-      })
+      console.error(error)
       options?.onError?.(error, params, undefined)
     },
     onSuccess: (data: ClaimVestedCoinsResult, variables, context) => {
       // Optimistically update the coin data with new locker amounts
-      const queryKey = getArtistCoinQueryKey(variables.tokenMint)
+      const queryKey = getFanClubQueryKey(variables.tokenMint)
       queryClient.setQueryData<Coin>(queryKey, (existingCoin) => {
         if (
           !existingCoin ||

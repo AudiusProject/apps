@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import EventEmitter from 'events'
 import path from 'path'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { ErrorLevel, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import type { Color } from '@audius/common/models'
 import { modalsActions } from '@audius/common/store'
 import type { ShareContent } from '@audius/common/store'
@@ -51,7 +51,6 @@ import {
   pickTwoMostDominantAndVibrant
 } from 'app/utils/dominantColors'
 import { isImageUriSource } from 'app/utils/image'
-import { reportToSentry } from 'app/utils/reportToSentry'
 import { getTrackRoute } from 'app/utils/routes'
 
 import { DrawerHeader } from '../core/DrawerHeader'
@@ -137,10 +136,18 @@ export const useShareToStory = ({
     size: SquareSizes.SIZE_480_BY_480
   })
   const isStickerImageLoadedRef = useRef(false)
-  const handleShareToStoryStickerLoad = () => {
+  const handleShareToStoryStickerLoad = useCallback(() => {
     isStickerImageLoadedRef.current = true
     stickerLoadedEventEmitter.emit(STICKER_LOADED_EVENT)
-  }
+  }, [])
+
+  const trackId = content?.type === 'track' ? content.track.track_id : null
+  // Reset when share content (track) changes so we wait for the new sticker to load
+  useEffect(() => {
+    if (trackId) {
+      isStickerImageLoadedRef.current = false
+    }
+  }, [trackId])
   const trackImageUri =
     content?.type === 'track' &&
     trackImage &&
@@ -151,25 +158,23 @@ export const useShareToStory = ({
 
   const captureStickerImage = useCallback(async () => {
     if (!isStickerImageLoadedRef.current) {
-      // Wait for the sticker component and image inside it to load. If this hasn't happened in 5 seconds, assume that it failed.
       await Promise.race([
         new Promise((resolve) =>
           stickerLoadedEventEmitter.once(STICKER_LOADED_EVENT, resolve)
         ),
-        new Promise((resolve) => {
-          setTimeout(resolve, 5000)
-        })
+        new Promise((resolve) => setTimeout(resolve, 5000))
       ])
-
       if (!isStickerImageLoadedRef.current) {
-        // Loading the sticker failed; return undefined
-        throw new Error('The sticker component did not load successfully.')
+        // onLoad may not fire on iOS (e.g. cached image, opacity:0); try capture anyway
+        await new Promise((resolve) => setTimeout(resolve, 100))
       }
     }
-
     let res: string | undefined
-    if (viewShotRef && viewShotRef.current && viewShotRef.current.capture) {
+    if (viewShotRef?.current?.capture) {
       res = await viewShotRef.current.capture()
+    }
+    if (!res) {
+      throw new Error('The sticker component did not load successfully.')
     }
     return res
   }, [viewShotRef])
@@ -203,11 +208,7 @@ export const useShareToStory = ({
 
   const handleError = useCallback(
     (platform: ShareToStoryPlatform, error: Error, name?: string) => {
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error,
-        name
-      })
+      console.error(error)
       toast({ content: messages.shareToStoryError, type: 'error' })
       track(
         make({
@@ -581,7 +582,14 @@ export const useShareToStory = ({
     handleShareToInstagramStory,
     handleShareToTikTok,
     selectedPlatform,
-    cancelStory
+    cancelStory,
+    /** Pre-resolved artwork source (mirror fallback applied) for the share sticker. Use this so the sticker always has a working image URL. */
+    stickerArtworkSource:
+      content?.type === 'track' &&
+      trackImage?.source != null &&
+      !trackImage.hasNoArtwork
+        ? trackImage.source
+        : undefined
   }
 }
 

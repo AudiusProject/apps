@@ -20,8 +20,11 @@ const solanaWeb3 = require('@solana/web3.js')
 const RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com' // DEVNET is https://api.devnet.solana.com
 
 // validation
-let args = process.argv
-if (args.length < 3 && !['fundRelayers', 'queryRelayerBalances'].includes(args[3])) {
+const args = process.argv
+if (
+  args.length < 3 &&
+  !['fundRelayers', 'queryRelayerBalances'].includes(args[3])
+) {
   _throwArgError()
 }
 const SOL_RELAYER_INFO = require(path.join(__dirname, args[2]))
@@ -44,31 +47,35 @@ const getSolConstants = () => {
 const queryRelayerBalances = async () => {
   const { solProdRelayerInfo, connection } = getSolConstants()
   console.log(solProdRelayerInfo)
-  const funderPkey = solProdRelayerInfo['funderPrivateKey']
-  const funderKeypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(funderPkey))
+  const funderPkey = solProdRelayerInfo.funderPrivateKey
+  const funderKeypair = solanaWeb3.Keypair.fromSecretKey(
+    Uint8Array.from(funderPkey)
+  )
 
   // Retrieve funder
   const funderBalance = await connection.getBalance(funderKeypair.publicKey)
   console.log(`Minimum Sol Per Relayer = ${getSolFromLamports(MIN_BALANCE)}`)
-  console.log(`FunderWallet = ${funderKeypair.publicKey}, Balance=${funderBalance}`)
+  console.log(
+    `FunderWallet = ${funderKeypair.publicKey}, Balance=${funderBalance}`
+  )
 
   // retrieve relayer wallets
   const relayerKeypairs = []
-  const relayerPkeys = solProdRelayerInfo['relayerWallets']
+  const relayerPkeys = solProdRelayerInfo.relayerWallets
 
-  for (var relayerPkey of relayerPkeys) {
+  for (const relayerPkey of relayerPkeys) {
     relayerKeypairs.push(
-      solanaWeb3.Keypair.fromSecretKey(
-        Uint8Array.from(relayerPkey['privateKey'])
-      )
+      solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(relayerPkey.privateKey))
     )
   }
 
   const belowMinimumBalanceRelayers = []
-  for (var relayerKeypair of relayerKeypairs) {
+  for (const relayerKeypair of relayerKeypairs) {
     const relayerBal = await connection.getBalance(relayerKeypair.publicKey)
     const diffInSol = getSolFromLamports(MIN_BALANCE - relayerBal)
-    console.log(`RelayerWallet=${relayerKeypair.publicKey}, Balance=${getSolFromLamports(relayerBal)} SOL, diff=${diffInSol} SOL`)
+    console.log(
+      `RelayerWallet=${relayerKeypair.publicKey}, Balance=${getSolFromLamports(relayerBal)} SOL, diff=${diffInSol} SOL`
+    )
     if (relayerBal < MIN_BALANCE) {
       belowMinimumBalanceRelayers.push(relayerKeypair)
     }
@@ -83,39 +90,53 @@ const queryRelayerBalances = async () => {
 
 const fundRelayers = async () => {
   const { connection } = getSolConstants()
-  const { funderKeypair, belowMinimumBalanceRelayers } = await queryRelayerBalances()
+  const { funderKeypair, belowMinimumBalanceRelayers } =
+    await queryRelayerBalances()
 
-  for (var relayerToFund of belowMinimumBalanceRelayers) {
+  for (const relayerToFund of belowMinimumBalanceRelayers) {
     console.log(`-------- Balances before transferring --------`)
-    console.log(`Fee payer balance: ${(await connection.getBalance(funderKeypair.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`)
-    console.log(`Funder balance: ${(await connection.getBalance(relayerToFund.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`)
+    console.log(
+      `Fee payer balance: ${(await connection.getBalance(funderKeypair.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`
+    )
+    console.log(
+      `Funder balance: ${(await connection.getBalance(relayerToFund.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`
+    )
     console.log(`Funding ${relayerToFund.publicKey} ${MIN_BALANCE} lamports`)
-    let transaction = new solanaWeb3.Transaction().add(
+    const transaction = new solanaWeb3.Transaction().add(
       solanaWeb3.SystemProgram.transfer({
         fromPubkey: funderKeypair.publicKey,
         toPubkey: relayerToFund.publicKey,
         lamports: MIN_BALANCE
       })
     )
-    let signature = await solanaWeb3.sendAndConfirmTransaction(
+    const signature = await solanaWeb3.sendAndConfirmTransaction(
       connection,
       transaction,
-      [funderKeypair], {
+      [funderKeypair],
+      {
         commitment: 'finalized'
       }
     )
-    console.log(`Transfer from ${funderKeypair.publicKey} to ${relayerToFund.publicKey} signature=${signature}`)
+    console.log(
+      `Transfer from ${funderKeypair.publicKey} to ${relayerToFund.publicKey} signature=${signature}`
+    )
     console.log(`-------- Balances after transferring --------`)
-    console.log(`Fee payer balance: ${(await connection.getBalance(relayerToFund.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`)
-    console.log(`Funder balance: ${(await connection.getBalance(funderKeypair.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`)
+    console.log(
+      `Fee payer balance: ${(await connection.getBalance(relayerToFund.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`
+    )
+    console.log(
+      `Funder balance: ${(await connection.getBalance(funderKeypair.publicKey)) / solanaWeb3.LAMPORTS_PER_SOL}`
+    )
   }
 }
 
-function _throwArgError () {
-  throw new Error('missing argument - format: node fundSolanaFeePayer path-to-relayer-config.json queryRelayerBalances|fundRelayers <optional amount to transfer in SOL>')
+function _throwArgError() {
+  throw new Error(
+    'missing argument - format: node fundSolanaFeePayer path-to-relayer-config.json queryRelayerBalances|fundRelayers <optional amount to transfer in SOL>'
+  )
 }
 
-async function run () {
+async function run() {
   try {
     switch (SCRIPT_ACTION) {
       case 'fundRelayers':

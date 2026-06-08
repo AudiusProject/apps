@@ -3,7 +3,7 @@ import { useIsCoinMember } from '@audius/common/hooks'
 import { ID } from '@audius/common/models'
 import {
   Flex,
-  IconArtistCoin,
+  IconFanClub,
   IconComponent,
   IconStar,
   Text
@@ -13,7 +13,7 @@ type BadgeType = 'artist' | 'coinMember'
 
 const iconMap: Record<BadgeType, IconComponent> = {
   artist: IconStar,
-  coinMember: IconArtistCoin
+  coinMember: IconFanClub
 }
 const messages: Record<BadgeType, string> = {
   artist: 'Artist',

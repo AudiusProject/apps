@@ -55,7 +55,7 @@ export const useRelatedArtists = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getRelatedUsers({
+      const { data = [] } = await sdk.users.getRelatedUsers({
         id: Id.parse(artistId),
         limit: pageSize,
         offset: pageParam,

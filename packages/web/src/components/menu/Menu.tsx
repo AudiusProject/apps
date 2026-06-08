@@ -3,6 +3,7 @@ import { forwardRef } from 'react'
 import { PopupMenu, PopupMenuItem, PopupMenuProps } from '@audius/harmony'
 
 import { useMainContentRef } from 'pages/MainContentContext'
+import appZIndex from 'utils/zIndex'
 
 import CollectionMenu, {
   OwnProps as CollectionMenuProps
@@ -21,19 +22,21 @@ type MenuProps = {
 } & Omit<PopupMenuProps, 'renderTrigger' | 'items'>
 
 const Menu = forwardRef<HTMLDivElement, MenuProps>((props, ref) => {
-  const { menu, onClose, zIndex, children, ...other } = props
+  const { menu, onClose, zIndex: popupZIndexProp, children, ...other } = props
   const mainContentRef = useMainContentRef()
+  const popupZIndex = popupZIndexProp ?? appZIndex.PROFILE_EDITABLE_COMPONENTS
 
   const renderMenu = (items: PopupMenuItem[]) => (
     <PopupMenu
       items={items}
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       ref={ref}
       renderTrigger={children}
-      zIndex={zIndex}
+      zIndex={popupZIndex}
       containerRef={mainContentRef}
+      portalLocation={mainContentRef.current}
       {...other}
     />
   )

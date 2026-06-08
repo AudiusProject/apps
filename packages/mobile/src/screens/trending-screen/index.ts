@@ -1,4 +1,6 @@
 export { TrendingScreen } from './TrendingScreen'
 export { TrendingFilterDrawer } from './TrendingFilterDrawer'
-export { TrendingCategoryDrawer } from './TrendingCategoryDrawer'
-export { TrendingTimeRangeDrawer } from './TrendingTimeRangeDrawer'
+export {
+  TRENDING_FILTER_MODAL,
+  TrendingCombinedFilterDrawer
+} from './TrendingCombinedFilterDrawer'

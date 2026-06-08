@@ -51,7 +51,7 @@ export const useTopArtistsInGenre = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getTopUsersInGenre({
+      const { data } = await sdk.users.getTopUsersInGenre({
         genre: [genre],
         limit: pageSize,
         offset: (pageParam as number) * pageSize

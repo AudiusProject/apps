@@ -1,5 +1,6 @@
 import {
   CSSProperties,
+  KeyboardEvent as ReactKeyboardEvent,
   MouseEvent,
   useCallback,
   useEffect,
@@ -17,6 +18,7 @@ import {
   IconCaretLeft,
   IconCaretRight,
   IconCaretUp,
+  isKeyboardActivationKey,
   Tooltip
 } from '@audius/harmony'
 import cn from 'classnames'
@@ -26,7 +28,6 @@ import {
   Row,
   TableRowProps,
   useFlexLayout,
-  useResizeColumns,
   useSortBy,
   useTable
 } from 'react-table'
@@ -42,12 +43,26 @@ import Skeleton from 'components/skeleton/Skeleton'
 
 import styles from './Table.module.css'
 import { TableLoadingSpinner } from './components/TableLoadingSpinner'
+import {
+  ResponsiveColumns,
+  getHiddenResponsiveColumns
+} from './responsiveColumns'
 
 // - Infinite scroll constants -
 // Fetch the next group of rows when the user scroll within X rows of the bottom
 const FETCH_THRESHOLD = 40
 // Number of rows to fetch in each batch
 const FETCH_BATCH_SIZE = 80
+// Table cells/headers add 12px left + 12px right padding in CSS.
+// Include this chrome in collapse budgeting to avoid clipping before drop.
+const TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH = 24
+
+const getColumnSortLabel = (column: any, headerContent: unknown) => {
+  if (typeof column.sortTitle === 'string') return column.sortTitle
+  if (typeof headerContent === 'string') return headerContent
+  if (typeof column.Header === 'string') return column.Header
+  return column.id ?? column.accessor ?? 'column'
+}
 
 // Column Sort Functions
 export const numericSorter = (accessor: string) => (rowA: any, rowB: any) => {
@@ -85,7 +100,10 @@ export type TableProps = {
   data: any[]
   defaultSorter?: (a: any, b: any) => number
   fetchBatchSize?: number
-  fetchMore?: (offset: number, limit: number) => void
+  fetchMore?: (
+    offset: number,
+    limit: number
+  ) => Promise<unknown> | undefined | void
   fetchPage?: (page: number) => void
   fetchThreshold?: number
   getRowClassName?: (rowIndex: number) => string
@@ -111,6 +129,11 @@ export type TableProps = {
   totalRowCount?: number
   useLocalSort?: boolean
   wrapperClassName?: string
+  responsiveColumns?: ResponsiveColumns
+}
+
+type TableRowPropsWithKeyDown = TableRowProps & {
+  onKeyDown?: (e: ReactKeyboardEvent<HTMLElement>) => void
 }
 
 export const Table = ({
@@ -141,6 +164,7 @@ export const Table = ({
   totalRowCount,
   useLocalSort = false,
   wrapperClassName,
+  responsiveColumns,
   ...other
 }: TableProps) => {
   const trackAccessMap = useGatedContentAccessMap(isTracksTable ? data : [])
@@ -171,6 +195,37 @@ export const Table = ({
     return Math.floor(totalRowCount / pageSize)
   }, [pageSize, totalRowCount])
 
+  const tableResizeObserverRef = useRef<ResizeObserver | null>(null)
+  const tableResizeHandlerRef = useRef<(() => void) | null>(null)
+  const [tableWidth, setTableWidth] = useState<number>(0)
+
+  const hiddenResponsiveColumnIds = useMemo(() => {
+    if (!responsiveColumns) return new Set<string>()
+    return getHiddenResponsiveColumns({
+      columns,
+      containerWidth: tableWidth,
+      responsiveColumns,
+      fallbackColumnWidth: defaultColumn.width,
+      columnChromeWidth: TABLE_COLUMN_HORIZONTAL_CHROME_WIDTH
+    })
+  }, [columns, defaultColumn.width, responsiveColumns, tableWidth])
+
+  const getColumnId = (column: any) => {
+    if (typeof column?.id === 'string' && column.id.length > 0) return column.id
+    if (typeof column?.accessor === 'string' && column.accessor.length > 0) {
+      return column.accessor
+    }
+    return null
+  }
+
+  const visibleColumns = useMemo(() => {
+    if (!hiddenResponsiveColumnIds.size) return columns
+    return columns.filter((column) => {
+      const id = getColumnId(column)
+      return id == null || !hiddenResponsiveColumnIds.has(id)
+    })
+  }, [columns, hiddenResponsiveColumnIds])
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -180,16 +235,62 @@ export const Table = ({
     state: { sortBy }
   } = useTable(
     {
-      columns,
+      columns: visibleColumns,
       data,
       defaultColumn,
       autoResetSortBy: false,
-      autoResetResize: false,
       manualSortBy: Boolean(onSort)
     },
     useSortBy,
-    useResizeColumns,
     useFlexLayout
+  )
+
+  const setTableWrapperNode = useCallback((node: HTMLDivElement | null) => {
+    if (tableResizeObserverRef.current) {
+      tableResizeObserverRef.current.disconnect()
+      tableResizeObserverRef.current = null
+    }
+    if (tableResizeHandlerRef.current) {
+      window.removeEventListener('resize', tableResizeHandlerRef.current)
+      tableResizeHandlerRef.current = null
+    }
+
+    if (!node) return
+
+    const measure = () => setTableWidth(node.clientWidth)
+    measure()
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const resizeObserver = new ResizeObserver(() => {
+        measure()
+      })
+      resizeObserver.observe(node)
+      tableResizeObserverRef.current = resizeObserver
+    } else {
+      window.addEventListener('resize', measure)
+      tableResizeHandlerRef.current = measure
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (tableResizeObserverRef.current) {
+        tableResizeObserverRef.current.disconnect()
+      }
+      if (tableResizeHandlerRef.current) {
+        window.removeEventListener('resize', tableResizeHandlerRef.current)
+      }
+    }
+  }, [])
+
+  const isEndColumn = useCallback(
+    (id: string) => id === 'trackActions' || id === 'overflowMenu',
+    []
+  )
+
+  const isColumnVisible = useCallback(
+    (id: string) => !hiddenResponsiveColumnIds.has(id),
+    [hiddenResponsiveColumnIds]
   )
 
   const [showMore, setShowMore] = useState(
@@ -245,6 +346,25 @@ export const Table = ({
 
   const renderTableHeader = useCallback((column: any, endHeader?: boolean) => {
     const { key, colSpan, role, style } = column.getHeaderProps()
+    const hasExplicitNullHeader =
+      column?.Header === null || column?.Header === false
+    const headerContent = hasExplicitNullHeader ? null : column.render('Header')
+    const isSortable = column.disableSortBy !== true
+    const {
+      onClick: onSortClick,
+      onKeyDown: onSortKeyDown,
+      ...sortByToggleProps
+    } = column.getSortByToggleProps()
+
+    const handleSortKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+      onSortKeyDown?.(e)
+      if (e.defaultPrevented || !isKeyboardActivationKey(e)) return
+
+      e.preventDefault()
+      e.stopPropagation()
+      onSortClick?.(e)
+    }
+
     return (
       <th
         className={cn(styles.tableHeader, {
@@ -258,16 +378,36 @@ export const Table = ({
         role={role}
         style={style}
         key={key}
+        aria-sort={
+          column.isSorted
+            ? column.isSortedDesc
+              ? 'descending'
+              : 'ascending'
+            : undefined
+        }
       >
         {/* Sorting Container */}
-        <div {...column.getSortByToggleProps()} title=''>
+        <div
+          {...sortByToggleProps}
+          title=''
+          className={styles.headerContent}
+          role={isSortable ? 'button' : undefined}
+          tabIndex={isSortable ? 0 : undefined}
+          aria-label={
+            isSortable
+              ? `Sort by ${getColumnSortLabel(column, headerContent)}`
+              : undefined
+          }
+          onClick={onSortClick}
+          onKeyDown={isSortable ? handleSortKeyDown : onSortKeyDown}
+        >
           <div className={styles.textCell}>
-            {column.sortTitle ? (
+            {column.sortTitle && headerContent ? (
               <Tooltip text={column.sortTitle} mount='page'>
-                {column.render('Header')}
+                {headerContent}
               </Tooltip>
             ) : (
-              column.render('Header')
+              headerContent
             )}
           </div>
           {!column.disableSortBy ? (
@@ -281,19 +421,6 @@ export const Table = ({
             </div>
           ) : null}
         </div>
-        {/* Resizing Container */}
-        {!column.disableResizing ? (
-          <div
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-            {...column.getResizerProps()}
-            className={cn(styles.resizer, {
-              [styles.isResizing]: column.isResizing
-            })}
-          />
-        ) : null}
       </th>
     )
   }, [])
@@ -301,11 +428,11 @@ export const Table = ({
   const renderHeaders = useCallback(() => {
     return headerGroups.map((headerGroup) => {
       const headers = headerGroup.headers.filter(
-        (header) => header.id !== 'trackActions' && header.id !== 'overflowMenu'
+        (header) => isColumnVisible(header.id) && !isEndColumn(header.id)
       )
       // Should only be one or the other
       const endHeaders = headerGroup.headers.filter(
-        (header) => header.id === 'trackActions' || header.id === 'overflowMenu'
+        (header) => isColumnVisible(header.id) && isEndColumn(header.id)
       )
 
       const { key: headerGroupKey, ...headerGroupProps } =
@@ -323,7 +450,7 @@ export const Table = ({
         </tr>
       )
     })
-  }, [headerGroups, renderTableHeader])
+  }, [headerGroups, isColumnVisible, isEndColumn, renderTableHeader])
 
   const renderCell = useCallback(
     (cell: Cell, isEnd?: boolean) => {
@@ -361,14 +488,16 @@ export const Table = ({
 
   const renderTableRow = useCallback(
     (row: Row, key: string, props: TableRowProps, className = '') => {
+      const { onKeyDown: onRowPropsKeyDown, ...rowProps } =
+        props as TableRowPropsWithKeyDown
       const cells = row.cells.filter(
         (cell: Cell) =>
-          cell.column.id !== 'trackActions' && cell.column.id !== 'overflowMenu'
+          isColumnVisible(cell.column.id) && !isEndColumn(cell.column.id)
       )
       // Should only be one or the other
       const endCells = row.cells.filter(
         (cell: Cell) =>
-          cell.column.id === 'trackActions' || cell.column.id === 'overflowMenu'
+          isColumnVisible(cell.column.id) && isEndColumn(cell.column.id)
       )
 
       const Row = isVirtualized ? 'div' : 'tr'
@@ -377,7 +506,6 @@ export const Table = ({
         (row.original as any).track_id
       ] ?? { isFetchingNFTAccess: false, hasStreamAccess: true }
       const isLocked = !isFetchingNFTAccess && !hasStreamAccess
-
       return (
         <Row
           className={cn(
@@ -389,11 +517,12 @@ export const Table = ({
               [styles.disabled]: isLocked
             }
           )}
-          {...props}
+          {...rowProps}
           key={key}
           onClick={(e: MouseEvent<HTMLTableRowElement>) =>
             onClickRow?.(e, row, row.index)
           }
+          onKeyDown={onRowPropsKeyDown}
         >
           {cells.map((cell) => renderCell(cell))}
           {endCells.length
@@ -406,6 +535,8 @@ export const Table = ({
       trackAccessMap,
       activeIndex,
       getRowClassName,
+      isColumnVisible,
+      isEndColumn,
       onClickRow,
       renderCell,
       isVirtualized
@@ -414,6 +545,9 @@ export const Table = ({
 
   const renderSkeletonRow = useCallback(
     (row: Row, key: string, props: TableRowProps) => {
+      const cells = row.cells.filter((cell: Cell) =>
+        isColumnVisible(cell.column.id)
+      )
       return (
         <tr
           className={cn(
@@ -427,11 +561,11 @@ export const Table = ({
           {...props}
           key={key}
         >
-          {row.cells.map((cell) => renderSkeletonCell(cell))}
+          {cells.map((cell) => renderSkeletonCell(cell))}
         </tr>
       )
     },
-    [activeIndex, getRowClassName, renderSkeletonCell]
+    [activeIndex, getRowClassName, isColumnVisible, renderSkeletonCell]
   )
 
   const onDragEnd = useCallback(
@@ -567,10 +701,15 @@ export const Table = ({
   ])
 
   const loadMoreRows = useCallback(
+    // Await the fetch so InfiniteLoader's in-flight tracking actually
+    // works — without the await the returned promise resolves immediately
+    // and InfiniteLoader will keep firing loadMoreRows in a tight loop
+    // (forceUpdate → still-unloaded-rows → loadMoreRows → repeat) which
+    // cascades through every page of a cursor-based query.
     async ({ startIndex }: { startIndex: number }) => {
       const offset = startIndex
       const limit = fetchBatchSize
-      fetchMore?.(offset, limit)
+      await fetchMore?.(offset, limit)
     },
     [fetchMore, fetchBatchSize]
   )
@@ -605,29 +744,37 @@ export const Table = ({
 
     return (
       <div className={styles.pageButtonContainer}>
-        <IconCaretLeft
-          className={cn(styles.pageCaret, {
-            [styles.disabled]: currentPage <= 0
-          })}
+        <button
+          type='button'
+          className={styles.pageCaretButton}
+          disabled={currentPage <= 0}
+          aria-label='Previous page'
           onClick={prevPage}
-        />
+        >
+          <IconCaretLeft className={styles.pageCaret} />
+        </button>
         {range(maxPage + 1).map((idx) => (
-          <div
+          <button
+            type='button'
             key={`pageButton_${idx}`}
             className={cn(styles.pageButton, {
               [styles.active]: currentPage === idx
             })}
+            aria-current={currentPage === idx ? 'page' : undefined}
             onClick={() => goToPage(idx)}
           >
             {idx + 1}
-          </div>
+          </button>
         ))}
-        <IconCaretRight
-          className={cn(styles.pageCaret, {
-            [styles.disabled]: currentPage >= maxPage
-          })}
+        <button
+          type='button'
+          className={styles.pageCaretButton}
+          disabled={currentPage >= maxPage}
+          aria-label='Next page'
           onClick={nextPage}
-        />
+        >
+          <IconCaretRight className={styles.pageCaret} />
+        </button>
       </div>
     )
   }, [
@@ -649,7 +796,12 @@ export const Table = ({
     }
 
     return (
-      <div className={styles.showMoreContainer} onClick={handleShowMoreToggle}>
+      <button
+        type='button'
+        className={styles.showMoreContainer}
+        aria-expanded={showMore}
+        onClick={handleShowMoreToggle}
+      >
         <p className={styles.showMoreText}>
           {showMore ? 'Show Less' : 'Show More'}
         </p>
@@ -658,13 +810,16 @@ export const Table = ({
         ) : (
           <IconCaretDown className={styles.showMoreCaret} />
         )}
-      </div>
+      </button>
     )
   }, [onShowMoreToggle, rows.length, showMore, showMoreLimit])
 
   const renderContent = useCallback(() => {
     return (
-      <div className={cn(styles.tableWrapper, wrapperClassName)}>
+      <div
+        className={cn(styles.tableWrapper, wrapperClassName)}
+        ref={setTableWrapperNode}
+      >
         <table
           className={cn(styles.table, tableClassName)}
           {...getTableProps()}
@@ -688,17 +843,19 @@ export const Table = ({
     renderPaginationControls,
     renderRows,
     renderShowMoreControl,
+    setTableWrapperNode,
     tableClassName,
     tableHeaderClassName,
     wrapperClassName
   ])
 
   // Force the window scroller to update its position
-  // after the DOM has laid out
+  // after the DOM has laid out. Also when row count changes (e.g. add/remove track)
+  // so scroll position is preserved.
   const wsRef = useRef<WindowScroller>(null)
   useLayoutEffect(() => {
     wsRef.current?.updatePosition()
-  }, [])
+  }, [rows.length])
 
   const renderVirtualizedContent = useCallback(() => {
     return (
@@ -719,7 +876,10 @@ export const Table = ({
                 onChildScroll,
                 scrollTop
               }) => (
-                <div className={cn(styles.tableWrapper, wrapperClassName)}>
+                <div
+                  className={cn(styles.tableWrapper, wrapperClassName)}
+                  ref={setTableWrapperNode}
+                >
                   <table
                     className={cn(styles.table, tableClassName)}
                     {...getTableProps()}
@@ -745,6 +905,7 @@ export const Table = ({
                         {({ width }) => (
                           <List
                             role='Tabpanel'
+                            tabIndex={-1}
                             autoHeight
                             height={height}
                             width={width}
@@ -778,6 +939,7 @@ export const Table = ({
     loadMoreRows,
     totalRowCount,
     rows.length,
+    setTableWrapperNode,
     fetchThreshold,
     fetchBatchSize,
     scrollRef,

@@ -16,18 +16,8 @@ function* handleSignUpSucceeded() {
   const emailField = yield* select(getEmailField)
   const handleField = yield* select(getHandleField)
 
-  // Record both CREATE_ACCOUNT_COMPLETE_CREATING and
-  // CREATE_ACCOUNT_FINISH events
-
   yield put(
     make(EventNames.CREATE_ACCOUNT_COMPLETE_CREATING, {
-      emailAddress: emailField.value,
-      handle: handleField.value
-    })
-  )
-
-  yield put(
-    make(EventNames.CREATE_ACCOUNT_FINISH, {
       emailAddress: emailField.value,
       handle: handleField.value
     })

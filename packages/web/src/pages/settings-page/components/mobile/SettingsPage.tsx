@@ -1,7 +1,14 @@
 import { useCallback, useContext, useEffect, useState, FC } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
-import { Name, SquareSizes, Theme } from '@audius/common/models'
+import { settingsMessages } from '@audius/common/messages'
+import {
+  Name,
+  SquareSizes,
+  Theme,
+  ThemeMode,
+  ThemePalette
+} from '@audius/common/models'
 import {
   settingsPageActions,
   themeSelectors,
@@ -12,6 +19,7 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  FilterButton,
   Flex,
   IconVerified,
   Modal,
@@ -21,14 +29,14 @@ import {
   SegmentedControl,
   Text,
   IconAudiusLogoHorizontalColor,
-  IconLogoCircleUSDCPng
+  IconLogoCircleUSDCPng,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import GroupableList from 'components/groupable-list/GroupableList'
 import Grouping from 'components/groupable-list/Grouping'
 import Row from 'components/groupable-list/Row'
@@ -36,7 +44,12 @@ import NavContext, { LeftPreset } from 'components/nav/mobile/NavContext'
 import Page from 'components/page/Page'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import useScrollToTop from 'hooks/useScrollToTop'
-import { isDarkMode } from 'utils/theme/theme'
+import {
+  isDarkMode,
+  THEME_KEY,
+  THEME_MODE_KEY,
+  THEME_PALETTE_KEY
+} from 'utils/theme/theme'
 
 import AboutSettingsPage from './AboutSettingsPage'
 import AccountSettingsPage from './AccountSettingsPage'
@@ -49,8 +62,8 @@ const {
   getNotificationSettings: getNotificationSettingsAction,
   getPushNotificationSettings: getPushNotificationSettingsAction
 } = settingsPageActions
-const { setTheme } = themeActions
-const { getTheme } = themeSelectors
+const { setTheme, setThemePalette, setThemeMode } = themeActions
+const { getTheme, getThemePalette, getThemeMode } = themeSelectors
 const { show } = musicConfettiActions
 const {
   ACCOUNT_SETTINGS_PAGE,
@@ -71,8 +84,7 @@ export enum SubPage {
 const messages = {
   pageTitle: 'Settings',
   appearanceTitle: 'Appearance',
-  appearance:
-    'Enable dark mode or use the default setting to match your system preferences.',
+  appearance: settingsMessages.appearanceDescription,
   aboutTitle: 'About',
   cast: 'Select your prefered casting method.',
   title: 'Settings',
@@ -115,8 +127,24 @@ export const SettingsPage = (props: SettingsPageProps) => {
   })
   const { userId, handle, name } = accountData ?? {}
   const theme = useSelector(getTheme)
+  const themePalette = useSelector(getThemePalette)
+  const themeMode = useSelector(getThemeMode)
   const { tier } = useTierAndVerifiedForUser(userId)
-  const showMatrix = tier === 'gold' || tier === 'platinum'
+  const showMatrix =
+    tier === 'gold' ||
+    tier === 'platinum' ||
+    process.env.NODE_ENV === 'development'
+
+  const effectivePalette =
+    themePalette ??
+    (theme === Theme.MATRIX ? ThemePalette.MATRIX : ThemePalette.CLASSIC)
+  const effectiveMode =
+    themeMode ??
+    (theme === Theme.LIGHT
+      ? ThemeMode.LIGHT
+      : theme === Theme.DARK
+        ? ThemeMode.DARK
+        : ThemeMode.AUTO)
 
   // Check for verification query param and show appropriate modal
   const verificationStatus = searchParams.get('verification')
@@ -168,17 +196,56 @@ export const SettingsPage = (props: SettingsPageProps) => {
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  const toggleTheme = (option: Theme) => {
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'matrix' | 'auto'
-      })
-    )
-    dispatch(setTheme({ theme: option }))
-    if (option === Theme.MATRIX) {
+  const onPaletteChange = (value: ThemePalette) => {
+    dispatch(setThemePalette({ themePalette: value }))
+    if (value === ThemePalette.MATRIX) {
+      dispatch(setTheme({ theme: Theme.MATRIX }))
       dispatch(show())
     }
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_PALETTE_KEY, value)
+      if (value === ThemePalette.MATRIX) {
+        window.localStorage.setItem(THEME_KEY, Theme.MATRIX)
+      }
+    }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, { mode: 'palette', palette: value })
+    )
   }
+
+  const onModeChange = (option: ThemeMode) => {
+    dispatch(setThemeMode({ themeMode: option }))
+    const theme =
+      option === ThemeMode.LIGHT
+        ? Theme.LIGHT
+        : option === ThemeMode.DARK
+          ? Theme.DARK
+          : Theme.AUTO
+    dispatch(setTheme({ theme }))
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(THEME_MODE_KEY, option)
+      window.localStorage.setItem(THEME_KEY, theme)
+    }
+    dispatch(
+      make(Name.SETTINGS_CHANGE_THEME, {
+        mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
+      })
+    )
+  }
+
+  const paletteOptions = [
+    { value: ThemePalette.DEFAULT, label: settingsMessages.defaultPalette },
+    { value: ThemePalette.CLASSIC, label: settingsMessages.classicPalette },
+    ...(showMatrix
+      ? [{ value: ThemePalette.MATRIX, label: settingsMessages.matrixMode }]
+      : [])
+  ]
+
+  const modeOptions = [
+    { key: ThemeMode.AUTO, text: settingsMessages.autoMode },
+    { key: ThemeMode.LIGHT, text: settingsMessages.lightMode },
+    { key: ThemeMode.DARK, text: settingsMessages.darkMode }
+  ]
 
   // Render out subPage if we're on one.
   if (subPage && subPage in SubPages) {
@@ -186,37 +253,29 @@ export const SettingsPage = (props: SettingsPageProps) => {
     return <SubPageComponent {...props} />
   }
 
-  const renderThemeSlider = () => {
-    const options = [
-      {
-        key: Theme.AUTO,
-        text: 'Auto'
-      },
-      {
-        key: Theme.DARK,
-        text: 'Dark'
-      },
-      {
-        key: Theme.LIGHT,
-        text: 'Light'
-      }
-    ]
-
-    if (showMatrix) {
-      options.push({ key: Theme.MATRIX, text: messages.matrixMode })
-    }
-
-    return (
-      <SegmentedControl
-        isMobile
-        fullWidth
-        options={options}
-        selected={theme ?? Theme.AUTO}
-        onSelectOption={(option) => toggleTheme(option)}
-        key={`tab-slider-${options.length}`}
+  const renderThemeControls = () => (
+    <Flex direction='column' gap='l'>
+      <FilterButton<ThemePalette>
+        label={messages.appearanceTitle}
+        value={effectivePalette}
+        options={paletteOptions}
+        onChange={(value) => onPaletteChange(value)}
+        variant='replaceLabel'
+        optionsLabel='Theme'
       />
-    )
-  }
+      {effectivePalette !== ThemePalette.MATRIX ? (
+        <SegmentedControl
+          isMobile
+          fullWidth
+          label='Color mode'
+          options={modeOptions}
+          selected={effectiveMode}
+          onSelectOption={(option) => onModeChange(option)}
+          key={`tab-slider-${effectivePalette}`}
+        />
+      ) : null}
+    </Flex>
+  )
 
   return (
     <Page
@@ -237,10 +296,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
           <Grouping>
             <Row to={ACCOUNT_SETTINGS_PAGE}>
               <div className={styles.account}>
-                <DynamicImage
-                  image={profilePicture}
-                  wrapperClassName={styles.profilePicture}
-                />
+                <Image src={profilePicture} className={styles.profilePicture} />
                 <div className={styles.info}>
                   <div className={styles.name}>{name}</div>
                   <div className={styles.handle}>{`@${handle}`}</div>
@@ -269,7 +325,7 @@ export const SettingsPage = (props: SettingsPageProps) => {
               title={messages.appearanceTitle}
               body={messages.appearance}
             >
-              {renderThemeSlider()}
+              {renderThemeControls()}
             </Row>
           </Grouping>
           <Grouping>

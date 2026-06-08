@@ -231,7 +231,7 @@ export const ServerWebPlayer = (props: ServerWebPlayerProps) => {
   const { isMobile, location, children } = props
   return (
     <StaticRouter location={location}>
-      <ThemeProvider theme='day'>
+      <ThemeProvider theme='default-light'>
         <WebPlayerContent isMobile={isMobile}>{children}</WebPlayerContent>
       </ThemeProvider>
     </StaticRouter>

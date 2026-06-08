@@ -1,9 +1,27 @@
 .playBar {
   width: 100%;
   min-width: 320px;
-  text-align: center;
   height: var(--play-bar-height);
-  background: var(--harmony-n-25);
+  display: grid;
+  /*
+   * Fixed-width artist column so it doesn't shrink/grow with title length and
+   * cause layout shift. The column width only changes at the narrow
+   * breakpoint (see .playBar.narrow).
+   */
+  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  -webkit-backdrop-filter: var(--frosted-surface-backdrop-filter, blur(10px));
+  background: var(
+    --frosted-surface-background,
+    color-mix(
+      in srgb,
+      var(--frosted-surface-background-color, var(--harmony-n-25))
+        var(--frosted-surface-opacity, 65%),
+      transparent
+    )
+  );
   user-select: none;
 }
 
@@ -12,42 +30,71 @@
   border-top: 1px solid var(--harmony-border-default);
 }
 
-.playBarContentWrapper {
-  display: flex;
-  justify-content: space-between;
-  height: 100%;
-}
-
-.playBarPlayingInfo {
-  flex: 0 0 230px;
+.artistInfo {
+  grid-column: 1;
+  grid-row: 1 / 3;
   min-width: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   text-align: left;
+  overflow: hidden;
+  padding-right: var(--harmony-unit-3);
 }
 
-.playBarControls {
-  flex: 1 0 218px;
-  display: flex;
-  flex-direction: column;
+.scrubber {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 12px 40px 0 32px;
+  min-width: 0;
 }
 
-.timeControls {
-  margin: 18px 24px 0px;
+/*
+ * The harmony Scrubber renders 40px-wide timestamp containers with text-align
+ * pinned toward the rail, leaving empty space at the outer edges. Override so
+ * the timestamp containers hug their text and the slider rail grows to fill
+ * the remaining space — that way the visible "0:24" / "3:47" text edges line
+ * up with the icons below.
+ */
+.scrubber > div > div:first-child,
+.scrubber > div > div:last-child {
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
-.buttonControls {
-  margin: 0 auto;
-  flex-grow: 1;
+.scrubber > div > div:nth-child(2) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bottomRow {
+  grid-column: 2;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 40px 6px 32px;
+  min-height: 0;
+  column-gap: var(--harmony-unit-3);
+}
+
+.bottomLeft {
+  grid-column: 1;
+  justify-self: start;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 188px;
-  margin-bottom: 6px;
+  gap: var(--harmony-unit-3);
 }
 
-.buttonControls > div {
+.playbackControls {
+  grid-column: 2;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: var(--harmony-unit-2);
+}
+
+.playbackControls > div {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -72,8 +119,25 @@
   width: 16px;
 }
 
-.optionsRight {
-  flex: 0 0 230px;
-  display: inline-flex;
+.bottomRight {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
   align-items: center;
+  gap: var(--harmony-unit-4);
+}
+
+.socialActionsWrapper {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.playBar.narrow {
+  grid-template-columns: 180px minmax(0, 1fr);
+}
+
+.narrow .scrubber,
+.narrow .bottomRow {
+  padding-right: 12px;
 }

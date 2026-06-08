@@ -7,11 +7,16 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(async (transaction) => {
-      await queryInterface.addColumn('UserTrackListens', 'count', {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1
-      }, { transaction })
+      await queryInterface.addColumn(
+        'UserTrackListens',
+        'count',
+        {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 1
+        },
+        { transaction }
+      )
     })
   },
 

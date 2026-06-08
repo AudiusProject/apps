@@ -1,4 +1,3 @@
-import { ErrorLevel } from '@audius/common/models'
 import type { CommonState, RemoteConfigState } from '@audius/common/store'
 import {
   chatMiddleware,
@@ -24,7 +23,6 @@ import thunk from 'redux-thunk'
 
 import { queryClient } from 'app/services/query-client'
 import { audiusSdk } from 'app/services/sdk/audius-sdk'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import type { DrawersState } from './drawers/slice'
 import drawers from './drawers/slice'
@@ -82,12 +80,6 @@ const onSagaError = (
       timeout: errorRestartTimeout
     })
   )
-
-  reportToSentry({
-    level: ErrorLevel.Fatal,
-    error,
-    additionalInfo: errorInfo
-  })
 
   // Automatically restart the app if the session is longer
   // than 30 seconds. Don't want to restart for shorter sessions
@@ -150,7 +142,16 @@ export const store = createStore(
 ) as unknown as Store<AppState> // need to explicitly type the store for offline-mode store reference
 storeContext.dispatch = store.dispatch
 
-export const persistor = persistStore(store)
+// Lazily created so we can defer redux-persist's first storage read until
+// after the AsyncStorage → MMKV migration completes (kicked off in
+// services/local-storage and gated in App.tsx). If we called persistStore
+// at module load, it would read an empty MMKV before the migration ran and
+// blow away persisted state on first launch after the storage swap.
+let _persistor: ReturnType<typeof persistStore> | null = null
+export const getOrCreatePersistor = () => {
+  if (!_persistor) _persistor = persistStore(store)
+  return _persistor
+}
 
 sagaMiddleware.run(rootSaga)
 

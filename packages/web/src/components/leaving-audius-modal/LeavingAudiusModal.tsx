@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { useLeavingAudiusModal } from '@audius/common/store'
 import {
   Modal,
@@ -13,6 +14,7 @@ import {
   Text,
   Hint
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import styles from './LeavingAudiusModal.module.css'
 
@@ -23,19 +25,28 @@ const messages = {
   visitSite: 'Visit Site'
 }
 
-export const LeavingAudiusModal = () => {
-  const { isOpen, data, onClose, onClosed } = useLeavingAudiusModal()
+export const LeavingAudiusModal = NiceModal.create(() => {
+  const modal = useModal()
+  // Continue reading the link payload from the redux slice that the
+  // useLeavingAudiusModal createModal hook stores; visibility is now owned
+  // by NiceModal via useModal().
+  const { data } = useLeavingAudiusModal()
   const { link } = data
+
+  const handleClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+
   const handleOpen = useCallback(() => {
     window.open(link, '_blank', 'noreferrer,noopener')
-    onClose()
-  }, [link, onClose])
+    handleClose()
+  }, [link, handleClose])
+
   return (
     <Modal
       bodyClassName={styles.modalBody}
-      isOpen={isOpen}
-      onClose={onClose}
-      onClosed={onClosed}
+      isOpen={modal.visible}
+      onClose={handleClose}
       size={'small'}
     >
       <ModalHeader>
@@ -48,7 +59,11 @@ export const LeavingAudiusModal = () => {
         </Hint>
       </ModalContent>
       <ModalFooter className={styles.footer}>
-        <Button className={styles.button} variant='secondary' onClick={onClose}>
+        <Button
+          className={styles.button}
+          variant='secondary'
+          onClick={handleClose}
+        >
           {messages.goBack}
         </Button>
         <Button className={styles.button} onClick={handleOpen}>
@@ -57,4 +72,7 @@ export const LeavingAudiusModal = () => {
       </ModalFooter>
     </Modal>
   )
-}
+})
+
+NiceModal.register('LeavingAudiusModal', LeavingAudiusModal)
+registerNiceModalId('LeavingAudiusModal')

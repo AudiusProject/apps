@@ -22,7 +22,7 @@ export const useSalesCount = (
     queryKey: getSalesCountQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = 0 } = await sdk.full.users.getSalesCount({
+      const { data = 0 } = await sdk.users.getSalesCount({
         id: Id.parse(userId),
         userId: Id.parse(userId)
       })

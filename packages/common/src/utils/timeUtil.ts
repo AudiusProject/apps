@@ -1,5 +1,4 @@
-import dayjs from 'dayjs'
-import advancedFormat from 'dayjs/plugin/advancedFormat'
+import dayjs from './dayjs'
 
 export const MS_IN_S = 1000
 export const S_IN_MIN = 60
@@ -34,8 +33,6 @@ export const getLargestTimeUnitText = (time: Date) => {
 
   return unit ? `${Math.floor(diff / timeUnitMsMap[unit])}${unit}` : 'just now'
 }
-
-dayjs.extend(advancedFormat)
 
 export const formatDateWithTimezoneOffset = (date: string): string => {
   return dayjs.utc(date).local().format('M/D/YY')

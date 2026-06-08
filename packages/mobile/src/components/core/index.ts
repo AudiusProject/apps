@@ -1,6 +1,5 @@
 export * from './AnimatedButton'
 export * from './CardList'
-export * from './DynamicImage'
 export * from './EmptyTile'
 export * from './FixedFooter'
 export * from './GradientIcon'

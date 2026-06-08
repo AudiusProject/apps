@@ -24,6 +24,8 @@ export const ORDER_PLAYLIST_FAILED = 'ORDER_PLAYLIST_FAILED'
 export const PUBLISH_PLAYLIST = 'PUBLISH_PLAYLIST'
 export const PUBLISH_PLAYLIST_FAILED = 'PUBLISH_PLAYLIST_FAILED'
 
+export const DUPLICATE_PLAYLIST = 'DUPLICATE_PLAYLIST'
+
 /**
  * @param initTrackId optional track id to pull artwork from.
  */
@@ -84,9 +86,10 @@ export function createPlaylistFailed(
 
 export function editPlaylist(
   playlistId: number,
-  formFields: EditCollectionValues
+  formFields: EditCollectionValues,
+  onComplete?: (success: boolean, error?: Error) => void
 ) {
-  return { type: EDIT_PLAYLIST, playlistId, formFields }
+  return { type: EDIT_PLAYLIST, playlistId, formFields, onComplete }
 }
 
 export function editPlaylistSucceeded() {
@@ -101,8 +104,17 @@ export function editPlaylistFailed(
   return { type: EDIT_PLAYLIST_FAILED, error, params, metadata }
 }
 
-export function addTrackToPlaylist(trackId: ID, playlistId: ID) {
-  return { type: ADD_TRACK_TO_PLAYLIST, trackId, playlistId }
+export function addTrackToPlaylist(
+  trackId: ID,
+  playlistId: ID,
+  options?: { silent?: boolean }
+) {
+  return {
+    type: ADD_TRACK_TO_PLAYLIST,
+    trackId,
+    playlistId,
+    silent: options?.silent ?? false
+  }
 }
 
 export function addTrackToPlaylistFailed(
@@ -164,4 +176,27 @@ export function publishPlaylistFailed(
   metadata: Record<string, unknown>
 ) {
   return { type: PUBLISH_PLAYLIST_FAILED, error, params, metadata }
+}
+
+export function duplicatePlaylist({
+  sourcePlaylistId,
+  formFields,
+  trackIds,
+  source,
+  isAlbum
+}: {
+  sourcePlaylistId: ID
+  formFields: Partial<Collection>
+  trackIds: ID[]
+  source: string
+  isAlbum?: boolean
+}) {
+  return {
+    type: DUPLICATE_PLAYLIST,
+    sourcePlaylistId,
+    formFields,
+    trackIds,
+    source,
+    isAlbum: !!isAlbum
+  }
 }

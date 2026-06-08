@@ -56,10 +56,13 @@ export const AddCollectionCard = ({
       onPress={handlePress}
       h={height}
       onLayout={(e) => {
-        // Dynamically size this card based on the width of it's container
-        // to match collection card image.
-        // 98 is the height of the rest of the collection card, which is static
-        setHeight(e.nativeEvent.layout.width + 98)
+        const nextHeight = e.nativeEvent.layout.width + 98
+        setHeight((currentHeight) => {
+          if (currentHeight && Math.abs(currentHeight - nextHeight) < 1) {
+            return currentHeight
+          }
+          return nextHeight
+        })
       }}
       style={{ minHeight: 250 }}
     >

@@ -49,7 +49,7 @@ export const useFollowers = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getFollowers({
+      const { data } = await sdk.users.getFollowers({
         id: Id.parse(userId),
         limit: pageSize,
         offset: pageParam,

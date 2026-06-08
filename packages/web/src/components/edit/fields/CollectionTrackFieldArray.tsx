@@ -66,7 +66,13 @@ const makeTrackKey = (track: TrackForUpload | TrackForEdit, index: number) => {
   return `${track.metadata.track_id}${suffix}`
 }
 
-export const CollectionTrackFieldArray = () => {
+type CollectionTrackFieldArrayProps = {
+  isUpload?: boolean
+}
+
+export const CollectionTrackFieldArray = ({
+  isUpload = false
+}: CollectionTrackFieldArrayProps = {}) => {
   const [{ value: tracks }] =
     useField<(TrackForUpload | TrackForEdit)[]>('tracks')
 
@@ -104,7 +110,7 @@ export const CollectionTrackFieldArray = () => {
                           <CollectionTrackField
                             index={index}
                             remove={remove}
-                            disableDelete={tracks.length === 1}
+                            disableDelete={isUpload && tracks.length === 1}
                           />
                         </div>
                       )}

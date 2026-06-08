@@ -11,7 +11,7 @@ export type ClaimState =
   | { status: ClaimStatus.ALREADY_CLAIMED }
   | { status: ClaimStatus.SUCCESS }
   | { status: ClaimStatus.CUMULATIVE_SUCCESS }
-  | { status: ClaimStatus.ERROR; aaoErrorCode: number | undefined }
+  | { status: ClaimStatus.ERROR }
 
 export type AudioRewardsClaim = {
   challengeId: ChallengeRewardID

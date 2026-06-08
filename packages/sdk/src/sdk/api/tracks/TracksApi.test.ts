@@ -37,7 +37,6 @@ const pngFile = fs.readFileSync(
 vitest.mock('../../services/EntityManager')
 vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
-vitest.mock('./TrackUploadHelper')
 
 vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
   start: async () => {
@@ -63,21 +62,10 @@ vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => ({
 }))
 
 vitest
-  .spyOn(TrackUploadHelper.prototype, 'generateId' as any)
+  .spyOn(TrackUploadHelper.prototype, 'generateId')
   .mockImplementation(async () => {
     return 1
   })
-
-vitest
-  .spyOn(
-    TrackUploadHelper.prototype,
-    'populateTrackMetadataWithUploadResponse' as any
-  )
-  .mockImplementation(async () => ({}))
-
-vitest
-  .spyOn(TrackUploadHelper.prototype, 'transformTrackUploadMetadata' as any)
-  .mockImplementation(async () => ({}))
 
 vitest
   .spyOn(EntityManagerClient.prototype, 'manageEntity')
@@ -111,33 +99,32 @@ describe('TracksApi', () => {
     const solanaClient = new SolanaClient({
       solanaWalletAdapter
     })
-    tracks = new TracksApi(
-      new Configuration(),
-      new Storage({
+    tracks = new TracksApi(new Configuration(), {
+      storage: new Storage({
         storageNodeSelector,
         logger: new Logger()
       }),
-      new EntityManagerClient({
+      entityManager: new EntityManagerClient({
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
       }),
-      new Logger(),
-      new ClaimableTokensClient({
+      logger: new Logger(),
+      claimableTokensClient: new ClaimableTokensClient({
         ...getDefaultClaimableTokensConfig(developmentConfig),
         audiusWalletClient,
         solanaClient
       }),
-      new PaymentRouterClient({
+      paymentRouterClient: new PaymentRouterClient({
         ...getDefaultPaymentRouterClientConfig(developmentConfig),
         solanaClient
       }),
-      new SolanaRelay(
+      solanaRelay: new SolanaRelay(
         new Configuration({
           middleware: []
         })
       ),
       solanaClient
-    )
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})
@@ -146,15 +133,17 @@ describe('TracksApi', () => {
 
   describe('uploadTrack', () => {
     it('uploads a track if valid metadata is provided', async () => {
-      const result = await tracks.uploadTrack({
+      const result = await tracks.createTrack({
         userId: '7eP5n',
         imageFile: {
           buffer: pngFile,
           name: 'coverArt'
         },
         metadata: {
+          trackCid:
+            'bafkreihzvsc5jqhxzdygntlqqd7kqtx3lul77d22v54a47m26n5q426z7i',
           title: 'BachGavotte',
-          genre: Genre.ELECTRONIC,
+          genre: Genre.Electronic,
           mood: Mood.TENDER
         },
         audioFile: {
@@ -172,13 +161,14 @@ describe('TracksApi', () => {
 
     it('throws an error if invalid metadata is provided', async () => {
       await expect(async () => {
-        await tracks.uploadTrack({
+        await tracks.createTrack({
           userId: '7eP5n',
           imageFile: {
             buffer: pngFile,
             name: 'coverArt'
           },
           metadata: {
+            // intentionally missing trackCid, genre
             title: 'BachGavotte'
           } as any,
           audioFile: {
@@ -201,7 +191,7 @@ describe('TracksApi', () => {
         },
         metadata: {
           title: 'BachGavotte',
-          genre: Genre.ELECTRONIC,
+          genre: Genre.Electronic,
           mood: Mood.TENDER
         }
       })

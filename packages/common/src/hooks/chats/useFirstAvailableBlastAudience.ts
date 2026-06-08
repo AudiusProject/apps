@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import { ChatBlastAudience } from '@audius/sdk'
 
 import {
-  useArtistCoinMembersCount,
-  useArtistCreatedCoin,
+  useFanClubMembersCount,
+  useArtistCreatedFanClub,
   useCurrentAccountUser,
   usePurchasersCount,
   useRemixersCount
@@ -15,8 +15,8 @@ export const useFirstAvailableBlastAudience = () => {
 
   const { data: purchasersCount } = usePurchasersCount()
   const { data: remixersCount } = useRemixersCount()
-  const { data: userCoin } = useArtistCreatedCoin(user?.user_id)
-  const { data: coinMembersCount } = useArtistCoinMembersCount({
+  const { data: userCoin } = useArtistCreatedFanClub(user?.user_id)
+  const { data: coinMembersCount } = useFanClubMembersCount({
     mint: userCoin?.mint
   })
 

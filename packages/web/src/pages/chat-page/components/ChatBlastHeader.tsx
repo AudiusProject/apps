@@ -23,18 +23,18 @@ export const ChatBlastHeader = ({ chat }: { chat: ChatBlast }) => {
       chat
     })
   const decodedId = OptionalHashId.parse(audienceContentId)
-  const albumArtwork = useCollectionCoverArt({
+  const { imageUrl: albumArtwork } = useCollectionCoverArt({
     collectionId: decodedId,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const trackArtwork = useTrackCoverArt({
+  const { imageUrl: trackArtwork } = useTrackCoverArt({
     trackId: decodedId,
     size: SquareSizes.SIZE_150_BY_150
   })
 
   return (
-    <Flex justifyContent='space-between' w='100%'>
-      <Flex gap='s' alignItems='center'>
+    <Flex justifyContent='space-between' w='100%' gap='l' css={{ minWidth: 0 }}>
+      <Flex gap='s' alignItems='center' css={{ minWidth: 0, flex: 1 }}>
         {audienceContentId ? (
           <Artwork
             src={audienceContentType === 'track' ? trackArtwork : albumArtwork}
@@ -42,22 +42,37 @@ export const ChatBlastHeader = ({ chat }: { chat: ChatBlast }) => {
             css={{ flexShrink: 0 }}
           />
         ) : null}
-        <Flex column gap='xs' alignItems='flex-start'>
-          <Flex gap='s' alignItems='center'>
+        <Flex
+          column
+          gap='xs'
+          alignItems='flex-start'
+          css={{ minWidth: 0, flex: 1 }}
+        >
+          <Flex
+            gap='s'
+            alignItems='center'
+            css={{ minWidth: 0, width: '100%' }}
+          >
             <IconTowerBroadcast size='m' color='default' />
-            <Text variant='title' size='l'>
+            <Text variant='title' size='l' maxLines={1} css={{ minWidth: 0 }}>
               {chatBlastSecondaryTitle}
             </Text>
-            <Text variant='title' size='l' color='subdued' maxLines={1}>
+            <Text
+              variant='title'
+              size='l'
+              color='subdued'
+              maxLines={1}
+              css={{ minWidth: 0 }}
+            >
               {contentTitle}
             </Text>
           </Flex>
-          <Text variant='body' size='s'>
+          <Text variant='body' size='s' maxLines={1} css={{ minWidth: 0 }}>
             {chatBlastCTA}
           </Text>
         </Flex>
       </Flex>
-      <Flex alignItems='flex-end'>
+      <Flex alignItems='flex-end' css={{ flexShrink: 0 }}>
         {audienceCount ? (
           <Flex gap='s' alignItems='center'>
             <IconUserList size='m' color='default' />

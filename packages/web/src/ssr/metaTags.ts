@@ -5,9 +5,8 @@
 
 import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
 
-// Image URLs
-export const DEFAULT_IMAGE_URL =
-  'https://download.audius.co/static-resources/preview-image.jpg'
+// Image URLs - default OG uses the Audius logo on black from og.audius.co
+export const DEFAULT_IMAGE_URL = 'https://og.audius.co/default'
 export const AUDIO_REWARDS_IMAGE_URL =
   'https://download.audius.co/static-resources/audio-rewards.png'
 export const SIGNUP_REF_IMAGE_URL =
@@ -15,6 +14,9 @@ export const SIGNUP_REF_IMAGE_URL =
 
 // Regex to detect Twitter/Discord bots that can embed players
 const CAN_EMBED_USER_AGENT_REGEX = /(twitter|discord)/i
+
+// Regex to detect Discord bot specifically
+const DISCORD_USER_AGENT_REGEX = /discord/i
 
 export type PlayableType = 'track' | 'playlist' | 'album'
 
@@ -33,14 +35,14 @@ export const createSeoDescription = (msg: string, userPage?: boolean) => {
   return `${msg} | Stream tracks, albums, playlists on desktop and mobile`
 }
 
-// Get base public URL based on environment
-const getPublicUrl = (): string => {
+/**
+ * Get base public URL based on environment (used for canonical, og:url, etc.)
+ */
+export const getPublicUrl = (): string => {
   const env = process.env.VITE_ENVIRONMENT || 'development'
   switch (env) {
     case 'production':
       return 'https://audius.co'
-    case 'staging':
-      return 'https://staging.audius.co'
     default:
       return 'http://localhost:3000'
   }
@@ -59,6 +61,15 @@ export const getEmbedUrl = (type: PlayableType, hashId: string): string => {
  */
 export const canEmbed = (userAgent: string): boolean => {
   return CAN_EMBED_USER_AGENT_REGEX.test(userAgent)
+}
+
+/**
+ * Check if User-Agent is Discord bot
+ * Discord uses a weird aspect ratio for OG unfurls, so we serve artwork
+ * directly instead of the custom OG image.
+ */
+export const isDiscord = (userAgent: string): boolean => {
+  return DISCORD_USER_AGENT_REGEX.test(userAgent)
 }
 
 /**
@@ -96,18 +107,60 @@ export const getExploreInfo = (type?: string): ExploreInfo => {
 }
 
 /**
+ * Homepage schema markup for Organization, WebSite, SoftwareApplication
+ */
+const getHomepageStructuredData = () => {
+  const publicUrl = getPublicUrl()
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${publicUrl}/#organization`,
+        name: 'Audius',
+        url: publicUrl,
+        sameAs: [
+          'https://twitter.com/audius',
+          'https://discord.gg/audius',
+          'https://github.com/AudiusProject'
+        ]
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${publicUrl}/#website`,
+        url: publicUrl,
+        name: 'Audius',
+        publisher: { '@id': `${publicUrl}/#organization` }
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'Audius',
+        applicationCategory: 'MusicApplication',
+        operatingSystem: 'Web, iOS, Android'
+      }
+    ]
+  }
+}
+
+/**
  * Default meta tag context
  */
-export const getDefaultContext = () => ({
-  title: 'Audius - Empowering Creators',
-  description:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  ogDescription:
-    'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
-  image: DEFAULT_IMAGE_URL,
-  imageAlt: 'The Audius Platform',
-  thumbnail: true
-})
+export const getDefaultContext = () => {
+  const publicUrl = getPublicUrl()
+  return {
+    title: 'Audius — Free Music Streaming for Artists, Labels & Fans',
+    description:
+      'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+    ogDescription:
+      'Audius is a music streaming and sharing platform that puts power back into the hands of content creators.',
+    image: DEFAULT_IMAGE_URL,
+    imageAlt: 'The Audius Platform',
+    thumbnail: true,
+    canonicalUrl: `${publicUrl}/`,
+    webUrl: `${publicUrl}/`,
+    structuredData: getHomepageStructuredData()
+  }
+}
 
 /**
  * Upload page meta tag context
@@ -282,19 +335,23 @@ export const getUserPageContext = ({
   bio: string
   hashId?: string
 }) => {
-  const pageTitle = userName
+  const displayName =
+    (userName && String(userName).trim()) ||
+    (handle && String(handle).trim()) ||
+    'Artist'
+  const pageTitle = displayName
   const pageDescription = createSeoDescription(
-    `Play ${userName} on Audius and discover followers on Audius`,
+    `Play ${displayName} on Audius and discover followers on Audius`,
     true
   )
   const canonicalUrl = fullProfilePage(handle)
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicGroup',
     '@id': canonicalUrl,
     datePublished: null,
     url: canonicalUrl,
-    name: userName,
+    name: displayName,
     description: bio || pageDescription,
     potentialAction: {
       '@type': 'ListenAction',
@@ -324,33 +381,43 @@ export const getUserPageContext = ({
 }
 
 /**
- * Track page meta tag context
+ * Track page meta tag context.
+ * Use isRemix and originalTrackCanonicalUrl so the original track can rank
+ * above remixes for the track name: originals get "Original" in the snippet,
+ * remixes get "Remix" and isBasedOn pointing to the original.
  */
 export const getTrackPageContext = ({
   title,
   userName,
   permalink,
   releaseDate,
-  hashId
+  hashId,
+  isRemix = false,
+  originalTrackCanonicalUrl
 }: {
   title?: string
   userName?: string
   permalink?: string
   releaseDate?: string
   hashId?: string
+  isRemix?: boolean
+  originalTrackCanonicalUrl?: string
 }) => {
   if (!title || !userName || !permalink) return {}
   const pageTitle = `${title} by ${userName}`
-  const pageDescription = `Stream ${title} by ${userName} on Audius`
+  const trackSnippet = `Stream ${title} by ${userName}`
+  const pageDescription = isRemix
+    ? `${trackSnippet} - Remix - on Audius`
+    : `${trackSnippet} - Original - on Audius`
   const canonicalUrl = fullTrackPage(permalink)
-  const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+  const structuredData: Record<string, unknown> = {
+    '@context': 'https://schema.org',
     '@type': 'MusicRecording',
     '@id': canonicalUrl,
     url: canonicalUrl,
     name: title,
     description: pageDescription,
-    datePublished: releaseDate || null,
+    datePublished: releaseDate ?? null,
     potentialAction: {
       '@type': 'ListenAction',
       target: [
@@ -364,6 +431,12 @@ export const getTrackPageContext = ({
         category: 'free',
         eligibleRegion: []
       }
+    }
+  }
+  if (isRemix && originalTrackCanonicalUrl) {
+    structuredData.isBasedOn = {
+      '@type': 'MusicRecording',
+      '@id': originalTrackCanonicalUrl
     }
   }
 
@@ -414,7 +487,7 @@ export const getCollectionPageContext = ({
     isAlbum
   )
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicAlbum',
     '@id': canonicalUrl,
     url: canonicalUrl,
@@ -451,9 +524,9 @@ export const getCollectionPageContext = ({
  * Coins page meta tag context
  */
 export const getCoinsPageContext = () => {
-  const pageTitle = 'Discover Artist Coins'
+  const pageTitle = 'Discover Fan Clubs • Audius'
   const pageDescription =
-    'Explore Artist Coins on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
+    'Explore Artist Fan Clubs on Audius. Support your favorite artists, unlock exclusive perks, and become part of their community.'
   const canonicalUrl = 'https://audius.co/coins'
 
   return {
@@ -472,7 +545,7 @@ export const getCoinsPageContext = () => {
 export const getWalletPageContext = () => {
   const pageTitle = 'Wallet'
   const pageDescription =
-    'Manage your Audius wallet. View your cash balance, artist coins, and linked wallets all in one place.'
+    'Manage your Audius wallet. View your cash balance, fan clubs, and linked wallets all in one place.'
   const canonicalUrl = 'https://audius.co/wallet'
 
   return {

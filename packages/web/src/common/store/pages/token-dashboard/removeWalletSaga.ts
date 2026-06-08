@@ -2,7 +2,6 @@ import { QUERY_KEYS, queryCurrentUserId } from '@audius/common/api'
 import {
   tokenDashboardPageActions,
   confirmerActions,
-  confirmTransaction,
   ConfirmRemoveWalletAction,
   getSDK
 } from '@audius/common/store'
@@ -34,19 +33,11 @@ function* removeWallet(action: ConfirmRemoveWalletAction) {
   }
 
   function* removeWalletFromUser() {
-    const result = yield* call([sdk.users, sdk.users.removeAssociatedWallet], {
+    yield* call([sdk.users, sdk.users.removeAssociatedWallet], {
       userId: Id.parse(accountUserId),
       wallet: { address: removeWallet, chain: removeChain }
     })
 
-    const { blockHash, blockNumber } = result
-
-    const confirmed = yield* call(confirmTransaction, blockHash, blockNumber)
-    if (!confirmed) {
-      throw new Error(
-        `Could not confirm remove wallet for account user id ${accountUserId}`
-      )
-    }
     return accountUserId
   }
 

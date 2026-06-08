@@ -31,5 +31,9 @@ export const entityToUserListEntity = {
   [Entity.Track]: UserListEntityType.TRACK,
   [Entity.User]: UserListEntityType.USER,
   [Entity.Album]: UserListEntityType.COLLECTION,
-  [Entity.Playlist]: UserListEntityType.COLLECTION
+  [Entity.Playlist]: UserListEntityType.COLLECTION,
+  // Event-typed comment notifications resolve through the underlying
+  // contest track (see useNotificationEntity), so the multi-user
+  // overflow drawer treats them as track lists.
+  [Entity.Event]: UserListEntityType.TRACK
 }

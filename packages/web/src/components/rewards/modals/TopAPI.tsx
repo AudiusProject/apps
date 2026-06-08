@@ -1,10 +1,11 @@
 import { useCallback } from 'react'
 
+import { registerNiceModalId } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import { Button, IconArrowRight as IconArrow } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import AudiusAPI from 'assets/img/audiusAPI.png'
-import { useModalState } from 'common/hooks/useModalState'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { useWithMobileStyle } from 'hooks/useWithMobileStyle'
 
@@ -42,13 +43,13 @@ const TopAPIBody = () => {
   )
 }
 
-const TopAPIModal = () => {
-  const [isOpen, setOpen] = useModalState('APIRewardsExplainer')
+const TopAPIModal = NiceModal.create(() => {
+  const modal = useModal()
 
   return (
     <ModalDrawer
-      isOpen={isOpen}
-      onClose={() => setOpen(false)}
+      isOpen={modal.visible}
+      onClose={() => modal.hide()}
       title={messages.modalTitle}
       isFullscreen={false}
       showTitleHeader
@@ -57,6 +58,9 @@ const TopAPIModal = () => {
       <TopAPIBody />
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('APIRewardsExplainer', TopAPIModal)
+registerNiceModalId('APIRewardsExplainer')
 
 export default TopAPIModal

@@ -1,13 +1,13 @@
-const { exec } = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const util = require('util')
+import { exec } from 'child_process'
+import fs from 'fs'
+import path from 'path'
+import { promisify } from 'util'
 
-const execAsync = util.promisify(exec)
+import { Command } from 'commander'
 
-const commander = require('commander')
+const execAsync = promisify(exec)
 
-const program = new commander.Command()
+const program = new Command()
 
 const OUT_DIR = 'src/sdk/api/generator/out'
 
@@ -60,6 +60,13 @@ const downloadSpec = async ({ env, apiVersion, apiFlavor }) => {
   fs.writeFileSync(path.join(process.env.PWD, SWAGGER_SPEC_PATH), spec)
 }
 
+const copySpecFromLocal = (specPath) => {
+  const absolutePath = path.isAbsolute(specPath)
+    ? specPath
+    : path.join(process.env.PWD, specPath)
+  fs.copyFileSync(absolutePath, path.join(process.env.PWD, SWAGGER_SPEC_PATH))
+}
+
 const generate = async ({ apiFlavor, generator }) => {
   const outputFolderName = apiFlavor === '' ? 'default' : apiFlavor
   const openApiGeneratorArgs = [
@@ -79,15 +86,25 @@ const generate = async ({ apiFlavor, generator }) => {
 
 program
   .command('generate', { isDefault: true })
-  .description('Generates the client')
+  .description('Generates the v1 default API client (v1/full has been removed)')
   .option('--env <env>', 'The environment of the DN to gen from', 'prod')
   .option('--api-version <apiVersion>', 'The API version', 'v1')
-  .option('--api-flavor <apiFlavor>', 'The API flavor', '')
+  .option(
+    '--spec <path>',
+    'Use a local swagger YAML file instead of fetching (path relative to cwd or absolute)'
+  )
   .option('--generator <generator>', 'The generator to use', 'typescript-fetch')
   .action(async (options) => {
-    clearOutput(options)
-    await downloadSpec(options)
-    await generate(options)
+    // Only generate default (v1) client; v1/full is no longer used
+    const apiFlavor = ''
+    const opts = { ...options, apiFlavor }
+    clearOutput(opts)
+    if (options.spec) {
+      copySpecFromLocal(options.spec)
+    } else {
+      await downloadSpec(opts)
+    }
+    await generate(opts)
   })
 
 program

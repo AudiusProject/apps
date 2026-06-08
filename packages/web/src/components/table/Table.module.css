@@ -1,6 +1,7 @@
 .tableWrapper {
   position: relative;
   width: 100%;
+  min-width: 288px;
   border-radius: 8px;
   box-shadow: var(--harmony-shadow-mid);
   background-color: var(--harmony-white);
@@ -12,7 +13,7 @@
   position: relative;
   overflow: hidden;
   width: 100%;
-  min-width: 0px !important;
+  min-width: 288px !important;
   background-color: var(--harmony-white);
 
   display: flex;
@@ -50,25 +51,10 @@
 .tableHeader {
   position: relative;
   background-color: var(--harmony-white);
-  padding-left: 12px;
+  padding-left: 0px;
   padding-right: 12px;
-  line-height: 41px;
+  line-height: normal;
   user-select: none;
-}
-
-.tableHeader.hasSorter .textCell {
-  padding-right: 6px;
-}
-
-.titleHeader + .titleHeader::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 1px;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  background-color: var(--harmony-n-100);
 }
 
 .textCell {
@@ -77,13 +63,47 @@
   text-overflow: ellipsis;
 }
 
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  min-height: 41px;
+}
+
+.headerContent[role='button'] {
+  cursor: pointer;
+}
+
+.headerContent:focus {
+  outline: none;
+}
+
+.headerContent:focus-visible {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary));
+  outline: none;
+}
+
+.tableHeader.leftAlign .headerContent {
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+.tableHeader.rightAlign .headerContent {
+  justify-content: flex-end;
+}
+
+.tableHeader:not(.leftAlign):not(.rightAlign) .headerContent {
+  justify-content: center;
+}
+
 .sortCaretContainer {
-  position: absolute;
   display: flex;
   flex-direction: column;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
+  justify-content: center;
 }
 
 .sortCaret {
@@ -108,13 +128,26 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0;
   height: 24px;
   width: 24px;
+  border: 0;
   border-radius: 6px;
+  background: transparent;
   font-size: 12px;
+  font-family: inherit;
   font-weight: 700;
   color: var(--harmony-n-600);
   cursor: pointer;
+}
+
+.pageButton:focus {
+  outline: none;
+}
+
+.pageButton:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
 }
 
 .pageButton:not(.active):hover {
@@ -130,7 +163,16 @@
 .pageCaret {
   height: 16px;
   width: 16px;
+}
+
+.pageCaretButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 }
 
@@ -138,16 +180,26 @@
   fill: var(--harmony-n-400);
 }
 
-.pageCaret:not(.disabled):hover path {
+.pageCaretButton:not(:disabled):hover .pageCaret path {
   fill: var(--harmony-neutral);
 }
 
-.pageCaret.disabled {
+.pageCaretButton:disabled {
   cursor: default;
 }
 
-.pageCaret.disabled path {
+.pageCaretButton:disabled .pageCaret path {
   fill: var(--harmony-n-150);
+}
+
+.pageCaretButton:focus {
+  outline: none;
+}
+
+.pageCaretButton:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
 }
 
 .showMoreContainer {
@@ -155,10 +207,21 @@
   display: flex;
   justify-content: center;
   gap: 4px;
+  width: 100%;
   padding: 15px 0;
+  border: 0;
   background-color: var(--harmony-n-25);
   border-top: 1px solid var(--harmony-n-100);
   cursor: pointer;
+}
+
+.showMoreContainer:focus {
+  outline: none;
+}
+
+.showMoreContainer:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
 }
 
 .showMoreContainer:hover .showMoreText {
@@ -204,6 +267,16 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.tableRow:focus {
+  outline: none;
+}
+
+.tableRow:focus-visible {
+  z-index: 4;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
+}
 .tableRow > .tableCell {
   background-color: var(--harmony-white);
 }
@@ -213,13 +286,19 @@
 }
 
 .tableRow:hover:not(.skeletonRow),
-.tableRow:hover > .tableCell {
+.tableRow:focus-within:not(.skeletonRow),
+.tableRow:hover:not(.skeletonRow) > .tableCell,
+.tableRow:focus-within:not(.skeletonRow) > .tableCell {
   z-index: 3;
   box-shadow:
     0 1px 0 0 var(--harmony-n-100),
     0 -1px 0 0 var(--harmony-n-100);
   transition: all 0.07s ease-in-out;
   background-color: var(--harmony-n-50);
+}
+
+.tableRow.skeletonRow {
+  cursor: default;
 }
 
 .tableRow.disabled {
@@ -257,15 +336,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.resizer {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  right: -2px;
-  width: 6px;
 }
 
 .leftAlign {

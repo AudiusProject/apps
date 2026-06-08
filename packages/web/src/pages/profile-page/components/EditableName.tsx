@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 
+import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { IconButton, IconPencil, useTheme } from '@audius/harmony'
 import cn from 'classnames'
 
@@ -43,17 +44,17 @@ export const EditableName = (props: EditableNameProps) => {
               ref={inputRef}
               defaultValue={name || ''}
               onBlur={onInputBlur}
-              maxLength={32}
+              maxLength={MAX_DISPLAY_NAME_LENGTH}
             />
           </>
         ) : (
           <div className={styles.editNameContainer}>
             <span className={styles.editingName}>{name}</span>
             <IconButton
-              css={{ marginBottom: spacing.s }}
+              css={{ marginBottom: spacing.s, marginLeft: spacing.s }}
               aria-label={messages.editLabel}
               icon={IconPencil}
-              color='white'
+              color='staticWhite'
               onClick={() => setEditing(true)}
               shadow='drop'
             />

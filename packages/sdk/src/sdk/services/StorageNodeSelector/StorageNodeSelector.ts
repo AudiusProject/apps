@@ -83,14 +83,15 @@ export class StorageNodeSelector implements StorageNodeSelectorService {
     }
 
     // Select the next node in rendezvous order from the list of all nodes
-    this.selectedNode = (await this.selectUntilEndOfList()) ?? null
-    this.logger.info('Selected content node', this.selectedNode)
+    const selectedNode = await this.selectUntilEndOfList()
 
-    if (!this.selectedNode) {
-      // We've selected all healthy nodes. Return null and start over next time select() is called
-      this.logger.info(
-        'Selected all healthy nodes. Returning null and starting over next time select() is called'
-      )
+    if (selectedNode) {
+      this.selectedNode = selectedNode
+      this.logger.info('Selected content node', this.selectedNode)
+    } else {
+      // No healthy nodes found
+      this.selectedNode = null
+      this.logger.warn('No healthy nodes found')
       this.selectionState = 'failed_all'
     }
 

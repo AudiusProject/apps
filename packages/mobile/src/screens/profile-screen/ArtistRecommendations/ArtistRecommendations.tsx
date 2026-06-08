@@ -54,18 +54,14 @@ export const ArtistRecommendations = (props: ArtistRecommendationsProps) => {
 
   const handlePressFollow = useCallback(() => {
     suggestedArtists.forEach((artist) => {
-      dispatch(
-        followUser(artist.user_id, FollowSource.ARTIST_RECOMMENDATIONS_POPUP)
-      )
+      dispatch(followUser(artist.user_id, FollowSource.USER_LIST))
     })
     setHasFollowedAll(true)
   }, [suggestedArtists, dispatch])
 
   const handlePressUnfollow = useCallback(() => {
     suggestedArtists.forEach((artist) => {
-      dispatch(
-        unfollowUser(artist.user_id, FollowSource.ARTIST_RECOMMENDATIONS_POPUP)
-      )
+      dispatch(unfollowUser(artist.user_id, FollowSource.USER_LIST))
     })
     setHasFollowedAll(false)
   }, [suggestedArtists, dispatch])

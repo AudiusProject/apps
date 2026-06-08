@@ -33,7 +33,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   },
   title: {
     fontSize: 18,
-    fontFamily: typography.fontByWeight.heavy,
+    fontFamily: typography.fontByWeight.bold,
     color: palette.neutralLight5,
     textTransform: 'uppercase'
   },
@@ -85,7 +85,15 @@ export const useAppScreenOptions = <
         params && (params as ContextualParams).fromAppDrawer
 
       return {
-        animation: isFromAppLeftDrawer ? 'none' : 'default',
+        // On iOS 26, the default `animation` ('default') makes
+        // `@react-navigation/native-stack` use Apple's
+        // `interactiveContentPopGestureRecognizer`, which is edge-only in our
+        // setup. Picking a non-default animation ('simple_push') combined with
+        // `customAnimationOnGesture: true` flips RNScreens onto its own
+        // `RNSPanGestureRecognizer`, which is full-screen and gives us
+        // swipe-to-pop from anywhere on the screen on both iOS 26 and earlier.
+        animation: isFromAppLeftDrawer ? 'none' : 'simple_push',
+        customAnimationOnGesture: true,
         fullScreenGestureEnabled: true,
         freezeOnBlur: true,
         cardOverlayEnabled: true,

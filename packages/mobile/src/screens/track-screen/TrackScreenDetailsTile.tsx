@@ -2,12 +2,14 @@ import type { RefObject } from 'react'
 import React, { useCallback } from 'react'
 
 import {
-  useRemixContest,
   useToggleFavoriteTrack,
   useTrackRank,
   useStems,
   useCurrentUserId,
-  useArtistCoin
+  useFanClub,
+  useTrackDownloadCount,
+  useTrackPageLineup,
+  getTrackPageLineupQueryKey
 } from '@audius/common/api'
 import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
@@ -29,10 +31,9 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
-import type { CommonState } from '@audius/common/store'
+import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import {
-  trackPageLineupActions,
-  queueSelectors,
+  playbackSelectors,
   reachabilitySelectors,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -43,7 +44,7 @@ import {
   favoritesUserListActions,
   trackPageActions,
   RepostType,
-  playerSelectors,
+  playbackActions,
   playbackPositionSelectors,
   PurchaseableContentType,
   usePublishConfirmationModal,
@@ -55,6 +56,7 @@ import {
   removeNullable,
   dayjs
 } from '@audius/common/utils'
+import { encodeHashId } from '@audius/sdk'
 import type { FlatList } from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -72,7 +74,7 @@ import {
   MusicBadge,
   Paper,
   Text,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony-native'
 import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import { Tag } from 'app/components/core'
@@ -95,23 +97,22 @@ import { makeStyles } from 'app/styles'
 import { DownloadSection } from './DownloadSection'
 import { TrackDescription } from './TrackDescription'
 
-const { getPlaying, getTrackId, getPreviewing } = playerSelectors
+const { getPlaying, getTrackId, getPreviewing } = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { tracksActions } = trackPageLineupActions
 const { getIsReachable } = reachabilitySelectors
 const { getTrackPosition } = playbackPositionSelectors
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const getCurrentQueueItem = makeGetCurrent()
 
 const messages = {
   track: 'track',
   podcast: 'podcast',
   remix: 'remix',
-  specialAccess: 'special access',
+  followersOnly: 'followers only',
   premiumTrack: 'premium track',
   coinGated: 'coin gated',
   generatedWithAi: 'generated with ai',
@@ -123,8 +124,7 @@ const messages = {
   preview: 'Preview',
   hidden: 'Hidden',
   releases: (releaseDate: string) =>
-    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`,
-  remixContest: 'Remix Contest'
+    `Releases ${formatReleaseDate({ date: releaseDate, withHour: true })}`
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -227,10 +227,8 @@ export const TrackScreenDetailsTile = ({
   const { open: openCommentDrawer } = useCommentDrawer()
 
   const isLongFormContent =
-    track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+    track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
-  const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = !!remixContest
 
   const isPlayingPreview = isPreviewing && isPlaying
   const isPlayingFullAccess = isPlaying && !isPreviewing
@@ -252,16 +250,18 @@ export const TrackScreenDetailsTile = ({
     isStreamGated ||
     (!isOwner && (playCount ?? 0) <= 0)
 
+  const isDownloadable = (track as Track)?.is_downloadable ?? false
+  const trackIdHash = encodeHashId(trackId)
+  const { data: downloadCount = 0 } = useTrackDownloadCount(trackIdHash)
+
   const isTokenGated = isContentTokenGated(streamConditions)
-  const { data: token } = useArtistCoin(
+  const { data: token } = useFanClub(
     (streamConditions as TokenGatedConditions)?.token_gate?.token_mint,
     { enabled: isTokenGated }
   )
 
   let headerText
-  if (isRemixContest) {
-    headerText = messages.remixContest
-  } else if (isRemix) {
+  if (isRemix) {
     headerText = messages.remix
   } else if (isStreamGated) {
     if (isContentUSDCPurchaseGated(streamConditions)) {
@@ -269,7 +269,7 @@ export const TrackScreenDetailsTile = ({
     } else if (isTokenGated) {
       headerText = messages.coinGated
     } else {
-      headerText = messages.specialAccess
+      headerText = messages.followersOnly
     }
   } else {
     headerText = messages.track
@@ -321,22 +321,64 @@ export const TrackScreenDetailsTile = ({
 
   const currentQueueItem = useSelector(getCurrentQueueItem)
   const currentTrack = useCurrentTrack()
+
+  // Subscribe to the same lineup that renders below the track so the hero
+  // play button can hand the related tracks (More By + You Might Also Like
+  // / Remixes) to the player as a queue. The query is shared with
+  // TrackScreenLineup via the tanquery cache, so this does not re-fetch.
+  // `enabled: isReachable` keeps the fetch off when offline — matching the
+  // visibility gate on TrackScreenLineup in TrackScreen.tsx.
+  const { trackIds: lineupTrackIds } = useTrackPageLineup(
+    { trackId },
+    { enabled: !!isReachable }
+  )
+
   const play = useCallback(
     ({ isPreview = false } = {}) => {
       if (isLineupLoading) return
 
       if (isPlaying && isPlayingId && isPreviewing === isPreview) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         recordPlay(trackId, false, true)
       } else if (
-        currentQueueItem.uid !== uid &&
+        currentQueueItem.trackId !== trackId &&
         currentTrack &&
         currentTrack.track_id === trackId
       ) {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         recordPlay(trackId)
       } else {
-        dispatch(tracksActions.play(uid, { isPreview }))
+        // Hero gets the legacy 'TRACK_TRACKS' source so its uid (built in
+        // TrackScreen via makeStableUid(..., 'TRACK_TRACKS')) still matches.
+        // The related tracks below render through TrackLineup with
+        // 'TRACK_PAGE_MORE_BY' — use the same source for those queue entries
+        // so the lineup tile highlights track auto-advance.
+        const heroSource = 'TRACK_TRACKS'
+        const relatedSource = 'TRACK_PAGE_MORE_BY'
+        const hasLineup =
+          !isPreview &&
+          lineupTrackIds.length > 1 &&
+          lineupTrackIds[0] === trackId
+        const tracks: PlaybackTrack[] = hasLineup
+          ? [
+              { trackId, source: heroSource },
+              ...lineupTrackIds.slice(1).map((id) => ({
+                trackId: id,
+                source: relatedSource
+              }))
+            ]
+          : [{ trackId, source: heroSource }]
+        dispatch(
+          playbackActions.playFrom({
+            tracks,
+            startIndex: 0,
+            querySource: hasLineup
+              ? {
+                  queryKey: [...getTrackPageLineupQueryKey(trackId)] as unknown[]
+                }
+              : null
+          })
+        )
         recordPlay(trackId, true, true)
       }
     },
@@ -345,10 +387,10 @@ export const TrackScreenDetailsTile = ({
       isPlaying,
       isPlayingId,
       isPreviewing,
-      currentQueueItem.uid,
-      uid,
+      currentQueueItem.trackId,
       currentTrack,
       trackId,
+      lineupTrackIds,
       dispatch
     ]
   )
@@ -376,8 +418,7 @@ export const TrackScreenDetailsTile = ({
     openCommentDrawer({
       entityId: trackId,
       navigation,
-      actions: tracksActions,
-      uid
+      playbackSource: 'TRACK_TRACKS'
     })
     trackEvent(
       make({
@@ -386,7 +427,7 @@ export const TrackScreenDetailsTile = ({
         source: 'track_page'
       })
     )
-  }, [openCommentDrawer, trackId, navigation, uid])
+  }, [openCommentDrawer, trackId, navigation])
 
   const handlePressSave = useToggleFavoriteTrack({
     trackId,
@@ -433,7 +474,7 @@ export const TrackScreenDetailsTile = ({
 
   const handlePressOverflow = () => {
     const isLongFormContent =
-      genre === Genre.PODCASTS || genre === Genre.AUDIOBOOKS
+      genre === Genre.Podcasts || genre === Genre.Audiobooks
     const addToAlbumAction =
       isOwner && !ddexApp ? OverflowAction.ADD_TO_ALBUM : null
     const overflowActions = [
@@ -553,7 +594,7 @@ export const TrackScreenDetailsTile = ({
       <TrackDogEar trackId={trackId} />
       <Flex p='l' gap='l' alignItems='center' w='100%'>
         <Flex row gap='xs' alignItems='center'>
-          {isTokenGated ? <IconArtistCoin size='s' color='subdued' /> : null}
+          {isTokenGated ? <IconFanClub size='s' color='subdued' /> : null}
           <Text
             variant='label'
             size='m'
@@ -652,6 +693,8 @@ export const TrackScreenDetailsTile = ({
           hideRepostCount={shouldHideRepostCount}
           commentCount={commentCount}
           hideCommentCount={shouldHideCommentCount}
+          downloadCount={downloadCount}
+          hideDownloadCount={!isDownloadable}
           onPressFavorites={handlePressFavorites}
           onPressReposts={handlePressReposts}
           onPressComments={handlePressComments}

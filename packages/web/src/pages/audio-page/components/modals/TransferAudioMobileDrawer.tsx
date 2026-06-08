@@ -1,6 +1,9 @@
-import { IconTokenGold as IconGold } from '@audius/harmony'
+import { useCallback } from 'react'
 
-import { useModalState } from 'common/hooks/useModalState'
+import { registerNiceModalId } from '@audius/common/services'
+import { IconTokenGold as IconGold } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
+
 import Drawer from 'components/drawer/Drawer'
 
 import styles from './TransferAudioMobileDrawer.module.css'
@@ -10,11 +13,12 @@ const messages = {
   subtitle: 'To transfer AUDIO please visit audius.co from a desktop browser'
 }
 
-const TransferAudioMobileDrawer = () => {
-  const [isOpen, setOpen] = useModalState('TransferAudioMobileWarning')
+const TransferAudioMobileDrawer = NiceModal.create(() => {
+  const modal = useModal()
+  const handleClose = useCallback(() => modal.hide(), [modal])
 
   return (
-    <Drawer isOpen={isOpen} onClose={() => setOpen(false)}>
+    <Drawer isOpen={modal.visible} onClose={handleClose}>
       <div className={styles.container}>
         <IconGold />
         <span className={styles.title}>{messages.title}</span>
@@ -22,6 +26,9 @@ const TransferAudioMobileDrawer = () => {
       </div>
     </Drawer>
   )
-}
+})
+
+NiceModal.register('TransferAudioMobileWarning', TransferAudioMobileDrawer)
+registerNiceModalId('TransferAudioMobileWarning')
 
 export default TransferAudioMobileDrawer

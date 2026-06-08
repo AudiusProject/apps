@@ -8,22 +8,24 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Flex,
+  IconAudiusLogo,
   IconAudiusLogoHorizontalNew,
-  IconDashboard,
   IconSettings
 } from '@audius/harmony'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import { RestrictionType, useRequiresAccountFn } from 'hooks/useRequiresAccount'
 
 import { NavHeaderButton } from './NavHeaderButton'
+import { useNavSidebar } from './NavSidebarContext'
 import { NotificationsButton } from './NotificationsButton'
 
-const { HOME_PAGE, SETTINGS_PAGE, DASHBOARD_PAGE } = route
+const { HOME_PAGE, SETTINGS_PAGE } = route
+const EXPANDED_HEADER_WIDTH = 240
+const COLLAPSED_HEADER_WIDTH = 64
 
 const messages = {
   homeLink: 'Go to Home',
-  dashboardLabel: 'Go to Dashboard',
   settingsLabel: 'Go to Settings'
 }
 
@@ -72,38 +74,63 @@ const RestrictedLink = ({
 }
 
 export const NavHeader = () => {
-  const { data: trackCount } = useCurrentAccountUser({
-    select: (user) => user?.track_count
-  })
+  const { isCollapsed } = useNavSidebar()
+  const { pathname } = useLocation()
+
+  if (isCollapsed) {
+    return (
+      <Flex
+        direction='column'
+        borderBottom='default'
+        flex={0}
+        css={{ minHeight: 58, width: COLLAPSED_HEADER_WIDTH, flexShrink: 0 }}
+      >
+        {/* Row 1: actions (settings + bell) */}
+        <Flex
+          alignItems='center'
+          justifyContent='center'
+          gap='xs'
+          css={{ height: 26, paddingTop: 4 }}
+        >
+          <RestrictedLink to={SETTINGS_PAGE} restriction='account'>
+            <NavHeaderButton
+              icon={IconSettings}
+              aria-label={messages.settingsLabel}
+              isActive={pathname === SETTINGS_PAGE}
+              size='m'
+            />
+          </RestrictedLink>
+          <NotificationsButton size='m' />
+        </Flex>
+        {/* Row 2: Audius triangle logo */}
+        <Flex alignItems='center' justifyContent='center' css={{ height: 32 }}>
+          <Link to={HOME_PAGE} aria-label={messages.homeLink}>
+            <IconAudiusLogo color='subdued' size='m' />
+          </Link>
+        </Flex>
+      </Flex>
+    )
+  }
 
   return (
     <Flex
       alignItems='center'
-      backgroundColor='surface1'
+      borderBottom='default'
       justifyContent='space-between'
       pv='l'
       ph='m'
       flex={0}
-      css={{ minHeight: 58 }}
+      css={{ minHeight: 58, width: EXPANDED_HEADER_WIDTH, flexShrink: 0 }}
     >
       <Link to={HOME_PAGE} aria-label={messages.homeLink}>
         <IconAudiusLogoHorizontalNew color='subdued' size='m' width='auto' />
       </Link>
       <Flex justifyContent='center' alignItems='center'>
-        {trackCount ? (
-          <RestrictedLink to={DASHBOARD_PAGE} restriction='account'>
-            <NavHeaderButton
-              icon={IconDashboard}
-              aria-label={messages.dashboardLabel}
-              isActive={location.pathname === DASHBOARD_PAGE}
-            />
-          </RestrictedLink>
-        ) : null}
         <RestrictedLink to={SETTINGS_PAGE} restriction='account'>
           <NavHeaderButton
             icon={IconSettings}
             aria-label={messages.settingsLabel}
-            isActive={location.pathname === SETTINGS_PAGE}
+            isActive={pathname === SETTINGS_PAGE}
           />
         </RestrictedLink>
         <NotificationsButton />

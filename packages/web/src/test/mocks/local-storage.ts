@@ -1,3 +1,5 @@
+import type { LocalStorage } from '@audius/common/services'
+
 export const createMockLocalStorage = () => {
   const storage = new Map<string, string>()
   const mockLocalStorage = {
@@ -12,6 +14,8 @@ export const createMockLocalStorage = () => {
 
   return {
     localStorage: mockLocalStorage,
+    preloadSyncKeys: async () => {},
+    preloadAccountSyncCache: async () => {},
     getItem: async (key: string) => storage.get(key) ?? null,
     getItemSync: (key: string) => storage.get(key) ?? null,
     setItem: async (key: string, value: string) => {
@@ -85,5 +89,5 @@ export const createMockLocalStorage = () => {
     setAudiusUserWalletAddress: async () => {},
     clearAudiusUserWalletAddress: async () => {},
     clearPlaybackRate: async () => {}
-  }
+  } as unknown as LocalStorage
 }

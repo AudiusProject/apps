@@ -11,6 +11,7 @@ export type NextButtonProps = {
 const NextButton = ({ onClick, isMobile }: NextButtonProps) => {
   return (
     <button
+      aria-label='Next track'
       className={cn(styles.button, {
         [styles.buttonFixedSize]: isMobile,
         [styles.previousNext]: isMobile

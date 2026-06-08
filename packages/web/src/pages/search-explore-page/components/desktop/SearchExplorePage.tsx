@@ -1,10 +1,15 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import {
+  Fragment,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import {
-  Paper,
-  Text,
   Flex,
   IconNote,
   IconAlbum,
@@ -12,19 +17,17 @@ import {
   TextInput,
   TextInputSize,
   IconSearch,
-  IconUser,
-  Divider,
-  FilterButton,
-  useTheme,
-  useMedia
+  IconUser
 } from '@audius/harmony'
 import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
-import BackgroundWaves from 'assets/img/publicSite/imageSearchHeaderBackground@2x.webp'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
+import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
-import useTabs from 'hooks/useTabs/useTabs'
+import { Tab, TabList } from 'components/tabs'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { filters } from 'pages/search-page/SearchFilters'
 import { SearchResults } from 'pages/search-page/SearchResults'
 import { SortMethodFilterButton } from 'pages/search-page/SortMethodFilterButton'
@@ -33,21 +36,23 @@ import {
   useSearchCategory,
   useShowSearchResults
 } from 'pages/search-page/hooks'
-import {
-  CategoryView,
-  ViewLayout,
-  viewLayoutOptions
-} from 'pages/search-page/types'
+import { CategoryView } from 'pages/search-page/types'
 
-import { ArtistCoinTracksSection } from './ArtistCoinTracksSection'
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
+import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
+import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
 import { FeelingLuckySection } from './FeelingLuckySection'
 import { LabelSpotlightSection } from './LabelSpotlightSection'
+import { MoodGrid } from './MoodGrid'
+import { NewAlbumReleasesSection } from './NewAlbumReleasesSection'
+import { QuickSearchGrid } from './QuickSearchGrid'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
+import { TopAlbumsThisMonthSection } from './TopAlbumsThisMonthSection'
+import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
   title: string
@@ -63,36 +68,18 @@ export enum SearchTabs {
 }
 
 const tabHeaders = [
+  { value: SearchTabs.ALL, icon: <IconSearch />, text: SearchTabs.ALL },
+  { value: SearchTabs.PROFILES, icon: <IconUser />, text: SearchTabs.PROFILES },
+  { value: SearchTabs.TRACKS, icon: <IconNote />, text: SearchTabs.TRACKS },
+  { value: SearchTabs.ALBUMS, icon: <IconAlbum />, text: SearchTabs.ALBUMS },
   {
-    icon: <IconSearch />,
-    text: SearchTabs.ALL,
-    label: SearchTabs.ALL
-  },
-  {
-    icon: <IconUser />,
-    text: SearchTabs.PROFILES,
-    label: SearchTabs.PROFILES
-  },
-  {
-    icon: <IconNote />,
-    text: SearchTabs.TRACKS,
-    label: SearchTabs.TRACKS
-  },
-  {
-    icon: <IconAlbum />,
-    text: SearchTabs.ALBUMS,
-    label: SearchTabs.ALBUMS
-  },
-  {
+    value: SearchTabs.PLAYLISTS,
     icon: <IconPlaylists />,
-    text: SearchTabs.PLAYLISTS,
-    label: SearchTabs.PLAYLISTS
+    text: SearchTabs.PLAYLISTS
   }
 ]
 
 const DEBOUNCE_MS = 200
-const MIN_WIDTH = 840
-const NORMAL_WIDTH = 1200
 
 const SearchExplorePage = ({
   title,
@@ -105,12 +92,13 @@ const SearchExplorePage = ({
   const [debouncedValue, setDebouncedValue] = useState(inputValue)
   const previousDebouncedValue = usePrevious(debouncedValue)
   const showSearchResults = useShowSearchResults()
-  const [tracksLayout, setTracksLayout] = useState<ViewLayout>('list')
   const searchBarRef = useRef<HTMLInputElement>(null)
+  const pageContentRef = useRef<HTMLDivElement>(null)
+  const tabContainerRef = useRef<HTMLDivElement>(null)
   const { data: currentUserId, isLoading: isCurrentUserIdLoading } =
     useCurrentUserId()
-  const { motion } = useTheme()
-  const { isLarge } = useMedia()
+  const isNarrowLayout = useIsContainerNarrow(pageContentRef, 760)
+  const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 552)
   const handleSearchTab = useCallback(
     (newTab: string) => {
       setCategory(newTab.toLowerCase() as CategoryView)
@@ -151,181 +139,217 @@ const SearchExplorePage = ({
       } else {
         newParams.delete('query')
       }
-      setSearchParams(newParams)
-    } else if (categoryKey === SearchTabs.ALL.toLowerCase()) {
-      // clear filters when searching all
-      const newParams = new URLSearchParams()
-      if (debouncedValue) {
-        newParams.set('query', debouncedValue)
-      }
-      setSearchParams(newParams)
+      setSearchParams(newParams, { replace: true })
     }
-  }, [
-    debouncedValue,
-    setSearchParams,
-    searchParams,
-    previousDebouncedValue,
-    categoryKey
-  ])
+  }, [debouncedValue, setSearchParams, searchParams, previousDebouncedValue])
 
   const filterKeys: string[] = categories[categoryKey].filters
 
-  const tabElements = useMemo(
-    () => tabHeaders.map((tab) => <Flex key={tab.label}>{tab.text}</Flex>),
-    []
+  const tabs = (
+    <TabList value={capitalize(categoryKey)} onChange={handleSearchTab}>
+      {tabHeaders.map((tab) => (
+        <Tab
+          key={tab.value}
+          value={tab.value}
+          icon={tab.icon}
+          hideText={shouldHideTabText}
+        >
+          {tab.text}
+        </Tab>
+      ))}
+    </TabList>
   )
 
-  const { tabs } = useTabs({
-    isMobile: false,
-    tabs: tabHeaders,
-    elements: tabElements,
-    onTabClick: handleSearchTab,
-    selectedTabLabel: capitalize(categoryKey)
-  })
-  const [bannerIsVisible, setBannerIsVisible] = useState(false)
-
-  useEffect(() => {
-    const img = new window.Image()
-    img.src = BackgroundWaves
-    img.onload = () => setBannerIsVisible(true)
-  }, [])
-
   const showUserContextualContent = isCurrentUserIdLoading || !!currentUserId
-  const showTrackContent = categoryKey === 'tracks' || categoryKey === 'all'
+  const showTrackContent =
+    categoryKey === CategoryView.TRACKS || categoryKey === CategoryView.ALL
   const showPlaylistContent =
-    categoryKey === 'playlists' || categoryKey === 'all'
-  const showUserContent = categoryKey === 'profiles' || categoryKey === 'all'
+    categoryKey === CategoryView.PLAYLISTS || categoryKey === CategoryView.ALL
+  const showUserContent =
+    categoryKey === CategoryView.PROFILES || categoryKey === CategoryView.ALL
+  const isTracksTab = categoryKey === CategoryView.TRACKS
+  const isPlaylistsTab = categoryKey === CategoryView.PLAYLISTS
+  const isAlbumsTab = categoryKey === CategoryView.ALBUMS
+  const showAlbumContent = isAlbumsTab
+  const sectionConfigs: {
+    key: string
+    shouldRender: boolean
+    element: ReactNode
+  }[] = [
+    {
+      key: 'recommendedTracks',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <RecommendedTracksSection />
+    },
+    {
+      key: 'featuredPlaylists',
+      shouldRender: showPlaylistContent,
+      element: <FeaturedPlaylistsSection />
+    },
+    {
+      key: 'topAlbumsThisMonth',
+      shouldRender: showAlbumContent,
+      element: <TopAlbumsThisMonthSection />
+    },
+    {
+      key: 'newAlbumReleases',
+      shouldRender: showAlbumContent,
+      element: <NewAlbumReleasesSection />
+    },
+    {
+      key: 'bestSellingAlbums',
+      shouldRender: showAlbumContent,
+      element: <BestSellingAlbumsSection />
+    },
+    {
+      key: 'featuredRemixContests',
+      shouldRender: showTrackContent,
+      element: <FeaturedRemixContestsSection />
+    },
+    {
+      key: 'fanClubs',
+      shouldRender: categoryKey === CategoryView.ALL,
+      element: <FanClubsExploreSection />
+    },
+    {
+      key: 'quickSearch',
+      shouldRender: isTracksTab,
+      element: <QuickSearchGrid />
+    },
+    {
+      key: 'recentlyPlayed',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <RecentlyPlayedSection />
+    },
+    {
+      key: 'undergroundTrendingTracks',
+      shouldRender: isTracksTab,
+      element: <UndergroundTrendingTracksSection />
+    },
+    {
+      key: 'artistSpotlight',
+      shouldRender: showUserContent,
+      element: <ArtistSpotlightSection />
+    },
+    {
+      key: 'labelSpotlight',
+      shouldRender: showUserContent,
+      element: <LabelSpotlightSection />
+    },
+    {
+      key: 'moodGrid',
+      shouldRender: isTracksTab || isPlaylistsTab || isAlbumsTab,
+      element: <MoodGrid />
+    },
+    {
+      key: 'feelingLucky',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <FeelingLuckySection />
+    },
+    {
+      key: 'recentSearches',
+      shouldRender: showUserContextualContent,
+      element: <RecentSearchesSection />
+    }
+  ]
+
+  const header = (
+    <Header
+      primary={messages.explore}
+      icon={IconSearch}
+      bottomBar={
+        <Flex ref={tabContainerRef} alignSelf='stretch' css={{ minWidth: 0 }}>
+          <Flex alignSelf='flex-start'>{tabs}</Flex>
+        </Flex>
+      }
+    />
+  )
+
+  const subHeader = (
+    <Flex
+      column
+      w='100%'
+      ph='2xl'
+      pv='m'
+      css={{
+        borderTop: '1px solid var(--harmony-n-100)',
+        background: 'color-mix(in srgb, var(--harmony-n-950) 3%, transparent)',
+        alignSelf: 'stretch'
+      }}
+    >
+      <Flex
+        column
+        gap='m'
+        css={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}
+      >
+        <TextInput
+          ref={searchBarRef}
+          label={messages.searchPlaceholder}
+          value={inputValue}
+          startIcon={IconSearch}
+          size={TextInputSize.SMALL}
+          onChange={handleSearch}
+          onClear={handleClearSearch}
+        />
+        {filterKeys.length ? (
+          <Flex
+            direction='row'
+            justifyContent={isNarrowLayout ? undefined : 'space-between'}
+            alignItems='center'
+            gap='s'
+            wrap='wrap'
+          >
+            <Flex direction='row' gap='s' wrap='wrap'>
+              {filterKeys.map((filterKey) => {
+                const FilterComponent =
+                  filters[filterKey as keyof typeof filters]
+                return <FilterComponent key={filterKey} />
+              })}
+            </Flex>
+            <Flex gap='s'>
+              <SortMethodFilterButton />
+            </Flex>
+          </Flex>
+        ) : null}
+      </Flex>
+    </Flex>
+  )
 
   return (
     <Page
       title={pageTitle}
       description={description}
       size='large'
-      variant='flush'
+      header={header}
+      subHeader={subHeader}
+      showSearch={false}
+      disableHeaderFrosted
+      frostedHeaderContainer
     >
       <Flex
-        justifyContent='center'
-        css={{
-          minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH
-        }}
+        ref={pageContentRef}
+        direction='column'
+        gap='3xl'
+        alignItems='stretch'
+        css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX, width: '100%' }}
       >
+        {/* Content Section */}
+        {inputValue || showSearchResults ? (
+          <SearchResults handleSearchTab={handleSearchTab} />
+        ) : null}
         <Flex
           direction='column'
-          pv='3xl'
-          ph='unit15'
           gap='3xl'
-          alignItems='stretch'
           css={{
-            minWidth: isLarge ? MIN_WIDTH : NORMAL_WIDTH,
-            maxWidth: isLarge ? '100%' : NORMAL_WIDTH
+            minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX,
+            overflowX: 'clip',
+            overflowY: 'visible',
+            display: inputValue || showSearchResults ? 'none' : undefined
           }}
         >
-          {/* Header Section */}
-          <Paper
-            alignItems='center'
-            direction='column'
-            gap='xl'
-            pv='xl'
-            ph='unit14'
-            css={{
-              backgroundImage: `url(${BackgroundWaves})`,
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              opacity: bannerIsVisible ? 1 : 0,
-              transition: `opacity ${motion.quick}`
-            }}
-            borderRadius='l'
-            alignSelf='stretch'
-          >
-            <Text variant='display' size='s' color='staticWhite'>
-              {messages.explore}
-            </Text>
-            <Text
-              variant='heading'
-              size='s'
-              color='staticWhite'
-              textAlign='center'
-            >
-              {messages.description}
-            </Text>
-            <Flex w='100%' css={{ maxWidth: 400 }}>
-              <TextInput
-                ref={searchBarRef}
-                label={messages.searchPlaceholder}
-                value={inputValue}
-                startIcon={IconSearch}
-                size={TextInputSize.SMALL}
-                onChange={handleSearch}
-                onClear={handleClearSearch}
-              />
-            </Flex>
-          </Paper>
-
-          {/* Tabs and Filters */}
-          <Flex direction='column' gap='l'>
-            <Flex direction='column'>
-              <Flex alignSelf='flex-start'>{tabs}</Flex>
-              <Divider orientation='horizontal' />
-            </Flex>
-            {filterKeys.length ? (
-              <Flex
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                css={{ flexWrap: 'wrap' }}
-              >
-                <Flex direction='row' gap='s' mv='m' css={{ flexWrap: 'wrap' }}>
-                  {filterKeys.map((filterKey) => {
-                    const FilterComponent =
-                      filters[filterKey as keyof typeof filters]
-                    return <FilterComponent key={filterKey} />
-                  })}
-                </Flex>
-                <Flex gap='s'>
-                  <SortMethodFilterButton />
-                  {categoryKey === CategoryView.TRACKS ? (
-                    <FilterButton
-                      value={tracksLayout}
-                      variant='replaceLabel'
-                      optionsLabel={messages.layoutOptionsLabel}
-                      onChange={setTracksLayout}
-                      options={viewLayoutOptions}
-                    />
-                  ) : null}
-                </Flex>
-              </Flex>
-            ) : null}
-          </Flex>
-
-          {/* Content Section */}
-          {inputValue || showSearchResults ? (
-            <SearchResults
-              tracksLayout={tracksLayout}
-              handleSearchTab={handleSearchTab}
-            />
-          ) : null}
-          <Flex
-            direction='column'
-            gap='3xl'
-            css={{ display: showSearchResults ? 'none' : undefined }}
-          >
-            {showTrackContent && showUserContextualContent && (
-              <RecommendedTracksSection />
-            )}
-            {showTrackContent && <ArtistCoinTracksSection />}
-            {showTrackContent && showUserContextualContent && (
-              <RecentlyPlayedSection />
-            )}
-            {showPlaylistContent && <FeaturedPlaylistsSection />}
-            {showTrackContent && <FeaturedRemixContestsSection />}
-            {showUserContent && <ArtistSpotlightSection />}
-            {showUserContent && <LabelSpotlightSection />}
-            {showTrackContent && showUserContextualContent && (
-              <FeelingLuckySection />
-            )}
-            {showUserContextualContent && <RecentSearchesSection />}
-          </Flex>
+          {sectionConfigs.map(({ key, shouldRender, element }) =>
+            shouldRender ? <Fragment key={key}>{element}</Fragment> : null
+          )}
         </Flex>
       </Flex>
     </Page>

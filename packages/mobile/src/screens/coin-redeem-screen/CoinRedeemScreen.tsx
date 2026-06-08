@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
 import {
-  useArtistCoinByTicker,
+  useFanClubByTicker,
   useCoinRedeemAmount,
   useCoinRedeemCodeAmount,
   useRedeemCoin,
@@ -57,7 +57,7 @@ export const CoinRedeemScreen = () => {
     ticker: string
     code?: string
   }
-  const { data: coin } = useArtistCoinByTicker({ ticker })
+  const { data: coin } = useFanClubByTicker({ ticker })
   const mint = coin?.mint ?? ''
 
   const { data: coinRedeemAmount, isPending: coinRedeemAmountPending } =

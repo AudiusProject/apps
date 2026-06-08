@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { userMetadataToSdk } from '~/adapters/user'
 import { primeUserData, useQueryContext } from '~/api/tan-query/utils'
-import { Feature } from '~/models/ErrorReporting'
 import { UserMetadata, WriteableUserMetadata } from '~/models/User'
 import { dataURLtoFile } from '~/utils'
 import { squashNewLines } from '~/utils/formatUtil'
@@ -16,7 +15,7 @@ export type MutationContext = {
 }
 
 export const useUpdateProfile = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
@@ -44,32 +43,21 @@ export const useUpdateProfile = () => {
         }
       }
 
-      const { blockHash, blockNumber } = await sdk.users.updateProfile({
+      await sdk.users.updateUser({
+        id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         profilePictureFile: metadata.updatedProfilePicture?.file,
         coverArtFile: metadata.updatedCoverPhoto?.file,
         metadata: userMetadataToSdk(metadata)
       })
 
-      // Wait for transaction confirmation
-      const confirmed = await sdk.services.entityManager.confirmWrite({
-        blockHash,
-        blockNumber
-      })
-
-      if (!confirmed) {
-        throw new Error(
-          `Could not confirm update profile for user id ${currentUserId}`
-        )
-      }
-
       // Fetch updated user data
-      const { data: userData = [] } = await sdk.full.users.getUser({
+      const response = await sdk.users.getUser({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId)
       })
 
-      return userData[0]
+      return response.data
     },
     onMutate: async (metadata): Promise<MutationContext> => {
       // Cancel any outgoing refetches
@@ -103,14 +91,7 @@ export const useUpdateProfile = () => {
         })
       }
 
-      reportToSentry({
-        error,
-        additionalInfo: {
-          metadata
-        },
-        feature: Feature.Edit,
-        name: 'Edit Profile'
-      })
+      console.error(error)
     },
     onSettled: (_, __) => {
       // Always refetch after error or success to ensure cache is in sync with server

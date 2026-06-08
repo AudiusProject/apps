@@ -1,8 +1,10 @@
 import cn from 'classnames'
 
-import RepostButton from 'components/alt-button/RepostButton'
+import AnimatedIconButton, {
+  AnimatedIconType
+} from 'components/animated-button/AnimatedIconButton'
 import Toast from 'components/toast/Toast'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsMatrix } from 'utils/theme/theme'
 
 import styles from './TableRepostButton.module.css'
 
@@ -19,23 +21,27 @@ export const TableRepostButton = ({
   onClick,
   reposted
 }: TableRepostButtonProps) => {
-  const isMatrixMode = isMatrix()
-  const isDark = isDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   return (
-    <div onClick={onClick} className={cn(styles.tableRepostButton, className)}>
+    <div
+      onClick={onClick}
+      className={cn(styles.tableRepostButton, className, {
+        [styles.reposted]: reposted
+      })}
+    >
       <Toast
         text={'Reposted!'}
         disabled={reposted}
         delay={REPOST_TIMEOUT}
         containerClassName={styles.iconContainer}
       >
-        <RepostButton
+        <AnimatedIconButton
+          icon={AnimatedIconType.REPOST}
           className={styles.icon}
           isActive={reposted}
-          onClick={onClick}
-          isDarkMode={isDark}
-          isMatrixMode={isMatrixMode}
+          onClick={onClick ?? (() => {})}
+          isMatrix={isMatrixMode}
         />
       </Toast>
     </div>

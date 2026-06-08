@@ -1,14 +1,19 @@
 import {
   HashId,
   OptionalHashId,
-  OptionalId,
-  type full,
-  type UpdateProfileRequest
+  type User,
+  type UserManager,
+  type ManagedUser,
+  type Account,
+  type UserPlaylistLibrary,
+  Id,
+  type UpdateUserRequestBody
 } from '@audius/sdk'
 import camelcaseKeys from 'camelcase-keys'
 import { omit, pick } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
+import type { PlaylistLibraryItem } from '~/models'
 import {
   AccountUserMetadata,
   ManagedUserMetadata,
@@ -28,10 +33,8 @@ import {
 import { playlistLibraryFromSDK } from './playlistLibrary'
 import { transformAndCleanList } from './utils'
 
-/** Converts a SDK `full.UserFull` response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
-export const userMetadataFromSDK = (
-  input: full.UserFull
-): UserMetadata | undefined => {
+/** Converts a SDK User response to a UserMetadata. Note: Will _not_ include the "current user" fields as those aren't returned by the Users API */
+export const userMetadataFromSDK = (input: User): UserMetadata | undefined => {
   const decodedUserId = OptionalHashId.parse(input.id)
   if (!decodedUserId) {
     return undefined
@@ -74,12 +77,19 @@ export const userMetadataFromSDK = (
         }
       : {},
     profile_picture: input.profilePicture
-      ? {
-          '150x150': input.profilePicture._150x150,
-          '480x480': input.profilePicture._480x480,
-          '1000x1000': input.profilePicture._1000x1000,
-          mirrors: input.profilePicture.mirrors
-        }
+      ? (() => {
+          const pic = input.profilePicture!
+          const mirrors =
+            'mirrors' in pic && Array.isArray(pic.mirrors)
+              ? pic.mirrors
+              : undefined
+          return {
+            '150x150': pic._150x150,
+            '480x480': pic._480x480,
+            '1000x1000': pic._1000x1000,
+            ...(mirrors != null && { mirrors })
+          }
+        })()
       : {},
     // Required Nullable fields
     bio: input.bio ?? null,
@@ -93,8 +103,8 @@ export const userMetadataFromSDK = (
     location: input.location ?? null,
     profile_picture_sizes: input.profilePictureSizes ?? null,
 
-    // Explicit handling for artist_coin_badge to convert nested logoUri to logo_uri
-    artist_coin_badge: input.artistCoinBadge
+    // Explicit handling for fan_club_badge to convert nested logoUri to logo_uri
+    fan_club_badge: input.artistCoinBadge
       ? {
           mint: input.artistCoinBadge.mint ?? '',
           logo_uri: input.artistCoinBadge.logoUri ?? '',
@@ -106,11 +116,11 @@ export const userMetadataFromSDK = (
   return newUser
 }
 
-export const userMetadataListFromSDK = (input?: full.UserFull[]) =>
+export const userMetadataListFromSDK = (input?: User[]) =>
   input ? input.map((d) => userMetadataFromSDK(d)).filter(removeNullable) : []
 
 export const managedUserFromSDK = (
-  input: full.ManagedUser
+  input: ManagedUser
 ): ManagedUserMetadata | undefined => {
   const user = userMetadataFromSDK(input.user)
   if (!user) {
@@ -122,11 +132,11 @@ export const managedUserFromSDK = (
   }
 }
 
-export const managedUserListFromSDK = (input?: full.ManagedUser[]) =>
+export const managedUserListFromSDK = (input?: ManagedUser[]) =>
   input ? input.map((d) => managedUserFromSDK(d)).filter(removeNullable) : []
 
 export const userManagerFromSDK = (
-  input: full.UserManager
+  input: UserManager
 ): UserManagerMetadata | undefined => {
   const manager = userMetadataFromSDK(input.manager)
   if (!manager) {
@@ -138,11 +148,11 @@ export const userManagerFromSDK = (
   }
 }
 
-export const userManagerListFromSDK = (input?: full.UserManager[]) =>
+export const userManagerListFromSDK = (input?: UserManager[]) =>
   input ? input.map((d) => userManagerFromSDK(d)).filter(removeNullable) : []
 
 export const accountFromSDK = (
-  input: full.AccountFull
+  input: Account
 ): AccountUserMetadata | undefined => {
   const user = userMetadataFromSDK(input.user)
   if (!user) {
@@ -164,29 +174,65 @@ export const accountFromSDK = (
   }
 }
 
+function mapLibraryContentsToSdkFormat(
+  libraryItems: PlaylistLibraryItem[]
+): UserPlaylistLibrary['contents'] {
+  const items: UserPlaylistLibrary['contents'] = []
+  for (const item of libraryItems) {
+    if (item.type === 'folder') {
+      const folder = {
+        id: item.id,
+        type: 'folder' as const,
+        name: item.name,
+        contents: mapLibraryContentsToSdkFormat(item.contents)
+      }
+      items.push(folder)
+    }
+    if (item.type === 'playlist') {
+      items.push({
+        playlistId: item.playlist_id,
+        type: 'playlist' as const
+      })
+    }
+  }
+  return items
+}
+
 export const userMetadataToSdk = (
   input: WriteableUserMetadata & Pick<AccountUserMetadata, 'playlist_library'>
-): UpdateProfileRequest['metadata'] => ({
+): UpdateUserRequestBody => ({
+  // The SDK's strict schema rejects null for name/handle/is_deactivated, so
+  // coerce nullish to undefined — legacy records where these are null in the
+  // DB (despite TS types) were silently failing profile save.
+  name: input.name ?? undefined,
+  handle: input.handle ?? undefined,
+  isDeactivated: input.is_deactivated ?? undefined,
+  // The SDK schema *does* allow null for profile_type, spl_usdc_payout_wallet,
+  // and coin_flair_mint (null is meaningful — e.g. coinFlairMint:null = use
+  // default badge). The OpenAPI-generated `UpdateUserRequestBody` type is
+  // incorrectly non-nullable for these, so spread via pick to bypass TS while
+  // preserving null at runtime.
   ...camelcaseKeys(
-    pick(input, [
-      'name',
-      'handle',
-      'is_deactivated',
-      'profile_type',
-      'spl_usdc_payout_wallet',
-      'coin_flair_mint'
-    ])
+    pick(input, ['profile_type', 'spl_usdc_payout_wallet', 'coin_flair_mint'])
   ),
   bio: input.bio ?? undefined,
   website: input.website ?? undefined,
-  artistPickTrackId: OptionalId.parse(input.artist_pick_track_id ?? undefined),
+  artistPickTrackId: input.artist_pick_track_id
+    ? Id.parse(input.artist_pick_track_id)
+    : undefined,
   events: {
-    referrer: OptionalId.parse(input.events?.referrer ?? undefined),
+    referrer: input.events?.referrer
+      ? Id.parse(input.events.referrer)
+      : undefined,
     isMobileUser: input.events?.is_mobile_user ?? undefined
   },
   location: input.location ?? undefined,
   twitterHandle: input.twitter_handle ?? undefined,
   instagramHandle: input.instagram_handle ?? undefined,
-  playlistLibrary: input.playlist_library ?? undefined,
+  playlistLibrary: input.playlist_library
+    ? {
+        contents: mapLibraryContentsToSdkFormat(input.playlist_library.contents)
+      }
+    : undefined,
   tiktokHandle: input.tiktok_handle ?? undefined
 })

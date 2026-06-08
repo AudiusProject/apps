@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { FixedDecimal } from '@audius/fixed-decimal'
 
 import { useCoinBalance } from '../api'
-import { useArtistCoin } from '../api/tan-query/coins/useArtistCoin'
+import { useFanClub } from '../api/tan-query/coins/useFanClub'
 import {
   getTokenDecimalPlaces,
   formatCurrencyWithSubscript,
@@ -51,7 +51,7 @@ export const useFormattedCoinBalance = (
     }
   )
 
-  const { data, isPending: isCoinPriceLoading } = useArtistCoin(mint)
+  const { data, isPending: isCoinPriceLoading } = useFanClub(mint)
 
   const balance = coinBalance?.balance
 

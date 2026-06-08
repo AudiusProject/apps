@@ -2,7 +2,7 @@ import { useEffect, useContext } from 'react'
 
 import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { Button } from '@audius/harmony'
+import { Button, isLightTheme } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
 import cn from 'classnames'
 import Lottie from 'lottie-react'
@@ -62,7 +62,7 @@ export const NotFoundPage = () => {
         })}
         css={{
           backgroundImage: `url(${tiledBackground})`,
-          backgroundBlendMode: theme.type === 'day' ? 'none' : 'color-burn'
+          backgroundBlendMode: isLightTheme(theme.type) ? 'none' : 'color-burn'
         }}
       >
         <div className={styles.contentWrapper}>

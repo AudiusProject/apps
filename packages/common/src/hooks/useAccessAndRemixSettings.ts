@@ -1,4 +1,4 @@
-import { useArtistCreatedCoin, useCurrentUserId } from '~/api/'
+import { useArtistCreatedFanClub, useCurrentUserId } from '~/api/'
 
 type UseAccessAndRemixSettingsProps = {
   isUpload: boolean
@@ -11,7 +11,7 @@ type UseAccessAndRemixSettingsProps = {
 
 export const useHasNoTokens = () => {
   const { data: userId } = useCurrentUserId()
-  const { data: coin, isLoading } = useArtistCreatedCoin(userId)
+  const { data: coin, isLoading } = useArtistCreatedFanClub(userId)
 
   return !isLoading && !coin
 }
@@ -45,8 +45,7 @@ export const useAccessAndRemixSettings = ({
 
   return {
     disableUsdcGate: isRemix || shouldDisablePublish,
-    disableSpecialAccessGate: isAlbum || isRemix || shouldDisablePublish,
-    disableSpecialAccessGateFields: isAlbum || isRemix || shouldDisablePublish,
+    disableFollowGate: isAlbum || isRemix || shouldDisablePublish,
     disableTokenGate: isAlbum || isRemix || hasNoTokens || shouldDisablePublish,
     disableTokenGateFields:
       isAlbum || isRemix || hasNoTokens || shouldDisablePublish,

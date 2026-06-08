@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import {
   useCurrentUserId,
@@ -12,6 +12,7 @@ import {
   SquareSizes,
   Collection
 } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   cacheCollectionsActions,
   addToCollectionUISelectors,
@@ -24,15 +25,15 @@ import {
   Scrollbar,
   IconMultiselectAdd,
   LoadingSpinner,
-  Tooltip
+  Tooltip,
+  Image
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { capitalize } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useModalState } from 'common/hooks/useModalState'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import SearchBar from 'components/search-bar/SearchBar'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 
@@ -56,10 +57,11 @@ const getMessages = (collectionType: 'album' | 'playlist') => ({
   hiddenAdd: `You cannot add hidden tracks to a public ${collectionType}.`
 })
 
-const AddToCollectionModal = () => {
+const AddToCollectionModal = NiceModal.create(() => {
   const dispatch = useDispatch()
 
-  const [isOpen, setIsOpen] = useModalState('AddToCollection')
+  const modal = useModal()
+  const handleClose = useCallback(() => modal.hide(), [modal])
   const collectionType = useSelector(getCollectionType)
   const trackId = useSelector(getTrackId)
   const trackTitle = useSelector(getTrackTitle)
@@ -119,7 +121,9 @@ const AddToCollectionModal = () => {
         })
       )
     } else {
-      dispatch(addTrackToPlaylist(trackId, playlist.playlist_id))
+      dispatch(
+        addTrackToPlaylist(trackId, playlist.playlist_id, { silent: true })
+      )
       if (trackTitle) {
         toast({
           content: messages.addedToast,
@@ -135,7 +139,7 @@ const AddToCollectionModal = () => {
       }
     }
 
-    setIsOpen(false)
+    handleClose()
   }
 
   const handleCreateCollection = () => {
@@ -149,16 +153,16 @@ const AddToCollectionModal = () => {
         'toast'
       )
     )
-    setIsOpen(false)
+    handleClose()
   }
 
   return (
     <Modal
-      isOpen={isOpen === true}
+      isOpen={modal.visible}
       showTitleHeader
       showDismissButton
       title={messages.title}
-      onClose={() => setIsOpen(false)}
+      onClose={handleClose}
       allowScroll={false}
       bodyClassName={styles.modalBody}
       headerContainerClassName={styles.modalHeader}
@@ -204,7 +208,7 @@ const AddToCollectionModal = () => {
       </Scrollbar>
     </Modal>
   )
-}
+})
 
 type CollectionItemProps = {
   collectionType: 'album' | 'playlist'
@@ -219,7 +223,7 @@ const CollectionItem = ({
   collection,
   collectionType
 }: CollectionItemProps) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId: collection.playlist_id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -230,11 +234,7 @@ const CollectionItem = ({
       className={cn(styles.listItem, [{ [styles.disabled]: disabled }])}
       onClick={() => handleClick(collection)}
     >
-      <DynamicImage
-        className={styles.image}
-        wrapperClassName={styles.imageWrapper}
-        image={image}
-      />
+      <Image className={cn(styles.imageWrapper, styles.image)} src={image} />
       {disabled ? (
         <Tooltip text={messages.hiddenAdd} placement='right'>
           <span className={styles.playlistName}>
@@ -247,5 +247,8 @@ const CollectionItem = ({
     </div>
   )
 }
+
+NiceModal.register('AddToCollection', AddToCollectionModal)
+registerNiceModalId('AddToCollection')
 
 export default AddToCollectionModal

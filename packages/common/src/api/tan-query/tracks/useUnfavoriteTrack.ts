@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Track } from '~/models/Track'
 import { accountActions } from '~/store/account'
@@ -25,7 +24,7 @@ export type UnfavoriteTrackArgs = {
 }
 
 export const useUnfavoriteTrack = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -122,7 +121,7 @@ export const useUnfavoriteTrack = () => {
     onSuccess: async (_, { trackId }) => {
       dispatch(tracksSocialActions.unsaveTrackSucceeded(trackId))
     },
-    onError: (error, { trackId }, context) => {
+    onError: (error, _args, context) => {
       if (!context) return
 
       // Revert optimistic updates
@@ -133,12 +132,7 @@ export const useUnfavoriteTrack = () => {
       })
       dispatch(accountActions.incrementTrackSaveCount())
 
-      reportToSentry({
-        error,
-        additionalInfo: { trackId },
-        name: 'Unfavorite Track',
-        feature: Feature.Social
-      })
+      console.error(error)
     }
   })
 }

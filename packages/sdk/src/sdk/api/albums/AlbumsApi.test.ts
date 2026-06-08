@@ -21,9 +21,9 @@ import { SolanaClient } from '../../services/Solana/programs/SolanaClient'
 import { Storage } from '../../services/Storage'
 import { StorageNodeSelector } from '../../services/StorageNodeSelector'
 import { Genre } from '../../types/Genre'
-import { Mood } from '../../types/Mood'
-import { Configuration } from '../generated/default'
+import { Configuration, Mood } from '../generated/default'
 import { PlaylistsApi as GeneratedPlaylistsApi } from '../generated/default/apis/PlaylistsApi'
+import type { PlaylistResponse } from '../generated/default/models/PlaylistResponse'
 import { TrackUploadHelper } from '../tracks/TrackUploadHelper'
 
 import { AlbumsApi } from './AlbumsApi'
@@ -38,8 +38,6 @@ const pngFile = fs.readFileSync(
 vitest.mock('../../services/EntityManager')
 vitest.mock('../../services/StorageNodeSelector')
 vitest.mock('../../services/Storage')
-vitest.mock('../tracks/TrackUploadHelper')
-vitest.mock('../tracks/TrackUploadHelper')
 vitest.mock('../generated/default/apis/PlaylistsApi')
 
 vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => {
@@ -66,21 +64,10 @@ vitest.spyOn(Storage.prototype, 'uploadFile').mockImplementation(() => {
 })
 
 vitest
-  .spyOn(TrackUploadHelper.prototype, 'generateId' as any)
+  .spyOn(TrackUploadHelper.prototype, 'generateId')
   .mockImplementation(async () => {
     return 1
   })
-
-vitest
-  .spyOn(
-    TrackUploadHelper.prototype,
-    'populateTrackMetadataWithUploadResponse' as any
-  )
-  .mockImplementation(async () => ({}))
-
-vitest
-  .spyOn(TrackUploadHelper.prototype, 'transformTrackUploadMetadata' as any)
-  .mockImplementation(async () => ({}))
 
 vitest
   .spyOn(EntityManagerClient.prototype, 'manageEntity')
@@ -91,21 +78,20 @@ vitest
     } as any
   })
 
+const mockPlaylistResponse: PlaylistResponse = {
+  latestChainBlock: 0,
+  latestIndexedBlock: 0,
+  latestChainSlotPlays: 0,
+  latestIndexedSlotPlays: 0,
+  signature: '',
+  timestamp: '',
+  version: { service: 'api', version: '1.0' },
+  data: []
+}
+
 vitest
   .spyOn(GeneratedPlaylistsApi.prototype, 'getPlaylist')
-  .mockImplementation(async () => {
-    return {
-      data: [
-        {
-          playlistName: 'test',
-          playlistContents: [
-            { trackId: 'yyNwXq7', timestamp: 1 },
-            { trackId: 'yyNwXq7', timestamp: 1 }
-          ]
-        } as any
-      ]
-    }
-  })
+  .mockImplementation(async () => mockPlaylistResponse)
 
 describe('AlbumsApi', () => {
   // TODO: Remove this setup in describe
@@ -129,33 +115,32 @@ describe('AlbumsApi', () => {
     const solanaClient = new SolanaClient({
       solanaWalletAdapter
     })
-    albums = new AlbumsApi(
-      new Configuration(),
-      new Storage({
+    albums = new AlbumsApi(new Configuration(), {
+      storage: new Storage({
         storageNodeSelector,
         logger: new Logger()
       }),
-      new EntityManagerClient({
+      entityManager: new EntityManagerClient({
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
       }),
       logger,
-      new ClaimableTokensClient({
+      claimableTokensClient: new ClaimableTokensClient({
         ...getDefaultClaimableTokensConfig(developmentConfig),
         audiusWalletClient,
         solanaClient
       }),
-      new PaymentRouterClient({
+      paymentRouterClient: new PaymentRouterClient({
         ...getDefaultPaymentRouterClientConfig(developmentConfig),
         solanaClient
       }),
-      new SolanaRelay(
+      solanaRelay: new SolanaRelay(
         new Configuration({
           middleware: []
         })
       ),
       solanaClient
-    )
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})
@@ -171,9 +156,9 @@ describe('AlbumsApi', () => {
           name: 'coverArt'
         },
         metadata: {
-          genre: Genre.ACOUSTIC,
+          genre: Genre.Acoustic,
           albumName: 'My Album',
-          mood: Mood.TENDER
+          mood: Mood.Tender
         },
         trackMetadatas: [
           {
@@ -230,9 +215,9 @@ describe('AlbumsApi', () => {
           name: 'coverArt'
         },
         metadata: {
-          genre: Genre.ACOUSTIC,
+          genre: Genre.Acoustic,
           albumName: 'My Album edited',
-          mood: Mood.TENDER
+          mood: Mood.Tender
         }
       })
 
@@ -252,7 +237,7 @@ describe('AlbumsApi', () => {
             name: 'coverArt'
           },
           metadata: {
-            mod: Mood.TENDER
+            mod: Mood.Tender
           } as any
         })
       }).rejects.toThrow()

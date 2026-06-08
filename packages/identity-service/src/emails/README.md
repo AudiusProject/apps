@@ -11,11 +11,3 @@
 | Variable         | Description                                 |
 | :--------------- | :------------------------------------------ |
 | name             | The user's name displayed in the email      |
-
-## welcomeDownload.html
-| Variable         | Description                                 |
-| :--------------- | :------------------------------------------ |
-| name             | The user's name displayed in the email      |
-
-## downloadMobileApp.html
-No Variables

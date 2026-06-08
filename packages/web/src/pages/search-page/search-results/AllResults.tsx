@@ -346,7 +346,6 @@ export const AllResults = ({ handleSearchTab }: AllResultsProps) => {
           </Flex>
           <TrackResults
             count={10}
-            viewLayout='grid'
             category={SearchKind.ALL}
             isFetching={isLoading}
             isPending={isPending}

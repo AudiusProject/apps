@@ -33,20 +33,31 @@ export const getWalletAccountQueryFn = async (
   sdk: AudiusSdk,
   queryClient: QueryClient
 ) => {
-  const { data } = await sdk.full.users.getUserAccount({
-    wallet
-  })
+  try {
+    const { data } = await sdk.users.getUserAccount({ wallet })
 
-  if (!data) {
-    console.warn('Missing user from account response')
+    if (!data) {
+      console.warn('Missing user from account response')
+      return null
+    }
+
+    const accountData = accountFromSDK(data)
+    if (accountData?.user) {
+      primeUserData({
+        users: [omit(accountData.user, 'playlists')],
+        queryClient
+      })
+    }
+    return accountData
+  } catch (err) {
+    // API returns 404 when user doesn't exist in api (incomplete signup).
+    // Return null so sign-in flow can redirect to complete account setup.
+    console.warn(
+      'Failed to fetch user account (may be incomplete signup):',
+      err
+    )
     return null
   }
-
-  const accountData = accountFromSDK(data)
-  if (accountData?.user) {
-    primeUserData({ users: [omit(accountData.user, 'playlists')], queryClient })
-  }
-  return accountData
 }
 
 /**
@@ -67,6 +78,9 @@ export function* getWalletAccountSaga(
     sdk,
     queryClient
   )
+  if (!accountData) {
+    return null
+  }
   const normalizedAccountData = {
     ...omit(accountData, ['user']),
     userId: accountData?.user?.user_id

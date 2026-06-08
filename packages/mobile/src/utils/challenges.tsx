@@ -28,7 +28,6 @@ import MobilePhoneWithArrow from 'app/assets/images/emojis/mobile-phone-with-arr
 import MultipleMusicalNotes from 'app/assets/images/emojis/multiple-musical-notes.png'
 import Parachute from 'app/assets/images/emojis/parachute.png'
 import Recycle from 'app/assets/images/emojis/recycle.png'
-import ArrowUp from 'app/assets/images/emojis/right-arrow-curving-up.png'
 import SmilingFaceLickingLips from 'app/assets/images/emojis/smiling-face-licking-lips.png'
 import SpeechBalloon from 'app/assets/images/emojis/speech-balloon.png'
 import TrebleClef from 'app/assets/images/emojis/treble-clef.png'
@@ -138,18 +137,6 @@ const mobileChallengeConfig: Partial<
         screen: 'explore',
         params: { screen: 'Explore' }
       }
-    }
-  },
-  'trending-playlist': {
-    icon: ArrowUp,
-    buttonInfo: {
-      iconRight: IconCheck
-    }
-  },
-  tp: {
-    icon: ArrowUp,
-    buttonInfo: {
-      iconRight: IconCheck
     }
   },
   'trending-track': {

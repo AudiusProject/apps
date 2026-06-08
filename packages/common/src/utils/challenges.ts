@@ -73,9 +73,9 @@ export const challengeRewardsConfig: Partial<
     id: ChallengeName.ListenStreakEndless,
     title: 'Listening Streak',
     description: () =>
-      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening (Silver Tier Required).',
+      'Listen to Audius daily for a week to start a streak and earn $AUDIO for each day you keep it going.',
     fullDescription: () =>
-      'Listen to music on Audius daily for seven days to start a streak. After that, earn $AUDIO for each consecutive day you continue listening (Silver Tier Required).',
+      'Listen to Audius daily for a week to start a streak and earn $AUDIO for each day you keep it going.',
     progressLabel: '%0/%1 Days',
     completedLabel: 'Keep Listening',
     panelButtonText: 'Trending on Audius'
@@ -185,18 +185,18 @@ export const challengeRewardsConfig: Partial<
   },
   [ChallengeName.TrendingTrack]: {
     id: ChallengeName.TrendingTrack,
-    title: 'Global Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    title: 'Global Trending Weekly Top 10',
+    description: () => 'Top 10 winners are selected every Friday at Noon PT!',
     fullDescription: () =>
-      'Top 5 winners are selected every Friday at Noon PT!',
+      'Top 10 winners are selected every Friday at Noon PT!',
     panelButtonText: 'See More'
   },
   [ChallengeName.TrendingUndergroundTrack]: {
     id: ChallengeName.TrendingUndergroundTrack,
-    title: 'Underground Trending Weekly Top 5',
-    description: () => 'Top 5 winners are selected every Friday at Noon PT!',
+    title: 'Underground Trending Weekly Top 10',
+    description: () => 'Top 10 winners are selected every Friday at Noon PT!',
     fullDescription: () =>
-      'Top 5 winners are selected every Friday at Noon PT!',
+      'Top 10 winners are selected every Friday at Noon PT!',
     panelButtonText: 'See More'
   },
   'top-api': {

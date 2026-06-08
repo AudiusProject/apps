@@ -1,10 +1,10 @@
-import { full, OptionalHashId } from '@audius/sdk'
+import { OptionalHashId, type Favorite as SdkFavorite } from '@audius/sdk'
 import { omit } from 'lodash'
 import snakecaseKeys from 'snakecase-keys'
 
 import { Favorite, FavoriteType } from '~/models/Favorite'
 
-export const favoriteFromSDK = (input: full.Favorite): Favorite | undefined => {
+export const favoriteFromSDK = (input: SdkFavorite): Favorite | undefined => {
   const decodedSaveItemId =
     typeof input.favoriteItemId === 'string'
       ? OptionalHashId.parse(input.favoriteItemId)
@@ -22,6 +22,7 @@ export const favoriteFromSDK = (input: full.Favorite): Favorite | undefined => {
     ...omit(snakecaseKeys(input), ['favorite_item_id', 'favorite_type']),
     save_item_id: decodedSaveItemId,
     save_type: input.favoriteType as FavoriteType,
-    user_id: decodedUserId
+    user_id: decodedUserId,
+    created_at: input.createdAt
   }
 }

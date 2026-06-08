@@ -8,7 +8,7 @@ import {
   useCurrentAccountUser
 } from '@audius/common/api'
 import { useAccountSwitcher } from '@audius/common/hooks'
-import { Name, ErrorLevel, UserMetadata } from '@audius/common/models'
+import { Name, UserMetadata } from '@audius/common/models'
 import { SignInResponse } from '@audius/common/services'
 import { signOutActions } from '@audius/common/store'
 import {
@@ -33,8 +33,6 @@ import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { AccountListContent } from 'components/nav/desktop/AccountSwitcher/AccountListContent'
 import { ProfileInfo } from 'components/profile-info/ProfileInfo'
 import { audiusSdk, authService } from 'services/audius-sdk'
-import { fingerprintClient } from 'services/fingerprint'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import styles from './OAuthLoginPage.module.css'
 import { ApproveTransactionScreen } from './components/ApproveTransactionScreen'
@@ -43,7 +41,7 @@ import { ContentWrapper } from './components/ContentWrapper'
 import { PermissionsSection } from './components/PermissionsSection'
 import { useOAuthSetup } from './hooks'
 import { messages } from './messages'
-import { WriteOnceTx } from './utils'
+import { DashboardWalletTx } from './utils'
 
 const { signOut } = signOutActions
 
@@ -78,7 +76,7 @@ export const OAuthLoginPage = () => {
   const toggleOtpUI = (on: boolean) => {
     if (on) {
       setShowOtpInput(true)
-      setSignInError(messages.otpError)
+      setSignInError(null)
     } else {
       setSignInError(null)
       setShowOtpInput(false)
@@ -115,7 +113,7 @@ export const OAuthLoginPage = () => {
       })
     )
     if (error && !isUserError) {
-      reportToSentry({ level: ErrorLevel.Error, error })
+      console.error(error)
     }
   }
 
@@ -189,17 +187,15 @@ export const OAuthLoginPage = () => {
     setIsSubmitting(true)
     let signInResponse: SignInResponse
     try {
-      const fpResponse = await fingerprintClient.identify(emailInput, 'web')
       const sanitizedOtp = otpInput ? otpInput.replace(/\s/g, '') : undefined
       signInResponse = await authService.signIn(
         emailInput,
         passwordInput,
-        fpResponse?.visitorId,
         sanitizedOtp
       )
 
       const sdk = await audiusSdk()
-      const { data } = await sdk.full.users.getUserAccount({
+      const { data } = await sdk.users.getUserAccount({
         wallet: signInResponse.walletAddress
       })
       if (!data) {
@@ -342,9 +338,14 @@ export const OAuthLoginPage = () => {
         </Flex>
       ) : (
         <div className={styles.container}>
-          <Flex alignItems='center' direction='column'>
-            <Flex gap='l' alignItems='center' mb='l'>
-              <Flex h='88px' w='88px'>
+          {/* Logos + Title */}
+          <Flex alignItems='center' direction='column' gap='m'>
+            <Flex gap='l' alignItems='center' justifyContent='center' w='100%'>
+              <Flex
+                h='88px'
+                w='88px'
+                css={{ borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}
+              >
                 <img src={AppIcon} alt='Audius Logo' />
               </Flex>
               <IconTransaction color='default' />
@@ -352,7 +353,7 @@ export const OAuthLoginPage = () => {
                 h='88px'
                 w='88px'
                 borderRadius='l'
-                css={{ overflow: 'hidden' }}
+                css={{ overflow: 'hidden', flexShrink: 0 }}
               >
                 {appImage ? (
                   <img src={appImage} alt={`${appName} Image`} />
@@ -372,29 +373,33 @@ export const OAuthLoginPage = () => {
                 )}
               </Flex>
             </Flex>
-            <Text variant='body' size='l'>{`${messages.allow}:`}</Text>
-            <Text variant='heading' size='s'>
-              {appName}
-            </Text>
+            <Flex direction='column' gap='s' alignItems='center'>
+              <Text variant='body' size='l' color='default'>
+                {`${messages.allow}:`}
+              </Text>
+              <Text variant='heading' size='s' color='default'>
+                {appName}
+              </Text>
+            </Flex>
           </Flex>
+
+          {/* Permissions */}
           {userAlreadyWriteAuthorized ? null : (
             <PermissionsSection
               scope={scope}
-              tx={tx as WriteOnceTx}
+              tx={tx as DashboardWalletTx}
               userEmail={isInManagerMode ? userEmail : null}
               isLoggedIn={isLoggedIn}
               isLoading={userEmail === null}
-              txParams={txParams}
+              txParams={txParams ?? undefined}
             />
           )}
-          <div className={styles.formArea}>
-            {isLoggedIn ? (
-              <div className={styles.userInfoContainer}>
-                <Text
-                  variant='body'
-                  size='m'
-                  css={{ color: 'var(--harmony-n-600)' }}
-                >
+
+          {/* Account / Sign-in section */}
+          {isLoggedIn ? (
+            <Flex direction='column' gap='l'>
+              <Flex direction='column' gap='s'>
+                <Text variant='body' size='m' color='subdued'>
                   {messages.signedInAs}
                 </Text>
                 <div className={styles.tile}>
@@ -407,71 +412,78 @@ export const OAuthLoginPage = () => {
                     user={account}
                   />
                 </div>
-                <Flex mt='l' alignItems='center' justifyContent='space-between'>
-                  <TextLink variant='visible' size='s' onClick={handleSignOut}>
-                    {messages.signOut}
-                  </TextLink>
-                  {accounts.length > 0 ? (
-                    <PlainButton
-                      iconLeft={IconUserArrowRotate}
-                      aria-label={messages.switchAccount}
-                      color='default'
-                      onClick={onOpenAccountSwitcher}
-                    >
-                      {messages.switchAccount}
-                    </PlainButton>
-                  ) : null}
-                </Flex>
-                <CTAButton
-                  isLoading={isSubmitting}
-                  disabled={isSubmitDisabled}
-                  onClick={handleAlreadySignedInAuthorizeSubmit}
-                >
-                  {userAlreadyWriteAuthorized
-                    ? messages.continueButton
-                    : messages.authorizeButton}
-                </CTAButton>
-              </div>
-            ) : (
-              <div className={styles.signInFormContainer}>
-                <form onSubmit={handleSignInFormSubmit}>
-                  {/* @ts-ignore */}
-                  <Input
-                    placeholder='Email'
-                    size='medium'
-                    type='email'
-                    name='email'
-                    id='email-input'
-                    isRequired
-                    autoComplete='username'
-                    value={emailInput}
-                    onChange={handleEmailInputChange}
-                  />
-                  {/* @ts-ignore */}
-                  <Input
-                    className={styles.passwordInput}
-                    placeholder='Password'
-                    size='medium'
-                    name='password'
-                    id='password-input'
-                    isRequired
-                    autoComplete='current-password'
-                    value={passwordInput}
-                    type='password'
-                    onChange={setPasswordInput}
-                  />
-                  {signInError == null ? null : (
-                    <div className={styles.credentialsErrorContainer}>
-                      <IconValidationX
-                        width={14}
-                        height={14}
-                        className={styles.credentialsErrorIcon}
-                      />
-                      <span className={styles.errorText}>{signInError}</span>
-                    </div>
-                  )}
-                  {showOtpInput ? (
-                    // @ts-ignore
+              </Flex>
+              <Flex alignItems='center' justifyContent='space-between'>
+                <TextLink variant='visible' size='s' onClick={handleSignOut}>
+                  {messages.signOut}
+                </TextLink>
+                {accounts.length > 0 ? (
+                  <PlainButton
+                    iconLeft={IconUserArrowRotate}
+                    aria-label={messages.switchAccount}
+                    color='default'
+                    onClick={onOpenAccountSwitcher}
+                  >
+                    {messages.switchAccount}
+                  </PlainButton>
+                ) : null}
+              </Flex>
+              <CTAButton
+                isLoading={isSubmitting}
+                disabled={isSubmitDisabled}
+                onClick={handleAlreadySignedInAuthorizeSubmit}
+              >
+                {userAlreadyWriteAuthorized
+                  ? messages.continueButton
+                  : messages.authorizeButton}
+              </CTAButton>
+            </Flex>
+          ) : (
+            <Flex direction='column'>
+              <form onSubmit={handleSignInFormSubmit}>
+                {/* @ts-ignore */}
+                <Input
+                  placeholder='Email'
+                  size='medium'
+                  type='email'
+                  name='email'
+                  id='email-input'
+                  isRequired
+                  autoComplete='username'
+                  value={emailInput}
+                  onChange={handleEmailInputChange}
+                />
+                {/* @ts-ignore */}
+                <Input
+                  className={styles.passwordInput}
+                  placeholder='Password'
+                  size='medium'
+                  name='password'
+                  id='password-input'
+                  isRequired
+                  autoComplete='current-password'
+                  value={passwordInput}
+                  type='password'
+                  onChange={setPasswordInput}
+                />
+                {signInError == null ? null : (
+                  <div className={styles.credentialsErrorContainer}>
+                    <IconValidationX
+                      width={14}
+                      height={14}
+                      className={styles.credentialsErrorIcon}
+                    />
+                    <span className={styles.errorText}>{signInError}</span>
+                  </div>
+                )}
+                {showOtpInput ? (
+                  <>
+                    <Flex mt='l'>
+                      <Text variant='body' size='s' color='subdued'>
+                        {messages.otpPrompt}
+                      </Text>
+                    </Flex>
+                    {/* @ts-ignore */}
                     <Input
                       placeholder='Verification Code'
                       size='medium'
@@ -483,27 +495,28 @@ export const OAuthLoginPage = () => {
                       onChange={setOtpInput}
                       className={cn(styles.otpInput)}
                     />
-                  ) : null}
-                  <CTAButton type='submit' isLoading={isSubmitting}>
-                    {messages.signInButton}
-                  </CTAButton>
-                </form>
-                <div className={styles.signUpButtonContainer}>
-                  <Link
-                    className={styles.linkButton}
-                    to={`/oauth/auth/signup${location.search}`}
-                  >
-                    {messages.signUp}
-                  </Link>
-                </div>
+                  </>
+                ) : null}
+                <CTAButton type='submit' isLoading={isSubmitting}>
+                  {messages.signInButton}
+                </CTAButton>
+              </form>
+              <div className={styles.signUpButtonContainer}>
+                <Link
+                  className={styles.linkButton}
+                  to={`/oauth/auth/signup${location.search}`}
+                >
+                  {messages.signUp}
+                </Link>
               </div>
-            )}
-            {generalSubmitError == null ? null : (
-              <div className={styles.generalErrorContainer}>
-                <span className={styles.errorText}>{generalSubmitError}</span>
-              </div>
-            )}
-          </div>
+            </Flex>
+          )}
+
+          {generalSubmitError == null ? null : (
+            <div className={styles.generalErrorContainer}>
+              <span className={styles.errorText}>{generalSubmitError}</span>
+            </div>
+          )}
         </div>
       )}
     </ContentWrapper>

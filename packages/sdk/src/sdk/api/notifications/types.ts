@@ -1,6 +1,11 @@
 import { z } from 'zod'
 
+import type { EntityManagerService } from '../../services'
 import { HashId } from '../../types/HashId'
+
+export type NotificationsApiServicesConfig = {
+  entityManager?: EntityManagerService
+}
 
 export const MarkAllNotificationsAsViewedSchema = z.object({
   userId: HashId

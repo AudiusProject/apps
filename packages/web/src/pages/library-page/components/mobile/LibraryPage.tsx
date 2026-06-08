@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react'
@@ -11,7 +12,7 @@ import {
   useGatedContentAccessMap,
   useDebouncedCallback
 } from '@audius/common/hooks'
-import { statusIsNotFinalized, ID, UID, Lineup } from '@audius/common/models'
+import { statusIsNotFinalized, ID, Status, UID } from '@audius/common/models'
 import {
   libraryPageSelectors,
   LibraryCategory,
@@ -22,25 +23,26 @@ import {
 import { route } from '@audius/common/utils'
 import {
   Button,
+  Flex,
   IconAlbum,
   IconFilter,
   IconNote,
-  IconPlaylists
+  IconPlaylists,
+  Skeleton
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useSelector } from 'react-redux'
 
-import { CollectionCard } from 'components/collection'
+import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { InfiniteCardLineup } from 'components/lineup/InfiniteCardLineup'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { useMainPageHeader } from 'components/nav/mobile/NavContext'
+import { Tab, TabList } from 'components/tabs'
 import TrackList from 'components/track/mobile/TrackList'
 import { TrackItemAction } from 'components/track/mobile/TrackListItem'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
-import useTabs from 'hooks/useTabs/useTabs'
 import { useLibraryCollections } from 'pages/library-page/hooks/useLibraryCollections'
 import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
@@ -51,7 +53,33 @@ import styles from './LibraryPage.module.css'
 import NewCollectionButton from './NewCollectionButton'
 
 const { TRENDING_PAGE } = route
-const { getCategory } = libraryPageSelectors
+const { getCategory, getSelectedCategoryLocalTrackAdds } = libraryPageSelectors
+
+const INITIAL_MOBILE_TRACK_SKELETON_ROWS = 10
+
+type LibraryTrackSkeletonPlaceholderProps = {
+  rowCount: number
+}
+
+const LibraryTrackSkeletonPlaceholder = (
+  props: LibraryTrackSkeletonPlaceholderProps
+) => {
+  const { rowCount } = props
+  const n =
+    rowCount > 0
+      ? Math.min(rowCount, INITIAL_MOBILE_TRACK_SKELETON_ROWS)
+      : INITIAL_MOBILE_TRACK_SKELETON_ROWS
+  return (
+    <Flex column gap='m' p='l' w='100%'>
+      {Array.from({ length: n }).map((_, i) => (
+        <Flex key={i} column gap='xs'>
+          <Skeleton h={16} w='55%' noShimmer />
+          <Skeleton h={14} w='32%' noShimmer />
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
 
 const emptyTabMessages = {
   afterSaved: "Once you have, this is where you'll find them!",
@@ -175,7 +203,7 @@ const TracksLineup = ({
   queuedAndPlaying,
   onTogglePlay
 }: {
-  tracks: Lineup<LibraryPageTrack>
+  tracks: { entries: LibraryPageTrack[]; status: Status }
   goToTrending: () => void
   onFilterChange: (e: any) => void
   filterText: string
@@ -184,6 +212,11 @@ const TracksLineup = ({
   queuedAndPlaying: boolean
   onTogglePlay: (uid: UID, trackId: ID) => void
 }) => {
+  const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
+  const expectedTrackCount = useMemo(
+    () => tracks.entries.length + Object.keys(localTrackAdds).length,
+    [tracks.entries.length, localTrackAdds]
+  )
   const [trackEntries] = getFilteredData(tracks.entries)
   const trackAccessMap = useGatedContentAccessMap(trackEntries)
   const trackList = trackEntries
@@ -270,7 +303,7 @@ const TracksLineup = ({
           </div>
         )}
         {isLoadingInitial ? (
-          <LoadingSpinner className={styles.spinner} />
+          <LibraryTrackSkeletonPlaceholder rowCount={expectedTrackCount} />
         ) : null}
         {trackList.length > 0 && (
           <div className={styles.trackListContainer}>
@@ -338,6 +371,17 @@ const AlbumCardLineup = () => {
   const albumCards = albumIds?.map((id) => {
     return <CollectionCard key={id} id={id} size='xs' />
   })
+  const albumCardsWithLoading = isFetchingNextPage
+    ? (albumCards ?? []).concat(
+        Array.from({ length: 6 }, (_, i) => (
+          <CollectionCardSkeleton
+            key={`loading-album-${i}`}
+            size='xs'
+            noShimmer
+          />
+        ))
+      )
+    : albumCards
 
   const noSavedAlbums = !isPending && albumIds?.length === 0 && !filterText
 
@@ -375,15 +419,20 @@ const AlbumCardLineup = () => {
               </div>
             </div>
           )}
-          {isPending ? <LoadingSpinner className={styles.spinner} /> : null}
+          {isPending ? (
+            <div className={styles.skeletonCardGrid}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <CollectionCardSkeleton key={i} size='xs' noShimmer />
+              ))}
+            </div>
+          ) : null}
           {albumIds?.length > 0 ? (
             <div className={styles.cardsContainer}>
               <InfiniteCardLineup
                 hasMore={hasNextPage}
                 loadMore={loadNextPage}
                 cardsClassName={styles.cardLineup}
-                cards={albumCards}
-                isLoadingMore={isFetchingNextPage}
+                cards={albumCardsWithLoading}
               />
             </div>
           ) : null}
@@ -458,6 +507,17 @@ const PlaylistCardLineup = ({
       />
     )
   })
+  const playlistCardsWithLoading = isFetchingNextPage
+    ? (playlistCards ?? []).concat(
+        Array.from({ length: 6 }, (_, i) => (
+          <CollectionCardSkeleton
+            key={`loading-playlist-${i}`}
+            size='xs'
+            noShimmer
+          />
+        ))
+      )
+    : playlistCards
 
   const containerRef = useTabContainerRef({
     resultsLength: playlistIds?.length,
@@ -495,15 +555,20 @@ const PlaylistCardLineup = ({
             </div>
           )}
           <NewCollectionButton collectionType='playlist' />
-          {isPending ? <LoadingSpinner className={styles.spinner} /> : null}
+          {isPending ? (
+            <div className={styles.skeletonCardGrid}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <CollectionCardSkeleton key={i} size='xs' noShimmer />
+              ))}
+            </div>
+          ) : null}
           {playlistIds?.length > 0 ? (
             <div className={styles.cardsContainer}>
               <InfiniteCardLineup
                 hasMore={hasNextPage}
                 loadMore={loadNextPage}
                 cardsClassName={styles.cardLineup}
-                cards={playlistCards}
-                isLoadingMore={isFetchingNextPage}
+                cards={playlistCardsWithLoading}
               />
             </div>
           ) : null}
@@ -514,28 +579,10 @@ const PlaylistCardLineup = ({
 }
 
 const filterMessages = {
-  filterTracks: 'Filter Tracks',
-  filterAlbums: 'Filter Albums',
-  filterPlaylists: 'Filter Playlists'
+  filterTracks: 'Filter...',
+  filterAlbums: 'Filter...',
+  filterPlaylists: 'Filter...'
 }
-
-const tabHeaders = [
-  {
-    icon: <IconNote />,
-    text: LibraryPageTabs.TRACKS,
-    label: LibraryPageTabs.TRACKS
-  },
-  {
-    icon: <IconAlbum />,
-    text: LibraryPageTabs.ALBUMS,
-    label: LibraryPageTabs.ALBUMS
-  },
-  {
-    icon: <IconPlaylists />,
-    text: LibraryPageTabs.PLAYLISTS,
-    label: LibraryPageTabs.PLAYLISTS
-  }
-]
 
 const messages = {
   title: 'Library',
@@ -555,47 +602,52 @@ const LibraryPage = () => {
     filterText,
     playlistUpdates,
     updatePlaylistLastViewedAt,
-    currentTab,
-    onChangeTab
+    currentTab
   } = useLibraryPage()
   useMainPageHeader()
   const queuedAndPlaying = playing && isQueued
 
   const goToTrending = () => goToRoute(TRENDING_PAGE)
-  const elements = [
-    <TracksLineup
-      key='tracksLineup'
-      tracks={tracks}
-      goToTrending={goToTrending}
-      onFilterChange={onFilterChange}
-      filterText={filterText}
-      getFilteredData={getFilteredData}
-      playingUid={playingUid}
-      queuedAndPlaying={queuedAndPlaying}
-      onTogglePlay={onTogglePlay}
-    />,
-    <AlbumCardLineup key='albumLineup' />,
-    <PlaylistCardLineup
-      key='playlistLineup'
-      goToTrending={goToTrending}
-      onFilterChange={onFilterChange}
-      playlistUpdates={playlistUpdates}
-      updatePlaylistLastViewedAt={updatePlaylistLastViewedAt}
-    />
-  ]
 
-  const handleTabClick = useCallback(
-    (newTab: string) => {
-      onChangeTab(newTab as LibraryPageTabs)
-    },
-    [onChangeTab]
+  const body =
+    currentTab === LibraryPageTabs.ALBUMS ? (
+      <AlbumCardLineup />
+    ) : currentTab === LibraryPageTabs.PLAYLISTS ? (
+      <PlaylistCardLineup
+        goToTrending={goToTrending}
+        onFilterChange={onFilterChange}
+        playlistUpdates={playlistUpdates}
+        updatePlaylistLastViewedAt={updatePlaylistLastViewedAt}
+      />
+    ) : (
+      <TracksLineup
+        tracks={tracks}
+        goToTrending={goToTrending}
+        onFilterChange={onFilterChange}
+        filterText={filterText}
+        getFilteredData={getFilteredData}
+        playingUid={playingUid}
+        queuedAndPlaying={queuedAndPlaying}
+        onTogglePlay={onTogglePlay}
+      />
+    )
+
+  const tabs = useMemo(
+    () => (
+      <TabList variant='mobile'>
+        <Tab to='/library/tracks' icon={<IconNote />}>
+          {LibraryPageTabs.TRACKS}
+        </Tab>
+        <Tab to='/library/albums' icon={<IconAlbum />}>
+          {LibraryPageTabs.ALBUMS}
+        </Tab>
+        <Tab to='/library/playlists' icon={<IconPlaylists />}>
+          {LibraryPageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
+    ),
+    []
   )
-  const { tabs, body } = useTabs({
-    tabs: tabHeaders,
-    elements,
-    initialScrollOffset: SCROLL_HEIGHT,
-    onTabClick: handleTabClick
-  })
 
   const { setHeader } = useContext(HeaderContext)
   useEffect(() => {

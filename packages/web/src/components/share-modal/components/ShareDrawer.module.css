@@ -39,12 +39,11 @@
   fill: var(--harmony-secondary);
 }
 
-.shareToTwitterAction {
+.shareToXAction {
   composes: action;
-  color: var(--harmony-blue);
-  border-top: none;
+  color: var(--harmony-secondary);
 }
 
-.shareToTwitterAction path {
-  fill: var(--harmony-blue);
+.shareToXAction path {
+  fill: var(--harmony-secondary);
 }

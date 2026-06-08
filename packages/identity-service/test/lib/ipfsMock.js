@@ -1,9 +1,9 @@
 const sinon = require('sinon')
 
-function getIPFSMock () {
+function getIPFSMock() {
   const ipfsMock = {
     types: {
-      Buffer: Buffer
+      Buffer
     },
     files: {
       add: sinon.mock()

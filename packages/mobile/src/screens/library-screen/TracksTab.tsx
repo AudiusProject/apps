@@ -1,43 +1,33 @@
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { useTracks, useUsers } from '@audius/common/api'
-import { PlaybackSource, Status } from '@audius/common/models'
+import { useLibraryTracks, useTracks, useUsers } from '@audius/common/api'
+import { Kind, Status } from '@audius/common/models'
 import type { ID, UID, Track, User } from '@audius/common/models'
 import {
-  libraryPageTracksLineupActions as tracksActions,
-  libraryPageActions,
   libraryPageSelectors,
   LibraryCategory,
   LibraryPageTabs,
+  playbackActions,
+  playbackSelectors,
   reachabilitySelectors
 } from '@audius/common/store'
-import { Uid, type Nullable } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import { makeStableUid, type Nullable } from '@audius/common/utils'
 import { debounce } from 'lodash'
-import Animated, { Layout } from 'react-native-reanimated'
+import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Tile, VirtualizedScrollView } from 'app/components/core'
+import { PlayBarChin } from 'app/components/core/PlayBarChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
 import { TrackList } from 'app/components/track-list'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
 import { getIsDoneLoadingFromDisk } from 'app/store/offline-downloads/selectors'
 import { makeStyles } from 'app/styles'
 
-import { LoadingMoreSpinner } from './LoadingMoreSpinner'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
-import { useFavoritesLineup } from './useFavoritesLineup'
 
-const { fetchSaves: fetchSavesAction, fetchMoreSaves } = libraryPageActions
-const {
-  getTrackSaves,
-  getLibraryTracksStatus,
-  getInitialFetchStatus,
-  getSelectedCategoryLocalTrackAdds,
-  getIsFetchingMore,
-  getCategory
-} = libraryPageSelectors
+const { getSelectedCategoryLocalTrackAdds, getCategory } = libraryPageSelectors
 const { getIsReachable } = reachabilitySelectors
 
 const messages = {
@@ -50,34 +40,51 @@ const messages = {
   inputPlaceholder: 'Filter Tracks'
 }
 
-const useStyles = makeStyles(({ spacing }) => ({
-  container: {
-    marginBottom: spacing(4),
-    marginHorizontal: spacing(3)
+const useStyles = makeStyles(({ palette, spacing }) => ({
+  root: {
+    flex: 1
   },
-  trackList: {
+  rowsContainer: {
+    flex: 1,
+    marginTop: spacing(3),
+    marginBottom: spacing(4),
+    marginHorizontal: spacing(3),
+    borderWidth: 1,
+    borderColor: palette.neutralLight8,
+    backgroundColor: palette.white,
     borderRadius: 8,
     overflow: 'hidden'
   },
-  spinnerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: spacing(12)
+  emptyState: {
+    marginTop: spacing(3),
+    marginHorizontal: spacing(3)
   }
 }))
 
 const FETCH_LIMIT = 50
+const FILTER_DEBOUNCE_MS = 250
 
-function useTracksWithUsers(trackUids: string[]) {
-  const trackIds = trackUids.map((uid) => Uid.fromString(uid).id as ID)
+function useTracksWithUsers(trackIds: ID[]) {
   const { data: tracks = [], byId: tracksById } = useTracks(trackIds)
-  const { byId: usersById } = useUsers(tracks.map((track) => track.owner_id))
+  const ownerIds = useMemo(
+    () => tracks.map((track) => track.owner_id),
+    [tracks]
+  )
+  const { byId: usersById } = useUsers(ownerIds)
 
-  return trackUids.map((uid) => {
-    const track = tracksById[Uid.fromString(uid).id]
-    const user = usersById[track?.owner_id]
-    return { uid, track, user }
-  })
+  return useMemo(
+    () =>
+      trackIds.map((id) => {
+        const track = tracksById[id]
+        const user = usersById[track?.owner_id]
+        return {
+          uid: makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS'),
+          track,
+          user
+        }
+      }),
+    [trackIds, tracksById, usersById]
+  )
 }
 
 export const TracksTab = () => {
@@ -86,37 +93,62 @@ export const TracksTab = () => {
   const isReachable = useSelector(getIsReachable)
 
   const [filterValue, setFilterValue] = useState('')
-  const [fetchPage, setFetchPage] = useState(0)
+  const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
   const selectedCategory = useSelector((state) =>
     getCategory(state, { currentTab: LibraryPageTabs.TRACKS })
   )
-  const savedTracksStatus = useSelector((state) => {
-    const onlineSavedTracksStatus = getLibraryTracksStatus(state)
-    const isDoneLoadingFromDisk = getIsDoneLoadingFromDisk(state)
-    const offlineSavedTracksStatus = isDoneLoadingFromDisk
-      ? Status.SUCCESS
-      : Status.LOADING
-    return isReachable ? onlineSavedTracksStatus : offlineSavedTracksStatus
+
+  const {
+    trackIds: fetchedTrackIds,
+    isPending: isLibraryQueryPending,
+    isFetchingNextPage,
+    isError: isLibraryQueryError,
+    hasNextPage,
+    fetchNextPage
+  } = useLibraryTracks({
+    category: selectedCategory,
+    query: debouncedFilterValue,
+    pageSize: FETCH_LIMIT
   })
 
-  const initialFetch = useSelector(getInitialFetchStatus)
-  const isFetchingMore = useSelector(getIsFetchingMore)
-  const saves = useSelector(getTrackSaves)
+  const isDoneLoadingFromDisk = useSelector(getIsDoneLoadingFromDisk)
+  const savedTracksStatus = isReachable
+    ? isLibraryQueryError
+      ? Status.ERROR
+      : isLibraryQueryPending
+        ? Status.LOADING
+        : Status.SUCCESS
+    : isDoneLoadingFromDisk
+      ? Status.SUCCESS
+      : Status.LOADING
+
+  const isFetchingMore = isFetchingNextPage
   const localAdditions = useSelector(getSelectedCategoryLocalTrackAdds)
 
   const saveCount = useMemo(
-    () => saves.length + Object.keys(localAdditions).length,
-    [saves, localAdditions]
+    () => fetchedTrackIds.length + Object.keys(localAdditions).length,
+    [fetchedTrackIds, localAdditions]
+  )
+  const trackSkeletonRowCount = useMemo(
+    () => (saveCount > 0 ? Math.min(saveCount, 10) : 10),
+    [saveCount]
   )
 
-  const fetchSaves = useCallback(() => {
-    dispatch(
-      fetchSavesAction(filterValue, selectedCategory, '', '', 0, FETCH_LIMIT)
-    )
-  }, [dispatch, filterValue, selectedCategory])
+  const lineupStatus = savedTracksStatus
 
-  const { entries, status: lineupStatus } = useFavoritesLineup(fetchSaves)
-  const trackUids = useMemo(() => entries.map(({ uid }) => uid), [entries])
+  // Combine server-fetched ids with locally-added ones (optimistic favorites
+  // / reposts / purchases that haven't yet been included in the server page).
+  const trackIds = useMemo(() => {
+    const ids = new Set<ID>()
+    fetchedTrackIds.forEach((id) => ids.add(id))
+    Object.keys(localAdditions).forEach((id) => ids.add(Number(id)))
+    return Array.from(ids)
+  }, [fetchedTrackIds, localAdditions])
+
+  const trackUids = useMemo(
+    () => trackIds.map((id) => makeStableUid(Kind.TRACKS, id, 'SAVED_TRACKS')),
+    [trackIds]
+  )
 
   const filterTrack = useCallback(
     (track: Nullable<Track>, user: Nullable<User>) => {
@@ -133,7 +165,7 @@ export const TracksTab = () => {
     [filterValue]
   )
 
-  const trackData = useTracksWithUsers(trackUids)
+  const trackData = useTracksWithUsers(trackIds)
   const isLoadingTracks = trackData.some(({ track, user }) => !track || !user)
 
   let emptyTabText: string
@@ -147,108 +179,151 @@ export const TracksTab = () => {
     emptyTabText = messages.emptyTracksPurchasedText
   }
 
-  const filteredTrackUids = useMemo(() => {
-    return trackData
-      .filter(({ track, user }) => filterTrack(track, user))
-      .map(({ uid }) => uid)
+  const filteredTrackEntries = useMemo(() => {
+    return trackData.filter(({ track, user }) => filterTrack(track, user))
   }, [trackData, filterTrack])
-
-  const allTracksFetched = useMemo(() => {
-    return trackUids.length === saveCount && !filterValue
-  }, [trackUids, saveCount, filterValue])
-
-  const handleMoreFetchSaves = useCallback(() => {
-    if (allTracksFetched || isFetchingMore || !isReachable) {
-      return
-    }
-
-    const nextPage = fetchPage + 1
-    dispatch(
-      fetchMoreSaves(
-        filterValue,
-        selectedCategory,
-        '',
-        '',
-        nextPage * FETCH_LIMIT,
-        FETCH_LIMIT
-      )
-    )
-    setFetchPage(nextPage)
-  }, [
-    allTracksFetched,
-    selectedCategory,
-    dispatch,
-    fetchPage,
-    filterValue,
-    isFetchingMore,
-    isReachable
-  ])
-
-  const togglePlay = useCallback(
-    (uid: UID, id: ID) => {
-      dispatch(tracksActions.togglePlay(uid, id, PlaybackSource.LIBRARY_PAGE))
-    },
-    [dispatch]
+  const filteredTrackUids = useMemo(
+    () => filteredTrackEntries.map(({ uid }) => uid),
+    [filteredTrackEntries]
+  )
+  const filteredTrackIds = useMemo(
+    () =>
+      filteredTrackEntries
+        .map(({ track }) => track?.track_id)
+        .filter((id): id is ID => Boolean(id)),
+    [filteredTrackEntries]
   )
 
-  const handleChangeFilterValue = useMemo(() => {
-    return debounce(setFilterValue, 250)
-  }, [])
+  const allTracksFetched = useMemo(() => {
+    return !hasNextPage && !filterValue
+  }, [hasNextPage, filterValue])
+
+  const handleMoreFetchSaves = useCallback(() => {
+    if (allTracksFetched || isFetchingMore || !isReachable || !hasNextPage) {
+      return
+    }
+    fetchNextPage().catch(() => undefined)
+  }, [
+    allTracksFetched,
+    isFetchingMore,
+    isReachable,
+    hasNextPage,
+    fetchNextPage
+  ])
+
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
+  const isPlaying = useSelector(playbackSelectors.getPlaying)
+
+  // Matches legacy `saveTracksLineupActions.prefix` so AudioPlayer's
+  // source-based offline-download check keeps working.
+  const playbackSource = 'SAVED_TRACKS'
+  const playbackQueue: PlaybackTrack[] = useMemo(
+    () =>
+      filteredTrackIds.map((id) => ({
+        trackId: id,
+        source: playbackSource
+      })),
+    [filteredTrackIds]
+  )
+
+  const togglePlay = useCallback(
+    (_uid: UID, id: ID) => {
+      if (currentPlaybackTrackId === id && isPlaying) {
+        dispatch(playbackActions.togglePlay())
+        return
+      }
+      if (currentPlaybackTrackId === id && !isPlaying) {
+        dispatch(playbackActions.play())
+        return
+      }
+      const startIndex = playbackQueue.findIndex((t) => t.trackId === id)
+      if (startIndex < 0) return
+      dispatch(
+        playbackActions.playFrom({
+          tracks: playbackQueue,
+          startIndex,
+          querySource: null
+        })
+      )
+    },
+    [dispatch, currentPlaybackTrackId, isPlaying, playbackQueue]
+  )
+
+  const commitFilterValue = useMemo(
+    () => debounce(setDebouncedFilterValue, FILTER_DEBOUNCE_MS),
+    []
+  )
+  const handleChangeFilterValue = useCallback(
+    (value: string) => {
+      setFilterValue(value)
+      commitFilterValue(value)
+    },
+    [commitFilterValue]
+  )
 
   const isPending =
     lineupStatus !== Status.SUCCESS ||
     savedTracksStatus !== Status.SUCCESS ||
     isLoadingTracks
 
-  const loadingSpinner = <LoadingMoreSpinner />
+  const showTrackSkeletonList = isPending && filteredTrackUids.length === 0
+  const shouldShowFilterInput =
+    trackUids.length > 0 || filterValue || (isPending && saveCount > 0)
 
-  const shouldShowFilterInput = trackUids.length > 0 || filterValue
-
-  const renderContent = () => {
+  const renderBody = () => {
     if (filteredTrackUids.length === 0 && !isPending) {
       if (!isReachable) {
-        return <NoTracksPlaceholder />
+        return (
+          <View style={styles.emptyState}>
+            <NoTracksPlaceholder />
+          </View>
+        )
       }
-      if (filterValue) {
-        return <EmptyTileCTA message={messages.noResultsText} />
-      }
-      return <EmptyTileCTA message={emptyTabText} />
+      return (
+        <View style={styles.emptyState}>
+          <EmptyTileCTA
+            message={filterValue ? messages.noResultsText : emptyTabText}
+          />
+        </View>
+      )
+    }
+
+    if (!showTrackSkeletonList && filteredTrackUids.length === 0) {
+      return null
     }
 
     return (
-      <WithLoader loading={initialFetch}>
-        <Animated.View layout={Layout}>
-          {filteredTrackUids.length ? (
-            <Tile styles={{ tile: styles.container }}>
-              <TrackList
-                style={styles.trackList}
-                hideArt
-                onEndReached={handleMoreFetchSaves}
-                onEndReachedThreshold={1.5}
-                togglePlay={togglePlay}
-                trackItemAction='overflow'
-                uids={filteredTrackUids}
-              />
-            </Tile>
-          ) : null}
-          {filteredTrackUids.length > 0 && isPending ? loadingSpinner : null}
-        </Animated.View>
-      </WithLoader>
+      <View style={styles.rowsContainer}>
+        <TrackList
+          hideArt
+          showSkeleton={showTrackSkeletonList}
+          skeletonRowCount={trackSkeletonRowCount}
+          hasNextPage={
+            isFetchingMore && !allTracksFetched && isReachable === true
+          }
+          onEndReached={handleMoreFetchSaves}
+          onEndReachedThreshold={1.5}
+          ListFooterComponent={<PlayBarChin />}
+          togglePlay={togglePlay}
+          trackItemAction='overflow'
+          uids={showTrackSkeletonList ? undefined : filteredTrackUids}
+        />
+      </View>
     )
   }
 
   return (
-    <VirtualizedScrollView>
-      <>
-        <OfflineContentBanner />
-        {shouldShowFilterInput && (
-          <FilterInput
-            placeholder={messages.inputPlaceholder}
-            onChangeText={handleChangeFilterValue}
-          />
-        )}
-        {renderContent()}
-      </>
-    </VirtualizedScrollView>
+    <View style={styles.root}>
+      <OfflineContentBanner />
+      {shouldShowFilterInput ? (
+        <FilterInput
+          placeholder={messages.inputPlaceholder}
+          onChangeText={handleChangeFilterValue}
+        />
+      ) : null}
+      {renderBody()}
+    </View>
   )
 }

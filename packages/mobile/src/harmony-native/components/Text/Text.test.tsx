@@ -1,15 +1,22 @@
+import type { ReactElement } from 'react'
+
 import { render, screen } from '@testing-library/react-native'
+
+import { ThemeProvider } from '../../foundations/theme'
 
 import { Text } from './Text'
 
+const renderWithTheme = (ui: ReactElement) =>
+  render(<ThemeProvider themeName='day'>{ui}</ThemeProvider>)
+
 test('renders text correctly', () => {
-  render(<Text>hello world</Text>)
+  renderWithTheme(<Text>hello world</Text>)
 
   expect(screen.getByText(/hello world/i)).toBeOnTheScreen()
 })
 
 test('it renders display variant correctly', () => {
-  render(<Text variant='display'>test display</Text>)
+  renderWithTheme(<Text variant='display'>test display</Text>)
 
   expect(
     screen.getByRole('heading', { name: /test display/i })
@@ -17,7 +24,7 @@ test('it renders display variant correctly', () => {
 })
 
 test('it renders heading variant correctly', () => {
-  render(<Text variant='heading'>test heading</Text>)
+  renderWithTheme(<Text variant='heading'>test heading</Text>)
 
   expect(
     screen.getByRole('heading', { name: /test heading/i })
@@ -25,7 +32,7 @@ test('it renders heading variant correctly', () => {
 })
 
 test('it renders labels correctly', () => {
-  render(<Text variant='label'>test label</Text>)
+  renderWithTheme(<Text variant='label'>test label</Text>)
 
   expect(screen.getByText(/test label/i)).toHaveStyle({
     textTransform: 'uppercase'
@@ -33,9 +40,9 @@ test('it renders labels correctly', () => {
 })
 
 test('it renders color correctly', () => {
-  render(<Text color='subdued'>test label</Text>)
+  renderWithTheme(<Text color='subdued'>test label</Text>)
 
   expect(screen.getByText(/test label/i)).toHaveStyle({
-    color: '#C2C0CC'
+    color: '#A2A0AFFF'
   })
 })

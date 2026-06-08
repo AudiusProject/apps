@@ -1,9 +1,7 @@
 import React, { useMemo } from 'react'
 
 import { useToggleTrack } from '@audius/common/hooks'
-import { Kind } from '@audius/common/models'
-import type { QueueSource } from '@audius/common/store'
-import { makeUid } from '@audius/common/utils'
+import type { Queueable, QueueSource } from '@audius/common/store'
 import { ScrollView } from 'react-native'
 
 import { Flex } from '@audius/harmony-native'
@@ -19,26 +17,25 @@ const CarouselItem = ({
   id,
   pairIndex,
   trackIndex,
-  source
+  source,
+  entries
 }: {
   id: number
   pairIndex: number
   trackIndex: number
   source: QueueSource
+  entries: Queueable[]
 }) => {
-  const uid = useMemo(() => makeUid(Kind.TRACKS, id, source), [id, source])
-
   const { togglePlay } = useToggleTrack({
     id,
-    uid,
-    source
+    source,
+    entries
   })
 
   return (
     <TrackTile
       key={id}
       id={id}
-      uid={uid}
       togglePlay={togglePlay}
       index={pairIndex * 2 + trackIndex}
     />
@@ -50,6 +47,14 @@ export const TrackTileCarousel = ({
   isLoading,
   source
 }: TrackTileCarouselProps) => {
+  const entries = useMemo(() => {
+    if (!tracks) return []
+    return tracks.map((id) => ({
+      id,
+      source
+    }))
+  }, [tracks, source])
+
   if (isLoading || !tracks) {
     return (
       <Flex direction='row' mh={-16}>
@@ -96,15 +101,18 @@ export const TrackTileCarousel = ({
             w={343}
             mr={pairIndex < trackPairs.length - 1 ? 16 : 0}
           >
-            {pair.map((track, trackIndex) => (
-              <CarouselItem
-                key={track}
-                id={track}
-                pairIndex={pairIndex}
-                trackIndex={trackIndex}
-                source={source}
-              />
-            ))}
+            {pair.map((track, trackIndex) => {
+              return (
+                <CarouselItem
+                  key={track}
+                  id={track}
+                  pairIndex={pairIndex}
+                  trackIndex={trackIndex}
+                  source={source}
+                  entries={entries}
+                />
+              )
+            })}
           </Flex>
         ))}
       </ScrollView>

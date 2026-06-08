@@ -2,6 +2,7 @@ import { CSSProperties, forwardRef } from 'react'
 
 import { CSSObject, useTheme } from '@emotion/react'
 
+import { isDarkTheme } from '../../../foundations/theme/theme'
 import { BaseButton } from '../BaseButton/BaseButton'
 
 import { ButtonProps } from './types'
@@ -24,6 +25,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hoverColor,
       variant = 'primary',
       size = 'default',
+      rounded,
       disabled,
       ...baseProps
     } = props
@@ -125,8 +127,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       boxShadow: `0 0 0 1px inset ${themeColors.border.strong}`
     }
     const tertiaryStyles: CSSObject = {
-      background:
-        type === 'dark' ? 'rgba(50, 51, 77, 0.6)' : 'rgb(255, 255, 255, 0.85)',
+      background: isDarkTheme(type)
+        ? 'rgba(50, 51, 77, 0.6)'
+        : 'rgb(255, 255, 255, 0.85)',
       color: themeColors.text.default,
       backdropFilter: 'blur(6px)',
       boxShadow: `0 0 0 1px inset ${themeColors.border.default}, ${shadows.near}`,
@@ -174,7 +177,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       color: themeColors.static.white,
       boxSizing: 'border-box',
       border: 'none',
-      borderRadius: cornerRadius.s,
+      borderRadius: rounded ? cornerRadius['2xl'] : cornerRadius.s,
       boxShadow: shadows.near,
 
       ...(isSmallOrXs

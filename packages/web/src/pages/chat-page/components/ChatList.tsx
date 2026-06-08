@@ -12,7 +12,6 @@ import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
 
 import { useSelector } from 'common/hooks/useSelector'
-import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 
 import styles from './ChatList.module.css'
 import { ChatListBlastItem } from './ChatListBlastItem'
@@ -30,10 +29,11 @@ const messages = {
 type ChatListProps = {
   currentChatId?: string
   onChatClicked: (chatId: string) => void
+  isCompact?: boolean
 } & ComponentPropsWithoutRef<'div'>
 
 export const ChatList = (props: ChatListProps) => {
-  const { currentChatId, onChatClicked } = props
+  const { currentChatId, onChatClicked, isCompact } = props
   const dispatch = useDispatch()
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
   const chats = useSelector(getChats)
@@ -51,7 +51,11 @@ export const ChatList = (props: ChatListProps) => {
   }, [status, setHasLoadedOnce])
 
   return (
-    <div className={cn(styles.root, props.className)}>
+    <div
+      className={cn(styles.root, props.className, {
+        [styles.compact]: isCompact
+      })}
+    >
       <InfiniteScroll
         pageStart={0}
         initialLoad={true}
@@ -60,10 +64,16 @@ export const ChatList = (props: ChatListProps) => {
         useWindow={false}
         loader={
           hasLoadedOnce ? (
-            <LoadingSpinner
-              key={'loading-spinner'}
-              className={styles.spinner}
-            />
+            <div key='loading-skeletons'>
+              <SkeletonChatListItem
+                style={{ opacity: 0.5 }}
+                isCompact={isCompact}
+              />
+              <SkeletonChatListItem
+                style={{ opacity: 0.25 }}
+                isCompact={isCompact}
+              />
+            </div>
           ) : undefined
         }
       >
@@ -75,6 +85,7 @@ export const ChatList = (props: ChatListProps) => {
                 chat={chat}
                 onChatClicked={onChatClicked}
                 currentChatId={currentChatId}
+                isCompact={isCompact}
               />
             ) : (
               <ChatListItem
@@ -82,6 +93,7 @@ export const ChatList = (props: ChatListProps) => {
                 currentChatId={currentChatId}
                 chat={chat}
                 onChatClicked={onChatClicked}
+                isCompact={isCompact}
               />
             )
           )
@@ -92,9 +104,15 @@ export const ChatList = (props: ChatListProps) => {
           </div>
         ) : (
           <>
-            <SkeletonChatListItem />
-            <SkeletonChatListItem style={{ opacity: 0.5 }} />
-            <SkeletonChatListItem style={{ opacity: 0.25 }} />
+            <SkeletonChatListItem isCompact={isCompact} />
+            <SkeletonChatListItem
+              style={{ opacity: 0.5 }}
+              isCompact={isCompact}
+            />
+            <SkeletonChatListItem
+              style={{ opacity: 0.25 }}
+              isCompact={isCompact}
+            />
           </>
         )}
       </InfiniteScroll>

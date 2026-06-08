@@ -13,6 +13,9 @@ import {
   deletePlaylistConfirmationModalUIActions,
   mobileOverflowMenuUISelectors,
   OverflowAction,
+  playbackActions,
+  playbackSelectors,
+  QueueSource,
   usePublishConfirmationModal,
   cacheCollectionsActions
 } from '@audius/common/store'
@@ -21,9 +24,17 @@ import { pick } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useToast } from 'app/hooks/useToast'
 import { AppTabNavigationContext } from 'app/screens/app-screen'
 import { setVisibility } from 'app/store/drawers/slice'
 import { getIsCollectionMarkedForDownload } from 'app/store/offline-downloads/selectors'
+
+const messages = {
+  willPlayNext: (count: number) =>
+    count === 1 ? 'Will play next' : `${count} songs will play next`,
+  addedToQueue: (count: number) =>
+    count === 1 ? 'Added to queue' : `Added ${count} songs to queue`
+}
 
 const { getMobileOverflowModal } = mobileOverflowMenuUISelectors
 const { requestOpen: openDeletePlaylist } =
@@ -43,10 +54,17 @@ type Props = {
 
 const CollectionOverflowMenuDrawer = ({ render }: Props) => {
   const dispatch = useDispatch()
+  const { toast } = useToast()
   const { navigation: contextNavigation } = useContext(AppTabNavigationContext)
   const navigation = useNavigation({ customNavigation: contextNavigation })
   const { id: modalId } = useSelector(getMobileOverflowModal)
   const id = modalId as ID
+  const playbackIndex = useSelector(playbackSelectors.getPlaybackIndex)
+
+  const { data: collectionTrackIds } = useCollection(id, {
+    select: (collection) =>
+      collection?.playlist_contents?.track_ids?.map((t) => t.track) ?? []
+  })
 
   const { data: partialPlaylist } = useCollection(id, {
     select: (collection) =>
@@ -114,7 +132,26 @@ const CollectionOverflowMenuDrawer = ({ render }: Props) => {
       openPublishConfirmation({
         contentType: is_album ? 'album' : 'playlist',
         confirmCallback: () => dispatch(publishPlaylist(Number(id)))
-      })
+      }),
+    [OverflowAction.PLAY_COLLECTION_NEXT]: () => {
+      const tracks = (collectionTrackIds ?? []).map((trackId) => ({
+        trackId,
+        source: QueueSource.COLLECTION_TRACKS
+      }))
+      if (tracks.length === 0) return
+      const insertIndex = playbackIndex >= 0 ? playbackIndex + 1 : 0
+      dispatch(playbackActions.addToQueue({ tracks, index: insertIndex }))
+      toast({ content: messages.willPlayNext(tracks.length) })
+    },
+    [OverflowAction.ADD_COLLECTION_TO_QUEUE]: () => {
+      const tracks = (collectionTrackIds ?? []).map((trackId) => ({
+        trackId,
+        source: QueueSource.COLLECTION_TRACKS
+      }))
+      if (tracks.length === 0) return
+      dispatch(playbackActions.addToQueue({ tracks }))
+      toast({ content: messages.addedToQueue(tracks.length) })
+    }
   }
 
   return render(callbacks)

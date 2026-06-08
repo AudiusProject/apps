@@ -11,7 +11,6 @@ import {
   ID,
   Track,
   FavoriteSource,
-  Kind,
   PlayableType,
   Name,
   ShareSource,
@@ -20,22 +19,22 @@ import {
   PlaybackSource
 } from '@audius/common/models'
 import {
-  trackPageLineupActions,
   trackPageActions,
-  trackPageSelectors,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
   shareModalUIActions,
-  playerSelectors,
-  playerActions
+  playbackSelectors,
+  playbackActions
 } from '@audius/common/store'
-import { formatDate, route, makeUid } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import { formatDate, route } from '@audius/common/utils'
 import { Box, Flex } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 
 import { make } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { CommentSection } from 'components/comments/CommentSection'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
@@ -43,21 +42,19 @@ import { FlushPageContainer } from 'components/page/FlushPageContainer'
 import Page from 'components/page/Page'
 import { EmptyStatBanner } from 'components/stat-banner/StatBanner'
 import { GiantTrackTile } from 'components/track/GiantTrackTile'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults, emptyStringGuard } from 'pages/track-page/utils'
 import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
-import { useTrackPageSize } from '../useTrackPageSize'
+import { TrackContestsSection } from '../shared/TrackContestsSection'
 
-import { RemixContestSection } from './RemixContestSection'
+import styles from './TrackPage.module.css'
 
 const { NOT_FOUND_PAGE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
-const { tracksActions } = trackPageLineupActions
 
 const TrackPage = () => {
   const location = useLocation()
@@ -71,7 +68,9 @@ const TrackPage = () => {
   const currentTrack = useCurrentTrack()
   const playing = useSelector(getPlaying)
   const previewing = useSelector(getPreviewing)
-  const source = useSelector(trackPageSelectors.getSourceSelector)
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
 
   const heroPlaying =
     playing &&
@@ -92,7 +91,6 @@ const TrackPage = () => {
       dispatch(trackPageActions.resetTrackPage())
     }
   }, [dispatch])
-  const { isDesktop } = useTrackPageSize()
   const isOwner = track?.owner_id === accountUserId
   const following = user?.does_current_user_follow ?? false
   const isSaved = track?.has_current_user_saved ?? false
@@ -121,12 +119,24 @@ const TrackPage = () => {
 
       const isOwner = track.owner_id === accountUserId
       const shouldPreview = isPreview && isOwner
-      const isSameTrack = currentTrack?.track_id === track.track_id
-      const trackUid = makeUid(Kind.TRACKS, track.track_id, source)
+      const isSameTrack = currentPlaybackTrackId === track.track_id
+      const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
-        dispatch(tracksActions.play(trackUid, { isPreview: shouldPreview }))
+        dispatch(playbackActions.stop({}))
+        const tracks: PlaybackTrack[] = [
+          {
+            trackId: track.track_id,
+            source: playbackSource
+          }
+        ]
+        dispatch(
+          playbackActions.playFrom({
+            tracks,
+            startIndex: 0,
+            querySource: null
+          })
+        )
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${track.track_id}`,
@@ -135,7 +145,7 @@ const TrackPage = () => {
           })
         )
       } else if (isPlayingParam) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, {
             id: `${track.track_id}`,
@@ -143,7 +153,7 @@ const TrackPage = () => {
           })
         )
       } else {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${track.track_id}`,
@@ -153,7 +163,7 @@ const TrackPage = () => {
         )
       }
     },
-    [track, accountUserId, currentTrack, previewing, dispatch, source]
+    [track, accountUserId, currentPlaybackTrackId, previewing, dispatch]
   )
 
   const onHeroRepost = useCallback(
@@ -224,13 +234,14 @@ const TrackPage = () => {
     }
   }, [commentSectionRef])
 
-  // SEO fields
+  // SEO fields (isRemix so original vs remix snippet/structured data is correct)
   const releaseDate = track ? track.release_date || track.created_at : ''
   const seoFields = getTrackPageContext({
     title: track?.title,
     permalink: track?.permalink,
     userName: user?.name,
-    releaseDate: releaseDate ? formatDate(releaseDate) : ''
+    releaseDate: releaseDate ? formatDate(releaseDate) : '',
+    isRemix: !!track?.remix_of
   })
 
   // Handle deleted track
@@ -317,15 +328,12 @@ const TrackPage = () => {
       fromOpacity={1}
       noIndex={defaults.isUnlisted}
     >
-      <FlushPageContainer>
-        <RemixContestCountdown trackId={track?.track_id ?? 0} />
-      </FlushPageContainer>
       <Box w='100%' css={{ position: 'absolute', height: '376px' }}>
         <CoverPhoto loading={loading} userId={user ? user.user_id : null} />
         <EmptyStatBanner />
         <EmptyNavBanner />
       </Box>
-      <FlushPageContainer>
+      <FlushPageContainer contentMinWidthPx={MIN_DESKTOP_CONTENT_WIDTH_PX}>
         <Flex
           direction='column'
           w='100%'
@@ -335,33 +343,32 @@ const TrackPage = () => {
           gap='unit12'
         >
           {renderGiantTrackTile()}
-          <RemixContestSection
-            trackId={track?.track_id ?? 0}
-            isOwner={isOwner}
-          />
-          <Flex
-            gap='2xl'
-            w='100%'
-            direction={isDesktop ? 'row' : 'column'}
-            mh='auto'
-            css={{ maxWidth: 1080 }}
-            justifyContent='center'
-          >
-            {isCommentingEnabled ? (
-              <Flex flex='3'>
-                <CommentSection
-                  entityId={defaults.trackId}
-                  // @ts-ignore
-                  commentSectionRef={commentSectionRef}
-                />
-              </Flex>
-            ) : null}
-            <TrackPageLineup
-              user={user ?? null}
-              trackId={track?.track_id}
-              commentsDisabled={track?.comments_disabled}
-            />
-          </Flex>
+          {track?.track_id ? (
+            <TrackContestsSection trackId={track.track_id} />
+          ) : null}
+          <Box w='100%' className={styles.commentsAndLineupContainer}>
+            <Flex
+              gap='2xl'
+              w='100%'
+              className={styles.commentsAndLineupSection}
+              justifyContent='center'
+            >
+              {isCommentingEnabled ? (
+                <Flex flex='3'>
+                  <CommentSection
+                    entityId={defaults.trackId}
+                    // @ts-ignore
+                    commentSectionRef={commentSectionRef}
+                  />
+                </Flex>
+              ) : null}
+              <TrackPageLineup
+                user={user ?? null}
+                trackId={track?.track_id}
+                commentsDisabled={track?.comments_disabled}
+              />
+            </Flex>
+          </Box>
         </Flex>
       </FlushPageContainer>
     </Page>

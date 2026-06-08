@@ -105,4 +105,10 @@ export type PopupProps = {
    * Whether to take the width of the anchor element
    */
   takeWidthOfAnchor?: boolean
+
+  /**
+   * Disable Popup's default bordered and elevated surface styles.
+   * Useful when children provide their own surface chrome.
+   */
+  disableDefaultStyles?: boolean
 }

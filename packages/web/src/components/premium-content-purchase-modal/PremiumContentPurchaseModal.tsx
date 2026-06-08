@@ -24,7 +24,7 @@ import {
   PurchaseVendor,
   USDCPurchaseConditions
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
+import { FeatureFlags, registerNiceModalId } from '@audius/common/services'
 import {
   buyUSDCActions,
   usePremiumContentPurchaseModal,
@@ -43,14 +43,15 @@ import {
   IconCart,
   ModalTitle
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import cn from 'classnames'
 import { Formik, useField, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useLocation } from 'react-router'
 import { useLocalStorage } from 'react-use'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { useHistoryContext } from 'app/HistoryProvider'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { ModalForm } from 'components/modal-form/ModalForm'
@@ -58,7 +59,7 @@ import { USDCManualTransfer } from 'components/usdc-manual-transfer/USDCManualTr
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useIsUSDCEnabled } from 'hooks/useIsUSDCEnabled'
 import { useManagedAccountNotAllowedCallback } from 'hooks/useManagedAccountNotAllowedRedirect'
-import { pushUniqueRoute } from 'utils/route'
+import { getPathname } from 'utils/route'
 import zIndex from 'utils/zIndex'
 
 import styles from './PremiumContentPurchaseModal.module.css'
@@ -113,7 +114,8 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   const currentPageIndex = pageToPageIndex(page)
 
   const { submitForm, resetForm } = useFormikContext()
-  const { history } = useHistoryContext()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { data: isAccountComplete = false } = useCurrentAccountUser({
     select: selectIsAccountComplete
   })
@@ -126,9 +128,12 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   // Navigate to track on successful purchase behind the modal
   useEffect(() => {
     if (stage === PurchaseContentStage.FINISH && permalink) {
-      dispatch(pushUniqueRoute(history.location, permalink))
+      const pathname = getPathname(location)
+      if (permalink !== pathname) {
+        navigate(permalink)
+      }
     }
-  }, [stage, permalink, dispatch, history])
+  }, [stage, permalink, navigate, location])
 
   const handleUSDCManualTransferClose = useCallback(() => {
     dispatch(setPurchasePage({ page: PurchaseContentPageType.PURCHASE }))
@@ -199,13 +204,13 @@ const PremiumContentPurchaseForm = (props: PremiumContentPurchaseFormProps) => {
   )
 }
 
-export const PremiumContentPurchaseModal = () => {
+export const PremiumContentPurchaseModal = NiceModal.create(() => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
   const {
-    isOpen,
-    onClose,
-    onClosed,
     data: { contentId, contentType }
   } = usePremiumContentPurchaseModal()
   const { isEnabled: isCoinflowEnabled, isLoaded: isCoinflowEnabledLoaded } =
@@ -301,10 +306,9 @@ export const PremiumContentPurchaseModal = () => {
   }, [isUnlocking, stage, onClose])
 
   const handleClosed = useCallback(() => {
-    onClosed()
     dispatch(cleanup())
     dispatch(cleanupUSDCRecovery())
-  }, [onClosed, dispatch])
+  }, [dispatch])
 
   useManagedAccountNotAllowedCallback({
     trigger: isOpen,
@@ -350,4 +354,7 @@ export const PremiumContentPurchaseModal = () => {
       ) : null}
     </ModalDrawer>
   )
-}
+})
+
+NiceModal.register('PremiumContentPurchaseModal', PremiumContentPurchaseModal)
+registerNiceModalId('PremiumContentPurchaseModal')

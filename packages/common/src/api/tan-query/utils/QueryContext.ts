@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import type { Dispatch } from 'redux'
 import { getContext } from 'typed-redux-saga'
 
@@ -9,6 +9,7 @@ import {
   AudiusBackend,
   Env,
   FeatureFlags,
+  LocalStorage,
   RemoteConfigInstance,
   SolanaWalletService
 } from '~/services/index'
@@ -16,20 +17,19 @@ import {
 import {
   AllTrackingEvents,
   AnalyticsEvent,
-  IdentifyTraits,
-  ReportToSentryArgs
+  IdentifyTraits
 } from '../../../models'
 
 export type QueryContextType = {
-  audiusSdk: () => Promise<AudiusSdk>
+  audiusSdk: () => Promise<AudiusSdkWithServices>
   audiusBackend: AudiusBackend
   authService: AuthService
   solanaWalletService: SolanaWalletService
   identityService: IdentityService
   dispatch: Dispatch
-  reportToSentry: (args: ReportToSentryArgs) => void
   env: Env
   fetch: typeof fetch
+  localStorage: LocalStorage
   remoteConfigInstance: RemoteConfigInstance
   getFeatureEnabled: (
     flag: FeatureFlags,
@@ -89,6 +89,8 @@ export function* getQueryContext(): Generator<any, QueryContextType, any> {
     dispatch: yield* getContext<QueryContextType['dispatch']>('dispatch'),
     env: yield* getContext<QueryContextType['env']>('env'),
     fetch,
+    localStorage:
+      yield* getContext<QueryContextType['localStorage']>('localStorage'),
     getFeatureEnabled:
       yield* getContext<QueryContextType['getFeatureEnabled']>(
         'getFeatureEnabled'
@@ -96,8 +98,6 @@ export function* getQueryContext(): Generator<any, QueryContextType, any> {
     remoteConfigInstance: yield* getContext<
       QueryContextType['remoteConfigInstance']
     >('remoteConfigInstance'),
-    reportToSentry:
-      yield* getContext<QueryContextType['reportToSentry']>('reportToSentry'),
     analytics: yield* getContext<QueryContextType['analytics']>('analytics'),
     nftClient: null,
     imageUtils: yield* getContext<QueryContextType['imageUtils']>('imageUtils')

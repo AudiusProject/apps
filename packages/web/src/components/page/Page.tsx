@@ -14,32 +14,61 @@ import styles from './Page.module.css'
 const HEADER_MARGIN_PX = 32
 
 // Responsible for positioning the header
-type HeaderContainerProps = Pick<PageProps, 'header' | 'showSearch'>
+type HeaderContainerProps = Pick<
+  PageProps,
+  | 'header'
+  | 'showSearch'
+  | 'headerContentPaddingInline'
+  | 'subHeader'
+  | 'disableHeaderFrosted'
+  | 'frostedHeaderContainer'
+>
 
 const HeaderContainer = (props: HeaderContainerProps) => {
-  const { header, showSearch } = props
+  const {
+    header,
+    showSearch,
+    headerContentPaddingInline,
+    subHeader,
+    disableHeaderFrosted,
+    frostedHeaderContainer
+  } = props
 
   const headerContainerRef = useRef<HTMLDivElement>(null)
+  const headerElement = cloneElement(header as any, {
+    headerContainerRef,
+    topLeftElement: showSearch ? <DesktopSearchBar /> : null
+  })
 
   return (
-    <div className={styles.headerContainer}>
-      <Frosted>
-        {cloneElement(header as any, {
-          headerContainerRef,
-          topLeftElement: showSearch ? <DesktopSearchBar /> : null
-        })}
-      </Frosted>
+    <div
+      ref={headerContainerRef}
+      className={cn(styles.headerContainer, {
+        [styles.headerContainerFrosted]: frostedHeaderContainer
+      })}
+    >
+      {disableHeaderFrosted ? (
+        <div style={{ paddingInline: headerContentPaddingInline }}>
+          {headerElement}
+        </div>
+      ) : (
+        <Frosted contentPaddingInline={headerContentPaddingInline}>
+          {headerElement}
+        </Frosted>
+      )}
+      {subHeader}
       {/* We attach the box shadow as a separate element to
           avoid overlapping the scroll bar.
       */}
-      <div className={styles.headerBoxShadow} />
+      {!subHeader && <div className={styles.headerBoxShadow} />}
     </div>
   )
 }
 
 type PageProps = {
-  variant?: 'insert' | 'flush'
+  variant?: 'inset' | 'flush'
   size?: 'medium' | 'large'
+  headerPadding?: number
   containerRef?: MutableRefObject<any>
   className?: string
   contentClassName?: string
@@ -47,6 +76,10 @@ type PageProps = {
   fromOpacity?: number
   fadeDuration?: number
   header?: ReactNode
+  subHeader?: ReactNode
+  headerContentPaddingInline?: string
+  disableHeaderFrosted?: boolean
+  frostedHeaderContainer?: boolean
 
   // There are some pages which don't have a fixed header but still display
   // a search bar that scrolls with the page.
@@ -73,6 +106,10 @@ export const Page = (props: PageProps) => {
     fadeDuration = 200,
     fromOpacity = 0.2,
     header,
+    subHeader,
+    headerContentPaddingInline = 'var(--harmony-unit-8)',
+    disableHeaderFrosted = false,
+    frostedHeaderContainer = false,
     image,
     noIndex = false,
     ogDescription,
@@ -82,7 +119,8 @@ export const Page = (props: PageProps) => {
     size = 'medium',
     structuredData,
     title,
-    variant = 'inset'
+    variant = 'inset',
+    headerPadding = HEADER_MARGIN_PX
   } = props
 
   const metaTagsProps = {
@@ -114,7 +152,16 @@ export const Page = (props: PageProps) => {
           props.className
         )}
       >
-        {header && <HeaderContainer header={header} showSearch={showSearch} />}
+        {header && (
+          <HeaderContainer
+            header={header}
+            subHeader={subHeader}
+            showSearch={showSearch}
+            headerContentPaddingInline={headerContentPaddingInline}
+            disableHeaderFrosted={disableHeaderFrosted}
+            frostedHeaderContainer={frostedHeaderContainer}
+          />
+        )}
         <div
           className={cn({
             [styles.inset]: variant === 'inset',
@@ -124,7 +171,7 @@ export const Page = (props: PageProps) => {
             [containerClassName ?? '']: !!containerClassName
           })}
           style={
-            variant === 'inset' ? { paddingTop: HEADER_MARGIN_PX } : undefined
+            variant === 'inset' ? { paddingTop: headerPadding } : undefined
           }
         >
           {/* Set an id so that nested components can mount in relation to page if needed, e.g. fixed menu popups. */}

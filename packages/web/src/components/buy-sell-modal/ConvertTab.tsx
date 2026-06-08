@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
-  transformArtistCoinsToTokenInfoMap,
-  useArtistCoin,
-  useArtistCoins
+  transformFanClubsToTokenInfoMap,
+  useFanClub,
+  useFanClubs
 } from '@audius/common/api'
 import { buySellMessages } from '@audius/common/messages'
 import type { CoinInfo } from '@audius/common/store'
@@ -44,8 +44,9 @@ export const ConvertTab = ({
     setSelectedOutputToken(quoteToken)
   }, [baseToken, quoteToken])
 
-  const { data: tokenPriceData, isPending: isTokenPriceLoading } =
-    useArtistCoin(selectedOutputToken.address)
+  const { data: tokenPriceData, isPending: isTokenPriceLoading } = useFanClub(
+    selectedOutputToken.address
+  )
 
   const decimalPlaces = useMemo(() => {
     if (!tokenPriceData?.price) return 2
@@ -71,17 +72,17 @@ export const ConvertTab = ({
     externalWalletAddress: externalWalletAccount?.address
   })
 
-  const { data: coins } = useArtistCoins()
-  const artistCoins: CoinInfo[] = useMemo(() => {
-    return Object.values(transformArtistCoinsToTokenInfoMap(coins ?? []))
+  const { data: coins } = useFanClubs()
+  const fanClubs: CoinInfo[] = useMemo(() => {
+    return Object.values(transformFanClubsToTokenInfoMap(coins ?? []))
   }, [coins])
 
   const totalAvailableTokens = useMemo(() => {
-    return [...(availableOutputTokens ?? []), ...artistCoins].filter(
+    return [...(availableOutputTokens ?? []), ...fanClubs].filter(
       (token, index, arr) =>
         arr.findIndex((t) => t.symbol === token.symbol) === index
     ) // Remove duplicates
-  }, [availableOutputTokens, artistCoins])
+  }, [availableOutputTokens, fanClubs])
 
   // Filter out the currently selected input token from available output tokens
   const filteredAvailableOutputTokens = useMemo(() => {
@@ -208,7 +209,7 @@ export const ConvertTab = ({
             onAmountChange={handleOutputAmountChange}
             availableBalance={0}
             exchangeRate={currentExchangeRate}
-            tokenPrice={tokenPriceData?.price.toString() ?? null}
+            tokenPrice={tokenPriceData?.price?.toString() ?? null}
             isTokenPriceLoading={isTokenPriceLoading}
             tokenPriceDecimalPlaces={decimalPlaces}
             availableTokens={filteredAvailableOutputTokens}

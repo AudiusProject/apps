@@ -1,7 +1,6 @@
 package co.audius.app
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import com.bytedance.sdk.open.tiktok.TikTokOpenApiFactory
 import com.bytedance.sdk.open.tiktok.TikTokOpenConfig
@@ -42,12 +41,6 @@ class MainActivity : ReactActivity() {
     // Disable React Native inspector to workaround RN 0.77 crash
     System.setProperty("react.native.inspector.disable", "true")
     
-    // Check if this is an oauth deep link and redirect to browser
-    if (handleOAuthDeepLink(intent)) {
-      finish()
-      return
-    }
-    
     RNBootSplash.init(this, R.style.BootTheme)
     super.onCreate(null)
     RNBars.init(this, "light-content")
@@ -55,38 +48,6 @@ class MainActivity : ReactActivity() {
 
     // lazy load Google Cast context
     CastContext.getSharedInstance(this)
-  }
-
-  override fun onNewIntent(intent: Intent) {
-    super.onNewIntent(intent)
-    
-    // Check if this is an oauth deep link and redirect to browser
-    if (handleOAuthDeepLink(intent)) {
-      finish()
-      return
-    }
-  }
-
-  /**
-   * Handles oauth deep links by opening them in the browser instead of the app.
-   * Returns true if the intent was an oauth route and was handled.
-   */
-  private fun handleOAuthDeepLink(intent: Intent?): Boolean {
-    if (intent == null) return false
-    
-    val data: Uri? = intent.data
-    if (data != null) {
-      val path = data.path
-      // If the path starts with /oauth, open in browser instead
-      if (path != null && path.startsWith("/oauth")) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, data)
-        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(browserIntent)
-        return true
-      }
-    }
-    
-    return false
   }
 
   override fun onDestroy() {

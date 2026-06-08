@@ -4,9 +4,7 @@ const cookieParser = require('cookie-parser')
 const sgMail = require('@sendgrid/mail')
 const sgClient = require('@sendgrid/client')
 const { redisClient, Lock } = require('./redis')
-const { createFpClient } = require('./fpClient')
 const optimizelySDK = require('@optimizely/optimizely-sdk')
-const Sentry = require('@sentry/node')
 const cluster = require('cluster')
 const config = require('./config.js')
 const txRelay = require('./relay/txRelay')
@@ -36,8 +34,6 @@ class App {
     this.port = port
     this.express = express()
     this.redisClient = redisClient
-    this.fpClient = createFpClient(config.get('fpServerApiKey'))
-    this.configureSentry()
     this.configureSendGrid()
 
     this.optimizelyPromise = null
@@ -77,8 +73,7 @@ class App {
       await Lock.clearAllLocks(generateWalletLockKey('*'))
       await Lock.clearAllLocks(generateETHWalletLockKey('*'))
 
-      // if it's a non test run
-      // start web server worker processes
+      // if it's a non test run, fork web server worker processes
       if (!config.get('isTestRun')) {
         // Fork extra web server workers
         // note - we can't have more than 1 worker at the moment because POA and ETH relays
@@ -141,7 +136,6 @@ class App {
       server.headersTimeout = config.get('headersTimeout')
 
       this.express.set('redis', this.redisClient)
-      this.express.set('fpClient', this.fpClient)
 
       logger.info(`Listening on port ${this.port}...`)
       return { app: this.express, server }
@@ -159,15 +153,6 @@ class App {
       'sendgridClient',
       config.get('sendgridApiKey') ? sgClient : null
     )
-  }
-
-  configureSentry() {
-    const dsn = config.get('sentryDSN')
-    if (dsn) {
-      Sentry.init({
-        dsn
-      })
-    }
   }
 
   configureOptimizely() {
@@ -401,7 +386,6 @@ class App {
     function errorHandler(err, req, res, next) {
       req.logger.error('Internal server error')
       req.logger.error(err.stack)
-      Sentry.captureException(err)
       sendResponse(req, res, errorResponseServerError('Internal server error'))
     }
     this.express.use(errorHandler)

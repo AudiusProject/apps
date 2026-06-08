@@ -67,7 +67,7 @@ export const useCoinBalance = ({
     }
   )
 
-  // Artist coins query
+  // Fan clubs query
   const userCoinQuery = useUserCoin(
     { mint, userId },
     {

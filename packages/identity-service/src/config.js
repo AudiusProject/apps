@@ -695,12 +695,6 @@ const config = convict({
     default: '',
     env: 'aaoAddress'
   },
-  sentryDSN: {
-    doc: 'Sentry DSN key',
-    format: String,
-    env: 'sentryDSN',
-    default: ''
-  },
   ethGasMultiplier: {
     doc: 'Constant value to multiply the configured FAST gas price by - in order to optimize tx success',
     format: Number,
@@ -791,12 +785,6 @@ const config = convict({
     env: 'stripeSecretKey',
     default: ''
   },
-  coinflowApiKey: {
-    doc: 'API key for coinflow merchant API',
-    format: String,
-    env: 'coinflowApiKey',
-    default: ''
-  },
   skipAbuseCheck: {
     doc: 'Skip AAO abuse check on relay and notifs',
     format: Boolean,
@@ -825,12 +813,6 @@ const config = convict({
     doc: 'Mint address of the USDC token on Solana',
     format: String,
     env: 'solanaUSDCMintAddress',
-    default: ''
-  },
-  fpServerApiKey: {
-    doc: 'API key for requesting visitorId information',
-    format: String,
-    env: 'fpServerApiKey',
     default: ''
   },
   useDiscoveryListens: {

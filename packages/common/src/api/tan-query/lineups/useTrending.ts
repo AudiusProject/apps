@@ -4,32 +4,20 @@ import {
   useInfiniteQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
 import { transformAndCleanList } from '~/adapters/utils'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { PlaybackSource } from '~/models'
+import { ID } from '~/models/Identifiers'
 import { TimeRange } from '~/models/TimeRange'
 import { StringKeys } from '~/services/remote-config'
-import {
-  trendingAllTimeActions,
-  trendingMonthActions,
-  trendingWeekActions
-} from '~/store/pages/trending/lineup/actions'
-import {
-  getDiscoverTrendingWeekLineup,
-  getDiscoverTrendingMonthLineup,
-  getDiscoverTrendingAllTimeLineup
-} from '~/store/pages/trending/selectors'
 import { Genre } from '~/utils/genres'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, LineupData, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 export const TRENDING_INITIAL_PAGE_SIZE = 10
 export const TRENDING_LOAD_MORE_PAGE_SIZE = 4
@@ -64,15 +52,16 @@ export const useTrending = (
   const { audiusSdk, remoteConfigInstance } = useQueryContext()
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
-  const dispatch = useDispatch()
 
-  const infiniteQueryData = useInfiniteQuery({
-    queryKey: getTrendingQueryKey({
-      timeRange,
-      genre,
-      initialPageSize,
-      loadMorePageSize
-    }),
+  const queryKey = getTrendingQueryKey({
+    timeRange,
+    genre,
+    initialPageSize,
+    loadMorePageSize
+  })
+
+  const query = useInfiniteQuery({
+    queryKey,
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       const isFirstPage = allPages.length === 1
@@ -89,7 +78,7 @@ export const useTrending = (
       const currentPageSize = isFirstPage ? initialPageSize : loadMorePageSize
 
       const { data: sdkResponse = [] } = version
-        ? await sdk.full.tracks.getTrendingTracksWithVersion({
+        ? await sdk.tracks.getTrendingTracksWithVersion({
             time: timeRange,
             genre: (genre as string) || undefined,
             userId: OptionalId.parse(currentUserId),
@@ -97,7 +86,7 @@ export const useTrending = (
             offset: pageParam,
             version
           })
-        : await sdk.full.tracks.getTrendingTracks({
+        : await sdk.tracks.getTrendingTracks({
             time: timeRange,
             genre: (genre as string) || undefined,
             userId: OptionalId.parse(currentUserId),
@@ -112,39 +101,6 @@ export const useTrending = (
 
       primeTrackData({ tracks, queryClient })
 
-      // Dispatch the data to the lineup sagas
-      switch (timeRange) {
-        case TimeRange.WEEK:
-          dispatch(
-            trendingWeekActions.fetchLineupMetadatas(
-              pageParam,
-              currentPageSize,
-              false,
-              { items: tracks }
-            )
-          )
-          break
-        case TimeRange.MONTH:
-          dispatch(
-            trendingMonthActions.fetchLineupMetadatas(
-              pageParam,
-              currentPageSize,
-              false,
-              { items: tracks }
-            )
-          )
-          break
-        case TimeRange.ALL_TIME:
-          dispatch(
-            trendingAllTimeActions.fetchLineupMetadatas(
-              pageParam,
-              currentPageSize,
-              false,
-              { items: tracks }
-            )
-          )
-          break
-      }
       return tracks.map((t) => ({
         id: t.track_id,
         type: EntityType.TRACK
@@ -155,35 +111,28 @@ export const useTrending = (
     enabled: options?.enabled !== false && !!timeRange
   })
 
-  let lineupActions
-  let lineupSelector
-  switch (timeRange) {
-    case TimeRange.MONTH:
-      lineupActions = trendingMonthActions
-      lineupSelector = getDiscoverTrendingMonthLineup
-      break
-    case TimeRange.ALL_TIME:
-      lineupActions = trendingAllTimeActions
-      lineupSelector = getDiscoverTrendingAllTimeLineup
-      break
-    case TimeRange.WEEK:
-      lineupActions = trendingWeekActions
-      lineupSelector = getDiscoverTrendingWeekLineup
-      break
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    // Raw data
+    data,
+    trackIds,
+
+    // Query state
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+
+    // Identity
+    queryKey
   }
-  return useLineupQuery({
-    lineupData: infiniteQueryData.data ?? [],
-    queryData: infiniteQueryData,
-    queryKey: getTrendingQueryKey({
-      timeRange,
-      genre,
-      initialPageSize,
-      loadMorePageSize
-    }),
-    lineupActions,
-    lineupSelector,
-    playbackSource: PlaybackSource.TRACK_TILE_LINEUP,
-    pageSize: loadMorePageSize,
-    initialPageSize
-  })
 }

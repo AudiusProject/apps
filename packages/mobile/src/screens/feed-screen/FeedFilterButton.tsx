@@ -1,30 +1,38 @@
-import { useCallback } from 'react'
-
+import { useFeedFilter } from '@audius/common/api'
 import { FeedFilter } from '@audius/common/models'
-import { feedPageSelectors, modalsActions } from '@audius/common/store'
-import { useDispatch, useSelector } from 'react-redux'
+import { modalsActions } from '@audius/common/store'
+import { useDispatch } from 'react-redux'
 
-import { ScreenHeaderButton } from 'app/components/core'
-import { messages } from 'app/components/feed-filter-drawer'
+import { Flex, IconLeading, SelectablePill } from '@audius/harmony-native'
 
-const { getFeedFilter } = feedPageSelectors
-const { setVisibility } = modalsActions
-
-const messageMap = {
-  [FeedFilter.ALL]: messages.filterAll,
-  [FeedFilter.ORIGINAL]: messages.filterOriginal,
-  [FeedFilter.REPOST]: messages.filterReposts
-}
+import { FEED_FILTER_MODAL } from './FeedFilterDrawer'
 
 export const FeedFilterButton = () => {
-  const feedFilter = useSelector(getFeedFilter)
   const dispatch = useDispatch()
+  const [feedFilter] = useFeedFilter()
 
-  const handlePress = useCallback(() => {
-    dispatch(setVisibility({ modal: 'FeedFilter', visible: true }))
-  }, [dispatch])
+  const hasActiveFilters = feedFilter !== FeedFilter.ALL
+
+  const handleOpenFilter = () => {
+    dispatch(
+      modalsActions.setVisibility({
+        modal: FEED_FILTER_MODAL,
+        visible: true
+      })
+    )
+  }
 
   return (
-    <ScreenHeaderButton onPress={handlePress} label={messageMap[feedFilter]} />
+    <Flex>
+      <SelectablePill
+        type='button'
+        icon={IconLeading}
+        size='large'
+        isSelected={hasActiveFilters}
+        isControlled
+        onPress={handleOpenFilter}
+        accessibilityLabel='Open filter'
+      />
+    </Flex>
   )
 }

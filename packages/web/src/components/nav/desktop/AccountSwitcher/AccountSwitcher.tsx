@@ -42,8 +42,11 @@ export const AccountSwitcher = ({
 
   const web3UserId = currentWeb3User?.user_id ?? null
 
-  const { data: managedAccounts = [], isSuccess: isManagedAccountsSuccess } =
-    useManagedAccounts(web3UserId)
+  const {
+    data: managedAccounts = [],
+    isSuccess: isManagedAccountsSuccess,
+    isPending: isManagedAccountsPending
+  } = useManagedAccounts(web3UserId)
 
   const parentElementRef = useRef<HTMLDivElement>(null)
   const onClickExpander = useCallback(
@@ -57,6 +60,9 @@ export const AccountSwitcher = ({
 
   const isVisible = Boolean(
     currentWeb3User && currentUserId && accounts.length > 0
+  )
+  const isLoadingAccounts = Boolean(
+    currentWeb3User && currentUserId && isManagedAccountsPending
   )
 
   // Notify parent of visibility changes
@@ -95,14 +101,15 @@ export const AccountSwitcher = ({
     switchToWeb3User
   ])
 
-  return !isVisible ? null : (
+  return !isVisible && !isLoadingAccounts ? null : (
     <Box ref={parentElementRef}>
       <IconButton
         color='default'
         size='2xs'
         aria-label='Open Account Switcher'
         icon={IconCaretDown}
-        onClick={onClickExpander}
+        disabled={isLoadingAccounts}
+        onClick={isVisible ? onClickExpander : undefined}
       />
       <Popup
         checkIfClickInside={(target: EventTarget) => {

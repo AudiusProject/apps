@@ -43,7 +43,7 @@ export const useTrackByPermalink = <TResult = TQTrack>(
     queryKey: getTrackByPermalinkQueryKey(permalink),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.tracks.getBulkTracks({
+      const { data = [] } = await sdk.tracks.getBulkTracks({
         permalink: [permalink!],
         userId: OptionalId.parse(currentUserId)
       })

@@ -1,15 +1,21 @@
+import { useCallback } from 'react'
+
 import { useCurrentUserId, useToggleFavoriteTrack } from '@audius/common/api'
-import { useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useGatedContentAccess,
+  useQueueNewFeatureBadge
+} from '@audius/common/hooks'
 import { FavoriteSource, SquareSizes } from '@audius/common/models'
 import type { Track, User } from '@audius/common/models'
-import { playerSelectors } from '@audius/common/store'
+import { playbackSelectors } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { TouchableOpacity, Animated, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
-import { IconLock } from '@audius/harmony-native'
+import { IconButton, IconIndent, IconLock } from '@audius/harmony-native'
 import { FavoriteButton } from 'app/components/favorite-button'
 import Text from 'app/components/text'
+import { useDrawer } from 'app/hooks/useDrawer'
 import { makeStyles } from 'app/styles'
 import { useColor } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
@@ -20,10 +26,11 @@ import { TrackImage } from '../image/TrackImage'
 import { PlayButton } from './PlayButton'
 import { TrackingBar } from './TrackingBar'
 import { NOW_PLAYING_HEIGHT, PLAY_BAR_HEIGHT } from './constants'
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 
 const messages = {
-  preview: 'PREVIEW'
+  preview: 'PREVIEW',
+  queueLabel: 'Queue'
 }
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
@@ -58,6 +65,11 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     gap: spacing(3)
+  },
+  queueContainer: {
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   playContainer: {
     flexShrink: 1,
@@ -151,6 +163,18 @@ export const PlayBar = (props: PlayBarProps) => {
     source: FavoriteSource.PLAYBAR
   })
 
+  const { onOpen: openQueue } = useDrawer('Queue')
+  const {
+    showBadge: showQueueNewFeatureBadge,
+    dismiss: dismissQueueNewFeatureBadge
+  } = useQueueNewFeatureBadge()
+  const handleOpenQueue = useCallback(() => {
+    if (showQueueNewFeatureBadge) {
+      dismissQueueNewFeatureBadge()
+    }
+    openQueue()
+  }, [showQueueNewFeatureBadge, dismissQueueNewFeatureBadge, openQueue])
+
   const renderFavoriteButton = () => {
     return (
       <FavoriteButton
@@ -231,6 +255,15 @@ export const PlayBar = (props: PlayBarProps) => {
             </View>
           ) : null}
         </TouchableOpacity>
+        <View style={styles.queueContainer}>
+          <IconButton
+            icon={IconIndent}
+            onPress={handleOpenQueue}
+            size='l'
+            color={showQueueNewFeatureBadge ? 'active' : 'default'}
+            aria-label={messages.queueLabel}
+          />
+        </View>
         <View style={styles.playContainer}>
           <PlayButton wrapperStyle={styles.playIcon} />
         </View>

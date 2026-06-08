@@ -8,15 +8,15 @@ import {
   LibraryPageTabs,
   reachabilitySelectors
 } from '@audius/common/store'
+import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { CollectionList } from 'app/components/collection-list'
-import { VirtualizedScrollView } from 'app/components/core'
+import { PlayBarChin } from 'app/components/core/PlayBarChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
-import { WithLoader } from 'app/components/with-loader/WithLoader'
+import { makeStyles } from 'app/styles'
 
-import { LoadingMoreSpinner } from './LoadingMoreSpinner'
 import { NoTracksPlaceholder } from './NoTracksPlaceholder'
 import { OfflineContentBanner } from './OfflineContentBanner'
 import { useLibraryCollections } from './useLibraryCollections'
@@ -33,7 +33,17 @@ const messages = {
   inputPlaceholder: 'Filter Albums'
 }
 
+const useStyles = makeStyles(() => ({
+  root: {
+    flex: 1
+  },
+  list: {
+    flex: 1
+  }
+}))
+
 export const AlbumsTab = () => {
+  const styles = useStyles()
   const [filterValue, setFilterValue] = useState('')
   const [debouncedFilterValue, setDebouncedFilterValue] = useState('')
 
@@ -78,12 +88,11 @@ export const AlbumsTab = () => {
     }
   })
 
-  const loadingSpinner = <LoadingMoreSpinner />
   const noItemsLoaded =
     !isPending && !collectionIds?.length && !debouncedFilterValue
 
   return (
-    <VirtualizedScrollView>
+    <View style={styles.root}>
       {noItemsLoaded ? (
         !isReachable ? (
           <NoTracksPlaceholder />
@@ -101,23 +110,21 @@ export const AlbumsTab = () => {
               handleChangeFilterValue(text)
             }}
           />
-          <WithLoader loading={isPending}>
+          <View style={styles.list}>
             <CollectionList
               collectionType='album'
               onEndReached={handleEndReached}
               onEndReachedThreshold={0.5}
-              scrollEnabled={false}
-              collectionIds={collectionIds}
+              collectionIds={collectionIds ?? []}
               showCreateCollectionTile={!!isReachable}
-              ListFooterComponent={
-                isFetchingNextPage && hasNextPage && collectionIds?.length > 0
-                  ? loadingSpinner
-                  : null
-              }
+              isLoading={isPending && (collectionIds?.length ?? 0) === 0}
+              isLoadingMore={isFetchingNextPage && hasNextPage}
+              totalCount={12}
+              ListFooterComponent={<PlayBarChin />}
             />
-          </WithLoader>
+          </View>
         </>
       )}
-    </VirtualizedScrollView>
+    </View>
   )
 }

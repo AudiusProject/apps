@@ -5,12 +5,13 @@ import { useCurrentTrack, useImageSize } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import {
   castActions,
-  playerSelectors,
-  playerActions
+  playbackSelectors,
+  playbackActions
 } from '@audius/common/store'
 import {
   CastState,
   MediaPlayerState,
+  useCastSession,
   useCastState,
   useMediaStatus,
   useRemoteMediaClient
@@ -20,7 +21,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAsync, usePrevious } from 'react-use'
 
 const { setIsCasting } = castActions
-const { getPlaying, getSeek, getCounter } = playerSelectors
+const { getPlaying, getSeek, getCounter } = playbackSelectors
 
 export { CastState, MediaPlayerState } from 'react-native-google-cast'
 
@@ -40,6 +41,7 @@ export const useChromecast = () => {
   const client = useRemoteMediaClient()
   const castState = useCastState()
   const mediaStatus = useMediaStatus()
+  const castSession = useCastSession()
   const previousCastState = usePrevious(castState)
 
   const [internalCounter, setInternalCounter] = useState(0)
@@ -82,15 +84,30 @@ export const useChromecast = () => {
 
   // Update our cast UI when the cast device connects
   useEffect(() => {
-    switch (castState) {
-      case CastState.CONNECTED:
-        dispatch(setIsCasting({ isCasting: true }))
-        break
-      default:
-        dispatch(setIsCasting({ isCasting: false }))
-        break
+    if (castState !== CastState.CONNECTED) {
+      // Tag the disconnect with method:'chromecast' so the reducer only
+      // clears state if chromecast was the active method — symmetric with
+      // Airplay.tsx so the two listeners don't clobber each other.
+      dispatch(setIsCasting({ isCasting: false, method: 'chromecast' }))
+      return
     }
-  }, [castState, dispatch])
+    let cancelled = false
+    const resolve = async () => {
+      const device = await castSession?.getCastDevice()
+      if (cancelled) return
+      dispatch(
+        setIsCasting({
+          isCasting: true,
+          method: 'chromecast',
+          deviceName: device?.friendlyName ?? null
+        })
+      )
+    }
+    resolve()
+    return () => {
+      cancelled = true
+    }
+  }, [castState, castSession, dispatch])
 
   // Ensure that the progress gets reset to 0
   // when a new track is played
@@ -145,9 +162,9 @@ export const useChromecast = () => {
         mediaStatus?.playerState === MediaPlayerState.BUFFERING) &&
         castState !== CastState.NOT_CONNECTED)
     ) {
-      dispatch(playerActions.setBuffering({ buffering: true }))
+      dispatch(playbackActions.setBuffering({ buffering: true }))
     } else {
-      dispatch(playerActions.setBuffering({ buffering: false }))
+      dispatch(playbackActions.setBuffering({ buffering: false }))
     }
   }, [mediaStatus, castState, dispatch])
 
@@ -175,7 +192,7 @@ export const useChromecast = () => {
       previousCastState === CastState.CONNECTED
     ) {
       TrackPlayer.setVolume(1)
-      dispatch(playerActions.pause())
+      dispatch(playbackActions.pause())
     }
   }, [castState, previousCastState, dispatch])
 

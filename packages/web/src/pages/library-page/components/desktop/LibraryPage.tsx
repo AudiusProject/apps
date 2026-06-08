@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import {
   useCurrentUserId,
@@ -29,9 +29,11 @@ import FilterInput from 'components/filter-input/FilterInput'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { dateSorter } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
+import { Tab, TabList } from 'components/tabs'
 import { TracksTable, TracksTableColumn } from 'components/tracks-table'
 import EmptyTable from 'components/tracks-table/EmptyTable'
-import useTabs from 'hooks/useTabs/useTabs'
+import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { useLibraryPage } from 'pages/library-page/hooks/useLibraryPage'
 
@@ -42,11 +44,13 @@ import { LibraryCategorySelectionMenu } from './LibraryCategorySelectionMenu'
 import styles from './LibraryPage.module.css'
 import { PlaylistsTabPage } from './PlaylistsTabPage'
 
-const { getInitialFetchStatus, getCategory } = libraryPageSelectors
+const { getCategory, getSelectedCategoryLocalTrackAdds } = libraryPageSelectors
+
+const INITIAL_TRACK_SKELETON_ROWS = 10
 
 const messages = {
   libraryHeader: 'Library',
-  filterPlaceholder: 'Filter Tracks',
+  filterPlaceholder: 'Filter...',
   emptyTracksBody: "Once you have, this is where you'll find them!",
   goToTrending: 'Go to Trending',
   title: 'Library',
@@ -54,9 +58,7 @@ const messages = {
 }
 
 const tableColumns: TracksTableColumn[] = [
-  'playButton',
   'trackName',
-  'artistName',
   'releaseDate',
   'savedDate',
   'length',
@@ -66,6 +68,10 @@ const tableColumns: TracksTableColumn[] = [
 ]
 
 const LibraryPage = () => {
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const tabContainerRef = useRef<HTMLDivElement>(null)
+  const isCondensedHeader = useIsContainerNarrow(titleRowRef, 720)
+  const shouldHideTabText = useIsContainerNarrow(tabContainerRef, 352)
   const { spacing } = useTheme()
   const {
     title,
@@ -83,13 +89,16 @@ const LibraryPage = () => {
     allTracksFetched,
     hasReachedEnd,
     filterText,
-    onChangeTab,
     onClickRow,
     onClickRepost,
     onSortTracks
   } = useLibraryPage()
   const mainContentRef = useMainContentRef()
-  const initFetch = useSelector(getInitialFetchStatus)
+  const localTrackAdds = useSelector(getSelectedCategoryLocalTrackAdds)
+  const expectedTrackCount = useMemo(
+    () => entries.length + Object.keys(localTrackAdds).length,
+    [entries.length, localTrackAdds]
+  )
   const { data: currentUserId } = useCurrentUserId()
 
   const { mutate: favoriteTrack } = useFavoriteTrack()
@@ -129,22 +138,41 @@ const LibraryPage = () => {
   const getTracksTableData = (): [LibraryPageTrack[], number] => {
     let [data, activeIndex] = getFilteredData(entries)
     if (!hasReachedEnd) {
-      // Add in some empty rows to show user that more are loading in
       data = data.concat(new Array(5).fill({ kind: Kind.EMPTY }))
     }
     return [data, activeIndex]
   }
 
-  const [dataSource, activeIndex] =
-    status === Status.SUCCESS || entries.length
-      ? getTracksTableData()
-      : [[], -1]
-
   const isEmpty =
     entries.length === 0 ||
     !entries.some((entry: LibraryPageTrack) => Boolean(entry.track_id))
-  const tracksLoading =
-    (status === Status.IDLE || status === Status.LOADING) && isEmpty
+  const hasResolvedTrackRows = entries.some((entry: LibraryPageTrack) =>
+    Boolean(entry.track_id)
+  )
+  // Show skeletons while the initial library-tracks query is loading and we
+  // don't yet have any resolved rows to show.
+  const showTrackTableSkeletons =
+    status === Status.LOADING && !hasResolvedTrackRows
+  const tracksLoading = showTrackTableSkeletons && isEmpty
+  const trackSkeletonRowCount =
+    expectedTrackCount > 0
+      ? Math.min(expectedTrackCount, INITIAL_TRACK_SKELETON_ROWS)
+      : INITIAL_TRACK_SKELETON_ROWS
+  const [dataSource, activeIndex]: [LibraryPageTrack[], number] =
+    showTrackTableSkeletons
+      ? [
+          Array.from(
+            {
+              length: trackSkeletonRowCount
+            },
+            () => ({ kind: Kind.EMPTY })
+          ) as unknown as LibraryPageTrack[],
+          -1
+        ]
+      : entries.length
+        ? getTracksTableData()
+        : [[], -1]
+
   const queuedAndPlaying = playing && isQueued
 
   // Setup play button
@@ -170,16 +198,8 @@ const LibraryPage = () => {
     </div>
   )
 
-  // Setup filter
-  const filterActive = currentTab === LibraryPageTabs.TRACKS
-  const filter = (
-    <div
-      className={styles.filterContainer}
-      style={{
-        opacity: filterActive ? 1 : 0,
-        pointerEvents: filterActive ? 'auto' : 'none'
-      }}
-    >
+  const trackTableHeaderFilter = (
+    <div className={styles.tableHeaderFilterContainer}>
       <FilterInput
         placeholder={messages.filterPlaceholder}
         onChange={onFilterChange}
@@ -188,77 +208,88 @@ const LibraryPage = () => {
     </div>
   )
 
-  const { tabs, body } = useTabs({
-    isMobile: false,
-    didChangeTabsFrom: (_, to) => {
-      onChangeTab(to as LibraryPageTabs)
-    },
-    bodyClassName: styles.tabBody,
-    elementClassName: styles.tabElement,
-    tabs: [
-      {
-        icon: <IconNote />,
-        text: LibraryPageTabs.TRACKS,
-        label: LibraryPageTabs.TRACKS
-      },
-      {
-        icon: <IconAlbum />,
-        text: LibraryPageTabs.ALBUMS,
-        label: LibraryPageTabs.ALBUMS
-      },
-      {
-        icon: <IconPlaylists />,
-        text: LibraryPageTabs.PLAYLISTS,
-        label: LibraryPageTabs.PLAYLISTS
-      }
-    ],
-    elements: [
-      isEmpty && !tracksLoading ? (
-        <EmptyTable
-          primaryText={emptyTracksHeader}
-          secondaryText={messages.emptyTracksBody}
-          buttonLabel={messages.goToTrending}
-          onClick={() => goToRoute('/trending')}
-        />
-      ) : (
-        <TracksTable
-          columns={tableColumns}
-          data={dataSource}
-          defaultSorter={dateSorter('dateSaved')}
-          fetchMore={fetchMoreTracks}
-          isVirtualized
-          key='favorites'
-          loading={tracksLoading || initFetch}
-          onClickFavorite={toggleSaveTrack}
-          onClickRepost={onClickRepost}
-          onClickRow={onClickRow}
-          onSort={allTracksFetched ? onSortTracks : onSortChange}
-          playing={queuedAndPlaying}
-          activeIndex={activeIndex}
-          scrollRef={mainContentRef}
-          useLocalSort={allTracksFetched}
-          fetchBatchSize={50}
-          userId={currentUserId}
-        />
-      ),
-      <AlbumsTabPage key='albums' />,
-      <PlaylistsTabPage key='playlists' />
-    ]
-  })
+  const tracksContent =
+    isEmpty && !showTrackTableSkeletons ? (
+      <EmptyTable
+        primaryText={emptyTracksHeader}
+        secondaryText={messages.emptyTracksBody}
+        buttonLabel={messages.goToTrending}
+        onClick={() => goToRoute('/trending')}
+      />
+    ) : (
+      <TracksTable
+        columns={tableColumns}
+        data={dataSource}
+        wrapperClassName={styles.libraryTrackTableWrapper}
+        trackActionsHeader={trackTableHeaderFilter}
+        defaultSorter={dateSorter('dateSaved')}
+        fetchMore={fetchMoreTracks}
+        isVirtualized
+        key='favorites'
+        onClickFavorite={toggleSaveTrack}
+        onClickRepost={onClickRepost}
+        onClickRow={onClickRow}
+        onSort={allTracksFetched ? onSortTracks : onSortChange}
+        playing={queuedAndPlaying}
+        activeIndex={activeIndex}
+        showArtistInTrackNameColumn
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.libraryTracks}
+        scrollRef={mainContentRef}
+        useLocalSort={allTracksFetched}
+        fetchBatchSize={50}
+        userId={currentUserId}
+      />
+    )
+
+  const body =
+    currentTab === LibraryPageTabs.ALBUMS ? (
+      <AlbumsTabPage />
+    ) : currentTab === LibraryPageTabs.PLAYLISTS ? (
+      <PlaylistsTabPage />
+    ) : (
+      tracksContent
+    )
 
   const headerBottomBar = (
-    <div className={styles.headerBottomBarContainer}>
-      {tabs}
-      {filter}
+    <div ref={tabContainerRef} className={styles.headerBottomBarContainer}>
+      <TabList>
+        <Tab
+          to='/library/tracks'
+          icon={<IconNote />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.TRACKS}
+        </Tab>
+        <Tab
+          to='/library/albums'
+          icon={<IconAlbum />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.ALBUMS}
+        </Tab>
+        <Tab
+          to='/library/playlists'
+          icon={<IconPlaylists />}
+          hideText={shouldHideTabText}
+        >
+          {LibraryPageTabs.PLAYLISTS}
+        </Tab>
+      </TabList>
     </div>
   )
 
   const header = (
     <Header
+      titleRowRef={titleRowRef}
       icon={IconLibrary}
       primary={messages.libraryHeader}
       secondary={isEmpty ? null : playAllButton}
-      rightDecorator={<LibraryCategorySelectionMenu currentTab={currentTab} />}
+      rightDecorator={
+        <LibraryCategorySelectionMenu
+          currentTab={currentTab}
+          mode={isCondensedHeader ? 'dropdown' : 'pills'}
+        />
+      }
       containerStyles={styles.libraryPageHeader}
       bottomBar={headerBottomBar}
     />

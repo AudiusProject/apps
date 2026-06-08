@@ -1,22 +1,27 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   DEVELOPER_APP_DESCRIPTION_MAX_LENGTH,
   DEVELOPER_APP_IMAGE_URL_MAX_LENGTH,
   DEVELOPER_APP_NAME_MAX_LENGTH,
   developerAppEditSchema,
-  useEditDeveloperApp
+  useEditDeveloperApp,
+  useDeactivateDeveloperAppAccessKey,
+  useCreateDeveloperAppAccessKey
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
 import {
   IconCopy,
+  IconTrash,
   IconButton,
   Button,
   Flex,
   IconEmbed,
-  Divider
+  Divider,
+  IconPlus,
+  Text
 } from '@audius/harmony'
-import { Form, Formik, useField } from 'formik'
+import { FieldArray, Form, Formik, useField } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
@@ -25,8 +30,10 @@ import { TextAreaField, TextField } from 'components/form-fields'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
+import { removeNullable } from 'utils/typeUtils'
 
 import styles from './EditAppPage.module.css'
+import { MaskedSecretDisplay } from './MaskedSecretDisplay'
 import { CreateAppPageProps, CreateAppsPages } from './types'
 
 type EditAppPageProps = CreateAppPageProps
@@ -38,12 +45,25 @@ const messages = {
   imageUrlLabel: 'App Icon URL',
   apiKey: 'api key',
   copyApiKeyLabel: 'copy api key',
+  bearerToken: 'bearer token',
+  copyBearerTokenLabel: 'copy bearer token',
+  revealTokenLabel: 'reveal bearer token',
+  hideTokenLabel: 'hide bearer token',
+  deleteAccessKeyLabel: 'delete bearer token',
+  createNewToken: 'Create New Bearer Token',
   copied: 'Copied!',
   goBack: 'Back to Your Apps',
   back: 'Back',
   save: 'Save Changes',
   saving: 'Saving',
-  miscError: 'Sorry, something went wrong. Please try again later.'
+  miscError: 'Sorry, something went wrong. Please try again later.',
+  redirectUrisLabel: 'Registered Callback URLs',
+  redirectUrisHelp:
+    'Allowed values for the redirect_uri query parameter when using OAuth2 to obtain user access tokens.',
+  removeRedirectUri: 'Remove redirect URI',
+  addRedirectUri: 'Add Redirect URI',
+  redirectUriPlaceholder:
+    'https://example.com/callback or myapp://oauth/callback'
 }
 
 const ImageField = ({ name }: { name: string }) => {
@@ -63,14 +83,37 @@ const ImageField = ({ name }: { name: string }) => {
   )
 }
 
+/** Active bearer tokens: from params.bearerToken (post-creation) or params.api_access_keys */
+const getBearerTokens = (params: EditAppPageProps['params']) => {
+  if (!params) return []
+  const { bearerToken, api_access_keys } = params
+  const fromAccessKeys =
+    api_access_keys
+      ?.filter((a) => a.is_active !== false)
+      ?.map((a) => a.api_access_key) ?? []
+  if (bearerToken != null && !fromAccessKeys.includes(bearerToken)) {
+    return [bearerToken, ...fromAccessKeys]
+  }
+  return fromAccessKeys
+}
+
 export const EditAppPage = (props: EditAppPageProps) => {
   const { params, setPage } = props
-  const { name, description, apiKey, imageUrl } = params || {}
+  const { name, apiKey } = params ?? {}
+  const initialBearerTokens = getBearerTokens(params)
+  const [bearerTokens, setBearerTokens] =
+    useState<string[]>(initialBearerTokens)
 
   const record = useRecord()
 
   const { isSuccess, isError, error, mutate, isPending } = useEditDeveloperApp()
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const deactivateAccessKey = useDeactivateDeveloperAppAccessKey()
+  const createAccessKey = useCreateDeveloperAppAccessKey()
+
+  // Sync bearer tokens when params change (e.g. navigating to different app)
+  useEffect(() => {
+    setBearerTokens(getBearerTokens(params))
+  }, [params])
 
   useEffect(() => {
     if (isSuccess) {
@@ -86,7 +129,6 @@ export const EditAppPage = (props: EditAppPageProps) => {
 
   useEffect(() => {
     if (isError) {
-      setSubmitError(messages.miscError)
       record(
         make(Name.DEVELOPER_APP_EDIT_ERROR, {
           error: error?.message
@@ -97,29 +139,64 @@ export const EditAppPage = (props: EditAppPageProps) => {
 
   const handleSubmit = useCallback(
     (values: DeveloperAppValues) => {
-      setSubmitError(null)
       record(
         make(Name.DEVELOPER_APP_EDIT_SUBMIT, {
           name: values.name,
           description: values.description
         })
       )
-      mutate(values)
+      // Trim redirect URIs and remove empty ones
+      const redirectUris = (values.redirectUris ?? [])
+        .map((u) => u?.trim())
+        .filter(removeNullable)
+      // Trim image URL and set to undefined if empty string
+      const imageUrl = values.imageUrl?.trim() || undefined
+      mutate({ ...values, redirectUris, imageUrl })
     },
     [mutate, record]
   )
 
-  const initialValues: DeveloperAppValues = {
-    apiKey: apiKey || '',
-    name: name || '',
-    description,
-    imageUrl
-  }
+  const initialValues: DeveloperAppValues = useMemo(
+    () => ({
+      apiKey: params?.apiKey || '',
+      name: params?.name || '',
+      description: params?.description,
+      imageUrl: params?.imageUrl,
+      redirectUris: params?.redirectUris?.length ? params.redirectUris : ['']
+    }),
+    [params]
+  )
 
   const copyApiKey = useCallback(() => {
     if (!apiKey) return
     copyToClipboard(apiKey)
   }, [apiKey])
+
+  const handleDeactivateToken = useCallback(
+    (token: string) => {
+      if (!apiKey) return
+      deactivateAccessKey.mutate(
+        { apiKey, apiAccessKey: token },
+        {
+          onSuccess: () => {
+            setBearerTokens((prev) => prev.filter((t) => t !== token))
+          }
+        }
+      )
+    },
+    [apiKey, deactivateAccessKey]
+  )
+
+  const handleCreateToken = useCallback(() => {
+    if (!apiKey) return
+    createAccessKey.mutate(apiKey, {
+      onSuccess: (data) => {
+        if (data.api_access_key) {
+          setBearerTokens((prev) => [data.api_access_key, ...prev])
+        }
+      }
+    })
+  }, [apiKey, createAccessKey])
 
   if (!params) return null
 
@@ -128,6 +205,7 @@ export const EditAppPage = (props: EditAppPageProps) => {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       validationSchema={toFormikValidationSchema(developerAppEditSchema)}
+      enableReinitialize
     >
       <Form>
         <Flex gap='m' direction='column'>
@@ -189,6 +267,83 @@ export const EditAppPage = (props: EditAppPageProps) => {
               </Toast>
             </span>
           </div>
+          {bearerTokens.map((token) => (
+            <div key={token} className={styles.keyRoot}>
+              <span className={styles.keyLabel}>{messages.bearerToken}</span>
+              <Divider orientation='vertical' className={styles.keyDivider} />
+              <MaskedSecretDisplay
+                value={token}
+                copiedMessage={messages.copied}
+                copyLabel={messages.copyBearerTokenLabel}
+                revealLabel={messages.revealTokenLabel}
+                hideLabel={messages.hideTokenLabel}
+                dividerClassName={styles.keyDivider}
+                extraActions={
+                  <IconButton
+                    onClick={() => handleDeactivateToken(token)}
+                    aria-label={messages.deleteAccessKeyLabel}
+                    color='subdued'
+                    icon={IconTrash}
+                    disabled={deactivateAccessKey.isPending}
+                  />
+                }
+              />
+            </div>
+          ))}
+          <Button
+            variant='secondary'
+            type='button'
+            onClick={handleCreateToken}
+            disabled={createAccessKey.isPending}
+            isLoading={createAccessKey.isPending}
+          >
+            {messages.createNewToken}
+          </Button>
+          <Flex direction='column' gap='s'>
+            <Text variant='body' strength='strong'>
+              {messages.redirectUrisLabel}
+            </Text>
+            <Text variant='body' size='s' color='subdued'>
+              {messages.redirectUrisHelp}
+            </Text>
+            <FieldArray name='redirectUris'>
+              {({ push, remove, form }) => {
+                const uris: string[] = form.values.redirectUris
+                return (
+                  <>
+                    {uris.map((uri, index) => {
+                      const isLast = index === uris.length - 1
+                      return (
+                        <Flex key={index} gap='s' alignItems='center'>
+                          <TextField
+                            name={`redirectUris.${index}`}
+                            label={`${messages.addRedirectUri} ${index + 1}`}
+                            placeholder={messages.redirectUriPlaceholder}
+                            disabled={isPending}
+                          />
+                          {isLast ? (
+                            <IconButton
+                              onClick={() => push('')}
+                              aria-label={messages.addRedirectUri}
+                              color='default'
+                              icon={IconPlus}
+                            />
+                          ) : (
+                            <IconButton
+                              onClick={() => remove(index)}
+                              aria-label={messages.removeRedirectUri}
+                              color='subdued'
+                              icon={IconTrash}
+                            />
+                          )}
+                        </Flex>
+                      )
+                    })}
+                  </>
+                )
+              }}
+            </FieldArray>
+          </Flex>
           <div className={styles.actionsContainer}>
             <Button
               variant='secondary'
@@ -208,11 +363,11 @@ export const EditAppPage = (props: EditAppPageProps) => {
               {isPending ? messages.saving : messages.save}
             </Button>
           </div>
-          {submitError == null ? null : (
+          {isError ? (
             <div className={styles.errorContainer}>
               <span className={styles.errorText}>{messages.miscError}</span>
             </div>
-          )}
+          ) : null}
         </Flex>
       </Form>
     </Formik>

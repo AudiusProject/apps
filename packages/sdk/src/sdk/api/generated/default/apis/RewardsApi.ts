@@ -2,8 +2,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -16,14 +15,14 @@
 
 import * as runtime from '../runtime';
 import type {
-  ClaimRewardsRequest,
+  ClaimRewardsRequestBody,
   ClaimRewardsResponse,
   CreateRewardCodeRequest,
   CreateRewardCodeResponse,
 } from '../models';
 import {
-    ClaimRewardsRequestFromJSON,
-    ClaimRewardsRequestToJSON,
+    ClaimRewardsRequestBodyFromJSON,
+    ClaimRewardsRequestBodyToJSON,
     ClaimRewardsResponseFromJSON,
     ClaimRewardsResponseToJSON,
     CreateRewardCodeRequestFromJSON,
@@ -32,8 +31,8 @@ import {
     CreateRewardCodeResponseToJSON,
 } from '../models';
 
-export interface ClaimRewardsOperationRequest {
-    claimRewardsRequest: ClaimRewardsRequest;
+export interface ClaimRewardsRequest {
+    reward: ClaimRewardsRequestBody;
 }
 
 export interface CreateRewardCodeOperationRequest {
@@ -49,9 +48,9 @@ export class RewardsApi extends runtime.BaseAPI {
      * @hidden
      * Claims all the filtered undisbursed rewards for a user
      */
-    async claimRewardsRaw(params: ClaimRewardsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClaimRewardsResponse>> {
-        if (params.claimRewardsRequest === null || params.claimRewardsRequest === undefined) {
-            throw new runtime.RequiredError('claimRewardsRequest','Required parameter params.claimRewardsRequest was null or undefined when calling claimRewards.');
+    async claimRewardsRaw(params: ClaimRewardsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClaimRewardsResponse>> {
+        if (params.reward === null || params.reward === undefined) {
+            throw new runtime.RequiredError('reward','Required parameter params.reward was null or undefined when calling claimRewards.');
         }
 
         const queryParameters: any = {};
@@ -65,7 +64,7 @@ export class RewardsApi extends runtime.BaseAPI {
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: ClaimRewardsRequestToJSON(params.claimRewardsRequest),
+            body: ClaimRewardsRequestBodyToJSON(params.reward),
         }, initOverrides);
 
         return new runtime.JSONApiResponse(response, (jsonValue) => ClaimRewardsResponseFromJSON(jsonValue));
@@ -74,7 +73,7 @@ export class RewardsApi extends runtime.BaseAPI {
     /**
      * Claims all the filtered undisbursed rewards for a user
      */
-    async claimRewards(params: ClaimRewardsOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClaimRewardsResponse> {
+    async claimRewards(params: ClaimRewardsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClaimRewardsResponse> {
         const response = await this.claimRewardsRaw(params, initOverrides);
         return await response.value();
     }

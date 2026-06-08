@@ -69,19 +69,21 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
     createMetric({
       value: formatCurrencyWithSubscript(coin.displayPrice),
       label: messages.pricePerCoin,
-      changePercent: coin.priceChange24hPercent,
+      changePercent:
+        (coin as Coin & { priceChange24hPercent?: number })
+          .priceChange24hPercent ?? undefined,
       rawValue: formatCurrency(coin.displayPrice)
     }),
     createMetric({
-      value: `$${formatCount(coin.displayMarketCap, 2)}`,
+      value: `$${formatCount(coin.displayMarketCap ?? 0, 2)}`,
       label: messages.marketCap
     }),
     createMetric({
-      value: `$${formatCount(coin.totalVolumeUSD, 2)}`,
+      value: `$${formatCount(coin.totalVolumeUSD ?? 0, 2)}`,
       label: messages.totalVolume
     }),
     createMetric({
-      value: formatCount(coin.holder),
+      value: formatCount(coin.holder ?? 0),
       label: messages.uniqueHolders
     }),
     createMetric({

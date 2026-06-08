@@ -1,14 +1,16 @@
 import type { ReactElement } from 'react'
 
-import { useProfileUser } from '@audius/common/api'
+import { useProfileUser, useUserHasRemixContest } from '@audius/common/api'
 import { useIsArtist } from '@audius/common/hooks'
 import { ProfilePageTabs } from '@audius/common/store'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
   IconAlbum,
   IconNote,
   IconPlaylists,
-  IconRepost
+  IconRepost,
+  IconTrophy
 } from '@audius/harmony-native'
 import {
   collapsibleTabScreen,
@@ -16,7 +18,10 @@ import {
 } from 'app/components/top-tab-bar'
 import { useRoute } from 'app/hooks/useRoute'
 
+import { PROFILE_NAV_CONTROLS_HEIGHT } from '../ProfileNavOverlay'
+
 import { AlbumsTab } from './AlbumsTab'
+import { ContestsTab } from './ContestsTab'
 import { PlaylistsTab } from './PlaylistsTab'
 import { RepostsTab } from './RepostsTab'
 import { TracksTab } from './TracksTab'
@@ -38,6 +43,7 @@ export const ProfileTabNavigator = ({
   refreshing,
   onRefresh
 }: ProfileTabNavigatorProps) => {
+  const insets = useSafeAreaInsets()
   const { user_id } =
     useProfileUser({
       select: (user) => ({ user_id: user.user_id })
@@ -49,6 +55,10 @@ export const ProfileTabNavigator = ({
     handle: params.handle
   }
   const isArtist = useIsArtist(params)
+  const { hasContest: profileHasContest } = useUserHasRemixContest(
+    isArtist ? user_id : null
+  )
+  const showContestsTab = profileHasContest
 
   const trackScreen = collapsibleTabScreen({
     name: ProfilePageTabs.TRACKS,
@@ -86,16 +96,30 @@ export const ProfileTabNavigator = ({
     onRefresh
   })
 
+  const contestsScreen = collapsibleTabScreen({
+    name: ProfilePageTabs.CONTESTS,
+    Icon: IconTrophy,
+    component: ContestsTab,
+    initialParams: { ...initialParams, lazy: true },
+    refreshing,
+    onRefresh
+  })
+
   if (isArtist) {
     return (
       <CollapsibleTabNavigator
         renderHeader={renderHeader}
         headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
+        minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
       >
         {trackScreen}
         {albumsScreen}
         {playlistsScreen}
         {repostsScreen}
+        {/* Contests tab — gated on whether this host actually runs any
+            remix contest. Hidden otherwise so the tab doesn't lead to an
+            empty/unreachable destination. */}
+        {showContestsTab ? contestsScreen : null}
       </CollapsibleTabNavigator>
     )
   }
@@ -104,6 +128,7 @@ export const ProfileTabNavigator = ({
     <CollapsibleTabNavigator
       renderHeader={renderHeader}
       headerHeight={INITIAL_PROFILE_HEADER_HEIGHT}
+      minHeaderHeight={insets.top + PROFILE_NAV_CONTROLS_HEIGHT}
     >
       {repostsScreen}
       {playlistsScreen}

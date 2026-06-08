@@ -1,8 +1,8 @@
 import { SquareSizes, UserMetadata } from '@audius/common/models'
-import { Flex, Text, useTheme } from '@audius/harmony'
+import { Flex, Text, useTheme, Image } from '@audius/harmony'
 import styled from '@emotion/styled'
+import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import { backgroundOverlay } from 'utils/styleUtils'
@@ -56,11 +56,9 @@ export const AccountSwitcherRow = ({
       }}
     >
       {isSelected && <Indicator />}
-      <DynamicImage
-        wrapperClassName={styles.profilePictureWrapper}
-        skeletonClassName={styles.profilePictureSkeleton}
-        className={styles.profilePicture}
-        image={profilePicture}
+      <Image
+        className={cn(styles.profilePictureWrapper, styles.profilePicture)}
+        src={profilePicture}
       />
       <Flex direction='column' gap='xs'>
         <Flex gap='xs' alignItems='center' justifyContent='flex-start'>

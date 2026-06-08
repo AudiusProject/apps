@@ -21,7 +21,8 @@ export type HeaderProps = {
   children?: ReactNode
   isChromeOrSafari?: boolean
   scrollBarWidth?: number
-  headerContainerRef?: React.RefObject<HTMLDivElement>
+  headerContainerRef?: React.RefObject<HTMLDivElement | null>
+  titleRowRef?: React.RefObject<HTMLDivElement | null>
   icon?: IconComponent
 }
 
@@ -40,6 +41,7 @@ export const Header = (props: HeaderProps) => {
     isChromeOrSafari,
     scrollBarWidth,
     headerContainerRef,
+    titleRowRef,
     icon: Icon
   } = props
 
@@ -62,14 +64,16 @@ export const Header = (props: HeaderProps) => {
           gap='l'
           mt='2xl'
           mb='l'
-          css={{ maxWidth: 1080 }}
+          css={{ maxWidth: 1080, marginLeft: 'auto', marginRight: 'auto' }}
         >
           {topLeftElement || null}
           <Flex
+            ref={titleRowRef}
             alignItems='center'
             justifyContent='space-between'
             w='100%'
             gap='m'
+            className={styles.contentGlow}
           >
             {showBackButton ? (
               <BackButton onClick={onClickBack ?? (() => navigate(-1))} />
@@ -77,6 +81,7 @@ export const Header = (props: HeaderProps) => {
             <Flex alignItems='center' gap='m'>
               {Icon ? <Icon size='2xl' color='heading' /> : null}
               <Text
+                className={styles.pageTitle}
                 variant='heading'
                 tag='h1'
                 strength='default'
@@ -86,8 +91,7 @@ export const Header = (props: HeaderProps) => {
                 {primary}
               </Text>
             </Flex>
-            {/* Padding to help align heading */}
-            <Flex pt={6}>
+            <Flex alignItems='center'>
               {typeof secondary === 'string' ? (
                 <Text
                   variant='body'
@@ -108,7 +112,9 @@ export const Header = (props: HeaderProps) => {
       {children}
       {bottomBar && (
         <div className={styles.bottomBarContainer}>
-          <div className={styles.bottomBar}>{bottomBar}</div>
+          <div className={cn(styles.bottomBar, styles.contentGlow)}>
+            {bottomBar}
+          </div>
         </div>
       )}
     </>

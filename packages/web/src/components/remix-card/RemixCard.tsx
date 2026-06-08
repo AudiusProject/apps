@@ -1,7 +1,7 @@
 import { ID, Remix } from '@audius/common/models'
+import { Image } from '@audius/harmony'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import UserBadges from 'components/user-badges/UserBadges'
@@ -38,10 +38,10 @@ const RemixCard = ({
   const images = (
     <div className={styles.images}>
       <div className={styles.profilePicture}>
-        <DynamicImage image={profilePictureImage} />
+        <Image src={profilePictureImage} />
       </div>
       <div className={styles.coverArt}>
-        <DynamicImage image={coverArtImage} />
+        <Image src={coverArtImage} />
       </div>
     </div>
   )

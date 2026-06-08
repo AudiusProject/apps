@@ -1,7 +1,7 @@
 import { memo, useCallback, useState } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useArtistCoinMessageHeader } from '@audius/common/hooks'
+import { useFanClubMessageHeader } from '@audius/common/hooks'
 import { Status } from '@audius/common/models'
 import { chatSelectors } from '@audius/common/store'
 import {
@@ -26,9 +26,9 @@ import { zIndex } from 'app/utils/zIndex'
 
 import { reactionMap } from '../notifications-screen/Reaction'
 
-import { ArtistCoinHeader } from './ArtistCoinHeader'
 import { ChatMessagePlaylist } from './ChatMessagePlaylist'
 import { ChatMessageTrack } from './ChatMessageTrack'
+import { FanClubHeader } from './FanClubHeader'
 import { LinkPreview } from './LinkPreview'
 import { ResendMessageButton } from './ResendMessageButton'
 import { REACTION_LONGPRESS_DELAY } from './constants'
@@ -60,7 +60,7 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
     borderTopEndRadius: 0
   },
   messageContainerAuthor: {
-    backgroundColor: palette.secondaryLight2
+    backgroundColor: palette.secondary
   },
   tail: {
     display: 'flex',
@@ -215,12 +215,12 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
     borderBottomWidth
   }
 
-  const artistCoinSymbol = useArtistCoinMessageHeader({
+  const fanClubSymbol = useFanClubMessageHeader({
     userId: senderUserId ?? 0,
     audience: message?.audience
   })
 
-  const hasHeader = artistCoinSymbol || isCollection || isTrack || link
+  const hasHeader = fanClubSymbol || isCollection || isTrack || link
 
   return message ? (
     <>
@@ -264,7 +264,7 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
             }
           >
             {senderUserId ? (
-              <ArtistCoinHeader
+              <FanClubHeader
                 userId={senderUserId}
                 audience={message?.audience}
               />
@@ -272,6 +272,8 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
             {isCollection ? (
               <ChatMessagePlaylist
                 key={`${link.value}-${link.start}-${link.end}`}
+                chatId={chatId}
+                messageId={messageId}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}
@@ -280,6 +282,8 @@ export const ChatMessageListItem = memo(function ChatMessageListItem(
             ) : isTrack ? (
               <ChatMessageTrack
                 key={`${link.value}-${link.start}-${link.end}`}
+                chatId={chatId}
+                messageId={messageId}
                 link={link.value}
                 onEmpty={onUnfurlEmpty}
                 onSuccess={onUnfurlSuccess}

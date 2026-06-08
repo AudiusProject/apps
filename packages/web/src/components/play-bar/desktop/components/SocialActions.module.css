@@ -1,9 +1,12 @@
 .root {
-  margin-left: var(--harmony-unit-9);
   display: flex;
-  gap: var(--harmony-unit-4);
+  gap: var(--harmony-unit-3);
   justify-content: center;
   align-items: center;
+}
+
+.compact {
+  gap: var(--harmony-unit-2);
 }
 
 .toggleRepostContainer,
@@ -12,4 +15,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.iconButton {
+  display: flex;
+  height: var(--harmony-unit-5);
+  width: var(--harmony-unit-5);
+  align-items: center;
+  transform: scale3d(1, 1, 1);
+  transition: all 0.12s ease-in-out !important;
+}
+
+.iconButton path {
+  fill: var(--harmony-n-400) !important;
+}
+
+.iconButtonActive path {
+  fill: var(--harmony-p-300) !important;
+}
+
+.iconButton:hover {
+  transform: scale3d(1.18, 1.18, 1.18);
+}
+
+.iconButton:active {
+  transform: scale3d(0.95, 0.95, 0.95);
+}
+
+.iconButtonRepost {
+  transform: scale(1.15);
+  transform-origin: center;
 }

@@ -9,6 +9,11 @@ import profilePicEmpty from 'app/assets/images/imageProfilePicEmpty2X.png'
 
 import { primitiveToImageSource } from './primitiveToImageSource'
 
+// Per-URL render timeout (ms) so a stalled Open Audio Validator Node
+// advances to the next mirror without waiting on the OS TCP timeout
+// (60–90s). Matches the web MirrorImage pattern.
+const USER_IMAGE_TIMEOUT_MS = 3000
+
 type UseUserImageOptions = {
   userId: ID | null | undefined
   size: SquareSizes
@@ -27,7 +32,11 @@ export const useProfilePicture = ({
   })
 
   const { profile_picture, updatedProfilePicture } = partialUser ?? {}
-  const { imageUrl, onError: onImageError } = useImageSize({
+  const {
+    imageUrl,
+    priorityLowResUrl,
+    onError: onImageError
+  } = useImageSize({
     artwork: profile_picture,
     targetSize: size,
     defaultImage: '',
@@ -54,6 +63,7 @@ export const useProfilePicture = ({
 
   return {
     source: primitiveToImageSource(imageUrl),
+    priorityLowResSource: primitiveToImageSource(priorityLowResUrl),
     isFallbackImage: false,
     onError: onImageError
   }
@@ -63,7 +73,11 @@ export type UserImageProps = UseUserImageOptions & Partial<ImageProps>
 
 export const UserImage = (props: UserImageProps) => {
   const { userId, size, onError, ...imageProps } = props
-  const { source, onError: onImageError } = useProfilePicture({ userId, size })
+  const {
+    source,
+    priorityLowResSource,
+    onError: onImageError
+  } = useProfilePicture({ userId, size })
 
   const handleError = (error: { nativeEvent: { error: string } }) => {
     if (source && typeof source === 'object' && 'uri' in source) {
@@ -72,5 +86,13 @@ export const UserImage = (props: UserImageProps) => {
     onError?.(error)
   }
 
-  return <Image {...imageProps} source={source} onError={handleError} />
+  return (
+    <Image
+      {...imageProps}
+      source={source}
+      priorityLowResSource={priorityLowResSource}
+      onError={handleError}
+      timeoutMs={USER_IMAGE_TIMEOUT_MS}
+    />
+  )
 }

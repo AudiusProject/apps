@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import type { CoinInfo, CoinPair } from '@audius/common/store'
 import { useCoinSwapForm } from '@audius/common/store'
 
@@ -77,7 +77,7 @@ export const SellScreen = ({
   onInputTokenChange,
   availableInputTokens
 }: SellScreenProps) => {
-  const { data: tokenPriceData } = useArtistCoin(tokenPair?.baseToken?.address)
+  const { data: tokenPriceData } = useFanClub(tokenPair?.baseToken?.address)
 
   const tokenPrice = tokenPriceData?.price?.toString() ?? null
 

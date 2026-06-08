@@ -22,7 +22,6 @@ import type { Challenge } from './types'
 
 const {
   getClaimStatus,
-  getAAOErrorCode,
   getUndisbursedUserChallenges,
   getChallengeRewardsModalType
 } = audioRewardsPageSelectors
@@ -51,7 +50,6 @@ export const ChallengeRewardsDrawer = () => {
   )
   const undisbursedUserChallenges = useSelector(getUndisbursedUserChallenges)
   const claimStatus = useSelector(getClaimStatus)
-  const aaoErrorCode = useSelector(getAAOErrorCode)
   const { toast } = useToast()
 
   const handleClose = useCallback(() => {
@@ -119,7 +117,6 @@ export const ChallengeRewardsDrawer = () => {
         challenge={challenge}
         challengeName={challengeName}
         claimStatus={claimStatus}
-        aaoErrorCode={aaoErrorCode}
         onClaim={() => onClaim(challenge)}
         onClose={handleClose}
       />

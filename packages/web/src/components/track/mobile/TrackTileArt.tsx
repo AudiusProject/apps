@@ -1,9 +1,9 @@
 import { memo } from 'react'
 
 import { SquareSizes, ID, Remix } from '@audius/common/models'
+import { Image } from '@audius/harmony'
 import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import TrackFlair from 'components/track-flair/TrackFlair'
 import { Size } from 'components/track-flair/types'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
@@ -40,29 +40,38 @@ const TrackTileArt = ({
   artworkIconClassName,
   callback
 }: TrackTileArtProps) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
     trackId: id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
   const imageProps = {
-    image: showSkeleton ? '' : image,
-    noShimmer,
-    wrapperClassName: coSign
+    src: showSkeleton ? undefined : image,
+    useSkeleton: !hasNoArtwork,
+    className: coSign
       ? styles.imageWrapper
-      : cn(styles.container, styles.imageWrapper, className),
+      : cn(
+          styles.container,
+          styles.imageWrapper,
+          className,
+          hasNoArtwork && styles.artworkEmpty
+        ),
     'aria-label': label,
     onLoad: callback
   }
 
   const renderImage = () => (
-    <DynamicImage {...imageProps}>
+    <Image {...imageProps}>
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
-        artworkIconClassName={artworkIconClassName}
+        artworkIconClassName={cn(
+          artworkIconClassName,
+          hasNoArtwork && styles.artworkIconVisible
+        )}
+        hasNoArtwork={hasNoArtwork}
       />
-    </DynamicImage>
+    </Image>
   )
 
   return (
@@ -88,29 +97,38 @@ const CollectionTileArt = ({
   artworkIconClassName,
   callback
 }: TrackTileArtProps) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image, hasNoArtwork } = useCollectionCoverArt({
     collectionId: id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
   const imageProps = {
-    image: showSkeleton ? '' : image,
-    noShimmer,
-    wrapperClassName: coSign
+    src: showSkeleton ? undefined : image,
+    useSkeleton: !hasNoArtwork,
+    className: coSign
       ? styles.imageWrapper
-      : cn(styles.container, styles.imageWrapper, className),
+      : cn(
+          styles.container,
+          styles.imageWrapper,
+          className,
+          hasNoArtwork && styles.artworkEmpty
+        ),
     'aria-label': label,
     onLoad: callback
   }
 
   const renderImage = () => (
-    <DynamicImage {...imageProps}>
+    <Image {...imageProps}>
       <ArtworkIcon
         isBuffering={!!isBuffering}
         isPlaying={!!isPlaying}
-        artworkIconClassName={artworkIconClassName}
+        artworkIconClassName={cn(
+          artworkIconClassName,
+          hasNoArtwork && styles.artworkIconVisible
+        )}
+        hasNoArtwork={hasNoArtwork}
       />
-    </DynamicImage>
+    </Image>
   )
 
   return renderImage()

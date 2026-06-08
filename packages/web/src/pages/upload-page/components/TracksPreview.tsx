@@ -59,7 +59,11 @@ export const TracksPreview = (props: TracksPreviewProps) => {
         <SegmentedControl
           label={messages.releaseType}
           onSelectOption={handleOptionSelect}
-          selected={String(uploadType)}
+          selected={String(
+            uploadType === UploadType.INDIVIDUAL_TRACK
+              ? UploadType.INDIVIDUAL_TRACKS
+              : uploadType
+          )}
           options={[
             { key: String(UploadType.INDIVIDUAL_TRACKS), text: 'Tracks' },
             { key: String(UploadType.ALBUM), text: 'Album' },

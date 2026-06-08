@@ -2,8 +2,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -17,27 +16,65 @@
 import * as runtime from '../runtime';
 import type {
   AccessInfoResponse,
+  CreatePlaylistRequestBody,
+  CreatePlaylistResponse,
+  FavoriteRequestBody,
+  FollowingResponse,
   PlaylistResponse,
   PlaylistSearchResult,
   PlaylistTracksResponse,
+  RepostRequestBody,
   TrendingPlaylistsResponse,
+  UpdatePlaylistRequestBody,
+  WriteResponse,
 } from '../models';
 import {
     AccessInfoResponseFromJSON,
     AccessInfoResponseToJSON,
+    CreatePlaylistRequestBodyFromJSON,
+    CreatePlaylistRequestBodyToJSON,
+    CreatePlaylistResponseFromJSON,
+    CreatePlaylistResponseToJSON,
+    FavoriteRequestBodyFromJSON,
+    FavoriteRequestBodyToJSON,
+    FollowingResponseFromJSON,
+    FollowingResponseToJSON,
     PlaylistResponseFromJSON,
     PlaylistResponseToJSON,
     PlaylistSearchResultFromJSON,
     PlaylistSearchResultToJSON,
     PlaylistTracksResponseFromJSON,
     PlaylistTracksResponseToJSON,
+    RepostRequestBodyFromJSON,
+    RepostRequestBodyToJSON,
     TrendingPlaylistsResponseFromJSON,
     TrendingPlaylistsResponseToJSON,
+    UpdatePlaylistRequestBodyFromJSON,
+    UpdatePlaylistRequestBodyToJSON,
+    WriteResponseFromJSON,
+    WriteResponseToJSON,
 } from '../models';
+
+export interface CreatePlaylistRequest {
+    userId: string;
+    metadata: CreatePlaylistRequestBody;
+}
+
+export interface DeletePlaylistRequest {
+    playlistId: string;
+    userId: string;
+}
+
+export interface FavoritePlaylistRequest {
+    playlistId: string;
+    userId: string;
+    metadata?: FavoriteRequestBody;
+}
 
 export interface GetBulkPlaylistsRequest {
     userId?: string;
     id?: Array<string>;
+    permalink?: Array<string>;
     upc?: Array<string>;
 }
 
@@ -51,22 +88,52 @@ export interface GetPlaylistAccessInfoRequest {
     userId?: string;
 }
 
-export interface GetPlaylistByHandleAndSlugRequest {
-    handle: string;
-    slug: string;
-    userId?: string;
-}
-
 export interface GetPlaylistTracksRequest {
     playlistId: string;
+}
+
+export interface GetPlaylistsNewReleasesRequest {
+    offset?: number;
+    limit?: number;
+    type?: GetPlaylistsNewReleasesTypeEnum;
+    userId?: string;
 }
 
 export interface GetTrendingPlaylistsRequest {
     offset?: number;
     limit?: number;
+    userId?: string;
     time?: GetTrendingPlaylistsTimeEnum;
     type?: GetTrendingPlaylistsTypeEnum;
     omitTracks?: boolean;
+}
+
+export interface GetTrendingPlaylistsWithVersionRequest {
+    version: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+    time?: GetTrendingPlaylistsWithVersionTimeEnum;
+}
+
+export interface GetUsersFromPlaylistFavoritesRequest {
+    playlistId: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+}
+
+export interface GetUsersFromPlaylistRepostsRequest {
+    playlistId: string;
+    offset?: number;
+    limit?: number;
+    userId?: string;
+}
+
+export interface RepostPlaylistRequest {
+    playlistId: string;
+    userId: string;
+    repostRequestBody?: RepostRequestBody;
 }
 
 export interface SearchPlaylistsRequest {
@@ -80,6 +147,27 @@ export interface SearchPlaylistsRequest {
     hasDownloads?: string;
 }
 
+export interface SharePlaylistRequest {
+    playlistId: string;
+    userId: string;
+}
+
+export interface UnfavoritePlaylistRequest {
+    playlistId: string;
+    userId: string;
+}
+
+export interface UnrepostPlaylistRequest {
+    playlistId: string;
+    userId: string;
+}
+
+export interface UpdatePlaylistRequest {
+    playlistId: string;
+    userId: string;
+    metadata: UpdatePlaylistRequestBody;
+}
+
 /**
  * 
  */
@@ -87,7 +175,184 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets a list of playlists by ID
+     * Creates a new playlist or album
+     */
+    async createPlaylistRaw(params: CreatePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreatePlaylistResponse>> {
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling createPlaylist.');
+        }
+
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling createPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CreatePlaylistRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CreatePlaylistResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates a new playlist or album
+     */
+    async createPlaylist(params: CreatePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreatePlaylistResponse> {
+        const response = await this.createPlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Deletes a playlist or album
+     */
+    async deletePlaylistRaw(params: DeletePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling deletePlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling deletePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Deletes a playlist or album
+     */
+    async deletePlaylist(params: DeletePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.deletePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Favorite a playlist
+     */
+    async favoritePlaylistRaw(params: FavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling favoritePlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling favoritePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: FavoriteRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Favorite a playlist
+     */
+    async favoritePlaylist(params: FavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.favoritePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Gets a list of playlists by ID, UPC, or permalink
      */
     async getBulkPlaylistsRaw(params: GetBulkPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PlaylistResponse>> {
         const queryParameters: any = {};
@@ -100,11 +365,22 @@ export class PlaylistsApi extends runtime.BaseAPI {
             queryParameters['id'] = params.id;
         }
 
+        if (params.permalink) {
+            queryParameters['permalink'] = params.permalink;
+        }
+
         if (params.upc) {
             queryParameters['upc'] = params.upc;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
 
         const response = await this.request({
             path: `/playlists`,
@@ -117,7 +393,7 @@ export class PlaylistsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets a list of playlists by ID
+     * Gets a list of playlists by ID, UPC, or permalink
      */
     async getBulkPlaylists(params: GetBulkPlaylistsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PlaylistResponse> {
         const response = await this.getBulkPlaylistsRaw(params, initOverrides);
@@ -140,6 +416,13 @@ export class PlaylistsApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
 
         const response = await this.request({
             path: `/playlists/{playlist_id}`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
@@ -176,6 +459,13 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
         const response = await this.request({
             path: `/playlists/{playlist_id}/access-info`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
             method: 'GET',
@@ -191,45 +481,6 @@ export class PlaylistsApi extends runtime.BaseAPI {
      */
     async getPlaylistAccessInfo(params: GetPlaylistAccessInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AccessInfoResponse> {
         const response = await this.getPlaylistAccessInfoRaw(params, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * @hidden
-     * Get a playlist by handle and slug
-     */
-    async getPlaylistByHandleAndSlugRaw(params: GetPlaylistByHandleAndSlugRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PlaylistResponse>> {
-        if (params.handle === null || params.handle === undefined) {
-            throw new runtime.RequiredError('handle','Required parameter params.handle was null or undefined when calling getPlaylistByHandleAndSlug.');
-        }
-
-        if (params.slug === null || params.slug === undefined) {
-            throw new runtime.RequiredError('slug','Required parameter params.slug was null or undefined when calling getPlaylistByHandleAndSlug.');
-        }
-
-        const queryParameters: any = {};
-
-        if (params.userId !== undefined) {
-            queryParameters['user_id'] = params.userId;
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        const response = await this.request({
-            path: `/playlists/by_permalink/{handle}/{slug}`.replace(`{${"handle"}}`, encodeURIComponent(String(params.handle))).replace(`{${"slug"}}`, encodeURIComponent(String(params.slug))),
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        return new runtime.JSONApiResponse(response, (jsonValue) => PlaylistResponseFromJSON(jsonValue));
-    }
-
-    /**
-     * Get a playlist by handle and slug
-     */
-    async getPlaylistByHandleAndSlug(params: GetPlaylistByHandleAndSlugRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PlaylistResponse> {
-        const response = await this.getPlaylistByHandleAndSlugRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -266,7 +517,57 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Gets trending playlists for a time period
+     * Returns recently released playlists or albums
+     */
+    async getPlaylistsNewReleasesRaw(params: GetPlaylistsNewReleasesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.type !== undefined) {
+            queryParameters['type'] = params.type;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/playlists/new-releases`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingPlaylistsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns recently released playlists or albums
+     */
+    async getPlaylistsNewReleases(params: GetPlaylistsNewReleasesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
+        const response = await this.getPlaylistsNewReleasesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns trending playlists for a time period
      */
     async getTrendingPlaylistsRaw(params: GetTrendingPlaylistsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
         const queryParameters: any = {};
@@ -277,6 +578,10 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         if (params.limit !== undefined) {
             queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
         }
 
         if (params.time !== undefined) {
@@ -293,6 +598,13 @@ export class PlaylistsApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
         const response = await this.request({
             path: `/playlists/trending`,
             method: 'GET',
@@ -304,10 +616,224 @@ export class PlaylistsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Gets trending playlists for a time period
+     * Returns trending playlists for a time period
      */
     async getTrendingPlaylists(params: GetTrendingPlaylistsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
         const response = await this.getTrendingPlaylistsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersionRaw(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TrendingPlaylistsResponse>> {
+        if (params.version === null || params.version === undefined) {
+            throw new runtime.RequiredError('version','Required parameter params.version was null or undefined when calling getTrendingPlaylistsWithVersion.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        if (params.time !== undefined) {
+            queryParameters['time'] = params.time;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/playlists/trending/{version}`.replace(`{${"version"}}`, encodeURIComponent(String(params.version))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TrendingPlaylistsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Returns trending playlists for a time period based on the given trending version
+     */
+    async getTrendingPlaylistsWithVersion(params: GetTrendingPlaylistsWithVersionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TrendingPlaylistsResponse> {
+        const response = await this.getTrendingPlaylistsWithVersionRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get users that favorited a playlist
+     */
+    async getUsersFromPlaylistFavoritesRaw(params: GetUsersFromPlaylistFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowingResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling getUsersFromPlaylistFavorites.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowingResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get users that favorited a playlist
+     */
+    async getUsersFromPlaylistFavorites(params: GetUsersFromPlaylistFavoritesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowingResponse> {
+        const response = await this.getUsersFromPlaylistFavoritesRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Get users that reposted a playlist
+     */
+    async getUsersFromPlaylistRepostsRaw(params: GetUsersFromPlaylistRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<FollowingResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling getUsersFromPlaylistReposts.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.offset !== undefined) {
+            queryParameters['offset'] = params.offset;
+        }
+
+        if (params.limit !== undefined) {
+            queryParameters['limit'] = params.limit;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FollowingResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Get users that reposted a playlist
+     */
+    async getUsersFromPlaylistReposts(params: GetUsersFromPlaylistRepostsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<FollowingResponse> {
+        const response = await this.getUsersFromPlaylistRepostsRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Repost a playlist
+     */
+    async repostPlaylistRaw(params: RepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling repostPlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling repostPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RepostRequestBodyToJSON(params.repostRequestBody),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Repost a playlist
+     */
+    async repostPlaylist(params: RepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.repostPlaylistRaw(params, initOverrides);
         return await response.value();
     }
 
@@ -370,8 +896,251 @@ export class PlaylistsApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * @hidden
+     * Record a playlist share event
+     */
+    async sharePlaylistRaw(params: SharePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling sharePlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling sharePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/shares`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Record a playlist share event
+     */
+    async sharePlaylist(params: SharePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.sharePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unfavorite a playlist
+     */
+    async unfavoritePlaylistRaw(params: UnfavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling unfavoritePlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unfavoritePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/favorites`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unfavorite a playlist
+     */
+    async unfavoritePlaylist(params: UnfavoritePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unfavoritePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Unrepost a playlist
+     */
+    async unrepostPlaylistRaw(params: UnrepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling unrepostPlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling unrepostPlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}/reposts`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Unrepost a playlist
+     */
+    async unrepostPlaylist(params: UnrepostPlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.unrepostPlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * @hidden
+     * Updates an existing playlist or album
+     */
+    async updatePlaylistRaw(params: UpdatePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WriteResponse>> {
+        if (params.playlistId === null || params.playlistId === undefined) {
+            throw new runtime.RequiredError('playlistId','Required parameter params.playlistId was null or undefined when calling updatePlaylist.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling updatePlaylist.');
+        }
+
+        if (params.metadata === null || params.metadata === undefined) {
+            throw new runtime.RequiredError('metadata','Required parameter params.metadata was null or undefined when calling updatePlaylist.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["write"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
+        }
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("BearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+        const response = await this.request({
+            path: `/playlists/{playlist_id}`.replace(`{${"playlist_id"}}`, encodeURIComponent(String(params.playlistId))),
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UpdatePlaylistRequestBodyToJSON(params.metadata),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WriteResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Updates an existing playlist or album
+     */
+    async updatePlaylist(params: UpdatePlaylistRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WriteResponse> {
+        const response = await this.updatePlaylistRaw(params, initOverrides);
+        return await response.value();
+    }
+
 }
 
+/**
+ * @export
+ */
+export const GetPlaylistsNewReleasesTypeEnum = {
+    Playlist: 'playlist',
+    Album: 'album'
+} as const;
+export type GetPlaylistsNewReleasesTypeEnum = typeof GetPlaylistsNewReleasesTypeEnum[keyof typeof GetPlaylistsNewReleasesTypeEnum];
 /**
  * @export
  */
@@ -390,6 +1159,16 @@ export const GetTrendingPlaylistsTypeEnum = {
     Album: 'album'
 } as const;
 export type GetTrendingPlaylistsTypeEnum = typeof GetTrendingPlaylistsTypeEnum[keyof typeof GetTrendingPlaylistsTypeEnum];
+/**
+ * @export
+ */
+export const GetTrendingPlaylistsWithVersionTimeEnum = {
+    Week: 'week',
+    Month: 'month',
+    Year: 'year',
+    AllTime: 'allTime'
+} as const;
+export type GetTrendingPlaylistsWithVersionTimeEnum = typeof GetTrendingPlaylistsWithVersionTimeEnum[keyof typeof GetTrendingPlaylistsWithVersionTimeEnum];
 /**
  * @export
  */

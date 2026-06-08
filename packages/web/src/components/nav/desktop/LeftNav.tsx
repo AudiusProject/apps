@@ -12,23 +12,27 @@ import { ProfileCompletionPanel } from 'components/profile-progress/ProfileCompl
 import { AccountDetails } from './AccountDetails'
 import { LeftNavCTA } from './LeftNavCTA'
 import { NavHeader } from './NavHeader'
+import { useNavSidebar } from './NavSidebarContext'
 import { NowPlayingArtworkTile } from './NowPlayingArtworkTile'
 import { RouteNav } from './RouteNav'
 import {
   FeedNavItem,
   TrendingNavItem,
   ExploreNavItem,
+  ContestsNavItem,
   LibraryNavItem,
   MessagesNavItem,
   WalletNavItem,
   RewardsNavItem,
+  DashboardNavItem,
   UploadNavItem,
   DevToolsNavItem,
   PlaylistsNavItem,
-  ArtistCoinsNavItem
+  FanClubsNavItem
 } from './nav-items'
 
 export const LEFT_NAV_WIDTH = 240
+export const LEFT_NAV_COLLAPSED_WIDTH = 64
 
 type OwnProps = {
   isElectron: boolean
@@ -36,9 +40,11 @@ type OwnProps = {
 
 export const LeftNav = (props: OwnProps) => {
   const { isElectron } = props
+  const { isCollapsed } = useNavSidebar()
   const { data: accountStatus } = useAccountStatus()
   const [navBodyContainerMeasureRef, navBodyContainerBoundaries] = useMeasure({
-    polyfill: ResizeObserver
+    polyfill: ResizeObserver,
+    debounce: { scroll: 0, resize: 80 }
   })
   const scrollbarRef = useRef<HTMLElement | null>(null)
   const [dragScrollingDirection, setDragScrollingDirection] = useState<
@@ -64,16 +70,24 @@ export const LeftNav = (props: OwnProps) => {
 
   return (
     <Flex
-      backgroundColor='surface1'
       borderRight='default'
       as='nav'
+      aria-label='Primary navigation'
       id='leftNav'
       direction='column'
       h='100%'
-      w='100%'
       css={{
+        width: isCollapsed ? LEFT_NAV_COLLAPSED_WIDTH : LEFT_NAV_WIDTH,
+        transition: 'width 0.2s ease',
         userSelect: 'none',
-        overflow: 'visible'
+        overflowX: 'clip',
+        overflowY: 'visible',
+        flexShrink: 0,
+        backdropFilter: 'var(--frosted-surface-backdrop-filter, blur(10px))',
+        WebkitBackdropFilter:
+          'var(--frosted-surface-backdrop-filter, blur(10px))',
+        background:
+          'var(--frosted-surface-background, color-mix(in srgb, var(--frosted-surface-background-color, var(--harmony-n-25)) var(--frosted-surface-opacity, 65%), transparent))'
       }}
     >
       {isElectron ? <RouteNav /> : null}
@@ -100,6 +114,8 @@ export const LeftNav = (props: OwnProps) => {
           containerRef={(el: HTMLElement) => {
             scrollbarRef.current = el
           }}
+          isHidden
+          options={{ suppressScrollX: true }}
         >
           <DragAutoscroller
             containerBoundaries={navBodyContainerBoundaries}
@@ -112,29 +128,41 @@ export const LeftNav = (props: OwnProps) => {
               flex='1 1 auto'
               css={{ overflow: 'hidden' }}
             >
-              <TrendingNavItem />
               <FeedNavItem />
+              <TrendingNavItem />
               <ExploreNavItem />
+              <ContestsNavItem />
               <LibraryNavItem />
               <MessagesNavItem />
               <WalletNavItem />
-              <ArtistCoinsNavItem />
+              <FanClubsNavItem />
               <RewardsNavItem />
+              <DashboardNavItem />
               <UploadNavItem />
               <DevToolsNavItem />
-              <Box mv='s'>
-                <Divider />
-              </Box>
-              <PlaylistsNavItem />
+              {!isCollapsed ? (
+                <>
+                  <Box mv='s'>
+                    <Divider />
+                  </Box>
+                  <PlaylistsNavItem />
+                </>
+              ) : null}
             </Flex>
           </DragAutoscroller>
         </Scrollbar>
       </Flex>
       {navLoaded ? (
-        <Flex direction='column' alignItems='center'>
-          <ProfileCompletionPanel />
-          <LeftNavCTA />
-          <NowPlayingArtworkTile />
+        <Flex
+          direction='column'
+          alignItems='center'
+          gap='s'
+          pb={isCollapsed ? 's' : undefined}
+        >
+          {!isCollapsed ? <ProfileCompletionPanel /> : null}
+          {!isCollapsed ? <LeftNavCTA /> : null}
+          <NowPlayingArtworkTile size={isCollapsed ? 56 : undefined} />
+          {isCollapsed ? <LeftNavCTA /> : null}
         </Flex>
       ) : null}
     </Flex>

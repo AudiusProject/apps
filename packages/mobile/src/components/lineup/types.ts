@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
 import type { Kind, ID, UID, Lineup as LineupData } from '@audius/common/models'
-import type { LineupBaseActions, CommonState } from '@audius/common/store'
+import type { CommonState } from '@audius/common/store'
 import type { Maybe } from '@audius/common/utils'
 import type { SectionListProps, ViewStyle } from 'react-native'
 
@@ -27,9 +27,6 @@ export type LoadingLineupItem = {
 }
 
 export type LineupProps = {
-  /** Object containing lineup actions such as setPage */
-  actions: LineupBaseActions
-
   /** The maximum number of total tracks to fetch */
   count?: number
 
@@ -200,8 +197,6 @@ export type LineupItemTileProps = Pick<
   index: number
   togglePlay: ({ uid, id, source }: TogglePlayConfig) => void
   onPress?: (id: ID) => void
-  /** Object containing lineup actions such as play, setPage, togglePlay */
-  actions: LineupBaseActions
 }
 
 export type LineupTileViewProps = Omit<LineupItemTileProps, 'item'> & {

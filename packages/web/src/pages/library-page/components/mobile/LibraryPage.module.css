@@ -124,9 +124,19 @@
 }
 
 .cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--harmony-unit-6) var(--harmony-unit-4);
   margin-top: 16px;
   padding: 0px 11px;
+}
+
+.skeletonCardGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--harmony-unit-4);
+  margin-top: 16px;
+  padding: 0 11px 16px;
 }
 
 /* Empty Tab */

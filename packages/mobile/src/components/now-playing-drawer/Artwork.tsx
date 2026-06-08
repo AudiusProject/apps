@@ -4,7 +4,7 @@ import {
 } from '@audius/common/hooks'
 import { SquareSizes } from '@audius/common/models'
 import type { Track } from '@audius/common/models'
-import { averageColorSelectors, playerSelectors } from '@audius/common/store'
+import { averageColorSelectors, playbackSelectors } from '@audius/common/store'
 import type { CommonState } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { Dimensions, View } from 'react-native'
@@ -14,7 +14,7 @@ import { makeStyles } from 'app/styles'
 
 import { TrackImage } from '../image/TrackImage'
 import { TrackDogEar } from '../track/TrackDogEar'
-const { getPreviewing } = playerSelectors
+const { getPreviewing } = playbackSelectors
 const { getDominantColorsByTrack } = averageColorSelectors
 
 const dimensions = Dimensions.get('window')
@@ -78,6 +78,7 @@ export const Artwork = ({ track }: ArtworkProps) => {
   return (
     <View style={[styles.root, { shadowColor }]}>
       <TrackImage
+        key={track?.track_id}
         trackId={track?.track_id}
         style={styles.image}
         size={SquareSizes.SIZE_1000_BY_1000}

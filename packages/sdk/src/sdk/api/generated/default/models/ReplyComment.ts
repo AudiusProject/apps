@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -14,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CommentEntityType } from './CommentEntityType';
+import {
+    CommentEntityTypeFromJSON,
+    CommentEntityTypeFromJSONTyped,
+    CommentEntityTypeToJSON,
+} from './CommentEntityType';
 import type { CommentMention } from './CommentMention';
 import {
     CommentMentionFromJSON,
@@ -41,10 +46,10 @@ export interface ReplyComment {
     entityId: string;
     /**
      * 
-     * @type {string}
+     * @type {CommentEntityType}
      * @memberof ReplyComment
      */
-    entityType: string;
+    entityType: CommentEntityType;
     /**
      * 
      * @type {string}
@@ -106,6 +111,12 @@ export interface ReplyComment {
      */
     updatedAt?: string;
     /**
+     * Optional URL for a video attachment on this reply
+     * @type {string}
+     * @memberof ReplyComment
+     */
+    videoUrl?: string | null;
+    /**
      * 
      * @type {number}
      * @memberof ReplyComment
@@ -142,7 +153,7 @@ export function ReplyCommentFromJSONTyped(json: any, ignoreDiscriminator: boolea
         
         'id': json['id'],
         'entityId': json['entity_id'],
-        'entityType': json['entity_type'],
+        'entityType': CommentEntityTypeFromJSON(json['entity_type']),
         'userId': json['user_id'],
         'message': json['message'],
         'mentions': !exists(json, 'mentions') ? undefined : ((json['mentions'] as Array<any>).map(CommentMentionFromJSON)),
@@ -153,6 +164,7 @@ export function ReplyCommentFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'isArtistReacted': !exists(json, 'is_artist_reacted') ? undefined : json['is_artist_reacted'],
         'createdAt': json['created_at'],
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
+        'videoUrl': !exists(json, 'video_url') ? undefined : json['video_url'],
         'parentCommentId': !exists(json, 'parent_comment_id') ? undefined : json['parent_comment_id'],
     };
 }
@@ -168,7 +180,7 @@ export function ReplyCommentToJSON(value?: ReplyComment | null): any {
         
         'id': value.id,
         'entity_id': value.entityId,
-        'entity_type': value.entityType,
+        'entity_type': CommentEntityTypeToJSON(value.entityType),
         'user_id': value.userId,
         'message': value.message,
         'mentions': value.mentions === undefined ? undefined : ((value.mentions as Array<any>).map(CommentMentionToJSON)),
@@ -179,6 +191,7 @@ export function ReplyCommentToJSON(value?: ReplyComment | null): any {
         'is_artist_reacted': value.isArtistReacted,
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,
+        'video_url': value.videoUrl,
         'parent_comment_id': value.parentCommentId,
     };
 }

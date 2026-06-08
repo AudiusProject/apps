@@ -3,7 +3,7 @@ import React from 'react'
 import { useRecommendedTracks } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { QueueSource } from '@audius/common/store'
-import { full } from '@audius/sdk'
+import { GetRecommendedTracksTimeEnum } from '@audius/sdk'
 
 import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
@@ -14,7 +14,7 @@ export const ForYouTracks = () => {
   const { inView, InViewWrapper } =
     useExploreSectionTracking('Recommended Tracks')
   const { data: recommendedTracks, isPending } = useRecommendedTracks(
-    { pageSize: 10, timeRange: full.GetRecommendedTracksTimeEnum.Week },
+    { pageSize: 10, timeRange: GetRecommendedTracksTimeEnum.Week },
     { enabled: inView }
   )
 

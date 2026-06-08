@@ -4,24 +4,20 @@ import {
   useQueryClient,
   InfiniteData
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { userTrackMetadataFromSDK } from '~/adapters/track'
 import { transformAndCleanList } from '~/adapters/utils'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { ID, PlaybackSource } from '~/models'
+import { ID } from '~/models'
 import { UserTrackMetadata } from '~/models/Track'
-import { trackPageSelectors } from '~/store/pages'
-import { tracksActions } from '~/store/pages/track/lineup/actions'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { useTrack } from '../tracks/useTrack'
 import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { useUser } from '../users/useUser'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 6
 
@@ -33,7 +29,6 @@ export const getTrackPageLineupQueryKey = (trackId: ID | null | undefined) =>
 type UseTrackPageLineupArgs = {
   trackId: ID | null | undefined
   pageSize?: number
-  disableAutomaticCacheHandling?: boolean
 }
 
 type TrackIndices = {
@@ -57,22 +52,17 @@ type TrackIndices = {
 }
 
 type TrackPageData = {
-  tracks: UserTrackMetadata[]
+  trackIds: ID[]
   indices: TrackIndices
 }
 
 export const useTrackPageLineup = (
-  {
-    trackId,
-    pageSize = DEFAULT_PAGE_SIZE,
-    disableAutomaticCacheHandling = false
-  }: UseTrackPageLineupArgs,
+  { trackId, pageSize = DEFAULT_PAGE_SIZE }: UseTrackPageLineupArgs,
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
   const { data: heroTrack } = useTrack(trackId)
 
@@ -80,10 +70,12 @@ export const useTrackPageLineup = (
     select: (user) => user?.handle
   })
 
-  const queryData = useInfiniteQuery({
-    queryKey: getTrackPageLineupQueryKey(trackId),
+  const queryKey = getTrackPageLineupQueryKey(trackId)
+
+  const query = useInfiniteQuery({
+    queryKey,
     initialPageParam: 0,
-    getNextPageParam: () => undefined, // Always return undefined to indicate no more pages
+    getNextPageParam: () => undefined, // always single page
     queryFn: async () => {
       const sdk = await audiusSdk()
       const tracks: UserTrackMetadata[] = []
@@ -95,7 +87,9 @@ export const useTrackPageLineup = (
         recommendedSection: { index: undefined, pageSize: undefined }
       }
 
-      if (!heroTrack || !ownerHandle) return { tracks: [], indices }
+      if (!heroTrack || !ownerHandle) {
+        return { trackIds: [] as ID[], indices }
+      }
 
       tracks.push(heroTrack as UserTrackMetadata)
       indices.mainTrackIndex = 0
@@ -105,7 +99,7 @@ export const useTrackPageLineup = (
         heroTrack.remix_of?.tracks?.[0]?.parent_track_id
 
       if (heroTrackRemixParentTrackId) {
-        const remixParentTrack = await sdk.full.tracks.getTrack({
+        const remixParentTrack = await sdk.tracks.getTrack({
           trackId: Id.parse(heroTrackRemixParentTrackId),
           userId: OptionalId.parse(currentUserId)
         })
@@ -119,16 +113,16 @@ export const useTrackPageLineup = (
         }
       } else {
         // If hero track is remixable (not a remix), get its remixes
-        const { data: remixesData } = await sdk.full.tracks.getTrackRemixes({
+        const remixesData = await sdk.tracks.getTrackRemixes({
           trackId: Id.parse(trackId),
           userId: OptionalId.parse(currentUserId),
           limit: pageSize,
           offset: 0
         })
 
-        if (remixesData?.tracks) {
+        if (remixesData?.data?.tracks) {
           const processedRemixes = transformAndCleanList(
-            remixesData.tracks,
+            remixesData.data.tracks,
             userTrackMetadataFromSDK
           )
           if (processedRemixes.length > 0) {
@@ -140,7 +134,7 @@ export const useTrackPageLineup = (
       }
 
       // Get more tracks by the artist
-      const { data = [] } = await sdk.full.users.getTracksByUserHandle({
+      const { data = [] } = await sdk.users.getTracksByUserHandle({
         handle: ownerHandle,
         userId: OptionalId.parse(currentUserId),
         sort: 'plays',
@@ -167,8 +161,8 @@ export const useTrackPageLineup = (
       }
 
       // If there are no remixes, get recommended tracks based on genre
-      if (indices.remixesSection.index === null) {
-        const { data: trendingData } = await sdk.full.tracks.getTrendingTracks({
+      if (indices.remixesSection.index === undefined) {
+        const { data: trendingData } = await sdk.tracks.getTrendingTracks({
           genre: heroTrack.genre,
           limit: pageSize
         })
@@ -194,42 +188,61 @@ export const useTrackPageLineup = (
 
       primeTrackData({ tracks, queryClient })
 
-      // offset is 1 because the hero track is already in the lineup
-      dispatch(
-        tracksActions.fetchLineupMetadatas(1, pageSize, false, {
-          items: tracks.slice(1),
-          indices
-        })
-      )
-
       return {
-        tracks: tracks.map((track) => ({
-          id: track.track_id,
-          type: EntityType.TRACK
-        })),
+        trackIds: tracks.map((track) => track.track_id),
         indices
       }
     },
+    select: (data) => data?.pages,
     ...options,
     enabled: options?.enabled !== false && !!ownerHandle && !!trackId
   })
 
-  const indices = queryData.data?.pages?.[0]?.indices
+  const firstPage = query.data?.[0]
+  const trackIds = firstPage?.trackIds ?? []
+  const indices = firstPage?.indices
 
-  const lineupData = useLineupQuery({
-    lineupData: queryData.data?.pages.flatMap((page) => page.tracks) ?? [],
-    queryData,
-    queryKey: getTrackPageLineupQueryKey(trackId),
-    lineupActions: tracksActions,
-    lineupSelector: trackPageSelectors.getLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize,
-    disableAutomaticCacheHandling
-  })
+  // Expose as `data` for lineup-data consumers (list of { id, type }).
+  const data = trackIds.map((id) => ({ id, type: EntityType.TRACK }))
 
   return {
-    ...lineupData,
+    // Raw data
+    data,
+    trackIds,
     indices,
-    hasNextPage: false // Override hasNextPage to always be false
+
+    // Query state
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: false as const,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+
+    // Identity
+    queryKey
   }
+}
+
+/**
+ * Warms the track page lineup ("more by", remixes, "you might also like") as
+ * early as possible so the lineup renders from cache instead of starting its
+ * fetch only once `TrackScreenLineup` mounts — which on mobile is gated behind
+ * the screen-ready / nav-animation delay in `ScreenSecondaryContent`.
+ *
+ * Unlike comments, this query genuinely depends on the hero track and its
+ * owner's handle (see the `enabled` guard in `useTrackPageLineup`), so it can't
+ * fire from a bare trackId before the track resolves. But hoisting it above the
+ * secondary content gate lets it fire the instant those deps are ready —
+ * overlapping the push transition instead of waiting for it to finish. Keeps a
+ * live observer so the warmed data is shared with `TrackScreenLineup`'s own
+ * query.
+ */
+export const usePrefetchTrackPageLineup = (
+  trackId: ID | null | undefined
+) => {
+  useTrackPageLineup({ trackId })
 }

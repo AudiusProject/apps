@@ -1,5 +1,5 @@
 import {
-  sdk,
+  createSdkWithServices,
   SolanaRelay,
   Configuration,
   createHedgehogWalletClient,
@@ -163,7 +163,7 @@ export const initializeAudiusSdk = async ({
 
     const audiusWalletClient = createHedgehogWalletClient(getHedgehog())
 
-    audiusSdk = sdk({
+    audiusSdk = createSdkWithServices({
       appName: 'audius-cmd',
       environment: 'development',
       services: {
@@ -207,7 +207,7 @@ export const getCurrentUserId = async () => {
     throw new Error('sdk not initialized')
   }
   const [address] = await audiusSdk.services.audiusWalletClient.getAddresses()
-  const { data } = await audiusSdk.full.users.getUserAccount({
+  const { data } = await audiusSdk.users.getUserAccount({
     wallet: address
   })
   if (!data?.user) {
@@ -224,7 +224,7 @@ export const getCurrentUserHandle = async () => {
     return currentHandle
   }
   const [address] = await audiusSdk.services.audiusWalletClient.getAddresses()
-  const { data } = await audiusSdk.full.users.getUserAccount({
+  const { data } = await audiusSdk.users.getUserAccount({
     wallet: address
   })
   if (!data?.user) {

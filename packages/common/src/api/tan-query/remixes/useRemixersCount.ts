@@ -27,7 +27,7 @@ export const useRemixersCount = (
     queryFn: async () => {
       const sdk = await audiusSdk()
       if (!currentUserId) return 0
-      const { data = 0 } = await sdk.full.users.getRemixersCount({
+      const { data = 0 } = await sdk.users.getRemixersCount({
         id: Id.parse(currentUserId),
         userId: Id.parse(currentUserId),
         trackId: OptionalId.parse(trackId)

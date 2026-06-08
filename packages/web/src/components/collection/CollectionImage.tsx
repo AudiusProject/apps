@@ -11,7 +11,7 @@ type CollectionImageProps = {
 export const CollectionImage = (props: CollectionImageProps) => {
   const { collectionId, size, ...other } = props
 
-  const imageSource = useCollectionCoverArt({
+  const { imageUrl: imageSource } = useCollectionCoverArt({
     collectionId,
     size
   })

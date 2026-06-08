@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -14,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { CommentEntityType } from './CommentEntityType';
+import {
+    CommentEntityTypeFromJSON,
+    CommentEntityTypeFromJSONTyped,
+    CommentEntityTypeToJSON,
+} from './CommentEntityType';
 import type { CommentMention } from './CommentMention';
 import {
     CommentMentionFromJSON,
@@ -47,10 +52,10 @@ export interface Comment {
     entityId: string;
     /**
      * 
-     * @type {string}
+     * @type {CommentEntityType}
      * @memberof Comment
      */
-    entityType: string;
+    entityType: CommentEntityType;
     /**
      * 
      * @type {string}
@@ -116,6 +121,18 @@ export interface Comment {
      * @type {boolean}
      * @memberof Comment
      */
+    isMembersOnly?: boolean;
+    /**
+     * Optional URL for a video attachment on this comment
+     * @type {string}
+     * @memberof Comment
+     */
+    videoUrl?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Comment
+     */
     isMuted?: boolean;
     /**
      * 
@@ -172,7 +189,7 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         
         'id': json['id'],
         'entityId': json['entity_id'],
-        'entityType': json['entity_type'],
+        'entityType': CommentEntityTypeFromJSON(json['entity_type']),
         'userId': !exists(json, 'user_id') ? undefined : json['user_id'],
         'message': json['message'],
         'mentions': !exists(json, 'mentions') ? undefined : ((json['mentions'] as Array<any>).map(CommentMentionFromJSON)),
@@ -183,6 +200,8 @@ export function CommentFromJSONTyped(json: any, ignoreDiscriminator: boolean): C
         'isCurrentUserReacted': !exists(json, 'is_current_user_reacted') ? undefined : json['is_current_user_reacted'],
         'isArtistReacted': !exists(json, 'is_artist_reacted') ? undefined : json['is_artist_reacted'],
         'isTombstone': !exists(json, 'is_tombstone') ? undefined : json['is_tombstone'],
+        'isMembersOnly': !exists(json, 'is_members_only') ? undefined : json['is_members_only'],
+        'videoUrl': !exists(json, 'video_url') ? undefined : json['video_url'],
         'isMuted': !exists(json, 'is_muted') ? undefined : json['is_muted'],
         'createdAt': json['created_at'],
         'updatedAt': !exists(json, 'updated_at') ? undefined : json['updated_at'],
@@ -202,7 +221,7 @@ export function CommentToJSON(value?: Comment | null): any {
         
         'id': value.id,
         'entity_id': value.entityId,
-        'entity_type': value.entityType,
+        'entity_type': CommentEntityTypeToJSON(value.entityType),
         'user_id': value.userId,
         'message': value.message,
         'mentions': value.mentions === undefined ? undefined : ((value.mentions as Array<any>).map(CommentMentionToJSON)),
@@ -213,6 +232,8 @@ export function CommentToJSON(value?: Comment | null): any {
         'is_current_user_reacted': value.isCurrentUserReacted,
         'is_artist_reacted': value.isArtistReacted,
         'is_tombstone': value.isTombstone,
+        'is_members_only': value.isMembersOnly,
+        'video_url': value.videoUrl,
         'is_muted': value.isMuted,
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,

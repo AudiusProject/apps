@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect, useRef } from 'react'
 
 import type {
   FavoriteType,
@@ -17,6 +17,7 @@ import type {
   GetCoinsSortDirectionEnum
 } from '@audius/sdk'
 import type { EventArg, NavigationState } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
 import type { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import { FilterButtonScreen } from '@audius/harmony-native'
@@ -24,6 +25,8 @@ import type { FilterButtonScreenParams } from '@audius/harmony-native'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
+import { SetAppTabNavigationContext } from 'app/screens/app-screen/AppTabNavigationProvider'
+import type { AppTabNavigation } from 'app/screens/app-screen/AppTabNavigationProvider'
 import { AudioScreen } from 'app/screens/audio-screen'
 import { CashScreen } from 'app/screens/cash-screen'
 import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
@@ -32,8 +35,7 @@ import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
 import {
   CoinDetailsScreen,
-  EditCoinDetailsScreen,
-  ExclusiveTracksScreen
+  EditCoinDetailsScreen
 } from 'app/screens/coin-details-screen'
 import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
@@ -65,8 +67,10 @@ import {
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
 
-import { ArtistCoinSortScreen } from '../artist-coin-sort-screen/ArtistCoinSortScreen'
-import { ArtistCoinsExploreScreen } from '../artist-coins-explore-screen/ArtistCoinsExploreScreen'
+import { ContestFollowersScreen, ContestScreen } from '../contest-screen'
+import { ContestsScreen } from '../contests-screen'
+import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
+import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
 
 import { useAppScreenOptions } from './useAppScreenOptions'
 
@@ -78,6 +82,8 @@ export type AppTabScreenParamList = {
     commentId?: string
   } & ({ handle: string; slug: string } | { trackId: ID })
   TrackRemixes: { trackId: ID } | { handle: string; slug: string }
+  Contest: { trackId: ID } | { handle: string; slug: string }
+  ContestFollowers: { eventId: ID }
   Profile: { handle: string; id?: ID } | { handle?: string; id: ID }
   Collection: {
     id?: ID
@@ -113,8 +119,9 @@ export type AppTabScreenParamList = {
 
   AudioScreen: undefined
   RewardsScreen: undefined
-  ArtistCoinsExplore: undefined
-  ArtistCoinSort: {
+  Contests: undefined
+  FanClubsExplore: undefined
+  FanClubSort: {
     initialSortMethod?: GetCoinsSortMethodEnum
     initialSortDirection?: GetCoinsSortDirectionEnum
   }
@@ -123,7 +130,6 @@ export type AppTabScreenParamList = {
   CoinDetailsScreen: { ticker: string }
   CoinRedeemScreen: { ticker: string; code?: string }
   EditCoinDetailsScreen: { ticker: string }
-  ExclusiveTracksScreen: { ticker: string }
   Upload: {
     initialMetadata?: Partial<TrackMetadataForUpload>
   }
@@ -176,23 +182,34 @@ type AppTabScreenProps = {
  */
 export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const screenOptions = useAppScreenOptions()
-  const { drawerNavigation } = useContext(AppDrawerContext)
+  const { drawerNavigation, setIsAtStackRoot } = useContext(AppDrawerContext)
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
+  const { setNavigation } = useContext(SetAppTabNavigationContext)
+  const isFocused = useIsFocused()
+  const isAtStackRootRef = useRef(true)
+
+  const applyDrawerSwipe = useCallback(
+    (isAtRoot: boolean) => {
+      setIsAtStackRoot?.(isAtRoot)
+      // NowPlayingDrawer calls setOptions({ swipeEnabled: false }) imperatively
+      // on pan release, and that override outlives a re-render of
+      // screenOptions, so we re-assert it imperatively here too.
+      drawerNavigation?.setOptions({
+        swipeEnabled: isAtRoot && !isNowPlayingDrawerOpen
+      })
+    },
+    [drawerNavigation, isNowPlayingDrawerOpen, setIsAtStackRoot]
+  )
 
   const handleChangeState = useCallback(
     (event: NavigationStateEvent) => {
-      const stackRoutes = event?.data?.state?.routes
-      const isStackUnopened = stackRoutes.length === 1
-      const isStackOpened = stackRoutes.length === 2
-
-      if (isStackUnopened) {
-        drawerNavigation?.setOptions({ swipeEnabled: true })
-      }
-      if (isStackOpened) {
-        drawerNavigation?.setOptions({ swipeEnabled: false })
-      }
+      // Nested navigator state changes bubble up; only act on the outer stack.
+      if (event?.data?.state?.type !== 'stack') return
+      const isAtRoot = event.data.state.routes.length === 1
+      isAtStackRootRef.current = isAtRoot
+      if (isFocused) applyDrawerSwipe(isAtRoot)
     },
-    [drawerNavigation]
+    [isFocused, applyDrawerSwipe]
   )
 
   /**
@@ -205,23 +222,37 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     setLastNavAction(undefined)
   }, [])
 
+  // Re-apply on tab focus so the drawer reflects the active tab's stack depth.
   useEffect(() => {
-    drawerNavigation?.setOptions({ swipeEnabled: !isNowPlayingDrawerOpen })
-  }, [drawerNavigation, isNowPlayingDrawerOpen])
+    if (isFocused) applyDrawerSwipe(isAtStackRootRef.current)
+  }, [isFocused, applyDrawerSwipe])
+
+  // Keep AppTabNavigationContext pointed at the active tab's stack so external
+  // surfaces like NowPlayingDrawer push onto whichever tab is currently in
+  // focus, regardless of stack depth.
+  const screenListeners = useCallback(
+    ({ navigation }: { navigation: any }) => ({
+      state: handleChangeState,
+      transitionEnd: handleTransitionEnd,
+      focus: () => setNavigation(navigation as AppTabNavigation)
+    }),
+    [handleChangeState, handleTransitionEnd, setNavigation]
+  )
 
   return (
     <Stack.Navigator
       screenOptions={screenOptions}
-      screenListeners={{
-        state: handleChangeState,
-        transitionEnd: handleTransitionEnd
-      }}
+      screenListeners={screenListeners}
     >
       {baseScreen(Stack)}
       <Stack.Screen name='Track' component={TrackScreen} />
       <Stack.Screen name='TrackRemixes' component={TrackRemixesScreen} />
       <Stack.Screen name='Collection' component={CollectionScreen} />
-      <Stack.Screen name='Profile' component={ProfileScreen} />
+      <Stack.Screen
+        name='Profile'
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Group>
         <Stack.Screen name='Followers' component={FollowersScreen} />
         <Stack.Screen name='Following' component={FollowingScreen} />
@@ -238,6 +269,20 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
 
       <Stack.Screen name='AudioScreen' component={AudioScreen} />
       <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
+      <Stack.Screen
+        name='Contests'
+        component={ContestsScreen}
+        // Contests is reached from the left nav drawer, which passes
+        // `fromAppDrawer: true` and drops the screen animation to 'none'.
+        // That leaves a jarring instant pop when navigating away. Force the
+        // standard horizontal push so it transitions like the Track screen.
+        options={{ animation: 'simple_push' }}
+      />
+      <Stack.Screen name='Contest' component={ContestScreen} />
+      <Stack.Screen
+        name='ContestFollowers'
+        component={ContestFollowersScreen}
+      />
       <Stack.Screen name='wallet' component={WalletScreen} />
       <Stack.Screen name='CashScreen' component={CashScreen} />
       <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
@@ -246,15 +291,8 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         name='EditCoinDetailsScreen'
         component={EditCoinDetailsScreen}
       />
-      <Stack.Screen
-        name='ExclusiveTracksScreen'
-        component={ExclusiveTracksScreen}
-      />
-      <Stack.Screen
-        name='ArtistCoinsExplore'
-        component={ArtistCoinsExploreScreen}
-      />
-      <Stack.Screen name='ArtistCoinSort' component={ArtistCoinSortScreen} />
+      <Stack.Screen name='FanClubsExplore' component={FanClubsExploreScreen} />
+      <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
 
       <Stack.Group>
         <Stack.Screen name='EditProfile' component={EditProfileScreen} />

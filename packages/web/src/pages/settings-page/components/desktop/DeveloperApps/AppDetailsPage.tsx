@@ -14,6 +14,7 @@ import Toast from 'components/toast/Toast'
 import { copyToClipboard } from 'utils/clipboardUtil'
 
 import styles from './AppDetailsPage.module.css'
+import { MaskedSecretDisplay } from './MaskedSecretDisplay'
 import { CreateAppPageProps, CreateAppsPages } from './types'
 
 type AppDetailsPageProps = CreateAppPageProps
@@ -22,12 +23,22 @@ const AUDIUS_SDK_LINK = 'https://docs.audius.co/developers'
 
 const messages = {
   secretReminder:
-    "Remember to save your API Secret. You won't be able to view it again.",
+    'Use your API Key, Secret, and a Bearer Token to authenticate requests to the Audius API or SDK.',
   description: 'Description',
   apiKey: 'api key',
+  apiKeyDescription: "Your app's public identifier.",
   copyApiKeyLabel: 'copy api key',
   apiSecret: 'api secret',
+  apiSecretDescription: "Your app's password. Shown once, save it!",
   copyApiSecretLabel: 'copy api secret',
+  revealSecretLabel: 'reveal api secret',
+  hideSecretLabel: 'hide api secret',
+  bearerToken: 'bearer token',
+  bearerTokenDescription:
+    'Used to sign requests. Regenerate a new one anytime.',
+  copyBearerTokenLabel: 'copy bearer token',
+  revealTokenLabel: 'reveal bearer token',
+  hideTokenLabel: 'hide bearer token',
   copied: 'Copied!',
   readTheDocs: 'Read the Developer Docs',
   goBack: 'Back to Your Apps'
@@ -40,22 +51,17 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
     setPage(CreateAppsPages.YOUR_APPS)
   }, [setPage])
 
-  const { name, description, apiKey, apiSecret } = params || {}
+  const { name, description, apiKey, apiSecret, bearerToken } = params ?? {}
   const copyApiKey = useCallback(() => {
     if (!apiKey) return
     copyToClipboard(apiKey)
   }, [apiKey])
 
-  const copySecret = useCallback(() => {
-    if (!apiSecret) return
-    copyToClipboard(apiSecret)
-  }, [apiSecret])
-
   if (!params) return null
 
   return (
     <div className={styles.root}>
-      {!apiSecret ? null : (
+      {!apiSecret && !bearerToken ? null : (
         <Hint
           icon={IconError}
           actions={
@@ -78,34 +84,14 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
           <p className={styles.description}>{description}</p>
         </span>
       )}
-      <div className={styles.keyRoot}>
-        <span className={styles.keyLabel}>{messages.apiKey}</span>
-        <Divider orientation='vertical' className={styles.keyDivider} />
-        <span className={styles.keyText}>{apiKey}</span>
-        <Divider orientation='vertical' className={styles.keyDivider} />
-        <span>
-          <Toast
-            text={messages.copied}
-            portalLocation={
-              typeof document !== 'undefined'
-                ? document.getElementById('page') || document.body
-                : undefined
-            }
-          >
-            <IconButton
-              onClick={copyApiKey}
-              aria-label={messages.copyApiKeyLabel}
-              color='subdued'
-              icon={IconCopy}
-            />
-          </Toast>
+      <div className={styles.keyBlock}>
+        <span className={styles.keyDescription}>
+          {messages.apiKeyDescription}
         </span>
-      </div>
-      {!apiSecret ? null : (
         <div className={styles.keyRoot}>
-          <span className={styles.keyLabel}>{messages.apiSecret}</span>
+          <span className={styles.keyLabel}>{messages.apiKey}</span>
           <Divider orientation='vertical' className={styles.keyDivider} />
-          <span className={styles.keyText}>{apiSecret}</span>
+          <span className={styles.keyText}>{apiKey}</span>
           <Divider orientation='vertical' className={styles.keyDivider} />
           <span>
             <Toast
@@ -117,13 +103,51 @@ export const AppDetailsPage = (props: AppDetailsPageProps) => {
               }
             >
               <IconButton
-                onClick={copySecret}
+                onClick={copyApiKey}
                 aria-label={messages.copyApiKeyLabel}
                 color='subdued'
                 icon={IconCopy}
               />
             </Toast>
           </span>
+        </div>
+      </div>
+      {!apiSecret ? null : (
+        <div className={styles.keyBlock}>
+          <span className={styles.keyDescription}>
+            {messages.apiSecretDescription}
+          </span>
+          <div className={styles.keyRoot}>
+            <span className={styles.keyLabel}>{messages.apiSecret}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <MaskedSecretDisplay
+              value={apiSecret}
+              copiedMessage={messages.copied}
+              copyLabel={messages.copyApiSecretLabel}
+              revealLabel={messages.revealSecretLabel}
+              hideLabel={messages.hideSecretLabel}
+              dividerClassName={styles.keyDivider}
+            />
+          </div>
+        </div>
+      )}
+      {!bearerToken ? null : (
+        <div className={styles.keyBlock}>
+          <span className={styles.keyDescription}>
+            {messages.bearerTokenDescription}
+          </span>
+          <div className={styles.keyRoot}>
+            <span className={styles.keyLabel}>{messages.bearerToken}</span>
+            <Divider orientation='vertical' className={styles.keyDivider} />
+            <MaskedSecretDisplay
+              value={bearerToken}
+              copiedMessage={messages.copied}
+              copyLabel={messages.copyBearerTokenLabel}
+              revealLabel={messages.revealTokenLabel}
+              hideLabel={messages.hideTokenLabel}
+              dividerClassName={styles.keyDivider}
+            />
+          </div>
         </div>
       )}
       <Button variant='secondary' onClick={handleGoBack}>

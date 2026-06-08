@@ -15,6 +15,7 @@ export type IconComponent = FunctionComponent<IconProps>
 
 export { default as IconAlbum } from '@audius/harmony/src/assets/icons/Album.svg'
 export { default as IconFilter } from '@audius/harmony/src/assets/icons/Filter.svg'
+export { default as IconLeading } from '@audius/harmony/src/assets/icons/Leading.svg'
 export { default as IconSearch } from '@audius/harmony/src/assets/icons/Search.svg'
 export { default as IconAllTime } from '@audius/harmony/src/assets/icons/AllTime.svg'
 export { default as IconFolder } from '@audius/harmony/src/assets/icons/Folder.svg'
@@ -65,6 +66,7 @@ export { default as IconMessage } from '@audius/harmony/src/assets/icons/Message
 export { default as IconMessages } from '@audius/harmony/src/assets/icons/Messages.svg'
 export { default as IconMerch } from '@audius/harmony/src/assets/icons/Merch.svg'
 export { default as IconStar } from '@audius/harmony/src/assets/icons/Star.svg'
+export { default as IconCast } from '@audius/harmony/src/assets/icons/Cast.svg'
 export { default as IconCastAirplay } from '@audius/harmony/src/assets/icons/CastAirplay.svg'
 export { default as IconMessageBlock } from '@audius/harmony/src/assets/icons/MessageBlock.svg'
 export { default as IconMessageSlash } from '@audius/harmony/src/assets/icons/MessageSlash.svg'
@@ -94,7 +96,6 @@ export { default as IconCloudDownloadPaused } from '@audius/harmony/src/assets/i
 export { default as IconNotificationOn } from '@audius/harmony/src/assets/icons/NotificationOn.svg'
 export { default as IconTrophy } from '@audius/harmony/src/assets/icons/Trophy.svg'
 export { default as IconCosign } from '@audius/harmony/src/assets/icons/Cosign.svg'
-export { default as IconContestSign } from '@audius/harmony/src/assets/icons/ContestSign.svg'
 export { default as IconCloudDownloadQueued } from '@audius/harmony/src/assets/icons/CloudDownloadQueued.svg'
 export { default as IconPause } from '@audius/harmony/src/assets/icons/Pause.svg'
 export { default as IconTurntable } from '@audius/harmony/src/assets/icons/Turntable.svg'
@@ -155,11 +156,12 @@ export { default as IconValidationX } from '@audius/harmony/src/assets/icons/Val
 export { default as IconCreditCard } from '@audius/harmony/src/assets/icons/CreditCard.svg'
 export { default as IconWaveform } from '@audius/harmony/src/assets/icons/Waveform.svg'
 export { default as IconMoneyBracket } from '@audius/harmony/src/assets/icons/MoneyBracket.svg'
+export { default as IconMoneySend } from '@audius/harmony/src/assets/icons/MoneySend.svg'
 export { default as IconPin } from '@audius/harmony/src/assets/icons/Pin.svg'
 export { default as IconPaperAirplane } from '@audius/harmony/src/assets/icons/PaperAirplane.svg'
 export { default as IconArrowUpToLine } from '@audius/harmony/src/assets/icons/ArrowUpToLine.svg'
 export { default as IconJupiterLogo } from '@audius/harmony/src/assets/icons/JupiterLogo.svg'
-export { default as IconArtistCoin } from '@audius/harmony/src/assets/icons/ArtistCoin.svg'
+export { default as IconFanClub } from '@audius/harmony/src/assets/icons/FanClub.svg'
 export { default as IconCoinGatedLabel } from '@audius/harmony/src/assets/icons/CoinGatedLabel.svg'
 
 // Two Tone / Special Styling

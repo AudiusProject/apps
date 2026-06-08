@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useNotificationEntity, useRemixes } from '@audius/common/api'
+import { useNotificationEntity, useRemixesCount } from '@audius/common/api'
 import {
   ArtistRemixContestEndedNotification as ArtistRemixContestEndedNotificationType,
   TrackEntity
@@ -10,14 +10,13 @@ import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
 
 import { push } from 'utils/navigation'
-import { pickWinnersPage } from 'utils/route'
+import { contestPage, pickWinnersPage } from 'utils/route'
 
 import { NotificationBody } from './components/NotificationBody'
 import { NotificationFooter } from './components/NotificationFooter'
 import { NotificationHeader } from './components/NotificationHeader'
 import { NotificationTile } from './components/NotificationTile'
 import { NotificationTitle } from './components/NotificationTitle'
-import { getEntityLink } from './utils'
 
 const messages = {
   title: 'Your Remix Contest Ended',
@@ -39,31 +38,32 @@ export const ArtistRemixContestEndedNotification = (
   const dispatch = useDispatch()
 
   const entity = useNotificationEntity(notification) as TrackEntity | null
-  const { data: remixes } = useRemixes({
+  const { data: remixCount = 0 } = useRemixesCount({
     trackId: entity?.track_id,
     isContestEntry: true
   })
-
-  const remixCount = remixes?.pages[0]?.count ?? 0
 
   const pickWinnersRoute = entity ? pickWinnersPage(entity?.permalink) : ''
 
   const handleClick = useCallback(() => {
     if (entity) {
-      dispatch(push(getEntityLink(entity)))
+      dispatch(push(contestPage(entity.permalink)))
     }
   }, [entity, dispatch])
 
-  if (!entity) return null
-
   return (
-    <NotificationTile notification={notification} onClick={handleClick}>
+    <NotificationTile
+      notification={notification}
+      onClick={entity ? handleClick : undefined}
+    >
       <NotificationHeader icon={<IconTrophy color='accent' />}>
         <NotificationTitle>{messages.title}</NotificationTitle>
       </NotificationHeader>
       <Flex column gap='l'>
-        <NotificationBody>{messages.pickWinnersDescription}</NotificationBody>
-        {remixCount > 0 && (
+        <NotificationBody>
+          {entity ? messages.pickWinnersDescription : messages.description}
+        </NotificationBody>
+        {entity && remixCount > 0 && (
           <Button css={{ width: 'fit-content' }} size='small' asChild>
             <Link to={pickWinnersRoute} onClick={(e) => e.stopPropagation()}>
               Pick Winners

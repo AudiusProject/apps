@@ -52,7 +52,14 @@ const messages = {
   checkDiskWarning: 'Check disk/mount',
   seedingDataText: 'Awaiting completion',
   uptimeWarning: 'Failed to determine when the server last restarted',
-  pending: 'Loading...'
+  pending: 'Loading...',
+  nodeType: 'Node Type',
+  peers: 'Peers',
+  currentHeight: 'Current Height',
+  storageType: 'Storage Type',
+  lastRestart: 'Last Restart',
+  gitSha: 'Git SHA',
+  viewConsole: 'View Console'
 }
 
 type ServiceDetailProps = {
@@ -118,6 +125,7 @@ const NodeOverview = ({
 }: NodeOverviewProps) => {
   const { isOpen, onClick, onClose } = useModalControls()
   const { health, status, error } = useNodeHealth(endpoint, serviceType)
+  const isValidator = serviceType === ServiceType.Validator
 
   let healthDetails = null
   if (status === 'pending') {
@@ -138,6 +146,48 @@ const NodeOverview = ({
           />
         }
       />
+    )
+  } else if (isValidator) {
+    healthDetails = (
+      <>
+        {health?.nodeType && (
+          <ServiceDetail label={messages.nodeType} value={health.nodeType} />
+        )}
+        {typeof health?.peerCount === 'number' && (
+          <ServiceDetail label={messages.peers} value={health.peerCount} />
+        )}
+        {typeof health?.currentHeight === 'number' && (
+          <ServiceDetail
+            label={messages.currentHeight}
+            value={health.currentHeight.toLocaleString()}
+          />
+        )}
+        {health?.storageType && (
+          <ServiceDetail
+            label={messages.storageType}
+            value={health.storageType}
+          />
+        )}
+        {health?.startedAt && (
+          <ServiceDetail
+            label={messages.lastRestart}
+            value={
+              <TextWithIcon
+                icon={<>{timeSince(health.startedAt)}</>}
+                text={`ago (${health.startedAt.toLocaleString()})`}
+              />
+            }
+          />
+        )}
+        {health?.gitSha && (
+          <ServiceDetail
+            label={messages.gitSha}
+            value={
+              <span title={health.gitSha}>{health.gitSha.slice(0, 7)}</span>
+            }
+          />
+        )}
+      </>
     )
   } else {
     healthDetails = (
@@ -320,6 +370,23 @@ const NodeOverview = ({
             direction='column'
             alignItems='flex-end'
           >
+            {isValidator && endpoint && !isDeregistered && (
+              <Box>
+                <Button
+                  onClick={() =>
+                    window.open(
+                      `${endpoint.replace(/\/$/, '')}/console`,
+                      '_blank',
+                      'noopener,noreferrer'
+                    )
+                  }
+                  type={ButtonType.PRIMARY}
+                  text={messages.viewConsole}
+                  className={clsx(styles.modifyBtn)}
+                  textClassName={styles.modifyBtnText}
+                />
+              </Box>
+            )}
             {!isDeregistered && isUnregistered && (
               <Box>
                 <Button

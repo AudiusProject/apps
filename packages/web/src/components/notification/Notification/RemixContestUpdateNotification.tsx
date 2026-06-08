@@ -1,0 +1,90 @@
+import { useCallback } from 'react'
+
+import { useNotificationEntity, useUser } from '@audius/common/api'
+import {
+  RemixContestUpdateNotification as RemixContestUpdateNotificationType,
+  TrackEntity
+} from '@audius/common/store'
+import { Flex, IconTrophy } from '@audius/harmony'
+import { useDispatch } from 'react-redux'
+
+import { TextLink } from 'components/link/TextLink'
+import { push } from 'utils/navigation'
+import { contestPage } from 'utils/route'
+
+import { NotificationBody } from './components/NotificationBody'
+import { NotificationFooter } from './components/NotificationFooter'
+import { NotificationHeader } from './components/NotificationHeader'
+import { NotificationTile } from './components/NotificationTile'
+import { NotificationTitle } from './components/NotificationTitle'
+import { TrackContent } from './components/TrackContent'
+import { UserNameLink } from './components/UserNameLink'
+
+const messages = {
+  title: 'Contest update',
+  description: 'posted an update in ',
+  fallbackWithUser: ' posted an update in their remix contest.',
+  fallbackGeneric: 'An update was posted in a remix contest.'
+}
+
+type RemixContestUpdateNotificationProps = {
+  notification: RemixContestUpdateNotificationType
+}
+
+export const RemixContestUpdateNotification = (
+  props: RemixContestUpdateNotificationProps
+) => {
+  const { notification } = props
+  const { timeLabel, isViewed, entityUserId } = notification
+  const dispatch = useDispatch()
+
+  const entity = useNotificationEntity(notification) as TrackEntity | null
+  const { data: hostUser } = useUser(entity ? null : entityUserId)
+  const host = entity?.user ?? hostUser ?? null
+
+  const handleClick = useCallback(() => {
+    if (entity) {
+      dispatch(push(contestPage(entity.permalink)))
+    }
+  }, [entity, dispatch])
+
+  return (
+    <NotificationTile
+      notification={notification}
+      onClick={entity ? handleClick : undefined}
+    >
+      <NotificationHeader icon={<IconTrophy color='accent' />}>
+        <NotificationTitle>{messages.title}</NotificationTitle>
+      </NotificationHeader>
+      {entity && entity.user ? (
+        <Flex alignItems='flex-start'>
+          <TrackContent track={entity} hideTitle />
+          <NotificationBody>
+            <UserNameLink user={entity.user} notification={notification} />{' '}
+            {messages.description}
+            <TextLink
+              css={{ display: 'inline' }}
+              variant='secondary'
+              size='l'
+              to={contestPage(entity.permalink)}
+            >
+              {entity.title}
+            </TextLink>
+          </NotificationBody>
+        </Flex>
+      ) : (
+        <NotificationBody>
+          {host ? (
+            <>
+              <UserNameLink user={host} notification={notification} />
+              {messages.fallbackWithUser}
+            </>
+          ) : (
+            messages.fallbackGeneric
+          )}
+        </NotificationBody>
+      )}
+      <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />
+    </NotificationTile>
+  )
+}

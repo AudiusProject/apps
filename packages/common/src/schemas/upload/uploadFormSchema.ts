@@ -1,4 +1,4 @@
-import { Genre, Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
+import { Mood, NativeFile, MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
 import { z } from 'zod'
 
 import { imageBlank } from '~/assets'
@@ -35,28 +35,43 @@ const TokenGatedConditionsSchema = z
   })
   .strict()
 
-/** Same as SDK but snake-cased */
+/** Same as API extended_payment_split (snake-cased) */
+const PaymentSplitSchema = z.object({
+  user_id: z.number(),
+  percentage: z.number().min(0).max(100),
+  payout_wallet: z.string().optional(),
+  amount: z.number().nonnegative().optional(),
+  eth_wallet: z.optional(z.string())
+})
+
+/** Same as SDK but snake-cased for USDC purchase conditions */
 const USDCPurchaseConditionsSchema = z
   .object({
     usdc_purchase: z.object({
       price: z.number().positive(),
-      splits: z.any()
+      splits: z.array(PaymentSplitSchema).default([])
     })
   })
   .strict()
 
-/** Same as SDK. */
+/**
+ * Same as SDK: arbitrary string up to 100 chars. The Genre enum is reserved
+ * for autocomplete suggestions; users may submit any value.
+ */
 const GenreSchema = z
-  .enum(Object.values(Genre) as [Genre, ...Genre[]])
+  .string()
+  .min(1, { message: messages.genreRequiredError })
+  .max(100)
   .nullable()
-  .refine((val) => val !== null, {
+  .refine((val) => val !== null && val.length > 0, {
     message: messages.genreRequiredError
   })
 
 /** Same as SDK. */
 const MoodSchema = z
-  .optional(z.enum(Object.values(Mood) as [Mood, ...Mood[]]))
+  .enum(Object.values(Mood) as [Mood, ...Mood[]])
   .nullable()
+  .optional()
 
 const DDEXResourceContributor = z
   .object({

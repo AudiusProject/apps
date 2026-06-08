@@ -10,10 +10,11 @@ const messages = {
   tracks: 'created any tracks yet',
   albums: 'created any albums yet',
   playlists: 'created any playlists yet',
-  reposts: 'reposted anything yet'
+  reposts: 'reposted anything yet',
+  contests: 'hosted any contests yet'
 }
 
-type Tab = 'tracks' | 'albums' | 'playlists' | 'reposts'
+type Tab = 'tracks' | 'albums' | 'playlists' | 'reposts' | 'contests'
 
 export const useEmptyProfileText = (tab: Tab) => {
   const { user_id, name } =

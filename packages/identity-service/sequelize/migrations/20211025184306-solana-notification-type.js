@@ -6,7 +6,9 @@ const models = require('../../src/models')
  */
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.sequelize.query("ALTER TYPE \"enum_SolanaNotifications_type\" ADD VALUE 'MilestoneListen'")
+    return queryInterface.sequelize.query(
+      'ALTER TYPE "enum_SolanaNotifications_type" ADD VALUE \'MilestoneListen\''
+    )
   },
   down: (queryInterface, Sequelize) => {
     const tableName = 'SolanaNotifications'
@@ -21,26 +23,38 @@ module.exports = {
         transaction
       })
 
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         CREATE TYPE "${newEnumName}"
-          AS ENUM ('${prevValues.join('\', \'')}')
-        `, { transaction })
+          AS ENUM ('${prevValues.join("', '")}')
+        `,
+        { transaction }
+      )
       // Change column type to the new ENUM TYPE
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         ALTER TABLE "${tableName}"
         ALTER COLUMN ${columnName}
           TYPE "${newEnumName}"
           USING ("${columnName}"::text::"${newEnumName}")
-      `, { transaction })
+      `,
+        { transaction }
+      )
       // Drop old ENUM
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         DROP TYPE "${enumName}"
-      `, { transaction })
+      `,
+        { transaction }
+      )
       // Rename new ENUM name
-      await queryInterface.sequelize.query(`
+      await queryInterface.sequelize.query(
+        `
         ALTER TYPE "${newEnumName}"
         RENAME TO "${enumName}"
-      `, { transaction })
+      `,
+        { transaction }
+      )
     })
   }
 }

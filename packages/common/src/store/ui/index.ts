@@ -57,7 +57,13 @@ export {
 } from './coinflow-modal/slice'
 
 export { default as themeReducer, actions as themeActions } from './theme/slice'
-export type { SetThemeAction, SetSystemAppearanceAction } from './theme/slice'
+export type {
+  SetThemeAction,
+  SetThemePaletteAction,
+  SetThemeModeAction,
+  SetFrostedSurfaceIntensityAction,
+  SetSystemAppearanceAction
+} from './theme/slice'
 export * as themeSelectors from './theme/selectors'
 
 export { default as toastReducer, actions as toastActions } from './toast/slice'
@@ -81,18 +87,10 @@ export {
 export * as transactionDetailsSelectors from './transaction-details/selectors'
 export * from './transaction-details/types'
 
-export {
-  default as searchUsersModalReducer,
-  actions as searchUsersModalActions
-} from './search-users-modal/slice'
-export type { SearchUsersModalState } from './search-users-modal/slice'
-export * as searchUsersModalSelectors from './search-users-modal/selectors'
-export { default as searchUsersModalSagas } from './search-users-modal/sagas'
-
 export * from './buy-sell'
 export {
   TOKEN_LISTING_MAP,
-  NON_ARTIST_COIN_MINTS,
+  NON_FAN_CLUB_MINTS,
   AUDIO_MINT,
   SOL_MINT,
   USDC_MINT

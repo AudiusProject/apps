@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCollection,
   useCurrentAccount,
   useTrack,
@@ -141,7 +141,7 @@ export const useStreamConditionsEntity = (
 
   const { byId: usersById } = useUsers([followUserId].filter(removeNullable))
   const followee = followUserId ? usersById[followUserId] : null
-  const { data: token } = useArtistCoin(tokenMint)
+  const { data: token } = useFanClub(tokenMint)
 
   return {
     followee,

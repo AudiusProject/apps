@@ -1,3 +1,4 @@
+import { UninitializedEntityManagerError } from '../../errors'
 import type { EntityManagerService } from '../../services'
 import {
   Action,
@@ -14,15 +15,19 @@ import {
   CreateDashboardWalletUser,
   CreateDashboardWalletUserRequest,
   DeleteDashboardWalletUserRequest,
-  DeleteDashboardWalletUserSchema
+  DeleteDashboardWalletUserSchema,
+  type DashboardWalletUsersApiServicesConfig
 } from './types'
 
 export class DashboardWalletUsersApi extends GeneratedDashboardWalletUsersApi {
+  private readonly entityManager?: EntityManagerService
+
   constructor(
     config: Configuration,
-    private readonly entityManager: EntityManagerService
+    services: DashboardWalletUsersApiServicesConfig
   ) {
     super(config)
+    this.entityManager = services.entityManager
   }
 
   /**
@@ -52,6 +57,9 @@ export class DashboardWalletUsersApi extends GeneratedDashboardWalletUsersApi {
           }
         }
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     const response = await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.DASHBOARD_WALLET_USER,
@@ -80,6 +88,9 @@ export class DashboardWalletUsersApi extends GeneratedDashboardWalletUsersApi {
       DeleteDashboardWalletUserSchema
     )(params)
 
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
     return await this.entityManager.manageEntity({
       userId,
       entityType: EntityType.DASHBOARD_WALLET_USER,

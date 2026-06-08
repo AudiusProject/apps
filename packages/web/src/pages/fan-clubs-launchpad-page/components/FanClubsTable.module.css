@@ -1,0 +1,82 @@
+.bodyWrapper {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  container-name: fan-clubs-content;
+}
+
+.tableWrapper {
+  width: 100%;
+  min-width: 328px;
+  border-radius: 8px;
+  border: 1px solid var(--harmony-n-100);
+  box-shadow: 0 2px 5px -2px rgba(133, 129, 153, 0.25);
+  background-color: var(--harmony-white);
+  padding-bottom: 5px;
+  margin-bottom: 52px;
+  overflow: hidden;
+}
+
+.filterHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-transform: none;
+  padding-left: 24px;
+  margin-bottom: 8px;
+}
+
+.filterHeader > div {
+  width: 100%;
+}
+
+.tokenIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tokenIconButton:focus {
+  outline: none;
+}
+
+.tokenIconButton:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: 3px;
+}
+
+.cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--harmony-unit-6) var(--harmony-unit-4);
+  margin-bottom: var(--harmony-unit-4);
+  min-width: 328px;
+}
+
+.cardsContainer > * {
+  flex: 0 0 calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+  max-width: calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+}
+
+@container fan-clubs-content (max-width: 900px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - var(--harmony-unit-4)) / 2);
+    max-width: calc((100% - var(--harmony-unit-4)) / 2);
+  }
+}
+
+@container fan-clubs-content (max-width: 640px) {
+  .cardsContainer > * {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

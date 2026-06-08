@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useAccountStatus, useCurrentUserId } from '@audius/common/api'
-import {
-  Name,
-  ErrorLevel,
-  statusIsNotFinalized,
-  UserMetadata
-} from '@audius/common/models'
+import { Name, statusIsNotFinalized, UserMetadata } from '@audius/common/models'
 import { Id } from '@audius/sdk'
 import * as queryString from 'query-string'
 import { useDispatch } from 'react-redux'
@@ -16,12 +11,12 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import { audiusSdk } from 'services/audius-sdk'
 import { identityService } from 'services/audius-sdk/identity'
 import * as errorActions from 'store/errors/actions'
-import { reportToSentry } from 'store/errors/reportToSentry'
 
 import { messages } from './messages'
 import { Display } from './types'
 import {
   authWrite,
+  exchangeForAuthorizationCode,
   formOAuthResponse,
   getDeveloperApp,
   getIsAppAuthorized,
@@ -30,26 +25,60 @@ import {
   handleAuthorizeConnectDashboardWallet,
   handleAuthorizeDisconnectDashboardWallet,
   isValidApiKey,
-  validateWriteOnceParams,
-  WriteOnceParams,
-  WriteOnceTx
+  validateDashboardWalletParams,
+  DashboardWalletParams
 } from './utils'
+
+// Collapse space-separated OAuth scopes (e.g. 'read write') to the highest privilege.
+// This handles Swagger UI sending 'scope=read write' when multiple scopes are selected.
+const collapseScopes = (
+  raw: string | string[] | (string | null)[] | null | undefined
+): string | null => {
+  if (!raw) return null
+  // Normalize to an array of individual scope tokens, splitting on whitespace
+  const strings = Array.isArray(raw)
+    ? raw.filter((t): t is string => typeof t === 'string')
+    : [raw]
+  const tokens = strings
+    .flatMap((s) => (s != null ? s.split(/\s+/) : []))
+    .filter((t) => t.length > 0)
+  if (tokens.includes('write')) return 'write'
+  if (tokens.includes('read')) return 'read'
+  return typeof raw === 'string' ? raw : null
+}
 
 const useParsedQueryParams = () => {
   const { search } = useLocation()
 
   const {
-    scope,
+    scope: rawScope,
     state,
     redirect_uri: redirectUri,
     app_name: appName,
     response_mode: responseMode,
-    api_key: apiKey,
+    api_key,
+    client_id,
     origin,
     tx,
     display: displayQueryParam,
+    response_type: responseType,
+    code_challenge: codeChallenge,
+    code_challenge_method: codeChallengeMethod,
     ...rest
   } = queryString.parse(search)
+
+  const scope = collapseScopes(rawScope)
+
+  const apiKey = (() => {
+    const raw =
+      typeof api_key === 'string'
+        ? api_key
+        : typeof client_id === 'string'
+          ? client_id
+          : undefined
+    if (raw?.toLowerCase().startsWith('0x')) return raw.slice(2)
+    return raw
+  })()
 
   const parsedRedirectUri = useMemo<'postmessage' | URL | null>(() => {
     if (redirectUri && typeof redirectUri === 'string') {
@@ -82,17 +111,13 @@ const useParsedQueryParams = () => {
 
   const { error, txParams } = useMemo(() => {
     let error: string | null = null
-    let txParams: WriteOnceParams | null = null // Only used for scope=write_once
+    let txParams: DashboardWalletParams | null = null
     if (isRedirectValid === false) {
       error = messages.redirectURIInvalidError
     } else if (parsedRedirectUri === 'postmessage' && !parsedOrigin) {
       // Only applicable if redirect URI set to `postMessage`
       error = messages.originInvalidError
-    } else if (
-      scope !== 'read' &&
-      scope !== 'write' &&
-      scope !== 'write_once'
-    ) {
+    } else if (scope !== 'read' && scope !== 'write') {
       error = messages.scopeError
     } else if (
       responseMode &&
@@ -112,18 +137,26 @@ const useParsedQueryParams = () => {
       } else if (!isValidApiKey(apiKey)) {
         error = messages.invalidApiKeyError
       }
-    } else if (scope === 'write_once') {
-      // Write-once scope-specific validations:
-      const { error: writeOnceParamsError, txParams: txParamsRes } =
-        validateWriteOnceParams({
-          tx,
-          params: rest,
-          willUsePostMessage: parsedRedirectUri === 'postmessage'
-        })
-      txParams = txParamsRes
-
-      if (writeOnceParamsError) {
-        error = writeOnceParamsError
+      // PKCE-specific validations when response_type=code
+      if (!error && responseType === 'code') {
+        if (!codeChallenge || typeof codeChallenge !== 'string') {
+          error = messages.missingCodeChallengeError
+        } else if (codeChallengeMethod !== 'S256') {
+          error = messages.invalidCodeChallengeMethodError
+        }
+      }
+      // Optional dashboard wallet tx params
+      if (!error && tx) {
+        const { error: txParamsError, txParams: txParamsRes } =
+          validateDashboardWalletParams({
+            tx,
+            params: rest,
+            willUsePostMessage: parsedRedirectUri === 'postmessage'
+          })
+        txParams = txParamsRes
+        if (txParamsError) {
+          error = txParamsError
+        }
       }
     }
     return { txParams, error }
@@ -148,7 +181,10 @@ const useParsedQueryParams = () => {
     error,
     tx,
     txParams,
-    display
+    display,
+    responseType,
+    codeChallenge,
+    codeChallengeMethod
   }
 }
 
@@ -186,6 +222,9 @@ export const useOAuthSetup = ({
     txParams,
     tx,
     display,
+    responseType,
+    codeChallenge,
+    codeChallengeMethod,
     error: initError
   } = useParsedQueryParams()
   const { data: accountStatus } = useAccountStatus()
@@ -196,7 +235,7 @@ export const useOAuthSetup = ({
   const [queryParamsError, setQueryParamsError] = useState<string | null>(
     initError
   )
-  /** The fetched developer app name if write OAuth (we use `queryParamAppName` if read or writeOnce OAuth and no API key is given) */
+  /** The fetched developer app name if write OAuth (we use `queryParamAppName` if read OAuth and no API key is given) */
   const [registeredDeveloperAppName, setRegisteredDeveloperAppName] =
     useState<string>()
   const appName = registeredDeveloperAppName ?? queryParamAppName
@@ -253,11 +292,21 @@ export const useOAuthSetup = ({
         setQueryParamsError(messages.invalidApiKeyError)
         return
       }
+      const registeredUris = developerApp.redirectUris
+      if (
+        registeredUris &&
+        registeredUris.length > 0 &&
+        typeof redirectUri === 'string' &&
+        !registeredUris.includes(redirectUri)
+      ) {
+        setQueryParamsError(messages.redirectUriNotRegisteredError(redirectUri))
+        return
+      }
       setRegisteredDeveloperAppName(developerApp.name)
       setAppImage(developerApp.imageUrl)
     }
     fetchDeveloperAppName()
-  }, [apiKey, queryParamAppName, queryParamsError, scope])
+  }, [apiKey, queryParamAppName, queryParamsError, scope, redirectUri])
 
   useEffect(() => {
     const getAndSetEmail = async () => {
@@ -358,7 +407,7 @@ export const useOAuthSetup = ({
             }
           }
         } else {
-          if (responseMode && responseMode === 'query') {
+          if (responseMode !== 'fragment') {
             if (state != null) {
               parsedRedirectUri!.searchParams.append('state', state as string)
             }
@@ -401,7 +450,7 @@ export const useOAuthSetup = ({
         })
       } catch (e) {
         if (e instanceof Error) {
-          reportToSentry({ level: ErrorLevel.Error, error: e })
+          console.error(e)
         }
         dispatch(
           errorActions.handleError({
@@ -476,33 +525,88 @@ export const useOAuthSetup = ({
         })
         return
       }
-    } else if (scope === 'write_once') {
-      // Note: Tx = 'connect_dashboard_wallet' since that's the only option available right now for write_once scope
-      if ((tx as WriteOnceTx) === 'connect_dashboard_wallet') {
-        const success = await handleAuthorizeConnectDashboardWallet({
-          state,
-          originUrl: parsedOrigin,
-          onError,
-          onWaitForWalletSignature: onPendingTransactionApproval,
-          onReceivedWalletSignature: onReceiveTransactionApproval,
-          account,
-          txParams: txParams!
-        })
-        if (!success) {
-          return
-        }
-      } else if ((tx as WriteOnceTx) === 'disconnect_dashboard_wallet') {
-        const success = await handleAuthorizeDisconnectDashboardWallet({
-          account,
-          txParams: txParams!,
-          onError
-        })
-        if (!success) {
-          return
+
+      // Handle dashboard wallet tx if present
+      if (tx && txParams) {
+        if (tx === 'connect_dashboard_wallet') {
+          const success = await handleAuthorizeConnectDashboardWallet({
+            state,
+            originUrl: parsedOrigin,
+            onError,
+            onWaitForWalletSignature: onPendingTransactionApproval,
+            onReceivedWalletSignature: onReceiveTransactionApproval,
+            account,
+            txParams
+          })
+          if (!success) {
+            return
+          }
+        } else if (tx === 'disconnect_dashboard_wallet') {
+          const success = await handleAuthorizeDisconnectDashboardWallet({
+            account,
+            txParams,
+            onError
+          })
+          if (!success) {
+            return
+          }
         }
       }
     }
 
+    // PKCE flow: exchange for authorization code and redirect with code
+    if (responseType === 'code') {
+      const code = await exchangeForAuthorizationCode({
+        account,
+        userEmail,
+        apiKey: apiKey as string,
+        redirectUri: (redirectUri as string) ?? 'postMessage',
+        codeChallenge: codeChallenge as string,
+        codeChallengeMethod: (codeChallengeMethod as string) ?? 'S256',
+        scope: scope as string,
+        onError: () => {
+          onError({
+            isUserError: false,
+            errorMessage: messages.miscError
+          })
+        }
+      })
+      if (!code) return
+
+      record(
+        make(Name.AUDIUS_OAUTH_COMPLETE, {
+          appId: (apiKey || appName)!,
+          scope: scope!,
+          alreadyAuthorized: !shouldCreateWriteGrant
+        })
+      )
+
+      if (parsedRedirectUri === 'postmessage') {
+        if (parsedOrigin && window.opener) {
+          window.opener.postMessage({ state, code }, parsedOrigin.origin)
+        } else {
+          onError({
+            isUserError: false,
+            errorMessage: messages.noWindowError
+          })
+        }
+      } else if (parsedRedirectUri) {
+        if (responseMode !== 'fragment') {
+          if (state != null) {
+            parsedRedirectUri.searchParams.append('state', state as string)
+          }
+          parsedRedirectUri.searchParams.append('code', code)
+          window.location.href = parsedRedirectUri.toString()
+        } else {
+          const statePart = state != null ? `state=${state}&` : ''
+          parsedRedirectUri.hash = `#${statePart}code=${code}`
+          window.location.href = parsedRedirectUri.toString()
+        }
+      }
+      return
+    }
+
+    // Implicit flow: form JWT and redirect
     await formResponseAndRedirect({
       account,
       grantCreated: shouldCreateWriteGrant
@@ -520,7 +624,7 @@ export const useOAuthSetup = ({
     userEmail,
     authorize,
     tx,
-    txParams: txParams as WriteOnceParams,
+    txParams,
     display
   }
 }

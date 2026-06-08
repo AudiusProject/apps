@@ -1,9 +1,9 @@
-import { full, OptionalHashId } from '@audius/sdk'
+import { OptionalHashId, type Repost as SdkRepost } from '@audius/sdk'
 import snakecaseKeys from 'snakecase-keys'
 
 import { Repost } from '~/models/Repost'
 
-export const repostFromSDK = (input: full.Repost): Repost | undefined => {
+export const repostFromSDK = (input: SdkRepost): Repost | undefined => {
   const decodedRepostItemId = OptionalHashId.parse(input.repostItemId)
   const decodedUserId = OptionalHashId.parse(input.userId)
   if (!decodedRepostItemId || !decodedUserId) {

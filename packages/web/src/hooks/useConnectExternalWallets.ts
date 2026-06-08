@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
-import { Name, Chain, Feature } from '@audius/common/models'
+import { Name, Chain } from '@audius/common/models'
+import { isLightTheme } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
 import type { NamespaceTypeMap } from '@reown/appkit'
 import { mainnet } from '@reown/appkit/networks'
@@ -14,8 +15,6 @@ import { useSwitchAccount, useAccount } from 'wagmi'
 
 import { appkitModal, audiusChain } from 'app/ReownAppKitModal'
 import { useRecord, make } from 'common/store/analytics/actions'
-import { reportToSentry } from 'store/errors/reportToSentry'
-
 /**
  * Error when trying to associate a wallet that was already associated
  */
@@ -88,13 +87,13 @@ export const useConnectExternalWallets = (
         await disconnect()
       }
       appkitModal.updateFeatures({ socials: false, email: false })
-      appkitModal.setThemeMode(theme.type === 'day' ? 'light' : 'dark')
+      appkitModal.setThemeMode(isLightTheme(theme.type) ? 'light' : 'dark')
       // If the user is signed in using an external wallet, they'll be connected
       // to the audiusChain network. Reset that to mainnet to connect properly.
       await appkitModal.switchNetwork(mainnet)
       await openAppKitModal({ view: 'Connect', namespace })
     },
-    [disconnect, isConnected, openAppKitModal, record, theme.type]
+    [disconnect, isConnected, openAppKitModal, record, theme]
   )
 
   /**
@@ -159,11 +158,10 @@ export const useConnectExternalWallets = (
           )
         }
         if (!solAddress && !ethAddress) {
-          reportToSentry({
-            error: new Error('No wallets found to connect'),
-            name: 'Connect Wallet Error',
-            feature: Feature.ArtistCoins
-          })
+          console.error(
+            'Connect Wallet Error',
+            new Error('No wallets found to connect')
+          )
         }
 
         setCurrentWallets({
@@ -183,14 +181,7 @@ export const useConnectExternalWallets = (
             error: String(event.data)
           })
         )
-        reportToSentry({
-          error: new Error('Connect Wallet Error'),
-          name: 'Connect Wallet Error',
-          feature: Feature.ArtistCoins,
-          additionalInfo: {
-            error: String(event.data)
-          }
-        })
+        console.error('Connect Wallet Error', new Error('Connect Wallet Error'))
         onError?.(event)
       }
     })

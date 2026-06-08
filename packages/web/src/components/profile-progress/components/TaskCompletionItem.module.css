@@ -2,6 +2,10 @@
   margin-right: 8px;
 }
 
+.surfaceCheckMark {
+  margin-right: 0;
+}
+
 .iconWrapper {
   height: 16px;
   margin-top: -1px;
@@ -14,4 +18,12 @@
   border: 1px solid var(--harmony-white);
   background-color: var(--harmony-white);
   margin-right: 6px;
+}
+
+.surfaceIncompleteCircle {
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--harmony-n-200);
+  background-color: transparent;
 }

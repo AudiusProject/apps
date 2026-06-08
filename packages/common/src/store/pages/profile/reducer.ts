@@ -1,12 +1,4 @@
-import { LineupActions, asLineup } from '~/store/lineup/reducer'
-import feedReducer, {
-  initialState as initialFeedLineupState
-} from '~/store/pages/profile/lineups/feed/reducer'
-import tracksReducer, {
-  initialState as initialTracksLineupState
-} from '~/store/pages/profile/lineups/tracks/reducer'
-
-import { Collection, Status, Track } from '../../../models'
+import { Status } from '../../../models'
 
 import {
   FETCH_PROFILE,
@@ -31,8 +23,6 @@ import {
   DismissProfileMeterAction,
   ProfilePageAction
 } from './actions'
-import { PREFIX as feedPrefix } from './lineups/feed/actions'
-import { PREFIX as tracksPrefix } from './lineups/tracks/actions'
 import { CollectionSortMode, ProfilePageState, ProfileState } from './types'
 
 const initialProfileState = {
@@ -46,10 +36,7 @@ const initialProfileState = {
 
   collectionSortMode: CollectionSortMode.TIMESTAMP,
 
-  profileMeterDismissed: false,
-
-  feed: initialFeedLineupState,
-  tracks: initialTracksLineupState
+  profileMeterDismissed: false
 }
 
 const updateProfile = (
@@ -178,56 +165,27 @@ const actionsMap = {
   }
 }
 
-const feedLineupReducer = asLineup(feedPrefix, feedReducer)
-const tracksLineupReducer = asLineup(tracksPrefix, tracksReducer)
-
-const reducer = (
-  state: ProfilePageState,
-  action:
-    | ProfilePageAction
-    | LineupActions<Track>
-    | LineupActions<Track | Collection>
-) => {
+const reducer = (state: ProfilePageState, action: ProfilePageAction) => {
   if (!state) {
     state = initialState
   }
 
-  // profile state with the user from ssr
   const { currentUser, entries } = state
-
   const profileHandle =
     'handle' in action && typeof action.handle === 'string'
       ? action.handle.toLowerCase()
       : currentUser
   if (!profileHandle) return state
 
-  let newEntry = entries[profileHandle] ?? initialProfileState
-
-  const feed = feedLineupReducer(
-    newEntry.feed,
-    action as LineupActions<Track | Collection>
-  )
-  if (feed !== newEntry.feed) {
-    newEntry = { ...newEntry, feed }
-  }
-
-  const tracks = tracksLineupReducer(
-    // @ts-ignore
-    newEntry.tracks,
-    action as LineupActions<Track>
-  )
-  if (tracks !== newEntry.tracks) {
-    newEntry = { ...newEntry, tracks }
-  }
-
+  const newEntry = entries[profileHandle] ?? initialProfileState
   const newState = {
     ...state,
     entries: { ...entries, [profileHandle]: newEntry }
   }
 
-  const matchingReduceFunction = actionsMap[action.type]
+  const matchingReduceFunction = (actionsMap as any)[action.type]
   if (!matchingReduceFunction) return newState
-  return matchingReduceFunction(newState, action as ProfilePageAction)
+  return matchingReduceFunction(newState, action)
 }
 
 export default reducer

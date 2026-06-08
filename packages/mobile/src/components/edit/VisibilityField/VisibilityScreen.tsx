@@ -19,9 +19,15 @@ import { ScheduledReleaseDateField } from './ScheduledReleaseDateField'
 
 type VisibilityType = 'scheduled' | 'public' | 'hidden'
 
+const getMessages = (entityType: 'track' | 'album' | 'playlist') => ({
+  ...messages,
+  title: `${entityType === 'track' ? 'Track' : entityType === 'album' ? 'Album' : 'Playlist'} Privacy`
+})
+
 export const VisibilityScreen = () => {
   const { values, initialValues, setValues } = useFormikContext<FormValues>()
   const { entityType } = values
+  const visibilityMessages = getMessages(entityType)
   const hiddenKey = entityType === 'track' ? 'is_unlisted' : 'is_private'
   const {
     [hiddenKey]: isHidden,
@@ -93,7 +99,7 @@ export const VisibilityScreen = () => {
 
   return (
     <FormScreen
-      title={messages.title}
+      title={visibilityMessages.title}
       icon={IconVisibilityPublic}
       onSubmit={handleSubmit}
       variant='white'
@@ -105,21 +111,21 @@ export const VisibilityScreen = () => {
       >
         <ExpandableRadio
           value='public'
-          label={messages.public}
-          description={messages.publicDescription}
+          label={visibilityMessages.public}
+          description={visibilityMessages.publicDescription}
         />
         <ExpandableRadio
           value='hidden'
-          label={messages.hidden}
+          label={visibilityMessages.hidden}
           icon={IconVisibilityHidden}
-          description={messages.hiddenDescription}
+          description={visibilityMessages.hiddenDescription}
         />
         {!initiallyPublic &&
         (entityType === 'track' || entityType === 'album') ? (
           <ExpandableRadio
             value='scheduled'
-            label={messages.scheduledRelease}
-            description={messages.scheduledReleaseDescription}
+            label={visibilityMessages.scheduledRelease}
+            description={visibilityMessages.scheduledReleaseDescription}
             checkedContent={
               <ScheduledReleaseDateField
                 releaseDate={releaseDate}

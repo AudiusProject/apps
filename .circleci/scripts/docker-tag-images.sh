@@ -40,13 +40,7 @@ discovery=(
   discovery-provider-notifications
   discovery-provider-openresty
   es-indexer
-  relay
-  solana-relay
-  trending-challenge-rewards
   staking
-  crm
-  mri
-  verified-notifications
   anti-abuse
   archiver
 )

@@ -1,6 +1,9 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 
-import { useCurrentTrack } from '@audius/common/hooks'
+import {
+  getUserTracksByHandleQueryKey,
+  useUserTracksByHandle
+} from '@audius/common/api'
 import {
   PlayableType,
   SquareSizes,
@@ -8,19 +11,13 @@ import {
   Playable,
   User
 } from '@audius/common/models'
-import {
-  lineupSelectors,
-  queueSelectors,
-  playerSelectors
-} from '@audius/common/store'
 import { route, NestedNonNullable } from '@audius/common/utils'
-import { Button, IconUser, Flex } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+import { Button, IconUser, Flex, Image } from '@audius/harmony'
+import { useDispatch } from 'react-redux'
 
 import { ArtistPopover } from 'components/artist/ArtistPopover'
 import CoverPhoto from 'components/cover-photo/CoverPhoto'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
-import Lineup, { LineupProps } from 'components/lineup/Lineup'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { EmptyNavBanner } from 'components/nav-banner/NavBanner'
 import { FlushPageContainer } from 'components/page/FlushPageContainer'
@@ -32,15 +29,11 @@ import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { push as pushRoute } from 'utils/navigation'
 import { withNullGuard } from 'utils/withNullGuard'
 
-import { moreByActions } from '../../store/lineups/more-by/actions'
-import { getLineup } from '../../store/selectors'
-
 import styles from './DeletedPage.module.css'
 
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
+const DELETED_MORE_BY_SOURCE = 'DELETED_MORE_BY'
+const MORE_BY_LIMIT = 5
 
 const messages = {
   trackDeleted: 'Track [Deleted]',
@@ -52,19 +45,19 @@ const messages = {
 }
 
 const TrackArt = ({ trackId }: { trackId: ID }) => {
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 const CollectionArt = ({ collectionId }: { collectionId: ID }) => {
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  return <DynamicImage wrapperClassName={styles.image} image={image} />
+  return <Image className={styles.image} src={image} />
 }
 
 export type DeletedPageProps = {
@@ -98,48 +91,21 @@ const DeletedPage = g(
     deletedByArtist = true
   }) => {
     const dispatch = useDispatch()
-    const currentTrack = useCurrentTrack()
 
-    const getMoreByLineup = useRef(makeGetLineupMetadatas(getLineup)).current
-    const getCurrentQueueItem = useRef(makeGetCurrent()).current
-    const moreBy = useSelector((state: any) => getMoreByLineup(state))
-    const currentQueueItem = useSelector(getCurrentQueueItem)
-    const isPlaying = useSelector(getPlaying)
-    const isBuffering = useSelector(getBuffering)
-
-    useEffect(() => {
-      return function cleanup() {
-        dispatch(moreByActions.reset())
-      }
-    }, [dispatch])
+    const moreByArgs = {
+      handle: user?.handle,
+      sort: 'plays' as const,
+      limit: MORE_BY_LIMIT
+    }
+    const { data: moreByTracks = [], isPending } = useUserTracksByHandle(
+      moreByArgs,
+      { enabled: !!user?.handle }
+    )
+    const moreByTrackIds = moreByTracks.map((t) => t.track_id)
 
     const goToArtistPage = useCallback(() => {
       dispatch(pushRoute(profilePage(user?.handle)))
     }, [dispatch, user])
-
-    const getLineupProps = (): LineupProps => {
-      return {
-        selfLoad: true,
-        variant: LineupVariant.CONDENSED,
-        lineup: moreBy,
-        count: 5,
-        playingUid: currentQueueItem.uid,
-        playingSource: currentQueueItem.source,
-        playingTrackId: currentTrack?.track_id ?? null,
-        playing: isPlaying,
-        buffering: isBuffering,
-        pauseTrack: () => dispatch(moreByActions.pause()),
-        playTrack: (uid?: string) => dispatch(moreByActions.play(uid)),
-        actions: moreByActions,
-        loadMore: (offset: number, limit: number) => {
-          dispatch(
-            moreByActions.fetchLineupMetadatas(offset, limit, false, {
-              handle: user?.handle
-            })
-          )
-        }
-      }
-    }
     const isPlaylist =
       playable.type === PlayableType.PLAYLIST ||
       playable.type === PlayableType.ALBUM
@@ -205,7 +171,19 @@ const DeletedPage = g(
           <div className={styles.lineupHeader}>{`${messages.moreBy(
             user.name
           )}`}</div>
-          <Lineup {...getLineupProps()} />
+          <TrackLineup
+            trackIds={moreByTrackIds}
+            source={DELETED_MORE_BY_SOURCE}
+            querySource={{
+              queryKey: [
+                ...getUserTracksByHandleQueryKey(moreByArgs)
+              ] as unknown[]
+            }}
+            isPending={isPending}
+            hasNextPage={false}
+            variant={LineupVariant.CONDENSED}
+            maxEntries={MORE_BY_LIMIT}
+          />
         </div>
       )
     }

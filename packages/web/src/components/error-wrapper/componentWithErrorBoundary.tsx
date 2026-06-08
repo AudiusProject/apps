@@ -1,6 +1,5 @@
 import React, { ReactNode, useCallback } from 'react'
 
-import { ErrorLevel } from '@audius/common/models'
 import {
   ErrorBoundary,
   ErrorBoundaryProps,
@@ -40,8 +39,7 @@ export function componentWithErrorBoundary<P extends object>(
             name: `ComponentErrorBoundary: ${name}`,
             message: error.message,
             shouldRedirect: false,
-            additionalInfo: errorInfo,
-            level: ErrorLevel.Error
+            additionalInfo: errorInfo
           })
         )
       },

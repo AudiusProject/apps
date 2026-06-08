@@ -1,25 +1,21 @@
 import { useEffect, useMemo } from 'react'
 
 import { EntityType } from '@audius/sdk'
-import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
-import { useQueryContext } from '~/api'
 import { useRemixContestWinners } from '~/api/tan-query/events/useRemixContestWinners'
-import { PlaybackSource } from '~/models/Analytics'
-import {
-  remixesPageLineupActions,
-  remixesPageSelectors,
-  remixesPageActions
-} from '~/store/pages'
+import { ID } from '~/models'
+import { remixesPageActions } from '~/store/pages'
 
-import {
-  mapLineupDataToFullLineupItems,
-  useLineupQuery
-} from '../lineups/useLineupQuery'
 import { LineupData, QueryOptions } from '../types'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 
-import { UseRemixesArgs, useRemixes, getRemixesQueryKey } from './useRemixes'
+import {
+  UseRemixesArgs,
+  useRemixes,
+  useRemixesCount,
+  getRemixesQueryKey
+} from './useRemixes'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -35,9 +31,7 @@ export const useRemixesLineup = (
   }: UseRemixesArgs,
   options?: QueryOptions
 ) => {
-  const queryClient = useQueryClient()
   const dispatch = useDispatch()
-  const { reportToSentry } = useQueryContext()
 
   // Get winner IDs
   const { data: winnerIds, isLoading: isWinnersLoading } =
@@ -71,45 +65,39 @@ export const useRemixesLineup = (
     }
   )
 
-  // Process and order the lineup data
-  const processedLineupData = useMemo(() => {
-    const remixTracks =
-      queryData.data?.pages.flatMap((page) => page.tracks) ?? []
+  // Total submissions/remixes count comes from the dedicated count query.
+  // The lineup query's queryFn primes this cache entry, so once the lineup
+  // is loaded this hits the cache instead of making another round-trip.
+  const { data: count } = useRemixesCount(
+    { trackId, isCosign, isContestEntry },
+    {
+      enabled: options?.enabled !== false && !!trackId
+    }
+  )
 
-    // Start with an empty array
+  // Process and order the lineup data
+  const processedLineupData: LineupData[] = useMemo(() => {
+    const remixTracks = queryData.data?.pages.flat() ?? []
+
     const orderedTracks: LineupData[] = []
 
     // Add original track if included (should be first)
     if (includeOriginal && trackId) {
-      orderedTracks.push({
-        id: trackId,
-        type: EntityType.TRACK
-      })
+      orderedTracks.push({ id: trackId, type: EntityType.TRACK })
     }
 
     // Add winner tracks if included (should be second)
     if (includeWinners && winnerIds?.length) {
-      // Create a Set of winner IDs for efficient lookup
       const winnerTracks = winnerIds.map((id) => ({
         id,
         type: EntityType.TRACK
       }))
       orderedTracks.push(...winnerTracks)
-
-      // Add remaining remix tracks (excluding original and winners)
-      const remainingTracks = remixTracks.filter((track) => {
-        if (track.id === trackId) return false // Always exclude original track
-        return true
-      })
-      orderedTracks.push(...remainingTracks)
-    } else {
-      // If not including winners, just filter out original track
-      const remainingTracks = remixTracks.filter((track) => {
-        if (track.id === trackId) return false // Always exclude original track
-        return true
-      })
-      orderedTracks.push(...remainingTracks)
     }
+
+    // Add remaining remix tracks (excluding original)
+    const remainingTracks = remixTracks.filter((track) => track.id !== trackId)
+    orderedTracks.push(...remainingTracks)
 
     return orderedTracks
   }, [
@@ -119,28 +107,6 @@ export const useRemixesLineup = (
     trackId,
     winnerIds
   ])
-
-  useEffect(() => {
-    if (processedLineupData) {
-      const fullLineupItems = mapLineupDataToFullLineupItems(
-        processedLineupData,
-        queryClient,
-        reportToSentry,
-        'remix'
-      )
-
-      dispatch(
-        remixesPageLineupActions.fetchLineupMetadatas(
-          0,
-          fullLineupItems.length,
-          false,
-          {
-            items: fullLineupItems
-          }
-        )
-      )
-    }
-  }, [processedLineupData, dispatch, queryClient, reportToSentry])
 
   const queryKey = getRemixesQueryKey({
     trackId,
@@ -152,20 +118,26 @@ export const useRemixesLineup = (
     isContestEntry
   })
 
-  const lineupData = useLineupQuery({
-    lineupData: processedLineupData,
-    queryData,
-    queryKey,
-    // We're manually dispatching the lineup data to the redux store, so we don't need to automatically cache it
-    disableAutomaticCacheHandling: true,
-    lineupActions: remixesPageLineupActions,
-    lineupSelector: remixesPageSelectors.getLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize
-  })
+  const trackIds = useMemo(
+    () =>
+      processedLineupData
+        .filter((d) => d.type === EntityType.TRACK)
+        .map((d) => d.id as ID),
+    [processedLineupData]
+  )
 
   return {
-    ...lineupData,
-    count: queryData.data?.pages[0]?.count
+    data: processedLineupData,
+    count,
+    trackIds,
+    queryKey,
+    pageSize,
+    loadNextPage: makeLoadNextPage(queryData),
+    hasNextPage: queryData.hasNextPage,
+    isLoading: queryData.isLoading,
+    isPending: queryData.isPending,
+    isError: queryData.isError,
+    isFetching: queryData.isFetching,
+    isSuccess: queryData.isSuccess
   }
 }

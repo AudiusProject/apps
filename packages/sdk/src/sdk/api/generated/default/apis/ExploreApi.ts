@@ -2,8 +2,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -37,8 +36,8 @@ export class ExploreApi extends runtime.BaseAPI {
 
     /**
      * @hidden
-     * Get best selling tracks and playlists
-     * Get best selling tracks and/or albums
+     * Get best selling tracks and/or albums with related entities
+     * Get best selling tracks and playlists with related entities
      */
     async getBestSellingRaw(params: GetBestSellingRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<BestSellingResponse>> {
         const queryParameters: any = {};
@@ -61,6 +60,13 @@ export class ExploreApi extends runtime.BaseAPI {
 
         const headerParameters: runtime.HTTPHeaders = {};
 
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
         const response = await this.request({
             path: `/explore/best-selling`,
             method: 'GET',
@@ -72,8 +78,8 @@ export class ExploreApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get best selling tracks and playlists
-     * Get best selling tracks and/or albums
+     * Get best selling tracks and/or albums with related entities
+     * Get best selling tracks and playlists with related entities
      */
     async getBestSelling(params: GetBestSellingRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<BestSellingResponse> {
         const response = await this.getBestSellingRaw(params, initOverrides);

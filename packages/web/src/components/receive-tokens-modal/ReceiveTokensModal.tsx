@@ -1,15 +1,13 @@
 import { useCallback, useContext } from 'react'
 
-import {
-  transformArtistCoinToTokenInfo,
-  useArtistCoin
-} from '@audius/common/api'
+import { transformFanClubToTokenInfo, useFanClub } from '@audius/common/api'
 import {
   useFormattedCoinBalance,
   useUserbank,
   useRootWalletAddress
 } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
+import { registerNiceModalId } from '@audius/common/services'
 import { useReceiveTokensModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -22,6 +20,7 @@ import {
   Text,
   useMedia
 } from '@audius/harmony'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { AddressTile } from 'components/address-tile'
 import { CryptoBalanceSection } from 'components/buy-sell-modal/CryptoBalanceSection'
@@ -35,12 +34,15 @@ import { copyToClipboard } from 'utils/clipboardUtil'
 const DIMENSIONS = 160
 const LOADING_HEIGHT = 400
 
-export const ReceiveTokensModal = () => {
+export const ReceiveTokensModal = NiceModal.create(() => {
   const { toast } = useContext(ToastContext)
   const { isMobile } = useMedia()
-  const { isOpen, onClose, data } = useReceiveTokensModal()
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => modal.hide(), [modal])
+  const { data } = useReceiveTokensModal()
   const { mint } = data ?? {}
-  const { data: coin } = useArtistCoin(mint)
+  const { data: coin } = useFanClub(mint)
   const { coinBalanceFormatted: balance } = useFormattedCoinBalance(
     mint ?? '',
     'en-US',
@@ -50,7 +52,7 @@ export const ReceiveTokensModal = () => {
   const { userBankAddress, loading: userBankLoading } = useUserbank(mint)
   const { rootWalletAddress, loading: rootWalletLoading } =
     useRootWalletAddress()
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Use root wallet address for USDC, user bank for others
   const isUsdc = mint === env.USDC_MINT_ADDRESS
@@ -101,7 +103,7 @@ export const ReceiveTokensModal = () => {
       icon={IconError}
       actions={
         <ExternalTextLink
-          to={route.AUDIUS_ARTIST_COINS_HELP_LINK}
+          to={route.AUDIUS_FAN_CLUBS_HELP_LINK}
           variant='visible'
           showUnderline
         >
@@ -170,4 +172,7 @@ export const ReceiveTokensModal = () => {
       </Flex>
     </ResponsiveModal>
   )
-}
+})
+
+NiceModal.register('ReceiveTokensModal', ReceiveTokensModal)
+registerNiceModalId('ReceiveTokensModal')

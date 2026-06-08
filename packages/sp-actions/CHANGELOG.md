@@ -1,5 +1,71 @@
 # @audius/sp-actions
 
+## 1.0.32
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.28
+
+## 1.0.31
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.27
+
+## 1.0.30
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.26
+
+## 1.0.29
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.25
+
+## 1.0.28
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.24
+
+## 1.0.27
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.23
+
+## 1.0.26
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.22
+
+## 1.0.25
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.21
+
+## 1.0.24
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.20
+
+## 1.0.23
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.19
+
+## 1.0.22
+
+### Patch Changes
+
+- @audius/sdk-legacy@6.0.18
+
 ## 1.0.21
 
 ### Patch Changes

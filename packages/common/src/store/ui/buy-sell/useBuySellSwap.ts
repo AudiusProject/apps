@@ -4,9 +4,10 @@ import { MutationStatus, useQueryClient } from '@tanstack/react-query'
 
 import {
   SLIPPAGE_BPS,
-  useArtistCoin,
+  useFanClub,
   useCurrentAccountUser,
-  getArtistCoinQueryKey
+  getFanClubQueryKey,
+  getFanClubFeedQueryKey
 } from '~/api'
 import { SwapStatus, SwapTokensResult } from '~/api/tan-query/jupiter/types'
 import { TQTrack } from '~/api/tan-query/models'
@@ -60,10 +61,8 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
   const { data: user } = useCurrentAccountUser()
   const [swapResult, setSwapResult] = useState<SwapResult | null>(null)
 
-  const { data: baseCoin } = useArtistCoin(selectedPair.baseToken.address ?? '')
-  const { data: quoteCoin } = useArtistCoin(
-    selectedPair.quoteToken.address ?? ''
-  )
+  const { data: baseCoin } = useFanClub(selectedPair.baseToken.address ?? '')
+  const { data: quoteCoin } = useFanClub(selectedPair.quoteToken.address ?? '')
 
   const { status: swapStatus, error: swapError, data: swapData } = swapHookData
 
@@ -100,7 +99,7 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.usdcBalance, user.wallet]
       })
-      // Invalidate individual user coin queries (for artist coins and $AUDIO)
+      // Invalidate individual user coin queries (for fan clubs and $AUDIO)
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoin]
       })
@@ -108,31 +107,47 @@ export const useBuySellSwap = (props: UseBuySellSwapProps) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.userCoins]
       })
-      // Invalidate artist coin members queries (leaderboard)
+      // Invalidate fan club members queries (leaderboard)
       if (baseCoin?.mint) {
         queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.artistCoinMembers, baseCoin?.mint]
+          queryKey: [QUERY_KEYS.fanClubMembers, baseCoin?.mint]
         })
       }
       if (quoteCoin?.mint) {
         queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.artistCoinMembers, quoteCoin?.mint]
+          queryKey: [QUERY_KEYS.fanClubMembers, quoteCoin?.mint]
         })
       }
 
-      // Invalidate artist coin queries to refresh fee claiming and graduation progress
+      // Invalidate fan club queries to refresh fee claiming and graduation progress
       if (baseCoin?.mint) {
         queryClient.invalidateQueries({
-          queryKey: getArtistCoinQueryKey(baseCoin.mint)
+          queryKey: getFanClubQueryKey(baseCoin.mint)
         })
       }
       if (quoteCoin?.mint) {
         queryClient.invalidateQueries({
-          queryKey: getArtistCoinQueryKey(quoteCoin.mint)
+          queryKey: getFanClubQueryKey(quoteCoin.mint)
         })
       }
 
-      // Invalidate track queries to provide track access if the user has traded the artist coin
+      // Invalidate fan club feed and comment queries so locked content is re-evaluated
+      if (baseCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getFanClubFeedQueryKey({ mint: baseCoin.mint })
+        })
+      }
+      if (quoteCoin?.mint) {
+        queryClient.invalidateQueries({
+          queryKey: getFanClubFeedQueryKey({ mint: quoteCoin.mint })
+        })
+      }
+      // Invalidate individual comment queries so locked posts refetch with access
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.comment]
+      })
+
+      // Invalidate track queries to provide track access if the user has traded the fan club
       const baseOwnerId = baseCoin?.ownerId ?? null
       const quoteOwnerId = quoteCoin?.ownerId ?? null
 

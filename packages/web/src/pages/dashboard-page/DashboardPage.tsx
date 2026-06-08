@@ -1,12 +1,23 @@
-import { useState, Suspense, ReactNode, useEffect, useCallback } from 'react'
+import {
+  useEffect,
+  useState,
+  Suspense,
+  ReactNode,
+  useCallback,
+  useMemo
+} from 'react'
 
-import { useCurrentAccountUser } from '@audius/common/api'
-import { Status } from '@audius/common/models'
+import {
+  useArtistDashboardListenData,
+  useCurrentAccountUser,
+  useUserTrackDownloadCountTotal
+} from '@audius/common/api'
 import { themeSelectors } from '@audius/common/store'
 import { dayjs, Dayjs, formatCount } from '@audius/common/utils'
+import { encodeHashId } from '@audius/sdk'
 import cn from 'classnames'
 import { each } from 'lodash'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { Header } from 'components/header/desktop/Header'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -16,13 +27,7 @@ import lazyWithPreload from 'utils/lazyWithPreload'
 import styles from './DashboardPage.module.css'
 import { ArtistCard } from './components/ArtistCard'
 import { ArtistContentSection } from './components/ArtistContentSection'
-import { TABLE_PAGE_SIZE } from './components/constants'
-import {
-  getDashboardListenData,
-  getDashboardStatus,
-  makeGetDashboard
-} from './store/selectors'
-import { fetch, reset, fetchListenData } from './store/slice'
+import { useFormattedTrackData } from './components/hooks'
 
 const { getTheme } = themeSelectors
 
@@ -36,6 +41,17 @@ export const messages = {
   thisYear: 'This Year'
 }
 
+const statLabels: Record<string, string> = {
+  tracks: 'Tracks',
+  albums: 'Albums',
+  plays: 'Plays',
+  downloads: 'Downloads',
+  reposts: 'Reposts',
+  followers: 'Followers',
+  playlists: 'Playlists',
+  following: 'Following'
+}
+
 const StatTile = (props: { title: string; value: any }) => {
   return (
     <div className={styles.statTileContainer}>
@@ -46,48 +62,82 @@ const StatTile = (props: { title: string; value: any }) => {
 }
 
 export const DashboardPage = () => {
-  const dispatch = useDispatch()
   const [selectedTrack, setSelectedTrack] = useState(-1)
 
   const { data: accountUser } = useCurrentAccountUser()
-  const { account, tracks, stats } = useSelector(makeGetDashboard(accountUser))
-  const listenData = useSelector(getDashboardListenData)
-  const dashboardStatus = useSelector(getDashboardStatus)
+  const account = accountUser
+  const tracks = useFormattedTrackData()
+
+  // Default the listen-data window to the last year. The chart calls
+  // `onSetYearOption` to swap the window; we keep it as local state and the
+  // tan-query hook below refetches automatically when start/end change.
+  const [listenWindow, setListenWindow] = useState(() => {
+    const now = dayjs()
+    return {
+      start: now.subtract(1, 'year').toISOString(),
+      end: now.toISOString()
+    }
+  })
+
+  // Preload the chart bundle once on mount.
+  useEffect(() => {
+    TotalPlaysChart.preload()
+  }, [])
+
+  const stats = useMemo(() => {
+    if (!account) return undefined
+    if (account.track_count) {
+      return {
+        tracks: account.track_count,
+        albums: account.album_count,
+        plays: tracks.reduce(
+          (totalPlays, track) => totalPlays + (track.play_count || 0),
+          0
+        ),
+        // downloads: merged in from useUserTrackDownloadCountTotal below
+        reposts: account.repost_count,
+        followers: account.follower_count
+      } as Record<string, number>
+    }
+    return {
+      playlists: account.playlist_count,
+      following: account.followee_count,
+      followers: account.follower_count
+    } as Record<string, number>
+  }, [account, tracks])
+
+  const accountUserIdHash =
+    accountUser?.user_id != null ? encodeHashId(accountUser.user_id) : null
+  const { data: totalDownloads = 0 } = useUserTrackDownloadCountTotal(
+    accountUserIdHash,
+    { enabled: (account?.track_count ?? 0) > 0 }
+  )
+  const statsWithDownloads = useMemo(
+    () =>
+      account?.track_count != null && stats
+        ? { ...stats, downloads: totalDownloads }
+        : stats,
+    [account?.track_count, stats, totalDownloads]
+  )
+  const { data: listenData, isPending: listenDataPending } =
+    useArtistDashboardListenData(listenWindow)
   const theme = useSelector(getTheme)
 
   const header = <Header primary={messages.title} />
 
-  useEffect(() => {
-    dispatch(fetch({ offset: 0, limit: TABLE_PAGE_SIZE }))
-    TotalPlaysChart.preload()
-    return () => {
-      dispatch(reset({}))
+  const onSetYearOption = useCallback((year: string) => {
+    let start: Dayjs
+    let end: Dayjs
+    if (year === messages.thisYear) {
+      const now = dayjs()
+      start = now.subtract(1, 'year')
+      end = now
+    } else {
+      start = dayjs('01/01/' + year)
+      end = start.add(1, 'year')
     }
-  }, [dispatch])
-
-  const onSetYearOption = useCallback(
-    (year: string) => {
-      let start: Dayjs
-      let end: Dayjs
-      if (year === messages.thisYear) {
-        const now = dayjs()
-        start = now.subtract(1, 'year')
-        end = now
-      } else {
-        start = dayjs('01/01/' + year)
-        end = start.add(1, 'year')
-      }
-      dispatch(
-        fetchListenData({
-          trackIds: tracks.map((t) => t.track_id),
-          start: start.toISOString(),
-          end: end.toISOString(),
-          period: 'month'
-        })
-      )
-    },
-    [dispatch, tracks]
-  )
+    setListenWindow({ start: start.toISOString(), end: end.toISOString() })
+  }, [])
 
   const renderChart = useCallback(() => {
     const trackCount = account?.track_count || 0
@@ -122,12 +172,14 @@ export const DashboardPage = () => {
     if (!account) return null
 
     const statTiles: ReactNode[] = []
-    each(stats, (stat, title) =>
-      statTiles.push(<StatTile key={title} title={title} value={stat} />)
+    each(statsWithDownloads, (stat, title) =>
+      statTiles.push(
+        <StatTile key={title} title={statLabels[title] ?? title} value={stat} />
+      )
     )
 
     return <div className={styles.statsContainer}>{statTiles}</div>
-  }, [account, stats])
+  }, [account, statsWithDownloads])
 
   return (
     <Page
@@ -136,7 +188,7 @@ export const DashboardPage = () => {
       contentClassName={styles.pageContainer}
       header={header}
     >
-      {!account || !listenData || dashboardStatus === Status.LOADING ? (
+      {!account || !listenData || listenDataPending ? (
         <LoadingSpinner className={styles.spinner} />
       ) : (
         <>

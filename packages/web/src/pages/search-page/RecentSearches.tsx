@@ -2,7 +2,7 @@ import { MouseEventHandler, useCallback, useMemo } from 'react'
 
 import { useCollection, useTrack, useUser } from '@audius/common/api'
 import { recentSearchMessages as messages } from '@audius/common/messages'
-import { Kind, SquareSizes, Status } from '@audius/common/models'
+import { Kind, SquareSizes } from '@audius/common/models'
 import {
   SearchItem,
   isSearchItem,
@@ -106,18 +106,18 @@ const RecentSearch = (props: RecentSearchProps) => {
 const RecentSearchTrack = (props: { searchItem: SearchItem }) => {
   const { searchItem } = props
   const { id } = searchItem
-  const { data: partialTrack } = useTrack(id, {
+  const { data: partialTrack, isPending } = useTrack(id, {
     select: (track) =>
       pick(track, ['title', 'permalink', 'owner_id', 'track_id'])
   })
   const { data: user } = useUser(partialTrack?.owner_id)
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: partialTrack?.track_id,
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  if (status === Status.LOADING) return <RecentSearchSkeleton />
+  if (isPending) return <RecentSearchSkeleton />
 
   if (!partialTrack) return null
   if (!user) return null
@@ -146,23 +146,26 @@ const RecentSearchTrack = (props: { searchItem: SearchItem }) => {
         >
           {title}
         </Text>
-        <Flex alignItems='baseline'>
+        <Flex alignItems='baseline' gap='xs' w='100%' css={{ minWidth: 0 }}>
           <Text
             variant='body'
             size='xs'
             color='subdued'
-            style={{ width: '100%' }}
+            css={{ flexShrink: 0 }}
           >
             {messages.track}
             {' |'}
             &nbsp;
           </Text>
-          <UserLink
-            size='xs'
-            userId={user.user_id}
-            variant='subdued'
-            badgeSize='2xs'
-          />
+          <Flex flex={1} css={{ minWidth: 0, overflow: 'hidden' }}>
+            <UserLink
+              size='xs'
+              userId={user.user_id}
+              variant='subdued'
+              badgeSize='2xs'
+              fullWidth
+            />
+          </Flex>
         </Flex>
       </Flex>
     </RecentSearch>
@@ -185,7 +188,7 @@ const RecentSearchCollection = (props: { searchItem: SearchItem }) => {
   const { playlist_id, playlist_name, permalink, playlist_owner_id, is_album } =
     partialCollection ?? {}
 
-  const image = useCollectionCoverArt({
+  const { imageUrl: image } = useCollectionCoverArt({
     collectionId: playlist_id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -220,23 +223,26 @@ const RecentSearchCollection = (props: { searchItem: SearchItem }) => {
         >
           {playlist_name}
         </Text>
-        <Flex alignItems='baseline'>
+        <Flex alignItems='baseline' gap='xs' w='100%' css={{ minWidth: 0 }}>
           <Text
             variant='body'
             size='xs'
             color='subdued'
-            style={{ width: '100%' }}
+            css={{ flexShrink: 0 }}
           >
             {is_album ? messages.album : messages.playlist}
             {' |'}
             &nbsp;
           </Text>
-          <UserLink
-            size='xs'
-            userId={playlist_owner_id}
-            variant='subdued'
-            badgeSize='2xs'
-          />
+          <Flex flex={1} css={{ minWidth: 0, overflow: 'hidden' }}>
+            <UserLink
+              size='xs'
+              userId={playlist_owner_id}
+              variant='subdued'
+              badgeSize='2xs'
+              fullWidth
+            />
+          </Flex>
         </Flex>
       </Flex>
     </RecentSearch>

@@ -1,5 +1,5 @@
 import { USDC } from '@audius/fixed-decimal'
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { SwapInstructionsResponse, SwapRequest } from '@jup-ag/api'
 import {
   createAssociatedTokenAccountIdempotentInstruction,
@@ -29,10 +29,10 @@ import {
 import { CoinInfo } from '~/store/ui/buy-sell/types'
 import {
   AUDIO_MINT,
-  NON_ARTIST_COIN_MINTS
+  NON_FAN_CLUB_MINTS
 } from '~/store/ui/shared/tokenConstants'
 
-import { getArtistCoinQueryKey } from '../coins'
+import { getFanClubQueryKey } from '../coins'
 import { QUERY_KEYS } from '../queryKeys'
 
 import {
@@ -121,7 +121,7 @@ export async function addTransferToUserBankInstructions({
   ethAddress: string
   amountLamports: bigint
   sourceAta: PublicKey
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   feePayer: PublicKey
   instructions: TransactionInstruction[]
 }): Promise<PublicKey> {
@@ -372,7 +372,7 @@ export const getJupiterSwapInstructions = async (
 }
 
 export const buildAndSendTransaction = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   keypair: Keypair,
   feePayer: PublicKey,
   instructions: TransactionInstruction[],
@@ -421,7 +421,7 @@ export const invalidateSwapQueries = async (
 }
 
 export const prepareOutputUserBank = async (
-  sdk: AudiusSdk,
+  sdk: AudiusSdkWithServices,
   ethAddress: string,
   outputTokenConfig: UserBankManagedTokenInfo
 ): Promise<string> => {
@@ -483,14 +483,14 @@ export const getIsDirectSwappable = (
   inputMint: string,
   outputMint: string
 ): boolean => {
-  // Check for direct swaps for non-artist coins
+  // Check for direct swaps for non-fan clubs
   if (
-    NON_ARTIST_COIN_MINTS.includes(inputMint) &&
-    NON_ARTIST_COIN_MINTS.includes(outputMint)
+    NON_FAN_CLUB_MINTS.includes(inputMint) &&
+    NON_FAN_CLUB_MINTS.includes(outputMint)
   ) {
     return true
   }
-  // At this point we know one of our mints is an artist coin - so to be a direct swap, the other mint must be AUDIO
+  // At this point we know one of our mints is a fan club - so to be a direct swap, the other mint must be AUDIO
   return inputMint === AUDIO_MINT || outputMint === AUDIO_MINT
 }
 
@@ -504,14 +504,14 @@ export const getCoinPoolState = (
   mint: string,
   queryClient: QueryClient
 ): { isDBC: boolean; isDAMM: boolean; hasPool: boolean } => {
-  if (NON_ARTIST_COIN_MINTS.includes(mint)) {
+  if (NON_FAN_CLUB_MINTS.includes(mint)) {
     return {
       isDBC: false,
       isDAMM: false,
       hasPool: false
     }
   }
-  const coinInfo = queryClient.getQueryData(getArtistCoinQueryKey(mint))
+  const coinInfo = queryClient.getQueryData(getFanClubQueryKey(mint))
   const isDBC = coinInfo?.dynamicBondingCurve?.isMigrated === false
   const isDAMM = coinInfo?.dynamicBondingCurve?.isMigrated === true
   return {

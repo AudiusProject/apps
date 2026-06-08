@@ -13,9 +13,10 @@ import { AccountDetails } from './AccountDetails'
 import { VanityMetrics } from './VanityMetrics'
 import {
   ProfileNavItem,
+  ContestsNavItem,
   MessagesNavItem,
   WalletNavItem,
-  ArtistCoinsNavItem,
+  FanClubsNavItem,
   RewardsNavItem,
   UploadNavItem,
   SettingsNavItem,
@@ -25,6 +26,7 @@ import {
 type AccountDrawerProps = DrawerContentComponentProps & {
   gesturesDisabled: boolean
   setGesturesDisabled: (disabled: boolean) => void
+  setIsAtStackRoot: (isAtStackRoot: boolean) => void
 }
 
 export const LeftNavDrawer = (props: AccountDrawerProps) => {
@@ -48,9 +50,10 @@ const WrappedLeftNavDrawer = () => {
         <AccountDetails />
         <VanityMetrics />
         <ProfileNavItem />
+        <ContestsNavItem />
         <MessagesNavItem />
         <WalletNavItem />
-        <ArtistCoinsNavItem />
+        <FanClubsNavItem />
         <RewardsNavItem />
         <UploadNavItem />
         <SettingsNavItem />

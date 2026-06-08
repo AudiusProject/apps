@@ -27,7 +27,6 @@ export const SelectablePill = (props: SelectablePillProps) => {
   const {
     type,
     icon: Icon,
-    label,
     size = 'small',
     isSelected: isSelectedProp,
     isControlled,
@@ -38,15 +37,16 @@ export const SelectablePill = (props: SelectablePillProps) => {
     style: styleProp,
     fullWidth,
     disableUnselectAnimation,
+    'aria-label': ariaLabel,
+    accessibilityLabel: accessibilityLabelProp,
     ...other
   } = props
-  const {
-    color,
-    motion,
-    cornerRadius,
-    typography,
-    type: themeType
-  } = useTheme()
+
+  const label = 'label' in props ? props.label : undefined
+  const isIconOnly = !('label' in props) && !!Icon
+  const displayLabel = label
+  const a11yLabel = ariaLabel ?? accessibilityLabelProp
+  const { color, motion, cornerRadius, typography } = useTheme()
   const [isPressing, setIsPressing] = useState(false)
   const [isSelected, setIsSelected] = useControlled({
     controlledProp: isSelectedProp,
@@ -56,6 +56,12 @@ export const SelectablePill = (props: SelectablePillProps) => {
 
   const pressed = useSharedValue(0)
   const selected = useSharedValue(isSelected ? 1 : 0)
+  // Bumped whenever the theme palette changes so the animated style
+  // worklets below re-execute on the UI thread and pick up the new
+  // color values. Reanimated only re-runs a worklet when a shared
+  // value it reads changes; updating useAnimatedStyle's dependency
+  // array alone is not enough to force a repaint.
+  const themeNudge = useSharedValue(0)
 
   const handlePressIn = useCallback(() => {
     pressed.value = withTiming(1, motion.press)
@@ -117,8 +123,23 @@ export const SelectablePill = (props: SelectablePillProps) => {
     disableUnselectAnimation
   ])
 
-  const animatedRootStyles = useAnimatedStyle(
-    () => ({
+  useEffect(() => {
+    themeNudge.value = themeNudge.value + 1
+  }, [
+    themeNudge,
+    color.background.white,
+    color.secondary.s400,
+    color.border.strong,
+    color.text.default,
+    color.static.white
+  ])
+
+  const animatedRootStyles = useAnimatedStyle(() => {
+    // Subscribe to themeNudge so this worklet re-runs whenever the
+    // theme palette changes and picks up the latest closure colors.
+    // eslint-disable-next-line no-unused-expressions
+    themeNudge.value
+    return {
       opacity: withTiming(disabled ? 0.45 : 1, motion.press),
       backgroundColor: interpolateColor(
         selected.value,
@@ -131,20 +152,25 @@ export const SelectablePill = (props: SelectablePillProps) => {
         [color.border.strong, color.secondary.s400]
       ),
       transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }]
-    }),
-    [disabled, themeType]
-  )
+    }
+  }, [
+    disabled,
+    color.background.white,
+    color.secondary.s400,
+    color.border.strong
+  ])
 
-  const animatedTextStyles = useAnimatedStyle(
-    () => ({
+  const animatedTextStyles = useAnimatedStyle(() => {
+    // eslint-disable-next-line no-unused-expressions
+    themeNudge.value
+    return {
       color: interpolateColor(
         selected.value,
         [0, 1],
         [color.text.default, color.static.white]
       )
-    }),
-    [themeType]
-  )
+    }
+  }, [color.text.default, color.static.white])
 
   return (
     <Pressable
@@ -153,6 +179,7 @@ export const SelectablePill = (props: SelectablePillProps) => {
       onTouchCancel={handleTouchCancel}
       onPress={handlePress}
       hitSlop={DEFAULT_HIT_SLOP}
+      accessibilityLabel={isIconOnly ? a11yLabel : undefined}
       style={[
         css({ alignSelf: 'flex-start', borderRadius: cornerRadius['2xl'] }),
         styleProp
@@ -178,19 +205,24 @@ export const SelectablePill = (props: SelectablePillProps) => {
         style={[animatedRootStyles, fullWidth ? { width: '100%' } : undefined]}
         {...other}
       >
-        {size !== 'small' && Icon ? (
+        {(isIconOnly || (size !== 'small' && Icon)) && Icon ? (
           <Icon
             size='s'
             color={isSelected || isPressing ? 'white' : 'default'}
           />
         ) : null}
-        <AnimatedText
-          numberOfLines={1}
-          variant='body'
-          style={[animatedTextStyles, { lineHeight: typography.lineHeight.m }]}
-        >
-          {label}
-        </AnimatedText>
+        {displayLabel != null ? (
+          <AnimatedText
+            numberOfLines={1}
+            variant='body'
+            style={[
+              animatedTextStyles,
+              { lineHeight: typography.lineHeight.m }
+            ]}
+          >
+            {displayLabel}
+          </AnimatedText>
+        ) : null}
       </AnimatedFlex>
     </Pressable>
   )

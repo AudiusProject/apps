@@ -15,15 +15,13 @@ const TrendingButton = ({
     <AnimatedBottomButton
       uniqueKey='trending-button'
       isActive={isActive}
-      darkMode={darkMode}
       isMatrix={isMatrixMode}
       onClick={onClick}
       href={href}
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconTrendingLight.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconTrendingDark.json')
+      iconJSON={() =>
+        import('../../../assets/animations/iconTrendingLight.json').then(
+          (m) => m.default
+        )
       }
       {...buttonProps}
     />

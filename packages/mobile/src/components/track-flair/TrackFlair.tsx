@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 
-import { useRemixContest, useTrack } from '@audius/common/api'
+import { useTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { View } from 'react-native'
 
-import { IconCosign, IconContestSign } from '@audius/harmony-native'
+import { IconCosign } from '@audius/harmony-native'
 
 import { Size } from './types'
 
@@ -79,15 +79,10 @@ export const TrackFlair = ({ size, children, style, trackId }: CoSignProps) => {
       )
     }
   })
-  const { data: remixContest } = useRemixContest(trackId)
 
   const { size: iconSize, position } = layoutBySize[size]
 
-  const FlairIcon = isCosign
-    ? IconCosign
-    : remixContest?.endDate
-      ? IconContestSign
-      : null
+  const FlairIcon = isCosign ? IconCosign : null
 
   return (
     <View style={style}>

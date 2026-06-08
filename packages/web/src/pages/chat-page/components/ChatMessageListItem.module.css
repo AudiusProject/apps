@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: var(--harmony-unit-2);
   align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .root.isAuthor {
@@ -18,16 +21,21 @@
   position: relative;
   z-index: 1;
   display: inline-block;
-  max-width: 448px;
+  min-width: 0;
+  max-width: min(448px, 100%);
   filter: var(--drop-shadow-near);
-  transition:
-    background-color var(--harmony-expressive),
-    filter var(--harmony-expressive);
+  transition: filter var(--harmony-quick);
 }
 
 .bubbleCorners {
   border-radius: var(--harmony-unit-3);
   overflow: hidden;
+}
+
+.bubbleContent {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .bubble:not(.nonInteractive):hover {
@@ -36,26 +44,93 @@
 }
 
 .isAuthor .bubble {
-  --bubble-color: var(--harmony-s-100);
+  --bubble-color: var(--harmony-s-300);
 }
 
 .isAuthor .bubble:hover {
-  --bubble-color: var(--harmony-s-200);
+  --bubble-color: var(--harmony-s-400);
+  filter: var(--drop-shadow-far);
 }
 
 .unfurl {
-  border-radius: 0;
-  flex: 1 1;
+  border-radius: var(--harmony-unit-3) var(--harmony-unit-3) 0 0 !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+/* When the unfurl has message text below it, draw a divider between them.
+ * URL-only messages (`.hideMessage`) skip the divider — the unfurl is the
+ * entire bubble in that case and a border at its bottom would visually
+ * disconnect from the tail. */
+.bubble:not(.hideMessage) .unfurl {
+  border-bottom: 1px solid var(--harmony-n-150) !important;
+}
+
+.unfurl > div:last-child {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.trackUnfurl {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.playlistUnfurl {
+}
+
+.bubble.hideMessage .unfurl {
+  border-radius: var(--harmony-unit-3) !important;
+}
+
+.bubble.hideMessage {
+  display: block;
+  width: min(448px, 100%);
+  min-width: min(288px, 100%);
+}
+
+.bubble.hideMessage .unfurl {
+  width: 100%;
+  min-width: 0 !important;
+}
+
+/* When the FanClubHeader sits at the top of a gated-blast bubble, square
+ * off the unfurl's top corners so they don't peek out below the header. */
+.fanClubHeader + .unfurl {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* When the message text is hidden AND a FanClubHeader is present, keep the
+ * bottom corners rounded but force the top corners square (overrides the
+ * higher-specificity `.bubble.hideMessage .unfurl` rule above). */
+.bubble.hideMessage .fanClubHeader + .unfurl {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: var(--harmony-unit-3) !important;
+  border-bottom-right-radius: var(--harmony-unit-3) !important;
 }
 
 .textWrapper {
   background-color: var(--bubble-color);
+  transition: background-color var(--harmony-quick);
   text-align: left;
-  max-width: 448px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .text {
+  min-width: 0;
+  max-width: 100%;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   word-break: break-word;
   user-select: text;
 }
@@ -128,23 +203,29 @@
   opacity: 1;
 }
 
-.reactionsContainer:not(.hasReaction) path {
-  width: var(--harmony-unit-6);
-  height: var(--harmony-unit-6);
-  fill: var(--harmony-secondary);
+.reactionsContainer:not(.hasReaction) .reactionsButton path {
+  fill: var(--harmony-text-subdued);
   transition: fill var(--harmony-quick);
 }
 
+.addReactionIcon {
+  transition: transform var(--harmony-quick) ease-out;
+}
+
+.reactionsContainer.isOpened .addReactionIcon {
+  transform: rotate(45deg);
+}
+
 .reactionsContainer:not(.hasReaction):hover .reactionsButton {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .reactionsContainer:not(.hasReaction):hover .reactionsButton path {
-  fill: var(--harmony-s-500);
+  fill: var(--harmony-text-default);
 }
 
-.reactionsContainer:not(.hasReaction):active .reactionsButton {
-  transform: scale(0.6);
+.reactionsContainer:not(.hasReaction) .reactionsButton:active {
+  transform: scale(0.9);
 }
 
 .reactionEmoji {

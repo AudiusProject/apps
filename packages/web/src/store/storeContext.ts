@@ -12,7 +12,6 @@ import {
 import { identityService } from 'services/audius-sdk/identity'
 import { env } from 'services/env'
 import { explore } from 'services/explore'
-import { fingerprintClient } from 'services/fingerprint'
 import { localStorage } from 'services/local-storage'
 import { queryClient } from 'services/query-client'
 import { getFeatureEnabled } from 'services/remote-config/featureFlagHelpers'
@@ -22,9 +21,6 @@ import { walletClient } from 'services/wallet-client'
 import { isElectron } from 'utils/clientUtil'
 import { generatePlaylistArtwork } from 'utils/imageProcessingUtil'
 import { getShare } from 'utils/share'
-
-import { reportToSentry } from './errors/reportToSentry'
-import { getLineupSelectorForRoute } from './lineup/lineupForRoute'
 
 export const buildStoreContext = ({
   isMobile,
@@ -49,32 +45,14 @@ export const buildStoreContext = ({
     analytics,
     remoteConfigInstance,
     audiusBackendInstance,
-    fingerprintClient,
     walletClient,
     localStorage,
     isNativeMobile: false,
     isElectron: isElectron(),
     env,
     explore,
-    // @ts-ignore js file
-    getLineupSelectorForRoute,
     audioPlayer: audioPlayer!,
     nftClient: null,
-    sentry: {
-      setTag: async (...args) => {
-        const Sentry = await import('@sentry/browser')
-        return Sentry.setTag(...args)
-      },
-      getCurrentScope: () => ({
-        setUser: (user: any) => {
-          // Lazy load Sentry and set user asynchronously
-          import('@sentry/browser').then((Sentry) => {
-            Sentry.getCurrentScope().setUser(user)
-          })
-        }
-      })
-    },
-    reportToSentry,
     trackDownload,
     instagramAppId: env.INSTAGRAM_APP_ID,
     instagramRedirectUrl: env.INSTAGRAM_REDIRECT_URL,

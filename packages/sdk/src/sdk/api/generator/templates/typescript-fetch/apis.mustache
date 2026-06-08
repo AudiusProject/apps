@@ -172,12 +172,12 @@ export class {{classname}} extends runtime.BaseAPI {
         {{#authMethods}}
         {{#isBasic}}
         {{#isBasicBasic}}
-        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
+        if (!headerParameters["Authorization"] && this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
             headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
         }
         {{/isBasicBasic}}
         {{#isBasicBearer}}
-        if (this.configuration && this.configuration.accessToken) {
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
             const token = this.configuration.accessToken;
             const tokenString = await token("{{name}}", [{{#scopes}}"{{{scope}}}"{{^-last}}, {{/-last}}{{/scopes}}]);
 
@@ -202,9 +202,11 @@ export class {{classname}} extends runtime.BaseAPI {
         {{/isKeyInQuery}}
         {{/isApiKey}}
         {{#isOAuth}}
-        if (this.configuration && this.configuration.accessToken) {
-            // oauth required
-            headerParameters["Authorization"] = await this.configuration.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}"{{^-last}}, {{/-last}}{{/scopes}}]);
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("{{name}}", [{{#scopes}}"{{{scope}}}"{{^-last}}, {{/-last}}{{/scopes}}]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
         }
 
         {{/isOAuth}}

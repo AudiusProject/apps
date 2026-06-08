@@ -48,6 +48,7 @@ export const restrictedHandles = new Set(
     'moods',
     'embed',
     'crypto',
+    'clubs',
     'payment',
     'error',
     'search',

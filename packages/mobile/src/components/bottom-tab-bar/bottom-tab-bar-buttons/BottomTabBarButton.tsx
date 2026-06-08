@@ -8,9 +8,7 @@ import { Pressable, StyleSheet } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { usePrevious } from 'react-use'
 
-import * as haptics from 'app/haptics'
-
-import { BOTTOM_BAR_BUTTON_HEIGHT } from '../constants'
+import { BOTTOM_BAR_BUTTON_HEIGHT, BOTTOM_BAR_TOP_PADDING } from '../constants'
 
 export type BaseBottomTabBarButtonProps = {
   name: string
@@ -29,7 +27,8 @@ export type BottomTabBarButtonProps = BaseBottomTabBarButtonProps & {
 const styles = StyleSheet.create({
   root: {
     width: '20%',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingTop: BOTTOM_BAR_TOP_PADDING
   },
   iconWrapper: {
     width: 28,
@@ -37,7 +36,7 @@ const styles = StyleSheet.create({
   },
   underlay: {
     width: '100%',
-    height: BOTTOM_BAR_BUTTON_HEIGHT,
+    height: BOTTOM_BAR_BUTTON_HEIGHT + BOTTOM_BAR_TOP_PADDING,
     position: 'absolute'
   }
 })
@@ -61,15 +60,6 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
   )
   const [isPressing, setIsPressing] = useState(false)
 
-  const handlePressIn = useCallback(() => {
-    // Trigger haptics on press down
-    if (isActive) {
-      haptics.light()
-    } else {
-      haptics.medium()
-    }
-  }, [isActive])
-
   const handlePress = useCallback(() => {
     if (!isActive) {
       animationRef.current?.play()
@@ -86,7 +76,6 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
   }, [isActive, previousActive])
 
   const handleLongPress = useCallback(() => {
-    haptics.medium()
     if (isActive) {
       onLongPress()
     } else {
@@ -109,7 +98,6 @@ export const BottomTabBarButton = (props: BottomTabBarButtonProps) => {
   return (
     <Pressable
       onPress={handlePress}
-      onPressIn={handlePressIn}
       onLongPress={handleLongPress}
       pointerEvents='box-only'
       style={styles.root}

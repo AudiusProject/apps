@@ -1,5 +1,5 @@
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
-import { Id, OptionalId, type AudiusSdk } from '@audius/sdk'
+import { Id, OptionalId, type AudiusSdkWithServices } from '@audius/sdk'
 import type { createJupiterApiClient, QuoteResponse } from '@jup-ag/api'
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import {
@@ -29,7 +29,6 @@ import {
 import { isPurchaseableAlbum, PurchaseableContentMetadata } from '~/hooks'
 import { Collection } from '~/models'
 import { FavoriteSource, Name } from '~/models/Analytics'
-import { ErrorLevel, Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import {
   PurchaseAccess,
@@ -52,8 +51,8 @@ import {
   pollForTokenAccountInfo
 } from '~/store/buy-usdc/utils'
 import { getContext } from '~/store/effects'
-import { getPreviewing, getTrackId } from '~/store/player/selectors'
-import { stop } from '~/store/player/slice'
+import { getPreviewing, getTrackId } from '~/store/playback/selectors'
+import { stop } from '~/store/playback/slice'
 import { saveTrack } from '~/store/social/tracks/actions'
 import {
   transactionCanceled,
@@ -292,13 +291,10 @@ function* pollForPurchaseConfirmation({
     ) {
       const sdk = yield* getSDK()
       for (const trackId of metadata.playlist_contents.track_ids) {
-        const { data } = yield* call(
-          [sdk.full.tracks, sdk.full.tracks.getTrack],
-          {
-            trackId: Id.parse(trackId.track),
-            userId: OptionalId.parse(currentUserId)
-          }
-        )
+        const { data } = yield* call([sdk.tracks, sdk.tracks.getTrack], {
+          trackId: Id.parse(trackId.track),
+          userId: OptionalId.parse(currentUserId)
+        })
         const track = data ? userTrackMetadataFromSDK(data) : null
 
         if (track) {
@@ -323,7 +319,7 @@ type GetPurchaseMetadataArgs = {
  * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/tracks/TracksApi.ts#L386 purchase}
  */
 function* purchaseTrackWithCoinflow(args: {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   trackId: ID
   userId: ID
   price: number
@@ -431,7 +427,7 @@ function* purchaseTrackWithCoinflow(args: {
  * @see {@link https://github.com/AudiusProject/apps/blob/75169cfb00894f5462a612b423129895f58a53fe/packages/libs/src/sdk/api/albums/AlbumsApi.ts#L386 purchase}
  */
 function* purchaseAlbumWithCoinflow(args: {
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
   albumId: ID
   userId: ID
   price: number
@@ -601,13 +597,10 @@ function* collectEmailAfterPurchase({
       return
     }
 
-    const { data: managers } = yield* call(
-      [sdk.full.users, sdk.full.users.getManagers],
-      {
-        id: Id.parse(sellerId),
-        isApproved: true
-      }
-    )
+    const { data: managers } = yield* call([sdk.users, sdk.users.getManagers], {
+      id: Id.parse(sellerId),
+      isApproved: true
+    })
 
     const grantees = managers?.map((m) => m.manager.id)
 
@@ -638,7 +631,6 @@ function* doStartPurchaseContentFlow({
   }
 }: ReturnType<typeof startPurchaseContentFlow>) {
   const usdcConfig = yield* call(getBuyUSDCRemoteConfig)
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
@@ -892,12 +884,7 @@ function* doStartPurchaseContentFlow({
       return
     }
 
-    yield* call(reportToSentry, {
-      level: ErrorLevel.Error,
-      error,
-      additionalInfo: { contentId, contentType },
-      feature: Feature.Purchase
-    })
+    console.error('Purchase failed', error, { contentId, contentType })
     yield* put(purchaseContentFlowFailed({ error }))
     yield* put(updateGatedContentStatus({ contentId, status: 'LOCKED' }))
     yield* call(

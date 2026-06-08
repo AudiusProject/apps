@@ -1,5 +1,9 @@
 /* eslint-disable import/first */
 /* eslint-disable import/order */
+// Apply Hermes Error.stack polyfill before any other code - fixes "Error.stack getter
+// called with an invalid receiver" from libraries using non-standard error inheritance
+require('./src/utils/hermes-error-stack-polyfill').applyHermesErrorStackPolyfill()
+
 // Import React first to ensure React internals are available
 import React from 'react'
 import 'react-native-gesture-handler'
@@ -31,7 +35,7 @@ require('react-native-url-polyfill/auto')
 // Needed to support micro-aes-gcm which looks for WebCrypto's SubtleCrypto
 global.crypto = new Crypto()
 
-const { App } = require('./src/app')
+const App = require('./src/app/ota-root').default
 
 // https://github.com/react-navigation/react-navigation/issues/9882
 LogBox.ignoreLogs(['new NativeEventEmitter'])

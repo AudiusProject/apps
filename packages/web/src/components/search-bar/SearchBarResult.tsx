@@ -202,7 +202,7 @@ export const TrackResult = ({
 }: TrackResultProps) => {
   const { data: track } = useTrack(trackId)
   const { data: user } = useUser(track?.owner_id)
-  const trackArtwork = useTrackCoverArt({
+  const { imageUrl: trackArtwork } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -238,7 +238,7 @@ export const CollectionResult = ({
   const { data: user } = useUser(
     collection ? collection.playlist_owner_id : null
   )
-  const collectionArtwork = useCollectionCoverArt({
+  const { imageUrl: collectionArtwork } = useCollectionCoverArt({
     collectionId,
     size: SquareSizes.SIZE_150_BY_150
   })

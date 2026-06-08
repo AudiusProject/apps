@@ -55,8 +55,12 @@ export const coinFromSdk = (input: CoinSDK | undefined): Coin | undefined => {
   // Birdeye data may not be available right after launch.
   // Fall back to dynamic bonding curve data if so.
   const defaultSupply = 1e9
+  const dbc = input.dynamicBondingCurve
+  if (!dbc) {
+    return undefined
+  }
 
-  const { isMigrated, priceUSD, address } = input.dynamicBondingCurve
+  const { isMigrated, priceUSD, address } = dbc
   const hasBirdeyeSupply =
     input.totalSupply !== undefined && input.totalSupply > 0
   const hasBirdeyePrice = input.price !== undefined && input.price > 0
@@ -67,14 +71,15 @@ export const coinFromSdk = (input: CoinSDK | undefined): Coin | undefined => {
   // For price, use the bonding curve price if the input hasn't graduated or we have no birdeye data
   const displayPrice =
     (!isMigrated && hasBondingCurveData) || !hasBirdeyePrice
-      ? priceUSD
-      : input.price
+      ? (priceUSD ?? 0)
+      : (input.price ?? 0)
 
   // For market cap, use the bonding curve market cap if the input hasn't graduated or we have no birdeye data
   const displayMarketCap =
     (!isMigrated && hasBondingCurveData) || !hasBirdeyeSupply
-      ? displayPrice * (hasBirdeyeSupply ? input.totalSupply : defaultSupply)
-      : input.marketCap
+      ? displayPrice *
+        (hasBirdeyeSupply ? (input.totalSupply ?? 0) : defaultSupply)
+      : (input.marketCap ?? 0)
 
   const { ownerId: _ignored, ...rest } = input
   return {

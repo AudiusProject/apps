@@ -73,7 +73,13 @@ export const getNonOptimisticChat = selectChatById
 export const getChats = createSelector(
   [selectAllChats, getOptimisticReads],
   (chats, optimisticReads) => {
-    return chats?.map((chat) => {
+    if (!chats) return chats
+    // Preserve outer array identity when no chat in this list has an optimistic
+    // read override, so subscribers don't re-render on unrelated optimistic
+    // state changes.
+    const hasAnyOptimistic = chats.some((c) => !!optimisticReads?.[c.chat_id])
+    if (!hasAnyOptimistic) return chats
+    return chats.map((chat) => {
       // If have a clientside optimistic read status, override the server status
       if (optimisticReads?.[chat.chat_id]) {
         chat = {
@@ -96,7 +102,15 @@ export const getChatMessages = createSelector(
     getOptimisticReactions
   ],
   (messages, optimisticReactions) => {
-    return messages?.map((message) => {
+    if (!messages) return messages
+    // Preserve outer array identity when no message in this chat has an
+    // optimistic reaction. Avoids re-rendering subscribers and re-triggering
+    // effects keyed on chatMessages identity when optimistic state is unrelated.
+    const hasAnyOptimistic = messages.some(
+      (m) => !!optimisticReactions[m.message_id]
+    )
+    if (!hasAnyOptimistic) return messages
+    return messages.map((message) => {
       const optimisticReaction = optimisticReactions[message.message_id]
       if (optimisticReaction) {
         return {

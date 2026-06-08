@@ -23,6 +23,7 @@ export const Button = (props: ButtonProps) => {
     hexColor,
     variant = 'primary',
     size = 'default',
+    rounded,
     disabled,
     style,
     gradient,
@@ -199,7 +200,7 @@ export const Button = (props: ButtonProps) => {
 
   const buttonStyles: ViewStyle = {
     borderWidth: 0,
-    borderRadius: cornerRadius.s,
+    borderRadius: rounded ? cornerRadius['2xl'] : cornerRadius.s,
     alignItems: 'center',
     justifyContent: 'center',
     // TODO bring this back properly

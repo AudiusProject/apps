@@ -38,10 +38,10 @@ export const AppTabsScreen = () => {
     <Tab.Navigator
       tabBar={tabBar}
       screenOptions={screenOptions}
-      initialRouteName='trending'
+      initialRouteName='feed'
     >
-      <Tab.Screen name='trending' component={TrendingTabScreen} />
       <Tab.Screen name='feed' component={FeedTabScreen} />
+      <Tab.Screen name='trending' component={TrendingTabScreen} />
       <Tab.Screen name='explore' component={ExploreTabScreen} />
       <Tab.Screen name='library' component={FavoritesTabScreen} />
       <Tab.Screen name='notifications' component={NotificationsTabScreen} />

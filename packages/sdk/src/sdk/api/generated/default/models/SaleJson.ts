@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -27,7 +26,7 @@ export interface SaleJson {
      */
     title?: string;
     /**
-     * Full URL link to the content
+     * URL link to the content
      * @type {string}
      * @memberof SaleJson
      */

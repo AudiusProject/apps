@@ -30,7 +30,7 @@ test('auth and fetches tracks', async ({ page, context }) => {
 
   // Set up response listener
   const responsePromise = page.waitForResponse(async (response) => {
-    if (response.url().includes('v1/full/users/4zZ9aV9/tracks')) {
+    if (response.url().includes('v1/users/4zZ9aV9/tracks')) {
       const json = await response.json()
       return json.data
     }

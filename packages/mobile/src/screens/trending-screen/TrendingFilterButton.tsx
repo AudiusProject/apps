@@ -1,30 +1,41 @@
-import { useCallback } from 'react'
-
+import { TimeRange } from '@audius/common/models'
 import { modalsActions, trendingPageSelectors } from '@audius/common/store'
-import { Genre } from '@audius/common/utils'
+import { ALL_GENRES } from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { FilterButton } from '@audius/harmony-native'
+import { Flex, IconLeading, SelectablePill } from '@audius/harmony-native'
 
-import { MODAL_NAME } from './TrendingFilterDrawer'
-
-const { getTrendingGenre } = trendingPageSelectors
-const { setVisibility } = modalsActions
+import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
 
 export const TrendingFilterButton = () => {
   const dispatch = useDispatch()
-  const trendingGenre = useSelector(getTrendingGenre) ?? Genre.ALL
+  const timeRange = useSelector(trendingPageSelectors.getTrendingTimeRange)
+  const genre = useSelector(trendingPageSelectors.getTrendingGenre)
 
-  const handlePress = useCallback(() => {
-    dispatch(setVisibility({ modal: MODAL_NAME, visible: true }))
-  }, [dispatch])
+  const hasActiveFilters =
+    (timeRange ?? TimeRange.WEEK) !== TimeRange.WEEK ||
+    (genre ?? ALL_GENRES) !== ALL_GENRES
+
+  const handleOpenFilter = () => {
+    dispatch(
+      modalsActions.setVisibility({
+        modal: TRENDING_FILTER_MODAL,
+        visible: true
+      })
+    )
+  }
 
   return (
-    <FilterButton
-      label={trendingGenre}
-      value={trendingGenre}
-      onPress={handlePress}
-      size='small'
-    />
+    <Flex>
+      <SelectablePill
+        type='button'
+        icon={IconLeading}
+        size='large'
+        isSelected={hasActiveFilters}
+        isControlled
+        onPress={handleOpenFilter}
+        accessibilityLabel='Open filter'
+      />
+    </Flex>
   )
 }

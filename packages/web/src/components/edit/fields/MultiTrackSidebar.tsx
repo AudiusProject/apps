@@ -8,13 +8,13 @@ import {
   IconCloudUpload,
   Text,
   useTheme,
-  IconButton
+  IconButton,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useField, useFormikContext } from 'formik'
 import { isEmpty } from 'lodash'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { useIndexedField } from 'components/edit-track/hooks'
 import {
   SingleTrackEditValues,
@@ -186,10 +186,9 @@ const TrackRow = (props: TrackRowProps) => {
                 {index + 1}
               </Text>
             )}
-            <DynamicImage
-              wrapperClassName={styles.artwork}
-              image={artworkUrl || placeholderArt}
-              isUrl
+            <Image
+              className={styles.artwork}
+              src={artworkUrl || placeholderArt}
             />
           </div>
           <Text

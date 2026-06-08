@@ -6,6 +6,7 @@ import useMeasure from 'react-use-measure'
 
 import { HarmonyTheme } from '../../foundations/theme'
 import { IconCaretRight } from '../../icons'
+import { createKeyboardActivationHandler } from '../../utils/keyboard'
 import { Box } from '../layout/Box'
 import { Flex } from '../layout/Flex'
 import { Text } from '../text'
@@ -85,17 +86,29 @@ export const ExpandableNavItem = ({
   )
 
   const handleClick = useCallback(() => {
+    if (disabled) return
     if (canUnfurl) {
       setIsOpen(!isOpen)
     }
     onClick?.(!isOpen)
-  }, [canUnfurl, isOpen, onClick])
+  }, [canUnfurl, disabled, isOpen, onClick])
+
+  const handleKeyDown = createKeyboardActivationHandler<HTMLDivElement>({
+    onActivate: handleClick,
+    disabled
+  })
 
   const styles = useMemo(
     () => ({
       ...getStyles(theme, disabled),
       opacity: isMainActive ? 0.8 : disabled ? 0.5 : 1,
-      transition: `opacity ${theme.motion.quick}, background-color ${theme.motion.hover}`
+      transition: `opacity ${theme.motion.quick}, background-color ${theme.motion.hover}`,
+      '&:focus-visible': {
+        borderRadius: theme.cornerRadius.m,
+        outline: 'none',
+        boxShadow:
+          'inset 0 0 0 2px var(--harmony-focus, var(--harmony-secondary))'
+      }
     }),
     [theme, disabled, isMainActive]
   )
@@ -183,7 +196,7 @@ export const ExpandableNavItem = ({
   const shouldShowRightIcon = isOpen || shouldPersistRightIcon
 
   return (
-    <Flex direction='column' role='navigation' w='100%' {...props}>
+    <Flex direction='column' w='100%' {...props}>
       <Flex
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -198,7 +211,10 @@ export const ExpandableNavItem = ({
             onMouseDown={handleMainContainerMouseDown}
             onMouseUp={handleMainContainerMouseUp}
             onClick={handleClick}
+            onKeyDown={handleKeyDown}
             role='button'
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
             aria-expanded={isOpen}
             aria-controls={`${label}-content`}
             aria-label={`${label} navigation section`}

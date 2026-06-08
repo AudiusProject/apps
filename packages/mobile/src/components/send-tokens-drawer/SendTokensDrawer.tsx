@@ -3,12 +3,10 @@ import { useState, useEffect } from 'react'
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import type { SolanaWalletAddress, User } from '@audius/common/models'
-import { ErrorLevel, Feature } from '@audius/common/models'
 import { useSendTokensModal } from '@audius/common/store'
 
 import { Divider, Flex } from '@audius/harmony-native'
 import Drawer from 'app/components/drawer/Drawer'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 import { DrawerHeader } from '../drawer/DrawerHeader'
 
@@ -103,7 +101,9 @@ export const SendTokensDrawer = () => {
         recipientWallet: state.destinationAddress as SolanaWalletAddress,
         amount: state.amount,
         // When sending to a user, pass their Ethereum address to derive user-bank ATA
-        recipientEthAddress: state.selectedUser?.erc_wallet
+        recipientEthAddress: state.selectedUser?.erc_wallet,
+        source: 'send_tokens_drawer',
+        recipientHandle: state.selectedUser?.handle
       })
 
       setState((prev) => ({ ...prev, step: 'success', signature }))
@@ -128,17 +128,7 @@ export const SendTokensDrawer = () => {
       }
 
       setError(errorMessage)
-      reportToSentry({
-        level: ErrorLevel.Error,
-        error: error as Error,
-        additionalInfo: {
-          amount: state.amount.toString(),
-          destinationAddress: state.destinationAddress,
-          mint: state.selectedMint,
-          errorString
-        },
-        feature: Feature.SendTokens
-      })
+      console.error(error as Error)
       setState((prev) => ({ ...prev, step: 'failure' }))
     }
   }

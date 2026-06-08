@@ -64,11 +64,20 @@ export type NftGatedConditions = {
   }
 }
 
+/** Single split in USDC purchase conditions (matches API extended_payment_split). */
+export type PaymentSplit = {
+  user_id: number
+  percentage: number
+  payout_wallet?: string
+  amount?: number
+  eth_wallet?: string
+}
+
 export type USDCPurchaseConditions = {
   usdc_purchase: {
     price: number
-    albumTrackPrice?: number
-    splits: Record<ID, number>
+    albumTrackPrice?: number | null
+    splits?: PaymentSplit[]
   }
 }
 
@@ -84,7 +93,7 @@ export type AccessPermissions = {
 }
 
 export enum GatedContentType {
-  SPECIAL_ACCESS = 'special access',
+  FOLLOW_GATED = 'follow gated',
   USDC_PURCHASE = 'usdc purchase',
   TOKEN_GATED = 'token gated'
 }
@@ -110,11 +119,6 @@ export const isContentNftGated = (
   gatedConditions?: Nullable<AccessConditions>
 ): gatedConditions is NftGatedConditions =>
   !!gatedConditions && 'nft_collection' in (gatedConditions ?? {})
-
-export const isContentSpecialAccess = (
-  gatedConditions?: Nullable<AccessConditions>
-): gatedConditions is FollowGatedConditions =>
-  isContentFollowGated(gatedConditions)
 
 export const isContentUSDCPurchaseGated = (
   gatedConditions?: Nullable<

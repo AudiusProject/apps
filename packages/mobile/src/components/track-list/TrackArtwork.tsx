@@ -2,15 +2,13 @@ import type { Track } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { View } from 'react-native'
 
-import {
-  IconVisibilityHidden,
-  IconPause,
-  IconPlay
-} from '@audius/harmony-native'
+import { IconVisibilityHidden, IconPlay } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
 import { useThemeColors } from 'app/utils/theme'
 
 import { TrackImage } from '../image/TrackImage'
+
+import { AnimatedEqBars } from './AnimatedEqBars'
 
 type TrackArtworkProps = {
   track: Track
@@ -33,6 +31,14 @@ const useStyles = makeStyles(({ spacing }) => ({
     alignItems: 'center',
     borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.4)'
+  },
+  nowPlayingOverlay: {
+    height: '100%',
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    borderRadius: 4,
+    backgroundColor: 'rgba(0,0,0,0.45)'
   }
 }))
 
@@ -40,8 +46,6 @@ export const TrackArtwork = (props: TrackArtworkProps) => {
   const { isPlaying, isActive, track, isUnlisted } = props
   const styles = useStyles()
   const { staticWhite } = useThemeColors()
-
-  const ActiveIcon = isPlaying ? IconPause : IconPlay
 
   return (
     <TrackImage
@@ -54,9 +58,13 @@ export const TrackArtwork = (props: TrackArtworkProps) => {
           <IconVisibilityHidden fill={staticWhite} />
         </View>
       ) : null}
-      {isActive ? (
+      {isActive && isPlaying ? (
+        <View style={styles.nowPlayingOverlay}>
+          <AnimatedEqBars isPlaying={isPlaying} />
+        </View>
+      ) : isActive ? (
         <View style={styles.artworkIcon}>
-          <ActiveIcon color='white' style={{ opacity: 0.8 }} />
+          <IconPlay color='white' style={{ opacity: 0.8 }} />
         </View>
       ) : null}
     </TrackImage>

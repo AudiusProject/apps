@@ -1,4 +1,6 @@
-import { useUserByHandle } from '@audius/common/api'
+import { useContext } from 'react'
+
+import { useCollection, useUserByHandle } from '@audius/common/api'
 import {
   ShareSource,
   RepostSource,
@@ -7,16 +9,20 @@ import {
   ID
 } from '@audius/common/models'
 import {
+  playbackActions,
+  playbackSelectors,
+  QueueSource,
   shareModalUIActions,
   collectionsSocialActions as socialActions
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { PopupMenuItem } from '@audius/harmony'
-import { connect } from 'react-redux'
+import { connect, useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
 import { Dispatch } from 'redux'
 
 import * as embedModalActions from 'components/embed-modal/store/actions'
+import { ToastContext } from 'components/toast/ToastContext'
 import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
 
@@ -36,6 +42,8 @@ export type OwnProps = {
   includeShare?: boolean
   includeVisitPage?: boolean
   includeVisitArtistPage?: boolean
+  includePlayNext?: boolean
+  includeAddToQueue?: boolean
   isFavorited?: boolean
   isOwner?: boolean
   isPublic?: boolean
@@ -55,7 +63,13 @@ export type CollectionMenuProps = OwnProps &
   ReturnType<typeof mapDispatchToProps>
 
 const messages = {
-  embed: 'Embed'
+  embed: 'Embed',
+  playNext: 'Play Next',
+  addToQueue: 'Add to Queue',
+  willPlayNext: (count: number) =>
+    count === 1 ? 'Will play next' : `${count} songs will play next`,
+  addedToQueue: (count: number) =>
+    count === 1 ? 'Added to queue' : `Added ${count} songs to queue`
 }
 
 const CollectionMenu = ({
@@ -64,6 +78,8 @@ const CollectionMenu = ({
   isReposted = false,
   includeFavorite = true,
   includeVisitPage = true,
+  includePlayNext = true,
+  includeAddToQueue = true,
   ...props
 }: CollectionMenuProps) => {
   const {
@@ -95,6 +111,13 @@ const CollectionMenu = ({
     handle ? handle.toLowerCase() : undefined,
     { select: (user) => user && user.track_count > 0 }
   )
+
+  const dispatch = useDispatch()
+  const { toast } = useContext(ToastContext)
+  const playbackIndex = useSelector(playbackSelectors.getPlaybackIndex)
+  const { data: collectionTrackIds } = useCollection(playlistId, {
+    select: (c) => c?.playlist_contents?.track_ids?.map((t) => t.track) ?? []
+  })
 
   const navigate = useNavigate()
 
@@ -160,8 +183,51 @@ const CollectionMenu = ({
         )
     }
 
+    const collectionTracks = (collectionTrackIds ?? []).map((trackId) => ({
+      trackId,
+      source: QueueSource.COLLECTION_TRACKS
+    }))
+
+    const playCollectionNextMenuItem = {
+      text: messages.playNext,
+      onClick: () => {
+        if (collectionTracks.length === 0) return
+        const insertIndex = playbackIndex >= 0 ? playbackIndex + 1 : 0
+        dispatch(
+          playbackActions.addToQueue({
+            tracks: collectionTracks,
+            index: insertIndex
+          })
+        )
+        toast(messages.willPlayNext(collectionTracks.length))
+      }
+    }
+
+    const addCollectionToQueueMenuItem = {
+      text: messages.addToQueue,
+      onClick: () => {
+        if (collectionTracks.length === 0) return
+        dispatch(playbackActions.addToQueue({ tracks: collectionTracks }))
+        toast(messages.addedToQueue(collectionTracks.length))
+      }
+    }
+
     const menu: { items: PopupMenuItem[] } = { items: [] }
 
+    if (
+      includePlayNext &&
+      collectionTracks.length > 0 &&
+      (isPublic || isOwner)
+    ) {
+      menu.items.push(playCollectionNextMenuItem)
+    }
+    if (
+      includeAddToQueue &&
+      collectionTracks.length > 0 &&
+      (isPublic || isOwner)
+    ) {
+      menu.items.push(addCollectionToQueueMenuItem)
+    }
     if (menu) {
       if (includeShare) menu.items.push(shareMenuItem)
     }

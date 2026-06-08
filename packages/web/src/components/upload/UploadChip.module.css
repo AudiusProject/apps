@@ -46,6 +46,17 @@
   line-height: 27px;
 }
 
+.cardFluid {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 224 / 312;
+
+  font-size: var(--harmony-font-xl);
+  font-weight: var(--harmony-font-bold);
+  letter-spacing: 0.72px;
+  line-height: 27px;
+}
+
 /* nav */
 
 .nav {

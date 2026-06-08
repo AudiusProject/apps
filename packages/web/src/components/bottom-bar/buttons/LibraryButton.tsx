@@ -1,30 +1,24 @@
 import { memo } from 'react'
 
-import AnimatedBottomButton from './AnimatedBottomButton'
+import { IconLibrary } from '@audius/harmony'
+
+import StaticBottomButton from './StaticBottomButton'
 import { ButtonProps } from './types'
 
 const LibraryButton = ({
-  darkMode,
+  darkMode: _darkMode,
+  isMatrixMode: _isMatrixMode,
   onClick,
   href,
   isActive,
-  isMatrixMode,
   ...buttonProps
 }: ButtonProps) => {
   return (
-    <AnimatedBottomButton
-      uniqueKey='library-button'
+    <StaticBottomButton
+      icon={IconLibrary}
       isActive={isActive}
-      darkMode={darkMode}
-      isMatrix={isMatrixMode}
       onClick={onClick}
       href={href}
-      iconLightJSON={() =>
-        import('../../../assets/animations/iconFavoriteLight.json')
-      }
-      iconDarkJSON={() =>
-        import('../../../assets/animations/iconFavoriteDark.json')
-      }
       {...buttonProps}
     />
   )

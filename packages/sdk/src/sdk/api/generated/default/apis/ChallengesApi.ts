@@ -2,8 +2,7 @@
 // @ts-nocheck
 /* eslint-disable */
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -16,12 +15,22 @@
 
 import * as runtime from '../runtime';
 import type {
+  AttestationReponse,
   UndisbursedChallenges,
 } from '../models';
 import {
+    AttestationReponseFromJSON,
+    AttestationReponseToJSON,
     UndisbursedChallengesFromJSON,
     UndisbursedChallengesToJSON,
 } from '../models';
+
+export interface GetChallengeAttestationRequest {
+    challengeId: string;
+    oracle: string;
+    specifier: string;
+    userId: string;
+}
 
 export interface GetUndisbursedChallengesRequest {
     offset?: number;
@@ -43,6 +52,68 @@ export interface GetUndisbursedChallengesForUserRequest {
  * 
  */
 export class ChallengesApi extends runtime.BaseAPI {
+
+    /**
+     * @hidden
+     * Produces an attestation that a given user has completed a challenge, or errors.
+     */
+    async getChallengeAttestationRaw(params: GetChallengeAttestationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AttestationReponse>> {
+        if (params.challengeId === null || params.challengeId === undefined) {
+            throw new runtime.RequiredError('challengeId','Required parameter params.challengeId was null or undefined when calling getChallengeAttestation.');
+        }
+
+        if (params.oracle === null || params.oracle === undefined) {
+            throw new runtime.RequiredError('oracle','Required parameter params.oracle was null or undefined when calling getChallengeAttestation.');
+        }
+
+        if (params.specifier === null || params.specifier === undefined) {
+            throw new runtime.RequiredError('specifier','Required parameter params.specifier was null or undefined when calling getChallengeAttestation.');
+        }
+
+        if (params.userId === null || params.userId === undefined) {
+            throw new runtime.RequiredError('userId','Required parameter params.userId was null or undefined when calling getChallengeAttestation.');
+        }
+
+        const queryParameters: any = {};
+
+        if (params.oracle !== undefined) {
+            queryParameters['oracle'] = params.oracle;
+        }
+
+        if (params.specifier !== undefined) {
+            queryParameters['specifier'] = params.specifier;
+        }
+
+        if (params.userId !== undefined) {
+            queryParameters['user_id'] = params.userId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
+
+        const response = await this.request({
+            path: `/challenges/{challenge_id}/attest`.replace(`{${"challenge_id"}}`, encodeURIComponent(String(params.challengeId))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AttestationReponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Produces an attestation that a given user has completed a challenge, or errors.
+     */
+    async getChallengeAttestation(params: GetChallengeAttestationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AttestationReponse> {
+        const response = await this.getChallengeAttestationRaw(params, initOverrides);
+        return await response.value();
+    }
 
     /**
      * @hidden
@@ -72,6 +143,13 @@ export class ChallengesApi extends runtime.BaseAPI {
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
+
+        if (!headerParameters["Authorization"] && this.configuration && this.configuration.accessToken) {
+            const token = await this.configuration.accessToken("OAuth2", ["read"]);
+            if (token) {
+                headerParameters["Authorization"] = token;
+            }
+        }
 
         const response = await this.request({
             path: `/challenges/undisbursed`,

@@ -5,7 +5,7 @@ import { View } from 'react-native'
 
 import { Divider, Text } from '@audius/harmony-native'
 import { Tile } from 'app/components/core'
-import Skeleton, { StaticSkeleton } from 'app/components/skeleton/Skeleton'
+import { StaticSkeleton } from 'app/components/skeleton/Skeleton'
 import { makeStyles } from 'app/styles'
 
 const messages = {
@@ -117,7 +117,7 @@ export const EntitySkeleton = (props: EntitySkeletonProps) => {
         >
           {entityType ? messages[entityType] : ''}
         </Text>
-        <Skeleton style={styles.trackArtwork} />
+        <StaticSkeleton style={styles.trackArtwork} />
         <StaticSkeleton style={styles.trackTitle} />
         <StaticSkeleton style={styles.artistName} />
         <StaticSkeleton style={styles.playButton} />

@@ -6,6 +6,7 @@ import type { LoggerService } from '../Logger'
 export type EntityManagerTransactionReceipt = {
   blockHash: string
   blockNumber: number
+  transactionHash: string
 }
 
 export type EntityManagerConfigInternal = {
@@ -25,6 +26,14 @@ export type EntityManagerConfigInternal = {
    * The endpoint to use for relays
    */
   endpoint: string
+  /** API key for relay calls */
+  apiKey?: string
+  /** API secret for relay calls */
+  apiSecret?: string
+  /** Bearer token for relay calls */
+  bearerToken?: string
+  /** App name for relay calls */
+  appName?: string
 }
 export type EntityManagerConfig = Partial<EntityManagerConfigInternal> & {
   audiusWalletClient: AudiusWalletClient

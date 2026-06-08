@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import type { UserFeedItem as SdkUserFeedItem } from '@audius/sdk'
 
 import { UserCollectionMetadata, UserTrackMetadata } from '~/models'
 
@@ -11,7 +11,7 @@ type UserFeedItem = {
 }
 
 export const userFeedItemFromSDK = (
-  input: full.UserFeedItem
+  input: SdkUserFeedItem
 ): UserFeedItem | undefined => {
   const item =
     input.type === 'track'

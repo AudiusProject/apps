@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 
 import { useTopArtists } from '@audius/common/api'
-import { feedPageActions } from '@audius/common/store'
+import { FollowSource } from '@audius/common/models'
+import { usersSocialActions } from '@audius/common/store'
 import { Button, Flex, IconUserFollow, Text } from '@audius/harmony'
 import { Form, Formik } from 'formik'
 import { useDispatch } from 'react-redux'
@@ -30,8 +31,11 @@ const FollowUsers = () => {
   const handleSubmit = useCallback(
     (values: FollowUsersValues) => {
       const { selectedArtists } = values
-      const followUsers = selectedArtists.map((id) => parseInt(id))
-      dispatch(feedPageActions.followUsers(followUsers))
+      selectedArtists.forEach((id) => {
+        dispatch(
+          usersSocialActions.followUser(parseInt(id), FollowSource.EMPTY_FEED)
+        )
+      })
     },
     [dispatch]
   )

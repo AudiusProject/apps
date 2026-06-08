@@ -24,23 +24,32 @@ export * from './tan-query/developer-apps/useDeveloperApps'
 export * from './tan-query/developer-apps/useAddDeveloperApp'
 export * from './tan-query/developer-apps/useEditDeveloperApp'
 export * from './tan-query/developer-apps/useDeleteDeveloperApp'
+export * from './tan-query/developer-apps/useDeactivateDeveloperAppAccessKey'
+export * from './tan-query/developer-apps/useCreateDeveloperAppAccessKey'
 
 // Events
 export * from './tan-query/events'
 
 // Explore
 export * from './tan-query/collection/useExploreContent'
+export * from './tan-query/collection/useTrendingAlbums'
+export * from './tan-query/collection/useNewAlbumReleases'
+export * from './tan-query/collection/useBestSellingAlbums'
+
+// Feed preferences (UI state, persisted)
+export * from './tan-query/feed/useFeedPreferences'
 
 // Lineups
 export * from './tan-query/lineups/useFeed'
+export * from './tan-query/lineups/useForYouFeed'
+export * from './tan-query/lineups/useExclusiveTracks'
 export * from './tan-query/lineups/useLibraryTracks'
 export * from './tan-query/lineups/useProfileReposts'
 export * from './tan-query/lineups/useProfileTracks'
 export * from './tan-query/lineups/useTrending'
 export * from './tan-query/lineups/useTrendingUnderground'
+export * from './tan-query/lineups/useTrendingWinners'
 export * from './tan-query/lineups/useTrackPageLineup'
-export * from './tan-query/lineups/useLineupQuery'
-export * from './tan-query/lineups/useExclusiveTracks'
 
 // Notifications
 export * from './tan-query/notifications/useMarkNotificationsAsViewed'
@@ -80,6 +89,7 @@ export * from './tan-query/search/useTopTags'
 // Tracks
 export * from './tan-query/tracks/useDeleteTrack'
 export * from './tan-query/tracks/useDownloadTrackStems'
+export * from './tan-query/tracks/useTrackDownloadCounts'
 export * from './tan-query/tracks/useFavoriteTrack'
 export * from './tan-query/tracks/useToggleFavoriteTrack'
 export * from './tan-query/tracks/useTrack'
@@ -123,11 +133,23 @@ export * from './tan-query/users/useUserPlaylists'
 export * from './tan-query/users/useUsers'
 export * from './tan-query/users/useUser'
 export * from './tan-query/users/useUserTracksByHandle'
+export * from './tan-query/users/useUserTrackDownloadCountTotal'
 export * from './tan-query/users/useProfileUser'
 export * from './tan-query/users/useOtherChatUsers'
 
 // Account
 export * from './tan-query/users/account/useResetPassword'
+export * from './tan-query/users/account/useResendRecoveryEmail'
+
+// Playlist updates
+export * from './tan-query/playlist-updates/usePlaylistUpdates'
+export * from './tan-query/playlist-updates/useMarkPlaylistAsViewed'
+
+// Search users modal
+export * from './tan-query/search-users-modal/useSearchUsersModal'
+
+// Artist Dashboard
+export * from './tan-query/dashboard/useArtistDashboardListenData'
 export * from './tan-query/users/account/useManagedAccounts'
 export * from './tan-query/users/account/useManagers'
 export * from './tan-query/users/account/useRequestAddManager'
@@ -151,6 +173,8 @@ export * from './tan-query/wallets/useAudioBalance'
 export * from './tan-query/wallets/useAssociatedWallets'
 export * from './tan-query/wallets/useWalletOwner'
 export * from './tan-query/wallets/useUSDCBalance'
+export * from './tan-query/wallets/useDestinationUsdcAccountCheck'
+export * from './tan-query/wallets/useRootWalletUsdcAccountCheck'
 export * from './tan-query/wallets/useExternalWalletBalance'
 export * from './tan-query/wallets/useCoinBalance'
 export * from './tan-query/wallets/useCoinBalanceBreakdown'

@@ -18,7 +18,7 @@ import {
   mobileOverflowMenuUIActions,
   OverflowAction,
   OverflowSource,
-  playerSelectors,
+  playbackSelectors,
   playbackPositionSelectors
 } from '@audius/common/store'
 import {
@@ -54,7 +54,7 @@ import { UserLink } from '../user-link'
 import { TrackArtwork } from './TrackArtwork'
 const { open: openOverflowMenu } = mobileOverflowMenuUIActions
 
-const { getPlaying, getUid } = playerSelectors
+const { getPlaying, getTrackId } = playbackSelectors
 const { getTrackPosition } = playbackPositionSelectors
 
 export type TrackItemAction = 'overflow' | 'remove'
@@ -66,7 +66,7 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     backgroundColor: palette.white
   },
   trackContainerActive: {
-    backgroundColor: palette.neutralLight9
+    backgroundColor: 'rgba(130,86,220,0.07)'
   },
   trackContainerDisabled: {
     backgroundColor: palette.neutralLight9
@@ -101,6 +101,9 @@ const useStyles = makeStyles(({ palette, spacing, typography }) => ({
     lineHeight: 16,
     paddingTop: 2,
     color: palette.neutral
+  },
+  trackTitleTextActive: {
+    color: '#8256DC'
   },
   downloadIndicator: {
     marginLeft: spacing(1)
@@ -221,14 +224,16 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
   const { isFetchingNFTAccess, hasStreamAccess } = useGatedContentAccess(track)
   const isLocked = !isFetchingNFTAccess && !hasStreamAccess
 
-  const isActive = useSelector((state) => {
-    const playingUid = getUid(state)
-    return uid !== undefined && uid === playingUid
-  })
+  const isActive = useSelector(
+    (state) => track_id !== undefined && getTrackId(state) === track_id
+  )
 
-  const isPlaying = useSelector((state) => {
-    return isActive && getPlaying(state)
-  })
+  const isPlaying = useSelector(
+    (state) =>
+      track_id !== undefined &&
+      getTrackId(state) === track_id &&
+      getPlaying(state)
+  )
   const isPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   // Unlike other gated tracks, USDC purchase gated tracks are playable because they have previews
   const isPlayable = !isDeleted && (!isLocked || isPurchaseGated)
@@ -261,13 +266,21 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
     currentUserId && contextPlaylist?.playlist_owner_id === currentUserId
 
   const isLongFormContent =
-    track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
-  const playbackPositionInfo = useSelector((state) =>
-    getTrackPosition(state, { trackId: track_id, userId: currentUserId })
+    track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
+  const playbackPositionStatus = useSelector(
+    (state) =>
+      getTrackPosition(state, { trackId: track_id, userId: currentUserId })
+        ?.status
   )
 
   const handleOpenOverflowMenu = useCallback(() => {
     const overflowActions = [
+      !isLocked && (!isUnlisted || isTrackOwner)
+        ? OverflowAction.PLAY_NEXT
+        : null,
+      !isLocked && (!isUnlisted || isTrackOwner)
+        ? OverflowAction.ADD_TO_QUEUE
+        : null,
       !isUnlisted || isTrackOwner ? OverflowAction.SHARE : null,
       !isTrackOwner && !isLocked && !isUnlisted
         ? has_current_user_saved
@@ -289,7 +302,7 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
         : OverflowAction.VIEW_TRACK_PAGE,
       !showViewAlbum && album_backlink ? OverflowAction.VIEW_ALBUM_PAGE : null,
       isLongFormContent
-        ? playbackPositionInfo?.status === 'COMPLETED'
+        ? playbackPositionStatus === 'COMPLETED'
           ? OverflowAction.MARK_AS_UNPLAYED
           : OverflowAction.MARK_AS_PLAYED
         : null,
@@ -321,7 +334,7 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
     isLongFormContent,
     showViewAlbum,
     album_backlink,
-    playbackPositionInfo?.status,
+    playbackPositionStatus,
     isContextPlaylistOwner,
     dispatch,
     track_id,
@@ -395,11 +408,21 @@ const TrackListItemComponent = (props: TrackListItemComponentProps) => {
               <View style={styles.trackTitle}>
                 <Text
                   numberOfLines={1}
-                  style={[styles.trackTitleText, { maxWidth: titleMaxWidth }]}
+                  style={[
+                    styles.trackTitleText,
+                    isActive && styles.trackTitleTextActive,
+                    { maxWidth: titleMaxWidth }
+                  ]}
                 >
                   {title}
                 </Text>
-                <Text numberOfLines={1} style={[styles.trackTitleText]}>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.trackTitleText,
+                    isActive && styles.trackTitleTextActive
+                  ]}
+                >
                   {messages.deleted}
                 </Text>
               </View>

@@ -43,6 +43,12 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#000000" />
+    <meta name="google" content="notranslate" />
+
+    <title>Audius — Free Music Streaming for Artists, Labels &amp; Fans</title>
+    <link rel="canonical" href="https://audius.co/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://audius.co/" />
 
     <link rel="manifest" href="/manifest.json" />
 
@@ -53,6 +59,7 @@
     <meta name="twitter:site" content="@audius" />
     <meta property="twitter:app:name:iphone" content="Audius Music" />
     <meta property="twitter:app:name:googleplay" content="Audius Music" />
+    <title>Audius — Free Music Streaming for Artists, Labels & Fans</title>
     <meta property="helmet" />
 
     <script id="polyfills" type="module" src="/src/polyfills.ts"></script>
@@ -60,10 +67,16 @@
     <script async type="text/javascript">
       // Account recovery
       try {
+        const RESET_REQUIRED_KEY = 'password-reset-required'
         const urlParams = new URLSearchParams(window.location.search)
         const useHashRouting = '%USE_HASH_ROUTING%' === 'true'
         const login = urlParams.get('login')
         const warning = urlParams.get('warning')
+        const mode = urlParams.get('mode')
+        const email = urlParams.get('email')
+        const lookupKey = urlParams.get('lookupKey')
+        const hasEmail = Boolean(email)
+        const hasLookupKey = Boolean(lookupKey)
 
         let entropy = null
         if (login) {
@@ -76,9 +89,38 @@
           redirectUrl += location.pathname
           window.history.replaceState({}, document.title, redirectUrl)
         }
-        if (warning === 'RECOVERY_DO_NOT_SHARE') {
-          const email = urlParams.get('email')
-          window.localStorage.setItem('password-reset-required', email)
+
+        const isEmailPasswordRecovery = mode === 'emailpassword'
+        const isPasswordRecovery =
+          !isEmailPasswordRecovery &&
+          (warning === 'RECOVERY_DO_NOT_SHARE' || mode === 'password')
+        const isRecoveryMode = isPasswordRecovery || isEmailPasswordRecovery
+
+        if (isRecoveryMode) {
+          let resetPayload = null
+
+          if (isEmailPasswordRecovery && hasLookupKey) {
+            resetPayload = {
+              mode: 'emailpassword',
+              email: email ?? undefined,
+              lookupKey
+            }
+          } else if (isPasswordRecovery && hasEmail) {
+            resetPayload = {
+              mode: 'password',
+              email
+            }
+          }
+
+          if (resetPayload) {
+            window.localStorage.setItem(
+              RESET_REQUIRED_KEY,
+              JSON.stringify(resetPayload)
+            )
+          } else {
+            window.localStorage.removeItem(RESET_REQUIRED_KEY)
+          }
+
           let redirectUrl = location.protocol + '//' + location.host
           if (useHashRouting) {
             redirectUrl += '/#'
@@ -121,6 +163,127 @@
       src="https://experiments.audius.co/datafiles/%OPTIMIZELY_KEY%.json/tag.js"
     ></script>
     <!-- end Optimizely -->
+
+    <!-- GEO: Organization, WebSite, SoftwareApplication schema for AI engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://audius.co/#organization",
+          "name": "Audius",
+          "url": "https://audius.co",
+          "logo": "https://og.audius.co/default",
+          "sameAs": [
+            "https://twitter.com/audius",
+            "https://github.com/audiusproject",
+            "https://discord.gg/audius",
+            "https://instagram.com/audius"
+          ],
+          "description": "Audius is a decentralized music streaming and sharing platform that puts power back into the hands of content creators."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://audius.co/#website",
+          "url": "https://audius.co",
+          "name": "Audius",
+          "publisher": { "@id": "https://audius.co/#organization" },
+          "description": "Free music streaming for artists, labels, and fans. Stream and share music on the decentralized Audius platform."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Audius",
+          "applicationCategory": "MusicApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "description": "Free music streaming for artists, labels, and fans. Upload, stream, and share music on the decentralized Audius platform."
+        }
+      ]
+    }
+    </script>
+
+    <!-- GEO: FAQPage schema for AI engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Audius is a music streaming and sharing platform for artists, labels, and fans. Artists can upload and share music, listeners can discover and stream it, and the platform is designed to put more power back into the hands of content creators. Audius is a decentralized platform, giving the community a more direct role in how the ecosystem grows and evolves."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is Audius made for?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Audius is made for the people pushing music scenes forward. Artists release music, run remix contests, and build unique experiences for their community. Record labels showcase their roster, host remix contests, and build a community around their brand. Music lovers engage with artists, discover new music, and help grow the scenes they care about."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I'm an artist. What can I do on Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Artists on Audius consistently release music, run remix contests, and create unique experiences for their scene they can't find anywhere else. Demos, WIPs, and anything in between live here — it's not about perfection, it's about participation. Successful artists consistently engage, activate, and collab with their community."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I'm a record label. What can I do on Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Record labels on Audius actively showcase their roster's music, discover artists, and create a community around their brand. They host remix contests, stay connected to emerging scenes, and build the momentum needed to support their releases everywhere else. Like artists, successful labels consistently engage, activate, and connect with their audience."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are there any subscription plans or fees for using Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Audius offers both free streaming and paid content options for both listeners and artists, with no subscription plans or fees required. You can enjoy unlimited free access to music, while artists have the option to offer premium content for sale. You can also support your favorite artists by sending them tips using $AUDIO tokens — 100% of tips go directly to the artists."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What devices are supported by Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Audius is accessible on all modern Android and iOS devices, desktop applications for macOS, Windows, and Linux, and most web browsers (Chromium-based browsers like Google Chrome are recommended for the best experience). Visit audius.co/download to get the app for your device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a limit to how much I can upload to Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "There is no limit to the number of tracks you can upload to your Audius profile. Each individual upload is restricted to a maximum of 200MB. For files exceeding 200MB, converting to 320kbps MP3 format before uploading is recommended."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I just love music. What can I do on Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Music lovers on Audius keep the culture alive. They play a vital role in directly engaging, amplifying, and creating opportunities for artists to grow in their scene. While some just love the music, many professionally run collectives, promote events, and use the platform to expand what they're already building."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I sign up for Audius?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Visit audius.co/signup, enter your email address, create a password, choose a unique handle (which cannot be changed later), set your display name, optionally select favorite genres and follow artists to personalize your feed. You'll land directly in Audius ready to explore music and build your profile."
+          }
+        }
+      ]
+    }
+    </script>
 
     <!-- start Meta Pixel -->
     <script async type="text/javascript">

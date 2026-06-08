@@ -14,40 +14,40 @@ type UserBadgesProps = {
   userId: ID
   badgeSize?: IconSize
   mint?: string
-  hideArtistCoinBadge?: boolean
+  hideFanClubBadge?: boolean
 }
 
 export const UserBadges = (props: UserBadgesProps) => {
-  const { userId, badgeSize = 's', mint, hideArtistCoinBadge } = props
+  const { userId, badgeSize = 's', mint, hideFanClubBadge } = props
 
   const { data: userData } = useUser(userId, {
     select: (user) => ({
       isVerified: user?.is_verified,
-      artistCoinBadge: user?.artist_coin_badge
+      fanClubBadge: user?.fan_club_badge
     })
   })
-  const { isVerified: userIsVerified, artistCoinBadge: userArtistCoinBadge } =
+  const { isVerified: userIsVerified, fanClubBadge: userFanClubBadge } =
     userData ?? {}
   const { tier } = useTierAndVerifiedForUser(userId)
 
   const displayMint = useMemo(() => {
-    // Priority: explicit mint prop > user's artist_coin_badge > null
+    // Priority: explicit mint prop > user's fan_club_badge > null
     if (mint) return mint
-    if (userArtistCoinBadge?.mint) return userArtistCoinBadge.mint
+    if (userFanClubBadge?.mint) return userFanClubBadge.mint
     return null
-  }, [mint, userArtistCoinBadge?.mint])
+  }, [mint, userFanClubBadge?.mint])
 
-  const shouldShowArtistCoinBadge =
+  const shouldShowFanClubBadge =
     !!displayMint &&
     displayMint !== env.WAUDIO_MINT_ADDRESS &&
-    !hideArtistCoinBadge
+    !hideFanClubBadge
 
   return (
     <Flex row gap='xs' alignItems='center'>
       {userIsVerified ? <IconVerified size={badgeSize} /> : null}
       <IconAudioBadge tier={tier} size={badgeSize} />
-      {shouldShowArtistCoinBadge ? (
-        <TokenIcon logoURI={userArtistCoinBadge?.logo_uri} size={badgeSize} />
+      {shouldShowFanClubBadge ? (
+        <TokenIcon logoURI={userFanClubBadge?.logo_uri} size={badgeSize} />
       ) : null}
     </Flex>
   )

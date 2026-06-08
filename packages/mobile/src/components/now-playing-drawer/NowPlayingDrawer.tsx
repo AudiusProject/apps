@@ -9,11 +9,7 @@ import {
 
 import { useUser } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import {
-  queueActions,
-  playerActions,
-  playerSelectors
-} from '@audius/common/store'
+import { playbackActions, playbackSelectors } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { useNavigationState } from '@react-navigation/native'
 import type {
@@ -27,6 +23,7 @@ import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { BOTTOM_BAR_HEIGHT } from 'app/components/bottom-tab-bar'
+import { useCommentDrawer } from 'app/components/comments/CommentDrawerContext'
 import Drawer, {
   DrawerAnimationStyle,
   FULL_DRAWER_HEIGHT
@@ -48,10 +45,9 @@ import { TitleBar } from './TitleBar'
 import { TrackInfo } from './TrackInfo'
 import { PLAY_BAR_HEIGHT } from './constants'
 import { useCurrentTrackDuration } from './useCurrentTrackDuration'
-const { seek, reset } = playerActions
+const { seekTo: seek, reset, next, previous } = playbackActions
 
-const { getPlaying, getUid, getCounter, getBuffering } = playerSelectors
-const { next, previous } = queueActions
+const { getPlaying, getTrackId, getCounter, getBuffering } = playbackSelectors
 
 const STATUS_BAR_FADE_CUTOFF = 0.6
 const SKIP_DURATION_SEC = 15
@@ -114,8 +110,11 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const styles = useStyles()
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
+  // Defer to the comments bottom-sheet while it's presented: its swipe-to-dismiss
+  // gesture would otherwise leak through and also close this drawer underneath.
+  const { isOpen: isCommentDrawerOpen } = useCommentDrawer()
   const playCounter = useSelector(getCounter)
-  const currentUid = useSelector(getUid)
+  const currentTrackId = useSelector(getTrackId)
   const isPlaying = useSelector(getPlaying)
   const isBuffering = useSelector(getBuffering)
   const [isPlayBarShowing, setIsPlayBarShowing] = useState(false)
@@ -137,10 +136,10 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   }, [isPlaying, isPlayBarShowing])
 
   useEffect(() => {
-    if (!currentUid) {
+    if (!currentTrackId) {
       setIsPlayBarShowing(false)
     }
-  }, [currentUid])
+  }, [currentTrackId])
 
   const onDrawerOpen = useCallback(() => {
     Keyboard.dismiss()
@@ -232,11 +231,11 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
 
   useEffect(() => {
     setMediaKey((mediaKey) => mediaKey + 1)
-  }, [playCounter, currentUid])
+  }, [playCounter, currentTrackId])
 
   const onNext = useCallback(async () => {
     const isLongFormContent =
-      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
     if (isLongFormContent) {
       const { position: currentPosition } = await TrackPlayer.getProgress()
       const newPosition = currentPosition + SKIP_DURATION_SEC
@@ -250,7 +249,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const onPrevious = useCallback(async () => {
     const { position: currentPosition } = await TrackPlayer.getProgress()
     const isLongFormContent =
-      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
     if (isLongFormContent) {
       const newPosition = currentPosition - SKIP_DURATION_SEC
       dispatch(seek({ seconds: Math.max(0, newPosition) }))
@@ -277,8 +276,8 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     if (!trackId) {
       return
     }
-    onClose()
     navigation?.push('Track', { trackId })
+    onClose()
   }, [onClose, navigation, trackId])
 
   return (
@@ -299,6 +298,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
       onPanResponderMove={onPanResponderMove}
       onPanResponderRelease={onPanResponderRelease}
       isGestureSupported={isGestureEnabled}
+      gesturesDisabled={isCommentDrawerOpen}
       translationAnim={translationAnim}
       // Disable safe area view edges because they are handled manually
       disableSafeAreaView
@@ -347,8 +347,8 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
             onNext={onNext}
             onPrevious={onPrevious}
             isLongFormContent={
-              track?.genre === Genre.PODCASTS ||
-              track?.genre === Genre.AUDIOBOOKS
+              track?.genre === Genre.Podcasts ||
+              track?.genre === Genre.Audiobooks
             }
           />
           <ActionsBar track={track} />

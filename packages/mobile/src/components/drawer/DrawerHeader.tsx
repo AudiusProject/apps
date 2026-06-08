@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from 'react-native'
 import { TouchableOpacity, View, Image } from 'react-native'
 
 import type { IconComponent } from '@audius/harmony-native'
-import { Flex, IconClose, spacing } from '@audius/harmony-native'
+import { Flex, IconCaretLeft, IconClose, spacing } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
 import { makeStyles } from 'app/styles'
 import { zIndex } from 'app/utils/zIndex'
@@ -15,6 +15,8 @@ type DrawerHeaderProps = {
   titleImage?: ImageSourcePropType
   isFullscreen?: boolean
   blockClose?: boolean
+  /** Use back arrow instead of close X. For nested drawers that navigate "back". */
+  showBackButton?: boolean
 }
 
 export const useStyles = makeStyles(({ spacing }) => ({
@@ -46,9 +48,11 @@ export const DrawerHeader = (props: DrawerHeaderProps) => {
     titleIcon: TitleIcon,
     titleImage,
     isFullscreen,
-    blockClose = false
+    blockClose = false,
+    showBackButton = false
   } = props
   const styles = useStyles()
+  const DismissIcon = showBackButton ? IconCaretLeft : IconClose
 
   return title || isFullscreen ? (
     <View style={styles.titleBarContainer}>
@@ -59,7 +63,7 @@ export const DrawerHeader = (props: DrawerHeaderProps) => {
           style={styles.dismissContainer}
           hitSlop={spacing.m}
         >
-          <IconClose size='m' color='subdued' />
+          <DismissIcon size='m' color='subdued' />
         </TouchableOpacity>
       ) : null}
       {title ? (

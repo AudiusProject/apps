@@ -37,7 +37,7 @@ import { StatusPill } from './StatusPill'
 const { getOptimisticUserChallenges } = challengesSelectors
 
 const PANEL_HEIGHT = 200
-const PANEL_WIDTH = 320
+const PANEL_WIDTH = 272
 
 type RewardPanelProps = {
   title: string
@@ -46,6 +46,7 @@ type RewardPanelProps = {
   remainingLabel?: string
   openModal: (modalType: ChallengeRewardsModalType) => void
   id: ChallengeRewardID
+  isLocked?: boolean
 }
 
 export const RewardPanel = ({
@@ -54,9 +55,10 @@ export const RewardPanel = ({
   description,
   openModal,
   progressLabel,
-  remainingLabel
+  remainingLabel,
+  isLocked = false
 }: RewardPanelProps) => {
-  const { color, spacing } = useTheme()
+  const { color } = useTheme()
   const { data: currentAccount } = useCurrentAccount()
   const { data: currentUser } = useCurrentAccountUser()
   const userChallenges = useSelector((state: CommonState) =>
@@ -122,10 +124,9 @@ export const RewardPanel = ({
 
   return (
     <Paper
-      onClick={openRewardModal}
-      flex={`0 0 calc(50% - ${spacing.unit4}px)`}
+      onClick={isLocked ? undefined : openRewardModal}
+      flex={`1 1 ${PANEL_WIDTH}px`}
       column
-      m='s'
       shadow='flat'
       border='strong'
       css={{
@@ -133,7 +134,7 @@ export const RewardPanel = ({
         minHeight: PANEL_HEIGHT,
         backgroundColor: hasDisbursed ? color.neutral.n25 : undefined,
         position: 'relative',
-        cursor: 'pointer'
+        cursor: isLocked ? 'default' : 'pointer'
       }}
     >
       <Flex column h='100%'>

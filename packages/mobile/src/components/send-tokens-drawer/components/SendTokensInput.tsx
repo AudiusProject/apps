@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState, useEffect } from 'react'
 
 import {
-  useArtistCoin,
+  useFanClub,
   useCoinBalance,
-  transformArtistCoinToTokenInfo,
+  transformFanClubToTokenInfo,
   useCurrentUserId,
   useTradeableCoins
 } from '@audius/common/api'
@@ -16,6 +16,7 @@ import { Keyboard } from 'react-native'
 
 import { Button, Divider, Flex, Text, TextInput } from '@audius/harmony-native'
 import { BalanceSection, SegmentedControl } from 'app/components/core'
+import Skeleton from 'app/components/skeleton'
 
 import { UserSearchAutocomplete } from './UserSearchAutocomplete'
 
@@ -123,13 +124,13 @@ export const SendTokensInput = ({
     useOwnedCoins(availableCoins)
 
   // Get the coin data and balance for selected token
-  const { data: coin } = useArtistCoin(selectedMint)
+  const { data: coin } = useFanClub(selectedMint)
   const { data: tokenBalance } = useCoinBalance({
     mint: selectedMint,
     includeExternalWallets: false,
     includeStaked: false
   })
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   // Calculate USD value for display
   const usdValueInfo = useMemo(() => {
@@ -314,17 +315,35 @@ export const SendTokensInput = ({
   const hasErrors = amountError || addressError
 
   // Show loading state if we don't have tokenInfo yet
-  // Only show loading if we have a mint to load, otherwise it might be stuck
+  // Use skeleton layout matching final content to prevent layout shift
   if (selectedMint && (!tokenInfo || coinsLoading || isOwnedCoinsLoading)) {
     return (
       <Flex gap='xl' ph='xl' pb='xl'>
+        {/* Segmented control skeleton */}
+        <Flex row gap='xs' style={{ width: '100%' }}>
+          <Skeleton height={40} style={{ flex: 1, borderRadius: 8 }} />
+          <Skeleton height={40} style={{ flex: 1, borderRadius: 8 }} />
+        </Flex>
         <BalanceSection mint={selectedMint} internalWalletOnly />
         <Divider />
-        <Flex gap='l' flex={1}>
-          <Text variant='body' color='subdued'>
-            Loading...
-          </Text>
+        {/* Sending section skeleton */}
+        <Flex gap='m'>
+          <Skeleton width={80} height={20} />
+          <Skeleton width='100%' height={56} style={{ borderRadius: 8 }} />
         </Flex>
+        <Divider />
+        {/* Recipient section skeleton */}
+        <Flex gap='m'>
+          <Skeleton width={100} height={20} />
+          <Skeleton width='100%' height={56} style={{ borderRadius: 8 }} />
+        </Flex>
+        {/* Terms skeleton */}
+        <Flex gap='xs'>
+          <Skeleton width='100%' height={16} />
+          <Skeleton width={140} height={16} />
+        </Flex>
+        {/* Button skeleton */}
+        <Skeleton width='100%' height={48} style={{ borderRadius: 8 }} />
       </Flex>
     )
   }

@@ -11,7 +11,6 @@ import {
   FavoriteSource,
   ID,
   Track,
-  Kind,
   PlayableType,
   Name,
   ShareSource,
@@ -21,18 +20,17 @@ import {
 } from '@audius/common/models'
 import {
   OverflowAction,
-  trackPageLineupActions,
-  trackPageSelectors,
   tracksSocialActions as socialTracksActions,
   shareModalUIActions,
   favoritesUserListActions,
   repostsUserListActions,
   mobileOverflowMenuUIActions,
-  playerSelectors,
-  playerActions,
+  playbackSelectors,
+  playbackActions,
   RepostType
 } from '@audius/common/store'
-import { formatDate, route, makeUid } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import { formatDate, route } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
@@ -47,22 +45,20 @@ import NavContext, {
   CenterPreset,
   RightPreset
 } from 'components/nav/mobile/NavContext'
-import { RemixContestCountdown } from 'components/track/RemixContestCountdown'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
 import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
 import { TrackPageLineup } from '../TrackPageLineup'
+import { TrackContestsSection } from '../shared/TrackContestsSection'
 
 import TrackPageHeader from './TrackHeader'
-import { RemixContestSection } from './remix-contests/RemixContestSection'
 
 const { NOT_FOUND_PAGE, FAVORITING_USERS_ROUTE, REPOSTING_USERS_ROUTE } = route
-const { getPlaying, getPreviewing } = playerSelectors
+const { getPlaying, getPreviewing } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
-const { tracksActions } = trackPageLineupActions
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 
@@ -78,7 +74,9 @@ const TrackPage = () => {
   const currentTrack = useCurrentTrack()
   const playing = useSelector(getPlaying)
   const previewing = useSelector(getPreviewing)
-  const source = useSelector(trackPageSelectors.getSourceSelector)
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
 
   const heroPlaying =
     playing &&
@@ -134,12 +132,24 @@ const TrackPage = () => {
 
       const isOwner = track.owner_id === accountUserId
       const shouldPreview = isPreview && isOwner
-      const isSameTrack = currentTrack?.track_id === track.track_id
-      const trackUid = makeUid(Kind.TRACKS, track.track_id, source)
+      const isSameTrack = currentPlaybackTrackId === track.track_id
+      const playbackSource = 'TRACK_TRACKS'
 
       if (previewing !== isPreview || !isSameTrack) {
-        dispatch(playerActions.stop({}))
-        dispatch(tracksActions.play(trackUid, { isPreview: shouldPreview }))
+        dispatch(playbackActions.stop({}))
+        const tracks: PlaybackTrack[] = [
+          {
+            trackId: track.track_id,
+            source: playbackSource
+          }
+        ]
+        dispatch(
+          playbackActions.playFrom({
+            tracks,
+            startIndex: 0,
+            querySource: null
+          })
+        )
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${track.track_id}`,
@@ -148,7 +158,7 @@ const TrackPage = () => {
           })
         )
       } else if (isPlayingParam) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, {
             id: `${track.track_id}`,
@@ -156,7 +166,7 @@ const TrackPage = () => {
           })
         )
       } else {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${track.track_id}`,
@@ -166,7 +176,7 @@ const TrackPage = () => {
         )
       }
     },
-    [track, accountUserId, currentTrack, previewing, dispatch, source]
+    [track, accountUserId, currentPlaybackTrackId, previewing, dispatch]
   )
 
   const onHeroRepost = useCallback(
@@ -238,13 +248,14 @@ const TrackPage = () => {
 
   const defaults = getTrackDefaults(track as Track | null)
 
-  // SEO fields
+  // SEO fields (isRemix so original vs remix snippet/structured data is correct)
   const releaseDate = track ? track.release_date || track.created_at : ''
   const seoFields = getTrackPageContext({
     title: track?.title,
     permalink: track?.permalink,
     userName: user?.name,
-    releaseDate: releaseDate ? formatDate(releaseDate) : ''
+    releaseDate: releaseDate ? formatDate(releaseDate) : '',
+    isRemix: !!track?.remix_of
   })
 
   // Handle deleted track
@@ -278,7 +289,6 @@ const TrackPage = () => {
     >
       <Flex column p='l' gap='2xl' w='100%'>
         <Flex column gap='l'>
-          <RemixContestCountdown trackId={defaults.trackId} />
           <TrackPageHeader
             isLoading={loading}
             isPlaying={heroPlaying}
@@ -320,7 +330,7 @@ const TrackPage = () => {
             goToRepostsPage={goToRepostsPage}
           />
         </Flex>
-        <RemixContestSection trackId={defaults.trackId} isOwner={isOwner} />
+        <TrackContestsSection trackId={defaults.trackId} />
         {isCommentingEnabled ? (
           <CommentPreview entityId={defaults.trackId} />
         ) : null}

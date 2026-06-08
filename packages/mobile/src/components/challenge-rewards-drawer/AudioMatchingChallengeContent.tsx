@@ -35,7 +35,6 @@ type AudioMatchingChallengeName =
   | ChallengeName.AudioMatchingSell
 
 export const AudioMatchingChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -149,9 +148,7 @@ export const AudioMatchingChallengeContent = ({
       statusLabel={statusLabel}
       additionalContent={additionalContent}
       actions={actions}
-      errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge
     />
   )

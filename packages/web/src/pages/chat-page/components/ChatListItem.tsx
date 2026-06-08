@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 
 import { useOtherChatUsersFromChat } from '@audius/common/api'
 import type { UserChat } from '@audius/sdk'
@@ -16,10 +16,13 @@ type ChatListItemProps = {
   currentChatId?: string
   chat: UserChat
   onChatClicked: (chatId: string) => void
+  isCompact?: boolean
 }
 
-export const ChatListItem = (props: ChatListItemProps) => {
-  const { chat, currentChatId, onChatClicked } = props
+export const ChatListItem = memo(function ChatListItem(
+  props: ChatListItemProps
+) {
+  const { chat, currentChatId, onChatClicked, isCompact } = props
   const isCurrentChat = currentChatId && currentChatId === chat.chat_id
 
   const users = useOtherChatUsersFromChat(chat)
@@ -32,11 +35,20 @@ export const ChatListItem = (props: ChatListItemProps) => {
     return null
   }
   return (
-    <div
-      className={cn(styles.root, { [styles.active]: isCurrentChat })}
+    <button
+      type='button'
+      className={cn(styles.root, {
+        [styles.active]: isCurrentChat,
+        [styles.compact]: isCompact
+      })}
       onClick={handleClick}
+      aria-current={isCurrentChat ? 'page' : undefined}
     >
-      <ChatUser user={users[0]} textClassName={styles.userText}>
+      <ChatUser
+        user={users[0]}
+        textClassName={styles.userText}
+        disableNavigation
+      >
         {chat.unread_message_count > 0 ? (
           <>
             <div className={styles.minimizedUnreadIndicatorTag} />
@@ -50,6 +62,6 @@ export const ChatListItem = (props: ChatListItemProps) => {
         ) : null}
       </ChatUser>
       <div className={styles.messagePreview}>{chat.last_message}</div>
-    </div>
+    </button>
   )
-}
+})

@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux'
 import { useQueryContext } from '~/api/tan-query/utils'
 import { useAppContext } from '~/context/appContext'
 import { Name } from '~/models/Analytics'
-import { Feature } from '~/models/ErrorReporting'
 import { ID } from '~/models/Identifiers'
 import { Track } from '~/models/Track'
 import { accountActions } from '~/store/account'
@@ -23,7 +22,7 @@ type FavoriteTrackArgs = {
 }
 
 export const useFavoriteTrack = () => {
-  const { audiusSdk, reportToSentry } = useQueryContext()
+  const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
@@ -151,7 +150,7 @@ export const useFavoriteTrack = () => {
       // Dispatch the saveTrackSucceeded action
       dispatch(tracksSocialActions.saveTrackSucceeded(trackId))
     },
-    onError: (error, { trackId }, context) => {
+    onError: (error, _args, context) => {
       if (!context) return
 
       // Revert optimistic updates
@@ -162,12 +161,7 @@ export const useFavoriteTrack = () => {
       })
       dispatch(accountActions.decrementTrackSaveCount())
 
-      reportToSentry({
-        error,
-        additionalInfo: { trackId },
-        name: 'Favorite Track',
-        feature: Feature.Social
-      })
+      console.error(error)
     }
   })
 }

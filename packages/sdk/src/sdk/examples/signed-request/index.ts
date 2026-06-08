@@ -50,7 +50,7 @@ const main = async () => {
   ).data?.id
 
   // Get our listening history, which requires us to be logged in
-  const history = await audiusSdk.full.users.getUsersTrackHistory({
+  const history = await audiusSdk.users.getUsersTrackHistory({
     id: userId!,
     limit: 1
   })

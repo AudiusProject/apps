@@ -5,6 +5,7 @@ import { program } from '@commander-js/extra-typings'
 import chalk from 'chalk'
 import type { ResponseError } from '@audius/sdk'
 import { managerCommand } from './manager/account-managers.js'
+import { developerAppCommand } from './developer-apps/developer-apps.js'
 import { authHeadersCommand } from './misc/auth-headers.js'
 import {
   claimRewardCommand,
@@ -22,6 +23,7 @@ import { albumCommand } from './album/index.js'
 import { entropyCommand } from './misc/entropy.js'
 import { aaoCommand } from './misc/aao.js'
 import { commentCommand } from './comments/index.js'
+import { eventCommand } from './event/index.js'
 
 async function main() {
   program.name('audius-cmd')
@@ -33,7 +35,9 @@ async function main() {
   program.addCommand(playlistCommand)
   program.addCommand(albumCommand)
   program.addCommand(commentCommand)
+  program.addCommand(eventCommand)
   program.addCommand(managerCommand)
+  program.addCommand(developerAppCommand)
   program.addCommand(authHeadersCommand)
   program.addCommand(claimRewardCommand)
   program.addCommand(claimRewardsCommand)

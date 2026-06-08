@@ -19,23 +19,31 @@ export const useDeleteDeveloperApp = () => {
         throw new Error('No current user ID')
       }
       const sdk = await audiusSdk()
-
       await sdk.developerApps.deleteDeveloperApp({
         userId: Id.parse(currentUserId),
-        appApiKey: apiKey
+        address: apiKey
       })
       return {}
     },
-    onSuccess: (_response, apiKey) => {
-      if (!currentUserId) {
-        throw new Error('No current user ID')
-      }
+    onMutate: async (apiKey) => {
+      if (!currentUserId) return
+      const queryKey = getDeveloperAppsQueryKey(currentUserId)
+      await queryClient.cancelQueries({ queryKey })
+      const previousApps = queryClient.getQueryData<DeveloperApp[]>(queryKey)
       queryClient.setQueryData(
-        getDeveloperAppsQueryKey(currentUserId),
+        queryKey,
         (oldData: DeveloperApp[] | undefined) => {
           if (!oldData) return []
           return oldData.filter((app) => app.apiKey !== apiKey)
         }
+      )
+      return { previousApps }
+    },
+    onError: (_error, _apiKey, context) => {
+      if (!currentUserId || !context?.previousApps) return
+      queryClient.setQueryData(
+        getDeveloperAppsQueryKey(currentUserId),
+        context.previousApps
       )
     }
   })

@@ -141,22 +141,34 @@ const CommentBlockInternal = (
             </Flex>
           ) : null}
           {!isTombstone ? (
-            <Flex justifyContent='space-between' alignItems='center'>
-              <Flex gap='s' alignItems='center'>
+            <Flex
+              justifyContent='space-between'
+              alignItems='center'
+              w='100%'
+              gap='s'
+            >
+              <Flex
+                gap='s'
+                alignItems='center'
+                flex='1 1 0'
+                css={{ minWidth: 0, flexWrap: 'wrap' }}
+              >
                 {isUserPending ? <Skeleton w={80} h={18} /> : null}
                 {!isUserPending && userId ? (
-                  <UserLink
-                    userId={userId}
-                    popover
-                    size='l'
-                    strength='strong'
-                  />
+                  <Box css={{ minWidth: 0 }}>
+                    <UserLink
+                      userId={userId}
+                      popover
+                      size='l'
+                      strength='strong'
+                    />
+                  </Box>
                 ) : null}
                 <Text
                   variant='body'
                   size='s'
                   color='subdued'
-                  css={{ whiteSpace: 'nowrap' }}
+                  css={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                   <Timestamp time={createdAtDate} />{' '}
                   {trackTimestampS !== undefined && !isPreview ? (
@@ -166,12 +178,14 @@ const CommentBlockInternal = (
                   ) : null}
                 </Text>
               </Flex>
-              {userId && (isPreview || !(isPinned || isArtistReacted)) ? (
-                <CommentBadge
-                  isArtist={isCommentByArtist}
-                  commentUserId={userId}
-                />
-              ) : null}
+              <Box css={{ flexShrink: 0 }}>
+                {userId && (isPreview || !(isPinned || isArtistReacted)) ? (
+                  <CommentBadge
+                    isArtist={isCommentByArtist}
+                    commentUserId={userId}
+                  />
+                ) : null}
+              </Box>
             </Flex>
           ) : null}
         </Flex>

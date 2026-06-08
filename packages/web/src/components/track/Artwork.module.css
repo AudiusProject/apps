@@ -28,6 +28,15 @@
   opacity: 0;
   transition: all ease-in-out 0.18s;
 }
+
+/* Empty artwork state: gray background + visible image icon (no skeleton) */
+.artworkWrapper.artworkEmpty .artworkIcon {
+  opacity: 1;
+  background-color: transparent;
+}
+.artworkWrapper.artworkEmpty .artworkIcon path {
+  fill: var(--harmony-static-white);
+}
 .artworkWrapper .artworkIcon > svg,
 .artworkWrapper .artworkIcon > div {
   position: absolute;

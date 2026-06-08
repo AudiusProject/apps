@@ -1,7 +1,14 @@
 import { useRef } from 'react'
 
-import { useTrackByParams, useUser } from '@audius/common/api'
-import { trackPageSelectors, reachabilitySelectors } from '@audius/common/store'
+import {
+  useTrackByParams,
+  usePrefetchTrackComments,
+  usePrefetchTrackPageLineup,
+  useUser
+} from '@audius/common/api'
+import { Kind } from '@audius/common/models'
+import { reachabilitySelectors } from '@audius/common/store'
+import { makeStableUid } from '@audius/common/utils'
 import type { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -16,13 +23,11 @@ import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryCo
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
 import { useRoute } from 'app/hooks/useRoute'
 
-import { RemixContestCountdown } from './RemixContestCountdown'
-import { RemixContestSection } from './RemixContestSection'
+import { TrackContestsSection } from './TrackContestsSection'
 import { TrackScreenDetailsTile } from './TrackScreenDetailsTile'
 import { TrackScreenLineup } from './TrackScreenLineup'
 import { TrackScreenSkeleton } from './TrackScreenSkeleton'
 
-const { getLineup } = trackPageSelectors
 const { getIsReachable } = reachabilitySelectors
 
 export const TrackScreen = () => {
@@ -34,9 +39,23 @@ export const TrackScreen = () => {
   const { data: fetchedTrack } = useTrackByParams(restParams)
   const track = fetchedTrack ?? searchTrack
 
-  const { data: user } = useUser(track?.owner_id)
+  // Kick off the comments fetch as early as possible — on mount, in parallel
+  // with the track/user fetch — so the comment section renders from cache
+  // instead of starting its own fetch only once it mounts (gated behind the
+  // user fetch and the secondary-content gate below). Uses the trackId from
+  // route params when available so it can fire before the track resolves.
+  const paramTrackId =
+    'trackId' in restParams ? restParams.trackId : undefined
+  const trackId = paramTrackId ?? track?.track_id
+  usePrefetchTrackComments(track?.comments_disabled ? null : trackId)
 
-  const lineup = useSelector(getLineup)
+  // Warm the "more by / remixes / you might also like" lineup too. Unlike
+  // comments it can't fire from the bare trackId (it needs the hero track +
+  // owner handle), but hoisting it here lets it start as soon as those resolve
+  // instead of waiting for the ScreenSecondaryContent screen-ready gate.
+  usePrefetchTrackPageLineup(trackId)
+
+  const { data: user } = useUser(track?.owner_id)
 
   if (!track || !user) {
     return (
@@ -56,12 +75,11 @@ export const TrackScreen = () => {
             {/* Track Details */}
             <ScreenPrimaryContent skeleton={<TrackScreenSkeleton />}>
               <Flex gap='l'>
-                <RemixContestCountdown trackId={track_id} />
                 <TrackScreenDetailsTile
                   track={track}
                   user={user}
-                  uid={lineup?.entries?.[0]?.uid}
-                  isLineupLoading={!lineup?.entries?.[0]}
+                  uid={makeStableUid(Kind.TRACKS, track_id, 'TRACK_TRACKS')}
+                  isLineupLoading={false}
                   scrollViewRef={scrollViewRef}
                 />
               </Flex>
@@ -70,11 +88,9 @@ export const TrackScreen = () => {
             {isReachable ? (
               <ScreenSecondaryContent>
                 <Flex gap='2xl'>
-                  {/* Remix Contest */}
-                  <RemixContestSection
-                    trackId={track_id}
-                    scrollRef={scrollViewRef}
-                  />
+                  {/* "Contests" tile rail links to the dedicated contest
+                      screen (Figma 2888-16639). */}
+                  <TrackContestsSection trackId={track_id} />
                   {/* Comments */}
                   {!comments_disabled ? (
                     <Flex flex={3}>

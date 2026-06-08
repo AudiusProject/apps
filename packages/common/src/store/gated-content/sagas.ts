@@ -78,14 +78,14 @@ export function* pollGatedContent({
   while (true) {
     const apiEntity = isAlbum
       ? yield* call(async () => {
-          const { data = [] } = await sdk.full.playlists.getPlaylist({
+          const { data = [] } = await sdk.playlists.getPlaylist({
             playlistId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })
           return transformAndCleanList(data, userCollectionMetadataFromSDK)[0]
         })
       : yield* call(async () => {
-          const { data } = await sdk.full.tracks.getTrack({
+          const { data } = await sdk.tracks.getTrack({
             trackId: Id.parse(contentId),
             userId: OptionalId.parse(currentUserId)
           })
@@ -195,7 +195,7 @@ export function* pollGatedContent({
  * 3. Poll for access for those tracks
  * 4. When access is returned, set those track statuses as 'UNLOCKED'
  */
-function* updateSpecialAccessTracks(
+function* updateFollowGatedTracks(
   trackOwnerId: ID,
   sourceTrackId?: Nullable<ID>
 ) {
@@ -286,7 +286,7 @@ function* handleUnfollowUser(
 function* handleFollowUser(
   action: ReturnType<typeof usersSocialActions.followUser>
 ) {
-  yield* call(updateSpecialAccessTracks, action.userId, action.trackId)
+  yield* call(updateFollowGatedTracks, action.userId, action.trackId)
 }
 
 /**

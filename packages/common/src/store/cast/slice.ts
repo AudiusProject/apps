@@ -1,39 +1,46 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { CastMethod } from './types'
-
-type CastState = {
-  method: CastMethod
-  isCasting: boolean
-}
+import { CastMethod, CastState } from './types'
 
 const initialState: CastState = {
-  method: 'airplay',
-  isCasting: false
+  isCasting: false,
+  method: null,
+  deviceName: null
 }
 
 const slice = createSlice({
   name: 'cast',
   initialState,
   reducers: {
-    updateMethod: (
-      state,
-      {
-        payload: { method }
-      }: PayloadAction<{ method: CastMethod; persist?: boolean }>
-    ) => {
-      state.method = method
-    },
     setIsCasting: (
       state,
-      { payload: { isCasting } }: PayloadAction<{ isCasting: boolean }>
+      {
+        payload: { isCasting, method, deviceName }
+      }: PayloadAction<{
+        isCasting: boolean
+        method?: CastMethod | null
+        deviceName?: string | null
+      }>
     ) => {
-      state.isCasting = isCasting
+      if (isCasting) {
+        state.isCasting = true
+        if (method !== undefined) state.method = method
+        if (deviceName !== undefined) state.deviceName = deviceName
+        return
+      }
+      // Turn-off only takes effect if the caller is referring to the
+      // currently-active method (or didn't specify one). This stops the
+      // AirPlay route-change listener from clearing a chromecast session
+      // that was set by GoogleCast.tsx — and vice versa.
+      if (method && state.method && state.method !== method) return
+      state.isCasting = false
+      state.method = null
+      state.deviceName = null
     }
   }
 })
 
-export const { updateMethod, setIsCasting } = slice.actions
+export const { setIsCasting } = slice.actions
 
 export default slice.reducer
 

@@ -1,11 +1,4 @@
-import type {
-  ID,
-  UID,
-  LineupState,
-  Status,
-  Track,
-  Collection
-} from '../../../models'
+import type { ID, UID, Status } from '../../../models'
 import type { Nullable } from '../../../utils/typeUtils'
 
 export enum CollectionSortMode {
@@ -34,8 +27,6 @@ export type ProfileState = {
   collectionStatus: Status
   collectionSortMode: CollectionSortMode
   profileMeterDismissed: boolean
-  feed: LineupState<Track | Collection>
-  tracks: LineupState<Track>
   error?: string
 }
 
@@ -48,14 +39,16 @@ export enum ProfilePageTabs {
   TRACKS = 'Tracks',
   ALBUMS = 'Albums',
   PLAYLISTS = 'Playlists',
-  REPOSTS = 'Reposts'
+  REPOSTS = 'Reposts',
+  CONTESTS = 'Contests'
 }
 
 export enum ProfilePageTabRoute {
   TRACKS = 'tracks',
   ALBUMS = 'albums',
   PLAYLISTS = 'playlists',
-  REPOSTS = 'reposts'
+  REPOSTS = 'reposts',
+  CONTESTS = 'contests'
 }
 
 export const getTabForRoute = (tabRoute: ProfilePageTabRoute) => {
@@ -68,5 +61,7 @@ export const getTabForRoute = (tabRoute: ProfilePageTabRoute) => {
       return ProfilePageTabs.PLAYLISTS
     case ProfilePageTabRoute.REPOSTS:
       return ProfilePageTabs.REPOSTS
+    case ProfilePageTabRoute.CONTESTS:
+      return ProfilePageTabs.CONTESTS
   }
 }

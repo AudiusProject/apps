@@ -15,6 +15,7 @@ export type FilterButtonScreenParams = {
   onChange: (value: Maybe<string>) => void
   value: string
   screen?: ComponentType<ScreenProps<string>>
+  disableSearch?: boolean
 }
 
 export const FilterButtonScreen = () => {
@@ -24,7 +25,8 @@ export const FilterButtonScreen = () => {
     title,
     onChange: onSubmit,
     value: initialValue,
-    screen: Screen
+    screen: Screen,
+    disableSearch = false
   } = params ?? {}
 
   const [value, setValue] = useState<Maybe<string>>(initialValue)
@@ -47,6 +49,7 @@ export const FilterButtonScreen = () => {
           value={value ?? ''}
           onSubmit={handleSubmit}
           searchText={`Search ${title}`}
+          disableSearch={disableSearch}
           clearable={Boolean(value)}
           onClear={() => setValue(undefined)}
         />

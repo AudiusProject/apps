@@ -46,6 +46,12 @@ type UploadChipProps = {
    */
   variant?: 'nav' | 'card' | 'tile'
   /**
+   * Controls card sizing behavior when variant is `card`.
+   * fixed: legacy 224x312 card dimensions
+   * fluid: responsive card that fills its container while preserving proportions
+   */
+  cardStyle?: 'fixed' | 'fluid'
+  /**
    * Is this upload the user's first of this type
    * */
   source: 'nav' | 'profile' | CreatePlaylistSource
@@ -55,6 +61,7 @@ type UploadChipProps = {
 const UploadChip = ({
   type = 'track',
   variant = 'tile',
+  cardStyle = 'fixed',
   isFirst = false,
   source
 }: UploadChipProps) => {
@@ -125,7 +132,8 @@ const UploadChip = ({
     <Tile
       className={cn(styles.root, {
         [styles.nav]: variant === 'nav',
-        [styles.card]: variant === 'card',
+        [styles.card]: variant === 'card' && cardStyle === 'fixed',
+        [styles.cardFluid]: variant === 'card' && cardStyle === 'fluid',
         [styles.tile]: variant === 'tile'
       })}
       as='button'

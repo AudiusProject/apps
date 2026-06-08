@@ -18,6 +18,13 @@ vars = { SENTRY_DSN = "https://4db9c77b0bd7ae6a935f8bd58c06dad3@o260428.ingest.s
     "https://api.audius.co"
 ] }
 
+# Preview environment for PR deployments (GitHub Actions)
+[env.preview]
+name = "audius-web-ssr-preview"
+vars = { DISCOVERY_NODE_ALLOWLIST = [
+    "https://api.audius.co"
+] }
+
 # Test environment, replace `test` with subdomain
 # Invoke with npx wrangler dev --env test
 [env.test]

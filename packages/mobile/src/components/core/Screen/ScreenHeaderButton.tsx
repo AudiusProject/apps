@@ -8,7 +8,14 @@ type ScreenHeaderButtonProps = Omit<SelectablePillProps, 'type'>
 export const ScreenHeaderButton = (props: ScreenHeaderButtonProps) => {
   return (
     <View>
-      <SelectablePill type='button' isSelected isControlled {...props} />
+      <SelectablePill
+        {...({
+          type: 'button',
+          isSelected: true,
+          isControlled: true,
+          ...props
+        } as SelectablePillProps)}
+      />
     </View>
   )
 }

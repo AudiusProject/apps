@@ -1,54 +1,53 @@
 import { useCallback, useMemo, useState } from 'react'
 
-import { useCurrentAccount } from '@audius/common/api'
-import { CreatePlaylistSource } from '@audius/common/models'
+import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
 import {
-  cacheCollectionsActions,
-  playlistLibraryActions,
-  playlistLibraryHelpers
+  playlistLibraryHelpers,
+  useDuplicatePlaylistModal
 } from '@audius/common/store'
 import {
   IconButton,
+  IconCopy,
   IconFolder,
   IconPlaylists,
   IconPlus,
   PopupMenu,
   PopupMenuItem
 } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router'
 
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { CREATE_PLAYLIST_PAGE } from 'utils/route'
 
-const { createPlaylist } = cacheCollectionsActions
 const { addFolderToLibrary, constructPlaylistFolder } = playlistLibraryHelpers
-const { update: updatePlaylistLibrary } = playlistLibraryActions
 
 const messages = {
   new: 'New',
   newPlaylistOrFolderTooltip: 'New Playlist or Folder',
   createPlaylist: 'Create Playlist',
+  duplicatePlaylist: 'Duplicate Playlist',
   createFolder: 'Create Folder',
-  newPlaylistName: 'New Playlist',
   newFolderName: 'New Folder'
 }
 
 // Allows user to create a playlist or playlist-folder
 export const CreatePlaylistLibraryItemButton = () => {
-  const dispatch = useDispatch()
   const { data: library } = useCurrentAccount({
     select: (account) => account?.playlistLibrary
   })
+  const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
+  const { onOpen: openDuplicatePlaylistModal } = useDuplicatePlaylistModal()
+  const navigate = useNavigate()
   const [isActive, setIsActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const handleSubmitPlaylist = useCallback(() => {
-    dispatch(
-      createPlaylist(
-        { playlist_name: messages.newPlaylistName },
-        CreatePlaylistSource.NAV
-      )
-    )
-  }, [dispatch])
+    navigate(CREATE_PLAYLIST_PAGE)
+  }, [navigate])
+
+  const handleDuplicatePlaylist = useCallback(() => {
+    openDuplicatePlaylistModal({ isAlbum: false })
+  }, [openDuplicatePlaylistModal])
 
   const handleSubmitFolder = useCallback(() => {
     if (!library) return null
@@ -56,8 +55,8 @@ export const CreatePlaylistLibraryItemButton = () => {
       library,
       constructPlaylistFolder(messages.newFolderName)
     )
-    dispatch(updatePlaylistLibrary({ playlistLibrary: newLibrary }))
-  }, [dispatch, library])
+    updatePlaylistLibrary(newLibrary)
+  }, [library, updatePlaylistLibrary])
 
   // Gate triggering popup behind authentication
   const handleClickPill = useRequiresAccountCallback(
@@ -75,12 +74,17 @@ export const CreatePlaylistLibraryItemButton = () => {
         onClick: handleSubmitPlaylist
       },
       {
+        text: messages.duplicatePlaylist,
+        icon: <IconCopy />,
+        onClick: handleDuplicatePlaylist
+      },
+      {
         text: messages.createFolder,
         icon: <IconFolder />,
         onClick: handleSubmitFolder
       }
     ],
-    [handleSubmitPlaylist, handleSubmitFolder]
+    [handleSubmitPlaylist, handleDuplicatePlaylist, handleSubmitFolder]
   )
 
   return (

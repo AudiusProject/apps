@@ -1,7 +1,4 @@
-import {
-  useArtistCoin,
-  transformArtistCoinToTokenInfo
-} from '@audius/common/api'
+import { useFanClub, transformFanClubToTokenInfo } from '@audius/common/api'
 import type { User } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { makeSolanaTransactionLink } from '@audius/common/utils'
@@ -45,8 +42,8 @@ export const SendTokensSuccess = ({
   signature,
   onDone
 }: SendTokensSuccessProps) => {
-  const { data: coin } = useArtistCoin(mint)
-  const tokenInfo = coin ? transformArtistCoinToTokenInfo(coin) : undefined
+  const { data: coin } = useFanClub(mint)
+  const tokenInfo = coin ? transformFanClubToTokenInfo(coin) : undefined
 
   const profilePicture = useProfilePicture({
     userId: selectedUser?.user_id,

@@ -27,6 +27,11 @@ const messages = {
   noMatches: 'No matches'
 }
 
+const defaultMenuOrigins = {
+  anchorOrigin: { horizontal: 'left', vertical: 'bottom' } as const,
+  transformOrigin: { horizontal: 'left', vertical: 'top' } as const
+}
+
 export const FilterButton = forwardRef(function FilterButton<
   Value extends string
 >(props: FilterButtonProps<Value>, ref: Ref<HTMLButtonElement>) {
@@ -77,8 +82,8 @@ export const FilterButton = forwardRef(function FilterButton<
     paddingBottom: spacing.s
   }
   const defaultIconStyles: CSSObject = {
-    width: spacing.unit4,
-    height: spacing.unit4
+    width: spacing.unit3 + spacing.unitHalf,
+    height: spacing.unit3 + spacing.unitHalf
   }
 
   const smallStyles: CSSObject = {
@@ -146,8 +151,6 @@ export const FilterButton = forwardRef(function FilterButton<
       : {})
   }
 
-  const iconCss = size === 'small' ? smallIconStyles : defaultIconStyles
-
   const handleClick = useCallback(() => {
     if (onClick) {
       onClick()
@@ -181,6 +184,11 @@ export const FilterButton = forwardRef(function FilterButton<
         )) as IconComponent)
       : (iconRight ?? (hasOptions ? IconCaretDown : null))
   }, [variant, value, iconRight, hasOptions, onClick, onChange, onReset])
+
+  const iconCss: CSSObject = {
+    ...(size === 'small' ? smallIconStyles : defaultIconStyles),
+    ...(Icon === IconCaretDown ? { marginLeft: spacing.unitHalf } : {})
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -255,6 +263,7 @@ export const FilterButton = forwardRef(function FilterButton<
         anchorRef={anchorRef}
         isVisible={isOpen}
         onClose={() => setIsOpen(false)}
+        {...defaultMenuOrigins}
         PaperProps={menuProps?.PaperProps}
       >
         {children ? (

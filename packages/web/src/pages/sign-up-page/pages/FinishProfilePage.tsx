@@ -8,7 +8,7 @@ import {
 } from '@audius/common/schemas'
 import { MAX_DISPLAY_NAME_LENGTH } from '@audius/common/services'
 import { route } from '@audius/common/utils'
-import { Button, Flex, Paper, Text, useTheme } from '@audius/harmony'
+import { Flex, Paper, Text, useTheme } from '@audius/harmony'
 import { Formik, Form, useFormikContext } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router'
@@ -25,7 +25,6 @@ import {
   getCoverPhotoField,
   getEmailField,
   getHandleField,
-  getLinkedSocialOnFirstPage,
   getNameField,
   getProfileImageField
 } from 'common/store/pages/signon/selectors'
@@ -34,11 +33,10 @@ import { useMedia } from 'hooks/useMedia'
 
 import { AccountHeader } from '../components/AccountHeader'
 import { ImageFieldValue } from '../components/ImageField'
-import { OutOfText } from '../components/OutOfText'
 import { Heading, Page, PageFooter } from '../components/layout'
 import { useFastReferral } from '../hooks/useFastReferral'
 
-const { SIGN_UP_GENRES_PAGE, SIGN_UP_LOADING_PAGE } = route
+const { SIGN_UP_LOADING_PAGE } = route
 
 type FinishProfileValues = {
   profileImage?: ImageFieldValue
@@ -55,11 +53,9 @@ const ImageUploadErrorText = () => {
   if (errors.coverPhoto === finishProfilePageMessages.coverPhotoUploadError) {
     errorText = errors.coverPhoto
   }
-  // Profile image error takes priority
   if (
     errors.profileImage === finishProfilePageMessages.profileImageUploadError
   ) {
-    // If both images have errors, we show a combined error message
     if (errorText !== undefined) {
       errorText = finishProfilePageMessages.bothImageUploadError
     } else {
@@ -88,12 +84,10 @@ export const FinishProfilePage = () => {
   const { value: savedDisplayName } = useSelector(getNameField)
   const handle = useSelector(getHandleField)
   const email = useSelector(getEmailField)
-  const linkedSocialOnFirstPage = useSelector(getLinkedSocialOnFirstPage)
   const savedCoverPhoto = useSelector(getCoverPhotoField)
   const savedProfileImage = useSelector(getProfileImageField)
   const isFastReferral = useFastReferral()
 
-  // If the user comes back from a later page we start with whats in the store
   const initialValues = {
     profileImage: savedProfileImage || undefined,
     coverPhoto: savedCoverPhoto || undefined,
@@ -136,12 +130,10 @@ export const FinishProfilePage = () => {
       }
       dispatch(setFinishedPhase1(true))
       if (isFastReferral) {
-        // Fast referral: create account immediately and skip genre/artist selection
         dispatch(signUp())
-        navigate(SIGN_UP_LOADING_PAGE)
+        navigate(SIGN_UP_LOADING_PAGE, { replace: true })
       } else {
-        // Normal flow: don't create account yet, let user select genres/artists first
-        navigate(SIGN_UP_GENRES_PAGE)
+        navigate('/signup/select-genres', { replace: true })
       }
     },
     [dispatch, isFastReferral, navigate]
@@ -164,14 +156,9 @@ export const FinishProfilePage = () => {
           autoFocusInputRef={displayNameInputRef}
         >
           <Heading
-            prefix={
-              isMobile || linkedSocialOnFirstPage ? null : (
-                <OutOfText numerator={2} denominator={2} />
-              )
-            }
             heading={finishProfilePageMessages.header}
             description={finishProfilePageMessages.description}
-            centered={!isMobile}
+            centered
           />
           <Paper direction='column' style={{ flexShrink: 0 }}>
             <AccountHeader
@@ -194,22 +181,7 @@ export const FinishProfilePage = () => {
               }}
             />
           </Paper>
-          <PageFooter
-            centered
-            sticky
-            buttonProps={{ disabled: !isValid }}
-            postfix={
-              isMobile ? null : (
-                <Button
-                  variant='secondary'
-                  fullWidth
-                  onClick={() => navigate(-1)}
-                >
-                  {finishProfilePageMessages.goBack}
-                </Button>
-              )
-            }
-          />
+          <PageFooter centered sticky buttonProps={{ disabled: !isValid }} />
         </Page>
       )}
     </Formik>

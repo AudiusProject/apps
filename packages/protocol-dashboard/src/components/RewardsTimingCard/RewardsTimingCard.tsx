@@ -95,6 +95,7 @@ export const RewardsTimingCard = () => {
           p='xl'
           css={{ flexGrow: 1 }}
           justifyContent='space-between'
+          alignItems='center'
           wrap='wrap'
           gap='l'
         >

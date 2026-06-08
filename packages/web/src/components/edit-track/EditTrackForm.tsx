@@ -80,7 +80,7 @@ const messages = {
 
 type EditTrackFormProps = {
   initialValues: TrackEditFormValues
-  onSubmit: (values: TrackEditFormValues) => void
+  onSubmit: (values: TrackEditFormValues) => void | Promise<void>
   hideContainer?: boolean
   disableNavigationPrompt?: boolean
 }
@@ -118,7 +118,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
 
       if (replaceFile) {
         // Replace audio confirmation is handled in the edit track page if needed
-        onSubmit(values)
+        return onSubmit(values)
       } else if (usersMayLoseAccess) {
         openHideContentConfirmation({ confirmCallback })
       } else if (isToBePublished && isInitiallyScheduled) {
@@ -126,7 +126,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
       } else if (isToBePublished) {
         openPublishConfirmation({ contentType: 'track', confirmCallback })
       } else {
-        onSubmit(values)
+        return onSubmit(values)
       }
     },
     [

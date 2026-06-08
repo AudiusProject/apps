@@ -1,7 +1,7 @@
 import { SquareSizes, UserMetadata } from '@audius/common/models'
-import { Flex, Text } from '@audius/harmony'
+import { Flex, Text, Image } from '@audius/harmony'
+import cn from 'classnames'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import UserBadges from 'components/user-badges/UserBadges'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
@@ -14,11 +14,9 @@ export const ArtistInfo = ({ user }: { user: UserMetadata }) => {
   })
   return (
     <Flex gap='m' alignItems='center' justifyContent='flex-start'>
-      <DynamicImage
-        wrapperClassName={styles.profilePictureWrapper}
-        skeletonClassName={styles.profilePictureSkeleton}
-        className={styles.profilePicture}
-        image={profilePicture}
+      <Image
+        className={cn(styles.profilePictureWrapper, styles.profilePicture)}
+        src={profilePicture}
       />
       <Flex direction='column' gap='xs'>
         <Flex gap='xs' alignItems='center' justifyContent='flex-start'>

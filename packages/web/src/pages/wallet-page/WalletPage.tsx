@@ -13,6 +13,7 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { WalletCoinsList } from 'pages/wallet-page/components/WalletCoinsList'
 
 import { LinkedWallets } from './components/LinkedWallets'
+import { SecureWalletReminderModal } from './components/SecureWalletReminderModal'
 
 const messages = {
   title: 'Wallet'
@@ -43,6 +44,10 @@ export const WalletPage = () => {
       p={isMobile ? 'l' : undefined}
       w='100%'
       css={{
+        minWidth: isMobile ? 0 : 332,
+        maxWidth: '100%',
+        containerType: 'inline-size',
+        containerName: 'wallet',
         '@media (min-width: 768px) and (max-width: 1024px)': {
           margin: '0 auto',
           marginBottom: spacing.xl
@@ -52,6 +57,7 @@ export const WalletPage = () => {
       <AccountBalance />
       <WalletCoinsList />
       <LinkedWallets />
+      <SecureWalletReminderModal />
     </Flex>
   )
 

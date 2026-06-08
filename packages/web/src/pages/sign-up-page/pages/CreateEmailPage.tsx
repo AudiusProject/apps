@@ -3,15 +3,12 @@ import { useCallback, useMemo } from 'react'
 import { useQueryContext } from '@audius/common/api'
 import { createEmailPageMessages } from '@audius/common/messages'
 import { emailSchema } from '@audius/common/schemas'
-import { useExternalWalletSignUpModal } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
-  Box,
   Button,
   Flex,
+  IconAudiusLogoHorizontal,
   IconArrowRight,
-  IconAudiusLogoHorizontalColor,
-  IconMetamask,
   Text,
   TextLink
 } from '@audius/harmony'
@@ -19,40 +16,38 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
-import { useWindowSize } from 'react-use'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import audiusLogoColored from 'assets/img/audiusLogoColored.png'
-import audiusLogoWhite from 'assets/img/audiusLogoWhite.png'
 import { setValueField, startSignUp } from 'common/store/pages/signon/actions'
 import { getEmailField } from 'common/store/pages/signon/selectors'
-import PreloadImage from 'components/preload-image/PreloadImage'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { identify } from 'services/analytics'
-import { isDarkMode } from 'utils/theme/theme'
 
-import { ExternalWalletSignUpModal } from '../components/ExternalWalletSignUpModal'
 import { NewEmailField } from '../components/NewEmailField'
-import { Heading, Page } from '../components/layout'
+import { Heading } from '../components/layout'
 
 const { SIGN_IN_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 
-const smallDesktopWindowHeight = 900
+const messages = {
+  ...createEmailPageMessages,
+  title: 'Sign Up',
+  mobileTitle: 'Sign Up For Audius',
+  alreadyHaveAccount: 'Already have an account?',
+  logIn: 'Log In',
+  mobileLogIn: 'Sign In',
+  continueButton: 'Continue',
+  mobileSignUpButton: 'Sign Up Free'
+}
 
 type SignUpEmailValues = {
   email: string
-  withMetaMask?: boolean
 }
 
 export const CreateEmailPage = () => {
   const { isMobile } = useMedia()
-  const { height: windowHeight } = useWindowSize()
-  const isSmallDesktop = windowHeight < smallDesktopWindowHeight
   const dispatch = useDispatch()
   const navigate = useNavigateToPage()
-  const { onOpen: openExternalWalletSignUpModal } =
-    useExternalWalletSignUpModal()
   const existingEmailValue = useSelector(getEmailField)
   const queryContext = useQueryContext()
   const queryClient = useQueryClient()
@@ -68,26 +63,17 @@ export const CreateEmailPage = () => {
 
   const handleSubmit = useCallback(
     async (values: SignUpEmailValues) => {
-      const { email, withMetaMask } = values
+      const { email } = values
       dispatch(startSignUp())
       dispatch(setValueField('email', email))
-      identify({
-        email
-      })
-      if (withMetaMask) {
-        openExternalWalletSignUpModal()
-      } else {
-        navigate(SIGN_UP_PASSWORD_PAGE)
-      }
+      identify({ email })
+      navigate(SIGN_UP_PASSWORD_PAGE)
     },
-    [dispatch, navigate, openExternalWalletSignUpModal]
+    [dispatch, navigate]
   )
 
-  const signInLink = (
-    <TextLink variant='visible' asChild>
-      <Link to={SIGN_IN_PAGE}>{createEmailPageMessages.signIn}</Link>
-    </TextLink>
-  )
+  const logoHeight = isMobile ? 48 : 56
+  const logoWidth = isMobile ? 236 : 275
 
   return (
     <Formik
@@ -97,80 +83,78 @@ export const CreateEmailPage = () => {
       validateOnMount={!!existingEmailValue}
       validateOnChange={false}
     >
-      {({ isSubmitting, setFieldValue, submitForm }) => (
-        <Page as={Form} pt={isMobile ? 'xl' : 'unit13'}>
-          <Box alignSelf='center'>
-            {isMobile || isSmallDesktop ? (
-              <IconAudiusLogoHorizontalColor />
-            ) : (
-              <PreloadImage
-                src={isDarkMode() ? audiusLogoWhite : audiusLogoColored}
-                alt='Audius Colored Logo'
-                css={{
-                  height: 160,
-                  width: 160,
-                  objectFit: 'contain'
-                }}
-              />
-            )}
-          </Box>
-          <Heading
-            heading={createEmailPageMessages.title}
-            tag='h1'
-            centered={isMobile}
-          />
-          <Flex direction='column' gap='l'>
-            <NewEmailField />
-          </Flex>
-          <Flex direction='column' gap='l'>
-            <Button
-              variant='primary'
-              type='submit'
-              fullWidth
-              iconRight={IconArrowRight}
-              isLoading={isSubmitting}
-              onClick={() => {
-                setFieldValue('withMetaMask', false)
-                submitForm()
-              }}
-            >
-              {createEmailPageMessages.signUp}
-            </Button>
-
-            <Text
-              variant='body'
-              size={isMobile ? 'm' : 'l'}
-              textAlign={isMobile ? 'center' : undefined}
-            >
-              {createEmailPageMessages.haveAccount} {signInLink}
-            </Text>
-          </Flex>
-          {!isMobile && window.ethereum ? (
-            <Flex direction='column' gap='s'>
+      {({ isSubmitting }) =>
+        isMobile ? (
+          <Flex
+            as={Form}
+            direction='column'
+            alignItems='center'
+            w='100%'
+            css={{ gap: 48, padding: '80px 24px' }}
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.mobileTitle} tag='h1' centered />
+            <Flex direction='column' gap='l' w='100%'>
+              <NewEmailField />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
               <Button
-                variant='secondary'
-                iconRight={IconMetamask}
-                isStaticIcon
-                fullWidth
+                variant='primary'
                 type='submit'
-                onClick={() => {
-                  setFieldValue('withMetaMask', true)
-                  submitForm()
-                }}
+                iconRight={IconArrowRight}
+                fullWidth
+                isLoading={isSubmitting}
               >
-                {createEmailPageMessages.signUpMetamask}
+                {messages.mobileSignUpButton}
               </Button>
-              <ExternalWalletSignUpModal />
-              <Text size='s' variant='body'>
-                {createEmailPageMessages.metaMaskNotRecommended}{' '}
-                <TextLink variant='visible'>
-                  {createEmailPageMessages.learnMore}
+              <Text variant='body' size='m' color='subdued'>
+                {messages.alreadyHaveAccount}{' '}
+                <TextLink variant='visible' asChild>
+                  <Link to={SIGN_IN_PAGE}>{messages.mobileLogIn}</Link>
                 </TextLink>
               </Text>
             </Flex>
-          ) : null}
-        </Page>
-      )}
+          </Flex>
+        ) : (
+          <Flex
+            as={Form}
+            direction='column'
+            gap='2xl'
+            alignItems='center'
+            p='2xl'
+          >
+            <IconAudiusLogoHorizontal
+              height={logoHeight}
+              width={logoWidth}
+              color='default'
+            />
+            <Heading heading={messages.title} tag='h1' centered />
+            <Flex direction='column' gap='l' w='100%'>
+              <NewEmailField />
+            </Flex>
+            <Flex direction='column' gap='l' w='100%' alignItems='center'>
+              <Text variant='body' size='l' color='subdued'>
+                {messages.alreadyHaveAccount}{' '}
+                <TextLink variant='visible' asChild>
+                  <Link to={SIGN_IN_PAGE}>{messages.logIn}</Link>
+                </TextLink>
+              </Text>
+              <Button
+                variant='primary'
+                type='submit'
+                fullWidth
+                isLoading={isSubmitting}
+              >
+                {messages.continueButton}
+              </Button>
+            </Flex>
+          </Flex>
+        )
+      }
     </Formik>
   )
 }

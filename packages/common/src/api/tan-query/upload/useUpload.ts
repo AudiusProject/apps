@@ -4,12 +4,7 @@ import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'
-import {
-  Name,
-  type StemUploadWithFile,
-  isContentFollowGated,
-  Feature
-} from '~/models'
+import { Name, type StemUploadWithFile, isContentFollowGated } from '~/models'
 import {
   type TrackForUpload,
   uploadActions,
@@ -165,8 +160,7 @@ export const useUpload = (
   const dispatch = useDispatch()
   const {
     audiusSdk,
-    analytics: { make, track },
-    reportToSentry
+    analytics: { make, track }
   } = useQueryContext()
 
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
@@ -200,7 +194,7 @@ export const useUpload = (
                 ? (t.metadata.artwork.source as 'unsplash' | 'original')
                 : 'original',
             trackId: t.metadata.track_id!,
-            genre: t.metadata.genre,
+            genre: t.metadata.genre ?? '',
             mood: t.metadata.mood ?? undefined,
             size: t.file.size ?? -1,
             fileType: t.file.type ?? '',
@@ -524,19 +518,7 @@ export const useUpload = (
               kind: uploadType === UploadType.ALBUM ? 'album' : 'playlist'
             })
           )
-          reportToSentry({
-            error: err as Error,
-            name: 'Upload: Collection Publish',
-            additionalInfo: {
-              collectionType: uploadType,
-              trackCount: tracks.length,
-              tracks: tracks.map((t) => ({
-                title: t.metadata.title,
-                hasStems: !!t.metadata.stems?.length
-              }))
-            },
-            feature: Feature.Upload
-          })
+          console.error('Upload: Collection Publish', err as Error)
           dispatch(uploadTracksFailed())
           onError?.(err as Error)
         }
@@ -552,7 +534,6 @@ export const useUpload = (
       publishTracksAsync,
       uploadCollectionArtwork,
       publishCollectionAsync,
-      reportToSentry,
       onError,
       onSuccess
     ]

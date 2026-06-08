@@ -7,9 +7,18 @@
   justify-content: left;
 }
 
-.filterContainer {
-  transition: all 0.5s;
-  padding-bottom: var(--harmony-unit-5);
+.tableHeaderFilterContainer {
+  width: calc(100% - 8px);
+  max-width: 100%;
+  margin-left: 8px;
+}
+
+.tableHeaderFilterContainer > div {
+  width: 100%;
+}
+
+.tableHeaderFilterContainer > div > div {
+  width: 100%;
 }
 
 /* Body Content Wrapper */
@@ -17,6 +26,8 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  container-type: inline-size;
+  container-name: library-content;
 }
 
 /* Track Table */
@@ -29,10 +40,52 @@
   overflow: hidden;
 }
 
+.libraryTrackTableWrapper {
+  border: 1px solid var(--harmony-n-100);
+}
+
 /* Albums */
 .cardsContainer {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--harmony-unit-6) var(--harmony-unit-4);
   margin-bottom: var(--harmony-unit-4);
+  min-width: 180px;
+}
+
+.cardsContainer > * {
+  flex: 0 0 calc((100% - (var(--harmony-unit-4) * 3)) / 4);
+  max-width: calc((100% - (var(--harmony-unit-4) * 3)) / 4);
+}
+
+.createPlaylistCardContainer {
+  width: 100%;
+}
+
+@container library-content (max-width: 880px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+    max-width: calc((100% - (var(--harmony-unit-4) * 2)) / 3);
+  }
+}
+
+@container library-content (max-width: 640px) {
+  .cardsContainer > * {
+    flex: 0 0 calc((100% - var(--harmony-unit-4)) / 2);
+    max-width: calc((100% - var(--harmony-unit-4)) / 2);
+  }
+}
+
+@container library-content (max-width: 380px) {
+  .cardsContainer > * {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .createPlaylistCardContainer button {
+    aspect-ratio: auto;
+    height: auto;
+  }
 }
 
 .playButtonContainer {
@@ -82,6 +135,6 @@
 
 .headerBottomBarContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: end;
 }

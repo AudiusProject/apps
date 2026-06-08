@@ -1,4 +1,4 @@
-import { PlaybackRate } from '~/store/player'
+import { PlaybackRate } from '~/store/playback'
 
 import { Nullable } from '../utils'
 
@@ -15,7 +15,12 @@ export enum AudioError {
 
 export type AudioPlayer = {
   audio: HTMLAudioElement
-  load: (duration: number, onEnd: () => void, mp3Url: Nullable<string>) => void
+  load: (
+    duration: number,
+    onEnd: () => void,
+    mp3Url: Nullable<string>,
+    loadTimeoutMs?: number
+  ) => void
   play: () => void
   pause: () => void
   stop: () => void

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Audius Auth (Sign-In)",
+    "slug": "audius-auth-sign-in",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "audiusauth",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#ffffff" } }
+  }
+}

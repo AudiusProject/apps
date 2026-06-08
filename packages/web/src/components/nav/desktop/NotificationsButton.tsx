@@ -23,7 +23,11 @@ const messages = {
   label: (count: number) => `${count} unread notifications`
 }
 
-export const NotificationsButton = () => {
+type NotificationsButtonProps = {
+  size?: 'xs' | 's' | 'm' | 'l' | 'xl'
+}
+
+export const NotificationsButton = ({ size }: NotificationsButtonProps) => {
   const { data: notificationCount = 0 } = useNotificationUnreadCount()
   const hasAccount = useHasAccount()
   const { data: isAccountComplete = false } = useCurrentAccountUser({
@@ -76,6 +80,7 @@ export const NotificationsButton = () => {
         icon={IconNotificationOn}
         aria-label={messages.label(notificationCount)}
         isActive={isOpen}
+        size={size}
       />
     )
     if (shouldShowCount) {
@@ -93,7 +98,8 @@ export const NotificationsButton = () => {
     handleToggleNotificationPanel,
     isOpen,
     shouldShowCount,
-    onOpen
+    onOpen,
+    size
   ])
 
   return (

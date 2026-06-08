@@ -40,6 +40,22 @@
   justify-content: space-between;
   padding: var(--harmony-unit-4);
   gap: var(--harmony-unit-3);
+  cursor: pointer;
+  transition: background-color var(--harmony-quick);
+}
+
+.suggestedTrack:hover,
+.suggestedTrack:focus-visible {
+  background-color: var(--harmony-n-50);
+}
+
+.suggestedTrack:focus {
+  outline: none;
+}
+
+.suggestedTrack:focus-visible {
+  outline: 2px solid var(--harmony-focus, var(--harmony-secondary));
+  outline-offset: -2px;
 }
 
 .trackDetails {
@@ -53,6 +69,36 @@
   width: var(--harmony-unit-10);
   border-radius: 2px;
   border: 0.5px solid var(--harmony-n-100);
+}
+
+.artworkWrapper {
+  position: relative;
+  height: var(--harmony-unit-10);
+  width: var(--harmony-unit-10);
+  flex-shrink: 0;
+}
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity var(--harmony-quick);
+  pointer-events: none;
+}
+
+.suggestedTrack:hover .playOverlay,
+.suggestedTrack:focus-visible .playOverlay,
+.playOverlay.isPlaying {
+  opacity: 1;
+}
+
+.userLinkWrapper {
+  display: inline-flex;
 }
 
 .trackInfo {
@@ -112,4 +158,9 @@
 .suggestedTrackSkeleton {
   composes: suggestedTrack;
   height: 72px;
+  cursor: default;
+}
+
+.suggestedTrackSkeleton:hover {
+  background-color: transparent;
 }

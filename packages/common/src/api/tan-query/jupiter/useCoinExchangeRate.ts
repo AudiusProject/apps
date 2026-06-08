@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
 import { FixedDecimal } from '@audius/fixed-decimal'
-import type { AudiusSdk } from '@audius/sdk'
+import type { AudiusSdkWithServices } from '@audius/sdk'
 import { QuoteResponse, SwapMode } from '@jup-ag/api'
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -116,7 +116,7 @@ export const getDirectQuote = async (
     swapMode?: SwapMode
   },
   queryClient: QueryClient,
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
 ): Promise<CoinExchangeRateResponse> => {
   const { hasPool: inputHasPool } = getCoinPoolState(
     params.inputMint,
@@ -172,7 +172,7 @@ export const getIndirectQuoteViaAudio = async (
     swapMode?: SwapMode
   },
   queryClient: QueryClient,
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
 ): Promise<CoinExchangeRateResponse> => {
   const { hasPool: inputHasPool } = getCoinPoolState(
     params.inputMint,
@@ -273,7 +273,7 @@ export const getQuoteViaMeteoraDBC = async (
     amountUi: number
     swapMode?: SwapMode
   },
-  sdk: AudiusSdk
+  sdk: AudiusSdkWithServices
 ): Promise<JupiterQuoteResult> => {
   const { inputMint, outputMint, inputDecimals, outputDecimals, amountUi } =
     params

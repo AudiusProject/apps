@@ -1,4 +1,4 @@
-import { full, Id, OptionalId } from '@audius/sdk'
+import { GetAlbumsByUserSortMethodEnum, Id, OptionalId } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -21,7 +21,7 @@ import { useCurrentUserId } from './account/useCurrentUserId'
 type GetAlbumsOptions = {
   userId: number | null | undefined
   pageSize?: number
-  sortMethod?: full.GetAlbumsByUserSortMethodEnum
+  sortMethod?: GetAlbumsByUserSortMethodEnum
   query?: string
 }
 
@@ -58,7 +58,7 @@ export const useUserAlbums = (
 
       const sdk = await audiusSdk()
 
-      const { data } = await sdk.full.users.getAlbumsByUser({
+      const { data } = await sdk.users.getAlbumsByUser({
         id: Id.parse(userId),
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
@@ -82,12 +82,23 @@ export const useUserAlbums = (
     enabled: options?.enabled !== false && !!userId
   })
 
-  const { data: collections } = useCollections(queryRes.data)
+  const {
+    data: collections,
+    isPending: isCollectionsPending,
+    isLoading: isCollectionsLoading
+  } = useCollections(queryRes.data)
+
+  // The ID query can resolve before the per-collection entity queries do; if
+  // we only reported `queryRes.isPending` the consumer would see an empty
+  // `data` array in that gap and flash a "no albums" state.
+  const hasPendingCollections =
+    (queryRes.data?.length ?? 0) > 0 && isCollectionsPending
 
   return {
     data: collections,
-    isPending: queryRes.isPending,
-    isLoading: queryRes.isLoading,
+    isPending: queryRes.isPending || hasPendingCollections,
+    isLoading:
+      queryRes.isLoading || (hasPendingCollections && isCollectionsLoading),
     hasNextPage: queryRes.hasNextPage,
     isFetchingNextPage: queryRes.isFetchingNextPage,
     fetchNextPage: queryRes.fetchNextPage

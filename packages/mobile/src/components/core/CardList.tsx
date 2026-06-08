@@ -25,12 +25,24 @@ export type CardListProps<ItemT> = Omit<FlatListProps<ItemT>, 'data'> & {
   // Use carousel spacing to override the parent's margins
   // e.g. make carousel start and end at edge of the screen
   carouselSpacing?: number
+
+  // Override the per-item slot width in horizontal mode. Defaults to
+  // `spacing(43)` (172px), which is right for small thumbnail-style cards
+  // (tracks, playlists) but too narrow for the redesigned contest card.
+  horizontalCardWidth?: number | `${number}%`
 }
 
 export type LoadingCard = { _loading: true }
 
-const getSkeletonData = (skeletonCount = 6): LoadingCard[] => {
-  return Array(Math.min(skeletonCount, 6)).fill({ _loading: true })
+const MAX_INITIAL_SKELETON_CARDS = 12
+
+const getSkeletonData = (requestedCount?: number): LoadingCard[] => {
+  const defaultCount = 6
+  const count = Math.min(
+    Math.max(requestedCount ?? defaultCount, defaultCount),
+    MAX_INITIAL_SKELETON_CARDS
+  )
+  return Array.from({ length: count }, () => ({ _loading: true }))
 }
 
 const DefaultLoadingCard = () => null
@@ -53,11 +65,12 @@ const useStyles = makeStyles(({ spacing }) => ({
     flexGrow: 0
   },
   cardHorizontal: {
-    width: spacing(43),
     paddingRight: spacing(3),
     paddingBottom: spacing(3)
   }
 }))
+
+const DEFAULT_HORIZONTAL_CARD_WIDTH = 172
 
 export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
   const {
@@ -71,6 +84,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
     totalCount,
     horizontal: isHorizontal = false,
     carouselSpacing = 0,
+    horizontalCardWidth = DEFAULT_HORIZONTAL_CARD_WIDTH,
     ...other
   } = props
 
@@ -87,7 +101,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
 
   const data = useMemo(() => {
     const skeletonData = isLoading ? getSkeletonData(totalCount) : []
-    const moreSkeletonData = isLoadingMore ? getSkeletonData(2) : []
+    const moreSkeletonData = isLoadingMore ? getSkeletonData(6) : []
 
     return [...(dataProp ?? []), ...skeletonData, ...moreSkeletonData]
   }, [dataProp, isLoading, isLoadingMore, totalCount])
@@ -102,7 +116,13 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
         )
 
       return (
-        <View style={isHorizontal ? styles.cardHorizontal : styles.card}>
+        <View
+          style={
+            isHorizontal
+              ? [styles.cardHorizontal, { width: horizontalCardWidth }]
+              : styles.card
+          }
+        >
           {itemElement}
         </View>
       )
@@ -112,8 +132,20 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
       renderItem,
       styles.card,
       styles.cardHorizontal,
-      isHorizontal
+      isHorizontal,
+      horizontalCardWidth
     ]
+  )
+
+  const keyExtractor = useCallback(
+    (item: ItemT | LoadingCard, index: number) => {
+      if ('_loading' in item) return `loading-${index}`
+      const id =
+        (item as { id?: string | number; playlist_id?: string | number }).id ??
+        (item as { playlist_id?: string | number }).playlist_id
+      return id != null ? String(id) : String(index)
+    },
+    []
   )
 
   if (isHorizontal) {
@@ -129,6 +161,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
           ref={ref}
           data={data}
           renderItem={handleRenderItem}
+          keyExtractor={keyExtractor}
           horizontal
           {...(other as Partial<CardListProps<ItemT | LoadingCard>>)}
         />
@@ -143,6 +176,7 @@ export function CardList<ItemT extends {}>(props: CardListProps<ItemT>) {
       ref={ref}
       data={data}
       renderItem={handleRenderItem}
+      keyExtractor={keyExtractor}
       numColumns={2}
       {...(other as Partial<CardListProps<ItemT | LoadingCard>>)}
     />

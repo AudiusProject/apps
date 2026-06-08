@@ -31,7 +31,6 @@ const messages = {
 }
 
 export const CosignChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -129,9 +128,7 @@ export const CosignChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={false}
     />
   )

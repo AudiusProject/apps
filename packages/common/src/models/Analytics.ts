@@ -1,6 +1,7 @@
 import { ChatPermission, Genre } from '@audius/sdk'
 
 import { FeedFilter } from '~/models/FeedFilter'
+import { FeedTab } from '~/models/FeedTab'
 import { ID, PlayableType } from '~/models/Identifiers'
 import { TimeRange } from '~/models/TimeRange'
 import { WalletAddress } from '~/models/Wallet'
@@ -21,6 +22,7 @@ export type IdentifyTraits = {
   name?: string
   email?: string
   userId?: ID
+  queue_new_feature_badge?: 'on' | 'off'
 }
 
 export type AnalyticsEvent = {
@@ -38,34 +40,6 @@ export enum Name {
   CREATE_ACCOUNT_OPEN = 'Create Account: Open',
   // When the user continues past the email page
   CREATE_ACCOUNT_COMPLETE_EMAIL = 'Create Account: Complete Email',
-  // When the user continues past the password page
-  CREATE_ACCOUNT_COMPLETE_PASSWORD = 'Create Account: Complete Password',
-  // When the user starts integrating with twitter
-  CREATE_ACCOUNT_START_TWITTER = 'Create Account: Start Twitter',
-  // When the user successfully continues past the "twitter connection page"
-  CREATE_ACCOUNT_COMPLETE_TWITTER = 'Create Account: Complete Twitter',
-  // When the user closed the twitter oauth modal
-  CREATE_ACCOUNT_CLOSED_TWITTER = 'Create Account: Closed Twitter',
-  // When the user encounters an error during twitter oauth
-  CREATE_ACCOUNT_TWITTER_ERROR = 'Create Account: Twitter Error',
-  // When the user starts integrating with instagram
-  CREATE_ACCOUNT_START_INSTAGRAM = 'Create Account: Start Instagram',
-  // When the user continues past the "instagram connection page"
-  CREATE_ACCOUNT_COMPLETE_INSTAGRAM = 'Create Account: Complete Instagram',
-  // When the user closed the instagram oauth modal
-  CREATE_ACCOUNT_CLOSED_INSTAGRAM = 'Create Account: Closed Instagram',
-  // When the user encounters an error during instagram oauth
-  CREATE_ACCOUNT_INSTAGRAM_ERROR = 'Create Account: Error Instagram',
-  // When the user starts integrating with tiktok
-  CREATE_ACCOUNT_START_TIKTOK = 'Create Account: Start TikTok',
-  // When the user continues past the "tiktok connection page"
-  CREATE_ACCOUNT_COMPLETE_TIKTOK = 'Create Account: Complete TikTok',
-  // When the user closes the tiktok oauth modal
-  CREATE_ACCOUNT_CLOSED_TIKTOK = 'Create Account: Closed TikTok',
-  // Errors encountered during tiktok oauth
-  CREATE_ACCOUNT_TIKTOK_ERROR = 'Create Account: TikTok Error',
-  // When the user continues past the "profile info page"
-  CREATE_ACCOUNT_COMPLETE_PROFILE = 'Create Account: Complete Profile',
   // When the user uploads a profile photo in signup
   CREATE_ACCOUNT_UPLOAD_PROFILE_PHOTO = 'Create Account: Upload Profile Photo',
   // When the user has an error uploading their profile photo
@@ -80,16 +54,12 @@ export enum Name {
   CREATE_ACCOUNT_FOLLOW_ARTIST = 'Create Account: Follow Artist',
   // When the user clicks to preview a song from an artist on the follow artists page
   CREATE_ACCOUNT_ARTIST_PREVIEWED = 'Create Account: Artist Previewed',
-  // When the user continues past the follow page
-  CREATE_ACCOUNT_COMPLETE_FOLLOW = 'Create Account: Complete Follow',
   // When the user continues past the loading page
   CREATE_ACCOUNT_COMPLETE_CREATING = 'Create Account: Complete Creating',
   // When the user creates a guest account
   CREATE_ACCOUNT_COMPLETE_GUEST_CREATING = 'Create Account: Complete Guest Creating',
   // When the user completes a guest profile for a full user
   CREATE_ACCOUNT_COMPLETE_GUEST_PROFILE = 'Create Account: Complete Guest Profile',
-  // When the user continues past the entire signup modal
-  CREATE_ACCOUNT_FINISH = 'Create Account: Finish',
   // When the user gets rate limited during signup auth
   CREATE_ACCOUNT_RATE_LIMIT = 'Create Account: Rate Limit',
   // When the user gets blocked by AAO during the signup path
@@ -106,22 +76,9 @@ export enum Name {
 
   // Settings
   SETTINGS_CHANGE_THEME = 'Settings: Change Theme',
-  SETTINGS_START_TWITTER_OAUTH = 'Settings: Start Twitter OAuth',
-  SETTINGS_COMPLETE_TWITTER_OAUTH = 'Settings: Complete Twitter OAuth',
-  SETTINGS_START_INSTAGRAM_OAUTH = 'Settings: Start Instagram OAuth',
-  SETTINGS_COMPLETE_INSTAGRAM_OAUTH = 'Settings: Complete Instagram OAuth',
-  SETTINGS_START_TIKTOK_OAUTH = 'Settings: Start TikTok OAuth',
-  SETTINGS_COMPLETE_TIKTOK_OAUTH = 'Settings: Complete TikTok OAuth',
   SETTINGS_RESEND_ACCOUNT_RECOVERY = 'Settings: Resend Account Recovery',
-  SETTINGS_START_CHANGE_PASSWORD = 'Settings: Start Change Password',
   SETTINGS_COMPLETE_CHANGE_PASSWORD = 'Settings: Complete Change Password',
   SETTINGS_LOG_OUT = 'Settings: Log Out',
-
-  // TikTok
-  // TODO: deprecate the following 3 metrics in favor of the duped CREATE_ACCOUNT ones
-  TIKTOK_START_OAUTH = 'TikTok: Start TikTok OAuth',
-  TIKTOK_COMPLETE_OAUTH = 'TikTok: Complete TikTok OAuth',
-  TIKTOK_OAUTH_ERROR = 'TikTok: TikTok OAuth Error',
 
   // Audius OAuth Login Page
   AUDIUS_OAUTH_START = 'Audius Oauth: Open Login (authenticate)',
@@ -152,7 +109,6 @@ export enum Name {
   ACCOUNT_HEALTH_UPLOAD_COVER_PHOTO = 'Account Health: Upload Cover Photo',
   ACCOUNT_HEALTH_UPLOAD_PROFILE_PICTURE = 'Account Health: Upload Profile Picture',
   ACCOUNT_HEALTH_DOWNLOAD_DESKTOP = 'Account Health: Download Desktop',
-  ACCOUNT_HEALTH_CLICK_APP_CTA_BANNER = 'Account Health: App CTA Banner',
 
   // TOS
   BANNER_TOS_CLICKED = 'Banner TOS Clicked',
@@ -179,9 +135,6 @@ export enum Name {
   DELETE = 'Delete',
 
   // Folders
-  FOLDER_OPEN_CREATE = 'Folder: Open Create Playlist Folder',
-  FOLDER_SUBMIT_CREATE = 'Folder: Submit Create Playlist Folder',
-  FOLDER_CANCEL_CREATE = 'Folder: Cancel Create Playlist Folder',
   FOLDER_OPEN_EDIT = 'Folder: Open Edit Playlist Folder',
   FOLDER_SUBMIT_EDIT = 'Folder: Submit Edit Playlist Folder',
   FOLDER_DELETE = 'Folder: Delete Playlist Folder',
@@ -198,26 +151,21 @@ export enum Name {
   // Note that upload is considered complete if it is explicitly rejected
   // by the node receiving the file (HTTP 403).
   TRACK_UPLOAD_COMPLETE_UPLOAD = 'Track Upload: Complete Upload',
-  TRACK_UPLOAD_COPY_LINK = 'Track Upload: Copy Link',
-  TRACK_UPLOAD_SHARE_WITH_FANS = 'Track Upload: Share with your fans',
   TRACK_UPLOAD_VIEW_TRACK_PAGE = 'Track Upload: View Track page',
   TWEET_FIRST_UPLOAD = 'Tweet First Upload',
 
   // Upload success tracking
   TRACK_UPLOAD_SUCCESS = 'Track Upload: Success',
   TRACK_UPLOAD_FAILURE = 'Track Upload: Failure',
-  TRACK_UPLOAD_REJECTED = 'Track Upload: Rejected',
 
   // Gated Track Uploads
   TRACK_UPLOAD_FOLLOW_GATED = 'Track Upload: Follow Gated',
   TRACK_UPLOAD_USDC_GATED = 'Track Upload: USDC Gated',
   TRACK_UPLOAD_TOKEN_GATED = 'Track Upload: Token Gated',
-  TRACK_UPLOAD_CLICK_USDC_WAITLIST_LINK = 'Track Upload: Clicked USDC Waitlist Link',
   // Download-Only Gated Track Uploads
   TRACK_UPLOAD_FOLLOW_GATED_DOWNLOAD = 'Track Upload: Follow Gated Download',
   TRACK_UPLOAD_USDC_GATED_DOWNLOAD = 'Track Upload: USDC Gated Download',
   TRACK_UPLOAD_TOKEN_GATED_DOWNLOAD = 'Track Upload: Token Gated Download',
-  TRACK_UPLOAD_CLICK_USDC_DOWNLOAD_WAITLIST_LINK = 'Track Upload: Clicked USDC Download Waitlist Link',
 
   // Track Downloads
   TRACK_DOWNLOAD_CLICKED_DOWNLOAD_ALL = 'Track Download: Clicked Download All',
@@ -235,9 +183,6 @@ export enum Name {
   // Collection Edits
   COLLECTION_EDIT_ACCESS_CHANGED = 'Collection Edit: Access Changed',
   COLLECTION_EDIT = 'Collection Edit: General Edits',
-
-  // Gated Track Listen
-  LISTEN_GATED = 'Listen: Gated',
 
   // Unlocked Gated Tracks
   USDC_PURCHASE_GATED_TRACK_UNLOCKED = 'USDC Gated: Track Unlocked',
@@ -257,6 +202,8 @@ export enum Name {
 
   // Notifications
   NOTIFICATIONS_OPEN = 'Notifications: Open',
+  /** Mobile: push open; also used in web dev to seed Amplitude event properties */
+  NOTIFICATIONS_OPEN_PUSH_NOTIFICATION = 'Notifications: Open Push Notification',
   NOTIFICATIONS_CLICK_TILE = 'Notifications: Clicked Tile',
   NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE = 'Notifications: Clicked Milestone Twitter Share',
   NOTIFICATIONS_CLICK_REMIX_CREATE_TWITTER_SHARE = 'Notifications: Clicked Remix Create Twitter Share',
@@ -280,19 +227,26 @@ export enum Name {
   PROFILE_PAGE_SHOWN_ARTIST_RECOMMENDATIONS = 'ProfilePage: Shown Artist Recommendations',
 
   // Track page
-  TRACK_PAGE_DOWNLOAD = 'Track Page: Download',
   TRACK_PAGE_PLAY_MORE = 'Track Page: Play More By This Artist',
 
   // Playback
   PLAYBACK_PLAY = 'Playback: Play',
   PLAYBACK_PAUSE = 'Playback: Pause',
+  PLAYLIST_PLAY = 'Playlist: Play',
   // Playback performance metrics
   BUFFERING_TIME = 'Buffering Time',
 
+  // Play Queue
+  PLAY_QUEUE_OPEN = 'Play Queue: Open',
+  PLAY_QUEUE_CLOSE = 'Play Queue: Close',
+  PLAY_QUEUE_ADD_TRACK = 'Play Queue: Add Track',
+  PLAY_QUEUE_REMOVE_TRACK = 'Play Queue: Remove Track',
+  PLAY_QUEUE_REORDER_TRACK = 'Play Queue: Reorder Track',
+  PLAY_QUEUE_PLAY_TRACK = 'Play Queue: Play Track',
+  PLAY_QUEUE_CLEAR = 'Play Queue: Clear',
+
   // Navigation
   PAGE_VIEW = 'Page View',
-  ON_FIRST_PAGE = 'nav-on-first-page',
-  NOT_ON_FIRST_PAGE = 'nav-not-on-first-page',
   LINK_CLICKING = 'Link Click',
   TAG_CLICKING = 'Tag Click',
 
@@ -303,9 +257,7 @@ export enum Name {
   // Search
   SEARCH_SEARCH = 'Search: Search',
   SEARCH_TAG_SEARCH = 'Search: Tag Search',
-  SEARCH_MORE_RESULTS = 'Search: More Results',
   SEARCH_RESULT_SELECT = 'Search: Result Select',
-  SEARCH_TAB_CLICK = 'Search: Tab Click',
 
   // Explore
   EXPLORE_SECTION_VIEW = 'Explore: Section View',
@@ -314,11 +266,6 @@ export enum Name {
   // Errors
   ERROR_PAGE = 'Error Page',
   NOT_FOUND_PAGE = 'Not Found Page',
-
-  // System
-  WEB_VITALS = 'Web Vitals',
-  PERFORMANCE = 'Performance',
-  CREATOR_NODE_SELECTION = 'Creator Node Selection',
 
   // Remixes
   STEM_COMPLETE_UPLOAD = 'Stem: Complete Upload',
@@ -329,28 +276,14 @@ export enum Name {
   REMIX_HIDE = 'Remix: Hide',
 
   // $AUDIO
-  SEND_AUDIO_REQUEST = 'Send $AUDIO: Request',
   SEND_AUDIO_SUCCESS = 'Send $AUDIO: Success',
   SEND_AUDIO_FAILURE = 'Send $AUDIO: Failure',
-
-  // AUDIO Manager
-  TRANSFER_AUDIO_TO_WAUDIO_REQUEST = 'TRANSFER_AUDIO_TO_WAUDIO_REQUEST',
-  TRANSFER_AUDIO_TO_WAUDIO_SUCCESS = 'TRANSFER_AUDIO_TO_WAUDIO_SUCCESS',
-  TRANSFER_AUDIO_TO_WAUDIO_FAILURE = 'TRANSFER_AUDIO_TO_WAUDIO_FAILURE',
-
-  // Service monitoring
-  SERVICE_MONITOR_REQUEST = 'Service Monitor: Request',
-  SERVICE_MONITOR_HEALTH_CHECK = 'Service Monitor: Status',
 
   // Playlist library
   PLAYLIST_LIBRARY_REORDER = 'Playlist Library: Reorder',
   PLAYLIST_LIBRARY_MOVE_PLAYLIST_INTO_FOLDER = 'Playlist Library: Move Playlist Into Folder',
   PLAYLIST_LIBRARY_ADD_PLAYLIST_TO_FOLDER = 'Playlist Library: Add Playlist To Folder',
   PLAYLIST_LIBRARY_MOVE_PLAYLIST_OUT_OF_FOLDER = 'Playlist Library: Move Playlist Out of Folder',
-  PLAYLIST_LIBRARY_EXPAND_FOLDER = 'Playlist Library: Expand Folder',
-  PLAYLIST_LIBRARY_COLLAPSE_FOLDER = 'Playlist Library: Collapse Folder',
-  // When a user clicks on a playlist in the library
-  PLAYLIST_LIBRARY_CLICKED = 'Playlist Library: Clicked',
 
   // Deactivate Account
   DEACTIVATE_ACCOUNT_PAGE_VIEW = 'Deactivate Account: Page View',
@@ -359,7 +292,6 @@ export enum Name {
   DEACTIVATE_ACCOUNT_FAILURE = 'Deactivate Account: Failure',
 
   // Create User Bank
-  CREATE_USER_BANK_REQUEST = 'Create User Bank: Request',
   CREATE_USER_BANK_SUCCESS = 'Create User Bank: Success',
   CREATE_USER_BANK_FAILURE = 'Create User Bank: Failure',
 
@@ -368,27 +300,8 @@ export enum Name {
   REWARDS_CLAIM_ALL_REQUEST = 'Rewards Claim All: Request',
   REWARDS_CLAIM_ALL_SUCCESS = 'Rewards Claim All: Success',
   REWARDS_CLAIM_ALL_FAILURE = 'Rewards Claim All: Failure',
-  REWARDS_CLAIM_ALL_BLOCKED = 'Rewards Claim All: Blocked',
   REWARDS_CLAIM_REQUEST = 'Rewards Claim: Request',
   REWARDS_CLAIM_SUCCESS = 'Rewards Claim: Success',
-  REWARDS_CLAIM_BLOCKED = 'Rewards Claim: Blocked',
-
-  // Social Proof
-  SOCIAL_PROOF_OPEN = 'Social Proof: Open',
-  SOCIAL_PROOF_SUCCESS = 'Social Proof: Success',
-  SOCIAL_PROOF_ERROR = 'Social Proof: Error',
-
-  // Buy Audio
-  BUY_AUDIO_ON_RAMP_OPENED = 'Buy Audio: On Ramp Opened',
-  BUY_AUDIO_ON_RAMP_CANCELED = 'Buy Audio: On Ramp Canceled',
-  BUY_AUDIO_ON_RAMP_SUCCESS = 'Buy Audio: On Ramp Success',
-  BUY_AUDIO_SUCCESS = 'Buy Audio: Success',
-  BUY_AUDIO_FAILURE = 'Buy Audio: Failure',
-
-  // Buy Audio Recovery
-  BUY_AUDIO_RECOVERY_OPENED = 'Buy Audio Recovery: Opened',
-  BUY_AUDIO_RECOVERY_SUCCESS = 'Buy Audio Recovery: Success',
-  BUY_AUDIO_RECOVERY_FAILURE = 'Buy Audio Recovery: Failure',
 
   // Buy USDC
   BUY_USDC_ON_RAMP_OPENED = 'Buy USDC: On Ramp Opened',
@@ -424,7 +337,6 @@ export enum Name {
   WITHDRAW_USDC_FORM_ERROR = 'Withdraw USDC: Form Error',
   WITHDRAW_USDC_SUCCESS = 'Withdraw USDC: Success',
   WITHDRAW_USDC_FAILURE = 'Withdraw USDC: Failure',
-  WITHDRAW_USDC_HELP_LINK_CLICKED = 'Withdraw USDC: Help Link Clicked',
   WITHDRAW_USDC_TRANSACTION_LINK_CLICKED = 'Withdraw USDC: Transaction Link Clicked',
 
   // Stripe Tracking
@@ -456,9 +368,7 @@ export enum Name {
   CONNECT_WALLET_NEW_WALLET_START = 'Connect Wallet: New Wallet Start',
   CONNECT_WALLET_NEW_WALLET_CONNECTING = 'Connect Wallet: New Wallet Connecting',
   CONNECT_WALLET_NEW_WALLET_CONNECTED = 'Connect Wallet: New Wallet Connected',
-  CONNECT_WALLET_DISCONNECTED = 'Connect Wallet: Disconnected',
   CONNECT_WALLET_ALREADY_ASSOCIATED = 'Connect Wallet: Already Associated',
-  CONNECT_WALLET_ASSOCIATION_ERROR = 'Connect Wallet: Association Error',
   CONNECT_WALLET_ERROR = 'Connect Wallet: Error',
 
   // Chat
@@ -484,15 +394,6 @@ export enum Name {
   CHAT_ENTRY_POINT = 'Chat Entry Point',
   CHAT_WEBSOCKET_ERROR = 'Chat Websocket Error',
 
-  // Jupiter
-  JUPITER_QUOTE_REQUEST = 'Jupiter: Quote Request',
-  JUPITER_QUOTE_RESPONSE = 'Jupiter: Quote Response',
-
-  // Repair Signups
-  SIGN_UP_REPAIR_START = 'Sign Up Repair: Start',
-  SIGN_UP_REPAIR_SUCCESS = 'Sign Up Repair: Success',
-  SIGN_UP_REPAIR_FAILURE = 'Sign Up Repair: Failure',
-
   // Export Private Key
   EXPORT_PRIVATE_KEY_LINK_CLICKED = 'Export Private Key: Settings Link Clicked',
   EXPORT_PRIVATE_KEY_PAGE_VIEWED = 'Export Private Key: Page Viewed',
@@ -502,7 +403,6 @@ export enum Name {
 
   // Manager Mode
   MANAGER_MODE_SWITCH_ACCOUNT = 'Manager Mode: Switch Account',
-  MANAGER_MODE_INVITE_MANAGER = 'Manager Mode: Invite Manager',
   MANAGER_MODE_ACCEPT_INVITE = 'Manager Mode: Accept Invite',
   MANAGER_MODE_CANCEL_INVITE = 'Manager Mode: Cancel Invite',
   MANAGER_MODE_REJECT_INVITE = 'Manager Mode: Reject Invite',
@@ -512,7 +412,6 @@ export enum Name {
   COMMENTS_CREATE_COMMENT = 'Comments: Create Comment',
   COMMENTS_UPDATE_COMMENT = 'Comments: Update Comment',
   COMMENTS_DELETE_COMMENT = 'Comments: Delete Comment',
-  COMMENTS_REPLY_TO_COMMENT = 'Comments: Reply to Comment',
   COMMENTS_FOCUS_COMMENT_INPUT = 'Comments: Focus Comment Input',
   COMMENTS_CLICK_REPLY_BUTTON = 'Comments: Click Reply Button',
   COMMENTS_LIKE_COMMENT = 'Comments: Like Comment',
@@ -532,7 +431,6 @@ export enum Name {
   COMMENTS_LOAD_MORE_COMMENTS = 'Comments: Load More Comments',
   COMMENTS_LOAD_NEW_COMMENTS = 'Comments: Load New Comments',
   COMMENTS_SHOW_REPLIES = 'Comments: Show Replies',
-  COMMENTS_LOAD_MORE_REPLIES = 'Comments: Load More Replies',
   COMMENTS_HIDE_REPLIES = 'Comments: Hide Replies',
   COMMENTS_APPLY_SORT = 'Comments: Apply Sort',
   COMMENTS_CLICK_COMMENT_STAT = 'Comments: Click Comment Stat',
@@ -564,20 +462,18 @@ export enum Name {
   REMIX_CONTEST_DELETE = 'Remix Contest: Delete',
   REMIX_CONTEST_PICK_WINNERS_OPEN = 'Remix Contest: Pick Winners Open',
   REMIX_CONTEST_PICK_WINNERS_FINALIZE = 'Remix Contest: Finalize Winners',
+  REMIX_CONTEST_VIEW = 'Remix Contest: View',
+  REMIX_CONTEST_ENTER = 'Remix Contest: Enter',
+  REMIX_CONTEST_VIEW_SUBMISSIONS = 'Remix Contest: View Submissions',
 
-  // Android App Lifecycle
-  ANDROID_APP_RESTART_HEARTBEAT = 'Android App: Restart Due to Heartbeat',
-  ANDROID_APP_RESTART_STALE = 'Android App: Restart Due to Stale Time',
-  ANDROID_APP_RESTART_FORCE_QUIT = 'Android App: Restart Due to Force Quit',
-
-  // Artist Coins
-  BANNER_ARTIST_COINS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
+  // Fan Clubs
+  BANNER_FAN_CLUBS_LAUNCH_CLICKED = 'Banner Artist Coins Launch Clicked',
   BANNER_TRADING_VOLUME_LAUNCH_CLICKED = 'Banner Trading Volume Launch Clicked',
   BANNER_YAK_COIN_LAUNCH_CLICKED = 'Banner Yak Coin Launch Clicked',
 
-  // Artist Coin Launchpad
+  // Fan Club Launchpad
   LAUNCHPAD_SPLASH_GET_STARTED = 'Launchpad: Get Started Clicked',
-  LAUNCHPAD_HAS_EXISTING_ARTIST_COIN = 'Launchpad: Has Existing Artist Coin',
+  LAUNCHPAD_HAS_EXISTING_FAN_CLUB = 'Launchpad: Has Existing Artist Coin',
   LAUNCHPAD_SPLASH_LEARN_MORE_CLICKED = 'Launchpad: Learn More Clicked',
   LAUNCHPAD_WALLET_CONNECT_SUCCESS = 'Launchpad: Wallet Connect Success',
   LAUNCHPAD_WALLET_CONNECT_ERROR = 'Launchpad: Wallet Connect Error',
@@ -589,9 +485,6 @@ export enum Name {
   LAUNCHPAD_COIN_CREATION_STARTED = 'Launchpad: Coin Creation Started',
   LAUNCHPAD_COIN_CREATION_SUCCESS = 'Launchpad: Coin Creation Success',
   LAUNCHPAD_COIN_CREATION_FAILURE = 'Launchpad: Coin Creation Failure',
-  LAUNCHPAD_FIRST_BUY_STARTED = 'Launchpad: First Buy Started',
-  LAUNCHPAD_FIRST_BUY_SUCCESS = 'Launchpad: First Buy Success',
-  LAUNCHPAD_FIRST_BUY_FAILURE = 'Launchpad: First Buy Failure',
   LAUNCHPAD_FIRST_BUY_RETRY = 'Launchpad: First Buy Retry',
   LAUNCHPAD_FIRST_BUY_MAX_BUTTON = 'Launchpad: First Buy Max Button Clicked',
   LAUNCHPAD_FIRST_BUY_QUOTE_RECEIVED = 'Launchpad: First Buy Quote Received',
@@ -645,88 +538,6 @@ type CreateAccountCompleteEmail = {
   eventName: Name.CREATE_ACCOUNT_COMPLETE_EMAIL
   emailAddress: string
 }
-type CreateAccountCompletePassword = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_PASSWORD
-  emailAddress: string
-}
-// Twitter Account Creation
-type CreateAccountStartTwitter = {
-  eventName: Name.CREATE_ACCOUNT_START_TWITTER
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountCompleteTwitter = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_TWITTER
-  isVerified: boolean
-  emailAddress?: string
-  handle: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountClosedTwitter = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_TWITTER
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountTwitterError = {
-  eventName: Name.CREATE_ACCOUNT_TWITTER_ERROR
-  emailAddress?: string
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
-// Instagram Account Creation
-type CreateAccountStartInstagram = {
-  eventName: Name.CREATE_ACCOUNT_START_INSTAGRAM
-  emailAddress?: string
-  page?: string
-}
-type CreateAccountCompleteInstagram = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_INSTAGRAM
-  isVerified: boolean
-  emailAddress?: string
-  handle: string
-  page?: string
-}
-type CreateAccountClosedInstagram = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_INSTAGRAM
-  emailAddress?: string
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountInstagramError = {
-  eventName: Name.CREATE_ACCOUNT_INSTAGRAM_ERROR
-  emailAddress?: string
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
-// TikTok account creation
-type CreateAccountStartTikTok = {
-  eventName: Name.CREATE_ACCOUNT_START_TIKTOK
-  emailAddress?: string
-  page?: string
-}
-type CreateAccountClosedTikTok = {
-  eventName: Name.CREATE_ACCOUNT_CLOSED_TIKTOK
-  page?: 'create-email' | 'pick-handle'
-}
-type CreateAccountCompleteTikTok =
-  | {
-      eventName: Name.CREATE_ACCOUNT_COMPLETE_TIKTOK
-      emailAddress: string
-      page?: string
-    }
-  | {
-      eventName: Name.CREATE_ACCOUNT_COMPLETE_TIKTOK
-      isVerified: boolean
-      handle: string
-      page?: string
-    }
-type CreateAccountTikTokError = {
-  eventName: Name.CREATE_ACCOUNT_TIKTOK_ERROR
-  error?: string
-  page?: 'create-email' | 'pick-handle'
-}
-
 type CreateAccountUploadProfilePhoto = {
   eventName: Name.CREATE_ACCOUNT_UPLOAD_PROFILE_PHOTO
   emailAddress?: string
@@ -744,11 +555,6 @@ type CreateAccountUploadProfileCover = {
 type CreateAccountUploadProfileCoverError = {
   eventName: Name.CREATE_ACCOUNT_UPLOAD_COVER_PHOTO_ERROR
   error: string
-}
-type CreateAccountCompleteProfile = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_PROFILE
-  emailAddress: string
-  handle: string
 }
 type CreateAccountSelectGenre = {
   eventName: Name.CREATE_ACCOUNT_SELECT_GENRE
@@ -771,13 +577,6 @@ type CreateAccountPreviewArtist = {
   artistName: string
 }
 
-type CreateAccountCompleteFollow = {
-  eventName: Name.CREATE_ACCOUNT_COMPLETE_FOLLOW
-  emailAddress: string
-  handle: string
-  users: string
-  count: number
-}
 type CreateAccountCompleteCreating = {
   eventName: Name.CREATE_ACCOUNT_COMPLETE_CREATING
   emailAddress: string
@@ -793,12 +592,6 @@ type CreateAccountWelcomeModalUploadTrack = {
   emailAddress: string
   handle: string
 }
-type CreateAccountOpenFinish = {
-  eventName: Name.CREATE_ACCOUNT_FINISH
-  emailAddress: string
-  handle: string
-}
-
 // Sign In
 type SignInStart = {
   eventName: Name.SIGN_IN_START
@@ -818,41 +611,8 @@ type SettingsChangeTheme = {
   eventName: Name.SETTINGS_CHANGE_THEME
   mode: 'dark' | 'light' | 'matrix' | 'auto'
 }
-type SettingsStartTwitterOauth = {
-  eventName: Name.SETTINGS_START_TWITTER_OAUTH
-  handle?: string
-}
-type SettingsCompleteTwitterOauth = {
-  eventName: Name.SETTINGS_COMPLETE_TWITTER_OAUTH
-  handle?: string
-  screen_name: string
-  is_verified: boolean
-}
-type SettingsStartInstagramOauth = {
-  eventName: Name.SETTINGS_START_INSTAGRAM_OAUTH
-  handle?: string
-}
-type SettingsCompleteInstagramOauth = {
-  eventName: Name.SETTINGS_COMPLETE_INSTAGRAM_OAUTH
-  handle?: string
-  username: string
-  is_verified: boolean
-}
-type SettingsStartTikTokOauth = {
-  eventName: Name.SETTINGS_START_TIKTOK_OAUTH
-  handle?: string
-}
-type SettingsCompleteTikTokOauth = {
-  eventName: Name.SETTINGS_COMPLETE_TIKTOK_OAUTH
-  handle?: string
-  username: string
-  is_verified: boolean
-}
 type SettingsResetAccountRecovery = {
   eventName: Name.SETTINGS_RESEND_ACCOUNT_RECOVERY
-}
-type SettingsStartChangePassword = {
-  eventName: Name.SETTINGS_START_CHANGE_PASSWORD
 }
 type SettingsCompleteChangePassword = {
   eventName: Name.SETTINGS_COMPLETE_CHANGE_PASSWORD
@@ -860,20 +620,6 @@ type SettingsCompleteChangePassword = {
 }
 type SettingsLogOut = {
   eventName: Name.SETTINGS_LOG_OUT
-}
-
-// TikTok
-type TikTokStartOAuth = {
-  eventName: Name.TIKTOK_START_OAUTH
-}
-
-type TikTokCompleteOAuth = {
-  eventName: Name.TIKTOK_COMPLETE_OAUTH
-}
-
-type TikTokOAuthError = {
-  eventName: Name.TIKTOK_OAUTH_ERROR
-  error: string
 }
 
 // Error
@@ -909,10 +655,6 @@ type AccountHealthUploadProfilePhoto = {
 type AccountHealthDownloadDesktop = {
   eventName: Name.ACCOUNT_HEALTH_DOWNLOAD_DESKTOP
   source: 'banner' | 'settings'
-}
-
-type AccountHealthCTABanner = {
-  eventName: Name.ACCOUNT_HEALTH_CLICK_APP_CTA_BANNER
 }
 
 // Social
@@ -962,7 +704,6 @@ export enum FollowSource {
   HOVER_TILE = 'hover tile',
   OVERFLOW = 'overflow',
   USER_LIST = 'user list',
-  ARTIST_RECOMMENDATIONS_POPUP = 'artist recommendations popup',
   EMPTY_FEED = 'empty feed',
   HOW_TO_UNLOCK_TRACK_PAGE = 'how to unlock track page',
   HOW_TO_UNLOCK_MODAL = 'how to unlock modal',
@@ -1073,18 +814,6 @@ type Delete = {
 
 // Folder
 
-type FolderOpenCreate = {
-  eventName: Name.FOLDER_OPEN_CREATE
-}
-
-type FolderSubmitCreate = {
-  eventName: Name.FOLDER_SUBMIT_CREATE
-}
-
-type FolderCancelCreate = {
-  eventName: Name.FOLDER_CANCEL_CREATE
-}
-
 type FolderOpenEdit = {
   eventName: Name.FOLDER_OPEN_EDIT
 }
@@ -1152,22 +881,6 @@ type TrackUploadFailure = {
   error?: string
 }
 
-type TrackUploadRejected = {
-  eventName: Name.TRACK_UPLOAD_REJECTED
-  kind: 'single_track' | 'multi_track' | 'album' | 'playlist'
-  error?: string
-}
-
-type TrackUploadCopyLink = {
-  eventName: Name.TRACK_UPLOAD_COPY_LINK
-  uploadType: string
-  url: string
-}
-type TrackUploadShareWithFans = {
-  eventName: Name.TRACK_UPLOAD_SHARE_WITH_FANS
-  uploadType: string
-  text: string
-}
 type TrackUploadViewTrackPage = {
   eventName: Name.TRACK_UPLOAD_VIEW_TRACK_PAGE
   uploadType: string
@@ -1195,10 +908,6 @@ type TrackUploadTokenGated = {
   lossless: boolean
 }
 
-type TrackUploadClickUSDCWaitListLink = {
-  eventName: Name.TRACK_UPLOAD_CLICK_USDC_WAITLIST_LINK
-}
-
 type TrackUploadFollowGatedDownload = {
   eventName: Name.TRACK_UPLOAD_FOLLOW_GATED_DOWNLOAD
   kind: 'tracks'
@@ -1219,10 +928,6 @@ type TrackUploadUSDCGatedDownload = {
   kind: 'tracks'
   downloadable: boolean
   lossless: boolean
-}
-
-type TrackUploadClickUSDCDownloadWaitListLink = {
-  eventName: Name.TRACK_UPLOAD_CLICK_USDC_DOWNLOAD_WAITLIST_LINK
 }
 
 // Track Downloads
@@ -1337,7 +1042,7 @@ type TrendingChangeView = {
 // Feed
 type FeedChangeView = {
   eventName: Name.FEED_CHANGE_VIEW
-  view: FeedFilter
+  view: FeedFilter | FeedTab
 }
 
 // Notifications
@@ -1345,10 +1050,18 @@ type NotificationsOpen = {
   eventName: Name.NOTIFICATIONS_OPEN
   source: 'button' | 'push notifications'
 }
+type NotificationsOpenPushNotification = {
+  eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
+  title?: string
+  body?: string
+  notificationCampaignId?: string
+}
 type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
   kind: string
   link_to: string
+  /** Internal campaign id when kind is announcement */
+  notificationCampaignId?: string
 }
 type NotificationsClickMilestone = {
   eventName: Name.NOTIFICATIONS_CLICK_MILESTONE_TWITTER_SHARE
@@ -1427,12 +1140,6 @@ type ProfilePageShownArtistRecommendations = {
 }
 
 // Track Page
-type TrackPageDownload = {
-  eventName: Name.TRACK_PAGE_DOWNLOAD
-  id: ID
-  category?: string
-  parent_track_id?: ID
-}
 type TrackPagePlayMore = {
   eventName: Name.TRACK_PAGE_PLAY_MORE
   id: ID
@@ -1464,6 +1171,7 @@ type PlaybackPlay = {
   id?: string
   isPreview?: boolean
   source: PlaybackSource
+  collectionId?: string
 }
 type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE
@@ -1471,9 +1179,59 @@ type PlaybackPause = {
   source: PlaybackSource
 }
 
+type PlaylistPlay = {
+  eventName: Name.PLAYLIST_PLAY
+  id: string
+  source: PlaybackSource
+  isAlbum?: boolean
+  trackCount?: number
+  isPreview?: boolean
+}
+
 type BufferingTime = {
   eventName: Name.BUFFERING_TIME
   duration: number
+}
+
+// Play Queue
+type PlayQueueOpen = {
+  eventName: Name.PLAY_QUEUE_OPEN
+  source: 'queue'
+  queueLength?: number
+}
+type PlayQueueClose = {
+  eventName: Name.PLAY_QUEUE_CLOSE
+  source: 'queue'
+}
+type PlayQueueAddTrack = {
+  eventName: Name.PLAY_QUEUE_ADD_TRACK
+  source: 'queue'
+  trackId: string
+  from?: 'overflow menu' | 'queue'
+}
+type PlayQueueRemoveTrack = {
+  eventName: Name.PLAY_QUEUE_REMOVE_TRACK
+  source: 'queue'
+  trackId: string
+  position: number
+}
+type PlayQueueReorderTrack = {
+  eventName: Name.PLAY_QUEUE_REORDER_TRACK
+  source: 'queue'
+  trackId: string
+  fromPosition: number
+  toPosition: number
+}
+type PlayQueuePlayTrack = {
+  eventName: Name.PLAY_QUEUE_PLAY_TRACK
+  source: 'queue'
+  trackId: string
+  position: number
+}
+type PlayQueueClear = {
+  eventName: Name.PLAY_QUEUE_CLEAR
+  source: 'queue'
+  queueLength: number
 }
 
 // Linking
@@ -1537,12 +1295,6 @@ type SearchTag = {
   source: SearchSource
 }
 
-type SearchMoreResults = {
-  eventName: Name.SEARCH_MORE_RESULTS
-  term: string
-  source: SearchSource
-}
-
 type SearchResultSelect = {
   eventName: Name.SEARCH_RESULT_SELECT
   term: string
@@ -1558,6 +1310,7 @@ export type ExploreSectionName =
   | 'Recently Played'
   | 'Quick Search'
   | 'Featured Playlists'
+  | 'Fan Clubs'
   | 'Featured Remix Contests'
   | 'Underground Trending Tracks'
   | 'Artist Spotlight'
@@ -1567,6 +1320,9 @@ export type ExploreSectionName =
   | 'Mood Grid'
   | 'Most Shared'
   | 'Best Selling'
+  | 'Best Selling Albums'
+  | 'Top Albums This Month'
+  | 'New Album Releases'
   | 'Recent Premium Tracks'
   | 'Feeling Lucky'
   | 'Recent Searches'
@@ -1586,35 +1342,10 @@ type ExploreSectionClick = {
   link?: string
 }
 
-type ListenGated = {
-  eventName: Name.LISTEN_GATED
-  trackId: string
-}
-
-type OnFirstPage = {
-  eventName: Name.ON_FIRST_PAGE
-}
-
-type NotOnFirstPage = {
-  eventName: Name.NOT_ON_FIRST_PAGE
-}
-
 type BrowserNotificationSetting = {
   eventName: Name.BROWSER_NOTIFICATION_SETTINGS
   provider: 'safari' | 'gcm'
   enabled: boolean
-}
-
-type WebVitals = {
-  eventName: Name.WEB_VITALS
-  metric: string
-  value: number
-  route: string
-}
-type Performance = {
-  eventName: Name.PERFORMANCE
-  metric: string
-  value: number
 }
 
 type StemCompleteUpload = {
@@ -1664,16 +1395,22 @@ type RemixHide = {
   handle: string
 }
 
-type SendAudioRequest = {
-  eventName: Name.SEND_AUDIO_REQUEST
-  from: WalletAddress
-  recipient: WalletAddress
-}
+/** Where in the app the send was initiated (for analytics parity with legacy Tip Audio) */
+export type SendAudioSource =
+  | 'send_tokens_modal'
+  | 'oauth_pay_page'
+  | 'send_tokens_drawer'
 
 type SendAudioSuccess = {
   eventName: Name.SEND_AUDIO_SUCCESS
   from: WalletAddress
   recipient: WalletAddress
+  amount?: string
+  source?: SendAudioSource | string
+  senderHandle?: string
+  senderWallet?: WalletAddress
+  recipientHandle?: string
+  recipientWallet?: WalletAddress
 }
 
 type SendAudioFailure = {
@@ -1681,23 +1418,12 @@ type SendAudioFailure = {
   from: WalletAddress
   recipient: WalletAddress
   error: string
-}
-
-type TransferAudioToWAudioRequest = {
-  eventName: Name.TRANSFER_AUDIO_TO_WAUDIO_REQUEST
-  from: WalletAddress
-}
-
-type TransferAudioToWAudioSuccess = {
-  eventName: Name.TRANSFER_AUDIO_TO_WAUDIO_SUCCESS
-  from: WalletAddress
-  txSignature: string
-  logs: string
-}
-
-type TransferAudioToWAudioFailure = {
-  eventName: Name.TRANSFER_AUDIO_TO_WAUDIO_FAILURE
-  from: WalletAddress
+  amount?: string
+  source?: SendAudioSource | string
+  senderHandle?: string
+  senderWallet?: WalletAddress
+  recipientHandle?: string
+  recipientWallet?: WalletAddress
 }
 
 type PlaylistLibraryReorder = {
@@ -1705,12 +1431,6 @@ type PlaylistLibraryReorder = {
   // Whether or not the reorder contains newly created temp playlists
   containsTemporaryPlaylists: boolean
   kind: PlaylistLibraryKind
-}
-
-type PlaylistLibraryClicked = {
-  eventName: Name.PLAYLIST_LIBRARY_CLICKED
-  playlistId: ID
-  hasUpdate: boolean
 }
 
 type PlaylistLibraryMovePlaylistIntoFolder = {
@@ -1725,14 +1445,6 @@ type PlaylistLibraryMovePlaylistOutOfFolder = {
   eventName: Name.PLAYLIST_LIBRARY_MOVE_PLAYLIST_OUT_OF_FOLDER
 }
 
-type PlaylistLibraryExpandFolder = {
-  eventName: Name.PLAYLIST_LIBRARY_EXPAND_FOLDER
-}
-
-type PlaylistLibraryCollapseFolder = {
-  eventName: Name.PLAYLIST_LIBRARY_COLLAPSE_FOLDER
-}
-
 type DeactivateAccountPageView = {
   eventName: Name.DEACTIVATE_ACCOUNT_PAGE_VIEW
 }
@@ -1744,11 +1456,6 @@ type DeactivateAccountSuccess = {
 }
 type DeactivateAccountFailure = {
   eventName: Name.DEACTIVATE_ACCOUNT_FAILURE
-}
-
-type CreateUserBankRequest = {
-  eventName: Name.CREATE_USER_BANK_REQUEST
-  userId: ID
 }
 
 type CreateUserBankSuccess = {
@@ -1784,14 +1491,6 @@ type RewardsClaimSuccess = {
   amount: number
 }
 
-type RewardsClaimBlocked = {
-  eventName: Name.REWARDS_CLAIM_BLOCKED
-  challengeId: string
-  specifier: string
-  amount: number
-  code: number
-}
-
 type RewardsClaimAllRequest = {
   eventName: Name.REWARDS_CLAIM_ALL_REQUEST
   count: number
@@ -1803,31 +1502,6 @@ type RewardsClaimAllSuccess = {
 type RewardsClaimAllFailure = {
   eventName: Name.REWARDS_CLAIM_ALL_FAILURE
   count: number
-}
-type RewardsClaimAllBlocked = {
-  eventName: Name.REWARDS_CLAIM_ALL_BLOCKED
-  count: number
-  code: number
-}
-
-type SocialProofOpen = {
-  eventName: Name.SOCIAL_PROOF_OPEN
-  kind: 'instagram' | 'twitter' | 'tiktok'
-  handle?: string
-}
-
-type SocialProofSuccess = {
-  eventName: Name.SOCIAL_PROOF_SUCCESS
-  kind: 'instagram' | 'twitter' | 'tiktok'
-  handle?: string
-  screenName: string
-}
-
-type SocialProofError = {
-  eventName: Name.SOCIAL_PROOF_ERROR
-  kind: 'instagram' | 'twitter' | 'tiktok'
-  handle?: string
-  error: string
 }
 
 type AudiusOauthStart = {
@@ -1919,57 +1593,6 @@ type AuthorizedAppRemoveError = {
   name?: string
   apiKey?: string
   error?: string
-}
-
-type BuyAudioOnRampOpened = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_OPENED
-  provider: string
-}
-
-type BuyAudioOnRampCanceled = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_CANCELED
-  provider: string
-}
-
-type BuyAudioOnRampSuccess = {
-  eventName: Name.BUY_AUDIO_ON_RAMP_SUCCESS
-  provider: string
-}
-
-type BuyAudioSuccess = {
-  eventName: Name.BUY_AUDIO_SUCCESS
-  provider: string
-  requestedAudio: number
-  actualAudio: number
-  surplusAudio: number
-}
-
-type BuyAudioFailure = {
-  eventName: Name.BUY_AUDIO_FAILURE
-  provider: string
-  requestedAudio: number
-  stage: string
-  error: string
-}
-
-type BuyAudioRecoveryOpened = {
-  eventName: Name.BUY_AUDIO_RECOVERY_OPENED
-  provider: string
-  trigger: string
-  balance: string
-}
-
-type BuyAudioRecoverySuccess = {
-  eventName: Name.BUY_AUDIO_RECOVERY_SUCCESS
-  provider: string
-  audioRecovered: number
-}
-
-type BuyAudioRecoveryFailure = {
-  eventName: Name.BUY_AUDIO_RECOVERY_FAILURE
-  provider: string
-  stage: string
-  error: string
 }
 
 // Buy USDC
@@ -2098,6 +1721,13 @@ export type WithdrawUSDCSuccess = WithdrawUSDCTransferEventFields & {
 
 export type WithdrawUSDCFailure = WithdrawUSDCTransferEventFields & {
   eventName: Name.WITHDRAW_USDC_FAILURE
+  error?: unknown
+  errorName?: string
+  /** HTTP status code, when the failure was a non-2xx SDK response. */
+  httpStatus?: number
+  httpStatusText?: string
+  /** Truncated response body, when the failure was a non-2xx SDK response. */
+  responseBody?: string
 }
 export type WithdrawUSDCCancelled = WithdrawUSDCTransferEventFields & {
   eventName: Name.WITHDRAW_USDC_CANCELLED
@@ -2116,6 +1746,13 @@ export type WithdrawUSDCCreateDestAccountSuccess =
 export type WithdrawUSDCCreateDestAccountFailure =
   WithdrawUSDCTransferEventFields & {
     eventName: Name.WITHDRAW_USDC_CREATE_DEST_TOKEN_ACCOUNT_FAILED
+    error?: unknown
+    errorName?: string
+    /** HTTP status code, when the failure was a non-2xx SDK response. */
+    httpStatus?: number
+    httpStatusText?: string
+    /** Truncated response body, when the failure was a non-2xx SDK response. */
+    responseBody?: string
   }
 
 export type WithdrawUSDCTransferToRootWallet =
@@ -2137,10 +1774,6 @@ export type WithdrawUSDCCoinflowSendTransactionFailed = {
   eventName: Name.WITHDRAW_USDC_COINFLOW_SEND_TRANSACTION_FAILED
   error?: string
   errorCode?: string | number
-}
-
-export type WithdrawUSDCHelpLinkClicked = WithdrawUSDCEventFields & {
-  eventName: Name.WITHDRAW_USDC_HELP_LINK_CLICKED
 }
 
 export type WithdrawUSDCTxLinkClicked = WithdrawUSDCTransferEventFields & {
@@ -2240,8 +1873,8 @@ type BannerTOSClicked = {
   eventName: Name.BANNER_TOS_CLICKED
 }
 
-type BannerArtistCoinsLaunchClicked = {
-  eventName: Name.BANNER_ARTIST_COINS_LAUNCH_CLICKED
+type BannerFanClubsLaunchClicked = {
+  eventName: Name.BANNER_FAN_CLUBS_LAUNCH_CLICKED
 }
 
 type BannerTradingVolumeLaunchClicked = {
@@ -2276,18 +1909,8 @@ type ConnectWalletNewWalletConnected = {
   walletAddress: WalletAddress
 }
 
-type ConnectWalletDisconnected = {
-  eventName: Name.CONNECT_WALLET_DISCONNECTED
-}
-
 type ConnectWalletAlreadyAssociated = {
   eventName: Name.CONNECT_WALLET_ALREADY_ASSOCIATED
-  chain: Chain
-  walletAddress: WalletAddress
-}
-
-type ConnectWalletAssociationError = {
-  eventName: Name.CONNECT_WALLET_ASSOCIATION_ERROR
   chain: Chain
   walletAddress: WalletAddress
 }
@@ -2403,27 +2026,6 @@ type ChatWebsocketError = {
   code?: string
 }
 
-// Jupiter
-type JupiterQuoteRequest = {
-  eventName: Name.JUPITER_QUOTE_REQUEST
-  inputMint: string
-  outputMint: string
-  swapMode?: string
-  slippageBps?: number
-  amount: number
-}
-
-type JupiterQuoteResponse = {
-  eventName: Name.JUPITER_QUOTE_RESPONSE
-  inputMint: string
-  outputMint: string
-  swapMode: string
-  slippageBps: number
-  otherAmountThreshold: number
-  inAmount: number
-  outAmount: number
-}
-
 // Export Private Key
 type ExportPrivateKeyLinkClicked = {
   eventName: Name.EXPORT_PRIVATE_KEY_LINK_CLICKED
@@ -2459,11 +2061,6 @@ type ExportPrivateKeyPrivateKeyCopied = {
 type ManagerModeSwitchAccount = {
   eventName: Name.MANAGER_MODE_SWITCH_ACCOUNT
   managedUserId: ID
-}
-
-type ManagerModeInviteManager = {
-  eventName: Name.MANAGER_MODE_INVITE_MANAGER
-  managerId: ID
 }
 
 type ManagerModeAcceptInvite = {
@@ -2611,12 +2208,6 @@ export type CommentsShowReplies = {
   trackId: ID
 }
 
-export type CommentsLoadMoreReplies = {
-  eventName: Name.COMMENTS_LOAD_MORE_REPLIES
-  commentId: ID
-  trackId: ID
-}
-
 export type CommentsHideReplies = {
   eventName: Name.COMMENTS_HIDE_REPLIES
   commentId: ID
@@ -2752,27 +2343,31 @@ export type RemixContestPickWinnersFinalize = {
   trackId: ID
 }
 
-export type AndroidAppRestartHeartbeat = {
-  eventName: Name.ANDROID_APP_RESTART_HEARTBEAT
-  timeSinceLastHeartbeat: number
+export type RemixContestView = {
+  eventName: Name.REMIX_CONTEST_VIEW
+  remixContestId: ID
+  trackId: ID
 }
 
-export type AndroidAppRestartStale = {
-  eventName: Name.ANDROID_APP_RESTART_STALE
-  backgroundDuration: number
+export type RemixContestEnter = {
+  eventName: Name.REMIX_CONTEST_ENTER
+  remixContestId: ID
+  trackId: ID
 }
 
-export type AndroidAppRestartForceQuit = {
-  eventName: Name.ANDROID_APP_RESTART_FORCE_QUIT
+export type RemixContestViewSubmissions = {
+  eventName: Name.REMIX_CONTEST_VIEW_SUBMISSIONS
+  remixContestId: ID
+  trackId: ID
 }
 
-// Artist Coin Launchpad
+// Fan Club Launchpad
 export type LaunchpadSplashGetStarted = {
   eventName: Name.LAUNCHPAD_SPLASH_GET_STARTED
 }
 
-export type LaunchpadHasExistingArtistCoin = {
-  eventName: Name.LAUNCHPAD_HAS_EXISTING_ARTIST_COIN
+export type LaunchpadHasExistingFanClub = {
+  eventName: Name.LAUNCHPAD_HAS_EXISTING_FAN_CLUB
 }
 
 export type LaunchpadSplashLearnMoreClicked = {
@@ -2835,30 +2430,6 @@ export type LaunchpadCoinCreationFailure = {
     | 'firstBuyFailed'
     | 'unknownError'
   launchCoinResponse: LaunchCoinResponse
-}
-
-export type LaunchpadFirstBuyStarted = {
-  eventName: Name.LAUNCHPAD_FIRST_BUY_STARTED
-  coinSymbol: string
-  mintAddress: string
-  payAmount: string
-  receiveAmount: string
-}
-
-export type LaunchpadFirstBuySuccess = {
-  eventName: Name.LAUNCHPAD_FIRST_BUY_SUCCESS
-  coinSymbol: string
-  mintAddress: string
-  payAmount: string
-  receiveAmount: string
-}
-
-export type LaunchpadFirstBuyFailure = {
-  eventName: Name.LAUNCHPAD_FIRST_BUY_FAILURE
-  coinSymbol: string
-  mintAddress: string
-  payAmount: string
-  error: string
 }
 
 export type LaunchpadFirstBuyRetry = {
@@ -3023,23 +2594,7 @@ export type AllTrackingEvents =
   | AppError
   | CreateAccountOpen
   | CreateAccountCompleteEmail
-  | CreateAccountCompletePassword
-  | CreateAccountStartTwitter
-  | CreateAccountCompleteTwitter
-  | CreateAccountStartInstagram
-  | CreateAccountCompleteInstagram
-  | CreateAccountStartTikTok
-  | CreateAccountClosedTikTok
-  | CreateAccountCompleteTikTok
-  | CreateAccountCompleteProfile
-  | CreateAccountCompleteFollow
   | CreateAccountCompleteCreating
-  | CreateAccountOpenFinish
-  | CreateAccountClosedTwitter
-  | CreateAccountTikTokError
-  | CreateAccountTwitterError
-  | CreateAccountClosedInstagram
-  | CreateAccountInstagramError
   | CreateAccountUploadProfilePhoto
   | CreateAccountUploadProfilePhotoError
   | CreateAccountUploadProfileCover
@@ -3053,26 +2608,15 @@ export type AllTrackingEvents =
   | SignInFinish
   | SignInWithIncompleteAccount
   | SettingsChangeTheme
-  | SettingsStartTwitterOauth
-  | SettingsCompleteTwitterOauth
-  | SettingsStartInstagramOauth
-  | SettingsCompleteInstagramOauth
-  | SettingsStartTikTokOauth
-  | SettingsCompleteTikTokOauth
   | SettingsResetAccountRecovery
-  | SettingsStartChangePassword
   | SettingsCompleteChangePassword
   | SettingsLogOut
-  | TikTokStartOAuth
-  | TikTokCompleteOAuth
-  | TikTokOAuthError
   | VisualizerOpen
   | VisualizerClose
   | AccountHealthMeterFull
   | AccountHealthUploadCoverPhoto
   | AccountHealthUploadProfilePhoto
   | AccountHealthDownloadDesktop
-  | AccountHealthCTABanner
   | Share
   | ShareToTwitter
   | Repost
@@ -3096,11 +2640,9 @@ export type AllTrackingEvents =
   | TrackUploadFollowGated
   | TrackUploadUSDCGated
   | TrackUploadTokenGated
-  | TrackUploadClickUSDCWaitListLink
   | TrackUploadFollowGatedDownload
   | TrackUploadUSDCGatedDownload
   | TrackUploadTokenGatedDownload
-  | TrackUploadClickUSDCDownloadWaitListLink
   | TrackDownloadClickedDownloadAll
   | TrackDownloadSuccessfulDownloadAll
   | TrackDownloadFailedDownloadAll
@@ -3114,9 +2656,6 @@ export type AllTrackingEvents =
   | CollectionEdit
   | TrackUploadSuccess
   | TrackUploadFailure
-  | TrackUploadRejected
-  | TrackUploadCopyLink
-  | TrackUploadShareWithFans
   | TrackUploadViewTrackPage
   | USDCGatedTrackUnlocked
   | FollowGatedTrackUnlocked
@@ -3127,6 +2666,7 @@ export type AllTrackingEvents =
   | TrendingChangeView
   | FeedChangeView
   | NotificationsOpen
+  | NotificationsOpenPushNotification
   | NotificationsClickTile
   | NotificationsClickMilestone
   | NotificationsClickRemixCreate
@@ -3145,11 +2685,18 @@ export type AllTrackingEvents =
   | ProfilePageClickTikTok
   | ProfilePageClickWebsite
   | ProfilePageShownArtistRecommendations
-  | TrackPageDownload
   | TrackPagePlayMore
   | PlaybackPlay
   | PlaybackPause
+  | PlaylistPlay
   | BufferingTime
+  | PlayQueueOpen
+  | PlayQueueClose
+  | PlayQueueAddTrack
+  | PlayQueueRemoveTrack
+  | PlayQueueReorderTrack
+  | PlayQueuePlayTrack
+  | PlayQueueClear
   | Follow
   | Unfollow
   | LinkClicking
@@ -3158,60 +2705,38 @@ export type AllTrackingEvents =
   | ModalClosed
   | SearchTerm
   | SearchTag
-  | SearchMoreResults
   | SearchResultSelect
   | ExploreSectionView
   | ExploreSectionClick
-  | ListenGated
   | ErrorPage
   | NotFoundPage
   | PageView
-  | OnFirstPage
-  | NotOnFirstPage
   | BrowserNotificationSetting
   | TweetFirstUpload
-  | WebVitals
-  | Performance
   | StemCompleteUpload
   | StemDelete
   | RemixNewRemix
   | RemixCosign
   | RemixCosignIndicator
   | RemixHide
-  | SendAudioRequest
   | SendAudioSuccess
   | SendAudioFailure
   | PlaylistLibraryReorder
-  | PlaylistLibraryClicked
   | PlaylistLibraryMovePlaylistIntoFolder
   | PlaylistLibraryAddPlaylistToFolder
   | PlaylistLibraryMovePlaylistOutOfFolder
-  | PlaylistLibraryExpandFolder
-  | PlaylistLibraryCollapseFolder
-  | TransferAudioToWAudioRequest
-  | TransferAudioToWAudioSuccess
-  | TransferAudioToWAudioFailure
   | DeactivateAccountPageView
   | DeactivateAccountRequest
   | DeactivateAccountSuccess
   | DeactivateAccountFailure
-  | CreateUserBankRequest
   | CreateUserBankSuccess
   | CreateUserBankFailure
   | RewardsClaimDetailsOpened
   | RewardsClaimRequest
   | RewardsClaimSuccess
-  | RewardsClaimBlocked
   | RewardsClaimAllRequest
   | RewardsClaimAllSuccess
   | RewardsClaimAllFailure
-  | RewardsClaimAllBlocked
-  | SocialProofOpen
-  | SocialProofSuccess
-  | SocialProofError
-  | FolderOpenCreate
-  | FolderSubmitCreate
-  | FolderCancelCreate
   | FolderOpenEdit
   | FolderSubmitEdit
   | FolderDelete
@@ -3220,14 +2745,6 @@ export type AllTrackingEvents =
   | AudiusOauthComplete
   | AudiusOauthSubmit
   | AudiusOauthError
-  | BuyAudioOnRampOpened
-  | BuyAudioOnRampSuccess
-  | BuyAudioOnRampCanceled
-  | BuyAudioSuccess
-  | BuyAudioFailure
-  | BuyAudioRecoveryOpened
-  | BuyAudioRecoverySuccess
-  | BuyAudioRecoveryFailure
   | BuyUSDCOnRampOpened
   | BuyUSDCOnRampSuccess
   | BuyUSDCOnRampCanceled
@@ -3257,7 +2774,6 @@ export type AllTrackingEvents =
   | WithdrawUSDCCoinflowWithdrawalReady
   | WithdrawUSDCCoinflowSendTransaction
   | WithdrawUSDCCoinflowSendTransactionFailed
-  | WithdrawUSDCHelpLinkClicked
   | WithdrawUSDCTxLinkClicked
   | StripeSessionCreationError
   | StripeSessionCreated
@@ -3275,7 +2791,7 @@ export type AllTrackingEvents =
   | PurchaseContentTOSClicked
   | PurchaseContentUSDCUserBankCopied
   | BannerTOSClicked
-  | BannerArtistCoinsLaunchClicked
+  | BannerFanClubsLaunchClicked
   | BannerTradingVolumeLaunchClicked
   | RateCtaDisplayed
   | RateCtaResponseNo
@@ -3283,9 +2799,7 @@ export type AllTrackingEvents =
   | ConnectWalletNewWalletStart
   | ConnectWalletNewWalletConnecting
   | ConnectWalletNewWalletConnected
-  | ConnectWalletDisconnected
   | ConnectWalletAlreadyAssociated
-  | ConnectWalletAssociationError
   | ConnectWalletError
   | ChatBlastCTAClicked
   | ChatBlastMessageSent
@@ -3318,15 +2832,12 @@ export type AllTrackingEvents =
   | AuthorizedAppRemoveError
   | ChatEntryPoint
   | ChatWebsocketError
-  | JupiterQuoteResponse
-  | JupiterQuoteRequest
   | ExportPrivateKeyLinkClicked
   | ExportPrivateKeyPageOpened
   | ExportPrivateKeyModalOpened
   | ExportPrivateKeyPublicAddressCopied
   | ExportPrivateKeyPrivateKeyCopied
   | ManagerModeSwitchAccount
-  | ManagerModeInviteManager
   | ManagerModeAcceptInvite
   | ManagerModeCancelInvite
   | ManagerModeRejectInvite
@@ -3353,7 +2864,6 @@ export type AllTrackingEvents =
   | CommentsLoadMoreComments
   | CommentsLoadNewComments
   | CommentsShowReplies
-  | CommentsLoadMoreReplies
   | CommentsHideReplies
   | CommentsApplySort
   | CommentsClickCommentStat
@@ -3379,11 +2889,11 @@ export type AllTrackingEvents =
   | RemixContestDelete
   | RemixContestPickWinnersOpen
   | RemixContestPickWinnersFinalize
-  | AndroidAppRestartHeartbeat
-  | AndroidAppRestartStale
-  | AndroidAppRestartForceQuit
+  | RemixContestView
+  | RemixContestEnter
+  | RemixContestViewSubmissions
   | LaunchpadSplashGetStarted
-  | LaunchpadHasExistingArtistCoin
+  | LaunchpadHasExistingFanClub
   | LaunchpadSplashLearnMoreClicked
   | LaunchpadWalletConnectSuccess
   | LaunchpadWalletInsufficientBalance
@@ -3392,9 +2902,6 @@ export type AllTrackingEvents =
   | LaunchpadCoinCreationStarted
   | LaunchpadCoinCreationSuccess
   | LaunchpadCoinCreationFailure
-  | LaunchpadFirstBuyStarted
-  | LaunchpadFirstBuySuccess
-  | LaunchpadFirstBuyFailure
   | LaunchpadFirstBuyRetry
   | LaunchpadFormInputChange
   | LaunchpadFormBack

@@ -70,7 +70,11 @@ const overflowRowConfig = ({
   },
   [OverflowAction.HOST_REMIX_CONTEST]: {
     text: isRemixContest ? 'Edit Remix Contest' : 'Host Remix Contest'
-  }
+  },
+  [OverflowAction.PLAY_NEXT]: { text: 'Play Next' },
+  [OverflowAction.ADD_TO_QUEUE]: { text: 'Add to Queue' },
+  [OverflowAction.PLAY_COLLECTION_NEXT]: { text: 'Play Next' },
+  [OverflowAction.ADD_COLLECTION_TO_QUEUE]: { text: 'Add to Queue' }
 })
 
 export const OverflowMenuDrawer = () => {

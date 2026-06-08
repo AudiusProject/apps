@@ -25,10 +25,10 @@ import type {
 import { ExpandableRadio } from '../ExpandableRadio'
 import { ExpandableRadioGroup } from '../ExpandableRadioGroup'
 
+import { FollowGatedRadioField } from './FollowGatedRadioField'
 import { PremiumRadioField } from './PremiumRadioField/PremiumRadioField'
 import { TRACK_PREVIEW } from './PremiumRadioField/TrackPreviewField'
 import { TRACK_PRICE } from './PremiumRadioField/TrackPriceField'
-import { SpecialAccessRadioField } from './SpecialAccessRadioField'
 import { TokenGatedRadioField } from './TokenGatedRadioField'
 
 const publicAvailability = StreamTrackAvailabilityType.PUBLIC
@@ -63,7 +63,7 @@ export const PriceAndAudienceScreen = () => {
       return StreamTrackAvailabilityType.TOKEN_GATED
     }
     if (isContentFollowGated(streamConditions)) {
-      return StreamTrackAvailabilityType.SPECIAL_ACCESS
+      return StreamTrackAvailabilityType.FOLLOW_GATED
     }
     return StreamTrackAvailabilityType.PUBLIC
     // we only care about what the initial value was here
@@ -74,9 +74,8 @@ export const PriceAndAudienceScreen = () => {
     useEditAccessConfirmationModal()
 
   const {
-    disableUsdcGate: disableUsdcGateOption,
-    disableSpecialAccessGate,
-    disableSpecialAccessGateFields,
+    disableUsdcGate,
+    disableFollowGate,
     disableTokenGate,
     disableTokenGateFields
   } = useAccessAndRemixSettings({
@@ -85,8 +84,6 @@ export const PriceAndAudienceScreen = () => {
     isInitiallyUnlisted: initialValues.is_unlisted,
     isScheduledRelease
   })
-
-  const disableUsdcGate = disableUsdcGateOption
 
   const [availability, setAvailability] =
     useState<StreamTrackAvailabilityType>(initialAvailability)
@@ -127,27 +124,16 @@ export const PriceAndAudienceScreen = () => {
 
   const navigation = useNavigation()
   const [usersMayLoseAccess, setUsersMayLoseAccess] = useState(false)
-  const [specialAccessType, setSpecialAccessType] = useState<
-    'follow' | undefined
-  >(undefined)
-
-  // Set the special access type based on stream conditions.
-  useEffect(() => {
-    if (isContentFollowGated(streamConditions)) {
-      setSpecialAccessType('follow')
-    }
-  }, [streamConditions])
 
   // Check if users may lose access based on the new audience.
   useEffect(() => {
     setUsersMayLoseAccess(
       getUsersMayLoseAccess({
         availability,
-        initialStreamConditions,
-        specialAccessType
+        initialStreamConditions
       })
     )
-  }, [availability, initialStreamConditions, specialAccessType])
+  }, [availability, initialStreamConditions])
 
   const handleSubmit = useCallback(() => {
     validateForm() // Fixes any erroneous errors that haven't been revalidated
@@ -197,12 +183,7 @@ export const PriceAndAudienceScreen = () => {
           />
         ) : null}
         {entityType === 'track' ? (
-          <SpecialAccessRadioField
-            disabled={
-              disableSpecialAccessGate || disableSpecialAccessGateFields
-            }
-            previousStreamConditions={previousStreamConditions}
-          />
+          <FollowGatedRadioField disabled={disableFollowGate} />
         ) : null}
         {entityType === 'track' ? (
           <TokenGatedRadioField

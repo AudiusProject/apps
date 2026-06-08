@@ -9,12 +9,12 @@ import { developmentConfig, HashId } from '@audius/sdk'
 import { http, HttpResponse } from 'msw'
 
 import { queryClient } from 'services/query-client'
+import { testCollection } from 'test/mocks/fixtures/collections'
 import {
-  mockArtistCoin,
+  mockFanClub,
   mockUserCoinHasBalance,
   mockCoinMembers
-} from 'test/mocks/fixtures/artistCoins'
-import { testCollection } from 'test/mocks/fixtures/collections'
+} from 'test/mocks/fixtures/fanClubs'
 import { testTrack } from 'test/mocks/fixtures/tracks'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 
@@ -30,15 +30,15 @@ type TestUser = typeof artistUser | typeof nonArtistUser
  *  User mocks
  */
 export const mockUserByHandle = (user: typeof artistUser) =>
-  http.get(`${apiEndpoint}/v1/full/users/handle/${user.handle}`, () =>
-    HttpResponse.json({ data: [user] })
+  http.get(`${apiEndpoint}/v1/users/handle/${user.handle}`, () =>
+    HttpResponse.json({ data: user })
   )
 
 export const mockRelatedUsers = (
   user: typeof artistUser,
   relatedUsers?: TestUser[]
 ) =>
-  http.get(`${apiEndpoint}/v1/full/users/${user.id}/related`, () =>
+  http.get(`${apiEndpoint}/v1/users/${user.id}/related`, () =>
     HttpResponse.json({ data: relatedUsers ?? [] })
   )
 
@@ -81,7 +81,7 @@ export const mockCurrentAccount = (
     userMetadataFromSDK(user)
   )
   // Set current account data
-  return http.get(`${apiEndpoint}/v1/full/users/account/${user.wallet}`, () =>
+  return http.get(`${apiEndpoint}/v1/users/account/${user.wallet}`, () =>
     HttpResponse.json({ data: account })
   )
 }
@@ -105,14 +105,14 @@ export const mockEvents = (/* todo: */) =>
   )
 
 /**
- * Artist Coins
+ * Fan Clubs
  */
-export const mockCoinByMint = (coin: typeof mockArtistCoin) =>
+export const mockCoinByMint = (coin: typeof mockFanClub) =>
   http.get(`${apiEndpoint}/v1/coins/${coin.mint}`, () =>
     HttpResponse.json({ data: coin })
   )
 
-export const mockCoinByTicker = (coin: typeof mockArtistCoin) =>
+export const mockCoinByTicker = (coin: typeof mockFanClub) =>
   http.get(`${apiEndpoint}/v1/coins/ticker/${coin.ticker}`, () =>
     HttpResponse.json({ data: coin })
   )
@@ -140,7 +140,7 @@ export const mockCoinMembersList = (
   )
 export const mockUserCreatedCoin = (
   userId: string,
-  coin: typeof mockArtistCoin
+  coin: typeof mockFanClub
 ) => {
   return http.get(`${apiEndpoint}/v1/coins`, ({ request }) => {
     const url = new URL(request.url)
@@ -158,7 +158,7 @@ export const mockUserCreatedCoin = (
  * Collections
  */
 export const mockCollectionById = (collection: typeof testCollection & any) =>
-  http.get(`${apiEndpoint}/v1/full/playlists`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/playlists`, ({ request }) => {
     const url = new URL(request.url)
     const id = url.searchParams.get('id')
 
@@ -173,7 +173,7 @@ export const mockCollectionById = (collection: typeof testCollection & any) =>
  * Tracks
  */
 export const mockTrackById = (track: typeof testTrack & any) =>
-  http.get(`${apiEndpoint}/v1/full/tracks`, ({ request }) => {
+  http.get(`${apiEndpoint}/v1/tracks`, ({ request }) => {
     const url = new URL(request.url)
     // Handle both single ID param and array params (id[]=1&id[]=2)
     const idParam = url.searchParams.get('id')
@@ -210,11 +210,9 @@ export const mockTrackById = (track: typeof testTrack & any) =>
  * Notifications
  */
 export const mockUsers = (users: (typeof artistUser)[]) =>
-  http.get(`${apiEndpoint}/v1/full/users`, () =>
-    HttpResponse.json({ data: users })
-  )
+  http.get(`${apiEndpoint}/v1/users`, () => HttpResponse.json({ data: users }))
 
 export const mockTracks = (tracks: (typeof testTrack)[]) =>
-  http.get(`${apiEndpoint}/v1/full/tracks`, () =>
+  http.get(`${apiEndpoint}/v1/tracks`, () =>
     HttpResponse.json({ data: tracks })
   )

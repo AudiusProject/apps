@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 
 import { AUDIO, FixedDecimal } from '@audius/fixed-decimal'
 
-import { useArtistCoin, useAudioBalance, useQueryContext } from '~/api'
+import { useFanClub, useAudioBalance, useQueryContext } from '~/api'
 import {
   formatAudioBalance,
   formatCount,
@@ -31,8 +31,9 @@ export const useFormattedAudioBalance = ({
     includeStaked
   })
 
-  const { data: audioPriceData, isPending: isAudioPriceLoading } =
-    useArtistCoin(env.WAUDIO_MINT_ADDRESS)
+  const { data: audioPriceData, isPending: isAudioPriceLoading } = useFanClub(
+    env.WAUDIO_MINT_ADDRESS
+  )
   const audioPrice = audioPriceData?.price?.toString() ?? null
   const hasFetchedAudioBalance = !isNullOrUndefined(totalBalance)
   const audioBalance = hasFetchedAudioBalance ? totalBalance : null

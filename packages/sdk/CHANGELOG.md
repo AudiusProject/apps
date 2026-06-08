@@ -1,5 +1,339 @@
 # @audius/sdk
 
+## 15.3.1
+
+### Patch Changes
+
+- Add a `files` field to `package.json` so the published tarball actually ships the built `dist/` directory. 15.3.0 was published with no `dist/` because the package's `.gitignore` excludes `dist`, and without an explicit `files` whitelist npm fell back to that ignore file and skipped every built artifact. Republish-only fix; no SDK code changes vs. 15.3.0.
+
+## 15.3.0
+
+### Minor Changes
+
+- c8f9a4d: Restore a CommonJS build alongside the existing ESM output. The SDK now ships dual ESM + CJS via the `package.json#exports` map (with `import`/`require`/`browser`/`react-native`/`types` conditions), so Node consumers using `require('@audius/sdk')` no longer hit ESM/CJS interop edges on transitive CJS deps (e.g. `lodash`, `axios`, `commander`, `file-type`, `tus-js-client`).
+
+  Resolved entries:
+
+  - Node ESM: `dist/index.esm.js`
+  - Node CJS: `dist/index.cjs`
+  - Browser ESM: `dist/index.browser.esm.js`
+  - Browser CJS: `dist/index.browser.cjs`
+  - React Native: `dist/index.native.js`
+  - Types: `dist/index.d.ts`
+
+## 15.2.0
+
+### Minor Changes
+
+- 6c4c717: Add token expiry tracking to OAuth token stores and improve session reliability. `isAuthenticated()` now checks token expiry and attempts silent refresh when needed. `getUser()` retries with a fresh token on 401 instead of immediately throwing.
+
+### Patch Changes
+
+- 4b53e87: Add Authorization header and API identification to relay calls to support proper rate limiting
+
+## 15.1.0
+
+### Minor Changes
+
+- 500dccb: Add artist coin solana connection flow
+
+### Patch Changes
+
+- d0f653d: Fix duplicate Bearer header prefix
+
+## 15.0.1
+
+### Patch Changes
+
+- 56dea87: Fix PKCE OAuth access token not being sent with Bearer prefix, and fix `getUser()` calling the wrong endpoint (`/oauth/me` → `/me`)
+
+## 15.0.0
+
+### Major Changes
+
+- 4f924fe: Consolidate Ethereum contract services into a single `EthereumService`
+
+  The individual Ethereum contract client classes (`GovernanceClient`,
+  `ClaimsManagerClient`, `ServiceProviderFactoryClient`,
+  `EthRewardsManagerClient`, `ServiceTypeManagerClient`,
+  `TrustedNotifierManagerClient`, `StakingClient`, `DelegateManagerClient`,
+  `AudiusTokenClient`, `AudiusWormholeClient`, `RegistryClient`) have been
+  removed from the SDK's `ServicesContainer`. They are replaced by a single
+  `EthereumService` instance exposed at `sdk.services.ethereum`, which wraps
+  each contract as a typed viem contract instance.
+
+  **Before:**
+
+  ```ts
+  await sdk.services.governanceClient.getVotingPeriod();
+  await sdk.services.claimsManagerClient.getPendingClaim(wallet);
+  ```
+
+  **After:**
+
+  ```ts
+  await sdk.services.ethereum.governance.read.getVotingPeriod([]);
+  await sdk.services.ethereum.claimsManager.read.getPendingClaim([wallet]);
+  ```
+
+  Contract instances expose the full viem contract interface (`.read.*`,
+  `.simulate.*`, `.write.*`, `.watchEvent.*`). ABIs and addresses are sourced
+  from `@audius/eth` with optional per-environment overrides via
+  `EthereumServiceConfig`.
+
+- 383db12: OAuth: rewrite with PKCE, async login, and React Native support
+
+  The OAuth service has been fully reworked. It now uses the OAuth 2.0
+  Authorization Code Flow with PKCE. The implicit flow (Ethereum-signed JWT)
+  has been removed. Tokens are persisted across sessions by default.
+
+  `sdk.oauth` is now always defined — no null check or `!` assertion needed.
+
+  React Native / Expo is now supported out of the box. See the [React Native / Expo](#react-native--expo) section below.
+
+  ## Breaking changes
+
+  ### Removed APIs
+
+  | Removed                                          | Replacement                                        |
+  | ------------------------------------------------ | -------------------------------------------------- |
+  | `oauth.init({ successCallback, errorCallback })` | No replacement — call `login()` directly           |
+  | `oauth.renderButton(element, options)`           | No replacement — build your own sign-in button     |
+  | `LoginSuccessCallback` type                      | Use `login().then()` or `await login()`            |
+  | `LoginErrorCallback` type                        | Use `login().catch()` or try/catch `await login()` |
+  | `ButtonOptions` type                             | —                                                  |
+  | `LoginResult` type                               | Call `oauth.getUser()` after login instead         |
+  | `write_once` scope                               | Use `write` scope instead                          |
+  | `WriteOnceParams` type                           | —                                                  |
+
+  ### Changed APIs
+
+  | API               | Before                            | After                                                                         |
+  | ----------------- | --------------------------------- | ----------------------------------------------------------------------------- |
+  | `login()`         | fire-and-forget, no `redirectUri` | `async`, returns `Promise<void>`; `redirectUri` optional if set in SDK config |
+  | `hasRefreshToken` | synchronous getter (`boolean`)    | `async` method returning `Promise<boolean>`                                   |
+
+  ### Added APIs
+
+  | Added                          | Description                                                                                        |
+  | ------------------------------ | -------------------------------------------------------------------------------------------------- |
+  | `handleRedirect(url?: string)` | Completes the OAuth flow from the redirect page. On mobile, called automatically inside `login()`. |
+  | `isAuthenticated()`            | `async` method returning `Promise<boolean>` — true if an access token is stored.                   |
+  | `getUser()`                    | Fetches the authenticated user's profile using the stored access token.                            |
+
+  ### `redirectUri`
+
+  Set `redirectUri` once in the SDK config and it applies to every `login()` call. You can still pass it per-call to override the config value.
+
+  ```ts
+  // Set once:
+  const sdk = audiusSdk({
+    appName: "My App",
+    apiKey: "YOUR_API_KEY",
+    redirectUri: "https://yourapp.com/callback",
+  });
+
+  // Override per-call if needed:
+  await sdk.oauth.login({
+    scope: "write",
+    redirectUri: "https://yourapp.com/other-callback",
+  });
+  ```
+
+  A `redirectUri` must be available from one of these sources or `login()` will throw.
+
+  ## Migration guide
+
+  ### Before
+
+  ```ts
+  // Once on mount:
+  sdk.oauth!.init({
+    successCallback: (profile) => setUser(profile),
+    errorCallback: (error) => setError(error.message),
+  });
+
+  // On sign-in button click:
+  sdk.oauth!.login({ scope: "write", display: "popup" });
+  ```
+
+  ### After
+
+  ```ts
+  // Once at initialization:
+  const sdk = audiusSdk({
+    appName: "My App",
+    apiKey: "YOUR_API_KEY",
+    redirectUri: "https://yourapp.com/callback",
+  });
+
+  // On sign-in button click:
+  try {
+    await sdk.oauth.login({ scope: "write" });
+    setUser(await sdk.oauth.getUser());
+  } catch (error) {
+    setError(error.message);
+  }
+  ```
+
+  ### `write_once` scope
+
+  Replace `write_once` with `write`.
+
+  ### Callback page (`handleRedirect`)
+
+  On your callback page, call `handleRedirect()`. In a popup it forwards the
+  code to the parent window and closes itself; in a full-page redirect it
+  performs the token exchange locally:
+
+  ```ts
+  await sdk.oauth.handleRedirect();
+  // Popup: closes automatically and resolves the parent login() promise
+  // Full-page redirect: token exchange complete — call getUser() next
+  ```
+
+  On **mobile** (React Native / Expo), the redirect is handled automatically
+  inside `login()` — no call to `handleRedirect()` is needed.
+
+  ## Registering a redirect URI
+
+  Register your redirect URI(s) at [audius.co/settings](https://audius.co/settings) → Developer Apps.
+
+  **Mobile** — use a custom URL scheme (e.g. `myapp://oauth/callback`) and register
+  the scheme as an intent filter in your app's native config.
+
+  **Local development** — register `http://localhost:PORT/callback` for your dev environment.
+
+  ## React Native / Expo
+
+  Import from `@audius/sdk` on React Native — the native entry point automatically:
+
+  - Uses `AsyncStorage` for token persistence across app restarts
+  - Uses `expo-web-browser` (`openAuthSessionAsync`) for the OAuth browser session, bypassing universal link interception
+
+  No extra configuration is needed. `login()` resolves after the browser closes and
+  the token exchange completes:
+
+  ```ts
+  const sdk = audiusSdk({
+    appName: "My App",
+    apiKey: "YOUR_API_KEY",
+    redirectUri: "myapp://oauth/callback",
+  });
+
+  await sdk.oauth.login({ scope: "write" });
+  const user = await sdk.oauth.getUser();
+  ```
+
+- e0e1ecb: Create SDK without services by default in all cases
+
+  Updates the `sdk()` constructor to create the SDK without the old services and API structure regardless of config. This will align all configurations to have the same API surface that matches existing docs and examples.
+
+  To maintain compatibility, older legacy apps can use `createSdkWithServices()` instead of `sdk()` when initting the SDK. This is not advised for third-party apps.
+
+- 671fa83: Remove CommonJS build outputs from the SDK. The SDK now only ships ESM (`index.esm.js` and `index.browser.esm.js`). The `main` field in `package.json` now points to the ESM output. Consumers that relied on `require('@audius/sdk')` will need to switch to ESM imports.
+
+### Minor Changes
+
+- f79f7df: Generated API updates: track download counts, /me endpoint
+
+  - Added `TracksApi.getTrackDownloadCount()` and `getTrackDownloadCounts()` from swagger
+  - Added `UsersApi.getMe()` for the authenticated user endpoint
+  - Fixed generator script (`gen.js` → `gen.cjs`) for ESM compatibility — the SDK package uses `"type": "module"` which caused Node to treat `.js` files as ESM, breaking the `require()`-based generator
+
+### Patch Changes
+
+- fc87e67: Fix preview in publishTrack if no previewCid present
+- 7c775fc: Filter storage nodes to `*.audius.co` endpoints to improve upload success rates.
+- 0866c3b: Minor fix to allow playlist uploads with album fields in the old entity manager schemas
+- Updated dependencies [a744274]
+  - @audius/eth@1.0.0
+
+## 14.1.0
+
+### Minor Changes
+
+- 0cbaf44: Add support for OAuth2.0 PKCE access/refresh tokens
+- 8fc2f10: Add accessAuthorities to track model
+
+### Patch Changes
+
+- e9ffc03: Support redirect_uri in entity manager writes
+- bd1ed10: Fix creation of legacy playlists
+- 7dfa92a: Update SDK with latest types
+
+## 14.0.1
+
+### Patch Changes
+
+- e44d789: Do not coerce access authorities to undefined
+
+## 14.0.0
+
+### Major Changes
+
+- d864806: Remove getPlaylistByHandleAndSlug in favor of getBulkPlaylists
+
+  - Removes `sdk.playlists.getPlaylistByHandleAndSlug()` in favor of calling `sdk.playlists.getBulkPlaylists({ permalink: ['/handle/playlist/playlist-name-slug'] })`
+  - Changes return values of `CommentsAPI` to match other APIs, removing `success` param.
+
+### Minor Changes
+
+- 71bb31b: Add programmable distribution config to stream_conditions
+
+### Patch Changes
+
+- 71bb31b: Fix missing bearer token for PUT /users
+- a7a9e17: Fix create/upload/update playlist in legacy path
+
+  - `publishTracks` returns string track IDs, which were being incorrectly parsed as though they were numbers that needed converting. This was changed behavior from recent SDK changes made to match the POST endpoints as this was working previously
+  - `createPlaylist` wasn't equipped to handle using a preset `playlistId` like our client expects, rejecting calls that had `playlistId` already set in the metadata (which would happen on our creation of playlists from scratch).
+  - `createPlaylistInternal` was being passed parsed parameters in the `createPlaylist` case, and unparsed in the `uploadPlaylist` case, and used types that made it hard to squeeze both callsites in. This was resulting in incorrectly setting some IDs to hash IDs (eg in `playlistContents`) and was uncovered when fixing the playlistId bug above
+  - `updatePlaylist` had incorrect schema still referencing `coverArtCid` instead of `playlistImageSizesMultihash`, blocking any playlist updates that included an image update
+
+- 8f12bb7: Fix cover art CID metadata properties for playlists and tracks.
+- 6cb4b6f: Fix UploadsApi to make start() a function
+
+## 13.1.0
+
+### Minor Changes
+
+- fdd1e54: Add register dev app key endpoint
+- ad2d058: Added UploadsApi
+
+## 13.0.1
+
+### Patch Changes
+
+- 7265a2e: Fix tests, fix return types of entity manager variation of APIs
+
+## 13.0.0
+
+### Major Changes
+
+- 0129871: Rewrite write endpoints
+
+  Write endpoints have gone an entire overhaul, and now will call the API conditionally to handle writes on behalf of apps if the EntityManager service is not initialized. In order to support this, and moving towards having this be the default path moving forward, the signatures for the writes have all changed to align with the autogenerated code from the API schema of the API write endpoints.
+
+  Non-exhaustive list of changes (see updated dev docs post release for complete breakdown of methods):
+
+  - Creating albums and playlists no longer lets you pass in track IDs separately. They must be part of the `playlistContents`
+  - No more `advancedOptions` in order to match the required schema for the write endpoints in API. For now there's no replacement. Reach out if you desire these abilities again.
+  - Most write method parameters now have top level `userId` and (if applicable) entity id (eg. `playlistId` for `updatePlaylist`) and a `metadata` field, to mirror the autogenerated code which separates the request path/query params and body. CommentsAPI for example has been affected greatly by this.
+  - `updateUserProfile` is now `updateUser`
+  - `addTrackToPlaylist`, `removeTrackToPlaylist` etc should _not_ be used going forward.
+  - `updateCoinRequest` is now `metadata` in `updateCoin` method parameters.
+  - USDC access gates for stream/download conditions now have splits formatted as a list with elements `user_id` and `percentage`
+  - Authentication can now be done via a Bearer token when using the API routes
+
+### Minor Changes
+
+- 825a39d: Support bearer token initialization
+
+### Patch Changes
+
+- e376ade: Add/update user should use CID for photo/cover art
+
 ## 12.0.1
 
 ### Patch Changes

@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -15,7 +14,7 @@
 
 import { exists, mapValues } from '../runtime';
 import {
-     CollectionActivityFromJSONTyped,
+     CollectionActivityWithoutTracksFromJSONTyped,
      TrackActivityFromJSONTyped
 } from './';
 
@@ -84,8 +83,8 @@ export function ActivityFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         return json;
     }
     if (!ignoreDiscriminator) {
-        if (json['_class'] === 'collection_activity') {
-            return CollectionActivityFromJSONTyped(json, true);
+        if (json['_class'] === 'collection_activity_without_tracks') {
+            return CollectionActivityWithoutTracksFromJSONTyped(json, true);
         }
         if (json['_class'] === 'track_activity') {
             return TrackActivityFromJSONTyped(json, true);

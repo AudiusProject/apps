@@ -1,4 +1,4 @@
-import { Id, full } from '@audius/sdk'
+import { Id, type GetUsersTrackHistoryRequest } from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -19,7 +19,7 @@ const DEFAULT_PAGE_SIZE = 10
 
 // `id` is automatically added by the hook
 export type UseRecentlyPlayedTracksArgs = Omit<
-  SDKInfiniteQueryArgs<full.GetUsersTrackHistoryRequest>,
+  SDKInfiniteQueryArgs<GetUsersTrackHistoryRequest>,
   'id'
 >
 export const getRecentlyPlayedTracksQueryKey = (
@@ -53,7 +53,7 @@ export const useRecentlyPlayedTracks = (
       if (!currentUserId) return []
       const sdk = await audiusSdk()
       const id = Id.parse(currentUserId)
-      const { data = [] } = await sdk.full.users.getUsersTrackHistory({
+      const { data = [] } = await sdk.users.getUsersTrackHistory({
         ...args,
         id,
         userId: id,

@@ -72,11 +72,6 @@ function* setupBackend() {
     console.info('Reconnected')
   }
 
-  const fingerprintClient = yield* getContext('fingerprintClient')
-
-  // Fire-and-forget init fp
-  fingerprintClient.init()
-
   // Start remote account fetch while we setup backend
   // Avoid setting the account as loading here since we already pulled the local account
   yield* put(accountActions.fetchAccount({ shouldMarkAccountAsLoading: false }))

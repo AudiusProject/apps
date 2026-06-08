@@ -10,7 +10,8 @@ import {
   Artwork,
   Button,
   Flex,
-  IconShare,
+  IconArrowRight,
+  IconCloudUpload,
   IconX,
   Modal,
   ModalContent,
@@ -28,6 +29,12 @@ import { openXLink } from 'utils/xShare'
 export const CoinSuccessModal = () => {
   const { isOpen, data: coinData, onClose, onClosed } = useCoinSuccessModal()
   const navigate = useNavigateToPage()
+
+  const handleVisitFanClub = useCallback(() => {
+    if (!coinData?.ticker) return
+    navigate(route.coinPage(coinData.ticker))
+    onClose()
+  }, [coinData?.ticker, navigate, onClose])
 
   const handleUploadCoinGatedTrack = useCallback(() => {
     const state:
@@ -59,7 +66,7 @@ export const CoinSuccessModal = () => {
     if (!coinData?.ticker || !coinData?.mint) return
 
     const coinUrl = `https://audius.co${route.coinPage(coinData.ticker)}`
-    const shareText = `My artist coin $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
+    const shareText = `My fan club $${coinData.ticker} is live on @Audius. Be the first to buy and unlock my exclusive fan club!\n\n${coinData.mint}\n`
     openXLink(coinUrl, shareText)
   }, [coinData])
 
@@ -87,9 +94,7 @@ export const CoinSuccessModal = () => {
 
             <Flex column gap='m' w='100%'>
               <Text variant='label' size='l' color='subdued'>
-                {hasFirstBuyAmount
-                  ? launchpadMessages.modal.purchaseSummaryTitle
-                  : launchpadMessages.modal.yourCoinTitle}
+                {launchpadMessages.modal.purchaseSummaryTitle}
               </Text>
               <Paper
                 p='m'
@@ -154,19 +159,28 @@ export const CoinSuccessModal = () => {
               <Button
                 variant='primary'
                 fullWidth
-                onClick={handleUploadCoinGatedTrack}
-                iconLeft={IconShare}
+                onClick={handleShareToX}
+                iconLeft={IconX}
               >
-                {launchpadMessages.modal.uploadCoinGatedTrack}
+                {launchpadMessages.modal.shareToX}
               </Button>
 
               <Button
                 variant='secondary'
                 fullWidth
-                onClick={handleShareToX}
-                iconLeft={IconX}
+                onClick={handleVisitFanClub}
+                iconRight={IconArrowRight}
               >
-                {launchpadMessages.modal.shareToX}
+                {launchpadMessages.modal.visitFanClub}
+              </Button>
+
+              <Button
+                variant='secondary'
+                fullWidth
+                onClick={handleUploadCoinGatedTrack}
+                iconLeft={IconCloudUpload}
+              >
+                {launchpadMessages.modal.uploadCoinGatedTrack}
               </Button>
             </Flex>
           </Flex>

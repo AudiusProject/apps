@@ -1,15 +1,14 @@
 import { useEffect, MouseEvent, useCallback, useMemo } from 'react'
 
 import {
-  CollectionTrackWithUid,
+  CollectionTrack,
   useUser,
   useCollection,
-  useCollectionTracksWithUid,
+  useOrderedCollectionTracks,
   useCurrentUserId
 } from '@audius/common/api'
 import {
   ID,
-  UID,
   ModalSource,
   isContentUSDCPurchaseGated,
   Name,
@@ -26,15 +25,16 @@ import {
   collectionsSocialActions,
   mobileOverflowMenuUIActions,
   shareModalUIActions,
-  themeSelectors,
   OverflowAction,
   OverflowSource,
-  playerSelectors
+  playbackSelectors
 } from '@audius/common/store'
 import { formatLineupTileDuration, route } from '@audius/common/utils'
 import {
   Box,
   Flex,
+  IconButton,
+  IconKebabHorizontal,
   IconVolumeLevel2 as IconVolume,
   Text
 } from '@audius/harmony'
@@ -46,13 +46,17 @@ import { useModalState } from 'common/hooks/useModalState'
 import { useRecord, make } from 'common/store/analytics/actions'
 import { CollectionDogEar } from 'components/collection'
 import { CollectionTileStats } from 'components/collection/CollectionTileStats'
+import { Draggable } from 'components/dragndrop'
 import { TextLink, UserLink } from 'components/link'
+import { OwnProps as CollectionMenuProps } from 'components/menu/CollectionMenu'
+import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackTileSize } from 'components/track/types'
+import { useIsMobile } from 'hooks/useIsMobile'
 import { useRequiresAccountOnClick } from 'hooks/useRequiresAccount'
-import { AppState } from 'store/types'
 import { push } from 'utils/navigation'
-import { isMatrix, shouldShowDark } from 'utils/theme/theme'
+import { fullTrackPage } from 'utils/route'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 
 import { DesktopCollectionTileProps } from '../desktop/CollectionTile'
 import { getCollectionWithFallback } from '../helpers'
@@ -62,8 +66,7 @@ import styles from './PlaylistTile.module.css'
 import TrackTileArt from './TrackTileArt'
 
 const { collectionPage } = route
-const { getUid, getBuffering, getPlaying } = playerSelectors
-const { getTheme } = themeSelectors
+const { getTrackId, getBuffering, getPlaying } = playbackSelectors
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const {
@@ -107,7 +110,7 @@ type OwnProps = Omit<
 
 type TrackItemProps = {
   index: number
-  track?: CollectionTrackWithUid
+  track?: CollectionTrack
   isAlbum: boolean
   active: boolean
   deleted?: boolean
@@ -163,8 +166,8 @@ const TrackItem = (props: TrackItemProps) => {
 }
 
 type TrackListProps = {
-  activeTrackUid: UID | null
-  tracks: CollectionTrackWithUid[]
+  activeTrackId: ID | null
+  tracks: CollectionTrack[]
   goToCollectionPage: (e: MouseEvent<HTMLElement>) => void
   isLoading?: boolean
   isAlbum: boolean
@@ -175,7 +178,7 @@ type TrackListProps = {
 
 const TrackList = ({
   tracks,
-  activeTrackUid,
+  activeTrackId,
   goToCollectionPage,
   isLoading,
   isAlbum,
@@ -183,6 +186,8 @@ const TrackList = ({
   trackCount,
   noShimmer
 }: TrackListProps) => {
+  const isMobile = useIsMobile()
+
   if (!tracks.length && isLoading && numLoadingSkeletonRows) {
     return (
       <Box backgroundColor='surface1'>
@@ -202,16 +207,32 @@ const TrackList = ({
 
   return (
     <Box backgroundColor='surface1' onClick={goToCollectionPage}>
-      {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => (
-        <TrackItem
-          key={track.uid}
-          active={activeTrackUid === track.uid}
-          deleted={track.is_delete}
-          index={index}
-          isAlbum={isAlbum}
-          track={track}
-        />
-      ))}
+      {tracks.slice(0, DISPLAY_TRACK_COUNT).map((track, index) => {
+        const item = (
+          <TrackItem
+            active={activeTrackId === track.track_id}
+            deleted={track.is_delete}
+            index={index}
+            isAlbum={isAlbum}
+            track={track}
+          />
+        )
+        // On desktop web, allow dragging each row onto a playlist/queue target.
+        // Skip on native mobile (no drag) and for deleted tracks.
+        return isMobile || track.is_delete ? (
+          <div key={`${track.track_id}-${index}`}>{item}</div>
+        ) : (
+          <Draggable
+            key={`${track.track_id}-${index}`}
+            text={track.title}
+            kind='track'
+            id={track.track_id}
+            link={fullTrackPage(track.permalink)}
+          >
+            {item}
+          </Draggable>
+        )
+      })}
       {trackCount && trackCount > DISPLAY_TRACK_COUNT ? (
         <>
           <div className={styles.trackItemDivider}></div>
@@ -225,7 +246,6 @@ const TrackList = ({
 }
 
 export const CollectionTile = ({
-  uid,
   id,
   index,
   size,
@@ -244,10 +264,11 @@ export const CollectionTile = ({
   noShimmer
 }: OwnProps) => {
   const dispatch = useDispatch()
+  const isMobile = useIsMobile()
 
   const { data: collectionWithoutFallback } = useCollection(id)
   const collection = getCollectionWithFallback(collectionWithoutFallback)
-  const tracks = useCollectionTracksWithUid(collectionWithoutFallback, uid)
+  const tracks = useOrderedCollectionTracks(collectionWithoutFallback)
   const { data: partialUser } = useUser(collection?.playlist_owner_id, {
     select: (user) => ({
       handle: user?.handle,
@@ -257,12 +278,11 @@ export const CollectionTile = ({
   })
   const { handle } = partialUser ?? {}
   const { data: currentUserId } = useCurrentUserId()
-  const playingUid = useSelector(getUid)
+  const playingTrackIdState = useSelector(getTrackId)
   const isBuffering = useSelector(getBuffering)
   const isPlaying = useSelector(getPlaying)
-  const darkMode = useSelector((state: AppState) =>
-    shouldShowDark(getTheme(state))
-  )
+  const darkMode = useIsDarkMode()
+  const isMatrixMode = useIsMatrix()
 
   const goToRoute = useCallback(
     (route: string) => {
@@ -327,8 +347,10 @@ export const CollectionTile = ({
 
   const record = useRecord()
   const isActive = useMemo(() => {
-    return tracks?.some((track) => track.uid === playingUid) ?? false
-  }, [tracks, playingUid])
+    return (
+      tracks?.some((track) => track.track_id === playingTrackIdState) ?? false
+    )
+  }, [tracks, playingTrackIdState])
   const hasStreamAccess = !!collection?.access?.stream
 
   const isOwner = collection.playlist_owner_id === currentUserId
@@ -413,6 +435,44 @@ export const CollectionTile = ({
     )
   }, [hasStreamAccess, collection, isOwner, clickOverflow])
 
+  const renderOverflowMenu = useCallback(() => {
+    const menu: Omit<CollectionMenuProps, 'children'> = {
+      handle: handle ?? '',
+      isFavorited: collection.has_current_user_saved,
+      isReposted: collection.has_current_user_reposted,
+      type: collection.is_album ? 'album' : 'playlist',
+      playlistId: collection.playlist_id,
+      playlistName: collection.playlist_name,
+      isPublic: !collection.is_private,
+      isOwner,
+      includeEmbed: !collection.is_private && !collection.is_stream_gated,
+      includeShare: true,
+      includeRepost: hasStreamAccess,
+      includeFavorite: hasStreamAccess,
+      includeVisitPage: true,
+      extraMenuItems: [],
+      permalink: collection.permalink || ''
+    }
+
+    return (
+      <Menu menu={menu}>
+        {(ref, triggerPopup) => (
+          <IconButton
+            ref={ref}
+            aria-label='More options'
+            icon={IconKebabHorizontal}
+            color='subdued'
+            size='l'
+            onClick={(e) => {
+              e.stopPropagation()
+              triggerPopup()
+            }}
+          />
+        )}
+      </Menu>
+    )
+  }, [collection, handle, hasStreamAccess, isOwner])
+
   const togglePlay = useCallback(() => {
     if (uploading) return
 
@@ -421,23 +481,40 @@ export const CollectionTile = ({
       : PlaybackSource.PLAYLIST_TILE_TRACK
 
     if (!isPlaying || !isActive) {
-      if (isActive) {
-        playTrack(playingUid!)
+      if (isActive && playingTrackIdState != null) {
+        playTrack(playingTrackIdState)
         record(
           make(Name.PLAYBACK_PLAY, {
             id: `${playingTrackId}`,
-            source
+            source,
+            collectionId: `${collection.playlist_id}`
+          })
+        )
+        record(
+          make(Name.PLAYLIST_PLAY, {
+            id: `${collection.playlist_id}`,
+            source,
+            isAlbum: !!collection.is_album,
+            trackCount: collection.track_count
           })
         )
       } else {
-        const trackUid = tracks[0] ? tracks[0].uid : null
         const trackId = tracks[0] ? tracks[0].track_id : null
-        if (!trackUid || !trackId) return
-        playTrack(trackUid)
+        if (!trackId) return
+        playTrack(trackId)
         record(
           make(Name.PLAYBACK_PLAY, {
             id: `${trackId}`,
-            source
+            source,
+            collectionId: `${collection.playlist_id}`
+          })
+        )
+        record(
+          make(Name.PLAYLIST_PLAY, {
+            id: `${collection.playlist_id}`,
+            source,
+            isAlbum: !!collection.is_album,
+            trackCount: collection.track_count
           })
         )
       }
@@ -457,9 +534,12 @@ export const CollectionTile = ({
     playTrack,
     pauseTrack,
     isActive,
-    playingUid,
+    playingTrackIdState,
     playingTrackId,
     uploading,
+    collection.playlist_id,
+    collection.is_album,
+    collection.track_count,
     record
   ])
 
@@ -580,6 +660,7 @@ export const CollectionTile = ({
             <UserLink
               userId={collection.playlist_owner_id}
               badgeSize='xs'
+              popover={!isMobile}
               css={{ marginTop: '-4px' }}
             >
               {!shouldShow ? (
@@ -601,7 +682,7 @@ export const CollectionTile = ({
           />
         </Box>
         <TrackList
-          activeTrackUid={playingUid || null}
+          activeTrackId={playingTrackIdState || null}
           goToCollectionPage={goToCollectionPage}
           tracks={tracks}
           isLoading={isLoading}
@@ -619,11 +700,12 @@ export const CollectionTile = ({
               toggleRepost={toggleRepost}
               onShare={onShare}
               onClickOverflow={onClickOverflow}
+              renderOverflow={renderOverflowMenu}
               onClickGatedUnlockPill={onClickGatedUnlockPill}
               isLoading={isActive && isBuffering}
               isOwner={isOwner}
               isDarkMode={darkMode}
-              isMatrixMode={isMatrix()}
+              isMatrixMode={isMatrixMode}
               hasStreamAccess={hasStreamAccess}
               streamConditions={collection.stream_conditions}
               isUnlisted={collection.is_private}

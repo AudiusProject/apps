@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentTrack } from '@audius/common/hooks'
-import { playerSelectors, playbackRateValueMap } from '@audius/common/store'
+import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { formatSeconds, Genre } from '@audius/common/utils'
 import { useAppState } from '@react-native-community/hooks'
 import type { TextInput } from 'react-native'
@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
 const { getPlaybackRate, getSeek, getSeekCounter, getCounter, getBuffering } =
-  playerSelectors
+  playbackSelectors
 
 export const usePosition = (
   mediaKey: string,
@@ -41,7 +41,7 @@ export const usePosition = (
 
     // Calculate the actual playback rate based on track type
     const isLongFormContent =
-      trackGenre === Genre.PODCASTS || trackGenre === Genre.AUDIOBOOKS
+      trackGenre === Genre.Podcasts || trackGenre === Genre.Audiobooks
     const actualPlaybackRate = isLongFormContent
       ? playbackRateValueMap[playbackRate]
       : 1.0

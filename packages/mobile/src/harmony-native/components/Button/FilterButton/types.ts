@@ -129,4 +129,9 @@ export type FilterButtonProps<Value extends string = string> = {
    */
   screen?: ComponentType<ScreenProps<Value>>
   renderLabel?: (label: string) => ReactNode
+
+  /**
+   * When true, the list selection screen will not show a search field (e.g. for short option lists)
+   */
+  disableSearch?: boolean
 }

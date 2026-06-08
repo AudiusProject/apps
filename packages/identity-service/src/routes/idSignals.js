@@ -10,7 +10,6 @@ const models = require('../models')
 const { QueryTypes } = require('sequelize')
 const userHandleMiddleware = require('../userHandleMiddleware')
 const authMiddleware = require('../authMiddleware')
-const { getDeviceIDCountForUserId } = require('../utils/fpHelpers')
 const { getIP, recordIP } = require('../utils/antiAbuse')
 
 module.exports = function (app) {
@@ -25,53 +24,46 @@ module.exports = function (app) {
       const handle = req.query.handle
       if (!handle) return errorResponseBadRequest('Please provide handle')
 
-      const [
-        captchaScores,
-        cognitoFlowScores,
-        deviceUserCount,
-        userIPRecord,
-        handleSimilarity
-      ] = await Promise.all([
-        models.sequelize.query(
-          `select "Users"."blockchainUserId" as "userId", "BotScores"."recaptchaScore" as "score", "BotScores"."recaptchaContext" as "context", "BotScores"."updatedAt" as "updatedAt"
+      const [captchaScores, cognitoFlowScores, userIPRecord, handleSimilarity] =
+        await Promise.all([
+          models.sequelize.query(
+            `select "Users"."blockchainUserId" as "userId", "BotScores"."recaptchaScore" as "score", "BotScores"."recaptchaContext" as "context", "BotScores"."updatedAt" as "updatedAt"
         from
           "Users" inner join "BotScores" on "Users"."walletAddress" = "BotScores"."walletAddress"
         where
           "Users"."handle" = :handle`,
-          {
-            replacements: { handle },
-            type: QueryTypes.SELECT
-          }
-        ),
-        models.sequelize.query(
-          `select "Users"."blockchainUserId" as "userId", "CognitoFlows"."score" as "score"
+            {
+              replacements: { handle },
+              type: QueryTypes.SELECT
+            }
+          ),
+          models.sequelize.query(
+            `select "Users"."blockchainUserId" as "userId", "CognitoFlows"."score" as "score"
         from
           "Users" inner join "CognitoFlows" on "Users"."handle" = "CognitoFlows"."handle"
         where
           "Users"."handle" = :handle`,
-          {
-            replacements: { handle },
-            type: QueryTypes.SELECT
-          }
-        ),
-        getDeviceIDCountForUserId(req.user.blockchainUserId),
-        models.UserIPs.findOne({ where: { handle } }),
-        models.sequelize.query(
-          `select count(*) from "Users" where "handle" SIMILAR TO :handle;`,
-          {
-            replacements: {
-              handle: `[0-9]*${handle.replace(/(^\d*|\d*$)/g, '')}[0-9]*`
-            },
-            type: QueryTypes.SELECT
-          }
-        )
-      ])
+            {
+              replacements: { handle },
+              type: QueryTypes.SELECT
+            }
+          ),
+          models.UserIPs.findOne({ where: { handle } }),
+          models.sequelize.query(
+            `select count(*) from "Users" where "handle" SIMILAR TO :handle;`,
+            {
+              replacements: {
+                handle: `[0-9]*${handle.replace(/(^\d*|\d*$)/g, '')}[0-9]*`
+              },
+              type: QueryTypes.SELECT
+            }
+          )
+        ])
 
       const response = {
         captchaScores,
         cognitoFlowScores,
         socialSignals: {},
-        deviceUserCount,
         userIP: userIPRecord && userIPRecord.userIP,
         emailAddress: req.user.email,
         handleSimilarity: handleSimilarity[0]?.count ?? 0

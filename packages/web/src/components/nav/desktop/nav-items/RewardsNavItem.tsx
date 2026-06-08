@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { useHasAccount } from '@audius/common/api'
 import { useChallengeCooldownSchedule } from '@audius/common/hooks'
 import { route } from '@audius/common/utils'
 import { IconGift, NotificationCount } from '@audius/harmony'
@@ -13,7 +12,6 @@ import { LeftNavLink } from '../LeftNavLink'
 const { REWARDS_PAGE } = route
 
 export const RewardsNavItem = () => {
-  const hasAccount = useHasAccount()
   const { claimableAmount } = useChallengeCooldownSchedule({
     multiple: true
   })
@@ -23,8 +21,7 @@ export const RewardsNavItem = () => {
     <LeftNavLink
       leftIcon={IconGift}
       to={REWARDS_PAGE}
-      disabled={!hasAccount}
-      restriction='account'
+      restriction='none'
       hasNotification={claimableAmount > 0}
       rightIcon={
         claimableAmount > 0 ? (

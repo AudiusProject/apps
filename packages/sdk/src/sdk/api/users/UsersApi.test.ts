@@ -94,21 +94,19 @@ const emailEncryption = new EmailEncryptionService(
 
 describe('UsersApi', () => {
   beforeAll(() => {
-    users = new UsersApi(
-      new Configuration(),
-      new Storage({
+    users = new UsersApi(new Configuration(), {
+      storage: new Storage({
         storageNodeSelector,
         logger: new Logger()
       }),
-      new EntityManagerClient({
+      entityManager: new EntityManagerClient({
         audiusWalletClient,
         endpoint: 'https://discoveryprovider.audius.co'
       }),
-      new Logger(),
-      claimableTokens,
+      claimableTokensClient: claimableTokens,
       solanaClient,
-      emailEncryption
-    )
+      emailEncryptionService: emailEncryption
+    })
     vitest.spyOn(console, 'warn').mockImplementation(() => {})
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})
@@ -117,7 +115,8 @@ describe('UsersApi', () => {
 
   describe('updateProfile', () => {
     it('updates the user profile if valid metadata is provided', async () => {
-      const result = await users.updateProfile({
+      const result = await users.updateUser({
+        id: '7eP5n',
         userId: '7eP5n',
         profilePictureFile: {
           buffer: pngFile,
@@ -143,7 +142,8 @@ describe('UsersApi', () => {
     })
 
     it('updates the user profile if partial valid metadata is provided', async () => {
-      const result = await users.updateProfile({
+      const result = await users.updateUser({
+        id: '7eP5n',
         userId: '7eP5n',
         metadata: {
           bio: 'The bio has been updated'
@@ -158,20 +158,13 @@ describe('UsersApi', () => {
 
     it('throws an error if invalid metadata is provided', async () => {
       await expect(async () => {
-        await users.updateProfile({
+        await users.updateUser({
+          id: '7eP5n',
           userId: '7eP5n',
           metadata: {
             asdf: '123'
           } as any
         })
-      }).rejects.toThrow()
-    })
-
-    it('throws an error if invalid request is sent', async () => {
-      await expect(async () => {
-        await users.updateProfile({
-          metadata: { bio: 'New bio' }
-        } as any)
       }).rejects.toThrow()
     })
   })

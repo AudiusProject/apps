@@ -5,8 +5,7 @@ import { useSdk } from '../hooks/useSdk'
 import { useCallback } from 'react'
 import { Status } from '../contexts/types'
 import { PreloadImage } from './PreloadImage'
-
-const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'stage' | 'prod'
+import { distributorAppKeyStorageKey } from '../contexts/AuthProvider'
 
 type DistributorCardProps = {
   appKey: string
@@ -32,21 +31,15 @@ export const DistributorCard = ({
   const data = initialData ?? fetchedData
 
   const handleClick = useCallback(() => {
-    // Initialize an sdk for the distributor and use that to auth the user.
-    const distroSdk = sdk({
-      apiKey: appKey
-    })
-    distroSdk.oauth!.init({
-      successCallback: () => undefined,
-      env: env === 'prod' ? 'production' : 'development'
-    })
-    distroSdk.oauth!.login({
+    // Store the appKey so AuthProvider can recreate this SDK after the redirect
+    localStorage.setItem(distributorAppKeyStorageKey, appKey)
+    const distroSdk = sdk({ apiKey: appKey })
+    distroSdk.oauth.login({
       scope: 'write',
-      redirectUri: `${url}/auth/redirect?redirect_uri=${encodeURIComponent(window.location.origin)}`,
-      display: 'fullScreen',
-      responseMode: 'query'
+      redirectUri: window.location.origin,
+      display: 'fullScreen'
     })
-  }, [appKey, url])
+  }, [appKey])
 
   return (
     <Flex

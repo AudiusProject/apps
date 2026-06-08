@@ -2,6 +2,7 @@ export const remixMessages = {
   remixesTitle: 'Remixes',
   remixes: 'Remix',
   submissionsTitle: 'Remix Contest Submissions',
+  pickWinnersSubmissionsTitle: 'Submissions',
   submissions: 'Submission',
   coSigned: 'Co-Signs',
   contestEntries: 'Contest Entries',
@@ -38,5 +39,5 @@ export const remixMessages = {
   contestHostingLabel: 'Learn how to host a successful remix contest',
   startContest: 'Start Contest',
   save: 'Save',
-  turnOff: 'Turn Off Contest'
+  turnOff: 'Delete Contest'
 }

@@ -1,8 +1,19 @@
-import { ChangeEvent, useEffect, useState, useRef, useCallback } from 'react'
+import {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useCallback
+} from 'react'
 
 import {
+  useAllPlaylistUpdateIds,
   useCollectionByParams,
+  useMarkPlaylistAsViewed,
+  useTracks,
   useUser,
+  useUsers,
   useCurrentUserId
 } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
@@ -21,10 +32,8 @@ import {
   Kind
 } from '@audius/common/models'
 import {
-  collectionPageLineupActions as tracksActions,
-  collectionPageSelectors,
   collectionPageActions as collectionActions,
-  queueSelectors,
+  playbackSelectors,
   collectionsSocialActions as socialCollectionsActions,
   tracksSocialActions as socialTracksActions,
   usersSocialActions as socialUsersActions,
@@ -36,9 +45,7 @@ import {
   repostsUserListActions,
   favoritesUserListActions,
   RepostType,
-  playerSelectors,
-  playlistUpdatesActions,
-  playlistUpdatesSelectors,
+  playbackActions,
   CollectionTrack,
   CollectionsPageType,
   CollectionPageTrackRecord,
@@ -46,12 +53,17 @@ import {
   usePremiumContentPurchaseModalActions,
   albumTrackRemoveConfirmationModalActions,
   PlayerBehavior,
-  playerActions,
-  useLineupTable,
-  lineupSelectors,
   cacheCollectionsActions
 } from '@audius/common/store'
-import { formatUrlName, Uid, route, makeUid } from '@audius/common/utils'
+import type { PlaybackTrack } from '@audius/common/store'
+import {
+  dayjs,
+  formatUrlName,
+  Uid,
+  route,
+  makeUid,
+  makeStableUid
+} from '@audius/common/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 
@@ -72,18 +84,19 @@ import { parseCollectionRoute } from 'utils/route/collectionRouteParser'
 
 const { NOT_FOUND_PAGE, REPOSTING_USERS_ROUTE, FAVORITING_USERS_ROUTE } = route
 const { trackModalOpened } = modalsActions
-const { selectAllPlaylistUpdateIds } = playlistUpdatesSelectors
-const { makeGetCurrent, getPlayerBehavior } = queueSelectors
-const { getPlaying } = playerSelectors
+const {
+  makeGetCurrent,
+  getCurrentPlayerBehavior: getPlayerBehavior,
+  getPlaying
+} = playbackSelectors
 const { setFavorite } = favoritesUserListActions
 const { setRepost } = repostsUserListActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
-const { getCollectionTracksLineup } = collectionPageSelectors
-const { updatedPlaylistViewed } = playlistUpdatesActions
-const { makeGetLineupOrder } = lineupSelectors
 const { removeTrackFromPlaylist, orderPlaylist, publishPlaylist } =
   cacheCollectionsActions
+
+const COLLECTION_TRACKS_SOURCE = 'COLLECTION_TRACKS'
 
 export const useCollectionPage = (
   type: CollectionsPageType,
@@ -96,21 +109,104 @@ export const useCollectionPage = (
   const pathname = getPathname(location)
 
   const params = parseCollectionRoute(pathname)
-  const { data: collection } = useCollectionByParams(params)
+  const {
+    data: collection,
+    isPending: isCollectionPending,
+    isError: isCollectionError
+  } = useCollectionByParams(params)
   const { data: user } = useUser(collection?.playlist_owner_id)
   const { data: accountUserId } = useCurrentUserId()
   const currentTrack = useCurrentTrack()
 
-  const tracks = useLineupTable(getCollectionTracksLineup)
+  const trackIdsInCollection = useMemo(
+    () =>
+      collection?.playlist_contents.track_ids.map(({ track }) => track) ?? [],
+    [collection]
+  )
+  const {
+    byId: tracksById,
+    data: fetchedTracks,
+    isPending: isTracksPending
+  } = useTracks(trackIdsInCollection, {
+    enabled: !!collection && trackIdsInCollection.length > 0
+  })
+  // Also fetch the track owners — `TQTrack = Omit<Track, 'user'>` so we need
+  // to attach `.user` ourselves before UI code like the tracks table reads
+  // `metadata.user.name`.
+  const trackOwnerIds = useMemo(
+    () => (fetchedTracks ?? []).map((t) => t.owner_id),
+    [fetchedTracks]
+  )
+  const { byId: usersById } = useUsers(trackOwnerIds)
+
+  // UI-owned sort/reorder order. A list of stable UIDs. `null` means
+  // "render in collection order" (no custom sort applied).
+  const [customOrder, setCustomOrder] = useState<string[] | null>(null)
+
+  // Build CollectionTrack[] entries from tanquery-cached tracks. These
+  // replace what used to come from the legacy `getCollectionTracksLineup`
+  // state. UIDs are derived so that row-level uid-based lookups (playing
+  // highlight, reorder) keep working.
+  const collectionEntries: CollectionTrack[] = useMemo(() => {
+    if (!collection) return []
+    return collection.playlist_contents.track_ids
+      .map(({ track: trackId, time }) => {
+        const t = tracksById[trackId]
+        if (!t) return null
+        const user = usersById[t.owner_id]
+        if (!user) return null
+        return {
+          ...(t as any),
+          user,
+          kind: Kind.TRACKS,
+          id: trackId,
+          uid: makeStableUid(Kind.TRACKS, trackId, COLLECTION_TRACKS_SOURCE),
+          dateAdded: dayjs.unix(time)
+        } as CollectionTrack
+      })
+      .filter((e): e is CollectionTrack => e !== null)
+  }, [collection, tracksById, usersById])
+
+  const sortedEntries: CollectionTrack[] = useMemo(() => {
+    if (!customOrder) return collectionEntries
+    const byUid = new Map(collectionEntries.map((e) => [e.uid, e]))
+    const ordered = customOrder
+      .map((uid) => byUid.get(uid))
+      .filter((e): e is CollectionTrack => !!e)
+    // If customOrder is stale (e.g. a track was removed), fall back to
+    // collectionEntries to avoid missing rows.
+    return ordered.length === collectionEntries.length
+      ? ordered
+      : collectionEntries
+  }, [collectionEntries, customOrder])
+
+  const tracksStatus: Status = isCollectionError
+    ? Status.ERROR
+    : !collection
+      ? Status.LOADING
+      : isCollectionPending || isTracksPending
+        ? Status.LOADING
+        : Status.SUCCESS
+
+  const tracks = useMemo(
+    () => ({ entries: sortedEntries, status: tracksStatus }),
+    [sortedEntries, tracksStatus]
+  )
+
   const playing = useSelector(getPlaying)
   const playerBehavior = useSelector(getPlayerBehavior)
   const previewing = playerBehavior === PlayerBehavior.PREVIEW_OR_FULL
-  const status = useSelector(
-    (state: any) => getCollectionTracksLineup(state)?.status ?? Status.LOADING
-  )
+  const status = tracksStatus
   const currentQueueItem = useSelector(makeGetCurrent())
-  const order = useSelector(makeGetLineupOrder(getCollectionTracksLineup))
-  const playlistUpdates = useSelector(selectAllPlaylistUpdateIds)
+  const order = useMemo(() => {
+    const map: Record<string, number> = {}
+    sortedEntries.forEach((entry, idx) => {
+      map[entry.uid] = idx
+    })
+    return map
+  }, [sortedEntries])
+  const { data: playlistUpdates = [] } = useAllPlaylistUpdateIds()
+  const { mutate: markPlaylistAsViewed } = useMarkPlaylistAsViewed()
   // Note: These selectors are available but not currently used in the hook
   // const reduxCollectionId = useSelector((state: any) => getCollectionId(state))
   // const reduxCollectionPermalink = useSelector((state: any) => getCollectionPermalink(state))
@@ -130,7 +226,7 @@ export const useCollectionPage = (
 
   // Fetch collection function
   const fetchCollection = useCallback(
-    (pathnameToFetch: string, fetchLineup = false) => {
+    (pathnameToFetch: string) => {
       const paramsToFetch = parseCollectionRoute(pathnameToFetch)
       if (!paramsToFetch) return
 
@@ -147,7 +243,7 @@ export const useCollectionPage = (
           collectionActions.fetchCollection(
             collectionId,
             permalink,
-            fetchLineup,
+            false,
             forceFetch
           )
         )
@@ -163,7 +259,7 @@ export const useCollectionPage = (
 
   // Fetch collection on mount and route changes
   useEffect(() => {
-    fetchCollection(pathname, true)
+    fetchCollection(pathname)
   }, [pathname, fetchCollection])
 
   // Set up history listener
@@ -176,7 +272,7 @@ export const useCollectionPage = (
         resetCollection()
       }
       prevPathnameRef.current = newPathname
-      fetchCollection(newPathname, true)
+      fetchCollection(newPathname)
       setInitialOrder(null)
     })
 
@@ -207,9 +303,9 @@ export const useCollectionPage = (
       playlistId &&
       playlistUpdates.includes(playlistId)
     ) {
-      dispatch(updatedPlaylistViewed({ playlistId }))
+      markPlaylistAsViewed({ playlistId })
     }
-  }, [collection, playlistId, type, playlistUpdates, dispatch])
+  }, [collection, playlistId, type, playlistUpdates, markPlaylistAsViewed])
 
   // Initialize order from tracks
   useEffect(() => {
@@ -335,46 +431,30 @@ export const useCollectionPage = (
     }
   }, [collection, params, user, pathname, dispatch, updatingRoute])
 
-  // Refetch tracks if track count increased
-  const prevTrackCountRef = useRef(trackCount)
-  useEffect(() => {
-    if (trackCount > prevTrackCountRef.current) {
-      dispatch(tracksActions.fetchLineupMetadatas(0, 200, false, undefined))
-    }
-    prevTrackCountRef.current = trackCount
-  }, [trackCount, dispatch])
-
-  // Check if collection content changed and refetch tracks
-  const prevCollectionRef = useRef(collection)
-  useEffect(() => {
+  // The currently-playing entry's uid (as constructed locally for this
+  // collection), or null if a different source is playing.
+  const playingUid = useMemo(() => {
     if (
-      collection &&
-      prevCollectionRef.current &&
-      collection.playlist_contents.track_ids.length ===
-        prevCollectionRef.current.playlist_contents.track_ids.length
+      currentQueueItem.trackId == null ||
+      currentQueueItem.source !== COLLECTION_TRACKS_SOURCE
     ) {
-      const prevIds = prevCollectionRef.current.playlist_contents.track_ids.map(
-        (t) => t.track
-      )
-      const currIds = collection.playlist_contents.track_ids.map((t) => t.track)
-      const contentsEqual =
-        prevIds.length === currIds.length &&
-        prevIds.every((id, idx) => id === currIds[idx])
-      if (!contentsEqual) {
-        dispatch(tracksActions.fetchLineupMetadatas(0, 200, false, undefined))
-      }
+      return null
     }
-    prevCollectionRef.current = collection
-  }, [collection, dispatch])
+    return makeStableUid(
+      Kind.TRACKS,
+      currentQueueItem.trackId,
+      COLLECTION_TRACKS_SOURCE
+    )
+  }, [currentQueueItem.trackId, currentQueueItem.source])
 
   // Helper functions
   const isQueued = useCallback(() => {
-    return tracks.entries.some((entry) => currentQueueItem.uid === entry.uid)
-  }, [tracks.entries, currentQueueItem.uid])
+    return tracks.entries.some((entry) => playingUid === entry.uid)
+  }, [tracks.entries, playingUid])
 
   const getPlayingUid = useCallback(() => {
-    return currentQueueItem.uid
-  }, [currentQueueItem.uid])
+    return playingUid
+  }, [playingUid])
 
   const getPlayingId = useCallback(() => {
     return currentTrack?.track_id ?? null
@@ -428,36 +508,72 @@ export const useCollectionPage = (
     setFilterText(e.target.value)
   }, [])
 
+  // Matches legacy `collectionPageLineupActions.prefix` ('COLLECTION_TRACKS')
+  // so code that keys off the queue source (e.g. PlaylistLibrary highlight)
+  // keeps working.
+  const collectionPlaybackSource = 'COLLECTION_TRACKS'
+  const currentPlaybackTrackId = useSelector(
+    playbackSelectors.getCurrentTrackId
+  )
+
+  const collectionPlaybackQueue: PlaybackTrack[] = useMemo(
+    () =>
+      tracks.entries.map((entry) => ({
+        trackId: entry.track_id,
+        source: collectionPlaybackSource
+      })),
+    [tracks.entries, collectionPlaybackSource]
+  )
+
   const onClickRow = useCallback(
     (trackRecord: CollectionPageTrackRecord) => {
-      const playingUid = getPlayingUid()
-      if (playing && playingUid === trackRecord.uid) {
-        dispatch(tracksActions.pause())
+      if (playing && currentPlaybackTrackId === trackRecord.track_id) {
+        dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, {
             id: `${trackRecord.track_id}`,
             source: PlaybackSource.PLAYLIST_TRACK
           })
         )
-      } else if (playingUid !== trackRecord.uid) {
-        dispatch(tracksActions.play(trackRecord.uid))
-        dispatch(
-          make(Name.PLAYBACK_PLAY, {
-            id: `${trackRecord.track_id}`,
-            source: PlaybackSource.PLAYLIST_TRACK
-          })
-        )
-      } else {
-        dispatch(tracksActions.play())
-        dispatch(
-          make(Name.PLAYBACK_PLAY, {
-            id: `${trackRecord.track_id}`,
-            source: PlaybackSource.PLAYLIST_TRACK
-          })
-        )
+        return
       }
+      if (!playing && currentPlaybackTrackId === trackRecord.track_id) {
+        dispatch(playbackActions.play())
+        dispatch(
+          make(Name.PLAYBACK_PLAY, {
+            id: `${trackRecord.track_id}`,
+            source: PlaybackSource.PLAYLIST_TRACK,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
+          })
+        )
+        return
+      }
+      const startIndex = collectionPlaybackQueue.findIndex(
+        (t) => t.trackId === trackRecord.track_id
+      )
+      if (startIndex < 0) return
+      dispatch(
+        playbackActions.playFrom({
+          tracks: collectionPlaybackQueue,
+          startIndex,
+          querySource: null
+        })
+      )
+      dispatch(
+        make(Name.PLAYBACK_PLAY, {
+          id: `${trackRecord.track_id}`,
+          source: PlaybackSource.PLAYLIST_TRACK,
+          ...(playlistId ? { collectionId: `${playlistId}` } : {})
+        })
+      )
     },
-    [playing, getPlayingUid, dispatch]
+    [
+      playing,
+      currentPlaybackTrackId,
+      dispatch,
+      playlistId,
+      collectionPlaybackQueue
+    ]
   )
 
   const onClickRepostTrack = useCallback(
@@ -518,7 +634,6 @@ export const useCollectionPage = (
         )
       } else {
         dispatch(removeTrackFromPlaylist(trackId, playlistId, timestamp))
-        dispatch(tracksActions.remove(Kind.TRACKS, uid))
       }
     },
     [collection, playlistId, dispatch]
@@ -532,7 +647,7 @@ export const useCollectionPage = (
 
       const shouldPreview = isPreview && isOwner
       if (playing && isQueuedValue && previewing === shouldPreview) {
-        dispatch(tracksActions.pause())
+        dispatch(playbackActions.togglePlay())
         dispatch(
           make(Name.PLAYBACK_PAUSE, {
             id: `${playingId}`,
@@ -540,28 +655,60 @@ export const useCollectionPage = (
           })
         )
       } else if (!playing && previewing === shouldPreview && isQueuedValue) {
-        dispatch(tracksActions.play())
+        dispatch(playbackActions.play())
         dispatch(
           make(Name.PLAYBACK_PLAY, {
             id: `${playingId}`,
             isPreview: shouldPreview,
-            source: PlaybackSource.PLAYLIST_PAGE
+            source: PlaybackSource.PLAYLIST_PAGE,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       } else if (tracks.entries.length > 0) {
-        dispatch(playerActions.stop({}))
-        dispatch(
-          tracksActions.play(tracks.entries[0].uid, {
-            isPreview: shouldPreview && isOwner
-          })
+        dispatch(playbackActions.stop({}))
+        const firstEntry = tracks.entries[0]
+        const startIndex = collectionPlaybackQueue.findIndex(
+          (t) => t.trackId === firstEntry.track_id
         )
+        if (startIndex >= 0) {
+          dispatch(
+            playbackActions.playFrom({
+              tracks: collectionPlaybackQueue,
+              startIndex,
+              querySource: null
+            })
+          )
+        }
         dispatch(
           make(Name.PLAYBACK_PLAY, {
-            id: `${tracks.entries[0].track_id}`,
+            id: `${firstEntry.track_id}`,
             isPreview: shouldPreview,
-            source: PlaybackSource.PLAYLIST_PAGE
+            source: PlaybackSource.PLAYLIST_PAGE,
+            ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
+        if (playlistId) {
+          dispatch(
+            make(Name.PLAYLIST_PLAY, {
+              id: `${playlistId}`,
+              source: PlaybackSource.PLAYLIST_PAGE,
+              isAlbum: !!collection?.is_album,
+              trackCount,
+              isPreview: shouldPreview
+            })
+          )
+        }
       }
     },
     [
@@ -572,7 +719,10 @@ export const useCollectionPage = (
       accountUserId,
       tracks.entries,
       getPlayingId,
-      dispatch
+      playlistId,
+      trackCount,
+      dispatch,
+      collectionPlaybackQueue
     ]
   )
 
@@ -584,23 +734,21 @@ export const useCollectionPage = (
     (sorters: any) => {
       const { column, order } = sorters
       const dataSource = formatMetadata(tracks.entries)
-      let updatedOrder
       if (!column) {
-        updatedOrder = initialOrder
+        // Reset to collection order.
+        setCustomOrder(null)
         setAllowReordering(true)
       } else {
-        updatedOrder = dataSource
+        const sortedUids = dataSource
           .sort((a, b) =>
             order === 'ascend' ? column.sorter(a, b) : column.sorter(b, a)
           )
           .map((metadata) => metadata.uid)
+        setCustomOrder(sortedUids)
         setAllowReordering(false)
       }
-      if (updatedOrder) {
-        dispatch(tracksActions.updateLineupOrder(updatedOrder))
-      }
     },
-    [tracks.entries, initialOrder, formatMetadata, dispatch]
+    [tracks.entries, formatMetadata]
   )
 
   const onReorderTracks = useCallback(
@@ -616,7 +764,7 @@ export const useCollectionPage = (
         time: tracks.entries[order[uid]].dateAdded.unix()
       }))
 
-      dispatch(tracksActions.updateLineupOrder(newOrder))
+      setCustomOrder(newOrder)
       setInitialOrder(newOrder)
       dispatch(orderPlaylist(playlistId, trackIdAndTimes, newOrder))
     },
@@ -771,7 +919,7 @@ export const useCollectionPage = (
   )
 
   const refreshCollection = useCallback(() => {
-    fetchCollection(pathname, true)
+    fetchCollection(pathname)
   }, [fetchCollection, pathname])
 
   // SEO fields

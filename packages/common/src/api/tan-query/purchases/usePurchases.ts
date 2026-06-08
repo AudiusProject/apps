@@ -1,10 +1,14 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
-import { full, Id } from '@audius/sdk'
+import {
+  Id,
+  type GetPurchasesSortDirectionEnum,
+  type GetPurchasesSortMethodEnum
+} from '@audius/sdk'
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 
 import { purchaseFromSDK } from '~/adapters/purchase'
-import { useQueryContext, makeLoadNextPage } from '~/api/tan-query/utils'
+import { useQueryContext } from '~/api/tan-query/utils'
 import { ID } from '~/models'
 import {
   USDCContentPurchaseType,
@@ -18,12 +22,16 @@ import { QueryKey, QueryOptions } from '../types'
 import { useUsers } from '../users/useUsers'
 import { combineQueryStatuses } from '../utils/combineQueryResults'
 
-const PAGE_SIZE = 10
+// Matches the consumer Table's `fetchBatchSize` so InfiniteLoader's
+// `minimumBatchSize` is satisfied in a single round-trip. When this was 10,
+// the Table asked for 50-row batches and InfiniteLoader cascaded 5 fetches
+// to fill each batch.
+const PAGE_SIZE = 50
 
 export type GetPurchaseListArgs = {
   userId: ID | null | undefined
-  sortMethod?: full.GetPurchasesSortMethodEnum
-  sortDirection?: full.GetPurchasesSortDirectionEnum
+  sortMethod?: GetPurchasesSortMethodEnum
+  sortDirection?: GetPurchasesSortDirectionEnum
   pageSize?: number
 }
 
@@ -61,7 +69,7 @@ export const usePurchases = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getPurchases({
+      const { data = [] } = await sdk.users.getPurchases({
         id: Id.parse(userId),
         userId: Id.parse(userId),
         limit: pageSize,
@@ -98,9 +106,16 @@ export const usePurchases = (
   const tracksQueryResult = useTracks(trackIdsToFetch)
   const collectionsQueryResult = useCollections(collectionIdsToFetch)
 
+  // Stable identity for loadNextPage so the consuming Table's `loadMoreRows`
+  // doesn't change every render. We read the latest queryResult from a ref
+  // at call time instead of capturing it in the closure deps.
+  const queryResultRef = useRef(queryResult)
+  queryResultRef.current = queryResult
   const loadNextPageCallback = useCallback(() => {
-    makeLoadNextPage(queryResult)
-  }, [queryResult])
+    const q = queryResultRef.current
+    if (q.isFetching || !q.hasNextPage) return undefined
+    return q.fetchNextPage()
+  }, [])
 
   return {
     ...combineQueryStatuses([

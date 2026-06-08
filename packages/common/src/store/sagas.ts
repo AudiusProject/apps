@@ -6,28 +6,24 @@
 // import recoveryEmailSagas from 'common/store/recovery-email/sagas'
 // import signOutSagas from 'common/store/sign-out/sagas'
 
+import niceModalBridgeSagas from '~/services/nice-modal-bridge/sagas'
 import { accountSagas } from '~/store/account'
 import { buyUSDCSagas } from '~/store/buy-usdc'
 import { sagas as castSagas } from '~/store/cast/sagas'
 import { gatedContentSagas } from '~/store/gated-content'
 import { chatSagas } from '~/store/pages/chat'
-import { playbackPositionSagas } from '~/store/playback-position'
-import { playerSagas } from '~/store/player'
 import { purchaseContentSagas } from '~/store/purchase-content'
-import remoteConfigSagas from '~/store/remote-config/sagas'
 import {
-  searchUsersModalSagas,
   toastSagas,
   deletePlaylistConfirmationModalUISagas,
   duplicateAddConfirmationModalUISagas,
   mobileOverflowMenuUISagas,
-  shareModalUISagas,
   stripeModalUISagas,
   withdrawUSDCSagas,
-  modalsSagas
+  modalsSagas,
+  shareModalUISagas
 } from '~/store/ui'
 
-import { playlistUpdatesSagas } from './playlist-updates'
 import { CommonStoreContext } from './storeContext'
 
 /**
@@ -40,12 +36,10 @@ import { CommonStoreContext } from './storeContext'
 export const sagas = (_ctx: CommonStoreContext) => ({
   account: accountSagas,
   buyUSDC: buyUSDCSagas,
-  remoteConfig: remoteConfigSagas,
   cast: castSagas,
   gatedContent: gatedContentSagas,
   purchaseContent: purchaseContentSagas,
   chat: chatSagas,
-  searchUsers: searchUsersModalSagas,
   toast: toastSagas,
   shareModalUI: shareModalUISagas,
   stripeModalUI: stripeModalUISagas,
@@ -53,10 +47,8 @@ export const sagas = (_ctx: CommonStoreContext) => ({
   modals: modalsSagas,
   deletePlaylistConfirmationModalUI: deletePlaylistConfirmationModalUISagas,
   duplidateAddConfirmationModalUI: duplicateAddConfirmationModalUISagas,
-  player: playerSagas,
-  playbackPosition: playbackPositionSagas,
-  playlistUpdates: playlistUpdatesSagas,
-  withdrawUSDC: withdrawUSDCSagas
+  withdrawUSDC: withdrawUSDCSagas,
+  niceModalBridge: niceModalBridgeSagas
 
   // signOut: signOutSagas
   // recoveryEmail: recoveryEmailSagas

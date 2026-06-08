@@ -1,11 +1,11 @@
 import { Env } from '@audius/common/services'
 
 export const env: Env = {
-  AAO_ENDPOINT: 'https://discoveryprovider.audius.co',
+  AAO_ENDPOINT: 'https://anti-abuse-oracle.audius.engineering',
   AMPLITUDE_API_KEY: '86760558b8bb1b3aae61656efd4ddacb',
   AMPLITUDE_PROXY: 'https://gain2.audius.co/2/httpapi',
   API_KEY: '8acf5eb7436ea403ee536a7334faa5e9ada4b50f',
-  API_URL: 'https://api.audius.co',
+  API_URL: process.env.VITE_API_URL ?? 'https://api.audius.co',
   APP_NAME: 'audius-client',
   ARCHIVE_ENDPOINT: 'https://api.audius.co',
   AUDIUS_NETWORK_CHAIN_ID: 31524,
@@ -35,9 +35,7 @@ export const env: Env = {
   EXPLORE_CONTENT_URL:
     'https://download.audius.co/static-resources/explore-content.json',
   FCM_PUSH_PUBLIC_KEY:
-    'BDBRR9S_UczQBflfaFPQf1JuCIZhMk90G_QnRI9wWuoObt7Ck6sRCxPDJfB_mJY3p55WdAO4C4xVJTAMoiv6JJQ',
-  FINGERPRINT_ENDPOINT: 'https://fp.audius.co',
-  FINGERPRINT_PUBLIC_API_KEY: 'MNtDQ4NCsNSP7YOkOiQT',
+    'BJlfnnPuZoLzcrS_K_NOJvqu_wFhguRuUDH8qPE_X-STh0CmWUuZHNPxMTr0YIHmuhKydiaSE2J0C1IAqA6YBFw',
   GA_HOSTNAME: 'audius.co',
   GA_MEASUREMENT_ID: 'G-V6N1ZTVGS5',
   HCAPTCHA_BASE_URL: 'https://audius.co',
@@ -62,13 +60,12 @@ export const env: Env = {
   REWARDS_MANAGER_TOKEN_PDA: '3V9opXNpHmPPymKeq7CYD8wWMH8wzFXmqEkNdzfsZhYq',
   SAFARI_WEB_PUSH_ID: 'web.co.audius',
   SCHEME: 'audius',
-  SENTRY_DSN: 'https://e26d2b01488f4b538ea235de6466c40a@s.audius.co/1457231',
   SOL_BRIDGE_ADDRESS: 'worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth',
   SOL_TOKEN_BRIDGE_ADDRESS: 'wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb',
   SOLANA_CLUSTER_ENDPOINT:
     'https://carolina-8qh733-fast-mainnet.helius-rpc.com',
   SOLANA_FEE_PAYER_ADDRESS: 'pqx3fvvh6b2eZBfLhTtQ5KxzU3CginmgGTmDCjk8TPP',
-  SOLANA_RELAY_ENDPOINT: 'https://discoveryprovider.audius.co',
+  SOLANA_RELAY_ENDPOINT: 'https://solana-relay.audius.engineering',
   SOLANA_TOKEN_PROGRAM_ADDRESS: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   SOLANA_WEB3_CLUSTER: 'mainnet-beta',
   STRIPE_CLIENT_PUBLISHABLE_KEY:

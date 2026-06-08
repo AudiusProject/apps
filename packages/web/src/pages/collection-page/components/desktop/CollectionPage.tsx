@@ -22,10 +22,18 @@ import { Id } from '@audius/sdk'
 
 import { CollectionDogEar } from 'components/collection'
 import { CollectionHeader } from 'components/collection/desktop/CollectionHeader'
+import { EditModeNavigationGuard } from 'components/collection/desktop/edit-mode/EditModeNavigationGuard'
+import { PlaylistEditModeBar } from 'components/collection/desktop/edit-mode/PlaylistEditModeBar'
+import { PlaylistEditModeProvider } from 'components/collection/desktop/edit-mode/PlaylistEditModeContext'
+import { EditAwareTracksTable } from 'components/collection/desktop/edit-mode/tracks/EditAwareTracksTable'
+import { TrackBulkActionsBar } from 'components/collection/desktop/edit-mode/tracks/TrackBulkActionsBar'
+import { TrackSelectionProvider } from 'components/collection/desktop/edit-mode/tracks/TrackSelectionContext'
+import FilterInput from 'components/filter-input/FilterInput'
 import Page from 'components/page/Page'
 import { SuggestedTracks } from 'components/suggested-tracks'
-import { TracksTable } from 'components/tracks-table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
+import { useMainContentRef } from 'pages/MainContentContext'
 import { computeCollectionMetadataProps } from 'pages/collection-page/store/utils'
 import { useCollectionPage } from 'pages/collection-page/useCollectionPage'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
@@ -33,7 +41,9 @@ import DeletedPage from 'pages/deleted-page/DeletedPage'
 import styles from './CollectionPage.module.css'
 
 const messages = {
-  noFilterMatches: 'No tracks match your search...'
+  noFilterMatches: 'No tracks match your search...',
+  filterPlaylist: 'Filter...',
+  filterAlbum: 'Filter...'
 }
 
 const getMessages = (collectionType: 'album' | 'playlist') => ({
@@ -85,6 +95,7 @@ type CollectionPageProps = {
 }
 
 const CollectionPage = ({ type }: CollectionPageProps) => {
+  const mainContentRef = useMainContentRef()
   const {
     collection,
     user,
@@ -98,6 +109,7 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     allowReordering,
     isQueued,
     getFilteredData,
+    filterText,
     onFilterChange,
     onPlay,
     onPreview,
@@ -159,9 +171,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   // useMemo must be called before any conditional returns
   const tracksTableColumns = useMemo(() => {
     const columns = [
-      'playButton',
+      isAlbum ? 'playButton' : undefined,
       'trackName',
-      isAlbum ? undefined : 'artistName',
       isAlbum ? 'date' : 'addedDate',
       'length',
       areAllTracksPremium ? undefined : 'plays',
@@ -185,9 +196,8 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
   const collectionLoading = statusValue === Status.LOADING
   const queuedAndPlaying = playing && isQueued()
   const queuedAndPreviewing = previewing && isQueued()
-  const tracksLoading =
-    trackCount > 0 &&
-    (tracks.status === Status.LOADING || tracks.status === Status.IDLE)
+  const tracksLoading = trackCount > 0 && tracks.status === Status.LOADING
+  const pageLoading = collectionLoading || tracksLoading
 
   const duration =
     dataSource.reduce(
@@ -264,7 +274,6 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
       playing={queuedAndPlaying}
       previewing={queuedAndPreviewing}
       // Actions
-      onFilterChange={onFilterChange}
       onPlay={onPlay}
       onPreview={onPreview}
       onClickReposts={onClickReposts}
@@ -283,76 +292,117 @@ const CollectionPage = ({ type }: CollectionPageProps) => {
     />
   )
 
-  const messages = getMessages(isAlbum ? 'album' : 'playlist')
-  return (
-    <Page
-      title={title}
-      description={pageDescription}
-      canonicalUrl={canonicalUrl}
-      structuredData={structuredData}
-      entityType='collection'
-      hashId={playlistId ? Id.parse(playlistId) : undefined}
-      containerClassName={styles.pageContainer}
-      contentClassName={styles.pageContent}
-      fromOpacity={1}
-      scrollableSearch
-    >
-      <Paper column mb='unit-10' css={{ minWidth: 774 }}>
-        <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
-        <div className={styles.topSectionWrapper}>{topSection}</div>
-        {!collectionLoading && isEmpty ? (
-          <EmptyContent
-            isOwner={isOwner}
-            isAlbum={isAlbum}
-            text={customEmptyText}
-          />
-        ) : !collectionLoading && dataSource.length === 0 ? (
-          <NoSearchResultsContent />
-        ) : (
-          <div className={styles.tableWrapper}>
-            <TracksTable
-              // @ts-ignore
-              columns={tracksTableColumns}
-              wrapperClassName={styles.tracksTableWrapper}
-              key={playlistName}
-              loading={collectionLoading}
-              userId={accountUserId}
-              playing={playing}
-              activeIndex={activeIndex}
-              data={dataSource}
-              onClickRow={onClickRow}
-              onClickFavorite={toggleSaveTrack}
-              onClickRemove={isOwner ? onClickRemove : undefined}
-              onClickRepost={onClickRepostTrack}
-              onClickPurchase={openPurchaseModal}
-              onReorder={onReorderTracks}
-              onSort={onSortTracks}
-              isReorderable={
-                accountUserId !== null &&
-                accountUserId === playlistOwnerId &&
-                allowReordering
-              }
-              removeText={`${messages.remove} ${
-                isAlbum ? messages.type.album : messages.type.playlist
-              }`}
-              isAlbumPage={isAlbum}
-              isAlbumPremium={
-                !!metadata && 'is_stream_gated' in metadata
-                  ? metadata?.is_stream_gated
-                  : false
-              }
-            />
-          </div>
-        )}
-      </Paper>
+  const trackTableHeaderFilter = !isPrivate ? (
+    <div className={styles.tableHeaderFilterContainer}>
+      <FilterInput
+        placeholder={isAlbum ? messages.filterAlbum : messages.filterPlaylist}
+        onChange={onFilterChange}
+        value={filterText}
+      />
+    </div>
+  ) : null
 
-      {!collectionLoading && isOwner && !isAlbum ? (
-        <Flex column gap='2xl' pv='2xl' w='100%' css={{ minWidth: 774 }}>
-          <Divider />
-          <SuggestedTracks collectionId={playlistId!} />
-        </Flex>
-      ) : null}
-    </Page>
+  const collectionMessages = getMessages(isAlbum ? 'album' : 'playlist')
+  const orderedTrackIds = dataSource
+    .map((t: CollectionTrack) => t.track_id)
+    .filter((id): id is number => typeof id === 'number')
+  return (
+    <PlaylistEditModeProvider
+      collectionId={playlistId ?? undefined}
+      isOwner={isOwner}
+    >
+      <TrackSelectionProvider orderedIds={orderedTrackIds}>
+        <Page
+          title={title}
+          description={pageDescription}
+          canonicalUrl={canonicalUrl}
+          structuredData={structuredData}
+          entityType='collection'
+          hashId={playlistId ? Id.parse(playlistId) : undefined}
+          containerClassName={styles.pageContainer}
+          contentClassName={styles.pageContent}
+          fromOpacity={1}
+          scrollableSearch
+        >
+          <Paper column mb='unit-10' border='default'>
+            <CollectionDogEar collectionId={playlistId ?? 0} borderOffset={0} />
+            <div className={styles.topSectionWrapper}>{topSection}</div>
+            {playlistId != null ? (
+              <TrackBulkActionsBar
+                collectionId={playlistId}
+                orderedTrackIds={orderedTrackIds}
+              />
+            ) : null}
+            {!pageLoading && isEmpty ? (
+              <EmptyContent
+                isOwner={isOwner}
+                isAlbum={isAlbum}
+                text={customEmptyText}
+              />
+            ) : !pageLoading &&
+              tracks.status === Status.SUCCESS &&
+              dataSource.length === 0 ? (
+              <NoSearchResultsContent />
+            ) : (
+              <div className={styles.tableWrapper}>
+                <EditAwareTracksTable
+                  collectionId={playlistId!}
+                  // @ts-ignore
+                  columns={tracksTableColumns}
+                  wrapperClassName={styles.tracksTableWrapper}
+                  key={playlistName}
+                  scrollRef={mainContentRef}
+                  loading={pageLoading}
+                  userId={accountUserId}
+                  playing={playing}
+                  activeIndex={activeIndex}
+                  data={dataSource}
+                  onClickRow={onClickRow}
+                  onClickFavorite={toggleSaveTrack}
+                  onClickRemove={isOwner ? onClickRemove : undefined}
+                  onClickRepost={onClickRepostTrack}
+                  onClickPurchase={openPurchaseModal}
+                  onReorder={onReorderTracks}
+                  onSort={onSortTracks}
+                  trackActionsHeader={trackTableHeaderFilter}
+                  showArtistInTrackNameColumn={!isAlbum}
+                  responsiveColumns={
+                    isAlbum
+                      ? RESPONSIVE_TABLE_POLICIES.collectionAlbumTracks
+                      : RESPONSIVE_TABLE_POLICIES.collectionPlaylistTracks
+                  }
+                  isReorderable={
+                    accountUserId !== null &&
+                    accountUserId === playlistOwnerId &&
+                    allowReordering
+                  }
+                  removeText={`${collectionMessages.remove} ${
+                    isAlbum
+                      ? collectionMessages.type.album
+                      : collectionMessages.type.playlist
+                  }`}
+                  isAlbumPage={isAlbum}
+                  isAlbumPremium={
+                    !!metadata && 'is_stream_gated' in metadata
+                      ? metadata?.is_stream_gated
+                      : false
+                  }
+                />
+              </div>
+            )}
+          </Paper>
+
+          {playlistId != null && isOwner && !isAlbum ? (
+            <Flex column gap='2xl' pv='2xl' w='100%'>
+              <Divider />
+              <SuggestedTracks collectionId={playlistId} />
+            </Flex>
+          ) : null}
+          <PlaylistEditModeBar />
+          <EditModeNavigationGuard />
+        </Page>
+      </TrackSelectionProvider>
+    </PlaylistEditModeProvider>
   )
 }
 

@@ -42,6 +42,7 @@ const STEM_INDEX_OFFSET_WITH_ORIGINAL_TRACK = 2
 
 const messages = {
   title: 'Stems & Downloads',
+  downloadTitle: 'Download',
   unlockAll: (price: string) => `Unlock All ${price}`,
   purchased: 'purchased',
   followToDownload: 'Must follow artist to download.',
@@ -174,7 +175,10 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   )
 
   const hasStems = stemTracks.length > 0
+  const sectionTitle = hasStems ? messages.title : messages.downloadTitle
   const downloadButtonText = hasStems ? messages.downloadAll : messages.download
+  const isSingleTrackDownload = !!is_downloadable && !hasStems
+  const isExpanded = !isSingleTrackDownload && expanded
 
   const handleDownloadButtonClick = useRequiresAccountCallback(
     (e) => {
@@ -194,33 +198,37 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
         <Flex
           gap='m'
           pt='l'
-          pb={expanded ? 'l' : undefined}
+          pb={isExpanded ? 'l' : undefined}
           w='100%'
           column
           justifyContent='space-between'
           alignItems='flex-start'
           backgroundColor='white'
-          role='button'
-          aria-expanded={expanded}
-          aria-controls='download-section'
-          onClick={onToggleExpand}
+          role={isSingleTrackDownload ? undefined : 'button'}
+          aria-expanded={isSingleTrackDownload ? undefined : isExpanded}
+          aria-controls={
+            isSingleTrackDownload ? undefined : 'downloads-section'
+          }
+          onClick={isSingleTrackDownload ? undefined : onToggleExpand}
           borderTop='default'
         >
           <Flex justifyContent='space-between' row wrap='wrap' gap='m' w='100%'>
             <Flex row alignItems='center' gap='s'>
               <IconReceive size='l' color='default' />
               <Text variant='label' size='l' strength='strong'>
-                {messages.title}
+                {sectionTitle}
               </Text>
             </Flex>
-            <IconCaretDown
-              css={{
-                transition: 'transform var(--harmony-expressive)',
-                transform: expanded ? 'rotate(-180deg)' : undefined
-              }}
-              size='m'
-              color='default'
-            />
+            {isSingleTrackDownload ? null : (
+              <IconCaretDown
+                css={{
+                  transition: 'transform var(--harmony-expressive)',
+                  transform: isExpanded ? 'rotate(-180deg)' : undefined
+                }}
+                size='m'
+                color='default'
+              />
+            )}
             {shouldDisplayPremiumDownloadLocked &&
             formattedPrice !== undefined ? (
               <Button
@@ -271,7 +279,7 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
             </Text>
           </Flex>
         ) : null}
-        <Expandable expanded={expanded} id='downloads-section'>
+        <Expandable expanded={isExpanded} id='downloads-section'>
           <Flex column gap='l'>
             {is_downloadable ? (
               <Flex column gap='l'>

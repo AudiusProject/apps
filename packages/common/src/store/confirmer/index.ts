@@ -1,6 +1,6 @@
 export * as confirmerActions from './actions'
 export { default as confirmerReducer } from './reducer'
 export * as confirmerSelectors from './selectors'
-export { default as confirmerSagas, confirmTransaction } from './sagas'
+export { default as confirmerSagas } from './sagas'
 export * from './types'
 export { initialState as initialConfirmerState } from './reducer'

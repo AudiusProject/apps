@@ -1,4 +1,4 @@
-import { full } from '@audius/sdk'
+import type { SearchModel } from '@audius/sdk'
 import { type QueryClient } from '@tanstack/react-query'
 
 import { primeCollectionData } from '~/api/tan-query/utils/primeCollectionData'
@@ -27,7 +27,7 @@ export type SearchResults = {
 }
 
 export const searchResultsFromSDK = (
-  input?: full.SearchModel,
+  input?: SearchModel,
   queryClient?: QueryClient
 ): SearchResults => {
   if (!input) {

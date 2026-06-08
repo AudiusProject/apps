@@ -30,7 +30,8 @@ export const FilterButton = <Value extends string>(
     onChange,
     filterScreen = 'FilterButton',
     options,
-    screen
+    screen,
+    disableSearch
   } = props
 
   const selectedOption = options?.find((option) => option.value === value)
@@ -113,11 +114,22 @@ export const FilterButton = <Value extends string>(
           title: label,
           onChange,
           value,
-          screen
+          screen,
+          disableSearch
         })
       }
     },
-    [onPress, options, screen, navigation, filterScreen, label, onChange, value]
+    [
+      onPress,
+      options,
+      screen,
+      navigation,
+      filterScreen,
+      label,
+      onChange,
+      value,
+      disableSearch
+    ]
   )
 
   const Icon = useMemo(() => {

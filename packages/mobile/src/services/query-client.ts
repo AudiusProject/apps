@@ -2,14 +2,13 @@ import { defaultRetryConfig, queryErrorHandler } from '@audius/common/api'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 
 import { env } from 'app/services/env'
-import { reportToSentry } from 'app/utils/reportToSentry'
 
 export const queryClient = new QueryClient({
   // In order to have a default error catcher, we need to use a custom query cache
   // ref: https://tkdodo.eu/blog/react-query-error-handling
   queryCache: new QueryCache({
     onError(error, query) {
-      queryErrorHandler(error, query, reportToSentry)
+      queryErrorHandler(error, query)
     }
   }),
   defaultOptions: {

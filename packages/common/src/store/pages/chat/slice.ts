@@ -222,20 +222,35 @@ const slice = createSlice({
       state.chats.status = Status.SUCCESS
       if (!state.chats.summary) {
         state.chats.summary = summary
-      } else {
+      } else if (summary) {
+        // Next direction: update if the response signals "no more newer chats"
+        // (count === 0) OR if its cursor strictly advances forward. The
+        // count===0 branch is what lets us trust the end-of-pagination signal
+        // even when the backend returns a null/empty cursor on an exhausted
+        // page; without it, prev_count/next_count get stuck above zero
+        // forever and the loader never resolves.
         if (
-          summary?.next_cursor &&
-          dayjs(summary?.next_cursor).isAfter(state.chats.summary.next_cursor)
+          summary.next_count === 0 ||
+          (summary.next_cursor &&
+            dayjs(summary.next_cursor).isAfter(state.chats.summary.next_cursor))
         ) {
-          state.chats.summary.next_cursor = summary?.next_cursor
-          state.chats.summary.next_count = summary?.next_count
+          state.chats.summary.next_count = summary.next_count
+          if (summary.next_cursor) {
+            state.chats.summary.next_cursor = summary.next_cursor
+          }
         }
+        // Prev direction: same pattern.
         if (
-          summary?.prev_cursor &&
-          dayjs(summary?.prev_cursor).isBefore(state.chats.summary.prev_cursor)
+          summary.prev_count === 0 ||
+          (summary.prev_cursor &&
+            dayjs(summary.prev_cursor).isBefore(
+              state.chats.summary.prev_cursor
+            ))
         ) {
-          state.chats.summary.prev_cursor = summary?.prev_cursor
-          state.chats.summary.prev_count = summary?.prev_count
+          state.chats.summary.prev_count = summary.prev_count
+          if (summary.prev_cursor) {
+            state.chats.summary.prev_cursor = summary.prev_cursor
+          }
         }
       }
       for (const chat of data) {
@@ -287,22 +302,32 @@ const slice = createSlice({
       }
 
       // Update the summary to include the max of next_cursor and
-      // min of prev_cursor.
+      // min of prev_cursor. Also honor count === 0 as an authoritative
+      // end-of-pagination signal so the count fields can converge to 0 even
+      // when the backend returns a null/empty cursor on an exhausted page.
       const existingSummary = state.chats.entities[chatId]?.messagesSummary
       const summaryToUse = { ...summary, ...existingSummary }
       if (
         !existingSummary ||
-        dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor)
+        summary.next_count === 0 ||
+        (summary.next_cursor &&
+          dayjs(summary.next_cursor).isAfter(existingSummary.next_cursor))
       ) {
         summaryToUse.next_count = summary.next_count
-        summaryToUse.next_cursor = summary.next_cursor
+        if (summary.next_cursor || !existingSummary) {
+          summaryToUse.next_cursor = summary.next_cursor
+        }
       }
       if (
         !existingSummary ||
-        dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor)
+        summary.prev_count === 0 ||
+        (summary.prev_cursor &&
+          dayjs(summary.prev_cursor).isBefore(existingSummary.prev_cursor))
       ) {
         summaryToUse.prev_count = summary.prev_count
-        summaryToUse.prev_cursor = summary.prev_cursor
+        if (summary.prev_cursor || !existingSummary) {
+          summaryToUse.prev_cursor = summary.prev_cursor
+        }
       }
 
       chatsAdapter.updateOne(state.chats, {
@@ -458,6 +483,49 @@ const slice = createSlice({
       // Reset our optimism :(
       const { chatId } = action.payload
       delete state.optimisticChatRead[chatId]
+      delete state.optimisticUnreadMessagesCount
+    },
+    markAllChatsAsRead: (state) => {
+      // triggers saga
+      // Optimistically mark every locally-known non-blast chat with unread
+      // messages as read. Chats that aren't loaded into state yet get cleared
+      // server-side by the saga's chat.read_all RPC and reconcile via the
+      // trailing fetchUnreadMessagesCount.
+      const allChats = chatsAdapter.getSelectors().selectAll(state.chats)
+      for (const chat of allChats) {
+        if (chat.is_blast) continue
+        if (!chat.unread_message_count) continue
+        state.optimisticChatRead[chat.chat_id] = {
+          last_read_at: chat.last_message_at,
+          unread_message_count: 0
+        }
+      }
+      state.optimisticUnreadMessagesCount = 0
+    },
+    markAllChatsAsReadSucceeded: (state) => {
+      // Server confirmed every chat_member.unread_count is now 0; promote the
+      // optimistic per-chat reads to the entity. unreadMessagesCount itself is
+      // overwritten by the trailing fetchUnreadMessagesCount the saga fires.
+      for (const chatId of Object.keys(state.optimisticChatRead)) {
+        const existingChat = chatsAdapter
+          .getSelectors()
+          .selectById(state.chats, chatId)
+        if (!existingChat || existingChat.is_blast) continue
+        chatsAdapter.updateOne(state.chats, {
+          id: chatId,
+          changes: {
+            last_read_at: existingChat.last_message_at,
+            unread_message_count: 0
+          }
+        })
+      }
+      state.optimisticChatRead = {}
+      delete state.optimisticUnreadMessagesCount
+    },
+    markAllChatsAsReadFailed: (state) => {
+      // chat.read_all is all-or-nothing; on failure undo every optimistic
+      // read this run installed.
+      state.optimisticChatRead = {}
       delete state.optimisticUnreadMessagesCount
     },
     sendMessage: (

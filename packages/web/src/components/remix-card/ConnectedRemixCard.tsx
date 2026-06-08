@@ -44,7 +44,7 @@ const ConnectedRemixCard = ({
     userId: partialUser?.user_id,
     size: SquareSizes.SIZE_150_BY_150
   })
-  const coverArtImage = useTrackCoverArt({
+  const { imageUrl: coverArtImage } = useTrackCoverArt({
     trackId,
     size: SquareSizes.SIZE_480_BY_480
   })

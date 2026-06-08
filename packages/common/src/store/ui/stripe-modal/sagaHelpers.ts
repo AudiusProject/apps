@@ -1,7 +1,6 @@
 import { call } from 'typed-redux-saga'
 
 import { Name, StripeEventFields } from '~/models/Analytics'
-import { ErrorLevel } from '~/models/ErrorReporting'
 import { getContext } from '~/store/effects'
 
 import { StripeSessionData } from './types'
@@ -33,7 +32,6 @@ export function* reportStripeFlowAnalytics(
   session: StripeSessionData,
   previousSession?: StripeSessionData
 ) {
-  const reportToSentry = yield* getContext('reportToSentry')
   const { track, make } = yield* getContext('analytics')
 
   if (!previousSession || session.status !== previousSession.status) {
@@ -59,12 +57,8 @@ export function* reportStripeFlowAnalytics(
         )
         break
       case 'rejected':
-        yield* call(reportToSentry, {
-          level: ErrorLevel.Error,
-          error: new Error('Stripe onramp session status: rejected'),
-          additionalInfo: {
-            session: cleanedSession
-          }
+        console.error('Stripe onramp session status: rejected', {
+          session: cleanedSession
         })
         yield* call(
           track,
@@ -93,12 +87,8 @@ export function* reportStripeFlowAnalytics(
         )
         break
       case 'error':
-        yield* call(reportToSentry, {
-          level: ErrorLevel.Error,
-          error: new Error('Stripe onramp session status: error'),
-          additionalInfo: {
-            session: cleanedSession
-          }
+        console.error('Stripe onramp session status: error', {
+          session: cleanedSession
         })
         yield* call(
           track,

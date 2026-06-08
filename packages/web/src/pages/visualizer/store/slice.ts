@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = { isVisible: false }
+const initialState = {
+  isVisible: false,
+  isAutoCycling: true,
+  autoHideTrackDetails: true
+}
 
 const slice = createSlice({
   name: 'application/ui/visualizer',
@@ -14,11 +18,22 @@ const slice = createSlice({
     },
     openVisualizer: (state) => {
       state.isVisible = true
+    },
+    toggleAutoCycle: (state) => {
+      state.isAutoCycling = !state.isAutoCycling
+    },
+    toggleAutoHideTrackDetails: (state) => {
+      state.autoHideTrackDetails = !state.autoHideTrackDetails
     }
   }
 })
 
-export const { toggleVisibility, closeVisualizer, openVisualizer } =
-  slice.actions
+export const {
+  toggleVisibility,
+  closeVisualizer,
+  openVisualizer,
+  toggleAutoCycle,
+  toggleAutoHideTrackDetails
+} = slice.actions
 
 export default slice.reducer

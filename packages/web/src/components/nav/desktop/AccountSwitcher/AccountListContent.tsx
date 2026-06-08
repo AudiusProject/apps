@@ -81,7 +81,10 @@ export const AccountListContent = ({
       backgroundColor='white'
       css={{
         overflow: 'hidden',
-        maxHeight: `calc(${contentHeight}px - ${spacing.unit12}px)`
+        maxHeight:
+          contentHeight > 0
+            ? `calc(${contentHeight}px - ${spacing.unit12}px)`
+            : undefined
       }}
     >
       <Flex
@@ -94,16 +97,14 @@ export const AccountListContent = ({
         gap='s'
       >
         {navBackElement}
-        <Flex alignItems='center' gap='s'>
-          <IconUserArrowRotate size='s' color='default' />
-          <Text
-            variant='title'
-            size={navBackElement ? 'l' : 'm'}
-            color='default'
-          >
-            {messages.switchAccount}
-          </Text>
-        </Flex>
+        {!navBackElement ? (
+          <Flex alignItems='center' gap='s'>
+            <IconUserArrowRotate size='s' color='default' />
+            <Text variant='title' size='m' color='default'>
+              {messages.switchAccount}
+            </Text>
+          </Flex>
+        ) : null}
       </Flex>
       <Flex
         as='ul'

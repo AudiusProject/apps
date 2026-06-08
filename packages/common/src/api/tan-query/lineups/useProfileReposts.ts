@@ -4,24 +4,17 @@ import {
   useInfiniteQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { repostActivityFromSDK, transformAndCleanList } from '~/adapters'
 import { useQueryContext, primeUserData } from '~/api/tan-query/utils'
-import { UserTrackMetadata, UserCollectionMetadata } from '~/models'
-import { PlaybackSource } from '~/models/Analytics'
-import {
-  profilePageSelectors,
-  profilePageFeedLineupActions as feedActions
-} from '~/store/pages'
+import { UserTrackMetadata, UserCollectionMetadata, ID } from '~/models'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, LineupData, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeCollectionData } from '../utils/primeCollectionData'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -45,10 +38,11 @@ export const useProfileReposts = (
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
-  const queryData = useInfiniteQuery({
-    queryKey: getProfileRepostsQueryKey({ handle, pageSize }),
+  const queryKey = getProfileRepostsQueryKey({ handle, pageSize })
+
+  const query = useInfiniteQuery({
+    queryKey,
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
@@ -60,7 +54,7 @@ export const useProfileReposts = (
 
       // If the @ is still at the beginning of the handle, trim it off
       const handleNoAt = handle.startsWith('@') ? handle.substring(1) : handle
-      const { data: repostsSDKData } = await sdk.full.users.getRepostsByHandle({
+      const { data: repostsSDKData } = await sdk.users.getRepostsByHandle({
         handle: handleNoAt,
         userId: OptionalId.parse(currentUserId),
         limit: pageSize,
@@ -94,13 +88,6 @@ export const useProfileReposts = (
         queryClient
       })
 
-      // Update lineup when new data arrives
-      dispatch(
-        feedActions.fetchLineupMetadatas(pageParam, pageSize, false, {
-          items: reposts
-        })
-      )
-
       // Return only ids
       return reposts.map((t) =>
         'track_id' in t
@@ -115,16 +102,24 @@ export const useProfileReposts = (
     enabled: options?.enabled !== false && !!handle
   })
 
-  return useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getProfileRepostsQueryKey({
-      handle,
-      pageSize
-    }),
-    lineupActions: feedActions,
-    lineupSelector: profilePageSelectors.getProfileFeedLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize
-  })
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+    refetch: query.refetch,
+    queryKey
+  }
 }

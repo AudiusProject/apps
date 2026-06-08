@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useArtistCoin } from '@audius/common/api'
+import { useFanClub } from '@audius/common/api'
 import { useFormattedCoinBalance } from '@audius/common/hooks'
 import { Image, TouchableOpacity } from 'react-native'
 
@@ -47,7 +47,7 @@ export type CoinCardProps = {
 export const CoinCard = ({ mint, showUserBalance = true }: CoinCardProps) => {
   const navigation = useNavigation()
 
-  const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(mint)
+  const { data: coinData, isPending: coinsDataLoading } = useFanClub(mint)
   const ticker = coinData?.ticker ?? ''
   const icon = coinData?.logoUri ?? ''
 

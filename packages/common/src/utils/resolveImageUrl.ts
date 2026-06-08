@@ -1,37 +1,15 @@
 import { SquareSizes, WidthSizes } from '~/models/ImageSizes'
 import { Maybe } from '~/utils/typeUtils'
 
+import { resolveUrlWithCascadingTimeout } from './resolveUrlWithCascadingTimeout'
+
 type Artwork<T extends string | number | symbol> = { [key in T]?: string } & {
   mirrors?: string[] | undefined
 }
 
-const tryUrl = async (url: string): Promise<boolean> => {
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000)
-    const response = await fetch(url, {
-      method: 'HEAD',
-      signal: controller.signal
-    })
-    clearTimeout(timeoutId)
-    return response.ok
-  } catch {
-    return false
-  }
-}
-
-const tryUrls = async (urls: string[]): Promise<string> => {
-  for (const url of urls) {
-    if (await tryUrl(url)) {
-      return url
-    }
-  }
-  return urls[0] ?? ''
-}
-
 /**
- * Resolves an image URL from an artwork object, handling mirrors and fallbacks.
- * This is a non-React version of the logic in useImageSize hook.
+ * Resolves an image URL from an artwork object using cascading timeouts:
+ * try primary (2s) → mirrors (2s) → mirrors (5s) → mirrors (30s)
  *
  * @param artwork - The artwork object containing size URLs and optional mirrors
  * @param targetSize - The desired size of the image
@@ -72,6 +50,6 @@ export const resolveImageUrl = async <
     }
   }
 
-  const workingUrl = await tryUrls(urlsToTry)
+  const workingUrl = await resolveUrlWithCascadingTimeout(urlsToTry)
   return workingUrl || defaultImage
 }

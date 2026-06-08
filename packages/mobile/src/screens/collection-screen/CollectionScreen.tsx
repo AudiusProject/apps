@@ -86,8 +86,11 @@ export const CollectionScreen = () => {
     slug
   } = params ?? {}
 
-  // Use useCollectionByParams to handle both ID-based and permalink-based collection fetching
-  const collectionParams = id ? { collectionId: id } : { handle, slug }
+  // Use useCollectionByParams to handle both ID-based and permalink-based collection fetching.
+  // collectionType comes from linking (e.g. ?collectionType=playlist) and is required for permalinks.
+  const collectionParams = id
+    ? { collectionId: id }
+    : { handle, slug, collectionType }
 
   const { data: cachedCollection } = useCollectionByParams(collectionParams)
   const { data: cachedUser } = useUser(cachedCollection?.playlist_owner_id)
@@ -178,6 +181,8 @@ const CollectionScreenComponent = (props: CollectionScreenComponentProps) => {
 
   const handlePressOverflow = useCallback(() => {
     const overflowActions = [
+      !is_private || isOwner ? OverflowAction.PLAY_COLLECTION_NEXT : null,
+      !is_private || isOwner ? OverflowAction.ADD_COLLECTION_TO_QUEUE : null,
       isOwner && !ddex_app
         ? is_album
           ? OverflowAction.EDIT_ALBUM

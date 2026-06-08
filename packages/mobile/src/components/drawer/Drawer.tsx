@@ -135,6 +135,12 @@ export type DrawerProps = {
    */
   isGestureSupported?: boolean
   /**
+   * When true, the drawer's pan responder will refuse to claim new gestures.
+   * Use this to defer to nested gesture-driven UI (e.g. drag-to-reorder lists)
+   * without tearing down the pan responder entirely.
+   */
+  gesturesDisabled?: boolean
+  /**
    * Whether or not the background behind the drawer should dim
    */
   shouldBackgroundDim?: boolean
@@ -208,6 +214,10 @@ export type DrawerProps = {
    * Optional replacement component for the drawer header
    */
   drawerHeader?: ComponentType<{ onClose: () => void }>
+  /**
+   * Show back arrow instead of close X in the header. For nested drawers.
+   */
+  showBackButton?: boolean
 
   translationAnim?: Animated.Value
 }
@@ -272,12 +282,14 @@ export const Drawer: DrawerComponent = ({
   isFullscreen,
   shouldBackgroundDim = true,
   isGestureSupported = true,
+  gesturesDisabled = false,
   animationStyle = DrawerAnimationStyle.SPRINGY,
   initialOffsetPosition = 0,
   shouldCloseToInitialOffset,
   shouldHaveRoundedBordersAtInitialOffset = false,
   zIndex = 5,
   drawerHeader: CustomDrawerHeader,
+  showBackButton = false,
   drawerStyle,
   shouldShowShadow = true,
   shouldAnimateShadow,
@@ -317,6 +329,13 @@ export const Drawer: DrawerComponent = ({
   // want to capture the users previous intent so that our next pan gesture can be
   // handled properly.
   const isOpenIntent = useRef(isOpen)
+
+  // Mirror gesturesDisabled into a ref so the pan responder always reads the
+  // latest value without needing to be recreated.
+  const gesturesDisabledRef = useRef(gesturesDisabled)
+  useEffect(() => {
+    gesturesDisabledRef.current = gesturesDisabled
+  }, [gesturesDisabled])
 
   const slideIn = useCallback(
     (position: number, velocity?: number, onFinished?: () => void) => {
@@ -459,6 +478,7 @@ export const Drawer: DrawerComponent = ({
     () =>
       PanResponder.create({
         onMoveShouldSetPanResponder: (e, gestureState) => {
+          if (gesturesDisabledRef.current) return false
           return Math.abs(gestureState.dy) > ON_MOVE_RESPONDER_DY
         },
         /**
@@ -705,6 +725,7 @@ export const Drawer: DrawerComponent = ({
             titleImage={titleImage}
             isFullscreen={isFullscreen}
             blockClose={blockClose}
+            showBackButton={showBackButton}
           />
         )}
         {children}

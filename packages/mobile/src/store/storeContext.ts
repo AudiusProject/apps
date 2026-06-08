@@ -6,7 +6,6 @@ import { audioPlayer } from 'app/services/audio-player'
 import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import { env } from 'app/services/env'
 import { explore } from 'app/services/explore'
-import { fingerprintClient } from 'app/services/fingerprint'
 import { localStorage } from 'app/services/local-storage'
 import { queryClient } from 'app/services/query-client'
 import {
@@ -23,7 +22,6 @@ import {
   signAndSendTransaction
 } from 'app/store/utils/phantomWalletConnect'
 import { generatePlaylistArtwork } from 'app/utils/generatePlaylistArtwork'
-import { reportToSentry } from 'app/utils/reportToSentry'
 import share from 'app/utils/share'
 
 export const storeContext: CommonStoreContext = {
@@ -37,7 +35,6 @@ export const storeContext: CommonStoreContext = {
   analytics,
   remoteConfigInstance,
   audiusBackendInstance,
-  fingerprintClient,
   walletClient,
   localStorage,
   isNativeMobile: true,
@@ -45,11 +42,6 @@ export const storeContext: CommonStoreContext = {
   env,
   explore,
   nftClient: null,
-  sentry: {
-    setTag: () => {}, // Sentry removed - no-op
-    getCurrentScope: () => ({ setUser: () => {} }) // Sentry removed - no-op
-  },
-  reportToSentry,
   // Shim in main, but defined in native-reloaded branch
   audioPlayer,
   trackDownload,

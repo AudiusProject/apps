@@ -1,8 +1,13 @@
 import { useCallback, useContext, useEffect } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
-import { useIsManagedAccount, useShareAction } from '@audius/common/hooks'
+import {
+  useIsManagedAccount,
+  useShareAction,
+  useShareContent
+} from '@audius/common/hooks'
 import { Name, PlayableType } from '@audius/common/models'
+import { registerNiceModalId } from '@audius/common/services'
 import {
   collectionsSocialActions,
   tracksSocialActions,
@@ -11,13 +16,13 @@ import {
   modalsActions,
   useCreateChatModal
 } from '@audius/common/store'
+import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch } from 'react-redux'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import * as embedModalActions from 'components/embed-modal/store/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { useModalState } from 'pages/modals/useModalState'
 import { SHARE_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 import { useSelector } from 'utils/reducer'
 import { openXLink } from 'utils/xShare'
@@ -27,27 +32,37 @@ import { ShareDrawer } from './components/ShareDrawer'
 import { messages } from './messages'
 import { getXShareText } from './utils'
 
-const { getShareState } = shareModalUISelectors
+const { getShareRequest, getShareSource } = shareModalUISelectors
 const { shareUser } = usersSocialActions
-const { shareTrack } = tracksSocialActions
+const { shareTrack, shareContest } = tracksSocialActions
 const { shareCollection } = collectionsSocialActions
 const { setVisibility } = modalsActions
 
-export const ShareModal = () => {
-  const { isOpen, onClose, onClosed } = useModalState('Share')
+export const ShareModal = NiceModal.create(() => {
+  const modal = useModal()
+  const isOpen = modal.visible
+  const onClose = useCallback(() => {
+    modal.hide()
+  }, [modal])
+  // NiceModal handles unmount via `remove()` after the close animation;
+  // there's no separate "fully closed" callback, so reuse onClose here.
+  const onClosed = onClose
   const sendShareAction = useShareAction()
 
   const { toast } = useContext(ToastContext)
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
   const record = useRecord()
-  const { content, source } = useSelector(getShareState)
+  const request = useSelector(getShareRequest)
+  const source = useSelector(getShareSource)
+  const content = useShareContent(request)
   const { data: accountUserId } = useCurrentUserId()
   const { onOpen: openCreateChatModal } = useCreateChatModal()
   const isManagerMode = useIsManagedAccount()
 
   const isOwner =
-    content?.type === 'track' && accountUserId === content.artist.user_id
+    (content?.type === 'track' || content?.type === 'contest') &&
+    accountUserId === content.artist.user_id
 
   const handleShareToDirectMessage = useCallback(async () => {
     if (!content) return
@@ -74,6 +89,12 @@ export const ShareModal = () => {
     switch (content.type) {
       case 'track':
         dispatch(shareTrack(content.track.track_id, source))
+        break
+      case 'contest':
+        // Contest copy-link uses the dedicated `shareContest` saga,
+        // which writes the contest URL (`{permalink}/contest`) to
+        // the clipboard rather than the track permalink.
+        dispatch(shareContest(content.track.track_id, source))
         break
       case 'profile':
         dispatch(shareUser(content.profile.user_id, source))
@@ -147,4 +168,11 @@ export const ShareModal = () => {
 
   if (isMobile) return <ShareDrawer {...shareProps} />
   return <ShareDialog {...shareProps} />
-}
+})
+
+// Register the modal so saga code (and anything else outside React) can
+// open it via `showNiceModal('Share')`. The id is also added to the
+// nice-modal bridge allowlist so legacy `setVisibility('Share', true)`
+// dispatches translate to `showNiceModal('Share')`.
+NiceModal.register('Share', ShareModal)
+registerNiceModalId('Share')

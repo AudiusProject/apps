@@ -1,27 +1,48 @@
 .container {
   position: relative;
-  display: inline-flex;
-  justify-content: space-between;
-  align-items: baseline;
   width: 100%;
-  min-width: 720px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+}
+
+.contentGlow {
+  filter: drop-shadow(
+      0 0 8px
+        color-mix(
+          in srgb,
+          var(--frosted-surface-background-color, var(--harmony-n-25)) 50%,
+          transparent
+        )
+    )
+    drop-shadow(
+      0 0 16px
+        color-mix(
+          in srgb,
+          var(--frosted-surface-background-color, var(--harmony-n-25)) 50%,
+          transparent
+        )
+    );
 }
 
 .bottomBarContainer {
-  display: flex;
-  justify-content: center;
   width: 100%;
-  min-width: 780px;
+  position: relative;
+  z-index: 1;
 }
 
 .bottomBar {
   max-width: 1080px;
-  flex: 1;
+  margin: 0 auto;
 }
 
 .rightDecorator {
-  margin: 0px 0px 3px auto;
+  display: flex;
+  align-items: center;
+  margin: 0px 0px 0px auto;
+}
+
+/* Single line, full title visible — no wrap, no ellipsis */
+.pageTitle {
+  white-space: nowrap;
 }

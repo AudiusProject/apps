@@ -12,7 +12,7 @@ const TrackHelmet = ({ track }) => {
   const hostname = getAudiusHostname()
   const url = `https://${hostname}${track.permalink}`
   const structuredData = {
-    '@context': 'http://schema.googleapis.com/',
+    '@context': 'https://schema.org',
     '@type': 'MusicRecording',
     '@id': url,
     url,

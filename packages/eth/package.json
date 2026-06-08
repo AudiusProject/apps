@@ -1,6 +1,6 @@
 {
   "name": "@audius/eth",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "The core Typescript mappings to the Audius Ethereum Contracts",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -21,7 +21,5 @@
     "url": "https://github.com/AudiusProject/apps/issues"
   },
   "homepage": "https://github.com/AudiusProject/apps/tree/main/packages/eth",
-  "dependencies": {
-    "viem": "2.21.21"
-  }
+  "sideEffects": false
 }

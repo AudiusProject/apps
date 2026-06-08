@@ -8,13 +8,17 @@ export const visibilityScreenName = 'Visibility'
 
 const messages = {
   ...visibilityMessages,
+  title: (entityType: 'track' | 'album' | 'playlist') =>
+    `${entityType === 'track' ? 'Track' : entityType === 'album' ? 'Album' : 'Playlist'} Privacy`,
   scheduled: (date: string) => `Scheduled for ${formatCalendarTime(date)}`
 }
 
 export const VisibilityField = () => {
-  const [{ value: entitiType }] = useField('entityType')
+  const [{ value: entityType }] = useField<'track' | 'album' | 'playlist'>(
+    'entityType'
+  )
   const [{ value: isHidden }] = useField(
-    entitiType === 'track' ? 'is_unlisted' : 'is_private'
+    entityType === 'track' ? 'is_unlisted' : 'is_private'
   )
   const [{ value: isScheduledRelease }] = useField('is_scheduled_release')
   const [{ value: releaseDate }] = useField('release_date')
@@ -28,7 +32,7 @@ export const VisibilityField = () => {
 
   return (
     <ContextualMenu
-      label={messages.title}
+      label={messages.title(entityType)}
       value={value}
       menuScreenName={visibilityScreenName}
     />

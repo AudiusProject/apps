@@ -3,13 +3,13 @@ import qs from 'query-string'
 import { ID, SearchCategory, SearchFilters } from '~/models'
 
 import { encodeUrlName, formatTickerForUrl } from './formatUtil'
-import { convertGenreLabelToValue, Genre } from './genres'
+import { convertGenreLabelToValue, type GenreLabel } from './genres'
 
 // External Routes
 export const PRIVACY_POLICY = '/legal/privacy-policy'
 export const TERMS_OF_SERVICE = '/legal/terms-of-use'
-export const ARTIST_COIN_TERMS = '/legal/artist-coin-terms'
-export const ARTIST_COIN_ACCEPTABLE_USE = '/legal/artist-coin-acceptable-use'
+export const FAN_CLUB_TERMS = '/legal/fan-club-terms'
+export const FAN_CLUB_ACCEPTABLE_USE = '/legal/fan-club-acceptable-use'
 export const API_TERMS = '/legal/api-terms'
 export const DOWNLOAD_START_LINK = '/download?start_download=true'
 export const DOWNLOAD_LINK = '/download'
@@ -31,12 +31,16 @@ export const TRENDING_PLAYLISTS_PAGE_LEGACY = '/trending/playlists'
 export const EXPLORE_PAGE = '/explore'
 export const TRENDING_PLAYLISTS_PAGE = '/explore/playlists'
 export const TRENDING_UNDERGROUND_PAGE = '/explore/underground'
+export const CONTESTS_PAGE = '/contests'
 
 // DEPRECATED - use /library instead.
 export const SAVED_PAGE = '/favorites'
 export const FAVORITES_PAGE = '/favorites'
 
 export const LIBRARY_PAGE = '/library'
+export const LIBRARY_TRACKS_PAGE = '/library/tracks'
+export const LIBRARY_ALBUMS_PAGE = '/library/albums'
+export const LIBRARY_PLAYLISTS_PAGE = '/library/playlists'
 export const HISTORY_PAGE = '/history'
 export const DASHBOARD_PAGE = '/dashboard'
 export const AUDIO_PAGE = '/audio'
@@ -74,11 +78,21 @@ export const COIN_DETAIL_BUY_PAGE = '/coins/:ticker/buy'
 export const COIN_REDEEM_PAGE = '/coins/:ticker/redeem/:code?'
 export const COIN_EXCLUSIVE_TRACKS_PAGE = '/coins/:ticker/exclusive-tracks'
 export const EDIT_COIN_DETAILS_PAGE = '/coins/:ticker/edit'
+/** Primary club detail route */
+export const CLUB_DETAIL_PAGE = '/clubs/:ticker'
+export const CLUB_DETAIL_BUY_PAGE = '/clubs/:ticker/buy'
+export const CLUB_REDEEM_PAGE = '/clubs/:ticker/redeem/:code?'
+export const CLUB_EXCLUSIVE_TRACKS_PAGE = '/clubs/:ticker/exclusive-tracks'
+export const EDIT_CLUB_DETAILS_PAGE = '/clubs/:ticker/edit'
 export const WALLET_PAGE = '/wallet'
 export const WALLET_GUIDE_PAGE = '/wallet/guide'
 export const CASH_PAGE = '/cash'
 export const COINS_CREATE_PAGE = '/coins/create'
+export const CLUBS_CREATE_PAGE = '/clubs/create'
+/** Legacy explore URL; app redirects to CLUBS_EXPLORE_PAGE. */
 export const COINS_EXPLORE_PAGE = '/coins'
+/** Fan club discovery (primary); same UI as legacy /coins. */
+export const CLUBS_EXPLORE_PAGE = '/clubs'
 export const PRIVATE_KEY_EXPORTER_SETTINGS_PAGE = '/settings/export-private-key'
 export const DEV_TOOLS_PAGE = '/dev-tools'
 export const SOLANA_TOOLS_PAGE = '/dev-tools/solana'
@@ -135,11 +149,15 @@ export const TRACK_EDIT_PAGE = '/:handle/:slug/edit'
 export const TRACK_REMIXES_PAGE = '/:handle/:slug/remixes'
 export const TRACK_COMMENTS_PAGE = '/:handle/:slug/comments'
 export const PICK_WINNERS_PAGE = '/:handle/:slug/pick-winners'
+export const CONTEST_PAGE = '/:handle/contest/:slug'
+export const HOST_REMIX_CONTEST_PAGE = '/:handle/:slug/host-contest'
+export const HOST_REMIX_CONTEST_ROOT_PAGE = '/host-contest'
 export const PROFILE_PAGE = '/:handle'
 export const PROFILE_PAGE_TRACKS = '/:handle/tracks'
 export const PROFILE_PAGE_ALBUMS = '/:handle/albums'
 export const PROFILE_PAGE_PLAYLISTS = '/:handle/playlists'
 export const PROFILE_PAGE_REPOSTS = '/:handle/reposts'
+export const PROFILE_PAGE_CONTESTS = '/:handle/contests'
 export const PROFILE_PAGE_COMMENTS = '/:handle/comments'
 
 // Opaque id routes
@@ -154,8 +172,11 @@ export const FOLLOWING_USERS_ROUTE = '/following'
 export const FOLLOWERS_USERS_ROUTE = '/followers'
 export const LEADERBOARD_USERS_ROUTE = '/leaderboard'
 export const COIN_DETAIL_MOBILE_WEB_ROUTE = '/coins/:ticker/details'
+export const CLUB_DETAIL_MOBILE_WEB_ROUTE = '/clubs/:ticker/details'
 export const COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
   '/coins/:ticker/exclusive-tracks/mobile'
+export const CLUB_EXCLUSIVE_TRACKS_MOBILE_ROUTE =
+  '/clubs/:ticker/exclusive-tracks/mobile'
 export const ACCOUNT_SETTINGS_PAGE = '/settings/account'
 export const NOTIFICATION_SETTINGS_PAGE = '/settings/notifications'
 export const ABOUT_SETTINGS_PAGE = '/settings/about'
@@ -203,8 +224,8 @@ export const AUDIUS_DEV_STAKER_LINK = 'https://audius.org/protocol'
 export const AUDIUS_HOT_AND_NEW =
   '/audius/playlist/hot-new-on-audius-%F0%9F%94%A5-4281'
 export const AUDIUS_HELP_LINK = 'https://help.audius.co/'
-export const AUDIUS_ARTIST_COIN_HELP_LINK =
-  'https://help.audius.co/product/artist-coins'
+export const AUDIUS_FAN_CLUB_HELP_LINK =
+  'https://help.audius.co/product/fan-clubs'
 
 export const AUDIUS_CAREERS_LINK = 'https://www.tikilabs.com/careers'
 export const AUDIUS_PODCAST_LINK =
@@ -212,8 +233,8 @@ export const AUDIUS_PODCAST_LINK =
 export const AUDIUS_CYPHER_LINK = 'https://discord.gg/audius'
 export const AUDIUS_API_LINK = 'https://audius.org/api'
 
-export const AUDIUS_ARTIST_COINS_HELP_LINK =
-  'https://help.audius.co/product/artist-coins'
+export const AUDIUS_FAN_CLUBS_HELP_LINK =
+  'https://help.audius.co/product/fan-clubs'
 
 // Birdeye Links
 export const BIRDEYE_BASE_URL = 'https://birdeye.so'
@@ -237,6 +258,7 @@ export const authenticatedRoutes = [
   PAYMENTS_PAGE,
   WITHDRAWALS_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
   CASH_PAGE
 ]
@@ -254,8 +276,8 @@ export const publicSiteRoutes = [
   TERMS_OF_SERVICE,
   PRIVACY_POLICY,
   API_TERMS,
-  ARTIST_COIN_TERMS,
-  ARTIST_COIN_ACCEPTABLE_USE,
+  FAN_CLUB_TERMS,
+  FAN_CLUB_ACCEPTABLE_USE,
   DOWNLOAD_LINK,
   AUTH_REDIRECT
 ]
@@ -277,6 +299,7 @@ export const orderedRoutes = [
   TRENDING_GENRES,
   TRENDING_PAGE,
   EXPLORE_PAGE,
+  CONTESTS_PAGE,
   EMPTY_PAGE,
   SEARCH_PAGE,
   UPLOAD_ALBUM_PAGE,
@@ -291,11 +314,15 @@ export const orderedRoutes = [
   AUDIO_PAGE,
   WALLET_AUDIO_PAGE,
   COIN_DETAIL_PAGE,
+  CLUB_DETAIL_PAGE,
   EDIT_COIN_DETAILS_PAGE,
+  EDIT_CLUB_DETAILS_PAGE,
   WALLET_PAGE,
   CASH_PAGE,
   COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_GUIDE_PAGE,
   REWARDS_PAGE,
   SETTINGS_PAGE,
@@ -326,6 +353,8 @@ export const staticRoutes = new Set([
   FEED_PAGE,
   TRENDING_PAGE,
   EXPLORE_PAGE,
+  CONTESTS_PAGE,
+  HOST_REMIX_CONTEST_ROOT_PAGE,
   TRENDING_PLAYLISTS_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   TRENDING_UNDERGROUND_PAGE,
@@ -345,7 +374,9 @@ export const staticRoutes = new Set([
   WALLET_PAGE,
   WALLET_GUIDE_PAGE,
   COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   COINS_CREATE_PAGE,
+  CLUBS_CREATE_PAGE,
   WALLET_AUDIO_PAGE,
   CASH_PAGE,
   REWARDS_PAGE,
@@ -441,7 +472,9 @@ export const searchPage = (searchOptions: SearchOptions) => {
   const { category, ...searchParams } = searchOptions
 
   if (searchParams.genre) {
-    searchParams.genre = convertGenreLabelToValue(searchParams.genre) as Genre
+    searchParams.genre = convertGenreLabelToValue(
+      searchParams.genre as GenreLabel
+    )
   }
 
   // Build the search path - category is optional
@@ -456,5 +489,11 @@ export const searchPage = (searchOptions: SearchOptions) => {
 export const coinPage = (ticker: string) =>
   `/coins/${formatTickerForUrl(ticker)}`
 
+export const clubPage = (ticker: string) =>
+  `/clubs/${formatTickerForUrl(ticker)}`
+
 export const coinRedeemPage = (ticker: string, code?: string) =>
   `/coins/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`
+
+export const clubRedeemPage = (ticker: string, code?: string) =>
+  `/clubs/${formatTickerForUrl(ticker)}/redeem${code ? `/${code}` : ''}`

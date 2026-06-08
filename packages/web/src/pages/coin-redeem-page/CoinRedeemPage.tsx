@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 
 import { Coin } from '@audius/common/adapters'
 import {
-  useArtistCoinByTicker,
+  useFanClubByTicker,
   useCoinRedeemAmount,
   useCoinRedeemCodeAmount,
   useCurrentUserId,
@@ -13,7 +13,7 @@ import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   coinPage,
   coinRedeemPage,
-  COINS_EXPLORE_PAGE,
+  CLUBS_EXPLORE_PAGE,
   NOT_FOUND_PAGE
 } from '@audius/common/src/utils/route'
 import { formatTickerForUrl } from '@audius/common/utils'
@@ -37,7 +37,7 @@ import Page from 'components/page/Page'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { BannerSection } from 'pages/coin-detail-page/components/CoinInfoSection'
+import { FanClubBannerSection } from 'pages/fan-club-detail-page/components/FanClubInfoSection'
 
 const messages = {
   title: (ticker: string) => `Redeem $${ticker}`,
@@ -111,7 +111,7 @@ const PageContent = ({
         flex={1}
         css={{ minWidth: 320, maxWidth: 484 }}
       >
-        <BannerSection mint={coin?.mint ?? ''} />
+        <FanClubBannerSection mint={coin?.mint ?? ''} />
         <Flex column p='l' ph='xl' w='100%' gap='s'>
           <Text variant='heading'>{messages.claimRewards}</Text>
           {!isSignedIn ? (
@@ -182,7 +182,7 @@ export const CoinRedeemPage = () => {
     isPending: coinPending,
     isError,
     isSuccess
-  } = useArtistCoinByTicker({ ticker: formattedTicker })
+  } = useFanClubByTicker({ ticker: formattedTicker })
 
   const { data: coinRedeemAmount, isPending: coinRedeemAmountPending } =
     useCoinRedeemAmount({ mint: coin?.mint })
@@ -203,7 +203,7 @@ export const CoinRedeemPage = () => {
     : coinRedeemAmountPending
 
   if (!ticker) {
-    return <Navigate to={COINS_EXPLORE_PAGE} />
+    return <Navigate to={CLUBS_EXPLORE_PAGE} />
   }
 
   if (ticker !== formattedTicker) {

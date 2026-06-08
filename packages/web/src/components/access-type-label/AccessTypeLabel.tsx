@@ -1,7 +1,7 @@
 import { AccessType } from '@audius/common/models'
 import { formatReleaseDate } from '@audius/common/utils'
 import {
-  IconSparkles,
+  IconUserFollowing,
   IconCart,
   IconReceive,
   IconCalendarMonth,
@@ -9,8 +9,7 @@ import {
   IconColors,
   Flex,
   Text,
-  IconArtistCoin,
-  IconCoinGatedLabel
+  IconFanClub
 } from '@audius/harmony'
 
 type AccessTypeLabelProps = {
@@ -20,7 +19,7 @@ type AccessTypeLabelProps = {
 }
 
 type AccessTypeConfig = {
-  icon: typeof IconSparkles
+  icon: typeof IconUserFollowing
   label: string | ((date?: string) => string)
   color: IconColors
 }
@@ -50,15 +49,15 @@ const ACCESS_TYPE_CONFIG: Record<AccessType, AccessTypeConfig> = {
     label: 'Extras',
     color: 'premium'
   },
-  [AccessType.SPECIAL_ACCESS]: {
-    icon: IconSparkles,
-    label: 'Special Access',
+  [AccessType.FOLLOW_GATED]: {
+    icon: IconUserFollowing,
+    label: 'Followers Only',
     color: 'special'
   },
   [AccessType.TOKEN_GATED]: {
-    icon: IconArtistCoin,
-    label: 'Coin Gated',
-    color: 'artistCoin'
+    icon: IconFanClub,
+    label: 'Fan Club',
+    color: 'subdued'
   },
   [AccessType.EXTRAS]: {
     icon: IconReceive,
@@ -76,15 +75,6 @@ export const AccessTypeLabel = (props: AccessTypeLabelProps) => {
     typeof config.label === 'function'
       ? config.label(scheduledReleaseDate)
       : config.label
-
-  // Use coin gated label svg instead of icon and text for token gated
-  if (type === AccessType.TOKEN_GATED) {
-    return (
-      <Flex alignItems='center'>
-        <IconCoinGatedLabel height={20} />
-      </Flex>
-    )
-  }
 
   return (
     <Flex gap='xs' alignItems='center'>

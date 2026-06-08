@@ -7,6 +7,7 @@ import { dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 
 import { Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 
 import styles from '../PayAndEarnPage.module.css'
 import { PurchaseCell, PurchaseRow } from '../types'
@@ -182,6 +183,7 @@ export const SalesTable = ({
       tableHeaderClassName={
         isNetworkCutEnabled ? styles.tableHeaderSmallPadding : undefined
       }
+      responsiveColumns={RESPONSIVE_TABLE_POLICIES.sales}
     />
   )
 }

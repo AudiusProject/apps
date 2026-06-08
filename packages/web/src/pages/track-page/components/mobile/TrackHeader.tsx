@@ -1,6 +1,6 @@
-import { Suspense, useCallback, useState } from 'react'
+import { Suspense, useCallback } from 'react'
 
-import { useRemixContest, useTrack, useTrackRank } from '@audius/common/api'
+import { useTrack, useTrackRank } from '@audius/common/api'
 import {
   SquareSizes,
   isContentUSDCPurchaseGated,
@@ -16,13 +16,13 @@ import {
   Flex,
   IconPause,
   IconPlay,
-  IconSparkles,
+  IconUserFollowing,
   IconCart,
   Box,
   Button,
   MusicBadge,
   Text,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 import IconCalendarMonth from '@audius/harmony/src/assets/icons/CalendarMonth.svg'
 import IconTrending from '@audius/harmony/src/assets/icons/Trending.svg'
@@ -30,7 +30,6 @@ import IconVisibilityHidden from '@audius/harmony/src/assets/icons/VisibilityHid
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 
-import { DownloadMobileAppDrawer } from 'components/download-mobile-app-drawer/DownloadMobileAppDrawer'
 import { UserLink } from 'components/link'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import { GatedContentSection } from 'components/track/GatedContentSection'
@@ -41,7 +40,7 @@ import HoverInfo from 'components/track-flair/HoverInfo'
 import { Size } from 'components/track-flair/types'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { push as pushRoute } from 'utils/navigation'
-import { isDarkMode } from 'utils/theme/theme'
+import { useIsDarkMode } from 'utils/theme/theme'
 
 import ActionButtonRow from './ActionButtonRow'
 import { DownloadSection } from './DownloadSection'
@@ -56,7 +55,7 @@ const messages = {
   preview: 'PREVIEW',
   pause: 'PAUSE',
   premiumTrack: 'PREMIUM TRACK',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   coinGated: 'COIN GATED',
   generatedWithAi: 'Generated With AI',
   artworkAltText: 'Track Artwork',
@@ -178,6 +177,7 @@ const TrackHeader = ({
   goToFavoritesPage,
   goToRepostsPage
 }: TrackHeaderProps) => {
+  const darkMode = useIsDarkMode()
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) => {
       return {
@@ -213,8 +213,6 @@ const TrackHeader = ({
   const albumInfo = album_backlink
   const shouldShowScheduledRelease =
     release_date && dayjs(release_date).isAfter(dayjs())
-  const { data: remixContest } = useRemixContest(trackId)
-  const isRemixContest = !!remixContest
 
   const imageElement = (
     <TrackArtwork
@@ -287,24 +285,14 @@ const TrackHeader = ({
   }, [dispatch, permalink])
 
   const renderHeaderText = () => {
-    if (isRemixContest) {
-      return (
-        <Flex justifyContent='center' alignItems='center'>
-          <Text variant='label' color='subdued'>
-            {messages.remixContest}
-          </Text>
-        </Flex>
-      )
-    }
-
     if (isStreamGated) {
-      let IconComponent = IconSparkles
-      let titleMessage = messages.specialAccess
+      let IconComponent = IconUserFollowing
+      let titleMessage = messages.followersOnly
       if (isContentUSDCPurchaseGated(streamConditions)) {
         IconComponent = IconCart
         titleMessage = messages.premiumTrack
       } else if (isContentTokenGated(streamConditions)) {
-        IconComponent = IconArtistCoin
+        IconComponent = IconFanClub
         titleMessage = messages.coinGated
       }
       return (
@@ -325,11 +313,6 @@ const TrackHeader = ({
       </Flex>
     )
   }
-
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const handleDrawerClose = useCallback(() => {
-    setIsDrawerOpen(false)
-  }, [setIsDrawerOpen])
 
   const trendingRank = useTrackRank(trackId)
 
@@ -402,7 +385,7 @@ const TrackHeader = ({
           onRepost={onRepost}
           onFavorite={onSaveHeroTrack}
           onShare={onShare}
-          darkMode={isDarkMode()}
+          darkMode={darkMode}
         />
         {coSign ? (
           <div className={cn(styles.coSignInfo, styles.withSectionDivider)}>
@@ -451,10 +434,6 @@ const TrackHeader = ({
             </Suspense>
           </Box>
         ) : null}
-        <DownloadMobileAppDrawer
-          isOpen={isDrawerOpen}
-          onClose={handleDrawerClose}
-        />
       </Flex>
     </Box>
   )

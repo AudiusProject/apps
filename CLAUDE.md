@@ -2,13 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Terminology
+
+Audius runs on the **Open Audio Protocol**, which uses a single canonical node type: the **Open Audio Validator Node**. The earlier split between *Discovery Nodes* and *Content Nodes* is deprecated — both roles are now served by validator nodes. When writing docs, comments, commit messages, or user-facing strings, use "Open Audio Validator Node" (or just "validator node"). Do not introduce new references to "Discovery Node", "Content Node", "Creator Node", or "Discovery Provider". Directory names like `packages/discovery-provider` and `mediorum` are retained for compatibility but no longer reflect the architecture.
+
 ## Project Overview
 
 Audius is a decentralized, community-owned music-sharing protocol. This is a monorepo containing:
 
 - Web and desktop applications (React + Vite)
 - Mobile applications (React Native)
-- Backend services (Discovery Provider, Content Node)
+- Backend services that together make up the Open Audio Validator Node software (indexer + media storage; see `packages/discovery-provider` and `mediorum` directories — names retained from earlier architecture)
 - Blockchain smart contracts (Ethereum and Solana)
 - SDK and common libraries
 
@@ -29,13 +33,13 @@ npm run protocol
 audius-compose connect
 
 # Run web application
-npm run web:dev      # Against local services
-npm run web:stage    # Against staging
-npm run web:prod     # Against production
+npm run web          # Against production
+npm run web:local    # Against local services
 
 # Run mobile applications
-npm run ios:dev      # iOS local development
-npm run android:dev  # Android local development
+npm run mobile       # Metro only — preferred for JS-only changes; user opens the simulator manually with the existing build
+npm run ios:dev      # iOS full build + boot simulator (slow; only when native modules changed)
+npm run android:dev  # Android full build + boot emulator (slow; only when native modules changed)
 
 # Testing
 npm run test         # Run all tests via Turbo
@@ -71,11 +75,12 @@ audius-cmd stream
 
 - **packages/web**: React web client with Vite, Redux Toolkit, Emotion CSS
 - **packages/mobile**: React Native app for iOS/Android
+- **packages/mobile/examples**: Runnable mobile examples (auth/sign-in, upload) with READMEs for AI and developer reference—see [packages/mobile/examples/README.md](packages/mobile/examples/README.md)
 - **packages/common**: Shared code between web and mobile (state, models, utilities)
 - **packages/sdk**: JavaScript SDK for interacting with Audius protocol
 - **packages/harmony**: Design system components and tokens
 - **packages/discovery-provider**: Python backend that indexes blockchain data
-- **mediorum**: Content node for storing/serving audio files
+- **mediorum**: Media storage component of the Open Audio Validator Node — stores and serves audio files (directory name retained from earlier "content node" architecture)
 
 ### State Management
 
@@ -88,6 +93,7 @@ audius-cmd stream
 - SDK (@audius/sdk) handles all protocol interactions
 - Services layer in packages/common/src/services
 - API adapters for web3 and traditional HTTP endpoints
+- **Mobile examples**: For auth (sign-in/OAuth-style), upload, etc., see `packages/mobile/examples/`; each example has a README with run instructions and source-of-truth file paths.
 
 ### Styling Approach
 
@@ -128,7 +134,7 @@ audius-cmd stream
 - Protocol must be running for local development
 - Mobile requires proper native environment setup
 - Some features require blockchain interaction
-- Audio processing happens on content nodes
+- Audio processing happens on Open Audio Validator Nodes (the role formerly called "content node" — deprecated terminology)
 
 ## Code Style and Best Practices
 

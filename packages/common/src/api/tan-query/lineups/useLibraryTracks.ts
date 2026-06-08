@@ -1,23 +1,18 @@
-import { Id, EntityType } from '@audius/sdk'
 import {
+  Id,
+  EntityType,
   GetUserLibraryTracksSortMethodEnum,
   GetUserLibraryTracksSortDirectionEnum
-} from '@audius/sdk/src/sdk/api/generated/full/apis/UsersApi'
+} from '@audius/sdk'
 import {
   InfiniteData,
   useInfiniteQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { PlaybackSource } from '~/models/Analytics'
 import { ID } from '~/models/Identifiers'
-import {
-  libraryPageTracksLineupActions,
-  libraryPageSelectors,
-  LibraryCategoryType
-} from '~/store/pages'
+import { LibraryCategoryType } from '~/store/pages'
 import { removeNullable } from '~/utils'
 
 import { userTrackMetadataFromSDK } from '../../../adapters/track'
@@ -26,8 +21,6 @@ import { QueryKey, QueryOptions, LineupData } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 5
 
@@ -72,21 +65,22 @@ export const useLibraryTracks = (
   const { data: currentUserId } = useCurrentUserId()
   const { audiusSdk } = useQueryContext()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
+
+  const queryKey = getLibraryTracksQueryKey({
+    currentUserId,
+    category,
+    sortMethod,
+    sortDirection,
+    query,
+    pageSize
+  })
 
   const queryData = useInfiniteQuery({
-    queryKey: getLibraryTracksQueryKey({
-      currentUserId,
-      category,
-      sortMethod,
-      sortDirection,
-      query,
-      pageSize
-    }),
+    queryKey,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!currentUserId) return []
+      if (!currentUserId) return [] as LineupData[]
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.full.users.getUserLibraryTracks({
+      const response = await sdk.users.getUserLibraryTracks({
         id: Id.parse(currentUserId),
         offset: pageParam,
         limit: pageSize,
@@ -96,26 +90,25 @@ export const useLibraryTracks = (
         query
       })
 
-      const tracks = data
-        .map((activity) => userTrackMetadataFromSDK(activity.item))
+      const data = response.data ?? []
+      const entries = data
+        .map((activity) => {
+          const track = userTrackMetadataFromSDK(activity.item)
+          if (!track) return null
+          return { track, timestamp: activity.timestamp }
+        })
         .filter(removeNullable)
 
-      primeTrackData({ tracks, queryClient })
+      primeTrackData({
+        tracks: entries.map((e) => e.track),
+        queryClient
+      })
 
-      // Update lineup when new data arrives
-      dispatch(
-        libraryPageTracksLineupActions.fetchLineupMetadatas(
-          pageParam,
-          pageSize,
-          false,
-          { tracks }
-        )
-      )
-
-      return tracks.map((t) => ({
-        id: t.track_id,
-        type: EntityType.TRACK
-      }))
+      return entries.map((e) => ({
+        id: e.track.track_id,
+        type: EntityType.TRACK,
+        timestamp: e.timestamp
+      })) as LineupData[]
     },
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
@@ -128,26 +121,25 @@ export const useLibraryTracks = (
     enabled: config?.enabled !== false && !!currentUserId
   })
 
-  const lineupData = useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getLibraryTracksQueryKey({
-      currentUserId,
-      category,
-      sortMethod,
-      sortDirection,
-      query,
-      pageSize
-    }),
-    lineupActions: libraryPageTracksLineupActions,
-    lineupSelector: libraryPageSelectors.getLibraryTracksLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize
-  })
+  const data = queryData.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
 
   return {
-    ...lineupData,
+    data,
+    trackIds,
+    isPending: queryData.isPending,
+    isLoading: queryData.isLoading,
+    isFetching: queryData.isFetching,
+    isFetchingNextPage: queryData.isFetchingNextPage,
+    isSuccess: queryData.isSuccess,
+    isError: queryData.isError,
+    isInitialLoading: queryData.isInitialLoading,
+    hasNextPage: queryData.hasNextPage,
+    fetchNextPage: queryData.fetchNextPage,
     loadNextPage: makeLoadNextPage(queryData),
+    queryKey,
     pageSize
   }
 }

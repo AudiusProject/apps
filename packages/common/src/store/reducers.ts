@@ -6,8 +6,6 @@ import account from './account/slice'
 import averageColorReducer from './average-color/slice'
 import { buyUSDCReducer } from './buy-usdc'
 import cast from './cast/slice'
-import changePasswordReducer from './change-password/slice'
-import { ChangePasswordState } from './change-password/types'
 import confirmer from './confirmer/reducer'
 import { ConfirmerState } from './confirmer/types'
 import downloads, { DownloadState } from './downloads/slice'
@@ -25,12 +23,9 @@ import {
   DeactivateAccountState
 } from './pages/deactivate-account'
 import exclusiveTracks from './pages/exclusive-tracks/slice'
-import feedReducer from './pages/feed/reducer'
-import { FeedPageState } from './pages/feed/types'
 import historyPageReducer from './pages/history-page/reducer'
 import { persistedLibraryPageReducer } from './pages/library-page/reducer'
 import pickWinners from './pages/pick-winners/slice'
-import premiumTracks from './pages/premium-tracks/slice'
 import profileReducer from './pages/profile/reducer'
 import { ProfilePageState } from './pages/profile/types'
 import remixes from './pages/remixes/slice'
@@ -43,31 +38,18 @@ import track from './pages/track/reducer'
 import { TrackPageState } from './pages/track/types'
 import trending from './pages/trending/reducer'
 import { TrendingPageState } from './pages/trending/types'
-import trendingUnderground from './pages/trending-underground/slice'
+import playback from './playback/slice'
+import { PlaybackState } from './playback/types'
 import { PlaybackPositionState } from './playback-position'
 import playbackPosition from './playback-position/slice'
-import player, { PlayerState } from './player/slice'
-import {
-  playlistLibraryReducer,
-  PlaylistLibraryState
-} from './playlist-library'
-import { playlistUpdatesReducer, PlaylistUpdateState } from './playlist-updates'
 import { purchaseContentReducer } from './purchase-content'
-import queue from './queue/slice'
 import reachability from './reachability/reducer'
 import { ReachabilityState } from './reachability/types'
-import { recoveryEmailReducer, RecoveryEmailState } from './recovery-email'
 import savedCollectionsReducer from './saved-collections/slice'
 import searchReducer from './search/slice'
 import { SearchState } from './search/types'
 import stemsUpload from './stems-upload/slice'
-import {
-  searchUsersModalReducer,
-  SearchUsersModalState,
-  ToastState,
-  TransactionDetailsState,
-  withdrawUSDCReducer
-} from './ui'
+import { ToastState, TransactionDetailsState, withdrawUSDCReducer } from './ui'
 import addToCollectionReducer, {
   AddToCollectionState
 } from './ui/add-to-collection/reducer'
@@ -120,8 +102,7 @@ export const reducers = (storage: Storage, history?: History) => ({
   savedCollections: savedCollectionsReducer,
 
   // Playback
-  queue,
-  player,
+  playback,
   playbackPosition,
 
   // Wallet
@@ -130,16 +111,11 @@ export const reducers = (storage: Storage, history?: History) => ({
   // Cast
   cast,
 
-  // Playlist Library
-  playlistLibrary: playlistLibraryReducer,
-  playlistUpdates: playlistUpdatesReducer,
-
   // UI
   ui: combineReducers({
     averageColor: averageColorReducer,
     addToCollection: addToCollectionReducer,
 
-    changePassword: changePasswordReducer,
     deletePlaylistConfirmationModal: deletePlaylistConfirmationReducer,
     duplicateAddConfirmationModal: duplicateAddConfirmationReducer,
     mobileOverflowModal: mobileOverflowModalReducer,
@@ -149,7 +125,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     shareModal: shareModalReducer,
     stripeModal: stripeModalReducer,
     coinflowModal: coinflowModalReducer,
-    searchUsersModal: searchUsersModalReducer,
     toast: toastReducer,
     transactionDetails: transactionDetailsReducer,
     userList: combineReducers({
@@ -164,8 +139,7 @@ export const reducers = (storage: Storage, history?: History) => ({
       purchasers: purchasersUserListReducer,
       remixers: remixersUserListReducer
     }),
-    theme,
-    recoveryEmail: recoveryEmailReducer
+    theme
   }),
 
   // Pages
@@ -174,7 +148,6 @@ export const reducers = (storage: Storage, history?: History) => ({
     chat: chatReducer,
     collection,
     deactivateAccount: deactivateAccountReducer,
-    feed: feedReducer(storage),
     historyPage: historyPageReducer,
     pickWinners,
     profile: profileReducer,
@@ -184,11 +157,9 @@ export const reducers = (storage: Storage, history?: History) => ({
     tokenDashboard: tokenDashboardSlice.reducer,
     track,
     trending: trending(history),
-    trendingUnderground,
     settings,
     remixes,
-    exclusiveTracks,
-    premiumTracks
+    exclusiveTracks
   }),
   search: searchReducer(storage),
   stemsUpload,
@@ -223,8 +194,7 @@ export type CommonState = {
   savedCollections: ReturnType<typeof savedCollectionsReducer>
 
   // Playback
-  queue: ReturnType<typeof queue>
-  player: PlayerState
+  playback: PlaybackState
   playbackPosition: PlaybackPositionState
 
   // Wallet
@@ -233,21 +203,15 @@ export type CommonState = {
   // Cast
   cast: ReturnType<typeof cast>
 
-  // Playlist library
-  playlistLibrary: PlaylistLibraryState
-  playlistUpdates: PlaylistUpdateState
-
   ui: {
     averageColor: ReturnType<typeof averageColorReducer>
     addToCollection: AddToCollectionState
-    changePassword: ChangePasswordState
     deletePlaylistConfirmationModal: DeletePlaylistConfirmationModalState
     duplicateAddConfirmationModal: DuplicateAddConfirmationModalState
     mobileOverflowModal: MobileOverflowModalState
     modals: ModalsState
     musicConfetti: MusicConfettiState
     nowPlaying: NowPlayingState
-    searchUsersModal: SearchUsersModalState
     shareModal: ShareModalState
     stripeModal: StripeModalState
     toast: ToastState
@@ -266,7 +230,6 @@ export type CommonState = {
       remixers: ReturnType<typeof remixersUserListReducer>
     }
     theme: ThemeState
-    recoveryEmail: RecoveryEmailState
   }
 
   pages: {
@@ -274,7 +237,6 @@ export type CommonState = {
     chat: ReturnType<typeof chatReducer>
     collection: CollectionsPageState
     deactivateAccount: DeactivateAccountState
-    feed: FeedPageState
 
     tokenDashboard: ReturnType<typeof tokenDashboardSlice.reducer>
     historyPage: HistoryPageState
@@ -285,10 +247,8 @@ export type CommonState = {
     searchResults: SearchPageState
     settings: SettingsPageState
     trending: TrendingPageState
-    trendingUnderground: ReturnType<typeof trendingUnderground>
     remixes: ReturnType<typeof remixes>
     exclusiveTracks: ReturnType<typeof exclusiveTracks>
-    premiumTracks: ReturnType<typeof premiumTracks>
   }
   search: SearchState
 

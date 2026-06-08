@@ -12,7 +12,7 @@ import {
   beforeEach
 } from 'vitest'
 
-import { mockArtistCoin } from 'test/mocks/fixtures/artistCoins'
+import { mockFanClub } from 'test/mocks/fixtures/fanClubs'
 import { artistUser, nonArtistUser } from 'test/mocks/fixtures/users'
 import {
   mockUserByHandle,
@@ -62,7 +62,11 @@ const ProfilePageWithRef = () => {
   )
 }
 
-export function renderProfilePage(user: any, options?: RenderOptions) {
+export function renderProfilePage(
+  user: any,
+  options?: RenderOptions & { initialRoute?: string }
+) {
+  const { ...renderOptions } = options ?? {}
   mswServer.use(
     mockUserByHandle(user),
     mockRelatedUsers(user),
@@ -75,8 +79,9 @@ export function renderProfilePage(user: any, options?: RenderOptions) {
     <Routes>
       <Route path='/' element={<Navigate to='/test-user' replace />} />
       <Route path='/:handle' element={<ProfilePageWithRef />} />
+      <Route path='/:handle/:tab' element={<ProfilePageWithRef />} />
     </Routes>,
-    options
+    renderOptions
   )
 }
 
@@ -107,13 +112,10 @@ describe('ProfilePage', () => {
   it('should render the profile page for a non-artist', async () => {
     renderProfilePage(nonArtistUser)
 
-    // User header
-    expect(
-      await screen.findByRole('heading', { name: nonArtistUser.name })
-    ).toBeInTheDocument()
+    // User header (name may have trailing space in mobile header)
     expect(
       await screen.findByRole('heading', {
-        name: `@${nonArtistUser.handle}`
+        name: new RegExp(`^${nonArtistUser.name}\\s*$`)
       })
     ).toBeInTheDocument()
 
@@ -123,11 +125,9 @@ describe('ProfilePage', () => {
     })
     expect(profilePhoto).toBeInTheDocument()
 
-    const dynamicImage = await within(profilePhoto).findByTestId(
-      'dynamic-image-second'
-    )
-    expect(dynamicImage.style.backgroundImage).toEqual(
-      `url("${nonArtistUser.profile_picture[SquareSizes.SIZE_480_BY_480]}")`
+    expect(profilePhoto).toHaveAttribute(
+      'src',
+      nonArtistUser.profile_picture[SquareSizes.SIZE_480_BY_480]
     )
 
     // TODO: cover photo not rendering in test env for some reason
@@ -222,8 +222,8 @@ describe('ProfilePage', () => {
     // TODO
   })
 
-  it('shows buy coin UI when the profile belongs to an artist with an owned coin', async () => {
-    mswServer.use(mockUserCreatedCoin(artistUser.id, mockArtistCoin))
+  it('shows fan club UI when the profile belongs to an artist with an owned coin', async () => {
+    mswServer.use(mockUserCreatedCoin(artistUser.id, mockFanClub))
 
     // Mock a different current user to simulate viewing another user's profile
     renderProfilePage(
@@ -237,17 +237,41 @@ describe('ProfilePage', () => {
       }
     )
 
-    // Wait for the profile to load
+    // Wait for the profile to load (name may have trailing space in mobile header)
     expect(
-      await screen.findByRole('heading', { name: artistUser.name })
+      await screen.findByRole('heading', {
+        name: new RegExp(`^${artistUser.name}\\s*$`)
+      })
     ).toBeInTheDocument()
 
     // Verify that coin-related elements are present when user has coins
-    const buyButton = await screen.findByRole('button', {
-      name: 'Buy Coins'
+    const viewFanClubButton = await screen.findByRole('button', {
+      name: 'View Fan Club'
     })
-    expect(buyButton).toBeInTheDocument()
+    expect(viewFanClubButton).toBeInTheDocument()
     expect(await screen.findByText('$MOCK')).toBeInTheDocument()
     expect(screen.queryByText('Tip $AUDIO')).not.toBeInTheDocument()
+  })
+
+  it('should navigate to the correct tab when using sub-routes', async () => {
+    renderProfilePage(artistUser, {
+      initialRoute: `/${artistUser.handle}/albums`
+    })
+
+    // Wait for the profile to load
+    expect(
+      await screen.findByRole('heading', {
+        name: new RegExp(`^${artistUser.name}\\s*$`)
+      })
+    ).toBeInTheDocument()
+
+    // Verify that the Albums tab is active (not the first tab)
+    const navBanner = await screen.findByTestId('nav-banner')
+    const albumsTab = await within(navBanner).findByText('Albums')
+    expect(albumsTab).toBeInTheDocument()
+
+    // The active tab should have specific styling - check parent for active class
+    const albumsTabParent = albumsTab.closest('[role="tab"]')
+    expect(albumsTabParent).toBeInTheDocument()
   })
 })

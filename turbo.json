@@ -16,6 +16,12 @@
       "dependsOn": ["^build"],
       "outputLogs": "new-only"
     },
+    "start:vite": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"],
+      "outputLogs": "new-only"
+    },
     "lint": {
       "outputLogs": "new-only",
       "dependsOn": ["^build", "^rebuild"]

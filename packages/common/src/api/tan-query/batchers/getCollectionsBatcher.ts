@@ -19,7 +19,7 @@ export const getCollectionsBatcher = memoize(
         const { sdk, currentUserId, queryClient } = context
         if (!ids.length) return []
 
-        const { data } = await sdk.full.playlists.getBulkPlaylists({
+        const { data } = await sdk.playlists.getBulkPlaylists({
           id: ids.map((id) => Id.parse(id)),
           userId: OptionalId.parse(currentUserId)
         })

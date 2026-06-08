@@ -1,5 +1,6 @@
 #import "AppDelegate.h"
 #import "RNBootSplash.h"
+#import <CodePush/CodePush.h>
 
 #import <GoogleCast/GoogleCast.h>
 #import <React/RCTBridge.h>
@@ -71,14 +72,9 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  // React Native 0.77 - explicitly set Metro URL
-  NSURL *url = [NSURL URLWithString:@"http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false"];
-  NSLog(@"[AppDelegate] DEBUG mode - Using Metro URL: %@", url);
-  return url;
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
-  NSURL *url = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  NSLog(@"[AppDelegate] RELEASE mode - Using bundled file: %@", url);
-  return url;
+  return [CodePush bundleURL];
 #endif
 }
 

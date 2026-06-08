@@ -1,31 +1,28 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
-import { useCurrentTrack } from '@audius/common/hooks'
-import { Name, FeedFilter } from '@audius/common/models'
 import {
-  lineupSelectors,
-  feedPageLineupActions as feedActions,
-  feedPageSelectors,
-  feedPageActions as discoverPageAction,
-  queueSelectors,
-  playerSelectors
-} from '@audius/common/store'
-import { IconFeed } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+  getFeedQueryKey,
+  FEED_INITIAL_PAGE_SIZE,
+  useCurrentUserId,
+  useFeed,
+  useFeedFilter,
+  useFeedTab,
+  useForYouFeed,
+  FOR_YOU_INITIAL_PAGE_SIZE
+} from '@audius/common/api'
+import { Name, FeedTab, type FeedFilter } from '@audius/common/models'
+import { Flex, IconFeed } from '@audius/harmony'
 
 import { make, useRecord } from 'common/store/analytics/actions'
+import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
-import Lineup from 'components/lineup/Lineup'
-import {
-  getLoadMoreTrackCount,
-  INITIAL_LOAD_TRACKS_MULTIPLIER
-} from 'components/lineup/LineupProvider'
+import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import EmptyFeed from 'pages/feed-page/components/EmptyFeed'
-
-import { FeedFilters } from './FeedFilters'
+import { FeedFilters } from 'pages/feed-page/components/FeedFilters'
+import { FeedTabs } from 'pages/feed-page/components/FeedTabs'
 
 const messages = {
   feedHeaderTitle: 'Your Feed',
@@ -33,114 +30,122 @@ const messages = {
   feedDescription: 'Listen to what people you follow are sharing'
 }
 
-const { getSource, getUid } = queueSelectors
-const { getPlaying, getBuffering } = playerSelectors
-const { getDiscoverFeedLineup, getFeedFilter } = feedPageSelectors
-const { makeGetLineupMetadatas } = lineupSelectors
-
 type FeedPageContentProps = {
   containerRef?: React.RefObject<HTMLDivElement>
 }
 
 const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
-  const dispatch = useDispatch()
-  const currentTrack = useCurrentTrack()
+  const titleRowRef = useRef<HTMLDivElement>(null)
+  const [feedTab, setFeedTab] = useFeedTab()
+  const [feedFilter, setFeedFilter] = useFeedFilter()
+  const { data: currentUserId } = useCurrentUserId()
 
-  const getFeedLineup = useRef(
-    makeGetLineupMetadatas(getDiscoverFeedLineup)
-  ).current
-  const feed = useSelector((state: any) => getFeedLineup(state))
-  const source = useSelector(getSource)
-  const uid = useSelector(getUid)
-  const playing = useSelector(getPlaying)
-  const buffering = useSelector(getBuffering)
-  const feedFilter = useSelector(getFeedFilter)
+  // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
+  // the shared default (mobile-tuned) so successive load-mores keep up with a
+  // user scrolling deep into the lineup.
+  const desktopLoadMorePageSize = 10
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      dispatch(feedActions.reset())
-    }
-  }, [dispatch])
+  const isForYou = feedTab === FeedTab.FOR_YOU
 
-  const getLineupProps = (lineup: any) => {
-    return {
-      lineup,
-      playingUid: uid,
-      playingSource: source ?? '',
-      playingTrackId: currentTrack?.track_id ?? null,
-      playing,
-      buffering,
-      scrollParent: containerRef?.current ?? null,
-      selfLoad: true
-    }
-  }
+  // Latest lineup. Disabled while For You is active.
+  const feedArgs = useMemo(
+    () => ({
+      userId: currentUserId,
+      filter: feedFilter,
+      initialPageSize: FEED_INITIAL_PAGE_SIZE,
+      loadMorePageSize: desktopLoadMorePageSize
+    }),
+    [feedFilter, currentUserId]
+  )
+  const followFeed = useFeed(feedArgs, { enabled: !isForYou })
 
-  const setFeedInView = (inView: boolean) => {
-    dispatch(feedActions.setInView(inView))
-  }
+  // For You lineup.
+  const forYouFeed = useForYouFeed(
+    {
+      initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
+      loadMorePageSize: desktopLoadMorePageSize
+    },
+    { enabled: isForYou }
+  )
 
-  const loadMoreFeed = (offset: number, limit: number, overwrite: boolean) => {
-    dispatch(feedActions.fetchLineupMetadatas(offset, limit, overwrite))
-  }
+  const followQuerySource = useMemo(
+    () => ({ queryKey: [...getFeedQueryKey(feedArgs)] as unknown[] }),
+    [feedArgs]
+  )
 
-  const playFeedTrack = (uid: string) => {
-    dispatch(feedActions.play(uid))
-  }
-
-  const pauseFeedTrack = () => {
-    dispatch(feedActions.pause())
-  }
-
-  const setFeedFilter = (filter: FeedFilter) => {
-    dispatch(discoverPageAction.setFeedFilter(filter))
-  }
-
-  const resetFeedLineup = () => {
-    dispatch(feedActions.reset())
-  }
-  const mainLineupProps = {
-    variant: LineupVariant.MAIN
-  }
-
-  const feedLineupProps = {
-    ...getLineupProps(feed),
-    setInView: setFeedInView,
-    loadMore: loadMoreFeed,
-    playTrack: playFeedTrack,
-    pauseTrack: pauseFeedTrack,
-    delineate: false,
-    actions: feedActions
-  }
   const record = useRecord()
+  const onSelectTab = useCallback(
+    (tab: FeedTab) => {
+      if (containerRef?.current?.scrollTo) {
+        containerRef.current.scrollTo(0, 0)
+      }
+      setFeedTab(tab)
+      record(make(Name.FEED_CHANGE_VIEW, { view: tab }))
+    },
+    [containerRef, setFeedTab, record]
+  )
 
-  const didSelectFilter = (filter: FeedFilter) => {
-    if (feedLineupProps.scrollParent && feedLineupProps.scrollParent.scrollTo) {
-      feedLineupProps.scrollParent.scrollTo(0, 0)
-    }
-    setFeedFilter(filter)
-    resetFeedLineup()
-    const fetchLimit = getLoadMoreTrackCount(
-      mainLineupProps.variant,
-      INITIAL_LOAD_TRACKS_MULTIPLIER
-    )
-    const fetchOffset = 0
-    loadMoreFeed(fetchOffset, fetchLimit, true)
-    record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
-  }
+  const onSelectFilter = useCallback(
+    (filter: FeedFilter) => {
+      setFeedFilter(filter)
+      record(make(Name.FEED_CHANGE_VIEW, { view: filter }))
+    },
+    [setFeedFilter, record]
+  )
 
   const header = (
     <Header
+      titleRowRef={titleRowRef}
       icon={IconFeed}
       primary={messages.feedHeaderTitle}
-      rightDecorator={
-        <FeedFilters
-          currentFilter={feedFilter}
-          didSelectFilter={didSelectFilter}
-        />
+      bottomBar={
+        <Flex
+          w='100%'
+          alignItems='center'
+          justifyContent='space-between'
+          gap='m'
+          pb='l'
+        >
+          <FeedTabs currentTab={feedTab} onSelectTab={onSelectTab} />
+          {isForYou ? null : (
+            <FeedFilters
+              currentFilter={feedFilter}
+              onSelectFilter={onSelectFilter}
+            />
+          )}
+        </Flex>
       }
     />
   )
+
+  // Both feed hooks expose the mixed `LineupData[]` the API returns
+  // (tracks + collection reposts). TrackLineup branches per entry, so
+  // collections show up inline wherever the backend puts them.
+  const lineupProps = isForYou
+    ? {
+        trackIds: forYouFeed.trackIds,
+        lineupItems: forYouFeed.data,
+        isPending: forYouFeed.isPending,
+        isFetching: forYouFeed.isFetching,
+        isError: forYouFeed.isError,
+        hasNextPage: forYouFeed.hasNextPage,
+        loadNextPage: forYouFeed.loadNextPage,
+        pageSize: desktopLoadMorePageSize,
+        initialPageSize: FOR_YOU_INITIAL_PAGE_SIZE,
+        querySource: undefined
+      }
+    : {
+        trackIds: followFeed.trackIds,
+        lineupItems: followFeed.data,
+        isPending: followFeed.isPending,
+        isFetching: followFeed.isFetching,
+        isError: followFeed.isError,
+        hasNextPage: followFeed.hasNextPage,
+        loadNextPage: followFeed.loadNextPage,
+        pageSize: desktopLoadMorePageSize,
+        initialPageSize: FEED_INITIAL_PAGE_SIZE,
+        querySource: followQuerySource
+      }
 
   return (
     <Page
@@ -149,12 +154,18 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
       size='large'
       header={header}
     >
-      <Lineup
-        emptyElement={<EmptyFeed />}
-        endOfLineup={<EndOfLineup />}
-        {...feedLineupProps}
-        {...mainLineupProps}
-      />
+      <Flex w='100%' css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}>
+        <TrackLineup
+          key={`feed-${feedTab}`}
+          aria-label='feed'
+          source='DISCOVER_FEED'
+          variant={LineupVariant.MAIN}
+          scrollParent={containerRef?.current ?? null}
+          emptyElement={<EmptyFeed />}
+          endOfLineupElement={<EndOfLineup />}
+          {...lineupProps}
+        />
+      </Flex>
     </Page>
   )
 }

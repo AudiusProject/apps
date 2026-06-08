@@ -1,6 +1,9 @@
 import { useCallback } from 'react'
 
-import { feedPageActions, feedPageLineupActions } from '@audius/common/store'
+import { QUERY_KEYS } from '@audius/common/api'
+import { FollowSource } from '@audius/common/models'
+import { usersSocialActions } from '@audius/common/store'
+import { useQueryClient } from '@tanstack/react-query'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { getFollowIds } from 'common/store/pages/signon/selectors'
 import { Dimensions, FlatList, ScrollView, View } from 'react-native'
@@ -45,16 +48,22 @@ const messages = {
 export const SuggestedFollows = () => {
   const styles = useStyles()
   const dispatch = useDispatch()
+  const queryClient = useQueryClient()
 
   const selectedUserIds = useSelector(getFollowIds)
 
   const handleArtistsSelected = useCallback(() => {
-    // Set eager users and refetch lineup
+    // Set eager users and refetch feed
     dispatch(signOnActions.followArtists())
-    dispatch(feedPageLineupActions.fetchLineupMetadatas())
+    // Invalidate the feed tan-query so it refetches after following
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.feed]
+    })
     // Async go follow users
-    dispatch(feedPageActions.followUsers(selectedUserIds))
-  }, [dispatch, selectedUserIds])
+    selectedUserIds.forEach((userId) => {
+      dispatch(usersSocialActions.followUser(userId, FollowSource.EMPTY_FEED))
+    })
+  }, [dispatch, queryClient, selectedUserIds])
 
   const headerElement = (
     <>

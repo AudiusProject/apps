@@ -16,6 +16,7 @@ import { difference } from 'lodash'
 import { useSelector } from 'react-redux'
 
 import type { AppState } from 'app/store'
+import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
 import {
   getIsDoneLoadingFromDisk,
   getOfflineCollectionsStatus
@@ -60,16 +61,20 @@ export const useLibraryCollections = ({
     return ids
   })
 
-  const localCollectionIds = difference(
-    locallyAddedCollectionIds,
-    locallyRemovedCollectionIds
+  const localCollectionIds = useMemo(
+    () => difference(locallyAddedCollectionIds, locallyRemovedCollectionIds),
+    [locallyAddedCollectionIds, locallyRemovedCollectionIds]
   )
 
   const { data: localCollections = [] } = useCollections(localCollectionIds)
 
-  const filteredLocalCollectionIds = filterCollections(localCollections, {
-    filterText: filterValue
-  }).map((collection) => collection.playlist_id)
+  const filteredLocalCollectionIds = useMemo(
+    () =>
+      filterCollections(localCollections, { filterText: filterValue }).map(
+        (collection) => collection.playlist_id
+      ),
+    [localCollections, filterValue]
+  )
 
   const {
     data: fetchedCollectionIds,
@@ -89,21 +94,48 @@ export const useLibraryCollections = ({
     sortDirection: 'desc'
   })
 
-  const filteredFetchedCollectionIds = difference(
-    fetchedCollectionIds,
-    localCollectionIds
+  const filteredFetchedCollectionIds = useMemo(
+    () => difference(fetchedCollectionIds, localCollectionIds),
+    [fetchedCollectionIds, localCollectionIds]
   )
 
   const offlineCollectionIds = useSelector((state: AppState) => {
     const offlineCollectionsStatus = getOfflineCollectionsStatus(state)
-    return Object.keys(offlineCollectionsStatus).filter(
-      (k) => offlineCollectionsStatus[k] === OfflineDownloadStatus.SUCCESS
-    )
+    const ids: number[] = []
+    for (const key of Object.keys(offlineCollectionsStatus)) {
+      if (key === DOWNLOAD_REASON_FAVORITES) continue
+      if (offlineCollectionsStatus[key] !== OfflineDownloadStatus.SUCCESS)
+        continue
+      const numericId = Number(key)
+      if (Number.isFinite(numericId) && numericId > 0) ids.push(numericId)
+    }
+    return ids
   })
 
-  const collectionIds = isReachable
-    ? [...filteredLocalCollectionIds, ...filteredFetchedCollectionIds]
-    : offlineCollectionIds
+  const { data: offlineCollections = [] } = useCollections(offlineCollectionIds)
+
+  const filteredOfflineCollectionIds = useMemo(() => {
+    const wantAlbums = collectionType === 'albums'
+    return filterCollections(
+      offlineCollections.filter(
+        (collection) => Boolean(collection.is_album) === wantAlbums
+      ),
+      { filterText: filterValue }
+    ).map((collection) => collection.playlist_id)
+  }, [offlineCollections, collectionType, filterValue])
+
+  const collectionIds = useMemo(
+    () =>
+      isReachable
+        ? [...filteredLocalCollectionIds, ...filteredFetchedCollectionIds]
+        : filteredOfflineCollectionIds,
+    [
+      isReachable,
+      filteredLocalCollectionIds,
+      filteredFetchedCollectionIds,
+      filteredOfflineCollectionIds
+    ]
+  )
 
   const loadNextPage = useMemo(
     () =>
@@ -128,11 +160,12 @@ export const useLibraryCollections = ({
 
   return {
     collectionIds,
-    hasNextPage,
+    hasNextPage: isReachable ? hasNextPage : false,
     loadNextPage,
     status,
-    isPending,
-    isLoading,
-    isFetchingNextPage
+    isPending: isReachable ? isPending : !isDoneLoadingFromDisk,
+    isLoading: isReachable ? isLoading : !isDoneLoadingFromDisk,
+    isFetchingNextPage: isReachable ? isFetchingNextPage : false,
+    localCollectionCount: localCollectionIds.length
   }
 }

@@ -2,8 +2,7 @@
 /* eslint-disable */
 // @ts-nocheck
 /**
- * API
- * Audius V1 API
+ * Audius API
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -14,6 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { SupporterReference } from './SupporterReference';
+import {
+    SupporterReferenceFromJSON,
+    SupporterReferenceFromJSONTyped,
+    SupporterReferenceToJSON,
+} from './SupporterReference';
 import type { User } from './User';
 import {
     UserFromJSON,
@@ -38,19 +43,37 @@ export interface Tip {
      * @type {User}
      * @memberof Tip
      */
-    sender?: User;
+    sender: User;
     /**
      * 
      * @type {User}
      * @memberof Tip
      */
-    receiver?: User;
+    receiver: User;
     /**
      * 
      * @type {string}
      * @memberof Tip
      */
     createdAt: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof Tip
+     */
+    slot: number;
+    /**
+     * 
+     * @type {Array<SupporterReference>}
+     * @memberof Tip
+     */
+    followeeSupporters: Array<SupporterReference>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Tip
+     */
+    txSignature: string;
 }
 
 /**
@@ -59,7 +82,12 @@ export interface Tip {
 export function instanceOfTip(value: object): value is Tip {
     let isInstance = true;
     isInstance = isInstance && "amount" in value && value["amount"] !== undefined;
+    isInstance = isInstance && "sender" in value && value["sender"] !== undefined;
+    isInstance = isInstance && "receiver" in value && value["receiver"] !== undefined;
     isInstance = isInstance && "createdAt" in value && value["createdAt"] !== undefined;
+    isInstance = isInstance && "slot" in value && value["slot"] !== undefined;
+    isInstance = isInstance && "followeeSupporters" in value && value["followeeSupporters"] !== undefined;
+    isInstance = isInstance && "txSignature" in value && value["txSignature"] !== undefined;
 
     return isInstance;
 }
@@ -75,9 +103,12 @@ export function TipFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tip {
     return {
         
         'amount': json['amount'],
-        'sender': !exists(json, 'sender') ? undefined : UserFromJSON(json['sender']),
-        'receiver': !exists(json, 'receiver') ? undefined : UserFromJSON(json['receiver']),
+        'sender': UserFromJSON(json['sender']),
+        'receiver': UserFromJSON(json['receiver']),
         'createdAt': json['created_at'],
+        'slot': json['slot'],
+        'followeeSupporters': ((json['followee_supporters'] as Array<any>).map(SupporterReferenceFromJSON)),
+        'txSignature': json['tx_signature'],
     };
 }
 
@@ -94,6 +125,9 @@ export function TipToJSON(value?: Tip | null): any {
         'sender': UserToJSON(value.sender),
         'receiver': UserToJSON(value.receiver),
         'created_at': value.createdAt,
+        'slot': value.slot,
+        'followee_supporters': ((value.followeeSupporters as Array<any>).map(SupporterReferenceToJSON)),
+        'tx_signature': value.txSignature,
     };
 }
 

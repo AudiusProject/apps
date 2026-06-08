@@ -1,11 +1,11 @@
-import { full, OptionalHashId } from '@audius/sdk'
+import { OptionalHashId, type Remix as SdkRemix } from '@audius/sdk'
 import snakecaseKeys from 'snakecase-keys'
 
 import { Remix } from '~/models/Track'
 
 import { userMetadataFromSDK } from './user'
 
-export const remixFromSDK = (input: full.FullRemix): Remix | undefined => {
+export const remixFromSDK = (input: SdkRemix): Remix | undefined => {
   const decodedTrackId = OptionalHashId.parse(input.parentTrackId)
   const user = userMetadataFromSDK(input.user)
   if (!decodedTrackId || !user) {

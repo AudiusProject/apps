@@ -1,28 +1,21 @@
 import { useCallback } from 'react'
 
-import { CreatePlaylistSource } from '@audius/common/models'
-import { cacheCollectionsActions } from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router'
+
+import { CREATE_PLAYLIST_PAGE } from 'utils/route'
 
 import { LeftNavLink } from '../LeftNavLink'
-const { createPlaylist } = cacheCollectionsActions
 
 const messages = {
-  empty: 'Create your first playlist!',
-  newPlaylistName: 'New Playlist'
+  empty: 'Create your first playlist!'
 }
 
 export const EmptyLibraryNavLink = () => {
-  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const handleCreatePlaylist = useCallback(() => {
-    dispatch(
-      createPlaylist(
-        { playlist_name: messages.newPlaylistName },
-        CreatePlaylistSource.NAV
-      )
-    )
-  }, [dispatch])
+    navigate(CREATE_PLAYLIST_PAGE)
+  }, [navigate])
 
   return (
     <LeftNavLink disabled onClick={handleCreatePlaylist}>

@@ -1,12 +1,8 @@
 import { useCallback } from 'react'
 
-import { useCurrentAccount } from '@audius/common/api'
+import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import {
-  playlistLibraryActions,
-  playlistLibraryHelpers
-} from '@audius/common/store'
-import { useDispatch } from 'react-redux'
+import { playlistLibraryHelpers } from '@audius/common/store'
 import { SetRequired } from 'type-fest'
 
 import { useRecord, make } from 'common/store/analytics/actions'
@@ -14,7 +10,6 @@ import { DeleteConfirmationModal } from 'components/delete-confirmation'
 import { DeleteConfirmationModalProps } from 'components/delete-confirmation/DeleteConfirmationModal'
 
 const { removePlaylistFolderInLibrary } = playlistLibraryHelpers
-const { update: updatePlaylistLibrary } = playlistLibraryActions
 
 const messages = {
   confirmDeleteFolderModalTitle: 'Delete Folder',
@@ -45,17 +40,24 @@ export const DeleteFolderConfirmationModal = (
     })
   })
   const { playlistLibrary, folder } = accountData ?? {}
-  const dispatch = useDispatch()
   const record = useRecord()
+  const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
 
   const handleDelete = useCallback(() => {
     if (!playlistLibrary || !folder) return
     const newLibrary = removePlaylistFolderInLibrary(playlistLibrary, folderId)
-    dispatch(updatePlaylistLibrary({ playlistLibrary: newLibrary }))
+    updatePlaylistLibrary(newLibrary)
 
     record(make(Name.FOLDER_DELETE, {}))
     onDelete?.()
-  }, [dispatch, folder, folderId, onDelete, playlistLibrary, record])
+  }, [
+    folder,
+    folderId,
+    onDelete,
+    playlistLibrary,
+    record,
+    updatePlaylistLibrary
+  ])
 
   return (
     <DeleteConfirmationModal

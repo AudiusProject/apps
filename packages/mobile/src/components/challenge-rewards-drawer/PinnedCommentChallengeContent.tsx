@@ -31,7 +31,6 @@ const messages = {
 }
 
 export const PinnedCommentChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -131,9 +130,7 @@ export const PinnedCommentChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={!!challenge?.cooldown_days}
     />
   )

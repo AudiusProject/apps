@@ -2,10 +2,15 @@ import {
   ChangeEventHandler,
   FocusEventHandler,
   useCallback,
+  useMemo,
   useState
 } from 'react'
 
-import { useUSDCBalance } from '@audius/common/api'
+import {
+  useUSDCBalance,
+  useDestinationUsdcAccountCheck,
+  useRootWalletUsdcAccountCheck
+} from '@audius/common/api'
 import { useFeatureFlag } from '@audius/common/hooks'
 import { walletMessages } from '@audius/common/messages'
 import { Name } from '@audius/common/models'
@@ -42,7 +47,7 @@ const WithdrawMethodOptions = [
 ]
 
 export const EnterTransferDetails = () => {
-  const { validateForm } = useFormikContext<WithdrawFormValues>()
+  const { validateForm, setFieldError } = useFormikContext<WithdrawFormValues>()
   const { data: balance } = useUSDCBalance()
   const { setData } = useWithdrawUSDCModal()
 
@@ -61,13 +66,48 @@ export const EnterTransferDetails = () => {
 
   const [
     { value },
-    { error: amountError },
+    { error: amountError, touched: amountTouched },
     { setValue: setAmount, setTouched: setAmountTouched }
   ] = useField(AMOUNT)
   const [{ value: methodValue }, _ignoredMethodMeta, { setValue: setMethod }] =
     useField<WithdrawMethod>(METHOD)
-  const [, { error: addressError }, { setTouched: setAddressTouched }] =
-    useField(ADDRESS)
+  const [
+    { value: addressValue },
+    _ignoredAddressMeta,
+    { setTouched: setAddressTouched }
+  ] = useField(ADDRESS)
+
+  const { data: destinationUsdcStatus } = useDestinationUsdcAccountCheck(
+    methodValue === WithdrawMethod.MANUAL_TRANSFER ? addressValue : null
+  )
+
+  const { data: rootWalletUsdcStatus } = useRootWalletUsdcAccountCheck({
+    enabled: methodValue === WithdrawMethod.COINFLOW
+  })
+
+  const isInsufficientForAtaFee = useMemo(() => {
+    if (
+      methodValue !== WithdrawMethod.MANUAL_TRANSFER ||
+      !destinationUsdcStatus ||
+      destinationUsdcStatus.hasUsdcAccount
+    ) {
+      return false
+    }
+    const amountCents =
+      typeof value === 'string' ? filterDecimalString(value).value : value
+    const feeCents = Math.ceil(destinationUsdcStatus.ataCreationFeeUsdc * 100)
+    return amountCents < feeCents || amountCents > balanceNumberCents
+  }, [methodValue, destinationUsdcStatus, value, balanceNumberCents])
+
+  const coinflowSetupFeeUsdc =
+    rootWalletUsdcStatus && !rootWalletUsdcStatus.hasUsdcAccount
+      ? rootWalletUsdcStatus.ataCreationFeeUsdc
+      : 0
+
+  // No separate minimum validation for the Coinflow setup fee — the fee is
+  // deducted from the withdrawal amount, and the existing $5 minimum still applies.
+  const isInsufficientForCoinflowSetup = false
+
   const [humanizedValue, setHumanizedValue] = useState(
     value ? decimalIntegerToHumanReadable(value) : '0'
   )
@@ -82,8 +122,9 @@ export const EnterTransferDetails = () => {
   const handleAmountBlur: FocusEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       setHumanizedValue(padDecimalValue(e.target.value))
+      setAmountTouched(true)
     },
-    [setHumanizedValue]
+    [setHumanizedValue, setAmountTouched]
   )
 
   const handleMaxPress = useCallback(() => {
@@ -112,8 +153,52 @@ export const EnterTransferDetails = () => {
     }
     const errors = await validateForm()
     if (errors[AMOUNT] || errors[ADDRESS]) return
-    setData({ page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS })
-  }, [setData, methodValue, validateForm, setAmountTouched, setAddressTouched])
+
+    if (
+      methodValue === WithdrawMethod.MANUAL_TRANSFER &&
+      destinationUsdcStatus
+    ) {
+      if (!destinationUsdcStatus.hasUsdcAccount) {
+        const feeCents = Math.ceil(
+          destinationUsdcStatus.ataCreationFeeUsdc * 100
+        )
+        const amountCents =
+          typeof value === 'string' ? filterDecimalString(value).value : value
+        if (amountCents < feeCents || amountCents > balanceNumberCents) {
+          setFieldError(
+            AMOUNT,
+            walletMessages.errors.ataCreationFeeRequired(
+              destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+            )
+          )
+          return
+        }
+      }
+    }
+
+    setData({
+      page: WithdrawUSDCModalPages.CONFIRM_TRANSFER_DETAILS,
+      ...(destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount
+        ? {
+            ataCreationFeeUsdc: destinationUsdcStatus.ataCreationFeeUsdc
+          }
+        : {}),
+      ...(coinflowSetupFeeUsdc > 0
+        ? { ataCreationFeeUsdc: coinflowSetupFeeUsdc }
+        : {})
+    })
+  }, [
+    setData,
+    methodValue,
+    validateForm,
+    setAmountTouched,
+    setAddressTouched,
+    setFieldError,
+    destinationUsdcStatus,
+    coinflowSetupFeeUsdc,
+    value,
+    balanceNumberCents
+  ])
 
   return (
     <Flex column gap='xl'>
@@ -124,7 +209,6 @@ export const EnterTransferDetails = () => {
           <Text variant='heading' size='s' color='subdued'>
             {walletMessages.amountToWithdraw}
           </Text>
-          <Text variant='body'>{walletMessages.destinationDescription}</Text>
         </Flex>
         <Flex column gap='s'>
           <Flex gap='s' alignItems='center'>
@@ -137,16 +221,37 @@ export const EnterTransferDetails = () => {
               onChange={handleAmountChange}
               onBlur={handleAmountBlur}
               startAdornmentText={messages.dollars}
+              error={
+                amountTouched &&
+                !!(
+                  amountError ||
+                  (isInsufficientForAtaFee && destinationUsdcStatus) ||
+                  isInsufficientForCoinflowSetup
+                )
+              }
+              helperText={
+                amountTouched &&
+                (amountError ||
+                  (isInsufficientForAtaFee && destinationUsdcStatus) ||
+                  isInsufficientForCoinflowSetup)
+                  ? (amountError ??
+                    (isInsufficientForCoinflowSetup
+                      ? walletMessages.errors.coinflowSetupFeeRequired(
+                          coinflowSetupFeeUsdc.toFixed(2)
+                        )
+                      : destinationUsdcStatus &&
+                          !destinationUsdcStatus.hasUsdcAccount
+                        ? walletMessages.errors.ataCreationFeeRequired(
+                            destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                          )
+                        : undefined))
+                  : undefined
+              }
             />
             <Button variant='secondary' onClick={handleMaxPress} size='large'>
               {walletMessages.max}
             </Button>
           </Flex>
-          {amountError && (
-            <Text variant='body' size='s' color='danger'>
-              {amountError}
-            </Text>
-          )}
         </Flex>
       </Flex>
       <Divider css={{ margin: 0 }} />
@@ -160,9 +265,18 @@ export const EnterTransferDetails = () => {
         />
       ) : null}
       {methodValue === WithdrawMethod.COINFLOW ? (
-        <Text variant='body' size='m'>
-          {walletMessages.cashTransferDescription}
-        </Text>
+        <Flex column gap='s'>
+          <Text variant='body' size='m'>
+            {walletMessages.cashTransferDescription}
+          </Text>
+          {coinflowSetupFeeUsdc > 0 ? (
+            <Text variant='body' size='s' color='warning'>
+              {walletMessages.cashTransferSetupFee(
+                coinflowSetupFeeUsdc.toFixed(2)
+              )}
+            </Text>
+          ) : null}
+        </Flex>
       ) : (
         <Flex column gap='l'>
           <Flex column gap='s'>
@@ -179,14 +293,18 @@ export const EnterTransferDetails = () => {
             name={ADDRESS}
             placeholder=''
           />
+          {destinationUsdcStatus && !destinationUsdcStatus.hasUsdcAccount ? (
+            <Text variant='body' size='s' color='warning'>
+              {walletMessages.errors.noUsdcAccountFound(
+                !amountError && !isInsufficientForAtaFee
+                  ? destinationUsdcStatus.ataCreationFeeUsdc.toFixed(2)
+                  : undefined
+              )}
+            </Text>
+          ) : null}
         </Flex>
       )}
-      <Button
-        variant='primary'
-        fullWidth
-        disabled={!!addressError || !!amountError}
-        onClick={handleContinue}
-      >
+      <Button variant='primary' fullWidth onClick={handleContinue}>
         {walletMessages.continue}
       </Button>
     </Flex>

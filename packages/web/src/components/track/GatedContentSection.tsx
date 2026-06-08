@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 
-import { useArtistCoin, useUsers } from '@audius/common/api'
+import { useFanClub, useUsers } from '@audius/common/api'
 import {
   Name,
   FollowSource,
@@ -25,10 +25,10 @@ import {
   Flex,
   Text,
   IconCart,
-  IconSparkles,
+  IconUserFollowing,
   Button,
   IconUserFollow,
-  IconArtistCoin
+  IconFanClub
 } from '@audius/harmony'
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
@@ -57,9 +57,9 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlocking: 'unlocking',
   unlocked: 'unlocked',
   coinGated: 'COIN GATED',
-  specialAccess: 'SPECIAL ACCESS',
+  followersOnly: 'FOLLOWERS ONLY',
   followArtist: 'Follow Artist',
-  buyArtistCoin: 'Buy Artist Coin',
+  buyFanClub: 'Buy Coins',
   period: '.',
   exclamationMark: '!',
   ownFollowGated: 'Users can unlock access by following your account!',
@@ -68,14 +68,14 @@ const getMessages = (contentType: PurchaseableContentType) => ({
   unlockedFollowGatedContentSuffix: `! This ${contentType} is now available.`,
   thankYouForSupporting: 'Thank you for supporting',
   unlockWithPurchase: `Unlock this ${contentType} with a one-time purchase!`,
-  ofArtistsCoin: "of the artist's coin",
-  artistCoin: 'Artist coin',
+  ofArtistsCoin: "of the artist's fan club",
+  fanClub: 'Fan club',
   unlockTokenGatedContentPrefix: (amount: number) =>
     `You must hold at least ${amount} `,
   unlockTokenGatedContentSuffix: ' in a connected wallet.',
   unlockedTokenGatedSuffix: ` was found in a linked wallet. This ${contentType} is now available.`,
   ownTokenGated:
-    'Fans can unlock access by linking a wallet containing your artist coin',
+    'Fans can unlock access by linking a wallet that holds your coin',
   purchased: `You've purchased this ${contentType}.`,
   buy: (price: string) => `Buy ${price}`,
   usersCanPurchase: (price: string) =>
@@ -109,7 +109,7 @@ const LockedGatedContentSection = ({
     useModalState('LockedContent')
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const { data: coin } = useArtistCoin(
+  const { data: coin } = useFanClub(
     isContentTokenGated(streamConditions)
       ? streamConditions.token_gate.token_mint
       : ''
@@ -271,7 +271,7 @@ const LockedGatedContentSection = ({
           onClick={handlePurchaseToken}
           fullWidth
         >
-          {messages.buyArtistCoin}
+          {messages.buyFanClub}
         </Button>
       )
     }
@@ -415,7 +415,7 @@ const UnlockedGatedContentSection = ({
   'contentId' | 'buttonClassName' | 'source'
 >) => {
   const messages = getMessages(contentType)
-  const { data: coin } = useArtistCoin(
+  const { data: coin } = useFanClub(
     isContentTokenGated(streamConditions)
       ? streamConditions.token_gate.token_mint
       : ''
@@ -443,7 +443,7 @@ const UnlockedGatedContentSection = ({
               ${coin.ticker}
             </TextLink>
           ) : (
-            messages.artistCoin
+            messages.fanClub
           )}
           {messages.unlockedTokenGatedSuffix}
         </Text>
@@ -475,14 +475,14 @@ const UnlockedGatedContentSection = ({
     return null
   }
 
-  let IconComponent = IconSparkles
-  let gatedConditionTitle = messages.specialAccess
+  let IconComponent = IconUserFollowing
+  let gatedConditionTitle = messages.followersOnly
 
   if (isContentUSDCPurchaseGated(streamConditions)) {
     IconComponent = IconCart
     gatedConditionTitle = messages.payToUnlock
   } else if (isContentTokenGated(streamConditions)) {
-    IconComponent = IconArtistCoin
+    IconComponent = IconFanClub
     gatedConditionTitle = messages.coinGated
   }
 

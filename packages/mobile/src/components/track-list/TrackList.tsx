@@ -32,6 +32,8 @@ type BaseTrackListProps = {
   isAlbumPage?: boolean
   onRemove?: (index: number) => void
   showSkeleton?: boolean
+  /** When `showSkeleton` is true, how many placeholder rows to render (capped). */
+  skeletonRowCount?: number
   hasNextPage?: boolean
   pageSize?: number
   togglePlay?: (uid: string, trackId: ID) => void
@@ -52,14 +54,14 @@ type TrackListProps = BaseTrackListProps &
   )
 
 const noOp = () => {}
-const keyExtractor = (item: string | number | LoadingItem) => {
-  if (typeof item === 'object' && '_loading' in item)
-    return `loading-${Math.random()}`
+const keyExtractor = (item: string | number | LoadingItem, index: number) => {
+  if (typeof item === 'object' && '_loading' in item) return `loading-${index}`
   return String(item)
 }
 
 const DEFAULT_PAGE_SIZE = 10
 const DEFAULT_INITIAL_SKELETON_COUNT = 8
+const MAX_SKELETON_ROWS = 50
 
 /**
  * A FlatList of tracks
@@ -77,6 +79,7 @@ export const TrackList = (props: TrackListProps) => {
     onRemove,
     onReorder,
     showSkeleton,
+    skeletonRowCount,
     hasNextPage,
     pageSize = DEFAULT_PAGE_SIZE,
     togglePlay,
@@ -165,19 +168,26 @@ export const TrackList = (props: TrackListProps) => {
     [onReorder]
   )
 
-  if (showSkeleton)
+  if (showSkeleton) {
+    const resolvedSkeletonCount = Math.min(
+      Math.max(skeletonRowCount ?? DEFAULT_INITIAL_SKELETON_COUNT, 1),
+      MAX_SKELETON_ROWS
+    )
     return (
       <FlashList
         {...(otherProps as Partial<FlashListProps<UID | ID | LoadingItem>>)}
         data={
           data.length > 0
             ? data
-            : new Array(DEFAULT_INITIAL_SKELETON_COUNT).fill({ _loading: true })
+            : Array.from({ length: resolvedSkeletonCount }, () => ({
+                _loading: true
+              }))
         }
         renderItem={renderSkeletonTrack}
         estimatedItemSize={60}
       />
     )
+  }
 
   return isReorderable ? (
     <DraggableFlatList

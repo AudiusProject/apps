@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { useUserCoins, useArtistCreatedCoin } from '~/api'
+import { useUserCoins, useArtistCreatedFanClub } from '~/api'
 import { ID } from '~/models'
 
 /**
@@ -13,14 +13,14 @@ export const useIsCoinMember = (
   userId: ID | null | undefined,
   artistId: ID | null | undefined
 ) => {
-  const { data: artistCoin } = useArtistCreatedCoin(artistId)
+  const { data: fanClub } = useArtistCreatedFanClub(artistId)
   const { data: userCoins } = useUserCoins(
     { userId },
-    { enabled: !!userId && !!artistCoin }
+    { enabled: !!userId && !!fanClub }
   )
 
   const isCoinHolder = useMemo(() => {
-    if (!artistCoin || !artistId || !userId) {
+    if (!fanClub || !artistId || !userId) {
       return false
     }
 
@@ -32,12 +32,12 @@ export const useIsCoinMember = (
     // Check if the user owns this specific artist's coin with positive balance
     return (
       userCoins?.some(
-        (userCoin) => userCoin.mint === artistCoin.mint && userCoin.balance > 0
+        (userCoin) => userCoin.mint === fanClub.mint && userCoin.balance > 0
       ) ?? false
     )
-  }, [userCoins, artistCoin, artistId, userId])
+  }, [userCoins, fanClub, artistId, userId])
 
-  const isLoading = !artistCoin || (userId !== artistId && !userCoins)
+  const isLoading = !fanClub || (userId !== artistId && !userCoins)
 
   return {
     isCoinHolder,

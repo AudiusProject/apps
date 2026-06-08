@@ -24,7 +24,6 @@ const messages = {
 }
 
 export const TastemakerChallengeContent = ({
-  aaoErrorCode,
   challenge,
   challengeName,
   claimStatus,
@@ -119,9 +118,7 @@ export const TastemakerChallengeContent = ({
           <CooldownSummaryTable challengeId={challenge.challenge_id} />
         ) : null
       }
-      errorContent={
-        claimError ? <ClaimError aaoErrorCode={aaoErrorCode} /> : null
-      }
+      errorContent={claimError ? <ClaimError /> : null}
       isCooldownChallenge={Boolean(challenge?.cooldown_days)}
     />
   )

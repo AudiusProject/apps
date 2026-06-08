@@ -16,7 +16,6 @@ import {
   type QueryContextType
 } from '~/api/tan-query/utils/QueryContext'
 import { Chain, ID } from '~/models'
-import { Feature } from '~/models/ErrorReporting'
 import { toErrorWithMessage } from '~/utils/error'
 
 import { QUERY_KEYS } from '../queryKeys'
@@ -43,7 +42,7 @@ export const getWalletAudioBalanceQueryKey = ({
 
 type FetchAudioBalanceContext = Pick<
   QueryContextType,
-  'audiusSdk' | 'audiusBackend' | 'reportToSentry'
+  'audiusSdk' | 'audiusBackend'
 >
 
 const getWalletAudioBalanceQueryFn =
@@ -54,26 +53,24 @@ const getWalletAudioBalanceQueryFn =
     ReturnType<typeof getWalletAudioBalanceQueryKey>
   >) => {
     const [_ignored, chain, address, { includeStaked }] = queryKey
-    const { audiusSdk, audiusBackend, reportToSentry } = context
+    const { audiusSdk, audiusBackend } = context
     try {
       const sdk = await audiusSdk()
       if (chain === Chain.Eth) {
         const checksumWallet = getAddress(address)
-        const balance = await sdk.services.audiusTokenClient.balanceOf({
-          account: checksumWallet
-        })
+        const ethereum = sdk.services.ethereum
+        const balance = await ethereum.audiusToken.read.balanceOf([
+          checksumWallet
+        ])
         if (!includeStaked) {
           return AUDIO(balance).value
         }
-        const delegatedBalance =
-          await sdk.services.delegateManagerClient.getTotalDelegatorStake({
-            delegatorAddress: checksumWallet
-          })
-        const stakedBalance = await sdk.services.stakingClient.totalStakedFor({
-          account: checksumWallet
-        })
-
-        return AUDIO(balance + delegatedBalance + stakedBalance).value
+        const [stakedBalance, delegatedBalance] = await Promise.all([
+          ethereum.staking.read.totalStakedFor([checksumWallet]),
+          ethereum.delegateManager.read.getTotalDelegatorStake([checksumWallet])
+        ])
+        const fullBalance = balance + stakedBalance + delegatedBalance
+        return AUDIO(fullBalance).value
       } else {
         const wAudioSolBalance = await audiusBackend.getAddressWAudioBalance({
           address,
@@ -83,12 +80,7 @@ const getWalletAudioBalanceQueryFn =
         return AUDIO(wAUDIO(BigInt(wAudioSolBalance.toString()))).value
       }
     } catch (error) {
-      reportToSentry({
-        error: toErrorWithMessage(error),
-        name: 'AudioBalanceFetchError',
-        feature: Feature.TanQuery,
-        additionalInfo: { address, chain }
-      })
+      console.error('AudioBalanceFetchError', toErrorWithMessage(error))
       throw error
     }
   }

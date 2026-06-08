@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useArtistCoins } from '@audius/common/api'
+import { useFanClubs } from '@audius/common/api'
 import {
   Button,
   Flex,
@@ -27,7 +27,7 @@ export const UserBankAddressDeriver = () => {
     data: coins,
     isPending: isLoadingCoins,
     error: coinsError
-  } = useArtistCoins()
+  } = useFanClubs()
 
   // Set default token when coins are loaded
   const availableCoins = coins?.filter((coin) => coin.ticker) ?? []

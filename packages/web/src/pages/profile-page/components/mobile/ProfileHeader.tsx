@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
-import { useArtistCreatedCoin } from '@audius/common/api'
+import { useArtistCreatedFanClub } from '@audius/common/api'
 import {
   imageCoverPhotoBlank,
   imageProfilePicEmpty
@@ -25,13 +25,13 @@ import {
   Button,
   IconPencil,
   FollowButton,
-  Text
+  Text,
+  Image
 } from '@audius/harmony'
 import cn from 'classnames'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistRecommendationsDropdown } from 'components/artist-recommendations/ArtistRecommendationsDropdown'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import Skeleton from 'components/skeleton/Skeleton'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
 import FollowsYouBadge from 'components/user-badges/FollowsYouBadge'
@@ -41,7 +41,7 @@ import { UserGeneratedText } from 'components/user-generated-text'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 
-import { BuyArtistCoinButton } from './BuyArtistCoinButton'
+import { BuyFanClubButton } from './BuyFanClubButton'
 import GrowingCoverPhoto from './GrowingCoverPhoto'
 import styles from './ProfileHeader.module.css'
 import { SocialLink } from './SocialLink'
@@ -215,9 +215,9 @@ const ProfileHeader = ({
     size: SquareSizes.SIZE_150_BY_150
   })
 
-  // Artist coin detection
-  const { data: artistCoin, isPending: isArtistCoinLoading } =
-    useArtistCreatedCoin(userId)
+  // Fan club detection
+  const { data: fanClub, isPending: isFanClubLoading } =
+    useArtistCreatedFanClub(userId)
 
   const record = useRecord()
 
@@ -282,13 +282,15 @@ const ProfileHeader = ({
   return (
     <div className={styles.headerContainer}>
       <GrowingCoverPhoto
-        image={updatedCoverPhoto || coverPhoto}
-        imageStyle={coverPhotoStyle}
-        wrapperClassName={cn(styles.coverPhoto, {
+        src={updatedCoverPhoto || coverPhoto}
+        style={coverPhotoStyle}
+        className={cn(styles.coverPhoto, {
           [styles.isEditing]: isEditing
         })}
         useBlur={Boolean(
-          !profile?.cover_photo_sizes && profile?.profile_picture_sizes
+          !profile?.cover_photo_sizes &&
+            !updatedCoverPhoto &&
+            profile?.profile_picture_sizes
         )}
       >
         {isArtist && !isEditing && !isDeactivated ? (
@@ -296,16 +298,15 @@ const ProfileHeader = ({
         ) : null}
         {isEditing && <UploadStub onChange={onUpdateCoverPhoto} />}
       </GrowingCoverPhoto>
-      <DynamicImage
-        image={updatedProfilePicture || profilePicture}
+      <Image
+        src={updatedProfilePicture || profilePicture}
         alt={messages.profilePicAltText}
-        className={styles.profilePicture}
-        wrapperClassName={cn(styles.profilePictureWrapper, {
+        className={cn(styles.profilePictureWrapper, styles.profilePicture, {
           [styles.isEditing]: isEditing
         })}
       >
         {isEditing && <UploadStub onChange={onUpdateProfilePicture} />}
-      </DynamicImage>
+      </Image>
       {!isEditing && !isDeactivated && (
         <div className={styles.artistInfo}>
           <div className={styles.titleContainer}>
@@ -451,9 +452,9 @@ const ProfileHeader = ({
             onClose={onCloseArtistRecommendations}
           />
 
-          {/* Artist coin buy button or tip button */}
-          {mode !== 'owner' && !isArtistCoinLoading && artistCoin?.mint && (
-            <BuyArtistCoinButton userId={userId} />
+          {/* Fan club buy button or tip button */}
+          {mode !== 'owner' && !isFanClubLoading && fanClub?.mint && (
+            <BuyFanClubButton userId={userId} />
           )}
         </div>
       )}

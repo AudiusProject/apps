@@ -56,14 +56,14 @@ export type Modals =
   | 'BrowserPushPermissionConfirmation'
   | 'AudioBreakdown'
   | 'DeactivateAccountConfirmation'
-  | 'FeedFilter'
   | 'PurchaseVendor'
   | 'TrendingGenreSelection'
   | 'TrendingCategory'
   | 'TrendingTimeRange'
+  | 'TrendingFilter'
+  | 'FeedFilter'
   | 'TrendingRewardsExplainer'
   | 'SocialProof'
-  | 'EditFolder'
   | 'EditTrack'
   | 'SignOutConfirmation'
   | 'Overflow'
@@ -83,7 +83,6 @@ export type Modals =
   | 'PlaybackRate'
   | 'ProfileActions'
   | 'PublishContentModal'
-  | 'LabelAccount'
   | 'DuplicateAddConfirmation'
   | 'PremiumContentPurchaseModal'
   | 'CreateChatModal'
@@ -116,11 +115,13 @@ export type Modals =
   | 'HostRemixContest'
   | 'ReceiveTokensModal'
   | 'SendTokensModal'
-  | 'ArtistCoinDetailsModal'
+  | 'FanClubDetailsModal'
   | 'FinalizeWinnersConfirmation'
   | 'CoinSuccessModal'
   | 'VerificationSuccess'
   | 'VerificationError'
+  | 'CreatePlaylistModal'
+  | 'DuplicatePlaylistModal'
 
 export type BasicModalsState = {
   [modal in Modals]: BaseModalState
@@ -160,7 +161,7 @@ export type StatefulModalsState = {
   ReceiveTokensModal: ReceiveTokensModalState
   SendTokensModal: SendTokensModalState
   CoinSuccessModal: CoinSuccessModalState
-  ArtistCoinDetailsModal: ArtistCoinDetailsModalState
+  FanClubDetailsModal: FanClubDetailsModalState
 }
 
 export type ReceiveTokensModalState = BaseModalState & {
@@ -172,7 +173,7 @@ export type SendTokensModalState = BaseModalState & {
   user?: User
 }
 
-export type ArtistCoinDetailsModalState = BaseModalState & {
+export type FanClubDetailsModalState = BaseModalState & {
   mint?: string
 }
 

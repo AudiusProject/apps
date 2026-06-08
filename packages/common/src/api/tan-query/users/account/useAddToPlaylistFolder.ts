@@ -23,6 +23,7 @@ type AddToFolderVariables = {
 }
 
 type AddToFolderResult = {
+  previousLibrary: PlaylistLibrary
   updatedLibrary: PlaylistLibrary
   entityId: PlaylistLibraryID
   folder: PlaylistLibraryFolder
@@ -52,8 +53,10 @@ export const useAddToPlaylistFolder = () => {
         throw new Error('Missing required data')
       }
 
+      // Snapshot before mutating — updatePlaylistLibrary overwrites the cache.
+      const previousLibrary = playlistLibrary
       const updatedLibrary = playlistLibraryHelpers.addPlaylistToFolder(
-        playlistLibrary,
+        previousLibrary,
         entityId,
         folder.id
       )
@@ -61,21 +64,20 @@ export const useAddToPlaylistFolder = () => {
       await updatePlaylistLibrary.mutateAsync(updatedLibrary)
 
       return {
+        previousLibrary,
         updatedLibrary,
         entityId,
         folder
       }
     },
-    onSuccess: ({ updatedLibrary, entityId, folder }) => {
-      // Invalidate the playlist library query
+    onSuccess: ({ previousLibrary, updatedLibrary, entityId, folder }) => {
       queryClient.setQueryData(getCurrentAccountQueryKey(), (old) => {
         if (!old) return old
         return { ...old, playlist_library: updatedLibrary }
       })
 
-      // If dragging in a new playlist, save to user collections
       if (typeof entityId === 'number') {
-        const isNewAddition = !playlistLibrary?.contents.some(
+        const isNewAddition = !previousLibrary.contents.some(
           (item) => 'playlist_id' in item && item.playlist_id === entityId
         )
         if (isNewAddition) {
@@ -83,9 +85,8 @@ export const useAddToPlaylistFolder = () => {
         }
       }
 
-      // Show a toast if playlist dragged from outside of library was already in the library
       if (
-        playlistLibraryHelpers.findInPlaylistLibrary(playlistLibrary!, entityId)
+        playlistLibraryHelpers.findInPlaylistLibrary(previousLibrary, entityId)
       ) {
         dispatch(
           toast({
@@ -94,7 +95,6 @@ export const useAddToPlaylistFolder = () => {
         )
       }
 
-      // Analytics
       track(
         make({
           eventName: Name.PLAYLIST_LIBRARY_ADD_PLAYLIST_TO_FOLDER

@@ -4,22 +4,16 @@ import {
   useInfiniteQuery,
   useQueryClient
 } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
 import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { PlaybackSource } from '~/models/Analytics'
-import {
-  trendingUndergroundPageLineupActions,
-  trendingUndergroundPageLineupSelectors
-} from '~/store/pages'
+import { ID } from '~/models/Identifiers'
 
 import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions, LineupData } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { makeLoadNextPage } from '../utils/infiniteQueryLoadNextPage'
 import { primeTrackData } from '../utils/primeTrackData'
-
-import { useLineupQuery } from './useLineupQuery'
 
 const DEFAULT_PAGE_SIZE = 10
 
@@ -41,10 +35,11 @@ export const useTrendingUnderground = (
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
 
-  const queryData = useInfiniteQuery({
-    queryKey: getTrendingUndergroundQueryKey({ pageSize }),
+  const queryKey = getTrendingUndergroundQueryKey({ pageSize })
+
+  const query = useInfiniteQuery({
+    queryKey,
     initialPageParam: 0,
     getNextPageParam: (lastPage: LineupData[], allPages) => {
       if (lastPage.length < pageSize) return undefined
@@ -52,27 +47,13 @@ export const useTrendingUnderground = (
     },
     queryFn: async ({ pageParam }) => {
       const sdk = await audiusSdk()
-
-      const { data = [] } = await sdk.full.tracks.getUndergroundTrendingTracks({
+      const { data = [] } = await sdk.tracks.getUndergroundTrendingTracks({
         offset: pageParam,
         limit: pageSize,
         userId: OptionalId.parse(currentUserId)
       })
-
       const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
-
       primeTrackData({ tracks, queryClient })
-
-      // Update lineup when new data arrives
-      dispatch(
-        trendingUndergroundPageLineupActions.fetchLineupMetadatas(
-          pageParam,
-          pageSize,
-          false,
-          { tracks }
-        )
-      )
-
       return tracks.map((t) => ({
         id: t.track_id,
         type: EntityType.TRACK
@@ -83,15 +64,23 @@ export const useTrendingUnderground = (
     enabled: options?.enabled !== false
   })
 
-  return useLineupQuery({
-    lineupData: queryData.data ?? [],
-    queryData,
-    queryKey: getTrendingUndergroundQueryKey({
-      pageSize
-    }),
-    lineupActions: trendingUndergroundPageLineupActions,
-    lineupSelector: trendingUndergroundPageLineupSelectors.getLineup,
-    playbackSource: PlaybackSource.TRACK_TILE,
-    pageSize
-  })
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    isInitialLoading: query.isInitialLoading,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
+    loadNextPage: makeLoadNextPage(query),
+    queryKey
+  }
 }

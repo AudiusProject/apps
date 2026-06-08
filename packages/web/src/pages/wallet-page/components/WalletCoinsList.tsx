@@ -1,9 +1,9 @@
-import { useCallback, useContext, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
   UserCoin,
-  useArtistCoin,
-  useArtistCreatedCoin,
+  useFanClub,
+  useArtistCreatedFanClub,
   useCoinBalance,
   useCurrentUserId,
   useQueryContext,
@@ -26,7 +26,11 @@ import {
   Button,
   Divider,
   Flex,
+  IconButton,
+  IconKebabHorizontal,
   Paper,
+  PopupMenu,
+  PopupMenuItem,
   Text,
   useMedia,
   useTheme,
@@ -41,13 +45,13 @@ import { useBuySellRegionSupport } from 'components/buy-sell-modal'
 import Skeleton from 'components/skeleton/Skeleton'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { OpenAppDrawer } from 'pages/coin-detail-page/components/OpenAppDrawer'
+import { OpenAppDrawer } from 'pages/fan-club-detail-page/components/OpenAppDrawer'
 import { env } from 'services/env'
 
 import { AudioCoinCard } from './AudioCoinCard'
 import { CoinRow } from './CoinCard'
 
-const { COINS_EXPLORE_PAGE, CASH_PAGE } = route
+const { CLUBS_EXPLORE_PAGE, CASH_PAGE } = route
 
 const USDCCoinCard = () => {
   const { data: currentUserId } = useCurrentUserId()
@@ -70,12 +74,13 @@ const USDCCoinCard = () => {
       symbol={TOKEN_LISTING_MAP.USDC.symbol}
       heldValue={usdcBalanceFormatted}
       dollarValue={usdcBalanceFormatted}
+      actionLabel='View Cash asset details'
     />
   )
 }
 
-const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
-  const { color } = useTheme()
+const DiscoverFanClubsCard = ({ onClick }: { onClick: () => void }) => {
+  const { color, spacing } = useTheme()
 
   return (
     <Flex
@@ -87,14 +92,44 @@ const DiscoverArtistCoinsCard = ({ onClick }: { onClick: () => void }) => {
       onClick={onClick}
       css={{
         cursor: 'pointer',
-        '&:hover': { backgroundColor: color.background.surface2 }
+        '&:hover,&:focus-within': { backgroundColor: color.background.surface2 }
       }}
     >
       <Text variant='heading' size='s'>
-        {walletMessages.artistCoins.title}
+        {walletMessages.fanClubs.title}
       </Text>
       <Flex alignItems='center' gap='m'>
-        <IconCaretRight size='l' color='subdued' />
+        <button
+          type='button'
+          aria-label='Discover fan clubs'
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick()
+          }}
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: spacing.unit8,
+            height: spacing.unit8,
+            padding: 0,
+            border: 0,
+            borderRadius: '50%',
+            background: 'transparent',
+            color: 'inherit',
+            cursor: 'pointer',
+            '&:focus': {
+              outline: 'none'
+            },
+            '&:focus-visible': {
+              outline:
+                '2px solid var(--harmony-focus, var(--harmony-secondary))',
+              outlineOffset: 2
+            }
+          }}
+        >
+          <IconCaretRight size='l' color='subdued' />
+        </button>
       </Flex>
     </Flex>
   )
@@ -140,6 +175,7 @@ const messages = {
   ...buySellMessages,
   withdrawCash: 'Withdraw Cash',
   addCash: 'Add Cash',
+  cashActions: 'Cash actions',
   managedAccount: "You can't do that as a managed user",
   buySellNotSupported: 'This is not supported in your region'
 }
@@ -176,33 +212,71 @@ const YourCoinsHeader = ({
     }
   }, [isManagedAccount, openBuySellModal, toast])
 
+  const cashMenuItems: PopupMenuItem[] = useMemo(
+    () => [
+      { text: messages.addCash, onClick: handleAddCashClick },
+      { text: messages.withdrawCash, onClick: handleWithdrawClick }
+    ],
+    [handleAddCashClick, handleWithdrawClick]
+  )
+
   return (
     <Flex
       alignItems='center'
       justifyContent='space-between'
+      gap='s'
       p='l'
       borderBottom='default'
     >
       <Text variant='heading' size='m' color='default'>
         {messages.assets}
       </Text>
-      <Flex gap='s'>
+      <Flex gap='s' alignItems='center'>
         {showCashButtons ? (
           <>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleAddCashClick}
+            <Flex
+              gap='s'
+              css={{
+                '@container wallet (max-width: 640px)': { display: 'none' }
+              }}
             >
-              {messages.addCash}
-            </Button>
-            <Button
-              variant='secondary'
-              size='small'
-              onClick={handleWithdrawClick}
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={handleAddCashClick}
+              >
+                {messages.addCash}
+              </Button>
+              <Button
+                variant='secondary'
+                size='small'
+                onClick={handleWithdrawClick}
+              >
+                {messages.withdrawCash}
+              </Button>
+            </Flex>
+            <Box
+              css={{
+                display: 'none',
+                '@container wallet (max-width: 640px)': {
+                  display: 'inline-flex'
+                }
+              }}
             >
-              {messages.withdrawCash}
-            </Button>
+              <PopupMenu
+                items={cashMenuItems}
+                renderTrigger={(ref, trigger) => (
+                  <IconButton
+                    ref={ref}
+                    icon={IconKebabHorizontal}
+                    size='s'
+                    color='subdued'
+                    onClick={() => trigger()}
+                    aria-label={messages.cashActions}
+                  />
+                )}
+              />
+            </Box>
           </>
         ) : null}
 
@@ -251,9 +325,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
     formattedHeldValue
   } = useFormattedCoinBalance(coin.mint)
 
-  const { data: coinData, isPending: coinsDataLoading } = useArtistCoin(
-    coin.mint
-  )
+  const { data: coinData, isPending: coinsDataLoading } = useFanClub(coin.mint)
 
   const isLoading =
     isCoinBalanceLoading || isCoinPriceLoading || coinsDataLoading
@@ -268,6 +340,7 @@ const CoinCardWithBalance = ({ coin }: { coin: UserCoin }) => {
       loading={isLoading}
       name={coinData?.name ?? ''}
       onClick={() => handleCoinClick(coin.ticker)}
+      actionLabel={`View ${coinData?.name || tokenSymbol} asset details`}
     />
   )
 }
@@ -287,14 +360,14 @@ export const WalletCoinsList = () => {
     setIsOpenAppDrawerOpen(false)
   }, [])
 
-  const { data: artistCoins, isPending: isLoadingCoins } = useUserCoins({
+  const { data: fanClubs, isPending: isLoadingCoins } = useUserCoins({
     userId: currentUserId
   })
-  const { data: artistOwnedCoin } = useArtistCreatedCoin(currentUserId)
-  const audioCoin = artistCoins?.find(
+  const { data: artistOwnedCoin } = useArtistCreatedFanClub(currentUserId)
+  const audioCoin = fanClubs?.find(
     (coin) => coin?.mint === env.WAUDIO_MINT_ADDRESS
   )
-  const otherCoins = artistCoins?.filter(
+  const otherCoins = fanClubs?.filter(
     (coin) =>
       coin?.mint !== env.WAUDIO_MINT_ADDRESS &&
       coin?.mint !== artistOwnedCoin?.mint &&
@@ -310,11 +383,11 @@ export const WalletCoinsList = () => {
   // Show audio coin card when no coins are available
   const coins =
     orderedCoins.length === 0 ? ['audio-coin' as const] : orderedCoins
-  // Add discover artist coins card at the end
-  const allCoins = [...coins, 'discover-artist-coins' as const]
+  // Add discover fan clubs card at the end
+  const allCoins = [...coins, 'discover-fan-clubs' as const]
 
-  const handleDiscoverArtistCoins = useCallback(() => {
-    navigate(COINS_EXPLORE_PAGE)
+  const handleDiscoverFanClubs = useCallback(() => {
+    navigate(CLUBS_EXPLORE_PAGE)
   }, [navigate])
 
   return (
@@ -338,10 +411,8 @@ export const WalletCoinsList = () => {
             <Divider />
             {allCoins.map((item, idx) => (
               <Box key={typeof item === 'string' ? item : item.mint}>
-                {item === 'discover-artist-coins' ? (
-                  <DiscoverArtistCoinsCard
-                    onClick={handleDiscoverArtistCoins}
-                  />
+                {item === 'discover-fan-clubs' ? (
+                  <DiscoverFanClubsCard onClick={handleDiscoverFanClubs} />
                 ) : item === 'audio-coin' ? (
                   <AudioCoinCard />
                 ) : (

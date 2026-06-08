@@ -1,10 +1,14 @@
 import {
+  getPlaylistUpdatesQueryKey,
   queryAccountUser,
   queryCollection,
+  queryCurrentUserId,
   queryUser,
   updateCollectionData,
   selectIsGuestAccount,
-  getUserQueryKey
+  getUserQueryKey,
+  removePlaylistFromLibrarySaga,
+  persistAccountPlaylistLibrarySaga
 } from '@audius/common/api'
 import { Name, Kind, ID, User } from '@audius/common/models'
 import {
@@ -14,7 +18,6 @@ import {
   LibraryCategory,
   collectionsSocialActions as socialActions,
   getContext,
-  playlistUpdatesActions,
   confirmerActions,
   getSDK
 } from '@audius/common/store'
@@ -29,11 +32,9 @@ import { call, takeEvery, put } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
 import * as signOnActions from 'common/store/pages/signon/actions'
-import { removePlaylistFromLibrary } from 'common/store/playlist-library/sagas'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 import watchCollectionErrors from './errorSagas'
-const { updatedPlaylistViewed } = playlistUpdatesActions
 const { addLocalCollection, removeLocalCollection } = libraryPageActions
 const { collectionPage } = route
 
@@ -138,7 +139,7 @@ export function* confirmRepostCollection(
         yield* call([sdk.playlists, sdk.playlists.repostPlaylist], {
           userId: Id.parse(userId),
           playlistId: Id.parse(collectionId),
-          metadata: {
+          repostRequestBody: {
             isRepostOfRepost: metadata?.is_repost_of_repost ?? false
           }
         })
@@ -336,7 +337,16 @@ export function* saveCollectionAsync(
   )
 
   if (!collection.is_album) {
-    yield* put(updatedPlaylistViewed({ playlistId: action.collectionId }))
+    // Optimistically clear the "has updates" badge for this playlist —
+    // saving a playlist counts as viewing it. Replaces the legacy
+    // `updatedPlaylistViewed` action; the mutation hook still drives the
+    // SDK call from the user-facing nav/page click handlers.
+    const queryClient = yield* getContext('queryClient')
+    const userId = yield* call(queryCurrentUserId)
+    queryClient.setQueryData(
+      getPlaylistUpdatesQueryKey(userId),
+      (old) => old?.filter((u) => u.playlist_id !== action.collectionId) ?? []
+    )
   }
 
   const subscribedUid = makeUid(
@@ -359,6 +369,7 @@ export function* saveCollectionAsync(
       permalink: collection.permalink || ''
     })
   )
+  yield* call(persistAccountPlaylistLibrarySaga)
 
   yield* put(
     addLocalCollection({
@@ -461,7 +472,7 @@ export function* unsaveCollectionAsync(
     accountActions.removeAccountPlaylist({ collectionId: action.collectionId })
   )
 
-  yield* call(removePlaylistFromLibrary, action.collectionId)
+  yield* call(removePlaylistFromLibrarySaga, action.collectionId)
   yield* call(updateCollectionData, [
     {
       playlist_id: action.collectionId,

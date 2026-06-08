@@ -1,6 +1,11 @@
 import { useCallback, useState } from 'react'
 
-import { useCollection, useCurrentAccount, useTrack } from '@audius/common/api'
+import {
+  useCollection,
+  useCurrentAccount,
+  useReorderLibrary,
+  useTrack
+} from '@audius/common/api'
 import {
   FavoriteSource,
   ID,
@@ -12,7 +17,6 @@ import {
 import {
   cacheCollectionsActions,
   collectionsSocialActions,
-  playlistLibraryActions,
   shareModalUIActions
 } from '@audius/common/store'
 import {
@@ -24,6 +28,7 @@ import {
   IconTrash,
   PopupMenuItem,
   Text,
+  Tooltip,
   useTheme
 } from '@audius/harmony'
 import { pick } from 'lodash'
@@ -50,7 +55,6 @@ import { PlaylistUpdateDot } from './PlaylistUpdateDot'
 import { usePlaylistPlayingStatus } from './usePlaylistPlayingStatus'
 
 const { addTrackToPlaylist } = cacheCollectionsActions
-const { reorder } = playlistLibraryActions
 const { requestOpen } = shareModalUIActions
 const { unsaveCollection } = collectionsSocialActions
 
@@ -59,7 +63,8 @@ const messages = {
   edit: 'Edit',
   share: 'Share',
   delete: 'Delete',
-  unfavorite: 'Unfavorite'
+  unfavorite: 'Unfavorite',
+  favorited: 'Favorited'
 }
 
 const acceptedKinds: DragDropKind[] = [
@@ -91,6 +96,7 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
   const dispatch = useDispatch()
   const record = useRecord()
   const navigate = useNavigate()
+  const { mutate: reorderLibrary } = useReorderLibrary()
 
   const { spacing } = useTheme()
 
@@ -185,16 +191,14 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
       if (kind === 'track') {
         dispatch(addTrackToPlaylist(draggingId, id))
       } else {
-        dispatch(
-          reorder({
-            draggingId,
-            droppingId: id,
-            draggingKind: kind as PlaylistLibraryKind
-          })
-        )
+        reorderLibrary({
+          collectionId: draggingId,
+          destinationId: id,
+          collectionType: kind as PlaylistLibraryKind
+        })
       }
     },
-    [dispatch, id]
+    [dispatch, id, reorderLibrary]
   )
 
   const draggingKind = useSelector(selectDraggingKind)
@@ -270,14 +274,23 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
               css={{ position: 'relative' }}
               justifyContent='space-between'
             >
-              <Text
-                variant='body'
-                size='s'
-                css={{ maxWidth: '160px' }}
-                ellipses
-              >
-                {name}
-              </Text>
+              <Flex alignItems='center' gap='xs' css={{ minWidth: 0, flex: 1 }}>
+                <Text
+                  variant='body'
+                  size='s'
+                  css={{ maxWidth: '160px' }}
+                  ellipses
+                >
+                  {name}
+                </Text>
+                {!isOwned ? (
+                  <Tooltip text={messages.favorited} placement='top'>
+                    <Flex alignItems='center' css={{ flexShrink: 0 }}>
+                      <IconHeart size='2xs' color='subdued' />
+                    </Flex>
+                  </Tooltip>
+                ) : null}
+              </Flex>
               <NavItemKebabButton
                 visible={isHovering && !isDraggingOver}
                 aria-label={

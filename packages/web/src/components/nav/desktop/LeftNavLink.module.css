@@ -1,0 +1,9 @@
+.navLink {
+  color: inherit;
+  display: block;
+  text-decoration: none;
+}
+
+.navLink:focus {
+  outline: none;
+}

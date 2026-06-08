@@ -48,6 +48,7 @@ export const useUserCoin = <TResult = UserCoinWithAccounts | null>(
 
       return response.data ?? null
     },
+    staleTime: 60_000,
     ...options,
     enabled:
       options?.enabled !== false &&

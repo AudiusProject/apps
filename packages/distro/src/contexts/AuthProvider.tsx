@@ -1,70 +1,68 @@
-import { User } from '@audius/sdk'
-import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { useSdk } from '../hooks/useSdk'
+import { sdk, User } from '@audius/sdk'
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import { Status } from './types'
 
 type AuthContext = {
-  user?: User,
-  status: Status,
+  user?: User
+  status: Status
   logout: () => void
 }
 
-const tokenLocalStorageKey = '@audius/sdk/token'
+export const distributorAppKeyStorageKey = '@audius/distro/appKey'
 
 const AuthContext = createContext<AuthContext>({
   status: Status.IDLE,
   logout: () => {}
-});
+})
 
-export const AuthProvider = ({ children }: { children: ReactNode}) => {
-  const { sdk } = useSdk()
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | undefined>(undefined)
   const [status, setStatus] = useState(Status.IDLE)
 
   useEffect(() => {
-    if (sdk) {
-      const fn = async () => {
-        try {
-          setStatus(Status.LOADING)
-          const urlParams = new URLSearchParams(window.location.search)
-          let token = localStorage.getItem(tokenLocalStorageKey)
-          if (!token) {
-            token = urlParams.get('token')
-          }
-          if (!token) {
-            setStatus(Status.SUCCESS)
-            return
-          }
-          const tokenRes = await sdk?.users.verifyIDToken({ token })
-          if (!tokenRes?.data?.userId) {
-            return
-          }
-    
-          const id = tokenRes.data.userId
-          const userRes = await sdk?.users.getUser({ id })
-          if (!userRes?.data) {
-            return
-          }
-    
-          const user = userRes.data
-          setUser(user)
-          localStorage.setItem(tokenLocalStorageKey, token)
+    const fn = async () => {
+      try {
+        setStatus(Status.LOADING)
+
+        const appKey = localStorage.getItem(distributorAppKeyStorageKey)
+        if (!appKey) {
           setStatus(Status.SUCCESS)
-          // Clear url params
-          window.history.replaceState(null, '', window.location.pathname)
-        } catch (e) {
-          console.error(e)
-          localStorage.removeItem(tokenLocalStorageKey)
-          setStatus(Status.ERROR)
+          return
         }
+        const env = import.meta.env.VITE_ENVIRONMENT as 'dev' | 'prod'
+        const distroSdk = sdk({
+          apiKey: appKey,
+          environment: env === 'dev' ? 'development' : 'production'
+        })
+
+        if (distroSdk.oauth.hasRedirectResult()) {
+          await distroSdk.oauth.handleRedirect()
+        }
+
+        const isAuthed = await distroSdk.oauth.isAuthenticated()
+        if (isAuthed) {
+          const { data: user } = await distroSdk.users.getMe()
+          setUser(user)
+        }
+
+        setStatus(Status.SUCCESS)
+      } catch (e) {
+        console.error(e)
+        setStatus(Status.ERROR)
       }
-      fn()
     }
-  }, [sdk])
+    fn()
+  }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(tokenLocalStorageKey)
-    // Reload without query params
+    localStorage.removeItem(distributorAppKeyStorageKey)
     window.location.href = window.location.pathname
   }, [])
 

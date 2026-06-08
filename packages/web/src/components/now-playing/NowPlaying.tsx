@@ -17,8 +17,8 @@ import {
   ID
 } from '@audius/common/models'
 import {
-  queueActions,
-  queueSelectors,
+  playbackActions,
+  playbackSelectors,
   RepeatMode,
   tracksSocialActions,
   mobileOverflowMenuUIActions,
@@ -26,28 +26,30 @@ import {
   OverflowAction,
   OverflowSource,
   usePremiumContentPurchaseModal,
-  playerActions,
-  playerSelectors,
   playbackRateValueMap,
   gatedContentSelectors,
   OverflowActionCallbacks,
   PurchaseableContentType
 } from '@audius/common/store'
 import { Genre, route } from '@audius/common/utils'
-import { IconCaretRight as IconCaret, Scrubber } from '@audius/harmony'
+import {
+  IconCaretRight as IconCaret,
+  IconImage,
+  Scrubber,
+  Image
+} from '@audius/harmony'
 import { Location } from 'history'
 import { connect, useSelector } from 'react-redux'
 import { Dispatch } from 'redux'
 
 import { useHistoryContext } from 'app/HistoryProvider'
 import { useRecord, make } from 'common/store/analytics/actions'
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import { LockedStatusBadge } from 'components/locked-status-badge'
 import PlayButton from 'components/play-bar/PlayButton'
 import NextButtonProvider from 'components/play-bar/next-button/NextButtonProvider'
 import PreviousButtonProvider from 'components/play-bar/previous-button/PreviousButtonProvider'
-import RepeatButtonProvider from 'components/play-bar/repeat-button/RepeatButtonProvider'
-import ShuffleButtonProvider from 'components/play-bar/shuffle-button/ShuffleButtonProvider'
+import RepeatButton from 'components/play-bar/repeat-button/RepeatButton'
+import ShuffleButton from 'components/play-bar/shuffle-button/ShuffleButton'
 import { PlayButtonStatus } from 'components/play-bar/types'
 import { GatedConditionsPill } from 'components/track/GatedConditionsPill'
 import { TrackDogEar } from 'components/track/TrackDogEar'
@@ -61,21 +63,28 @@ import {
 import { audioPlayer } from 'services/audio-player'
 import { AppState } from 'store/types'
 import { pushUniqueRoute as pushRoute } from 'utils/route'
-import { isDarkMode, isMatrix } from 'utils/theme/theme'
+import { useIsDarkMode, useIsMatrix } from 'utils/theme/theme'
 import { withNullGuard } from 'utils/withNullGuard'
 
 import styles from './NowPlaying.module.css'
 import ActionsBar from './components/ActionsBar'
 const { profilePage } = route
-const { makeGetCurrent } = queueSelectors
+const { makeGetCurrent } = playbackSelectors
 const { getBuffering, getCounter, getPlaying, getPlaybackRate, getSeek } =
-  playerSelectors
+  playbackSelectors
 
-const { seek, reset } = playerActions
+const { seekTo: seek, reset } = playbackActions
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 const { open } = mobileOverflowMenuUIActions
 const { repostTrack, undoRepostTrack } = tracksSocialActions
-const { next, pause, play, previous, repeat, shuffle } = queueActions
+const {
+  next,
+  pause,
+  play,
+  previous,
+  setRepeat: repeat,
+  setShuffle: shuffle
+} = playbackActions
 const { getGatedContentStatusMap } = gatedContentSelectors
 
 type OwnProps = {
@@ -96,12 +105,12 @@ const messages = {
 }
 
 const g = withNullGuard((wide: NowPlayingProps) => {
-  const { uid, source } = wide.currentQueueItem
+  const { trackId, source } = wide.currentQueueItem
   const currentTrack = useCurrentTrack()
   const { data: user } = useUser(currentTrack?.owner_id)
-  if (uid !== null && currentTrack !== null && source !== null && !!user) {
+  if (trackId !== null && currentTrack !== null && source !== null && !!user) {
     const currentQueueItem = {
-      uid,
+      trackId,
       source,
       user,
       track: currentTrack
@@ -134,8 +143,10 @@ const NowPlaying = g(
     clickOverflow,
     goToRoute
   }) => {
-    const { uid, track, user } = currentQueueItem
+    const { trackId: queueTrackId, track, user } = currentQueueItem
     const { history } = useHistoryContext()
+    const isDarkMode = useIsDarkMode()
+    const isMatrixMode = useIsMatrix()
 
     const { data: currentUserId } = useCurrentUserId()
 
@@ -163,7 +174,7 @@ const NowPlaying = g(
 
     const playbackRate = useSelector(getPlaybackRate)
     const isLongFormContent =
-      track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+      track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
 
     const startSeeking = useCallback(() => {
       clearInterval(seekInterval.current)
@@ -211,7 +222,7 @@ const NowPlaying = g(
     } = track
 
     const { name, handle } = user
-    const image = useTrackCoverArt({
+    const { imageUrl: image, hasNoArtwork } = useTrackCoverArt({
       trackId: track_id,
       size: SquareSizes.SIZE_480_BY_480
     })
@@ -313,7 +324,7 @@ const NowPlaying = g(
 
     const onPrevious = () => {
       const isLongFormContent =
-        track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+        track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
       if (isLongFormContent) {
         const position = timing.position
         const newPosition = position - SKIP_DURATION_SEC
@@ -333,7 +344,7 @@ const NowPlaying = g(
 
     const onNext = () => {
       const isLongFormContent =
-        track?.genre === Genre.PODCASTS || track?.genre === Genre.AUDIOBOOKS
+        track?.genre === Genre.Podcasts || track?.genre === Genre.Audiobooks
       if (isLongFormContent) {
         const newPosition = timing.position + SKIP_DURATION_SEC
         seek(Math.min(newPosition, timing.duration))
@@ -357,8 +368,6 @@ const NowPlaying = g(
         ${dominantColor ? 0.25 : 0})`,
       transition: 'box-shadow 0.3s ease-in-out'
     }
-
-    const matrix = isMatrix()
 
     const gatedTrackStatusMap = useSelector(getGatedContentStatusMap)
     const gatedTrackStatus =
@@ -403,7 +412,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id} borderOffset={2} />
-              <DynamicImage image={image} />
+              <Image src={image} useSkeleton={!hasNoArtwork}>
+                {hasNoArtwork ? (
+                  <div className={styles.emptyArtworkIcon}>
+                    <IconImage width={80} height={80} />
+                  </div>
+                ) : null}
+              </Image>
             </div>
           </TrackFlair>
         ) : (
@@ -415,7 +430,13 @@ const NowPlaying = g(
               style={artworkAverageColor}
             >
               <TrackDogEar trackId={track_id as ID} borderOffset={2} />
-              <DynamicImage image={image} />
+              <Image src={image} useSkeleton={!hasNoArtwork}>
+                {hasNoArtwork ? (
+                  <div className={styles.emptyArtworkIcon}>
+                    <IconImage width={80} height={80} />
+                  </div>
+                ) : null}
+              </Image>
             </div>
           </div>
         )}
@@ -447,9 +468,9 @@ const NowPlaying = g(
           <Scrubber
             // Include the duration in the media key because the play counter can
             // potentially update before the duration coming from the native layer if present
-            mediaKey={`${uid}${mediaKey}${timing.duration}`}
+            mediaKey={`${queueTrackId}${mediaKey}${timing.duration}`}
             isPlaying={isPlaying && !isBuffering}
-            isDisabled={!uid}
+            isDisabled={!queueTrackId}
             isMobile
             getAudioPosition={
               audioPlayer ? audioPlayer.getPosition : () => timing.position
@@ -466,13 +487,14 @@ const NowPlaying = g(
             }
             style={{
               railListenedColor: 'var(--track-slider-rail)',
-              handleColor: 'var(--track-slider-handle)'
+              handleColor: 'var(--track-slider-handle)',
+              handleBorderColor: 'var(--track-slider-handle-border)'
             }}
           />
         </div>
         <div className={styles.controls}>
           <div className={styles.repeatButton}>
-            <RepeatButtonProvider
+            <RepeatButton
               onRepeatOff={() => repeat(RepeatMode.OFF)}
               onRepeatAll={() => repeat(RepeatMode.ALL)}
               onRepeatSingle={() => repeat(RepeatMode.SINGLE)}
@@ -492,7 +514,7 @@ const NowPlaying = g(
             <NextButtonProvider isMobile onClick={onNext} />
           </div>
           <div className={styles.shuffleButton}>
-            <ShuffleButtonProvider
+            <ShuffleButton
               onShuffleOn={() => shuffle(true)}
               onShuffleOff={() => shuffle(false)}
             />
@@ -517,8 +539,8 @@ const NowPlaying = g(
             onToggleFavorite={toggleFavorite}
             onShare={onShare}
             onClickOverflow={onClickOverflow}
-            isDarkMode={isDarkMode()}
-            isMatrixMode={matrix}
+            isDarkMode={isDarkMode}
+            isMatrixMode={isMatrixMode}
           />
         </div>
       </div>

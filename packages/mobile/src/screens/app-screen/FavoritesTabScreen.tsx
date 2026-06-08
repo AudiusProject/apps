@@ -11,6 +11,10 @@ export type FavoritesTabScreenParamList = AppTabScreenParamList & {
 export const FavoritesTabScreen =
   createAppTabScreenStack<FavoritesTabScreenParamList>((Stack) => (
     <>
-      <Stack.Screen name='Library' component={LibraryScreen} />
+      <Stack.Screen
+        name='Library'
+        component={LibraryScreen}
+        options={{ freezeOnBlur: true }}
+      />
     </>
   ))

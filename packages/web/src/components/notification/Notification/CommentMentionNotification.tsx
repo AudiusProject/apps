@@ -6,7 +6,10 @@ import {
   useUsers
 } from '@audius/common/api'
 import { Name } from '@audius/common/models'
-import { CommentMentionNotification as CommentMentionNotificationType } from '@audius/common/store'
+import {
+  CommentMentionNotification as CommentMentionNotificationType,
+  Entity
+} from '@audius/common/store'
 import { IconMessage } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -32,7 +35,8 @@ import { entityToUserListEntity, USER_LENGTH_LIMIT } from './utils'
 const messages = {
   mentioned: ' tagged you in a comment on ',
   your: 'your',
-  their: 'their'
+  their: 'their',
+  remixContestLabel: 'remix contest'
 }
 
 type CommentMentionNotificationProps = {
@@ -124,7 +128,9 @@ export const CommentMentionNotification = (
             isOwner
           />
         )}{' '}
-        {entityType.toLowerCase()}{' '}
+        {entityType === Entity.Event
+          ? messages.remixContestLabel
+          : entityType.toLowerCase()}{' '}
         <EntityLink entity={entity} entityType={entityType} />
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />

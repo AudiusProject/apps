@@ -26,13 +26,15 @@ export const useManagedAccounts = <TResult = ManagedUserMetadata[] | undefined>(
     queryKey: getManagedAccountsQueryKey(userId),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const managedUsers = await sdk.full.users.getManagedUsers({
+      const managedUsers = await sdk.users.getManagedUsers({
         id: Id.parse(userId)
       })
       const { data = [] } = managedUsers
       return managedUserListFromSDK(data) as TResult
     },
-    enabled: isValidId(userId),
-    ...options
+    ...options,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    enabled: isValidId(userId) && options?.enabled !== false
   })
 }

@@ -11,23 +11,12 @@ export enum AnimatedIconType {
   REPOST_LIGHT = 'REPOST_LIGHT'
 }
 
-const animationMap = {
-  [AnimatedIconType.FAVORITE]: {
-    dark: 'iconFavoriteDark',
-    light: 'iconFavoriteLight'
-  },
-  [AnimatedIconType.REPOST]: {
-    dark: 'iconRepostDark',
-    light: 'iconRepostLight'
-  },
-  [AnimatedIconType.FAVORITE_LIGHT]: {
-    dark: 'iconFavoriteLighterDark',
-    light: 'iconFavoriteLighterLight'
-  },
-  [AnimatedIconType.REPOST_LIGHT]: {
-    dark: 'iconRepostLighterDark',
-    light: 'iconRepostLighterLight'
-  }
+/** Base asset path per icon - theme applied at runtime via useLottieThemeColors */
+const animationMap: Record<AnimatedIconType, string> = {
+  [AnimatedIconType.FAVORITE]: 'iconFavoriteLight',
+  [AnimatedIconType.REPOST]: 'iconRepostLight',
+  [AnimatedIconType.FAVORITE_LIGHT]: 'iconFavoriteLighterLight',
+  [AnimatedIconType.REPOST_LIGHT]: 'iconRepostLighterLight'
 }
 
 type AnimatedIconButtonProps = {
@@ -36,44 +25,54 @@ type AnimatedIconButtonProps = {
   isDisabled?: boolean
   isActive?: boolean
   className?: string
+  wrapperClassName?: string
   stopPropagation?: boolean
   activeClassName?: string
   disabledClassName?: string
   icon: AnimatedIconType
-  darkMode: boolean
+  /** @deprecated Theme applied at runtime - no longer used */
+  darkMode?: boolean
   isMatrix?: boolean
+  'aria-label'?: string
 }
 
 const AnimatedIconButton = ({
   onClick,
   href,
   className,
+  wrapperClassName,
   activeClassName,
   disabledClassName,
   icon,
-  darkMode,
   isMatrix = false,
   isDisabled = false,
   isActive = false,
-  stopPropagation = false
+  stopPropagation = false,
+  'aria-label': ariaLabel,
+  ...rest
 }: AnimatedIconButtonProps) => {
-  const { dark, light } = animationMap[icon]
+  const assetPath = animationMap[icon]
   const [uniqueKey] = useState(`${uuid()}-${icon}`)
   return (
     <AnimatedButtonProvider
       uniqueKey={uniqueKey}
       isActive={isActive}
       isDisabled={isDisabled}
-      darkMode={darkMode}
       isMatrix={isMatrix}
-      onClick={onClick || ((e: MouseEvent) => {})}
+      onClick={onClick ?? (() => {})}
       href={href}
-      iconLightJSON={() => import(`../../assets/animations/${light}.json`)}
-      iconDarkJSON={() => import(`../../assets/animations/${dark}.json`)}
+      iconJSON={() =>
+        import(`../../assets/animations/${assetPath}.json`).then(
+          (m) => m.default
+        )
+      }
       activeClassName={activeClassName}
       disabledClassName={disabledClassName}
       className={className}
+      wrapperClassName={wrapperClassName}
       stopPropagation={stopPropagation}
+      aria-label={ariaLabel}
+      {...rest}
     />
   )
 }

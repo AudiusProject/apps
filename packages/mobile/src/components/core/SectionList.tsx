@@ -1,9 +1,10 @@
 import type { Ref, RefObject } from 'react'
-import { forwardRef, useContext } from 'react'
+import { forwardRef, useCallback, useContext, useRef } from 'react'
 
 import { Portal } from '@gorhom/portal'
 import type {
   DefaultSectionT,
+  LayoutChangeEvent,
   SectionList as RNSectionList,
   SectionListProps as RNSectionListProps
 } from 'react-native'
@@ -13,6 +14,11 @@ import {
   useCollapsibleStyle,
   useCurrentTabScrollY
 } from 'react-native-collapsible-tab-view'
+import {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue
+} from 'react-native-reanimated'
 
 import { useThemeColors } from 'app/utils/theme'
 
@@ -26,13 +32,61 @@ type CollapsibleSectionListProps<ItemT> = RNSectionListProps<ItemT>
 const CollapsibleSectionList = <ItemT,>(
   props: CollapsibleSectionListProps<ItemT>
 ) => {
+  const {
+    onEndReached,
+    onEndReachedThreshold,
+    onContentSizeChange,
+    ...restProps
+  } = props
   const { refreshing, onRefresh } = useContext(CollapsibleTabNavigatorContext)
   const { progressViewOffset } = useCollapsibleStyle()
   const { neutral, staticWhite } = useThemeColors()
   const scrollY = useCurrentTabScrollY()
 
+  // Tabs.SectionList overrides onScroll with its own Reanimated handler,
+  // which prevents VirtualizedList's internal onEndReached from firing.
+  // We synthesize onEndReached by watching the Reanimated scroll value.
+  const contentHeight = useSharedValue(0)
+  const layoutHeight = useSharedValue(0)
+  const onEndReachedRef = useRef(onEndReached)
+  onEndReachedRef.current = onEndReached
+
+  const fireOnEndReached = useCallback(() => {
+    onEndReachedRef.current?.({ distanceFromEnd: 0 })
+  }, [])
+
+  const handleContentSizeChange = useCallback(
+    (w: number, h: number) => {
+      contentHeight.value = h
+      onContentSizeChange?.(w, h)
+    },
+    [contentHeight, onContentSizeChange]
+  )
+
+  const handleLayout = useCallback(
+    (e: LayoutChangeEvent) => {
+      layoutHeight.value = e.nativeEvent.layout.height
+    },
+    [layoutHeight]
+  )
+
+  useAnimatedReaction(
+    () => {
+      const threshold = onEndReachedThreshold ?? 0.5
+      const layout = layoutHeight.value
+      const content = contentHeight.value
+      if (layout === 0 || content === 0) return false
+      return layout + scrollY.value >= content - threshold * layout
+    },
+    (isPastEnd, wasPastEnd) => {
+      if (isPastEnd && !wasPastEnd) {
+        runOnJS(fireOnEndReached)()
+      }
+    }
+  )
+
   return (
-    <View>
+    <View onLayout={handleLayout}>
       {Platform.OS === 'ios' && onRefresh ? (
         <Portal hostName='PullToRefreshPortalHost'>
           <PullToRefresh
@@ -45,7 +99,8 @@ const CollapsibleSectionList = <ItemT,>(
         </Portal>
       ) : null}
       <Tabs.SectionList
-        {...props}
+        {...restProps}
+        onContentSizeChange={handleContentSizeChange}
         scrollToOverflowEnabled
         refreshControl={
           Platform.OS === 'ios' ? undefined : (

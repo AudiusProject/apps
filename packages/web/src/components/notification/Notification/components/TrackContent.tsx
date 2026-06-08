@@ -1,7 +1,7 @@
 import { SquareSizes } from '@audius/common/models'
 import { TrackEntity } from '@audius/common/store'
+import { Image } from '@audius/harmony'
 
-import DynamicImage from 'components/dynamic-image/DynamicImage'
 import TrackFlair, { Size } from 'components/track-flair/TrackFlair'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 
@@ -15,7 +15,7 @@ type TrackContentProps = {
 export const TrackContent = (props: TrackContentProps) => {
   const { track, hideTitle = false } = props
 
-  const image = useTrackCoverArt({
+  const { imageUrl: image } = useTrackCoverArt({
     trackId: track.track_id,
     size: SquareSizes.SIZE_150_BY_150
   })
@@ -28,10 +28,7 @@ export const TrackContent = (props: TrackContentProps) => {
         size={Size.SMALL}
         className={styles.cosign}
       >
-        <DynamicImage
-          wrapperClassName={styles.trackContentArtwork}
-          image={image}
-        />
+        <Image className={styles.trackContentArtwork} src={image} />
       </TrackFlair>
       {hideTitle ? null : (
         <span className={styles.trackContentText}>{track.title}</span>

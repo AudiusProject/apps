@@ -8,6 +8,7 @@ import { dayjs } from '@audius/common/utils'
 import { USDC } from '@audius/fixed-decimal'
 
 import { Table } from 'components/table'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 
 import payAndEarnStyles from '../PayAndEarnPage.module.css'
 import { TransactionCell, TransactionRow } from '../types'
@@ -47,7 +48,6 @@ type WithdrawalsTableProps = {
 }
 
 const defaultColumns: WithdrawalsTableColumn[] = [
-  'spacerLeft',
   'destination',
   'date',
   'amount',
@@ -92,7 +92,7 @@ const renderAmountCell = (cellInfo: TransactionCell) => {
 const tableColumnMap = {
   destination: {
     id: 'destination',
-    Header: 'Method',
+    Header: <span className={styles.methodHeader}>Method</span>,
     accessor: 'metadata',
     Cell: renderDestinationCell,
     width: 480,
@@ -176,6 +176,7 @@ export const WithdrawalsTable = ({
       scrollRef={scrollRef}
       fetchBatchSize={fetchBatchSize}
       wrapperClassName={payAndEarnStyles.tableWrapper}
+      responsiveColumns={RESPONSIVE_TABLE_POLICIES.withdrawals}
     />
   )
 }
