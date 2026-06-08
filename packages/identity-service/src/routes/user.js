@@ -131,6 +131,11 @@ module.exports = function (app) {
             { IP, timezone },
             { where: { blockchainUserId } }
           )
+          // Create a user notification setting so the user can receive notifications.
+          models.UserNotificationSettings.findOrCreate({
+            where: { userId: blockchainUserId },
+            defaults: { userId: blockchainUserId }
+          })
 
           return successResponse()
         } catch (err) {

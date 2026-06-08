@@ -399,6 +399,30 @@ const config = convict({
     default: false,
     env: 'isTestRun'
   },
+  awsAccessKeyId: {
+    doc: 'AWS access key with SNS permissions',
+    format: String,
+    default: null,
+    env: 'awsAccessKeyId'
+  },
+  awsSecretAccessKey: {
+    doc: 'AWS access key secret with SNS permissions',
+    format: String,
+    default: null,
+    env: 'awsSecretAccessKey'
+  },
+  awsSNSiOSARN: {
+    doc: 'AWS ARN for iOS in SNS',
+    format: String,
+    default: null,
+    env: 'awsSNSiOSARN'
+  },
+  awsSNSAndroidARN: {
+    doc: 'AWS ARN for Android in SNS',
+    format: String,
+    default: null,
+    env: 'awsSNSAndroidARN'
+  },
   minGasPrice: {
     doc: 'minimum gas price; 10 GWei, 10 * POA default gas price',
     format: 'nat',
