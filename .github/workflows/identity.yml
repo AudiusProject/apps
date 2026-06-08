@@ -363,22 +363,3 @@ jobs:
             git_sha=${{ github.sha }}
           cache-from: type=gha,scope=identity-service
           cache-to: type=gha,scope=identity-service,mode=max
-
-      - name: Alert Slack on failure
-        if: failure() && env.SLACK_DAILY_DEPLOY_WEBHOOK != ''
-        env:
-          SLACK_DAILY_DEPLOY_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
-          JOB_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          json_content=$(cat <<EOF
-          { "blocks": [
-            { "type": "section",
-              "text": { "type": "mrkdwn",
-                        "text": "Failed to build and push identity-service. Today's release can't move forward until this is resolved. Hint: check <${JOB_URL}|here>" }
-            }
-          ]}
-          EOF
-          )
-          curl -f -X POST -H 'Content-type: application/json' \
-            --data "$json_content" \
-            "$SLACK_DAILY_DEPLOY_WEBHOOK"
