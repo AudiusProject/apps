@@ -14,11 +14,7 @@ const config = require('../config.js')
 const WEBSITE_HOST = config.get('websiteHost')
 
 const recoveryTemplate = handlebars.compile(
-  fs
-    .readFileSync(
-      path.resolve(__dirname, '../notifications/emails/recovery.html')
-    )
-    .toString()
+  fs.readFileSync(path.resolve(__dirname, '../emails/recovery.html')).toString()
 )
 
 const toQueryStr = (obj) => {

@@ -11,7 +11,6 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "npx ts-node-dev --respawn --transpile-only src/index.ts",
-    "render:email": "rimraf src/notifications/renderEmail && babel src/notifications/components/ -d src/notifications/renderEmail",
     "db:migrate": "node src/migrationManager.js",
     "test": "./scripts/run-tests.sh",
     "test:debug": "./scripts/run-tests.sh -d",
@@ -19,7 +18,7 @@
     "report": "nyc report --reporter=html",
     "lint:fix": "eslint --fix --ext=js,ts src",
     "lint": "eslint --ext=js,ts src",
-    "copyfiles": "cp -r ./src/notifications/emails ./build/src/notifications",
+    "copyfiles": "cp -r ./src/emails ./build/src",
     "build": "tsc --project tsconfig.build.json && npm run copyfiles",
     "typecheck": "tsc",
     "typecheck:watch": "tsc --watch",
@@ -150,10 +149,7 @@
       "describe",
       "afterEach"
     ],
-    "ignore": [
-      "src/notifications/components/*",
-      "src/notifications/renderEmail/*"
-    ]
+    "ignore": []
   },
   "version": "0.0.31"
 }

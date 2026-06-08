@@ -1,4 +1,4 @@
-const { getOtpEmail } = require('../notifications/emails/otp')
+const { getOtpEmail } = require('../emails/otp')
 const { Op } = require('sequelize')
 const models = require('../models')
 

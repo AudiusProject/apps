@@ -369,24 +369,6 @@ const config = convict({
     default: '',
     env: 'entityManagerAddress'
   },
-  audiusNotificationUrl: {
-    doc: 'Url of audius notifications',
-    format: String,
-    default: null,
-    env: 'audiusNotificationUrl'
-  },
-  notificationStartBlock: {
-    doc: 'First block to start notification indexing from',
-    format: Number,
-    default: 0,
-    env: 'notificationStartBlock'
-  },
-  solanaNotificationStartSlot: {
-    doc: 'First slot to start solana notification indexing from',
-    format: Number,
-    default: 0,
-    env: 'solanaNotificationStartSlot'
-  },
   ethTokenAddress: {
     doc: 'ethTokenAddress',
     format: String,
@@ -417,30 +399,6 @@ const config = convict({
     default: false,
     env: 'isTestRun'
   },
-  awsAccessKeyId: {
-    doc: 'AWS access key with SNS permissions',
-    format: String,
-    default: null,
-    env: 'awsAccessKeyId'
-  },
-  awsSecretAccessKey: {
-    doc: 'AWS access key secret with SNS permissions',
-    format: String,
-    default: null,
-    env: 'awsSecretAccessKey'
-  },
-  awsSNSiOSARN: {
-    doc: 'AWS ARN for iOS in SNS',
-    format: String,
-    default: null,
-    env: 'awsSNSiOSARN'
-  },
-  awsSNSAndroidARN: {
-    doc: 'AWS ARN for Android in SNS',
-    format: String,
-    default: null,
-    env: 'awsSNSAndroidARN'
-  },
   minGasPrice: {
     doc: 'minimum gas price; 10 GWei, 10 * POA default gas price',
     format: 'nat',
@@ -466,42 +424,6 @@ const config = convict({
     format: String,
     default: '0xf7100',
     env: 'defaultGasLimit'
-  },
-  browserPushGCMAPIKey: {
-    doc: 'Google Cloud Messaging Browser Push Key',
-    format: String,
-    default: '',
-    env: 'browserPushGCMAPIKey'
-  },
-  browserPushVapidPublicKey: {
-    doc: 'Vapid Public Key for browser push notification',
-    format: String,
-    default: '',
-    env: 'browserPushVapidPublicKey'
-  },
-  browserPushVapidPrivateKey: {
-    doc: 'Vapid Private Key for browser push notifications',
-    format: String,
-    default: '',
-    env: 'browserPushVapidPrivateKey'
-  },
-  apnKeyId: {
-    doc: 'APN Key ID for safari browser push notifications',
-    format: String,
-    default: '',
-    env: 'apnKeyId'
-  },
-  apnTeamId: {
-    doc: 'APN Team ID for safari browser push notifications',
-    format: String,
-    default: '',
-    env: 'apnTeamId'
-  },
-  apnAuthKey: {
-    doc: 'APN Auth Key, read from a string into a file',
-    format: String,
-    default: '',
-    env: 'apnAuthKey'
   },
   environment: {
     doc: 'Determines running on development or production',
@@ -778,12 +700,6 @@ const config = convict({
     format: Number,
     env: 'clusterForkProcessCount',
     default: 1
-  },
-  minSolanaNotificationSlot: {
-    doc: 'The slot number to start indexing if no slots defined',
-    format: Number,
-    env: 'minSolanaNotificationSlot',
-    default: 166928009
   },
   successAudioReporterSlackUrl: {
     doc: 'The slack url to post messages for success in audio / rewards events',
