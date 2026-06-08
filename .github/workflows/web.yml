@@ -862,5 +862,5 @@ jobs:
           cd packages/web
           deploying_version=$(jq -r '.version' package.json)
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to web \n\" } }]}"
+          json_content="{ \"channel\": \"#eng\", \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to web \n\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK

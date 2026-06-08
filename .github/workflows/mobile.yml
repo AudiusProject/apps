@@ -595,7 +595,7 @@ jobs:
         run: |
           deploying_version=$(jq -r '.version' packages/mobile/package.json)
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed co.audius.audiusmusic.releasecandidate <${job_url}|v${deploying_version}> to mobile ios\" } }]}"
+          json_content="{ \"channel\": \"#eng\", \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed co.audius.audiusmusic.releasecandidate <${job_url}|v${deploying_version}> to mobile ios\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
 
   # Android Release Candidate: Build and upload
@@ -821,7 +821,7 @@ jobs:
         run: |
           deploying_version=$(jq -r '.version' packages/mobile/package.json)
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed releaseCandidate <${job_url}|v${deploying_version}> to mobile android\" } }]}"
+          json_content="{ \"channel\": \"#eng\", \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed releaseCandidate <${job_url}|v${deploying_version}> to mobile android\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
 
   # iOS Production: Build and upload (requires approval)
