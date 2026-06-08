@@ -18,6 +18,12 @@ type WebKitAudio = HTMLAudioElement & {
   webkitCurrentPlaybackTargetIsWireless?: boolean
 }
 
+// Safari's AirPlay availability event isn't in lib.dom; it carries an
+// `availability` field that is 'available' when a target is on the network.
+type AirplayAvailabilityEvent = Event & {
+  availability?: 'available' | 'not-available'
+}
+
 const getAudio = (): HTMLAudioElement | null => {
   if (typeof window === 'undefined') return null
   return audioPlayer?.audio ?? window.audio ?? null
@@ -66,6 +72,10 @@ export const useRemotePlayback = () => {
     const remote = getRemote()
     return !!remote && typeof remote.prompt === 'function'
   })
+  // Whether a wireless playback target (Cast/AirPlay device) is actually
+  // reachable on the network right now. Used to hide the device row when
+  // there's nothing to connect to.
+  const [available, setAvailable] = useState<boolean>(false)
 
   useEffect(() => {
     if (safari) {
@@ -128,6 +138,78 @@ export const useRemotePlayback = () => {
     }
   }, [safari])
 
+  // Track whether any wireless target is available on the network.
+  useEffect(() => {
+    if (safari) {
+      const attach = (): (() => void) | undefined => {
+        const audio = getAudio()
+        if (!audio) return undefined
+        const onAvailability = (e: Event) => {
+          setAvailable(
+            (e as AirplayAvailabilityEvent).availability === 'available'
+          )
+        }
+        // Safari fires this on registration with the current availability and
+        // again whenever a target appears/disappears.
+        audio.addEventListener(
+          'webkitplaybacktargetavailabilitychanged',
+          onAvailability
+        )
+        return () =>
+          audio.removeEventListener(
+            'webkitplaybacktargetavailabilitychanged',
+            onAvailability
+          )
+      }
+      // The audio element is created lazily; retry on the next tick if needed.
+      let cleanup = attach()
+      if (!cleanup) {
+        const t = setTimeout(() => {
+          cleanup = attach()
+        }, 0)
+        return () => {
+          clearTimeout(t)
+          cleanup?.()
+        }
+      }
+      return cleanup
+    }
+
+    let cancelled = false
+    let callbackId: number | null = null
+    const attach = () => {
+      const remote = getRemote()
+      if (!remote || typeof remote.watchAvailability !== 'function') {
+        // Can't query availability on this platform — assume a device may be
+        // present so we never hide a working cast flow.
+        setAvailable(true)
+        return
+      }
+      remote
+        .watchAvailability((isAvailable) => setAvailable(isAvailable))
+        .then((id) => {
+          if (cancelled) remote.cancelWatchAvailability(id)
+          else callbackId = id
+        })
+        .catch(() => {
+          // Monitoring unsupported (spec: rejects with NotSupportedError) —
+          // assume available rather than hiding the device row.
+          setAvailable(true)
+        })
+    }
+    let timer: ReturnType<typeof setTimeout> | null = null
+    if (!getRemote()) timer = setTimeout(attach, 0)
+    else attach()
+    return () => {
+      cancelled = true
+      if (timer) clearTimeout(timer)
+      const remote = getRemote()
+      if (remote && callbackId != null) {
+        remote.cancelWatchAvailability(callbackId)
+      }
+    }
+  }, [safari])
+
   useEffect(() => {
     dispatch(setIsCasting({ isCasting: state === 'connected' }))
   }, [state, dispatch])
@@ -151,5 +233,5 @@ export const useRemotePlayback = () => {
     }
   }, [safari])
 
-  return { state, supported, prompt }
+  return { state, supported, available, prompt }
 }

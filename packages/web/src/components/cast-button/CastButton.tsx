@@ -18,7 +18,7 @@ export const CastButton = () => {
   // tab-casts via the system picker. Track an optimistic local flag set when
   // the user successfully picks a device.
   const [pickedCast, setPickedCast] = useState(false)
-  const { supported, state, prompt } = useRemotePlayback()
+  const { supported, available, state, prompt } = useRemotePlayback()
   const isCasting =
     pickedCast || state === 'connected' || state === 'connecting'
   // Safari's `audio.remote.prompt()` opens the AirPlay picker; on Chromium
@@ -85,6 +85,7 @@ export const CastButton = () => {
         isVisible={isOpen}
         anchorRef={anchorRef}
         isCasting={isCasting}
+        castAvailable={available}
         mode={mode}
         onClose={handleClose}
         onSelectThisBrowser={handleSelectThisBrowser}

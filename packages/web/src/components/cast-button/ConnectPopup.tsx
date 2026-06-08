@@ -41,6 +41,7 @@ type ConnectPopupProps = {
   isVisible: boolean
   anchorRef: MutableRefObject<HTMLElement | null>
   isCasting: boolean
+  castAvailable: boolean
   mode: 'cast' | 'airplay'
   onClose: () => void
   onSelectThisBrowser: () => void
@@ -95,6 +96,7 @@ export const ConnectPopup = ({
   isVisible,
   anchorRef,
   isCasting,
+  castAvailable,
   mode,
   onClose,
   onSelectThisBrowser,
@@ -212,16 +214,22 @@ export const ConnectPopup = ({
             active={!isCasting}
             onClick={onSelectThisBrowser}
           />
-          <Row
-            label={
-              mode === 'airplay'
-                ? messages.airplayDevices
-                : messages.googleCastDevices
-            }
-            icon={mode === 'airplay' ? IconCastAirplay : IconSpeaker}
-            active={isCasting}
-            onClick={onSelectCastDevices}
-          />
+          {/* Only offer the device row when a target is on the network (or
+              we're already casting, so the user can disconnect). Avoids the
+              confusing "Google Cast devices" option when there's nothing to
+              connect to. */}
+          {castAvailable || isCasting ? (
+            <Row
+              label={
+                mode === 'airplay'
+                  ? messages.airplayDevices
+                  : messages.googleCastDevices
+              }
+              icon={mode === 'airplay' ? IconCastAirplay : IconSpeaker}
+              active={isCasting}
+              onClick={onSelectCastDevices}
+            />
+          ) : null}
         </Flex>
       </Flex>
     </div>,
