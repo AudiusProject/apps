@@ -15,7 +15,7 @@ import {
   Paper,
   Text
 } from '@audius/harmony-native'
-import { UserLink } from 'app/components/user-link'
+import { TrackArtists } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { LockedStatusBadge } from '../core'
@@ -46,6 +46,7 @@ export const TrackCard = (props: TrackCardProps) => {
         track,
         'title',
         'owner_id',
+        'collaborators',
         'repost_count',
         'save_count',
         'is_unlisted',
@@ -58,6 +59,7 @@ export const TrackCard = (props: TrackCardProps) => {
   const {
     title,
     owner_id,
+    collaborators,
     repost_count,
     save_count,
     is_unlisted,
@@ -99,8 +101,9 @@ export const TrackCard = (props: TrackCardProps) => {
         <Text variant='title' textAlign='center' numberOfLines={1}>
           {title}
         </Text>
-        <UserLink
+        <TrackArtists
           userId={owner_id!}
+          collaborators={collaborators}
           textAlign='center'
           style={{ justifyContent: 'center' }}
         />
