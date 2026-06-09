@@ -16,6 +16,7 @@ import {
   ID,
   Name
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import {
   cacheCollectionsActions,
   tracksSocialActions,
@@ -30,7 +31,6 @@ import {
   useHostRemixContestModal,
   QueueSource
 } from '@audius/common/store'
-import { FeatureFlags } from '@audius/common/services'
 import { Genre, Nullable, route } from '@audius/common/utils'
 import { PopupMenuItem } from '@audius/harmony'
 import { pick } from 'lodash'

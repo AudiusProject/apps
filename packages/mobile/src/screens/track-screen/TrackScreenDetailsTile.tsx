@@ -16,7 +16,6 @@ import {
   useFeatureFlag,
   useGatedContentAccess
 } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import {
   Name,
   ShareSource,
@@ -36,6 +35,7 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import {
   playbackSelectors,
