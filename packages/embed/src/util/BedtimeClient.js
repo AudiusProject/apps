@@ -112,7 +112,13 @@ export const getCollectionByPermalink = async (handle, slug, type) => {
   const res = await audiusSdk.playlists.getBulkPlaylists({
     permalink: [permalink]
   })
-  return getFormattedCollectionResponse(res.data)
+  const collection = getFormattedCollectionResponse(res.data)
+  if (!collection) return null
+  // The bulk/permalink endpoint resolves collection metadata but does not
+  // hydrate the track list (it returns an empty `tracks` array), which leaves
+  // the embed player with only a header and no playable tracks. Re-fetch the
+  // full collection by its (hash) id to get the populated track list.
+  return getCollectionWithHashId(collection.id)
 }
 
 export const getEntityEvents = async (entityId, entityType) => {
