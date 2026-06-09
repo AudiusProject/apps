@@ -7,7 +7,6 @@ import {
   useToggleFavoriteTrack,
   useTrack
 } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,
@@ -16,7 +15,6 @@ import {
   ID,
   Name
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import {
   cacheCollectionsActions,
   tracksSocialActions,
@@ -149,9 +147,6 @@ const TrackMenu = ({
   const { toast } = useContext(ToastContext)
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
-  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
-    FeatureFlags.COLLABORATIVE_TRACKS
-  )
   const { mutate: rejectTrackCollaboration } = useRejectTrackCollaboration()
   const { onOpen: openDeleteTrackConfirmation } =
     useDeleteTrackConfirmationModal()
@@ -170,7 +165,6 @@ const TrackMenu = ({
   // Whether the current user is an accepted collaborator (not the owner), and
   // can therefore remove themselves from the track.
   const isCollaborator =
-    isCollaborativeTracksEnabled &&
     !!currentUserId &&
     (partialTrack?.collaborators ?? []).some(
       (collaborator) => collaborator.user_id === currentUserId

@@ -16,7 +16,8 @@ import { UserNameLink } from './components/UserNameLink'
 
 const messages = {
   title: 'Collaboration Accepted',
-  accepted: 'accepted your invitation to collaborate on'
+  accepted: 'accepted your invitation to collaborate on',
+  aTrack: 'a track'
 }
 
 type TrackCollaboratorAcceptNotificationProps = {
@@ -38,7 +39,7 @@ export const TrackCollaboratorAcceptNotification = (
     }
   }, [dispatch, track?.permalink])
 
-  if (!collaborator || !track) return null
+  if (!collaborator) return null
 
   return (
     <NotificationTile notification={notification} onClick={handleClick}>
@@ -49,7 +50,7 @@ export const TrackCollaboratorAcceptNotification = (
       </NotificationHeader>
       <NotificationBody>
         <UserNameLink user={collaborator} notification={notification} />{' '}
-        {messages.accepted} {track.title}.
+        {messages.accepted} {track?.title ?? messages.aTrack}.
       </NotificationBody>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />
     </NotificationTile>

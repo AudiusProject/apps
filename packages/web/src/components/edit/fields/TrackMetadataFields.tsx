@@ -1,5 +1,3 @@
-import { useFeatureFlag } from '@audius/common/hooks'
-import { FeatureFlags } from '@audius/common/services'
 import { Flex } from '@audius/harmony'
 import { MAX_DESCRIPTION_LENGTH } from '@audius/sdk'
 import { useField } from 'formik'
@@ -17,9 +15,6 @@ const messages = {
 
 export const TrackMetadataFields = () => {
   const [{ value: index }] = useField('trackMetadatasIndex')
-  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
-    FeatureFlags.COLLABORATIVE_TRACKS
-  )
 
   return (
     <Flex direction='column' gap='l'>
@@ -41,9 +36,7 @@ export const TrackMetadataFields = () => {
         showMaxLength
         grows
       />
-      {isCollaborativeTracksEnabled ? (
-        <CollaboratorsField name={getTrackFieldName(index, 'collaborators')} />
-      ) : null}
+      <CollaboratorsField name={getTrackFieldName(index, 'collaborators')} />
     </Flex>
   )
 }

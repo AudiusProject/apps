@@ -18,7 +18,8 @@ import {
 
 const messages = {
   title: 'Track Collaboration Invite',
-  invitedYou: 'invited you to collaborate on'
+  invitedYou: 'invited you to collaborate on',
+  aTrack: 'a track'
 }
 
 type TrackCollaboratorInviteNotificationProps = {
@@ -38,7 +39,7 @@ export const TrackCollaboratorInviteNotification = (
     navigation.navigate(notification)
   }, [navigation, notification])
 
-  if (!inviter || !track) return null
+  if (!inviter) return null
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
@@ -48,7 +49,8 @@ export const TrackCollaboratorInviteNotification = (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <NotificationProfilePicture profile={inviter} />
         <NotificationText style={{ flexShrink: 1 }}>
-          <UserNameLink user={inviter} /> {messages.invitedYou} {track.title}.
+          <UserNameLink user={inviter} /> {messages.invitedYou}{' '}
+          {track?.title ?? messages.aTrack}.
         </NotificationText>
       </View>
     </NotificationTile>

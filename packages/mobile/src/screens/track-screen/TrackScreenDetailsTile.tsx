@@ -11,11 +11,7 @@ import {
   useTrackPageLineup,
   getTrackPageLineupQueryKey
 } from '@audius/common/api'
-import {
-  useCurrentTrack,
-  useFeatureFlag,
-  useGatedContentAccess
-} from '@audius/common/hooks'
+import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
 import {
   Name,
   ShareSource,
@@ -35,7 +31,6 @@ import type {
   User,
   TokenGatedConditions
 } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { CommonState, PlaybackTrack } from '@audius/common/store'
 import {
   playbackSelectors,
@@ -219,12 +214,8 @@ export const TrackScreenDetailsTile = ({
   } = track as Track
 
   const isOwner = ownerId === currentUserId
-  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
-    FeatureFlags.COLLABORATIVE_TRACKS
-  )
   // Accepted collaborators (not the owner) can remove themselves from a track.
   const isCollaborator =
-    isCollaborativeTracksEnabled &&
     !!currentUserId &&
     (collaborators ?? []).some(
       (collaborator) => collaborator.user_id === currentUserId

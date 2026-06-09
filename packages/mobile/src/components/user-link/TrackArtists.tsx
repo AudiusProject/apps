@@ -1,8 +1,6 @@
 import { ComponentProps, Fragment } from 'react'
 
-import { useFeatureFlag } from '@audius/common/hooks'
 import type { ID } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 
 import type { IconSize } from '@audius/harmony-native'
 import { Flex, Text } from '@audius/harmony-native'
@@ -18,15 +16,13 @@ type CollaboratorLinksProps = {
 
 /**
  * Renders accepted collaborators as comma-separated `", <UserLink>"` entries.
- * Returns null when the collaborative-tracks flag is off or there are none, so
- * it's a no-op append to an existing owner element.
+ * Returns null when there are none, so it's a no-op append to an owner element.
  */
 export const CollaboratorLinks = ({
   collaborators,
   badgeSize
 }: CollaboratorLinksProps) => {
-  const { isEnabled } = useFeatureFlag(FeatureFlags.COLLABORATIVE_TRACKS)
-  if (!isEnabled || !collaborators?.length) {
+  if (!collaborators?.length) {
     return null
   }
   return (

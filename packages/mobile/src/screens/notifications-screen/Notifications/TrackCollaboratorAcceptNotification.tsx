@@ -18,7 +18,8 @@ import {
 
 const messages = {
   title: 'Collaboration Accepted',
-  accepted: 'accepted your invitation to collaborate on'
+  accepted: 'accepted your invitation to collaborate on',
+  aTrack: 'a track'
 }
 
 type TrackCollaboratorAcceptNotificationProps = {
@@ -38,7 +39,7 @@ export const TrackCollaboratorAcceptNotification = (
     navigation.navigate(notification)
   }, [navigation, notification])
 
-  if (!collaborator || !track) return null
+  if (!collaborator) return null
 
   return (
     <NotificationTile notification={notification} onPress={handlePress}>
@@ -48,7 +49,8 @@ export const TrackCollaboratorAcceptNotification = (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <NotificationProfilePicture profile={collaborator} />
         <NotificationText style={{ flexShrink: 1 }}>
-          <UserNameLink user={collaborator} /> {messages.accepted} {track.title}.
+          <UserNameLink user={collaborator} /> {messages.accepted}{' '}
+          {track?.title ?? messages.aTrack}.
         </NotificationText>
       </View>
     </NotificationTile>

@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useUpdateTrack } from '@audius/common/api'
-import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
-import { FeatureFlags } from '@audius/common/services'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
@@ -98,9 +96,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   const styles = useStyles()
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
-    FeatureFlags.COLLABORATIVE_TRACKS
-  )
 
   // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
@@ -364,7 +359,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
                 </SubmenuList>
                 <TagField />
                 <DescriptionField />
-                {isCollaborativeTracksEnabled ? <CollaboratorField /> : null}
+                <CollaboratorField />
                 <SubmenuList removeBottomDivider>
                   <VisibilityField />
                   <PriceAndAudienceField />
