@@ -25,7 +25,9 @@ describe('generateVerificationToken', () => {
   })
 
   it('produces unique tokens on each call', () => {
-    const tokens = new Set(Array.from({ length: 20 }, generateVerificationToken))
+    const tokens = new Set(
+      Array.from({ length: 20 }, generateVerificationToken)
+    )
     assert.strictEqual(tokens.size, 20)
   })
 })
@@ -47,10 +49,7 @@ describe('hashToken', () => {
 
   it('matches crypto.createHash("sha256") directly', () => {
     const token = 'test-token-value'
-    const expected = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex')
+    const expected = crypto.createHash('sha256').update(token).digest('hex')
     assert.strictEqual(hashToken(token), expected)
   })
 })

@@ -1,8 +1,6 @@
 const crypto = require('crypto')
 const config = require('../config')
-const {
-  getEmailVerificationEmail
-} = require('../emails/emailVerification')
+const { getEmailVerificationEmail } = require('../emails/emailVerification')
 
 const TOKEN_BYTES = 32
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000

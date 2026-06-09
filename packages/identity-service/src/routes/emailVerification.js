@@ -56,7 +56,7 @@ module.exports = function (app) {
 
       return redirectTo('success')
     } catch (err) {
-      (req.logger || console).error('Error verifying email', err)
+      ;(req.logger || console).error('Error verifying email', err)
       return redirectTo('error')
     }
   })
