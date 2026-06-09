@@ -219,11 +219,17 @@ export interface SearchTrack {
      */
     title: string;
     /**
-     * 
+     *
      * @type {User}
      * @memberof SearchTrack
      */
     user: User;
+    /**
+     * Accepted collaborator artists on the track.
+     * @type {Array<User>}
+     * @memberof SearchTrack
+     */
+    collaborators?: Array<User>;
     /**
      * 
      * @type {number}
@@ -670,6 +676,7 @@ export function SearchTrackFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'tags': !exists(json, 'tags') ? undefined : json['tags'],
         'title': json['title'],
         'user': UserFromJSON(json['user']),
+        'collaborators': !exists(json, 'collaborators') ? undefined : ((json['collaborators'] as Array<any>).map(UserFromJSON)),
         'duration': json['duration'],
         'isDownloadable': json['is_downloadable'],
         'playCount': json['play_count'],
@@ -762,6 +769,7 @@ export function SearchTrackToJSON(value?: SearchTrack | null): any {
         'tags': value.tags,
         'title': value.title,
         'user': UserToJSON(value.user),
+        'collaborators': value.collaborators === undefined ? undefined : ((value.collaborators as Array<any>).map(UserToJSON)),
         'duration': value.duration,
         'is_downloadable': value.isDownloadable,
         'play_count': value.playCount,

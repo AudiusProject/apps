@@ -138,13 +138,8 @@ export const userTrackMetadataFromSDK = (
       : null,
     track_segments: input.trackSegments.map(trackSegmentFromSDK),
     user,
-    // Accepted collaborator artists, same SDK shape as `user`. The API field is
-    // not yet in the generated SDK Track type, so it's accessed via a local
-    // extension; each is decoded/cleaned like the owner.
-    collaborators: transformAndCleanList(
-      (input as { collaborators?: (typeof input)['user'][] }).collaborators,
-      userMetadataFromSDK
-    ),
+    // Accepted collaborator artists, decoded/cleaned like the owner.
+    collaborators: transformAndCleanList(input.collaborators, userMetadataFromSDK),
 
     // Retypes
     license: (input.license as License) ?? null,
