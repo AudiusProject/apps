@@ -33,7 +33,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Draggable } from 'components/dragndrop'
-import { TextLink, UserLink } from 'components/link'
+import { TextLink, TrackArtists } from 'components/link'
 import Menu from 'components/menu/Menu'
 import Skeleton from 'components/skeleton/Skeleton'
 import { TrackArtwork } from 'components/track/Artwork'
@@ -418,8 +418,9 @@ export const TrackTile = ({
                   {isLoading ? (
                     <Skeleton width='50%' height='20px' noShimmer={noShimmer} />
                   ) : (
-                    <UserLink
+                    <TrackArtists
                       userId={user_id}
+                      collaborators={track?.collaborators}
                       badgeSize='xs'
                       isActive={isActive}
                       aria-label={partialUser?.name}

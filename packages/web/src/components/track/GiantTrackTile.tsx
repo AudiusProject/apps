@@ -47,7 +47,7 @@ import { pick } from 'lodash'
 import { useToggle } from 'react-use'
 import useMeasure from 'react-use-measure'
 
-import { UserLink } from 'components/link'
+import { TrackArtists } from 'components/link'
 import Menu from 'components/menu/Menu'
 import { SearchTag } from 'components/search-bar/SearchTag'
 import Skeleton from 'components/skeleton/Skeleton'
@@ -190,6 +190,9 @@ export const GiantTrackTile = ({
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)
   const { data: track } = useTrack(trackId, {
     select: (track) => pick(track, ['is_downloadable', 'preview_cid'])
+  })
+  const { data: collaborators } = useTrack(trackId, {
+    select: (track) => track.collaborators
   })
   const shouldShowDownloadSection = !!track?.is_downloadable
   // Preview button is shown for USDC-gated tracks if user does not have access
@@ -539,7 +542,11 @@ export const GiantTrackTile = ({
                   }}
                 >
                   <Text color='subdued'>By </Text>
-                  <UserLink userId={userId} popover />
+                  <TrackArtists
+                    userId={userId}
+                    collaborators={collaborators}
+                    popover
+                  />
                 </Text>
               </Flex>
               <div

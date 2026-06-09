@@ -263,6 +263,10 @@ export type TrackMetadata = {
     playlist_name: string
     permalink: string
   }
+
+  // Accepted collaborator artists (collaborative tracks). Embedded by the API,
+  // same shape as `user` (the track owner). Empty when there are none.
+  collaborators?: UserMetadata[]
 } & Timestamped
 
 export type WriteableTrackMetadata = TrackMetadata & {

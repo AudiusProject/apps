@@ -16,7 +16,8 @@ export enum FeatureFlags {
   COLLAPSED_EXPLORE_HEADER = 'collapsed_explore_header',
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
   FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
-  QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge'
+  QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge',
+  COLLABORATIVE_TRACKS = 'collaborative_tracks'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -49,5 +50,6 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.COLLAPSED_EXPLORE_HEADER]: false,
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
-  [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false
+  [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false,
+  [FeatureFlags.COLLABORATIVE_TRACKS]: false
 }
