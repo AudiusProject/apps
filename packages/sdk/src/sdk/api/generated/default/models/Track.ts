@@ -219,7 +219,7 @@ export interface Track {
      */
     title: string;
     /**
-     *
+     * 
      * @type {User}
      * @memberof Track
      */

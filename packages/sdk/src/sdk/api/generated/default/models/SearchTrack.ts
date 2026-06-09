@@ -219,7 +219,7 @@ export interface SearchTrack {
      */
     title: string;
     /**
-     *
+     * 
      * @type {User}
      * @memberof SearchTrack
      */
