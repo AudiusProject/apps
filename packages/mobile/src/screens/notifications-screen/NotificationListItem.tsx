@@ -25,6 +25,8 @@ import {
   USDCPurchaseBuyerNotification,
   ApproveManagerRequestNotification,
   RequestManagerNotification,
+  TrackCollaboratorInviteNotification,
+  TrackCollaboratorAcceptNotification,
   CommentNotification,
   CommentThreadNotification,
   CommentMentionNotification,
@@ -97,6 +99,14 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return <RequestManagerNotification notification={notification} />
       case NotificationType.ApproveManagerRequest:
         return <ApproveManagerRequestNotification notification={notification} />
+      case NotificationType.TrackCollaboratorInvite:
+        return (
+          <TrackCollaboratorInviteNotification notification={notification} />
+        )
+      case NotificationType.TrackCollaboratorAccept:
+        return (
+          <TrackCollaboratorAcceptNotification notification={notification} />
+        )
       case NotificationType.Comment:
         return <CommentNotification notification={notification} />
       case NotificationType.CommentThread:

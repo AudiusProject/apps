@@ -33,6 +33,8 @@ import type {
   USDCPurchaseSellerNotification,
   RequestManagerNotification,
   ApproveManagerRequestNotification,
+  TrackCollaboratorInviteNotification,
+  TrackCollaboratorAcceptNotification,
   CommentNotification,
   CommentMentionNotification,
   CommentThreadNotification,
@@ -355,6 +357,22 @@ export const useNotificationNavigation = () => {
       },
       [NotificationType.ApproveManagerRequest]: userIdHandler,
       [NotificationType.RequestManager]: userIdHandler,
+      [NotificationType.TrackCollaboratorInvite]: (
+        notification: TrackCollaboratorInviteNotification
+      ) => {
+        navigation.navigate('Track', {
+          trackId: notification.trackId,
+          canBeUnlisted: false
+        })
+      },
+      [NotificationType.TrackCollaboratorAccept]: (
+        notification: TrackCollaboratorAcceptNotification
+      ) => {
+        navigation.navigate('Track', {
+          trackId: notification.trackId,
+          canBeUnlisted: false
+        })
+      },
       [PushNotificationType.Message]: messagesHandler,
       [PushNotificationType.MessageReaction]: messagesHandler,
       [NotificationType.Comment]: entityHandler,

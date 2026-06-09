@@ -34,6 +34,8 @@ import { RemixCreateNotification } from './RemixCreateNotification'
 import { RepostNotification } from './RepostNotification'
 import { RepostOfRepostNotification } from './RepostOfRepostNotification'
 import { RequestManagerNotification } from './RequestManagerNotification'
+import { TrackCollaboratorAcceptNotification } from './TrackCollaboratorAcceptNotification'
+import { TrackCollaboratorInviteNotification } from './TrackCollaboratorInviteNotification'
 import { TastemakerNotification } from './TastemakerNotification'
 import { TierChangeNotification } from './TierChangeNotification'
 import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedAlbumNotification'
@@ -111,6 +113,16 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.ApproveManagerRequest: {
         return <ApproveManagerNotification notification={notification} />
+      }
+      case NotificationType.TrackCollaboratorInvite: {
+        return (
+          <TrackCollaboratorInviteNotification notification={notification} />
+        )
+      }
+      case NotificationType.TrackCollaboratorAccept: {
+        return (
+          <TrackCollaboratorAcceptNotification notification={notification} />
+        )
       }
       case NotificationType.AddTrackToPlaylist: {
         return <AddTrackToPlaylistNotification notification={notification} />

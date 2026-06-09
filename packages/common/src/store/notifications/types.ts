@@ -39,6 +39,8 @@ export enum NotificationType {
   USDCPurchaseBuyer = 'USDCPurchaseBuyer',
   RequestManager = 'RequestManager',
   ApproveManagerRequest = 'ApproveManagerRequest',
+  TrackCollaboratorInvite = 'TrackCollaboratorInvite',
+  TrackCollaboratorAccept = 'TrackCollaboratorAccept',
   Comment = 'Comment',
   CommentThread = 'CommentThread',
   CommentMention = 'CommentMention',
@@ -85,6 +87,8 @@ export enum PushNotificationType {
   MessageReaction = 'MessageReaction',
   RequestManager = 'RequestManager',
   ApproveManagerRequest = 'ApproveManagerRequest',
+  TrackCollaboratorInvite = 'TrackCollaboratorInvite',
+  TrackCollaboratorAccept = 'TrackCollaboratorAccept',
   Comment = 'Comment',
   CommentThread = 'CommentThread',
   CommentMention = 'CommentMention',
@@ -548,6 +552,18 @@ export type ApproveManagerRequestNotification = BaseNotification & {
   userId: ID
 }
 
+export type TrackCollaboratorInviteNotification = BaseNotification & {
+  type: NotificationType.TrackCollaboratorInvite
+  trackId: ID
+  inviterUserId: ID
+}
+
+export type TrackCollaboratorAcceptNotification = BaseNotification & {
+  type: NotificationType.TrackCollaboratorAccept
+  trackId: ID
+  collaboratorUserId: ID
+}
+
 export type CommentNotification = BaseNotification & {
   type: NotificationType.Comment
   entityId: ID
@@ -686,6 +702,8 @@ export type Notification =
   | USDCPurchaseBuyerNotification
   | RequestManagerNotification
   | ApproveManagerRequestNotification
+  | TrackCollaboratorInviteNotification
+  | TrackCollaboratorAcceptNotification
   | CommentNotification
   | CommentThreadNotification
   | CommentMentionNotification
