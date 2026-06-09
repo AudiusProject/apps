@@ -338,6 +338,11 @@ export const trackMetadataForUploadToSdk = (
           }))
         }
       : undefined,
+    // Collaborators are tagged as full user objects in the form; the on-chain
+    // metadata carries numeric user ids, which the ETL reconciles into invites.
+    collaborators: input.collaborators
+      ? input.collaborators.map((collaborator) => collaborator.user_id)
+      : undefined,
     stemOf: input.stem_of
       ? {
           category: input.stem_of.category,
