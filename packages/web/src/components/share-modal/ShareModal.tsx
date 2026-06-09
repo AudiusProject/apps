@@ -94,7 +94,7 @@ export const ShareModal = NiceModal.create(() => {
         // Contest copy-link uses the dedicated `shareContest` saga,
         // which writes the contest URL (`{permalink}/contest`) to
         // the clipboard rather than the track permalink.
-        dispatch(shareContest(content.track.track_id, source))
+        dispatch(shareContest(content.track.track_id, source, content.eventPermalink))
         break
       case 'profile':
         dispatch(shareUser(content.profile.user_id, source))

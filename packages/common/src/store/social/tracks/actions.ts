@@ -129,5 +129,9 @@ export const shareTrack = createCustomAction(
  */
 export const shareContest = createCustomAction(
   SHARE_CONTEST,
-  (trackId: ID, source: ShareSource) => ({ trackId, source })
+  (trackId: ID, source: ShareSource, eventPermalink?: string) => ({
+    trackId,
+    source,
+    eventPermalink
+  })
 )

@@ -216,7 +216,8 @@ export const ContestScreen = () => {
       shareModalUIActions.requestOpen({
         type: 'contest',
         trackId,
-        source: ShareSource.PAGE
+        source: ShareSource.PAGE,
+        ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
   }, [dispatch, trackId])

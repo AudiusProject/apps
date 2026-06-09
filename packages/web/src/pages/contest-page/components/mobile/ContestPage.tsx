@@ -300,7 +300,8 @@ const ContestPage = ({
       shareModalUIActions.requestOpen({
         type: 'contest',
         trackId,
-        source: ShareSource.PAGE
+        source: ShareSource.PAGE,
+        ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
   }, [dispatch, trackId])
@@ -505,7 +506,7 @@ const ContestPage = ({
   return (
     <Page
       title={messages.title}
-      canonicalUrl={fullContestPage(track.permalink)}
+      canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
       variant='flush'
     >
       {/* Top section: hero banner + meta (title, CTA, deadline,

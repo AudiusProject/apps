@@ -405,7 +405,8 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
       shareModalUIActions.requestOpen({
         type: 'contest',
         trackId,
-        source: ShareSource.PAGE
+        source: ShareSource.PAGE,
+        ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
   }, [dispatch, trackId])
@@ -490,7 +491,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return (
       <Page
         title={messages.title}
-        canonicalUrl={fullContestPage(track.permalink)}
+        canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
         variant='flush'
       >
         <Box
@@ -554,7 +555,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   return (
     <Page
       title={messages.title}
-      canonicalUrl={fullContestPage(track.permalink)}
+      canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
       variant='flush'
     >
       {/* Content is centered to MAX_CONTENT_WIDTH and sits on the
