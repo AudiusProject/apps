@@ -11,7 +11,12 @@ import {
   useTrackPageLineup,
   getTrackPageLineupQueryKey
 } from '@audius/common/api'
-import { useCurrentTrack, useGatedContentAccess } from '@audius/common/hooks'
+import {
+  useCurrentTrack,
+  useFeatureFlag,
+  useGatedContentAccess
+} from '@audius/common/hooks'
+import { FeatureFlags } from '@audius/common/services'
 import {
   Name,
   ShareSource,
@@ -209,10 +214,21 @@ export const TrackScreenDetailsTile = ({
     is_scheduled_release: isScheduledRelease,
     _is_publishing,
     preview_cid,
-    album_backlink
+    album_backlink,
+    collaborators
   } = track as Track
 
   const isOwner = ownerId === currentUserId
+  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
+    FeatureFlags.COLLABORATIVE_TRACKS
+  )
+  // Accepted collaborators (not the owner) can remove themselves from a track.
+  const isCollaborator =
+    isCollaborativeTracksEnabled &&
+    !!currentUserId &&
+    (collaborators ?? []).some(
+      (collaborator) => collaborator.user_id === currentUserId
+    )
   const hideFavorite = isUnlisted || !hasStreamAccess
   const hideRepost = isUnlisted || !isReachable || !hasStreamAccess
   const hideOverflow = !isReachable || (isUnlisted && !isOwner)
@@ -497,7 +513,8 @@ export const TrackScreenDetailsTile = ({
       isOwner && isScheduledRelease && isUnlisted
         ? OverflowAction.RELEASE_NOW
         : null,
-      isOwner && !ddexApp ? OverflowAction.DELETE_TRACK : null
+      isOwner && !ddexApp ? OverflowAction.DELETE_TRACK : null,
+      isCollaborator ? OverflowAction.LEAVE_TRACK_COLLABORATION : null
     ].filter(removeNullable)
 
     dispatch(

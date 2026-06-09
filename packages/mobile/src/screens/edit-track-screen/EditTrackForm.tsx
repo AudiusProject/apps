@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useUpdateTrack } from '@audius/common/api'
+import { useFeatureFlag } from '@audius/common/hooks'
 import { DownloadQuality, Name } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
@@ -47,7 +49,8 @@ import {
   TagField,
   SubmenuList,
   RemixSettingsField,
-  AdvancedField
+  AdvancedField,
+  CollaboratorField
 } from './fields'
 import type { EditTrackFormProps } from './types'
 import { getUploadMetadataFromFormValues } from './util'
@@ -95,6 +98,9 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
   const styles = useStyles()
   const navigation = useNavigation()
   const dispatch = useDispatch()
+  const { isEnabled: isCollaborativeTracksEnabled } = useFeatureFlag(
+    FeatureFlags.COLLABORATIVE_TRACKS
+  )
 
   // Use track file selector directly like web version
   const { track: selectedTrack, selectFile } = useTrackFileSelector()
@@ -358,6 +364,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
                 </SubmenuList>
                 <TagField />
                 <DescriptionField />
+                {isCollaborativeTracksEnabled ? <CollaboratorField /> : null}
                 <SubmenuList removeBottomDivider>
                   <VisibilityField />
                   <PriceAndAudienceField />

@@ -56,6 +56,10 @@ const overflowRowConfig = ({
   [OverflowAction.EDIT_TRACK]: { text: 'Edit Track' },
   [OverflowAction.RELEASE_NOW]: { text: 'Release Now' },
   [OverflowAction.DELETE_TRACK]: { text: 'Delete Track', isDestructive: true },
+  [OverflowAction.LEAVE_TRACK_COLLABORATION]: {
+    text: 'Remove Me as Collaborator',
+    isDestructive: true
+  },
   [OverflowAction.VIEW_EPISODE_PAGE]: { text: 'View Episode Page' },
   [OverflowAction.MARK_AS_PLAYED]: { text: 'Mark as Played' },
   [OverflowAction.MARK_AS_UNPLAYED]: { text: 'Mark as Unplayed' },
