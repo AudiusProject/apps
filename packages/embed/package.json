@@ -10,6 +10,7 @@
     "build:prod": "env-cmd -f .env.prod turbo run build && npm run build-api && mv build build-production",
     "build-api": "webpack --config src/api/webpack.config.js -o build/api.js",
     "deploy:prod": "npx wrangler publish --env production",
+    "test": "jest",
     "lint:fix": "eslint --cache --fix --ext=js,jsx,ts,tsx src",
     "lint": "eslint --cache --ext=js,jsx,ts,tsx src",
     "lint:env": "dotenv-linter",
