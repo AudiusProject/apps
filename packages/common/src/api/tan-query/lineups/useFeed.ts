@@ -107,8 +107,23 @@ export const useFeed = (
       )
     },
     select: (data) => data?.pages.flat(),
+    // Keep the loaded feed stable for 5 minutes. Without a staleTime the
+    // react-query default of 0 causes the query to refetch on the next
+    // mount/focus right after the first paint. If that refetch settles
+    // empty (transient backend result, or a different validator node in
+    // the fleet returning nothing), react-query replaces the populated
+    // feed with `[]` — the same blank-feed bug fixed in useForYouFeed
+    // via staleTime: Infinity. 5 minutes is used here instead because
+    // the "Latest" feed is chronological and users expect fresh content
+    // when they return after a while; Infinity would suppress that.
+    // Callers can override via options.staleTime if needed.
+    staleTime: 5 * 60 * 1000,
     ...options,
-    enabled: currentUserId !== null
+    // Require a fully-resolved id (`!= null` excludes `undefined`). While
+    // the account is still loading `currentUserId` is `undefined`; running
+    // the query then would cache `[]` under the `[feed, undefined]` key —
+    // an entry a later render could briefly surface as "no content".
+    enabled: options?.enabled !== false && currentUserId != null
   })
 
   const data = query.data ?? []
