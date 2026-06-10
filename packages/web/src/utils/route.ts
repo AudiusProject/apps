@@ -65,9 +65,13 @@ export const fullPickWinnersPage = (permalink: string) => {
 }
 
 export const contestPage = (permalink: string) => {
-  // Permalink shape: `/{handle}/{slug}`. Contest URL injects the literal
+  // If permalink already contains a "contest" segment (i.e. it came from
+  // event_routes rather than track_routes) return it as-is.
+  const parts = permalink.split('/')
+  if (parts.includes('contest')) return permalink
+  // Track permalink shape: `/{handle}/{slug}`. Inject the literal
   // "contest" segment between handle and slug → `/{handle}/contest/{slug}`.
-  const [, handle, ...rest] = permalink.split('/')
+  const [, handle, ...rest] = parts
   return `/${handle}/contest/${rest.join('/')}`
 }
 export const fullContestPage = (permalink: string) => {

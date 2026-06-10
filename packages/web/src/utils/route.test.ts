@@ -40,3 +40,16 @@ describe('CONTEST_PAGE route pattern', () => {
     expect(CONTEST_PAGE).not.toBe(TRACK_REMIXES_PAGE)
   })
 })
+
+describe('contestPage with event permalink passthrough', () => {
+  it('returns an event-routes permalink unchanged when it already contains contest', () => {
+    // event_routes produces slugs like /Protohype/best-remix-contest
+    // which already contain a 'contest' segment -- return as-is.
+    expect(contestPage('/Protohype/contest/best-remix-contest')).toBe(
+      '/Protohype/contest/best-remix-contest'
+    )
+  })
+  it('still rewrites a plain track permalink when no contest segment exists', () => {
+    expect(contestPage('/Artist/my-track')).toBe('/Artist/contest/my-track')
+  })
+})

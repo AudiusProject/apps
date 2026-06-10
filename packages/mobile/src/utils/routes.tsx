@@ -16,11 +16,16 @@ export const getTrackRoute = (
 }
 
 export const getContestRoute = (
-  track: { permalink: string },
+  track: { permalink: string; contestPermalink?: string },
   fullUrl = false
 ) => {
-  // Permalink shape: `/{handle}/{slug}` → contest URL is
-  // `/{handle}/contest/{slug}`. Mirror the web `contestPage` helper.
+  // If the event has its own permalink from event_routes, use it directly.
+  if (track.contestPermalink) {
+    const route = track.contestPermalink
+    return fullUrl ? `${AUDIUS_URL}${route}` : route
+  }
+  // Fallback: derive contest URL from the track permalink.
+  // `/{handle}/{slug}` → `/{handle}/contest/{slug}`.
   const [, handle, ...rest] = track.permalink.split('/')
   const route = `/${handle}/contest/${rest.join('/')}`
   return fullUrl ? `${AUDIUS_URL}${route}` : route

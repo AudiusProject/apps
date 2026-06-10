@@ -79,6 +79,13 @@ export interface Event {
      * @memberof Event
      */
     eventData: object;
+    /**
+     * Canonical contest permalink derived from event_routes.
+     * Optional - absent until the API begins returning this field.
+     * @type {string}
+     * @memberof Event
+     */
+    permalink?: string;
 }
 
 
@@ -138,6 +145,7 @@ export function EventFromJSONTyped(json: any, ignoreDiscriminator: boolean): Eve
         'createdAt': json['created_at'],
         'updatedAt': json['updated_at'],
         'eventData': json['event_data'],
+        'permalink': !exists(json, 'permalink') ? undefined : json['permalink'],
     };
 }
 
@@ -160,6 +168,7 @@ export function EventToJSON(value?: Event | null): any {
         'created_at': value.createdAt,
         'updated_at': value.updatedAt,
         'event_data': value.eventData,
+        'permalink': value.permalink,
     };
 }
 
