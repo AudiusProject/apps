@@ -304,7 +304,7 @@ const ContestPage = ({
         ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
-  }, [dispatch, trackId])
+  }, [contest?.permalink, dispatch, trackId])
 
   const { imageUrl: trackCoverArtUrl } = useTrackCoverArt({
     trackId,
@@ -393,7 +393,7 @@ const ContestPage = ({
     if (trackId) {
       dispatch(remixesPageActions.fetchTrackSucceeded({ trackId }))
     }
-  }, [dispatch, trackId])
+  }, [contest?.permalink, dispatch, trackId])
 
   useEffect(() => {
     return function cleanup() {

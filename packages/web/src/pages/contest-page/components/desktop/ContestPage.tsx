@@ -306,7 +306,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     if (trackId) {
       dispatch(fetchTrackSucceeded({ trackId }))
     }
-  }, [dispatch, trackId])
+  }, [contest?.permalink, dispatch, trackId])
 
   useEffect(() => {
     return function cleanup() {
@@ -409,7 +409,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
         ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
-  }, [dispatch, trackId])
+  }, [contest?.permalink, dispatch, trackId])
 
   const renderActions = useCallback(() => {
     if (!eventId) return null
