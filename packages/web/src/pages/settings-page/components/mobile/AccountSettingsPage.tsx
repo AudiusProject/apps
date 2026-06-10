@@ -45,6 +45,14 @@ const messages = {
   recoveryButtonTitle: 'Resend Recovery Email',
   recoveryEmailSent: 'Recovery Email Sent!',
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
+  emailVerificationTitle: 'Email Verification',
+  emailVerificationDescription:
+    'Verify that you can receive email at the address connected to your Audius account.',
+  emailVerificationButtonTitle: 'Resend Verification Email',
+  emailVerificationSent: 'Verification email sent!',
+  emailVerificationAlreadyVerified: 'Your email is already verified.',
+  emailVerificationNotSent:
+    'Unable to send verification email. Please try again!',
   verifyTitle: 'Verify Your Account',
   verifyDescription:
     'Verify your Audius profile by completing identity verification',
@@ -140,6 +148,8 @@ const AccountSettingsPage = () => {
   })
   const { userId, handle, name } = accountData ?? {}
   const [showModalSignOut, setShowModalSignOut] = useState(false)
+  const [isSendingVerificationEmail, setIsSendingVerificationEmail] =
+    useState(false)
   const { toast } = useContext(ToastContext)
   const { isVerified } = useTierAndVerifiedForUser(userId)
 
@@ -173,6 +183,22 @@ const AccountSettingsPage = () => {
     [authService, identityService, toast, record]
   )
 
+  const onClickResendVerificationEmail = useCallback(async () => {
+    setIsSendingVerificationEmail(true)
+    try {
+      const result = await identityService.resendEmailVerification()
+      toast(
+        result.alreadyVerified
+          ? messages.emailVerificationAlreadyVerified
+          : messages.emailVerificationSent
+      )
+    } catch (e) {
+      toast(messages.emailVerificationNotSent)
+    } finally {
+      setIsSendingVerificationEmail(false)
+    }
+  }, [identityService, toast])
+
   const goToChangePasswordSettingsPage = useCallback(() => {
     goToRoute(CHANGE_PASSWORD_SETTINGS_PAGE)
   }, [goToRoute])
@@ -205,6 +231,14 @@ const AccountSettingsPage = () => {
           description={messages.recoveryDescription}
           buttonTitle={messages.recoveryButtonTitle}
           onClick={onClickRecover}
+        />
+        <AccountSettingsItem
+          icon={IconEmailAddress}
+          title={messages.emailVerificationTitle}
+          description={messages.emailVerificationDescription}
+          buttonTitle={messages.emailVerificationButtonTitle}
+          onClick={onClickResendVerificationEmail}
+          disabled={isSendingVerificationEmail}
         />
         <AccountSettingsItem
           icon={IconVerified}

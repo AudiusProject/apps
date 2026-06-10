@@ -1,7 +1,8 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import {
   useCurrentAccountUser,
+  useQueryContext,
   useResendRecoveryEmail
 } from '@audius/common/api'
 import { modalsActions, useTierAndVerifiedForUser } from '@audius/common/store'
@@ -43,6 +44,14 @@ const messages = {
   recoveryButtonTitle: 'Resend Recovery Email',
   recoveryEmailSent: 'Recovery Email Sent!',
   recoveryEmailNotSent: 'Unable to send recovery email. Please try again!',
+  emailVerificationTitle: 'Email Verification',
+  emailVerificationDescription:
+    'Verify that you can receive email at the address connected to your Audius account.',
+  emailVerificationButtonTitle: 'Resend Verification Email',
+  emailVerificationSent: 'Verification email sent!',
+  emailVerificationAlreadyVerified: 'Your email is already verified.',
+  emailVerificationNotSent:
+    'Unable to send verification email. Please try again!',
   verifyTitle: 'Verification',
   verifyDescription:
     'Verify your Audius profile by completing identity verification.',
@@ -78,6 +87,9 @@ export const AccountSettingsScreen = () => {
   const styles = useStyles()
   const { toast } = useToast()
   const dispatch = useDispatch()
+  const { identityService } = useQueryContext()
+  const [isSendingVerificationEmail, setIsSendingVerificationEmail] =
+    useState(false)
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => pick(user, ['user_id', 'handle', 'name'])
   })
@@ -101,6 +113,23 @@ export const AccountSettingsScreen = () => {
       onError: () => toast({ content: messages.recoveryEmailNotSent })
     })
   }, [resendRecoveryEmail, toast])
+
+  const handlePressEmailVerification = useCallback(async () => {
+    setIsSendingVerificationEmail(true)
+    try {
+      const result = await identityService.resendEmailVerification()
+      toast({
+        content: result.alreadyVerified
+          ? messages.emailVerificationAlreadyVerified
+          : messages.emailVerificationSent,
+        type: 'info'
+      })
+    } catch (e) {
+      toast({ content: messages.emailVerificationNotSent, type: 'error' })
+    } finally {
+      setIsSendingVerificationEmail(false)
+    }
+  }, [identityService, toast])
 
   const handlePressChangeEmail = useCallback(() => {
     navigation.push('ChangeEmail')
@@ -154,6 +183,14 @@ export const AccountSettingsScreen = () => {
             description={messages.recoveryDescription}
             buttonTitle={messages.recoveryButtonTitle}
             onPress={handlePressRecoveryEmail}
+          />
+          <AccountSettingsItem
+            title={messages.emailVerificationTitle}
+            titleIcon={IconEmailAddress}
+            description={messages.emailVerificationDescription}
+            buttonTitle={messages.emailVerificationButtonTitle}
+            onPress={handlePressEmailVerification}
+            disabled={isSendingVerificationEmail}
           />
           <AccountSettingsItem
             title={messages.verifyTitle}

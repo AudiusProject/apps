@@ -219,6 +219,7 @@ const ContestsPage = lazy(() =>
   }))
 )
 const SettingsPage = lazy(() => import('pages/settings-page/SettingsPage'))
+const VerifyEmailPage = lazy(() => import('pages/verify-email-page'))
 const TrackCommentsPage = lazy(() =>
   import('pages/track-page/TrackCommentsPage').then((m) => ({
     default: m.TrackCommentsPage
@@ -294,6 +295,7 @@ const {
   COIN_EXCLUSIVE_TRACKS_PAGE,
   COIN_EXCLUSIVE_TRACKS_MOBILE_ROUTE,
   CHECK_PAGE,
+  EMAIL_VERIFICATION_PAGE,
   TRENDING_PLAYLISTS_PAGE,
   TRENDING_PLAYLISTS_PAGE_LEGACY,
   DEACTIVATE_PAGE,
@@ -1055,6 +1057,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={LABEL_ACCOUNT_SETTINGS_PAGE}
                   element={<SettingsPage containerRef={mainContentRef} />}
                 />
+                <Route
+                  path={EMAIL_VERIFICATION_PAGE}
+                  element={<VerifyEmailPage />}
+                />
                 <Route path={CHECK_PAGE} element={<CheckPage />} />
                 {isMobile ? (
                   <>
@@ -1511,6 +1517,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route
                   path={LABEL_ACCOUNT_SETTINGS_PAGE}
                   element={<SettingsPage containerRef={mainContentRef} />}
+                />
+                <Route
+                  path={EMAIL_VERIFICATION_PAGE}
+                  element={<VerifyEmailPage />}
                 />
                 <Route path={CHECK_PAGE} element={<CheckPage />} />
                 <Route
