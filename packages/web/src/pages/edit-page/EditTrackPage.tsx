@@ -116,6 +116,13 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
+    // Seed the editable collaborators with accepted + still-pending invites, so
+    // saving doesn't drop pending ones (the ETL reconciles the metadata set on
+    // update). `pending_collaborators` is only populated for the track owner.
+    collaborators: [
+      ...(track?.collaborators ?? []),
+      ...(track?.pending_collaborators ?? [])
+    ],
     genre: (track?.genre as Genre) ?? '',
     mood: (track?.mood as Mood) ?? null,
     artwork: {

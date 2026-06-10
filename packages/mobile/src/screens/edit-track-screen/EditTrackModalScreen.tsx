@@ -45,6 +45,13 @@ export const EditTrackModalScreen = () => {
 
   const initialValues = {
     ...track,
+    // Seed the editable collaborators with accepted + still-pending invites so
+    // saving doesn't drop pending ones (the ETL reconciles the set on update).
+    // `pending_collaborators` is only populated for the track owner.
+    collaborators: [
+      ...(track.collaborators ?? []),
+      ...(track.pending_collaborators ?? [])
+    ],
     artwork: null,
     trackArtwork:
       trackImage && trackImage.source && isImageUriSource(trackImage.source)

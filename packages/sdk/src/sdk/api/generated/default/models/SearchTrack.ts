@@ -231,6 +231,12 @@ export interface SearchTrack {
      */
     collaborators?: Array<User>;
     /**
+     * Pending collaborator invites; only present on the owner's own tracks.
+     * @type {Array<User>}
+     * @memberof SearchTrack
+     */
+    pendingCollaborators?: Array<User>;
+    /**
      * 
      * @type {number}
      * @memberof SearchTrack
@@ -677,6 +683,7 @@ export function SearchTrackFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'title': json['title'],
         'user': UserFromJSON(json['user']),
         'collaborators': !exists(json, 'collaborators') ? undefined : ((json['collaborators'] as Array<any>).map(UserFromJSON)),
+        'pendingCollaborators': !exists(json, 'pending_collaborators') ? undefined : ((json['pending_collaborators'] as Array<any>).map(UserFromJSON)),
         'duration': json['duration'],
         'isDownloadable': json['is_downloadable'],
         'playCount': json['play_count'],
@@ -770,6 +777,7 @@ export function SearchTrackToJSON(value?: SearchTrack | null): any {
         'title': value.title,
         'user': UserToJSON(value.user),
         'collaborators': value.collaborators === undefined ? undefined : ((value.collaborators as Array<any>).map(UserToJSON)),
+        'pending_collaborators': value.pendingCollaborators === undefined ? undefined : ((value.pendingCollaborators as Array<any>).map(UserToJSON)),
         'duration': value.duration,
         'is_downloadable': value.isDownloadable,
         'play_count': value.playCount,

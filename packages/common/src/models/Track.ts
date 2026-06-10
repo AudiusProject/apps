@@ -267,6 +267,10 @@ export type TrackMetadata = {
   // Accepted collaborator artists (collaborative tracks). Embedded by the API,
   // same shape as `user` (the track owner). Empty when there are none.
   collaborators?: UserMetadata[]
+
+  // Pending collaborator invites — only populated by the API on the owner's own
+  // tracks, so the edit form can preserve still-pending invites on save.
+  pending_collaborators?: UserMetadata[]
 } & Timestamped
 
 export type WriteableTrackMetadata = TrackMetadata & {

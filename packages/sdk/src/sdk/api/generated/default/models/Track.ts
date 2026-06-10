@@ -231,6 +231,12 @@ export interface Track {
      */
     collaborators?: Array<User>;
     /**
+     * Pending collaborator invites; only present on the owner's own tracks.
+     * @type {Array<User>}
+     * @memberof Track
+     */
+    pendingCollaborators?: Array<User>;
+    /**
      * 
      * @type {number}
      * @memberof Track
@@ -685,6 +691,7 @@ export function TrackFromJSONTyped(json: any, ignoreDiscriminator: boolean): Tra
         'title': json['title'],
         'user': UserFromJSON(json['user']),
         'collaborators': !exists(json, 'collaborators') ? undefined : ((json['collaborators'] as Array<any>).map(UserFromJSON)),
+        'pendingCollaborators': !exists(json, 'pending_collaborators') ? undefined : ((json['pending_collaborators'] as Array<any>).map(UserFromJSON)),
         'duration': json['duration'],
         'isDownloadable': json['is_downloadable'],
         'playCount': json['play_count'],
@@ -779,6 +786,7 @@ export function TrackToJSON(value?: Track | null): any {
         'title': value.title,
         'user': UserToJSON(value.user),
         'collaborators': value.collaborators === undefined ? undefined : ((value.collaborators as Array<any>).map(UserToJSON)),
+        'pending_collaborators': value.pendingCollaborators === undefined ? undefined : ((value.pendingCollaborators as Array<any>).map(UserToJSON)),
         'duration': value.duration,
         'is_downloadable': value.isDownloadable,
         'play_count': value.playCount,

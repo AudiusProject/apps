@@ -140,6 +140,11 @@ export const userTrackMetadataFromSDK = (
     user,
     // Accepted collaborator artists, decoded/cleaned like the owner.
     collaborators: transformAndCleanList(input.collaborators, userMetadataFromSDK),
+    // Pending invites (owner-only); lets the edit form preserve them on save.
+    pending_collaborators: transformAndCleanList(
+      input.pendingCollaborators,
+      userMetadataFromSDK
+    ),
 
     // Retypes
     license: (input.license as License) ?? null,
