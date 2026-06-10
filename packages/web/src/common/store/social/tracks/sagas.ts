@@ -816,7 +816,9 @@ function* watchShareContest() {
       if (!user) return
 
       // Prefer event_routes permalink; fall back to deriving from track permalink.
-      const link = eventPermalink ? fullContestPage(eventPermalink) : fullContestPage(track.permalink)
+      const link = eventPermalink
+        ? fullContestPage(eventPermalink)
+        : fullContestPage(track.permalink)
       const share = yield* getContext('share')
       share(link, formatShareText(track.title, user.name))
 
