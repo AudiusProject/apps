@@ -309,9 +309,8 @@ jobs:
       # Mirror what CircleCI ran: `npx mocha` with no args (the
       # docker-compose.test.yml `test-identity-service` entrypoint shifted "test"
       # off and invoked `npx mocha`). Mocha's default `test/*.{js,cjs,mjs}` glob
-      # picks up only the `.js` test files; `test/index.ts` (which transitively
-      # imports the solana relay tree and requires populated solana env vars) is
-      # intentionally skipped, matching prior CI behavior.
+      # picks up only the `.js` test files; `test/index.ts` is intentionally
+      # skipped, matching prior CI behavior.
       - name: Run tests
         timeout-minutes: 20
         working-directory: packages/identity-service

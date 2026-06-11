@@ -216,48 +216,6 @@ const config = convict({
     env: 'rateLimitingTikTokLimit',
     default: null
   },
-  rateLimitingListensPerTrackPerHour: {
-    doc: 'Listens per track per user per Hour',
-    format: 'nat',
-    env: 'rateLimitingListensPerTrackPerHour',
-    default: null
-  },
-  rateLimitingListensPerIPTrackPerHour: {
-    doc: 'Listens per track per IP per Hour',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPTrackPerHour',
-    default: null
-  },
-  rateLimitingListensPerTrackPerDay: {
-    doc: 'Listens per track per user per Day',
-    format: 'nat',
-    env: 'rateLimitingListensPerTrackPerDay',
-    default: null
-  },
-  rateLimitingListensPerIPTrackPerDay: {
-    doc: 'Listens per track per IP per Day',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPTrackPerDay',
-    default: null
-  },
-  rateLimitingListensPerIPPerHour: {
-    doc: 'Listens per IP per Hour',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPPerHour',
-    default: null
-  },
-  rateLimitingListensPerIPPerDay: {
-    doc: 'Listens per IP per Day',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPPerDay',
-    default: null
-  },
-  rateLimitingListensPerIPPerWeek: {
-    doc: 'Listens per IP per Week',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPPerWeek',
-    default: null
-  },
   rateLimitingEthRelaysPerIPPerDay: {
     doc: 'Eth relay operations per IP per day',
     format: 'nat',
@@ -269,18 +227,6 @@ const config = convict({
     format: 'nat',
     env: 'rateLimitingEthRelaysPerWalletPerDay',
     default: 10
-  },
-  rateLimitingListensPerTrackPerWeek: {
-    doc: 'Listens per track per user per Week',
-    format: 'nat',
-    env: 'rateLimitingListensPerTrackPerWeek',
-    default: null
-  },
-  rateLimitingListensPerIPTrackPerWeek: {
-    doc: 'Listens per track per IP per Week',
-    format: 'nat',
-    env: 'rateLimitingListensPerIPTrackPerWeek',
-    default: null
   },
   rateLimitingListensIPWhitelist: {
     doc: 'Regex of IP addresses that should not get rate limited',
@@ -337,12 +283,6 @@ const config = convict({
     format: Number,
     env: 'ethMinimumFunderBalance',
     default: 0.5
-  },
-  solMinimumBalance: {
-    doc: 'Minimum SOL balance below which /sol_balance_check fails',
-    format: Number,
-    env: 'solMinimumBalance',
-    default: 1000000000
   },
   sendgridApiKey: {
     doc: 'Sendgrid API key used to send emails',
@@ -587,42 +527,6 @@ const config = convict({
     env: 'solanaEndpoint',
     default: null
   },
-  solanaEndpointListensProgram: {
-    doc: 'The Solana RPC endpoint to make requests against for the listens program',
-    format: String,
-    env: 'solanaEndpointListensProgram',
-    default: null
-  },
-  solanaTrackListenCountAddress: {
-    doc: 'solanaTrackListenCountAddress',
-    format: String,
-    default: '',
-    env: 'solanaTrackListenCountAddress'
-  },
-  solanaAudiusEthRegistryAddress: {
-    doc: 'solanaAudiusEthRegistryAddress',
-    format: String,
-    default: '',
-    env: 'solanaAudiusEthRegistryAddress'
-  },
-  solanaValidSigner: {
-    doc: 'solanaValidSigner',
-    format: String,
-    default: '',
-    env: 'solanaValidSigner'
-  },
-  solanaFeePayerWallets: {
-    doc: 'solanaFeePayerWallets - Stringified array like[{ privateKey: [] },...]',
-    format: 'string-array',
-    default: [],
-    env: 'solanaFeePayerWallets'
-  },
-  solanaSignerPrivateKey: {
-    doc: 'solanaSignerPrivateKey',
-    format: String,
-    default: '',
-    env: 'solanaSignerPrivateKey'
-  },
   solanaTxCommitmentLevel: {
     doc: 'solanaTxCommitmentLevel',
     format: String,
@@ -731,42 +635,6 @@ const config = convict({
     env: 'errorAudioReporterSlackUrl',
     default: ''
   },
-  errorWormholeReporterSlackUrl: {
-    doc: 'The slack url to post messages for errors in wormhole transfers',
-    format: String,
-    env: 'errorWormholeReporterSlackUrl',
-    default: ''
-  },
-  wormholeRPCHosts: {
-    doc: 'Wormhole RPC Host',
-    format: String,
-    env: 'wormholeRPCHosts',
-    default: ''
-  },
-  solBridgeAddress: {
-    doc: 'Sol bridge address for wormhole',
-    format: String,
-    env: 'solBridgeAddress',
-    default: ''
-  },
-  solTokenBridgeAddress: {
-    doc: 'Sol token bridge address for wormhole',
-    format: String,
-    env: 'solTokenBridgeAddress',
-    default: ''
-  },
-  ethBridgeAddress: {
-    doc: 'Eth bridge address for wormhole',
-    format: String,
-    env: 'ethBridgeAddress',
-    default: ''
-  },
-  ethTokenBridgeAddress: {
-    doc: 'Eth token bridge address for wormhole',
-    format: String,
-    env: 'ethTokenBridgeAddress',
-    default: ''
-  },
   websiteHost: {
     doc: 'Audius website host',
     format: String,
@@ -820,12 +688,6 @@ const config = convict({
     format: String,
     env: 'solanaUSDCMintAddress',
     default: ''
-  },
-  useDiscoveryListens: {
-    doc: 'Forward listen requests to discovery',
-    format: Boolean,
-    env: 'useDiscoveryListens',
-    default: true
   }
 })
 
