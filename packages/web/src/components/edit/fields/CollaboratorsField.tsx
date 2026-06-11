@@ -10,7 +10,7 @@ import { CollaboratorsMenuFields } from './CollaboratorsMenuFields'
 
 const messages = {
   label: 'Collaborators',
-  description: 'Tag other artists as collaborators. Each is invited to accept.'
+  description: 'Tag other artists as collaborators'
 }
 
 type CollaboratorsFormValues = { collaborators: UserMetadata[] }
