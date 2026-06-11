@@ -1,145 +1,70 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
-import { useCurrentUserId } from '@audius/common/api'
-import { User, UserMetadata } from '@audius/common/models'
-import {
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  IconClose,
-  Text,
-  useTheme
-} from '@audius/harmony'
-import { useField } from 'formik'
+import { UserMetadata } from '@audius/common/models'
+import { Flex, IconUserGroup, Text } from '@audius/harmony'
 
-import ArtistChip from 'components/artist/ArtistChip'
-import { SearchUsersModal } from 'components/search-users-modal/SearchUsersModal'
+import { ContextualMenu } from 'components/data-entry/ContextualMenu'
+import { useTrackField } from 'components/edit-track/hooks'
+
+import { CollaboratorsMenuFields } from './CollaboratorsMenuFields'
 
 const messages = {
   label: 'Collaborators',
-  description:
-    'Tag other artists as collaborators. Each is invited to accept; once they do, the track also appears on their profile.',
-  add: 'Add Collaborator',
-  modalTitle: 'Add Collaborators',
-  remove: (name: string) => `Remove ${name}`
+  description: 'Tag other artists as collaborators. Each is invited to accept.'
 }
 
-type CollaboratorsFieldProps = {
-  name: string
-}
+type CollaboratorsFormValues = { collaborators: UserMetadata[] }
 
 /**
- * Track-upload field for tagging collaborator artists, modeled on the
- * invite-manager search UI. Stores the selected users on the form; the upload
- * adapter maps them to numeric ids for the on-chain metadata.
+ * Settings box (like Visibility / Remix Settings) for tagging collaborator
+ * artists. Opens the "Add Collaborator" modal; the upload adapter maps the
+ * selected users to numeric ids for the on-chain metadata.
  */
-export const CollaboratorsField = ({ name }: CollaboratorsFieldProps) => {
-  const { color } = useTheme()
-  const [{ value }, , { setValue }] = useField<UserMetadata[] | undefined>(name)
+export const CollaboratorsField = () => {
+  const [{ value }, , { setValue }] =
+    useTrackField<UserMetadata[]>('collaborators')
   const collaborators = useMemo(() => value ?? [], [value])
-  const [isOpen, setIsOpen] = useState(false)
-  const { data: currentUserId } = useCurrentUserId()
 
-  const excludedUserIds = useMemo(() => {
-    const ids = collaborators.map((collaborator) => collaborator.user_id)
-    if (currentUserId) ids.push(currentUserId)
-    return ids
-  }, [collaborators, currentUserId])
+  const initialValues = useMemo(() => ({ collaborators }), [collaborators])
 
-  const handleAdd = useCallback(
-    (user: User) => {
-      setValue([...collaborators, user])
-      setIsOpen(false)
+  const onSubmit = useCallback(
+    (values: CollaboratorsFormValues) => {
+      setValue(values.collaborators)
     },
-    [collaborators, setValue]
+    [setValue]
   )
 
-  const handleRemove = useCallback(
-    (userId: number) => {
-      setValue(
-        collaborators.filter((collaborator) => collaborator.user_id !== userId)
-      )
-    },
-    [collaborators, setValue]
-  )
-
-  const renderUser = useCallback(
-    (user: User) => (
-      <Box
-        key={user.user_id}
-        pv='l'
-        borderTop='default'
-        ph='xl'
-        css={{
-          '&:hover': {
-            cursor: 'pointer',
-            backgroundColor: color.background.surface1
-          }
-        }}
-      >
-        <ArtistChip
-          userId={user.user_id}
-          showPopover={false}
-          onClickArtistName={() => handleAdd(user)}
-        />
-      </Box>
-    ),
-    [handleAdd, color]
-  )
+  const renderValue = useCallback(() => {
+    if (collaborators.length === 0) return null
+    return (
+      <Flex gap='s' wrap='wrap' pt='m'>
+        {collaborators.map((collaborator) => (
+          <Flex
+            key={collaborator.user_id}
+            alignItems='center'
+            border='strong'
+            borderRadius='m'
+            ph='s'
+            pv='2xs'
+          >
+            <Text variant='body' size='s'>
+              {collaborator.name}
+            </Text>
+          </Flex>
+        ))}
+      </Flex>
+    )
+  }, [collaborators])
 
   return (
-    <Flex direction='column' gap='m'>
-      <Flex direction='column' gap='xs'>
-        <Text variant='title' size='l'>
-          {messages.label}
-        </Text>
-        <Text variant='body' size='s' color='subdued'>
-          {messages.description}
-        </Text>
-      </Flex>
-      {collaborators.length > 0 ? (
-        <Flex gap='s' wrap='wrap'>
-          {collaborators.map((collaborator) => (
-            <Flex
-              key={collaborator.user_id}
-              alignItems='center'
-              gap='xs'
-              pl='s'
-              pr='xs'
-              pv='2xs'
-              border='strong'
-              borderRadius='m'
-            >
-              <Text variant='body' size='s'>
-                {collaborator.name}
-              </Text>
-              <IconButton
-                icon={IconClose}
-                size='xs'
-                color='subdued'
-                aria-label={messages.remove(collaborator.name)}
-                onClick={() => handleRemove(collaborator.user_id)}
-              />
-            </Flex>
-          ))}
-        </Flex>
-      ) : null}
-      <Button
-        variant='secondary'
-        size='small'
-        onClick={() => setIsOpen(true)}
-        css={{ alignSelf: 'flex-start' }}
-      >
-        {messages.add}
-      </Button>
-      <SearchUsersModal
-        titleProps={{ title: messages.modalTitle }}
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        excludedUserIds={excludedUserIds}
-        renderUser={renderUser}
-      />
-    </Flex>
+    <ContextualMenu
+      label={messages.label}
+      description={messages.description}
+      icon={<IconUserGroup />}
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+      renderValue={renderValue}
+      menuFields={<CollaboratorsMenuFields />}
+    />
   )
 }

@@ -5,7 +5,6 @@ import { useField } from 'formik'
 import { getTrackFieldName } from 'components/edit-track/hooks'
 import { ArtworkField, TagField, TextAreaField } from 'components/form-fields'
 
-import { CollaboratorsField } from './CollaboratorsField'
 import { SelectGenreField } from './SelectGenreField'
 import { SelectMoodField } from './SelectMoodField'
 import { TrackNameField } from './TrackNameField'
@@ -36,7 +35,6 @@ export const TrackMetadataFields = () => {
         showMaxLength
         grows
       />
-      <CollaboratorsField name={getTrackFieldName(index, 'collaborators')} />
     </Flex>
   )
 }
