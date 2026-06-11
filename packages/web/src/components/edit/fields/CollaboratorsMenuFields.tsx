@@ -54,7 +54,9 @@ const CollaboratorRow = ({ user, onRemove }: CollaboratorRowProps) => (
     />
     <Flex direction='column' alignItems='flex-end' gap='2xs'>
       <PopupMenu
-        items={[{ text: messages.remove, icon: <IconTrash />, onClick: onRemove }]}
+        items={[
+          { text: messages.remove, icon: <IconTrash />, onClick: onRemove }
+        ]}
         renderTrigger={(anchorRef, triggerPopup) => (
           <IconButton
             ref={anchorRef}
