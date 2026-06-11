@@ -38,4 +38,15 @@ describe('test /health_check and /balance_check', function () {
   it('responds 404 for invalid route', function (done) {
     request(app).get('/invalid_route').expect(404, done)
   })
+
+  it('does not expose the legacy Solana relay routes', async function () {
+    await request(app)
+      .post('/tracks/123/listen')
+      .send({ userId: 456 })
+      .expect(404)
+
+    await request(app).get('/tracks/listen/solana/status').expect(404)
+    await request(app).post('/wormhole_relay').send({}).expect(404)
+    await request(app).get('/sol_balance_check').expect(404)
+  })
 })

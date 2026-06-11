@@ -8,7 +8,6 @@ const {
 const { sequelize } = require('../models')
 const { getRelayerFunds, fundRelayerIfEmpty } = require('../relay/txRelay')
 const { getEthRelayerFunds } = require('../relay/ethTxRelay')
-const solanaWeb3 = require('@solana/web3.js')
 const Web3 = require('web3')
 
 // Defaults used in relay health check endpoint
@@ -260,57 +259,6 @@ module.exports = function (app) {
           ...balanceResponse
         })
       }
-    })
-  )
-
-  app.get(
-    '/sol_balance_check',
-    handleResponse(async (req, res) => {
-      const minimumBalance = parseFloat(
-        req.query.minimumBalance || config.get('solMinimumBalance')
-      )
-      const solanaFeePayerWallets = config.get('solanaFeePayerWallets')
-      const libs = req.app.get('audiusLibs')
-      const connection = libs.solanaWeb3Manager.getConnection()
-
-      const solanaFeePayerBalances = {}
-      const belowMinimumBalances = []
-
-      if (solanaFeePayerWallets) {
-        await Promise.all(
-          [...solanaFeePayerWallets].map(async (wallet) => {
-            const feePayerPubKey = solanaWeb3.Keypair.fromSecretKey(
-              Uint8Array.from(wallet.privateKey)
-            ).publicKey
-            const feePayerBase58 = feePayerPubKey.toBase58()
-            const balance = await connection.getBalance(feePayerPubKey)
-            if (balance < minimumBalance) {
-              belowMinimumBalances.push({ wallet: feePayerBase58, balance })
-            }
-            solanaFeePayerBalances[feePayerBase58] = balance
-            return { wallet: feePayerBase58, balance }
-          })
-        )
-      }
-
-      const solanaFeePayerBalancesArr = Object.keys(solanaFeePayerBalances).map(
-        (key) => [key, solanaFeePayerBalances[key]]
-      )
-
-      if (belowMinimumBalances.length === 0) {
-        return successResponse({
-          above_balance_minimum: true,
-          minimum_balance: minimumBalance,
-          balances: solanaFeePayerBalancesArr
-        })
-      }
-
-      return errorResponseServerError({
-        above_balance_minimum: false,
-        minimum_balance: minimumBalance,
-        belowMinimumBalances,
-        balances: solanaFeePayerBalancesArr
-      })
     })
   )
 

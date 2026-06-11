@@ -15,7 +15,6 @@ const audiusLibsWrapper = require('./audiusLibsInstance')
 const { generateWalletLockKey } = require('./relay/txRelay.js')
 const { generateETHWalletLockKey } = require('./relay/ethTxRelay.js')
 
-const { SlackReporter } = require('./utils/slackReporter')
 const { sendResponse, errorResponseServerError } = require('./apiHelpers')
 const { logger, loggingMiddleware } = require('./logging')
 const {
@@ -23,8 +22,7 @@ const {
   getRateLimiterMiddleware,
   getRelayBlocklistMiddleware,
   getRelayRateLimiterMiddleware,
-  isIPWhitelisted,
-  getIP
+  isIPWhitelisted
 } = require('./rateLimiter.js')
 const cors = require('./corsMiddleware')
 const { startRegistrationQueue } = require('./solanaNodeRegistration')
@@ -92,7 +90,6 @@ class App {
         const audiusInstance = await this.configureAudiusInstance()
 
         await this.configureDiscoveryNodeRegistration(audiusInstance)
-        await this.configureReporter()
       } else {
         // if it's a test run only start the server
         await new Promise((resolve) => {
@@ -124,8 +121,6 @@ class App {
     } else {
       // if it's not the master worker in the cluster
       await this.configureAudiusInstance()
-
-      await this.configureReporter()
 
       await new Promise((resolve) => {
         server = this.express.listen(this.port, resolve)
@@ -175,14 +170,6 @@ class App {
     return optimizelyClientInstance
   }
 
-  configureReporter() {
-    const slackWormholeErrorReporter = new SlackReporter({
-      slackUrl: config.get('errorWormholeReporterSlackUrl'),
-      childLogger: logger
-    })
-    this.express.set('slackWormholeErrorReporter', slackWormholeErrorReporter)
-  }
-
   async configureDiscoveryNodeRegistration(libs) {
     const childLogger = logger.child({ service: 'Discovery Node Registration' })
     await startRegistrationQueue(libs, childLogger)
@@ -215,62 +202,6 @@ class App {
     this.express.use(bodyParser.json({ limit: '1mb' }))
     this.express.use(cookieParser())
     this.express.use(cors())
-  }
-
-  // Create rate limits for listens on a per track per user basis and per track per ip basis
-  _createRateLimitsForListenCounts(interval, timeInSeconds) {
-    const listenCountLimiter = getRateLimiter({
-      prefix: `listenCountLimiter:::${interval}-track:::`,
-      expiry: timeInSeconds,
-      max: config.get(`rateLimitingListensPerTrackPer${interval}`), // max requests per interval
-      skip: function (req) {
-        const { ip, senderIP } = getIP(req)
-        const ipToCheck = senderIP || ip
-        // Do not apply user-specific rate limits for any whitelisted IP
-        return isIPWhitelisted(ipToCheck, req)
-      },
-      keyGenerator: function (req) {
-        const trackId = req.params.id
-        const userId = req.body.userId
-        return `${trackId}:::${userId}`
-      }
-    })
-
-    const listenCountIPTrackLimiter = getRateLimiter({
-      prefix: `listenCountLimiter:::${interval}-ip-track:::`,
-      expiry: timeInSeconds,
-      max: config.get(`rateLimitingListensPerIPTrackPer${interval}`), // max requests per interval
-      skip: function (req) {
-        const { ip } = getIP(req)
-        return isIPWhitelisted(ip, req)
-      },
-      keyGenerator: function (req) {
-        const trackId = req.params.id
-        const { ip } = getIP(req)
-        return `${ip}:::${trackId}`
-      }
-    })
-
-    // Create a rate limiter for listens  based on IP
-    const listenCountIPRequestLimiter = getRateLimiter({
-      prefix: `listenCountLimiter:::${interval}-ip-exclusive:::`,
-      expiry: timeInSeconds,
-      max: config.get(`rateLimitingListensPerIPPer${interval}`), // max requests per interval
-      skip: function (req) {
-        const { ip } = getIP(req)
-        return isIPWhitelisted(ip, req)
-      },
-      keyGenerator: function (req) {
-        const { ip } = getIP(req)
-        return `${ip}`
-      }
-    })
-
-    return [
-      listenCountLimiter,
-      listenCountIPTrackLimiter,
-      listenCountIPRequestLimiter
-    ]
   }
 
   setRateLimiters() {
@@ -306,42 +237,9 @@ class App {
     // This limiter double dips with the reqLimiter. The 5 requests every hour are also counted here
     this.express.use('/tiktok/', tikTokRequestRateLimiter)
 
-    const ONE_HOUR_IN_SECONDS = 60 * 60
-    const [
-      listenCountHourlyTrackLimiter,
-      listenCountHourlyIPTrackLimiter,
-      listenCountHourlyIPLimiter
-    ] = this._createRateLimitsForListenCounts('Hour', ONE_HOUR_IN_SECONDS)
-    const [
-      listenCountDailyTrackLimiter,
-      listenCountDailyIPTrackLimiter,
-      listenCountDailyIPLimiter
-    ] = this._createRateLimitsForListenCounts('Day', ONE_HOUR_IN_SECONDS * 24)
-    const [
-      listenCountWeeklyTrackLimiter,
-      listenCountWeeklyIPTrackLimiter,
-      listenCountWeeklyIPLimiter
-    ] = this._createRateLimitsForListenCounts(
-      'Week',
-      ONE_HOUR_IN_SECONDS * 24 * 7
-    )
-
-    // This limiter double dips with the reqLimiter. The 5 requests every hour are also counted here
-    this.express.use(
-      '/tracks/:id/listen',
-      listenCountHourlyTrackLimiter,
-      listenCountHourlyIPTrackLimiter,
-      listenCountHourlyIPLimiter,
-      listenCountDailyTrackLimiter,
-      listenCountDailyIPTrackLimiter,
-      listenCountDailyIPLimiter,
-      listenCountWeeklyTrackLimiter,
-      listenCountWeeklyIPTrackLimiter,
-      listenCountWeeklyIPLimiter
-    )
-
     // Eth relay rate limits
     // Default to 50 per ip per day and one of 10 per wallet per day
+    const ONE_HOUR_IN_SECONDS = 60 * 60
     const ethRelayIPRateLimiter = getRateLimiter({
       prefix: 'ethRelayIPRateLimiter',
       expiry: ONE_HOUR_IN_SECONDS * 24,

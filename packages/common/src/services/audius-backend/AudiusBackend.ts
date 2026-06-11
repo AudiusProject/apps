@@ -38,7 +38,7 @@ import {
   PushNotificationSetting,
   PushNotifications
 } from '../../store'
-import { getErrorMessage, uuid, Maybe, Nullable } from '../../utils'
+import { getErrorMessage, Maybe, Nullable } from '../../utils'
 
 import { MintName } from './solana'
 
@@ -85,8 +85,6 @@ export const AuthHeaders = Object.freeze({
   Message: 'Encoded-Data-Message',
   Signature: 'Encoded-Data-Signature'
 })
-
-const unauthenticatedUuid = uuid()
 
 export type TransactionReceipt = { blockHash: string; blockNumber: number }
 
@@ -149,34 +147,6 @@ export const audiusBackend = ({
       throw new Error(`Token address not found for mint: ${mint}`)
     }
     return new PublicKey(address)
-  }
-
-  async function recordTrackListen({
-    userId,
-    trackId,
-    sdk
-  }: {
-    userId: ID
-    trackId: ID
-    sdk: AudiusSdkWithServices
-  }) {
-    try {
-      const { data, signature } = await signIdentityServiceRequest({ sdk })
-      await fetch(`${identityServiceUrl}/tracks/${trackId}/listen`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          [AuthHeaders.Message]: data,
-          [AuthHeaders.Signature]: signature
-        },
-        body: JSON.stringify({
-          userId: userId ?? unauthenticatedUuid,
-          solanaListen: true
-        })
-      })
-    } catch (err) {
-      console.error(getErrorMessage(err))
-    }
   }
 
   async function updateCreator({
@@ -1211,7 +1181,6 @@ export const audiusBackend = ({
     getSignature,
     getWAudioBalance,
     identityServiceUrl,
-    recordTrackListen,
     registerDeviceToken,
     reportNotificationCampaignPushOpen,
     sendTokens,
