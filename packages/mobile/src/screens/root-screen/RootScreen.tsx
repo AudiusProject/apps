@@ -40,6 +40,8 @@ import { OAuthScreen } from '../oauth-screen/OAuthScreen'
 import { ResetPasswordModalScreen } from '../reset-password-screen'
 import { SignOnStack } from '../sign-on-screen'
 
+import { useActivityPing } from 'app/hooks/useActivityPing'
+
 import { StatusBar } from './StatusBar'
 import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount'
 
@@ -97,6 +99,7 @@ export const RootScreen = () => {
   )
 
   useResetNotificationBadgeCount()
+  useActivityPing()
 
   // Reset the player on first mount so a crash doesn't leak previous playback
   // state into the next session. PAY-1412.
