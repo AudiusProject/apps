@@ -392,6 +392,31 @@ export const audiusBackend = ({
     }
   }
 
+  async function pingActivity({
+    sdk,
+    userId
+  }: {
+    sdk: AudiusSdkWithServices
+    userId: number
+  }) {
+    try {
+      const { data, signature } = await signAPIRequest({ sdk })
+      if (!signature) return
+      const encodedUserId = encodeHashId(userId)
+      if (!encodedUserId) return
+      const base = env.API_URL.replace(/\/$/, '')
+      await fetch(`${base}/v1/users/me/ping?user_id=${encodedUserId}`, {
+        method: 'POST',
+        headers: {
+          [AuthHeaders.Message]: data,
+          [AuthHeaders.Signature]: signature
+        }
+      })
+    } catch {
+      // Fire-and-forget
+    }
+  }
+
   async function signAPIRequest({
     sdk,
     input
@@ -1181,6 +1206,7 @@ export const audiusBackend = ({
     getSignature,
     getWAudioBalance,
     identityServiceUrl,
+    pingActivity,
     registerDeviceToken,
     reportNotificationCampaignPushOpen,
     sendTokens,
