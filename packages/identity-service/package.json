@@ -16,7 +16,7 @@
     "test:debug": "./scripts/run-tests.sh -d",
     "coverage": "nyc npm run test",
     "report": "nyc report --reporter=html",
-    "copyfiles": "cp -r ./src/emails ./build/src",
+    "copyfiles": "cp -r ./src/emails ./build/src && cp ./loadAudiusSdk.cjs ./build/loadAudiusSdk.cjs",
     "build": "tsc --project tsconfig.build.json && npm run copyfiles",
     "lint": "eslint . --ext .ts,.js,.jsx,.tsx",
     "lint:fix": "eslint . --ext .ts,.js,.jsx,.tsx --fix",
