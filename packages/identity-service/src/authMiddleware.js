@@ -11,6 +11,68 @@ const models = require('./models')
 const audiusLibsWrapper = require('./audiusLibsInstance')
 const { encodeHashId, decodeHashId } = require('./utils/hashIds')
 
+const SDK_USER_LOOKUP_TIMEOUT_MS = 3000
+
+const withTimeout = (promise, ms, message) => {
+  let timeoutId
+  const timeout = new Promise((_resolve, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms)
+  })
+
+  return Promise.race([
+    promise,
+    timeout
+  ]).finally(() => clearTimeout(timeoutId))
+}
+
+const getUserAccountForWallet = async ({
+  req,
+  walletAddress,
+  encodedDataMessage,
+  signature
+}) => {
+  const audiusSdk = req.app.get('audiusSdk')
+  const usersApi = audiusSdk?.users ?? audiusSdk?.full?.users
+
+  if (!usersApi) {
+    throw new Error('Audius SDK users API is unavailable')
+  }
+
+  return withTimeout(
+    usersApi.getUserAccount({
+      wallet: walletAddress,
+      encodedDataMessage,
+      encodedDataSignature: signature
+    }),
+    SDK_USER_LOOKUP_TIMEOUT_MS,
+    'audiusSdk.users.getUserAccount timed out'
+  )
+}
+
+const backfillUserFromAccount = async ({
+  req,
+  user,
+  walletAddress,
+  encodedDataMessage,
+  signature
+}) => {
+  const res = await getUserAccountForWallet({
+    req,
+    walletAddress,
+    encodedDataMessage,
+    signature
+  })
+  const accountUser = res.data.user
+  const userId = decodeHashId(accountUser.id)
+  const handle = accountUser.handle
+
+  return user.update({
+    blockchainUserId: userId,
+    handle,
+    isGuest: !handle
+  })
+}
+
 /**
  * Queries for whether the wallet address has privilege to act as actingUserId
  * @param {number} managerWalletAddress
@@ -114,18 +176,12 @@ async function authMiddleware(req, res, next) {
       // ensuring that the user.handle always represents the latest state on chain
       if (!user.blockchainUserId || !user.handle) {
         try {
-          const res = await req.app.get('audiusSdk').full.users.getUserAccount({
-            wallet: walletAddress,
+          user = await backfillUserFromAccount({
+            req,
+            user,
+            walletAddress,
             encodedDataMessage,
-            encodedDataSignature: signature
-          })
-          const discprovUser = res.data.user
-          const userId = decodeHashId(discprovUser.id)
-          const handle = discprovUser.handle
-          user = await user.update({
-            blockchainUserId: userId,
-            handle,
-            isGuest: !handle
+            signature
           })
         } catch (e) {
           req.logger.error(e, 'Failed to update blockchainUserId/handle')
@@ -181,18 +237,12 @@ const parameterizedAuthMiddleware = ({ shouldRespondBadRequest }) => {
 
       if (!user.blockchainUserId || !user.handle) {
         try {
-          const res = await req.app.get('audiusSdk').full.users.getUserAccount({
-            wallet: walletAddress,
+          user = await backfillUserFromAccount({
+            req,
+            user,
+            walletAddress,
             encodedDataMessage,
-            encodedDataSignature: signature
-          })
-          const discprovUser = res.data.user
-          const userId = decodeHashId(discprovUser.id)
-          const handle = discprovUser.handle
-          user = await user.update({
-            blockchainUserId: userId,
-            handle,
-            isGuest: !handle
+            signature
           })
         } catch (e) {
           req.logger.error(e, 'Failed to update blockchainUserId/handle')
