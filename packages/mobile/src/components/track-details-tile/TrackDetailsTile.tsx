@@ -20,6 +20,7 @@ import {
   IconUserFollowing
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
+import { CollaboratorLinks } from 'app/components/user-link'
 import { UserBadges } from 'app/components/user-badges'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { makeStyles, flexRowCentered, typography } from 'app/styles'
@@ -168,6 +169,10 @@ export const TrackDetailsTile = ({
           <Flex row alignItems='center' gap='xs' mt='xs'>
             <Text fontSize='medium'>{owner.name}</Text>
             <UserBadges userId={owner.user_id} badgeSize='xs' />
+            <CollaboratorLinks
+              collaborators={track.collaborators}
+              badgeSize='xs'
+            />
           </Flex>
           {earnAmount ? (
             <Flex direction='row' alignItems='center' gap='xs' pt='xs'>

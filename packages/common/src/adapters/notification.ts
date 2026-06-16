@@ -463,6 +463,26 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    case 'track_collaborator_invite': {
+      const data = notification.actions[0].data
+
+      return {
+        type: NotificationType.TrackCollaboratorInvite,
+        trackId: HashId.parse(data.trackId)!,
+        inviterUserId: HashId.parse(data.inviterUserId)!,
+        ...formatBaseNotification(notification)
+      }
+    }
+    case 'track_collaborator_accept': {
+      const data = notification.actions[0].data
+
+      return {
+        type: NotificationType.TrackCollaboratorAccept,
+        trackId: HashId.parse(data.trackId)!,
+        collaboratorUserId: HashId.parse(data.collaboratorUserId)!,
+        ...formatBaseNotification(notification)
+      }
+    }
     case 'comment': {
       let entityId = 0
       let entityType = Entity.Track

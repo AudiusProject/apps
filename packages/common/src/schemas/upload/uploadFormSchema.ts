@@ -153,6 +153,11 @@ const createSdkSchema = () =>
     .object({
       track_id: z.optional(z.number()).nullable(),
       allowed_api_keys: z.optional(z.array(z.string())).nullable(),
+      // Tagged collaborator artists (full user objects in the form; the upload
+      // adapter maps them to numeric ids for the on-chain metadata).
+      collaborators: z.optional(
+        z.array(z.object({ user_id: z.number() }).passthrough()).nullable()
+      ),
       description: z
         .optional(z.string().max(MAX_DESCRIPTION_LENGTH))
         .nullable(),

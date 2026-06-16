@@ -1,5 +1,6 @@
 export * from './SelectGenreField'
 export * from './DescriptionField'
+export * from './CollaboratorField'
 export * from './TagField'
 export * from './SelectMoodField'
 export * from './SubmenuList'

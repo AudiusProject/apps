@@ -4,6 +4,7 @@ import type React from 'react'
 import {
   useCollection,
   useCurrentUserId,
+  useRejectTrackCollaboration,
   useToggleFavoriteTrack,
   useTrack,
   useUser
@@ -63,7 +64,8 @@ const messages = {
   markedAsPlayed: 'Marked as Played',
   markedAsUnplayed: 'Marked as Unplayed',
   willPlayNext: 'Will play next',
-  addedToQueue: 'Added to queue'
+  addedToQueue: 'Added to queue',
+  removedCollaboration: 'Removed as collaborator'
 }
 
 const TrackOverflowMenuDrawer = ({ render }: Props) => {
@@ -95,6 +97,8 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
     trackId: id,
     source: FavoriteSource.OVERFLOW
   })
+
+  const { mutate: rejectTrackCollaboration } = useRejectTrackCollaboration()
 
   const handlePurchasePress = useCallback(() => {
     if (track?.track_id) {
@@ -214,6 +218,10 @@ const TrackOverflowMenuDrawer = ({ render }: Props) => {
           data: { trackId: id }
         })
       )
+    },
+    [OverflowAction.LEAVE_TRACK_COLLABORATION]: () => {
+      rejectTrackCollaboration({ trackId: id })
+      toast({ content: messages.removedCollaboration })
     },
     [OverflowAction.MARK_AS_PLAYED]: () => {
       dispatch(

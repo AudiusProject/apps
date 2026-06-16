@@ -47,7 +47,8 @@ import {
   TagField,
   SubmenuList,
   RemixSettingsField,
-  AdvancedField
+  AdvancedField,
+  CollaboratorField
 } from './fields'
 import type { EditTrackFormProps } from './types'
 import { getUploadMetadataFromFormValues } from './util'
@@ -358,6 +359,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
                 </SubmenuList>
                 <TagField />
                 <DescriptionField />
+                <CollaboratorField />
                 <SubmenuList removeBottomDivider>
                   <VisibilityField />
                   <PriceAndAudienceField />

@@ -41,7 +41,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
 import { Draggable } from 'components/dragndrop'
-import { TextLink, UserLink } from 'components/link'
+import { TextLink, TrackArtists } from 'components/link'
 import Menu from 'components/menu/Menu'
 import { OwnProps as TrackMenuProps } from 'components/menu/TrackMenu'
 import Skeleton from 'components/skeleton/Skeleton'
@@ -471,8 +471,9 @@ export const TrackTile = ({
                 />
               ) : null}
             </TextLink>
-            <UserLink
+            <TrackArtists
               userId={user_id}
+              collaborators={track?.collaborators}
               badgeSize='xs'
               popover={!isMobile}
               css={{ marginTop: '-4px' }}
@@ -487,7 +488,7 @@ export const TrackTile = ({
                   />
                 </>
               ) : null}
-            </UserLink>
+            </TrackArtists>
           </Flex>
         </div>
         <TrackTileStats

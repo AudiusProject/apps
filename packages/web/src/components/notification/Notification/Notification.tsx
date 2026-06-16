@@ -37,6 +37,8 @@ import { RequestManagerNotification } from './RequestManagerNotification'
 import { TastemakerNotification } from './TastemakerNotification'
 import { TierChangeNotification } from './TierChangeNotification'
 import { TrackAddedToPurchasedAlbumNotification } from './TrackAddedToPurchasedAlbumNotification'
+import { TrackCollaboratorAcceptNotification } from './TrackCollaboratorAcceptNotification'
+import { TrackCollaboratorInviteNotification } from './TrackCollaboratorInviteNotification'
 import { TrendingTrackNotification } from './TrendingTrackNotification'
 import { TrendingUndergroundNotification } from './TrendingUndergroundNotification'
 import { USDCPurchaseBuyerNotification } from './USDCPurchaseBuyerNotification'
@@ -111,6 +113,16 @@ export const Notification = (props: NotificationProps) => {
       }
       case NotificationType.ApproveManagerRequest: {
         return <ApproveManagerNotification notification={notification} />
+      }
+      case NotificationType.TrackCollaboratorInvite: {
+        return (
+          <TrackCollaboratorInviteNotification notification={notification} />
+        )
+      }
+      case NotificationType.TrackCollaboratorAccept: {
+        return (
+          <TrackCollaboratorAcceptNotification notification={notification} />
+        )
       }
       case NotificationType.AddTrackToPlaylist: {
         return <AddTrackToPlaylistNotification notification={notification} />

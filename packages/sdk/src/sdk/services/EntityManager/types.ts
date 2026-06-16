@@ -106,7 +106,8 @@ export enum EntityType {
   EMAIL_ACCESS = 'EmailAccess',
   ASSOCIATED_WALLET = 'AssociatedWallet',
   COLLECTIBLES = 'Collectibles',
-  EVENT = 'Event'
+  EVENT = 'Event',
+  TRACK_COLLABORATOR = 'TrackCollaborator'
 }
 
 export type AdvancedOptions = {

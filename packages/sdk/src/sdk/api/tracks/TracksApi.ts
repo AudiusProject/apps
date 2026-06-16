@@ -72,6 +72,8 @@ import {
   type CreateTrackRequestWithFiles,
   PublishStemSchema,
   UploadTrackSchema,
+  TrackCollaboratorSchema,
+  type EntityManagerTrackCollaboratorRequest,
   type TracksApiServicesConfig
 } from './types'
 
@@ -567,6 +569,56 @@ export class TracksApi extends GeneratedTracksApi {
       return await this.deleteTrackWithEntityManager(params)
     }
     return super.deleteTrack(params, requestInit)
+  }
+
+  /** @hidden
+   * Accept a collaborator invite on a track. Signed by the invited
+   * collaborator; the track owner tags collaborators in the track metadata.
+   */
+  async acceptTrackCollaboration(
+    params: EntityManagerTrackCollaboratorRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { userId, trackId } = await parseParams(
+      'acceptTrackCollaboration',
+      TrackCollaboratorSchema
+    )(params)
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
+    return await this.entityManager.manageEntity({
+      userId,
+      entityType: EntityType.TRACK_COLLABORATOR,
+      entityId: trackId,
+      action: Action.APPROVE,
+      ...advancedOptions
+    })
+  }
+
+  /** @hidden
+   * Decline a pending collaborator invite, or leave a track you've already
+   * accepted. Signed by the collaborator. Both map to the same Reject action.
+   */
+  async rejectTrackCollaboration(
+    params: EntityManagerTrackCollaboratorRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { userId, trackId } = await parseParams(
+      'rejectTrackCollaboration',
+      TrackCollaboratorSchema
+    )(params)
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
+    return await this.entityManager.manageEntity({
+      userId,
+      entityType: EntityType.TRACK_COLLABORATOR,
+      entityId: trackId,
+      action: Action.REJECT,
+      ...advancedOptions
+    })
   }
 
   /** @hidden

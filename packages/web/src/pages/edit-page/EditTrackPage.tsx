@@ -1,6 +1,9 @@
 import { createContext } from 'react'
 
-import { fileToSdk } from '@audius/common/adapters'
+import {
+  fileToSdk,
+  getTrackCollaboratorsForEdit
+} from '@audius/common/adapters'
 import { useStems, useTrackByParams, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes, StemUpload, TrackMetadata } from '@audius/common/models'
 import {
@@ -116,6 +119,7 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const trackAsMetadataForUpload: TrackMetadataForUpload = {
     ...(track as TrackMetadata),
+    collaborators: getTrackCollaboratorsForEdit(track),
     genre: (track?.genre as Genre) ?? '',
     mood: (track?.mood as Mood) ?? null,
     artwork: {

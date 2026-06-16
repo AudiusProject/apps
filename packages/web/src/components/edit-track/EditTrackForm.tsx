@@ -33,6 +33,7 @@ import { MenuFormCallbackStatus } from 'components/data-entry/ContextualMenu'
 import { AnchoredSubmitRow } from 'components/edit/AnchoredSubmitRow'
 import { AnchoredSubmitRowEdit } from 'components/edit/AnchoredSubmitRowEdit'
 import { AdvancedField } from 'components/edit/fields/AdvancedField'
+import { CollaboratorsField } from 'components/edit/fields/CollaboratorsField'
 import { MultiTrackSidebar } from 'components/edit/fields/MultiTrackSidebar'
 import { RemixSettingsField } from 'components/edit/fields/RemixSettingsField'
 import { StemsAndDownloadsField } from 'components/edit/fields/StemsAndDownloadsField'
@@ -396,6 +397,7 @@ const TrackEditForm = (
                 }}
               />
               <RemixSettingsField isUpload={isUpload} />
+              <CollaboratorsField />
             </div>
           </div>
           {isMultiTrack ? <MultiTrackFooter /> : null}

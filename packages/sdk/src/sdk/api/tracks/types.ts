@@ -153,6 +153,9 @@ export const UploadTrackMetadataSchema = z.object({
     .nullable(),
   accessAuthorities: z.optional(z.array(z.string()).nullable()),
   allowedApiKeys: z.optional(z.array(z.string()).nullable()),
+  // Collaborator artist user ids (numeric). Indexed by the ETL as pending
+  // invites; each tagged artist must accept before the credit is active.
+  collaborators: z.optional(z.array(z.number()).nullable()),
   isDownloadGated: z.optional(z.boolean()),
   downloadConditions: z
     .optional(
@@ -316,6 +319,19 @@ export const DeleteTrackSchema = z
   .strict()
 
 export type EntityManagerDeleteTrackRequest = z.input<typeof DeleteTrackSchema>
+
+// A collaborator accepts/declines (or leaves) a track collaboration. userId is
+// the collaborator; trackId is the track they were tagged on.
+export const TrackCollaboratorSchema = z
+  .object({
+    userId: HashId,
+    trackId: HashId
+  })
+  .strict()
+
+export type EntityManagerTrackCollaboratorRequest = z.input<
+  typeof TrackCollaboratorSchema
+>
 
 export const FavoriteTrackSchema = z
   .object({

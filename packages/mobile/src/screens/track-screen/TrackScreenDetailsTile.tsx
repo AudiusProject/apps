@@ -58,7 +58,6 @@ import {
 } from '@audius/common/utils'
 import { encodeHashId } from '@audius/sdk'
 import type { FlatList } from 'react-native'
-import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
@@ -89,7 +88,7 @@ import { TrackImage } from 'app/components/image/TrackImage'
 import { OfflineStatusRow } from 'app/components/offline-downloads'
 import { TrackDogEar } from 'app/components/track/TrackDogEar'
 import { TrackFlair, Size } from 'app/components/track-flair'
-import { UserBadges } from 'app/components/user-badges'
+import { TrackArtists } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { make, track as trackEvent } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
@@ -209,10 +208,17 @@ export const TrackScreenDetailsTile = ({
     is_scheduled_release: isScheduledRelease,
     _is_publishing,
     preview_cid,
-    album_backlink
+    album_backlink,
+    collaborators
   } = track as Track
 
   const isOwner = ownerId === currentUserId
+  // Accepted collaborators (not the owner) can remove themselves from a track.
+  const isCollaborator =
+    !!currentUserId &&
+    (collaborators ?? []).some(
+      (collaborator) => collaborator.user_id === currentUserId
+    )
   const hideFavorite = isUnlisted || !hasStreamAccess
   const hideRepost = isUnlisted || !isReachable || !hasStreamAccess
   const hideOverflow = !isReachable || (isUnlisted && !isOwner)
@@ -499,7 +505,8 @@ export const TrackScreenDetailsTile = ({
       isOwner && isScheduledRelease && isUnlisted
         ? OverflowAction.RELEASE_NOW
         : null,
-      isOwner && !ddexApp ? OverflowAction.DELETE_TRACK : null
+      isOwner && !ddexApp ? OverflowAction.DELETE_TRACK : null,
+      isCollaborator ? OverflowAction.LEAVE_TRACK_COLLABORATION : null
     ].filter(removeNullable)
 
     dispatch(
@@ -619,14 +626,13 @@ export const TrackScreenDetailsTile = ({
             {title}
           </Text>
           {user ? (
-            <TouchableOpacity onPress={handlePressArtistName}>
-              <Flex direction='row' gap='xs'>
-                <Text variant='body' color='accent' size='l'>
-                  {user.name}
-                </Text>
-                <UserBadges userId={user.user_id} badgeSize='s' />
-              </Flex>
-            </TouchableOpacity>
+            <TrackArtists
+              userId={user.user_id}
+              collaborators={collaborators}
+              size='l'
+              badgeSize='s'
+              style={{ justifyContent: 'center' }}
+            />
           ) : null}
         </Flex>
         {isLongFormContent && track ? (

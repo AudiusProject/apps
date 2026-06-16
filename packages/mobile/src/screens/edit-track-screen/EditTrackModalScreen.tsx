@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 
+import { getTrackCollaboratorsForEdit } from '@audius/common/adapters'
 import { useTrack, useUpdateTrack } from '@audius/common/api'
 import { SquareSizes } from '@audius/common/models'
 import type { TrackMetadataForUpload } from '@audius/common/store'
@@ -45,6 +46,7 @@ export const EditTrackModalScreen = () => {
 
   const initialValues = {
     ...track,
+    collaborators: getTrackCollaboratorsForEdit(track),
     artwork: null,
     trackArtwork:
       trackImage && trackImage.source && isImageUriSource(trackImage.source)

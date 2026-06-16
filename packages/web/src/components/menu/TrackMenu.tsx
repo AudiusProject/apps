@@ -2,6 +2,7 @@ import { useContext } from 'react'
 
 import {
   useCurrentUserId,
+  useRejectTrackCollaboration,
   useRemixContest,
   useToggleFavoriteTrack,
   useTrack
@@ -79,7 +80,9 @@ const messages = {
   playNext: 'Play Next',
   addToQueue: 'Add to Queue',
   willPlayNext: 'Will play next',
-  addedToQueue: 'Added to queue'
+  addedToQueue: 'Added to queue',
+  removeCollaboration: 'Remove Me as Collaborator',
+  removedCollaboration: 'Removed as collaborator'
 }
 
 export type OwnProps = {
@@ -144,12 +147,28 @@ const TrackMenu = ({
   const { toast } = useContext(ToastContext)
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
+  const { mutate: rejectTrackCollaboration } = useRejectTrackCollaboration()
   const { onOpen: openDeleteTrackConfirmation } =
     useDeleteTrackConfirmationModal()
   const { onOpen: openHostRemixContest } = useHostRemixContestModal()
   const { data: partialTrack } = useTrack(props.trackId, {
-    select: (track) => pick(track, ['album_backlink', 'permalink', 'remix_of'])
+    select: (track) =>
+      pick(track, [
+        'album_backlink',
+        'permalink',
+        'remix_of',
+        'collaborators',
+        'owner_id'
+      ])
   })
+
+  // Whether the current user is an accepted collaborator (not the owner), and
+  // can therefore remove themselves from the track.
+  const isCollaborator =
+    !!currentUserId &&
+    (partialTrack?.collaborators ?? []).some(
+      (collaborator) => collaborator.user_id === currentUserId
+    )
 
   const toggleSaveTrack = useToggleFavoriteTrack({
     trackId: props.trackId,
@@ -370,6 +389,16 @@ const TrackMenu = ({
       }
     }
 
+    const leaveCollaborationMenuItem: PopupMenuItem = {
+      text: messages.removeCollaboration,
+      onClick: () => {
+        if (trackId) {
+          rejectTrackCollaboration({ trackId })
+          toast(messages.removedCollaboration)
+        }
+      }
+    }
+
     const menu: { items: PopupMenuItem[] } = { items: [] }
 
     if (
@@ -395,6 +424,9 @@ const TrackMenu = ({
     }
     if (includeFavorite && !isOwner && (!isDeleted || isFavorited)) {
       menu.items.push(favoriteMenuItem)
+    }
+    if (isCollaborator && !isOwner && !isDeleted) {
+      menu.items.push(leaveCollaborationMenuItem)
     }
     if (includeAddToAlbum && !isDeleted && isOwner) {
       menu.items.push(addToAlbumMenuItem)
