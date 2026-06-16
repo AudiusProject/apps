@@ -27,7 +27,11 @@ type AvatarViewerProps = {
  * surrounding backdrop, fade, swipe-to-dismiss, and close button live in
  * the shared {@link FullscreenImageViewer}.
  */
-export const AvatarViewer = ({ userId, isOpen, onClose }: AvatarViewerProps) => {
+export const AvatarViewer = ({
+  userId,
+  isOpen,
+  onClose
+}: AvatarViewerProps) => {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
 
   // Use the largest cached size the image API serves so the full-screen

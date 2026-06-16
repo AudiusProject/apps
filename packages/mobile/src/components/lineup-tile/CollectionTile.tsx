@@ -6,8 +6,8 @@ import {
   useOrderedCollectionTracks,
   useUser
 } from '@audius/common/api'
-import { useGatedCollectionAccess } from '@audius/common/hooks'
 import type { CollectionTrack } from '@audius/common/api'
+import { useGatedCollectionAccess } from '@audius/common/hooks'
 import {
   ShareSource,
   RepostSource,

@@ -374,7 +374,9 @@ export const TrackScreenDetailsTile = ({
             startIndex: 0,
             querySource: hasLineup
               ? {
-                  queryKey: [...getTrackPageLineupQueryKey(trackId)] as unknown[]
+                  queryKey: [
+                    ...getTrackPageLineupQueryKey(trackId)
+                  ] as unknown[]
                 }
               : null
           })

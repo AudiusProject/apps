@@ -49,16 +49,12 @@ export const SelectGenreScreen = () => {
   const data = useMemo(() => {
     if (trimmed === '') return knownGenres
     const matchesKnownExactly = knownGenres.some(
-      (g) =>
-        g.label.toLowerCase() === lower || g.value.toLowerCase() === lower
+      (g) => g.label.toLowerCase() === lower || g.value.toLowerCase() === lower
     )
     if (matchesKnownExactly || trimmed.length > MAX_GENRE_LENGTH) {
       return filtered
     }
-    return [
-      { value: trimmed, label: messages.useCustom(trimmed) },
-      ...filtered
-    ]
+    return [{ value: trimmed, label: messages.useCustom(trimmed) }, ...filtered]
   }, [trimmed, lower, filtered])
 
   return (

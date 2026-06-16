@@ -26,6 +26,7 @@ import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffectOnce } from 'react-use'
 
+import { useActivityPing } from 'app/hooks/useActivityPing'
 import useAppState from 'app/hooks/useAppState'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
@@ -39,8 +40,6 @@ import { AppDrawerScreen } from '../app-drawer-screen'
 import { OAuthScreen } from '../oauth-screen/OAuthScreen'
 import { ResetPasswordModalScreen } from '../reset-password-screen'
 import { SignOnStack } from '../sign-on-screen'
-
-import { useActivityPing } from 'app/hooks/useActivityPing'
 
 import { StatusBar } from './StatusBar'
 import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount'

@@ -1,12 +1,7 @@
 import type { ReactNode } from 'react'
 import { useCallback, useEffect } from 'react'
 
-import {
-  Modal,
-  StatusBar,
-  StyleSheet,
-  TouchableOpacity
-} from 'react-native'
+import { Modal, StatusBar, StyleSheet, TouchableOpacity } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,

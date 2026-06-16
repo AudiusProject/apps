@@ -190,9 +190,7 @@ export const TrackLineup = ({
   // from cache (already primed by the rendered CollectionTiles).
   const collectionIds = useMemo(
     () =>
-      visibleItems
-        .filter((i) => i.type !== EntityType.TRACK)
-        .map((i) => i.id),
+      visibleItems.filter((i) => i.type !== EntityType.TRACK).map((i) => i.id),
     [visibleItems]
   )
   const { byId: collectionsById } = useCollections(collectionIds)

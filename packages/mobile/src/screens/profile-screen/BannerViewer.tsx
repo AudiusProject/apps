@@ -26,7 +26,11 @@ type BannerViewerProps = {
  * backdrop). Modal + swipe-to-dismiss + close button come from the shared
  * {@link FullscreenImageViewer}.
  */
-export const BannerViewer = ({ userId, isOpen, onClose }: BannerViewerProps) => {
+export const BannerViewer = ({
+  userId,
+  isOpen,
+  onClose
+}: BannerViewerProps) => {
   const { width: windowWidth } = useWindowDimensions()
 
   // Largest cached cover-photo size. Header uses SIZE_640.

@@ -21,7 +21,10 @@ export const getContentUrl = (content: ShareContent) => {
       // own permalink from event_routes, use it directly; otherwise derive
       // from the parent track's permalink.
       const { track, eventPermalink } = content
-      return getContestRoute({ permalink: track.permalink, contestPermalink: eventPermalink }, true)
+      return getContestRoute(
+        { permalink: track.permalink, contestPermalink: eventPermalink },
+        true
+      )
     }
     case 'profile': {
       const { profile } = content

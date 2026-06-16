@@ -220,7 +220,7 @@ export const ContestScreen = () => {
         ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
       })
     )
-  }, [dispatch, trackId])
+  }, [dispatch, trackId, contest?.permalink])
 
   // Pull-to-refresh: invalidate the contest's event + comment queries so all
   // tabs (details, updates, submissions, comments) refetch the next time

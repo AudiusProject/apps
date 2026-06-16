@@ -44,8 +44,7 @@ export const TrackScreen = () => {
   // instead of starting its own fetch only once it mounts (gated behind the
   // user fetch and the secondary-content gate below). Uses the trackId from
   // route params when available so it can fire before the track resolves.
-  const paramTrackId =
-    'trackId' in restParams ? restParams.trackId : undefined
+  const paramTrackId = 'trackId' in restParams ? restParams.trackId : undefined
   const trackId = paramTrackId ?? track?.track_id
   usePrefetchTrackComments(track?.comments_disabled ? null : trackId)
 
