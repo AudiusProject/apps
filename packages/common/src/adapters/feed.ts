@@ -6,7 +6,7 @@ import { userCollectionMetadataFromSDK } from './collection'
 import { userTrackMetadataFromSDK } from './track'
 
 type UserFeedItem = {
-  type: 'track' | 'playlist'
+  type: 'track' | 'playlist' | 'album'
   item: UserTrackMetadata | UserCollectionMetadata
 }
 
