@@ -79,6 +79,13 @@ module.exports = function (app) {
     handleResponse(async (req) => {
       const { blockchainUserId, handle } = req.user
 
+      if (!handle) {
+        req.logger.warn(
+          `idSignals | record_ip | Skipping IP record for user with id ${blockchainUserId} because handle is missing`
+        )
+        return successResponse()
+      }
+
       try {
         const userIP = getIP(req)
         req.logger.info(

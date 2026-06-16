@@ -1,5 +1,9 @@
 import { useEffect } from 'react'
 
+import {
+  selectIsAccountComplete,
+  useCurrentAccountUser
+} from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import { useSelector } from 'react-redux'
@@ -26,10 +30,15 @@ export const LoadingAccountPage = () => {
   const isFastReferral = useFastReferral()
   const accountReady = useSelector(getAccountReady)
   const accountCreationStatus = useSelector(getStatus)
+  const { data: hasCompleteAccount = false } = useCurrentAccountUser({
+    select: selectIsAccountComplete
+  })
 
   const isAccountReady = isFastReferral
-    ? accountReady
-    : accountReady || accountCreationStatus === EditingStatus.SUCCESS
+    ? accountReady || hasCompleteAccount
+    : accountReady ||
+      hasCompleteAccount ||
+      accountCreationStatus === EditingStatus.SUCCESS
 
   useEffect(() => {
     if (isAccountReady) {
