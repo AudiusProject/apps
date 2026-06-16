@@ -1,13 +1,11 @@
 import { useCurrentAccountUser } from '@audius/common/api'
-import { imageProfilePicEmpty } from '@audius/common/assets'
+import { imageProfilePicEmptyNew as imageProfilePicEmpty } from '@audius/common/assets'
 import { Name, SquareSizes } from '@audius/common/models'
 import {
   Avatar,
   Box,
   Flex,
   IconArrowLeft,
-  IconButton,
-  IconCamera,
   IconVerified,
   PlainButton,
   Text,
@@ -64,17 +62,7 @@ const ProfileImageAvatar = ({
         ...(isSmallSize ? { transform: 'translateY(20px)' } : null)
       }}
       isLoading={false}
-    >
-      {isEditing && (!imageUrl || imageUrl === imageProfilePicEmpty) ? (
-        <IconButton
-          aria-label='Upload a profile photo'
-          size='l'
-          color='white'
-          shadow='drop'
-          icon={IconCamera}
-        />
-      ) : null}
-    </Avatar>
+    />
   )
 }
 
@@ -104,7 +92,8 @@ export const AccountHeader = (props: AccountHeaderProps) => {
   const { accountHandle, userId, accountDisplayName } = accountData ?? {}
   const accountProfilePic = useProfilePicture({
     userId: userId ?? undefined,
-    size: SquareSizes.SIZE_150_BY_150
+    size: SquareSizes.SIZE_150_BY_150,
+    defaultImage: imageProfilePicEmpty
   })
 
   const isEditing = mode === 'editing'
