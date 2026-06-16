@@ -97,8 +97,9 @@ export const useForYouFeed = (
       )
     },
     select: (data) => data?.pages.flat(),
+    staleTime: Infinity,
     ...options,
-    enabled: options?.enabled !== false && currentUserId !== null
+    enabled: options?.enabled !== false && currentUserId != null
   })
 
   const data = query.data ?? []
@@ -109,7 +110,7 @@ export const useForYouFeed = (
   // When the query is disabled, react-query keeps isPending/isLoading true
   // (data is undefined). Surface them as false so consumers can render an
   // empty state instead of an indefinite loading state.
-  const isDisabled = currentUserId === null || options?.enabled === false
+  const isDisabled = currentUserId == null || options?.enabled === false
 
   return {
     data,
