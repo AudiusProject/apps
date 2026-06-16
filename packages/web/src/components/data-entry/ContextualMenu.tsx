@@ -68,6 +68,15 @@ const MenuForm = (props: MenuFormProps) => {
   const { resetForm, errors, initialStatus, status, setStatus } =
     useFormikContext()
 
+  // The HTML `id`/`form` attribute association requires an id with no
+  // whitespace. Labels like "Track Privacy" contain spaces, which makes the
+  // `<Form>`/submit-button association silently fail so the Save button does
+  // nothing on click. Slugify the label into a valid id used for both ends.
+  const formId = useMemo(
+    () => label.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '') || 'menu-form',
+    [label]
+  )
+
   const handleCancel = useCallback(() => {
     resetForm()
     onClose()
@@ -93,7 +102,7 @@ const MenuForm = (props: MenuFormProps) => {
         <ModalTitle title={label} icon={icon} />
       </ModalHeader>
       <ModalContent>
-        <Form id={label}>{menuFields}</Form>
+        <Form id={formId}>{menuFields}</Form>
       </ModalContent>
       <ModalFooter className={styles.footer}>
         {errorMessage ? (
@@ -103,7 +112,7 @@ const MenuForm = (props: MenuFormProps) => {
             </Text>
           </Box>
         ) : null}
-        <Button variant='primary' form={label} type='submit'>
+        <Button variant='primary' form={formId} type='submit'>
           {messages.save}
         </Button>
       </ModalFooter>
