@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useCollection, useUser } from '@audius/common/api'
 import { FollowSource } from '@audius/common/models'
@@ -7,6 +7,7 @@ import { IconButton, IconKebabHorizontal } from '@audius/harmony'
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
+import { DeleteCollectionConfirmationModal } from 'components/edit-collection/DeleteCollectionConfirmationModal'
 import { CollectionMenuProps } from 'components/menu/CollectionMenu'
 import Menu from 'components/menu/Menu'
 
@@ -36,7 +37,8 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
         'playlist_owner_id',
         'has_current_user_saved',
         'permalink',
-        'access'
+        'access',
+        'ddex_app'
       )
   })
   const dispatch = useDispatch()
@@ -48,8 +50,12 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     playlist_owner_id,
     has_current_user_saved,
     permalink,
-    access
+    access,
+    ddex_app
   } = partialCollection ?? {}
+
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
+    useState(false)
 
   const { data: owner } = useUser(playlist_owner_id)
   const isFollowing = owner?.does_current_user_follow
@@ -81,28 +87,38 @@ export const OverflowMenuButton = (props: OverflowMenuButtonProps) => {
     isFavorited: has_current_user_saved,
     mount: 'page',
     isOwner,
+    ddexApp: ddex_app,
+    includeDelete: isOwner && !ddex_app,
     includeEmbed: !is_private && !is_stream_gated,
     includeFavorite: hasStreamAccess,
     includeRepost: hasStreamAccess,
     includeShare: true,
     includeVisitPage: false,
     isPublic: !is_private,
+    onDelete: () => setIsDeleteConfirmationOpen(true),
     extraMenuItems,
     permalink
   } as unknown as CollectionMenuProps
 
   return (
-    <Menu menu={overflowMenu}>
-      {(ref, triggerPopup) => (
-        <IconButton
-          ref={ref}
-          aria-label={messages.moreOptions}
-          size='2xl'
-          icon={IconKebabHorizontal}
-          onClick={() => triggerPopup()}
-          color='subdued'
-        />
-      )}
-    </Menu>
+    <>
+      <Menu menu={overflowMenu}>
+        {(ref, triggerPopup) => (
+          <IconButton
+            ref={ref}
+            aria-label={messages.moreOptions}
+            size='2xl'
+            icon={IconKebabHorizontal}
+            onClick={() => triggerPopup()}
+            color='subdued'
+          />
+        )}
+      </Menu>
+      <DeleteCollectionConfirmationModal
+        collectionId={collectionId}
+        visible={isDeleteConfirmationOpen}
+        onCancel={() => setIsDeleteConfirmationOpen(false)}
+      />
+    </>
   )
 }

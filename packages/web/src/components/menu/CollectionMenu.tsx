@@ -35,6 +35,7 @@ export type OwnProps = {
   children: (items: PopupMenuItem[]) => JSX.Element
   extraMenuItems?: PopupMenuItem[]
   handle: string
+  includeDelete?: boolean
   includeEdit?: boolean
   includeEmbed?: boolean
   includeFavorite?: boolean
@@ -49,6 +50,7 @@ export type OwnProps = {
   isPublic?: boolean
   isReposted?: boolean
   onClose?: () => void
+  onDelete?: () => void
   onRepost?: () => void
   onShare?: () => void
   playlistId: PlaylistId
@@ -88,12 +90,14 @@ const CollectionMenu = ({
     ddexApp,
     playlistId,
     isOwner,
+    includeDelete,
     includeEdit,
     includeShare,
     includeRepost,
     includeEmbed,
     includeVisitArtistPage = true,
     isPublic,
+    onDelete,
     onShare,
     goToRoute,
     openEmbedModal,
@@ -249,6 +253,12 @@ const CollectionMenu = ({
     }
     if (includeEdit && isOwner && !ddexApp) {
       menu.items.push(editCollectionMenuItem)
+    }
+    if (includeDelete && isOwner && !ddexApp) {
+      menu.items.push({
+        text: `Delete ${typeName}`,
+        onClick: () => onDelete?.()
+      })
     }
 
     return menu
