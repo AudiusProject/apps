@@ -9,6 +9,7 @@ import { pick } from 'lodash'
 
 import { preload } from 'utils/image'
 
+import { shouldUseProfilePictureAsCoverPhoto } from './useCoverPhotoUtils'
 import { useProfilePicture } from './useProfilePicture'
 
 export const useCoverPhoto = ({
@@ -42,9 +43,17 @@ export const useCoverPhoto = ({
   const isDefaultCover = imageUrl === imageCoverPhotoBlank
   const isDefaultProfile = profilePicture === imageProfilePicEmpty
   const shouldBlur = isDefaultCover && !isDefaultProfile
+  const shouldUseProfilePicture = shouldUseProfilePictureAsCoverPhoto({
+    coverPhoto: cover_photo,
+    profilePicture,
+    defaultProfilePicture: imageProfilePicEmpty
+  })
 
   if (updatedCoverPhoto) {
     return { image: updatedCoverPhoto.url, shouldBlur: false }
+  }
+  if (shouldUseProfilePicture) {
+    return { image: profilePicture, shouldBlur: true }
   }
 
   return { image: shouldBlur ? profilePicture : imageUrl, shouldBlur }
