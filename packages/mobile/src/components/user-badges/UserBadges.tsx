@@ -41,11 +41,18 @@ export const UserBadges = (props: UserBadgesProps) => {
     !!displayMint &&
     displayMint !== env.WAUDIO_MINT_ADDRESS &&
     !hideFanClubBadge
+  const shouldShowAudioBadge = tier !== 'none'
+
+  if (!userIsVerified && !shouldShowAudioBadge && !shouldShowFanClubBadge) {
+    return null
+  }
 
   return (
     <Flex row gap='xs' alignItems='center'>
       {userIsVerified ? <IconVerified size={badgeSize} /> : null}
-      <IconAudioBadge tier={tier} size={badgeSize} />
+      {shouldShowAudioBadge ? (
+        <IconAudioBadge tier={tier} size={badgeSize} />
+      ) : null}
       {shouldShowFanClubBadge ? (
         <TokenIcon logoURI={userFanClubBadge?.logo_uri} size={badgeSize} />
       ) : null}

@@ -1,17 +1,21 @@
-import { ComponentProps, Fragment } from 'react'
+import type { ComponentProps } from 'react'
+import { Fragment } from 'react'
 
 import type { ID } from '@audius/common/models'
+import { StyleSheet } from 'react-native'
+import type { StyleProp, ViewStyle } from 'react-native'
 
-import type { IconSize } from '@audius/harmony-native'
 import { Flex, Text } from '@audius/harmony-native'
 
 import { UserLink } from './UserLink'
 
 type Collaborator = { user_id: ID }
 
-type CollaboratorLinksProps = {
+type CollaboratorLinksProps = Omit<
+  ComponentProps<typeof UserLink>,
+  'userId'
+> & {
   collaborators?: Collaborator[] | null
-  badgeSize?: IconSize
 }
 
 /**
@@ -20,7 +24,7 @@ type CollaboratorLinksProps = {
  */
 export const CollaboratorLinks = ({
   collaborators,
-  badgeSize
+  ...userLinkProps
 }: CollaboratorLinksProps) => {
   if (!collaborators?.length) {
     return null
@@ -30,16 +34,21 @@ export const CollaboratorLinks = ({
       {collaborators.map((collaborator) => (
         <Fragment key={collaborator.user_id}>
           <Text color='subdued'>, </Text>
-          <UserLink userId={collaborator.user_id} badgeSize={badgeSize} />
+          <UserLink
+            {...userLinkProps}
+            userId={collaborator.user_id}
+            style={styles.artistLink}
+          />
         </Fragment>
       ))}
     </>
   )
 }
 
-type TrackArtistsProps = ComponentProps<typeof UserLink> & {
+type TrackArtistsProps = Omit<ComponentProps<typeof UserLink>, 'style'> & {
   /** Accepted collaborator artists embedded on the track. */
   collaborators?: Collaborator[] | null
+  style?: StyleProp<ViewStyle>
 }
 
 /**
@@ -49,6 +58,7 @@ type TrackArtistsProps = ComponentProps<typeof UserLink> & {
  */
 export const TrackArtists = ({
   collaborators,
+  style,
   ...userLinkProps
 }: TrackArtistsProps) => {
   return (
@@ -56,13 +66,22 @@ export const TrackArtists = ({
       row
       alignItems='center'
       justifyContent='center'
-      style={{ flexShrink: 1 }}
+      w='100%'
+      style={[styles.artistRow, style]}
     >
-      <UserLink {...userLinkProps} />
-      <CollaboratorLinks
-        collaborators={collaborators}
-        badgeSize={userLinkProps.badgeSize}
-      />
+      <UserLink {...userLinkProps} style={styles.artistLink} />
+      <CollaboratorLinks collaborators={collaborators} {...userLinkProps} />
     </Flex>
   )
 }
+
+const styles = StyleSheet.create({
+  artistRow: {
+    flexShrink: 1,
+    overflow: 'hidden'
+  },
+  artistLink: {
+    flexShrink: 1,
+    minWidth: 0
+  }
+})
