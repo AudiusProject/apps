@@ -20,8 +20,8 @@ import {
   IconUserFollowing
 } from '@audius/harmony-native'
 import { Text } from 'app/components/core'
-import { CollaboratorLinks } from 'app/components/user-link'
 import { UserBadges } from 'app/components/user-badges'
+import { CollaboratorLinks } from 'app/components/user-link'
 import { useIsUSDCEnabled } from 'app/hooks/useIsUSDCEnabled'
 import { makeStyles, flexRowCentered, typography } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
