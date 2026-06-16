@@ -114,7 +114,7 @@ async function authMiddleware(req, res, next) {
       // ensuring that the user.handle always represents the latest state on chain
       if (!user.blockchainUserId || !user.handle) {
         try {
-          const res = await req.app.get('audiusSdk').full.users.getUserAccount({
+          const res = await req.app.get('audiusSdk').users.getUserAccount({
             wallet: walletAddress,
             encodedDataMessage,
             encodedDataSignature: signature
@@ -181,7 +181,7 @@ const parameterizedAuthMiddleware = ({ shouldRespondBadRequest }) => {
 
       if (!user.blockchainUserId || !user.handle) {
         try {
-          const res = await req.app.get('audiusSdk').full.users.getUserAccount({
+          const res = await req.app.get('audiusSdk').users.getUserAccount({
             wallet: walletAddress,
             encodedDataMessage,
             encodedDataSignature: signature
