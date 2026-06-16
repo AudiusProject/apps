@@ -58,17 +58,23 @@
 }
 
 .headerTextContainer {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   padding-left: 8px;
 }
 
 .nameContainer {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .artistName {
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--harmony-static-white);
   font-size: 20px;
   font-weight: 900;
@@ -87,17 +93,23 @@
 
 .artistHandleWrapper {
   display: flex;
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   margin-right: 10px;
 }
 
 .artistHandle {
   display: inline-block;
+  flex: 0 1 auto;
+  min-width: 0;
   color: var(--harmony-static-white);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.25px;
   line-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   user-select: none;
   text-shadow: 0 1px 2px rgba(39, 31, 71, 0.5);
   margin-right: 8px;
