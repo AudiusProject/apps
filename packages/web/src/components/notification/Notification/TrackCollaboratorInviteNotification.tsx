@@ -1,11 +1,12 @@
-import { MouseEvent, useCallback, useContext } from 'react'
+import { MouseEvent, useCallback, useContext, useEffect } from 'react'
 
 import {
   useTrack,
   useUser,
   useAcceptTrackCollaboration,
   useCurrentUserId,
-  useRejectTrackCollaboration
+  useRejectTrackCollaboration,
+  useTrackCollaborationStatus
 } from '@audius/common/api'
 import { useAcceptedTrackCollaborationInvite } from '@audius/common/hooks'
 import { TrackCollaboratorInviteNotification as TrackCollaboratorInviteNotificationType } from '@audius/common/store'
@@ -52,6 +53,10 @@ export const TrackCollaboratorInviteNotification = (
   const { data: currentUserId } = useCurrentUserId()
   const { isMarkedAccepted, markAccepted } =
     useAcceptedTrackCollaborationInvite(currentUserId, trackId)
+  const {
+    data: isCollaborationAccepted,
+    isPending: isCollaborationStatusPending
+  } = useTrackCollaborationStatus(trackId, currentUserId)
   // Best-effort: private tracks won't load for a pending collaborator.
   const { data: track } = useTrack(trackId)
   const { mutate: acceptCollaboration, isPending: isAccepting } =
@@ -60,7 +65,17 @@ export const TrackCollaboratorInviteNotification = (
     useRejectTrackCollaboration()
   const isSubmitting = isAccepting || isDeclining
   const isAccepted =
-    isMarkedAccepted || isTrackCollaborationAccepted(track, currentUserId)
+    isMarkedAccepted ||
+    isCollaborationAccepted ||
+    isTrackCollaborationAccepted(track, currentUserId)
+  const isCheckingAccepted =
+    !!currentUserId && isCollaborationStatusPending && !isAccepted
+
+  useEffect(() => {
+    if (isCollaborationAccepted) {
+      markAccepted()
+    }
+  }, [isCollaborationAccepted, markAccepted])
 
   const handleClick = useCallback(() => {
     if (track?.permalink) {
@@ -120,11 +135,11 @@ export const TrackCollaboratorInviteNotification = (
           variant='primary'
           size='small'
           onClick={isAccepted ? undefined : handleAccept}
-          disabled={isAccepted || isSubmitting}
+          disabled={isAccepted || isSubmitting || isCheckingAccepted}
         >
           {isAccepted ? messages.acceptedButton : messages.accept}
         </Button>
-        {isAccepted ? null : (
+        {isAccepted || isCheckingAccepted ? null : (
           <Button
             variant='secondary'
             size='small'

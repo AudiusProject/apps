@@ -18,6 +18,7 @@ export const QUERY_KEYS = {
   trackCommentCount: 'trackCommentCount',
   trackDownloadCounts: 'trackDownloadCounts',
   track: 'track',
+  trackCollaborationStatus: 'trackCollaborationStatus',
   tracksByUser: 'tracksByUser',
   tracksByHandle: 'tracksByHandle',
   trackByPermalink: 'trackByPermalink',

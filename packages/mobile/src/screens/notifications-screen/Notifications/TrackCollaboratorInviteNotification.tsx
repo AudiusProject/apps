@@ -1,10 +1,11 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import {
   useAcceptTrackCollaboration,
   useCurrentUserId,
   useRejectTrackCollaboration,
   useTrack,
+  useTrackCollaborationStatus,
   useUser
 } from '@audius/common/api'
 import { useAcceptedTrackCollaborationInvite } from '@audius/common/hooks'
@@ -53,6 +54,10 @@ export const TrackCollaboratorInviteNotification = (
   const { data: currentUserId } = useCurrentUserId()
   const { isMarkedAccepted, markAccepted } =
     useAcceptedTrackCollaborationInvite(currentUserId, notification.trackId)
+  const {
+    data: isCollaborationAccepted,
+    isPending: isCollaborationStatusPending
+  } = useTrackCollaborationStatus(notification.trackId, currentUserId)
   const { data: track } = useTrack(notification.trackId)
   const { mutate: acceptCollaboration, isPending: isAccepting } =
     useAcceptTrackCollaboration()
@@ -60,7 +65,17 @@ export const TrackCollaboratorInviteNotification = (
     useRejectTrackCollaboration()
   const isSubmitting = isAccepting || isDeclining
   const isAccepted =
-    isMarkedAccepted || isTrackCollaborationAccepted(track, currentUserId)
+    isMarkedAccepted ||
+    isCollaborationAccepted ||
+    isTrackCollaborationAccepted(track, currentUserId)
+  const isCheckingAccepted =
+    !!currentUserId && isCollaborationStatusPending && !isAccepted
+
+  useEffect(() => {
+    if (isCollaborationAccepted) {
+      markAccepted()
+    }
+  }, [isCollaborationAccepted, markAccepted])
 
   const handlePress = useCallback(() => {
     navigation.navigate(notification)
@@ -115,12 +130,12 @@ export const TrackCollaboratorInviteNotification = (
         <Button
           size='small'
           onPress={isAccepted ? undefined : handleAccept}
-          disabled={isAccepted || isSubmitting}
+          disabled={isAccepted || isSubmitting || isCheckingAccepted}
           isLoading={isAccepting}
         >
           {isAccepted ? messages.acceptedButton : messages.accept}
         </Button>
-        {isAccepted ? null : (
+        {isAccepted || isCheckingAccepted ? null : (
           <Button
             size='small'
             variant='secondary'
