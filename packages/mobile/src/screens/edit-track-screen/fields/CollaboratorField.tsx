@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { useCurrentUserId, useSearchUserResults } from '@audius/common/api'
 import type { User, UserMetadata } from '@audius/common/models'
@@ -26,7 +26,7 @@ const messages = {
  */
 export const CollaboratorField = () => {
   const [{ value }, , { setValue }] = useField<UserMetadata[] | undefined>(name)
-  const collaborators = value ?? []
+  const collaborators = useMemo(() => value ?? [], [value])
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   useDebounce(() => setDebouncedQuery(query), DEBOUNCE_MS, [query])
