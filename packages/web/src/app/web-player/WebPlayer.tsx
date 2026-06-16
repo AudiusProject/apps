@@ -67,6 +67,7 @@ import PlayBarProvider from 'components/play-bar/PlayBarProvider'
 import { RewardClaimedToast } from 'components/reward-claimed-toast/RewardClaimedToast'
 import { USDCBalanceFetcher } from 'components/usdc-balance-fetcher/USDCBalanceFetcher'
 import { useEnvironment } from 'hooks/useEnvironment'
+import { useActivityPing } from 'hooks/useActivityPing'
 import { usePlaybackPositionPersistence } from 'hooks/usePlaybackPositionPersistence'
 import { usePlaybackPositionPolling } from 'hooks/usePlaybackPositionPolling'
 import { usePlaybackRatePersistence } from 'hooks/usePlaybackRatePersistence'
@@ -498,6 +499,7 @@ const WebPlayer = (props: WebPlayerProps) => {
   const frostedSurfaceIntensity =
     useSelector(getFrostedSurfaceIntensity) ?? FrostedSurfaceIntensity.DEFAULT
 
+  useActivityPing()
   usePlaybackRatePersistence()
   usePlaybackPositionPersistence()
   usePlaybackPositionPolling()
