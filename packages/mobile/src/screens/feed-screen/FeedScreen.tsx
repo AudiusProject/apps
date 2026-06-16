@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 
 import {
   getFeedQueryKey,
@@ -13,7 +13,10 @@ import {
   FOR_YOU_LOAD_MORE_PAGE_SIZE
 } from '@audius/common/api'
 import { Name, FeedTab } from '@audius/common/models'
+import { useDrawerStatus } from '@react-navigation/drawer'
+import { useFocusEffect } from '@react-navigation/native'
 import { StyleSheet, View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import PagerView, {
   type PagerViewOnPageSelectedEvent
 } from 'react-native-pager-view'
@@ -22,6 +25,8 @@ import { Screen, ScreenContent } from 'app/components/core'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { SuggestedFollows } from 'app/components/suggested-follows'
+import { useDrawer } from 'app/hooks/useDrawer'
+import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { make, track } from 'app/services/analytics'
 
@@ -70,6 +75,57 @@ export const FeedScreen = () => {
   const followQuerySource = useMemo(
     () => ({ queryKey: [...getFeedQueryKey(feedArgs)] as unknown[] }),
     [feedArgs]
+  )
+
+  const { drawerHelpers, setGesturesDisabled } = useContext(AppDrawerContext)
+  const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
+  const drawerStatus = useDrawerStatus()
+
+  // The drawer's own root-level swipe-to-open (swipeEdgeWidth = full screen)
+  // competes with the pager here: with both active, a right-swipe on Latest
+  // opens the drawer instead of paging back to For You, and the two openers
+  // arbitrate unpredictably with the track tiles' tap gesture. While the feed
+  // is focused and the drawer is closed, turn the native drawer swipe off so
+  // the pager owns paging and the gesture below is the single drawer-opener
+  // (For You only). Re-enable once it's open so it can still be swiped closed,
+  // and restore fully on blur.
+  useFocusEffect(
+    useCallback(() => {
+      setGesturesDisabled?.(drawerStatus === 'closed')
+      return () => setGesturesDisabled?.(false)
+    }, [setGesturesDisabled, drawerStatus])
+  )
+
+  // The For You page is the leftmost pager page, so a right-swipe there has
+  // no page to fall back to — PagerView would otherwise swallow it, leaving
+  // the left nav drawer unreachable by gesture (only the header avatar would
+  // open it). This gesture re-enables swipe-to-open on For You: it activates
+  // only on a rightward drag (`activeOffsetX`) and bails on a leftward drag
+  // (`failOffsetX`) so swiping to Latest still reaches the pager untouched.
+  // Disabled on Latest, where right-swipe legitimately pages back to For You.
+  const openDrawerGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .enabled(isForYou && !isNowPlayingDrawerOpen)
+        .activeOffsetX(20)
+        .failOffsetX(-20)
+        .runOnJS(true)
+        .onStart(() => {
+          drawerHelpers?.openDrawer()
+        }),
+    [isForYou, isNowPlayingDrawerOpen, drawerHelpers]
+  )
+
+  // Run the pan simultaneously with the pager's own native gesture. Without
+  // this the pager's native fling recognizer claims fast horizontal swipes
+  // before the pan crosses its activation threshold, so quick right-swipes on
+  // For You never open the drawer. Made simultaneous, the pan always gets to
+  // evaluate direction: a rightward swipe opens the drawer (the pager can't
+  // page right from page 0 anyway) while a leftward swipe still pages to Latest.
+  const pagerGesture = useMemo(() => Gesture.Native(), [])
+  const composedGesture = useMemo(
+    () => Gesture.Simultaneous(openDrawerGesture, pagerGesture),
+    [openDrawerGesture, pagerGesture]
   )
 
   const pagerRef = useRef<PagerView>(null)
@@ -170,38 +226,42 @@ export const FeedScreen = () => {
         <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
         {/* Horizontal pager: swipe left/right toggles between For You and
             Latest, mirroring the tab headers above. Both lineups stay mounted
-            so each retains its own scroll position. */}
-        <PagerView
-          ref={pagerRef}
-          style={styles.pager}
-          initialPage={feedTabIndex}
-          onPageSelected={handlePageSelected}
-        >
-          <View key={FeedTab.FOR_YOU} style={styles.page}>
-            <TrackLineup
-              source='DISCOVER_FEED'
-              pullToRefresh={false}
-              hideHeaderOnEmpty
-              LineupEmptyComponent={<SuggestedFollows />}
-              ListFooterComponent={
-                <EndOfLineupNotice description={messages.endOfFeed} />
-              }
-              {...forYouLineupProps}
-            />
-          </View>
-          <View key={FeedTab.LATEST} style={styles.page}>
-            <TrackLineup
-              source='DISCOVER_FEED'
-              pullToRefresh
-              hideHeaderOnEmpty
-              LineupEmptyComponent={<SuggestedFollows />}
-              ListFooterComponent={
-                <EndOfLineupNotice description={messages.endOfFeed} />
-              }
-              {...followLineupProps}
-            />
-          </View>
-        </PagerView>
+            so each retains its own scroll position. The GestureDetector lets a
+            right-swipe on the leftmost (For You) page open the left nav drawer
+            instead of being swallowed by the pager. */}
+        <GestureDetector gesture={composedGesture}>
+          <PagerView
+            ref={pagerRef}
+            style={styles.pager}
+            initialPage={feedTabIndex}
+            onPageSelected={handlePageSelected}
+          >
+            <View key={FeedTab.FOR_YOU} style={styles.page}>
+              <TrackLineup
+                source='DISCOVER_FEED'
+                pullToRefresh={false}
+                hideHeaderOnEmpty
+                LineupEmptyComponent={<SuggestedFollows />}
+                ListFooterComponent={
+                  <EndOfLineupNotice description={messages.endOfFeed} />
+                }
+                {...forYouLineupProps}
+              />
+            </View>
+            <View key={FeedTab.LATEST} style={styles.page}>
+              <TrackLineup
+                source='DISCOVER_FEED'
+                pullToRefresh
+                hideHeaderOnEmpty
+                LineupEmptyComponent={<SuggestedFollows />}
+                ListFooterComponent={
+                  <EndOfLineupNotice description={messages.endOfFeed} />
+                }
+                {...followLineupProps}
+              />
+            </View>
+          </PagerView>
+        </GestureDetector>
       </ScreenContent>
     </Screen>
   )
