@@ -38,16 +38,19 @@ import { repostFromSDK } from './repost'
 import { userMetadataFromSDK } from './user'
 import { transformAndCleanList } from './utils'
 
-const VALID_GENRES = new Set<string>(Object.values(Genre))
 const VALID_MOODS = new Set<string>(Object.values(Mood))
 
-function toSdkGenre(
-  value: string | undefined | ''
-): (typeof Genre)[keyof typeof Genre] | undefined {
+/**
+ * Pass through any non-empty genre string to the SDK. Canonical Genre enum
+ * values are returned as-is; freeform strings are also passed through
+ * unchanged so artists can enter custom genres (the SDK upload schema caps
+ * them at 100 chars). Previously this filtered out any value not in the
+ * canonical Genre enum, which caused custom genres to silently fall back to
+ * Electronic.
+ */
+function toSdkGenre(value: string | undefined | ''): string | undefined {
   if (value === undefined || value === '') return undefined
-  return VALID_GENRES.has(value)
-    ? (value as (typeof Genre)[keyof typeof Genre])
-    : undefined
+  return value
 }
 
 function toSdkMood(

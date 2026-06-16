@@ -30,4 +30,26 @@ describe('trackMetadataForUploadToSdk', () => {
 
     expect(result.allowedApiKeys).toBeNull()
   })
+
+  it('passes a freeform/custom genre through to the SDK unchanged', () => {
+    const result = trackMetadataForUploadToSdk(
+      makeMetadata({ genre: 'Ambient Drone' })
+    )
+
+    expect(result.genre).toBe('Ambient Drone')
+  })
+
+  it('preserves a canonical genre', () => {
+    const result = trackMetadataForUploadToSdk(
+      makeMetadata({ genre: Genre.HipHopRap })
+    )
+
+    expect(result.genre).toBe(Genre.HipHopRap)
+  })
+
+  it('falls back to Electronic only when genre is empty', () => {
+    const result = trackMetadataForUploadToSdk(makeMetadata({ genre: '' }))
+
+    expect(result.genre).toBe(Genre.Electronic)
+  })
 })
