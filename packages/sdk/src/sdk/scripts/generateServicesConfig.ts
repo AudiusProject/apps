@@ -125,6 +125,16 @@ const CONTENT_NODE_SERVICE_TYPE =
   '0x636f6e74656e742d6e6f64650000000000000000000000000000000000000000' as const
 const VALIDATOR_SERVICE_TYPE =
   '0x76616c696461746f720000000000000000000000000000000000000000000000' as const
+const AUDIUS_STORAGE_NODE_HOSTNAME = 'creatornode.audius.co'
+
+const isAudiusStorageNodeEndpoint = (endpoint: string) => {
+  try {
+    const { hostname } = new URL(endpoint)
+    return hostname === AUDIUS_STORAGE_NODE_HOSTNAME
+  } catch {
+    return false
+  }
+}
 
 const generateServicesConfig = async (
   config: SdkServicesConfig
@@ -184,17 +194,12 @@ const generateServicesConfig = async (
   const minVersion = hexToString(versionHex, { size: 32 })
 
   config.network.minVersion = minVersion
-  // Filter to only *.audius.co storage nodes to improve upload success rates —
-  // third-party nodes have historically had lower reliability.
+  // Use the canonical Audius-operated storage node to improve upload success
+  // rates while avoiding lower-reliability third-party nodes.
   config.network.storageNodes = storageNodes
-    .filter(([_ownerWallet, endpoint]: any) => {
-      try {
-        const { hostname } = new URL(endpoint)
-        return hostname.endsWith('.audius.co')
-      } catch {
-        return false
-      }
-    })
+    .filter(([_ownerWallet, endpoint]: any) =>
+      isAudiusStorageNodeEndpoint(endpoint)
+    )
     .map(([_ownerWallet, endpoint, _blockNumber, delegateOwnerWallet]: any) => ({
       endpoint,
       delegateOwnerWallet
