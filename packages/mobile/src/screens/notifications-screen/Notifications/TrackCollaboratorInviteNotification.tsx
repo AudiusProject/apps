@@ -1,11 +1,21 @@
 import { useCallback } from 'react'
 
-import { useTrack, useUser } from '@audius/common/api'
+import {
+  useAcceptTrackCollaboration,
+  useCurrentUserId,
+  useRejectTrackCollaboration,
+  useTrack,
+  useUser
+} from '@audius/common/api'
+import { useAcceptedTrackCollaborationInvite } from '@audius/common/hooks'
 import type { TrackCollaboratorInviteNotification as TrackCollaboratorInviteNotificationType } from '@audius/common/store'
+import { isTrackCollaborationAccepted } from '@audius/common/utils'
+import type { GestureResponderEvent } from 'react-native'
 import { View } from 'react-native'
 
-import { IconUserArrowRotate } from '@audius/harmony-native'
+import { Button, Flex, IconUserArrowRotate } from '@audius/harmony-native'
 import { useNotificationNavigation } from 'app/hooks/useNotificationNavigation'
+import { useToast } from 'app/hooks/useToast'
 
 import {
   NotificationHeader,
@@ -19,7 +29,13 @@ import {
 const messages = {
   title: 'Track Collaboration Invite',
   invitedYou: 'invited you to collaborate on',
-  aTrack: 'a track'
+  aTrack: 'a track',
+  accept: 'Accept',
+  decline: 'Decline',
+  acceptedButton: 'Accepted',
+  accepted: 'Collaboration accepted!',
+  declined: 'Invitation declined',
+  error: 'Something went wrong. Please try again.'
 }
 
 type TrackCollaboratorInviteNotificationProps = {
@@ -31,13 +47,55 @@ export const TrackCollaboratorInviteNotification = (
 ) => {
   const { notification } = props
   const navigation = useNotificationNavigation()
+  const { toast } = useToast()
 
   const { data: inviter } = useUser(notification.inviterUserId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { isMarkedAccepted, markAccepted } =
+    useAcceptedTrackCollaborationInvite(currentUserId, notification.trackId)
   const { data: track } = useTrack(notification.trackId)
+  const { mutate: acceptCollaboration, isPending: isAccepting } =
+    useAcceptTrackCollaboration()
+  const { mutate: rejectCollaboration, isPending: isDeclining } =
+    useRejectTrackCollaboration()
+  const isSubmitting = isAccepting || isDeclining
+  const isAccepted =
+    isMarkedAccepted || isTrackCollaborationAccepted(track, currentUserId)
 
   const handlePress = useCallback(() => {
     navigation.navigate(notification)
   }, [navigation, notification])
+
+  const handleAccept = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation()
+      acceptCollaboration(
+        { trackId: notification.trackId },
+        {
+          onSuccess: () => {
+            markAccepted()
+            toast({ content: messages.accepted })
+          },
+          onError: () => toast({ content: messages.error, type: 'error' })
+        }
+      )
+    },
+    [acceptCollaboration, markAccepted, notification.trackId, toast]
+  )
+
+  const handleDecline = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation()
+      rejectCollaboration(
+        { trackId: notification.trackId },
+        {
+          onSuccess: () => toast({ content: messages.declined }),
+          onError: () => toast({ content: messages.error, type: 'error' })
+        }
+      )
+    },
+    [notification.trackId, rejectCollaboration, toast]
+  )
 
   if (!inviter) return null
 
@@ -53,6 +111,27 @@ export const TrackCollaboratorInviteNotification = (
           {track?.title ?? messages.aTrack}.
         </NotificationText>
       </View>
+      <Flex row gap='s' mt='xl' alignItems='flex-start'>
+        <Button
+          size='small'
+          onPress={isAccepted ? undefined : handleAccept}
+          disabled={isAccepted || isSubmitting}
+          isLoading={isAccepting}
+        >
+          {isAccepted ? messages.acceptedButton : messages.accept}
+        </Button>
+        {isAccepted ? null : (
+          <Button
+            size='small'
+            variant='secondary'
+            onPress={handleDecline}
+            disabled={isSubmitting}
+            isLoading={isDeclining}
+          >
+            {messages.decline}
+          </Button>
+        )}
+      </Flex>
     </NotificationTile>
   )
 }

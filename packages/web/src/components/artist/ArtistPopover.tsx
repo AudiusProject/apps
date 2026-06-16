@@ -1,6 +1,7 @@
 import { ReactNode, useRef, useCallback, MutableRefObject } from 'react'
 
-import { useCurrentUserId, useUserByHandle } from '@audius/common/api'
+import { useCurrentUserId, useUser, useUserByHandle } from '@audius/common/api'
+import { ID } from '@audius/common/models'
 import { Popup, type PopupProps, type Origin } from '@audius/harmony'
 import { useHoverDelay } from '@audius/harmony/src/hooks/useHoverDelay'
 import { CSSObject } from '@emotion/react'
@@ -9,6 +10,7 @@ import { ArtistCard } from './ArtistCard'
 
 type ArtistPopoverProps = {
   handle: string | undefined
+  userId?: ID
   children: ReactNode
   onNavigateAway?: () => void
   mouseEnterDelay?: number
@@ -39,6 +41,7 @@ const DEFAULT_TRANSFORM_ORIGIN: Origin = {
 
 export const ArtistPopover = ({
   handle,
+  userId: artistUserId,
   children,
   onNavigateAway,
   mouseEnterDelay = 0.5,
@@ -54,8 +57,12 @@ export const ArtistPopover = ({
   const { isVisible, handleMouseEnter, handleMouseLeave, clearTimer } =
     useHoverDelay(mouseEnterDelay, 'hover')
 
-  const { data: creator } = useUserByHandle(handle)
-  const { data: userId } = useCurrentUserId()
+  const { data: creatorById } = useUser(artistUserId)
+  const { data: creatorByHandle } = useUserByHandle(handle, {
+    enabled: !artistUserId
+  })
+  const creator = creatorById ?? creatorByHandle
+  const { data: currentUserId } = useCurrentUserId()
 
   const handleClose = useCallback(() => {
     clearTimer()
@@ -63,7 +70,7 @@ export const ArtistPopover = ({
   }, [clearTimer, onNavigateAway])
 
   const content =
-    creator && userId !== creator.user_id ? (
+    creator && currentUserId !== creator.user_id ? (
       <ArtistCard artist={creator} onNavigateAway={handleClose} />
     ) : null
 

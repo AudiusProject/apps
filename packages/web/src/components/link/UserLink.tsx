@@ -83,7 +83,7 @@ export const UserLink = (props: UserLinkProps) => {
     lineHeight: 'normal',
     minWidth: 0,
     maxWidth: '100%',
-    overflow: 'hidden',
+    overflow: noOverflow ? 'visible' : 'hidden',
     width: fullWidth ? '100%' : undefined
   }
   const nameRowStyles: CSSObject = {
@@ -143,6 +143,7 @@ export const UserLink = (props: UserLinkProps) => {
               overflow: noOverflow ? 'visible' : 'hidden'
             }}
             handle={handle}
+            userId={userId}
           >
             <TextLink
               to={url}

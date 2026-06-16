@@ -33,15 +33,30 @@ export const TrackArtists = ({
   return (
     <Flex
       alignItems='center'
-      css={{ minWidth: 0, overflow: 'hidden', display: 'inline-flex' }}
+      css={{
+        minWidth: 0,
+        maxWidth: '100%',
+        overflow: userLinkProps.popover ? 'visible' : 'hidden',
+        display: 'inline-flex'
+      }}
     >
-      <UserLink userId={userId} ellipses {...userLinkProps} />
+      <UserLink
+        userId={userId}
+        ellipses
+        {...userLinkProps}
+        noOverflow={userLinkProps.noOverflow || userLinkProps.popover}
+      />
       {extraArtists.map((collaborator) => (
         <Fragment key={collaborator.user_id}>
           <Text color='subdued' css={{ marginRight: 4 }}>
             ,
           </Text>
-          <UserLink userId={collaborator.user_id} ellipses {...userLinkProps} />
+          <UserLink
+            userId={collaborator.user_id}
+            ellipses
+            {...userLinkProps}
+            noOverflow={userLinkProps.noOverflow || userLinkProps.popover}
+          />
         </Fragment>
       ))}
     </Flex>

@@ -4,9 +4,12 @@ import {
   useTrack,
   useUser,
   useAcceptTrackCollaboration,
+  useCurrentUserId,
   useRejectTrackCollaboration
 } from '@audius/common/api'
+import { useAcceptedTrackCollaborationInvite } from '@audius/common/hooks'
 import { TrackCollaboratorInviteNotification as TrackCollaboratorInviteNotificationType } from '@audius/common/store'
+import { isTrackCollaborationAccepted } from '@audius/common/utils'
 import { Button, Flex, IconUserArrowRotate } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
@@ -28,6 +31,7 @@ const messages = {
   aTrack: 'a track',
   accept: 'Accept',
   decline: 'Decline',
+  acceptedButton: 'Accepted',
   accepted: 'Collaboration accepted!',
   declined: 'Invitation declined',
   error: 'Something went wrong. Please try again.'
@@ -45,6 +49,9 @@ export const TrackCollaboratorInviteNotification = (
   const dispatch = useDispatch()
   const { toast } = useContext(ToastContext)
   const { data: inviter } = useUser(inviterUserId)
+  const { data: currentUserId } = useCurrentUserId()
+  const { isMarkedAccepted, markAccepted } =
+    useAcceptedTrackCollaborationInvite(currentUserId, trackId)
   // Best-effort: private tracks won't load for a pending collaborator.
   const { data: track } = useTrack(trackId)
   const { mutate: acceptCollaboration, isPending: isAccepting } =
@@ -52,6 +59,8 @@ export const TrackCollaboratorInviteNotification = (
   const { mutate: rejectCollaboration, isPending: isDeclining } =
     useRejectTrackCollaboration()
   const isSubmitting = isAccepting || isDeclining
+  const isAccepted =
+    isMarkedAccepted || isTrackCollaborationAccepted(track, currentUserId)
 
   const handleClick = useCallback(() => {
     if (track?.permalink) {
@@ -65,12 +74,15 @@ export const TrackCollaboratorInviteNotification = (
       acceptCollaboration(
         { trackId },
         {
-          onSuccess: () => toast(messages.accepted),
+          onSuccess: () => {
+            markAccepted()
+            toast(messages.accepted)
+          },
           onError: () => toast(messages.error)
         }
       )
     },
-    [acceptCollaboration, trackId, toast]
+    [acceptCollaboration, markAccepted, trackId, toast]
   )
 
   const handleDecline = useCallback(
@@ -107,19 +119,21 @@ export const TrackCollaboratorInviteNotification = (
         <Button
           variant='primary'
           size='small'
-          onClick={handleAccept}
-          disabled={isSubmitting}
+          onClick={isAccepted ? undefined : handleAccept}
+          disabled={isAccepted || isSubmitting}
         >
-          {messages.accept}
+          {isAccepted ? messages.acceptedButton : messages.accept}
         </Button>
-        <Button
-          variant='secondary'
-          size='small'
-          onClick={handleDecline}
-          disabled={isSubmitting}
-        >
-          {messages.decline}
-        </Button>
+        {isAccepted ? null : (
+          <Button
+            variant='secondary'
+            size='small'
+            onClick={handleDecline}
+            disabled={isSubmitting}
+          >
+            {messages.decline}
+          </Button>
+        )}
       </Flex>
       <NotificationFooter timeLabel={timeLabel} isViewed={isViewed} />
     </NotificationTile>

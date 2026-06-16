@@ -23,7 +23,11 @@ import {
   StemCategory,
   TrackSegment
 } from '~/models'
-import { StemTrackMetadata, UserTrackMetadata } from '~/models/Track'
+import type {
+  StemTrackMetadata,
+  TrackMetadata,
+  UserTrackMetadata
+} from '~/models/Track'
 import type { TrackMetadataForUpload } from '~/store/upload/types'
 import { formatMusicalKey, License, Maybe, squashNewLines } from '~/utils'
 import dayjs from '~/utils/dayjs'
@@ -70,6 +74,18 @@ export const trackSegmentFromSDK = ({
   duration: `${duration}`,
   multihash
 })
+
+type TrackCollaboratorMetadata = Pick<
+  TrackMetadata,
+  'collaborators' | 'pending_collaborators'
+>
+
+export const getTrackCollaboratorsForEdit = (
+  track?: Partial<TrackCollaboratorMetadata> | null
+): NonNullable<TrackMetadata['collaborators']> => [
+  ...(track?.collaborators ?? []),
+  ...(track?.pending_collaborators ?? [])
+]
 
 export const userTrackMetadataFromSDK = (
   input: Track | SearchTrack
@@ -139,7 +155,10 @@ export const userTrackMetadataFromSDK = (
     track_segments: input.trackSegments.map(trackSegmentFromSDK),
     user,
     // Accepted collaborator artists, decoded/cleaned like the owner.
-    collaborators: transformAndCleanList(input.collaborators, userMetadataFromSDK),
+    collaborators: transformAndCleanList(
+      input.collaborators,
+      userMetadataFromSDK
+    ),
     // Pending invites (owner-only); lets the edit form preserve them on save.
     pending_collaborators: transformAndCleanList(
       input.pendingCollaborators,
