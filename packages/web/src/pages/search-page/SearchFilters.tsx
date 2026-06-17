@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
 
 import {
   GENRES,
@@ -55,6 +55,24 @@ const GenreFilter = () => {
     updateGenreParams(value)
   }
 
+  const options = useMemo(() => {
+    const genreOptions = GENRES.map((genre) => ({
+      label: genre,
+      value: convertGenreLabelToValue(genre)
+    }))
+
+    // Freeform/custom genres (e.g. "Hyperpop Fusion") aren't in the predefined
+    // GENRES list. Without a matching option the FilterButton can't resolve a
+    // label and the active chip falls back to the generic "Genre" text, leaving
+    // no indication of what's actually being filtered. Add the current genre as
+    // an option so it renders as a selected chip.
+    if (genre && !genreOptions.some((option) => option.value === genre)) {
+      return [{ label: genre, value: genre }, ...genreOptions]
+    }
+
+    return genreOptions
+  }, [genre])
+
   return (
     <FilterButton
       label={messages.genre}
@@ -65,10 +83,7 @@ const GenreFilter = () => {
       }}
       value={genre}
       onChange={handleGenreChange}
-      options={GENRES.map((genre) => ({
-        label: genre,
-        value: convertGenreLabelToValue(genre)
-      }))}
+      options={options}
       showFilterInput
       filterInputProps={{ label: messages.genreFilterLabel }}
     />
