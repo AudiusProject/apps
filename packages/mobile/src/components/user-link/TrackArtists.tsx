@@ -59,8 +59,7 @@ type TrackArtistsProps = Omit<
 
 /**
  * A track's centered artist line for mobile: the owner `<UserLink>` plus
- * accepted collaborators. User badges render on their own centered row so the
- * names stay visually centered under the title.
+ * accepted collaborators, each followed by their own user badges.
  */
 export const TrackArtists = ({
   collaborators,
@@ -92,45 +91,39 @@ export const TrackArtists = ({
 
   return (
     <Flex alignItems='center' w='100%' style={[styles.artistColumn, style]}>
-      <Text
-        numberOfLines={1}
-        ellipsizeMode='tail'
-        textAlign='center'
-        style={styles.artistNames}
-      >
-        {artists.map((artist, index) => (
-          <Fragment key={artist.userId}>
-            {index > 0 ? <Text color='subdued'>, </Text> : null}
-            <TextLink
-              {...textLinkProps}
-              to={{ screen: 'Profile', params: { id: artist.userId } }}
-              numberOfLines={1}
-              style={textLinkStyle}
-            >
-              {artist.name}
-            </TextLink>
-          </Fragment>
-        ))}
-      </Text>
       <Flex
         row
         alignItems='center'
         justifyContent='center'
-        style={styles.badges}
+        w='100%'
+        style={styles.artistLine}
       >
-        <UserBadges
-          userId={userId}
-          badgeSize={badgeSize}
-          mint={mint}
-          hideFanClubBadge={hideFanClubBadge}
-        />
-        {collaborators?.map((collaborator) => (
-          <UserBadges
-            key={collaborator.user_id}
-            userId={collaborator.user_id}
-            badgeSize={badgeSize}
-            hideFanClubBadge={hideFanClubBadge}
-          />
+        {artists.map((artist, index) => (
+          <Fragment key={artist.userId}>
+            {index > 0 ? <Text color='subdued'>, </Text> : null}
+            <Flex
+              row
+              alignItems='center'
+              gap='xs'
+              style={styles.artistGroup}
+              testID={`track-artist-${artist.userId}`}
+            >
+              <TextLink
+                {...textLinkProps}
+                to={{ screen: 'Profile', params: { id: artist.userId } }}
+                numberOfLines={1}
+                style={[styles.artistName, textLinkStyle]}
+              >
+                {artist.name}
+              </TextLink>
+              <UserBadges
+                userId={artist.userId}
+                badgeSize={badgeSize}
+                mint={artist.userId === userId ? mint : undefined}
+                hideFanClubBadge={hideFanClubBadge}
+              />
+            </Flex>
+          </Fragment>
         ))}
       </Flex>
     </Flex>
@@ -142,11 +135,17 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     overflow: 'hidden'
   },
-  artistNames: {
-    width: '100%'
+  artistLine: {
+    minWidth: 0,
+    overflow: 'hidden'
   },
-  badges: {
-    gap: 4
+  artistGroup: {
+    flexShrink: 1,
+    minWidth: 0
+  },
+  artistName: {
+    flexShrink: 1,
+    minWidth: 0
   },
   artistLink: {
     flexShrink: 1,

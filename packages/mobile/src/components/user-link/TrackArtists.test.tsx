@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native'
+import { render, screen, within } from '@testing-library/react-native'
 
 import { TrackArtists } from './TrackArtists'
 
@@ -15,8 +15,8 @@ jest.mock(
     const { Text, View } = require('react-native')
 
     return {
-      Flex: ({ children, style }: any) =>
-        React.createElement(View, { style }, children),
+      Flex: ({ children, style, testID }: any) =>
+        React.createElement(View, { style, testID }, children),
       Text: ({ children }: any) => React.createElement(Text, null, children),
       TextLink: ({ children, to }: any) =>
         React.createElement(Text, null, `${to.params.id}:${children}`)
@@ -65,13 +65,16 @@ describe('TrackArtists', () => {
     })
   })
 
-  it('centers artist names and renders badges for each artist', () => {
+  it('centers artist groups with each artist badge beside its name', () => {
     render(<TrackArtists userId={1} collaborators={[{ user_id: 2 }]} />)
 
+    const ownerGroup = screen.getByTestId('track-artist-1')
+    const collaboratorGroup = screen.getByTestId('track-artist-2')
+
     expect(mockUseUsers).toHaveBeenCalledWith([1, 2])
-    expect(screen.getByText('1:ray61626b')).toBeOnTheScreen()
-    expect(screen.getByText('2:dj g8r')).toBeOnTheScreen()
-    expect(screen.getByText('badges:1')).toBeOnTheScreen()
-    expect(screen.getByText('badges:2')).toBeOnTheScreen()
+    expect(within(ownerGroup).getByText('1:ray61626b')).toBeOnTheScreen()
+    expect(within(ownerGroup).getByText('badges:1')).toBeOnTheScreen()
+    expect(within(collaboratorGroup).getByText('2:dj g8r')).toBeOnTheScreen()
+    expect(within(collaboratorGroup).getByText('badges:2')).toBeOnTheScreen()
   })
 })
