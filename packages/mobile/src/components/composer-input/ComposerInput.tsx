@@ -190,7 +190,11 @@ export const ComposerInput = forwardRef(function ComposerInput(
   const prevLinkEntities = usePrevious(linkEntities)
 
   const timestamps = useMemo(() => {
-    if (!partialTrack || !partialTrack.access.stream) return []
+    // `access` is typed as required on Track but is frequently absent at
+    // runtime (tracks hydrated from search/lineup/notification caches before
+    // gated-access enrichment). Optional-chain it so the comment drawer's
+    // composer doesn't crash on open when there's no access info yet.
+    if (!partialTrack || !partialTrack.access?.stream) return []
 
     const { duration } = partialTrack
     return Array.from(value.matchAll(timestampRegex))
