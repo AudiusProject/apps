@@ -18,6 +18,7 @@ export { DeveloperAppsApi } from './api/developer-apps/DeveloperAppsApi'
 export { DashboardWalletUsersApi } from './api/dashboard-wallet-users/DashboardWalletUsersApi'
 export { UsersApi } from './api/users/UsersApi'
 export { ResolveApi } from './api/ResolveApi'
+export { GenresApi } from './api/generated/default'
 export {
   GetAudioTransactionHistorySortMethodEnum,
   GetAudioTransactionHistorySortDirectionEnum,

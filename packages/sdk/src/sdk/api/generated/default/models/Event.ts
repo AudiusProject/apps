@@ -81,7 +81,6 @@ export interface Event {
     eventData: object;
     /**
      * Canonical contest permalink derived from event_routes.
-     * Optional - absent until the API begins returning this field.
      * @type {string}
      * @memberof Event
      */

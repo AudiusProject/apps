@@ -215,10 +215,6 @@ import {
     RequestManagerNotificationFromJSONTyped,
     RequestManagerNotificationToJSON,
 } from './RequestManagerNotification';
-import type { TrackCollaboratorNotification } from './TrackCollaboratorNotification';
-import {
-    TrackCollaboratorNotificationFromJSONTyped,
-} from './TrackCollaboratorNotification';
 import {
     SaveNotification,
     instanceOfSaveNotification,
@@ -283,6 +279,13 @@ import {
     TrackAddedToPurchasedAlbumNotificationToJSON,
 } from './TrackAddedToPurchasedAlbumNotification';
 import {
+    TrackCollaboratorNotification,
+    instanceOfTrackCollaboratorNotification,
+    TrackCollaboratorNotificationFromJSON,
+    TrackCollaboratorNotificationFromJSONTyped,
+    TrackCollaboratorNotificationToJSON,
+} from './TrackCollaboratorNotification';
+import {
     TrendingNotification,
     instanceOfTrendingNotification,
     TrendingNotificationFromJSON,
@@ -323,7 +326,7 @@ import {
  * 
  * @export
  */
-export type Notification = { type: 'announcement' } & AnnouncementNotification | { type: 'approve_manager_request' } & ApproveManagerRequestNotification | { type: 'artist_remix_contest_ended' } & ArtistRemixContestEndedNotification | { type: 'artist_remix_contest_ending_soon' } & ArtistRemixContestEndingSoonNotification | { type: 'artist_remix_contest_submissions' } & ArtistRemixContestSubmissionsNotification | { type: 'challenge_reward' } & ChallengeRewardNotification | { type: 'claimable_reward' } & ClaimableRewardNotification | { type: 'comment' } & CommentNotification | { type: 'comment_mention' } & CommentMentionNotification | { type: 'comment_reaction' } & CommentReactionNotification | { type: 'comment_thread' } & CommentThreadNotification | { type: 'cosign' } & CosignNotification | { type: 'create' } & CreateNotification | { type: 'fan_club_text_post' } & FanClubTextPostNotification | { type: 'fan_remix_contest_ended' } & FanRemixContestEndedNotification | { type: 'fan_remix_contest_ending_soon' } & FanRemixContestEndingSoonNotification | { type: 'fan_remix_contest_started' } & FanRemixContestStartedNotification | { type: 'fan_remix_contest_submission' } & FanRemixContestSubmissionNotification | { type: 'fan_remix_contest_winners_selected' } & FanRemixContestWinnersSelectedNotification | { type: 'follow' } & FollowNotification | { type: 'listen_streak_reminder' } & ListenStreakReminderNotification | { type: 'milestone' } & MilestoneNotification | { type: 'reaction' } & ReactionNotification | { type: 'remix' } & RemixNotification | { type: 'remix_contest_update' } & RemixContestUpdateNotification | { type: 'repost' } & RepostNotification | { type: 'repost_of_repost' } & RepostOfRepostNotification | { type: 'request_manager' } & RequestManagerNotification | { type: 'save' } & SaveNotification | { type: 'save_of_repost' } & SaveOfRepostNotification | { type: 'supporter_dethroned' } & SupporterDethronedNotification | { type: 'supporter_rank_up' } & SupporterRankUpNotification | { type: 'supporting_rank_up' } & SupporterRankUpNotification | { type: 'tastemaker' } & TastemakerNotification | { type: 'tier_change' } & TierChangeNotification | { type: 'tip_receive' } & ReceiveTipNotification | { type: 'tip_send' } & SendTipNotification | { type: 'track_added_to_playlist' } & TrackAddedToPlaylistNotification | { type: 'track_added_to_purchased_album' } & TrackAddedToPurchasedAlbumNotification | { type: 'trending' } & TrendingNotification | { type: 'trending_playlist' } & TrendingPlaylistNotification | { type: 'trending_underground' } & TrendingUndergroundNotification | { type: 'usdc_purchase_buyer' } & UsdcPurchaseBuyerNotification | { type: 'usdc_purchase_seller' } & UsdcPurchaseSellerNotification | { type: 'track_collaborator_invite' } & TrackCollaboratorNotification | { type: 'track_collaborator_accept' } & TrackCollaboratorNotification;
+export type Notification = { type: 'announcement' } & AnnouncementNotification | { type: 'approve_manager_request' } & ApproveManagerRequestNotification | { type: 'artist_remix_contest_ended' } & ArtistRemixContestEndedNotification | { type: 'artist_remix_contest_ending_soon' } & ArtistRemixContestEndingSoonNotification | { type: 'artist_remix_contest_submissions' } & ArtistRemixContestSubmissionsNotification | { type: 'challenge_reward' } & ChallengeRewardNotification | { type: 'claimable_reward' } & ClaimableRewardNotification | { type: 'comment' } & CommentNotification | { type: 'comment_mention' } & CommentMentionNotification | { type: 'comment_reaction' } & CommentReactionNotification | { type: 'comment_thread' } & CommentThreadNotification | { type: 'cosign' } & CosignNotification | { type: 'create' } & CreateNotification | { type: 'fan_club_text_post' } & FanClubTextPostNotification | { type: 'fan_remix_contest_ended' } & FanRemixContestEndedNotification | { type: 'fan_remix_contest_ending_soon' } & FanRemixContestEndingSoonNotification | { type: 'fan_remix_contest_started' } & FanRemixContestStartedNotification | { type: 'fan_remix_contest_submission' } & FanRemixContestSubmissionNotification | { type: 'fan_remix_contest_winners_selected' } & FanRemixContestWinnersSelectedNotification | { type: 'follow' } & FollowNotification | { type: 'listen_streak_reminder' } & ListenStreakReminderNotification | { type: 'milestone' } & MilestoneNotification | { type: 'reaction' } & ReactionNotification | { type: 'remix' } & RemixNotification | { type: 'remix_contest_update' } & RemixContestUpdateNotification | { type: 'repost' } & RepostNotification | { type: 'repost_of_repost' } & RepostOfRepostNotification | { type: 'request_manager' } & RequestManagerNotification | { type: 'save' } & SaveNotification | { type: 'save_of_repost' } & SaveOfRepostNotification | { type: 'supporter_dethroned' } & SupporterDethronedNotification | { type: 'supporter_rank_up' } & SupporterRankUpNotification | { type: 'supporting_rank_up' } & SupporterRankUpNotification | { type: 'tastemaker' } & TastemakerNotification | { type: 'tier_change' } & TierChangeNotification | { type: 'tip_receive' } & ReceiveTipNotification | { type: 'tip_send' } & SendTipNotification | { type: 'track_added_to_playlist' } & TrackAddedToPlaylistNotification | { type: 'track_added_to_purchased_album' } & TrackAddedToPurchasedAlbumNotification | { type: 'track_collaborator_accept' } & TrackCollaboratorNotification | { type: 'track_collaborator_invite' } & TrackCollaboratorNotification | { type: 'trending' } & TrendingNotification | { type: 'trending_playlist' } & TrendingPlaylistNotification | { type: 'trending_underground' } & TrendingUndergroundNotification | { type: 'usdc_purchase_buyer' } & UsdcPurchaseBuyerNotification | { type: 'usdc_purchase_seller' } & UsdcPurchaseSellerNotification;
 
 export function NotificationFromJSON(json: any): Notification {
     return NotificationFromJSONTyped(json, false);
@@ -412,6 +415,10 @@ export function NotificationFromJSONTyped(json: any, ignoreDiscriminator: boolea
             return {...TrackAddedToPlaylistNotificationFromJSONTyped(json, true), type: 'track_added_to_playlist'};
         case 'track_added_to_purchased_album':
             return {...TrackAddedToPurchasedAlbumNotificationFromJSONTyped(json, true), type: 'track_added_to_purchased_album'};
+        case 'track_collaborator_accept':
+            return {...TrackCollaboratorNotificationFromJSONTyped(json, true), type: 'track_collaborator_accept'};
+        case 'track_collaborator_invite':
+            return {...TrackCollaboratorNotificationFromJSONTyped(json, true), type: 'track_collaborator_invite'};
         case 'trending':
             return {...TrendingNotificationFromJSONTyped(json, true), type: 'trending'};
         case 'trending_playlist':
@@ -422,10 +429,6 @@ export function NotificationFromJSONTyped(json: any, ignoreDiscriminator: boolea
             return {...UsdcPurchaseBuyerNotificationFromJSONTyped(json, true), type: 'usdc_purchase_buyer'};
         case 'usdc_purchase_seller':
             return {...UsdcPurchaseSellerNotificationFromJSONTyped(json, true), type: 'usdc_purchase_seller'};
-        case 'track_collaborator_invite':
-            return {...TrackCollaboratorNotificationFromJSONTyped(json, true), type: 'track_collaborator_invite'};
-        case 'track_collaborator_accept':
-            return {...TrackCollaboratorNotificationFromJSONTyped(json, true), type: 'track_collaborator_accept'};
         default:
             throw new Error(`No variant of Notification exists with 'type=${json['type']}'`);
     }
@@ -517,6 +520,10 @@ export function NotificationToJSON(value?: Notification | null): any {
             return TrackAddedToPlaylistNotificationToJSON(value);
         case 'track_added_to_purchased_album':
             return TrackAddedToPurchasedAlbumNotificationToJSON(value);
+        case 'track_collaborator_accept':
+            return TrackCollaboratorNotificationToJSON(value);
+        case 'track_collaborator_invite':
+            return TrackCollaboratorNotificationToJSON(value);
         case 'trending':
             return TrendingNotificationToJSON(value);
         case 'trending_playlist':

@@ -166,6 +166,8 @@ export const GetNotificationsTypesEnum = {
     TrackAddedToPurchasedAlbum: 'track_added_to_purchased_album',
     RequestManager: 'request_manager',
     ApproveManagerRequest: 'approve_manager_request',
+    TrackCollaboratorInvite: 'track_collaborator_invite',
+    TrackCollaboratorAccept: 'track_collaborator_accept',
     ClaimableReward: 'claimable_reward',
     Comment: 'comment',
     CommentThread: 'comment_thread',

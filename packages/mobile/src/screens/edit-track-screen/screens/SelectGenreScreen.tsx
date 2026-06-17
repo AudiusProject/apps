@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react'
 
-import { GENRES, convertGenreLabelToValue } from '@audius/common/utils'
+import { useGenreSuggestions } from '@audius/common/api'
+import {
+  getGenreSuggestionKey,
+  getStaticGenreSuggestions,
+  normalizeGenre
+} from '@audius/common/utils'
 import { useField } from 'formik'
 
 import { Flex } from '@audius/harmony-native'
@@ -17,10 +22,7 @@ const messages = {
   useCustom: (value: string) => `Use "${value}" as a custom genre`
 }
 
-const knownGenres = GENRES.map((genre) => ({
-  value: convertGenreLabelToValue(genre),
-  label: genre
-}))
+const staticSuggestions = getStaticGenreSuggestions()
 
 const useStyles = makeStyles(({ spacing, typography }) => ({
   searchInput: {
@@ -32,30 +34,38 @@ const useStyles = makeStyles(({ spacing, typography }) => ({
 export const SelectGenreScreen = () => {
   const [{ value }, , { setValue }] = useField<string>('genre')
   const [input, setInput] = useState('')
+  const { data: suggestions = staticSuggestions } = useGenreSuggestions()
   const styles = useStyles()
 
   const trimmed = input.trim()
   const lower = trimmed.toLowerCase()
+  const normalized = normalizeGenre(trimmed)
+  const normalizedKey = getGenreSuggestionKey(normalized)
 
   const filtered = useMemo(() => {
-    if (trimmed === '') return knownGenres
-    return knownGenres.filter(
+    if (trimmed === '') return suggestions
+    return suggestions.filter(
       (g) =>
         g.label.toLowerCase().includes(lower) ||
         g.value.toLowerCase().includes(lower)
     )
-  }, [trimmed, lower])
+  }, [trimmed, lower, suggestions])
 
   const data = useMemo(() => {
-    if (trimmed === '') return knownGenres
-    const matchesKnownExactly = knownGenres.some(
-      (g) => g.label.toLowerCase() === lower || g.value.toLowerCase() === lower
+    if (trimmed === '') return suggestions
+    const matchesKnownExactly = suggestions.some(
+      (g) =>
+        getGenreSuggestionKey(g.label) === normalizedKey ||
+        getGenreSuggestionKey(g.value) === normalizedKey
     )
     if (matchesKnownExactly || trimmed.length > MAX_GENRE_LENGTH) {
       return filtered
     }
-    return [{ value: trimmed, label: messages.useCustom(trimmed) }, ...filtered]
-  }, [trimmed, lower, filtered])
+    return [
+      { value: normalized, label: messages.useCustom(normalized) },
+      ...filtered
+    ]
+  }, [trimmed, normalized, normalizedKey, suggestions, filtered])
 
   return (
     <ListSelectionScreen

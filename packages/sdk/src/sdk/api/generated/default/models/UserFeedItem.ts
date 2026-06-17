@@ -32,7 +32,7 @@ import {
  * 
  * @export
  */
-export type UserFeedItem = { type: 'playlist' } & PlaylistFeedItem | { type: 'album' } & PlaylistFeedItem | { type: 'track' } & TrackFeedItem;
+export type UserFeedItem = { type: 'playlist' } & PlaylistFeedItem | { type: 'track' } & TrackFeedItem;
 
 export function UserFeedItemFromJSON(json: any): UserFeedItem {
     return UserFeedItemFromJSONTyped(json, false);
@@ -45,8 +45,6 @@ export function UserFeedItemFromJSONTyped(json: any, ignoreDiscriminator: boolea
     switch (json['type']) {
         case 'playlist':
             return {...PlaylistFeedItemFromJSONTyped(json, true), type: 'playlist'};
-        case 'album':
-            return {...PlaylistFeedItemFromJSONTyped(json, true), type: 'album'};
         case 'track':
             return {...TrackFeedItemFromJSONTyped(json, true), type: 'track'};
         default:
@@ -63,8 +61,6 @@ export function UserFeedItemToJSON(value?: UserFeedItem | null): any {
     }
     switch (value['type']) {
         case 'playlist':
-            return PlaylistFeedItemToJSON(value);
-        case 'album':
             return PlaylistFeedItemToJSON(value);
         case 'track':
             return TrackFeedItemToJSON(value);

@@ -8,6 +8,7 @@ apis/DeveloperAppsApi.ts
 apis/EventsApi.ts
 apis/ExploreApi.ts
 apis/FanClubApi.ts
+apis/GenresApi.ts
 apis/NotificationsApi.ts
 apis/PlaylistsApi.ts
 apis/PrizesApi.ts
@@ -236,6 +237,8 @@ models/PlaylistUpdates.ts
 models/PlaylistUpdatesResponse.ts
 models/PlaylistWithoutTracks.ts
 models/PlaylistsResponse.ts
+models/PopularGenre.ts
+models/PopularGenresResponse.ts
 models/PrizeClaimRequestBody.ts
 models/PrizeClaimResponse.ts
 models/PrizePublic.ts
@@ -352,6 +355,9 @@ models/TrackAddedToPurchasedAlbumNotification.ts
 models/TrackAddedToPurchasedAlbumNotificationAction.ts
 models/TrackAddedToPurchasedAlbumNotificationActionData.ts
 models/TrackArtwork.ts
+models/TrackCollaboratorNotification.ts
+models/TrackCollaboratorNotificationAction.ts
+models/TrackCollaboratorNotificationActionData.ts
 models/TrackCommentCountResponse.ts
 models/TrackCommentNotificationResponse.ts
 models/TrackCommentsResponse.ts
