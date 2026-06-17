@@ -1,4 +1,5 @@
-import { GENRES, convertGenreLabelToValue } from '@audius/common/utils'
+import { useGenreSuggestions } from '@audius/common/api'
+import { getStaticGenreSuggestions } from '@audius/common/utils'
 
 import { TextField, TextFieldProps } from 'components/form-fields'
 
@@ -13,11 +14,11 @@ type SelectGenreFieldProps = Partial<TextFieldProps> & {
   name: string
 }
 
-const suggestions = Array.from(
-  new Set(GENRES.map((genre) => convertGenreLabelToValue(genre)))
-)
+const staticSuggestions = getStaticGenreSuggestions()
 
 export const SelectGenreField = (props: SelectGenreFieldProps) => {
+  const { data: suggestions = staticSuggestions } = useGenreSuggestions()
+
   return (
     <>
       <TextField
@@ -30,7 +31,7 @@ export const SelectGenreField = (props: SelectGenreFieldProps) => {
         {...props}
       />
       <datalist id={GENRE_DATALIST_ID}>
-        {suggestions.map((value) => (
+        {suggestions.map(({ value }) => (
           <option key={value} value={value} />
         ))}
       </datalist>
