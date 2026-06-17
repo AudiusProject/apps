@@ -5,7 +5,8 @@ import type { SearchCategory } from '@audius/common/api'
 import {
   useCurrentUserId,
   useFollowers,
-  useSearchUserResults
+  useSearchUserResults,
+  useTrack
 } from '@audius/common/api'
 import type { ReplyingAndEditingState } from '@audius/common/context'
 import {
@@ -238,6 +239,12 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const insets = useSafeAreaInsets()
   const commentListRef = useRef<BottomSheetFlatListMethods>(null)
 
+  // When the drawer is opened from a lineup tile (e.g. the feed), the full
+  // track may not yet be in the query cache. CommentSectionProvider returns
+  // null until the track loads, which would render an empty bottom sheet, so
+  // fetch the track here and show a loading state instead of a blank drawer.
+  const { data: track } = useTrack(entityId)
+
   const [onAutocomplete, setOnAutocomplete] = useState<
     (user: UserMetadata) => void
   >(() => {})
@@ -339,28 +346,36 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
         keyboardBlurBehavior='restore'
         android_keyboardInputMode='adjustResize'
       >
-        <CommentSectionProvider
-          entityId={entityId}
-          replyingAndEditingState={replyingAndEditingState}
-          setReplyingAndEditingState={setReplyingAndEditingState}
-          navigation={navigation}
-          closeDrawer={handleCloseDrawer}
-          playbackSource={playbackSource}
-        >
-          <CommentDrawerHeader minimal={autoCompleteActive} />
-          <Divider orientation='horizontal' />
-          {autoCompleteActive ? (
-            <CommentDrawerAutocompleteContent
-              query={acText}
-              onSelect={onAutocomplete}
-            />
-          ) : (
-            <CommentDrawerContent
-              commentListRef={commentListRef}
-              highlightedComment={highlightedComment}
-            />
-          )}
-        </CommentSectionProvider>
+        {track ? (
+          <CommentSectionProvider
+            entityId={entityId}
+            replyingAndEditingState={replyingAndEditingState}
+            setReplyingAndEditingState={setReplyingAndEditingState}
+            navigation={navigation}
+            closeDrawer={handleCloseDrawer}
+            playbackSource={playbackSource}
+          >
+            <CommentDrawerHeader minimal={autoCompleteActive} />
+            <Divider orientation='horizontal' />
+            {autoCompleteActive ? (
+              <CommentDrawerAutocompleteContent
+                query={acText}
+                onSelect={onAutocomplete}
+              />
+            ) : (
+              <CommentDrawerContent
+                commentListRef={commentListRef}
+                highlightedComment={highlightedComment}
+              />
+            )}
+          </CommentSectionProvider>
+        ) : (
+          <>
+            <CommentSkeleton />
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </>
+        )}
       </BottomSheetModal>
       {isDrawerVisible ? (
         <Box
