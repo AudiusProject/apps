@@ -76,5 +76,7 @@ describe('TrackArtists', () => {
     expect(within(ownerGroup).getByText('badges:1')).toBeOnTheScreen()
     expect(within(collaboratorGroup).getByText('2:dj g8r')).toBeOnTheScreen()
     expect(within(collaboratorGroup).getByText('badges:2')).toBeOnTheScreen()
+    expect(screen.getAllByText('badges:1')).toHaveLength(1)
+    expect(screen.getAllByText('badges:2')).toHaveLength(1)
   })
 })

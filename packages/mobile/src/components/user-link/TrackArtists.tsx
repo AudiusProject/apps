@@ -14,25 +14,6 @@ import { UserLink } from './UserLink'
 
 type Collaborator = { user_id: ID }
 
-type ArtistBadgesProps = ComponentProps<typeof UserBadges> & {
-  isSpacer?: boolean
-}
-
-const ArtistBadges = ({ isSpacer, ...props }: ArtistBadgesProps) => (
-  <Flex
-    row
-    alignItems='center'
-    gap='xs'
-    pointerEvents={isSpacer ? 'none' : undefined}
-    accessibilityElementsHidden={isSpacer}
-    importantForAccessibility={isSpacer ? 'no-hide-descendants' : undefined}
-    style={isSpacer ? styles.badgeSpacer : undefined}
-  >
-    <Flex style={styles.badgeGapAnchor} />
-    <UserBadges {...props} />
-  </Flex>
-)
-
 type CollaboratorLinksProps = Omit<
   ComponentProps<typeof UserLink>,
   'userId'
@@ -117,24 +98,13 @@ export const TrackArtists = ({
         w='100%'
         style={styles.artistLine}
       >
-        <Flex row alignItems='center' style={styles.badgeSpacerRow}>
-          {artists.map((artist) => (
-            <ArtistBadges
-              key={artist.userId}
-              userId={artist.userId}
-              badgeSize={badgeSize}
-              mint={artist.userId === userId ? mint : undefined}
-              hideFanClubBadge={hideFanClubBadge}
-              isSpacer
-            />
-          ))}
-        </Flex>
         {artists.map((artist, index) => (
           <Fragment key={artist.userId}>
             {index > 0 ? <Text color='subdued'>, </Text> : null}
             <Flex
               row
               alignItems='center'
+              gap='xs'
               style={styles.artistGroup}
               testID={`track-artist-${artist.userId}`}
             >
@@ -146,7 +116,7 @@ export const TrackArtists = ({
               >
                 {artist.name}
               </TextLink>
-              <ArtistBadges
+              <UserBadges
                 userId={artist.userId}
                 badgeSize={badgeSize}
                 mint={artist.userId === userId ? mint : undefined}
@@ -168,15 +138,6 @@ const styles = StyleSheet.create({
   artistLine: {
     minWidth: 0,
     overflow: 'hidden'
-  },
-  badgeSpacerRow: {
-    flexShrink: 0
-  },
-  badgeSpacer: {
-    opacity: 0
-  },
-  badgeGapAnchor: {
-    width: 0
   },
   artistGroup: {
     flexShrink: 1,
