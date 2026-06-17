@@ -237,7 +237,13 @@ export const CommentBlockInternal = (
 // This is an extra component wrapper because the comment data coming back from aquery could be undefined
 // There's no way to return early in the above component due to rules of hooks ordering
 export const CommentBlock = (props: CommentBlockProps) => {
+  const { track } = useCurrentCommentSection()
   const { data: comment } = useComment(props.commentId)
+  // `track` is typed as always-present, but when the drawer is opened from a
+  // lineup/feed tile the track is hydrated from the partial lineup cache and
+  // can momentarily be undefined. Bail before `CommentBlockInternal`
+  // dereferences `track.track_id` / `track.pinned_comment_id` / `track.duration`.
+  if (!track) return null
   if (!comment || !('id' in comment)) return null
   return <CommentBlockInternal {...props} comment={comment} />
 }

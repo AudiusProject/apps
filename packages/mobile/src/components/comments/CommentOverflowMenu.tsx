@@ -97,7 +97,7 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
   } = useCurrentCommentSection()
 
   const isCommentOwner = Number(userId) === currentUserId
-  const isPinned = track.pinned_comment_id === id
+  const isPinned = track?.pinned_comment_id === id
 
   const [pinComment] = usePinComment()
   const [deleteComment] = useDeleteComment()
@@ -117,14 +117,14 @@ export const CommentOverflowMenu = (props: CommentOverflowMenuProps) => {
   }
 
   const handleShare = useCallback(() => {
-    const url = `${env.AUDIUS_URL}${track.permalink}?commentId=${Id.parse(comment.id)}`
+    const url = `${env.AUDIUS_URL}${track?.permalink ?? ''}?commentId=${Id.parse(comment.id)}`
     Clipboard.setString(url)
     toast({
       content: messages.toasts.linkCopied,
       type: 'info',
       timeout: 1500
     })
-  }, [comment.id, track.permalink, toast])
+  }, [comment.id, track?.permalink, toast])
 
   const rows: ActionDrawerRow[] = [
     {
