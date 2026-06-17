@@ -1,11 +1,12 @@
 import type { ComponentProps } from 'react'
-import { Fragment } from 'react'
+import { Fragment, useMemo } from 'react'
 
+import { useUsers } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { StyleSheet } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 
-import { Flex, Text } from '@audius/harmony-native'
+import { Flex, Text, TextLink } from '@audius/harmony-native'
 
 import { UserBadges } from '../user-badges'
 
@@ -66,16 +67,51 @@ export const TrackArtists = ({
   style,
   ...userLinkProps
 }: TrackArtistsProps) => {
+  const {
+    userId,
+    badgeSize,
+    hideFanClubBadge,
+    mint,
+    textLinkStyle,
+    ...textLinkProps
+  } = userLinkProps
+  const artistIds = useMemo(
+    () => [
+      userId,
+      ...(collaborators?.map((collaborator) => collaborator.user_id) ?? [])
+    ],
+    [userId, collaborators]
+  )
+  const { byId: usersById } = useUsers(artistIds)
+  const artists = artistIds
+    .map((artistId) => ({
+      userId: artistId,
+      name: usersById[artistId]?.name
+    }))
+    .filter((artist) => artist.name)
+
   return (
     <Flex alignItems='center' w='100%' style={[styles.artistColumn, style]}>
-      <Flex row alignItems='center' justifyContent='center' w='100%'>
-        <UserLink {...userLinkProps} hideBadges style={styles.artistLink} />
-        <CollaboratorLinks
-          collaborators={collaborators}
-          {...userLinkProps}
-          hideBadges
-        />
-      </Flex>
+      <Text
+        numberOfLines={1}
+        ellipsizeMode='tail'
+        textAlign='center'
+        style={styles.artistNames}
+      >
+        {artists.map((artist, index) => (
+          <Fragment key={artist.userId}>
+            {index > 0 ? <Text color='subdued'>, </Text> : null}
+            <TextLink
+              {...textLinkProps}
+              to={{ screen: 'Profile', params: { id: artist.userId } }}
+              numberOfLines={1}
+              style={textLinkStyle}
+            >
+              {artist.name}
+            </TextLink>
+          </Fragment>
+        ))}
+      </Text>
       <Flex
         row
         alignItems='center'
@@ -83,16 +119,17 @@ export const TrackArtists = ({
         style={styles.badges}
       >
         <UserBadges
-          userId={userLinkProps.userId}
-          badgeSize={userLinkProps.badgeSize}
-          hideFanClubBadge={userLinkProps.hideFanClubBadge}
+          userId={userId}
+          badgeSize={badgeSize}
+          mint={mint}
+          hideFanClubBadge={hideFanClubBadge}
         />
         {collaborators?.map((collaborator) => (
           <UserBadges
             key={collaborator.user_id}
             userId={collaborator.user_id}
-            badgeSize={userLinkProps.badgeSize}
-            hideFanClubBadge={userLinkProps.hideFanClubBadge}
+            badgeSize={badgeSize}
+            hideFanClubBadge={hideFanClubBadge}
           />
         ))}
       </Flex>
@@ -104,6 +141,9 @@ const styles = StyleSheet.create({
   artistColumn: {
     flexShrink: 1,
     overflow: 'hidden'
+  },
+  artistNames: {
+    width: '100%'
   },
   badges: {
     gap: 4
