@@ -24,6 +24,7 @@ type UserLinkProps = Omit<TextLinkProps<ParamList>, 'to' | 'children'> & {
   badgeSize?: IconSize
   textLinkStyle?: StyleProp<TextStyle>
   disabled?: boolean
+  hideBadges?: boolean
   hideFanClubBadge?: boolean
   mint?: string
 }
@@ -35,6 +36,7 @@ export const UserLink = (props: UserLinkProps) => {
     style,
     textLinkStyle,
     disabled,
+    hideBadges,
     hideFanClubBadge,
     mint,
     ...other
@@ -89,12 +91,14 @@ export const UserLink = (props: UserLinkProps) => {
         >
           {userName}
         </TextLink>
-        <UserBadges
-          userId={userId}
-          badgeSize={badgeSize}
-          mint={mint}
-          hideFanClubBadge={hideFanClubBadge}
-        />
+        {hideBadges ? null : (
+          <UserBadges
+            userId={userId}
+            badgeSize={badgeSize}
+            mint={mint}
+            hideFanClubBadge={hideFanClubBadge}
+          />
+        )}
       </AnimatedFlex>
     </Pressable>
   )

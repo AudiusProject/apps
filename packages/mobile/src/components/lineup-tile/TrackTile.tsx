@@ -85,6 +85,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
       title: track.title,
       track_id: track.track_id,
       genre: track.genre,
+      collaborators: track.collaborators,
       stream_conditions: track.stream_conditions,
 
       ddex_app: track.ddex_app,
@@ -100,6 +101,7 @@ const TrackTileComponent = (props: TrackTileProps) => {
   const { data: user } = useUser(track?.owner_id, {
     select: (user) => ({
       artist_pick_track_id: user.artist_pick_track_id,
+      name: user.name,
       user_id: user.user_id,
       is_deactivated: user.is_deactivated
     })
@@ -309,6 +311,8 @@ const TrackTileComponent = (props: TrackTileProps) => {
           onPressWithPropagationBlock={handlePressWithPropagationBlock}
           title={track.title}
           userId={user.user_id}
+          userName={user.name}
+          collaborators={track.collaborators}
           isPlayingUid={isPlayingUid}
           type='track'
           trackId={track.track_id}

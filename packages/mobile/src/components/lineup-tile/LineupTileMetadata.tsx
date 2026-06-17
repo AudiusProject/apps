@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 
 import { IconVolumeLevel2 } from '@audius/harmony-native'
 import { Text, FadeInView } from 'app/components/core'
-import { UserLink } from 'app/components/user-link'
+import { UserBadges } from 'app/components/user-badges'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { makeStyles } from 'app/styles'
 import type { GestureResponderHandler } from 'app/types/gesture'
@@ -13,6 +13,8 @@ import { useThemeColors } from 'app/utils/theme'
 
 import { LineupTileArt } from './LineupTileArt'
 import { LineupTileTopRight } from './LineupTileTopRight'
+import type { ArtistNameCollaborator } from './artistNames'
+import { getTrackArtistNames } from './artistNames'
 import { useStyles as useTileStyles } from './styles'
 import type { RenderImage } from './types'
 
@@ -26,6 +28,16 @@ const useStyles = makeStyles(({ palette }) => ({
   },
   playingIndicator: {
     marginLeft: 8
+  },
+  artistText: {
+    flexShrink: 1,
+    minWidth: 0
+  },
+  artistBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 0,
+    gap: 4
   },
   coSignLabel: {
     position: 'absolute',
@@ -45,6 +57,8 @@ type Props = {
   renderImage: RenderImage
   title: string
   userId: ID
+  userName: string
+  collaborators?: ArtistNameCollaborator[] | null
   isPlayingUid: boolean
   type: 'track' | 'playlist' | 'album'
   trackId: ID
@@ -59,6 +73,8 @@ export const LineupTileMetadata = ({
   renderImage,
   title,
   userId,
+  userName,
+  collaborators,
   isPlayingUid,
   type,
   trackId,
@@ -72,6 +88,7 @@ export const LineupTileMetadata = ({
   const navigation = useNavigation()
 
   const isActive = isPlayingUid
+  const artistNames = getTrackArtistNames(userName, collaborators)
 
   const isPlaying = useSelector((state) => {
     return getPlaying(state) && isActive
@@ -139,14 +156,24 @@ export const LineupTileMetadata = ({
           onPressIn={onPressWithPropagationBlock}
           onPress={handlePressArtist}
           activeOpacity={0.7}
-          style={{ alignSelf: 'flex-start' }}
+          style={tileStyles.artist}
         >
-          <View pointerEvents='none'>
-            <UserLink
-              variant={isActive ? 'active' : 'default'}
-              textVariant='body'
-              userId={userId}
-            />
+          <Text
+            color={isActive ? 'primary' : 'neutral'}
+            numberOfLines={1}
+            ellipsizeMode='tail'
+            style={styles.artistText}
+          >
+            {artistNames}
+          </Text>
+          <View style={styles.artistBadges}>
+            <UserBadges userId={userId} />
+            {collaborators?.map((collaborator) => (
+              <UserBadges
+                key={collaborator.user_id}
+                userId={collaborator.user_id}
+              />
+            ))}
           </View>
         </TouchableOpacity>
       </FadeInView>

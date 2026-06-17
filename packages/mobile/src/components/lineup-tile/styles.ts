@@ -56,6 +56,9 @@ export const useStyles = makeStyles(({ palette }) => ({
   },
   artist: {
     ...flexRowCentered(),
+    justifyContent: 'flex-start',
+    gap: spacing(1),
+    width: '100%',
     marginBottom: 'auto',
     paddingRight: spacing(10),
     minHeight: 20

@@ -621,7 +621,7 @@ export const TrackScreenDetailsTile = ({
           </Flex>
         ) : null}
         {imageElement}
-        <Flex gap='xs' alignItems='center'>
+        <Flex gap='xs' alignItems='center' w='100%'>
           <Text variant='heading' size='s' textAlign='center'>
             {title}
           </Text>
@@ -630,7 +630,6 @@ export const TrackScreenDetailsTile = ({
               userId={user.user_id}
               collaborators={collaborators}
               size='l'
-              badgeSize='s'
               style={{ justifyContent: 'center' }}
             />
           ) : null}
