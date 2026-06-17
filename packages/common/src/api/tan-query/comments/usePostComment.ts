@@ -73,7 +73,9 @@ export const usePostComment = () => {
         trackTimestampS,
         reactCount: 0,
         replyCount: 0,
-        replies: undefined,
+        // Match the server-hydrated shape (`commentFromSDK` always returns an
+        // array) so the optimistic comment renders identically to a real one.
+        replies: [],
         createdAt: new Date().toISOString(),
         updatedAt: undefined
       }
