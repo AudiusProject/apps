@@ -40,13 +40,22 @@ export const CommentThread = (props: CommentThreadProps) => {
   const { motion, spacing } = useTheme()
   const { entityId } = useCurrentCommentSection()
   const { data: rootCommentData } = useComment(commentId)
-  const rootComment = rootCommentData as Comment // We can safely assume that this is a parent comment
+  const rootComment = rootCommentData as Comment | null | undefined // May be null/undefined or a `{}` placeholder while the individual comment cache is (re)hydrating
+
+  // Guard before any `rootComment.id` access. The individual comment cache can
+  // briefly be undefined/null or an empty `{}` placeholder (written by
+  // `useComments`' queryFn) while it (re)hydrates — e.g. when a post mutation
+  // toggles the list query off via `useIsMutating` and the optimistic id is
+  // momentarily present without its primed comment data. Dereferencing
+  // `rootComment.id` in that window throws and crashes the app.
+  const hasRootComment = !!rootComment && 'id' in rootComment
 
   const isReplyHighlighted =
-    highlightedComment?.parentCommentId === rootComment.id
+    hasRootComment && highlightedComment?.parentCommentId === rootComment.id
   const highlightedCommentId =
-    isReplyHighlighted || highlightedComment?.id === rootComment.id
-      ? highlightedComment.id
+    hasRootComment &&
+    (isReplyHighlighted || highlightedComment?.id === rootComment.id)
+      ? highlightedComment?.id
       : null
 
   const [hiddenReplies, setHiddenReplies] = useState<{
@@ -105,6 +114,7 @@ export const CommentThread = (props: CommentThreadProps) => {
   )
 
   useEffect(() => {
+    if (!hasRootComment) return
     if (hiddenReplies[rootComment.id]) {
       repliesContainerHeight.value = withTiming(0, motion.expressive)
     } else if (rootComment.replies?.length) {
@@ -116,6 +126,7 @@ export const CommentThread = (props: CommentThreadProps) => {
       }
     }
   }, [
+    hasRootComment,
     hiddenReplies,
     rootComment,
     motion.expressive,
@@ -123,7 +134,7 @@ export const CommentThread = (props: CommentThreadProps) => {
     repliesContainerHeight
   ])
 
-  if (!rootComment || !('id' in rootComment)) return null
+  if (!hasRootComment) return null
 
   const { replyCount = 0 } = rootComment
 
