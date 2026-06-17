@@ -630,7 +630,6 @@ export const TrackScreenDetailsTile = ({
               userId={user.user_id}
               collaborators={collaborators}
               size='l'
-              badgeSize='s'
               style={{ justifyContent: 'center' }}
             />
           ) : null}

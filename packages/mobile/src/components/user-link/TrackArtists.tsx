@@ -7,6 +7,8 @@ import type { StyleProp, ViewStyle } from 'react-native'
 
 import { Flex, Text } from '@audius/harmony-native'
 
+import { UserBadges } from '../user-badges'
+
 import { UserLink } from './UserLink'
 
 type Collaborator = { user_id: ID }
@@ -45,16 +47,19 @@ export const CollaboratorLinks = ({
   )
 }
 
-type TrackArtistsProps = Omit<ComponentProps<typeof UserLink>, 'style'> & {
+type TrackArtistsProps = Omit<
+  ComponentProps<typeof UserLink>,
+  'style' | 'hideBadges'
+> & {
   /** Accepted collaborator artists embedded on the track. */
   collaborators?: Collaborator[] | null
   style?: StyleProp<ViewStyle>
 }
 
 /**
- * A track's artist line for mobile: the owner `<UserLink>` plus accepted
- * collaborators. With the flag off (or no collaborators) it renders just the
- * owner — a safe drop-in for an existing owner `<UserLink>`.
+ * A track's centered artist line for mobile: the owner `<UserLink>` plus
+ * accepted collaborators. User badges render on their own centered row so the
+ * names stay visually centered under the title.
  */
 export const TrackArtists = ({
   collaborators,
@@ -62,23 +67,46 @@ export const TrackArtists = ({
   ...userLinkProps
 }: TrackArtistsProps) => {
   return (
-    <Flex
-      row
-      alignItems='center'
-      justifyContent='center'
-      w='100%'
-      style={[styles.artistRow, style]}
-    >
-      <UserLink {...userLinkProps} style={styles.artistLink} />
-      <CollaboratorLinks collaborators={collaborators} {...userLinkProps} />
+    <Flex alignItems='center' w='100%' style={[styles.artistColumn, style]}>
+      <Flex row alignItems='center' justifyContent='center' w='100%'>
+        <UserLink {...userLinkProps} hideBadges style={styles.artistLink} />
+        <CollaboratorLinks
+          collaborators={collaborators}
+          {...userLinkProps}
+          hideBadges
+        />
+      </Flex>
+      <Flex
+        row
+        alignItems='center'
+        justifyContent='center'
+        style={styles.badges}
+      >
+        <UserBadges
+          userId={userLinkProps.userId}
+          badgeSize={userLinkProps.badgeSize}
+          hideFanClubBadge={userLinkProps.hideFanClubBadge}
+        />
+        {collaborators?.map((collaborator) => (
+          <UserBadges
+            key={collaborator.user_id}
+            userId={collaborator.user_id}
+            badgeSize={userLinkProps.badgeSize}
+            hideFanClubBadge={userLinkProps.hideFanClubBadge}
+          />
+        ))}
+      </Flex>
     </Flex>
   )
 }
 
 const styles = StyleSheet.create({
-  artistRow: {
+  artistColumn: {
     flexShrink: 1,
     overflow: 'hidden'
+  },
+  badges: {
+    gap: 4
   },
   artistLink: {
     flexShrink: 1,
