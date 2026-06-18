@@ -121,6 +121,23 @@ export const toTrendingGenre = (value: string | null): SDKGenre | null => {
   return convertGenreLabelToValue(value as GenreLabel)
 }
 
+/**
+ * Converts a genre label from the trending filter UI into the value stored in
+ * trending state. Unlike {@link toTrendingGenre}, this accepts freeform /
+ * community genres that are not part of the static {@link GENRES} list, so the
+ * dynamic popular-genres filter can select long-tail genres. Strips the
+ * Electronic prefix for the static electronic subgenres and maps the
+ * {@link ALL_GENRES} sentinel / empty values to null.
+ */
+export const toTrendingGenreValue = (value: string | null): SDKGenre | null => {
+  if (value === null || value === '' || value === ALL_GENRES) return null
+  return (
+    value.startsWith(ELECTRONIC_PREFIX)
+      ? value.slice(ELECTRONIC_PREFIX.length)
+      : value
+  ) as SDKGenre
+}
+
 const NEWLY_ADDED_GENRES: string[] = []
 
 export const TRENDING_GENRES = GENRES.filter(
@@ -205,4 +222,29 @@ export const mergeGenreSuggestions = (
     if (countDiff !== 0) return countDiff
     return a.label.localeCompare(b.label)
   })
+}
+
+/** Number of top genres to request from the popular-genres endpoint. */
+export const POPULAR_GENRES_LIMIT = 25
+
+/**
+ * Selects the genre suggestions to display in the trending genre filter for a
+ * given search query. With no query, returns the popular/ranked genres (those
+ * with a recent-activity count) so the top genres are shown by default; while
+ * searching, matches labels across the full set so long-tail genres remain
+ * discoverable. Falls back to the full list when no popular genres are
+ * available (e.g. the popular-genres request failed).
+ */
+export const getTrendingGenreSuggestions = (
+  suggestions: GenreSuggestion[],
+  searchValue = ''
+): GenreSuggestion[] => {
+  const query = searchValue.trim().toLowerCase()
+  if (query) {
+    return suggestions.filter((genre) =>
+      genre.label.toLowerCase().includes(query)
+    )
+  }
+  const popular = suggestions.filter((genre) => genre.count !== undefined)
+  return popular.length > 0 ? popular : suggestions
 }

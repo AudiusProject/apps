@@ -10,6 +10,7 @@ type TrendingGenreSelectionPageProps = {
   selectedGenre: string | null
   didSelectGenre: (genre: string | null) => void
   genres: string[]
+  topGenres?: string[]
 }
 
 const messages = {
@@ -19,7 +20,8 @@ const messages = {
 const TrendingGenreSelectionPage = ({
   selectedGenre,
   didSelectGenre,
-  genres
+  genres,
+  topGenres
 }: TrendingGenreSelectionPageProps) => {
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
 
@@ -33,6 +35,7 @@ const TrendingGenreSelectionPage = ({
     <MobilePageContainer backgroundClassName={styles.pageBackground} fullHeight>
       <GenreSelectionList
         genres={genres}
+        topGenres={topGenres}
         didSelectGenre={didSelectGenre}
         selectedGenre={selectedGenre}
         containerClassName={styles.container}

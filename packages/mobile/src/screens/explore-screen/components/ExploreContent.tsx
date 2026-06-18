@@ -16,6 +16,7 @@ import { LabelSpotlight } from './LabelSpotlight'
 import { NewAlbumReleases } from './NewAlbumReleases'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
 import { TopAlbumsThisMonth } from './TopAlbumsThisMonth'
+import { TrendingGenres } from './TrendingGenres'
 
 export const ExploreContent = () => {
   const [category] = useSearchCategory()
@@ -32,6 +33,7 @@ export const ExploreContent = () => {
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
       {showTrackContent && showUserContextualContent && <ForYouTracks />}
       {showPlaylistContent && <FeaturedPlaylists />}
+      {showTrackContent && <TrendingGenres />}
       {showAlbumContent && <TopAlbumsThisMonth />}
       {showAlbumContent && <NewAlbumReleases />}
       {showAlbumContent && <BestSellingAlbums />}

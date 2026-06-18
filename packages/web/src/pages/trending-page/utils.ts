@@ -1,5 +1,5 @@
 import { TimeRange } from '@audius/common/models'
-import { GENRES, Genre } from '@audius/common/utils'
+import { ALL_GENRES, Genre } from '@audius/common/utils'
 
 import { URL_PARAM_KEYS } from './constants'
 
@@ -37,10 +37,14 @@ export const isValidWinnersWeek = (week: string | null): boolean =>
   week !== null && WEEK_YYYY_MM_DD_REGEX.test(week)
 
 /**
- * Validate if a genre string is a valid genre
+ * Validate if a genre string is usable as a trending filter. Permissive by
+ * design: now that freeform genres are supported, the canonical validation
+ * happens server-side via normalization. We accept any non-empty value that
+ * isn't the {@link ALL_GENRES} sentinel so freeform genres in the URL param
+ * (e.g. `?genre=Hyper+Pop`) restore on page load instead of being dropped.
  */
 export const isValidGenre = (genre: string | null): boolean => {
-  return genre !== null && Object.values(GENRES).includes(genre as any)
+  return genre !== null && genre.trim() !== '' && genre !== ALL_GENRES
 }
 
 /**

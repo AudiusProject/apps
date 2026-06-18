@@ -15,6 +15,7 @@ export const exploreMessages = {
   bestSellingAlbums: 'Best Selling Albums',
   exploreByMood: (category?: string) =>
     `Explore${category ? ` ${category}` : ''} by Mood`,
+  trendingGenres: 'Trending Genres',
   quickSearch: 'Quick Search',
   activeDiscussions: 'Active Discussions',
   mostShared: 'Most Shared Tracks This Week',

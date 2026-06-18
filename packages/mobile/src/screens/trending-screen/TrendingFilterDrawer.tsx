@@ -1,16 +1,15 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import { usePopularGenres } from '@audius/common/api'
 import {
   modalsActions,
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
 import {
-  type Genre,
-  ELECTRONIC_PREFIX,
-  ELECTRONIC_SUBGENRES,
-  GENRES,
-  ALL_GENRES
+  ALL_GENRES,
+  getTrendingGenreSuggestions,
+  toTrendingGenreValue
 } from '@audius/common/utils'
 import {
   FlatList,
@@ -46,8 +45,6 @@ const messages = {
   searchPlaceholder: 'Search Genres',
   selected: 'Selected'
 }
-
-const trendingGenres = [ALL_GENRES, ...GENRES]
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
   root: {
@@ -90,6 +87,7 @@ export const TrendingFilterDrawer = () => {
   const trendingGenre = useSelector(getTrendingGenre) ?? ALL_GENRES
   const { onClose } = useDrawerState(MODAL_NAME)
   const dispatch = useDispatch()
+  const { data: genreSuggestions = [] } = usePopularGenres()
 
   const handleBack = useCallback(() => {
     dispatch(setVisibility({ modal: MODAL_NAME, visible: false }))
@@ -122,20 +120,20 @@ export const TrendingFilterDrawer = () => {
   )
 
   const genres = useMemo(() => {
-    const searchValueLower = searchValue.toLowerCase()
-    return trendingGenres.filter((genre) =>
-      genre.toLowerCase().includes(searchValueLower)
-    )
-  }, [searchValue])
+    // Show the top popular genres by default; while searching, match across the
+    // full set so long-tail genres remain discoverable.
+    const filtered = getTrendingGenreSuggestions(
+      genreSuggestions,
+      searchValue
+    ).map((genre) => genre.label)
+    const query = searchValue.trim().toLowerCase()
+    const includeAllGenres = !query || ALL_GENRES.toLowerCase().includes(query)
+    return includeAllGenres ? [ALL_GENRES, ...filtered] : filtered
+  }, [genreSuggestions, searchValue])
 
   const handleSelect = useCallback(
     (genre: string) => {
-      const trimmedGenre =
-        genre === ALL_GENRES
-          ? null
-          : (genre.replace(ELECTRONIC_PREFIX, '') as Genre)
-
-      dispatch(setTrendingGenre(trimmedGenre))
+      dispatch(setTrendingGenre(toTrendingGenreValue(genre)))
       Keyboard.dismiss()
       onClose()
     },
@@ -168,8 +166,9 @@ export const TrendingFilterDrawer = () => {
           ItemSeparatorComponent={Divider}
           renderItem={({ item: genre }) => {
             const isSelected =
-              ELECTRONIC_SUBGENRES[genre] === trendingGenre ||
-              genre === trendingGenre
+              genre === ALL_GENRES
+                ? trendingGenre === ALL_GENRES
+                : toTrendingGenreValue(genre) === trendingGenre
 
             return (
               <Pressable onPress={() => handleSelect(genre)}>

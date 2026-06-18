@@ -69,6 +69,7 @@ export const QUERY_KEYS = {
   trackHistory: 'trackHistory',
   topTags: 'topTags',
   genreSuggestions: 'genreSuggestions',
+  popularGenres: 'popularGenres',
   feed: 'feed',
   feedTab: 'feedTab',
   feedFilter: 'feedFilter',
