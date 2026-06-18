@@ -1,0 +1,48 @@
+.wrapper {
+  display: flex;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: var(--harmony-unit-8);
+}
+
+.panel {
+  display: flex;
+  width: min(100%, 480px);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--harmony-unit-6);
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  height: 64px;
+  width: 64px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--harmony-secondary);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--harmony-unit-3);
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  max-width: 360px;
+  flex-direction: column;
+  gap: var(--harmony-unit-3);
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    align-items: flex-start;
+    padding: var(--harmony-unit-6);
+    padding-top: var(--harmony-unit-12);
+  }
+}
