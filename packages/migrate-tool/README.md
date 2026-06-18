@@ -15,8 +15,9 @@ database backing the request queue.
    that would be migrated.
 3. They submit a migration request. The request is stored in Supabase with
    `status = 'pending'`.
-4. An Audius team member opens `/admin`, unlocks with the admin bearer token,
-   and reviews the request. Identity verification (confirming the requester
+4. An Audius team member opens `/admin`, signs in with their Audius Google
+   account (only `@audius.co` / `@audius.org` accounts are allowed), and
+   reviews the request. Identity verification (confirming the requester
    actually owns the old account) happens **out-of-band** via the usual
    support channel — the tool does not enforce it.
 5. On approval the backend pulls each old track's audio + artwork via the SDK
@@ -73,10 +74,24 @@ get an **API Key** and a **Bearer Token**.
 You'll also need to whitelist the deployment's OAuth redirect URI in the dev
 app's settings (e.g. `https://migrate.audius.co/`).
 
-### 3. Admin token
+### 3. Admin auth (Google SSO)
 
-- `ADMIN_BEARER_TOKEN` — pick a long random string. Share it only with team
-  members authorized to approve migrations.
+The admin console is gated by Google sign-in restricted to Audius staff
+(`@audius.co` / `@audius.org`) — the same pattern as the notifications
+dashboard. Create an OAuth 2.0 Web client in Google Cloud Console, add the
+deployment origin (e.g. `https://migrate.audius.co`) as an authorized
+JavaScript origin, and set:
+
+- `VITE_GOOGLE_CLIENT_ID` — the OAuth client ID (safe in the browser)
+- `GOOGLE_CLIENT_ID` — the same client ID, used by the backend to verify
+  Google ID tokens
+- `AUTH_SESSION_SECRET` — a random string (≥32 chars) that signs the session
+  JWT stored in an httpOnly cookie
+
+Optionally, `ADMIN_BEARER_TOKEN` remains as an escape hatch for
+programmatic/CLI access to the admin endpoints via
+`Authorization: Bearer <token>`. The UI never uses it; leave it unset if you
+don't need API access.
 
 ### 4. Vercel
 
@@ -84,9 +99,12 @@ app's settings (e.g. `https://migrate.audius.co/`).
 cd packages/migrate-tool
 npx vercel link
 npx vercel env add VITE_AUDIUS_API_KEY
+npx vercel env add VITE_GOOGLE_CLIENT_ID
 npx vercel env add AUDIUS_API_KEY
 npx vercel env add AUDIUS_BEARER_TOKEN
-npx vercel env add ADMIN_BEARER_TOKEN
+npx vercel env add GOOGLE_CLIENT_ID
+npx vercel env add AUTH_SESSION_SECRET
+npx vercel env add ADMIN_BEARER_TOKEN   # optional escape hatch
 npx vercel env add SUPABASE_URL
 npx vercel env add SUPABASE_SERVICE_ROLE_KEY
 npx vercel --prod
@@ -109,7 +127,7 @@ functions locally, run them with `npx vercel dev` instead.
 ## Approving a request
 
 1. Go to `https://migrate.audius.co/admin`.
-2. Paste the `ADMIN_BEARER_TOKEN` to unlock.
+2. Sign in with your Audius Google account (`@audius.co` / `@audius.org`).
 3. Review the request — especially the old handle and the track list.
 4. **Verify the requester owns the old account through your usual support
    channel.** This is the only safeguard against migration abuse.
@@ -122,8 +140,12 @@ functions locally, run them with `npx vercel dev` instead.
 - `api/` — Vercel serverless functions
   - `api/requests/index.ts` — `POST /api/requests` (create)
   - `api/requests/[id].ts` — `GET /api/requests/:id` (status)
-  - `api/admin/requests.ts` — `GET /api/admin/requests` (list, bearer-gated)
-  - `api/admin/approve.ts` — `POST /api/admin/approve?id=…` (bearer-gated)
-  - `api/admin/reject.ts` — `POST /api/admin/reject?id=…` (bearer-gated)
+  - `api/auth/index.ts` — `POST /api/auth` (verify Google token, set session)
+  - `api/auth/session.ts` — `GET /api/auth/session` (current admin)
+  - `api/auth/logout.ts` — `POST /api/auth/logout` (clear session)
+  - `api/admin/requests.ts` — `GET /api/admin/requests` (list, admin-gated)
+  - `api/admin/approve.ts` — `POST /api/admin/approve?id=…` (admin-gated)
+  - `api/admin/reject.ts` — `POST /api/admin/reject?id=…` (admin-gated)
+  - `api/_lib/auth.ts` — Google SSO session + admin gate
   - `api/_lib/migrate.ts` — migration worker
 - `supabase/migrations/0001_init.sql` — DB schema

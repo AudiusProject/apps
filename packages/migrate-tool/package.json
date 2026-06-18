@@ -14,7 +14,10 @@
   },
   "dependencies": {
     "@audius/sdk": "file:../sdk",
+    "@react-oauth/google": "^0.13.4",
     "@supabase/supabase-js": "^2.45.0",
+    "google-auth-library": "^10.6.2",
+    "jose": "^6.2.2",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

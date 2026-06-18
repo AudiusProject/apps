@@ -1,80 +1,76 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  type CredentialResponse
+} from '@react-oauth/google'
+
+import { config } from '../config'
 import type { MigrationRequest } from '../types'
 
-const TOKEN_STORAGE_KEY = 'audius-migrate-admin-token'
+const messages = {
+  signInHint:
+    'Sign in with your Audius Google account. Only @audius.co and @audius.org accounts can approve migrations.',
+  signInError: 'Sign-in failed. Use an Audius Google account.'
+}
 
-export function Admin() {
-  const [token, setToken] = useState<string>(
-    () => sessionStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
-  )
-  const [authenticated, setAuthenticated] = useState(false)
+function AdminConsole({ admin, onSignOut }: { admin: string; onSignOut: () => void }) {
   const [requests, setRequests] = useState<MigrationRequest[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
-  const fetchList = useCallback(
-    async (bearerToken: string) => {
-      setLoading(true)
-      setError(null)
-      try {
-        const res = await fetch('/api/admin/requests', {
-          headers: { Authorization: `Bearer ${bearerToken}` }
-        })
-        if (res.status === 401) {
-          throw new Error('Invalid admin token.')
-        }
-        if (!res.ok) {
-          throw new Error(`Server returned ${res.status}`)
-        }
-        const body = (await res.json()) as { requests: MigrationRequest[] }
-        setRequests(body.requests)
-        setAuthenticated(true)
-        sessionStorage.setItem(TOKEN_STORAGE_KEY, bearerToken)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load.')
-        setAuthenticated(false)
-      } finally {
-        setLoading(false)
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/requests', {
+        credentials: 'include'
+      })
+      if (res.status === 401) {
+        onSignOut()
+        throw new Error('Session expired. Please sign in again.')
       }
-    },
-    []
-  )
+      if (!res.ok) {
+        throw new Error(`Server returned ${res.status}`)
+      }
+      const body = (await res.json()) as { requests: MigrationRequest[] }
+      setRequests(body.requests)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load.')
+    } finally {
+      setLoading(false)
+    }
+  }, [onSignOut])
 
   useEffect(() => {
-    if (token) fetchList(token)
-    // Run once on mount with the persisted token (if any). Subsequent
-    // refreshes happen through the explicit "Refresh" button.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleUnlock = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
-      fetchList(token)
-    },
-    [token, fetchList]
-  )
+    fetchList()
+  }, [fetchList])
 
   const handleApprove = useCallback(
     async (id: string) => {
-      if (!confirm('Approve this migration? The tracks will be re-uploaded on the new account.')) return
+      if (
+        !confirm(
+          'Approve this migration? The tracks will be re-uploaded on the new account.'
+        )
+      )
+        return
       setBusyId(id)
       try {
         const res = await fetch(
           `/api/admin/approve?id=${encodeURIComponent(id)}`,
-          { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+          { method: 'POST', credentials: 'include' }
         )
         if (!res.ok) throw new Error(`Approve failed: ${res.status}`)
-        await fetchList(token)
+        await fetchList()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Approve failed.')
       } finally {
         setBusyId(null)
       }
     },
-    [token, fetchList]
+    [fetchList]
   )
 
   const handleReject = useCallback(
@@ -87,48 +83,21 @@ export function Admin() {
           `/api/admin/reject?id=${encodeURIComponent(id)}`,
           {
             method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reason })
           }
         )
         if (!res.ok) throw new Error(`Reject failed: ${res.status}`)
-        await fetchList(token)
+        await fetchList()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Reject failed.')
       } finally {
         setBusyId(null)
       }
     },
-    [token, fetchList]
+    [fetchList]
   )
-
-  if (!authenticated) {
-    return (
-      <div className="card">
-        <h2>Admin</h2>
-        {error && <div className="error">{error}</div>}
-        <form onSubmit={handleUnlock}>
-          <label htmlFor="admin-token">Admin bearer token</label>
-          <input
-            id="admin-token"
-            type="password"
-            placeholder="ADMIN_BEARER_TOKEN"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            autoComplete="off"
-          />
-          <div style={{ marginTop: 12 }}>
-            <button type="submit" disabled={!token || loading}>
-              {loading ? 'Verifying…' : 'Unlock'}
-            </button>
-          </div>
-        </form>
-      </div>
-    )
-  }
 
   return (
     <>
@@ -136,13 +105,25 @@ export function Admin() {
       <div className="card">
         <div className="row">
           <h2 style={{ margin: 0 }}>Requests</h2>
-          <button className="secondary" onClick={() => fetchList(token)}>
-            Refresh
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="muted" style={{ fontSize: 13 }}>
+              {admin}
+            </span>
+            <button
+              className="secondary"
+              onClick={fetchList}
+              disabled={loading}
+            >
+              {loading ? 'Loading…' : 'Refresh'}
+            </button>
+            <button className="secondary" onClick={onSignOut}>
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
 
-      {(requests ?? []).length === 0 && (
+      {(requests ?? []).length === 0 && !loading && (
         <div className="card muted">No requests yet.</div>
       )}
 
@@ -207,5 +188,104 @@ export function Admin() {
         </div>
       ))}
     </>
+  )
+}
+
+export function Admin() {
+  const [admin, setAdmin] = useState<string | null>(null)
+  const [checking, setChecking] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Restore an existing session on mount.
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/auth/session', { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : { email: null }))
+      .then((body: { email: string | null }) => {
+        if (!cancelled && body.email) setAdmin(body.email)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setChecking(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleGoogleSuccess = useCallback(
+    async (credential: CredentialResponse) => {
+      setError(null)
+      const token = credential.credential
+      if (!token) {
+        setError(messages.signInError)
+        return
+      }
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        })
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as {
+            error?: string
+          }
+          setError(body.error ?? messages.signInError)
+          return
+        }
+        const body = (await res.json()) as { email: string }
+        setAdmin(body.email)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : messages.signInError)
+      }
+    },
+    []
+  )
+
+  const handleSignOut = useCallback(async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    } finally {
+      setAdmin(null)
+    }
+  }, [])
+
+  if (admin) {
+    return <AdminConsole admin={admin} onSignOut={handleSignOut} />
+  }
+
+  if (checking) {
+    return <div className="card muted">Checking session…</div>
+  }
+
+  if (!config.googleClientId) {
+    return (
+      <div className="card">
+        <h2>Admin</h2>
+        <div className="error">
+          Google OAuth is not configured (<code>VITE_GOOGLE_CLIENT_ID</code>{' '}
+          missing).
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card">
+      <h2>Admin</h2>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {messages.signInHint}
+      </p>
+      {error && <div className="error">{error}</div>}
+      <GoogleOAuthProvider clientId={config.googleClientId}>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError(messages.signInError)}
+          useOneTap={false}
+        />
+      </GoogleOAuthProvider>
+    </div>
   )
 }
