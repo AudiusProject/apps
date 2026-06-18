@@ -14,6 +14,7 @@ import {
   CoinsApi,
   Configuration,
   ExploreApi,
+  GenresApi,
   PrizesApi,
   RewardsApi,
   SearchApi,
@@ -465,6 +466,7 @@ const initializeApis = ({
 
   const events = new EventsApi(apiClientConfig, services)
   const explore = new ExploreApi(apiClientConfig)
+  const genres = new GenresApi(apiClientConfig)
   const search = new SearchApi(apiClientConfig)
   const uploads = new UploadsApi(services)
 
@@ -488,6 +490,7 @@ const initializeApis = ({
     notifications,
     events,
     explore,
+    genres,
     search,
     coins,
     wallets,

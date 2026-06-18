@@ -85,6 +85,8 @@ export * from './tan-query/remixes/useRemixes'
 export * from './tan-query/search/useSearchAutocomplete'
 export * from './tan-query/search/useSearchResults'
 export * from './tan-query/search/useTopTags'
+export * from './tan-query/search/useGenreSuggestions'
+export * from './tan-query/search/usePopularGenres'
 
 // Tracks
 export * from './tan-query/tracks/useDeleteTrack'

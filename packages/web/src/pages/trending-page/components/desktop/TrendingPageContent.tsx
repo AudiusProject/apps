@@ -5,19 +5,15 @@ import {
   getTrendingUndergroundQueryKey,
   TRENDING_INITIAL_PAGE_SIZE,
   useTrending,
-  useTrendingUnderground
+  useTrendingUnderground,
+  usePopularGenres
 } from '@audius/common/api'
 import { Name, TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import {
-  getCanonicalName,
-  route,
-  toTrendingGenre,
-  TRENDING_GENRES
-} from '@audius/common/utils'
+import { route, toTrendingGenreValue } from '@audius/common/utils'
 import {
   FilterButton,
   Flex,
@@ -58,6 +54,7 @@ const messages = {
   thisMonth: 'This Month',
   allTime: 'All Time',
   allGenres: 'All Genres',
+  searchGenres: 'Search Genres',
   genres: 'Genres',
   endOfLineupDescription: "Looks like you've reached the end of this list..."
 }
@@ -116,6 +113,7 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const trendingGenre = useSelector(getTrendingGenre)
   const trendingTimeRange = useSelector(getTrendingTimeRange)
+  const { data: genreSuggestions = [] } = usePopularGenres()
 
   // Desktop viewports + fast trackpad / wheel scroll need bigger pages than
   // the shared default (mobile-tuned) so successive load-mores keep up with a
@@ -216,7 +214,11 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
 
   const setTrendingGenre = useCallback(
     (genre: string | null) => {
-      dispatch(trendingPageActions.setTrendingGenre(toTrendingGenre(genre)))
+      // toTrendingGenreValue keeps freeform/community genres (from the dynamic
+      // popular-genres filter) while mapping the all-genres sentinel to null.
+      dispatch(
+        trendingPageActions.setTrendingGenre(toTrendingGenreValue(genre))
+      )
     },
     [dispatch]
   )
@@ -280,11 +282,13 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     { label: messages.allTime, value: TimeRange.ALL_TIME }
   ]
 
+  // Popular genres (ranked by recent activity) lead the list, followed by the
+  // long-tail static genres; all are searchable via the filter input.
   const genreOptions = [
     { label: messages.allGenres, value: 'all' },
-    ...TRENDING_GENRES.map((g) => ({
-      label: getCanonicalName(g),
-      value: g
+    ...genreSuggestions.map((g) => ({
+      label: g.label,
+      value: g.value
     }))
   ]
 
@@ -320,6 +324,11 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
                 variant='replaceLabel'
                 onChange={handleGenreChange}
                 options={genreOptions}
+                showFilterInput
+                filterInputProps={{
+                  label: messages.searchGenres,
+                  placeholder: messages.searchGenres
+                }}
                 virtualized
                 menuProps={{ maxHeight: 320, width: 240 }}
               />
@@ -372,6 +381,11 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
                 variant='replaceLabel'
                 onChange={handleGenreChange}
                 options={genreOptions}
+                showFilterInput
+                filterInputProps={{
+                  label: messages.searchGenres,
+                  placeholder: messages.searchGenres
+                }}
                 virtualized
                 menuProps={{ maxHeight: 320, width: 240 }}
               />

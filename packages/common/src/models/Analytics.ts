@@ -1313,6 +1313,7 @@ export type ExploreSectionName =
   | 'Fan Clubs'
   | 'Featured Remix Contests'
   | 'Underground Trending Tracks'
+  | 'Trending Genres'
   | 'Artist Spotlight'
   | 'Label Spotlight'
   | 'Active Discussions'

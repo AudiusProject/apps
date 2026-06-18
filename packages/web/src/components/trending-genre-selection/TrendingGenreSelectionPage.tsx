@@ -1,3 +1,4 @@
+import { usePopularGenres } from '@audius/common/api'
 import { TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
@@ -5,8 +6,8 @@ import {
 } from '@audius/common/store'
 import {
   Genre,
-  TRENDING_GENRES,
-  toTrendingGenre,
+  getTrendingGenreSuggestions,
+  toTrendingGenreValue,
   route
 } from '@audius/common/utils'
 import { connect } from 'react-redux'
@@ -35,14 +36,23 @@ const ConnectedTrendingGenreSelectionPage = ({
   setTrendingTimeRange,
   goToTrending
 }: ConnectedTrendingGenreSelectionPageProps) => {
+  const { data: genreSuggestions = [] } = usePopularGenres()
+
   const setTrimmedGenre = (genre: string | null) => {
-    setTrendingGenre(toTrendingGenre(genre))
+    setTrendingGenre(toTrendingGenreValue(genre))
     setTrendingTimeRange(timeRange)
     goToTrending()
   }
+
+  const allGenres = genreSuggestions.map((g) => g.label)
+  const topGenres = getTrendingGenreSuggestions(genreSuggestions).map(
+    (g) => g.label
+  )
+
   return (
     <TrendingGenreSelectionPage
-      genres={TRENDING_GENRES}
+      genres={allGenres}
+      topGenres={topGenres}
       didSelectGenre={setTrimmedGenre}
       selectedGenre={genre}
     />

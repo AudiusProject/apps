@@ -52,6 +52,7 @@ import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
 import { RecommendedTracksSection } from './RecommendedTracksSection'
 import { TopAlbumsThisMonthSection } from './TopAlbumsThisMonthSection'
+import { TrendingGenresSection } from './TrendingGenresSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
 
 export type SearchExplorePageProps = {
@@ -185,6 +186,11 @@ const SearchExplorePage = ({
       key: 'featuredPlaylists',
       shouldRender: showPlaylistContent,
       element: <FeaturedPlaylistsSection />
+    },
+    {
+      key: 'trendingGenres',
+      shouldRender: showTrackContent,
+      element: <TrendingGenresSection />
     },
     {
       key: 'topAlbumsThisMonth',

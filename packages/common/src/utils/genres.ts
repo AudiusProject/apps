@@ -121,8 +121,130 @@ export const toTrendingGenre = (value: string | null): SDKGenre | null => {
   return convertGenreLabelToValue(value as GenreLabel)
 }
 
+/**
+ * Converts a genre label from the trending filter UI into the value stored in
+ * trending state. Unlike {@link toTrendingGenre}, this accepts freeform /
+ * community genres that are not part of the static {@link GENRES} list, so the
+ * dynamic popular-genres filter can select long-tail genres. Strips the
+ * Electronic prefix for the static electronic subgenres and maps the
+ * {@link ALL_GENRES} sentinel / empty values to null.
+ */
+export const toTrendingGenreValue = (value: string | null): SDKGenre | null => {
+  if (value === null || value === '' || value === ALL_GENRES) return null
+  return (
+    value.startsWith(ELECTRONIC_PREFIX)
+      ? value.slice(ELECTRONIC_PREFIX.length)
+      : value
+  ) as SDKGenre
+}
+
 const NEWLY_ADDED_GENRES: string[] = []
 
 export const TRENDING_GENRES = GENRES.filter(
   (g) => !NEWLY_ADDED_GENRES.includes(g)
 )
+
+export type GenreSuggestion = {
+  label: string
+  value: string
+  count?: number
+}
+
+const GENRE_WORDS_TO_UPPERCASE = new Set([
+  'dj',
+  'edm',
+  'idm',
+  'r&b',
+  'uk',
+  'us'
+])
+
+export const normalizeGenre = (genre: string) => {
+  const trimmed = genre.trim().replace(/\s+/g, ' ')
+  if (!trimmed) return ''
+
+  return trimmed
+    .split(/(\s|-|\/)/)
+    .map((part) => {
+      if (part === ' ' || part === '-' || part === '/') return part
+
+      const lower = part.toLowerCase()
+      if (GENRE_WORDS_TO_UPPERCASE.has(lower)) return lower.toUpperCase()
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join('')
+}
+
+export const getGenreSuggestionKey = (genre: string) =>
+  genre.toLowerCase().replace(/[^a-z0-9]/g, '')
+
+export const getStaticGenreSuggestions = () =>
+  GENRES.map((genre) => ({
+    label: genre,
+    value: convertGenreLabelToValue(genre)
+  }))
+
+export const mergeGenreSuggestions = (
+  communityGenres: GenreSuggestion[],
+  staticGenres: GenreSuggestion[] = getStaticGenreSuggestions()
+) => {
+  const suggestionsByKey = new Map<string, GenreSuggestion>()
+
+  communityGenres.forEach((genre) => {
+    const normalized = normalizeGenre(genre.value)
+    const key = getGenreSuggestionKey(normalized)
+    if (!normalized || !key) return
+
+    const existingGenre = suggestionsByKey.get(key)
+    if ((existingGenre?.count ?? -1) > (genre.count ?? -1)) return
+
+    suggestionsByKey.set(key, {
+      label: normalized,
+      value: normalized,
+      count: genre.count
+    })
+  })
+
+  staticGenres.forEach((genre) => {
+    const key = getGenreSuggestionKey(genre.value)
+    if (!key) return
+
+    const communityGenre = suggestionsByKey.get(key)
+    suggestionsByKey.set(key, {
+      ...communityGenre,
+      label: genre.label,
+      value: genre.value
+    })
+  })
+
+  return Array.from(suggestionsByKey.values()).sort((a, b) => {
+    const countDiff = (b.count ?? -1) - (a.count ?? -1)
+    if (countDiff !== 0) return countDiff
+    return a.label.localeCompare(b.label)
+  })
+}
+
+/** Number of top genres to request from the popular-genres endpoint. */
+export const POPULAR_GENRES_LIMIT = 25
+
+/**
+ * Selects the genre suggestions to display in the trending genre filter for a
+ * given search query. With no query, returns the popular/ranked genres (those
+ * with a recent-activity count) so the top genres are shown by default; while
+ * searching, matches labels across the full set so long-tail genres remain
+ * discoverable. Falls back to the full list when no popular genres are
+ * available (e.g. the popular-genres request failed).
+ */
+export const getTrendingGenreSuggestions = (
+  suggestions: GenreSuggestion[],
+  searchValue = ''
+): GenreSuggestion[] => {
+  const query = searchValue.trim().toLowerCase()
+  if (query) {
+    return suggestions.filter((genre) =>
+      genre.label.toLowerCase().includes(query)
+    )
+  }
+  const popular = suggestions.filter((genre) => genre.count !== undefined)
+  return popular.length > 0 ? popular : suggestions
+}
