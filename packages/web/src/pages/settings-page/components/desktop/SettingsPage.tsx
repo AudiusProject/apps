@@ -169,12 +169,19 @@ export const SettingsPage = () => {
     setIsNotificationSettingsModalVisible
   ] = useState(false)
   const [isEmailToastVisible, setIsEmailToastVisible] = useState(false)
+  const [isEmailVerificationToastVisible, setIsEmailVerificationToastVisible] =
+    useState(false)
+  const [isEmailVerificationLoading, setIsEmailVerificationLoading] =
+    useState(false)
   const [isChangePasswordModalVisible, setIsChangePasswordModalVisible] =
     useState(false)
   const [isChangeEmailModalVisible, setIsChangeEmailModalVisible] =
     useState(false)
   const [emailToastText, setEmailToastText] = useState(
     settingsMessages.emailSent
+  )
+  const [emailVerificationToastText, setEmailVerificationToastText] = useState(
+    settingsMessages.emailVerificationSent
   )
   const [, setIsInboxSettingsModalVisible] = useModalState('InboxSettings')
   const [, setIsCommentSettingsModalVisible] = useModalState('CommentSettings')
@@ -258,6 +265,35 @@ export const SettingsPage = () => {
     identityService,
     authService,
     dispatch
+  ])
+
+  const showEmailVerificationToast = useCallback(() => {
+    const fn = async () => {
+      setIsEmailVerificationLoading(true)
+      try {
+        const result = await identityService.resendEmailVerification()
+        setEmailVerificationToastText(
+          result.alreadyVerified
+            ? settingsMessages.emailVerificationAlreadyVerified
+            : settingsMessages.emailVerificationSent
+        )
+        setIsEmailVerificationToastVisible(true)
+      } catch (e) {
+        console.error(e)
+        setEmailVerificationToastText(settingsMessages.emailVerificationNotSent)
+        setIsEmailVerificationToastVisible(true)
+      } finally {
+        setIsEmailVerificationLoading(false)
+      }
+      setTimeout(() => {
+        setIsEmailVerificationToastVisible(false)
+      }, EMAIL_TOAST_TIMEOUT)
+    }
+    fn()
+  }, [
+    setIsEmailVerificationToastVisible,
+    setEmailVerificationToastText,
+    identityService
   ])
 
   const handleDownloadDesktopAppClicked = useCallback(() => {
@@ -603,6 +639,30 @@ export const SettingsPage = () => {
             >
               <Button onClick={showEmailToast} variant='secondary' fullWidth>
                 {settingsMessages.accountRecoveryButtonText}
+              </Button>
+            </Toast>
+          </SettingsCard>
+        ) : null}
+        {!isManagedAccount ? (
+          <SettingsCard
+            icon={<IconEmailAddress color='accent' />}
+            title={settingsMessages.emailVerificationCardTitle}
+            description={settingsMessages.emailVerificationCardDescription}
+          >
+            <Toast
+              text={emailVerificationToastText}
+              open={isEmailVerificationToastVisible}
+              className={styles.cardToast}
+              anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+              transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+            >
+              <Button
+                onClick={showEmailVerificationToast}
+                variant='secondary'
+                fullWidth
+                isLoading={isEmailVerificationLoading}
+              >
+                {settingsMessages.emailVerificationButtonText}
               </Button>
             </Toast>
           </SettingsCard>

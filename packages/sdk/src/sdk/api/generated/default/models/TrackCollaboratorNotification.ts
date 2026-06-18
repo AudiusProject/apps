@@ -31,7 +31,7 @@ export interface TrackCollaboratorNotification {
      * @type {string}
      * @memberof TrackCollaboratorNotification
      */
-    type: string;
+    type: TrackCollaboratorNotificationTypeEnum;
     /**
      *
      * @type {string}
@@ -57,6 +57,17 @@ export interface TrackCollaboratorNotification {
      */
     actions: Array<TrackCollaboratorNotificationAction>;
 }
+
+
+/**
+ * @export
+ */
+export const TrackCollaboratorNotificationTypeEnum = {
+    Invite: 'track_collaborator_invite',
+    Accept: 'track_collaborator_accept'
+} as const;
+export type TrackCollaboratorNotificationTypeEnum = typeof TrackCollaboratorNotificationTypeEnum[keyof typeof TrackCollaboratorNotificationTypeEnum];
+
 
 /**
  * Check if a given object implements the TrackCollaboratorNotification interface.

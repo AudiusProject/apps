@@ -13,7 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-
 /**
  *
  * @export
@@ -38,13 +37,36 @@ export interface TrackCollaboratorNotificationActionData {
      * @memberof TrackCollaboratorNotificationActionData
      */
     collaboratorUserId: string;
+    /**
+     * Current collaborator invite status at response time.
+     * @type {string}
+     * @memberof TrackCollaboratorNotificationActionData
+     */
+    status?: TrackCollaboratorNotificationActionDataStatusEnum;
 }
+
+
+/**
+ * @export
+ */
+export const TrackCollaboratorNotificationActionDataStatusEnum = {
+    Pending: 'pending',
+    Accepted: 'accepted',
+    Rejected: 'rejected'
+} as const;
+export type TrackCollaboratorNotificationActionDataStatusEnum = typeof TrackCollaboratorNotificationActionDataStatusEnum[keyof typeof TrackCollaboratorNotificationActionDataStatusEnum];
+
 
 /**
  * Check if a given object implements the TrackCollaboratorNotificationActionData interface.
  */
 export function instanceOfTrackCollaboratorNotificationActionData(value: object): value is TrackCollaboratorNotificationActionData {
-    return true;
+    let isInstance = true;
+    isInstance = isInstance && "trackId" in value && value["trackId"] !== undefined;
+    isInstance = isInstance && "inviterUserId" in value && value["inviterUserId"] !== undefined;
+    isInstance = isInstance && "collaboratorUserId" in value && value["collaboratorUserId"] !== undefined;
+
+    return isInstance;
 }
 
 export function TrackCollaboratorNotificationActionDataFromJSON(json: any): TrackCollaboratorNotificationActionData {
@@ -57,9 +79,10 @@ export function TrackCollaboratorNotificationActionDataFromJSONTyped(json: any, 
     }
     return {
 
-        'trackId': !exists(json, 'track_id') ? undefined : json['track_id'],
-        'inviterUserId': !exists(json, 'inviter_user_id') ? undefined : json['inviter_user_id'],
-        'collaboratorUserId': !exists(json, 'collaborator_user_id') ? undefined : json['collaborator_user_id'],
+        'trackId': json['track_id'],
+        'inviterUserId': json['inviter_user_id'],
+        'collaboratorUserId': json['collaborator_user_id'],
+        'status': !exists(json, 'status') ? undefined : json['status'],
     };
 }
 
@@ -75,5 +98,6 @@ export function TrackCollaboratorNotificationActionDataToJSON(value?: TrackColla
         'track_id': value.trackId,
         'inviter_user_id': value.inviterUserId,
         'collaborator_user_id': value.collaboratorUserId,
+        'status': value.status,
     };
 }

@@ -25,6 +25,11 @@ type CreateStripeSessionResponse = {
   status: string
 }
 
+type ResendEmailVerificationResponse = {
+  status: true
+  alreadyVerified?: boolean
+}
+
 enum TransactionMetadataType {
   PURCHASE_SOL_AUDIO_SWAP = 'PURCHASE_SOL_AUDIO_SWAP'
 }
@@ -230,6 +235,19 @@ export class IdentityService {
       throw new Error('No email found')
     }
     return res.email
+  }
+
+  /**
+   * Resend the current user's email verification link.
+   */
+  async resendEmailVerification() {
+    const headers = await this.getAuthHeaders()
+
+    return await this._makeRequest<ResendEmailVerificationResponse>({
+      url: '/email/resend-verification',
+      method: 'post',
+      headers
+    })
   }
 
   /**

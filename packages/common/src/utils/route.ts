@@ -55,6 +55,7 @@ export const HOME_PAGE = '/'
 export const NOT_FOUND_PAGE = '/404'
 export const SIGN_IN_PAGE = '/signin'
 export const SIGN_IN_CONFIRM_EMAIL_PAGE = '/signin/confirm-email'
+export const EMAIL_VERIFICATION_PAGE = '/verify-email'
 export const SIGN_UP_PAGE = '/signup'
 export const SIGN_ON_ALIASES = Object.freeze([
   '/login',
@@ -285,6 +286,7 @@ export const publicSiteRoutes = [
 // ordered list of routes the App attempts to match in increasing order of route selectivity
 export const orderedRoutes = [
   SIGN_IN_PAGE,
+  EMAIL_VERIFICATION_PAGE,
   SIGN_UP_PAGE,
   ...SIGN_ON_ALIASES,
   SIGN_UP_EMAIL_PAGE,

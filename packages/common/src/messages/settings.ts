@@ -31,6 +31,7 @@ export const settingsMessages = {
   labelAccountCardTitle: 'Label Account',
   notificationsCardTitle: 'Configure Notifications',
   accountRecoveryCardTitle: 'Resend Recovery Email',
+  emailVerificationCardTitle: 'Email Verification',
   changeEmailCardTitle: 'Change Email',
   changePasswordCardTitle: 'Change Password',
   accountsYouManageTitle: 'Accounts You Manage',
@@ -46,6 +47,8 @@ export const settingsMessages = {
   notificationsCardDescription: 'Review your notification preferences.',
   accountRecoveryCardDescription:
     'Resend your password reset email and store it safely. This email is the only way to recover your account if you forget your password.',
+  emailVerificationCardDescription:
+    'Verify that you can receive email at the address connected to your Audius account.',
   changeEmailCardDescription:
     'Change the email you use to sign in and receive emails.',
   changePasswordCardDescription: 'Change the password to your Audius account.',
@@ -61,6 +64,11 @@ export const settingsMessages = {
   commentSettingsButtonText: 'Comment Settings',
   notificationsButtonText: 'Configure Notifications',
   accountRecoveryButtonText: 'Resend Email',
+  emailVerificationButtonText: 'Resend Verification Email',
+  emailVerificationSent: 'Verification email sent!',
+  emailVerificationAlreadyVerified: 'Your email is already verified.',
+  emailVerificationNotSent:
+    'Unable to send verification email. Please try again!',
   changeEmailButtonText: 'Change Email',
   changePasswordButtonText: 'Change Password',
   desktopAppButtonText: 'Get The App',
