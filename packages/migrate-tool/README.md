@@ -64,12 +64,12 @@ You'll need:
 ### 2. Audius developer app
 
 Create a developer app at <https://audius.co/settings> → Developer Apps. You'll
-get an **API Key** and a **Bearer Token**.
+get an **API Key** and an **API Secret**.
 
 - `VITE_AUDIUS_API_KEY` — the API key (safe in the browser; baked into the build)
 - `AUDIUS_API_KEY` — same API key, for the backend
-- `AUDIUS_BEARER_TOKEN` — backend-only; grants the app permission to act on
-  behalf of users who have authorized it via OAuth
+- `AUDIUS_API_SECRET` — backend-only; authenticates the app and signs its
+  requests server-side. Never expose this in the browser.
 
 You'll also need to whitelist the deployment's OAuth redirect URI in the dev
 app's settings (e.g. `https://migrate.audius.co/`).
@@ -101,7 +101,7 @@ npx vercel link
 npx vercel env add VITE_AUDIUS_API_KEY
 npx vercel env add VITE_GOOGLE_CLIENT_ID
 npx vercel env add AUDIUS_API_KEY
-npx vercel env add AUDIUS_BEARER_TOKEN
+npx vercel env add AUDIUS_API_SECRET
 npx vercel env add GOOGLE_CLIENT_ID
 npx vercel env add AUTH_SESSION_SECRET
 npx vercel env add ADMIN_BEARER_TOKEN   # optional escape hatch
