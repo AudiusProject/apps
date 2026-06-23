@@ -13,7 +13,7 @@ import {
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import { getCanonicalName, route, toTrendingGenre } from '@audius/common/utils'
+import { route, toTrendingGenre } from '@audius/common/utils'
 import {
   FilterButton,
   Flex,
@@ -259,7 +259,7 @@ const TrendingPageMobileContent = ({
 
   const genreLabel =
     trendingGenre !== null && trendingGenre !== undefined
-      ? getCanonicalName(trendingGenre)
+      ? trendingGenre
       : messages.allGenres
 
   const isGenreSelected = trendingGenre !== null && trendingGenre !== undefined

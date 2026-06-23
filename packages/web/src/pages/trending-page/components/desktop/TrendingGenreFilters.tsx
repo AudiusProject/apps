@@ -1,6 +1,6 @@
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 
-import { getCanonicalName, removeNullable } from '@audius/common/utils'
+import { removeNullable } from '@audius/common/utils'
 import { Flex, IconKebabHorizontal, SelectablePill } from '@audius/harmony'
 
 const messages = {
@@ -83,7 +83,7 @@ export const TrendingGenreFilters = (props: TrendingGenreFiltersProps) => {
           key={genre}
           name='trending-genre-filter'
           type='radio'
-          label={getCanonicalName(genre) ?? ''}
+          label={genre}
           value={genre}
           size='large'
           isSelected={genre === currentGenre}
