@@ -1,10 +1,7 @@
 import React, { useCallback, useMemo, useRef } from 'react'
 
 import { exploreMessages as messages } from '@audius/common/messages'
-import {
-  QUICK_SEARCH_PRESETS,
-  QuickSearchPreset
-} from '@audius/common/utils'
+import { QUICK_SEARCH_PRESETS, QuickSearchPreset } from '@audius/common/utils'
 import { Flex, Paper, Text, useTheme } from '@audius/harmony'
 
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
