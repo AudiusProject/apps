@@ -5,6 +5,7 @@ const {
   errorResponseBadRequest,
   errorResponseForbidden
 } = require('./apiHelpers')
+const { getErrorLogFields } = require('./logging')
 
 const models = require('./models')
 
@@ -128,7 +129,10 @@ async function authMiddleware(req, res, next) {
             isGuest: !handle
           })
         } catch (e) {
-          req.logger.error(e, 'Failed to update blockchainUserId/handle')
+          req.logger.warn(
+            { error: getErrorLogFields(e) },
+            'Failed to update blockchainUserId/handle'
+          )
         }
       }
       req.user = user
@@ -195,7 +199,10 @@ const parameterizedAuthMiddleware = ({ shouldRespondBadRequest }) => {
             isGuest: !handle
           })
         } catch (e) {
-          req.logger.error(e, 'Failed to update blockchainUserId/handle')
+          req.logger.warn(
+            { error: getErrorLogFields(e) },
+            'Failed to update blockchainUserId/handle'
+          )
         }
       }
       req.user = user
