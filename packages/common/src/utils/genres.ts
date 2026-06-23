@@ -180,7 +180,7 @@ export const getGenreSuggestionKey = (genre: string) =>
 
 export const getStaticGenreSuggestions = () =>
   GENRES.map((genre) => ({
-    label: genre,
+    label: genre.replace(/^Electronic - /, ''),
     value: convertGenreLabelToValue(genre)
   }))
 
