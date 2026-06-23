@@ -69,6 +69,8 @@ export const settingsMessages = {
   emailVerificationAlreadyVerified: 'Your email is already verified.',
   emailVerificationNotSent:
     'Unable to send verification email. Please try again!',
+  emailVerifiedStatus: 'Email verified',
+  emailNotVerifiedStatus: 'Email not verified',
   changeEmailButtonText: 'Change Email',
   changePasswordButtonText: 'Change Password',
   desktopAppButtonText: 'Get The App',
