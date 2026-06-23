@@ -1,9 +1,5 @@
-import { QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { QUERY_KEYS } from '~/api'
-import { fetchEmailInUse } from '~/api/tan-query/users/useEmailInUse'
-import { QueryContextType } from '~/api/tan-query/utils/QueryContext'
 import { PurchaseMethod, PurchaseVendor } from '~/models/PurchaseContent'
 import { PurchaseContentPage } from '~/store'
 
@@ -21,20 +17,10 @@ import {
 import { PayExtraPreset } from './types'
 
 export const messages = {
-  amountInvalid: 'Please specify an amount between $1 and $100',
-  emailRequired: 'Please enter an email.',
-  invalidEmail: 'Please enter a valid email.',
-  emailInUse: 'Email already taken.',
-  somethingWentWrong: 'Something went wrong. Try again later.',
-  guestAccountExists: 'Guest account exists.'
+  amountInvalid: 'Please specify an amount between $1 and $100'
 }
 
-export const createPurchaseContentSchema = (
-  queryContext: QueryContextType,
-  queryClient: QueryClient,
-  page: PurchaseContentPage,
-  emailFromLocalStorage?: string
-) => {
+export const createPurchaseContentSchema = (page: PurchaseContentPage) => {
   return z
     .object({
       [CUSTOM_AMOUNT]: z
@@ -77,39 +63,4 @@ export const createPurchaseContentSchema = (
         path: [GUEST_EMAIL] // Specify the path to the error
       }
     )
-    .superRefine(async ({ guestEmail }, ctx) => {
-      if (
-        page !== PurchaseContentPage.GUEST_CHECKOUT ||
-        !guestEmail ||
-        guestEmail === emailFromLocalStorage
-      ) {
-        // only validate email if on guest checkout page and email is different
-        return
-      }
-
-      const { exists: isEmailInUse, isGuest } = await queryClient.fetchQuery({
-        queryKey: [QUERY_KEYS.emailInUse, guestEmail],
-        queryFn: async () => await fetchEmailInUse(guestEmail, queryContext)
-      })
-
-      if (isEmailInUse === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: messages.somethingWentWrong,
-          path: [GUEST_EMAIL]
-        })
-      } else if (isGuest) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: messages.guestAccountExists,
-          path: [GUEST_EMAIL]
-        })
-      } else if (isEmailInUse) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: messages.emailInUse,
-          path: [GUEST_EMAIL]
-        })
-      }
-    })
 }

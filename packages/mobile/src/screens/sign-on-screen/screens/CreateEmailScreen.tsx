@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
 import { createEmailPageMessages } from '@audius/common/messages'
 import { emailSchema } from '@audius/common/schemas'
-import { useQueryClient } from '@tanstack/react-query'
 import { setValueField, startSignUp } from 'common/store/pages/signon/actions'
 import { getEmailField } from 'common/store/pages/signon/selectors'
 import { Formik } from 'formik'
@@ -36,15 +34,13 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
   const dispatch = useDispatch()
   const navigation = useNavigation<SignOnScreenParamList>()
   const existingEmailValue = useSelector(getEmailField)
-  const queryContext = useQueryContext()
-  const queryClient = useQueryClient()
 
   const initialValues = {
     email: existingEmailValue.value ?? ''
   }
   const EmailSchema = useMemo(() => {
-    return toFormikValidationSchema(emailSchema(queryContext, queryClient))
-  }, [queryContext, queryClient])
+    return toFormikValidationSchema(emailSchema())
+  }, [])
 
   useTrackScreen('CreateEmail')
 
@@ -76,7 +72,6 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
               <NewEmailField
                 name='email'
                 label={createEmailPageMessages.emailLabel}
-                onChangeScreen={onChangeScreen}
               />
             </Flex>
             <Flex direction='column' gap='l'>

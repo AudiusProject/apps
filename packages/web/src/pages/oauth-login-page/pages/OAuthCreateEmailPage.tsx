@@ -1,8 +1,7 @@
 import { useCallback, useMemo } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
 import { createEmailPageMessages } from '@audius/common/messages'
-import { emailSchema, emailSchemaMessages } from '@audius/common/schemas'
+import { emailSchema } from '@audius/common/schemas'
 import {
   Divider,
   Flex,
@@ -13,7 +12,6 @@ import {
   IconTransaction,
   Text
 } from '@audius/harmony'
-import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useField } from 'formik'
 import { Link, useLocation } from 'react-router'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
@@ -40,14 +38,9 @@ export const OAuthCreateEmailPage = ({
   appImage,
   onNext
 }: OAuthCreateEmailPageProps) => {
-  const queryContext = useQueryContext()
-  const queryClient = useQueryClient()
   const location = useLocation()
 
-  const EmailSchema = useMemo(
-    () => toFormikValidationSchema(emailSchema(queryContext, queryClient)),
-    [queryContext, queryClient]
-  )
+  const EmailSchema = useMemo(() => toFormikValidationSchema(emailSchema()), [])
 
   const initialValues: SignUpEmailValues = {
     email: ''
@@ -157,18 +150,7 @@ const EmailInputWithError = ({
 }: {
   setFieldValue: (field: string, value: string) => void
 }) => {
-  const location = useLocation()
   const [field, { error, touched }] = useField('email')
-  const emailInUse = error === emailSchemaMessages.emailInUse
-
-  const signInLink = (
-    <Link
-      to={`/oauth/auth${location.search}`}
-      style={{ color: 'var(--harmony-primary)', textDecoration: 'none' }}
-    >
-      {createEmailPageMessages.signIn}
-    </Link>
-  )
 
   return (
     <Flex direction='column' gap='s' mt='s'>
@@ -186,13 +168,7 @@ const EmailInputWithError = ({
         }}
         onBlur={field.onBlur}
       />
-      {touched && error && emailInUse ? (
-        <Hint icon={IconError}>
-          {error} {signInLink}
-        </Hint>
-      ) : touched && error ? (
-        <Hint icon={IconError}>{error}</Hint>
-      ) : null}
+      {touched && error ? <Hint icon={IconError}>{error}</Hint> : null}
     </Flex>
   )
 }

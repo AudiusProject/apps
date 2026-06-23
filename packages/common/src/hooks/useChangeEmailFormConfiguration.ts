@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
 
-import { useQueryClient } from '@tanstack/react-query'
 import { FormikHelpers } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
@@ -55,7 +54,6 @@ export const useChangeEmailFormConfiguration = (onComplete: () => void) => {
   const [page, setPage] = useState(ChangeEmailPage.ConfirmPassword)
   const queryContext = useQueryContext()
   const { authService } = queryContext
-  const queryClient = useQueryClient()
 
   // Move schema initializations inside the hook to prevent initialization timing issues
   const confirmPasswordFormikSchema = toFormikValidationSchema(
@@ -67,10 +65,7 @@ export const useChangeEmailFormConfiguration = (onComplete: () => void) => {
   )
   const verifyEmailFormikSchema = toFormikValidationSchema(confirmEmailSchema)
 
-  const EmailSchema = useMemo(
-    () => toFormikValidationSchema(emailSchema(queryContext, queryClient)),
-    [queryContext, queryClient]
-  )
+  const EmailSchema = useMemo(() => toFormikValidationSchema(emailSchema()), [])
 
   const validationSchema =
     page === ChangeEmailPage.ConfirmPassword

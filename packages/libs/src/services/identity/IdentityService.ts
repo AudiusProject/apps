@@ -171,19 +171,6 @@ export class IdentityService {
   }
 
   /**
-   * Check if an email address has been previously registered.
-   */
-  async checkIfEmailRegistered(email: string) {
-    return await this._makeRequest<{ exists: boolean }>({
-      url: '/users/check',
-      method: 'get',
-      params: {
-        email
-      }
-    })
-  }
-
-  /**
    * Check if the lookupKey exists.
    * WARNING: might not be the auth credentials for the current user!
    * Only use when just a soft check is necessary. Use confirmCredentials.
