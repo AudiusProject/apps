@@ -1,9 +1,0 @@
-create_concatenated_patch_file:
-  description: 'Concatenate all patch-files into single file. File is used as checksum source for part of caching key.'
-  parameters:
-    filename:
-      type: string
-  steps:
-    - run:
-        name: Combine patch-files to single file
-        command: ls -d -- packages/*/patches/*.patch | xargs cat > << parameters.filename >>

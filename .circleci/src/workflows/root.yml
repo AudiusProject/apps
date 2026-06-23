@@ -1,7 +1,0 @@
-jobs:
-  - root-publish-github-release-protocol:
-      # Audius Client context contains the GHI token
-      context: Audius Client
-      filters:
-        branches:
-          only: /(^release-v.*)$/
