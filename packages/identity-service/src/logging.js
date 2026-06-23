@@ -38,6 +38,64 @@ function requestNotExcludedFromLogging(url) {
   return excludedRoutes.indexOf(url) === -1
 }
 
+const sensitiveQueryParamKeys = new Set([
+  'email',
+  'username',
+  'lookupkey',
+  'otp',
+  'token',
+  'signature',
+  'encoded-data-message',
+  'encoded-data-signature'
+])
+
+function sanitizeQueryParams(queryParams) {
+  if (!queryParams) return undefined
+
+  const params = new URLSearchParams(queryParams)
+  const sanitizedParams = []
+  params.forEach((value, key) => {
+    const sanitizedValue = sensitiveQueryParamKeys.has(key.toLowerCase())
+      ? '[redacted]'
+      : value
+    sanitizedParams.push(
+      `${encodeURIComponent(key)}=${encodeURIComponent(sanitizedValue)}`
+    )
+  })
+
+  return sanitizedParams.length ? sanitizedParams.join('&') : undefined
+}
+
+function withoutEmptyFields(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(
+      ([, value]) => value !== undefined && value !== null && value !== ''
+    )
+  )
+}
+
+function stripQueryParams(url) {
+  return typeof url === 'string' ? url.split('?')[0] : undefined
+}
+
+function getErrorLogFields(error) {
+  if (typeof error === 'string') {
+    return { message: error }
+  }
+  if (!error || typeof error !== 'object') {
+    return { message: String(error) }
+  }
+
+  return withoutEmptyFields({
+    name: error?.name,
+    message: error?.message,
+    code: error?.code,
+    status: error?.response?.status,
+    method: error?.config?.method,
+    url: stripQueryParams(error?.config?.url)
+  })
+}
+
 function loggingMiddleware(req, res, next) {
   const providedRequestID = req.header('X-Request-ID')
   const requestID = providedRequestID || shortid.generate()
@@ -49,7 +107,8 @@ function loggingMiddleware(req, res, next) {
     requestMethod: req.method,
     requestHostname: req.hostname,
     requestUrl: urlParts[0],
-    requestQueryParams: urlParts.length > 1 ? urlParts[1] : undefined,
+    requestQueryParams:
+      urlParts.length > 1 ? sanitizeQueryParams(urlParts[1]) : undefined,
     requestIP: req.ip,
     requestXForwardedFor: req.headers['x-forwarded-for']
   })
@@ -59,4 +118,10 @@ function loggingMiddleware(req, res, next) {
   next()
 }
 
-module.exports = { logger, loggingMiddleware, requestNotExcludedFromLogging }
+module.exports = {
+  getErrorLogFields,
+  logger,
+  loggingMiddleware,
+  requestNotExcludedFromLogging,
+  sanitizeQueryParams
+}

@@ -1,4 +1,5 @@
 require('./expressAppTest')
+require('./apiHelpersTest')
 require('./authenticationTest')
 require('./relayTest')
 require('./configTest')

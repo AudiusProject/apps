@@ -32,7 +32,11 @@ const sendResponse = (module.exports.sendResponse = (req, res, resp) => {
     logger = logger.child({
       errorMessage: resp.object.error
     })
-    logger.error('Error processing request:', resp.object.error)
+    if (resp.statusCode >= 500) {
+      logger.error('Error processing request:', resp.object.error)
+    } else {
+      logger.debug('Client error response:', resp.object.error)
+    }
   }
   res.status(resp.statusCode).send(resp.object)
 })
