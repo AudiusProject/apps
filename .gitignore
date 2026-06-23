@@ -203,7 +203,6 @@ app-keypair.json
 
 # CI
 combined-patch-file.txt
-.circleci/continue_config.yml
 
 # Identity
 packages/identity-service/emailCache

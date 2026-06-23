@@ -13,5 +13,5 @@ done
 echo "Writing template..."
 jq -c -n --arg header ":rocket: Packages successfully published to npm!"\
     --arg packages "*Packages*: $PACKAGES"\
-    -f .circleci/slack-templates/publish-packages-template.jq\
+    -f scripts/slack-templates/publish-packages-template.jq\
   > /tmp/publish-packages-template.json

@@ -1,6 +1,0 @@
-when: << pipeline.parameters.run-eth-contracts-workflow >>
-jobs:
-  - test:
-      name: test-eth-contracts
-      context: Vercel
-      service: eth-contracts
