@@ -86,7 +86,8 @@ export class AlbumsApi {
     params: CreateAlbumRequestWithFiles,
     requestInit?: RequestInit
   ) {
-    const { albumId, imageFile, metadata, onProgress, trackIds, userId } = params
+    const { albumId, imageFile, metadata, onProgress, trackIds, userId } =
+      params
     const { albumName, ...playlistMetadata } = metadata
     const timestamp = Math.floor(Date.now() / 1000)
     const playlistContents =
