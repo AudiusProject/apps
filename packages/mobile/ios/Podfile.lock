@@ -3,8 +3,6 @@ PODS:
     - React-Core
   - Base64 (1.1.2)
   - boost (1.84.0)
-  - BVLinearGradient (2.8.3):
-    - React-Core
   - CodePush (12.3.2):
     - Base64 (~> 1.1)
     - JWT (~> 3.0.0-beta.12)
@@ -2284,8 +2282,6 @@ PODS:
   - SnapSDK/SCSDKLoginKit (1.15.0):
     - SnapSDK/SCSDKCoreKit
   - SocketRocket (0.7.1)
-  - SRSRadialGradient (1.1.4):
-    - React
   - SSZipArchive (2.5.5)
   - SwiftAudioEx (1.1.0)
   - tiktok-opensdk-react-native (0.10.7):
@@ -2328,7 +2324,6 @@ PODS:
 DEPENDENCIES:
   - "amplitude-react-native (from `../../../node_modules/@amplitude/analytics-react-native`)"
   - boost (from `../../../node_modules/react-native/third-party-podspecs/boost.podspec`)
-  - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - "CodePush (from `../../../node_modules/@bravemobile/react-native-code-push`)"
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - "dr-pogodin-react-native-fs (from `../node_modules/@dr.pogodin/react-native-fs`)"
@@ -2442,7 +2437,6 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNZipArchive (from `../../../node_modules/react-native-zip-archive`)
   - "snap-kit-react-native (from `../../../node_modules/@snapchat/snap-kit-react-native`)"
-  - SRSRadialGradient (from `../../../node_modules/react-native-radial-gradient/ios`)
   - tiktok-opensdk-react-native (from `../../../node_modules/tiktok-opensdk-react-native`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2467,8 +2461,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@amplitude/analytics-react-native"
   boost:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/boost.podspec"
-  BVLinearGradient:
-    :path: "../node_modules/react-native-linear-gradient"
   CodePush:
     :path: "../../../node_modules/@bravemobile/react-native-code-push"
   DoubleConversion:
@@ -2690,8 +2682,6 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-zip-archive"
   snap-kit-react-native:
     :path: "../../../node_modules/@snapchat/snap-kit-react-native"
-  SRSRadialGradient:
-    :path: "../../../node_modules/react-native-radial-gradient/ios"
   tiktok-opensdk-react-native:
     :path: "../../../node_modules/tiktok-opensdk-react-native"
   Yoga:
@@ -2701,7 +2691,6 @@ SPEC CHECKSUMS:
   amplitude-react-native: 9d57e1bcc4175039e36283390aa3daeaea9441a5
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
-  BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   CodePush: f52aac93456bc76d8219ca3673cc7ce81470429d
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   dr-pogodin-react-native-fs: 69314b5d4e9f561657febeae7a250c2bb8561874
@@ -2819,7 +2808,6 @@ SPEC CHECKSUMS:
   snap-kit-react-native: 751006199818fccb38c8a01196495167bc25e9fb
   SnapSDK: 1e68aad748e080f49e3802559b3b76026666ef62
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  SRSRadialGradient: 8363f6c3ce63636f5ffee74a7016f5c84a6df0a1
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   SwiftAudioEx: f6aa653770f3a0d3851edaf8d834a30aee4a7646
   tiktok-opensdk-react-native: f6b1a34bb4c1889c0dae5838effe484c673ea0c0
@@ -2828,6 +2816,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 80b8985ad794298fb69d3341de183f33d1853654
   Yoga: adb397651e1c00672c12e9495babca70777e411e
 
-PODFILE CHECKSUM: c239dce87c3b2bb790be1b30cee424f8f00aa30a
+PODFILE CHECKSUM: 0ea83090adc693808f933bbd5e29fa542a3e3602
 
 COCOAPODS: 1.15.2
