@@ -54,6 +54,7 @@ export type UpdateAlbumRequestBody = Omit<
 export type CreateAlbumRequest = {
   userId: string
   albumId?: string
+  trackIds?: string[]
   metadata: CreateAlbumRequestBody
 }
 

@@ -152,6 +152,36 @@ describe('AlbumsApi', () => {
   })
 
   describe('createAlbum', () => {
+    it('does not pass album id as a top-level playlist create param', async () => {
+      const createPlaylistSpy = vitest
+        .spyOn((albums as any).playlistsApi, 'createPlaylist')
+        .mockResolvedValueOnce({ playlistId: 'x5pJ3Aj' } as any)
+
+      try {
+        await albums.createAlbum({
+          userId: '7eP5n',
+          albumId: 'x5pJ3Aj',
+          metadata: {
+            albumName: 'My Album'
+          }
+        })
+
+        const playlistParams = createPlaylistSpy.mock.calls[0]![0]
+        expect(playlistParams).not.toHaveProperty('albumId')
+        expect(playlistParams).toMatchObject({
+          userId: '7eP5n',
+          metadata: {
+            isAlbum: true,
+            playlistContents: [],
+            playlistId: 'x5pJ3Aj',
+            playlistName: 'My Album'
+          }
+        })
+      } finally {
+        createPlaylistSpy.mockRestore()
+      }
+    })
+
     it('creates a blank album with a provided album id', async () => {
       manageEntitySpy.mockClear()
 
