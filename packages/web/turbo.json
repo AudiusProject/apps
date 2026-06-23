@@ -12,6 +12,7 @@
         "@audius/fixed-decimal#build",
         "@audius/harmony#build",
         "@audius/eth#build",
+        "@audius/sdk#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only",
@@ -24,6 +25,7 @@
         "@audius/fixed-decimal#build",
         "@audius/harmony#build",
         "@audius/eth#build",
+        "@audius/sdk#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only"
@@ -36,6 +38,7 @@
         "@audius/fixed-decimal#build",
         "@audius/harmony#build",
         "@audius/eth#build",
+        "@audius/sdk#build",
         "@audius/spl#build"
       ],
       "outputLogs": "new-only"

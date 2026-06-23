@@ -5,7 +5,11 @@ import { describe, it, expect, vitest, beforeAll } from 'vitest'
 
 import { developmentConfig } from '../../config/development'
 import { createAppWalletClient } from '../../services/AudiusWalletClient'
-import { EntityManagerClient } from '../../services/EntityManager'
+import {
+  EntityManagerAction,
+  EntityManagerClient,
+  EntityType
+} from '../../services/EntityManager'
 import { Logger } from '../../services/Logger'
 import { SolanaRelay } from '../../services/Solana/SolanaRelay'
 import { SolanaRelayWalletAdapter } from '../../services/Solana/SolanaRelayWalletAdapter'
@@ -69,7 +73,7 @@ vitest
     return 1
   })
 
-vitest
+const manageEntitySpy = vitest
   .spyOn(EntityManagerClient.prototype, 'manageEntity')
   .mockImplementation(async () => {
     return {
@@ -145,6 +149,70 @@ describe('AlbumsApi', () => {
     vitest.spyOn(console, 'info').mockImplementation(() => {})
     vitest.spyOn(console, 'debug').mockImplementation(() => {})
     vitest.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  describe('createAlbum', () => {
+    it('does not pass album id as a top-level playlist create param', async () => {
+      const createPlaylistSpy = vitest
+        .spyOn((albums as any).playlistsApi, 'createPlaylist')
+        .mockResolvedValueOnce({ playlistId: 'x5pJ3Aj' } as any)
+
+      try {
+        await albums.createAlbum({
+          userId: '7eP5n',
+          albumId: 'x5pJ3Aj',
+          metadata: {
+            albumName: 'My Album'
+          }
+        })
+
+        const playlistParams = createPlaylistSpy.mock.calls[0]![0]
+        expect(playlistParams).not.toHaveProperty('albumId')
+        expect(playlistParams).toMatchObject({
+          userId: '7eP5n',
+          metadata: {
+            isAlbum: true,
+            playlistContents: [],
+            playlistId: 'x5pJ3Aj',
+            playlistName: 'My Album'
+          }
+        })
+      } finally {
+        createPlaylistSpy.mockRestore()
+      }
+    })
+
+    it('creates a blank album with a provided album id', async () => {
+      manageEntitySpy.mockClear()
+
+      const result = await albums.createAlbum({
+        userId: '7eP5n',
+        albumId: 'x5pJ3Aj',
+        metadata: {
+          albumName: 'My Album'
+        }
+      })
+
+      expect(result).toStrictEqual({
+        blockHash: 'a',
+        blockNumber: 1,
+        playlistId: 'x5pJ3Aj'
+      })
+      expect(manageEntitySpy).toHaveBeenCalledTimes(1)
+
+      const manageEntityOptions = manageEntitySpy.mock.calls[0]![0]
+      expect(manageEntityOptions.entityType).toBe(EntityType.PLAYLIST)
+      expect(manageEntityOptions.action).toBe(EntityManagerAction.CREATE)
+
+      const metadata = JSON.parse(manageEntityOptions.metadata!)
+      expect(metadata.data).toMatchObject({
+        is_album: true,
+        playlist_contents: [],
+        playlist_id: manageEntityOptions.entityId,
+        playlist_name: 'My Album'
+      })
+      expect(metadata.data).not.toHaveProperty('album_id')
+    })
   })
 
   describe('uploadAlbum', () => {

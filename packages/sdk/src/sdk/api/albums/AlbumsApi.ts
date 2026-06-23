@@ -86,14 +86,27 @@ export class AlbumsApi {
     params: CreateAlbumRequestWithFiles,
     requestInit?: RequestInit
   ) {
-    const { metadata, ...rest } = params
+    const { albumId, imageFile, metadata, onProgress, trackIds, userId } =
+      params
     const { albumName, ...playlistMetadata } = metadata
+    const timestamp = Math.floor(Date.now() / 1000)
+    const playlistContents =
+      playlistMetadata.playlistContents ??
+      (trackIds ?? []).map((trackId) => ({
+        trackId,
+        timestamp,
+        metadataTimestamp: timestamp
+      }))
 
     // Transform album request to playlist request
     const playlistParams = {
-      ...rest,
+      imageFile,
+      onProgress,
+      userId,
       metadata: {
         ...playlistMetadata,
+        ...(albumId ? { playlistId: albumId } : {}),
+        playlistContents,
         playlistName: albumName,
         isAlbum: true
       }
