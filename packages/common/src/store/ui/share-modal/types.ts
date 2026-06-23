@@ -16,15 +16,11 @@ type ShareTrackContent = {
  * Contest shares use the same underlying data as a track share (the
  * contest is keyed off a parent track) but link to the contest page
  * (`{trackPermalink}/contest`) instead of the track itself.
- * When the event has its own permalink from event_routes, that value is
- * passed as `eventPermalink` and used directly.
  */
 type ShareContestContent = {
   type: 'contest'
   track: Track
   artist: User
-  /** Canonical contest permalink from event_routes, if available. */
-  eventPermalink?: string
 }
 
 type ShareProfileContent = {
@@ -59,7 +55,7 @@ export type ShareContent =
 
 export type ShareModalRequest =
   | { type: 'track'; trackId: ID }
-  | { type: 'contest'; trackId: ID; eventPermalink?: string }
+  | { type: 'contest'; trackId: ID }
   | { type: 'profile'; profileId: ID }
   | { type: 'collection'; collectionId: ID }
 

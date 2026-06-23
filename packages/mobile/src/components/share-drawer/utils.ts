@@ -17,14 +17,11 @@ export const getContentUrl = (content: ShareContent) => {
       return getTrackRoute(track, true)
     }
     case 'contest': {
-      // Contest shares point at the contest page. When the event has its
-      // own permalink from event_routes, use it directly; otherwise derive
-      // from the parent track's permalink.
-      const { track, eventPermalink } = content
-      return getContestRoute(
-        { permalink: track.permalink, contestPermalink: eventPermalink },
-        true
-      )
+      // Contest shares point at the parent track's contest page —
+      // `{permalink}/contest` — so sharing copies the contest URL
+      // rather than the underlying track.
+      const { track } = content
+      return getContestRoute(track, true)
     }
     case 'profile': {
       const { profile } = content

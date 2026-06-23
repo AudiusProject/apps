@@ -300,11 +300,10 @@ const ContestPage = ({
       shareModalUIActions.requestOpen({
         type: 'contest',
         trackId,
-        source: ShareSource.PAGE,
-        ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
+        source: ShareSource.PAGE
       })
     )
-  }, [contest?.permalink, dispatch, trackId])
+  }, [dispatch, trackId])
 
   const { imageUrl: trackCoverArtUrl } = useTrackCoverArt({
     trackId,
@@ -393,7 +392,7 @@ const ContestPage = ({
     if (trackId) {
       dispatch(remixesPageActions.fetchTrackSucceeded({ trackId }))
     }
-  }, [contest?.permalink, dispatch, trackId])
+  }, [dispatch, trackId])
 
   useEffect(() => {
     return function cleanup() {
@@ -506,7 +505,7 @@ const ContestPage = ({
   return (
     <Page
       title={messages.title}
-      canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
+      canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
       {/* Top section: hero banner + meta (title, CTA, deadline,

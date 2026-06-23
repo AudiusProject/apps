@@ -44,14 +44,10 @@ export const getXShareText = async (
     case 'contest': {
       const {
         track: { title, permalink, track_id },
-        artist,
-        eventPermalink
+        artist
       } = content
       xText = messageConfig.contestShareText(title, getXShareHandle(artist))
-      // Prefer event_routes permalink; fall back to deriving from track permalink.
-      link = eventPermalink
-        ? fullContestPage(eventPermalink)
-        : fullContestPage(permalink)
+      link = fullContestPage(permalink)
       // Contest shares route through the parent track's analytics
       // entry — there's no dedicated 'contest' event kind yet and
       // the parent track is what gets credited for engagement.

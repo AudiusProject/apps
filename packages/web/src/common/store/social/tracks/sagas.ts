@@ -807,7 +807,7 @@ function* watchShareContest() {
   yield* takeEvery(
     socialActions.SHARE_CONTEST,
     function* (action: ReturnType<typeof socialActions.shareContest>) {
-      const { trackId, eventPermalink } = action
+      const { trackId } = action
 
       const track = yield* queryTrack(trackId)
       if (!track) return
@@ -815,10 +815,7 @@ function* watchShareContest() {
       const user = yield* queryUser(track.owner_id)
       if (!user) return
 
-      // Prefer event_routes permalink; fall back to deriving from track permalink.
-      const link = eventPermalink
-        ? fullContestPage(eventPermalink)
-        : fullContestPage(track.permalink)
+      const link = fullContestPage(track.permalink)
       const share = yield* getContext('share')
       share(link, formatShareText(track.title, user.name))
 
