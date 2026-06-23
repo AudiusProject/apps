@@ -86,7 +86,7 @@ export class AlbumsApi {
     params: CreateAlbumRequestWithFiles,
     requestInit?: RequestInit
   ) {
-    const { metadata, ...rest } = params
+    const { metadata, albumId, ...rest } = params
     const { albumName, ...playlistMetadata } = metadata
 
     // Transform album request to playlist request
@@ -94,6 +94,8 @@ export class AlbumsApi {
       ...rest,
       metadata: {
         ...playlistMetadata,
+        ...(albumId ? { playlistId: albumId } : {}),
+        playlistContents: playlistMetadata.playlistContents ?? [],
         playlistName: albumName,
         isAlbum: true
       }
