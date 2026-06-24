@@ -8,7 +8,7 @@
 #import <React/RCTRootView.h>
 #import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 #import <React/RCTLinkingManager.h>
-#import "RNNotifications.h"
+#import <Firebase.h>
 #import <TiktokOpensdkReactNative-Bridging-Header.h>
 
 @implementation AppDelegate
@@ -35,7 +35,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [RNNotifications startMonitorNotifications];
+  [FIRApp configure];
   NSString *receiverAppID = @"222B31C8";
   GCKDiscoveryCriteria *criteria = [[GCKDiscoveryCriteria alloc] initWithApplicationID:receiverAppID];
   GCKCastOptions* options = [[GCKCastOptions alloc] initWithDiscoveryCriteria:criteria];
@@ -76,18 +76,6 @@
 #else
   return [CodePush bundleURL];
 #endif
-}
-
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-  [RNNotifications didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
-}
-
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-  [RNNotifications didFailToRegisterForRemoteNotificationsWithError:error];
-}
-
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [RNNotifications didReceiveBackgroundNotification:userInfo withCompletionHandler:completionHandler];
 }
 
 @end

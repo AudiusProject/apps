@@ -36,6 +36,14 @@ target 'AudiusReactNative' do
 
   pod 'nSure'
 
+  # Firebase (via @react-native-firebase) ships Swift pods (FirebaseCoreInternal,
+  # etc.) that depend on these C/Obj-C pods, which don't define module maps. The
+  # project links pods statically by default, and Swift static pods can't import
+  # non-modular dependencies — so opt these into modular headers. See the
+  # @react-native-firebase iOS "non-modular" troubleshooting note.
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
+
   config = use_native_modules!
 
   use_react_native!(
