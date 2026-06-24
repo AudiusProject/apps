@@ -1,10 +1,22 @@
 import { getCurrentAccountQueryKey } from '@audius/common/api'
 import { MobileOS } from '@audius/common/models'
 import type { AccountState } from '@audius/common/store'
+import notifee, { EventType } from '@notifee/react-native'
+import type { Event as NotifeeEvent } from '@notifee/react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+  getAPNSToken,
+  getInitialNotification,
+  getMessaging,
+  getToken as getFcmToken,
+  isDeviceRegisteredForRemoteMessages,
+  onNotificationOpenedApp,
+  onTokenRefresh,
+  registerDeviceForRemoteMessages,
+  requestPermission
+} from '@react-native-firebase/messaging'
+import type { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Platform } from 'react-native'
-import { Notifications } from 'react-native-notifications'
-import type { Registered, Notification } from 'react-native-notifications'
 import { requestNotifications } from 'react-native-permissions'
 
 import { track, make } from 'app/services/analytics'
@@ -52,7 +64,7 @@ function parseAndroidNotificationData(data: Record<string, any>): any {
 }
 
 function extractNotificationCampaignIdFromPayload(
-  payload: Notification['payload']
+  payload: Record<string, any> | undefined
 ): string | undefined {
   const target = payload?.data?.data ?? payload?.data ?? payload ?? undefined
   if (!target || typeof target !== 'object') return undefined
@@ -87,29 +99,68 @@ async function reportNotificationCampaignPushOpen(
   })
 }
 
-// Set to true while the push notification service is registering with the os
-let isRegistering = false
+// A tapped push, normalized across platforms. `payload` matches what
+// react-native-notifications used to hand us: the APNs userInfo minus `aps` on
+// iOS, the FCM data map on Android.
+type OpenedNotification = {
+  title?: string
+  body?: string
+  payload: Record<string, any>
+}
+
+const fromRemoteMessage = (
+  message: FirebaseMessagingTypes.RemoteMessage
+): OpenedNotification => ({
+  title: message.notification?.title,
+  body: message.notification?.body,
+  payload: message.data ?? {}
+})
+
+// Our iOS pushes go straight to APNs through SNS, not through FCM, so
+// @react-native-firebase/messaging ignores taps on them. Notifee reports them
+// as PRESS events instead (AppDelegate makes sure it sees them).
+const fromNotifeeEvent = ({
+  type,
+  detail
+}: NotifeeEvent): OpenedNotification | null => {
+  if (type !== EventType.PRESS || !detail.notification) return null
+  return {
+    title: detail.notification.title,
+    body: detail.notification.body,
+    payload: (detail.notification.data ?? {}) as Record<string, any>
+  }
+}
 
 // Singleton class
 class PushNotifications {
-  lastId: number
   token: Token | null
   navigation: NotificationNavigation | null
+  // A tap that arrived before navigation was ready (cold start)
+  private pendingOpen: OpenedNotification | null
+  private isNavigationReady: boolean
 
-  // onNotification is a function passed in that is to be called when a
-  // notification is to be emitted.
   constructor() {
-    this.configure()
-    this.lastId = 0
     this.token = null
     this.navigation = null
+    this.pendingOpen = null
+    this.isNavigationReady = false
+    this.configure()
   }
 
   setNavigation = (navigation: NotificationNavigation) => {
     this.navigation = navigation
   }
 
-  onNotification = (notification: Notification) => {
+  private handleOpened = (notification: OpenedNotification | null) => {
+    if (!notification) return
+    if (!this.isNavigationReady) {
+      this.pendingOpen = notification
+      return
+    }
+    this.onNotification(notification)
+  }
+
+  onNotification = (notification: OpenedNotification) => {
     console.info(`Received notification ${JSON.stringify(notification)}`)
     const { title, body, payload } = notification
     const notificationCampaignId =
@@ -138,19 +189,43 @@ class PushNotifications {
     this.navigation?.navigate(data)
   }
 
-  // Method used to open the push notification that the user pressed while the app was closed
+  // Called once navigation is ready. Opens the push the user tapped to launch
+  // the app, if any.
   openInitialNotification = async () => {
-    const notification = await Notifications.getInitialNotification()
+    this.isNavigationReady = true
+    if (Platform.OS === MobileOS.ANDROID) {
+      const message = await getInitialNotification(getMessaging())
+      if (message) {
+        this.pendingOpen = fromRemoteMessage(message)
+      }
+    }
+    const notification = this.pendingOpen
+    this.pendingOpen = null
     if (notification) {
       this.onNotification(notification)
     }
   }
 
-  async onRegister(event: Registered) {
-    const token = { token: event.deviceToken, os: Platform.OS }
+  private async persistToken(deviceToken: string) {
+    const token = { token: deviceToken, os: Platform.OS }
     this.token = token
     await AsyncStorage.setItem(DEVICE_TOKEN, JSON.stringify(token))
-    isRegistering = false
+    return token
+  }
+
+  // identity-service registers iOS tokens with an SNS APNs platform app, so iOS
+  // must send the raw APNs token, not an FCM token. Lowercase hex matches what
+  // react-native-notifications sent, so existing rows and endpoints are reused.
+  private async fetchDeviceToken() {
+    if (Platform.OS === MobileOS.IOS) {
+      const messaging = getMessaging()
+      if (!isDeviceRegisteredForRemoteMessages(messaging)) {
+        await registerDeviceForRemoteMessages(messaging)
+      }
+      const apnsToken = await getAPNSToken(messaging)
+      return apnsToken ? apnsToken.toLowerCase() : null
+    }
+    return await getFcmToken(getMessaging())
   }
 
   deregister() {
@@ -158,10 +233,22 @@ class PushNotifications {
   }
 
   async configure() {
-    Notifications.events().registerRemoteNotificationsRegistered(
-      this.onRegister
-    )
-    Notifications.events().registerNotificationOpened(this.onNotification)
+    if (Platform.OS === MobileOS.IOS) {
+      notifee.onForegroundEvent((event) =>
+        this.handleOpened(fromNotifeeEvent(event))
+      )
+      notifee.onBackgroundEvent(async (event) =>
+        this.handleOpened(fromNotifeeEvent(event))
+      )
+    } else {
+      const messaging = getMessaging()
+      onNotificationOpenedApp(messaging, (message) =>
+        this.handleOpened(fromRemoteMessage(message))
+      )
+      onTokenRefresh(messaging, (token) => {
+        this.persistToken(token).catch(() => {})
+      })
+    }
 
     try {
       const token = await AsyncStorage.getItem(DEVICE_TOKEN)
@@ -175,40 +262,30 @@ class PushNotifications {
     }
   }
 
-  async hasPermission(): Promise<boolean> {
-    return await Notifications.isRegisteredForRemoteNotifications()
-  }
-
   async requestPermission() {
-    isRegistering = true
-
     if (Platform.OS === MobileOS.ANDROID) {
       // Android 13+ needs POST_NOTIFICATIONS. Use requestNotifications — PERMISSIONS.ANDROID
       // does not expose POST_NOTIFICATIONS in react-native-permissions v5, so request(undefined) crashed native code.
       await requestNotifications()
+    } else {
+      await requestPermission(getMessaging())
     }
-
-    Notifications.registerRemoteNotifications()
-  }
-
-  cancelNotif() {
-    Notifications.cancelLocalNotification(this.lastId)
-  }
-
-  cancelAll() {
-    Notifications.ios.cancelAllLocalNotifications()
   }
 
   setBadgeCount(count: number) {
-    Notifications.ios.setBadgeCount(count)
+    if (Platform.OS === MobileOS.IOS) {
+      notifee.setBadgeCount(count)
+    }
   }
 
   async getToken() {
-    // Wait until the device token and OS are persisted to async storage
-    // isRegistering modified as global
-    // eslint-disable-next-line no-unmodified-loop-condition
-    while (isRegistering) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+    try {
+      const deviceToken = await this.fetchDeviceToken()
+      if (deviceToken) {
+        return await this.persistToken(deviceToken)
+      }
+    } catch (e) {
+      console.error('Failed to fetch push token', e)
     }
     const token = await AsyncStorage.getItem(DEVICE_TOKEN)
     if (token) {

@@ -37,6 +37,11 @@ target 'AudiusReactNative' do
 
   pod 'nSure'
 
+  # Firebase's Swift pods import these, and pods link statically here, so they
+  # need module maps.
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
+
   config = use_native_modules!
 
   use_react_native!(
