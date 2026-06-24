@@ -1,10 +1,11 @@
 import { getCurrentAccountQueryKey } from '@audius/common/api'
 import { MobileOS } from '@audius/common/models'
 import type { AccountState } from '@audius/common/store'
+import notifee from '@notifee/react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import messaging from '@react-native-firebase/messaging'
+import type { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
 import { Platform } from 'react-native'
-import { Notifications } from 'react-native-notifications'
-import type { Registered, Notification } from 'react-native-notifications'
 import { requestNotifications } from 'react-native-permissions'
 
 import { track, make } from 'app/services/analytics'
@@ -16,13 +17,13 @@ import { EventNames } from 'app/types/analytics'
 import { DEVICE_TOKEN } from './constants/storage-keys'
 
 /**
- * On Android, FCM delivers all `data` payload values as strings.
- * This means numeric IDs like `initiator` and `entityId` arrive as "123"
- * instead of 123, and nested objects/arrays arrive as stringified JSON.
- * This function restores the original types so notification handlers
- * can navigate correctly.
+ * Firebase Cloud Messaging delivers every `data` payload value as a string on
+ * both platforms. This means numeric IDs like `initiator` and `entityId`
+ * arrive as "123" instead of 123, and nested objects/arrays arrive as
+ * stringified JSON. This function restores the original types so notification
+ * handlers can navigate correctly.
  */
-function parseAndroidNotificationData(data: Record<string, any>): any {
+function parseNotificationData(data: Record<string, any>): any {
   const parsed: Record<string, any> = {}
   for (const [key, value] of Object.entries(data)) {
     if (typeof value !== 'string') {
@@ -51,14 +52,20 @@ function parseAndroidNotificationData(data: Record<string, any>): any {
   return parsed
 }
 
-function extractNotificationCampaignIdFromPayload(
-  payload: Notification['payload']
+function extractNotificationCampaignId(
+  data: Record<string, any> | undefined
 ): string | undefined {
-  const target = payload?.data?.data ?? payload?.data ?? payload ?? undefined
-  if (!target || typeof target !== 'object') return undefined
-  const o = target as Record<string, unknown>
-  const v = o.notification_campaign_id ?? o.notificationCampaignId
-  return typeof v === 'string' && v.length > 0 ? v : undefined
+  if (!data || typeof data !== 'object') return undefined
+  // The navigation payload may live at the top level of `data` or nested under
+  // a `data` key, so check both.
+  const candidates = [data, (data as Record<string, unknown>).data].filter(
+    (d) => d && typeof d === 'object'
+  ) as Record<string, unknown>[]
+  for (const o of candidates) {
+    const v = o.notification_campaign_id ?? o.notificationCampaignId
+    if (typeof v === 'string' && v.length > 0) return v
+  }
+  return undefined
 }
 
 type Token = {
@@ -87,33 +94,36 @@ async function reportNotificationCampaignPushOpen(
   })
 }
 
-// Set to true while the push notification service is registering with the os
-let isRegistering = false
-
 // Singleton class
 class PushNotifications {
   lastId: number
   token: Token | null
   navigation: NotificationNavigation | null
+  private unsubscribeOpened: (() => void) | null = null
+  private unsubscribeTokenRefresh: (() => void) | null = null
 
-  // onNotification is a function passed in that is to be called when a
-  // notification is to be emitted.
   constructor() {
-    this.configure()
     this.lastId = 0
     this.token = null
     this.navigation = null
+    this.configure()
   }
 
   setNavigation = (navigation: NotificationNavigation) => {
     this.navigation = navigation
   }
 
-  onNotification = (notification: Notification) => {
-    console.info(`Received notification ${JSON.stringify(notification)}`)
-    const { title, body, payload } = notification
-    const notificationCampaignId =
-      extractNotificationCampaignIdFromPayload(payload)
+  // Called when the user taps a remote push notification (firebase RemoteMessage)
+  onNotificationOpened = (
+    remoteMessage: FirebaseMessagingTypes.RemoteMessage
+  ) => {
+    console.info(`Received notification ${JSON.stringify(remoteMessage)}`)
+    const title = remoteMessage.notification?.title
+    const body = remoteMessage.notification?.body
+    // FCM delivers all `data` values as strings on both platforms, breaking
+    // numeric ID fields and nested objects. Parse them back to native types.
+    const data = parseNotificationData(remoteMessage.data ?? {})
+    const notificationCampaignId = extractNotificationCampaignId(data)
     track(
       make({
         eventName: EventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION,
@@ -127,39 +137,52 @@ class PushNotifications {
         reportNotificationCampaignPushOpen(notificationCampaignId)
       ).catch(() => {})
     }
-    let data = payload?.data?.data ?? payload?.data ?? payload
-    // On Android, FCM delivers all data values as strings, breaking
-    // numeric ID fields and nested objects. Parse them back.
-    if (Platform.OS === MobileOS.ANDROID && data && typeof data === 'object') {
-      data = parseAndroidNotificationData(data)
-    }
-    this.navigation?.navigate(data)
+    // The navigation payload may be nested under a `data` key
+    const navigationData = data?.data ?? data
+    this.navigation?.navigate(navigationData)
   }
 
   // Method used to open the push notification that the user pressed while the app was closed
   openInitialNotification = async () => {
-    const notification = await Notifications.getInitialNotification()
-    if (notification) {
-      this.onNotification(notification)
+    const remoteMessage = await messaging().getInitialNotification()
+    if (remoteMessage) {
+      this.onNotificationOpened(remoteMessage)
     }
   }
 
-  async onRegister(event: Registered) {
-    const token = { token: event.deviceToken, os: Platform.OS }
+  private persistToken = async (fcmToken: string) => {
+    const token = { token: fcmToken, os: Platform.OS }
     this.token = token
     await AsyncStorage.setItem(DEVICE_TOKEN, JSON.stringify(token))
-    isRegistering = false
+    return token
   }
 
-  deregister() {
-    AsyncStorage.removeItem(DEVICE_TOKEN)
+  async deregister() {
+    await AsyncStorage.removeItem(DEVICE_TOKEN)
+    this.token = null
+    try {
+      await messaging().deleteToken()
+    } catch (e) {
+      console.error('Failed to delete FCM token', e)
+    }
   }
 
   async configure() {
-    Notifications.events().registerRemoteNotificationsRegistered(
-      this.onRegister
+    // Handle notification taps that bring the app from background to foreground
+    this.unsubscribeOpened = messaging().onNotificationOpenedApp(
+      (remoteMessage) => {
+        if (remoteMessage) {
+          this.onNotificationOpened(remoteMessage)
+        }
+      }
     )
-    Notifications.events().registerNotificationOpened(this.onNotification)
+
+    // Keep the persisted token in sync when FCM rotates it
+    this.unsubscribeTokenRefresh = messaging().onTokenRefresh((fcmToken) => {
+      this.persistToken(fcmToken).catch((e) =>
+        console.error('Failed to persist refreshed FCM token', e)
+      )
+    })
 
     try {
       const token = await AsyncStorage.getItem(DEVICE_TOKEN)
@@ -174,45 +197,48 @@ class PushNotifications {
   }
 
   async hasPermission(): Promise<boolean> {
-    return await Notifications.isRegisteredForRemoteNotifications()
+    const status = await messaging().hasPermission()
+    return (
+      status === messaging.AuthorizationStatus.AUTHORIZED ||
+      status === messaging.AuthorizationStatus.PROVISIONAL
+    )
   }
 
   async requestPermission() {
-    isRegistering = true
-
     if (Platform.OS === MobileOS.ANDROID) {
       // Android 13+ needs POST_NOTIFICATIONS. Use requestNotifications — PERMISSIONS.ANDROID
       // does not expose POST_NOTIFICATIONS in react-native-permissions v5, so request(undefined) crashed native code.
       await requestNotifications()
     }
 
-    Notifications.registerRemoteNotifications()
+    await messaging().requestPermission()
   }
 
-  cancelNotif() {
-    Notifications.cancelLocalNotification(this.lastId)
+  async cancelNotif() {
+    await notifee.cancelNotification(String(this.lastId))
   }
 
-  cancelAll() {
-    Notifications.ios.cancelAllLocalNotifications()
+  async cancelAll() {
+    await notifee.cancelAllNotifications()
   }
 
   setBadgeCount(count: number) {
-    Notifications.ios.setBadgeCount(count)
+    notifee.setBadgeCount(count)
   }
 
   async getToken() {
-    // Wait until the device token and OS are persisted to async storage
-    // isRegistering modified as global
-    // eslint-disable-next-line no-unmodified-loop-condition
-    while (isRegistering) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+    try {
+      const fcmToken = await messaging().getToken()
+      return await this.persistToken(fcmToken)
+    } catch (e) {
+      console.error('Failed to fetch FCM token', e)
+      // Fall back to a previously persisted token, if any
+      const token = await AsyncStorage.getItem(DEVICE_TOKEN)
+      if (token) {
+        return JSON.parse(token)
+      }
+      return {}
     }
-    const token = await AsyncStorage.getItem(DEVICE_TOKEN)
-    if (token) {
-      return JSON.parse(token)
-    }
-    return {}
   }
 }
 
