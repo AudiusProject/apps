@@ -88,7 +88,6 @@ import { Pages } from './types'
 const { FEED_PAGE, SIGN_IN_PAGE, SIGN_UP_PAGE, SIGN_UP_PASSWORD_PAGE } = route
 const { requestPushNotificationPermissions } = settingsPageActions
 const { saveCollection } = collectionsSocialActions
-const { toast } = toastActions
 
 /**
  * Sends a recovery info email to the currently logged-in user.
@@ -119,7 +118,6 @@ const PASSWORD_RESET_REQUIRED_KEY = 'password-reset-required'
 const messages = {
   incompleteAccount:
     'Oops, it looks like your account was never fully completed!',
-  emailCheckFailed: 'Something has gone wrong, please try again later.',
   deactivatedAccount:
     'Your account has been deactivated. Please contact support.'
 }
@@ -285,45 +283,6 @@ function* validateHandle(
     console.error('Sign Up: validateHandle failed', err)
     yield* put(signOnActions.validateHandleFailed(err.message))
     if (onValidate) onValidate(true)
-  }
-}
-
-function* checkEmail(action: ReturnType<typeof signOnActions.checkEmail>) {
-  const identityService = yield* getContext('identityService')
-  if (!isValidEmailString(action.email)) {
-    yield* put(signOnActions.validateEmailFailed('characters'))
-    return
-  }
-
-  try {
-    const inUse = yield* call(
-      [identityService, identityService.checkIfEmailRegistered],
-      action.email
-    )
-    if (inUse) {
-      yield* put(signOnActions.goToPage(Pages.SIGNIN))
-      // let mobile client know that email is in use
-      yield* put(signOnActions.validateEmailSucceeded(false))
-      if (action.onUnavailable) {
-        yield* call(action.onUnavailable)
-      }
-    } else {
-      const trackEvent = make(Name.CREATE_ACCOUNT_COMPLETE_EMAIL, {
-        emailAddress: action.email
-      })
-      yield* put(trackEvent)
-      yield* put(signOnActions.validateEmailSucceeded(true))
-      yield* put(signOnActions.goToPage(Pages.PASSWORD))
-      if (action.onAvailable) {
-        yield* call(action.onAvailable)
-      }
-    }
-  } catch (error) {
-    console.error('Sign Up: email check failed', error as Error)
-    yield* put(toast({ content: messages.emailCheckFailed }))
-    if (action.onError) {
-      yield* call(action.onError)
-    }
   }
 }
 
@@ -1019,10 +978,6 @@ function* watchFetchReferrer() {
   yield* takeLatest(signOnActions.FETCH_REFERRER, fetchReferrer)
 }
 
-function* watchCheckEmail() {
-  yield* takeLatest(signOnActions.CHECK_EMAIL, checkEmail)
-}
-
 function* watchValidateEmail() {
   yield* takeLatest(signOnActions.VALIDATE_EMAIL, validateEmail)
 }
@@ -1084,7 +1039,6 @@ export default function sagas() {
   const sagas = [
     watchCompleteFollowArtists,
     watchFetchReferrer,
-    watchCheckEmail,
     watchValidateEmail,
     watchValidateHandle,
     watchSignUp,

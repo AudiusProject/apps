@@ -45,7 +45,6 @@ export const QUERY_KEYS = {
   sales: 'sales',
   salesCount: 'salesCount',
   mutualFollowers: 'mutualFollowers',
-  emailInUse: 'emailInUse',
   handleInUse: 'handleInUse',
   handleReservedStatus: 'handleReservedStatus',
   search: 'search',

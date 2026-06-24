@@ -207,19 +207,6 @@ export class IdentityService {
   }
 
   /**
-   * Check if an email address has been previously registered.
-   */
-  async checkIfEmailRegistered(email: string) {
-    return await this._makeRequest<{ exists: boolean; isGuest: boolean }>({
-      url: '/users/check',
-      method: 'get',
-      params: {
-        email
-      }
-    })
-  }
-
-  /**
    * Get the user's email used for notifications and display.
    */
   async getUserEmail() {

@@ -31,7 +31,6 @@ export class Account extends Base {
     this.confirmCredentials = this.confirmCredentials.bind(this)
     this.changeCredentials = this.changeCredentials.bind(this)
     this.resetPassword = this.resetPassword.bind(this)
-    this.checkIfEmailRegistered = this.checkIfEmailRegistered.bind(this)
     this.associateTwitterUser = this.associateTwitterUser.bind(this)
     this.associateInstagramUser = this.associateInstagramUser.bind(this)
     this.associateTikTokUser = this.associateTikTokUser.bind(this)
@@ -279,14 +278,6 @@ export class Account extends Base {
       }
     }
     return await this.hedgehog.confirmCredentials(args)
-  }
-
-  /**
-   * Check if an email address has been previously registered.
-   */
-  async checkIfEmailRegistered(email: string) {
-    this.REQUIRES(Services.IDENTITY_SERVICE)
-    return await this.identityService.checkIfEmailRegistered(email)
   }
 
   /**

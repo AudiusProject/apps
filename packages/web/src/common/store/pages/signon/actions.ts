@@ -11,7 +11,6 @@ export const SET_VALUE_FIELD = 'SIGN_ON/SET_VALUE_FIELD'
 export const RESET_SIGN_ON = 'SIGN_ON/RESET_SIGN_ON'
 
 export const VALIDATE_EMAIL = 'SIGN_ON/VALIDATE_EMAIL'
-export const VALIDATE_EMAIL_IN_USE = 'SIGN_ON/VALIDATE_EMAIL_IN_USE'
 export const VALIDATE_EMAIL_SUCCEEDED = 'SIGN_ON/VALIDATE_EMAIL_SUCCEEDED'
 export const VALIDATE_EMAIL_FAILED = 'SIGN_ON/VALIDATE_EMAIL_FAILED'
 
@@ -22,8 +21,6 @@ export const VALIDATE_HANDLE_FAILED = 'SIGN_ON/VALIDATE_HANDLE_FAILED'
 export const HIDE_PREVIEW_HINT = 'SIGN_ON/HIDE_PREVIEW_HINT'
 export const FOLLOW_ARTISTS = 'SIGN_ON/FOLLOW_ARTISTS'
 export const SET_ACCOUNT_READY = 'SIGN_ON/SET_ACCOUNT_READY'
-
-export const CHECK_EMAIL = 'SIGN_ON/CHECK_EMAIL'
 
 export const SIGN_IN = 'SIGN_ON/SIGN_IN'
 export const SIGN_IN_SUCCEEDED = 'SIGN_ON/SIGN_IN_SUCCEEDED'
@@ -92,25 +89,12 @@ export function resetSignOn() {
   return { type: RESET_SIGN_ON }
 }
 
-export function checkEmail(
-  email: string,
-  onAvailable?: () => void,
-  onUnavailable?: () => void,
-  onError?: () => void
-) {
-  return { type: CHECK_EMAIL, email, onAvailable, onUnavailable, onError }
-}
-
 /**
  * Requests the backend to check if email is valid
  * @param email the email to check
  */
 export function validateEmail(email: string) {
   return { type: VALIDATE_EMAIL, email }
-}
-
-export function validateEmailInUse(email: string) {
-  return { type: VALIDATE_EMAIL_IN_USE, email }
 }
 
 export function validateEmailSucceeded(available?: boolean) {

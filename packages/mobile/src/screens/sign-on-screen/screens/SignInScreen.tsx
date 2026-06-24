@@ -1,19 +1,13 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
 import { signInPageMessages } from '@audius/common/messages'
-import {
-  signInSchema,
-  signInErrorMessages,
-  emailSchemaMessages
-} from '@audius/common/schemas'
+import { signInSchema, signInErrorMessages } from '@audius/common/schemas'
 import {
   getEmailField,
   getPasswordField,
   getRequiresOtp,
   getStatus
 } from '@audius/web/src/common/store/pages/signon/selectors'
-import { useQueryClient } from '@tanstack/react-query'
 import { setValueField, signIn } from 'common/store/pages/signon/actions'
 import { Formik, useField } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
@@ -25,7 +19,6 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 
 import { EmailField } from '../components/EmailField'
-import { GuestEmailHint } from '../components/GuestEmailHint'
 import { Heading } from '../components/layout'
 import type { SignOnScreenParamList } from '../types'
 import { useTrackScreen } from '../utils/useTrackScreen'
@@ -43,13 +36,11 @@ export const SignInScreen = () => {
   const { onOpen } = useDrawer('ForgotPassword')
   const requiresOtp = useSelector(getRequiresOtp)
   const navigation = useNavigation<SignOnScreenParamList>()
-  const queryClient = useQueryClient()
   useTrackScreen('SignIn')
 
-  const queryContext = useQueryContext()
   const SignInSchema = useMemo(
-    () => toFormikValidationSchema(signInSchema(queryContext, queryClient)),
-    [queryContext, queryClient]
+    () => toFormikValidationSchema(signInSchema()),
+    []
   )
 
   useEffect(() => {
@@ -83,21 +74,13 @@ export const SignInScreen = () => {
       validateOnChange={false}
       onSubmit={handleSubmit}
     >
-      {({ handleSubmit, errors }) => {
-        const hideEmailError =
-          errors.email === emailSchemaMessages.guestAccountExists
+      {({ handleSubmit }) => {
         return (
           <>
             <Heading heading={signInPageMessages.title} centered />
             <Flex gap='l'>
-              <EmailField
-                name='email'
-                label={signInPageMessages.emailLabel}
-                error={hideEmailError ? false : undefined}
-                helperText={hideEmailError ? false : undefined}
-              />
+              <EmailField name='email' label={signInPageMessages.emailLabel} />
               <SignInPasswordField />
-              <GuestEmailHint />
             </Flex>
             <Flex gap='l'>
               <Button

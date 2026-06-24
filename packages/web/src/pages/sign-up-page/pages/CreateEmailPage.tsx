@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
 import { createEmailPageMessages } from '@audius/common/messages'
 import { emailSchema } from '@audius/common/schemas'
 import { route } from '@audius/common/utils'
@@ -12,7 +11,6 @@ import {
   Text,
   TextLink
 } from '@audius/harmony'
-import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router'
@@ -49,13 +47,8 @@ export const CreateEmailPage = () => {
   const dispatch = useDispatch()
   const navigate = useNavigateToPage()
   const existingEmailValue = useSelector(getEmailField)
-  const queryContext = useQueryContext()
-  const queryClient = useQueryClient()
 
-  const EmailSchema = useMemo(
-    () => toFormikValidationSchema(emailSchema(queryContext, queryClient)),
-    [queryContext, queryClient]
-  )
+  const EmailSchema = useMemo(() => toFormikValidationSchema(emailSchema()), [])
 
   const initialValues = {
     email: existingEmailValue.value ?? ''

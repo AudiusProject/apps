@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useQueryContext } from '@audius/common/api'
 import { signInPageMessages } from '@audius/common/messages'
 import { signInSchema, signInErrorMessages } from '@audius/common/schemas'
 import { route } from '@audius/common/utils'
@@ -12,7 +11,6 @@ import {
   TextLink,
   Text
 } from '@audius/harmony'
-import { useQueryClient } from '@tanstack/react-query'
 import { Form, Formik, useField } from 'formik'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
@@ -28,7 +26,6 @@ import {
 import { HarmonyPasswordField } from 'components/form-fields/HarmonyPasswordField'
 import { useMedia } from 'hooks/useMedia'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
-import { GuestEmailHint } from 'pages/sign-on-page/GuestEmailHint'
 import { EmailField } from 'pages/sign-up-page/components/EmailField'
 import { ForgotPasswordModal } from 'pages/sign-up-page/components/ForgotPasswordModal'
 import { Heading } from 'pages/sign-up-page/components/layout'
@@ -61,11 +58,9 @@ export const SignInPage = () => {
   const { value: existingPassword } = useSelector(getPasswordField)
   const requiresOtp = useSelector(getRequiresOtp)
 
-  const queryContext = useQueryContext()
-  const queryClient = useQueryClient()
   const SignInSchema = useMemo(
-    () => toFormikValidationSchema(signInSchema(queryContext, queryClient)),
-    [queryContext, queryClient]
+    () => toFormikValidationSchema(signInSchema()),
+    []
   )
 
   useEffect(() => {
@@ -121,7 +116,6 @@ export const SignInPage = () => {
             <Flex direction='column' gap='l' w='100%'>
               <EmailField />
               <SignInPasswordField />
-              <GuestEmailHint />
             </Flex>
             <Flex direction='column' gap='l' w='100%' alignItems='center'>
               <Button
@@ -170,7 +164,6 @@ export const SignInPage = () => {
               >
                 {messages.forgotPassword}
               </TextLink>
-              <GuestEmailHint />
             </Flex>
             <Flex direction='column' gap='l' w='100%' alignItems='center'>
               <Text variant='body' size='l' color='subdued'>

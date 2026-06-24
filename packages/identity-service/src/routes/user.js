@@ -124,33 +124,6 @@ module.exports = function (app) {
   )
 
   /**
-   * Check if a email address is taken. email is passed in via query param
-   */
-  app.get(
-    '/users/check',
-    handleResponse(async (req, res, next) => {
-      let email = req.query.email
-      if (email) {
-        email = email.toLowerCase()
-        const existingUser = await models.User.findOne({
-          where: {
-            email
-          }
-        })
-        if (existingUser) {
-          return successResponse({
-            exists: true,
-            isGuest: existingUser.isGuest
-          })
-        } else {
-          return successResponse({ exists: false })
-        }
-      } else
-        return errorResponseBadRequest('Please pass in a valid email address')
-    })
-  )
-
-  /**
    * Update User Timezone / IP
    */
   app.post(

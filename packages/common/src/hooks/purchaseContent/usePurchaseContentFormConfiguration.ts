@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { USDC, UsdcWei } from '@audius/fixed-decimal'
-import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
 
 import { useCurrentAccount, useCurrentAccountUser, useUSDCBalance } from '~/api'
-import { useQueryContext } from '~/api/tan-query/utils/QueryContext'
 import { UserCollectionMetadata } from '~/models'
 import { PurchaseMethod, PurchaseVendor } from '~/models/PurchaseContent'
 import { UserTrackMetadata } from '~/models/Track'
@@ -53,9 +51,6 @@ export const usePurchaseContentFormConfiguration = ({
   presetValues: PayExtraAmountPresetValues
   purchaseVendor?: PurchaseVendor
 }) => {
-  const queryClient = useQueryClient()
-  const queryContext = useQueryContext()
-
   const dispatch = useDispatch()
   const isAlbum = isContentCollection(metadata)
   const isTrack = isContentTrack(metadata)
@@ -99,14 +94,8 @@ export const usePurchaseContentFormConfiguration = ({
       : undefined
 
   const validationSchema = useMemo(
-    () =>
-      createPurchaseContentSchema(
-        queryContext,
-        queryClient,
-        page,
-        guestEmail ?? undefined
-      ),
-    [queryContext, queryClient, guestEmail, page]
+    () => createPurchaseContentSchema(page),
+    [page]
   )
   type PurchaseContentValues = z.input<typeof validationSchema>
 

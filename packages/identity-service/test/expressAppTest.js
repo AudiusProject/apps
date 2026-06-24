@@ -49,4 +49,8 @@ describe('test /health_check and /balance_check', function () {
     await request(app).post('/wormhole_relay').send({}).expect(404)
     await request(app).get('/sol_balance_check').expect(404)
   })
+
+  it('does not expose email registration checks', async function () {
+    await request(app).get('/users/check?email=test@example.com').expect(404)
+  })
 })
