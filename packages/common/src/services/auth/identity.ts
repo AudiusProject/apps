@@ -30,6 +30,11 @@ type ResendEmailVerificationResponse = {
   alreadyVerified?: boolean
 }
 
+export type UserEmailResponse = {
+  email: string | undefined | null
+  isEmailVerified: boolean
+}
+
 enum TransactionMetadataType {
   PURCHASE_SOL_AUDIO_SWAP = 'PURCHASE_SOL_AUDIO_SWAP'
 }
@@ -220,16 +225,24 @@ export class IdentityService {
   }
 
   /**
-   * Get the user's email used for notifications and display.
+   * Get the user's email and verification status used for notifications and
+   * display.
    */
-  async getUserEmail() {
+  async getUserEmailAndStatus() {
     const headers = await this.getAuthHeaders()
 
-    const res = await this._makeRequest<{ email: string | undefined | null }>({
+    return await this._makeRequest<UserEmailResponse>({
       url: '/user/email',
       method: 'get',
       headers
     })
+  }
+
+  /**
+   * Get the user's email used for notifications and display.
+   */
+  async getUserEmail() {
+    const res = await this.getUserEmailAndStatus()
 
     if (!res.email) {
       throw new Error('No email found')

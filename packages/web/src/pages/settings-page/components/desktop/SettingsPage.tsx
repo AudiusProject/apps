@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useCurrentAccountUser, useQueryContext } from '@audius/common/api'
+import {
+  useCurrentAccountUser,
+  useCurrentUserEmail,
+  useQueryContext
+} from '@audius/common/api'
 import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import {
@@ -39,6 +43,7 @@ import {
   IconReceive,
   IconSettings,
   IconSignOut,
+  IconValidationCheck,
   IconVerified,
   Modal,
   ModalContent,
@@ -158,6 +163,8 @@ export const SettingsPage = () => {
   const emailFrequency = useSelector(getEmailFrequency)
   const notificationSettings = useSelector(getBrowserNotificationSettings)
   const { tier } = useTierAndVerifiedForUser(userId)
+  const { data: emailData } = useCurrentUserEmail()
+  const isEmailVerified = emailData?.isEmailVerified
   const showMatrix =
     tier === 'gold' ||
     tier === 'platinum' ||
@@ -649,22 +656,39 @@ export const SettingsPage = () => {
             title={settingsMessages.emailVerificationCardTitle}
             description={settingsMessages.emailVerificationCardDescription}
           >
-            <Toast
-              text={emailVerificationToastText}
-              open={isEmailVerificationToastVisible}
-              className={styles.cardToast}
-              anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
-              transformOrigin={{ horizontal: 'center', vertical: 'top' }}
-            >
-              <Button
-                onClick={showEmailVerificationToast}
-                variant='secondary'
-                fullWidth
-                isLoading={isEmailVerificationLoading}
-              >
-                {settingsMessages.emailVerificationButtonText}
-              </Button>
-            </Toast>
+            <Flex direction='column' gap='s'>
+              <Flex alignItems='center' gap='xs'>
+                {isEmailVerified ? (
+                  <IconValidationCheck size='s' />
+                ) : (
+                  <IconError size='s' color='subdued' />
+                )}
+                <Text variant='body' size='s' color='subdued'>
+                  {isEmailVerified
+                    ? settingsMessages.emailVerifiedStatus
+                    : settingsMessages.emailNotVerifiedStatus}
+                </Text>
+              </Flex>
+              {!isEmailVerified ? (
+                <Toast
+                  text={emailVerificationToastText}
+                  open={isEmailVerificationToastVisible}
+                  className={styles.cardToast}
+                  anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+                  transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+                >
+                  <Button
+                    onClick={showEmailVerificationToast}
+                    variant='secondary'
+                    fullWidth
+                    isLoading={isEmailVerificationLoading}
+                    disabled={isEmailVerificationLoading}
+                  >
+                    {settingsMessages.emailVerificationButtonText}
+                  </Button>
+                </Toast>
+              ) : null}
+            </Flex>
           </SettingsCard>
         ) : null}
         {!isManagedAccount ? (

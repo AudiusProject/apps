@@ -145,6 +145,7 @@ export * from './tan-query/users/useOtherChatUsers'
 // Account
 export * from './tan-query/users/account/useResetPassword'
 export * from './tan-query/users/account/useResendRecoveryEmail'
+export * from './tan-query/users/account/useCurrentUserEmail'
 
 // Playlist updates
 export * from './tan-query/playlist-updates/usePlaylistUpdates'

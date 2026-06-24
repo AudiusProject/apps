@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 
 import {
   useCurrentAccountUser,
+  useCurrentUserEmail,
   useQueryContext,
   useResendRecoveryEmail
 } from '@audius/common/api'
@@ -52,6 +53,8 @@ const messages = {
   emailVerificationAlreadyVerified: 'Your email is already verified.',
   emailVerificationNotSent:
     'Unable to send verification email. Please try again!',
+  emailVerifiedStatus: 'Email verified',
+  emailNotVerifiedStatus: 'Email not verified',
   verifyTitle: 'Verification',
   verifyDescription:
     'Verify your Audius profile by completing identity verification.',
@@ -90,6 +93,8 @@ export const AccountSettingsScreen = () => {
   const { identityService } = useQueryContext()
   const [isSendingVerificationEmail, setIsSendingVerificationEmail] =
     useState(false)
+  const { data: emailData } = useCurrentUserEmail()
+  const isEmailVerified = emailData?.isEmailVerified
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => pick(user, ['user_id', 'handle', 'name'])
   })
@@ -191,6 +196,10 @@ export const AccountSettingsScreen = () => {
             buttonTitle={messages.emailVerificationButtonTitle}
             onPress={handlePressEmailVerification}
             disabled={isSendingVerificationEmail}
+            isVerified={isEmailVerified}
+            verifiedText={messages.emailVerifiedStatus}
+            notVerifiedText={messages.emailNotVerifiedStatus}
+            hideButton={isEmailVerified}
           />
           <AccountSettingsItem
             title={messages.verifyTitle}

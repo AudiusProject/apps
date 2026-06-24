@@ -198,7 +198,8 @@ module.exports = function (app) {
       })
 
       return successResponse({
-        email: userData.email
+        email: userData.email,
+        isEmailVerified: userData.isEmailVerified
       })
     })
   )

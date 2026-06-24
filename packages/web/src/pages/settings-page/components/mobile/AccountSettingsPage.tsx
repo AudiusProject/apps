@@ -1,6 +1,10 @@
 import { useState, useContext, useCallback } from 'react'
 
-import { useQueryContext, useCurrentAccountUser } from '@audius/common/api'
+import {
+  useQueryContext,
+  useCurrentAccountUser,
+  useCurrentUserEmail
+} from '@audius/common/api'
 import { Name, SquareSizes } from '@audius/common/models'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { route } from '@audius/common/utils'
@@ -8,8 +12,10 @@ import {
   Button,
   IconRecoveryEmail,
   IconEmailAddress,
+  IconError,
   IconKey,
   IconSignOut,
+  IconValidationCheck,
   IconVerified,
   Flex,
   Text,
@@ -53,6 +59,8 @@ const messages = {
   emailVerificationAlreadyVerified: 'Your email is already verified.',
   emailVerificationNotSent:
     'Unable to send verification email. Please try again!',
+  emailVerifiedStatus: 'Email verified',
+  emailNotVerifiedStatus: 'Email not verified',
   verifyTitle: 'Verify Your Account',
   verifyDescription:
     'Verify your Audius profile by completing identity verification',
@@ -83,6 +91,12 @@ type AccountSettingsItemProps = {
   buttonTitle: string
   disabled?: boolean
   onClick: () => void
+  /** Optional verification status shown above the action button. */
+  isVerified?: boolean
+  verifiedText?: string
+  notVerifiedText?: string
+  /** Hide the action button (e.g. once the email is verified). */
+  hideButton?: boolean
 }
 
 const AccountSettingsItem = ({
@@ -91,7 +105,11 @@ const AccountSettingsItem = ({
   icon: Icon,
   buttonTitle,
   disabled,
-  onClick
+  onClick,
+  isVerified,
+  verifiedText,
+  notVerifiedText,
+  hideButton
 }: AccountSettingsItemProps) => {
   const { color } = useTheme()
   return (
@@ -123,15 +141,29 @@ const AccountSettingsItem = ({
       >
         {description}
       </Text>
-      <Button
-        variant='secondary'
-        size='small'
-        fullWidth
-        onClick={onClick}
-        disabled={disabled}
-      >
-        {buttonTitle}
-      </Button>
+      {verifiedText && notVerifiedText ? (
+        <Flex alignItems='center' gap='xs'>
+          {isVerified ? (
+            <IconValidationCheck size='s' />
+          ) : (
+            <IconError size='s' color='subdued' />
+          )}
+          <Text variant='body' size='xs' color='subdued'>
+            {isVerified ? verifiedText : notVerifiedText}
+          </Text>
+        </Flex>
+      ) : null}
+      {hideButton ? null : (
+        <Button
+          variant='secondary'
+          size='small'
+          fullWidth
+          onClick={onClick}
+          disabled={disabled}
+        >
+          {buttonTitle}
+        </Button>
+      )}
     </Flex>
   )
 }
@@ -147,6 +179,8 @@ const AccountSettingsPage = () => {
     })
   })
   const { userId, handle, name } = accountData ?? {}
+  const { data: emailData } = useCurrentUserEmail()
+  const isEmailVerified = emailData?.isEmailVerified
   const [showModalSignOut, setShowModalSignOut] = useState(false)
   const [isSendingVerificationEmail, setIsSendingVerificationEmail] =
     useState(false)
@@ -239,6 +273,10 @@ const AccountSettingsPage = () => {
           buttonTitle={messages.emailVerificationButtonTitle}
           onClick={onClickResendVerificationEmail}
           disabled={isSendingVerificationEmail}
+          isVerified={isEmailVerified}
+          verifiedText={messages.emailVerifiedStatus}
+          notVerifiedText={messages.emailNotVerifiedStatus}
+          hideButton={isEmailVerified}
         />
         <AccountSettingsItem
           icon={IconVerified}
