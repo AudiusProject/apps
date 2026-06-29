@@ -1,0 +1,143 @@
+---
+title: Artist Profile Updates
+description: Updating Audius artist profiles with DDEX MEAD
+---
+
+
+Audius supports basic artist profile updates from DDEX MEAD messages. Distributors can send MEAD to
+update an artist's Audius profile display name, bio, profile picture, and cover photo without
+redelivering a release.
+
+MEAD profile updates are processed separately from ERN release deliveries. They do not create,
+update, or takedown tracks or albums.
+
+## Requirements
+
+- The distributor must already be configured as an Audius DDEX source.
+- The artist must have authorized the distributor's Audius app before the profile update can be
+  published.
+- The MEAD message must identify the artist by one of:
+  - `ProprietaryId` with `Namespace="AudiusUserId"`
+  - `ProprietaryId` with `Namespace="AudiusHandle"`
+  - a `PartyName` or official `Pseudonym` matching an authorized Audius user for the source app
+- Profile and cover images must be delivered as package-relative files. Remote image URLs are not
+  fetched by the DDEX processor.
+- Bio text must be 256 characters or fewer.
+
+If the processor cannot match the MEAD party to an authorized Audius user, the update is stored but
+blocked until the artist grants access to the distributor app.
+
+## Supported Fields
+
+| Audius profile field | MEAD source |
+| --- | --- |
+| Display name | `DisplayName`, `DisplayArtistName`, official `Pseudonym/Name`, or `PartyName` |
+| Bio | `Biography/Text` |
+| Profile picture | `Image` with `ImageType` such as `ProfilePicture`, `ArtistPhoto`, `Avatar`, or `Headshot` |
+| Cover photo | `Image` with `ImageType` such as `ProfileBanner`, `CoverPhoto`, `Header`, or `Background` |
+
+The image `File/URI` should be relative to the XML file or package root, matching the delivery style
+used for ERN audio and artwork assets.
+
+## Standalone MEAD Message
+
+This example targets an artist by Audius user ID and updates the display name, bio, and profile
+picture.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<mead:MeadMessage xmlns:mead="http://ddex.net/xml/mead/10">
+  <MessageHeader>
+    <MessageId>artist-profile-update-001</MessageId>
+    <MessageCreatedDateTime>2026-06-22T13:00:00Z</MessageCreatedDateTime>
+  </MessageHeader>
+  <PartyInformationList>
+    <PartyInformation>
+      <PartySummary>
+        <PartyReference>P-ARTIST-1</PartyReference>
+        <ProprietaryId Namespace="AudiusUserId">
+          <Identifier>artist-user-1</Identifier>
+        </ProprietaryId>
+        <PartyName>
+          <FullName>
+            <Name>Artist One</Name>
+          </FullName>
+        </PartyName>
+      </PartySummary>
+      <Pseudonym>
+        <Name>
+          <FullName>
+            <Name>Artist One Display</Name>
+          </FullName>
+        </Name>
+        <IsOfficial>true</IsOfficial>
+      </Pseudonym>
+      <Biography>
+        <Text>Short artist bio from a standalone MEAD update.</Text>
+      </Biography>
+      <Image>
+        <ResourceReference>IMG-PROFILE</ResourceReference>
+        <File>
+          <URI>images/profile.jpg</URI>
+        </File>
+        <ImageType UserDefinedValue="ProfilePicture" />
+      </Image>
+    </PartyInformation>
+  </PartyInformationList>
+</mead:MeadMessage>
+```
+
+## Feed Entry Message
+
+This example uses a MEAD feed entry, targets the artist by authorized Audius handle, and includes
+both a profile picture and cover photo.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Feed xmlns="http://ddex.net/xml/mead/10">
+  <MessageHeader>
+    <MessageId>artist-profile-feed-001</MessageId>
+    <MessageCreatedDateTime>2026-06-22T14:00:00Z</MessageCreatedDateTime>
+  </MessageHeader>
+  <Entry>
+    <Party>
+      <PartyReference>P-ARTIST-2</PartyReference>
+      <ProprietaryId Namespace="AudiusHandle">
+        <Identifier>artisttwo</Identifier>
+      </ProprietaryId>
+      <PartyName>
+        <FullName>
+          <Name>Artist Two</Name>
+        </FullName>
+      </PartyName>
+    </Party>
+    <PartyInformation>
+      <DisplayName>Artist Two Deluxe</DisplayName>
+      <Biography>
+        <Text>Bio update sent as an entry in a larger MEAD feed.</Text>
+      </Biography>
+      <Image>
+        <File>
+          <URI>images/artist-two-profile.png</URI>
+        </File>
+        <ImageType UserDefinedValue="ArtistPhoto" />
+      </Image>
+      <Image>
+        <File>
+          <URI>images/artist-two-banner.jpg</URI>
+        </File>
+        <ImageType UserDefinedValue="ProfileBanner" />
+      </Image>
+    </PartyInformation>
+  </Entry>
+</Feed>
+```
+
+## Delivery Notes
+
+- Send MEAD XML through the same configured delivery bucket or ingestion path used for DDEX.
+- Use a fresh `MessageId` and `MessageCreatedDateTime` for each update so redeliveries are not
+  treated as stale.
+- Include profile image files alongside the MEAD XML. For example, if the XML references
+  `images/profile.jpg`, the delivered package should contain that file at `images/profile.jpg`.
+- Do not send `https://` image URLs. The processor intentionally rejects remote image fetches.
