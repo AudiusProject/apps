@@ -133,6 +133,10 @@ export default defineConfig({
               link: '/distributors/specification/metadata',
             },
             {
+              text: 'Artist Profile Updates',
+              link: '/distributors/specification/artist-profile-updates',
+            },
+            {
               text: 'Deal Types',
               items: [
                 {
