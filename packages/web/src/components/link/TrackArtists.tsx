@@ -24,7 +24,14 @@ export const TrackArtists = ({
   collaborators,
   ...userLinkProps
 }: TrackArtistsProps) => {
-  const extraArtists = collaborators ?? []
+  const seenUserIds = new Set<ID>([userId])
+  const extraArtists = (collaborators ?? []).filter((collaborator) => {
+    if (seenUserIds.has(collaborator.user_id)) {
+      return false
+    }
+    seenUserIds.add(collaborator.user_id)
+    return true
+  })
 
   if (extraArtists.length === 0) {
     return <UserLink userId={userId} {...userLinkProps} />
