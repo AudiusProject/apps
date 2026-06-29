@@ -20,6 +20,8 @@ update, or takedown tracks or albums.
   - `ProprietaryId` with `Namespace="AudiusUserId"`
   - `ProprietaryId` with `Namespace="AudiusHandle"`
   - a `PartyName` or official `Pseudonym` matching an authorized Audius user for the source app
+- `AudiusUserId` values must be Audius API/SDK hash IDs, such as `7eP5n`, not numeric database IDs
+  or handles.
 - Profile and cover images must be delivered as package-relative files. Remote image URLs are not
   fetched by the DDEX processor.
 - Bio text must be 256 characters or fewer.
@@ -56,7 +58,7 @@ picture.
       <PartySummary>
         <PartyReference>P-ARTIST-1</PartyReference>
         <ProprietaryId Namespace="AudiusUserId">
-          <Identifier>artist-user-1</Identifier>
+          <Identifier>7eP5n</Identifier>
         </ProprietaryId>
         <PartyName>
           <FullName>
