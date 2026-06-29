@@ -77,15 +77,34 @@ export const trackSegmentFromSDK = ({
 
 type TrackCollaboratorMetadata = Pick<
   TrackMetadata,
-  'collaborators' | 'pending_collaborators'
+  'owner_id' | 'collaborators' | 'pending_collaborators'
 >
+
+const getUniqueCollaborators = <T extends { user_id: number }>(
+  collaborators: T[],
+  ownerId?: number | null
+): T[] => {
+  const seenUserIds = new Set<number>()
+  if (ownerId) {
+    seenUserIds.add(ownerId)
+  }
+
+  return collaborators.filter((collaborator) => {
+    if (seenUserIds.has(collaborator.user_id)) {
+      return false
+    }
+    seenUserIds.add(collaborator.user_id)
+    return true
+  })
+}
 
 export const getTrackCollaboratorsForEdit = (
   track?: Partial<TrackCollaboratorMetadata> | null
-): NonNullable<TrackMetadata['collaborators']> => [
-  ...(track?.collaborators ?? []),
-  ...(track?.pending_collaborators ?? [])
-]
+): NonNullable<TrackMetadata['collaborators']> =>
+  getUniqueCollaborators(
+    [...(track?.collaborators ?? []), ...(track?.pending_collaborators ?? [])],
+    track?.owner_id
+  )
 
 export const userTrackMetadataFromSDK = (
   input: Track | SearchTrack
@@ -360,7 +379,9 @@ export const trackMetadataForUploadToSdk = (
     // Collaborators are tagged as full user objects in the form; the on-chain
     // metadata carries numeric user ids, which the ETL reconciles into invites.
     collaborators: input.collaborators
-      ? input.collaborators.map((collaborator) => collaborator.user_id)
+      ? getUniqueCollaborators(input.collaborators, input.owner_id).map(
+          (collaborator) => collaborator.user_id
+        )
       : undefined,
     stemOf: input.stem_of
       ? {

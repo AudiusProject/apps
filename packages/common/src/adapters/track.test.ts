@@ -68,6 +68,21 @@ describe('getTrackCollaboratorsForEdit', () => {
       })
     ).toEqual([accepted, pending])
   })
+
+  it('deduplicates collaborators and excludes the owner', () => {
+    const accepted = makeUserMetadata(2)
+    const duplicateAccepted = makeUserMetadata(2)
+    const pending = makeUserMetadata(3)
+    const owner = makeUserMetadata(1)
+
+    expect(
+      getTrackCollaboratorsForEdit({
+        owner_id: 1,
+        collaborators: [accepted, duplicateAccepted, owner],
+        pending_collaborators: [pending, accepted]
+      })
+    ).toEqual([accepted, pending])
+  })
 })
 
 describe('userTrackMetadataFromSDK', () => {
@@ -129,6 +144,22 @@ describe('trackMetadataForUploadToSdk', () => {
     const result = trackMetadataForUploadToSdk(
       makeMetadata({
         collaborators: [makeUserMetadata(2), makeUserMetadata(3)]
+      })
+    )
+
+    expect(result).toMatchObject({ collaborators: [2, 3] })
+  })
+
+  it('deduplicates collaborator user ids before upload', () => {
+    const result = trackMetadataForUploadToSdk(
+      makeMetadata({
+        owner_id: 1,
+        collaborators: [
+          makeUserMetadata(2),
+          makeUserMetadata(2),
+          makeUserMetadata(1),
+          makeUserMetadata(3)
+        ]
       })
     )
 
