@@ -6,6 +6,7 @@ import { useQueryContext } from '~/api/tan-query/utils'
 import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
+import { COMMENT_LIST_MUTATION_KEY } from './types'
 import {
   addCommentCount,
   getCommentQueryKey,
@@ -30,6 +31,7 @@ export const usePostComment = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: COMMENT_LIST_MUTATION_KEY,
     mutationFn: async (args: PostCommentArgs) => {
       const sdk = await audiusSdk()
       return await sdk.comments.createComment({

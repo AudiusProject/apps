@@ -18,7 +18,11 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { primeCommentData } from '../utils/primeCommentData'
 import { primeRelatedData } from '../utils/primeRelatedData'
 
-import { COMMENT_ROOT_PAGE_SIZE, messages } from './types'
+import {
+  COMMENT_LIST_MUTATION_KEY,
+  COMMENT_ROOT_PAGE_SIZE,
+  messages
+} from './types'
 import { useComments } from './useComments'
 
 export const useUserComments = (
@@ -33,7 +37,9 @@ export const useUserComments = (
 ) => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
-  const isMutating = useIsMutating()
+  const isMutatingCommentList = useIsMutating({
+    mutationKey: COMMENT_LIST_MUTATION_KEY
+  })
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
 
@@ -68,7 +74,8 @@ export const useUserComments = (
     },
     select: (data) => data.pages.flat(),
     ...options,
-    enabled: isMutating === 0 && options?.enabled !== false && !!userId
+    enabled:
+      isMutatingCommentList === 0 && options?.enabled !== false && !!userId
   })
 
   const { error, data: commentIds } = queryRes

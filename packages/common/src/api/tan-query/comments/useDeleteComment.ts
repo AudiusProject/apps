@@ -7,7 +7,7 @@ import { useQueryContext } from '~/api/tan-query/utils'
 import { Comment, ID, ReplyComment } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
-import { messages } from './types'
+import { COMMENT_LIST_MUTATION_KEY, messages } from './types'
 import {
   getCommentQueryKey,
   getTrackCommentListQueryKey,
@@ -27,6 +27,7 @@ export const useDeleteComment = () => {
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
+    mutationKey: COMMENT_LIST_MUTATION_KEY,
     mutationFn: async ({ commentId, userId }: DeleteCommentArgs) => {
       const commentData = {
         userId: Id.parse(userId),

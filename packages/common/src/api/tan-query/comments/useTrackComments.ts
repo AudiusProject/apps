@@ -21,7 +21,11 @@ import { useCurrentUserId } from '../users/account/useCurrentUserId'
 import { primeCommentData } from '../utils/primeCommentData'
 import { primeRelatedData } from '../utils/primeRelatedData'
 
-import { COMMENT_ROOT_PAGE_SIZE, messages } from './types'
+import {
+  COMMENT_LIST_MUTATION_KEY,
+  COMMENT_ROOT_PAGE_SIZE,
+  messages
+} from './types'
 import { useComments } from './useComments'
 import { getTrackCommentListQueryKey } from './utils'
 
@@ -46,7 +50,9 @@ const useTrackCommentsQuery = (
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
-  const isMutating = useIsMutating()
+  const isMutatingCommentList = useIsMutating({
+    mutationKey: COMMENT_LIST_MUTATION_KEY
+  })
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
@@ -84,7 +90,8 @@ const useTrackCommentsQuery = (
     staleTime: Infinity, // Stale time is set to infinity so that we never reload data thats currently shown on screen (because sorting could have changed)
     gcTime: 0, // Cache time is set to 1 so that the data is cleared any time we leave the page viewing it or change sorts
     ...options,
-    enabled: isMutating === 0 && options?.enabled !== false && !!trackId
+    enabled:
+      isMutatingCommentList === 0 && options?.enabled !== false && !!trackId
   })
 }
 

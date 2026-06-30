@@ -8,6 +8,20 @@ import { QueryKey } from '../types'
 
 import { CommentOrReply, TrackCommentCount } from './types'
 
+type CommentQueryStatus = 'error' | 'pending' | 'success'
+
+export const getCommentSectionLoading = ({
+  commentCount,
+  isLoadingMorePages,
+  status
+}: {
+  commentCount: number | undefined
+  isLoadingMorePages: boolean
+  status: CommentQueryStatus
+}) => {
+  return status === 'pending' && !isLoadingMorePages && commentCount !== 0
+}
+
 export const getCommentQueryKey = (commentId: ID | null | undefined) => {
   return [QUERY_KEYS.comment, commentId] as unknown as QueryKey<CommentOrReply>
 }
