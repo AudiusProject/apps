@@ -17,9 +17,9 @@ describe('GrantsApi', () => {
   const managerUserId = '0EdNZyj'
   const grantorUserId = 'n3A5v'
   const managerWallet = '0xc54bbb0ccf422e3c66c9120fce31f9aa2596b016'
-  const manageEntity = vitest.fn()
 
   let grants: GrantsApi
+  let manageEntity: ReturnType<typeof vitest.fn>
 
   beforeEach(() => {
     vitest.resetAllMocks()
@@ -28,7 +28,7 @@ describe('GrantsApi', () => {
         ercWallet: managerWallet
       }
     } as any)
-    manageEntity.mockResolvedValue({
+    manageEntity = vitest.fn().mockResolvedValue({
       blockHash: 'blockHash',
       blockNumber: 1,
       transactionHash: 'transactionHash'
