@@ -25,6 +25,12 @@ on:
       - '.github/workflows/identity.yml'
   workflow_dispatch:
 
+# Cancel superseded PR runs; on main, head_ref is empty so the docker-push run
+# is never cancelled by a subsequent push.
+concurrency:
+  group: identity-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   NODE_VERSION: '24.10.0'
 
