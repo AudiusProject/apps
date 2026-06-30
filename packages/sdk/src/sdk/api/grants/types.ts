@@ -51,8 +51,16 @@ export type EntityManagerApproveGrantRequest = z.input<
   typeof ApproveGrantSchema
 >
 
+export const RejectGrantSchema = z.object({
+  userId: HashId,
+  grantorUserId: HashId
+})
+
+export type EntityManagerRejectGrantRequest = z.input<typeof RejectGrantSchema>
+
 export type CreateGrantRequest = EntityManagerCreateGrantRequest
 export type AddManagerRequest = EntityManagerAddManagerRequest
 export type RemoveManagerRequest = EntityManagerRemoveManagerRequest
 export type RevokeGrantRequest = EntityManagerRevokeGrantRequest
 export type ApproveGrantRequest = EntityManagerApproveGrantRequest
+export type RejectGrantRequest = EntityManagerRejectGrantRequest

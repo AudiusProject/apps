@@ -24,10 +24,12 @@ import {
   CreateGrantSchema,
   RemoveManagerSchema,
   RevokeGrantSchema,
+  RejectGrantSchema,
   type EntityManagerAddManagerRequest,
   type EntityManagerApproveGrantRequest,
   type EntityManagerCreateGrantRequest,
   type EntityManagerRemoveManagerRequest,
+  type EntityManagerRejectGrantRequest,
   type EntityManagerRevokeGrantRequest,
   type GrantsApiServicesConfig
 } from './types'
@@ -223,6 +225,7 @@ export class GrantsApi {
       'approveGrant',
       ApproveGrantSchema
     )(params)
+    const managerUser = await this.getManagerUser(userId, 'approveGrant')
 
     if (!this.entityManager) {
       throw new UninitializedEntityManagerError()
@@ -233,6 +236,7 @@ export class GrantsApi {
       entityId: 0,
       action: Action.APPROVE,
       metadata: JSON.stringify({
+        grantee_address: managerUser.ercWallet,
         grantor_user_id: grantorUserId
       }),
       ...advancedOptions
@@ -257,6 +261,39 @@ export class GrantsApi {
       }
     }
     return await this.usersApi.approveGrant(request, requestInit)
+  }
+
+  async rejectGrantWithEntityManager(
+    params: EntityManagerRejectGrantRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    const { userId, grantorUserId } = await parseParams(
+      'rejectGrant',
+      RejectGrantSchema
+    )(params)
+    const managerUser = await this.getManagerUser(userId, 'rejectGrant')
+
+    if (!this.entityManager) {
+      throw new UninitializedEntityManagerError()
+    }
+    return await this.entityManager.manageEntity({
+      userId,
+      entityType: EntityType.GRANT,
+      entityId: 0,
+      action: Action.REJECT,
+      metadata: JSON.stringify({
+        grantee_address: managerUser.ercWallet,
+        grantor_user_id: grantorUserId
+      }),
+      ...advancedOptions
+    })
+  }
+
+  async rejectGrant(
+    params: EntityManagerRejectGrantRequest,
+    advancedOptions?: AdvancedOptions
+  ) {
+    return await this.rejectGrantWithEntityManager(params, advancedOptions)
   }
 
   private async getManagerUser(

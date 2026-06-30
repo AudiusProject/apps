@@ -47,8 +47,10 @@ export type {
   EntityManagerApproveGrantRequest,
   EntityManagerCreateGrantRequest,
   EntityManagerRemoveManagerRequest,
+  EntityManagerRejectGrantRequest,
   EntityManagerRevokeGrantRequest,
   RemoveManagerRequest,
+  RejectGrantRequest,
   RevokeGrantRequest
 } from './api/grants/types'
 export {
@@ -56,6 +58,7 @@ export {
   ApproveGrantSchema,
   CreateGrantSchema,
   RemoveManagerSchema,
+  RejectGrantSchema,
   RevokeGrantSchema
 } from './api/grants/types'
 export * from './services'

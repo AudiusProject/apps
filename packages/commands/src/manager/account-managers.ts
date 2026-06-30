@@ -44,12 +44,12 @@ export const rejectManagerCommand = new Command('reject')
   .option('-f, --from <from>', 'The manager account handle')
   .action(async (handle, { from }) => {
     const audiusSdk = await initializeAudiusSdk({ handle: from })
-    const managerUserId = await getCurrentUserId()
+    const userId = await getCurrentUserId()
 
-    const { data: user } = await audiusSdk.users.getUserByHandle({ handle })
-    const { id: userId } = user!
+    const { data: grantor } = await audiusSdk.users.getUserByHandle({ handle })
+    const { id: grantorUserId } = grantor!
 
-    await audiusSdk.grants.removeManager({ userId, managerUserId })
+    await audiusSdk.grants.rejectGrant({ userId, grantorUserId })
     console.log(chalk.green(`Manager request rejected.`))
   })
 
