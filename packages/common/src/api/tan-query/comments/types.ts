@@ -4,6 +4,7 @@ export type CommentOrReply = Comment | ReplyComment
 
 export const COMMENT_ROOT_PAGE_SIZE = 15
 export const COMMENT_REPLIES_PAGE_SIZE = 15
+export const COMMENT_LIST_MUTATION_KEY = ['commentListMutation'] as const
 
 export const messages = {
   loadError: (type: 'comments' | 'replies') =>

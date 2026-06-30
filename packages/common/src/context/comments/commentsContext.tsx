@@ -19,7 +19,8 @@ import {
   useTrackCommentCount,
   resetPreviousCommentCount,
   useTrack,
-  useCurrentUserId
+  useCurrentUserId,
+  getCommentSectionLoading
 } from '~/api'
 import { useGatedContentAccess } from '~/hooks'
 import { ModalSource, ID, Comment, ReplyComment, Name, Track } from '~/models'
@@ -122,7 +123,6 @@ export function CommentSectionProvider<NavigationProp>(
     data: comments = [],
     commentIds = [],
     status,
-    isFetching,
     hasNextPage,
     fetchNextPage: loadMorePages,
     isFetchingNextPage: isLoadingMorePages
@@ -148,6 +148,7 @@ export function CommentSectionProvider<NavigationProp>(
     commentCountData?.previousValue !== undefined &&
     commentCountData?.currentValue !== undefined &&
     commentCountData?.previousValue < commentCountData?.currentValue
+  const commentCount = commentCountData?.currentValue ?? track?.comment_count
 
   const dispatch = useDispatch()
 
@@ -226,8 +227,11 @@ export function CommentSectionProvider<NavigationProp>(
     ]
   )
 
-  const commentSectionLoading =
-    (status === 'pending' || isFetching) && !isLoadingMorePages
+  const commentSectionLoading = getCommentSectionLoading({
+    commentCount,
+    isLoadingMorePages,
+    status
+  })
 
   if (!track) {
     return null
@@ -242,7 +246,7 @@ export function CommentSectionProvider<NavigationProp>(
         artistId: owner_id,
         entityId,
         entityType,
-        commentCount: commentCountData?.currentValue ?? track.comment_count,
+        commentCount,
         isCommentCountLoading,
         commentIds,
         commentSectionLoading,

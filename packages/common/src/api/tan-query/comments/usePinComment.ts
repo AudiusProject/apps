@@ -10,7 +10,7 @@ import { Nullable } from '~/utils'
 
 import { getTrackQueryKey } from '../tracks/useTrack'
 
-import { messages } from './types'
+import { COMMENT_LIST_MUTATION_KEY, messages } from './types'
 import { getTrackCommentListQueryKey } from './utils'
 
 export type PinCommentArgs = {
@@ -27,6 +27,7 @@ export const usePinComment = () => {
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   return useMutation({
+    mutationKey: COMMENT_LIST_MUTATION_KEY,
     mutationFn: async (args: PinCommentArgs) => {
       const { userId, commentId, isPinned, trackId } = args
       const sdk = await audiusSdk()

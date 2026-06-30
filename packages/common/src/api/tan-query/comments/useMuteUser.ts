@@ -6,7 +6,7 @@ import { useQueryContext } from '~/api/tan-query/utils'
 import { Comment, ID } from '~/models'
 import { toast } from '~/store/ui/toast/slice'
 
-import { messages } from './types'
+import { COMMENT_LIST_MUTATION_KEY, messages } from './types'
 import {
   getCommentQueryKey,
   getTrackCommentCountQueryKey,
@@ -27,6 +27,7 @@ export const useMuteUser = () => {
   const dispatch = useDispatch()
 
   return useMutation({
+    mutationKey: COMMENT_LIST_MUTATION_KEY,
     mutationFn: async ({ userId, mutedUserId, isMuted }: MuteUserArgs) => {
       const sdk = await audiusSdk()
       await sdk.comments.muteUser(userId, mutedUserId, isMuted)
