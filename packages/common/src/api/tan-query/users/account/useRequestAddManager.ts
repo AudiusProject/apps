@@ -21,10 +21,13 @@ export const useRequestAddManager = () => {
       const encodedUserId = Id.parse(userId)
       const encodedManagerUserId = Id.parse(managerUserId)
       const sdk = await audiusSdk()
-      await sdk.grants.addManager({
-        userId: encodedUserId,
-        managerUserId: encodedManagerUserId
-      })
+      await sdk.grants.addManagerWithEntityManager(
+        {
+          userId: encodedUserId,
+          managerUserId: encodedManagerUserId
+        },
+        { skipConfirmation: true }
+      )
       return payload
     },
     onSuccess: (data) => {

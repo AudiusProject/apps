@@ -3,7 +3,7 @@ import { useCallback, useContext, useEffect, useMemo } from 'react'
 import {
   useApproveManagedAccount,
   useCurrentUserId,
-  useRemoveManager
+  useRejectManagedAccount
 } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
 import { useAccountSwitcher, useIsManagedAccount } from '@audius/common/hooks'
@@ -90,8 +90,9 @@ export const ManagedUserListItem = ({
   const {
     mutate: rejectManagedAccount,
     isPending: rejectIsPending,
+    isSuccess: rejectIsSuccess,
     isError: rejectIsError
-  } = useRemoveManager()
+  } = useRejectManagedAccount()
   const isPending =
     grant?.is_approved == null || approveIsPending || rejectIsPending
   const { toast } = useContext(ToastContext)
@@ -123,11 +124,10 @@ export const ManagedUserListItem = ({
       })
     )
     rejectManagedAccount({
-      userId: user.user_id,
-      managerUserId: currentUserId
+      userId: currentUserId,
+      grantorUser: user
     })
-    toast(messages.invitationRejected)
-  }, [rejectManagedAccount, currentUserId, user.user_id, toast, make, track])
+  }, [rejectManagedAccount, currentUserId, user, make, track])
 
   useEffect(() => {
     if (approveIsSuccess) {
@@ -138,10 +138,12 @@ export const ManagedUserListItem = ({
   }, [toast, approveIsSuccess, approveIsError])
 
   useEffect(() => {
-    if (rejectIsError) {
+    if (rejectIsSuccess) {
+      toast(messages.invitationRejected)
+    } else if (rejectIsError) {
       toast(sharedMessages.somethingWentWrong)
     }
-  }, [toast, rejectIsError])
+  }, [toast, rejectIsSuccess, rejectIsError])
 
   const popupMenuItems = useMemo(() => {
     const items = []
