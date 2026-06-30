@@ -1,5 +1,6 @@
 import { AUDIO, wAUDIO, AudioWei } from '@audius/fixed-decimal'
 import { type AudiusSdkWithServices, Id } from '@audius/sdk'
+import { getAccount } from '@solana/spl-token'
 import { PublicKey } from '@solana/web3.js'
 
 import { userWalletsFromSDK } from '~/adapters'
@@ -9,7 +10,6 @@ import { isNullOrUndefined } from '~/utils/typeUtils'
 
 import {
   AudiusBackend,
-  getUserbankAccountInfo,
   pollForTokenBalanceChange
 } from '../audius-backend'
 import { Env } from '../env'
@@ -68,10 +68,15 @@ export class WalletClient {
     ethAddress: string
   }): Promise<string> {
     const sdk = await this.audiusSdk()
-    const account = await getUserbankAccountInfo(sdk, {
-      ethAddress,
-      mint: 'wAUDIO'
-    })
+    const { userBank } =
+      await sdk.services.claimableTokensClient.getOrCreateUserBank({
+        ethWallet: ethAddress,
+        mint: 'wAUDIO'
+      })
+    const account = await getAccount(
+      sdk.services.solanaClient.connection,
+      userBank
+    )
     if (!account) {
       throw new Error('No userbank account.')
     }
