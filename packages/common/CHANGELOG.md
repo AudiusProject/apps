@@ -1,5 +1,24 @@
 # @audius/common
 
+## 1.5.79
+
+### Patch Changes
+
+- 272b8db: Fix freeform/custom track genres silently reverting to Electronic on save. `toSdkGenre` in the track adapter filtered out any value not in the canonical `Genre` enum and returned `undefined`, which then fell back to `DEFAULT_GENRE` (Electronic) before reaching the SDK. Now any non-empty genre string is passed through unchanged (the SDK upload schema already caps it at 100 chars), so custom genres entered by artists are preserved end-to-end.
+- 98ad217: Forward the running CodePush bundle label to Optimizely as an `otaVersion` attribute (or `"native"` when no OTA is applied), so feature flags can be gated on a specific OTA cut in addition to the native binary version.
+- 5d9d4e4: Add `usePrefetchTrackComments` and `usePrefetchTrackPageLineup`, hooks that warm a track's comment list and "more by / remixes / you might also like" lineup as early as possible (e.g. on track screen mount) so those sections render from cache instead of starting their own fetch only once they mount. Each keeps a live observer so the warmed data isn't evicted before the section mounts. `usePrefetchTrackComments` can fire from a bare trackId; `usePrefetchTrackPageLineup` still depends on the hero track + owner handle but starts the instant those resolve rather than waiting for the mobile screen-ready/animation gate.
+- 791b612: Hide the profile Contests tab unless the `CONTESTS` feature flag is enabled and the artist hosts at least one remix contest. Previously the desktop and mobile-web profiles always rendered the tab for any artist (ignoring the flag entirely), and the React Native side respected the flag but still showed the tab for artists who don't run any contest — both led to an empty/unreachable destination. Adds a shared `useUserHasRemixContest` hook that paginates the global remix-contest list (matching `ContestsTab`'s page cap) and matches `event.userId` against the host. Direct visits to `/:handle/contests` on a non-qualifying profile fall back to the default tab so the body stays in sync with the (now hidden) tab list.
+- f3d55fa: Remove FingerprintJS from all clients and services. Sign-in no longer collects a `visitorId`, the identity service's fingerprint-based OTP bypass is gone (new devices always require OTP), and the anti-abuse-oracle drops the per-fingerprint device-count scoring and UI section.
+- f97f1ac: Remove the unused legacy lineup store module (`store/lineup`: `lineupActions`, `lineupReducer`, `lineupSelectors`, `LineupBaseActions`, `lineupRegistry`) from `@audius/common`. The lineup engine has been fully migrated to tan-query hooks plus the playback slice; these exports had no remaining consumers and were not wired into any store.
+- b52d005: Rename the Feed page's "Chronological" tab to "Latest" on web and mobile. The persisted `feed-page:tab` localStorage value is migrated transparently so existing users land on the same tab they had selected.
+- Updated dependencies [b803e5e]
+- Updated dependencies [90725b5]
+- Updated dependencies [6bd5c27]
+- Updated dependencies [da6c724]
+- Updated dependencies [be0537f]
+- Updated dependencies [8662a56]
+  - @audius/sdk@16.0.0
+
 ## 1.5.78
 
 ### Patch Changes

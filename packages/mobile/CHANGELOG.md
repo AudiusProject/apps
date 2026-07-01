@@ -1,5 +1,37 @@
 # @audius/mobile
 
+## 1.5.186
+
+### Patch Changes
+
+- 5a20b85: Fix bottom tab bar color clipping after the comment drawer opens. The drawer rendered a white overlay over the bottom safe area to color the gap below its footer, but it was kept mounted after dismissal and covered the tab bar's surface1 padding, leaving a visible color seam at the bottom. The overlay now only renders while the drawer is visible.
+- ea2ca22: Fix a thin white sliver appearing above the cover image when pulling to refresh on the mobile contest page. `ContestHero` was clipping its scaled cover image with `overflow: 'hidden'`, so the existing scale + translate over-scroll interpolation could only stretch within the 220px hero box and never bled upward into the over-scroll gap. The clip is removed (mirroring `ProfileCoverPhoto`), and the title/CTA/countdown section gets its own opaque background to cover the downward bleed — same sibling-with-bg pattern `ProfileHeader` uses below the cover photo.
+- 76ef0bb: Restrict the Top Albums This Month, New Album Releases, and Best Selling Albums sections on the Explore page to the Albums tab only, matching web behavior.
+- 1259682: Fix video embed sizing in fan club post cards. The WebView's embedded HTML set `iframe { height: 100% }` but neither `<html>` nor `<body>` had an explicit height, so the iframe collapsed and left a visible gap inside the 16:9 container. Giving `html, body` an explicit `100%` height lets the iframe fill the card as intended.
+- af63712: Fix initial dark mode load on the mobile app: with theme set to Auto and the system in dark mode, the app launched in light and only flipped after backgrounding. Also fix SelectablePill components keeping the previous palette's colors after a theme flip.
+- c917fd6: Fix the mobile play queue drag-to-reorder gesture: dragging a track row was being claimed by the queue drawer's swipe-to-dismiss pan responder, so reorder attempts dragged the drawer down instead. The drawer now suspends its pan responder while a row is being dragged. Also adds a grabber bar above the Queue title and a bit more breathing room in the header.
+- 5a5a93f: Smooth out the infinite-scroll feel on Trending and Feed lineups. The mobile `TrackLineup` previously waited a 100ms debounce before dispatching `loadNextPage`, then waited again for the parent's `isFetching` to round-trip back through tanquery before any skeleton rows appeared — so users would scroll to the bottom, see nothing happen, then see late skeletons, then tracks. The threshold is now bumped from 0.5 to a full viewport ahead, the debounce and the duplicate `onScroll` handler are removed, and a synchronous local "load triggered" flag flips skeletons on in the same tick the scroll handler fires.
+- 432167f: Migrate seven legacy redux-saga packages to tan-query hooks (recovery-email, change-password, playlist-updates, search-users-modal, dashboard-page, cache/tracks, recommendation, and the dead search-ai-bar). Mobile-facing changes: AccountSettings now uses `useResendRecoveryEmail`, ChatUserListScreen uses `useSearchUsersModal` infinite query, track edit/delete flows go through `useUpdateTrack`/`useDeleteTrack` hooks instead of the saga + confirmer queue.
+- 98ad217: Forward the running CodePush bundle label to Optimizely as an `otaVersion` attribute (or `"native"` when no OTA is applied), so feature flags can be gated on a specific OTA cut in addition to the native binary version.
+- 791b612: Hide the profile Contests tab unless the `CONTESTS` feature flag is enabled and the artist hosts at least one remix contest. Previously the desktop and mobile-web profiles always rendered the tab for any artist (ignoring the flag entirely), and the React Native side respected the flag but still showed the tab for artists who don't run any contest — both led to an empty/unreachable destination. Adds a shared `useUserHasRemixContest` hook that paginates the global remix-contest list (matching `ContestsTab`'s page cap) and matches `event.userId` against the host. Direct visits to `/:handle/contests` on a non-qualifying profile fall back to the default tab so the body stays in sync with the (now hidden) tab list.
+- f3d55fa: Remove FingerprintJS from all clients and services. Sign-in no longer collects a `visitorId`, the identity service's fingerprint-based OTP bypass is gone (new devices always require OTP), and the anti-abuse-oracle drops the per-fingerprint device-count scoring and UI section.
+- b52d005: Rename the Feed page's "Chronological" tab to "Latest" on web and mobile. The persisted `feed-page:tab` localStorage value is migrated transparently so existing users land on the same tab they had selected.
+- Updated dependencies [b803e5e]
+- Updated dependencies [90725b5]
+- Updated dependencies [272b8db]
+- Updated dependencies [6bd5c27]
+- Updated dependencies [98ad217]
+- Updated dependencies [da6c724]
+- Updated dependencies [be0537f]
+- Updated dependencies [5d9d4e4]
+- Updated dependencies [791b612]
+- Updated dependencies [f3d55fa]
+- Updated dependencies [8662a56]
+- Updated dependencies [f97f1ac]
+- Updated dependencies [b52d005]
+  - @audius/sdk@16.0.0
+  - @audius/common@1.5.79
+
 ## 1.5.180
 
 ### Patch Changes
