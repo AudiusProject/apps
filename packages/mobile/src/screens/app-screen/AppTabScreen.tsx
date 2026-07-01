@@ -251,7 +251,13 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       <Stack.Screen
         name='Profile'
         component={ProfileScreen}
-        options={{ headerShown: false }}
+        // Profile uses a collapsible tab view (horizontal pager + vertical
+        // scroll). The global `fullScreenGestureEnabled: true` makes the
+        // swipe-to-pop recognizer span the whole screen, so a slightly diagonal
+        // vertical scroll gets hijacked as a back gesture. Restrict swipe-back
+        // to the left edge here (same treatment as the Chat screen) so
+        // mid-screen scrolling reaches the list untouched.
+        options={{ headerShown: false, fullScreenGestureEnabled: false }}
       />
       <Stack.Group>
         <Stack.Screen name='Followers' component={FollowersScreen} />
