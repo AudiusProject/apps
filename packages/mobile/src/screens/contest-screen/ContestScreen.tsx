@@ -169,7 +169,8 @@ export const ContestScreen = () => {
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
-  const { data: followState } = useEventFollowState(eventId)
+  const { data: followState, isPending: isFollowStatePending } =
+    useEventFollowState(eventId)
   const { mutate: followEvent } = useFollowEvent()
   const { mutate: unfollowEvent } = useUnfollowEvent()
   const isOwner = !!currentUserId && currentUserId === track?.owner_id
@@ -443,10 +444,18 @@ export const ContestScreen = () => {
                 variant={followState?.isFollowed ? 'secondary' : 'primary'}
                 size='small'
                 onPress={handleToggleFollow}
+                // Show a spinner while the follow state loads instead of
+                // defaulting to "Follow", which would flash before snapping
+                // to "Following" for users who already follow the contest.
+                isLoading={isFollowStatePending}
                 disabled={!currentUserId || !eventId}
                 fullWidth
               >
-                {followState?.isFollowed ? messages.following : messages.follow}
+                {isFollowStatePending
+                  ? ''
+                  : followState?.isFollowed
+                    ? messages.following
+                    : messages.follow}
               </Button>
             </Flex>
             {!isEnded ? (

@@ -220,7 +220,8 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   const eventId = contest?.eventId
 
   const { data: currentUserId } = useCurrentUserId()
-  const { data: followState } = useEventFollowState(eventId)
+  const { data: followState, isPending: isFollowStatePending } =
+    useEventFollowState(eventId)
   const { mutate: followEvent } = useFollowEvent()
   const { mutate: unfollowEvent } = useUnfollowEvent()
   // Drives the Following → Unfollow label swap on hover for the contest
@@ -451,12 +452,17 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
           size='small'
           variant={isFollowed ? 'primary' : 'secondary'}
           iconLeft={followIcon}
+          // While the follow state is still loading, render a spinner-only
+          // button (fixed width keeps layout stable) so it doesn't flash
+          // "Follow" before snapping to "Following" for users who already
+          // follow the contest.
+          isLoading={isFollowStatePending}
           onClick={handleToggleFollow}
           onMouseEnter={() => setIsFollowHovering(true)}
           onMouseLeave={() => setIsFollowHovering(false)}
           css={{ width: 112, justifyContent: 'center' }}
         >
-          {followLabel}
+          {isFollowStatePending ? '' : followLabel}
         </Button>
         {!isEnded ? (
           <Button size='small' onClick={handleEnterContest}>
@@ -470,6 +476,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     isOwner,
     isEnded,
     followState?.isFollowed,
+    isFollowStatePending,
     isFollowHovering,
     handleToggleFollow,
     handleEditContest,

@@ -263,6 +263,24 @@ describe('ContestPage', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('does not flash "Follow" while the follow state is still loading', () => {
+    // Mid-flight: no data yet. The button must not render the unfollowed
+    // "Follow" label, otherwise it flashes before snapping to "Following"
+    // for users who already follow the contest.
+    mocks.useEventFollowState.mockReturnValue({
+      data: undefined,
+      isPending: true
+    })
+    renderContestPage()
+
+    expect(
+      screen.queryByRole('button', { name: /^follow$/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^following$/i })
+    ).not.toBeInTheDocument()
+  })
+
   it('includes the track title in the page header when the contest is attached to a track', () => {
     renderContestPage()
     // The redesigned hero composes the display title as
