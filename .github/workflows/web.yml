@@ -12,7 +12,6 @@ on:
       - 'packages/sdk/**'
       - 'package-lock.json'
       - '.github/workflows/web.yml'
-      - '.circleci/**'
   pull_request:
     paths:
       - 'packages/web/**'
@@ -22,8 +21,14 @@ on:
       - 'packages/sdk/**'
       - 'package-lock.json'
       - '.github/workflows/web.yml'
-      - '.circleci/**'
   workflow_dispatch:
+
+# Cancel superseded PR runs (new commits supersede in-flight CI). Keyed on the
+# PR branch for PRs; on main, head_ref is empty so runs group by ref and do NOT
+# cancel — an in-flight production deploy is never interrupted by a new push.
+concurrency:
+  group: web-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   NODE_VERSION: '24.10.0'
@@ -379,7 +384,10 @@ jobs:
     name: Web Deploy Preview
     runs-on: ubuntu-latest
     needs: web-build
-    if: github.event_name == 'pull_request'
+    # Opt-in: only deploy a live Cloudflare preview when the PR carries the
+    # `preview` label. Most PRs don't need one, and each preview is a build
+    # download + two wrangler deploys. Add the label to get a preview URL.
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'preview')
     permissions:
       contents: read
       pull-requests: write

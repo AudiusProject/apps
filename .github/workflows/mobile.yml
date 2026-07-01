@@ -12,7 +12,6 @@ on:
       - 'packages/sdk/**'
       - 'package-lock.json'
       - '.github/workflows/mobile.yml'
-      - '.circleci/**'
   workflow_dispatch:
     inputs:
       ota_channel:
