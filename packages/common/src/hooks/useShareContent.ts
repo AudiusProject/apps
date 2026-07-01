@@ -30,14 +30,6 @@ export const useShareContent = (
 
   if (request.type === 'track' || request.type === 'contest') {
     if (!track || !trackArtist) return null
-    if (request.type === 'contest') {
-      return {
-        type: 'contest',
-        track,
-        artist: trackArtist,
-        ...(request.eventPermalink ? { eventPermalink: request.eventPermalink } : {})
-      }
-    }
     return { type: request.type, track, artist: trackArtist }
   }
 

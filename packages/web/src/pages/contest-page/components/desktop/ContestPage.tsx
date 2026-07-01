@@ -306,7 +306,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     if (trackId) {
       dispatch(fetchTrackSucceeded({ trackId }))
     }
-  }, [contest?.permalink, dispatch, trackId])
+  }, [dispatch, trackId])
 
   useEffect(() => {
     return function cleanup() {
@@ -405,11 +405,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
       shareModalUIActions.requestOpen({
         type: 'contest',
         trackId,
-        source: ShareSource.PAGE,
-        ...(contest?.permalink ? { eventPermalink: contest.permalink } : {})
+        source: ShareSource.PAGE
       })
     )
-  }, [contest?.permalink, dispatch, trackId])
+  }, [dispatch, trackId])
 
   const renderActions = useCallback(() => {
     if (!eventId) return null
@@ -491,7 +490,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     return (
       <Page
         title={messages.title}
-        canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
+        canonicalUrl={fullContestPage(track.permalink)}
         variant='flush'
       >
         <Box
@@ -555,7 +554,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   return (
     <Page
       title={messages.title}
-      canonicalUrl={fullContestPage(contest?.permalink ?? track.permalink)}
+      canonicalUrl={fullContestPage(track.permalink)}
       variant='flush'
     >
       {/* Content is centered to MAX_CONTENT_WIDTH and sits on the
