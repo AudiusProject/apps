@@ -36,6 +36,7 @@ import { ProfilePicture } from 'app/components/core'
 import { UserBadges } from 'app/components/user-badges'
 import { LoadingSpinner } from 'app/harmony-native/components/LoadingSpinner/LoadingSpinner'
 
+import { useCommentDrawer } from './CommentDrawerContext'
 import { CommentDrawerForm } from './CommentDrawerForm'
 import { CommentDrawerHeader } from './CommentDrawerHeader'
 import { CommentSkeleton } from './CommentSkeleton'
@@ -239,6 +240,16 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
   const insets = useSafeAreaInsets()
   const commentListRef = useRef<BottomSheetFlatListMethods>(null)
 
+  // `closeAndExitNowPlaying` is read here (inside CommentDrawerContext.Provider)
+  // and threaded into CommentSectionContext so that CommentBlock can access it
+  // without calling useCommentDrawer() directly.  We must NOT call
+  // useCommentDrawer() from inside the BottomSheetModal portal content because
+  // @gorhom/portal renders portal children at a PortalHost that is a *sibling*
+  // of the CommentDrawerContext.Provider in the tree, so the context is
+  // unreachable from there — causing a 100%-reproducible crash the moment any
+  // comment renders.
+  const { closeAndExitNowPlaying } = useCommentDrawer()
+
   // When the drawer is opened from a lineup tile (e.g. the feed), the full
   // track may not yet be in the query cache. CommentSectionProvider returns
   // null until the track loads, which would render an empty bottom sheet, so
@@ -353,6 +364,7 @@ export const CommentDrawer = (props: CommentDrawerProps) => {
             setReplyingAndEditingState={setReplyingAndEditingState}
             navigation={navigation}
             closeDrawer={handleCloseDrawer}
+            closeAndExitNowPlaying={closeAndExitNowPlaying}
             playbackSource={playbackSource}
           >
             <CommentDrawerHeader minimal={autoCompleteActive} />

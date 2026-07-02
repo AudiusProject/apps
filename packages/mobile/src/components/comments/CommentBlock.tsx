@@ -25,7 +25,6 @@ import { UserLink } from '../user-link'
 import { ArtistPick } from './ArtistPick'
 import { CommentActionBar } from './CommentActionBar'
 import { CommentBadge } from './CommentBadge'
-import { useCommentDrawer } from './CommentDrawerContext'
 import { CommentText } from './CommentText'
 import { Timestamp } from './Timestamp'
 import { TimestampLink } from './TimestampLink'
@@ -43,15 +42,21 @@ export const CommentBlockInternal = (
   }
 ) => {
   const { comment, isPreview, parentCommentId, highlightedCommentId } = props
-  const { artistId, track, navigation } = useCurrentCommentSection()
+  const { artistId, track, navigation, closeAndExitNowPlaying } =
+    useCurrentCommentSection()
   // Use this for in-drawer navigation (profile pic, user link, mentions)
   // so the destination screen is visible once we navigate. The section
   // context's `closeDrawer` would only close the comment drawer and leave
   // the now-playing drawer covering the destination.
-  const { closeAndExitNowPlaying } = useCommentDrawer()
+  //
+  // closeAndExitNowPlaying is threaded through CommentSectionContext rather
+  // than read directly from useCommentDrawer() because @gorhom/portal renders
+  // BottomSheetModal content at a PortalHost that sits *outside* the
+  // CommentDrawerContext.Provider in the React tree — calling useCommentDrawer()
+  // here would throw every time a comment renders.
   const trackIdForCloseAll = track.track_id
   const handleNavigateAway = useCallback(() => {
-    closeAndExitNowPlaying(trackIdForCloseAll)
+    closeAndExitNowPlaying?.(trackIdForCloseAll)
   }, [closeAndExitNowPlaying, trackIdForCloseAll])
   const {
     id: commentId,
