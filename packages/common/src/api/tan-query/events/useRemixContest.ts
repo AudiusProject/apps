@@ -19,12 +19,17 @@ export type RemixContestData = {
   sourceTrackIds?: number[]
 }
 
+// Note: OverrideProperties/Merge/Simplify from type-fest can lose optional
+// properties on doubly-nested intersection types (e.g. permalink? on Event,
+// which is itself an OverrideProperties of EventSDK). We explicitly intersect
+// Pick<Event, 'permalink'> to ensure the property survives the simplification.
 type RemixContestEvent = OverrideProperties<
   Event,
   {
     eventData: RemixContestData
   }
->
+> &
+  Pick<Event, 'permalink'>
 
 /**
  * Hook to fetch the remix contest event for a given entity ID.
