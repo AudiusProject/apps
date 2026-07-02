@@ -45,6 +45,17 @@ type CommentSectionProviderProps<NavigationProp> = {
   ) => void
   navigation?: NavigationProp
   closeDrawer?: () => void
+  /**
+   * Close the comment drawer AND any open now-playing drawer behind it.
+   * Passed from CommentDrawerProvider and threaded through to CommentBlock
+   * so that tapping a user link / mention inside a comment can close both
+   * drawers before navigating away.
+   *
+   * This must be threaded via context (rather than calling useCommentDrawer()
+   * directly in CommentBlock) because @gorhom/bottom-sheet portals content
+   * outside the CommentDrawerContext.Provider's React tree.
+   */
+  closeAndExitNowPlaying?: (trackId: ID) => void
   uid?: string
   /**
    * Opaque source tag for the playback queue when the user plays the track
@@ -94,6 +105,7 @@ export function CommentSectionProvider<NavigationProp>(
     setReplyingAndEditingState,
     navigation,
     closeDrawer,
+    closeAndExitNowPlaying,
     playbackSource = 'comments'
   } = props
   const { data: track } = useTrack(entityId)
@@ -263,6 +275,7 @@ export function CommentSectionProvider<NavigationProp>(
         loadMorePages: handleLoadMorePages,
         navigation,
         closeDrawer: handleCloseDrawer,
+        closeAndExitNowPlaying,
         hasNewComments
       }}
     >
