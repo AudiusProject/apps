@@ -220,7 +220,7 @@ export const ContestScreen = () => {
         source: ShareSource.PAGE
       })
     )
-  }, [dispatch, trackId, contest?.permalink])
+  }, [dispatch, trackId])
 
   // Pull-to-refresh: invalidate the contest's event + comment queries so all
   // tabs (details, updates, submissions, comments) refetch the next time
