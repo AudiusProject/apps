@@ -64,6 +64,8 @@
 .minimizedUnreadIndicatorTag {
   display: none;
   position: absolute;
+  /* Harmony Image renders the avatar img at z-index 2. */
+  z-index: 3;
   top: var(--harmony-unit-4);
   right: var(--harmony-unit-4);
   height: var(--harmony-unit-4);
