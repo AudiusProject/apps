@@ -22,12 +22,16 @@ const requestDiscordJWT = async (sdk: AudiusSdkWithServices, env: Env) => {
     message: data
   })
   const response = await fetch(
-    `${env.DISCORD_BOT_SERVER}/request_discord_code?signature=${encodeURIComponent(signature)}&message=${encodeURIComponent(data)}`,
+    `${env.DISCORD_BOT_SERVER}/request_discord_code`,
     {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        message: data,
+        signature
+      })
     }
   )
   if (!response.ok) {
@@ -47,6 +51,8 @@ export const useGetDiscordOAuthLink = (currentCoin?: string) => {
       jwt: discordJWT.token,
       currentCoin
     })
-    return `${AUDIUS_DISCORD_OAUTH_LINK}&state=${statePayload}`
+    return `${AUDIUS_DISCORD_OAUTH_LINK}&state=${encodeURIComponent(
+      statePayload
+    )}`
   }, [audiusSdk, env, currentCoin])
 }
