@@ -16,17 +16,24 @@ export const useProfilePicture = ({
   defaultImage?: string
 }) => {
   const { data: partialUser } = useUser(userId, {
-    select: (user) => pick(user, 'profile_picture', 'updatedProfilePicture')
+    select: (user) =>
+      pick(user, 'profile_picture', 'updatedProfilePicture', 'is_deactivated')
   })
-  const { profile_picture, updatedProfilePicture } = partialUser ?? {}
+  const { profile_picture, updatedProfilePicture, is_deactivated } =
+    partialUser ?? {}
 
   const { imageUrl } = useImageSize({
-    artwork: profile_picture,
+    // Deactivated/deleted accounts must not expose their profile picture
+    // (privacy/GDPR) — force the default placeholder instead.
+    artwork: is_deactivated ? undefined : profile_picture,
     targetSize: size,
     defaultImage: defaultImage ?? profilePicEmpty,
     preloadImageFn: preload
   })
 
+  if (is_deactivated) {
+    return defaultImage ?? profilePicEmpty
+  }
   if (updatedProfilePicture) {
     return updatedProfilePicture.url
   }
