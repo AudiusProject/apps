@@ -451,7 +451,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     >
       <Box ref={profileFocusRootRef} w='100%' pb='2xl'>
         <CoverPhoto
-          userId={userId}
+          userId={isDeactivated ? null : userId}
           updatedCoverPhoto={updatedCoverPhoto ? updatedCoverPhoto.url : ''}
           error={updatedCoverPhoto ? updatedCoverPhoto.error : false}
           loading={status === Status.LOADING}
@@ -484,7 +484,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               >
                 {/* @ts-ignore */}
                 <ProfilePicture
-                  userId={userId}
+                  userId={isDeactivated ? undefined : userId}
                   updatedProfilePicture={
                     updatedProfilePicture ? updatedProfilePicture.url : ''
                   }

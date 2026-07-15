@@ -30,11 +30,14 @@ export const useCoverPhoto = ({
     defaultImage: imageProfilePicEmpty
   })
   const { data: partialUser } = useUser(userId, {
-    select: (user) => pick(user, 'cover_photo', 'updatedCoverPhoto')
+    select: (user) =>
+      pick(user, 'cover_photo', 'updatedCoverPhoto', 'is_deactivated')
   })
-  const { cover_photo, updatedCoverPhoto } = partialUser ?? {}
+  const { cover_photo, updatedCoverPhoto, is_deactivated } = partialUser ?? {}
   const { imageUrl } = useImageSize({
-    artwork: cover_photo,
+    // Deactivated/deleted accounts must not expose their cover photo
+    // (privacy/GDPR) — force the default placeholder instead.
+    artwork: is_deactivated ? undefined : cover_photo,
     targetSize: size,
     defaultImage: defaultImage ?? imageCoverPhotoBlank,
     preloadImageFn: preload
@@ -49,6 +52,9 @@ export const useCoverPhoto = ({
     defaultProfilePicture: imageProfilePicEmpty
   })
 
+  if (is_deactivated) {
+    return { image: defaultImage ?? imageCoverPhotoBlank, shouldBlur: false }
+  }
   if (updatedCoverPhoto) {
     return { image: updatedCoverPhoto.url, shouldBlur: false }
   }
