@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 import { Id } from '@audius/sdk'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
@@ -9,6 +11,10 @@ import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
 import { useTrack } from './useTrack'
+
+// Stop polling the archive job after this long even if it never transitions
+// out of `active`, so the UI can surface an error instead of spinning forever.
+const STEMS_ARCHIVE_POLL_TIMEOUT_MS = 300_000 // 5 minutes
 
 type GetStemsArchiveJobStatusResponse = {
   id: string
@@ -109,6 +115,13 @@ export const useGetStemsArchiveJobStatus = (
 ) => {
   const { audiusSdk } = useQueryContext()
 
+  // Track when polling for this job began so we can enforce a hard timeout even
+  // if the job never transitions out of `active`.
+  const jobStartTimeRef = useRef<number | null>(null)
+  useEffect(() => {
+    jobStartTimeRef.current = jobId ? Date.now() : null
+  }, [jobId])
+
   return useQuery({
     queryKey: getStemsArchiveJobQueryKey(jobId),
     queryFn: async () => {
@@ -124,6 +137,15 @@ export const useGetStemsArchiveJobStatus = (
     },
     // refetch once per second until the job is completed or failed
     refetchInterval: (query) => {
+      // Hard stop: give up polling after the timeout even if the job is still
+      // reported as active, so we don't spin forever on a stalled job.
+      const jobStartTime = jobStartTimeRef.current
+      if (
+        jobStartTime !== null &&
+        Date.now() - jobStartTime > STEMS_ARCHIVE_POLL_TIMEOUT_MS
+      ) {
+        return false
+      }
       if (!query.state.data) {
         return 1000
       }
