@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import {
   getTrendingQueryKey,
@@ -13,7 +20,11 @@ import {
   trendingPageActions,
   trendingPageSelectors
 } from '@audius/common/store'
-import { route, toTrendingGenre } from '@audius/common/utils'
+import {
+  route,
+  toTrendingGenre,
+  toTrendingGenreValue
+} from '@audius/common/utils'
 import {
   FilterButton,
   Flex,
@@ -136,12 +147,20 @@ const TrendingPageMobileContent = ({
     dispatch(pushRoute(TRENDING_GENRES_ROUTE))
   }, [dispatch])
 
+  // A `?genre=` in the URL is the user's intent for this visit and must win
+  // over whatever genre an earlier trending visit left behind in redux —
+  // otherwise arriving from Explore with `?genre=Jazz` silently keeps showing
+  // the previous genre. With no genre in the URL, redux still wins so the last
+  // filter is remembered (and gets written back to the URL by the sync effect
+  // below).
+  const genreFromUrlOnMount = useRef(parseUrlParams().genre)
+
   useEffect(() => {
     const { genre, timeRange } = parseUrlParams()
-    if (trendingGenre) {
-      updateGenreUrlParam(trendingGenre, replaceRouteCallback)
-    } else if (isValidGenre(genre)) {
-      dispatch(trendingPageActions.setTrendingGenre(genre as any))
+    if (isValidGenre(genre)) {
+      dispatch(
+        trendingPageActions.setTrendingGenre(toTrendingGenreValue(genre))
+      )
     }
     if (isValidTimeRange(timeRange)) {
       dispatch(trendingPageActions.setTrendingTimeRange(timeRange as TimeRange))
@@ -152,6 +171,13 @@ const TrendingPageMobileContent = ({
     updateTimeRangeUrlParam(trendingTimeRange, replaceRouteCallback)
   }, [trendingTimeRange, replaceRouteCallback])
   useEffect(() => {
+    // Skip the first run when the URL already carries the genre: redux has not
+    // caught up with the effect above yet, and writing the stale value back
+    // would clobber the incoming param.
+    if (isValidGenre(genreFromUrlOnMount.current)) {
+      genreFromUrlOnMount.current = null
+      return
+    }
     updateGenreUrlParam(trendingGenre, replaceRouteCallback)
   }, [trendingGenre, replaceRouteCallback])
 

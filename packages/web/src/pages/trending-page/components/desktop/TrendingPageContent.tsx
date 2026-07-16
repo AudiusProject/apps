@@ -159,12 +159,20 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     [dispatch]
   )
 
+  // A `?genre=` in the URL is the user's intent for this visit and must win
+  // over whatever genre an earlier trending visit left behind in redux —
+  // otherwise arriving from Explore with `?genre=Jazz` silently keeps showing
+  // the previous genre. With no genre in the URL, redux still wins so the last
+  // filter is remembered (and gets written back to the URL by the sync effect
+  // below).
+  const genreFromUrlOnMount = useRef(parseUrlParams().genre)
+
   useEffect(() => {
     const { genre, timeRange } = parseUrlParams()
-    if (trendingGenre) {
-      updateGenreUrlParam(trendingGenre, replaceRouteCallback)
-    } else if (isValidGenre(genre)) {
-      dispatch(trendingPageActions.setTrendingGenre(genre as any))
+    if (isValidGenre(genre)) {
+      dispatch(
+        trendingPageActions.setTrendingGenre(toTrendingGenreValue(genre))
+      )
     }
     if (isValidTimeRange(timeRange)) {
       dispatch(trendingPageActions.setTrendingTimeRange(timeRange as TimeRange))
@@ -177,6 +185,13 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   }, [trendingTimeRange, replaceRouteCallback])
 
   useEffect(() => {
+    // Skip the first run when the URL already carries the genre: redux has not
+    // caught up with the effect above yet, and writing the stale value back
+    // would clobber the incoming param.
+    if (isValidGenre(genreFromUrlOnMount.current)) {
+      genreFromUrlOnMount.current = null
+      return
+    }
     updateGenreUrlParam(trendingGenre, replaceRouteCallback)
   }, [trendingGenre, replaceRouteCallback])
 

@@ -4,7 +4,6 @@ import { usePopularGenres } from '@audius/common/api'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { trendingPageActions } from '@audius/common/store'
 import { toTrendingGenreValue } from '@audius/common/utils'
-import { ScrollView } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import { Flex, SelectablePill, Skeleton } from '@audius/harmony-native'
@@ -53,33 +52,21 @@ export const TrendingGenres = () => {
   return (
     <InViewWrapper>
       <ExploreSection title={messages.trendingGenres}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyboardShouldPersistTaps='handled'
-        >
-          <Flex row gap='s' alignItems='center'>
-            {showSkeleton
-              ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    h={36}
-                    w={96}
-                    borderRadius='2xl'
-                    noShimmer
-                  />
-                ))
-              : topGenres.map((genre) => (
-                  <SelectablePill
-                    key={genre.value}
-                    type='button'
-                    size='large'
-                    label={genre.label}
-                    onPress={() => handleGenrePress(genre.value)}
-                  />
-                ))}
-          </Flex>
-        </ScrollView>
+        <Flex row wrap='wrap' gap='s' alignItems='center'>
+          {showSkeleton
+            ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+                <Skeleton key={i} h={36} w={96} borderRadius='2xl' noShimmer />
+              ))
+            : topGenres.map((genre) => (
+                <SelectablePill
+                  key={genre.value}
+                  type='button'
+                  size='large'
+                  label={genre.label}
+                  onPress={() => handleGenrePress(genre.value)}
+                />
+              ))}
+        </Flex>
       </ExploreSection>
     </InViewWrapper>
   )
