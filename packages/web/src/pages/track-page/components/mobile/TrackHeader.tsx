@@ -1,6 +1,6 @@
 import { Suspense, useCallback } from 'react'
 
-import { useTrack, useTrackRank } from '@audius/common/api'
+import { useTrack, useTrackRank, useStems } from '@audius/common/api'
 import {
   SquareSizes,
   isContentUSDCPurchaseGated,
@@ -185,22 +185,16 @@ const TrackHeader = ({
         album_backlink: track?.album_backlink,
         release_date: track?.release_date,
         ddex_app: track?.ddex_app,
-        permalink: track?.permalink,
-        _stems: track?._stems
+        permalink: track?.permalink
       }
     }
   })
-  const {
-    is_downloadable,
-    album_backlink,
-    release_date,
-    ddex_app,
-    permalink,
-    _stems
-  } = partialTrack ?? {}
+  const { is_downloadable, album_backlink, release_date, ddex_app, permalink } =
+    partialTrack ?? {}
 
   const dispatch = useDispatch()
-  const hasDownloadableAssets = is_downloadable || (_stems?.length ?? 0) > 0
+  const { data: stems = [] } = useStems(trackId)
+  const hasDownloadableAssets = is_downloadable || stems.length > 0
 
   const showSocials = !isUnlisted && hasStreamAccess
   const isUSDCPurchaseGated = isContentUSDCPurchaseGated(streamConditions)

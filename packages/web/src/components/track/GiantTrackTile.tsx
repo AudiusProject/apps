@@ -3,7 +3,8 @@ import { useCallback, useState, useEffect, useRef } from 'react'
 import {
   useTrackRank,
   useToggleFavoriteTrack,
-  useTrack
+  useTrack,
+  useStems
 } from '@audius/common/api'
 import {
   isContentUSDCPurchaseGated,
@@ -194,7 +195,8 @@ export const GiantTrackTile = ({
   const { data: collaborators } = useTrack(trackId, {
     select: (track) => track.collaborators
   })
-  const shouldShowDownloadSection = !!track?.is_downloadable
+  const { data: stems = [] } = useStems(trackId)
+  const shouldShowDownloadSection = !!track?.is_downloadable || stems.length > 0
   // Preview button is shown for USDC-gated tracks if user does not have access
   // or is the owner
   const showPreview =
