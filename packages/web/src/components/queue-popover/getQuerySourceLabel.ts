@@ -25,7 +25,6 @@ const LABELS: Record<string, string> = {
   tracksByAlbum: 'Album',
   trackPageLineup: 'More tracks',
   remixes: 'Remixes',
-  recommendedTracks: 'Recommended',
   search: 'Search results'
 }
 

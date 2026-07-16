@@ -11,7 +11,6 @@ import { BestSellingAlbums } from './BestSellingAlbums'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
-import { ForYouTracks } from './ForYouTracks'
 import { LabelSpotlight } from './LabelSpotlight'
 import { NewAlbumReleases } from './NewAlbumReleases'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
@@ -31,7 +30,6 @@ export const ExploreContent = () => {
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
-      {showTrackContent && showUserContextualContent && <ForYouTracks />}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <TrendingGenres />}
       {showAlbumContent && <TopAlbumsThisMonth />}
