@@ -56,6 +56,7 @@ export const initialState: BasicModalsState = {
   EditAccessConfirmation: { isOpen: false },
   EarlyReleaseConfirmation: { isOpen: false },
   PublishConfirmation: { isOpen: false },
+  PublishHiddenTracksConfirmation: { isOpen: false },
   HideContentConfirmation: { isOpen: false },
   ReplaceTrackConfirmation: { isOpen: false },
   ReplaceTrackProgress: { isOpen: false },
