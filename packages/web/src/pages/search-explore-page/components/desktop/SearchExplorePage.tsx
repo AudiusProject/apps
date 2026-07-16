@@ -50,7 +50,6 @@ import { NewAlbumReleasesSection } from './NewAlbumReleasesSection'
 import { QuickSearchGrid } from './QuickSearchGrid'
 import { RecentSearchesSection } from './RecentSearchesSection'
 import { RecentlyPlayedSection } from './RecentlyPlayedSection'
-import { RecommendedTracksSection } from './RecommendedTracksSection'
 import { TopAlbumsThisMonthSection } from './TopAlbumsThisMonthSection'
 import { TrendingGenresSection } from './TrendingGenresSection'
 import { UndergroundTrendingTracksSection } from './UndergroundTrendingTracksSection'
@@ -177,11 +176,6 @@ const SearchExplorePage = ({
     shouldRender: boolean
     element: ReactNode
   }[] = [
-    {
-      key: 'recommendedTracks',
-      shouldRender: showTrackContent && showUserContextualContent,
-      element: <RecommendedTracksSection />
-    },
     {
       key: 'featuredPlaylists',
       shouldRender: showPlaylistContent,

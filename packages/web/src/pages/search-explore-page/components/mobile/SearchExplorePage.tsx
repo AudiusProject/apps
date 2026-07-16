@@ -46,7 +46,6 @@ import { NewAlbumReleasesSection } from '../desktop/NewAlbumReleasesSection'
 import { QuickSearchGrid } from '../desktop/QuickSearchGrid'
 import { RecentSearchesSection } from '../desktop/RecentSearchesSection'
 import { RecentlyPlayedSection } from '../desktop/RecentlyPlayedSection'
-import { RecommendedTracksSection } from '../desktop/RecommendedTracksSection'
 import { TopAlbumsThisMonthSection } from '../desktop/TopAlbumsThisMonthSection'
 import { UndergroundTrendingTracksSection } from '../desktop/UndergroundTrendingTracksSection'
 
@@ -228,9 +227,6 @@ const SearchExplorePage = ({
             display: inputValue || showSearchResults ? 'none' : undefined
           }}
         >
-          {showTrackContent && showUserContextualContent ? (
-            <RecommendedTracksSection />
-          ) : null}
           {isTracksTab ? <QuickSearchGrid /> : null}
           {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
