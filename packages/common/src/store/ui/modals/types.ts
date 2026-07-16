@@ -23,6 +23,7 @@ import { InboxUnavailableModalState } from './inbox-unavailable-modal'
 import { LeavingAudiusModalState } from './leaving-audius-modal'
 import { PremiumContentPurchaseModalState } from './premium-content-purchase-modal'
 import { PublishConfirmationModalState } from './publish-confirmation-modal'
+import { PublishHiddenTracksConfirmationModalState } from './publish-hidden-tracks-confirmation-modal'
 import { ReplaceTrackConfirmationModalState } from './replace-track-confirmation-modal'
 import { ReplaceTrackProgressModalState } from './replace-track-progress-modal'
 import { UploadConfirmationModalState } from './upload-confirmation-modal'
@@ -93,6 +94,7 @@ export type Modals =
   | 'EditAccessConfirmation'
   | 'EarlyReleaseConfirmation'
   | 'PublishConfirmation'
+  | 'PublishHiddenTracksConfirmation'
   | 'HideContentConfirmation'
   | 'WithdrawUSDCModal'
   | 'USDCPurchaseDetailsModal'
@@ -148,6 +150,7 @@ export type StatefulModalsState = {
   EditAccessConfirmation: EditAccessConfirmationModalState
   EarlyReleaseConfirmation: EarlyReleaseConfirmationModalState
   PublishConfirmation: PublishConfirmationModalState
+  PublishHiddenTracksConfirmation: PublishHiddenTracksConfirmationModalState
   HideContentConfirmation: HideContentConfirmationModalState
   DeleteTrackConfirmation: DeleteTrackConfirmationModalState
   ReplaceTrackConfirmation: ReplaceTrackConfirmationModalState

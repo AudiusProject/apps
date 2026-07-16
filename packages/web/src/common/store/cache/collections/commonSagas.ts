@@ -17,6 +17,7 @@ import {
   PlaylistContents,
   ID,
   Collection,
+  Track,
   isContentUSDCPurchaseGated
 } from '@audius/common/models'
 import {
@@ -27,7 +28,10 @@ import {
   getContext,
   confirmerActions,
   trackPageActions,
-  getSDK
+  getSDK,
+  publishHiddenTracksConfirmationModalActions,
+  publishHiddenTracksConfirmed,
+  keepHiddenTracksPrivate
 } from '@audius/common/store'
 import {
   squashNewLines,
@@ -36,7 +40,15 @@ import {
   updatePlaylistArtwork
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
-import { all, call, put, takeEvery, takeLatest } from 'typed-redux-saga'
+import {
+  all,
+  call,
+  put,
+  race,
+  take,
+  takeEvery,
+  takeLatest
+} from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
 import watchTrackErrors from 'common/store/cache/collections/errorSagas'
@@ -62,6 +74,78 @@ const messages = {
   removingTrack: 'Removing track...',
   removedTrack: 'Removed track',
   reorderStale: 'This collection was updated elsewhere. Try again.'
+}
+
+/** Tracks the user deliberately hid, as opposed to pre-releases. */
+const getHiddenTracks = (playlistTracks: Track[] | null | undefined) =>
+  (playlistTracks ?? []).filter(
+    (track) => track.is_unlisted && !track.is_scheduled_release
+  )
+
+/**
+ * Asks whether deliberately-hidden tracks should be published along with their
+ * collection. Resolves to true when there is nothing to ask about.
+ *
+ * Ask before kicking off the write: the publish path applies the result inside
+ * a confirmer callback, which serializes writes for the collection, so blocking
+ * there would hold that queue for as long as the modal is up.
+ */
+export function* confirmPublishHiddenTracks(
+  hiddenTrackCount: number,
+  isAlbum: boolean
+) {
+  if (hiddenTrackCount === 0) return true
+
+  // Mobile renders no drawer for this modal yet, so prompting there would block
+  // the publish forever. Until the drawer lands it keeps the previous
+  // publish-everything behavior.
+  const isNativeMobile = yield* getContext('isNativeMobile')
+  if (isNativeMobile) return true
+
+  yield* put(
+    publishHiddenTracksConfirmationModalActions.open({
+      contentType: isAlbum ? 'album' : 'playlist',
+      hiddenTrackCount
+    })
+  )
+
+  const { confirmed } = yield* race({
+    confirmed: take(publishHiddenTracksConfirmed.type),
+    keepPrivate: take(keepHiddenTracksPrivate.type)
+  })
+
+  return !!confirmed
+}
+
+/**
+ * Publishes the hidden tracks of a collection that is being made public.
+ *
+ * Deliberately-hidden tracks are published only when `publishHiddenTracks` is
+ * set, which the caller obtains from `confirmPublishHiddenTracks`. Scheduled
+ * releases are separate: they are published only as an early release, which
+ * requires the collection itself to be a scheduled release whose tracks are all
+ * scheduled.
+ */
+export function* publishHiddenChildTracks(
+  playlist: Collection,
+  playlistTracks: Track[] | null | undefined,
+  publishHiddenTracks: boolean
+) {
+  const tracks = playlistTracks ?? []
+  const isEachTrackScheduled = tracks.every(
+    (track) => track.is_unlisted && track.is_scheduled_release
+  )
+  const isEarlyRelease = !!playlist.is_scheduled_release && isEachTrackScheduled
+
+  for (const track of tracks) {
+    if (!track.is_unlisted) continue
+    const shouldPublish = track.is_scheduled_release
+      ? isEarlyRelease
+      : publishHiddenTracks
+    if (shouldPublish) {
+      yield* put(trackPageActions.makeTrackPublic(track.track_id))
+    }
+  }
 }
 
 /** Counts instances of trackId in a playlist. */
@@ -157,22 +241,16 @@ function* editPlaylistAsync(
         playlistId
       )
 
-      // Publish all hidden tracks
-      // If the playlist is a scheduled release
-      //    AND all tracks are scheduled releases, publish them all
-      const isEachTrackScheduled = playlistTracksForPublish?.every(
-        (track) => track.is_unlisted && track.is_scheduled_release
+      const publishHiddenTracks = yield* confirmPublishHiddenTracks(
+        getHiddenTracks(playlistTracksForPublish).length,
+        !!playlist.is_album
       )
-      const isEarlyRelease =
-        playlistBeforeEdit.is_scheduled_release && isEachTrackScheduled
-      for (const track of playlistTracksForPublish ?? []) {
-        if (
-          track.is_unlisted &&
-          (!track.is_scheduled_release || isEarlyRelease)
-        ) {
-          yield* put(trackPageActions.makeTrackPublic(track.track_id))
-        }
-      }
+
+      yield* publishHiddenChildTracks(
+        playlistBeforeEdit,
+        playlistTracksForPublish,
+        publishHiddenTracks
+      )
     }
   } catch (error) {
     if (onComplete) yield* call(onComplete, false, error as Error)
@@ -482,15 +560,25 @@ function* publishPlaylistAsync(
   if (!playlist) return
   const playlistWithPublishing = { ...playlist, _is_publishing: true }
 
+  // Ask before the write starts, so the modal never holds the confirmer queue.
+  const tracksBeforePublish = yield* call(
+    queryCollectionTracks,
+    action.playlistId
+  )
+  const publishHiddenTracks = yield* confirmPublishHiddenTracks(
+    getHiddenTracks(tracksBeforePublish).length,
+    !!action.isAlbum
+  )
+
   yield* call(updateCollectionData, [
     { playlist_id: playlist.playlist_id, _is_publishing: true }
   ])
 
-  yield* call(
-    confirmPublishPlaylist,
+  yield* confirmPublishPlaylist(
     userId,
     action.playlistId,
     playlistWithPublishing,
+    publishHiddenTracks,
     action.dismissToastKey,
     action.isAlbum
   )
@@ -500,6 +588,7 @@ function* confirmPublishPlaylist(
   userId: ID,
   playlistId: ID,
   playlist: Collection,
+  publishHiddenTracks: boolean,
   dismissToastKey?: string,
   isAlbum?: boolean
 ) {
@@ -534,22 +623,12 @@ function* confirmPublishPlaylist(
         yield* call(updateCollectionData, [confirmedPlaylist])
 
         const playlistTracks = yield* call(queryCollectionTracks, playlistId)
-        // Publish all hidden tracks
-        // If the playlist is a scheduled release
-        //    AND all tracks are scheduled releases, publish them all
-        const isEachTrackScheduled = playlistTracks?.every(
-          (track) => track.is_unlisted && track.is_scheduled_release
+
+        yield* publishHiddenChildTracks(
+          playlist,
+          playlistTracks,
+          publishHiddenTracks
         )
-        const isEarlyRelease =
-          playlist.is_scheduled_release && isEachTrackScheduled
-        for (const track of playlistTracks ?? []) {
-          if (
-            track.is_unlisted &&
-            (!track.is_scheduled_release || isEarlyRelease)
-          ) {
-            yield* put(trackPageActions.makeTrackPublic(track.track_id))
-          }
-        }
 
         if (dismissToastKey) {
           yield* put(manualClearToast({ key: dismissToastKey }))

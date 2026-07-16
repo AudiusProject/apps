@@ -29,6 +29,7 @@ import { notificationModalReducer } from './notification-modal'
 import parentReducer, { initialState } from './parentSlice'
 import { premiumContentPurchaseModalReducer } from './premium-content-purchase-modal'
 import { publishConfirmationModalReducer } from './publish-confirmation-modal'
+import { publishHiddenTracksConfirmationModalReducer } from './publish-hidden-tracks-confirmation-modal'
 import { receiveTokensModalReducer } from './receive-tokens-modal'
 import { replaceTrackConfirmationModalReducer } from './replace-track-confirmation-modal'
 import { replaceTrackProgressModalReducer } from './replace-track-progress-modal'
@@ -83,6 +84,7 @@ const combinedReducers = combineReducers({
   ReplaceTrackConfirmation: replaceTrackConfirmationModalReducer,
   ReplaceTrackProgress: replaceTrackProgressModalReducer,
   PublishConfirmation: publishConfirmationModalReducer,
+  PublishHiddenTracksConfirmation: publishHiddenTracksConfirmationModalReducer,
   HideContentConfirmation: hideContentConfirmationModalReducer,
   ExternalWalletSignUp: externalWalletSignUpModalReducer,
   ConnectedWallets: connectedWalletsModalReducer,
