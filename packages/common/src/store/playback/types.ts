@@ -1,4 +1,4 @@
-import { ID, Track, User } from '../../models'
+import { FeedTab, ID, Track, User } from '../../models'
 
 export const PLAYBACK_RATE_LS_KEY = 'playbackRate'
 
@@ -92,6 +92,11 @@ export type PlaybackTrack = {
   // Set by collection-page when building its queue; consumed by analytics
   // (PLAYBACK_PLAY events).
   collectionId?: ID
+  // The feed view (FOR_YOU / LATEST) this entry was queued from, if any.
+  // Set by the feed lineup when building its queue; consumed by analytics
+  // (PLAYBACK_PLAY events). Stamped at queue time so passive plays report
+  // the view the track actually came from even if the user switches tabs.
+  feedType?: FeedTab
   playerBehavior?: PlayerBehavior
 }
 

@@ -1172,6 +1172,9 @@ type PlaybackPlay = {
   isPreview?: boolean
   source: PlaybackSource
   collectionId?: string
+  // Which feed view the play originated from (matches FEED_CHANGE_VIEW's
+  // `view` values). Only present for plays coming from the feed lineup.
+  feed_type?: FeedTab
 }
 type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE

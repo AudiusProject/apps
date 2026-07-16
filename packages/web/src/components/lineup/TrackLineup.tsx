@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { LineupData } from '@audius/common/api'
 import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
-import { ID, PlaybackSource, Name } from '@audius/common/models'
+import { FeedTab, ID, PlaybackSource, Name } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type {
   PlaybackTrack,
@@ -96,6 +96,11 @@ export type TrackLineupProps = {
   onClickTile?: (trackId: ID) => void
 
   playbackSource?: PlaybackSource
+
+  // The feed view (FOR_YOU / LATEST) this lineup renders, when it's the
+  // feed. Stamped onto queue entries and attached to PLAYBACK_PLAY events
+  // as `feed_type` so plays can be attributed to a feed view.
+  feedType?: FeedTab
 }
 
 /**
@@ -134,7 +139,8 @@ export const TrackLineup = ({
   delineatorMap,
   elementAdornment,
   onClickTile,
-  playbackSource = PlaybackSource.TRACK_TILE_LINEUP
+  playbackSource = PlaybackSource.TRACK_TILE_LINEUP,
+  feedType
 }: TrackLineupProps) => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
@@ -181,9 +187,10 @@ export const TrackLineup = ({
     () =>
       playbackTrackIds.map((id) => ({
         trackId: id,
-        source
+        source,
+        ...(feedType ? { feedType } : {})
       })),
-    [playbackTrackIds, source]
+    [playbackTrackIds, source, feedType]
   )
 
   const togglePlay = useCallback(
@@ -204,7 +211,11 @@ export const TrackLineup = ({
       if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
         dispatch(
-          make(Name.PLAYBACK_PLAY, { id: `${trackId}`, source: analytics })
+          make(Name.PLAYBACK_PLAY, {
+            id: `${trackId}`,
+            source: analytics,
+            ...(feedType ? { feed_type: feedType } : {})
+          })
         )
         return
       }
@@ -218,7 +229,11 @@ export const TrackLineup = ({
         })
       )
       dispatch(
-        make(Name.PLAYBACK_PLAY, { id: `${trackId}`, source: analytics })
+        make(Name.PLAYBACK_PLAY, {
+          id: `${trackId}`,
+          source: analytics,
+          ...(feedType ? { feed_type: feedType } : {})
+        })
       )
     },
     [
@@ -230,7 +245,8 @@ export const TrackLineup = ({
       currentLegacy?.source,
       source,
       isPlaying,
-      playbackSource
+      playbackSource,
+      feedType
     ]
   )
 

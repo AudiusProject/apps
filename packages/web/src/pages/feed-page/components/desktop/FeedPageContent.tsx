@@ -159,6 +159,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
           key={`feed-${feedTab}`}
           aria-label='feed'
           source='DISCOVER_FEED'
+          feedType={feedTab}
           variant={LineupVariant.MAIN}
           scrollParent={containerRef?.current ?? null}
           emptyElement={<EmptyFeed />}
