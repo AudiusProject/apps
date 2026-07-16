@@ -29,7 +29,6 @@ import {
   Divider,
   FilterButton,
   Flex,
-  IconButton,
   IconShare,
   IconUserFollow,
   IconUserFollowing,
@@ -442,9 +441,10 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
     return (
       <Flex gap='s' alignItems='center' wrap='wrap'>
-        <IconButton
-          icon={IconShare}
-          color='default'
+        <Button
+          size='small'
+          variant='secondary'
+          iconLeft={IconShare}
           aria-label={messages.share}
           onClick={handleShareContest}
         />
@@ -530,7 +530,7 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 >
                   <Skeleton h={20} w={140} />
                   <Flex gap='s'>
-                    <Skeleton h={32} w={32} css={{ borderRadius: '50%' }} />
+                    <Skeleton h={32} w={48} />
                     <Skeleton h={32} w={120} />
                     <Skeleton h={32} w={120} />
                   </Flex>
