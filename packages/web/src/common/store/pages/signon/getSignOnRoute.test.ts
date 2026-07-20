@@ -1,13 +1,15 @@
-import {
-  SIGN_IN_PAGE,
-  SIGN_UP_FINISH_PROFILE_PAGE,
-  SIGN_UP_HANDLE_PAGE,
-  SIGN_UP_PASSWORD_PAGE
-} from '@audius/common/src/utils/route'
+import { route } from '@audius/common/utils'
 import { describe, expect, it } from 'vitest'
 
 import { getSignOnRoute } from './getSignOnRoute'
 import { Pages } from './types'
+
+const {
+  SIGN_IN_PAGE,
+  SIGN_UP_FINISH_PROFILE_PAGE,
+  SIGN_UP_HANDLE_PAGE,
+  SIGN_UP_PASSWORD_PAGE
+} = route
 
 describe('getSignOnRoute', () => {
   it('routes Identity-only accounts to handle selection', () => {

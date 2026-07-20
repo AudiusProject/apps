@@ -1,12 +1,14 @@
-import {
+import { route } from '@audius/common/utils'
+
+import { Pages } from './types'
+
+const {
   SIGN_IN_PAGE,
   SIGN_UP_FINISH_PROFILE_PAGE,
   SIGN_UP_HANDLE_PAGE,
   SIGN_UP_PAGE,
   SIGN_UP_PASSWORD_PAGE
-} from '@audius/common/src/utils/route'
-
-import { Pages } from './types'
+} = route
 
 type GetSignOnRouteParams = {
   signIn: boolean
