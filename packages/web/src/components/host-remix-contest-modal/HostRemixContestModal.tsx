@@ -138,7 +138,11 @@ export const HostRemixContestModal = NiceModal.create(() => {
     if (hasError || !trackId || !userId) return
 
     const endDate = parsedDate.toISOString()
+    // event_data is replaced wholesale by the indexer on update, so carry
+    // over the fields this form doesn't edit (title, coverPhotoUrl,
+    // sourceTrackIds, etc.) instead of dropping them.
     const eventData = {
+      ...remixContest?.eventData,
       description: contestDescription,
       prizeInfo: contestPrizeInfo,
       winners: remixContest?.eventData.winners ?? []

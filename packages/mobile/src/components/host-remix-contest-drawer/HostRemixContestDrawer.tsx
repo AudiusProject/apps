@@ -147,7 +147,11 @@ export const HostRemixContestDrawer = () => {
       updateEvent({
         eventId: remixContest.eventId,
         endDate: endDate.toISOString(),
+        // event_data is replaced wholesale by the indexer on update, so
+        // carry over the fields this form doesn't edit (title,
+        // coverPhotoUrl, sourceTrackIds, etc.) instead of dropping them.
         eventData: {
+          ...remixContest.eventData,
           description,
           prizeInfo,
           videoUrl: videoUrl.trim() || undefined,
