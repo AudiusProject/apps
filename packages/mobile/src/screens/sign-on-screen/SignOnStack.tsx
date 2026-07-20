@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   useCurrentAccountUser,
@@ -9,10 +9,11 @@ import type { NativeStackNavigationOptions } from '@react-navigation/native-stac
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import {
   getFinishedPhase1,
+  getHandleField,
   getPage,
   getStartedAndFinishedSignup
 } from 'common/store/pages/signon/selectors'
-import { Pages } from 'common/store/pages/signon/types'
+import type { Pages } from 'common/store/pages/signon/types'
 import { Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -29,6 +30,7 @@ import { SelectArtistsScreen } from './screens/SelectArtistScreen'
 import { SelectGenresScreen } from './screens/SelectGenresScreen'
 import { SignOnScreen } from './screens/SignOnScreen'
 import type { SignOnScreenParamList } from './types'
+import { getSignOnScreen } from './utils/getSignOnScreen'
 
 const Stack = createNativeStackNavigator()
 const screenOptionsOverrides = { animationTypeForReplace: 'pop' as const }
@@ -69,15 +71,23 @@ export const SignOnStack = (props: SignOnStackProps) => {
   )
 
   const page = useSelector(getPage)
+  const handle = useSelector(getHandleField)
   const navigation = useNavigation<SignOnScreenParamList>()
+  const lastHandledPage = useRef<Pages | null>(null)
 
   // Respond to signon saga page changes
   useEffect(() => {
-    // This occurs when a guest account confirms email and is ready to complete their account
-    if (page === Pages.PASSWORD) {
-      navigation.navigate('CreatePassword')
-    }
-  }, [navigation, page])
+    // Process each page transition once. Handle changes on PickHandle should not
+    // advance the user to FinishProfile before they submit the handle.
+    if (lastHandledPage.current === page) return
+    lastHandledPage.current = page
+
+    const screen = getSignOnScreen({
+      page,
+      hasHandle: Boolean(handle.value)
+    })
+    if (screen) navigation.navigate(screen)
+  }, [handle.value, navigation, page])
 
   return (
     <ScreenOptionsContext.Provider
