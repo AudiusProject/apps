@@ -77,6 +77,7 @@ import { waitForRead, waitForWrite } from 'utils/sagaHelpers'
 
 import * as signOnActions from './actions'
 import { watchSignOnError } from './errorSagas'
+import { getSignOnRoute } from './getSignOnRoute'
 import {
   getFollowIds,
   getIsGuest,
@@ -85,7 +86,7 @@ import {
 } from './selectors'
 import { Pages } from './types'
 
-const { FEED_PAGE, SIGN_IN_PAGE, SIGN_UP_PAGE, SIGN_UP_PASSWORD_PAGE } = route
+const { FEED_PAGE } = route
 const { requestPushNotificationPermissions } = settingsPageActions
 const { saveCollection } = collectionsSocialActions
 const { toast } = toastActions
@@ -119,6 +120,8 @@ const PASSWORD_RESET_REQUIRED_KEY = 'password-reset-required'
 const messages = {
   incompleteAccount:
     'Oops, it looks like your account was never fully completed!',
+  accountCreationFailed:
+    "We couldn't finish creating your account. Your login is saved; please try again.",
   emailCheckFailed: 'Something has gone wrong, please try again later.',
   deactivatedAccount:
     'Your account has been deactivated. Please contact support.'
@@ -574,6 +577,11 @@ function* signUp() {
                     username: email
                   })
                 }
+
+                // Identity is committed before the core user write. Preserve
+                // that checkpoint so a failed core write can be retried without
+                // attempting to register the same email again.
+                yield* put(signOnActions.setIdentityAccountReady())
               }
 
               const [wallet] = yield* call([
@@ -581,35 +589,67 @@ function* signUp() {
                 sdk.services.audiusWalletClient.getAddresses
               ])
 
-              const events: CreateUserRequestWithFiles['metadata']['events'] =
-                {}
-              if (referrer) {
-                events.referrer = OptionalId.parse(referrer)
-              }
-              if (isNativeMobile) {
-                events.isMobileUser = true
-              }
+              // A previous relay may have succeeded even if its confirmation
+              // timed out. Check the wallet before issuing another CREATE so
+              // resuming remains idempotent once that user is indexed.
+              const existingAccount = alreadyExisted
+                ? yield* call(getWalletAccountSaga, wallet, sdk, queryClient)
+                : null
 
-              const createUserMetadata: CreateUserRequestWithFiles = {
-                profilePictureFile: signOn.profileImage?.file as File,
-                coverArtFile: signOn.coverPhoto?.file as File,
-                metadata: {
-                  location: location ?? undefined,
-                  name,
-                  events,
-                  handle,
-                  wallet
+              if (existingAccount) {
+                userId = existingAccount.user.user_id
+
+                // Older incomplete accounts can have an indexed core user but
+                // no profile name. Complete that user rather than creating a
+                // second user ID for the same wallet.
+                if (!existingAccount.user.name) {
+                  const completeProfileRequest: UpdateUserRequestWithFiles = {
+                    id: Id.parse(userId),
+                    userId: Id.parse(userId),
+                    profilePictureFile: signOn.profileImage?.file as File,
+                    coverArtFile: signOn.coverPhoto?.file as File,
+                    metadata: {
+                      location: location ?? undefined,
+                      name,
+                      handle
+                    }
+                  }
+                  yield* call(
+                    [sdk.users, sdk.users.updateUser],
+                    completeProfileRequest
+                  )
                 }
-              }
+              } else {
+                const events: CreateUserRequestWithFiles['metadata']['events'] =
+                  {}
+                if (referrer) {
+                  events.referrer = OptionalId.parse(referrer)
+                }
+                if (isNativeMobile) {
+                  events.isMobileUser = true
+                }
 
-              const { userId: returnedUserId } = yield* call(
-                [sdk.users, sdk.users.createUser],
-                createUserMetadata
-              )
-              if (!returnedUserId) {
-                throw new Error('User ID not returned from createUser')
+                const createUserMetadata: CreateUserRequestWithFiles = {
+                  profilePictureFile: signOn.profileImage?.file as File,
+                  coverArtFile: signOn.coverPhoto?.file as File,
+                  metadata: {
+                    location: location ?? undefined,
+                    name,
+                    events,
+                    handle,
+                    wallet
+                  }
+                }
+
+                const { userId: returnedUserId } = yield* call(
+                  [sdk.users, sdk.users.createUser],
+                  createUserMetadata
+                )
+                if (!returnedUserId) {
+                  throw new Error('User ID not returned from createUser')
+                }
+                userId = decodeHashId(returnedUserId)!
               }
-              userId = decodeHashId(returnedUserId)!
             }
 
             yield* put(
@@ -644,11 +684,11 @@ function* signUp() {
             const params: signOnActions.SignUpFailedParams = {
               error: error.message,
               // TODO: Remove phase, stop using error Sagas for signup
-              // We are mostly handling reporting here already and we're
-              // only using it for error redirects.
               phase: 'CREATE_USER',
-              shouldReport: false, // We are reporting in this saga
-              shouldToast: rateLimited
+              shouldRedirect: false,
+              shouldReport: true,
+              shouldToast: true,
+              message: messages.accountCreationFailed
             }
             if (rateLimited) {
               params.message = 'Please try again later'
@@ -675,6 +715,9 @@ function* signUp() {
               console.error(error)
             }
             yield* put(signOnActions.signUpFailed(params))
+            // Let the confirmer run its failure callback. Swallowing this error
+            // causes the success callback to run and overwrite the failure.
+            throw error
           }
         },
         function* () {
@@ -770,7 +813,10 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       )
       yield* put(
         signOnActions.openSignOn(false, Pages.PROFILE, {
-          accountAlreadyExisted: true
+          accountAlreadyExisted: true,
+          finishedPhase1: false,
+          startedSignUpProcess: true,
+          status: 'editing'
         })
       )
 
@@ -813,19 +859,22 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
         yield* put(
           signOnActions.openSignOn(false, Pages.PASSWORD, {
             accountAlreadyExisted: true,
+            finishedPhase1: false,
+            startedSignUpProcess: true,
+            status: 'editing',
             handle: {
               value: user.handle,
               status: 'disabled'
             }
           })
         )
-        if (!isNativeMobile) {
-          yield* put(pushRoute(SIGN_UP_PASSWORD_PAGE))
-        }
       } else {
         yield* put(
           signOnActions.openSignOn(false, Pages.PROFILE, {
             accountAlreadyExisted: true,
+            finishedPhase1: false,
+            startedSignUpProcess: true,
+            status: 'editing',
             handle: {
               value: user.handle,
               status: 'disabled'
@@ -1058,8 +1107,13 @@ function* watchOpenSignOn() {
   yield* takeLatest(
     signOnActions.OPEN_SIGN_ON,
     function* (action: ReturnType<typeof signOnActions.openSignOn>) {
-      const route = action.signIn ? SIGN_IN_PAGE : SIGN_UP_PAGE
-      yield* put(pushRoute(route))
+      const signOn = yield* select(getSignOn)
+      const signOnRoute = getSignOnRoute({
+        signIn: action.signIn,
+        page: action.page,
+        hasHandle: Boolean(signOn.handle.value)
+      })
+      yield* put(pushRoute(signOnRoute))
     }
   )
 }

@@ -2,6 +2,7 @@ import { route } from '@audius/common/utils'
 
 import {
   SET_ACCOUNT_READY,
+  SET_IDENTITY_ACCOUNT_READY,
   SET_FIELD,
   SET_VALUE_FIELD,
   VALIDATE_EMAIL,
@@ -21,6 +22,7 @@ import {
   FINISH_SIGN_UP,
   SIGN_UP_SUCCEEDED,
   SIGN_UP_FAILED,
+  SIGN_UP_TIMEOUT,
   SIGN_IN,
   SIGN_IN_FAILED,
   SIGN_IN_SUCCEEDED,
@@ -83,6 +85,12 @@ const actionsMap = {
     return {
       ...state,
       accountReady: true
+    }
+  },
+  [SET_IDENTITY_ACCOUNT_READY](state) {
+    return {
+      ...state,
+      accountAlreadyExisted: true
     }
   },
   [RESET_SIGN_ON](state) {
@@ -294,6 +302,12 @@ const actionsMap = {
     }
   },
   [SIGN_UP_FAILED](state, action) {
+    return {
+      ...state,
+      status: 'failure'
+    }
+  },
+  [SIGN_UP_TIMEOUT](state, action) {
     return {
       ...state,
       status: 'failure'
