@@ -18,7 +18,10 @@ function* handleSignOnError(
   const SIGN_IN_ERROR_PREFIX = 'SIGN_ON/SIGN_IN_ERROR_'
 
   // Determine whether the error should redirect to /error and whether it should report it.
-  const shouldRedirect = !noRedirectSet.has(action.type)
+  const shouldRedirect =
+    'shouldRedirect' in action
+      ? (action.shouldRedirect ?? !noRedirectSet.has(action.type))
+      : !noRedirectSet.has(action.type)
 
   const shouldReport = 'shouldReport' in action ? action.shouldReport : true
 

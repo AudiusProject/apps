@@ -22,6 +22,7 @@ export const VALIDATE_HANDLE_FAILED = 'SIGN_ON/VALIDATE_HANDLE_FAILED'
 export const HIDE_PREVIEW_HINT = 'SIGN_ON/HIDE_PREVIEW_HINT'
 export const FOLLOW_ARTISTS = 'SIGN_ON/FOLLOW_ARTISTS'
 export const SET_ACCOUNT_READY = 'SIGN_ON/SET_ACCOUNT_READY'
+export const SET_IDENTITY_ACCOUNT_READY = 'SIGN_ON/SET_IDENTITY_ACCOUNT_READY'
 
 export const CHECK_EMAIL = 'SIGN_ON/CHECK_EMAIL'
 
@@ -191,6 +192,7 @@ export type SignUpFailedParams = {
   error: string
   phase: string
   redirectRoute?: string
+  shouldRedirect?: boolean
   shouldReport: boolean
   shouldToast: boolean
   message?: string
@@ -201,6 +203,7 @@ export const signUpFailed = ({
   error,
   phase,
   redirectRoute,
+  shouldRedirect,
   shouldReport,
   shouldToast,
   message,
@@ -210,6 +213,7 @@ export const signUpFailed = ({
   error,
   phase,
   redirectRoute,
+  shouldRedirect,
   shouldReport,
   shouldToast,
   message,
@@ -286,6 +290,14 @@ export function setAccountReady() {
 }
 
 /**
+ * Marks the Identity portion of signup complete so core account creation can
+ * be retried without registering the email again.
+ */
+export function setIdentityAccountReady() {
+  return { type: SET_IDENTITY_ACCOUNT_READY }
+}
+
+/**
  * Adds the user ids to be followed on account completion
  * @param userIds The user ids to add as selected and follow
  */
@@ -326,7 +338,10 @@ export const nextPage = (isMobile: boolean) => ({ type: NEXT_PAGE, isMobile })
 export const previousPage = () => ({ type: PREVIOUS_PAGE })
 export const goToPage = (page: Pages) => ({ type: GO_TO_PAGE, page })
 
-export const signUpTimeout = () => ({ type: SIGN_UP_TIMEOUT })
+export const signUpTimeout = () => ({
+  type: SIGN_UP_TIMEOUT,
+  shouldRedirect: false
+})
 export const updateRouteOnCompletion = (route: string) => ({
   type: UPDATE_ROUTE_ON_COMPLETION,
   route

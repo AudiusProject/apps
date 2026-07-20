@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { route } from '@audius/common/utils'
-import { Flex } from '@audius/harmony'
-import { useSelector } from 'react-redux'
+import { Button, Flex } from '@audius/harmony'
+import { useDispatch, useSelector } from 'react-redux'
 
+import { signUp } from 'common/store/pages/signon/actions'
 import { getStatus, getAccountReady } from 'common/store/pages/signon/selectors'
 import { EditingStatus } from 'common/store/pages/signon/types'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
@@ -16,12 +17,17 @@ const { SIGN_UP_COMPLETED_REDIRECT } = route
 
 const messages = {
   heading: 'Your Account is Almost Ready to Rock 🤘',
-  description: "We're just finishing up a few things..."
+  description: "We're just finishing up a few things...",
+  failureHeading: "We Couldn't Finish Creating Your Account",
+  failureDescription:
+    'Your login is saved. Try again to finish creating your account.',
+  retry: 'Try Again'
 }
 
 // This loading page shows up when the users account is still being created either due to slow creation or a fast user
 // The user just waits here until the account is created and before being shown the welcome modal on the trending page
 export const LoadingAccountPage = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigateToPage()
   const isFastReferral = useFastReferral()
   const accountReady = useSelector(getAccountReady)
@@ -30,23 +36,40 @@ export const LoadingAccountPage = () => {
   const isAccountReady = isFastReferral
     ? accountReady
     : accountReady || accountCreationStatus === EditingStatus.SUCCESS
+  const didAccountCreationFail = accountCreationStatus === EditingStatus.FAILURE
+
+  const handleRetry = useCallback(() => {
+    dispatch(signUp())
+  }, [dispatch])
 
   useEffect(() => {
     if (isAccountReady) {
       navigate(SIGN_UP_COMPLETED_REDIRECT)
     }
-    // TODO: what to do in an error scenario? Any way to recover to a valid step?
   }, [navigate, isAccountReady])
 
   return (
     <Page gap='3xl' justifyContent='center' alignItems='center' pb='3xl'>
-      <LoadingSpinner css={{ height: '72px' }} />
+      {didAccountCreationFail ? null : (
+        <LoadingSpinner css={{ height: '72px' }} />
+      )}
       <Flex justifyContent='center' css={{ textAlign: 'center' }}>
         <Heading
-          heading={messages.heading}
-          description={messages.description}
+          heading={
+            didAccountCreationFail ? messages.failureHeading : messages.heading
+          }
+          description={
+            didAccountCreationFail
+              ? messages.failureDescription
+              : messages.description
+          }
         />
       </Flex>
+      {didAccountCreationFail ? (
+        <Button variant='primary' onClick={handleRetry}>
+          {messages.retry}
+        </Button>
+      ) : null}
     </Page>
   )
 }
