@@ -69,6 +69,7 @@ const {
   getCurrentPlayerBehavior,
   getCurrentTrackId,
   getCollectionId,
+  getFeedType,
   getOvershot,
   getPlaybackIndex,
   getPlaybackQueue,
@@ -772,11 +773,13 @@ function* watchNext() {
         } else {
           yield* call(playCurrent)
           const collId = yield* select(getCollectionId)
+          const feedType = yield* select(getFeedType)
           yield* put(
             make(Name.PLAYBACK_PLAY, {
               id: `${trackId}`,
               source: AnalyticsPlaybackSource.PASSIVE,
-              ...(collId ? { collectionId: collId } : {})
+              ...(collId ? { collectionId: collId } : {}),
+              ...(feedType ? { feed_type: feedType } : {})
             })
           )
         }
@@ -811,11 +814,13 @@ function* watchPrevious() {
     if (track) {
       yield* call(playCurrent)
       const collId = yield* select(getCollectionId)
+      const feedType = yield* select(getFeedType)
       yield* put(
         make(Name.PLAYBACK_PLAY, {
           id: `${trackId}`,
           source: AnalyticsPlaybackSource.PASSIVE,
-          ...(collId ? { collectionId: collId } : {})
+          ...(collId ? { collectionId: collId } : {}),
+          ...(feedType ? { feed_type: feedType } : {})
         })
       )
     } else {

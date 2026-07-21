@@ -29,6 +29,9 @@ export const getCurrentSource = (state: CommonState) =>
 export const getCollectionId = (state: CommonState) =>
   getCurrentPlaybackTrack(state)?.collectionId ?? null
 
+export const getFeedType = (state: CommonState) =>
+  getCurrentPlaybackTrack(state)?.feedType ?? null
+
 export const getCurrentPlayerBehavior = (state: CommonState) =>
   getCurrentPlaybackTrack(state)?.playerBehavior ??
   PlayerBehavior.FULL_OR_PREVIEW

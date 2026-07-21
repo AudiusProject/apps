@@ -162,6 +162,7 @@ const FeedPageMobileContent = ({
           key={`feed-${feedTab}`}
           aria-label='feed'
           source='DISCOVER_FEED'
+          feedType={feedTab}
           ordered
           variant={LineupVariant.MAIN}
           scrollParent={containerRef?.current ?? null}
