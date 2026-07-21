@@ -754,13 +754,24 @@ jobs:
         run: |
           aws s3 sync packages/web/sourcemaps s3://sourcemaps.audius.co --cache-control max-age=604800
 
-  web-deploy:
-    name: Web Deploy
+  # Single approval gate for the whole production release. Approving this job
+  # releases web *and* all three desktop builds, replacing the separate
+  # per-platform approval gates the old CircleCI pipeline had.
+  production-gate:
+    name: Production Release Gate
     runs-on: ubuntu-latest
     needs: [web-build, web-check-ssr-bundlesize]
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
+    steps:
+      - run: echo "Production release approved — deploying web and desktop"
+
+  web-deploy:
+    name: Web Deploy
+    runs-on: ubuntu-latest
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -871,4 +882,195 @@ jobs:
           deploying_version=$(jq -r '.version' package.json)
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to web \n\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  # Desktop (Electron) builds. electron-builder reads packages/web/build-production
+  # directly (see packages/web/scripts/dist.js), so the `builds` artifact is
+  # downloaded in place and not renamed.
+  desktop-build-mac:
+    name: Desktop Build (Mac)
+    runs-on: macos-latest
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 90
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      # node-gyp needs distutils, removed in Python 3.12+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      # Required by electron-builder to build the .dmg on macOS
+      - name: Add dmg-license
+        run: npm run install-dmg-license -w @audius/web
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: builds
+          path: packages/web
+
+      - name: Build & publish Mac desktop app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          ASC_PROVIDER: ${{ secrets.ASC_PROVIDER }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd packages/web
+          npm run dist:mac-publish-production
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          cd packages/web
+          deploying_version=$(jq -r '.version' package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to desktop mac \n\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  desktop-build-win:
+    name: Desktop Build (Windows)
+    runs-on: ubuntu-latest
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 90
+    container:
+      image: electronuserland/builder:18-wine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # The image ships Node 18; the repo sets engine-strict with node >=24.10.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: builds
+          path: packages/web
+
+      - name: Build & publish Windows desktop app
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd packages/web
+          npm run dist:win-publish-production
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          cd packages/web
+          deploying_version=$(jq -r '.version' package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to desktop win \n\" } }]}"
+          curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  desktop-build-linux:
+    name: Desktop Build (Linux)
+    runs-on: ubuntu-latest
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 90
+    container:
+      image: electronuserland/builder
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Install dependencies
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Download builds
+        uses: actions/download-artifact@v4
+        with:
+          name: builds
+          path: packages/web
+
+      - name: Build & publish Linux desktop app
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd packages/web
+          npm run dist:linux-publish-production
+
+      - name: Slack notification
+        if: success()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
+        run: |
+          cd packages/web
+          deploying_version=$(jq -r '.version' package.json)
+          job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to desktop linux \n\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
