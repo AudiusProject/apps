@@ -1,7 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
 import { useArtistCreatedFanClub } from '@audius/common/api'
-import { imageCoverPhotoBlank } from '@audius/common/assets'
+import {
+  imageCoverPhotoBlank,
+  imageProfilePicEmpty
+} from '@audius/common/assets'
 import {
   Name,
   SquareSizes,
@@ -297,7 +300,9 @@ const ProfileHeader = ({
       </GrowingCoverPhoto>
       <Image
         src={
-          isDeactivated ? undefined : updatedProfilePicture || profilePicture
+          isDeactivated
+            ? imageProfilePicEmpty
+            : updatedProfilePicture || profilePicture
         }
         alt={messages.profilePicAltText}
         className={cn(styles.profilePictureWrapper, styles.profilePicture, {

@@ -1,14 +1,12 @@
 import { route } from '@audius/common/utils'
-import { Button, IconArrowRight } from '@audius/harmony'
-import cn from 'classnames'
+import { Button, Flex, IconArrowRight, Text } from '@audius/harmony'
 import { Link } from 'react-router'
-
-import styles from './DeactivatedProfileTombstone.module.css'
 
 const { HOME_PAGE } = route
 
 const messages = {
   helpText: 'This Account No Longer Exists',
+  description: 'The account you’re looking for has been deleted.',
   buttonText: 'Take Me Back To The Music'
 }
 
@@ -18,16 +16,39 @@ export const DeactivatedProfileTombstone = ({
   isMobile?: boolean
 }) => {
   return (
-    <div className={cn(styles.deactivated, { [styles.mobile]: isMobile })}>
-      <div className={styles.deactivatedText}>{messages.helpText}</div>
-      <Button
-        variant='primary'
-        fullWidth={isMobile}
-        asChild
-        iconRight={IconArrowRight}
+    <Flex
+      w='100%'
+      column
+      alignItems='center'
+      justifyContent='center'
+      p='xl'
+      // Fill the space below the profile header so the message reads as a
+      // centered empty state rather than being pinned to the top.
+      css={{ minHeight: 'clamp(240px, 32vh, 420px)', userSelect: 'none' }}
+    >
+      <Flex
+        column
+        alignItems='center'
+        gap='xl'
+        css={{ width: '100%', maxWidth: 400 }}
       >
-        <Link to={HOME_PAGE}>{messages.buttonText}</Link>
-      </Button>
-    </div>
+        <Flex column alignItems='center' gap='s'>
+          <Text variant='heading' size='m' textAlign='center'>
+            {messages.helpText}
+          </Text>
+          <Text variant='body' size='l' color='subdued' textAlign='center'>
+            {messages.description}
+          </Text>
+        </Flex>
+        <Button
+          variant='primary'
+          fullWidth={isMobile}
+          asChild
+          iconRight={IconArrowRight}
+        >
+          <Link to={HOME_PAGE}>{messages.buttonText}</Link>
+        </Button>
+      </Flex>
+    </Flex>
   )
 }
