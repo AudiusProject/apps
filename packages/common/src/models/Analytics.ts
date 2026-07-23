@@ -378,6 +378,7 @@ export enum Name {
   CREATE_CHAT_BLAST_SUCCESS = 'Chat Blast: Create - Success',
   CREATE_CHAT_BLAST_FAILURE = 'Chat Blast: Create - Failure',
   CHAT_BLAST_MESSAGE_SENT = 'Chat Blast: Message Sent',
+  CHAT_BLAST_MESSAGE_VIEWED = 'Chat Blast: Message Viewed',
   SEND_MESSAGE_SUCCESS = 'Send Message: Success',
   SEND_MESSAGE_FAILURE = 'Send Message: Failure',
   DELETE_CHAT_SUCCESS = 'Delete Chat: Success',
@@ -1959,6 +1960,15 @@ type ChatBlastMessageSent = {
   audienceContentId?: ID
 }
 
+type ChatBlastMessageViewed = {
+  eventName: Name.CHAT_BLAST_MESSAGE_VIEWED
+  isNativeMobile?: boolean
+  chatId: string
+  audience: string
+  audienceContentType?: string
+  audienceContentId?: ID
+}
+
 type SendMessageSuccess = {
   eventName: Name.SEND_MESSAGE_SUCCESS
 }
@@ -2807,6 +2817,7 @@ export type AllTrackingEvents =
   | ConnectWalletError
   | ChatBlastCTAClicked
   | ChatBlastMessageSent
+  | ChatBlastMessageViewed
   | CreateChatSuccess
   | CreateChatFailure
   | CreateChatBlastSuccess
