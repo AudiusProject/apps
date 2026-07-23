@@ -6,6 +6,7 @@
  */
 
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 
 const { notarize } = require('@electron/notarize')
@@ -36,6 +37,27 @@ program
   )
   .parse(process.argv)
 
+/**
+ * Writes the App Store Connect API key (.p8) to a temp file, since notarytool
+ * takes a path rather than the key contents. The secret may hold either the raw
+ * PEM contents or a base64 encoding of them.
+ * @returns {string} path to the written .p8 file
+ */
+const writeApiKeyFile = () => {
+  const rawKey = process.env.APP_STORE_CONNECT_API_KEY_KEY
+  const key = rawKey.includes('BEGIN PRIVATE KEY')
+    ? rawKey
+    : Buffer.from(rawKey, 'base64').toString('utf8')
+
+  const keyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asc-api-key-'))
+  const keyPath = path.join(
+    keyDir,
+    `AuthKey_${process.env.APP_STORE_CONNECT_API_KEY_KEY_ID}.p8`
+  )
+  fs.writeFileSync(keyPath, key, { mode: 0o600 })
+  return keyPath
+}
+
 const notarizeFn = async (appId, params) => {
   // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {
@@ -49,20 +71,33 @@ const notarizeFn = async (appId, params) => {
     throw new Error(`Cannot find application at: ${appPath}`)
   }
 
+  const missing = [
+    'APP_STORE_CONNECT_API_KEY_KEY',
+    'APP_STORE_CONNECT_API_KEY_KEY_ID',
+    'APP_STORE_CONNECT_API_KEY_ISSUER_ID'
+  ].filter((name) => !process.env[name])
+  if (missing.length) {
+    throw new Error(
+      `Cannot notarize, missing env vars: ${missing.join(', ')}`
+    )
+  }
+
   console.log(`Notarizing ${appId} at ${appPath}`)
+  const keyPath = writeApiKeyFile()
   try {
     await notarize({
-      appBundleId: appId,
+      tool: 'notarytool',
       appPath,
-      appleId: process.env.APPLE_ID,
-      appleIdPassword: process.env.APPLE_ID_PASSWORD,
-      ascProvider: process.env.ASC_PROVIDER,
-      teamId: process.env.ASC_PROVIDER
+      appleApiKey: keyPath,
+      appleApiKeyId: process.env.APP_STORE_CONNECT_API_KEY_KEY_ID,
+      appleApiIssuer: process.env.APP_STORE_CONNECT_API_KEY_ISSUER_ID
     })
   } catch (error) {
     console.error(error)
     // Propagate the error back up.
     throw new Error(error)
+  } finally {
+    fs.rmSync(path.dirname(keyPath), { recursive: true, force: true })
   }
   console.log(`Finished notarizing ${appId}`)
 }
