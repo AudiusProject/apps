@@ -9,6 +9,16 @@
   flex-direction: column;
 }
 
+/**
+ * Deactivated profiles render no artist info below the cover photo, so the
+ * header must size to its content instead of growing into the space the
+ * tombstone claims — otherwise the two split the viewport and leave a blank
+ * band between the avatar and the message.
+ */
+.headerContainer.deactivated {
+  flex: none;
+}
+
 .coverPhoto {
   display: flex;
   flex-direction: column;

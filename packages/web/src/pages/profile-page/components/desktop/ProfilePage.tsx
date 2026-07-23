@@ -450,8 +450,12 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
       fromOpacity={1}
     >
       <Box ref={profileFocusRootRef} w='100%' pb='2xl'>
+        {/* `useCoverPhoto`/`useProfilePicture` already scrub deactivated
+            accounts' images and return the default placeholders, so pass the
+            real userId — withholding it leaves the hooks unresolved and the
+            images stuck on a loading skeleton. */}
         <CoverPhoto
-          userId={isDeactivated ? null : userId}
+          userId={userId}
           updatedCoverPhoto={updatedCoverPhoto ? updatedCoverPhoto.url : ''}
           error={updatedCoverPhoto ? updatedCoverPhoto.error : false}
           loading={status === Status.LOADING}
@@ -484,7 +488,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
               >
                 {/* @ts-ignore */}
                 <ProfilePicture
-                  userId={isDeactivated ? undefined : userId}
+                  userId={userId}
                   updatedProfilePicture={
                     updatedProfilePicture ? updatedProfilePicture.url : ''
                   }
@@ -551,12 +555,7 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
           <Box>
             <EmptyStatBanner />
             <EmptyNavBanner />
-            <FlushPageContainer>
-              <Flex flex='1 1 100%' mh='auto' columnGap={PROFILE_COLUMN_GAP}>
-                <LeftColumnSpacer />
-                {status === Status.SUCCESS && <DeactivatedProfileTombstone />}
-              </Flex>
-            </FlushPageContainer>
+            {status === Status.SUCCESS && <DeactivatedProfileTombstone />}
           </Box>
         ) : (
           <Mask show={editMode} zIndex={zIndex.PROFILE_EDIT_MASK}>

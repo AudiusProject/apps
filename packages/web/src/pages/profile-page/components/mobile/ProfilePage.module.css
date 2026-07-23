@@ -1,6 +1,21 @@
 .container {
   flex-direction: column;
 }
+
+/**
+ * Deactivated profiles have no tabs or lineups, so the page would otherwise
+ * end just below the header and leave the rest of the viewport blank. Stretch
+ * the container to the full viewport so the tombstone (flex: 1) can fill it.
+ */
+.deactivatedContainer {
+  /**
+   * 100% (not 100dvh) so the page stops at the bottom of the scroll area
+   * rather than overflowing by the height of anything stacked above it,
+   * e.g. the announcement banner.
+   */
+  min-height: 100%;
+}
+
 /* Bottom Section */
 
 .tracksLineupContainer {
