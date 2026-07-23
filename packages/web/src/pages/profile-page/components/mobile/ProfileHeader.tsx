@@ -280,7 +280,11 @@ const ProfileHeader = ({
   }
 
   return (
-    <div className={styles.headerContainer}>
+    <div
+      className={cn(styles.headerContainer, {
+        [styles.deactivated]: isDeactivated
+      })}
+    >
       <GrowingCoverPhoto
         src={updatedCoverPhoto || coverPhoto}
         style={coverPhotoStyle}

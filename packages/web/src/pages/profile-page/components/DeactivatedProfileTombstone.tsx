@@ -23,8 +23,15 @@ export const DeactivatedProfileTombstone = ({
       justifyContent='center'
       p='xl'
       // Fill the space below the profile header so the message reads as a
-      // centered empty state rather than being pinned to the top.
-      css={{ minHeight: 'clamp(240px, 32vh, 420px)', userSelect: 'none' }}
+      // centered empty state rather than being pinned to the top. On mobile
+      // web the page container is stretched to the viewport, so `flex: 1`
+      // claims everything below the header; on desktop the page is sized by
+      // its content, so fall back to a fixed minimum.
+      flex={isMobile ? 1 : undefined}
+      css={{
+        minHeight: isMobile ? undefined : 'clamp(240px, 32vh, 420px)',
+        userSelect: 'none'
+      }}
     >
       <Flex
         column

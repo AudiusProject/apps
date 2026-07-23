@@ -433,11 +433,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
   }
 
   if (profile.is_deactivated) {
-    content = (
-      <div className={styles.contentContainer}>
-        <DeactivatedProfileTombstone isMobile />
-      </div>
-    )
+    // Rendered as a direct child of the page container (a flex column) so the
+    // tombstone's `flex: 1` can claim the space left below the header.
+    content = <DeactivatedProfileTombstone isMobile />
   } else if (!isLoading && !isEditing) {
     content = (
       <div className={styles.contentContainer}>
@@ -463,7 +461,9 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         structuredData={structuredData}
         entityType='user'
         hashId={profile?.user_id ? Id.parse(profile.user_id) : undefined}
-        containerClassName={styles.container}
+        containerClassName={cn(styles.container, {
+          [styles.deactivatedContainer]: profile.is_deactivated
+        })}
       >
         <ProfileHeader
           isDeactivated={profile.is_deactivated ?? false}
