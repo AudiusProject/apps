@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 
 import {
   isPurchaseableAlbum,
+  usePurchaseableStemCount,
   type PurchaseableContentMetadata
 } from '@audius/common/hooks'
 import {
@@ -54,12 +55,14 @@ export const PurchaseSuccess = ({
     ? getCollectionRoute(metadata)
     : getTrackRoute(metadata, true)
 
+  const stemCount = usePurchaseableStemCount(metadata)
+
   const dispatch = useDispatch()
 
   const handleXShare = useCallback(
     (handle: string) => {
       let shareText: string
-      if (!isAlbum && metadata.is_download_gated && metadata._stems?.length) {
+      if (!isAlbum && metadata.is_download_gated && stemCount > 0) {
         shareText = messages.shareXText('stems for', title, handle)
       } else {
         shareText = messages.shareXText(
@@ -76,7 +79,7 @@ export const PurchaseSuccess = ({
         } as const
       }
     },
-    [isAlbum, metadata, title]
+    [isAlbum, metadata, title, stemCount]
   )
 
   const onRepost = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Id } from '@audius/sdk'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -14,7 +14,13 @@ import { useTrack } from './useTrack'
 
 // Stop polling the archive job after this long even if it never transitions
 // out of `active`, so the UI can surface an error instead of spinning forever.
-const STEMS_ARCHIVE_POLL_TIMEOUT_MS = 300_000 // 5 minutes
+//
+// Sized for the large end of real stem sets: a contest track can carry dozens
+// of lossless stems totalling multiple GB, and WAV barely compresses, so the
+// server-side zip legitimately runs for many minutes. The previous 5 minute
+// budget expired before those archives could finish and reported a failure for
+// a job that was still making progress.
+const STEMS_ARCHIVE_POLL_TIMEOUT_MS = 900_000 // 15 minutes
 
 type GetStemsArchiveJobStatusResponse = {
   id: string
@@ -48,9 +54,21 @@ export const useDownloadTrackStems = ({ trackId }: { trackId: ID }) => {
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
 
-  // Use existing track data to get access information
-  const { data: trackAccess } = useTrack(trackId, {
-    select: (track) => track?.access
+  // Whether the parent track can be bundled into the archive. Two separate
+  // conditions, and both matter:
+  //   - `is_downloadable` — the artist actually offers the full track. If
+  //     this is false there is no downloadable parent file at all and its
+  //     download URL 404s.
+  //   - `access.download` — the *gating* check ("this user is allowed to
+  //     download"), which is `true` for any ungated track regardless of
+  //     whether a downloadable file exists.
+  // Checking only the latter asks the archiver to include a file that isn't
+  // there, which is how stem archives for stem-only tracks broke.
+  const { data: parentDownloadability } = useTrack(trackId, {
+    select: (track) => ({
+      isDownloadable: track?.is_downloadable === true,
+      hasDownloadAccess: track?.access?.download === true
+    })
   })
 
   return useMutation({
@@ -64,8 +82,9 @@ export const useDownloadTrackStems = ({ trackId }: { trackId: ID }) => {
         throw new Error('Current user ID is required')
       }
 
-      // Use track access info to determine if parent track is downloadable
-      const includeParent = trackAccess?.download === true
+      const includeParent =
+        parentDownloadability?.isDownloadable === true &&
+        parentDownloadability?.hasDownloadAccess === true
 
       return await archiver.createStemsArchive({
         trackId: Id.parse(trackId),
@@ -115,14 +134,14 @@ export const useGetStemsArchiveJobStatus = (
 ) => {
   const { audiusSdk } = useQueryContext()
 
-  // Track when polling for this job began so we can enforce a hard timeout even
-  // if the job never transitions out of `active`.
-  const jobStartTimeRef = useRef<number | null>(null)
-  useEffect(() => {
-    jobStartTimeRef.current = jobId ? Date.now() : null
-  }, [jobId])
+  // Hard stop for a job that never transitions out of `active`. This has to be
+  // real state rather than a ref: returning `false` from `refetchInterval`
+  // silently stops polling without re-rendering, and the job state stays
+  // `active` forever, so callers had no way to tell a stalled job from an
+  // in-progress one and would spin indefinitely.
+  const [isTimedOut, setIsTimedOut] = useState(false)
 
-  return useQuery({
+  const query = useQuery({
     queryKey: getStemsArchiveJobQueryKey(jobId),
     queryFn: async () => {
       if (!jobId) {
@@ -135,15 +154,9 @@ export const useGetStemsArchiveJobStatus = (
       }
       return await archiver.getStemsArchiveJobStatus({ jobId })
     },
-    // refetch once per second until the job is completed or failed
+    // refetch once per second until the job is completed, failed, or we give up
     refetchInterval: (query) => {
-      // Hard stop: give up polling after the timeout even if the job is still
-      // reported as active, so we don't spin forever on a stalled job.
-      const jobStartTime = jobStartTimeRef.current
-      if (
-        jobStartTime !== null &&
-        Date.now() - jobStartTime > STEMS_ARCHIVE_POLL_TIMEOUT_MS
-      ) {
+      if (isTimedOut) {
         return false
       }
       if (!query.state.data) {
@@ -159,4 +172,19 @@ export const useGetStemsArchiveJobStatus = (
     enabled: !!jobId,
     ...options
   })
+
+  const jobState = query.data?.state
+  const isSettled = jobState === 'completed' || jobState === 'failed'
+
+  useEffect(() => {
+    setIsTimedOut(false)
+    if (!jobId || isSettled) return
+    const timer = setTimeout(
+      () => setIsTimedOut(true),
+      STEMS_ARCHIVE_POLL_TIMEOUT_MS
+    )
+    return () => clearTimeout(timer)
+  }, [jobId, isSettled])
+
+  return { ...query, isTimedOut }
 }

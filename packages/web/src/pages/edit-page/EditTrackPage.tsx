@@ -56,7 +56,13 @@ export const EditTrackPage = (props: EditPageProps) => {
 
   const { data: track, status: trackStatus } = useTrackByParams(params)
 
-  const { data: stemTracks = [] } = useStems(track?.track_id)
+  // The form must not initialize until the stems query has settled. Its stem
+  // list is the source of truth for the reconcile on save, so rendering early
+  // would seed the form with an empty list and delete every published stem on
+  // the first submit.
+  const { data: stemTracks = [], isPending: isStemsPending } = useStems(
+    track?.track_id
+  )
 
   const onSubmit = async (formValues: TrackEditFormValues) => {
     const metadata = { ...formValues.trackMetadatas[0] }
@@ -149,7 +155,7 @@ export const EditTrackPage = (props: EditPageProps) => {
         />
       }
     >
-      {trackStatus !== 'success' || !coverArtUrl ? (
+      {trackStatus !== 'success' || !coverArtUrl || isStemsPending ? (
         <LoadingSpinnerFullPage />
       ) : (
         <EditFormScrollContext.Provider value={scrollToTop}>

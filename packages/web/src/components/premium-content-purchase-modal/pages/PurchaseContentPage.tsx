@@ -10,6 +10,7 @@ import {
   usePurchaseMethod,
   PurchaseableContentMetadata,
   isPurchaseableAlbum,
+  usePurchaseableStemCount,
   PURCHASE_METHOD_MINT_ADDRESS
 } from '@audius/common/hooks'
 import { PurchaseMethod, PurchaseVendor } from '@audius/common/models'
@@ -99,10 +100,7 @@ export const PurchaseContentPage = (props: PurchaseContentPageProps) => {
   }, [handleChangeVendor, showCoinflow, purchaseVendor])
 
   const isAlbumPurchase = isPurchaseableAlbum(metadata)
-  const stemsPurchaseCount =
-    'is_download_gated' in metadata && metadata.is_download_gated
-      ? (metadata._stems?.length ?? 0)
-      : 0
+  const stemsPurchaseCount = usePurchaseableStemCount(metadata)
   const downloadPurchaseCount =
     'is_download_gated' in metadata &&
     metadata.is_download_gated &&

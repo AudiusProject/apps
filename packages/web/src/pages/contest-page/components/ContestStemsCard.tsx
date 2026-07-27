@@ -183,11 +183,17 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   // Action: per-row download. Mirrors the `handleDownload` path on
   // DownloadSection — opens the wait-for-download modal with the
   // specific trackId the user clicked.
+  //
+  // Deliberately does NOT pass `parentTrackId`: the download saga appends
+  // the parent to the file list (`[...trackIds, parentTrackId]`), so doing
+  // so would pull the full track down alongside every single-stem download.
+  // When the parent isn't downloadable its download URL 404s and takes the
+  // whole batch with it. `DownloadRow` on the track page has always called
+  // this with just the row's own id — match it.
   const handleDownloadOne = useRequiresAccountCallback(
-    (downloadTrackId: ID, parentTrackId?: ID) => {
+    (downloadTrackId: ID) => {
       followContestIfNeeded()
       openWaitForDownloadModal({
-        parentTrackId,
         trackIds: [downloadTrackId],
         quality: DownloadQuality.ORIGINAL
       })
@@ -368,7 +374,7 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
               title={row.title}
               subtitle={row.subtitle}
               size={row.size}
-              onDownload={() => handleDownloadOne(row.trackId, trackId)}
+              onDownload={() => handleDownloadOne(row.trackId)}
             />
           ))}
         </Box>

@@ -302,7 +302,6 @@ export type ComputedTrackProperties = {
   _followees?: Followee[]
   _marked_deleted?: boolean
   _is_publishing?: boolean
-  _stems?: Stem[]
 
   // Present iff remixes have been fetched for a track
   _remixes?: Array<{ track_id: ID }>

@@ -73,16 +73,19 @@ const DownloadTrackArchiveModalContent = ({
 
   const { mutate: cancelStemsArchiveJob } = useCancelStemsArchiveJob()
 
-  const { data: jobStatus, isError: isJobStatusError } =
-    useGetStemsArchiveJobStatus({
-      jobId
-    })
+  const {
+    data: jobStatus,
+    isError: isJobStatusError,
+    isTimedOut: isJobTimedOut
+  } = useGetStemsArchiveJobStatus({
+    jobId
+  })
 
   const hasError =
     !isStartingDownload &&
     (initiateDownloadFailed ||
       jobStatus?.state === 'failed' ||
-      (!!jobId && isJobStatusError))
+      (!!jobId && (isJobStatusError || isJobTimedOut)))
 
   useEffect(() => {
     if (hasError) {
