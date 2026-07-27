@@ -1,3 +1,4 @@
+import { usePurchaseableStemCount } from '@audius/common/hooks'
 import { PurchaseableContentMetadata } from '@audius/common/src/hooks/purchaseContent/types'
 import { isPurchaseableAlbum } from '@audius/common/src/hooks/purchaseContent/utils'
 import { SIGN_IN_PAGE } from '@audius/common/src/utils/route'
@@ -33,10 +34,7 @@ export const GuestCheckoutPage = (props: GuestCheckoutProps) => {
   })
   const isMobile = useIsMobile()
   const isAlbumPurchase = isPurchaseableAlbum(metadata)
-  const stemsPurchaseCount =
-    'is_download_gated' in metadata && metadata.is_download_gated
-      ? (metadata._stems?.length ?? 0)
-      : 0
+  const stemsPurchaseCount = usePurchaseableStemCount(metadata)
   const downloadPurchaseCount =
     'is_download_gated' in metadata &&
     metadata.is_download_gated &&

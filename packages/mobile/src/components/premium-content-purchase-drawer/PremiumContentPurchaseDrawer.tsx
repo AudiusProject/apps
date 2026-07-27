@@ -18,6 +18,7 @@ import {
   isStreamPurchaseable,
   isTrackDownloadPurchaseable,
   isContentDownloadGated,
+  usePurchaseableStemCount,
   PURCHASE_METHOD_MINT_ADDRESS,
   useFeatureFlag
 } from '@audius/common/hooks'
@@ -319,9 +320,7 @@ const RenderForm = ({
     }
   }, [setPurchaseVendor, showCoinflow, purchaseVendor])
 
-  const stemsPurchaseCount = isContentDownloadGated(content)
-    ? (content._stems?.length ?? 0)
-    : 0
+  const stemsPurchaseCount = usePurchaseableStemCount(content)
   const downloadPurchaseCount =
     isContentDownloadGated(content) && content.is_downloadable ? 1 : 0
   const streamPurchaseCount = content.is_stream_gated ? 1 : 0

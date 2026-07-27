@@ -1,37 +1,49 @@
-import { Track } from '@audius/sdk'
 import { Dispatch } from 'redux'
 
 import { ID } from '~/models/Identifiers'
 import { StemUploadWithFile } from '~/models/Stems'
-import { Stem } from '~/models/Track'
 import { stemsUploadActions } from '~/store/stems-upload'
 import { TrackMetadataForUpload } from '~/store/upload'
 import { uuid } from '~/utils/uid'
 
 const { startStemUploads } = stemsUploadActions
 
-type TrackWithStems = {
-  _stems?: Stem[]
-  track_id: number
-} & Partial<Track>
+/**
+ * The shape this module needs off an already-published stem. Both the
+ * `StemTrack`s returned by `useStems` and the lighter `Stem` records satisfy
+ * it.
+ */
+type ExistingStem = {
+  track_id: ID
+}
 
 /**
- * Handles stem updates for a track, including new uploads and removals
- * @param track The track being updated with new metadata
- * @param currentTrack The existing track data
+ * Reconciles the stem list submitted by an edit form against the stems already
+ * published on the track: uploads the ones that were added, deletes the ones
+ * that were removed.
+ *
+ * `existingStems` must be the *server* view of the track's stems (from the
+ * stems query), not anything derived from the submitted metadata. Passing an
+ * empty list means "no removals can be detected" — which is the safe failure
+ * mode, and what this did unconditionally when it read the never-populated
+ * `_stems` field off the cached track.
+ *
+ * @param metadata The track metadata being submitted
+ * @param trackId The track being updated — parent for any new stem uploads
+ * @param existingStems The stems currently published on the track
  * @param inProgressStemUploads Any stem uploads that are currently in progress
+ * @param deleteTrack Callback used to delete a removed stem's track
  * @param dispatch Redux dispatch function
  */
 export const handleStemUpdates = (
   metadata: Partial<TrackMetadataForUpload>,
-  currentTrack: TrackWithStems,
+  trackId: ID,
+  existingStems: ExistingStem[],
   inProgressStemUploads: any[] = [],
   deleteTrack: (trackId: ID) => void,
   dispatch: Dispatch
 ) => {
   if (!metadata.stems) return
-
-  const existingStems = currentTrack._stems || []
 
   // Calculate stems to upload (new stems)
   const addedStems = metadata.stems.filter((stem) => {
@@ -61,7 +73,7 @@ export const handleStemUpdates = (
   if (addedStemsWithFiles.length > 0) {
     dispatch(
       startStemUploads({
-        parentId: currentTrack.track_id,
+        parentId: trackId,
         uploads: addedStemsWithFiles,
         batchUID: uuid()
       })

@@ -36,6 +36,7 @@ import { handleStemUpdates } from '../utils/handleStemUpdates'
 import { primeTrackData } from '../utils/primeTrackData'
 
 import { useDeleteTrack } from './useDeleteTrack'
+import { getStemsQueryKey } from './useStems'
 import { getTrackQueryKey } from './useTrack'
 
 const { getCurrentUploads } = stemsUploadSelectors
@@ -174,15 +175,20 @@ export const useUpdateTrack = () => {
         store.getState() as CommonState,
         trackId
       )
-      if (previousMetadata) {
-        handleStemUpdates(
-          metadata,
-          previousMetadata as any,
-          inProgressStemUploads,
-          (trackId: ID) => deleteTrack({ trackId }),
-          dispatch
-        )
-      }
+      // Server view of the track's stems. Anything not represented in the
+      // submitted metadata is treated as removed, so this has to come from the
+      // stems query rather than the cached track — the track's `_stems` field
+      // was never populated, which silently discarded every stem removal.
+      const existingStems =
+        queryClient.getQueryData(getStemsQueryKey(trackId)) ?? []
+      handleStemUpdates(
+        metadata,
+        trackId,
+        existingStems,
+        inProgressStemUploads,
+        (trackId: ID) => deleteTrack({ trackId }),
+        dispatch
+      )
 
       // New-remix analytics — replaces the legacy `trackNewRemixEvent` saga
       // helper. Fires when the parent_track_id changes.
