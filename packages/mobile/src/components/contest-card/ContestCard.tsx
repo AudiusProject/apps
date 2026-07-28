@@ -326,13 +326,17 @@ export const ContestCard = (props: ContestCardProps) => {
         <Divider orientation='horizontal' />
 
         <Flex direction='column' gap='s'>
-          <Text
-            variant='heading'
-            size={variant === 'hero' ? 'l' : 'm'}
-            numberOfLines={2}
-          >
-            {contestTitle}
-          </Text>
+          {/* minHeight reserves space for 2 lines of heading/m (lineHeight xl = 32px × 2)
+              so grid cards stay the same height whether the title wraps or not. */}
+          <View style={{ minHeight: variant === 'hero' ? undefined : 64 }}>
+            <Text
+              variant='heading'
+              size={variant === 'hero' ? 'l' : 'm'}
+              numberOfLines={2}
+            >
+              {contestTitle}
+            </Text>
+          </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
