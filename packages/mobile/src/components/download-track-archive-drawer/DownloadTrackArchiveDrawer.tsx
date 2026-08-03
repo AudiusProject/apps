@@ -124,13 +124,20 @@ const DownloadTrackArchiveDrawerContent = ({
 
   const { mutate: cancelStemsArchiveJob } = useCancelStemsArchiveJob()
 
-  const { data: jobState } = useGetStemsArchiveJobStatus({
+  const {
+    data: jobState,
+    isError: isJobStatusError,
+    isTimedOut: isJobTimedOut
+  } = useGetStemsArchiveJobStatus({
     jobId
   })
 
   const hasError =
     !isStartingDownload &&
-    (downloadError || initiateDownloadFailed || jobState?.state === 'failed')
+    (downloadError ||
+      initiateDownloadFailed ||
+      jobState?.state === 'failed' ||
+      (!!jobId && (isJobStatusError || isJobTimedOut)))
 
   useEffect(() => {
     if (hasError) {
