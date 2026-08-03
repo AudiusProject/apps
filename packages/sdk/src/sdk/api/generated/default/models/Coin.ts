@@ -201,12 +201,6 @@ export interface Coin {
      */
     marketCap?: number;
     /**
-     * Total volume traded in USD (all time)
-     * @type {number}
-     * @memberof Coin
-     */
-    totalVolumeUSD?: number;
-    /**
      * Number of holders
      * @type {number}
      * @memberof Coin
@@ -300,7 +294,6 @@ export function CoinFromJSONTyped(json: any, ignoreDiscriminator: boolean): Coin
         'rewardPool': !exists(json, 'reward_pool') ? undefined : RewardPoolFromJSON(json['reward_pool']),
         'price': !exists(json, 'price') ? undefined : json['price'],
         'marketCap': !exists(json, 'marketCap') ? undefined : json['marketCap'],
-        'totalVolumeUSD': !exists(json, 'totalVolumeUSD') ? undefined : json['totalVolumeUSD'],
         'holder': !exists(json, 'holder') ? undefined : json['holder'],
         'totalSupply': !exists(json, 'totalSupply') ? undefined : json['totalSupply'],
         'liquidity': !exists(json, 'liquidity') ? undefined : json['liquidity'],
@@ -346,7 +339,6 @@ export function CoinToJSON(value?: Coin | null): any {
         'reward_pool': RewardPoolToJSON(value.rewardPool),
         'price': value.price,
         'marketCap': value.marketCap,
-        'totalVolumeUSD': value.totalVolumeUSD,
         'holder': value.holder,
         'totalSupply': value.totalSupply,
         'liquidity': value.liquidity,
