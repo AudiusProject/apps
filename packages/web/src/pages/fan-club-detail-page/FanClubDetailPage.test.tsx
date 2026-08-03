@@ -95,14 +95,6 @@ const assertFanClubInsightsSection = async () => {
   expect(within(marketCapRow).getByText(/\$9\.0K/i)).toBeInTheDocument()
   expect(within(marketCapRow).getByText(/^market cap$/i)).toBeInTheDocument()
 
-  // Volume (All-Time): $127.32
-  const volumeRow = screen.getByTestId('metric-row-Volume (All-Time)')
-  expect(volumeRow).toBeInTheDocument()
-  expect(within(volumeRow).getByText(/\$127\.32/)).toBeInTheDocument()
-  expect(
-    within(volumeRow).getByText(/^volume \(all-time\)$/i)
-  ).toBeInTheDocument()
-
   // Unique Holders: 11
   const holdersRow = screen.getByTestId('metric-row-Unique Holders')
   expect(holdersRow).toBeInTheDocument()

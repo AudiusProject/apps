@@ -57,7 +57,7 @@ export const RESPONSIVE_TABLE_POLICIES = {
       },
       {
         maxWidth: 815,
-        hide: ['holders', 'createdDate', 'marketCap', 'totalVolumeUSD']
+        hide: ['holders', 'createdDate', 'marketCap']
       },
       {
         maxWidth: 671,
@@ -65,7 +65,6 @@ export const RESPONSIVE_TABLE_POLICIES = {
           'holders',
           'createdDate',
           'marketCap',
-          'totalVolumeUSD',
           'artist'
         ]
       },
@@ -75,7 +74,6 @@ export const RESPONSIVE_TABLE_POLICIES = {
           'holders',
           'createdDate',
           'marketCap',
-          'totalVolumeUSD',
           'artist',
           'price'
         ]
