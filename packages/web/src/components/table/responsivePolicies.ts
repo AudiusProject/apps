@@ -61,22 +61,11 @@ export const RESPONSIVE_TABLE_POLICIES = {
       },
       {
         maxWidth: 671,
-        hide: [
-          'holders',
-          'createdDate',
-          'marketCap',
-          'artist'
-        ]
+        hide: ['holders', 'createdDate', 'marketCap', 'artist']
       },
       {
         maxWidth: 420,
-        hide: [
-          'holders',
-          'createdDate',
-          'marketCap',
-          'artist',
-          'price'
-        ]
+        hide: ['holders', 'createdDate', 'marketCap', 'artist', 'price']
       }
     ],
     ['tokenName', 'buy']
