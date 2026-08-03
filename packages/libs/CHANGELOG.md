@@ -1,5 +1,18 @@
 # @audius/sdk
 
+## 6.0.29
+
+### Patch Changes
+
+- f3d55fa: Remove FingerprintJS from all clients and services. Sign-in no longer collects a `visitorId`, the identity service's fingerprint-based OTP bypass is gone (new devices always require OTP), and the anti-abuse-oracle drops the per-fingerprint device-count scoring and UI section.
+- Updated dependencies [b803e5e]
+- Updated dependencies [90725b5]
+- Updated dependencies [6bd5c27]
+- Updated dependencies [da6c724]
+- Updated dependencies [be0537f]
+- Updated dependencies [8662a56]
+  - @audius/sdk@16.0.0
+
 ## 6.0.28
 
 ### Patch Changes

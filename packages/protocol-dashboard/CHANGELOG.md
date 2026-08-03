@@ -1,5 +1,26 @@
 # @audius/protocol-dashboard
 
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [b803e5e]
+- Updated dependencies [90725b5]
+- Updated dependencies [272b8db]
+- Updated dependencies [6bd5c27]
+- Updated dependencies [98ad217]
+- Updated dependencies [da6c724]
+- Updated dependencies [be0537f]
+- Updated dependencies [5d9d4e4]
+- Updated dependencies [791b612]
+- Updated dependencies [f3d55fa]
+- Updated dependencies [8662a56]
+- Updated dependencies [f97f1ac]
+- Updated dependencies [b52d005]
+  - @audius/sdk@16.0.0
+  - @audius/common@1.5.79
+  - @audius/sdk-legacy@6.0.29
+
 ## 0.1.18
 
 ### Patch Changes

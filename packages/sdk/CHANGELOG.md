@@ -1,5 +1,47 @@
 # @audius/sdk
 
+## 16.0.0
+
+### Major Changes
+
+- 6bd5c27: Rename the path field on `getNotifications` and `getPlaylistUpdates` from `userId` to `id`, matching the convention used by every `/users/{id}/…` method. Add an optional `userId` query field that carries the requester id for personalization of embedded `related.users` (e.g. `does_current_user_follow`).
+
+  **Migration:**
+
+  ```ts
+  // Before
+  sdk.notifications.getNotifications({ userId: "aE9MA" });
+  sdk.notifications.getPlaylistUpdates({ userId: "aE9MA" });
+
+  // After
+  sdk.notifications.getNotifications({
+    id: "aE9MA", // notifications owner (was `userId`)
+    userId: "aE9MA", // requester id, for personalization of related.users
+  });
+  sdk.notifications.getPlaylistUpdates({ id: "aE9MA", userId: "aE9MA" });
+  ```
+
+  The two ids differ only when a manager reads a managed user's notifications; in the normal flow they're the same value. The wire format and server URL are unchanged — only the request type shape was renamed to remove a collision between the path and the new query parameter.
+
+### Minor Changes
+
+- be0537f: Add an optional `userId?: string` query parameter to three endpoints so the backend can personalize embedded users in `related.users` / collection owners (`does_current_user_follow`, etc.):
+
+  - `events.getRemixContests`
+  - `users.getContestsByUser`
+  - `playlists.getPlaylistsNewReleases`
+
+  Without this, the endpoints' handlers (`app.getMyId(c)`) resolved the requester id from the missing `?user_id=` query and got `0`, so embedded user objects came back with `does_current_user_follow: false` for everyone. Clients that primed those into a shared cache (e.g. via `primeRelatedData` / `primeCollectionData`) silently poisoned follow state for the surfaced artists.
+
+  Existing callers continue to work unchanged — the field is optional. Pass `Id.parse(currentUserId)` (or whichever id your app treats as "me") to opt in.
+
+### Patch Changes
+
+- b803e5e: Point the production anti-abuse oracle endpoint at `https://anti-abuse-oracle.audius.engineering`, replacing the old `https://discoveryprovider.audius.co` host in the SDK services config and supporting clients/services.
+- 90725b5: Fix `AlbumsApi.createAlbum` when callers provide an `albumId`, ensuring the id is passed through as playlist create metadata and blank album creation sends explicit empty playlist contents.
+- da6c724: Add `allowedApiKeys` to `UploadTrackMetadataSchema` so it's preserved when uploading or updating tracks. Previously the strict schema stripped the field, which prevented the "Disallow Streaming via the API" setting from being saved.
+- 8662a56: Generate the production SDK storage-node defaults from the canonical Audius storage-node hostname, removing `creatornode2.audius.co` and `creatornode3.audius.co`.
+
 ## 15.3.1
 
 ### Patch Changes
