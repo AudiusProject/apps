@@ -184,16 +184,6 @@ const renderMarketCapCell = (cellInfo: CoinCell) => {
   )
 }
 
-const renderTotalVolumeUSDCell = (cellInfo: CoinCell) => {
-  const coin = cellInfo.row.original
-  return (
-    <Text variant='body' size='m'>
-      {walletMessages.dollarSign}
-      {formatCount(coin.totalVolumeUSD ?? 0, 2)}
-    </Text>
-  )
-}
-
 const renderHoldersCell = (cellInfo: CoinCell) => {
   const coin = cellInfo.row.original
   return (
@@ -272,19 +262,6 @@ const tableColumnMap = {
     disableResizing: true,
     sorter: numericSorter('price')
   },
-  totalVolumeUSD: {
-    id: 'totalVolumeUSD',
-    Header: 'Vol',
-    accessor: 'totalVolumeUSD',
-    Cell: renderTotalVolumeUSDCell,
-    disableSortBy: false,
-    align: 'right',
-    width: 120,
-    minWidth: 120,
-    maxWidth: 120,
-    disableResizing: true,
-    sorter: numericSorter('totalVolumeUSD')
-  },
   marketCap: {
     id: 'marketCap',
     Header: 'Market Cap',
@@ -340,7 +317,6 @@ const tableColumnMap = {
 const sortMethodMap: Record<string, GetCoinsSortMethodEnum> = {
   price: GetCoinsSortMethodEnum.Price,
   marketCap: GetCoinsSortMethodEnum.MarketCap,
-  totalVolumeUSD: GetCoinsSortMethodEnum.Volume,
   createdAt: GetCoinsSortMethodEnum.CreatedAt,
   holder: GetCoinsSortMethodEnum.Holder
 }
@@ -508,7 +484,6 @@ export const FanClubsTable = ({ viewMode }: FanClubsTableProps) => {
       baseColumns.tokenName,
       baseColumns.artist,
       baseColumns.price,
-      baseColumns.totalVolumeUSD,
       baseColumns.marketCap,
       baseColumns.createdDate,
       baseColumns.holders,

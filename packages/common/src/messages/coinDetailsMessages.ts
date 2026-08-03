@@ -39,7 +39,6 @@ export const coinDetailsMessages = {
     pricePerCoin: 'Price',
     holdersOnAudius: 'Holders on Audius',
     uniqueHolders: 'Unique Holders',
-    totalVolume: 'Volume (All-Time)',
     marketCap: 'Market Cap',
     unableToLoad: 'Unable to load insights',
     graduated: 'Graduated',

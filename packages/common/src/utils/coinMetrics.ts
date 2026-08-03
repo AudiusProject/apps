@@ -21,7 +21,6 @@ const messages = {
   pricePerCoin: 'Price',
   holdersOnAudius: 'Holders on Audius',
   uniqueHolders: 'Unique Holders',
-  totalVolume: 'Volume (All-Time)',
   volume24h: 'Volume (24h)',
   marketCap: 'Market Cap',
   graduationProgress: 'Graduation Progress'
@@ -77,10 +76,6 @@ export const createCoinMetrics = (coin: Coin): MetricData[] => {
     createMetric({
       value: `$${formatCount(coin.displayMarketCap ?? 0, 2)}`,
       label: messages.marketCap
-    }),
-    createMetric({
-      value: `$${formatCount(coin.totalVolumeUSD ?? 0, 2)}`,
-      label: messages.totalVolume
     }),
     createMetric({
       value: formatCount(coin.holder ?? 0),
