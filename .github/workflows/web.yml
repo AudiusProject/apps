@@ -24,10 +24,12 @@ on:
   workflow_dispatch:
 
 # Cancel superseded PR runs (new commits supersede in-flight CI). Keyed on the
-# PR branch for PRs; on main, head_ref is empty so runs group by ref and do NOT
-# cancel — an in-flight production deploy is never interrupted by a new push.
+# PR branch for PRs; on main, head_ref is empty so we fall back to run_id, giving
+# every main run its own group. Main runs are therefore independent — a run parked
+# at the production/release approval gate never blocks (or is blocked by) the next
+# push, and an in-flight deploy is never interrupted.
 concurrency:
-  group: web-${{ github.head_ref || github.ref }}
+  group: web-${{ github.head_ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
