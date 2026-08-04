@@ -146,29 +146,33 @@ export const publishTracks = async (
         }
       }
 
-      const [trackResult, stemsResults] = await Promise.all([
-        publishParentTrack(),
-        publishStems(context, {
-          clientId: param.clientId,
-          parentMetadata: param.metadata,
-          stems:
-            param.metadata.stems
-              ?.map((stem, index) => {
-                const audioUploadResponse = param.stemsUploadResponses?.[index]
+      // Publish the parent track first, then publish stems sequentially.
+      // Previously both ran concurrently via Promise.all, which caused a race
+      // condition: publishStem calls referenced the parent trackId before it
+      // was confirmed on-chain, so every stem publish failed. The UI then
+      // showed red ⚠ error icons on all stem rows even though the upload
+      // succeeded (reproducible on contest uploads: Burko, Andrew Lux, etc.)
+      const trackResult = await publishParentTrack()
+      const stemsResults = await publishStems(context, {
+        clientId: param.clientId,
+        parentMetadata: param.metadata,
+        stems:
+          param.metadata.stems
+            ?.map((stem, index) => {
+              const audioUploadResponse = param.stemsUploadResponses?.[index]
 
-                // This should never be the case, but being defensive
-                if (!audioUploadResponse) return null
-                return {
-                  metadata: stem,
-                  audioUploadResponse
-                }
-              })
-              .filter(
-                (stem): stem is NonNullable<typeof stem> => stem !== null
-              ) ?? [],
-          parentTrackId: trackId
-        })
-      ])
+              // This should never be the case, but being defensive
+              if (!audioUploadResponse) return null
+              return {
+                metadata: stem,
+                audioUploadResponse
+              }
+            })
+            .filter(
+              (stem): stem is NonNullable<typeof stem> => stem !== null
+            ) ?? [],
+        parentTrackId: trackId
+      })
 
       return {
         clientId: param.clientId,
