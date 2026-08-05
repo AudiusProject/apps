@@ -81,12 +81,28 @@ export const useUpdateProfile = () => {
 
       return { previousMetadata }
     },
-    onError: (error, metadata, context?: MutationContext) => {
-      // If the mutation fails, roll back user data
+    onSuccess: (_data, variables) => {
+      // Re-confirm the mutation in the cache after server success.
+      // We re-apply mutation variables rather than the raw server response
+      // to guard against discovery-node propagation lag: the node answering
+      // getUser may not yet have indexed the confirmed block.
+      const currentCache = queryClient.getQueryData<UserMetadata>(
+        getUserQueryKey(currentUserId)
+      )
+      if (currentCache) {
+        primeUserData({
+          queryClient,
+          users: [{ ...currentCache, ...variables }],
+          forceReplace: true
+        })
+      }
+    },
+    onError: (error, _metadata, context?: MutationContext) => {
+      // If the mutation fails, roll back user data to previous state
       if (context?.previousMetadata) {
         primeUserData({
           queryClient,
-          users: [{ ...context.previousMetadata, ...metadata }],
+          users: [context.previousMetadata],
           forceReplace: true
         })
       }

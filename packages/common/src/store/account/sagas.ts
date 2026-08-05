@@ -364,7 +364,18 @@ function* setLocalStorageAccountAndUser(
   }
 
   yield* call([localStorage, localStorage.setAudiusAccount], formattedAccount)
-  yield* call([localStorage, localStorage.setAudiusAccountUser], accountUser)
+  // Prefer cached user data (which may include recent optimistic mutations
+  // like profile_type changes) over the server-fetched response. This prevents
+  // setLocalStorageAccountAndUser from overwriting changes that haven't yet
+  // propagated to all discovery nodes.
+  const queryClient = yield* getContext('queryClient')
+  const cachedUser = queryClient.getQueryData<UserMetadata>(
+    getUserQueryKey(accountUser.user_id)
+  )
+  yield* call(
+    [localStorage, localStorage.setAudiusAccountUser],
+    cachedUser ?? accountUser
+  )
 }
 
 function* recordIPIfNotRecent(handle: string): SagaIterator {
