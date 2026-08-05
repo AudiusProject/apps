@@ -132,6 +132,13 @@ const DownloadTrackArchiveDrawerContent = ({
     jobId
   })
 
+  // `isTimedOut` and `isError` have to be part of this, not just `failed`.
+  // A job that never leaves `waiting` — the archiver worker losing its Redis
+  // lock and holding every concurrency slot, for instance — is reported as a
+  // perfectly valid non-terminal state forever, so keying only off `failed`
+  // leaves the drawer spinning with no error and no retry until the user
+  // gives up. The shared hook already enforces STEMS_ARCHIVE_POLL_TIMEOUT_MS
+  // and hands back `isTimedOut`; web consumes it and mobile did not.
   const hasError =
     !isStartingDownload &&
     (downloadError ||
