@@ -36,9 +36,7 @@ export const FeaturedRemixContests = () => {
           carouselSpacing={spacing.l}
           horizontalCardWidth={contestCardWidth}
           isLoading={isAllContestsPending}
-          LoadingCardComponent={() => (
-            <ContestCardSkeleton style={{ width: contestCardWidth }} />
-          )}
+          LoadingCardComponent={() => <ContestCardSkeleton />}
         />
       </ExploreSection>
     </InViewWrapper>
