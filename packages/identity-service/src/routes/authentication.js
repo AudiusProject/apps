@@ -253,6 +253,13 @@ module.exports = function (app) {
 
       const otpRequired = await requiresOtp({ email })
       if (!otpRequired) {
+        const associatedEmail = await getWalletAssociatedEmail({
+          req,
+          authUser: existingUser
+        })
+        if (!associatedEmail || email !== associatedEmail.toLowerCase()) {
+          return errorResponseBadRequest('Invalid credentials')
+        }
         return successResponse(existingUser)
       } else if (!otp) {
         // use email from registered address if available
