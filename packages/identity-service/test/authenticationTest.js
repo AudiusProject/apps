@@ -235,6 +235,25 @@ describe('test authentication routes', function () {
     assert.ok(otp)
   })
 
+  it('only bypasses otp for the associated review email', async function () {
+    const [authRecord, userRecord] = await signUpUser({
+      associateWallet: true
+    })
+    const email = 'testflight@audius.co'
+
+    await request(app)
+      .get('/authentication')
+      .query({ lookupKey: authRecord.lookupKey, email })
+      .expect(400, { error: 'Invalid credentials' })
+
+    await userRecord.update({ email })
+
+    await request(app)
+      .get('/authentication')
+      .query({ lookupKey: authRecord.lookupKey, email })
+      .expect(200)
+  })
+
   it('is case-insensitive for OTP code checks', async function () {
     await signUpUser()
 
