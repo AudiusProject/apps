@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { CrossPlatformFile } from '../../types/File'
+import type { AudiusWalletClient } from '../AudiusWalletClient'
 import type { LoggerService } from '../Logger'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
@@ -31,6 +32,12 @@ export type StorageServiceConfig = Partial<StorageServiceConfigInternal> & {
    * The StorageNodeSelector service used to get the relevant storage node for content
    */
   storageNodeSelector: StorageNodeSelectorService
+  /**
+   * Signs audio uploads so the storage node can attest on chain which wallet
+   * they came from. Optional: when absent, audio uploads go out unsigned and
+   * simply never earn an attestation, so they cannot later claim their cids.
+   */
+  audiusWalletClient?: AudiusWalletClient
 }
 
 export const ProgressEventSchema = z.object({
@@ -123,4 +130,13 @@ export type FileMetadata = {
   userWallet?: string
   previewStartSeconds?: number
   placementHosts?: string
+  /**
+   * Decoded user id the upload belongs to. Sent on every audio upload and
+   * carried inside the signature, so it cannot be swapped after signing.
+   *
+   * Image uploads leave this unset: signup uploads a profile picture before
+   * the account has a user id, and images are served unauthenticated anyway,
+   * so there is no claim to protect.
+   */
+  userId?: number
 }

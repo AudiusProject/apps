@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 
-import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
+import { HashId, Id, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'
@@ -15,6 +15,7 @@ import {
   UploadType
 } from '~/store'
 
+import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { type QueryContextType, useQueryContext } from '../utils'
 
 import { usePublishCollection } from './usePublishCollection'
@@ -31,7 +32,8 @@ const {
 
 const getStemUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
-  tracks: TrackForUpload[]
+  tracks: TrackForUpload[],
+  userId: number | undefined
 ) => {
   const sdk = await context.audiusSdk()
   return tracks.flatMap(
@@ -40,6 +42,7 @@ const getStemUploadTasks = async (
         const file = (stemFile as StemUploadWithFile).file
         const task = sdk.tracks.uploadTrackFiles({
           audioFile: fileToSdk(file, 'audio'),
+          userId: userId === undefined ? undefined : Id.parse(userId),
           onProgress: (_, { key, loaded, total, transcode }) => {
             context.dispatch(
               updateProgress({
@@ -120,12 +123,14 @@ const getCoverArtUploadTasks = async (
 
 const getTrackUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
-  tracks: TrackForUpload[]
+  tracks: TrackForUpload[],
+  userId: number | undefined
 ) => {
   const sdk = await context.audiusSdk()
   return tracks.map((t) => {
     const task = sdk.tracks.uploadTrackFiles({
       audioFile: fileToSdk(t.file, 'audio'),
+      userId: userId === undefined ? undefined : Id.parse(userId),
       onProgress: (_, { key, loaded, total, transcode }) => {
         context.dispatch(
           uploadActions.updateProgress({
@@ -162,6 +167,11 @@ export const useUpload = (
     audiusSdk,
     analytics: { make, track }
   } = useQueryContext()
+  // Audio uploads are signed for this user so the storage node can attest on
+  // chain who uploaded the bytes, which is what makes the resulting cids
+  // claimable on a track.
+  const { data: account } = useCurrentAccount()
+  const userId = account?.userId ?? undefined
 
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
   const { mutateAsync: publishCollectionAsync } = usePublishCollection()
@@ -208,7 +218,11 @@ export const useUpload = (
         )
       })
 
-      const tasks = await getTrackUploadTasks({ audiusSdk, dispatch }, tracks)
+      const tasks = await getTrackUploadTasks(
+        { audiusSdk, dispatch },
+        tracks,
+        userId
+      )
 
       // Store the upload tasks for potential aborting later
       tasks.forEach((task, i) => {
@@ -324,7 +338,11 @@ export const useUpload = (
 
   const uploadStemFiles = useCallback(
     async (tracks: TrackForUpload[]) => {
-      const tasks = await getStemUploadTasks({ audiusSdk, dispatch }, tracks)
+      const tasks = await getStemUploadTasks(
+        { audiusSdk, dispatch },
+        tracks,
+        userId
+      )
       return await uploadFiles(tasks)
     },
     [audiusSdk, dispatch, uploadFiles]

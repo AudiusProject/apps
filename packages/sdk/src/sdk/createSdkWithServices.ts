@@ -200,6 +200,7 @@ const initializeServices = ({
     new Storage({
       ...getDefaultStorageServiceConfig(servicesConfig),
       storageNodeSelector,
+      audiusWalletClient,
       logger
     })
 

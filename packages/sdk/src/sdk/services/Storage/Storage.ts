@@ -4,11 +4,14 @@ import { productionConfig } from '../../config/production'
 import fetch from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
 import { wait } from '../../utils/wait'
+import type { AudiusWalletClient } from '../AudiusWalletClient'
 import type { LoggerService } from '../Logger'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
 
 import { getDefaultStorageServiceConfig } from './getDefaultConfig'
+import { signUpload } from './signUpload'
 import type {
+  FileMetadata,
   FileTemplate,
   ProgressHandler,
   StorageService,
@@ -29,6 +32,7 @@ export class Storage implements StorageService {
    */
   private readonly config: StorageServiceConfigInternal
   private readonly storageNodeSelector: StorageNodeSelectorService
+  private readonly audiusWalletClient: AudiusWalletClient | undefined
   private readonly logger: LoggerService
 
   constructor(config: StorageServiceConfig) {
@@ -37,7 +41,59 @@ export class Storage implements StorageService {
       getDefaultStorageServiceConfig(productionConfig)
     )
     this.storageNodeSelector = config.storageNodeSelector
+    this.audiusWalletClient = config.audiusWalletClient
     this.logger = this.config.logger.createPrefixedLogger('[storage]')
+  }
+
+  /**
+   * Builds the tus metadata that identifies who an upload belongs to.
+   *
+   * Audio is signed so the storage node can attest on chain which wallet
+   * uploaded the bytes; that attestation is what lets the uploader name the
+   * resulting cids on a track. Images are left alone — they are served
+   * unauthenticated, so there is nothing to claim, and requiring a signature
+   * would break signup, which uploads a profile picture before the account
+   * has a user id.
+   *
+   * A missing wallet client or user id is not fatal. The upload proceeds
+   * unsigned and simply never earns an attestation, which fails later at the
+   * point of claiming rather than here.
+   */
+  private async getUploadAuthMetadata(
+    metadata: FileMetadata
+  ): Promise<Record<string, string>> {
+    if (metadata.template !== 'audio') {
+      return {}
+    }
+    if (!this.audiusWalletClient || metadata.userId === undefined) {
+      this.logger.warn(
+        'uploading audio without a signature; it will not be claimable on a track',
+        {
+          hasWallet: !!this.audiusWalletClient,
+          hasUserId: metadata.userId !== undefined
+        }
+      )
+      return {}
+    }
+
+    try {
+      const { signature, userId, timestamp } = await signUpload({
+        audiusWalletClient: this.audiusWalletClient,
+        userId: metadata.userId
+      })
+      // The signed fields travel alongside the signature because the verifier
+      // needs them to reconstruct the typed data. They are reproduced inside
+      // the signed payload, so tampering with either only breaks recovery — it
+      // cannot redirect the upload to another user.
+      return {
+        signature,
+        userId: userId.toString(),
+        timestamp: timestamp.toString()
+      }
+    } catch (e) {
+      this.logger.error('failed to sign upload', e)
+      throw e
+    }
   }
 
   /**
@@ -54,6 +110,10 @@ export class Storage implements StorageService {
         if (uploadPromise) {
           return uploadPromise
         }
+        // Sign before selecting a node so a signing failure surfaces as such,
+        // rather than as an opaque upload rejection later.
+        const authMetadata = await this.getUploadAuthMetadata(metadata)
+
         uploadPromise = new Promise<UploadResponse>((resolve, reject) => {
           this.storageNodeSelector
             .getSelectedNode()
@@ -85,6 +145,7 @@ export class Storage implements StorageService {
                     file.type ||
                     'application/octet-stream',
                   template: metadata.template,
+                  ...authMetadata,
                   ...(metadata.placementHosts
                     ? { placementHosts: metadata.placementHosts }
                     : {}),

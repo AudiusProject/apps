@@ -178,7 +178,7 @@ export class TracksApi extends GeneratedTracksApi {
     let totalProgressPercentage = 0
     return {
       start: async () => {
-        const { audioFile, imageFile, fileMetadata, onProgress } =
+        const { audioFile, imageFile, fileMetadata, userId, onProgress } =
           await parseParams('uploadTrackFiles', UploadTrackFilesSchema)(params)
 
         imageUpload = imageFile
@@ -214,6 +214,7 @@ export class TracksApi extends GeneratedTracksApi {
                 template: 'audio',
                 filename: audioFile.name ?? undefined,
                 filetype: audioFile.type ?? undefined,
+                userId,
                 placementHosts: fileMetadata?.placementHosts,
                 previewStartSeconds: fileMetadata?.previewStartSeconds
               }
@@ -396,6 +397,7 @@ export class TracksApi extends GeneratedTracksApi {
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
         imageFile: params.imageFile,
+        userId: params.userId,
         fileMetadata: {
           placementHosts: params.metadata.placementHosts,
           previewStartSeconds: params.metadata.previewStartSeconds
@@ -480,6 +482,7 @@ export class TracksApi extends GeneratedTracksApi {
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
         imageFile: params.imageFile,
+        userId: params.userId,
         fileMetadata: {
           placementHosts: params.metadata.placementHosts,
           previewStartSeconds: params.metadata.previewStartSeconds

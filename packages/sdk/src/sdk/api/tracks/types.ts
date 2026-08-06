@@ -273,6 +273,10 @@ export const UploadTrackFilesSchema = z
   .object({
     audioFile: z.optional(AudioFile),
     imageFile: z.optional(ImageFile),
+    // Audio uploads are signed for this user so the storage node can attest
+    // on chain who uploaded the bytes. Without it the upload still succeeds
+    // but never becomes claimable on a track.
+    userId: z.optional(HashId),
     fileMetadata: z
       .object({
         placementHosts: z.string().optional(),
