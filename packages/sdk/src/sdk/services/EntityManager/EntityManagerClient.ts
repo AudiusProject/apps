@@ -10,7 +10,7 @@ import * as runtime from '../../api/generated/default/runtime'
 import { productionConfig } from '../../config/production'
 import fetch, { Headers } from '../../utils/fetch'
 import { mergeConfigWithDefaults } from '../../utils/mergeConfigs'
-import { getNonce } from '../../utils/signatureSchemas'
+import { getNonce } from '../../utils/nonce'
 import type { AudiusWalletClient } from '../AudiusWalletClient'
 import type { LoggerService } from '../Logger'
 
