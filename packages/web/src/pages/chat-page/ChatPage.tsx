@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useCanSendMessage } from '@audius/common/hooks'
-import { Status } from '@audius/common/models'
+import { Name, Status } from '@audius/common/models'
 import { chatActions, chatSelectors } from '@audius/common/store'
+import { ChatBlast, OptionalHashId } from '@audius/sdk'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
 import { useParams, useLocation, useNavigate } from 'react-router'
@@ -11,6 +12,7 @@ import Page from 'components/page/Page'
 import { useIsContainerNarrow } from 'hooks/useIsContainerNarrow'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useManagedAccountNotAllowedRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
+import { make, track } from 'services/analytics'
 import { push } from 'utils/navigation'
 import { useSelector } from 'utils/reducer'
 import { chatPage } from 'utils/route'
@@ -32,6 +34,36 @@ const messages = {
 }
 
 const NARROW_LAYOUT_THRESHOLD_PX = 1080
+
+// Local-storage key tracking which blast chat threads the user has already
+// viewed, so the `Chat Blast: Message Viewed` event fires only once per blast.
+const VIEWED_BLAST_CHATS_LOCAL_STORAGE_KEY = 'viewedBlastChats'
+
+const getViewedBlastChats = (): string[] => {
+  try {
+    const raw = window.localStorage.getItem(
+      VIEWED_BLAST_CHATS_LOCAL_STORAGE_KEY
+    )
+    const parsed = raw ? JSON.parse(raw) : []
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+const markBlastChatViewed = (chatId: string) => {
+  try {
+    const viewed = getViewedBlastChats()
+    if (!viewed.includes(chatId)) {
+      window.localStorage.setItem(
+        VIEWED_BLAST_CHATS_LOCAL_STORAGE_KEY,
+        JSON.stringify([...viewed, chatId])
+      )
+    }
+  } catch {
+    // Ignore local-storage write failures; worst case the event fires again.
+  }
+}
 
 export const ChatPage = () => {
   useManagedAccountNotAllowedRedirect()
@@ -109,6 +141,26 @@ export const ChatPage = () => {
       dispatch(fetchPermissions({ userIds: [firstOtherUser.user_id] }))
     }
   }, [dispatch, firstOtherUser, isMobile])
+
+  // Track when a user opens a blast DM thread. Fires once per blast per user.
+  useEffect(() => {
+    if (!currentChatId || !chat?.is_blast) return
+    const viewed = getViewedBlastChats()
+    if (viewed.includes(currentChatId)) return
+    const blastChat = chat as ChatBlast
+    markBlastChatViewed(currentChatId)
+    track(
+      make({
+        eventName: Name.CHAT_BLAST_MESSAGE_VIEWED,
+        isNativeMobile: false,
+        chatId: currentChatId,
+        audience: blastChat.audience,
+        audienceContentType: blastChat.audience_content_type,
+        audienceContentId:
+          OptionalHashId.parse(blastChat.audience_content_id) ?? undefined
+      })
+    )
+  }, [currentChatId, chat])
 
   if (isMobile) {
     return <MobileChatPage />

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { useCanSendMessage } from '@audius/common/hooks'
-import { Status } from '@audius/common/models'
+import { Name, Status } from '@audius/common/models'
 import type { ChatMessageWithExtras } from '@audius/common/models'
 import {
   chatActions,
@@ -16,6 +16,7 @@ import {
 } from '@audius/common/utils'
 import { OptionalHashId, OptionalId, type ChatBlast } from '@audius/sdk'
 import { Portal } from '@gorhom/portal'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect } from '@react-navigation/native'
 import type { FlatListProps, LayoutChangeEvent } from 'react-native'
 import {
@@ -40,9 +41,11 @@ import {
 } from 'app/components/core'
 import LoadingSpinner from 'app/components/loading-spinner'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
+import { VIEWED_BLAST_CHATS_KEY } from 'app/constants/storage-keys'
 import { light } from 'app/haptics'
 import { useRoute } from 'app/hooks/useRoute'
 import { useToast } from 'app/hooks/useToast'
+import { make, track } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
@@ -288,6 +291,37 @@ export const ChatScreen = () => {
       dispatch(markChatAsRead({ chatId }))
     }
   }, [chatId, dispatch])
+
+  // Track when a user opens a blast DM thread. Fires once per blast per user.
+  useEffect(() => {
+    if (!chatId || !chat?.is_blast) return
+    const blastChat = chat as ChatBlast
+    const trackBlastViewed = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(VIEWED_BLAST_CHATS_KEY)
+        const viewed: string[] = raw ? JSON.parse(raw) : []
+        if (!Array.isArray(viewed) || viewed.includes(chatId)) return
+        await AsyncStorage.setItem(
+          VIEWED_BLAST_CHATS_KEY,
+          JSON.stringify([...viewed, chatId])
+        )
+        track(
+          make({
+            eventName: Name.CHAT_BLAST_MESSAGE_VIEWED,
+            isNativeMobile: true,
+            chatId,
+            audience: blastChat.audience,
+            audienceContentType: blastChat.audience_content_type,
+            audienceContentId:
+              OptionalHashId.parse(blastChat.audience_content_id) ?? undefined
+          })
+        )
+      } catch {
+        // Ignore storage failures; worst case the event fires again later.
+      }
+    }
+    trackBlastViewed()
+  }, [chatId, chat])
 
   // Fetch all permissions, blockers/blockees, and recheck_permissions flag
   useEffect(() => {
