@@ -269,7 +269,8 @@ export class TracksApi extends GeneratedTracksApi {
         async () =>
           await this.storage.generatePreview({
             cid: populatedMetadata.trackCid!,
-            secondOffset: populatedMetadata.previewStartSeconds!
+            secondOffset: populatedMetadata.previewStartSeconds!,
+            userId: decodeHashId(params.userId) ?? undefined
           }),
         (e) => {
           this.logger.info('Retrying generatePreview', e)
@@ -512,7 +513,8 @@ export class TracksApi extends GeneratedTracksApi {
         async () =>
           await this.storage.generatePreview({
             cid: metadata.trackCid!,
-            secondOffset: metadata.previewStartSeconds!
+            secondOffset: metadata.previewStartSeconds!,
+            userId: decodeHashId(params.userId) ?? undefined
           }),
         (e) => {
           this.logger.info('Retrying generatePreview', e)

@@ -86,10 +86,12 @@ export type StorageService = {
   getUploadStatus: (uploadId: string) => Promise<UploadResponse>
   generatePreview: ({
     cid,
-    secondOffset
+    secondOffset,
+    userId
   }: {
     cid: string
     secondOffset: number
+    userId?: number
   }) => Promise<string>
 }
 

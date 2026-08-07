@@ -220,17 +220,27 @@ export class Storage implements StorageService {
 
   /**
    * Generates a preview for a track at the given second offset
+   *
+   * Signed for the same reason audio uploads are: the node attests the
+   * resulting cid on chain so it can be named as a track's preview, and it
+   * will only do that for a user who already owns the source audio. Previews
+   * stream publicly, so a preview cid anyone could claim would let an attacker
+   * slice a gated track into 30-second windows and reassemble it.
+   *
    * @param {Object} params
    * @param {string} params.cid - The CID of the track to generate a preview for
    * @param {number} params.secondOffset - The offset in seconds to start the preview from
+   * @param {number} params.userId - Decoded id of the user the source audio belongs to
    * @returns {Promise<string>} The CID of the generated preview
    */
   async generatePreview({
     cid,
-    secondOffset
+    secondOffset,
+    userId
   }: {
     cid: string
     secondOffset: number
+    userId?: number
   }) {
     const contentNodeEndpoint = await this.storageNodeSelector.getSelectedNode()
 
@@ -238,12 +248,24 @@ export class Storage implements StorageService {
       throw new Error('No content node available')
     }
 
-    const response = await fetch(
-      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`,
-      {
-        method: 'POST'
-      }
+    const url = new URL(
+      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`
     )
+
+    // Unsigned when there is no wallet or no user to sign for. The node
+    // accepts those where content authorization is not yet enforced, and the
+    // preview simply never earns a claim.
+    if (this.audiusWalletClient && userId !== undefined) {
+      const signed = await signUpload({
+        audiusWalletClient: this.audiusWalletClient,
+        userId
+      })
+      url.searchParams.set('signature', signed.signature)
+      url.searchParams.set('userId', String(signed.userId))
+      url.searchParams.set('timestamp', String(signed.timestamp))
+    }
+
+    const response = await fetch(url, { method: 'POST' })
     if (!response.ok) {
       throw new Error(
         `Failed to generate preview for cid ${cid} at offset ${secondOffset}, status: ${response.status}`
