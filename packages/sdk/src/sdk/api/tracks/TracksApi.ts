@@ -270,7 +270,7 @@ export class TracksApi extends GeneratedTracksApi {
           await this.storage.generatePreview({
             cid: populatedMetadata.trackCid!,
             secondOffset: populatedMetadata.previewStartSeconds!,
-            userId: decodeHashId(params.userId) ?? undefined
+            userId
           }),
         (e) => {
           this.logger.info('Retrying generatePreview', e)

@@ -6,6 +6,7 @@ import {
 import { Name, StemCategory } from '@audius/common/models'
 import { publishStems } from '@audius/common/src/api/tan-query/upload/usePublishStems'
 import { getContext, stemsUploadActions } from '@audius/common/store'
+import { Id } from '@audius/sdk'
 import { takeEvery, put, call } from 'typed-redux-saga'
 
 import { make } from 'common/store/analytics/actions'
@@ -35,7 +36,8 @@ function* watchUploadStems() {
         const sdk = await audiusSdk()
         const uploadHandles = uploads.map((stem, index) => {
           return sdk.tracks.uploadTrackFiles({
-            audioFile: stem.file
+            audioFile: stem.file,
+            userId: Id.parse(userId)
           })
         })
         const uploadResponses = await Promise.all(

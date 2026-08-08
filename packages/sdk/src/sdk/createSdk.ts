@@ -178,6 +178,7 @@ export const createSdk = (config: SdkConfig) => {
               endpoint: apiEndpoint, // health_check is at root, not /v1
               logger
             }),
+          audiusWalletClient: services?.audiusWalletClient,
           logger
         })
     })

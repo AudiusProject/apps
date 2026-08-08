@@ -231,7 +231,7 @@ export const useUpload = (
 
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles, track, make]
+    [audiusSdk, dispatch, uploadFiles, track, make, userId]
   )
 
   /**
@@ -345,7 +345,7 @@ export const useUpload = (
       )
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles]
+    [audiusSdk, dispatch, uploadFiles, userId]
   )
 
   const startUpload = useCallback(

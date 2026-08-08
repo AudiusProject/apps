@@ -230,7 +230,7 @@ export class Storage implements StorageService {
    * @param {Object} params
    * @param {string} params.cid - The CID of the track to generate a preview for
    * @param {number} params.secondOffset - The offset in seconds to start the preview from
-   * @param {number} params.userId - Decoded id of the user the source audio belongs to
+   * @param {number} [params.userId] - Decoded id of the user the source audio belongs to
    * @returns {Promise<string>} The CID of the generated preview
    */
   async generatePreview({

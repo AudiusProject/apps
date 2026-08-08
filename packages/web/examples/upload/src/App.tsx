@@ -180,7 +180,10 @@ export default function App() {
 
       // Step 1 — upload audio
       setResult('Uploading audio...')
-      const audioUpload = sdk.uploads.createAudioUpload({ file: audioFile })
+      const audioUpload = sdk.uploads.createAudioUpload({
+        file: audioFile,
+        userId: String(profile.userId ?? profile.sub ?? '') || undefined
+      })
 
       // Step 2 — upload cover art (optional)
       if (coverFile) setResult('Uploading cover art...')
