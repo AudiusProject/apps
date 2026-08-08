@@ -152,11 +152,22 @@ export const useUpdateTrack = () => {
         })
       }
 
+      // A changed preview start needs a freshly sliced preview clip. The SDK
+      // only regenerates when asked (and skips it when a new audio file is
+      // uploaded, since transcoding produces the preview then); without this
+      // flag an edit updates preview_start_seconds in metadata while the
+      // track keeps streaming the old preview_cid's clip.
+      const generatePreview =
+        metadataWithSplits.preview_start_seconds != null &&
+        metadataWithSplits.preview_start_seconds !==
+          previousMetadata?.preview_start_seconds
+
       const response = await sdk.tracks.updateTrack({
         audioFile,
         imageFile,
         trackId: Id.parse(trackId),
         userId: Id.parse(userId),
+        generatePreview,
         metadata: sdkMetadata as UpdateTrackRequestBody,
         onProgress: (_, progress) => {
           if (progress.key === 'audio') {
