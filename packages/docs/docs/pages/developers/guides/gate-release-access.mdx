@@ -43,7 +43,7 @@ The [gated-upload example](https://github.com/AudiusProject/apps/tree/main/packa
 
 **Client**
 
-- OAuth login, upload via SDK (`uploadTrackFiles`, then `create-track` with the server), and streaming via `GET /stream/:trackId` (server redirects to signed URL).
+- OAuth login, upload via SDK (`uploadTrackFiles` with the uploading user's `userId`, then `create-track` with the server), and streaming via `GET /stream/:trackId` (server redirects to signed URL).
 
 Run the server from `packages/web/examples/gated-upload/server` with `AUDIUS_API_KEY`, `AUDIUS_BEARER_TOKEN`, and `SIGNER_PRIVATE_KEY` in `.env`. See the [README](https://github.com/AudiusProject/apps/blob/main/packages/web/examples/gated-upload/README.md) for full setup.
 

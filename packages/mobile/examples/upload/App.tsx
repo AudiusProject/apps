@@ -182,7 +182,8 @@ export default function App() {
           uri: audioFile.uri,
           name: audioFile.name ?? 'audio',
           type: audioFile.mimeType ?? 'audio/mpeg'
-        }
+        },
+        userId: String(profile.id ?? '')
       })
 
       const imageUpload = coverUri

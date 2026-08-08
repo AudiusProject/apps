@@ -22,6 +22,12 @@ Uploads API to get CIDs, then pass those CIDs as metadata when creating or updat
 Upload an audio file to a storage node. Returns the resulting CIDs and audio analysis metadata
 (duration, BPM, musical key).
 
+The `userId` names the user the upload is made for. Validator nodes record it on chain against the
+resulting CIDs, which is what allows those CIDs to later be named on that user's track. Uploads made
+without the correct user id cannot be published once content authorization is enforced. The id is
+always passed explicitly — it is never inferred from your API key or session, because a manager or
+developer app can act on behalf of more than one user.
+
 Example:
 
 ```ts
@@ -35,6 +41,7 @@ const upload = audiusSdk.uploads.createAudioUpload({
     name: 'track.mp3',
     type: 'audio/mpeg',
   },
+  userId: '7eP5n',
   onProgress: ({ loaded, total }) => {
     console.log(`Upload progress: ${Math.round((loaded / total) * 100)}%`)
   },
@@ -52,6 +59,7 @@ Create an object with the following fields and pass it as the first argument.
 | Name                  | Type                                                                    | Description                                          | Required?    |
 | :-------------------- | :---------------------------------------------------------------------- | :--------------------------------------------------- | :----------- |
 | `file`                | `File`                                                                  | The audio file to upload                             | **Required** |
+| `userId`              | `string`                                                                | The ID of the user the audio is uploaded for         | **Required** |
 | `onProgress`          | `(event: { loaded: number; total: number; transcode: number }) => void` | A callback for tracking upload progress              | _Optional_   |
 | `previewStartSeconds` | `number`                                                                | Start time in seconds for generating a preview clip  | _Optional_   |
 | `placementHosts`      | `string[]`                                                              | A list of storage node hosts to prefer for placement | _Optional_   |
@@ -126,7 +134,7 @@ a track with the returned CIDs.
 ```ts
 import fs from 'fs'
 
-// Step 1: Upload the audio file
+// Step 1: Upload the audio file for the user who will own the track
 const trackBuffer = fs.readFileSync('path/to/track.mp3')
 const audioUpload = audiusSdk.uploads.createAudioUpload({
   file: {
@@ -134,6 +142,7 @@ const audioUpload = audiusSdk.uploads.createAudioUpload({
     name: 'track.mp3',
     type: 'audio/mpeg',
   },
+  userId: '7eP5n',
   previewStartSeconds: 30,
 })
 const audioResult = await audioUpload.start()

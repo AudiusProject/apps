@@ -79,10 +79,12 @@ export type StorageService = {
   getUploadStatus: (uploadId: string) => Promise<UploadResponse>
   generatePreview: ({
     cid,
-    secondOffset
+    secondOffset,
+    userId
   }: {
     cid: string
     secondOffset: number
+    userId: number
   }) => Promise<string>
 }
 
@@ -123,4 +125,16 @@ export type FileMetadata = {
   userWallet?: string
   previewStartSeconds?: number
   placementHosts?: string
+  /**
+   * Decoded id of the user the upload is made for. Sent on audio uploads so
+   * the validator can attest on chain that these bytes were uploaded for that
+   * user, which is what makes the resulting cids claimable on a track. It is
+   * an assertion, not proof of identity — ownership is enforced when the cid
+   * is named on a track, in a signed entity-manager write.
+   *
+   * Image uploads leave this unset: signup uploads a profile picture before
+   * the account has a user id, and images are served unauthenticated anyway,
+   * so there is no claim to protect.
+   */
+  userId?: number
 }

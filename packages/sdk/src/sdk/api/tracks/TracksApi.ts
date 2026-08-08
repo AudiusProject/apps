@@ -178,7 +178,7 @@ export class TracksApi extends GeneratedTracksApi {
     let totalProgressPercentage = 0
     return {
       start: async () => {
-        const { audioFile, imageFile, fileMetadata, onProgress } =
+        const { audioFile, imageFile, fileMetadata, userId, onProgress } =
           await parseParams('uploadTrackFiles', UploadTrackFilesSchema)(params)
 
         imageUpload = imageFile
@@ -214,6 +214,7 @@ export class TracksApi extends GeneratedTracksApi {
                 template: 'audio',
                 filename: audioFile.name ?? undefined,
                 filetype: audioFile.type ?? undefined,
+                userId,
                 placementHosts: fileMetadata?.placementHosts,
                 previewStartSeconds: fileMetadata?.previewStartSeconds
               }
@@ -268,7 +269,8 @@ export class TracksApi extends GeneratedTracksApi {
         async () =>
           await this.storage.generatePreview({
             cid: populatedMetadata.trackCid!,
-            secondOffset: populatedMetadata.previewStartSeconds!
+            secondOffset: populatedMetadata.previewStartSeconds!,
+            userId
           }),
         (e) => {
           this.logger.info('Retrying generatePreview', e)
@@ -396,6 +398,7 @@ export class TracksApi extends GeneratedTracksApi {
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
         imageFile: params.imageFile,
+        userId: params.userId,
         fileMetadata: {
           placementHosts: params.metadata.placementHosts,
           previewStartSeconds: params.metadata.previewStartSeconds
@@ -480,6 +483,7 @@ export class TracksApi extends GeneratedTracksApi {
       await this.uploadTrackFiles({
         audioFile: params.audioFile,
         imageFile: params.imageFile,
+        userId: params.userId,
         fileMetadata: {
           placementHosts: params.metadata.placementHosts,
           previewStartSeconds: params.metadata.previewStartSeconds
@@ -509,7 +513,8 @@ export class TracksApi extends GeneratedTracksApi {
         async () =>
           await this.storage.generatePreview({
             cid: metadata.trackCid!,
-            secondOffset: metadata.previewStartSeconds!
+            secondOffset: metadata.previewStartSeconds!,
+            userId: decodeHashId(params.userId)!
           }),
         (e) => {
           this.logger.info('Retrying generatePreview', e)

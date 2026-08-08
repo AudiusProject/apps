@@ -85,6 +85,9 @@ export class Storage implements StorageService {
                     file.type ||
                     'application/octet-stream',
                   template: metadata.template,
+                  ...(metadata.userId !== undefined
+                    ? { userId: metadata.userId.toString() }
+                    : {}),
                   ...(metadata.placementHosts
                     ? { placementHosts: metadata.placementHosts }
                     : {}),
@@ -159,17 +162,27 @@ export class Storage implements StorageService {
 
   /**
    * Generates a preview for a track at the given second offset
+   *
+   * The user id names who the resulting preview cid is attested to, and the
+   * validator refuses unless that user already claims the source cid —
+   * previews stream publicly, so a preview cid anyone could mint over
+   * arbitrary audio would let an attacker slice a gated track into 30-second
+   * windows. Asserting another user's id credits them, not the caller.
+   *
    * @param {Object} params
    * @param {string} params.cid - The CID of the track to generate a preview for
    * @param {number} params.secondOffset - The offset in seconds to start the preview from
+   * @param {number} params.userId - Decoded id of the user the source audio belongs to
    * @returns {Promise<string>} The CID of the generated preview
    */
   async generatePreview({
     cid,
-    secondOffset
+    secondOffset,
+    userId
   }: {
     cid: string
     secondOffset: number
+    userId: number
   }) {
     const contentNodeEndpoint = await this.storageNodeSelector.getSelectedNode()
 
@@ -177,12 +190,12 @@ export class Storage implements StorageService {
       throw new Error('No content node available')
     }
 
-    const response = await fetch(
-      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`,
-      {
-        method: 'POST'
-      }
+    const url = new URL(
+      `${contentNodeEndpoint}/generate_preview/${cid}/${secondOffset}`
     )
+    url.searchParams.set('userId', String(userId))
+
+    const response = await fetch(url, { method: 'POST' })
     if (!response.ok) {
       throw new Error(
         `Failed to generate preview for cid ${cid} at offset ${secondOffset}, status: ${response.status}`

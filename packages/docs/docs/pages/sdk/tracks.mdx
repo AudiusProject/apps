@@ -199,7 +199,9 @@ Example:
 ```ts
 import fs from 'fs'
 
-// First, upload files using the Uploads API
+// First, upload files using the Uploads API.
+// Audio uploads name the user they are made for; the resulting CIDs are only
+// claimable on that user's tracks.
 const trackBuffer = fs.readFileSync('path/to/track.mp3')
 const audioUpload = audiusSdk.uploads.createAudioUpload({
   file: {
@@ -207,6 +209,7 @@ const audioUpload = audiusSdk.uploads.createAudioUpload({
     name: 'track.mp3',
     type: 'audio/mpeg',
   },
+  userId: '7eP5n',
 })
 const audioResult = await audioUpload.start()
 
