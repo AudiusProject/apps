@@ -223,7 +223,8 @@ export default function App() {
       setResult('Uploading audio...')
       const task = sdk.tracks.uploadTrackFiles({
         audioFile,
-        imageFile: imageFileForSdk
+        imageFile: imageFileForSdk,
+        userId: profile.userId
       })
       const { audioUploadResponse, imageUploadResponse } = await task.start()
       if (!audioUploadResponse?.results?.['320']) {

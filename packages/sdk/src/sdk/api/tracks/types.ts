@@ -271,6 +271,13 @@ export type UploadTrackRequest = Omit<
 
 export const UploadTrackFilesSchema = z
   .object({
+    // The user the upload is made for. Required — and always explicit, never
+    // derived from auth state, because a manager or developer-app session can
+    // act for more than one user. Audio uploads carry it so the validator can
+    // attest on chain that the bytes were uploaded for this user, which is
+    // what makes the resulting cids claimable on a track. Without a claim,
+    // publishing fails once content authorization is enforced.
+    userId: HashId,
     audioFile: z.optional(AudioFile),
     imageFile: z.optional(ImageFile),
     fileMetadata: z

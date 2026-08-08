@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 
-import { HashId, type UploadTrackFilesTask } from '@audius/sdk'
+import { HashId, Id, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'
@@ -15,6 +15,7 @@ import {
   UploadType
 } from '~/store'
 
+import { useCurrentAccount } from '../users/account/useCurrentAccount'
 import { type QueryContextType, useQueryContext } from '../utils'
 
 import { usePublishCollection } from './usePublishCollection'
@@ -31,7 +32,8 @@ const {
 
 const getStemUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
-  tracks: TrackForUpload[]
+  tracks: TrackForUpload[],
+  userId: number
 ) => {
   const sdk = await context.audiusSdk()
   return tracks.flatMap(
@@ -40,6 +42,7 @@ const getStemUploadTasks = async (
         const file = (stemFile as StemUploadWithFile).file
         const task = sdk.tracks.uploadTrackFiles({
           audioFile: fileToSdk(file, 'audio'),
+          userId: Id.parse(userId),
           onProgress: (_, { key, loaded, total, transcode }) => {
             context.dispatch(
               updateProgress({
@@ -70,7 +73,8 @@ const getStemUploadTasks = async (
 
 const getCoverArtUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
-  tracks: TrackForUpload[]
+  tracks: TrackForUpload[],
+  userId: number
 ) => {
   const sdk = await context.audiusSdk()
   return tracks
@@ -91,6 +95,7 @@ const getCoverArtUploadTasks = async (
       const file = fileToSdk(t.metadata.artwork.file, 'cover_art')
       const task = sdk.tracks.uploadTrackFiles({
         imageFile: file,
+        userId: Id.parse(userId),
         onProgress: (_, { key, loaded, total }) => {
           context.dispatch(
             uploadActions.updateProgress({
@@ -120,12 +125,14 @@ const getCoverArtUploadTasks = async (
 
 const getTrackUploadTasks = async (
   context: Pick<QueryContextType, 'audiusSdk' | 'dispatch'>,
-  tracks: TrackForUpload[]
+  tracks: TrackForUpload[],
+  userId: number
 ) => {
   const sdk = await context.audiusSdk()
   return tracks.map((t) => {
     const task = sdk.tracks.uploadTrackFiles({
       audioFile: fileToSdk(t.file, 'audio'),
+      userId: Id.parse(userId),
       onProgress: (_, { key, loaded, total, transcode }) => {
         context.dispatch(
           uploadActions.updateProgress({
@@ -162,6 +169,18 @@ export const useUpload = (
     audiusSdk,
     analytics: { make, track }
   } = useQueryContext()
+  // Uploads carry this user's id so the validator can attest on chain who the
+  // bytes were uploaded for, which is what makes the resulting cids claimable
+  // on a track. The SDK requires it, so a missing account fails loudly here
+  // rather than producing an unclaimable upload.
+  const { data: account } = useCurrentAccount()
+  const userId = account?.userId ?? undefined
+  const requireUserId = useCallback(() => {
+    if (userId === undefined) {
+      throw new Error('useUpload: no current user id — cannot upload')
+    }
+    return userId
+  }, [userId])
 
   const { mutateAsync: publishTracksAsync } = usePublishTracks()
   const { mutateAsync: publishCollectionAsync } = usePublishCollection()
@@ -208,7 +227,11 @@ export const useUpload = (
         )
       })
 
-      const tasks = await getTrackUploadTasks({ audiusSdk, dispatch }, tracks)
+      const tasks = await getTrackUploadTasks(
+        { audiusSdk, dispatch },
+        tracks,
+        requireUserId()
+      )
 
       // Store the upload tasks for potential aborting later
       tasks.forEach((task, i) => {
@@ -217,7 +240,7 @@ export const useUpload = (
 
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles, track, make]
+    [audiusSdk, dispatch, uploadFiles, track, make, requireUserId]
   )
 
   /**
@@ -265,11 +288,12 @@ export const useUpload = (
     async (tracks: TrackForUpload[]) => {
       const tasks = await getCoverArtUploadTasks(
         { audiusSdk, dispatch },
-        tracks
+        tracks,
+        requireUserId()
       )
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles]
+    [audiusSdk, dispatch, uploadFiles, requireUserId]
   )
 
   const uploadCollectionArtwork = useCallback(
@@ -295,6 +319,7 @@ export const useUpload = (
 
       const uploadTask = sdk.tracks.uploadTrackFiles({
         imageFile: fileToSdk(imageFile, 'artwork'),
+        userId: Id.parse(requireUserId()),
         onProgress: (_, { key, loaded, total }) => {
           dispatch(
             updateProgress({
@@ -319,15 +344,19 @@ export const useUpload = (
         { ...uploadTask, clientId: 'collection-artwork', key: 'image' }
       ])
     },
-    [audiusSdk, dispatch, uploadFiles]
+    [audiusSdk, dispatch, uploadFiles, requireUserId]
   )
 
   const uploadStemFiles = useCallback(
     async (tracks: TrackForUpload[]) => {
-      const tasks = await getStemUploadTasks({ audiusSdk, dispatch }, tracks)
+      const tasks = await getStemUploadTasks(
+        { audiusSdk, dispatch },
+        tracks,
+        requireUserId()
+      )
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles]
+    [audiusSdk, dispatch, uploadFiles, requireUserId]
   )
 
   const startUpload = useCallback(

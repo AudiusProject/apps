@@ -10,7 +10,7 @@ A serverless Audius track upload example using SDK + OAuth PKCE entirely in the 
 4. The parent's `login()` promise resolves; call `sdk.oauth.getUser()` to retrieve the authenticated user's profile. The access token is stored internally in the SDK's `tokenStore`.
 5. User picks an audio file (and optional cover art), fills in title/genre/description.
 6. On upload:
-   - `sdk.uploads.createAudioUpload({ file })` uploads audio to a storage node → returns `trackCid`, `origFileCid`, `duration`, etc.
+   - `sdk.uploads.createAudioUpload({ file, userId })` uploads audio to a storage node for the given user → returns `trackCid`, `origFileCid`, `duration`, etc.
    - `sdk.uploads.createImageUpload({ file })` uploads cover art → returns `coverArtSizes` CID.
    - `sdk.tracks.createTrack({ userId, metadata })` registers the track on-chain, authenticated via the stored OAuth access token.
 

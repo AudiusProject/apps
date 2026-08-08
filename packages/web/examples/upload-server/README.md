@@ -53,6 +53,6 @@ Open the URL shown (default `http://localhost:5176`). Sign in with Audius (popup
 1. User clicks "Sign in with Audius" → popup opens, returns token via postMessage
 2. Client verifies token via `verifyIDToken`, gets `userId`
 3. User picks audio (required) + cover (optional), enters title/genre
-4. Client calls `sdk.tracks.uploadTrackFiles({ audioFile, imageFile })` → gets trackCid, etc.
+4. Client calls `sdk.tracks.uploadTrackFiles({ audioFile, imageFile, userId })` → gets trackCid, etc.
 5. Client POSTs `{ userId, metadata }` to `/create-track`
 6. Server uses `sdk({ apiKey, bearerToken }).tracks.createTrack()` with developer app bearer
