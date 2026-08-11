@@ -850,6 +850,18 @@ jobs:
           mv build-ssr-production/server/chunks/*.map sourcemaps/assets
           mv build-ssr-production/server/entries/*.map sourcemaps/assets
 
+      # The desktop app polls s3://audius.co for a newer web bundle and swaps it
+      # in without a full reinstall (see packages/web/src/electron.js).
+      # Two things have to line up for already-shipped clients:
+      #   - package.json must sit *inside* build-production, since that's the
+      #     version marker the app reads back after applying an update
+      #   - the tar must carry the `packages/web/` prefix, because the app looks
+      #     for web-update/packages/web/build-production after extracting
+      - name: Package build for desktop web-update
+        run: |
+          cp packages/web/package.json packages/web/build-production/package.json
+          tar -czf build-production.tar.gz packages/web/build-production
+
       - name: Move build
         run: |
           cd packages/web
@@ -874,6 +886,23 @@ jobs:
           cd packages/web
           npm_config_yes=true npx wrangler@4.54.0 deploy --config ./src/ssr/wrangler.toml --env production
           npm_config_yes=true npx wrangler@4.54.0 deploy --config ./wrangler.toml --env production
+
+      # Runs after Cloudflare so a bad S3 credential can't block the web deploy.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
+
+      - name: Publish desktop web-update to S3
+        run: |
+          aws s3 cp build-production.tar.gz s3://audius.co/build-production.tar.gz \
+            --cache-control max-age=0 --content-type 'application/gzip'
+          # Written last: it's the version marker clients poll, so it should
+          # only flip once the bundle it points at is actually downloadable.
+          aws s3 cp packages/web/package.json s3://audius.co/package.json \
+            --cache-control max-age=0 --content-type 'application/json'
 
       - name: Slack notification
         if: success()
@@ -923,6 +952,9 @@ jobs:
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          # macOS runners default to a 256 fd soft limit, which npm blows
+          # through while populating its cache (EMFILE).
+          ulimit -n 65536
           mkdir -p /tmp/android-sdk-dummy
           npm ci --prefer-offline || npm install --prefer-offline
 
@@ -944,6 +976,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
+          # electron-builder opens a large number of files while packing the
+          # universal binary; same 256 fd default applies here.
+          ulimit -n 65536
           cd packages/web
           npm run dist:mac-publish-production
 
@@ -1002,6 +1037,11 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # The runner mounts /github/home as HOME and chowns it to uid 1001,
+          # but the container runs as root. wine refuses to create its prefix in
+          # a directory it doesn't own, which kills the rcedit step. Point HOME
+          # at a directory root actually owns.
+          HOME: /root
         run: |
           cd packages/web
           npm run dist:win-publish-production
