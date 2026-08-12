@@ -955,9 +955,16 @@ jobs:
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          # macOS runners default to a 256 fd soft limit, which npm blows
-          # through while populating its cache (EMFILE).
-          ulimit -n 65536
+          # macOS runners default to a 256 fd soft limit and npm blows through
+          # it populating its cache (EMFILE on cacache index writes). Raising
+          # the soft limit alone did not clear it, so also cap npm's own
+          # concurrency. Limits are echoed because macOS can clamp the
+          # effective ceiling to kern.maxfilesperproc regardless of ulimit.
+          echo "before: soft=$(ulimit -Sn) hard=$(ulimit -Hn)"
+          sysctl kern.maxfiles kern.maxfilesperproc || true
+          ulimit -n "$(ulimit -Hn)" 2>/dev/null || ulimit -n 65536 || true
+          echo "after:  soft=$(ulimit -Sn)"
+          npm config set maxsockets 8
           mkdir -p /tmp/android-sdk-dummy
           npm ci --prefer-offline || npm install --prefer-offline
 
@@ -1011,10 +1018,9 @@ jobs:
     name: Desktop Build (Windows)
     runs-on: ubuntu-latest
     needs: [web-build]
-    # TEMP(revert before merge): run on this branch instead of main so the
-    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
-    # pull_request events (github.ref would be refs/pull/N/merge).
-    if: github.head_ref == 'fix/desktop-builds-and-updates'
+    # TEMP: already verified green in run 31549356767; parked so Mac
+    # iterations don't burn ~20min of CI re-proving them.
+    if: false
     timeout-minutes: 90
     container:
       image: electronuserland/builder:18-wine
@@ -1083,10 +1089,9 @@ jobs:
     name: Desktop Build (Linux)
     runs-on: ubuntu-latest
     needs: [web-build]
-    # TEMP(revert before merge): run on this branch instead of main so the
-    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
-    # pull_request events (github.ref would be refs/pull/N/merge).
-    if: github.head_ref == 'fix/desktop-builds-and-updates'
+    # TEMP: already verified green in run 31549356767; parked so Mac
+    # iterations don't burn ~20min of CI re-proving them.
+    if: false
     timeout-minutes: 90
     container:
       image: electronuserland/builder
