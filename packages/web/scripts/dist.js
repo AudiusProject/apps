@@ -239,7 +239,10 @@ if (program.win) {
   buildParams.win = ['default']
 }
 if (program.linux) {
-  buildParams.linux = ['default']
+  // Explicitly AppImage rather than 'default', which electron-builder expands
+  // to snap *and* AppImage. We don't ship a snap, and the build image has no
+  // snapcraft, so 'default' fails the whole linux build.
+  buildParams.linux = ['AppImage']
 }
 
 if (program.publish) {
