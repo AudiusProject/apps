@@ -921,11 +921,8 @@ jobs:
   desktop-build-mac:
     name: Desktop Build (Mac)
     runs-on: macos-latest
-    needs: [web-build]
-    # TEMP(revert before merge): run on this branch instead of main so the
-    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
-    # pull_request events (github.ref would be refs/pull/N/merge).
-    if: github.head_ref == 'fix/desktop-builds-and-updates'
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
     timeout-minutes: 90
     steps:
       - name: Checkout code
@@ -991,27 +988,16 @@ jobs:
           # this job never got far enough to hit it.
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          # TEMP(revert before merge): electron-builder skips signing on
-          # pull_request builds, and notarizeFn then fails on the unsigned app.
-          # That's an artifact of testing from a PR — a push to main signs
-          # normally — but without this the signing path can't be exercised
-          # pre-merge. Safe here only because the job's `if` restricts it to
-          # this branch, so no fork PR can reach it.
-          CSC_FOR_PULL_REQUEST: 'true'
         run: |
           # electron-builder opens a large number of files while packing the
-          # universal binary; same 256 fd default applies here.
+          # universal binary. The sysctl raise in the install step persists for
+          # the runner VM, so the soft limit can be lifted here too.
           ulimit -n 65536
           cd packages/web
-          # TEMP(revert before merge): --publish never so this branch cannot
-          # overwrite latest-*.yml on download.audius.co
-          node ./scripts/dist.js --mac --publish never --env production
-          ls -la dist/ || true
+          npm run dist:mac-publish-production
 
       - name: Slack notification
-        # TEMP(revert before merge): these are test builds, not a release —
-        # don't announce a production desktop deploy in Slack.
-        if: false
+        if: success()
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
@@ -1024,10 +1010,8 @@ jobs:
   desktop-build-win:
     name: Desktop Build (Windows)
     runs-on: ubuntu-latest
-    needs: [web-build]
-    # TEMP: already verified green in run 31549356767; parked so Mac
-    # iterations don't burn ~20min of CI re-proving them.
-    if: false
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
     timeout-minutes: 90
     container:
       image: electronuserland/builder:18-wine
@@ -1074,15 +1058,10 @@ jobs:
           HOME: /root
         run: |
           cd packages/web
-          # TEMP(revert before merge): --publish never so this branch cannot
-          # overwrite latest-*.yml on download.audius.co
-          node ./scripts/dist.js --win --publish never --env production
-          ls -la dist/ || true
+          npm run dist:win-publish-production
 
       - name: Slack notification
-        # TEMP(revert before merge): these are test builds, not a release —
-        # don't announce a production desktop deploy in Slack.
-        if: false
+        if: success()
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
@@ -1095,10 +1074,8 @@ jobs:
   desktop-build-linux:
     name: Desktop Build (Linux)
     runs-on: ubuntu-latest
-    needs: [web-build]
-    # TEMP: already verified green in run 31549356767; parked so Mac
-    # iterations don't burn ~20min of CI re-proving them.
-    if: false
+    needs: [production-gate]
+    if: github.ref == 'refs/heads/main'
     timeout-minutes: 90
     container:
       image: electronuserland/builder
@@ -1139,15 +1116,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           cd packages/web
-          # TEMP(revert before merge): --publish never so this branch cannot
-          # overwrite latest-*.yml on download.audius.co
-          node ./scripts/dist.js --linux --publish never --env production
-          ls -la dist/ || true
+          npm run dist:linux-publish-production
 
       - name: Slack notification
-        # TEMP(revert before merge): these are test builds, not a release —
-        # don't announce a production desktop deploy in Slack.
-        if: false
+        if: success()
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
