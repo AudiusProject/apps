@@ -975,6 +975,12 @@ jobs:
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Developer ID cert. Without these electron-builder finds no signing
+          # identity on the runner and skips signing, and notarizeFn then fails
+          # because an unsigned app can't be notarized. The EMFILE crash meant
+          # this job never got far enough to hit it.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         run: |
           # electron-builder opens a large number of files while packing the
           # universal binary; same 256 fd default applies here.
