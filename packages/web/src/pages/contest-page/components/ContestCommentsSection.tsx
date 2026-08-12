@@ -23,6 +23,8 @@ import {
 } from '@audius/harmony'
 
 import { UserLink } from 'components/link/UserLink'
+import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGeneratedTextV2'
+import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 
 const messages = {
   heading: 'Contest Feed',
@@ -358,20 +360,13 @@ const ContestCommentRow = ({
           </Text>
         ) : null}
       </Flex>
-      <Text variant='body' size='m'>
+      <UserGeneratedTextV2 variant='body' size='m' mentions={(comment as any).mentions ?? []}>
         {comment.message}
-      </Text>
+      </UserGeneratedTextV2>
       {videoUrl ? (
-        <video
-          controls
-          src={videoUrl}
-          style={{
-            width: '100%',
-            maxHeight: 340,
-            borderRadius: 8,
-            backgroundColor: '#000'
-          }}
-        />
+        <Box mt='xs'>
+          <VideoEmbed url={videoUrl} />
+        </Box>
       ) : null}
     </Paper>
   )
