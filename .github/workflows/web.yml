@@ -955,15 +955,15 @@ jobs:
           ANDROID_HOME: /tmp/android-sdk-dummy
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          # macOS runners default to a 256 fd soft limit and npm blows through
-          # it populating its cache (EMFILE on cacache index writes). Raising
-          # the soft limit alone did not clear it, so also cap npm's own
-          # concurrency. Limits are echoed because macOS can clamp the
-          # effective ceiling to kern.maxfilesperproc regardless of ulimit.
-          echo "before: soft=$(ulimit -Sn) hard=$(ulimit -Hn)"
-          sysctl kern.maxfiles kern.maxfilesperproc || true
-          ulimit -n "$(ulimit -Hn)" 2>/dev/null || ulimit -n 65536 || true
-          echo "after:  soft=$(ulimit -Sn)"
+          # npm exhausts file descriptors populating its cache (EMFILE on
+          # cacache index writes). ulimit alone cannot fix this: the runner's
+          # soft limit is already 10240, which is exactly kern.maxfilesperproc,
+          # and the kernel caps every process there no matter what ulimit
+          # reports. Raise the kernel ceiling itself, then the soft limit, and
+          # cap npm's concurrency as well.
+          sudo sysctl -w kern.maxfiles=131072 kern.maxfilesperproc=65536
+          ulimit -n 65536
+          echo "fd limit now: $(ulimit -Sn) (maxfilesperproc $(sysctl -n kern.maxfilesperproc))"
           npm config set maxsockets 8
           mkdir -p /tmp/android-sdk-dummy
           npm ci --prefer-offline || npm install --prefer-offline
@@ -991,6 +991,13 @@ jobs:
           # this job never got far enough to hit it.
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # TEMP(revert before merge): electron-builder skips signing on
+          # pull_request builds, and notarizeFn then fails on the unsigned app.
+          # That's an artifact of testing from a PR — a push to main signs
+          # normally — but without this the signing path can't be exercised
+          # pre-merge. Safe here only because the job's `if` restricts it to
+          # this branch, so no fork PR can reach it.
+          CSC_FOR_PULL_REQUEST: 'true'
         run: |
           # electron-builder opens a large number of files while packing the
           # universal binary; same 256 fd default applies here.
