@@ -36,6 +36,7 @@ import { ActionDrawerWithoutRedux } from '../../components/action-drawer'
 import { Timestamp } from '../../components/comments/Timestamp'
 import { ComposerInput } from '../../components/composer-input'
 import { ProfilePicture } from '../../components/core/ProfilePicture'
+import { UserGeneratedText } from 'app/components/core'
 import { UserLink } from '../../components/user-link'
 
 const messages = {
@@ -475,9 +476,13 @@ const ContestCommentRow = ({
             />
           ) : null}
         </Flex>
-        <Text variant='body' size='s'>
+        <UserGeneratedText
+          variant='body'
+          size='s'
+          mentions={(comment as any).mentions ?? []}
+        >
           {comment.message}
-        </Text>
+        </UserGeneratedText>
         {videoUrl ? (
           <View style={{ marginTop: 4 }}>
             {/* Updates store YouTube / Vimeo URLs (set via the
