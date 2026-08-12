@@ -921,8 +921,11 @@ jobs:
   desktop-build-mac:
     name: Desktop Build (Mac)
     runs-on: macos-latest
-    needs: [production-gate]
-    if: github.ref == 'refs/heads/main'
+    needs: [web-build]
+    # TEMP(revert before merge): run on this branch instead of main so the
+    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
+    # pull_request events (github.ref would be refs/pull/N/merge).
+    if: github.head_ref == 'fix/desktop-builds-and-updates'
     timeout-minutes: 90
     steps:
       - name: Checkout code
@@ -986,10 +989,15 @@ jobs:
           # universal binary; same 256 fd default applies here.
           ulimit -n 65536
           cd packages/web
-          npm run dist:mac-publish-production
+          # TEMP(revert before merge): --publish never so this branch cannot
+          # overwrite latest-*.yml on download.audius.co
+          node ./scripts/dist.js --mac --publish never --env production
+          ls -la dist/ || true
 
       - name: Slack notification
-        if: success()
+        # TEMP(revert before merge): these are test builds, not a release —
+        # don't announce a production desktop deploy in Slack.
+        if: false
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
@@ -1002,8 +1010,11 @@ jobs:
   desktop-build-win:
     name: Desktop Build (Windows)
     runs-on: ubuntu-latest
-    needs: [production-gate]
-    if: github.ref == 'refs/heads/main'
+    needs: [web-build]
+    # TEMP(revert before merge): run on this branch instead of main so the
+    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
+    # pull_request events (github.ref would be refs/pull/N/merge).
+    if: github.head_ref == 'fix/desktop-builds-and-updates'
     timeout-minutes: 90
     container:
       image: electronuserland/builder:18-wine
@@ -1050,10 +1061,15 @@ jobs:
           HOME: /root
         run: |
           cd packages/web
-          npm run dist:win-publish-production
+          # TEMP(revert before merge): --publish never so this branch cannot
+          # overwrite latest-*.yml on download.audius.co
+          node ./scripts/dist.js --win --publish never --env production
+          ls -la dist/ || true
 
       - name: Slack notification
-        if: success()
+        # TEMP(revert before merge): these are test builds, not a release —
+        # don't announce a production desktop deploy in Slack.
+        if: false
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
@@ -1066,8 +1082,11 @@ jobs:
   desktop-build-linux:
     name: Desktop Build (Linux)
     runs-on: ubuntu-latest
-    needs: [production-gate]
-    if: github.ref == 'refs/heads/main'
+    needs: [web-build]
+    # TEMP(revert before merge): run on this branch instead of main so the
+    # desktop fixes can be exercised pre-merge. head_ref is the branch name on
+    # pull_request events (github.ref would be refs/pull/N/merge).
+    if: github.head_ref == 'fix/desktop-builds-and-updates'
     timeout-minutes: 90
     container:
       image: electronuserland/builder
@@ -1108,10 +1127,15 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           cd packages/web
-          npm run dist:linux-publish-production
+          # TEMP(revert before merge): --publish never so this branch cannot
+          # overwrite latest-*.yml on download.audius.co
+          node ./scripts/dist.js --linux --publish never --env production
+          ls -la dist/ || true
 
       - name: Slack notification
-        if: success()
+        # TEMP(revert before merge): these are test builds, not a release —
+        # don't announce a production desktop deploy in Slack.
+        if: false
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
