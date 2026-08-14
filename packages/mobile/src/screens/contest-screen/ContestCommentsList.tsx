@@ -30,13 +30,13 @@ import {
   SelectablePill,
   Text
 } from '@audius/harmony-native'
+import { UserGeneratedText } from 'app/components/core'
 import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
 
 import { ActionDrawerWithoutRedux } from '../../components/action-drawer'
 import { Timestamp } from '../../components/comments/Timestamp'
 import { ComposerInput } from '../../components/composer-input'
 import { ProfilePicture } from '../../components/core/ProfilePicture'
-import { UserGeneratedText } from 'app/components/core'
 import { UserLink } from '../../components/user-link'
 
 const messages = {
@@ -479,7 +479,7 @@ const ContestCommentRow = ({
         <UserGeneratedText
           variant='body'
           size='s'
-          mentions={(comment as any).mentions ?? []}
+          mentions={comment.mentions ?? []}
         >
           {comment.message}
         </UserGeneratedText>

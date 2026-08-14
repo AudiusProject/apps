@@ -638,7 +638,11 @@ const ContestCommentRow = ({
             </Box>
           ) : null}
         </Flex>
-        <UserGeneratedTextV2 variant='body' size='s' mentions={(comment as any).mentions ?? []}>
+        <UserGeneratedTextV2
+          variant='body'
+          size='s'
+          mentions={comment.mentions ?? []}
+        >
           {comment.message}
         </UserGeneratedTextV2>
         {videoUrl ? (
@@ -868,7 +872,11 @@ const ContestCommentReplyRow = ({
             ) : null}
           </Flex>
         </Flex>
-        <UserGeneratedTextV2 variant='body' size='s' mentions={reply.mentions ?? []}>
+        <UserGeneratedTextV2
+          variant='body'
+          size='s'
+          mentions={reply.mentions ?? []}
+        >
           {reply.message}
         </UserGeneratedTextV2>
         <Flex gap='m' alignItems='center' pt='xs'>

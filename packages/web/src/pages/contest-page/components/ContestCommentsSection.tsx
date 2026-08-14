@@ -360,7 +360,11 @@ const ContestCommentRow = ({
           </Text>
         ) : null}
       </Flex>
-      <UserGeneratedTextV2 variant='body' size='m' mentions={(comment as any).mentions ?? []}>
+      <UserGeneratedTextV2
+        variant='body'
+        size='m'
+        mentions={comment.mentions ?? []}
+      >
         {comment.message}
       </UserGeneratedTextV2>
       {videoUrl ? (
