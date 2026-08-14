@@ -34,6 +34,7 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { UserLink } from 'components/link/UserLink'
+import { UserGeneratedTextV2 } from 'components/user-generated-text/UserGeneratedTextV2'
 import { VideoEmbed } from 'components/video-embed/VideoEmbed'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
@@ -637,9 +638,13 @@ const ContestCommentRow = ({
             </Box>
           ) : null}
         </Flex>
-        <Text variant='body' size='s'>
+        <UserGeneratedTextV2
+          variant='body'
+          size='s'
+          mentions={comment.mentions ?? []}
+        >
           {comment.message}
-        </Text>
+        </UserGeneratedTextV2>
         {videoUrl ? (
           <Box mt='xs'>
             {/* Updates only accept YouTube / Vimeo URLs (set via the
@@ -867,9 +872,13 @@ const ContestCommentReplyRow = ({
             ) : null}
           </Flex>
         </Flex>
-        <Text variant='body' size='s'>
+        <UserGeneratedTextV2
+          variant='body'
+          size='s'
+          mentions={reply.mentions ?? []}
+        >
           {reply.message}
-        </Text>
+        </UserGeneratedTextV2>
         <Flex gap='m' alignItems='center' pt='xs'>
           <Flex
             gap='xs'

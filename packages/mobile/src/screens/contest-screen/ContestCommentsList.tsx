@@ -30,6 +30,7 @@ import {
   SelectablePill,
   Text
 } from '@audius/harmony-native'
+import { UserGeneratedText } from 'app/components/core'
 import { VideoEmbed } from 'app/components/video-embed/VideoEmbed'
 
 import { ActionDrawerWithoutRedux } from '../../components/action-drawer'
@@ -475,9 +476,13 @@ const ContestCommentRow = ({
             />
           ) : null}
         </Flex>
-        <Text variant='body' size='s'>
+        <UserGeneratedText
+          variant='body'
+          size='s'
+          mentions={comment.mentions ?? []}
+        >
           {comment.message}
-        </Text>
+        </UserGeneratedText>
         {videoUrl ? (
           <View style={{ marginTop: 4 }}>
             {/* Updates store YouTube / Vimeo URLs (set via the
