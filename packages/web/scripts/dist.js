@@ -41,13 +41,37 @@ program
  * Writes the App Store Connect API key (.p8) to a temp file, since notarytool
  * takes a path rather than the key contents. The secret may hold either the raw
  * PEM contents or a base64 encoding of them.
+ *
+ * notarytool parses the .p8 strictly and rejects anything malformed with a bare
+ * `invalidPEMDocument`, which says nothing about what was wrong. Secret stores
+ * mangle PEMs in two routine ways — flattening the newlines to literal `\n`, or
+ * stripping them entirely — so rather than trusting the stored formatting, pull
+ * out the base64 body and rebuild the PEM from scratch.
  * @returns {string} path to the written .p8 file
  */
 const writeApiKeyFile = () => {
   const rawKey = process.env.APP_STORE_CONNECT_API_KEY_KEY
-  const key = rawKey.includes('BEGIN PRIVATE KEY')
+  const decoded = rawKey.includes('BEGIN PRIVATE KEY')
     ? rawKey
     : Buffer.from(rawKey, 'base64').toString('utf8')
+
+  const body = decoded
+    .replace(/-----(BEGIN|END) PRIVATE KEY-----/g, '')
+    .replace(/\\r\\n|\\n/g, '')
+    .replace(/\s/g, '')
+  if (!body || !/^[A-Za-z0-9+/]+={0,2}$/.test(body)) {
+    throw new Error(
+      'APP_STORE_CONNECT_API_KEY_KEY is not a PKCS#8 private key. Expected the ' +
+        'contents of the .p8 downloaded from App Store Connect (or a base64 ' +
+        'encoding of it).'
+    )
+  }
+  const key = [
+    '-----BEGIN PRIVATE KEY-----',
+    ...body.match(/.{1,64}/g),
+    '-----END PRIVATE KEY-----',
+    ''
+  ].join('\n')
 
   const keyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'asc-api-key-'))
   const keyPath = path.join(
