@@ -3,9 +3,9 @@ import { ChangeEvent, KeyboardEvent } from 'react'
 import { Status } from '@audius/common/models'
 import { IconSearch, Tooltip } from '@audius/harmony'
 import cn from 'classnames'
-import Lottie from 'lottie-react'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 
 import styles from './SearchBar.module.css'
 

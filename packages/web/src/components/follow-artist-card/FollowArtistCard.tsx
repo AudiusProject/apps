@@ -18,12 +18,12 @@ import {
   useTheme
 } from '@audius/harmony'
 import { useField } from 'formik'
-import Lottie from 'lottie-react'
 import { useDispatch } from 'react-redux'
 import { useHover } from 'react-use'
 
 import { make } from 'common/store/analytics/actions'
 import { Avatar } from 'components/avatar/Avatar'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import Skeleton from 'components/skeleton/Skeleton'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 import { useMedia } from 'hooks/useMedia'

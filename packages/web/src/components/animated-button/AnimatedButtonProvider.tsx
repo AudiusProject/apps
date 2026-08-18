@@ -9,9 +9,10 @@ import {
 
 import { useInstanceVar } from '@audius/common/hooks'
 import cn from 'classnames'
-import Lottie, { LottieRefCurrentProps } from 'lottie-react'
+import type { LottieRefCurrentProps } from 'lottie-react'
 
 import { SeoLink } from 'components/link'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import { applyThemeToLottie } from 'utils/lottieTheme'
 import { useLottieThemeColors } from 'utils/theme/theme'
 

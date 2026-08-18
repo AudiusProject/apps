@@ -7,7 +7,9 @@ import {
 } from 'react'
 
 import cn from 'classnames'
-import Lottie, { LottieOptions, LottieRefCurrentProps } from 'lottie-react'
+import type { LottieOptions, LottieRefCurrentProps } from 'lottie-react'
+
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 
 import styles from './Reaction.module.css'
 

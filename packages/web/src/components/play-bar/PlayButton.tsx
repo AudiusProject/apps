@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
 import cn from 'classnames'
-import Lottie, { LottieRefCurrentProps } from 'lottie-react'
+import type { LottieRefCurrentProps } from 'lottie-react'
 
 import pbIconPause from 'assets/animations/pbIconPause.json'
 import pbIconPlay from 'assets/animations/pbIconPlay.json'
 import pbLoadingSpinner from 'assets/animations/pbLoadingSpinner.json'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 
 import styles from './PlayBarButton.module.css'
 

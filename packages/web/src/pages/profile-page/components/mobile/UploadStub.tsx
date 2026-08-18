@@ -2,9 +2,9 @@ import { useState, useRef, useCallback } from 'react'
 
 import { IconCloudUpload as IconUpload } from '@audius/harmony'
 import cn from 'classnames'
-import Lottie from 'lottie-react'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 
 import styles from './UploadStub.module.css'
 
