@@ -5,7 +5,9 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  Ref
+  Ref,
+  lazy,
+  Suspense
 } from 'react'
 
 import { CSSObject, useTheme } from '@emotion/react'
@@ -20,8 +22,26 @@ import { Text } from '~harmony/components/text/Text'
 import { useControlled } from '~harmony/hooks/useControlled'
 import { IconCaretDown, IconCloseAlt, IconSearch } from '~harmony/icons'
 
-import { OptionsList, VirtualizedOptionsList } from './FilterButtonOptionsList'
+import { OptionsList } from './FilterButtonOptionsList'
 import { FilterButtonProps } from './types'
+
+/**
+ * `react-virtualized` is ~638 KB of source and is only needed when a consumer
+ * opts in with the `virtualized` prop (3 call sites across the web app). It was
+ * previously a static import, so every surface using FilterButton — and
+ * FilterButton is reachable from the eager app shell via PaymentMethod — paid
+ * for it. Loaded on demand instead; the menu is only rendered while open, so
+ * the import starts when a virtualized filter menu is actually opened.
+ */
+const VirtualizedOptionsList = lazy(() =>
+  import('./FilterButtonVirtualizedOptionsList').then((m) => ({
+    // `lazy()` erases the component's `<Value extends string>` generic, so it
+    // resolves to the `string` instantiation. Re-declaring the generic on the
+    // lazy const keeps call sites type-safe; the generic is erased at runtime
+    // either way, so this only restores what lazy() dropped.
+    default: m.VirtualizedOptionsList as typeof m.VirtualizedOptionsList
+  }))
+) as typeof import('./FilterButtonVirtualizedOptionsList').VirtualizedOptionsList
 
 const messages = {
   noMatches: 'No matches'
@@ -228,13 +248,15 @@ export const FilterButton = forwardRef(function FilterButton<
 
   const optionElements = filteredOptions ? (
     virtualized ? (
-      <VirtualizedOptionsList
-        options={filteredOptions}
-        optionRefs={optionRefs}
-        onChange={handleOptionSelected}
-        height={menuProps?.maxHeight}
-        width={menuProps?.width}
-      />
+      <Suspense fallback={null}>
+        <VirtualizedOptionsList
+          options={filteredOptions}
+          optionRefs={optionRefs}
+          onChange={handleOptionSelected}
+          height={menuProps?.maxHeight}
+          width={menuProps?.width}
+        />
+      </Suspense>
     ) : (
       <OptionsList
         options={filteredOptions}

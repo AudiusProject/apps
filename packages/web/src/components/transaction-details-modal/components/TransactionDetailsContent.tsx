@@ -21,7 +21,7 @@ import {
 import cn from 'classnames'
 
 import { AudioTransactionIcon } from 'components/audio-transaction-icon'
-import { isChangePositive } from 'components/audio-transactions-table/AudioTransactionsTable'
+import { isChangePositive } from 'components/audio-transactions-table/isChangePositive'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { getChallengeConfig } from 'pages/rewards-page/config'
 
