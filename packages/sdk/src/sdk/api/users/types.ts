@@ -321,3 +321,21 @@ export type CreateUserRequestWithFiles = CreateUserRequest &
 
 export type UpdateUserRequestWithFiles = UpdateUserRequest &
   UserFileUploadParams
+
+/**
+ * Params for `UsersApi.getSuggestedFollows`.
+ *
+ * Hand-written rather than generated: the endpoint post-dates the last SDK
+ * regeneration. Delete this and use the generated request type once
+ * `npm run gen` has been re-run against a node serving /users/{id}/suggested-follows.
+ */
+export type GetSuggestedFollowsRequest = {
+  /** A User ID */
+  id: string
+  /** The number of items to fetch */
+  limit?: number
+  /** The number of items to skip. Useful for pagination (page number * limit) */
+  offset?: number
+  /** The user ID of the user making the request */
+  userId?: string
+}

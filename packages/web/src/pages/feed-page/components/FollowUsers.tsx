@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useTopArtists } from '@audius/common/api'
+import { useFollowSuggestions } from '@audius/common/api'
 import { FollowSource } from '@audius/common/models'
 import { usersSocialActions } from '@audius/common/store'
 import { Button, Flex, IconUserFollow, Text } from '@audius/harmony'
@@ -12,6 +12,7 @@ import { SelectArtistsPreviewContextProvider } from 'components/follow-artist-ca
 
 const messages = {
   cta: `Let’s fix that by following some of these artists!`,
+  personalizedCta: `Here are artists you’ve liked but aren’t following yet.`,
   noFollowers: `Your feed is empty`
 }
 
@@ -26,7 +27,7 @@ const initialValues: FollowUsersValues = {
 const FollowUsers = () => {
   const dispatch = useDispatch()
 
-  const { data: featuredArtists } = useTopArtists('Featured')
+  const { data: suggestedArtists, isPersonalized } = useFollowSuggestions()
 
   const handleSubmit = useCallback(
     (values: FollowUsersValues) => {
@@ -50,7 +51,9 @@ const FollowUsers = () => {
                 {messages.noFollowers}{' '}
                 <i className='emoji face-screaming-in-fear' />
               </Text>
-              <Text variant='body'>{messages.cta}</Text>
+              <Text variant='body'>
+                {isPersonalized ? messages.personalizedCta : messages.cta}
+              </Text>
             </Flex>
             <Flex
               inline
@@ -60,7 +63,7 @@ const FollowUsers = () => {
               gap='m'
               m='s'
             >
-              {featuredArtists?.map((artist) => (
+              {suggestedArtists?.map((artist) => (
                 <FollowArtistCard key={artist.user_id} user={artist} />
               ))}
             </Flex>
