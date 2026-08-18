@@ -9,12 +9,11 @@ import {
 import { getWalletClient } from '@wagmi/core'
 import { type WalletClient } from 'viem'
 
-import { audiusChain, wagmiAdapter } from 'app/ReownAppKitModal'
+import { hasPersistedWalletConnection, loadAppKit } from 'app/appkit'
+import { audiusChain } from 'app/audiusChain'
 
 import { env } from '../env'
 import { localStorage } from '../local-storage'
-
-const wagmiConfig = wagmiAdapter.wagmiConfig
 
 export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   // Check if the user has already connected Hedgehog first...
@@ -29,8 +28,18 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
     return createHedgehogWalletClient(authService.hedgehogInstance)
   }
 
+  // No external wallet has ever connected in this browser, so there is nothing
+  // to restore. Return before loading AppKit — this is the common path for
+  // every email/password user and keeps the wallet SDK out of startup.
+  if (!hasPersistedWalletConnection()) {
+    return createHedgehogWalletClient(authService.hedgehogInstance)
+  }
+
   // Try the connected external wallet next...
   console.debug('[audiusSdk] Initializing SDK with external wallet...')
+
+  const { wagmiAdapter } = await loadAppKit()
+  const wagmiConfig = wagmiAdapter.wagmiConfig
 
   // Wait for the wallet to finish connecting/reconnecting
   if (

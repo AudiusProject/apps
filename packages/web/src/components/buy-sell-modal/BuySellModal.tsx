@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState, useEffect } from 'react'
 
 import { buySellMessages } from '@audius/common/messages'
-import { registerNiceModalId } from '@audius/common/services'
 import { useBuySellModal, useAddCashModal } from '@audius/common/store'
 import {
   IconJupiterLogo,
@@ -117,6 +116,3 @@ export const BuySellModal = NiceModal.create(() => {
     </Modal>
   )
 })
-
-NiceModal.register('BuySellModal', BuySellModal)
-registerNiceModalId('BuySellModal')

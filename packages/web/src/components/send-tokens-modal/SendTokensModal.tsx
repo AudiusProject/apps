@@ -3,7 +3,6 @@ import { useCallback, useState, useEffect, useRef } from 'react'
 import { useSendCoins } from '@audius/common/api'
 import { walletMessages } from '@audius/common/messages'
 import { SolanaWalletAddress, User } from '@audius/common/models'
-import { registerNiceModalId } from '@audius/common/services'
 import { useSendTokensModal } from '@audius/common/store'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
@@ -278,8 +277,5 @@ const SendTokensModal = NiceModal.create(() => {
     </ResponsiveModal>
   )
 })
-
-NiceModal.register('SendTokensModal', SendTokensModal)
-registerNiceModalId('SendTokensModal')
 
 export default SendTokensModal

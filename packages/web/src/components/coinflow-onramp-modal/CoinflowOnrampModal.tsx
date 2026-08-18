@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { useCoinflowAdapter } from '@audius/common/hooks'
-import { registerNiceModalId } from '@audius/common/services'
 import {
   coinflowModalUIActions,
   useCoinflowOnrampModal
@@ -96,6 +95,3 @@ export const CoinflowOnrampModal = NiceModal.create(() => {
     </ModalDrawer>
   )
 })
-
-NiceModal.register('CoinflowOnramp', CoinflowOnrampModal)
-registerNiceModalId('CoinflowOnramp')
