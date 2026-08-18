@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useSuggestedArtists } from '@audius/common/api'
+import { useFollowSuggestions } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import {
   removeFollowArtists,
@@ -28,7 +28,7 @@ export const SuggestedArtistsList = (props: SuggestedArtistsListProps) => {
   const { secondaryLight2, secondaryDark2, white } = useThemeColors()
   const dispatch = useDispatch()
 
-  const { data: suggestedArtists } = useSuggestedArtists()
+  const { data: suggestedArtists } = useFollowSuggestions()
   const selectedArtistIds: ID[] = useSelector(getFollowIds)
 
   const handleSelectArtist = useCallback(

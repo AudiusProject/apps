@@ -22,6 +22,8 @@ import {
   DownloadSalesAsCSVRequest,
   DownloadUSDCWithdrawalsAsCSVRequest,
   UsersApi as GeneratedUsersApi,
+  RelatedArtistResponseFromJSON,
+  type RelatedArtistResponse,
   type UserPlaylistLibrary
 } from '../generated/default'
 import * as runtime from '../generated/default/runtime'
@@ -55,7 +57,8 @@ import {
   type CreateUserRequestWithFiles,
   type UserFileUploadParams,
   type EntityManagerPlaylistLibraryContents,
-  type UsersApiServicesConfig
+  type UsersApiServicesConfig,
+  type GetSuggestedFollowsRequest
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
@@ -863,5 +866,71 @@ export class UsersApi extends GeneratedUsersApi {
         data: { collectibles: collectibles ?? {} }
       })
     })
+  }
+
+  /**
+   * Gets artists to suggest the user follow, based on the tracks and albums
+   * they have favorited or reposted but whose artist they do not already
+   * follow. Returns an empty list for users with no favorites or reposts.
+   *
+   * Hand-written for the same reason as `GetSuggestedFollowsRequest`: this
+   * endpoint is newer than the checked-in generated client. It mirrors what
+   * the generator would emit, so replacing it with the generated method later
+   * is a no-op for callers.
+   */
+  async getSuggestedFollows(
+    params: GetSuggestedFollowsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<RelatedArtistResponse> {
+    if (params.id === null || params.id === undefined) {
+      throw new runtime.RequiredError(
+        'id',
+        'Required parameter params.id was null or undefined when calling getSuggestedFollows.'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (params.offset !== undefined) {
+      queryParameters.offset = params.offset
+    }
+
+    if (params.limit !== undefined) {
+      queryParameters.limit = params.limit
+    }
+
+    if (params.userId !== undefined) {
+      queryParameters.user_id = params.userId
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    if (
+      !headerParameters.Authorization &&
+      this.configuration &&
+      this.configuration.accessToken
+    ) {
+      const token = await this.configuration.accessToken('OAuth2', ['read'])
+      if (token) {
+        headerParameters.Authorization = token
+      }
+    }
+
+    const response = await this.request(
+      {
+        path: `/users/{id}/suggested-follows`.replace(
+          `{${'id'}}`,
+          encodeURIComponent(String(params.id))
+        ),
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (jsonValue) =>
+      RelatedArtistResponseFromJSON(jsonValue)
+    ).value()
   }
 }
