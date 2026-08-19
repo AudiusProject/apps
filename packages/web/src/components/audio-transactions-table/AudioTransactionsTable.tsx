@@ -61,12 +61,7 @@ const defaultColumns: AudioTransactionsTableColumn[] = [
   'spacer2'
 ]
 
-export const isChangePositive = (tx: TransactionDetails) => {
-  return (
-    tx.transactionType === TransactionType.PURCHASE ||
-    tx.method === TransactionMethod.RECEIVE
-  )
-}
+export { isChangePositive } from './isChangePositive'
 
 // Cell Render Functions
 const renderTransactionTypeCell = (cellInfo: TransactionCell) => {
