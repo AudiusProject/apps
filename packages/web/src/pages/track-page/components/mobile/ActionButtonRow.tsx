@@ -6,12 +6,12 @@ import {
   IconPencil
 } from '@audius/harmony'
 import cn from 'classnames'
-import Lottie from 'lottie-react'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
 import AnimatedIconButton, {
   AnimatedIconType
 } from 'components/animated-button/AnimatedIconButton'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 
 import styles from './ActionButtonRow.module.css'
 

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 import cn from 'classnames'
-import Lottie, { LottieRefCurrentProps } from 'lottie-react'
+import type { LottieRefCurrentProps } from 'lottie-react'
 
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { applyThemeToLottie } from 'utils/lottieTheme'
 import { useLottieThemeColors } from 'utils/theme/theme'

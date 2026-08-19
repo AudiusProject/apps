@@ -20,10 +20,10 @@ import {
   IconVisibilityHidden
 } from '@audius/harmony'
 import cn from 'classnames'
-import Lottie from 'lottie-react'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
 import { SeoLink } from 'components/link'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import { TablePlayButton } from 'components/table/components/TablePlayButton'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 

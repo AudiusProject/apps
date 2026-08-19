@@ -3,6 +3,11 @@
     {
       "path": "./build-ssr-production/server/chunks/chunk-*.js",
       "maxSize": "30 kB"
+    },
+    {
+      "path": "./build-production/assets/index-*.js",
+      "maxSize": "1600 kB",
+      "compression": "gzip"
     }
   ]
 }

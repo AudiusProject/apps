@@ -4,11 +4,11 @@ import { imageCoverPhotoBlank } from '@audius/common/assets'
 import { WidthSizes } from '@audius/common/models'
 import { Nullable } from '@audius/common/utils'
 import cn from 'classnames'
-import Lottie from 'lottie-react'
 import { FileWithPreview } from 'react-dropzone'
 
 import loadingSpinner from 'assets/animations/loadingSpinner.json'
 import ImageSelectionButton from 'components/image-selection/ImageSelectionButton'
+import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import { useCoverPhoto } from 'hooks/useCoverPhoto'
 
 import styles from './CoverPhoto.module.css'
