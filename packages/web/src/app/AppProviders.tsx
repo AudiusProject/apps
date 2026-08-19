@@ -1,4 +1,4 @@
-import { ReactNode, useState, useMemo } from 'react'
+import { ReactNode, useState, useMemo, useEffect } from 'react'
 
 import { FrostedSurfaceIntensity, ThemePalette } from '@audius/common/models'
 import { setNiceModalAdapter } from '@audius/common/services'
@@ -13,7 +13,7 @@ import {
   RouterProvider
 } from 'react-router'
 import { PersistGate } from 'redux-persist/integration/react'
-import { WagmiProvider } from 'wagmi'
+import { createConfig, http, WagmiProvider } from 'wagmi'
 
 import { REACT_QUERY_DEVTOOLS_KEY, useDevToggle } from 'hooks/useDevToggle'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -28,13 +28,60 @@ import {
   getThemePaletteFromStorage
 } from 'utils/theme/theme'
 
-import { wagmiAdapter } from './ReownAppKitModal'
+import {
+  hasPersistedWalletConnection,
+  loadAppKit,
+  useLoadedAppKit
+} from './appkit'
+import { audiusChain } from './audiusChain'
 import './registerNiceModals'
 import { createRoutes } from './routes'
 
 // Wire the platform-agnostic bridge so common (sagas/services) can drive
 // nice-modal-react without depending on the package directly.
 setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
+
+/**
+ * <WagmiProvider> needs a Config synchronously on first render, but the real one
+ * is built by Reown's WagmiAdapter — which we no longer load at startup, since
+ * importing it drags the whole AppKit graph into the entry chunk. This minimal
+ * stand-in fills the gap until AppKit actually loads.
+ *
+ * `storage: null` matters: the real config persists to `wagmi.store`, and a
+ * second config writing that key would clobber it along with the
+ * hasPersistedWalletConnection() probe that reads it.
+ */
+const bootstrapWagmiConfig = createConfig({
+  chains: [audiusChain],
+  transports: { [audiusChain.id]: http() },
+  storage: null
+})
+
+/**
+ * Mounts WagmiProvider unconditionally and swaps in the adapter's config once
+ * AppKit loads. Swapping the `config` prop re-renders context consumers but does
+ * not unmount the subtree — making WagmiProvider itself conditional would remount
+ * the entire app the moment a wallet appeared.
+ */
+const WagmiGate = ({ children }: { children: ReactNode }) => {
+  const appkit = useLoadedAppKit()
+
+  useEffect(() => {
+    // Restore a previously connected external wallet. Users who never connected
+    // one never pay for the chunk.
+    if (!appkit && hasPersistedWalletConnection()) {
+      loadAppKit()
+    }
+  }, [appkit])
+
+  return (
+    <WagmiProvider
+      config={appkit?.wagmiAdapter.wagmiConfig ?? bootstrapWagmiConfig}
+    >
+      {children}
+    </WagmiProvider>
+  )
+}
 
 type AppProvidersProps = {
   children?: ReactNode
@@ -88,7 +135,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   }, [basename])
 
   return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+    <WagmiGate>
       <QueryClientProvider client={queryClient}>
         <MediaProvider>
           <ReduxProvider store={store}>
@@ -102,6 +149,6 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         </MediaProvider>
         {reactQueryDevtoolsEnabled ? <ReactQueryDevtools /> : null}
       </QueryClientProvider>
-    </WagmiProvider>
+    </WagmiGate>
   )
 }

@@ -2,7 +2,6 @@ import React, { lazy, Suspense, useEffect } from 'react'
 
 import { SyncLocalStorageUserProvider } from '@audius/common/api'
 import { route } from '@audius/common/utils'
-import { CoinflowPurchaseProtection } from '@coinflowlabs/react'
 import NiceModal from '@ebay/nice-modal-react'
 import type { RouteObject } from 'react-router'
 import { Navigate, Outlet, useNavigate } from 'react-router'
@@ -23,6 +22,17 @@ import { AppErrorBoundary } from './AppErrorBoundary'
 import { AudiusQueryProvider } from './AudiusQueryProvider'
 import { ThemeProvider } from './ThemeProvider'
 import WebPlayer from './web-player/WebPlayer'
+
+/**
+ * `@coinflowlabs/react` pulls in the nsure-ai fraud-detection SDK, which was
+ * landing in the entry chunk for every visitor. Nothing here is needed before
+ * first paint, and this already renders inside a <Suspense> boundary below.
+ */
+const CoinflowPurchaseProtection = lazy(() =>
+  import('@coinflowlabs/react').then((m) => ({
+    default: m.CoinflowPurchaseProtection
+  }))
+)
 
 const {
   PRIVATE_KEY_EXPORTER_SETTINGS_PAGE,

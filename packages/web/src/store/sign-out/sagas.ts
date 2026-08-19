@@ -8,14 +8,12 @@ import {
 import { disconnect } from '@wagmi/core'
 import { takeLatest, put, call } from 'redux-saga/effects'
 
-import { wagmiAdapter } from 'app/ReownAppKitModal'
+import { getLoadedAppKit } from 'app/appkit'
 import { make } from 'common/store/analytics/actions'
 import { signOut } from 'store/sign-out/signOut'
 import { push } from 'utils/navigation'
 const { resetAccount, unsubscribeBrowserPushNotifications } = accountActions
 const { signOut: signOutAction } = signOutActions
-
-const wagmiConfig = wagmiAdapter.wagmiConfig
 
 function* watchSignOut() {
   const localStorage = yield* getContext('localStorage')
@@ -24,7 +22,10 @@ function* watchSignOut() {
   yield takeLatest(
     signOutAction.type,
     function* (action: ReturnType<typeof signOutAction>) {
-      if (wagmiConfig.state.status === 'connected') {
+      // Only reachable if AppKit was loaded, which only happens once a wallet
+      // is actually in play — if it never loaded there is nothing to disconnect.
+      const wagmiConfig = getLoadedAppKit()?.wagmiAdapter.wagmiConfig
+      if (wagmiConfig && wagmiConfig.state.status === 'connected') {
         yield call(disconnect, wagmiConfig)
       }
       yield put(resetAccount())

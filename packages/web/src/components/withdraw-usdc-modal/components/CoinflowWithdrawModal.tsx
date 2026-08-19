@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 
 import { useCoinflowWithdrawalAdapter } from '@audius/common/hooks'
-import { registerNiceModalId } from '@audius/common/services'
 import {
   withdrawUSDCActions,
   withdrawUSDCSelectors
@@ -90,6 +89,3 @@ export const CoinflowWithdrawModal = NiceModal.create(() => {
     </ModalDrawer>
   )
 })
-
-NiceModal.register('CoinflowWithdraw', CoinflowWithdrawModal)
-registerNiceModalId('CoinflowWithdraw')

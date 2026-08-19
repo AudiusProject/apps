@@ -5,7 +5,6 @@ import {
   useRemoveAssociatedWallet
 } from '@audius/common/api'
 import { Chain } from '@audius/common/models'
-import { registerNiceModalId } from '@audius/common/services'
 import {
   Button,
   Flex,
@@ -251,6 +250,3 @@ export const ConnectedWalletsModal = NiceModal.create(() => {
     </Modal>
   )
 })
-
-NiceModal.register('ConnectedWallets', ConnectedWalletsModal)
-registerNiceModalId('ConnectedWallets')
