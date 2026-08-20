@@ -8,7 +8,7 @@ import {
 } from '@audius/common/api'
 import { Kind } from '@audius/common/models'
 import { reachabilitySelectors } from '@audius/common/store'
-import { makeStableUid } from '@audius/common/utils'
+import { isTrackUnavailable, makeStableUid } from '@audius/common/utils'
 import type { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -21,6 +21,7 @@ import {
 } from 'app/components/core'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
+import { TrackUnavailable } from 'app/components/track-unavailable/TrackUnavailable'
 import { useRoute } from 'app/hooks/useRoute'
 
 import { TrackContestsSection } from './TrackContestsSection'
@@ -65,6 +66,19 @@ export const TrackScreen = () => {
   }
 
   const { track_id, permalink, comments_disabled } = track
+
+  // The API reports tracks whose owner is no longer active as non-streamable.
+  // Honor that instead of rendering a playable track screen. Deleted tracks
+  // are excluded by the helper and keep their existing DeletedTile treatment.
+  if (isTrackUnavailable(track)) {
+    return (
+      <Screen url={permalink}>
+        <ScreenContent>
+          <TrackUnavailable />
+        </ScreenContent>
+      </Screen>
+    )
+  }
 
   return (
     <Screen url={permalink}>

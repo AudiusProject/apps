@@ -11,12 +11,14 @@ import { ServerWebPlayer } from 'app/web-player/ServerWebPlayer'
 import { MetaTags } from 'components/meta-tags/MetaTags'
 import { DesktopServerTrackPage } from 'pages/track-page/DesktopServerTrackPage'
 import { MobileServerTrackPage } from 'pages/track-page/MobileServerTrackPage'
+import { ServerUnavailableTrack } from 'pages/unavailable-track-page/ServerUnavailableTrack'
 import {
   canEmbed,
   DEFAULT_IMAGE_URL,
   getAppUrl,
   getEmbedUrl,
   getTrackPageContext,
+  getUnavailableTrackContext,
   getWebUrl,
   isDiscord
 } from 'ssr/metaTags'
@@ -50,9 +52,15 @@ export default function render(pageContext: TrackPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
+  // The API reports tracks whose owner is no longer active as non-streamable.
+  // Serve none of their metadata: no title, artwork, embed player, or index.
+  // Explicit `=== false` because the field is absent on older API responses.
+  const isUnavailable = track?.is_streamable === false
+
   // Check if this request can show an embed player (Twitter/Discord bots)
   // Don't show embed for comment pages
-  const shouldEmbed = canEmbed(userAgent) && !is_stream_gated && !commentData
+  const shouldEmbed =
+    canEmbed(userAgent) && !is_stream_gated && !commentData && !isUnavailable
 
   // Create a fresh cache instance for this SSR request
   // This ensures the theme context is properly connected
@@ -62,7 +70,9 @@ export default function render(pageContext: TrackPageContext) {
 
   // Build meta tags - use comment-specific if we have comment data
   let seoMetadata
-  if (commentData) {
+  if (isUnavailable) {
+    seoMetadata = getUnavailableTrackContext()
+  } else if (commentData) {
     const trackName = commentData.track.title
     const artistName = commentData.track.user.name
     const commenterName = commentData.commenter.name
@@ -99,9 +109,10 @@ export default function render(pageContext: TrackPageContext) {
   // Discord uses a weird aspect ratio for OG unfurls, so serve artwork
   // directly instead of the custom OG image
   const discordBot = isDiscord(userAgent)
-  const discordImageOverride = discordBot
-    ? (track?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL)
-    : undefined
+  const discordImageOverride =
+    discordBot && !isUnavailable
+      ? (track?.artwork?.['1000x1000'] ?? DEFAULT_IMAGE_URL)
+      : undefined
 
   const pageHtml = renderToString(
     <CacheProvider value={cache}>
@@ -120,9 +131,12 @@ export default function render(pageContext: TrackPageContext) {
             embedUrl={embedUrl}
             appUrl={appUrl}
             webUrl={webUrl}
-            thumbnail={false}
+            thumbnail={isUnavailable}
+            noIndex={isUnavailable}
           />
-          {isMobile ? (
+          {isUnavailable ? (
+            <ServerUnavailableTrack />
+          ) : isMobile ? (
             <MobileServerTrackPage track={track} user={user} />
           ) : (
             <DesktopServerTrackPage track={track} user={user} />

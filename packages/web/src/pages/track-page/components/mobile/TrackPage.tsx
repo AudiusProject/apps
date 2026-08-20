@@ -30,7 +30,7 @@ import {
   RepostType
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { formatDate, route } from '@audius/common/utils'
+import { formatDate, isTrackUnavailable, route } from '@audius/common/utils'
 import { Flex } from '@audius/harmony'
 import { Id } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
@@ -47,6 +47,7 @@ import NavContext, {
 } from 'components/nav/mobile/NavContext'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
+import { UnavailableTrackPage } from 'pages/unavailable-track-page/UnavailableTrackPage'
 import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
@@ -274,6 +275,13 @@ const TrackPage = () => {
         deletedByArtist={!track._blocked && track.is_available}
       />
     )
+  }
+
+  // The API reports tracks whose owner is no longer active as non-streamable.
+  // Honor that instead of rendering a playable track page. Checked after the
+  // deleted case above, which has its own more specific treatment.
+  if (isTrackUnavailable(track)) {
+    return <UnavailableTrackPage />
   }
 
   return (
