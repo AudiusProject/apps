@@ -124,8 +124,7 @@ export const userTrackMetadataFromSDK = (
       'id',
       'user_id',
       'followee_favorites',
-      'favorite_count',
-      'is_streamable'
+      'favorite_count'
     ]),
 
     // Conversions

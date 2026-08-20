@@ -163,6 +163,22 @@ export const getDefaultContext = () => {
 }
 
 /**
+ * Meta tag context for a track the API reports as non-streamable (its owner is
+ * no longer active). Deliberately generic - none of the track's or the
+ * account's title, artwork, or canonical URL - and always paired with
+ * `noIndex` at the call site so these pages stay out of search results and
+ * social unfurls.
+ */
+export const getUnavailableTrackContext = () => ({
+  title: 'Track Unavailable',
+  description: 'This track can no longer be streamed on Audius.',
+  ogDescription: 'This track can no longer be streamed on Audius.',
+  image: DEFAULT_IMAGE_URL,
+  imageAlt: 'The Audius Platform',
+  thumbnail: true
+})
+
+/**
  * Upload page meta tag context
  */
 export const getUploadContext = () => ({

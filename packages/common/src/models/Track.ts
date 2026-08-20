@@ -193,6 +193,14 @@ export type TrackMetadata = {
   is_scheduled_release: boolean
   is_unlisted: boolean
   is_available: boolean
+  /**
+   * Whether the API will serve audio for this track. The API sets it to false
+   * when the track is deleted or its owner is no longer active (a self
+   * deactivation or a trusted-notifier delist). Optional because not every
+   * track source populates it, so treat `undefined` as "no opinion" rather
+   * than as "not streamable".
+   */
+  is_streamable?: boolean
   is_stream_gated: boolean
   stream_conditions: Nullable<AccessConditions>
   is_download_gated: boolean

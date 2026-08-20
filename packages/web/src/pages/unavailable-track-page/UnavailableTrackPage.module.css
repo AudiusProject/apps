@@ -1,0 +1,9 @@
+/**
+ * The message is the only content on the page, so stretch the container to the
+ * full scroll area and let the message's `flex: 1` center it rather than
+ * pinning it to the top of the viewport.
+ */
+.container {
+  flex-direction: column;
+  min-height: 100%;
+}
