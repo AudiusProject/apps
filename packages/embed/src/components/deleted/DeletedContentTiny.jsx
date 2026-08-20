@@ -5,10 +5,19 @@ import styles from './DeletedContentTiny.module.css'
 
 const messages = {
   deletedBy: 'Track Deleted By Artist',
-  deleted: 'Deleted'
+  deleted: 'Deleted',
+  unavailable: 'Track Unavailable'
 }
 
-const DeletedContentTiny = ({ onClick, isBlocked }) => {
+const DeletedContentTiny = ({ onClick, isBlocked, isUnavailable }) => {
+  // `unavailable` says nothing about the account on purpose: the same flag
+  // covers a self deactivation and a delisted account.
+  const label = isUnavailable
+    ? messages.unavailable
+    : isBlocked
+      ? messages.deleted
+      : messages.deletedBy
+
   return (
     <div className={styles.wrapper}>
       <PlayButton
@@ -16,9 +25,7 @@ const DeletedContentTiny = ({ onClick, isBlocked }) => {
         className={styles.playButton}
       />
       <div className={styles.container} onClick={onClick}>
-        <div className={styles.info}>
-          {isBlocked ? messages.deleted : messages.deletedBy}
-        </div>
+        <div className={styles.info}>{label}</div>
         <AudiusLogoGlyph className={styles.logo} />
       </div>
     </div>

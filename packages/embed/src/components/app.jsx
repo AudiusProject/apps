@@ -141,6 +141,10 @@ const App = (props) => {
   const searchParams = useSearchParams()
   const [didError, setDidError] = useState(false) // General errors
   const [did404, setDid404] = useState(false) // 404s indicate content was deleted
+  // A track whose owner is no longer active - the artist deactivated their own
+  // account, or the account was delisted by the trusted notifier. Rendered with
+  // the same "not available" treatment as a 404, but with its own copy.
+  const [isUnavailable, setIsUnavailable] = useState(false)
   const [requestState, setRequestState] = useState(null) // Parsed request state
   const [isRetrying, setIsRetrying] = useState(false) // Currently retrying?
 
@@ -188,10 +192,20 @@ const App = (props) => {
 
         if (!track) {
           setDid404(true)
+          setIsUnavailable(false)
+          setTracksResponse(null)
+        } else if (track.isStreamable === false) {
+          // The stream endpoint refuses these, so there is nothing to play -
+          // don't render the title, artist and artwork either. Checked with an
+          // explicit `=== false` because an absent field must not read as
+          // unavailable.
+          setDid404(true)
+          setIsUnavailable(true)
           setTracksResponse(null)
         } else {
           const events = await getEntityEvents(track.id, 'track')
           setDid404(false)
+          setIsUnavailable(false)
           setTracksResponse({ ...track, events })
           recordOpen(
             decodeHashId(track.id),
@@ -234,9 +248,11 @@ const App = (props) => {
 
         if (!collection) {
           setDid404(true)
+          setIsUnavailable(false)
           setCollectionsResponse(null)
         } else {
           setDid404(false)
+          setIsUnavailable(false)
           setCollectionsResponse(collection)
           recordOpen(
             decodeHashId(collection.id),
@@ -273,6 +289,7 @@ const App = (props) => {
       setDidError(true)
       setShowLoadingAnimation(false)
       setDid404(false)
+      setIsUnavailable(false)
       setTracksResponse(null)
       setCollectionsResponse(null)
     }
@@ -334,7 +351,12 @@ const App = (props) => {
 
     // Tiny variant renders its own deleted content
     if (did404) {
-      return <DeletedContent flavor={requestState.playerFlavor} />
+      return (
+        <DeletedContent
+          flavor={requestState.playerFlavor}
+          isUnavailable={isUnavailable}
+        />
+      )
     }
 
     if (showLoadingAnimation && !isTiny) {

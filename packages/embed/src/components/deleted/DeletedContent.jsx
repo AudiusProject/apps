@@ -12,22 +12,36 @@ import DeletedContentTiny from './DeletedContentTiny'
 const messages = {
   mainLabel: 'This content was removed by the creator.',
   deleted: 'Deleted',
+  unavailable: 'This track can no longer be streamed on Audius.',
   subLabel1: 'Unlimited Uploads.',
   subLabel2: '320kbps Streaming.',
   subLabel3: '100% Free.',
   buttonLabel: 'Find more on'
 }
 
-const DeletedContent = ({ flavor, isBlocked }) => {
+const DeletedContent = ({ flavor, isBlocked, isUnavailable }) => {
   const onClickFindMore = () => {
     window.open(getCopyableLink(), '_blank')
   }
+
+  // `unavailable` says nothing about the account on purpose: the same flag
+  // covers a self deactivation and a delisted account, and we shouldn't tell
+  // listeners the creator removed the track when moderation suppressed it.
+  const label = isUnavailable
+    ? messages.unavailable
+    : isBlocked
+      ? messages.deleted
+      : messages.mainLabel
 
   const isCard = flavor === PlayerFlavor.CARD
   const isTiny = flavor === PlayerFlavor.TINY
   if (isTiny) {
     return (
-      <DeletedContentTiny onClick={onClickFindMore} isBlocked={isBlocked} />
+      <DeletedContentTiny
+        onClick={onClickFindMore}
+        isBlocked={isBlocked}
+        isUnavailable={isUnavailable}
+      />
     )
   }
 
@@ -41,9 +55,7 @@ const DeletedContent = ({ flavor, isBlocked }) => {
           }}
         />
       )}
-      <div className={styles.label}>
-        {isBlocked ? messages.deleted : messages.mainLabel}
-      </div>
+      <div className={styles.label}>{label}</div>
       {isCard && (
         <div className={styles.subLabel}>
           <span>{messages.subLabel1}</span>
