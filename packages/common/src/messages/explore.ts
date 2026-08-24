@@ -29,6 +29,10 @@ export const exploreMessages = {
   recentlyPlayed: 'Recently Played',
   discoverWeekly: 'Your Discover Weekly',
   discoverWeeklySubtitle: 'Updated every Monday',
+  discoverWeeklyBadge: 'New',
+  discoverWeeklyPitch:
+    'A fresh mix of tracks picked just for you. Updated every Monday.',
+  discoverWeeklyCta: 'Listen Now',
   discoverWeeklyTrackCount: (count: number) =>
     `${count} ${count === 1 ? 'track' : 'tracks'}`,
   undergroundTrending: 'Underground Trending',

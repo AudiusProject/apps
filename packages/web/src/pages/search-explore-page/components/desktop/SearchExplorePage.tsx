@@ -24,6 +24,7 @@ import { useSearchParams } from 'react-router'
 import { useDebounce, useEffectOnce, usePrevious } from 'react-use'
 
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
+import { DiscoverWeeklyBanner } from 'components/discover-weekly'
 import { Header } from 'components/header/desktop/Header'
 import Page from 'components/page/Page'
 import { Tab, TabList } from 'components/tabs'
@@ -40,7 +41,6 @@ import { CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
-import { DiscoverWeeklySection } from './DiscoverWeeklySection'
 import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
@@ -178,6 +178,11 @@ const SearchExplorePage = ({
     element: ReactNode
   }[] = [
     {
+      key: 'discoverWeekly',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <DiscoverWeeklyBanner surface='explore' />
+    },
+    {
       key: 'featuredPlaylists',
       shouldRender: showPlaylistContent,
       element: <FeaturedPlaylistsSection />
@@ -221,11 +226,6 @@ const SearchExplorePage = ({
       key: 'recentlyPlayed',
       shouldRender: showTrackContent && showUserContextualContent,
       element: <RecentlyPlayedSection />
-    },
-    {
-      key: 'discoverWeekly',
-      shouldRender: showTrackContent && showUserContextualContent,
-      element: <DiscoverWeeklySection />
     },
     {
       key: 'undergroundTrendingTracks',

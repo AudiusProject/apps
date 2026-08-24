@@ -39,6 +39,7 @@ import {
 } from 'app/screens/coin-details-screen'
 import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
+import { DiscoverWeeklyScreen } from 'app/screens/discover-weekly-screen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
 import { RewardsScreen } from 'app/screens/rewards-screen'
@@ -108,6 +109,7 @@ export type AppTabScreenParamList = {
   SettingsScreen: undefined
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
+  DiscoverWeeklyScreen: undefined
   AccountSettingsScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined
@@ -298,6 +300,10 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
         component={EditCoinDetailsScreen}
       />
       <Stack.Screen name='FanClubsExplore' component={FanClubsExploreScreen} />
+      <Stack.Screen
+        name='DiscoverWeeklyScreen'
+        component={DiscoverWeeklyScreen}
+      />
       <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
 
       <Stack.Group>

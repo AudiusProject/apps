@@ -263,6 +263,12 @@ export enum Name {
   EXPLORE_SECTION_VIEW = 'Explore: Section View',
   EXPLORE_SECTION_CLICK = 'Explore: Section Click',
 
+  // Discover Weekly
+  DISCOVER_WEEKLY_BANNER_VIEW = 'Discover Weekly: Banner View',
+  DISCOVER_WEEKLY_BANNER_CLICK = 'Discover Weekly: Banner Click',
+  DISCOVER_WEEKLY_PAGE_VIEW = 'Discover Weekly: Page View',
+  DISCOVER_WEEKLY_PLAY_ALL = 'Discover Weekly: Play All',
+
   // Errors
   ERROR_PAGE = 'Error Page',
   NOT_FOUND_PAGE = 'Not Found Page',
@@ -1346,6 +1352,39 @@ type ExploreSectionClick = {
   id?: ID
   kind?: 'track' | 'profile' | 'playlist' | 'album' | 'mood' | 'preset'
   link?: string
+}
+
+/**
+ * Surface the banner was rendered on. The mix is reachable from more than one
+ * place, so every Discover Weekly event carries this -- otherwise there's no
+ * way to tell which entry point is actually driving listens.
+ */
+export type DiscoverWeeklySurface = 'explore' | 'feed'
+
+type DiscoverWeeklyBannerView = {
+  eventName: Name.DISCOVER_WEEKLY_BANNER_VIEW
+  surface: DiscoverWeeklySurface
+  source: 'web' | 'mobile'
+  trackCount: number
+}
+
+type DiscoverWeeklyBannerClick = {
+  eventName: Name.DISCOVER_WEEKLY_BANNER_CLICK
+  surface: DiscoverWeeklySurface
+  source: 'web' | 'mobile'
+  trackCount: number
+}
+
+type DiscoverWeeklyPageView = {
+  eventName: Name.DISCOVER_WEEKLY_PAGE_VIEW
+  source: 'web' | 'mobile'
+  trackCount: number
+}
+
+type DiscoverWeeklyPlayAll = {
+  eventName: Name.DISCOVER_WEEKLY_PLAY_ALL
+  source: 'web' | 'mobile'
+  trackCount: number
 }
 
 type BrowserNotificationSetting = {
@@ -2723,6 +2762,10 @@ export type AllTrackingEvents =
   | SearchResultSelect
   | ExploreSectionView
   | ExploreSectionClick
+  | DiscoverWeeklyBannerView
+  | DiscoverWeeklyBannerClick
+  | DiscoverWeeklyPageView
+  | DiscoverWeeklyPlayAll
   | ErrorPage
   | NotFoundPage
   | PageView

@@ -1,49 +1,65 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
 import { useDiscoverWeekly } from '@audius/common/api'
-import { useToggleTrack } from '@audius/common/hooks'
+import { useAnalytics } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { QueueSource } from '@audius/common/store'
+import { Name, type DiscoverWeeklySurface } from '@audius/common/models'
 import { Image } from 'react-native'
 
-import { Divider, Flex, Paper, Text } from '@audius/harmony-native'
+import { Flex, Paper, Text } from '@audius/harmony-native'
 import discoverWeeklyArt from 'app/assets/images/discoverWeekly.jpg'
-import { CollectionCardSkeleton } from 'app/components/collection-list/CollectionCardSkeleton'
+import { useNavigation } from 'app/hooks/useNavigation'
 
 import { useExploreSectionTracking } from '../hooks/useExploreSectionTracking'
 
-const CARD_WIDTH = 200
+const ART_SIZE = 96
 
 /**
- * The mix rendered as a collection card, so it reads like a playlist even
- * though it isn't one. Mirrors the web Explore section.
+ * Promotional banner for Discover Weekly, pinned to the top of Explore.
  *
- * The artwork is a bundled asset rather than entity cover art: the mix has no
- * playlist_id to hang an image on. Same reason pressing plays in place rather
- * than navigating to a Collection screen -- there's nothing to navigate to.
- *
- * Deliberately not wrapped in ExploreSection like its siblings: there's one
- * card, and a section heading would just repeat the card's own title.
+ * Mirrors the web banner: an entry point rather than a content row, so it
+ * navigates to the full mix instead of playing in place. Deliberately not
+ * wrapped in ExploreSection -- it sits above the section stack.
  */
-export const DiscoverWeekly = () => {
+type DiscoverWeeklyProps = {
+  /** Which surface this instance renders on -- carried on every event so we
+   * can tell which entry point actually drives listens. */
+  surface?: DiscoverWeeklySurface
+}
+
+export const DiscoverWeekly = ({
+  surface = 'explore'
+}: DiscoverWeeklyProps) => {
   const { InViewWrapper, inView } = useExploreSectionTracking('Discover Weekly')
-  const { trackIds, isLoading, isError, isSuccess } = useDiscoverWeekly(
+  const navigation = useNavigation()
+  const { trackEvent } = useAnalytics()
+  const { trackIds, isError, isSuccess } = useDiscoverWeekly(
     { limit: 30 },
     { enabled: inView }
   )
 
-  // Queue the whole mix, starting at the top, so playback continues through
-  // all 30 rather than stopping after the first track.
-  const entries = useMemo(
-    () => trackIds.map((id) => ({ id, source: QueueSource.EXPLORE })),
-    [trackIds]
-  )
+  // Fire the impression once, and only once there's a real mix behind it.
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (hasTrackedView.current || !inView || !trackIds.length) return
+    hasTrackedView.current = true
+    trackEvent({
+      eventName: Name.DISCOVER_WEEKLY_BANNER_VIEW,
+      surface,
+      source: 'mobile',
+      trackCount: trackIds.length
+    })
+  }, [inView, trackIds.length, surface, trackEvent])
 
-  const { togglePlay } = useToggleTrack({
-    id: trackIds[0] ?? null,
-    source: QueueSource.EXPLORE,
-    entries
-  })
+  const handlePress = useCallback(() => {
+    trackEvent({
+      eventName: Name.DISCOVER_WEEKLY_BANNER_CLICK,
+      surface,
+      source: 'mobile',
+      trackCount: trackIds.length
+    })
+    navigation.navigate('DiscoverWeeklyScreen')
+  }, [navigation, trackEvent, surface, trackIds.length])
 
   if (isError || (isSuccess && trackIds.length === 0)) {
     return null
@@ -51,46 +67,23 @@ export const DiscoverWeekly = () => {
 
   return (
     <InViewWrapper>
-      <Flex w={CARD_WIDTH}>
-        {!inView || isLoading || !trackIds.length ? (
-          <CollectionCardSkeleton noShimmer />
-        ) : (
-          <Paper border='default' onPress={togglePlay}>
-            <Flex p='s' gap='s'>
-              <Image
-                source={discoverWeeklyArt}
-                style={{ width: '100%', aspectRatio: 1, borderRadius: 8 }}
-              />
-              <Text variant='title' textAlign='center' numberOfLines={1}>
-                {messages.discoverWeekly}
-              </Text>
-              <Text
-                variant='body'
-                size='s'
-                color='subdued'
-                textAlign='center'
-                numberOfLines={1}
-              >
-                {messages.discoverWeeklySubtitle}
-              </Text>
-            </Flex>
-            <Divider orientation='horizontal' />
-            <Flex
-              direction='row'
-              gap='l'
-              pv='s'
-              justifyContent='center'
-              backgroundColor='surface1'
-              borderBottomLeftRadius='m'
-              borderBottomRightRadius='m'
-            >
-              <Text variant='body' size='s' strength='strong' color='subdued'>
-                {messages.discoverWeeklyTrackCount(trackIds.length)}
-              </Text>
-            </Flex>
-          </Paper>
-        )}
-      </Flex>
+      <Paper row alignItems='center' gap='m' p='m' onPress={handlePress}>
+        <Image
+          source={discoverWeeklyArt}
+          style={{ width: ART_SIZE, height: ART_SIZE, borderRadius: 8 }}
+        />
+        <Flex column gap='xs' style={{ flex: 1 }}>
+          <Text variant='label' size='s' color='accent'>
+            {messages.discoverWeeklyBadge}
+          </Text>
+          <Text variant='title' size='l' numberOfLines={1}>
+            {messages.discoverWeekly}
+          </Text>
+          <Text variant='body' size='s' color='subdued'>
+            {messages.discoverWeeklyPitch}
+          </Text>
+        </Flex>
+      </Paper>
     </InViewWrapper>
   )
 }

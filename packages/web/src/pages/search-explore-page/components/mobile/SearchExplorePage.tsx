@@ -22,6 +22,7 @@ import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, usePrevious } from 'react-use'
 
+import { DiscoverWeeklyBanner } from 'components/discover-weekly'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -36,7 +37,6 @@ import { Category, CategoryKey, CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
-import { DiscoverWeeklySection } from '../desktop/DiscoverWeeklySection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
@@ -228,12 +228,12 @@ const SearchExplorePage = ({
             display: inputValue || showSearchResults ? 'none' : undefined
           }}
         >
+          {showTrackContent && showUserContextualContent ? (
+            <DiscoverWeeklyBanner surface='explore' />
+          ) : null}
           {isTracksTab ? <QuickSearchGrid /> : null}
           {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
-          ) : null}
-          {showTrackContent && showUserContextualContent ? (
-            <DiscoverWeeklySection />
           ) : null}
           {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
           {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}

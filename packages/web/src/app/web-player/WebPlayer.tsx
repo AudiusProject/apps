@@ -239,6 +239,7 @@ const {
   NOTIFICATION_PAGE,
   NOTIFICATION_USERS_PAGE,
   EXPLORE_PAGE,
+  DISCOVER_WEEKLY_PAGE,
   CONTESTS_PAGE,
   SAVED_PAGE,
   LIBRARY_PAGE,
@@ -329,6 +330,9 @@ const {
 
 // TODO: do we need to lazy load edit?
 const EditTrackPage = lazy(() => import('pages/edit-page'))
+const DiscoverWeeklyPage = lazy(
+  () => import('pages/discover-weekly-page/DiscoverWeeklyPage')
+)
 const UploadPage = lazy(() => import('pages/upload-page'))
 const CheckPage = lazy(() => import('pages/check-page/CheckPage'))
 const Modals = lazy(() => import('pages/modals/Modals'))
@@ -924,6 +928,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<LibraryPage />}
                 />
                 <Route path={HISTORY_PAGE} element={<HistoryPage />} />
+                <Route
+                  path={DISCOVER_WEEKLY_PAGE}
+                  element={<DiscoverWeeklyPage />}
+                />
                 {!isProduction ? (
                   <Route path={DEV_TOOLS_PAGE} element={<DevTools />} />
                 ) : null}
@@ -1402,6 +1410,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   element={<LibraryPage />}
                 />
                 <Route path={HISTORY_PAGE} element={<HistoryPage />} />
+                <Route
+                  path={DISCOVER_WEEKLY_PAGE}
+                  element={<DiscoverWeeklyPage />}
+                />
                 {!isProduction ? (
                   <Route path={DEV_TOOLS_PAGE} element={<DevTools />} />
                 ) : null}

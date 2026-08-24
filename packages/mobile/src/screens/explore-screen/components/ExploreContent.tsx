@@ -31,6 +31,9 @@ export const ExploreContent = () => {
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
+      {showTrackContent && showUserContextualContent && (
+        <DiscoverWeekly surface='explore' />
+      )}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <TrendingGenres />}
       {showAlbumContent && <TopAlbumsThisMonth />}
@@ -40,7 +43,6 @@ export const ExploreContent = () => {
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}
-      {showTrackContent && showUserContextualContent && <DiscoverWeekly />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
       {showTrackContent && showUserContextualContent && <FeelingLucky />}
