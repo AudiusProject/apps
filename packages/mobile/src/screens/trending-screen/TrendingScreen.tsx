@@ -5,8 +5,14 @@ import { useSelector } from 'react-redux'
 
 import { Flex, IconTrending } from '@audius/harmony-native'
 import { Screen, ScreenContent } from 'app/components/core'
+import { useBottomChinHeight } from 'app/components/core/BottomChin'
 import { ScreenPrimaryContent } from 'app/components/core/Screen/ScreenPrimaryContent'
 import { ScreenSecondaryContent } from 'app/components/core/Screen/ScreenSecondaryContent'
+import { FloatingSubHeader } from 'app/screens/app-screen/FloatingSubHeader'
+import {
+  useGlassHeaderInset,
+  useGlassScrollHandler
+} from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 
 import { TRENDING_FILTER_MODAL } from './TrendingCombinedFilterDrawer'
@@ -28,6 +34,16 @@ const titleByCategory = {
 
 export const TrendingScreen = () => {
   const category = useSelector(getTrendingCategory) ?? 'tracks'
+  const glassHeaderInset = useGlassHeaderInset()
+  const bottomChin = useBottomChinHeight()
+  const handleGlassScroll = useGlassScrollHandler()
+
+  // TrackLineup opts out of the shared chin, so it needs the bottom inset
+  // that clears the floating tab bar folded in here.
+  const lineupContentStyle = {
+    paddingTop: glassHeaderInset,
+    paddingBottom: bottomChin
+  }
 
   const [winnersWeek, setWinnersWeek] = useState<string | null>(null)
   const [winnersSubFilter, setWinnersSubFilter] = useState<
@@ -61,23 +77,36 @@ export const TrendingScreen = () => {
   )
 
   return (
-    <Screen url='Trending' header={renderHeader}>
+    <Screen url='Trending' header={renderHeader} headerTransparent>
       <Flex flex={1} direction='column' style={{ minHeight: 0 }}>
-        <ScreenPrimaryContent skeleton={trendingPills}>
-          {trendingPills}
-        </ScreenPrimaryContent>
+        {/* Pinned into the floating glass stack under the title so the
+            lineups scroll behind one continuous frosted surface. */}
+        <FloatingSubHeader>
+          <ScreenPrimaryContent skeleton={trendingPills}>
+            {trendingPills}
+          </ScreenPrimaryContent>
+        </FloatingSubHeader>
         <ScreenContent>
           {category === 'tracks' ? (
             <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
-              <TrendingTracksLineup header={<TrendingFilterChips />} />
+              <TrendingTracksLineup
+                header={<TrendingFilterChips />}
+                contentContainerStyle={lineupContentStyle}
+                onScroll={handleGlassScroll}
+              />
             </ScreenSecondaryContent>
           ) : category === 'underground' ? (
             <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
-              <TrendingUndergroundLineup />
+              <TrendingUndergroundLineup
+                contentContainerStyle={lineupContentStyle}
+                onScroll={handleGlassScroll}
+              />
             </ScreenSecondaryContent>
           ) : (
             <ScreenSecondaryContent skeleton={<TrendingLineupSkeletons />}>
               <TrendingWinnersView
+                contentContainerStyle={lineupContentStyle}
+                onScroll={handleGlassScroll}
                 week={winnersWeek}
                 subFilter={winnersSubFilter}
                 onWeekChange={setWinnersWeek}

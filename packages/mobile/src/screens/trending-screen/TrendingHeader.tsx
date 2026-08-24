@@ -45,8 +45,10 @@ type TrendingHeaderProps = {
 }
 
 const useStyles = makeStyles(({ palette, spacing, typography }) => ({
+  // No backgroundColor: when rendered inside `FloatingSubHeader` the
+  // surrounding `GlassSurface` owns the frosted fill, and an opaque white here
+  // would punch a solid band through it.
   root: {
-    backgroundColor: palette.white,
     borderBottomWidth: 1,
     borderBottomColor: palette.neutralLight8,
     borderTopWidth: 1,

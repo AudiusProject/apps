@@ -56,6 +56,13 @@ export type ScreenProps = {
   variant?: ScreenVariant
   as?: ComponentType<ViewProps>
   header?: () => ReactElement
+  /**
+   * Float the custom header over the screen instead of stacking content below
+   * it, so content scrolls behind a translucent header. The screen is then
+   * responsible for padding its own scrollable content by the header height
+   * (see `useRootHeaderHeight`).
+   */
+  headerTransparent?: boolean
   // Callback called when user presses back button
   onBack?: () => void
 }
@@ -76,6 +83,7 @@ export const Screen = (props: ScreenProps) => {
     style,
     as: RootComponent = View,
     header,
+    headerTransparent,
     onBack
   } = props
   const palette = useThemePalette()
@@ -107,6 +115,7 @@ export const Screen = (props: ScreenProps) => {
       removeUndefined({
         header,
         headerShown: header ? true : undefined,
+        headerTransparent,
         headerLeft: topbarLeft === undefined ? undefined : () => topbarLeft,
         headerRight: topbarRight
           ? () => topbarRight
@@ -136,7 +145,8 @@ export const Screen = (props: ScreenProps) => {
     headerTitleProp,
     icon,
     IconProps,
-    header
+    header,
+    headerTransparent
   ])
 
   return (

@@ -13,6 +13,7 @@ import type { FeedTabScreenParamList } from './FeedTabScreen'
 import { FeedTabScreen } from './FeedTabScreen'
 import { NotificationsTabScreen } from './NotificationsTabScreen'
 import type { ProfileTabScreenParamList } from './ProfileTabScreen'
+import { TabBarAutoHideProvider } from './TabBarAutoHideContext'
 import type { TrendingTabScreenParamList } from './TrendingTabScreen'
 import { TrendingTabScreen } from './TrendingTabScreen'
 import { usePrefetchNotifications } from './usePrefetchNotifications'
@@ -35,16 +36,20 @@ export const AppTabsScreen = () => {
   usePrefetchNotifications()
 
   return (
-    <Tab.Navigator
-      tabBar={tabBar}
-      screenOptions={screenOptions}
-      initialRouteName='feed'
-    >
-      <Tab.Screen name='feed' component={FeedTabScreen} />
-      <Tab.Screen name='trending' component={TrendingTabScreen} />
-      <Tab.Screen name='explore' component={ExploreTabScreen} />
-      <Tab.Screen name='library' component={FavoritesTabScreen} />
-      <Tab.Screen name='notifications' component={NotificationsTabScreen} />
-    </Tab.Navigator>
+    // Sits above the navigator so the tab bar, which renders as a sibling of
+    // the screens, can still animate off the focused tab's scrolling.
+    <TabBarAutoHideProvider>
+      <Tab.Navigator
+        tabBar={tabBar}
+        screenOptions={screenOptions}
+        initialRouteName='feed'
+      >
+        <Tab.Screen name='feed' component={FeedTabScreen} />
+        <Tab.Screen name='trending' component={TrendingTabScreen} />
+        <Tab.Screen name='explore' component={ExploreTabScreen} />
+        <Tab.Screen name='library' component={FavoritesTabScreen} />
+        <Tab.Screen name='notifications' component={NotificationsTabScreen} />
+      </Tab.Navigator>
+    </TabBarAutoHideProvider>
   )
 }

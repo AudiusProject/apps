@@ -111,6 +111,14 @@ export type TrackLineupProps = {
   LineupEmptyComponent?: SectionListProps<unknown>['ListEmptyComponent']
   ListFooterComponent?: SectionListProps<unknown>['ListFooterComponent']
   hideHeaderOnEmpty?: boolean
+  /**
+   * Padding/style applied to the scrollable content itself (not the list
+   * frame). Root tab screens use this to clear the floating glass header, so
+   * content starts below it but scrolls behind it.
+   */
+  contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
+  /** Scroll callback, used by root screens to drive the glass chrome. */
+  onScroll?: SectionListProps<unknown>['onScroll']
   itemStyles?: ViewStyle
   pullToRefresh?: boolean
   disableTopTabScroll?: boolean
@@ -153,6 +161,8 @@ export const TrackLineup = ({
   LineupEmptyComponent,
   ListFooterComponent,
   hideHeaderOnEmpty,
+  contentContainerStyle,
+  onScroll,
   itemStyles,
   pullToRefresh,
   disableTopTabScroll,
@@ -393,9 +403,12 @@ export const TrackLineup = ({
       <SectionList
         {...pullToRefreshProps}
         ref={ref}
+        contentContainerStyle={contentContainerStyle}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         ListHeaderComponent={hideHeaderOnEmpty && isEmpty ? undefined : header}
         ListFooterComponent={hasNextPage ? null : ListFooterComponent}
-        hidePlayBarChin={true}
+        hideBottomChin={true}
         ListEmptyComponent={LineupEmptyComponent}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={LOAD_MORE_THRESHOLD}

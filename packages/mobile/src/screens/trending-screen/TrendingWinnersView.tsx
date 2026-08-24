@@ -5,6 +5,7 @@ import {
   useTrendingWinners
 } from '@audius/common/api'
 import { dayjs } from '@audius/common/utils'
+import type { SectionListProps } from 'react-native'
 import { ScrollView, View } from 'react-native'
 
 import {
@@ -49,6 +50,8 @@ const formatWeekLabel = (week: string | null): string => {
 }
 
 export type TrendingWinnersViewProps = {
+  contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
+  onScroll?: SectionListProps<unknown>['onScroll']
   week: string | null
   subFilter: WinnersSubFilter
   onWeekChange: (week: string | null) => void
@@ -56,6 +59,8 @@ export type TrendingWinnersViewProps = {
 }
 
 export const TrendingWinnersView = ({
+  contentContainerStyle,
+  onScroll,
   week,
   subFilter,
   onWeekChange,
@@ -108,7 +113,11 @@ export const TrendingWinnersView = ({
 
   if (isPending) {
     return (
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={contentContainerStyle}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      >
         <View style={styles.headerWrapper}>
           <Paper
             p='l'
@@ -184,6 +193,8 @@ export const TrendingWinnersView = ({
 
   return (
     <TrackLineup
+      contentContainerStyle={contentContainerStyle}
+      onScroll={onScroll}
       isTrending
       rankIconCount={5}
       trackIds={trackIds}

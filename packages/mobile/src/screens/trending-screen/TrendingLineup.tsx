@@ -29,12 +29,16 @@ const sourceFor = (timeRange: TimeRange) => {
 type TrendingLineupProps = {
   timeRange: TimeRange
   header?: SectionListProps<unknown>['ListHeaderComponent']
+  contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
+  onScroll?: SectionListProps<unknown>['onScroll']
   rankIconCount?: number
 }
 
 export const TrendingLineup = ({
   timeRange,
   header,
+  contentContainerStyle,
+  onScroll,
   rankIconCount
 }: TrendingLineupProps) => {
   const navigation = useNavigation()
@@ -83,6 +87,8 @@ export const TrendingLineup = ({
       isTrending
       rankIconCount={rankIconCount}
       header={header}
+      contentContainerStyle={contentContainerStyle}
+      onScroll={onScroll}
       itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
       pullToRefresh
     />

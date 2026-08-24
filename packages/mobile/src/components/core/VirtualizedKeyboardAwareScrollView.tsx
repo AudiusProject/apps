@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 import type { KeyboardAwareFlatListProps } from 'react-native-keyboard-aware-scroll-view'
 import { KeyboardAwareFlatList } from 'react-native-keyboard-aware-scroll-view'
 
-import { PlayBarChin } from './PlayBarChin'
+import { BottomChin } from './BottomChin'
 
 type BaseFlatListProps = Omit<
   KeyboardAwareFlatListProps<null>,
@@ -32,7 +32,7 @@ export const VirtualizedKeyboardAwareScrollView = (
       data={null}
       renderItem={() => null}
       scrollIndicatorInsets={{ right: Number.MIN_VALUE }}
-      ListFooterComponent={PlayBarChin}
+      ListFooterComponent={BottomChin}
       {...other}
     />
   )
