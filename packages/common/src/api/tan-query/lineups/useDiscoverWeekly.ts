@@ -12,6 +12,11 @@ import { primeTrackData } from '../utils/primeTrackData'
 
 const DEFAULT_LIMIT = 30
 
+// The server recomputes at the ISO week boundary and caches for hours, so
+// anything on this order is cheap. Bounded rather than Infinity so a transient
+// failure or an empty response doesn't stick for the whole session.
+const STALE_TIME_MS = 30 * 60 * 1000
+
 export type UseDiscoverWeeklyArgs = {
   limit?: number
 }
@@ -32,8 +37,11 @@ export const getDiscoverWeeklyQueryKey = ({
  * fixed-size artifact, not a lineup you scroll. There is no page 2.
  *
  * The server holds the mix constant for the ISO week, so the client cache can
- * be long-lived; the staleness that matters is the week boundary, not minutes.
- * Refetch-on-mount is left off for the same reason.
+ * be long-lived -- but NOT infinite. With staleTime: Infinity and
+ * refetchOnMount: false, a single failed or empty first fetch was permanent for
+ * the session: nothing retried it, and the surfaces that hide themselves on an
+ * empty result stayed hidden until the app restarted. A bounded staleTime keeps
+ * the request count low while still letting a bad result heal.
  */
 export const useDiscoverWeekly = (
   { limit = DEFAULT_LIMIT }: UseDiscoverWeeklyArgs = {},
@@ -59,8 +67,7 @@ export const useDiscoverWeekly = (
         type: EntityType.TRACK
       }))
     },
-    staleTime: Infinity,
-    refetchOnMount: false,
+    staleTime: STALE_TIME_MS,
     ...options,
     enabled: options?.enabled !== false && !!currentUserId
   })
