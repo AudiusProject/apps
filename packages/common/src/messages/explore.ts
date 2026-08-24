@@ -27,6 +27,10 @@ export const exploreMessages = {
   feelingLucky: 'Feeling Lucky?',
   imFeelingLucky: "I'm Feeling Lucky",
   recentlyPlayed: 'Recently Played',
+  discoverWeekly: 'Your Discover Weekly',
+  discoverWeeklySubtitle: 'Updated every Monday',
+  discoverWeeklyTrackCount: (count: number) =>
+    `${count} ${count === 1 ? 'track' : 'tracks'}`,
   undergroundTrending: 'Underground Trending',
   verified: 'Verified'
 }

@@ -40,6 +40,7 @@ import { CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from './ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from './BestSellingAlbumsSection'
+import { DiscoverWeeklySection } from './DiscoverWeeklySection'
 import { FanClubsExploreSection } from './FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from './FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from './FeaturedRemixContestsSection'
@@ -220,6 +221,11 @@ const SearchExplorePage = ({
       key: 'recentlyPlayed',
       shouldRender: showTrackContent && showUserContextualContent,
       element: <RecentlyPlayedSection />
+    },
+    {
+      key: 'discoverWeekly',
+      shouldRender: showTrackContent && showUserContextualContent,
+      element: <DiscoverWeeklySection />
     },
     {
       key: 'undergroundTrendingTracks',

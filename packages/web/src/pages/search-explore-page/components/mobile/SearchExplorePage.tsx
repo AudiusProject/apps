@@ -36,6 +36,7 @@ import { Category, CategoryKey, CategoryView } from 'pages/search-page/types'
 
 import { ArtistSpotlightSection } from '../desktop/ArtistSpotlightSection'
 import { BestSellingAlbumsSection } from '../desktop/BestSellingAlbumsSection'
+import { DiscoverWeeklySection } from '../desktop/DiscoverWeeklySection'
 import { FanClubsExploreSection } from '../desktop/FanClubsExploreSection'
 import { FeaturedPlaylistsSection } from '../desktop/FeaturedPlaylistsSection'
 import { FeaturedRemixContestsSection } from '../desktop/FeaturedRemixContestsSection'
@@ -230,6 +231,9 @@ const SearchExplorePage = ({
           {isTracksTab ? <QuickSearchGrid /> : null}
           {showTrackContent && showUserContextualContent ? (
             <RecentlyPlayedSection />
+          ) : null}
+          {showTrackContent && showUserContextualContent ? (
+            <DiscoverWeeklySection />
           ) : null}
           {showPlaylistContent ? <FeaturedPlaylistsSection /> : null}
           {showAlbumContent ? <TopAlbumsThisMonthSection /> : null}

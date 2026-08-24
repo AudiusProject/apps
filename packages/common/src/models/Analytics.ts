@@ -1312,6 +1312,7 @@ export type ExploreSectionName =
   | 'Recommended Tracks'
   | 'Artist Coin Tracks'
   | 'Recently Played'
+  | 'Discover Weekly'
   | 'Quick Search'
   | 'Featured Playlists'
   | 'Fan Clubs'

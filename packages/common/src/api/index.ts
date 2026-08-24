@@ -48,6 +48,7 @@ export * from './tan-query/lineups/useProfileReposts'
 export * from './tan-query/lineups/useProfileTracks'
 export * from './tan-query/lineups/useTrending'
 export * from './tan-query/lineups/useTrendingUnderground'
+export * from './tan-query/lineups/useDiscoverWeekly'
 export * from './tan-query/lineups/useTrendingWinners'
 export * from './tan-query/lineups/useTrackPageLineup'
 

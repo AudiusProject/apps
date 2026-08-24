@@ -1,0 +1,82 @@
+import { Id, OptionalId, EntityType } from '@audius/sdk'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { transformAndCleanList, userTrackMetadataFromSDK } from '~/adapters'
+import { useQueryContext } from '~/api/tan-query/utils'
+import { ID } from '~/models/Identifiers'
+
+import { QUERY_KEYS } from '../queryKeys'
+import { QueryKey, QueryOptions, LineupData } from '../types'
+import { useCurrentUserId } from '../users/account/useCurrentUserId'
+import { primeTrackData } from '../utils/primeTrackData'
+
+const DEFAULT_LIMIT = 30
+
+export type UseDiscoverWeeklyArgs = {
+  limit?: number
+}
+
+export const getDiscoverWeeklyQueryKey = ({
+  userId,
+  limit = DEFAULT_LIMIT
+}: UseDiscoverWeeklyArgs & { userId: ID | null | undefined }) =>
+  [QUERY_KEYS.discoverWeekly, userId, { limit }] as unknown as QueryKey<
+    LineupData[]
+  >
+
+/**
+ * The current user's Discover Weekly mix: tracks they haven't heard, weighted
+ * toward artists they don't already follow.
+ *
+ * Deliberately a plain `useQuery` rather than an infinite one — the mix is a
+ * fixed-size artifact, not a lineup you scroll. There is no page 2.
+ *
+ * The server holds the mix constant for the ISO week, so the client cache can
+ * be long-lived; the staleness that matters is the week boundary, not minutes.
+ * Refetch-on-mount is left off for the same reason.
+ */
+export const useDiscoverWeekly = (
+  { limit = DEFAULT_LIMIT }: UseDiscoverWeeklyArgs = {},
+  options?: QueryOptions
+) => {
+  const { audiusSdk } = useQueryContext()
+  const { data: currentUserId } = useCurrentUserId()
+  const queryClient = useQueryClient()
+
+  const query = useQuery({
+    queryKey: getDiscoverWeeklyQueryKey({ userId: currentUserId, limit }),
+    queryFn: async () => {
+      const sdk = await audiusSdk()
+      const { data = [] } = await sdk.users.getDiscoverWeekly({
+        id: Id.parse(currentUserId),
+        limit,
+        userId: OptionalId.parse(currentUserId)
+      })
+      const tracks = transformAndCleanList(data, userTrackMetadataFromSDK)
+      primeTrackData({ tracks, queryClient })
+      return tracks.map((t) => ({
+        id: t.track_id,
+        type: EntityType.TRACK
+      }))
+    },
+    staleTime: Infinity,
+    refetchOnMount: false,
+    ...options,
+    enabled: options?.enabled !== false && !!currentUserId
+  })
+
+  const data = query.data ?? []
+  const trackIds = data
+    .filter((d) => d.type === EntityType.TRACK)
+    .map((d) => d.id as ID)
+
+  return {
+    data,
+    trackIds,
+    isPending: query.isPending,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isSuccess: query.isSuccess,
+    isError: query.isError
+  }
+}
