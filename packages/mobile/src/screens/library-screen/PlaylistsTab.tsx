@@ -13,7 +13,7 @@ import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 import { CollectionList } from 'app/components/collection-list'
-import { PlayBarChin } from 'app/components/core/PlayBarChin'
+import { BottomChin } from 'app/components/core/BottomChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
 import { makeStyles } from 'app/styles'
@@ -119,7 +119,7 @@ export const PlaylistsTab = () => {
               createPlaylistSource={CreatePlaylistSource.LIBRARY_PAGE}
               isLoading={isPending && (collectionIds?.length ?? 0) === 0}
               totalCount={12}
-              ListFooterComponent={<PlayBarChin />}
+              ListFooterComponent={<BottomChin />}
             />
           </View>
         </>

@@ -13,7 +13,7 @@ import { useThemeColors } from 'app/utils/theme'
 
 import { CollapsibleTabNavigatorContext } from '../top-tab-bar'
 
-import { PlayBarChin } from './PlayBarChin'
+import { BottomChin } from './BottomChin'
 import { PullToRefresh, useOverflowHandlers } from './PullToRefresh'
 
 export type FlatListT<ItemT> = RNFlatList<ItemT>
@@ -152,10 +152,10 @@ export const FlatList = forwardRef(function FlatList<ItemT>(
   const FooterComponent = ListFooterComponent ? (
     <>
       {ListFooterComponent}
-      <PlayBarChin />
+      <BottomChin />
     </>
   ) : (
-    PlayBarChin
+    BottomChin
   )
 
   const flatListProps = {

@@ -17,7 +17,7 @@ import { debounce } from 'lodash'
 import { View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { PlayBarChin } from 'app/components/core/PlayBarChin'
+import { BottomChin } from 'app/components/core/BottomChin'
 import { EmptyTileCTA } from 'app/components/empty-tile-cta'
 import { FilterInput } from 'app/components/filter-input'
 import { TrackList } from 'app/components/track-list'
@@ -305,7 +305,7 @@ export const TracksTab = () => {
           }
           onEndReached={handleMoreFetchSaves}
           onEndReachedThreshold={1.5}
-          ListFooterComponent={<PlayBarChin />}
+          ListFooterComponent={<BottomChin />}
           togglePlay={togglePlay}
           trackItemAction='overflow'
           uids={showTrackSkeletonList ? undefined : filteredTrackUids}

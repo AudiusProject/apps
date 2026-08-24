@@ -29,6 +29,11 @@ export const TrendingTabScreen =
       options={{
         header: renderTrendingHeader,
         headerShown: true,
+        // Matches TrendingScreen's own `headerTransparent` so the very first
+        // native frame already floats the header — otherwise the pre-declared
+        // header lays out in flow and the content shifts once the screen's
+        // setOptions lands.
+        headerTransparent: true,
         contentStyle: { paddingTop: 0 }
       }}
     />

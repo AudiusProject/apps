@@ -24,7 +24,10 @@ export const NotificationsScreen = () => {
   useFocusEffect(handleMarkAsViewed)
 
   return (
-    <Screen header={() => <MobileRootHeader title={messages.header} />}>
+    <Screen
+      header={() => <MobileRootHeader title={messages.header} />}
+      headerTransparent
+    >
       <ScreenPrimaryContent>{null}</ScreenPrimaryContent>
       <ScreenContent>
         <ScreenSecondaryContent>

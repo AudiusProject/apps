@@ -73,6 +73,8 @@ import { ContestsScreen } from '../contests-screen'
 import { FanClubSortScreen } from '../fan-club-sort-screen/FanClubSortScreen'
 import { FanClubsExploreScreen } from '../fan-clubs-explore-screen/FanClubsExploreScreen'
 
+import { GlassChromeProvider } from './GlassChromeContext'
+import { TabBarAutoHideBridge } from './TabBarAutoHideContext'
 import { useAppScreenOptions } from './useAppScreenOptions'
 
 export type AppTabScreenParamList = {
@@ -242,123 +244,141 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   )
 
   return (
-    <Stack.Navigator
-      screenOptions={screenOptions}
-      screenListeners={screenListeners}
-    >
-      {baseScreen(Stack)}
-      <Stack.Screen name='Track' component={TrackScreen} />
-      <Stack.Screen name='TrackRemixes' component={TrackRemixesScreen} />
-      <Stack.Screen name='Collection' component={CollectionScreen} />
-      <Stack.Screen
-        name='Profile'
-        component={ProfileScreen}
-        // Profile uses a collapsible tab view (horizontal pager + vertical
-        // scroll). The global `fullScreenGestureEnabled: true` makes the
-        // swipe-to-pop recognizer span the whole screen, so a slightly diagonal
-        // vertical scroll gets hijacked as a back gesture. Restrict swipe-back
-        // to the left edge here (same treatment as the Chat screen) so
-        // mid-screen scrolling reaches the list untouched.
-        options={{ headerShown: false, fullScreenGestureEnabled: false }}
-      />
-      <Stack.Group>
-        <Stack.Screen name='Followers' component={FollowersScreen} />
-        <Stack.Screen name='Following' component={FollowingScreen} />
-        <Stack.Screen name='Favorited' component={FavoritedScreen} />
-        <Stack.Screen name='Mutuals' component={MutualsScreen} />
-        <Stack.Screen name='RelatedArtists' component={RelatedArtistsScreen} />
+    // Publishes the floating root header's height to the screens below it, so
+    // they can pad their scrollable content and let it slide behind the glass.
+    <GlassChromeProvider>
+      {/*
+        The bottom tab bar lives outside this provider, so it can't read the
+        scroll signal directly — this hands it out while the tab is focused.
+      */}
+      <TabBarAutoHideBridge />
+      <Stack.Navigator
+        screenOptions={screenOptions}
+        screenListeners={screenListeners}
+      >
+        {baseScreen(Stack)}
+        <Stack.Screen name='Track' component={TrackScreen} />
+        <Stack.Screen name='TrackRemixes' component={TrackRemixesScreen} />
+        <Stack.Screen name='Collection' component={CollectionScreen} />
         <Stack.Screen
-          name='NotificationUsers'
-          component={NotificationUsersScreen}
+          name='Profile'
+          component={ProfileScreen}
+          // Profile uses a collapsible tab view (horizontal pager + vertical
+          // scroll). The global `fullScreenGestureEnabled: true` makes the
+          // swipe-to-pop recognizer span the whole screen, so a slightly diagonal
+          // vertical scroll gets hijacked as a back gesture. Restrict swipe-back
+          // to the left edge here (same treatment as the Chat screen) so
+          // mid-screen scrolling reaches the list untouched.
+          options={{ headerShown: false, fullScreenGestureEnabled: false }}
         />
-      </Stack.Group>
-      <Stack.Screen name='Reposts' component={RepostsScreen} />
-      <Stack.Screen name='CoinLeaderboard' component={CoinLeaderboardScreen} />
+        <Stack.Group>
+          <Stack.Screen name='Followers' component={FollowersScreen} />
+          <Stack.Screen name='Following' component={FollowingScreen} />
+          <Stack.Screen name='Favorited' component={FavoritedScreen} />
+          <Stack.Screen name='Mutuals' component={MutualsScreen} />
+          <Stack.Screen
+            name='RelatedArtists'
+            component={RelatedArtistsScreen}
+          />
+          <Stack.Screen
+            name='NotificationUsers'
+            component={NotificationUsersScreen}
+          />
+        </Stack.Group>
+        <Stack.Screen name='Reposts' component={RepostsScreen} />
+        <Stack.Screen
+          name='CoinLeaderboard'
+          component={CoinLeaderboardScreen}
+        />
 
-      <Stack.Screen name='AudioScreen' component={AudioScreen} />
-      <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
-      <Stack.Screen
-        name='Contests'
-        component={ContestsScreen}
-        // Contests is reached from the left nav drawer, which passes
-        // `fromAppDrawer: true` and drops the screen animation to 'none'.
-        // That leaves a jarring instant pop when navigating away. Force the
-        // standard horizontal push so it transitions like the Track screen.
-        options={{ animation: 'simple_push' }}
-      />
-      <Stack.Screen name='Contest' component={ContestScreen} />
-      <Stack.Screen
-        name='ContestFollowers'
-        component={ContestFollowersScreen}
-      />
-      <Stack.Screen name='wallet' component={WalletScreen} />
-      <Stack.Screen name='CashScreen' component={CashScreen} />
-      <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
-      <Stack.Screen name='CoinRedeemScreen' component={CoinRedeemScreen} />
-      <Stack.Screen
-        name='EditCoinDetailsScreen'
-        component={EditCoinDetailsScreen}
-      />
-      <Stack.Screen name='FanClubsExplore' component={FanClubsExploreScreen} />
-      <Stack.Screen
-        name='DiscoverWeeklyScreen'
-        component={DiscoverWeeklyScreen}
-      />
-      <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
+        <Stack.Screen name='AudioScreen' component={AudioScreen} />
+        <Stack.Screen name='RewardsScreen' component={RewardsScreen} />
+        <Stack.Screen
+          name='Contests'
+          component={ContestsScreen}
+          // Contests is reached from the left nav drawer, which passes
+          // `fromAppDrawer: true` and drops the screen animation to 'none'.
+          // That leaves a jarring instant pop when navigating away. Force the
+          // standard horizontal push so it transitions like the Track screen.
+          options={{ animation: 'simple_push' }}
+        />
+        <Stack.Screen name='Contest' component={ContestScreen} />
+        <Stack.Screen
+          name='ContestFollowers'
+          component={ContestFollowersScreen}
+        />
+        <Stack.Screen name='wallet' component={WalletScreen} />
+        <Stack.Screen name='CashScreen' component={CashScreen} />
+        <Stack.Screen name='CoinDetailsScreen' component={CoinDetailsScreen} />
+        <Stack.Screen name='CoinRedeemScreen' component={CoinRedeemScreen} />
+        <Stack.Screen
+          name='EditCoinDetailsScreen'
+          component={EditCoinDetailsScreen}
+        />
+        <Stack.Screen
+          name='FanClubsExplore'
+          component={FanClubsExploreScreen}
+        />
+        <Stack.Screen
+          name='DiscoverWeeklyScreen'
+          component={DiscoverWeeklyScreen}
+        />
+        <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
 
-      <Stack.Group>
-        <Stack.Screen name='EditProfile' component={EditProfileScreen} />
-        <Stack.Screen name='SettingsScreen' component={SettingsScreen} />
-        <Stack.Screen name='AboutScreen' component={AboutScreen} />
-        <Stack.Screen
-          name='ListeningHistoryScreen'
-          component={ListeningHistoryScreen}
-        />
-        <Stack.Screen
-          name='AccountSettingsScreen'
-          component={AccountSettingsScreen}
-        />
-        <Stack.Screen
-          name='InboxSettingsScreen'
-          component={InboxSettingsScreen}
-        />
-        <Stack.Screen
-          name='CommentSettingsScreen'
-          component={CommentSettingsScreen}
-        />
-        <Stack.Screen
-          name='DownloadSettingsScreen'
-          component={DownloadSettingsScreen}
-        />
-        <Stack.Screen
-          name='NotificationSettingsScreen'
-          component={NotificationSettingsScreen}
-        />
-        <Stack.Screen name='ChangeEmail' component={ChangeEmailModalScreen} />
-      </Stack.Group>
+        <Stack.Group>
+          <Stack.Screen name='EditProfile' component={EditProfileScreen} />
+          <Stack.Screen name='SettingsScreen' component={SettingsScreen} />
+          <Stack.Screen name='AboutScreen' component={AboutScreen} />
+          <Stack.Screen
+            name='ListeningHistoryScreen'
+            component={ListeningHistoryScreen}
+          />
+          <Stack.Screen
+            name='AccountSettingsScreen'
+            component={AccountSettingsScreen}
+          />
+          <Stack.Screen
+            name='InboxSettingsScreen'
+            component={InboxSettingsScreen}
+          />
+          <Stack.Screen
+            name='CommentSettingsScreen'
+            component={CommentSettingsScreen}
+          />
+          <Stack.Screen
+            name='DownloadSettingsScreen'
+            component={DownloadSettingsScreen}
+          />
+          <Stack.Screen
+            name='NotificationSettingsScreen'
+            component={NotificationSettingsScreen}
+          />
+          <Stack.Screen name='ChangeEmail' component={ChangeEmailModalScreen} />
+        </Stack.Group>
 
-      <Stack.Screen
-        name='FilterButton'
-        component={FilterButtonScreen}
-        options={{ ...screenOptions, presentation: 'fullScreenModal' }}
-      />
-      <Stack.Group>
-        <Stack.Screen name='ChatList' component={ChatListScreen} />
-        <Stack.Screen name='ChatUserList' component={ChatUserListScreen} />
         <Stack.Screen
-          name='SendTokensUserSelection'
-          component={SendTokensUserSelectionScreen}
+          name='FilterButton'
+          component={FilterButtonScreen}
+          options={{ ...screenOptions, presentation: 'fullScreenModal' }}
         />
-        <Stack.Screen
-          name='Chat'
-          component={ChatScreen}
-          getId={({ params }) =>
-            // @ts-ignore hard to correctly type navigation params (PAY-1141)
-            params?.chatId
-          }
-          options={{ ...screenOptions, fullScreenGestureEnabled: false }}
-        />
-      </Stack.Group>
-    </Stack.Navigator>
+        <Stack.Group>
+          <Stack.Screen name='ChatList' component={ChatListScreen} />
+          <Stack.Screen name='ChatUserList' component={ChatUserListScreen} />
+          <Stack.Screen
+            name='SendTokensUserSelection'
+            component={SendTokensUserSelectionScreen}
+          />
+          <Stack.Screen
+            name='Chat'
+            component={ChatScreen}
+            getId={({ params }) =>
+              // @ts-ignore hard to correctly type navigation params (PAY-1141)
+              params?.chatId
+            }
+            options={{ ...screenOptions, fullScreenGestureEnabled: false }}
+          />
+        </Stack.Group>
+      </Stack.Navigator>
+    </GlassChromeProvider>
   )
 }

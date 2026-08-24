@@ -38,7 +38,7 @@ import {
 } from '@audius/harmony-native'
 import imageSearchHeaderBackground from 'app/assets/images/imageCoinsBackgroundImage.webp'
 import { GradientText, Screen, TokenIcon } from 'app/components/core'
-import { PlayBarChin } from 'app/components/core/PlayBarChin'
+import { BottomChin } from 'app/components/core/BottomChin'
 import { UserLink } from 'app/components/user-link'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useStatusBarStyle } from 'app/hooks/useStatusBarStyle'
@@ -451,7 +451,7 @@ export const FanClubsExploreScreen = () => {
           commonOptions={tabCommonOptions}
         />
       </View>
-      <PlayBarChin />
+      <BottomChin />
     </Screen>
   )
 }

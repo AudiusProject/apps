@@ -22,11 +22,18 @@ import PagerView, {
 } from 'react-native-pager-view'
 
 import { Screen, ScreenContent } from 'app/components/core'
+import { useBottomChinHeight } from 'app/components/core/BottomChin'
 import { EndOfLineupNotice } from 'app/components/lineup/EndOfLineupNotice'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { SuggestedFollows } from 'app/components/suggested-follows'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
+import { FloatingSubHeader } from 'app/screens/app-screen/FloatingSubHeader'
+import {
+  useGlassHeaderInset,
+  useGlassScrollHandler,
+  useResetGlassScroll
+} from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { DiscoverWeekly } from 'app/screens/explore-screen/components/DiscoverWeekly'
 import { make, track } from 'app/services/analytics'
@@ -49,6 +56,10 @@ const styles = StyleSheet.create({
 })
 
 export const FeedScreen = () => {
+  const glassHeaderInset = useGlassHeaderInset()
+  const bottomChin = useBottomChinHeight()
+  const handleGlassScroll = useGlassScrollHandler()
+  const resetGlassScroll = useResetGlassScroll()
   const [feedTab, setFeedTab] = useFeedTab()
   const [feedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
@@ -177,6 +188,12 @@ export const FeedScreen = () => {
     }
   }, [feedTabIndex])
 
+  // Both lineups stay mounted with their own scroll positions, so the incoming
+  // page's offset is not the one the chrome is currently showing.
+  useEffect(() => {
+    resetGlassScroll()
+  }, [feedTabIndex, resetGlassScroll])
+
   // Memoized so the header isn't a new function reference on every render —
   // otherwise Screen's setOptions runs each parent re-render and React
   // Navigation rebuilds the header, remounting AccountPictureHeader and
@@ -188,6 +205,13 @@ export const FeedScreen = () => {
       </MobileRootHeader>
     ),
     [isForYou]
+  )
+
+  // TrackLineup opts out of the shared chin (`hideBottomChin`), so the
+  // bottom inset that clears the floating tab bar has to ride along here.
+  const lineupContentStyle = useMemo(
+    () => ({ paddingTop: glassHeaderInset, paddingBottom: bottomChin }),
+    [glassHeaderInset, bottomChin]
   )
 
   const forYouLineupProps = {
@@ -222,9 +246,15 @@ export const FeedScreen = () => {
   }
 
   return (
-    <Screen url='Feed' header={renderHeader}>
+    <Screen url='Feed' header={renderHeader} headerTransparent>
       <ScreenContent>
-        <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
+        {/* Pinned into the floating glass stack directly under the title, so
+            the lineups scroll behind one continuous frosted surface rather
+            than sliding under the header and colliding with an opaque tab
+            row. */}
+        <FloatingSubHeader>
+          <FeedTabs currentTab={feedTab} onSelectTab={handleSelectTab} />
+        </FloatingSubHeader>
         {/* Horizontal pager: swipe left/right toggles between For You and
             Latest, mirroring the tab headers above. Both lineups stay mounted
             so each retains its own scroll position. The GestureDetector lets a
@@ -247,6 +277,8 @@ export const FeedScreen = () => {
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
                 }
+                contentContainerStyle={lineupContentStyle}
+                onScroll={isForYou ? handleGlassScroll : undefined}
                 {...forYouLineupProps}
               />
             </View>
@@ -260,6 +292,8 @@ export const FeedScreen = () => {
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
                 }
+                contentContainerStyle={lineupContentStyle}
+                onScroll={isForYou ? undefined : handleGlassScroll}
                 {...followLineupProps}
               />
             </View>

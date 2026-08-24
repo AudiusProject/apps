@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import discoverWeeklyArt from 'assets/img/discoverWeekly.jpg'
 import { make } from 'common/store/analytics/actions'
 import Page from 'components/page/Page'
+import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TrackTableLineup, TracksTableColumn } from 'components/tracks-table'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
@@ -194,6 +195,7 @@ export const DiscoverWeeklyPage = () => {
         columns={columns}
         userId={currentUserId}
         showArtistInTrackNameColumn
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.discoverWeeklyTracks}
         scrollRef={mainContentRef}
       />
     </Page>

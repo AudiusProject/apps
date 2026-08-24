@@ -16,14 +16,12 @@ type FeedTabsProps = {
 }
 
 export const FeedTabs = ({ currentTab, onSelectTab }: FeedTabsProps) => {
-  const { spacing, color } = useTheme()
+  const { spacing } = useTheme()
   return (
-    <View
-      style={{
-        backgroundColor: color.background.white,
-        paddingVertical: spacing.s
-      }}
-    >
+    // No background: this row is rendered inside the header's `GlassSurface`
+    // (see FloatingSubHeader), which owns the frosted fill. Painting an opaque
+    // white here would punch a solid band through the glass.
+    <View style={{ paddingVertical: spacing.s }}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
