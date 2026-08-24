@@ -5,17 +5,20 @@ import { Text } from '@audius/harmony/src/components/text'
 import { Link } from 'react-router'
 
 const messages = {
-  heading: 'This Track Isn’t Available',
-  description: 'This track can no longer be streamed on Audius.',
+  heading: 'Whoops',
+  description: 'This is not the page you’re looking for...',
   buttonText: 'Take Me Back To The Music'
 }
 
 /**
- * Server-rendered twin of the unavailable-track message. Kept separate, and on
- * deep harmony imports, so the SSR worker bundle doesn't pull in the client
- * barrels - matching the other Server* page components.
+ * Server-rendered twin of NotFoundPage. Kept separate, and on deep harmony
+ * imports, so the SSR worker bundle doesn't pull in the client barrels -
+ * matching the other Server* page components. The Lottie animation and tiled
+ * background from the client page are deliberately left out: they'd pull a
+ * large animation payload into the worker bundle for a page the client
+ * replaces on hydration anyway.
  */
-export const ServerUnavailableTrack = () => {
+export const ServerNotFound = () => {
   return (
     <Flex
       w='100%'

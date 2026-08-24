@@ -47,7 +47,6 @@ import NavContext, {
 } from 'components/nav/mobile/NavContext'
 import DeletedPage from 'pages/deleted-page/DeletedPage'
 import { getTrackDefaults } from 'pages/track-page/utils'
-import { UnavailableTrackPage } from 'pages/unavailable-track-page/UnavailableTrackPage'
 import { getTrackPageContext } from 'ssr/metaTags'
 import { parseTrackRoute } from 'utils/route/trackRouteParser'
 
@@ -85,12 +84,15 @@ const TrackPage = () => {
     !!currentTrack &&
     currentTrack.track_id === track.track_id
 
-  // Simple error handling
+  // Simple error handling. A track whose owner is no longer active - a self
+  // deactivation, or an account delisted by the trusted notifier - is treated
+  // the same as one that doesn't exist: the API already 404s its stream so it
+  // can't be told apart from a missing track, and the page shouldn't either.
   useEffect(() => {
-    if (status === 'error') {
+    if (status === 'error' || isTrackUnavailable(track)) {
       navigate(NOT_FOUND_PAGE)
     }
-  }, [status, navigate])
+  }, [status, track, navigate])
   const { setLeft, setCenter, setRight } = useContext(NavContext)!
   useEffect(() => {
     setLeft(LeftPreset.BACK)
@@ -277,11 +279,11 @@ const TrackPage = () => {
     )
   }
 
-  // The API reports tracks whose owner is no longer active as non-streamable.
-  // Honor that instead of rendering a playable track page. Checked after the
-  // deleted case above, which has its own more specific treatment.
+  // The redirect above runs in an effect, which fires after the first paint.
+  // Render nothing until it lands so the track's title and artwork never reach
+  // the screen, even for a frame.
   if (isTrackUnavailable(track)) {
-    return <UnavailableTrackPage />
+    return null
   }
 
   return (
