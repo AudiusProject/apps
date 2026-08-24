@@ -8,6 +8,7 @@ import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestSellingAlbums } from './BestSellingAlbums'
+import { DiscoverWeekly } from './DiscoverWeekly'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -39,6 +40,7 @@ export const ExploreContent = () => {
       {showTrackContent && showUserContextualContent && (
         <RecentlyPlayedTracks />
       )}
+      {showTrackContent && showUserContextualContent && <DiscoverWeekly />}
       {showUserContent && <ArtistSpotlight />}
       {showUserContent && <LabelSpotlight />}
       {showTrackContent && showUserContextualContent && <FeelingLucky />}
