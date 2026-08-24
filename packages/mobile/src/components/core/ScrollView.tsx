@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 import type { ScrollViewProps as RNScrollViewProps } from 'react-native'
 import { ScrollView as RNScrollView } from 'react-native'
 
-import { PlayBarChin } from './PlayBarChin'
+import { BottomChin } from './BottomChin'
 
 export type ScrollViewElement = RNScrollView
 
@@ -15,7 +15,7 @@ export const ScrollView = forwardRef<ScrollViewElement, ScrollViewProps>(
     return (
       <RNScrollView {...other} ref={ref}>
         {children}
-        <PlayBarChin />
+        <BottomChin />
       </RNScrollView>
     )
   }

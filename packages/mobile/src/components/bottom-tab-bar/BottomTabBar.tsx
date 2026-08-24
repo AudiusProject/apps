@@ -9,6 +9,7 @@ import { Animated } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Flex } from '@audius/harmony-native'
+import { GlassSurface } from 'app/components/core/Screen/GlassSurface'
 import { FULL_DRAWER_HEIGHT } from 'app/components/drawer'
 import { PLAY_BAR_HEIGHT } from 'app/components/now-playing-drawer'
 
@@ -103,29 +104,34 @@ export const BottomTabBar = (props: BottomTabBarProps) => {
         interpolatePostion(translationAnim, insets.bottom)
       ]}
     >
-      <Flex
-        row
-        pointerEvents='auto'
-        borderTop='default'
-        backgroundColor='surface1'
-        wrap='nowrap'
-        justifyContent='space-evenly'
-        pb={insets.bottom}
-      >
-        {routes.map(({ name, key }, index) => {
-          const BottomTabBarButton = bottomTabBarButtons[name]
+      {/*
+        Frosted rather than a solid fill so content scrolls behind the bar,
+        matching the floating header stack. The separator goes on the top edge
+        here — that's the side content passes under.
+      */}
+      <GlassSurface borderEdge='top'>
+        <Flex
+          row
+          pointerEvents='auto'
+          wrap='nowrap'
+          justifyContent='space-evenly'
+          pb={insets.bottom}
+        >
+          {routes.map(({ name, key }, index) => {
+            const BottomTabBarButton = bottomTabBarButtons[name]
 
-          return (
-            <BottomTabBarButton
-              key={key}
-              routeKey={key}
-              isActive={index === activeIndex}
-              onPress={handlePress}
-              onLongPress={handleLongPress}
-            />
-          )
-        })}
-      </Flex>
+            return (
+              <BottomTabBarButton
+                key={key}
+                routeKey={key}
+                isActive={index === activeIndex}
+                onPress={handlePress}
+                onLongPress={handleLongPress}
+              />
+            )
+          })}
+        </Flex>
+      </GlassSurface>
     </Animated.View>
   )
 }

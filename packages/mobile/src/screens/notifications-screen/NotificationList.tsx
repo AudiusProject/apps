@@ -5,8 +5,14 @@ import type { Notification } from '@audius/common/store'
 import { useIsFocused } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
 import type { ViewToken } from 'react-native'
+import { View } from 'react-native'
 
-import { makeStyles } from 'app/styles'
+import { useBottomChinHeight } from 'app/components/core/BottomChin'
+import {
+  useGlassHeaderInset,
+  useGlassScrollHandler
+} from 'app/screens/app-screen/GlassChromeContext'
+import { spacing } from 'app/styles/spacing'
 
 import { AppDrawerContext } from '../app-drawer-screen'
 
@@ -23,11 +29,7 @@ type RenderItem = Notification | LoadingItem
 const isLoadingItem = (item: RenderItem): item is LoadingItem =>
   '_loading' in item
 
-const useStyles = makeStyles(({ spacing }) => ({
-  container: {
-    paddingBottom: spacing(30)
-  }
-}))
+const LIST_PADDING_BOTTOM = spacing(30)
 
 /**
  * Hook to handle tracking visibility for notification items, by index.
@@ -81,7 +83,9 @@ const useIsViewable = () => {
 }
 
 export const NotificationList = () => {
-  const styles = useStyles()
+  const glassHeaderInset = useGlassHeaderInset()
+  const bottomChin = useBottomChinHeight()
+  const handleGlassScroll = useGlassScrollHandler()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const { gesturesDisabled } = useContext(AppDrawerContext)
 
@@ -149,12 +153,25 @@ export const NotificationList = () => {
   )
 
   if (!isPending && !isError && notifications.length === 0) {
-    return <EmptyNotifications />
+    // Not a list, so it needs the glass-header inset applied directly.
+    return (
+      <View style={{ paddingTop: glassHeaderInset }}>
+        <EmptyNotifications />
+      </View>
+    )
   }
 
   return (
     <FlashList
-      contentContainerStyle={styles.container}
+      contentContainerStyle={{
+        paddingTop: glassHeaderInset,
+        paddingBottom: LIST_PADDING_BOTTOM + bottomChin
+      }}
+      // Keeps the pull-to-refresh spinner below the floating header rather
+      // than spinning underneath the glass.
+      progressViewOffset={glassHeaderInset}
+      onScroll={handleGlassScroll}
+      scrollEventThrottle={16}
       refreshing={isRefreshing}
       onRefresh={handleRefresh}
       data={data}

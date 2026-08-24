@@ -5,7 +5,7 @@ import { FlatList } from 'react-native'
 
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
 
-import { PlayBarChin } from './PlayBarChin'
+import { BottomChin } from './BottomChin'
 
 type BaseFlatListProps = Omit<
   FlatListProps<null>,
@@ -45,7 +45,7 @@ export const VirtualizedScrollView = forwardRef<
       data={null}
       renderItem={() => null}
       scrollIndicatorInsets={{ right: Number.MIN_VALUE }}
-      ListFooterComponent={PlayBarChin}
+      ListFooterComponent={BottomChin}
       {...other}
     />
   )

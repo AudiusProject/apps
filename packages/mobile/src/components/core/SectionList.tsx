@@ -24,7 +24,7 @@ import { useThemeColors } from 'app/utils/theme'
 
 import { CollapsibleTabNavigatorContext } from '../top-tab-bar'
 
-import { PlayBarChin } from './PlayBarChin'
+import { BottomChin } from './BottomChin'
 import { PullToRefresh, useOverflowHandlers } from './PullToRefresh'
 
 type CollapsibleSectionListProps<ItemT> = RNSectionListProps<ItemT>
@@ -181,19 +181,19 @@ export const SectionList = forwardRef(function SectionList<
   SectionT = DefaultSectionT
 >(
   props: Animated.AnimatedProps<RNSectionListProps<ItemT, SectionT>> & {
-    hidePlayBarChin?: boolean
+    hideBottomChin?: boolean
   },
   ref: Ref<RNSectionList<ItemT, SectionT>>
 ) {
-  const { ListFooterComponent, hidePlayBarChin, ...other } = props
+  const { ListFooterComponent, hideBottomChin, ...other } = props
 
   const FooterComponent = ListFooterComponent ? (
     <>
       {ListFooterComponent}
-      {hidePlayBarChin ? null : <PlayBarChin />}
+      {hideBottomChin ? null : <BottomChin />}
     </>
-  ) : hidePlayBarChin ? null : (
-    <PlayBarChin />
+  ) : hideBottomChin ? null : (
+    <BottomChin />
   )
 
   const sectionListProps = {

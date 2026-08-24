@@ -12,10 +12,14 @@ const PAGE_SIZE = 10
 
 type TrendingUndergroundLineupProps = {
   header?: SectionListProps<unknown>['ListHeaderComponent']
+  contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
+  onScroll?: SectionListProps<unknown>['onScroll']
 }
 
 export const TrendingUndergroundLineup = ({
-  header
+  header,
+  contentContainerStyle,
+  onScroll
 }: TrendingUndergroundLineupProps) => {
   const { trackIds, isPending, isFetching, hasNextPage, loadNextPage } =
     useTrendingUnderground({ pageSize: PAGE_SIZE })
@@ -42,6 +46,8 @@ export const TrendingUndergroundLineup = ({
       isTrending
       rankIconCount={5}
       header={header}
+      contentContainerStyle={contentContainerStyle}
+      onScroll={onScroll}
       itemStyles={{ paddingTop: 16, paddingBottom: 0 }}
       pullToRefresh
     />
