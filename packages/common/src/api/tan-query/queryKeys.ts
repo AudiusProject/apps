@@ -53,6 +53,7 @@ export const QUERY_KEYS = {
   trending: 'trending',
   suggestedArtists: 'suggestedArtists',
   suggestedFollows: 'suggestedFollows',
+  discoverWeekly: 'discoverWeekly',
   topArtistsInGenre: 'topArtistsInGenre',
   audioTransactions: 'audioTransactions',
   audioTransactionsCount: 'audioTransactionsCount',

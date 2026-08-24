@@ -37,6 +37,10 @@ export const RESPONSIVE_TABLE_POLICIES = {
     ['dateReleased', 'dateListened', 'time', 'reposts', 'plays'],
     ['trackName', 'trackActions']
   ),
+  discoverWeeklyTracks: makeHideOrderPolicy(
+    ['dateReleased', 'reposts', 'plays', 'time'],
+    ['trackName', 'trackActions']
+  ),
   dashboardAlbums: makeHideOrderPolicy(
     ['spacer', 'reposts', 'saves', 'dateReleased'],
     ['name', 'overflowMenu']

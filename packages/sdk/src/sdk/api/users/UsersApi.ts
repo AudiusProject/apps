@@ -23,7 +23,9 @@ import {
   DownloadUSDCWithdrawalsAsCSVRequest,
   UsersApi as GeneratedUsersApi,
   RelatedArtistResponseFromJSON,
+  TracksResponseFromJSON,
   type RelatedArtistResponse,
+  type TracksResponse,
   type UserPlaylistLibrary
 } from '../generated/default'
 import * as runtime from '../generated/default/runtime'
@@ -58,7 +60,8 @@ import {
   type UserFileUploadParams,
   type EntityManagerPlaylistLibraryContents,
   type UsersApiServicesConfig,
-  type GetSuggestedFollowsRequest
+  type GetSuggestedFollowsRequest,
+  type GetDiscoverWeeklyRequest
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
@@ -931,6 +934,70 @@ export class UsersApi extends GeneratedUsersApi {
 
     return await new runtime.JSONApiResponse(response, (jsonValue) =>
       RelatedArtistResponseFromJSON(jsonValue)
+    ).value()
+  }
+
+  /**
+   * Gets the user's Discover Weekly mix: tracks they have not heard,
+   * weighted toward artists they do not already follow. The mix is fixed for
+   * the calendar week (ISO week, UTC) and rotates when the week rolls over.
+   *
+   * Unlike `getSuggestedFollows`, this returns results for a listener with no
+   * history, so callers do not need a non-personalized fallback.
+   *
+   * Hand-written for the same reason as `getSuggestedFollows`: this endpoint
+   * is newer than the checked-in generated client. It mirrors what the
+   * generator would emit, so replacing it later is a no-op for callers.
+   */
+  async getDiscoverWeekly(
+    params: GetDiscoverWeeklyRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<TracksResponse> {
+    if (params.id === null || params.id === undefined) {
+      throw new runtime.RequiredError(
+        'id',
+        'Required parameter params.id was null or undefined when calling getDiscoverWeekly.'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (params.limit !== undefined) {
+      queryParameters.limit = params.limit
+    }
+
+    if (params.userId !== undefined) {
+      queryParameters.user_id = params.userId
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    if (
+      !headerParameters.Authorization &&
+      this.configuration &&
+      this.configuration.accessToken
+    ) {
+      const token = await this.configuration.accessToken('OAuth2', ['read'])
+      if (token) {
+        headerParameters.Authorization = token
+      }
+    }
+
+    const response = await this.request(
+      {
+        path: `/users/{id}/discover-weekly`.replace(
+          `{${'id'}}`,
+          encodeURIComponent(String(params.id))
+        ),
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters
+      },
+      initOverrides
+    )
+
+    return await new runtime.JSONApiResponse(response, (jsonValue) =>
+      TracksResponseFromJSON(jsonValue)
     ).value()
   }
 }

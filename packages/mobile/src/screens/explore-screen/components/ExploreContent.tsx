@@ -8,6 +8,7 @@ import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestSellingAlbums } from './BestSellingAlbums'
+import { DiscoverWeekly } from './DiscoverWeekly'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -30,6 +31,9 @@ export const ExploreContent = () => {
 
   return (
     <Flex gap='2xl' pt='s' pb={150} ph='l'>
+      {showTrackContent && showUserContextualContent && (
+        <DiscoverWeekly surface='explore' />
+      )}
       {showPlaylistContent && <FeaturedPlaylists />}
       {showTrackContent && <TrendingGenres />}
       {showAlbumContent && <TopAlbumsThisMonth />}

@@ -35,6 +35,7 @@ import {
   useResetGlassScroll
 } from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
+import { DiscoverWeekly } from 'app/screens/explore-screen/components/DiscoverWeekly'
 import { make, track } from 'app/services/analytics'
 
 import { FeedFilterButton } from './FeedFilterButton'
@@ -271,6 +272,7 @@ export const FeedScreen = () => {
                 source='DISCOVER_FEED'
                 pullToRefresh={false}
                 hideHeaderOnEmpty
+                header={<DiscoverWeekly surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
@@ -285,6 +287,7 @@ export const FeedScreen = () => {
                 source='DISCOVER_FEED'
                 pullToRefresh
                 hideHeaderOnEmpty
+                header={<DiscoverWeekly surface='feed' />}
                 LineupEmptyComponent={<SuggestedFollows />}
                 ListFooterComponent={
                   <EndOfLineupNotice description={messages.endOfFeed} />
