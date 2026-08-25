@@ -21,14 +21,22 @@ import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 const IOS_TINT_OPACITY = 0.72
 
 /**
- * Android does not get a real backdrop blur. `@react-native-community/blur`'s
- * Android implementation is expensive enough to drop frames on a surface that
- * is composited on every scroll frame, and the existing app-wide precedent
- * (ProfileNavOverlay) already falls back to a solid fill there. We use a high
- * -opacity tint instead: content still slides under the header, it just isn't
- * blurred while it does.
+ * Android does not get a real backdrop blur — `@react-native-community/blur`'s
+ * Android implementation is expensive enough to drop frames on a surface
+ * composited on every scroll frame — so the surface is fully opaque there,
+ * matching the existing `ProfileNavOverlay` fallback.
+ *
+ * It is opaque rather than *nearly* opaque on purpose. Translucency only reads
+ * as frost when something blurs what shows through; with no blur, whatever
+ * bleeds through keeps its edges and reads as legible ghost text sitting on
+ * top of the header. A previous 0.94 looked acceptable in light mode (~8%
+ * relative contrast) but broke badly in dark: 6% of near-white content over a
+ * near-black surface is a ~93% luminance jump, leaving track titles and play
+ * counts clearly readable behind the header. Any single alpha that suits one
+ * theme is wrong for the other, so Android trades the hint of translucency for
+ * a clean surface. Content still slides under it — it just isn't see-through.
  */
-const ANDROID_TINT_OPACITY = 0.94
+const ANDROID_TINT_OPACITY = 1
 
 /**
  * Scroll distance (px) over which the bottom edge fades from invisible to
