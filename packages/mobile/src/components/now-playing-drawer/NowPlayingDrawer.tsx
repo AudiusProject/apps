@@ -17,7 +17,15 @@ import type {
   GestureResponderEvent,
   PanResponderGestureState
 } from 'react-native'
-import { Keyboard, Platform, View, StatusBar, Pressable } from 'react-native'
+import {
+  Keyboard,
+  Platform,
+  View,
+  StatusBar,
+  Pressable,
+  StyleSheet
+} from 'react-native'
+import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TrackPlayer from 'react-native-track-player'
 import { useDispatch, useSelector } from 'react-redux'
@@ -33,6 +41,7 @@ import { useDrawer } from 'app/hooks/useDrawer'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
 import { AppTabNavigationContext } from 'app/screens/app-screen'
+import { useTabBarHiddenProgress } from 'app/screens/app-screen/TabBarAutoHideContext'
 import { makeStyles } from 'app/styles'
 import { zIndex } from 'app/utils/zIndex'
 
@@ -110,6 +119,7 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const styles = useStyles()
 
   const { isOpen, onOpen, onClose } = useDrawer('NowPlaying')
+  const tabBarHidden = useTabBarHiddenProgress()
   // Defer to the comments bottom-sheet while it's presented: its swipe-to-dismiss
   // gesture would otherwise leak through and also close this drawer underneath.
   const { isOpen: isCommentDrawerOpen } = useCommentDrawer()
@@ -169,6 +179,31 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   const effectiveTopInset =
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
   const effectiveBottomInset = isOpen && isDrawerFullyOpen ? 0 : insets.bottom
+
+  // Travel with the bottom tab bar so the bottom chrome moves as one unit.
+  // The collapsed drawer rests `BOTTOM_BAR_HEIGHT + PLAY_BAR_HEIGHT` off the
+  // bottom, so once the tab bar floats away the play bar would otherwise hang
+  // there with an empty band beneath it.
+  //
+  // This moves the whole drawer rather than just the play bar inside it: the
+  // white surface behind the play bar belongs to the drawer root, so
+  // translating only its contents slides the bar off a background that stays
+  // put, leaving an empty white block. Pinned to 0 while open, since the same
+  // drawer is the full-screen player and translating that would drag the
+  // expanded player off screen with it.
+  const chromeHideStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          translateY: isOpen
+            ? 0
+            : (PLAY_BAR_HEIGHT + BOTTOM_BAR_HEIGHT + insets.bottom) *
+              tabBarHidden.value
+        }
+      ]
+    }),
+    [isOpen, insets.bottom]
+  )
 
   useEffect(() => {
     if (
@@ -281,79 +316,94 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   }, [onClose, navigation, trackId])
 
   return (
-    <Drawer
-      // Appears below bottom bar whereas normally drawers appear above
-      zIndex={zIndex.NOW_PLAYING_DRAWER}
-      isOpen={isOpen}
-      onClose={onClose}
-      onOpen={onDrawerOpen}
-      initialOffsetPosition={BOTTOM_BAR_HEIGHT + PLAY_BAR_HEIGHT}
-      shouldCloseToInitialOffset={isPlayBarShowing}
-      animationStyle={DrawerAnimationStyle.SPRINGY}
-      shouldBackgroundDim={false}
-      shouldShowShadow={!isInChatScreen}
-      shouldAnimateShadow={false}
-      drawerStyle={{ overflow: 'visible' }}
-      onPercentOpen={onDrawerPercentOpen}
-      onPanResponderMove={onPanResponderMove}
-      onPanResponderRelease={onPanResponderRelease}
-      isGestureSupported={isGestureEnabled}
-      gesturesDisabled={isCommentDrawerOpen}
-      translationAnim={translationAnim}
-      // Disable safe area view edges because they are handled manually
-      disableSafeAreaView
+    // Wrapping the drawer creates a new stacking context, so its own z-order
+    // has to be restated out here. `box-none` keeps the full-screen wrapper
+    // from swallowing touches meant for the screen behind it.
+    <Reanimated.View
+      pointerEvents='box-none'
+      style={[
+        StyleSheet.absoluteFill,
+        { zIndex: zIndex.NOW_PLAYING_DRAWER },
+        chromeHideStyle
+      ]}
     >
-      <View
-        style={[
-          styles.container,
-          { paddingTop: effectiveTopInset, paddingBottom: effectiveBottomInset }
-        ]}
+      <Drawer
+        // Appears below bottom bar whereas normally drawers appear above
+        zIndex={zIndex.NOW_PLAYING_DRAWER}
+        isOpen={isOpen}
+        onClose={onClose}
+        onOpen={onDrawerOpen}
+        initialOffsetPosition={BOTTOM_BAR_HEIGHT + PLAY_BAR_HEIGHT}
+        shouldCloseToInitialOffset={isPlayBarShowing}
+        animationStyle={DrawerAnimationStyle.SPRINGY}
+        shouldBackgroundDim={false}
+        shouldShowShadow={!isInChatScreen}
+        shouldAnimateShadow={false}
+        drawerStyle={{ overflow: 'visible' }}
+        onPercentOpen={onDrawerPercentOpen}
+        onPanResponderMove={onPanResponderMove}
+        onPanResponderRelease={onPanResponderRelease}
+        isGestureSupported={isGestureEnabled}
+        gesturesDisabled={isCommentDrawerOpen}
+        translationAnim={translationAnim}
+        // Disable safe area view edges because they are handled manually
+        disableSafeAreaView
       >
-        <View style={styles.playBarContainer}>
-          <PlayBar
-            mediaKey={`${mediaKey}`}
-            duration={trackDuration}
-            track={track}
-            user={user}
-            onPress={onDrawerOpen}
-            translationAnim={translationAnim}
-          />
-        </View>
-        <Logo translationAnim={translationAnim} />
-        <View style={styles.titleBarContainer}>
-          <TitleBar onClose={onClose} />
-        </View>
-        <Pressable onPress={handlePressTitle} style={styles.artworkContainer}>
-          <Artwork track={track} />
-        </Pressable>
-        <View style={styles.trackInfoContainer}>
-          <TrackInfo
-            onPressTitle={handlePressTitle}
-            track={track}
-            user={user}
-          />
-        </View>
-        <View style={styles.scrubberContainer}>
-          <Scrubber
-            mediaKey={`${mediaKey}`}
-            isPlaying={isPlaying && !isBuffering}
-            onPressIn={onPressScrubberIn}
-            onPressOut={onPressScrubberOut}
-            duration={trackDuration}
-          />
-        </View>
-        <View style={styles.controlsContainer}>
-          <AudioControls
-            onNext={onNext}
-            onPrevious={onPrevious}
-            isLongFormContent={
-              track?.genre === Genre.Podcasts ||
-              track?.genre === Genre.Audiobooks
+        <View
+          style={[
+            styles.container,
+            {
+              paddingTop: effectiveTopInset,
+              paddingBottom: effectiveBottomInset
             }
-          />
-          <ActionsBar track={track} />
+          ]}
+        >
+          <View style={styles.playBarContainer}>
+            <PlayBar
+              mediaKey={`${mediaKey}`}
+              duration={trackDuration}
+              track={track}
+              user={user}
+              onPress={onDrawerOpen}
+              translationAnim={translationAnim}
+            />
+          </View>
+          <Logo translationAnim={translationAnim} />
+          <View style={styles.titleBarContainer}>
+            <TitleBar onClose={onClose} />
+          </View>
+          <Pressable onPress={handlePressTitle} style={styles.artworkContainer}>
+            <Artwork track={track} />
+          </Pressable>
+          <View style={styles.trackInfoContainer}>
+            <TrackInfo
+              onPressTitle={handlePressTitle}
+              track={track}
+              user={user}
+            />
+          </View>
+          <View style={styles.scrubberContainer}>
+            <Scrubber
+              mediaKey={`${mediaKey}`}
+              isPlaying={isPlaying && !isBuffering}
+              onPressIn={onPressScrubberIn}
+              onPressOut={onPressScrubberOut}
+              duration={trackDuration}
+            />
+          </View>
+          <View style={styles.controlsContainer}>
+            <AudioControls
+              onNext={onNext}
+              onPrevious={onPrevious}
+              isLongFormContent={
+                track?.genre === Genre.Podcasts ||
+                track?.genre === Genre.Audiobooks
+              }
+            />
+            <ActionsBar track={track} />
+          </View>
         </View>
-      </View>
-    </Drawer>
+      </Drawer>
+    </Reanimated.View>
   )
 })
