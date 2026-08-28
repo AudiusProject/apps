@@ -216,6 +216,7 @@ export function* fetchAccountAsync({
         reason: 'ACCOUNT_DEACTIVATED'
       })
     )
+    return
   }
 
   const guestEmailFromLocalStorage = yield* call(
