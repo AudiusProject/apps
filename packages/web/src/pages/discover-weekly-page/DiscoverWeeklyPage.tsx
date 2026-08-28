@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useCurrentUserId, useDiscoverWeekly } from '@audius/common/api'
-import { useAnalytics } from '@audius/common/hooks'
+import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
 import { ID, Name, PlaybackSource } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
+import { route } from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -15,6 +17,7 @@ import {
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
+import { Navigate } from 'react-router'
 
 import discoverWeeklyArt from 'assets/img/discoverWeekly.jpg'
 import { make } from 'common/store/analytics/actions'
@@ -29,6 +32,8 @@ const messages = {
   description:
     'A fresh mix of tracks picked for you, updated every Monday on Audius.'
 }
+
+const { EXPLORE_PAGE } = route
 
 const DISCOVER_WEEKLY_SOURCE = 'DISCOVER_WEEKLY_TRACKS'
 const PAGE_SIZE = 30
@@ -61,9 +66,16 @@ export const DiscoverWeeklyPage = () => {
   const mainContentRef = useMainContentRef()
   const { data: currentUserId } = useCurrentUserId()
 
-  const { trackIds, isPending, isFetching, isLoading } = useDiscoverWeekly({
-    limit: PAGE_SIZE
-  })
+  // The route stays registered while the flag is off -- the URL is public and
+  // shareable, so a link that predates the rollout should land somewhere real
+  // rather than 404.
+  const { isEnabled: isDiscoverWeeklyEnabled, isLoaded: isFlagLoaded } =
+    useFeatureFlag(FeatureFlags.DISCOVER_WEEKLY)
+
+  const { trackIds, isPending, isFetching, isLoading } = useDiscoverWeekly(
+    { limit: PAGE_SIZE },
+    { enabled: isDiscoverWeeklyEnabled }
+  )
 
   // Fired once the mix resolves rather than on mount, so trackCount is real
   // and a failed load doesn't register as a page view.
@@ -139,6 +151,11 @@ export const DiscoverWeeklyPage = () => {
   ])
 
   const isEmpty = !isLoading && trackIds.length === 0
+
+  // Nothing until remote config resolves, so an enabled user doesn't get
+  // bounced to Explore on the first frame.
+  if (!isFlagLoaded) return null
+  if (!isDiscoverWeeklyEnabled) return <Navigate to={EXPLORE_PAGE} replace />
 
   return (
     <Page title={messages.title} description={messages.description}>

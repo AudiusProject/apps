@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import { useDiscoverWeekly } from '@audius/common/api'
-import { useAnalytics } from '@audius/common/hooks'
+import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { Name, type DiscoverWeeklySurface } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { Image } from 'react-native'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
@@ -33,9 +34,12 @@ export const DiscoverWeekly = ({
   const { InViewWrapper, inView } = useExploreSectionTracking('Discover Weekly')
   const navigation = useNavigation()
   const { trackEvent } = useAnalytics()
+  const { isEnabled: isDiscoverWeeklyEnabled } = useFeatureFlag(
+    FeatureFlags.DISCOVER_WEEKLY
+  )
   const { trackIds, isError, isSuccess } = useDiscoverWeekly(
     { limit: 30 },
-    { enabled: inView }
+    { enabled: inView && isDiscoverWeeklyEnabled }
   )
 
   // Fire the impression once, and only once there's a real mix behind it.
@@ -61,7 +65,13 @@ export const DiscoverWeekly = ({
     navigation.navigate('DiscoverWeeklyScreen')
   }, [navigation, trackEvent, surface, trackIds.length])
 
-  if (isError || (isSuccess && trackIds.length === 0)) {
+  // The flag check sits with the empty/error case so both surfaces that render
+  // this banner -- Explore and the feed -- are gated by this one return.
+  if (
+    !isDiscoverWeeklyEnabled ||
+    isError ||
+    (isSuccess && trackIds.length === 0)
+  ) {
     return null
   }
 
