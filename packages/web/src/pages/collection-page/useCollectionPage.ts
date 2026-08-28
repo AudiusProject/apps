@@ -161,7 +161,11 @@ export const useCollectionPage = (
           kind: Kind.TRACKS,
           id: trackId,
           uid: makeStableUid(Kind.TRACKS, trackId, COLLECTION_TRACKS_SOURCE),
-          dateAdded: dayjs.unix(time)
+          // `time` is 0 for entries whose added-timestamp was never written to
+          // playlist_contents. `dayjs.unix(0)` renders as 12/31/69 and, being a
+          // truthy object, also defeats the `dateAdded || created_at` fallback
+          // downstream — so fall back to the track's creation date here.
+          dateAdded: time ? dayjs.unix(time) : dayjs(t.created_at)
         } as CollectionTrack
       })
       .filter((e): e is CollectionTrack => e !== null)
