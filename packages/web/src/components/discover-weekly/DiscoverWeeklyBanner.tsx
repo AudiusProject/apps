@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useDiscoverWeekly } from '@audius/common/api'
-import { useAnalytics } from '@audius/common/hooks'
+import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { Name, type DiscoverWeeklySurface } from '@audius/common/models'
+import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import {
   Artwork,
@@ -53,9 +54,13 @@ export const DiscoverWeeklyBanner = ({
     fallbackInView: true
   })
 
+  const { isEnabled: isDiscoverWeeklyEnabled } = useFeatureFlag(
+    FeatureFlags.DISCOVER_WEEKLY
+  )
+
   const { trackIds, isError, isSuccess } = useDiscoverWeekly(
     { limit: 30 },
-    { enabled: inView }
+    { enabled: inView && isDiscoverWeeklyEnabled }
   )
 
   // Fire the impression once, and only once there's a real mix behind it --
@@ -84,8 +89,13 @@ export const DiscoverWeeklyBanner = ({
   }, [navigate, trackEvent, surface, isMobile, trackIds.length])
 
   // Hidden entirely when there's no mix to promote -- a banner advertising an
-  // empty page is worse than no banner.
-  if (isError || (isSuccess && trackIds.length === 0)) {
+  // empty page is worse than no banner. The flag check sits alongside it so
+  // every surface that renders the banner is gated by this one return.
+  if (
+    !isDiscoverWeeklyEnabled ||
+    isError ||
+    (isSuccess && trackIds.length === 0)
+  ) {
     return null
   }
 
