@@ -95,48 +95,52 @@ export const DiscoverWeeklyScreen = () => {
     })
   }, [trackIds.length, trackEvent])
 
+  const header = (
+    <Flex ph='l' pt='l'>
+      <Paper row gap='l' alignItems='center' p='l'>
+        <Image
+          source={discoverWeeklyArt}
+          style={{ width: ART_SIZE, height: ART_SIZE, borderRadius: 8 }}
+        />
+        <Flex column gap='xs' style={{ flex: 1 }}>
+          <Text variant='title' size='l'>
+            {exploreMessages.discoverWeekly}
+          </Text>
+          <Text variant='body' size='s' color='subdued'>
+            {exploreMessages.discoverWeeklySubtitle}
+          </Text>
+          {trackIds.length ? (
+            <Text variant='body' size='s' color='subdued'>
+              {exploreMessages.discoverWeeklyTrackCount(trackIds.length)}
+            </Text>
+          ) : null}
+          <Button
+            variant='primary'
+            size='small'
+            iconLeft={isPlaying ? IconPause : IconPlay}
+            onPress={handlePlay}
+            disabled={!trackIds.length}
+          >
+            {isPlaying ? 'Pause' : 'Play'}
+          </Button>
+        </Flex>
+      </Paper>
+    </Flex>
+  )
+
   return (
     <Screen title={messages.title} topbarRight={null} variant='secondary'>
       <ScreenContent>
-        <Paper m='l' gap='l' h='100%'>
-          <Flex row gap='l' alignItems='center' p='l'>
-            <Image
-              source={discoverWeeklyArt}
-              style={{ width: ART_SIZE, height: ART_SIZE, borderRadius: 8 }}
-            />
-            <Flex column gap='xs' style={{ flex: 1 }}>
-              <Text variant='title' size='l'>
-                {exploreMessages.discoverWeekly}
-              </Text>
-              <Text variant='body' size='s' color='subdued'>
-                {exploreMessages.discoverWeeklySubtitle}
-              </Text>
-              {trackIds.length ? (
-                <Text variant='body' size='s' color='subdued'>
-                  {exploreMessages.discoverWeeklyTrackCount(trackIds.length)}
-                </Text>
-              ) : null}
-              <Button
-                variant='primary'
-                size='small'
-                iconLeft={isPlaying ? IconPause : IconPlay}
-                onPress={handlePlay}
-                disabled={!trackIds.length}
-              >
-                {isPlaying ? 'Pause' : 'Play'}
-              </Button>
-            </Flex>
-          </Flex>
-          <TrackLineup
-            trackIds={trackIds}
-            source='DISCOVER_WEEKLY_TRACKS'
-            isPending={isPending}
-            isFetching={isFetching}
-            hasNextPage={false}
-            loadNextPage={() => {}}
-            pageSize={30}
-          />
-        </Paper>
+        <TrackLineup
+          trackIds={trackIds}
+          source={DISCOVER_WEEKLY_SOURCE}
+          isPending={isPending}
+          isFetching={isFetching}
+          hasNextPage={false}
+          loadNextPage={() => {}}
+          pageSize={30}
+          header={header}
+        />
       </ScreenContent>
     </Screen>
   )
