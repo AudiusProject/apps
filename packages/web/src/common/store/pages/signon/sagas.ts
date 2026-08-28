@@ -839,6 +839,10 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       yield* put(
         make(Name.SIGN_IN_WITH_DEACTIVATED_ACCOUNT, { handle: user.handle })
       )
+      // The hedgehog login above already persisted a session. Clear it, or a
+      // refresh will restore the deactivated account via fetchAccount.
+      const authService = yield* getContext('authService')
+      yield* call([authService, authService.signOut])
       yield* put(signOnActions.signInFailed('Account is deactivated'))
       yield* put(toastActions.toast({ content: messages.deactivatedAccount }))
       return
