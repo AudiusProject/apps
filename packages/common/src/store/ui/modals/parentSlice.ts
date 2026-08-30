@@ -87,7 +87,8 @@ export const initialState: BasicModalsState = {
   VerificationSuccess: { isOpen: false },
   VerificationError: { isOpen: false },
   CreatePlaylistModal: { isOpen: false },
-  DuplicatePlaylistModal: { isOpen: false }
+  DuplicatePlaylistModal: { isOpen: false },
+  AddTracksByUrlModal: { isOpen: false }
 }
 
 const slice = createSlice({
