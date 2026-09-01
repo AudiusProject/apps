@@ -1,5 +1,25 @@
 # @audius/sdk
 
+## 17.0.0
+
+### Major Changes
+
+- 5714430: Audio uploads and preview generation now carry the id of the user they are made for. Validator nodes attest the resulting cids to that user on chain, which is what makes them claimable on a track once content authorization is enforced; `generate_preview` additionally refuses users that do not already claim the source audio.
+
+  BREAKING: `userId` (encoded id) is now required on `tracks.uploadTrackFiles` and `uploads.createAudioUpload`, and `Storage.generatePreview` requires a decoded `userId`. The high-level methods (`createTrack`, `updateTrack`, `uploadTrack`, `publishTrack`) already required `userId` and now thread it through automatically — callers of those need no changes. The id is always explicit, never derived from auth state, because a manager or developer-app session can act for more than one user.
+
+  No signature or wallet is involved: the id is an assertion, and ownership is enforced where it always was — in the signed entity-manager write that names a cid on a track.
+
+### Minor Changes
+
+- 02ee302: Add `users.getWeeklyRotation`, a hand-written client for `GET /v1/users/{id}/weekly-rotation` — a personalized weekly track mix that is stable for the ISO week. This method has not appeared in a published release before; it was briefly named `getDiscoverWeekly` on `main` only.
+
+### Patch Changes
+
+- 294f53d: Remove `totalVolumeUSD` from the `Coin` model. The `/v1/coins` endpoint no longer returns this field.
+- 075329a: Remove unused EIP-712 `domains`, `types`, and `generators` exports from the internal `signatureSchemas` module and rename what remains (`getNonce`) to `nonce.ts`. None of the removed definitions were reachable from the public SDK entry point, so this is not a breaking change.
+- 4c4b321: Add `permalink` to the `Event` model, syncing the generated SDK with the current API (the `/v1/events` response now returns a canonical contest permalink).
+
 ## 16.0.0
 
 ### Major Changes
