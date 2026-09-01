@@ -14,7 +14,8 @@ import {
   gatedContentSelectors,
   confirmerActions,
   modalsActions,
-  getSDK
+  getSDK,
+  downloadsActions
 } from '@audius/common/store'
 import {
   formatShareText,
@@ -689,6 +690,19 @@ function* downloadTracks({
         (e as Error).message
       }. Error: ${e}`
     )
+    // Dispatch the error so the WaitForDownloadModal surfaces it instead of
+    // spinning forever. This covers failures that happen before reaching
+    // trackDownload.downloadTracks (e.g. getTrackDownloadUrl throwing on a
+    // stem whose download URL is broken). track-download.ts handles its own
+    // errors and dispatches setDownloadError there too; double-dispatching
+    // is harmless — the reducer just overwrites with the same error state.
+    if ((e as Error).name !== 'AbortError') {
+      yield* put(
+        downloadsActions.setDownloadError(
+          e instanceof Error ? e : new Error(`Download failed: ${e}`)
+        )
+      )
+    }
   }
 }
 
@@ -710,25 +724,51 @@ function* watchDownloadTrack() {
           console.error(
             `Failed to download because no mainTrack ${mainTrackId}`
           )
+          yield* put(
+            downloadsActions.setDownloadError(
+              new Error(`Track ${mainTrackId} not found`)
+            )
+          )
           return
         }
         const userId = mainTrack?.owner_id
         const user = yield* queryUser(userId)
         if (!user) {
           console.error(`Failed to download because no user ${userId}`)
+          yield* put(
+            downloadsActions.setDownloadError(
+              new Error(`User ${userId} not found`)
+            )
+          )
           return
         }
         const rootDirectoryName = `${user.name} - ${mainTrack.title} (Audius)`
         // Mobile typecheck complains if this array isn't typed
         const tracks: { trackId: ID; filename: string }[] = []
 
-        for (const trackId of [...trackIds, parentTrackId].filter(
-          removeNullable
-        )) {
+        // Dedupe and skip non-downloadable parent. Appending parentTrackId
+        // lets the archive include the full track alongside stems, but if the
+        // parent is not downloadable its URL 404s and stalls the whole batch.
+        // Using a Set removes duplicates when parentTrackId is already in
+        // trackIds (e.g. single-file downloads from the track page).
+        const idsToDownload = [
+          ...new Set([
+            ...trackIds,
+            ...(parentTrackId != null && mainTrack.is_downloadable
+              ? [parentTrackId]
+              : [])
+          ])
+        ]
+        for (const trackId of idsToDownload) {
           const track = yield* queryTrack(trackId)
           if (!track) {
             console.error(
               `Skipping individual download because no track ${trackId}`
+            )
+            yield* put(
+              downloadsActions.setDownloadError(
+                new Error(`Track ${trackId} not found`)
+              )
             )
             return
           }
@@ -744,6 +784,14 @@ function* watchDownloadTrack() {
           })
         }
 
+        if (tracks.length === 0) {
+          yield* put(
+            downloadsActions.setDownloadError(
+              new Error('No downloadable files found')
+            )
+          )
+          return
+        }
         yield* call(downloadTracks, {
           tracks,
           original,

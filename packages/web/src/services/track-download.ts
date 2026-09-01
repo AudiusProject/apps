@@ -46,7 +46,10 @@ class TrackDownload extends TrackDownloadBase {
     abortSignal,
     dispatch
   }: DownloadTrackArgs) {
-    if (files.length === 0) return
+    if (files.length === 0) {
+      dispatch(setDownloadError(new Error('No downloadable files found')))
+      return
+    }
 
     dispatch(beginDownload())
 
