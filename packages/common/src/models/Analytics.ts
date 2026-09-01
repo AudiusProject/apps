@@ -263,11 +263,11 @@ export enum Name {
   EXPLORE_SECTION_VIEW = 'Explore: Section View',
   EXPLORE_SECTION_CLICK = 'Explore: Section Click',
 
-  // Discover Weekly
-  DISCOVER_WEEKLY_BANNER_VIEW = 'Discover Weekly: Banner View',
-  DISCOVER_WEEKLY_BANNER_CLICK = 'Discover Weekly: Banner Click',
-  DISCOVER_WEEKLY_PAGE_VIEW = 'Discover Weekly: Page View',
-  DISCOVER_WEEKLY_PLAY_ALL = 'Discover Weekly: Play All',
+  // Weekly Rotation
+  WEEKLY_ROTATION_BANNER_VIEW = 'Weekly Rotation: Banner View',
+  WEEKLY_ROTATION_BANNER_CLICK = 'Weekly Rotation: Banner Click',
+  WEEKLY_ROTATION_PAGE_VIEW = 'Weekly Rotation: Page View',
+  WEEKLY_ROTATION_PLAY_ALL = 'Weekly Rotation: Play All',
 
   // Errors
   ERROR_PAGE = 'Error Page',
@@ -1318,7 +1318,7 @@ export type ExploreSectionName =
   | 'Recommended Tracks'
   | 'Artist Coin Tracks'
   | 'Recently Played'
-  | 'Discover Weekly'
+  | 'Weekly Rotation'
   | 'Quick Search'
   | 'Featured Playlists'
   | 'Fan Clubs'
@@ -1356,33 +1356,33 @@ type ExploreSectionClick = {
 
 /**
  * Surface the banner was rendered on. The mix is reachable from more than one
- * place, so every Discover Weekly event carries this -- otherwise there's no
+ * place, so every Weekly Rotation event carries this -- otherwise there's no
  * way to tell which entry point is actually driving listens.
  */
-export type DiscoverWeeklySurface = 'explore' | 'feed'
+export type WeeklyRotationSurface = 'explore' | 'feed'
 
-type DiscoverWeeklyBannerView = {
-  eventName: Name.DISCOVER_WEEKLY_BANNER_VIEW
-  surface: DiscoverWeeklySurface
+type WeeklyRotationBannerView = {
+  eventName: Name.WEEKLY_ROTATION_BANNER_VIEW
+  surface: WeeklyRotationSurface
   source: 'web' | 'mobile'
   trackCount: number
 }
 
-type DiscoverWeeklyBannerClick = {
-  eventName: Name.DISCOVER_WEEKLY_BANNER_CLICK
-  surface: DiscoverWeeklySurface
+type WeeklyRotationBannerClick = {
+  eventName: Name.WEEKLY_ROTATION_BANNER_CLICK
+  surface: WeeklyRotationSurface
   source: 'web' | 'mobile'
   trackCount: number
 }
 
-type DiscoverWeeklyPageView = {
-  eventName: Name.DISCOVER_WEEKLY_PAGE_VIEW
+type WeeklyRotationPageView = {
+  eventName: Name.WEEKLY_ROTATION_PAGE_VIEW
   source: 'web' | 'mobile'
   trackCount: number
 }
 
-type DiscoverWeeklyPlayAll = {
-  eventName: Name.DISCOVER_WEEKLY_PLAY_ALL
+type WeeklyRotationPlayAll = {
+  eventName: Name.WEEKLY_ROTATION_PLAY_ALL
   source: 'web' | 'mobile'
   trackCount: number
 }
@@ -2762,10 +2762,10 @@ export type AllTrackingEvents =
   | SearchResultSelect
   | ExploreSectionView
   | ExploreSectionClick
-  | DiscoverWeeklyBannerView
-  | DiscoverWeeklyBannerClick
-  | DiscoverWeeklyPageView
-  | DiscoverWeeklyPlayAll
+  | WeeklyRotationBannerView
+  | WeeklyRotationBannerClick
+  | WeeklyRotationPageView
+  | WeeklyRotationPlayAll
   | ErrorPage
   | NotFoundPage
   | PageView

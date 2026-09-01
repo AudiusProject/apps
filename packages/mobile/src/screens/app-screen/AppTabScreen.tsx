@@ -39,7 +39,6 @@ import {
 } from 'app/screens/coin-details-screen'
 import { CoinRedeemScreen } from 'app/screens/coin-redeem-screen'
 import { CollectionScreen } from 'app/screens/collection-screen/CollectionScreen'
-import { DiscoverWeeklyScreen } from 'app/screens/discover-weekly-screen'
 import { EditProfileScreen } from 'app/screens/edit-profile-screen'
 import { ProfileScreen } from 'app/screens/profile-screen'
 import { RewardsScreen } from 'app/screens/rewards-screen'
@@ -67,6 +66,7 @@ import {
   CoinLeaderboardScreen
 } from 'app/screens/user-list-screen'
 import { WalletScreen } from 'app/screens/wallet-screen'
+import { WeeklyRotationScreen } from 'app/screens/weekly-rotation-screen'
 
 import { ContestFollowersScreen, ContestScreen } from '../contest-screen'
 import { ContestsScreen } from '../contests-screen'
@@ -111,7 +111,7 @@ export type AppTabScreenParamList = {
   SettingsScreen: undefined
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
-  DiscoverWeeklyScreen: undefined
+  WeeklyRotationScreen: undefined
   AccountSettingsScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined
@@ -320,8 +320,8 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
           component={FanClubsExploreScreen}
         />
         <Stack.Screen
-          name='DiscoverWeeklyScreen'
-          component={DiscoverWeeklyScreen}
+          name='WeeklyRotationScreen'
+          component={WeeklyRotationScreen}
         />
         <Stack.Screen name='FanClubSort' component={FanClubSortScreen} />
 

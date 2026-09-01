@@ -27,13 +27,13 @@ export const exploreMessages = {
   feelingLucky: 'Feeling Lucky?',
   imFeelingLucky: "I'm Feeling Lucky",
   recentlyPlayed: 'Recently Played',
-  discoverWeekly: 'Your Discover Weekly',
-  discoverWeeklySubtitle: 'Updated every Monday',
-  discoverWeeklyBadge: 'New',
-  discoverWeeklyPitch:
+  weeklyRotation: 'Your Weekly Rotation',
+  weeklyRotationSubtitle: 'Updated every Monday',
+  weeklyRotationBadge: 'New',
+  weeklyRotationPitch:
     'A fresh mix of tracks picked just for you. Updated every Monday.',
-  discoverWeeklyCta: 'Listen Now',
-  discoverWeeklyTrackCount: (count: number) =>
+  weeklyRotationCta: 'Listen Now',
+  weeklyRotationTrackCount: (count: number) =>
     `${count} ${count === 1 ? 'track' : 'tracks'}`,
   undergroundTrending: 'Underground Trending',
   verified: 'Verified'

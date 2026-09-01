@@ -17,20 +17,20 @@ const DEFAULT_LIMIT = 30
 // failure or an empty response doesn't stick for the whole session.
 const STALE_TIME_MS = 30 * 60 * 1000
 
-export type UseDiscoverWeeklyArgs = {
+export type UseWeeklyRotationArgs = {
   limit?: number
 }
 
-export const getDiscoverWeeklyQueryKey = ({
+export const getWeeklyRotationQueryKey = ({
   userId,
   limit = DEFAULT_LIMIT
-}: UseDiscoverWeeklyArgs & { userId: ID | null | undefined }) =>
-  [QUERY_KEYS.discoverWeekly, userId, { limit }] as unknown as QueryKey<
+}: UseWeeklyRotationArgs & { userId: ID | null | undefined }) =>
+  [QUERY_KEYS.weeklyRotation, userId, { limit }] as unknown as QueryKey<
     LineupData[]
   >
 
 /**
- * The current user's Discover Weekly mix: tracks they haven't heard, weighted
+ * The current user's Weekly Rotation mix: tracks they haven't heard, weighted
  * toward artists they don't already follow.
  *
  * Deliberately a plain `useQuery` rather than an infinite one — the mix is a
@@ -43,8 +43,8 @@ export const getDiscoverWeeklyQueryKey = ({
  * empty result stayed hidden until the app restarted. A bounded staleTime keeps
  * the request count low while still letting a bad result heal.
  */
-export const useDiscoverWeekly = (
-  { limit = DEFAULT_LIMIT }: UseDiscoverWeeklyArgs = {},
+export const useWeeklyRotation = (
+  { limit = DEFAULT_LIMIT }: UseWeeklyRotationArgs = {},
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
@@ -52,10 +52,10 @@ export const useDiscoverWeekly = (
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    queryKey: getDiscoverWeeklyQueryKey({ userId: currentUserId, limit }),
+    queryKey: getWeeklyRotationQueryKey({ userId: currentUserId, limit }),
     queryFn: async () => {
       const sdk = await audiusSdk()
-      const { data = [] } = await sdk.users.getDiscoverWeekly({
+      const { data = [] } = await sdk.users.getWeeklyRotation({
         id: Id.parse(currentUserId),
         limit,
         userId: OptionalId.parse(currentUserId)

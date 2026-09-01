@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useDiscoverWeekly } from '@audius/common/api'
+import { useWeeklyRotation } from '@audius/common/api'
 import { useAnalytics } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
@@ -18,26 +18,26 @@ import {
   Paper,
   Text
 } from '@audius/harmony-native'
-import discoverWeeklyArt from 'app/assets/images/discoverWeekly.jpg'
+import weeklyRotationArt from 'app/assets/images/weeklyRotation.jpg'
 import { Screen, ScreenContent } from 'app/components/core'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
 
 const messages = {
-  title: 'Discover Weekly'
+  title: 'Weekly Rotation'
 }
 
 const ART_SIZE = 120
-const DISCOVER_WEEKLY_SOURCE = 'DISCOVER_WEEKLY_TRACKS'
+const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
 
 /**
- * The full Discover Weekly mix. Mirrors the web page: artwork header, then the
+ * The full Weekly Rotation mix. Mirrors the web page: artwork header, then the
  * track list.
  *
  * The endpoint returns a fixed 30, so there is no pagination -- hasNextPage is
  * false and loadNextPage is a no-op.
  */
-export const DiscoverWeeklyScreen = () => {
-  const { trackIds, isPending, isFetching } = useDiscoverWeekly({ limit: 30 })
+export const WeeklyRotationScreen = () => {
+  const { trackIds, isPending, isFetching } = useWeeklyRotation({ limit: 30 })
   const { trackEvent } = useAnalytics()
   const dispatch = useDispatch()
 
@@ -50,7 +50,7 @@ export const DiscoverWeeklyScreen = () => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: DISCOVER_WEEKLY_SOURCE
+        source: WEEKLY_ROTATION_SOURCE
       })),
     [trackIds]
   )
@@ -69,7 +69,7 @@ export const DiscoverWeeklyScreen = () => {
     }
 
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_PLAY_ALL,
+      eventName: Name.WEEKLY_ROTATION_PLAY_ALL,
       source: 'mobile',
       trackCount: playbackQueue.length
     })
@@ -89,7 +89,7 @@ export const DiscoverWeeklyScreen = () => {
     if (hasTrackedView.current || !trackIds.length) return
     hasTrackedView.current = true
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_PAGE_VIEW,
+      eventName: Name.WEEKLY_ROTATION_PAGE_VIEW,
       source: 'mobile',
       trackCount: trackIds.length
     })
@@ -99,19 +99,19 @@ export const DiscoverWeeklyScreen = () => {
     <Flex ph='l' pt='l'>
       <Paper row gap='l' alignItems='center' p='l'>
         <Image
-          source={discoverWeeklyArt}
+          source={weeklyRotationArt}
           style={{ width: ART_SIZE, height: ART_SIZE, borderRadius: 8 }}
         />
         <Flex column gap='xs' style={{ flex: 1 }}>
           <Text variant='title' size='l'>
-            {exploreMessages.discoverWeekly}
+            {exploreMessages.weeklyRotation}
           </Text>
           <Text variant='body' size='s' color='subdued'>
-            {exploreMessages.discoverWeeklySubtitle}
+            {exploreMessages.weeklyRotationSubtitle}
           </Text>
           {trackIds.length ? (
             <Text variant='body' size='s' color='subdued'>
-              {exploreMessages.discoverWeeklyTrackCount(trackIds.length)}
+              {exploreMessages.weeklyRotationTrackCount(trackIds.length)}
             </Text>
           ) : null}
           <Button
@@ -133,7 +133,7 @@ export const DiscoverWeeklyScreen = () => {
       <ScreenContent>
         <TrackLineup
           trackIds={trackIds}
-          source={DISCOVER_WEEKLY_SOURCE}
+          source={WEEKLY_ROTATION_SOURCE}
           isPending={isPending}
           isFetching={isFetching}
           hasNextPage={false}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useCurrentUserId, useDiscoverWeekly } from '@audius/common/api'
+import { useCurrentUserId, useWeeklyRotation } from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
 import { ID, Name, PlaybackSource } from '@audius/common/models'
@@ -19,7 +19,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate } from 'react-router'
 
-import discoverWeeklyArt from 'assets/img/discoverWeekly.jpg'
+import weeklyRotationArt from 'assets/img/weeklyRotation.jpg'
 import { make } from 'common/store/analytics/actions'
 import Page from 'components/page/Page'
 import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
@@ -28,14 +28,14 @@ import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
 
 const messages = {
-  title: 'Discover Weekly',
+  title: 'Weekly Rotation',
   description:
     'A fresh mix of tracks picked for you, updated every Monday on Audius.'
 }
 
 const { EXPLORE_PAGE } = route
 
-const DISCOVER_WEEKLY_SOURCE = 'DISCOVER_WEEKLY_TRACKS'
+const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
 const PAGE_SIZE = 30
 const ARTWORK_SIZE = 200
 
@@ -49,7 +49,7 @@ const columns: TracksTableColumn[] = [
 ]
 
 /**
- * The full Discover Weekly mix.
+ * The full Weekly Rotation mix.
  *
  * Structured like a collection page -- artwork, title, play-all, track list --
  * but it isn't backed by a collection entity, so it's assembled from the same
@@ -59,7 +59,7 @@ const columns: TracksTableColumn[] = [
  *
  * The endpoint returns a fixed 30, so there is no pagination.
  */
-export const DiscoverWeeklyPage = () => {
+export const WeeklyRotationPage = () => {
   const dispatch = useDispatch()
   const isMobile = useIsMobile()
   const { trackEvent } = useAnalytics()
@@ -69,12 +69,12 @@ export const DiscoverWeeklyPage = () => {
   // The route stays registered while the flag is off -- the URL is public and
   // shareable, so a link that predates the rollout should land somewhere real
   // rather than 404.
-  const { isEnabled: isDiscoverWeeklyEnabled, isLoaded: isFlagLoaded } =
-    useFeatureFlag(FeatureFlags.DISCOVER_WEEKLY)
+  const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
+    useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
-  const { trackIds, isPending, isFetching, isLoading } = useDiscoverWeekly(
+  const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
     { limit: PAGE_SIZE },
-    { enabled: isDiscoverWeeklyEnabled }
+    { enabled: isWeeklyRotationEnabled }
   )
 
   // Fired once the mix resolves rather than on mount, so trackCount is real
@@ -84,7 +84,7 @@ export const DiscoverWeeklyPage = () => {
     if (hasTrackedView.current || !trackIds.length) return
     hasTrackedView.current = true
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_PAGE_VIEW,
+      eventName: Name.WEEKLY_ROTATION_PAGE_VIEW,
       source: isMobile ? 'mobile' : 'web',
       trackCount: trackIds.length
     })
@@ -99,7 +99,7 @@ export const DiscoverWeeklyPage = () => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: DISCOVER_WEEKLY_SOURCE
+        source: WEEKLY_ROTATION_SOURCE
       })),
     [trackIds]
   )
@@ -124,7 +124,7 @@ export const DiscoverWeeklyPage = () => {
     }
 
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_PLAY_ALL,
+      eventName: Name.WEEKLY_ROTATION_PLAY_ALL,
       source: isMobile ? 'mobile' : 'web',
       trackCount: playbackQueue.length
     })
@@ -155,7 +155,7 @@ export const DiscoverWeeklyPage = () => {
   // Nothing until remote config resolves, so an enabled user doesn't get
   // bounced to Explore on the first frame.
   if (!isFlagLoaded) return null
-  if (!isDiscoverWeeklyEnabled) return <Navigate to={EXPLORE_PAGE} replace />
+  if (!isWeeklyRotationEnabled) return <Navigate to={EXPLORE_PAGE} replace />
 
   return (
     <Page title={messages.title} description={messages.description}>
@@ -166,7 +166,7 @@ export const DiscoverWeeklyPage = () => {
         alignItems={isMobile ? 'center' : 'flex-end'}
       >
         <Artwork
-          src={discoverWeeklyArt}
+          src={weeklyRotationArt}
           h={ARTWORK_SIZE}
           w={ARTWORK_SIZE}
           css={{ flexShrink: 0 }}
@@ -181,12 +181,12 @@ export const DiscoverWeeklyPage = () => {
             size='s'
             textAlign={isMobile ? 'center' : undefined}
           >
-            {exploreMessages.discoverWeekly}
+            {exploreMessages.weeklyRotation}
           </Text>
           <Text variant='body' size='l' color='subdued'>
-            {exploreMessages.discoverWeeklySubtitle}
+            {exploreMessages.weeklyRotationSubtitle}
             {trackIds.length
-              ? ` · ${exploreMessages.discoverWeeklyTrackCount(trackIds.length)}`
+              ? ` · ${exploreMessages.weeklyRotationTrackCount(trackIds.length)}`
               : ''}
           </Text>
           <Button
@@ -201,7 +201,7 @@ export const DiscoverWeeklyPage = () => {
       </Flex>
 
       <TrackTableLineup
-        source={DISCOVER_WEEKLY_SOURCE}
+        source={WEEKLY_ROTATION_SOURCE}
         trackIds={trackIds}
         isPending={isPending}
         isFetching={isFetching}
@@ -212,11 +212,11 @@ export const DiscoverWeeklyPage = () => {
         columns={columns}
         userId={currentUserId}
         showArtistInTrackNameColumn
-        responsiveColumns={RESPONSIVE_TABLE_POLICIES.discoverWeeklyTracks}
+        responsiveColumns={RESPONSIVE_TABLE_POLICIES.weeklyRotationTracks}
         scrollRef={mainContentRef}
       />
     </Page>
   )
 }
 
-export default DiscoverWeeklyPage
+export default WeeklyRotationPage

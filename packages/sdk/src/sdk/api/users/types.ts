@@ -341,14 +341,14 @@ export type GetSuggestedFollowsRequest = {
 }
 
 /**
- * Params for `UsersApi.getDiscoverWeekly`.
+ * Params for `UsersApi.getWeeklyRotation`.
  *
  * Hand-written for the same reason as `GetSuggestedFollowsRequest`: the
  * endpoint post-dates the last SDK regeneration. Delete this and use the
  * generated request type once `npm run gen` has been re-run against a node
- * serving /users/{id}/discover-weekly.
+ * serving /users/{id}/weekly-rotation.
  */
-export type GetDiscoverWeeklyRequest = {
+export type GetWeeklyRotationRequest = {
   /** A User ID */
   id: string
   /** The number of tracks to fetch (default 30, max 50) */
