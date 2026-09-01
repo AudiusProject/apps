@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import { useDiscoverWeekly } from '@audius/common/api'
+import { useWeeklyRotation } from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
-import { Name, type DiscoverWeeklySurface } from '@audius/common/models'
+import { Name, type WeeklyRotationSurface } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import { route } from '@audius/common/utils'
 import {
@@ -17,22 +17,22 @@ import {
 import { useInView } from 'react-intersection-observer'
 import { useNavigate } from 'react-router'
 
-import discoverWeeklyArt from 'assets/img/discoverWeekly.jpg'
+import weeklyRotationArt from 'assets/img/weeklyRotation.jpg'
 import { useIsMobile } from 'hooks/useIsMobile'
 
-const { DISCOVER_WEEKLY_PAGE } = route
+const { WEEKLY_ROTATION_PAGE } = route
 
 const ART_SIZE_DESKTOP = 140
 const ART_SIZE_MOBILE = 96
 
-type DiscoverWeeklyBannerProps = {
+type WeeklyRotationBannerProps = {
   /** Which surface this instance is rendered on -- carried on every event so
    * we can tell which entry point actually drives listens. */
-  surface: DiscoverWeeklySurface
+  surface: WeeklyRotationSurface
 }
 
 /**
- * Promotional banner for Discover Weekly.
+ * Promotional banner for Weekly Rotation.
  *
  * Shared across Explore and the feed rather than duplicated, so the two stay
  * visually identical and the analytics differ only by `surface`.
@@ -40,9 +40,9 @@ type DiscoverWeeklyBannerProps = {
  * Navigates to the full mix rather than playing in place -- the banner is an
  * entry point, and the page it opens has the play-all.
  */
-export const DiscoverWeeklyBanner = ({
+export const WeeklyRotationBanner = ({
   surface
-}: DiscoverWeeklyBannerProps) => {
+}: WeeklyRotationBannerProps) => {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
   const { trackEvent } = useAnalytics()
@@ -54,13 +54,13 @@ export const DiscoverWeeklyBanner = ({
     fallbackInView: true
   })
 
-  const { isEnabled: isDiscoverWeeklyEnabled } = useFeatureFlag(
-    FeatureFlags.DISCOVER_WEEKLY
+  const { isEnabled: isWeeklyRotationEnabled } = useFeatureFlag(
+    FeatureFlags.WEEKLY_ROTATION
   )
 
-  const { trackIds, isError, isSuccess } = useDiscoverWeekly(
+  const { trackIds, isError, isSuccess } = useWeeklyRotation(
     { limit: 30 },
-    { enabled: inView && isDiscoverWeeklyEnabled }
+    { enabled: inView && isWeeklyRotationEnabled }
   )
 
   // Fire the impression once, and only once there's a real mix behind it --
@@ -71,7 +71,7 @@ export const DiscoverWeeklyBanner = ({
     if (hasTrackedView.current || !inView || !trackIds.length) return
     hasTrackedView.current = true
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_BANNER_VIEW,
+      eventName: Name.WEEKLY_ROTATION_BANNER_VIEW,
       surface,
       source: isMobile ? 'mobile' : 'web',
       trackCount: trackIds.length
@@ -80,19 +80,19 @@ export const DiscoverWeeklyBanner = ({
 
   const handleClick = useCallback(() => {
     trackEvent({
-      eventName: Name.DISCOVER_WEEKLY_BANNER_CLICK,
+      eventName: Name.WEEKLY_ROTATION_BANNER_CLICK,
       surface,
       source: isMobile ? 'mobile' : 'web',
       trackCount: trackIds.length
     })
-    navigate(DISCOVER_WEEKLY_PAGE)
+    navigate(WEEKLY_ROTATION_PAGE)
   }, [navigate, trackEvent, surface, isMobile, trackIds.length])
 
   // Hidden entirely when there's no mix to promote -- a banner advertising an
   // empty page is worse than no banner. The flag check sits alongside it so
   // every surface that renders the banner is gated by this one return.
   if (
-    !isDiscoverWeeklyEnabled ||
+    !isWeeklyRotationEnabled ||
     isError ||
     (isSuccess && trackIds.length === 0)
   ) {
@@ -114,23 +114,23 @@ export const DiscoverWeeklyBanner = ({
         css={{ cursor: 'pointer' }}
       >
         <Artwork
-          src={discoverWeeklyArt}
+          src={weeklyRotationArt}
           h={artSize}
           w={artSize}
           css={{ flexShrink: 0 }}
         />
         <Flex direction='column' gap='xs' css={{ minWidth: 0, flex: 1 }}>
           <Text variant='label' size='s' color='accent'>
-            {messages.discoverWeeklyBadge}
+            {messages.weeklyRotationBadge}
           </Text>
           <Text
             variant={isMobile ? 'title' : 'heading'}
             size={isMobile ? 'l' : 's'}
           >
-            {messages.discoverWeekly}
+            {messages.weeklyRotation}
           </Text>
           <Text variant='body' size={isMobile ? 's' : 'l'} color='subdued'>
-            {messages.discoverWeeklyPitch}
+            {messages.weeklyRotationPitch}
           </Text>
         </Flex>
         {isMobile ? null : (
@@ -140,7 +140,7 @@ export const DiscoverWeeklyBanner = ({
             onClick={handleClick}
             css={{ flexShrink: 0 }}
           >
-            {messages.discoverWeeklyCta}
+            {messages.weeklyRotationCta}
           </Button>
         )}
       </Paper>

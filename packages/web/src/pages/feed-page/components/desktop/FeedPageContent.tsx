@@ -15,7 +15,7 @@ import { Flex, IconFeed } from '@audius/harmony'
 
 import { make, useRecord } from 'common/store/analytics/actions'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
-import { DiscoverWeeklyBanner } from 'components/discover-weekly'
+import { WeeklyRotationBanner } from 'components/weekly-rotation'
 import { Header } from 'components/header/desktop/Header'
 import EndOfLineup from 'components/lineup/EndOfLineup'
 import { TrackLineup } from 'components/lineup/TrackLineup'
@@ -164,7 +164,7 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         {/* Above the lineup so the mix is reachable without leaving the feed:
             Explore is the only other entry point and it takes a deliberate
             detour to get to. */}
-        <DiscoverWeeklyBanner surface='feed' />
+        <WeeklyRotationBanner surface='feed' />
         <TrackLineup
           key={`feed-${feedTab}`}
           aria-label='feed'

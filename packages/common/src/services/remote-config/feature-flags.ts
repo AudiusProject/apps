@@ -17,7 +17,7 @@ export enum FeatureFlags {
   LAUNCHPAD_VERIFICATION = 'launchpad_verification',
   FAN_CLUB_TEXT_POST_POSTING = 'fan_club_text_post_posting',
   QUEUE_NEW_FEATURE_BADGE = 'queue_new_feature_badge',
-  DISCOVER_WEEKLY = 'discover_weekly'
+  WEEKLY_ROTATION = 'weekly_rotation'
 }
 
 type FlagDefaults = Record<FeatureFlags, boolean>
@@ -28,7 +28,7 @@ export const environmentFlagDefaults: Record<
 > = {
   development: {
     [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: true,
-    [FeatureFlags.DISCOVER_WEEKLY]: true
+    [FeatureFlags.WEEKLY_ROTATION]: true
   },
   production: {}
 }
@@ -52,5 +52,5 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
   [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false,
-  [FeatureFlags.DISCOVER_WEEKLY]: false
+  [FeatureFlags.WEEKLY_ROTATION]: false
 }

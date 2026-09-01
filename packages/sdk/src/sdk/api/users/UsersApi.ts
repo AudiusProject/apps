@@ -61,7 +61,7 @@ import {
   type EntityManagerPlaylistLibraryContents,
   type UsersApiServicesConfig,
   type GetSuggestedFollowsRequest,
-  type GetDiscoverWeeklyRequest
+  type GetWeeklyRotationRequest
 } from './types'
 
 export class UsersApi extends GeneratedUsersApi {
@@ -938,7 +938,7 @@ export class UsersApi extends GeneratedUsersApi {
   }
 
   /**
-   * Gets the user's Discover Weekly mix: tracks they have not heard,
+   * Gets the user's Weekly Rotation mix: tracks they have not heard,
    * weighted toward artists they do not already follow. The mix is fixed for
    * the calendar week (ISO week, UTC) and rotates when the week rolls over.
    *
@@ -949,14 +949,14 @@ export class UsersApi extends GeneratedUsersApi {
    * is newer than the checked-in generated client. It mirrors what the
    * generator would emit, so replacing it later is a no-op for callers.
    */
-  async getDiscoverWeekly(
-    params: GetDiscoverWeeklyRequest,
+  async getWeeklyRotation(
+    params: GetWeeklyRotationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
   ): Promise<TracksResponse> {
     if (params.id === null || params.id === undefined) {
       throw new runtime.RequiredError(
         'id',
-        'Required parameter params.id was null or undefined when calling getDiscoverWeekly.'
+        'Required parameter params.id was null or undefined when calling getWeeklyRotation.'
       )
     }
 
@@ -985,7 +985,7 @@ export class UsersApi extends GeneratedUsersApi {
 
     const response = await this.request(
       {
-        path: `/users/{id}/discover-weekly`.replace(
+        path: `/users/{id}/weekly-rotation`.replace(
           `{${'id'}}`,
           encodeURIComponent(String(params.id))
         ),

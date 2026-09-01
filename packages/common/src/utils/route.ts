@@ -31,7 +31,7 @@ export const TRENDING_PLAYLISTS_PAGE_LEGACY = '/trending/playlists'
 export const EXPLORE_PAGE = '/explore'
 export const TRENDING_PLAYLISTS_PAGE = '/explore/playlists'
 export const TRENDING_UNDERGROUND_PAGE = '/explore/underground'
-export const DISCOVER_WEEKLY_PAGE = '/explore/discover-weekly'
+export const WEEKLY_ROTATION_PAGE = '/explore/weekly-rotation'
 export const CONTESTS_PAGE = '/contests'
 
 // DEPRECATED - use /library instead.
@@ -302,7 +302,7 @@ export const orderedRoutes = [
   TRENDING_GENRES,
   TRENDING_PAGE,
   EXPLORE_PAGE,
-  DISCOVER_WEEKLY_PAGE,
+  WEEKLY_ROTATION_PAGE,
   CONTESTS_PAGE,
   EMPTY_PAGE,
   SEARCH_PAGE,
@@ -357,7 +357,7 @@ export const staticRoutes = new Set([
   FEED_PAGE,
   TRENDING_PAGE,
   EXPLORE_PAGE,
-  DISCOVER_WEEKLY_PAGE,
+  WEEKLY_ROTATION_PAGE,
   CONTESTS_PAGE,
   HOST_REMIX_CONTEST_ROOT_PAGE,
   TRENDING_PLAYLISTS_PAGE,

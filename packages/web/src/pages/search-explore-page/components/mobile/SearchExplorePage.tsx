@@ -22,7 +22,7 @@ import { capitalize } from 'lodash'
 import { useSearchParams } from 'react-router'
 import { useDebounce, usePrevious } from 'react-use'
 
-import { DiscoverWeeklyBanner } from 'components/discover-weekly'
+import { WeeklyRotationBanner } from 'components/weekly-rotation'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
@@ -229,7 +229,7 @@ const SearchExplorePage = ({
           }}
         >
           {showTrackContent && showUserContextualContent ? (
-            <DiscoverWeeklyBanner surface='explore' />
+            <WeeklyRotationBanner surface='explore' />
           ) : null}
           {isTracksTab ? <QuickSearchGrid /> : null}
           {showTrackContent && showUserContextualContent ? (

@@ -37,7 +37,7 @@ export const RESPONSIVE_TABLE_POLICIES = {
     ['dateReleased', 'dateListened', 'time', 'reposts', 'plays'],
     ['trackName', 'trackActions']
   ),
-  discoverWeeklyTracks: makeHideOrderPolicy(
+  weeklyRotationTracks: makeHideOrderPolicy(
     ['dateReleased', 'reposts', 'plays', 'time'],
     ['trackName', 'trackActions']
   ),
