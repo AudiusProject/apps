@@ -160,11 +160,18 @@ export const ShareDrawer = NiceModal.create(() => {
     }
   }, [dispatch, content, source])
 
+  // The story platforms build a video out of the track's audio, so a track with
+  // nothing to play cannot be shared to them. `is_streamable` is false for an
+  // upload that was indexed without its track_cid: the stream URL 404s, ffmpeg
+  // fails on it, and the user gets a bare "something went wrong" with no idea
+  // why. Compare against `false` explicitly - an absent field means the source
+  // did not populate it, not that the track is broken.
   const isShareableTrack =
     content?.type === 'track' &&
     !content.track.is_unlisted &&
     !content.track.is_invalid &&
     !content.track.is_delete &&
+    content.track.is_streamable !== false &&
     !isStreamGatedTrack
 
   const performActionAndClose = useCallback(
