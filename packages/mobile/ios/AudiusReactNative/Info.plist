@@ -80,6 +80,8 @@
 	<string>This lets you select photos for uploading to Audius, and lets you share tracks to TikTok and other social media.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This lets you select photos for uploading to Audius, including setting your profile picture and track cover art.</string>
+	<key>RCTNewArchEnabled</key>
+	<false/>
 	<key>SCSDKClientId</key>
 	<string>$(SCSDK_CLIENT_ID)</string>
 	<key>SCSDKRedirectUrl</key>

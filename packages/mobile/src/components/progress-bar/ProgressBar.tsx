@@ -1,10 +1,10 @@
 import type { ViewStyle } from 'react-native'
 import { View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
-import { useTheme } from '@audius/harmony-native'
+import { LinearGradient, useTheme } from '@audius/harmony-native'
 import type { StylesProp } from 'app/styles'
 import { makeStyles } from 'app/styles'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 import { useThemeColors } from 'app/utils/theme'
 
 const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -87,8 +87,7 @@ export const ProgressBar = ({
         }
       : {
           colors: [pageHeaderGradientColor1, pageHeaderGradientColor2],
-          useAngle: true,
-          angle: 315
+          ...getGradientStartEnd(315)
         }
 
   return (

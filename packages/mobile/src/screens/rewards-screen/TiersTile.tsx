@@ -13,9 +13,9 @@ import { badgeTiers, getTierAndNumberForBalance } from '@audius/common/store'
 import type { Nullable } from '@audius/common/utils'
 import { formatNumberCommas } from '@audius/common/utils'
 import { Linking } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 import {
+  LinearGradient,
   Button,
   Flex,
   IconDiscord,
