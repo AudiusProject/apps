@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'packages/web/**'
+      - 'packages/embed/**'
       - 'packages/common/**'
       - 'packages/harmony/**'
       - 'packages/libs/**'
@@ -15,6 +16,7 @@ on:
   pull_request:
     paths:
       - 'packages/web/**'
+      - 'packages/embed/**'
       - 'packages/common/**'
       - 'packages/harmony/**'
       - 'packages/libs/**'
@@ -914,6 +916,103 @@ jobs:
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to web \n\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
+
+  # Ported from the CircleCI `embed-deploy-production-cloudflare` job, which was
+  # dropped with the rest of .circleci in #14504 and never replaced - leaving the
+  # embed player with no deploy path at all. Unlike the old job (which only ran
+  # on release* branches) this deploys straight from main, and unlike the web
+  # deploy it isn't behind the production gate: the embed is a self-contained
+  # player with no desktop/S3 half to coordinate with.
+  embed-deploy:
+    name: Embed Deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Upgrade npm to 11.10.0
+        run: npm install -g npm@11.10.0
+
+      - name: Create concatenated patch file
+        id: patch-file
+        run: |
+          ls -d -- packages/*/patches/*.patch 2>/dev/null | xargs cat > combined-patch-file.txt || touch combined-patch-file.txt
+          echo "patch_checksum=$(sha256sum combined-patch-file.txt | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/embed/node_modules
+            packages/harmony/node_modules
+            packages/common/node_modules
+            packages/libs/node_modules
+            packages/sdk/node_modules
+          key: npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-${{ steps.patch-file.outputs.patch_checksum }}
+          restore-keys: |
+            npm-cache-${{ runner.os }}-node-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm cache clean --force || true
+          npm ci --prefer-offline || npm install --prefer-offline
+
+      - name: Run postinstall (if cache hit)
+        if: steps.cache-node-modules.outputs.cache-hit == 'true'
+        env:
+          CI: true
+          SKIP_POD_INSTALL: true
+          SKIP_ANDROID_INSTALL: true
+          ANDROID_HOME: /tmp/android-sdk-dummy
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          mkdir -p /tmp/android-sdk-dummy
+          npm run postinstall
+
+      # `build:prod` runs turbo, which builds the harmony/sdk dists first, then
+      # renames build/ to build-production/.
+      - name: Build embed
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          cd packages/embed
+          npm run build:prod
+
+      - name: Install workers-site dependencies
+        run: |
+          cd packages/embed/workers-site
+          npm i
+
+      # wrangler.toml's [site] bucket points at ./build, so undo the rename that
+      # build:prod just did. The old CircleCI job did exactly this - the split
+      # is why `build:prod && deploy:prod` deploys nothing on its own.
+      - name: Move build
+        run: |
+          cd packages/embed
+          mv build-production build
+
+      - name: Deploy to Cloudflare (Production)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          cd packages/embed
+          npm_config_yes=true npx wrangler@4.54.0 deploy --env production
 
   # Desktop (Electron) builds. electron-builder reads packages/web/build-production
   # directly (see packages/web/scripts/dist.js), so the `builds` artifact is
