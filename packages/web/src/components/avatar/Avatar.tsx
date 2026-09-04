@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, SyntheticEvent } from 'react'
 
 import { useCurrentUserId, useUser } from '@audius/common/api'
 import { imageProfilePicEmptyNew } from '@audius/common/assets'
@@ -11,7 +11,7 @@ import {
 
 import { componentWithErrorBoundary } from 'components/error-wrapper/componentWithErrorBoundary'
 import { UserLink } from 'components/link'
-import { useProfilePicture } from 'hooks/useProfilePicture'
+import { useProfilePictureSource } from 'hooks/useProfilePicture'
 
 const messages = {
   goTo: 'Go to',
@@ -39,24 +39,38 @@ export const AvatarContent = (props: AvatarProps) => {
     ...other
   } = props
 
-  const [hasError, setHasError] = useState(false)
+  // Tracks the src that most recently failed to render. This must be the
+  // failing url rather than a boolean: a boolean latches, so once one host
+  // 502s the placeholder would win forever, even after `useImageSize`
+  // resolves a working mirror into `imageUrl`.
+  const [failedSrc, setFailedSrc] = useState<Nullable<string>>(null)
 
   useEffect(() => {
-    setHasError(false)
+    setFailedSrc(null)
   }, [userId])
 
-  const handleError = () => {
-    setHasError(true)
-  }
+  const { imageUrl: profileImage, onError: onImageError } =
+    useProfilePictureSource({
+      userId: userId ?? undefined,
+      size: imageSize
+    })
 
-  const profileImage = useProfilePicture({
-    userId: userId ?? undefined,
-    size: imageSize
-  })
+  const handleError = useCallback(
+    (event: SyntheticEvent<HTMLImageElement>) => {
+      const src = event.currentTarget.src
+      setFailedSrc(src)
+      // Let useImageSize advance to the next mirror. Once every mirror has
+      // failed it stops handing back new urls, and the placeholder below
+      // sticks (a data uri, so it cannot error and re-enter this path).
+      onImageError?.(src)
+    },
+    [onImageError]
+  )
 
   const image = userId ? profileImage : imageProfilePicEmptyNew
 
-  const finalImageSrc = hasError ? imageProfilePicEmptyNew : image
+  const finalImageSrc =
+    image && image === failedSrc ? imageProfilePicEmptyNew : image
 
   const { data: currentUserId } = useCurrentUserId()
   const { data: userName } = useUser(userId, {
@@ -69,7 +83,7 @@ export const AvatarContent = (props: AvatarProps) => {
   if (ariaHidden) {
     return (
       <HarmonyAvatar
-        key={hasError ? 'error' : 'no-error'}
+        key={finalImageSrc}
         src={finalImageSrc}
         onError={handleError}
         {...other}
@@ -80,7 +94,7 @@ export const AvatarContent = (props: AvatarProps) => {
   if (onClick) {
     return (
       <HarmonyAvatar
-        key={hasError ? 'error' : 'no-error'}
+        key={finalImageSrc}
         role='button'
         tabIndex={0}
         aria-label={label}
@@ -103,7 +117,7 @@ export const AvatarContent = (props: AvatarProps) => {
         noOverflow={popover}
       >
         <HarmonyAvatar
-          key={hasError ? 'error' : 'no-error'}
+          key={finalImageSrc}
           data-testid='avatar-test'
           src={finalImageSrc}
           onError={handleError}
@@ -115,7 +129,7 @@ export const AvatarContent = (props: AvatarProps) => {
 
   return (
     <HarmonyAvatar
-      key={hasError ? 'error' : 'no-error'}
+      key={finalImageSrc}
       src={finalImageSrc}
       onError={handleError}
       {...other}
