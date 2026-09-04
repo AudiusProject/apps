@@ -222,6 +222,9 @@ export class Storage implements StorageService {
     const start = Date.now()
     let lastProgressUpdate = Date.now()
     let lastTranscodeProgress = 0
+    // Tracks whether we ever saw a `done` response with no usable transcode
+    // result, so the timeout can say which of the two failures this was.
+    let sawDoneWithoutResults = false
 
     const maxPollingMs =
       template === 'audio'
@@ -254,7 +257,26 @@ export class Storage implements StorageService {
           })
         }
         if (resp?.status === 'done') {
-          return resp
+          // `done` alone is not proof the transcode results are here. Upload
+          // rows replicate across storage nodes, and getProcessingStatus talks
+          // to whichever node is selected, so a mirror can answer `done` from a
+          // row it has not finished catching up on. Accepting that response
+          // hands populateTrackMetadataWithUploadResponse a `results` map with
+          // no '320' key, the track entity gets written with an undefined
+          // trackCid, and the upload succeeds into a track that can never be
+          // played - no error anywhere, just a dead track with a live page.
+          //
+          // Keep polling instead. A node that really is finished will have the
+          // cid on the next pass, and in the genuinely stuck case this times
+          // out loudly rather than silently publishing unplayable audio.
+          if (template === 'audio' && !resp.results?.['320']) {
+            sawDoneWithoutResults = true
+            this.logger.warn(
+              `Storage node reported done with no transcode results, still polling. id=${id}`
+            )
+          } else {
+            return resp
+          }
         }
         if (resp?.status === 'error') {
           throw new Error(
@@ -278,6 +300,11 @@ export class Storage implements StorageService {
       await wait(POLL_STATUS_INTERVAL)
     }
 
+    if (sawDoneWithoutResults) {
+      throw new Error(
+        `Upload reported done but no transcode result appeared within ${maxPollingMs}ms. id=${id}`
+      )
+    }
     throw new Error(`Upload took over ${maxPollingMs}ms. id=${id}`)
   }
 
