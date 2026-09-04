@@ -1,3 +1,4 @@
+import { SquareSizes } from '@audius/common/models'
 import { PROFILE_PAGE } from '@audius/common/src/utils/route'
 import { Text } from '@audius/harmony'
 import { MemoryRouter, Route, Routes } from 'react-router'
@@ -5,7 +6,15 @@ import { describe, expect, beforeAll, afterEach, afterAll } from 'vitest'
 
 import { artistUser } from 'test/mocks/fixtures/users'
 import { mockUsers } from 'test/msw/mswMocks'
-import { RenderOptions, mswServer, render, screen, it } from 'test/test-utils'
+import {
+  RenderOptions,
+  mswServer,
+  render,
+  screen,
+  it,
+  fireEvent,
+  waitFor
+} from 'test/test-utils'
 
 import { UserCard } from './UserCard'
 
@@ -67,6 +76,31 @@ describe('UserCard', () => {
       'src',
       `${artistUser.profile_picture['480x480']}`
     )
+  })
+
+  it('retries a mirror when the primary host fails to render', async () => {
+    // A content node that answers /health_check but 502s on the blob still
+    // gets handed out as the primary, so the avatar has to survive an <img>
+    // error by moving to a mirror rather than latching the empty placeholder.
+    const deadUrl =
+      'https://dead-node.test/artist-user-image-profile-medium.jpg'
+    renderUserCard({
+      ...artistUser,
+      profile_picture: {
+        ...artistUser.profile_picture,
+        [SquareSizes.SIZE_480_BY_480]: deadUrl
+      }
+    })
+
+    fireEvent.error(await screen.findByRole('img'))
+
+    await waitFor(async () => {
+      const src = (await screen.findByRole('img')).getAttribute('src')
+      expect(src).not.toMatch(/^data:/)
+      expect(new URL(src!).hostname).toBe(
+        new URL(artistUser.profile_picture.mirrors[0]).hostname
+      )
+    })
   })
 
   it('handles users with large follow counts correctly', async () => {
