@@ -6,13 +6,19 @@ import {
 } from '@audius/common/services'
 import { tracksSocialActions, downloadsActions } from '@audius/common/store'
 import { dedupFilenames } from '@audius/common/utils'
-import { downloadZip } from 'client-zip'
 
 import { track as trackEvent } from './analytics/amplitude'
 
 const { downloadFinished } = tracksSocialActions
 
 const { beginDownload, setDownloadError } = downloadsActions
+
+// Gap between successive anchor clicks when downloading a batch. Chrome
+// coalesces rapid programmatic downloads from one origin into a single
+// "Download multiple files?" permission prompt, but only if they arrive as a
+// recognizable burst; firing them in the same tick makes it drop all but the
+// first, and spacing them out too far makes it prompt repeatedly.
+const MULTI_DOWNLOAD_STAGGER_MS = 300
 
 function isMobileSafari() {
   if (!navigator) return false
@@ -39,87 +45,58 @@ function browserDownload({ url, filename }: DownloadFile) {
   }
 }
 
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms))
+
 class TrackDownload extends TrackDownloadBase {
-  async downloadTracks({
-    files,
-    rootDirectoryName,
-    abortSignal,
-    dispatch
-  }: DownloadTrackArgs) {
-    if (files.length === 0) return
+  /**
+   * Hands each file to the browser as its own download rather than bundling
+   * them into an archive.
+   *
+   * This used to fetch every file into memory and zip it client-side (and,
+   * for "Download All", delegate to the server-side archiver service). Both
+   * were unstable for the sets that matter most — a contest track carries
+   * dozens of lossless stems totalling multiple GB, WAV barely compresses, so
+   * the zip was pure overhead on top of a fragile job queue that routinely
+   * stranded users on a spinner.
+   *
+   * Individual downloads have neither problem: the browser streams each file
+   * straight to disk with its own progress and resume behavior, nothing is
+   * buffered in the tab, and there is no job to stall. The tradeoff is the
+   * one-time "Download multiple files?" permission prompt, which is the UX
+   * we're deliberately opting into.
+   *
+   * Filenames come from the server. `link.download` is ignored on
+   * cross-origin URLs, but these URLs point at api.audius.co, which redirects
+   * to a content node that sets `Content-Disposition: attachment` carrying
+   * the `filename` query param the download saga already signs into the URL.
+   */
+  async downloadTracks({ files, abortSignal, dispatch }: DownloadTrackArgs) {
+    if (files.length === 0) {
+      dispatch(setDownloadError(new Error('No downloadable files found')))
+      return
+    }
 
     dispatch(beginDownload())
 
     dedupFilenames(files)
     try {
-      const results = await Promise.allSettled(
-        files.map(({ url }) => window.fetch(url, { signal: abortSignal }))
-      )
-
-      // `allSettled` swallows the abort rejection, so check for it explicitly
-      // and rethrow in the shape the catch below expects.
-      if (abortSignal?.aborted) {
-        const abortError = new Error('Download aborted')
-        abortError.name = 'AbortError'
-        throw abortError
-      }
-
-      // Download whatever is actually available rather than failing the whole
-      // batch on one bad file. A single unavailable track — most commonly a
-      // parent whose `is_downloadable` is false, whose download URL 404s —
-      // used to take every other file down with it.
-      const available: { file: DownloadFile; response: Response }[] = []
-      const skipped: string[] = []
-
-      results.forEach((result, i) => {
-        const file = files[i]
-        if (result.status === 'fulfilled' && result.value.ok) {
-          available.push({ file, response: result.value })
-        } else {
-          const reason =
-            result.status === 'fulfilled'
-              ? `HTTP ${result.value.status}`
-              : ((result.reason as Error)?.message ?? 'request failed')
-          skipped.push(`${file.filename} (${reason})`)
+      for (const [i, file] of files.entries()) {
+        if (abortSignal?.aborted) {
+          const abortError = new Error('Download aborted')
+          abortError.name = 'AbortError'
+          throw abortError
         }
-      })
-
-      if (skipped.length > 0) {
-        console.warn(
-          `Skipping ${skipped.length} of ${files.length} unavailable file(s) during download: ${skipped.join(', ')}`
-        )
+        browserDownload(file)
+        if (i < files.length - 1) {
+          await delay(MULTI_DOWNLOAD_STAGGER_MS)
+        }
       }
 
-      // Only a batch where nothing at all could be fetched is a failure.
-      if (available.length === 0) {
-        throw new Error('Download unsuccessful')
-      }
-
-      const filename = rootDirectoryName ?? available[0].file.filename
-      let url
-      if (available.length === 1) {
-        url = available[0].response.url
-      } else {
-        if (!rootDirectoryName)
-          throw new Error(
-            'rootDirectory must be supplied when downloading multiple files'
-          )
-        const blob = await downloadZip(
-          available.map(({ file, response }) => {
-            return {
-              name: rootDirectoryName + '/' + file.filename,
-              input: response
-            }
-          })
-        ).blob()
-        url = URL.createObjectURL(blob)
-      }
-      browserDownload({ url, filename })
       dispatch(downloadFinished())
 
-      // Track download success event
       const eventName =
-        available.length === 1
+        files.length === 1
           ? Name.TRACK_DOWNLOAD_SUCCESSFUL_DOWNLOAD_SINGLE
           : Name.TRACK_DOWNLOAD_SUCCESSFUL_DOWNLOAD_ALL
       trackEvent(eventName, { device: 'web' })

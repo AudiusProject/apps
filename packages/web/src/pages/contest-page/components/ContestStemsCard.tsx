@@ -20,7 +20,6 @@ import {
   stemCategoryFriendlyNames
 } from '@audius/common/models'
 import {
-  useDownloadTrackArchiveModal,
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
   PurchaseableContentType
@@ -96,8 +95,6 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
   // Auto-follow the contest when a signed-in user kicks off a stem
@@ -149,24 +146,22 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
     { enabled: stems.length > 0 || !!track?.is_downloadable }
   )
 
-  // Action: Download All archive modal (parent + stems).
+  // Action: Download All. Hands the parent plus every stem to the browser as
+  // individual downloads instead of queueing a server-side archive job.
+  // Passing `parentTrackId` is what pulls the full track into the batch, and
+  // the saga drops it when the parent isn't downloadable.
   const handleDownloadAll = useRequiresAccountCallback(
     (e: MouseEvent) => {
       e.stopPropagation()
       if (!track) return
       followContestIfNeeded()
-      openDownloadTrackArchiveModal({
-        trackId,
-        fileCount: stemsCount + (track.is_downloadable ? 1 : 0)
+      openWaitForDownloadModal({
+        parentTrackId: trackId,
+        trackIds: stems.map((s) => s.track_id),
+        quality: DownloadQuality.ORIGINAL
       })
     },
-    [
-      followContestIfNeeded,
-      openDownloadTrackArchiveModal,
-      trackId,
-      stemsCount,
-      track
-    ]
+    [followContestIfNeeded, openWaitForDownloadModal, trackId, stems, track]
   )
 
   const handleUnlockAll = useRequiresAccountCallback(
