@@ -195,8 +195,10 @@ export type TrackMetadata = {
   is_available: boolean
   /**
    * Whether the API will serve audio for this track. The API sets it to false
-   * when the track is deleted or its owner is no longer active (a self
-   * deactivation or a trusted-notifier delist). Optional because not every
+   * when the track is deleted, when its owner is no longer active (a self
+   * deactivation or a trusted-notifier delist), or when the row carries no
+   * track_cid - an upload that transcoded fine but was indexed without the cid
+   * pointing at the audio, leaving nothing to play. Optional because not every
    * track source populates it, so treat `undefined` as "no opinion" rather
    * than as "not streamable".
    */
