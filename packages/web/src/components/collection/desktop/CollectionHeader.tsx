@@ -36,6 +36,7 @@ import { CollectionActionButtons } from './CollectionActionButtons'
 import styles from './CollectionHeader.module.css'
 import { EditableCollectionDescription } from './EditableCollectionDescription'
 import { EditableCollectionTitle } from './EditableCollectionTitle'
+import { InlineAlbumPriceAndAudience } from './edit-mode/InlineAlbumPriceAndAudience'
 import { usePlaylistEditMode } from './edit-mode/PlaylistEditModeContext'
 
 const { editPlaylist } = cacheCollectionsActions
@@ -311,7 +312,11 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
       borderTop='strong'
       borderBottom='strong'
     >
-      {isStreamGated && streamConditions ? (
+      {isEditingThis && isAlbumFromCollection ? (
+        // Albums can be switched between free and pay-to-unlock while editing.
+        // This takes the place of the gated-content banner until Apply.
+        <InlineAlbumPriceAndAudience collectionId={collectionId} />
+      ) : isStreamGated && streamConditions ? (
         <GatedContentSection
           isLoading={isLoading}
           contentId={collectionId}
