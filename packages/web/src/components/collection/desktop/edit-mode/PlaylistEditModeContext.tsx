@@ -10,14 +10,18 @@ import {
 } from 'react'
 
 import { useCollection, useCollectionTracks } from '@audius/common/api'
-import { ID } from '@audius/common/models'
+import { AccessConditions, ID, Name } from '@audius/common/models'
 import {
   cacheCollectionsActions,
   EditCollectionValues,
   toastActions
 } from '@audius/common/store'
+import { Nullable } from '@audius/common/utils'
+import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
+
+import { track } from 'services/analytics'
 
 import { isDraftCollection, removeDraftCollection } from './draftCollections'
 import { useCreateDraftPlaylist } from './useCreateDraftPlaylist'
@@ -31,12 +35,48 @@ type ArtworkDraft = {
   source?: string
 }
 
+/**
+ * Access ("Price & Audience") fields that can be staged for albums. These are
+ * the fields the album update actually carries to the SDK; Apply hands them to
+ * the editPlaylist saga, which fills in the USDC splits for a newly premium
+ * album.
+ */
+export type PlaylistAccessDraft = {
+  is_stream_gated?: Nullable<boolean>
+  stream_conditions?: Nullable<AccessConditions>
+}
+
+export const ACCESS_DRAFT_FIELDS = [
+  'is_stream_gated',
+  'stream_conditions'
+] as const
+
 export type PlaylistMetadataDraft = {
   playlist_name?: string
   description?: string | null
   is_private?: boolean
   artwork?: ArtworkDraft | null
-}
+} & PlaylistAccessDraft
+
+/** Picks only the access fields that were actually staged. */
+const stagedAccessFields = (
+  draft: PlaylistMetadataDraft
+): PlaylistAccessDraft => ({
+  ...(draft.is_stream_gated !== undefined
+    ? { is_stream_gated: draft.is_stream_gated }
+    : {}),
+  ...(draft.stream_conditions !== undefined
+    ? { stream_conditions: draft.stream_conditions }
+    : {})
+})
+
+const accessFieldChanged = (
+  draft: PlaylistMetadataDraft,
+  collection: Record<string, unknown>,
+  field: (typeof ACCESS_DRAFT_FIELDS)[number]
+) =>
+  draft[field] !== undefined &&
+  !isEqual(draft[field] ?? null, collection[field] ?? null)
 
 type Status = 'idle' | 'saving' | 'conflict'
 
@@ -253,6 +293,11 @@ export const PlaylistEditModeProvider = ({
       }
     }
     if (draft.artwork !== undefined && draft.artwork !== null) return true
+    for (const f of ACCESS_DRAFT_FIELDS) {
+      if (accessFieldChanged(draft, collection as Record<string, unknown>, f)) {
+        return true
+      }
+    }
     return false
   }, [collection, draft, removedTrackIds, isCreate, draftTrackCount])
 
@@ -351,13 +396,32 @@ export const PlaylistEditModeProvider = ({
         draft.is_private !== undefined
           ? draft.is_private
           : collection.is_private,
-      artwork: draft.artwork ?? { url: '' }
+      artwork: draft.artwork ?? { url: '' },
+      ...stagedAccessFields(draft)
     } as EditCollectionValues
+
+    const accessChanged = accessFieldChanged(
+      draft,
+      collection as Record<string, unknown>,
+      'stream_conditions'
+    )
+    if (accessChanged) {
+      // Mirror the dedicated edit page: access changes get their own event.
+      track({
+        eventName: Name.COLLECTION_EDIT_ACCESS_CHANGED,
+        properties: {
+          id: collection.playlist_id,
+          from: collection.stream_conditions,
+          to: draft.stream_conditions
+        }
+      })
+    }
 
     const savedDetails =
       draft.playlist_name !== undefined ||
       draft.description !== undefined ||
-      draft.is_private !== undefined
+      draft.is_private !== undefined ||
+      accessChanged
     const savedArtwork = draft.artwork != null
     const savedTracks = removedTrackIds.size > 0
 
