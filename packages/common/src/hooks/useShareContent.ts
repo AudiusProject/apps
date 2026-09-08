@@ -15,10 +15,13 @@ export const useShareContent = (
   const profileId = request?.type === 'profile' ? request.profileId : null
   const collectionId =
     request?.type === 'collection' ? request.collectionId : null
+  const weeklyRotationUserId =
+    request?.type === 'weeklyRotation' ? request.userId : null
 
   const { data: track } = useTrack(trackId)
   const { data: profile } = useUser(profileId)
   const { data: collection } = useCollection(collectionId)
+  const { data: weeklyRotationUser } = useUser(weeklyRotationUserId)
 
   const trackArtistId = track?.owner_id ?? null
   const collectionOwnerId = collection?.playlist_owner_id ?? null
@@ -44,6 +47,11 @@ export const useShareContent = (
       return { type: 'album', album: collection, artist: collectionOwner }
     }
     return { type: 'playlist', playlist: collection, creator: collectionOwner }
+  }
+
+  if (request.type === 'weeklyRotation') {
+    if (!weeklyRotationUser) return null
+    return { type: 'weeklyRotation', user: weeklyRotationUser }
   }
 
   return null

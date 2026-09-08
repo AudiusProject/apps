@@ -5,7 +5,8 @@ const shareTypeMap: Record<ShareType, string> = {
   profile: 'Profile',
   album: 'Album',
   playlist: 'Playlist',
-  contest: 'Contest'
+  contest: 'Contest',
+  weeklyRotation: 'Weekly Rotation'
 }
 
 export const messages = {
@@ -30,6 +31,8 @@ export const messages = {
     `Check out ${albumName} by ${handle} @audius $AUDIO`,
   playlistShareText: (playlistName: string, handle: string) =>
     `Check out ${playlistName} by ${handle} @audius $AUDIO`,
+  weeklyRotationShareText: (handle: string) =>
+    `Check out ${handle}'s Weekly Rotation on @audius $AUDIO`,
   loadingStoryModalTitle: 'Generating Story',
   loadingInstagramStorySubtitle: 'Preparing to open Instagram',
   loadingSnapchatSubtitle: 'Preparing to open Snapchat',

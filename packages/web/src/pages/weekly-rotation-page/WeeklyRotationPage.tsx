@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useCurrentUserId, useWeeklyRotation } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserByHandle,
+  useWeeklyRotation
+} from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
-import { ID, Name, PlaybackSource } from '@audius/common/models'
+import { ID, Name, PlaybackSource, ShareSource } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { playbackActions, playbackSelectors } from '@audius/common/store'
+import {
+  playbackActions,
+  playbackSelectors,
+  shareModalUIActions
+} from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -14,10 +22,11 @@ import {
   Flex,
   IconPause,
   IconPlay,
+  IconShare,
   Text
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
-import { Navigate } from 'react-router'
+import { Navigate, useParams } from 'react-router'
 
 import weeklyRotationArt from 'assets/img/weeklyRotation.jpg'
 import { make } from 'common/store/analytics/actions'
@@ -26,14 +35,18 @@ import { RESPONSIVE_TABLE_POLICIES } from 'components/table/responsivePolicies'
 import { TrackTableLineup, TracksTableColumn } from 'components/tracks-table'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
+import { fullWeeklyRotationPage } from 'utils/route'
+import { getWeeklyRotationOgImageUrl } from 'utils/weeklyRotationPeriod'
 
 const messages = {
   title: 'Weekly Rotation',
   description:
-    'A fresh mix of tracks picked for you, updated every Monday on Audius.'
+    'A fresh mix of tracks picked for you, updated every Wednesday on Audius.',
+  share: 'Share'
 }
 
 const { EXPLORE_PAGE } = route
+const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
 const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
 const PAGE_SIZE = 30
@@ -57,6 +70,12 @@ const columns: TracksTableColumn[] = [
  * Artwork is the bundled asset for the same reason: there's no playlist_id to
  * hang cover art on.
  *
+ * Two routes land here. `/explore/weekly-rotation` is the signed-in user's own
+ * mix; `/explore/weekly-rotation/:handle` is a shared link to someone else's,
+ * which is what Share produces. The endpoint is public, so the shared page
+ * works signed out. Opening your own handle's link is the same as the bare
+ * route.
+ *
  * The endpoint returns a fixed 30, so there is no pagination.
  */
 export const WeeklyRotationPage = () => {
@@ -65,6 +84,7 @@ export const WeeklyRotationPage = () => {
   const { trackEvent } = useAnalytics()
   const mainContentRef = useMainContentRef()
   const { data: currentUserId } = useCurrentUserId()
+  const { handle } = useParams<{ handle?: string }>()
 
   // The route stays registered while the flag is off -- the URL is public and
   // shareable, so a link that predates the rollout should land somewhere real
@@ -72,9 +92,16 @@ export const WeeklyRotationPage = () => {
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
+  // With a handle in the URL the mix belongs to that user; otherwise to the
+  // viewer. Resolving the handle to a user is what the share modal, the
+  // header, and the query all key off.
+  const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
+  const targetUserId = handle ? handleUser?.user_id : currentUserId
+  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+
   const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
-    { limit: PAGE_SIZE },
-    { enabled: isWeeklyRotationEnabled }
+    { limit: PAGE_SIZE, userId: targetUserId },
+    { enabled: isWeeklyRotationEnabled && !!targetUserId }
   )
 
   // Fired once the mix resolves rather than on mount, so trackCount is real
@@ -150,6 +177,19 @@ export const WeeklyRotationPage = () => {
     isMobile
   ])
 
+  // The share modal resolves the owner's handle from the id, so the bare
+  // route shares the viewer's own mix under their handle.
+  const handleShare = useCallback(() => {
+    if (!targetUserId) return
+    dispatch(
+      requestOpenShareModal({
+        type: 'weeklyRotation',
+        userId: targetUserId,
+        source: ShareSource.PAGE
+      })
+    )
+  }, [dispatch, targetUserId])
+
   const isEmpty = !isLoading && trackIds.length === 0
 
   // Nothing until remote config resolves, so an enabled user doesn't get
@@ -157,8 +197,24 @@ export const WeeklyRotationPage = () => {
   if (!isFlagLoaded) return null
   if (!isWeeklyRotationEnabled) return <Navigate to={EXPLORE_PAGE} replace />
 
+  const title = isOwnMix
+    ? exploreMessages.weeklyRotation
+    : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
+
+  // Only the handle route gets the collage card and a canonical URL: the bare
+  // route is per-viewer and shouldn't be indexed as anyone's mix.
+  const metaTags = handle
+    ? {
+        title,
+        description: messages.description,
+        image: getWeeklyRotationOgImageUrl(handle),
+        canonicalUrl: fullWeeklyRotationPage(handle),
+        thumbnail: false
+      }
+    : { title: messages.title, description: messages.description }
+
   return (
-    <Page title={messages.title} description={messages.description}>
+    <Page {...metaTags}>
       <Flex
         direction={isMobile ? 'column' : 'row'}
         gap='xl'
@@ -181,7 +237,7 @@ export const WeeklyRotationPage = () => {
             size='s'
             textAlign={isMobile ? 'center' : undefined}
           >
-            {exploreMessages.weeklyRotation}
+            {title}
           </Text>
           <Text variant='body' size='l' color='subdued'>
             {exploreMessages.weeklyRotationSubtitle}
@@ -189,14 +245,24 @@ export const WeeklyRotationPage = () => {
               ? ` · ${exploreMessages.weeklyRotationTrackCount(trackIds.length)}`
               : ''}
           </Text>
-          <Button
-            variant='primary'
-            iconLeft={isPlaying ? IconPause : IconPlay}
-            onClick={handlePlay}
-            disabled={isEmpty || isLoading}
-          >
-            {isPlaying ? 'Pause' : 'Play'}
-          </Button>
+          <Flex gap='s' wrap='wrap' justifyContent='center'>
+            <Button
+              variant='primary'
+              iconLeft={isPlaying ? IconPause : IconPlay}
+              onClick={handlePlay}
+              disabled={isEmpty || isLoading}
+            >
+              {isPlaying ? 'Pause' : 'Play'}
+            </Button>
+            <Button
+              variant='secondary'
+              iconLeft={IconShare}
+              onClick={handleShare}
+              disabled={!targetUserId || isEmpty}
+            >
+              {messages.share}
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
 

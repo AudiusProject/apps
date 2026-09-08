@@ -6,7 +6,8 @@ import {
   fullCollectionPage,
   fullContestPage,
   fullProfilePage,
-  fullTrackPage
+  fullTrackPage,
+  fullWeeklyRotationPage
 } from 'utils/route'
 
 import { messages } from './messages'
@@ -20,6 +21,7 @@ type ShareMessageConfig = Pick<
   | 'contestShareText'
   | 'playlistShareText'
   | 'albumShareText'
+  | 'weeklyRotationShareText'
 >
 
 export const getXShareText = async (
@@ -97,6 +99,13 @@ export const getXShareText = async (
         is_album
       )
       analyticsEvent = { kind: 'playlist', id: playlist_id, url: link }
+      break
+    }
+    case 'weeklyRotation': {
+      const { user } = content
+      xText = messageConfig.weeklyRotationShareText(getXShareHandle(user))
+      link = fullWeeklyRotationPage(user.handle)
+      analyticsEvent = { kind: 'weeklyRotation', id: user.user_id, url: link }
       break
     }
   }

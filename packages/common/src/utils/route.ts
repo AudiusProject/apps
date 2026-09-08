@@ -32,6 +32,9 @@ export const EXPLORE_PAGE = '/explore'
 export const TRENDING_PLAYLISTS_PAGE = '/explore/playlists'
 export const TRENDING_UNDERGROUND_PAGE = '/explore/underground'
 export const WEEKLY_ROTATION_PAGE = '/explore/weekly-rotation'
+// Someone else's mix. Lives under /explore rather than /:handle/weekly-rotation
+// because /:handle/:slug is the track permalink pattern.
+export const WEEKLY_ROTATION_USER_PAGE = '/explore/weekly-rotation/:handle'
 export const CONTESTS_PAGE = '/contests'
 
 // DEPRECATED - use /library instead.
@@ -303,6 +306,7 @@ export const orderedRoutes = [
   TRENDING_PAGE,
   EXPLORE_PAGE,
   WEEKLY_ROTATION_PAGE,
+  WEEKLY_ROTATION_USER_PAGE,
   CONTESTS_PAGE,
   EMPTY_PAGE,
   SEARCH_PAGE,
@@ -426,6 +430,10 @@ export const staticRoutes = new Set([
   CHAT_PAGE,
   CHATS_PAGE
 ])
+
+export const weeklyRotationPage = (handle: string) => {
+  return `${WEEKLY_ROTATION_PAGE}/${encodeUrlName(handle)}`
+}
 
 export const profilePage = (handle: string | null | undefined) => {
   return `/${encodeUrlName(handle ?? '')}`

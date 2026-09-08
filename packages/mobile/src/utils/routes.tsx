@@ -31,6 +31,11 @@ export const getUserRoute = (user: UserHandle, fullUrl = false) => {
   return fullUrl ? `${AUDIUS_URL}${route}` : route
 }
 
+export const getWeeklyRotationRoute = (user: UserHandle, fullUrl = false) => {
+  const route = `/explore/weekly-rotation/${encodeUrlName(user.handle)}`
+  return fullUrl ? `${AUDIUS_URL}${route}` : route
+}
+
 export const getCollectionRoute = (
   collection: Pick<UserCollectionMetadata, 'permalink'>,
   fullUrl = false

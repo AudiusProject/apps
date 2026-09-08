@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { useShareAction, useShareContent } from '@audius/common/hooks'
+import { exploreMessages } from '@audius/common/messages'
 import { Name, ShareSource } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
 import {
@@ -31,6 +32,8 @@ import { useToast } from 'app/hooks/useToast'
 import type { AppTabScreenParamList } from 'app/screens/app-screen'
 import { make, track } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
+import { getWeeklyRotationRoute } from 'app/utils/routes'
+import share from 'app/utils/share'
 import { useThemeColors } from 'app/utils/theme'
 
 import { ActionDrawerWithoutRedux } from '../action-drawer/ActionDrawerWithoutRedux'
@@ -157,6 +160,27 @@ export const ShareDrawer = NiceModal.create(() => {
       case 'playlist':
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
+      case 'weeklyRotation': {
+        // No entity behind the mix, so no social saga: open the system
+        // sheet directly with the same link Copy Link uses, and emit the
+        // same Share event the sagas do.
+        // `share` prepends AUDIUS_URL itself, so hand it the path.
+        const url = getWeeklyRotationRoute(content.user)
+        share({
+          url,
+          message: exploreMessages.weeklyRotationFor(content.user.name)
+        })
+        track(
+          make({
+            eventName: Name.SHARE,
+            kind: 'weeklyRotation',
+            id: `${content.user.user_id}`,
+            url,
+            source
+          })
+        )
+        break
+      }
     }
   }, [dispatch, content, source])
 
@@ -232,6 +256,10 @@ export const ShareDrawer = NiceModal.create(() => {
       result.push(shareToInstagramStoriesAction)
       result.push(shareVideoToTiktokAction)
       result.push(shareToSnapchatAction)
+    } else if (content?.type === 'weeklyRotation') {
+      // The story/video paths need a single streamable track; a mix has
+      // none, but X works off the link alone.
+      result.push(shareToXAction)
     }
 
     result.push(copyLinkAction, shareSheetAction)
@@ -247,7 +275,8 @@ export const ShareDrawer = NiceModal.create(() => {
     handleOpenShareSheet,
     handleShareToSnapchat,
     handleShareToInstagramStory,
-    isShareableTrack
+    isShareableTrack,
+    content?.type
   ])
 
   // Trigger share action on mount with new content

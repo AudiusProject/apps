@@ -19,19 +19,25 @@ const STALE_TIME_MS = 30 * 60 * 1000
 
 export type UseWeeklyRotationArgs = {
   limit?: number
+  /**
+   * Whose mix. Defaults to the signed-in user; pass another user's id to
+   * view a shared mix. The endpoint is public, so any user works.
+   */
+  userId?: ID | null
 }
 
 export const getWeeklyRotationQueryKey = ({
   userId,
   limit = DEFAULT_LIMIT
-}: UseWeeklyRotationArgs & { userId: ID | null | undefined }) =>
+}: Omit<UseWeeklyRotationArgs, 'userId'> & { userId: ID | null | undefined }) =>
   [QUERY_KEYS.weeklyRotation, userId, { limit }] as unknown as QueryKey<
     LineupData[]
   >
 
 /**
- * The current user's Weekly Rotation mix: tracks they haven't heard, weighted
- * toward artists they don't already follow.
+ * A user's Weekly Rotation mix: tracks they haven't heard, weighted toward
+ * artists they don't already follow. The current user's by default; a shared
+ * link passes the sharer's id.
  *
  * Deliberately a plain `useQuery` rather than an infinite one — the mix is a
  * fixed-size artifact, not a lineup you scroll. There is no page 2.
@@ -44,19 +50,20 @@ export const getWeeklyRotationQueryKey = ({
  * the request count low while still letting a bad result heal.
  */
 export const useWeeklyRotation = (
-  { limit = DEFAULT_LIMIT }: UseWeeklyRotationArgs = {},
+  { limit = DEFAULT_LIMIT, userId: userIdArg }: UseWeeklyRotationArgs = {},
   options?: QueryOptions
 ) => {
   const { audiusSdk } = useQueryContext()
   const { data: currentUserId } = useCurrentUserId()
   const queryClient = useQueryClient()
+  const userId = userIdArg ?? currentUserId
 
   const query = useQuery({
-    queryKey: getWeeklyRotationQueryKey({ userId: currentUserId, limit }),
+    queryKey: getWeeklyRotationQueryKey({ userId, limit }),
     queryFn: async () => {
       const sdk = await audiusSdk()
       const { data = [] } = await sdk.users.getWeeklyRotation({
-        id: Id.parse(currentUserId),
+        id: Id.parse(userId),
         limit,
         userId: OptionalId.parse(currentUserId)
       })
@@ -69,7 +76,7 @@ export const useWeeklyRotation = (
     },
     staleTime: STALE_TIME_MS,
     ...options,
-    enabled: options?.enabled !== false && !!currentUserId
+    enabled: options?.enabled !== false && !!userId
   })
 
   const data = query.data ?? []

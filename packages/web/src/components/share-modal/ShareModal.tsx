@@ -23,8 +23,10 @@ import { make, useRecord } from 'common/store/analytics/actions'
 import * as embedModalActions from 'components/embed-modal/store/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
+import { copyLinkToClipboard } from 'utils/clipboardUtil'
 import { SHARE_TOAST_TIMEOUT_MILLIS } from 'utils/constants'
 import { useSelector } from 'utils/reducer'
+import { weeklyRotationPage } from 'utils/route'
 import { openXLink } from 'utils/xShare'
 
 import { ShareDialog } from './components/ShareDialog'
@@ -105,10 +107,26 @@ export const ShareModal = NiceModal.create(() => {
       case 'playlist':
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
+      case 'weeklyRotation': {
+        // No entity, so no social saga to route through: the link is a
+        // function of the handle alone. Same clipboard path and Share
+        // event the sagas emit.
+        const link = weeklyRotationPage(content.user.handle)
+        copyLinkToClipboard(link)
+        record(
+          make(Name.SHARE, {
+            kind: 'weeklyRotation',
+            id: `${content.user.user_id}`,
+            url: link,
+            source
+          })
+        )
+        break
+      }
     }
     toast(messages.toast(content.type), SHARE_TOAST_TIMEOUT_MILLIS)
     onClose()
-  }, [dispatch, toast, content, source, onClose])
+  }, [dispatch, toast, content, source, onClose, record])
 
   const handleEmbed = useCallback(() => {
     if (content?.type === 'track') {

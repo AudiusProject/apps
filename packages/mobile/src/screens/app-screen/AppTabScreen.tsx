@@ -111,7 +111,8 @@ export type AppTabScreenParamList = {
   SettingsScreen: undefined
   AboutScreen: undefined
   ListeningHistoryScreen: undefined
-  WeeklyRotationScreen: undefined
+  // No handle: the signed-in user's own mix. With one: a shared mix.
+  WeeklyRotationScreen: { handle?: string } | undefined
   AccountSettingsScreen: undefined
   ChangeEmail: undefined
   ChangePassword: undefined

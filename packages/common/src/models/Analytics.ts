@@ -719,7 +719,7 @@ export enum FollowSource {
 
 type Share = {
   eventName: Name.SHARE
-  kind: 'profile' | 'album' | 'playlist' | 'track'
+  kind: 'profile' | 'album' | 'playlist' | 'track' | 'weeklyRotation'
   source: ShareSource
   id: string
   url: string
@@ -727,7 +727,7 @@ type Share = {
 
 export type ShareToTwitter = {
   eventName: Name.SHARE_TO_TWITTER
-  kind: 'profile' | 'album' | 'playlist' | 'track'
+  kind: 'profile' | 'album' | 'playlist' | 'track' | 'weeklyRotation'
   source: ShareSource
   id: number
   url: string
