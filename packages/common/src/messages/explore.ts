@@ -28,10 +28,11 @@ export const exploreMessages = {
   imFeelingLucky: "I'm Feeling Lucky",
   recentlyPlayed: 'Recently Played',
   weeklyRotation: 'Your Weekly Rotation',
-  weeklyRotationSubtitle: 'Updated every Monday',
+  weeklyRotationFor: (name: string) => `${name}'s Weekly Rotation`,
+  weeklyRotationSubtitle: 'Updated every Wednesday',
   weeklyRotationBadge: 'New',
   weeklyRotationPitch:
-    'A fresh mix of tracks picked just for you. Updated every Monday.',
+    'A fresh mix of tracks picked just for you. Updated every Wednesday.',
   weeklyRotationCta: 'Listen Now',
   weeklyRotationTrackCount: (count: number) =>
     `${count} ${count === 1 ? 'track' : 'tracks'}`,

@@ -3,7 +3,13 @@
  * Centralized meta tag generation for both SSR and client-side rendering
  */
 
-import { fullCollectionPage, fullProfilePage, fullTrackPage } from 'utils/route'
+import {
+  fullCollectionPage,
+  fullProfilePage,
+  fullTrackPage,
+  fullWeeklyRotationPage
+} from 'utils/route'
+import { getWeeklyRotationOgImageUrl } from 'utils/weeklyRotationPeriod'
 
 // Image URLs - default OG uses the Audius logo on black from og.audius.co
 export const DEFAULT_IMAGE_URL = 'https://og.audius.co/default'
@@ -90,7 +96,15 @@ export const getWebUrl = (path: string): string => {
 /**
  * Explore type to metadata mapping
  */
-export const exploreMap: Record<string, ExploreInfo> = {}
+export const exploreMap: Record<string, ExploreInfo> = {
+  'weekly-rotation': {
+    title: 'Weekly Rotation',
+    description: createSeoDescription(
+      'A fresh mix of tracks picked for you, updated every Wednesday on Audius'
+    ),
+    image: DEFAULT_IMAGE_URL
+  }
+}
 
 /**
  * Get explore info for a given type
@@ -332,6 +346,35 @@ export const getSearchContext = () => ({
   image: DEFAULT_IMAGE_URL,
   thumbnail: true
 })
+
+/**
+ * A shared Weekly Rotation (/explore/weekly-rotation/:handle). The card is a
+ * collage of the mix's first four tracks, rendered by og.audius.co; the
+ * period is stamped into the image URL so scrapers that cache by URL see a
+ * new card when the mix rolls over.
+ */
+export const getWeeklyRotationPageContext = ({
+  handle,
+  userName
+}: {
+  handle: string
+  userName?: string
+}) => {
+  const displayName =
+    (userName && String(userName).trim()) ||
+    (handle && String(handle).trim()) ||
+    'Listener'
+  return {
+    title: `${displayName}'s Weekly Rotation`,
+    description: createSeoDescription(
+      `A mix of tracks picked for ${displayName}, updated every Wednesday on Audius`
+    ),
+    image: getWeeklyRotationOgImageUrl(handle),
+    imageAlt: `${displayName}'s Weekly Rotation on Audius`,
+    canonicalUrl: fullWeeklyRotationPage(handle),
+    thumbnail: false
+  }
+}
 
 /**
  * SEO Utility functions to generate titles and descriptions

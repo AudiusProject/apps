@@ -240,6 +240,7 @@ const {
   NOTIFICATION_USERS_PAGE,
   EXPLORE_PAGE,
   WEEKLY_ROTATION_PAGE,
+  WEEKLY_ROTATION_USER_PAGE,
   CONTESTS_PAGE,
   SAVED_PAGE,
   LIBRARY_PAGE,
@@ -932,6 +933,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                   path={WEEKLY_ROTATION_PAGE}
                   element={<WeeklyRotationPage />}
                 />
+                <Route
+                  path={WEEKLY_ROTATION_USER_PAGE}
+                  element={<WeeklyRotationPage />}
+                />
                 {!isProduction ? (
                   <Route path={DEV_TOOLS_PAGE} element={<DevTools />} />
                 ) : null}
@@ -1412,6 +1417,10 @@ const WebPlayer = (props: WebPlayerProps) => {
                 <Route path={HISTORY_PAGE} element={<HistoryPage />} />
                 <Route
                   path={WEEKLY_ROTATION_PAGE}
+                  element={<WeeklyRotationPage />}
+                />
+                <Route
+                  path={WEEKLY_ROTATION_USER_PAGE}
                   element={<WeeklyRotationPage />}
                 />
                 {!isProduction ? (

@@ -1,11 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useWeeklyRotation } from '@audius/common/api'
+import {
+  useCurrentUserId,
+  useUserByHandle,
+  useWeeklyRotation
+} from '@audius/common/api'
 import { useAnalytics } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
 import type { ID } from '@audius/common/models'
-import { Name } from '@audius/common/models'
-import { playbackActions, playbackSelectors } from '@audius/common/store'
+import { Name, ShareSource } from '@audius/common/models'
+import {
+  playbackActions,
+  playbackSelectors,
+  shareModalUIActions
+} from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
 import { Image } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -13,17 +21,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
   Button,
   Flex,
+  IconButton,
   IconPause,
   IconPlay,
+  IconShare,
   Paper,
   Text
 } from '@audius/harmony-native'
 import weeklyRotationArt from 'app/assets/images/weeklyRotation.jpg'
 import { Screen, ScreenContent } from 'app/components/core'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
+import { useRoute } from 'app/hooks/useRoute'
+
+const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
 const messages = {
-  title: 'Weekly Rotation'
+  title: 'Weekly Rotation',
+  share: 'Share'
 }
 
 const ART_SIZE = 120
@@ -33,11 +47,25 @@ const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
  * The full Weekly Rotation mix. Mirrors the web page: artwork header, then the
  * track list.
  *
+ * Without a `handle` param this is the signed-in user's own mix. With one --
+ * a shared link, deep-linked from `/explore/weekly-rotation/:handle` -- it is
+ * that user's. The endpoint is public, so a shared mix loads for anyone.
+ *
  * The endpoint returns a fixed 30, so there is no pagination -- hasNextPage is
  * false and loadNextPage is a no-op.
  */
 export const WeeklyRotationScreen = () => {
-  const { trackIds, isPending, isFetching } = useWeeklyRotation({ limit: 30 })
+  const { params } = useRoute<'WeeklyRotationScreen'>()
+  const handle = params?.handle
+  const { data: currentUserId } = useCurrentUserId()
+  const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
+  const targetUserId = handle ? handleUser?.user_id : currentUserId
+  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+
+  const { trackIds, isPending, isFetching } = useWeeklyRotation(
+    { limit: 30, userId: targetUserId },
+    { enabled: !!targetUserId }
+  )
   const { trackEvent } = useAnalytics()
   const dispatch = useDispatch()
 
@@ -82,6 +110,17 @@ export const WeeklyRotationScreen = () => {
     )
   }, [dispatch, isPlaying, currentPlaybackTrackId, playbackQueue, trackEvent])
 
+  const handleShare = useCallback(() => {
+    if (!targetUserId) return
+    dispatch(
+      requestOpenShareModal({
+        type: 'weeklyRotation',
+        userId: targetUserId,
+        source: ShareSource.PAGE
+      })
+    )
+  }, [dispatch, targetUserId])
+
   // Fired once the mix resolves, so trackCount is real and a failed load
   // doesn't register as a page view.
   const hasTrackedView = useRef(false)
@@ -95,6 +134,21 @@ export const WeeklyRotationScreen = () => {
     })
   }, [trackIds.length, trackEvent])
 
+  const title = isOwnMix
+    ? exploreMessages.weeklyRotation
+    : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
+
+  const topbarRight = (
+    <IconButton
+      icon={IconShare}
+      onPress={handleShare}
+      color='subdued'
+      disabled={!targetUserId || !trackIds.length}
+      aria-label={messages.share}
+      ripple
+    />
+  )
+
   const header = (
     <Flex ph='l' pt='l'>
       <Paper row gap='l' alignItems='center' p='l'>
@@ -104,7 +158,7 @@ export const WeeklyRotationScreen = () => {
         />
         <Flex column gap='xs' style={{ flex: 1 }}>
           <Text variant='title' size='l'>
-            {exploreMessages.weeklyRotation}
+            {title}
           </Text>
           <Text variant='body' size='s' color='subdued'>
             {exploreMessages.weeklyRotationSubtitle}
@@ -129,7 +183,11 @@ export const WeeklyRotationScreen = () => {
   )
 
   return (
-    <Screen title={messages.title} topbarRight={null} variant='secondary'>
+    <Screen
+      title={messages.title}
+      topbarRight={topbarRight}
+      variant='secondary'
+    >
       <ScreenContent>
         <TrackLineup
           trackIds={trackIds}

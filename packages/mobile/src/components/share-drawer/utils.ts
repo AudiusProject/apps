@@ -5,7 +5,8 @@ import {
   getCollectionRoute,
   getContestRoute,
   getTrackRoute,
-  getUserRoute
+  getUserRoute,
+  getWeeklyRotationRoute
 } from 'app/utils/routes'
 
 import { messages } from './messages'
@@ -34,6 +35,10 @@ export const getContentUrl = (content: ShareContent) => {
     case 'playlist': {
       const { playlist } = content
       return getCollectionRoute(playlist, true)
+    }
+    case 'weeklyRotation': {
+      const { user } = content
+      return getWeeklyRotationRoute(user, true)
     }
   }
 }
@@ -71,6 +76,10 @@ export const getXShareText = async (content: ShareContent) => {
         creator
       } = content
       return messages.playlistShareText(playlist_name, getXShareHandle(creator))
+    }
+    case 'weeklyRotation': {
+      const { user } = content
+      return messages.weeklyRotationShareText(getXShareHandle(user))
     }
   }
 }

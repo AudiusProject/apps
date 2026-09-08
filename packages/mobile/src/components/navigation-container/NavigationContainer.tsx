@@ -123,6 +123,8 @@ const NavigationContainer = (props: NavigationContainerProps) => {
                         MostLoved: 'explore/most-loved',
                         FeelingLucky: 'explore/feeling-lucky',
                         HeavyRotation: 'explore/heavy-rotation',
+                        WeeklyRotationScreen:
+                          'explore/weekly-rotation/:handle?',
                         ChillPlaylists: 'explore/chill',
                         IntensePlaylists: 'explore/intense',
                         IntimatePlaylists: 'explore/intimate',
