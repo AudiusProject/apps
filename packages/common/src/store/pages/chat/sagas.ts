@@ -144,7 +144,9 @@ export function* doFetchLatestChats() {
     let lastResponse: TypedCommsResponse<UserChat[]> | undefined
     const currentUserId = yield* call(queryCurrentUserId)
     if (!currentUserId) {
-      throw new Error('User not found')
+      // User is logged out - this is expected, don't report to Sentry
+      yield* put(fetchMoreChatsFailed())
+      return
     }
     while (hasMoreChats) {
       const response = yield* call([sdk.chats, sdk.chats.getAll], {
@@ -201,7 +203,9 @@ function* doFetchMoreChats() {
     const before = summary?.prev_cursor
     const currentUserId = yield* call(queryCurrentUserId)
     if (!currentUserId) {
-      throw new Error('User not found')
+      // User is logged out - this is expected, don't report to Sentry
+      yield* put(fetchMoreChatsFailed())
+      return
     }
     const response = yield* call([sdk.chats, sdk.chats.getAll], {
       userId: Id.parse(currentUserId),
