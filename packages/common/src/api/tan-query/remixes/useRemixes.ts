@@ -169,10 +169,10 @@ export const useRemixes = (
 }
 
 /**
- * Count-only companion to `useRemixes`. Hits the same SDK endpoint with
- * `limit=0` and stores just the total under a separate query key so the
- * lineup query can keep its standard `LineupData[]` page shape (which is
- * what `TrackLineup` / `playFrom`'s `querySource` requires).
+ * Count companion to `useRemixes`. Hits the same SDK endpoint and stores
+ * just the total under a separate query key so the lineup query can keep
+ * its standard `LineupData[]` page shape (which is what `TrackLineup` /
+ * `playFrom`'s `querySource` requires).
  */
 export const useRemixesCount = (
   { trackId, isCosign = false, isContestEntry = false }: UseRemixesCountArgs,
@@ -189,7 +189,11 @@ export const useRemixesCount = (
       const remixesResponse = await sdk.tracks.getTrackRemixes({
         trackId: Id.parse(trackId),
         userId: OptionalId.parse(currentUserId),
-        limit: 0,
+        // Fetch one item so the count follows the same API path as the
+        // paginated remix list. Some nodes do not treat limit=0 as a
+        // reliable count-only request, which can make contest pages show
+        // "Submissions (0)" while the list below has entries.
+        limit: 1,
         offset: 0,
         onlyCosigns: isCosign,
         onlyContestEntries: isContestEntry
