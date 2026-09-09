@@ -3,6 +3,7 @@ import { ComponentType, lazy } from 'react'
 import { Modals as ModalTypes } from '@audius/common/store'
 
 import { CoinSuccessModal } from 'components/CoinSuccessModal'
+import { AddTracksByUrlModal } from 'components/add-tracks-by-url-modal/AddTracksByUrlModal'
 import AppCTAModal from 'components/app-cta-modal/AppCTAModal'
 import BrowserPushConfirmationModal from 'components/browser-push-confirmation-modal/BrowserPushConfirmationModal'
 import ConfirmerPreview from 'components/confirmer-preview/ConfirmerPreview'
@@ -41,7 +42,8 @@ const commonModalsMap: { [Modal in ModalTypes]?: ComponentType } = {
   CreateChatModal,
   StripeOnRamp: StripeOnRampModal,
   CreatePlaylistModal,
-  DuplicatePlaylistModal
+  DuplicatePlaylistModal,
+  AddTracksByUrlModal
 }
 
 const commonModals = Object.entries(commonModalsMap) as [
