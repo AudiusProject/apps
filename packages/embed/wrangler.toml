@@ -1,11 +1,13 @@
 compatibility_date = "2023-11-06"
-type = "webpack"
 account_id = "3811365464a8e56b2b27a5590e328e49"
 workers_dev = true
 
+# `main` replaces the old `[site] entry-point`, and the wrangler-1.x
+# `type = "webpack"` field is gone - wrangler bundles the worker itself now.
+main = "workers-site/index.js"
+
 [site]
 bucket = "./build"
-entry-point = "workers-site"
 
 [env.test]
 name = "test"
