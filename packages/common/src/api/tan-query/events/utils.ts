@@ -29,3 +29,12 @@ export const getEventListQueryKey = ({ pageSize }: { pageSize?: number }) => {
 export const getEventIdsByEntityIdQueryKey = (
   args?: EventIdsByEntityIdOptions
 ) => [QUERY_KEYS.eventsByEntityId, args] as unknown as QueryKey<ID[]>
+
+export const dedupeContestTrackIds = (trackIds: ID[]) => {
+  const seenTrackIds = new Set<ID>()
+  return trackIds.filter((trackId) => {
+    if (seenTrackIds.has(trackId)) return false
+    seenTrackIds.add(trackId)
+    return true
+  })
+}
