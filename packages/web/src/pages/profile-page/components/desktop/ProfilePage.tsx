@@ -109,9 +109,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     twitterHandle,
     instagramHandle,
     tikTokHandle,
-    twitterVerified,
-    instagramVerified,
-    tikTokVerified,
     website,
     fanClubBadge,
     hasProfilePicture,
@@ -629,9 +626,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
                   twitterHandle={twitterHandle}
                   instagramHandle={instagramHandle}
                   tikTokHandle={tikTokHandle}
-                  twitterVerified={twitterVerified}
-                  instagramVerified={instagramVerified}
-                  tikTokVerified={tikTokVerified}
                   website={website}
                   fanClubBadge={fanClubBadge}
                   created={created}

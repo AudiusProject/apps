@@ -49,7 +49,6 @@ import {
 import { ProfileMode } from 'components/stat-banner/StatBanner'
 import { StatProps } from 'components/stats/Stats'
 import * as unfollowConfirmationActions from 'components/unfollow-confirmation-modal/store/actions'
-import { verifiedHandleWhitelist } from 'utils/handleWhitelist'
 import { resizeImage } from 'utils/imageProcessingUtil'
 import { push, replace } from 'utils/navigation'
 import { getPathname } from 'utils/route'
@@ -271,11 +270,7 @@ export const useProfilePage = () => {
   const stats = getStats(isArtist ?? false)
 
   const userId = profile ? profile.user_id : null
-  const handle = profile ? `@${profile.handle}` : ''
   const verified = profile ? profile.is_verified : false
-  const twitterVerified = !!profile?.verified_with_twitter
-  const instagramVerified = !!profile?.verified_with_instagram
-  const tikTokVerified = !!profile?.verified_with_tiktok
   const created = profile
     ? dayjs(profile.created_at).format('YYYY')
     : dayjs().format('YYYY')
@@ -289,23 +284,17 @@ export const useProfilePage = () => {
   const twitterHandle = profile
     ? updatedTwitterHandle !== null
       ? updatedTwitterHandle
-      : twitterVerified && !verifiedHandleWhitelist.has(handle)
-        ? profile.handle
-        : (profile.twitter_handle ?? '')
+      : (profile.twitter_handle ?? '')
     : ''
   const instagramHandle = profile
     ? updatedInstagramHandle !== null
       ? updatedInstagramHandle
-      : instagramVerified
-        ? profile.handle
-        : (profile.instagram_handle ?? '')
+      : (profile.instagram_handle ?? '')
     : ''
   const tikTokHandle = profile
     ? updatedTikTokHandle !== null
       ? updatedTikTokHandle
-      : tikTokVerified
-        ? profile.handle
-        : (profile.tiktok_handle ?? '')
+      : (profile.tiktok_handle ?? '')
     : ''
   const website =
     profile && updatedWebsite !== null
@@ -838,9 +827,6 @@ export const useProfilePage = () => {
     twitterHandle,
     instagramHandle,
     tikTokHandle,
-    twitterVerified,
-    instagramVerified,
-    tikTokVerified,
     website,
     fanClubBadge,
     hasProfilePicture: !!hasProfilePicture,

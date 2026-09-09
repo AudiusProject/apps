@@ -87,9 +87,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
     twitterHandle,
     instagramHandle,
     tikTokHandle,
-    twitterVerified,
-    instagramVerified,
-    tikTokVerified,
     website,
     hasProfilePicture,
     following,
@@ -417,9 +414,6 @@ const ProfilePage = ({ containerRef }: ProfilePageProps) => {
         xHandle={xHandle}
         instagramHandle={instagramHandle}
         tikTokHandle={tikTokHandle}
-        twitterVerified={twitterVerified}
-        instagramVerified={instagramVerified}
-        tikTokVerified={tikTokVerified}
         website={website}
         onUpdateName={updateName}
         onUpdateBio={updateBio}

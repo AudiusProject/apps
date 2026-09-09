@@ -17,9 +17,6 @@ type EditProfileProps = {
   xHandle: string
   instagramHandle: string
   tikTokHandle: string
-  twitterVerified: boolean
-  instagramVerified: boolean
-  tikTokVerified: boolean
   website: string
 
   onUpdateName: (name: string) => void
@@ -38,9 +35,6 @@ const EditProfile = ({
   xHandle,
   instagramHandle,
   tikTokHandle,
-  twitterVerified,
-  instagramVerified,
-  tikTokVerified,
   website,
   onUpdateName,
   onUpdateBio,
@@ -82,7 +76,6 @@ const EditProfile = ({
             onChange={onUpdateXHandle}
             maxLength={200}
             inputPrefix='@'
-            isDisabled={!!twitterVerified}
           />
           <EditableRow
             label={<IconInstagram className={styles.icon} />}
@@ -91,7 +84,6 @@ const EditProfile = ({
             onChange={onUpdateInstagramHandle}
             maxLength={200}
             inputPrefix='@'
-            isDisabled={!!instagramVerified}
           />
           <EditableRow
             label={<IconTikTok className={styles.icon} />}
@@ -100,7 +92,6 @@ const EditProfile = ({
             onChange={onUpdateTikTokHandle}
             maxLength={200}
             inputPrefix='@'
-            isDisabled={!!tikTokVerified}
           />
           <EditableRow
             label={<IconLink className={styles.icon} />}
