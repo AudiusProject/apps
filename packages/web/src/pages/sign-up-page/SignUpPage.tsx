@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { Navigate, Route, Routes, useLocation } from 'react-router'
 
 import { getRouteOnCompletion } from 'common/store/pages/signon/selectors'
+import { getSignUpCompletionRoute } from 'pages/sign-up-page/utils/getSignUpCompletionRoute'
 import { useDetermineAllowedRoute } from 'pages/sign-up-page/utils/useDetermineAllowedRoutes'
 
 import { CreateEmailPage } from './pages/CreateEmailPage'
@@ -20,7 +21,6 @@ import { SelectGenresPage } from './pages/SelectGenresPage'
 import { RouteContextProvider } from './utils/RouteContext'
 
 const {
-  FEED_PAGE,
   TRENDING_PAGE,
   SIGN_UP_APP_CTA_PAGE,
   SIGN_UP_ARTISTS_PAGE,
@@ -161,7 +161,7 @@ export const SignUpPage = () => {
           path='completed'
           element={
             <SignUpRoute path={SIGN_UP_COMPLETED_REDIRECT}>
-              <Navigate to={completionRoute || FEED_PAGE} replace />
+              <Navigate to={getSignUpCompletionRoute(completionRoute)} replace />
             </SignUpRoute>
           }
         />

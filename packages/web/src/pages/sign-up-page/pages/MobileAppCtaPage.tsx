@@ -40,7 +40,7 @@ export const MobileAppCtaPage = () => {
   const status = useSelector(getStatus)
 
   const handleContinue = useCallback(() => {
-    // If account creation is complete, go to feed
+    // If account creation is complete, go to the post-signup landing page
     // Otherwise, show loading screen until account is ready
     if (status === EditingStatus.SUCCESS) {
       navigate(SIGN_UP_COMPLETED_REDIRECT)
