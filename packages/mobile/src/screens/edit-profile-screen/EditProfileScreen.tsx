@@ -42,23 +42,10 @@ const useStyles = makeStyles(({ spacing }) => ({
   }
 }))
 
-type EditProfileFormProps = FormikProps<ProfileValues> & {
-  isXVerified: boolean
-  isInstagramVerified: boolean
-  isTikTokVerified: boolean
-}
+type EditProfileFormProps = FormikProps<ProfileValues>
 
 const EditProfileForm = (props: EditProfileFormProps) => {
-  const {
-    handleSubmit,
-    handleReset,
-    isXVerified,
-    isInstagramVerified,
-    isTikTokVerified,
-    errors,
-    values,
-    setFieldValue
-  } = props
+  const { handleSubmit, handleReset, errors, values, setFieldValue } = props
   const styles = useStyles()
 
   const handleFanClubBadgeChange = useCallback(
@@ -112,7 +99,6 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 placeholder='username'
                 startAdornmentText='@'
                 startIcon={IconX}
-                editable={!isXVerified}
                 noGutter
               />
               <TextField
@@ -121,7 +107,6 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 placeholder='username'
                 startAdornmentText='@'
                 startIcon={IconInstagram}
-                editable={!isInstagramVerified}
                 noGutter
               />
               <TextField
@@ -130,7 +115,6 @@ const EditProfileForm = (props: EditProfileFormProps) => {
                 placeholder='username'
                 startAdornmentText='@'
                 startIcon={IconTikTok}
-                editable={!isTikTokVerified}
                 noGutter
               />
             </Flex>
@@ -225,9 +209,6 @@ export const EditProfileScreen = () => {
   if (!profile) return null
 
   const {
-    verified_with_twitter: verifiedWithX = false,
-    verified_with_instagram: verifiedWithInstagram = false,
-    verified_with_tiktok: verifiedWithTiktok = false,
     name = '',
     bio = null,
     location = null,
@@ -265,14 +246,7 @@ export const EditProfileScreen = () => {
       enableReinitialize
     >
       {(formikProps) => {
-        return (
-          <EditProfileForm
-            {...formikProps}
-            isXVerified={verifiedWithX}
-            isInstagramVerified={verifiedWithInstagram}
-            isTikTokVerified={verifiedWithTiktok}
-          />
-        )
+        return <EditProfileForm {...formikProps} />
       }}
     </Formik>
   )
