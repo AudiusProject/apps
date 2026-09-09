@@ -14,7 +14,6 @@ import { chatBlastModalReducer } from './create-chat-blast-modal'
 import { createChatModalReducer } from './create-chat-modal'
 import { createPlaylistModalReducer } from './create-playlist-modal'
 import { deleteTrackConfirmationModalReducer } from './delete-track-confirmation-modal'
-import { downloadTrackArchiveModalReducer } from './download-track-archive-modal'
 import { duplicatePlaylistModalReducer } from './duplicate-playlist-modal'
 import { earlyReleaseConfirmationModalReducer } from './early-release-confirmation-modal'
 import { editAccessConfirmationModalReducer } from './edit-access-confirmation-modal'
@@ -90,7 +89,6 @@ const combinedReducers = combineReducers({
   ConnectedWallets: connectedWalletsModalReducer,
   Announcement: announcementModalReducer,
   Notification: notificationModalReducer,
-  DownloadTrackArchive: downloadTrackArchiveModalReducer,
   HostRemixContest: hostRemixContestModalReducer,
   FinalizeWinnersConfirmation: finalizeWinnersConfirmationModalReducer,
   ReceiveTokensModal: receiveTokensModalReducer,

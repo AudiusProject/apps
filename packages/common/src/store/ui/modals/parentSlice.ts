@@ -76,7 +76,6 @@ export const initialState: BasicModalsState = {
   ConnectedWallets: { isOpen: false },
   Announcement: { isOpen: false },
   Notification: { isOpen: false },
-  DownloadTrackArchive: { isOpen: false },
   BuySellModal: { isOpen: false },
   HostRemixContest: { isOpen: false },
   FinalizeWinnersConfirmation: { isOpen: false },

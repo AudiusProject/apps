@@ -6,7 +6,6 @@ import type { ID } from '@audius/common/models'
 import { DownloadQuality, ModalSource } from '@audius/common/models'
 import {
   PurchaseableContentType,
-  useDownloadTrackArchiveModal,
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal
 } from '@audius/common/store'
@@ -128,28 +127,28 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
     ]
   )
 
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
-
+  // Download All goes through the same saga as a single-row download, which
+  // fetches each file and zips it on-device. The server-side archiver it used
+  // to call queued a job that regularly never got picked up, stranding users
+  // on a spinner; zipping locally has no queue to stall on. Native keeps the
+  // single-archive result because there's no browser here to hand a batch of
+  // individual downloads to.
   const handleDownloadAll = useCallback(() => {
     if (shouldDisplayDownloadFollowGated) {
       toast({ content: messages.followToDownload })
       return
     }
 
-    // Only include parent track in count if it's downloadable
-    const parentTrackCount = track?.access?.download ? 1 : 0
-    openDownloadTrackArchiveModal({
-      trackId,
-      fileCount: stemTracks.length + parentTrackCount
+    handleDownload({
+      trackIds: stemTracks.map((s) => s.track_id),
+      parentTrackId: trackId
     })
   }, [
-    openDownloadTrackArchiveModal,
+    handleDownload,
     shouldDisplayDownloadFollowGated,
-    stemTracks.length,
+    stemTracks,
     toast,
-    trackId,
-    track?.access?.download
+    trackId
   ])
 
   const hasStems = stemTracks.length > 0

@@ -19,7 +19,6 @@ import { CreateChatActionsDrawer } from 'app/components/create-chat-actions-draw
 import { DeactivateAccountConfirmationDrawer } from 'app/components/deactivate-account-confirmation-drawer'
 import { DeleteChatDrawer } from 'app/components/delete-chat-drawer'
 import { DeletePlaylistConfirmationDrawer } from 'app/components/delete-playlist-confirmation-drawer'
-import { DownloadTrackArchiveDrawer } from 'app/components/download-track-archive-drawer/DownloadTrackArchiveDrawer'
 import { ArtistPickConfirmationDrawer } from 'app/components/drawers/ArtistPickConfirmationDrawer'
 import { MuteCommentsConfirmationDrawer } from 'app/components/drawers/MuteCommentsConfirmationDrawer'
 import { DuplicateAddConfirmationDrawer } from 'app/components/duplicate-add-confirmation-drawer'
@@ -141,7 +140,6 @@ const commonDrawersMap: { [Modal in Modals]?: ComponentType } = {
   ReplaceTrackProgress: ReplaceTrackProgressDrawer,
   EarlyReleaseConfirmation: EarlyReleaseConfirmationDrawer,
   ArtistPick: ArtistPickConfirmationDrawer,
-  DownloadTrackArchive: DownloadTrackArchiveDrawer,
   HostRemixContest: HostRemixContestDrawer,
   WithdrawUSDCModal: WithdrawUSDCDrawer,
   ReceiveTokensModal: ReceiveTokensDrawer,

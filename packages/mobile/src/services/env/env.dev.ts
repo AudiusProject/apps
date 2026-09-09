@@ -8,7 +8,6 @@ export const env: Env = {
   API_KEY: '2dc52ec9a4c31790cab6653de0c637f680faa993',
   API_URL: process.env.VITE_API_URL ?? 'http://audius-api',
   APP_NAME: 'audius-client',
-  ARCHIVE_ENDPOINT: process.env.VITE_API_URL ?? 'http://audius-api',
   AUDIUS_NETWORK_CHAIN_ID: 1337,
   AUDIUS_URL: 'https://audius.co',
   BITSKI_CALLBACK_URL: 'https://audius.co/bitski-callback.html',
