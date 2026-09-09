@@ -133,6 +133,45 @@ const unlistedTrackFallbackTrackData = {
   duration: 0
 }
 
+const haveSameTrackIds = (currentIds: ID[], nextIds: ID[]) => {
+  if (currentIds.length !== nextIds.length) return false
+
+  const counts = new Map<ID, number>()
+  currentIds.forEach((id) => counts.set(id, (counts.get(id) ?? 0) + 1))
+
+  for (const id of nextIds) {
+    const count = counts.get(id)
+    if (!count) return false
+    if (count === 1) {
+      counts.delete(id)
+    } else {
+      counts.set(id, count - 1)
+    }
+  }
+
+  return counts.size === 0
+}
+
+const getQueueReorderMoves = (currentIds: ID[], nextIds: ID[]) => {
+  if (!haveSameTrackIds(currentIds, nextIds)) return null
+
+  const working = [...currentIds]
+  const moves: { from: number; to: number }[] = []
+
+  for (let to = 0; to < nextIds.length; to++) {
+    if (working[to] === nextIds[to]) continue
+
+    const from = working.findIndex((id, i) => i > to && id === nextIds[to])
+    if (from === -1) return null
+
+    const [moved] = working.splice(from, 1)
+    working.splice(to, 0, moved)
+    moves.push({ from, to })
+  }
+
+  return moves
+}
+
 type QueueableTrack = {
   track: Nullable<Track>
 } & Pick<PlaybackTrack, 'playerBehavior'>
@@ -369,6 +408,21 @@ const useQueueSync = (isAudioSetup: boolean) => {
     [makeTrackData]
   )
 
+  // --- reorderQueue: move existing RNTP items without restarting playback ---
+  const reorderQueue = useCallback(
+    async (currentTrackIds: ID[], nextTrackIds: ID[]) => {
+      const moves = getQueueReorderMoves(currentTrackIds, nextTrackIds)
+      if (!moves) return false
+
+      for (const { from, to } of moves) {
+        await TrackPlayer.move(from, to)
+      }
+
+      return true
+    },
+    []
+  )
+
   // --- handleQueueChange: decides reset vs append ---
   const handleQueueChange = useCallback(async () => {
     const refTrackIds = queueListRef.current
@@ -391,17 +445,31 @@ const useQueueSync = (isAudioSetup: boolean) => {
       return
     }
 
-    queueListRef.current = queueTrackIds
-
     const isQueueAppend =
       refTrackIds.length > 0 &&
       isEqual(queueTrackIds.slice(0, refTrackIds.length), refTrackIds) &&
       !didPlayerBehaviorChange
 
+    const isQueueReorder =
+      refTrackIds.length > 0 &&
+      haveSameTrackIds(refTrackIds, queueTrackIds) &&
+      !didOfflineToggleChange &&
+      !didPlayerBehaviorChange
+
     if (isQueueAppend) {
       await appendToQueue(queueTracks.slice(refTrackIds.length))
+      queueListRef.current = queueTrackIds
+    } else if (isQueueReorder) {
+      const didReorder = await reorderQueue(refTrackIds, queueTrackIds)
+      if (didReorder) {
+        queueListRef.current = queueTrackIds
+      } else {
+        await resetQueue(queueTracks, queueIndex)
+        queueListRef.current = queueTrackIds
+      }
     } else {
       await resetQueue(queueTracks, queueIndex)
+      queueListRef.current = queueTrackIds
     }
   }, [
     queueTracks,
@@ -411,6 +479,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
     didPlayerBehaviorChange,
     queueTrackOwnersMap,
     appendToQueue,
+    reorderQueue,
     resetQueue
   ])
 
