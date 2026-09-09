@@ -270,6 +270,7 @@ export const useProfilePage = () => {
   const stats = getStats(isArtist ?? false)
 
   const userId = profile ? profile.user_id : null
+  const handle = profile ? `@${profile.handle}` : ''
   const verified = profile ? profile.is_verified : false
   const created = profile
     ? dayjs(profile.created_at).format('YYYY')
