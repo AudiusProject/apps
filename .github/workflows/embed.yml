@@ -1,0 +1,57 @@
+name: Embed Production Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: embed-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: true
+      SKIP_POD_INSTALL: true
+      SKIP_ANDROID_INSTALL: true
+      ANDROID_HOME: /tmp/android-sdk-dummy
+      NODE_OPTIONS: --max-old-space-size=8192
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.10.0'
+          cache: npm
+      - run: npm install -g npm@11.10.0
+      - name: Install dependencies
+        run: |
+          mkdir -p "$ANDROID_HOME"
+          npm ci --prefer-offline || npm install --prefer-offline
+      - name: Build workspace dependencies
+        run: npx turbo run build --filter='embed^...'
+      - name: Verify embed
+        working-directory: packages/embed
+        run: |
+          npm test -- --runInBand
+          npm run verify
+      - name: Build production embed
+        working-directory: packages/embed
+        run: |
+          npx env-cmd -f .env.prod npm run build
+          npm run build-api
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: embed-production-${{ github.sha }}
+          path: packages/embed/build
+          retention-days: 7
+      - name: Deploy production embed
+        working-directory: packages/embed
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler@3.30.1 deploy --env production
