@@ -5,8 +5,9 @@ import { useTheme } from '@emotion/react'
 import type { LottieViewProps } from 'lottie-react-native'
 import LottieView from 'lottie-react-native'
 import { Pressable, StyleSheet } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import { usePrevious } from 'react-use'
+
+import { LinearGradient } from '@audius/harmony-native'
 
 import { BOTTOM_BAR_BUTTON_HEIGHT, BOTTOM_BAR_TOP_PADDING } from '../constants'
 

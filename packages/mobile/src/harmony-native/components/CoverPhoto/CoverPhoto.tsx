@@ -11,11 +11,11 @@ import type {
   StyleProp
 } from 'react-native'
 import { ImageBackground, View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 import type { CornerRadiusOptions } from '@audius/harmony-native'
 
 import { useTheme } from '../../foundations/theme'
+import { LinearGradient } from '../LinearGradient/LinearGradient'
 
 type CoverPhotoImage = Image | ImageSourcePropType | null | undefined
 

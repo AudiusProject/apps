@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 
 import type { Nullable } from '@audius/common/utils'
-import type { ScrollView, FlatList } from 'react-native/types'
+import type { ScrollView, FlatList } from 'react-native'
 
 import { ExpandableContent, UserGeneratedText } from 'app/components/core'
 

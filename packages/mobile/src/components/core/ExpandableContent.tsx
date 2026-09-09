@@ -1,13 +1,13 @@
 import { useCallback, useState, useEffect, useRef } from 'react'
 import type { ReactNode, RefObject } from 'react'
 
-import type { View } from 'react-native'
 import { Platform } from 'react-native'
 import type {
+  View,
   LayoutChangeEvent,
   ScrollView,
   FlatList
-} from 'react-native/types'
+} from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

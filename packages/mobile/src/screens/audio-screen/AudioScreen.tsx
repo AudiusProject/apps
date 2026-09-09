@@ -11,10 +11,10 @@ import { AUDIO } from '@audius/fixed-decimal'
 import { useFocusEffect } from '@react-navigation/native'
 import { Image, Linking } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch, useSelector } from 'react-redux'
 
 import {
+  LinearGradient,
   Button,
   Flex,
   IconCrown,

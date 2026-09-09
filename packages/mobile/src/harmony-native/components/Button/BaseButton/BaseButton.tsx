@@ -3,7 +3,6 @@ import { useCallback } from 'react'
 import { Pressable } from 'react-native'
 import type { GestureResponderEvent, ViewStyle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import LinearGradient from 'react-native-linear-gradient'
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -14,6 +13,7 @@ import Animated, {
 import * as haptic from 'app/haptics'
 
 import { useTheme } from '../../../foundations/theme'
+import { LinearGradient } from '../../LinearGradient/LinearGradient'
 import { LoadingSpinner } from '../../LoadingSpinner/LoadingSpinner'
 import { Text } from '../../Text/Text'
 

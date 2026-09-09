@@ -1,6 +1,4 @@
-import LinearGradient from 'react-native-linear-gradient'
-
-import { Box, spacing, useTheme } from '@audius/harmony-native'
+import { LinearGradient, Box, spacing, useTheme } from '@audius/harmony-native'
 
 interface GraduationProgressBarProps {
   value: number

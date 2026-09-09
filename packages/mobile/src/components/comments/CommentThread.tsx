@@ -9,7 +9,7 @@ import {
   type ID,
   type ReplyComment
 } from '@audius/common/models'
-import type { LayoutChangeEvent } from 'react-native/types'
+import type { LayoutChangeEvent } from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
