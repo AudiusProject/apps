@@ -34,6 +34,8 @@ jobs:
           npm ci --prefer-offline || npm install --prefer-offline
       - name: Build workspace dependencies
         run: npx turbo run build --filter='embed^...'
+      - name: Link environment linter executable
+        run: npm run rebuild -w @audius/dotenv-linter
       - name: Verify embed
         working-directory: packages/embed
         run: |
