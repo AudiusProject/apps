@@ -69,6 +69,8 @@ function SignUpRoute({
 
 export const SignUpPage = () => {
   const completionRoute = useSelector(getRouteOnCompletion)
+  const defaultCompletionRoute =
+    completionRoute === FEED_PAGE ? TRENDING_PAGE : completionRoute
 
   return (
     <RouteContextProvider>
@@ -161,7 +163,7 @@ export const SignUpPage = () => {
           path='completed'
           element={
             <SignUpRoute path={SIGN_UP_COMPLETED_REDIRECT}>
-              <Navigate to={completionRoute || FEED_PAGE} replace />
+              <Navigate to={defaultCompletionRoute ?? TRENDING_PAGE} replace />
             </SignUpRoute>
           }
         />
