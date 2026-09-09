@@ -366,16 +366,25 @@ export const useShareToStory = ({
         // For simplicity, assume that calculating dominant colors and generating the sticker takes 20% of the total loading time:
         dispatch(setProgress(20))
 
-        const { data, signature } =
-          await audiusBackendInstance.signGatedContentRequest({
-            sdk
+        // Nothing here was guarded before, so a rejection - a failed signature,
+        // an SDK that never initialized - escaped as an unhandled promise
+        // rejection: no toast, and the progress drawer left spinning forever.
+        let streamMp3Url: string
+        try {
+          const { data, signature } =
+            await audiusBackendInstance.signGatedContentRequest({
+              sdk
+            })
+          streamMp3Url = await sdk.tracks.getTrackStreamUrl({
+            trackId: Id.parse(content.track.track_id),
+            userId: OptionalId.parse(userId),
+            userSignature: signature,
+            userData: data
           })
-        const streamMp3Url = await sdk.tracks.getTrackStreamUrl({
-          trackId: Id.parse(content.track.track_id),
-          userId: OptionalId.parse(userId),
-          userSignature: signature,
-          userData: data
-        })
+        } catch (e) {
+          handleError(platform, e, 'Error at resolve stream url step')
+          return
+        }
         const storyVideoPath = path.join(
           RNFS.TemporaryDirectoryPath,
           `storyVideo-${uuid()}.mp4`
