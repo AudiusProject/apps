@@ -9,7 +9,7 @@ import {
   IconTokenPlatinum
 } from '@audius/harmony'
 
-import { getCopyableLink } from '../../util/shareUtil'
+import { getAudiusURL, getCopyableLink } from '../../util/shareUtil'
 
 import styles from './Titles.module.css'
 
@@ -57,7 +57,7 @@ const Titles = ({
   }
 
   const onClickArtist = () => {
-    window.open(getCopyableLink(handle), '_blank')
+    window.open(getCopyableLink(`${getAudiusURL()}/${handle}`), '_blank')
   }
 
   return (
