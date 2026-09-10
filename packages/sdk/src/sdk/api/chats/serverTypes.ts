@@ -103,6 +103,14 @@ export type ChatPermitRPC = {
   }
 }
 
+export type ChatSetCategoryRPC = {
+  method: 'chat.set_category'
+  params: {
+    chat_id: string
+    category: ChatCategory | null
+  }
+}
+
 export type RPCPayloadRequest =
   | ChatBlastRPC
   | ChatCreateRPC
@@ -115,6 +123,7 @@ export type RPCPayloadRequest =
   | ChatBlockRPC
   | ChatUnblockRPC
   | ChatPermitRPC
+  | ChatSetCategoryRPC
   | ValidateCanChatRPC
 
 export type RPCPayload = RPCPayloadRequest & {
@@ -138,6 +147,8 @@ export type UserChat = {
   unread_message_count: number
   last_read_at: string
   cleared_history_at: string
+  /** Inbox category chosen by the current user. Absent/null = uncategorized. */
+  category?: ChatCategory | null
 
   // If blast:
   is_blast: false
@@ -215,6 +226,25 @@ export enum ChatPermission {
   FOLLOWERS = 'followers',
   VERIFIED = 'verified',
   NONE = 'none'
+}
+
+/**
+ * Per-user inbox category for a chat. Chats without a category are
+ * "uncategorized" and surface in the default inbox view.
+ */
+export enum ChatCategory {
+  PRIORITY = 'priority',
+  GENERAL = 'general'
+}
+
+/**
+ * Unread message counts for the current user, broken down by inbox category.
+ * Blast "chats" are never counted.
+ */
+export type ChatUnreadCountByCategory = {
+  priority: number
+  general: number
+  uncategorized: number
 }
 
 export enum ChatBlastAudience {

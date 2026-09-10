@@ -3,6 +3,7 @@ import { z } from 'zod'
 import {
   CommsResponse,
   ChatPermission,
+  ChatCategory,
   ChatMessage,
   ChatMessageNullableReaction,
   ChatBlastAudience
@@ -142,6 +143,16 @@ export const ChatPermitRequestSchema = z.object({
 })
 
 export type ChatPermitRequest = z.infer<typeof ChatPermitRequestSchema>
+
+export const ChatSetCategoryRequestSchema = z.object({
+  currentUserId: z.optional(z.string()),
+  chatId: z.string(),
+  category: z.nullable(z.nativeEnum(ChatCategory))
+})
+
+export type ChatSetCategoryRequest = z.infer<
+  typeof ChatSetCategoryRequestSchema
+>
 
 export const ChatValidateCanCreateRequestSchema = z.object({
   currentUserId: z.optional(z.string()),

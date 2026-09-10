@@ -9,7 +9,8 @@ import { CommonState } from '~/store/reducers'
 import { Maybe, removeNullable } from '~/utils/typeUtils'
 
 import { chatMessagesAdapter, chatsAdapter } from './slice'
-import { ChatPermissionAction } from './types'
+import { ChatPermissionAction, InboxTab } from './types'
+import { getInboxTabForChat } from './utils'
 
 const { selectById: selectChatById, selectAll: selectAllChats } =
   chatsAdapter.getSelectors<CommonState>((state) => state.pages.chat.chats)
@@ -135,16 +136,73 @@ export const getUnreadMessagesCount = (state: CommonState) => {
   return state.pages.chat.unreadMessagesCount
 }
 
+/**
+ * Unread counts broken down by inbox category, honoring optimistic updates.
+ * Undefined until the server has supplied them.
+ */
+export const getUnreadMessagesCountByCategory = (state: CommonState) =>
+  state.pages.chat.optimisticUnreadMessagesCountByCategory ??
+  state.pages.chat.unreadMessagesCountByCategory
+
+const makeGetChatsForInboxTab = (tab: InboxTab) =>
+  createSelector([getChats], (chats) =>
+    chats.filter((chat) => getInboxTabForChat(chat) === tab)
+  )
+
+/** Chats shown in the Priority tab: those marked Priority plus uncategorized. */
+export const getPriorityInboxChats = makeGetChatsForInboxTab(InboxTab.PRIORITY)
+
+/** Chats shown in the General tab: only those the user marked General. */
+export const getGeneralInboxChats = makeGetChatsForInboxTab(InboxTab.GENERAL)
+
+export const getChatsForInboxTab = (state: CommonState, tab: InboxTab) =>
+  tab === InboxTab.GENERAL
+    ? getGeneralInboxChats(state)
+    : getPriorityInboxChats(state)
+
+/**
+ * Whether the given inbox tab has unread messages. Prefers the server's
+ * per-category counts (which cover chats not yet paginated into state) and
+ * falls back to scanning the loaded chats.
+ */
+export const getHasUnreadMessagesForInboxTab = (
+  state: CommonState,
+  tab: InboxTab
+) => {
+  const counts = getUnreadMessagesCountByCategory(state)
+  if (counts) {
+    const tabCount =
+      tab === InboxTab.GENERAL
+        ? counts.general
+        : counts.priority + counts.uncategorized
+    if (tabCount > 0) return true
+  }
+  return getChatsForInboxTab(state, tab).some(
+    (chat) => !chat.is_blast && chat.unread_message_count > 0
+  )
+}
+
+export const getHasUnreadPriorityMessages = (state: CommonState) =>
+  getHasUnreadMessagesForInboxTab(state, InboxTab.PRIORITY)
+
+export const getHasUnreadGeneralMessages = (state: CommonState) =>
+  getHasUnreadMessagesForInboxTab(state, InboxTab.GENERAL)
+
+/**
+ * Whether the account has any unread messages across every inbox category.
+ * Drives the sidebar / nav dot, so a new message in either Priority or
+ * General (or an uncategorized chat) lights it up.
+ */
 export const getHasUnreadMessages = (state: CommonState) => {
   if (getUnreadMessagesCount(state) > 0) {
     return true
   }
-  // This really shouldn't be necessary since the above should be kept in sync
+  // This really shouldn't be necessary since the above should be kept in sync.
+  // Blasts never carry unread counts, so skip them rather than stopping at the
+  // first one (they sort to the top on ties and would hide a later unread).
   const chats = getChats(state)
   for (const chat of chats) {
-    if (chat.is_blast) {
-      return false
-    }
+    if (chat.is_blast) continue
     if (chat.unread_message_count > 0) {
       return true
     }
