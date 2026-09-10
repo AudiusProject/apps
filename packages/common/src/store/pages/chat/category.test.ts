@@ -74,6 +74,15 @@ const withServerCounts = (
 const asCommonState = (chat: ReturnType<typeof chatReducer>) =>
   ({ pages: { chat } }) as unknown as CommonState
 
+/** The (non-blast) chat entity, narrowed so `category` is readable. */
+const getUserChatEntity = (
+  state: ReturnType<typeof chatReducer>,
+  chatId: string
+): UserChat | undefined => {
+  const chat = state.chats.entities[chatId]
+  return chat && !chat.is_blast ? chat : undefined
+}
+
 describe('chat categories', () => {
   describe('getInboxTabForChat', () => {
     it('puts uncategorized and priority chats in Priority, general in General', () => {
@@ -100,7 +109,7 @@ describe('chat categories', () => {
           category: ChatCategory.GENERAL
         })
       )
-      expect(optimistic.chats.entities['chat-1']?.category).toBe(
+      expect(getUserChatEntity(optimistic, 'chat-1')?.category).toBe(
         ChatCategory.GENERAL
       )
       expect(optimistic.pendingChatCategoryRollback['chat-1']).toBeNull()
@@ -112,7 +121,7 @@ describe('chat categories', () => {
           category: ChatCategory.GENERAL
         })
       )
-      expect(confirmed.chats.entities['chat-1']?.category).toBe(
+      expect(getUserChatEntity(confirmed, 'chat-1')?.category).toBe(
         ChatCategory.GENERAL
       )
       expect(confirmed.pendingChatCategoryRollback['chat-1']).toBeUndefined()
@@ -133,7 +142,7 @@ describe('chat categories', () => {
         optimistic,
         actions.setChatCategoryFailed({ chatId: 'chat-1' })
       )
-      expect(rolledBack.chats.entities['chat-1']?.category).toBe(
+      expect(getUserChatEntity(rolledBack, 'chat-1')?.category).toBe(
         ChatCategory.PRIORITY
       )
       expect(rolledBack.pendingChatCategoryRollback['chat-1']).toBeUndefined()
@@ -157,7 +166,7 @@ describe('chat categories', () => {
           summary: makeSummary()
         })
       )
-      expect(clobbered.chats.entities['chat-1']?.category).toBeNull()
+      expect(getUserChatEntity(clobbered, 'chat-1')?.category).toBeNull()
       const confirmed = chatReducer(
         clobbered,
         actions.setChatCategorySucceeded({
@@ -165,7 +174,7 @@ describe('chat categories', () => {
           category: ChatCategory.GENERAL
         })
       )
-      expect(confirmed.chats.entities['chat-1']?.category).toBe(
+      expect(getUserChatEntity(confirmed, 'chat-1')?.category).toBe(
         ChatCategory.GENERAL
       )
     })
