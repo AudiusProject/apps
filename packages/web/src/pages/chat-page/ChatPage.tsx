@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useCanSendMessage } from '@audius/common/hooks'
 import { Name, Status } from '@audius/common/models'
-import { chatActions, chatSelectors } from '@audius/common/store'
+import { chatActions, chatSelectors, InboxTab } from '@audius/common/store'
 import { ChatBlast, OptionalHashId } from '@audius/sdk'
 import cn from 'classnames'
 import { useDispatch } from 'react-redux'
@@ -90,6 +90,7 @@ export const ChatPage = () => {
 
   const chats = useSelector(getChats)
   const chatsStatus = useSelector(getChatsStatus)
+  const [currentTab, setCurrentTab] = useState<InboxTab>(InboxTab.PRIORITY)
   // Only collapse the sidebar once we know for sure the account has no chats.
   // During LOADING / IDLE we keep the sidebar visible so the skeleton loader
   // still renders and we don't flash a layout shift.
@@ -183,6 +184,8 @@ export const ChatPage = () => {
         <ChatHeader
           currentChatId={currentChatId}
           isNarrowLayout={isNarrowLayout}
+          currentTab={currentTab}
+          onSelectTab={setCurrentTab}
         />
       }
     >
@@ -192,6 +195,7 @@ export const ChatPage = () => {
             <ChatList
               className={chatListClassName}
               currentChatId={currentChatId}
+              currentTab={currentTab}
               isCompact={isNarrowLayout}
               onChatClicked={handleChatClicked}
             />

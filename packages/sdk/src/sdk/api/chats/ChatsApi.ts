@@ -54,6 +54,8 @@ import {
   ChatReadRequestSchema,
   ChatReadAllRequest,
   ChatReadAllRequestSchema,
+  ChatSetCategoryRequest,
+  ChatSetCategoryRequestSchema,
   ChatUnfurlRequest,
   ChatUnfurlRequestSchema,
   TypedCommsResponse,
@@ -63,6 +65,7 @@ import {
   type ChatCreateRPC,
   type ChatInvite,
   type ChatMessage,
+  type ChatUnreadCountByCategory,
   type ChatWebsocketEventData,
   type RPCPayloadRequest,
   type UpgradableChatBlast,
@@ -310,6 +313,33 @@ export class ChatsApi
       query
     })
     return (await res.json()) as TypedCommsResponse<number>
+  }
+
+  /**
+   * Gets the total unread message count of the current user, broken down by
+   * inbox category (priority / general / uncategorized). Used to drive the
+   * per-tab notification dots in the inbox.
+   * @param params.currentUserId the user to act on behalf of
+   * @returns the unread count by category response
+   */
+  public async getUnreadCountByCategory(params?: ChatGetUnreadCountRequest) {
+    const parsedArgs = await parseParams(
+      'getUnreadCountByCategory',
+      ChatGetUnreadCountRequestSchema
+    )(params)
+    const query: HTTPQuery = {
+      timestamp: new Date().getTime()
+    }
+    if (parsedArgs?.currentUserId) {
+      query.current_user_id = parsedArgs.currentUserId
+    }
+    const res = await this.signAndSendRequest({
+      method: 'GET',
+      path: `/comms/chats/unread_by_category`,
+      headers: {},
+      query
+    })
+    return (await res.json()) as TypedCommsResponse<ChatUnreadCountByCategory>
   }
 
   /**
@@ -675,6 +705,30 @@ export class ChatsApi
         permit: permit ?? ChatPermission.ALL,
         permit_list: permitList ?? [ChatPermission.ALL],
         allow
+      }
+    })
+  }
+
+  /**
+   * Sets (or clears) the inbox category of a chat for the current user.
+   * Chats marked 'priority' or 'general' are routed to that inbox tab;
+   * passing null returns the chat to the uncategorized inbox.
+   * @param params.chatId the chat to categorize
+   * @param params.category 'priority' | 'general' | null
+   * @param params.currentUserId the user to act on behalf of
+   * @returns the rpc object
+   */
+  public async setCategory(params: ChatSetCategoryRequest) {
+    const { currentUserId, chatId, category } = await parseParams(
+      'setCategory',
+      ChatSetCategoryRequestSchema
+    )(params)
+    return await this.sendRpc({
+      current_user_id: currentUserId,
+      method: 'chat.set_category',
+      params: {
+        chat_id: chatId,
+        category
       }
     })
   }

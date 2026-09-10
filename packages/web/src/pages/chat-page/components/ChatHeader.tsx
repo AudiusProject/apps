@@ -4,6 +4,7 @@ import {
   chatActions,
   chatSelectors,
   CommonState,
+  InboxTab,
   useCreateChatModal
 } from '@audius/common/store'
 import {
@@ -23,6 +24,7 @@ import { useModalState } from 'common/hooks/useModalState'
 import { Frosted } from 'components/frosted/Frosted'
 
 import { ChatBlastHeader } from './ChatBlastHeader'
+import { InboxTabs } from './InboxTabs'
 import { UserChatHeader } from './UserChatHeader'
 
 const messages = {
@@ -38,13 +40,15 @@ const CHAT_LIST_WIDTH_PX = 400
 
 type ChatHeaderProps = {
   currentChatId?: string
+  currentTab: InboxTab
+  onSelectTab: (tab: InboxTab) => void
   isNarrowLayout?: boolean
   scrollBarWidth?: number
   headerContainerRef?: React.RefObject<HTMLDivElement | null>
 }
 
 export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
-  ({ currentChatId, isNarrowLayout }, ref) => {
+  ({ currentChatId, currentTab, onSelectTab, isNarrowLayout }, ref) => {
     const dispatch = useDispatch()
     const { onOpen: openCreateChatModal } = useCreateChatModal()
     const [, setInboxSettingsVisible] = useModalState('InboxSettings')
@@ -86,32 +90,37 @@ export const ChatHeader = forwardRef<HTMLDivElement, ChatHeaderProps>(
         : [])
     ]
 
+    // Title row (32px) + tabs row (32px) + padding/gap fill the 112px
+    // --chat-header-height exactly, so the list offsets are unchanged.
     const headerContent = (
-      <Flex p='l' alignItems='center' gap='m'>
-        <IconMessages size='2xl' color='heading' />
-        <Text variant='heading' strength='default' size='l' color='heading'>
-          {messages.header}
-        </Text>
-        <Flex gap='m' css={{ marginLeft: 'auto' }}>
-          <IconButton
-            aria-label={messages.compose}
-            icon={IconCompose}
-            onClick={handleComposeClicked}
-          />
-          <PopupMenu
-            items={inboxMenuItems}
-            transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-            renderTrigger={(ref, trigger) => (
-              <IconButton
-                ref={ref}
-                aria-label={messages.inboxOptions}
-                icon={IconKebabHorizontal}
-                onClick={() => trigger()}
-              />
-            )}
-          />
+      <Flex column p='l' gap='m' w='100%' css={{ minWidth: 0 }}>
+        <Flex alignItems='center' gap='m' w='100%'>
+          <IconMessages size='2xl' color='heading' />
+          <Text variant='heading' strength='default' size='l' color='heading'>
+            {messages.header}
+          </Text>
+          <Flex gap='m' css={{ marginLeft: 'auto' }}>
+            <IconButton
+              aria-label={messages.compose}
+              icon={IconCompose}
+              onClick={handleComposeClicked}
+            />
+            <PopupMenu
+              items={inboxMenuItems}
+              transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+              renderTrigger={(ref, trigger) => (
+                <IconButton
+                  ref={ref}
+                  aria-label={messages.inboxOptions}
+                  icon={IconKebabHorizontal}
+                  onClick={() => trigger()}
+                />
+              )}
+            />
+          </Flex>
         </Flex>
+        <InboxTabs currentTab={currentTab} onSelectTab={onSelectTab} />
       </Flex>
     )
 
