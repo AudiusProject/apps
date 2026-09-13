@@ -8,7 +8,6 @@ import { useSearchCategory } from 'app/screens/search-screen/searchState'
 
 import { ArtistSpotlight } from './ArtistSpotlight'
 import { BestSellingAlbums } from './BestSellingAlbums'
-import { WeeklyRotation } from './WeeklyRotation'
 import { FeaturedPlaylists } from './FeaturedPlaylists'
 import { FeaturedRemixContests } from './FeaturedRemixContests'
 import { FeelingLucky } from './FeelingLucky'
@@ -17,6 +16,7 @@ import { NewAlbumReleases } from './NewAlbumReleases'
 import { RecentlyPlayedTracks } from './RecentlyPlayed'
 import { TopAlbumsThisMonth } from './TopAlbumsThisMonth'
 import { TrendingGenres } from './TrendingGenres'
+import { WeeklyRotation } from './WeeklyRotation'
 
 export const ExploreContent = () => {
   const [category] = useSearchCategory()
