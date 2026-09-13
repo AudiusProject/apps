@@ -1,4 +1,17 @@
-import { ChatPermission } from '@audius/sdk'
+import { ChatPermission, type ChatUnreadCountByCategory } from '@audius/sdk'
+
+/**
+ * The tab a chat is shown under in the inbox. Chats the user has not
+ * categorized yet ("uncategorized") always surface in the Priority tab so
+ * that new conversations are never buried without an explicit action.
+ */
+export enum InboxTab {
+  PRIORITY = 'priority',
+  GENERAL = 'general'
+}
+
+/** Bucket key used for per-category unread counts. */
+export type ChatCategoryKey = keyof ChatUnreadCountByCategory
 
 /** Action current user can take to be able to message another user */
 export enum ChatPermissionAction {

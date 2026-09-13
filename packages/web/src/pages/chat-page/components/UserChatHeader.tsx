@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { useOtherChatUsers } from '@audius/common/api'
 import { User } from '@audius/common/models'
-import { chatSelectors } from '@audius/common/store'
+import { chatSelectors, CommonState } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
   IconButton,
@@ -23,8 +23,9 @@ import { BlockUserConfirmationModal } from './BlockUserConfirmationModal'
 import { ChatUser } from './ChatUser'
 import { DeleteChatConfirmationModal } from './DeleteChatConfirmationModal'
 import { UnblockUserConfirmationModal } from './UnblockUserConfirmationModal'
+import { useChatCategoryMenuItems } from './useChatCategoryMenuItems'
 
-const { getBlockees } = chatSelectors
+const { getBlockees, getChat } = chatSelectors
 const { profilePage } = route
 
 const messages = {
@@ -47,6 +48,8 @@ export const UserChatHeader = ({ chatId }: { chatId?: string }) => {
   const users = useOtherChatUsers(chatId)
   const user: User | null = users[0] ?? null
   const blockeeList = useSelector(getBlockees)
+  const chat = useSelector((state: CommonState) => getChat(state, chatId ?? ''))
+  const categoryMenuItems = useChatCategoryMenuItems(chat)
   const isBlocked = user && blockeeList.includes(user.user_id)
   const handleUnblockClicked = useCallback(() => {
     setIsUnblockUserModalVisible(true)
@@ -85,6 +88,7 @@ export const UserChatHeader = ({ chatId }: { chatId?: string }) => {
       icon: <IconUser />,
       onClick: handleVisitClicked
     },
+    ...categoryMenuItems,
     isBlocked
       ? {
           text: messages.unblock,

@@ -8,6 +8,8 @@ import {
   type ValidatedChatPermissions,
   type ChatBlastAudience,
   type ChatBlast,
+  type ChatCategory,
+  type ChatUnreadCountByCategory,
   Id
 } from '@audius/sdk'
 import {
@@ -24,6 +26,7 @@ import { hasTail } from '~/utils/chatUtils'
 import dayjs from '~/utils/dayjs'
 
 import { ChatWebsocketError } from './types'
+import { getChatCategoryKey } from './utils'
 
 export type Chat = UserChat | ChatBlast
 
@@ -48,6 +51,18 @@ type ChatState = {
   >
   unreadMessagesCount: number
   optimisticUnreadMessagesCount?: number
+  /**
+   * Server-reported unread counts per inbox category. Undefined until the
+   * server has answered (or if it doesn't support the breakdown yet), in which
+   * case the per-tab dots fall back to the chats loaded in state.
+   */
+  unreadMessagesCountByCategory?: ChatUnreadCountByCategory
+  optimisticUnreadMessagesCountByCategory?: ChatUnreadCountByCategory
+  /**
+   * Category a chat had before an in-flight setChatCategory, keyed by chat id,
+   * so a failed request can be rolled back.
+   */
+  pendingChatCategoryRollback: Record<ChatID, ChatCategory | null>
   optimisticReactions: Record<string, ChatMessageReaction>
   optimisticChatRead: Record<
     string,
@@ -95,6 +110,32 @@ const { selectById: getChat } = chatsAdapter.getSelectors(
   (state: ChatState) => state.chats
 )
 
+/**
+ * Applies a delta to the optimistic unread count of the category bucket that
+ * `chat` belongs to. No-op until the server has supplied a baseline.
+ */
+const adjustUnreadCountForChatCategory = (
+  state: ChatState,
+  chat: { category?: ChatCategory | null },
+  delta: number
+) => {
+  if (!state.unreadMessagesCountByCategory || delta === 0) return
+  const counts = state.optimisticUnreadMessagesCountByCategory ?? {
+    ...state.unreadMessagesCountByCategory
+  }
+  const key = getChatCategoryKey(chat)
+  counts[key] = Math.max(0, counts[key] + delta)
+  state.optimisticUnreadMessagesCountByCategory = counts
+}
+
+/** The unread count currently shown for a chat, honoring optimistic reads. */
+const getDisplayedUnreadCount = (state: ChatState, chatId: ChatID) => {
+  const optimisticRead = state.optimisticChatRead[chatId]
+  if (optimisticRead) return optimisticRead.unread_message_count
+  const chat = getChat(state, chatId)
+  return chat && !chat.is_blast ? chat.unread_message_count : 0
+}
+
 const messageSortComparator = (a: ChatMessage, b: ChatMessage) =>
   dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? 1 : -1
 
@@ -136,6 +177,7 @@ const initialState: ChatState = {
   messages: {},
   unreadMessagesCount: 0,
   optimisticChatRead: {},
+  pendingChatCategoryRollback: {},
   optimisticReactions: {},
   activeChatId: null,
   blockees: [],
@@ -188,10 +230,19 @@ const slice = createSlice({
     },
     fetchUnreadMessagesCountSucceeded: (
       state,
-      action: PayloadAction<{ unreadMessagesCount: number }>
+      action: PayloadAction<{
+        unreadMessagesCount: number
+        unreadMessagesCountByCategory?: ChatUnreadCountByCategory
+      }>
     ) => {
-      state.unreadMessagesCount = action.payload.unreadMessagesCount
+      const { unreadMessagesCount, unreadMessagesCountByCategory } =
+        action.payload
+      state.unreadMessagesCount = unreadMessagesCount
       delete state.optimisticUnreadMessagesCount
+      if (unreadMessagesCountByCategory) {
+        state.unreadMessagesCountByCategory = unreadMessagesCountByCategory
+        delete state.optimisticUnreadMessagesCountByCategory
+      }
     },
     fetchUnreadMessagesCountFailed: (_state) => {},
     goToChat: (
@@ -444,6 +495,11 @@ const slice = createSlice({
       const { chatId } = action.payload
       const existingChat = getChat(state, chatId)
       if (existingChat && !existingChat.is_blast) {
+        adjustUnreadCountForChatCategory(
+          state,
+          existingChat,
+          -getDisplayedUnreadCount(state, chatId)
+        )
         state.optimisticChatRead[chatId] = {
           last_read_at: existingChat.last_message_at,
           unread_message_count: 0
@@ -465,9 +521,18 @@ const slice = createSlice({
       const { chatId } = action.payload
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
+      delete state.optimisticUnreadMessagesCountByCategory
       const existingChat = getChat(state, chatId)
       if (!existingChat || existingChat.is_blast) return
       state.unreadMessagesCount -= existingChat?.unread_message_count ?? 0
+      if (state.unreadMessagesCountByCategory) {
+        const key = getChatCategoryKey(existingChat)
+        state.unreadMessagesCountByCategory[key] = Math.max(
+          0,
+          state.unreadMessagesCountByCategory[key] -
+            existingChat.unread_message_count
+        )
+      }
       chatsAdapter.updateOne(state.chats, {
         id: chatId,
         changes: {
@@ -484,6 +549,7 @@ const slice = createSlice({
       const { chatId } = action.payload
       delete state.optimisticChatRead[chatId]
       delete state.optimisticUnreadMessagesCount
+      delete state.optimisticUnreadMessagesCountByCategory
     },
     markAllChatsAsRead: (state) => {
       // triggers saga
@@ -501,6 +567,13 @@ const slice = createSlice({
         }
       }
       state.optimisticUnreadMessagesCount = 0
+      if (state.unreadMessagesCountByCategory) {
+        state.optimisticUnreadMessagesCountByCategory = {
+          priority: 0,
+          general: 0,
+          uncategorized: 0
+        }
+      }
     },
     markAllChatsAsReadSucceeded: (state) => {
       // Server confirmed every chat_member.unread_count is now 0; promote the
@@ -521,12 +594,21 @@ const slice = createSlice({
       }
       state.optimisticChatRead = {}
       delete state.optimisticUnreadMessagesCount
+      if (state.unreadMessagesCountByCategory) {
+        state.unreadMessagesCountByCategory = {
+          priority: 0,
+          general: 0,
+          uncategorized: 0
+        }
+      }
+      delete state.optimisticUnreadMessagesCountByCategory
     },
     markAllChatsAsReadFailed: (state) => {
       // chat.read_all is all-or-nothing; on failure undo every optimistic
       // read this run installed.
       state.optimisticChatRead = {}
       delete state.optimisticUnreadMessagesCount
+      delete state.optimisticUnreadMessagesCountByCategory
     },
     sendMessage: (
       state,
@@ -629,6 +711,7 @@ const slice = createSlice({
         // Web or mobile: update optimistic unread count
         state.optimisticUnreadMessagesCount =
           (state.optimisticUnreadMessagesCount ?? state.unreadMessagesCount) + 1
+        adjustUnreadCountForChatCategory(state, existingChat, 1)
       } else {
         // Mark chat as read if its our own
         chatsAdapter.updateOne(state.chats, {
@@ -641,6 +724,11 @@ const slice = createSlice({
         state.optimisticUnreadMessagesCount =
           (state.optimisticUnreadMessagesCount ?? state.unreadMessagesCount) -
           existingUnreadCount
+        adjustUnreadCountForChatCategory(
+          state,
+          existingChat,
+          -existingUnreadCount
+        )
       }
     },
     /**
@@ -755,6 +843,68 @@ const slice = createSlice({
       const { chatId } = action.payload
       chatsAdapter.removeOne(state.chats, chatId)
       chatMessagesAdapter.removeAll(state.messages[chatId])
+    },
+    setChatCategory: (
+      state,
+      action: PayloadAction<{ chatId: string; category: ChatCategory | null }>
+    ) => {
+      // triggers saga
+      // Optimistically move the chat (and its unread messages) to the new
+      // category so it switches tabs immediately.
+      const { chatId, category } = action.payload
+      const existingChat = getChat(state, chatId)
+      if (!existingChat || existingChat.is_blast) return
+      const previousCategory = existingChat.category ?? null
+      if (previousCategory === category) return
+      if (!(chatId in state.pendingChatCategoryRollback)) {
+        state.pendingChatCategoryRollback[chatId] = previousCategory
+      }
+      const unreadCount = getDisplayedUnreadCount(state, chatId)
+      adjustUnreadCountForChatCategory(state, existingChat, -unreadCount)
+      adjustUnreadCountForChatCategory(state, { category }, unreadCount)
+      chatsAdapter.updateOne(state.chats, {
+        id: chatId,
+        changes: { category }
+      })
+    },
+    setChatCategorySucceeded: (
+      state,
+      action: PayloadAction<{ chatId: string; category: ChatCategory | null }>
+    ) => {
+      const { chatId, category } = action.payload
+      delete state.pendingChatCategoryRollback[chatId]
+      const existingChat = getChat(state, chatId)
+      if (!existingChat || existingChat.is_blast) return
+      // Re-assert the confirmed category in case a concurrent chat refetch
+      // overwrote the optimistic value with the server's stale one.
+      if ((existingChat.category ?? null) !== category) {
+        chatsAdapter.updateOne(state.chats, {
+          id: chatId,
+          changes: { category }
+        })
+      }
+    },
+    setChatCategoryFailed: (
+      state,
+      action: PayloadAction<{ chatId: string }>
+    ) => {
+      const { chatId } = action.payload
+      const previousCategory = state.pendingChatCategoryRollback[chatId]
+      if (previousCategory === undefined) return
+      delete state.pendingChatCategoryRollback[chatId]
+      const existingChat = getChat(state, chatId)
+      if (!existingChat || existingChat.is_blast) return
+      const unreadCount = getDisplayedUnreadCount(state, chatId)
+      adjustUnreadCountForChatCategory(state, existingChat, -unreadCount)
+      adjustUnreadCountForChatCategory(
+        state,
+        { category: previousCategory },
+        unreadCount
+      )
+      chatsAdapter.updateOne(state.chats, {
+        id: chatId,
+        changes: { category: previousCategory }
+      })
     },
     logError: (
       _state,

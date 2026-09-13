@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 
-import { chatSelectors } from '@audius/common/store'
+import { chatActions, chatSelectors } from '@audius/common/store'
+import { ChatCategory } from '@audius/sdk'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useDrawer } from 'app/hooks/useDrawer'
@@ -10,12 +11,15 @@ import { setVisibility } from 'app/store/drawers/slice'
 
 import ActionDrawer from '../action-drawer'
 
-const { getDoesBlockUser } = chatSelectors
+const { getDoesBlockUser, getChat } = chatSelectors
+const { setChatCategory } = chatActions
 
 const CHAT_ACTIONS_MODAL_NAME = 'ChatActions'
 
 const messages = {
   visitProfile: 'Visit Profile',
+  moveToPriority: 'Move to Priority',
+  moveToGeneral: 'Move to General',
   blockMessages: 'Block Messages',
   unblockMessages: 'Unblock Messages',
   reportAbuse: 'Report Abuse',
@@ -30,6 +34,8 @@ export const ChatActionsDrawer = () => {
   const doesBlockUser = useSelector((state: AppState) =>
     getDoesBlockUser(state, userId)
   )
+  const chat = useSelector((state: AppState) => getChat(state, chatId))
+  const category = chat && !chat.is_blast ? (chat.category ?? null) : null
 
   const closeDrawer = useCallback(() => {
     dispatch(
@@ -67,6 +73,16 @@ export const ChatActionsDrawer = () => {
     )
   }, [closeDrawer, dispatch, userId])
 
+  const handleMoveToPriorityPress = useCallback(() => {
+    closeDrawer()
+    dispatch(setChatCategory({ chatId, category: ChatCategory.PRIORITY }))
+  }, [chatId, closeDrawer, dispatch])
+
+  const handleMoveToGeneralPress = useCallback(() => {
+    closeDrawer()
+    dispatch(setChatCategory({ chatId, category: ChatCategory.GENERAL }))
+  }, [chatId, closeDrawer, dispatch])
+
   const handleDeletePress = useCallback(() => {
     closeDrawer()
     dispatch(
@@ -86,6 +102,22 @@ export const ChatActionsDrawer = () => {
           text: messages.visitProfile,
           callback: handleVisitProfilePress
         },
+        ...(category !== ChatCategory.PRIORITY
+          ? [
+              {
+                text: messages.moveToPriority,
+                callback: handleMoveToPriorityPress
+              }
+            ]
+          : []),
+        ...(category !== ChatCategory.GENERAL
+          ? [
+              {
+                text: messages.moveToGeneral,
+                callback: handleMoveToGeneralPress
+              }
+            ]
+          : []),
         {
           text: doesBlockUser
             ? messages.unblockMessages

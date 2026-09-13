@@ -6,7 +6,7 @@ import {
 } from 'react'
 
 import { Status } from '@audius/common/models'
-import { chatActions, chatSelectors } from '@audius/common/store'
+import { chatActions, chatSelectors, InboxTab } from '@audius/common/store'
 import cn from 'classnames'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
@@ -18,25 +18,40 @@ import { ChatListBlastItem } from './ChatListBlastItem'
 import { ChatListItem } from './ChatListItem'
 import { SkeletonChatListItem } from './SkeletonChatListItem'
 
-const { getChats, getChatsStatus, getHasMoreChats } = chatSelectors
+const { getChatsForInboxTab, getChatsStatus, getHasMoreChats } = chatSelectors
 const { fetchMoreChats } = chatActions
 
 const messages = {
   nothingHere: 'Nothing Here Yet',
-  start: 'Start a Conversation!'
+  priorityEmpty:
+    'New conversations, and ones you mark as Priority, show up here.',
+  generalEmpty: 'Conversations you mark as General show up here.'
 }
+
+const emptyMessageForTab: Record<InboxTab, string> = {
+  [InboxTab.PRIORITY]: messages.priorityEmpty,
+  [InboxTab.GENERAL]: messages.generalEmpty
+}
+
+/**
+ * Chats are paginated by recency across all categories, so a tab can be
+ * empty while older pages still hold chats that belong in it. Keep fetching
+ * until the tab has at least this many rows or there is nothing left.
+ */
+const MIN_VISIBLE_CHATS_PER_TAB = 10
 
 type ChatListProps = {
   currentChatId?: string
+  currentTab: InboxTab
   onChatClicked: (chatId: string) => void
   isCompact?: boolean
 } & ComponentPropsWithoutRef<'div'>
 
 export const ChatList = (props: ChatListProps) => {
-  const { currentChatId, onChatClicked, isCompact } = props
+  const { currentChatId, currentTab, onChatClicked, isCompact } = props
   const dispatch = useDispatch()
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
-  const chats = useSelector(getChats)
+  const chats = useSelector((state) => getChatsForInboxTab(state, currentTab))
   const status = useSelector(getChatsStatus)
   const hasMore = useSelector(getHasMoreChats)
 
@@ -49,6 +64,19 @@ export const ChatList = (props: ChatListProps) => {
       setHasLoadedOnce(true)
     }
   }, [status, setHasLoadedOnce])
+
+  // Backfill the current tab from older pages when it is nearly empty
+  const needsBackfill = hasMore && chats.length < MIN_VISIBLE_CHATS_PER_TAB
+  useEffect(() => {
+    if (status === Status.SUCCESS && needsBackfill) {
+      dispatch(fetchMoreChats())
+    }
+  }, [status, needsBackfill, dispatch])
+
+  // While there are still pages to load, the InfiniteScroll loader (below)
+  // shows skeletons, so only show the empty state once we've run out.
+  const isEmptyTab =
+    chats.length === 0 && hasLoadedOnce && (!hasMore || status === Status.ERROR)
 
   return (
     <div
@@ -97,12 +125,14 @@ export const ChatList = (props: ChatListProps) => {
               />
             )
           )
-        ) : hasLoadedOnce ? (
+        ) : isEmptyTab ? (
           <div className={styles.empty}>
             <div className={styles.header}>{messages.nothingHere}</div>
-            <div className={styles.subheader}>{messages.start}</div>
+            <div className={styles.subheader}>
+              {emptyMessageForTab[currentTab]}
+            </div>
           </div>
-        ) : (
+        ) : hasLoadedOnce ? null : (
           <>
             <SkeletonChatListItem isCompact={isCompact} />
             <SkeletonChatListItem

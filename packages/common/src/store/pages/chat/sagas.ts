@@ -1,5 +1,6 @@
 import {
   ChatBlast,
+  ChatCategory,
   HashId,
   Id,
   OptionalHashId,
@@ -38,6 +39,7 @@ import {
   removeNullable
 } from '../../../utils'
 import { getContext } from '../../effects'
+import type { CommonStoreContext } from '../../storeContext'
 
 import * as chatSelectors from './selectors'
 import { actions as chatActions } from './slice'
@@ -91,7 +93,10 @@ const {
   fetchLinkUnfurl,
   fetchLinkUnfurlSucceeded,
   deleteChat,
-  deleteChatSucceeded
+  deleteChatSucceeded,
+  setChatCategory,
+  setChatCategorySucceeded,
+  setChatCategoryFailed
 } = chatActions
 const { getChatsSummary, getChat, getUnfurlMetadata, getNonOptimisticChat } =
   chatSelectors
@@ -115,13 +120,40 @@ function* fetchUsersForChats(chats: UserChat[]) {
   yield* call(queryUsers, Array.from(userIds.values()))
 }
 
+/**
+ * Fetches the per-category unread breakdown used by the inbox tab dots.
+ * Failure is non-fatal (older nodes don't serve it); the dots then fall back
+ * to the chats loaded in state.
+ */
+function* fetchUnreadMessagesCountByCategory(
+  sdk: Awaited<ReturnType<CommonStoreContext['audiusSdk']>>
+) {
+  try {
+    const response = yield* call([
+      sdk.chats,
+      sdk.chats.getUnreadCountByCategory
+    ])
+    return response.data
+  } catch (e) {
+    console.warn('Chats: unread count by category unavailable', e as Error)
+    return undefined
+  }
+}
+
 function* doFetchUnreadMessagesCount() {
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
     const response = yield* call([sdk.chats, sdk.chats.getUnreadCount])
+    const unreadMessagesCountByCategory = yield* call(
+      fetchUnreadMessagesCountByCategory,
+      sdk
+    )
     yield* put(
-      fetchUnreadMessagesCountSucceeded({ unreadMessagesCount: response.data })
+      fetchUnreadMessagesCountSucceeded({
+        unreadMessagesCount: response.data,
+        unreadMessagesCountByCategory
+      })
     )
   } catch (e) {
     yield* put(fetchUnreadMessagesCountFailed())
@@ -904,6 +936,51 @@ function* watchDeleteChat() {
   yield takeEvery(deleteChat, doDeleteChat)
 }
 
+export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
+  const { chatId, category } = action.payload
+  const { track, make } = yield* getContext('analytics')
+  try {
+    const audiusSdk = yield* getContext('audiusSdk')
+    const sdk = yield* call(audiusSdk)
+    const chat = yield* select((state) => getNonOptimisticChat(state, chatId))
+    // Blasts are synthetic client-side chats and can't be categorized
+    if (chat?.is_blast) return
+    yield* call([sdk.chats, sdk.chats.setCategory], { chatId, category })
+    yield* put(setChatCategorySucceeded({ chatId, category }))
+    yield* put(
+      toast({
+        content:
+          category === ChatCategory.PRIORITY
+            ? 'Moved to Priority'
+            : category === ChatCategory.GENERAL
+              ? 'Moved to General'
+              : 'Conversation uncategorized'
+      })
+    )
+    yield* call(
+      track,
+      make({ eventName: Name.SET_CHAT_CATEGORY_SUCCESS, category })
+    )
+  } catch (e) {
+    yield* put(setChatCategoryFailed({ chatId }))
+    yield* put(
+      toast({
+        type: 'error',
+        content: 'Failed to update conversation. Please try again.'
+      })
+    )
+    console.error('Chats', e as Error)
+    yield* call(
+      track,
+      make({ eventName: Name.SET_CHAT_CATEGORY_FAILURE, category })
+    )
+  }
+}
+
+function* watchSetChatCategory() {
+  yield takeEvery(setChatCategory, doSetChatCategory)
+}
+
 function* watchLogError() {
   yield takeEvery(logError, doLogError)
 }
@@ -931,6 +1008,7 @@ export const sagas = () => {
     watchFetchPermissions,
     watchFetchLinkUnfurlMetadata,
     watchDeleteChat,
+    watchSetChatCategory,
     watchLogError
   ]
 }

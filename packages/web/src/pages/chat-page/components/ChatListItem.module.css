@@ -1,3 +1,8 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
 .root {
   appearance: none;
   display: flex;
@@ -102,4 +107,23 @@
 
 .root.compact .minimizedUnreadIndicatorTag {
   display: flex;
+}
+
+/* Category options: revealed on hover / keyboard focus, hidden in compact */
+.optionsButton {
+  position: absolute;
+  right: var(--harmony-unit-4);
+  bottom: var(--harmony-unit-3);
+  z-index: 2;
+  padding: var(--harmony-unit-1);
+  border-radius: var(--harmony-unit-1);
+  background-color: var(--harmony-n-50);
+  opacity: 0;
+  transition: opacity 0.12s ease-out;
+}
+
+.container:hover .optionsButton,
+.container:focus-within .optionsButton,
+.optionsButton[aria-expanded='true'] {
+  opacity: 1;
 }

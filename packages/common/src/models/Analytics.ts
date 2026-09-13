@@ -389,6 +389,8 @@ export enum Name {
   SEND_MESSAGE_FAILURE = 'Send Message: Failure',
   DELETE_CHAT_SUCCESS = 'Delete Chat: Success',
   DELETE_CHAT_FAILURE = 'Delete Chat: Failure',
+  SET_CHAT_CATEGORY_SUCCESS = 'Set Chat Category: Success',
+  SET_CHAT_CATEGORY_FAILURE = 'Set Chat Category: Failure',
   BLOCK_USER_SUCCESS = 'Block User: Success',
   BLOCK_USER_FAILURE = 'Block User: Failure',
   CHANGE_INBOX_SETTINGS_SUCCESS = 'Change Inbox Settings: Success',
@@ -2025,6 +2027,16 @@ type DeleteChatFailure = {
   eventName: Name.DELETE_CHAT_FAILURE
 }
 
+type SetChatCategorySuccess = {
+  eventName: Name.SET_CHAT_CATEGORY_SUCCESS
+  category: 'priority' | 'general' | null
+}
+
+type SetChatCategoryFailure = {
+  eventName: Name.SET_CHAT_CATEGORY_FAILURE
+  category: 'priority' | 'general' | null
+}
+
 type BlockUserSuccess = {
   eventName: Name.BLOCK_USER_SUCCESS
   blockedUserId: ID
@@ -2870,6 +2882,8 @@ export type AllTrackingEvents =
   | SendMessageFailure
   | DeleteChatSuccess
   | DeleteChatFailure
+  | SetChatCategorySuccess
+  | SetChatCategoryFailure
   | BlockUserSuccess
   | BlockUserFailure
   | ChangeInboxSettingsSuccess
