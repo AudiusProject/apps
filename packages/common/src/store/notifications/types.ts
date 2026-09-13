@@ -46,6 +46,7 @@ export enum NotificationType {
   CommentMention = 'CommentMention',
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
+  WeeklyRotation = 'WeeklyRotation',
   ArtistRemixContestEnded = 'ArtistRemixContestEnded',
   ArtistRemixContestEndingSoon = 'ArtistRemixContestEndingSoon',
   ArtistRemixContestSubmissions = 'ArtistRemixContestSubmissions',
@@ -94,6 +95,7 @@ export enum PushNotificationType {
   CommentMention = 'CommentMention',
   CommentReaction = 'CommentReaction',
   ListenStreakReminder = 'ListenStreakReminder',
+  WeeklyRotation = 'WeeklyRotation',
   FanClubTextPost = 'FanClubTextPost'
 }
 
@@ -604,6 +606,13 @@ export type ListenStreakReminderNotification = BaseNotification & {
   streak: number
 }
 
+export type WeeklyRotationNotification = BaseNotification & {
+  type: NotificationType.WeeklyRotation
+  /** The rotation period announced, as an ISO (year, week) pair. */
+  year: number
+  week: number
+}
+
 export type FanRemixContestStartedNotification = BaseNotification & {
   type: NotificationType.FanRemixContestStarted
   entityId: ID
@@ -709,6 +718,7 @@ export type Notification =
   | CommentMentionNotification
   | CommentReactionNotification
   | ListenStreakReminderNotification
+  | WeeklyRotationNotification
   | ArtistRemixContestEndedNotification
   | FanRemixContestEndedNotification
   | FanRemixContestWinnersSelectedNotification

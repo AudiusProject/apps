@@ -12,7 +12,8 @@ import {
   IconTrending as IconTrendingBase,
   IconTrophy,
   IconUser,
-  IconCart as IconCartBase
+  IconCart as IconCartBase,
+  IconArrowRotate
 } from '@audius/harmony'
 
 import styles from './icons.module.css'
@@ -80,4 +81,8 @@ export const IconStreakFire = () => {
       🔥
     </span>
   )
+}
+
+export const IconWeeklyRotation = () => {
+  return <IconArrowRotate color='accent' />
 }
