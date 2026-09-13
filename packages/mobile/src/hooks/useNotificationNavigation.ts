@@ -272,6 +272,12 @@ export const useNotificationNavigation = () => {
       ) => {
         navigation.navigate('RewardsScreen')
       },
+      // Handles both the in-app tile and the push payload (`type:
+      // 'WeeklyRotation'`); neither carries an entity, the mix is fetched on
+      // demand for the signed-in user.
+      [NotificationType.WeeklyRotation]: () => {
+        navigation.navigate('WeeklyRotationScreen')
+      },
       [PushNotificationType.FavoriteAlbum]: socialActionHandler,
       [PushNotificationType.FavoritePlaylist]: socialActionHandler,
       [PushNotificationType.FavoriteTrack]: socialActionHandler,

@@ -3,3 +3,8 @@ export const listenStreakReminderMessages = {
   body: (streak: number) =>
     `Your ${streak} day listening streak will end in 6 hours! Keep listening to earn daily rewards!`
 }
+
+export const weeklyRotationNotificationMessages = {
+  title: 'Your Weekly Rotation Is Ready',
+  body: 'A fresh mix of tracks picked just for you. Give it a spin before it rotates next Wednesday.'
+}

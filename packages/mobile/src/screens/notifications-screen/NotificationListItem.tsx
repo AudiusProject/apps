@@ -43,6 +43,7 @@ import { FanRemixContestSubmissionNotification } from './Notifications/FanRemixC
 import { FanRemixContestWinnersSelectedNotification } from './Notifications/FanRemixContestWinnersSelectedNotification'
 import { ListenStreakReminderNotification } from './Notifications/ListenStreakReminderNotification'
 import { RemixContestUpdateNotification } from './Notifications/RemixContestUpdateNotification'
+import { WeeklyRotationNotification } from './Notifications/WeeklyRotationNotification'
 
 type NotificationListItemProps = {
   notification: Notification
@@ -117,6 +118,8 @@ export const NotificationListItem = (props: NotificationListItemProps) => {
         return <CommentReactionNotification notification={notification} />
       case NotificationType.ListenStreakReminder:
         return <ListenStreakReminderNotification notification={notification} />
+      case NotificationType.WeeklyRotation:
+        return <WeeklyRotationNotification notification={notification} />
       case NotificationType.FanRemixContestEnded:
         return <FanRemixContestEndedNotification notification={notification} />
       case NotificationType.FanRemixContestEndingSoon:

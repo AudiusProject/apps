@@ -688,6 +688,15 @@ export const notificationFromSDK = (
           type: string
           actions: typeof notification.actions
         }
+        if (n.type === 'weekly_rotation') {
+          const data = n.actions[0].data as unknown as Record<string, number>
+          return {
+            type: NotificationType.WeeklyRotation,
+            year: data.year,
+            week: data.week,
+            ...formatBaseNotification(notification)
+          }
+        }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>
           return {
