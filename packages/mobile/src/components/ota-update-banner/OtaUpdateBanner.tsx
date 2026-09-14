@@ -51,25 +51,42 @@ function syncStatusLabel(status: CodePush.SyncStatus): string {
 type BannerPhase = 'none' | 'pending'
 
 /**
+ * How long to keep polling for a pending package after mount/foreground, and
+ * how often. A production bundle takes tens of seconds to download on a
+ * phone, and the download is usually owned by the CodePush root HOC's own
+ * sync (ota-root), not by this component's -- see `prefetchUpdate`.
+ */
+const PENDING_POLL_INTERVAL_MS = 2000
+const PENDING_POLL_WINDOW_MS = 3 * 60 * 1000
+
+/**
  * CodePush is configured in ota-root (ON_APP_RESUME) to fetch updates with
  * ON_NEXT_RESTART. We only surface UI when an update is already downloaded
  * and installed as pending — then the user restarts when they want.
+ *
+ * One instance mounts per root tab header, so each tab that is open polls on
+ * its own. The first tab (Feed) mounts while the root HOC's sync is already
+ * running, so its own `CodePush.sync` returns SYNC_IN_PROGRESS immediately
+ * and never observes the install; it has to find the pending package by
+ * polling. Before the poll window was long enough, the banner only ever
+ * appeared on a tab mounted *after* the download finished (Trending).
  */
 export const OtaUpdateBanner = () => {
   const { color, spacing } = useTheme()
   const [phase, setPhase] = useState<BannerPhase>('none')
   const dismissedRef = useRef(false)
   const pendingLoggedRef = useRef(false)
-  const pollTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const refresh = useCallback(async () => {
+  /** Re-reads CodePush state; resolves to whether a pending package exists. */
+  const refresh = useCallback(async (): Promise<boolean> => {
     if (!isOtaEnabled()) {
       if (!FORCE_OTA_BANNER_PREVIEW) {
         setPhase('none')
       } else {
         setPhase('pending')
       }
-      return
+      return false
     }
     try {
       const pending = await CodePush.getUpdateMetadata(
@@ -84,10 +101,11 @@ export const OtaUpdateBanner = () => {
           )
         }
         setPhase(dismissedRef.current ? 'none' : 'pending')
-        return
+        return true
       }
       pendingLoggedRef.current = false
       setPhase('none')
+      return false
     } catch (e) {
       console.warn(
         '[OTA] getUpdateMetadata(PENDING) failed',
@@ -95,23 +113,40 @@ export const OtaUpdateBanner = () => {
         `lastHistoryEndpoint=${getOtaLastHistoryEndpointForLogs()}`
       )
       setPhase('none')
+      return false
     }
   }, [])
 
+  const stopPendingPolls = useCallback(() => {
+    if (pollTimeoutRef.current) {
+      clearTimeout(pollTimeoutRef.current)
+      pollTimeoutRef.current = null
+    }
+  }, [])
+
+  // Poll until a pending package shows up or the window closes. Polling
+  // (rather than a fixed handful of early checks) is what lets the tab that
+  // was open during the download -- normally Feed, the initial tab -- show
+  // the banner instead of only the tab opened afterwards.
   const schedulePendingPolls = useCallback(() => {
-    pollTimeoutsRef.current.forEach(clearTimeout)
-    pollTimeoutsRef.current = []
+    stopPendingPolls()
     if (!isOtaEnabled()) {
       return
     }
-    const delaysMs = [0, 800, 2000, 4000]
-    delaysMs.forEach((ms) => {
-      const id = setTimeout(() => {
-        refresh().catch(() => {})
-      }, ms)
-      pollTimeoutsRef.current.push(id)
-    })
-  }, [refresh])
+    const startedAt = Date.now()
+    const tick = () => {
+      pollTimeoutRef.current = null
+      refresh()
+        .catch(() => false)
+        .then((pending) => {
+          if (pending || Date.now() - startedAt >= PENDING_POLL_WINDOW_MS) {
+            return
+          }
+          pollTimeoutRef.current = setTimeout(tick, PENDING_POLL_INTERVAL_MS)
+        })
+    }
+    tick()
+  }, [refresh, stopPendingPolls])
 
   const prefetchUpdate = useCallback(async () => {
     if (!isOtaEnabled()) {
@@ -165,11 +200,8 @@ export const OtaUpdateBanner = () => {
     refresh().catch(() => {})
     prefetchUpdate().catch(() => {})
     schedulePendingPolls()
-    return () => {
-      pollTimeoutsRef.current.forEach(clearTimeout)
-      pollTimeoutsRef.current = []
-    }
-  }, [refresh, prefetchUpdate, schedulePendingPolls])
+    return stopPendingPolls
+  }, [refresh, prefetchUpdate, schedulePendingPolls, stopPendingPolls])
 
   const handleDismiss = useCallback(() => {
     dismissedRef.current = true
