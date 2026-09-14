@@ -198,7 +198,8 @@ export const MetaTags = (props: MetaTagsProps) => {
           <meta name='twitter:app:url:ipad' content={appUrl} />
           <meta name='twitter:app:name:googleplay' content='Audius Music' />
           <meta name='twitter:app:id:googleplay' content='co.audius.app' />
-          <meta name='twitter:app:url:googleplay' content={appUrl} />
+          {/* Omit the Android app URL: X's WebView can load audius:// as a
+              webpage and fail with ERR_UNKNOWN_URL_SCHEME. */}
         </Helmet>
       ) : null}
 
