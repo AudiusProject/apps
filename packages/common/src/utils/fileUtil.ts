@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer'
 
 import { Track, User } from '~/models'
-import { DownloadFile } from '~/services'
 
 /** Convert a base64 string to a file object */
 export const dataURLtoFile = async (
@@ -66,7 +65,10 @@ export const getFilename = ({
   return filename
 }
 
-export const dedupFilenames = (files: DownloadFile[]) => {
+// Only reads and rewrites `filename`, so it accepts anything carrying one —
+// callers that dedup before they have a URL to pair it with shouldn't have to
+// invent a placeholder to satisfy `DownloadFile`.
+export const dedupFilenames = (files: { filename: string }[]) => {
   const filenameCounts = new Map<string, number>()
   for (const file of files) {
     const count = filenameCounts.get(file.filename) ?? 0

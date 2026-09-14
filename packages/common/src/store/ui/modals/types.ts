@@ -13,7 +13,6 @@ import { CoinflowOnrampModalState } from './coinflow-onramp-modal'
 import { CoinflowWithdrawModalState } from './coinflow-withdraw-modal'
 import { ChatBlastModalState } from './create-chat-blast-modal'
 import { DeleteTrackConfirmationModalState } from './delete-track-confirmation-modal'
-import { DownloadTrackArchiveModalState } from './download-track-archive-modal'
 import { EarlyReleaseConfirmationModalState } from './early-release-confirmation-modal'
 import { EditAccessConfirmationModalState } from './edit-access-confirmation-modal'
 import { FinalizeWinnersConfirmationModalState } from './finalize-winners-confirmation-modal'
@@ -112,7 +111,6 @@ export type Modals =
   | 'ConnectedWallets'
   | 'Announcement'
   | 'Notification'
-  | 'DownloadTrackArchive'
   | 'BuySellModal'
   | 'HostRemixContest'
   | 'ReceiveTokensModal'
@@ -158,7 +156,6 @@ export type StatefulModalsState = {
   FinalizeWinnersConfirmation: FinalizeWinnersConfirmationModalState
   Announcement: AnnouncementModalState
   Notification: BaseModalState
-  DownloadTrackArchive: DownloadTrackArchiveModalState
   BuySellModal: BuySellModalState
   HostRemixContest: HostRemixContestModalState
   ReceiveTokensModal: ReceiveTokensModalState

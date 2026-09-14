@@ -7,8 +7,7 @@ import {
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
   toastActions,
-  PurchaseableContentType,
-  useDownloadTrackArchiveModal
+  PurchaseableContentType
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import {
@@ -89,9 +88,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const { onOpen: openPremiumContentPurchaseModal } =
     usePremiumContentPurchaseModal()
 
-  const { onOpen: openDownloadTrackArchiveModal } =
-    useDownloadTrackArchiveModal()
-
   const { onOpen: openWaitForDownloadModal } = useWaitForDownloadModal()
 
   const onToggleExpand = useCallback(() => setExpanded((val) => !val), [])
@@ -148,6 +144,10 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
     ]
   )
 
+  // Download All hands every stem to the browser as its own download rather
+  // than asking the archiver to zip them server-side. `parentTrackId` is what
+  // makes the saga append the full track to the batch, and it only does so
+  // when the parent is actually downloadable.
   const handleDownloadAll = useRequiresAccountCallback(
     (e) => {
       e.stopPropagation()
@@ -156,21 +156,18 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
         dispatch(toast({ content: messages.followToDownload }))
         return
       }
-      // Only include parent track in count if it's downloadable
-      const parentTrackCount = partialTrack?.access?.download ? 1 : 0
-      openDownloadTrackArchiveModal({
-        trackId,
-        fileCount: stemTracks.length + parentTrackCount
+      handleDownload({
+        trackIds: stemTracks.map((s) => s.track_id),
+        parentTrackId: trackId
       })
     },
     [
       isMobile,
       shouldDisplayDownloadFollowGated,
-      openDownloadTrackArchiveModal,
+      handleDownload,
       trackId,
-      stemTracks.length,
-      dispatch,
-      partialTrack?.access?.download
+      stemTracks,
+      dispatch
     ]
   )
 

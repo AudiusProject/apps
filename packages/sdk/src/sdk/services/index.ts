@@ -1,7 +1,6 @@
 export * from './AntiAbuseOracle'
 export * from './Ethereum'
 export * from './AntiAbuseOracleSelector'
-export * from './Archiver'
 export * from './AudiusWalletClient'
 export * from './EntityManager'
 export * from './Logger'

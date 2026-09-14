@@ -19,7 +19,6 @@ import 'components/album-track-remove-confirmation-modal/AlbumTrackRemoveConfirm
 import 'components/artist-pick-modal/ArtistPickModal'
 import 'components/delete-playlist-confirmation-modal/DeletePlaylistConfirmationModal'
 import 'components/delete-track-confirmation-modal/DeleteTrackConfirmationModal'
-import 'components/download-track-archive-modal/DownloadTrackArchiveModal'
 import 'components/duplicate-add-confirmation-modal/DuplicateAddConfirmationModal'
 import 'components/early-release-confirmation-modal/EarlyReleaseConfirmationModal'
 import 'components/edit-access-confirmation-modal/EditAccessConfirmationModal'
