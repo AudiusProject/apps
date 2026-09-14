@@ -2,9 +2,10 @@ import { useMemo, useRef } from 'react'
 
 import type { DimensionValue, StyleProp, ViewStyle } from 'react-native'
 import { Animated, Easing, View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
+import { LinearGradient } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 import { useThemeColors } from 'app/utils/theme'
 
 const ANIMATION_DURATION_MS = 1500
@@ -64,8 +65,7 @@ export const Skeleton = (props: SkeletonProps) => {
         style={[styles.skeleton, { transform: [{ translateX: shimmerPos }] }]}
       >
         <LinearGradient
-          useAngle
-          angle={90}
+          {...getGradientStartEnd(90)}
           locations={[0, 0.32, 0.46, 0.54, 0.68, 1]}
           colors={[
             skeleton,

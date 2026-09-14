@@ -7,9 +7,9 @@ import { WidthSizes } from '@audius/common/models'
 import { shortenSPLAddress } from '@audius/common/utils'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Image, Linking, StyleSheet, View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 import {
+  LinearGradient,
   Divider,
   Flex,
   IconCopy,

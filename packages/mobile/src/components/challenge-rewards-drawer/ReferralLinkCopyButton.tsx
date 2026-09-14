@@ -2,13 +2,13 @@ import { useCallback } from 'react'
 
 import Clipboard from '@react-native-clipboard/clipboard'
 import { Animated, View, TouchableHighlight } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
-import { IconCopy } from '@audius/harmony-native'
+import { LinearGradient, IconCopy } from '@audius/harmony-native'
 import Text from 'app/components/text'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import { useToast } from 'app/hooks/useToast'
 import { makeStyles } from 'app/styles'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 import { useThemeColors } from 'app/utils/theme'
 
 const messages = {
@@ -70,9 +70,7 @@ export const ReferralLinkCopyButton = ({
       >
         <LinearGradient
           style={[styles.borderRadius]}
-          angleCenter={{ x: 0.5, y: 0.5 }}
-          angle={350}
-          useAngle={true}
+          {...getGradientStartEnd(350)}
           colors={[pageHeaderGradientColor1, pageHeaderGradientColor2]}
           locations={[0.0204, 1]}
         >

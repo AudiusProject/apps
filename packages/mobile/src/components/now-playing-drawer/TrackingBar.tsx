@@ -4,12 +4,13 @@ import { useCurrentTrack } from '@audius/common/hooks'
 import { playbackSelectors, playbackRateValueMap } from '@audius/common/store'
 import { Genre } from '@audius/common/utils'
 import { Animated, Dimensions, Easing } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import TrackPlayer, { useIsPlaying } from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { useAsync } from 'react-use'
 
+import { LinearGradient } from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 import { useThemeColors } from 'app/utils/theme'
 
 import { NOW_PLAYING_HEIGHT } from './constants'
@@ -143,8 +144,7 @@ export const TrackingBar = (props: TrackingBarProps) => {
     <Animated.View style={[styles.rail, { opacity: rootOpacity }]}>
       <Animated.View style={[styles.tracker, { transform: trackerTransform }]}>
         <LinearGradient
-          useAngle
-          angle={135}
+          {...getGradientStartEnd(135)}
           colors={[primaryLight2, primaryDark2]}
           style={{ flex: 1 }}
         />

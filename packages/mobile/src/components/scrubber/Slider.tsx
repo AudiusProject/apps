@@ -6,14 +6,15 @@ import { Genre } from '@audius/common/utils'
 import { useAppState } from '@react-native-community/hooks'
 import type { GestureResponderEvent } from 'react-native'
 import { Easing, View, Animated, PanResponder } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import TrackPlayer from 'react-native-track-player'
 import { useSelector } from 'react-redux'
 import { useAsync, usePrevious } from 'react-use'
 
+import { LinearGradient } from '@audius/harmony-native'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import { makeStyles } from 'app/styles'
 import { attachToDx } from 'app/utils/animation'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 import { useThemeColors } from 'app/utils/theme'
 
 const { getPlaybackRate, getSeek, getSeekCounter } = playbackSelectors
@@ -401,8 +402,7 @@ export const Slider = memo(function Slider(props: SliderProps) {
             ]}
           >
             <LinearGradient
-              useAngle
-              angle={135}
+              {...getGradientStartEnd(135)}
               colors={[primaryLight2, primaryDark2]}
               style={{ flex: 1 }}
             />

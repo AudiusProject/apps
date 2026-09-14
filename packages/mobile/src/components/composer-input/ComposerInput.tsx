@@ -19,13 +19,13 @@ import {
 } from '@audius/common/utils'
 import { OptionalHashId } from '@audius/sdk'
 import { isEqual, pick } from 'lodash'
-import type { TextInput as RnTextInput } from 'react-native'
 import { Platform, TouchableOpacity } from 'react-native'
 import type {
+  TextInput as RnTextInput,
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
   TextInputSelectionChangeEventData
-} from 'react-native/types'
+} from 'react-native'
 import { usePrevious } from 'react-use'
 
 import { Flex, IconSend, mergeRefs } from '@audius/harmony-native'
