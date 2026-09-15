@@ -4,7 +4,8 @@ import type { GetSignedVAAResponse } from '@certusone/wormhole-sdk/lib/cjs/proto
 import type {
   RpcResponseAndContext,
   SignatureResult,
-  Transaction
+  Transaction,
+  TransactionResponse
 } from '@solana/web3.js'
 import bs58 from 'bs58'
 import { BN, toBuffer } from 'ethereumjs-util'
@@ -362,7 +363,13 @@ export class Wormhole {
       phase = phases.GET_EMITTER_ADDR
 
       // Get the sequence number and emitter address required to fetch the signedVAA of our message
-      const info = await connection.getTransaction(transactionSignature)
+      // Declare the highest transaction version this client can decode. RPC
+      // providers reject getTransaction requests that omit this now that
+      // Transaction v1 is live. web3.js 1.x decodes legacy and v0 only, and the
+      // transaction relayed above is always legacy, so 0 is correct here.
+      const info = (await connection.getTransaction(transactionSignature, {
+        maxSupportedTransactionVersion: 0
+      })) as TransactionResponse | null
       const sequence = this.wormholeSDK.parseSequenceFromLogSolana(info!)
       const emitterAddress = await this.wormholeSDK.getEmitterAddressSolana(
         this.solTokenBridgeAddress
