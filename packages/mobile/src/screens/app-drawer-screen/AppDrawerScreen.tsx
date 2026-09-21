@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DrawerContentComponentProps } from '@react-navigation/drawer'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { useNavigation } from '@react-navigation/native'
-import { Dimensions, Platform, View, StyleSheet } from 'react-native'
+import { Platform, View, StyleSheet } from 'react-native'
 
 import { IconAudiusLogoHorizontal } from '@audius/harmony-native'
 import { AudioPlayer } from 'app/components/audio/AudioPlayer'
@@ -15,7 +15,7 @@ import { AppScreen } from '../app-screen'
 import { AppDrawerContextProvider } from './AppDrawerContext'
 import { LeftNavDrawer } from './left-nav-drawer'
 
-const SCREEN_WIDTH = Dimensions.get('window').width
+const DRAWER_SWIPE_EDGE_WIDTH = 40
 
 const Drawer = createDrawerNavigator()
 
@@ -66,13 +66,16 @@ export const AppDrawerScreen = memo(() => {
 
   // Drawer swipe-to-open is enabled only when at the tab stack's root, so
   // the right-swipe gesture inside a nested stack falls through to the native
-  // stack's fullScreenSwipe back behavior. swipeEdgeWidth stays at the full
-  // screen width so opening the drawer from the root doesn't require a swipe
-  // from the screen edge.
+  // stack's fullScreenSwipe back behavior. The navigator's own pan is kept to
+  // the left edge: its activation thresholds are a fixed 5pt on both axes, so
+  // stretched across the full screen it claimed any touch that drifted
+  // sideways first and killed the vertical scroll underneath. Opening from
+  // mid-screen is handled by `useOpenDrawerGesture`, which is angle-gated.
+  // (swipeEdgeWidth only applies while closed; swipe-to-close stays full-width.)
   const drawerScreenOptions = useMemo(
     () => ({
       headerShown: false,
-      swipeEdgeWidth: SCREEN_WIDTH,
+      swipeEdgeWidth: DRAWER_SWIPE_EDGE_WIDTH,
       drawerType: 'slide' as const,
       drawerStyle: { width: '75%' as const },
       swipeEnabled:

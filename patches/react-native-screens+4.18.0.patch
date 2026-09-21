@@ -1,0 +1,86 @@
+diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+index 51f0218..263f558 100644
+--- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
++++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+@@ -915,6 +915,12 @@ RNS_IGNORE_SUPER_CALL_END
+     // with native interactiveContentPopGestureRecognizer, so we have to fallback to the old implementation.
+     // In this case, the old one should behave as close as the new native one, having only the difference
+     // in animation, and without any customization that is exclusive for it (e.g. gestureResponseDistance).
++    // AUDIUS PATCH: full-screen swipe-to-pop must be a committed horizontal drag,
++    // otherwise a slightly-diagonal vertical scroll gets hijacked as a back gesture.
++    if (![self rnsAudius_isCommittedDismissPan:gestureRecognizer topScreen:topScreen]) {
++      return NO;
++    }
++
+     if (@available(iOS 26, *)) {
+       if (customAnimationOnSwipePropSetAndSelectedAnimationIsCustom) {
+         _isFullWidthSwipingWithPanGesture = YES;
+@@ -1117,6 +1123,68 @@ RNS_IGNORE_SUPER_CALL_END
+   return _controller;
+ }
+ 
++// AUDIUS PATCH -----------------------------------------------------------------
++// `RNSPanGestureRecognizer` spans the whole screen when `fullScreenSwipeEnabled`
++// is set, and upstream treats *any* rightward translation as a back gesture (see
++// `isBackGesture` in shouldRecognizeSimultaneously...). With no angle threshold,
++// a vertical scroll carrying a pixel or two of horizontal drift gets hijacked as
++// swipe-to-pop and the scroll view's pan is cancelled mid-scroll.
++//
++// This gate requires the drag to be *committed* along the screen's dismiss axis
++// before the pop gesture may claim it: enough travel in the dismiss direction,
++// and clearly more travel on that axis than across it. A drag that starts
++// vertical fails here, the recognizer never leaves Possible, and the scroll view
++// keeps the touch sequence for good.
++// NOTE: keep the minimum *below* UIPanGestureRecognizer's own activation
++// threshold (~10pt). `gestureRecognizerShouldBegin:` is consulted once, at the
++// moment the recognizer crosses that threshold, so a minimum at or above it
++// would reject legitimate horizontal swipes that simply haven't travelled far
++// enough yet. The dominance ratio does the real work here; the minimum only
++// rejects jitter. Raising the ratio is the safe way to make this stricter.
++static const CGFloat RNSAudiusDismissMinTranslation = 5.0;
++static const CGFloat RNSAudiusDismissDominanceRatio = 2.0;
++
++- (BOOL)rnsAudius_isCommittedDismissPan:(UIGestureRecognizer *)gestureRecognizer
++                              topScreen:(RNSScreenView *)topScreen
++{
++  if (![gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
++    return YES;
++  }
++
++  UIPanGestureRecognizer *pan = (UIPanGestureRecognizer *)gestureRecognizer;
++  CGPoint translation = [pan translationInView:pan.view];
++
++  CGFloat alongAxis;
++  CGFloat acrossAxis;
++
++  if (topScreen.swipeDirection == RNSScreenSwipeDirectionVertical) {
++    // Vertically-dismissed screens (e.g. modals): down is the dismiss direction.
++    alongAxis = translation.y;
++    acrossAxis = translation.x;
++  } else {
++    alongAxis = translation.x;
++    acrossAxis = translation.y;
++
++    // Mirror the direction handling in `handleSwipe:` so RTL layouts and
++    // slide-from-left screens dismiss toward their own trailing edge.
++    if (_controller.view.semanticContentAttribute == UISemanticContentAttributeForceRightToLeft) {
++      alongAxis = -alongAxis;
++    }
++    if (topScreen.stackAnimation == RNSScreenStackAnimationSlideFromLeft) {
++      alongAxis = -alongAxis;
++    }
++  }
++
++  // Must be travelling toward dismissal, not merely off-axis.
++  if (alongAxis < RNSAudiusDismissMinTranslation) {
++    return NO;
++  }
++
++  // ...and must be decisively along the axis rather than diagonal.
++  return fabs(alongAxis) >= fabs(acrossAxis) * RNSAudiusDismissDominanceRatio;
++}
++// END AUDIUS PATCH -------------------------------------------------------------
++
+ - (BOOL)isInGestureResponseDistance:(UIGestureRecognizer *)gestureRecognizer topScreen:(RNSScreenView *)topScreen
+ {
+   NSDictionary *gestureResponseDistanceValues = topScreen.gestureResponseDistance;
