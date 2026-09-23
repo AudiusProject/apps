@@ -79,9 +79,6 @@ describe('UserCard', () => {
   })
 
   it('retries a mirror when the primary host fails to render', async () => {
-    // A content node that answers /health_check but 502s on the blob still
-    // gets handed out as the primary, so the avatar has to survive an <img>
-    // error by moving to a mirror rather than latching the empty placeholder.
     const deadUrl =
       'https://dead-node.test/artist-user-image-profile-medium.jpg'
     renderUserCard({

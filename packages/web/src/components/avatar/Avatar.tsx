@@ -39,10 +39,8 @@ export const AvatarContent = (props: AvatarProps) => {
     ...other
   } = props
 
-  // Tracks the src that most recently failed to render. This must be the
-  // failing url rather than a boolean: a boolean latches, so once one host
-  // 502s the placeholder would win forever, even after `useImageSize`
-  // resolves a working mirror into `imageUrl`.
+  // The src that last failed. Stored as a url, not a boolean, so a later
+  // mirror url from useImageSize can still render.
   const [failedSrc, setFailedSrc] = useState<Nullable<string>>(null)
 
   useEffect(() => {
@@ -59,9 +57,8 @@ export const AvatarContent = (props: AvatarProps) => {
     (event: SyntheticEvent<HTMLImageElement>) => {
       const src = event.currentTarget.src
       setFailedSrc(src)
-      // Let useImageSize advance to the next mirror. Once every mirror has
-      // failed it stops handing back new urls, and the placeholder below
-      // sticks (a data uri, so it cannot error and re-enter this path).
+      // Let useImageSize try the next mirror. Once all fail, the data-uri
+      // placeholder below sticks.
       onImageError?.(src)
     },
     [onImageError]
