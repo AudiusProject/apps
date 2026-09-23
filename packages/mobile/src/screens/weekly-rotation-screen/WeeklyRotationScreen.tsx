@@ -59,7 +59,10 @@ export const WeeklyRotationScreen = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
   const targetUserId = handle ? handleUser?.user_id : currentUserId
-  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+  const isOwnMix =
+    !handle || (handleUser != null && handleUser.user_id === currentUserId)
+  // Per-owner source so your own mix and a shared one don't share play state.
+  const playbackSource = `${WEEKLY_ROTATION_SOURCE}:${targetUserId ?? ''}`
 
   const { trackIds, isPending, isFetching } = useWeeklyRotation(
     { limit: 30, userId: targetUserId },
@@ -74,11 +77,9 @@ export const WeeklyRotationScreen = () => {
   )
   const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
 
-  // The header button reflects -- and controls -- this mix only. Keyed off
-  // the global playing flag alone it read "Pause" while something else was
-  // playing, and "Pause" on any track but the first restarted the mix.
+  // The header button only reflects and controls playback of this mix.
   const isQueued =
-    currentPlaybackSource === WEEKLY_ROTATION_SOURCE &&
+    currentPlaybackSource === playbackSource &&
     currentPlaybackTrackId != null &&
     trackIds.includes(currentPlaybackTrackId)
   const isPlaying = isPlaybackActive && isQueued
@@ -87,9 +88,9 @@ export const WeeklyRotationScreen = () => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: WEEKLY_ROTATION_SOURCE
+        source: playbackSource
       })),
-    [trackIds]
+    [trackIds, playbackSource]
   )
 
   // Mirrors the web page's play-all: toggle when the mix is what's loaded,
@@ -199,7 +200,7 @@ export const WeeklyRotationScreen = () => {
       <ScreenContent>
         <TrackLineup
           trackIds={trackIds}
-          source={WEEKLY_ROTATION_SOURCE}
+          source={playbackSource}
           isPending={isPending}
           isFetching={isFetching}
           hasNextPage={false}

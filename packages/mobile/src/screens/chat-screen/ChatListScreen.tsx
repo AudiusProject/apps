@@ -36,6 +36,9 @@ const CHATS_MESSAGES_PREFETCH_LIMIT = 10
  * until the tab has at least this many rows or there is nothing left.
  */
 const MIN_VISIBLE_CHATS_PER_TAB = 10
+// Stop backfilling after this many pages per tab visit, so a mostly empty tab
+// doesn't page through the whole chat history.
+const MAX_BACKFILL_PAGES = 5
 // Precalculated height for perf optimization
 const CHAT_ITEM_HEIGHT = 88 // Calculated height: pv='l' (32px) + ProfilePicture unit12 (48px) + text/margins (~8px)
 
@@ -172,10 +175,18 @@ export const ChatListScreen = () => {
   }, [dispatch])
 
   // Backfill the current tab from older pages when it is nearly empty
+  const [backfillPages, setBackfillPages] = useState(0)
+  useEffect(() => {
+    setBackfillPages(0)
+  }, [currentTab])
+  const isBackfillExhausted = backfillPages >= MAX_BACKFILL_PAGES
   const needsBackfill =
-    hasMore && nonEmptyChats.length < MIN_VISIBLE_CHATS_PER_TAB
+    hasMore &&
+    nonEmptyChats.length < MIN_VISIBLE_CHATS_PER_TAB &&
+    !isBackfillExhausted
   useEffect(() => {
     if (chatsStatus === Status.SUCCESS && needsBackfill) {
+      setBackfillPages((pages) => pages + 1)
       dispatch(fetchMoreChats())
     }
   }, [chatsStatus, needsBackfill, dispatch])
@@ -239,7 +250,9 @@ export const ChatListScreen = () => {
                   renderItem={renderItem}
                   keyExtractor={keyExtractor}
                   ListEmptyComponent={() =>
-                    hasMore && chatsStatus !== Status.ERROR ? (
+                    hasMore &&
+                    chatsStatus !== Status.ERROR &&
+                    !isBackfillExhausted ? (
                       // Still backfilling this tab from older pages
                       <>
                         <ChatListItemSkeleton index={0} shouldFade />

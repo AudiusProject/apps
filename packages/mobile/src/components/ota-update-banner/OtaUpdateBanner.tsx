@@ -77,6 +77,8 @@ export const OtaUpdateBanner = () => {
   const dismissedRef = useRef(false)
   const pendingLoggedRef = useRef(false)
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Bumped on every stop/restart so an in-flight poll can't reschedule itself.
+  const pollGenerationRef = useRef(0)
 
   /** Re-reads CodePush state; resolves to whether a pending package exists. */
   const refresh = useCallback(async (): Promise<boolean> => {
@@ -118,6 +120,7 @@ export const OtaUpdateBanner = () => {
   }, [])
 
   const stopPendingPolls = useCallback(() => {
+    pollGenerationRef.current += 1
     if (pollTimeoutRef.current) {
       clearTimeout(pollTimeoutRef.current)
       pollTimeoutRef.current = null
@@ -133,13 +136,18 @@ export const OtaUpdateBanner = () => {
     if (!isOtaEnabled()) {
       return
     }
+    const generation = pollGenerationRef.current
     const startedAt = Date.now()
     const tick = () => {
       pollTimeoutRef.current = null
       refresh()
         .catch(() => false)
         .then((pending) => {
-          if (pending || Date.now() - startedAt >= PENDING_POLL_WINDOW_MS) {
+          if (
+            generation !== pollGenerationRef.current ||
+            pending ||
+            Date.now() - startedAt >= PENDING_POLL_WINDOW_MS
+          ) {
             return
           }
           pollTimeoutRef.current = setTimeout(tick, PENDING_POLL_INTERVAL_MS)

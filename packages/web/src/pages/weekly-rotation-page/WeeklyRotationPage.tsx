@@ -92,12 +92,13 @@ export const WeeklyRotationPage = () => {
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
-  // With a handle in the URL the mix belongs to that user; otherwise to the
-  // viewer. Resolving the handle to a user is what the share modal, the
-  // header, and the query all key off.
+  // The mix belongs to the handle's user if present, otherwise the viewer.
   const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
   const targetUserId = handle ? handleUser?.user_id : currentUserId
-  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+  const isOwnMix =
+    !handle || (handleUser != null && handleUser.user_id === currentUserId)
+  // Per-owner source so your own mix and a shared one don't share play state.
+  const playbackSource = `${WEEKLY_ROTATION_SOURCE}:${targetUserId ?? ''}`
 
   const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
     { limit: PAGE_SIZE, userId: targetUserId },
@@ -123,11 +124,9 @@ export const WeeklyRotationPage = () => {
   )
   const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
 
-  // The header button reflects -- and controls -- this mix only. Keyed off
-  // the global playing flag alone it read "Pause" while something else was
-  // playing, and "Pause" on any track but the first restarted the mix.
+  // The header button only reflects and controls playback of this mix.
   const isQueued =
-    currentPlaybackSource === WEEKLY_ROTATION_SOURCE &&
+    currentPlaybackSource === playbackSource &&
     currentPlaybackTrackId != null &&
     trackIds.includes(currentPlaybackTrackId)
   const isPlaying = isPlaybackActive && isQueued
@@ -136,9 +135,9 @@ export const WeeklyRotationPage = () => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: WEEKLY_ROTATION_SOURCE
+        source: playbackSource
       })),
-    [trackIds]
+    [trackIds, playbackSource]
   )
 
   // Toggle when the mix is what's loaded, otherwise start the queue from the
@@ -278,7 +277,7 @@ export const WeeklyRotationPage = () => {
       </Flex>
 
       <TrackTableLineup
-        source={WEEKLY_ROTATION_SOURCE}
+        source={playbackSource}
         trackIds={trackIds}
         isPending={isPending}
         isFetching={isFetching}
