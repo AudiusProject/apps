@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import fetch from '../../utils/fetch'
 import type { StorageNodeSelectorService } from '../StorageNodeSelector'
@@ -51,13 +51,13 @@ describe('generatePreview', () => {
   })
 })
 
-// A storage node can answer `done` from an upload row it has not finished
-// replicating, with no transcode results on it yet. Accepting that response
-// writes a track whose trackCid is undefined: the upload "succeeds" into a
-// track that can never be played, with no error raised anywhere.
 describe('pollProcessingStatus', () => {
   beforeEach(() => {
     mockFetch.mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   const statusResponse = (body: unknown) =>
@@ -97,6 +97,28 @@ describe('pollProcessingStatus', () => {
 
     expect(resp.results['320']).toBe('QmTranscoded')
     expect(mockFetch).toHaveBeenCalledTimes(2)
+  }, 20000)
+
+  it('moves to the next node and gives up when done never has a result', async () => {
+    let now = 0
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+    mockFetch.mockImplementation(async () => {
+      now += 61000
+      return statusResponse({ id: 'upload-1', status: 'done', results: {} })
+    })
+    const getSelectedNode = vi.fn(async () => 'https://node.example.com')
+    const storage = new Storage({
+      storageNodeSelector: {
+        getSelectedNode,
+        triedSelectingAllNodes: () => false
+      } as unknown as StorageNodeSelectorService
+    })
+
+    await expect(poll(storage, 'audio')).rejects.toThrow(
+      'Upload reported done but no transcode result'
+    )
+    expect(mockFetch).toHaveBeenCalledTimes(3)
+    expect(getSelectedNode).toHaveBeenCalledWith(true)
   }, 20000)
 
   it('returns immediately once the transcode result is present', async () => {
