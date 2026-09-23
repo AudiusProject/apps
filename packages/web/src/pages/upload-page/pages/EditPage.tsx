@@ -4,8 +4,7 @@ import {
   CollectionFormState,
   TrackFormState,
   UploadFormState,
-  UploadType,
-  TrackMetadataForUpload
+  UploadType
 } from '@audius/common/store'
 import { useUnmount } from 'react-use'
 
@@ -17,11 +16,10 @@ import { UploadTrackForm } from '../forms/UploadTrackForm'
 type EditPageProps = {
   formState: TrackFormState | CollectionFormState
   onContinue: (formState: UploadFormState) => void
-  initialMetadata?: Partial<TrackMetadataForUpload>
 }
 
 export const EditPage = (props: EditPageProps) => {
-  const { formState, onContinue, initialMetadata } = props
+  const { formState, onContinue } = props
   const { stopPreview } = useContext(UploadPreviewContext)
   useUnmount(stopPreview)
 
@@ -32,7 +30,6 @@ export const EditPage = (props: EditPageProps) => {
         <UploadTrackForm
           formState={formState}
           onContinue={onContinue}
-          initialMetadata={initialMetadata}
         />
       )
     case UploadType.ALBUM:

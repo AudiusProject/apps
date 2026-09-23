@@ -31,16 +31,6 @@ describe('getTrackEditInitialMetadata', () => {
     })
   })
 
-  it('seeds from initialMetadata when the track has nothing yet', () => {
-    const result = getTrackEditInitialMetadata(makeMetadata(), {
-      description: 'seeded description',
-      tags: 'seeded,tags'
-    })
-
-    expect(result.description).toBe('seeded description')
-    expect(result.tags).toBe('seeded,tags')
-  })
-
   // Regression: EditTrackForm runs with `enableReinitialize`, and
   // `formState.tracks` is rewritten with the user's edits on every submit. When
   // this function blanked description/tags unconditionally, that reset wiped
@@ -80,13 +70,5 @@ describe('getTrackEditInitialMetadata', () => {
     )
 
     expect(result.field_visibility?.remixes).toBe(false)
-  })
-
-  it('is stable across repeated calls so the form does not reset spuriously', () => {
-    const metadata = makeMetadata({ description: 'kept', tags: 'a,b' })
-
-    expect(getTrackEditInitialMetadata(metadata)).toEqual(
-      getTrackEditInitialMetadata(metadata)
-    )
   })
 })

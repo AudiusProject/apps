@@ -20,6 +20,11 @@ import styles from './SelectPage.module.css'
 
 type ErrorType = { reason: 'corrupted' | 'size' | 'type' } | null
 
+// Files that already had initialMetadata applied. Module-level so the seed is
+// applied once per file even if the user goes back to this page, and never
+// overwrites later edits.
+const seededFiles = new WeakSet<object>()
+
 type SelectPageProps = {
   formState: UploadFormState
   onContinue: (formState: UploadFormState) => void
@@ -43,7 +48,18 @@ const SelectPage = (props: SelectPageProps) => {
       switch (uploadType) {
         case UploadType.INDIVIDUAL_TRACK:
         case UploadType.INDIVIDUAL_TRACKS:
-          onContinue({ tracks, uploadType })
+          onContinue({
+            tracks: tracks.map((track) => {
+              if (!initialMetadata || !track.file) return track
+              if (seededFiles.has(track.file)) return track
+              seededFiles.add(track.file)
+              return {
+                ...track,
+                metadata: { ...track.metadata, ...initialMetadata }
+              }
+            }),
+            uploadType
+          })
           break
         case UploadType.ALBUM:
         case UploadType.PLAYLIST:
@@ -51,7 +67,7 @@ const SelectPage = (props: SelectPageProps) => {
           break
       }
     }
-  }, [onContinue, tracks, uploadType])
+  }, [onContinue, tracks, uploadType, initialMetadata])
 
   const onSelectTracks = useCallback(
     async (selectedFiles: File[]) => {
