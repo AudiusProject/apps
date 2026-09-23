@@ -1,8 +1,4 @@
-import {
-  mainnet,
-  solana,
-  type AppKitNetwork
-} from '@reown/appkit/networks'
+import { mainnet, solana, type AppKitNetwork } from '@reown/appkit/networks'
 import { createAppKit } from '@reown/appkit/react'
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'

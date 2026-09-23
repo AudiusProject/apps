@@ -45,9 +45,7 @@ export const LazyLottie = (props: LottieProps) => {
   }, [lottieRef])
 
   return (
-    <Suspense
-      fallback={<div className={rest.className} style={rest.style} />}
-    >
+    <Suspense fallback={<div className={rest.className} style={rest.style} />}>
       <Lottie {...rest} lottieRef={forwardingRef} />
     </Suspense>
   )

@@ -37,7 +37,10 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   console.debug('[audiusSdk] Initializing SDK with external wallet...')
 
   const appkit = await loadAppKit().catch((e) => {
-    console.warn('[audiusSdk] Failed to load AppKit. Falling back to Hedgehog.', e)
+    console.warn(
+      '[audiusSdk] Failed to load AppKit. Falling back to Hedgehog.',
+      e
+    )
     return undefined
   })
   if (!appkit) {
