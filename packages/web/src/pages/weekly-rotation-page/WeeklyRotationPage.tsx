@@ -117,10 +117,20 @@ export const WeeklyRotationPage = () => {
     })
   }, [trackIds.length, isMobile, trackEvent])
 
-  const isPlaying = useSelector(playbackSelectors.getPlaying)
+  const isPlaybackActive = useSelector(playbackSelectors.getPlaying)
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
   )
+  const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
+
+  // The header button reflects -- and controls -- this mix only. Keyed off
+  // the global playing flag alone it read "Pause" while something else was
+  // playing, and "Pause" on any track but the first restarted the mix.
+  const isQueued =
+    currentPlaybackSource === WEEKLY_ROTATION_SOURCE &&
+    currentPlaybackTrackId != null &&
+    trackIds.includes(currentPlaybackTrackId)
+  const isPlaying = isPlaybackActive && isQueued
 
   const playbackQueue: PlaybackTrack[] = useMemo(
     () =>
@@ -131,19 +141,19 @@ export const WeeklyRotationPage = () => {
     [trackIds]
   )
 
-  // Mirrors the History page's play-all: toggle when we're already on the
-  // first track, otherwise start the queue from the top.
+  // Toggle when the mix is what's loaded, otherwise start the queue from the
+  // top.
   const handlePlay = useCallback(() => {
     if (playbackQueue.length === 0) return
     const firstId = playbackQueue[0].trackId as ID
 
-    if (currentPlaybackTrackId === firstId) {
+    if (isQueued) {
       dispatch(
         isPlaying ? playbackActions.togglePlay() : playbackActions.play()
       )
       dispatch(
         make(isPlaying ? Name.PLAYBACK_PAUSE : Name.PLAYBACK_PLAY, {
-          id: `${firstId}`,
+          id: `${currentPlaybackTrackId}`,
           source: PlaybackSource.PLAYLIST_PAGE
         })
       )
@@ -171,6 +181,7 @@ export const WeeklyRotationPage = () => {
   }, [
     dispatch,
     isPlaying,
+    isQueued,
     currentPlaybackTrackId,
     playbackQueue,
     trackEvent,
