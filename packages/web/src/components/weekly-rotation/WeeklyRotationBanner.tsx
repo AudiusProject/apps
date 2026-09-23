@@ -26,8 +26,7 @@ const ART_SIZE_DESKTOP = 140
 const ART_SIZE_MOBILE = 96
 
 type WeeklyRotationBannerProps = {
-  /** Which surface this instance is rendered on -- carried on every event so
-   * we can tell which entry point actually drives listens. */
+  /** Surface this renders on; sent with every event. */
   surface: WeeklyRotationSurface
 }
 
@@ -36,9 +35,6 @@ type WeeklyRotationBannerProps = {
  *
  * Shared across Explore and the feed rather than duplicated, so the two stay
  * visually identical and the analytics differ only by `surface`.
- *
- * Navigates to the full mix rather than playing in place -- the banner is an
- * entry point, and the page it opens has the play-all.
  */
 export const WeeklyRotationBanner = ({
   surface
@@ -63,9 +59,8 @@ export const WeeklyRotationBanner = ({
     { enabled: inView && isWeeklyRotationEnabled }
   )
 
-  // Fire the impression once, and only once there's a real mix behind it --
-  // an impression for a banner that then hides itself would inflate the
-  // denominator on click-through.
+  // Fire once, only when the mix is non-empty, so hidden banners don't count
+  // as impressions.
   const hasTrackedView = useRef(false)
   useEffect(() => {
     if (hasTrackedView.current || !inView || !trackIds.length) return
@@ -88,9 +83,8 @@ export const WeeklyRotationBanner = ({
     navigate(WEEKLY_ROTATION_PAGE)
   }, [navigate, trackEvent, surface, isMobile, trackIds.length])
 
-  // Hidden entirely when there's no mix to promote -- a banner advertising an
-  // empty page is worse than no banner. The flag check sits alongside it so
-  // every surface that renders the banner is gated by this one return.
+  // Hidden when flagged off or when there's no mix. Gates every surface that
+  // renders the banner.
   if (
     !isWeeklyRotationEnabled ||
     isError ||
@@ -137,7 +131,6 @@ export const WeeklyRotationBanner = ({
           <Button
             variant='primary'
             iconRight={IconArrowRight}
-            onClick={handleClick}
             css={{ flexShrink: 0 }}
           >
             {messages.weeklyRotationCta}
