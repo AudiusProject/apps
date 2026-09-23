@@ -348,10 +348,8 @@ export const getSearchContext = () => ({
 })
 
 /**
- * A shared Weekly Rotation (/explore/weekly-rotation/:handle). The card is a
- * collage of the mix's first four tracks, rendered by og.audius.co; the
- * period is stamped into the image URL so scrapers that cache by URL see a
- * new card when the mix rolls over.
+ * Meta tags for /explore/weekly-rotation/:handle. The OG image comes from
+ * og.audius.co.
  */
 export const getWeeklyRotationPageContext = ({
   handle,

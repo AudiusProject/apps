@@ -1,10 +1,11 @@
 /**
  * The Weekly Rotation period, as the API defines it: identified by an ISO
  * (year, week) pair but rolling over on Wednesday 00:00 UTC rather than
- * Monday. Mirrors `weeklyRotationPeriod` in the api repo.
+ * Monday. Mirrors `weeklyrotation.Period` in the api repo
+ * (weeklyrotation/period.go).
  *
- * Pure and dependency-free on purpose: the SSR bundle imports it, and SSR
- * avoids `@audius/common/utils` because that drags in dayjs and friends.
+ * Kept dependency-free because the SSR bundle imports it (no
+ * `@audius/common/utils` or dayjs).
  */
 
 const ROLLOVER_OFFSET_DAYS = 2 // ISO Monday -> Wednesday
@@ -39,9 +40,8 @@ export const formatWeeklyRotationPeriod = ({
 const OG_BASE_URL = 'https://og.audius.co'
 
 /**
- * The OG card for a listener's current mix. The period is a cache-buster:
- * scrapers key their caches on the URL, and the same handle means a new
- * card once the week rolls over.
+ * OG card URL for a user's current mix. The period param busts scraper caches
+ * each week.
  */
 export const getWeeklyRotationOgImageUrl = (
   handle: string,

@@ -51,10 +51,8 @@ function syncStatusLabel(status: CodePush.SyncStatus): string {
 type BannerPhase = 'none' | 'pending'
 
 /**
- * How long to keep polling for a pending package after mount/foreground, and
- * how often. A production bundle takes tens of seconds to download on a
- * phone, and the download is usually owned by the CodePush root HOC's own
- * sync (ota-root), not by this component's -- see `prefetchUpdate`.
+ * Poll for a pending package after mount/foreground. The download usually
+ * takes tens of seconds and is done by ota-root's sync, not `prefetchUpdate`.
  */
 const PENDING_POLL_INTERVAL_MS = 2000
 const PENDING_POLL_WINDOW_MS = 3 * 60 * 1000
@@ -64,12 +62,9 @@ const PENDING_POLL_WINDOW_MS = 3 * 60 * 1000
  * ON_NEXT_RESTART. We only surface UI when an update is already downloaded
  * and installed as pending — then the user restarts when they want.
  *
- * One instance mounts per root tab header, so each tab that is open polls on
- * its own. The first tab (Feed) mounts while the root HOC's sync is already
- * running, so its own `CodePush.sync` returns SYNC_IN_PROGRESS immediately
- * and never observes the install; it has to find the pending package by
- * polling. Before the poll window was long enough, the banner only ever
- * appeared on a tab mounted *after* the download finished (Trending).
+ * One instance per root tab. A tab mounted during ota-root's sync gets
+ * SYNC_IN_PROGRESS from its own sync, so it detects the pending package by
+ * polling.
  */
 export const OtaUpdateBanner = () => {
   const { color, spacing } = useTheme()
@@ -127,10 +122,7 @@ export const OtaUpdateBanner = () => {
     }
   }, [])
 
-  // Poll until a pending package shows up or the window closes. Polling
-  // (rather than a fixed handful of early checks) is what lets the tab that
-  // was open during the download -- normally Feed, the initial tab -- show
-  // the banner instead of only the tab opened afterwards.
+  // Poll until a pending package appears or the window closes.
   const schedulePendingPolls = useCallback(() => {
     stopPendingPolls()
     if (!isOtaEnabled()) {

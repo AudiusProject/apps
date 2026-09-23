@@ -46,12 +46,10 @@ const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
  * The full Weekly Rotation mix. Mirrors the web page: artwork header, then the
  * track list.
  *
- * Without a `handle` param this is the signed-in user's own mix. With one --
- * a shared link, deep-linked from `/explore/weekly-rotation/:handle` -- it is
- * that user's. The endpoint is public, so a shared mix loads for anyone.
+ * Shows the signed-in user's mix, or the `handle` param's user's mix (deep
+ * link `/explore/weekly-rotation/:handle`).
  *
- * The endpoint returns a fixed 30, so there is no pagination -- hasNextPage is
- * false and loadNextPage is a no-op.
+ * The endpoint returns a fixed 30, so there is no pagination.
  */
 export const WeeklyRotationScreen = () => {
   const { params } = useRoute<'WeeklyRotationScreen'>()

@@ -364,7 +364,7 @@ describe('chat categories', () => {
       expect(getHasUnreadMessages(asCommonState(seeded))).toBe(true)
     })
 
-    it('goes quiet once the General chat is read', () => {
+    it('clears once the General chat is read', () => {
       const seeded = withServerCounts(
         seed([
           makeChat('general-1', {

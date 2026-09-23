@@ -64,17 +64,15 @@ const columns: TracksTableColumn[] = [
 /**
  * The full Weekly Rotation mix.
  *
- * Structured like a collection page -- artwork, title, play-all, track list --
- * but it isn't backed by a collection entity, so it's assembled from the same
+ * Structured like a collection page (artwork, title, play-all, track list) but
+ * it isn't backed by a collection entity, so it's assembled from the same
  * pieces the History page uses rather than reusing the collection page.
  * Artwork is the bundled asset for the same reason: there's no playlist_id to
  * hang cover art on.
  *
- * Two routes land here. `/explore/weekly-rotation` is the signed-in user's own
- * mix; `/explore/weekly-rotation/:handle` is a shared link to someone else's,
- * which is what Share produces. The endpoint is public, so the shared page
- * works signed out. Opening your own handle's link is the same as the bare
- * route.
+ * `/explore/weekly-rotation` shows the signed-in user's mix;
+ * `/explore/weekly-rotation/:handle` shows that user's mix (public, works
+ * signed out).
  *
  * The endpoint returns a fixed 30, so there is no pagination.
  */
@@ -86,9 +84,8 @@ export const WeeklyRotationPage = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { handle } = useParams<{ handle?: string }>()
 
-  // The route stays registered while the flag is off -- the URL is public and
-  // shareable, so a link that predates the rollout should land somewhere real
-  // rather than 404.
+  // The route stays registered while the flag is off so shared links redirect
+  // instead of 404ing.
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
@@ -187,8 +184,6 @@ export const WeeklyRotationPage = () => {
     isMobile
   ])
 
-  // The share modal resolves the owner's handle from the id, so the bare
-  // route shares the viewer's own mix under their handle.
   const handleShare = useCallback(() => {
     if (!targetUserId) return
     dispatch(
@@ -211,8 +206,8 @@ export const WeeklyRotationPage = () => {
     ? exploreMessages.weeklyRotation
     : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
 
-  // Only the handle route gets the collage card and a canonical URL: the bare
-  // route is per-viewer and shouldn't be indexed as anyone's mix.
+  // Only the handle route gets an OG card and canonical URL; the bare route is
+  // per-viewer.
   const metaTags = handle
     ? {
         title,

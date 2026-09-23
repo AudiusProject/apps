@@ -63,10 +63,8 @@ type InlineAlbumPriceAndAudienceProps = {
 }
 
 /**
- * Renders the album "Price & Audience" settings (free vs. pay-to-unlock)
- * inside the collection page's inline edit mode. The dedicated /edit page
- * has always offered this; the inline editor replaced the pencil link to that
- * page, so albums need it here too.
+ * Album "Price & Audience" settings (free vs. pay-to-unlock) for the inline
+ * collection editor.
  */
 export const InlineAlbumPriceAndAudience = (
   props: InlineAlbumPriceAndAudienceProps
