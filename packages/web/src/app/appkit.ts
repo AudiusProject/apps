@@ -1,18 +1,9 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * Lazy access to the Reown AppKit singletons.
- *
- * `ReownAppKitModal` runs `new WagmiAdapter(...)`, `new SolanaAdapter()` and
- * `createAppKit(...)` at module scope, so a single static import anywhere in the
- * eager graph pins `@reown/appkit`, both adapters, `@walletconnect/*` and
- * `@solana/web3.js` into the entry chunk — for every visitor, including the
- * majority who never touch a wallet.
- *
- * Everything reaching AppKit from eagerly-loaded code should go through here
- * instead of importing `ReownAppKitModal` directly. Code that is already behind
- * a `React.lazy` boundary (wallet pages, wallet modals) can keep importing it
- * directly — those chunks are only fetched when the user gets there.
+ * Lazy access to ReownAppKitModal, which creates AppKit and its adapters at
+ * module scope. Eagerly loaded code must go through here so the wallet SDKs
+ * stay out of the entry chunk.
  */
 type AppKitModule = Pick<
   typeof import('./ReownAppKitModal'),
@@ -33,7 +24,7 @@ export const registerLoadedAppKit = (mod: AppKitModule) => {
   listeners.forEach((notify) => notify())
 }
 
-/** Loads AppKit on demand. Memoized — concurrent callers share one import. */
+/** Loads AppKit on demand. Concurrent callers share one import. */
 export const loadAppKit = (): Promise<AppKitModule> => {
   if (loaded) return Promise.resolve(loaded)
   if (!pending) {
@@ -52,11 +43,7 @@ export const loadAppKit = (): Promise<AppKitModule> => {
   return pending
 }
 
-/**
- * The AppKit module if it has already loaded, else `undefined`. Never triggers
- * a load — for callers that only need to act on an *existing* connection (e.g.
- * disconnect on sign-out: if AppKit never loaded there is nothing to disconnect).
- */
+/** The AppKit module if it has already loaded. Never triggers a load. */
 export const getLoadedAppKit = (): AppKitModule | undefined => loaded
 
 const subscribe = (listener: () => void) => {
@@ -79,21 +66,16 @@ export const useLoadedAppKit = (): AppKitModule | undefined =>
 const WAGMI_STORAGE_KEY = 'wagmi.store'
 
 /**
- * Whether this browser has a persisted external-wallet connection, i.e. whether
- * AppKit needs to load at startup to restore it.
- *
- * Deliberately biased toward `true`. A false negative silently downgrades an
- * external-wallet user to Hedgehog, which is a correctness bug; a false positive
- * only costs an unnecessary chunk load. When the key is present but unreadable
- * we load AppKit and let wagmi decide.
+ * Whether this browser has a persisted external-wallet connection. Returns
+ * true when the stored value can't be parsed, since a false negative would
+ * drop an external-wallet user to Hedgehog.
  */
 export const hasPersistedWalletConnection = (): boolean => {
   let raw: string | null = null
   try {
     raw = window.localStorage.getItem(WAGMI_STORAGE_KEY)
   } catch {
-    // localStorage unavailable (SSR, private mode). Nothing could have been
-    // persisted, so there is no connection to restore.
+    // localStorage unavailable (SSR, private mode)
     return false
   }
   if (!raw) return false

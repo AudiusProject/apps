@@ -28,9 +28,7 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
     return createHedgehogWalletClient(authService.hedgehogInstance)
   }
 
-  // No external wallet has ever connected in this browser, so there is nothing
-  // to restore. Return before loading AppKit — this is the common path for
-  // every email/password user and keeps the wallet SDK out of startup.
+  // No persisted external wallet; skip loading AppKit.
   if (!hasPersistedWalletConnection()) {
     return createHedgehogWalletClient(authService.hedgehogInstance)
   }

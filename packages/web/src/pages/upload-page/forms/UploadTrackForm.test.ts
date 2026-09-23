@@ -31,10 +31,7 @@ describe('getTrackEditInitialMetadata', () => {
     })
   })
 
-  // Regression: EditTrackForm runs with `enableReinitialize`, and
-  // `formState.tracks` is rewritten with the user's edits on every submit. When
-  // this function blanked description/tags unconditionally, that reset wiped
-  // them and the track published with no description and no tags.
+  // EditTrackForm reinitializes from formState.tracks after each submit.
   it('preserves user-entered values when the form reinitializes', () => {
     const edited = makeMetadata({
       description: 'Stream elsewhere & follow on IG',

@@ -42,14 +42,8 @@ import { createRoutes } from './routes'
 setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 
 /**
- * <WagmiProvider> needs a Config synchronously on first render, but the real one
- * is built by Reown's WagmiAdapter — which we no longer load at startup, since
- * importing it drags the whole AppKit graph into the entry chunk. This minimal
- * stand-in fills the gap until AppKit actually loads.
- *
- * `storage: null` matters: the real config persists to `wagmi.store`, and a
- * second config writing that key would clobber it along with the
- * hasPersistedWalletConnection() probe that reads it.
+ * Placeholder wagmi config used until AppKit is lazily loaded. storage: null so
+ * it never writes to `wagmi.store`, which the real config owns.
  */
 const bootstrapWagmiConfig = createConfig({
   chains: [audiusChain],
@@ -60,17 +54,14 @@ const bootstrapWagmiConfig = createConfig({
 })
 
 /**
- * Mounts WagmiProvider unconditionally and swaps in the adapter's config once
- * AppKit loads. Swapping the `config` prop re-renders context consumers but does
- * not unmount the subtree — making WagmiProvider itself conditional would remount
- * the entire app the moment a wallet appeared.
+ * Keeps WagmiProvider mounted and swaps in AppKit's config once it loads
+ * (changing `config` doesn't remount children).
  */
 const WagmiGate = ({ children }: { children: ReactNode }) => {
   const appkit = useLoadedAppKit()
 
   useEffect(() => {
-    // Restore a previously connected external wallet. Users who never connected
-    // one never pay for the chunk.
+    // Load AppKit at startup only to restore a persisted wallet connection.
     if (!appkit && hasPersistedWalletConnection()) {
       loadAppKit().catch((e) => {
         console.warn('[appkit] Failed to load AppKit', e)

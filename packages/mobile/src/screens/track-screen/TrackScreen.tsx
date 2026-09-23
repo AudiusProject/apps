@@ -69,9 +69,6 @@ export const TrackScreen = () => {
 
   const { track_id, permalink, comments_disabled } = track
 
-  // The API reports tracks whose owner is no longer active as non-streamable.
-  // Honor that instead of rendering a playable track screen. Deleted tracks
-  // are excluded by the helper and keep their existing DeletedTile treatment.
   if (isTrackUnavailable(track, currentUserId)) {
     return (
       <Screen url={permalink}>
