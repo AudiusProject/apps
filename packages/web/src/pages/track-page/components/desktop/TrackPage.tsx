@@ -83,10 +83,10 @@ const TrackPage = () => {
   // the same as one that doesn't exist: the API already 404s its stream so it
   // can't be told apart from a missing track, and the page shouldn't either.
   useEffect(() => {
-    if (status === 'error' || isTrackUnavailable(track)) {
-      navigate(NOT_FOUND_PAGE)
+    if (status === 'error' || isTrackUnavailable(track, accountUserId)) {
+      navigate(NOT_FOUND_PAGE, { replace: true })
     }
-  }, [status, track, navigate])
+  }, [status, track, accountUserId, navigate])
 
   // Simple cleanup
   useEffect(() => {
@@ -268,7 +268,7 @@ const TrackPage = () => {
   // The redirect above runs in an effect, which fires after the first paint.
   // Render nothing until it lands so the track's title and artwork never reach
   // the screen, even for a frame.
-  if (isTrackUnavailable(track)) {
+  if (isTrackUnavailable(track, accountUserId)) {
     return null
   }
 
