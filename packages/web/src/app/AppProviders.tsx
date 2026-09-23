@@ -54,7 +54,9 @@ setNiceModalAdapter({ show: NiceModal.show, hide: NiceModal.hide })
 const bootstrapWagmiConfig = createConfig({
   chains: [audiusChain],
   transports: { [audiusChain.id]: http() },
-  storage: null
+  storage: null,
+  connectors: [],
+  multiInjectedProviderDiscovery: false
 })
 
 /**
@@ -70,7 +72,9 @@ const WagmiGate = ({ children }: { children: ReactNode }) => {
     // Restore a previously connected external wallet. Users who never connected
     // one never pay for the chunk.
     if (!appkit && hasPersistedWalletConnection()) {
-      loadAppKit()
+      loadAppKit().catch((e) => {
+        console.warn('[appkit] Failed to load AppKit', e)
+      })
     }
   }, [appkit])
 

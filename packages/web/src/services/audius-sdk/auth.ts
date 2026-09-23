@@ -6,7 +6,7 @@ import {
   createHedgehogWalletClient,
   type AudiusWalletClient
 } from '@audius/sdk'
-import { getWalletClient } from '@wagmi/core'
+import { getWalletClient, reconnect } from '@wagmi/core'
 import { type WalletClient } from 'viem'
 
 import { hasPersistedWalletConnection, loadAppKit } from 'app/appkit'
@@ -38,8 +38,24 @@ export const getAudiusWalletClient = async (): Promise<AudiusWalletClient> => {
   // Try the connected external wallet next...
   console.debug('[audiusSdk] Initializing SDK with external wallet...')
 
-  const { wagmiAdapter } = await loadAppKit()
-  const wagmiConfig = wagmiAdapter.wagmiConfig
+  const appkit = await loadAppKit().catch((e) => {
+    console.warn('[audiusSdk] Failed to load AppKit. Falling back to Hedgehog.', e)
+    return undefined
+  })
+  if (!appkit) {
+    return createHedgehogWalletClient(authService.hedgehogInstance)
+  }
+  const wagmiConfig = appkit.wagmiAdapter.wagmiConfig
+
+  // A freshly loaded config rehydrates as 'disconnected'. WagmiProvider only
+  // starts the reconnect when it re-renders with this config, which may not
+  // have happened yet, so start it here (reconnect is a no-op if in progress).
+  if (
+    wagmiConfig.state.status === 'disconnected' &&
+    wagmiConfig.state.current
+  ) {
+    await reconnect(wagmiConfig)
+  }
 
   // Wait for the wallet to finish connecting/reconnecting
   if (

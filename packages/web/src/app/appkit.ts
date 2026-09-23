@@ -14,21 +14,40 @@ import { useSyncExternalStore } from 'react'
  * a `React.lazy` boundary (wallet pages, wallet modals) can keep importing it
  * directly — those chunks are only fetched when the user gets there.
  */
-type AppKitModule = typeof import('./ReownAppKitModal')
+type AppKitModule = Pick<
+  typeof import('./ReownAppKitModal'),
+  'appkitModal' | 'wagmiAdapter'
+>
 
 let loaded: AppKitModule | undefined
 let pending: Promise<AppKitModule> | undefined
 const listeners = new Set<() => void>()
 
+/**
+ * Called by ReownAppKitModal when it is evaluated, so a direct static import
+ * (from an already-lazy chunk) is tracked the same as loadAppKit().
+ */
+export const registerLoadedAppKit = (mod: AppKitModule) => {
+  if (loaded) return
+  loaded = mod
+  listeners.forEach((notify) => notify())
+}
+
 /** Loads AppKit on demand. Memoized — concurrent callers share one import. */
 export const loadAppKit = (): Promise<AppKitModule> => {
   if (loaded) return Promise.resolve(loaded)
   if (!pending) {
-    pending = import('./ReownAppKitModal').then((mod) => {
-      loaded = mod
-      listeners.forEach((notify) => notify())
-      return mod
-    })
+    pending = import('./ReownAppKitModal').then(
+      (mod) => {
+        registerLoadedAppKit(mod)
+        return mod
+      },
+      (error) => {
+        // Allow a retry after a failed chunk load
+        pending = undefined
+        throw error
+      }
+    )
   }
   return pending
 }
