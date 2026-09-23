@@ -66,12 +66,10 @@ export const AppDrawerScreen = memo(() => {
 
   // Drawer swipe-to-open is enabled only when at the tab stack's root, so
   // the right-swipe gesture inside a nested stack falls through to the native
-  // stack's fullScreenSwipe back behavior. The navigator's own pan is kept to
-  // the left edge: its activation thresholds are a fixed 5pt on both axes, so
-  // stretched across the full screen it claimed any touch that drifted
-  // sideways first and killed the vertical scroll underneath. Opening from
-  // mid-screen is handled by `useOpenDrawerGesture`, which is angle-gated.
-  // (swipeEdgeWidth only applies while closed; swipe-to-close stays full-width.)
+  // stack's fullScreenSwipe back behavior. The navigator's pan (fixed 5pt
+  // thresholds) is limited to the left edge so it can't take vertical scrolls;
+  // mid-screen opening uses `useOpenDrawerGesture`. swipeEdgeWidth only applies
+  // while closed, so swipe-to-close stays full-width.
   const drawerScreenOptions = useMemo(
     () => ({
       headerShown: false,

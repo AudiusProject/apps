@@ -94,10 +94,10 @@ export const FeedScreen = () => {
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const drawerStatus = useDrawerStatus()
 
-  // The drawer's own root-level swipe-to-open (swipeEdgeWidth = full screen)
-  // competes with the pager here: with both active, a right-swipe on Latest
-  // opens the drawer instead of paging back to For You, and the two openers
-  // arbitrate unpredictably with the track tiles' tap gesture. While the feed
+  // The drawer navigator's edge swipe-to-open competes with the pager here:
+  // with both active, a right-swipe on Latest opens the drawer instead of
+  // paging back to For You, and the two openers arbitrate unpredictably with
+  // the track tiles' tap gesture. While the feed
   // is focused and the drawer is closed, turn the native drawer swipe off so
   // the pager owns paging and the gesture below is the single drawer-opener
   // (For You only). Re-enable once it's open so it can still be swiped closed,

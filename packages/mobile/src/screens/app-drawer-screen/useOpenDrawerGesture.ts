@@ -6,20 +6,14 @@ import { AppDrawerContext } from './AppDrawerContext'
 
 // Rightward travel needed before the pan claims the touch.
 const OPEN_DRAWER_ACTIVE_OFFSET_X = 20
-// Vertical travel that rules the touch out as a drawer swipe. Together with
-// the active offset this is an angle gate: the finger has to get 20pt right
-// before it gets 12pt up or down (within ~30° of horizontal), so a vertical
-// scroll that drifts sideways — however far, over however long a drag — fails
-// the pan early and the list keeps the touch for good.
+// Fail on 12pt of vertical travel, so only drags within ~30 degrees of
+// horizontal open the drawer.
 const OPEN_DRAWER_FAIL_OFFSET_Y = 12
 
 /**
- * Direction-locked pan that opens the left nav drawer: rightward only, and
- * only when the drag is clearly horizontal. This is the app's drawer-opener
- * everywhere away from the screen edge. The drawer navigator's own pan can't
- * do this job full-screen — its thresholds are a hardcoded 5pt on both axes,
- * so it wins any touch that happens to move sideways first and cancels the
- * scroll underneath it.
+ * Rightward, mostly horizontal pan that opens the left nav drawer from
+ * mid-screen. The drawer navigator's own pan has fixed 5pt thresholds, so it
+ * is limited to the screen edge.
  */
 export const useOpenDrawerGesture = (enabled: boolean) => {
   const { drawerHelpers } = useContext(AppDrawerContext)

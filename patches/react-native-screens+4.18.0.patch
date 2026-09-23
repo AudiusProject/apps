@@ -15,28 +15,15 @@ index 51f0218..263f558 100644
      if (@available(iOS 26, *)) {
        if (customAnimationOnSwipePropSetAndSelectedAnimationIsCustom) {
          _isFullWidthSwipingWithPanGesture = YES;
-@@ -1117,6 +1123,68 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -1117,6 +1123,55 @@ RNS_IGNORE_SUPER_CALL_END
    return _controller;
  }
  
 +// AUDIUS PATCH -----------------------------------------------------------------
-+// `RNSPanGestureRecognizer` spans the whole screen when `fullScreenSwipeEnabled`
-+// is set, and upstream treats *any* rightward translation as a back gesture (see
-+// `isBackGesture` in shouldRecognizeSimultaneously...). With no angle threshold,
-+// a vertical scroll carrying a pixel or two of horizontal drift gets hijacked as
-+// swipe-to-pop and the scroll view's pan is cancelled mid-scroll.
-+//
-+// This gate requires the drag to be *committed* along the screen's dismiss axis
-+// before the pop gesture may claim it: enough travel in the dismiss direction,
-+// and clearly more travel on that axis than across it. A drag that starts
-+// vertical fails here, the recognizer never leaves Possible, and the scroll view
-+// keeps the touch sequence for good.
-+// NOTE: keep the minimum *below* UIPanGestureRecognizer's own activation
-+// threshold (~10pt). `gestureRecognizerShouldBegin:` is consulted once, at the
-+// moment the recognizer crosses that threshold, so a minimum at or above it
-+// would reject legitimate horizontal swipes that simply haven't travelled far
-+// enough yet. The dominance ratio does the real work here; the minimum only
-+// rejects jitter. Raising the ratio is the safe way to make this stricter.
++// Require the full-screen pop pan to be mostly horizontal (along >= 2x across,
++// >= 5pt) so a diagonal vertical scroll isn't taken as swipe-to-pop. Keep the
++// minimum below UIPanGestureRecognizer's ~10pt activation, since
++// gestureRecognizerShouldBegin: runs once at that point.
 +static const CGFloat RNSAudiusDismissMinTranslation = 5.0;
 +static const CGFloat RNSAudiusDismissDominanceRatio = 2.0;
 +
@@ -71,12 +58,12 @@ index 51f0218..263f558 100644
 +    }
 +  }
 +
-+  // Must be travelling toward dismissal, not merely off-axis.
++  // Must be moving in the dismiss direction.
 +  if (alongAxis < RNSAudiusDismissMinTranslation) {
 +    return NO;
 +  }
 +
-+  // ...and must be decisively along the axis rather than diagonal.
++  // Must be mostly along the dismiss axis.
 +  return fabs(alongAxis) >= fabs(acrossAxis) * RNSAudiusDismissDominanceRatio;
 +}
 +// END AUDIUS PATCH -------------------------------------------------------------
