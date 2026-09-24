@@ -64,17 +64,15 @@ const columns: TracksTableColumn[] = [
 /**
  * The full Weekly Rotation mix.
  *
- * Structured like a collection page -- artwork, title, play-all, track list --
- * but it isn't backed by a collection entity, so it's assembled from the same
+ * Structured like a collection page (artwork, title, play-all, track list) but
+ * it isn't backed by a collection entity, so it's assembled from the same
  * pieces the History page uses rather than reusing the collection page.
  * Artwork is the bundled asset for the same reason: there's no playlist_id to
  * hang cover art on.
  *
- * Two routes land here. `/explore/weekly-rotation` is the signed-in user's own
- * mix; `/explore/weekly-rotation/:handle` is a shared link to someone else's,
- * which is what Share produces. The endpoint is public, so the shared page
- * works signed out. Opening your own handle's link is the same as the bare
- * route.
+ * `/explore/weekly-rotation` shows the signed-in user's mix;
+ * `/explore/weekly-rotation/:handle` shows that user's mix (public, works
+ * signed out).
  *
  * The endpoint returns a fixed 30, so there is no pagination.
  */
@@ -86,18 +84,18 @@ export const WeeklyRotationPage = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { handle } = useParams<{ handle?: string }>()
 
-  // The route stays registered while the flag is off -- the URL is public and
-  // shareable, so a link that predates the rollout should land somewhere real
-  // rather than 404.
+  // The route stays registered while the flag is off so shared links redirect
+  // instead of 404ing.
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
-  // With a handle in the URL the mix belongs to that user; otherwise to the
-  // viewer. Resolving the handle to a user is what the share modal, the
-  // header, and the query all key off.
+  // The mix belongs to the handle's user if present, otherwise the viewer.
   const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
   const targetUserId = handle ? handleUser?.user_id : currentUserId
-  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+  const isOwnMix =
+    !handle || (handleUser != null && handleUser.user_id === currentUserId)
+  // Per-owner source so your own mix and a shared one don't share play state.
+  const playbackSource = `${WEEKLY_ROTATION_SOURCE}:${targetUserId ?? ''}`
 
   const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
     { limit: PAGE_SIZE, userId: targetUserId },
@@ -123,11 +121,9 @@ export const WeeklyRotationPage = () => {
   )
   const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
 
-  // The header button reflects -- and controls -- this mix only. Keyed off
-  // the global playing flag alone it read "Pause" while something else was
-  // playing, and "Pause" on any track but the first restarted the mix.
+  // The header button only reflects and controls playback of this mix.
   const isQueued =
-    currentPlaybackSource === WEEKLY_ROTATION_SOURCE &&
+    currentPlaybackSource === playbackSource &&
     currentPlaybackTrackId != null &&
     trackIds.includes(currentPlaybackTrackId)
   const isPlaying = isPlaybackActive && isQueued
@@ -136,9 +132,9 @@ export const WeeklyRotationPage = () => {
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: WEEKLY_ROTATION_SOURCE
+        source: playbackSource
       })),
-    [trackIds]
+    [trackIds, playbackSource]
   )
 
   // Toggle when the mix is what's loaded, otherwise start the queue from the
@@ -188,8 +184,6 @@ export const WeeklyRotationPage = () => {
     isMobile
   ])
 
-  // The share modal resolves the owner's handle from the id, so the bare
-  // route shares the viewer's own mix under their handle.
   const handleShare = useCallback(() => {
     if (!targetUserId) return
     dispatch(
@@ -212,8 +206,8 @@ export const WeeklyRotationPage = () => {
     ? exploreMessages.weeklyRotation
     : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
 
-  // Only the handle route gets the collage card and a canonical URL: the bare
-  // route is per-viewer and shouldn't be indexed as anyone's mix.
+  // Only the handle route gets an OG card and canonical URL; the bare route is
+  // per-viewer.
   const metaTags = handle
     ? {
         title,
@@ -278,7 +272,7 @@ export const WeeklyRotationPage = () => {
       </Flex>
 
       <TrackTableLineup
-        source={WEEKLY_ROTATION_SOURCE}
+        source={playbackSource}
         trackIds={trackIds}
         isPending={isPending}
         isFetching={isFetching}

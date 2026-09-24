@@ -25,12 +25,8 @@ type WeeklyRotationNotificationProps = {
 }
 
 /**
- * "Your Weekly Rotation is ready", sent every Wednesday. Opens the viewer's
- * own mix; there is no entity to resolve.
- *
- * Hidden while the feature flag is off: the server fans the row out to every
- * active listener regardless, and a tile that links to a page which bounces
- * back to Explore would be worse than no tile.
+ * Weekly Rotation ready notification (sent Wednesdays); opens the viewer's
+ * mix. Hidden when the flag is off, since the server sends it regardless.
  */
 export const WeeklyRotationNotification = (
   props: WeeklyRotationNotificationProps

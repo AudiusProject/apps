@@ -51,9 +51,7 @@ export const flagDefaults: FlagDefaults = {
   [FeatureFlags.LAUNCHPAD_VERIFICATION]: true,
   [FeatureFlags.FAN_CLUB_TEXT_POST_POSTING]: false,
   [FeatureFlags.QUEUE_NEW_FEATURE_BADGE]: false,
-  // Launched 2026-09-13 at 100%. Defaulting on means a shared
-  // /explore/weekly-rotation/:handle link still renders when the Optimizely
-  // datafile hasn't loaded (a first visit on a cold cache) instead of
-  // bouncing the visitor to Explore; the remote flag stays the kill switch.
+  // Default on so shared links render before the Optimizely datafile loads;
+  // the remote flag is the kill switch.
   [FeatureFlags.WEEKLY_ROTATION]: true
 }

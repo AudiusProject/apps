@@ -32,8 +32,7 @@ export const EXPLORE_PAGE = '/explore'
 export const TRENDING_PLAYLISTS_PAGE = '/explore/playlists'
 export const TRENDING_UNDERGROUND_PAGE = '/explore/underground'
 export const WEEKLY_ROTATION_PAGE = '/explore/weekly-rotation'
-// Someone else's mix. Lives under /explore rather than /:handle/weekly-rotation
-// because /:handle/:slug is the track permalink pattern.
+// Under /explore to avoid colliding with /:handle/:slug track permalinks.
 export const WEEKLY_ROTATION_USER_PAGE = '/explore/weekly-rotation/:handle'
 export const CONTESTS_PAGE = '/contests'
 

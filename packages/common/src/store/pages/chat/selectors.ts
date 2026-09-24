@@ -197,9 +197,8 @@ export const getHasUnreadMessages = (state: CommonState) => {
   if (getUnreadMessagesCount(state) > 0) {
     return true
   }
-  // This really shouldn't be necessary since the above should be kept in sync.
-  // Blasts never carry unread counts, so skip them rather than stopping at the
-  // first one (they sort to the top on ties and would hide a later unread).
+  // Fallback if the count is out of sync. Blasts have no unread count; skip
+  // them.
   const chats = getChats(state)
   for (const chat of chats) {
     if (chat.is_blast) continue
