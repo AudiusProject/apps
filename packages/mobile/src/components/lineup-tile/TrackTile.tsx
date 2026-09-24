@@ -64,6 +64,8 @@ const TrackTileComponent = (props: TrackTileProps) => {
     variant,
     style,
     showArtistPick = false,
+    favoriteSource = FavoriteSource.TILE,
+    repostSource = RepostSource.TILE,
     ...lineupTileProps
   } = props
 
@@ -261,17 +263,17 @@ const TrackTileComponent = (props: TrackTileProps) => {
 
   const handlePressSave = useToggleFavoriteTrack({
     trackId: track?.track_id as number,
-    source: FavoriteSource.TILE
+    source: favoriteSource
   })
 
   const handlePressRepost = useCallback(() => {
     if (!track) return
     if (track.has_current_user_reposted) {
-      dispatch(undoRepostTrack(track.track_id, RepostSource.TILE))
+      dispatch(undoRepostTrack(track.track_id, repostSource))
     } else {
-      dispatch(repostTrack(track.track_id, RepostSource.TILE))
+      dispatch(repostTrack(track.track_id, repostSource))
     }
-  }, [track, dispatch])
+  }, [track, dispatch, repostSource])
 
   const publish = useCallback(() => {
     if (!track) return

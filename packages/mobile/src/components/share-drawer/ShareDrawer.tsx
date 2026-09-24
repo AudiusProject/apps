@@ -108,7 +108,13 @@ export const ShareDrawer = NiceModal.create(() => {
       presetMessage: getContentUrl(content),
       defaultUserList: 'chats'
     })
-    track(make({ eventName: Name.CHAT_ENTRY_POINT, source: 'share' }))
+    track(
+      make({
+        eventName: Name.CHAT_ENTRY_POINT,
+        source: 'share',
+        kind: content.type
+      })
+    )
     if (source === ShareSource.NOW_PLAYING) {
       onCloseNowPlaying()
     }
@@ -123,7 +129,18 @@ export const ShareDrawer = NiceModal.create(() => {
     } else {
       console.error(`Can't open: ${xShareUrl}`)
     }
-  }, [content])
+    if (content.type === 'weeklyRotation' && source) {
+      track(
+        make({
+          eventName: Name.SHARE_TO_TWITTER,
+          kind: 'weeklyRotation',
+          id: content.user.user_id,
+          url: getContentUrl(content),
+          source
+        })
+      )
+    }
+  }, [content, source])
 
   const {
     handleShareToStoryStickerLoad,
@@ -143,7 +160,19 @@ export const ShareDrawer = NiceModal.create(() => {
       type: 'info',
       timeout: shareToastTimeout
     })
-  }, [toast, content, shareType])
+    if (content.type === 'weeklyRotation' && source) {
+      track(
+        make({
+          eventName: Name.SHARE,
+          kind: 'weeklyRotation',
+          id: `${content.user.user_id}`,
+          url: link,
+          source,
+          channel: 'copyLink'
+        })
+      )
+    }
+  }, [toast, content, shareType, source])
 
   const handleOpenShareSheet = useCallback(() => {
     if (!source || !content) return
@@ -174,7 +203,8 @@ export const ShareDrawer = NiceModal.create(() => {
             kind: 'weeklyRotation',
             id: `${content.user.user_id}`,
             url,
-            source
+            source,
+            channel: 'shareSheet'
           })
         )
         break

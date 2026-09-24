@@ -1,41 +1,9 @@
-/**
- * The Weekly Rotation period, as the API defines it: identified by an ISO
- * (year, week) pair but rolling over on Wednesday 00:00 UTC rather than
- * Monday. Mirrors `weeklyrotation.Period` in the api repo
- * (weeklyrotation/period.go).
- *
- * Kept dependency-free because the SSR bundle imports it (no
- * `@audius/common/utils` or dayjs).
- */
-
-const ROLLOVER_OFFSET_DAYS = 2 // ISO Monday -> Wednesday
-const MS_PER_DAY = 86_400_000
-
-export type WeeklyRotationPeriod = { year: number; week: number }
-
-export const getWeeklyRotationPeriod = (
-  date: Date = new Date()
-): WeeklyRotationPeriod => {
-  // Shift back so a period that started on Wednesday maps onto the ISO week
-  // whose Monday it belongs to, then do the standard ISO week calculation:
-  // the ISO week of a date is the week of that date's Thursday.
-  const d = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-  )
-  d.setUTCDate(d.getUTCDate() - ROLLOVER_OFFSET_DAYS)
-  const isoWeekday = d.getUTCDay() || 7
-  d.setUTCDate(d.getUTCDate() + 4 - isoWeekday)
-  const year = d.getUTCFullYear()
-  const yearStart = Date.UTC(year, 0, 1)
-  const week = Math.ceil(((d.getTime() - yearStart) / MS_PER_DAY + 1) / 7)
-  return { year, week }
-}
-
-/** `2026-37`: stable, sortable, safe in a query string. */
-export const formatWeeklyRotationPeriod = ({
-  year,
-  week
-}: WeeklyRotationPeriod) => `${year}-${String(week).padStart(2, '0')}`
+// Imported by path rather than `@audius/common/utils` so the SSR bundle
+// doesn't pull in the rest of common.
+import {
+  formatWeeklyRotationPeriod,
+  getWeeklyRotationPeriod
+} from '@audius/common/src/utils/weeklyRotation'
 
 const OG_BASE_URL = 'https://og.audius.co'
 

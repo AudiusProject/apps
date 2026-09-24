@@ -35,6 +35,8 @@ type TrackTableLineupProps = Omit<
   | 'data'
 > & {
   playingSource?: PlaybackSource
+  favoriteSource?: FavoriteSource
+  repostSource?: RepostSource
   // Source tag for the playback queue (also used for stable UID generation).
   source: string
   // Ordered list of track IDs to display.
@@ -50,6 +52,8 @@ type TrackTableLineupProps = Omit<
 
 export const TrackTableLineup = ({
   playingSource = PlaybackSource.TRACK_TILE,
+  favoriteSource = FavoriteSource.TRACK_PAGE,
+  repostSource = RepostSource.TRACK_PAGE,
   source,
   trackIds,
   isInitialLoading,
@@ -116,32 +120,24 @@ export const TrackTableLineup = ({
     (track: TrackWithUID) => {
       const trackId = track.track_id
       if (!track.has_current_user_saved) {
-        dispatch(
-          tracksSocialActions.saveTrack(trackId, FavoriteSource.TRACK_PAGE)
-        )
+        dispatch(tracksSocialActions.saveTrack(trackId, favoriteSource))
       } else {
-        dispatch(
-          tracksSocialActions.unsaveTrack(trackId, FavoriteSource.TRACK_PAGE)
-        )
+        dispatch(tracksSocialActions.unsaveTrack(trackId, favoriteSource))
       }
     },
-    [dispatch]
+    [dispatch, favoriteSource]
   )
 
   const onClickRepost = useCallback(
     (track: TrackWithUID) => {
       const trackId = track.track_id
       if (!track.has_current_user_reposted) {
-        dispatch(
-          tracksSocialActions.repostTrack(trackId, RepostSource.TRACK_PAGE)
-        )
+        dispatch(tracksSocialActions.repostTrack(trackId, repostSource))
       } else {
-        dispatch(
-          tracksSocialActions.undoRepostTrack(trackId, RepostSource.TRACK_PAGE)
-        )
+        dispatch(tracksSocialActions.undoRepostTrack(trackId, repostSource))
       }
     },
-    [dispatch]
+    [dispatch, repostSource]
   )
 
   const onClickRow = useCallback(

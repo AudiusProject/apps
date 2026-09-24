@@ -75,7 +75,9 @@ export const ShareModal = NiceModal.create(() => {
       onCancelAction: setVisibility({ modal: 'Share', visible: true }),
       defaultUserList: 'chats'
     })
-    dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'share' }))
+    dispatch(
+      make(Name.CHAT_ENTRY_POINT, { source: 'share', kind: content.type })
+    )
   }, [openCreateChatModal, dispatch, onClose, content])
 
   const handleShareToX = useCallback(async () => {
@@ -117,7 +119,8 @@ export const ShareModal = NiceModal.create(() => {
             kind: 'weeklyRotation',
             id: `${content.user.user_id}`,
             url: link,
-            source
+            source,
+            channel: 'copyLink'
           })
         )
         break
