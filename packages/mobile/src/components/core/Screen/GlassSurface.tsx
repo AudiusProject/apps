@@ -21,20 +21,10 @@ import { isDarkTheme, useThemeColors, useThemeVariant } from 'app/utils/theme'
 const IOS_TINT_OPACITY = 0.72
 
 /**
- * Android does not get a real backdrop blur — `@react-native-community/blur`'s
- * Android implementation is expensive enough to drop frames on a surface
- * composited on every scroll frame — so the surface is fully opaque there,
- * matching the existing `ProfileNavOverlay` fallback.
- *
- * It is opaque rather than *nearly* opaque on purpose. Translucency only reads
- * as frost when something blurs what shows through; with no blur, whatever
- * bleeds through keeps its edges and reads as legible ghost text sitting on
- * top of the header. A previous 0.94 looked acceptable in light mode (~8%
- * relative contrast) but broke badly in dark: 6% of near-white content over a
- * near-black surface is a ~93% luminance jump, leaving track titles and play
- * counts clearly readable behind the header. Any single alpha that suits one
- * theme is wrong for the other, so Android trades the hint of translucency for
- * a clean surface. Content still slides under it — it just isn't see-through.
+ * Android has no backdrop blur (too costly on a surface composited every
+ * scroll frame), so the tint is fully opaque. Without blur, any translucency
+ * leaves the content behind legible through the header, especially in dark
+ * mode.
  */
 const ANDROID_TINT_OPACITY = 1
 
@@ -74,8 +64,8 @@ type GlassSurfaceProps = ViewProps & {
  * full control of its own layout — drop it in as the first child of a
  * position-relative container and the surface fills it.
  *
- * iOS gets a genuine backdrop blur; Android gets a near-opaque tint. See the
- * opacity constants above for why.
+ * iOS gets a backdrop blur; Android gets an opaque tint. See the opacity
+ * constants above.
  */
 export const GlassSurface = (props: GlassSurfaceProps) => {
   const {
@@ -94,8 +84,7 @@ export const GlassSurface = (props: GlassSurfaceProps) => {
     Platform.OS === 'ios' ? IOS_TINT_OPACITY : ANDROID_TINT_OPACITY
 
   const edgeStyle = useAnimatedStyle(() => {
-    // No scrollY (or nothing scrolled yet) → draw the edge statically, which
-    // is what non-scrolling callers want.
+    // Without scrollY the edge is always drawn.
     if (!scrollY) return { opacity: 1 }
     return {
       opacity: interpolate(

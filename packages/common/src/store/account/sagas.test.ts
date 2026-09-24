@@ -56,9 +56,6 @@ const runFetchAccount = (account: AccountUserMetadata) => {
 }
 
 describe('fetchAccountAsync', () => {
-  // Regression test: the deactivated branch used to fall through to
-  // fetchAccountSucceeded/signedIn, so a deactivated user was signed back in
-  // on any app load despite the sign-in form rejecting them.
   it('does not sign in a deactivated account', async () => {
     await runFetchAccount(makeAccount(true))
       .put(fetchAccountFailed({ reason: 'ACCOUNT_DEACTIVATED' }))

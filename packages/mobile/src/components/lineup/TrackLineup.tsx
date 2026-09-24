@@ -30,6 +30,7 @@ import { StyleSheet, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { SectionList } from 'app/components/core'
+import { useBottomChinHeight } from 'app/components/core/BottomChin'
 import {
   TrackTile,
   CollectionTile,
@@ -112,9 +113,9 @@ export type TrackLineupProps = {
   ListFooterComponent?: SectionListProps<unknown>['ListFooterComponent']
   hideHeaderOnEmpty?: boolean
   /**
-   * Padding/style applied to the scrollable content itself (not the list
-   * frame). Root tab screens use this to clear the floating glass header, so
-   * content starts below it but scrolls behind it.
+   * Style for the scrollable content. Root tab screens use it to clear the
+   * floating glass header. Defaults to a bottom inset that clears the tab bar
+   * and play bar; pass `paddingBottom` to override it.
    */
   contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
   /** Scroll callback, used by root screens to drive the glass chrome. */
@@ -393,6 +394,12 @@ export const TrackLineup = ({
 
   useScrollToTop(scrollToTop, disableTopTabScroll)
 
+  const bottomChin = useBottomChinHeight()
+  const listContentStyle = useMemo(
+    () => [{ paddingBottom: bottomChin }, contentContainerStyle],
+    [bottomChin, contentContainerStyle]
+  )
+
   const isEmpty = !isPending && !isFetching && entries.length === 0
   const pullToRefreshProps = pullToRefresh
     ? { onRefresh: isEmpty ? undefined : refresh, refreshing: !!refreshing }
@@ -403,7 +410,7 @@ export const TrackLineup = ({
       <SectionList
         {...pullToRefreshProps}
         ref={ref}
-        contentContainerStyle={contentContainerStyle}
+        contentContainerStyle={listContentStyle}
         onScroll={onScroll}
         scrollEventThrottle={16}
         ListHeaderComponent={hideHeaderOnEmpty && isEmpty ? undefined : header}

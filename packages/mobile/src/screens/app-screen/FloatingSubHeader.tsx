@@ -23,18 +23,13 @@ type FloatingSubHeaderProps = {
 }
 
 /**
- * Pins a screen's persistent top row — feed tabs, trending pills, the library
- * category menu — directly beneath the floating root header as a second glass
- * layer.
+ * Pins a screen's persistent top row (feed tabs, trending pills) beneath the
+ * floating root header as a second glass layer, so content scrolls behind one
+ * continuous frosted surface.
  *
- * Without this the row would sit in normal flow and content would scroll
- * behind the translucent header only to collide with an opaque row. Floating
- * it keeps the whole top cluster one continuous frosted surface.
- *
- * The row stays owned by its screen rather than being passed into
- * `MobileRootHeader`'s render prop on purpose: those render props are memoized
- * so that changing tab state doesn't rebuild the header and remount
- * `AccountPictureHeader` (which re-fires the profile-picture fetch).
+ * Owned by the screen rather than passed into `MobileRootHeader`, whose
+ * memoized render prop must not rebuild on tab-state changes (that remounts
+ * `AccountPictureHeader` and re-fires the profile-picture fetch).
  */
 export const FloatingSubHeader = (props: FloatingSubHeaderProps) => {
   const { children, showBorder = true } = props

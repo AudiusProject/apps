@@ -22,6 +22,7 @@ const MAX_TRACK_TRANSCODE_TIMEOUT = 3600000 // 1 hour
 const MAX_TRACK_TRANSCODE_NO_PROGRESS_TIMEOUT = 1200000 // 20 minutes
 const MAX_IMAGE_RESIZE_TIMEOUT_MS = 300000 // 5 minutes
 const POLL_STATUS_INTERVAL = 3000 // 3s
+const MAX_DONE_WITHOUT_RESULTS_MS = 120000 // 2 minutes
 
 export class Storage implements StorageService {
   /**
@@ -222,9 +223,8 @@ export class Storage implements StorageService {
     const start = Date.now()
     let lastProgressUpdate = Date.now()
     let lastTranscodeProgress = 0
-    // Tracks whether we ever saw a `done` response with no usable transcode
-    // result, so the timeout can say which of the two failures this was.
-    let sawDoneWithoutResults = false
+    // When a node first reported done without a 320 result.
+    let doneWithoutResultsSince: number | null = null
 
     const maxPollingMs =
       template === 'audio'
@@ -237,7 +237,27 @@ export class Storage implements StorageService {
           throw new Error('Upload aborted')
         }
         const resp = await this.getProcessingStatus(id)
-        if (template === 'audio' && resp.transcode_progress) {
+        if (resp?.status === 'done') {
+          if (template !== 'audio' || resp.results?.['320']) {
+            return resp
+          }
+          // A node can report done before its copy of the upload row has the
+          // transcode results. Keep polling, on the next node, until the 320
+          // cid shows up.
+          doneWithoutResultsSince ??= Date.now()
+          if (
+            Date.now() - doneWithoutResultsSince >
+            MAX_DONE_WITHOUT_RESULTS_MS
+          ) {
+            throw new Error(
+              `Upload reported done but no transcode result appeared within ${MAX_DONE_WITHOUT_RESULTS_MS}ms. id=${id}`
+            )
+          }
+          this.logger.warn(
+            `Storage node reported done with no transcode results, still polling. id=${id}`
+          )
+          await this.storageNodeSelector.getSelectedNode(true)
+        } else if (template === 'audio' && resp.transcode_progress) {
           // Only update lastProgressUpdate if the progress has increased
           if (resp.transcode_progress > lastTranscodeProgress) {
             lastProgressUpdate = Date.now()
@@ -256,28 +276,6 @@ export class Storage implements StorageService {
             transcode: resp.transcode_progress
           })
         }
-        if (resp?.status === 'done') {
-          // `done` alone is not proof the transcode results are here. Upload
-          // rows replicate across storage nodes, and getProcessingStatus talks
-          // to whichever node is selected, so a mirror can answer `done` from a
-          // row it has not finished catching up on. Accepting that response
-          // hands populateTrackMetadataWithUploadResponse a `results` map with
-          // no '320' key, the track entity gets written with an undefined
-          // trackCid, and the upload succeeds into a track that can never be
-          // played - no error anywhere, just a dead track with a live page.
-          //
-          // Keep polling instead. A node that really is finished will have the
-          // cid on the next pass, and in the genuinely stuck case this times
-          // out loudly rather than silently publishing unplayable audio.
-          if (template === 'audio' && !resp.results?.['320']) {
-            sawDoneWithoutResults = true
-            this.logger.warn(
-              `Storage node reported done with no transcode results, still polling. id=${id}`
-            )
-          } else {
-            return resp
-          }
-        }
         if (resp?.status === 'error') {
           throw new Error(
             `Upload failed: id=${id}, resp=${JSON.stringify(resp)}`
@@ -287,6 +285,7 @@ export class Storage implements StorageService {
         // Rethrow if error is "Upload failed", stalled, or if status code is 422 (Unprocessable Entity)
         if (
           e.message?.startsWith('Upload failed') ||
+          e.message?.startsWith('Upload reported done') ||
           e.message?.startsWith('No transcoding progress increase') ||
           (e.response && e.response?.status === 422)
         ) {
@@ -300,11 +299,6 @@ export class Storage implements StorageService {
       await wait(POLL_STATUS_INTERVAL)
     }
 
-    if (sawDoneWithoutResults) {
-      throw new Error(
-        `Upload reported done but no transcode result appeared within ${maxPollingMs}ms. id=${id}`
-      )
-    }
     throw new Error(`Upload took over ${maxPollingMs}ms. id=${id}`)
   }
 

@@ -1356,11 +1356,7 @@ type ExploreSectionClick = {
   link?: string
 }
 
-/**
- * Surface the banner was rendered on. The mix is reachable from more than one
- * place, so every Weekly Rotation event carries this -- otherwise there's no
- * way to tell which entry point is actually driving listens.
- */
+/** Surface the banner was rendered on, so events can be split by entry point. */
 export type WeeklyRotationSurface = 'explore' | 'feed'
 
 type WeeklyRotationBannerView = {

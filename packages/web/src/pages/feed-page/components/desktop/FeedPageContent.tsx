@@ -161,9 +161,6 @@ const FeedPageContent = ({ containerRef }: FeedPageContentProps) => {
         gap='l'
         css={{ minWidth: MIN_DESKTOP_CONTENT_WIDTH_PX }}
       >
-        {/* Above the lineup so the mix is reachable without leaving the feed:
-            Explore is the only other entry point and it takes a deliberate
-            detour to get to. */}
         <WeeklyRotationBanner surface='feed' />
         <TrackLineup
           key={`feed-${feedTab}`}

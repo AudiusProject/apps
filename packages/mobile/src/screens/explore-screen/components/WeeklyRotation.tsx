@@ -19,12 +19,11 @@ const ART_SIZE = 96
  * Promotional banner for Weekly Rotation, pinned to the top of Explore.
  *
  * Mirrors the web banner: an entry point rather than a content row, so it
- * navigates to the full mix instead of playing in place. Deliberately not
- * wrapped in ExploreSection -- it sits above the section stack.
+ * navigates to the full mix instead of playing in place. Not wrapped in
+ * ExploreSection because it sits above the section stack.
  */
 type WeeklyRotationProps = {
-  /** Which surface this instance renders on -- carried on every event so we
-   * can tell which entry point actually drives listens. */
+  /** Surface this renders on; sent with every event. */
   surface?: WeeklyRotationSurface
 }
 
@@ -65,8 +64,8 @@ export const WeeklyRotation = ({
     navigation.navigate('WeeklyRotationScreen')
   }, [navigation, trackEvent, surface, trackIds.length])
 
-  // The flag check sits with the empty/error case so both surfaces that render
-  // this banner -- Explore and the feed -- are gated by this one return.
+  // Hidden when flagged off or when there's no mix. Gates both the Explore and
+  // feed placements.
   if (
     !isWeeklyRotationEnabled ||
     isError ||
