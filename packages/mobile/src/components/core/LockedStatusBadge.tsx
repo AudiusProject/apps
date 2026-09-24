@@ -1,7 +1,11 @@
 import { View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
-import { IconLock, IconLockUnlocked, useTheme } from '@audius/harmony-native'
+import {
+  LinearGradient,
+  IconLock,
+  IconLockUnlocked,
+  useTheme
+} from '@audius/harmony-native'
 import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useColor } from 'app/utils/theme'

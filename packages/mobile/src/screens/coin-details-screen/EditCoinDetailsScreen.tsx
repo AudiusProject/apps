@@ -19,9 +19,9 @@ import { useRoute, useNavigation } from '@react-navigation/native'
 import { useFormikContext, Formik } from 'formik'
 import { Image as RNImage, View, StyleSheet } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import LinearGradient from 'react-native-linear-gradient'
 
 import {
+  LinearGradient,
   IconInstagram,
   IconLink,
   IconPlus,

@@ -7,14 +7,15 @@ import type {
   ViewStyle
 } from 'react-native'
 import { Animated, Image, View } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import type { SvgProps } from 'react-native-svg'
 
+import { LinearGradient } from '@audius/harmony-native'
 import IconAudioRewardsPill from 'app/assets/images/iconAudioRewardsPill.svg'
 import { Pressable } from 'app/components/core'
 import Text from 'app/components/text'
 import { usePressScaleAnimation } from 'app/hooks/usePressScaleAnimation'
 import { font, makeStyles } from 'app/styles'
+import { getGradientStartEnd } from 'app/utils/linearGradient'
 
 type ColorTileProps = {
   style?: StyleProp<ViewStyle>
@@ -142,8 +143,7 @@ export const ColorTile = ({
     >
       <LinearGradient
         colors={gradientColors}
-        useAngle
-        angle={gradientAngle}
+        {...getGradientStartEnd(gradientAngle)}
         style={styles.gradientContainer}
       >
         <Pressable

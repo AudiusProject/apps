@@ -1,8 +1,8 @@
 import MaskedView from '@react-native-masked-view/masked-view'
 import type { TextProps } from 'react-native'
-import type { LinearGradientProps } from 'react-native-linear-gradient'
-import LinearGradient from 'react-native-linear-gradient'
 
+import type { LinearGradientProps } from '@audius/harmony-native'
+import { LinearGradient } from '@audius/harmony-native'
 import Text from 'app/components/text'
 import { useThemeColors } from 'app/utils/theme'
 

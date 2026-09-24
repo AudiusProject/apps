@@ -14,11 +14,11 @@ import {
 } from '@audius/common/store'
 import { USDC } from '@audius/fixed-decimal'
 import { TouchableOpacity } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 import { useDispatch, useSelector } from 'react-redux'
 
 import type { FlexProps } from '@audius/harmony-native'
 import {
+  LinearGradient,
   Button,
   Flex,
   IconLock,

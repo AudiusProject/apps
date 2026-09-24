@@ -12,7 +12,7 @@ import { useToast } from 'app/hooks/useToast'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { TextPressable } from './TextPressable'
-import type { Source } from './types'
+import type { Source, TextLinkProps } from './types'
 
 const messages = {
   error: 'Unable to open this URL'
@@ -71,7 +71,10 @@ export const ExternalLink = (props: ExternalLinkProps) => {
   const handlePress = useExternalLinkHandlePress({ url, onPress })
 
   return (
-    <TextPressable onPress={handlePress} {...other}>
+    // `other` carries TouchableWithoutFeedback props; TextPressable forwards
+    // them onto the underlying Text where the non-text extras are harmless.
+    // RN 0.81's stricter prop types require narrowing the spread.
+    <TextPressable onPress={handlePress} {...(other as Partial<TextLinkProps>)}>
       {children}
     </TextPressable>
   )

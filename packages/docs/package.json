@@ -17,8 +17,8 @@
     "@scalar/api-reference-react": "0.9.11",
     "ajv": "8.5.0",
     "zod": "4.3.6",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.1.8",
+    "react-dom": "19.1.8",
     "vocs": "1.0.8"
   },
   "devDependencies": {
