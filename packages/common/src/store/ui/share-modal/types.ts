@@ -53,10 +53,8 @@ type SharePlaylistContent = {
 }
 
 /**
- * A listener's Weekly Rotation mix. There is no entity behind it -- the mix
- * is computed on demand from the listener's id -- so the only thing the share
- * needs is the listener: the link is built from their handle and the card
- * from their current mix.
+ * A user's Weekly Rotation. Not backed by an entity; the link is built from
+ * the user's handle.
  */
 type ShareWeeklyRotationContent = {
   type: 'weeklyRotation'

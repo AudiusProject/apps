@@ -165,6 +165,7 @@ const RepeatButton = ({
   }
 
   const lottieRef = useRef<LottieRefCurrentProps>(null)
+  const [isLottieReady, setIsLottieReady] = useState(false)
   useEffect(() => {
     if (lottieRef.current) {
       if (state.isPaused) {
@@ -173,7 +174,7 @@ const RepeatButton = ({
         lottieRef.current.play()
       }
     }
-  }, [lottieRef, state.isPaused])
+  }, [lottieRef, state.isPaused, isLottieReady])
 
   if (!animations || !state.icon) return null
 
@@ -188,6 +189,7 @@ const RepeatButton = ({
     >
       <Lottie
         lottieRef={lottieRef}
+        onLottieReady={() => setIsLottieReady(true)}
         loop={false}
         autoplay={false}
         animationData={state.icon}

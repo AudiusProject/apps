@@ -190,7 +190,6 @@ export const UploadPage = (props: UploadPageProps) => {
         page = (
           <EditPage
             formState={formState}
-            initialMetadata={initialMetadata}
             onContinue={(formState: UploadFormState) => {
               setFormState(formState)
               const isPrivateCollection =

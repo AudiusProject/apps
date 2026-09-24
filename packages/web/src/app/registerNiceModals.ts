@@ -54,25 +54,10 @@ import 'pages/fan-club-detail-page/components/ClaimVestedCoinsModal'
 import 'pages/rewards-page/components/modals/ChallengeRewardsModal/ChallengeRewardsModal'
 
 /**
- * Wallet modals, registered lazily.
- *
- * These three pull in the Reown AppKit graph (`@reown/*`, `@walletconnect/*`,
- * `@solana/web3.js`). Importing them here for their registration side effect put
- * roughly 1.5 MB of wallet SDK in the entry chunk for every visitor, including
- * everyone who never opens a wallet.
- *
- * Registering a lazy component instead is safe because NiceModal only renders
- * modals that are currently *visible* (`NiceModalPlaceholder` filters the
- * registry by the visible ids), so nothing here mounts — or suspends — until the
- * user actually opens one.
- *
- * Registration lives here rather than in each modal module on purpose: if those
- * modules still self-registered, the dynamic import would overwrite
- * MODAL_REGISTRY mid-flight and React would swap the element type underneath an
- * open modal, remounting it and losing its state.
- *
- * The Suspense boundary is local because `NiceModal.Provider` mounts its
- * placeholder outside the only boundary in routes.tsx.
+ * Wallet and Coinflow modals are registered lazily to keep AppKit and Coinflow
+ * out of the entry chunk. NiceModal only renders visible modals, so nothing
+ * loads until one opens. Registration stays here (not in the modal modules) so
+ * the lazy import can't re-register and remount an open modal.
  */
 const registerLazyModal = (
   id: string,
@@ -101,13 +86,6 @@ registerLazyModal('ConnectedWallets', () =>
   )
 )
 
-/**
- * Coinflow modals, registered lazily.
- *
- * `@coinflowlabs/react` bundles the nsure-ai fraud-detection SDK (~294 KB of
- * source on its own). Neither is needed until a user actually reaches a
- * purchase or withdrawal flow.
- */
 registerLazyModal('CoinflowOnramp', () =>
   import('components/coinflow-onramp-modal/CoinflowOnrampModal').then((m) => ({
     default: m.CoinflowOnrampModal

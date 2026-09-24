@@ -15,7 +15,6 @@ import {
 type UploadTrackFormProps = {
   formState: TrackFormState
   onContinue: (formState: TrackFormState) => void
-  initialMetadata?: Partial<TrackMetadataForUpload>
 }
 
 const defaultHiddenFields = {
@@ -28,42 +27,29 @@ const defaultHiddenFields = {
 }
 
 /**
- * Seeds the edit form for one track.
- *
- * `EditTrackForm` runs with `enableReinitialize`, so this value is not just the
- * first render's defaults — Formik resets the whole form to it whenever it
- * deep-changes. `formState.tracks` is rewritten with the user's edits every
- * time the form is submitted (see `onSubmit` below, and `EditPage.onContinue`,
- * which calls `setFormState` while still on the edit phase), so a recompute is
- * routine rather than exceptional.
- *
- * That makes it critical to prefer what's already on `track.metadata` over the
- * `initialMetadata` seed. Blanking `description`/`tags`/`stems` unconditionally
- * discarded whatever the user had typed on every reset, and publishing after
- * that point uploaded a track with an empty description and no tags.
+ * Seeds the edit form for one track. EditTrackForm uses enableReinitialize and
+ * formState.tracks is updated on every submit, so this must only read from
+ * track.metadata (any initialMetadata seed is applied when the track is added).
  */
 export const getTrackEditInitialMetadata = (
-  metadata: TrackMetadataForUpload,
-  initialMetadata?: Partial<TrackMetadataForUpload>
+  metadata: TrackMetadataForUpload
 ): SingleTrackEditValues =>
   ({
     ...metadata,
-    ...initialMetadata,
-    description: metadata.description ?? initialMetadata?.description ?? '',
-    tags: metadata.tags ?? initialMetadata?.tags ?? '',
+    description: metadata.description ?? '',
+    tags: metadata.tags ?? '',
     field_visibility: {
       ...defaultHiddenFields,
-      ...initialMetadata?.field_visibility,
       ...metadata.field_visibility,
       remixes: metadata.field_visibility?.remixes ?? true
     },
-    stems: metadata.stems ?? initialMetadata?.stems ?? [],
-    isrc: metadata.isrc ?? initialMetadata?.isrc ?? '',
-    iswc: metadata.iswc ?? initialMetadata?.iswc ?? ''
+    stems: metadata.stems ?? [],
+    isrc: metadata.isrc ?? '',
+    iswc: metadata.iswc ?? ''
   }) as SingleTrackEditValues
 
 export const UploadTrackForm = (props: UploadTrackFormProps) => {
-  const { formState, onContinue, initialMetadata } = props
+  const { formState, onContinue } = props
   const { tracks } = formState
 
   const initialValues: TrackEditFormValues = useMemo(
@@ -71,10 +57,10 @@ export const UploadTrackForm = (props: UploadTrackFormProps) => {
       trackMetadatasIndex: 0,
       tracks: tracks as TrackForUpload[],
       trackMetadatas: tracks.map((track) =>
-        getTrackEditInitialMetadata(track.metadata, initialMetadata)
+        getTrackEditInitialMetadata(track.metadata)
       )
     }),
-    [tracks, initialMetadata]
+    [tracks]
   )
 
   const onSubmit = useCallback(

@@ -13,11 +13,7 @@ const messages = {
   buttonText: 'Take Me Back To The Music'
 }
 
-/**
- * Shown in place of a track screen the API reports as non-streamable - today
- * that means the owner is no longer active. Says nothing about the account,
- * since the same flag covers a self deactivation and a delisted account.
- */
+/** Shown in place of a track the API reports as non-streamable. */
 export const TrackUnavailable = () => {
   const linkTo = useLinkTo()
 

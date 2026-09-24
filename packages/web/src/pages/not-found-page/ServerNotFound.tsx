@@ -11,12 +11,8 @@ const messages = {
 }
 
 /**
- * Server-rendered twin of NotFoundPage. Kept separate, and on deep harmony
- * imports, so the SSR worker bundle doesn't pull in the client barrels -
- * matching the other Server* page components. The Lottie animation and tiled
- * background from the client page are deliberately left out: they'd pull a
- * large animation payload into the worker bundle for a page the client
- * replaces on hydration anyway.
+ * SSR version of NotFoundPage. Uses deep harmony imports and skips the Lottie
+ * animation and background to keep the worker bundle small.
  */
 export const ServerNotFound = () => {
   return (

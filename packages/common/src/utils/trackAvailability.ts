@@ -1,25 +1,25 @@
+import type { ID } from '~/models/Identifiers'
 import type { Track, TrackMetadata } from '~/models/Track'
 
-type MaybeTrack = Pick<TrackMetadata, 'is_delete' | 'is_streamable'> &
+type MaybeTrack = Pick<
+  TrackMetadata,
+  'is_delete' | 'is_streamable' | 'owner_id'
+> &
   Partial<Pick<Track, '_marked_deleted'>>
 
 /**
- * Whether a track should be shown as no longer available.
- *
- * The API reports this via `is_streamable`, which it sets to false when the
- * track is deleted, when its owner is no longer active - either because the
- * artist deactivated their own account or because the account was delisted by
- * the trusted notifier - or when the row has no track_cid, an upload that was
- * indexed without the cid pointing at its audio. Deleted tracks are excluded
- * here because they have their own, more specific "deleted by artist"
- * treatment.
- *
- * The check is an explicit `=== false` on purpose: not every track source
- * populates `is_streamable`, and an absent field must not be read as
- * unavailable.
+ * Whether a track should be shown as no longer available, i.e. the API marked
+ * it non-streamable (e.g. its owner is no longer active). Deleted tracks are
+ * excluded since they have their own treatment, and the owner can always see
+ * their own track. Uses `=== false` because not every source sets
+ * is_streamable.
  */
-export const isTrackUnavailable = (track: MaybeTrack | null | undefined) =>
+export const isTrackUnavailable = (
+  track: MaybeTrack | null | undefined,
+  currentUserId?: ID | null
+) =>
   !!track &&
   track.is_streamable === false &&
   !track.is_delete &&
-  !track._marked_deleted
+  !track._marked_deleted &&
+  (currentUserId == null || track.owner_id !== currentUserId)

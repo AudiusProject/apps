@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 
 import {
+  useCurrentUserId,
   useTrackByParams,
   usePrefetchTrackComments,
   usePrefetchTrackPageLineup,
@@ -56,6 +57,7 @@ export const TrackScreen = () => {
   usePrefetchTrackPageLineup(trackId)
 
   const { data: user } = useUser(track?.owner_id)
+  const { data: currentUserId } = useCurrentUserId()
 
   if (!track || !user) {
     return (
@@ -67,10 +69,7 @@ export const TrackScreen = () => {
 
   const { track_id, permalink, comments_disabled } = track
 
-  // The API reports tracks whose owner is no longer active as non-streamable.
-  // Honor that instead of rendering a playable track screen. Deleted tracks
-  // are excluded by the helper and keep their existing DeletedTile treatment.
-  if (isTrackUnavailable(track)) {
+  if (isTrackUnavailable(track, currentUserId)) {
     return (
       <Screen url={permalink}>
         <ScreenContent>

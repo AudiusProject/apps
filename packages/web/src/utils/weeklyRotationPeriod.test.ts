@@ -9,8 +9,7 @@ import {
 const utc = (y: number, m: number, d: number, h = 0) =>
   new Date(Date.UTC(y, m - 1, d, h))
 
-// The same cases as TestWeeklyRotationPeriod in the api repo, so the two
-// implementations can't drift apart without one of these failing.
+// Same cases as TestPeriod in the api repo (weeklyrotation/period_test.go).
 describe('getWeeklyRotationPeriod', () => {
   it('opens ISO week 37 at the Wednesday rollover', () => {
     // 2026-09-09 is a Wednesday.

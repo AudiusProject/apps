@@ -10,8 +10,6 @@ const messages = {
 }
 
 const DeletedContentTiny = ({ onClick, isBlocked, isUnavailable }) => {
-  // `unavailable` says nothing about the account on purpose: the same flag
-  // covers a self deactivation and a delisted account.
   const label = isUnavailable
     ? messages.unavailable
     : isBlocked

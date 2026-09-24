@@ -29,8 +29,8 @@ export const getSuggestedFollowsQueryKey = ({
  * albums they have favorited or reposted but whose artist they don't already
  * follow.
  *
- * Returns an empty array for users with no favorites or reposts — see
- * `useFollowSuggestions` for the surface-level fallback to featured artists.
+ * Returns an empty array for users with no favorites or reposts. See
+ * `useFollowSuggestions` for the fallback to featured artists.
  */
 export const useSuggestedFollows = (
   { limit = DEFAULT_LIMIT }: UseSuggestedFollowsArgs = {},
