@@ -29,6 +29,7 @@ import { TrackLineup } from 'app/components/lineup/TrackLineup'
 import { SuggestedFollows } from 'app/components/suggested-follows'
 import { useDrawer } from 'app/hooks/useDrawer'
 import { AppDrawerContext } from 'app/screens/app-drawer-screen'
+import { useOpenDrawerGesture } from 'app/screens/app-drawer-screen/useOpenDrawerGesture'
 import { FloatingSubHeader } from 'app/screens/app-screen/FloatingSubHeader'
 import {
   useGlassHeaderInset,
@@ -90,14 +91,14 @@ export const FeedScreen = () => {
     [feedArgs]
   )
 
-  const { drawerHelpers, setGesturesDisabled } = useContext(AppDrawerContext)
+  const { setGesturesDisabled } = useContext(AppDrawerContext)
   const { isOpen: isNowPlayingDrawerOpen } = useDrawer('NowPlaying')
   const drawerStatus = useDrawerStatus()
 
-  // The drawer's own root-level swipe-to-open (swipeEdgeWidth = full screen)
-  // competes with the pager here: with both active, a right-swipe on Latest
-  // opens the drawer instead of paging back to For You, and the two openers
-  // arbitrate unpredictably with the track tiles' tap gesture. While the feed
+  // The drawer navigator's edge swipe-to-open competes with the pager here:
+  // with both active, a right-swipe on Latest opens the drawer instead of
+  // paging back to For You, and the two openers arbitrate unpredictably with
+  // the track tiles' tap gesture. While the feed
   // is focused and the drawer is closed, turn the native drawer swipe off so
   // the pager owns paging and the gesture below is the single drawer-opener
   // (For You only). Re-enable once it's open so it can still be swiped closed,
@@ -112,21 +113,12 @@ export const FeedScreen = () => {
   // The For You page is the leftmost pager page, so a right-swipe there has
   // no page to fall back to — PagerView would otherwise swallow it, leaving
   // the left nav drawer unreachable by gesture (only the header avatar would
-  // open it). This gesture re-enables swipe-to-open on For You: it activates
-  // only on a rightward drag (`activeOffsetX`) and bails on a leftward drag
-  // (`failOffsetX`) so swiping to Latest still reaches the pager untouched.
+  // open it). The shared drawer-opener only claims a clearly horizontal
+  // rightward drag, so swiping to Latest still reaches the pager untouched and
+  // a vertical scroll with sideways drift stays with the lineup.
   // Disabled on Latest, where right-swipe legitimately pages back to For You.
-  const openDrawerGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .enabled(isForYou && !isNowPlayingDrawerOpen)
-        .activeOffsetX(20)
-        .failOffsetX(-20)
-        .runOnJS(true)
-        .onStart(() => {
-          drawerHelpers?.openDrawer()
-        }),
-    [isForYou, isNowPlayingDrawerOpen, drawerHelpers]
+  const openDrawerGesture = useOpenDrawerGesture(
+    isForYou && !isNowPlayingDrawerOpen
   )
 
   // Run the pan simultaneously with the pager's own native gesture. Without
