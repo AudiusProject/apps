@@ -7,11 +7,7 @@ import { CSSTransition } from 'react-transition-group'
 
 import '@audius/harmony/dist/harmony.css'
 
-import {
-  initTrackSessionStart,
-  recordOpen,
-  recordError
-} from '../analytics/analytics'
+import { initAnalytics, recordOpen, recordError } from '../analytics/analytics'
 import { ID_ROUTE, HASH_ID_ROUTE, PERMALINK_ROUTE } from '../routes'
 import {
   getCollection,
@@ -161,9 +157,9 @@ const App = (props) => {
     }
   }, [didError])
 
-  // Record this session with analytics
+  // Set up analytics
   useEffect(() => {
-    initTrackSessionStart()
+    initAnalytics()
   }, [])
 
   // TODO: pull these out into separate functions?

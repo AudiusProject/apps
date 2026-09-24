@@ -6,6 +6,9 @@ import { Name } from '@audius/common/models'
 
 import { useDeferredElement } from 'app/hooks/useDeferredElement'
 
+// Sections already reported during this app session
+const trackedSections = new Set<ExploreSectionName>()
+
 /**
  * Hook to track explore section impressions when they come into view on mobile
  */
@@ -14,7 +17,8 @@ export const useExploreSectionTracking = (sectionName: ExploreSectionName) => {
   const { trackEvent } = useAnalytics()
 
   useEffect(() => {
-    if (inView) {
+    if (inView && !trackedSections.has(sectionName)) {
+      trackedSections.add(sectionName)
       trackEvent({
         eventName: Name.EXPLORE_SECTION_VIEW,
         section: sectionName,

@@ -55,6 +55,20 @@ export const isMobile = () => {
   )
 }
 
+const BOT_USER_AGENT_REGEX =
+  /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|prerender|phantomjs|puppeteer|playwright|selenium|facebookexternalhit|embedly|bingpreview|inspectiontool/i
+
+/**
+ * Crawlers and automated browsers. Automation drivers set navigator.webdriver.
+ */
+export const isLikelyBot = () => {
+  if (typeof navigator === 'undefined') return false
+  if (navigator.webdriver === true) return true
+  const userAgent = navigator.userAgent ?? ''
+  // Cubot is a phone brand, not a crawler
+  return BOT_USER_AGENT_REGEX.test(userAgent) && !/cubot/i.test(userAgent)
+}
+
 export const isElectron = () => {
   if (typeof navigator === 'undefined') {
     return false

@@ -7,6 +7,7 @@ import {
   Types as AmplitudeTypes
 } from '@amplitude/analytics-react-native'
 import type { IdentifyTraits } from '@audius/common/models'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import VersionNumber from 'react-native-version-number'
 
 import { env } from 'app/services/env'
@@ -22,6 +23,9 @@ let analyticsSetupStatus: 'ready' | 'pending' | 'error' = 'pending'
 const AmplitudeWriteKey = env.AMPLITUDE_API_KEY
 const AmplitudeProxy = env.AMPLITUDE_PROXY
 const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production'
+
+const IDENTIFY_TRAITS_KEY = 'amplitude:identifiedTraits'
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 export const init = async () => {
   try {
@@ -84,11 +88,29 @@ export const identify = async (traits: IdentifyTraits) => {
   if (traits.handle) {
     setUserId(traits.handle)
   }
+
+  // User properties persist in Amplitude, so skip an identify that would set
+  // the same values again (it runs on every account load). Resend weekly in
+  // case an earlier one was dropped.
+  const serializedTraits = JSON.stringify([
+    Math.floor(Date.now() / WEEK_MS),
+    Object.keys(traits)
+      .sort()
+      .map((k) => [k, traits[k as keyof IdentifyTraits]])
+  ])
+  const previousTraits = await AsyncStorage.getItem(IDENTIFY_TRAITS_KEY).catch(
+    () => null
+  )
+  if (previousTraits === serializedTraits) return
+
   const identifyObj = new Identify()
   Object.entries(traits).forEach(([key, value]) => {
     identifyObj.set(key, value)
   })
   await amplitudeIdentify(identifyObj)
+  await AsyncStorage.setItem(IDENTIFY_TRAITS_KEY, serializedTraits).catch(
+    () => {}
+  )
 }
 
 // Track Event

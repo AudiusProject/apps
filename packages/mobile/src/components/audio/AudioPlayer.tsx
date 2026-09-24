@@ -108,6 +108,8 @@ const longFormContentCapabilities = [
   Capability.JumpBackward
 ]
 
+const MIN_REPORTED_BUFFER_MS = 1000
+
 const updatePlayerOptions = async (isLongForm = false) => {
   const coreCapabilities = isLongForm
     ? longFormContentCapabilities
@@ -517,9 +519,12 @@ const usePlaybackEvents = ({
       dispatch(playbackActions.setBuffering({ buffering: bufferingDuringPlay }))
       if (!bufferingDuringPlay && bufferStartTime) {
         const bufferDuration = Math.ceil(performance.now() - bufferStartTime)
-        analyticsTrack(
-          make({ eventName: Name.BUFFERING_TIME, duration: bufferDuration })
-        )
+        // Short buffers are routine and were over half of these events
+        if (bufferDuration >= MIN_REPORTED_BUFFER_MS) {
+          analyticsTrack(
+            make({ eventName: Name.BUFFERING_TIME, duration: bufferDuration })
+          )
+        }
         setBufferStartTime(undefined)
       }
     }
