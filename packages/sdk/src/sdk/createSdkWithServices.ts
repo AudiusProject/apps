@@ -239,16 +239,6 @@ const initializeServices = ({
         })
       )
 
-  const archiverService = config.services?.archiverService
-    ? config.services.archiverService.withMiddleware(
-        addRequestSignatureMiddleware({
-          services: { audiusWalletClient, logger },
-          apiKey,
-          apiSecret
-        })
-      )
-    : undefined
-
   const emailEncryptionService =
     config.services?.emailEncryptionService ??
     new EmailEncryptionService(
@@ -338,7 +328,6 @@ const initializeServices = ({
     solanaRelay,
     antiAbuseOracle,
     emailEncryptionService,
-    archiverService,
     logger,
     tokenStore: config.services?.tokenStore ?? new TokenStoreLocalStorage()
   }

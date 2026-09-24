@@ -4,7 +4,6 @@ import { z } from 'zod'
 import type { OAuthTokenStore } from './oauth/tokenStore'
 import { AntiAbuseOracleService } from './services/AntiAbuseOracle/types'
 import type { AntiAbuseOracleSelectorService } from './services/AntiAbuseOracleSelector/types'
-import type { ArchiverService } from './services/Archiver'
 import type { AudiusWalletClient } from './services/AudiusWalletClient'
 import { EmailEncryptionService } from './services/Encryption'
 import type { EntityManagerService } from './services/EntityManager'
@@ -109,7 +108,6 @@ export type ServicesContainer = {
   /**
    * Service used to create and download track archives
    */
-  archiverService?: ArchiverService
 
   /**
    * Service for interacting with Audius Ethereum contracts.

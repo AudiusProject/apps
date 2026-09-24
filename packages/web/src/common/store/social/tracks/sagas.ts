@@ -20,7 +20,8 @@ import {
   formatShareText,
   makeKindId,
   removeNullable,
-  getFilename
+  getFilename,
+  dedupFilenames
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import {
@@ -642,13 +643,25 @@ function* downloadTracks({
       : (nftAccessSignatureMap[parentTrackId]?.mp3 ?? null)
 
     yield* call(async () => {
+      // Dedup before building URLs, not after. The browser now saves each
+      // file straight from the network, so the name it lands under comes from
+      // the `Content-Disposition` header the content node builds out of this
+      // `filename` param — not from anything we can set at click time. A
+      // duplicate that isn't resolved here reaches disk as "name (1).wav".
+      const namedTracks = tracks.map(({ trackId, filename }) => ({
+        trackId,
+        filename
+      }))
+      dedupFilenames(namedTracks)
+
       const files = await Promise.all(
-        tracks.map(async ({ trackId, filename }) => {
+        namedTracks.map(async ({ trackId, filename }) => {
           const url = await sdk.tracks.getTrackDownloadUrl({
             trackId: Id.parse(trackId),
             userId: OptionalId.parse(userId),
             userSignature: signature,
             userData: data,
+            filename,
             nftAccessSignature: nftAccessSignature
               ? JSON.stringify(nftAccessSignature)
               : undefined
