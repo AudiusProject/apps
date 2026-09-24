@@ -7,7 +7,14 @@ import {
 } from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
-import { ID, Name, PlaybackSource, ShareSource } from '@audius/common/models'
+import {
+  FavoriteSource,
+  ID,
+  Name,
+  PlaybackSource,
+  RepostSource,
+  ShareSource
+} from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   playbackActions,
@@ -15,7 +22,12 @@ import {
   shareModalUIActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import {
+  formatWeeklyRotationPeriod,
+  getWeeklyRotationPeriod,
+  getWeeklyRotationQueueSource,
+  route
+} from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -48,7 +60,6 @@ const messages = {
 const { EXPLORE_PAGE } = route
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
-const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
 const PAGE_SIZE = 30
 const ARTWORK_SIZE = 200
 
@@ -94,26 +105,45 @@ export const WeeklyRotationPage = () => {
   const targetUserId = handle ? handleUser?.user_id : currentUserId
   const isOwnMix =
     !handle || (handleUser != null && handleUser.user_id === currentUserId)
-  // Per-owner source so your own mix and a shared one don't share play state.
-  const playbackSource = `${WEEKLY_ROTATION_SOURCE}:${targetUserId ?? ''}`
+  const playbackSource = getWeeklyRotationQueueSource(targetUserId)
 
-  const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
-    { limit: PAGE_SIZE, userId: targetUserId },
-    { enabled: isWeeklyRotationEnabled && !!targetUserId }
+  const { trackIds, isPending, isFetching, isLoading, isSuccess, isError } =
+    useWeeklyRotation(
+      { limit: PAGE_SIZE, userId: targetUserId },
+      { enabled: isWeeklyRotationEnabled && !!targetUserId }
+    )
+
+  const mixProperties = useMemo(
+    () => ({
+      source: isMobile ? ('mobile' as const) : ('web' as const),
+      period: formatWeeklyRotationPeriod(getWeeklyRotationPeriod()),
+      isOwnMix,
+      ownerUserId: targetUserId ? `${targetUserId}` : undefined
+    }),
+    [isMobile, isOwnMix, targetUserId]
   )
 
-  // Fired once the mix resolves rather than on mount, so trackCount is real
-  // and a failed load doesn't register as a page view.
+  // Fired once the mix resolves rather than on mount, so trackCount and status
+  // are real.
   const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (hasTrackedView.current || !trackIds.length) return
+    if (hasTrackedView.current || (!isSuccess && !isError)) return
     hasTrackedView.current = true
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_PAGE_VIEW,
-      source: isMobile ? 'mobile' : 'web',
-      trackCount: trackIds.length
+      ...mixProperties,
+      trackCount: trackIds.length,
+      status: isError ? 'error' : trackIds.length ? 'success' : 'empty',
+      isSignedIn: !!currentUserId
     })
-  }, [trackIds.length, isMobile, trackEvent])
+  }, [
+    isSuccess,
+    isError,
+    trackIds.length,
+    mixProperties,
+    currentUserId,
+    trackEvent
+  ])
 
   const isPlaybackActive = useSelector(playbackSelectors.getPlaying)
   const currentPlaybackTrackId = useSelector(
@@ -150,7 +180,7 @@ export const WeeklyRotationPage = () => {
       dispatch(
         make(isPlaying ? Name.PLAYBACK_PAUSE : Name.PLAYBACK_PLAY, {
           id: `${currentPlaybackTrackId}`,
-          source: PlaybackSource.PLAYLIST_PAGE
+          source: PlaybackSource.WEEKLY_ROTATION
         })
       )
       return
@@ -158,7 +188,7 @@ export const WeeklyRotationPage = () => {
 
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_PLAY_ALL,
-      source: isMobile ? 'mobile' : 'web',
+      ...mixProperties,
       trackCount: playbackQueue.length
     })
     dispatch(
@@ -171,7 +201,7 @@ export const WeeklyRotationPage = () => {
     dispatch(
       make(Name.PLAYBACK_PLAY, {
         id: `${firstId}`,
-        source: PlaybackSource.PLAYLIST_PAGE
+        source: PlaybackSource.WEEKLY_ROTATION
       })
     )
   }, [
@@ -181,7 +211,7 @@ export const WeeklyRotationPage = () => {
     currentPlaybackTrackId,
     playbackQueue,
     trackEvent,
-    isMobile
+    mixProperties
   ])
 
   const handleShare = useCallback(() => {
@@ -273,6 +303,9 @@ export const WeeklyRotationPage = () => {
 
       <TrackTableLineup
         source={playbackSource}
+        playingSource={PlaybackSource.WEEKLY_ROTATION}
+        favoriteSource={FavoriteSource.WEEKLY_ROTATION}
+        repostSource={RepostSource.WEEKLY_ROTATION}
         trackIds={trackIds}
         isPending={isPending}
         isFetching={isFetching}

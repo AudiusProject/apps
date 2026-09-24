@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useWeeklyRotation } from '@audius/common/api'
+import { useCurrentUserId, useWeeklyRotation } from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages as messages } from '@audius/common/messages'
 import { Name, type WeeklyRotationSurface } from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
-import { route } from '@audius/common/utils'
+import {
+  formatWeeklyRotationPeriod,
+  getWeeklyRotationPeriod,
+  route
+} from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -46,6 +50,7 @@ export const WeeklyRotationBanner = ({
   const navigate = useNavigate()
   const isMobile = useIsMobile()
   const { trackEvent } = useAnalytics()
+  const { data: currentUserId } = useCurrentUserId()
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -63,6 +68,19 @@ export const WeeklyRotationBanner = ({
     { enabled: inView && isWeeklyRotationEnabled }
   )
 
+  // The banner always promotes the viewer's own mix.
+  const mixProperties = useMemo(
+    () => ({
+      surface,
+      source: isMobile ? ('mobile' as const) : ('web' as const),
+      trackCount: trackIds.length,
+      period: formatWeeklyRotationPeriod(getWeeklyRotationPeriod()),
+      isOwnMix: true,
+      ownerUserId: currentUserId ? `${currentUserId}` : undefined
+    }),
+    [surface, isMobile, trackIds.length, currentUserId]
+  )
+
   // Fire the impression once, and only once there's a real mix behind it --
   // an impression for a banner that then hides itself would inflate the
   // denominator on click-through.
@@ -72,21 +90,17 @@ export const WeeklyRotationBanner = ({
     hasTrackedView.current = true
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_BANNER_VIEW,
-      surface,
-      source: isMobile ? 'mobile' : 'web',
-      trackCount: trackIds.length
+      ...mixProperties
     })
-  }, [inView, trackIds.length, surface, isMobile, trackEvent])
+  }, [inView, trackIds.length, mixProperties, trackEvent])
 
   const handleClick = useCallback(() => {
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_BANNER_CLICK,
-      surface,
-      source: isMobile ? 'mobile' : 'web',
-      trackCount: trackIds.length
+      ...mixProperties
     })
     navigate(WEEKLY_ROTATION_PAGE)
-  }, [navigate, trackEvent, surface, isMobile, trackIds.length])
+  }, [navigate, trackEvent, mixProperties])
 
   // Hidden entirely when there's no mix to promote -- a banner advertising an
   // empty page is worse than no banner. The flag check sits alongside it so
@@ -137,7 +151,6 @@ export const WeeklyRotationBanner = ({
           <Button
             variant='primary'
             iconRight={IconArrowRight}
-            onClick={handleClick}
             css={{ flexShrink: 0 }}
           >
             {messages.weeklyRotationCta}

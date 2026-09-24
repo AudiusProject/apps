@@ -685,7 +685,8 @@ export enum RepostSource {
   LIBRARY_PAGE = 'library page',
   OVERFLOW = 'overflow',
   TRACK_LIST = 'track list',
-  PURCHASE = 'purchase'
+  PURCHASE = 'purchase',
+  WEEKLY_ROTATION = 'weekly rotation'
 }
 export enum FavoriteSource {
   TILE = 'tile',
@@ -703,7 +704,8 @@ export enum FavoriteSource {
   // you had a smart collection and it was favorited so it
   // shows in your left-nav.
   IMPLICIT = 'implicit',
-  NAVIGATOR = 'navigator'
+  NAVIGATOR = 'navigator',
+  WEEKLY_ROTATION = 'weekly rotation'
 }
 export enum FollowSource {
   INBOX_UNAVAILABLE_MODAL = 'inbox unavailable modal',
@@ -725,6 +727,7 @@ type Share = {
   source: ShareSource
   id: string
   url: string
+  channel?: 'copyLink' | 'shareSheet'
 }
 
 export type ShareToTwitter = {
@@ -1064,6 +1067,10 @@ type NotificationsOpenPushNotification = {
   title?: string
   body?: string
   notificationCampaignId?: string
+  /** The push payload's `data.type`, e.g. `WeeklyRotation` */
+  type?: string
+  /** The push payload's `data.id`, when it has one */
+  id?: string
 }
 type NotificationsClickTile = {
   eventName: Name.NOTIFICATIONS_CLICK_TILE
@@ -1172,7 +1179,8 @@ export enum PlaybackSource {
   CHAT_TRACK = 'chat_track',
   CHAT_PLAYLIST_TRACK = 'chat_playlist_track',
   SEARCH_PAGE = 'search page',
-  EXCLUSIVE_TRACKS_PAGE = 'exclusive tracks page'
+  EXCLUSIVE_TRACKS_PAGE = 'exclusive tracks page',
+  WEEKLY_ROTATION = 'weekly rotation'
 }
 
 type PlaybackPlay = {
@@ -1184,6 +1192,9 @@ type PlaybackPlay = {
   // Which feed view the play originated from (matches FEED_CHANGE_VIEW's
   // `view` values). Only present for plays coming from the feed lineup.
   feed_type?: FeedTab
+  // Owner of the Weekly Rotation mix the track was queued from. Set on
+  // passive plays so auto-advance through a mix is attributable to it.
+  weeklyRotationOwnerId?: string
 }
 type PlaybackPause = {
   eventName: Name.PLAYBACK_PAUSE
@@ -1280,7 +1291,7 @@ export enum ModalSource {
 // Modals
 type ModalOpened = {
   eventName: Name.MODAL_OPENED
-  source: ModalSource
+  source: ModalSource | ShareSource
   name: string
 } & Record<string, any> // For passing state values
 
@@ -1363,31 +1374,35 @@ type ExploreSectionClick = {
  */
 export type WeeklyRotationSurface = 'explore' | 'feed'
 
+type WeeklyRotationMixProperties = {
+  source: 'web' | 'mobile'
+  trackCount: number
+  /** The mix's period, e.g. `2026-38` (see getWeeklyRotationPeriod) */
+  period: string
+  /** Whether the viewer is looking at their own mix rather than a shared one */
+  isOwnMix: boolean
+  ownerUserId?: string
+}
+
 type WeeklyRotationBannerView = {
   eventName: Name.WEEKLY_ROTATION_BANNER_VIEW
   surface: WeeklyRotationSurface
-  source: 'web' | 'mobile'
-  trackCount: number
-}
+} & WeeklyRotationMixProperties
 
 type WeeklyRotationBannerClick = {
   eventName: Name.WEEKLY_ROTATION_BANNER_CLICK
   surface: WeeklyRotationSurface
-  source: 'web' | 'mobile'
-  trackCount: number
-}
+} & WeeklyRotationMixProperties
 
 type WeeklyRotationPageView = {
   eventName: Name.WEEKLY_ROTATION_PAGE_VIEW
-  source: 'web' | 'mobile'
-  trackCount: number
-}
+  status: 'success' | 'empty' | 'error'
+  isSignedIn: boolean
+} & WeeklyRotationMixProperties
 
 type WeeklyRotationPlayAll = {
   eventName: Name.WEEKLY_ROTATION_PLAY_ALL
-  source: 'web' | 'mobile'
-  trackCount: number
-}
+} & WeeklyRotationMixProperties
 
 type BrowserNotificationSetting = {
   eventName: Name.BROWSER_NOTIFICATION_SETTINGS
@@ -2085,6 +2100,14 @@ type ChatReportUser = {
 type ChatEntryPoint = {
   eventName: Name.CHAT_ENTRY_POINT
   source: 'banner' | 'navmenu' | 'share' | 'profile'
+  /** What was shared, when source is `share` */
+  kind?:
+    | 'profile'
+    | 'album'
+    | 'playlist'
+    | 'track'
+    | 'contest'
+    | 'weeklyRotation'
 }
 
 type ChatWebsocketError = {
