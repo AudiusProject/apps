@@ -2,13 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 import { useUser } from '@audius/common/api'
 import { imageBlank as placeholderArt } from '@audius/common/assets'
-import { useAnalytics } from '@audius/common/hooks'
-import {
-  SquareSizes,
-  ID,
-  ExploreSectionName,
-  Name
-} from '@audius/common/models'
+import { SquareSizes, ID, ExploreSectionName } from '@audius/common/models'
 import { formatCount, route } from '@audius/common/utils'
 import { Image } from '@audius/harmony'
 import cn from 'classnames'
@@ -17,7 +11,6 @@ import { Dispatch } from 'redux'
 
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import UserBadges from 'components/user-badges/UserBadges'
-import { useIsMobile } from 'hooks/useIsMobile'
 import { useProfilePicture } from 'hooks/useProfilePicture'
 import {
   setUsers,
@@ -66,27 +59,14 @@ const UserArtCard = g(
     user,
     setFollowerUser,
     setModalVisibility,
-    goToRoute,
-    sectionName
+    goToRoute
   }) => {
     const { user_id, name, handle, follower_count } = user
-    const { trackEvent } = useAnalytics()
-    const isMobile = useIsMobile()
 
     const goToProfile = useCallback(() => {
-      if (sectionName) {
-        trackEvent({
-          eventName: Name.EXPLORE_SECTION_CLICK,
-          section: sectionName,
-          source: isMobile ? 'mobile' : 'web',
-          id: user_id,
-          kind: 'profile',
-          link: profilePage(handle)
-        })
-      }
       const link = profilePage(handle)
       goToRoute(link)
-    }, [handle, goToRoute, sectionName, user_id, trackEvent, isMobile])
+    }, [handle, goToRoute])
 
     const onClickFollowers = useCallback(() => {
       setFollowerUser(user_id)

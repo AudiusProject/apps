@@ -1,4 +1,3 @@
-import { Name } from '@audius/common/models'
 import { TRENDING_PAGE } from '@audius/common/src/utils/route'
 import {
   accountActions,
@@ -9,7 +8,6 @@ import { disconnect } from '@wagmi/core'
 import { takeLatest, put, call } from 'redux-saga/effects'
 
 import { getLoadedAppKit } from 'app/appkit'
-import { make } from 'common/store/analytics/actions'
 import { signOut } from 'store/sign-out/signOut'
 import { push } from 'utils/navigation'
 const { resetAccount, unsubscribeBrowserPushNotifications } = accountActions
@@ -35,11 +33,7 @@ function* watchSignOut() {
       queryClient.resetQueries()
       queryClient.clear() // ORDER MATTERS HERE - clear() must be called after resetQueries()
       yield put(unsubscribeBrowserPushNotifications())
-      yield put(
-        make(Name.SETTINGS_LOG_OUT, {
-          callback: () => signOut(localStorage, authService)
-        })
-      )
+      signOut(localStorage, authService)
       if (!action?.payload?.fromOAuth) {
         yield put(push(TRENDING_PAGE))
       }

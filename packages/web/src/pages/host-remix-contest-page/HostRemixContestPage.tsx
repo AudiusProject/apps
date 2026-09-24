@@ -13,7 +13,7 @@ import {
   useUser
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
-import { Name, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import {
   dayjs,
   getVideoThumbnailUrl,
@@ -48,7 +48,6 @@ import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeR
 import Page from 'components/page/Page'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
-import { track, make } from 'services/analytics'
 import { contestPage } from 'utils/route'
 
 import {
@@ -535,14 +534,6 @@ export const HostRemixContestPage = () => {
         endDate,
         userId: currentUserId
       })
-
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_UPDATE,
-          remixContestId: remixContest.eventId,
-          trackId: entityTrackId
-        })
-      )
     } else {
       try {
         await createEvent({
@@ -559,13 +550,6 @@ export const HostRemixContestPage = () => {
         // contest page.
         return
       }
-
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_CREATE,
-          trackId: entityTrackId
-        })
-      )
     }
 
     clearDraft()
@@ -601,15 +585,6 @@ export const HostRemixContestPage = () => {
     if (!remixContest || !currentUserId) return
     deleteEvent({ eventId: remixContest.eventId, userId: currentUserId })
 
-    if (primaryTrackId) {
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_DELETE,
-          remixContestId: remixContest.eventId,
-          trackId: primaryTrackId
-        })
-      )
-    }
     clearDraft()
     if (primaryPermalink) {
       navigate(primaryPermalink)
@@ -619,7 +594,6 @@ export const HostRemixContestPage = () => {
     remixContest,
     currentUserId,
     deleteEvent,
-    primaryTrackId,
     primaryPermalink,
     navigate
   ])

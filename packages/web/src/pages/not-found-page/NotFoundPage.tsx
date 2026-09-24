@@ -1,6 +1,5 @@
 import { useEffect, useContext } from 'react'
 
-import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
 import { Button, isLightTheme } from '@audius/harmony'
 import { useTheme } from '@emotion/react'
@@ -9,7 +8,6 @@ import { Link } from 'react-router'
 
 import notFoundAnimation from 'assets/animations/404.json'
 import tiledBackground from 'assets/img/notFoundTiledBackround.png'
-import { useRecord, make } from 'common/store/analytics/actions'
 import { LazyLottie as Lottie } from 'components/lottie/LazyLottie'
 import NavContext, {
   CenterPreset,
@@ -33,10 +31,6 @@ const messages = {
 export const NotFoundPage = () => {
   const theme = useTheme()
   const isMobile = useIsMobile()
-  const record = useRecord()
-  useEffect(() => {
-    record(make(Name.NOT_FOUND_PAGE, {}))
-  }, [record])
 
   const navContext = useContext(NavContext)!
   useEffect(() => {

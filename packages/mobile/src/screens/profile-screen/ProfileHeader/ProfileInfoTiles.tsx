@@ -10,7 +10,6 @@ import {
   useProfileUser
 } from '@audius/common/api'
 import type { UserMetadata } from '@audius/common/models'
-import { Name } from '@audius/common/models'
 import { View, ScrollView } from 'react-native'
 import Animated, {
   FadeIn,
@@ -32,7 +31,6 @@ import {
   ProfilePictureList,
   ProfilePictureListSkeleton
 } from 'app/screens/notifications-screen/Notification'
-import { make, track as trackEvent } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
 import type { SvgProps } from 'app/types/svg'
 import { useThemePalette } from 'app/utils/theme'
@@ -264,13 +262,7 @@ export const ProfileInfoTiles = () => {
   }, [])
   const onOpenRecentCommentsDrawer = useCallback(() => {
     setIsRecentCommentsDrawerOpen(true)
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_HISTORY_DRAWER_OPEN,
-        userId: user_id
-      })
-    )
-  }, [user_id])
+  }, [])
 
   const { data: accountId } = useCurrentUserId()
 

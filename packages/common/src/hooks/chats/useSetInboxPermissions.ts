@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { useCurrentUserId } from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils'
-import { useAppContext } from '~/context/appContext'
-import { Name } from '~/models/Analytics'
 import { CommonState } from '~/store'
 import {
   chatActions,
@@ -24,9 +22,6 @@ export const useSetInboxPermissions = () => {
   const permissions = useSelector((state: CommonState) =>
     getUserChatPermissions(state, userId)
   )
-  const {
-    analytics: { track, make }
-  } = useAppContext()
   const permissionsStatus = useSelector(getChatPermissionsStatus)
 
   const doFetchPermissions = useCallback(() => {
@@ -37,29 +32,16 @@ export const useSetInboxPermissions = () => {
 
   const savePermissions = useCallback(
     async (permitMap: InboxSettingsFormValues) => {
-      let permitList
       try {
         const sdk = await audiusSdk()
-        permitList = transformMapToPermitList(permitMap)
+        const permitList = transformMapToPermitList(permitMap)
         await sdk.chats.permit({ permitList, allow: true })
         doFetchPermissions()
-        track(
-          make({
-            eventName: Name.CHANGE_INBOX_SETTINGS_SUCCESS,
-            permitList
-          })
-        )
       } catch (e) {
         console.error('Chats', e as Error)
-        track(
-          make({
-            eventName: Name.CHANGE_INBOX_SETTINGS_FAILURE,
-            permitList
-          })
-        )
       }
     },
-    [audiusSdk, doFetchPermissions, track, make]
+    [audiusSdk, doFetchPermissions]
   )
 
   return {

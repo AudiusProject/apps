@@ -8,13 +8,7 @@ import {
   queryTracks,
   updateCollectionData
 } from '@audius/common/api'
-import {
-  Name,
-  Kind,
-  Collection,
-  ID,
-  ChallengeName
-} from '@audius/common/models'
+import { Kind, Collection, ID, ChallengeName } from '@audius/common/models'
 import {
   cacheCollectionsActions,
   cacheActions,
@@ -34,7 +28,6 @@ import {
 import { Id } from '@audius/sdk'
 import { call, put, takeEvery } from 'typed-redux-saga'
 
-import { make } from 'common/store/analytics/actions'
 import { ensureLoggedIn } from 'common/utils/ensureLoggedIn'
 import { waitForWrite } from 'utils/sagaHelpers'
 
@@ -157,13 +150,6 @@ function* addTrackToPlaylistAsync(action: AddTrackToPlaylistAction) {
       specifier: Id.parse(userId)
     })
   )
-
-  const event = make(Name.PLAYLIST_ADD, {
-    trackId: action.trackId,
-    playlistId: action.playlistId
-  })
-
-  yield* put(event)
 
   if (!action.silent) {
     yield* put(

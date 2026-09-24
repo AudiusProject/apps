@@ -10,7 +10,7 @@ import {
   useMuteUser
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import { Comment, ID, Name, ReplyComment } from '@audius/common/models'
+import { Comment, ID, ReplyComment } from '@audius/common/models'
 import {
   Box,
   ButtonVariant,
@@ -29,7 +29,6 @@ import { Id } from '@audius/sdk'
 import { ConfirmationModal } from 'components/confirmation-modal'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
-import { make, track as trackEvent } from 'services/analytics'
 import { env } from 'services/env'
 import { copyToClipboard } from 'utils/clipboardUtil'
 import { removeNullable } from 'utils/typeUtils'
@@ -104,20 +103,9 @@ export const CommentActionBar = ({
     useUpdateCommentNotificationSetting(commentId)
 
   // Handlers
-  const handleReact = useRequiresAccountCallback(
-    () => {
-      reactToComment(commentId, !isCurrentUserReacted)
-    },
-    [commentId, isCurrentUserReacted, reactToComment],
-    () => {
-      trackEvent(
-        make({
-          eventName: Name.COMMENTS_OPEN_AUTH_MODAL,
-          trackId: entityId
-        })
-      )
-    }
-  )
+  const handleReact = useRequiresAccountCallback(() => {
+    reactToComment(commentId, !isCurrentUserReacted)
+  }, [commentId, isCurrentUserReacted, reactToComment])
 
   const handleDelete = useCallback(() => {
     // note: we do some UI logic in the CommentBlock above this so we can't trigger directly from here
@@ -157,13 +145,7 @@ export const CommentActionBar = ({
 
   const [handleClickReply, mobileAppDrawer] = useCommentActionCallback(() => {
     onClickReply()
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_CLICK_REPLY_BUTTON,
-        commentId
-      })
-    )
-  }, [onClickReply, commentId])
+  }, [onClickReply])
 
   const handleShare = useCallback(() => {
     const url = `${env.AUDIUS_URL}${track.permalink}?commentId=${Id.parse(comment.id)}`
@@ -311,19 +293,9 @@ export const CommentActionBar = ({
   )
 
   const [handleClickOverflowMenu, replyMobileAppDrawer] =
-    useCommentActionCallback(
-      (triggerPopup: () => void) => {
-        triggerPopup()
-
-        trackEvent(
-          make({
-            eventName: Name.COMMENTS_OPEN_COMMENT_OVERFLOW_MENU,
-            commentId
-          })
-        )
-      },
-      [commentId]
-    )
+    useCommentActionCallback((triggerPopup: () => void) => {
+      triggerPopup()
+    }, [])
 
   return (
     <Flex gap='l' alignItems='center'>

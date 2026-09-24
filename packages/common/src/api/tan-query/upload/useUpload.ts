@@ -4,7 +4,7 @@ import { HashId, Id, type UploadTrackFilesTask } from '@audius/sdk'
 import { useDispatch } from 'react-redux'
 
 import { fileToSdk } from '~/adapters'
-import { Name, type StemUploadWithFile, isContentFollowGated } from '~/models'
+import { Name, type StemUploadWithFile } from '~/models'
 import {
   type TrackForUpload,
   uploadActions,
@@ -202,29 +202,8 @@ export const useUpload = (
 
   const uploadTrackFiles = useCallback(
     async (tracks: TrackForUpload[]) => {
-      // Track analytics for each track being uploaded
       tracks.forEach((t) => {
         trackFiles.current.set(t.clientId, t.file)
-        track(
-          make({
-            eventName: Name.TRACK_UPLOAD_TRACK_UPLOADING,
-            artworkSource:
-              t.metadata.artwork && 'source' in t.metadata.artwork
-                ? (t.metadata.artwork.source as 'unsplash' | 'original')
-                : 'original',
-            trackId: t.metadata.track_id!,
-            genre: t.metadata.genre ?? '',
-            mood: t.metadata.mood ?? undefined,
-            size: t.file.size ?? -1,
-            fileType: t.file.type ?? '',
-            name: t.file.name ?? '',
-            downloadable: isContentFollowGated(t.metadata.download_conditions)
-              ? 'follow'
-              : t.metadata.is_downloadable
-                ? 'yes'
-                : 'no'
-          })
-        )
       })
 
       const tasks = await getTrackUploadTasks(
@@ -240,7 +219,7 @@ export const useUpload = (
 
       return await uploadFiles(tasks)
     },
-    [audiusSdk, dispatch, uploadFiles, track, make, requireUserId]
+    [audiusSdk, dispatch, uploadFiles, requireUserId]
   )
 
   /**

@@ -13,7 +13,6 @@ import { Id, OptionalId } from '@audius/sdk'
 import ReactNativeBlobUtil from 'react-native-blob-util'
 import { select, call, put, take, race, all } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
 import {
   getCollectionCoverArtPath,
   getLocalCollectionDir,
@@ -21,7 +20,6 @@ import {
   mkdirSafe
 } from 'app/services/offline-downloader'
 import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
-import { EventNames } from 'app/types/analytics'
 
 import { getCollectionOfflineDownloadStatus } from '../../../selectors'
 import type { CollectionId, OfflineJob } from '../../../slice'
@@ -56,9 +54,6 @@ function* shouldAbortDownload(collectionId: CollectionId) {
 
 export function* downloadCollectionWorker(collectionId: CollectionId) {
   const queueItem: OfflineJob = { type: 'collection', id: collectionId }
-  track(
-    make({ eventName: EventNames.OFFLINE_MODE_DOWNLOAD_START, ...queueItem })
-  )
   yield* put(startJob(queueItem))
 
   const { jobResult, cancel, abortDownload, abortJob } = yield* race({
@@ -80,32 +75,14 @@ export function* downloadCollectionWorker(collectionId: CollectionId) {
     yield* put(cancelJob(queueItem))
     yield* call(removeDownloadedCollection, collectionId)
   } else if (jobResult === OfflineDownloadStatus.ERROR) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_FAILURE,
-        ...queueItem
-      })
-    )
     yield* put(errorJob(queueItem))
     yield* call(removeDownloadedCollection, collectionId)
     yield* put(requestProcessNextJob())
   } else if (jobResult === OfflineDownloadStatus.ABANDONED) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_FAILURE,
-        ...queueItem
-      })
-    )
     yield* put(abandonJob(queueItem))
     yield* call(removeDownloadedCollection, collectionId)
     yield* put(requestProcessNextJob())
   } else if (jobResult === OfflineDownloadStatus.SUCCESS) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_SUCCESS,
-        ...queueItem
-      })
-    )
     yield* put(completeJob(queueItem))
     yield* put(requestProcessNextJob())
   }

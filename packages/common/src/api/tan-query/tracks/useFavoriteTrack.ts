@@ -105,47 +105,8 @@ export const useFavoriteTrack = () => {
       return { previousTrack, previousUser: currentUser }
     },
     onSuccess: async (_, { trackId }) => {
-      // Handle co-sign events after successful save
       const track = queryClient.getQueryData(getTrackQueryKey(trackId))
       if (!track) return
-
-      const remixTrack = track.remix_of?.tracks?.[0]
-      const isCoSign = remixTrack?.user?.user_id === currentUserId
-      if (isCoSign) {
-        const parentTrackId = remixTrack?.parent_track_id
-        const hasAlreadyCoSigned =
-          remixTrack?.has_remix_author_reposted ||
-          remixTrack?.has_remix_author_saved
-
-        const parentTrack = queryClient.getQueryData(
-          getTrackQueryKey(parentTrackId)
-        )
-
-        // Dispatch co-sign events
-        trackEvent({
-          eventName: Name.REMIX_COSIGN_INDICATOR,
-          properties: {
-            id: trackId,
-            handle: currentUser?.handle,
-            original_track_id: parentTrack?.track_id,
-            original_track_title: parentTrack?.title,
-            action: 'favorited'
-          }
-        })
-
-        if (!hasAlreadyCoSigned) {
-          trackEvent({
-            eventName: Name.REMIX_COSIGN,
-            properties: {
-              id: trackId,
-              handle: currentUser?.handle,
-              original_track_id: parentTrack?.track_id,
-              original_track_title: parentTrack?.title,
-              action: 'favorited'
-            }
-          })
-        }
-      }
 
       // Dispatch the saveTrackSucceeded action
       dispatch(tracksSocialActions.saveTrackSucceeded(trackId))

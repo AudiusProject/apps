@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
 
-import { Name } from '@audius/common/models'
 import type { Nullable } from '@audius/common/utils'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Linking, View } from 'react-native'
@@ -16,7 +15,6 @@ import {
 import { Text } from 'app/components/core'
 import { NativeDrawer } from 'app/components/drawer'
 import { RATE_CTA_STORAGE_KEY } from 'app/constants/storage-keys'
-import { make, track } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
 import { isSolanaPhone } from 'app/utils/os'
 import { SOLANA_DAPP_STORE_LINK } from 'app/utils/playStore'
@@ -68,7 +66,6 @@ export const RateCtaDrawer = () => {
 
   const handleReviewConfirm = useCallback(() => {
     const isAvailable = isSolanaPhone ? true : InAppReview.isAvailable()
-    track(make({ eventName: Name.RATE_CTA_RESPONSE_YES }))
     setUserRateResponse('YES')
     AsyncStorage.setItem(RATE_CTA_STORAGE_KEY, 'YES')
 
@@ -88,7 +85,6 @@ export const RateCtaDrawer = () => {
   }, [])
 
   const handleReviewDeny = useCallback(() => {
-    track(make({ eventName: Name.RATE_CTA_RESPONSE_NO }))
     setUserRateResponse('NO')
     AsyncStorage.setItem(RATE_CTA_STORAGE_KEY, 'NO')
   }, [])

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const sdk = vi.hoisted(() => {
-  let sessionId = 1
   const identify = vi.fn()
   return {
     init: vi.fn(() => ({ promise: Promise.resolve() })),
@@ -9,10 +8,7 @@ const sdk = vi.hoisted(() => {
     track: vi.fn(),
     setUserId: vi.fn(),
     identify,
-    getSessionId: vi.fn(() => sessionId),
-    setSessionId: (id: number) => {
-      sessionId = id
-    },
+    getDeviceId: vi.fn((): string | undefined => 'device'),
     Identify: class {
       set = vi.fn()
     }
@@ -37,7 +33,6 @@ describe('amplitude', () => {
     window.localStorage.clear()
     vi.restoreAllMocks()
     vi.clearAllMocks()
-    sdk.setSessionId(1)
     // The test DOM reports itself as automated
     vi.spyOn(window.navigator, 'webdriver', 'get').mockReturnValue(false)
   })
@@ -59,26 +54,54 @@ describe('amplitude', () => {
     )
   })
 
-  it('tracks Session Start once per Amplitude session', async () => {
+  it('sets the client user property once per device', async () => {
     await (await loadAmplitude()).init(false)
     await (await loadAmplitude()).init(false)
-    expect(sdk.track).toHaveBeenCalledTimes(1)
+    expect(sdk.identify).toHaveBeenCalledTimes(1)
+    expect(sdk.track).not.toHaveBeenCalled()
+  })
 
-    sdk.setSessionId(2)
-    await (await loadAmplitude()).init(false)
-    expect(sdk.track).toHaveBeenCalledTimes(2)
+  it('always sends core events and samples the rest by device', async () => {
+    const amplitude = await loadAmplitude()
+    await amplitude.init(false)
+    const { getAnalyticsSampleRate } = await import('@audius/common/models')
+
+    await amplitude.track('Playback: Play', { id: 1 })
+    expect(sdk.track).toHaveBeenLastCalledWith('Playback: Play', { id: 1 })
+
+    const devices = Array.from({ length: 1000 }, (_, i) => `device-${i}`)
+    const kept = devices.filter(
+      (d) => getAnalyticsSampleRate('Play Queue: Open', d) !== null
+    )
+    expect(kept.length).toBeGreaterThan(60)
+    expect(kept.length).toBeLessThan(140)
+
+    sdk.getDeviceId.mockReturnValue(kept[0])
+    await amplitude.track('Play Queue: Open', { id: 2 })
+    expect(sdk.track).toHaveBeenLastCalledWith('Play Queue: Open', {
+      id: 2,
+      sampleRate: 0.1
+    })
+
+    const dropped = devices.find((d) => !kept.includes(d))
+    sdk.getDeviceId.mockReturnValue(dropped!)
+    sdk.track.mockClear()
+    await amplitude.track('Play Queue: Open')
+    expect(sdk.track).not.toHaveBeenCalled()
   })
 
   it('skips identify when traits are unchanged', async () => {
     const amplitude = await loadAmplitude()
-    const traits = { handle: 'someone', userId: 1, isVerified: false }
+    await amplitude.init(false)
+    sdk.identify.mockClear()
+    const traits = { handle: 'someone', userId: 1, name: 'Someone' }
 
     await amplitude.identify(traits)
     await amplitude.identify({ ...traits })
     expect(sdk.identify).toHaveBeenCalledTimes(1)
     expect(sdk.setUserId).toHaveBeenCalledTimes(2)
 
-    await amplitude.identify({ ...traits, isVerified: true })
+    await amplitude.identify({ ...traits, name: 'Someone Else' })
     expect(sdk.identify).toHaveBeenCalledTimes(2)
   })
 

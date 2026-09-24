@@ -1,10 +1,7 @@
 import { useCallback, useEffect } from 'react'
 
 import { useDeleteDeveloperApp } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import { Button, ModalFooter } from '@audius/harmony'
-
-import { make, useRecord } from 'common/store/analytics/actions'
 
 import styles from './DeleteAppConfirmationPage.module.css'
 import { CreateAppPageProps, CreateAppsPages } from './types'
@@ -23,9 +20,7 @@ export const DeleteAppConfirmationPage = (
   props: DeleteAppConfirmationPageProps
 ) => {
   const { params, setPage } = props
-  const { isSuccess, isError, error, mutate, isPending } =
-    useDeleteDeveloperApp()
-  const record = useRecord()
+  const { isSuccess, isError, mutate, isPending } = useDeleteDeveloperApp()
   const apiKey = params?.apiKey
   const name = params?.name
 
@@ -41,27 +36,14 @@ export const DeleteAppConfirmationPage = (
   useEffect(() => {
     if (isSuccess) {
       setPage(CreateAppsPages.YOUR_APPS)
-      record(
-        make(Name.DEVELOPER_APP_DELETE_SUCCESS, {
-          name,
-          apiKey
-        })
-      )
     }
-  }, [isSuccess, setPage, record, name, apiKey])
+  }, [isSuccess, setPage])
 
   useEffect(() => {
     if (isError) {
       setPage(CreateAppsPages.YOUR_APPS)
-      record(
-        make(Name.DEVELOPER_APP_DELETE_ERROR, {
-          name: params?.name,
-          apiKey: params?.apiKey,
-          error: error?.message
-        })
-      )
     }
-  }, [isError, setPage, record, params?.name, params?.apiKey, error?.message])
+  }, [isError, setPage])
 
   return (
     <div>

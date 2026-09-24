@@ -1,5 +1,5 @@
 import { useCurrentUserId, useTrack } from '@audius/common/api'
-import { ID, Name } from '@audius/common/models'
+import { ID } from '@audius/common/models'
 import { formatCount, isLongFormContent, pluralize } from '@audius/common/utils'
 import {
   Flex,
@@ -12,7 +12,6 @@ import {
 import { pick } from 'lodash'
 import { useDispatch } from 'react-redux'
 
-import { make, track as trackEvent } from 'services/analytics'
 import * as userListActions from 'store/application/ui/userListModal/slice'
 import {
   UserListEntityType,
@@ -100,13 +99,6 @@ export const TrackStats = (props: TrackStatsProps) => {
 
   const handleClickComments = () => {
     scrollToCommentSection()
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_CLICK_COMMENT_STAT,
-        trackId,
-        source: 'track_page'
-      })
-    )
   }
 
   const shouldUseMobileRules = forceMobileStyle

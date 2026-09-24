@@ -8,7 +8,7 @@ import {
 } from '@audius/common/api'
 import { imageBlank as placeholderCoverArt } from '@audius/common/assets'
 import { useGatedContentAccessMap } from '@audius/common/hooks'
-import { SquareSizes, Collection, ID, Name } from '@audius/common/models'
+import { SquareSizes, Collection, ID } from '@audius/common/models'
 import { newCollectionMetadata } from '@audius/common/schemas'
 import { RandomImage } from '@audius/common/services'
 import {
@@ -33,7 +33,6 @@ import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useIsUnauthorizedForHandleRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import UploadStub from 'pages/profile-page/components/mobile/UploadStub'
-import { track } from 'services/analytics'
 import { AppState } from 'store/types'
 import { resizeImage } from 'utils/imageProcessingUtil'
 import { replace } from 'utils/navigation'
@@ -234,13 +233,6 @@ const EditCollectionPage = g(({ removeTrack, editPlaylist, orderPlaylist }) => {
       }
 
       editPlaylist(collection.playlist_id, formFields as EditCollectionValues)
-
-      track({
-        eventName: Name.COLLECTION_EDIT,
-        properties: {
-          id: collection.playlist_id
-        }
-      })
 
       dispatch(replace(permalink))
     }

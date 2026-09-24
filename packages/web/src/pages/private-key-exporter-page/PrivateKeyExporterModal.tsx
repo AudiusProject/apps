@@ -1,7 +1,5 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 
-import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import {
   ModalContent,
   ModalHeader,
@@ -17,7 +15,6 @@ import {
 } from '@audius/harmony'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { make, useRecord } from 'common/store/analytics/actions'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { useIsMobile } from 'hooks/useIsMobile'
 
@@ -155,24 +152,9 @@ const AdditionalResources = () => {
 }
 
 const PrivateKeyExporterModal = () => {
-  const record = useRecord()
   const isMobile = useIsMobile()
-  const { data: accountHandle } = useCurrentAccountUser({
-    select: (user) => user?.handle
-  })
-  const { data: accountUserId } = useCurrentUserId()
   const [isVisible, setIsVisible] = useModalState('PrivateKeyExporter')
   const handleClose = useCallback(() => setIsVisible(false), [setIsVisible])
-  useEffect(() => {
-    if (isVisible && accountHandle && accountUserId) {
-      record(
-        make(Name.EXPORT_PRIVATE_KEY_MODAL_OPENED, {
-          handle: accountHandle,
-          userId: accountUserId
-        })
-      )
-    }
-  }, [isVisible, accountHandle, accountUserId, record])
   return (
     <ModalDrawer
       bodyClassName={styles.modal}

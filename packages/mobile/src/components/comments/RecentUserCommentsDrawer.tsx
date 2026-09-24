@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 
 import type { CommentOrReply } from '@audius/common/api'
 import { useTrack, useUser, useUserComments } from '@audius/common/api'
-import { Name, type ID } from '@audius/common/models'
+import { type ID } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
 import {
   BottomSheetBackdrop,
@@ -23,7 +23,6 @@ import {
 } from '@audius/harmony-native'
 import { LoadingSpinner } from 'app/harmony-native/components/LoadingSpinner/LoadingSpinner'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { make, track as trackEvent } from 'app/services/analytics'
 
 import { ProfilePicture } from '../core/ProfilePicture'
 import { UserLink } from '../user-link'
@@ -51,26 +50,13 @@ const CommentItem = ({ comment }: { comment: CommentOrReply }) => {
   const { data: track, isLoading: isTrackLoading } = useTrack(comment?.entityId)
   const { data: artist, isLoading: isArtistLoading } = useUser(track?.owner_id)
 
-  const trackUserCommentClick = useCallback(() => {
-    if (comment) {
-      trackEvent(
-        make({
-          eventName: Name.COMMENTS_HISTORY_CLICK,
-          commentId: comment.id,
-          userId
-        })
-      )
-    }
-  }, [comment, userId])
-
   const handlePressView = useCallback(() => {
     if (track?.track_id) {
-      trackUserCommentClick()
       // @ts-ignore (bad types on useNavigation)
       navigation.push('Track', { trackId: track.track_id })
     }
     onClose()
-  }, [navigation, track?.track_id, onClose, trackUserCommentClick])
+  }, [navigation, track?.track_id, onClose])
 
   if (isTrackLoading || isArtistLoading) {
     return <CommentSkeleton />

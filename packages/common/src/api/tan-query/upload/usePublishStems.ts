@@ -1,7 +1,7 @@
-import { HashId, Id, type UploadResponse } from '@audius/sdk'
+import { Id, type UploadResponse } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { StemCategory, Name, type StemUpload } from '~/models'
+import { StemCategory, type StemUpload } from '~/models'
 import { ProgressStatus, uploadActions } from '~/store'
 import type { TrackMetadataForUpload } from '~/store/upload/types'
 
@@ -34,12 +34,7 @@ export const publishStems = async (
   context: PublishStemsContext,
   params: PublishStemsParams
 ) => {
-  const {
-    userId,
-    audiusSdk,
-    dispatch,
-    analytics: { make, track }
-  } = context
+  const { userId, audiusSdk, dispatch } = context
 
   if (!userId) {
     throw new Error('User ID is required to publish stems')
@@ -64,14 +59,6 @@ export const publishStems = async (
             stemIndex: index,
             key: 'audio',
             progress: { status: ProgressStatus.COMPLETE }
-          })
-        )
-        track(
-          make({
-            eventName: Name.STEM_COMPLETE_UPLOAD,
-            id: HashId.parse(stemRes.trackId),
-            parent_track_id: params.parentTrackId,
-            category: stem.metadata.category ?? StemCategory.OTHER
           })
         )
         return { trackId: stemRes.trackId, error: null }

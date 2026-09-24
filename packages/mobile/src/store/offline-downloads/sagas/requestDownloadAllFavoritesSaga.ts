@@ -10,9 +10,7 @@ import { Id } from '@audius/sdk'
 import { fetchAllAccountCollections } from 'common/store/saved-collections/sagas'
 import { takeEvery, select, call, put } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
 import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
-import { EventNames } from 'app/types/analytics'
 
 import type { OfflineEntry } from '../slice'
 import { addOfflineEntries, requestDownloadAllFavorites } from '../slice'
@@ -24,7 +22,6 @@ export function* requestDownloadAllFavoritesSaga() {
 }
 
 function* downloadAllFavorites() {
-  track(make({ eventName: EventNames.OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_ON }))
   const currentUserId = yield* call(queryCurrentUserId)
   if (!currentUserId) return
 

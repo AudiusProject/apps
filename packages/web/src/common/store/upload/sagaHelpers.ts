@@ -1,8 +1,6 @@
 import { queryAccountUser } from '@audius/common/api'
 import {
   Name,
-  isContentFollowGated,
-  isContentTokenGated,
   isContentUSDCPurchaseGated,
   USDCPurchaseConditions
 } from '@audius/common/models'
@@ -28,23 +26,7 @@ export function* recordGatedTracks(
         ? trackOrMetadata.metadata
         : trackOrMetadata
       if (isStreamGated && streamConditions) {
-        if (isContentFollowGated(streamConditions)) {
-          out.push(
-            make(Name.TRACK_UPLOAD_FOLLOW_GATED, {
-              kind: 'tracks',
-              downloadable: isDownloadable,
-              lossless: isOriginalAvailable
-            })
-          )
-        } else if (isContentTokenGated(streamConditions)) {
-          out.push(
-            make(Name.TRACK_UPLOAD_TOKEN_GATED, {
-              kind: 'tracks',
-              downloadable: isDownloadable,
-              lossless: isOriginalAvailable
-            })
-          )
-        } else if (isContentUSDCPurchaseGated(streamConditions)) {
+        if (isContentUSDCPurchaseGated(streamConditions)) {
           out.push(
             make(Name.TRACK_UPLOAD_USDC_GATED, {
               kind: 'tracks',
@@ -55,23 +37,7 @@ export function* recordGatedTracks(
           )
         }
       } else if (isDownloadGated && dowloadConditions) {
-        if (isContentFollowGated(dowloadConditions)) {
-          out.push(
-            make(Name.TRACK_UPLOAD_FOLLOW_GATED_DOWNLOAD, {
-              kind: 'tracks',
-              downloadable: isDownloadable,
-              lossless: isOriginalAvailable
-            })
-          )
-        } else if (isContentTokenGated(dowloadConditions)) {
-          out.push(
-            make(Name.TRACK_UPLOAD_TOKEN_GATED_DOWNLOAD, {
-              kind: 'tracks',
-              downloadable: isDownloadable,
-              lossless: isOriginalAvailable
-            })
-          )
-        } else if (isContentUSDCPurchaseGated(dowloadConditions)) {
+        if (isContentUSDCPurchaseGated(dowloadConditions)) {
           out.push(
             make(Name.TRACK_UPLOAD_USDC_GATED_DOWNLOAD, {
               kind: 'tracks',

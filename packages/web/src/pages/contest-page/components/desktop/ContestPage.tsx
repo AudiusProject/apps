@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import {
   getRemixesQueryKey,
@@ -15,7 +15,7 @@ import {
   useUser
 } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { Name, SquareSizes, ShareSource } from '@audius/common/models'
+import { SquareSizes, ShareSource } from '@audius/common/models'
 import {
   remixesPageActions,
   remixesPageSelectors,
@@ -52,7 +52,6 @@ import { useRequiresAccountCallback } from 'hooks/useRequiresAccount'
 import { useTrackCoverArt } from 'hooks/useTrackCoverArt'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { make, track as trackEvent } from 'services/analytics'
 import {
   fullContestPage,
   hostRemixContestPage,
@@ -314,24 +313,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
     }
   }, [dispatch])
 
-  // Fire a Remix Contest: View event the first time the page resolves a
-  // trackId + eventId for the contest. Guard with a ref so navigating
-  // between contest tabs (which doesn't unmount the page) doesn't
-  // re-fire the event.
-  const hasFiredViewRef = useRef(false)
-  useEffect(() => {
-    if (hasFiredViewRef.current) return
-    if (trackId == null || eventId == null) return
-    hasFiredViewRef.current = true
-    trackEvent(
-      make({
-        eventName: Name.REMIX_CONTEST_VIEW,
-        remixContestId: eventId,
-        trackId
-      })
-    )
-  }, [trackId, eventId])
-
   const isEnded = useMemo(() => {
     if (!contest?.endDate) return true
     return dayjs(contest.endDate).isBefore(dayjs())
@@ -384,17 +365,8 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
   // pre-filled form regardless of entry point.
   const enterContest = useEnterContest(trackId)
   const handleEnterContest = useCallback(async () => {
-    if (trackId != null && eventId != null) {
-      trackEvent(
-        make({
-          eventName: Name.REMIX_CONTEST_ENTER,
-          remixContestId: eventId,
-          trackId
-        })
-      )
-    }
     await enterContest()
-  }, [enterContest, trackId, eventId])
+  }, [enterContest])
 
   const handleShareContest = useCallback(() => {
     if (!trackId) return
@@ -740,15 +712,6 @@ const ContestPage = ({ containerRef: _containerRef }: ContestPageProps) => {
                 isSelected={activeTab === 'submissions'}
                 label={messages.submissionsTab(submissionsCount)}
                 onClick={() => {
-                  if (activeTab !== 'submissions' && trackId && eventId) {
-                    trackEvent(
-                      make({
-                        eventName: Name.REMIX_CONTEST_VIEW_SUBMISSIONS,
-                        remixContestId: eventId,
-                        trackId
-                      })
-                    )
-                  }
                   setActiveTab('submissions')
                 }}
               />

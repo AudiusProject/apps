@@ -9,7 +9,6 @@ import { useIsManagedAccount } from '@audius/common/hooks'
 import { settingsMessages } from '@audius/common/messages'
 import {
   FrostedSurfaceIntensity,
-  Name,
   Theme,
   ThemeMode,
   ThemePalette
@@ -60,7 +59,6 @@ import { useDispatch } from 'react-redux'
 import { Link, useSearchParams } from 'react-router'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { make, useRecord } from 'common/store/analytics/actions'
 import { ChangeEmailModal } from 'components/change-email/ChangeEmailModal'
 import { ChangePasswordModal } from 'components/change-password/ChangePasswordModal'
 import { Header } from 'components/header/desktop/Header'
@@ -150,12 +148,11 @@ export const SettingsPage = () => {
 
   const { data: accountData } = useCurrentAccountUser({
     select: (user) => ({
-      handle: user?.handle,
       userId: user?.user_id,
       isVerified: user?.is_verified
     })
   })
-  const { handle, userId, isVerified } = accountData ?? {}
+  const { userId, isVerified } = accountData ?? {}
   const theme = useSelector(getTheme)
   const themePalette = useSelector(getThemePalette)
   const themeMode = useSelector(getThemeMode)
@@ -244,10 +241,6 @@ export const SettingsPage = () => {
     dispatch(signOutAction())
   }, [dispatch])
 
-  const handleSignOut = useCallback(() => {
-    dispatch(make(Name.SETTINGS_LOG_OUT, { callback: signOut }))
-  }, [dispatch, signOut])
-
   const showEmailToast = useCallback(() => {
     const fn = async () => {
       try {
@@ -255,7 +248,6 @@ export const SettingsPage = () => {
         await identityService.sendRecoveryInfo(info)
         setEmailToastText(settingsMessages.emailSent)
         setIsEmailToastVisible(true)
-        dispatch(make(Name.SETTINGS_RESEND_ACCOUNT_RECOVERY, {}))
       } catch (e) {
         console.error(e)
         setEmailToastText(settingsMessages.emailNotSent)
@@ -266,13 +258,7 @@ export const SettingsPage = () => {
       }, EMAIL_TOAST_TIMEOUT)
     }
     fn()
-  }, [
-    setIsEmailToastVisible,
-    setEmailToastText,
-    identityService,
-    authService,
-    dispatch
-  ])
+  }, [setIsEmailToastVisible, setEmailToastText, identityService, authService])
 
   const showEmailVerificationToast = useCallback(() => {
     const fn = async () => {
@@ -304,9 +290,8 @@ export const SettingsPage = () => {
   ])
 
   const handleDownloadDesktopAppClicked = useCallback(() => {
-    dispatch(make(Name.ACCOUNT_HEALTH_DOWNLOAD_DESKTOP, { source: 'settings' }))
     window.location.href = `https://audius.co${DOWNLOAD_LINK}`
-  }, [dispatch])
+  }, [])
 
   const openChangePasswordModal = useCallback(() => {
     setIsChangePasswordModalVisible(true)
@@ -343,10 +328,6 @@ export const SettingsPage = () => {
     },
     [dispatch]
   )
-  const record = useRecord()
-  const recordExportPrivateKeyLinkClicked = useCallback(() => {
-    record(make(Name.EXPORT_PRIVATE_KEY_LINK_CLICKED, { handle, userId }))
-  }, [record, handle, userId])
 
   const goToVerification = useCallback(() => {
     dispatch(push(CHECK_PAGE))
@@ -421,12 +402,6 @@ export const SettingsPage = () => {
         window.localStorage.setItem(THEME_KEY, Theme.MATRIX)
       }
     }
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: 'palette',
-        palette: value
-      })
-    )
   }
 
   const onModeChange = (option: ThemeMode) => {
@@ -442,11 +417,6 @@ export const SettingsPage = () => {
       window.localStorage.setItem(THEME_MODE_KEY, option)
       window.localStorage.setItem(THEME_KEY, theme)
     }
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
-      })
-    )
   }
 
   const onFrostedSurfaceIntensityChange = (value: FrostedSurfaceIntensity) => {
@@ -814,7 +784,6 @@ export const SettingsPage = () => {
           <Link
             className={cn(styles.link, styles.showPrivateKey)}
             to={PRIVATE_KEY_EXPORTER_SETTINGS_PAGE}
-            onClick={recordExportPrivateKeyLinkClicked}
           >
             {settingsMessages.showPrivateKey}
           </Link>
@@ -842,7 +811,7 @@ export const SettingsPage = () => {
             <Button variant='secondary' onClick={closeSignOutModal} fullWidth>
               Nevermind
             </Button>
-            <Button variant='primary' onClick={handleSignOut} fullWidth>
+            <Button variant='primary' onClick={signOut} fullWidth>
               Sign Out
             </Button>
           </ModalFooter>

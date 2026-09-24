@@ -1,5 +1,4 @@
 import { queryAccountUser, queryCurrentUserId } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import {
   deactivateAccountActions,
   signOutActions,
@@ -11,7 +10,6 @@ import {
 import { waitForValue } from '@audius/common/utils'
 import { call, delay, put, takeEvery } from 'typed-redux-saga'
 
-import { make } from 'common/store/analytics/actions'
 import { waitForWrite } from 'utils/sagaHelpers'
 
 const { afterDeactivationSignOut, deactivateAccount, deactivateAccountFailed } =
@@ -35,7 +33,6 @@ function* handleDeactivateAccount() {
       requestConfirmation(
         DEACTIVATE_CONFIRMATION_UID,
         function* () {
-          yield* put(make(Name.DEACTIVATE_ACCOUNT_REQUEST, {}))
           yield* call(audiusBackendInstance.updateCreator, {
             metadata: { ...userMetadata, is_deactivated: true },
             sdk
@@ -43,19 +40,16 @@ function* handleDeactivateAccount() {
         },
         // @ts-ignore: confirmer is untyped
         function* () {
-          yield* put(make(Name.DEACTIVATE_ACCOUNT_SUCCESS, {}))
           // Do the signout in another action so confirmer can clear
           yield* put(afterDeactivationSignOut())
         },
         function* () {
-          yield* put(make(Name.DEACTIVATE_ACCOUNT_FAILURE, {}))
           yield* put(deactivateAccountFailed())
         }
       )
     )
   } catch (e) {
     console.error(e)
-    yield* put(make(Name.DEACTIVATE_ACCOUNT_FAILURE, {}))
     yield* put(deactivateAccountFailed())
   }
 }

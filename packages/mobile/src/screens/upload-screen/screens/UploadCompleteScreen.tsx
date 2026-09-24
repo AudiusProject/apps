@@ -1,10 +1,9 @@
 import React, { useCallback } from 'react'
 
 import { useTrack } from '@audius/common/api'
-import { Name, ShareSource } from '@audius/common/models'
+import { ShareSource } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
 import { shareModalUIActions, uploadActions } from '@audius/common/store'
-import { make } from '@audius/web/src/common/store/analytics/actions'
 import { View, Image } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -105,7 +104,6 @@ export const UploadCompleteScreen = () => {
         defaultUserList: 'chats'
       })
     )
-    dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'upload' }))
     handleClose()
   }, [dispatch, handleClose, navigation, trackRoute])
 

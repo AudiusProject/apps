@@ -5,9 +5,8 @@ import {
   useCurrentUserId,
   useRejectManagedAccount
 } from '@audius/common/api'
-import { useAppContext } from '@audius/common/context'
 import { useAccountSwitcher, useIsManagedAccount } from '@audius/common/hooks'
-import { ManagedUserMetadata, Name } from '@audius/common/models'
+import { ManagedUserMetadata } from '@audius/common/models'
 import { chatSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -96,38 +95,23 @@ export const ManagedUserListItem = ({
   const isPending =
     grant?.is_approved == null || approveIsPending || rejectIsPending
   const { toast } = useContext(ToastContext)
-  const {
-    analytics: { track, make }
-  } = useAppContext()
 
   const handleApprove = useCallback(() => {
     if (!currentUserId) return
 
-    track(
-      make({
-        eventName: Name.MANAGER_MODE_ACCEPT_INVITE,
-        managedUserId: user.user_id
-      })
-    )
     approveManagedAccount({
       userId: currentUserId,
       grantorUser: user
     })
-  }, [approveManagedAccount, currentUserId, user, make, track])
+  }, [approveManagedAccount, currentUserId, user])
 
   const handleReject = useCallback(() => {
     if (!currentUserId) return
-    track(
-      make({
-        eventName: Name.MANAGER_MODE_REJECT_INVITE,
-        managedUserId: user.user_id
-      })
-    )
     rejectManagedAccount({
       userId: currentUserId,
       grantorUser: user
     })
-  }, [rejectManagedAccount, currentUserId, user, make, track])
+  }, [rejectManagedAccount, currentUserId, user])
 
   useEffect(() => {
     if (approveIsSuccess) {

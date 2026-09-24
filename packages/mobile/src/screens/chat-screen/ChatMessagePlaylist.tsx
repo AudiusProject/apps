@@ -7,7 +7,7 @@ import {
 } from '@audius/common/api'
 import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
 import type { TrackPlayback } from '@audius/common/hooks'
-import { Name, PlaybackSource, Kind } from '@audius/common/models'
+import { PlaybackSource, Kind } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
 import { QueueSource, playbackSelectors } from '@audius/common/store'
 import type { ChatMessageTileProps } from '@audius/common/store'
@@ -120,11 +120,6 @@ export const ChatMessagePlaylist = ({
   const collectionExists = !!collection
   useEffect(() => {
     if (collectionExists && uid) {
-      trackEvent(
-        make({
-          eventName: Name.MESSAGE_UNFURL_PLAYLIST
-        })
-      )
       onSuccess?.()
     } else {
       onEmpty?.()

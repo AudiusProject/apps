@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useUpdateTrack } from '@audius/common/api'
-import { DownloadQuality, Name } from '@audius/common/models'
+import { DownloadQuality } from '@audius/common/models'
 import type { TrackForUpload } from '@audius/common/store'
 import {
   useWaitForDownloadModal,
@@ -30,7 +30,6 @@ import { PickArtworkField, TextField } from 'app/components/fields'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useTrackFileSelector } from 'app/hooks/useTrackFileSelector'
 import { FormScreen } from 'app/screens/form-screen'
-import { make, track as trackEvent } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 
@@ -153,16 +152,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     }
 
     selectFile()
-
-    // Track Replace event
-    trackEvent(
-      make({
-        eventName: Name.TRACK_REPLACE_REPLACE,
-        trackId: values.track_id,
-        source: isUpload ? 'upload' : 'edit'
-      })
-    )
-  }, [selectFile, isUpload, values.track_id])
+  }, [selectFile])
 
   // Handle when a new track file is selected
   useEffect(() => {
@@ -180,24 +170,8 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
           ? selectedTrack.file.uri
           : selectedTrack.file.name
       setSelectedTrackFile(fileUri)
-
-      // Track replace event
-      trackEvent(
-        make({
-          eventName: Name.TRACK_REPLACE_REPLACE,
-          trackId: values.track_id,
-          source: isUpload ? 'upload' : 'edit'
-        })
-      )
     }
-  }, [
-    selectedTrack,
-    setTitle,
-    setOrigFilename,
-    values.track_id,
-    isUpload,
-    isTitleTouched
-  ])
+  }, [selectedTrack, setTitle, setOrigFilename, isUpload, isTitleTouched])
 
   const handleDownload = useCallback(() => {
     if (!initialValues.track_id) {
@@ -209,14 +183,6 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
       trackIds: [initialValues.track_id],
       quality: DownloadQuality.ORIGINAL
     })
-
-    // Track Download event
-    trackEvent(
-      make({
-        eventName: Name.TRACK_REPLACE_DOWNLOAD,
-        trackId: initialValues.track_id
-      })
-    )
   }, [openWaitForDownload, initialValues.track_id])
 
   const handlePressBack = useCallback(() => {

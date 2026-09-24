@@ -1,8 +1,7 @@
-import { Name, Chain } from '@audius/common/models'
+import { Chain } from '@audius/common/models'
 import {
   tokenDashboardPageSelectors,
   tokenDashboardPageActions,
-  getContext,
   getSDK
 } from '@audius/common/store'
 import { HashId } from '@audius/sdk'
@@ -36,15 +35,6 @@ export function* checkIsNewWallet(walletAddress: string, chain: Chain) {
           'This wallet has already been associated with an Audius account.'
       })
     )
-
-    const analytics = yield* getContext('analytics')
-    analytics.track({
-      eventName: Name.CONNECT_WALLET_ALREADY_ASSOCIATED,
-      properties: {
-        chain,
-        walletAddress
-      }
-    })
 
     return false
   }

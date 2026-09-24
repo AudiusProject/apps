@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { useTrackByPermalink, useUser } from '@audius/common/api'
 import { useGatedContentAccess, useToggleTrack } from '@audius/common/hooks'
 import type { TrackPlayback } from '@audius/common/hooks'
-import { Name, PlaybackSource, Kind } from '@audius/common/models'
+import { PlaybackSource, Kind } from '@audius/common/models'
 import type { ID } from '@audius/common/models'
 import { QueueSource } from '@audius/common/store'
 import type { ChatMessageTileProps } from '@audius/common/store'
@@ -68,11 +68,6 @@ export const ChatMessageTrack = ({
 
   useEffect(() => {
     if (trackExists && user && uid) {
-      trackEvent(
-        make({
-          eventName: Name.MESSAGE_UNFURL_TRACK
-        })
-      )
       onSuccess?.()
     } else {
       onEmpty?.()

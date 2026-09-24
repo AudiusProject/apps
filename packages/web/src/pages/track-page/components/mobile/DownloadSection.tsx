@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 import { useStems, useTrack } from '@audius/common/api'
 import { useDownloadableContentAccess } from '@audius/common/hooks'
-import { Name, ModalSource, DownloadQuality, ID } from '@audius/common/models'
+import { ModalSource, DownloadQuality, ID } from '@audius/common/models'
 import {
   usePremiumContentPurchaseModal,
   useWaitForDownloadModal,
@@ -24,7 +24,6 @@ import {
 import { useDispatch } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { make, useRecord } from 'common/store/analytics/actions'
 import { Expandable } from 'components/expandable/Expandable'
 import { useIsMobile } from 'hooks/useIsMobile'
 import {
@@ -58,7 +57,6 @@ type DownloadSectionProps = {
 
 export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
   const dispatch = useDispatch()
-  const record = useRecord()
   const isMobile = useIsMobile()
   const { data: partialTrack } = useTrack(trackId, {
     select: (track) => {
@@ -117,24 +115,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
           trackIds,
           quality: downloadQuality
         })
-
-        // Track download attempt event
-        if (parentTrackId) {
-          record(
-            make(Name.TRACK_DOWNLOAD_CLICKED_DOWNLOAD_ALL, {
-              parentTrackId,
-              stemTrackIds: trackIds,
-              device: 'web'
-            })
-          )
-        } else {
-          record(
-            make(Name.TRACK_DOWNLOAD_CLICKED_DOWNLOAD_SINGLE, {
-              trackId: trackIds[0],
-              device: 'web'
-            })
-          )
-        }
       }
     },
     [
@@ -142,7 +122,6 @@ export const DownloadSection = ({ trackId }: DownloadSectionProps) => {
       downloadQuality,
       isMobile,
       openWaitForDownloadModal,
-      record,
       shouldDisplayDownloadFollowGated,
       partialTrack
     ]

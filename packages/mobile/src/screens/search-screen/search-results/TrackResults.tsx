@@ -2,14 +2,13 @@ import { useCallback, useMemo } from 'react'
 
 import { useSearchTrackResults } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { Kind, Name } from '@audius/common/models'
+import { Kind } from '@audius/common/models'
 import { searchActions } from '@audius/common/store'
 import { Keyboard } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import { Flex } from '@audius/harmony-native'
 import { TrackLineup } from 'app/components/lineup/TrackLineup'
-import { make, track as record } from 'app/services/analytics'
 
 import { NoResultsTile } from '../NoResultsTile'
 import { SearchCatalogTile } from '../SearchCatalogTile'
@@ -50,18 +49,8 @@ export const TrackResults = () => {
           }
         })
       )
-
-      record(
-        make({
-          eventName: Name.SEARCH_RESULT_SELECT,
-          term: query,
-          source: 'search results page',
-          id,
-          kind: 'track'
-        })
-      )
     },
-    [dispatch, query]
+    [dispatch]
   )
 
   const querySource = useMemo(

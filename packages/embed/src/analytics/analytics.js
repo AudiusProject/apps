@@ -22,12 +22,25 @@ const isLikelyBot = () => {
 
 let isEnabled = false
 
-// No separate Session Start: every load already sends Embed: Open Player
+const CLIENT_IDENTIFIED_KEY = 'amplitude:clientIdentified'
+
+// Which client the user is on, as a user property set once per device
+const identifyClient = () => {
+  try {
+    if (window.localStorage.getItem(CLIENT_IDENTIFIED_KEY)) return
+    window.localStorage.setItem(CLIENT_IDENTIFIED_KEY, '1')
+  } catch {
+    // Storage can be blocked in third-party iframes, so identify every load
+  }
+  amp.identify(new amplitude.Identify().set('client', 'Embed'))
+}
+
 export const initAnalytics = () => {
   try {
     if (AMP_API_KEY && AMP_PROXY && !isLikelyBot()) {
       amp.init(AMP_API_KEY, undefined, { apiEndpoint: AMP_PROXY })
       isEnabled = true
+      identifyClient()
     }
   } catch (err) {
     logError(err)
@@ -36,8 +49,6 @@ export const initAnalytics = () => {
 
 const SOURCE = 'embed player'
 
-const OPEN = 'Embed: Open Player'
-const ERROR = 'Embed: Player Error'
 const PLAYBACK_PLAY = 'Playback: Play'
 const PLAYBACK_PAUSE = 'Playback: Pause'
 const LISTEN = 'Listen'
@@ -46,22 +57,6 @@ const track = (event, properties) => {
   if (isEnabled) {
     amp.logEvent(event, properties)
   }
-}
-
-/** id param is the numeric id */
-export const recordOpen = (id, title, handle, path) => {
-  track(OPEN, {
-    id: `${id}`,
-    handle,
-    title,
-    path,
-    source: SOURCE,
-    referrer: document.referrer
-  })
-}
-
-export const recordError = () => {
-  track(ERROR, { referrer: document.referrer })
 }
 
 /** id param is the numeric id */

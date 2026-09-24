@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   useCurrentCommentSection,
@@ -6,7 +6,7 @@ import {
   usePostComment
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import { ID, Name, SquareSizes } from '@audius/common/models'
+import { ID, SquareSizes } from '@audius/common/models'
 import { playbackSelectors } from '@audius/common/src/store'
 import { Avatar, Flex } from '@audius/harmony'
 import { CommentMention } from '@audius/sdk'
@@ -17,7 +17,6 @@ import { usePrevious } from 'react-use'
 import { ComposerInput } from 'components/composer-input/ComposerInput'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useProfilePicture } from 'hooks/useProfilePicture'
-import { make, track } from 'services/analytics'
 import { audioPlayer } from 'services/audio-player'
 
 import { useCommentActionCallback } from './useCommentActionCallback'
@@ -88,15 +87,8 @@ export const CommentForm = ({
     }
   }
 
-  const [handleClickInput, mobileAppDrawer] = useCommentActionCallback(() => {
-    track(
-      make({
-        eventName: Name.COMMENTS_FOCUS_COMMENT_INPUT,
-        trackId: entityId,
-        source: 'comment_input'
-      })
-    )
-  }, [entityId])
+  const [handleClickInput, mobileAppDrawer] =
+    useCommentActionCallback(() => {}, [])
 
   const profileImage = useProfilePicture({
     userId: currentUserId ?? undefined,
@@ -117,37 +109,6 @@ export const CommentForm = ({
     // Incrementing the message id "clears" the input value
     setMessageId((prev) => prev + 1)
   }
-
-  const handleAddMention = useCallback((userId: ID) => {
-    track(
-      make({
-        eventName: Name.COMMENTS_ADD_MENTION,
-        userId
-      })
-    )
-  }, [])
-
-  const handleAddTimestamp = useCallback((timestamp: number) => {
-    track(
-      make({
-        eventName: Name.COMMENTS_ADD_TIMESTAMP,
-        timestamp
-      })
-    )
-  }, [])
-
-  const handleAddLink = useCallback(
-    (entityId: ID, kind: 'track' | 'collection' | 'user') => {
-      track(
-        make({
-          eventName: Name.COMMENTS_ADD_LINK,
-          entityId,
-          kind
-        })
-      )
-    },
-    []
-  )
 
   return (
     <>
@@ -175,9 +136,6 @@ export const CommentForm = ({
           onSubmit={(value: string, _, mentions) => {
             handleSubmit({ commentMessage: value, mentions })
           }}
-          onAddMention={handleAddMention}
-          onAddTimestamp={handleAddTimestamp}
-          onAddLink={handleAddLink}
           disabled={disabled}
           blurOnSubmit={true}
         />

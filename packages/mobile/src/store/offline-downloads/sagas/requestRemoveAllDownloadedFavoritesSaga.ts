@@ -1,8 +1,6 @@
 import { takeEvery, select, put } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
 import { DOWNLOAD_REASON_FAVORITES } from 'app/store/offline-downloads/constants'
-import { EventNames } from 'app/types/analytics'
 
 import {
   getOfflineCollectionMetadata,
@@ -27,7 +25,6 @@ export function* requestRemoveAllDownloadedFavoritesSaga() {
 }
 
 function* removeAllDownloadedFavoritesWorker() {
-  track(make({ eventName: EventNames.OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_OFF }))
   const offlineItemsToRemove: OfflineEntry[] = []
   const offlineCollectionMetadata = yield* select(getOfflineCollectionMetadata)
   const offlineCollectionIds = Object.keys(offlineCollectionMetadata).map(

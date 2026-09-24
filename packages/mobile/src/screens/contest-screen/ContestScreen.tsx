@@ -3,7 +3,6 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState
 } from 'react'
 
@@ -21,7 +20,7 @@ import {
   useUnfollowEvent,
   useUser
 } from '@audius/common/api'
-import { Name, ShareSource } from '@audius/common/models'
+import { ShareSource } from '@audius/common/models'
 import { shareModalUIActions } from '@audius/common/store'
 import { dayjs, getLocalTimezone } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
@@ -42,7 +41,6 @@ import {
 import { UserLink } from 'app/components/user-link'
 import { useEnterContest } from 'app/hooks/useEnterContest'
 import { useRoute } from 'app/hooks/useRoute'
-import { make, track as trackEvent } from 'app/services/analytics'
 import { setVisibility } from 'app/store/drawers/slice'
 
 import { ContestHero, CONTEST_HERO_HEIGHT } from './ContestHero'
@@ -295,36 +293,8 @@ export const ContestScreen = () => {
 
   const enterContest = useEnterContest(trackId)
   const handleEnterContest = useCallback(async () => {
-    if (trackId != null && eventId != null) {
-      trackEvent(
-        make({
-          eventName: Name.REMIX_CONTEST_ENTER,
-          remixContestId: eventId,
-          trackId
-        })
-      )
-    }
     await enterContest()
-  }, [enterContest, trackId, eventId])
-
-  // Fire a Remix Contest: View event the first time the screen resolves
-  // both a trackId and an eventId. The screen is mounted once per
-  // navigation push, so a ref guard makes the event idempotent across
-  // unrelated re-renders (followers count update, scroll-y reaction,
-  // etc.) while still firing on each fresh push.
-  const hasFiredViewRef = useRef(false)
-  useEffect(() => {
-    if (hasFiredViewRef.current) return
-    if (trackId == null || eventId == null) return
-    hasFiredViewRef.current = true
-    trackEvent(
-      make({
-        eventName: Name.REMIX_CONTEST_VIEW,
-        remixContestId: eventId,
-        trackId
-      })
-    )
-  }, [trackId, eventId])
+  }, [enterContest])
 
   // Hide the stack navigator header — the in-hero back button is the
   // only back affordance in the Figma (2888-131647). Leaving the

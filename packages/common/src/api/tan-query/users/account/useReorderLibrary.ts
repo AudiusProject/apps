@@ -87,14 +87,6 @@ export const useReorderLibrary = () => {
         return { ...old, playlist_library: updatedLibrary }
       })
 
-      track(
-        make({
-          eventName: Name.PLAYLIST_LIBRARY_REORDER,
-          containsTemporaryPlaylists: false,
-          kind: collectionType
-        })
-      )
-
       if (collectionType === 'playlist' && typeof collectionId === 'number') {
         const isNewAddition = !previousLibrary.contents.some(
           (item: PlaylistLibraryItem) =>

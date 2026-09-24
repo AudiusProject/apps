@@ -1,5 +1,4 @@
 import { queryHasAccount } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import {
   settingsPageSelectors,
   settingsPageActions as actions,
@@ -10,7 +9,6 @@ import {
 import { getErrorMessage } from '@audius/common/utils'
 import { select, call, put, takeEvery } from 'typed-redux-saga'
 
-import { make } from 'common/store/analytics/actions'
 import commonSettingsSagas from 'common/store/pages/settings/sagas'
 import {
   Permission,
@@ -96,11 +94,6 @@ function* watchToogleBrowserPushNotification() {
                 subscription
               })
             }
-            const event = make(Name.BROWSER_NOTIFICATION_SETTINGS, {
-              provider: 'gcm',
-              enabled: action.enabled
-            })
-            yield* put(event)
           }
         } else if (isSafariPushAvailable) {
           const pushPermission = getSafariPushBrowser()
@@ -115,12 +108,6 @@ function* watchToogleBrowserPushNotification() {
                 deviceType: 'safari'
               })
             }
-
-            const event = make(Name.BROWSER_NOTIFICATION_SETTINGS, {
-              provider: 'safari',
-              enabled: true
-            })
-            yield* put(event)
           } else if (
             !action.enabled &&
             pushPermission.permission === Permission.GRANTED
@@ -131,12 +118,6 @@ function* watchToogleBrowserPushNotification() {
                 deviceToken: pushPermission.deviceToken
               })
             }
-
-            const event = make(Name.BROWSER_NOTIFICATION_SETTINGS, {
-              provider: 'safari',
-              enabled: false
-            })
-            yield* put(event)
           }
         }
       } catch (error) {
@@ -233,12 +214,6 @@ function* watchUpdateNotificationSettings() {
           sdk,
           settings: { [action.notificationType]: isOn }
         })
-
-        const event = make(Name.NOTIFICATIONS_TOGGLE_SETTINGS, {
-          settings: action.notificationType,
-          enabled: isOn
-        })
-        yield* put(event)
       } catch (error) {
         console.error(error)
         yield* put(

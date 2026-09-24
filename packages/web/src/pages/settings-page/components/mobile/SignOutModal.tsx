@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 
-import { Name } from '@audius/common/models'
 import { signOutActions } from '@audius/common/store'
 import {
   Button,
@@ -13,8 +12,6 @@ import {
   ModalTitle
 } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
-
-import { make, useRecord } from 'common/store/analytics/actions'
 
 const { signOut } = signOutActions
 
@@ -32,16 +29,11 @@ type SignOutModalProps = Omit<ModalProps, 'children'>
 
 const SignOutModal = (props: SignOutModalProps) => {
   const { onClose } = props
-  const record = useRecord()
   const dispatch = useDispatch()
 
   const handleSignOut = useCallback(() => {
-    record(
-      make(Name.SETTINGS_LOG_OUT, {
-        callback: () => dispatch(signOut())
-      })
-    )
-  }, [record, dispatch])
+    dispatch(signOut())
+  }, [dispatch])
 
   return (
     <Modal {...props}>

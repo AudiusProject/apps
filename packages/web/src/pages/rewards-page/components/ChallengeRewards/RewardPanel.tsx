@@ -5,7 +5,6 @@ import { useFormattedProgressLabel } from '@audius/common/hooks'
 import {
   ChallengeName,
   ChallengeRewardID,
-  Name,
   OptimisticUserChallenge
 } from '@audius/common/models'
 import { AIRDROP_PAGE } from '@audius/common/src/utils/route'
@@ -29,7 +28,6 @@ import { useLocation } from 'react-router'
 import { useEffectOnce } from 'react-use'
 
 import { CoinProgressBar } from 'components/coin-progress-bar/CoinProgressBar'
-import { make, track } from 'services/analytics'
 import { doesMatchRoute } from 'utils/route'
 
 import { StatusPill } from './StatusPill'
@@ -67,9 +65,6 @@ export const RewardPanel = ({
   const location = useLocation()
   const openRewardModal = () => {
     openModal(id)
-    track(
-      make({ eventName: Name.REWARDS_CLAIM_DETAILS_OPENED, challengeId: id })
-    )
   }
   useEffectOnce(() => {
     const match = doesMatchRoute(location, AIRDROP_PAGE)

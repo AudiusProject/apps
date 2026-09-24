@@ -6,7 +6,6 @@ import {
   route
 } from '@audius/common/utils'
 import {
-  Name,
   SquareSizes,
   Track
 } from '@audius/common/models'
@@ -36,10 +35,6 @@ import Toast from 'components/toast/Toast'
 
 import styles from './VisualizerProvider.module.css'
 
-import {
-  make,
-  TrackEvent
-} from 'common/store/analytics/actions'
 import { Image } from '@audius/harmony'
 import PlayingTrackInfo from 'components/play-bar/desktop/components/PlayingTrackInfo'
 import {
@@ -295,8 +290,6 @@ const Visualizer = ({
   playing,
   autoHideTrackDetails,
   onClose,
-  recordOpen,
-  recordClose,
   goToRoute
 }: VisualizerProps) => {
   const [toastText, setToastText] = useState('')
@@ -451,7 +444,6 @@ const Visualizer = ({
   useEffect(() => {
     if (isVisible) {
       ButterchurnVisualizer?.show()
-      recordOpen()
       setShowVisualizer(true)
       setTimeout(() => {
         setFadeVisualizer(true)
@@ -466,7 +458,6 @@ const Visualizer = ({
       const timer = setTimeout(() => {
         setShowVisualizer(false)
         ButterchurnVisualizer?.hide()
-        recordClose()
       }, 400)
       return () => clearTimeout(timer)
     }
@@ -624,14 +615,6 @@ const makeMapStateToProps = () => {
 }
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  recordOpen: () => {
-    const trackEvent: TrackEvent = make(Name.VISUALIZER_OPEN, {})
-    dispatch(trackEvent)
-  },
-  recordClose: () => {
-    const trackEvent: TrackEvent = make(Name.VISUALIZER_CLOSE, {})
-    dispatch(trackEvent)
-  },
   goToRoute: (route: string) => dispatch(push(route))
 })
 

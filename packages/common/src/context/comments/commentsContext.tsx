@@ -23,14 +23,12 @@ import {
   getCommentSectionLoading
 } from '~/api'
 import { useGatedContentAccess } from '~/hooks'
-import { ModalSource, ID, Comment, ReplyComment, Name, Track } from '~/models'
+import { ModalSource, ID, Comment, ReplyComment, Track } from '~/models'
 import { playbackActions } from '~/store'
 import { seekTo } from '~/store/playback/slice'
 import { PurchaseableContentType } from '~/store/purchase-content/types'
 import { usePremiumContentPurchaseModal } from '~/store/ui/modals/premium-content-purchase-modal'
 import { Nullable } from '~/utils'
-
-import { useAppContext } from '../appContext'
 
 type CommentSectionProviderProps<NavigationProp> = {
   entityId: ID
@@ -110,10 +108,6 @@ export function CommentSectionProvider<NavigationProp>(
   } = props
   const { data: track } = useTrack(entityId)
 
-  const {
-    analytics: { make, track: trackEvent }
-  } = useAppContext()
-
   const [currentSort, setCurrentSort] = useState<CommentSortMethod>(
     CommentSortMethod.Top
   )
@@ -121,18 +115,11 @@ export function CommentSectionProvider<NavigationProp>(
     resetPreviousCommentCount(queryClient, entityId)
     queryClient.resetQueries({ queryKey: [QUERY_KEYS.trackCommentList] })
     setCurrentSort(sortMethod)
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_APPLY_SORT,
-        sortType: sortMethod
-      })
-    )
   }
 
   const { data: currentUserId } = useCurrentUserId()
 
   const {
-    data: comments = [],
     commentIds = [],
     status,
     hasNextPage,
@@ -171,21 +158,11 @@ export function CommentSectionProvider<NavigationProp>(
 
   const handleLoadMorePages = useCallback(() => {
     loadMorePages()
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_LOAD_MORE_COMMENTS,
-        trackId: entityId,
-        offset: comments.length
-      })
-    )
-  }, [comments.length, entityId, loadMorePages, make, trackEvent])
+  }, [loadMorePages])
 
   const handleResetComments = useCallback(() => {
     resetComments()
-    trackEvent(
-      make({ eventName: Name.COMMENTS_LOAD_NEW_COMMENTS, trackId: entityId })
-    )
-  }, [entityId, make, resetComments, trackEvent])
+  }, [resetComments])
 
   const handleCloseDrawer = useCallback(() => {
     closeDrawer?.()

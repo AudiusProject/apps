@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { useComment, useCommentReplies } from '@audius/common/api'
-import { useCurrentCommentSection } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import {
-  Name,
-  type Comment,
-  type ID,
-  type ReplyComment
-} from '@audius/common/models'
+import { type Comment, type ID, type ReplyComment } from '@audius/common/models'
 import type { LayoutChangeEvent } from 'react-native/types'
 import Animated, {
   useAnimatedStyle,
@@ -24,7 +18,6 @@ import {
   PlainButton,
   useTheme
 } from '@audius/harmony-native'
-import { make, track } from 'app/services/analytics'
 
 import LoadingSpinner from '../loading-spinner/LoadingSpinner'
 
@@ -38,7 +31,6 @@ type CommentThreadProps = {
 export const CommentThread = (props: CommentThreadProps) => {
   const { commentId, highlightedComment } = props
   const { motion, spacing } = useTheme()
-  const { entityId } = useCurrentCommentSection()
   const { data: rootCommentData } = useComment(commentId)
   const rootComment = rootCommentData as Comment | null | undefined // May be null/undefined or a `{}` placeholder while the individual comment cache is (re)hydrating
 
@@ -66,16 +58,6 @@ export const CommentThread = (props: CommentThreadProps) => {
     const newHiddenReplies = { ...hiddenReplies }
     newHiddenReplies[commentId] = !newHiddenReplies[commentId]
     setHiddenReplies(newHiddenReplies)
-
-    track(
-      make({
-        eventName: newHiddenReplies[commentId]
-          ? Name.COMMENTS_HIDE_REPLIES
-          : Name.COMMENTS_SHOW_REPLIES,
-        commentId,
-        trackId: entityId
-      })
-    )
   }
   const [hasRequestedMore, setHasRequestedMore] = useState(false)
   const { isFetching: isFetchingReplies } = useCommentReplies(

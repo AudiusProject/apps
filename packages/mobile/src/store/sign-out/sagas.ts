@@ -1,4 +1,3 @@
-import { Name } from '@audius/common/models'
 import {
   accountActions,
   tokenDashboardPageActions,
@@ -10,7 +9,6 @@ import { waitForValue } from '@audius/common/utils'
 import { setupBackend } from '@audius/web/src/common/store/backend/actions'
 import { getIsSettingUp } from '@audius/web/src/common/store/backend/selectors'
 import { resetSignOn } from '@audius/web/src/common/store/pages/signon/actions'
-import { make } from 'common/store/analytics/actions'
 import { takeLatest, put, call } from 'typed-redux-saga'
 
 import {
@@ -31,7 +29,6 @@ const { signOut: signOutAction } = signOutActions
 const storageKeysToRemove = [THEME_STORAGE_KEY, ENTROPY_KEY, SEARCH_HISTORY_KEY]
 
 function* signOut() {
-  yield* put(make(Name.SETTINGS_LOG_OUT, {}))
   const authService = yield* getContext('authService')
   const queryClient = yield* getContext('queryClient')
 

@@ -1,10 +1,7 @@
 import { useCallback, useEffect } from 'react'
 
 import { useCurrentUserId, useRemoveAuthorizedApp } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import { Button, ModalFooter } from '@audius/harmony'
-
-import { make, useRecord } from 'common/store/analytics/actions'
 
 import styles from './RemoveAppConfirmationPage.module.css'
 import { AuthorizedAppPageProps, AuthorizedAppsPages } from './types'
@@ -24,16 +21,12 @@ export const RemoveAppConfirmationPage = (
   const { params, setPage } = props
   const {
     mutate: removeAuthorizedApp,
-    error,
     isPending,
     isSuccess,
     isError
   } = useRemoveAuthorizedApp()
-  const errorMessage = error?.message
   const { data: userId } = useCurrentUserId()
-  const record = useRecord()
   const address = params?.address
-  const apiKey = address?.slice(2)
   const name = params?.name
 
   const handleCancel = useCallback(() => {
@@ -48,27 +41,14 @@ export const RemoveAppConfirmationPage = (
   useEffect(() => {
     if (isSuccess) {
       setPage(AuthorizedAppsPages.YOUR_APPS)
-      record(
-        make(Name.AUTHORIZED_APP_REMOVE_SUCCESS, {
-          name,
-          apiKey
-        })
-      )
     }
-  }, [isSuccess, setPage, record, name, address, apiKey])
+  }, [isSuccess, setPage])
 
   useEffect(() => {
     if (isError) {
       setPage(AuthorizedAppsPages.YOUR_APPS)
-      record(
-        make(Name.AUTHORIZED_APP_REMOVE_ERROR, {
-          name,
-          apiKey,
-          error: errorMessage
-        })
-      )
     }
-  }, [isError, setPage, record, name, address, apiKey, errorMessage])
+  }, [isError, setPage])
 
   if (!params) return null
 

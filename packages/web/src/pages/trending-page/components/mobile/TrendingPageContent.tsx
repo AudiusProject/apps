@@ -15,7 +15,7 @@ import {
   useTrending,
   useTrendingUnderground
 } from '@audius/common/api'
-import { Name, TimeRange } from '@audius/common/models'
+import { TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
   trendingPageSelectors
@@ -34,7 +34,6 @@ import {
 import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import Header from 'components/header/mobile/Header'
 import { HeaderContext } from 'components/header/mobile/HeaderContextProvider'
 import { EndOfLineup } from 'components/lineup/EndOfLineup'
@@ -188,8 +187,6 @@ const TrendingPageMobileContent = ({
     setCenter(CenterPreset.LOGO)
   }, [setLeft, setCenter, setRight])
 
-  const record = useRecord()
-
   const setTrendingTimeRange = useCallback(
     (tr: TimeRange) => dispatch(trendingPageActions.setTrendingTimeRange(tr)),
     [dispatch]
@@ -204,14 +201,8 @@ const TrendingPageMobileContent = ({
     (timeRange: TimeRange) => {
       setTrendingTimeRange(timeRange)
       scrollWindowToTop()
-      record(
-        make(Name.TRENDING_CHANGE_VIEW, {
-          timeframe: timeRange,
-          genre: trendingGenre ?? ''
-        })
-      )
     },
-    [setTrendingTimeRange, record, trendingGenre]
+    [setTrendingTimeRange]
   )
 
   const queryForRange = useCallback(

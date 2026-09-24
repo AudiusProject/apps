@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 
 import { useTrack } from '@audius/common/api'
-import { FavoriteType, ID, Name } from '@audius/common/models'
+import { FavoriteType, ID } from '@audius/common/models'
 import {
   favoritesUserListActions,
   repostsUserListActions,
@@ -15,7 +15,6 @@ import { AvatarList } from 'components/avatar'
 import { UserName, VanityMetric } from 'components/entity/VanityMetrics'
 import { TrackTileSize } from 'components/track/types'
 import { useIsMobile } from 'hooks/useIsMobile'
-import { make, track as trackEvent } from 'services/analytics'
 import {
   setUsers,
   setVisibility
@@ -174,16 +173,6 @@ export const CommentMetric = (props: CommentMetricProps) => {
   })
   const { commentCount = 0, permalink, commentsDisabled } = partialTrack ?? {}
 
-  const handleClick = useCallback(() => {
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_CLICK_COMMENT_STAT,
-        trackId,
-        source: 'lineup'
-      })
-    )
-  }, [trackId])
-
   if (commentsDisabled) return null
 
   const url = isMobile
@@ -192,7 +181,7 @@ export const CommentMetric = (props: CommentMetricProps) => {
   const isSmall = size === TrackTileSize.SMALL
 
   return (
-    <VanityMetric ellipses to={url} onClick={handleClick}>
+    <VanityMetric ellipses to={url}>
       <IconMessage size='s' color='subdued' title={messages.comments} />
       {commentCount > 0 || isSmall
         ? formatCount(commentCount)

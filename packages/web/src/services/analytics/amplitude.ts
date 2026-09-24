@@ -1,4 +1,8 @@
-import { Name, MobileOS, IdentifyTraits } from '@audius/common/models'
+import {
+  MobileOS,
+  IdentifyTraits,
+  getAnalyticsSampleRate
+} from '@audius/common/models'
 
 import { env } from 'services/env'
 import {
@@ -14,7 +18,7 @@ const AMPLITUDE_PROXY = env.AMPLITUDE_PROXY
 const isAmplitudeConfigured =
   !!AMP_API_KEY && !!AMPLITUDE_PROXY && !isLikelyBot()
 
-const SESSION_START_KEY = 'amplitude:sessionStartSessionId'
+const CLIENT_KEY = 'amplitude:client'
 const IDENTIFY_TRAITS_KEY = 'amplitude:identifiedTraits'
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -92,11 +96,9 @@ export const init = async (isMobile: boolean) => {
           getSessionReplayPlugin()
         ])
 
-        // Every option left out of defaultTracking defaults to on. The
-        // automatic session_start and [Amplitude] Page Viewed events are
-        // deleted in the Amplitude project, so they were only ever sent,
-        // counted by the proxy, and dropped. Session Start below covers
-        // sessions, and attribution stays on for utm/referrer user properties.
+        // Every option left out of defaultTracking defaults to on. Amplitude
+        // derives sessions from session ids without the automatic events, and
+        // attribution stays on for utm/referrer user properties.
         await amplitude.init(AMP_API_KEY, {
           serverUrl: AMPLITUDE_PROXY,
           defaultTracking: {
@@ -111,11 +113,14 @@ export const init = async (isMobile: boolean) => {
         const sessionReplayTracking = sessionReplayPlugin.sessionReplayPlugin()
         amplitude.add(sessionReplayTracking)
 
-        // Once per Amplitude session rather than once per page load
-        const sessionId = String(amplitude.getSessionId() ?? '')
-        if (!sessionId || readStorage(SESSION_START_KEY) !== sessionId) {
-          amplitude.track(Name.SESSION_START, { source: getSource(isMobile) })
-          writeStorage(SESSION_START_KEY, sessionId)
+        // Which client the user is on, as a user property. Only sent when it
+        // changes for this device.
+        const client = getSource(isMobile) ?? 'Desktop Web'
+        if (readStorage(CLIENT_KEY) !== client) {
+          const identifyObj = new amplitude.Identify()
+          identifyObj.set('client', client)
+          amplitude.identify(identifyObj)
+          writeStorage(CLIENT_KEY, client)
         }
 
         isInitialized = true
@@ -183,7 +188,13 @@ export const track = async (
 
   try {
     const amplitude = await getAmplitude()
-    amplitude.track(event, properties)
+    const sampleRate = getAnalyticsSampleRate(event, amplitude.getDeviceId())
+    if (sampleRate !== null) {
+      amplitude.track(
+        event,
+        sampleRate < 1 ? { ...properties, sampleRate } : properties
+      )
+    }
     if (callback) {
       callback()
     }

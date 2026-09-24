@@ -9,7 +9,7 @@ import {
   useGatedContentAccess,
   useToggleTrack
 } from '@audius/common/hooks'
-import { Name, PlaybackSource, ID, ModalSource } from '@audius/common/models'
+import { PlaybackSource, ID, ModalSource } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
 import { getPathFromTrackUrl } from '@audius/common/utils'
 import { useQuery } from '@tanstack/react-query'
@@ -92,7 +92,6 @@ export const ChatMessageTrack = ({
     // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedTrack) {
-      dispatch(make(Name.MESSAGE_UNFURL_TRACK, {}))
       onSuccess?.()
     } else {
       // Track URL resolved to nothing playable (deleted or missing) —
@@ -100,7 +99,7 @@ export const ChatMessageTrack = ({
       // showing a misleading or generic preview.
       onEmpty?.()
     }
-  }, [isPending, hasResolvedTrack, onSuccess, onEmpty, dispatch])
+  }, [isPending, hasResolvedTrack, onSuccess, onEmpty])
 
   if (isPending) {
     return <ChatUnfurlSkeleton className={className} />

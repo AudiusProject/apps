@@ -4,17 +4,23 @@ import {
   setUserId,
   identify as amplitudeIdentify,
   Identify,
+  getDeviceId,
   Types as AmplitudeTypes
 } from '@amplitude/analytics-react-native'
 import type { IdentifyTraits } from '@audius/common/models'
+import {
+  CORE_ANALYTICS_EVENTS,
+  getAnalyticsSampleRate
+} from '@audius/common/models'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Platform } from 'react-native'
 import VersionNumber from 'react-native-version-number'
 
 import { env } from 'app/services/env'
 
 import packageInfo from '../../package.json'
 import type { Track, Screen, AllEvents } from '../types/analytics'
-import { EventNames } from '../types/analytics'
+import { EventNames, MOBILE_CORE_EVENTS } from '../types/analytics'
 
 const { version: clientVersion } = packageInfo
 
@@ -25,6 +31,7 @@ const AmplitudeProxy = env.AMPLITUDE_PROXY
 const IS_PRODUCTION_BUILD = process.env.NODE_ENV === 'production'
 
 const IDENTIFY_TRAITS_KEY = 'amplitude:identifiedTraits'
+const CLIENT_IDENTIFIED_KEY = 'amplitude:clientIdentified'
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 export const init = async () => {
@@ -43,6 +50,7 @@ export const init = async () => {
         minIdLength: 1 // By default amplitude rejects our handle ids if they're less than 5 characters
       })
       analyticsSetupStatus = 'ready'
+      identifyClient().catch(() => {})
     } else {
       analyticsSetupStatus = 'error'
       console.error(
@@ -53,6 +61,24 @@ export const init = async () => {
     analyticsSetupStatus = 'error'
     console.error(`Amplitude error: ${err}`)
   }
+}
+
+const coreEvents: ReadonlySet<string> = new Set([
+  ...CORE_ANALYTICS_EVENTS,
+  ...MOBILE_CORE_EVENTS
+])
+
+// Which client the user is on, as a user property set once per install
+const identifyClient = async () => {
+  const client = Platform.OS === 'ios' ? 'iOS App' : 'Android App'
+  const previous = await AsyncStorage.getItem(CLIENT_IDENTIFIED_KEY).catch(
+    () => null
+  )
+  if (previous === client) return
+  const identifyObj = new Identify()
+  identifyObj.set('client', client)
+  await amplitudeIdentify(identifyObj)
+  await AsyncStorage.setItem(CLIENT_IDENTIFIED_KEY, client).catch(() => {})
 }
 
 const isAudiusSetup = async () => {
@@ -117,9 +143,16 @@ export const identify = async (traits: IdentifyTraits) => {
 export const track = async ({ eventName, properties }: Track) => {
   const isSetup = await isAudiusSetup()
   if (!isSetup) return
+  const sampleRate = getAnalyticsSampleRate(
+    eventName,
+    getDeviceId(),
+    coreEvents
+  )
+  if (sampleRate === null) return
   const version = VersionNumber.appVersion
   const propertiesWithContext = {
     ...properties,
+    ...(sampleRate < 1 ? { sampleRate } : {}),
     clientVersion,
     isNativeMobile: true,
     mobileClientVersion: version

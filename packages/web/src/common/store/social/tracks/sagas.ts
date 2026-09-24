@@ -125,42 +125,6 @@ export function* repostTrackAsync(
   yield* call(updateTrackData, [
     { track_id: action.trackId, ...eagerlyUpdatedMetadata }
   ])
-
-  if (remixTrack && isCoSign) {
-    const {
-      parent_track_id,
-      has_remix_author_reposted,
-      has_remix_author_saved
-    } = remixTrack
-
-    // Track Cosign Event
-    const hasAlreadyCoSigned =
-      has_remix_author_reposted || has_remix_author_saved
-
-    const parentTrack = yield* queryTrack(parent_track_id)
-
-    if (parentTrack) {
-      const coSignIndicatorEvent = make(Name.REMIX_COSIGN_INDICATOR, {
-        id: action.trackId,
-        handle: user.handle,
-        original_track_id: parentTrack.track_id,
-        original_track_title: parentTrack.title,
-        action: 'reposted'
-      })
-      yield* put(coSignIndicatorEvent)
-
-      if (!hasAlreadyCoSigned) {
-        const coSignEvent = make(Name.REMIX_COSIGN, {
-          id: action.trackId,
-          handle: user.handle,
-          original_track_id: parentTrack.track_id,
-          original_track_title: parentTrack.title,
-          action: 'reposted'
-        })
-        yield* put(coSignEvent)
-      }
-    }
-  }
 }
 
 export function* confirmRepostTrack(
@@ -392,35 +356,6 @@ export function* saveTrackAsync(
     { track_id: action.trackId, ...eagerlyUpdatedMetadata }
   ])
   yield* put(socialActions.saveTrackSucceeded(action.trackId))
-  if (isCoSign) {
-    // Track Cosign Event
-    const parentTrackId = remixTrack.parent_track_id
-    const hasAlreadyCoSigned =
-      remixTrack.has_remix_author_reposted || remixTrack.has_remix_author_saved
-
-    const parentTrack = yield* queryTrack(parentTrackId)
-    const accountUser = yield* call(queryAccountUser)
-    const handle = accountUser?.handle
-    const coSignIndicatorEvent = make(Name.REMIX_COSIGN_INDICATOR, {
-      id: action.trackId,
-      handle,
-      original_track_id: parentTrack?.track_id,
-      original_track_title: parentTrack?.title,
-      action: 'favorited'
-    })
-    yield* put(coSignIndicatorEvent)
-
-    if (!hasAlreadyCoSigned) {
-      const coSignEvent = make(Name.REMIX_COSIGN, {
-        id: action.trackId,
-        handle,
-        original_track_id: parentTrack?.track_id,
-        original_track_title: parentTrack?.title,
-        action: 'favorited'
-      })
-      yield* put(coSignEvent)
-    }
-  }
 }
 
 export function* confirmSaveTrack(
@@ -574,9 +509,6 @@ export function* watchSetArtistPick() {
       )
       const user = yield* call(queryUser, userId)
       yield* fork(updateProfileAsync, { metadata: user })
-
-      const event = make(Name.ARTIST_PICK_SELECT_TRACK, { id: action.trackId })
-      yield* put(event)
     }
   )
 }
@@ -599,9 +531,6 @@ export function* watchUnsetArtistPick() {
     )
     const user = yield* call(queryUser, userId)
     yield* fork(updateProfileAsync, { metadata: user })
-
-    const event = make(Name.ARTIST_PICK_SELECT_TRACK, { id: 'none' })
-    yield* put(event)
   })
 }
 

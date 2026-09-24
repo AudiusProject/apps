@@ -1,10 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useDispatch } from 'react-redux'
-
-import { make } from 'common/store/analytics/actions'
 
 import { CallToActionBanner } from './CallToActionBanner'
 
@@ -20,7 +16,6 @@ const TOS_BANNER_LOCAL_STORAGE_KEY = 'dismissTermsOfServiceBanner10.5.25'
  * Displays a CTA Banner announcing ToS Updates
  */
 export const TermsOfServiceUpdateBanner = () => {
-  const dispatch = useDispatch()
   const hasDismissed = window.localStorage.getItem(TOS_BANNER_LOCAL_STORAGE_KEY)
   const [isVisible, setIsVisible] = useState(!hasDismissed)
 
@@ -31,9 +26,8 @@ export const TermsOfServiceUpdateBanner = () => {
 
   const handleAccept = useCallback(() => {
     window.open(TERMS_OF_SERVICE)
-    dispatch(make(Name.BANNER_TOS_CLICKED, {}))
     handleClose()
-  }, [dispatch, handleClose])
+  }, [handleClose])
 
   return isVisible ? (
     <CallToActionBanner

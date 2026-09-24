@@ -1,12 +1,10 @@
 import { useCallback } from 'react'
 
 import type { ID } from '@audius/common/models'
-import { Name } from '@audius/common/models'
 import { chatActions } from '@audius/common/store'
 import { useDispatch } from 'react-redux'
 
 import { IconMessage, Button } from '@audius/harmony-native'
-import { make, track } from 'app/services/analytics'
 
 const { createChat } = chatActions
 
@@ -24,7 +22,6 @@ export const MessageButton = (props: MessageButtonProps) => {
 
   const handlePress = useCallback(() => {
     dispatch(createChat({ userIds: [userId] }))
-    track(make({ eventName: Name.CHAT_ENTRY_POINT, source: 'profile' }))
   }, [dispatch, userId])
 
   return (

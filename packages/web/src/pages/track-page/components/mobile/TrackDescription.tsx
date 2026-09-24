@@ -25,11 +25,7 @@ export const TrackDescription = ({
         collapsedHeight={DEFAULT_LINE_HEIGHT * MAX_DESCRIPTION_LINES}
       >
         <Flex css={{ overflow: 'hidden', textWrap: 'wrap' }}>
-          <UserGeneratedText
-            variant='body'
-            className={className}
-            linkSource='track page'
-          >
+          <UserGeneratedText variant='body' className={className}>
             {description}
           </UserGeneratedText>
         </Flex>

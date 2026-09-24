@@ -5,10 +5,7 @@ import type {
 } from '@audius/common/models'
 import { Name as CommonEventNames } from '@audius/common/models'
 
-import type { OfflineJob } from 'app/store/offline-downloads/slice'
-
 enum MobileEventNames {
-  APP_ERROR = 'App Unexpected Error',
   SHARE_TO_IG_STORY = 'Share to Instagram story - start',
   SHARE_TO_IG_STORY_CANCELLED = 'Share to Instagram story - cancelled',
   SHARE_TO_IG_STORY_ERROR = 'Share to Instagram story - error',
@@ -23,22 +20,26 @@ enum MobileEventNames {
   SHARE_TO_TIKTOK_VIDEO_SUCCESS = 'Share to TikTok (video) - success',
 
   // Offline Mode
-  OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_ON = 'Offline Mode: Download All Toggle On',
-  OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_OFF = 'Offline Mode: Download All Toggle Off',
-  OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_ON = 'Offline Mode: Download Collection Toggle On',
-  OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_OFF = 'Offline Mode: Download Collection Toggle Off',
-  OFFLINE_MODE_DOWNLOAD_REQUEST = 'Offline Mode: Download Item Request',
-  OFFLINE_MODE_DOWNLOAD_START = 'Offline Mode: Download Item Start',
-  OFFLINE_MODE_DOWNLOAD_SUCCESS = 'Offline Mode: Download Item Success',
-  OFFLINE_MODE_DOWNLOAD_FAILURE = 'Offline Mode: Download Item Failure',
-  OFFLINE_MODE_REMOVE_ITEM = 'Offline Mode: Remove Item',
-  OFFLINE_MODE_PLAY = 'Offline Mode: Offline Play',
-  OFFLINE_MODE_FILEPATH_MIGRATION_STARTED = 'Offline Mode: File path migration started',
-  OFFLINE_MODE_FILEPATH_MIGRATION_SUCCESS = 'Offline Mode: File path migration succeeded',
-  OFFLINE_MODE_FILEPATH_MIGRATION_FAILURE = 'Offline Mode: File path migration failed'
+  OFFLINE_MODE_PLAY = 'Offline Mode: Offline Play'
 }
 
 export const EventNames = { ...CommonEventNames, ...MobileEventNames }
+
+/** Mobile-only events that are never sampled (share channels) */
+export const MOBILE_CORE_EVENTS: readonly string[] = [
+  MobileEventNames.SHARE_TO_IG_STORY,
+  MobileEventNames.SHARE_TO_IG_STORY_CANCELLED,
+  MobileEventNames.SHARE_TO_IG_STORY_ERROR,
+  MobileEventNames.SHARE_TO_IG_STORY_SUCCESS,
+  MobileEventNames.SHARE_TO_SNAPCHAT,
+  MobileEventNames.SHARE_TO_SNAPCHAT_CANCELLED,
+  MobileEventNames.SHARE_TO_SNAPCHAT_ERROR,
+  MobileEventNames.SHARE_TO_SNAPCHAT_STORY_SUCCESS,
+  MobileEventNames.SHARE_TO_TIKTOK_VIDEO,
+  MobileEventNames.SHARE_TO_TIKTOK_VIDEO_CANCELLED,
+  MobileEventNames.SHARE_TO_TIKTOK_VIDEO_ERROR,
+  MobileEventNames.SHARE_TO_TIKTOK_VIDEO_SUCCESS
+]
 
 type NotificationsOpenPushNotification = {
   eventName: Name.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION
@@ -96,86 +97,20 @@ type ShareToTikTokVideoError = {
   error: string
 }
 
-type AppError = {
-  eventName: MobileEventNames.APP_ERROR
-  message?: string
-}
-
-type OfflineModeDownloadAllToggleOn = {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_ON
-}
-
-type OfflineModeDownloadAllToggleOff = {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_ALL_TOGGLE_OFF
-}
-
-type OfflineModeDownloadCollectionToggleOn = {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_ON
-  collectionId: ID
-}
-
-type OfflineModeDownloadCollectionToggleOff = {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_OFF
-  collectionId: ID
-}
-
-type OfflineModeDownloadRequest = OfflineJob & {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_REQUEST
-}
-
-type OfflineModeDownloadStart = OfflineJob & {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_START
-}
-
-type OfflineModeDownloadSuccess = OfflineJob & {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_SUCCESS
-}
-
-type OfflineModeDownloadFailure = OfflineJob & {
-  eventName: MobileEventNames.OFFLINE_MODE_DOWNLOAD_FAILURE
-}
-
-type OfflineModeRemoveItem = OfflineJob & {
-  eventName: MobileEventNames.OFFLINE_MODE_REMOVE_ITEM
-}
-
 type OfflineModePlay = {
   eventName: MobileEventNames.OFFLINE_MODE_PLAY
   trackId: ID
 }
 
-type OfflineFilePathMigrationStarted = {
-  eventName: MobileEventNames.OFFLINE_MODE_FILEPATH_MIGRATION_STARTED
-}
-type OfflineFilePathMigrationSucceess = {
-  eventName: MobileEventNames.OFFLINE_MODE_FILEPATH_MIGRATION_SUCCESS
-}
-type OfflineFilePathMigrationFailed = {
-  eventName: MobileEventNames.OFFLINE_MODE_FILEPATH_MIGRATION_FAILURE
-}
-
 type MobileTrackingEvents =
   | NotificationsOpenPushNotification
-  | AppError
   | ShareToIGStory
   | ShareToIGStoryError
   | ShareToSnapchat
   | ShareToSnapchatError
   | ShareToTikTokVideo
   | ShareToTikTokVideoError
-  | OfflineModeDownloadAllToggleOn
-  | OfflineModeDownloadAllToggleOff
-  | OfflineModeDownloadCollectionToggleOn
-  | OfflineModeDownloadCollectionToggleOff
-  | OfflineModeDownloadFailure
-  | OfflineModeDownloadRequest
-  | OfflineModeDownloadStart
-  | OfflineModeDownloadSuccess
-  | OfflineModeRemoveItem
   | OfflineModePlay
-  | OfflineFilePathMigrationStarted
-  | OfflineFilePathMigrationSucceess
-  | OfflineFilePathMigrationFailed
 
 export type AllEvents = CommonTrackingEvents | MobileTrackingEvents
 

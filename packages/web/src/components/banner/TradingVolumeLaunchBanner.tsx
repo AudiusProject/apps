@@ -1,10 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import { Name } from '@audius/common/models'
-import { useDispatch } from 'react-redux'
 import { useLocalStorage } from 'react-use'
-
-import { make } from 'common/store/analytics/actions'
 
 import { CallToActionBanner } from './CallToActionBanner'
 
@@ -17,7 +13,6 @@ const messages = {
 }
 
 export const TradingVolumeLaunchBanner = () => {
-  const dispatch = useDispatch()
   const [isDismissed, setIsDismissed] = useLocalStorage(
     TRADING_VOLUME_BANNER_LOCAL_STORAGE_KEY,
     false
@@ -30,10 +25,9 @@ export const TradingVolumeLaunchBanner = () => {
   }, [setIsDismissed])
 
   const handleAccept = useCallback(() => {
-    dispatch(make(Name.BANNER_TRADING_VOLUME_LAUNCH_CLICKED, {}))
     window.open('https://season1.audius.co', '_blank')
     handleClose()
-  }, [dispatch, handleClose])
+  }, [handleClose])
 
   return isVisible ? (
     <CallToActionBanner
