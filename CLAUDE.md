@@ -2,17 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Terminology
-
-Audius runs on the **Open Audio Protocol**, which uses a single canonical node type: the **Open Audio Validator Node**. The earlier split between *Discovery Nodes* and *Content Nodes* is deprecated — both roles are now served by validator nodes. When writing docs, comments, commit messages, or user-facing strings, use "Open Audio Validator Node" (or just "validator node"). Do not introduce new references to "Discovery Node", "Content Node", "Creator Node", or "Discovery Provider". Directory names like `packages/discovery-provider` and `mediorum` are retained for compatibility but no longer reflect the architecture.
-
 ## Project Overview
 
 Audius is a decentralized, community-owned music-sharing protocol. This is a monorepo containing:
 
 - Web and desktop applications (React + Vite)
 - Mobile applications (React Native)
-- Backend services that together make up the Open Audio Validator Node software (indexer + media storage; see `packages/discovery-provider` and `mediorum` directories — names retained from earlier architecture)
+- Backend services (Discovery Provider, Content Node)
 - Blockchain smart contracts (Ethereum and Solana)
 - SDK and common libraries
 
@@ -33,8 +29,9 @@ npm run protocol
 audius-compose connect
 
 # Run web application
-npm run web          # Against production
-npm run web:local    # Against local services
+npm run web:dev      # Against local services
+npm run web:prod     # Against production
+# NOTE: web:stage does not exist — there is no staging environment
 
 # Run mobile applications
 npm run mobile       # Metro only — preferred for JS-only changes; user opens the simulator manually with the existing build
@@ -80,7 +77,7 @@ audius-cmd stream
 - **packages/sdk**: JavaScript SDK for interacting with Audius protocol
 - **packages/harmony**: Design system components and tokens
 - **packages/discovery-provider**: Python backend that indexes blockchain data
-- **mediorum**: Media storage component of the Open Audio Validator Node — stores and serves audio files (directory name retained from earlier "content node" architecture)
+- **mediorum**: Content node for storing/serving audio files
 
 ### State Management
 
@@ -123,6 +120,21 @@ audius-cmd stream
 - Backend changes may require protocol restart
 - Design system changes affect both web and mobile
 
+### Branching Rules
+
+- Always branch off main: `git fetch origin && git checkout -b your-branch origin/main`
+- Never branch off another feature branch
+- If a branch isn't based on main, rebase it: `git rebase origin/main`
+- Always work in the main repository worktree — never in Claude's auto-created worktrees under `.claude/worktrees/`
+
+### Environments
+
+- There is NO staging environment — only development and production
+- `npm run web:prod` is the correct command to run locally against prod
+- `npm run web:dev` runs against local protocol
+- The environment type is either `'development'` or `'production'` — never `'staging'`
+- Never add staging support or reference `staging.audius.co`
+
 ### Environment Variables
 
 - Web: See packages/web/.env.dev
@@ -134,7 +146,7 @@ audius-cmd stream
 - Protocol must be running for local development
 - Mobile requires proper native environment setup
 - Some features require blockchain interaction
-- Audio processing happens on Open Audio Validator Nodes (the role formerly called "content node" — deprecated terminology)
+- Audio processing happens on content nodes
 
 ## Code Style and Best Practices
 
