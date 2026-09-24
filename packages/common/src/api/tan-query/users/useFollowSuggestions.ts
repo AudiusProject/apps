@@ -8,13 +8,8 @@ export type UseFollowSuggestionsArgs = {
 }
 
 /**
- * Artists to suggest the user follow on empty-feed / "find artists" surfaces.
- *
- * Prefers suggestions personalized from the user's own favorites and reposts,
- * and falls back to the curated featured list when there aren't any — which is
- * the common case for a brand new account, and the only case for a signed-out
- * one. Both surfaces that show follow suggestions share this so the fallback
- * rule lives in one place.
+ * Follow suggestions for empty-feed surfaces: personalized suggestions when
+ * available, otherwise the featured artists list.
  */
 export const useFollowSuggestions = (
   { limit }: UseFollowSuggestionsArgs = {},
@@ -25,10 +20,8 @@ export const useFollowSuggestions = (
 
   const hasPersonalized = !!personalized?.length
 
-  // Fetched unconditionally rather than gated on personalization coming back
-  // empty: the empty case is exactly the new-account case this surface exists
-  // for, and gating would put a serial request in front of it. The fallback is
-  // a small static list, so fetching it and discarding it costs ~nothing.
+  // Fetch in parallel so new accounts (no personalized results) don't wait on
+  // two serial requests.
   const { data: featured, isPending: isFeaturedPending } = useTopArtists(
     'Featured',
     options

@@ -8,11 +8,7 @@
   animation: spinner-rotate 1.4s linear infinite;
 }
 
-/*
- * Grow-then-shrink sweep, matching the Lottie animation this replaced: the arc
- * grew from empty to full over ~1s, then shrank back over ~2s, rotating
- * throughout. 101 is the r=16 circumference (2πr ≈ 100.53) rounded up.
- */
+/* 101 is the circumference of the r=16 arc (2πr), rounded up. */
 .arc {
   animation: spinner-sweep 2.1s ease-in-out infinite;
 }

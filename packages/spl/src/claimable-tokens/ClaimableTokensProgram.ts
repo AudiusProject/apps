@@ -1,9 +1,15 @@
 import { struct, u8 } from '@solana/buffer-layout'
 import { publicKey, u64 } from '@solana/buffer-layout-utils'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import {
+  TOKEN_PROGRAM_ID,
+  TokenInstruction,
+  createSetAuthorityInstruction,
+  setAuthorityInstructionData
+} from '@solana/spl-token'
 import {
   PublicKey,
   SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   SYSVAR_RENT_PUBKEY,
   SystemProgram,
   TransactionInstruction
@@ -22,7 +28,13 @@ import {
   DecodedTransferClaimableTokensInstruction,
   NonceAccountData,
   TransferClaimableTokensSignedInstructionData,
-  DecodedClaimableTokenInstruction
+  DecodedClaimableTokenInstruction,
+  SetClaimableTokensAuthorityParams,
+  SetClaimableTokensAuthorityInstructionData,
+  DecodedSetClaimableTokensAuthorityInstruction,
+  SetClaimableTokensAuthoritySignedData,
+  CloseClaimableTokensAccountInstructionData,
+  DecodedCloseClaimableTokensAccountInstruction
 } from './types'
 
 const TRANSFER_NONCE_PREFIX = 'N_'
@@ -51,6 +63,14 @@ export class ClaimableTokensProgram {
     'Ewkv3JahEFRKkcJmpoKB7pXbnUHwjAyXiwEo4ZY2rezQ'
   )
 
+  /**
+   * The only account the program's Close instruction will send rent to.
+   * @see {@link https://github.com/AudiusProject/solana-programs/blob/main/claimable-tokens/program/src/processor.rs DEFAULT_RENT_DESTINATION}
+   */
+  public static readonly rentDestination = new PublicKey(
+    '2HYDf9XvHRKhquxK1z4ETJ8ywueZcqEazyFZdRfLqGcT'
+  )
+
   public static readonly layouts = {
     createAccountInstructionData:
       struct<CreateClaimableTokensAccountInstructionData>([
@@ -68,6 +88,12 @@ export class ClaimableTokensProgram {
         u64('amount'),
         u64('nonce')
       ]),
+    setAuthorityInstructionData:
+      struct<SetClaimableTokensAuthorityInstructionData>([u8('instruction')]),
+    closeInstructionData: struct<CloseClaimableTokensAccountInstructionData>([
+      u8('instruction'),
+      ethAddress('ethAddress')
+    ]),
     nonceAccountData: struct<NonceAccountData>([u8('version'), u64('nonce')])
   }
 
@@ -201,6 +227,150 @@ export class ClaimableTokensProgram {
     }
   }
 
+  /**
+   * Creates a SetAuthority instruction, which changes an SPL Token authority
+   * of a user bank.
+   *
+   * Must be immediately preceded by a Secp256k1 instruction signed by the
+   * user's Ethereum wallet over the data from
+   * {@link createSignedSetAuthorityData}.
+   */
+  public static createSetAuthorityInstruction({
+    userBank,
+    authority,
+    programId = ClaimableTokensProgram.programId,
+    tokenProgramId = TOKEN_PROGRAM_ID
+  }: SetClaimableTokensAuthorityParams) {
+    const data = Buffer.alloc(
+      ClaimableTokensProgram.layouts.setAuthorityInstructionData.span
+    )
+    ClaimableTokensProgram.layouts.setAuthorityInstructionData.encode(
+      { instruction: ClaimableTokensInstruction.SetAuthority },
+      data
+    )
+    const keys = [
+      { pubkey: userBank, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      {
+        pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+        isSigner: false,
+        isWritable: false
+      },
+      {
+        pubkey: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+        isSigner: false,
+        isWritable: false
+      },
+      { pubkey: tokenProgramId, isSigner: false, isWritable: false }
+    ]
+    return new TransactionInstruction({ programId, keys, data })
+  }
+
+  public static decodeSetAuthorityInstruction({
+    programId,
+    keys: [
+      userBank,
+      authority,
+      sysvarInstructions,
+      recentBlockhashes,
+      tokenProgramId
+    ],
+    data
+  }: TransactionInstruction): DecodedSetClaimableTokensAuthorityInstruction {
+    return {
+      programId,
+      keys: {
+        userBank,
+        authority,
+        sysvarInstructions,
+        recentBlockhashes,
+        tokenProgramId
+      },
+      data: ClaimableTokensProgram.layouts.setAuthorityInstructionData.decode(
+        data
+      )
+    }
+  }
+
+  public static decodeCloseInstruction({
+    programId,
+    keys: [userBank, authority, destination, tokenProgramId],
+    data
+  }: TransactionInstruction): DecodedCloseClaimableTokensAccountInstruction {
+    return {
+      programId,
+      keys: {
+        userBank,
+        authority,
+        destination,
+        tokenProgramId
+      },
+      data: ClaimableTokensProgram.layouts.closeInstructionData.decode(data)
+    }
+  }
+
+  /**
+   * Encodes the message the user's Ethereum wallet signs to authorize a
+   * SetAuthority instruction. Matches the program's Borsh-serialized
+   * SignedSetAuthorityData: the blockhash, the SPL Token SetAuthority
+   * instruction data as a Vec<u8>, and the user bank.
+   */
+  public static createSignedSetAuthorityData({
+    blockhash,
+    userBank,
+    authorityType,
+    newAuthority,
+    tokenProgramId = TOKEN_PROGRAM_ID
+  }: SetClaimableTokensAuthoritySignedData & { tokenProgramId?: PublicKey }) {
+    // Only the data is used, so the current authority is irrelevant
+    const tokenInstructionData = createSetAuthorityInstruction(
+      userBank,
+      userBank,
+      authorityType,
+      newAuthority,
+      [],
+      tokenProgramId
+    ).data
+    const length = Buffer.alloc(4)
+    length.writeUInt32LE(tokenInstructionData.length)
+    return Buffer.concat([
+      Buffer.from(bs58.decode(blockhash)),
+      length,
+      tokenInstructionData,
+      userBank.toBuffer()
+    ])
+  }
+
+  /**
+   * Decodes the signed message of the Secp256k1 instruction preceding a
+   * SetAuthority instruction.
+   * @see {@link createSignedSetAuthorityData}
+   */
+  public static decodeSignedSetAuthorityData(
+    data: Uint8Array
+  ): SetClaimableTokensAuthoritySignedData {
+    const buffer = Buffer.from(data)
+    const tokenInstructionLength = buffer.readUInt32LE(32)
+    const tokenInstructionEnd = 36 + tokenInstructionLength
+    if (buffer.length !== tokenInstructionEnd + 32) {
+      throw new Error('Invalid SetAuthority signed data length')
+    }
+    const tokenInstructionData = buffer.subarray(36, tokenInstructionEnd)
+    if (tokenInstructionData.length !== setAuthorityInstructionData.span) {
+      throw new Error('Invalid SetAuthority token instruction length')
+    }
+    const decoded = setAuthorityInstructionData.decode(tokenInstructionData)
+    if (decoded.instruction !== TokenInstruction.SetAuthority) {
+      throw new Error('Signed token instruction is not SetAuthority')
+    }
+    return {
+      blockhash: bs58.encode(buffer.subarray(0, 32)),
+      userBank: new PublicKey(buffer.subarray(tokenInstructionEnd)),
+      authorityType: decoded.authorityType,
+      newAuthority: decoded.newAuthorityOption ? decoded.newAuthority : null
+    }
+  }
+
   public static decodeInstruction(
     instruction: TransactionInstruction
   ): DecodedClaimableTokenInstruction {
@@ -211,6 +381,10 @@ export class ClaimableTokensProgram {
         )
       case ClaimableTokensInstruction.Transfer:
         return ClaimableTokensProgram.decodeTransferInstruction(instruction)
+      case ClaimableTokensInstruction.SetAuthority:
+        return ClaimableTokensProgram.decodeSetAuthorityInstruction(instruction)
+      case ClaimableTokensInstruction.Close:
+        return ClaimableTokensProgram.decodeCloseInstruction(instruction)
       default:
         throw new Error('Invalid Claimable Token Program Instruction')
     }
@@ -226,6 +400,18 @@ export class ClaimableTokensProgram {
     decoded: DecodedClaimableTokenInstruction
   ): decoded is DecodedTransferClaimableTokensInstruction {
     return decoded.data.instruction === ClaimableTokensInstruction.Transfer
+  }
+
+  public static isSetAuthorityInstruction(
+    decoded: DecodedClaimableTokenInstruction
+  ): decoded is DecodedSetClaimableTokensAuthorityInstruction {
+    return decoded.data.instruction === ClaimableTokensInstruction.SetAuthority
+  }
+
+  public static isCloseInstruction(
+    decoded: DecodedClaimableTokenInstruction
+  ): decoded is DecodedCloseClaimableTokensAccountInstruction {
+    return decoded.data.instruction === ClaimableTokensInstruction.Close
   }
 
   public static createSignedTransferInstructionData({

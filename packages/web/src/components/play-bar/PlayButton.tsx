@@ -124,6 +124,7 @@ const PlayButton = ({
   }
 
   const lottieRef = useRef<LottieRefCurrentProps>(null)
+  const [isLottieReady, setIsLottieReady] = useState(false)
   useEffect(() => {
     if (lottieRef.current) {
       if (currentIsPaused) {
@@ -132,7 +133,7 @@ const PlayButton = ({
         lottieRef.current.play()
       }
     }
-  }, [lottieRef, currentIsPaused, playState])
+  }, [lottieRef, currentIsPaused, playState, isLottieReady])
 
   const ariaLabel = isLoading
     ? 'track loading'
@@ -151,6 +152,7 @@ const PlayButton = ({
       <div className={styles.animation}>
         <Lottie
           lottieRef={lottieRef}
+          onLottieReady={() => setIsLottieReady(true)}
           loop={loop}
           autoplay={false}
           animationData={data}

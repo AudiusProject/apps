@@ -1,5 +1,11 @@
 # @audius/spl
 
+## 2.2.0
+
+### Minor Changes
+
+- 58ec6a3: Add Claimable Tokens `SetAuthority` and `Close` instruction support: `createSetAuthorityInstruction`, `createSignedSetAuthorityData`, `decodeSignedSetAuthorityData`, decoders, and `ClaimableTokensProgram.rentDestination`.
+
 ## 2.1.0
 
 ### Minor Changes

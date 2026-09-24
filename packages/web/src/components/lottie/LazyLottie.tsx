@@ -1,29 +1,54 @@
-import { ComponentProps, lazy, Suspense } from 'react'
+import {
+  ComponentProps,
+  MutableRefObject,
+  lazy,
+  Suspense,
+  useMemo,
+  useRef
+} from 'react'
 
 import type LottieComponent from 'lottie-react'
+import type { LottieRefCurrentProps } from 'lottie-react'
 
 /**
- * `lottie-react` / `lottie-web` is a ~613 KB animation runtime. Importing it
- * statically anywhere in the eager graph pins it into the entry chunk for every
- * visitor, and it was reachable from a dozen surfaces (play bar, search bar,
- * notification reactions, animated buttons).
- *
- * None of those animations are needed before first paint, so the runtime loads
- * on demand instead. Use this in place of a direct `lottie-react` import.
- *
- * Note on `lottieRef`: lottie-react takes it as an ordinary prop rather than a
- * React ref, so it forwards through this boundary unchanged. It is populated
- * once the chunk resolves, so callers that drive playback imperatively must
- * keep their existing `if (lottieRef.current)` guards.
+ * Lazy-loaded lottie-react; use instead of importing lottie-react directly so
+ * the runtime stays out of the entry chunk. lottieRef is null until the chunk
+ * loads, so callers that drive playback from an effect should re-run it when
+ * onLottieReady fires.
  */
 const Lottie = lazy(() => import('lottie-react'))
 
-type LottieProps = ComponentProps<typeof LottieComponent>
+type LottieProps = ComponentProps<typeof LottieComponent> & {
+  /** Called once lottieRef.current has been populated. */
+  onLottieReady?: () => void
+}
 
-export const LazyLottie = (props: LottieProps) => (
-  <Suspense fallback={null}>
-    <Lottie {...props} />
-  </Suspense>
-)
+export const LazyLottie = (props: LottieProps) => {
+  const { lottieRef, onLottieReady, ...rest } = props
+  const onReadyRef = useRef(onLottieReady)
+  onReadyRef.current = onLottieReady
+
+  // lottie-react assigns lottieRef.current in an effect once the animation is
+  // set up. Forward the assignment and notify the caller.
+  const forwardingRef = useMemo(() => {
+    if (!lottieRef) return undefined
+    const target = lottieRef as MutableRefObject<LottieRefCurrentProps | null>
+    return {
+      get current() {
+        return target.current
+      },
+      set current(value: LottieRefCurrentProps | null) {
+        target.current = value
+        if (value) onReadyRef.current?.()
+      }
+    }
+  }, [lottieRef])
+
+  return (
+    <Suspense fallback={<div className={rest.className} style={rest.style} />}>
+      <Lottie {...rest} lottieRef={forwardingRef} />
+    </Suspense>
+  )
+}
 
 export default LazyLottie

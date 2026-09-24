@@ -982,7 +982,7 @@ export const audiusBackend = ({
     if (recipientEthAddress) {
       // When sending to a user by ETH address, derive their user bank and
       // combine account creation (if needed) + transfer in a single tx.
-      const { userBank, instruction: createInstruction } =
+      const { userBank, instructions: createInstructions } =
         await sdk.services.claimableTokensClient.createUserBankIfNeededInstruction(
           {
             ethWallet: recipientEthAddress,
@@ -996,7 +996,7 @@ export const audiusBackend = ({
         ethAddress,
         sdk,
         mint,
-        prefixInstructions: createInstruction ? [createInstruction] : []
+        prefixInstructions: createInstructions
       })
       return { res, error: null }
     } else {

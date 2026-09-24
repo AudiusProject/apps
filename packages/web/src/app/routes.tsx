@@ -23,11 +23,7 @@ import { AudiusQueryProvider } from './AudiusQueryProvider'
 import { ThemeProvider } from './ThemeProvider'
 import WebPlayer from './web-player/WebPlayer'
 
-/**
- * `@coinflowlabs/react` pulls in the nsure-ai fraud-detection SDK, which was
- * landing in the entry chunk for every visitor. Nothing here is needed before
- * first paint, and this already renders inside a <Suspense> boundary below.
- */
+// Lazy so @coinflowlabs/react (and nsure-ai) stays out of the entry chunk.
 const CoinflowPurchaseProtection = lazy(() =>
   import('@coinflowlabs/react').then((m) => ({
     default: m.CoinflowPurchaseProtection

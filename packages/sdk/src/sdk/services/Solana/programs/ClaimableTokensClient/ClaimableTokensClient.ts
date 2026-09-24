@@ -4,12 +4,14 @@ import {
   ClaimableTokensInstruction,
   ClaimableTokensProgram
 } from '@audius/spl'
+import { AuthorityType } from '@solana/spl-token'
 import { SendTransactionOptions } from '@solana/wallet-adapter-base'
 import {
   VersionedTransaction,
   Secp256k1Program,
   PublicKey,
   Transaction,
+  TransactionInstruction,
   SendTransactionError
 } from '@solana/web3.js'
 
@@ -32,6 +34,10 @@ import {
   CreateTransferSchema,
   type CreateSecpRequest,
   CreateSecpSchema,
+  type CreateUserBankIfNeededRequest,
+  CreateUserBankIfNeededSchema,
+  type CreateCloseAuthorityRequest,
+  CreateCloseAuthoritySchema,
   ClaimableTokensConfig
 } from './types'
 
@@ -145,19 +151,18 @@ export class ClaimableTokensClient {
         await this.client.connection.getAccountInfo(userBank)
       if (!userBankAccount) {
         this.logger.debug(`User bank ${userBank} does not exist. Creating...`)
-        const createUserBankInstruction =
-          ClaimableTokensProgram.createAccountInstruction({
-            ethAddress: ethWallet,
-            payer: feePayer,
-            mint,
-            authority: this.deriveAuthority(mint),
-            userBank,
-            programId: this.programId
-          })
         const { blockhash, lastValidBlockHeight } =
           await this.client.connection.getLatestBlockhash()
+        const instructions = await this.createUserBankInstructions({
+          ethWallet,
+          mint,
+          feePayer,
+          userBank,
+          recentBlockhash: blockhash,
+          instructionIndex: 0
+        })
         const transaction = await this.client.buildTransaction({
-          instructions: [createUserBankInstruction],
+          instructions,
           recentBlockhash: blockhash
         })
         const signature = await this.sendTransaction(transaction)
@@ -183,48 +188,139 @@ export class ClaimableTokensClient {
   }
 
   /**
-   * Returns a create-user-bank instruction if the user bank does not yet exist,
-   * or null if it already does.  Does NOT send a transaction — the caller is
-   * expected to include the instruction in its own transaction.
+   * Returns the create-user-bank instructions if the user bank does not yet
+   * exist, or an empty array if it already does. Does NOT send a transaction —
+   * the caller is expected to include the instructions, in order and starting
+   * at `instructionIndex`, in its own transaction.
+   *
+   * @see {@link createCloseAuthorityInstructions}
    */
   async createUserBankIfNeededInstruction(
-    params: GetOrCreateUserBankRequest
+    params: CreateUserBankIfNeededRequest
   ): Promise<{
     userBank: PublicKey
-    instruction: ReturnType<
-      typeof ClaimableTokensProgram.createAccountInstruction
-    > | null
+    instructions: TransactionInstruction[]
   }> {
     const args = await parseParams(
       'createUserBankIfNeededInstruction',
-      GetOrCreateUserBankSchema
+      CreateUserBankIfNeededSchema
     )(params)
     const {
       ethWallet = await this.getDefaultWalletAddress(),
-      feePayer: feePayerOverride
+      feePayer: feePayerOverride,
+      instructionIndex = 0
     } = args
     const mint = parseMint(args.mint, this.preconfiguredMints)
     const feePayer = feePayerOverride ?? (await this.client.getFeePayer())
-    const userBank = await this.deriveUserBank(args)
+    const userBank = await this.deriveUserBank({ ethWallet, mint: args.mint })
 
     const userBankAccount =
       await this.client.connection.getAccountInfo(userBank)
     if (!userBankAccount) {
       this.logger.debug(
-        `User bank ${userBank} does not exist. Returning create instruction.`
+        `User bank ${userBank} does not exist. Returning create instructions.`
       )
-      const instruction = ClaimableTokensProgram.createAccountInstruction({
-        ethAddress: ethWallet,
-        payer: feePayer,
+      const { blockhash } = await this.client.connection.getLatestBlockhash()
+      const instructions = await this.createUserBankInstructions({
+        ethWallet,
         mint,
-        authority: this.deriveAuthority(mint),
+        feePayer,
         userBank,
-        programId: this.programId
+        recentBlockhash: blockhash,
+        instructionIndex
       })
-      return { userBank, instruction }
+      return { userBank, instructions }
     }
     this.logger.debug(`User bank ${userBank} already exists.`)
-    return { userBank, instruction: null }
+    return { userBank, instructions: [] }
+  }
+
+  /**
+   * Creates the Secp256k1 and SetAuthority instructions that make the
+   * program's rent destination the close authority of a user bank, so that
+   * the rent paid to create it can't be reclaimed by anyone else.
+   *
+   * The user bank must be owned by the connected wallet, and the
+   * instructions must be placed in order starting at `instructionIndex`.
+   */
+  async createCloseAuthorityInstructions(params: CreateCloseAuthorityRequest) {
+    const {
+      ethWallet = await this.getDefaultWalletAddress(),
+      mint: mintOrToken,
+      recentBlockhash,
+      instructionIndex
+    } = await parseParams(
+      'createCloseAuthorityInstructions',
+      CreateCloseAuthoritySchema
+    )(params)
+    const mint = parseMint(mintOrToken, this.preconfiguredMints)
+    const signerAddress = await this.getDefaultWalletAddress()
+    if (signerAddress.toLowerCase() !== ethWallet.toLowerCase()) {
+      throw new Error(
+        `Cannot set the close authority of a user bank for another wallet (${ethWallet})`
+      )
+    }
+    const userBank = await this.deriveUserBank({ ethWallet, mint })
+    const data = ClaimableTokensProgram.createSignedSetAuthorityData({
+      blockhash: recentBlockhash,
+      userBank,
+      authorityType: AuthorityType.CloseAccount,
+      newAuthority: ClaimableTokensProgram.rentDestination
+    })
+    const [signature, recoveryId] = await this.audiusWalletClient.sign({
+      message: { raw: data }
+    })
+    return [
+      Secp256k1Program.createInstructionWithEthAddress({
+        ethAddress: ethWallet,
+        message: data,
+        signature,
+        recoveryId,
+        instructionIndex
+      }),
+      ClaimableTokensProgram.createSetAuthorityInstruction({
+        userBank,
+        authority: this.deriveAuthority(mint),
+        programId: this.programId
+      })
+    ]
+  }
+
+  /**
+   * Creates a user bank along with the instructions that set its close
+   * authority to the program's rent destination.
+   */
+  private async createUserBankInstructions({
+    ethWallet,
+    mint,
+    feePayer,
+    userBank,
+    recentBlockhash,
+    instructionIndex
+  }: {
+    ethWallet: string
+    mint: PublicKey
+    feePayer: PublicKey
+    userBank: PublicKey
+    recentBlockhash: string
+    instructionIndex: number
+  }) {
+    const createInstruction = ClaimableTokensProgram.createAccountInstruction({
+      ethAddress: ethWallet,
+      payer: feePayer,
+      mint,
+      authority: this.deriveAuthority(mint),
+      userBank,
+      programId: this.programId
+    })
+    const closeAuthorityInstructions =
+      await this.createCloseAuthorityInstructions({
+        ethWallet,
+        mint,
+        recentBlockhash,
+        instructionIndex: instructionIndex + 1
+      })
+    return [createInstruction, ...closeAuthorityInstructions]
   }
 
   /**
