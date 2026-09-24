@@ -153,30 +153,6 @@ const recordPlay = (
   )
 }
 
-const recordPlaylistPlay = ({
-  collectionId,
-  isAlbum,
-  trackCount,
-  isPreview
-}: {
-  collectionId: Maybe<number>
-  isAlbum: boolean
-  trackCount: number
-  isPreview?: boolean
-}) => {
-  if (collectionId == null) return
-  track(
-    make({
-      eventName: Name.PLAYLIST_PLAY,
-      id: String(collectionId),
-      source: PlaybackSource.PLAYLIST_PAGE,
-      isAlbum,
-      trackCount,
-      isPreview
-    })
-  )
-}
-
 export const CollectionScreenDetailsTile = ({
   description,
   collectionId,
@@ -329,12 +305,6 @@ export const CollectionScreenDetailsTile = ({
       } else if (!isPlaying && isQueued) {
         dispatch(playbackActions.play())
         recordPlay(playingTrackId, true, numericCollectionId)
-        recordPlaylistPlay({
-          collectionId: numericCollectionId,
-          isAlbum: !!isAlbum,
-          trackCount,
-          isPreview
-        })
       } else if (trackCount > 0 && collectionPlaybackQueue.length > 0) {
         dispatch(
           playbackActions.playFrom({
@@ -348,12 +318,6 @@ export const CollectionScreenDetailsTile = ({
           true,
           numericCollectionId
         )
-        recordPlaylistPlay({
-          collectionId: numericCollectionId,
-          isAlbum: !!isAlbum,
-          trackCount,
-          isPreview
-        })
       }
     },
     [
@@ -364,8 +328,7 @@ export const CollectionScreenDetailsTile = ({
       collectionPlaybackQueue,
       dispatch,
       playingTrackId,
-      numericCollectionId,
-      isAlbum
+      numericCollectionId
     ]
   )
 

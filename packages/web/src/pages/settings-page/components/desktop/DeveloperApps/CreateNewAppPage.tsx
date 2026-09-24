@@ -7,13 +7,11 @@ import {
   developerAppSchema,
   useAddDeveloperApp
 } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import { Button } from '@audius/harmony'
 import { Form, Formik } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { TextAreaField, TextField } from 'components/form-fields'
 
 import styles from './CreateNewAppPage.module.css'
@@ -35,47 +33,28 @@ type CreateNewAppPageProps = CreateAppPageProps
 
 export const CreateNewAppPage = (props: CreateNewAppPageProps) => {
   const { setPage } = props
-  const record = useRecord()
 
-  const { data, isSuccess, isError, error, mutate, isPending } =
-    useAddDeveloperApp()
+  const { data, isSuccess, isError, mutate, isPending } = useAddDeveloperApp()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     if (isSuccess && data) {
       setPage(CreateAppsPages.APP_DETAILS, data)
-      record(
-        make(Name.DEVELOPER_APP_CREATE_SUCCESS, {
-          name: data.name,
-          apiKey: data.apiKey
-        })
-      )
     }
-  }, [isSuccess, data, record, setPage])
+  }, [isSuccess, data, setPage])
 
   useEffect(() => {
     if (isError) {
       setSubmitError(messages.miscError)
-      record(
-        make(Name.DEVELOPER_APP_CREATE_ERROR, {
-          error: error?.message
-        })
-      )
     }
-  }, [isError, record, error?.message])
+  }, [isError])
 
   const handleSubmit = useCallback(
     (values: DeveloperAppValues) => {
       setSubmitError(null)
-      record(
-        make(Name.DEVELOPER_APP_CREATE_SUBMIT, {
-          name: values.name,
-          description: values.description
-        })
-      )
       mutate(values)
     },
-    [mutate, record]
+    [mutate]
   )
 
   const initialValues: DeveloperAppValues = {

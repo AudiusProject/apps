@@ -42,7 +42,6 @@ const LinkifyText = forwardRef((props: LinkifyTextProps, ref) => {
 
 type UserGeneratedTextProps<T extends ElementType> = TextProps<T> & {
   linkProps?: Partial<TextLinkProps>
-  linkSource?: 'profile page' | 'track page' | 'collection page'
   onClickLink?: (event: MouseEvent<HTMLAnchorElement>) => void
 }
 
@@ -100,7 +99,6 @@ export const UserGeneratedText = forwardRef(function <T extends ElementType>(
     strength,
     lineHeight,
     tag = 'p',
-    linkSource,
     onClickLink,
     linkProps: textLinkProps,
     ...other
@@ -110,7 +108,6 @@ export const UserGeneratedText = forwardRef(function <T extends ElementType>(
     () => ({
       render: (linkProps) => <RenderLink {...linkProps} />,
       attributes: {
-        source: linkSource,
         onClick: onClickLink,
         textVariant: variant,
         size,
@@ -119,15 +116,7 @@ export const UserGeneratedText = forwardRef(function <T extends ElementType>(
         ...textLinkProps
       }
     }),
-    [
-      linkSource,
-      onClickLink,
-      variant,
-      size,
-      strength,
-      lineHeight,
-      textLinkProps
-    ]
+    [onClickLink, variant, size, strength, lineHeight, textLinkProps]
   )
 
   const children =

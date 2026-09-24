@@ -6,7 +6,6 @@ import {
   useUserByParams,
   useUserComments
 } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import { profilePage } from '@audius/common/src/utils/route'
 import { dayjs } from '@audius/common/utils'
 import {
@@ -33,7 +32,6 @@ import { TrackLink, UserLink } from 'components/link'
 import Page from 'components/page/Page'
 import { useMainContentRef } from 'pages/MainContentContext'
 import { useProfileParams } from 'pages/profile-page/useProfileParams'
-import { make, track as trackEvent } from 'services/analytics'
 import { fullCommentHistoryPage } from 'utils/route'
 
 const messages = {
@@ -67,24 +65,11 @@ const UserComment = ({ comment }: { comment: CommentOrReply }) => {
     [createdAt]
   )
 
-  const trackUserCommentClick = useCallback(() => {
-    if (userId) {
-      trackEvent(
-        make({
-          eventName: Name.COMMENTS_HISTORY_CLICK,
-          commentId: id,
-          userId
-        })
-      )
-    }
-  }, [id, userId])
-
   const goToTrackPage = useCallback(() => {
     if (track) {
-      trackUserCommentClick()
       navigate(track.permalink)
     }
-  }, [track, trackUserCommentClick, navigate])
+  }, [track, navigate])
 
   if (!comment || !userId) return null
 
@@ -96,11 +81,7 @@ const UserComment = ({ comment }: { comment: CommentOrReply }) => {
           <Text variant='body' size='s' textAlign='left' color='subdued'>
             {track ? (
               <Flex gap='xs' alignItems='center'>
-                <TrackLink
-                  variant='visible'
-                  trackId={track?.track_id}
-                  onClick={trackUserCommentClick}
-                />
+                <TrackLink variant='visible' trackId={track?.track_id} />
                 {messages.by}
                 <UserLink variant='visible' userId={track?.owner_id} popover />
               </Flex>

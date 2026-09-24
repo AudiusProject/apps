@@ -25,9 +25,6 @@ import {
 } from '@audius/harmony-native'
 import { Expandable, ExpandableArrowIcon } from 'app/components/expandable'
 import { useToast } from 'app/hooks/useToast'
-import { make, track as trackEvent } from 'app/services/analytics'
-import type { AllEvents } from 'app/types/analytics'
-import { EventNames } from 'app/types/analytics'
 
 import { DownloadRow } from './DownloadRow'
 
@@ -99,24 +96,6 @@ export const DownloadSection = ({ trackId }: { trackId: ID }) => {
           trackIds,
           quality: downloadQuality
         })
-
-        // Track download attempt event
-        let event: AllEvents
-        if (parentTrackId) {
-          event = {
-            eventName: EventNames.TRACK_DOWNLOAD_CLICKED_DOWNLOAD_ALL,
-            parentTrackId,
-            stemTrackIds: trackIds,
-            device: 'native'
-          }
-        } else {
-          event = {
-            eventName: EventNames.TRACK_DOWNLOAD_CLICKED_DOWNLOAD_SINGLE,
-            trackId: trackIds[0],
-            device: 'native'
-          }
-        }
-        trackEvent(make(event))
       }
     },
     [

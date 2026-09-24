@@ -5,9 +5,7 @@ import {
   useCurrentWeb3Account,
   useRemoveManager
 } from '@audius/common/api'
-import { useAppContext } from '@audius/common/context'
 import { useAccountSwitcher } from '@audius/common/hooks'
-import { Name } from '@audius/common/models'
 import { Button, Flex, Text } from '@audius/harmony'
 
 import { ToastContext } from 'components/toast/ToastContext'
@@ -46,20 +44,11 @@ export const RemoveManagerConfirmationContent = ({
   const managerIsCurrentWeb3User = currentWeb3User?.user_id === managerUserId
   const { switchToWeb3User } = useAccountSwitcher()
   const { toast } = useContext(ToastContext)
-  const {
-    analytics: { track, make }
-  } = useAppContext()
 
   const handleDelete = useCallback(() => {
     if (!userId || !managerUserId) return
-    track(
-      make({
-        eventName: Name.MANAGER_MODE_REMOVE_MANAGER,
-        managerId: managerUserId
-      })
-    )
     removeManager({ userId, managerUserId })
-  }, [userId, managerUserId, removeManager, make, track])
+  }, [userId, managerUserId, removeManager])
 
   useEffect(() => {
     if (isSuccess) {

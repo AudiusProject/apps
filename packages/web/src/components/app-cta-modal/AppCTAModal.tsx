@@ -1,11 +1,9 @@
 import { useCallback } from 'react'
 
-import { Name } from '@audius/common/models'
 import { Modal, Button, IconCloudDownload } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import QRCode from 'assets/img/imageQR.png'
-import { make } from 'common/store/analytics/actions'
 import DownloadApp from 'services/download-app/DownloadApp'
 import { setVisibility } from 'store/application/ui/app-cta-modal/slice'
 import { getOS } from 'utils/clientUtil'
@@ -36,10 +34,6 @@ const useCallbacks = () => {
 
   const isOpen = useSelector((state) => state.application.ui.appCTAModal.isOpen)
 
-  const recordDownloadDesktopApp = useCallback(() => {
-    dispatch(make(Name.ACCOUNT_HEALTH_DOWNLOAD_DESKTOP, { source: 'banner' }))
-  }, [dispatch])
-
   const onClose = useCallback(
     () => dispatch(setVisibility({ isOpen: false })),
     [dispatch]
@@ -48,8 +42,7 @@ const useCallbacks = () => {
   const downloadDesktopApp = useCallback(() => {
     if (!os) return
     DownloadApp.start(os)
-    recordDownloadDesktopApp()
-  }, [recordDownloadDesktopApp])
+  }, [])
 
   return { isOpen, downloadDesktopApp, onClose }
 }

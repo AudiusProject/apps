@@ -418,9 +418,7 @@ export const GiantTrackTile = ({
           .split(',')
           .filter((t) => t)
           .map((tag) => (
-            <SearchTag key={tag} source='track page'>
-              {tag}
-            </SearchTag>
+            <SearchTag key={tag}>{tag}</SearchTag>
           ))}
       </Flex>
     )

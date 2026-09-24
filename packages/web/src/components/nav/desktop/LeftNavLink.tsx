@@ -1,11 +1,8 @@
 import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 
-import { Name } from '@audius/common/models'
 import { NavItem, NavItemProps } from '@audius/harmony'
-import { useDispatch } from 'react-redux'
 import { NavLink, useLocation } from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
 import {
   RestrictionType,
   useRequiresAccountOnClick
@@ -72,7 +69,6 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
     ...other
   } = props
   const location = useLocation()
-  const dispatch = useDispatch()
   const { isCollapsed } = useNavSidebar()
   const [isFocusVisible, setIsFocusVisible] = useState(false)
   const isPointerFocusRef = useRef(false)
@@ -88,18 +84,9 @@ export const LeftNavLink = (props: LeftNavLinkProps) => {
 
   const requiresAccountOnClick = useRequiresAccountOnClick(
     (e) => {
-      // Only dispatch analytics if we're actually navigating
-      if (to) {
-        dispatch(
-          make(Name.LINK_CLICKING, {
-            url: to,
-            source: 'left nav'
-          })
-        )
-      }
       onClick?.(e)
     },
-    [onClick, to, dispatch],
+    [onClick],
     undefined,
     undefined,
     restriction

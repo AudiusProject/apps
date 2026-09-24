@@ -9,7 +9,6 @@ import {
   useUpdateEvent
 } from '@audius/common/api'
 import { remixMessages } from '@audius/common/messages'
-import { Name } from '@audius/common/models'
 import { registerNiceModalId } from '@audius/common/services'
 import { useHostRemixContestModal } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
@@ -32,7 +31,6 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { DatePicker } from 'components/edit/fields/DatePickerField'
 import { mergeReleaseDateValues } from 'components/edit/fields/visibility/mergeReleaseDateValues'
-import { track, make } from 'services/analytics'
 
 import { TimeInput, parseTime } from './TimeInput'
 
@@ -155,14 +153,6 @@ export const HostRemixContestModal = NiceModal.create(() => {
         endDate,
         userId
       })
-
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_UPDATE,
-          remixContestId: remixContest.eventId,
-          trackId
-        })
-      )
     } else {
       createEvent({
         eventType: EventEventTypeEnum.RemixContest,
@@ -172,13 +162,6 @@ export const HostRemixContestModal = NiceModal.create(() => {
         endDate,
         userId
       })
-
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_CREATE,
-          trackId
-        })
-      )
     }
 
     onClose()
@@ -202,18 +185,8 @@ export const HostRemixContestModal = NiceModal.create(() => {
   const handleDeleteEvent = useCallback(() => {
     if (!remixContest || !userId) return
     deleteEvent({ eventId: remixContest.eventId, userId })
-
-    if (trackId) {
-      track(
-        make({
-          eventName: Name.REMIX_CONTEST_DELETE,
-          remixContestId: remixContest.eventId,
-          trackId
-        })
-      )
-    }
     onClose()
-  }, [remixContest, userId, deleteEvent, onClose, trackId])
+  }, [remixContest, userId, deleteEvent, onClose])
 
   return (
     <Modal

@@ -8,7 +8,7 @@ import {
   useTrendingUnderground,
   usePopularGenres
 } from '@audius/common/api'
-import { Name, TimeRange } from '@audius/common/models'
+import { TimeRange } from '@audius/common/models'
 import {
   trendingPageActions,
   trendingPageSelectors
@@ -22,7 +22,6 @@ import {
 } from '@audius/harmony'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { openSignOn } from 'common/store/pages/signon/actions'
 import { MIN_DESKTOP_CONTENT_WIDTH_PX } from 'common/utils/layout'
 import { Header } from 'components/header/desktop/Header'
@@ -196,7 +195,6 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
   }, [trendingGenre, replaceRouteCallback])
 
   const { trendingTitle, pageTitle, trendingDescription } = TRENDING_MESSAGES
-  const record = useRecord()
 
   // ----- Tab logic -----------------------------------------------------------
   const queryForRange = useCallback(
@@ -267,28 +265,16 @@ const TrendingPageContent = ({ containerRef }: TrendingPageContentProps) => {
     (value: string) => {
       const tr = value as TimeRange
       setTrendingTimeRange(tr)
-      record(
-        make(Name.TRENDING_CHANGE_VIEW, {
-          timeframe: tr,
-          genre: trendingGenre ?? ''
-        })
-      )
     },
-    [setTrendingTimeRange, record, trendingGenre]
+    [setTrendingTimeRange]
   )
 
   const handleGenreChange = useCallback(
     (value: string) => {
       const next = value === 'all' ? null : value
       setTrendingGenre(next)
-      record(
-        make(Name.TRENDING_CHANGE_VIEW, {
-          timeframe: trendingTimeRange,
-          genre: next ?? ''
-        })
-      )
     },
-    [setTrendingGenre, record, trendingTimeRange]
+    [setTrendingGenre]
   )
 
   const timeRangeOptions = [

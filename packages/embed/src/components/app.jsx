@@ -7,11 +7,7 @@ import { CSSTransition } from 'react-transition-group'
 
 import '@audius/harmony/dist/harmony.css'
 
-import {
-  initTrackSessionStart,
-  recordOpen,
-  recordError
-} from '../analytics/analytics'
+import { initAnalytics } from '../analytics/analytics'
 import { ID_ROUTE, HASH_ID_ROUTE, PERMALINK_ROUTE } from '../routes'
 import {
   getCollection,
@@ -23,7 +19,6 @@ import {
   getEntityEvents
 } from '../util/BedtimeClient'
 import { getArtworkUrl } from '../util/getArtworkUrl'
-import { decodeHashId } from '../util/hashIds'
 import { getDominantColor } from '../util/image/imageProcessingUtil'
 import { isMobileWebTwitter } from '../util/isMobileWebTwitter'
 import { logError } from '../util/logError'
@@ -153,15 +148,9 @@ const App = (props) => {
   const [dominantColor, setDominantColor] = useState(null)
   const playerContainerRef = useRef(null)
 
+  // Set up analytics
   useEffect(() => {
-    if (didError) {
-      recordError()
-    }
-  }, [didError])
-
-  // Record this session with analytics
-  useEffect(() => {
-    initTrackSessionStart()
+    initAnalytics()
   }, [])
 
   // TODO: pull these out into separate functions?
@@ -202,12 +191,6 @@ const App = (props) => {
           setDid404(false)
           setIsUnavailable(false)
           setTracksResponse({ ...track, events })
-          recordOpen(
-            decodeHashId(track.id),
-            track.title,
-            track.user.handle,
-            stripLeadingSlash(track.permalink)
-          )
 
           const artworkUrl = await getArtworkUrl(track)
           // Set dominant color
@@ -249,12 +232,6 @@ const App = (props) => {
           setDid404(false)
           setIsUnavailable(false)
           setCollectionsResponse(collection)
-          recordOpen(
-            decodeHashId(collection.id),
-            collection.playlistName,
-            collection.user.handle,
-            stripLeadingSlash(collection.permalink)
-          )
 
           const artworkUrl = await getArtworkUrl(collection)
           // Set dominant color

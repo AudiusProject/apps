@@ -509,18 +509,7 @@ function* signUp() {
                     oldUsername: email,
                     oldPassword: TEMPORARY_PASSWORD
                   })
-                  yield* put(
-                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
-                      status: 'success'
-                    })
-                  )
-                } catch {
-                  yield* put(
-                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
-                      status: 'failure'
-                    })
-                  )
-                }
+                } catch {}
               }
 
               yield* fork(sendPostSignInRecoveryEmail, { handle, email })

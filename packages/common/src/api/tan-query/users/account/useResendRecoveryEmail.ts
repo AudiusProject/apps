@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { useAppContext } from '~/context/appContext'
-import { Name } from '~/models/Analytics'
 
 import { useQueryContext } from '../../utils'
 
@@ -11,7 +10,7 @@ import { useQueryContext } from '../../utils'
  * packages/web/src/common/store/recovery-email/sagas.ts.
  */
 export const useResendRecoveryEmail = () => {
-  const { authService, identityService, analytics } = useQueryContext()
+  const { authService, identityService } = useQueryContext()
   const { getHostUrl } = useAppContext()
 
   return useMutation({
@@ -23,13 +22,6 @@ export const useResendRecoveryEmail = () => {
         login: recoveryInfo.login,
         host
       })
-    },
-    onSuccess: () => {
-      analytics.track(
-        analytics.make({
-          eventName: Name.SETTINGS_RESEND_ACCOUNT_RECOVERY
-        })
-      )
     },
     onError: (error) => {
       console.error(

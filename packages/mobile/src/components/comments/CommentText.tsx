@@ -1,20 +1,17 @@
 import { useCallback, useState } from 'react'
 
 import { commentsMessages as messages } from '@audius/common/messages'
-import { Name, type ID } from '@audius/common/models'
+import { type ID } from '@audius/common/models'
 import {
   getDurationFromTimestampMatch,
   timestampRegex
 } from '@audius/common/utils'
 import type { CommentMention } from '@audius/sdk'
 import type { NavigationProp, ParamListBase } from '@react-navigation/native'
-import type { GestureResponderEvent } from 'react-native'
 import { useToggle } from 'react-use'
 
 import { Flex, Text, TextLink } from '@audius/harmony-native'
 import { UserGeneratedText } from 'app/components/core'
-import type { LinkKind } from 'app/harmony-native/components/TextLink/types'
-import { make, track } from 'app/services/analytics'
 
 import { TimestampLink } from './TimestampLink'
 
@@ -38,7 +35,6 @@ export const CommentText = (props: CommentTextProps) => {
     isEdited,
     isPreview,
     mentions,
-    commentId,
     trackDuration,
     onCloseDrawer,
     renderTimestamps = true,
@@ -56,43 +52,9 @@ export const CommentText = (props: CommentTextProps) => {
     [isOverflowing]
   )
 
-  const handlePressLink = useCallback(
-    (e: GestureResponderEvent, linkKind: LinkKind, linkEntityId?: ID) => {
-      if (linkKind === 'mention' && linkEntityId) {
-        track(
-          make({
-            eventName: Name.COMMENTS_CLICK_MENTION,
-            userId: linkEntityId,
-            commentId
-          })
-        )
-      } else {
-        track(
-          make({
-            eventName: Name.COMMENTS_CLICK_LINK,
-            commentId,
-            kind: linkKind as 'track' | 'collection' | 'user' | 'other',
-            entityId: linkEntityId
-          })
-        )
-      }
-      onCloseDrawer?.()
-    },
-    [onCloseDrawer, commentId]
-  )
-
-  const handlePressTimestamp = useCallback(
-    (e: GestureResponderEvent, timestampSeconds: number) => {
-      track(
-        make({
-          eventName: Name.COMMENTS_CLICK_TIMESTAMP,
-          commentId,
-          timestamp: timestampSeconds
-        })
-      )
-    },
-    [commentId]
-  )
+  const handlePressLink = useCallback(() => {
+    onCloseDrawer?.()
+  }, [onCloseDrawer])
 
   return (
     <Flex alignItems='flex-start' gap='xs'>
@@ -127,10 +89,7 @@ export const CommentText = (props: CommentTextProps) => {
                 renderTimestamps && timestampSeconds <= trackDuration
 
               return showLink ? (
-                <TimestampLink
-                  timestampSeconds={timestampSeconds}
-                  onPress={handlePressTimestamp}
-                />
+                <TimestampLink timestampSeconds={timestampSeconds} />
               ) : (
                 <Text>{text}</Text>
               )

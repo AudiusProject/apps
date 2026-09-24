@@ -258,9 +258,7 @@ const TrackHeader = ({
     return (
       <Flex gap='s' wrap='wrap' w='100%'>
         {filteredTags.map((tag) => (
-          <SearchTag key={tag} source='track page'>
-            {tag}
-          </SearchTag>
+          <SearchTag key={tag}>{tag}</SearchTag>
         ))}
       </Flex>
     )

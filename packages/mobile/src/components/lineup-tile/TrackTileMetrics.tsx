@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useTrack } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
-import { FavoriteType, Name } from '@audius/common/models'
+import { FavoriteType } from '@audius/common/models'
 import {
   repostsUserListActions,
   favoritesUserListActions,
@@ -13,7 +13,6 @@ import { useDispatch } from 'react-redux'
 
 import { IconRepost, IconHeart, IconMessage } from '@audius/harmony-native'
 import { useNavigation } from 'app/hooks/useNavigation'
-import { make, track as trackEvent } from 'app/services/analytics'
 
 import { useCommentDrawer } from '../comments/CommentDrawerContext'
 
@@ -118,14 +117,6 @@ export const CommentMetric = (props: CommentMetricProps) => {
       autoFocusInput: false,
       playbackSource
     })
-
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_CLICK_COMMENT_STAT,
-        trackId,
-        source: 'lineup'
-      })
-    )
   }, [open, trackId, navigation, playbackSource])
 
   if (commentCount === undefined || commentsDisabled) return null

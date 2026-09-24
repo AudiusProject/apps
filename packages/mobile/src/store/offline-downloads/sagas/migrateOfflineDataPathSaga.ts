@@ -5,7 +5,6 @@ import ReactNativeBlobUtil from 'react-native-blob-util'
 import RNFS from 'react-native-fs'
 import { call, put, select } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
 import { downloadsRoot } from 'app/services/offline-downloader'
 import {
   getOfflineCollectionsStatus,
@@ -14,7 +13,6 @@ import {
 } from 'app/store/offline-downloads/selectors'
 import type { OfflineJob } from 'app/store/offline-downloads/slice'
 import { redownloadOfflineItems } from 'app/store/offline-downloads/slice'
-import { EventNames } from 'app/types/analytics'
 
 import { DOWNLOAD_REASON_FAVORITES } from '../constants'
 
@@ -31,26 +29,9 @@ export function* migrateOfflineDataPathSaga() {
   const legacyFilesExist = yield* call(exists, legacyDownloadsRoot)
   if (!legacyFilesExist) return
 
-  track(
-    make({
-      eventName: EventNames.OFFLINE_MODE_FILEPATH_MIGRATION_STARTED
-    })
-  )
-
   try {
     yield* call(copyRecursive, legacyDownloadsRoot, downloadsRoot)
-
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_FILEPATH_MIGRATION_SUCCESS
-      })
-    )
   } catch (e) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_FILEPATH_MIGRATION_FAILURE
-      })
-    )
     // If we fail, nuke the legacy directory to ensure we don't retry the process on every startup
     // also requeue everything for download
     yield* call(migrationRecovery)

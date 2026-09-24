@@ -7,13 +7,11 @@ import {
   useTracks
 } from '@audius/common/api'
 import { usePlayTrack, usePauseTrack } from '@audius/common/hooks'
-import { Name, ModalSource } from '@audius/common/models'
+import { ModalSource } from '@audius/common/models'
 import { QueueSource, ChatMessageTileProps } from '@audius/common/store'
 import { getPathFromPlaylistUrl } from '@audius/common/utils'
 import { useQuery } from '@tanstack/react-query'
-import { useDispatch } from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
 import { CollectionTile } from 'components/track/mobile/CollectionTile'
 import { TrackTileSize } from 'components/track/types'
 
@@ -25,8 +23,6 @@ export const ChatMessagePlaylist = ({
   onSuccess,
   className
 }: ChatMessageTileProps) => {
-  const dispatch = useDispatch()
-
   const permalink = getPathFromPlaylistUrl(link) ?? ''
   const { data: playlist } = useCollectionByPermalink(permalink)
 
@@ -77,7 +73,6 @@ export const ChatMessagePlaylist = ({
     // resolving so the URL text doesn't flash before the tile or empty state.
     if (isPending) return
     if (hasResolvedCollection) {
-      dispatch(make(Name.MESSAGE_UNFURL_PLAYLIST, {}))
       onSuccess?.()
     } else {
       // Collection URL resolved to nothing playable (deleted or missing) —
@@ -85,7 +80,7 @@ export const ChatMessagePlaylist = ({
       // showing a misleading or generic preview.
       onEmpty?.()
     }
-  }, [isPending, hasResolvedCollection, onSuccess, onEmpty, dispatch])
+  }, [isPending, hasResolvedCollection, onSuccess, onEmpty])
 
   if (isPending) {
     return <ChatUnfurlSkeleton className={className} />

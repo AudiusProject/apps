@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import { useCurrentAccountUser, useCurrentUserId } from '@audius/common/api'
-import { Name } from '@audius/common/models'
+import { useCurrentUserId } from '@audius/common/api'
 import { route } from '@audius/common/utils'
 import {
   Box,
@@ -25,7 +24,6 @@ import { useDispatch } from 'react-redux'
 import { Link } from 'react-router'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { make, useRecord } from 'common/store/analytics/actions'
 import { Avatar } from 'components/avatar/Avatar'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
 import { push } from 'utils/navigation'
@@ -340,23 +338,6 @@ const AgreeAndContinue = () => {
 
 const PrivateKeyExporterPage = () => {
   useRequiresAccount()
-  const record = useRecord()
-  const { data: accountUserId } = useCurrentUserId()
-  const { data: accountHandle } = useCurrentAccountUser({
-    select: (user) => user?.handle
-  })
-  const [hasViewed, setHasViewed] = useState(false)
-  useEffect(() => {
-    if (accountHandle && accountUserId && !hasViewed) {
-      setHasViewed(true)
-      record(
-        make(Name.EXPORT_PRIVATE_KEY_PAGE_VIEWED, {
-          handle: accountHandle,
-          userId: accountUserId
-        })
-      )
-    }
-  }, [accountHandle, accountUserId, hasViewed, record])
   return (
     <Flex direction='column' css={{ width: '100%' }}>
       <Header />

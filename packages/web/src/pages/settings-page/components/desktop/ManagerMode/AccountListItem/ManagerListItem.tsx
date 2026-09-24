@@ -1,9 +1,8 @@
 import { useCallback, useMemo } from 'react'
 
 import { useCurrentUserId, useRemoveManager } from '@audius/common/api'
-import { useAppContext } from '@audius/common/context'
 import { useIsManagedAccount } from '@audius/common/hooks'
-import { Name, UserManagerMetadata } from '@audius/common/models'
+import { UserManagerMetadata } from '@audius/common/models'
 import { chatSelectors } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -53,10 +52,6 @@ export const ManagerListItem = ({
     navigate(profilePage(manager.handle))
   }, [navigate, manager])
 
-  const {
-    analytics: { track, make }
-  } = useAppContext()
-
   const { mutate: cancelPendingInvite } = useRemoveManager()
 
   const { canCreateChat } = useCanCreateChat(manager.user_id)
@@ -76,17 +71,11 @@ export const ManagerListItem = ({
   const handleCancelInvite = useCallback(() => {
     if (!currentUserId) return
 
-    track(
-      make({
-        eventName: Name.MANAGER_MODE_CANCEL_INVITE,
-        managerId: currentUserId
-      })
-    )
     cancelPendingInvite({
       userId: currentUserId,
       managerUserId: manager.user_id
     })
-  }, [currentUserId, manager.user_id, make, track, cancelPendingInvite])
+  }, [currentUserId, manager.user_id, cancelPendingInvite])
 
   const popupMenuItems = useMemo(() => {
     const items = []

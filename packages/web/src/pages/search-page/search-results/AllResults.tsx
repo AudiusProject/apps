@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react'
 
 import { useSearchAllResults } from '@audius/common/api'
-import { SquareSizes, Name, Kind } from '@audius/common/models'
+import { SquareSizes, Kind } from '@audius/common/models'
 import { searchActions, SearchKind } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -16,7 +16,6 @@ import {
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
 import { CollectionCard, CollectionCardSkeleton } from 'components/collection'
 import { CollectionImage } from 'components/collection/CollectionImage'
 import { TrackArtwork } from 'components/track/TrackArtwork'
@@ -143,16 +142,8 @@ export const AllResults = ({ handleSearchTab }: AllResultsProps) => {
           }
         })
       )
-      dispatch(
-        make(Name.SEARCH_RESULT_SELECT, {
-          searchText: query,
-          kind: entityType,
-          id: item.user_id || item.track_id || item.playlist_id,
-          source: 'search results page'
-        })
-      )
     },
-    [dispatch, query]
+    [dispatch]
   )
 
   const handleClickSearchResult = useCallback(

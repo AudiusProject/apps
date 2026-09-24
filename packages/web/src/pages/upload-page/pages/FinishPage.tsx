@@ -3,7 +3,6 @@ import { useCallback, useMemo } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import { imageBlank as placeholderArt } from '@audius/common/assets'
 import { useUploadCompletionRoute } from '@audius/common/hooks'
-import { Name } from '@audius/common/models'
 import {
   uploadSelectors,
   UploadType,
@@ -26,10 +25,9 @@ import {
   Flex,
   Image
 } from '@audius/harmony'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
 import LoadingSpinner from 'components/loading-spinner/LoadingSpinner'
 import { Tile } from 'components/tile'
 
@@ -140,7 +138,6 @@ export const FinishPage = (props: FinishPageProps) => {
     select: (user) => user?.handle
   })
   const fullUploadPercent = useSelector(getCombinedUploadPercentage)
-  const dispatch = useDispatch()
 
   const uploadComplete = useMemo(() => {
     if (
@@ -188,10 +185,6 @@ export const FinishPage = (props: FinishPageProps) => {
     uploadType,
     accountHandle: accountHandle!
   })
-
-  const handleViewUpload = useCallback(() => {
-    dispatch(make(Name.TRACK_UPLOAD_VIEW_TRACK_PAGE, { uploadType }))
-  }, [dispatch, uploadType])
 
   const isUnlistedTrack =
     (formState.tracks &&
@@ -265,7 +258,7 @@ export const FinishPage = (props: FinishPageProps) => {
             <PlainButton onClick={handleUploadMoreClick} iconLeft={IconUpload}>
               {messages.uploadMore}
             </PlainButton>
-            <PlainButton iconRight={IconArrow} onClick={handleViewUpload}>
+            <PlainButton iconRight={IconArrow}>
               <Link to={visitButtonPath}>{visitButtonText}</Link>
             </PlainButton>
           </div>

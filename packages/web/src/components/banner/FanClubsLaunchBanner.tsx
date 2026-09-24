@@ -1,11 +1,8 @@
 import { useCallback, useState } from 'react'
 
-import { Name } from '@audius/common/models'
 import { route } from '@audius/common/utils'
-import { useDispatch } from 'react-redux'
 import { useLocalStorage } from 'react-use'
 
-import { make } from 'common/store/analytics/actions'
 import { useNavigateToPage } from 'hooks/useNavigateToPage'
 
 import { CallToActionBanner } from './CallToActionBanner'
@@ -18,7 +15,6 @@ const messages = {
 }
 
 export const FanClubsLaunchBanner = () => {
-  const dispatch = useDispatch()
   const navigate = useNavigateToPage()
   const [isDismissed, setIsDismissed] = useLocalStorage(
     FAN_CLUB_BANNER_LOCAL_STORAGE_KEY,
@@ -32,10 +28,9 @@ export const FanClubsLaunchBanner = () => {
   }, [setIsDismissed])
 
   const handleAccept = useCallback(() => {
-    dispatch(make(Name.BANNER_FAN_CLUBS_LAUNCH_CLICKED, {}))
     navigate(route.CLUBS_EXPLORE_PAGE)
     handleClose()
-  }, [dispatch, handleClose, navigate])
+  }, [handleClose, navigate])
 
   return isVisible ? (
     <CallToActionBanner

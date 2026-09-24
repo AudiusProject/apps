@@ -5,7 +5,7 @@ import { ExternalTextLink } from 'components/link'
 import styles from './ProfileHeader.module.css'
 
 type SocialLinkProps = {
-  onClick: () => void
+  onClick?: () => void
   to: string
   icon: ReactElement
 }

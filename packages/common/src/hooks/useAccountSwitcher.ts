@@ -2,15 +2,11 @@ import { useCallback } from 'react'
 
 import { useCurrentUserId, useCurrentWeb3Account } from '~/api'
 import { useAppContext } from '~/context'
-import { Name } from '~/models/Analytics'
 import { UserMetadata } from '~/models/User'
 
 export const useAccountSwitcher = () => {
   const { localStorage } = useAppContext()
   const { data: currentWeb3User } = useCurrentWeb3Account()
-  const {
-    analytics: { make, track }
-  } = useAppContext()
 
   const switchAccount = useCallback(
     async (user: UserMetadata) => {
@@ -18,13 +14,6 @@ export const useAccountSwitcher = () => {
         console.error('User has no wallet address')
         return
       }
-      await track(
-        make({
-          eventName: Name.MANAGER_MODE_SWITCH_ACCOUNT,
-          managedUserId: user.user_id
-        })
-      )
-
       // Set an override if we aren't using the wallet of the "signed in" user
       if (currentWeb3User && currentWeb3User.wallet === user.wallet) {
         await localStorage.clearAudiusUserWalletOverride()
@@ -37,7 +26,7 @@ export const useAccountSwitcher = () => {
 
       window.location.reload()
     },
-    [currentWeb3User, localStorage, make, track]
+    [currentWeb3User, localStorage]
   )
 
   /** Convenience method to switch out of Manager Mode and back to the current web3 user */

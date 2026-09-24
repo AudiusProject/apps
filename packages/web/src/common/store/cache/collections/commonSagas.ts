@@ -12,7 +12,6 @@ import {
   updateCollectionData
 } from '@audius/common/api'
 import {
-  Name,
   Kind,
   PlaylistContents,
   ID,
@@ -50,7 +49,6 @@ import {
   takeLatest
 } from 'typed-redux-saga'
 
-import { make } from 'common/store/analytics/actions'
 import watchTrackErrors from 'common/store/cache/collections/errorSagas'
 import * as signOnActions from 'common/store/pages/signon/actions'
 import { getUSDCMetadata } from 'common/store/upload/sagaHelpers'
@@ -552,9 +550,6 @@ function* publishPlaylistAsync(
     yield* put(signOnActions.openSignOn(false))
     return
   }
-
-  const event = make(Name.PLAYLIST_MAKE_PUBLIC, { id: action.playlistId })
-  yield* put(event)
 
   const playlist = yield* queryCollection(action.playlistId)
   if (!playlist) return

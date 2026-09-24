@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import {
   useUser,
@@ -12,7 +12,6 @@ import {
   getRemixesQueryKey
 } from '@audius/common/api'
 import { remixMessages as messages } from '@audius/common/messages'
-import { Name } from '@audius/common/models'
 import { remixesPageActions, remixesPageSelectors } from '@audius/common/store'
 import { dayjs } from '@audius/common/utils'
 import {
@@ -33,7 +32,6 @@ import { LineupVariant } from 'components/lineup/types'
 import Page from 'components/page/Page'
 import { useRemixPageParams } from 'pages/remixes-page/hooks'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { track as trackEvent, make } from 'services/analytics'
 import { fullTrackRemixesPage, pickWinnersPage } from 'utils/route'
 
 import styles from './RemixesPage.module.css'
@@ -120,17 +118,6 @@ const RemixesPage = (_props: RemixesPageProps) => {
   }, [dispatch])
 
   const pickWinnersRoute = track ? pickWinnersPage(track.permalink) : ''
-  const handlePickWinnersClick = useCallback(() => {
-    if (contest?.eventId && track) {
-      trackEvent(
-        make({
-          eventName: Name.REMIX_CONTEST_PICK_WINNERS_OPEN,
-          remixContestId: contest?.eventId,
-          trackId: track.track_id
-        })
-      )
-    }
-  }, [contest?.eventId, track])
 
   if (!track || !user) {
     return null
@@ -154,7 +141,7 @@ const RemixesPage = (_props: RemixesPageProps) => {
       containerStyles={styles.header}
       rightDecorator={
         showPickWinnersButton ? (
-          <Button size='small' asChild onClick={handlePickWinnersClick}>
+          <Button size='small' asChild>
             <Link to={pickWinnersRoute}>
               {winnerCount > 0 ? messages.editWinners : messages.pickWinners}
             </Link>

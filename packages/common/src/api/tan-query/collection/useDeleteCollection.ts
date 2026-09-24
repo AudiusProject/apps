@@ -3,8 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useDispatch } from 'react-redux'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { useAppContext } from '~/context/appContext'
-import { Name } from '~/models/Analytics'
 import { ID } from '~/models/Identifiers'
 import { accountActions } from '~/store'
 
@@ -28,9 +26,6 @@ export const useDeleteCollection = () => {
   const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const { data: currentUserId } = useCurrentUserId()
-  const {
-    analytics: { track: trackEvent }
-  } = useAppContext()
 
   return useMutation({
     mutationFn: async ({ collectionId }: DeleteCollectionArgs) => {
@@ -44,7 +39,7 @@ export const useDeleteCollection = () => {
 
       return { collectionId }
     },
-    onMutate: async ({ collectionId, source }): Promise<MutationContext> => {
+    onMutate: async ({ collectionId }): Promise<MutationContext> => {
       if (!currentUserId) {
         throw new Error('User ID is required')
       }
@@ -59,16 +54,6 @@ export const useDeleteCollection = () => {
         getCollectionQueryKey(collectionId)
       )
       if (!previousCollection) throw new Error('Collection not found')
-
-      // Analytics tracking
-      trackEvent({
-        eventName: Name.DELETE,
-        properties: {
-          kind: previousCollection.is_album ? 'album' : 'playlist',
-          id: collectionId,
-          source
-        }
-      })
 
       // Optimistic updates - mark as deleted in cache
       primeCollectionData({

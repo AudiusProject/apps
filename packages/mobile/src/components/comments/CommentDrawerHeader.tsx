@@ -6,7 +6,6 @@ import {
   useUpdateTrackCommentNotificationSetting
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import { Name } from '@audius/common/models'
 import { Portal } from '@gorhom/portal'
 import { useKeyboard } from '@react-native-community/hooks'
 import { Keyboard, TouchableWithoutFeedback, View } from 'react-native'
@@ -22,7 +21,6 @@ import {
   Text
 } from '@audius/harmony-native'
 import { useToast } from 'app/hooks/useToast'
-import { track, make } from 'app/services/analytics'
 
 import { ActionDrawerWithoutRedux } from '../action-drawer'
 
@@ -65,12 +63,6 @@ export const CommentDrawerHeader = (props: CommentDrawerHeaderProps) => {
 
   const handlePressOverflowMenu = () => {
     toggleNotificationActionDrawer()
-    track(
-      make({
-        eventName: Name.COMMENTS_OPEN_TRACK_OVERFLOW_MENU,
-        trackId: entityId
-      })
-    )
   }
 
   const showCommentSortBar = commentCount !== undefined && commentCount > 1

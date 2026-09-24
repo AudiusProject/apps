@@ -10,7 +10,7 @@ import {
   useUpdateEvent
 } from '@audius/common/api'
 import { remixMessages as messages } from '@audius/common/messages'
-import { ID, Name } from '@audius/common/models'
+import { ID } from '@audius/common/models'
 import { toast } from '@audius/common/src/store/ui/toast/slice'
 import {
   playbackSelectors,
@@ -44,7 +44,6 @@ import { Page } from 'components/page/Page'
 import { TrackTile } from 'components/track/desktop/TrackTile'
 import { TrackTileSize } from 'components/track/types'
 import { useUpdateSearchParams } from 'pages/search-page/hooks'
-import { track, make } from 'services/analytics'
 import { selectDragnDropState } from 'store/dragndrop/slice'
 import { contestPage } from 'utils/route'
 
@@ -154,16 +153,6 @@ export const PickWinnersPage = () => {
           userId: currentUserId,
           entityId: originalTrack?.track_id
         })
-
-        if (originalTrack?.track_id) {
-          track(
-            make({
-              eventName: Name.REMIX_CONTEST_PICK_WINNERS_FINALIZE,
-              remixContestId: remixContest.eventId,
-              trackId: originalTrack?.track_id
-            })
-          )
-        }
       }
 
       navigate(contestPage(originalTrack?.permalink ?? ''))

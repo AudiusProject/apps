@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useCurrentAccount, useCurrentAccountUser } from '@audius/common/api'
-import { Name, ChallengeName } from '@audius/common/models'
+import { ChallengeName } from '@audius/common/models'
 import type { ChallengeRewardID } from '@audius/common/models'
 import {
   challengesSelectors,
@@ -42,7 +42,6 @@ import LoadingSpinner from 'app/components/loading-spinner'
 import type { SummaryTableItem } from 'app/components/summary-table/SummaryTable'
 import { useNavigation } from 'app/hooks/useNavigation'
 import type { ProfileTabScreenParamList } from 'app/screens/app-screen/ProfileTabScreen'
-import { make, track } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
 import { getChallengeConfig } from 'app/utils/challenges'
 import { isDarkTheme, useThemeVariant } from 'app/utils/theme'
@@ -217,12 +216,6 @@ export const ChallengeRewardsTile = () => {
         const props = getChallengeConfig(id)
         const onPress = () => {
           openModal(id)
-          track(
-            make({
-              eventName: Name.REWARDS_CLAIM_DETAILS_OPENED,
-              challengeId: id
-            })
-          )
         }
         return (
           <Panel
@@ -240,12 +233,6 @@ export const ChallengeRewardsTile = () => {
         const props = getChallengeConfig(id)
         const onPress = () => {
           openModal(id)
-          track(
-            make({
-              eventName: Name.REWARDS_CLAIM_DETAILS_OPENED,
-              challengeId: id
-            })
-          )
         }
         return (
           <Panel
@@ -263,12 +250,6 @@ export const ChallengeRewardsTile = () => {
         const props = getChallengeConfig(id)
         const onPress = () => {
           openModal(id)
-          track(
-            make({
-              eventName: Name.REWARDS_CLAIM_DETAILS_OPENED,
-              challengeId: id
-            })
-          )
         }
         return (
           <Panel

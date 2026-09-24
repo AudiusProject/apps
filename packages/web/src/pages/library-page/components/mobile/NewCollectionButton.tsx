@@ -1,11 +1,9 @@
 import { useCallback } from 'react'
 
-import { Name, CreatePlaylistSource } from '@audius/common/models'
+import { CreatePlaylistSource } from '@audius/common/models'
 import { cacheCollectionsActions } from '@audius/common/store'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-
-import { useRecord, make } from 'common/store/analytics/actions'
 
 import styles from './NewCollectionButton.module.css'
 
@@ -29,8 +27,6 @@ const NewCollectionButton = ({
   onClick,
   collectionType
 }: NewCollectionButtonProps) => {
-  const record = useRecord()
-
   const handleClick = useCallback(() => {
     if (onClick) {
       onClick()
@@ -41,12 +37,7 @@ const NewCollectionButton = ({
         createNewPlaylist()
       }
     }
-    record(
-      make(Name.PLAYLIST_OPEN_CREATE, {
-        source: CreatePlaylistSource.LIBRARY_PAGE
-      })
-    )
-  }, [collectionType, createNewAlbum, createNewPlaylist, onClick, record])
+  }, [collectionType, createNewAlbum, createNewPlaylist, onClick])
 
   return (
     <button className={styles.button} onClick={handleClick}>

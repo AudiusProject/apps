@@ -11,7 +11,6 @@ import { useCurrentUserId } from '~/api'
 import { useQueryContext } from '~/api/tan-query/utils'
 import {
   ID,
-  Name,
   SearchSource,
   UserMetadata,
   UserCollectionMetadata,
@@ -128,7 +127,7 @@ const useSearchQueryProps = <T>(
     pageSize,
     ...filters
   }
-  const { audiusSdk, getFeatureEnabled, analytics } = useQueryContext()
+  const { audiusSdk, getFeatureEnabled } = useQueryContext()
   const queryClient = useQueryClient()
 
   return {
@@ -180,27 +179,6 @@ const useSearchQueryProps = <T>(
         isVerified: filters.isVerified,
         hasDownloads: filters.hasDownloads,
         isPurchaseable: filters.isPremium
-      }
-
-      // Fire analytics only for the first page of results
-      if (pageParam === 0 && !disableAnalytics) {
-        analytics.track(
-          analytics.make(
-            isTagsSearch
-              ? {
-                  eventName: Name.SEARCH_TAG_SEARCH,
-                  tag: query,
-                  source,
-                  ...searchParams
-                }
-              : {
-                  eventName: Name.SEARCH_SEARCH,
-                  term: query,
-                  source,
-                  ...searchParams
-                }
-          )
-        )
       }
 
       const { data } = isTagsSearch

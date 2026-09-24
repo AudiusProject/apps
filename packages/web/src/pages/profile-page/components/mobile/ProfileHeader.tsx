@@ -6,7 +6,6 @@ import {
   imageProfilePicEmpty
 } from '@audius/common/assets'
 import {
-  Name,
   SquareSizes,
   WidthSizes,
   ID,
@@ -30,7 +29,6 @@ import {
 } from '@audius/harmony'
 import cn from 'classnames'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { ArtistRecommendationsDropdown } from 'components/artist-recommendations/ArtistRecommendationsDropdown'
 import Skeleton from 'components/skeleton/Skeleton'
 import SubscribeButton from 'components/subscribe-button/SubscribeButton'
@@ -219,35 +217,6 @@ const ProfileHeader = ({
   const { data: fanClub, isPending: isFanClubLoading } =
     useArtistCreatedFanClub(userId)
 
-  const record = useRecord()
-
-  const onGoToInstagram = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_INSTAGRAM, {
-        handle: handle.replace('@', ''),
-        instagramHandle
-      })
-    )
-  }, [record, instagramHandle, handle])
-
-  const onGoToX = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_TWITTER, {
-        handle: handle.replace('@', ''),
-        twitterHandle: xHandle
-      })
-    )
-  }, [record, xHandle, handle])
-
-  const onGoToTikTok = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_TIKTOK, {
-        handle: handle.replace('@', ''),
-        tikTokHandle
-      })
-    )
-  }, [record, tikTokHandle, handle])
-
   const onGoToFollowersPage = () => {
     setFollowersUserId(userId)
     goToRoute(FOLLOWERS_USERS_ROUTE)
@@ -265,12 +234,6 @@ const ProfileHeader = ({
     }
     const win = window.open(link, '_blank')
     if (win) win.focus()
-    record(
-      make(Name.PROFILE_PAGE_CLICK_WEBSITE, {
-        handle,
-        website
-      })
-    )
   }
 
   // If we're not loading, we know that
@@ -396,21 +359,18 @@ const ProfileHeader = ({
               {xHandle ? (
                 <SocialLink
                   to={`https://x.com/${xHandle}`}
-                  onClick={onGoToX}
                   icon={<IconX size='xl' />}
                 />
               ) : null}
               {instagramHandle ? (
                 <SocialLink
                   to={`https://instagram.com/${instagramHandle}`}
-                  onClick={onGoToInstagram}
                   icon={<IconInstagram size='xl' />}
                 />
               ) : null}
               {tikTokHandle ? (
                 <SocialLink
                   to={`https://tiktok.com/@${tikTokHandle}`}
-                  onClick={onGoToTikTok}
                   icon={<IconTikTok />}
                 />
               ) : null}
@@ -422,7 +382,6 @@ const ProfileHeader = ({
               ref={bioRefCb}
               color='subdued'
               size='s'
-              linkSource='profile page'
               className={cn(styles.bio, {
                 [styles.bioExpanded]: hasEllipsis && !isDescriptionMinimized
               })}

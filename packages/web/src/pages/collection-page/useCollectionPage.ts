@@ -667,17 +667,6 @@ export const useCollectionPage = (
             ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
-        if (playlistId) {
-          dispatch(
-            make(Name.PLAYLIST_PLAY, {
-              id: `${playlistId}`,
-              source: PlaybackSource.PLAYLIST_PAGE,
-              isAlbum: !!collection?.is_album,
-              trackCount,
-              isPreview: shouldPreview
-            })
-          )
-        }
       } else if (tracks.entries.length > 0) {
         dispatch(playbackActions.stop({}))
         const firstEntry = tracks.entries[0]
@@ -701,17 +690,6 @@ export const useCollectionPage = (
             ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
-        if (playlistId) {
-          dispatch(
-            make(Name.PLAYLIST_PLAY, {
-              id: `${playlistId}`,
-              source: PlaybackSource.PLAYLIST_PAGE,
-              isAlbum: !!collection?.is_album,
-              trackCount,
-              isPreview: shouldPreview
-            })
-          )
-        }
       }
     },
     [
@@ -723,7 +701,6 @@ export const useCollectionPage = (
       tracks.entries,
       getPlayingId,
       playlistId,
-      trackCount,
       dispatch,
       collectionPlaybackQueue
     ]

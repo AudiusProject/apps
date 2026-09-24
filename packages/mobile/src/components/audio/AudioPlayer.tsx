@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useState, useMemo } from 'react'
 
 import { useCurrentUserId, useTracks, useUsers } from '@audius/common/api'
 import { useCurrentTrack } from '@audius/common/hooks'
-import { Name, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import type { ID, Track } from '@audius/common/models'
 import {
   playbackActions,
@@ -41,7 +41,6 @@ import TrackPlayer, {
 import { useDispatch, useSelector } from 'react-redux'
 import { useAsync, usePrevious } from 'react-use'
 
-import { make, track as analyticsTrack } from 'app/services/analytics'
 import { audiusBackendInstance } from 'app/services/audius-backend-instance'
 import {
   getLocalAudioPath,
@@ -504,7 +503,6 @@ const usePlaybackEvents = ({
     getUserTrackPositions(state, { userId: currentUserId })
   )
 
-  const [bufferStartTime, setBufferStartTime] = useState<number>()
   const { bufferingDuringPlay } = useIsPlaying()
   const previousBufferingState = usePrevious(bufferingDuringPlay)
 
@@ -515,21 +513,8 @@ const usePlaybackEvents = ({
       bufferingDuringPlay !== previousBufferingState
     ) {
       dispatch(playbackActions.setBuffering({ buffering: bufferingDuringPlay }))
-      if (!bufferingDuringPlay && bufferStartTime) {
-        const bufferDuration = Math.ceil(performance.now() - bufferStartTime)
-        analyticsTrack(
-          make({ eventName: Name.BUFFERING_TIME, duration: bufferDuration })
-        )
-        setBufferStartTime(undefined)
-      }
     }
-  }, [
-    bufferStartTime,
-    bufferingDuringPlay,
-    dispatch,
-    previousBufferingState,
-    track
-  ])
+  }, [bufferingDuringPlay, dispatch, previousBufferingState, track])
 
   const seekToRef = useRef<number | null>(null)
 
@@ -626,7 +611,6 @@ const usePlaybackEvents = ({
 
     // --- Active track changed ---
     if (event.type === Event.PlaybackActiveTrackChanged) {
-      setBufferStartTime(performance.now())
       const playerIndex = await TrackPlayer.getActiveTrackIndex()
       if (playerIndex === undefined) return
 

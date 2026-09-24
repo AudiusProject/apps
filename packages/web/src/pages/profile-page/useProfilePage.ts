@@ -8,7 +8,6 @@ import {
 } from '@audius/common/api'
 import { useIsArtist } from '@audius/common/hooks'
 import {
-  Name,
   ShareSource,
   FollowSource,
   CreatePlaylistSource,
@@ -41,7 +40,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 
-import { make, TrackEvent } from 'common/store/analytics/actions'
 import {
   openSignOn,
   showRequiresAccountToast
@@ -397,10 +395,6 @@ export const useProfilePage = () => {
         handleLower
       )
     )
-    const trackEvent: TrackEvent = make(Name.PROFILE_PAGE_SORT, {
-      sort: 'recent'
-    })
-    dispatch(trackEvent)
   }, [profile, handleLower, dispatch])
 
   const onSortByPopular = useCallback(() => {
@@ -412,27 +406,13 @@ export const useProfilePage = () => {
         handleLower
       )
     )
-    const trackEvent: TrackEvent = make(Name.PROFILE_PAGE_SORT, {
-      sort: 'popular'
-    })
-    dispatch(trackEvent)
   }, [profile, handleLower, dispatch])
 
   const didChangeTabsFrom = useCallback(
     (prevLabel: string, currLabel: string) => {
-      if (prevLabel !== currLabel) {
-        const trackEvent: TrackEvent = make(Name.PROFILE_PAGE_TAB_CLICK, {
-          tab: currLabel.toLowerCase() as
-            | 'tracks'
-            | 'albums'
-            | 'reposts'
-            | 'playlists'
-        })
-        dispatch(trackEvent)
-      }
       setActiveTab(currLabel as ProfilePageTabs)
     },
-    [dispatch]
+    []
   )
 
   const onEdit = useCallback(() => {
@@ -621,19 +601,9 @@ export const useProfilePage = () => {
     const updatedMetadata = newUserMetadata({ ...profile })
     if (updatedCoverPhoto && (updatedCoverPhoto as any).file) {
       updatedMetadata.updatedCoverPhoto = updatedCoverPhoto
-      const trackEvent: TrackEvent = make(
-        Name.ACCOUNT_HEALTH_UPLOAD_COVER_PHOTO,
-        { source: (updatedCoverPhoto as any).source }
-      )
-      dispatch(trackEvent)
     }
     if (updatedProfilePicture && (updatedProfilePicture as any).file) {
       updatedMetadata.updatedProfilePicture = updatedProfilePicture
-      const trackEvent: TrackEvent = make(
-        Name.ACCOUNT_HEALTH_UPLOAD_PROFILE_PICTURE,
-        { source: (updatedProfilePicture as any).source }
-      )
-      dispatch(trackEvent)
     }
     if (updatedName) {
       updatedMetadata.name = updatedName
@@ -703,8 +673,7 @@ export const useProfilePage = () => {
     updatedTikTokHandle,
     updatedWebsite,
     updatedFanClubBadge,
-    updateProfile,
-    dispatch
+    updateProfile
   ])
 
   const refreshProfile = useCallback(() => {
@@ -739,7 +708,6 @@ export const useProfilePage = () => {
     }
     if (chatPermissions?.canCreateChat) {
       dispatch(createChat({ userIds: [profile.user_id] }))
-      dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'profile' }))
     } else {
       dispatch(inboxUnavailableModalActions.open({ userId: profile.user_id }))
     }

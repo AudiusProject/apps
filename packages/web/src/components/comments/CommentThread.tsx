@@ -1,9 +1,8 @@
 import { useState } from 'react'
 
 import { useComment, useCommentReplies } from '@audius/common/api'
-import { useCurrentCommentSection } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import { Comment, ID, Name, ReplyComment } from '@audius/common/models'
+import { Comment, ID, ReplyComment } from '@audius/common/models'
 import {
   Box,
   Flex,
@@ -11,8 +10,6 @@ import {
   IconCaretUp,
   PlainButton
 } from '@audius/harmony'
-
-import { track, make } from 'services/analytics'
 
 import { CommentBlock } from './CommentBlock'
 import { useHighlightedComment } from './useHighlightedComment'
@@ -26,7 +23,6 @@ export const CommentThread = ({ commentId }: { commentId: ID }) => {
       ? highlightedComment?.id
       : null
 
-  const { entityId } = useCurrentCommentSection()
   const [hasRequestedMore, setHasRequestedMore] = useState(false)
   const { isFetching: isFetchingReplies } = useCommentReplies(
     { commentId },
@@ -41,16 +37,6 @@ export const CommentThread = ({ commentId }: { commentId: ID }) => {
     const newHiddenReplies = { ...hiddenReplies }
     newHiddenReplies[commentId] = !newHiddenReplies[commentId]
     setHiddenReplies(newHiddenReplies)
-
-    track(
-      make({
-        eventName: newHiddenReplies[commentId]
-          ? Name.COMMENTS_HIDE_REPLIES
-          : Name.COMMENTS_SHOW_REPLIES,
-        commentId,
-        trackId: entityId
-      })
-    )
   }
 
   const handleLoadMoreReplies = () => {

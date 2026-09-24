@@ -2,21 +2,14 @@ import { useCallback, useMemo } from 'react'
 
 import { useComment, useUser } from '@audius/common/api'
 import { useCurrentCommentSection } from '@audius/common/context'
-import {
-  Name,
-  type Comment,
-  type ID,
-  type ReplyComment
-} from '@audius/common/models'
+import { type Comment, type ID, type ReplyComment } from '@audius/common/models'
 import { dayjs } from '@audius/common/utils'
 import { css } from '@emotion/native'
 import { useLinkProps } from '@react-navigation/native'
-import type { GestureResponderEvent } from 'react-native'
 import { TouchableOpacity } from 'react-native'
 import Animated, { FadeIn, Keyframe } from 'react-native-reanimated'
 
 import { Flex, Text, useTheme } from '@audius/harmony-native'
-import { make, track as trackEvent } from 'app/services/analytics'
 
 import { ProfilePicture } from '../core/ProfilePicture'
 import { Skeleton } from '../skeleton'
@@ -83,19 +76,6 @@ export const CommentBlockInternal = (
     handleNavigateAway()
     onPressProfilePic()
   }, [handleNavigateAway, onPressProfilePic])
-
-  const handlePressTimestamp = useCallback(
-    (e: GestureResponderEvent, timestampSeconds: number) => {
-      trackEvent(
-        make({
-          eventName: Name.COMMENTS_CLICK_TIMESTAMP,
-          commentId,
-          timestamp: timestampSeconds
-        })
-      )
-    },
-    [commentId]
-  )
 
   const highlightBackgroundFadeAnimation = useMemo(
     () =>
@@ -199,7 +179,6 @@ export const CommentBlockInternal = (
                         <TimestampLink
                           size='s'
                           timestampSeconds={trackTimestampS}
-                          onPress={handlePressTimestamp}
                         />
                       </>
                     ) : null}

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
-import { DownloadQuality, Name } from '@audius/common/models'
+import { DownloadQuality } from '@audius/common/models'
 import { TrackMetadataFormSchema } from '@audius/common/schemas'
 import {
   TrackForUpload,
@@ -49,7 +49,6 @@ import layoutStyles from 'components/layout/layout.module.css'
 import { NavigationPrompt } from 'components/navigation-prompt/NavigationPrompt'
 import { EditFormScrollContext } from 'pages/edit-page/EditTrackPage'
 import { processFiles } from 'pages/upload-page/store/utils/processFiles'
-import { make, track as trackEvent } from 'services/analytics'
 import { removeNullable } from 'utils/typeUtils'
 
 import styles from './EditTrackForm.module.css'
@@ -185,7 +184,6 @@ const TrackEditForm = (
   const trackIdx = values.trackMetadatasIndex
   const [, , { setValue: setIndex }] = useField('trackMetadatasIndex')
   const initialTrackValues = initialValues.trackMetadatas[trackIdx] ?? {}
-  const initialTrackId = initialTrackValues.track_id
   const { values: formValues } =
     useFormikContext() as FormikContextType<TrackEditFormValues>
 
@@ -222,30 +220,11 @@ const TrackEditForm = (
   }, [trackPreviewUrl])
 
   const handleTogglePreview = useCallback(() => {
-    if (!isPreviewPlaying) {
-      // Track Preview event
-      trackEvent(
-        make({
-          eventName: Name.TRACK_REPLACE_PREVIEW,
-          trackId: initialTrackId,
-          source: isUpload ? 'upload' : 'edit'
-        })
-      )
-    }
-
     const currentPreview =
       (formValues.tracks[trackIdx] as TrackForUpload)?.preview ?? preview
 
     togglePreview(currentPreview, trackIdx)
-  }, [
-    togglePreview,
-    formValues,
-    trackIdx,
-    preview,
-    isPreviewPlaying,
-    initialTrackId,
-    isUpload
-  ])
+  }, [togglePreview, formValues, trackIdx, preview])
 
   const getArtworkUrl = (artwork: typeof updatedArtwork) => {
     if (!artwork) return undefined
@@ -297,15 +276,6 @@ const TrackEditForm = (
         }
         setTrackValue(newFile)
         setOrigFilename(newFile.metadata.orig_filename)
-
-        // Track replace event
-        trackEvent(
-          make({
-            eventName: Name.TRACK_REPLACE_REPLACE,
-            trackId: initialTrackId,
-            source: isUpload ? 'upload' : 'edit'
-          })
-        )
       }
     },
     [
@@ -318,7 +288,6 @@ const TrackEditForm = (
       isArtworkSet,
       setTrackValue,
       setOrigFilename,
-      initialTrackId,
       setTitle,
       setArtworkValue
     ]
@@ -336,14 +305,6 @@ const TrackEditForm = (
       trackIds: [initialTrackValues.track_id],
       quality: DownloadQuality.ORIGINAL
     })
-
-    // Track Download event
-    trackEvent(
-      make({
-        eventName: Name.TRACK_REPLACE_DOWNLOAD,
-        trackId: initialTrackValues.track_id
-      })
-    )
   }, [openWaitforDownload, initialTrackValues.track_id])
 
   return (
