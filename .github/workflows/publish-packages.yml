@@ -150,7 +150,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.26.0
         if: steps.changesets.outputs.published == 'true'
         with:
-          channel-id: "C03EK0C69QD"
+          channel-id: "CA80RCL77"
           payload: ${{ steps.generate-slack-payload.outputs.payload }}
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_TOKEN }}
