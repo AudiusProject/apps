@@ -6,7 +6,6 @@ import {
   useUser,
   CommentOrReply
 } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import {
   Flex,
   IconMessage,
@@ -22,7 +21,6 @@ import { animated, useSpring, useTrail } from '@react-spring/web'
 import { useDispatch } from 'react-redux'
 
 import { TrackLink } from 'components/link'
-import { make, track as trackEvent } from 'services/analytics'
 import { push } from 'utils/navigation'
 import { fullCommentHistoryPage } from 'utils/route'
 
@@ -49,21 +47,8 @@ const CommentListItem = ({
   const [isHovered, setIsHovered] = useState(false)
   const { data: track } = useTrack(comment?.entityId)
 
-  const trackCommentItemClick = useCallback(() => {
-    if (comment && comment.userId) {
-      trackEvent(
-        make({
-          eventName: Name.RECENT_COMMENTS_CLICK,
-          commentId: comment.id,
-          userId: comment.userId
-        })
-      )
-    }
-  }, [comment])
-
   const handleClick = () => {
     if (track) {
-      trackCommentItemClick()
       dispatch(push(track.permalink))
     }
   }
@@ -91,7 +76,6 @@ const CommentListItem = ({
               showUnderline={isHovered}
               trackId={track?.track_id}
               ellipses
-              onClick={trackCommentItemClick}
             />
           ) : (
             <Skeleton w='80%' h={theme.typography.lineHeight.m} />

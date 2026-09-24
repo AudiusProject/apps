@@ -9,7 +9,6 @@ import {
   useDeactivateDeveloperAppAccessKey,
   useCreateDeveloperAppAccessKey
 } from '@audius/common/api'
-import { Name } from '@audius/common/models'
 import {
   IconCopy,
   IconTrash,
@@ -25,7 +24,6 @@ import { FieldArray, Form, Formik, useField } from 'formik'
 import { z } from 'zod'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { TextAreaField, TextField } from 'components/form-fields'
 import PreloadImage from 'components/preload-image/PreloadImage'
 import Toast from 'components/toast/Toast'
@@ -99,14 +97,12 @@ const getBearerTokens = (params: EditAppPageProps['params']) => {
 
 export const EditAppPage = (props: EditAppPageProps) => {
   const { params, setPage } = props
-  const { name, apiKey } = params ?? {}
+  const { apiKey } = params ?? {}
   const initialBearerTokens = getBearerTokens(params)
   const [bearerTokens, setBearerTokens] =
     useState<string[]>(initialBearerTokens)
 
-  const record = useRecord()
-
-  const { isSuccess, isError, error, mutate, isPending } = useEditDeveloperApp()
+  const { isSuccess, isError, mutate, isPending } = useEditDeveloperApp()
   const deactivateAccessKey = useDeactivateDeveloperAppAccessKey()
   const createAccessKey = useCreateDeveloperAppAccessKey()
 
@@ -118,33 +114,11 @@ export const EditAppPage = (props: EditAppPageProps) => {
   useEffect(() => {
     if (isSuccess) {
       setPage(CreateAppsPages.YOUR_APPS)
-      record(
-        make(Name.DEVELOPER_APP_EDIT_SUCCESS, {
-          name: name || '',
-          apiKey: apiKey || ''
-        })
-      )
     }
-  }, [isSuccess, apiKey, name, record, setPage])
-
-  useEffect(() => {
-    if (isError) {
-      record(
-        make(Name.DEVELOPER_APP_EDIT_ERROR, {
-          error: error?.message
-        })
-      )
-    }
-  }, [isError, record, error?.message])
+  }, [isSuccess, setPage])
 
   const handleSubmit = useCallback(
     (values: DeveloperAppValues) => {
-      record(
-        make(Name.DEVELOPER_APP_EDIT_SUBMIT, {
-          name: values.name,
-          description: values.description
-        })
-      )
       // Trim redirect URIs and remove empty ones
       const redirectUris = (values.redirectUris ?? [])
         .map((u) => u?.trim())
@@ -153,7 +127,7 @@ export const EditAppPage = (props: EditAppPageProps) => {
       const imageUrl = values.imageUrl?.trim() || undefined
       mutate({ ...values, redirectUris, imageUrl })
     },
-    [mutate, record]
+    [mutate]
   )
 
   const initialValues: DeveloperAppValues = useMemo(

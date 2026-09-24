@@ -490,14 +490,6 @@ export const CollectionTile = ({
             collectionId: `${collection.playlist_id}`
           })
         )
-        record(
-          make(Name.PLAYLIST_PLAY, {
-            id: `${collection.playlist_id}`,
-            source,
-            isAlbum: !!collection.is_album,
-            trackCount: collection.track_count
-          })
-        )
       } else {
         const trackId = tracks[0] ? tracks[0].track_id : null
         if (!trackId) return
@@ -507,14 +499,6 @@ export const CollectionTile = ({
             id: `${trackId}`,
             source,
             collectionId: `${collection.playlist_id}`
-          })
-        )
-        record(
-          make(Name.PLAYLIST_PLAY, {
-            id: `${collection.playlist_id}`,
-            source,
-            isAlbum: !!collection.is_album,
-            trackCount: collection.track_count
           })
         )
       }
@@ -538,8 +522,6 @@ export const CollectionTile = ({
     playingTrackId,
     uploading,
     collection.playlist_id,
-    collection.is_album,
-    collection.track_count,
     record
   ])
 

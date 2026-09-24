@@ -1,4 +1,5 @@
 export * from './Analytics'
+export * from './AnalyticsSampling'
 export * from './AudioRewards'
 export * from './BadgeTier'
 export * from './Cache'

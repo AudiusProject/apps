@@ -10,7 +10,7 @@ import {
 } from 'react'
 
 import { useCollection, useCollectionTracks } from '@audius/common/api'
-import { AccessConditions, ID, Name } from '@audius/common/models'
+import { AccessConditions, ID } from '@audius/common/models'
 import {
   cacheCollectionsActions,
   EditCollectionValues,
@@ -20,8 +20,6 @@ import { Nullable } from '@audius/common/utils'
 import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router'
-
-import { track } from 'services/analytics'
 
 import { isDraftCollection, removeDraftCollection } from './draftCollections'
 import { useCreateDraftPlaylist } from './useCreateDraftPlaylist'
@@ -405,18 +403,6 @@ export const PlaylistEditModeProvider = ({
       collection as Record<string, unknown>,
       'stream_conditions'
     )
-    if (accessChanged) {
-      // Mirror the dedicated edit page: access changes get their own event.
-      track({
-        eventName: Name.COLLECTION_EDIT_ACCESS_CHANGED,
-        properties: {
-          id: collection.playlist_id,
-          from: collection.stream_conditions,
-          to: draft.stream_conditions
-        }
-      })
-    }
-
     const savedDetails =
       draft.playlist_name !== undefined ||
       draft.description !== undefined ||

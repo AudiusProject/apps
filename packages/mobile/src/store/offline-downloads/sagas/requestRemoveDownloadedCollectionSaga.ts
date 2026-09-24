@@ -1,8 +1,5 @@
 import { takeEvery, select, put } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
-import { EventNames } from 'app/types/analytics'
-
 import { getOfflineTrackMetadata } from '../selectors'
 import type { CollectionAction, OfflineEntry } from '../slice'
 import { removeOfflineItems, requestRemoveDownloadedCollection } from '../slice'
@@ -16,13 +13,6 @@ export function* requestRemoveDownloadedCollectionSaga() {
 
 function* removeDownloadedCollectionWorker(action: CollectionAction) {
   const { collectionId } = action.payload
-  track(
-    make({
-      eventName: EventNames.OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_OFF,
-      collectionId
-    })
-  )
-
   const offlineItemsToRemove: OfflineEntry[] = []
 
   offlineItemsToRemove.push({

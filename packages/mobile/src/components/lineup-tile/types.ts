@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react'
 
-import type { PlaybackSource, Collection, ID, UID } from '@audius/common/models'
+import type {
+  PlaybackSource,
+  Collection,
+  FavoriteSource,
+  ID,
+  RepostSource,
+  UID
+} from '@audius/common/models'
 import type { EnhancedCollectionTrack } from '@audius/common/store'
 import type { StyleProp, ViewStyle } from 'react-native'
 
@@ -37,6 +44,8 @@ export type TrackTileProps = {
   style?: StyleProp<ViewStyle>
   source?: LineupTileSource
   showArtistPick?: boolean
+  favoriteSource?: FavoriteSource
+  repostSource?: RepostSource
 }
 
 export type CollectionTileProps = {

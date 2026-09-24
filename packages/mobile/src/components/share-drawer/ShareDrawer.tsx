@@ -108,7 +108,13 @@ export const ShareDrawer = NiceModal.create(() => {
       presetMessage: getContentUrl(content),
       defaultUserList: 'chats'
     })
-    track(make({ eventName: Name.CHAT_ENTRY_POINT, source: 'share' }))
+    track(
+      make({
+        eventName: Name.CHAT_ENTRY_POINT,
+        source: 'share',
+        kind: content.type
+      })
+    )
     if (source === ShareSource.NOW_PLAYING) {
       onCloseNowPlaying()
     }
@@ -123,7 +129,18 @@ export const ShareDrawer = NiceModal.create(() => {
     } else {
       console.error(`Can't open: ${xShareUrl}`)
     }
-  }, [content])
+    if (content.type === 'weeklyRotation' && source) {
+      track(
+        make({
+          eventName: Name.SHARE_TO_TWITTER,
+          kind: 'weeklyRotation',
+          id: content.user.user_id,
+          url: getContentUrl(content),
+          source
+        })
+      )
+    }
+  }, [content, source])
 
   const {
     handleShareToStoryStickerLoad,
@@ -143,7 +160,19 @@ export const ShareDrawer = NiceModal.create(() => {
       type: 'info',
       timeout: shareToastTimeout
     })
-  }, [toast, content, shareType])
+    if (content.type === 'weeklyRotation' && source) {
+      track(
+        make({
+          eventName: Name.SHARE,
+          kind: 'weeklyRotation',
+          id: `${content.user.user_id}`,
+          url: link,
+          source,
+          channel: 'copyLink'
+        })
+      )
+    }
+  }, [toast, content, shareType, source])
 
   const handleOpenShareSheet = useCallback(() => {
     if (!source || !content) return
@@ -161,10 +190,8 @@ export const ShareDrawer = NiceModal.create(() => {
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
       case 'weeklyRotation': {
-        // No entity behind the mix, so no social saga: open the system
-        // sheet directly with the same link Copy Link uses, and emit the
-        // same Share event the sagas do.
-        // `share` prepends AUDIUS_URL itself, so hand it the path.
+        // No saga for weekly rotation shares; open the share sheet directly.
+        // share() prepends AUDIUS_URL.
         const url = getWeeklyRotationRoute(content.user)
         share({
           url,
@@ -176,7 +203,8 @@ export const ShareDrawer = NiceModal.create(() => {
             kind: 'weeklyRotation',
             id: `${content.user.user_id}`,
             url,
-            source
+            source,
+            channel: 'shareSheet'
           })
         )
         break
@@ -184,12 +212,8 @@ export const ShareDrawer = NiceModal.create(() => {
     }
   }, [dispatch, content, source])
 
-  // The story platforms build a video out of the track's audio, so a track with
-  // nothing to play cannot be shared to them. `is_streamable` is false for an
-  // upload that was indexed without its track_cid: the stream URL 404s, ffmpeg
-  // fails on it, and the user gets a bare "something went wrong" with no idea
-  // why. Compare against `false` explicitly - an absent field means the source
-  // did not populate it, not that the track is broken.
+  // Story sharing renders the track's audio, so skip tracks the API marks
+  // unstreamable (undefined = not populated).
   const isShareableTrack =
     content?.type === 'track' &&
     !content.track.is_unlisted &&
@@ -264,8 +288,7 @@ export const ShareDrawer = NiceModal.create(() => {
       result.push(shareVideoToTiktokAction)
       result.push(shareToSnapchatAction)
     } else if (content?.type === 'weeklyRotation') {
-      // The story/video paths need a single streamable track; a mix has
-      // none, but X works off the link alone.
+      // Story/video shares need a single track; X only needs the link.
       result.push(shareToXAction)
     }
 

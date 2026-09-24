@@ -1,14 +1,13 @@
 import { useCallback } from 'react'
 
 import { useSearchUserResults } from '@audius/common/api'
-import { Kind, Name, UserMetadata } from '@audius/common/models'
+import { Kind, UserMetadata } from '@audius/common/models'
 import { searchActions } from '@audius/common/store'
 import { Box, Flex, useTheme } from '@audius/harmony'
 import { range } from 'lodash'
 import InfiniteScroll from 'react-infinite-scroller'
 import { useDispatch } from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
 import { UserCard } from 'components/user-card'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { useMainContentRef } from 'pages/MainContentContext'
@@ -55,8 +54,6 @@ const ProfileResultsSkeletons = ({
 export const ProfileResultsTiles = (props: ProfileResultsProps) => {
   const { limit, skeletonCount = 10, data, isFetching, isPending } = props
   const ids = data?.map((user) => user.user_id) ?? []
-  const { query } = useSearchParams()
-
   const isMobile = useIsMobile()
   const dispatch = useDispatch()
 
@@ -73,17 +70,9 @@ export const ProfileResultsTiles = (props: ProfileResultsProps) => {
             }
           })
         )
-        dispatch(
-          make(Name.SEARCH_RESULT_SELECT, {
-            term: query,
-            source: 'search results page',
-            id,
-            kind: 'profile'
-          })
-        )
       }
     },
-    [dispatch, query]
+    [dispatch]
   )
 
   // Only show pagination skeletons when we're not loading the first page & still under the limit

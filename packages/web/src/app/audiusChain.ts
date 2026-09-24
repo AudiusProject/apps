@@ -3,19 +3,8 @@ import { type Chain } from 'viem'
 import { env } from 'services/env'
 
 /**
- * Audius ACDC chain (now ports to Core).
- *
- * Deliberately lives outside `ReownAppKitModal`. That module constructs
- * `WagmiAdapter`, `SolanaAdapter` and `createAppKit` as import-time side
- * effects, so importing *any* symbol from it — even a plain config object like
- * this one — pulls the whole AppKit graph (`@reown/*`, `@walletconnect/*`)
- * into the importing chunk.
- *
- * Most consumers only need `audiusChain.id`. Keeping the definition free of
- * Reown imports lets them stay out of that graph entirely.
- *
- * Typed against viem's `Chain` rather than `@reown/appkit/networks` so there is
- * no `@reown` coupling here at all, even at the type level.
+ * Audius ACDC chain (now ports to Core). Kept free of @reown imports so
+ * importing it doesn't pull AppKit into the chunk.
  */
 export const audiusChain = {
   id: env.AUDIUS_NETWORK_CHAIN_ID,

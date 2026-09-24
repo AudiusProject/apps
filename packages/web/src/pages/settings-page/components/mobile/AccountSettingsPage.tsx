@@ -5,7 +5,7 @@ import {
   useCurrentAccountUser,
   useCurrentUserEmail
 } from '@audius/common/api'
-import { Name, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import { useTierAndVerifiedForUser } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import {
@@ -26,7 +26,6 @@ import {
 import { debounce } from 'lodash'
 import { useDispatch } from 'react-redux'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import MobilePageContainer from 'components/mobile-page-container/MobilePageContainer'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useProfilePicture } from 'hooks/useProfilePicture'
@@ -196,7 +195,6 @@ const AccountSettingsPage = () => {
     userId,
     size: SquareSizes.SIZE_480_BY_480
   })
-  const record = useRecord()
   const onClickRecover = useCallback(
     () =>
       debounce(
@@ -206,7 +204,6 @@ const AccountSettingsPage = () => {
               await authService.generateRecoveryInfo()
             )
             toast(messages.emailSent)
-            record(make(Name.SETTINGS_RESEND_ACCOUNT_RECOVERY, {}))
           } catch (e) {
             toast(messages.emailNotSent)
           }
@@ -214,7 +211,7 @@ const AccountSettingsPage = () => {
         2000,
         { leading: true, trailing: false }
       )(),
-    [authService, identityService, toast, record]
+    [authService, identityService, toast]
   )
 
   const onClickResendVerificationEmail = useCallback(async () => {

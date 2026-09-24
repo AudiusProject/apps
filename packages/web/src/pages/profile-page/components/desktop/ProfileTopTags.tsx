@@ -30,9 +30,7 @@ export const ProfileTopTags = () => {
       />
       <Paper p='s' gap='s' wrap='wrap'>
         {topTags.map((tag) => (
-          <SearchTag key={tag} source='profile page'>
-            {tag}
-          </SearchTag>
+          <SearchTag key={tag}>{tag}</SearchTag>
         ))}
       </Paper>
     </ProfilePageNavSectionItem>

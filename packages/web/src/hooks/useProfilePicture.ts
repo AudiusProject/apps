@@ -13,11 +13,9 @@ type UseProfilePictureArgs = {
 }
 
 /**
- * Like `useProfilePicture`, but also returns the `onError` callback from
- * `useImageSize`. Callers that render the url in an `<img>` should pass it
- * through, so that a render-time failure (which `preload` can miss — the two
- * requests are separate and a node can fail one and serve the other) advances
- * to the next mirror instead of stranding the image on a dead host.
+ * Like `useProfilePicture`, but also returns `useImageSize`'s `onError`, so an
+ * `<img>` render failure can advance to the next mirror. `preload` alone can
+ * miss a node that fails the render request.
  */
 export const useProfilePictureSource = ({
   userId,

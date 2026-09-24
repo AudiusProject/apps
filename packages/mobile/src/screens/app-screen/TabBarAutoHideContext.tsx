@@ -12,17 +12,8 @@ const TabBarAutoHideContext = createContext<SharedValue<number> | undefined>(
 )
 
 /**
- * Carries the focused tab's chrome auto-hide progress out to the bottom tab
- * bar.
- *
- * `GlassChromeProvider` is mounted per tab stack, so the scroll signal it
- * publishes is only reachable from inside a tab's own screens. The tab bar is
- * the navigator's `tabBar` — rendered as a *sibling* of the screens, not a
- * descendant — so no per-tab provider sits above it, and there are five of
- * them anyway. This provider goes above the tab navigator instead and holds
- * the single value the bar animates off; `TabBarAutoHideBridge`, mounted
- * inside each tab stack, mirrors that tab's progress into it while it is the
- * focused tab.
+ * Holds the focused tab's auto-hide progress for the bottom tab bar, which
+ * renders outside the per-tab `GlassChromeProvider`.
  */
 export const TabBarAutoHideProvider = (props: { children: ReactNode }) => {
   const hidden = useSharedValue(0)
@@ -50,8 +41,15 @@ export const useTabBarHiddenProgress = () => {
 /**
  * Republishes this tab stack's auto-hide progress while the tab is focused.
  * Mount inside the stack's `GlassChromeProvider`; renders nothing.
+ *
+ * Pushed screens don't drive the scroll signal, so the chrome is always shown
+ * when the stack is not at its root.
  */
-export const TabBarAutoHideBridge = () => {
+export const TabBarAutoHideBridge = ({
+  isAtStackRoot
+}: {
+  isAtStackRoot: boolean
+}) => {
   const hidden = useChromeHiddenProgress()
   const published = useContext(TabBarAutoHideContext)
   const isFocused = useIsFocused()
@@ -59,17 +57,20 @@ export const TabBarAutoHideBridge = () => {
   useAnimatedReaction(
     () => hidden.value,
     (current) => {
-      if (isFocused && published) published.value = current
+      if (isFocused && published) {
+        published.value = isAtStackRoot ? current : 0
+      }
     },
-    [isFocused, published]
+    [isFocused, isAtStackRoot, published]
   )
 
-  // A blurred tab stops scrolling, and so stops writing. The incoming tab has
-  // to hand over its progress on focus, otherwise the bar keeps whatever state
-  // the tab the user just left had it in.
+  // Publish the current progress when the tab gains focus or the stack depth
+  // changes.
   useEffect(() => {
-    if (isFocused && published) published.value = hidden.value
-  }, [isFocused, published, hidden])
+    if (isFocused && published) {
+      published.value = isAtStackRoot ? hidden.value : 0
+    }
+  }, [isFocused, isAtStackRoot, published, hidden])
 
   return null
 }

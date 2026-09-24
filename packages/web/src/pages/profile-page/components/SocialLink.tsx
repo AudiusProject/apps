@@ -43,7 +43,7 @@ const isHandleType = (type: Type): type is HandleType =>
 type SocialLinkProps = {
   type: Type
   link: string
-  onClick: (event?: any) => void
+  onClick?: (event?: any) => void
   iconOnly?: boolean
 }
 

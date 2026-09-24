@@ -52,11 +52,8 @@ export default function render(pageContext: TrackPageContext) {
   const userAgent = headers?.['user-agent'] ?? ''
   const isMobile = isMobileUserAgent(userAgent)
 
-  // The API reports tracks whose owner is no longer active as non-streamable.
-  // Serve none of their metadata: no title, artwork, embed player, or index -
-  // the page is rendered as a plain 404, matching what the client navigates to
-  // and what the API returns for these tracks. Explicit `=== false` because the
-  // field is absent on older API responses.
+  // Non-streamable tracks render as a 404 with no track metadata. `=== false`
+  // because older responses omit the field.
   const isUnavailable = track?.is_streamable === false
 
   // Check if this request can show an embed player (Twitter/Discord bots)

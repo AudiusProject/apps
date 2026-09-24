@@ -5,21 +5,14 @@ import { Flex, FlexProps } from '../layout/Flex'
 
 type LoadingSpinnerProps = FlexProps & Pick<IconProps, 'size' | 'color'>
 
-/**
- * Circumference of the r=16 arc (2πr ≈ 100.53), rounded up. Used as the dash
- * gap so a single dash segment can sweep the whole circle.
- */
+/** Circumference of the r=16 arc (2πr ≈ 100.53), rounded up. */
 const CIRCUMFERENCE = 101
 
 const rotate = keyframes`
   to { transform: rotate(360deg); }
 `
 
-/**
- * Grow-then-shrink sweep, matching the Lottie animation this replaced: the arc
- * grew from empty to full over ~1s, then shrank back to empty over ~2s, while
- * rotating throughout.
- */
+/** Arc grows then shrinks while the svg rotates. */
 const sweep = keyframes`
   0% { stroke-dasharray: 1 ${CIRCUMFERENCE}; stroke-dashoffset: 0; }
   50% { stroke-dasharray: 75 ${CIRCUMFERENCE}; stroke-dashoffset: -18; }
@@ -27,14 +20,8 @@ const sweep = keyframes`
 `
 
 /**
- * Previously rendered a Lottie animation. `lottie-web` is a ~613 KB animation
- * runtime, and a loading spinner is the one component that cannot be lazily
- * loaded — it is what renders *while* things load — so it pinned the whole
- * runtime into the entry chunk for every visitor.
- *
- * The `svg > g > path` structure is deliberate: ~10 stylesheets across the web
- * app recolour the spinner with `.someClass g path { stroke: ... }` selectors
- * written against the Lottie output. Keeping the shape keeps those working.
+ * CSS spinner (no lottie, so it can live in the entry chunk). Keep the
+ * svg > g > path structure: web stylesheets recolour it via `g path` selectors.
  */
 const LoadingSpinner = (props: LoadingSpinnerProps) => {
   const { size = 'l', color, ...rest } = props

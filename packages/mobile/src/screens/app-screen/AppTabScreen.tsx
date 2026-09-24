@@ -250,23 +250,19 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
     [handleChangeState, handleTransitionEnd, setNavigation]
   )
 
-  // Mid-screen swipe-to-open for this tab's root screen. Off whenever a screen
-  // has claimed horizontal gestures for itself (`gesturesDisabled` — e.g. the
-  // feed, which composes its own opener with its pager) and whenever a
-  // right-swipe should mean "back" instead.
+  // Mid-screen swipe-to-open on the tab's root screen. Off when a screen handles
+  // horizontal gestures itself (gesturesDisabled, e.g. Feed) or when a right
+  // swipe means back.
   const openDrawerGesture = useOpenDrawerGesture(
     isFocused && isAtStackRoot && !gesturesDisabled && !isNowPlayingDrawerOpen
   )
 
   return (
-    // Publishes the floating root header's height to the screens below it, so
-    // they can pad their scrollable content and let it slide behind the glass.
+    // Publishes the floating header heights and scroll signal to this tab's
+    // screens.
     <GlassChromeProvider>
-      {/*
-        The bottom tab bar lives outside this provider, so it can't read the
-        scroll signal directly — this hands it out while the tab is focused.
-      */}
-      <TabBarAutoHideBridge />
+      {/* Hands the scroll signal to the tab bar, which renders outside this provider. */}
+      <TabBarAutoHideBridge isAtStackRoot={isAtStackRoot} />
       <GestureDetector gesture={openDrawerGesture}>
         <View style={styles.root} collapsable={false}>
           <Stack.Navigator

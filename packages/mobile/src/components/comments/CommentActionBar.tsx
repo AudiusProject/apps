@@ -5,15 +5,9 @@ import {
   useReactToComment
 } from '@audius/common/context'
 import { commentsMessages as messages } from '@audius/common/messages'
-import {
-  Name,
-  type Comment,
-  type ID,
-  type ReplyComment
-} from '@audius/common/models'
+import { type Comment, type ID, type ReplyComment } from '@audius/common/models'
 
 import { Box, Flex, PlainButton, Text } from '@audius/harmony-native'
-import { make, track } from 'app/services/analytics'
 
 import { FavoriteButton } from '../favorite-button'
 
@@ -43,14 +37,7 @@ export const CommentActionBar = (props: CommentActionBarProps) => {
       replyingToComment: comment,
       replyingToCommentId: parentCommentId ?? comment.id
     })
-
-    track(
-      make({
-        eventName: Name.COMMENTS_CLICK_REPLY_BUTTON,
-        commentId
-      })
-    )
-  }, [comment, commentId, parentCommentId, setReplyingAndEditingState])
+  }, [comment, parentCommentId, setReplyingAndEditingState])
 
   return (
     <>

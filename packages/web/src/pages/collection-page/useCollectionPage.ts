@@ -161,11 +161,10 @@ export const useCollectionPage = (
           kind: Kind.TRACKS,
           id: trackId,
           uid: makeStableUid(Kind.TRACKS, trackId, COLLECTION_TRACKS_SOURCE),
-          // `time` is 0 for entries whose added-timestamp was never written to
-          // playlist_contents. `dayjs.unix(0)` renders as 12/31/69 and, being a
-          // truthy object, also defeats the `dateAdded || created_at` fallback
-          // downstream — so fall back to the track's creation date here.
-          dateAdded: time ? dayjs.unix(time) : dayjs(t.created_at)
+          // `time` is 0 when playlist_contents has no added timestamp; show the
+          // track's created_at instead of the Unix epoch.
+          dateAdded: time ? dayjs.unix(time) : dayjs(t.created_at),
+          timeAdded: time
         } as CollectionTrack
       })
       .filter((e): e is CollectionTrack => e !== null)
@@ -668,17 +667,6 @@ export const useCollectionPage = (
             ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
-        if (playlistId) {
-          dispatch(
-            make(Name.PLAYLIST_PLAY, {
-              id: `${playlistId}`,
-              source: PlaybackSource.PLAYLIST_PAGE,
-              isAlbum: !!collection?.is_album,
-              trackCount,
-              isPreview: shouldPreview
-            })
-          )
-        }
       } else if (tracks.entries.length > 0) {
         dispatch(playbackActions.stop({}))
         const firstEntry = tracks.entries[0]
@@ -702,17 +690,6 @@ export const useCollectionPage = (
             ...(playlistId ? { collectionId: `${playlistId}` } : {})
           })
         )
-        if (playlistId) {
-          dispatch(
-            make(Name.PLAYLIST_PLAY, {
-              id: `${playlistId}`,
-              source: PlaybackSource.PLAYLIST_PAGE,
-              isAlbum: !!collection?.is_album,
-              trackCount,
-              isPreview: shouldPreview
-            })
-          )
-        }
       }
     },
     [
@@ -724,7 +701,6 @@ export const useCollectionPage = (
       tracks.entries,
       getPlayingId,
       playlistId,
-      trackCount,
       dispatch,
       collectionPlaybackQueue
     ]
@@ -765,7 +741,10 @@ export const useCollectionPage = (
 
       const trackIdAndTimes = newOrder.map((uid: any) => ({
         id: tracks.entries[order[uid]].track_id,
-        time: tracks.entries[order[uid]].dateAdded.unix()
+        // Write back the stored time, not the display fallback in dateAdded.
+        time:
+          tracks.entries[order[uid]].timeAdded ??
+          tracks.entries[order[uid]].dateAdded.unix()
       }))
 
       setCustomOrder(newOrder)

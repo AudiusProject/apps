@@ -2,13 +2,12 @@ import {
   useCollectionByPermalink,
   useCollectionTracks
 } from '@audius/common/api'
-import { Name, SquareSizes } from '@audius/common/models'
+import { SquareSizes } from '@audius/common/models'
 import { CollectionValues } from '@audius/common/schemas'
 import {
   EditCollectionValues,
   cacheCollectionsActions
 } from '@audius/common/store'
-import { isEqual } from 'lodash'
 import { useDispatch } from 'react-redux'
 import { useParams, useMatch, useSearchParams } from 'react-router'
 
@@ -19,7 +18,6 @@ import Page from 'components/page/Page'
 import { useCollectionCoverArt } from 'hooks/useCollectionCoverArt'
 import { useIsUnauthorizedForHandleRedirect } from 'hooks/useManagedAccountNotAllowedRedirect'
 import { useRequiresAccount } from 'hooks/useRequiresAccount'
-import { track } from 'services/analytics'
 import { replace } from 'utils/navigation'
 
 import { getEditablePlaylistContents, updatePlaylistContents } from '../utils'
@@ -74,25 +72,6 @@ export const EditCollectionPage = () => {
 
   const handleSubmit = (values: CollectionValues) => {
     const { playlist_contents, tracks, ...restValues } = values
-
-    track({
-      eventName: Name.COLLECTION_EDIT,
-      properties: {
-        id: playlist_id
-      }
-    })
-
-    // We want to pay special attention to access condition changes
-    if (!isEqual(values.stream_conditions, initialValues.stream_conditions)) {
-      track({
-        eventName: Name.COLLECTION_EDIT_ACCESS_CHANGED,
-        properties: {
-          id: playlist_id,
-          from: initialValues.stream_conditions,
-          to: values.stream_conditions
-        }
-      })
-    }
 
     const updatedPlaylistContents = updatePlaylistContents(
       tracks,

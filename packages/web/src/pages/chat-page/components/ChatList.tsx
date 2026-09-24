@@ -39,6 +39,9 @@ const emptyMessageForTab: Record<InboxTab, string> = {
  * until the tab has at least this many rows or there is nothing left.
  */
 const MIN_VISIBLE_CHATS_PER_TAB = 10
+// Stop backfilling after this many pages per tab visit, so a mostly empty tab
+// doesn't page through the whole chat history.
+const MAX_BACKFILL_PAGES = 5
 
 type ChatListProps = {
   currentChatId?: string
@@ -66,9 +69,16 @@ export const ChatList = (props: ChatListProps) => {
   }, [status, setHasLoadedOnce])
 
   // Backfill the current tab from older pages when it is nearly empty
-  const needsBackfill = hasMore && chats.length < MIN_VISIBLE_CHATS_PER_TAB
+  const [backfillPages, setBackfillPages] = useState(0)
+  useEffect(() => {
+    setBackfillPages(0)
+  }, [currentTab])
+  const isBackfillExhausted = backfillPages >= MAX_BACKFILL_PAGES
+  const needsBackfill =
+    hasMore && chats.length < MIN_VISIBLE_CHATS_PER_TAB && !isBackfillExhausted
   useEffect(() => {
     if (status === Status.SUCCESS && needsBackfill) {
+      setBackfillPages((pages) => pages + 1)
       dispatch(fetchMoreChats())
     }
   }, [status, needsBackfill, dispatch])
@@ -76,7 +86,9 @@ export const ChatList = (props: ChatListProps) => {
   // While there are still pages to load, the InfiniteScroll loader (below)
   // shows skeletons, so only show the empty state once we've run out.
   const isEmptyTab =
-    chats.length === 0 && hasLoadedOnce && (!hasMore || status === Status.ERROR)
+    chats.length === 0 &&
+    hasLoadedOnce &&
+    (!hasMore || status === Status.ERROR || isBackfillExhausted)
 
   return (
     <div
@@ -88,7 +100,7 @@ export const ChatList = (props: ChatListProps) => {
         pageStart={0}
         initialLoad={true}
         loadMore={handleLoadMoreChats}
-        hasMore={hasMore}
+        hasMore={hasMore && !isEmptyTab}
         useWindow={false}
         loader={
           hasLoadedOnce ? (

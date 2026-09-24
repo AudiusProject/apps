@@ -11,14 +11,12 @@ import { Id, OptionalId } from '@audius/sdk'
 import ReactNativeBlobUtil from 'react-native-blob-util'
 import { select, call, put, all, take, race } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
 import {
   getLocalAudioPath,
   getLocalTrackCoverArtDestination,
   getLocalTrackDir,
   getLocalTrackJsonPath
 } from 'app/services/offline-downloader'
-import { EventNames } from 'app/types/analytics'
 
 import { getTrackOfflineDownloadStatus } from '../../../selectors'
 import type { OfflineJob } from '../../../slice'
@@ -54,9 +52,6 @@ function* shouldAbortDownload(trackId: ID) {
 
 export function* downloadTrackWorker(trackId: ID, requeueCount?: number) {
   const queueItem: OfflineJob = { type: 'track', id: trackId, requeueCount }
-  track(
-    make({ eventName: EventNames.OFFLINE_MODE_DOWNLOAD_START, ...queueItem })
-  )
   yield* put(startJob(queueItem))
 
   const { jobResult, cancel, abortDownload, abortJob } = yield* race({
@@ -78,12 +73,6 @@ export function* downloadTrackWorker(trackId: ID, requeueCount?: number) {
     yield* call(removeDownloadedTrack, trackId)
     yield* put(cancelJob(queueItem))
   } else if (jobResult === OfflineDownloadStatus.ERROR) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_FAILURE,
-        ...queueItem
-      })
-    )
     yield* call(removeDownloadedTrack, trackId)
     if ((requeueCount ?? 0) < MAX_REQUEUE_COUNT - 1) {
       yield* put(errorJob(queueItem))
@@ -92,22 +81,10 @@ export function* downloadTrackWorker(trackId: ID, requeueCount?: number) {
     }
     yield* put(requestProcessNextJob())
   } else if (jobResult === OfflineDownloadStatus.ABANDONED) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_FAILURE,
-        ...queueItem
-      })
-    )
     yield* put(abandonJob(queueItem))
     yield* call(removeDownloadedTrack, trackId)
     yield* put(requestProcessNextJob())
   } else if (jobResult === OfflineDownloadStatus.SUCCESS) {
-    track(
-      make({
-        eventName: EventNames.OFFLINE_MODE_DOWNLOAD_SUCCESS,
-        ...queueItem
-      })
-    )
     yield* put(completeJob({ ...queueItem, completedAt: Date.now() }))
     yield* put(requestProcessNextJob())
   }

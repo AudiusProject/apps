@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { useCurrentAccount, useUpdatePlaylistLibrary } from '@audius/common/api'
-import { Name, PlaylistLibraryFolder } from '@audius/common/models'
+import { PlaylistLibraryFolder } from '@audius/common/models'
 import { playlistLibraryHelpers } from '@audius/common/store'
 import {
   Modal,
@@ -11,7 +11,6 @@ import {
   IconFolder
 } from '@audius/harmony'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import FolderForm from 'components/create-playlist/FolderForm'
 import { DeleteFolderConfirmationModal } from 'components/nav/desktop/PlaylistLibrary/DeleteFolderConfirmationModal'
 import { zIndex } from 'utils/zIndex'
@@ -33,7 +32,6 @@ type EditFolderModalProps = {
 
 export const EditFolderModal = (props: EditFolderModalProps) => {
   const { isOpen, onClose, folder } = props
-  const record = useRecord()
   const { data: playlistLibrary } = useCurrentAccount({
     select: (account) => account?.playlistLibrary
   })
@@ -41,11 +39,6 @@ export const EditFolderModal = (props: EditFolderModalProps) => {
   const onCloseDeleteConfirmation = () => setShowDeleteConfirmation(false)
 
   const { mutate: updatePlaylistLibrary } = useUpdatePlaylistLibrary()
-
-  const handleCancel = useCallback(() => {
-    record(make(Name.FOLDER_CANCEL_EDIT, {}))
-    onClose()
-  }, [onClose, record])
 
   const handleSubmit = useCallback(
     (newName: string) => {
@@ -57,10 +50,9 @@ export const EditFolderModal = (props: EditFolderModalProps) => {
         )
         updatePlaylistLibrary(newLibrary)
       }
-      record(make(Name.FOLDER_SUBMIT_EDIT, {}))
       onClose()
     },
-    [folder, onClose, playlistLibrary, record, updatePlaylistLibrary]
+    [folder, onClose, playlistLibrary, updatePlaylistLibrary]
   )
 
   const handleConfirmDelete = useCallback(() => {
@@ -91,7 +83,7 @@ export const EditFolderModal = (props: EditFolderModalProps) => {
           <FolderForm
             isEditMode
             onSubmit={handleSubmit}
-            onCancel={handleCancel}
+            onCancel={onClose}
             onDelete={handleConfirmDelete}
             initialFolderName={folder.name}
           />

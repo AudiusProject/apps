@@ -509,18 +509,7 @@ function* signUp() {
                     oldUsername: email,
                     oldPassword: TEMPORARY_PASSWORD
                   })
-                  yield* put(
-                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
-                      status: 'success'
-                    })
-                  )
-                } catch {
-                  yield* put(
-                    make(Name.SETTINGS_COMPLETE_CHANGE_PASSWORD, {
-                      status: 'failure'
-                    })
-                  )
-                }
+                } catch {}
               }
 
               yield* fork(sendPostSignInRecoveryEmail, { handle, email })
@@ -839,9 +828,8 @@ function* signIn(action: ReturnType<typeof signOnActions.signIn>) {
       yield* put(
         make(Name.SIGN_IN_WITH_DEACTIVATED_ACCOUNT, { handle: user.handle })
       )
-      // The hedgehog login above already persisted a session. Clear it, or a
-      // refresh will restore the deactivated account via fetchAccount.
-      const authService = yield* getContext('authService')
+      // authService.signIn persisted a session; clear it so fetchAccount
+      // doesn't restore the deactivated account on refresh.
       yield* call([authService, authService.signOut])
       yield* put(signOnActions.signInFailed('Account is deactivated'))
       yield* put(toastActions.toast({ content: messages.deactivatedAccount }))

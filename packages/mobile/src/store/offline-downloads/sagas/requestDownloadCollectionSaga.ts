@@ -8,9 +8,6 @@ import { collectionsSocialActions, getSDK } from '@audius/common/store'
 import { Id, OptionalId } from '@audius/sdk'
 import { takeEvery, put, call } from 'typed-redux-saga'
 
-import { make, track } from 'app/services/analytics'
-import { EventNames } from 'app/types/analytics'
-
 import type { CollectionAction, OfflineEntry } from '../slice'
 import { addOfflineEntries, requestDownloadCollection } from '../slice'
 
@@ -22,13 +19,6 @@ export function* requestDownloadCollectionSaga() {
 
 function* downloadCollection(action: CollectionAction) {
   const { collectionId } = action.payload
-  track(
-    make({
-      eventName: EventNames.OFFLINE_MODE_DOWNLOAD_COLLECTION_TOGGLE_ON,
-      collectionId
-    })
-  )
-
   const currentUserId = yield* call(queryCurrentUserId)
   if (!currentUserId) return
 

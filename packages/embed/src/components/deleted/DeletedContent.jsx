@@ -24,9 +24,6 @@ const DeletedContent = ({ flavor, isBlocked, isUnavailable }) => {
     window.open(getCopyableLink(), '_blank')
   }
 
-  // `unavailable` says nothing about the account on purpose: the same flag
-  // covers a self deactivation and a delisted account, and we shouldn't tell
-  // listeners the creator removed the track when moderation suppressed it.
   const label = isUnavailable
     ? messages.unavailable
     : isBlocked

@@ -12,7 +12,7 @@ import { SelectArtistsPreviewContextProvider } from 'components/follow-artist-ca
 
 const messages = {
   cta: `Let’s fix that by following some of these artists!`,
-  personalizedCta: `Here are artists you’ve liked but aren’t following yet.`,
+  personalizedCta: `Follow artists whose tracks you’ve favorited or reposted.`,
   noFollowers: `Your feed is empty`
 }
 

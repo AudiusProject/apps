@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { QUERY_KEYS } from '@audius/common/api'
+import { QUERY_KEYS, useFollowSuggestions } from '@audius/common/api'
 import { FollowSource } from '@audius/common/models'
 import { usersSocialActions } from '@audius/common/store'
 import { useQueryClient } from '@tanstack/react-query'
@@ -42,7 +42,8 @@ const useStyles = makeStyles(({ spacing, palette }) => ({
 
 const messages = {
   title: `Follow users to personalize your feed`,
-  instruction: `Let's fix that by following some of these artists!`
+  instruction: `Let's fix that by following some of these artists!`,
+  personalizedInstruction: `Follow artists whose tracks you’ve favorited or reposted.`
 }
 
 export const SuggestedFollows = () => {
@@ -51,6 +52,7 @@ export const SuggestedFollows = () => {
   const queryClient = useQueryClient()
 
   const selectedUserIds = useSelector(getFollowIds)
+  const { isPersonalized } = useFollowSuggestions()
 
   const handleArtistsSelected = useCallback(() => {
     // Set eager users and refetch feed
@@ -72,7 +74,9 @@ export const SuggestedFollows = () => {
           {messages.title}
         </Text>
         <Text variant='body1' style={styles.instruction}>
-          {messages.instruction}
+          {isPersonalized
+            ? messages.personalizedInstruction
+            : messages.instruction}
         </Text>
       </View>
     </>

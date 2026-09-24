@@ -39,15 +39,7 @@ export const getWeeklyRotationQueryKey = ({
  * artists they don't already follow. The current user's by default; a shared
  * link passes the sharer's id.
  *
- * Deliberately a plain `useQuery` rather than an infinite one — the mix is a
- * fixed-size artifact, not a lineup you scroll. There is no page 2.
- *
- * The server holds the mix constant for the ISO week, so the client cache can
- * be long-lived -- but NOT infinite. With staleTime: Infinity and
- * refetchOnMount: false, a single failed or empty first fetch was permanent for
- * the session: nothing retried it, and the surfaces that hide themselves on an
- * empty result stayed hidden until the app restarted. A bounded staleTime keeps
- * the request count low while still letting a bad result heal.
+ * A plain `useQuery`: the mix is a fixed 30 tracks with no pagination.
  */
 export const useWeeklyRotation = (
   { limit = DEFAULT_LIMIT, userId: userIdArg }: UseWeeklyRotationArgs = {},

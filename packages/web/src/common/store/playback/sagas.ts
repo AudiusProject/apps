@@ -36,6 +36,7 @@ import {
   Nullable,
   actionChannelDispatcher,
   getTrackPreviewDuration,
+  getWeeklyRotationOwnerIdFromQueueSource,
   waitForAccount
 } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
@@ -774,12 +775,18 @@ function* watchNext() {
           yield* call(playCurrent)
           const collId = yield* select(getCollectionId)
           const feedType = yield* select(getFeedType)
+          const weeklyRotationOwnerId = getWeeklyRotationOwnerIdFromQueueSource(
+            yield* select(getCurrentSource)
+          )
           yield* put(
             make(Name.PLAYBACK_PLAY, {
               id: `${trackId}`,
               source: AnalyticsPlaybackSource.PASSIVE,
               ...(collId ? { collectionId: collId } : {}),
-              ...(feedType ? { feed_type: feedType } : {})
+              ...(feedType ? { feed_type: feedType } : {}),
+              ...(weeklyRotationOwnerId
+                ? { weeklyRotationOwnerId: `${weeklyRotationOwnerId}` }
+                : {})
             })
           )
         }
@@ -815,12 +822,18 @@ function* watchPrevious() {
       yield* call(playCurrent)
       const collId = yield* select(getCollectionId)
       const feedType = yield* select(getFeedType)
+      const weeklyRotationOwnerId = getWeeklyRotationOwnerIdFromQueueSource(
+        yield* select(getCurrentSource)
+      )
       yield* put(
         make(Name.PLAYBACK_PLAY, {
           id: `${trackId}`,
           source: AnalyticsPlaybackSource.PASSIVE,
           ...(collId ? { collectionId: collId } : {}),
-          ...(feedType ? { feed_type: feedType } : {})
+          ...(feedType ? { feed_type: feedType } : {}),
+          ...(weeklyRotationOwnerId
+            ? { weeklyRotationOwnerId: `${weeklyRotationOwnerId}` }
+            : {})
         })
       )
     } else {

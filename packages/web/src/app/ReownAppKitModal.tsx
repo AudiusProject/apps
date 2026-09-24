@@ -1,9 +1,4 @@
-import {
-  mainnet,
-  solana,
-  type AppKitNetwork,
-  type Chain
-} from '@reown/appkit/networks'
+import { mainnet, solana, type AppKitNetwork } from '@reown/appkit/networks'
 import { createAppKit } from '@reown/appkit/react'
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
@@ -11,15 +6,10 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { env } from 'services/env'
 import zIndex from 'utils/zIndex'
 
-// Audius ACDC chain (now ports to Core)
-export const audiusChain = {
-  id: env.AUDIUS_NETWORK_CHAIN_ID,
-  name: 'Audius',
-  nativeCurrency: { name: '-', symbol: '-', decimals: 18 },
-  rpcUrls: {
-    default: { http: [`${env.API_URL}/core/erpc`] }
-  }
-} as const satisfies Chain
+import { registerLoadedAppKit } from './appkit'
+import { audiusChain } from './audiusChain'
+
+export { audiusChain }
 
 const projectId = env.REOWN_PROJECT_ID
 const networks: [AppKitNetwork, ...AppKitNetwork[]] = [
@@ -48,3 +38,5 @@ export const appkitModal = createAppKit({
     email: false
   }
 })
+
+registerLoadedAppKit({ appkitModal, wagmiAdapter })

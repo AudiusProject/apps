@@ -7,7 +7,14 @@ import {
 } from '@audius/common/api'
 import { useAnalytics, useFeatureFlag } from '@audius/common/hooks'
 import { exploreMessages } from '@audius/common/messages'
-import { ID, Name, PlaybackSource, ShareSource } from '@audius/common/models'
+import {
+  FavoriteSource,
+  ID,
+  Name,
+  PlaybackSource,
+  RepostSource,
+  ShareSource
+} from '@audius/common/models'
 import { FeatureFlags } from '@audius/common/services'
 import {
   playbackActions,
@@ -15,7 +22,12 @@ import {
   shareModalUIActions
 } from '@audius/common/store'
 import type { PlaybackTrack } from '@audius/common/store'
-import { route } from '@audius/common/utils'
+import {
+  formatWeeklyRotationPeriod,
+  getWeeklyRotationPeriod,
+  getWeeklyRotationQueueSource,
+  route
+} from '@audius/common/utils'
 import {
   Artwork,
   Button,
@@ -48,7 +60,6 @@ const messages = {
 const { EXPLORE_PAGE } = route
 const { requestOpen: requestOpenShareModal } = shareModalUIActions
 
-const WEEKLY_ROTATION_SOURCE = 'WEEKLY_ROTATION_TRACKS'
 const PAGE_SIZE = 30
 const ARTWORK_SIZE = 200
 
@@ -64,17 +75,15 @@ const columns: TracksTableColumn[] = [
 /**
  * The full Weekly Rotation mix.
  *
- * Structured like a collection page -- artwork, title, play-all, track list --
- * but it isn't backed by a collection entity, so it's assembled from the same
+ * Structured like a collection page (artwork, title, play-all, track list) but
+ * it isn't backed by a collection entity, so it's assembled from the same
  * pieces the History page uses rather than reusing the collection page.
  * Artwork is the bundled asset for the same reason: there's no playlist_id to
  * hang cover art on.
  *
- * Two routes land here. `/explore/weekly-rotation` is the signed-in user's own
- * mix; `/explore/weekly-rotation/:handle` is a shared link to someone else's,
- * which is what Share produces. The endpoint is public, so the shared page
- * works signed out. Opening your own handle's link is the same as the bare
- * route.
+ * `/explore/weekly-rotation` shows the signed-in user's mix;
+ * `/explore/weekly-rotation/:handle` shows that user's mix (public, works
+ * signed out).
  *
  * The endpoint returns a fixed 30, so there is no pagination.
  */
@@ -86,65 +95,92 @@ export const WeeklyRotationPage = () => {
   const { data: currentUserId } = useCurrentUserId()
   const { handle } = useParams<{ handle?: string }>()
 
-  // The route stays registered while the flag is off -- the URL is public and
-  // shareable, so a link that predates the rollout should land somewhere real
-  // rather than 404.
+  // The route stays registered while the flag is off so shared links redirect
+  // instead of 404ing.
   const { isEnabled: isWeeklyRotationEnabled, isLoaded: isFlagLoaded } =
     useFeatureFlag(FeatureFlags.WEEKLY_ROTATION)
 
-  // With a handle in the URL the mix belongs to that user; otherwise to the
-  // viewer. Resolving the handle to a user is what the share modal, the
-  // header, and the query all key off.
+  // The mix belongs to the handle's user if present, otherwise the viewer.
   const { data: handleUser } = useUserByHandle(handle, { enabled: !!handle })
   const targetUserId = handle ? handleUser?.user_id : currentUserId
-  const isOwnMix = !handle || handleUser?.user_id === currentUserId
+  const isOwnMix =
+    !handle || (handleUser != null && handleUser.user_id === currentUserId)
+  const playbackSource = getWeeklyRotationQueueSource(targetUserId)
 
-  const { trackIds, isPending, isFetching, isLoading } = useWeeklyRotation(
-    { limit: PAGE_SIZE, userId: targetUserId },
-    { enabled: isWeeklyRotationEnabled && !!targetUserId }
+  const { trackIds, isPending, isFetching, isLoading, isSuccess, isError } =
+    useWeeklyRotation(
+      { limit: PAGE_SIZE, userId: targetUserId },
+      { enabled: isWeeklyRotationEnabled && !!targetUserId }
+    )
+
+  const mixProperties = useMemo(
+    () => ({
+      source: isMobile ? ('mobile' as const) : ('web' as const),
+      period: formatWeeklyRotationPeriod(getWeeklyRotationPeriod()),
+      isOwnMix,
+      ownerUserId: targetUserId ? `${targetUserId}` : undefined
+    }),
+    [isMobile, isOwnMix, targetUserId]
   )
 
-  // Fired once the mix resolves rather than on mount, so trackCount is real
-  // and a failed load doesn't register as a page view.
+  // Fired once the mix resolves rather than on mount, so trackCount and status
+  // are real.
   const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (hasTrackedView.current || !trackIds.length) return
+    if (hasTrackedView.current || (!isSuccess && !isError)) return
     hasTrackedView.current = true
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_PAGE_VIEW,
-      source: isMobile ? 'mobile' : 'web',
-      trackCount: trackIds.length
+      ...mixProperties,
+      trackCount: trackIds.length,
+      status: isError ? 'error' : trackIds.length ? 'success' : 'empty',
+      isSignedIn: !!currentUserId
     })
-  }, [trackIds.length, isMobile, trackEvent])
+  }, [
+    isSuccess,
+    isError,
+    trackIds.length,
+    mixProperties,
+    currentUserId,
+    trackEvent
+  ])
 
-  const isPlaying = useSelector(playbackSelectors.getPlaying)
+  const isPlaybackActive = useSelector(playbackSelectors.getPlaying)
   const currentPlaybackTrackId = useSelector(
     playbackSelectors.getCurrentTrackId
   )
+  const currentPlaybackSource = useSelector(playbackSelectors.getCurrentSource)
+
+  // The header button only reflects and controls playback of this mix.
+  const isQueued =
+    currentPlaybackSource === playbackSource &&
+    currentPlaybackTrackId != null &&
+    trackIds.includes(currentPlaybackTrackId)
+  const isPlaying = isPlaybackActive && isQueued
 
   const playbackQueue: PlaybackTrack[] = useMemo(
     () =>
       trackIds.map((id) => ({
         trackId: id,
-        source: WEEKLY_ROTATION_SOURCE
+        source: playbackSource
       })),
-    [trackIds]
+    [trackIds, playbackSource]
   )
 
-  // Mirrors the History page's play-all: toggle when we're already on the
-  // first track, otherwise start the queue from the top.
+  // Toggle when the mix is what's loaded, otherwise start the queue from the
+  // top.
   const handlePlay = useCallback(() => {
     if (playbackQueue.length === 0) return
     const firstId = playbackQueue[0].trackId as ID
 
-    if (currentPlaybackTrackId === firstId) {
+    if (isQueued) {
       dispatch(
         isPlaying ? playbackActions.togglePlay() : playbackActions.play()
       )
       dispatch(
         make(isPlaying ? Name.PLAYBACK_PAUSE : Name.PLAYBACK_PLAY, {
-          id: `${firstId}`,
-          source: PlaybackSource.PLAYLIST_PAGE
+          id: `${currentPlaybackTrackId}`,
+          source: PlaybackSource.WEEKLY_ROTATION
         })
       )
       return
@@ -152,7 +188,7 @@ export const WeeklyRotationPage = () => {
 
     trackEvent({
       eventName: Name.WEEKLY_ROTATION_PLAY_ALL,
-      source: isMobile ? 'mobile' : 'web',
+      ...mixProperties,
       trackCount: playbackQueue.length
     })
     dispatch(
@@ -165,20 +201,19 @@ export const WeeklyRotationPage = () => {
     dispatch(
       make(Name.PLAYBACK_PLAY, {
         id: `${firstId}`,
-        source: PlaybackSource.PLAYLIST_PAGE
+        source: PlaybackSource.WEEKLY_ROTATION
       })
     )
   }, [
     dispatch,
     isPlaying,
+    isQueued,
     currentPlaybackTrackId,
     playbackQueue,
     trackEvent,
-    isMobile
+    mixProperties
   ])
 
-  // The share modal resolves the owner's handle from the id, so the bare
-  // route shares the viewer's own mix under their handle.
   const handleShare = useCallback(() => {
     if (!targetUserId) return
     dispatch(
@@ -201,8 +236,8 @@ export const WeeklyRotationPage = () => {
     ? exploreMessages.weeklyRotation
     : exploreMessages.weeklyRotationFor(handleUser?.name ?? handle ?? '')
 
-  // Only the handle route gets the collage card and a canonical URL: the bare
-  // route is per-viewer and shouldn't be indexed as anyone's mix.
+  // Only the handle route gets an OG card and canonical URL; the bare route is
+  // per-viewer.
   const metaTags = handle
     ? {
         title,
@@ -267,7 +302,10 @@ export const WeeklyRotationPage = () => {
       </Flex>
 
       <TrackTableLineup
-        source={WEEKLY_ROTATION_SOURCE}
+        source={playbackSource}
+        playingSource={PlaybackSource.WEEKLY_ROTATION}
+        favoriteSource={FavoriteSource.WEEKLY_ROTATION}
+        repostSource={RepostSource.WEEKLY_ROTATION}
         trackIds={trackIds}
         isPending={isPending}
         isFetching={isFetching}

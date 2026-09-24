@@ -1,16 +1,10 @@
 import { useCallback, useContext, useEffect, useState } from 'react'
 
-import {
-  useCurrentAccountUser,
-  useCurrentUserId,
-  useQueryContext
-} from '@audius/common/api'
-import { Name } from '@audius/common/models'
+import { useQueryContext } from '@audius/common/api'
 import { Nullable, shortenSPLAddress } from '@audius/common/utils'
 import { Flex, Box, Divider, IconCopy, Text, useTheme } from '@audius/harmony'
 import pkg from 'bs58'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { ToastContext } from 'components/toast/ToastContext'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { copyToClipboard } from 'utils/clipboardUtil'
@@ -33,33 +27,11 @@ type KeyProps = {
 const Key = ({ label, value, isPrivate }: KeyProps) => {
   const { color } = useTheme()
   const { toast } = useContext(ToastContext)
-  const record = useRecord()
   const isMobile = useIsMobile()
-  const { data: accountHandle } = useCurrentAccountUser({
-    select: (user) => user?.handle
-  })
-  const { data: accountUserId } = useCurrentUserId()
   const handleClick = useCallback(() => {
     copyToClipboard(value)
-    if (accountHandle && accountUserId) {
-      if (isPrivate) {
-        record(
-          make(Name.EXPORT_PRIVATE_KEY_PRIVATE_KEY_COPIED, {
-            handle: accountHandle,
-            userId: accountUserId
-          })
-        )
-      } else {
-        record(
-          make(Name.EXPORT_PRIVATE_KEY_PUBLIC_ADDRESS_COPIED, {
-            handle: accountHandle,
-            userId: accountUserId
-          })
-        )
-      }
-    }
     toast(messages.copied)
-  }, [value, accountHandle, accountUserId, isPrivate, record, toast])
+  }, [value, toast])
   return (
     <Flex
       border='strong'

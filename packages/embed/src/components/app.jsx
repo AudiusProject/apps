@@ -7,11 +7,7 @@ import { CSSTransition } from 'react-transition-group'
 
 import '@audius/harmony/dist/harmony.css'
 
-import {
-  initTrackSessionStart,
-  recordOpen,
-  recordError
-} from '../analytics/analytics'
+import { initAnalytics } from '../analytics/analytics'
 import { ID_ROUTE, HASH_ID_ROUTE, PERMALINK_ROUTE } from '../routes'
 import {
   getCollection,
@@ -23,7 +19,6 @@ import {
   getEntityEvents
 } from '../util/BedtimeClient'
 import { getArtworkUrl } from '../util/getArtworkUrl'
-import { decodeHashId } from '../util/hashIds'
 import { getDominantColor } from '../util/image/imageProcessingUtil'
 import { isMobileWebTwitter } from '../util/isMobileWebTwitter'
 import { logError } from '../util/logError'
@@ -141,9 +136,7 @@ const App = (props) => {
   const searchParams = useSearchParams()
   const [didError, setDidError] = useState(false) // General errors
   const [did404, setDid404] = useState(false) // 404s indicate content was deleted
-  // A track whose owner is no longer active - the artist deactivated their own
-  // account, or the account was delisted by the trusted notifier. Rendered with
-  // the same "not available" treatment as a 404, but with its own copy.
+  // Track reported as non-streamable by the API
   const [isUnavailable, setIsUnavailable] = useState(false)
   const [requestState, setRequestState] = useState(null) // Parsed request state
   const [isRetrying, setIsRetrying] = useState(false) // Currently retrying?
@@ -155,15 +148,9 @@ const App = (props) => {
   const [dominantColor, setDominantColor] = useState(null)
   const playerContainerRef = useRef(null)
 
+  // Set up analytics
   useEffect(() => {
-    if (didError) {
-      recordError()
-    }
-  }, [didError])
-
-  // Record this session with analytics
-  useEffect(() => {
-    initTrackSessionStart()
+    initAnalytics()
   }, [])
 
   // TODO: pull these out into separate functions?
@@ -195,10 +182,7 @@ const App = (props) => {
           setIsUnavailable(false)
           setTracksResponse(null)
         } else if (track.isStreamable === false) {
-          // The stream endpoint refuses these, so there is nothing to play -
-          // don't render the title, artist and artwork either. Checked with an
-          // explicit `=== false` because an absent field must not read as
-          // unavailable.
+          // `=== false`: older responses omit isStreamable
           setDid404(true)
           setIsUnavailable(true)
           setTracksResponse(null)
@@ -207,12 +191,6 @@ const App = (props) => {
           setDid404(false)
           setIsUnavailable(false)
           setTracksResponse({ ...track, events })
-          recordOpen(
-            decodeHashId(track.id),
-            track.title,
-            track.user.handle,
-            stripLeadingSlash(track.permalink)
-          )
 
           const artworkUrl = await getArtworkUrl(track)
           // Set dominant color
@@ -254,12 +232,6 @@ const App = (props) => {
           setDid404(false)
           setIsUnavailable(false)
           setCollectionsResponse(collection)
-          recordOpen(
-            decodeHashId(collection.id),
-            collection.playlistName,
-            collection.user.handle,
-            stripLeadingSlash(collection.permalink)
-          )
 
           const artworkUrl = await getArtworkUrl(collection)
           // Set dominant color

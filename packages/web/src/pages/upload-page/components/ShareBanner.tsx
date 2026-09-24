@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useCurrentAccountUser } from '@audius/common/api'
 import { useUploadCompletionRoute } from '@audius/common/hooks'
-import { Name, ShareSource } from '@audius/common/models'
+import { ShareSource } from '@audius/common/models'
 import {
   UploadType,
   shareModalUIActions,
@@ -12,7 +12,6 @@ import { Button, IconMessage, IconShare, Text } from '@audius/harmony'
 import { useDispatch } from 'react-redux'
 
 import backgroundPlaceholder from 'assets/img/1-Concert-3-1.jpg'
-import { make } from 'common/store/analytics/actions'
 import { getCopyableLink } from 'utils/clipboardUtil'
 import { useSelector } from 'utils/reducer'
 
@@ -113,7 +112,6 @@ export const ShareBanner = (props: ShareBannerProps) => {
         defaultUserList: 'chats'
       })
     )
-    dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'upload' }))
   }, [accountUser, dispatch, shareLink])
 
   return (

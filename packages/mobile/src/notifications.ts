@@ -114,24 +114,26 @@ class PushNotifications {
     const { title, body, payload } = notification
     const notificationCampaignId =
       extractNotificationCampaignIdFromPayload(payload)
+    let data = payload?.data?.data ?? payload?.data ?? payload
+    // On Android, FCM delivers all data values as strings, breaking
+    // numeric ID fields and nested objects. Parse them back.
+    if (Platform.OS === MobileOS.ANDROID && data && typeof data === 'object') {
+      data = parseAndroidNotificationData(data)
+    }
     track(
       make({
         eventName: EventNames.NOTIFICATIONS_OPEN_PUSH_NOTIFICATION,
         title,
         body,
-        notificationCampaignId
+        notificationCampaignId,
+        type: typeof data?.type === 'string' ? data.type : undefined,
+        id: data?.id != null ? `${data.id}` : undefined
       })
     )
     if (notificationCampaignId) {
       Promise.resolve(
         reportNotificationCampaignPushOpen(notificationCampaignId)
       ).catch(() => {})
-    }
-    let data = payload?.data?.data ?? payload?.data ?? payload
-    // On Android, FCM delivers all data values as strings, breaking
-    // numeric ID fields and nested objects. Parse them back.
-    if (Platform.OS === MobileOS.ANDROID && data && typeof data === 'object') {
-      data = parseAndroidNotificationData(data)
     }
     this.navigation?.navigate(data)
   }

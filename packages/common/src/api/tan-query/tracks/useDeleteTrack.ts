@@ -2,8 +2,6 @@ import { Id } from '@audius/sdk'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useQueryContext } from '~/api/tan-query/utils'
-import { useAppContext } from '~/context/appContext'
-import { Name } from '~/models/Analytics'
 import { ID } from '~/models/Identifiers'
 import { Track } from '~/models/Track'
 import { UserMetadata } from '~/models/User'
@@ -30,9 +28,6 @@ export const useDeleteTrack = () => {
   const queryClient = useQueryClient()
   const { data: currentUserId } = useCurrentUserId()
   const { data: currentUser } = useUser(currentUserId)
-  const {
-    analytics: { track: trackEvent }
-  } = useAppContext()
 
   return useMutation({
     mutationFn: async ({ trackId }: DeleteTrackArgs) => {
@@ -46,7 +41,7 @@ export const useDeleteTrack = () => {
 
       return { trackId }
     },
-    onMutate: async ({ trackId, source }): Promise<MutationContext> => {
+    onMutate: async ({ trackId }): Promise<MutationContext> => {
       if (!currentUserId || !currentUser) {
         throw new Error('User ID is required')
       }
@@ -81,30 +76,7 @@ export const useDeleteTrack = () => {
         forceReplace: true
       })
 
-      trackEvent({
-        eventName: Name.DELETE,
-        properties: {
-          kind: 'track',
-          id: trackId,
-          source
-        }
-      })
-
       return { previousTrack, previousUser: currentUser }
-    },
-    onSuccess: async (_, { trackId }) => {
-      const track = queryClient.getQueryData(getTrackQueryKey(trackId))
-
-      if (track?.stem_of) {
-        trackEvent({
-          eventName: Name.STEM_DELETE,
-          properties: {
-            id: track.track_id,
-            parent_track_id: track.stem_of.parent_track_id,
-            category: track.stem_of.category
-          }
-        })
-      }
     },
     onError: (error, { trackId }, context) => {
       if (!context || !currentUserId || !context.previousTrack) return

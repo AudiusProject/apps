@@ -364,7 +364,6 @@ function* doFetchMoreMessages(action: ReturnType<typeof fetchMoreMessages>) {
 
 function* doSetMessageReaction(action: ReturnType<typeof setMessageReaction>) {
   const { chatId, messageId, reaction, userId } = action.payload
-  const { track, make } = yield* getContext('analytics')
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -389,30 +388,15 @@ function* doSetMessageReaction(action: ReturnType<typeof setMessageReaction>) {
         reaction: reactionResponse
       })
     )
-    yield* call(
-      track,
-      make({
-        eventName: Name.SEND_MESSAGE_REACTION_SUCCESS,
-        reaction
-      })
-    )
   } catch (e) {
     yield* put(setMessageReactionFailed(action.payload))
     console.error('Chats', e as Error)
-    yield* call(
-      track,
-      make({
-        eventName: Name.SEND_MESSAGE_REACTION_FAILURE,
-        reaction
-      })
-    )
   }
 }
 
 function* doCreateChat(action: ReturnType<typeof createChat>) {
   const { userIds, skipNavigation, presetMessage, replaceNavigation } =
     action.payload
-  const { track, make } = yield* getContext('analytics')
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -445,7 +429,6 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
         throw new Error("Chat couldn't be found after creating")
       }
       yield* put(createChatSucceeded({ chat }))
-      yield* call(track, make({ eventName: Name.CREATE_CHAT_SUCCESS }))
     }
   } catch (e) {
     const isForbiddenError = isResponseError(e) && e.response?.status === 403
@@ -472,7 +455,6 @@ function* doCreateChat(action: ReturnType<typeof createChat>) {
     if (!isForbiddenError) {
       console.error('Chats', e as Error)
     }
-    yield* call(track, make({ eventName: Name.CREATE_CHAT_FAILURE }))
   }
 }
 
@@ -486,7 +468,6 @@ function* doCreateChatBlast(action: ReturnType<typeof createChatBlast>) {
     skipNavigation
   } = action.payload
 
-  const { track, make } = yield* getContext('analytics')
   const currentUserId = yield* call(queryCurrentUserId)
   try {
     if (!currentUserId) {
@@ -520,16 +501,6 @@ function* doCreateChatBlast(action: ReturnType<typeof createChatBlast>) {
           chat: newBlast
         })
       )
-      yield* call(
-        track,
-        make({
-          eventName: Name.CREATE_CHAT_BLAST_SUCCESS,
-          audience,
-          audienceContentType,
-          audienceContentId,
-          sentBy: currentUserId
-        })
-      )
     }
   } catch (e) {
     yield* put(
@@ -539,17 +510,6 @@ function* doCreateChatBlast(action: ReturnType<typeof createChatBlast>) {
       })
     )
     console.error('Chats', e as Error)
-
-    yield* call(
-      track,
-      make({
-        eventName: Name.CREATE_CHAT_BLAST_FAILURE,
-        audience,
-        audienceContentType,
-        audienceContentId,
-        sentBy: currentUserId ?? undefined
-      })
-    )
   }
 }
 
@@ -676,7 +636,6 @@ function* doSendMessage(action: ReturnType<typeof sendMessage>) {
       }
     }
     console.error('Chats', e as Error)
-    yield* call(track, make({ eventName: Name.SEND_MESSAGE_FAILURE }))
   }
 }
 
@@ -734,7 +693,6 @@ function* doFetchBlockers() {
 
 function* doBlockUser(action: ReturnType<typeof blockUser>) {
   const { userId } = action.payload
-  const { track, make } = yield* getContext('analytics')
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -742,16 +700,8 @@ function* doBlockUser(action: ReturnType<typeof blockUser>) {
       userId: Id.parse(userId)
     })
     yield* put(fetchBlockees())
-    yield* call(
-      track,
-      make({ eventName: Name.BLOCK_USER_SUCCESS, blockedUserId: userId })
-    )
   } catch (e) {
     console.error('Chats', e as Error)
-    yield* call(
-      track,
-      make({ eventName: Name.BLOCK_USER_FAILURE, blockedUserId: userId })
-    )
   }
 }
 
@@ -821,7 +771,6 @@ function* doFetchLinkUnfurlMetadata(
 
 function* doDeleteChat(action: ReturnType<typeof deleteChat>) {
   const { chatId } = action.payload
-  const { track, make } = yield* getContext('analytics')
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -834,18 +783,13 @@ function* doDeleteChat(action: ReturnType<typeof deleteChat>) {
     yield* delay(1)
     // NOW delete the chat - otherwise we refetch it right away
     yield* put(deleteChatSucceeded({ chatId }))
-    yield* call(track, make({ eventName: Name.DELETE_CHAT_SUCCESS }))
   } catch (e) {
     console.error('Chats', e as Error)
-    yield* call(track, make({ eventName: Name.DELETE_CHAT_FAILURE }))
   }
 }
 
 function* doLogError({ payload: { error } }: ReturnType<typeof logError>) {
-  const { track, make } = yield* getContext('analytics')
-  const { code } = error
   console.error(error)
-  yield* call(track, make({ eventName: Name.CHAT_WEBSOCKET_ERROR, code }))
 }
 
 function* watchFetchUnreadMessagesCount() {
@@ -938,7 +882,6 @@ function* watchDeleteChat() {
 
 export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
   const { chatId, category } = action.payload
-  const { track, make } = yield* getContext('analytics')
   try {
     const audiusSdk = yield* getContext('audiusSdk')
     const sdk = yield* call(audiusSdk)
@@ -957,10 +900,6 @@ export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
               : 'Conversation uncategorized'
       })
     )
-    yield* call(
-      track,
-      make({ eventName: Name.SET_CHAT_CATEGORY_SUCCESS, category })
-    )
   } catch (e) {
     yield* put(setChatCategoryFailed({ chatId }))
     yield* put(
@@ -970,10 +909,6 @@ export function* doSetChatCategory(action: ReturnType<typeof setChatCategory>) {
       })
     )
     console.error('Chats', e as Error)
-    yield* call(
-      track,
-      make({ eventName: Name.SET_CHAT_CATEGORY_FAILURE, category })
-    )
   }
 }
 

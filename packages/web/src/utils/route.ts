@@ -113,8 +113,7 @@ export const fullProfilePage = (handle: string) => {
   return `${BASE_URL}${profilePage(handle)}`
 }
 
-// A listener's Weekly Rotation. Under /explore rather than /:handle/... so it
-// can't collide with a track permalink.
+// Under /explore to avoid colliding with /:handle/:slug track permalinks.
 export const weeklyRotationPage = (handle: string) => {
   return `/explore/weekly-rotation/${encodeUrlName(handle)}`
 }

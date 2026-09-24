@@ -1,13 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { useCollection, useUser } from '@audius/common/api'
-import { useAnalytics } from '@audius/common/hooks'
-import {
-  ID,
-  SquareSizes,
-  ExploreSectionName,
-  Name
-} from '@audius/common/models'
+import { ID, SquareSizes, ExploreSectionName } from '@audius/common/models'
 import { Flex } from '@audius/harmony'
 import { useNavigate } from 'react-router'
 
@@ -17,7 +11,6 @@ import { UserLink } from 'components/link/UserLink'
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import { FavoriteStats } from 'components/stats/FavoriteStats'
 import { RepostStats } from 'components/stats/RepostStats'
-import { useIsMobile } from 'hooks/useIsMobile'
 import { UserListEntityType } from 'store/application/ui/userListModal/types'
 
 type CollectionArtCardProps = {
@@ -27,37 +20,15 @@ type CollectionArtCardProps = {
 
 const ARTWORK_SIZE = 240
 
-export const CollectionArtCard = ({
-  id,
-  sectionName
-}: CollectionArtCardProps) => {
+export const CollectionArtCard = ({ id }: CollectionArtCardProps) => {
   const [isPerspectiveDisabled] = useState(false)
   const navigate = useNavigate()
-  const { trackEvent } = useAnalytics()
-  const isMobile = useIsMobile()
   const { data: partialCollection } = useCollection(id)
 
   const goToPlaylist = useCallback(() => {
     if (!partialCollection?.permalink) return
-    if (sectionName) {
-      trackEvent({
-        eventName: Name.EXPLORE_SECTION_CLICK,
-        section: sectionName,
-        source: isMobile ? 'mobile' : 'web',
-        id,
-        kind: 'playlist',
-        link: partialCollection.permalink
-      })
-    }
     navigate(partialCollection.permalink)
-  }, [
-    navigate,
-    partialCollection?.permalink,
-    sectionName,
-    id,
-    trackEvent,
-    isMobile
-  ])
+  }, [navigate, partialCollection?.permalink])
 
   const { data: user } = useUser(partialCollection?.playlist_owner_id)
 

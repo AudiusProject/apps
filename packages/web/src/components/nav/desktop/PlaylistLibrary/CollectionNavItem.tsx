@@ -9,7 +9,6 @@ import {
 import {
   FavoriteSource,
   ID,
-  Name,
   PlaylistLibraryID,
   PlaylistLibraryKind,
   ShareSource
@@ -36,7 +35,6 @@ import { useDispatch } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router'
 import { useToggle } from 'react-use'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { Draggable } from 'components/dragndrop'
 import { DeleteCollectionConfirmationModal } from 'components/edit-collection/DeleteCollectionConfirmationModal'
 import {
@@ -94,7 +92,6 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
   const location = useLocation()
   const isSelected = location.pathname === url
   const dispatch = useDispatch()
-  const record = useRecord()
   const navigate = useNavigate()
   const { mutate: reorderLibrary } = useReorderLibrary()
 
@@ -134,8 +131,7 @@ export const CollectionNavItem = (props: CollectionNavItemProps) => {
 
   const handleEdit = useCallback(() => {
     navigate(`${permalink}/edit`)
-    record(make(Name.PLAYLIST_OPEN_EDIT_FROM_LIBRARY, {}))
-  }, [navigate, permalink, record])
+  }, [navigate, permalink])
 
   const handleShare = useCallback(() => {
     dispatch(

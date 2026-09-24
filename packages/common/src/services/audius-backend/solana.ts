@@ -140,7 +140,6 @@ export const getUserbankAccountInfo = async (
 export const createUserBankIfNeeded = async (
   sdk: AudiusSdkWithServices,
   {
-    recordAnalytics,
     mint = DEFAULT_MINT,
     ethAddress: recipientEthAddress
   }: CreateUserBankIfNeededConfig
@@ -163,26 +162,10 @@ export const createUserBankIfNeeded = async (
     } else {
       // Otherwise we must have tried to create one
       console.info(`Userbank doesn't exist, attempted to create...`)
-
-      recordAnalytics({
-        eventName: Name.CREATE_USER_BANK_SUCCESS,
-        properties: { mint, recipientEthAddress }
-      })
     }
     return res.userBank
   } catch (err: any) {
-    // Catching error here for analytics purposes
     const errorMessage = 'error' in err ? err.error : (err as any).toString()
-    const errorCode = 'errorCode' in err ? err.errorCode : undefined
-    recordAnalytics({
-      eventName: Name.CREATE_USER_BANK_FAILURE,
-      properties: {
-        mint,
-        recipientEthAddress,
-        errorCode,
-        errorMessage
-      }
-    })
     throw new Error(`Failed to create user bank: ${errorMessage}`)
   }
 }

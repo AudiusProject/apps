@@ -1,7 +1,6 @@
-import { Name } from '@audius/common/models'
 import type { CommonState } from '@audius/common/store'
-import { tokenDashboardPageSelectors, getContext } from '@audius/common/store'
-import { getErrorMessage, waitForValue } from '@audius/common/utils'
+import { tokenDashboardPageSelectors } from '@audius/common/store'
+import { waitForValue } from '@audius/common/utils'
 import bs58 from 'bs58'
 import { addWalletToUser } from 'common/store/pages/token-dashboard/addWalletToUser'
 import { takeEvery, select, put, call } from 'typed-redux-saga'
@@ -91,30 +90,12 @@ function* signMessageAsync(action: SignMessageAction) {
 
   yield* put(setConnectionStatus({ status: 'done' }))
   yield* put(setVisibility({ drawer: 'ConnectNewWallet', visible: false }))
-
-  const analytics = yield* getContext('analytics')
-  analytics.track({
-    eventName: Name.CONNECT_WALLET_NEW_WALLET_CONNECTED,
-    properties: {
-      chain,
-      walletAddress: wallet
-    }
-  })
 }
 
 export function* watchSignMessage() {
   yield* takeEvery(signMessage.type, function* (action: SignMessageAction) {
-    const analytics = yield* getContext('analytics')
     try {
       yield* call(signMessageAsync, action)
-    } catch (e) {
-      const error = `Caught error in signMessageSaga:  ${getErrorMessage(e)}`
-      analytics.track({
-        eventName: Name.CONNECT_WALLET_ERROR,
-        properties: {
-          error
-        }
-      })
-    }
+    } catch {}
   })
 }

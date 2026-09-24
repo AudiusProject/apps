@@ -138,11 +138,6 @@ const EmbedModal = ({ isOpen, kind, id, close }: EmbedModalProps) => {
   // Configure analytics
   const record = useRecord()
 
-  useEffect(() => {
-    if (isOpen && kind && id) {
-      record(make(Name.EMBED_OPEN, { kind, id: `${id}` }))
-    }
-  }, [isOpen, kind, id, record])
   const onCopy = useCallback(() => {
     if (kind && id) {
       record(

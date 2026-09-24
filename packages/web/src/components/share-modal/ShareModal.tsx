@@ -75,7 +75,9 @@ export const ShareModal = NiceModal.create(() => {
       onCancelAction: setVisibility({ modal: 'Share', visible: true }),
       defaultUserList: 'chats'
     })
-    dispatch(make(Name.CHAT_ENTRY_POINT, { source: 'share' }))
+    dispatch(
+      make(Name.CHAT_ENTRY_POINT, { source: 'share', kind: content.type })
+    )
   }, [openCreateChatModal, dispatch, onClose, content])
 
   const handleShareToX = useCallback(async () => {
@@ -108,9 +110,8 @@ export const ShareModal = NiceModal.create(() => {
         dispatch(shareCollection(content.playlist.playlist_id, source))
         break
       case 'weeklyRotation': {
-        // No entity, so no social saga to route through: the link is a
-        // function of the handle alone. Same clipboard path and Share
-        // event the sagas emit.
+        // No saga for weekly rotation shares; copy the link and record the
+        // event here.
         const link = weeklyRotationPage(content.user.handle)
         copyLinkToClipboard(link)
         record(
@@ -118,7 +119,8 @@ export const ShareModal = NiceModal.create(() => {
             kind: 'weeklyRotation',
             id: `${content.user.user_id}`,
             url: link,
-            source
+            source,
+            channel: 'copyLink'
           })
         )
         break

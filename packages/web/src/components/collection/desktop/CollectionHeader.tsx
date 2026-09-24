@@ -353,11 +353,7 @@ export const CollectionHeader = (props: CollectionHeaderProps) => {
               onSave={handleSaveDescription}
             />
           ) : description ? (
-            <UserGeneratedText
-              size='s'
-              linkSource='collection page'
-              css={{ textAlign: 'left' }}
-            >
+            <UserGeneratedText size='s' css={{ textAlign: 'left' }}>
               {description}
             </UserGeneratedText>
           ) : null}

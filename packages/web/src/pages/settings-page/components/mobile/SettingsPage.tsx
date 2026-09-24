@@ -3,7 +3,6 @@ import { useCallback, useContext, useEffect, useState, FC } from 'react'
 import { useCurrentAccountUser } from '@audius/common/api'
 import { settingsMessages } from '@audius/common/messages'
 import {
-  Name,
   SquareSizes,
   Theme,
   ThemeMode,
@@ -36,7 +35,6 @@ import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router'
 
-import { make } from 'common/store/analytics/actions'
 import GroupableList from 'components/groupable-list/GroupableList'
 import Grouping from 'components/groupable-list/Grouping'
 import Row from 'components/groupable-list/Row'
@@ -208,9 +206,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
         window.localStorage.setItem(THEME_KEY, Theme.MATRIX)
       }
     }
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, { mode: 'palette', palette: value })
-    )
   }
 
   const onModeChange = (option: ThemeMode) => {
@@ -226,11 +221,6 @@ export const SettingsPage = (props: SettingsPageProps) => {
       window.localStorage.setItem(THEME_MODE_KEY, option)
       window.localStorage.setItem(THEME_KEY, theme)
     }
-    dispatch(
-      make(Name.SETTINGS_CHANGE_THEME, {
-        mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
-      })
-    )
   }
 
   const paletteOptions = [

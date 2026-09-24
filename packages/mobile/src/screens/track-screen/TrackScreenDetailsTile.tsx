@@ -428,13 +428,6 @@ export const TrackScreenDetailsTile = ({
       navigation,
       playbackSource: 'TRACK_TRACKS'
     })
-    trackEvent(
-      make({
-        eventName: Name.COMMENTS_CLICK_COMMENT_STAT,
-        trackId,
-        source: 'track_page'
-      })
-    )
   }, [openCommentDrawer, trackId, navigation])
 
   const handlePressSave = useToggleFavoriteTrack({

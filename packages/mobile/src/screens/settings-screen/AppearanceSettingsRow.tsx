@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 
 import { useCurrentUserId } from '@audius/common/api'
 import { settingsMessages as messages } from '@audius/common/messages'
-import { Name, Theme, ThemeMode, ThemePalette } from '@audius/common/models'
+import { Theme, ThemeMode, ThemePalette } from '@audius/common/models'
 import {
   useTierAndVerifiedForUser,
   themeActions,
@@ -13,7 +13,6 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { IconAppearance, Flex } from '@audius/harmony-native'
 import { SegmentedControl } from 'app/components/core'
-import { make, track } from 'app/services/analytics'
 
 import { SettingsRowLabel } from './SettingRowLabel'
 import { SettingsRow } from './SettingsRow'
@@ -69,13 +68,6 @@ export const AppearanceSettingsRow = () => {
         dispatch(setTheme({ theme: Theme.MATRIX }))
         dispatch(showMusicConfetti())
       }
-      track(
-        make({
-          eventName: Name.SETTINGS_CHANGE_THEME,
-          mode: 'palette',
-          palette: value
-        } as any)
-      )
     },
     [dispatch]
   )
@@ -90,12 +82,6 @@ export const AppearanceSettingsRow = () => {
             ? Theme.DARK
             : Theme.AUTO
       dispatch(setTheme({ theme: themeValue }))
-      track(
-        make({
-          eventName: Name.SETTINGS_CHANGE_THEME,
-          mode: option.toLowerCase() as 'dark' | 'light' | 'auto'
-        })
-      )
     },
     [dispatch]
   )

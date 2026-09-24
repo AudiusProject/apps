@@ -12,8 +12,11 @@ import type { LineupData } from '@audius/common/api'
 import { useCollections } from '@audius/common/api'
 import {
   Kind,
+  Name,
+  type FavoriteSource,
   type ID,
   type PlaybackSource,
+  type RepostSource,
   type UID
 } from '@audius/common/models'
 import { playbackActions, playbackSelectors } from '@audius/common/store'
@@ -30,12 +33,14 @@ import { StyleSheet, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { SectionList } from 'app/components/core'
+import { useBottomChinHeight } from 'app/components/core/BottomChin'
 import {
   TrackTile,
   CollectionTile,
   LineupTileSkeleton
 } from 'app/components/lineup-tile'
 import { useScrollToTop } from 'app/hooks/useScrollToTop'
+import { make, track } from 'app/services/analytics'
 
 const { makeGetCurrent } = playbackSelectors
 const { getPlaying } = playbackSelectors
@@ -112,9 +117,9 @@ export type TrackLineupProps = {
   ListFooterComponent?: SectionListProps<unknown>['ListFooterComponent']
   hideHeaderOnEmpty?: boolean
   /**
-   * Padding/style applied to the scrollable content itself (not the list
-   * frame). Root tab screens use this to clear the floating glass header, so
-   * content starts below it but scrolls behind it.
+   * Style for the scrollable content. Root tab screens use it to clear the
+   * floating glass header. Defaults to a bottom inset that clears the tab bar
+   * and play bar; pass `paddingBottom` to override it.
    */
   contentContainerStyle?: SectionListProps<unknown>['contentContainerStyle']
   /** Scroll callback, used by root screens to drive the glass chrome. */
@@ -123,7 +128,10 @@ export type TrackLineupProps = {
   pullToRefresh?: boolean
   disableTopTabScroll?: boolean
   onPressItem?: (id: ID) => void
+  /** When set, tile plays and pauses record Playback events with it */
   playbackSource?: PlaybackSource
+  favoriteSource?: FavoriteSource
+  repostSource?: RepostSource
 
   /**
    * Map of indices (into `trackIds`) to JSX elements rendered after the
@@ -167,6 +175,9 @@ export const TrackLineup = ({
   pullToRefresh,
   disableTopTabScroll,
   onPressItem,
+  playbackSource,
+  favoriteSource,
+  repostSource,
   delineatorMap
 }: TrackLineupProps) => {
   const dispatch = useDispatch()
@@ -234,12 +245,25 @@ export const TrackLineup = ({
       const currentTrackId = currentLegacy?.trackId ?? null
       const currentSource = currentLegacy?.source ?? null
       const isSameTile = currentTrackId === id && currentSource === source
+      const recordPlayback = (play: boolean) => {
+        if (!playbackSource) return
+        const properties = { id: `${id}`, source: playbackSource }
+        track(
+          make(
+            play
+              ? { eventName: Name.PLAYBACK_PLAY, ...properties }
+              : { eventName: Name.PLAYBACK_PAUSE, ...properties }
+          )
+        )
+      }
       if (isSameTile && isPlaying) {
         dispatch(playbackActions.togglePlay())
+        recordPlayback(false)
         return
       }
       if (isSameTile && !isPlaying) {
         dispatch(playbackActions.play())
+        recordPlayback(true)
         return
       }
       // For a collection tile, locate the track within that collection's queue
@@ -260,6 +284,7 @@ export const TrackLineup = ({
           querySource: querySource ?? null
         })
       )
+      recordPlayback(true)
     },
     [
       dispatch,
@@ -268,7 +293,8 @@ export const TrackLineup = ({
       currentLegacy?.trackId,
       currentLegacy?.source,
       source,
-      isPlaying
+      isPlaying,
+      playbackSource
     ]
   )
 
@@ -347,6 +373,8 @@ export const TrackLineup = ({
                 togglePlay={togglePlay}
                 onPress={onPressItem}
                 showArtistPick={showArtistPick}
+                favoriteSource={favoriteSource}
+                repostSource={repostSource}
               />
             ) : (
               <CollectionTile
@@ -367,6 +395,8 @@ export const TrackLineup = ({
       togglePlay,
       onPressItem,
       showArtistPick,
+      favoriteSource,
+      repostSource,
       delineatorMap
     ]
   )
@@ -393,6 +423,12 @@ export const TrackLineup = ({
 
   useScrollToTop(scrollToTop, disableTopTabScroll)
 
+  const bottomChin = useBottomChinHeight()
+  const listContentStyle = useMemo(
+    () => [{ paddingBottom: bottomChin }, contentContainerStyle],
+    [bottomChin, contentContainerStyle]
+  )
+
   const isEmpty = !isPending && !isFetching && entries.length === 0
   const pullToRefreshProps = pullToRefresh
     ? { onRefresh: isEmpty ? undefined : refresh, refreshing: !!refreshing }
@@ -403,7 +439,7 @@ export const TrackLineup = ({
       <SectionList
         {...pullToRefreshProps}
         ref={ref}
-        contentContainerStyle={contentContainerStyle}
+        contentContainerStyle={listContentStyle}
         onScroll={onScroll}
         scrollEventThrottle={16}
         ListHeaderComponent={hideHeaderOnEmpty && isEmpty ? undefined : header}

@@ -1,7 +1,7 @@
 import { useCallback, useContext, useMemo } from 'react'
 
 import { useSearchAllResults } from '@audius/common/api'
-import { Kind, Name } from '@audius/common/models'
+import { Kind } from '@audius/common/models'
 import {
   searchActions,
   type SearchItem as SearchItemType
@@ -12,11 +12,10 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
 
 import { Flex, Paper, Text } from '@audius/harmony-native'
-import { make, track as record } from 'app/services/analytics'
 
 import { NoResultsTile } from '../NoResultsTile'
 import { SearchItem, SearchItemSkeleton } from '../SearchItem'
-import { SearchContext, useSearchQuery } from '../searchState'
+import { SearchContext } from '../searchState'
 
 const { addItem: addRecentSearch } = searchActions
 
@@ -40,25 +39,10 @@ const AllResultsItem = ({
   item: SearchItemType & { isLoading?: boolean; isAlbum?: boolean }
 }) => {
   const dispatch = useDispatch()
-  const [query] = useSearchQuery()
 
   const handlePress = useCallback(() => {
     dispatch(addRecentSearch({ searchItem: item }))
-
-    record(
-      make({
-        eventName: Name.SEARCH_RESULT_SELECT,
-        term: query,
-        source: 'search results page',
-        id: item.id,
-        kind: {
-          [Kind.COLLECTIONS]: item.isAlbum ? 'album' : 'playlist',
-          [Kind.TRACKS]: 'track',
-          [Kind.USERS]: 'profile'
-        }[item.kind]
-      })
-    )
-  }, [item, dispatch, query])
+  }, [item, dispatch])
 
   return item.isLoading ? (
     <SearchItemSkeleton />

@@ -180,17 +180,9 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
     isOpen && isDrawerFullyOpen ? staticTopInset.current : insets.top
   const effectiveBottomInset = isOpen && isDrawerFullyOpen ? 0 : insets.bottom
 
-  // Travel with the bottom tab bar so the bottom chrome moves as one unit.
-  // The collapsed drawer rests `BOTTOM_BAR_HEIGHT + PLAY_BAR_HEIGHT` off the
-  // bottom, so once the tab bar floats away the play bar would otherwise hang
-  // there with an empty band beneath it.
-  //
-  // This moves the whole drawer rather than just the play bar inside it: the
-  // white surface behind the play bar belongs to the drawer root, so
-  // translating only its contents slides the bar off a background that stays
-  // put, leaving an empty white block. Pinned to 0 while open, since the same
-  // drawer is the full-screen player and translating that would drag the
-  // expanded player off screen with it.
+  // Slide the collapsed drawer out with the tab bar. Translates the whole
+  // drawer because the play bar's background belongs to the drawer root.
+  // Pinned to 0 while open, since the open drawer is the full-screen player.
   const chromeHideStyle = useAnimatedStyle(
     () => ({
       transform: [
@@ -316,9 +308,8 @@ export const NowPlayingDrawer = memo(function NowPlayingDrawer(
   }, [onClose, navigation, trackId])
 
   return (
-    // Wrapping the drawer creates a new stacking context, so its own z-order
-    // has to be restated out here. `box-none` keeps the full-screen wrapper
-    // from swallowing touches meant for the screen behind it.
+    // The wrapper is a new stacking context, so restate the drawer's z-order.
+    // `box-none` lets touches reach the screen behind it.
     <Reanimated.View
       pointerEvents='box-none'
       style={[

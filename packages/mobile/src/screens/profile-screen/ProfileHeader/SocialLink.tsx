@@ -14,9 +14,7 @@ import {
 } from '@audius/harmony-native'
 import type { LinkProps } from 'app/components/core'
 import { Link, UserGeneratedText } from 'app/components/core'
-import { make } from 'app/services/analytics'
 import { makeStyles } from 'app/styles'
-import { EventNames } from 'app/types/analytics'
 import { prependProtocol } from 'app/utils/prependProtocol'
 
 const useStyles = makeStyles(({ spacing }) => ({
@@ -117,26 +115,18 @@ export const SocialLink = (props: SocialLinkProps) => {
 type XSocialLinkProps = Partial<SocialLinkProps>
 
 export const XSocialLink = (props: XSocialLinkProps) => {
-  const { handle, x_handle } =
+  const { x_handle } =
     useProfileUser({
       select: (user) => ({
-        handle: user.handle,
         x_handle: user.twitter_handle
       })
     }).user ?? {}
-
-  const sanitizedHandle = handle?.replace('@', '')
 
   return (
     <SocialLink
       url={`https://x.com/${x_handle}`}
       text={x_handle ? `@${x_handle}` : x_handle}
       icon={IconX}
-      analytics={make({
-        eventName: EventNames.PROFILE_PAGE_CLICK_TWITTER,
-        handle: sanitizedHandle ?? 'undefined',
-        twitterHandle: x_handle as string
-      })}
       {...props}
     />
   )
@@ -145,26 +135,18 @@ export const XSocialLink = (props: XSocialLinkProps) => {
 type InstagramSocialLinkProps = Partial<SocialLinkProps>
 
 export const InstagramSocialLink = (props: InstagramSocialLinkProps) => {
-  const { handle, instagram_handle } =
+  const { instagram_handle } =
     useProfileUser({
       select: (user) => ({
-        handle: user.handle,
         instagram_handle: user.instagram_handle
       })
     }).user ?? {}
-
-  const sanitizedHandle = handle?.replace('@', '')
 
   return (
     <SocialLink
       url={`https://instagram.com/${instagram_handle}`}
       text={instagram_handle ? `@${instagram_handle}` : instagram_handle}
       icon={IconInstagram}
-      analytics={make({
-        eventName: EventNames.PROFILE_PAGE_CLICK_INSTAGRAM,
-        handle: sanitizedHandle ?? 'undefined',
-        instagramHandle: instagram_handle as string
-      })}
       {...props}
     />
   )
@@ -173,26 +155,18 @@ export const InstagramSocialLink = (props: InstagramSocialLinkProps) => {
 type TikTokSocialLinkProps = Partial<SocialLinkProps>
 
 export const TikTokSocialLink = (props: TikTokSocialLinkProps) => {
-  const { handle, tiktok_handle } =
+  const { tiktok_handle } =
     useProfileUser({
       select: (user) => ({
-        handle: user.handle,
         tiktok_handle: user.tiktok_handle
       })
     }).user ?? {}
-
-  const sanitizedHandle = handle?.replace('@', '')
 
   return (
     <SocialLink
       url={`https://tiktok.com/@${tiktok_handle}`}
       text={tiktok_handle ? `@${tiktok_handle}` : tiktok_handle}
       icon={IconTikTok}
-      analytics={make({
-        eventName: EventNames.PROFILE_PAGE_CLICK_TIKTOK,
-        handle: sanitizedHandle ?? 'undefined',
-        tikTokHandle: tiktok_handle as string
-      })}
       {...props}
     />
   )

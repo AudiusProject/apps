@@ -6,8 +6,7 @@ import {
   useAddAssociatedWallet,
   useCurrentAccountUser
 } from '@audius/common/api'
-import { useAppContext } from '@audius/common/context'
-import { Name, Chain } from '@audius/common/models'
+import { Chain } from '@audius/common/models'
 import type { NamespaceTypeMap } from '@reown/appkit'
 import type { EventsControllerState } from '@reown/appkit/react'
 import type { Provider as SolanaProvider } from '@reown/appkit-adapter-solana/react'
@@ -83,9 +82,6 @@ export const useConnectAndAssociateWallets = (
   onSuccess?: (wallets: ConnectedWallet[]) => void,
   onError?: (error: unknown) => void
 ) => {
-  const {
-    analytics: { track, make }
-  } = useAppContext()
   const { signMessageAgnostic } = useSignMessageAgnostic()
   const { data: currentUser } = useCurrentAccountUser()
   const { data: connectedWallets } = useAssociatedWallets()
@@ -99,7 +95,6 @@ export const useConnectAndAssociateWallets = (
   const associateConnectedWallets = useCallback(async () => {
     try {
       setIsAssociating(true)
-      track(make({ eventName: Name.CONNECT_WALLET_NEW_WALLET_START }))
       const activeAccount = appkitModal.getAccount()
       const originalAddress = currentUser?.wallet
 
@@ -125,15 +120,6 @@ export const useConnectAndAssociateWallets = (
       // Ensure there are wallets to associate
       if (filteredWallets.length === 0) {
         if (wallets.length > 0) {
-          for (const { chain, address } of wallets) {
-            track(
-              make({
-                eventName: Name.CONNECT_WALLET_ALREADY_ASSOCIATED,
-                chain,
-                walletAddress: address
-              })
-            )
-          }
           throw new AlreadyAssociatedError('Wallets already added')
         } else {
           throw new Error('No wallets selected')
@@ -147,13 +133,6 @@ export const useConnectAndAssociateWallets = (
           address,
           chain
         })
-        track(
-          make({
-            eventName: Name.CONNECT_WALLET_NEW_WALLET_CONNECTING,
-            chain,
-            walletAddress: address
-          })
-        )
         const signature = await signMessageAgnostic(
           `AudiusUserID:${currentUser?.user_id}`,
           address,
@@ -172,19 +151,11 @@ export const useConnectAndAssociateWallets = (
           wallet: { address, chain },
           signature
         })
-        track(
-          make({
-            eventName: Name.CONNECT_WALLET_NEW_WALLET_CONNECTED,
-            chain,
-            walletAddress: address
-          })
-        )
       }
 
       // DONE!
       onSuccess?.(filteredWallets)
     } catch (e) {
-      track(make({ eventName: Name.CONNECT_WALLET_ERROR, error: String(e) }))
       onError?.(e)
     } finally {
       setIsAssociating(false)
@@ -194,11 +165,9 @@ export const useConnectAndAssociateWallets = (
     connectedWallets,
     currentUser?.user_id,
     currentUser?.wallet,
-    make,
     onError,
     onSuccess,
-    signMessageAgnostic,
-    track
+    signMessageAgnostic
   ])
 
   /**
@@ -210,15 +179,9 @@ export const useConnectAndAssociateWallets = (
 
   const handleConnectError = useCallback(
     (event: EventsControllerState) => {
-      track(
-        make({
-          eventName: Name.CONNECT_WALLET_ERROR,
-          error: String(event.data)
-        })
-      )
       onError?.(event)
     },
-    [make, onError, track]
+    [onError]
   )
 
   const { isPending: isConnecting, openAppKitModal } =

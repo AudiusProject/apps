@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { ID, Name } from '@audius/common/models'
+import { ID } from '@audius/common/models'
 import {
   Flex,
   IconCaretDown,
@@ -11,7 +11,6 @@ import {
 import { ResizeObserver } from '@juggle/resize-observer'
 import useMeasure from 'react-use-measure'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import ProfilePageBadge from 'components/user-badges/ProfilePageBadge'
 import { UserGeneratedText } from 'components/user-generated-text'
 
@@ -39,7 +38,6 @@ const MAX_BIO_SIZE = 16 * 4
 
 export const ProfileBio = ({
   userId,
-  handle,
   bio,
   location,
   website,
@@ -89,76 +87,19 @@ export const ProfileBio = ({
     setIsCollapsed(!isCollapsed)
   }, [isCollapsed, setIsCollapsed])
 
-  const record = useRecord()
-
-  const onClickTwitter = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_TWITTER, {
-        handle: handle.replace('@', ''),
-        twitterHandle
-      })
-    )
-  }, [record, handle, twitterHandle])
-  const onClickInstagram = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_INSTAGRAM, {
-        handle: handle.replace('@', ''),
-        instagramHandle
-      })
-    )
-  }, [record, handle, instagramHandle])
-  const onClickTikTok = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_TIKTOK, {
-        handle: handle.replace('@', ''),
-        tikTokHandle
-      })
-    )
-  }, [record, handle, tikTokHandle])
-  const onClickWebsite = useCallback(() => {
-    record(
-      make(Name.PROFILE_PAGE_CLICK_WEBSITE, {
-        handle: handle.replace('@', ''),
-        website
-      })
-    )
-  }, [record, handle, website])
-
   const renderCollapsedContent = () =>
     hasSocial ? (
       <Flex gap='m'>
         {twitterHandle && (
-          <SocialLink
-            type={Type.X}
-            link={twitterHandle}
-            onClick={onClickTwitter}
-            iconOnly
-          />
+          <SocialLink type={Type.X} link={twitterHandle} iconOnly />
         )}
         {instagramHandle && (
-          <SocialLink
-            type={Type.INSTAGRAM}
-            link={instagramHandle}
-            onClick={onClickInstagram}
-            iconOnly
-          />
+          <SocialLink type={Type.INSTAGRAM} link={instagramHandle} iconOnly />
         )}
         {tikTokHandle && (
-          <SocialLink
-            type={Type.TIKTOK}
-            link={tikTokHandle}
-            onClick={onClickTikTok}
-            iconOnly
-          />
+          <SocialLink type={Type.TIKTOK} link={tikTokHandle} iconOnly />
         )}
-        {website && (
-          <SocialLink
-            type={Type.WEBSITE}
-            link={website}
-            onClick={onClickWebsite}
-            iconOnly
-          />
-        )}
+        {website && <SocialLink type={Type.WEBSITE} link={website} iconOnly />}
       </Flex>
     ) : (
       <></>
@@ -166,34 +107,12 @@ export const ProfileBio = ({
 
   const renderExpandedContent = () => (
     <Flex column gap='m'>
-      {twitterHandle && (
-        <SocialLink
-          type={Type.X}
-          link={twitterHandle}
-          onClick={onClickTwitter}
-        />
-      )}
+      {twitterHandle && <SocialLink type={Type.X} link={twitterHandle} />}
       {instagramHandle && (
-        <SocialLink
-          type={Type.INSTAGRAM}
-          link={instagramHandle}
-          onClick={onClickInstagram}
-        />
+        <SocialLink type={Type.INSTAGRAM} link={instagramHandle} />
       )}
-      {tikTokHandle && (
-        <SocialLink
-          type={Type.TIKTOK}
-          link={tikTokHandle}
-          onClick={onClickTikTok}
-        />
-      )}
-      {website && (
-        <SocialLink
-          type={Type.WEBSITE}
-          link={website}
-          onClick={onClickWebsite}
-        />
-      )}
+      {tikTokHandle && <SocialLink type={Type.TIKTOK} link={tikTokHandle} />}
+      {website && <SocialLink type={Type.WEBSITE} link={website} />}
       <Text size='xs'>{location}</Text>
       <Text size='xs'> Joined {created}</Text>
     </Flex>
@@ -208,7 +127,6 @@ export const ProfileBio = ({
           ref={bioRef}
           ellipses
           maxLines={isCollapsed ? 4 : undefined}
-          linkSource='profile page'
         >
           {bio}
         </UserGeneratedText>

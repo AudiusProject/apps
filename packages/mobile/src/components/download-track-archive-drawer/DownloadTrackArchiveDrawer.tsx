@@ -8,7 +8,6 @@ import {
 } from '@audius/common/api'
 import { useAppContext } from '@audius/common/context'
 import type { ID } from '@audius/common/models'
-import { Name } from '@audius/common/models'
 import type { DownloadFile } from '@audius/common/services'
 import { useDownloadTrackArchiveModal } from '@audius/common/store'
 
@@ -96,10 +95,6 @@ const DownloadTrackArchiveDrawerContent = ({
   onClose,
   onClosed
 }: DownloadTrackArchiveDrawerContentProps) => {
-  const {
-    analytics: { track, make }
-  } = useAppContext()
-
   const { data: trackTitle } = useTrack(trackId, {
     select: (track) => track.title
   })
@@ -147,16 +142,6 @@ const DownloadTrackArchiveDrawerContent = ({
       (!!jobId && (isJobStatusError || isJobTimedOut)))
 
   useEffect(() => {
-    if (hasError) {
-      track(
-        make({
-          eventName: Name.TRACK_DOWNLOAD_FAILED_DOWNLOAD_ALL
-        })
-      )
-    }
-  }, [hasError, track, make])
-
-  useEffect(() => {
     downloadTrackStems()
   }, [downloadTrackStems])
 
@@ -170,16 +155,11 @@ const DownloadTrackArchiveDrawerContent = ({
             filename: `${trackTitle}.zip`
           }
         })
-        track(
-          make({
-            eventName: Name.TRACK_DOWNLOAD_SUCCESSFUL_DOWNLOAD_ALL
-          })
-        )
         onClose()
       }
       fetchResult()
     }
-  }, [jobState, onClose, jobId, downloadFile, trackTitle, make, track])
+  }, [jobState, onClose, jobId, downloadFile, trackTitle])
 
   // Close drawer automatically if download was successful
   useEffect(() => {

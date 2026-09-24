@@ -85,11 +85,7 @@ export const EditableCollectionDescription = ({
     >
       <Flex gap='s' alignItems='flex-start'>
         {value ? (
-          <UserGeneratedText
-            size='s'
-            linkSource='collection page'
-            css={{ textAlign: 'left' }}
-          >
+          <UserGeneratedText size='s' css={{ textAlign: 'left' }}>
             {value}
           </UserGeneratedText>
         ) : (

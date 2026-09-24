@@ -2,6 +2,7 @@ import { useCallback, useLayoutEffect, useState } from 'react'
 
 import { newCollectionMetadata } from '@audius/common/schemas'
 import {
+  TrackForUpload,
   TrackMetadataForUpload,
   UploadFormState,
   UploadType
@@ -19,6 +20,22 @@ import { processFiles } from '../store/utils/processFiles'
 import styles from './SelectPage.module.css'
 
 type ErrorType = { reason: 'corrupted' | 'size' | 'type' } | null
+
+// Files that already had initialMetadata applied. Module-level so the seed is
+// applied once per file even if the user goes back to this page, and never
+// overwrites later edits.
+const seededFiles = new WeakSet<object>()
+
+export const applyInitialMetadata = <T extends TrackForUpload>(
+  tracks: T[],
+  initialMetadata?: Partial<TrackMetadataForUpload>
+): T[] =>
+  tracks.map((track) => {
+    if (!initialMetadata || !track.file) return track
+    if (seededFiles.has(track.file)) return track
+    seededFiles.add(track.file)
+    return { ...track, metadata: { ...track.metadata, ...initialMetadata } }
+  })
 
 type SelectPageProps = {
   formState: UploadFormState
@@ -43,7 +60,10 @@ const SelectPage = (props: SelectPageProps) => {
       switch (uploadType) {
         case UploadType.INDIVIDUAL_TRACK:
         case UploadType.INDIVIDUAL_TRACKS:
-          onContinue({ tracks, uploadType })
+          onContinue({
+            tracks: applyInitialMetadata(tracks, initialMetadata),
+            uploadType
+          })
           break
         case UploadType.ALBUM:
         case UploadType.PLAYLIST:
@@ -51,7 +71,7 @@ const SelectPage = (props: SelectPageProps) => {
           break
       }
     }
-  }, [onContinue, tracks, uploadType])
+  }, [onContinue, tracks, uploadType, initialMetadata])
 
   const onSelectTracks = useCallback(
     async (selectedFiles: File[]) => {

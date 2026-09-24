@@ -1,12 +1,42 @@
-import { Name, MobileOS, IdentifyTraits } from '@audius/common/models'
+import {
+  MobileOS,
+  IdentifyTraits,
+  getAnalyticsSampleRate
+} from '@audius/common/models'
 
 import { env } from 'services/env'
-import { isElectron as getIsElectron, getMobileOS } from 'utils/clientUtil'
+import {
+  isElectron as getIsElectron,
+  getMobileOS,
+  isLikelyBot
+} from 'utils/clientUtil'
 
 const AMP_API_KEY = env.AMPLITUDE_API_KEY
 const AMPLITUDE_PROXY = env.AMPLITUDE_PROXY
 
-const isAmplitudeConfigured = !!AMP_API_KEY && !!AMPLITUDE_PROXY
+// Crawlers load pages but never use them, so they get no analytics at all
+const isAmplitudeConfigured =
+  !!AMP_API_KEY && !!AMPLITUDE_PROXY && !isLikelyBot()
+
+const CLIENT_KEY = 'amplitude:client'
+const IDENTIFY_TRAITS_KEY = 'amplitude:identifiedTraits'
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+const readStorage = (key: string) => {
+  try {
+    return window.localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+const writeStorage = (key: string, value: string) => {
+  try {
+    window.localStorage.setItem(key, value)
+  } catch {
+    // Storage can be unavailable (private mode), in which case we just resend
+  }
+}
 
 // Lazy-loaded Amplitude SDK
 let amplitudeInstance: typeof import('@amplitude/analytics-browser') | null =
@@ -66,18 +96,32 @@ export const init = async (isMobile: boolean) => {
           getSessionReplayPlugin()
         ])
 
-        amplitude.init(AMP_API_KEY, {
+        // Every option left out of defaultTracking defaults to on. Amplitude
+        // derives sessions from session ids without the automatic events, and
+        // attribution stays on for utm/referrer user properties.
+        await amplitude.init(AMP_API_KEY, {
           serverUrl: AMPLITUDE_PROXY,
           defaultTracking: {
-            sessions: true
+            attribution: true,
+            pageViews: false,
+            sessions: false,
+            formInteractions: false,
+            fileDownloads: false
           }
-        })
+        }).promise
 
         const sessionReplayTracking = sessionReplayPlugin.sessionReplayPlugin()
         amplitude.add(sessionReplayTracking)
 
-        const source = getSource(isMobile)
-        amplitude.track(Name.SESSION_START, { source })
+        // Which client the user is on, as a user property. Only sent when it
+        // changes for this device.
+        const client = getSource(isMobile) ?? 'Desktop Web'
+        if (readStorage(CLIENT_KEY) !== client) {
+          const identifyObj = new amplitude.Identify()
+          identifyObj.set('client', client)
+          amplitude.identify(identifyObj)
+          writeStorage(CLIENT_KEY, client)
+        }
 
         isInitialized = true
       }
@@ -108,9 +152,21 @@ export const identify = async (
       amplitude.setUserId(traits.handle)
     }
     if (traits && Object.keys(traits).length > 0) {
-      const identifyObj = new amplitude.Identify()
-      Object.entries(traits).map(([k, v]) => identifyObj.set(k, v))
-      amplitude.identify(identifyObj)
+      // User properties persist in Amplitude, so skip an identify that would
+      // set the same values again (it runs on every account load). Resend
+      // weekly in case an earlier one was dropped.
+      const serializedTraits = JSON.stringify([
+        Math.floor(Date.now() / WEEK_MS),
+        Object.keys(traits)
+          .sort()
+          .map((k) => [k, traits[k as keyof IdentifyTraits]])
+      ])
+      if (readStorage(IDENTIFY_TRAITS_KEY) !== serializedTraits) {
+        const identifyObj = new amplitude.Identify()
+        Object.entries(traits).map(([k, v]) => identifyObj.set(k, v))
+        amplitude.identify(identifyObj)
+        writeStorage(IDENTIFY_TRAITS_KEY, serializedTraits)
+      }
     }
     if (callback) callback()
   } catch (err) {
@@ -132,7 +188,13 @@ export const track = async (
 
   try {
     const amplitude = await getAmplitude()
-    amplitude.track(event, properties)
+    const sampleRate = getAnalyticsSampleRate(event, amplitude.getDeviceId())
+    if (sampleRate !== null) {
+      amplitude.track(
+        event,
+        sampleRate < 1 ? { ...properties, sampleRate } : properties
+      )
+    }
     if (callback) {
       callback()
     }

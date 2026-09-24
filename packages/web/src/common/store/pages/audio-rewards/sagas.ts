@@ -25,7 +25,6 @@ import {
   modalsActions,
   getContext,
   musicConfettiActions,
-  CommonStoreContext,
   getSDK
 } from '@audius/common/store'
 import { waitForValue, isPlayCountChallenge } from '@audius/common/utils'
@@ -213,48 +212,27 @@ async function claimRewardsForChallenge({
   sdk,
   userId,
   challengeId,
-  specifiers,
-  track,
-  make
+  specifiers
 }: {
   sdk: AudiusSdk
   userId: string
   challengeId: ChallengeId
   specifiers: SpecifierWithAmount[]
-  track: CommonStoreContext['analytics']['track']
-  make: CommonStoreContext['analytics']['make']
 }): Promise<(SpecifierWithAmount | ErrorResult)[]> {
   return await Promise.all(
     specifiers.map(async (specifierWithAmount) =>
-      track(
-        make({
-          eventName: Name.REWARDS_CLAIM_REQUEST,
-          challengeId,
-          specifier: specifierWithAmount.specifier,
-          amount: specifierWithAmount.amount
+      sdk.rewards
+        .claimRewards({
+          reward: {
+            challengeId,
+            specifier: specifierWithAmount.specifier,
+            userId
+          }
         })
-      )
-        .then(() =>
-          sdk.rewards.claimRewards({
-            reward: {
-              challengeId,
-              specifier: specifierWithAmount.specifier,
-              userId
-            }
-          })
-        )
         .then((res) => {
           if (res?.data?.[0]?.error) {
             throw new Error(res.data[0].error)
           }
-          track(
-            make({
-              eventName: Name.REWARDS_CLAIM_SUCCESS,
-              challengeId,
-              specifier: specifierWithAmount.specifier,
-              amount: specifierWithAmount.amount
-            })
-          )
           return res
         })
         .then(() => {
@@ -277,7 +255,6 @@ function* claimSingleChallengeRewardAsync(
   const env = yield* getContext('env')
   const audiusSdk = yield* getContext('audiusSdk')
   const sdk = yield* call(audiusSdk)
-  const { track, make } = yield* getContext('analytics')
 
   const { claim } = action.payload
   const { specifiers, challengeId } = claim
@@ -302,9 +279,7 @@ function* claimSingleChallengeRewardAsync(
     sdk,
     userId: Id.parse(userId),
     challengeId: challengeId as ChallengeId,
-    specifiers,
-    track,
-    make
+    specifiers
   })
   const claimed = results.filter((r) => !('error' in r))
 
@@ -365,10 +340,6 @@ function* claimAllChallengeRewardsAsync(
   )
   if (hasError) {
     yield* put(claimChallengeRewardFailed())
-    yield* call(
-      track,
-      make({ eventName: Name.REWARDS_CLAIM_ALL_FAILURE, count: claims.length })
-    )
   } else {
     yield* put(claimAllChallengeRewardsSucceeded())
     yield* call(

@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect } from 'react'
 
-import { Name, Status } from '@audius/common/models'
+import { Status } from '@audius/common/models'
 import {
   deactivateAccountActions,
   deactivateAccountSelectors
@@ -10,7 +10,6 @@ import cn from 'classnames'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { useModalState } from 'common/hooks/useModalState'
-import { make, useRecord } from 'common/store/analytics/actions'
 import LoadingSpinnerFullPage from 'components/loading-spinner-full-page/LoadingSpinnerFullPage'
 import { useIsMobile } from 'hooks/useIsMobile'
 import { push } from 'utils/navigation'
@@ -145,10 +144,6 @@ export const DeactivateAccountPage = () => {
     },
     [onConfirm, closeConfirmation]
   )
-  const record = useRecord()
-  useEffect(() => {
-    record(make(Name.DEACTIVATE_ACCOUNT_PAGE_VIEW, {}))
-  }, [record])
 
   useEffect(() => {
     if (deactivateAccountStatus === Status.ERROR) {

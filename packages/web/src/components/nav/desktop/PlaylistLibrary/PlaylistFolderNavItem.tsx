@@ -4,11 +4,7 @@ import {
   useAddToPlaylistFolder,
   useAllPlaylistUpdateIds
 } from '@audius/common/api'
-import {
-  Name,
-  PlaylistLibraryID,
-  PlaylistLibraryFolder
-} from '@audius/common/models'
+import { PlaylistLibraryID, PlaylistLibraryFolder } from '@audius/common/models'
 import {
   IconFolder,
   PopupMenuItem,
@@ -22,7 +18,6 @@ import {
 import { ClassNames } from '@emotion/react'
 import { useToggle } from 'react-use'
 
-import { make, useRecord } from 'common/store/analytics/actions'
 import { Draggable, Droppable } from 'components/dragndrop'
 import { EditFolderModal } from 'components/edit-folder-modal/EditFolderModal'
 import { DragDropKind, selectDraggingKind } from 'store/dragndrop/slice'
@@ -67,7 +62,6 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
     [setIsOpen]
   )
 
-  const record = useRecord()
   const { mutate: addToPlaylistFolder } = useAddToPlaylistFolder()
   const [isDeleteConfirmationOpen, toggleDeleteConfirmationOpen] =
     useToggle(false)
@@ -108,15 +102,11 @@ export const PlaylistFolderNavItem = (props: PlaylistFolderNavItemProps) => {
     setIsHoveringNested(false)
   }, [])
 
-  const handleClickEdit = useCallback(
-    (event: MouseEvent<HTMLElement>) => {
-      event.preventDefault()
-      event.stopPropagation()
-      setIsEditFolderOpen(true)
-      record(make(Name.FOLDER_OPEN_EDIT, {}))
-    },
-    [record]
-  )
+  const handleClickEdit = useCallback((event: MouseEvent<HTMLElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setIsEditFolderOpen(true)
+  }, [])
 
   const handleCloseEdit = useCallback(() => {
     setIsEditFolderOpen(false)

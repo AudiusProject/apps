@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 
-import { useTopArtists } from '@audius/common/api'
+import { useFollowSuggestions } from '@audius/common/api'
 import { FollowSource } from '@audius/common/models'
 import { usersSocialActions } from '@audius/common/store'
 import {
@@ -19,7 +19,9 @@ import { SelectArtistsPreviewContextProvider } from 'components/follow-artist-ca
 
 const messages = {
   title: 'Follow users to personalize your feed',
-  instruction: "Let's fix that by following some of these artists!"
+  instruction: "Let's fix that by following some of these artists!",
+  personalizedInstruction:
+    'Follow artists whose tracks you’ve favorited or reposted.'
 }
 
 type FollowUsersValues = {
@@ -34,7 +36,7 @@ const MobileWebEmptyFeed = () => {
   const { spacing } = useTheme()
   const dispatch = useDispatch()
 
-  const { data: featuredArtists } = useTopArtists('Featured')
+  const { data: featuredArtists, isPersonalized } = useFollowSuggestions()
 
   const handleSubmit = useCallback(
     (values: FollowUsersValues) => {
@@ -65,7 +67,9 @@ const MobileWebEmptyFeed = () => {
                   {messages.title}
                 </Text>
                 <Text variant='body' textAlign='center' color='subdued'>
-                  {messages.instruction}
+                  {isPersonalized
+                    ? messages.personalizedInstruction
+                    : messages.instruction}
                 </Text>
               </Flex>
 

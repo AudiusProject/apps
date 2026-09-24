@@ -56,10 +56,6 @@ const useStyles = makeStyles(({ spacing, typography }) => ({
  * glass, matching the desktop client's `Frosted` surface. It reports its
  * measured height through `GlassChromeContext` so the screen underneath
  * can pad its scrollable content to start below the header.
- *
- * The screenshot-only Audius logo that previously lived here behind the
- * Dynamic Island has moved up to AppDrawerScreen as a top-level overlay so
- * it doesn't animate with the screen during stack transitions.
  */
 export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const { title, children, showDivider = true } = props
@@ -72,9 +68,8 @@ export const MobileRootHeader = (props: MobileRootHeaderProps) => {
   const hidden = useChromeHiddenProgress()
   const headerHeight = useRootHeaderHeight()
 
-  // Slide the whole header off the top as the chrome hides. Purely visual —
-  // the list keeps its padding, so content never reflows, it just gets more
-  // of the screen to show through.
+  // Slide the header off the top as the chrome hides. Visual only: the list
+  // keeps its padding so content doesn't reflow.
   const hideStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -headerHeight * hidden.value }]
   }))

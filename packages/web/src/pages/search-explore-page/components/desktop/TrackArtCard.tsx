@@ -1,13 +1,7 @@
 import { useCallback } from 'react'
 
 import { useRemixContest, useTrack } from '@audius/common/api'
-import { useAnalytics } from '@audius/common/hooks'
-import {
-  ID,
-  SquareSizes,
-  ExploreSectionName,
-  Name
-} from '@audius/common/models'
+import { ID, SquareSizes, ExploreSectionName } from '@audius/common/models'
 import { dayjs, formatContestDeadlineWithStatus } from '@audius/common/utils'
 import { Flex, Skeleton, Text } from '@audius/harmony'
 import { useNavigate } from 'react-router'
@@ -16,7 +10,6 @@ import { TrackLink } from 'components/link/TrackLink'
 import { UserLink } from 'components/link/UserLink'
 import PerspectiveCard from 'components/perspective-card/PerspectiveCard'
 import { TrackArtwork } from 'components/track/TrackArtwork'
-import { useIsMobile } from 'hooks/useIsMobile'
 
 type TrackArtCardProps = {
   id: ID
@@ -37,10 +30,8 @@ const messages = {
 
 const ARTWORK_SIZE = 240
 
-export const TrackArtCard = ({ id, sectionName }: TrackArtCardProps) => {
+export const TrackArtCard = ({ id }: TrackArtCardProps) => {
   const navigate = useNavigate()
-  const { trackEvent } = useAnalytics()
-  const isMobile = useIsMobile()
 
   const { data: track, isLoading: isTrackLoading } = useTrack(id)
   const { data: contest, isLoading: isContestLoading } = useRemixContest(id)
@@ -49,18 +40,8 @@ export const TrackArtCard = ({ id, sectionName }: TrackArtCardProps) => {
 
   const goToTrack = useCallback(() => {
     if (!track?.permalink) return
-    if (sectionName) {
-      trackEvent({
-        eventName: Name.EXPLORE_SECTION_CLICK,
-        section: sectionName,
-        source: isMobile ? 'mobile' : 'web',
-        id,
-        kind: 'track',
-        link: track.permalink
-      })
-    }
     navigate(track.permalink)
-  }, [navigate, track?.permalink, sectionName, id, trackEvent, isMobile])
+  }, [navigate, track?.permalink])
 
   if (!track) return null
 

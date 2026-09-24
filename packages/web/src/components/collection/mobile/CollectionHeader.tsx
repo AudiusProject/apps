@@ -299,10 +299,7 @@ const CollectionHeader = ({
           />
         ) : null}
         {description ? (
-          <UserGeneratedText
-            css={{ textAlign: 'left' }}
-            linkSource='collection page'
-          >
+          <UserGeneratedText css={{ textAlign: 'left' }}>
             {description}
           </UserGeneratedText>
         ) : null}

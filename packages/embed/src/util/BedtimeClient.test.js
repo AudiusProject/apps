@@ -2,18 +2,23 @@ const mockGetBulkPlaylists = jest.fn()
 const mockGetPlaylist = jest.fn()
 const mockGetBulkTracks = jest.fn()
 
-jest.mock('@audius/sdk', () => ({
-  sdk: () => ({
-    playlists: {
-      getBulkPlaylists: (...args) => mockGetBulkPlaylists(...args),
-      getPlaylist: (...args) => mockGetPlaylist(...args)
-    },
-    tracks: {
-      getBulkTracks: (...args) => mockGetBulkTracks(...args)
-    },
-    events: {}
-  })
-}))
+// virtual: CI runs this before the sdk dist is built
+jest.mock(
+  '@audius/sdk',
+  () => ({
+    sdk: () => ({
+      playlists: {
+        getBulkPlaylists: (...args) => mockGetBulkPlaylists(...args),
+        getPlaylist: (...args) => mockGetPlaylist(...args)
+      },
+      tracks: {
+        getBulkTracks: (...args) => mockGetBulkTracks(...args)
+      },
+      events: {}
+    })
+  }),
+  { virtual: true }
+)
 
 // Avoid loading amplitude-js (and its browser globals) at import time.
 jest.mock('../analytics/analytics', () => ({

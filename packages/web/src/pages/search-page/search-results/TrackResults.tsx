@@ -1,13 +1,12 @@
 import { useCallback, useMemo } from 'react'
 
 import { SEARCH_PAGE_SIZE, useSearchTrackResults } from '@audius/common/api'
-import { Kind, Name } from '@audius/common/models'
+import { Kind } from '@audius/common/models'
 import { searchActions, SearchKind } from '@audius/common/store'
 import { Flex } from '@audius/harmony'
 import { css } from '@emotion/css'
 import { useDispatch } from 'react-redux'
 
-import { make } from 'common/store/analytics/actions'
 import { TrackLineup } from 'components/lineup/TrackLineup'
 import { LineupVariant } from 'components/lineup/types'
 import { useIsMobile } from 'hooks/useIsMobile'
@@ -56,16 +55,8 @@ export const TrackResults = (props: TrackResultsProps) => {
           })
         )
       }
-      dispatch(
-        make(Name.SEARCH_RESULT_SELECT, {
-          searchText: searchParams.query,
-          kind: 'track',
-          id,
-          source: 'search results page'
-        })
-      )
     },
-    [dispatch, searchParams]
+    [dispatch]
   )
 
   // Wait for useSearchAllResults to finish loading before fetching tracks

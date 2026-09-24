@@ -12,13 +12,7 @@ import {
   queryUser,
   updateCollectionData
 } from '@audius/common/api'
-import {
-  Name,
-  Kind,
-  CollectionMetadata,
-  ID,
-  Track
-} from '@audius/common/models'
+import { Kind, CollectionMetadata, ID, Track } from '@audius/common/models'
 import { newCollectionMetadata } from '@audius/common/schemas'
 import {
   accountActions,
@@ -34,7 +28,6 @@ import { makeKindId, Nullable, route } from '@audius/common/utils'
 import { Id, OptionalId } from '@audius/sdk'
 import { call, put, takeLatest } from 'typed-redux-saga'
 
-import { make } from 'common/store/analytics/actions'
 import { ensureLoggedIn } from 'common/utils/ensureLoggedIn'
 import { waitForWrite } from 'utils/sagaHelpers'
 
@@ -179,14 +172,6 @@ function* createAndConfirmPlaylist(
 ) {
   const sdk = yield* getSDK()
 
-  const event = make(Name.PLAYLIST_START_CREATE, {
-    source,
-    artworkSource: formFields.artwork
-      ? formFields.artwork.source
-      : formFields.cover_art_sizes
-  })
-  yield* put(event)
-
   function* confirmPlaylist() {
     const userId = yield* call(queryCurrentUserId)
     if (!userId) {
@@ -240,13 +225,6 @@ function* createAndConfirmPlaylist(
 
     yield* call(updateCollectionData, [reformattedPlaylist])
 
-    yield* put(
-      make(Name.PLAYLIST_COMPLETE_CREATE, {
-        source,
-        status: 'success'
-      })
-    )
-
     yield* put(cacheCollectionsActions.createPlaylistSucceeded())
 
     return confirmedPlaylist
@@ -254,12 +232,6 @@ function* createAndConfirmPlaylist(
 
   function* onError(result: RequestConfirmationError) {
     const { message, error, timeout } = result
-    yield* put(
-      make(Name.PLAYLIST_COMPLETE_CREATE, {
-        source,
-        status: 'failure'
-      })
-    )
     yield* put(
       cacheCollectionsActions.createPlaylistFailed(
         error,
