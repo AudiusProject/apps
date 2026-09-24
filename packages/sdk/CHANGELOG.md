@@ -1,5 +1,11 @@
 # @audius/sdk
 
+## 17.0.1
+
+### Patch Changes
+
+- 737c197: When a storage node reports an audio upload as done without its transcode result, poll the next node and fail after two minutes instead of waiting for the 20-minute stall timeout.
+
 ## 17.0.0
 
 ### Major Changes
