@@ -15,6 +15,7 @@ import {
 import { Name, FeedTab } from '@audius/common/models'
 import { useDrawerStatus } from '@react-navigation/drawer'
 import { useFocusEffect } from '@react-navigation/native'
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { StyleSheet, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import PagerView, {
@@ -32,7 +33,7 @@ import { FloatingSubHeader } from 'app/screens/app-screen/FloatingSubHeader'
 import {
   useGlassHeaderInset,
   useGlassScrollHandler,
-  useResetGlassScroll
+  useSyncGlassScroll
 } from 'app/screens/app-screen/GlassChromeContext'
 import { MobileRootHeader } from 'app/screens/app-screen/MobileRootHeader'
 import { WeeklyRotation } from 'app/screens/explore-screen/components/WeeklyRotation'
@@ -59,7 +60,7 @@ export const FeedScreen = () => {
   const glassHeaderInset = useGlassHeaderInset()
   const bottomChin = useBottomChinHeight()
   const handleGlassScroll = useGlassScrollHandler()
-  const resetGlassScroll = useResetGlassScroll()
+  const syncGlassScroll = useSyncGlassScroll()
   const [feedTab, setFeedTab] = useFeedTab()
   const [feedFilter] = useFeedFilter()
   const { data: currentUserId } = useCurrentUserId()
@@ -188,11 +189,30 @@ export const FeedScreen = () => {
     }
   }, [feedTabIndex])
 
-  // Both lineups stay mounted with their own scroll positions, so the incoming
-  // page's offset is not the one the chrome is currently showing.
+  // Both lineups stay mounted with their own scroll positions. Track each
+  // page's offset so the chrome can pick up the incoming page's position.
+  const pageOffsetsRef = useRef<Record<FeedTab, number>>({
+    [FeedTab.FOR_YOU]: 0,
+    [FeedTab.LATEST]: 0
+  })
+  const handleForYouScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      pageOffsetsRef.current[FeedTab.FOR_YOU] = e.nativeEvent.contentOffset.y
+      if (isForYou) handleGlassScroll(e)
+    },
+    [isForYou, handleGlassScroll]
+  )
+  const handleLatestScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      pageOffsetsRef.current[FeedTab.LATEST] = e.nativeEvent.contentOffset.y
+      if (!isForYou) handleGlassScroll(e)
+    },
+    [isForYou, handleGlassScroll]
+  )
+
   useEffect(() => {
-    resetGlassScroll()
-  }, [feedTabIndex, resetGlassScroll])
+    syncGlassScroll(pageOffsetsRef.current[feedTab] ?? 0)
+  }, [feedTab, syncGlassScroll])
 
   // Memoized so the header isn't a new function reference on every render —
   // otherwise Screen's setOptions runs each parent re-render and React
@@ -278,7 +298,7 @@ export const FeedScreen = () => {
                   <EndOfLineupNotice description={messages.endOfFeed} />
                 }
                 contentContainerStyle={lineupContentStyle}
-                onScroll={isForYou ? handleGlassScroll : undefined}
+                onScroll={handleForYouScroll}
                 {...forYouLineupProps}
               />
             </View>
@@ -293,7 +313,7 @@ export const FeedScreen = () => {
                   <EndOfLineupNotice description={messages.endOfFeed} />
                 }
                 contentContainerStyle={lineupContentStyle}
-                onScroll={isForYou ? undefined : handleGlassScroll}
+                onScroll={handleLatestScroll}
                 {...followLineupProps}
               />
             </View>

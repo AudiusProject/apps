@@ -1,7 +1,11 @@
 import { ID, UID, Status, LineupTrack } from '~/models'
 import type { Dayjs } from '~/utils/dayjs'
 
-export type CollectionTrack = LineupTrack & { dateAdded: Dayjs }
+export type CollectionTrack = LineupTrack & {
+  dateAdded: Dayjs
+  /** Raw playlist_contents time (unix seconds). 0 when it was never written. */
+  timeAdded?: number
+}
 
 export type CollectionsPageState = {
   collectionPermalink: string

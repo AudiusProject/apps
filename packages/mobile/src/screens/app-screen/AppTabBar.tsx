@@ -54,18 +54,14 @@ export const AppTabBar = (props: TabBarProps) => {
 
 const styles = StyleSheet.create({
   bar: {
-    // Floated out of flow so the screen container underneath is full-height.
-    // In normal flow the navigator reserves BOTTOM_BAR_HEIGHT + the bottom
-    // inset for the bar, which meant hiding it only uncovered dead
-    // background; now content actually occupies that space and slides behind
-    // the glass, and hiding the bar reveals more of it.
+    // Out of flow so screens are full height and content scrolls behind the
+    // bar. Screens clear it with `BottomChin`.
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    // Wrapping the bar creates a new stacking context, so the z-order it
-    // already declared for itself has to be restated out here to keep it
-    // above the now-playing drawer.
+    // The wrapper is a new stacking context, so restate the bar's z-order to
+    // keep it above the now-playing drawer.
     zIndex: 4,
     elevation: 4
   }

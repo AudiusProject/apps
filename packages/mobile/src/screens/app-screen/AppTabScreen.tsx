@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import type {
   FavoriteType,
@@ -192,6 +192,7 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   const { setNavigation } = useContext(SetAppTabNavigationContext)
   const isFocused = useIsFocused()
   const isAtStackRootRef = useRef(true)
+  const [isAtStackRoot, setIsAtStackRootState] = useState(true)
 
   const applyDrawerSwipe = useCallback(
     (isAtRoot: boolean) => {
@@ -212,6 +213,7 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
       if (event?.data?.state?.type !== 'stack') return
       const isAtRoot = event.data.state.routes.length === 1
       isAtStackRootRef.current = isAtRoot
+      setIsAtStackRootState(isAtRoot)
       if (isFocused) applyDrawerSwipe(isAtRoot)
     },
     [isFocused, applyDrawerSwipe]
@@ -245,14 +247,11 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
   )
 
   return (
-    // Publishes the floating root header's height to the screens below it, so
-    // they can pad their scrollable content and let it slide behind the glass.
+    // Publishes the floating header heights and scroll signal to this tab's
+    // screens.
     <GlassChromeProvider>
-      {/*
-        The bottom tab bar lives outside this provider, so it can't read the
-        scroll signal directly — this hands it out while the tab is focused.
-      */}
-      <TabBarAutoHideBridge />
+      {/* Hands the scroll signal to the tab bar, which renders outside this provider. */}
+      <TabBarAutoHideBridge isAtStackRoot={isAtStackRoot} />
       <Stack.Navigator
         screenOptions={screenOptions}
         screenListeners={screenListeners}
