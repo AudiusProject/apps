@@ -22,8 +22,7 @@ function* watchSignOut() {
   yield takeLatest(
     signOutAction.type,
     function* (action: ReturnType<typeof signOutAction>) {
-      // Only reachable if AppKit was loaded, which only happens once a wallet
-      // is actually in play — if it never loaded there is nothing to disconnect.
+      // If AppKit never loaded there is no wallet connection to disconnect.
       const wagmiConfig = getLoadedAppKit()?.wagmiAdapter.wagmiConfig
       if (wagmiConfig && wagmiConfig.state.status === 'connected') {
         yield call(disconnect, wagmiConfig)

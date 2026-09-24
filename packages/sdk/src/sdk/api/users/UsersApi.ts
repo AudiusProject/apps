@@ -876,10 +876,7 @@ export class UsersApi extends GeneratedUsersApi {
    * they have favorited or reposted but whose artist they do not already
    * follow. Returns an empty list for users with no favorites or reposts.
    *
-   * Hand-written for the same reason as `GetSuggestedFollowsRequest`: this
-   * endpoint is newer than the checked-in generated client. It mirrors what
-   * the generator would emit, so replacing it with the generated method later
-   * is a no-op for callers.
+   * Hand-written until the generated client is regenerated with this endpoint.
    */
   async getSuggestedFollows(
     params: GetSuggestedFollowsRequest,

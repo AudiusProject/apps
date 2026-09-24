@@ -141,6 +141,7 @@ const ShuffleButton = ({
   }
 
   const lottieRef = useRef<LottieRefCurrentProps>(null)
+  const [isLottieReady, setIsLottieReady] = useState(false)
   useEffect(() => {
     if (lottieRef.current) {
       if (state.isPaused) {
@@ -149,7 +150,7 @@ const ShuffleButton = ({
         lottieRef.current.play()
       }
     }
-  }, [lottieRef, state.isPaused])
+  }, [lottieRef, state.isPaused, isLottieReady])
 
   if (!animations || !state.icon) return null
 
@@ -168,6 +169,7 @@ const ShuffleButton = ({
     >
       <Lottie
         lottieRef={lottieRef}
+        onLottieReady={() => setIsLottieReady(true)}
         loop={false}
         autoplay={false}
         animationData={state.icon}

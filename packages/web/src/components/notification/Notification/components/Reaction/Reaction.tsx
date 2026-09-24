@@ -83,6 +83,7 @@ export const Reaction = (props: ReactionProps) => {
   }, [isClicked])
 
   const lottieRef = useRef<LottieRefCurrentProps>(null)
+  const [isLottieReady, setIsLottieReady] = useState(false)
   useEffect(() => {
     if (!lottieRef.current) return
     const shouldPlay = isInteracting || (!onlyPlayOnHover && isActive !== false)
@@ -91,7 +92,7 @@ export const Reaction = (props: ReactionProps) => {
     } else {
       lottieRef.current.stop()
     }
-  }, [lottieRef, isActive, isInteracting, onlyPlayOnHover])
+  }, [lottieRef, isActive, isInteracting, onlyPlayOnHover, isLottieReady])
 
   return (
     <div
@@ -109,6 +110,7 @@ export const Reaction = (props: ReactionProps) => {
       <Lottie
         style={{ height, width }}
         lottieRef={lottieRef}
+        onLottieReady={() => setIsLottieReady(true)}
         title={title}
         autoplay={!onlyPlayOnHover}
         loop

@@ -92,6 +92,7 @@ const AnimatedButton = ({
   )
 
   const animationRef = useRef<LottieRefCurrentProps>(null)
+  const [isLottieReady, setIsLottieReady] = useState(false)
   useEffect(() => {
     if (animationRef.current) {
       if (isPaused) {
@@ -100,12 +101,13 @@ const AnimatedButton = ({
         animationRef.current.play()
       }
     }
-  }, [animationRef, isPaused])
+  }, [animationRef, isPaused, isLottieReady])
 
   const buttonElement = (
     <div className={cn(wrapperClassName)}>
       <Lottie
         lottieRef={animationRef}
+        onLottieReady={() => setIsLottieReady(true)}
         animationData={iconJSON}
         loop={false}
         autoplay={false}

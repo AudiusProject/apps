@@ -176,14 +176,7 @@ export const getDefaultContext = () => {
   }
 }
 
-/**
- * Meta tag context for a page served as a 404. Used for tracks the API reports
- * as non-streamable (their owner is no longer active), which are rendered as
- * plain not-found pages so they can't be told apart from a track that never
- * existed. Carries none of the track's or the account's title, artwork, or
- * canonical URL, and is always paired with `noIndex` at the call site so these
- * pages stay out of search results and social unfurls.
- */
+/** Meta tags for a not-found page. Pair with noIndex. */
 export const getNotFoundContext = () => ({
   title: 'Not Found',
   description: '404 - Page not found',
