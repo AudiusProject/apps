@@ -85,3 +85,32 @@ export const CreateSecpSchema = z
   .strict()
 
 export type CreateSecpRequest = z.infer<typeof CreateSecpSchema>
+
+export const CreateUserBankIfNeededSchema = GetOrCreateUserBankSchema.extend({
+  /**
+   * The index the returned instructions will start at within the
+   * transaction. Defaults to 0.
+   */
+  instructionIndex: z.number().optional()
+}).strict()
+
+export type CreateUserBankIfNeededRequest = z.infer<
+  typeof CreateUserBankIfNeededSchema
+>
+
+export const CreateCloseAuthoritySchema = z
+  .object({
+    /** The user's Ethereum wallet. Defaults to the current audiusWalletClient address. */
+    ethWallet: z.string().optional(),
+    /** The name of the token mint. */
+    mint: MintSchema,
+    /** The blockhash to sign. Should be the transaction's recent blockhash. */
+    recentBlockhash: z.string(),
+    /** The index the Secp256k1 instruction will be at within the transaction. */
+    instructionIndex: z.number()
+  })
+  .strict()
+
+export type CreateCloseAuthorityRequest = z.infer<
+  typeof CreateCloseAuthoritySchema
+>

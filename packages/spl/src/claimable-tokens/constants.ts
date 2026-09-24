@@ -1,6 +1,8 @@
 export enum ClaimableTokensInstruction {
   Create = 0,
-  Transfer = 1
+  Transfer = 1,
+  SetAuthority = 2,
+  Close = 3
 }
 
 /**
