@@ -1173,7 +1173,8 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
           cd packages/web
-          deploying_version=$(jq -r '.version' package.json)
+          # The electronuserland/builder image has no jq
+          deploying_version=$(node -p "require('./package.json').version")
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to desktop win \n\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
@@ -1231,7 +1232,8 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_DAILY_DEPLOY_WEBHOOK }}
         run: |
           cd packages/web
-          deploying_version=$(jq -r '.version' package.json)
+          # The electronuserland/builder image has no jq
+          deploying_version=$(node -p "require('./package.json').version")
           job_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           json_content="{ \"blocks\": [{ \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": \"Deployed production <${job_url}|v${deploying_version}> to desktop linux \n\" } }]}"
           curl -f -X POST -H 'Content-type: application/json' --data "$json_content" $SLACK_WEBHOOK
