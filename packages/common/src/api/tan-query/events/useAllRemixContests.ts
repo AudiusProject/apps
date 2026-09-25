@@ -19,7 +19,11 @@ import { QUERY_KEYS } from '../queryKeys'
 import { QueryKey, QueryOptions } from '../types'
 import { useCurrentUserId } from '../users/account/useCurrentUserId'
 
-import { getEventIdsByEntityIdQueryKey, getEventQueryKey } from './utils'
+import {
+  dedupeContestTrackIds,
+  getEventIdsByEntityIdQueryKey,
+  getEventQueryKey
+} from './utils'
 
 const DEFAULT_PAGE_SIZE = 25
 
@@ -132,7 +136,7 @@ export const useAllRemixContests = (
         })
         .filter(removeNullable)
     },
-    select: (data) => data.pages.flat(),
+    select: (data) => dedupeContestTrackIds(data.pages.flat()),
     ...options
   })
 }
