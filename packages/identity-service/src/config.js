@@ -485,6 +485,19 @@ const config = convict({
     env: 'hCaptchaSecret',
     default: ''
   },
+  coinflowApiKey: {
+    doc: 'Coinflow merchant API key. Must match the client merchant ID and environment.',
+    format: String,
+    env: 'coinflowApiKey',
+    sensitive: true,
+    default: ''
+  },
+  coinflowEnvironment: {
+    doc: 'Coinflow API environment',
+    format: ['sandbox', 'prod'],
+    env: 'coinflowEnvironment',
+    default: 'sandbox'
+  },
   plaidClientId: {
     doc: 'Plaid client ID',
     format: String,
