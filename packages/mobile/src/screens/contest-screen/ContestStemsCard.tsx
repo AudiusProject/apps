@@ -137,8 +137,11 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
 
   const handleDownloadOne = (downloadTrackId: ID) => {
     followContestIfNeeded()
+    // Do NOT pass parentTrackId: the saga appends it to the file list, so
+    // passing it here would pull the full track alongside every single-stem
+    // download. When the parent isn't downloadable its URL 404s and the
+    // whole batch stalls. Match the web card which omits parentTrackId.
     openWaitForDownloadModal({
-      parentTrackId: trackId,
       trackIds: [downloadTrackId],
       quality: DownloadQuality.ORIGINAL
     })
@@ -147,13 +150,18 @@ export const ContestStemsCard = ({ trackId }: ContestStemsCardProps) => {
   const handleDownloadAll = () => {
     if (!track) return
     followContestIfNeeded()
-    // All stems + (optionally) the parent track.
+    // Include the parent only when it's actually downloadable and the user
+    // has access — mirrors the web card's is_downloadable check and gates
+    // on access.download to avoid 404s for stem-only tracks.
+    const includeParent =
+      track.is_downloadable === true && track.access?.download === true
     const ids = [
-      ...(track.is_downloadable ? [trackId] : []),
+      ...(includeParent ? [trackId] : []),
       ...stems.map((s) => s.track_id)
     ]
+    // Do NOT pass parentTrackId: the saga appends it unconditionally, which
+    // would re-include a non-downloadable parent and 404 the whole batch.
     openWaitForDownloadModal({
-      parentTrackId: trackId,
       trackIds: ids,
       quality: DownloadQuality.ORIGINAL
     })
