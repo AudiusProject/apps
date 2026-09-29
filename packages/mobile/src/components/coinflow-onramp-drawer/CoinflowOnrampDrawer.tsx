@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useCoinflowAdapter } from '@audius/common/hooks'
+import { useCoinflowAdapter, useCoinflowSessionKey } from '@audius/common/hooks'
 import {
   coinflowModalUIActions,
   useCoinflowOnrampModal
@@ -18,6 +18,8 @@ import { makeStyles } from 'app/styles'
 import { spacing } from 'app/styles/spacing'
 import { useThemeColors } from 'app/utils/theme'
 import { zIndex } from 'app/utils/zIndex'
+
+import { CoinflowSessionStatus } from './CoinflowSessionStatus'
 
 const MODAL_NAME = 'CoinflowOnramp'
 
@@ -102,7 +104,12 @@ export const CoinflowOnrampDrawer = () => {
     onFailure: handleClose
   })
   const deviceId = getCoinflowDeviceId()
-  const showContent = isOpen && adapter
+  const { sessionKey, isError, isFetching, retry } = useCoinflowSessionKey({
+    wallet: adapter?.wallet.publicKey.toBase58(),
+    environment: IS_PRODUCTION ? 'prod' : 'sandbox',
+    enabled: isOpen
+  })
+  const showContent = isOpen && adapter && sessionKey
 
   return (
     <AppDrawer
@@ -116,6 +123,8 @@ export const CoinflowOnrampDrawer = () => {
     >
       {showContent ? (
         <CoinflowPurchase
+          // SDK runtime supports sessionKey with a wallet, but its types omit it.
+          {...{ sessionKey }}
           deviceId={deviceId}
           transaction={transaction}
           wallet={adapter.wallet}
@@ -126,6 +135,12 @@ export const CoinflowOnrampDrawer = () => {
           env={IS_PRODUCTION ? 'prod' : 'sandbox'}
           blockchain='solana'
           subtotal={{ cents: amount * 100, currency: Currency.USD }}
+        />
+      ) : isOpen ? (
+        <CoinflowSessionStatus
+          isError={isError}
+          isFetching={isFetching}
+          onRetry={() => retry()}
         />
       ) : null}
     </AppDrawer>

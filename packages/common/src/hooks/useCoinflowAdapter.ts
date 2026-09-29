@@ -21,6 +21,8 @@ import {
 } from '~/store'
 
 type CoinflowAdapter = {
+  accountWallet: string | null | undefined
+  signerWallet: string | null | undefined
   wallet: {
     publicKey: PublicKey
     sendTransaction: (
@@ -41,10 +43,11 @@ export const useCoinflowWithdrawalAdapter = () => {
   } = useAppContext()
   const [adapter, setAdapter] = useState<CoinflowAdapter | null>(null)
   const { data: walletAddresses } = useWalletAddresses()
-  const { currentUser } = walletAddresses ?? {}
+  const { currentUser, web3User } = walletAddresses ?? {}
   const { audiusSdk, solanaWalletService } = useQueryContext()
 
   useEffect(() => {
+    let canceled = false
     const initWallet = async () => {
       const wallet = await solanaWalletService.getKeypair()
       const sdk = await audiusSdk()
@@ -57,7 +60,10 @@ export const useCoinflowWithdrawalAdapter = () => {
         return
       }
 
+      if (canceled) return
       setAdapter({
+        accountWallet: currentUser,
+        signerWallet: web3User,
         connection,
         wallet: {
           publicKey: wallet.publicKey,
@@ -111,9 +117,23 @@ export const useCoinflowWithdrawalAdapter = () => {
       })
     }
     initWallet()
-  }, [audiusBackend, currentUser, solanaWalletService, make, track, audiusSdk])
+    return () => {
+      canceled = true
+    }
+  }, [
+    audiusBackend,
+    currentUser,
+    web3User,
+    solanaWalletService,
+    make,
+    track,
+    audiusSdk
+  ])
 
-  return adapter
+  return adapter?.accountWallet === currentUser &&
+    adapter?.signerWallet === web3User
+    ? adapter
+    : null
 }
 
 /** An adapter for signing and sending unmodified Coinflow transactions. Will partialSign with the
@@ -128,11 +148,14 @@ export const useCoinflowAdapter = ({
   onFailure: () => void
 }) => {
   const { audiusBackend } = useAppContext()
+  const { data: walletAddresses } = useWalletAddresses()
+  const { currentUser, web3User } = walletAddresses ?? {}
   const [adapter, setAdapter] = useState<CoinflowAdapter | null>(null)
   const { audiusSdk, solanaWalletService } = useQueryContext()
   const dispatch = useDispatch()
 
   useEffect(() => {
+    let canceled = false
     const initWallet = async () => {
       const wallet = await solanaWalletService.getKeypair()
       const sdk = await audiusSdk()
@@ -144,7 +167,10 @@ export const useCoinflowAdapter = ({
         return
       }
 
+      if (canceled) return
       setAdapter({
+        accountWallet: currentUser,
+        signerWallet: web3User,
         connection,
         wallet: {
           publicKey: wallet.publicKey,
@@ -192,7 +218,12 @@ export const useCoinflowAdapter = ({
       })
     }
     initWallet()
+    return () => {
+      canceled = true
+    }
   }, [
+    currentUser,
+    web3User,
     audiusBackend,
     solanaWalletService,
     audiusSdk,
@@ -201,5 +232,8 @@ export const useCoinflowAdapter = ({
     onFailure
   ])
 
-  return adapter
+  return adapter?.accountWallet === currentUser &&
+    adapter?.signerWallet === web3User
+    ? adapter
+    : null
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useCoinflowAdapter } from '@audius/common/hooks'
+import { useCoinflowAdapter, useCoinflowSessionKey } from '@audius/common/hooks'
 import {
   coinflowModalUIActions,
   useCoinflowOnrampModal
@@ -16,6 +16,7 @@ import { isElectron } from 'utils/clientUtil'
 import zIndex from 'utils/zIndex'
 
 import styles from './CoinflowOnrampModal.module.css'
+import { CoinflowSessionStatus } from './CoinflowSessionStatus'
 
 const { transactionSucceeded, transactionCanceled } = coinflowModalUIActions
 
@@ -62,7 +63,12 @@ export const CoinflowOnrampModal = NiceModal.create(() => {
     onSuccess: handleSuccess,
     onFailure: handleClose
   })
-  const showContent = isOpen && adapter
+  const { sessionKey, isError, isFetching, retry } = useCoinflowSessionKey({
+    wallet: adapter?.wallet.publicKey.toBase58(),
+    environment: IS_PRODUCTION ? 'prod' : 'sandbox',
+    enabled: isOpen
+  })
+  const showContent = isOpen && adapter && sessionKey
 
   return (
     <ModalDrawer
@@ -76,6 +82,8 @@ export const CoinflowOnrampModal = NiceModal.create(() => {
     >
       {showContent ? (
         <CoinflowPurchase
+          // SDK runtime supports sessionKey with a wallet, but its types omit it.
+          {...{ sessionKey }}
           email={guestEmail}
           transaction={transaction}
           wallet={adapter.wallet}
@@ -90,6 +98,12 @@ export const CoinflowOnrampModal = NiceModal.create(() => {
           disableApplePay={isElectron()}
           blockchain='solana'
           subtotal={{ cents: amount * 100, currency: Currency.USD }}
+        />
+      ) : isOpen ? (
+        <CoinflowSessionStatus
+          isError={isError}
+          isFetching={isFetching}
+          onRetry={() => retry()}
         />
       ) : null}
     </ModalDrawer>
