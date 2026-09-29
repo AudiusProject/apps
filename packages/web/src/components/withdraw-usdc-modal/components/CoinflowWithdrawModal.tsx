@@ -1,6 +1,9 @@
 import { useCallback } from 'react'
 
-import { useCoinflowWithdrawalAdapter } from '@audius/common/hooks'
+import {
+  useCoinflowWithdrawalAdapter,
+  useCoinflowSessionKey
+} from '@audius/common/hooks'
 import {
   withdrawUSDCActions,
   withdrawUSDCSelectors
@@ -9,6 +12,7 @@ import { CoinflowWithdraw, OnSuccessMethod } from '@coinflowlabs/react'
 import NiceModal, { useModal } from '@ebay/nice-modal-react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { CoinflowSessionStatus } from 'components/coinflow-onramp-modal/CoinflowSessionStatus'
 import ModalDrawer from 'components/modal-drawer/ModalDrawer'
 import { env } from 'services/env'
 import zIndex from 'utils/zIndex'
@@ -62,7 +66,12 @@ export const CoinflowWithdrawModal = NiceModal.create(() => {
     [dispatch, onClose]
   )
 
-  const showContent = isOpen && adapter && amount !== undefined
+  const { sessionKey, isError, isFetching, retry } = useCoinflowSessionKey({
+    wallet: adapter?.wallet.publicKey.toBase58(),
+    environment: IS_PRODUCTION ? 'prod' : 'sandbox',
+    enabled: isOpen
+  })
+  const showContent = isOpen && adapter && amount !== undefined && sessionKey
 
   return (
     <ModalDrawer
@@ -76,6 +85,7 @@ export const CoinflowWithdrawModal = NiceModal.create(() => {
     >
       {showContent ? (
         <CoinflowWithdraw
+          sessionKey={sessionKey}
           amount={amount / 100}
           lockAmount={true}
           wallet={adapter.wallet}
@@ -84,6 +94,12 @@ export const CoinflowWithdrawModal = NiceModal.create(() => {
           merchantId={MERCHANT_ID || ''}
           env={IS_PRODUCTION ? 'prod' : 'sandbox'}
           blockchain='solana'
+        />
+      ) : isOpen ? (
+        <CoinflowSessionStatus
+          isError={isError}
+          isFetching={isFetching}
+          onRetry={() => retry()}
         />
       ) : null}
     </ModalDrawer>

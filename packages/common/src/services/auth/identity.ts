@@ -337,6 +337,21 @@ export class IdentityService {
     })
   }
 
+  async createCoinflowSessionKey(data: {
+    wallet: string
+    signature: string
+    timestamp: number
+    environment: 'prod' | 'sandbox'
+  }) {
+    return await this._makeRequest<{ key: string; expiresAt: number }>({
+      url: '/coinflow/session-key',
+      method: 'post',
+      headers: await this.getAuthHeaders(),
+      data,
+      timeout: 15000
+    })
+  }
+
   async createPersonaSessionToken() {
     const headers = await this.getAuthHeaders()
 

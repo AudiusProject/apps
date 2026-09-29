@@ -1,6 +1,9 @@
 import { useCallback } from 'react'
 
-import { useCoinflowWithdrawalAdapter } from '@audius/common/hooks'
+import {
+  useCoinflowWithdrawalAdapter,
+  useCoinflowSessionKey
+} from '@audius/common/hooks'
 import {
   useCoinflowWithdrawModal,
   withdrawUSDCActions,
@@ -12,6 +15,7 @@ import { CoinflowWithdraw } from '@coinflowlabs/react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Flex, IconButton, IconCloseAlt } from '@audius/harmony-native'
+import { CoinflowSessionStatus } from 'app/components/coinflow-onramp-drawer/CoinflowSessionStatus'
 import { AppDrawer } from 'app/components/drawer'
 import { env } from 'app/services/env'
 import { zIndex } from 'app/utils/zIndex'
@@ -57,7 +61,12 @@ export const CoinflowWithdrawDrawer = () => {
     onClose()
   }, [dispatch, onClose])
 
-  const showContent = isOpen && adapter && amount !== undefined
+  const { sessionKey, isError, isFetching, retry } = useCoinflowSessionKey({
+    wallet: adapter?.wallet.publicKey.toBase58(),
+    environment: IS_PRODUCTION ? 'prod' : 'sandbox',
+    enabled: isOpen
+  })
+  const showContent = isOpen && adapter && amount !== undefined && sessionKey
 
   return (
     <AppDrawer
@@ -72,6 +81,7 @@ export const CoinflowWithdrawDrawer = () => {
     >
       {showContent ? (
         <CoinflowWithdraw
+          sessionKey={sessionKey}
           amount={amount / 100}
           lockAmount={true}
           wallet={adapter.wallet}
@@ -80,6 +90,12 @@ export const CoinflowWithdrawDrawer = () => {
           merchantId={env.COINFLOW_MERCHANT_ID || ''}
           env={IS_PRODUCTION ? 'prod' : 'sandbox'}
           blockchain='solana'
+        />
+      ) : isOpen ? (
+        <CoinflowSessionStatus
+          isError={isError}
+          isFetching={isFetching}
+          onRetry={() => retry()}
         />
       ) : null}
     </AppDrawer>
