@@ -417,4 +417,7 @@ export * from './UserTracksDownloadCountResponse';
 export * from './UserTracksRemixedResponse';
 export * from './VerifyToken';
 export * from './VersionMetadata';
+export * from './WeeklyRotationNotification';
+export * from './WeeklyRotationNotificationAction';
+export * from './WeeklyRotationNotificationActionData';
 export * from './WriteResponse';

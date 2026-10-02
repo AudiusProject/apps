@@ -174,6 +174,7 @@ export const GetNotificationsTypesEnum = {
     CommentMention: 'comment_mention',
     CommentReaction: 'comment_reaction',
     ListenStreakReminder: 'listen_streak_reminder',
+    WeeklyRotation: 'weekly_rotation',
     FanRemixContestStarted: 'fan_remix_contest_started',
     FanRemixContestEnded: 'fan_remix_contest_ended',
     FanRemixContestEndingSoon: 'fan_remix_contest_ending_soon',
