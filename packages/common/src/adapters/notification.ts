@@ -600,6 +600,15 @@ export const notificationFromSDK = (
         ...formatBaseNotification(notification)
       }
     }
+    case 'weekly_rotation': {
+      const data = notification.actions[0].data
+      return {
+        type: NotificationType.WeeklyRotation,
+        year: data.year,
+        week: data.week,
+        ...formatBaseNotification(notification)
+      }
+    }
     case 'fan_remix_contest_ended': {
       const data = notification.actions[0].data
       return {
@@ -687,15 +696,6 @@ export const notificationFromSDK = (
         const n = notification as unknown as {
           type: string
           actions: typeof notification.actions
-        }
-        if (n.type === 'weekly_rotation') {
-          const data = n.actions[0].data as unknown as Record<string, number>
-          return {
-            type: NotificationType.WeeklyRotation,
-            year: data.year,
-            week: data.week,
-            ...formatBaseNotification(notification)
-          }
         }
         if (n.type === 'remix_contest_update') {
           const data = n.actions[0].data as unknown as Record<string, string>

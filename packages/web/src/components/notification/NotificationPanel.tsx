@@ -11,6 +11,7 @@ import {
   Popup,
   Flex,
   Text,
+  Button,
   LoadingSpinner,
   useTheme
 } from '@audius/harmony'
@@ -24,7 +25,10 @@ import { EmptyNotifications } from './EmptyNotifications'
 import { Notification } from './Notification'
 
 const messages = {
-  title: 'Notifications'
+  title: 'Notifications',
+  loading: 'Loading notifications',
+  error: 'Unable to load notifications. Please try again.',
+  retry: 'Try Again'
 }
 
 type NotificationPanelProps = {
@@ -59,14 +63,15 @@ export const NotificationPanel = ({
     hasNextPage,
     isPending,
     isError,
-    isFetchingNextPage
+    isFetching,
+    refetch
   } = useNotifications()
 
   const handleLoadMore = useCallback(() => {
-    if (!isFetchingNextPage) {
+    if (hasNextPage && !isFetching && !isError) {
       fetchNextPage()
     }
-  }, [fetchNextPage, isFetchingNextPage])
+  }, [fetchNextPage, hasNextPage, isFetching, isError])
 
   const isUserListOpen = useSelector(getIsUserListOpen)
   const { mutate: markAsViewed } = useMarkNotificationsAsViewed()
@@ -94,7 +99,7 @@ export const NotificationPanel = ({
   }, [isOpen, markAsViewed])
 
   const userHasNoNotifications =
-    (!isPending || isError) && notifications.length === 0
+    !isPending && !isError && notifications.length === 0
 
   return (
     <Popup
@@ -139,18 +144,10 @@ export const NotificationPanel = ({
         <Scrollbar css={{ maxHeight: 'calc(100vh - 333px)' }} id={scrollbarId}>
           <InfiniteScroll
             loadMore={handleLoadMore}
-            hasMore={hasNextPage}
-            initialLoad={isPending}
+            hasMore={hasNextPage && !isFetching && !isError}
+            initialLoad={false}
             useWindow={false}
             threshold={SCROLL_THRESHOLD}
-            loader={
-              <LoadingSpinner
-                key='loading-spinner'
-                size='xl'
-                alignSelf='center'
-                mv='xl'
-              />
-            }
             getScrollParent={getScrollParent}
             css={{
               display: 'flex',
@@ -174,6 +171,25 @@ export const NotificationPanel = ({
                 )
               })
             )}
+            {isError ? (
+              <Flex
+                as='li'
+                column
+                alignItems='center'
+                gap='l'
+                pv='l'
+                role='alert'
+              >
+                <Text>{messages.error}</Text>
+                <Button onClick={() => refetch()} disabled={isFetching}>
+                  {messages.retry}
+                </Button>
+              </Flex>
+            ) : isPending || isFetching ? (
+              <Flex as='li' justifyContent='center' pv='xl'>
+                <LoadingSpinner size='xl' aria-label={messages.loading} />
+              </Flex>
+            ) : null}
           </InfiniteScroll>
         </Scrollbar>
       </Flex>
