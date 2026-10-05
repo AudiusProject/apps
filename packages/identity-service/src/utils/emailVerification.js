@@ -1,6 +1,10 @@
 const crypto = require('crypto')
 const config = require('../config')
-const { getEmailVerificationEmail } = require('../emails/emailVerification')
+const {
+  getEmailVerificationEmail,
+  getEmailVerificationEmailText
+} = require('../emails/emailVerification')
+const { DISABLE_TRACKING } = require('./transactionalEmail')
 
 const TOKEN_BYTES = 32
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000
@@ -27,12 +31,18 @@ const sendVerificationEmail = async ({ email, token, sendgrid, logger }) => {
   const verificationLink = buildVerificationLink(token)
   const copyrightYear = new Date().getFullYear().toString()
   const html = getEmailVerificationEmail({ verificationLink, copyrightYear })
+  const text = getEmailVerificationEmailText({
+    verificationLink,
+    copyrightYear
+  })
 
   await sendgrid.send({
     from: 'The Audius Team <team@audius.co>',
     to: email,
     subject: 'Verify your Audius email address',
-    html
+    html,
+    text,
+    trackingSettings: DISABLE_TRACKING
   })
   return true
 }

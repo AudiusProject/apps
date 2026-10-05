@@ -58,4 +58,16 @@ const getEmailVerificationEmail = ({ verificationLink, copyrightYear }) => {
   `
 }
 
-module.exports = { getEmailVerificationEmail }
+const getEmailVerificationEmailText = ({ verificationLink, copyrightYear }) => {
+  return `Verify your email
+
+Confirm this email address to finish setting up your Audius account:
+${verificationLink}
+
+This link will expire in 24 hours. If you didn't create an Audius account, you can safely ignore this email.
+
+© ${copyrightYear} Audius, Inc. All rights reserved.
+`
+}
+
+module.exports = { getEmailVerificationEmail, getEmailVerificationEmailText }

@@ -10,11 +10,15 @@ const handlebars = require('handlebars')
 const fs = require('fs')
 const path = require('path')
 const config = require('../config.js')
+const { DISABLE_TRACKING } = require('../utils/transactionalEmail')
 
 const WEBSITE_HOST = config.get('websiteHost')
 
 const recoveryTemplate = handlebars.compile(
   fs.readFileSync(path.resolve(__dirname, '../emails/recovery.html')).toString()
+)
+const recoveryTextTemplate = handlebars.compile(
+  fs.readFileSync(path.resolve(__dirname, '../emails/recovery.txt')).toString()
 )
 
 const toQueryStr = (obj) => {
@@ -98,12 +102,15 @@ module.exports = function (app) {
         copyright_year: copyrightYear
       }
       const recoveryHtml = recoveryTemplate(context)
+      const recoveryText = recoveryTextTemplate(context)
 
       const emailParams = {
         from: 'Audius Recovery <recovery@audius.co>',
         to: `${email}`,
         subject: 'Save This Email: Audius Password Recovery',
-        html: recoveryHtml
+        html: recoveryHtml,
+        text: recoveryText,
+        trackingSettings: DISABLE_TRACKING
       }
       try {
         await sg.send(emailParams)

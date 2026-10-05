@@ -1,4 +1,5 @@
 const { getOtpEmail, getOtpEmailText } = require('../emails/otp')
+const { DISABLE_TRACKING } = require('./transactionalEmail')
 
 const OTP_CHARS = '0123456789'
 const OTP_REDIS_PREFIX = 'otp'
@@ -61,10 +62,7 @@ const sendOtp = async ({ email, redis, sendgrid }) => {
     subject: `${formattedOtp} is your Audius verification code`,
     html: getOtpEmail({ otp: formattedOtp, copyrightYear }),
     text: getOtpEmailText({ otp: formattedOtp, copyrightYear }),
-    trackingSettings: {
-      clickTracking: { enable: false, enableText: false },
-      openTracking: { enable: false }
-    }
+    trackingSettings: DISABLE_TRACKING
   }
 
   await redis.set(
