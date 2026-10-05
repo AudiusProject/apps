@@ -22,6 +22,16 @@ on:
         options:
           - rc
           - production
+      native_build:
+        description: 'Build and upload native apps without a version bump'
+        required: false
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - ios
+          - android
+          - all
 
 env:
   NODE_VERSION: '24.10.0'
@@ -433,7 +443,7 @@ jobs:
     name: iOS Release Candidate Build & Upload
     runs-on: macos-26
     needs: [mobile-install, mobile-version-check]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (needs.mobile-version-check.outputs.version_changed == 'true' || github.event.inputs.native_build == 'ios' || github.event.inputs.native_build == 'all')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -602,7 +612,7 @@ jobs:
     name: Android Release Candidate Build & Upload
     runs-on: ubuntu-latest
     needs: [mobile-install, mobile-version-check]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (needs.mobile-version-check.outputs.version_changed == 'true' || github.event.inputs.native_build == 'android' || github.event.inputs.native_build == 'all')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -625,6 +635,9 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The default also installs the removed legacy `tools` package, which fails.
+          packages: platform-tools
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -828,7 +841,7 @@ jobs:
     name: iOS Production Build & Upload
     runs-on: macos-26
     needs: [mobile-install, mobile-version-check]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (needs.mobile-version-check.outputs.version_changed == 'true' || github.event.inputs.native_build == 'ios' || github.event.inputs.native_build == 'all')
     environment:
       name: mobile-production-ios
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -984,7 +997,7 @@ jobs:
     name: Android Production Build & Upload
     runs-on: ubuntu-latest
     needs: [mobile-install, mobile-version-check]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.mobile-version-check.outputs.version_changed == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (needs.mobile-version-check.outputs.version_changed == 'true' || github.event.inputs.native_build == 'android' || github.event.inputs.native_build == 'all')
     environment:
       name: mobile-production-android
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -1010,6 +1023,9 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The default also installs the removed legacy `tools` package, which fails.
+          packages: platform-tools
 
       - name: Cache Gradle
         uses: actions/cache@v4
