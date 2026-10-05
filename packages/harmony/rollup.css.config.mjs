@@ -3,6 +3,8 @@ import { createRequire } from 'node:module'
 import postcss from 'rollup-plugin-postcss'
 import rollupTypescript from 'rollup-plugin-typescript2'
 
+import { NO_FONTS_CSS, harmonyCssWithFonts } from './rollup.fonts.mjs'
+
 const cjsRequire = createRequire(import.meta.url)
 const tspCompiler = cjsRequire('ts-patch/compiler')
 
@@ -26,10 +28,11 @@ export default {
     }),
     postcss({
       minimize: true,
-      extract: 'harmony.css',
+      extract: NO_FONTS_CSS,
       modules: true,
       inject: false
-    })
+    }),
+    harmonyCssWithFonts()
   ],
   // External everything since we only care about CSS extraction
   external: () => true,

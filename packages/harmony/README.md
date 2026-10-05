@@ -60,6 +60,8 @@ Import styles exported by Harmony
 import '@audius/harmony/dist/harmony.css'
 ```
 
+`harmony.css` inlines the Avenir Next LT Pro font faces as base64. If you serve the font files yourself, import `@audius/harmony/dist/harmony-no-fonts.css` instead and declare the `@font-face` rules in your app.
+
 Setup the ThemeProvider exported by Harmony
 
 ```tsx
