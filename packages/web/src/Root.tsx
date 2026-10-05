@@ -1,4 +1,4 @@
-import '@audius/harmony/dist/harmony.css'
+import '@audius/harmony/dist/harmony-no-fonts.css'
 
 import { Suspense, useState, useEffect, lazy } from 'react'
 
