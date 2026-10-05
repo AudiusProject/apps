@@ -7,6 +7,7 @@ import { Platform } from 'react-native'
 import { setLastNavAction } from 'app/hooks/useNavigation'
 
 import { BuySellModalScreen } from '../buy-sell-screen'
+import { ChangeEmailModalScreen } from '../change-email-screen/ChangeEmailScreen'
 import { ChangePasswordModalScreen } from '../change-password-screen'
 import { CreateChatBlastNavigator } from '../create-chat-blast-screen/CreateChatBlastNavigator'
 import { EditCollectionScreen } from '../edit-collection-screen'
@@ -60,6 +61,7 @@ export const AppScreen = () => {
           name='FeatureFlagOverride'
           component={FeatureFlagOverrideScreen}
         />
+        <Stack.Screen name='ChangeEmail' component={ChangeEmailModalScreen} />
         <Stack.Screen
           name='ChangePassword'
           component={ChangePasswordModalScreen}

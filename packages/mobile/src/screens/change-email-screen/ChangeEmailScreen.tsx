@@ -62,9 +62,7 @@ const ChangeEmailHeaderLeft = ({ page }: { page: ChangeEmailPage }) => {
     return <BackButton />
   } else {
     return (
-      <TouchableOpacity
-        onPress={() => navigation.popTo('AccountSettingsScreen')}
-      >
+      <TouchableOpacity onPress={() => navigation.getParent()?.goBack()}>
         <IconClose size='l' color='subdued' />
       </TouchableOpacity>
     )
@@ -165,7 +163,7 @@ const ChangeEmailScreen = () => {
   const navigation = useNavigation()
   const { toast } = useToast()
   const onSuccess = useCallback(() => {
-    navigation.popTo('AccountSettingsScreen')
+    navigation.goBack()
     toast({ content: messages.success, type: 'info' })
   }, [navigation, toast])
   const { page, setPage, ...formikConfiguration } =
