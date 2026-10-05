@@ -32,7 +32,6 @@ import { SetAppTabNavigationContext } from 'app/screens/app-screen/AppTabNavigat
 import type { AppTabNavigation } from 'app/screens/app-screen/AppTabNavigationProvider'
 import { AudioScreen } from 'app/screens/audio-screen'
 import { CashScreen } from 'app/screens/cash-screen'
-import { ChangeEmailModalScreen } from 'app/screens/change-email-screen/ChangeEmailScreen'
 import { ChatListScreen } from 'app/screens/chat-screen/ChatListScreen'
 import { ChatScreen } from 'app/screens/chat-screen/ChatScreen'
 import { ChatUserListScreen } from 'app/screens/chat-screen/ChatUserListScreen'
@@ -371,10 +370,6 @@ export const AppTabScreen = ({ baseScreen, Stack }: AppTabScreenProps) => {
               <Stack.Screen
                 name='NotificationSettingsScreen'
                 component={NotificationSettingsScreen}
-              />
-              <Stack.Screen
-                name='ChangeEmail'
-                component={ChangeEmailModalScreen}
               />
             </Stack.Group>
 
