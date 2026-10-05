@@ -1,5 +1,5 @@
 import featuresBg from '../assets/features-bg.svg?url'
-import featuresVisual from '../assets/features-visual.jpg'
+import featuresVisual from '../assets/features-visual.webp'
 
 import styles from './GrowthStartsHere.module.css'
 
@@ -45,7 +45,10 @@ export const GrowthStartsHere = (_props: GrowthStartsHereProps) => {
             <img
               src={featuresVisual}
               alt='Audius app interface'
+              width={1456}
+              height={965}
               loading='lazy'
+              decoding='async'
             />
           </div>
           <div className={styles.featuresList}>
