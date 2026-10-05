@@ -1,4 +1,5 @@
-const { getOtpEmail } = require('../emails/otp')
+const { getOtpEmail, getOtpEmailText } = require('../emails/otp')
+const { DISABLE_TRACKING } = require('./transactionalEmail')
 
 const OTP_CHARS = '0123456789'
 const OTP_REDIS_PREFIX = 'otp'
@@ -23,11 +24,7 @@ const generateOtp = () => {
   return OTP
 }
 
-const getEmail = ({ otp }) => {
-  const copyrightYear = new Date().getFullYear().toString()
-  const formattedOtp = `${otp.substring(0, 3)} ${otp.substring(3, 6)}`
-  return getOtpEmail({ otp: formattedOtp, copyrightYear })
-}
+const formatOtp = (otp) => `${otp.substring(0, 3)} ${otp.substring(3, 6)}`
 
 const validateOtp = async ({ email, otp, redis }) => {
   const storedOtp = await redis.get(`${OTP_REDIS_PREFIX}:${email}`)
@@ -56,15 +53,16 @@ const updateOtpCount = async ({ email, redis }) => {
 
 const sendOtp = async ({ email, redis, sendgrid }) => {
   const otp = generateOtp()
-  const html = getEmail({
-    otp
-  })
+  const formattedOtp = formatOtp(otp)
+  const copyrightYear = new Date().getFullYear().toString()
 
   const emailParams = {
     from: 'The Audius Team <team@audius.co>',
     to: email,
-    subject: 'Your Audius Verification Code',
-    html
+    subject: `${formattedOtp} is your Audius verification code`,
+    html: getOtpEmail({ otp: formattedOtp, copyrightYear }),
+    text: getOtpEmailText({ otp: formattedOtp, copyrightYear }),
+    trackingSettings: DISABLE_TRACKING
   }
 
   await redis.set(

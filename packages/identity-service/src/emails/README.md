@@ -1,6 +1,6 @@
 # Email Templates 
 
-## recovery.html
+## recovery.html, recovery.txt
 | Variable      | Description       |
 | :------------ | :---------------- |
 | recovery_link | The recovery Link |

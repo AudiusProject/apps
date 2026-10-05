@@ -1,0 +1,11 @@
+Save this email
+
+The link below is the only way to recover your Audius account if you forget your password. Audius cannot reset your password for you.
+
+Keep this email somewhere safe and never share it with anyone.
+
+Reset my password: {{{recovery_link}}}
+
+Questions? Contact Audius Support: https://help.audius.co
+
+© {{copyright_year}} Audius, Inc. All rights reserved.
