@@ -140,10 +140,6 @@
     </script>
 
     <!-- start Google Analytics -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=%GA_MEASUREMENT_ID%"
-    ></script>
     <script>
       const measurementId = '%GA_MEASUREMENT_ID%'
       window.dataLayer = window.dataLayer || []
@@ -287,7 +283,7 @@
 
     <!-- start Meta Pixel -->
     <script async type="text/javascript">
-      !(function (f, b, e, v, n, t, s) {
+      !(function (f, n) {
         if (f.fbq) return
         n = f.fbq = function () {
           n.callMethod
@@ -299,21 +295,26 @@
         n.loaded = !0
         n.version = '2.0'
         n.queue = []
-        t = b.createElement(e)
-        t.async = !0
-        t.src = v
-        s = b.getElementsByTagName(e)[0]
-        s.parentNode.insertBefore(t, s)
-      })(
-        window,
-        document,
-        'script',
-        'https://connect.facebook.net/en_US/fbevents.js'
-      )
+      })(window)
       fbq('init', '725806216135811')
       fbq('track', 'PageView')
     </script>
     <!-- End Meta Pixel -->
+
+    <!-- Load analytics after the page so they don't compete with the app bundle. The stubs above queue calls until then. -->
+    <script>
+      window.addEventListener('load', function () {
+        ;[
+          'https://www.googletagmanager.com/gtag/js?id=%GA_MEASUREMENT_ID%',
+          'https://connect.facebook.net/en_US/fbevents.js'
+        ].forEach(function (src) {
+          var script = document.createElement('script')
+          script.async = true
+          script.src = src
+          document.head.appendChild(script)
+        })
+      })
+    </script>
     <style id="emotion"></style>
   </head>
   <body>
