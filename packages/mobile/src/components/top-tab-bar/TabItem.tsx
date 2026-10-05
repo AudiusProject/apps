@@ -71,7 +71,7 @@ export const TabItem = ({
         onLongPress={onLongPress}
         onPress={onPress}
         style={styles.tab}
-        testID={options.tabBarTestID}
+        testID={options.tabBarButtonTestID}
       >
         <View>{icon}</View>
         <Text variant='body' size='xs' strength='strong'>

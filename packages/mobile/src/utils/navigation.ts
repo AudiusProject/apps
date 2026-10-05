@@ -7,7 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
  * Can be passed to useNavigationState
  */
 export const getRoutePath = (
-  state: NavigationState,
+  state: NavigationState | undefined,
   routePath?: string[]
 ): string[] | undefined => {
   if (!state || state.routes.length === 0) {
@@ -22,7 +22,7 @@ export const getRoutePath = (
  * Navigation state selector that selects the primary route
  * e.g. 'feed', 'trending', 'profile', etc
  */
-export const getPrimaryRoute = (state: NavigationState) => {
+export const getPrimaryRoute = (state: NavigationState | undefined) => {
   // The route at index 2 is the primary route
   return getRoutePath(state)?.[2]
 }

@@ -63,7 +63,7 @@ const ChangeEmailHeaderLeft = ({ page }: { page: ChangeEmailPage }) => {
   } else {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('AccountSettingsScreen')}
+        onPress={() => navigation.popTo('AccountSettingsScreen')}
       >
         <IconClose size='l' color='subdued' />
       </TouchableOpacity>
@@ -90,9 +90,13 @@ const ChangeEmailNavigator = ({
     }
   })
 
-  // Map hook page state to screen navigations
+  // Map hook page state to screen navigations. The pages live in the nested
+  // stack, so target them through this screen's route.
   useEffect(() => {
-    navigation.navigate(ChangeEmailPage[page])
+    navigation.navigate('ChangeEmail', {
+      screen: ChangeEmailPage[page],
+      pop: true
+    })
   }, [page, navigation])
 
   // Map navigations back to the hook page state
@@ -161,7 +165,7 @@ const ChangeEmailScreen = () => {
   const navigation = useNavigation()
   const { toast } = useToast()
   const onSuccess = useCallback(() => {
-    navigation.navigate('AccountSettingsScreen')
+    navigation.popTo('AccountSettingsScreen')
     toast({ content: messages.success, type: 'info' })
   }, [navigation, toast])
   const { page, setPage, ...formikConfiguration } =

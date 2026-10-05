@@ -60,9 +60,9 @@ const ResetPasswordScreen = () => {
 
   const handleCancel = useCallback(() => {
     if (isSignedIn) {
-      navigation.navigate('HomeStack')
+      navigation.navigate('HomeStack', undefined, { pop: true })
     } else {
-      navigation.navigate('SignOnStack')
+      navigation.navigate('SignOnStack', undefined, { pop: true })
     }
   }, [navigation, isSignedIn])
 

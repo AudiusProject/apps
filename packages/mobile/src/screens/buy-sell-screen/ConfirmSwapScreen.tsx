@@ -220,7 +220,7 @@ export const ConfirmSwapScreen = ({ route }: ConfirmSwapScreenProps) => {
       )
 
       // Navigate back to input screen (matching web behavior)
-      navigation.navigate('BuySellMain')
+      navigation.popTo('BuySellMain')
 
       // Show toast notification
       toast({ content: messages.transactionFailed, type: 'error' })

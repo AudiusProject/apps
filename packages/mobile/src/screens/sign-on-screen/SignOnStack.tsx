@@ -20,6 +20,8 @@ import { useSelector } from 'react-redux'
 import { ScreenOptionsContext, defaultScreenOptions } from 'app/app/navigation'
 import { useNavigation } from 'app/hooks/useNavigation'
 
+import type { RootScreenParamList } from '../root-screen'
+
 import { AccountLoadingScreen } from './screens/AccountLoadingScreen'
 import { ConfirmEmailScreen } from './screens/ConfirmEmailScreen'
 import { CreatePasswordScreen } from './screens/CreatePasswordScreen'
@@ -29,7 +31,6 @@ import { ReviewHandleScreen } from './screens/ReviewHandleScreen'
 import { SelectArtistsScreen } from './screens/SelectArtistScreen'
 import { SelectGenresScreen } from './screens/SelectGenresScreen'
 import { SignOnScreen } from './screens/SignOnScreen'
-import type { SignOnScreenParamList } from './types'
 import { getSignOnScreen } from './utils/getSignOnScreen'
 
 const Stack = createNativeStackNavigator()
@@ -72,7 +73,7 @@ export const SignOnStack = (props: SignOnStackProps) => {
 
   const page = useSelector(getPage)
   const handle = useSelector(getHandleField)
-  const navigation = useNavigation<SignOnScreenParamList>()
+  const navigation = useNavigation<RootScreenParamList>()
   const lastHandledPage = useRef<Pages | null>(null)
 
   // Respond to signon saga page changes
@@ -86,7 +87,9 @@ export const SignOnStack = (props: SignOnStackProps) => {
       page,
       hasHandle: Boolean(handle.value)
     })
-    if (screen) navigation.navigate(screen)
+    // The sign-on screens live in the nested stack below, so target them
+    // through this screen's route.
+    if (screen) navigation.navigate('SignOnStack', { screen, pop: true })
   }, [handle.value, navigation, page])
 
   return (

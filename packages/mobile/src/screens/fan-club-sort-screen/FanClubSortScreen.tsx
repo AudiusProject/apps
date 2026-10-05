@@ -72,10 +72,14 @@ export const FanClubSortScreen = () => {
 
   const handleBackPress = useCallback(() => {
     // Navigate back to parent screen with sort params
-    navigation.navigate('FanClubsExplore', {
-      sortMethod: selectedOption,
-      sortDirection: selectedDirection
-    })
+    navigation.popTo(
+      'FanClubsExplore',
+      {
+        sortMethod: selectedOption,
+        sortDirection: selectedDirection
+      },
+      { merge: true }
+    )
   }, [navigation, selectedOption, selectedDirection])
 
   const handleDirectionChange = useCallback(
