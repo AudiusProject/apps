@@ -13,6 +13,7 @@ import {
 } from '@audius/common/store'
 import { route } from '@audius/common/utils'
 import { PortalHost } from '@gorhom/portal'
+import type { NavigatorScreenParams } from '@react-navigation/native'
 import { useLinkTo } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useIsRestoring } from '@tanstack/react-query'
@@ -40,6 +41,7 @@ import { AppDrawerScreen } from '../app-drawer-screen'
 import { OAuthScreen } from '../oauth-screen/OAuthScreen'
 import { ResetPasswordModalScreen } from '../reset-password-screen'
 import { SignOnStack } from '../sign-on-screen'
+import type { SignOnScreenParamList } from '../sign-on-screen/types'
 
 import { StatusBar } from './StatusBar'
 import { useResetNotificationBadgeCount } from './useResetNotificationBadgeCount'
@@ -57,7 +59,7 @@ export type RootScreenParamList = {
   HomeStack: undefined
   SignUp: undefined
   SignIn: undefined
-  SignOnStack: undefined
+  SignOnStack: NavigatorScreenParams<SignOnScreenParamList> | undefined
   ResetPassword: { login: string; email: string }
   OAuthScreen: { search: string }
 }

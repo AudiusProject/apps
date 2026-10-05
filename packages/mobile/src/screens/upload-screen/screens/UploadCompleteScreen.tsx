@@ -17,6 +17,7 @@ import {
 import EmojiRaisedHands from 'app/assets/images/emojis/person-raising-both-hands-in-celebration.png'
 import { Text, Tile } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 import { FormScreen } from 'app/screens/form-screen'
 import { makeStyles } from 'app/styles'
 import { getTrackRoute } from 'app/utils/routes'
@@ -71,6 +72,8 @@ export const UploadCompleteScreen = () => {
   const styles = useStyles()
   const trackId = useSelector((state: CommonState) => state.upload.completionId)
   const navigation = useNavigation()
+  // Profile and chat screens live in the tab stacks, not in the upload modal
+  const tabNavigation = useAppTabNavigation()
   const dispatch = useDispatch()
   const { data: track } = useTrack(trackId)
   const trackRoute = track ? getTrackRoute(track, true) : ''
@@ -82,8 +85,8 @@ export const UploadCompleteScreen = () => {
 
   const handleDone = useCallback(() => {
     handleClose()
-    navigation.push('Profile', { handle: 'accountUser' })
-  }, [handleClose, navigation])
+    tabNavigation.push('Profile', { handle: 'accountUser' })
+  }, [handleClose, tabNavigation])
 
   const handleShare = useCallback(() => {
     if (!trackId) return
@@ -98,14 +101,12 @@ export const UploadCompleteScreen = () => {
   }, [dispatch, handleClose, trackId])
 
   const handleShareToDirectMessage = useCallback(async () => {
-    dispatch(
-      navigation.navigate('ChatUserList', {
-        presetMessage: trackRoute,
-        defaultUserList: 'chats'
-      })
-    )
     handleClose()
-  }, [dispatch, handleClose, navigation, trackRoute])
+    tabNavigation.navigate('ChatUserList', {
+      presetMessage: trackRoute,
+      defaultUserList: 'chats'
+    })
+  }, [handleClose, tabNavigation, trackRoute])
 
   return (
     <FormScreen

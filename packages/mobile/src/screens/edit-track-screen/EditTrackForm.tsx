@@ -33,7 +33,7 @@ import { FormScreen } from 'app/screens/form-screen'
 import { setVisibility } from 'app/store/drawers/slice'
 import { makeStyles } from 'app/styles'
 
-import { TopBarIconButton } from '../app-screen'
+import { TopBarIconButton, useAppTabNavigation } from '../app-screen'
 
 import { EditTrackFormOverflowMenuDrawer } from './EditTrackFormOverflowMenuDrawer'
 import { EditTrackFormPreviewContextProvider } from './EditTrackFormPreviewContext'
@@ -94,6 +94,7 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
     errorsKeys.length > 0 && errorsKeys.every((errorKey) => touched[errorKey])
   const styles = useStyles()
   const navigation = useNavigation()
+  const tabNavigation = useAppTabNavigation()
   const dispatch = useDispatch()
 
   // Use track file selector directly like web version
@@ -215,10 +216,13 @@ export const EditTrackForm = (props: EditTrackFormProps) => {
       metadata,
       audioFile: selectedTrack.file
     })
-    navigation.navigate('Track', { trackId: values.track_id })
+    // Close the modal, then show the track in the tab stack below
+    navigation.goBack()
+    tabNavigation.navigate('Track', { trackId: values.track_id })
   }, [
     initialValues,
     navigation,
+    tabNavigation,
     openReplaceTrackProgress,
     selectedTrack,
     updateTrack,

@@ -1,7 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 
 import { useCurrentAccountUser, useHasAccount } from '@audius/common/api'
-import type { LinkingOptions } from '@react-navigation/native'
+import type { LinkingOptions, ParamListBase } from '@react-navigation/native'
 import {
   NavigationContainer as RNNavigationContainer,
   createNavigationContainerRef,
@@ -21,7 +21,7 @@ type NavigationContainerProps = {
   children: ReactNode
 }
 
-export const navigationRef = createNavigationContainerRef()
+export const navigationRef = createNavigationContainerRef<ParamListBase>()
 
 /**
  * NavigationContainer contains the react-navigation context

@@ -33,11 +33,14 @@ export const CollapsibleTabNavigator = ({
   minHeaderHeight,
   renderTabBar
 }: CollapsibleTabNavigatorProps) => {
-  const { state, navigation, descriptors } = useNavigationBuilder(TabRouter, {
-    children,
-    screenOptions,
-    initialRouteName
-  })
+  const { state, navigation, descriptors, render } = useNavigationBuilder(
+    TabRouter,
+    {
+      children,
+      screenOptions,
+      initialRouteName
+    }
+  )
 
   const ref = useRef<CollapsibleRef | null>(null)
 
@@ -51,7 +54,9 @@ export const CollapsibleTabNavigator = ({
 
   const { color } = useTheme()
 
-  return (
+  // `render` provides the navigator contexts (focused route, state listeners)
+  // that `useIsFocused` and `useNavigationState` read inside the tab screens.
+  return render(
     <Tabs.Container
       ref={ref}
       allowHeaderOverscroll

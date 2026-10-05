@@ -13,8 +13,7 @@ function* watchGoToChat() {
     } = action
     if (navigationRef.isReady()) {
       if (!chatId) {
-        // @ts-ignore navigationRef is not parametrized correctly (PAY-1141)
-        navigationRef.navigate('ChatList')
+        navigationRef.navigate('ChatList', undefined, { pop: true })
       } else {
         if (replaceNavigation) {
           navigationRef.current?.dispatch(

@@ -67,9 +67,7 @@ const ChangePasswordHeaderLeft = ({ page }: { page: ChangePasswordPage }) => {
     return <BackButton />
   } else {
     return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate('AccountSettingsScreen')}
-      >
+      <TouchableOpacity onPress={() => navigation.getParent()?.goBack()}>
         <IconClose size='l' color='subdued' />
       </TouchableOpacity>
     )
@@ -95,9 +93,13 @@ const ChangePasswordNavigator = ({
     }
   })
 
-  // Map hook page state to screen navigations
+  // Map hook page state to screen navigations. The pages live in the nested
+  // stack, so target them through this screen's route.
   useEffect(() => {
-    navigation.navigate(ChangePasswordPage[page])
+    navigation.navigate('ChangePassword', {
+      screen: ChangePasswordPage[page],
+      pop: true
+    })
   }, [page, navigation])
 
   // Map navigations back to the hook page state
@@ -169,7 +171,7 @@ const ChangePasswordScreen = () => {
   const { toast } = useToast()
 
   const onSuccess = useCallback(() => {
-    navigation.navigate('AccountSettingsScreen')
+    navigation.goBack()
     toast({ content: messages.success, type: 'info' })
   }, [navigation, toast])
 

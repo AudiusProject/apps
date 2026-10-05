@@ -9,6 +9,7 @@ import { ModalScreen } from 'app/components/core'
 import { useTrackImage } from 'app/components/image/TrackImage'
 import { useNavigation } from 'app/hooks/useNavigation'
 import { useRoute } from 'app/hooks/useRoute'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 import { isImageUriSource } from 'app/utils/image'
 
 import { EditTrackScreen } from './EditTrackScreen'
@@ -22,6 +23,7 @@ export const EditTrackModalScreen = () => {
   const { params } = useRoute<'EditTrack'>()
   const { id } = params
   const navigation = useNavigation()
+  const tabNavigation = useAppTabNavigation()
 
   const { data: track } = useTrack(id)
   const { mutateAsync: updateTrack } = useUpdateTrack()
@@ -37,9 +39,11 @@ export const EditTrackModalScreen = () => {
         trackId: id,
         metadata
       })
-      navigation.navigate('Track', { trackId: id })
+      // Close the modal, then show the track in the tab stack below
+      navigation.goBack()
+      tabNavigation.navigate('Track', { trackId: id })
     },
-    [id, navigation, updateTrack]
+    [id, navigation, tabNavigation, updateTrack]
   )
 
   if (!track) return null

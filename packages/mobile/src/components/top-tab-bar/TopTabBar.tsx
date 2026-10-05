@@ -145,7 +145,7 @@ export const TopTabBar = ({ state, descriptors, navigation, position }) => {
                 onLongPress={() => onLongPress(route, index)}
                 onPress={() => onPress(route, index)}
                 style={styles.tab}
-                testID={options.tabBarTestID}
+                testID={options.tabBarButtonTestID}
               >
                 <Animated.View style={{ opacity }}>{icon}</Animated.View>
                 <AnimatedText size='xs' strength='strong' style={{ opacity }}>

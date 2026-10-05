@@ -19,6 +19,7 @@ import {
   FixedFooterContent
 } from 'app/components/core'
 import { useNavigation } from 'app/hooks/useNavigation'
+import { useAppTabNavigation } from 'app/screens/app-screen'
 
 import { SwapBalanceSection } from '../../components/buy-sell'
 
@@ -48,6 +49,7 @@ export const TransactionResultScreen = ({
   route
 }: TransactionResultScreenProps) => {
   const navigation = useNavigation()
+  const tabNavigation = useAppTabNavigation()
   const { result } = route.params
 
   // Always call hooks at the top level to avoid conditional hook calls
@@ -70,7 +72,7 @@ export const TransactionResultScreen = ({
   const handleDone = () => {
     // Close the modal and navigate back to the wallet screen
     navigation.getParent()?.goBack()
-    navigation.navigate('wallet')
+    tabNavigation.navigate('wallet', undefined, { pop: true })
   }
 
   if (result.status === 'success' && successData) {
