@@ -35,12 +35,14 @@ export const EditableLabel = ({
         defaultValue={value}
         onChange={handleChange}
         onBlur={handleBlur}
-        style={{
+        css={{
           flex: '1 1 0',
           border: 'none',
           background: 'none',
           fontSize: 14,
-          fontWeight: 500
+          fontWeight: 500,
+          // iOS Safari zooms the page on focus when input text is under 16px
+          '@media (hover: none) and (pointer: coarse)': { fontSize: 16 }
         }}
         autoFocus
       />

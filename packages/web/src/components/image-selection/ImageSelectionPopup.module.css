@@ -143,3 +143,10 @@
     opacity: 1;
   }
 }
+
+/* iOS Safari zooms the page on focus when input text is under 16px */
+@media (hover: none) and (pointer: coarse) {
+  .query > input {
+    font-size: var(--harmony-font-m);
+  }
+}
