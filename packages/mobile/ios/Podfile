@@ -89,6 +89,18 @@ target 'AudiusReactNative' do
       end
     end
 
+    # Xcode 27 rejects deployment targets below 15.0, which several pods
+    # still declare. Raise them to the app's minimum.
+    min_ios_version = '15.5'
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        target_version = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if target_version && Gem::Version.new(target_version) < Gem::Version.new(min_ios_version)
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version
+        end
+      end
+    end
+
     # Fix for GenerateDSYMFile error with new architecture
     installer.pods_project.build_configurations.each do |config|
       if config.name == 'Debug'
