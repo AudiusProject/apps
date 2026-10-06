@@ -47,6 +47,16 @@ https://play.google.com/console/u/0/developers/7193943409852709836/app/497383956
 The version code needs to be a monotonically increasing number.
 
 ### Preparing the apk
+The release apk must be signed with the key matching `cert_fingerprint` in config.yaml. It is not in the repo.
+Get the keystore and passwords from the team password vault and add them to `~/.gradle/gradle.properties`:
+```
+MYAPP_UPLOAD_STORE_FILE=/absolute/path/to/upload.keystore
+MYAPP_UPLOAD_KEY_ALIAS=...
+MYAPP_UPLOAD_STORE_PASSWORD=...
+MYAPP_UPLOAD_KEY_PASSWORD=...
+```
+Without them the build falls back to the debug key and `dapp-store validate` will reject it.
+
 cd ../android
 ./gradlew app:assembleRelease -PreactNativeArchitectures=arm64-v8a
 cd ../dapp-store
