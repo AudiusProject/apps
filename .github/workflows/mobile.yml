@@ -792,6 +792,21 @@ jobs:
         run: |
           echo "${{ secrets.FASTLANE_PLAYSTORE_JSON }}" | base64 --decode > packages/mobile/android/app/api.json
 
+      - name: Setup Android upload key
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          for name in ANDROID_UPLOAD_KEYSTORE_BASE64 ANDROID_UPLOAD_KEY_ALIAS ANDROID_UPLOAD_STORE_PASSWORD ANDROID_UPLOAD_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing secret $name"
+              exit 1
+            fi
+          done
+          echo "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.keystore"
+
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
@@ -822,6 +837,10 @@ jobs:
         timeout-minutes: 60
         env:
           FASTLANE_PLAYSTORE_JSON: ${{ secrets.FASTLANE_PLAYSTORE_JSON }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_STORE_FILE: ${{ runner.temp }}/upload.keystore
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
         run: |
           cd packages/mobile/android
           bundle exec fastlane releaseCandidate track:internal
@@ -1174,6 +1193,21 @@ jobs:
         run: |
           echo "${{ secrets.FASTLANE_PLAYSTORE_JSON }}" | base64 --decode > packages/mobile/android/app/api.json
 
+      - name: Setup Android upload key
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          for name in ANDROID_UPLOAD_KEYSTORE_BASE64 ANDROID_UPLOAD_KEY_ALIAS ANDROID_UPLOAD_STORE_PASSWORD ANDROID_UPLOAD_KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing secret $name"
+              exit 1
+            fi
+          done
+          echo "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.keystore"
+
       - name: Build dependencies
         timeout-minutes: 60
         run: npx turbo run build --filter=@audius/mobile
@@ -1204,6 +1238,10 @@ jobs:
         timeout-minutes: 60
         env:
           FASTLANE_PLAYSTORE_JSON: ${{ secrets.FASTLANE_PLAYSTORE_JSON }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_STORE_FILE: ${{ runner.temp }}/upload.keystore
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
         run: |
           cd packages/mobile/android
           bundle exec fastlane prod track:alpha

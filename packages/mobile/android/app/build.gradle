@@ -160,6 +160,8 @@ android {
             keyPassword 'android'
         }
         release {
+            // Upload key is provided by CI (ORG_GRADLE_PROJECT_MYAPP_UPLOAD_* env vars)
+            // or ~/.gradle/gradle.properties. It is never committed.
             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
                 storeFile file(MYAPP_UPLOAD_STORE_FILE)
                 storePassword MYAPP_UPLOAD_STORE_PASSWORD
@@ -173,9 +175,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.release
+            // Without the upload key (local builds), sign with the debug key.
+            signingConfig project.hasProperty('MYAPP_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
