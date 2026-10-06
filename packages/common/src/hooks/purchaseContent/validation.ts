@@ -1,8 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { QUERY_KEYS } from '~/api'
-import { fetchEmailInUse } from '~/api/tan-query/users/useEmailInUse'
+import { fetchEmailInUseForValidation } from '~/api/tan-query/users/useEmailInUse'
 import { QueryContextType } from '~/api/tan-query/utils/QueryContext'
 import { PurchaseMethod, PurchaseVendor } from '~/models/PurchaseContent'
 import { PurchaseContentPage } from '~/store'
@@ -87,11 +86,22 @@ export const createPurchaseContentSchema = (
         return
       }
 
-      const { exists: isEmailInUse, isGuest } = await queryClient.fetchQuery({
-        queryKey: [QUERY_KEYS.emailInUse, guestEmail],
-        queryFn: async () => await fetchEmailInUse(guestEmail, queryContext)
-      })
+      const result = await fetchEmailInUseForValidation(
+        guestEmail,
+        queryContext,
+        queryClient
+      )
+      if (!result) return
+      if ('error' in result) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error,
+          path: [GUEST_EMAIL]
+        })
+        return
+      }
 
+      const { exists: isEmailInUse, isGuest } = result
       if (isEmailInUse === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

@@ -65,8 +65,7 @@ export const CreateEmailScreen = (props: SignOnScreenProps) => {
       onSubmit={handleSubmit}
       validationSchema={EmailSchema}
       validateOnChange={false}
-      validateOnMount={!!existingEmailValue}
-      enableReinitialize
+      validateOnMount={!!existingEmailValue.value}
     >
       {({ handleSubmit }) => (
         <>

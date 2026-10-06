@@ -80,7 +80,7 @@ export const CreateEmailPage = () => {
       initialValues={initialValues}
       onSubmit={handleSubmit}
       validationSchema={EmailSchema}
-      validateOnMount={!!existingEmailValue}
+      validateOnMount={!!existingEmailValue.value}
       validateOnChange={false}
     >
       {({ isSubmitting }) =>
