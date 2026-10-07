@@ -31,7 +31,6 @@ project 'AudiusReactNative',
 'Prod.Release' => :release
 
 target 'AudiusReactNative' do
-  pod 'SRSRadialGradient', :path => '../../../node_modules/react-native-radial-gradient/ios'
   pod 'ffmpeg-kit-ios-full-gpl', :podspec => './ffmpeg-kit-ios-full-gpl.podspec'
   pod 'ffmpeg-kit-react-native', :subspecs => ['full-gpl'], :podspec => '../../../node_modules/ffmpeg-kit-react-native/ffmpeg-kit-react-native.podspec'
 
