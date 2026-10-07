@@ -1,8 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { QUERY_KEYS } from '~/api'
-import { fetchEmailInUse } from '~/api/tan-query/users/useEmailInUse'
+import { fetchEmailInUseForValidation } from '~/api/tan-query/users/useEmailInUse'
 import { QueryContextType } from '~/api/tan-query/utils'
 
 export const messages = {
@@ -24,11 +23,17 @@ export const signInSchema = (
       })
       .email(messages.email)
       .superRefine(async (email, ctx) => {
-        const { isGuest } = await queryClient.fetchQuery({
-          queryKey: [QUERY_KEYS.emailInUse, email],
-          queryFn: async () => await fetchEmailInUse(email, queryContext)
-        })
-        if (isGuest) {
+        const result = await fetchEmailInUseForValidation(
+          email,
+          queryContext,
+          queryClient
+        )
+        if (result && 'error' in result) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: result.error
+          })
+        } else if (result?.isGuest) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: messages.guestAccountExists
