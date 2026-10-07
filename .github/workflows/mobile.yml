@@ -32,6 +32,11 @@ on:
           - ios
           - android
           - all
+      binary_version:
+        description: 'Publish the OTA for this store binary version instead of package.json (e.g. 1.5.185)'
+        required: false
+        default: ''
+        type: string
 
 env:
   NODE_VERSION: '24.10.0'
@@ -188,11 +193,23 @@ jobs:
 
       - name: Determine version change
         id: version-check
+        env:
+          BINARY_VERSION_INPUT: ${{ github.event.inputs.binary_version }}
         run: |
           set -euo pipefail
           CURRENT_VERSION=$(jq -r '.version' packages/mobile/package.json)
           PREV_VERSION=$(git show HEAD^:packages/mobile/package.json | jq -r '.version')
-          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          # A binary_version override only retargets OTA publishes; it never
+          # counts as a version change for native builds.
+          if [[ -n "${BINARY_VERSION_INPUT:-}" ]]; then
+            if [[ ! "$BINARY_VERSION_INPUT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "binary_version must be MAJOR.MINOR.PATCH, got '$BINARY_VERSION_INPUT'" >&2
+              exit 1
+            fi
+            echo "current_version=$BINARY_VERSION_INPUT" >> "$GITHUB_OUTPUT"
+          else
+            echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          fi
           echo "previous_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
           if [[ "$CURRENT_VERSION" == "$PREV_VERSION" ]]; then
             echo "version_changed=false" >> "$GITHUB_OUTPUT"
@@ -318,6 +335,10 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
+          # The bundle reads package.json to pick its OTA history file, so it
+          # must carry the version it is published for.
+          jq --arg v "$BINARY_VERSION" '.version = $v' package.json > package.json.tmp
+          mv package.json.tmp package.json
           npx code-push release \
             --binary-version "$BINARY_VERSION" \
             --app-version "$OTA_APP_VERSION" \
@@ -431,6 +452,10 @@ jobs:
           OTA_APP_VERSION="${MAJOR}.${MINOR}.${OTA_PATCH}"
 
           cd packages/mobile
+          # The bundle reads package.json to pick its OTA history file, so it
+          # must carry the version it is published for.
+          jq --arg v "$BINARY_VERSION" '.version = $v' package.json > package.json.tmp
+          mv package.json.tmp package.json
           npx code-push release \
             --binary-version "$BINARY_VERSION" \
             --app-version "$OTA_APP_VERSION" \
