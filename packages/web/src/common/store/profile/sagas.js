@@ -1,4 +1,4 @@
-import { userMetadataListFromSDK } from '@audius/common/adapters'
+import { userMetadataFromSDK } from '@audius/common/adapters'
 import {
   getUserQueryKey,
   queryCurrentUserId,
@@ -144,11 +144,11 @@ function* confirmUpdateProfile(userId, metadata) {
         })
         yield waitForAccount()
         const currentUserId = yield call(queryCurrentUserId)
-        const { data = [] } = yield call([sdk.users, sdk.users.getUser], {
+        const { data } = yield call([sdk.users, sdk.users.getUser], {
           id: Id.parse(userId),
           userId: Id.parse(currentUserId)
         })
-        return userMetadataListFromSDK(data)[0]
+        return data ? userMetadataFromSDK(data) : undefined
       },
       function* (confirmedUser) {
         // Invalidate the user query to refetch fresh data from the server
@@ -156,7 +156,7 @@ function* confirmUpdateProfile(userId, metadata) {
         // - Processed image sizes (cover photo, profile picture)
         // - Computed fan_club_badge (based on coin_flair_mint and user's coins)
         queryClient.invalidateQueries({
-          queryKey: getUserQueryKey(confirmedUser.user_id)
+          queryKey: getUserQueryKey(confirmedUser?.user_id ?? metadata.user_id)
         })
         yield put(profileActions.updateProfileSucceeded(metadata.user_id))
       },
