@@ -1,8 +1,8 @@
 import { QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { QUERY_KEYS, QueryContextType } from '~/api'
-import { fetchEmailInUse } from '~/api/tan-query/users/useEmailInUse'
+import { QueryContextType } from '~/api'
+import { fetchEmailInUseForValidation } from '~/api/tan-query/users/useEmailInUse'
 import { EMAIL_REGEX } from '~/utils/email'
 
 export const emailSchemaMessages = {
@@ -22,10 +22,20 @@ export const emailSchema = (
       .string({ required_error: emailSchemaMessages.emailRequired })
       .regex(EMAIL_REGEX, { message: emailSchemaMessages.invalidEmail })
       .superRefine(async (email, ctx) => {
-        const { exists: isEmailInUse, isGuest } = await queryClient.fetchQuery({
-          queryKey: [QUERY_KEYS.emailInUse, email],
-          queryFn: async () => await fetchEmailInUse(email, queryContext)
-        })
+        const result = await fetchEmailInUseForValidation(
+          email,
+          queryContext,
+          queryClient
+        )
+        if (!result) return z.NEVER
+        if ('error' in result) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: result.error
+          })
+          return z.NEVER
+        }
+        const { exists: isEmailInUse, isGuest } = result
         if (isEmailInUse === undefined) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
