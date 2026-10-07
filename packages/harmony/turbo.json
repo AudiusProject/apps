@@ -2,8 +2,13 @@
   "extends": ["//"],
   "tasks": {
     "build:css": {
-      "inputs": ["src/css-entry.ts", "src/foundations/**/*.css"],
-      "outputs": ["dist/harmony.css"],
+      "inputs": [
+        "src/css-entry.ts",
+        "src/foundations/**/*.css",
+        "rollup.css.config.mjs",
+        "rollup.fonts.mjs"
+      ],
+      "outputs": ["dist/harmony.css", "dist/harmony-no-fonts.css"],
       "outputLogs": "new-only"
     },
     "test": {

@@ -3,17 +3,66 @@
   <head>
     <meta charset="utf-8" />
 
-    <!-- Avenir Font -->
-    <link rel="preload" as="style" href="/fonts.css" />
+    <!-- Avenir font. Preload the body (500) and title/label (700) weights. -->
     <link
-      rel="stylesheet"
-      href="/fonts.css"
-      media="print"
-      onload="this.media='all'"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/avenir/AvenirNextLTPro-Medium.woff2"
+      crossorigin
     />
-    <noscript>
-      <link rel="stylesheet" href="/fonts.css" />
-    </noscript>
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/avenir/AvenirNextLTPro-Bold.woff2"
+      crossorigin
+    />
+    <style>
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 100;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-UltraLight.woff2')
+          format('woff2');
+      }
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-Regular.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-Medium.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-DemiBold.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-Bold.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Avenir Next LT Pro';
+        font-style: normal;
+        font-weight: 900;
+        font-display: swap;
+        src: url('/fonts/avenir/AvenirNextLTPro-Heavy.woff2') format('woff2');
+      }
+    </style>
 
     <link
       rel="apple-touch-icon"
