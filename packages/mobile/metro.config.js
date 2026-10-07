@@ -151,7 +151,7 @@ const config = {
 
       // Various polyfills to enable @audius/sdk to run in react-native
       child_process: emptyPolyfill,
-      fs: resolveModule('react-native-fs'),
+      fs: resolveModule('@dr.pogodin/react-native-fs'),
       net: emptyPolyfill,
       tls: resolveModule('tls-browserify')
     },
