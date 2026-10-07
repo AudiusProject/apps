@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useComment, useCommentReplies } from '@audius/common/api'
 import { commentsMessages as messages } from '@audius/common/messages'
 import { type Comment, type ID, type ReplyComment } from '@audius/common/models'
-import type { LayoutChangeEvent } from 'react-native/types'
+import type { LayoutChangeEvent } from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

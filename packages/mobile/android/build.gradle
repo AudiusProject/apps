@@ -8,7 +8,7 @@ buildscript {
         targetSdkVersion = 36
         castFrameworkVersion = "21.0.0"
         ndkVersion = "27.1.12297006"
-        kotlinVersion = "2.0.21"
+        kotlinVersion = "2.1.20"
     }
     // @react-native-firebase defaults to Firebase BoM 34, whose
     // play-services-measurement needs Kotlin 2.2. Stay on 33 until the app's
