@@ -46,7 +46,7 @@ export const initialState = {
     [PushNotificationSetting.Mentions]: true,
     [PushNotificationSetting.Reactions]: true
   },
-  [emailFrequency]: EmailFrequency.Daily
+  [emailFrequency]: EmailFrequency.Weekly
 }
 
 const actionsMap: ActionsMap<SettingsPageState> = {
