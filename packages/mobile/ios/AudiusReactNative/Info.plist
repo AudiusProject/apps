@@ -80,12 +80,25 @@
 	<string>This lets you select photos for uploading to Audius, and lets you share tracks to TikTok and other social media.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This lets you select photos for uploading to Audius, including setting your profile picture and track cover art.</string>
+	<key>RCTNewArchEnabled</key>
+	<false/>
 	<key>SCSDKClientId</key>
 	<string>$(SCSDK_CLIENT_ID)</string>
 	<key>SCSDKRedirectUrl</key>
 	<string>audius://snap-kit/oauth2</string>
 	<key>TikTokClientKey</key>
 	<string>${TIKTOK_APP_ID}</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AvenirNextLTPro-Bold.otf</string>
+		<string>AvenirNextLTPro-Heavy.otf</string>
+		<string>AvenirNextLTPro-DemiBold.otf</string>
+		<string>AvenirNextLTPro-Medium.otf</string>
+		<string>AvenirNextLTPro-Regular.otf</string>
+		<string>AvenirNextLTPro-UltLt.otf</string>
+		<string>AvenirNextLTPro-Light.otf</string>
+		<string>AvenirNextLTPro-Thin.otf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -103,17 +116,6 @@
 			</array>
 		</dict>
 	</dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>AvenirNextLTPro-Bold.otf</string>
-		<string>AvenirNextLTPro-Heavy.otf</string>
-		<string>AvenirNextLTPro-DemiBold.otf</string>
-		<string>AvenirNextLTPro-Medium.otf</string>
-		<string>AvenirNextLTPro-Regular.otf</string>
-		<string>AvenirNextLTPro-UltLt.otf</string>
-		<string>AvenirNextLTPro-Light.otf</string>
-		<string>AvenirNextLTPro-Thin.otf</string>
-	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
