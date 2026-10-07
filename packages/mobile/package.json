@@ -193,7 +193,6 @@
     "@react-native/metro-config": "0.79.5",
     "@react-native/typescript-config": "0.79.5",
     "@redux-devtools/cli": "4.0.0",
-    "@testing-library/jest-native": "5.4.3",
     "@testing-library/react-native": "12.4.3",
     "@types/array.prototype.flat": "1.2.1",
     "@types/color": "3.0.6",
@@ -216,26 +215,5 @@
     "reactotron-react-native": "^5.1.14",
     "replace-in-file": "6.3.5",
     "typescript": "5.0.4"
-  },
-  "jest": {
-    "preset": "react-native",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "<rootDir>/node_modules/react-native",
-      "^@testing-library/react-native$": "<rootDir>/node_modules/@testing-library/react-native"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-reanimated)/)"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
   }
 }
