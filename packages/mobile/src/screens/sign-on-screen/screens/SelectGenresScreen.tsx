@@ -118,7 +118,7 @@ export const SelectGenresScreen = () => {
       validateOnChange
       validationSchema={toFormikValidationSchema(selectGenresSchema)}
     >
-      <View>
+      <Flex flex={1}>
         <ScrollView testID='genreScrollView'>
           <Paper flex={1} gap='2xl' pb='2xl'>
             <ReadOnlyAccountHeader />
@@ -135,7 +135,7 @@ export const SelectGenresScreen = () => {
           buttonProps={{ disabled: false }}
           postfix={<SkipButton />}
         />
-      </View>
+      </Flex>
     </Formik>
   )
 }
