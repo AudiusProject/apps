@@ -1,4 +1,31 @@
-import { scrypt } from 'react-native-fast-crypto'
+import { NativeModules, Platform } from 'react-native'
+import { scrypt as fastCryptoScrypt } from 'react-native-fast-crypto'
+
+const scrypt = async (
+  passwd: Uint8Array,
+  salt: Uint8Array,
+  N: number,
+  r: number,
+  p: number,
+  dkLen: number
+): Promise<Uint8Array> => {
+  // react-native-fast-crypto's prebuilt Android library logs the password,
+  // so Android derives keys in the app's own AudiusScrypt module. Older
+  // binaries without the module still use fast-crypto.
+  const { AudiusScrypt } = NativeModules
+  if (Platform.OS === 'android' && AudiusScrypt) {
+    const keyBase64: string = await AudiusScrypt.scrypt(
+      Buffer.from(passwd).toString('base64'),
+      Buffer.from(salt).toString('base64'),
+      N,
+      r,
+      p,
+      dkLen
+    )
+    return new Uint8Array(Buffer.from(keyBase64, 'base64'))
+  }
+  return await fastCryptoScrypt(passwd, salt, N, r, p, dkLen)
+}
 
 /**
  * Given a user encryptStr and initialization vector, generate a private key
