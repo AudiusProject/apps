@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 
 import { css } from '@emotion/native'
 import { useFormikContext } from 'formik'
-import type { LayoutChangeEvent } from 'react-native'
-import { Dimensions, Keyboard, Platform, View } from 'react-native'
+import { Dimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import type {
@@ -37,21 +36,7 @@ type PageProps = FlexProps & {
 export const gutterSize = 'l'
 
 export const Page = (props: PageProps) => {
-  const { children, style, noGutter, onLayout, ...other } = props
-
-  // Android shrinks the window when the keyboard opens. Hold the page at its
-  // keyboard-closed height so the footer stays behind the keyboard, as on iOS.
-  const [restingHeight, setRestingHeight] = useState<number>()
-
-  const handleLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      if (Platform.OS === 'android' && !Keyboard.isVisible()) {
-        setRestingHeight(event.nativeEvent.layout.height)
-      }
-      onLayout?.(event)
-    },
-    [onLayout]
-  )
+  const { children, style, noGutter, ...other } = props
 
   const layoutProps: FlexProps = {
     direction: 'column',
@@ -71,14 +56,12 @@ export const Page = (props: PageProps) => {
         style={[
           css({
             zIndex: 1,
-            minHeight: restingHeight,
             // Offset the absolute positioned footer
             // calc = footer button height (48) + footer padding (2*spacing.l) + extra padding (spacing.xl)
             paddingBottom: 48 + spacing.l * 2 + spacing.xl
           }),
           style
         ]}
-        onLayout={handleLayout}
         {...other}
       >
         {children}
