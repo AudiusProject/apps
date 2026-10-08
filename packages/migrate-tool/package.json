@@ -18,8 +18,8 @@
     "@supabase/supabase-js": "^2.45.0",
     "google-auth-library": "^10.6.2",
     "jose": "^6.2.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "19.1.4",
+    "react-dom": "19.1.4"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

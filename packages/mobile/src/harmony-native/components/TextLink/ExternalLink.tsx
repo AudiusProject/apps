@@ -12,7 +12,7 @@ import { useToast } from 'app/hooks/useToast'
 import type { GestureResponderHandler } from 'app/types/gesture'
 
 import { TextPressable } from './TextPressable'
-import type { Source } from './types'
+import type { Source, TextLinkProps } from './types'
 
 const messages = {
   error: 'Unable to open this URL'
@@ -71,7 +71,8 @@ export const ExternalLink = (props: ExternalLinkProps) => {
   const handlePress = useExternalLinkHandlePress({ url, onPress })
 
   return (
-    <TextPressable onPress={handlePress} {...other}>
+    // TextPressable passes these through to Text.
+    <TextPressable onPress={handlePress} {...(other as Partial<TextLinkProps>)}>
       {children}
     </TextPressable>
   )
