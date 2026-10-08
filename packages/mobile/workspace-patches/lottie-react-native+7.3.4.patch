@@ -1,0 +1,18 @@
+diff --git a/node_modules/lottie-react-native/ios/Fabric/LottieAnimationViewComponentView.mm b/node_modules/lottie-react-native/ios/Fabric/LottieAnimationViewComponentView.mm
+index de8b545..095ab4c 100644
+--- a/node_modules/lottie-react-native/ios/Fabric/LottieAnimationViewComponentView.mm
++++ b/node_modules/lottie-react-native/ios/Fabric/LottieAnimationViewComponentView.mm
+@@ -40,6 +40,13 @@ using namespace facebook::react;
+ 
+ #pragma mark - RCTComponentViewProtocol
+ 
++// The container keeps autoPlay/loop and the loaded animation across recycling,
++// while _props resets to defaults, so a recycled view can autoplay.
+++ (BOOL)shouldBeRecycled
++{
++    return NO;
++}
++
+ + (ComponentDescriptorProvider)componentDescriptorProvider
+ {
+     return concreteComponentDescriptorProvider<LottieAnimationViewComponentDescriptor>();
