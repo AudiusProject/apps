@@ -24,3 +24,91 @@ index b2409a0..42efd37 100644
          )
      }
  
+diff --git a/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt b/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
+index afa6b0f..24c890b 100644
+--- a/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
++++ b/node_modules/react-native-track-player/android/src/main/java/com/doublesymmetry/trackplayer/service/MusicService.kt
+@@ -31,6 +31,7 @@ import com.doublesymmetry.trackplayer.utils.BundleUtils
+ import com.doublesymmetry.trackplayer.utils.BundleUtils.setRating
+ import com.facebook.react.HeadlessJsTaskService
+ import com.facebook.react.bridge.Arguments
++import com.facebook.react.bridge.ReactContext
+ import com.facebook.react.jstasks.HeadlessJsTaskConfig
+ import com.facebook.react.modules.core.DeviceEventManagerModule
+ import com.google.android.exoplayer2.ui.R as ExoPlayerR
+@@ -94,7 +95,11 @@ class MusicService : HeadlessJsTaskService() {
+     private var compactCapabilities: List<Capability> = emptyList()
+ 
+     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+-        startTask(getTaskConfig(intent))
++        try {
++            startTask(getTaskConfig(intent))
++        } catch (e: Exception) {
++            Timber.e(e, "Failed to start headless task")
++        }
+         startAndStopEmptyNotificationToAvoidANR()
+         return START_STICKY
+     }
+@@ -739,21 +744,41 @@ class MusicService : HeadlessJsTaskService() {
+         return bundle
+     }
+ 
++    /**
++     * The base class picks ReactInstanceManager on the old architecture and ReactHost in
++     * bridgeless mode. It throws if ReactHost is missing, so treat that as no context.
++     */
++    private val currentReactContext: ReactContext?
++        get() = try {
++            reactContext
++        } catch (e: Exception) {
++            Timber.e(e, "React context unavailable")
++            null
++        }
++
+     @MainThread
+     private fun emit(event: String, data: Bundle? = null) {
+-        reactNativeHost.reactInstanceManager.currentReactContext
+-            ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+-            ?.emit(event, data?.let { Arguments.fromBundle(it) })
++        try {
++            currentReactContext
++                ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
++                ?.emit(event, data?.let { Arguments.fromBundle(it) })
++        } catch (e: Exception) {
++            Timber.e(e, "Failed to emit event: $event")
++        }
+     }
+ 
+     @MainThread
+     private fun emitList(event: String, data: List<Bundle> = emptyList()) {
+-        val payload = Arguments.createArray()
+-        data.forEach { payload.pushMap(Arguments.fromBundle(it)) }
++        try {
++            val payload = Arguments.createArray()
++            data.forEach { payload.pushMap(Arguments.fromBundle(it)) }
+ 
+-        reactNativeHost.reactInstanceManager.currentReactContext
+-            ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+-            ?.emit(event, payload)
++            currentReactContext
++                ?.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
++                ?.emit(event, payload)
++        } catch (e: Exception) {
++            Timber.e(e, "Failed to emit event: $event")
++        }
+     }
+ 
+     override fun getTaskConfig(intent: Intent?): HeadlessJsTaskConfig {
+@@ -798,7 +823,11 @@ class MusicService : HeadlessJsTaskService() {
+ 
+     @MainThread
+     override fun onDestroy() {
+-        super.onDestroy()
++        try {
++            super.onDestroy()
++        } catch (e: Exception) {
++            Timber.e(e, "HeadlessJsTaskService.onDestroy failed")
++        }
+         if (::player.isInitialized) {
+             player.destroy()
+         }
