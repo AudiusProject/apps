@@ -3286,7 +3286,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNSVG (15.15.0):
+  - RNSVG (15.15.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3312,10 +3312,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.15.0)
+    - RNSVG/common (= 15.15.1)
     - SocketRocket
     - Yoga
-  - RNSVG/common (15.15.0):
+  - RNSVG/common (15.15.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3893,7 +3893,7 @@ SPEC CHECKSUMS:
   RNReanimated: f894416139cf476d1208ef1a25cc8a97712754d0
   RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
   RNShare: 193803c6faa86aebb3e741c8a3457995ebe4989a
-  RNSVG: 1b1c4232bb99e7de77beb37bbb5720ede9ed8c67
+  RNSVG: 046b3f72f0ddbe895a88cdd3bfc3b19822c9efab
   RNZipArchive: 7bb4c70d6aa2dd235212c0a4a3de0a4e237e2569
   snap-kit-react-native: 751006199818fccb38c8a01196495167bc25e9fb
   SnapSDK: 1e68aad748e080f49e3802559b3b76026666ef62
