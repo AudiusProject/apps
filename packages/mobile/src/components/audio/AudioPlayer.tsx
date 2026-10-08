@@ -58,6 +58,7 @@ import {
 } from 'app/store/offline-downloads/slice'
 
 import { useChromecast } from './GoogleCast'
+import { addTracksAroundCurrent } from './addTracksAroundCurrent'
 import { useSavePodcastProgress } from './useSavePodcastProgress'
 
 export const DEFAULT_IMAGE_URL =
@@ -340,20 +341,14 @@ const useQueueSync = (isAudioSetup: boolean) => {
         // Sort by original index so RNTP order matches redux order
         resolved.sort((a, b) => a.i - b.i)
 
-        const before = resolved.filter(({ i }) => i < startIndex)
-        const after = resolved.filter(({ i }) => i > startIndex)
+        const before = resolved
+          .filter(({ i }) => i < startIndex)
+          .map(({ data }) => data)
+        const after = resolved
+          .filter(({ i }) => i > startIndex)
+          .map(({ data }) => data)
 
-        // Insert "before" tracks at position 0. Iterate from last to first so
-        // that earliest ends up at index 0 (each insert pushes prior entries
-        // right by one).
-        for (let j = before.length - 1; j >= 0; j--) {
-          await TrackPlayer.add(before[j].data, 0)
-        }
-
-        // Append "after" tracks at the end
-        if (after.length > 0) {
-          await TrackPlayer.add(after.map(({ data }) => data))
-        }
+        await addTracksAroundCurrent(TrackPlayer, before, after)
       }
     },
     [makeTrackData]
