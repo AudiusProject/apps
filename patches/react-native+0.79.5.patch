@@ -1,0 +1,56 @@
+diff --git a/node_modules/react-native/Libraries/Core/ExceptionsManager.js b/node_modules/react-native/Libraries/Core/ExceptionsManager.js
+index 05160ce..d2f2dd2 100644
+--- a/node_modules/react-native/Libraries/Core/ExceptionsManager.js
++++ b/node_modules/react-native/Libraries/Core/ExceptionsManager.js
+@@ -39,6 +39,24 @@ function unstable_setExceptionDecorator(
+   userExceptionDecorator = exceptionDecorator;
+ }
+ 
++/**
++ * Safely reads the .stack property from an error-like value.
++ * Hermes can throw "Error.stack getter called with an invalid receiver" when
++ * .stack is accessed on objects that inherit from Error using legacy patterns
++ * (e.g. MyError.prototype = new Error) or other non-Error values. This helper
++ * prevents that from crashing the app.
++ * @see https://github.com/facebook/react-native/issues/43636
++ * @see https://github.com/facebook/hermes/issues/1496
++ */
++function getErrorStackSafe(e: mixed): string | void {
++  if (e == null) return undefined;
++  try {
++    return typeof e.stack === 'string' ? e.stack : undefined;
++  } catch {
++    return undefined;
++  }
++}
++
+ function preprocessException(data: ExceptionData): ExceptionData {
+   if (userExceptionDecorator && !inUserExceptionDecorator) {
+     inUserExceptionDecorator = true;
+@@ -63,7 +81,7 @@ function reportException(
+   reportToConsole: boolean, // only true when coming from handleException; the error has not yet been logged
+ ) {
+   const parseErrorStack = require('./Devtools/parseErrorStack').default;
+-  const stack = parseErrorStack(e?.stack);
++  const stack = parseErrorStack(getErrorStackSafe(e));
+   const currentExceptionID = ++exceptionID;
+   const originalMessage = e.message || '';
+   let message = originalMessage;
+@@ -84,7 +102,7 @@ function reportException(
+     // $FlowFixMe[incompatible-use] we can't define a type with a Symbol-keyed field in flow
+     ...e[decoratedExtraDataKey],
+     jsEngine: e.jsEngine,
+-    rawStack: e.stack,
++    rawStack: getErrorStackSafe(e),
+   };
+   if (e.cause != null && typeof e.cause === 'object') {
+     extraData.stackSymbols = e.cause.stackSymbols;
+@@ -218,7 +236,7 @@ function reactConsoleErrorHandler(...args) {
+   let error;
+ 
+   const firstArg = args[0];
+-  if (firstArg?.stack) {
++  if (getErrorStackSafe(firstArg)) {
+     // reportException will console.error this with high enough fidelity.
+     error = firstArg;
+   } else {

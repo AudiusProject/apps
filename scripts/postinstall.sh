@@ -14,11 +14,6 @@ fi
 printf "${GREEN}Applying patches...\n${NC}"
 npm run patch-package > /dev/null
 
-printf "${GREEN}Patching React Native ExceptionsManager (Hermes fix)...\n${NC}"
-if [[ -f "./packages/mobile/scripts/patch-react-native-exceptions.js" ]]; then
-  node ./packages/mobile/scripts/patch-react-native-exceptions.js
-fi
-
 # xcodebuild may exist (e.g. if xcode-select is installed via homebrew) but won't work alone
 if [[ -z "${SKIP_POD_INSTALL}" ]]; then
   if ! xcodebuild --help &>/dev/null; then
