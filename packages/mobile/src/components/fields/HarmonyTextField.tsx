@@ -71,7 +71,11 @@ export const HarmonyTextField = forwardRef(
         }}
         onBlur={(e) => {
           if (transformValueOnBlur) {
-            e.nativeEvent.text = transformValueOnBlur(e.nativeEvent.text)
+            // The blur event type has no `text`; iOS still sends it.
+            const nativeEvent = e.nativeEvent as typeof e.nativeEvent & {
+              text: string
+            }
+            nativeEvent.text = transformValueOnBlur(nativeEvent.text)
           }
           field.onBlur(name)(e)
         }}
