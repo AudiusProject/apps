@@ -173,7 +173,7 @@ jobs:
           fi
 
       - name: Lint & Typecheck
-        run: npx turbo run verify --filter=@audius/mobile
+        run: npx turbo run verify test --filter=@audius/mobile
 
   mobile-version-check:
     name: Mobile Version Change Check

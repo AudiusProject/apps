@@ -1,1 +1,1 @@
-require('@testing-library/jest-native/extend-expect')
+require('@testing-library/react-native/extend-expect')
