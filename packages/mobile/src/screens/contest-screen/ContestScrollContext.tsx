@@ -1,8 +1,9 @@
 import { createContext, useContext } from 'react'
 
-import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 import type { SharedValue } from 'react-native-reanimated'
 import { useAnimatedReaction } from 'react-native-reanimated'
+
+import { useCurrentTabScrollY } from 'app/components/collapsible-tabs'
 
 /**
  * Context that exposes the current contest tab's scroll position as

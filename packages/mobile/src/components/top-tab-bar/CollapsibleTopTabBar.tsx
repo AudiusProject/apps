@@ -2,12 +2,12 @@ import { useMemo } from 'react'
 
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs'
 import { Dimensions, View } from 'react-native'
-import type { TabBarProps } from 'react-native-collapsible-tab-view'
 import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
 
+import type { TabBarProps } from 'app/components/collapsible-tabs'
 import { makeStyles } from 'app/styles'
 
 import { TabItem } from './TabItem'

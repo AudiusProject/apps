@@ -2,12 +2,12 @@ import { useRemixContest } from '@audius/common/api'
 import type { ID } from '@audius/common/models'
 import { SquareSizes } from '@audius/common/models'
 import { Image, View } from 'react-native'
-import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 import Animated, {
   interpolate,
   useAnimatedStyle
 } from 'react-native-reanimated'
 
+import { useCurrentTabScrollY } from 'app/components/collapsible-tabs'
 import { useTrackImage } from 'app/components/image/TrackImage'
 
 const AnimatedImage = Animated.createAnimatedComponent(Image)

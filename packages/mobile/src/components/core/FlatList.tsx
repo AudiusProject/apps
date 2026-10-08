@@ -7,8 +7,8 @@ import type {
   FlatList as RNFlatList
 } from 'react-native'
 import { Animated, Platform, RefreshControl, View } from 'react-native'
-import { Tabs, useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 
+import { Tabs, useCurrentTabScrollY } from 'app/components/collapsible-tabs'
 import { useThemeColors } from 'app/utils/theme'
 
 import { CollapsibleTabNavigatorContext } from '../top-tab-bar'

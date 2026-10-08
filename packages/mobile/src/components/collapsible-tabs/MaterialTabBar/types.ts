@@ -1,20 +1,17 @@
-import type React from 'react'
-
-import type {
+import React from 'react'
+import {
   LayoutChangeEvent,
   PressableProps,
   StyleProp,
   TextStyle,
-  ViewStyle
+  ViewStyle,
 } from 'react-native'
-import type { AnimatedStyle, SharedValue } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 
-import type { TabBarProps, TabItemProps } from 'app/components/collapsible-tabs'
+import { TabBarProps, TabName, TabItemProps } from '../types'
 
-type TabName = string
-
-type AnimatedViewStyle = AnimatedStyle<ViewStyle>
-type AnimatedTextStyle = AnimatedStyle<TextStyle>
+type AnimatedStyle = StyleProp<Animated.AnimateStyle<ViewStyle>>
+type AnimatedTextStyle = StyleProp<Animated.AnimateStyle<TextStyle>>
 
 export type MaterialTabItemProps<T extends TabName> = TabItemProps<T> & {
   onPress: (name: T) => void
@@ -47,7 +44,7 @@ export type MaterialTabBarProps<N extends TabName> = TabBarProps<N> & {
   /**
    * Style to apply to the active indicator.
    */
-  indicatorStyle?: AnimatedViewStyle
+  indicatorStyle?: AnimatedStyle
   /**
    * React component to render as tab bar item
    */
@@ -93,8 +90,8 @@ export type ItemLayout = {
 }
 
 export type IndicatorProps = {
-  indexDecimal: SharedValue<number>
+  indexDecimal: Animated.SharedValue<number>
   itemsLayout: ItemLayout[]
-  style?: AnimatedViewStyle
+  style?: AnimatedStyle
   fadeIn?: boolean
 }

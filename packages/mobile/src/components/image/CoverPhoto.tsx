@@ -5,7 +5,6 @@ import { SquareSizes, WidthSizes } from '@audius/common/models'
 import { BlurView } from '@react-native-community/blur'
 import { pick } from 'lodash'
 import { StyleSheet } from 'react-native'
-import { useCurrentTabScrollY } from 'react-native-collapsible-tab-view'
 import Animated, {
   interpolate,
   useAnimatedStyle
@@ -13,6 +12,7 @@ import Animated, {
 
 import type { ImageProps } from '@audius/harmony-native'
 import { Image, preload } from '@audius/harmony-native'
+import { useCurrentTabScrollY } from 'app/components/collapsible-tabs'
 
 import { useProfilePicture } from './UserImage'
 import { primitiveToImageSource } from './primitiveToImageSource'
