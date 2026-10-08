@@ -3095,7 +3095,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNSVG (15.15.0):
+  - RNSVG (15.15.1):
     - React-Core
   - RNZipArchive (7.0.1):
     - React-Core
@@ -3675,7 +3675,7 @@ SPEC CHECKSUMS:
   RNReanimated: 0bbb3008a808d475acdfc88db0ce80b15a3d2e33
   RNScreens: 1bc0ddb1a9c8dcc6f95afb87a3d038e3169a2f9e
   RNShare: 0f53dddbcd178ef1c05d20ae0f4ad1a704aa5e38
-  RNSVG: 05e418b8bff7c0c6e2aa5a0f87a856e8110ef4cb
+  RNSVG: 7bdea1843c44c59b3725b2217589d17d41461a56
   RNZipArchive: 7bb4c70d6aa2dd235212c0a4a3de0a4e237e2569
   snap-kit-react-native: 751006199818fccb38c8a01196495167bc25e9fb
   SnapSDK: 1e68aad748e080f49e3802559b3b76026666ef62
