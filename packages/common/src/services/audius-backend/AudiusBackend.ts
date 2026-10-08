@@ -186,26 +186,6 @@ export const audiusBackend = ({
     return null
   }
 
-  async function clearNotificationBadges({
-    sdk
-  }: {
-    sdk: AudiusSdkWithServices
-  }) {
-    try {
-      const { data, signature } = await signIdentityServiceRequest({ sdk })
-      return await fetch(`${identityServiceUrl}/notifications/clear_badges`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          [AuthHeaders.Message]: data,
-          [AuthHeaders.Signature]: signature
-        }
-      }).then((res) => res.json())
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
   async function getEmailNotificationSettings({
     sdk
   }: {
@@ -1189,7 +1169,6 @@ export const audiusBackend = ({
   }
 
   return {
-    clearNotificationBadges,
     deregisterDeviceToken,
     disableBrowserNotifications,
     findAssociatedTokenAddress,
