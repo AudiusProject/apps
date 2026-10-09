@@ -1,6 +1,6 @@
 import { css } from '@emotion/native'
 import { View } from 'react-native'
-import type { ViewStyle } from 'react-native/types'
+import type { ViewStyle } from 'react-native'
 
 import { useTheme } from '../../../foundations/theme'
 import { Flex } from '../Flex/Flex'

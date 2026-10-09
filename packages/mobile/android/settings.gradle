@@ -1,4 +1,14 @@
-pluginManagement { includeBuild("../../../node_modules/@react-native/gradle-plugin") }
+// npm may nest @react-native/gradle-plugin under react-native, so resolve it
+// from react-native instead of assuming it is hoisted.
+pluginManagement {
+  def reactNativeGradlePlugin = new File(
+    providers.exec {
+      workingDir(rootDir)
+      commandLine("node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })")
+    }.standardOutput.asText.get().trim()
+  ).getParentFile().absolutePath
+  includeBuild(reactNativeGradlePlugin)
+}
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'AudiusReactNative'
@@ -9,4 +19,11 @@ project(':react-native-config').projectDir = new File(rootProject.projectDir, '.
 include ':react-native-google-cast'
 project(':react-native-google-cast').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-google-cast/android')
 include ':app'
-includeBuild('../../../node_modules/@react-native/gradle-plugin')
+includeBuild(
+  new File(
+    providers.exec {
+      workingDir(rootDir)
+      commandLine("node", "--print", "require.resolve('@react-native/gradle-plugin/package.json', { paths: [require.resolve('react-native/package.json')] })")
+    }.standardOutput.asText.get().trim()
+  ).getParentFile().absolutePath
+)
