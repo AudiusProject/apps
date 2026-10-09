@@ -87,12 +87,12 @@ const App = () => {
     remoteConfigInstance.waitForRemoteConfig().then(() => {
       dispatch(remoteConfigActions.setDidLoad())
     })
-    if (!localStoragePreloaded) {
-      localStoragePreloadPromise.then(
-        () => setPreloaded(true),
-        () => setPreloaded(true)
-      )
-    }
+    // The preload can resolve after the first render but before this effect
+    // runs, so subscribe even when the flag is already set.
+    localStoragePreloadPromise.then(
+      () => setPreloaded(true),
+      () => setPreloaded(true)
+    )
   })
 
   // Wait for the cached account/user to land in the sync cache before
