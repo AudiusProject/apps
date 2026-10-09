@@ -10,6 +10,6 @@
 		<string>$(PRODUCT_MODULE_NAME).NotificationService</string>
 	</dict>
 	<key>RCTNewArchEnabled</key>
-	<false/>
+	<true/>
 </dict>
 </plist>
