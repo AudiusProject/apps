@@ -173,6 +173,7 @@ const useQueueSync = (isAudioSetup: boolean) => {
   const dispatch = useDispatch()
 
   const queueIndex = useSelector(getIndex)
+  const playing = useSelector(getPlaying)
   const queueOrder = useSelector(getPlaybackQueue)
   const queueSource = useSelector(getSource)
   const queueCollectionId = useSelector(getCollectionId)
@@ -411,6 +412,12 @@ const useQueueSync = (isAudioSetup: boolean) => {
   // --- handleQueueIdxChange: skip within a synced queue ---
   const latestQueueIdxRef = useRef<number>(-1)
 
+  // Read by handleQueueIdxChange without re-running it on play/pause.
+  const playingRef = useRef(playing)
+  useEffect(() => {
+    playingRef.current = playing
+  }, [playing])
+
   const handleQueueIdxChange = useCallback(async () => {
     if (queueIndex === -1) return
 
@@ -425,6 +432,12 @@ const useQueueSync = (isAudioSetup: boolean) => {
       const queue = await TrackPlayer.getQueue()
       if (queueIndex < queue.length) {
         await TrackPlayer.skip(queueIndex)
+        // On iOS, skip keeps playing only if the player was in the playing
+        // state, so a skip while loading, buffering or paused at the end of
+        // the queue loads the track paused.
+        if (playingRef.current) {
+          await TrackPlayer.play()
+        }
       }
     }
   }, [queueIndex, queueTrackIds])
@@ -601,6 +614,14 @@ const usePlaybackEvents = ({
     }
     if (event.type === Event.RemoteJumpBackward) {
       setSeekPosition(Math.max(0, position - SKIP_DURATION_SEC))
+      return
+    }
+
+    // --- Queue ended: the native player has stopped, so mark redux paused.
+    // Otherwise `playing` stays true and the next play (restart, previous,
+    // tapping a track) never reaches TrackPlayer.play().
+    if (event.type === Event.PlaybackQueueEnded) {
+      dispatch(playbackActions.pause({ onlySetState: true }))
       return
     }
 
